@@ -13,7 +13,7 @@
  * Canonical owner: src/ui/map/data/commandSurfaceArt.ts
  */
 
-import { resolvePresidentialCommandArt } from './presidentialCommandArt';
+import { resolveCommandCardOverride, resolvePresidentialCommandArt } from './presidentialCommandArt';
 
 export const COMMAND_CARD_DESK_ASSET: Readonly<Record<string, string>> = {
   // Command areas (4:3 → packet_thumbnails)
@@ -34,4 +34,12 @@ export const COMMAND_CARD_DESK_ASSET: Readonly<Record<string, string>> = {
 /** Art URL for a command area or action id; null when none ships. */
 export function resolveCommandCardArt(id: string, faction?: string | null): string | null {
   return resolvePresidentialCommandArt(id, COMMAND_CARD_DESK_ASSET, faction);
+}
+
+/**
+ * Wide (5:1) banner art for a command area (surface redesign 2026-11-10): the
+ * `command_cards/<id>_banner_<faction>.webp` cut when one ships, else the area's card.
+ */
+export function resolveCommandBannerArt(id: string, faction?: string | null): string | null {
+  return resolveCommandCardOverride(`${id}_banner`, faction) ?? resolveCommandCardArt(id, faction);
 }

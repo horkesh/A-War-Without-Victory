@@ -10,7 +10,7 @@ import { turnToDateString } from '../../utils/formatters';
 import { ConsequenceStrip } from './ConsequenceStrip';
 import { DeskAuthorityHeader } from './DeskAuthorityHeader';
 import { DeskPacket } from './DeskPacket';
-import { PRESIDENTIAL_DESK_BACKGROUND } from '../../data/presidentialDeskAssets';
+import { PRESIDENTIAL_DESK_BANNER } from '../../data/presidentialDeskAssets';
 import {
   SurfaceBanner,
   SurfaceCloseButton,
@@ -144,7 +144,7 @@ export function PresidentDeskShell({
           data-testid="president-desk-scroll-region"
           className="overscroll-contain [-webkit-mask-image:linear-gradient(to_bottom,black_calc(100%_-_1.5rem),transparent)] [mask-image:linear-gradient(to_bottom,black_calc(100%_-_1.5rem),transparent)]"
         >
-          <SurfaceBanner art={PRESIDENTIAL_DESK_BACKGROUND} title={t('desk.packet.title')} blurb={t('desk.banner.blurb')} />
+          <SurfaceBanner art={PRESIDENTIAL_DESK_BANNER} title={t('desk.packet.title')} blurb={t('desk.banner.blurb')} />
           <SurfaceSections>
             <DeskPacket items={items} onAction={onAction} requiredItemIds={requiredItemIds} />
           </SurfaceSections>

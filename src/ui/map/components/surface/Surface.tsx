@@ -298,7 +298,7 @@ export function SurfaceBanner({ art, title, blurb, children }: { art?: string | 
   return (
     <div className="relative h-44 shrink-0">
       {art && <img src={art} alt="" className="absolute inset-0 h-full w-full object-cover" />}
-      <div className={cx('absolute inset-0', art ? 'bg-[#0a0c10]/70' : 'bg-[#141821]')} />
+      <div className={cx('absolute inset-0', art ? 'bg-gradient-to-r from-[#0a0c10]/75 via-[#0a0c10]/50 to-[#0a0c10]/35' : 'bg-[#141821]')} />
       <div className="absolute inset-x-8 bottom-6 flex flex-col gap-1.5">
         <h3 className="m-0 text-[34px] font-semibold leading-tight text-[#f6ecd2]">{title}</h3>
         {blurb && <p className="m-0 text-[18px] text-[#e2d6b8]">{blurb}</p>}

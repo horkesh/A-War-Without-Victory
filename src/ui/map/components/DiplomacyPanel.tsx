@@ -13,7 +13,7 @@ import type {
 import { t, type MessageKey } from '../i18n';
 import { turnToDateString } from '../utils/formatters';
 import { getPlayerSafeMilitaryFactionName } from '../utils/playerSafeText';
-import { resolveCommandCardArt } from '../data/commandSurfaceArt';
+import { resolveCommandBannerArt } from '../data/commandSurfaceArt';
 import {
     SurfaceBanner,
     SurfaceCloseButton,
@@ -299,7 +299,7 @@ export function DiplomacyPanel({ view, onClose }: DiplomacyPanelProps) {
         view.negotiationTimeline.length > 0 ||
         view.needleHints.length > 0;
     const patronlessRBiH = view.playerFaction === 'RBiH';
-    const bannerArt = resolveCommandCardArt('cat_diplomacy', view.playerFaction ?? null);
+    const bannerArt = resolveCommandBannerArt('cat_diplomacy', view.playerFaction ?? null);
     return (
         <div className="fixed inset-0 z-[70] bg-[#05070a]/70" role="presentation">
             <section

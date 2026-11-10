@@ -1,14 +1,15 @@
 import presidentialDeskBackground from '../../warroom/assets/hq_presidential_desk_1992.webp';
+import presidentialDeskBanner from '../assets/presidential_desk/desk_banner.webp';
 
-import decisionHeaderCounterOffer from '../assets/presidential_desk/decision_headers/decision_header_counter_offer.webp';
-import decisionHeaderDiplomacy from '../assets/presidential_desk/decision_headers/decision_header_diplomacy.webp';
-import decisionHeaderEconomic from '../assets/presidential_desk/decision_headers/decision_header_economic.webp';
-import decisionHeaderHumanitarianConvoy from '../assets/presidential_desk/decision_headers/decision_header_humanitarian_convoy.webp';
-import decisionHeaderIntelligence from '../assets/presidential_desk/decision_headers/decision_header_intelligence.webp';
-import decisionHeaderMilitaryStaff from '../assets/presidential_desk/decision_headers/decision_header_military_staff.webp';
-import decisionHeaderParamilitary from '../assets/presidential_desk/decision_headers/decision_header_paramilitary.webp';
-import decisionHeaderPersonnel from '../assets/presidential_desk/decision_headers/decision_header_personnel.webp';
-import decisionHeaderTerritorial from '../assets/presidential_desk/decision_headers/decision_header_territorial.webp';
+import decisionHeaderCounterOffer from '../assets/presidential_desk/decision_headers/decision_header_counter_offer_wide.webp';
+import decisionHeaderDiplomacy from '../assets/presidential_desk/decision_headers/decision_header_diplomacy_wide.webp';
+import decisionHeaderEconomic from '../assets/presidential_desk/decision_headers/decision_header_economic_wide.webp';
+import decisionHeaderHumanitarianConvoy from '../assets/presidential_desk/decision_headers/decision_header_humanitarian_convoy_wide.webp';
+import decisionHeaderIntelligence from '../assets/presidential_desk/decision_headers/decision_header_intelligence_wide.webp';
+import decisionHeaderMilitaryStaff from '../assets/presidential_desk/decision_headers/decision_header_military_staff_wide.webp';
+import decisionHeaderParamilitary from '../assets/presidential_desk/decision_headers/decision_header_paramilitary_wide.webp';
+import decisionHeaderPersonnel from '../assets/presidential_desk/decision_headers/decision_header_personnel_wide.webp';
+import decisionHeaderTerritorial from '../assets/presidential_desk/decision_headers/decision_header_territorial_wide.webp';
 
 import consequenceHumanitarianAccess from '../assets/presidential_desk/consequence_stills/consequence_humanitarian_access.webp';
 import consequenceNegotiatedSettlement from '../assets/presidential_desk/consequence_stills/consequence_negotiated_settlement.webp';
@@ -29,6 +30,8 @@ import type { DecisionConsequenceRecord } from './decisionConsequenceLedger';
 import type { TurnAftermathTone } from './turnAftermath';
 
 export const PRESIDENTIAL_DESK_BACKGROUND = presidentialDeskBackground;
+/** Wide (5:1) cut of the presidential desk for the Desk surface banner (surface redesign 2026-11-10). */
+export const PRESIDENTIAL_DESK_BANNER = presidentialDeskBanner;
 
 const DECISION_HEADERS: Partial<Record<DecisionSurfaceFamilyId, string>> = {
   autonomy_proposal: decisionHeaderDiplomacy,
