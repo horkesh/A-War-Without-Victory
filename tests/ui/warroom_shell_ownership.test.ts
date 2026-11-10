@@ -87,7 +87,6 @@ describe('GUI audit Batch F Warroom shell ownership', () => {
         expect(app).toMatch(/const openWarroomDecisionRoomFromField =[\s\S]*if \(activeEventDecisionId !== null\) return false;/);
         expect(app).toMatch(/const openWarroomDecisionRoomFromField =[\s\S]*setWarroomDecisionRoomOpen\(true\);[\s\S]*return true;/);
         expect(app).toMatch(/const openWarroomDeskFromField = \(\) => \{[\s\S]*if \(activeEventDecisionId !== null\) return;/);
-        expect(app).toMatch(/const openCommandCategory = \(\) => \{[\s\S]*if \(activeEventDecisionId !== null\) return;/);
         expect(app).toMatch(/const openWarroomOverlay = \(surface: WarroomOverlaySurface\) => \{[\s\S]*if \(activeEventDecisionId !== null\) return;/);
     });
 
@@ -174,7 +173,7 @@ describe('GUI audit Batch F Warroom shell ownership', () => {
         const decisionStart = app.indexOf('const openWarroomDecisionRoomFromField =');
         const decisionEnd = app.indexOf('\n\n  const reviewPreAdvancePriorities', decisionStart);
         const deskStart = app.indexOf('const openWarroomDeskFromField = () => {');
-        const deskEnd = app.indexOf('\n  const openCommandCategory =', deskStart);
+        const deskEnd = app.indexOf('\n  const openWarroomOverlay =', deskStart);
 
         expect(helperStart).toBeGreaterThanOrEqual(0);
         expect(helperEnd).toBeGreaterThan(helperStart);
@@ -214,31 +213,24 @@ describe('GUI audit Batch F Warroom shell ownership', () => {
 
     it('routes Warroom-hosted Decision Room non-local targets through the visible shell handoff path', () => {
         const app = read('src/ui/map/App.tsx');
-        const hostStart = app.indexOf('{warroomDecisionRoomOpen && (');
-        const hostEnd = app.indexOf('\n        </div>', hostStart);
+        const hostStart = app.indexOf('{(commandStripOpen || warroomDecisionRoomOpen) && (');
+        const hostEnd = app.indexOf('\n          )}', hostStart);
 
         expect(hostStart).toBeGreaterThanOrEqual(0);
         expect(hostEnd).toBeGreaterThan(hostStart);
 
         const host = app.slice(hostStart, hostEnd);
-        expect(host).toMatch(/<PresidentialDecisionRoomPanel[\s\S]*onNavigateTarget=\{reviewPreAdvanceTarget\}[\s\S]*onInspectFieldPlan=\{inspectFieldOperationPlanFromDossier\}[\s\S]*\/>/);
-        expect(host).not.toContain('<PresidentialDecisionRoomPanel onNavigateTarget={openDecisionRoomTarget} />');
+        expect(host).toMatch(/<CommandSurface[\s\S]*onNavigateTarget=\{reviewPreAdvanceTarget\}[\s\S]*onInspectFieldPlan=\{inspectFieldOperationPlanFromDossier\}[\s\S]*\/>/);
+        expect(host).not.toContain('onNavigateTarget={openDecisionRoomTarget}');
     });
 
     it('routes Warroom-hosted Decision Room chrome through i18n keys', () => {
-        const app = read('src/ui/map/App.tsx');
-        const hostStart = app.indexOf('{warroomDecisionRoomOpen && (');
-        const hostEnd = app.indexOf('\n        </div>', hostStart);
-
-        expect(hostStart).toBeGreaterThanOrEqual(0);
-        expect(hostEnd).toBeGreaterThan(hostStart);
-
-        const host = app.slice(hostStart, hostEnd);
-        expect(host).toContain("{t('warroomDecisionRoom.host.aria')}");
-        expect(host).toContain("{t('warroomDecisionRoom.host.eyebrow')}");
-        expect(host).toContain("{t('warroomDecisionRoom.host.title')}");
-        expect(host).toContain("{t('warroomDecisionRoom.host.closeAria')}");
-        expect(host).toContain("{t('warroomDecisionRoom.host.close')}");
+        // One Command Surface hosts the Decision Room (owner redesign 2026-11-10).
+        const host = read('src/ui/map/components/command_surface/CommandSurface.tsx');
+        expect(host).toContain("aria-label={t('commandSurface.aria')}");
+        expect(host).toContain("{t('commandSurface.eyebrow').toUpperCase()}");
+        expect(host).toContain("aria-label={t('commandSurface.closeAria')}");
+        expect(host).toContain("{t('commandSurface.close')}");
         expect(host).not.toContain('aria-label="Warroom Decision Room"');
         expect(host).not.toContain('>Command Surface</div>');
         expect(host).not.toContain('>Decision Room</h2>');

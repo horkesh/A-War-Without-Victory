@@ -24,7 +24,7 @@ import {
   resolveCommandCardOverride,
   resolveDeskAssetByBasename,
 } from './presidentialCommandArt';
-import { COMMAND_CARD_DESK_ASSET } from '../components/warroom/CommandCard';
+import { COMMAND_CARD_DESK_ASSET } from './commandSurfaceArt';
 
 type DirectiveLever = PresidentialDecisionRoomDirective['lever'];
 

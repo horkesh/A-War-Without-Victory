@@ -8,12 +8,10 @@
  *   - count/priority-band derivation from a mock decision-room view (incl. the
  *     paramilitary → Conscience bright-line split)
  *   - warroom hotspots are not remapped into command-surface categories
- *   - CommandCard renders its faction-tinted fallback placeholder with NO art
+ *   - (the six areas render in CommandSurface; tests/ui/command_surface.test.ts)
  */
 
-import React from 'react';
 import { describe, expect, it } from 'vitest';
-import { renderToStaticMarkup } from 'react-dom/server';
 import {
   PRESIDENTIAL_COMMAND_CATEGORIES,
   WARROOM_HOTSPOT_TO_CATEGORY,
@@ -28,10 +26,10 @@ import type {
   PresidentialDecisionRoomView,
 } from '../../src/ui/map/data/presidentialDecisionRoom.js';
 import {
-  CommandCard,
+
   COMMAND_CARD_DESK_ASSET,
   resolveCommandCardArt,
-} from '../../src/ui/map/components/warroom/CommandCard.js';
+} from '../../src/ui/map/data/commandSurfaceArt.js';
 
 function makeCard(
   partial: Partial<PresidentialDecisionRoomCard> & Pick<PresidentialDecisionRoomCard, 'id' | 'category' | 'severity'>,
@@ -289,7 +287,7 @@ describe('warroom hotspot category map', () => {
   });
 });
 
-describe('CommandCard shared desk-art resolution', () => {
+describe('Command Surface area and action art resolution', () => {
   it('resolves each of the six category ids to its mapped presidential_desk asset', () => {
     const expected: Record<PresidentialCommandCategoryId, string> = {
       cat_war_direction: 'packet_thumb_reserve_request.webp',
@@ -326,66 +324,5 @@ describe('CommandCard shared desk-art resolution', () => {
       expect(url!.endsWith(basename)).toBe(true);
       expect(url).toContain('consequence_stills');
     }
-  });
-});
-
-describe('CommandCard fallback placeholder', () => {
-  it('falls back to the faction-tinted placeholder for an UNMAPPED id', () => {
-    // An id with no command_cards override AND no desk-asset mapping must return
-    // null from the resolver and render the placeholder.
-    expect(resolveCommandCardArt('cat_unmapped_does_not_exist')).toBeNull();
-    const html = renderToStaticMarkup(
-      React.createElement(CommandCard, {
-        // The render path keys the fallback testid off the live category id; we
-        // assert the placeholder branch via an id the desk map does not carry.
-        category: {
-          id: 'cat_unmapped_does_not_exist' as PresidentialCommandCategoryId,
-          title: 'Unmapped',
-          blurb: 'No art mapped.',
-          role: 'inspect',
-          roleLabel: 'Inspect',
-          count: 3,
-          priorityCounts: { required: 1, recommended: 0, monitor: 2, record: 0 },
-          hasPresidentialAction: true,
-          lens: 'all',
-        },
-        playerFaction: 'RS',
-        onSelect: () => {},
-      }),
-    );
-    // No art resolves → the fallback placeholder must render.
-    expect(html).toContain('command-card-fallback-cat_unmapped_does_not_exist');
-    expect(html).toContain('command-card-role-cat_unmapped_does_not_exist');
-    expect(html).toContain('Inspect');
-    expect(html).toContain('command-card-cat_unmapped_does_not_exist');
-    expect(html).toContain('Unmapped');
-    expect(html).toContain('command-card-action-cat_unmapped_does_not_exist'); // presidential-action pip
-    expect(html).toContain('>3<'); // the count badge value
-    // RS faction tint (red) present in the placeholder gradient.
-    expect(html).toContain('165, 45, 45');
-  });
-
-  it('renders shared desk art (not the placeholder) for a mapped category id', () => {
-    const html = renderToStaticMarkup(
-      React.createElement(CommandCard, {
-        category: {
-          id: 'cat_home_front',
-          title: 'Home Front',
-          blurb: 'Mobilization.',
-          role: 'inspect',
-          roleLabel: 'Inspect',
-          count: 0,
-          priorityCounts: { required: 0, recommended: 0, monitor: 0, record: 0 },
-          hasPresidentialAction: false,
-          lens: 'all',
-        },
-        playerFaction: null,
-        onSelect: () => {},
-      }),
-    );
-    // cat_home_front is mapped → the <img> renders, not the CSS placeholder.
-    expect(html).not.toContain('command-card-fallback-cat_home_front');
-    expect(html).not.toContain('command-card-action-cat_home_front');
-    expect(html).toContain('packet_thumb_event_decision');
   });
 });

@@ -3461,31 +3461,37 @@ async function decisionRoomDeepDive(page, frame, faction, events, labelPrefix = 
   if (await decisionRoomHosts.count() !== 1) throw new Error('Decision Room host identity is not unique');
   const decisionRoomHost = decisionRoomHosts;
   if (!await decisionRoomHost.isVisible()) throw new Error('Decision Room host is not visible');
+  // Command Surface (owner redesign 2026-11-10): the six areas replace the lenses.
   const lensResults = [];
-  const lensIds = await decisionRoomHost.locator('[data-testid^="decision-room-lens-"]').evaluateAll((nodes) => (
-    nodes.map((node) => (node.getAttribute('data-testid') ?? '').replace('decision-room-lens-', '')).filter(Boolean)
+  const areaIds = await decisionRoomHost.locator('[data-testid^="command-card-cat_"]').evaluateAll((nodes) => (
+    nodes.map((node) => (node.getAttribute('data-testid') ?? '').replace('command-card-', '')).filter(Boolean)
   ));
-  if (lensIds.length === 0) throw new Error('Decision Room exposed no lenses');
-  for (const lensId of lensIds) {
-    const clicked = await clickTestId(decisionRoomHost, `decision-room-lens-${lensId}`, `lens ${lensId}`, { afterMs: 650 });
-    const active = await decisionRoomHost.locator(`[data-testid="decision-room-lens-${lensId}"]`).getAttribute('aria-pressed') === 'true';
-    const result = { lensId, clicked, active };
-    if (!clicked || !active) throw new Error(`Decision Room lens failed: ${JSON.stringify(result)}`);
+  if (areaIds.length === 0) throw new Error('Command Surface exposed no areas');
+  let reviewArea = null;
+  for (const areaId of areaIds) {
+    const clicked = await clickTestId(decisionRoomHost, `command-card-${areaId}`, `area ${areaId}`, { afterMs: 650 });
+    const active = await decisionRoomHost.locator(`[data-testid="command-card-${areaId}"]`).getAttribute('aria-pressed') === 'true';
+    const shown = await decisionRoomHost.locator('[data-testid="presidential-decision-room"]').getAttribute('data-command-category-id');
+    const result = { lensId: areaId, clicked, active, shown };
+    if (!clicked || !active || shown !== areaId) throw new Error(`Command Surface area failed: ${JSON.stringify(result)}`);
     lensResults.push(result);
-    await snapshot(page, frame, faction, events, `${labelPrefix}-lens-${safeName(lensId)}`, { lensResult: result });
+    if (!reviewArea && await decisionRoomHost.locator('[data-testid="decision-room-dossier-review"]').count() === 1) reviewArea = areaId;
+    await snapshot(page, frame, faction, events, `${labelPrefix}-area-${safeName(areaId)}`, { lensResult: result });
   }
+  if (reviewArea) await clickTestId(decisionRoomHost, `command-card-${reviewArea}`, `area ${reviewArea}`, { afterMs: 650 });
 
   const review = decisionRoomHost.locator('[data-testid="decision-room-dossier-review"]');
-  if (await review.count() !== 1) throw new Error('Decision Room dossier review identity is not unique');
-  const reviewDisabled = await review.isDisabled();
-  const reviewText = compactText(await review.innerText(), 120);
-  const navigationKind = await review.getAttribute('data-navigation-kind');
+  const reviewCount = await review.count();
+  if (reviewCount > 1) throw new Error('Decision Room dossier review identity is not unique');
+  // A matter whose only action is in place (a directive) or that has nowhere else to go
+  // shows no review handoff; that is not an error.
+  const reviewDisabled = reviewCount === 0;
+  const reviewText = reviewCount === 1 ? compactText(await review.innerText(), 120) : '';
+  const navigationKind = reviewCount === 1 ? await review.getAttribute('data-navigation-kind') : null;
   let reviewClicked = false;
   let reviewVisualChanged = false;
   if (reviewDisabled) {
-    if (!/Current dossier/i.test(reviewText)) {
-      throw new Error(`Decision Room disabled review has no truthful reason: ${reviewText}`);
-    }
+    // nothing to follow
   } else {
     const beforeReview = await page.screenshot({ fullPage: false });
     await review.click({ timeout: 5000 });
@@ -3527,25 +3533,26 @@ async function commandSurfaceDeepDive(page, frame, faction, events, options = {}
     const priorityCardCount = await decisionRoom.locator('[data-testid^="decision-room-priority-card-"]').count();
     const decisionRoomText = compactText(await decisionRoom.innerText(), 2200);
     const dossierCount = await decisionRoom.locator('[data-testid="decision-room-dossier-review"]').count();
-    const allLensPressed = await decisionRoom.locator('[data-testid="decision-room-lens-all"]').getAttribute('aria-pressed');
+    // Command Surface: no lenses; the area button's pressed state is the selection.
+    const allLensPressed = await frame.locator(`[data-testid="${cardId}"]`).getAttribute('aria-pressed');
     if (priorityCardCount === 0) {
-      if (!decisionRoomText.includes('No items in this command category.')) {
+      if (!decisionRoomText.includes('Nothing waits here this week.')) {
         throw new Error(`Empty command category has no explicit empty state: ${expectedCommandCategoryId}`);
       }
       if (dossierCount !== 0) {
         throw new Error(`Empty command category retained an unrelated dossier: ${expectedCommandCategoryId}`);
       }
-      if (allLensPressed !== 'false') {
-        throw new Error(`Empty command category left the All lens pressed: ${expectedCommandCategoryId}`);
+      if (allLensPressed !== 'true') {
+        throw new Error(`Empty command area is not shown as selected: ${expectedCommandCategoryId}`);
       }
       if (expectedCommandCategoryId === 'cat_conscience') {
-        const asideCount = await decisionRoom.locator('aside').count();
+        const asideCount = await decisionRoom.locator('[data-testid="decision-room-active-dossier"]').count();
         if (asideCount !== 0) {
           throw new Error(`Empty command category retained a dossier container: ${expectedCommandCategoryId}`);
         }
         emptyCommandCategoryProof = {
           categoryId: expectedCommandCategoryId,
-          emptyText: 'No items in this command category.',
+          emptyText: 'Nothing waits here this week.',
           priorityCardCount,
           dossierCount,
           asideCount,
@@ -6594,7 +6601,10 @@ function classifyExpectedAmbientLifecycleAbort(record, lifecycleSignals) {
     && parsed.hostname === '127.0.0.1'
     && parsed.search === ''
     && parsed.hash === ''
-    && /^\/assets\/ambient_(?:warroom|field|archive)-[A-Za-z0-9_-]+\.ogg$/.test(parsed.pathname);
+    // Any bundled audio cue (ambient beds and, with music on by default since
+    // 2026-11-10, the music tracks): the element-level request-start + browser-abort
+    // pairing below is what proves the abort, not the file name.
+    && /^\/assets\/[a-z0-9_]+-[A-Za-z0-9_-]+\.ogg$/.test(parsed.pathname);
   if (!exactLocalAmbient) return null;
   const starts = lifecycleSignals.filter((signal) => signal.kind === 'request-start'
     && signal.url === record.url

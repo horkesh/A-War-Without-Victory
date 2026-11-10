@@ -411,31 +411,30 @@ describe('WarroomShellLayer accessibility proof', () => {
     });
 
     it('opens command-surface cards into a Warroom-native Decision Room host, not generic Army HQ briefing', () => {
+        // One Command Surface (owner redesign 2026-11-10): areas switch inside the
+        // Warroom-native surface; nothing routes to the generic Army HQ briefing.
         const appSource = readFileSync('src/ui/map/App.tsx', 'utf8');
-        const openCommandCategoryStart = appSource.indexOf('const openCommandCategory =');
-        const openWarroomOverlayStart = appSource.indexOf('const openWarroomOverlay =', openCommandCategoryStart);
-        const openCommandCategoryBody = appSource.slice(openCommandCategoryStart, openWarroomOverlayStart);
+        const surfaceSource = readFileSync('src/ui/map/components/command_surface/CommandSurface.tsx', 'utf8');
+        const hostStart = appSource.indexOf('{(commandStripOpen || warroomDecisionRoomOpen) && (');
+        const host = appSource.slice(hostStart, appSource.indexOf('\n          )}', hostStart));
 
-        expect(openCommandCategoryStart).toBeGreaterThan(-1);
-        expect(openWarroomOverlayStart).toBeGreaterThan(openCommandCategoryStart);
-        expect(openCommandCategoryBody).toContain('setWarroomDecisionRoomOpen(true)');
-        expect(openCommandCategoryBody).not.toContain("openArmyHQTab(useGameStore.getState(), 'briefing')");
-        expect(openCommandCategoryBody).not.toContain("setAppScreen('game')");
-        expect(appSource).toContain('data-testid="warroom-decision-room-host"');
-        expect(appSource).toMatch(
-            /<PresidentialDecisionRoomPanel[\s\S]*onNavigateTarget=\{reviewPreAdvanceTarget\}[\s\S]*onInspectFieldPlan=\{inspectFieldOperationPlanFromDossier\}/,
-        );
+        expect(hostStart).toBeGreaterThan(-1);
+        expect(host).toMatch(/<CommandSurface[\s\S]*onNavigateTarget=\{reviewPreAdvanceTarget\}[\s\S]*onInspectFieldPlan=\{inspectFieldOperationPlanFromDossier\}/);
+        expect(surfaceSource).toContain('data-testid="warroom-decision-room-host"');
+        expect(surfaceSource).toContain('onClick={() => selectArea(area.id)}');
+        expect(surfaceSource).not.toContain("openArmyHQTab(useGameStore.getState(), 'briefing')");
+        expect(surfaceSource).not.toContain("setAppScreen('game')");
     });
 
-    it('keeps Warroom-hosted Decision Room review text readable over the staff-room background', () => {
-        const appSource = readFileSync('src/ui/map/App.tsx', 'utf8');
-        const panelSource = readFileSync('src/ui/map/components/army_hq/PresidentialDecisionRoomPanel.tsx', 'utf8');
+    it('keeps the Command Surface readable over the staff-room background', () => {
+        const surfaceSource = readFileSync('src/ui/map/components/command_surface/CommandSurface.tsx', 'utf8');
 
-        expect(appSource).toContain('bg-[#0f131a]/98');
-        expect(appSource).not.toContain('bg-panel-bg/96');
-        expect(panelSource).toContain('bg-[#121820]/95');
-        expect(panelSource).not.toContain('bg-panel-card/55');
-        expect(panelSource).not.toContain('max-h-8 overflow-hidden text-[10px]');
+        // Opaque surface and columns; no translucent reading panels or tiny clipped text.
+        expect(surfaceSource).toContain('bg-[#11141b]');
+        expect(surfaceSource).toContain('bg-[#0f1218]');
+        expect(surfaceSource).not.toContain('bg-panel-card/55');
+        expect(surfaceSource).not.toMatch(/text-\[(?:9|10|11)px\]/);
+        expect(surfaceSource).not.toContain('text-xs');
     });
 
     it('routes Warroom Diplomacy and Chronicle directly to their mature player-facing panels', () => {

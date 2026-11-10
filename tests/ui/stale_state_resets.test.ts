@@ -58,14 +58,16 @@ describe('GUI audit Batch E stale-state resets', () => {
         expect(selectionPanel).toMatch(/useEffect\(\(\)\s*=>\s*\{[\s\S]*setSupportMessage\(null\)[\s\S]*\}, \[selectedOsid\]\)/);
     });
 
-    it('flattened Decision Room filters stay visible instead of becoming hidden stale state', () => {
-        const panel = read('src/ui/map/components/army_hq/PresidentialDecisionRoomPanel.tsx');
+    it('Command Surface areas stay visible instead of becoming hidden stale state', () => {
+        const panel = read('src/ui/map/components/command_surface/CommandSurface.tsx');
 
         expect(panel).not.toContain('setShowAdvanced');
         expect(panel).not.toContain('showAdvanced');
         expect(panel).not.toContain('data-testid="decision-room-advanced"');
-        expect(panel).toContain('{view.lenses.length > 0 && (');
-        expect(panel).toContain('setActiveLens(id)');
+        expect(panel).toContain('{areas.map((area, index) => {');
+        expect(panel).toContain('setAreaId(id)');
+        // A stale selected card falls back to the area's first matter.
+        expect(panel).toContain('orderedCards.some((card) => card.id === cardId) ? cardId : orderedCards[0]?.id ?? null');
     });
 
     it('the Inbox home badge closes store-owned overlays before clearing selections', () => {

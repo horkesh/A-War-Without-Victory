@@ -47,19 +47,16 @@ describe('leadership action desktop wiring', () => {
     }
   });
 
-  it('places directive controls before optional dossier artwork', () => {
-    const source = readFileSync(
-      resolve(process.cwd(), 'src/ui/map/components/army_hq/DirectiveCard.tsx'),
-      'utf8',
-    );
-    const componentStart = source.indexOf('return (', source.indexOf('export function DirectiveCard'));
-    const component = source.slice(componentStart);
+  it('keeps the directive controls in the action footer, with the lever art above the matter', () => {
+    // Owner redesign 2026-11-10: the Command Surface detail shows the lever's still at the
+    // top of the matter and the directive controls in the footer that never scrolls away.
+    const card = readFileSync(resolve(process.cwd(), 'src/ui/map/components/army_hq/DirectiveCard.tsx'), 'utf8');
+    const surface = readFileSync(resolve(process.cwd(), 'src/ui/map/components/command_surface/CommandSurface.tsx'), 'utf8');
 
-    expect(component.indexOf('onClick={handleConfirm}')).toBeGreaterThanOrEqual(0);
-    expect(component.indexOf('data-testid="directive-card-header-art"')).toBeGreaterThanOrEqual(0);
-    expect(component.indexOf('onClick={handleConfirm}')).toBeLessThan(
-      component.indexOf('data-testid="directive-card-header-art"'),
-    );
+    expect(card).toContain('onClick={handleConfirm}');
+    expect(card).not.toContain('data-testid="directive-card-header-art"');
+    expect(surface).toContain('resolveDirectiveActArt(selectedCard.directive.lever, playerFaction)');
+    expect(surface.indexOf('{detailArt && <img')).toBeLessThan(surface.indexOf('<DirectiveCard directive={dossier.directive}'));
   });
 });
 

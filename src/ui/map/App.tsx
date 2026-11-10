@@ -65,10 +65,9 @@ import { AudioSurfaceBedController } from './components/AudioSurfaceBedControlle
 import { WarroomShellLayer } from './components/warroom/WarroomShellLayer';
 import { AdvanceTurnModal } from './components/warroom/AdvanceTurnModal';
 import { WarroomStatusBar } from './components/warroom/WarroomStatusBar';
-import { CommandCardStrip } from './components/warroom/CommandCardStrip';
+import { CommandSurface } from './components/command_surface/CommandSurface';
 import type { PresidentialCommandCategoryId } from './data/presidentialCategories';
 import { PresidentDeskShell } from './components/presidential_desk/PresidentDeskShell';
-import { PresidentialDecisionRoomPanel } from './components/army_hq/PresidentialDecisionRoomPanel';
 import { Z } from '../shared/zIndex';
 import { RootErrorBoundary } from './components/RootErrorBoundary';
 import { PanelBreadcrumb } from './components/PanelBreadcrumb';
@@ -1460,14 +1459,6 @@ function App() {
     setDiplomacyOpen(false);
     setAppScreen('warroom');
   };
-  const openCommandCategory = () => {
-    if (activeEventDecisionId !== null) return;
-    setCommandStripOpen(false);
-    setCommandStripCategoryId(null);
-    setWarroomDeskOpen(false);
-    setWarroomOverlaySurface(null);
-    setWarroomDecisionRoomOpen(true);
-  };
   const openWarroomOverlay = (surface: WarroomOverlaySurface) => {
     if (activeEventDecisionId !== null) return;
     rememberWarroomFocus();
@@ -2211,49 +2202,19 @@ function App() {
               reviewedAftermathTurn={turnAftermath?.turn ?? null}
             />
           )}
-          {commandStripOpen && (
-            <CommandCardStrip
-              initialCategoryId={commandStripCategoryId}
-              onOpenCategory={openCommandCategory}
-              onClose={() => closeCommandStrip()}
+          {(commandStripOpen || warroomDecisionRoomOpen) && (
+            // One Command Surface (owner redesign 2026-11-10) serves both entries: the
+            // toolbar/hotspot "command strip" and every Decision Room deep link.
+            <CommandSurface
+              initialCategoryId={commandStripOpen ? commandStripCategoryId : null}
+              onClose={() => {
+                if (commandStripOpen) closeCommandStrip();
+                setWarroomDecisionRoomOpen(false);
+                if (!commandStripOpen) restoreWarroomFocus();
+              }}
+              onNavigateTarget={reviewPreAdvanceTarget}
+              onInspectFieldPlan={inspectFieldOperationPlanFromDossier}
             />
-          )}
-          {warroomDecisionRoomOpen && (
-            <div
-              role="dialog"
-              aria-label={t('warroomDecisionRoom.host.aria')}
-              aria-modal="false"
-              data-testid="warroom-decision-room-host"
-              className="pointer-events-auto absolute inset-x-3 bottom-20 z-[6] mx-auto flex max-h-[76%] max-w-6xl flex-col overflow-hidden rounded-md border border-accent-gold/35 bg-[#0f131a]/98 shadow-[0_28px_90px_rgba(0,0,0,0.7)] backdrop-blur-sm xl:left-10 xl:right-10"
-            >
-              <div
-                data-decision-room-fixed-header="true"
-                className="z-20 flex shrink-0 items-end justify-between gap-2 border-b border-panel-border/70 bg-[#0f131a] px-4 pb-3 pt-4"
-              >
-                <div>
-                  <div className="text-xs font-bold uppercase tracking-[0.1em] text-accent-gold">{t('warroomDecisionRoom.host.eyebrow')}</div>
-                  <h2 className="mt-0.5 text-[15px] font-bold leading-tight text-text-primary">{t('warroomDecisionRoom.host.title')}</h2>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setWarroomDecisionRoomOpen(false);
-                    restoreWarroomFocus();
-                  }}
-                  aria-label={t('warroomDecisionRoom.host.closeAria')}
-                  data-testid="warroom-decision-room-close"
-                  className="shrink-0 rounded border border-panel-border bg-black/60 px-2.5 py-1 text-xs font-bold uppercase tracking-[0.08em] text-text-secondary transition-colors hover:border-accent-gold/45 hover:text-accent-gold"
-                >
-                  {t('warroomDecisionRoom.host.close')}
-                </button>
-              </div>
-              <div data-decision-room-scroll-owner="true" className="min-h-0 overflow-y-auto px-4 pb-4 pt-3">
-                <PresidentialDecisionRoomPanel
-                  onNavigateTarget={reviewPreAdvanceTarget}
-                  onInspectFieldPlan={inspectFieldOperationPlanFromDossier}
-                />
-              </div>
-            </div>
           )}
           {warroomOverlaySurface && (
             <WarroomNativeOverlay

@@ -7,7 +7,7 @@ const FILES = [
   'src/ui/map/components/chronicle/ChronicleOverlay.tsx',
   'src/ui/map/components/presidential_desk/DeskAuthorityHeader.tsx',
   'src/ui/map/components/presidential_desk/PresidentDeskShell.tsx',
-  'src/ui/map/components/warroom/CommandCardStrip.tsx',
+  'src/ui/map/components/command_surface/CommandSurface.tsx',
 ];
 
 describe('reading-surface backdrop contract', () => {
@@ -20,7 +20,7 @@ describe('reading-surface backdrop contract', () => {
 
   it('keeps Warroom native previews and command surfaces opaque', () => {
     const app = readFileSync('src/ui/map/App.tsx', 'utf8');
-    const commandStrip = readFileSync('src/ui/map/components/warroom/CommandCardStrip.tsx', 'utf8');
+    const commandStrip = readFileSync('src/ui/map/components/command_surface/CommandSurface.tsx', 'utf8');
     const desk = readFileSync('src/ui/map/components/presidential_desk/PresidentDeskShell.tsx', 'utf8');
     const authority = readFileSync('src/ui/map/components/presidential_desk/DeskAuthorityHeader.tsx', 'utf8');
 

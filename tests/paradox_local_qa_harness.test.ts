@@ -336,7 +336,7 @@ test('52-week Electron QA supports bounded major-surface checkpoint tours', () =
         /openDeskInboxItem\(\s*frame,\s*'reserve_request',\s*`reserve:\$\{requestId\}`,?\s*\)/,
         'reserve requests without a visible aftermath action must reopen their exact President Desk modal',
     );
-    assert.match(harness, /decision-room-lens-\$\{lensId\}/);
+    assert.match(harness, /command-card-\$\{areaId\}/);
     assert.doesNotMatch(harness, /\/Command\\s\+\\d\*\/i/);
     assert.match(harness, /Final-state tour mutated serialized game state/);
     assert.match(harness, /Final-state tour mutated Command Authority/);
@@ -589,16 +589,16 @@ test('52-week Electron QA supports bounded major-surface checkpoint tours', () =
     assert.match(harness, /for \(let attempt = 1; attempt <= 2; attempt \+= 1\)/);
     assert.match(harness, /Warroom route produced no visual change/);
     assert.match(harness, /data-command-category-id/);
-    assert.match(harness, /No items in this command category\./);
-    assert.match(harness, /decision-room-lens-all/);
+    assert.match(harness, /Nothing waits here this week\./);
+    assert.match(harness, /Command Surface area failed/);
     assert.match(harness, /Empty command category retained an unrelated dossier/);
-    assert.match(harness, /Empty command category left the All lens pressed/);
+    assert.match(harness, /Empty command area is not shown as selected/);
     assert.match(harness, /Empty command category retained a dossier container/);
     assert.match(harness, /Final-state tour did not prove an empty cat_conscience command category/);
     assert.match(harness, /requireEmptyCommandCategoryProof/);
     assert.match(harness, /proofLabelPrefix: `final-turn-\$\{turn\}`/);
     assert.match(harness, /finalTourProof/);
-    assert.match(harness, /Decision Room exposed no lenses/);
+    assert.match(harness, /Command Surface exposed no areas/);
     assert.match(harness, /async function exerciseHistoricalOperationMapHandoff\(/);
     assert.match(
         harness,

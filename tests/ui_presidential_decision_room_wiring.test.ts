@@ -145,7 +145,7 @@ describe('Presidential Decision Room wiring', () => {
   });
 
   it('routes card actions through canonical shell navigation helpers', () => {
-    const panel = read('../src/ui/map/components/army_hq/PresidentialDecisionRoomPanel.tsx');
+    const panel = read('../src/ui/map/components/command_surface/CommandSurface.tsx');
     const router = read('../src/ui/map/utils/presidentialDecisionRoomNavigation.ts');
 
     expect(panel).toContain('buildPresidentialDecisionRoomView');
@@ -178,16 +178,15 @@ describe('Presidential Decision Room wiring', () => {
   });
 
   it('lets App-owned Decision Room navigation open counter-offer modals', () => {
-    const panel = read('../src/ui/map/components/army_hq/PresidentialDecisionRoomPanel.tsx');
+    const panel = read('../src/ui/map/components/command_surface/CommandSurface.tsx');
     const app = read('../src/ui/map/App.tsx');
 
     expect(panel).toContain('onNavigateTarget?:');
-    expect(panel).toContain('navigateTarget(reviewTarget)');
-    expect(panel).toContain('navigateTarget(card.navigationTarget)');
-    expect(panel).toContain('data-command-category-id={activeCommandCategoryId ?? \'\'}');
+    expect(panel).toContain('if (review) navigate(review.target);');
+    expect(panel).toContain('data-command-category-id={activeArea.id}');
     expect(panel).toContain('data-testid="decision-room-dossier-review"');
-    expect(panel).toContain('data-navigation-kind={reviewTarget.kind}');
-    expect(panel).toContain('data-testid={`decision-room-card-action-${card.id}`}');
+    expect(panel).toContain('data-navigation-kind={review.target.kind}');
+    expect(panel).toContain('data-testid={`decision-room-priority-card-${card.id}`}');
     expect(app).toContain('const openDecisionRoomTarget =');
     expect(app).toContain("if (target.kind === 'counter-offer')");
     expect(app).toContain('setSelectedCounterOfferId(target.counterOfferId)');
@@ -199,7 +198,7 @@ describe('Presidential Decision Room wiring', () => {
     const enclaveBranch = app.slice(enclaveBranchStart, inboxBranchStart);
     expect(enclaveBranch).toContain('gs.setArmyHQOpen(false)');
     expect(app).toMatch(
-      /<PresidentialDecisionRoomPanel[\s\S]{0,300}onNavigateTarget=\{reviewPreAdvanceTarget\}[\s\S]{0,300}\/>/,
+      /<CommandSurface[\s\S]{0,600}onNavigateTarget=\{reviewPreAdvanceTarget\}[\s\S]{0,300}\/>/,
     );
     expect(app).toContain('<ArmyHQModal');
     expect(app).toContain('onDecisionRoomNavigateTarget={openDecisionRoomTarget}');
@@ -217,32 +216,30 @@ describe('Presidential Decision Room wiring', () => {
     expect(navState.calls).toEqual([]);
   });
 
-  it('renders priority lenses as local filters over the Decision Room card list', () => {
-    const panel = read('../src/ui/map/components/army_hq/PresidentialDecisionRoomPanel.tsx');
+  it('places every card in exactly one of the six areas and filters locally', () => {
+    const panel = read('../src/ui/map/components/command_surface/CommandSurface.tsx');
 
     expect(panel).toContain('useState');
-    expect(panel).toContain('activeLens');
-    expect(panel).toContain('setActiveLens');
-    expect(panel).toContain('view.lenses.map');
-    expect(panel).toContain('filteredCards');
-    expect(panel).toContain("lens.id === 'all'");
+    expect(panel).toContain('PRESIDENTIAL_COMMAND_CATEGORIES.map');
+    expect(panel).toContain('cardBelongsToPresidentialCommandCategory(card, category.id)');
+    expect(panel).toContain('setAreaId');
   });
 
-  it('renders a flat decision-room card list without progressive-disclosure scaffolding', () => {
-    const panel = read('../src/ui/map/components/army_hq/PresidentialDecisionRoomPanel.tsx');
+  it('renders every matter of the area without progressive-disclosure scaffolding', () => {
+    const panel = read('../src/ui/map/components/command_surface/CommandSurface.tsx');
 
     expect(panel).not.toContain('showAdvanced');
     expect(panel).not.toContain('setShowAdvanced');
     expect(panel).not.toContain("t('decisionRoom.viewAdvanced')");
     expect(panel).not.toContain("t('decisionRoom.hideAdvanced')");
     expect(panel).not.toContain('data-testid="decision-room-advanced"');
-    expect(panel).toContain('{view.lenses.length > 0 && (');
-    expect(panel).toContain('filteredCards.map((card, index) => {');
-    expect(panel).not.toContain('filteredCards.slice');
+    expect(panel).toContain('groups.map(({ group, cards }) => (');
+    expect(panel).toContain('cards.map((card) => {');
+    expect(panel).not.toContain('cards.slice');
   });
 
   it('does not render command-loop lanes as another queue owner', () => {
-    const panel = read('../src/ui/map/components/army_hq/PresidentialDecisionRoomPanel.tsx');
+    const panel = read('../src/ui/map/components/command_surface/CommandSurface.tsx');
 
     expect(panel).not.toContain('CommandQuestionLane');
     expect(panel).not.toContain('view.commandQuestions.map');
@@ -252,7 +249,7 @@ describe('Presidential Decision Room wiring', () => {
   });
 
   it('does not render product-loop handoffs as another history owner', () => {
-    const panel = read('../src/ui/map/components/army_hq/PresidentialDecisionRoomPanel.tsx');
+    const panel = read('../src/ui/map/components/command_surface/CommandSurface.tsx');
     const model = read('../src/ui/map/data/presidentialDecisionRoom.ts');
 
     expect(panel).not.toContain('ProductLoopStep');
@@ -265,7 +262,7 @@ describe('Presidential Decision Room wiring', () => {
   });
 
   it('does not render source handoffs as another records owner', () => {
-    const panel = read('../src/ui/map/components/army_hq/PresidentialDecisionRoomPanel.tsx');
+    const panel = read('../src/ui/map/components/command_surface/CommandSurface.tsx');
     const model = read('../src/ui/map/data/presidentialDecisionRoom.ts');
 
     expect(model).toContain('sourceHandoffs');
@@ -279,24 +276,22 @@ describe('Presidential Decision Room wiring', () => {
   });
 
   it('renders a selected priority dossier over the existing card archive', () => {
-    const panel = read('../src/ui/map/components/army_hq/PresidentialDecisionRoomPanel.tsx');
+    const panel = read('../src/ui/map/components/command_surface/CommandSurface.tsx');
     const model = read('../src/ui/map/data/presidentialDecisionRoom.ts');
 
     expect(model).toContain('activeDossier');
     expect(model).toContain('buildActiveDossier');
     expect(model).toContain('selectedCardId');
-    expect(panel).toContain('activeCardId');
-    expect(panel).toContain('setActiveCardId');
-    expect(panel).toContain('PriorityDossier');
+    expect(panel).toContain('setCardId');
     expect(panel).toContain('view.activeDossier');
-    expect(panel).toContain('onSelectCard');
+    expect(panel).toContain('data-testid="decision-room-active-dossier"');
     expect(panel).toContain("t('decisionRoom.priorityDossier')");
     expect(panel).not.toContain('priorityDossierQueue');
     expect(panel).not.toContain('priorityDossierLedger');
   });
 
   it('does not import or expose sensitive-history/combat-lane internals', () => {
-    const panel = read('../src/ui/map/components/army_hq/PresidentialDecisionRoomPanel.tsx');
+    const panel = read('../src/ui/map/components/command_surface/CommandSurface.tsx');
     const model = read('../src/ui/map/data/presidentialDecisionRoom.ts');
     const combined = `${panel}\n${model}`;
 

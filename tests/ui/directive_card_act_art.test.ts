@@ -24,7 +24,7 @@ import {
 import {
   COMMAND_CARD_DESK_ASSET,
   resolveCommandCardArt,
-} from '../../src/ui/map/components/warroom/CommandCard.js';
+} from '../../src/ui/map/data/commandSurfaceArt.js';
 import type { PresidentialDecisionRoomDirective } from '../../src/ui/map/data/presidentialDecisionRoom.js';
 
 type Lever = PresidentialDecisionRoomDirective['lever'];
