@@ -280,7 +280,7 @@ describe('ArmyReservePanel elite commander identity', () => {
     render(React.createElement(ArmyReservePanel, { railSlot: 'primary', onOpenDecisionRoomTarget }));
 
     const detail = screen.getByTestId('army-reserve-request-presentation-req-arbih-1');
-    expect(detail.className).toContain('text-[12px]');
+    expect(detail.className).toContain('text-[13px]');
     expect(detail.getAttribute('aria-label')).toBe('Reserve request detail for 1st Corps');
     expect(detail.textContent).toContain('Requesting command1st Corps');
     expect(detail.textContent).toContain('Recipient OGSarajevo North');

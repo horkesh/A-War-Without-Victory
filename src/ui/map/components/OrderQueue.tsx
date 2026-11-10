@@ -99,7 +99,7 @@ export function OrderQueue() {
           position: 'absolute',
           left: 0,
           bottom: 'var(--awwv-bottom-bar-clearance, 2.5rem)',
-          width: '15.5rem',
+          width: '17rem',
           zIndex: Z.ORDER_QUEUE,
           direction: 'ltr',
         }}
@@ -119,7 +119,7 @@ export function OrderQueue() {
         position: 'absolute',
         left: 0,
         bottom: 'var(--awwv-bottom-bar-clearance, 2.5rem)',
-        width: '15.5rem',
+        width: '17rem',
         zIndex: Z.ORDER_QUEUE,
         direction: 'ltr',
       }}

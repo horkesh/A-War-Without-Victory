@@ -79,7 +79,7 @@ export function EmptyState({
       data-testid="empty-state"
     >
       <div
-        className="text-xs uppercase tracking-[0.22em] text-text-secondary"
+        className="text-[13px] uppercase tracking-[0.22em] text-text-secondary"
         data-testid="empty-state-message"
       >
         {glyph ? (
@@ -91,7 +91,7 @@ export function EmptyState({
       </div>
       {helpText ? (
         <div
-          className="mt-1 text-xs italic text-text-secondary"
+          className="mt-1 text-[13px] italic text-text-secondary"
           data-testid="empty-state-help"
         >
           {helpText}

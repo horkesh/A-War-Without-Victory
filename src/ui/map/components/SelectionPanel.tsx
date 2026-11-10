@@ -298,7 +298,7 @@ export function SelectionPanel({ railSlot = 'primary', breadcrumb }: SelectionPa
               className="w-5 h-3.5 object-cover rounded-sm drop-shadow-sm border border-black/20"
             />
           )}
-          <span className="font-sans text-xs text-accent-gold uppercase tracking-wide font-semibold">
+          <span className="font-sans text-[13px] text-accent-gold uppercase tracking-wide font-semibold">
             {t('selection.settlementInfo')}
           </span>
           {breadcrumb}
@@ -361,10 +361,10 @@ export function SelectionPanel({ railSlot = 'primary', breadcrumb }: SelectionPa
             data-target-mun-id={selectedMunId}
             className="mt-3 rounded border border-panel-border bg-panel-card p-2.5 space-y-1.5"
           >
-            <div className="font-sans text-xs uppercase tracking-wide text-accent-gold font-semibold">
+            <div className="font-sans text-[13px] uppercase tracking-wide text-accent-gold font-semibold">
               {t('selection.localSupport')}
             </div>
-            <div className="text-xs text-text-secondary">
+            <div className="text-[13px] text-text-secondary">
               {activeSupport
                 ? t('selection.localSupportTarget', {
                   label: getLocalizedMunicipalitySupportLabel(activeSupport.type),
@@ -378,23 +378,23 @@ export function SelectionPanel({ railSlot = 'primary', breadcrumb }: SelectionPa
               disabled={!canStageSupport}
               aria-describedby={localSupportUnavailableReason ? 'settlement-local-support-unavailable' : undefined}
               title={localSupportUnavailableReason ?? undefined}
-              className="px-3 py-1 text-xs font-mono uppercase tracking-wide bg-panel-bg hover:bg-panel-hover text-text-primary border border-panel-border rounded transition-all disabled:opacity-50"
+              className="px-3 py-1 text-[13px] font-mono uppercase tracking-wide bg-panel-bg hover:bg-panel-hover text-text-primary border border-panel-border rounded transition-all disabled:opacity-50"
             >
               {t('selection.stageSupport', { label: supportLabel })}
             </button>
-            <div className="text-xs text-text-secondary">
+            <div className="text-[13px] text-text-secondary">
               {t('selection.targetMunicipality', { municipality: getPlayerSafeMunicipalityName(selectedMunId) })}
             </div>
             {localSupportUnavailableReason && (
-              <div id="settlement-local-support-unavailable" className="text-xs text-amber-300/85">
+              <div id="settlement-local-support-unavailable" className="text-[13px] text-amber-300/85">
                 {localSupportUnavailableReason}
               </div>
             )}
-            {supportMessage && <div className="text-xs text-text-secondary">{supportMessage}</div>}
+            {supportMessage && <div className="text-[13px] text-text-secondary">{supportMessage}</div>}
           </div>
         )}
         {!loadedGameState && (
-          <div className="text-xs text-text-secondary italic mt-3">
+          <div className="text-[13px] text-text-secondary italic mt-3">
             Load a save file to see control, formations, and population change.
           </div>
         )}

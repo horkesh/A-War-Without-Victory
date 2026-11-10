@@ -86,7 +86,7 @@ describe('tactical shell frame contract', () => {
 
     expect(orderQueue).toContain('if (stagedOrders.length === 0) return null;');
     expect(orderQueue).toContain("bottom: 'var(--awwv-bottom-bar-clearance, 2.5rem)'");
-    expect(orderQueue).toContain("width: '15.5rem'");
+    expect(orderQueue).toContain("width: '17rem'");
     expect(orderQueue).not.toContain('Order queue (0)');
     expect(orderQueue).not.toContain("width: '18rem'");
     expect(orderQueue).not.toContain("bottom: '2.25rem'");

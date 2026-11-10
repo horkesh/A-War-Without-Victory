@@ -41,7 +41,7 @@ function PatronGauge({ faction, authority }: { faction: string; authority: numbe
 
     return (
         <div className="flex items-center gap-3">
-            <div className="w-24 text-xs text-[#6a5a40] font-bold uppercase shrink-0"
+            <div className="w-24 text-[13px] text-[#6a5a40] font-bold uppercase shrink-0"
                  style={{ fontFamily: 'var(--font-command)' }}>
                 {PATRON_LABELS[faction] ?? getPlayerSafeMilitaryFactionName(faction)}
             </div>
@@ -49,7 +49,7 @@ function PatronGauge({ faction, authority }: { faction: string; authority: numbe
                 <div className="h-full rounded transition-all duration-500" style={{ width: `${pct}%`, backgroundColor: color }} />
             </div>
             <div className="w-16 text-right">
-                <span className="text-xs font-bold uppercase" style={{ color, fontFamily: 'var(--font-data)' }}>
+                <span className="text-[13px] font-bold uppercase" style={{ color, fontFamily: 'var(--font-data)' }}>
                     {level}
                 </span>
             </div>
@@ -67,13 +67,13 @@ function DimensionBar({ dimKey, value, playerFaction }: { dimKey: string; value:
 
     return (
         <div className="flex items-center gap-2">
-            <div className="w-28 text-xs text-[#6a5a40] shrink-0" style={{ fontFamily: 'var(--font-command)' }}>
+            <div className="w-28 text-[13px] text-[#6a5a40] shrink-0" style={{ fontFamily: 'var(--font-command)' }}>
                 {t(labelKey)}
             </div>
             <div className="flex-1 h-2.5 bg-[#d8d0c4] rounded overflow-hidden border border-[#c8b898]/50">
                 <div className="h-full rounded transition-all duration-500" style={{ width: `${pct}%`, backgroundColor: dim.color }} />
             </div>
-            <div className="w-8 text-right text-xs tabular-nums text-[#2a2016]" style={{ fontFamily: 'var(--font-data)' }}>
+            <div className="w-8 text-right text-[13px] tabular-nums text-[#2a2016]" style={{ fontFamily: 'var(--font-data)' }}>
                 {Math.round(pct)}
             </div>
         </div>
@@ -104,11 +104,11 @@ export function DiplomacyOverview({ strategicDimensions, negotiatingCapital, pat
             {/* Patron Pressure */}
             {visiblePatronOverride && Object.keys(visiblePatronOverride).length > 0 && (
                 <div>
-                    <div className="text-xs uppercase tracking-widest text-[#8a7a60] font-bold mb-2"
+                    <div className="text-[13px] uppercase tracking-widest text-[#8a7a60] font-bold mb-2"
                          title={t('diplomacyOverview.patronOverrideAuthority.title')}>
                         {t('diplomacyOverview.patronOverrideAuthority')}
                     </div>
-                    <div className="text-xs text-[#8a7a60] italic mb-2 -mt-1">
+                    <div className="text-[13px] text-[#8a7a60] italic mb-2 -mt-1">
                         {t('diplomacyOverview.patronOverrideAuthority.subtitle')}
                     </div>
                     <div className="space-y-1.5">
@@ -122,11 +122,11 @@ export function DiplomacyOverview({ strategicDimensions, negotiatingCapital, pat
             {/* Strategic Dimensions */}
             {hasDims && factions.length > 0 && (
                 <div>
-                    <div className="text-xs uppercase tracking-widest text-[#8a7a60] font-bold mb-2"
+                    <div className="text-[13px] uppercase tracking-widest text-[#8a7a60] font-bold mb-2"
                          title={t('diplomacyOverview.negotiationCapital.title')}>
                         {t('diplomacyOverview.negotiationCapital')}
                     </div>
-                    <div className="text-xs text-[#8a7a60] italic mb-2 -mt-1">
+                    <div className="text-[13px] text-[#8a7a60] italic mb-2 -mt-1">
                         {t('diplomacyOverview.negotiationCapital.subtitle')}
                     </div>
                     {factions.map(faction => {
@@ -135,10 +135,10 @@ export function DiplomacyOverview({ strategicDimensions, negotiatingCapital, pat
                         const composite = negotiatingCapital?.[faction];
                         return (
                             <div key={faction} className="mb-3">
-                                <div className="text-xs font-bold text-[#2a2016] mb-1.5">
+                                <div className="text-[13px] font-bold text-[#2a2016] mb-1.5">
                                     {getPlayerSafePoliticalFactionName(faction)}
                                     {composite != null && (
-                                        <span className="ml-2 text-xs font-normal text-[#6a5a40]"
+                                        <span className="ml-2 text-[13px] font-normal text-[#6a5a40]"
                                               title="Weighted negotiating-capital score (0-100) across the six strategic dimensions.">
                                             {negotiatingCapitalBand(composite)} ({Math.round(composite)}/100)
                                         </span>
@@ -156,7 +156,7 @@ export function DiplomacyOverview({ strategicDimensions, negotiatingCapital, pat
             )}
 
             {!hasDims && !visiblePatronOverride && (
-                <div className="text-xs text-[#8a7a60] italic">
+                <div className="text-[13px] text-[#8a7a60] italic">
                     {t('diplomacyOverview.notAvailable')}
                 </div>
             )}
