@@ -1533,16 +1533,18 @@ async function selectDecisionRoomCard(surface, titlePattern, options = {}) {
     .filter({ hasText: titlePattern })
     .first();
   if (!(await card.count().catch(() => 0))) return false;
-  const dossierButton = card.locator('button').filter({ hasText: /Dossier/i }).first();
-  if (!(await dossierButton.count().catch(() => 0))) return false;
-  await dossierButton.scrollIntoViewIfNeeded().catch(() => {});
+  // Command Surface (2026-11-10): the matter card itself is the select button.
+  await card.scrollIntoViewIfNeeded().catch(() => {});
   try {
-    await dossierButton.click({ timeout: options.timeout ?? 8000 });
+    await card.click({ timeout: options.timeout ?? 8000 });
   } catch {
     return false;
   }
   await sleep(options.afterMs ?? 900);
-  return true;
+  const cardTestId = await card.getAttribute('data-testid').catch(() => null);
+  const selectedId = await surface.locator('[data-testid="decision-room-active-dossier"]').first()
+    .getAttribute('data-card-id').catch(() => null);
+  return Boolean(cardTestId && selectedId && cardTestId === `decision-room-priority-card-${selectedId}`);
 }
 
 async function openPendingEventDecisionFromDesk(frame, eventId) {
@@ -3226,7 +3228,7 @@ async function acceptStrategicProposalThroughUi(frame, proposal, options = {}) {
   if (!openedCategory) throw new Error(`Required proposal category failed: ${reviewId}`);
   const card = frame.locator(`[data-testid="decision-room-priority-card-${priorityCardId}"]`).first();
   await card.waitFor({ state: 'visible', timeout: 5000 });
-  const dossier = card.getByRole('button', { name: 'Dossier', exact: true }).first();
+  const dossier = card; // Command Surface: the matter card is the select button
   await dossier.waitFor({ state: 'visible', timeout: 5000 });
   await dossier.click({ timeout: 5000 });
   const host = frame.locator('[data-testid="warroom-decision-room-host"]').first();
@@ -3236,8 +3238,6 @@ async function acceptStrategicProposalThroughUi(frame, proposal, options = {}) {
     `[data-testid="decision-room-active-dossier"][data-card-id="${priorityCardId}"]`,
   ).first();
   await dossierPanel.waitFor({ state: 'visible', timeout: 5000 });
-  const dossierReview = dossierPanel.locator('[data-testid="decision-room-dossier-review"]').first();
-  await dossierReview.waitFor({ state: 'visible', timeout: 5000 });
   const dossierText = await dossierPanel.innerText({ timeout: 5000 });
   let dossierTruth = null;
   let dossierTruthError = null;
@@ -5167,7 +5167,7 @@ async function handleCurrentSurface(page, frame, faction, events, options = {}) 
       `[data-testid="decision-room-priority-card-counter-offer:${counterOfferId}"]`,
     ).first();
     await card.waitFor({ state: 'visible', timeout: 5000 });
-    const dossier = card.getByRole('button', { name: 'Dossier', exact: true }).first();
+    const dossier = card; // Command Surface: the matter card is the select button
     await dossier.click({ timeout: 5000 });
     await sleep(700);
     await snapshot(page, frame, faction, events, 'counter-offer-before-response', {
@@ -5307,7 +5307,7 @@ async function handleCurrentSurface(page, frame, faction, events, options = {}) 
     }
     const card = frame.locator(`[data-testid="decision-room-priority-card-command:elite-deploy:${requestId}"]`).first();
     await card.waitFor({ state: 'visible', timeout: 5000 });
-    const dossier = card.getByRole('button', { name: 'Dossier', exact: true }).first();
+    const dossier = card; // Command Surface: the matter card is the select button
     await dossier.click({ timeout: 5000 });
     await sleep(700);
     const host = frame.locator('[data-testid="warroom-decision-room-host"]').first();
