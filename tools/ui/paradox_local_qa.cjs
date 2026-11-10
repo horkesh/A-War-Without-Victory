@@ -1618,10 +1618,24 @@ async function clickExactVisibleButton(surface, exactText, label, options = {}) 
 function officerResponseLabel(officerMatter) {
   if (officerMatter?.eventType === 'officer_available') return 'File availability notice';
   if (officerMatter?.eventType === 'replacement_suggested') return 'Keep current commander';
+  // Command reactions (kept in step with selectOfficerSuccessionResponse).
+  if (['order_modified', 'order_pushback', 'order_refused', 'army_directive_pushback'].includes(officerMatter?.eventType)) return 'ACCEPT';
   return 'Acknowledge';
 }
 
 function selectOfficerSuccessionResponse(officerMatter, policy) {
+  // Command reactions the Desk routes to the Decision Room; the player accepts them in the
+  // Army HQ briefing the dossier hands off to ("Open Briefing" -> order interpretations -> Accept).
+  if (['order_modified', 'order_pushback', 'order_refused', 'army_directive_pushback'].includes(officerMatter?.eventType)) {
+    return {
+      responseLabel: 'ACCEPT',
+      expectedDecision: officerMatter?.overrideAction === 'override-officer-interpretation' ? 'override_confirmed' : 'acknowledged',
+      route: 'army-hq-briefing',
+      policy: policy.requested,
+      policyVersion: policy.version,
+      candidateOfficerId: officerMatter?.officerId ?? null,
+    };
+  }
   if (officerMatter?.eventType !== 'replacement_suggested') {
     return {
       responseLabel: officerMatter?.eventType === 'officer_available' ? 'File availability notice' : 'Acknowledge',
@@ -3141,6 +3155,40 @@ async function openArmyHqFromCurrentSurface(frame, label, options = {}) {
     return clickTestId(frame, 'warroom-toolbar-staff', `${label} warroom route`, { afterMs });
   }
   return false;
+}
+
+/**
+ * Accept a command reaction the way a player does: the Decision Room dossier's source handoff
+ * ("Open Briefing") opens the Army HQ briefing, whose order-interpretation card carries Accept.
+ * Falls back to the Army HQ route only when the dossier offers no enabled handoff.
+ */
+async function acceptOfficerEventInArmyHqBriefing(frame, eventId) {
+  const handoff = frame.locator('[data-testid="decision-room-dossier-review"]').first();
+  if (await handoff.isVisible().catch(() => false) && await handoff.isEnabled().catch(() => false)) {
+    await handoff.scrollIntoViewIfNeeded();
+    await handoff.click({ timeout: 8000 });
+    await sleep(900);
+  }
+  const armyHq = frame.locator('[data-testid="army-hq-modal"]').first();
+  if (!await armyHq.isVisible().catch(() => false)) {
+    await clearOpenSurfaces(frame);
+    if (!await openArmyHqFromCurrentSurface(frame, `officer reaction ${eventId} army hq`)) return false;
+  }
+  await armyHq.waitFor({ state: 'visible', timeout: 5000 });
+  const briefingTab = frame.locator('#army-hq-tab-briefing').first();
+  if (await briefingTab.getAttribute('aria-selected').catch(() => null) !== 'true') {
+    await briefingTab.click({ timeout: 5000 });
+  }
+  await frame.locator('#army-hq-tabpanel-briefing').first().waitFor({ state: 'visible', timeout: 5000 });
+  const accept = frame
+    .locator(`[data-testid="order-interpretation-card"][data-event-id="${eventId}"] [data-testid="order-interpretation-accept"]`)
+    .first();
+  if (!await accept.count().catch(() => 0)) return false;
+  await accept.scrollIntoViewIfNeeded();
+  if (!await accept.isVisible().catch(() => false) || !await accept.isEnabled().catch(() => false)) return false;
+  await accept.click({ timeout: 8000 });
+  await sleep(1200);
+  return true;
 }
 
 async function openCommandSurfaceFromWarroom(frame, label = 'command surface') {
@@ -5353,6 +5401,8 @@ async function handleCurrentSurface(page, frame, faction, events, options = {}) 
     });
     const responded = officerResponse.route === 'personnel'
       ? await clickHistoricalOfficerSuccessionOffer(frame, officerMatter)
+      : officerResponse.route === 'army-hq-briefing'
+        ? await acceptOfficerEventInArmyHqBriefing(frame, officerEventId)
       : await clickExactVisibleButton(
         frame,
         responseLabel,

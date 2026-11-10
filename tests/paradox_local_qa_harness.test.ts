@@ -3190,7 +3190,14 @@ test('officer handling opens the exact grouped matter and attributes its durable
     assert.match(handler, /openDeskInboxItem\(frame, 'officer_event', officerMatter\.inboxItemId\)/);
     assert.equal(officerResponseLabel({ eventType: 'officer_available' }), 'File availability notice');
     assert.equal(officerResponseLabel({ eventType: 'replacement_suggested' }), 'Keep current commander');
-    assert.equal(officerResponseLabel({ eventType: 'order_pushback' }), 'Acknowledge');
+    assert.equal(officerResponseLabel({ eventType: 'order_pushback' }), 'ACCEPT');
+    assert.equal(officerResponseLabel({ eventType: 'army_directive_pushback' }), 'ACCEPT');
+    assert.equal(officerResponseLabel({ eventType: 'officer_relieved' }), 'Acknowledge');
+    // Command reactions are accepted in the Army HQ briefing the Decision Room hands off to.
+    assert.match(handler, /officerResponse\.route === 'army-hq-briefing'[\s\S]*?acceptOfficerEventInArmyHqBriefing\(frame, officerEventId\)/);
+    const accept = extractFunctionSource(harness, 'acceptOfficerEventInArmyHqBriefing');
+    assert.match(accept, /decision-room-dossier-review/);
+    assert.match(accept, /order-interpretation-card"\]\[data-event-id="\$\{eventId\}"\] \[data-testid="order-interpretation-accept"\]/);
     assert.match(handler, /const officerResponse = selectOfficerSuccessionResponse\(officerMatter, officerSuccessionPolicy\)/);
     assert.match(handler, /const responseLabel = officerResponse\.responseLabel/);
     assert.match(handler, /waitForNewExactDecisionReceipt\([\s\S]*?'officer'[\s\S]*?'eventId'[\s\S]*?officerEventId/);

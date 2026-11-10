@@ -16,7 +16,10 @@ import type { MessageKey } from '../../i18n';
 import { RELIEF_MORALE_PENALTY } from '../../../../sim/combat/order_interpretation.js';
 
 // Phase 3 interpretation event types only (not personnel events)
-const INTERPRETATION_TYPES = new Set(['order_modified', 'order_pushback', 'order_refused']);
+// The Army CO's pushback on a political directive is answered here too: the Decision Room
+// card hands off to this briefing, and nothing else lets the player accept it (R8 shakedown
+// 2026-11-10: an unaccepted directive pushback stayed pending for the rest of the war).
+const INTERPRETATION_TYPES = new Set(['order_modified', 'order_pushback', 'order_refused', 'army_directive_pushback']);
 
 interface BadgeStyle {
     border: string;
@@ -33,6 +36,12 @@ const BADGE_STYLES: Record<string, BadgeStyle> = {
         labelKey: 'orderInterpretation.badge.modified',
     },
     order_pushback: {
+        border: 'border-orange-500/30',
+        bg: 'bg-orange-900/10',
+        text: 'text-orange-400',
+        labelKey: 'orderInterpretation.badge.pushback',
+    },
+    army_directive_pushback: {
         border: 'border-orange-500/30',
         bg: 'bg-orange-900/10',
         text: 'text-orange-400',
@@ -90,6 +99,8 @@ export function OrderInterpretationPanel({ gameState, playerFaction }: OrderInte
                 return (
                     <div
                         key={event.event_id}
+                        data-testid="order-interpretation-card"
+                        data-event-id={event.event_id}
                         className={`border ${badge.border} ${badge.bg} p-3 space-y-2`}
                     >
                         {/* Type badge + officer name */}
@@ -118,6 +129,7 @@ export function OrderInterpretationPanel({ gameState, playerFaction }: OrderInte
                         <div className="flex gap-2 pt-1">
                             <button
                                 type="button"
+                                data-testid="order-interpretation-accept"
                                 onClick={() => { void handleAcknowledge(event.event_id); }}
                                 className="text-xs font-bold uppercase tracking-widest px-3 py-1 border border-panel-border text-text-primary hover:bg-panel-bg transition-all font-mono"
                             >
