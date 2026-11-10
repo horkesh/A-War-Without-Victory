@@ -36,6 +36,7 @@ export const bcsMessages: Partial<Record<MessageKey, string>> = {
     'equipmentReport.close': 'Zatvori ratni pregled',
 
     'settings.title': 'Postavke',
+    'settings.eyebrow': 'Opcije igre',
     'settings.tab.gameplay': 'Igra',
     'settings.tab.display': 'Prikaz',
     'settings.tab.audio': 'Zvuk',

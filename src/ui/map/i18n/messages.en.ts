@@ -34,6 +34,7 @@ export const enMessages = {
     'equipmentReport.close': 'Close war summary',
 
     'settings.title': 'Settings',
+    'settings.eyebrow': 'Game options',
     'settings.tab.gameplay': 'Gameplay',
     'settings.tab.display': 'Display',
     'settings.tab.audio': 'Audio',

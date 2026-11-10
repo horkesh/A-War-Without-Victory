@@ -14232,3 +14232,9 @@ Owner: bring every player surface into the Command Surface's style, on shared bu
 - Shared decision header: description held to 36 rem and a second bottom shade, so the copy stays readable over bright plates (the personnel plate was the worst case).
 - Tests: peace-plan, decision-family, localization and modal-stack files plus the event set, 263/263 (no test changes needed).
 - Rendered (dev build, RBiH, with a test peace plan and a test replacement recommendation injected in the dev store): peace plan 1280 × 720 1,192 × 612 columns 801/389, 2293 × 960 1,192 × 815 columns 641/549; officer matter 1,024 × 552 at both sizes; no overflow, minimum text 13 px.
+
+## 2026-11-10 — Settings redesigned (UI)
+
+- `SettingsScreen.tsx`: the 500 px card becomes a medium surface (up to 1,216 × 832): header (Game options, Settings, Close), the sections as a left rail, and the chosen section's rows in a scrolling column — each row a card with a 17 px label and 15 px description, 56 × 32 px toggles, 44 px selects, wider sliders and full-size diagnostics buttons. The interface-size block (`InterfaceScaleSettings`, styled in `globals.css`) matches the rows; the `globals.css` cap on `settings-panel` moved from 500 px to 76 rem. Behaviour, IPC, focus trap and `data-testid="settings-panel"` unchanged; Close now leads the tab order (test `audio_controls_reliability` updated). New strings `settings.eyebrow` (EN/BCS).
+- Tests: Settings, interface-scale and `globals.css` readers 202/202.
+- Rendered (dev build, main menu → Settings): 2293 × 960 surface 1,216 × 832, columns 336/879; 1280 × 720 1,216 × 624, columns 272/943; all five sections without overflow, minimum text 13 px.
