@@ -395,7 +395,7 @@ export function FormationDetail({ railSlot = 'primary', breadcrumb }: FormationD
                   className="w-full text-left px-2 py-1.5 bg-accent-blue/5 border border-accent-blue/20 rounded-md flex items-center justify-between text-[13px] hover:bg-accent-blue/10 transition-colors group"
                 >
                   <div className="flex items-center gap-2">
-                    <span className="text-accent-blue/60 uppercase font-bold tracking-tighter">
+                    <span className="text-accent-blue uppercase font-bold tracking-tighter">
                       {isArmyHq ? t('formationDetail.subordinatedTo') : t('formationDetail.corps')}
                     </span>
                     <span className="text-accent-blue font-bold uppercase group-hover:underline">
@@ -426,7 +426,7 @@ export function FormationDetail({ railSlot = 'primary', breadcrumb }: FormationD
                     aria-label={t('formationDetail.inspectSector', { sector: sectorLabel })}
                   >
                     <div className="flex items-center gap-2">
-                      <span className="text-accent-gold/60 uppercase font-bold tracking-tighter">{t('formationDetail.sector')}</span>
+                      <span className="text-accent-gold uppercase font-bold tracking-tighter">{t('formationDetail.sector')}</span>
                       <span className="text-accent-gold font-bold uppercase group-hover:underline">
                         {sectorLabel}
                       </span>

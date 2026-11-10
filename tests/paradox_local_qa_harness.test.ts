@@ -981,7 +981,7 @@ function ambientSignals(window: Window & typeof globalThis): any[] {
 test('ambient lifecycle observer records browser media progress with exact element state and ignores other audio', () => {
     const dom = new JSDOM(`
         <audio id="ambient" src="http://127.0.0.1:3002/assets/ambient_field-D4f9a2.ogg"></audio>
-        <audio id="ui" src="http://127.0.0.1:3002/assets/ui_click-D4f9a2.ogg"></audio>
+        <audio id="ui" src="http://127.0.0.1:3002/media/ui_click.ogg"></audio>
     `);
     const { window } = dom;
     const ambient = window.document.querySelector<HTMLAudioElement>('#ambient')!;

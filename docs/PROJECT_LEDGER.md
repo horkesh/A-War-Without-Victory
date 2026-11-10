@@ -14313,3 +14313,10 @@ The map rails must stay narrow so the map stays visible, so they keep their plac
 ## 2026-11-10 — HRHB front-visit detail re-cut approved (art)
 
 Codex removed the Mercedes badge from `act_front_visit_detail_HRHB.webp` (#564 at 7b6118fd2). Re-reviewed at native scale: plain boot lid, no legible plate or text, scene unchanged — APPROVED, so all 15 matter-detail headers in #564 pass. The file is now on this branch (byte-identical to the PR), so the HRHB front-visit detail slot shows the re-cut; `directive_card_act_art` now exercises the fallback with a lever that ships no detail cut (address the nation).
+
+## 2026-11-10 — R8: unit-panel labels readable; harness pairs music-track aborts (UI, QA)
+
+- RBiH attempt 10 (package i, after merging surface-redesign through 34298478e) stopped on the launch screen: the harness saw the legacy load-failure menu (`#mm-new-campaign`, `src/ui/warroom/index.html`), which the shell shows only when the embedded app is slow to load. Another session was running Electron and a dev server at the same time. Attempt 11 on the same package started cleanly, so this was a slow start under load. Still to check: how long the shell waits before falling back.
+- Attempt 11 played 24 turns and failed only readability: `FormationDetail.tsx` drew the "Corps:" and "OG:" labels at 60% opacity (3.07:1 and 3.5:1). They are now full opacity.
+- Music aborts: a track cut off by a track change reported `net::ERR_ABORTED`. The harness lifecycle observer only recorded `ambient_*` files, so music never paired and counted as a network failure (13 in attempt 09, 10 in attempt 11). The observer now records any bundled `/assets/<name>-<hash>.ogg`, which is the same shape the abort classifier accepts, and it observes `new Audio()` elements from construction. `tests/paradox_local_qa_harness.test.ts` keeps its "ignores other audio" case with a non-bundled path; 122/122 pass.
+- One unexplained hillshade tile abort (attempt 09) is left to recur before any rule change.

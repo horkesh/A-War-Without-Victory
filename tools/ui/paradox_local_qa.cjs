@@ -6382,7 +6382,9 @@ function installAmbientLifecycleObserver() {
   const metadata = new WeakMap();
   const ambientUrl = (element) => {
     const url = element.currentSrc || element.src || '';
-    return /\/assets\/ambient_(?:warroom|field|archive)-[A-Za-z0-9_-]+\.ogg(?:$|[?#])/.test(url) ? url : '';
+    // Any bundled audio cue: ambient beds and, with music on by default since 2026-11-10,
+    // the music tracks (same file shape the abort classifier accepts).
+    return /\/assets\/[a-z0-9_]+-[A-Za-z0-9_-]+\.ogg(?:$|[?#])/.test(url) ? url : '';
   };
   const getMetadata = (element) => {
     let value = metadata.get(element);
