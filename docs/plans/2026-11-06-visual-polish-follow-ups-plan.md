@@ -1,6 +1,8 @@
 # Visual polish follow-ups — the five recorded lanes, run in parallel (2026-11-06)
 
-**Status:** ACTIVE (owner direction 2026-11-06: "tackle them all in a separate tree; if it waits for something, then it waits, but the rest?"). Successor of [2026-11-05-visual-polish-art-direction-plan.md](2026-11-05-visual-polish-art-direction-plan.md), registered under R7 once that packet closes on PR #533. Branch `claude/visual-polish-followups` in worktree `F:/AWWV-worktrees/visual-polish`.
+**Status:** CLOSED with R7 (owner, 2026-11-08). A shipped as #542; C as #541 and #543–#544; E as #538; B holds, with its brief travelling with the enclave feature's own PR; D slices 1–2 shipped (#535, #536) and its further slices are post-1.0 backlog in the master roadmap.
+
+Earlier status: ACTIVE (owner direction 2026-11-06: "tackle them all in a separate tree; if it waits for something, then it waits, but the rest?"). Successor of [2026-11-05-visual-polish-art-direction-plan.md](2026-11-05-visual-polish-art-direction-plan.md), registered under R7 once that packet closes on PR #533. Branch `claude/visual-polish-followups` in worktree `F:/AWWV-worktrees/visual-polish`.
 **Owner of this plan:** Claude (integrator). Creators: Codex for images under the [art work order](../40_reports/proposals/20261106_VISUAL_POLISH_ART_WORK_ORDER.md); Pyrrhic seats for panels; Claude for code and docs.
 **Rules carried over:** presentation only in code lanes; no engine, state, authored or calibration data without its own gate; never Codex's files; i18n keys in one announced commit per lane; §6 chain for anything gated; one change per measured run for anything calibration-moving.
 

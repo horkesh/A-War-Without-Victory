@@ -47,7 +47,9 @@ not_delegable:
 tasks:
   - id: R7A-T1-CUE-CALL-SITES
     kind: extract
-    status: open
+    # Done 2026-11-08: R7-AUDIO-CUE-WIRING closed on the 2026-11-05 disposition (re-checked
+    # against non-test playCue call sites on main), and R7 closed by the owner (#559).
+    status: done
     edit: []
     # Current registry/API references, including control and preference-export consumers.
     # Keep the complete file list: sampling can omit a live cue hook.

@@ -13900,6 +13900,28 @@ Found during the R7 offline audio run: `resolveMapServerBaseUrl` in `src/desktop
 - Packaged proof on `b5018e63e`: a fresh `desktop:package:dir` build under the offline audio harness made 0 dev-server probes (8 before), used its built server, passed all four audio checks, and touched 0 remote URLs.
 - No simulation, state, scenario or calibration change.
 
+## 2026-11-08 — Match the R7 interface cues and restore turn-completion playback (AUDIO)
+
+Work order CL-20261108-043 replaces the nine Kenney runtime cues with original deterministic synthesis. The replacements measure −37.7 to −34.0 dB mean at game cue gain, with lower spectral centres. The turn completion cue measures 6.2 dB above the round 1 mix. A packaged reproduction showed the original OGG failed to play because its tail packet lacked a timestamp. The new export uses 100 ms Ogg pages and plays through in Electron. Prior Kenney and first-party files are retained with their provenance.
+
+- 124 focused tests, five Python generator and timestamp checks, typecheck, builds and independent review passed. The corrected offline Windows run verified all 30 bundled OGGs, complete playback of all ten changed files, and a byte-identical isolated turn-zero save.
+- Round 2 awaits human listening and sensitivity acceptance. See [the listening record](../logs/r7-english-readability/closeout-human-audio-listen.md).
+
+## 2026-11-08 - R7 closed: listening round 2 accepted; listening and roll-up gates closed (DOCS, ROADMAP)
+
+Owner: "Yeah, they're fine" (round 2) and "Close the listening gate and R7".
+- Round 2: the ten cues remade in #558 (`91ef2af42`) accepted; Claude's re-measurement matched Codex's table and all ten decode cleanly. Round 1 clarifications recorded: the 13 unmarked cues are fine and sensitivity is accepted. Record: `logs/r7-english-readability/closeout-human-audio-listen-round2.md`.
+- `R7-AUDIO-HUMAN-ACCEPTANCE` and `R7-ACCEPTANCE-ALL-GREEN` closed; every R7 gate is now closed. The five in-game audio checks are waived to R8 packaged play by the owner.
+- Roadmap: R7 row CLOSED; lane-order, sequence and audit lines updated; Army HQ paper further slices added to the post-1.0 backlog. R7 audio plan and visual-polish follow-ups plan marked CLOSED. `plan_index.yml` regenerated.
+- No code, simulation, scenario or calibration change.
+
+## 2026-11-08 - R6 closed (DOCS, ROADMAP)
+
+Owner: "Yes, close R6." The roadmap R6 row still read "GLOBAL NO-GO" from October although the owner signed off all four checkpoints on 2026-11-06 (712/711/712/710, live = headless for all three player factions, strict health PASS, Farz guard enforced on `__w188_n63`) and closed the calibration lane.
+- `R6-CALIBRATION-INTEGRATION` closed with `CALIBRATION_MASTER.md` as evidence; its history stays in the notes.
+- Roadmap and command-board R6 rows CLOSED; R6 plan status CLOSED; `plan_index.test.ts` now expects R6 closed; `plan_index.yml` regenerated.
+- Brka and Ilijaš Krivajevići remain open cells by owner direction. No code, simulation, scenario or calibration change.
+
 ## 2026-11-08 — Require ultrawide composition for new Dayton visuals (PLAN, ART)
 
 The owner set ultrawide as the production format for all new Dayton visuals. The active Dayton implementation plan at F:/AWWV-worktrees/.dayton-design/DAYTON_CONFERENCE_IMPLEMENTATION_PLAN.md specifies a native 3840 × 1280 target for full-frame art, registered standard-screen framing, and visual acceptance at five viewport sizes. New prop and interface art must register or reflow in both formats. The v1 concepts remain blocking references. Documentation and production criteria only.
