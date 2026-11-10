@@ -124,7 +124,7 @@ Grades A+/A/B/C/D/F are assigned by faction-specific anchors (the anchor tables 
 
 | RBiH anchor | Condition |
 |---|---|
-| A+ | >33% territory AND no enclaves lost AND zero war crimes |
+| A+ | >33% territory AND no enclaves lost AND zero war crimes authorized in play (`war_crimes_events_emergent`; owner 2026-11-10: scripted historical records no longer block it) |
 | A | ≥30% territory AND ≤1 enclave lost AND Sarajevo held |
 | B | ≥25% territory AND Sarajevo held |
 | C | ≥18% territory AND ≤3 enclaves lost |

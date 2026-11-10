@@ -819,6 +819,11 @@
         "special": false,
         "confidence": "approximate"
       },
+      "op:orasje:ostra_luka": {
+        "faction": "HRHB",
+        "special": false,
+        "confidence": "approximate"
+      },
       "op:pale:bulozi": {
         "faction": "RBiH",
         "special": false,
@@ -943,6 +948,11 @@
         "faction": "RBiH",
         "special": false,
         "confidence": "verified"
+      },
+      "op:sanski_most:stari_majdan": {
+        "faction": "RBiH",
+        "special": false,
+        "confidence": "approximate"
       },
       "op:skender_vakuf:donji_koricani": {
         "faction": "HRHB",
@@ -1104,6 +1114,11 @@
         "special": false,
         "confidence": "verified"
       },
+      "op:trebinje:velicani": {
+        "faction": "HRHB",
+        "special": false,
+        "confidence": "approximate"
+      },
       "op:trebinje:zakovo_2": {
         "faction": "RS",
         "special": false,
@@ -1120,6 +1135,16 @@
         "confidence": "verified"
       },
       "op:trnovo:kijevo_2": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "approximate"
+      },
+      "op:trnovo:tosici": {
+        "faction": "RS",
+        "special": false,
+        "confidence": "approximate"
+      },
+      "op:trnovo:trnovo": {
         "faction": "RS",
         "special": false,
         "confidence": "approximate"

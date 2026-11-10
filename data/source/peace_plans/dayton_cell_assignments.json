@@ -1132,10 +1132,10 @@
    "evidence": "GFAP Annex 2 Art. I and Appendix (text: ohr.int/dayton-peace-agreement/annex-2/); IEBL as implemented, read from the 1991 census republished on the post-1995 municipal structure (data/source/bih_census_1991.json; BHAS codes 1xxxx=FBiH, 2xxxx=RS, 3xxxx=Brcko District), joined to the cell's member settlements via settlements_wgs84_1990.geojson census_ids: Kopanice->Orašje[FBiH]; Orašje->Orašje[FBiH]; Vidovice->Orašje[FBiH]; Jenjić->Donji Žabar[RS]/Orašje[FBiH]; Lepnica->Donji Žabar[RS]/Orašje[FBiH]. Shares by area: {\"FED\": 81.2, \"RS\": 18.8}; by population: {\"FED\": 96.1, \"RS\": 3.9}. RS keeps Donji Zabar. Jenjic, Lepnica split FED-LAYER: Posavina Canton; HVO Orasje Corps District held the Orasje pocket to war end (BB1 KB p0217, p0437)"
   },
   "op:orasje:ostra_luka": {
-   "entity": "RS",
-   "faction": "RS",
-   "confidence": "unresolved",
-   "rule": "A2-MAJORITY-AREA 63.7% RS, but population 50.6% FED and principal settlement Ostra Luka split 63% FBiH; Donji Zabar (RS seat) also in the cell - indicators conflict",
+   "entity": "FED",
+   "faction": "HRHB",
+   "confidence": "approximate",
+   "rule": "OWNER-RULING 2026-11-10: principal-settlement rule for the five cells whose land and town fall on opposite sides; Ostra Luka town 63% FBiH (Orašje, HRHB). A2-MAJORITY-AREA 63.7% RS, but population 50.6% FED and principal settlement Ostra Luka split 63% FBiH; Donji Zabar (RS seat) also in the cell - indicators conflict",
    "evidence": "GFAP Annex 2 Art. I and Appendix (text: ohr.int/dayton-peace-agreement/annex-2/); IEBL as implemented, read from the 1991 census republished on the post-1995 municipal structure (data/source/bih_census_1991.json; BHAS codes 1xxxx=FBiH, 2xxxx=RS, 3xxxx=Brcko District), joined to the cell's member settlements via settlements_wgs84_1990.geojson census_ids: Bukova Greda->Orašje[FBiH]; Čović Polje->Donji Žabar[RS]/Orašje[FBiH]; Bok->Orašje[FBiH]; Oštra Luka->Donji Žabar[RS]/Orašje[FBiH]; Donji Žabar->Donji Žabar[RS]; Lončari->Donji Žabar[RS]. Shares by area: {\"FED\": 36.3, \"RS\": 63.7}; by population: {\"FED\": 50.6, \"RS\": 49.4}. RS keeps Donji Zabar. Owner decision needed"
   },
   "op:pale:bulozi": {
@@ -1314,10 +1314,10 @@
    "evidence": "GFAP Annex 2 Art. I and Appendix (text: ohr.int/dayton-peace-agreement/annex-2/); IEBL as implemented, read from the 1991 census republished on the post-1995 municipal structure (data/source/bih_census_1991.json; BHAS codes 1xxxx=FBiH, 2xxxx=RS, 3xxxx=Brcko District), joined to the cell's member settlements via settlements_wgs84_1990.geojson census_ids: Fajtovci->Sanski Most[FBiH]; Gorice->Sanski Most[FBiH]; Gornji Kamengrad->Sanski Most[FBiH]; Modra->Sanski Most[FBiH]; Naprelje->Sanski Most[FBiH]; Okreč->Sanski Most[FBiH]; Skucani Vakuf->Sanski Most[FBiH]; Lukavice->Sanski Most[FBiH]; Podvidača->Oštra Luka[RS]/Sanski Most[FBiH]; Zenkovići->Oštra Luka[RS]/Sanski Most[FBiH]. RS keeps Ostra Luka (Japra valley, Koprivna); Federation keeps Sanski Most town (ARBiH Oct 1995, BB1 KB p0420) FED-LAYER: Una-Sana Canton; taken by ARBiH 5th Corps Oct 1995 (BB1 KB p0420)"
   },
   "op:sanski_most:stari_majdan": {
-   "entity": "RS",
-   "faction": "RS",
-   "confidence": "unresolved",
-   "rule": "A2-MAJORITY-AREA 73.6% RS, but population 54.6% FED and principal settlement Stari Majdan (1,212) FBiH - indicators conflict",
+   "entity": "FED",
+   "faction": "RBiH",
+   "confidence": "approximate",
+   "rule": "OWNER-RULING 2026-11-10: principal-settlement rule for the five cells whose land and town fall on opposite sides; Stari Majdan town FBiH (Sanski Most, RBiH). A2-MAJORITY-AREA 73.6% RS, but population 54.6% FED and principal settlement Stari Majdan (1,212) FBiH - indicators conflict",
    "evidence": "GFAP Annex 2 Art. I and Appendix (text: ohr.int/dayton-peace-agreement/annex-2/); IEBL as implemented, read from the 1991 census republished on the post-1995 municipal structure (data/source/bih_census_1991.json; BHAS codes 1xxxx=FBiH, 2xxxx=RS, 3xxxx=Brcko District), joined to the cell's member settlements via settlements_wgs84_1990.geojson census_ids: Stari Majdan->Sanski Most[FBiH]; Batkovci->Oštra Luka[RS]/Sanski Most[FBiH]; Stara Rijeka->Oštra Luka[RS]/Sanski Most[FBiH]; Garevica->Oštra Luka[RS]; Ovanjska->Oštra Luka[RS]. Shares by area: {\"FED\": 26.4, \"RS\": 73.6}; by population: {\"FED\": 54.6, \"RS\": 45.4}. RS keeps Ostra Luka (Japra valley, Koprivna); Federation keeps Sanski Most town (ARBiH Oct 1995, BB1 KB p0420). Garevica (29 km2), Ovanjska RS; Stara Rijeka, Batkovci split. Owner decision needed"
   },
   "op:skender_vakuf:donji_koricani": {
@@ -1545,10 +1545,10 @@
    "evidence": "GFAP Annex 2 Art. I and Appendix (text: ohr.int/dayton-peace-agreement/annex-2/); IEBL as implemented, read from the 1991 census republished on the post-1995 municipal structure (data/source/bih_census_1991.json; BHAS codes 1xxxx=FBiH, 2xxxx=RS, 3xxxx=Brcko District), joined to the cell's member settlements via settlements_wgs84_1990.geojson census_ids: Aranđelovo->Trebinje[RS]; Arslanagića Most->Trebinje[RS]; Bogojević Selo->Trebinje[RS]; Borilovići->Trebinje[RS]; Budoši->Trebinje[RS]; Bugovina->Trebinje[RS]; Donje Čičevo->Trebinje[RS]; Donje Grančarevo->Trebinje[RS]; Donje Vrbno->Trebinje[RS]; Donji Orahovac->Trebinje[RS]; Dubočani->Trebinje[RS]; Gornje Čičevo->Trebinje[RS]; Gornje Grančarevo->Trebinje[RS]; Gornje Vrbno->Trebinje[RS]; Gornji Orahovac->Trebinje[RS]; Grab->Trebinje[RS]; Jasen->Trebinje[RS]; Jazina->Trebinje[RS]; Klobuk->Trebinje[RS]; Konjsko->Trebinje[RS]; Kraj->Trebinje[RS]; Kunja Glavica->Trebinje[RS]; Lastva->Trebinje[RS]; Mosko->Trebinje[RS]; Necvijeće->Trebinje[RS]; Ograde->Trebinje[RS]; Orašje Zubci->Trebinje[RS]; Podštirovnik->Trebinje[RS]; Pridvorci->Trebinje[RS]; Rapti Zupci->Trebinje[RS]; Rasovac->Trebinje[RS]; Skočigrm->Trebinje[RS]; Todorići->Trebinje[RS]; Trebinje->Trebinje[RS]; Tuli->Trebinje[RS]; Turmenti->Trebinje[RS]; Ubla->Trebinje[RS]; Uvjeća->Trebinje[RS]; Velja Gora->Trebinje[RS]; Vrpolje Ljubomir->Trebinje[RS]; Vučija->Trebinje[RS]; Zgonjevo->Trebinje[RS]; Željevo->Trebinje[RS]; Župa->Trebinje[RS]. RS keeps Trebinje; Federation keeps Ravno (Popovo polje and Ivanica/Bobani)"
   },
   "op:trebinje:velicani": {
-   "entity": "RS",
-   "faction": "RS",
-   "confidence": "unresolved",
-   "rule": "A2-MAJORITY-AREA 62.4% RS, but population 52.8% FED and the Ravno municipal seat lies in the cell - indicators conflict",
+   "entity": "FED",
+   "faction": "HRHB",
+   "confidence": "approximate",
+   "rule": "OWNER-RULING 2026-11-10: principal-settlement rule for the five cells whose land and town fall on opposite sides; Ravno seat FBiH (Ravno, HRHB). A2-MAJORITY-AREA 62.4% RS, but population 52.8% FED and the Ravno municipal seat lies in the cell - indicators conflict",
    "evidence": "GFAP Annex 2 Art. I and Appendix (text: ohr.int/dayton-peace-agreement/annex-2/); IEBL as implemented, read from the 1991 census republished on the post-1995 municipal structure (data/source/bih_census_1991.json; BHAS codes 1xxxx=FBiH, 2xxxx=RS, 3xxxx=Brcko District), joined to the cell's member settlements via settlements_wgs84_1990.geojson census_ids: Čvaljina->Ravno[FBiH]; Dvrsnica->Ravno[FBiH]; Ravno->Ravno[FBiH]; Grmljani->Ravno[FBiH]/Trebinje[RS]; Orašje Popovo->Ravno[FBiH]/Trebinje[RS]; Strujići->Ravno[FBiH]/Trebinje[RS]; Veličani->Ravno[FBiH]/Trebinje[RS]; Kotezi->Ravno[FBiH]/Trebinje[RS]; Čavaš->Ravno[FBiH]; Zavala->Ravno[FBiH]; Do->Trebinje[RS]; Dodanovići->Trebinje[RS]; Dubljani->Trebinje[RS]; Korlati->Trebinje[RS]; Prhinje->Trebinje[RS]. Shares by area: {\"FED\": 37.6, \"RS\": 62.4}; by population: {\"FED\": 52.8, \"RS\": 47.2}. RS keeps Trebinje; Federation keeps Ravno (Popovo polje and Ivanica/Bobani). Velicani, Grmljani, Strujici RS; Ravno, Zavala, Cvaljina FBiH. Owner decision needed"
   },
   "op:trebinje:zakovo_2": {
@@ -1580,17 +1580,17 @@
    "evidence": "GFAP Annex 2 Art. I and Appendix (text: ohr.int/dayton-peace-agreement/annex-2/); IEBL as implemented, read from the 1991 census republished on the post-1995 municipal structure (data/source/bih_census_1991.json; BHAS codes 1xxxx=FBiH, 2xxxx=RS, 3xxxx=Brcko District), joined to the cell's member settlements via settlements_wgs84_1990.geojson census_ids: Bogatići->Trnovo[FBiH]/Trnovo[RS]; Donja Presjenica->Trnovo[FBiH]/Trnovo[RS]; Kijevo->Trnovo[RS]; Jablanica->Trnovo[RS]; Ulobići->Trnovo[RS]; Podivič->Trnovo[RS]; Klanac->Trnovo[RS]. Shares by area: {\"FED\": 17.3, \"RS\": 82.7}; by population: {\"FED\": 9.9, \"RS\": 90.1}. Split between Trnovo (FBiH) and Trnovo (RS); BHAS places Trnovo town (1,985 of 2,099 inhabitants) in RS Trnovo, contrary to the research-report v1 note. part of Donja Presjenica FBiH"
   },
   "op:trnovo:tosici": {
-   "entity": "FED",
-   "faction": "RBiH",
-   "confidence": "unresolved",
-   "rule": "A2-MAJORITY-AREA 64.5% FED, but population 59.2% RS and principal settlement Tosici (391) RS - indicators conflict; FED-LAYER (verified)",
+   "entity": "RS",
+   "faction": "RS",
+   "confidence": "approximate",
+   "rule": "OWNER-RULING 2026-11-10: principal-settlement rule for the five cells whose land and town fall on opposite sides; Tošići RS. A2-MAJORITY-AREA 64.5% FED, but population 59.2% RS and principal settlement Tosici (391) RS - indicators conflict; FED-LAYER (verified)",
    "evidence": "GFAP Annex 2 Art. I and Appendix (text: ohr.int/dayton-peace-agreement/annex-2/); IEBL as implemented, read from the 1991 census republished on the post-1995 municipal structure (data/source/bih_census_1991.json; BHAS codes 1xxxx=FBiH, 2xxxx=RS, 3xxxx=Brcko District), joined to the cell's member settlements via settlements_wgs84_1990.geojson census_ids: Češina Strana->Trnovo[FBiH]; Lisovići->Trnovo[FBiH]; Rijeka->Trnovo[FBiH]; Šišići->Trnovo[FBiH]; Grab->Trnovo[FBiH]/Trnovo[RS]; Bistročaj->Trnovo[FBiH]/Trnovo[RS]; Bašci->Trnovo[FBiH]/Trnovo[RS]; Ilovice->Trnovo[FBiH]/Trnovo[RS]; Mađari->Trnovo[FBiH]; Vrbovnik->Trnovo[FBiH]/Trnovo[RS]; Rajski Do->Trnovo[RS]; Tošići->Trnovo[RS]. Shares by area: {\"FED\": 64.5, \"RS\": 35.5}; by population: {\"FED\": 40.8, \"RS\": 59.2}. Split between Trnovo (FBiH) and Trnovo (RS); BHAS places Trnovo town (1,985 of 2,099 inhabitants) in RS Trnovo, contrary to the research-report v1 note. Treskavica slopes FBiH; Tosici, Rajski Do RS. Owner decision needed FED-LAYER: Sarajevo Canton (Trnovo FBiH); 1995 Treskavica-Trnovo fighting (BB1 KB p0443)"
   },
   "op:trnovo:trnovo": {
-   "entity": "FED",
-   "faction": "RBiH",
-   "confidence": "unresolved",
-   "rule": "A2-MAJORITY-AREA 79.2% FED, but population 65.5% RS and principal settlement Trnovo town (1,985 of 2,099) in RS Trnovo - indicators conflict; FED-LAYER (verified)",
+   "entity": "RS",
+   "faction": "RS",
+   "confidence": "approximate",
+   "rule": "OWNER-RULING 2026-11-10: principal-settlement rule for the five cells whose land and town fall on opposite sides; Trnovo town in RS Trnovo. A2-MAJORITY-AREA 79.2% FED, but population 65.5% RS and principal settlement Trnovo town (1,985 of 2,099) in RS Trnovo - indicators conflict; FED-LAYER (verified)",
    "evidence": "GFAP Annex 2 Art. I and Appendix (text: ohr.int/dayton-peace-agreement/annex-2/); IEBL as implemented, read from the 1991 census republished on the post-1995 municipal structure (data/source/bih_census_1991.json; BHAS codes 1xxxx=FBiH, 2xxxx=RS, 3xxxx=Brcko District), joined to the cell's member settlements via settlements_wgs84_1990.geojson census_ids: Brutusi->Trnovo[FBiH]; Čeružići->Trnovo[FBiH]; Dejčići->Trnovo[FBiH]; Dujmovići->Trnovo[FBiH]; Ledići->Trnovo[FBiH]; Mijanovići->Trnovo[FBiH]; Ostojići->Trnovo[FBiH]; Pendičići->Trnovo[FBiH]; Šabanci->Trnovo[FBiH]; Trebečaj->Trnovo[FBiH]; Kozija Luka->Trnovo[FBiH]/Trnovo[RS]; Milje->Trnovo[FBiH]/Trnovo[RS]; Trnovo->Trnovo[FBiH]/Trnovo[RS]; Godinja->Trnovo[FBiH]/Trnovo[RS]; Gračanica->Trnovo[FBiH]/Trnovo[RS]; Turovi->Trnovo[RS]. Shares by area: {\"FED\": 79.2, \"RS\": 20.8}; by population: {\"FED\": 34.5, \"RS\": 65.5}. Split between Trnovo (FBiH) and Trnovo (RS); BHAS places Trnovo town (1,985 of 2,099 inhabitants) in RS Trnovo, contrary to the research-report v1 note. Dejcici-Trebecaj-Ledici valley FBiH; Trnovo town and Turovi RS. Research-report v1 claimed the town went to the Federation; BHAS says otherwise. Owner decision needed FED-LAYER: Sarajevo Canton (Trnovo FBiH); 1995 Treskavica-Trnovo fighting (BB1 KB p0443)"
   },
   "op:trnovo:tusila": {

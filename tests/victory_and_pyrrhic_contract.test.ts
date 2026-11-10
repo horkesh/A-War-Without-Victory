@@ -148,11 +148,14 @@ describe('v0.9.0 — classifyOutcome canon', () => {
 // ─────────────────────────────────────────────────────────────────────────────
 
 describe('v0.9.0 — faction grade anchor canon', () => {
-    test('RBiH A+ requires zero war_crimes_events', () => {
+    // Owner, 2026-11-10: only war crimes RBiH authorized in play block A+; scripted records do not.
+    test('RBiH A+ requires zero war crimes authorized in play', () => {
         const state = minimalState();
         const cleanCap = emptyBreakdown({ territory_controlled_pct: 40, war_crimes_events: 0 });
-        const tainted = emptyBreakdown({ territory_controlled_pct: 40, war_crimes_events: 1 });
+        const scripted = emptyBreakdown({ territory_controlled_pct: 40, war_crimes_events: 1 });
+        const tainted = emptyBreakdown({ territory_controlled_pct: 40, war_crimes_events: 1, war_crimes_events_emergent: 1 });
         expect(computeFactionGrade(cleanCap, 'RBiH', state).grade).toBe('A+');
+        expect(computeFactionGrade(scripted, 'RBiH', state).grade).toBe('A+');
         expect(computeFactionGrade(tainted, 'RBiH', state).grade).not.toBe('A+');
     });
 

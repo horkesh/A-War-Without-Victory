@@ -272,3 +272,7 @@ Cells that form the corridor between Goražde and the Sarajevo canton (Federatio
 - `tools/peace/iebl_cell_audit/compute_cells.py`, `build_outputs.py`, `build_audit_md.py`: deterministic pipeline (reads repo data read-only; regenerates the deliverable and this report).
 - `tools/peace/iebl_cell_audit/crossed_cells.txt`: per-cell settlement-level evidence for the IEBL-crossed cells; `diff_rows.json`: reference-save comparison; `CHECKPOINT.md`: run record.
 - Fetched sources (Annex 2, Final Award, Prlić TJ Vol. 2 PDF + text, Wikipedia raw wikitext) are not committed; the pipeline re-fetches them from the URLs in §2.
+
+## Owner ruling, 2026-11-10
+
+The five unresolved cells follow the principal-settlement rule, consistently: each goes where its main town went. `op:orasje:ostra_luka` (Ostra Luka) → Federation, HRHB; `op:sanski_most:stari_majdan` (Stari Majdan) → Federation, RBiH; `op:trebinje:velicani` (Ravno seat) → Federation, HRHB; `op:trnovo:tosici` (Tošići) → RS; `op:trnovo:trnovo` (Trnovo town) → RS. Each is recorded as approximate with the ruling in its rule field; the table now fixes 252 cells (190 verified, 62 approximate, 0 unresolved). On the painted October 1995 front the Dayton map reads RS 46.85 %, Federation 53.15 %, with all five as ruled.

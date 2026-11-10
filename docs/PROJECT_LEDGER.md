@@ -14071,3 +14071,14 @@ Follow-up 1 (§6): an RS capture of Srebrenica before the genocide window carrie
 
 - Verification: typecheck clean; `tests/dc_a6_overrun_enclave.test.ts` (35; 25 fail with the rule off), `tests/settlement_contiguity.test.ts` (13); full suite green (exit 0); 188-week runs `__w188_n6` and `__w188_n7` 712 / 711 / 712 / 710, Farz P-A and P-B PASS, enclave guard holds; map build 9–10 ms with or without the search. Evidence `F:/AWWV-worktrees/.dayton-design/a6-followups/`.
 - Residuals recorded under the A6 checkpoint (no condemnation for a counterfactual overrun; Bihać; shelling; freed brigades; the older ghost line's wording; BCS Chronicle diacritics; a stale QA doc line).
+
+## 2026-11-10 — DC: owner questions settled (DATA, SCORING, CANON)
+
+The owner settled the plan's four open questions, each as recommended.
+- **Five straddling Dayton cells follow their town.** Ostra Luka (HRHB), Stari Majdan (RBiH) and Veličani (HRHB) go to the Federation; Tošići and Trnovo town to RS (`data/source/peace_plans/dayton_cell_assignments.json`, rebuilt into `plan_cell_assignments.json`; 252 cells fixed, none unresolved; plan shares unchanged). Painted October 1995 front: RS 46.85 %, Federation 53.15 %.
+- **Peace-plan borders stay as the scanned maps show** (Contact Group Derventa town, Donja Tramošnica, Čelić, Ostra Luka; Owen–Stoltenberg Šipovo, Teslić; Vance–Owen southern Bihać, two Visoko cells). No code change.
+- **RBiH A+ is blocked only by war crimes RBiH authorized in play** (`war_crimes_events_emergent`), not by scripted historical records, which had put A+ out of reach (13 on the historical run, 3 authorized). Canon VICTORY §3.2 updated.
+- **RBiH A band text reads "30% or more territory"**, matching its rule.
+- Historical verdict unchanged (RBiH still authorized three and lost two enclaves).
+- Recorded: verdict grade descriptions are English-only in the BCS interface (existing gap).
+- Verification: typecheck clean; `tests/dc_owner_rulings_20261110.test.ts` (8), the canon contract test updated to the ruling, and the Dayton cell, A6 and contiguity tests pass; full suite: 364 files passed, two failed (the contract test, since updated and passing, and a 10 s hook timeout in `runtime_dependency_resolution`, passing on re-run); 188-week run `__w188_n8` 712 / 711 / 712 / 710, all guards pass.

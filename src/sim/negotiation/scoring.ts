@@ -546,11 +546,13 @@ const RBIH_GRADE_ANCHORS: GradeAnchor[] = [
         test: (cap) =>
             cap.territory_controlled_pct > 33 &&
             cap.enclaves_lost.length === 0 &&
-            cap.war_crimes_events === 0,
+            // Owner, 2026-11-10: only war crimes RBiH authorized in play block A+; scripted
+            // historical records (the shared counter) no longer put A+ out of reach.
+            (cap.war_crimes_events_emergent ?? 0) === 0,
     },
     {
         grade: 'A',
-        description: 'Roughly historical outcome — 30-33% territory, Sarajevo held, enclaves mostly defended',
+        description: 'Roughly historical outcome — 30% or more territory, Sarajevo held, enclaves mostly defended',
         test: (cap) =>
             cap.territory_controlled_pct >= 30 &&
             cap.enclaves_lost.length <= 1 &&

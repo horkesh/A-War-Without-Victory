@@ -26,10 +26,10 @@ Read this section first; the checkpoints under each amendment hold the detail. B
 4. ~~Packaged-Electron proof~~ done 2026-11-09, re-run as native-10 after the signatory wording and inspection by place (`F:/AWWV-worktrees/.dayton-design/packaged-proof/RESULT.md`): three rounds per faction, sign, signing table, Verdict, RS relaunch, RS decline after three rounds, a forced table from an engine-derived save; the board line in the packaged room. Not exercised in the app: the eight weeks of war after a decline (engine-tested), viewports above this host's 2293 × 960 screen (browser preview), the full-width Boundary Map panel.
 5. Push the branch and open a PR when the owner asks.
 
-**Open for the owner (none blocks)**
-- Five unresolved Dayton audit cells, left to the quota pass: Ostra Luka (Orašje), Stari Majdan (Sanski Most), Veličani (Trebinje), Tošići and Trnovo town (Trnovo).
-- Peace-plan borders still read as the image shows: Contact Group Derventa town, Donja Tramošnica, Čelić, Ostra Luka; Owen–Stoltenberg Šipovo and Teslić; Vance–Owen southern Bihać and two Visoko cells.
-- Pyrrhic panel, undecided: RBiH A+ blocked by any war-crimes event (others only by condemnation); RBiH A band text "30–33 %" against an open band.
+**Owner questions: all settled 2026-11-10**
+- ~~Five unresolved Dayton audit cells~~ owner 2026-11-10: they follow their town (principal-settlement rule): Ostra Luka (HRHB), Stari Majdan (RBiH) and Veličani (HRHB) to the Federation; Tošići and Trnovo town to RS. The audit table now fixes all 252 cells (190 verified, 62 approximate, none unresolved).
+- ~~Peace-plan borders read as the image shows~~ owner 2026-11-10: kept as the scanned maps show (Contact Group Derventa town, Donja Tramošnica, Čelić, Ostra Luka; Owen–Stoltenberg Šipovo and Teslić; Vance–Owen southern Bihać and two Visoko cells.); the written shares cannot be placed settlement by settlement.
+- ~~RBiH A+ and A band text~~ owner 2026-11-10: RBiH A+ is blocked only by war crimes RBiH authorized in play (`war_crimes_events_emergent`), not scripted records; the A band reads "30% or more territory". Historical verdict unchanged (RBiH authorized three, and lost two enclaves).
 - ~~Follow-ups recorded under A6~~ done 2026-11-09 (corridor search; §6 panel: no territory credit for an overrun enclave, end-of-war rupture check, "overrun" copy); residuals under the A6 checkpoint.
 
 **Traps for the next session**
