@@ -14265,3 +14265,10 @@ Packaged R8 shakedown (RBiH attempt 06, package from `ce56d775f`; `paradox-local
 ## 2026-11-10 — Opening-brief Inbox yields to every Warroom surface (UI, R8)
 
 R8 RBiH attempt 07 (packaged build f, after the surface redesign merge) stopped on turn 0: the opening-brief Presidential Inbox floated over the Command Surface's right column and intercepted its action button (screenshot `r8-shakedown-20261110-rbih-07-rbih-058`). The Inbox already gave way to the President's Desk; `App.tsx` now also hides it while the Command Surface, Decision Room or a Warroom overlay surface is open, and it returns when they close because the brief is still pending. Pins in `tests/ui/app_boot_main_menu.test.ts` and `tests/ui/warroom_shell_ownership.test.ts` updated; the six inbox/opening test files pass 122/122, typecheck clean. Packaged proof is the next RBiH attempt.
+
+## 2026-11-10 — Desk matters without an action show no dead button; right panels clear the Find button (UI, R8)
+
+R8 RBiH attempt 08 (packaged build g) played all 24 turns and failed only the readability gate:
+- **Dead button inside the Desk.** A situation matter with nothing to open drew a disabled "Open President's Desk" button inside the President's Desk, in #7d7462 ink (3.77:1). `presidential_desk/DecisionCard.tsx` now renders no button when the matter has no action; the harness already treats a missing `desk-card-action` as "nothing to open".
+- **Find button over panel content.** The fixed Find (Ctrl/⌘ K) button (`bottom: 3.25rem; right: 1rem`) covered a "Dismiss" button and settlement figures at the foot of right-edge panels. `panelRail.ts` adds `RIGHT_RAIL_BOTTOM` (bottom-bar clearance + 3rem) for `DETAIL_PANEL_STYLE` and `RIGHT_PANEL_STYLE`; the Warroom Inbox dossier's bottom gap is 3rem. Left panels are unchanged.
+- Verification: typecheck clean; full suite passes except `tests/runtime_dependency_resolution.test.ts`, which hit a 10 s hook timeout in a 33-minute loaded run and passes 13/13 alone. Packaged proof is RBiH attempt 09.
