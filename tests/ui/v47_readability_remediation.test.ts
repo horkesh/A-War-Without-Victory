@@ -18,7 +18,7 @@ describe('RBiH v47 evidence-backed readability floor', () => {
   it('keeps Chronicle category chips readable with a compact line box', () => {
     const source = readComponent('chronicle', 'ChronicleCard.tsx');
 
-    expect(source).toContain('rounded text-xs leading-none font-bold uppercase');
+    expect(source).toContain('rounded text-[13px] leading-none font-bold uppercase');
     expect(source).not.toContain('rounded text-[7px] font-bold uppercase');
     expect(source).not.toContain('text-[7px]');
     expect(source).toContain("entry.ghost ? 'text-amber-200/80 italic' : 'text-stone-300/90'");
