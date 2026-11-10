@@ -677,18 +677,18 @@ Style: black-white alternating stripe. **No chevrons** (standing directive — d
 
 **Default:** Deck.gl formation counters via `buildTacticalDeckLayers.ts`. **`deckFormationCounters`** in `deckLayerCapabilities.ts` is **`true`** by default — MapLibre `formation-markers` and `formation-labels` are hidden to prevent double-draw. Deck.gl enrichment layers include: health bar, supply dot, status icons, stack badges, and op/disrupted glow rings. On the pitched 2.5D main map, formation counters are screen-space symbols over terrain, not terrain decals: `MapContainer.tsx` must keep the tactical `MapboxOverlay` non-interleaved (`interleaved: false`), sprites must have opaque faction bodies plus an opaque paper/ink halo, and counter/label Deck layers must set `depthTest: false`, `depthMask: false`, and `depthWriteEnabled: false` so hillshade, borders, and labels cannot physically or visually cut into units.
 
-Deck and the accessible DOM interaction owner use the same truthful `location_osid` screen projection. A counter whose true projected point is off-screen or hidden by shell chrome is omitted; no path may clamp it to a viewport edge and imply a false location. Co-located members use deterministic offsets with at most 12 visible member badges, while the stack badge/picker retains access to the complete stable member list. The DOM owner supplies exact named-formation selection and enemy-contact hover parity; Deck retains visual ownership after fallback readiness.
+Deck and the accessible DOM interaction owner read ONE layout, `layoutFormationCounters` in `src/ui/map/layers/formationCounterLayout.ts` (R8 rework, 2026-11-10). A stack (all counters at one `location_osid`) is drawn only when its settlement point is on the canvas and outside every `[data-awwv-counter-occluder]` panel; no path may clamp it to a viewport edge and imply a false location. It draws as a cascade of at most 3 counters (each step up-left behind the top counter) plus a count badge on the top counter's top-right corner; members past the cascade are carried by the badge count and the stack picker. To clear panels, edges and neighbours a stack may shift at most 0.85 counter-height sideways and 0.4 up or down, and every drawn cascade counter must still cover the settlement point; a stack that cannot then clear a panel is hidden whole, never drawn as a sliver. A same-side stack that would bury more than 30% of a neighbour's top counter or badge joins that neighbour's badge (`merged_osids`); opposing sides never merge, and the player's own stacks paint above contacts. The DOM owner supplies exact named-formation selection, transparent stack-picker targets at each badge and enemy-contact hover parity; Deck retains visual ownership after fallback readiness (the DOM badge is visible only in the pre-Deck fallback).
+
+Counter, highlight and badge sprites come from one pre-packed atlas (`getCounterIconAtlas` in `formationIcons.ts`). Deck 9.2's auto-packing grew its atlas by copying the old texture, and in the Electron/WebGL build that copy came out blank, so every counter already shown vanished whenever a new sprite appeared while separately drawn badges stayed: the "badge with no counter" defect. Settlement labels are never offset; a label whose settlement is off-canvas or under a panel is omitted. Live proof: `node tools/ui/counter_visibility_probe.cjs <repo> <outDir> RBiH <WxH>` against the dev map on port 3002 (layout, panel, badge and screenshot paint checks).
 
 When **`deckFormationCounters`** is **true** (the default), MapLibre formation symbol layers are hidden and Deck supplies:
 
 | Layer ID | Source | Purpose |
 |----------|--------|---------|
-| `deck-formations-icons` | Deck.gl | Unit counters with zoom-dependent scaling (16px @ Z6 to 40px @ Z14) |
+| `deck-formations-icons` | Deck.gl | Unit counters with zoom-dependent scaling (16px @ Z6 to 40px @ Z14), and each stack's count badge as a row painted straight after its own top counter (`counter_role: 'stack-badge'`) |
 | `deck-formations-labels` | Deck.gl | Formation name labels |
 | `deck-formations-orders` | Deck.gl | Posture / order glyphs |
 | `deck-formations-supply-dot` | Deck.gl | Supply status indicator dot |
-| `deck-formations-stack-circle` | Deck.gl | Background circle for stack count badge |
-| `deck-formations-stack-text` | Deck.gl | Text badge for stack counts |
 
 ### Major-municipality label layer
 

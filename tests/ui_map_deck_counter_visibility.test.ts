@@ -3,15 +3,19 @@ import { readFileSync } from 'node:fs';
 
 import {
     buildTacticalDeckLayers,
-    filterViewportClampablePointFeatures,
-    filterViewportSafePointFeatures,
     getBaseFormationIconId,
-    getCounterFootprintHalfSize,
     getHighlightedFormationIconId,
     getFormationStackPixelOffset,
-    getViewportSafePixelOffset,
+    isStackBadgeRow,
 } from '../src/ui/map/layers/buildTacticalDeckLayers.js';
 import { buildFormationCounterDomOverlayItems } from '../src/ui/map/layers/formationCounterDomOverlay.js';
+import {
+    STACK_CASCADE_MAX,
+    STACK_MAX_SHIFT_X,
+    STACK_MAX_SHIFT_Y,
+    getStackBadgeDiameter,
+    layoutFormationCounters,
+} from '../src/ui/map/layers/formationCounterLayout.js';
 
 function makeFeature(id: string, isStackTop: boolean) {
     return {
@@ -313,419 +317,213 @@ it('deck counters derive clipping bounds from visible panel occluders', () => {
     expect(inboxSource).toContain('data-awwv-counter-occluder="true"');
 });
 
-it('filters deck point features that would render clipped against the viewport edge', () => {
-    const inside = {
+// ---------------------------------------------------------------------------------------
+// Counter layout (R8 rework, 2026-11-10): one layout pass feeds the Deck icon layer and
+// the DOM hit targets; badges are rows of the same icon layer, painted after their own
+// counter; a stack never leaves its settlement and never draws under a panel.
+// ---------------------------------------------------------------------------------------
+
+type Clip = Parameters<typeof layoutFormationCounters>[2];
+
+function stackFeature(id: string, osid: string, stackIndex: number, stackCount: number, coordinates: [number, number] = [17.8, 44.1], extra: Record<string, unknown> = {}) {
+    return {
         type: 'Feature',
-        geometry: { type: 'Point', coordinates: [17.8, 44.1] },
-        properties: { id: 'inside' },
-    };
-    const edge = {
-        type: 'Feature',
-        geometry: { type: 'Point', coordinates: [17.9, 44.2] },
-        properties: { id: 'edge' },
-    };
-
-    const filtered = filterViewportSafePointFeatures([inside, edge] as any, {
-        width: 400,
-        height: 300,
-        padding: { top: 16, right: 16, bottom: 16, left: 16 },
-        project: (coordinates) => coordinates[0] === 17.8 ? { x: 200, y: 150 } : { x: 392, y: 150 },
-    }, { halfWidth: 44, halfHeight: 24 });
-
-    expect(filtered.map((feature: any) => feature.properties.id)).toEqual(['inside']);
-});
-
-it('filters deck counters whose footprint would intersect floating UI occluders', () => {
-    const clear = makeFeature('clear', true);
-    const covered = makeFeature('covered', true);
-    (covered.geometry as any).coordinates = [18.8, 44.9];
-
-    const filtered = filterViewportSafePointFeatures([clear, covered] as any, {
-        width: 900,
-        height: 600,
-        padding: { top: 32, right: 32, bottom: 32, left: 32 },
-        occluders: [{ left: 450, top: 180, right: 650, bottom: 360 }],
-        project: (coordinates) => coordinates[0] === 17.8 ? { x: 220, y: 220 } : { x: 520, y: 240 },
-    }, { halfWidth: 68, halfHeight: 48 });
-
-    expect(filtered.map((feature: any) => feature.properties.id)).toEqual(['clear']);
-});
-
-it('keeps deck counters renderable by offsetting edge points inward instead of hiding them', () => {
-    const edge = {
-        type: 'Feature',
-        geometry: { type: 'Point', coordinates: [17.9, 44.2] },
-        properties: { id: 'edge' },
-    };
-
-    expect(getViewportSafePixelOffset(edge as any, {
-        width: 400,
-        height: 300,
-        padding: { top: 16, right: 16, bottom: 16, left: 16 },
-        project: () => ({ x: 392, y: 10 }),
-    }, { halfWidth: 44, halfHeight: 24 })).toEqual([-52, 30]);
-});
-
-it('keeps owned Deck counters visible by clamping them into the current uncluttered map band', () => {
-    const safe = makeFeature('safe', true);
-    const underPanel = makeFeature('under-panel', true);
-    (underPanel.geometry as any).coordinates = [18.8, 44.9];
-    const formationsGeoJson = {
-        type: 'FeatureCollection',
-        features: [safe, underPanel],
-    } as any;
-
-    const layers = buildTacticalDeckLayers(
-        formationsGeoJson,
-        false,
-        true,
-        10,
-        ['safe', 'under-panel'],
-        {
-            width: 400,
-            height: 300,
-            padding: { top: 16, right: 16, bottom: 80, left: 180 },
-            project: (coordinates) => coordinates[0] === 17.8 ? { x: 280, y: 120 } : { x: 40, y: 260 },
-        },
-    );
-    const baseLayer = layers.find((layer: any) => layer.id === 'deck-formations-icons') as any;
-    const highlightedLayer = layers.find((layer: any) => layer.id === 'deck-formations-highlighted') as any;
-
-    expect(baseLayer.props.data.map((feature: any) => feature.properties.id)).toEqual(['safe']);
-    expect(highlightedLayer.props.data.map((feature: any) => feature.properties.id)).toEqual(['safe']);
-});
-
-it('keeps enemy contact clutter out of the clamped counter band when safe counters already exist', () => {
-    const safe = makeFeature('safe', true);
-    const underPanelContact = makeEnemyContactFeature('enemy-under-panel', true);
-    (underPanelContact.geometry as any).coordinates = [18.8, 44.9];
-    const formationsGeoJson = {
-        type: 'FeatureCollection',
-        features: [safe, underPanelContact],
-    } as any;
-
-    const layers = buildTacticalDeckLayers(
-        formationsGeoJson,
-        false,
-        true,
-        10,
-        ['safe', 'enemy-under-panel'],
-        {
-            width: 400,
-            height: 300,
-            padding: { top: 16, right: 16, bottom: 80, left: 180 },
-            project: (coordinates) => coordinates[0] === 17.8 ? { x: 280, y: 120 } : { x: 40, y: 260 },
-        },
-    );
-    const baseLayer = layers.find((layer: any) => layer.id === 'deck-formations-icons') as any;
-    const highlightedLayer = layers.find((layer: any) => layer.id === 'deck-formations-highlighted') as any;
-
-    expect(baseLayer.props.data.map((feature: any) => feature.properties.id)).toEqual(['safe']);
-    expect(highlightedLayer.props.data.map((feature: any) => feature.properties.id)).toEqual(['safe']);
-});
-
-it('nudges a top-edge counter just clear of the safe margin, still over its settlement (R8, 2026-11-10)', () => {
-    // Before 2026-11-10 a counter whose full footprint crossed the top margin was omitted,
-    // so brigades near the toolbar vanished while their settlement was in view. Now its
-    // stack is nudged down just enough, as long as it still covers its settlement point.
-    const topEdge = makeFeature('top-edge', true);
-    const safe = makeFeature('safe-top', true);
-    (safe.geometry as any).coordinates = [18.8, 44.9];
-    const formationsGeoJson = {
-        type: 'FeatureCollection',
-        features: [topEdge, safe],
-    } as any;
-    const clip = {
-        width: 500,
-        height: 360,
-        padding: { top: 72, right: 24, bottom: 64, left: 24 },
-        project: (coordinates: [number, number]) => coordinates[0] === 17.8 ? { x: 240, y: 96 } : { x: 240, y: 132 },
-    };
-
-    const layers = buildTacticalDeckLayers(formationsGeoJson, false, true, 10, [], clip);
-    const baseLayer = layers.find((layer: any) => layer.id === 'deck-formations-icons') as any;
-    const items = buildFormationCounterDomOverlayItems({ formationsGeoJson, formationsVisible: true, zoom: 10, viewportClip: clip });
-    const half = getCounterFootprintHalfSize(items[0]!.height);
-
-    expect(getCounterFootprintHalfSize(40)).toEqual({ halfWidth: 68, halfHeight: 48 });
-    expect([...baseLayer.props.data.map((feature: any) => feature.properties.id)].sort()).toEqual(['safe-top', 'top-edge']);
-    // Drawn, and clear of the top margin (the two counters are also separated from each other).
-    const top = items.find((item) => item.id === 'top-edge')!;
-    expect(top.y - half.halfHeight).toBeGreaterThanOrEqual(72);
-});
-
-it('nudges a lone counter by the smallest shift, keeping it over its settlement', () => {
-    const lone = makeFeature('lone', true);
-    const formationsGeoJson = { type: 'FeatureCollection', features: [lone] } as any;
-    const clip = {
-        width: 500,
-        height: 360,
-        padding: { top: 72, right: 24, bottom: 64, left: 24 },
-        project: () => ({ x: 240, y: 96 }),
-    };
-    const items = buildFormationCounterDomOverlayItems({ formationsGeoJson, formationsVisible: true, zoom: 10, viewportClip: clip });
-    expect(items.map((item) => item.id)).toEqual(['lone']);
-    const half = getCounterFootprintHalfSize(items[0]!.height);
-    expect(items[0]!.y - half.halfHeight).toBe(72);
-    expect(items[0]!.y + half.halfHeight).toBeGreaterThanOrEqual(96);
-});
-
-it('nudges a stack clear of a panel it grazes, but never onto its settlement-less side', () => {
-    const grazing = makeFeature('grazing', true);
-    const formationsGeoJson = { type: 'FeatureCollection', features: [grazing] } as any;
-    const items = buildFormationCounterDomOverlayItems({
-        formationsGeoJson,
-        formationsVisible: true,
-        zoom: 10,
-        viewportClip: {
-            width: 800,
-            height: 600,
-            padding: { top: 20, right: 20, bottom: 20, left: 20 },
-            // A panel starting 30 px right of the settlement: the counter's footprint grazes it.
-            occluders: [{ left: 430, top: 0, right: 800, bottom: 600 }],
-            project: () => ({ x: 400, y: 300 }),
-        },
-    });
-    expect(items.map((item) => item.id)).toEqual(['grazing']);
-    const half = getCounterFootprintHalfSize(items[0]!.height);
-    expect(items[0]!.x + half.halfWidth).toBeLessThan(430);
-    expect(items[0]!.x + half.halfWidth).toBeGreaterThanOrEqual(400);
-});
-
-it('does not pull formations hundreds of pixels outside the southern viewport onto the visible edge', () => {
-    const safe = makeFeature('safe', true);
-    const nearSouth = makeFeature('near-south', true);
-    (nearSouth.geometry as any).coordinates = [18.8, 44.9];
-    const formationsGeoJson = {
-        type: 'FeatureCollection',
-        features: [safe, nearSouth],
-    } as any;
-
-    const layers = buildTacticalDeckLayers(
-        formationsGeoJson,
-        false,
-        true,
-        8,
-        [],
-        {
-            width: 1386,
-            height: 837,
-            padding: { top: 72, right: 24, bottom: 64, left: 264 },
-            project: (coordinates) => coordinates[0] === 17.8 ? { x: 700, y: 300 } : { x: 872, y: 1040 },
-        },
-    );
-    const baseLayer = layers.find((layer: any) => layer.id === 'deck-formations-icons') as any;
-
-    expect(baseLayer.props.data.map((feature: any) => feature.properties.id)).toEqual(['safe']);
-});
-
-it('does not relocate an owned counter whose footprint is beyond the southern viewport edge', () => {
-    const safe = makeFeature('safe', true);
-    const nearSouth = makeFeature('near-south', true);
-    (nearSouth.geometry as any).coordinates = [18.8, 44.9];
-    const layers = buildTacticalDeckLayers({ type: 'FeatureCollection', features: [safe, nearSouth] } as any, false, true, 8, [], {
-        width: 1386,
-        height: 837,
-        padding: { top: 72, right: 24, bottom: 64, left: 264 },
-        project: (coordinates) => coordinates[0] === 17.8 ? { x: 700, y: 300 } : { x: 872, y: 810 },
-    });
-    const baseLayer = layers.find((layer: any) => layer.id === 'deck-formations-icons') as any;
-
-    expect(baseLayer.props.data.map((feature: any) => feature.properties.id)).toEqual(['safe']);
-});
-
-it('filters only counters too far outside the viewport to clamp honestly', () => {
-    const nearLeft = makeFeature('near-left', true);
-    const farLeft = makeFeature('far-left', true);
-    (farLeft.geometry as any).coordinates = [16, 44.1];
-
-    const filtered = filterViewportClampablePointFeatures([nearLeft, farLeft] as any, {
-        width: 500,
-        height: 360,
-        padding: { top: 40, right: 80, bottom: 40, left: 80 },
-        project: (coordinates) => coordinates[0] === 17.8 ? { x: 20, y: 160 } : { x: -260, y: 160 },
-    }, getCounterFootprintHalfSize(40));
-
-    expect(filtered.map((feature: any) => feature.properties.id)).toEqual(['near-left']);
-});
-
-it('does not relocate counters into the safe band when their OSID is outside it', () => {
-    const nearLeft = makeFeature('near-left', true);
-    const farLeft = makeFeature('far-left', true);
-    (farLeft.geometry as any).coordinates = [16, 44.1];
-    const formationsGeoJson = {
-        type: 'FeatureCollection',
-        features: [nearLeft, farLeft],
-    } as any;
-
-    const layers = buildTacticalDeckLayers(
-        formationsGeoJson,
-        false,
-        true,
-        10,
-        [],
-        {
-            width: 500,
-            height: 360,
-            padding: { top: 40, right: 80, bottom: 40, left: 80 },
-            project: (coordinates) => coordinates[0] === 17.8 ? { x: 20, y: 160 } : { x: -260, y: 160 },
-        },
-    );
-    const baseLayer = layers.find((layer: any) => layer.id === 'deck-formations-icons') as any;
-
-    expect(baseLayer.props.data).toEqual([]);
-});
-
-it('does not create DOM counter hit targets away from the formation OSID', () => {
-    const nearLeft = makeFeature('near-left', true);
-    const farLeft = makeFeature('far-left', true);
-    (farLeft.geometry as any).coordinates = [16, 44.1];
-    const formationsGeoJson = {
-        type: 'FeatureCollection',
-        features: [nearLeft, farLeft],
-    } as any;
-
-    const items = buildFormationCounterDomOverlayItems({
-        formationsGeoJson,
-        formationsVisible: true,
-        zoom: 10,
-        viewportClip: {
-            width: 500,
-            height: 360,
-            padding: { top: 40, right: 80, bottom: 40, left: 80 },
-            project: (coordinates) => coordinates[0] === 17.8 ? { x: 20, y: 160 } : { x: -260, y: 160 },
-        },
-    });
-
-    expect(items).toEqual([]);
-});
-
-it('caps the visible exact-member fan while preserving the full stack count badge', () => {
-    const features = Array.from({ length: 20 }, (_, index) => ({
-        ...makeFeature(`stack-${index}`, true),
-        properties: {
-            ...makeFeature(`stack-${index}`, true).properties,
-            stack_index: index,
-            stack_count: 20,
-            is_stack_top: index === 0,
-        },
-    }));
-    const layers = buildTacticalDeckLayers(
-        { type: 'FeatureCollection', features } as any,
-        false,
-        true,
-        10,
-        [],
-        {
-            width: 800,
-            height: 600,
-            padding: { top: 20, right: 20, bottom: 20, left: 20 },
-            project: () => ({ x: 400, y: 350 }),
-        },
-    );
-    const baseLayer = layers.find((layer: any) => layer.id === 'deck-formations-icons') as any;
-    const countLayer = layers.find((layer: any) => layer.id === 'deck-formations-stack-text') as any;
-
-    expect(baseLayer.props.data).toHaveLength(12);
-    expect(baseLayer.props.data.map((feature: any) => feature.properties.stack_index)).toEqual(
-        Array.from({ length: 12 }, (_, index) => index),
-    );
-    expect(countLayer.props.getText(countLayer.props.data[0])).toBe('20');
-});
-
-it('does not expose a clamped owned counter underneath a live UI occluder', () => {
-    const covered = makeFeature('covered', true);
-    const formationsGeoJson = {
-        type: 'FeatureCollection',
-        features: [covered],
-    } as any;
-
-    const items = buildFormationCounterDomOverlayItems({
-        formationsGeoJson,
-        formationsVisible: true,
-        zoom: 10,
-        viewportClip: {
-            width: 500,
-            height: 360,
-            padding: { top: 20, right: 20, bottom: 20, left: 20 },
-            occluders: [{ left: 50, top: 100, right: 120, bottom: 200 }],
-            project: () => ({ x: -20, y: 150 }),
-        },
-    });
-
-    expect(items).toEqual([]);
-});
-
-it('drops an entire stack when collision separation would move its final hit targets under UI chrome', () => {
-    const stacked = (id: string, osid: string, stackIndex: number) => ({
-        type: 'Feature',
-        geometry: { type: 'Point', coordinates: [17.8, 44.1] },
+        geometry: { type: 'Point', coordinates },
         properties: {
             id,
             name: id,
-            icon_id: `counter-${id}`,
+            icon_id: `brigade__RBiH__h100__m100_${id}`,
+            white_icon_id: `white__brigade__RBiH__h100__m100_${id}`,
             location_osid: osid,
             stack_index: stackIndex,
-            stack_count: 2,
+            stack_count: stackCount,
             is_stack_top: stackIndex === 0,
+            ...extra,
         },
-    });
-    const formationsGeoJson = {
-        type: 'FeatureCollection',
-        features: [
-            stacked('a1', 'op:test:a', 0),
-            stacked('a2', 'op:test:a', 1),
-            stacked('b1', 'op:test:b', 0),
-            stacked('b2', 'op:test:b', 1),
-        ],
     } as any;
-    const viewportClip = {
+}
+
+function bodyCovers(item: { x: number; y: number; width: number; height: number }, point: { x: number; y: number }) {
+    const inset = item.height * 0.075;
+    return point.x >= item.x - item.width / 2 + inset && point.x <= item.x + item.width / 2 - inset
+        && point.y >= item.y - item.height / 2 + inset && point.y <= item.y + item.height / 2 - inset;
+}
+
+it('paints each stack badge in the counter icon layer right after its own top counter', () => {
+    const features = [
+        stackFeature('a1', 'op:t:a', 0, 3),
+        stackFeature('a2', 'op:t:a', 1, 3),
+        stackFeature('a3', 'op:t:a', 2, 3),
+    ];
+    const clip: Clip = { width: 800, height: 600, padding: { top: 0, right: 0, bottom: 0, left: 0 }, project: () => ({ x: 400, y: 300 }) };
+    const layers = buildTacticalDeckLayers({ type: 'FeatureCollection', features } as any, false, true, 10, [], clip);
+    const icons = layers.find((layer: any) => layer.id === 'deck-formations-icons') as any;
+
+    expect(layers.some((layer: any) => /stack-(circle|text)/.test(layer.id))).toBe(false);
+    const rows = icons.props.data;
+    expect(rows.map((row: any) => (isStackBadgeRow(row) ? `badge:${row.properties.stack_count}` : row.properties.id)))
+        .toEqual(['a3', 'a2', 'a1', 'badge:3']);
+    // The badge sits on the top counter's corner, mostly inside its body.
+    const top = icons.props.getPixelOffset(rows[2]);
+    const badge = icons.props.getPixelOffset(rows[3]);
+    const h = icons.props.getSize(rows[2]);
+    expect(Math.abs(badge[0] - top[0])).toBeLessThan(h);
+    expect(Math.abs(badge[1] - top[1])).toBeLessThan(h / 2);
+    expect(icons.props.getSize(rows[3])).toBe(getStackBadgeDiameter(h));
+});
+
+it('keeps every stack top over its own settlement while separating neighbours', () => {
+    const features = [
+        stackFeature('a', 'op:t:a', 0, 1, [17.8, 44.1]),
+        stackFeature('b', 'op:t:b', 0, 1, [17.81, 44.1]),
+        stackFeature('c', 'op:t:c', 0, 1, [17.82, 44.1]),
+    ];
+    const points: Record<number, { x: number; y: number }> = { 17.8: { x: 400, y: 300 }, 17.81: { x: 418, y: 302 }, 17.82: { x: 400, y: 318 } };
+    const clip: Clip = { width: 800, height: 600, padding: { top: 0, right: 0, bottom: 0, left: 0 }, project: (c) => points[c[0]] };
+    const items = buildFormationCounterDomOverlayItems({ formationsGeoJson: { type: 'FeatureCollection', features } as any, formationsVisible: true, zoom: 8, viewportClip: clip });
+
+    expect(items.length).toBeGreaterThan(0);
+    for (const item of items) {
+        const feature = features.find((candidate) => candidate.properties.id === item.id);
+        expect(bodyCovers(item, points[feature.geometry.coordinates[0]]), `${item.id} off its settlement`).toBe(true);
+    }
+});
+
+it('never shifts a stack farther than the layout limits', () => {
+    const h = 24;
+    const crowd = Array.from({ length: 9 }, (_, index) => stackFeature(`s${index}`, `op:t:${index}`, 0, 1, [17 + index / 100, 44]));
+    const clip: Clip = { width: 800, height: 600, padding: { top: 0, right: 0, bottom: 0, left: 0 }, project: (c) => ({ x: 400 + (c[0] - 17) * 300, y: 300 }) };
+    const layout = layoutFormationCounters(crowd, h, clip);
+    for (const stack of layout.stacks) {
+        expect(Math.abs(stack.shift[0])).toBeLessThanOrEqual(Math.round(h * STACK_MAX_SHIFT_X));
+        expect(Math.abs(stack.shift[1])).toBeLessThanOrEqual(Math.round(h * STACK_MAX_SHIFT_Y));
+    }
+    // Every unit is drawn or carried by a drawn stack's badge.
+    expect(layout.stacks.reduce((sum, stack) => sum + stack.count, 0)).toBe(9);
+});
+
+it('merges a same-side stack it would bury into its neighbour badge instead of hiding it', () => {
+    const features = [
+        stackFeature('a1', 'op:t:a', 0, 2),
+        stackFeature('a2', 'op:t:a', 1, 2),
+        stackFeature('b1', 'op:t:b', 0, 1),
+    ];
+    const clip: Clip = { width: 800, height: 600, padding: { top: 0, right: 0, bottom: 0, left: 0 }, project: () => ({ x: 400, y: 300 }) };
+    const layout = layoutFormationCounters(features, 24, clip);
+
+    expect(layout.stacks).toHaveLength(1);
+    expect(layout.stacks[0]?.osid).toBe('op:t:a');
+    expect(layout.stacks[0]?.count).toBe(3);
+    expect(layout.stacks[0]?.badge?.count).toBe(3);
+    expect(layout.stacks[0]?.mergedOsids).toEqual(['op:t:b']);
+});
+
+it('never merges opposing sides and paints the player\'s own stack above a contact', () => {
+    const features = [
+        stackFeature('own', 'op:t:a', 0, 1),
+        stackFeature('enemy_contact:op:t:b:0', 'op:t:b', 0, 1, [17.8, 44.1], { kind: 'enemy_contact', is_enemy_contact: true }),
+    ];
+    const clip: Clip = { width: 800, height: 600, padding: { top: 0, right: 0, bottom: 0, left: 0 }, project: () => ({ x: 400, y: 300 }) };
+    const layout = layoutFormationCounters(features, 24, clip);
+
+    expect(layout.stacks.map((stack) => stack.side)).toEqual(['contact', 'own']);
+});
+
+it('hides a stack whose settlement is under a panel and never pulls one in from off-canvas', () => {
+    const features = [
+        stackFeature('covered', 'op:t:a', 0, 1, [17.8, 44.1]),
+        stackFeature('offscreen', 'op:t:b', 0, 1, [16, 44.1]),
+        stackFeature('visible', 'op:t:c', 0, 1, [18.5, 44.1]),
+    ];
+    const clip: Clip = {
         width: 800,
         height: 600,
-        padding: { top: 20, right: 20, bottom: 20, left: 20 },
-        occluders: [{ left: 350, top: 195, right: 450, bottom: 240 }],
+        padding: { top: 0, right: 0, bottom: 0, left: 0 },
+        occluders: [{ left: 0, top: 0, right: 300, bottom: 600 }],
+        project: (c) => (c[0] === 17.8 ? { x: 150, y: 300 } : c[0] === 16 ? { x: -30, y: 300 } : { x: 600, y: 300 }),
+    };
+    const items = buildFormationCounterDomOverlayItems({ formationsGeoJson: { type: 'FeatureCollection', features } as any, formationsVisible: true, zoom: 10, viewportClip: clip });
+
+    expect(items.map((item) => item.id)).toEqual(['visible']);
+});
+
+it('nudges a stack clear of a panel it grazes while still covering its settlement', () => {
+    const grazing = stackFeature('grazing', 'op:t:a', 0, 1);
+    const clip: Clip = {
+        width: 800,
+        height: 600,
+        padding: { top: 0, right: 0, bottom: 0, left: 0 },
+        occluders: [{ left: 430, top: 0, right: 800, bottom: 600 }],
+        project: () => ({ x: 410, y: 300 }),
+    };
+    const items = buildFormationCounterDomOverlayItems({ formationsGeoJson: { type: 'FeatureCollection', features: [grazing] } as any, formationsVisible: true, zoom: 10, viewportClip: clip });
+
+    expect(items.map((item) => item.id)).toEqual(['grazing']);
+    expect((items[0]?.x ?? NaN) + (items[0]?.width ?? NaN) / 2).toBeLessThanOrEqual(430);
+    expect(bodyCovers(items[0] ?? { x: NaN, y: NaN, width: 0, height: 0 }, { x: 410, y: 300 })).toBe(true);
+});
+
+it('hides a stack whole when its settlement hugs a panel too closely to clear it', () => {
+    const tight = stackFeature('tight', 'op:t:a', 0, 1);
+    const clip: Clip = {
+        width: 800,
+        height: 600,
+        padding: { top: 0, right: 0, bottom: 0, left: 0 },
+        occluders: [{ left: 402, top: 0, right: 800, bottom: 600 }],
         project: () => ({ x: 400, y: 300 }),
     };
-    const items = buildFormationCounterDomOverlayItems({
-        formationsGeoJson,
-        formationsVisible: true,
-        zoom: 10,
-        viewportClip,
-    });
-    const layers = buildTacticalDeckLayers(formationsGeoJson, false, true, 10, [], viewportClip);
-    const baseLayer = layers.find((layer: any) => layer.id === 'deck-formations-icons') as any;
+    const layout = layoutFormationCounters([tight], 24, clip);
 
-    expect(items.map((item) => item.id)).toEqual(['a1', 'a2']);
-    expect(baseLayer.props.data.map((feature: any) => feature.properties.id)).toEqual(['a1', 'a2']);
+    expect(layout.stacks).toEqual([]);
+    expect(layout.blockedOsids).toEqual(['op:t:a']);
 });
 
-it('uses bounded pixel offsets for stacked counters instead of map-coordinate drift', () => {
-    const stacked = {
-        type: 'Feature',
-        geometry: { type: 'Point', coordinates: [17.9, 44.2] },
-        properties: { id: 'stacked', stack_index: 7, stack_count: 12 },
-    };
+it('caps the drawn cascade and carries the rest in the badge count', () => {
+    const features = Array.from({ length: 20 }, (_, index) => stackFeature(`stack-${String(index).padStart(2, '0')}`, 'op:t:big', index, 20));
+    const clip: Clip = { width: 800, height: 600, padding: { top: 0, right: 0, bottom: 0, left: 0 }, project: () => ({ x: 400, y: 350 }) };
+    const layers = buildTacticalDeckLayers({ type: 'FeatureCollection', features } as any, false, true, 10, [], clip);
+    const icons = layers.find((layer: any) => layer.id === 'deck-formations-icons') as any;
+    const counters = icons.props.data.filter((row: any) => !isStackBadgeRow(row));
+    const badges = icons.props.data.filter((row: any) => isStackBadgeRow(row));
 
-    expect(getFormationStackPixelOffset(stacked as any, 40)).toEqual([7, -16]);
-    expect(getViewportSafePixelOffset(stacked as any, {
-        width: 400,
-        height: 300,
-        padding: { top: 16, right: 16, bottom: 16, left: 16 },
-        project: () => ({ x: 392, y: 10 }),
-    }, { halfWidth: 44, halfHeight: 24 }, getFormationStackPixelOffset(stacked as any, 40))).toEqual([-52, 30]);
+    expect(counters).toHaveLength(STACK_CASCADE_MAX);
+    expect(counters[counters.length - 1].properties.id).toBe('stack-00');
+    expect(badges.map((row: any) => row.properties.stack_count)).toEqual([20]);
 });
 
-it('clamps bottom-edge Deck counters with negative Y offsets in screen coordinates', () => {
-    const edge = {
-        type: 'Feature',
-        geometry: { type: 'Point', coordinates: [17.9, 44.2] },
-        properties: { id: 'bottom-edge' },
-    };
+it('uses bounded up-left cascade offsets for stacked counters', () => {
+    const member = (stackIndex: number) => ({ properties: { id: 'm', stack_index: stackIndex, stack_count: 12 } });
+    expect(getFormationStackPixelOffset(member(0) as any, 40)).toEqual([0, 0]);
+    expect(getFormationStackPixelOffset(member(1) as any, 40)).toEqual([-5, -5]);
+    expect(getFormationStackPixelOffset(member(2) as any, 40)).toEqual([-10, -10]);
+    // Past the cascade: under the top counter, carried by the badge.
+    expect(getFormationStackPixelOffset(member(7) as any, 40)).toEqual([0, 0]);
+});
 
-    expect(getViewportSafePixelOffset(edge as any, {
-        width: 400,
-        height: 300,
-        padding: { top: 16, right: 16, bottom: 16, left: 16 },
-        project: () => ({ x: 200, y: 292 }),
-    }, { halfWidth: 44, halfHeight: 24 })).toEqual([0, -32]);
+it('keeps DOM hit targets on the drawn counters and transparent once Deck paints them', () => {
+    const features = [stackFeature('a1', 'op:t:a', 0, 2), stackFeature('a2', 'op:t:a', 1, 2)];
+    const clip: Clip = { width: 800, height: 600, padding: { top: 0, right: 0, bottom: 0, left: 0 }, project: () => ({ x: 400, y: 300 }) };
+    const layers = buildTacticalDeckLayers({ type: 'FeatureCollection', features } as any, false, true, 10, [], clip);
+    const icons = layers.find((layer: any) => layer.id === 'deck-formations-icons') as any;
+    const items = buildFormationCounterDomOverlayItems({ formationsGeoJson: { type: 'FeatureCollection', features } as any, formationsVisible: true, zoom: 10, viewportClip: clip });
+
+    for (const item of items) {
+        const row = icons.props.data.find((candidate: any) => !isStackBadgeRow(candidate) && candidate.properties.id === item.id);
+        const offset = icons.props.getPixelOffset(row);
+        expect([item.x, item.y]).toEqual([400 + offset[0], 300 + offset[1]]);
+    }
+    const top = items.find((item) => item.id === 'a1');
+    const badgeRow = icons.props.data.find((row: any) => isStackBadgeRow(row));
+    const badgeOffset = icons.props.getPixelOffset(badgeRow);
+    expect(top?.badge).toEqual({ x: 400 + badgeOffset[0], y: 300 + badgeOffset[1], diameter: icons.props.getSize(badgeRow) });
+
+    const overlaySource = readFileSync('src/ui/map/layers/formationCounterDomOverlay.ts', 'utf8');
+    expect(overlaySource).toContain("badge.style.opacity = args.visualMode === 'fallback' ? '1' : '0'");
+});
+
+it('settlement labels stay on their settlement instead of sliding away from panels', () => {
+    const source = readFileSync('src/ui/map/layers/buildTacticalDeckLayers.ts', 'utf8');
+    const labelStart = source.indexOf("id: 'deck-settlement-labels'");
+    const labelBlock = source.slice(labelStart, source.indexOf('})', labelStart));
+    expect(labelBlock).not.toContain('getPixelOffset');
 });
