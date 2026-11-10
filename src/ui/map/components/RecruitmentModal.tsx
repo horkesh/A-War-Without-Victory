@@ -48,6 +48,10 @@ function getReasonLabel(brigade: RecruitmentCatalogBrigade, reason: RecruitmentE
     : t(REASON_LABEL_KEYS[reason]);
 }
 
+function isAlreadyRaised(brigade: RecruitmentCatalogBrigade): boolean {
+  return (brigade.reason_codes ?? []).includes('already_recruited');
+}
+
 export function RecruitmentModal({
   isOpen,
   loading,
@@ -63,7 +67,17 @@ export function RecruitmentModal({
     [brigades, playerFaction]
   );
   const eligible = useMemo(() => playerBrigades.filter((b) => b.eligible !== false), [playerBrigades]);
-  const unavailable = useMemo(() => playerBrigades.filter((b) => b.eligible === false), [playerBrigades]);
+  // Wargame convention (HOI4 deployment, AGEOD reinforcements, WitE build queues): a unit that is
+  // already in the field leaves the raise list. Raised brigades are kept only as a closed,
+  // read-only tally at the bottom so the player can still check what exists.
+  const raised = useMemo(
+    () => playerBrigades.filter((b) => b.eligible === false && isAlreadyRaised(b)),
+    [playerBrigades]
+  );
+  const unavailable = useMemo(
+    () => playerBrigades.filter((b) => b.eligible === false && !isAlreadyRaised(b)),
+    [playerBrigades]
+  );
 
   const [selectedBrigadeId, setSelectedBrigadeId] = useState('');
   const [equipmentClass, setEquipmentClass] = useState('');
@@ -163,6 +177,22 @@ export function RecruitmentModal({
                     ))}
                   </ul>
                 </section>
+              )}
+              {raised.length > 0 && (
+                <details data-testid="recruitment-raised" className="group border-t border-panel-border pt-4">
+                  <summary className="flex min-h-10 cursor-pointer list-none items-center gap-2 text-xs font-semibold uppercase text-text-secondary hover:text-text-primary [&::-webkit-details-marker]:hidden">
+                    <span aria-hidden="true" className="inline-block text-sm transition-transform group-open:rotate-90">▸</span>
+                    {t('recruitment.alreadyRaised', { count: raised.length })}
+                  </summary>
+                  <p className="mt-1 text-xs text-text-secondary">{t('recruitment.alreadyRaisedNote')}</p>
+                  <ul className="mt-3 grid grid-cols-1 gap-x-6 gap-y-1 sm:grid-cols-2">
+                    {raised.map((brigade) => (
+                      <li key={brigade.id} className="truncate text-sm text-text-secondary" title={brigade.name}>
+                        {brigade.name}
+                      </li>
+                    ))}
+                  </ul>
+                </details>
               )}
             </>
           )}
