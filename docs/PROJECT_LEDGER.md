@@ -14290,3 +14290,7 @@ The map rails must stay narrow so the map stays visible, so they keep their plac
 - Gates on 99fba68ee: `npm run desktop:map:build` exit 0, tactical-map entry chunk 2,951 kB, no chunk-size warning; full `npm run test:vitest` exit 0 (slices 85/366/365/364/365 files, only the deliberate child-process failure controls fail); typecheck clean. Not checked in the packaged app.
 - Art: Codex PRs #561–#563 APPROVED with green CI; the merge needs the owner's go-ahead in this session (the permission classifier blocked an unprompted merge). #564 waits on the HRHB front-visit re-cut (Mercedes badge). Round-2 brief (aftermath headers) added to the art brief doc.
 - Not redesigned: the Dayton parchment fallback (the game always opens the conference room from #560), the map toolbar's own 12 px labels.
+
+## 2026-11-10 — HRHB front-visit detail re-cut approved (art)
+
+Codex removed the Mercedes badge from `act_front_visit_detail_HRHB.webp` (#564 at 7b6118fd2). Re-reviewed at native scale: plain boot lid, no legible plate or text, scene unchanged — APPROVED, so all 15 matter-detail headers in #564 pass. The file is now on this branch (byte-identical to the PR), so the HRHB front-visit detail slot shows the re-cut; `directive_card_act_art` now exercises the fallback with a lever that ships no detail cut (address the nation).

@@ -195,8 +195,10 @@ describe('faction-aware command-card override resolution', () => {
   });
 
   it('falls back to the faction card when a detail cut is missing', () => {
-    // act_front_visit_detail_HRHB is held back (REVISE, 2026-11-10); the card still resolves.
-    const url = resolveDirectiveActArt('front_visit', 'HRHB');
-    expect(url?.endsWith('act_front_visit_HRHB.webp')).toBe(true);
+    // The leadership gestures ship no detail cut; their faction card still resolves.
+    const url = resolveDirectiveActArt('address_nation', 'HRHB');
+    expect(url?.endsWith('act_address_nation_HRHB.webp')).toBe(true);
+    // The re-cut HRHB front visit (badge removed, 2026-11-10) now resolves to its detail cut.
+    expect(resolveDirectiveActArt('front_visit', 'HRHB')?.endsWith('act_front_visit_detail_HRHB.webp')).toBe(true);
   });
 });
