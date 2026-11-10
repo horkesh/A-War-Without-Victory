@@ -38,8 +38,9 @@ describe('RBiH v47 evidence-backed readability floor', () => {
   it('keeps the disabled front-visit action readable', () => {
     const source = readComponent('army_hq', 'FrontVisitSection.tsx');
 
-    // On paper the disabled action keeps a readable mid ink (neutral-500 on the paper token), never a 40 % alpha.
-    expect(source).toContain("'border-neutral-400/50 text-neutral-500 bg-black/5 cursor-not-allowed'");
+    // On paper the disabled action keeps a readable ink, never a 40 % alpha. neutral-500 measured
+    // 3.65:1 on the paper in the packaged R8 shakedown (2026-11-10); neutral-600 clears 4.5:1.
+    expect(source).toContain("'border-neutral-400/50 text-neutral-600 bg-black/5 cursor-not-allowed'");
     expect(source).not.toContain('text-text-secondary/40');
   });
 

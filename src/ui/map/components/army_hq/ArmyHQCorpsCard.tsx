@@ -220,6 +220,13 @@ export function ArmyHQCorpsCard({
             {effectivenessTitle}. {cohesionTitle}
         </span>
     );
+    // The compressed card is one clipped line: there the description stays screen-reader
+    // only (R8 shakedown 2026-11-10: revealed on focus, it was cut off).
+    const compressedConditionDescription = (
+        <span id={descriptionId} data-testid="army-hq-corps-focus-description" className="sr-only">
+            {effectivenessTitle}. {cohesionTitle}
+        </span>
+    );
 
     // Compressed: single line when another card is flipped
     if (isCompressed) {
@@ -231,7 +238,7 @@ export function ArmyHQCorpsCard({
                 aria-describedby={descriptionId}
                 className="bg-panel-card border border-panel-border overflow-hidden hover:border-amber-400/40 transition-colors cursor-pointer group focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent-gold"
             >
-                {conditionDescription}
+                {compressedConditionDescription}
                 <div className="flex items-center justify-between px-3 py-2 bg-panel-card">
                     <span className="text-xs font-bold text-text-secondary uppercase tracking-widest font-mono">
                         {displayName}

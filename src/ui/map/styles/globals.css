@@ -52,7 +52,7 @@
 .interface-scale-settings select, .interface-scale-settings button { background: #24211c; padding: 0.4rem 0.6rem; border: 1px solid #8a7a6060; border-radius: 3px; }
 .command-palette-opener { position: fixed; right: 1rem; bottom: 3.25rem; display: flex; align-items: center; gap: 0.6rem; border: 1px solid #8a7a6070; border-radius: 3px; background: #1a1815f5; color: #dacbaf; padding: 0.45rem 0.7rem; font: 0.75rem var(--font-command); }
 .command-palette-opener:disabled { opacity: 0.45; }
-.command-palette-opener kbd { color: #a79c85; font-size: 0.68rem; }
+.command-palette-opener kbd { color: #a79c85; font-size: 0.75rem; }
 .command-palette { width: min(40rem, calc(var(--interface-viewport-width, 100vw) - 2rem)); max-height: calc(var(--interface-viewport-height, 100vh) - 2rem) !important; overflow: auto; border: 1px solid #8a7a6080; border-radius: 5px; background: #1a1815; box-shadow: 0 1rem 4rem #0009; padding: 1rem; color: #e5decc; }
 .command-palette__heading { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 0.8rem; font: 1rem var(--font-command); }
 .command-palette__heading button { padding: 0.2rem 0.6rem; font-size: 1.3rem; }

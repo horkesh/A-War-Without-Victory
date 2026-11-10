@@ -161,7 +161,8 @@ export function FrontVisitSection() {
                     className={`w-full text-xs font-bold uppercase tracking-wider px-3 py-1.5 border transition-colors text-left ${
                         canVisit
                             ? 'border-emerald-800/50 text-emerald-900 bg-emerald-900/10 hover:bg-emerald-900/20 hover:border-emerald-800/80 cursor-pointer'
-                            : 'border-neutral-400/50 text-neutral-500 bg-black/5 cursor-not-allowed'
+                            // Disabled but still read (why the visit is unavailable): WCAG AA contrast on paper.
+                            : 'border-neutral-400/50 text-neutral-600 bg-black/5 cursor-not-allowed'
                     }`}
                     title={t('frontVisit.buttonTitle', { cost: FRONT_VISIT_COST })}
                 >
