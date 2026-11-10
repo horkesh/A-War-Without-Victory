@@ -14284,3 +14284,9 @@ The map rails must stay narrow so the map stays visible, so they keep their plac
 - **Width:** the command sidebar widens from 15.5 to 17 rem so its header and stance rows fit the larger text; every coupled offset moves with it (`panelRail` left offsets, map-mode legend, supply legend, order queue).
 - Tests updated for the 13 px strings and the 17 rem offsets (`v47_readability_remediation`, `army_reserve_elite_commander`, `supply_legend_overlap_contract`, `ui_map_panel_rail`, `ui_shell_frame_contract`); 89 panel/shell files 1,167/1,167.
 - Rendered (dev build, RBiH, War Map at 1280 × 720, panels opened through the store): command sidebar 272 px, sector/corps/army-reserve rails 384 px at x 290, opaque `#11141b`, minimum text 13 px, no clipped text (the sidebar's faction band bleeds by design; the sector panel's "SECRET" watermark is readability-ignored). The settlement, formation and order-of-battle rails were caught mid power-on animation in the background pane, so only their type floor and plane were measured, not their wrap. The map toolbar itself (12 px "DESK", "Find") is outside this pass.
+
+## 2026-11-10 — Surface redesign round 2 closeout (UI)
+
+- Gates on 99fba68ee: `npm run desktop:map:build` exit 0, tactical-map entry chunk 2,951 kB, no chunk-size warning; full `npm run test:vitest` exit 0 (slices 85/366/365/364/365 files, only the deliberate child-process failure controls fail); typecheck clean. Not checked in the packaged app.
+- Art: Codex PRs #561–#563 APPROVED with green CI; the merge needs the owner's go-ahead in this session (the permission classifier blocked an unprompted merge). #564 waits on the HRHB front-visit re-cut (Mercedes badge). Round-2 brief (aftermath headers) added to the art brief doc.
+- Not redesigned: the Dayton parchment fallback (the game always opens the conference room from #560), the map toolbar's own 12 px labels.
