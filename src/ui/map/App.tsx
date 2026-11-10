@@ -463,7 +463,7 @@ function WarroomNativeOverlay({
           onClose();
         }
       }}
-      className="pointer-events-auto absolute left-1/2 top-[4.5rem] z-[7] flex max-h-[calc(100%-6rem)] w-[min(56rem,calc(100%-3rem))] -translate-x-1/2 flex-col overflow-hidden rounded-lg border border-accent-gold/35 bg-[#11141b] text-text-primary shadow-[0_30px_90px_rgba(0,0,0,0.65)] outline-none"
+      className="pointer-events-auto absolute left-1/2 top-[4.5rem] z-[7] flex max-h-[calc(100%-11.5rem)] w-[min(56rem,calc(100%-3rem))] -translate-x-1/2 flex-col overflow-hidden rounded-lg border border-accent-gold/35 bg-[#11141b] text-text-primary shadow-[0_30px_90px_rgba(0,0,0,0.65)] outline-none"
     >
       <SurfaceHeader
         eyebrow={t(copy.eyebrowKey)}

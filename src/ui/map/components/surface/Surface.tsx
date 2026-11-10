@@ -23,6 +23,8 @@
 import { forwardRef, type ButtonHTMLAttributes, type HTMLAttributes, type ReactNode } from 'react';
 import { t } from '../../i18n';
 
+/** Bottom edge of Warroom surfaces: clears the Warroom status strip below them. */
+export const SURFACE_WARROOM_BOTTOM = 'bottom-28';
 /** Big gold primary action (56px). */
 export const SURFACE_PRIMARY_BUTTON =
   'h-14 rounded-md bg-[#c9a75c] px-6 text-[18px] font-bold text-[#15120b] transition hover:bg-[#d8b86c] disabled:cursor-default disabled:opacity-45';
@@ -114,8 +116,12 @@ export const SurfaceFrame = forwardRef<HTMLDivElement, SurfaceFrameProps>(functi
 ) {
   const width = size === 'medium' ? 'w-[min(76rem,calc(100%-3rem))]' : 'w-[min(110rem,calc(100%-3rem))]';
   const frameClass = cx(
-    'pointer-events-auto absolute bottom-6 left-1/2 top-[4.5rem] flex -translate-x-1/2 flex-col overflow-hidden rounded-lg border border-accent-gold/35 bg-[#11141b] text-text-primary shadow-[0_30px_90px_rgba(0,0,0,0.65)] outline-none',
+    'pointer-events-auto absolute left-1/2 top-[4.5rem] flex -translate-x-1/2 flex-col overflow-hidden rounded-lg border border-accent-gold/35 bg-[#11141b] text-text-primary shadow-[0_30px_90px_rgba(0,0,0,0.65)] outline-none',
     width,
+    // In the Warroom the surface stops above the status strip (bottom-[2%], up to a few
+    // wrapped rows) so "Review Before Advance" and the docket stay visible (R8 shakedown
+    // 2026-11-10). Static clearance on purpose — see PresidentDeskShell history.
+    placement === 'warroom' ? SURFACE_WARROOM_BOTTOM : 'bottom-6',
     placement === 'warroom' ? layerClassName ?? 'z-[7]' : null,
     className,
   );
@@ -356,7 +362,7 @@ export function SurfaceMatterCard({ title, explanation, chip, selected, disabled
     >
       <span className="flex min-w-0 flex-col gap-1.5">
         <span className="text-[19px] font-semibold leading-snug text-[#f1e6c8]">{title}</span>
-        {explanation && <span className="line-clamp-2 text-[16px] leading-relaxed text-[#c2b69c]">{explanation}</span>}
+        {explanation && <span className="text-[16px] leading-relaxed text-[#c2b69c]">{explanation}</span>}
         {meta && <span className="text-[15px] leading-snug text-[#9c917b]">{meta}</span>}
       </span>
       {chip ? <span className={cx(SURFACE_CHIP, chip.className)}>{chip.label}</span> : <span />}

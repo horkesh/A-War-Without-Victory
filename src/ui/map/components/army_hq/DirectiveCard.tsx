@@ -851,7 +851,7 @@ export function DirectiveCard({ directive, gameState, onReceipt }: DirectiveCard
               onClick={handleConfirm}
               disabled={issueDisabled}
               title={issueTitle}
-              className="h-12 min-w-0 truncate whitespace-nowrap rounded-md border border-transparent bg-[#c9a75c] px-4 text-[17px] font-bold text-[#15120b] transition hover:bg-[#d8b86c] disabled:cursor-default disabled:border-panel-border/55 disabled:bg-panel-bg/50 disabled:text-text-muted"
+              className="h-12 min-w-0 truncate whitespace-nowrap rounded-md border border-transparent bg-[#c9a75c] px-4 text-[17px] font-bold text-[#15120b] transition hover:bg-[#d8b86c] disabled:cursor-default disabled:border-[#3a4150] disabled:bg-[#1b2029] disabled:text-[#b9ad94]"
             >
               {busy
                 ? (needsObjection ? t('directive.button.consulting') : t('directive.button.issuing'))

@@ -313,7 +313,7 @@ export function DiplomacyPanel({ view, onClose }: DiplomacyPanelProps) {
                         onClose();
                     }
                 }}
-                className="absolute bottom-6 left-1/2 top-[4.5rem] flex w-[min(110rem,calc(100%-3rem))] -translate-x-1/2 flex-col overflow-hidden rounded-lg border border-accent-gold/35 bg-[#11141b] text-text-primary shadow-[0_30px_90px_rgba(0,0,0,0.65)]"
+                className="absolute bottom-28 left-1/2 top-[4.5rem] flex w-[min(110rem,calc(100%-3rem))] -translate-x-1/2 flex-col overflow-hidden rounded-lg border border-accent-gold/35 bg-[#11141b] text-text-primary shadow-[0_30px_90px_rgba(0,0,0,0.65)]"
             >
                 <SurfaceHeader
                     eyebrow={factionDisplayName(view.playerFaction)}

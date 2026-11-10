@@ -14238,3 +14238,11 @@ Owner: bring every player surface into the Command Surface's style, on shared bu
 - `SettingsScreen.tsx`: the 500 px card becomes a medium surface (up to 1,216 × 832): header (Game options, Settings, Close), the sections as a left rail, and the chosen section's rows in a scrolling column — each row a card with a 17 px label and 15 px description, 56 × 32 px toggles, 44 px selects, wider sliders and full-size diagnostics buttons. The interface-size block (`InterfaceScaleSettings`, styled in `globals.css`) matches the rows; the `globals.css` cap on `settings-panel` moved from 500 px to 76 rem. Behaviour, IPC, focus trap and `data-testid="settings-panel"` unchanged; Close now leads the tab order (test `audio_controls_reliability` updated). New strings `settings.eyebrow` (EN/BCS).
 - Tests: Settings, interface-scale and `globals.css` readers 202/202.
 - Rendered (dev build, main menu → Settings): 2293 × 960 surface 1,216 × 832, columns 336/879; 1280 × 720 1,216 × 624, columns 272/943; all five sections without overflow, minimum text 13 px.
+
+## 2026-11-10 — R8 shakedown readability fixes on the new surfaces (UI)
+
+Packaged R8 shakedown (RBiH attempt 06, package from `ce56d775f`; `paradox-local-qa-readability-r8-shakedown-20261110-rbih-06.json`, 343 findings) flagged three Command Surface problems, fixed in the shared parts so every surface gets them:
+- **Occlusion (~240):** Warroom surfaces covered the status strip ("Review Before Advance", WAR, REQUIRED, the docket). `SurfaceFrame` (Command Surface, Desk), Diplomacy and the Warroom previews now stop at `bottom-28` (`SURFACE_WARROOM_BOTTOM`), the same static clearance the old Desk used for a wrapped multi-row strip; full-window modal surfaces are unchanged (the strip is suspended under them). Dev build 1280 × 720: surface bottom 608 px, strip 669–703 px, strip on top at its centre.
+- **Clipped text (~120):** `SurfaceMatterCard` no longer clamps the explanation to two lines; it wraps in full.
+- **Contrast (7):** DirectiveCard's disabled Issue button uses opaque `#1b2029` with `#b9ad94` ink (≈ 7.4:1) instead of muted ink on a translucent fill.
+- Tests: `decision_room_header_contrast` now pins the unclamped explanation and the Warroom bottom; 71 affected files + Command Surface 860/860. No harness change.

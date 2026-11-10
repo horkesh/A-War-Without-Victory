@@ -21,7 +21,11 @@ test('Command Surface header uses a stable high-contrast surface', () => {
 
 test('Command Surface explanations wrap and the detail scrolls back to the top for a new matter', () => {
   const surface = source();
-  expect(shared()).toContain('line-clamp-2 text-[16px] leading-relaxed');
+  // R8 shakedown 2026-11-10: the explanation wraps in full; no hidden clamped text.
+  expect(shared()).toContain('{explanation && <span className="text-[16px] leading-relaxed');
+  expect(shared()).not.toContain('line-clamp');
+  // ...and Warroom surfaces stop above the status strip instead of covering it.
+  expect(shared()).toContain("SURFACE_WARROOM_BOTTOM = 'bottom-28'");
   expect(shared()).toContain('m-0 text-[18px] leading-relaxed text-[#ddd1b3]">{explanation}');
   expect(surface).toContain('explanation={dossier.explanation}');
   expect(surface).toMatch(/data-testid="decision-room-dossier-scroll"/);
