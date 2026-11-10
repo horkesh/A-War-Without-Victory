@@ -28,10 +28,10 @@ describe('RBiH v47 evidence-backed readability floor', () => {
     const personnel = readComponent('army_hq', 'PersonnelContent.tsx');
     const briefing = readComponent('army_hq', 'ChiefOfStaffBriefing.tsx');
 
-    expect(personnel).toContain('shrink-0 text-xs leading-none font-bold uppercase tracking-[0.12em]');
+    expect(personnel).toContain('shrink-0 text-[13px] leading-none font-bold uppercase tracking-[0.12em]');
     expect(personnel).not.toContain('text-[7px] font-bold uppercase tracking-[0.12em] opacity-75');
     expect(personnel).not.toContain('min-w-0 truncate text-xs text-text-primary');
-    expect(briefing).toContain('className={`text-xs leading-relaxed italic ${DOSSIER_INK.body}`}');
+    expect(briefing).toContain('className={`text-[13px] leading-relaxed italic ${DOSSIER_INK.body}`}');
     expect(briefing).not.toContain('text-[9.5px]');
   });
 
@@ -56,7 +56,7 @@ describe('RBiH v47 evidence-backed readability floor', () => {
   it('wraps the latest archived decision title instead of hiding it behind an ellipsis', () => {
     const source = readComponent('army_hq', 'RecordsContent.tsx');
 
-    expect(source).toContain('max-w-[14rem] break-words text-xs leading-snug text-text-primary');
+    expect(source).toContain('max-w-[14rem] break-words text-[13px] leading-snug text-text-primary');
     expect(source).not.toContain('max-w-[14rem] truncate text-xs text-text-primary');
   });
 

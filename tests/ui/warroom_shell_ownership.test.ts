@@ -36,8 +36,8 @@ describe('GUI audit Batch F Warroom shell ownership', () => {
         expect(modal).toContain('onReturnToDesk');
         expect(modal).toContain('data-testid="army-hq-desk-return"');
         expect(modal).toContain("t('armyHq.returnDesk')");
-        expect(modal).toContain('FIELD');
-        expect(modal).toContain('WARROOM');
+        expect(modal).toContain("t('armyHq.backToField')");
+        expect(modal).toContain("t('armyHq.backToWarroom')");
         expect(modal).toContain('shouldShowWarroomReturn');
         expect(read('src/ui/map/App.tsx')).toContain('onReturnToDesk={openWarroomDeskFromField}');
     });

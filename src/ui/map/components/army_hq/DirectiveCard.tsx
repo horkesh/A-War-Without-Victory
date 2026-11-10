@@ -652,7 +652,7 @@ export function DirectiveCard({ directive, gameState, onReceipt }: DirectiveCard
         <div
           role="group"
           aria-label={t('directive.reserveCommitment.aria')}
-          className="mt-2 rounded border border-panel-border/60 bg-panel-bg/60 p-2 text-[12px] leading-snug"
+          className="mt-2 rounded border border-panel-border/60 bg-panel-bg/60 p-2 text-[13px] leading-snug"
         >
           <p className="mb-1 font-semibold text-text-primary">{t('directive.reserveCommitment.title')}</p>
           {[

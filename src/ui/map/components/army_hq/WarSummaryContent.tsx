@@ -81,7 +81,7 @@ export function WarSummaryContent({ focusSection = 'overview', onNavigateTarget 
         setActiveSection(focusSection);
     }, [focusSection]);
 
-    if (!loadedGameState) return <div className="text-text-secondary italic text-[12px] py-8 text-center">{t('warSummary.noState')}</div>;
+    if (!loadedGameState) return <div className="text-text-secondary italic text-[13px] py-8 text-center">{t('warSummary.noState')}</div>;
 
     const { label, casualtyLedger, civilianCasualties } = loadedGameState;
 
@@ -122,7 +122,7 @@ export function WarSummaryContent({ focusSection = 'overview', onNavigateTarget 
                 <div className="text-[13px] font-bold text-amber-400 tracking-[0.08em] uppercase">
                     {t('warSummary.title')}
                 </div>
-                <div className="text-xs text-text-secondary mt-0.5">
+                <div className="text-[13px] text-text-secondary mt-0.5">
                     {formatTurnLabel(label)}
                 </div>
             </div>
@@ -134,7 +134,7 @@ export function WarSummaryContent({ focusSection = 'overview', onNavigateTarget 
                         key={section}
                         type="button"
                         onClick={() => setActiveSection(section)}
-                        className={`px-2.5 py-1 text-xs uppercase tracking-[0.08em] rounded-md border transition-all ${
+                        className={`px-2.5 py-1 text-[13px] uppercase tracking-[0.08em] rounded-md border transition-all ${
                             activeSection === section
                                 ? 'bg-amber-400/15 border-amber-400/40 text-amber-400'
                                 : 'bg-panel-card border-panel-border text-text-secondary hover:text-text-primary hover:bg-white/5'
@@ -149,7 +149,7 @@ export function WarSummaryContent({ focusSection = 'overview', onNavigateTarget 
                 <div
                     data-testid="war-summary-posture"
                     role="note"
-                    className="mb-4 max-w-prose rounded border border-amber-400/30 bg-amber-400/[0.06] px-3 py-2 text-[12px] font-semibold leading-snug text-amber-200"
+                    className="mb-4 max-w-prose rounded border border-amber-400/30 bg-amber-400/[0.06] px-3 py-2 text-[13px] font-semibold leading-snug text-amber-200"
                 >
                     {t('warSummary.posture.hold')}
                 </div>
@@ -165,12 +165,12 @@ export function WarSummaryContent({ focusSection = 'overview', onNavigateTarget 
                             )}
                             <SummarySection title={t('warSummary.section.territory')}>
                                 <PlayerFactionHeader faction={playerFaction} />
-                                <div className="mt-2 space-y-1 text-[12px]">
+                                <div className="mt-2 space-y-1 text-[13px]">
                                     <div className="flex items-center justify-between gap-3">
                                         <span className="text-text-secondary">{t('warSummary.label.friendlyControl')}</span>
                                         <span className="text-text-primary tabular-nums">{fmtPct(areaPct[playerFaction] ?? 0)}</span>
                                     </div>
-                                    <div className="max-w-prose text-xs text-text-secondary leading-snug">
+                                    <div className="max-w-prose text-[13px] text-text-secondary leading-snug">
                                         {t('warSummary.note.enemyControl')}
                                     </div>
                                 </div>
@@ -178,7 +178,7 @@ export function WarSummaryContent({ focusSection = 'overview', onNavigateTarget 
 
                             <SummarySection title={t('warSummary.section.militaryStrength')}>
                                 <PlayerFactionHeader faction={playerFaction} />
-                                <div className="mt-2 space-y-1 text-[12px]">
+                                <div className="mt-2 space-y-1 text-[13px]">
                                     <div className="flex items-center justify-between gap-3">
                                         <span className="text-text-secondary">{t('warSummary.label.personnelAtArms')}</span>
                                         <span className="text-text-primary tabular-nums">{formatPersonnel(atArmsByFaction[playerFaction] ?? 0)}</span>
@@ -207,7 +207,7 @@ export function WarSummaryContent({ focusSection = 'overview', onNavigateTarget 
                             </SummarySection>
 
                             <SummarySection title={t('warSummary.section.displacement')}>
-                                <div className="space-y-1 text-[12px]">
+                                <div className="space-y-1 text-[13px]">
                                     <div className="flex items-center justify-between gap-3">
                                         <span className="text-text-secondary">{t('warSummary.label.theaterDisplaced')}</span>
                                         <span className="text-text-primary tabular-nums">{reportedK(totalDisplaced, totalDisplacedReported)}</span>
@@ -216,7 +216,7 @@ export function WarSummaryContent({ focusSection = 'overview', onNavigateTarget 
                                         <span className="text-text-secondary">{t('warSummary.label.ownDisplaced')}</span>
                                         <span className="text-text-primary tabular-nums">{reportedK(displacedByFaction[playerFaction], displacedByFactionReported)}</span>
                                     </div>
-                                    <div className="max-w-prose text-xs text-text-secondary leading-snug">
+                                    <div className="max-w-prose text-[13px] text-text-secondary leading-snug">
                                         {t('warSummary.note.enemyDisplacement')}
                                     </div>
                                 </div>
@@ -224,7 +224,7 @@ export function WarSummaryContent({ focusSection = 'overview', onNavigateTarget 
 
                             {campaignCost.recordCount > 0 && (
                                 <SummarySection title={t('warSummary.section.campaignCost')}>
-                                    <div className="space-y-1 text-[12px]" data-testid="war-summary-campaign-cost">
+                                    <div className="space-y-1 text-[13px]" data-testid="war-summary-campaign-cost">
                                         <div className="flex items-center justify-between gap-3">
                                             <span className="text-text-secondary">{t('warSummary.label.severity')}</span>
                                             <span className="text-text-primary uppercase tabular-nums">{campaignCostSeverityLabel(campaignCost.severity)}</span>
@@ -232,7 +232,7 @@ export function WarSummaryContent({ focusSection = 'overview', onNavigateTarget 
                                         <div className="flex items-center justify-between gap-3">
                                             <div>
                                                 <div className="text-text-secondary">{t('warSummary.label.friendlyCasualties')}</div>
-                                                <div className="text-xs text-text-secondary leading-snug">
+                                                <div className="text-[13px] text-text-secondary leading-snug">
                                                     {campaignCost.friendlyMilitaryCasualtyScope === 'campaign_ledger'
                                                         ? `${t('records.campaignCostSoFar')}: ${t('situation.casualtyBreakdown', {
                                                             killed: reportedK(casualtyLedger?.[playerFaction]?.killed, casualtyLedgerReported),
@@ -258,12 +258,12 @@ export function WarSummaryContent({ focusSection = 'overview', onNavigateTarget 
 
                             {hasElevatedWarExhaustion && (
                                 <SummarySection title={t('warSummary.section.campaignDrag')}>
-                                    <div className="space-y-1 text-[12px]" data-testid="war-summary-campaign-drag">
+                                    <div className="space-y-1 text-[13px]" data-testid="war-summary-campaign-drag">
                                         <div className="flex items-center justify-between gap-3">
                                             <span className="text-text-secondary">{t('warSummary.label.warExhaustion')}</span>
                                             <span className="text-text-primary tabular-nums">{Math.round(playerWarExhaustion!)}</span>
                                         </div>
-                                        <div className="max-w-prose text-xs text-text-secondary leading-snug">
+                                        <div className="max-w-prose text-[13px] text-text-secondary leading-snug">
                                             {t('warSummary.note.commandStrain')}
                                         </div>
                                     </div>
@@ -272,7 +272,7 @@ export function WarSummaryContent({ focusSection = 'overview', onNavigateTarget 
 
                             {sitrep && (
                                 <SummarySection title={t('warSummary.section.operationalSitrep')}>
-                                    <div className="space-y-1 text-[12px]">
+                                    <div className="space-y-1 text-[13px]">
                                         <div className="max-w-prose text-text-secondary leading-snug">{localizedOperationalSitrepCopy(sitrep.headlineToken, sitrep.headline)}</div>
                                         <div className="flex items-center justify-between gap-3">
                                             <span className="text-text-secondary">{t('warSummary.label.fronts')}</span>
@@ -290,7 +290,7 @@ export function WarSummaryContent({ focusSection = 'overview', onNavigateTarget 
                                             <span className="text-text-primary tabular-nums">{sitrep.operations.activeCount}</span>
                                         </div>
                                         {sitrep.alerts.length > 0 && (
-                                            <div className="max-w-prose text-xs text-text-secondary leading-snug">
+                                            <div className="max-w-prose text-[13px] text-text-secondary leading-snug">
                                                 {sitrep.alerts.slice(0, 2).map((alert) => localizedOperationalSitrepCopy(alert.textToken, alert.text)).join(' ')}
                                             </div>
                                         )}
@@ -304,9 +304,9 @@ export function WarSummaryContent({ focusSection = 'overview', onNavigateTarget 
                                 <table className="w-full border-collapse">
                                     <thead>
                                         <tr>
-                                            <th className="text-xs text-text-secondary font-semibold text-left py-1">{t('warSummary.label.faction')}</th>
+                                            <th className="text-[13px] text-text-secondary font-semibold text-left py-1">{t('warSummary.label.faction')}</th>
                                             {WAR_SUMMARY_FACTIONS.map((f) => (
-                                                <th key={f} className={`text-xs font-semibold text-right px-2 py-1 ${FACTION_COLORS[f] ?? 'text-text-primary'}`}>
+                                                <th key={f} className={`text-[13px] font-semibold text-right px-2 py-1 ${FACTION_COLORS[f] ?? 'text-text-primary'}`}>
                                                     <div className="flex flex-col items-end gap-0.5">
                                                         {getFactionFlag(f) && <img src={getFactionFlag(f)} alt="" className="w-3.5 h-2.5 object-cover rounded-[1px]" />}
                                                         {FACTION_SHORT_LABELS[f]}
@@ -317,9 +317,9 @@ export function WarSummaryContent({ focusSection = 'overview', onNavigateTarget 
                                     </thead>
                                     <tbody>
                                         <tr>
-                                            <td className="text-xs text-text-secondary py-0.5">{t('warSummary.label.areaWeighted')}</td>
+                                            <td className="text-[13px] text-text-secondary py-0.5">{t('warSummary.label.areaWeighted')}</td>
                                             {WAR_SUMMARY_FACTIONS.map((f) => (
-                                                <td key={f} className="text-[12px] text-text-primary text-right px-2 py-0.5 tabular-nums">{fmtPct(areaPct[f])}</td>
+                                                <td key={f} className="text-[13px] text-text-primary text-right px-2 py-0.5 tabular-nums">{fmtPct(areaPct[f])}</td>
                                             ))}
                                         </tr>
                                     </tbody>
@@ -330,9 +330,9 @@ export function WarSummaryContent({ focusSection = 'overview', onNavigateTarget 
                                 <table className="w-full border-collapse">
                                     <thead>
                                         <tr>
-                                            <th className="text-xs text-text-secondary font-semibold text-left py-1" />
+                                            <th className="text-[13px] text-text-secondary font-semibold text-left py-1" />
                                             {WAR_SUMMARY_FACTIONS.map((f) => (
-                                                <th key={f} className={`text-xs font-semibold text-right px-2 py-1 ${FACTION_COLORS[f] ?? 'text-text-primary'}`}>
+                                                <th key={f} className={`text-[13px] font-semibold text-right px-2 py-1 ${FACTION_COLORS[f] ?? 'text-text-primary'}`}>
                                                     {FACTION_SHORT_LABELS[f]}
                                                 </th>
                                             ))}
@@ -340,37 +340,37 @@ export function WarSummaryContent({ focusSection = 'overview', onNavigateTarget 
                                     </thead>
                                     <tbody>
                                         <tr>
-                                            <td className="text-xs text-text-secondary py-0.5">{t('warSummary.label.atArms')}</td>
+                                            <td className="text-[13px] text-text-secondary py-0.5">{t('warSummary.label.atArms')}</td>
                                             {WAR_SUMMARY_FACTIONS.map((f) => (
-                                                <td key={f} className="text-[12px] text-text-primary text-right px-2 py-0.5 tabular-nums">{formatPersonnel(atArmsByFaction[f] ?? 0)}</td>
+                                                <td key={f} className="text-[13px] text-text-primary text-right px-2 py-0.5 tabular-nums">{formatPersonnel(atArmsByFaction[f] ?? 0)}</td>
                                             ))}
                                         </tr>
                                         {WAR_SUMMARY_FACTIONS.some((f) => (mobilizedPoolByFaction[f] ?? 0) > 0) && (
                                             <>
                                                 <tr>
-                                                    <td className="text-xs text-text-secondary py-0.5">{t('warSummary.label.mobilizedPool')}</td>
+                                                    <td className="text-[13px] text-text-secondary py-0.5">{t('warSummary.label.mobilizedPool')}</td>
                                                     {WAR_SUMMARY_FACTIONS.map((f) => (
-                                                        <td key={f} className="text-[12px] text-text-primary text-right px-2 py-0.5 tabular-nums">{formatPersonnel(mobilizedPoolByFaction[f] ?? 0)}</td>
+                                                        <td key={f} className="text-[13px] text-text-primary text-right px-2 py-0.5 tabular-nums">{formatPersonnel(mobilizedPoolByFaction[f] ?? 0)}</td>
                                                     ))}
                                                 </tr>
                                                 <tr>
-                                                    <td className="text-xs text-text-secondary py-0.5">{t('warSummary.label.mobilizedTotal')}</td>
+                                                    <td className="text-[13px] text-text-secondary py-0.5">{t('warSummary.label.mobilizedTotal')}</td>
                                                     {WAR_SUMMARY_FACTIONS.map((f) => (
-                                                        <td key={f} className="text-[12px] text-text-primary text-right px-2 py-0.5 tabular-nums">{formatPersonnel(mobilizedTotalByFaction[f] ?? atArmsByFaction[f] ?? 0)}</td>
+                                                        <td key={f} className="text-[13px] text-text-primary text-right px-2 py-0.5 tabular-nums">{formatPersonnel(mobilizedTotalByFaction[f] ?? atArmsByFaction[f] ?? 0)}</td>
                                                     ))}
                                                 </tr>
                                             </>
                                         )}
                                         <tr>
-                                            <td className="text-xs text-text-secondary py-0.5">{t('warSummary.label.kia')}</td>
+                                            <td className="text-[13px] text-text-secondary py-0.5">{t('warSummary.label.kia')}</td>
                                             {WAR_SUMMARY_FACTIONS.map((f) => (
-                                                <td key={f} className="text-[12px] text-text-primary text-right px-2 py-0.5 tabular-nums">{reportedK(casualtyLedger?.[f]?.killed, casualtyLedgerReported)}</td>
+                                                <td key={f} className="text-[13px] text-text-primary text-right px-2 py-0.5 tabular-nums">{reportedK(casualtyLedger?.[f]?.killed, casualtyLedgerReported)}</td>
                                             ))}
                                         </tr>
                                         <tr>
-                                            <td className="text-xs text-text-secondary py-0.5">{t('warSummary.label.wia')}</td>
+                                            <td className="text-[13px] text-text-secondary py-0.5">{t('warSummary.label.wia')}</td>
                                             {WAR_SUMMARY_FACTIONS.map((f) => (
-                                                <td key={f} className="text-[12px] text-text-primary text-right px-2 py-0.5 tabular-nums">{reportedK(casualtyLedger?.[f]?.wounded, casualtyLedgerReported)}</td>
+                                                <td key={f} className="text-[13px] text-text-primary text-right px-2 py-0.5 tabular-nums">{reportedK(casualtyLedger?.[f]?.wounded, casualtyLedgerReported)}</td>
                                             ))}
                                         </tr>
                                     </tbody>
@@ -378,7 +378,7 @@ export function WarSummaryContent({ focusSection = 'overview', onNavigateTarget 
                             </SummarySection>
 
                             <SummarySection title={t('warSummary.section.displacement')}>
-                                <div className="flex flex-wrap gap-x-4 gap-y-1 text-[12px]">
+                                <div className="flex flex-wrap gap-x-4 gap-y-1 text-[13px]">
                                     <div>
                                         <span className="text-text-secondary">{t('warSummary.label.totalDisplaced')} </span>
                                         <span className="text-text-primary tabular-nums">{reportedK(totalDisplaced, totalDisplacedReported)}</span>
@@ -409,7 +409,7 @@ export function WarSummaryContent({ focusSection = 'overview', onNavigateTarget 
                         }
                         return (
                             <SummarySection title={t('warSummary.section.civilianImpact')}>
-                                <div className="flex gap-6 text-[12px]">
+                                <div className="flex gap-6 text-[13px]">
                                     <div>
                                         <span className="text-text-secondary">{t('warSummary.label.civilianKilled')} </span>
                                         <span className="text-red-400 font-semibold tabular-nums">{localizedInteger(totalKilled)}</span>
@@ -458,7 +458,7 @@ function StrategicObjectivesSection({
             className="xl:col-span-2 min-[2200px]:col-span-3 border-y border-panel-border py-3"
             aria-label={t('warSummary.section.strategicObjectives')}
         >
-            <h2 className="mb-2 text-[12px] font-bold uppercase text-text-primary">
+            <h2 className="mb-2 text-[13px] font-bold uppercase text-text-primary">
                 {t('warSummary.section.strategicObjectives')}
             </h2>
             <div className="grid grid-cols-1 xl:grid-cols-2 min-[2200px]:grid-cols-3 gap-2">
@@ -471,7 +471,7 @@ function StrategicObjectivesSection({
                     return (
                         <article
                             key={objective.id}
-                            className="rounded border border-panel-border bg-panel-card p-3 text-[12px] leading-snug"
+                            className="rounded border border-panel-border bg-panel-card p-3 text-[13px] leading-snug"
                         >
                             <h3 className="mb-2 font-semibold text-text-primary">{objective.title}</h3>
                             <div className="space-y-1.5">
@@ -510,7 +510,7 @@ function StrategicObjectivesSection({
                                                     useGameStore.getState(),
                                                 ))}
                                             aria-label={`${owner}: ${objective.nextLever.label}`}
-                                            className="min-h-7 min-w-0 max-w-prose rounded border border-amber-400/35 bg-amber-400/10 px-2 py-1 text-left text-[12px] font-semibold text-amber-300 hover:bg-amber-400/15"
+                                            className="min-h-7 min-w-0 max-w-prose rounded border border-amber-400/35 bg-amber-400/10 px-2 py-1 text-left text-[13px] font-semibold text-amber-300 hover:bg-amber-400/15"
                                         >
                                             <span className="block text-text-secondary">{owner}</span>
                                             <span className="block">{objective.nextLever.label}</span>
@@ -519,7 +519,7 @@ function StrategicObjectivesSection({
                                         <div
                                             data-testid="strategic-objective-no-filed-action"
                                             data-owner={objective.nextLever.owner}
-                                            className="min-h-7 min-w-0 max-w-prose rounded border border-panel-border bg-panel-bg/60 px-2 py-1 text-left text-[12px] font-semibold text-text-secondary"
+                                            className="min-h-7 min-w-0 max-w-prose rounded border border-panel-border bg-panel-bg/60 px-2 py-1 text-left text-[13px] font-semibold text-text-secondary"
                                         >
                                             <span className="block text-text-muted">{owner}</span>
                                             <span className="block">{objective.nextLever.label}</span>
@@ -555,7 +555,7 @@ function ObjectiveRow({
 function SummarySection({ title, children }: { title: string; children: React.ReactNode }) {
     return (
         <div className="rounded border border-panel-border bg-panel-card p-3">
-            <div className="text-xs text-text-secondary uppercase tracking-[0.1em] mb-1.5 pb-1 border-b border-panel-border">
+            <div className="text-[13px] text-text-secondary uppercase tracking-[0.1em] mb-1.5 pb-1 border-b border-panel-border">
                 {title}
             </div>
             {children}
@@ -567,7 +567,7 @@ function PlayerFactionHeader({ faction }: { faction: (typeof WAR_SUMMARY_FACTION
     return (
         <div className="flex items-center gap-2">
             {getFactionFlag(faction) && <img src={getFactionFlag(faction)} alt="" className="w-4 h-3 object-cover rounded-[1px]" />}
-            <span className={`text-xs font-semibold ${FACTION_COLORS[faction] ?? 'text-text-primary'}`}>
+            <span className={`text-[13px] font-semibold ${FACTION_COLORS[faction] ?? 'text-text-primary'}`}>
                 {getPlayerSafeMilitaryFactionName(faction, FACTION_SHORT_LABELS[faction])}
             </span>
         </div>

@@ -88,7 +88,7 @@ describe('Army HQ responsive composition contract', () => {
 
     it('prevents the Summary and Army HQ scroll owners from creating horizontal scroll', () => {
         expect(summarySource).toContain('w-full min-w-0 max-w-none overflow-x-clip');
-        expect(modalSource).toContain('relative min-w-0 flex-1 overflow-y-auto overflow-x-clip px-3 pt-2 pb-3');
+        expect(modalSource).toContain('relative min-h-0 min-w-0 overflow-y-auto overflow-x-clip px-8 py-6');
         expect(summarySource).not.toContain('overflow-x-auto');
     });
 

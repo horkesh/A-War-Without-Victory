@@ -291,7 +291,7 @@ describe('War Summary campaign cost localization', () => {
         const section = screen.getByRole('region', { name: 'Strategic Objectives' });
         const objectives = within(section).getAllByRole('article');
         expect(objectives).toHaveLength(4);
-        expect(objectives.every((objective) => objective.className.includes('text-[12px]'))).toBe(true);
+        expect(objectives.every((objective) => objective.className.includes('text-[13px]'))).toBe(true);
         expect(objectives[0]?.textContent).toContain('Protect state survival');
         expect(objectives[0]?.textContent).toContain('StatusCritical');
         expect(objectives[0]?.textContent).toContain('TrendWorsening');

@@ -175,26 +175,26 @@ export function SupplyIntelligence({ breakdown, enclaves, mobilization, currentT
 
     return (
         <div className="bg-panel-card border border-panel-border rounded p-4 mb-4">
-            <div className="text-xs uppercase tracking-[0.25em] font-bold text-text-secondary mb-3 pb-2 border-b border-panel-border">
+            <div className="text-[13px] uppercase tracking-[0.25em] font-bold text-text-secondary mb-3 pb-2 border-b border-panel-border">
                 SUPPLY &amp; SUSTAINABILITY
             </div>
 
             {/* Supply breakdown */}
             <div className="mb-3">
                 <div className="flex items-baseline gap-3 mb-1">
-                    <span className="text-[12px] text-text-primary font-bold">
+                    <span className="text-[13px] text-text-primary font-bold">
                         GENERAL SUPPLY: {currentGeneralLabel}
                     </span>
-                    <span className={`text-xs font-bold ${breakdown.estimatedNetPerTurn < 0 ? 'text-red-400' : 'text-emerald-400'}`}>
+                    <span className={`text-[13px] font-bold ${breakdown.estimatedNetPerTurn < 0 ? 'text-red-400' : 'text-emerald-400'}`}>
                         {breakdown.estimatedNetPerTurn >= 0 ? '▲' : '▼'} {breakdown.estimatedNetPerTurn}/turn
                     </span>
                     {breakdown.estimatedRunwayTurns != null && (
-                        <span className="text-xs text-red-400/80">
+                        <span className="text-[13px] text-red-400/80">
                             Depletion ~{breakdown.estimatedRunwayTurns} turns ({turnToDateString(currentTurn + breakdown.estimatedRunwayTurns)})
                         </span>
                     )}
                 </div>
-                <div className="text-xs text-text-secondary/70 flex flex-wrap gap-x-3 ml-1">
+                <div className="text-[13px] text-text-secondary/70 flex flex-wrap gap-x-3 ml-1">
                     <span>maint −{breakdown.estimatedMaintenanceDrain}</span>
                     <span>patron +{breakdown.estimatedPatronAid}</span>
                     <span>heavy equip {heavyDrainLabel}</span>
@@ -204,7 +204,7 @@ export function SupplyIntelligence({ breakdown, enclaves, mobilization, currentT
             {/* Enclave bars */}
             {enclaves.length > 0 && (
                 <div className="mb-3">
-                    <div className="text-xs uppercase tracking-[0.2em] text-text-secondary font-bold mb-1.5">
+                    <div className="text-[13px] uppercase tracking-[0.2em] text-text-secondary font-bold mb-1.5">
                         ENCLAVES
                     </div>
                     <div className="space-y-1">
@@ -213,14 +213,14 @@ export function SupplyIntelligence({ breakdown, enclaves, mobilization, currentT
                             const barColor = pct > 60 ? 'bg-emerald-500' : pct > 30 ? 'bg-amber-500' : 'bg-red-500';
                             return (
                                 <div key={enc.id} className="flex items-center gap-2">
-                                    <span className="text-xs text-text-primary w-24 truncate font-bold">{enc.displayName}</span>
+                                    <span className="text-[13px] text-text-primary w-24 truncate font-bold">{enc.displayName}</span>
                                     <div className="flex-1 h-[6px] bg-panel-bg rounded-sm overflow-hidden">
                                         <div className={`h-full ${barColor} transition-all`} style={{ width: `${pct}%` }} />
                                     </div>
-                                    <span className="text-xs text-text-secondary tabular-nums w-8 text-right">{enc.resilience}</span>
-                                    <span className="text-xs text-text-secondary/60">·</span>
-                                    <span className="text-xs text-text-secondary/60 tabular-nums w-12">{enc.siegeTurns}t siege</span>
-                                    <span className={`text-xs font-bold uppercase ${SUPPLY_STATE_TEXT[enc.supplyState]}`}>
+                                    <span className="text-[13px] text-text-secondary tabular-nums w-8 text-right">{enc.resilience}</span>
+                                    <span className="text-[13px] text-text-secondary/60">·</span>
+                                    <span className="text-[13px] text-text-secondary/60 tabular-nums w-12">{enc.siegeTurns}t siege</span>
+                                    <span className={`text-[13px] font-bold uppercase ${SUPPLY_STATE_TEXT[enc.supplyState]}`}>
                                         {SUPPLY_STATE_LABEL[enc.supplyState]}
                                     </span>
                                 </div>
@@ -232,7 +232,7 @@ export function SupplyIntelligence({ breakdown, enclaves, mobilization, currentT
 
             {/* Mobilization */}
             {mobilization && (
-                <div className="text-xs text-text-secondary flex flex-wrap gap-x-4">
+                <div className="text-[13px] text-text-secondary flex flex-wrap gap-x-4">
                     <span>
                         <span className="text-text-primary font-bold tabular-nums">{mobilization.exhaustionPct.toFixed(1)}%</span>
                         {' '}pool exhausted
