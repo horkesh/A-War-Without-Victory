@@ -5407,6 +5407,7 @@ export const bcsMessages: Partial<Record<MessageKey, string>> = {
     'eventDecision.presidentialResponse': 'Predsjednicki odgovor',
     'eventDecision.chooseResponseAria': 'Izaberi odgovor: {response}',
     'eventDecision.recordTrail': 'Trag zapisa: nakon vaseg odgovora, ova odluka se arhivira u dnevniku odluka Hronike; zapisi Armijskog staba cuvaju posljedice, prilike, operacije i posljedice poteza.',
+    'eventDecision.returnToMap': 'Nazad na kartu',
     'eventDecision.turnPaused.title': 'Potez je zaustavljen prije borbi',
     'eventDecision.turnPaused.body': 'Odgovorite sada i vasa odluka djeluje ove sedmice, prije pokreta i borbi. Ako nastavite bez odgovora, odluka ostaje na vasem stolu i djeluje tek od sljedece sedmice.',
     'eventDecision.turnPaused.continue': 'Nastavi potez',

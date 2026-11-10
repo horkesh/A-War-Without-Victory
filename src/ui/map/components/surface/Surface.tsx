@@ -67,6 +67,9 @@ export const SURFACE_MODAL_PANEL_FULL =
   'flex h-[calc(var(--interface-viewport-height,100vh)-6rem)] w-[min(110rem,calc(var(--interface-viewport-width,100vw)-3rem))] flex-col overflow-hidden rounded-lg border border-accent-gold/35 bg-[#11141b] text-text-primary shadow-[0_30px_90px_rgba(0,0,0,0.65)] outline-none';
 export const SURFACE_MODAL_PANEL_MEDIUM =
   'flex h-[min(52rem,calc(var(--interface-viewport-height,100vh)-6rem))] w-[min(76rem,calc(var(--interface-viewport-width,100vw)-3rem))] flex-col overflow-hidden rounded-lg border border-accent-gold/35 bg-[#11141b] text-text-primary shadow-[0_30px_90px_rgba(0,0,0,0.65)] outline-none';
+/** A short notice: grows with its content up to the cap; columns still scroll on their own. */
+export const SURFACE_MODAL_PANEL_COMPACT =
+  'flex max-h-[min(46rem,calc(var(--interface-viewport-height,100vh)-6rem))] w-[min(64rem,calc(var(--interface-viewport-width,100vw)-3rem))] flex-col overflow-hidden rounded-lg border border-accent-gold/35 bg-[#11141b] text-text-primary shadow-[0_30px_90px_rgba(0,0,0,0.65)] outline-none';
 
 /** Column templates. Widths follow the interface viewport so ultrawide gets room and 1280 still fits. */
 const RAIL_WIDTH = 'clamp(17rem,calc(var(--interface-viewport-width,100vw)*0.19),21rem)';

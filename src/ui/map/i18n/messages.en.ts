@@ -6018,6 +6018,7 @@ export const enMessages = {
     'eventDecision.presidentialResponse': 'Presidential Response',
     'eventDecision.chooseResponseAria': 'Choose response: {response}',
     'eventDecision.recordTrail': 'Record trail: after your response, this decision is filed in the Chronicle decision ledger; Army HQ Records keeps consequences, opportunities, operations, and week aftermath.',
+    'eventDecision.returnToMap': 'Return to map',
     'eventDecision.turnPaused.title': 'The turn is paused before combat',
     'eventDecision.turnPaused.body': 'Answer now and your decision takes effect this week, before movement and combat. If you continue without answering, the decision stays on your desk and takes effect only from next week.',
     'eventDecision.turnPaused.continue': 'Continue turn',
