@@ -14246,3 +14246,10 @@ Packaged R8 shakedown (RBiH attempt 06, package from `ce56d775f`; `paradox-local
 - **Clipped text (~120):** `SurfaceMatterCard` no longer clamps the explanation to two lines; it wraps in full.
 - **Contrast (7):** DirectiveCard's disabled Issue button uses opaque `#1b2029` with `#b9ad94` ink (≈ 7.4:1) instead of muted ink on a translucent fill.
 - Tests: `decision_room_header_contrast` now pins the unclamped explanation and the Warroom bottom; 71 affected files + Command Surface 860/860. No harness change.
+
+## 2026-11-10 — Surface redesign closeout and art briefs (UI)
+
+- All surfaces on the owner's list are rebuilt on `components/surface/Surface.tsx`, one commit each: Command Surface refactor, President's Desk + Inbox, Advance, event decision + notice, Army HQ, Diplomacy, Warroom Intelligence/Staff/Faction previews, Chronicle, peace plan + officer matter, Settings; plus the R8 shakedown readability fixes.
+- Gates: `npx tsc --noEmit` clean; full `npm run test:vitest` exit 0 (slices 85/366/365/364/365 files; only the deliberate child-process failure controls fail, as designed), run after the Settings commit; the R8 fix commit re-verified on its 71 affected files + Command Surface (860/860). `npm run desktop:map:build`: tactical-map entry chunk 2,952 kB, no chunk-size warning. Not yet checked in the packaged app.
+- Art: the new wide slots crop today's 4:3 cards and 3:1 plates. Briefs for Codex in `docs/40_reports/handovers/20261110_SURFACE_REDESIGN_ART_BRIEFS.md` (18 area banners 2400 × 480, optional 15 action detail headers, 9 wide decision plates 3000 × 480, 1 Desk banner); wiring with fallbacks to follow delivery. Nothing is blocked on them.
+- Not redesigned (outside the list, noted for a later pass): the counter-offer, convoy, reserve, paramilitary, Dayton and intelligence-brief modals (they inherit the new decision header only), the turn-aftermath modal, the tactical-map side panels.
