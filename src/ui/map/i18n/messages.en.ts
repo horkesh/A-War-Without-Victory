@@ -1250,6 +1250,8 @@ export const enMessages = {
     'recruitment.eligibleNow': 'Eligible now',
     'recruitment.noneEligible': 'No formations are currently eligible. Review the unavailable list for requirements.',
     'recruitment.unavailable': 'Unavailable',
+    'recruitment.alreadyRaised': 'Already raised ({count})',
+    'recruitment.alreadyRaisedNote': 'These brigades are already in the field and cannot be raised again.',
     'recruitment.reason.wrongFaction': 'Belongs to another faction',
     'recruitment.reason.notYetAvailable': 'Available from week {week}',
     'recruitment.reason.alreadyRecruited': 'Already recruited',

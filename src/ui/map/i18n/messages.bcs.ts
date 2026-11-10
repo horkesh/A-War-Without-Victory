@@ -1227,6 +1227,8 @@ export const bcsMessages: Partial<Record<MessageKey, string>> = {
     'recruitment.eligibleNow': 'Dostupno sada',
     'recruitment.noneEligible': 'Trenutno nema dostupnih formacija. Pregledajte uslove u listi nedostupnih.',
     'recruitment.unavailable': 'Nedostupno',
+    'recruitment.alreadyRaised': 'Već formirane ({count})',
+    'recruitment.alreadyRaisedNote': 'Ove brigade su već na terenu i ne mogu se ponovo formirati.',
     'recruitment.reason.wrongFaction': 'Pripada drugoj frakciji',
     'recruitment.reason.notYetAvailable': 'Dostupno od sedmice {week}',
     'recruitment.reason.alreadyRecruited': 'Vec regrutovano',
