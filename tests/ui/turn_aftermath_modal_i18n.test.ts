@@ -330,7 +330,10 @@ describe('TurnAftermathModal localization', () => {
 
         const commandDesk = screen.getByText('Command Desk');
         const signals = screen.getByText('Strategic Signals');
-        expect(commandDesk.compareDocumentPosition(signals) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+        // Surface redesign 2026-11-10: the command desk owns the always-visible right column;
+        // the supporting signals scroll in the left one.
+        expect(commandDesk.closest('aside')).toBeTruthy();
+        expect(signals.closest('aside')).toBeNull();
         expect(screen.getByText('1st Brigade moved').closest('button')).toBeNull();
         expect(onOpenCodex).not.toHaveBeenCalled();
     });
@@ -545,6 +548,6 @@ describe('TurnAftermathModal localization', () => {
         const source = readFileSync('src/ui/map/components/TurnAftermathModal.tsx', 'utf8');
 
         expect(source).not.toContain('line-clamp-2 text-xs leading-4 opacity-80');
-        expect(source).toContain('break-words text-xs leading-4 opacity-80');
+        expect(source).toContain('break-words text-[15px] leading-snug opacity-85');
     });
 });

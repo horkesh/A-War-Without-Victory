@@ -77,6 +77,10 @@ export const DIRECTIVE_LEVER_TO_ACT_ID: Readonly<Record<DirectiveLever, string>>
 export function resolveDirectiveActArt(lever: DirectiveLever, faction?: string | null): string | null {
   const actId = DIRECTIVE_LEVER_TO_ACT_ID[lever];
   if (!actId) return null;
+  // 0. Surface redesign (2026-11-10): the wide detail cut (`<act_id>_detail_<faction>.webp`,
+  //    2.5:1 for the Command Surface detail header) wins when one ships.
+  const detail = resolveCommandCardOverride(`${actId}_detail`, faction);
+  if (detail) return detail;
   // 1. Per-id override wins (faction-specific command_cards/<act_id>_<faction>.webp first,
   //    then the faction-agnostic command_cards/<act_id>.webp).
   const override = resolveCommandCardOverride(actId, faction);

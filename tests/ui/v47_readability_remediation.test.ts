@@ -131,7 +131,7 @@ describe('RBiH v47 evidence-backed readability floor', () => {
     const oob = readComponent('OOBSidebar.tsx');
     const statusStrip = readComponent('BottomStatusStrip.tsx');
 
-    expect(emptyState).toContain('text-xs uppercase tracking-[0.22em] text-text-secondary');
+    expect(emptyState).toContain('text-[13px] uppercase tracking-[0.22em] text-text-secondary');
     expect(emptyState).not.toContain('text-text-secondary/70');
     expect(corpsCard).not.toContain('text-text-secondary/60 text-xs uppercase tracking-wide');
     expect(oob).not.toContain('text-xs text-accent-gold/70 truncate');
@@ -150,7 +150,7 @@ describe('RBiH v47 evidence-backed readability floor', () => {
     expect(theme).toContain("RS: 'text-[#a62d2d]'");
     expect(theme).toContain("RBiH: 'text-[#286a32]'");
     expect(theme).toContain("HRHB: 'text-[#285f94]'");
-    expect(source).toContain('text-xs font-normal text-neutral-600 normal-case');
+    expect(source).toContain('text-[13px] font-normal text-neutral-600 normal-case');
     expect(source).not.toContain('text-xs font-normal text-neutral-400 normal-case');
     expect(source).not.toContain('text-xs uppercase font-bold text-neutral-500');
   });

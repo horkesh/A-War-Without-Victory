@@ -57,9 +57,9 @@ export const DETAIL_PANEL_STYLE: CSSProperties = {
 
 /**
  * Nested panels anchored to the left Command sidebar.
- * Keep these offsets in sync with OOBSidebar's `w-[15.5rem]`.
+ * Keep these offsets in sync with OOBSidebar's `w-[17rem]`.
  */
-const LEFT_SIDEBAR_WIDTH = '15.5rem';
+const LEFT_SIDEBAR_WIDTH = '17rem';
 const PANEL_GAP = '0.5rem';
 const LEFT_PRIMARY_OFFSET = `calc(${LEFT_SIDEBAR_WIDTH} + ${PANEL_GAP})`;
 

@@ -218,7 +218,7 @@ export function FormationDetail({ railSlot = 'primary', breadcrumb }: FormationD
   if (!loadedGameState || !formation) {
     return (
       <div
-        className="panel-slide-in-right flex flex-col bg-panel-bg/95 backdrop-blur-sm border border-panel-border rounded-lg shadow-xl overflow-hidden"
+        className="panel-slide-in-right flex flex-col bg-[#11141b] border border-accent-gold/30 rounded-lg shadow-xl overflow-hidden"
         style={getPanelRailStyle(railSlot, '24rem', 'left')}
       >
         <div className="h-10 bg-panel-card border-b border-panel-border panel-shimmer" />
@@ -321,17 +321,17 @@ export function FormationDetail({ railSlot = 'primary', breadcrumb }: FormationD
           {getArmyCrest(formation.faction) && (
             <img src={getArmyCrest(formation.faction)} alt="" className="w-4 h-4 object-contain" />
           )}
-          <span className="font-sans text-xs text-accent-gold uppercase tracking-wide font-semibold">
+          <span className="font-sans text-[13px] text-accent-gold uppercase tracking-wide font-semibold">
             {t('formationDetail.formation')}
           </span>
           {breadcrumb}
           {isBrigade && decorations.length > 0 && (
             <div className="flex items-center gap-px ml-0.5" title={t('formationDetail.decorationsEarned', { count: decorations.length })}>
               {decorations.slice(0, 5).map((dec, i) => (
-                <span key={`${dec.tier}-${dec.type}-${i}`} className={`text-xs leading-none select-none ${getPrestigeTierColor(dec.tier === 'tier_3' ? 1 : dec.tier === 'tier_2' ? 2 : 3)}`}>★</span>
+                <span key={`${dec.tier}-${dec.type}-${i}`} className={`text-[13px] leading-none select-none ${getPrestigeTierColor(dec.tier === 'tier_3' ? 1 : dec.tier === 'tier_2' ? 2 : 3)}`}>★</span>
               ))}
               {decorations.length > 5 && (
-                <span className="text-xs text-text-secondary ml-0.5">+{decorations.length - 5}</span>
+                <span className="text-[13px] text-text-secondary ml-0.5">+{decorations.length - 5}</span>
               )}
             </div>
           )}
@@ -392,7 +392,7 @@ export function FormationDetail({ railSlot = 'primary', breadcrumb }: FormationD
                       ? { kind: 'field-formation-in-army-reserve', formationId: formation.id, armyHqId: parent.id, osid: formation.location_osid }
                       : { kind: 'field-formation-in-corps', formationId: formation.id, corpsId: parent.id, osid: formation.location_osid });
                   }}
-                  className="w-full text-left px-2 py-1.5 bg-accent-blue/5 border border-accent-blue/20 rounded-md flex items-center justify-between text-xs hover:bg-accent-blue/10 transition-colors group"
+                  className="w-full text-left px-2 py-1.5 bg-accent-blue/5 border border-accent-blue/20 rounded-md flex items-center justify-between text-[13px] hover:bg-accent-blue/10 transition-colors group"
                 >
                   <div className="flex items-center gap-2">
                     <span className="text-accent-blue/60 uppercase font-bold tracking-tighter">
@@ -421,7 +421,7 @@ export function FormationDetail({ railSlot = 'primary', breadcrumb }: FormationD
                       corpsId: currentSector.corps_id ?? formation.corps_id ?? null,
                       osid: formation.location_osid,
                     })}
-                    className="w-full text-left px-2 py-1.5 bg-accent-gold/5 border border-accent-gold/20 rounded-md flex items-center justify-between text-xs hover:bg-accent-gold/10 transition-colors group"
+                    className="w-full text-left px-2 py-1.5 bg-accent-gold/5 border border-accent-gold/20 rounded-md flex items-center justify-between text-[13px] hover:bg-accent-gold/10 transition-colors group"
                     title={sectorLabel}
                     aria-label={t('formationDetail.inspectSector', { sector: sectorLabel })}
                   >
@@ -431,7 +431,7 @@ export function FormationDetail({ railSlot = 'primary', breadcrumb }: FormationD
                         {sectorLabel}
                       </span>
                       {currentSectorIsOverride && (
-                        <span className="px-1 py-0 bg-accent-gold/20 text-accent-gold text-xs uppercase rounded border border-accent-gold/30 font-bold">
+                        <span className="px-1 py-0 bg-accent-gold/20 text-accent-gold text-[13px] uppercase rounded border border-accent-gold/30 font-bold">
                           {t('formationDetail.override')}
                         </span>
                       )}
@@ -453,7 +453,7 @@ export function FormationDetail({ railSlot = 'primary', breadcrumb }: FormationD
               }
               if (isBrigade) {
                 return (
-                  <div className="w-full px-2 py-1.5 bg-white/5 border border-white/10 rounded-md text-xs">
+                  <div className="w-full px-2 py-1.5 bg-white/5 border border-white/10 rounded-md text-[13px]">
                     <div className="flex items-center justify-between gap-2">
                       <span className="text-text-secondary uppercase font-bold tracking-tighter">
                         {t('formationDetail.sector')}
@@ -462,7 +462,7 @@ export function FormationDetail({ railSlot = 'primary', breadcrumb }: FormationD
                         {t('formationDetail.noActiveSector')}
                       </span>
                     </div>
-                    <div className="mt-0.5 text-xs text-text-secondary/80">
+                    <div className="mt-0.5 text-[13px] text-text-secondary/80">
                       {t('formationDetail.noActiveSectorHelp')}
                     </div>
                   </div>
@@ -472,7 +472,7 @@ export function FormationDetail({ railSlot = 'primary', breadcrumb }: FormationD
                 const corpsSectors = sectors.filter(s => s.corps_id === formation.id);
                 if (corpsSectors.length > 0) {
                   return (
-                    <div className="px-2 py-1 bg-white/5 border border-white/10 rounded flex items-center justify-between text-xs">
+                    <div className="px-2 py-1 bg-white/5 border border-white/10 rounded flex items-center justify-between text-[13px]">
                       <span className="text-text-secondary uppercase">{t('formationDetail.operationalSectors')}</span>
                       <span className="text-text-primary font-bold">{t('formationDetail.activeCount', { count: corpsSectors.length })}</span>
                     </div>
@@ -483,7 +483,7 @@ export function FormationDetail({ railSlot = 'primary', breadcrumb }: FormationD
             })()}
 
             {/* Posture & readiness */}
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs px-2 py-1 bg-black/20 rounded border border-panel-border/30">
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[13px] px-2 py-1 bg-black/20 rounded border border-panel-border/30">
               <span className="text-text-secondary">{t('formationDetail.posture')}</span>
               <span className="text-text-primary font-semibold">{postureValue}</span>
               {lifecycleValue && (
@@ -498,9 +498,9 @@ export function FormationDetail({ railSlot = 'primary', breadcrumb }: FormationD
             {/* Stranded (Isolated) indicator */}
             {formation.strandedStatus === 'holding' && (
               <div className="flex items-center gap-1.5 px-2 py-1 rounded bg-red-900/30 border border-red-500/30">
-                <span className="text-xs font-bold uppercase tracking-wider text-red-400">{t('formationDetail.isolated')}</span>
+                <span className="text-[13px] font-bold uppercase tracking-wider text-red-400">{t('formationDetail.isolated')}</span>
                 {formation.strandedSinceTurn != null && (
-                  <span className="text-xs text-red-400/60">
+                  <span className="text-[13px] text-red-400/60">
                     {t('formationDetail.sinceDate', { date: turnToDateString(formation.strandedSinceTurn) })}
                   </span>
                 )}
@@ -508,7 +508,7 @@ export function FormationDetail({ railSlot = 'primary', breadcrumb }: FormationD
             )}
             {formation.strandedStatus === 'reconnected' && (
               <div className="flex items-center gap-1.5 px-2 py-1 rounded bg-green-900/30 border border-green-500/30">
-                <span className="text-xs font-bold uppercase tracking-wider text-green-400">{t('formationDetail.reconnected')}</span>
+                <span className="text-[13px] font-bold uppercase tracking-wider text-green-400">{t('formationDetail.reconnected')}</span>
               </div>
             )}
 
@@ -538,7 +538,7 @@ export function FormationDetail({ railSlot = 'primary', breadcrumb }: FormationD
                 return (
                   <div className="pt-2 border-t border-panel-border space-y-2">
                     <EliteCommanderSummary commander={formation.eliteCommander} />
-                    <div className="flex items-center justify-between text-xs">
+                    <div className="flex items-center justify-between text-[13px]">
                       <span className="text-text-secondary">{t('formationDetail.officerCadreQuality')}</span>
                       <span className="text-text-primary font-mono bg-black/30 px-1.5 py-0.5 rounded border border-panel-border/50">
                         {Math.round(formation.officer_quality * 100)}%
@@ -568,8 +568,8 @@ export function FormationDetail({ railSlot = 'primary', breadcrumb }: FormationD
                 : 'text-amber-600 border-amber-600/30 bg-amber-900/20';
               return (
                 <div className="pt-2 border-t border-panel-border flex items-center justify-between">
-                  <span className="text-xs text-text-secondary">{t('formationDetail.unitDistinction')}</span>
-                  <span className={`px-2 py-0.5 text-xs font-bold tracking-wider rounded border ${tierColor}`}>
+                  <span className="text-[13px] text-text-secondary">{t('formationDetail.unitDistinction')}</span>
+                  <span className={`px-2 py-0.5 text-[13px] font-bold tracking-wider rounded border ${tierColor}`}>
                     ★ {displayName}
                   </span>
                 </div>
@@ -577,9 +577,9 @@ export function FormationDetail({ railSlot = 'primary', breadcrumb }: FormationD
             })()}
 
             {formation.honor && (
-              <div className="pt-1 flex items-center justify-between text-xs">
+              <div className="pt-1 flex items-center justify-between text-[13px]">
                 <span className="text-text-secondary">{t('formationDetail.historicalHonor')}</span>
-                <span className="px-1.5 py-0.5 bg-accent-gold/20 text-accent-gold text-xs font-semibold uppercase tracking-wider rounded border border-accent-gold/30">
+                <span className="px-1.5 py-0.5 bg-accent-gold/20 text-accent-gold text-[13px] font-semibold uppercase tracking-wider rounded border border-accent-gold/30">
                   {formation.honor}
                 </span>
               </div>
@@ -588,8 +588,8 @@ export function FormationDetail({ railSlot = 'primary', breadcrumb }: FormationD
             {/* TO&E */}
             {formation.composition && (
               <div className="pt-2 border-t border-panel-border space-y-2">
-                <div className="text-xs text-text-secondary">{t('formationDetail.toeEquipment')}</div>
-                <div className="space-y-1.5 text-xs">
+                <div className="text-[13px] text-text-secondary">{t('formationDetail.toeEquipment')}</div>
+                <div className="space-y-1.5 text-[13px]">
                   {formation.composition.tanks > 0 && (
                     <div className="flex justify-between items-center">
                       <span className="text-text-secondary w-16">{t('formationDetail.tanks')}</span>
@@ -614,14 +614,14 @@ export function FormationDetail({ railSlot = 'primary', breadcrumb }: FormationD
                       <div className="flex-1 flex items-center gap-2">
                         <span
                           data-testid="formation-aa-condition-unreported"
-                          className="flex-1 text-xs italic text-text-secondary"
+                          className="flex-1 text-[13px] italic text-text-secondary"
                         />
                         <span className="text-text-primary tabular-nums w-6 text-right font-mono">{formation.composition.aa_systems}</span>
                       </div>
                     </div>
                   )}
                   {formation.equipment_decay != null && (
-                    <div className="flex justify-between items-center text-xs pt-1">
+                    <div className="flex justify-between items-center text-[13px] pt-1">
                       <span className="text-text-secondary">{t('formationDetail.overallSupplyEffectiveness')}</span>
                       <span className="text-text-primary font-mono">{Math.round(formation.equipment_decay * 100)}%</span>
                     </div>
@@ -631,7 +631,7 @@ export function FormationDetail({ railSlot = 'primary', breadcrumb }: FormationD
             )}
 
             {/* Stats grid */}
-            <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs [&>span]:min-w-0 [&>span]:break-words px-2 py-1 bg-black/10 rounded">
+            <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-[13px] [&>span]:min-w-0 [&>span]:break-words px-2 py-1 bg-black/10 rounded">
               {Number.isFinite(formation.cohesion) && (
                 <>
                   <span className="text-text-secondary flex items-center gap-1"><Icon name="cohesion" size={12} /> {t('formationDetail.cohesion')}</span>
@@ -643,10 +643,10 @@ export function FormationDetail({ railSlot = 'primary', breadcrumb }: FormationD
                   const color = c >= 70 ? '#d4a055' : c >= 40 ? '#d48a55' : '#d45555';
                   return (
                     <>
-                      <span style={{ color, letterSpacing: '1px', fontSize: '12px' }}>
+                      <span style={{ color, letterSpacing: '1px', fontSize: '13px' }}>
                         {'■'.repeat(filled)}<span style={{ opacity: 0.2 }}>{'■'.repeat(blocks - filled)}</span>
                       </span>
-                      <span className="text-text-secondary text-xs">{Math.round(c)}</span>
+                      <span className="text-text-secondary text-[13px]">{Math.round(c)}</span>
                     </>
                   );
                     })()}
@@ -664,10 +664,10 @@ export function FormationDetail({ railSlot = 'primary', breadcrumb }: FormationD
                       const color = m >= 60 ? '#55d48a' : m >= 30 ? '#d4d455' : '#d45555';
                       return (
                         <>
-                          <span style={{ color, letterSpacing: '1px', fontSize: '12px' }}>
+                          <span style={{ color, letterSpacing: '1px', fontSize: '13px' }}>
                             {'■'.repeat(filled)}<span style={{ opacity: 0.2 }}>{'■'.repeat(blocks - filled)}</span>
                           </span>
-                          <span className="text-text-secondary text-xs">{Math.round(m)}</span>
+                          <span className="text-text-secondary text-[13px]">{Math.round(m)}</span>
                         </>
                       );
                     })()}
@@ -717,7 +717,7 @@ export function FormationDetail({ railSlot = 'primary', breadcrumb }: FormationD
                       className="group font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent-gold"
                     >
                       {band.grade} <span className="text-text-primary">{t(band.labelKey)}</span>
-                      <span className="sr-only group-focus:not-sr-only group-focus:block text-xs font-normal text-text-secondary">{title}</span>
+                      <span className="sr-only group-focus:not-sr-only group-focus:block text-[13px] font-normal text-text-secondary">{title}</span>
                     </span>
                   </>
                 );
@@ -757,9 +757,9 @@ export function FormationDetail({ railSlot = 'primary', breadcrumb }: FormationD
             </div>
 
             {formation.movementStatus && formation.movementStatus !== 'deployed' && (
-              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs px-2 py-1.5 bg-black/20 rounded border border-panel-border/40">
-                <span className="text-text-secondary uppercase font-bold text-xs">{t('formationDetail.movement')}</span>
-                <span className={`px-2 py-0.5 text-xs font-bold uppercase rounded border ${
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[13px] px-2 py-1.5 bg-black/20 rounded border border-panel-border/40">
+                <span className="text-text-secondary uppercase font-bold text-[13px]">{t('formationDetail.movement')}</span>
+                <span className={`px-2 py-0.5 text-[13px] font-bold uppercase rounded border ${
                   formation.movementStatus === 'in_transit'
                     ? 'bg-accent-blue/20 text-accent-blue border-accent-blue/40'
                     : 'bg-[#d4a055]/20 text-[#d4a055] border-[#d4a055]/40'
@@ -775,7 +775,7 @@ export function FormationDetail({ railSlot = 'primary', breadcrumb }: FormationD
             )}
 
             {formation.location_osid && (
-              <div className="text-xs min-w-0">
+              <div className="text-[13px] min-w-0">
                 <span className="text-text-secondary">{t('formationDetail.location')} </span>
                 <button
                   type="button"
@@ -790,7 +790,7 @@ export function FormationDetail({ railSlot = 'primary', breadcrumb }: FormationD
             )}
 
             {isBrigade && (
-              <div className="text-xs min-w-0">
+              <div className="text-[13px] min-w-0">
                 <span className="text-text-secondary">{t('formationDetail.homeMunicipality')} </span>
                 <span className="text-text-primary break-all">
                       {formation.municipalityId ? getMunicipalityDisplayName(formation.municipalityId, municipalityDisplayNames) : '—'}
@@ -801,8 +801,8 @@ export function FormationDetail({ railSlot = 'primary', breadcrumb }: FormationD
             {/* Narrative arc badge (brief — full history on Record tab) */}
             {formation.narrativeArc && (
               <div className="pt-2 border-t border-panel-border flex items-center justify-between">
-                <span className="text-xs text-text-secondary">{t('formationDetail.narrativeArc')}</span>
-                <span className={`px-2 py-0.5 text-xs font-bold uppercase tracking-wider rounded border ${
+                <span className="text-[13px] text-text-secondary">{t('formationDetail.narrativeArc')}</span>
+                <span className={`px-2 py-0.5 text-[13px] font-bold uppercase tracking-wider rounded border ${
                   formation.narrativeArc === 'veteran' ? 'text-yellow-400 border-yellow-500/30 bg-yellow-900/20'
                   : formation.narrativeArc === 'bloodied' ? 'text-[#d45555] border-[#d45555]/30 bg-[#d45555]/10'
                   : formation.narrativeArc === 'risen' ? 'text-[#55d48a] border-[#55d48a]/30 bg-[#55d48a]/10'
@@ -829,31 +829,31 @@ export function FormationDetail({ railSlot = 'primary', breadcrumb }: FormationD
             {isBrigade && (
               <div className="p-2 bg-black/20 rounded border border-panel-border/40 space-y-1.5">
                 <div className="flex items-start justify-between gap-2">
-                  <div className="text-xs text-text-secondary uppercase font-bold tracking-widest">{t('formationDetail.campaignLosses')}</div>
+                  <div className="text-[13px] text-text-secondary uppercase font-bold tracking-widest">{t('formationDetail.campaignLosses')}</div>
                   {casualtySplitIsDerived && (
-                    <div className="text-xs text-amber-300 uppercase font-bold tracking-widest">{t('formationDetail.estimatedSplit')}</div>
+                    <div className="text-[13px] text-amber-300 uppercase font-bold tracking-widest">{t('formationDetail.estimatedSplit')}</div>
                   )}
                 </div>
                 {casualtySplitProvenanceLabel && (
-                  <div className={`text-xs leading-snug ${casualtySplitIsDerived ? 'text-amber-300/90 italic' : 'text-text-secondary'}`}>
+                  <div className={`text-[13px] leading-snug ${casualtySplitIsDerived ? 'text-amber-300/90 italic' : 'text-text-secondary'}`}>
                     {casualtySplitProvenanceLabel}
                   </div>
                 )}
                 <div className="grid grid-cols-3 gap-2 text-center">
                   <div>
-                    <div className="text-xs text-text-secondary uppercase">{t('formationDetail.kia')}</div>
+                    <div className="text-[13px] text-text-secondary uppercase">{t('formationDetail.kia')}</div>
                     <div className={`text-sm font-mono font-bold ${casualtySplitIsDerived ? 'text-amber-300' : ''}`} style={casualtySplitIsDerived ? undefined : { color: '#d45555' }}>
                       {formatCampaignLossInteger(formation.campaignKia, casualtySplitIsDerived)}
                     </div>
                   </div>
                   <div>
-                    <div className="text-xs text-text-secondary uppercase">{t('formationDetail.wia')}</div>
+                    <div className="text-[13px] text-text-secondary uppercase">{t('formationDetail.wia')}</div>
                     <div className={`text-sm font-mono font-bold ${casualtySplitIsDerived ? 'text-amber-300' : ''}`} style={casualtySplitIsDerived ? undefined : { color: '#d4d455' }}>
                       {formatCampaignLossInteger(formation.campaignWia, casualtySplitIsDerived)}
                     </div>
                   </div>
                   <div>
-                    <div className="text-xs text-text-secondary uppercase">{t('formationDetail.miaPow')}</div>
+                    <div className="text-[13px] text-text-secondary uppercase">{t('formationDetail.miaPow')}</div>
                     <div className={`text-sm font-mono font-bold ${casualtySplitIsDerived ? 'text-amber-300' : 'text-text-secondary'}`}>
                       {formatCampaignLossInteger(formation.campaignMia, casualtySplitIsDerived)}
                     </div>
@@ -863,14 +863,14 @@ export function FormationDetail({ railSlot = 'primary', breadcrumb }: FormationD
             )}
 
             {formation.last_repulsed_from && (
-              <div className="text-xs text-text-secondary min-w-0">
+              <div className="text-[13px] text-text-secondary min-w-0">
                 <span>{t('formationDetail.lastRepulsedFrom')} </span>
                 <span className="font-mono text-text-primary break-all">{getOsidDisplayName(formation.last_repulsed_from.osid, osidDisplayNames)}</span>
                 <span> {t('formationDetail.dateParen', { date: turnToDateString(formation.last_repulsed_from.turn) })}</span>
               </div>
             )}
             {formation.last_retreat_from && (
-              <div className="text-xs text-text-secondary min-w-0">
+              <div className="text-[13px] text-text-secondary min-w-0">
                 <span>{t('formationDetail.retreatedFrom')} </span>
                 <span className="font-mono text-text-primary break-all">{getOsidDisplayName(formation.last_retreat_from.osid, osidDisplayNames)}</span>
                 <span> {t('formationDetail.dateParen', { date: turnToDateString(formation.last_retreat_from.turn) })}</span>
@@ -882,14 +882,14 @@ export function FormationDetail({ railSlot = 'primary', breadcrumb }: FormationD
                 {formation.combatSummary ? (
                   <CombatSummaryPanel summary={formation.combatSummary} compact noTopBorder />
                 ) : (
-                  <div className="pt-2 mb-3 text-xs">
-                    <div className="text-text-secondary font-semibold mb-1.5 text-xs uppercase tracking-wide">
+                  <div className="pt-2 mb-3 text-[13px]">
+                    <div className="text-text-secondary font-semibold mb-1.5 text-[13px] uppercase tracking-wide">
                       {t('combatRecord.emptyTitle')}
                     </div>
                     <div className="text-text-secondary italic">{t('formationDetail.combatRecordUnavailable')}</div>
                   </div>
                 )}
-                <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs [&>span]:min-w-0 [&>span]:break-words px-1">
+                <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-[13px] [&>span]:min-w-0 [&>span]:break-words px-1">
                   {formation.brigade_history && (
                     <>
                       {formation.brigade_history.longest_victory_streak > 0 && (
@@ -912,8 +912,8 @@ export function FormationDetail({ railSlot = 'primary', breadcrumb }: FormationD
                   (formation.brigade_history.total_equipment_destroyed.tanks > 0 ||
                     formation.brigade_history.total_equipment_destroyed.artillery > 0) && (
                     <div className="mt-2 p-1.5 border border-dashed border-[#55d48a]/30 bg-[#55d48a]/5 rounded flex justify-between items-center">
-                      <span className="text-xs text-[#55d48a] uppercase font-semibold">{t('formationDetail.equipmentDestroyed')}</span>
-                      <div className="flex gap-2 text-xs font-mono">
+                      <span className="text-[13px] text-[#55d48a] uppercase font-semibold">{t('formationDetail.equipmentDestroyed')}</span>
+                      <div className="flex gap-2 text-[13px] font-mono">
                         {formation.brigade_history.total_equipment_destroyed.tanks > 0 && (
                           <span title={t('formationDetail.tanksApcsKnockedOut')}>🛻 {formation.brigade_history.total_equipment_destroyed.tanks}</span>
                         )}
@@ -929,11 +929,11 @@ export function FormationDetail({ railSlot = 'primary', breadcrumb }: FormationD
 
                 {formation.recent_engagements && formation.recent_engagements.length > 0 && (
                   <div className="pt-2">
-                    <div className="text-xs text-text-secondary mb-1">{t('formationDetail.recentEngagements')}</div>
+                    <div className="text-[13px] text-text-secondary mb-1">{t('formationDetail.recentEngagements')}</div>
                     <div className="space-y-1">
                       {sortRecentEngagements(formation.recent_engagements)
                         .map((engagement, idx) => (
-                        <div key={`${engagement.turn}-${engagement.osid}-${engagement.role}-${idx}`} className="text-xs leading-4 border-l-2 pl-1.5 border-panel-border/30">
+                        <div key={`${engagement.turn}-${engagement.osid}-${engagement.role}-${idx}`} className="text-[13px] leading-4 border-l-2 pl-1.5 border-panel-border/30">
                           <span className="text-text-secondary">{formatEngagementTurnLabel(engagement.turn)} </span>
                           <span className="text-text-primary">{formatEngagementOutcomeLabel(engagement.outcome)}</span>
                           <span className="text-text-secondary"> {t('formationDetail.asRoleAt', { role: formatEngagementRole(engagement.role) })} </span>
@@ -955,8 +955,8 @@ export function FormationDetail({ railSlot = 'primary', breadcrumb }: FormationD
             {formation.narrativeArc && (
               <div className="pt-3 border-t border-panel-border space-y-2 min-w-0">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs text-text-secondary uppercase font-bold tracking-widest">{t('formationDetail.unitHistory')}</span>
-                  <span className={`px-2 py-0.5 text-xs font-bold uppercase tracking-wider rounded border ${
+                  <span className="text-[13px] text-text-secondary uppercase font-bold tracking-widest">{t('formationDetail.unitHistory')}</span>
+                  <span className={`px-2 py-0.5 text-[13px] font-bold uppercase tracking-wider rounded border ${
                     formation.narrativeArc === 'veteran' ? 'text-yellow-400 border-yellow-500/30 bg-yellow-900/20'
                     : formation.narrativeArc === 'bloodied' ? 'text-[#d45555] border-[#d45555]/30 bg-[#d45555]/10'
                     : formation.narrativeArc === 'risen' ? 'text-[#55d48a] border-[#55d48a]/30 bg-[#55d48a]/10'
@@ -968,7 +968,7 @@ export function FormationDetail({ railSlot = 'primary', breadcrumb }: FormationD
                   </span>
                 </div>
                 {formation.warNarrative && (
-                  <div className="text-xs text-text-primary leading-4 italic whitespace-pre-wrap break-words">
+                  <div className="text-[13px] text-text-primary leading-4 italic whitespace-pre-wrap break-words">
                     {sanitizeHistoryMoment(formation.warNarrative, osidDisplayNames)}
                   </div>
                 )}
@@ -981,7 +981,7 @@ export function FormationDetail({ railSlot = 'primary', breadcrumb }: FormationD
                         return aTurn - bTurn;
                       })
                       .map((m, i) => (
-                      <div key={i} className="text-xs text-text-secondary break-words">
+                      <div key={i} className="text-[13px] text-text-secondary break-words">
                         <span className="text-text-primary">{formatHistoryMomentDate(m.turn)}:</span>{' '}
                         {m.turn <= 0
                           ? t('formationDetail.initialDeploymentRecord')
@@ -1001,30 +1001,30 @@ export function FormationDetail({ railSlot = 'primary', breadcrumb }: FormationD
             {isBrigade && (
               <div
                 data-testid="formation-detail-delegated-command-note"
-                className="text-xs text-text-secondary px-2 py-1.5 bg-black/10 border border-panel-border/30 rounded"
+                className="text-[13px] text-text-secondary px-2 py-1.5 bg-black/10 border border-panel-border/30 rounded"
               >
                 {t('formationDetail.delegatedCommand')}
               </div>
             )}
             {!ipc.isAvailable && formation.eliteLoanState && (
-              <div className="text-xs text-text-secondary italic px-2 py-1.5 bg-black/10 border border-panel-border/30 rounded">
+              <div className="text-[13px] text-text-secondary italic px-2 py-1.5 bg-black/10 border border-panel-border/30 rounded">
                 {t('formationDetail.commandBridgeUnavailable')}
               </div>
             )}
             {/* Elite loan status (elite brigades only) */}
             {formation.eliteLoanState && (
               <div className="space-y-2 pb-3 border-b border-panel-border">
-                <span className="text-xs text-accent-gold uppercase tracking-widest font-bold opacity-70">{t('formationDetail.armyReserveStatus')}</span>
+                <span className="text-[13px] text-accent-gold uppercase tracking-widest font-bold opacity-70">{t('formationDetail.armyReserveStatus')}</span>
                 {formation.eliteLoanState.permanently_degraded ? (
-                  <div className="px-2 py-1.5 bg-[#d45555]/10 border border-[#d45555]/30 rounded text-xs text-[#d45555] font-semibold">
+                  <div className="px-2 py-1.5 bg-[#d45555]/10 border border-[#d45555]/30 rounded text-[13px] text-[#d45555] font-semibold">
                     {t('formationDetail.eliteDegraded')}
                   </div>
                 ) : formation.eliteLoanState.on_loan ? (
                   <div className="space-y-1.5">
-                    <div className="px-2 py-1.5 bg-[#d4a855]/10 border border-[#d4a855]/40 rounded text-xs space-y-0.5">
+                    <div className="px-2 py-1.5 bg-[#d4a855]/10 border border-[#d4a855]/40 rounded text-[13px] space-y-0.5">
                       <div className="flex items-center justify-between">
-                        <span className="text-[#d4a855] font-bold uppercase text-xs">{t('formationDetail.onLoan')}</span>
-                        <span className="text-text-secondary text-xs">
+                        <span className="text-[#d4a855] font-bold uppercase text-[13px]">{t('formationDetail.onLoan')}</span>
+                        <span className="text-text-secondary text-[13px]">
                           {t('formationDetail.weeksDeployed', { weeks: formation.eliteLoanState.turns_deployed.toString() })}
                         </span>
                       </div>
@@ -1039,17 +1039,17 @@ export function FormationDetail({ railSlot = 'primary', breadcrumb }: FormationD
                       type="button"
                       disabled={!ipc.isAvailable}
                       onClick={() => void ipc.recallEliteBrigade(formation.id).then(r => { if (!r.ok) setLoadError(r.error ?? t('formationDetail.recallFailed')); })}
-                      className={`w-full px-2 py-1.5 border rounded text-xs font-bold transition-colors ${ipc.isAvailable ? 'bg-[#d45555]/20 border-[#d45555]/40 text-[#d45555] hover:bg-[#d45555]/30' : 'bg-white/5 border-white/10 text-text-secondary cursor-not-allowed'}`}
+                      className={`w-full px-2 py-1.5 border rounded text-[13px] font-bold transition-colors ${ipc.isAvailable ? 'bg-[#d45555]/20 border-[#d45555]/40 text-[#d45555] hover:bg-[#d45555]/30' : 'bg-white/5 border-white/10 text-text-secondary cursor-not-allowed'}`}
                     >
                       {t('formationDetail.recallToReserve')}
                     </button>
                   </div>
                 ) : formation.eliteLoanState.in_cooldown ? (
-                  <div className="px-2 py-1.5 bg-black/20 border border-panel-border/40 rounded text-xs text-text-secondary">
+                  <div className="px-2 py-1.5 bg-black/20 border border-panel-border/40 rounded text-[13px] text-text-secondary">
                     {t('formationDetail.cooldownReturning')}
                   </div>
                 ) : (
-                  <div className="px-2 py-1.5 bg-[#55d48a]/10 border border-[#55d48a]/30 rounded text-xs text-[#55d48a] font-semibold">
+                  <div className="px-2 py-1.5 bg-[#55d48a]/10 border border-[#55d48a]/30 rounded text-[13px] text-[#55d48a] font-semibold">
                     {t('formationDetail.readyForDeployment')}
                   </div>
                 )}
@@ -1061,14 +1061,14 @@ export function FormationDetail({ railSlot = 'primary', breadcrumb }: FormationD
               <div className="space-y-2">
                 {/* Layer 1: badge */}
                 <div className="flex items-center justify-between px-2 py-1.5 bg-black/20 rounded border border-panel-border/40">
-                  <span className="text-xs text-text-secondary uppercase font-bold tracking-widest">{t('formationDetail.fieldEffectiveness')}</span>
+                  <span className="text-[13px] text-text-secondary uppercase font-bold tracking-widest">{t('formationDetail.fieldEffectiveness')}</span>
                   {isHome ? (
-                    <span className="px-1.5 py-0.5 bg-[#55d48a]/20 text-[#55d48a] text-xs font-bold rounded border border-[#55d48a]/30 uppercase">
+                    <span className="px-1.5 py-0.5 bg-[#55d48a]/20 text-[#55d48a] text-[13px] font-bold rounded border border-[#55d48a]/30 uppercase">
                       {t('formationDetail.homeTurf')}
                     </span>
                   ) : (
                     <span
-                      className={`px-1.5 py-0.5 text-xs font-bold rounded border uppercase ${
+                      className={`px-1.5 py-0.5 text-[13px] font-bold rounded border uppercase ${
                         effPct >= 90 ? 'bg-[#55d48a]/10 text-[#55d48a] border-[#55d48a]/30'
                         : effPct >= 80 ? 'bg-[#d4d455]/10 text-[#d4d455] border-[#d4d455]/30'
                         : 'bg-[#d45555]/10 text-[#d45555] border-[#d45555]/30'
@@ -1081,7 +1081,7 @@ export function FormationDetail({ railSlot = 'primary', breadcrumb }: FormationD
 
                 {/* Layer 2: dual power stats */}
                 {!isHome && hops != null && (
-                  <div className="px-2 py-1.5 bg-black/10 rounded border border-panel-border/20 text-xs space-y-1">
+                  <div className="px-2 py-1.5 bg-black/10 rounded border border-panel-border/20 text-[13px] space-y-1">
                     <div className="flex justify-between items-center">
                       <span className="text-text-secondary">{t('formationDetail.powerAtHome')}</span>
                       <span className="text-[#55d48a] font-mono font-semibold">
@@ -1094,7 +1094,7 @@ export function FormationDetail({ railSlot = 'primary', breadcrumb }: FormationD
                         {formatHomePower(Number.isFinite(formation.personnel) ? (formation.personnel as number) * (effPct / 100) : null)}
                       </span>
                     </div>
-                    <div className="text-xs text-text-secondary pt-0.5">
+                    <div className="text-[13px] text-text-secondary pt-0.5">
                       {t('formationDetail.hopsFromHome', { hops: hops.toString() })}
                     </div>
                   </div>

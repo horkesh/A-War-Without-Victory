@@ -84,7 +84,7 @@ import {
 import { getOsidDisplayName } from './utils/osidDisplayName';
 import { t, useLocale } from './i18n';
 import { getDecisionHeaderForFamily } from './data/presidentialDeskAssets';
-import { resolveCommandCardArt } from './data/commandSurfaceArt';
+import { resolveCommandBannerArt } from './data/commandSurfaceArt';
 import { SurfaceHeader, SURFACE_CLOSE_BUTTON, SURFACE_PRIMARY_BUTTON } from './components/surface/Surface';
 import { getPlayerSafeMilitaryFactionName } from './utils/playerSafeText';
 import {
@@ -419,8 +419,8 @@ const WARROOM_OVERLAY_COPY: Record<NativeWarroomOverlaySurface, {
 /** Art for each Warroom preview: the intelligence plate, the command and home-front cards. */
 function warroomOverlayArt(surface: NativeWarroomOverlaySurface, faction: string | null | undefined): string | null {
   if (surface === 'intelligence') return getDecisionHeaderForFamily('intelligence_notification');
-  if (surface === 'staff') return resolveCommandCardArt('cat_command', faction ?? null);
-  return resolveCommandCardArt('cat_home_front', faction ?? null);
+  if (surface === 'staff') return resolveCommandBannerArt('cat_command', faction ?? null);
+  return resolveCommandBannerArt('cat_home_front', faction ?? null);
 }
 
 /**

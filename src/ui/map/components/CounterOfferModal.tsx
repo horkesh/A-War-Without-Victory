@@ -7,6 +7,16 @@ import { getPlayerSafePoliticalFactionName } from '../utils/playerSafeText';
 import { getDecisionHeaderForFamily } from '../data/presidentialDeskAssets';
 import { t, type MessageKey } from '../i18n';
 import { DecisionModalImageHeader } from './DecisionModalImageHeader';
+import {
+  SurfaceFigure,
+  SurfaceModalBody,
+  SurfaceModalFooter,
+  SURFACE_LABEL,
+  SURFACE_MODAL_BACKDROP,
+  SURFACE_MODAL_PANEL_COMPACT,
+  SURFACE_PRIMARY_BUTTON_COMPACT,
+  SURFACE_SECONDARY_BUTTON,
+} from './surface/Surface';
 
 interface CounterOfferModalProps {
   offerId: string | null;
@@ -63,20 +73,23 @@ export function CounterOfferModal({ offerId, state, onClose }: CounterOfferModal
       rider: offer.rider,
     });
     if (!result.ok) {
-      setLoadError(result.error ?? 'Counter-offer response could not be submitted.');
+      setLoadError(result.error ?? t('decisionModal.counterOffer.submitFailed'));
       return;
     }
     onClose();
   };
 
+  // Surface redesign (owner, 2026-11-10): a compact surface — plate and title, the offer's
+  // figures, split, model, source and rider in plain 15–19px type, and the two answers in
+  // a fixed footer.
   return (
     <Modal
       isOpen={Boolean(offerId)}
       onClose={onClose}
       zIndex={Z.CRITICAL_MODAL}
       ariaLabelledBy="counter-offer-modal-title"
-      backdropClassName="bg-black/75 backdrop-blur-sm"
-      panelClassName="w-[min(calc(var(--interface-viewport-width,100vw)*0.94),680px)] overflow-hidden rounded-lg border border-accent-gold/35 bg-panel-bg text-text-primary shadow-2xl"
+      backdropClassName={SURFACE_MODAL_BACKDROP}
+      panelClassName={SURFACE_MODAL_PANEL_COMPACT}
     >
       {headerImage && (
         <DecisionModalImageHeader
@@ -92,70 +105,54 @@ export function CounterOfferModal({ offerId, state, onClose }: CounterOfferModal
       )}
 
       {offer && (
-        <div className="space-y-4 px-5 py-4 text-[12px]">
-          <div className="grid gap-2 sm:grid-cols-3">
-            <div className="border border-panel-border bg-panel-card px-3 py-2">
-              <div className="text-xs font-bold uppercase tracking-[0.16em] text-text-muted">{t('decisionModal.counterOffer.plan')}</div>
-              <div className="mt-1 text-[12px] font-bold text-text-primary">{offer.planName}</div>
-            </div>
-            <div className="border border-panel-border bg-panel-card px-3 py-2">
-              <div className="text-xs font-bold uppercase tracking-[0.16em] text-text-muted">{t('decisionModal.counterOffer.response')}</div>
-              <div className="mt-1 text-[12px] font-bold text-text-primary">{responseLabel(offer.response)}</div>
-            </div>
-            <div className="border border-panel-border bg-panel-card px-3 py-2">
-              <div className="text-xs font-bold uppercase tracking-[0.16em] text-text-muted">{t('decisionModal.counterOffer.chain')}</div>
-              <div className="mt-1 text-[12px] font-bold text-text-primary">{t('decisionModal.counterOffer.chainDepth', { depth: offer.chainDepth })}</div>
-            </div>
+        <SurfaceModalBody>
+          <div className="grid gap-3 sm:grid-cols-3">
+            <SurfaceFigure label={t('decisionModal.counterOffer.plan')} value={offer.planName} />
+            <SurfaceFigure label={t('decisionModal.counterOffer.response')} value={responseLabel(offer.response)} />
+            <SurfaceFigure label={t('decisionModal.counterOffer.chain')} value={t('decisionModal.counterOffer.chainDepth', { depth: offer.chainDepth })} />
           </div>
 
-          <div className="border border-panel-border bg-panel-card px-3 py-3">
-            <div className="mb-2 text-xs font-bold uppercase tracking-[0.16em] text-text-muted">{t('decisionModal.counterOffer.territorialSplit')}</div>
-            <div className="grid gap-2 sm:grid-cols-3">
+          <section className="flex flex-col gap-2">
+            <div className={SURFACE_LABEL}>{t('decisionModal.counterOffer.territorialSplit')}</div>
+            <div className="grid gap-3 sm:grid-cols-3">
               {(['RBiH', 'RS', 'HRHB'] as const).map((faction) => (
-                <div key={faction} className="rounded border border-white/10 bg-black/20 px-2 py-2">
-                  <div className="text-xs uppercase tracking-[0.12em] text-text-muted">
-                    {getPlayerSafePoliticalFactionName(faction)}
-                  </div>
-                  <div className="mt-1 text-[16px] font-bold text-text-primary">{offer.proposedSplit[faction]}%</div>
-                </div>
+                <SurfaceFigure
+                  key={faction}
+                  label={getPlayerSafePoliticalFactionName(faction)}
+                  value={<span className="font-mono text-[22px]">{offer.proposedSplit[faction]}%</span>}
+                />
               ))}
             </div>
-          </div>
+          </section>
 
-          <div className="grid gap-2 sm:grid-cols-2">
-            <div className="border border-panel-border bg-panel-card px-3 py-3">
-              <div className="text-xs font-bold uppercase tracking-[0.16em] text-text-muted">{t('decisionModal.counterOffer.institutionalModel')}</div>
-              <div className="mt-1 text-[12px] text-text-secondary">{formatInstitution(offer.institutionalModel)}</div>
-            </div>
-            <div className="border border-panel-border bg-panel-card px-3 py-3">
-              <div className="text-xs font-bold uppercase tracking-[0.16em] text-text-muted">{t('decisionModal.counterOffer.source')}</div>
-              <div className="mt-1 text-[12px] text-text-secondary">{offer.sourceCitation || t('decisionModal.counterOffer.noCitation')}</div>
-            </div>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <SurfaceFigure label={t('decisionModal.counterOffer.institutionalModel')} value={<span className="text-[16px] font-normal text-[#ddd1b3]">{formatInstitution(offer.institutionalModel)}</span>} />
+            <SurfaceFigure label={t('decisionModal.counterOffer.source')} value={<span className="text-[16px] font-normal text-[#ddd1b3]">{offer.sourceCitation || t('decisionModal.counterOffer.noCitation')}</span>} />
           </div>
 
           {offer.rider && (
-            <div className="border border-accent-gold/25 bg-accent-gold/8 px-3 py-3">
-              <div className="text-xs font-bold uppercase tracking-[0.16em] text-accent-gold">{t('decisionModal.counterOffer.rider')}</div>
-              <div className="mt-1 text-[12px] text-text-secondary">{offer.rider}</div>
+            <div className="flex flex-col gap-1.5 rounded-md border border-accent-gold/30 bg-accent-gold/[0.06] px-5 py-4">
+              <div className={SURFACE_LABEL}>{t('decisionModal.counterOffer.rider')}</div>
+              <div className="text-[16px] leading-relaxed text-[#ddd1b3]">{offer.rider}</div>
             </div>
           )}
-        </div>
+        </SurfaceModalBody>
       )}
 
       {!offer && (
         <div
           id="counter-offer-unavailable-reason"
-          className="px-5 py-4 text-[12px] leading-relaxed text-text-secondary"
+          className="px-8 py-6 text-[16px] leading-relaxed text-[#c2b69c]"
         >
           {unavailableReason}
         </div>
       )}
 
-      <div className="flex justify-end gap-2 border-t border-panel-border bg-black/20 px-5 py-3">
+      <SurfaceModalFooter>
         <button
           type="button"
           onClick={onClose}
-          className="border border-panel-border px-3 py-1.5 text-xs font-bold uppercase tracking-[0.12em] text-text-secondary"
+          className={SURFACE_SECONDARY_BUTTON}
         >
           {t('decisionModal.counterOffer.reviewLater')}
         </button>
@@ -165,11 +162,11 @@ export function CounterOfferModal({ offerId, state, onClose }: CounterOfferModal
           disabled={!offer}
           aria-describedby={!offer ? 'counter-offer-unavailable-reason' : undefined}
           title={!offer ? unavailableReason : undefined}
-          className="border border-accent-gold/45 bg-accent-gold/12 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.12em] text-accent-gold disabled:opacity-40"
+          className={SURFACE_PRIMARY_BUTTON_COMPACT}
         >
           {t('decisionModal.counterOffer.submit')}
         </button>
-      </div>
+      </SurfaceModalFooter>
     </Modal>
   );
 }

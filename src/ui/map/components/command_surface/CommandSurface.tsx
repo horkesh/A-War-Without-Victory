@@ -33,7 +33,7 @@ import {
   PRESIDENTIAL_COMMAND_CATEGORIES,
   type PresidentialCommandCategoryId,
 } from '../../data/presidentialCategories';
-import { resolveCommandCardArt } from '../../data/commandSurfaceArt';
+import { resolveCommandBannerArt, resolveCommandCardArt } from '../../data/commandSurfaceArt';
 import { resolveDirectiveActArt } from '../../data/directiveActArt';
 import { useGameStore } from '../../store/gameStore';
 import { useIPC } from '../../desktop/useIPC';
@@ -299,7 +299,7 @@ export function CommandSurface({ initialCategoryId = null, onClose, onNavigateTa
     const selfTarget = target.kind === 'decision-room' && target.cardId === dossier.cardId;
     if (target.kind !== 'none' && !selfTarget) review = { target, label };
   }
-  const bannerArt = resolveCommandCardArt(activeArea.id, playerFaction);
+  const bannerArt = resolveCommandBannerArt(activeArea.id, playerFaction);
   const detailArt = selectedCard?.directive
     ? resolveDirectiveActArt(selectedCard.directive.lever, playerFaction)
     : null;

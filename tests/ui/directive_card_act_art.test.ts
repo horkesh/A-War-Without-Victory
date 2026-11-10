@@ -187,9 +187,18 @@ describe('faction-aware command-card override resolution', () => {
   });
 
   it('directive act art prefers the faction-specific override', () => {
+    // Surface redesign 2026-11-10: the wide detail cut wins when one ships.
     const url = resolveDirectiveActArt('replace_co', 'HRHB');
     expect(url).not.toBeNull();
-    expect(url!.endsWith('act_replace_commander_HRHB.webp')).toBe(true);
+    expect(url?.endsWith('act_replace_commander_detail_HRHB.webp')).toBe(true);
     expect(url).toContain('command_cards');
+  });
+
+  it('falls back to the faction card when a detail cut is missing', () => {
+    // The leadership gestures ship no detail cut; their faction card still resolves.
+    const url = resolveDirectiveActArt('address_nation', 'HRHB');
+    expect(url?.endsWith('act_address_nation_HRHB.webp')).toBe(true);
+    // The re-cut HRHB front visit (badge removed, 2026-11-10) now resolves to its detail cut.
+    expect(resolveDirectiveActArt('front_visit', 'HRHB')?.endsWith('act_front_visit_detail_HRHB.webp')).toBe(true);
   });
 });
