@@ -388,6 +388,37 @@ describe('DaytonNegotiationModal — live conference room', () => {
         expect(screen.getByRole('meter', { name: 'Room to bargain' })).toBeTruthy();
     });
 
+    it('a tabled round drops the cached preview: signing waits for a fresh one (PR #560 review)', async () => {
+        const proposal = { territorial_demands: [], territorial_concessions: [], institutional_choices: {} };
+        const accept = { decision: 'accept' as const, reason: '', reason_code: 'accept_patron' as const, proposal_cost: 0, available_capital: 50 };
+        let finishFresh: (response: unknown) => void = () => {};
+        const previewDayton = vi.fn()
+            .mockResolvedValueOnce({ ok: true, agreement: agreement() })
+            .mockImplementationOnce(() => new Promise(resolve => { finishFresh = resolve; }));
+        const resolveDayton = vi.fn().mockResolvedValue({ ok: true });
+        (window as unknown as { awwv: Record<string, unknown> }).awwv = { previewDayton, resolveDayton };
+        const view = render(createElement(DaytonNegotiationModal, { dayton: PENDING, conference: true }));
+        fireEvent.click(screen.getByRole('button', { name: 'Skip arrival' }));
+        await waitFor(() => expect(previewDayton).toHaveBeenCalledTimes(1));
+        fireEvent.click(within(screen.getByRole('navigation', { name: 'Conference objects' })).getByRole('button', { name: 'Current draft' }));
+        fireEvent.click(screen.getByRole('button', { name: 'Review agreement' }));
+        await screen.findByRole('region', { name: 'Institutions and powers' });
+        // The saved state arrives with one more round on the record.
+        view.rerender(createElement(DaytonNegotiationModal, {
+            dayton: { ...PENDING, rounds: [{ round: 1, turn: 187, pressure: 0, proposal, responses: { RS: accept, HRHB: accept } }] as never },
+            conference: true,
+        }));
+        await waitFor(() => expect(previewDayton).toHaveBeenCalledTimes(2));
+        const sign = screen.getByRole<HTMLButtonElement>('button', { name: 'Sign agreement' });
+        expect(sign.disabled).toBe(true);
+        fireEvent.click(sign);
+        expect(resolveDayton).not.toHaveBeenCalled();
+        await act(async () => finishFresh({ ok: true, agreement: agreement() }));
+        await screen.findByRole('region', { name: 'Institutions and powers' });
+        fireEvent.click(screen.getByRole('button', { name: 'Sign agreement' }));
+        expect(resolveDayton).toHaveBeenCalledTimes(1);
+    });
+
     it('warns on the last round and offers only sign or walk away once the rounds are spent', () => {
         const proposal = { territorial_demands: [], territorial_concessions: [], institutional_choices: {} };
         const accept = { decision: 'accept' as const, reason: '', reason_code: 'accept_patron' as const, proposal_cost: 0, available_capital: 50 };

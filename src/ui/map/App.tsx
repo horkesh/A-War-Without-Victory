@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { PresidentialToolbar } from './components/PresidentialToolbar';
 import { SelectionPanel } from './components/SelectionPanel';
 import { CorpsFrontPanel } from './components/CorpsFrontPanel';
@@ -40,7 +40,11 @@ import { ReserveRequestModal } from './components/ReserveRequestModal';
 import { OfficerMatterModal } from './components/OfficerMatterModal';
 import { IntelligenceBriefModal } from './components/IntelligenceBriefModal';
 import { CounterOfferModal } from './components/CounterOfferModal';
-import { DaytonNegotiationModal } from './components/DaytonNegotiationModal';
+// The Dayton conference opens once per campaign, so its screens load on demand and
+// stay out of the entry chunk (vite.config.ts chunk-size limit).
+const DaytonNegotiationModal = lazy(() =>
+  import('./components/DaytonNegotiationModal').then(m => ({ default: m.DaytonNegotiationModal })),
+);
 import { DiplomacyPanel } from './components/DiplomacyPanel';
 import { MainMenu } from './components/MainMenu';
 import { PauseMenu } from './components/PauseMenu';
@@ -2106,7 +2110,9 @@ function App() {
           save sitting at the Dayton step must not cover the boot Main Menu with
           this non-dismissible modal. Shows once the player is past the menu. */}
       {appScreen !== 'mainMenu' && loadedGameState?.pendingDayton && !loadedGameState?.gameOver && (
-        <DaytonNegotiationModal key={campaignViewportEpoch} dayton={loadedGameState.pendingDayton} conference />
+        <Suspense fallback={null}>
+          <DaytonNegotiationModal key={campaignViewportEpoch} dayton={loadedGameState.pendingDayton} conference />
+        </Suspense>
       )}
       <PeaceWarTransitionOverlay />
       <VerdictScreen onLoadSaveState={handleMainMenuLoadGame} onLoadSaveError={setLoadError} />

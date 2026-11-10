@@ -1653,6 +1653,8 @@ export interface LoadedGameState {
             claimant?: string;
             areaPct?: number;
             osids?: string[];
+            /** The player's own protected ground: no Concede (patron_leverage.playerMayConcede). */
+            protectedCore?: boolean;
         }>;
         /** Set on the table reopened after a declined Dayton: no decline option. */
         forced?: { onFaction: string; by: string };

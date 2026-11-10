@@ -24,7 +24,7 @@ Read this section first; the checkpoints under each amendment hold the detail. B
 2. ~~A4 binder as annexes~~ done 2026-11-09 (the rest of this item stays as the record) (boundary Annex 2, constitution Annex 4, return Annex 7, military Annex 1A, Brčko), each clause with a plain "what this means for you" line.
 3. ~~Stage 3 constitution depth~~ done 2026-11-09: the first three subjects by power and by place.
 4. ~~Packaged-Electron proof~~ done 2026-11-09, re-run as native-10 after the signatory wording and inspection by place (`F:/AWWV-worktrees/.dayton-design/packaged-proof/RESULT.md`): three rounds per faction, sign, signing table, Verdict, RS relaunch, RS decline after three rounds, a forced table from an engine-derived save; the board line in the packaged room. Not exercised in the app: the eight weeks of war after a decline (engine-tested), viewports above this host's 2293 × 960 screen (browser preview), the full-width Boundary Map panel.
-5. Push the branch and open a PR when the owner asks.
+5. ~~Push the branch and open a PR~~ done 2026-11-10: PR #560 (main merged in first). CI and Codex review fixes 2026-11-10: entry chunk under the 3,000 kB limit (Dayton screens load on demand), a tabled round drops the cached preview, protected ground holds for captured-ground packages, baseline pins re-recorded (final save and run summary only). Next: merge once CI is green.
 
 **Owner questions: all settled 2026-11-10**
 - ~~Five unresolved Dayton audit cells~~ owner 2026-11-10: they follow their town (principal-settlement rule): Ostra Luka (HRHB), Stari Majdan (RBiH) and Veličani (HRHB) to the Federation; Tošići and Trnovo town to RS. The audit table now fixes all 252 cells (190 verified, 62 approximate, none unresolved).

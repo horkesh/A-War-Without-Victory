@@ -384,7 +384,9 @@ export function DaytonNegotiationModal({ dayton, conference = false }: DaytonNeg
         if (!ipc.isAvailable || nextRound === null || overBudget || tabling || mutationInFlight.current || !playerFaction) return;
         setTabling(true);
         setTableError(false);
-        setAdopted(false);
+        // A tabled round moves the parties' pressure and willingness, which the resolver
+        // reads: any preview (or one still in flight) no longer shows what would be signed.
+        clearProbe();
         try {
             const res = await ipc.tableDaytonRound(buildProposal());
             if (!res.ok) setTableError(true);
@@ -395,6 +397,18 @@ export function DaytonNegotiationModal({ dayton, conference = false }: DaytonNeg
             setTabling(false);
         }
     };
+
+    // The saved round count is the authority: when it changes (this window or a state
+    // push), drop the cached preview so signing needs a fresh one, and re-preview if the
+    // player is in final review.
+    const seenRounds = useRef(rounds.length);
+    useEffect(() => {
+        if (seenRounds.current === rounds.length) return;
+        seenRounds.current = rounds.length;
+        clearProbe();
+        if (panel === 'review') void handleProbe();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [rounds.length]);
 
     const runConferenceMutation = async (action: 'submit' | 'decline', request: () => Promise<{ ok: boolean }>) => {
         if (mutationInFlight.current) return;

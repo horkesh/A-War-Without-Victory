@@ -4221,6 +4221,8 @@ export function derivePendingDayton(state: any): LoadedGameState['pendingDayton'
             claimant: p.claimant,
             areaPct: p.area_pct,
             osids: packageOsids(p),
+            // Same rule as the map packages: no Concede on the player's protected ground.
+            ...(!playerMayConcede(p, playerFaction) ? { protectedCore: true } : {}),
         }))
         : [];
     const forced = pd.forced && typeof pd.forced === 'object'

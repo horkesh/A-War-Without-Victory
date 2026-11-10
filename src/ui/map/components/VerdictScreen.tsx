@@ -12,16 +12,18 @@
  *
  * "The least bad version of a tragedy."
  */
-import { useState, useMemo, useRef } from 'react';
+import { lazy, Suspense, useState, useMemo, useRef } from 'react';
 import { useGameStore } from '../store/gameStore';
 import { useIPC } from '../desktop/useIPC';
 import type { FactionVerdict, DimensionGrade, GameVerdict } from '../../../state/negotiation_types.js';
 import { WarCostSummary } from './WarCostSummary';
-import { DaytonSettlementViewer } from './DaytonSettlementViewer';
 import { TreatyLedger } from '../dayton_conference/TreatyLedger';
-import { BoundaryMap } from '../dayton_conference/BoundaryMap';
 import { operativeOwners } from '../dayton_conference/annexes';
-import { DaytonSigningBeat } from '../dayton_conference/DaytonSigningBeat';
+
+// Dayton screens load on demand, out of the entry chunk (vite.config.ts chunk-size limit).
+const DaytonSettlementViewer = lazy(() => import('./DaytonSettlementViewer').then(m => ({ default: m.DaytonSettlementViewer })));
+const BoundaryMap = lazy(() => import('../dayton_conference/BoundaryMap').then(m => ({ default: m.BoundaryMap })));
+const DaytonSigningBeat = lazy(() => import('../dayton_conference/DaytonSigningBeat').then(m => ({ default: m.DaytonSigningBeat })));
 import type { CostLedger } from '../../../sim/endgame/cost_ledger.js';
 import type { ComparisonResult, MilestoneComparison, MilestoneComparisonStatus } from '../../../sim/endgame/endgame_comparison.js';
 import { getPeacePlanById } from '../../../sim/negotiation/peace_plan_data.js';
@@ -469,7 +471,9 @@ export function VerdictScreen({ onLoadSaveState, onLoadSaveError }: VerdictScree
                     backdropClassName="bg-[#1c1b17]"
                     panelClassName="h-full w-full overflow-hidden"
                 >
-                    <DaytonSigningBeat agreement={signedAgreement} fallbackDate={date} onContinue={() => setSigningSeen(true)} />
+                    <Suspense fallback={null}>
+                        <DaytonSigningBeat agreement={signedAgreement} fallbackDate={date} onContinue={() => setSigningSeen(true)} />
+                    </Suspense>
                 </Modal>
             </div>
         );
@@ -644,7 +648,7 @@ export function VerdictScreen({ onLoadSaveState, onLoadSaveError }: VerdictScree
                 </div>
 
                 {loadedGameState.daytonAgreement?.version === 1 ? (
-                    <>
+                    <Suspense fallback={null}>
                         {/* The grade judges the war; this shows what the table changed (owner, 2026-11-08). */}
                         <TreatyLedger treaty={loadedGameState.daytonAgreement.treaty} signed />
                         {/* DC A3: the signed line against the front it ended. */}
@@ -656,7 +660,7 @@ export function VerdictScreen({ onLoadSaveState, onLoadSaveError }: VerdictScree
                             ]} />
                         </div>
                         <DaytonSettlementViewer agreement={loadedGameState.daytonAgreement} mode="signed" />
-                    </>
+                    </Suspense>
                 ) : verdict.dayton_result ? (
                     <p className="text-sm text-text-secondary">{t('dayton.agreement.legacy')}</p>
                 ) : null}

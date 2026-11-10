@@ -107,10 +107,11 @@ describe('DC A5 signing beat', () => {
         expect(screen.getByRole('button', { name: 'Nastavi na presudu' })).toBeTruthy();
     });
 
-    it('stands between the signature and the Verdict', () => {
+    it('stands between the signature and the Verdict', async () => {
         storeState = { loadedGameState: { gameOver: true, turn: 188, daytonAgreement: agreement, controlBySettlement: {}, formations: [] } };
         render(createElement(VerdictScreen));
-        expect(screen.getByTestId('dayton-signing-beat')).toBeTruthy();
+        // The beat loads on demand (React.lazy, PR #560 chunk-size fix).
+        expect(await screen.findByTestId('dayton-signing-beat')).toBeTruthy();
         fireEvent.click(screen.getByTestId('dayton-signing-continue'));
         expect(screen.queryByTestId('dayton-signing-beat')).toBeNull();
         expect(document.body.textContent?.length).toBeGreaterThan(0);

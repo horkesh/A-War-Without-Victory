@@ -20,12 +20,14 @@ import { initiateDaytonNegotiation, resolveDaytonNegotiation } from '../src/sim/
 import { computeSettlementControllers, computeSettlementControllersWith, planCellAssignments, settlementControllersFor } from '../src/sim/negotiation/peace_settlement.js';
 import { parseDaytonProposal } from '../src/desktop/dayton_proposal.js';
 import { getTerritorialPackageById } from '../src/sim/negotiation/territorial_packages.js';
-import { playerMayConcede } from '../src/sim/negotiation/patron_leverage.js';
+import { playerMayConcede, PROTECTED_MUNICIPALITIES } from '../src/sim/negotiation/patron_leverage.js';
 import { resolveOsidsForKeywords } from '../src/sim/negotiation/package_area_resolver.js';
 import { computeTreatyAutonomyIndex } from '../src/sim/negotiation/institutional_packages.js';
 import { computePeaceDysfunctionBreakdown } from '../src/sim/negotiation/peace_dysfunction.js';
 import { evaluateBotResponse } from '../src/sim/negotiation/bot_negotiation.js';
 import { tableDaytonRound } from '../src/sim/negotiation/dayton_rounds.js';
+import { frontPackagesForPlayer } from '../src/sim/negotiation/front_packages.js';
+import { derivePendingDayton } from '../src/ui/map/data/GameStateAdapter.js';
 
 const root = process.cwd();
 const painted = JSON.parse(readFileSync(resolve(root, 'data/source/calibration/painted_control_oct1995.json'), 'utf8'))
@@ -62,6 +64,28 @@ describe('1. deals move only the parties\' own ground', () => {
         expect(playerMayConcede(getTerritorialPackageById('brcko_district')!, 'RS')).toBe(true);
         expect(playerMayConcede(getTerritorialPackageById('central_bosnia')!, 'RBiH')).toBe(true);
         expect(() => parseDaytonProposal({ ...E, territorial_concessions: ['mostar'] }, makeState('HRHB'))).toThrow(/territorial_concessions/);
+    });
+
+    it('the same rule holds for captured ground in a protected municipality (PR #560 review)', () => {
+        // RBiH holds one RS-heartland cell the Dayton map gives RS: the first protected
+        // municipality whose cell makes a captured-ground package.
+        const map = planCellAssignments('dayton');
+        const candidates = Object.keys(map).sort().filter(o => map[o]?.faction === 'RS'
+            && PROTECTED_MUNICIPALITIES.RS!.has(o.split(':')[1] ?? '') && painted[o] === 'RS');
+        let state = makeState('RS');
+        let pkg: ReturnType<typeof frontPackagesForPlayer>[number] | undefined;
+        for (const cell of candidates) {
+            state = makeState('RS');
+            state.political.political_controllers![cell] = 'RBiH';
+            pkg = frontPackagesForPlayer(state, 'RS').find(p => p.id === `front:${cell.split(':')[1]}:RBiH:RS`);
+            if (pkg) break;
+        }
+        expect(pkg, 'RBiH holding RS-heartland ground makes a front package').toBeDefined();
+        expect(playerMayConcede(pkg!, 'RS')).toBe(false);
+        expect(() => parseDaytonProposal({ ...E, territorial_concessions: [pkg!.id] }, state)).toThrow(/territorial_concessions/);
+        state.military.negotiation!.pending_dayton = initiateDaytonNegotiation(state);
+        const front = derivePendingDayton(state)!.frontPackages?.find(p => p.id === pkg!.id);
+        expect(front?.protectedCore).toBe(true);
     });
 
     it('a Federation concession hands RS only the conceding party\'s cells, never its partner\'s', () => {

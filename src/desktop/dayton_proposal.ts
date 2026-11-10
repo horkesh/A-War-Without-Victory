@@ -96,16 +96,12 @@ export function parseDaytonProposal(payload: unknown, state: GameState): DaytonP
             // Concede only on ground it gives the player.
             if (field === 'territorial_demands' && holder === playerFaction) invalid(field);
             if (field === 'territorial_concessions' && holder !== playerFaction) invalid(field);
+            const pkg = TERRITORY_IDS.has(id) ? getTerritorialPackageById(id) : frontPackages?.find(p => p.id === id);
             // Ground never on the table (Mostar and western Herzegovina, DC A6 panel).
-            if (field === 'territorial_demands') {
-                const pkg = TERRITORY_IDS.has(id) ? getTerritorialPackageById(id) : frontPackages?.find(p => p.id === id);
-                if (pkg && !isOnTheTable(pkg)) invalid(field);
-            }
-            // A player never gives up its own protected ground (Brčko excepted, D1).
-            if (field === 'territorial_concessions' && TERRITORY_IDS.has(id)) {
-                const pkg = getTerritorialPackageById(id);
-                if (pkg && !playerMayConcede(pkg, playerFaction)) invalid(field);
-            }
+            if (field === 'territorial_demands' && pkg && !isOnTheTable(pkg)) invalid(field);
+            // A player never gives up its own protected ground (Brčko excepted, D1), whether
+            // the map package or captured ground the player holds there on the front.
+            if (field === 'territorial_concessions' && pkg && !playerMayConcede(pkg, playerFaction)) invalid(field);
             seenTerritory.add(id);
             ids.push(id);
         }
