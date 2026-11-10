@@ -17,6 +17,11 @@ import consequencePersonnelChange from '../assets/presidential_desk/consequence_
 import consequencePublicPressure from '../assets/presidential_desk/consequence_stills/consequence_public_pressure.webp';
 import consequenceReserveDeployment from '../assets/presidential_desk/consequence_stills/consequence_reserve_deployment.webp';
 
+import aftermathGainWide from '../assets/presidential_desk/aftermath_headers/aftermath_gain_wide.webp';
+import aftermathLossWide from '../assets/presidential_desk/aftermath_headers/aftermath_loss_wide.webp';
+import aftermathMixedWide from '../assets/presidential_desk/aftermath_headers/aftermath_mixed_wide.webp';
+import aftermathQuietWide from '../assets/presidential_desk/aftermath_headers/aftermath_quiet_wide.webp';
+
 import packetThumbConvoy from '../assets/presidential_desk/packet_thumbnails/packet_thumb_convoy.webp';
 import packetThumbEventDecision from '../assets/presidential_desk/packet_thumbnails/packet_thumb_event_decision.webp';
 import packetThumbIntelligence from '../assets/presidential_desk/packet_thumbnails/packet_thumb_intelligence.webp';
@@ -89,6 +94,23 @@ const TONE_STILLS: Readonly<Record<TurnAftermathTone, string>> = Object.freeze({
 
 export function getConsequenceStillForTone(tone: TurnAftermathTone): string {
   return TONE_STILLS[tone];
+}
+
+/**
+ * Wide (6.25:1) cut behind the end-of-week aftermath header, by the week's tone
+ * (surface redesign round 2, 2026-11-11). Same scenes as the 16:9 consequence
+ * stills, which stay for the Desk's "What followed" thumbnails; falls back to the
+ * still for any tone without a wide cut.
+ */
+const TONE_AFTERMATH_HEADERS: Readonly<Partial<Record<TurnAftermathTone, string>>> = Object.freeze({
+  gain: aftermathGainWide,
+  loss: aftermathLossWide,
+  mixed: aftermathMixedWide,
+  quiet: aftermathQuietWide,
+});
+
+export function getAftermathHeaderForTone(tone: TurnAftermathTone): string {
+  return TONE_AFTERMATH_HEADERS[tone] ?? getConsequenceStillForTone(tone);
 }
 
 export function getDecisionHeaderForFamily(familyId: DecisionSurfaceFamilyId): string | null {

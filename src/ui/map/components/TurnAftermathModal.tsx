@@ -12,7 +12,7 @@ import type { OfficerResentmentReceipt } from '../data/officerResentmentReceipts
 import { getDecisionSurfaceForInboxType } from '../data/decisionSurfaceRegistry';
 import { Z } from '../../shared/zIndex';
 import { Modal } from '../../shared/Modal';
-import { getConsequenceStillForTone } from '../data/presidentialDeskAssets';
+import { getAftermathHeaderForTone } from '../data/presidentialDeskAssets';
 import { t, type MessageKey } from '../i18n';
 import { formatPersonnel, formatCount, turnToDateString } from '../utils/formatters';
 import {
@@ -210,7 +210,7 @@ export function TurnAftermathModal({
               button beside the title; DecisionModalImageHeader owns the shared recipe. */}
           <img
             data-testid="turn-aftermath-header-art"
-            src={getConsequenceStillForTone(view.tone)}
+            src={getAftermathHeaderForTone(view.tone)}
             alt=""
             aria-hidden="true"
             className="pointer-events-none absolute inset-0 h-full w-full object-cover"
