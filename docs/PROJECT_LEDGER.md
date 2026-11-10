@@ -14327,3 +14327,13 @@ Owner, playing through: the recruitment list mixed brigades already raised with 
 - Harness: every existing data-testid is kept. `--auto-recruit` clicks `recruitment-apply`, which still acts on the first eligible brigade (the default selection), and nothing in the raised block is focusable or clickable apart from its summary. A new test pins this.
 - Tests: `recruitment_modal_player_copy` gains two cases (split and closed block, Recruit targets the first eligible; BCS label). The 9 recruitment/modal/a11y/harness files pass 195/195, and typecheck is clean.
 - Rendered (dev Electron against this worktree's dev server, RBiH turn 0): before, 78 "Already recruited" rows were interleaved with the not-yet brigades. After, the Unavailable list holds only not-yet brigades and "Already raised (78)" sits closed at the bottom. Audited at 1280 × 720 and 2293 × 960, closed and open: smallest text 12 px, no text under 4.5:1 contrast. BCS was checked in jsdom only; the live locale reload returned to the menu.
+
+## 2026-11-10 — R8 harness: media range-request aborts pair with a played-through element (QA)
+
+RBiH attempt 12 (package j) passed every gate except runtime network failures. All 14 were `net::ERR_ABORTED` on music tracks. The lifecycle observer, now recording them, showed why the old element-abort pairing could never match: Chromium cancels and reissues media range requests at load and mid-track without firing an element `abort`. `classifyRecoveredMediaElementAbort` in `tools/ui/paradox_local_qa.cjs` excuses such an abort only when all of these hold:
+- the URL is a bundled `/assets/<name>-<hash>.ogg` on the local origin;
+- the same element and source epoch had a `request-start` no later than 2 s after the request began;
+- that element reached `loadeddata`, `canplay` or `playing`;
+- that element never reported `error`.
+
+Allowlist label: `media-element-played-through-abort`. Replaying attempt 12's recorded signals: 14 → 0 remaining. A new test covers the positive case (load-time and mid-track aborts) and four rejections: never played, played then errored, started after the request, other track. A non-bundled path is also rejected. The harness suite passes 123/123.
