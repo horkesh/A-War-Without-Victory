@@ -5792,6 +5792,7 @@ export const enMessages = {
     'decisionModal.reserve.purpose': 'Purpose',
     'decisionModal.reserve.close': 'Decide later',
     'decisionModal.reserve.decline': 'Decline request',
+    'decisionModal.reserve.declineFailed': 'The reserve request could not be declined.',
     'decisionModal.reserve.acceptSuggested': 'Open {brigade} dossier',
     'decisionModal.reserve.openReservePool': 'Choose from reserve pool',
     'decisionModal.counterOffer.responseConditional': 'Conditional accept',
@@ -5822,6 +5823,7 @@ export const enMessages = {
     'decisionModal.counterOffer.rider': 'Rider',
     'decisionModal.counterOffer.reviewLater': 'Review later',
     'decisionModal.counterOffer.submit': 'Submit as counter-proposal',
+    'decisionModal.counterOffer.submitFailed': 'The counter-proposal could not be submitted.',
     // i18n Car 2 — Batch B4: DirectiveCard (War-Direction directive act card)
     'directive.lever.request_op': 'Direct corps to objective',
     'directive.lever.force_launch': 'Force operation launch',

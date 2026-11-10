@@ -8,6 +8,12 @@ import { getOsidDisplayName } from '../utils/osidDisplayName';
 import { getPlayerSafeMilitaryFactionName } from '../utils/playerSafeText';
 import { getDecisionHeaderForFamily } from '../data/presidentialDeskAssets';
 import { DecisionModalImageHeader } from './DecisionModalImageHeader';
+import {
+    SURFACE_MODAL_BACKDROP,
+    SURFACE_MODAL_PANEL_MEDIUM,
+    SURFACE_PRIMARY_BUTTON_COMPACT,
+    SURFACE_SECONDARY_BUTTON,
+} from './surface/Surface';
 import { t, useLocale, type Locale } from '../i18n';
 
 type ParamilitaryDecision = 'allow' | 'deny';
@@ -145,10 +151,10 @@ export function ParamilitaryReviewModal({ isOpen, onClose }: ParamilitaryReviewM
             onClose={onClose}
             zIndex={Z.CRITICAL_MODAL}
             ariaLabelledBy="paramilitary-review-title"
-            backdropClassName="bg-black/75 backdrop-blur-sm"
-            panelClassName="w-[min(calc(var(--interface-viewport-width,100vw)*0.92),680px)] max-h-[calc(var(--interface-viewport-height,100vh)*0.88)] overflow-hidden rounded-lg border border-red-500/35 bg-panel-bg text-text-primary shadow-2xl"
+            backdropClassName={SURFACE_MODAL_BACKDROP}
+            panelClassName={SURFACE_MODAL_PANEL_MEDIUM}
         >
-            <div className="flex max-h-[calc(var(--interface-viewport-height,100vh)*0.88)] flex-col">
+            <div className="flex min-h-0 flex-1 flex-col">
                 {headerImage && (
                     <DecisionModalImageHeader
                         imageUrl={headerImage}
@@ -160,28 +166,28 @@ export function ParamilitaryReviewModal({ isOpen, onClose }: ParamilitaryReviewM
                         accentClassName="text-red-300"
                     />
                 )}
-                <div className="border-b border-panel-border bg-red-950/25 px-5 py-3">
-                    <div className="mt-3 flex flex-wrap gap-2 text-xs font-bold uppercase tracking-[0.08em] text-text-secondary">
-                        <span className="rounded border border-panel-border bg-panel-card px-2 py-1">
+                <div className="shrink-0 border-b border-[#262b35] bg-red-950/20 px-8 py-4">
+                    <div className="flex flex-wrap gap-2 text-[15px] font-semibold text-[#f1e6c8]">
+                        <span className="rounded-md border border-[#3a4150] bg-[#161a22] px-3 py-1.5">
                             {requests.length === 1
                                 ? t('paramilitaryReview.requestCount', { count: requests.length })
                                 : t('paramilitaryReview.requestCountPlural', { count: requests.length })}
                         </span>
-                        <span className="rounded border border-panel-border bg-panel-card px-2 py-1">
+                        <span className="rounded-md border border-[#3a4150] bg-[#161a22] px-3 py-1.5">
                             {t('paramilitaryReview.estimatedStrength', { strength: totalStrength })}
                         </span>
                     </div>
-                    <div className="mt-2 text-[12px] leading-snug text-text-secondary">
+                    <div className="mt-3 text-[16px] leading-relaxed text-[#ddd1b3]">
                         {t('paramilitaryReview.packetHint')}
                     </div>
-                    <div className="mt-1 text-[12px] leading-snug text-text-secondary">
+                    <div className="mt-1 text-[16px] leading-relaxed text-[#ddd1b3]">
                         {t('paramilitaryReview.policyHint')}
                     </div>
                 </div>
 
-                <div className="flex-1 space-y-2 overflow-y-auto px-5 py-4">
+                <div className="min-h-0 flex-1 space-y-3 overflow-y-auto px-8 py-6">
                     {requests.length === 0 ? (
-                        <div className="rounded border border-panel-border bg-panel-card px-3 py-3 text-[12px] text-text-secondary">
+                        <div className="rounded-md border border-[#2a303c] bg-[#161a22] px-5 py-4 text-[16px] text-[#c2b69c]">
                             {t('paramilitaryReview.empty')}
                         </div>
                     ) : requests.map((request) => {
@@ -198,11 +204,11 @@ export function ParamilitaryReviewModal({ isOpen, onClose }: ParamilitaryReviewM
                             ? null
                             : deploymentImpact + (civilianRisk / PARAMILITARY_TARGET_AVG_POPULATION);
                         return (
-                            <div key={request.target_osid} className="rounded border border-panel-border bg-panel-card px-3 py-3">
+                            <div key={request.target_osid} className="rounded-md border border-[#2a303c] bg-[#161a22] px-5 py-4">
                                 <div className="flex flex-wrap items-start justify-between gap-3">
                                     <div className="min-w-0">
-                                        <div className="text-[13px] font-bold text-text-primary">{place}</div>
-                                        <div className="mt-1 text-xs uppercase tracking-[0.08em] text-text-secondary">
+                                        <div className="text-[19px] font-semibold text-[#f1e6c8]">{place}</div>
+                                        <div className="mt-1 text-[15px] text-[#b9ad94]">
                                             {t('paramilitaryReview.requestMeta', {
                                                 faction: getPlayerSafeMilitaryFactionName(request.faction),
                                                 mode: modeLabel(request.mode),
@@ -214,7 +220,7 @@ export function ParamilitaryReviewModal({ isOpen, onClose }: ParamilitaryReviewM
                                         <button
                                             type="button"
                                             onClick={() => choose(request.target_osid, 'deny')}
-                                            className={`rounded border px-3 py-1.5 text-xs font-bold uppercase tracking-[0.08em] transition-colors ${
+                                            className={`h-11 rounded-md border px-4 text-[15px] font-semibold transition-colors ${
                                                 selected === 'deny'
                                                     ? 'border-emerald-400/70 bg-emerald-500/15 text-emerald-200'
                                                     : 'border-panel-border bg-panel-bg text-text-secondary hover:text-text-primary'
@@ -225,7 +231,7 @@ export function ParamilitaryReviewModal({ isOpen, onClose }: ParamilitaryReviewM
                                         <button
                                             type="button"
                                             onClick={() => choose(request.target_osid, 'allow')}
-                                            className={`rounded border px-3 py-1.5 text-xs font-bold uppercase tracking-[0.08em] transition-colors ${
+                                            className={`h-11 rounded-md border px-4 text-[15px] font-semibold transition-colors ${
                                                 selected === 'allow'
                                                     ? 'border-red-400/75 bg-red-500/15 text-red-200'
                                                     : 'border-panel-border bg-panel-bg text-text-secondary hover:text-text-primary'
@@ -241,10 +247,10 @@ export function ParamilitaryReviewModal({ isOpen, onClose }: ParamilitaryReviewM
                                 >
                                     <dl className="grid grid-cols-1 gap-x-5 gap-y-3 sm:grid-cols-2">
                                         <div>
-                                            <dt className="text-xs font-bold uppercase tracking-[0.08em] text-text-secondary">
+                                            <dt className="text-[14px] text-[#b9ad94]">
                                                 {t('paramilitaryReview.targetPopulation')}
                                             </dt>
-                                            <dd className="mt-1 text-[13px] leading-snug text-text-primary">
+                                            <dd className="mt-1 text-[16px] leading-snug text-text-primary">
                                                 {population == null
                                                     ? t('paramilitaryReview.targetPopulationUnavailable')
                                                     : t('paramilitaryReview.targetPopulationValue', {
@@ -253,28 +259,28 @@ export function ParamilitaryReviewModal({ isOpen, onClose }: ParamilitaryReviewM
                                             </dd>
                                         </div>
                                         <div>
-                                            <dt className="text-xs font-bold uppercase tracking-[0.08em] text-text-secondary">
+                                            <dt className="text-[14px] text-[#b9ad94]">
                                                 {t('paramilitaryReview.civilianCasualties')}
                                             </dt>
-                                            <dd className="mt-1 text-[13px] leading-snug text-red-200">
+                                            <dd className="mt-1 text-[16px] leading-snug text-red-200">
                                                 {civilianRisk == null
                                                     ? t('paramilitaryReview.projectionUnavailable')
                                                     : formatNumber(civilianRisk, locale)}
                                             </dd>
                                         </div>
                                         <div>
-                                            <dt className="text-xs font-bold uppercase tracking-[0.08em] text-text-secondary">
+                                            <dt className="text-[14px] text-[#b9ad94]">
                                                 {t('paramilitaryReview.warCrimeIncrement')}
                                             </dt>
-                                            <dd className="mt-1 text-[13px] leading-snug text-red-200">
+                                            <dd className="mt-1 text-[16px] leading-snug text-red-200">
                                                 {t('paramilitaryReview.warCrimeIncrementValue')}
                                             </dd>
                                         </div>
                                         <div>
-                                            <dt className="text-xs font-bold uppercase tracking-[0.08em] text-text-secondary">
+                                            <dt className="text-[14px] text-[#b9ad94]">
                                                 {t('paramilitaryReview.internationalStandingImpact')}
                                             </dt>
-                                            <dd className="mt-1 text-[13px] leading-snug text-red-200">
+                                            <dd className="mt-1 text-[16px] leading-snug text-red-200">
                                                 {captureImpact == null
                                                     ? t('paramilitaryReview.internationalStandingDeploymentOnly', {
                                                         deploymentImpact: formatStandingPoints(deploymentImpact, locale),
@@ -287,10 +293,10 @@ export function ParamilitaryReviewModal({ isOpen, onClose }: ParamilitaryReviewM
                                         </div>
                                     </dl>
                                     <div className="mt-3 border-t border-panel-border/80 pt-3">
-                                        <div className="text-xs font-bold uppercase tracking-[0.08em] text-text-secondary">
+                                        <div className="text-[14px] text-[#b9ad94]">
                                             {t('paramilitaryReview.sourceContextLabel')}
                                         </div>
-                                        <p className="mt-1 text-[12px] leading-relaxed text-text-secondary">
+                                        <p className="mt-1 text-[15px] leading-relaxed text-[#c2b69c]">
                                             {t('paramilitaryReview.sourceContext', {
                                                 modelPopulation: formatNumber(PARAMILITARY_TARGET_AVG_POPULATION, locale),
                                             })}
@@ -302,14 +308,14 @@ export function ParamilitaryReviewModal({ isOpen, onClose }: ParamilitaryReviewM
                     })}
                 </div>
 
-                <div className="flex flex-wrap items-center justify-between gap-3 border-t border-panel-border bg-panel-card/70 px-5 py-3">
+                <div className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-t border-[#262b35] bg-[#12161e] px-8 pb-6 pt-5">
                     <div className="flex flex-wrap gap-2">
                         <button
                             type="button"
                             data-testid="paramilitary-deny-packet"
                             onClick={() => chooseAll('deny')}
                             disabled={requests.length === 0 || submitting}
-                            className="rounded border border-panel-border px-3 py-1.5 text-xs font-bold uppercase tracking-[0.08em] text-text-secondary hover:text-text-primary disabled:opacity-40"
+                            className="h-11 rounded-md border border-[#3a4150] bg-[#1b2029] px-4 text-[15px] font-semibold text-[#e8dcbc] hover:border-accent-gold/60 disabled:opacity-45"
                         >
                             {t('paramilitaryReview.denyPacket')}
                         </button>
@@ -318,7 +324,7 @@ export function ParamilitaryReviewModal({ isOpen, onClose }: ParamilitaryReviewM
                             data-testid="paramilitary-allow-packet"
                             onClick={() => chooseAll('allow')}
                             disabled={requests.length === 0 || submitting}
-                            className="rounded border border-red-500/35 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.08em] text-red-300 hover:bg-red-500/10 disabled:opacity-40"
+                            className="h-11 rounded-md border border-red-500/40 px-4 text-[15px] font-semibold text-red-200 hover:bg-red-500/10 disabled:opacity-45"
                         >
                             {t('paramilitaryReview.allowPacket')}
                         </button>
@@ -327,7 +333,7 @@ export function ParamilitaryReviewModal({ isOpen, onClose }: ParamilitaryReviewM
                             data-testid="paramilitary-always-deny"
                             onClick={() => chooseStandingPolicy('always_deny')}
                             disabled={requests.length === 0 || submitting}
-                            className={`rounded border px-3 py-1.5 text-xs font-bold uppercase tracking-[0.08em] transition-colors disabled:opacity-40 ${
+                            className={`h-11 rounded-md border px-4 text-[15px] font-semibold transition-colors disabled:opacity-40 ${
                                 standingPolicy === 'always_deny'
                                     ? 'border-emerald-400/70 bg-emerald-500/15 text-emerald-200'
                                     : 'border-emerald-500/35 text-emerald-300 hover:bg-emerald-500/10'
@@ -340,7 +346,7 @@ export function ParamilitaryReviewModal({ isOpen, onClose }: ParamilitaryReviewM
                             data-testid="paramilitary-always-allow"
                             onClick={() => chooseStandingPolicy('always_allow')}
                             disabled={requests.length === 0 || submitting}
-                            className={`rounded border px-3 py-1.5 text-xs font-bold uppercase tracking-[0.08em] transition-colors disabled:opacity-40 ${
+                            className={`h-11 rounded-md border px-4 text-[15px] font-semibold transition-colors disabled:opacity-40 ${
                                 standingPolicy === 'always_allow'
                                     ? 'border-red-400/75 bg-red-500/15 text-red-200'
                                     : 'border-red-500/35 text-red-300 hover:bg-red-500/10'
@@ -354,7 +360,7 @@ export function ParamilitaryReviewModal({ isOpen, onClose }: ParamilitaryReviewM
                             type="button"
                             onClick={onClose}
                             disabled={submitting}
-                            className="rounded border border-panel-border px-4 py-2 text-xs font-bold uppercase tracking-[0.12em] text-text-secondary hover:text-text-primary disabled:opacity-40"
+                            className={SURFACE_SECONDARY_BUTTON}
                         >
                             {t('paramilitaryReview.close')}
                         </button>
@@ -363,7 +369,7 @@ export function ParamilitaryReviewModal({ isOpen, onClose }: ParamilitaryReviewM
                             data-testid="paramilitary-submit-decisions"
                             onClick={() => void submit()}
                             disabled={!allDecided || submitting}
-                            className="rounded border border-accent-gold/55 bg-accent-gold/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.12em] text-accent-gold hover:bg-accent-gold/20 disabled:cursor-not-allowed disabled:opacity-40"
+                            className={SURFACE_PRIMARY_BUTTON_COMPACT}
                         >
                             {submitting ? t('paramilitaryReview.submitting') : t('paramilitaryReview.submit')}
                         </button>

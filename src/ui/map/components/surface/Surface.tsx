@@ -444,6 +444,34 @@ export function SurfaceStat({ label, value, tone }: { label: ReactNode; value: R
   );
 }
 
+/** A figure tile: plain label over a large value (decision modals, summaries). */
+export function SurfaceFigure({ label, value, tone, className }: { label: ReactNode; value: ReactNode; tone?: string; className?: string }) {
+  return (
+    <div className={cx('flex min-w-0 flex-col gap-1 rounded-md border border-[#2a303c] bg-[#161a22] px-4 py-3', className)}>
+      <span className="text-[15px] leading-snug text-[#b9ad94]">{label}</span>
+      <span className={cx('break-words text-[19px] font-semibold leading-snug', tone ?? 'text-[#f1e6c8]')}>{value}</span>
+    </div>
+  );
+}
+
+/** Scrolling body of a compact/medium modal surface. */
+export function SurfaceModalBody({ className, children, ...rest }: HTMLAttributes<HTMLDivElement>) {
+  return (
+    <div className={cx('flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-8 py-6', className)} {...rest}>
+      {children}
+    </div>
+  );
+}
+
+/** Fixed action footer of a compact/medium modal surface (actions right-aligned). */
+export function SurfaceModalFooter({ className, children, ...rest }: HTMLAttributes<HTMLDivElement>) {
+  return (
+    <div className={cx('flex shrink-0 flex-wrap items-center justify-end gap-3 border-t border-[#262b35] bg-[#12161e] px-8 pb-6 pt-5', className)} {...rest}>
+      {children}
+    </div>
+  );
+}
+
 /** The detail's action footer: never scrolls away. */
 export function SurfaceDetailFooter({ className, children, ...rest }: HTMLAttributes<HTMLDivElement>) {
   return (

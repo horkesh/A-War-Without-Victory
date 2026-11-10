@@ -8,6 +8,16 @@ import { getDecisionHeaderForFamily } from '../data/presidentialDeskAssets';
 import { t, type MessageKey } from '../i18n';
 import { getArmyReserveRequestCauseCopy } from '../utils/armyReserveSeverity';
 import { DecisionModalImageHeader } from './DecisionModalImageHeader';
+import {
+  SurfaceFigure,
+  SurfaceModalBody,
+  SurfaceModalFooter,
+  SURFACE_LABEL_MUTED,
+  SURFACE_MODAL_BACKDROP,
+  SURFACE_MODAL_PANEL_COMPACT,
+  SURFACE_PRIMARY_BUTTON_COMPACT,
+  SURFACE_SECONDARY_BUTTON,
+} from './surface/Surface';
 import type { PresidentialDecisionRoomNavigationTarget } from '../data/presidentialDecisionRoom';
 import { buildReserveRequestPresentation } from '../data/reserveRequestPresentation';
 
@@ -97,22 +107,25 @@ export function ReserveRequestModal({ requestId, state, onClose, onOpenReservePa
     if (!request) return;
     const result = await ipc.declineReserveRequest(request.request_id, 'Presidential desk declined reserve commitment after review.');
     if (!result.ok) {
-      setLoadError(result.error ?? 'Reserve request could not be declined.');
+      setLoadError(result.error ?? t('decisionModal.reserve.declineFailed'));
       return;
     }
     onClose();
   };
 
+  // Surface redesign (owner, 2026-11-10): a compact surface — the reserve plate, the three
+  // figures, the request as label/value rows, the cause, and the choices in a fixed footer
+  // with the reserve pool as the gold primary action.
   return (
     <Modal
       isOpen={Boolean(requestId)}
       onClose={onClose}
       zIndex={Z.CRITICAL_MODAL}
       ariaLabelledBy="reserve-request-modal-title"
-      backdropClassName="bg-black/75 backdrop-blur-sm"
-      panelClassName="w-[min(calc(var(--interface-viewport-width,100vw)*0.92),620px)] overflow-hidden rounded-lg border border-sky-400/35 bg-panel-bg text-text-primary shadow-2xl"
+      backdropClassName={SURFACE_MODAL_BACKDROP}
+      panelClassName={SURFACE_MODAL_PANEL_COMPACT}
     >
-      <div data-testid="reserve-request-modal" data-request-id={rawId ?? ''}>
+      <div data-testid="reserve-request-modal" data-request-id={rawId ?? ''} className="flex min-h-0 flex-1 flex-col">
       {headerImage && (
         <DecisionModalImageHeader
           imageUrl={headerImage}
@@ -125,67 +138,59 @@ export function ReserveRequestModal({ requestId, state, onClose, onOpenReservePa
         />
       )}
       {request && (
-        <div className="space-y-3 px-5 py-4 text-[12px]">
-          <div className="grid grid-cols-3 gap-2">
-            <div className="border border-panel-border bg-panel-card px-2 py-2">
-              <div className="text-xs font-bold uppercase tracking-[0.16em] text-text-muted">{t('decisionModal.reserve.priority')}</div>
-              <div className="mt-1 text-[12px] font-bold text-text-primary">{presentation?.severity ?? t('corpsFront.unreported')}</div>
-            </div>
-            <div className="border border-panel-border bg-panel-card px-2 py-2">
-              <div className="text-xs font-bold uppercase tracking-[0.16em] text-text-muted">{t('decisionModal.reserve.travel')}</div>
-              <div className="mt-1 text-[12px] font-bold text-text-primary">
-                {suggestedBrigade ? presentation?.travelTime ?? unavailable : t('decisionModal.reserve.travelPendingSelection')}
-              </div>
-            </div>
-            <div className="border border-panel-border bg-panel-card px-2 py-2">
-              <div className="text-xs font-bold uppercase tracking-[0.16em] text-text-muted">{t('decisionModal.reserve.purpose')}</div>
-              <div className="mt-1 text-[12px] font-bold text-text-primary">{getReserveRequestPurposeLabel(request.purpose, request.reason)}</div>
-            </div>
+        <SurfaceModalBody>
+          <div className="grid grid-cols-3 gap-3">
+            <SurfaceFigure label={t('decisionModal.reserve.priority')} value={presentation?.severity ?? t('corpsFront.unreported')} />
+            <SurfaceFigure
+              label={t('decisionModal.reserve.travel')}
+              value={suggestedBrigade ? presentation?.travelTime ?? unavailable : t('decisionModal.reserve.travelPendingSelection')}
+            />
+            <SurfaceFigure label={t('decisionModal.reserve.purpose')} value={getReserveRequestPurposeLabel(request.purpose, request.reason)} />
           </div>
           {presentation && (
             <div
               role="group"
               aria-label={t('armyReserve.presentation.aria', { corps: corpsName })}
-              className="border border-panel-border bg-panel-card px-3 py-3"
+              className="flex flex-col rounded-md border border-[#2a303c] bg-[#161a22] px-5 py-3"
             >
               {reserveDetailRows.map(([label, value]) => (
-                <div key={label} className="grid grid-cols-[8.5rem_minmax(0,1fr)] gap-2 py-0.5">
-                  <span className="text-text-secondary">{label}</span>
-                  <span className="min-w-0 text-text-primary">{value}</span>
+                <div key={label} className="grid grid-cols-[minmax(9rem,14rem)_minmax(0,1fr)] gap-4 border-b border-[#262b35] py-2 last:border-b-0">
+                  <span className="text-[15px] text-[#b9ad94]">{label}</span>
+                  <span className="min-w-0 text-[16px] text-[#f1e6c8]">{value}</span>
                 </div>
               ))}
               {!suggestedBrigade && (
-                <p className="mt-2 border-t border-panel-border pt-2 text-text-secondary">
+                <p className="m-0 mt-2 border-t border-[#262b35] pt-3 text-[15px] leading-relaxed text-[#c2b69c]">
                   {t('decisionModal.reserve.noCandidate')}
                 </p>
               )}
             </div>
           )}
           {causeCopy && (
-            <div className="border border-panel-border bg-panel-card px-3 py-3 text-text-secondary">
-              <div className="text-xs font-bold uppercase tracking-[0.14em] text-text-muted">{causeCopy.label}</div>
-              <div className="mt-1 text-text-primary">{causeCopy.summary}</div>
-              <div className="mt-1">{causeCopy.detail}</div>
+            <div className="flex flex-col gap-1.5 rounded-md border border-[#2a303c] bg-[#161a22] px-5 py-4">
+              <div className={SURFACE_LABEL_MUTED}>{causeCopy.label}</div>
+              <div className="text-[17px] font-semibold text-[#f1e6c8]">{causeCopy.summary}</div>
+              <div className="text-[16px] leading-relaxed text-[#c2b69c]">{causeCopy.detail}</div>
             </div>
           )}
-        </div>
+        </SurfaceModalBody>
       )}
-      <div className="flex justify-end gap-2 border-t border-panel-border bg-black/20 px-5 py-3">
-        <button type="button" data-testid="reserve-request-close" onClick={onClose} className="border border-panel-border px-3 py-1.5 text-xs font-bold uppercase tracking-[0.12em] text-text-secondary">{t('decisionModal.reserve.close')}</button>
-        <button type="button" data-testid="reserve-request-decline" onClick={decline} disabled={!request} className="border border-red-400/45 bg-red-500/10 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.12em] text-red-200 disabled:opacity-40">{t('decisionModal.reserve.decline')}</button>
+      <SurfaceModalFooter>
+        <button type="button" data-testid="reserve-request-close" onClick={onClose} className={SURFACE_SECONDARY_BUTTON}>{t('decisionModal.reserve.close')}</button>
+        <button type="button" data-testid="reserve-request-decline" onClick={decline} disabled={!request} className="h-12 rounded-md border border-red-400/50 bg-red-500/15 px-5 text-[16px] font-semibold text-red-100 transition hover:bg-red-500/25 disabled:opacity-45">{t('decisionModal.reserve.decline')}</button>
         {request?.suggested_brigade_id && suggestedBrigadeName && (
           <button
             type="button"
             data-testid="reserve-request-review-suggested"
             onClick={reviewSuggested}
             disabled={!request}
-            className="border border-panel-border bg-black/15 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.12em] text-text-primary disabled:opacity-40"
+            className={SURFACE_SECONDARY_BUTTON}
           >
             {t('decisionModal.reserve.acceptSuggested', { brigade: suggestedBrigadeName })}
           </button>
         )}
-        <button type="button" data-testid="reserve-request-open-pool" onClick={onOpenReservePanel} disabled={!request} className="border border-accent-gold/45 bg-accent-gold/12 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.12em] text-accent-gold disabled:opacity-40">{t('decisionModal.reserve.openReservePool')}</button>
-      </div>
+        <button type="button" data-testid="reserve-request-open-pool" onClick={onOpenReservePanel} disabled={!request} className={SURFACE_PRIMARY_BUTTON_COMPACT}>{t('decisionModal.reserve.openReservePool')}</button>
+      </SurfaceModalFooter>
       </div>
     </Modal>
   );
