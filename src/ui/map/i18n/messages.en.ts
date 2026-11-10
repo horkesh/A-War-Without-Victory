@@ -5781,6 +5781,7 @@ export const enMessages = {
     'decisionModal.intel.bodyFallback': 'This intelligence brief is no longer pending.',
     'decisionModal.intel.close': 'Close',
     'decisionModal.intel.acknowledge': 'Acknowledge',
+    'decisionModal.intel.acknowledgeFailed': 'The intelligence brief could not be filed.',
     'decisionModal.reserve.eyebrow': 'Army HQ Request',
     'decisionModal.reserve.imageAlt': 'Army HQ Request',
     'decisionModal.reserve.title': 'Reserve request',

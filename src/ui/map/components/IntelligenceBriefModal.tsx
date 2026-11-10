@@ -6,6 +6,14 @@ import { useGameStore } from '../store/gameStore';
 import { getDecisionHeaderForFamily } from '../data/presidentialDeskAssets';
 import { t } from '../i18n';
 import { DecisionModalImageHeader } from './DecisionModalImageHeader';
+import {
+  SurfaceModalBody,
+  SurfaceModalFooter,
+  SURFACE_MODAL_BACKDROP,
+  SURFACE_MODAL_PANEL_COMPACT,
+  SURFACE_PRIMARY_BUTTON_COMPACT,
+  SURFACE_SECONDARY_BUTTON,
+} from './surface/Surface';
 
 interface IntelligenceBriefModalProps {
   notificationId: string | null;
@@ -28,20 +36,22 @@ export function IntelligenceBriefModal({ notificationId, state, onClose }: Intel
     if (!notification) return;
     const result = await ipc.dismissEventNotification(notification.notification_id);
     if (!result.ok) {
-      setLoadError(result.error ?? 'Intelligence brief could not be acknowledged.');
+      setLoadError(result.error ?? t('decisionModal.intel.acknowledgeFailed'));
       return;
     }
     onClose();
   };
 
+  // Surface redesign (owner, 2026-11-10): a compact surface — intelligence plate and the
+  // brief's headline, the brief in 18px prose, Close and File brief (gold) in a fixed footer.
   return (
     <Modal
       isOpen={Boolean(notificationId)}
       onClose={onClose}
       zIndex={Z.CRITICAL_MODAL}
       ariaLabelledBy="intelligence-brief-modal-title"
-      backdropClassName="bg-black/75 backdrop-blur-sm"
-      panelClassName="w-[min(calc(var(--interface-viewport-width,100vw)*0.92),560px)] overflow-hidden rounded-lg border border-sky-400/35 bg-panel-bg text-text-primary shadow-2xl"
+      backdropClassName={SURFACE_MODAL_BACKDROP}
+      panelClassName={SURFACE_MODAL_PANEL_COMPACT}
     >
       {headerImage && (
         <DecisionModalImageHeader
@@ -53,13 +63,15 @@ export function IntelligenceBriefModal({ notificationId, state, onClose }: Intel
           accentClassName="text-sky-300"
         />
       )}
-      <div className="px-5 py-4 text-[12px] leading-relaxed text-text-secondary">
-        {notification?.body ?? t('decisionModal.intel.bodyFallback')}
-      </div>
-      <div className="flex justify-end gap-2 border-t border-panel-border bg-black/20 px-5 py-3">
-        <button type="button" onClick={onClose} className="border border-panel-border px-3 py-1.5 text-xs font-bold uppercase tracking-[0.12em] text-text-secondary">{t('decisionModal.intel.close')}</button>
-        <button type="button" onClick={acknowledge} disabled={!notification} className="border border-accent-gold/45 bg-accent-gold/12 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.12em] text-accent-gold disabled:opacity-40">{t('decisionModal.intel.acknowledge')}</button>
-      </div>
+      <SurfaceModalBody>
+        <p className="m-0 text-[18px] leading-relaxed text-[#ddd1b3]">
+          {notification?.body ?? t('decisionModal.intel.bodyFallback')}
+        </p>
+      </SurfaceModalBody>
+      <SurfaceModalFooter>
+        <button type="button" onClick={onClose} className={SURFACE_SECONDARY_BUTTON}>{t('decisionModal.intel.close')}</button>
+        <button type="button" onClick={acknowledge} disabled={!notification} className={SURFACE_PRIMARY_BUTTON_COMPACT}>{t('decisionModal.intel.acknowledge')}</button>
+      </SurfaceModalFooter>
     </Modal>
   );
 }

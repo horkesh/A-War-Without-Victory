@@ -5838,6 +5838,7 @@ export const bcsMessages: Partial<Record<MessageKey, string>> = {
     'decisionModal.intel.bodyFallback': 'Ovaj obavještajni izvještaj više nije na čekanju.',
     'decisionModal.intel.close': 'Zatvori',
     'decisionModal.intel.acknowledge': 'Prihvati',
+    'decisionModal.intel.acknowledgeFailed': 'Obavještajni izvještaj nije mogao biti zaveden.',
     'decisionModal.reserve.eyebrow': 'Zahtjev štaba armije',
     'decisionModal.reserve.imageAlt': 'Zahtjev štaba armije',
     'decisionModal.reserve.title': 'Zahtjev za rezervom',
