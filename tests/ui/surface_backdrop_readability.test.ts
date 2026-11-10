@@ -26,7 +26,9 @@ describe('reading-surface backdrop contract', () => {
 
     expect(app).toContain('bg-[#11141b]');
     expect(commandStrip).toContain('bg-[#11141b]');
-    expect(desk).toContain('bg-[#11141b]');
+    // Surface redesign 2026-11-10: the Desk is the shared opaque SurfaceFrame.
+    expect(desk).toContain('<SurfaceFrame');
+    expect(readFileSync('src/ui/map/components/surface/Surface.tsx', 'utf8')).toContain('bg-[#11141b]');
     expect(authority).toContain('bg-[#11141b]');
   });
 

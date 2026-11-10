@@ -5469,7 +5469,7 @@ export const enMessages = {
     'deskAuthority.lever.eliteDeploy': 'Release elite reserve',
     'deskAuthority.lever.replaceCo': 'Replace commander',
     'deskAuthority.lever.frontVisit': 'Visit the front',
-    'deskAuthority.costSuffix': '{cost} CA',
+    'deskAuthority.costSuffix': '{cost} Authority',
 
     // --- Presidential desk shell (Batch B1) ---
     'desk.faction.rs': 'Republika Srpska',
@@ -5513,6 +5513,10 @@ export const enMessages = {
     'desk.consequences.decisions': 'Decisions',
     'desk.consequences.openRecords': 'Open Records',
     'desk.consequences.openChronicle': 'Open Chronicle',
+    'desk.section.signatures': 'Needs your signature',
+    'desk.section.otherMatters': 'Other matters on the desk',
+    'desk.banner.blurb': 'Sign what needs your signature, then decide whether the week goes on.',
+    'desk.footer.heading': 'Before the week goes on',
     'decisionConsequences.ariaLabel': 'Decision consequence records',
     'decisionConsequences.title': 'Decision Consequences',
     'decisionConsequences.subtitle': 'Presidential choices that already entered the campaign record.',

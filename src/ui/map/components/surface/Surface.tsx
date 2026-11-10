@@ -36,9 +36,9 @@ export const SURFACE_SECONDARY_BUTTON =
 export const SURFACE_CLOSE_BUTTON =
   'h-11 shrink-0 rounded border border-[#3a4150] bg-[#1b2029] px-5 text-[16px] font-semibold text-[#e8dcbc] transition hover:border-accent-gold/60 hover:text-accent-gold';
 /** Mono gold label (section headings, eyebrows). */
-export const SURFACE_LABEL = 'font-mono text-[13px] font-semibold tracking-[0.16em] text-[#e0c27a]';
+export const SURFACE_LABEL = 'uppercase font-mono text-[13px] font-semibold tracking-[0.16em] text-[#e0c27a]';
 /** Mono muted label (sub-headings). */
-export const SURFACE_LABEL_MUTED = 'font-mono text-[13px] font-semibold tracking-[0.16em] text-[#b9ad94]';
+export const SURFACE_LABEL_MUTED = 'uppercase font-mono text-[13px] font-semibold tracking-[0.16em] text-[#b9ad94]';
 /** Tone chips: one look for every surface. */
 export const SURFACE_CHIP = 'whitespace-nowrap rounded border px-3 py-1.5 font-mono text-[14px] font-semibold';
 export const SURFACE_TONE = {
