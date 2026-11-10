@@ -85,7 +85,7 @@ describe('local playtest evidence packet', () => {
                 locale: 'bcs',
                 reduceMotion: true,
                 colorblindPreset: 'deuteranopia',
-                audio: { muted: false, masterVolume: 0.75, musicEnabled: false, musicVolume: 0.5 },
+                audio: { muted: false, masterVolume: 0.75, musicEnabled: true, musicVolume: 0.5, musicDefaultsVersion: 2 },
                 crashDiagnosticsConsent: true,
             },
             counts: {

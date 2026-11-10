@@ -2324,9 +2324,10 @@ function App() {
           role="status"
           aria-live="polite"
           data-testid="action-receipt-toast"
-          // Top strip, over the (dimmed) toolbar: at top-20 it covered the next decision's
-          // header (R8 shakedown 2026-11-10). pointer-events-none, so the toolbar stays usable.
-          className="pointer-events-none fixed left-1/2 top-3 w-[min(34rem,calc(100vw-2rem))] -translate-x-1/2 rounded border border-emerald-400/45 bg-[#10151d] px-4 py-3 text-center text-sm font-semibold text-emerald-100 shadow-2xl"
+          // Bottom-left corner: centred at the top it covered the next decision's header
+          // (top-20) or the toolbar labels (top-3) in the R8 shakedown, 2026-11-10. The
+          // bottom-right holds the find hint and Advance bar; decisions sit centred.
+          className="pointer-events-none fixed bottom-4 left-4 w-[min(22rem,calc(100vw-2rem))] rounded border border-emerald-400/45 bg-[#10151d] px-4 py-3 text-left text-sm font-semibold text-emerald-100 shadow-2xl"
           style={{ zIndex: Z.MODAL_HARD }}
         >
           {actionReceiptMessage}

@@ -55,7 +55,7 @@ describe('native audio preference ownership', () => {
         fireEvent.change(master, { target: { value: '45' } });
         fireEvent.change(musicVolume, { target: { value: '25' } });
         await waitFor(() => expect(settings).toEqual({
-            audioPreferences: { ...initialAudio, masterVolume: .45, musicVolume: .25 },
+            audioPreferences: { ...initialAudio, masterVolume: .45, musicVolume: .25, musicDefaultsVersion: 2 },
             interfaceScale: 150,
             futureSetting: { present: true },
         }));
@@ -81,7 +81,7 @@ describe('native audio preference ownership', () => {
         expect(screen.getByRole('button', { name: 'Toggle background music' }).getAttribute('aria-pressed')).toBe('true');
         expect(screen.getByRole('slider', { name: 'Music volume' })).toHaveProperty('value', '65');
         await waitFor(() => expect(saveSettings).toHaveBeenCalledWith(
-            { audioPreferences: { masterVolume: .7 } },
+            { audioPreferences: { masterVolume: .7, musicDefaultsVersion: 2 } },
             expect.objectContaining({ merge: true }),
         ));
     });
@@ -101,7 +101,7 @@ describe('native audio preference ownership', () => {
         fireEvent.change(master, { target: { value: '45' } });
         fireEvent.change(music, { target: { value: '25' } });
         await waitFor(() => expect(saveSettings).toHaveBeenLastCalledWith(
-            { audioPreferences: { masterVolume: .45, musicVolume: .25 } },
+            { audioPreferences: { masterVolume: .45, musicVolume: .25, musicDefaultsVersion: 2 } },
             expect.objectContaining({ merge: true }),
         ));
     });
