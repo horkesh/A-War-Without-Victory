@@ -40,6 +40,27 @@ import { Z } from '../../../shared/zIndex';
 import { Modal } from '../../../shared/Modal';
 import { playCue } from '../../audio/audio_engine';
 import { t } from '../../i18n';
+import { turnToDateString } from '../../utils/formatters';
+import {
+  SurfaceColumns,
+  SurfaceContent,
+  SurfaceDetail,
+  SurfaceDetailBody,
+  SurfaceDetailFooter,
+  SurfaceHeader,
+  SurfaceSection,
+  SurfaceSections,
+  SurfaceStat,
+  SURFACE_CHIP,
+  SURFACE_LABEL_MUTED,
+  SURFACE_MODAL_BACKDROP,
+  SURFACE_MODAL_PANEL_MEDIUM,
+  SURFACE_PRIMARY_BUTTON,
+  SURFACE_PRIMARY_BUTTON_COMPACT,
+  SURFACE_SECONDARY_BUTTON,
+  SURFACE_STATUS_TONE,
+  SURFACE_TONE,
+} from '../surface/Surface';
 // LANE-NIGHTSHIFT-A5-ARMY-HQ-PUSHBACK-UI: read-only display of Army HQ
 // pushback (CO objections + Mladić-class autonomous-launch warnings).
 // DDR: docs/40_reports/audits/20260506_AI_OFFICERS_ARMY_COS_DESIGN_DECISIONS.md
@@ -71,11 +92,11 @@ function isBlockerReviewDuplicate(item: PreAdvanceCommandReviewItem, blockers: P
   });
 }
 
-function statusClass(status: PreAdvanceCommandReviewStatus): string {
-  if (status === 'blocked') return 'border-red-500/60 bg-red-950/40 text-red-300';
-  if (status === 'review') return 'border-amber-500/60 bg-amber-950/35 text-amber-300';
-  if (status === 'clear') return 'border-emerald-500/50 bg-emerald-950/30 text-emerald-300';
-  return 'border-panel-border bg-panel-card text-text-secondary';
+function statusTone(status: PreAdvanceCommandReviewStatus): keyof typeof SURFACE_STATUS_TONE {
+  if (status === 'blocked') return 'danger';
+  if (status === 'review') return 'warn';
+  if (status === 'clear') return 'good';
+  return 'neutral';
 }
 
 function categoryLabel(category: PreAdvanceCommandReviewItem['category']): string {
@@ -90,26 +111,17 @@ function categoryLabel(category: PreAdvanceCommandReviewItem['category']): strin
   return t('decisionRoom.category.memory');
 }
 
-function severityLabel(severity: PreAdvanceCommandReviewItem['severity']): string {
-  if (severity === 'blocking') return t('warroom.severity.blocking');
-  if (severity === 'critical') return t('warroom.severity.critical');
-  if (severity === 'warning') return t('warroom.severity.warning');
-  return t('warroom.severity.info');
+function severityChip(severity: PreAdvanceCommandReviewItem['severity']): { label: string; className: string } | null {
+  if (severity === 'blocking') return { label: t('warroom.severity.blocking'), className: SURFACE_TONE.danger };
+  if (severity === 'critical') return { label: t('warroom.severity.critical'), className: SURFACE_TONE.danger };
+  if (severity === 'warning') return { label: t('warroom.severity.warning'), className: SURFACE_TONE.warn };
+  return null;
 }
 
+/** One figure of the week's review (surface redesign 2026-11-10: plain group words, full label). */
 function MetricCell({ label, value, highlighted = false }: { label: string; value: number; highlighted?: boolean }) {
   return (
-    <div className="min-w-0 border border-panel-border/60 bg-panel-card/65 px-2 py-1.5">
-      <div
-        title={label}
-        className="line-clamp-2 text-xs font-bold uppercase leading-tight tracking-[0.08em] text-text-muted"
-      >
-        {label}
-      </div>
-      <div className={`text-base font-bold tabular-nums ${highlighted ? 'text-amber-300' : 'text-text-primary'}`}>
-        {value}
-      </div>
-    </div>
+    <SurfaceStat label={<span title={label}>{label}</span>} value={value} tone={highlighted ? 'text-amber-200' : undefined} />
   );
 }
 
@@ -123,36 +135,27 @@ function ReviewItemRow({
   onReview: (item: PreAdvanceCommandReviewItem) => void;
 }) {
   const canReview = item.navigationTarget.kind !== 'none';
+  const chip = severityChip(item.severity);
 
   return (
-    <div className="border border-panel-border/60 bg-panel-card/65 px-2 py-1.5">
-      <div className="flex min-w-0 items-start justify-between gap-2">
-        <div className="min-w-0">
-          <div className="flex flex-wrap items-center gap-1">
-            <span className="border border-panel-border/70 bg-panel-bg/70 px-1 py-0.5 text-xs font-bold uppercase tracking-[0.1em] text-text-secondary">
-              {categoryLabel(item.category)}
-            </span>
-            <span className="border border-panel-border/55 bg-black/15 px-1 py-0.5 text-xs font-bold uppercase tracking-[0.1em] text-text-muted">
-              {severityLabel(item.severity)}
-            </span>
-          </div>
-          <div className="mt-1 truncate text-xs font-bold text-text-primary">{item.title}</div>
-          <div className="mt-0.5 line-clamp-2 text-xs leading-snug text-text-secondary">{item.explanation}</div>
+    <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-5 rounded-md border border-[#2a303c] bg-[#161a22] px-5 py-4">
+      <div className="flex min-w-0 flex-col gap-1.5">
+        <div className="flex flex-wrap items-center gap-2.5">
+          <span className={SURFACE_LABEL_MUTED}>{categoryLabel(item.category)}</span>
+          {chip && <span className={`${SURFACE_CHIP} ${chip.className}`}>{chip.label}</span>}
         </div>
-        <div className="shrink-0 text-right">
-          <button
-            type="button"
-            onClick={() => onReview(item)}
-            disabled={disabled || !canReview}
-            className="border border-amber-400/35 bg-amber-400/10 px-2 py-1 text-xs font-bold uppercase tracking-[0.1em] text-amber-300 transition-colors hover:bg-amber-400/20 disabled:cursor-default disabled:border-panel-border/55 disabled:bg-panel-bg/50 disabled:text-text-muted"
-          >
-            {item.actionLabel}
-          </button>
-          <div className="mt-1 max-w-[8rem] truncate text-xs uppercase tracking-[0.1em] text-text-muted">
-            {item.sourceOwner}
-          </div>
-        </div>
+        <div className="text-[18px] font-semibold leading-snug text-[#f1e6c8]">{item.title}</div>
+        <div className="text-[16px] leading-relaxed text-[#c2b69c]">{item.explanation}</div>
+        {item.sourceOwner && <div className="text-[14px] text-[#9c917b]">{item.sourceOwner}</div>}
       </div>
+      <button
+        type="button"
+        onClick={() => onReview(item)}
+        disabled={disabled || !canReview}
+        className={SURFACE_SECONDARY_BUTTON}
+      >
+        {item.actionLabel}
+      </button>
     </div>
   );
 }
@@ -167,29 +170,22 @@ function BlockerRow({
   onResolve: (blocker: PresidentialBlocker) => void;
 }) {
   return (
-    <div className="border border-red-500/45 bg-red-950/25 px-2 py-1.5">
-      <div className="flex min-w-0 items-start justify-between gap-2">
-        <div className="min-w-0">
-          <div className="flex flex-wrap items-center gap-1">
-            <span className="border border-red-500/45 bg-red-950/45 px-1 py-0.5 text-xs font-bold uppercase tracking-[0.1em] text-red-300">
-              {t('advanceTurn.required')}
-            </span>
-            <span className="border border-panel-border/55 bg-black/15 px-1 py-0.5 text-xs font-bold uppercase tracking-[0.1em] text-text-muted">
-              {blocker.typeLabel}
-            </span>
-          </div>
-          <div className="mt-1 truncate text-xs font-bold text-text-primary">{blocker.title}</div>
-          <div className="mt-0.5 line-clamp-2 text-xs leading-snug text-text-secondary">{blocker.summary}</div>
+    <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-5 rounded-md border border-red-400/40 bg-[#1c1719] px-5 py-4">
+      <div className="flex min-w-0 flex-col gap-1.5">
+        <div className="flex flex-wrap items-center gap-2.5">
+          <span className={SURFACE_LABEL_MUTED}>{blocker.typeLabel}</span>
         </div>
-        <button
-          type="button"
-          onClick={() => onResolve(blocker)}
-          disabled={disabled}
-          className="shrink-0 border border-red-400/45 bg-red-400/10 px-2 py-1 text-xs font-bold uppercase tracking-[0.1em] text-red-200 transition-colors hover:bg-red-400/20 disabled:cursor-default disabled:border-panel-border/55 disabled:bg-panel-bg/50 disabled:text-text-muted"
-        >
-          {blocker.actionLabel}
-        </button>
+        <div className="text-[18px] font-semibold leading-snug text-[#f1e6c8]">{blocker.title}</div>
+        <div className="text-[16px] leading-relaxed text-[#c2b69c]">{blocker.summary}</div>
       </div>
+      <button
+        type="button"
+        onClick={() => onResolve(blocker)}
+        disabled={disabled}
+        className={SURFACE_PRIMARY_BUTTON_COMPACT}
+      >
+        {blocker.actionLabel}
+      </button>
     </div>
   );
 }
@@ -377,6 +373,14 @@ export function AdvanceTurnModal({ onReviewPriorities, onReviewItem, onResolveBl
     onResolveBlocker?.(blocker.action, blocker.id);
   }, [advancing, blockers, onResolveBlocker, pending, setPending]);
 
+
+  const isBlocked = review.status === 'blocked' || blockers.length > 0;
+  const turn = loadedGameState?.turn ?? null;
+
+  // Surface redesign (owner, 2026-11-10): Advance is a surface in the Command Surface's
+  // style — what stands between the president and the next week on the left (blockers,
+  // then staff review items, then Army HQ pushback), the week's figures and the decision
+  // on the right with the Advance button in a footer that never scrolls away.
   return (
     <Modal
       isOpen={pending && !turnPausedForDecisions}
@@ -384,149 +388,143 @@ export function AdvanceTurnModal({ onReviewPriorities, onReviewItem, onResolveBl
       zIndex={Z.CRITICAL_MODAL}
       closeOnBackdropClick={false}
       ariaLabelledBy="advance-turn-title"
-      backdropClassName="bg-black/65 px-4"
-      panelClassName="max-h-[calc(var(--interface-viewport-height,100vh)-2rem)] w-full max-w-lg overflow-y-auto border border-panel-border bg-panel-bg/97 text-text-primary shadow-2xl backdrop-blur-md"
+      backdropClassName={SURFACE_MODAL_BACKDROP}
+      panelClassName={SURFACE_MODAL_PANEL_MEDIUM}
     >
       <>
-        <div className="border-b border-panel-border bg-panel-card/70 px-4 py-3">
-          <div className="flex flex-wrap items-start justify-between gap-2">
-            <div className="min-w-0">
-              <div id="advance-turn-title" className="text-xs font-bold uppercase tracking-wider text-accent-gold">
-                {t('advanceTurn.title')}
-              </div>
-              <div className="mt-0.5 text-sm font-bold text-text-primary">
-                {t(
-                  review.status === 'clear'
-                    ? 'advanceTurn.clearQuestion'
-                    : review.status === 'review'
-                      ? 'advanceTurn.reviewQuestion'
-                      : 'advanceTurn.confirmQuestion',
-                )}
-              </div>
-            </div>
-            <div className={`border px-2 py-1 text-xs font-bold uppercase tracking-[0.12em] ${statusClass(review.status)}`}>
+        <SurfaceHeader
+          eyebrow={turn != null ? turnToDateString(turn) : t('advanceTurn.title')}
+          title={<span id="advance-turn-title">{t('advanceTurn.title')}</span>}
+          trailing={(
+            <div className={`rounded border px-4 py-2 text-[16px] ${SURFACE_STATUS_TONE[statusTone(review.status)]}`}>
               {review.headline}
             </div>
-          </div>
-        </div>
+          )}
+        />
 
-        <div className="space-y-3 px-4 py-3">
-          <div className="text-xs leading-snug text-text-secondary">
-            {t(review.status === 'clear' ? 'advanceTurn.holdRecommendation' : 'advanceTurn.warning')}
-          </div>
+        <SurfaceColumns layout="content-detail">
+          <SurfaceContent>
+            <SurfaceSections>
+              {isBlocked && (
+                <section className="flex flex-col gap-2 rounded-md border border-red-400/40 bg-red-950/25 px-5 py-4">
+                  <div className="text-[20px] font-semibold text-red-100">
+                    {t('advanceTurn.blockedTitle')}
+                  </div>
+                  <div className="text-[16px] leading-relaxed text-[#ddd1b3]">
+                    {t('advanceTurn.blockedSummary')}
+                  </div>
+                  {review.canReviewPriorities && (
+                    <button
+                      type="button"
+                      onClick={handleReviewPriorities}
+                      disabled={advancing}
+                      className={`self-start ${SURFACE_SECONDARY_BUTTON}`}
+                    >
+                      {t('advanceTurn.openReview')}
+                    </button>
+                  )}
+                </section>
+              )}
 
-          {(review.status === 'blocked' || blockers.length > 0) && (
-            <section className="rounded border border-red-500/40 bg-red-950/30 px-3 py-2">
-              <div className="text-xs font-bold uppercase tracking-[0.14em] text-red-300">
-                {t('advanceTurn.blockedTitle')}
+              {blockers.length > 0 && (
+                <SurfaceSection label={t('advanceTurn.resolveBeforeAdvancing')}>
+                  {blockers.map((blocker) => (
+                    <BlockerRow
+                      key={blocker.id}
+                      blocker={blocker}
+                      disabled={advancing}
+                      onResolve={handleResolveBlocker}
+                    />
+                  ))}
+                </SurfaceSection>
+              )}
+
+              <SurfaceSection label={t('decisionRoom.reviewBeforeAdvance')}>
+                {reviewItems.length === 0 ? (
+                  <div className="rounded-md border border-[#2a303c] bg-[#161a22] px-5 py-4 text-[16px] leading-relaxed text-[#c2b69c]">
+                    {t('decisionRoom.noBuriedItems')}
+                  </div>
+                ) : reviewItems.map((item) => (
+                  <ReviewItemRow
+                    key={item.id}
+                    item={item}
+                    disabled={advancing}
+                    onReview={handleReviewItem}
+                  />
+                ))}
+              </SurfaceSection>
+
+              {/* LANE-NIGHTSHIFT-A5-ARMY-HQ-PUSHBACK-UI: read-only display of CO
+                  objections + Mladić-class autonomous-launch warnings. Panel
+                  returns null when no data surfaces — keeps shell clean. */}
+              <ArmyCoPushbackPanel
+                currentTurn={armyCoPushbackData.currentTurn}
+                officers={armyCoPushbackData.officers}
+                pendingOfficerEvents={armyCoPushbackData.pendingOfficerEvents}
+                decisionTraces={armyCoPushbackData.decisionTraces}
+                playerFaction={armyCoPushbackData.playerFaction}
+              />
+            </SurfaceSections>
+          </SurfaceContent>
+
+          <SurfaceDetail>
+            <SurfaceDetailBody
+              title={t(
+                review.status === 'clear'
+                  ? 'advanceTurn.clearQuestion'
+                  : review.status === 'review'
+                    ? 'advanceTurn.reviewQuestion'
+                    : 'advanceTurn.confirmQuestion',
+              )}
+              explanation={t(review.status === 'clear' ? 'advanceTurn.holdRecommendation' : 'advanceTurn.warning')}
+            >
+              <div className="flex flex-col pt-1">
+                <MetricCell label={t('commandSurface.group.needs')} value={review.metrics.priorityCounts.required} highlighted={review.metrics.priorityCounts.required > 0} />
+                <MetricCell label={t('commandSurface.group.review')} value={review.metrics.priorityCounts.recommended} />
+                <MetricCell label={t('commandSurface.group.watch')} value={review.metrics.priorityCounts.monitor} />
+                <MetricCell label={t('commandSurface.group.record')} value={review.metrics.priorityCounts.record} />
               </div>
-              <div className="mt-1 text-xs leading-snug text-text-secondary">
-                {t('advanceTurn.blockedSummary')}
-              </div>
-              {review.canReviewPriorities && (
+            </SurfaceDetailBody>
+            <SurfaceDetailFooter>
+              <button
+                type="button"
+                onClick={() => void handleConfirm()}
+                disabled={advancing || isBlocked}
+                className={SURFACE_PRIMARY_BUTTON}
+              >
+                {advancing
+                  ? t('advanceTurn.advancing')
+                  : t(
+                    review.status === 'clear'
+                      ? 'advanceTurn.advanceHoldingPolicy'
+                      : review.status === 'review'
+                        ? 'advanceTurn.advanceRecordedDecisions'
+                        : 'advanceTurn.advance',
+                  )}
+              </button>
+              <div className="flex flex-wrap gap-3">
+                {review.canReviewPriorities && (
+                  <button
+                    type="button"
+                    onClick={handleReviewPriorities}
+                    disabled={advancing}
+                    className={`flex-1 ${SURFACE_SECONDARY_BUTTON}`}
+                  >
+                    {t('advanceTurn.reviewPriorities')}
+                  </button>
+                )}
                 <button
                   type="button"
-                  onClick={handleReviewPriorities}
+                  onClick={handleCancel}
                   disabled={advancing}
-                  className="mt-2 border border-red-300/35 bg-red-400/10 px-2 py-1 text-xs font-bold uppercase text-red-200 transition-colors hover:bg-red-400/20 disabled:opacity-50"
+                  className={`flex-1 ${SURFACE_SECONDARY_BUTTON}`}
                 >
-                  {t('advanceTurn.openReview')}
+                  {t('armyHq.cancel')}
                 </button>
-              )}
-            </section>
-          )}
-
-          <section>
-            <div className="mb-1.5 text-xs font-bold uppercase tracking-[0.16em] text-text-muted">
-              {t('decisionRoom.reviewBeforeAdvance')}
-            </div>
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-              <MetricCell label={t('decisionRoom.metric.required')} value={review.metrics.priorityCounts.required} highlighted={review.metrics.priorityCounts.required > 0} />
-              <MetricCell label={t('decisionRoom.metric.recommended')} value={review.metrics.priorityCounts.recommended} />
-              <MetricCell label={t('decisionRoom.metric.monitor')} value={review.metrics.priorityCounts.monitor} />
-              <MetricCell label={t('decisionRoom.metric.record')} value={review.metrics.priorityCounts.record} />
-            </div>
-          </section>
-
-          {blockers.length > 0 && (
-            <section className="space-y-1.5">
-              <div className="text-xs font-bold uppercase tracking-[0.16em] text-red-300">
-                {t('advanceTurn.resolveBeforeAdvancing')}
               </div>
-              {blockers.map((blocker) => (
-                <BlockerRow
-                  key={blocker.id}
-                  blocker={blocker}
-                  disabled={advancing}
-                  onResolve={handleResolveBlocker}
-                />
-              ))}
-            </section>
-          )}
-
-          <section className="space-y-1.5">
-            {reviewItems.length === 0 ? (
-              <div className="border border-panel-border/60 bg-panel-card/65 px-2 py-2 text-xs text-text-secondary">
-                {t('decisionRoom.noBuriedItems')}
-              </div>
-            ) : reviewItems.map((item) => (
-              <ReviewItemRow
-                key={item.id}
-                item={item}
-                disabled={advancing}
-                onReview={handleReviewItem}
-              />
-            ))}
-          </section>
-
-          {/* LANE-NIGHTSHIFT-A5-ARMY-HQ-PUSHBACK-UI: read-only display of CO
-              objections + Mladić-class autonomous-launch warnings. Panel
-              returns null when no data surfaces — keeps shell clean. */}
-          <ArmyCoPushbackPanel
-            currentTurn={armyCoPushbackData.currentTurn}
-            officers={armyCoPushbackData.officers}
-            pendingOfficerEvents={armyCoPushbackData.pendingOfficerEvents}
-            decisionTraces={armyCoPushbackData.decisionTraces}
-            playerFaction={armyCoPushbackData.playerFaction}
-          />
-        </div>
-
-        <div className="flex flex-wrap gap-2 border-t border-panel-border bg-panel-card/70 px-4 py-3">
-          <button
-            type="button"
-            onClick={() => void handleConfirm()}
-            disabled={advancing || review.status === 'blocked' || blockers.length > 0}
-            className="border border-accent-gold/70 bg-accent-gold px-3 py-1.5 text-xs font-bold uppercase text-black transition-colors hover:bg-amber-300 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            {advancing
-              ? t('advanceTurn.advancing')
-              : t(
-                review.status === 'clear'
-                  ? 'advanceTurn.advanceHoldingPolicy'
-                  : review.status === 'review'
-                    ? 'advanceTurn.advanceRecordedDecisions'
-                    : 'advanceTurn.advance',
-              )}
-          </button>
-          {review.canReviewPriorities && (
-            <button
-              type="button"
-              onClick={handleReviewPriorities}
-              disabled={advancing}
-              className="border border-amber-400/35 bg-amber-400/10 px-3 py-1.5 text-xs font-bold uppercase text-amber-300 transition-colors hover:bg-amber-400/20 disabled:opacity-50"
-            >
-              {t('advanceTurn.reviewPriorities')}
-            </button>
-          )}
-          <button
-            type="button"
-            onClick={handleCancel}
-            disabled={advancing}
-            className="border border-panel-border/70 bg-panel-bg/70 px-3 py-1.5 text-xs font-bold uppercase text-text-secondary transition-colors hover:bg-panel-hover hover:text-text-primary disabled:opacity-50"
-          >
-            {t('armyHq.cancel')}
-          </button>
-        </div>
+            </SurfaceDetailFooter>
+          </SurfaceDetail>
+        </SurfaceColumns>
       </>
     </Modal>
   );

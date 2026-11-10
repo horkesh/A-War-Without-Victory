@@ -280,9 +280,14 @@ describe('EventDecisionModal presidential dossier', () => {
       onRespond: () => undefined,
     }));
 
+    // Surface redesign 2026-11-10: the responses own the right-hand column, which scrolls on
+    // its own, so no amount of situation copy can push them below the fold.
     const responseRail = screen.getByTestId('event-decision-response-rail');
     const text = container.textContent ?? '';
-    expect(text.indexOf(responseRail.textContent ?? '')).toBeLessThan(text.indexOf('Situation'));
+    expect(text).toContain('Situation');
+    expect(responseRail.closest('aside')).toBeTruthy();
+    expect(responseRail.textContent).not.toContain('Situation');
+    expect(responseRail.className).toContain('overflow-y-auto');
     expect(screen.getByRole('button', { name: 'Choose response: Adopt all six goals' })).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Choose response: Delay the vote' })).toBeTruthy();
   });

@@ -164,7 +164,7 @@ describe('Command Surface in BCS', () => {
     setLocale('bcs');
     renderSurface(makeState(paramilitary));
     const text = screen.getByTestId('warroom-decision-room-host').textContent ?? '';
-    for (const bcs of ['Autoritet', 'OVE SEDMICE', 'Potrebna odluka', 'TRAŽI VAŠU ODLUKU']) expect(text).toContain(bcs);
+    for (const bcs of ['Autoritet', 'Ove sedmice', 'Potrebna odluka', 'Traži vašu odluku']) expect(text).toContain(bcs);
     for (const en of ['This week', 'Decision needed', 'Needs your decision', 'Nothing waiting']) expect(text).not.toContain(en);
   });
 });

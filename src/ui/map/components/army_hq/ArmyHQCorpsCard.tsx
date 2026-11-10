@@ -216,7 +216,7 @@ export function ArmyHQCorpsCard({
     const frontCohesionWidth = reportedCohesion != null ? Math.min(70, reportedCohesion * 0.7) : 0;
 
     const conditionDescription = (
-        <span id={descriptionId} data-testid="army-hq-corps-focus-description" className="sr-only group-focus-visible:not-sr-only group-focus-visible:block min-w-0 max-w-full break-words px-3 py-2 text-xs font-normal text-text-secondary">
+        <span id={descriptionId} data-testid="army-hq-corps-focus-description" className="sr-only group-focus-visible:not-sr-only group-focus-visible:block min-w-0 max-w-full break-words px-3 py-2 text-[13px] font-normal text-text-secondary">
             {effectivenessTitle}. {cohesionTitle}
         </span>
     );
@@ -240,11 +240,11 @@ export function ArmyHQCorpsCard({
             >
                 {compressedConditionDescription}
                 <div className="flex items-center justify-between px-3 py-2 bg-panel-card">
-                    <span className="text-xs font-bold text-text-secondary uppercase tracking-widest font-mono">
+                    <span className="text-[13px] font-bold text-text-secondary uppercase tracking-widest font-mono">
                         {displayName}
                     </span>
                     <div className="flex items-center gap-2">
-                        <span className={`text-xs font-bold tabular-nums font-mono ${gradeColor}`}>
+                        <span className={`text-[13px] font-bold tabular-nums font-mono ${gradeColor}`}>
                             {data.eff.grade}
                         </span>
                     </div>
@@ -279,11 +279,11 @@ export function ArmyHQCorpsCard({
             {conditionDescription}
             <div className="flex flex-wrap items-start justify-between gap-2 px-4 pt-4">
                 {hasThreat && (
-                    <span className="max-w-full break-words text-xs text-red-400 font-bold animate-pulse tracking-[0.15em] bg-red-500/10 border border-red-500/30 px-1.5 py-0.5">
+                    <span className="max-w-full break-words text-[13px] text-red-400 font-bold animate-pulse tracking-[0.15em] bg-red-500/10 border border-red-500/30 px-1.5 py-0.5">
                         {t('armyHqCorps.incoming')}
                     </span>
                 )}
-                <span className={`ml-auto max-w-full break-words text-xs font-bold uppercase tracking-[0.2em] px-2 py-1 border ${stanceClass} font-mono`}>
+                <span className={`ml-auto max-w-full break-words text-[13px] font-bold uppercase tracking-[0.2em] px-2 py-1 border ${stanceClass} font-mono`}>
                     {stanceLabel}
                 </span>
             </div>
@@ -295,7 +295,7 @@ export function ArmyHQCorpsCard({
                 </div>
 
                 {/* Line 2: Commander + grade */}
-                <div className="mt-1.5 flex flex-wrap items-start gap-x-2.5 gap-y-1 text-[12px] text-text-secondary">
+                <div className="mt-1.5 flex flex-wrap items-start gap-x-2.5 gap-y-1 text-[13px] text-text-secondary">
                     {displayCommanderName ? (
                         <span className="min-w-0 basis-full break-words sm:basis-auto sm:flex-1">
                             {data.syntheticCommand ? `${t('armyHqCorps.operationCommander')}: ` : ''}
@@ -331,20 +331,20 @@ export function ArmyHQCorpsCard({
                 </div>
 
                 {data.commanderDisplay?.source === 'opening_read_model' && (
-                    <div data-testid="army-hq-opening-command-provenance" className="mt-1 text-xs leading-4 text-amber-300/85">
+                    <div data-testid="army-hq-opening-command-provenance" className="mt-1 text-[13px] leading-4 text-amber-300/85">
                         <span className="font-bold uppercase tracking-[0.12em]">{t('commanderDisplay.openingCommand')}</span>
                         <span className="text-text-secondary"> - {t('commanderDisplay.openingCommandHelp')}</span>
                     </div>
                 )}
                 {data.commanderDisplay?.source === 'synthetic' && (
-                    <div data-testid="army-hq-command-staff-provenance" className="mt-1 text-xs leading-4 text-amber-300/85">
+                    <div data-testid="army-hq-command-staff-provenance" className="mt-1 text-[13px] leading-4 text-amber-300/85">
                         <span className="font-bold uppercase tracking-[0.12em]">{t('commanderDisplay.commandStaff')}</span>
                         <span className="text-text-secondary"> - {t('commanderDisplay.commandStaffHelp')}</span>
                     </div>
                 )}
 
                 {readinessGrade && (
-                    <div className="mt-1 text-xs uppercase tracking-[0.12em] text-text-secondary font-mono">
+                    <div className="mt-1 text-[13px] uppercase tracking-[0.12em] text-text-secondary font-mono">
                         {t('armyHqCorps.readinessVitals', {
                             fatigue: roundConditionLabel(data.avgFatigue),
                             cohesion: roundConditionLabel(data.avgCohesion),
@@ -353,7 +353,7 @@ export function ArmyHQCorpsCard({
                 )}
 
                 {/* Equipment icons */}
-                <div className="flex items-center gap-4 mt-1.5 text-[12px]">
+                <div className="flex items-center gap-4 mt-1.5 text-[13px]">
                     <span className="flex items-center gap-1">
                         <Icon name="tanks" size={14} className="text-text-secondary" />
                         <span className="text-text-primary font-bold tabular-nums">{data.equipment.tanksLabel}</span>
@@ -365,9 +365,9 @@ export function ArmyHQCorpsCard({
                 </div>
 
                 {/* Line 3: Stats */}
-                <div className="flex items-center gap-4 mt-3 text-[12px] tabular-nums font-mono">
+                <div className="flex items-center gap-4 mt-3 text-[13px] tabular-nums font-mono">
                     <div className="flex flex-col">
-                        <span className="text-xs text-text-secondary uppercase tracking-tighter">{t('armyHqCorps.personnel')}</span>
+                        <span className="text-[13px] text-text-secondary uppercase tracking-tighter">{t('armyHqCorps.personnel')}</span>
                         <span
                             data-testid="army-hq-corps-card-personnel"
                             data-report-state={data.personnelTone.state}
@@ -377,11 +377,11 @@ export function ArmyHQCorpsCard({
                         </span>
                     </div>
                     <div className="flex flex-col">
-                        <span className="text-xs text-text-secondary uppercase tracking-tighter">{t('armyHqCorps.orbat')}</span>
+                        <span className="text-[13px] text-text-secondary uppercase tracking-tighter">{t('armyHqCorps.orbat')}</span>
                         <span className="text-text-secondary font-bold">{t('armyHqCorps.brigadeShortCount', { count: brigades.length })}</span>
                     </div>
                     <div className="flex flex-col">
-                        <span className="text-xs text-text-secondary uppercase tracking-tighter">{t('armyHqCorps.front')}</span>
+                        <span className="text-[13px] text-text-secondary uppercase tracking-tighter">{t('armyHqCorps.front')}</span>
                         <span className="text-text-secondary font-bold">{t('armyHqCorps.sectorShortCount', { count: sectors.length })}</span>
                     </div>
                 </div>
@@ -389,10 +389,10 @@ export function ArmyHQCorpsCard({
                 {/* Active op indicator */}
                 {data.displayedOp && data.displayedOpLabel && (
                     <div className="mt-3 pt-2.5 border-t border-panel-border flex flex-col gap-1">
-                        <span className="text-xs text-red-400 font-bold tracking-[0.2em] uppercase">{data.displayedOpLabel}</span>
+                        <span className="text-[13px] text-red-400 font-bold tracking-[0.2em] uppercase">{data.displayedOpLabel}</span>
                         <div className="flex items-center gap-2">
                             <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
-                            <span className="text-xs text-red-400 font-bold truncate uppercase font-mono">
+                            <span className="text-[13px] text-red-400 font-bold truncate uppercase font-mono">
                                 {data.displayedOp.display_name}
                             </span>
                         </div>
@@ -402,7 +402,7 @@ export function ArmyHQCorpsCard({
                 {/* This-week battles */}
                 {data.corpsBattles.length > 0 && (
                     <div className="mt-2.5 flex gap-2">
-                        <div className="px-2 py-0.5 bg-red-900/40 border border-red-500/40 text-red-400 text-xs font-bold tracking-widest animate-pulse">
+                        <div className="px-2 py-0.5 bg-red-900/40 border border-red-500/40 text-red-400 text-[13px] font-bold tracking-widest animate-pulse">
                             {t('armyHqCorps.contactEngagements', { count: data.corpsBattles.length })}
                         </div>
                     </div>
@@ -411,7 +411,7 @@ export function ArmyHQCorpsCard({
                 {!data.commandStrainReported && (
                     <div className="mt-2.5">
                         <div
-                            className="inline-flex px-2 py-0.5 text-xs font-bold tracking-widest border bg-panel-bg/60 border-panel-border/60 text-text-secondary"
+                            className="inline-flex px-2 py-0.5 text-[13px] font-bold tracking-widest border bg-panel-bg/60 border-panel-border/60 text-text-secondary"
                             title={t('armyHqCorps.commandStrainUnreported')}
                         >
                             {t('armyHqCorps.commandStrainUnreported')}
@@ -423,7 +423,7 @@ export function ArmyHQCorpsCard({
                 {data.displayedStrain > 0 && (
                     <div className="mt-2.5 flex flex-wrap gap-1.5">
                         <div
-                            className={`px-2 py-0.5 text-xs font-bold tracking-widest border ${
+                            className={`px-2 py-0.5 text-[13px] font-bold tracking-widest border ${
                                 data.strainLabel === 'compromised'
                                     ? 'bg-red-900/30 border-red-500/40 text-red-400'
                                     : 'bg-amber-900/30 border-amber-500/40 text-amber-400'
@@ -445,7 +445,7 @@ export function ArmyHQCorpsCard({
                         {/* Friction dot — demoted from badge to dot indicator (back face owns the detail list) */}
                         {data.frictionTypes.length > 0 && (
                             <div
-                                className="flex items-center gap-1 px-2 py-0.5 text-xs font-bold tracking-widest border bg-amber-900/20 border-amber-600/40 text-amber-500"
+                                className="flex items-center gap-1 px-2 py-0.5 text-[13px] font-bold tracking-widest border bg-amber-900/20 border-amber-600/40 text-amber-500"
                                 title={t('armyHqCorps.frictionTitle')}
                             >
                                 <span className="w-1.5 h-1.5 rounded-full bg-amber-500 inline-block" />
@@ -458,7 +458,7 @@ export function ArmyHQCorpsCard({
                 {data.displayedStrain === 0 && data.frictionTypes.length > 0 && (
                     <div className="mt-2.5">
                         <div
-                            className="flex items-center gap-1 px-2 py-0.5 text-xs font-bold tracking-widest border bg-amber-900/20 border-amber-600/40 text-amber-500 inline-flex"
+                            className="flex items-center gap-1 px-2 py-0.5 text-[13px] font-bold tracking-widest border bg-amber-900/20 border-amber-600/40 text-amber-500 inline-flex"
                             title={t('armyHqCorps.frictionTitle')}
                         >
                             <span className="w-1.5 h-1.5 rounded-full bg-amber-500 inline-block" />
@@ -500,7 +500,7 @@ export function ArmyHQCorpsCard({
                     aria-label={collapseCardAria}
                     className="flex items-center gap-3 hover:opacity-80 transition-opacity"
                 >
-                    <span className="text-[12px] text-text-secondary font-mono">&larr; {t('armyHqCorps.back')}</span>
+                    <span className="text-[13px] text-text-secondary font-mono">&larr; {t('armyHqCorps.back')}</span>
                     <div className="text-[18px] font-bold text-amber-400 uppercase tracking-widest" style={{ fontFamily: 'var(--font-command)' }}>
                         {displayName}
                     </div>
@@ -512,7 +512,7 @@ export function ArmyHQCorpsCard({
                     </span>
                 </button>
                 <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-3 text-[12px] tabular-nums font-mono text-text-secondary uppercase">
+                    <div className="flex items-center gap-3 text-[13px] tabular-nums font-mono text-text-secondary uppercase">
                         <span><b className="text-text-primary">{data.totalPersonnelLabel}</b> {t('armyHqCorps.personnelShort')}</span>
                         <span><b className="text-text-primary">{brigades.length}</b> {t('armyHqCorps.brigadeShort')}</span>
                         <span><b className="text-text-primary">{sectors.length}</b> {t('armyHqCorps.sectorShort')}</span>

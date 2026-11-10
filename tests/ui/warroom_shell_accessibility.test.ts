@@ -427,7 +427,8 @@ describe('WarroomShellLayer accessibility proof', () => {
     });
 
     it('keeps the Command Surface readable over the staff-room background', () => {
-        const surfaceSource = readFileSync('src/ui/map/components/command_surface/CommandSurface.tsx', 'utf8');
+        const surfaceSource = readFileSync('src/ui/map/components/command_surface/CommandSurface.tsx', 'utf8')
+            + readFileSync('src/ui/map/components/surface/Surface.tsx', 'utf8');
 
         // Opaque surface and columns; no translucent reading panels or tiny clipped text.
         expect(surfaceSource).toContain('bg-[#11141b]');

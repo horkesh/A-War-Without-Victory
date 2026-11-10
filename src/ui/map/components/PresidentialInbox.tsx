@@ -54,12 +54,12 @@ const OPENING_BRIEFS: Record<string, { titleKey: MessageKey; bulletKeys: Message
  */
 export const DOSSIER_LAYOUT = Object.freeze({
     top: '34%',
-    width: '20rem',
+    width: '24rem',
     right: '1.25rem',
     bottomGap: '0.75rem',
 });
 
-const PANEL_STYLE: CSSProperties = { ...DETAIL_PANEL_STYLE, width: '22rem' };
+const PANEL_STYLE: CSSProperties = { ...DETAIL_PANEL_STYLE, width: '25rem' };
 const DOSSIER_STYLE: CSSProperties = {
     ...DETAIL_PANEL_STYLE,
     width: DOSSIER_LAYOUT.width,
@@ -68,9 +68,9 @@ const DOSSIER_STYLE: CSSProperties = {
     bottom: `calc(var(--awwv-bottom-bar-clearance, 2.5rem) + ${DOSSIER_LAYOUT.bottomGap})`,
     overflow: 'visible',
 };
-const PANEL_CLASS = 'bg-panel-bg/95 backdrop-blur-sm border-l border-panel-border flex flex-col';
-const DOSSIER_CLASS = 'flex flex-col rounded-sm border border-accent-gold/40 ring-1 ring-inset ring-accent-gold/15 bg-panel-bg/95 shadow-[0_18px_40px_rgba(0,0,0,0.55)] backdrop-blur-sm';
-const DOSSIER_TAB_CLASS = 'pointer-events-none absolute -top-5 left-3 rounded-t-sm border border-b-0 border-accent-gold/50 bg-paper px-2.5 py-0.5 font-mono text-xs font-bold uppercase tracking-[0.18em] text-panel-bg shadow-[0_-1px_2px_rgba(0,0,0,0.25)]';
+const PANEL_CLASS = 'bg-[#11141b] border-l border-accent-gold/35 flex flex-col text-text-primary';
+const DOSSIER_CLASS = 'flex flex-col rounded-lg border border-accent-gold/35 bg-[#11141b] text-text-primary shadow-[0_30px_90px_rgba(0,0,0,0.65)]';
+const DOSSIER_TAB_CLASS = 'pointer-events-none absolute -top-7 left-4 rounded-t-md border border-b-0 border-accent-gold/50 bg-paper px-3 py-1 font-mono text-[13px] font-semibold uppercase tracking-[0.16em] text-panel-bg shadow-[0_-1px_2px_rgba(0,0,0,0.25)]';
 
 const PRIORITY_STYLES: Record<InboxItem['priorityBand'], { badge: string; border: string; labelKey: MessageKey }> = {
     required: { badge: 'bg-red-500 text-neutral-950', border: 'border-red-500/40', labelKey: 'decisionRoom.metric.required' },
@@ -94,6 +94,11 @@ export function typeLabel(type: string): string {
     return t('inbox.type.reviewItem');
 }
 
+// Surface redesign (2026-11-10): the Inbox keeps its place (map rail, desk dossier) but
+// reads in the surface style — opaque, 13–18px text, mono gold labels, full-size buttons.
+const CARD_LABEL = 'uppercase font-mono text-[13px] font-semibold tracking-[0.14em] text-[#b9ad94]';
+const BADGE_CLASS = 'rounded px-2 py-0.5 font-mono text-[13px] font-semibold';
+
 export function InboxCard({ item, onClick }: { item: InboxItem; onClick: () => void }) {
     const style = PRIORITY_STYLES[item.priorityBand];
     const cardTypeLabel = typeLabel(item.type);
@@ -103,7 +108,7 @@ export function InboxCard({ item, onClick }: { item: InboxItem; onClick: () => v
     if (item.type === 'intelligence_notification') {
         return (
             <div
-                className={`w-full text-left p-2.5 rounded border ${style.border} bg-panel-card`}
+                className={`flex w-full flex-col gap-1.5 rounded-md border ${style.border} bg-[#161a22] px-4 py-3 text-left`}
                 data-testid="presidential-inbox-card"
                 data-inbox-item-id={item.id}
                 data-inbox-item-type={item.type}
@@ -112,24 +117,24 @@ export function InboxCard({ item, onClick }: { item: InboxItem; onClick: () => v
                 data-priority-band={item.priorityBand}
                 data-threat-severity={item.severity}
             >
-                <div className="flex items-center gap-1.5 mb-1">
-                    <span className={`text-xs font-bold uppercase tracking-widest px-1.5 py-0.5 rounded ${style.badge}`}>
+                <div className="flex items-center gap-2">
+                    <span className={`${BADGE_CLASS} ${style.badge}`}>
                         {priorityLabel}
                     </span>
-                    <span className="text-xs font-bold uppercase tracking-widest text-text-secondary">
+                    <span className={CARD_LABEL}>
                         {cardTypeLabel}
                     </span>
                     <button
                         type="button"
                         onClick={onClick}
-                        className="ml-auto text-xs font-bold uppercase tracking-widest text-text-secondary hover:text-white transition-colors"
+                        className="ml-auto h-9 rounded-md border border-[#3a4150] px-3 text-[14px] font-semibold text-[#e8dcbc] transition hover:border-accent-gold/60"
                         aria-label={t('inbox.dismissIntel')}
                     >
                         {t('inbox.dismiss')}
                     </button>
                 </div>
-                <div className="text-xs font-bold text-text-primary leading-tight">{item.title}</div>
-                <div className="text-xs text-text-secondary leading-snug mt-0.5">{item.subtitle}</div>
+                <div className="text-[16px] font-semibold leading-snug text-[#f1e6c8]">{item.title}</div>
+                <div className="text-[15px] leading-snug text-[#c2b69c]">{item.subtitle}</div>
             </div>
         );
     }
@@ -146,27 +151,27 @@ export function InboxCard({ item, onClick }: { item: InboxItem; onClick: () => v
             data-actionable={isActionable ? 'true' : 'false'}
             data-priority-band={item.priorityBand}
             data-threat-severity={item.severity}
-            className={`w-full text-left p-2.5 rounded border ${style.border} ${
+            className={`flex w-full flex-col gap-1.5 rounded-md border px-4 py-3 text-left ${style.border} ${
                 isActionable
-                    ? 'bg-panel-card hover:bg-panel-card-hover cursor-pointer transition-colors'
+                    ? 'bg-[#161a22] cursor-pointer transition hover:border-[#c9a75c] hover:bg-[#1b2029]'
                     : 'bg-transparent cursor-default'
             }`}
         >
-            <div className="flex items-center gap-1.5 mb-1">
-                <span className={`text-xs font-bold uppercase tracking-widest px-1.5 py-0.5 rounded ${style.badge}`}>
+            <div className="flex items-center gap-2">
+                <span className={`${BADGE_CLASS} ${style.badge}`}>
                     {priorityLabel}
                 </span>
-                <span className="text-xs font-bold uppercase tracking-widest text-text-secondary">
+                <span className={CARD_LABEL}>
                     {cardTypeLabel}
                 </span>
                 {(item.updateCount ?? 1) > 1 && (
-                    <span className="ml-auto text-xs font-bold uppercase tracking-widest px-1.5 py-0.5 rounded bg-white/8 text-text-secondary border border-white/10">
+                    <span className="ml-auto rounded border border-[#3a4150] px-2 py-0.5 text-[13px] font-semibold text-[#b9ad94]">
                         {t('inbox.updates', { count: (item.updateCount ?? 1) - 1 })}
                     </span>
                 )}
             </div>
-            <div className="text-xs font-bold text-text-primary leading-tight">{item.title}</div>
-            <div className="text-xs text-text-secondary leading-snug mt-0.5">{item.subtitle}</div>
+            <div className="text-[16px] font-semibold leading-snug text-[#f1e6c8]">{item.title}</div>
+            <div className="text-[15px] leading-snug text-[#c2b69c]">{item.subtitle}</div>
         </button>
     );
 }
@@ -185,17 +190,17 @@ function OpeningBrief({
 
     return (
         <div
-            className="p-3 rounded border border-accent-gold/30 bg-gradient-to-b from-panel-card to-transparent mb-3"
+            className="flex flex-col gap-3 rounded-md border border-accent-gold/35 bg-[#161a22] p-4"
             data-testid="presidential-inbox-opening-brief"
         >
-            <div className="text-xs font-bold uppercase tracking-widest text-accent-gold mb-1.5">
+            <div className="uppercase font-mono text-[13px] font-semibold tracking-[0.16em] text-[#e0c27a]">
                 {t('inbox.openingBrief.label')}
             </div>
-            <div className="text-[12px] font-bold text-text-primary mb-1">{t(brief.titleKey)}</div>
-            <ul className="space-y-1 text-xs text-text-secondary leading-relaxed">
+            <div className="text-[19px] font-semibold leading-snug text-[#f1e6c8]">{t(brief.titleKey)}</div>
+            <ul className="m-0 flex list-none flex-col gap-1.5 p-0 text-[15px] leading-relaxed text-[#ddd1b3]">
                 {brief.bulletKeys.map((bulletKey) => (
-                    <li key={bulletKey} className="flex gap-2">
-                        <span className="mt-[0.45em] h-1 w-1 shrink-0 rounded-full bg-accent-gold/70" />
+                    <li key={bulletKey} className="grid grid-cols-[0.875rem_minmax(0,1fr)] gap-2">
+                        <span aria-hidden="true" className="text-[#c9a75c]">•</span>
                         <span>{t(bulletKey)}</span>
                     </li>
                 ))}
@@ -205,10 +210,10 @@ function OpeningBrief({
                 real win/lose axis: there is no conquest victory; the war is
                 judged at Dayton by its human cost. Mirrors the deck's beats
                 1+3 at first contact. */}
-            <p className="mt-2 border-t border-accent-gold/15 pt-2 text-xs italic leading-snug text-text-secondary/90">
+            <p className="m-0 border-t border-[#262b35] pt-3 text-[15px] italic leading-relaxed text-[#c2b69c]">
                 {t('inbox.openingBrief.thesis')}
             </p>
-            <div className="mt-2.5 flex items-center justify-between gap-3">
+            <div className="flex flex-col gap-2">
                 <button
                     type="button"
                     data-testid="presidential-inbox-opening-brief-open-desk"
@@ -216,7 +221,7 @@ function OpeningBrief({
                         onOpenDesk();
                         onDismiss();
                     }}
-                    className="text-xs font-bold uppercase tracking-widest text-accent-gold hover:text-white transition-colors"
+                    className="h-12 rounded-md bg-[#c9a75c] px-5 text-[16px] font-bold text-[#15120b] transition hover:bg-[#d8b86c]"
                 >
                     {t('inbox.openDesk')}
                 </button>
@@ -224,7 +229,7 @@ function OpeningBrief({
                     type="button"
                     data-testid="presidential-inbox-opening-brief-read-later"
                     onClick={onDismiss}
-                    className="text-xs font-bold uppercase tracking-widest text-text-secondary hover:text-white transition-colors"
+                    className="h-11 rounded-md border border-[#3a4150] bg-[#1b2029] px-5 text-[15px] font-semibold text-[#e8dcbc] transition hover:border-accent-gold/60"
                 >
                     {t('inbox.openingBrief.readLater')}
                 </button>
@@ -235,43 +240,32 @@ function OpeningBrief({
 
 function QuietInboxCapsule({ onOpenDesk, recordFiled }: { onOpenDesk: () => void; recordFiled: boolean }) {
     return (
-        <div className="rounded border border-panel-border bg-panel-card/80 p-3 space-y-2" data-testid="presidential-inbox-quiet-capsule">
-            <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                    <div className="text-xs font-bold uppercase tracking-[0.2em] text-accent-gold">
-                        {t('inbox.commandWatch')}
-                    </div>
-                    <div className="mt-1 text-[12px] font-bold text-text-primary">
-                        {t('inbox.noOrders')}
-                    </div>
-                    <div className="mt-1 text-xs leading-snug text-text-secondary">
-                        {t('inbox.quietTurn')}
-                    </div>
+        <div className="flex flex-col gap-3 rounded-md border border-[#2a303c] bg-[#161a22] p-4" data-testid="presidential-inbox-quiet-capsule">
+            <div className="flex flex-col gap-1">
+                <div className="uppercase font-mono text-[13px] font-semibold tracking-[0.16em] text-[#e0c27a]">
+                    {t('inbox.commandWatch')}
                 </div>
-                <div className="h-2 w-2 shrink-0 rounded-full bg-amber-300/80 shadow-[0_0_10px_rgba(252,211,77,0.35)]" />
+                <div className="text-[17px] font-semibold text-[#f1e6c8]">
+                    {t('inbox.noOrders')}
+                </div>
+                <div className="text-[15px] leading-snug text-[#c2b69c]">
+                    {t('inbox.quietTurn')}
+                </div>
             </div>
-            <div className="grid grid-cols-2 gap-1.5">
-                <button
-                    type="button"
-                    onClick={onOpenDesk}
-                    data-testid="presidential-inbox-quiet-open-desk"
-                    className="rounded border border-accent-gold/25 bg-accent-gold/8 px-2 py-2 text-left hover:bg-accent-gold/12 transition-colors"
-                >
-                    <div className="text-xs font-bold uppercase tracking-[0.14em] text-accent-gold">
-                        {t('inbox.decisionRoom')}
-                    </div>
-                    <div className="mt-0.5 text-xs leading-snug text-text-secondary">
-                        {t('inbox.openDesk')}
-                    </div>
-                </button>
-                <div className="rounded border border-panel-border/80 bg-black/10 px-2 py-2">
-                    <div className="text-xs font-bold uppercase tracking-[0.14em] text-text-primary">
-                        {t('inbox.chronicle')}
-                    </div>
-                    <div className="mt-0.5 text-xs leading-snug text-text-secondary">
-                        {t(recordFiled ? 'inbox.latestRecordFiled' : 'inbox.noRecordFiledYet')}
-                    </div>
-                </div>
+            <button
+                type="button"
+                onClick={onOpenDesk}
+                data-testid="presidential-inbox-quiet-open-desk"
+                className="flex flex-col gap-0.5 rounded-md border border-accent-gold/35 bg-[#1b2029] px-4 py-2.5 text-left transition hover:border-[#c9a75c]"
+            >
+                <span className="text-[16px] font-semibold text-[#e0c27a]">{t('inbox.decisionRoom')}</span>
+                <span className="text-[14px] leading-snug text-[#b9ad94]">{t('inbox.openDesk')}</span>
+            </button>
+            <div className="flex flex-col gap-0.5 px-1">
+                <span className="text-[15px] font-semibold text-[#ddd1b3]">{t('inbox.chronicle')}</span>
+                <span className="text-[14px] leading-snug text-[#9c917b]">
+                    {t(recordFiled ? 'inbox.latestRecordFiled' : 'inbox.noRecordFiledYet')}
+                </span>
             </div>
         </div>
     );
@@ -324,23 +318,21 @@ export function PresidentialInbox({ onAction, eventCatalog, material = 'panel' }
                 </div>
             )}
             {/* Header */}
-            <div className="px-3 py-2.5 border-b border-panel-border flex items-center justify-between shrink-0">
-                <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold uppercase tracking-[0.15em] text-text-primary">
-                        {t('inbox.title')}
+            <div className="flex shrink-0 items-center justify-between gap-3 border-b border-[#262b35] bg-[#141821] px-4 py-3">
+                <span className="text-[18px] font-semibold text-[#f1e6c8]">
+                    {t('inbox.title')}
+                </span>
+                {actionableCount > 0 && (
+                    <span className={`inline-flex h-7 min-w-7 items-center justify-center rounded-full px-2 font-mono text-[14px] font-semibold ${
+                        blocking ? 'bg-red-300 text-[#15120b]' : 'bg-[#e0b45a] text-[#15120b]'
+                    }`}>
+                        {actionableCount}
                     </span>
-                    {actionableCount > 0 && (
-                        <span className={`text-xs font-bold px-1.5 py-0.5 rounded ${
-                            blocking ? 'bg-red-500 text-neutral-950' : 'bg-amber-500/80 text-neutral-950'
-                        }`}>
-                            {actionableCount}
-                        </span>
-                    )}
-                </div>
+                )}
             </div>
 
             {/* Scrollable content */}
-            <div className="flex-1 overflow-y-auto px-2.5 py-2 space-y-2">
+            <div className="flex min-h-0 flex-1 flex-col gap-2.5 overflow-y-auto px-3 py-3">
                 {/* Opening brief (first turn only) */}
                 {openingBriefPending && playerFaction && (
                     <OpeningBrief
@@ -352,7 +344,7 @@ export function PresidentialInbox({ onAction, eventCatalog, material = 'panel' }
 
                 {/* Actionable items */}
                 {actionableItems.length > 0 && (
-                    <div className="space-y-1.5">
+                    <div className="flex flex-col gap-2">
                         {actionableItems.map(item => (
                             <InboxCard
                                 key={item.id}
@@ -374,12 +366,12 @@ export function PresidentialInbox({ onAction, eventCatalog, material = 'panel' }
                 {/* Situation divider + items */}
                 {situationItems.length > 0 && (
                     <>
-                        <div className="border-t border-panel-border/50 pt-2 mt-2">
-                            <div className="text-xs font-bold uppercase tracking-[0.2em] text-text-tertiary mb-1.5">
+                        <div className="mt-2 border-t border-[#262b35] pt-3">
+                            <div className="uppercase font-mono text-[13px] font-semibold tracking-[0.16em] text-[#e0c27a]">
                                 {t('inbox.situation')}
                             </div>
                         </div>
-                        <div className="space-y-1">
+                        <div className="flex flex-col gap-2">
                             {situationItems.map(item => (
                                 <InboxCard
                                     key={item.id}
@@ -412,7 +404,7 @@ export function InboxBadge({ onClick }: { onClick: () => void }) {
             <button
                 type="button"
                 onClick={onClick}
-                className="text-xs font-bold uppercase tracking-[0.1em] text-text-secondary hover:text-text-primary transition-colors px-2 py-1"
+                className="text-[13px] font-bold uppercase tracking-[0.1em] text-text-secondary hover:text-text-primary transition-colors px-2 py-1"
                 title={t('inbox.badgeTitleEmpty')}
             >
                 {t('inbox.title')}
@@ -426,7 +418,7 @@ export function InboxBadge({ onClick }: { onClick: () => void }) {
         <button
             type="button"
             onClick={onClick}
-            className={`text-xs font-bold uppercase tracking-[0.1em] px-2 py-1 rounded transition-colors ${
+            className={`text-[13px] font-bold uppercase tracking-[0.1em] px-2 py-1 rounded transition-colors ${
                 blocking
                     ? 'bg-red-500/20 text-red-400 hover:bg-red-500/30'
                     : 'bg-amber-500/20 text-amber-400 hover:bg-amber-500/30'

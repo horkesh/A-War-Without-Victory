@@ -298,7 +298,8 @@ describe('decision family modals', () => {
     const source = readFileSync('src/ui/map/components/DecisionModalImageHeader.tsx', 'utf8');
 
     expect(source).toContain('from-black/92');
-    expect(source).toContain('text-[#d8d1c3]');
+    // Surface redesign 2026-11-10: lighter cream description at 17px.
+    expect(source).toContain('text-[17px] leading-relaxed text-[#e2d6b8]');
     expect(source).not.toContain('from-black/82 via-black/58 to-black/18');
     expect(source).not.toContain('text-text-secondary">{description}</p>');
   });

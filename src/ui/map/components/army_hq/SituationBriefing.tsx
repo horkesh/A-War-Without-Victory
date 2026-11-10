@@ -65,16 +65,16 @@ export function SituationBriefing({ items, onNavigate }: SituationBriefingProps)
             className={`${DOSSIER_PAPER_CLASS} mb-4`}
         >
             <summary className={`cursor-pointer list-none flex items-center justify-between px-4 py-2.5 border-b ${DOSSIER_BAND_CLASS}`}>
-                <span className={`text-xs uppercase tracking-[0.25em] font-bold ${DOSSIER_INK.heading}`}>
+                <span className={`text-[13px] uppercase tracking-[0.25em] font-bold ${DOSSIER_INK.heading}`}>
                     {t('situationBriefing.title')}
                 </span>
-                <span className={`text-xs uppercase tracking-[0.15em] tabular-nums ${DOSSIER_INK.muted}`}>
+                <span className={`text-[13px] uppercase tracking-[0.15em] tabular-nums ${DOSSIER_INK.muted}`}>
                     {summaryLabel}
                 </span>
             </summary>
 
             {items.length === 0 ? (
-                <div className={`px-4 py-2 text-xs italic ${DOSSIER_INK.muted}`}>
+                <div className={`px-4 py-2 text-[13px] italic ${DOSSIER_INK.muted}`}>
                     {t('situationBriefing.empty')}
                 </div>
             ) : (
@@ -115,22 +115,22 @@ export function SituationBriefing({ items, onNavigate }: SituationBriefingProps)
                                 <div className="flex items-start gap-2">
                                     <span className={`w-1.5 h-1.5 rounded-full shrink-0 mt-1 ${dotColor}`} />
                                     <div className="min-w-0 flex-1">
-                                        <div className={`text-xs leading-snug font-semibold ${DOSSIER_INK.heading}`}>
+                                        <div className={`text-[13px] leading-snug font-semibold ${DOSSIER_INK.heading}`}>
                                             {copy.title}
                                         </div>
                                         {copy.detail && (
-                                            <div className={`text-xs leading-snug mt-0.5 ${DOSSIER_INK.body}`}>
+                                            <div className={`text-[13px] leading-snug mt-0.5 ${DOSSIER_INK.body}`}>
                                                 {copy.detail}
                                             </div>
                                         )}
                                         {disabledReason && (
-                                            <div className={`text-xs leading-snug mt-1 ${DOSSIER_INK.muted}`}>
+                                            <div className={`text-[13px] leading-snug mt-1 ${DOSSIER_INK.muted}`}>
                                                 {disabledReason}
                                             </div>
                                         )}
                                     </div>
                                     {hasTarget && onNavigate && targetLabel && (
-                                        <span className="text-amber-900 group-hover:text-amber-700 text-xs font-mono font-bold shrink-0 transition-colors">
+                                        <span className="text-amber-900 group-hover:text-amber-700 text-[13px] font-mono font-bold shrink-0 transition-colors">
                                             {targetLabel}
                                         </span>
                                     )}

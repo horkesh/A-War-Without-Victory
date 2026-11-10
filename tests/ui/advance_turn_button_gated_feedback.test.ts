@@ -502,8 +502,8 @@ describe('ADVANCE_TURN gated feedback', () => {
     const { container } = render(createElement(AdvanceTurnModal, { onResolveBlocker: vi.fn() }));
     const copy = container.textContent ?? '';
 
+    // Surface redesign 2026-11-10: the section label names the requirement; no per-row tag.
     expect(screen.getByText('Riješi prije nastavka')).toBeTruthy();
-    expect(screen.getAllByText('Obavezno').length).toBeGreaterThan(0);
     expect(screen.getByText('Odluka događaja')).toBeTruthy();
     expect(copy).not.toContain('Resolve before advancing');
     expect(copy).not.toContain('Required');

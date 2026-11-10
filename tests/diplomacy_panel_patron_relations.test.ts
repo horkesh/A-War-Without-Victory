@@ -80,8 +80,10 @@ describe('DiplomacyPanel — Patron Relations reframe', () => {
             }),
         );
         expect(html).toContain('Related Diplomatic Tracks');
-        expect(html).toContain('<details');
-        // The demoted signals still render (data not deleted), just inside the collapsed block.
+        // Surface redesign 2026-11-10: the demoted signals sit apart in their own right-hand
+        // column instead of a collapsed block; still secondary to the patron.
+        expect(html).toContain('data-testid="diplomacy-related-tracks"');
+        expect(html.indexOf('Your Patron')).toBeLessThan(html.indexOf('Related Diplomatic Tracks'));
         expect(html).toContain('Sarajevo siege visibility');
         expect(html).toContain('Allow a humanitarian convoy');
     });

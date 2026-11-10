@@ -156,8 +156,13 @@ it('labels Settings as a dialog, contains keyboard focus and restores the opener
   const view = render(createElement(SettingsScreen, { onClose() {} }));
   const dialog = screen.getByRole('dialog', { name: 'Settings' });
   expect(dialog.getAttribute('aria-modal')).toBe('true');
-  const first = screen.getByRole('button', { name: 'Audio' });
-  const last = screen.getByRole('button', { name: /^Close$/ });
+  // Surface redesign 2026-11-10: Close sits in the fixed header, so it leads the tab order;
+  // the section rail and the rows follow, and focus wraps between the two ends.
+  const first = screen.getByRole('button', { name: /^Close$/ });
+  expect(screen.getByRole('button', { name: 'Audio' })).toBeTruthy();
+  const tabbables = Array.from(dialog.querySelectorAll<HTMLElement>('button, input, select, textarea, [href], [tabindex]:not([tabindex="-1"])'))
+    .filter((el) => !el.hasAttribute('disabled') && el.tabIndex >= 0);
+  const last = tabbables[tabbables.length - 1] as HTMLElement;
   expect(document.activeElement).toBe(first);
   last.focus(); fireEvent.keyDown(last, { key: 'Tab' }); expect(document.activeElement).toBe(first);
   first.focus(); fireEvent.keyDown(first, { key: 'Tab', shiftKey: true }); expect(document.activeElement).toBe(last);

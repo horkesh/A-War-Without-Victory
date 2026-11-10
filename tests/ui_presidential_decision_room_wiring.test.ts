@@ -163,7 +163,10 @@ describe('Presidential Decision Room wiring', () => {
   it("keeps the President's Desk overlay clear of the persistent top toolbar", () => {
     const shell = read('../src/ui/map/components/presidential_desk/PresidentDeskShell.tsx');
 
-    expect(shell).toContain('top-[var(--awwv-toolbar-clearance,5.5rem)]');
+    // Surface redesign 2026-11-10: the Desk is a shared SurfaceFrame, whose top clears the toolbar.
+    const frame = read('../src/ui/map/components/surface/Surface.tsx');
+    expect(shell).toContain('<SurfaceFrame');
+    expect(frame).toContain('top-[4.5rem]');
     expect(shell).toContain('data-testid="desk-close-overlay"');
   });
 

@@ -27,6 +27,18 @@ import { t } from '../i18n';
 import { getDecisionHeaderForFamily } from '../data/presidentialDeskAssets';
 import { resolvePeacePlanStill } from '../data/peacePlanArt';
 import { turnToDateString } from '../utils/formatters';
+import {
+    SurfaceColumns,
+    SurfaceContent,
+    SurfaceDetail,
+    SurfaceDetailFooter,
+    SurfaceStat,
+    SURFACE_LABEL,
+    SURFACE_LABEL_MUTED,
+    SURFACE_MODAL_BACKDROP,
+    SURFACE_MODAL_PANEL_MEDIUM,
+    SURFACE_SECONDARY_BUTTON,
+} from './surface/Surface';
 
 const INSTITUTIONAL_LABELS: Record<string, string> = {
     cantonization: 'Ethnic Cantonization',
@@ -126,24 +138,24 @@ export function PeacePlanModal({ plan, onDismiss }: PeacePlanModalProps) {
             widthPercent,
         };
     });
+    // Surface redesign (owner, 2026-11-10): a surface in the Command Surface's style —
+    // the plan's plate and name on top; the documentary still and the plan's account on
+    // the left; the proposed division, the institutional model, the other delegations and
+    // the president's three answers on the right, the answers in a footer that never
+    // scrolls away.
     return (
         <Modal
             isOpen={true}
             dismissible={false}
             zIndex={Z.CRITICAL_MODAL}
             ariaLabelledBy="peace-plan-title"
-            backdropClassName="bg-black/70 backdrop-blur-sm"
-            panelClassName="w-[95%] max-w-[640px] max-h-[calc(var(--interface-viewport-height,100vh)*0.9)] overflow-auto rounded-lg border-2 border-[#8a7a60]/60 shadow-2xl"
-            panelStyle={{
-                background: 'linear-gradient(160deg, #f0e8d8 0%, #e0d8c0 50%, #d8ceb8 100%)',
-                fontFamily: 'var(--font-command)',
-            }}
+            backdropClassName={SURFACE_MODAL_BACKDROP}
+            panelClassName={SURFACE_MODAL_PANEL_MEDIUM}
         >
             <>
-                {/* Header — document stamp */}
                 <div
                     data-testid="peace-plan-header"
-                    className="relative isolate px-8 pt-8 pb-4 border-b-2 border-[#8a7a60]/30"
+                    className="relative isolate min-h-44 shrink-0 overflow-hidden border-b border-[#262b35]"
                 >
                     {headerImage && (
                         <img
@@ -151,151 +163,133 @@ export function PeacePlanModal({ plan, onDismiss }: PeacePlanModalProps) {
                             alt=""
                             aria-hidden="true"
                             data-testid="peace-plan-header-art"
-                            className="pointer-events-none absolute inset-x-0 top-0 h-28 w-full object-cover opacity-35"
+                            className="pointer-events-none absolute inset-0 h-full w-full object-cover"
                         />
                     )}
                     <div
                         aria-hidden="true"
                         data-testid="peace-plan-header-overlay"
-                        className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-[#1b130c]/35 to-transparent"
+                        className="pointer-events-none absolute inset-0 bg-gradient-to-r from-black/92 via-black/82 to-black/50"
                     />
-                    <div
-                        aria-hidden="true"
-                        className="pointer-events-none absolute top-4 right-4 text-xs uppercase tracking-widest text-[#8a7a60]/60 font-bold rotate-[-8deg] border-2 border-[#8a7a60]/30 px-2 py-1 rounded"
-                    >
-                        DIPLOMATIC
-                    </div>
-                    <div data-testid="peace-plan-header-content" className="relative">
-                        <div className="text-xs uppercase tracking-[0.2em] text-[#8a7a60] font-bold mb-1">
-                            International Peace Proposal
+                    <div data-testid="peace-plan-header-content" className="relative flex min-h-44 flex-col justify-end gap-1.5 px-8 py-6">
+                        <div className={SURFACE_LABEL}>
+                            {t('peacePlan.eyebrow')}
                         </div>
-                        <h2 id="peace-plan-title" className="text-[20px] font-bold text-[#2a2016] leading-tight">
+                        <h2 id="peace-plan-title" className="m-0 text-[30px] font-semibold leading-tight text-[#f6ecd2]">
                             {plan.planName}
                         </h2>
-                        <div className="text-xs text-[#6a5a40] mt-1"
-                             style={{ fontFamily: 'var(--font-data)' }}>
+                        <div className="text-[16px] text-[#e2d6b8]">
                             {t('peacePlan.proposedDate', { date: turnToDateString(plan.turnOffered) })}
                         </div>
                     </div>
                 </div>
 
-                {/* Documentary plan still — rendered ONLY when the plan id maps
-                    to a committed asset under assets/plans/ (resolver returns
-                    null otherwise, e.g. cutileiro). Absent → nothing here, so
-                    the still-less layout is byte-identical to before. */}
-                {planStill && (
-                    <div className="relative w-full border-b border-[#c8b898]/40" data-testid="peace-plan-still">
-                        <img
-                            src={planStill}
-                            alt=""
-                            aria-hidden="true"
-                            className="block w-full object-cover"
-                            style={{ aspectRatio: '3 / 2', maxHeight: '280px' }}
-                        />
-                        {/* Bottom fade into the paper so the still seats into the document. */}
-                        <div
-                            aria-hidden="true"
-                            className="absolute inset-x-0 bottom-0 h-1/4 pointer-events-none"
-                            style={{
-                                background: 'linear-gradient(to top, rgba(224,216,192,0.9), rgba(224,216,192,0))',
-                            }}
-                        />
-                    </div>
-                )}
+                <SurfaceColumns layout="content-detail">
+                    <SurfaceContent>
+                        {/* Documentary plan still — rendered ONLY when the plan id maps
+                            to a committed asset under assets/plans/ (resolver returns
+                            null otherwise, e.g. cutileiro). */}
+                        {planStill && (
+                            <div className="relative w-full shrink-0" data-testid="peace-plan-still">
+                                <img
+                                    src={planStill}
+                                    alt=""
+                                    aria-hidden="true"
+                                    className="block w-full object-cover"
+                                    style={{ aspectRatio: '3 / 2', maxHeight: '320px' }}
+                                />
+                            </div>
+                        )}
+                        <p className="m-0 px-8 py-6 text-[18px] leading-relaxed text-[#ddd1b3]">
+                            {plan.narrative}
+                        </p>
+                    </SurfaceContent>
 
-                {/* Narrative */}
-                <div className="px-8 py-5 text-[13px] text-[#2a2016] leading-relaxed border-b border-[#c8b898]/40">
-                    {plan.narrative}
-                </div>
+                    <SurfaceDetail>
+                        <div className="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto px-7 py-6">
+                            <section className="flex flex-col gap-3">
+                                <div className={SURFACE_LABEL}>
+                                    {t('peacePlan.territorialDivision')}
+                                </div>
+                                <div className="flex h-6 gap-1 overflow-hidden rounded border border-[#3a4150]">
+                                    {splitRows.map((row) => (
+                                        <div
+                                            key={row.faction}
+                                            role="meter"
+                                            aria-label={`${row.label} territory share`}
+                                            aria-valuemin={0}
+                                            aria-valuemax={100}
+                                            aria-valuenow={row.displayPercent}
+                                            className={FACTION_BAR_COLORS[row.faction]}
+                                            style={{ width: `${row.widthPercent}%` }}
+                                            title={`${row.label}: ${formatPercent(row.displayPercent)}%`}
+                                        />
+                                    ))}
+                                </div>
+                                <div className="flex flex-col">
+                                    {splitRows.map((row) => (
+                                        <SurfaceStat key={row.faction} label={row.label} value={`${formatPercent(row.displayPercent)}%`} />
+                                    ))}
+                                </div>
+                                <div className="text-[16px] leading-relaxed text-[#ddd1b3]">
+                                    <span className="font-semibold text-[#f1e6c8]">{t('peace.institutionalModel')}</span>{' '}
+                                    {formatInstitutionalModel(plan.institutionalModel)}
+                                </div>
+                            </section>
 
-                {/* Territorial Split */}
-                <div className="px-8 py-4 border-b border-[#c8b898]/40">
-                    <div className="text-xs uppercase tracking-widest text-[#8a7a60] font-bold mb-3">
-                        Proposed Territorial Division
-                    </div>
-                    <div className="flex gap-1 h-5 rounded overflow-hidden border border-[#8a7a60]/30 mb-2">
-                        {splitRows.map((row) => (
-                            <div
-                                key={row.faction}
-                                role="meter"
-                                aria-label={`${row.label} territory share`}
-                                aria-valuemin={0}
-                                aria-valuemax={100}
-                                aria-valuenow={row.displayPercent}
-                                className={FACTION_BAR_COLORS[row.faction]}
-                                style={{ width: `${row.widthPercent}%` }}
-                                title={`${row.label}: ${formatPercent(row.displayPercent)}%`}
-                            />
-                        ))}
-                    </div>
-                    <div className="flex justify-between text-xs text-[#6a5a40]"
-                         style={{ fontFamily: 'var(--font-data)' }}>
-                        {splitRows.map((row) => (
-                            <span key={row.faction}>{row.label} {formatPercent(row.displayPercent)}%</span>
-                        ))}
-                    </div>
-                    <div className="text-xs text-[#6a5a40] mt-2">
-                        <span className="font-bold text-[#2a2016]">{t('peace.institutionalModel')}</span>{' '}
-                        {formatInstitutionalModel(plan.institutionalModel)}
-                    </div>
-                </div>
-
-                {/* Other delegations' positions are simulation-private until the
-                    player commits. Resolution records the complete response map. */}
-                <div className="px-8 py-4 border-b border-[#c8b898]/40">
-                    <div className="text-xs uppercase tracking-widest text-[#8a7a60] font-bold mb-2">
-                        {t('peacePlan.otherFactionResponses')}
-                    </div>
-                    <div className="space-y-1.5" data-testid="peace-plan-other-responses">
-                        <div className="text-[12px] italic text-[#5a4a34]">
-                            {t('peacePlan.otherFactionPositionsPending')}
+                            {/* Other delegations' positions are simulation-private until the
+                                player commits. Resolution records the complete response map. */}
+                            <section className="flex flex-col gap-2">
+                                <div className={SURFACE_LABEL_MUTED}>
+                                    {t('peacePlan.otherFactionResponses')}
+                                </div>
+                                <div data-testid="peace-plan-other-responses">
+                                    <div className="text-[16px] italic leading-relaxed text-[#c2b69c]">
+                                        {t('peacePlan.otherFactionPositionsPending')}
+                                    </div>
+                                </div>
+                            </section>
                         </div>
-                    </div>
-                </div>
 
-                {/* Commander's Decision */}
-                <div className="px-8 py-5">
-                    <div className="text-xs uppercase tracking-widest text-[#8a7a60] font-bold mb-3 text-center">
-                        {t('peacePlan.decisionRequired')}
-                    </div>
-                    {responseError && (
-                        <div
-                            role="alert"
-                            className="mb-3 border border-[#8a2a2a]/40 bg-[#e8d0d0] px-3 py-2 text-center text-[12px] font-bold text-[#6a1a1a]"
-                        >
-                            {responseError}
-                        </div>
-                    )}
-                    <div className="flex gap-4 justify-center">
-                        <button
-                            type="button"
-                            onClick={() => void handleRespond('accepted')}
-                            disabled={isSubmitting}
-                            className="px-6 py-2.5 rounded border-2 border-[#2a6a2a]/50 bg-[#d0e8d0] text-[#1a4a1a] font-bold text-[13px] uppercase tracking-wider hover:bg-[#b8d8b8] transition-colors"
-                            style={{ fontFamily: 'var(--font-command)' }}
-                        >
-                            {t('peacePlan.acceptPlan')}
-                        </button>
-                        <button
-                            type="button"
-                            onClick={onDismiss}
-                            disabled={isSubmitting}
-                            className="px-6 py-2.5 rounded border-2 border-[#6a5a40]/35 bg-[#d8ceb8] text-[#4a3a24] font-bold text-[13px] uppercase tracking-wider hover:bg-[#c8b898] transition-colors"
-                            style={{ fontFamily: 'var(--font-command)' }}
-                        >
-                            {t('peacePlan.reviewLater')}
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => void handleRespond('rejected')}
-                            disabled={isSubmitting}
-                            className="px-6 py-2.5 rounded border-2 border-[#8a2a2a]/50 bg-[#e8d0d0] text-[#6a1a1a] font-bold text-[13px] uppercase tracking-wider hover:bg-[#d8b8b8] transition-colors"
-                            style={{ fontFamily: 'var(--font-command)' }}
-                        >
-                            {t('peacePlan.rejectPlan')}
-                        </button>
-                    </div>
-                </div>
+                        <SurfaceDetailFooter>
+                            <div className={SURFACE_LABEL}>
+                                {t('peacePlan.decisionRequired')}
+                            </div>
+                            {responseError && (
+                                <div
+                                    role="alert"
+                                    className="rounded-md border border-red-400/45 bg-red-500/10 px-4 py-3 text-[15px] font-semibold text-red-100"
+                                >
+                                    {responseError}
+                                </div>
+                            )}
+                            <button
+                                type="button"
+                                onClick={() => void handleRespond('accepted')}
+                                disabled={isSubmitting}
+                                className="h-12 rounded-md border border-emerald-400/50 bg-emerald-500/15 px-5 text-[17px] font-semibold text-emerald-100 transition hover:bg-emerald-500/25 disabled:opacity-45"
+                            >
+                                {t('peacePlan.acceptPlan')}
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => void handleRespond('rejected')}
+                                disabled={isSubmitting}
+                                className="h-12 rounded-md border border-red-400/50 bg-red-500/15 px-5 text-[17px] font-semibold text-red-100 transition hover:bg-red-500/25 disabled:opacity-45"
+                            >
+                                {t('peacePlan.rejectPlan')}
+                            </button>
+                            <button
+                                type="button"
+                                onClick={onDismiss}
+                                disabled={isSubmitting}
+                                className={SURFACE_SECONDARY_BUTTON}
+                            >
+                                {t('peacePlan.reviewLater')}
+                            </button>
+                        </SurfaceDetailFooter>
+                    </SurfaceDetail>
+                </SurfaceColumns>
             </>
         </Modal>
     );

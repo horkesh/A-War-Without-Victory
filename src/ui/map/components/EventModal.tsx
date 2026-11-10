@@ -17,6 +17,17 @@ import { getPlayerSafeDisplayLabel, getPlayerSafePoliticalFactionName } from '..
 import { resolveEventIllustration, section6StillAlt } from '../data/eventIllustrationArt';
 import { t, type MessageKey } from '../i18n';
 import { isDisplayEventEffectKind } from '../utils/eventEffectDisplay';
+import {
+    SurfaceCloseButton,
+    SurfaceColumns,
+    SurfaceDetail,
+    SurfaceHeader,
+    SURFACE_CHIP,
+    SURFACE_LABEL,
+    SURFACE_MODAL_BACKDROP,
+    SURFACE_MODAL_PANEL_COMPACT,
+    SURFACE_PRIMARY_BUTTON,
+} from './surface/Surface';
 
 /** Display-ready event data for the modal. */
 export interface EventDisplayData {
@@ -120,204 +131,119 @@ export function EventModal({ event, queuePosition, queueTotal, onAcknowledge }: 
     // assistive technology. Any other still is decorative beside the narrative.
     const illustrationAlt = section6StillAlt(event.image);
 
+    // Surface redesign (owner, 2026-11-10): a short notice in the Command Surface's style —
+    // the still and the report on the left, what it changes and the single Acknowledged
+    // action on the right, in a footer that never scrolls away.
     return (
         <Modal
             isOpen={true}
             onClose={onAcknowledge}
             zIndex={Z.GLASS_PANEL_EVENT_MODAL}
             ariaLabelledBy="event-modal-title"
-            backdropClassName="bg-black/50 backdrop-blur-sm"
-            panelClassName="relative flex flex-col bg-panel-bg/95 backdrop-blur-md border border-[rgba(180,160,130,0.15)] shadow-xl rounded-lg overflow-hidden animate-slideUp"
-            panelStyle={{ width: '520px', maxHeight: 'calc(var(--interface-viewport-height, 100vh) * 0.84)' }}
+            backdropClassName={SURFACE_MODAL_BACKDROP}
+            panelClassName={`relative animate-slideUp ${SURFACE_MODAL_PANEL_COMPACT}`}
             testIdBackdrop="event-modal-backdrop"
             testIdPanel="event-modal-panel"
         >
-            <div className="flex items-center justify-between px-2.5 py-1.5 border-b border-[rgba(180,160,130,0.15)]">
-                <h2
-                    className="text-accent-gold uppercase tracking-[0.22em] text-[12px] font-black leading-none"
-                    style={{ textShadow: '0 0 8px rgba(196,163,90,0.3)' }}
-                >
-                    {t('event.title')}
-                </h2>
-                <button
-                    onClick={onAcknowledge}
-                    className="text-text-secondary hover:text-accent-gold transition-colors text-base leading-none"
-                    aria-label={t('common.close')}
-                >
-                    &times;
-                </button>
-            </div>
-            <div
-                className="min-h-0 overflow-y-auto px-2.5 py-2"
-                data-testid="event-modal-scroll-region"
-            >
-            {/* Queue indicator */}
-            {queueTotal != null && queueTotal > 1 && (
-                <div className="text-right text-xs mb-2" style={{ color: '#8a8578' }}>
-                    {t('event.queuePosition', { position: queuePosition ?? 1, total: queueTotal })}
-                </div>
-            )}
-
-            {/* Dispatch paper container */}
-            <div
-                className="rounded-md overflow-hidden relative"
-                style={{
-                    background: 'linear-gradient(165deg, #f0e8d8 0%, #e8dfc8 40%, #e0d8c0 100%)',
-                    boxShadow: 'inset 0 0 30px rgba(0,0,0,0.05)',
-                }}
-            >
-                {/* Documentary-realism illustration — rendered ONLY when the event
-                    authors an `image` and the asset resolves. Absent → nothing here,
-                    so the text-only dispatch layout is byte-identical to before. */}
-                {illustration && (
-                    <div className="relative w-full" data-testid="event-modal-illustration">
-                        <img
-                            src={illustration}
-                            alt={illustrationAlt ?? ''}
-                            aria-hidden={illustrationAlt ? undefined : 'true'}
-                            className="block w-full object-cover"
-                            style={{ aspectRatio: '16 / 9' }}
-                        />
-                        {/* Bottom fade into the paper so the still seats into the dispatch. */}
-                        <div
-                            aria-hidden="true"
-                            className="absolute inset-x-0 bottom-0 h-1/4 pointer-events-none"
-                            style={{
-                                background: 'linear-gradient(to top, rgba(224,216,192,0.9), rgba(224,216,192,0))',
-                            }}
-                        />
-                    </div>
-                )}
-
-                {/* Subtle paper noise */}
+            <SurfaceHeader
+                eyebrow={t('event.title')}
+                title={<span id="event-modal-title">{event.title}</span>}
+                trailing={queueTotal != null && queueTotal > 1 ? (
+                    <span className="text-[16px] text-[#b9ad94]">
+                        {t('event.queuePosition', { position: queuePosition ?? 1, total: queueTotal })}
+                    </span>
+                ) : undefined}
+                close={<SurfaceCloseButton onClick={onAcknowledge} aria-label={t('common.close')} />}
+            />
+            <SurfaceColumns layout={mechanicalEffects.length > 0 ? 'content-detail' : 'single'}>
                 <div
-                    className="absolute inset-0 pointer-events-none opacity-[0.03]"
-                    style={{
-                        backgroundImage: 'repeating-conic-gradient(#000 0.0001%, transparent 0.0002%)',
-                        backgroundSize: '80px 80px',
-                    }}
-                />
-
-                <div className="p-5 relative">
-                    <div
-                        data-testid="event-modal-metadata-row"
-                        className="mb-3 flex flex-wrap items-start justify-between gap-2"
-                    >
-                        {/* Faction impact badges */}
-                        <div
-                            data-testid="event-modal-faction-badges"
-                            className="flex min-w-0 flex-1 flex-wrap items-center gap-1.5"
-                        >
-                            {factions.map(fid => (
-                                <span
-                                    key={fid}
-                                    className="text-xs px-2 py-0.5 rounded font-bold tracking-wider"
-                                    style={{
-                                        backgroundColor: `${FACTION_COLORS[fid] ?? '#888'}18`,
-                                        color: FACTION_COLORS[fid] ?? '#888',
-                                        border: `1px solid ${FACTION_COLORS[fid] ?? '#888'}40`,
-                                    }}
-                                >
-                                    {getPlayerSafePoliticalFactionName(fid)}
-                                </span>
-                            ))}
+                    className="flex min-h-0 flex-col overflow-y-auto"
+                    data-testid="event-modal-scroll-region"
+                >
+                    {/* Documentary-realism illustration — rendered ONLY when the event
+                        authors an `image` and the asset resolves. */}
+                    {illustration && (
+                        <div className="relative w-full shrink-0" data-testid="event-modal-illustration">
+                            <img
+                                src={illustration}
+                                alt={illustrationAlt ?? ''}
+                                aria-hidden={illustrationAlt ? undefined : 'true'}
+                                className="block max-h-80 w-full object-cover"
+                                style={{ aspectRatio: '16 / 9' }}
+                            />
                         </div>
-
-                        {/* Keep the stamp in normal flow so long faction names wrap beside it. */}
+                    )}
+                    <div className="flex flex-col gap-4 px-8 py-6">
                         <div
-                            data-testid="event-modal-category-stamp"
-                            className="shrink-0 px-3 py-1.5 border-2 rounded-sm font-bold uppercase tracking-[0.2em] text-xs select-none"
-                            style={{
-                                transform: 'rotate(-4deg)',
-                                borderColor: cat.color,
-                                color: cat.color,
-                                opacity: 0.7,
-                                backgroundColor: `${cat.bg}15`,
-                            }}
+                            data-testid="event-modal-metadata-row"
+                            className="flex flex-wrap items-center justify-between gap-3"
                         >
-                            <div className="flex items-center gap-1.5">
-                                <Icon name={cat.icon} size={12} color={cat.color} />
+                            <div
+                                data-testid="event-modal-faction-badges"
+                                className="flex min-w-0 flex-1 flex-wrap items-center gap-2"
+                            >
+                                {factions.map(fid => (
+                                    <span
+                                        key={fid}
+                                        className="rounded border px-3 py-1 text-[14px] font-semibold"
+                                        style={{
+                                            color: FACTION_COLORS[fid] ?? '#888',
+                                            borderColor: `${FACTION_COLORS[fid] ?? '#888'}66`,
+                                        }}
+                                    >
+                                        {getPlayerSafePoliticalFactionName(fid)}
+                                    </span>
+                                ))}
+                            </div>
+                            <div
+                                data-testid="event-modal-category-stamp"
+                                className={`${SURFACE_CHIP} flex shrink-0 items-center gap-2`}
+                                style={{ borderColor: cat.color, color: cat.color }}
+                            >
+                                <Icon name={cat.icon} size={14} color={cat.color} />
                                 {t(cat.labelKey)}
                             </div>
                         </div>
+                        <p className="m-0 text-[18px] leading-relaxed text-[#ddd1b3]">
+                            {event.narrative}
+                        </p>
                     </div>
+                </div>
 
-                    {/* Title — typewriter style on paper */}
-                    <h3
-                        id="event-modal-title"
-                        className="text-lg font-bold mb-3"
-                        style={{ color: '#3a3228', fontFamily: 'var(--font-command)' }}
-                    >
-                        {event.title}
-                    </h3>
-
-                    {/* Narrative body — field report style */}
-                    <p
-                        className="text-sm leading-relaxed mb-4"
-                        style={{ color: '#4a4438', fontFamily: 'var(--font-command)', lineHeight: '1.7' }}
-                    >
-                        {event.narrative}
-                    </p>
-
-                    {/* Effect preview — on paper, subtle box */}
-                    {mechanicalEffects.length > 0 && (
-                        <div
-                            className="mb-4 p-3 rounded-sm"
-                            style={{
-                                backgroundColor: 'rgba(60,50,35,0.06)',
-                                border: '1px solid rgba(60,50,35,0.12)',
-                            }}
-                        >
-                            <div
-                                className="text-xs uppercase tracking-[0.15em] mb-2 font-bold"
-                                style={{ color: '#8a7e68' }}
-                            >
+                {mechanicalEffects.length > 0 && (
+                    <SurfaceDetail>
+                        <div className="min-h-0 flex-1 overflow-y-auto px-7 py-6">
+                            <div className={`pb-3 ${SURFACE_LABEL}`}>
                                 {t('event.intelligenceAssessment')}
                             </div>
-                            <ul className="space-y-1.5">
+                            <ul className="m-0 flex list-none flex-col gap-2 p-0">
                                 {mechanicalEffects.map((e, i) => (
-                                    <li key={i} className="text-xs flex items-start gap-1.5" style={{ color: '#5a5040' }}>
-                                        <Icon
-                                            name={EFFECT_ICONS[e.kind] ?? 'star'}
-                                            size={11}
-                                            color="#8a7e68"
-                                        />
+                                    <li key={i} className="flex items-start gap-2.5 text-[16px] leading-relaxed text-[#ddd1b3]">
+                                        <span className="mt-1 shrink-0">
+                                            <Icon
+                                                name={EFFECT_ICONS[e.kind] ?? 'star'}
+                                                size={15}
+                                                color="#c9a75c"
+                                            />
+                                        </span>
                                         <span>{e.description}</span>
                                     </li>
                                 ))}
                             </ul>
                         </div>
-                    )}
-
-                </div>
-            </div>
-            </div>
+                    </SurfaceDetail>
+                )}
+            </SurfaceColumns>
             {/* Keep the only completion action visible while long dispatches scroll. */}
             <div
-                className="shrink-0 flex justify-end px-5 py-2.5 border-t"
+                className="flex shrink-0 justify-end border-t border-[#262b35] bg-[#12161e] px-7 py-4"
                 data-testid="event-modal-action-bar"
-                style={{
-                    background: 'linear-gradient(165deg, #eee5d2 0%, #e2d9c2 100%)',
-                    borderColor: 'rgba(60,50,35,0.16)',
-                }}
             >
                 <button
                     data-testid="event-notice-acknowledge"
                     data-event-id={event.id}
                     onClick={onAcknowledge}
-                    className="px-5 py-2 rounded-sm text-sm font-bold uppercase tracking-wider transition-all"
-                    style={{
-                        backgroundColor: 'rgba(60,80,50,0.12)',
-                        color: '#5a6a4a',
-                        border: '1px solid rgba(60,80,50,0.25)',
-                        fontFamily: 'var(--font-command)',
-                    }}
-                    onMouseEnter={e => {
-                        (e.currentTarget as HTMLElement).style.backgroundColor = 'rgba(60,80,50,0.22)';
-                    }}
-                    onMouseLeave={e => {
-                        (e.currentTarget as HTMLElement).style.backgroundColor = 'rgba(60,80,50,0.12)';
-                    }}
+                    className={SURFACE_PRIMARY_BUTTON}
                 >
                     {t('event.acknowledged')}
                 </button>

@@ -24,6 +24,7 @@ import type { LoadedGameState } from '../../data/types';
 import { isPresidentialCadenceHold } from '../../data/presidentialCadenceHold';
 import { deriveInboxItems } from '../../data/inboxItems';
 import { t } from '../../i18n';
+import { SURFACE_LABEL_MUTED } from '../surface/Surface';
 import {
   AUTHOR_OP_COST,
   REQUEST_OP_COST,
@@ -95,100 +96,92 @@ export function DeskAuthorityHeader({ state }: DeskAuthorityHeaderProps) {
   const atCapacity = max > 0 && current >= max;
   const nearCapacityQuiet = isPresidentialCadenceHold(state, deriveInboxItems(state, null));
 
-  const gaugeColor = pct >= 60 ? 'bg-emerald-400/70' : pct >= 30 ? 'bg-amber-400/70' : 'bg-red-400/70';
+  const gaugeColor = pct >= 60 ? 'bg-emerald-400/70' : pct >= 30 ? 'bg-amber-400/70' : 'bg-[#e07a6a]';
   const valueColor = pct >= 60 ? 'text-emerald-300' : pct >= 30 ? 'text-amber-300' : 'text-red-300';
 
+  // Surface redesign (2026-11-10): the band is the Desk's left column — Authority first,
+  // then what it buys. Plain lines, 15–18px text, no abbreviations.
   return (
     <section
       data-testid="desk-authority-header"
       aria-label={t('deskAuthority.title')}
-      className="pointer-events-auto border border-panel-border/80 bg-[#11141b] p-4 shadow-[0_24px_80px_rgba(0,0,0,0.46)]"
+      className="flex flex-col gap-4"
     >
-      <div className="flex items-baseline justify-between gap-3 border-b border-panel-border/70 pb-2">
-        <div>
-          <div className="text-xs font-bold uppercase tracking-[0.22em] text-accent-gold">
-            {t('deskAuthority.title')}
-          </div>
-          <div className="mt-0.5 text-xs text-text-secondary">{t('deskAuthority.subtitle')}</div>
-        </div>
+      <div className="flex flex-col gap-1 px-2">
+        <span className={SURFACE_LABEL_MUTED}>{t('deskAuthority.title')}</span>
+        <span className="text-[15px] leading-snug text-[#9c917b]">{t('deskAuthority.subtitle')}</span>
       </div>
 
-      {/* Current Command Authority — compact gauge + value. */}
-      <div className="mt-3">
-        <div className="flex items-center justify-between">
-          <span className="text-xs font-bold uppercase tracking-[0.16em] text-text-muted">
-            {t('deskAuthority.caLabel')}
-          </span>
+      <div className="flex flex-col gap-3 rounded-md border border-[#2a303c] bg-[#11141b] p-4">
+        <div className="flex flex-col gap-0.5">
+          <span className="text-[16px] text-[#b9ad94]">{t('deskAuthority.caLabel')}</span>
           <span
             data-testid="desk-authority-ca-value"
-            className={`text-[14px] font-bold tabular-nums ${valueColor}`}
+            className={`font-mono text-[24px] font-semibold tabular-nums ${valueColor}`}
           >
             {t('deskAuthority.caValue', { current, max })}
           </span>
         </div>
-        <div className="mt-1.5 h-2 w-full overflow-hidden rounded-full bg-white/10">
+        <div className="h-2.5 w-full overflow-hidden rounded-full bg-[#262b35]">
           <div className={`h-full ${gaugeColor} transition-all duration-500`} style={{ width: `${pct}%` }} />
         </div>
-        <div className="mt-1 flex items-center justify-between text-xs text-text-secondary">
-          <span data-testid="desk-authority-spent">{t('deskAuthority.spentThisTurn', { spent: spentThisTurn })}</span>
-          <span data-testid="desk-authority-bank">{t('deskAuthority.bank', { reserve, max: reserveMax })}</span>
-        </div>
-        <div className="mt-1 grid grid-cols-1 gap-0.5 text-xs text-text-secondary">
-          <span data-testid="desk-authority-income-source">
+        <ul className="m-0 flex list-none flex-col gap-1.5 p-0 text-[15px] leading-snug text-[#c2b69c]">
+          <li data-testid="desk-authority-spent">{t('deskAuthority.spentThisTurn', { spent: spentThisTurn })}</li>
+          <li data-testid="desk-authority-bank">{t('deskAuthority.bank', { reserve, max: reserveMax })}</li>
+          <li data-testid="desk-authority-income-source">
             {t('deskAuthority.incomeSource', { source: t(sourceLabelKey(ca.lastRecoverySource)) })}
-          </span>
+          </li>
           {directiveCadence != null && (
-            <span data-testid="desk-authority-cadence">
+            <li data-testid="desk-authority-cadence">
               {t('deskAuthority.cadence', { turns: directiveCadence })}
-            </span>
+            </li>
           )}
-        </div>
-        {lowAuthority && (
-          <div
-            data-testid="desk-authority-low-cue"
-            className="mt-2 border border-red-400/40 bg-red-500/10 px-2 py-1 text-xs font-semibold text-red-200"
-          >
-            {t('deskAuthority.lowHint')}
-          </div>
-        )}
-        {nearCapacityQuiet && (
-          <div
-            role="note"
-            data-testid="desk-authority-cadence-hold"
-            className="mt-2 border border-sky-300/30 bg-sky-500/10 px-2 py-1.5 text-xs leading-relaxed text-sky-100"
-          >
-            {t('deskAuthority.cadenceHold')}
-          </div>
-        )}
-        {atCapacity && (
-          <div
-            data-testid="desk-authority-capacity-cue"
-            className="mt-2 border border-emerald-300/30 bg-emerald-500/10 px-2 py-1.5 text-xs leading-relaxed text-emerald-100"
-          >
-            {t('deskAuthority.capacityHint')}
-          </div>
-        )}
+        </ul>
       </div>
 
-      {/* Lever cost legend — names + CA costs from the canonical constants. */}
-      <div className="mt-3">
-        <div className="text-xs font-bold uppercase tracking-[0.16em] text-text-muted">
-          {t('deskAuthority.legendHeading')}
+      {lowAuthority && (
+        <div
+          data-testid="desk-authority-low-cue"
+          className="rounded-md border border-red-400/40 bg-red-500/10 px-4 py-3 text-[15px] font-semibold leading-snug text-red-200"
+        >
+          {t('deskAuthority.lowHint')}
         </div>
-        <ul className="mt-1.5 grid grid-cols-2 gap-x-3 gap-y-1">
+      )}
+      {nearCapacityQuiet && (
+        <div
+          role="note"
+          data-testid="desk-authority-cadence-hold"
+          className="rounded-md border border-sky-300/30 bg-sky-500/10 px-4 py-3 text-[15px] leading-relaxed text-sky-100"
+        >
+          {t('deskAuthority.cadenceHold')}
+        </div>
+      )}
+      {atCapacity && (
+        <div
+          data-testid="desk-authority-capacity-cue"
+          className="rounded-md border border-emerald-300/30 bg-emerald-500/10 px-4 py-3 text-[15px] leading-relaxed text-emerald-100"
+        >
+          {t('deskAuthority.capacityHint')}
+        </div>
+      )}
+
+      {/* What Authority buys — names and costs from the canonical constants. */}
+      <div className="flex flex-col gap-2">
+        <span className={`px-2 ${SURFACE_LABEL_MUTED}`}>{t('deskAuthority.legendHeading')}</span>
+        <ul className="m-0 flex list-none flex-col p-0">
           {LEVER_COSTS.map(({ labelKey, cost }) => {
             const affordable = current >= cost;
             return (
               <li
                 key={labelKey}
                 data-testid="desk-authority-lever"
-                className="flex items-center justify-between gap-2 text-xs"
+                className="flex items-baseline justify-between gap-3 border-b border-[#262b35] px-2 py-2 last:border-b-0"
               >
-                <span className={affordable ? 'text-text-secondary' : 'text-text-muted/60'}>
+                <span className={`text-[15px] ${affordable ? 'text-[#ddd1b3]' : 'text-[#7d7462]'}`}>
                   {t(labelKey)}
                 </span>
                 <span
-                  className={`shrink-0 font-mono font-bold tabular-nums ${affordable ? 'text-accent-gold' : 'text-red-300/70'}`}
+                  className={`shrink-0 font-mono text-[15px] font-semibold tabular-nums ${affordable ? 'text-[#e0c27a]' : 'text-red-300/80'}`}
                 >
                   {t('deskAuthority.costSuffix', { cost })}
                 </span>
