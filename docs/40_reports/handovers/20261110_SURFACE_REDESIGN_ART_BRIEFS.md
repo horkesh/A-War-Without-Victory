@@ -42,3 +42,14 @@ Rail thumbnails (square, 48–64 px) and packet thumbnails on Desk cards (96 × 
 ## Wiring (Claude, after delivery)
 
 `resolveCommandCardArt` already resolves `command_cards/<id>_<FACTION>.webp` first. The banner, detail and wide-plate lookups will try the new id (`cat_<area>_banner`, `act_<action>_detail`, `decision_header_<family>_wide`) and fall back to today's file when absent, so files can land one at a time. §4 needs a one-line import swap in `PresidentDeskShell.tsx`.
+
+## 5. End-of-week aftermath headers — 4 images (round 2, 2026-11-10)
+
+- **Where it shows:** the header band of the end-of-week aftermath surface, chosen by the week's tone. Rendered at least 176 px tall across 1,207–1,760 px (6.9:1 to 10:1), with the eyebrow, date (30 px), a tone chip, the headline and one line of story over the left 55 %, and the Close button on the right edge.
+- **Today:** `src/ui/map/assets/presidential_desk/consequence_stills/consequence_<still>.webp` (1280 × 720, 16:9), cropped to a thin strip. The same stills also serve the Desk's "What followed" thumbnails, so they stay as they are.
+- **Ask:** `src/ui/map/assets/presidential_desk/aftermath_headers/aftermath_<tone>_wide.webp`, **3000 × 480 (6.25:1)**, same documentary scene as the source still recomposed as a long panorama, subject in the right 45 %, the left 55 % dark and low-detail (shadowed table, wall, floor), nothing bright under the Close button at the far right.
+  - `gain` ← `consequence_reserve_deployment.webp`
+  - `loss` ← `consequence_public_pressure.webp`
+  - `mixed` ← `consequence_humanitarian_access.webp`
+  - `quiet` ← `consequence_negotiated_settlement.webp`
+- Same rules as §1–§3: no people's faces, no text/pseudo-text, no logos, badges or flags, period objects only. Wiring (Claude): `getAftermathHeaderForTone` with fallback to today's still.
