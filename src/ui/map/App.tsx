@@ -83,6 +83,9 @@ import {
 } from './data/officerResentmentReceipts';
 import { getOsidDisplayName } from './utils/osidDisplayName';
 import { t, useLocale } from './i18n';
+import { getDecisionHeaderForFamily } from './data/presidentialDeskAssets';
+import { resolveCommandCardArt } from './data/commandSurfaceArt';
+import { SurfaceHeader, SURFACE_CLOSE_BUTTON, SURFACE_PRIMARY_BUTTON } from './components/surface/Surface';
 import { getPlayerSafeMilitaryFactionName } from './utils/playerSafeText';
 import {
   isCurrentTacticalInteractionReady,
@@ -413,6 +416,19 @@ const WARROOM_OVERLAY_COPY: Record<NativeWarroomOverlaySurface, {
   },
 };
 
+/** Art for each Warroom preview: the intelligence plate, the command and home-front cards. */
+function warroomOverlayArt(surface: NativeWarroomOverlaySurface, faction: string | null | undefined): string | null {
+  if (surface === 'intelligence') return getDecisionHeaderForFamily('intelligence_notification');
+  if (surface === 'staff') return resolveCommandCardArt('cat_command', faction ?? null);
+  return resolveCommandCardArt('cat_home_front', faction ?? null);
+}
+
+/**
+ * Warroom preview for Intelligence, Army HQ staff and Faction (surface redesign, owner
+ * 2026-11-10): a compact surface in the Command Surface's style below the toolbar —
+ * header with Close, the room's art, what it holds in plain 18px prose, and one big gold
+ * button into the full record.
+ */
 function WarroomNativeOverlay({
   surface,
   onClose,
@@ -423,8 +439,10 @@ function WarroomNativeOverlay({
   onDrillIn: () => void;
 }) {
   const dialogRef = useRef<HTMLElement | null>(null);
+  const faction = useGameStore((s) => s.loadedGameState?.player_faction ?? null);
   const copy = WARROOM_OVERLAY_COPY[surface];
   const title = t(copy.titleKey);
+  const art = warroomOverlayArt(surface, faction);
 
   useEffect(() => {
     dialogRef.current?.focus();
@@ -445,32 +463,37 @@ function WarroomNativeOverlay({
           onClose();
         }
       }}
-      className="pointer-events-auto absolute left-4 top-24 z-[7] w-[min(30rem,calc(100vw-2rem))] border border-panel-border/80 bg-[#11141b] p-4 shadow-[0_24px_80px_rgba(0,0,0,0.58)] md:left-6 xl:left-10"
+      className="pointer-events-auto absolute left-1/2 top-[4.5rem] z-[7] flex max-h-[calc(100%-6rem)] w-[min(56rem,calc(100%-3rem))] -translate-x-1/2 flex-col overflow-hidden rounded-lg border border-accent-gold/35 bg-[#11141b] text-text-primary shadow-[0_30px_90px_rgba(0,0,0,0.65)] outline-none"
     >
-      <div className="flex items-start justify-between gap-4 border-b border-panel-border/70 pb-3">
-        <div>
-          <div className="text-xs font-bold uppercase tracking-[0.22em] text-accent-gold">{t(copy.eyebrowKey)}</div>
-          <h2 className="mt-1 text-[18px] font-bold leading-tight text-text-primary">{title}</h2>
-        </div>
+      <SurfaceHeader
+        eyebrow={t(copy.eyebrowKey)}
+        title={title}
+        close={(
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label={t('warroom.overlay.closeAria', { title })}
+            data-testid={`warroom-overlay-${surface}-close`}
+            className={SURFACE_CLOSE_BUTTON}
+          >
+            {t('warroom.overlay.close')}
+          </button>
+        )}
+      />
+      <div className="min-h-0 flex-1 overflow-y-auto">
+        {art && <img src={art} alt="" className="block h-52 w-full object-cover" />}
+        <p className="m-0 px-8 py-6 text-[18px] leading-relaxed text-[#ddd1b3]">{t(copy.bodyKey)}</p>
+      </div>
+      <div className="flex shrink-0 border-t border-[#262b35] bg-[#12161e] px-8 pb-6 pt-5">
         <button
           type="button"
-          onClick={onClose}
-          aria-label={t('warroom.overlay.closeAria', { title })}
-          data-testid={`warroom-overlay-${surface}-close`}
-          className="border border-panel-border/80 bg-black/20 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.14em] text-text-secondary transition-colors hover:border-accent-gold/45 hover:text-accent-gold"
+          onClick={onDrillIn}
+          data-testid={`warroom-overlay-${surface}-drill-in`}
+          className={`flex-1 ${SURFACE_PRIMARY_BUTTON}`}
         >
-          {t('warroom.overlay.close')}
+          {t(copy.drillInLabelKey)}
         </button>
       </div>
-      <p className="mt-3 text-[12px] leading-relaxed text-text-secondary">{t(copy.bodyKey)}</p>
-      <button
-        type="button"
-        onClick={onDrillIn}
-        data-testid={`warroom-overlay-${surface}-drill-in`}
-        className="mt-4 border border-accent-gold/45 bg-accent-gold/12 px-3 py-2 text-left text-xs font-bold uppercase tracking-[0.14em] text-accent-gold transition-colors hover:bg-accent-gold/20"
-      >
-        {t(copy.drillInLabelKey)}
-      </button>
     </section>
   );
 }
