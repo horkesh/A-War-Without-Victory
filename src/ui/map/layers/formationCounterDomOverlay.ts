@@ -1,13 +1,9 @@
-import type { Feature, FeatureCollection } from 'geojson';
-import { getIconDataUrl } from '../map/formationIcons';
-import {
-  buildFormationCounterPixelOffsets,
-  filterFinalFormationCounterFeatures,
-  getCounterFootprintHalfSize,
-  getFormationStackPixelOffset,
-  selectViewportFormationCounterFeatures,
-  type DeckViewportClip,
-} from './buildTacticalDeckLayers';
+import type { FeatureCollection } from 'geojson';
+import { getIconDataUrl, getStackBadgeLabel } from '../map/formationIcons';
+import { getFormationCounterIconHeight, type DeckViewportClip } from './buildTacticalDeckLayers';
+import { layoutFormationCounters } from './formationCounterLayout';
+
+export { getFormationCounterIconHeight };
 
 export interface FormationCounterDomOverlayItem {
   id: string;
@@ -19,79 +15,59 @@ export interface FormationCounterDomOverlayItem {
   width: number;
   height: number;
   locationOsid: string | null;
+  /** Paint slot inside its stack: 0 is the top counter. */
   stackIndex: number;
+  /** Units the stack's badge stands for (its members plus any merged neighbours). */
   stackCount: number;
+  /** Badge centre and size, on the stack's top counter only. */
+  badge: { x: number; y: number; diameter: number } | null;
 }
 
 export type FormationCounterSelectionIntent = 'exact' | 'stack-aware';
 export type FormationCounterVisualMode = 'fallback' | 'hit-targets';
 
-export function getFormationCounterIconHeight(zoom: number): number {
-  if (zoom <= 6) return 16;
-  if (zoom >= 14) return 40;
-  if (zoom < 9) return 16 + (zoom - 6) * (24 - 16) / 3;
-  if (zoom < 12) return 24 + (zoom - 9) * (32 - 24) / 3;
-  return 32 + (zoom - 12) * (40 - 32) / 2;
-}
-
-function featureCoordinates(feature: Feature): [number, number] | null {
-  if (feature.geometry?.type !== 'Point') return null;
-  const coordinates = feature.geometry.coordinates;
-  if (!Array.isArray(coordinates) || typeof coordinates[0] !== 'number' || typeof coordinates[1] !== 'number') {
-    return null;
-  }
-  return [coordinates[0], coordinates[1]];
-}
-
+/**
+ * DOM counterparts of the drawn counters, in paint order, from the same layout the Deck
+ * icon layer paints — so every hit target and badge sits exactly on a drawn counter.
+ */
 export function buildFormationCounterDomOverlayItems(args: {
   formationsGeoJson: FeatureCollection;
   formationsVisible: boolean;
   zoom: number;
   viewportClip: DeckViewportClip | null | undefined;
 }): FormationCounterDomOverlayItem[] {
-  if (!args.formationsVisible) return [];
+  if (!args.formationsVisible || !args.viewportClip) return [];
   const iconHeight = getFormationCounterIconHeight(args.zoom);
-  const iconHalfSize = getCounterFootprintHalfSize(iconHeight);
-  const getFormationPixelOffset = (feature: Feature) => getFormationStackPixelOffset(feature, iconHeight);
-  const visibleFeatures = selectViewportFormationCounterFeatures(
-    args.formationsGeoJson.features,
-    args.viewportClip,
-    iconHalfSize,
-    getFormationPixelOffset,
-  );
-  const pixelOffsets = buildFormationCounterPixelOffsets(visibleFeatures, iconHeight, args.viewportClip);
-  const finalVisibleFeatures = filterFinalFormationCounterFeatures(
-    visibleFeatures,
-    pixelOffsets,
-    iconHeight,
-    args.viewportClip,
-  );
-
-  return finalVisibleFeatures.flatMap((feature) => {
-    const coordinates = featureCoordinates(feature);
-    const point = coordinates && args.viewportClip?.project(coordinates);
-    if (!point) return [];
-    const id = String(feature.properties?.id ?? '');
-    const iconId = String(feature.properties?.icon_id ?? '');
-    if (!id || !iconId) return [];
-    const offset = pixelOffsets.get(id) ?? getFormationPixelOffset(feature);
-    const properties = (feature.properties ?? {}) as Record<string, unknown>;
-    const stackIndex = typeof properties.stack_index === 'number' ? Math.max(0, Math.floor(properties.stack_index)) : 0;
-    const stackCount = typeof properties.stack_count === 'number' ? Math.max(1, Math.floor(properties.stack_count)) : 1;
-    return [{
-      id,
-      iconId,
-      label: String(properties.name ?? properties.display_name ?? id),
-      properties,
-      x: point.x + offset[0],
-      y: point.y + offset[1],
-      width: iconHeight * 2,
-      height: iconHeight,
-      locationOsid: typeof properties.location_osid === 'string' ? properties.location_osid : null,
-      stackIndex,
-      stackCount,
-    }];
-  });
+  const layout = layoutFormationCounters(args.formationsGeoJson.features, iconHeight, args.viewportClip);
+  const items: FormationCounterDomOverlayItem[] = [];
+  for (const stack of layout.stacks) {
+    if (!stack.anchor) continue;
+    const anchor = stack.anchor;
+    const memberCount = stack.counters.length;
+    stack.counters.forEach((counter, paintIndex) => {
+      const properties = (counter.feature.properties ?? {}) as Record<string, unknown>;
+      const iconId = String(properties.icon_id ?? '');
+      if (!counter.id || !iconId) return;
+      const isTop = counter.role === 'stack-top';
+      items.push({
+        id: counter.id,
+        iconId,
+        label: String(properties.name ?? properties.display_name ?? counter.id),
+        properties,
+        x: anchor.x + counter.offset[0],
+        y: anchor.y + counter.offset[1],
+        width: iconHeight * 2,
+        height: iconHeight,
+        locationOsid: stack.osid,
+        stackIndex: memberCount - 1 - paintIndex,
+        stackCount: stack.count,
+        badge: isTop && stack.badge
+          ? { x: anchor.x + stack.badge.offset[0], y: anchor.y + stack.badge.offset[1], diameter: stack.badge.diameter }
+          : null,
+      });
+    });
+  }
+  return items;
 }
 
 type CounterControl = {
@@ -123,17 +99,17 @@ function buildCounterControls(
       width: item.width,
       height: item.height,
     });
-    if (item.stackIndex === 0 && item.stackCount > 1 && item.locationOsid) {
+    if (item.badge && item.locationOsid) {
       controls.push({
         key: `stack:${item.locationOsid}`,
         item,
         intent: 'stack-aware',
         ariaLabel: stackAriaLabel(item.stackCount, item.label),
         stackOsid: item.locationOsid,
-        x: item.x + Math.round(item.height * 0.72),
-        y: item.y - Math.round(item.height * 0.42),
-        width: 24,
-        height: 24,
+        x: item.badge.x,
+        y: item.badge.y,
+        width: Math.max(24, item.badge.diameter),
+        height: Math.max(24, item.badge.diameter),
       });
     }
   }
@@ -259,22 +235,28 @@ export function renderFormationCounterDomOverlay(args: {
       img.style.height = `${control.item.height}px`;
       img.style.opacity = args.visualMode === 'fallback' ? '1' : '0';
     } else {
+      // The visible badge is painted by the Deck icon layer right after its own counter.
+      // This span is only the pre-Deck fallback; as a hit target it stays transparent, so
+      // a badge can never show where Deck drew no counter (R8, 2026-11-10).
       button.replaceChildren();
       const badge = container.ownerDocument.createElement('span');
+      const diameter = control.item.badge?.diameter ?? 18;
       badge.dataset.awwvFormationStackCount = String(control.item.stackCount);
       badge.setAttribute('aria-hidden', 'true');
-      badge.textContent = String(control.item.stackCount);
+      badge.textContent = getStackBadgeLabel(control.item.stackCount);
       badge.style.display = 'block';
-      badge.style.width = '20px';
-      badge.style.height = '20px';
-      badge.style.margin = '2px';
+      badge.style.boxSizing = 'border-box';
+      badge.style.width = `${diameter}px`;
+      badge.style.height = `${diameter}px`;
+      badge.style.margin = `${(control.height - diameter) / 2}px ${(control.width - diameter) / 2}px`;
+      badge.style.opacity = args.visualMode === 'fallback' ? '1' : '0';
       badge.style.border = '1px solid rgba(245, 203, 92, 0.9)';
       badge.style.borderRadius = '50%';
       badge.style.background = 'rgba(18, 18, 16, 0.96)';
       badge.style.color = '#f8e6ad';
-      badge.style.fontSize = '11px';
+      badge.style.fontSize = `${Math.max(9, Math.round(diameter * 0.58))}px`;
       badge.style.fontWeight = '800';
-      badge.style.lineHeight = '18px';
+      badge.style.lineHeight = `${diameter - 2}px`;
       badge.style.textAlign = 'center';
       badge.style.boxShadow = '0 1px 4px rgba(0, 0, 0, 0.75)';
       badge.style.pointerEvents = 'none';

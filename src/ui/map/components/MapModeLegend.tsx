@@ -59,6 +59,7 @@ export function MapModeLegend() {
     return (
       <div
         data-testid="map-mode-legend"
+        data-awwv-counter-occluder="true"
         className="absolute bottom-24 z-10 rounded border border-panel-border bg-panel-bg px-3 py-2 text-text-primary shadow-lg"
         style={{ left: 'calc(15.5rem + 1rem)', minWidth: 268 }}
       >
@@ -109,6 +110,7 @@ export function MapModeLegend() {
   return (
     <div
       data-testid="map-mode-legend"
+      data-awwv-counter-occluder="true"
       className="absolute bottom-24 z-10 rounded border border-panel-border bg-panel-bg px-3 py-2 text-text-primary shadow-lg"
       style={{ left: 'calc(15.5rem + 1rem)', minWidth: 140 }}
     >
