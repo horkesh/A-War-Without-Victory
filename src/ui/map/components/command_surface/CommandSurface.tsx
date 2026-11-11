@@ -30,6 +30,7 @@ import {
 } from '../../data/presidentialDecisionRoom';
 import {
   cardBelongsToPresidentialCommandCategory,
+  derivePresidentialCommandCategoryCounts,
   PRESIDENTIAL_COMMAND_CATEGORIES,
   type PresidentialCommandCategoryId,
 } from '../../data/presidentialCategories';
@@ -213,6 +214,12 @@ export function CommandSurface({ initialCategoryId = null, onClose, onNavigateTa
     for (const card of cards) counts[matterGroup(card)] += card.countWeight ?? 1;
     return { id: category.id, cards, counts };
   }), [baseView.cards]);
+  // The shared agenda totals per area, exposed on each rail item as data attributes
+  // (as the retired command cards did) so the browser gates can read area counts.
+  const agendaCounts = useMemo(
+    () => new Map(derivePresidentialCommandCategoryCounts(baseView).map((entry) => [entry.id, entry])),
+    [baseView],
+  );
 
   // Deep links: a requested card selects it and its area; an area opens it; a legacy
   // lens opens the first area holding a card of that kind.
@@ -366,6 +373,11 @@ export function CommandSurface({ initialCategoryId = null, onClose, onNavigateTa
               <SurfaceRailItem
                 key={area.id}
                 data-testid={`command-card-${area.id}`}
+                data-awwv-count={agendaCounts.get(area.id)?.count ?? 0}
+                data-awwv-required-count={agendaCounts.get(area.id)?.priorityCounts.required ?? 0}
+                data-awwv-recommended-count={agendaCounts.get(area.id)?.priorityCounts.recommended ?? 0}
+                data-awwv-monitor-count={agendaCounts.get(area.id)?.priorityCounts.monitor ?? 0}
+                data-awwv-record-count={agendaCounts.get(area.id)?.priorityCounts.record ?? 0}
                 aria-keyshortcuts={String(index + 1)}
                 selected={area.id === activeArea.id}
                 onClick={() => selectArea(area.id)}
