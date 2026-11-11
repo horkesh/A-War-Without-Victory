@@ -162,6 +162,7 @@ test('historical event policy accepts exact visible tooltip or same-modal dossie
     const policy = loadAsyncFunction<(surface: any) => Promise<any>>(harness, 'policyEventResponseControl', {
         historicalChoice: true,
         rbihParamilitaryPolicyOverride: null,
+        rsDrinaPolicyOverride: null,
         selectHistoricalEventChoice,
         hasMeaningfulSourceContent,
     });
@@ -188,6 +189,7 @@ test('historical event policy rejects absent, empty, hidden, foreign, or ambiguo
     const policy = loadAsyncFunction<(surface: any) => Promise<any>>(harness, 'policyEventResponseControl', {
         historicalChoice: true,
         rbihParamilitaryPolicyOverride: null,
+        rsDrinaPolicyOverride: null,
         selectHistoricalEventChoice,
         hasMeaningfulSourceContent,
     });
@@ -4465,6 +4467,7 @@ test('RBiH paramilitary override chooses only the existing visible counterfactua
                 provenance: 'explicit_visible_player_policy_selector',
                 eventId: 'rbih_paramilitary_policy_1992',
             },
+            rsDrinaPolicyOverride: null,
             selectHistoricalEventChoice,
             hasMeaningfulSourceContent: () => false,
         },
@@ -4525,6 +4528,110 @@ test('RBiH paramilitary override chooses only the existing visible counterfactua
     assert.match(clickSource, /policyEventResponseControl/);
     assert.match(clickSource, /assertExactEventDecisionReceipt/);
     assert.match(clickSource, /receipt\.responseId !== transcriptRow\.responseId/);
+});
+
+test('RS Drina selector accepts only one explicit known option on a Historical RS run', () => {
+    const harness = readHarness();
+    const parse = loadFunction<(
+        argv: string[],
+        historical: boolean,
+        factions: string[],
+    ) => Record<string, unknown> | null>(harness, 'parseRsDrinaPolicyOverride', {
+        RS_DRINA_POLICY_OPTIONS: ['restrained', 'systematic'],
+    });
+
+    assert.equal(parse(['node', 'qa.cjs', '--historical-choice', '--faction=RS'], true, ['RS']), null);
+    assert.deepEqual(JSON.parse(JSON.stringify(parse(['--rs-drina-policy=restrained'], true, ['RS']))), {
+        requested: 'restrained',
+        version: 1,
+        provenance: 'explicit_operator_selection_for_unranked_sensitive_decision',
+        eventId: 'drina_cleansing_decision_1992',
+    });
+    assert.throws(() => parse(['--rs-drina-policy=restrained', '--rs-drina-policy=restrained'], true, ['RS']), /exactly once/i);
+    assert.throws(() => parse(['--rs-drina-policy'], true, ['RS']), /unknown.*empty/i);
+    assert.throws(() => parse(['--rs-drina-policy=cleanse'], true, ['RS']), /unknown.*cleanse/i);
+    assert.throws(() => parse(['--rs-drina-policy=restrained'], false, ['RS']), /historical-choice/i);
+    assert.throws(() => parse(['--rs-drina-policy=restrained'], true, ['RBiH']), /RS only/i);
+    assert.throws(() => parse(['--rs-drina-policy=restrained'], true, ['RS', 'RBiH']), /RS only/i);
+    assert.ok(
+        harness.indexOf('const rsDrinaPolicyOverride = parseRsDrinaPolicyOverride(')
+            < harness.indexOf('reserveEvidenceDirectory();'),
+        'invalid selector requests must fail before any native launch preparation',
+    );
+    assert.match(harness, /\.\.\.\(rsDrinaPolicyOverride \? \{ rsDrinaPolicyOverride \} : \{\}\)/);
+});
+
+test('RS Drina selector picks the named visible control only while the decision has no ranked default', async () => {
+    const harness = readHarness();
+    const selectHistoricalEventChoice = loadFunction<(decision: any) => any>(harness, 'selectHistoricalEventChoice');
+    const override = {
+        requested: 'restrained',
+        version: 1,
+        provenance: 'explicit_operator_selection_for_unranked_sensitive_decision',
+        eventId: 'drina_cleansing_decision_1992',
+    };
+    const policyWith = (rsDrinaPolicyOverride: unknown) => loadAsyncFunction<(surface: any) => Promise<any>>(
+        harness,
+        'policyEventResponseControl',
+        {
+            historicalChoice: true,
+            rbihParamilitaryPolicyOverride: null,
+            rsDrinaPolicyOverride,
+            selectHistoricalEventChoice,
+            hasMeaningfulSourceContent: () => false,
+        },
+    );
+    const controls = [
+        { id: 'systematic-control', label: 'Open command-accountability proceedings' },
+        { id: 'restrained-control', label: 'Impose immediate civilian-protection restraints' },
+    ];
+    const responseList = {
+        nth: (index: number) => controls[index],
+        evaluateAll: async (callback: (nodes: any[]) => unknown) => callback(controls.map((control) => ({
+            firstElementChild: { firstElementChild: { textContent: control.label } },
+        }))),
+    };
+    const rail = { getAttribute: async () => 'drina_cleansing_decision_1992' };
+    const modal = { locator: (selector: string) => selector.includes('rail')
+        ? { count: async () => 1, first: () => rail }
+        : responseList };
+    const baseOptions = [
+        { id: 'systematic', label: controls[0].label },
+        { id: 'restrained', label: controls[1].label },
+    ];
+    const surface = (extra: Record<string, unknown> = {}, options: unknown[] = baseOptions, playerFaction = 'RS') => ({
+        locator: () => ({ count: async () => 1, first: () => modal }),
+        evaluate: async () => ({
+            meta: { turn: 10, player_faction: playerFaction },
+            military: {
+                pending_event_decisions: [{
+                    event_id: 'drina_cleansing_decision_1992',
+                    faction: 'RS',
+                    response_options: options,
+                    ...extra,
+                }],
+            },
+        }),
+    });
+
+    await assert.rejects(policyWith(null)(surface()), /No ranked authored historical default/);
+
+    const policy = policyWith(override);
+    const selected = await policy(surface());
+    assert.equal(selected.loc.id, 'restrained-control');
+    assert.equal(selected.choice.responseId, 'restrained');
+    assert.equal(selected.choice.basis, 'player_selected_counterfactual');
+    assert.equal(selected.choice.historicityClaim, 'none_counterfactual_player_choice');
+    assert.deepEqual(JSON.parse(JSON.stringify(selected.choice.requestedOverride)), override);
+
+    await assert.rejects(policy(surface({ staff_recommended_response_id: 'systematic' })), /refuses/i);
+    await assert.rejects(policy(surface({ historical_default_response_id: 'systematic' })), /refuses/i);
+    await assert.rejects(policy(surface({}, [
+        { id: 'systematic', label: controls[0].label, historical_marker: 'historical_default' },
+        { id: 'restrained', label: controls[1].label },
+    ])), /refuses/i);
+    await assert.rejects(policy(surface({}, [baseOptions[0]])), /missing option restrained/i);
+    await assert.rejects(policy(surface({}, baseOptions, 'RBiH')), /exact player event|mismatched/i);
 });
 
 test('readability gate includes tiny text, ancestor clipping, inaccessible truncation, contrast, and occlusion', () => {

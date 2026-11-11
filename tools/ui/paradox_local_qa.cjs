@@ -89,6 +89,36 @@ function parseRbihParamilitaryPolicyOverride(argv, historical, selectedFactions)
   };
 }
 
+// drina_cleansing_decision_1992 is a Ring 3 sensitive decision authored with NO historical
+// default and NO staff recommendation, and the game offers no way to leave it unanswered.
+// A Historical-choice run therefore cannot pick an answer for it on its own: the operator
+// must name one here, and the transcript records it as a player-selected counterfactual
+// that claims no historicity. The selector only fills that gap; it refuses to act if the
+// event ever gains an authored default or staff recommendation.
+const RS_DRINA_POLICY_OPTIONS = ['restrained', 'systematic'];
+
+function parseRsDrinaPolicyOverride(argv, historical, selectedFactions) {
+  const prefix = '--rs-drina-policy=';
+  const optionArgs = argv.filter((arg) => arg === '--rs-drina-policy' || arg.startsWith(prefix));
+  const values = optionArgs.map((arg) => arg === '--rs-drina-policy' ? '' : arg.slice(prefix.length));
+  if (values.length === 0) return null;
+  if (values.length !== 1) throw new Error('--rs-drina-policy must be provided exactly once');
+  const requested = values[0];
+  if (!RS_DRINA_POLICY_OPTIONS.includes(requested)) {
+    throw new Error(`Unknown --rs-drina-policy option: ${requested || 'empty'}`);
+  }
+  if (!historical) throw new Error('--rs-drina-policy requires --historical-choice');
+  if (selectedFactions.length !== 1 || selectedFactions[0] !== 'RS') {
+    throw new Error('--rs-drina-policy is available for RS only');
+  }
+  return {
+    requested,
+    version: 1,
+    provenance: 'explicit_operator_selection_for_unranked_sensitive_decision',
+    eventId: 'drina_cleansing_decision_1992',
+  };
+}
+
 function hasMeaningfulSourceContent(value, prefix) {
   if (typeof value !== 'string') return false;
   const labelIndex = value.toLocaleLowerCase('en-US').lastIndexOf(prefix.toLocaleLowerCase('en-US'));
@@ -114,7 +144,29 @@ async function policyEventResponseControl(surface) {
   });
   const decision = (raw.military?.pending_event_decisions ?? []).find(row => row.event_id === eventId && row.faction === raw.meta?.player_faction);
   if (!decision) throw new Error(`Historical-choice surface lacks exact player event: ${eventId}`);
-  let selected = selectHistoricalEventChoice(decision);
+  let selected;
+  if (rsDrinaPolicyOverride && eventId === rsDrinaPolicyOverride.eventId) {
+    if (raw.meta?.player_faction !== 'RS' || decision.faction !== 'RS') {
+      throw new Error(`RS Drina selector reached mismatched player: ${raw.meta?.player_faction ?? 'missing'}`);
+    }
+    const options = decision.response_options ?? [];
+    if (decision.historical_default_response_id
+      || decision.staff_recommended_response_id
+      || options.some((option) => option.historical_marker === 'historical_default')) {
+      throw new Error('RS Drina selector refuses a decision that now has an authored default or staff recommendation');
+    }
+    const matchingOptions = options.filter((option) => option.id === rsDrinaPolicyOverride.requested);
+    if (matchingOptions.length === 0) throw new Error(`RS Drina selector is missing option ${rsDrinaPolicyOverride.requested}`);
+    if (matchingOptions.length !== 1) throw new Error(`RS Drina selector has ambiguous option ${rsDrinaPolicyOverride.requested}`);
+    selected = {
+      ...matchingOptions[0],
+      basis: 'player_selected_counterfactual',
+      historicityClaim: 'none_counterfactual_player_choice',
+      requestedOverride: { ...rsDrinaPolicyOverride },
+    };
+  } else {
+    selected = selectHistoricalEventChoice(decision);
+  }
   if (rbihParamilitaryPolicyOverride && eventId === rbihParamilitaryPolicyOverride.eventId) {
     if (raw.meta?.player_faction !== 'RBiH' || decision.faction !== 'RBiH') {
       throw new Error(`RBiH paramilitary override reached mismatched player: ${raw.meta?.player_faction ?? 'missing'}`);
@@ -245,6 +297,11 @@ const factions = args.has('--all-factions')
   ? ['RS', 'RBiH', 'HRHB']
   : [process.argv.find((arg) => arg.startsWith('--faction='))?.split('=')[1] ?? 'RS'];
 const rbihParamilitaryPolicyOverride = parseRbihParamilitaryPolicyOverride(
+  process.argv,
+  historicalChoice,
+  factions,
+);
+const rsDrinaPolicyOverride = parseRsDrinaPolicyOverride(
   process.argv,
   historicalChoice,
   factions,
@@ -815,6 +872,7 @@ const provenance = {
   requiredMapOrigin,
   officerSuccessionPolicy,
   ...(rbihParamilitaryPolicyOverride ? { rbihParamilitaryPolicyOverride } : {}),
+  ...(rsDrinaPolicyOverride ? { rsDrinaPolicyOverride } : {}),
   electronMainSha256: fileSha256(path.join(repo, 'src', 'desktop', 'electron-main.cjs')),
   warroomIndexSha256: fileSha256(path.join(repo, 'dist', 'warroom', 'index.html')),
   tacticalMapIndexSha256: fileSha256(path.join(repo, 'dist', 'tactical-map', 'index.html')),
