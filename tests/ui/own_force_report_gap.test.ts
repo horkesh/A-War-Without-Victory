@@ -132,7 +132,7 @@ describe('own-force report gap presentation', () => {
 
     const { container } = render(createElement(FormationDetail, { railSlot: 'primary' }));
 
-    expect(container.textContent).toContain('Awaiting first posture order');
+    expect(container.textContent).toContain('Not yet set by the commander');
     expect(container.textContent).toContain('1');
     expect(container.textContent).not.toMatch(/[Uu]nreported/);
     expectOwnForceReportGap(container, ['posture', 'cohesion', 'morale', 'fatigue', 'personnel']);
