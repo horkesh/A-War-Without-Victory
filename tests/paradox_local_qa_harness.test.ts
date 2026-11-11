@@ -713,6 +713,11 @@ test('directional map probes record empty terrain but require at least one visib
     assert.match(mapProbe, /selected:\s*'formation'/);
     assert.match(mapProbe, /selected:\s*'sector'/);
     assert.match(mapProbe, /selected:\s*'corps'/);
+    // A click on a stacked counter opens the stack dialog; it is recorded and closed, never
+    // left open to intercept the next probe click (rs-02, turn 16).
+    assert.match(mapProbe, /\[role="dialog"\]\[aria-label="Formation stack"\]/);
+    assert.match(mapProbe, /selected:\s*'stack-expansion'/);
+    assert.match(mapProbe, /if \(await directionalStackExpansion\.isVisible[\s\S]*?closeDirectionalStackExpansion\(`before/);
     assert.match(mapProbe, /selected:\s*false/);
     assert.match(mapProbe, /successfulDirectionalSelections === 0/);
     assert.match(mapProbe, /Directional map probe selected no settlements/);

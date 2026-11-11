@@ -4200,8 +4200,19 @@ async function mapInteractionProbe(page, frame, faction, events, labelPrefix = '
   const directionalFormationDetail = frame.locator('[data-testid="formation-detail-panel"]').first();
   const directionalSectorPanel = frame.locator('[data-testid="corps-front-panel"]').first();
   const directionalCorpsPanel = frame.locator('[data-testid="corps-detail-panel"]').first();
+  // A directional click that lands on a stacked counter opens the stack expansion dialog,
+  // whose full-screen backdrop then intercepts every later map click.
+  const directionalStackExpansion = frame.locator('[role="dialog"][aria-label="Formation stack"]').first();
+  const closeDirectionalStackExpansion = async (label) => {
+    const dismissed = await clickMatch(frame, /Dismiss Expansion/i, `dismiss stack expansion ${label}`, { afterMs: 300 });
+    if (!dismissed) await page.keyboard.press('Escape');
+    await directionalStackExpansion.waitFor({ state: 'hidden', timeout: 5000 });
+  };
   let successfulDirectionalSelections = 0;
   for (const pos of positions) {
+    if (await directionalStackExpansion.isVisible().catch(() => false)) {
+      await closeDirectionalStackExpansion(`before ${pos.label}`);
+    }
     if (await selectionPanel.isVisible().catch(() => false)) {
       await selectionPanel.locator('button').first().click({ timeout: 5000 });
       await selectionPanel.waitFor({ state: 'hidden', timeout: 5000 });
@@ -4271,6 +4282,15 @@ async function mapInteractionProbe(page, frame, faction, events, labelPrefix = '
         });
         await directionalCorpsPanel.locator('button').first().click({ timeout: 5000 });
         await directionalCorpsPanel.waitFor({ state: 'hidden', timeout: 5000 });
+        continue;
+      }
+      if (await directionalStackExpansion.isVisible().catch(() => false)) {
+        clickResults.push({ label: pos.label, clicked: true, selected: 'stack-expansion' });
+        await snapshot(page, frame, faction, events, `${labelPrefix}-map-click-${pos.label}-stack`, {
+          mapClick: pos,
+          selected: 'stack-expansion',
+        });
+        await closeDirectionalStackExpansion(pos.label);
         continue;
       }
       clickResults.push({ label: pos.label, clicked: true, selected: false });
