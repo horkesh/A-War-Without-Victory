@@ -4591,7 +4591,8 @@ test('RS Drina selector picks the named visible control only while the decision 
             firstElementChild: { firstElementChild: { textContent: control.label } },
         }))),
     };
-    const rail = { getAttribute: async () => 'drina_cleansing_decision_1992' };
+    let railEventId = 'drina_cleansing_decision_1992';
+    const rail = { getAttribute: async () => railEventId };
     const modal = { locator: (selector: string) => selector.includes('rail')
         ? { count: async () => 1, first: () => rail }
         : responseList };
@@ -4599,14 +4600,14 @@ test('RS Drina selector picks the named visible control only while the decision 
         { id: 'systematic', label: controls[0].label },
         { id: 'restrained', label: controls[1].label },
     ];
-    const surface = (extra: Record<string, unknown> = {}, options: unknown[] = baseOptions, playerFaction = 'RS') => ({
+    const surface = (extra: Record<string, unknown> = {}, options: unknown[] = baseOptions, playerFaction = 'RS', decisionFaction = 'RS') => ({
         locator: () => ({ count: async () => 1, first: () => modal }),
         evaluate: async () => ({
             meta: { turn: 10, player_faction: playerFaction },
             military: {
                 pending_event_decisions: [{
-                    event_id: 'drina_cleansing_decision_1992',
-                    faction: 'RS',
+                    event_id: railEventId,
+                    faction: decisionFaction,
                     response_options: options,
                     ...extra,
                 }],
@@ -4631,7 +4632,22 @@ test('RS Drina selector picks the named visible control only while the decision 
         { id: 'restrained', label: controls[1].label },
     ])), /refuses/i);
     await assert.rejects(policy(surface({}, [baseOptions[0]])), /missing option restrained/i);
-    await assert.rejects(policy(surface({}, baseOptions, 'RBiH')), /exact player event|mismatched/i);
+    await assert.rejects(policy(surface({}, [
+        baseOptions[0],
+        baseOptions[1],
+        { id: 'restrained', label: controls[1].label },
+    ])), /ambiguous option restrained/i);
+    await assert.rejects(policy(surface({}, baseOptions, 'RBiH')), /exact player event/i);
+    // The dedicated guard: an RBiH player holding an RBiH-owned copy of the same event id.
+    await assert.rejects(policy(surface({}, baseOptions, 'RBiH', 'RBiH')), /RS Drina selector reached mismatched player: RBiH/);
+
+    // Any other event keeps the ordinary ranked selection while the selector is set.
+    railEventId = 'some_other_rs_event';
+    const other = await policy(surface({ staff_recommended_response_id: 'systematic' }));
+    assert.equal(other.choice.responseId, 'systematic');
+    assert.equal(other.choice.basis, 'staff_recommendation');
+    assert.equal(other.choice.requestedOverride, undefined);
+    await assert.rejects(policy(surface()), /No ranked authored historical default/);
 });
 
 test('readability gate includes tiny text, ancestor clipping, inaccessible truncation, contrast, and occlusion', () => {
