@@ -122,12 +122,12 @@ export function FrontVisitSection() {
             {/* The sheet sits inside the collapsible's content: CollapsibleSection paints an
                 opaque dark card, so paper around it would be covered (Codex review on #536). */}
             <DossierPaper testId="front-visit-sheet" className="flex flex-col gap-2 px-3 py-2">
-                <p className={`text-xs leading-snug ${DOSSIER_INK.body}`}>
+                <p className={`text-[13px] leading-snug ${DOSSIER_INK.body}`}>
                     {t('frontVisit.stake')}
                 </p>
 
                 {/* Availability readout */}
-                <div className={`flex flex-col gap-0.5 text-xs ${DOSSIER_INK.muted}`}>
+                <div className={`flex flex-col gap-0.5 text-[13px] ${DOSSIER_INK.muted}`}>
                     {avail.firesLeft > 0 ? (
                         <span>{t('frontVisit.firesLeft', { count: avail.firesLeft })}</span>
                     ) : (
@@ -158,10 +158,11 @@ export function FrontVisitSection() {
                     type="button"
                     disabled={!canVisit}
                     onClick={(e) => { e.stopPropagation(); void handleVisit(); }}
-                    className={`w-full text-xs font-bold uppercase tracking-wider px-3 py-1.5 border transition-colors text-left ${
+                    className={`w-full text-[13px] font-bold uppercase tracking-wider px-3 py-1.5 border transition-colors text-left ${
                         canVisit
                             ? 'border-emerald-800/50 text-emerald-900 bg-emerald-900/10 hover:bg-emerald-900/20 hover:border-emerald-800/80 cursor-pointer'
-                            : 'border-neutral-400/50 text-neutral-500 bg-black/5 cursor-not-allowed'
+                            // Disabled but still read (why the visit is unavailable): WCAG AA contrast on paper.
+                            : 'border-neutral-400/50 text-neutral-600 bg-black/5 cursor-not-allowed'
                     }`}
                     title={t('frontVisit.buttonTitle', { cost: FRONT_VISIT_COST })}
                 >

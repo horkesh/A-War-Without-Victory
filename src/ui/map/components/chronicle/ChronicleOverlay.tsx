@@ -22,6 +22,7 @@ import type { ChronicleChapter } from '../../data/chronicleChapters.js';
 import { EmptyState } from '../EmptyState.js';
 import { Z } from '../../../shared/zIndex.js';
 import { t, useLocale } from '../../i18n';
+import { SurfaceCloseButton, SurfaceHeader, SurfaceStat, SURFACE_LABEL, SURFACE_SECONDARY_BUTTON } from '../surface/Surface';
 
 /** Abbreviated date for column labels: "Dec 1992" */
 function turnToShortDate(turn: number): string {
@@ -143,7 +144,7 @@ export function ChronicleViewModeToggle({
                             aria-pressed={active}
                             onClick={() => onModeChange(option)}
                             className={[
-                                'h-7 min-w-[70px] rounded-sm px-2 font-mono text-xs uppercase transition-colors',
+                                'h-7 min-w-[70px] rounded-sm px-2 font-mono text-[14px] uppercase transition-colors',
                                 active
                                     ? 'bg-stone-200/15 text-stone-100'
                                     : 'text-stone-400 hover:text-stone-200',
@@ -154,10 +155,10 @@ export function ChronicleViewModeToggle({
                     );
                 })}
             </div>
-            <span className="text-xs font-mono text-stone-400">
+            <span className="text-[14px] font-mono text-stone-400">
                 {t('chronicle.lens', { label: activeFilterLabel })}
             </span>
-            <span className="text-xs font-mono text-stone-400">
+            <span className="text-[14px] font-mono text-stone-400">
                 {t(chapterCount === 1 ? 'chronicle.chapterCount.one' : 'chronicle.chapterCount.many', { count: chapterCount })}
             </span>
         </div>
@@ -178,7 +179,7 @@ function ChronicleChapterView({
     if (chapters.length === 0) {
         return (
             <div className="flex h-full items-center justify-center">
-                <p className="text-xs text-stone-400">{t('chronicle.noChapters')}</p>
+                <p className="text-[14px] text-stone-400">{t('chronicle.noChapters')}</p>
             </div>
         );
     }
@@ -193,10 +194,10 @@ function ChronicleChapterView({
                     className="rounded-sm border border-amber-400/20 bg-amber-950/10 px-4 py-3"
                     aria-label={t('chronicle.recapTitle')}
                 >
-                    <div className="text-xs font-mono uppercase tracking-[0.18em] text-amber-300/80">
+                    <div className="text-[14px] font-mono uppercase tracking-[0.18em] text-amber-300/80">
                         {t('chronicle.recapTitle')}
                     </div>
-                    <p className="mt-1 text-[12px] leading-relaxed text-stone-300">
+                    <p className="mt-1 text-[14px] leading-relaxed text-stone-300">
                         {t(recap.chapterCount === 1 ? 'chronicle.recapBody.one' : 'chronicle.recapBody.many', {
                             chapters: recap.chapterCount,
                             range: recap.monthRange,
@@ -205,7 +206,7 @@ function ChronicleChapterView({
                             headlines: recap.headlineCount,
                         })}
                     </p>
-                    <p className="mt-1 text-xs font-mono uppercase tracking-[0.08em] text-stone-400">
+                    <p className="mt-1 text-[14px] font-mono uppercase tracking-[0.08em] text-stone-400">
                         {t('chronicle.recapArc', {
                             opening: recap.openingChapterTitle,
                             closing: recap.closingChapterTitle,
@@ -222,7 +223,7 @@ function ChronicleChapterView({
                 >
                     <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0">
-                            <div className="text-xs font-mono uppercase tracking-[0.16em] text-stone-400">
+                            <div className="text-[14px] font-mono uppercase tracking-[0.16em] text-stone-400">
                                 {chapter.monthLabels.join(' / ')}
                             </div>
                             <h2
@@ -231,11 +232,11 @@ function ChronicleChapterView({
                             >
                                 {chapter.title}
                             </h2>
-                            <p className="mt-1 text-xs text-stone-400">
+                            <p className="mt-1 text-[14px] text-stone-400">
                                 {chapter.summary} | {formatChronicleChapterDateRange(chapter)}
                             </p>
                         </div>
-                        <div className="shrink-0 text-right text-xs font-mono uppercase text-stone-400">
+                        <div className="shrink-0 text-right text-[14px] font-mono uppercase text-stone-400">
                             {formatChronicleBoundaryKind(chapter.boundaryKind)}
                         </div>
                     </div>
@@ -247,21 +248,21 @@ function ChronicleChapterView({
                                 className="rounded-sm border border-panel-border/30 bg-black/20 p-2 text-left"
                             >
                                 <div className="flex items-center justify-between gap-2">
-                                    <span className="text-xs font-mono uppercase text-stone-400">
+                                    <span className="text-[14px] font-mono uppercase text-stone-400">
                                         {turnToFullDate(ref.turn)} | {chronicleTypeLabel(ref.type)}
                                     </span>
                                     {ref.headline && (
-                                        <span className="text-xs font-mono uppercase text-amber-300">{t('chronicle.headline')}</span>
+                                        <span className="text-[14px] font-mono uppercase text-amber-300">{t('chronicle.headline')}</span>
                                     )}
                                 </div>
-                                <div className="mt-1 text-xs leading-snug text-stone-200">
+                                <div className="mt-1 text-[14px] leading-snug text-stone-200">
                                     {ref.title}
                                 </div>
                                 <div className="mt-2 flex gap-2">
                                     <button
                                         type="button"
                                         onClick={() => onSelectTurn(ref.turn)}
-                                        className="h-7 rounded-sm border border-white/10 px-2 text-xs font-bold uppercase tracking-[0.12em] text-stone-300 hover:border-stone-400/60"
+                                        className="h-7 rounded-sm border border-white/10 px-2 text-[14px] font-bold uppercase tracking-[0.12em] text-stone-300 hover:border-stone-400/60"
                                     >
                                         {t('chronicle.select')}
                                     </button>
@@ -271,7 +272,7 @@ function ChronicleChapterView({
                                             data-testid="chronicle-chapter-open-turn-record"
                                             data-turn={ref.turn}
                                             onClick={() => onOpenTurnRecord(ref.turn)}
-                                            className="h-7 rounded-sm border border-amber-400/25 px-2 text-xs font-bold uppercase tracking-[0.12em] text-amber-200 hover:border-amber-300/70"
+                                            className="h-7 rounded-sm border border-amber-400/25 px-2 text-[14px] font-bold uppercase tracking-[0.12em] text-amber-200 hover:border-amber-300/70"
                                         >
                                             {t('chronicle.openTurnRecord')}
                                         </button>
@@ -279,7 +280,7 @@ function ChronicleChapterView({
                                         <span
                                             data-testid="chronicle-chapter-entry-only"
                                             data-turn={ref.turn}
-                                            className="inline-flex h-6 items-center rounded-sm border border-white/10 px-2 text-xs font-bold uppercase tracking-[0.12em] text-stone-400"
+                                            className="inline-flex h-6 items-center rounded-sm border border-white/10 px-2 text-[14px] font-bold uppercase tracking-[0.12em] text-stone-400"
                                         >
                                             {t('chronicle.chronicleOnlyEntry')}
                                         </span>
@@ -590,7 +591,7 @@ export function ChronicleOverlay() {
 
                 {/* Turn label */}
                 <div
-                    className="text-xs font-mono text-stone-400 mt-1 select-none"
+                    className="text-[14px] font-mono text-stone-400 mt-1 select-none"
                     style={{ marginTop: RIBBON_HEIGHT + 2 }}
                 >
                     {turn % 4 === 0 || hasEvents ? turnToShortDate(turn) : ''}
@@ -608,7 +609,7 @@ export function ChronicleOverlay() {
                         {group.length === 1 ? (
                             /* Single entry — show card directly with date */
                             <div className="flex flex-col items-center" style={{ gap: `${CARD_STACK_GAP}px` }}>
-                                <div className="text-xs font-mono text-stone-400 mb-1">
+                                <div className="text-[14px] font-mono text-stone-400 mb-1">
                                     {formatChronicleGroupDate(turn, group)}
                                 </div>
                                 <ChronicleCard key={`${turn}-${group[0].type}-0`} entry={group[0]} />
@@ -621,7 +622,7 @@ export function ChronicleOverlay() {
                                         setSelectedTurn(turn);
                                         toggleWeekExpanded(turn);
                                     }}
-                                    className="flex items-center gap-1.5 px-2.5 py-1 rounded-sm text-xs font-mono text-stone-300 hover:text-amber-300 transition-colors cursor-pointer select-none"
+                                    className="flex items-center gap-1.5 px-2.5 py-1 rounded-sm text-[14px] font-mono text-stone-300 hover:text-amber-300 transition-colors cursor-pointer select-none"
                                     style={{
                                         background: 'linear-gradient(135deg, #2a2520 0%, #1e1b18 100%)',
                                         border: '1px solid rgba(255,255,255,0.08)',
@@ -631,7 +632,7 @@ export function ChronicleOverlay() {
                                     <span className="text-amber-400/80">{formatChronicleGroupDate(turn, group)}</span>
                                     <span className="text-stone-400">—</span>
                                     <span>{t('chronicle.eventCount', { count: group.length })}</span>
-                                    <span className="ml-auto text-xs text-stone-400">
+                                    <span className="ml-auto text-[14px] text-stone-400">
                                         {expandedWeeks.has(turn) ? '\u25B2' : '\u25BC'}
                                     </span>
                                 </button>
@@ -660,58 +661,65 @@ export function ChronicleOverlay() {
         );
     }
 
+    // Surface redesign (owner, 2026-11-10): the Chronicle keeps the full window for its
+    // timeline but reads in the Command Surface's style — a fixed header (eyebrow, the
+    // date range, the lenses, the view toggle, Close), the timeline, and the selected
+    // week's dossier as a right-hand column that scrolls on its own.
     return (
         <div
             className="fixed inset-0 overflow-hidden bg-[#090a0f] flex flex-col"
             style={{ zIndex: Z.MODAL }}
             data-testid="chronicle-overlay"
         >
-            {/* Header */}
-            <div className="flex items-center justify-between px-6 py-2.5 border-b border-white/8">
-                <div className="flex min-w-0 flex-1 flex-wrap items-center gap-3">
-                    <h1
-                        className="text-xs font-bold uppercase tracking-[0.25em] text-amber-400/90 shrink-0"
-                        style={{ fontFamily: 'var(--font-command)' }}
-                    >
-                        {t('chronicle.title')}
-                    </h1>
-                    <span className="text-xs font-mono text-stone-400 shrink-0">
-                        {t('chronicle.eventRatio', { filtered: filteredEntries.length, total: allEntries.length })} - {turnToFullDate(minTurn)} - {turnToFullDate(maxTurn)}
+            <SurfaceHeader
+                eyebrow={t('chronicle.title')}
+                title={`${turnToFullDate(minTurn)} – ${turnToFullDate(maxTurn)}`}
+                trailing={(
+                    <span className="text-[15px] text-[#b9ad94]">
+                        {t('chronicle.eventRatio', { filtered: filteredEntries.length, total: allEntries.length })}
                     </span>
-                    <div className="flex min-w-0 flex-wrap items-center gap-1.5" data-coachmark-id="chronicle-filter">
-                        {visibleFilters.map(filter => {
-                            const active = filter.id === activeFilter;
-                            const count = entryCounts[filter.id];
-                            return (
-                                <button
-                                    key={filter.id}
-                                    type="button"
-                                    aria-pressed={active}
-                                    data-testid={`chronicle-filter-${filter.id}`}
-                                    data-selected={active ? 'true' : 'false'}
-                                    title={t('chronicle.filterTitle', { label: chronicleFilterLabel(filter), count })}
-                                    onClick={() => setActiveFilter(filter.id)}
-                                    className={[
-                                        'h-7 min-w-[54px] rounded-sm border px-2 font-mono text-xs uppercase transition-colors',
-                                        active
-                                            ? 'border-amber-400/70 bg-amber-400/15 text-amber-200'
-                                            : 'border-white/10 bg-black/25 text-stone-400 hover:border-stone-400/60 hover:text-stone-200',
-                                    ].join(' ')}
+                )}
+                close={(
+                    <SurfaceCloseButton onClick={handleClose} data-testid="chronicle-close">
+                        {t('chronicle.close')}
+                    </SurfaceCloseButton>
+                )}
+            />
+            {/* Lenses and view toggle on their own strip, so the header never wraps. */}
+            <div className="flex shrink-0 items-center border-b border-[#262b35] bg-[#11141b] px-7 py-3">
+                <div className="flex min-w-0 flex-wrap items-center gap-2" data-coachmark-id="chronicle-filter">
+                    {visibleFilters.map(filter => {
+                        const active = filter.id === activeFilter;
+                        const count = entryCounts[filter.id];
+                        return (
+                            <button
+                                key={filter.id}
+                                type="button"
+                                aria-pressed={active}
+                                data-testid={`chronicle-filter-${filter.id}`}
+                                data-selected={active ? 'true' : 'false'}
+                                title={t('chronicle.filterTitle', { label: chronicleFilterLabel(filter), count })}
+                                onClick={() => setActiveFilter(filter.id)}
+                                className={[
+                                    'h-10 min-w-[54px] rounded-md border px-3.5 text-[15px] font-semibold transition-colors',
+                                    active
+                                        ? 'border-[#c9a75c] bg-[#232936] text-[#f1e6c8]'
+                                        : 'border-[#3a4150] bg-[#1b2029] text-[#c2b69c] hover:border-accent-gold/60 hover:text-[#f1e6c8]',
+                                ].join(' ')}
+                            >
+                                <span>{chronicleFilterLabel(filter)}</span>
+                                <span aria-hidden="true" className="text-[#9c917b]">
+                                    {' · '}
+                                </span>
+                                <span
+                                    aria-label={t(count === 1 ? 'chronicle.entryCount.one' : 'chronicle.entryCount.many', { count })}
+                                    className="font-mono text-[#9c917b]"
                                 >
-                                    <span>{chronicleFilterLabel(filter)}</span>
-                                    <span aria-hidden="true" className="text-stone-400">
-                                        {' · '}
-                                    </span>
-                                    <span
-                                        aria-label={t(count === 1 ? 'chronicle.entryCount.one' : 'chronicle.entryCount.many', { count })}
-                                        className="text-stone-400"
-                                    >
-                                        {count}
-                                    </span>
-                                </button>
-                            );
-                        })}
-                    </div>
+                                    {count}
+                                </span>
+                            </button>
+                        );
+                    })}
                     <ChronicleViewModeToggle
                         mode={viewMode}
                         activeFilterLabel={activeFilterLabel}
@@ -719,13 +727,6 @@ export function ChronicleOverlay() {
                         onModeChange={setViewMode}
                     />
                 </div>
-                <button
-                    onClick={handleClose}
-                    data-testid="chronicle-close"
-                    className="ml-3 shrink-0 text-xs font-mono text-stone-400 hover:text-red-300 transition-colors uppercase tracking-wider"
-                >
-                    {t('chronicle.close')}
-                </button>
             </div>
 
             {/* Main scrollable area: ribbon + stems + cards */}
@@ -733,7 +734,7 @@ export function ChronicleOverlay() {
                 <div
                     ref={scrollRef}
                     className={[
-                        'min-w-0 flex-1 border-r border-white/8',
+                        'min-w-0 flex-1 border-r border-[#262b35]',
                         viewMode === 'entries' ? 'overflow-x-auto overflow-y-hidden' : 'overflow-x-hidden overflow-y-auto',
                     ].join(' ')}
                     style={{ scrollbarWidth: 'thin', scrollbarColor: '#555 #1a1a1a' }}
@@ -767,7 +768,7 @@ export function ChronicleOverlay() {
                             {/* Turn columns with stems and cards */}
                             {filteredEntries.length === 0 ? (
                                 <div className="flex items-center justify-center" style={{ minHeight: '320px' }}>
-                                    <p className="text-stone-400 text-xs">
+                                    <p className="text-[16px] text-[#c2b69c]">
                                         {t('chronicle.noEntries')}
                                     </p>
                                 </div>
@@ -780,45 +781,39 @@ export function ChronicleOverlay() {
                     )}
                 </div>
 
-                <aside className="w-[360px] shrink-0 bg-[#11131a] flex flex-col min-h-0">
-                    <div className="px-4 py-3 border-b border-white/8">
-                        <div className="text-xs uppercase tracking-[0.18em] text-amber-400/80 font-bold">
+                <aside className="w-[clamp(21rem,calc(var(--interface-viewport-width,100vw)*0.28),32rem)] shrink-0 bg-[#11131a] flex flex-col min-h-0">
+                    <div className="flex flex-col gap-1 border-b border-[#262b35] px-6 py-4">
+                        <div className={SURFACE_LABEL}>
                             {t('chronicle.dossier')}
                         </div>
-                        <div className="mt-1 text-xs text-text-primary font-semibold">
+                        <div className="text-[22px] font-semibold leading-tight text-[#f6ecd2]">
                             {selectedTurn != null ? turnToFullDate(selectedTurn) : t('chronicle.noTurnSelected')}
                         </div>
                     </div>
-                    <div className="px-4 py-3 grid grid-cols-3 gap-2 border-b border-white/8 text-xs">
-                        <div className="bg-black/20 border border-panel-border/40 rounded p-2">
-                            <div className="text-text-secondary uppercase tracking-wide">{t('chronicle.metric.events')}</div>
-                            <div className="text-text-primary font-bold">
-                                {selectedTurn != null ? (turnGroups.get(selectedTurn)?.length ?? 0) : 0}
-                            </div>
-                        </div>
-                        <div className="bg-black/20 border border-panel-border/40 rounded p-2">
-                            <div className="text-text-secondary uppercase tracking-wide">{t('chronicle.metric.headline')}</div>
-                            <div className="text-text-primary font-bold">
-                                {selectedTurn != null
-                                    ? (turnGroups.get(selectedTurn)?.some((e) => e.headline) ? t('chronicle.yes') : t('chronicle.no'))
-                                    : t('chronicle.no')}
-                            </div>
-                        </div>
-                        <div className="bg-black/20 border border-panel-border/40 rounded p-2">
-                            <div className="text-text-secondary uppercase tracking-wide">{t('chronicle.metric.lens')}</div>
-                            <div className="text-text-primary font-bold truncate" title={activeFilterLabel}>
-                                {activeFilterLabel}
-                            </div>
-                        </div>
+                    <div className="flex flex-col border-b border-[#262b35] px-6 py-2">
+                        <SurfaceStat
+                            label={t('chronicle.metric.events')}
+                            value={selectedTurn != null ? (turnGroups.get(selectedTurn)?.length ?? 0) : 0}
+                        />
+                        <SurfaceStat
+                            label={t('chronicle.metric.headline')}
+                            value={selectedTurn != null
+                                ? (turnGroups.get(selectedTurn)?.some((e) => e.headline) ? t('chronicle.yes') : t('chronicle.no'))
+                                : t('chronicle.no')}
+                        />
+                        <SurfaceStat
+                            label={t('chronicle.metric.lens')}
+                            value={<span title={activeFilterLabel}>{activeFilterLabel}</span>}
+                        />
                     </div>
 
-                    <div className="flex-1 overflow-y-auto px-4 py-3 space-y-2">
+                    <div className="flex-1 overflow-y-auto px-6 py-4 space-y-3">
                         {allEntries.length > 0 && filteredEntries.length === 0 ? (
-                            <div className="text-xs text-text-secondary italic">
+                            <div className="text-[16px] leading-relaxed text-[#c2b69c] italic">
                                 {t('chronicle.noEntries')}
                             </div>
                         ) : selectedTurn == null || (turnGroups.get(selectedTurn)?.length ?? 0) === 0 ? (
-                            <div className="text-xs text-text-secondary italic">
+                            <div className="text-[16px] leading-relaxed text-[#c2b69c] italic">
                                 {t('chronicle.selectTurnHelp')}
                             </div>
                         ) : (
@@ -827,15 +822,16 @@ export function ChronicleOverlay() {
                                     focusedChronicleDecisionRecordId
                                     && entry.metadata?.decisionRecordId === focusedChronicleDecisionRecordId,
                                 );
+                                const recordAvailable = Boolean(entry.metadata?.operationAarId || entry.metadata?.decisionRecordId || aftermathTurns.has(entry.turn));
                                 return (
                                 <div
                                     key={`${selectedTurn}-${entry.type}-${i}`}
                                     tabIndex={isFocusedDecisionEntry ? -1 : undefined}
                                     className={[
-                                        'border rounded p-2 bg-black/15',
+                                        'rounded-md border bg-[#161a22] p-3',
                                         isFocusedDecisionEntry
-                                            ? 'border-amber-300/70 shadow-[0_0_0_1px_rgba(251,191,36,0.22)]'
-                                            : 'border-panel-border/30',
+                                            ? 'border-[#c9a75c] shadow-[0_0_0_1px_rgba(201,167,92,0.3)]'
+                                            : 'border-[#2a303c]',
                                     ].join(' ')}
                                     data-testid="chronicle-dossier-entry"
                                     data-turn={entry.turn}
@@ -853,13 +849,8 @@ export function ChronicleOverlay() {
                                         data-operation-aar-id={entry.metadata?.operationAarId ?? undefined}
                                         data-decision-record-id={entry.metadata?.decisionRecordId ?? undefined}
                                         onClick={() => handleOpenEntryRecord(entry)}
-                                        disabled={!entry.metadata?.operationAarId && !entry.metadata?.decisionRecordId && !aftermathTurns.has(entry.turn)}
-                                        className={[
-                                            'mt-2 h-7 w-full rounded-sm border px-2 text-xs font-bold uppercase tracking-[0.12em] transition-colors',
-                                            !entry.metadata?.operationAarId && !entry.metadata?.decisionRecordId && !aftermathTurns.has(entry.turn)
-                                                ? 'cursor-default border-white/10 bg-white/5 text-stone-400'
-                                                : 'border-amber-400/30 bg-amber-400/10 text-amber-200 hover:border-amber-300/70 hover:bg-amber-400/15',
-                                        ].join(' ')}
+                                        disabled={!recordAvailable}
+                                        className={`mt-3 w-full ${SURFACE_SECONDARY_BUTTON}`}
                                     >
                                         {actionLabelForEntry(entry)}
                                     </button>

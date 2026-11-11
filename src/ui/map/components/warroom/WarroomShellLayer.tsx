@@ -28,7 +28,7 @@ import {
   type WarroomNavigationCommand,
 } from '../../utils/warroomNavigation';
 import { t } from '../../i18n';
-import { WARROOM_SCENE_URLS, type WarroomSceneYear } from './warroom-asset-urls';
+import { WARROOM_SCENE_URLS, warroomWideSceneUrl, type WarroomSceneYear } from './warroom-asset-urls';
 import {
   WARROOM_SCENE_ASPECT,
   WARROOM_SCENE_HEIGHT,
@@ -1120,7 +1120,11 @@ export function WarroomShellLayer({ onNavigate, onOpenSidePicker, statusDock }: 
         overflow: 'hidden',
       }}
     >
-      <WarroomScenePlate src={scenePlateUrl}>
+      <WarroomScenePlate src={scenePlateUrl}
+        wideSrc={warroomWideSceneUrl(playerFaction, year)}
+        softenRightJoin={playerFaction === 'RBiH'}
+        coverLeftCurtain={playerFaction === 'RS'}
+      >
         <WarroomToolbar onNavigate={onNavigate} />
         {statusDock}
         {deskMapRegion ? (

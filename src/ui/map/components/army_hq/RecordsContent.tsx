@@ -74,37 +74,37 @@ export function RecordsContent({ eventCatalog }: RecordsContentProps = {}) {
             >
                 <div className="flex flex-wrap items-start justify-between gap-3">
                     <div className="min-w-0">
-                        <div className="text-xs font-bold uppercase tracking-[0.15em] text-text-secondary">{t('recordsContent.archiveSummary.title')}</div>
-                        <div className="mt-1 text-xs text-text-secondary">
+                        <div className="text-[13px] font-bold uppercase tracking-[0.15em] text-text-secondary">{t('recordsContent.archiveSummary.title')}</div>
+                        <div className="mt-1 text-[13px] text-text-secondary">
                             {t('recordsContent.archiveSummary.help')}
                         </div>
                     </div>
                     <div className="text-right">
-                        <div className="text-xs font-bold uppercase tracking-[0.14em] text-text-muted">{t('recordsContent.archiveSummary.latestDecision')}</div>
-                        <div className="max-w-[14rem] break-words text-xs leading-snug text-text-primary">
+                        <div className="text-[13px] font-bold uppercase tracking-[0.14em] text-text-muted">{t('recordsContent.archiveSummary.latestDecision')}</div>
+                        <div className="max-w-[14rem] break-words text-[13px] leading-snug text-text-primary">
                             {archiveCounts.decisionSummary.latestTitle ?? t('recordsContent.archiveSummary.noDecision')}
                         </div>
                     </div>
                 </div>
                 <div className="mt-3 grid grid-cols-2 gap-2 md:grid-cols-5">
                     <div className="rounded border border-panel-border/60 bg-black/20 px-2 py-2">
-                        <div className="text-xs font-bold uppercase tracking-[0.14em] text-text-muted">{t('recordsContent.archiveSummary.turnRecords')}</div>
+                        <div className="text-[13px] font-bold uppercase tracking-[0.14em] text-text-muted">{t('recordsContent.archiveSummary.turnRecords')}</div>
                         <div className="mt-1 text-[14px] font-bold tabular-nums text-text-primary">{archiveCounts.aftermath}</div>
                     </div>
                     <div className="rounded border border-panel-border/60 bg-black/20 px-2 py-2">
-                        <div className="text-xs font-bold uppercase tracking-[0.14em] text-text-muted">{t('recordsContent.archiveSummary.operationAars')}</div>
+                        <div className="text-[13px] font-bold uppercase tracking-[0.14em] text-text-muted">{t('recordsContent.archiveSummary.operationAars')}</div>
                         <div className="mt-1 text-[14px] font-bold tabular-nums text-text-primary">{archiveCounts.ops}</div>
                     </div>
                     <div className="rounded border border-panel-border/60 bg-black/20 px-2 py-2">
-                        <div className="text-xs font-bold uppercase tracking-[0.14em] text-text-muted">{t('recordsContent.archiveSummary.decisions')}</div>
+                        <div className="text-[13px] font-bold uppercase tracking-[0.14em] text-text-muted">{t('recordsContent.archiveSummary.decisions')}</div>
                         <div className="mt-1 text-[14px] font-bold tabular-nums text-text-primary">{archiveCounts.decisions}</div>
                     </div>
                     <div className="rounded border border-panel-border/60 bg-black/20 px-2 py-2">
-                        <div className="text-xs font-bold uppercase tracking-[0.14em] text-text-muted">{t('recordsContent.archiveSummary.chronicleFiled')}</div>
+                        <div className="text-[13px] font-bold uppercase tracking-[0.14em] text-text-muted">{t('recordsContent.archiveSummary.chronicleFiled')}</div>
                         <div className="mt-1 text-[14px] font-bold tabular-nums text-text-primary">{archiveCounts.decisionSummary.chronicleRouteCount}</div>
                     </div>
                     <div className="rounded border border-panel-border/60 bg-black/20 px-2 py-2">
-                        <div className="text-xs font-bold uppercase tracking-[0.14em] text-text-muted">{t('recordsContent.archiveSummary.opportunities')}</div>
+                        <div className="text-[13px] font-bold uppercase tracking-[0.14em] text-text-muted">{t('recordsContent.archiveSummary.opportunities')}</div>
                         <div className="mt-1 text-[14px] font-bold tabular-nums text-text-primary">{archiveCounts.opportunities}</div>
                     </div>
                 </div>
@@ -115,10 +115,10 @@ export function RecordsContent({ eventCatalog }: RecordsContentProps = {}) {
                 aria-label={t('recordsContent.operationLedger.title')}
                 data-testid="records-operation-ledger"
             >
-                <div className="text-[12px] font-bold uppercase text-text-primary">
+                <div className="text-[13px] font-bold uppercase text-text-primary">
                     {t('recordsContent.operationLedger.title')}
                 </div>
-                <div className="mt-1 text-[12px] leading-relaxed text-text-secondary">
+                <div className="mt-1 text-[13px] leading-relaxed text-text-secondary">
                     {t('recordsContent.operationLedger.help')}
                 </div>
                 <div className="mt-3 grid grid-cols-2 gap-2 md:grid-cols-3">
@@ -131,7 +131,7 @@ export function RecordsContent({ eventCatalog }: RecordsContentProps = {}) {
                             data-denominator={metric.denominator}
                             className="border-l-2 border-panel-border px-2 py-1"
                         >
-                            <div className="text-[12px] font-semibold text-text-secondary">
+                            <div className="text-[13px] font-semibold text-text-secondary">
                                 {t(LIFECYCLE_LABEL_KEYS[metric.phase])}
                             </div>
                             <div className="text-[16px] font-bold tabular-nums text-text-primary">{metric.count}</div>
@@ -140,7 +140,7 @@ export function RecordsContent({ eventCatalog }: RecordsContentProps = {}) {
                 </div>
                 {operationLifecycle.excludedHistoryRows.length > 0 && (
                     <div
-                        className="mt-3 border-l-2 border-amber-400/50 px-2 py-1 text-[12px] text-text-secondary"
+                        className="mt-3 border-l-2 border-amber-400/50 px-2 py-1 text-[13px] text-text-secondary"
                         data-testid="records-operation-exclusion-scope"
                     >
                         {t(
@@ -174,7 +174,7 @@ export function RecordsContent({ eventCatalog }: RecordsContentProps = {}) {
                         data-selected={subTab === id ? 'true' : 'false'}
                         aria-label={t('recordsContent.subtab.buttonAria', { label })}
                         onClick={() => setSubTab(id)}
-                        className={`px-3 py-1.5 text-xs font-bold uppercase tracking-[0.15em] rounded-md border transition-all ${
+                        className={`px-3 py-1.5 text-[13px] font-bold uppercase tracking-[0.15em] rounded-md border transition-all ${
                             subTab === id
                                 ? 'bg-amber-400/15 border-amber-400/30 text-amber-400'
                                 : 'bg-panel-card border-panel-border text-text-secondary hover:text-text-primary hover:bg-white/5'
@@ -197,14 +197,14 @@ export function RecordsContent({ eventCatalog }: RecordsContentProps = {}) {
             </div>
 
             <div className="mb-4 rounded-md border border-panel-border bg-panel-card px-3 py-2">
-                <div className="text-xs font-bold uppercase tracking-[0.15em] text-text-secondary">{t('codex.title')}</div>
-                <div className="mt-1 text-xs text-text-secondary">
+                <div className="text-[13px] font-bold uppercase tracking-[0.15em] text-text-secondary">{t('codex.title')}</div>
+                <div className="mt-1 text-[13px] text-text-secondary">
                     {t('recordsContent.codexHelp')}
                 </div>
                 <button
                     type="button"
                     onClick={() => openCodex(useGameStore.getState())}
-                    className="mt-2 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.15em] rounded-md border border-panel-border bg-panel-card text-text-secondary transition-all hover:text-text-primary hover:bg-white/5"
+                    className="mt-2 px-3 py-1.5 text-[13px] font-bold uppercase tracking-[0.15em] rounded-md border border-panel-border bg-panel-card text-text-secondary transition-all hover:text-text-primary hover:bg-white/5"
                 >
                     {t('recordsContent.openCodex')}
                 </button>

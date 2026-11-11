@@ -125,7 +125,7 @@ export function CorpsDetail({ railSlot = 'primary', breadcrumb }: CorpsDetailPro
     return (
       <div
         data-awwv-counter-occluder="true"
-        className="panel-slide-in-right flex flex-col bg-panel-bg/95 backdrop-blur-sm border border-panel-border rounded-lg shadow-xl overflow-hidden"
+        className="panel-slide-in-right flex flex-col bg-[#11141b] border border-accent-gold/30 rounded-lg shadow-xl overflow-hidden"
         style={getPanelRailStyle(railSlot, '24rem', 'left')}
       >
         <div className="h-10 bg-panel-card border-b border-panel-border panel-shimmer" />
@@ -216,14 +216,14 @@ export function CorpsDetail({ railSlot = 'primary', breadcrumb }: CorpsDetailPro
     <div
       data-testid="corps-detail-panel"
       data-awwv-counter-occluder="true"
-      className="panel-slide-in-right flex flex-col bg-panel-bg/95 backdrop-blur-sm border border-panel-border rounded-lg shadow-xl overflow-hidden"
+      className="panel-slide-in-right flex flex-col bg-[#11141b] border border-accent-gold/30 rounded-lg shadow-xl overflow-hidden"
       style={getPanelRailStyle(railSlot, '24rem', 'left')}
     >
       {/* Header */}
       <div className="flex items-center justify-between px-3 py-2 bg-panel-card border-b border-panel-border shrink-0">
         <div className="flex items-center gap-2 min-w-0">
           <span className="inline-block w-3 h-3 rounded-sm shrink-0" style={{ backgroundColor: corpsColor }} />
-          <span className="font-sans text-xs text-accent-gold uppercase tracking-wide font-semibold truncate">
+          <span className="font-sans text-[13px] text-accent-gold uppercase tracking-wide font-semibold truncate">
             {corpsDisplayName}
           </span>
           {breadcrumb}
@@ -246,12 +246,12 @@ export function CorpsDetail({ railSlot = 'primary', breadcrumb }: CorpsDetailPro
       <TabBar tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} />
 
       {/* Tab content */}
-      <div className="flex-1 overflow-auto min-h-0 text-[12px]">
+      <div className="flex-1 overflow-auto min-h-0 text-[13px]">
 
         {/* ── OVERVIEW ── */}
         {activeTab === 'overview' && (
           <div className="p-3 space-y-3">
-            <div className="text-text-secondary text-xs">
+            <div className="text-text-secondary text-[13px]">
               <span className={FACTION_COLORS[corpsFormation.faction] ?? 'text-text-primary'}>
                 {getPlayerSafeMilitaryFactionName(corpsFormation.faction)}
               </span>
@@ -300,14 +300,14 @@ export function CorpsDetail({ railSlot = 'primary', breadcrumb }: CorpsDetailPro
                       className="font-semibold"
                       title={t('effectiveness.exactTooltip', { value: agg.totalEffectiveness.toLocaleString() })}
                     >
-                      <span className="text-xs font-bold" style={{ color: gradeColor }}>
+                      <span className="text-[13px] font-bold" style={{ color: gradeColor }}>
                         {band.grade}
                       </span>
                       <span className="ml-1 text-text-primary">
                         {t(band.labelKey)}
                       </span>
                       {band.grade !== 'UNREPORTED' && agg.ineffectiveCount > 0 && (
-                        <span className="text-xs text-red-400 ml-1">{t('corpsDetail.weakCount', { count: agg.ineffectiveCount })}</span>
+                        <span className="text-[13px] text-red-400 ml-1">{t('corpsDetail.weakCount', { count: agg.ineffectiveCount })}</span>
                       )}
                     </span>
                   </div>
@@ -358,7 +358,7 @@ export function CorpsDetail({ railSlot = 'primary', breadcrumb }: CorpsDetailPro
               };
               return (
                 <div className="border-t border-panel-border pt-3 space-y-1.5">
-                  <div className="text-text-secondary text-xs uppercase tracking-wider mb-1">{t('corpsDetail.equipment')}</div>
+                  <div className="text-text-secondary text-[13px] uppercase tracking-wider mb-1">{t('corpsDetail.equipment')}</div>
                   {tanks.total > 0 && (
                     <div className="flex justify-between">
                       <span className="text-text-secondary flex items-center gap-1"><Icon name="tanks" size={12} /> {t('corpsCard.tanks')}</span>
@@ -401,7 +401,7 @@ export function CorpsDetail({ railSlot = 'primary', breadcrumb }: CorpsDetailPro
         {activeTab === 'orbat' && (
           <div className="py-1">
             {subordinates.length === 0 ? (
-              <div className="p-3 text-text-secondary italic text-xs">{t('corpsDetail.noSubordinateBrigades')}</div>
+              <div className="p-3 text-text-secondary italic text-[13px]">{t('corpsDetail.noSubordinateBrigades')}</div>
             ) : (
               [...subordinates]
                 .sort((a, b) => compareLocalizedFormationNames(a, b, locale))
@@ -432,7 +432,7 @@ export function CorpsDetail({ railSlot = 'primary', breadcrumb }: CorpsDetailPro
         {activeTab === 'sectors' && (
           <div className="p-3 space-y-1">
             {corpsSectors.length === 0 ? (
-              <div className="text-text-secondary italic text-xs">{t('corpsDetail.noSectorsAssigned')}</div>
+              <div className="text-text-secondary italic text-[13px]">{t('corpsDetail.noSectorsAssigned')}</div>
             ) : (
               corpsSectors.map((s) => {
                 const sectorAssignment = buildSectorFormationAssignment(s, subordinates, corpsSectors);
@@ -470,8 +470,8 @@ export function CorpsDetail({ railSlot = 'primary', breadcrumb }: CorpsDetailPro
                   className="w-full flex items-center justify-between px-2 py-1.5 rounded border border-panel-border bg-panel-card hover:bg-panel-hover transition-colors text-left"
                 >
                   <div className="min-w-0">
-                    <div className="text-text-primary text-xs font-medium truncate">{sectorLabel}</div>
-                    <div className="text-text-secondary text-xs tabular-nums">
+                    <div className="text-text-primary text-[13px] font-medium truncate">{sectorLabel}</div>
+                    <div className="text-text-secondary text-[13px] tabular-nums">
                       {t('oob.sectorLineCount', { count: sectorAssignment.frontlineIds.length.toString() })}
                       {sectorAssignment.reserveIds.length > 0 && ` + ${t('oob.sectorHeldBackCount', { count: sectorAssignment.reserveIds.length.toString() })}`}
                       {sectorAssignment.rearIds.length > 0 && ` + ${t('oob.sectorRearSupportCount', { count: sectorAssignment.rearIds.length.toString() })}`}
@@ -481,7 +481,7 @@ export function CorpsDetail({ railSlot = 'primary', breadcrumb }: CorpsDetailPro
                     </div>
                   </div>
                   <div className="shrink-0 ml-2 text-right">
-                    <div className="text-xs tabular-nums">
+                    <div className="text-[13px] tabular-nums">
                       <span className="text-text-secondary">{t('corpsDetail.effShort')} </span>
                       <span
                         className="text-text-primary"
@@ -490,10 +490,10 @@ export function CorpsDetail({ railSlot = 'primary', breadcrumb }: CorpsDetailPro
                         {sectorBand ? `${sectorBand.grade} ${t(sectorBand.labelKey)}` : '--'}
                       </span>
                     </div>
-                    <div className="text-xs text-text-secondary tabular-nums">
+                    <div className="text-[13px] text-text-secondary tabular-nums">
                       {t('oob.sectorCoverage.label')}: {t(SECTOR_COVERAGE_KEYS[coverageTier])}
                     </div>
-                    <div className="text-xs uppercase text-text-secondary opacity-70">
+                    <div className="text-[13px] uppercase text-text-secondary opacity-70">
                       {formatCorpsDetailStance(s.sector_stance)}
                       {s.stance_source === 'player' && <span className="ml-1 text-accent-gold">●</span>}
                     </div>
@@ -508,14 +508,14 @@ export function CorpsDetail({ railSlot = 'primary', breadcrumb }: CorpsDetailPro
         {/* ── OPS ── */}
         {activeTab === 'ops' && (
           <div className="p-3 space-y-2.5">
-            <div className="text-xs uppercase tracking-widest text-text-secondary font-bold">
+            <div className="text-[13px] uppercase tracking-widest text-text-secondary font-bold">
               {t('corpsDetail.fieldSnapshot')}
             </div>
-            <div className="text-xs text-text-secondary -mt-1">
+            <div className="text-[13px] text-text-secondary -mt-1">
               {t('corpsDetail.fieldSnapshotHelp')}
             </div>
             {corpsOps.length === 0 ? (
-              <div className="text-text-secondary italic text-xs">{t('corpsDetail.noPlayerFacingOps')}</div>
+              <div className="text-text-secondary italic text-[13px]">{t('corpsDetail.noPlayerFacingOps')}</div>
             ) : (
               corpsOps.map((op) => {
                 const phaseBg = op.phase_unreported
@@ -544,15 +544,15 @@ export function CorpsDetail({ railSlot = 'primary', breadcrumb }: CorpsDetailPro
                     }`}
                   >
                     <div className="flex justify-between items-start mb-1">
-                      <div className="font-semibold text-text-primary text-[12px] uppercase tracking-wide">{op.display_name}</div>
-                      <span className={`px-1.5 py-0.5 rounded text-xs uppercase font-bold tracking-wider ${phaseBg}`}>
+                      <div className="font-semibold text-text-primary text-[13px] uppercase tracking-wide">{op.display_name}</div>
+                      <span className={`px-1.5 py-0.5 rounded text-[13px] uppercase font-bold tracking-wider ${phaseBg}`}>
                         {phaseLabel}
                       </span>
                     </div>
 
                     {op.phase === 'execution' && (
                       <div className="mt-2 space-y-1">
-                        <div className="flex justify-between text-xs text-text-secondary">
+                        <div className="flex justify-between text-[13px] text-text-secondary">
                           <span>{t('operationsPanel.momentum')}</span>
                           {momentum != null && (
                             <span className={momentum >= 0 ? 'text-[#55d48a]' : 'text-[#d45555]'}>
@@ -575,7 +575,7 @@ export function CorpsDetail({ railSlot = 'primary', breadcrumb }: CorpsDetailPro
                       </div>
                     )}
 
-                    <div className="flex items-center justify-between text-xs mt-2 pt-1.5 border-t border-panel-border/30">
+                    <div className="flex items-center justify-between text-[13px] mt-2 pt-1.5 border-t border-panel-border/30">
                       <span className="text-text-secondary">{t('corpsDetail.brigadeCount', { count: op.participating_brigade_count })}</span>
                       {Array.isArray(op.objectives) && op.objectives.length > 0 && op.current_objective_index !== undefined && (
                         <span className="text-accent-gold">
@@ -594,12 +594,12 @@ export function CorpsDetail({ railSlot = 'primary', breadcrumb }: CorpsDetailPro
         {/* ── ORDERS ── */}
         {activeTab === 'orders' && (
           <div className="p-3 space-y-3">
-            <div className="text-xs text-text-secondary uppercase tracking-widest font-bold">
+            <div className="text-[13px] text-text-secondary uppercase tracking-widest font-bold">
               {t('operationHistory.title')}
             </div>
             <div
               data-testid="corps-detail-delegated-command-note"
-              className="text-xs text-text-secondary px-2 py-1.5 bg-black/10 border border-panel-border/30 rounded"
+              className="text-[13px] text-text-secondary px-2 py-1.5 bg-black/10 border border-panel-border/30 rounded"
             >
               {t('corpsDetail.delegatedOperations')}
             </div>

@@ -1,5 +1,7 @@
 # AWWV GUI Master Reference
 
+**Warroom panoramas and room art audit (2026-11-08, verified local branch)**. The [closeout](implemented/20261108_WARROOM_PANORAMAS_AND_ART_AUDIT.md) records all 15 rooms, the panorama join corrections, the uniform and newspaper repairs, and the browser and build evidence.
+
 **Command palette and scalable UI (2026-11-07, verified local branch):** [Report](implemented/20261106_COMMAND_PALETTE_UI_SCALE.md) records friendly-name keyboard navigation, persistent 100/125/150% chrome, nine-case browser/required-decision proof, actual native reload/relaunch and strict save preservation, independent review and full qualification. Integration and global calibration/release gates remain separate.
 
 **Purpose:** Single living reference for GUI (map + warroom) status. Read first when starting GUI work; update during the session when completing GUI changes.

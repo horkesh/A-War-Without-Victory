@@ -4,7 +4,7 @@ import { createElement } from 'react';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import * as bus from '../../src/ui/map/audio/audio_engine';
 import * as manifest from '../../src/ui/map/audio/sound_manifest';
-import { applyAudioPreferences, loadAudioPreferences, saveAudioPreferences } from '../../src/ui/map/audio/audio_preferences';
+import { applyAudioPreferences, AUDIO_PREFERENCES_STORAGE_KEY, loadAudioPreferences, MUSIC_DEFAULTS_VERSION, saveAudioPreferences } from '../../src/ui/map/audio/audio_preferences';
 import { AudioSurfaceBedController } from '../../src/ui/map/components/AudioSurfaceBedController';
 import { SettingsScreen } from '../../src/ui/map/components/SettingsScreen';
 import { setLocale } from '../../src/ui/map/i18n';
@@ -82,7 +82,7 @@ it('replaces a failed media element so a later cue can recover from decode error
 it('uses safe defaults when browser storage access itself is denied', () => {
   const getter = vi.spyOn(window, 'localStorage', 'get').mockImplementation(() => { throw new Error('denied'); });
   try {
-    expect(loadAudioPreferences()).toMatchObject({ muted: false, masterVolume: .5, musicEnabled: false, musicVolume: .5 });
+    expect(loadAudioPreferences()).toMatchObject({ muted: false, masterVolume: .5, musicEnabled: true, musicVolume: .5 });
     expect(() => saveAudioPreferences({ muted: true, masterVolume: .2 })).not.toThrow();
   } finally { getter.mockRestore(); }
 });
@@ -121,13 +121,25 @@ it('keeps requested music silent until explicit opt-in and gesture, then updates
   expect(bus.getAudioState().ambientPlaybackEnabled).toBe(false);
 });
 
-it('persists independent music opt-in and level without changing master mute', () => {
+it('plays music by default and persists an opt-out and level without changing master mute', () => {
   render(createElement(SettingsScreen, { onClose() {} }));
   const toggle = screen.getByRole('button', { name: 'Toggle background music' });
-  expect(toggle.getAttribute('aria-pressed')).toBe('false');
+  // Owner 2026-11-10: music is on by default.
+  expect(toggle.getAttribute('aria-pressed')).toBe('true');
   fireEvent.click(toggle);
   fireEvent.change(screen.getByRole('slider', { name: 'Music volume' }), { target: { value: '30' } });
-  expect(loadAudioPreferences()).toMatchObject({ muted: false, musicEnabled: true, musicVolume: .3 });
+  expect(loadAudioPreferences()).toMatchObject({ muted: false, musicEnabled: false, musicVolume: .3 });
+});
+
+it('turns music on once for a profile saved under the old "off" default, then keeps the choice', () => {
+  // Saved before the owner's default change: the stored "off" was the old default, not a choice.
+  window.localStorage.setItem(AUDIO_PREFERENCES_STORAGE_KEY, JSON.stringify({ muted: false, masterVolume: .5, musicEnabled: false, musicVolume: .5 }));
+  expect(loadAudioPreferences()).toMatchObject({ musicEnabled: true, musicDefaultsVersion: MUSIC_DEFAULTS_VERSION });
+  // A choice made under the current default is kept.
+  saveAudioPreferences({ muted: false, masterVolume: .5, musicEnabled: false, musicVolume: .5 });
+  expect(loadAudioPreferences()).toMatchObject({ musicEnabled: false });
+  // An explicit in-memory setting is never overridden by the migration.
+  expect(applyAudioPreferences({ muted: false, masterVolume: .5, musicEnabled: false }).musicEnabled).toBe(false);
 });
 
 it('does not restore a stale playing-music marker after mute during an in-flight request', async () => {
@@ -144,8 +156,13 @@ it('labels Settings as a dialog, contains keyboard focus and restores the opener
   const view = render(createElement(SettingsScreen, { onClose() {} }));
   const dialog = screen.getByRole('dialog', { name: 'Settings' });
   expect(dialog.getAttribute('aria-modal')).toBe('true');
-  const first = screen.getByRole('button', { name: 'Audio' });
-  const last = screen.getByRole('button', { name: /^Close$/ });
+  // Surface redesign 2026-11-10: Close sits in the fixed header, so it leads the tab order;
+  // the section rail and the rows follow, and focus wraps between the two ends.
+  const first = screen.getByRole('button', { name: /^Close$/ });
+  expect(screen.getByRole('button', { name: 'Audio' })).toBeTruthy();
+  const tabbables = Array.from(dialog.querySelectorAll<HTMLElement>('button, input, select, textarea, [href], [tabindex]:not([tabindex="-1"])'))
+    .filter((el) => !el.hasAttribute('disabled') && el.tabIndex >= 0);
+  const last = tabbables[tabbables.length - 1] as HTMLElement;
   expect(document.activeElement).toBe(first);
   last.focus(); fireEvent.keyDown(last, { key: 'Tab' }); expect(document.activeElement).toBe(first);
   first.focus(); fireEvent.keyDown(first, { key: 'Tab', shiftKey: true }); expect(document.activeElement).toBe(last);

@@ -6,6 +6,13 @@ import { useGameStore } from '../store/gameStore';
 import { getDecisionHeaderForFamily } from '../data/presidentialDeskAssets';
 import { t } from '../i18n';
 import { DecisionModalImageHeader } from './DecisionModalImageHeader';
+import {
+  SURFACE_LABEL,
+  SURFACE_MODAL_BACKDROP,
+  SURFACE_MODAL_PANEL_COMPACT,
+  SURFACE_PRIMARY_BUTTON_COMPACT,
+  SURFACE_SECONDARY_BUTTON,
+} from './surface/Surface';
 import { strictCompare } from '../../../state/validateGameState';
 
 interface OfficerMatterModalProps {
@@ -102,20 +109,23 @@ export function OfficerMatterModal({ itemId, state, onClose, onOpenPersonnel }: 
     if (!event) return;
     const result = await ipc.acknowledgeOfficerEvent(event.event_id);
     if (!result.ok) {
-      setLoadError(result.error ?? 'Officer matter could not be acknowledged.');
+      setLoadError(result.error ?? t('decisionModal.officer.acknowledgeFailed'));
       return;
     }
     onClose();
   };
 
+  // Surface redesign (owner, 2026-11-10): a compact surface — the personnel plate and title
+  // on top, the officer and the matter in plain prose, and the three choices in a fixed
+  // footer with Army HQ personnel as the gold primary action.
   return (
     <Modal
       isOpen={Boolean(itemId)}
       onClose={onClose}
       zIndex={Z.CRITICAL_MODAL}
       ariaLabelledBy="officer-matter-modal-title"
-      backdropClassName="bg-black/75 backdrop-blur-sm"
-      panelClassName="w-[min(calc(var(--interface-viewport-width,100vw)*0.92),560px)] overflow-hidden rounded-lg border border-amber-400/35 bg-panel-bg text-text-primary shadow-2xl"
+      backdropClassName={SURFACE_MODAL_BACKDROP}
+      panelClassName={SURFACE_MODAL_PANEL_COMPACT}
     >
       {headerImage && (
         <DecisionModalImageHeader
@@ -129,28 +139,28 @@ export function OfficerMatterModal({ itemId, state, onClose, onOpenPersonnel }: 
         />
       )}
       {event && (
-        <div className="space-y-2 px-5 py-4 text-[12px]">
-          <div className="font-bold text-text-primary">{event.officer_name ?? event.current_commander_name ?? t('decisionModal.officer.staffFallback')}</div>
-          <div className="text-xs uppercase tracking-[0.12em] text-text-muted">{officerEventTypeLabel(event.type)}</div>
+        <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto px-8 py-6">
+          <div className={SURFACE_LABEL}>{officerEventTypeLabel(event.type)}</div>
+          <div className="text-[24px] font-semibold leading-tight text-[#f6ecd2]">{event.officer_name ?? event.current_commander_name ?? t('decisionModal.officer.staffFallback')}</div>
           {guidance && (
             <div
               data-testid="officer-matter-semantics"
-              className="border border-amber-400/25 bg-amber-400/[0.06] px-3 py-3 leading-relaxed text-text-secondary"
+              className="rounded-md border border-amber-400/30 bg-amber-400/[0.06] px-5 py-4 text-[17px] leading-relaxed text-[#ddd1b3]"
             >
               {guidance}
             </div>
           )}
-          {event.reason && <div className="border border-panel-border bg-panel-card px-3 py-3 text-text-secondary">{event.reason}</div>}
+          {event.reason && <div className="rounded-md border border-[#2a303c] bg-[#161a22] px-5 py-4 text-[16px] leading-relaxed text-[#c2b69c]">{event.reason}</div>}
         </div>
       )}
-      <div className="flex justify-end gap-2 border-t border-panel-border bg-black/20 px-5 py-3">
-        <button type="button" onClick={onClose} className="border border-panel-border px-3 py-1.5 text-xs font-bold uppercase tracking-[0.12em] text-text-secondary">{t('decisionModal.officer.close')}</button>
-        <button type="button" onClick={acknowledge} disabled={!event} className="border border-panel-border bg-black/20 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.12em] text-text-primary disabled:opacity-40">{acknowledgeLabel}</button>
+      <div className="flex shrink-0 flex-wrap justify-end gap-3 border-t border-[#262b35] bg-[#12161e] px-8 pb-6 pt-5">
+        <button type="button" onClick={onClose} className={SURFACE_SECONDARY_BUTTON}>{t('decisionModal.officer.close')}</button>
+        <button type="button" onClick={acknowledge} disabled={!event} className={SURFACE_SECONDARY_BUTTON}>{acknowledgeLabel}</button>
         <button
           type="button"
           onClick={() => onOpenPersonnel(event?.type === 'replacement_suggested' ? 'briefing' : 'personnel')}
           disabled={!event}
-          className="border border-accent-gold/45 bg-accent-gold/12 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.12em] text-accent-gold disabled:opacity-40"
+          className={SURFACE_PRIMARY_BUTTON_COMPACT}
         >
           {t('decisionModal.officer.openPersonnel')}
         </button>

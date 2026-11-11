@@ -59,11 +59,11 @@ describe('presidential desk assets', () => {
     expect(PRESIDENTIAL_DESK_BACKGROUND).toContain('hq_presidential_desk_1992');
   });
 
-  it('keeps command-card comments aligned with shipped override art', async () => {
+  it('keeps the Command Surface art comments aligned with shipped override art', async () => {
     const { readFile } = await import('node:fs/promises');
-    const source = await readFile('src/ui/map/components/warroom/CommandCard.tsx', 'utf8');
+    const source = await readFile('src/ui/map/data/commandSurfaceArt.ts', 'utf8');
 
-    expect(source).toContain('faction-specific command-card overrides');
+    expect(source).toContain('per-id override `command_cards/<id>.webp`');
     expect(source).not.toContain('No new art is added');
   });
 });

@@ -23,7 +23,7 @@ describe('GUI audit Batch H supply legend overlap contract', () => {
         const source = readFileSync('src/ui/map/components/SupplyPanel.tsx', 'utf8');
 
         expect(source).toContain('data-testid="supply-logistics-panel"');
-        expect(source).toContain("left: 'calc(15.5rem + 12px)'");
+        expect(source).toContain("left: 'calc(17rem + 12px)'");
         expect(source).not.toContain("left: '12px'");
     });
 
@@ -31,7 +31,7 @@ describe('GUI audit Batch H supply legend overlap contract', () => {
         const source = readFileSync('src/ui/map/components/MapModeLegend.tsx', 'utf8');
 
         expect(source).toContain('data-testid="map-mode-legend"');
-        expect(source).toContain("left: 'calc(15.5rem + 1rem)'");
+        expect(source).toContain("left: 'calc(17rem + 1rem)'");
         expect(source).not.toContain('bottom-24 left-4');
     });
 

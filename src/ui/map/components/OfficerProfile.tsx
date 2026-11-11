@@ -53,10 +53,10 @@ export function OfficerProfile({
         <div className={`p-2 bg-black/20 rounded border border-panel-border/30 space-y-1.5${className ? ` ${className}` : ''}`}>
             {/* Header: label + origin badge */}
             <div className="flex items-center justify-between">
-                <div className="text-xs uppercase text-text-secondary tracking-wider font-semibold">{label}</div>
+                <div className="text-[13px] uppercase text-text-secondary tracking-wider font-semibold">{label}</div>
                 {showOriginBadge && (
                     <span
-                        className={`text-xs uppercase tracking-wider font-bold px-1.5 py-0.5 rounded bg-black/30 border border-panel-border/30 ${origin.color}`}
+                        className={`text-[13px] uppercase tracking-wider font-bold px-1.5 py-0.5 rounded bg-black/30 border border-panel-border/30 ${origin.color}`}
                         title={origin.label === 'JNA' ? t('officerProfile.jnaTitle') : undefined}
                     >
                         {origin.label}
@@ -68,11 +68,11 @@ export function OfficerProfile({
             <div className="flex items-start gap-2">
                 <RankInsignia rank={officer.rank} faction={officer.faction} />
                 <div className="min-w-0 flex-1">
-                    <div className="text-xs font-bold text-accent-gold truncate">
+                    <div className="text-[13px] font-bold text-accent-gold truncate">
                         {rank} {officer.name}
-                        {officer.acting_commander && <span className="text-xs text-text-secondary ml-1 font-normal">{t('officerProfile.acting')}</span>}
+                        {officer.acting_commander && <span className="text-[13px] text-text-secondary ml-1 font-normal">{t('officerProfile.acting')}</span>}
                     </div>
-                    <div className="text-xs text-text-secondary italic">{archetype}</div>
+                    <div className="text-[13px] text-text-secondary italic">{archetype}</div>
                 </div>
             </div>
 
@@ -89,8 +89,8 @@ export function OfficerProfile({
                     <StatRow label={t('officerProfile.loyalty')} value={officer.political_reliability} descriptor={getReliabilityLabel(officer.political_reliability)} />
                 )}
                 {!compact && officer.effective_compliance_modifier !== undefined && (
-                    <div className="flex items-center gap-2 text-xs">
-                        <span className="text-text-secondary w-[62px] shrink-0">{t('officerProfile.modifier')}</span>
+                    <div className="flex items-center gap-2 text-[13px]">
+                        <span className="text-text-secondary w-[92px] shrink-0">{t('officerProfile.modifier')}</span>
                         <span className={`font-mono tracking-tight ${getComplianceModifierColor(officer.effective_compliance_modifier)}`}>
                             {getComplianceModifierTextFromValue(officer.effective_compliance_modifier)}
                         </span>
@@ -101,7 +101,7 @@ export function OfficerProfile({
 
             {/* Combat record + tenure (when available) */}
             {(officer.battles > 0 || officer.turns_in_command > 0) && (
-                <div className="flex gap-3 text-xs text-text-secondary pt-0.5 border-t border-panel-border/20">
+                <div className="flex gap-3 text-[13px] text-text-secondary pt-0.5 border-t border-panel-border/20">
                     {officer.battles > 0 && <span>{formatCombatRecord(officer.battles, officer.victories)}</span>}
                     {officer.turns_in_command > 0 && <span>{formatTenure(officer.turns_in_command)}</span>}
                 </div>
@@ -110,18 +110,18 @@ export function OfficerProfile({
             {/* Experience & competence growth */}
             {(officer.operations_commanded != null && officer.operations_commanded > 0) && (
                 <div className="space-y-0.5 pt-0.5 border-t border-panel-border/20">
-                    <div className="flex items-center gap-2 text-xs">
-                        <span className="text-text-secondary w-[62px] shrink-0">{t('officerProfile.opsLed')}</span>
+                    <div className="flex items-center gap-2 text-[13px]">
+                        <span className="text-text-secondary w-[92px] shrink-0">{t('officerProfile.opsLed')}</span>
                         <span className="font-mono text-accent-gold">{officer.operations_commanded}</span>
                         {officer.initial_competence != null && officer.competence > officer.initial_competence && (
-                            <span className="text-green-400 text-xs">
+                            <span className="text-green-400 text-[13px]">
                                 {t('officerProfile.competenceGain', { value: (officer.competence - officer.initial_competence).toFixed(1) })}
                             </span>
                         )}
                     </div>
                     {officer.experience_points != null && officer.experience_points > 0 && (
-                        <div className="flex items-center gap-1 text-xs">
-                            <span className="text-text-secondary w-[62px] shrink-0">{t('officerProfile.xp')}</span>
+                        <div className="flex items-center gap-1 text-[13px]">
+                            <span className="text-text-secondary w-[92px] shrink-0">{t('officerProfile.xp')}</span>
                             <div className="flex-1 h-1 bg-black/40 rounded overflow-hidden">
                                 <div
                                     className="h-full bg-accent-gold/70 rounded"
@@ -137,9 +137,9 @@ export function OfficerProfile({
             {/* Combat record (aggregated from operation_history; read-only). */}
             {!compact && officer.combat_record && officer.combat_record.operations_commanded > 0 && (
                 <div className="space-y-0.5 pt-0.5 border-t border-panel-border/20">
-                    <div className="text-xs uppercase text-text-secondary tracking-wider font-semibold">{t('officerProfile.combatRecord')}</div>
-                    <div className="flex items-center gap-2 text-xs">
-                        <span className="text-text-secondary w-[62px] shrink-0">{t('officerProfile.opsCommanded')}</span>
+                    <div className="text-[13px] uppercase text-text-secondary tracking-wider font-semibold">{t('officerProfile.combatRecord')}</div>
+                    <div className="flex items-center gap-2 text-[13px]">
+                        <span className="text-text-secondary w-[92px] shrink-0">{t('officerProfile.opsCommanded')}</span>
                         <span className="font-mono text-text-primary">{officer.combat_record.operations_commanded}</span>
                         <span className="text-text-secondary">
                             {t('officerProfile.wlpRecord', {
@@ -149,19 +149,19 @@ export function OfficerProfile({
                             })}
                         </span>
                     </div>
-                    <div className="flex items-center gap-2 text-xs">
-                        <span className="text-text-secondary w-[62px] shrink-0">{t('officerProfile.casualtiesSuffered')}</span>
+                    <div className="flex items-center gap-2 text-[13px]">
+                        <span className="text-text-secondary w-[92px] shrink-0">{t('officerProfile.casualtiesSuffered')}</span>
                         <span className="font-mono text-red-400">{officer.combat_record.casualties_suffered.toLocaleString('en-US')}</span>
                         <span className="text-text-secondary">{t('officerProfile.casualtiesInflicted')}</span>
                         <span className="font-mono text-green-400">{officer.combat_record.casualties_inflicted.toLocaleString('en-US')}</span>
                     </div>
-                    <div className="flex items-center gap-2 text-xs">
-                        <span className="text-text-secondary w-[62px] shrink-0">{t('officerProfile.objectivesTaken')}</span>
+                    <div className="flex items-center gap-2 text-[13px]">
+                        <span className="text-text-secondary w-[92px] shrink-0">{t('officerProfile.objectivesTaken')}</span>
                         <span className="font-mono text-accent-gold">{officer.combat_record.objectives_captured}</span>
                     </div>
                     {officer.combat_record.last_operation && (
-                        <div className="flex items-center gap-2 text-xs">
-                            <span className="text-text-secondary w-[62px] shrink-0">{t('officerProfile.lastOperation')}</span>
+                        <div className="flex items-center gap-2 text-[13px]">
+                            <span className="text-text-secondary w-[92px] shrink-0">{t('officerProfile.lastOperation')}</span>
                             <span className="text-text-primary truncate" title={officer.combat_record.last_operation.name}>
                                 {officer.combat_record.last_operation.name}
                             </span>
@@ -181,7 +181,7 @@ export function OfficerProfile({
 
             {/* Casualty vulnerability indicator */}
             {officer.casualty_vulnerability != null && officer.casualty_vulnerability >= 0.10 && (
-                <div className={`text-xs font-semibold px-1.5 py-0.5 rounded ${
+                <div className={`text-[13px] font-semibold px-1.5 py-0.5 rounded ${
                     officer.casualty_vulnerability >= 0.15
                         ? 'bg-red-900/30 border border-red-500/40 text-red-400'
                         : 'bg-amber-900/30 border border-amber-500/40 text-amber-400'
@@ -201,8 +201,8 @@ export function OfficerProfile({
 function StatRow({ label, value, descriptor }: { label: string; value: number; descriptor: string }) {
     const color = getRatingColor(value);
     return (
-        <div className="flex items-center gap-2 text-xs">
-            <span className="text-text-secondary w-[62px] shrink-0">{label}</span>
+        <div className="flex items-center gap-2 text-[13px]">
+            <span className="text-text-secondary w-[92px] shrink-0">{label}</span>
             <span className={`font-mono tracking-tight ${color}`}>{formatPips(value)}</span>
             <span className="text-text-secondary">{descriptor}</span>
         </div>
@@ -241,7 +241,7 @@ function RankInsignia({ rank, faction }: { rank: string; faction: string }) {
                     <span
                         key={i}
                         className="leading-none"
-                        style={{ color, fontSize: starCount >= 3 ? 9 : 10 }}
+                        style={{ color, fontSize: starCount >= 3 ? 13 : 14 }}
                     >
                         {'\u2605'}
                     </span>

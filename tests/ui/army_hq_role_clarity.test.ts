@@ -31,7 +31,9 @@ describe('Army HQ role clarity and contrast', () => {
   });
 
   it('keeps command access names complete and gives each corps enough width', () => {
-    expect(source).toContain('minmax(21rem,1fr)');
+    // Surface redesign 2026-11-10: the corps list is a full-width rail column, one corps per line.
+    expect(source).toContain('data-testid="army-hq-corps-index" className="flex flex-col gap-1.5 pt-3"');
+    expect(source).toContain('break-words text-[16px] font-semibold');
     expect(source).not.toContain('flex-1 truncate text-xs font-bold uppercase text-text-primary');
   });
 
@@ -57,7 +59,7 @@ describe('Army HQ role clarity and contrast', () => {
 
   it('wraps aftermath signal evidence instead of clipping it', () => {
     expect(aftermathSource).not.toContain('truncate text-xs uppercase tracking-[0.1em] opacity-75');
-    expect(aftermathSource).toContain('break-words text-xs uppercase tracking-[0.1em]');
+    expect(aftermathSource).toContain('break-words text-[13px] uppercase tracking-[0.1em]');
   });
 
   it('keeps visit availability and battle outcomes readable', () => {

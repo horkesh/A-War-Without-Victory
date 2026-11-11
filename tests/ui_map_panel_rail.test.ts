@@ -6,8 +6,8 @@ it('left rail panels align to the visible command sidebar without the old blank 
     const primary = panelRail.getPanelRailStyle('primary', '24rem', 'left');
     const secondary = panelRail.getPanelRailStyle('secondary', '24rem', 'left');
 
-    expect(primary.left).toBe('calc(15.5rem + 0.5rem)');
-    expect(secondary.left).toBe('calc(15.5rem + 0.5rem)');
+    expect(primary.left).toBe('calc(17rem + 0.5rem)');
+    expect(secondary.left).toBe('calc(17rem + 0.5rem)');
 });
 
 it('derivePanelRailState keeps formation as the single leaf when a brigade drills in from a sector', () => {

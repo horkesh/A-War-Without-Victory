@@ -15,6 +15,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { EventDecisionModal } from '../../src/ui/map/components/EventDecisionModal.js';
 import { resolveEventIllustration, section6StillAlt } from '../../src/ui/map/data/eventIllustrationArt.js';
 import {
+  getAftermathHeaderForTone,
   getConsequenceStillForTone,
   getDecisionHeaderForEventCategory,
 } from '../../src/ui/map/data/presidentialDeskAssets.js';
@@ -71,6 +72,17 @@ describe('decision plate by event category', () => {
       stills.add(url);
     }
     expect(stills.size).toBeGreaterThanOrEqual(2);
+  });
+
+  it('returns a distinct wide aftermath header for every tone (round 2 art)', () => {
+    const headers = new Set<string>();
+    for (const tone of ['gain', 'loss', 'mixed', 'quiet'] as const) {
+      const url = getAftermathHeaderForTone(tone);
+      expect(url, tone).toContain(`aftermath_${tone}_wide`);
+      expect(url).not.toBe(getConsequenceStillForTone(tone));
+      headers.add(url);
+    }
+    expect(headers.size).toBe(4);
   });
 });
 
@@ -132,9 +144,9 @@ describe('EventDecisionModal image header', () => {
 });
 
 describe('aftermath still and Army HQ crest wiring', () => {
-  it('turn aftermath draws a consequence still behind its header', () => {
+  it('turn aftermath draws the wide tone header behind its header', () => {
     const source = readFileSync('src/ui/map/components/TurnAftermathModal.tsx', 'utf8');
-    expect(source).toContain('getConsequenceStillForTone(view.tone)');
+    expect(source).toContain('getAftermathHeaderForTone(view.tone)');
     expect(source).toContain('data-testid="turn-aftermath-header-art"');
   });
 

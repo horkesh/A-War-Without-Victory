@@ -111,7 +111,7 @@ export const BrigadeRow = memo(function BrigadeRow({ formation, compact, highlig
   });
 
   const containerClasses = [
-    'group w-full flex flex-wrap items-center gap-1.5 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent-gold font-mono text-xs border-b border-panel-border/50 last:border-b-0 px-2',
+    'group w-full flex flex-wrap items-center gap-1.5 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent-gold font-mono text-[13px] border-b border-panel-border/50 last:border-b-0 px-2',
     `border-l-2 ${stanceStripe}`,
     compact ? 'py-1' : 'py-1.5',
     rowClass,
@@ -145,14 +145,14 @@ export const BrigadeRow = memo(function BrigadeRow({ formation, compact, highlig
         const ht = getHighestTier(decorations);
         const dn = ht ? getDecorationName(formation.faction ?? '', ht) : '';
         return (
-          <span className={`shrink-0 text-xs leading-none ${prestigePipColor}`} title={dn}>
+          <span className={`shrink-0 text-[13px] leading-none ${prestigePipColor}`} title={dn}>
             <Icon name="star" size={9} />
           </span>
         );
       })()}
 
       {/* Personnel count */}
-      <span className="shrink-0 text-xs tabular-nums text-text-secondary flex items-center gap-0.5" title={t('brigadeRow.personnelTitle', { personnel: formatCount(formation.personnel) })}>
+      <span className="shrink-0 text-[13px] tabular-nums text-text-secondary flex items-center gap-0.5" title={t('brigadeRow.personnelTitle', { personnel: formatCount(formation.personnel) })}>
         <Icon name="personnel" size={9} />
         {formatPersonnel(formation.personnel)}
       </span>
@@ -160,7 +160,7 @@ export const BrigadeRow = memo(function BrigadeRow({ formation, compact, highlig
       {/* Cohesion bar */}
       <div className="flex items-center gap-0.5 shrink-0" aria-label={t('brigadeRow.cohesionAria', { cohesion: cohesionLabel })}>
         {cohesion == null ? (
-          <span className="text-xs italic text-text-secondary">{t('corpsFront.unreported')}</span>
+          <span className="text-[13px] italic text-text-secondary">{t('corpsFront.unreported')}</span>
         ) : (
           Array.from({ length: 5 }, (_, idx) => (
             <span
@@ -172,14 +172,14 @@ export const BrigadeRow = memo(function BrigadeRow({ formation, compact, highlig
       </div>
 
       {/* Fatigue */}
-      <div className={`min-w-5 text-right shrink-0 tabular-nums text-xs ${fatClass} flex items-center justify-end gap-0.5`} aria-label={t('brigadeRow.fatigueAria', { fatigue: fatigueLabel })}>
+      <div className={`min-w-5 text-right shrink-0 tabular-nums text-[13px] ${fatClass} flex items-center justify-end gap-0.5`} aria-label={t('brigadeRow.fatigueAria', { fatigue: fatigueLabel })}>
         <Icon name="fatigue" size={8} />
         {fatigueLabel}
       </div>
 
       {/* Status badge — rubber stamp style */}
       <span
-        className={`shrink-0 text-xs uppercase px-1 py-px rounded border font-bold tracking-wider ${badge.class}`}
+        className={`shrink-0 text-[13px] uppercase px-1 py-px rounded border font-bold tracking-wider ${badge.class}`}
         style={{ transform: 'rotate(-1.5deg)' }}
       >
         {statusLabel}

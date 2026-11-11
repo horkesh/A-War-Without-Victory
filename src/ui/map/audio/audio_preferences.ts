@@ -14,7 +14,16 @@ export interface AudioPreferences {
     masterVolume: number;
     musicEnabled?: boolean;
     musicVolume?: number;
+    /** Set once music on/off is read under the current default (see MUSIC_DEFAULTS_VERSION). */
+    musicDefaultsVersion?: number;
 }
+
+/**
+ * Music plays by default (owner, 2026-11-10). Profiles saved before this stored the old
+ * "off" default, indistinguishable from a deliberate choice, so a record from an older
+ * defaults version takes the new default once; any later choice is kept.
+ */
+export const MUSIC_DEFAULTS_VERSION = 2;
 
 interface StorageLike {
     getItem(key: string): string | null;
@@ -26,8 +35,9 @@ export const AUDIO_PREFERENCES_STORAGE_KEY = 'awwv.audio.preferences.v2';
 export const DEFAULT_AUDIO_PREFERENCES: AudioPreferences = {
     muted: false,
     masterVolume: 0.5,
-    musicEnabled: false,
+    musicEnabled: true,
     musicVolume: 0.5,
+    musicDefaultsVersion: MUSIC_DEFAULTS_VERSION,
 };
 
 const OLD_V1_DEFAULT_AUDIO_PREFERENCES: AudioPreferences = {
@@ -50,9 +60,23 @@ export function normalizeAudioPreferences(value: unknown): AudioPreferences {
     return {
         muted: typeof record.muted === 'boolean' ? record.muted : DEFAULT_AUDIO_PREFERENCES.muted,
         masterVolume: clampMasterVolume(record.masterVolume),
-        musicEnabled: record.musicEnabled === true,
+        musicEnabled: typeof record.musicEnabled === 'boolean' ? record.musicEnabled : DEFAULT_AUDIO_PREFERENCES.musicEnabled,
         musicVolume: clampMasterVolume(record.musicVolume),
+        musicDefaultsVersion: MUSIC_DEFAULTS_VERSION,
     };
+}
+
+/**
+ * Read a SAVED record (browser storage or the desktop profile). A record from before
+ * MUSIC_DEFAULTS_VERSION stored the old "music off" default, not a choice: it takes the
+ * current default once. In-memory updates go through normalizeAudioPreferences only.
+ */
+export function readStoredAudioPreferences(value: unknown): AudioPreferences {
+    const record = value && typeof value === 'object' ? value as Partial<AudioPreferences> : {};
+    const migrated = record.musicDefaultsVersion === MUSIC_DEFAULTS_VERSION
+        ? record
+        : { ...record, musicEnabled: DEFAULT_AUDIO_PREFERENCES.musicEnabled };
+    return normalizeAudioPreferences(migrated);
 }
 
 function getBrowserStorage(): StorageLike | null {
@@ -77,10 +101,10 @@ export function loadAudioPreferences(storage: StorageLike | null = getBrowserSto
     if (!storage) return { ...DEFAULT_AUDIO_PREFERENCES };
     try {
         const raw = storage.getItem(AUDIO_PREFERENCES_STORAGE_KEY);
-        if (raw) return normalizeAudioPreferences(JSON.parse(raw));
+        if (raw) return readStoredAudioPreferences(JSON.parse(raw));
         const legacyRaw = storage.getItem(AUDIO_PREFERENCES_STORAGE_KEY_V1);
         if (!legacyRaw) return { ...DEFAULT_AUDIO_PREFERENCES };
-        const legacy = normalizeAudioPreferences(JSON.parse(legacyRaw));
+        const legacy = readStoredAudioPreferences(JSON.parse(legacyRaw));
         // Pre-WP-8 untouched profiles stored this exact silent default. A user who
         // deliberately accepted mute at 0.5 is indistinguishable, so prefer unmuting:
         // accidental silence hides that the soundscape exists, while mute is one click.
@@ -152,7 +176,9 @@ export function connectNativeAudioPreferences(bridge: SettingsBridge): () => voi
     };
     const persist = (patch: Partial<AudioPreferences>) => {
         writeTail = writeTail.then(async () => {
-            unsaved = { ...unsaved, ...patch };
+            // The native store merges patches: stamp the defaults version with every write so a
+            // music choice saved there reads back as a choice (MUSIC_DEFAULTS_VERSION).
+            unsaved = { ...unsaved, ...patch, musicDefaultsVersion: MUSIC_DEFAULTS_VERSION };
             const result = await bridge.saveSettings({ audioPreferences: unsaved }, {
                 merge: true,
                 audioDefaults: { ...browser },
@@ -185,7 +211,7 @@ export function connectNativeAudioPreferences(bridge: SettingsBridge): () => voi
 
         const stored = settingsRecord(profile?.audioPreferences) ? profile.audioPreferences : null;
         const edited = Object.keys(pending).length > 0;
-        session.current = normalizeAudioPreferences({ ...(stored ?? browser), ...pending });
+        session.current = normalizeAudioPreferences({ ...(stored ? readStoredAudioPreferences(stored) : browser), ...pending });
         hydrating = false;
         if (stored || edited) saveAudioPreferences(session.current);
         applyAudioPreferences(session.current);

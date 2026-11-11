@@ -8,6 +8,7 @@ import { getConsequenceStillForRecord } from '../../data/presidentialDeskAssets'
 import { shouldNarrateTerritorySummary } from '../../data/territorySummaryGuard';
 import { t, type MessageKey } from '../../i18n';
 import { turnToDateString } from '../../utils/formatters';
+import { SURFACE_LABEL_MUTED } from '../surface/Surface';
 import type { DecisionConsequenceRecord } from '../../data/decisionConsequenceLedger';
 
 export interface ConsequenceStripProps {
@@ -46,16 +47,25 @@ export function ConsequenceStrip({ state, onOpenRecords, onOpenDecisionRecords, 
   ).recordsRouteCount;
   const latestFiledTurn = filedSummary?.turn ?? decisionRecords[0]?.turn ?? null;
 
+  const figures: Array<{ label: string; value: number }> = [
+    { label: t('desk.consequences.battles'), value: battleCount },
+    { label: t('desk.consequences.displaced'), value: displacement },
+    { label: t('desk.consequences.events'), value: notableEvents },
+    { label: t('desk.consequences.decisions'), value: decisionRecordCount },
+  ];
+
+  // Surface redesign (2026-11-10): "What followed" reads as a section of the Desk's
+  // right column — figures as plain rows, then the latest decisions with their stills.
   return (
     <section
-      className="border-t border-panel-border/70 pt-3"
+      className="flex flex-col gap-3"
       aria-label={t('desk.consequences.ariaLabel')}
       data-testid="desk-consequence-strip"
     >
-      <div className="flex items-center justify-between gap-3">
-        <div>
-          <div className="text-xs font-bold uppercase tracking-[0.2em] text-text-muted">{t('desk.consequences.heading')}</div>
-          <div className="mt-1 text-xs text-text-secondary">
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex flex-col gap-1">
+          <div className={SURFACE_LABEL_MUTED}>{t('desk.consequences.heading')}</div>
+          <div className="text-[15px] text-[#9c917b]">
             {latestFiledTurn != null ? t('desk.consequences.lastFiled', { date: turnToDateString(latestFiledTurn) }) : t('desk.consequences.noRecord')}
           </div>
         </div>
@@ -63,31 +73,21 @@ export function ConsequenceStrip({ state, onOpenRecords, onOpenDecisionRecords, 
           type="button"
           onClick={onOpenRecords}
           data-testid="desk-consequence-open-records"
-          className="border border-panel-border bg-black/20 px-2.5 py-1.5 text-xs font-bold uppercase tracking-[0.13em] text-text-secondary transition-colors hover:border-accent-gold/45 hover:text-accent-gold"
+          className="h-10 shrink-0 rounded-md border border-[#3a4150] bg-[#1b2029] px-4 text-[15px] font-semibold text-[#e8dcbc] transition hover:border-accent-gold/60"
         >
           {t('desk.consequences.records')}
         </button>
       </div>
-      <div className="mt-3 grid grid-cols-4 gap-2">
-        <div className="border border-panel-border/70 bg-black/20 px-2 py-2">
-          <div className="text-xs font-bold uppercase tracking-[0.16em] text-text-muted">{t('desk.consequences.battles')}</div>
-          <div className="mt-1 text-[16px] font-bold text-text-primary">{battleCount}</div>
-        </div>
-        <div className="border border-panel-border/70 bg-black/20 px-2 py-2">
-          <div className="text-xs font-bold uppercase tracking-[0.16em] text-text-muted">{t('desk.consequences.displaced')}</div>
-          <div className="mt-1 text-[16px] font-bold text-text-primary">{displacement}</div>
-        </div>
-        <div className="border border-panel-border/70 bg-black/20 px-2 py-2">
-          <div className="text-xs font-bold uppercase tracking-[0.16em] text-text-muted">{t('desk.consequences.events')}</div>
-          <div className="mt-1 text-[16px] font-bold text-text-primary">{notableEvents}</div>
-        </div>
-        <div className="border border-panel-border/70 bg-black/20 px-2 py-2">
-          <div className="text-xs font-bold uppercase tracking-[0.16em] text-text-muted">{t('desk.consequences.decisions')}</div>
-          <div className="mt-1 text-[16px] font-bold text-text-primary">{decisionRecordCount}</div>
-        </div>
+      <div className="grid grid-cols-2 gap-2">
+        {figures.map((figure) => (
+          <div key={figure.label} className="rounded-md border border-[#2a303c] bg-[#161a22] px-4 py-2.5">
+            <div className="text-[15px] text-[#b9ad94]">{figure.label}</div>
+            <div className="font-mono text-[20px] font-semibold tabular-nums text-[#f1e6c8]">{figure.value}</div>
+          </div>
+        ))}
       </div>
       {decisionRecords.length > 0 && (
-        <div className="mt-3 space-y-2">
+        <div className="flex flex-col gap-2">
           {decisionRecords.map((record) => {
             const title = resolveDecisionConsequenceCopy(record, 'title');
             const outcome = resolveDecisionConsequenceCopy(record, 'outcome');
@@ -107,22 +107,20 @@ export function ConsequenceStrip({ state, onOpenRecords, onOpenDecisionRecords, 
                   onOpenRecords();
                 }
               }}
-              className="flex w-full gap-2 border border-panel-border/70 bg-black/20 px-2.5 py-2 text-left transition-colors hover:border-accent-gold/45"
+              className="grid w-full grid-cols-[5.5rem_minmax(0,1fr)] gap-3 rounded-md border border-[#2a303c] bg-[#161a22] p-3 text-left transition hover:border-[#4a4436]"
             >
               <img
                 src={getConsequenceStillForRecord(record)}
                 alt={t('decisionConsequences.imageAlt', { title })}
-                className="h-12 w-20 shrink-0 border border-panel-border/60 object-cover"
+                className="h-16 w-full rounded object-cover"
               />
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center justify-between gap-2">
-                  <div className="truncate text-xs font-bold text-text-primary">{title}</div>
-                  <div className="shrink-0 text-xs font-bold uppercase tracking-[0.14em] text-accent-gold">{outcome}</div>
+              <div className="flex min-w-0 flex-col gap-1">
+                <div className="text-[16px] font-semibold leading-snug text-[#f1e6c8]">{title}</div>
+                <div className="text-[14px] font-semibold text-[#e0c27a]">{outcome}</div>
+                <div className="text-[14px] leading-snug text-[#b9ad94]">
+                  {familyLabel(record)} · {t('decisionConsequences.date', { date: turnToDateString(record.turn) })} · {detail}
                 </div>
-                <div className="mt-1 truncate text-xs text-text-secondary">
-                  {familyLabel(record)} / {t('decisionConsequences.date', { date: turnToDateString(record.turn) })} / {detail}
-                </div>
-                <div className="mt-1 text-xs font-bold uppercase tracking-[0.13em] text-text-muted">
+                <div className="text-[14px] font-semibold text-[#c9a75c]">
                   {record.recordTarget === 'chronicle'
                     ? t('desk.consequences.openChronicle')
                     : t('desk.consequences.openRecords')}

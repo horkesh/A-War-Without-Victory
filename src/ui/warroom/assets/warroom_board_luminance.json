@@ -10,7 +10,7 @@
     "cork": "desk_map"
   },
   "metric": "median CIE L* of region pixels, D65",
-  "source_digest": "3facf848b152904445fc8eea9b15e01dba63020517d203130113fb8f9b9f2f40",
+  "source_digest": "a9f8441ecd015627d0dcbae46412f3b80ce488b6d77722aed0722784c583699f",
   "boards": {
     "HRHB": {
       "1991": 60.1,
@@ -43,9 +43,9 @@
       "1995": 20.4
     },
     "RBiH": {
-      "1991": 53,
+      "1991": 53.2,
       "1992": 35.4,
-      "1993": 28.1,
+      "1993": 28.2,
       "1994": 50.5,
       "1995": 56.3
     },

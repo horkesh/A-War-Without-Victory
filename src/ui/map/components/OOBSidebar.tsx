@@ -98,7 +98,7 @@ function SectorStrengthBadge({ strengthClass }: { strengthClass: string }) {
   const style = STRENGTH_BADGE_STYLES[strengthClass] ?? 'text-text-secondary';
   const label = getPlayerSafeSectorStrengthLabel(strengthClass);
   return (
-    <span className={`text-xs uppercase tracking-tight shrink-0 ${style}`}>
+    <span className={`text-[13px] uppercase tracking-tight shrink-0 ${style}`}>
       {label}
     </span>
   );
@@ -298,13 +298,13 @@ export function OOBSidebar() {
     return (
       <div
         data-awwv-counter-occluder="true"
-        className="absolute left-0 z-10 w-[15.5rem] flex flex-col bg-panel-bg/95 backdrop-blur-sm border-r border-panel-border overflow-hidden"
+        className="absolute left-0 z-10 w-[17rem] flex flex-col bg-[#11141b] border-r border-accent-gold/30 overflow-hidden"
         style={{ direction: 'ltr', top: 'var(--awwv-toolbar-clearance, 5.5rem)', bottom: 'var(--awwv-bottom-bar-clearance, 2.5rem)' }}
       >
-        <div className="px-2.5 py-1.5 font-sans text-xs text-accent-gold uppercase tracking-[0.14em] font-semibold border-b border-panel-border glow-text">
+        <div className="px-2.5 py-1.5 font-sans text-[13px] text-accent-gold uppercase tracking-[0.14em] font-semibold border-b border-panel-border glow-text">
           {t('oob.command')}
         </div>
-        <div className="px-2.5 py-2 text-xs text-text-secondary italic">{t('oob.loadSaveHelp')}</div>
+        <div className="px-2.5 py-2 text-[13px] text-text-secondary italic">{t('oob.loadSaveHelp')}</div>
       </div>
     );
   }
@@ -312,11 +312,11 @@ export function OOBSidebar() {
   return (
     <div
         data-awwv-counter-occluder="true"
-        className="absolute left-0 z-10 w-[15.5rem] flex flex-col bg-panel-bg/95 backdrop-blur-sm border-r border-panel-border overflow-hidden"
+        className="absolute left-0 z-10 w-[17rem] flex flex-col bg-[#11141b] border-r border-accent-gold/30 overflow-hidden"
       style={{ direction: 'ltr', top: 'var(--awwv-toolbar-clearance, 5.5rem)', bottom: 'var(--awwv-bottom-bar-clearance, 2.5rem)' }}
     >
       {/* Overlay — explicitly absolute to avoid flex-item space consumption */}
-      <div className="px-2.5 py-1.5 font-sans text-xs text-accent-gold uppercase tracking-[0.14em] font-semibold border-b border-panel-border shrink-0 relative z-10 glow-text">
+      <div className="px-2.5 py-1.5 font-sans text-[13px] text-accent-gold uppercase tracking-[0.14em] font-semibold border-b border-panel-border shrink-0 relative z-10 glow-text">
         {t('oob.command')}
       </div>
 
@@ -349,7 +349,7 @@ export function OOBSidebar() {
           {expandedSections.army && (
             <div className="p-2 space-y-2">
               {!armyByFaction || (armyByFaction.size === 0 && reserveByFaction.size === 0 && phantomCommandFormationsByFaction.size === 0) ? (
-                <div className="text-xs text-text-secondary italic">{t('oob.noFormations')}</div>
+                <div className="text-[13px] text-text-secondary italic">{t('oob.noFormations')}</div>
               ) : (
                 FACTION_ORDER.filter((f) => f === playerFaction && (armyByFaction.has(f) || reserveByFaction.has(f) || phantomCommandFormationsByFaction.has(f))).map((faction, factionIndex) => {
                   const formations = armyByFaction.get(faction) ?? [];
@@ -398,14 +398,14 @@ export function OOBSidebar() {
                         {getArmyCrest(faction) && (
                           <img src={getArmyCrest(faction)} alt="" className="w-3.5 h-3.5 object-contain opacity-70" />
                         )}
-                        <span className={`text-xs font-mono font-bold uppercase tracking-[0.16em] ${FACTION_COLORS[faction] ?? 'text-text-primary'}`}>
+                        <span className={`text-[13px] font-mono font-bold uppercase tracking-[0.16em] ${FACTION_COLORS[faction] ?? 'text-text-primary'}`}>
                           {getArmyName(faction) ?? faction}
                         </span>
                         {getArmyCrest(faction) && (
                           <img src={getArmyCrest(faction)} alt="" className="w-3.5 h-3.5 object-contain opacity-70" />
                         )}
                       </div>
-                      <div className="w-full flex items-stretch justify-between gap-1 rounded font-mono text-xs font-medium bg-panel-card border border-panel-border text-left group/faction">
+                      <div className="w-full flex items-stretch justify-between gap-1 rounded font-mono text-[13px] font-medium bg-panel-card border border-panel-border text-left group/faction">
                         <button
                           type="button"
                           onClick={() => setSelectedArmyId(faction)}
@@ -424,7 +424,7 @@ export function OOBSidebar() {
                             const commander = getFactionArmyCommander(faction, loadedGameState);
                             if (commander) {
                               return (
-                                <span className="block truncate pl-6 text-xs text-text-secondary">
+                                <span className="block truncate pl-6 text-[13px] text-text-secondary">
                                   {t('oob.co')}{' '}
                                   <span className="text-accent-gold font-semibold">
                                     {formatRank(commander.rank)} {commander.name}
@@ -444,7 +444,7 @@ export function OOBSidebar() {
                             ? t('oob.expandFaction', { faction: getPlayerSafeMilitaryFactionName(faction) })
                             : t('oob.collapseFaction', { faction: getPlayerSafeMilitaryFactionName(faction) })}
                         >
-                          <span className="text-text-secondary tabular-nums text-xs">
+                          <span className="text-text-secondary tabular-nums text-[13px]">
                             {formatFactionFormationCount(formations.length, reserves.length)}
                           </span>
                           <span
@@ -471,9 +471,9 @@ export function OOBSidebar() {
                                   onClick={() => setSelectedArmyHqId(hqId)}
                                 >
                                   <div className="flex items-center gap-2 min-w-0">
-                                    <span className="text-xs text-accent-gold font-bold uppercase tracking-wider">{t('oob.reserveHq', { name: hqName })}</span>
+                                    <span className="text-[13px] text-accent-gold font-bold uppercase tracking-wider">{t('oob.reserveHq', { name: hqName })}</span>
                                   </div>
-                                  <span className="text-xs text-text-secondary tabular-nums shrink-0">{t('oob.unitCount', { count: hqBrigades.length })}</span>
+                                  <span className="text-[13px] text-text-secondary tabular-nums shrink-0">{t('oob.unitCount', { count: hqBrigades.length })}</span>
                                 </button>
                                 <div className="mt-0.5 flex flex-wrap gap-1">
                                   {hqBrigades.map(b => (
@@ -483,7 +483,7 @@ export function OOBSidebar() {
                                       data-testid="oob-hq-reserve-brigade"
                                       data-formation-id={b.id}
                                       data-army-hq-id={hqId}
-                                      className="text-xs text-accent-gold truncate hover:text-accent-gold focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent-gold/70"
+                                      className="text-[13px] text-accent-gold truncate hover:text-accent-gold focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent-gold/70"
                                       onClick={() => inspectOnField(useGameStore.getState(), {
                                         kind: 'field-formation-in-army-reserve',
                                         formationId: b.id,
@@ -556,7 +556,7 @@ export function OOBSidebar() {
                                           data-formation-id={brigade.id}
                                           aria-label={inspectLabel}
                                           title={inspectLabel}
-                                          className="block w-full truncate rounded border border-panel-border/50 bg-panel-bg/70 px-2 py-1 text-left text-xs text-accent-gold/80 hover:border-accent-gold/50 hover:text-accent-gold focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent-gold/70"
+                                          className="block w-full truncate rounded border border-panel-border/50 bg-panel-bg/70 px-2 py-1 text-left text-[13px] text-accent-gold/80 hover:border-accent-gold/50 hover:text-accent-gold focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent-gold/70"
                                           onMouseEnter={() => setHoveredOsids(brigade.location_osid ? [brigade.location_osid] : [])}
                                           onMouseLeave={() => setHoveredOsids([])}
                                           onClick={() => inspectOnField(useGameStore.getState(), brigade.location_osid
@@ -590,7 +590,7 @@ export function OOBSidebar() {
             testId="oob-section-mobilization-toggle"
           />
           {expandedSections.mobilization && (
-            <div className="p-2 space-y-1.5 text-xs">
+            <div className="p-2 space-y-1.5 text-[13px]">
               {!mobilizationSummary ? (
                 <div className="text-text-secondary italic px-1">{t('oob.noMobilizationData')}</div>
               ) : (
@@ -605,10 +605,10 @@ export function OOBSidebar() {
                   ].filter((field): field is string => Boolean(field));
                   return (
                     <div key={faction} className="rounded border border-panel-border bg-panel-card p-1.5 space-y-1">
-                      <div className={`font-mono text-xs font-medium ${FACTION_COLORS[faction] ?? 'text-text-primary'}`}>
+                      <div className={`font-mono text-[13px] font-medium ${FACTION_COLORS[faction] ?? 'text-text-primary'}`}>
                         {getPlayerSafeMilitaryFactionName(faction)}
                       </div>
-                      <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-xs">
+                      <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-[13px]">
                         <span className="text-text-secondary">{t('oob.available')}</span>
                         <span className="text-text-primary tabular-nums">{formatReportedWhole(summary.total_available)}</span>
                         <span className="text-text-secondary">{t('oob.committed')}</span>
@@ -623,10 +623,10 @@ export function OOBSidebar() {
                       <OwnForceReportGapNotice fields={mobilizationReportGaps} />
                       {Array.isArray(summary.top_pools) && summary.top_pools.length > 0 && (
                         <div className="pt-1 border-t border-panel-border/50">
-                          <div className="text-xs uppercase tracking-wide text-text-secondary mb-1">{t('oob.topPools')}</div>
+                          <div className="text-[13px] uppercase tracking-wide text-text-secondary mb-1">{t('oob.topPools')}</div>
                           <div className="space-y-1">
                             {summary.top_pools.map((pool) => (
-                              <div key={`${faction}-${pool.mun_id}`} className="flex items-center justify-between text-xs">
+                              <div key={`${faction}-${pool.mun_id}`} className="flex items-center justify-between text-[13px]">
                                 <span className="text-text-secondary">{getPlayerSafeMunicipalityName(pool.mun_id)}</span>
                                 <span className="text-text-primary tabular-nums">{formatReportedWhole(pool.available)}</span>
                               </div>
@@ -648,7 +648,7 @@ export function OOBSidebar() {
             onToggle={() => toggleSection('operations')}
           />
           {expandedSections.operations && (
-            <div className="p-2 space-y-1.5 text-xs">
+            <div className="p-2 space-y-1.5 text-[13px]">
               {!operationsByFaction ? (
                 <div className="text-text-secondary italic px-1">{t('operationHistory.noActive')}</div>
               ) : (
@@ -656,7 +656,7 @@ export function OOBSidebar() {
                   const ops = operationsByFaction.get(faction)!;
                   return (
                     <div key={faction} className="space-y-1">
-                      <div className={`font-mono text-xs font-medium px-1 ${FACTION_COLORS[faction] ?? 'text-text-primary'}`}>
+                      <div className={`font-mono text-[13px] font-medium px-1 ${FACTION_COLORS[faction] ?? 'text-text-primary'}`}>
                         {getPlayerSafeMilitaryFactionName(faction)}
                       </div>
                       {ops.map((op) => {
@@ -680,13 +680,13 @@ export function OOBSidebar() {
                             onClick={() => setSelectedOperationKey(isSelected ? null : opKey)}
                             className={`w-full text-left rounded border px-2 py-1.5 space-y-1 transition-colors ${isSelected ? 'border-accent-gold bg-panel-active' : 'border-panel-border bg-panel-card hover:bg-panel-hover'}`}
                           >
-                            <div className={`font-sans text-xs font-semibold ${FACTION_COLORS[op.faction] ?? 'text-text-primary'}`}>
+                            <div className={`font-sans text-[13px] font-semibold ${FACTION_COLORS[op.faction] ?? 'text-text-primary'}`}>
                               {op.display_name}
                             </div>
-                            <div className="text-text-secondary text-xs">
+                            <div className="text-text-secondary text-[13px]">
                               {getPlayerSafeCorpsName(op.corps_name, op.corps_id)} / {getPlayerSafeMilitaryFactionName(op.faction)}
                             </div>
-                            <div className="flex items-center gap-2 text-xs">
+                            <div className="flex items-center gap-2 text-[13px]">
                               <span className={`px-1.5 py-0.5 rounded text-white uppercase font-semibold ${phaseBg}`}>
                                 {phaseLabel}
                               </span>
@@ -694,7 +694,7 @@ export function OOBSidebar() {
                                 <span className="text-text-secondary">{t('operationsSection.momShort')} {op.momentum}</span>
                               )}
                             </div>
-                            <div className="text-xs tabular-nums flex items-center gap-1 flex-wrap">
+                            <div className="text-[13px] tabular-nums flex items-center gap-1 flex-wrap">
                               {objTotal > 0 && (
                                 <span className="text-text-secondary">
                                   {objDisplayCurrent == null
@@ -732,7 +732,7 @@ export function OOBSidebar() {
             testId="oob-section-sectors-toggle"
           />
           {expandedSections.sectors && (
-            <div className="p-2.5 space-y-1.5 text-xs">
+            <div className="p-2.5 space-y-1.5 text-[13px]">
               {!sectorsByFaction ? (
                 <div className="text-text-secondary italic px-1">{t('oob.noSectorData')}</div>
               ) : (
@@ -740,7 +740,7 @@ export function OOBSidebar() {
                   const sectors = sectorsByFaction.get(faction)!;
                   return (
                     <div key={faction} className="space-y-1">
-                      <div className={`font-mono text-xs font-medium px-1 ${FACTION_COLORS[faction] ?? 'text-text-primary'}`}>
+                      <div className={`font-mono text-[13px] font-medium px-1 ${FACTION_COLORS[faction] ?? 'text-text-primary'}`}>
                         {getPlayerSafeMilitaryFactionName(faction)}
                       </div>
                       {sectors.map((sector) => {
@@ -791,16 +791,16 @@ export function OOBSidebar() {
                               style={{ backgroundColor: color }}
                             />
                             <div className="min-w-0 flex-1">
-                              <div className="text-text-primary truncate text-xs flex items-center gap-1.5">
+                              <div className="text-text-primary truncate text-[13px] flex items-center gap-1.5">
                                 <span className="truncate">{sectorLabel}</span>
                                 {sectorAssignment.lineHoldingIds.length > 0 && sector.combat_strength_class && (
                                   <SectorStrengthBadge strengthClass={sector.combat_strength_class} />
                                 )}
                               </div>
-                              <div className="text-text-secondary text-xs truncate">
+                              <div className="text-text-secondary text-[13px] truncate">
                                 {t('oob.sectorOwner', { corps: ownerName })}
                               </div>
-                              <div className="text-text-secondary text-xs tabular-nums">
+                              <div className="text-text-secondary text-[13px] tabular-nums">
                                 {t('oob.sectorLineCount', { count: sectorAssignment.frontlineIds.length.toString() })}
                                 {sectorAssignment.reserveIds.length > 0 && ` + ${t('oob.sectorHeldBackCount', { count: sectorAssignment.reserveIds.length.toString() })}`}
                                 {sectorAssignment.rearIds.length > 0 && ` + ${t('oob.sectorRearSupportCount', { count: sectorAssignment.rearIds.length.toString() })}`}

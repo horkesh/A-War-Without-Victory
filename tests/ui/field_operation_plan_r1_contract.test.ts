@@ -31,7 +31,7 @@ describe('field operation plan preserves retained-map identity and ordering cont
 
   it('keeps historical-operation dossier actions readable without hidden truncation', () => {
     const panelSource = readFileSync(
-      join(process.cwd(), 'src/ui/map/components/army_hq/PresidentialDecisionRoomPanel.tsx'),
+      join(process.cwd(), 'src/ui/map/components/command_surface/CommandSurface.tsx'),
       'utf8',
     );
     const reviewStart = panelSource.indexOf('data-testid="decision-room-dossier-review"');
@@ -39,8 +39,9 @@ describe('field operation plan preserves retained-map identity and ordering cont
     const reviewAction = panelSource.slice(reviewStart, reviewEnd);
 
     expect(reviewStart).toBeGreaterThan(-1);
-    expect(reviewAction).toContain('min-h-8');
-    expect(reviewAction).toContain('whitespace-normal');
+    // Full-size button (48–56 px) whose label wraps; never truncated.
+    expect(reviewAction).toMatch(/h-1[24] flex-1/);
     expect(reviewAction).not.toContain('truncate');
+    expect(reviewAction).not.toContain('whitespace-nowrap');
   });
 });

@@ -781,7 +781,7 @@ describe('DirectiveCard stop-op action host', () => {
     render(React.createElement(DirectiveCard, { directive: eliteDeployDirective, gameState: state }));
 
     const detail = screen.getByRole('group', { name: 'Reserve commitment detail' });
-    expect(detail.className).toContain('text-[12px]');
+    expect(detail.className).toContain('text-[13px]');
     expect(detail.textContent).toContain('Requesting command3rd Corps');
     expect(detail.textContent).toContain('Recipient OGCentral Bosnia West');
     expect(detail.textContent).toContain('Candidate forceGuards Brigade');

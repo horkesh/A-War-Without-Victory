@@ -42,6 +42,16 @@ import {
 } from '../../shared/factionPalette';
 import { SUPPORTED_LOCALES, t, useLocale, type Locale } from '../i18n';
 import { InterfaceScaleSettings } from '../preferences/InterfaceScale';
+import {
+    SurfaceCloseButton,
+    SurfaceColumns,
+    SurfaceContent,
+    SurfaceHeader,
+    SurfaceRail,
+    SurfaceRailItem,
+    SURFACE_MODAL_PANEL_MEDIUM,
+    SURFACE_SECONDARY_BUTTON,
+} from './surface/Surface';
 
 interface SettingsSection {
     id: string;
@@ -226,8 +236,11 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
         ...settingsSections.map(s => ({ id: s.id, title: s.title })),
     ];
 
+    // Surface redesign (owner, 2026-11-10): Settings is a surface in the Command Surface's
+    // style — header with Close, the sections as a left rail, the chosen section's rows in
+    // a column that scrolls on its own; 15–18px text, 48px controls.
     return (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/80 backdrop-blur-sm"
+        <div className="fixed inset-0 flex items-center justify-center bg-[#05070a]/80"
              style={{ zIndex: Z.HARD_MODAL }}>
             <button
                 type="button"
@@ -248,222 +261,213 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
                  aria-modal="true"
                  aria-labelledby="settings-title"
                  tabIndex={-1}
-                 className="relative z-10 w-[90%] max-w-[500px] max-h-[80vh] overflow-auto rounded-lg border border-[#8a7a60]/30 shadow-2xl p-6"
-                 style={{ background: 'rgba(26, 24, 21, 0.97)' }}
+                 className={`relative z-10 ${SURFACE_MODAL_PANEL_MEDIUM}`}
             >
+                <SurfaceHeader
+                    eyebrow={t('settings.eyebrow')}
+                    title={<span id="settings-title">{t('settings.title')}</span>}
+                    close={(
+                        <SurfaceCloseButton onClick={handleClose} data-audio-close>
+                            {t('settings.close')}
+                        </SurfaceCloseButton>
+                    )}
+                />
 
-                <h2 id="settings-title" className="text-[16px] text-[#c4a35a] font-bold tracking-wider text-center mb-4"
-                    style={{ fontFamily: 'var(--font-command)' }}>
-                    {t('settings.title')}
-                </h2>
+                <SurfaceColumns layout="rail-content">
+                    <SurfaceRail aria-label={t('settings.title')}>
+                        {allSections.map(sec => (
+                            <SurfaceRailItem
+                                key={sec.id}
+                                selected={activeSection === sec.id}
+                                onClick={() => setActiveSectionAndRefresh(sec.id)}
+                                title={sec.title}
+                            />
+                        ))}
+                    </SurfaceRail>
 
-                {/* Section tabs */}
-                <div className="flex flex-wrap gap-2 mb-4 justify-center">
-                    {allSections.map(sec => (
-                        <button key={sec.id} type="button"
-                            aria-pressed={activeSection === sec.id}
-                            onClick={() => setActiveSectionAndRefresh(sec.id)}
-                            className={`text-xs uppercase tracking-wider px-3 py-1.5 rounded border transition-colors ${
-                                activeSection === sec.id
-                                    ? 'text-[#c4a35a] border-[#c4a35a]/40 bg-[#c4a35a]/10'
-                                    : 'text-[#8a7a60] border-[#8a7a60]/20 hover:bg-[#8a7a60]/10'
-                            }`}
-                            style={{ fontFamily: 'var(--font-command)' }}>
-                            {sec.title}
-                        </button>
-                    ))}
-                </div>
-
-                {/* Content */}
-                <InterfaceScaleSettings />
-                <div className="space-y-3 mb-6">
-                    {activeSection === 'gameplay' && (
-                        <>
-                            {/*
-                              LANE-NIGHTSHIFT-V092-TUTORIAL-LANE-B-SUBSET:
-                              tutorial restart affordance. Only rendered when
-                              the tutorial has been dismissed — there is no
-                              point restarting an already-active tutorial.
-                            */}
-                            {tutorialDismissed && (
-                                <SettingRow
-                                    label={t('settings.tutorial.label')}
-                                    description={t('settings.tutorial.description')}
-                                >
-                                    <div data-testid="settings-tutorial-restart-host">
-                                        <OnboardingRestartButton ipc={onboardingBridge} />
-                                    </div>
+                    <SurfaceContent>
+                        <div className="flex flex-col gap-3 px-8 py-6">
+                            <InterfaceScaleSettings />
+                            {activeSection === 'gameplay' && (
+                                <>
+                                    {/*
+                                      LANE-NIGHTSHIFT-V092-TUTORIAL-LANE-B-SUBSET:
+                                      tutorial restart affordance. Only rendered when
+                                      the tutorial has been dismissed — there is no
+                                      point restarting an already-active tutorial.
+                                    */}
+                                    {tutorialDismissed && (
+                                        <SettingRow
+                                            label={t('settings.tutorial.label')}
+                                            description={t('settings.tutorial.description')}
+                                        >
+                                            <div data-testid="settings-tutorial-restart-host">
+                                                <OnboardingRestartButton ipc={onboardingBridge} />
+                                            </div>
+                                        </SettingRow>
+                                    )}
+                                </>
+                            )}
+                            {activeSection === 'audio' && (
+                                <>
+                                    <SettingRow
+                                        label={t('settings.audio.music.label')}
+                                        description={t('settings.audio.music.description')}
+                                    >
+                                        <BoundToggleSwitch
+                                            checked={audioPreferences.musicEnabled === true}
+                                            onChange={(musicEnabled) => updateAudioPreferences({ musicEnabled })}
+                                            ariaLabel={t('settings.audio.music.ariaLabel')}
+                                        />
+                                    </SettingRow>
+                                    <SettingRow label={t('settings.audio.musicVolume.label')} description={t('settings.audio.musicVolume.description')}>
+                                        <input
+                                            type="range" min="0" max="100" step="5"
+                                            value={Math.round((audioPreferences.musicVolume ?? 0.5) * 100)}
+                                            onChange={event => updateAudioPreferences({ musicVolume: Number(event.target.value) / 100 })}
+                                            aria-label={t('settings.audio.musicVolume.ariaLabel')}
+                                            className="w-44 accent-[#c9a75c]"
+                                        />
+                                    </SettingRow>
+                                    <SettingRow
+                                        label={t('settings.audio.soundscape.label')}
+                                        description={t('settings.audio.soundscape.description')}
+                                    >
+                                        <BoundToggleSwitch
+                                            checked={!audioPreferences.muted}
+                                            onChange={setSoundscapeEnabled}
+                                            ariaLabel={t('settings.audio.soundscape.ariaLabel')}
+                                        />
+                                    </SettingRow>
+                                    <SettingRow label={t('settings.masterVolume.label')} description={t('settings.masterVolume.description')}>
+                                        <input
+                                            type="range"
+                                            min="0"
+                                            max="100"
+                                            step="5"
+                                            value={Math.round(audioPreferences.masterVolume * 100)}
+                                            onChange={(event) => setMasterVolumePercent(event.target.value)}
+                                            aria-label={t('settings.masterVolume.aria')}
+                                            className="w-44 accent-[#c9a75c]"
+                                        />
+                                    </SettingRow>
+                                </>
+                            )}
+                            {activeSection === 'a11y' && (
+                                <>
+                                    <SettingRow label={t('settings.reduceMotion.label')} description={t('settings.reduceMotion.description')}>
+                                        <BoundToggleSwitch
+                                            checked={reduceMotion}
+                                            onChange={setReduceMotion}
+                                            ariaLabel={t('settings.reduceMotion.ariaLabel')}
+                                        />
+                                    </SettingRow>
+                                    <SettingRow label={t('settings.colorblindMode.label')} description={t('settings.colorblindMode.description')}>
+                                        <select
+                                            className={SETTINGS_SELECT}
+                                            aria-label={t('settings.colorblindMode.ariaLabel')}
+                                            value={colorblindPreset}
+                                            onChange={(e) => setColorblindPreset(e.target.value as ColorblindPreset)}>
+                                            <option value="default">{t('settings.colorblindMode.default')}</option>
+                                            <option value="deuteranopia">{t('settings.colorblindMode.deuteranopia')}</option>
+                                            <option value="protanopia">{t('settings.colorblindMode.protanopia')}</option>
+                                            <option value="tritanopia">{t('settings.colorblindMode.tritanopia')}</option>
+                                        </select>
+                                    </SettingRow>
+                                </>
+                            )}
+                            {activeSection === 'language' && (
+                                <SettingRow label={t('settings.language.label')} description={t('settings.language.description')}>
+                                    <select
+                                        className={SETTINGS_SELECT}
+                                        aria-label={t('settings.language.ariaLabel')}
+                                        value={locale}
+                                        onChange={(e) => setLocale(e.target.value as Locale)}>
+                                        {SUPPORTED_LOCALES.map((option) => (
+                                            <option key={option} value={option}>
+                                                {option === 'en'
+                                                    ? t('settings.language.option.en')
+                                                    : t('settings.language.option.bcs')}
+                                            </option>
+                                        ))}
+                                    </select>
                                 </SettingRow>
                             )}
-                        </>
-                    )}
-                    {activeSection === 'audio' && (
-                        <>
-                            <SettingRow
-                                label={t('settings.audio.music.label')}
-                                description={t('settings.audio.music.description')}
-                            >
-                                <BoundToggleSwitch
-                                    checked={audioPreferences.musicEnabled === true}
-                                    onChange={(musicEnabled) => updateAudioPreferences({ musicEnabled })}
-                                    ariaLabel={t('settings.audio.music.ariaLabel')}
-                                />
-                            </SettingRow>
-                            <SettingRow label={t('settings.audio.musicVolume.label')} description={t('settings.audio.musicVolume.description')}>
-                                <input
-                                    type="range" min="0" max="100" step="5"
-                                    value={Math.round((audioPreferences.musicVolume ?? 0.5) * 100)}
-                                    onChange={event => updateAudioPreferences({ musicVolume: Number(event.target.value) / 100 })}
-                                    aria-label={t('settings.audio.musicVolume.ariaLabel')}
-                                    className="w-28 accent-[#c4a35a]"
-                                />
-                            </SettingRow>
-                            <SettingRow
-                                label={t('settings.audio.soundscape.label')}
-                                description={t('settings.audio.soundscape.description')}
-                            >
-                                <BoundToggleSwitch
-                                    checked={!audioPreferences.muted}
-                                    onChange={setSoundscapeEnabled}
-                                    ariaLabel={t('settings.audio.soundscape.ariaLabel')}
-                                />
-                            </SettingRow>
-                            <SettingRow label={t('settings.masterVolume.label')} description={t('settings.masterVolume.description')}>
-                                <input
-                                    type="range"
-                                    min="0"
-                                    max="100"
-                                    step="5"
-                                    value={Math.round(audioPreferences.masterVolume * 100)}
-                                    onChange={(event) => setMasterVolumePercent(event.target.value)}
-                                    aria-label={t('settings.masterVolume.aria')}
-                                    className="w-28 accent-[#c4a35a]"
-                                />
-                            </SettingRow>
-                        </>
-                    )}
-                    {activeSection === 'a11y' && (
-                        <>
-                            <SettingRow label={t('settings.reduceMotion.label')} description={t('settings.reduceMotion.description')}>
-                                <BoundToggleSwitch
-                                    checked={reduceMotion}
-                                    onChange={setReduceMotion}
-                                    ariaLabel={t('settings.reduceMotion.ariaLabel')}
-                                />
-                            </SettingRow>
-                            <SettingRow label={t('settings.colorblindMode.label')} description={t('settings.colorblindMode.description')}>
-                                <select
-                                    className="bg-[#2a2720] text-[#d5c9bc] text-xs border border-[#8a7a60]/20 rounded px-2 py-1"
-                                    aria-label={t('settings.colorblindMode.ariaLabel')}
-                                    value={colorblindPreset}
-                                    onChange={(e) => setColorblindPreset(e.target.value as ColorblindPreset)}>
-                                    <option value="default">{t('settings.colorblindMode.default')}</option>
-                                    <option value="deuteranopia">{t('settings.colorblindMode.deuteranopia')}</option>
-                                    <option value="protanopia">{t('settings.colorblindMode.protanopia')}</option>
-                                    <option value="tritanopia">{t('settings.colorblindMode.tritanopia')}</option>
-                                </select>
-                            </SettingRow>
-                        </>
-                    )}
-                    {activeSection === 'language' && (
-                        <SettingRow label={t('settings.language.label')} description={t('settings.language.description')}>
-                            <select
-                                className="bg-[#2a2720] text-[#d5c9bc] text-xs border border-[#8a7a60]/20 rounded px-2 py-1"
-                                aria-label={t('settings.language.ariaLabel')}
-                                value={locale}
-                                onChange={(e) => setLocale(e.target.value as Locale)}>
-                                {SUPPORTED_LOCALES.map((option) => (
-                                    <option key={option} value={option}>
-                                        {option === 'en'
-                                            ? t('settings.language.option.en')
-                                            : t('settings.language.option.bcs')}
-                                    </option>
-                                ))}
-                            </select>
-                        </SettingRow>
-                    )}
-                    {activeSection === 'diagnostics' && (
-                        <>
-                            <SettingRow
-                                label={t('settings.crashDiagnostics.label')}
-                                description={t('settings.crashDiagnostics.description')}
-                            >
-                                <BoundToggleSwitch
-                                    checked={crashConsentEnabled}
-                                    onChange={setCrashDiagnosticsEnabled}
-                                    ariaLabel={t('settings.crashDiagnostics.ariaLabel')}
-                                />
-                            </SettingRow>
-                            <div className="rounded border border-[#8a7a60]/10 bg-[#2a2720]/50 p-2">
-                                <p className="m-0 text-xs leading-relaxed text-[#8a7a60]">
-                                    {t('settings.crashDiagnostics.privacy')}
-                                </p>
-                                <p className="mb-0 mt-2 text-xs text-[#d5c9bc]">
-                                    {t('settings.crashDiagnostics.status', { count: String(crashReportCount) })}
-                                </p>
-                                <div className="mt-2 flex flex-wrap gap-2">
-                                    <button
-                                        type="button"
-                                        onClick={exportCrashReports}
-                                        className="text-xs uppercase tracking-wider text-[#c4a35a] border border-[#c4a35a]/30 px-2 py-1 rounded hover:bg-[#c4a35a]/10"
-                                        style={{ fontFamily: 'var(--font-command)' }}
+                            {activeSection === 'diagnostics' && (
+                                <>
+                                    <SettingRow
+                                        label={t('settings.crashDiagnostics.label')}
+                                        description={t('settings.crashDiagnostics.description')}
                                     >
-                                        {t('settings.crashDiagnostics.export')}
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={exportPlaytestEvidence}
-                                        className="text-xs uppercase tracking-wider text-[#c4a35a] border border-[#c4a35a]/30 px-2 py-1 rounded hover:bg-[#c4a35a]/10"
-                                        style={{ fontFamily: 'var(--font-command)' }}
-                                    >
-                                        {t('settings.playtestEvidence.export')}
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={clearCrashReports}
-                                        className="text-xs uppercase tracking-wider text-[#8a7a60] border border-[#8a7a60]/20 px-2 py-1 rounded hover:bg-[#8a7a60]/10"
-                                        style={{ fontFamily: 'var(--font-command)' }}
-                                    >
-                                        {t('settings.crashDiagnostics.clear')}
-                                    </button>
-                                </div>
-                                {crashExportJson && (
-                                    <textarea
-                                        readOnly
-                                        aria-label={t('settings.crashDiagnostics.exportedAriaLabel')}
-                                        value={crashExportJson}
-                                        className="mt-2 h-24 w-full resize-none rounded border border-[#8a7a60]/20 bg-[#1c1a16] p-2 text-xs text-[#d5c9bc]"
-                                    />
-                                )}
-                                {playtestEvidenceJson && (
-                                    <textarea
-                                        readOnly
-                                        aria-label={t('settings.playtestEvidence.exportedAriaLabel')}
-                                        value={playtestEvidenceJson}
-                                        className="mt-2 h-24 w-full resize-none rounded border border-[#8a7a60]/20 bg-[#1c1a16] p-2 text-xs text-[#d5c9bc]"
-                                    />
-                                )}
-                            </div>
-                        </>
-                    )}
-                    {/* Registered sections */}
-                    {settingsSections.filter(s => s.id === activeSection).map(s => {
-                        const Component = s.component;
-                        return <Component key={s.id} />;
-                    })}
-                </div>
-
-                <div className="flex justify-center gap-3">
-                    <button type="button" onClick={handleClose} data-audio-close
-                        className="text-xs uppercase tracking-wider text-[#8a7a60] border border-[#8a7a60]/20 px-4 py-2 rounded hover:bg-[#8a7a60]/10"
-                        style={{ fontFamily: 'var(--font-command)' }}>
-                        {t('settings.close')}
-                    </button>
-                </div>
+                                        <BoundToggleSwitch
+                                            checked={crashConsentEnabled}
+                                            onChange={setCrashDiagnosticsEnabled}
+                                            ariaLabel={t('settings.crashDiagnostics.ariaLabel')}
+                                        />
+                                    </SettingRow>
+                                    <div className="flex flex-col gap-3 rounded-md border border-[#2a303c] bg-[#161a22] px-5 py-4">
+                                        <p className="m-0 text-[15px] leading-relaxed text-[#c2b69c]">
+                                            {t('settings.crashDiagnostics.privacy')}
+                                        </p>
+                                        <p className="m-0 text-[16px] text-[#f1e6c8]">
+                                            {t('settings.crashDiagnostics.status', { count: String(crashReportCount) })}
+                                        </p>
+                                        <div className="flex flex-wrap gap-3">
+                                            <button
+                                                type="button"
+                                                onClick={exportCrashReports}
+                                                className={SURFACE_SECONDARY_BUTTON}
+                                            >
+                                                {t('settings.crashDiagnostics.export')}
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={exportPlaytestEvidence}
+                                                className={SURFACE_SECONDARY_BUTTON}
+                                            >
+                                                {t('settings.playtestEvidence.export')}
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={clearCrashReports}
+                                                className={SURFACE_SECONDARY_BUTTON}
+                                            >
+                                                {t('settings.crashDiagnostics.clear')}
+                                            </button>
+                                        </div>
+                                        {crashExportJson && (
+                                            <textarea
+                                                readOnly
+                                                aria-label={t('settings.crashDiagnostics.exportedAriaLabel')}
+                                                value={crashExportJson}
+                                                className="h-32 w-full resize-none rounded border border-[#3a4150] bg-[#0f1218] p-3 font-mono text-[13px] text-[#ddd1b3]"
+                                            />
+                                        )}
+                                        {playtestEvidenceJson && (
+                                            <textarea
+                                                readOnly
+                                                aria-label={t('settings.playtestEvidence.exportedAriaLabel')}
+                                                value={playtestEvidenceJson}
+                                                className="h-32 w-full resize-none rounded border border-[#3a4150] bg-[#0f1218] p-3 font-mono text-[13px] text-[#ddd1b3]"
+                                            />
+                                        )}
+                                    </div>
+                                </>
+                            )}
+                            {/* Registered sections */}
+                            {settingsSections.filter(s => s.id === activeSection).map(s => {
+                                const Component = s.component;
+                                return <Component key={s.id} />;
+                            })}
+                        </div>
+                    </SurfaceContent>
+                </SurfaceColumns>
             </div>
         </div>
     );
 }
+
+const SETTINGS_SELECT = 'h-11 rounded-md border border-[#3a4150] bg-[#1b2029] px-3 text-[15px] text-[#f1e6c8]';
 
 function resolveSettingsPlatform(): 'desktop' | 'browser' | 'unknown' {
     if (typeof window === 'undefined') return 'unknown';
@@ -481,12 +485,12 @@ function resolveSettingsOsFamily(): 'windows' | 'macos' | 'linux' | 'unknown' {
 
 function SettingRow({ label, description, children }: { label: string; description: string; children: React.ReactNode }) {
     return (
-        <div className="flex items-center justify-between p-2 rounded border border-[#8a7a60]/10 bg-[#2a2720]/50">
-            <div>
-                <div className="text-[12px] text-[#d5c9bc]">{label}</div>
-                <div className="text-xs text-[#8a7a60]">{description}</div>
+        <div className="flex items-center justify-between gap-6 rounded-md border border-[#2a303c] bg-[#161a22] px-5 py-4">
+            <div className="flex min-w-0 flex-col gap-1">
+                <div className="text-[17px] font-semibold text-[#f1e6c8]">{label}</div>
+                <div className="text-[15px] leading-snug text-[#b9ad94]">{description}</div>
             </div>
-            {children}
+            <div className="shrink-0">{children}</div>
         </div>
     );
 }
@@ -512,11 +516,11 @@ function BoundToggleSwitch({
             aria-pressed={checked}
             aria-label={ariaLabel}
             onClick={() => onChange(!checked)}
-            className={`w-10 h-5 rounded-full border transition-colors relative ${
-                checked ? 'bg-[#c4a35a]/30 border-[#c4a35a]/50' : 'bg-[#2a2720] border-[#8a7a60]/30'
+            className={`w-14 h-8 rounded-full border transition-colors relative ${
+                checked ? 'bg-[#c9a75c]/35 border-[#c9a75c]/70' : 'bg-[#1b2029] border-[#3a4150]'
             }`}>
-            <div className={`w-3.5 h-3.5 rounded-full absolute top-0.5 transition-all ${
-                checked ? 'left-5 bg-[#c4a35a]' : 'left-0.5 bg-[#8a7a60]'
+            <div className={`w-6 h-6 rounded-full absolute top-[3px] transition-all ${
+                checked ? 'left-[26px] bg-[#c9a75c]' : 'left-[3px] bg-[#7d7462]'
             }`} />
         </button>
     );

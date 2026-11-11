@@ -453,15 +453,15 @@ export function ChiefOfStaffBriefing({ briefingItems, gameState, faction, onCorp
             stamp={t('chiefOfStaff.header.stamp')}
             header={(
                 <>
-                    <div className={`text-xs uppercase font-bold tracking-[0.2em] ${DOSSIER_INK.muted}`}>{t('chiefOfStaff.header.dailyBriefing')} — {turnToDateString(turn)}</div>
-                    <div className={`text-xs font-bold mt-0.5 ${DOSSIER_INK.heading}`}>
+                    <div className={`text-[13px] uppercase font-bold tracking-[0.2em] ${DOSSIER_INK.muted}`}>{t('chiefOfStaff.header.dailyBriefing')} — {turnToDateString(turn)}</div>
+                    <div className={`text-[13px] font-bold mt-0.5 ${DOSSIER_INK.heading}`}>
                         {profile.rank} {profile.name}
                     </div>
-                    <div className={`text-xs italic ${DOSSIER_INK.muted}`}>{profileTitle}</div>
+                    <div className={`text-[13px] italic ${DOSSIER_INK.muted}`}>{profileTitle}</div>
                 </>
             )}
             footer={(
-                <div className={`text-xs italic text-right ${DOSSIER_INK.muted}`}>
+                <div className={`text-[13px] italic text-right ${DOSSIER_INK.muted}`}>
                     — {profile.rank} {profile.name.split(' ').pop()}, {profileTitle}
                 </div>
             )}
@@ -469,7 +469,7 @@ export function ChiefOfStaffBriefing({ briefingItems, gameState, faction, onCorp
             {/* Body — missive text with inline links */}
             <div className="px-3 py-1.5 flex-1 overflow-y-auto">
                 {paragraphs.map((segments, i) => (
-                    <p key={i} className={`text-[12px] leading-relaxed mb-2 last:mb-0 ${DOSSIER_INK.body}`} style={{ fontFamily: 'var(--font-command)' }}>
+                    <p key={i} className={`text-[13px] leading-relaxed mb-2 last:mb-0 ${DOSSIER_INK.body}`} style={{ fontFamily: 'var(--font-command)' }}>
                         {i === 0 && <>&ldquo;</>}
                         {segments.map((seg, j) =>
                             seg.type === 'link' && onCorpsClick ? (
@@ -494,7 +494,7 @@ export function ChiefOfStaffBriefing({ briefingItems, gameState, faction, onCorp
                 {letterHomeText && (
                     <div className={`mt-2 pt-2 border-t ${DOSSIER_INK.rule}`}>
                         <p
-                            className={`text-xs leading-relaxed italic ${DOSSIER_INK.body}`}
+                            className={`text-[13px] leading-relaxed italic ${DOSSIER_INK.body}`}
                             style={{ fontFamily: 'var(--font-command)', borderLeft: '2px solid #b8860b44', paddingLeft: '8px' }}
                         >
                             {letterHomeText}

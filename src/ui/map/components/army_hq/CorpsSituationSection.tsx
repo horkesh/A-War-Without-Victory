@@ -50,7 +50,7 @@ export function CorpsSituationSection({ assessment }: CorpsSituationSectionProps
     if (!assessment) {
         return (
             <CollapsibleSection sectionKey="situation-assessment" title={t('corpsSituation.title')} defaultOpen>
-                <div className="px-3 py-2 text-xs italic text-text-secondary">
+                <div className="px-3 py-2 text-[13px] italic text-text-secondary">
                     {t('corpsFront.unreported')}
                 </div>
             </CollapsibleSection>
@@ -90,12 +90,12 @@ export function CorpsSituationSection({ assessment }: CorpsSituationSectionProps
 
     return (
         <CollapsibleSection sectionKey="situation-assessment" title={t('corpsSituation.title')} defaultOpen>
-            <div className="px-3 py-2 space-y-1.5 text-xs">
+            <div className="px-3 py-2 space-y-1.5 text-[13px]">
                 {/* Wave 2: Dominant reason banner with constraint badge */}
                 {dominantReason && (
                     <div className="flex items-start gap-2">
                         {badge && (
-                            <span className={`shrink-0 text-xs font-bold tracking-wider uppercase px-1.5 py-0.5 border ${badge.color}`}>
+                            <span className={`shrink-0 text-[13px] font-bold tracking-wider uppercase px-1.5 py-0.5 border ${badge.color}`}>
                                 {t(badge.labelKey)}
                             </span>
                         )}

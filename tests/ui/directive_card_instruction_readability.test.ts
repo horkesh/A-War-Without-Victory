@@ -5,9 +5,9 @@ import { withoutComments } from '../helpers/sourceComments';
 describe('DirectiveCard instruction readability', () => {
   it('wraps the full operation instruction in both command-bridge branches', () => {
     const source = withoutComments(readFileSync('src/ui/map/components/army_hq/DirectiveCard.tsx', 'utf8'));
-    const wrappingClass = 'className="mt-0.5 break-words text-xs font-bold leading-snug text-text-primary"';
+    const wrappingClass = 'className="mt-1 break-words text-[17px] font-semibold leading-snug text-text-primary"';
 
-    expect(source.match(new RegExp(wrappingClass, 'g')) ?? []).toHaveLength(2);
-    expect(source).not.toContain('className="mt-0.5 truncate text-xs font-bold text-text-primary"');
+    expect(source.split(wrappingClass).length - 1).toBe(2);
+    expect(source).not.toContain('truncate text-[17px]');
   });
 });

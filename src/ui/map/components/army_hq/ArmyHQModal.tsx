@@ -44,13 +44,24 @@ import {
     buildArmyHqPresidentialHandoff,
     type ArmyHqPresidentialHandoff,
 } from '../../data/armyHqPresidentialHandoff';
+import {
+    SurfaceCloseButton,
+    SurfaceColumns,
+    SurfaceHeader,
+    SurfaceRail,
+    SURFACE_LABEL,
+    SURFACE_LABEL_MUTED,
+    SURFACE_MODAL_PANEL_FULL,
+    SURFACE_PRIMARY_BUTTON_COMPACT,
+    SURFACE_SECONDARY_BUTTON,
+} from '../surface/Surface';
 import osidAreasData from '../../../../../data/derived/operational/osid_areas.json';
 
 const HQ_TABS = [
-    { id: 'briefing' as const, labelKey: 'armyHq.tab.briefing' as const },
-    { id: 'summary' as const, labelKey: 'armyHq.tab.summary' as const },
-    { id: 'records' as const, labelKey: 'armyHq.tab.records' as const },
-    { id: 'personnel' as const, labelKey: 'armyHq.tab.personnel' as const },
+    { id: 'briefing' as const, labelKey: 'armyHq.tab.briefing' as const, blurbKey: 'armyHq.tabBlurb.briefing' as const },
+    { id: 'summary' as const, labelKey: 'armyHq.tab.summary' as const, blurbKey: 'armyHq.tabBlurb.summary' as const },
+    { id: 'records' as const, labelKey: 'armyHq.tab.records' as const, blurbKey: 'armyHq.tabBlurb.records' as const },
+    { id: 'personnel' as const, labelKey: 'armyHq.tab.personnel' as const, blurbKey: 'armyHq.tabBlurb.personnel' as const },
 ];
 
 const osidAreas = osidAreasData as { total_area_km2: number; areas: Record<string, number> };
@@ -68,6 +79,13 @@ const FACTION_DISPLAY: Record<string, string> = {
     RBiH: 'Armija Republike Bosne i Hercegovine',
     HRHB: 'Hrvatsko Vijeće Obrane',
 };
+
+/** Surface frame for Army HQ: one opaque gold-bordered surface over a dimmed backdrop. */
+const ARMY_HQ_FRAME = `absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 ${SURFACE_MODAL_PANEL_FULL}`;
+/** Rail-button look shared by the tabs and the corps list. */
+const RAIL_BUTTON = 'flex w-full items-center gap-3 rounded-md border px-3.5 py-2.5 text-left transition';
+const RAIL_BUTTON_ACTIVE = 'border-[#c9a75c] bg-[#232936]';
+const RAIL_BUTTON_IDLE = 'border-transparent hover:border-[#3a4150] hover:bg-[#171b23]';
 
 function DecisionRoomHandoff({
     handoff,
@@ -88,12 +106,12 @@ function DecisionRoomHandoff({
     return (
         <section
             data-testid="army-hq-decision-room-handoff"
-            className="rounded-lg border border-amber-400/25 bg-amber-400/[0.05] p-3"
+            className="flex flex-col gap-2 rounded-md border border-amber-400/30 bg-amber-400/[0.06] px-5 py-4"
         >
-                <div className="text-xs font-bold uppercase tracking-[0.22em] text-amber-300">
+            <div className={SURFACE_LABEL}>
                 {t('armyHq.decisionRoomHandoff.title')}
             </div>
-            <div className="mt-1 text-xs leading-relaxed text-text-secondary">
+            <div className="text-[16px] leading-relaxed text-[#ddd1b3]">
                 {detail}
             </div>
             <button
@@ -105,7 +123,7 @@ function DecisionRoomHandoff({
                     if (routesToDesk) onReturnToDesk?.();
                     else onNavigateTarget?.({ kind: 'decision-room', lens: 'all' });
                 }}
-                className="mt-2 h-8 rounded border border-amber-400/35 bg-amber-400/12 px-3 text-xs font-bold uppercase tracking-[0.12em] text-amber-300 transition hover:bg-amber-400/20 disabled:cursor-default disabled:border-panel-border/55 disabled:bg-panel-bg/50 disabled:text-text-muted"
+                className={`self-start ${SURFACE_PRIMARY_BUTTON_COMPACT}`}
             >
                 {routesToDesk ? t('armyHq.returnDesk') : t('armyHq.openDecisionRoom')}
             </button>
@@ -123,10 +141,10 @@ function OfficerMiniBio({ officer }: { officer: NamedOfficerView }) {
     ];
     const present = rows.filter((row): row is [string, string] => Boolean(row[1]));
     return (
-        <DossierPaper testId="army-hq-officer-note" className="mt-2 px-3 py-2 text-xs leading-snug">
+        <DossierPaper testId="army-hq-officer-note" className="mt-2 px-4 py-3 text-[15px] leading-relaxed">
             <div className={DOSSIER_INK.body}>{officer.bio_short ?? t('armyHq.officer.servicePending')}</div>
             {present.length > 0 && (
-                <div className={`mt-1.5 grid grid-cols-1 gap-0.5 border-t pt-1.5 ${DOSSIER_INK.rule}`}>
+                <div className={`mt-2 grid grid-cols-1 gap-1 border-t pt-2 ${DOSSIER_INK.rule}`}>
                     {present.map(([label, value]) => (
                         <div key={label}><span className={`uppercase tracking-wide ${DOSSIER_INK.muted}`}>{label} </span><span className={DOSSIER_INK.heading}>{value}</span></div>
                     ))}
@@ -136,55 +154,54 @@ function OfficerMiniBio({ officer }: { officer: NamedOfficerView }) {
     );
 }
 
+/** The corps list in the left rail: one line per corps, its readiness in plain words. */
 function CommandAccessStrip({
     corpsFormations,
-    sectorsByCorps,
-    opsByCorps,
     readinessByCorps,
+    expandedCorpsId,
     onSelect,
 }: {
     corpsFormations: FormationView[];
     sectorsByCorps: Map<string, CorpsFrontSectorView[]>;
     opsByCorps: Map<string, OperationView[]>;
     readinessByCorps: Map<string, { grade?: ReadinessGrade; hasThreat?: boolean }>;
+    expandedCorpsId: string | null;
     onSelect: (corpsId: string) => void;
 }) {
     if (corpsFormations.length === 0) return null;
     return (
-        <div data-testid="army-hq-corps-index" className="mb-3 border-y border-panel-border bg-panel-card/70 px-2 py-2">
-            <div className="mb-1.5 flex items-center justify-between gap-2">
-                <div className="text-xs font-bold uppercase tracking-[0.22em] text-text-secondary">
-                    {t('armyHq.commandAccess')}
-                </div>
-                <div className="text-xs font-bold uppercase tracking-[0.18em] text-text-secondary">
-                    {t('armyHq.commandAccessHint')}
-                </div>
+        <div data-testid="army-hq-corps-index" className="flex flex-col gap-1.5 pt-3">
+            <div className={`px-2 ${SURFACE_LABEL_MUTED}`}>
+                {t('armyHq.commandAccess')}
             </div>
-            <div className="grid grid-cols-[repeat(auto-fit,minmax(21rem,1fr))] gap-1.5">
-                {corpsFormations.map((corps) => {
-                    const readiness = readinessByCorps.get(corps.id);
-                    return (
-                        <button
-                            key={corps.id}
-                            type="button"
-                            data-testid={`army-hq-corps-${corps.id}`}
-                            data-corps-id={corps.id}
-                            onClick={() => onSelect(corps.id)}
-                            className="min-w-0 rounded-md border border-panel-border/70 bg-panel-bg px-2 py-1.5 text-left transition-colors hover:border-amber-400/40 hover:bg-amber-400/5"
-                        >
-                            <div className="flex items-start gap-2">
-                                <span className={`h-2 w-2 rounded-full ${readiness?.hasThreat ? 'bg-red-500' : 'bg-emerald-400'}`} />
-                                <span className="min-w-0 flex-1 break-words text-xs font-bold uppercase leading-tight text-text-primary">
-                                    {getPlayerSafeCorpsName(corps.name, corps.id)}
-                                </span>
-                                <span className="shrink-0 rounded border border-panel-border bg-panel-card px-1.5 py-0.5 text-xs font-bold text-accent-gold">
-                                    {t('armyHq.commandAccessReadiness', { grade: readiness?.grade ? readinessGradeLabel(readiness.grade) : '--' })}
-                                </span>
-                            </div>
-                        </button>
-                    );
-                })}
+            <div className="px-2 pb-1 text-[14px] leading-snug text-[#9c917b]">
+                {t('armyHq.commandAccessHint')}
             </div>
+            {corpsFormations.map((corps) => {
+                const readiness = readinessByCorps.get(corps.id);
+                const selected = expandedCorpsId === corps.id;
+                return (
+                    <button
+                        key={corps.id}
+                        type="button"
+                        data-testid={`army-hq-corps-${corps.id}`}
+                        data-corps-id={corps.id}
+                        aria-pressed={selected}
+                        onClick={() => onSelect(corps.id)}
+                        className={`${RAIL_BUTTON} ${selected ? RAIL_BUTTON_ACTIVE : RAIL_BUTTON_IDLE}`}
+                    >
+                        <span aria-hidden="true" className={`h-2.5 w-2.5 shrink-0 rounded-full ${readiness?.hasThreat ? 'bg-red-400' : 'bg-emerald-400'}`} />
+                        <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+                            <span className="break-words text-[16px] font-semibold leading-snug text-[#f1e6c8]">
+                                {getPlayerSafeCorpsName(corps.name, corps.id)}
+                            </span>
+                            <span className="text-[14px] text-[#b9ad94]">
+                                {t('armyHq.commandAccessReadiness', { grade: readiness?.grade ? readinessGradeLabel(readiness.grade) : '--' })}
+                            </span>
+                        </span>
+                    </button>
+                );
+            })}
         </div>
     );
 }
@@ -378,8 +395,8 @@ export function ArmyHQModal({
     const handleTabKeyDown = useCallback((e: React.KeyboardEvent<HTMLButtonElement>, currentIdx: number) => {
         const len = HQ_TABS.length;
         let nextIdx: number | null = null;
-        if (e.key === 'ArrowRight') nextIdx = (currentIdx + 1) % len;
-        else if (e.key === 'ArrowLeft') nextIdx = (currentIdx - 1 + len) % len;
+        if (e.key === 'ArrowRight' || e.key === 'ArrowDown') nextIdx = (currentIdx + 1) % len;
+        else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') nextIdx = (currentIdx - 1 + len) % len;
         else if (e.key === 'Home') nextIdx = 0;
         else if (e.key === 'End') nextIdx = len - 1;
         if (nextIdx == null) return;
@@ -393,45 +410,27 @@ export function ArmyHQModal({
     // so we host only The War's Record (campaign history sourced from loadedGameState).
     if (open && state && isObserver) {
         return (
-            <div ref={dialogFocus.ref} onKeyDown={dialogFocus.onKeyDown} tabIndex={-1} className="fixed inset-0 flex overflow-hidden" style={{ zIndex: Z.MODAL }} role="dialog" aria-modal="true" aria-label={t('armyHq.dialogTitle')}>
+            <div ref={dialogFocus.ref} onKeyDown={dialogFocus.onKeyDown} tabIndex={-1} className="fixed inset-0 overflow-hidden" style={{ zIndex: Z.MODAL }} role="dialog" aria-modal="true" aria-label={t('armyHq.dialogTitle')}>
                 <button
                     type="button"
                     aria-label={t('armyHq.dismissBackdrop')}
-                tabIndex={-1}
-                    className="absolute inset-0 bg-black/85 cursor-default"
+                    tabIndex={-1}
+                    className="absolute inset-0 cursor-default bg-[#05070a]/85"
                     onClick={() => setOpen(false)}
                 />
-                <div className="relative flex-1 flex flex-col h-full overflow-hidden bg-panel-bg text-text-primary">
-                    <div className="flex items-center justify-between px-3 py-1 shrink-0 border-b border-panel-border bg-panel-card">
-                        <div className="flex items-center gap-2">
-                            <button
-                                type="button"
-                                onClick={() => setOpen(false)}
-                                className="flex items-center gap-1 px-2 py-0.5 text-xs font-bold uppercase tracking-[0.14em] text-text-secondary border border-panel-border rounded-md hover:bg-panel-hover hover:text-text-primary transition-colors"
-                                title={t('armyHq.returnFieldTitle')}
-                            >
-                                ← FIELD
-                            </button>
-                            <div>
-                                <div className="text-xs uppercase tracking-[0.22em] text-text-secondary font-bold">
-                                    {t('armyHq.observerLabel')}
-                                </div>
-                                <div className="text-[14px] font-bold uppercase tracking-[0.04em] text-text-primary leading-tight">
-                                    {t('armyHq.tab.records')}
-                                </div>
-                            </div>
-                        </div>
-                        <div className="text-right">
-                            <div className="text-xs uppercase tracking-[0.22em] text-text-secondary font-bold">
-                                {t('armyHq.strategicSituation')}
-                            </div>
-                            <div className="text-[12px] font-bold text-text-primary tabular-nums">
-                                {turnToDateString(state.turn ?? 0)}
-                            </div>
-                        </div>
-                    </div>
+                <div className={ARMY_HQ_FRAME}>
+                    <SurfaceHeader
+                        eyebrow={t('armyHq.observerLabel')}
+                        title={t('armyHq.tab.records')}
+                        trailing={<span className="font-mono text-[16px] font-semibold text-[#f1e6c8]">{turnToDateString(state.turn ?? 0)}</span>}
+                        close={(
+                            <SurfaceCloseButton onClick={() => setOpen(false)} title={t('armyHq.returnFieldTitle')}>
+                                {t('armyHq.backToField')}
+                            </SurfaceCloseButton>
+                        )}
+                    />
                     <div
-                        className="relative min-w-0 flex-1 overflow-y-auto overflow-x-clip px-3 pt-2 pb-3"
+                        className="relative min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-clip px-8 py-6 text-[15px]"
                         role="tabpanel"
                         id="army-hq-tabpanel-records"
                         aria-label={t('armyHq.tab.records')}
@@ -446,7 +445,20 @@ export function ArmyHQModal({
     if (!open || !faction || !state || !data) return null;
 
     const crestSrc = getArmyCrest(faction);
+    const showWarroomReturn = !expandedCorpsId && shouldShowWarroomReturn(
+        typeof window !== 'undefined' ? window.location.search : '',
+        ipc.isAvailable,
+    );
+    const briefingCounts = [
+        { label: t('armyHq.critical'), value: data.briefingItems.filter((item) => item.severity === 'critical').length, tone: 'text-red-300' },
+        { label: t('armyHq.warnings'), value: data.briefingItems.filter((item) => item.severity === 'warning').length, tone: 'text-amber-200' },
+        { label: t('armyHq.executingOps'), value: data.executingOperationCount, tone: 'text-emerald-200' },
+    ];
 
+    // Surface redesign (owner, 2026-11-10): Army HQ is one surface in the Command Surface's
+    // style — header with the army, the staff or corps in view, the date and strength; the
+    // four rooms of the HQ and the corps list in the left rail; the chosen room in the
+    // middle column, which scrolls on its own.
     return (
         <div
             ref={dialogFocus.ref}
@@ -454,7 +466,7 @@ export function ArmyHQModal({
             tabIndex={-1}
             data-testid="army-hq-modal"
             data-expanded-corps-id={expandedCorpsId ?? ''}
-            className="fixed inset-0 flex overflow-hidden"
+            className="fixed inset-0 overflow-hidden"
             style={{ zIndex: Z.MODAL }}
             role="dialog"
             aria-modal="true"
@@ -465,180 +477,163 @@ export function ArmyHQModal({
                 type="button"
                 aria-label={t('armyHq.dismissBackdrop')}
                 tabIndex={-1}
-                className="absolute inset-0 bg-black/85 cursor-default"
+                className="absolute inset-0 cursor-default bg-[#05070a]/85"
                 onClick={() => setOpen(false)}
             />
 
-            <div className="relative flex-1 flex flex-col h-full overflow-hidden bg-panel-bg text-text-primary">
-
-                <div className="flex items-center justify-between px-3 py-1 shrink-0 border-b border-panel-border bg-panel-card">
-                    {/* Left: back/close + warroom return + crest + title */}
-                    <div className="flex items-center gap-2">
-                        <button
-                            type="button"
-                            data-testid={expandedCorpsId ? 'army-hq-corps-back' : 'army-hq-field-return'}
-                            onClick={() => {
-                                if (expandedCorpsId) {
-                                    setExpandedCorpsId(null);
-                                } else {
-                                    setOpen(false);
-                                }
-                            }}
-                            className="flex items-center gap-1 px-2 py-0.5 text-xs font-bold uppercase tracking-[0.14em] text-text-secondary border border-panel-border rounded-md hover:bg-panel-hover hover:text-text-primary transition-colors"
-                            title={expandedCorpsId ? t('armyHq.backOverviewTitle') : t('armyHq.returnFieldTitle')}
-                        >
-                            {expandedCorpsId ? '← BACK' : '← FIELD'}
-                        </button>
-                        {!expandedCorpsId && onReturnToDesk && (
-                            <button
-                                type="button"
-                                data-testid="army-hq-desk-return"
-                                onClick={() => {
-                                    setOpen(false);
-                                    onReturnToDesk();
-                                }}
-                                className="px-2 py-0.5 text-xs font-bold uppercase tracking-[0.14em] text-accent-gold border border-accent-gold/30 rounded-md hover:bg-accent-gold/10 transition-colors"
-                                title={t('armyHq.returnDeskTitle')}
-                            >
-                                {t('armyHq.returnDesk')}
-                            </button>
-                        )}
-                        {!expandedCorpsId && shouldShowWarroomReturn(
-                            typeof window !== 'undefined' ? window.location.search : '',
-                            ipc.isAvailable,
-                        ) && (
-                            <button
-                                type="button"
-                                onClick={() => {
-                                    setOpen(false);
-                                    if (isEmbeddedTacticalMap(window.location.search)) {
-                                        window.parent.postMessage({ type: 'awwv-back-to-hq' }, '*');
-                                    } else {
-                                        void ipc.focusWarroom();
-                                    }
-                                }}
-                                className="px-2 py-0.5 text-xs font-bold uppercase tracking-[0.14em] text-amber-300 border border-amber-400/20 rounded-md hover:bg-amber-400/10 hover:text-amber-200 transition-colors"
-                                title={t('armyHq.returnWarroomTitle')}
-                            >
-                                WARROOM
-                            </button>
-                        )}
-                        {crestSrc && (
-                            <img data-testid="army-hq-crest" src={crestSrc} alt="" className="h-11 w-11 object-contain drop-shadow-[0_1px_2px_rgba(0,0,0,0.7)]" draggable={false} />
-                        )}
-                        <div>
-                            <div className="text-xs uppercase tracking-[0.22em] text-text-secondary font-bold">
-                                {expandedCorpsId ? `${getArmyName(faction) ?? faction} HQ` : (FACTION_DISPLAY[faction] ?? faction)}
-                            </div>
-                            <div className="text-[14px] font-bold uppercase tracking-[0.04em] text-text-primary leading-tight">
-                                {expandedCorpsId
-                                    ? getPlayerSafeCorpsName(
-                                        data?.corpsFormations.find(c => c.id === expandedCorpsId)?.name,
-                                        expandedCorpsId,
-                                    )
-                                    : t('armyHq.mainStaff', { army: getArmyName(faction) ?? faction })
-                                }
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Right: situation + close */}
-                    <div className="flex items-center gap-2">
-                        <div className="text-right">
-                            <div className="text-xs uppercase tracking-[0.22em] text-text-secondary font-bold">
-                                {t('armyHq.strategicSituation')}
-                            </div>
-                            <div className="text-[12px] font-bold text-text-primary tabular-nums">
-                                {turnToDateString(state.turn ?? 0)}
-                            </div>
-                            <div
-                                data-testid="army-hq-personnel-reporting"
-                                className="mt-0.5 text-xs uppercase tracking-[0.12em] text-text-secondary"
-                            >
+            <div className={ARMY_HQ_FRAME}>
+                <SurfaceHeader
+                    eyebrow={expandedCorpsId ? `${getArmyName(faction) ?? faction} HQ` : (FACTION_DISPLAY[faction] ?? faction)}
+                    title={expandedCorpsId
+                        ? getPlayerSafeCorpsName(
+                            data?.corpsFormations.find(c => c.id === expandedCorpsId)?.name,
+                            expandedCorpsId,
+                        )
+                        : t('armyHq.mainStaff', { army: getArmyName(faction) ?? faction })}
+                    trailing={(
+                        <div className="flex flex-col items-end gap-0.5">
+                            <span className="font-mono text-[16px] font-semibold text-[#f1e6c8]">{turnToDateString(state.turn ?? 0)}</span>
+                            <span data-testid="army-hq-personnel-reporting" className="text-[15px] text-[#b9ad94]">
                                 <span>{t('personnel.totalPersonnel')}</span>
-                                <span className="ml-1 font-bold text-text-primary tabular-nums">{data.totalPersonnelLabel}</span>
-                            </div>
+                                <span className="ml-1.5 font-mono font-semibold tabular-nums text-[#f1e6c8]">{data.totalPersonnelLabel}</span>
+                            </span>
                         </div>
-                        <button
-                            type="button"
+                    )}
+                    close={(
+                        <SurfaceCloseButton
                             onClick={() => { setExpandedCorpsId(null); setOpen(false); }}
                             aria-label={t('armyHq.close')}
-                            className="text-text-secondary hover:text-text-primary text-[18px] leading-none transition-colors px-1"
+                        />
+                    )}
+                >
+                    {crestSrc && (
+                        <img data-testid="army-hq-crest" src={crestSrc} alt="" className="h-14 w-14 object-contain drop-shadow-[0_1px_2px_rgba(0,0,0,0.7)]" draggable={false} />
+                    )}
+                </SurfaceHeader>
+
+                <SurfaceColumns layout="rail-content">
+                    <SurfaceRail
+                        as="div"
+                        footer={(
+                            <div className="flex flex-col gap-2 pt-3">
+                                <button
+                                    type="button"
+                                    data-testid={expandedCorpsId ? 'army-hq-corps-back' : 'army-hq-field-return'}
+                                    onClick={() => {
+                                        if (expandedCorpsId) {
+                                            setExpandedCorpsId(null);
+                                        } else {
+                                            setOpen(false);
+                                        }
+                                    }}
+                                    className={SURFACE_SECONDARY_BUTTON}
+                                    title={expandedCorpsId ? t('armyHq.backOverviewTitle') : t('armyHq.returnFieldTitle')}
+                                >
+                                    {expandedCorpsId ? t('armyHq.backToOverview') : t('armyHq.backToField')}
+                                </button>
+                                {!expandedCorpsId && onReturnToDesk && (
+                                    <button
+                                        type="button"
+                                        data-testid="army-hq-desk-return"
+                                        onClick={() => {
+                                            setOpen(false);
+                                            onReturnToDesk();
+                                        }}
+                                        className={SURFACE_SECONDARY_BUTTON}
+                                        title={t('armyHq.returnDeskTitle')}
+                                    >
+                                        {t('armyHq.returnDesk')}
+                                    </button>
+                                )}
+                                {showWarroomReturn && (
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setOpen(false);
+                                            if (isEmbeddedTacticalMap(window.location.search)) {
+                                                window.parent.postMessage({ type: 'awwv-back-to-hq' }, '*');
+                                            } else {
+                                                void ipc.focusWarroom();
+                                            }
+                                        }}
+                                        className={SURFACE_SECONDARY_BUTTON}
+                                        title={t('armyHq.returnWarroomTitle')}
+                                    >
+                                        {t('armyHq.backToWarroom')}
+                                    </button>
+                                )}
+                            </div>
+                        )}
+                    >
+                        {/* A11y LANE-NIGHTSHIFT-V093-A11Y-LANE-C: tablist semantics + arrow-key navigation. */}
+                        <div
+                            data-tutorial-step="army-hq-tabs"
+                            role="tablist"
+                            aria-label={t('armyHq.tablist')}
+                            aria-orientation="vertical"
+                            className="flex flex-col gap-1.5"
                         >
-                            &times;
-                        </button>
-                    </div>
-                </div>
+                            {HQ_TABS.map(({ id, labelKey, blurbKey }, idx) => {
+                                const isActive = activeTab === id;
+                                return (
+                                    <button
+                                        key={id}
+                                        id={`army-hq-tab-${id}`}
+                                        data-testid={`army-hq-tab-${id}`}
+                                        ref={(el) => { tabRefs.current[id] = el; }}
+                                        type="button"
+                                        role="tab"
+                                        aria-selected={isActive}
+                                        aria-label={t(labelKey)}
+                                        aria-controls={`army-hq-tabpanel-${id}`}
+                                        tabIndex={isActive ? 0 : -1}
+                                        data-tutorial-step={`army-hq-tab-${id}`}
+                                        onClick={() => setActiveTab(id)}
+                                        onKeyDown={(e) => handleTabKeyDown(e, idx)}
+                                        className={`${RAIL_BUTTON} ${isActive ? RAIL_BUTTON_ACTIVE : RAIL_BUTTON_IDLE}`}
+                                    >
+                                        <span className="flex min-w-0 flex-col gap-0.5">
+                                            <span className="text-[18px] font-semibold leading-tight text-[#f1e6c8]">{t(labelKey)}</span>
+                                            <span className="text-[14px] leading-snug text-[#b9ad94]">{t(blurbKey)}</span>
+                                        </span>
+                                    </button>
+                                );
+                            })}
+                        </div>
+                        {activeTab === 'briefing' && (
+                            <CommandAccessStrip
+                                corpsFormations={data.corpsFormations}
+                                sectorsByCorps={data.sectorsByCorps}
+                                opsByCorps={data.opsByCorps}
+                                readinessByCorps={data.readinessByCorps}
+                                expandedCorpsId={expandedCorpsId}
+                                onSelect={navigateToCorps}
+                            />
+                        )}
+                    </SurfaceRail>
 
-                {/* A11y LANE-NIGHTSHIFT-V093-A11Y-LANE-C: tablist semantics + arrow-key navigation. */}
-                <div
-                    data-tutorial-step="army-hq-tabs"
-                    role="tablist"
-                    aria-label={t('armyHq.tablist')}
-                    className="flex items-center gap-0.5 px-3 py-0.5 bg-panel-bg border-b border-panel-border shrink-0"
-                >
-                    {HQ_TABS.map(({ id, labelKey }, idx) => {
-                        const isActive = activeTab === id;
-                        return (
-                            <button
-                                key={id}
-                                id={`army-hq-tab-${id}`}
-                                data-testid={`army-hq-tab-${id}`}
-                                ref={(el) => { tabRefs.current[id] = el; }}
-                                type="button"
-                                role="tab"
-                                aria-selected={isActive}
-                                aria-controls={`army-hq-tabpanel-${id}`}
-                                tabIndex={isActive ? 0 : -1}
-                                data-tutorial-step={`army-hq-tab-${id}`}
-                                onClick={() => setActiveTab(id)}
-                                onKeyDown={(e) => handleTabKeyDown(e, idx)}
-                                className={`px-2.5 py-0.5 text-xs font-bold uppercase tracking-[0.15em] rounded-md transition-all ${
-                                    isActive
-                                        ? 'bg-amber-400/15 text-amber-400 border border-amber-400/30'
-                                        : 'text-text-secondary hover:text-text-primary hover:bg-white/5 border border-transparent'
-                                }`}
-                            >
-                                {t(labelKey)}
-                            </button>
-                        );
-                    })}
-                </div>
-
-                <div
-                    className="relative min-w-0 flex-1 overflow-y-auto overflow-x-clip px-3 pt-2 pb-3"
-                    role="tabpanel"
-                    id={`army-hq-tabpanel-${activeTab}`}
-                    aria-labelledby={`army-hq-tab-${activeTab}`}
-                >
+                    <div
+                        className="relative min-h-0 min-w-0 overflow-y-auto overflow-x-clip px-8 py-6 text-[15px]"
+                        role="tabpanel"
+                        id={`army-hq-tabpanel-${activeTab}`}
+                        aria-labelledby={`army-hq-tab-${activeTab}`}
+                    >
 
                     {/* ═══ BRIEFING TAB ═══ */}
                     {activeTab === 'briefing' && (
                         <>
                             {/*
-                             * Top section: two-band layout.
-                             *   Briefing band (left, lg:col-span-7) — paper Chief of Staff briefing.
-                             *   Evidence/Action band (right, lg:col-span-5) — commander, mini-bio,
-                             *   counts row, and Strategic Position (when dimensions exist).
-                             * Palette: gold = command/action; blue-green = friendly state; red =
-                             * threat/critical; paper = authored briefing; gray = secondary metadata.
-                             * War Exhaustion is intentionally NOT a standalone Army HQ widget —
-                             * the underlying mechanic stays alive in Chief of Staff prose, War
-                             * Summary, OOB summaries, and Command Relationship.
+                             * Two-band layout: the Chief of Staff's briefing (paper) with the
+                             * presidential handoffs on the left; the commander, the week's
+                             * counts, Strategic Position and the situation list on the right.
+                             * War Exhaustion is intentionally NOT a standalone Army HQ widget.
                              */}
                             {!expandedCorpsId && (
                                 <>
                                 <EquipmentSummary summary={state.equipmentSummary} />
-                                <CommandAccessStrip
-                                    corpsFormations={data.corpsFormations}
-                                    sectorsByCorps={data.sectorsByCorps}
-                                    opsByCorps={data.opsByCorps}
-                                    readinessByCorps={data.readinessByCorps}
-                                    onSelect={navigateToCorps}
-                                />
-                                <div className="grid grid-cols-1 gap-3 mb-3 items-start xl:grid-cols-[minmax(0,1.12fr)_minmax(22rem,0.88fr)]">
+                                <div className="mb-6 grid grid-cols-1 items-start gap-5 xl:grid-cols-[minmax(0,1.12fr)_minmax(22rem,0.88fr)]">
                                     {/* Briefing band — Chief of Staff (primary document) */}
-                                    <div className="min-w-0 space-y-3">
+                                    <div className="min-w-0 space-y-4">
                                         <ChiefOfStaffBriefing
                                             briefingItems={data.briefingItems}
                                             gameState={state}
@@ -662,15 +657,15 @@ export function ArmyHQModal({
                                     </div>
 
                                     {/* Evidence / Action band */}
-                                    <div className="min-w-0 flex flex-col gap-2">
+                                    <div className="flex min-w-0 flex-col gap-4">
                                         {/* Commander dossier — friendly identity + mini-bio */}
-                                        <div className="bg-panel-card border border-emerald-500/20 rounded-lg p-2.5">
-                                            <div className="text-xs uppercase tracking-[0.22em] text-emerald-300 font-bold mb-1 pb-1 border-b border-emerald-500/15">
+                                        <div className="rounded-md border border-[#2a303c] bg-[#161a22] p-4">
+                                            <div className={`mb-1 ${SURFACE_LABEL}`}>
                                                 {t('armyHq.armyCommander')}
                                             </div>
                                             <div
                                                 data-testid="army-hq-command-role"
-                                                className="mb-2 text-xs leading-snug text-text-secondary"
+                                                className="mb-3 text-[15px] leading-snug text-[#c2b69c]"
                                             >
                                                 {t('armyHq.armyCommander.role')}
                                             </div>
@@ -680,32 +675,22 @@ export function ArmyHQModal({
                                                     <OfficerMiniBio officer={data.commander} />
                                                 </>
                                             ) : (
-                                                <div className="text-text-secondary text-xs py-3 text-center italic">
+                                                <div className="py-3 text-center text-[15px] italic text-[#c2b69c]">
                                                     {t('armyHq.noCommander')}
                                                 </div>
                                             )}
                                         </div>
 
-                                        {/* Counts row — red threat / amber warning / blue-green active ops */}
+                                        {/* Counts — threat / warning / operations under way */}
                                         <div className="grid grid-cols-3 gap-2">
-                                            <div className="rounded-lg border border-red-500/25 bg-red-500/[0.04] px-2 py-1.5">
-                                                <div className="text-xs uppercase tracking-[0.18em] text-red-300 font-bold">{t('armyHq.critical')}</div>
-                                                <div className="text-[16px] font-bold text-red-400 tabular-nums leading-tight">
-                                                    {data.briefingItems.filter((item) => item.severity === 'critical').length}
+                                            {briefingCounts.map((count) => (
+                                                <div key={count.label} className="rounded-md border border-[#2a303c] bg-[#161a22] px-3 py-2.5">
+                                                    <div className="text-[14px] leading-snug text-[#b9ad94]">{count.label}</div>
+                                                    <div className={`font-mono text-[22px] font-semibold tabular-nums ${count.tone}`}>
+                                                        {count.value}
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            <div className="rounded-lg border border-amber-400/25 bg-amber-400/[0.04] px-2 py-1.5">
-                                                <div className="text-xs uppercase tracking-[0.18em] text-amber-300 font-bold">{t('armyHq.warnings')}</div>
-                                                <div className="text-[16px] font-bold text-amber-300 tabular-nums leading-tight">
-                                                    {data.briefingItems.filter((item) => item.severity === 'warning').length}
-                                                </div>
-                                            </div>
-                                            <div className="rounded-lg border border-emerald-500/25 bg-emerald-500/[0.04] px-2 py-1.5">
-                                                <div className="text-xs uppercase tracking-[0.18em] text-emerald-300 font-bold">{t('armyHq.executingOps')}</div>
-                                                <div className="text-[16px] font-bold text-emerald-300 tabular-nums leading-tight">
-                                                    {data.executingOperationCount}
-                                                </div>
-                                            </div>
+                                            ))}
                                         </div>
 
                                         {/* Strategic Position — renders null when dimensions absent */}
@@ -726,7 +711,7 @@ export function ArmyHQModal({
 
                             {/* Corps Cards */}
                             <div>
-                                <div className="text-xs uppercase tracking-[0.22em] text-text-secondary font-bold mb-2 pb-1 border-b border-panel-border">
+                                <div className={`mb-3 border-b border-[#262b35] pb-2 ${SURFACE_LABEL}`}>
                                     {t('armyHq.allCorps', { count: data.corpsFormations.length })}
                                 </div>
 
@@ -772,7 +757,8 @@ export function ArmyHQModal({
                             onOpenAutonomy={handleOpenAutonomy}
                         />
                     )}
-                </div>
+                    </div>
+                </SurfaceColumns>
             </div>
         </div>
     );

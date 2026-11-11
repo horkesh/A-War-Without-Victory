@@ -578,7 +578,7 @@ async function assertToolbarRoutesDisabled(page, summary, flow) {
     const hasVisible = (selector) => Array.from(document.querySelectorAll(selector)).some(isVisible);
     return {
       armyHq: hasVisible('[id^="army-hq-tabpanel-"], [data-testid="army-hq-corps-index"]'),
-      chronicle: /^War Chronicle$/i.test(visibleTextFor('h1')),
+      chronicle: hasVisible('[data-testid="chronicle-overlay"]') || /^War Chronicle$/i.test(visibleTextFor('h1')),
       codex: Boolean(Array.from(document.querySelectorAll('[data-testid="codex-panel"]')).some(isVisible)),
       decisionHistory: /Decision History|Authored Choices/i.test(visibleTextFor('[role="dialog"], [aria-modal="true"]')),
       humanitarianLedger: /National Humanitarian Ledger/i.test(visibleTextFor('[role="dialog"], [aria-modal="true"], aside, section')),

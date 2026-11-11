@@ -7,6 +7,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   applyAudioPreferences,
   loadAudioPreferences,
+  saveAudioPreferences,
 } from '../../src/ui/map/audio/audio_preferences.js';
 import {
   getAudioState,
@@ -162,7 +163,7 @@ describe('WP-8 ambient audio floor', () => {
   it('fresh profiles enable the bus but no cue is accepted before user gesture unlock', async () => {
     const prefs = applyAudioPreferences(loadAudioPreferences(new MemoryStorage()));
 
-    expect(prefs).toEqual({ musicEnabled: false, musicVolume: 0.5, muted: false, masterVolume: 0.5 });
+    expect(prefs).toEqual({ musicEnabled: true, musicVolume: 0.5, musicDefaultsVersion: 2, muted: false, masterVolume: 0.5 });
     expect(getAudioState()).toMatchObject({ enabled: true, muted: false, userGestureUnlocked: false });
 
     await playCue('ui_click', 1000);
@@ -485,6 +486,9 @@ describe('WP-8 ambient audio floor', () => {
   });
 
   it('retries ambient playback through controller pointer and keyboard gestures after a pending failure', async () => {
+    // Ambient only: music (on by default since 2026-11-10) would add its own pending play.
+    saveAudioPreferences({ muted: false, masterVolume: 0.5, musicEnabled: false });
+    applyAudioPreferences({ muted: false, masterVolume: 0.5, musicEnabled: false });
     setAmbientPlaybackEnabled(true);
     render(React.createElement(AudioSurfaceBedController, { appScreen: 'warroom' }));
 
@@ -647,7 +651,7 @@ describe('WP-8 ambient audio floor', () => {
   it('keeps all beds silent across settings, gesture, and surface changes without changing global audio', async () => {
     const resolveSpy = vi.spyOn(soundManifest, 'resolveCuePlaybackUrl');
     const prefs = applyAudioPreferences(loadAudioPreferences(new MemoryStorage()));
-    expect(prefs).toEqual({ musicEnabled: false, musicVolume: 0.5, muted: false, masterVolume: 0.5 });
+    expect(prefs).toEqual({ musicEnabled: true, musicVolume: 0.5, musicDefaultsVersion: 2, muted: false, masterVolume: 0.5 });
 
     for (const bedId of ['ambient_warroom', 'ambient_field', 'ambient_archive'] as const) {
       await playAmbientBed(bedId);
@@ -656,7 +660,9 @@ describe('WP-8 ambient audio floor', () => {
 
     setEnabled(true);
     unmuteAudio();
-    applyAudioPreferences({ muted: false, masterVolume: 0.5 });
+    // Beds only: music (on by default since 2026-11-10) resolves its own cue URLs.
+    saveAudioPreferences({ muted: false, masterVolume: 0.5, musicEnabled: false });
+    applyAudioPreferences({ muted: false, masterVolume: 0.5, musicEnabled: false });
     unlockAudioForUserGesture();
     expect(isAmbientPlaybackEnabled()).toBe(false);
 

@@ -16,6 +16,7 @@ import { useGameStore } from '../store/gameStore';
 import { turnToDateString } from '../utils/formatters';
 import { FACTION_HEX_COLORS } from '../utils/theme';
 import { shouldNarrateTerritorySummary } from '../data/territorySummaryGuard';
+import { t } from '../i18n';
 
 interface TerritoryDataPoint {
   turn: number;
@@ -108,8 +109,8 @@ export const TerritoryOverTimeChart = React.memo(function TerritoryOverTimeChart
 
   return (
     <div data-testid="territory-over-time-chart">
-      <h3 className="text-xs font-bold uppercase tracking-wider text-text-secondary mb-2">
-        Territory Over Time
+      <h3 className="text-[13px] font-bold uppercase tracking-wider text-text-secondary mb-2">
+        {t('territoryChart.title')}
       </h3>
       {hasHistory ? (
         <svg
@@ -185,10 +186,10 @@ export const TerritoryOverTimeChart = React.memo(function TerritoryOverTimeChart
           ))}
         </svg>
       ) : (
-        <div className="text-center py-8 text-text-muted text-xs font-mono">
+        <div className="text-center py-8 text-text-muted text-[13px] font-mono">
           {territoryHistory.length === 0
-            ? 'No turn history available yet. Advance a few turns to see territory trends.'
-            : 'Insufficient data points. Advance more turns to build the trend chart.'
+            ? t('territoryChart.noHistory')
+            : t('territoryChart.insufficient')
           }
         </div>
       )}
