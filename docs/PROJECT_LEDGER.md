@@ -14324,3 +14324,13 @@ R8 RBiH attempt 08 (packaged build g) played all 24 turns and failed only the re
 - Attempt 11 played 24 turns and failed only readability: `FormationDetail.tsx` drew the "Corps:" and "OG:" labels at 60% opacity (3.07:1 and 3.5:1). They are now full opacity.
 - Music aborts: a track cut off by a track change reported `net::ERR_ABORTED`. The harness lifecycle observer only recorded `ambient_*` files, so music never paired and counted as a network failure (13 in attempt 09, 10 in attempt 11). The observer now records any bundled `/assets/<name>-<hash>.ogg`, which is the same shape the abort classifier accepts, and it observes `new Audio()` elements from construction. `tests/paradox_local_qa_harness.test.ts` keeps its "ignores other audio" case with a non-bundled path; 122/122 pass.
 - One unexplained hillshade tile abort (attempt 09) is left to recur before any rule change.
+
+## 2026-11-10 — R8 harness: media range-request aborts pair with a played-through element (QA)
+
+RBiH attempt 12 (package j) passed every gate except runtime network failures. All 14 were `net::ERR_ABORTED` on music tracks. The lifecycle observer, now recording them, showed why the old element-abort pairing could never match: Chromium cancels and reissues media range requests at load and mid-track without firing an element `abort`. `classifyRecoveredMediaElementAbort` in `tools/ui/paradox_local_qa.cjs` excuses such an abort only when all of these hold:
+- the URL is a bundled `/assets/<name>-<hash>.ogg` on the local origin;
+- the same element and source epoch had a `request-start` no later than 2 s after the request began;
+- that element reached `loadeddata`, `canplay` or `playing`;
+- that element never reported `error`.
+
+Allowlist label: `media-element-played-through-abort`. Replaying attempt 12's recorded signals: 14 → 0 remaining. A new test covers the positive case (load-time and mid-track aborts) and four rejections: never played, played then errored, started after the request, other track. A non-bundled path is also rejected. The harness suite passes 123/123.

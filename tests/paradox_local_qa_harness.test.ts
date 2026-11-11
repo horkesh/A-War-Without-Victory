@@ -885,9 +885,10 @@ test('sector warnings remain fatal when final serialized state cannot prove same
 test('ambient abort attribution requires one exact element/source epoch and consumes it once', () => {
     const harness = readHarness();
     const classifySource = extractFunctionSource(harness, 'classifyExpectedAmbientLifecycleAbort');
+    const recoveredSource = extractFunctionSource(harness, 'classifyRecoveredMediaElementAbort');
     const attributeSource = extractFunctionSource(harness, 'attributeAmbientLifecycleAborts');
     const attribute = runInNewContext(
-        `(() => { const classifyExpectedAmbientLifecycleAbort = ${classifySource}; return (${attributeSource}); })()`,
+        `(() => { const classifyExpectedAmbientLifecycleAbort = ${classifySource}; const classifyRecoveredMediaElementAbort = ${recoveredSource}; return (${attributeSource}); })()`,
         { URL },
     ) as (failures: Array<Record<string, unknown>>, stops: Array<Record<string, unknown>>, expected: Array<Record<string, unknown>>) => void;
     const url = 'http://127.0.0.1:3002/assets/ambient_field-D4f9a2.ogg';
@@ -930,6 +931,54 @@ test('ambient abort attribution requires one exact element/source epoch and cons
     const wrongOriginExpected: Array<Record<string, unknown>> = [];
     attribute(wrongOriginFailures, [start('media:1', 1, wrongOrigin), abort('media:1', 1, wrongOrigin)], wrongOriginExpected);
     assert.equal(wrongOriginExpected.length, 0);
+});
+
+test('a media range-request abort is excused only when the same element played that source without error', () => {
+    const harness = readHarness();
+    const classifySource = extractFunctionSource(harness, 'classifyExpectedAmbientLifecycleAbort');
+    const recoveredSource = extractFunctionSource(harness, 'classifyRecoveredMediaElementAbort');
+    const attributeSource = extractFunctionSource(harness, 'attributeAmbientLifecycleAborts');
+    const attribute = runInNewContext(
+        `(() => { const classifyExpectedAmbientLifecycleAbort = ${classifySource}; const classifyRecoveredMediaElementAbort = ${recoveredSource}; return (${attributeSource}); })()`,
+        { URL },
+    ) as (failures: Array<Record<string, unknown>>, signals: Array<Record<string, unknown>>, expected: Array<Record<string, unknown>>) => void;
+    const music = 'http://127.0.0.1:3002/assets/the_long_winter-CRQ6dHRh.ogg';
+    const failure = (requestInitiatedAtMs: number, failureUrl = music) => ({
+        failure: { errorText: 'net::ERR_ABORTED' }, method: 'GET', url: failureUrl,
+        resourceType: 'media', isMainFrame: false, eventCount: 22,
+        teardownStarted: false, observedAtMs: requestInitiatedAtMs + 5, requestInitiatedAtMs,
+    });
+    const signal = (kind: string, observedAtMs: number, elementId = 'media:2', signalUrl = music) => ({
+        kind, elementId, sourceEpoch: 1, url: signalUrl, origin: 'http://127.0.0.1:3002', observedAtMs,
+    });
+    // Attempt 12's shape: load-time abort and a later mid-track range abort, element plays.
+    const played = [signal('request-start', 1_000), signal('canplay', 1_050), signal('playing', 1_050)];
+    const failures = [failure(1_000), failure(60_000)];
+    const expected: Array<Record<string, unknown>> = [];
+    attribute(failures, played, expected);
+    assert.equal(failures.length, 0);
+    assert.deepEqual(expected.map((entry) => entry.allowlist), ['media-element-played-through-abort', 'media-element-played-through-abort']);
+
+    for (const signals of [
+        [signal('request-start', 1_000)], // never played
+        [...played, signal('error', 1_500)], // played, then errored
+        [signal('request-start', 5_000), signal('playing', 5_050)], // started after the request
+        [signal('request-start', 1_000, 'media:2', 'http://127.0.0.1:3002/assets/a_country_before_dawn-PtkU-Fjj.ogg'),
+            signal('playing', 1_050, 'media:2', 'http://127.0.0.1:3002/assets/a_country_before_dawn-PtkU-Fjj.ogg')], // other track
+    ]) {
+        const rejected = [failure(1_000)];
+        const rejectedExpected: Array<Record<string, unknown>> = [];
+        attribute(rejected, signals, rejectedExpected);
+        assert.equal(rejectedExpected.length, 0);
+        assert.equal(rejected.length, 1);
+    }
+    const external = [failure(1_000, 'http://127.0.0.1:3002/media/voice.ogg')];
+    const externalExpected: Array<Record<string, unknown>> = [];
+    attribute(external, [
+        signal('request-start', 1_000, 'media:3', 'http://127.0.0.1:3002/media/voice.ogg'),
+        signal('playing', 1_050, 'media:3', 'http://127.0.0.1:3002/media/voice.ogg'),
+    ], externalExpected);
+    assert.equal(externalExpected.length, 0);
 });
 
 function mediaTimeRanges(pairs: Array<[number, number]>) {

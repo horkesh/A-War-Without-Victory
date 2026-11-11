@@ -6642,13 +6642,66 @@ function classifyExpectedAmbientLifecycleAbort(record, lifecycleSignals) {
   return { requestStart, browserAbort: browserAborts[0] };
 }
 
+/**
+ * Chromium's media loader cancels and reissues range requests while a track plays (at
+ * load and mid-track), reporting `net::ERR_ABORTED` with NO element `abort` event. Such an
+ * abort is benign when the same element had already started loading that exact URL, went
+ * on to play it (`loadeddata`/`canplay`/`playing`), and never reported `error` for that
+ * source. A track that genuinely failed never plays or reports `error`, so it still counts.
+ * (R8 RBiH attempt 12: 14 music aborts, every element played through.)
+ */
+function classifyRecoveredMediaElementAbort(record, lifecycleSignals) {
+  if (record.failure?.errorText !== 'net::ERR_ABORTED'
+    || record.method !== 'GET'
+    || record.resourceType !== 'media'
+    || record.isMainFrame
+    || !Number.isFinite(record.requestInitiatedAtMs)) return null;
+  let parsed;
+  try {
+    parsed = new URL(record.url);
+  } catch {
+    return null;
+  }
+  const bundledCue = parsed.protocol === 'http:'
+    && parsed.hostname === '127.0.0.1'
+    && parsed.search === ''
+    && parsed.hash === ''
+    && /^\/assets\/[a-z0-9_]+-[A-Za-z0-9_-]+\.ogg$/.test(parsed.pathname);
+  if (!bundledCue) return null;
+  const sameSource = (signal) => signal.url === record.url && signal.origin === parsed.origin
+    && typeof signal.elementId === 'string' && Number.isInteger(signal.sourceEpoch);
+  const starts = lifecycleSignals.filter((signal) => signal.kind === 'request-start' && sameSource(signal)
+    && Number.isFinite(signal.observedAtMs)
+    && signal.observedAtMs <= record.requestInitiatedAtMs + 2_000);
+  for (const start of starts) {
+    const identity = `${start.elementId}:${start.sourceEpoch}`;
+    const epochSignals = lifecycleSignals.filter((signal) => sameSource(signal)
+      && `${signal.elementId}:${signal.sourceEpoch}` === identity);
+    if (epochSignals.some((signal) => signal.kind === 'error')) continue;
+    const played = epochSignals.find((signal) => ['loadeddata', 'canplay', 'playing'].includes(signal.kind));
+    if (played) return { requestStart: start, played };
+  }
+  return null;
+}
+
 function attributeAmbientLifecycleAborts(networkFailures, lifecycleSignals, expectedAmbientLifecycleAborts) {
   const availableSignals = [...lifecycleSignals];
   const attributedFailureIndexes = new Set();
   for (let index = 0; index < networkFailures.length; index += 1) {
     const record = networkFailures[index];
     const attribution = classifyExpectedAmbientLifecycleAbort(record, availableSignals);
-    if (!attribution) continue;
+    if (!attribution) {
+      const recovered = classifyRecoveredMediaElementAbort(record, lifecycleSignals);
+      if (recovered) {
+        expectedAmbientLifecycleAborts.push({
+          ...record,
+          ambientLifecycle: recovered,
+          allowlist: 'media-element-played-through-abort',
+        });
+        attributedFailureIndexes.add(index);
+      }
+      continue;
+    }
     const consumed = new Set([attribution.requestStart, attribution.browserAbort]);
     availableSignals.splice(0, availableSignals.length, ...availableSignals.filter((signal) => !consumed.has(signal)));
     expectedAmbientLifecycleAborts.push({
