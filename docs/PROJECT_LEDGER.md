@@ -14334,3 +14334,19 @@ RBiH attempt 12 (package j) passed every gate except runtime network failures. A
 - that element never reported `error`.
 
 Allowlist label: `media-element-played-through-abort`. Replaying attempt 12's recorded signals: 14 → 0 remaining. A new test covers the positive case (load-time and mid-track aborts) and four rejections: never played, played then errored, started after the request, other track. A non-bundled path is also rejected. The harness suite passes 123/123.
+
+## 2026-11-11 — R8 packaged shakedowns on the merged branch: Drina run setting, contrast and stack-dialog fixes (QA, UI)
+
+Round 14 (package l, branch b525c41a0 with the counter rework and recruitment change merged) and round 15 (package m):
+
+- **RBiH-14: PASS.** 24 turns, every gate green, 0 network failures. First packaged pass with the reworked counters and the "Already raised" recruitment section.
+- **HRHB-01: FAIL → fixed; HRHB-02: PASS.** "No friendly line" on the Corps Front card measured 4.43:1 (`text-red-600` on the paper card). It and the three low-morale/cohesion/high-fatigue values in the same block now use `text-red-700` (bc840ab3a).
+- **RS-01: FAIL → harness setting.** The run stopped at turn 10 on `drina_cleansing_decision_1992`. That Ring 3 decision is authored with no historical default and no staff recommendation, and the game cannot leave it unanswered: the modal can only be closed by answering, and the decision never expires. The owner chose an explicit run setting over an in-game defer. `--rs-drina-policy=<restrained|systematic>` (dd09be6cb, tests 436a8c161) records the answer as `basis: player_selected_counterfactual`, `historicityClaim: none_counterfactual_player_choice`, and in run provenance. It refuses to act if the event gains an authored default or staff recommendation. No game code, event data or canon changed.
+- **Pyrrhic panel on the setting (independent seats; historian, game design/canon, QA): APPROVE-WITH-CONDITIONS, unanimous.** Conditions, binding on every report that uses it:
+  - Name the answer by its label. Option `systematic` is "Open command-accountability proceedings" and `restrained` is "Impose immediate civilian-protection restraints". Never write the bare id `systematic`, which reads as a cleansing option.
+  - An RS Historical-choice run that uses the setting is counterfactual from turn 10 onward. It is UI evidence only, never calibration, parity or historical-baseline evidence.
+  - Never call either answer the "historical" or "default" choice; neither happened (ICTY Karadžić TJ, Strategic Goal 3; Kunarac, Lukić, Krnojelac). `drina_valley_ethnic_cleansing_1992` still fires regardless of the answer.
+  - QA's three test gaps were added: duplicate option id, the dedicated mismatched-player guard, and non-Drina events unaffected.
+  Game design/canon: harness-only, so no §6 gate row applies and no canon record is needed.
+- **RS-02 (`--rs-drina-policy=restrained`): FAIL at turn 16 → harness fix.** A directional map-probe click landed on a stacked counter and opened the formation stack dialog. Its backdrop then intercepted the next probe click. The probe now records that click as `stack-expansion`, closes the dialog, and closes any stack dialog still open before each click (79133b001). RS-03 rerun on package m.
+- Full vitest suite green on 436a8c161. The red lines in the log are the deliberate `tests/fixtures/vitest_balanced` failure controls.
