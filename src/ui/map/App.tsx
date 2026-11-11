@@ -1050,6 +1050,16 @@ function App() {
     if (pausedDecision) setActiveEventDecisionId(pausedDecision.event_id);
   }, [turnPauseStatus, activeEventDecisionId, loadedGameState?.pendingEventDecisions, playerFaction]);
 
+  // A paused turn the player CONTINUED without answering leaves its decision on the desk.
+  // Close the modal once the pause is resumed: a required decision is re-opened by the
+  // auto-launch effect after the turn; an optional one stays on the desk instead of coming
+  // back as a modal that can only be closed by answering.
+  useEffect(() => {
+    if (turnPauseStatus?.status !== 'resumed') return;
+    if (activeEventDecisionId === null) return;
+    setActiveEventDecisionId(null);
+  }, [turnPauseStatus, activeEventDecisionId]);
+
   // Async presidential blockers own the full interaction surface. Preserve
   // map selection/camera state, but suspend every Warroom shell that could
   // otherwise remain clickable behind the required response.
@@ -2044,6 +2054,15 @@ function App() {
                     // 'no_paused_turn': the turn already resumed (e.g. a double click).
                     if (!result.ok && result.error !== 'no_paused_turn') {
                       setLoadError(result.error ?? 'Failed to continue the turn.');
+                      return;
+                    }
+                    // Continuing without answering leaves the decision on the desk, as the
+                    // footer promises. Mark the pause resumed now (the main process's own
+                    // notice may still be in flight); the resumed-pause effect then closes
+                    // this modal so an optional decision cannot return as an undismissable one.
+                    const pauseStatus = useGameStore.getState().turnPauseStatus;
+                    if (pauseStatus?.status === 'paused') {
+                      useGameStore.getState().setTurnPauseStatus({ status: 'resumed', turn: pauseStatus.turn });
                     }
                   });
                 },
