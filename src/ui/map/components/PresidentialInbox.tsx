@@ -56,7 +56,8 @@ export const DOSSIER_LAYOUT = Object.freeze({
     top: '34%',
     width: '24rem',
     right: '1.25rem',
-    bottomGap: '0.75rem',
+    // Clears the floating Find (Ctrl/⌘ K) button below it (R8 RBiH attempt 08).
+    bottomGap: '3rem',
 });
 
 const PANEL_STYLE: CSSProperties = { ...DETAIL_PANEL_STYLE, width: '25rem' };
