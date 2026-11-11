@@ -54,6 +54,12 @@ let eventChoiceTranscript = [];
 let campaignModeSelectionEvidence = null;
 let officerSuccessionChoiceTranscript = [];
 
+function isUnrankedOptionalEventDecision(decision) {
+  if (!decision || decision.requires_player_response === true) return false;
+  if (decision.historical_default_response_id || decision.staff_recommended_response_id) return false;
+  return !(decision.response_options ?? []).some((option) => option.historical_marker === 'historical_default');
+}
+
 function selectHistoricalEventChoice(decision) {
   const options = decision?.response_options ?? [];
   const declared = decision?.historical_default_response_id;
@@ -1903,8 +1909,18 @@ async function readState(frame) {
     ));
   const eventDecisionReceiptIds = eventDecisionReceipts.map((receipt) => receipt.eventId);
   const canonicalReserveRequests = raw.military?.pending_reserve_requests;
-  const playerPendingEventDecisions = pendingEventDecisions
+  const playerFactionEventDecisions = pendingEventDecisions
     .filter(({ decision }) => !playerFaction || !decision?.faction || decision.faction === playerFaction);
+  // Historical-choice runs leave an OPTIONAL decision with no ranked answer unanswered, as a
+  // player may; it is reported separately and never treated as a pending blocker.
+  const unansweredOptionalEventDecisionIds = historicalChoice
+    ? playerFactionEventDecisions
+      .filter(({ decision }) => isUnrankedOptionalEventDecision(decision))
+      .map(({ id }) => id)
+      .filter(Boolean)
+    : [];
+  const playerPendingEventDecisions = playerFactionEventDecisions
+    .filter(({ id }) => !unansweredOptionalEventDecisionIds.includes(id));
   const paramilitaryRequests = playerPendingParamilitaryRequests.length;
   const blockerInventory = buildPlayerBlockerInventory(raw, playerFaction, {
     eventDecisions: playerPendingEventDecisions.length,
@@ -1929,6 +1945,7 @@ async function readState(frame) {
     pendingEventDecisionIds: playerPendingEventDecisions
       .map(({ id }) => id)
       .filter(Boolean),
+    unansweredOptionalEventDecisionIds,
     eventDecisionReceiptIds,
     eventDecisionReceipts,
     eventFireCounts: Object.fromEntries(Object.entries(raw.military?.event_fire_counts ?? {})
@@ -5145,6 +5162,33 @@ async function handleCurrentSurface(page, frame, faction, events, options = {}) 
     await snapshot(page, frame, faction, events, 'dayton-after-response', { clicked, cleared, after });
     if (!cleared) throw new Error('Pending Dayton negotiation remained after visible response');
     return { handled: true, action: 'dayton-decline-talks' };
+  }
+  const pausedContinue = frame.locator('[data-testid="event-decision-continue-turn"]').first();
+  if (historicalChoice && !pendingEventId && await pausedContinue.isVisible().catch(() => false)) {
+    const visibleEventId = await frame.locator('[data-testid="event-decision-response-rail"]').first()
+      .getAttribute('data-event-id').catch(() => null);
+    if (visibleEventId && (pendingState?.unansweredOptionalEventDecisionIds ?? []).includes(visibleEventId)) {
+      await snapshot(page, frame, faction, events, 'optional-event-left-unanswered-before', { eventId: visibleEventId });
+      const continued = await clickTestId(
+        frame,
+        'event-decision-continue-turn',
+        `continue paused turn leaving ${visibleEventId} unanswered`,
+        { afterMs: 1500 },
+      );
+      if (!continued) throw new Error(`Paused turn could not continue past optional decision: ${visibleEventId}`);
+      eventChoiceTranscript.push({
+        eventId: visibleEventId,
+        responseId: null,
+        basis: 'left_unanswered_optional_no_ranked_answer',
+        historicityClaim: 'none',
+        turn: pendingState?.turn ?? null,
+        faction: pendingState?.playerFaction ?? null,
+        playerInput: true,
+        status: 'left_unanswered',
+      });
+      await snapshot(page, frame, faction, events, 'optional-event-left-unanswered-after', { eventId: visibleEventId });
+      return { handled: true, action: `event-left-unanswered:${visibleEventId}` };
+    }
   }
   if (pendingEventId) {
     const responseRail = frame.locator('[data-testid="event-decision-response-rail"]').first();

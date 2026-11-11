@@ -4535,6 +4535,27 @@ test('RBiH paramilitary override chooses only the existing visible counterfactua
     assert.match(clickSource, /receipt\.responseId !== transcriptRow\.responseId/);
 });
 
+test('Historical runs leave only an OPTIONAL decision with no ranked answer unanswered', () => {
+    const harness = readHarness();
+    const isUnranked = loadFunction<(decision: unknown) => boolean>(harness, 'isUnrankedOptionalEventDecision');
+    const options = [{ id: 'a' }, { id: 'b' }];
+    assert.equal(isUnranked({ requires_player_response: false, response_options: options }), true);
+    assert.equal(isUnranked({ response_options: options }), true);
+    assert.equal(isUnranked({ requires_player_response: true, response_options: options }), false);
+    assert.equal(isUnranked({ response_options: options, staff_recommended_response_id: 'a' }), false);
+    assert.equal(isUnranked({ response_options: options, historical_default_response_id: 'b' }), false);
+    assert.equal(isUnranked({ response_options: [{ id: 'a', historical_marker: 'historical_default' }] }), false);
+    assert.equal(isUnranked(null), false);
+
+    const handle = extractFunctionSource(harness, 'handleCurrentSurface');
+    assert.match(handle, /historicalChoice && !pendingEventId && await pausedContinue\.isVisible/);
+    assert.match(handle, /unansweredOptionalEventDecisionIds \?\? \[\]\)\.includes\(visibleEventId\)/);
+    assert.match(handle, /basis: 'left_unanswered_optional_no_ranked_answer'/);
+    const read = extractFunctionSource(harness, 'readState');
+    assert.match(read, /const unansweredOptionalEventDecisionIds = historicalChoice/);
+    assert.match(read, /!unansweredOptionalEventDecisionIds\.includes\(id\)/);
+});
+
 test('RS Drina selector accepts only one explicit known option on a Historical RS run', () => {
     const harness = readHarness();
     const parse = loadFunction<(
