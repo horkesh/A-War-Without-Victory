@@ -113,7 +113,21 @@ export function selectViewportFormationCounterFeatures(
         return typeof stackIndex !== 'number'
             || Math.max(0, Math.floor(stackIndex)) < MAX_VISIBLE_STACK_FAN_MEMBERS;
     });
-    return filterViewportSafePointFeatures(boundedFanFeatures, clip, size, getPixelOffset);
+    // Only drop counters whose position is off the canvas here. Panels and the safe
+    // margin are judged per STACK by filterFinalFormationCounterFeatures, which can nudge
+    // a stack clear instead of hiding it; filtering them here per counter removed them
+    // before that step could (R8, 2026-11-10).
+    if (!clip) return boundedFanFeatures;
+    return boundedFanFeatures.filter((feature) => {
+        const coordinates = getPointCoordinates(feature);
+        const point = coordinates ? clip.project(coordinates) : null;
+        if (!point) return false;
+        const offset = getPixelOffset(feature);
+        const x = point.x + offset[0];
+        const y = point.y + offset[1];
+        return x >= -size.halfWidth && x <= clip.width + size.halfWidth
+            && y >= -size.halfHeight && y <= clip.height + size.halfHeight;
+    });
 }
 
 export function getViewportSafePixelOffset(
@@ -254,42 +268,61 @@ export function buildFormationCounterPixelOffsets(
     return result;
 }
 
+type Rect = { left: number; right: number; top: number; bottom: number };
+
+const rectsOverlap = (left: Rect, right: Rect) => left.right > right.left
+    && left.left < right.right
+    && left.bottom > right.top
+    && left.top < right.bottom;
+
+/**
+ * Keep every stack whose footprint (counters plus stack badge) sits in the safe viewport
+ * clear of panels. A stack that touches a panel or the safe edge is first NUDGED as one
+ * unit by the smallest shift (at most two counter heights) that clears every panel and
+ * stays in the safe viewport; the shift is written into `pixelOffsets` so the caller
+ * draws it there. Only a stack that cannot be cleared that way is hidden. Before
+ * 2026-11-10 any touch hid the whole stack, so brigades near the inbox, the top bar or
+ * the minimap blinked out while mostly in view (R8, owner's ultrawide).
+ */
 export function filterFinalFormationCounterFeatures(
     features: Feature[],
-    pixelOffsets: ReadonlyMap<string, [number, number]>,
+    pixelOffsets: Map<string, [number, number]>,
     iconHeight: number,
     clip: DeckViewportClip | null | undefined,
 ): Feature[] {
     if (!clip) return features;
-    const groupSafety = new Map<string, boolean>();
-    const rectOverlaps = (
-        left: { left: number; right: number; top: number; bottom: number },
-        right: { left: number; right: number; top: number; bottom: number },
-    ) => left.right > right.left
-        && left.left < right.right
-        && left.bottom > right.top
-        && left.top < right.bottom;
+    const groupBroken = new Set<string>();
+    const groupFootprint = new Map<string, Rect>();
+    // The drawn counters only (no edge clearance): what neighbouring stacks must not overlap.
+    const groupCore = new Map<string, Rect>();
+    const groupAnchor = new Map<string, { x: number; y: number }>();
+    const groupMembers = new Map<string, Array<{ id: string; offset: [number, number] }>>();
+    // The rendered counter's full footprint, edge clearance included (the size the
+    // viewport filter used before 2026-11-10), so a kept counter never crowds a panel.
+    const half = getCounterFootprintHalfSize(iconHeight);
+    const groupIdOf = (feature: Feature, id: string) => (typeof feature.properties?.location_osid === 'string'
+        ? feature.properties.location_osid
+        : `formation:${id}`);
 
     for (const feature of features) {
         const id = String(feature.properties?.id ?? '');
-        const groupId = typeof feature.properties?.location_osid === 'string'
-            ? feature.properties.location_osid
-            : `formation:${id}`;
-        if (groupSafety.get(groupId) === false) continue;
+        const groupId = groupIdOf(feature, id);
+        if (groupBroken.has(groupId)) continue;
         const coordinates = getPointCoordinates(feature);
         const point = coordinates ? clip.project(coordinates) : null;
         if (!id || !point) {
-            groupSafety.set(groupId, false);
+            groupBroken.add(groupId);
             continue;
         }
         const offset = pixelOffsets.get(id) ?? getFormationStackPixelOffset(feature, iconHeight);
         const centerX = point.x + offset[0];
         const centerY = point.y + offset[1];
+        if (!groupAnchor.has(groupId)) groupAnchor.set(groupId, { x: point.x, y: point.y });
         const footprint = {
-            left: centerX - iconHeight,
-            right: centerX + iconHeight,
-            top: centerY - iconHeight / 2,
-            bottom: centerY + iconHeight / 2,
+            left: centerX - half.halfWidth,
+            right: centerX + half.halfWidth,
+            top: centerY - half.halfHeight,
+            bottom: centerY + half.halfHeight,
         };
         const stackIndex = Number(feature.properties?.stack_index ?? 0);
         const stackCount = Number(feature.properties?.stack_count ?? 1);
@@ -301,21 +334,122 @@ export function filterFinalFormationCounterFeatures(
             footprint.top = Math.min(footprint.top, badgeCenterY - 12);
             footprint.bottom = Math.max(footprint.bottom, badgeCenterY + 12);
         }
-        const insideSafeViewport = footprint.left >= clip.padding.left
-            && footprint.right <= clip.width - clip.padding.right
-            && footprint.top >= clip.padding.top
-            && footprint.bottom <= clip.height - clip.padding.bottom;
-        const clearOfOccluders = !(clip.occluders ?? []).some((occluder) => rectOverlaps(footprint, occluder));
-        if (!insideSafeViewport || !clearOfOccluders) groupSafety.set(groupId, false);
-        else if (!groupSafety.has(groupId)) groupSafety.set(groupId, true);
+        const core = {
+            left: centerX - iconHeight,
+            right: centerX + iconHeight,
+            top: centerY - iconHeight / 2,
+            bottom: centerY + iconHeight / 2,
+        };
+        const coreUnion = groupCore.get(groupId);
+        groupCore.set(groupId, coreUnion
+            ? {
+                left: Math.min(coreUnion.left, core.left),
+                right: Math.max(coreUnion.right, core.right),
+                top: Math.min(coreUnion.top, core.top),
+                bottom: Math.max(coreUnion.bottom, core.bottom),
+            }
+            : core);
+        const union = groupFootprint.get(groupId);
+        groupFootprint.set(groupId, union
+            ? {
+                left: Math.min(union.left, footprint.left),
+                right: Math.max(union.right, footprint.right),
+                top: Math.min(union.top, footprint.top),
+                bottom: Math.max(union.bottom, footprint.bottom),
+            }
+            : footprint);
+        const members = groupMembers.get(groupId) ?? [];
+        members.push({ id, offset: [offset[0], offset[1]] });
+        groupMembers.set(groupId, members);
+    }
+
+    const occluders = clip.occluders ?? [];
+    const placementOk = (rect: Rect) => rect.left >= clip.padding.left
+        && rect.right <= clip.width - clip.padding.right
+        && rect.top >= clip.padding.top
+        && rect.bottom <= clip.height - clip.padding.bottom
+        && !occluders.some((occluder) => rectsOverlap(rect, occluder));
+    const shifted = (rect: Rect, dx: number, dy: number): Rect => ({
+        left: rect.left + dx, right: rect.right + dx, top: rect.top + dy, bottom: rect.bottom + dy,
+    });
+    const maxShift = iconHeight * 2;
+    const keep = new Set<string>();
+    const placed: Rect[] = [];
+    // A stack is drawn only when its settlement point itself is in the safe viewport and
+    // not under a panel: a counter is never pulled in from a settlement the player cannot see.
+    const anchorVisible = (anchor: { x: number; y: number } | undefined) => anchor !== undefined
+        && anchor.x >= clip.padding.left && anchor.x <= clip.width - clip.padding.right
+        && anchor.y >= clip.padding.top && anchor.y <= clip.height - clip.padding.bottom
+        && !occluders.some((occluder) => anchor.x >= occluder.left && anchor.x <= occluder.right
+            && anchor.y >= occluder.top && anchor.y <= occluder.bottom);
+    const ordered = [...groupFootprint]
+        .filter(([groupId]) => !groupBroken.has(groupId) && anchorVisible(groupAnchor.get(groupId)))
+        .sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0));
+    const needsNudge: Array<[string, Rect]> = [];
+    const coreOf = (groupId: string, fallback: Rect) => groupCore.get(groupId) ?? fallback;
+    for (const [groupId, rect] of ordered) {
+        if (placementOk(rect)) {
+            keep.add(groupId);
+            placed.push(coreOf(groupId, rect));
+        } else {
+            needsNudge.push([groupId, rect]);
+        }
+    }
+    const coversAnchor = (rect: Rect, anchor: { x: number; y: number } | undefined) => anchor !== undefined
+        && anchor.x >= rect.left && anchor.x <= rect.right && anchor.y >= rect.top && anchor.y <= rect.bottom;
+    for (const [groupId, rect] of needsNudge) {
+        const anchor = groupAnchor.get(groupId);
+        const core = coreOf(groupId, rect);
+        // Candidate shifts: just past each panel edge and each safe-viewport edge, on
+        // either axis; take the smallest that clears everything (deterministic order).
+        const xs = new Set<number>([0]);
+        const ys = new Set<number>([0]);
+        for (const occluder of occluders) {
+            if (!rectsOverlap(rect, occluder)) continue;
+            xs.add(occluder.left - rect.right - 1);
+            xs.add(occluder.right - rect.left + 1);
+            ys.add(occluder.top - rect.bottom - 1);
+            ys.add(occluder.bottom - rect.top + 1);
+        }
+        xs.add(clip.padding.left - rect.left);
+        xs.add(clip.width - clip.padding.right - rect.right);
+        ys.add(clip.padding.top - rect.top);
+        ys.add(clip.height - clip.padding.bottom - rect.bottom);
+        // Also step just past nearby stacks, so a crowded stack can slide beside its
+        // neighbours when the space straight off the edge is already taken.
+        for (const other of placed) {
+            if (other.right < core.left - 2 * maxShift || other.left > core.right + 2 * maxShift) continue;
+            if (other.bottom < core.top - 2 * maxShift || other.top > core.bottom + 2 * maxShift) continue;
+            xs.add(other.left - core.right - 1);
+            xs.add(other.right - core.left + 1);
+            ys.add(other.top - core.bottom - 1);
+            ys.add(other.bottom - core.top + 1);
+        }
+        let best: [number, number] | null = null;
+        for (const dx of [...xs].sort((a, b) => Math.abs(a) - Math.abs(b) || a - b)) {
+            for (const dy of [...ys].sort((a, b) => Math.abs(a) - Math.abs(b) || a - b)) {
+                if (Math.abs(dx) > maxShift || Math.abs(dy) > maxShift) continue;
+                const candidate = shifted(rect, dx, dy);
+                // A nudged stack must still cover its own settlement (never drawn away from
+                // its OSID), clear every panel, and not land on another stack.
+                if (!coversAnchor(candidate, anchor)) continue;
+                if (!placementOk(candidate)) continue;
+                const candidateCore = shifted(core, dx, dy);
+                if (placed.some((other) => rectsOverlap(candidateCore, other))) continue;
+                if (!best || Math.hypot(dx, dy) < Math.hypot(best[0], best[1])) best = [dx, dy];
+            }
+        }
+        if (!best) continue;
+        for (const member of groupMembers.get(groupId) ?? []) {
+            pixelOffsets.set(member.id, [member.offset[0] + best[0], member.offset[1] + best[1]]);
+        }
+        keep.add(groupId);
+        placed.push(shifted(core, best[0], best[1]));
     }
 
     return features.filter((feature) => {
         const id = String(feature.properties?.id ?? '');
-        const groupId = typeof feature.properties?.location_osid === 'string'
-            ? feature.properties.location_osid
-            : `formation:${id}`;
-        return groupSafety.get(groupId) === true;
+        return keep.has(groupIdOf(feature, id));
     });
 }
 

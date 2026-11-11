@@ -424,7 +424,10 @@ it('keeps enemy contact clutter out of the clamped counter band when safe counte
     expect(highlightedLayer.props.data.map((feature: any) => feature.properties.id)).toEqual(['safe']);
 });
 
-it('uses an expanded rendered-counter footprint and omits covered top-edge counters', () => {
+it('nudges a top-edge counter just clear of the safe margin, still over its settlement (R8, 2026-11-10)', () => {
+    // Before 2026-11-10 a counter whose full footprint crossed the top margin was omitted,
+    // so brigades near the toolbar vanished while their settlement was in view. Now its
+    // stack is nudged down just enough, as long as it still covers its settlement point.
     const topEdge = makeFeature('top-edge', true);
     const safe = makeFeature('safe-top', true);
     (safe.geometry as any).coordinates = [18.8, 44.9];
@@ -432,24 +435,61 @@ it('uses an expanded rendered-counter footprint and omits covered top-edge count
         type: 'FeatureCollection',
         features: [topEdge, safe],
     } as any;
+    const clip = {
+        width: 500,
+        height: 360,
+        padding: { top: 72, right: 24, bottom: 64, left: 24 },
+        project: (coordinates: [number, number]) => coordinates[0] === 17.8 ? { x: 240, y: 96 } : { x: 240, y: 132 },
+    };
 
-    const layers = buildTacticalDeckLayers(
-        formationsGeoJson,
-        false,
-        true,
-        10,
-        [],
-        {
-            width: 500,
-            height: 360,
-            padding: { top: 72, right: 24, bottom: 64, left: 24 },
-            project: (coordinates) => coordinates[0] === 17.8 ? { x: 240, y: 96 } : { x: 240, y: 132 },
-        },
-    );
+    const layers = buildTacticalDeckLayers(formationsGeoJson, false, true, 10, [], clip);
     const baseLayer = layers.find((layer: any) => layer.id === 'deck-formations-icons') as any;
+    const items = buildFormationCounterDomOverlayItems({ formationsGeoJson, formationsVisible: true, zoom: 10, viewportClip: clip });
+    const half = getCounterFootprintHalfSize(items[0]!.height);
 
     expect(getCounterFootprintHalfSize(40)).toEqual({ halfWidth: 68, halfHeight: 48 });
-    expect(baseLayer.props.data.map((feature: any) => feature.properties.id)).toEqual(['safe-top']);
+    expect([...baseLayer.props.data.map((feature: any) => feature.properties.id)].sort()).toEqual(['safe-top', 'top-edge']);
+    // Drawn, and clear of the top margin (the two counters are also separated from each other).
+    const top = items.find((item) => item.id === 'top-edge')!;
+    expect(top.y - half.halfHeight).toBeGreaterThanOrEqual(72);
+});
+
+it('nudges a lone counter by the smallest shift, keeping it over its settlement', () => {
+    const lone = makeFeature('lone', true);
+    const formationsGeoJson = { type: 'FeatureCollection', features: [lone] } as any;
+    const clip = {
+        width: 500,
+        height: 360,
+        padding: { top: 72, right: 24, bottom: 64, left: 24 },
+        project: () => ({ x: 240, y: 96 }),
+    };
+    const items = buildFormationCounterDomOverlayItems({ formationsGeoJson, formationsVisible: true, zoom: 10, viewportClip: clip });
+    expect(items.map((item) => item.id)).toEqual(['lone']);
+    const half = getCounterFootprintHalfSize(items[0]!.height);
+    expect(items[0]!.y - half.halfHeight).toBe(72);
+    expect(items[0]!.y + half.halfHeight).toBeGreaterThanOrEqual(96);
+});
+
+it('nudges a stack clear of a panel it grazes, but never onto its settlement-less side', () => {
+    const grazing = makeFeature('grazing', true);
+    const formationsGeoJson = { type: 'FeatureCollection', features: [grazing] } as any;
+    const items = buildFormationCounterDomOverlayItems({
+        formationsGeoJson,
+        formationsVisible: true,
+        zoom: 10,
+        viewportClip: {
+            width: 800,
+            height: 600,
+            padding: { top: 20, right: 20, bottom: 20, left: 20 },
+            // A panel starting 30 px right of the settlement: the counter's footprint grazes it.
+            occluders: [{ left: 430, top: 0, right: 800, bottom: 600 }],
+            project: () => ({ x: 400, y: 300 }),
+        },
+    });
+    expect(items.map((item) => item.id)).toEqual(['grazing']);
+    const half = getCounterFootprintHalfSize(items[0]!.height);
+    expect(items[0]!.x + half.halfWidth).toBeLessThan(430);
+    expect(items[0]!.x + half.halfWidth).toBeGreaterThanOrEqual(400);
 });
 
 it('does not pull formations hundreds of pixels outside the southern viewport onto the visible edge', () => {
