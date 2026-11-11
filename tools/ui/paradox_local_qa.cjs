@@ -6555,6 +6555,19 @@ function installAmbientLifecycleObserver() {
   for (const binding of mediaEventBindings) {
     document.addEventListener(binding.eventKind, binding.listener, true);
   }
+  // `new Audio(url)` (audio_engine.ts) starts loading a detached element whose events never
+  // reach `document`, and its `loadstart` fires before the first play(). Observe at
+  // construction so a music track's request-start is recorded (R8 RBiH attempt 09).
+  const OriginalAudio = window.Audio;
+  if (typeof OriginalAudio === 'function') {
+    const ObservedAudio = function ObservedAudio(...args) {
+      const element = new OriginalAudio(...args);
+      try { observeElement(element); } catch {}
+      return element;
+    };
+    ObservedAudio.prototype = OriginalAudio.prototype;
+    window.Audio = ObservedAudio;
+  }
 }
 
 async function installAmbientLifecycleObserverBeforeStartup(page) {
