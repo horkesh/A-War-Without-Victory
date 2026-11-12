@@ -223,7 +223,8 @@ describe('GUI audit label discipline', () => {
     const localSupport = selection.container.querySelector('[data-testid="settlement-local-support"]');
 
     expect(panel?.getAttribute('data-rail-slot')).toBe('primary');
-    expect(panel?.style.right).toBe('0px');
+    // Map rail system: the settlement panel opens in the one rail slot beside the sidebar.
+    expect(panel?.style.left).toMatch(/^calc\(17(?:\.5)?rem/);
     expect(localSupport?.getAttribute('data-target-mun-id')).toBe('actual_municipality');
     expect(selection.container.textContent).toContain('Actual Municipality');
     expect(selection.container.textContent).toContain('Desktop command bridge unavailable. Local support orders are read-only in this browser view.');

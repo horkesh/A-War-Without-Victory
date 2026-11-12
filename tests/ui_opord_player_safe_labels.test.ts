@@ -102,7 +102,8 @@ describe('buildOpordDisplayModel', () => {
         );
 
         expect(oobSource).toContain('getPlayerSafeMilitaryFactionName(faction)');
-        expect(oobSource).toContain('getPlayerSafeMilitaryFactionName(op.faction)');
+        // Map rail system: operation rows list only the player's own operations, so they name the corps, not the army.
+        expect(oobSource).not.toMatch(/\{op\.faction\}/);
         expect(oobSource).not.toContain('View ${faction} army summary');
         expect(briefingSource).toContain('getPlayerSafeMilitaryFactionName(operation.faction)');
         expect(briefingSource).toContain('findPlayerFacingOperationByKey');

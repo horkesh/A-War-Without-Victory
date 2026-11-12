@@ -31,6 +31,8 @@ interface TabBarProps<T extends string> {
   idPrefix?: string;
   /** Accessible name for the tablist (announces the group purpose). */
   ariaLabel?: string;
+  /** Narrow rails (the 17rem order-of-battle sidebar): tabs size to their labels, tighter padding. */
+  dense?: boolean;
 }
 
 /** Stable per-tab id, used for aria-labelledby on the matching tabpanel. */
@@ -49,6 +51,7 @@ export function TabBar<T extends string>({
   onTabChange,
   idPrefix = 'tabbar',
   ariaLabel,
+  dense = false,
 }: TabBarProps<T>) {
   const refs = useRef<Record<string, HTMLButtonElement | null>>({});
 
@@ -72,7 +75,7 @@ export function TabBar<T extends string>({
 
   return (
     <div
-      className="flex shrink-0 gap-1 border-b border-[#262b35] bg-[#12161e] px-3"
+      className={`flex shrink-0 border-b border-[#262b35] bg-[#12161e] ${dense ? "gap-0 px-1.5" : "gap-1 px-3"}`}
       role="tablist"
       aria-label={ariaLabel}
     >
@@ -98,7 +101,7 @@ export function TabBar<T extends string>({
             tabIndex={isActive ? 0 : -1}
             onClick={() => onTabChange(tab.id)}
             onKeyDown={(e) => handleKeyDown(e, idx)}
-            className={`kbd-focus -mb-px min-w-0 flex-1 border-b-2 px-1.5 py-2.5 text-[14px] font-semibold leading-tight transition-colors ${
+            className={`kbd-focus -mb-px min-w-0 border-b-2 py-2.5 text-[14px] ${dense ? "flex-auto px-1" : "flex-1 px-1.5"} font-semibold leading-tight transition-colors ${
               isActive
                 ? 'border-[#c9a75c] text-[#f1e6c8]'
                 : 'border-transparent text-[#b9ad94] hover:text-[#f1e6c8]'
@@ -106,7 +109,7 @@ export function TabBar<T extends string>({
           >
             {tab.label}
             {tab.count != null && tab.count > 0 && (
-              <span aria-hidden="true" className="ml-1 font-mono text-[13px] text-[#9c917b]">{tab.count}</span>
+              <span aria-hidden="true" className={`font-mono text-[13px] text-[#9c917b] ${dense ? 'block' : 'ml-1'}`}>{` ${tab.count}`}</span>
             )}
           </button>
         );

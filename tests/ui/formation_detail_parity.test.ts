@@ -754,7 +754,7 @@ describe('Formation Detail parity display', () => {
     const view = render(React.createElement(FormationDetail, { railSlot: 'primary' }));
     const copy = view.container.textContent ?? '';
 
-    expect(copy).toContain('TO&E (Equipment)');
+    expect(copy).toContain('Heavy equipment');
     expect(copy).toContain('Tanks');
     expect(copy).toContain('Artillery');
     expect(copy).toContain('Staff returns incomplete');

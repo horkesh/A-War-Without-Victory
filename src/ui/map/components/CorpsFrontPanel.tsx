@@ -668,15 +668,6 @@ export function CorpsFrontPanel({ breadcrumb }: CorpsFrontPanelProps) {
                       {sectorAssignment.overrideIds.length > 0 && `, ${t('corpsFront.commandDirectedBrigades', { count: sectorAssignment.overrideIds.length })}`}
                     </span>
                   </div>
-                  <div className="flex flex-col">
-                      <span className="text-[14px] text-[#b9ad94]">{t('corpsFront.sectorStance')}</span>
-                    {hasReportedSectorStance && (
-                      <span className="font-medium uppercase">
-                        {sectorStanceLabel}
-                        {currentStanceSource === 'player' && <span className="ml-1 text-[13px] text-amber-200 bg-amber-400/10 px-0.5 rounded font-bold">{t('corpsFront.manual')}</span>}
-                      </span>
-                    )}
-                  </div>
                   {hasReportedLogisticsPriority && (
                     <div className="flex flex-col">
                       <span className="text-[14px] text-[#b9ad94]" title={logisticsPriorityTitle}>{t('corpsFront.supplyPriority')}</span>

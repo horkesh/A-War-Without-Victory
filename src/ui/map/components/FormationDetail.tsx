@@ -477,10 +477,12 @@ export function FormationDetail({ breadcrumb }: FormationDetailProps) {
                     label={railLabel(t('formationDetail.movement'))}
                     value={formatMovementStatusLabel(formation.movementStatus)}
                     tone={formation.movementStatus === 'in_transit' ? 'text-sky-200' : 'text-amber-200'}
-                    title={formation.movementStance
-                      ? t('formationDetail.movementStance', { stance: getPlayerSafeSectorStanceLabel(formation.movementStance) })
-                      : undefined}
                   />
+                )}
+                {formation.movementStatus && formation.movementStatus !== 'deployed' && formation.movementStance && (
+                  <p className="m-0 pb-1.5 text-[14px] leading-snug text-[#9c917b]">
+                    {t('formationDetail.movementStance', { stance: getPlayerSafeSectorStanceLabel(formation.movementStance) })}
+                  </p>
                 )}
               </MapRailStats>
               <OwnForceReportGapNotice fields={reportGaps} />

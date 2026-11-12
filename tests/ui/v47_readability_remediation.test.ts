@@ -97,9 +97,9 @@ describe('RBiH v47 evidence-backed readability floor', () => {
 
     expect(theme).toContain("'faction-rs': '#e08080'");
     expect(theme).toContain("'text-secondary': '#a89e90'");
-    expect(corpsFront).toContain('!border-neutral-400 !bg-neutral-200/90 !text-neutral-700');
-    expect(corpsFront).toContain('text-red-800 font-bold bg-red-100');
-    expect(corpsFront).not.toContain('text-red-600 font-bold bg-red-100');
+    expect(corpsFront).not.toContain('!border-neutral-400 !bg-neutral-200/90 !text-neutral-700');
+    expect(corpsFront).toContain('text-red-300 font-bold bg-red-500/10');
+    expect(corpsFront).not.toContain('text-red-800 font-bold bg-red-100');
     expect(recruitment).toContain('bg-interactive text-neutral-950');
     expect(attack).toContain('bg-interactive text-neutral-950');
     expect(warSummary).toContain('FACTION_COLORS[f]');

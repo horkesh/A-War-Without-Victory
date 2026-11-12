@@ -133,7 +133,7 @@ export function OrderQueue() {
             <button
               type="button"
               onClick={() => clearStagedOrders()}
-              className="kbd-focus rounded border border-[#3a4150] bg-[#1b2029] px-2.5 py-1 text-[13px] font-semibold text-[#e8dcbc] hover:border-accent-gold/60"
+              className="kbd-focus whitespace-nowrap rounded border border-[#3a4150] bg-[#1b2029] px-2.5 py-1 text-[13px] font-semibold text-[#e8dcbc] hover:border-accent-gold/60"
             >
               {t('orderQueue.clearAll')}
             </button>

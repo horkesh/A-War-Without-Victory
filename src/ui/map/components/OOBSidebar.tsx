@@ -348,6 +348,7 @@ export function OOBSidebar() {
         onTabChange={setActiveSection}
         idPrefix="oob"
         ariaLabel={t('mapRail.oobTabs')}
+        dense
       />
 
       <div

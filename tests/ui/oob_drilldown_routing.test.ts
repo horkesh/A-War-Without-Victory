@@ -445,7 +445,7 @@ describe('OOBSidebar drilldown routing', () => {
     expect(orbatButtons).toHaveLength(1);
     expect(orbatButtons[0].textContent).toContain('Order of battle');
     expect(screen.queryByRole('button', { name: /^Ungrouped/i })).toBeNull();
-    const ungroupedCard = Array.from(container.querySelectorAll('.rounded-lg'))
+    const ungroupedCard = Array.from(container.querySelectorAll('[data-testid="oob-corps-card"], .rounded-md'))
       .find((card) => (card.textContent ?? '').includes('Ungrouped'));
     expect(ungroupedCard?.textContent).toContain('Ungrouped');
     expect(ungroupedCard?.textContent).not.toContain('Commander record unreported');
