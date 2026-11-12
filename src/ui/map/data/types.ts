@@ -1094,6 +1094,7 @@ export interface StanceMatterReceiptView {
     mainStaffDelayTurns: number;
     patronShift: number;
     notPutReason: string | null;
+    notPutCount: number;
     lapseReason: string | null;
 }
 

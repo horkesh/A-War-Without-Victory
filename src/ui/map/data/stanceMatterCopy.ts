@@ -183,8 +183,12 @@ export function stanceMatterReceiptLine(receipt: StanceMatterReceiptView): strin
       return receipt.mainStaffDelayTurns > 0
         ? t('stanceMatter.receipt.constrainedDelayed', params)
         : t('stanceMatter.receipt.constrained', params);
-    case 'not_put':
-      return t('stanceMatter.receipt.notPut', { ...params, reason: t(NOT_PUT_KEYS[receipt.notPutReason ?? ''] ?? NOT_PUT_KEYS.cap!) });
+    case 'not_put': {
+      const reason = t(NOT_PUT_KEYS[receipt.notPutReason ?? ''] ?? NOT_PUT_KEYS.cap!);
+      return receipt.notPutCount > 1
+        ? t(receipt.scope === 'og' ? 'stanceMatter.receipt.notPutManyOg' : 'stanceMatter.receipt.notPutMany', { subject: receipt.corpsName, count: receipt.notPutCount, reason })
+        : t('stanceMatter.receipt.notPut', { ...params, reason });
+    }
     case 'hold_lapsed':
       return t('stanceMatter.receipt.holdLapsed', { ...params, reason: t(LAPSE_KEYS[receipt.lapseReason ?? ''] ?? LAPSE_KEYS.autonomy_changed!) });
     case 'answered_lapsed': return t('stanceMatter.receipt.answeredLapsed', params);

@@ -4626,6 +4626,7 @@ function deriveStanceMatterViews(
             mainStaffDelayTurns: num(r.main_staff_delay_turns) ?? 0,
             patronShift: num(r.patron_shift) ?? 0,
             notPutReason: str(r.not_put_reason),
+            notPutCount: num(r.not_put_count) ?? 1,
             lapseReason: str(r.lapse_reason),
         }))
         .reverse();

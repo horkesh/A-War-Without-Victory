@@ -209,6 +209,22 @@ describe('stance matters: generation', () => {
         expect(state.meta.stance_matter_history?.filter((r) => r.not_put_reason === 'cap')).toHaveLength(1);
     });
 
+    it('groups not_put changes into one Records line per corps, scope and reason per turn', () => {
+        const state = makeState();
+        state.military.corps_front_sectors = {
+            'sector:c_a:0': sector('sector:c_a:0', 'c_a', 'RBiH', 'defend', ['a1', 'a2']),
+            'sector:c_a:1': sector('sector:c_a:1', 'c_a', 'RBiH', 'defend', ['b1', 'b2']),
+            'sector:c_a:2': sector('sector:c_a:2', 'c_a', 'RBiH', 'defend', ['c1', 'c2']),
+        };
+        runTurn(state, {});
+        for (const id of ['sector:c_a:0', 'sector:c_a:1', 'sector:c_a:2']) state.military.corps_front_sectors[id]!.sector_stance = 'active_defense';
+        runTurn(state, {});
+        expect(state.meta.stance_matters?.filter((m) => m.scope === 'og')).toHaveLength(1);
+        const grouped = state.meta.stance_matter_history?.filter((r) => r.outcome === 'not_put');
+        expect(grouped).toHaveLength(1);
+        expect(grouped![0]).toMatchObject({ scope: 'og', not_put_reason: 'cooldown', not_put_count: 2 });
+    });
+
     it('cools a corps down for four turns after a matter (not_put: cooldown)', () => {
         const state = makeState();
         runTurn(state, {});

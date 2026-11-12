@@ -562,8 +562,20 @@ export function generateStanceMatters(
             .sort((a, b) => (a.turn - b.turn) || strictCompare(a.id, b.id));
     }
     if (notPut.length > 0) {
+        // One Records line per (corps, scope, reason) per turn, with a count: OG stances can
+        // flip most weeks, and a line per flip would bury the president's own decisions.
+        const grouped = new Map<string, StanceMatterReceipt>();
+        for (const receipt of [...notPut].sort((a, b) => strictCompare(a.id, b.id))) {
+            const key = `${receipt.corps_id}|${receipt.scope}|${receipt.not_put_reason}`;
+            const first = grouped.get(key);
+            if (first) {
+                first.not_put_count = (first.not_put_count ?? 1) + 1;
+            } else {
+                grouped.set(key, { ...receipt });
+            }
+        }
         const existing = new Set((state.meta.stance_matter_history ?? []).map((r) => `${r.id}|${r.outcome}`));
-        appendReceipts(state, notPut.filter((r) => !existing.has(`${r.id}|${r.outcome}`)));
+        appendReceipts(state, [...grouped.values()].filter((r) => !existing.has(`${r.id}|${r.outcome}`)));
     }
     matterState.cooldown_until_by_corps = sortedRecord(matterState.cooldown_until_by_corps);
     refreshStanceBaselines(state, faction);

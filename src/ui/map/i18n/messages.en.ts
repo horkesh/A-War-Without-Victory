@@ -3898,6 +3898,8 @@ export const enMessages = {
     'stanceMatter.receipt.constrained': '{subject}: you limited the move to {to}: {constraint}, for {weeks} weeks.',
     'stanceMatter.receipt.constrainedDelayed': '{subject}: you limited the move to {to}: {constraint}. The order went out after a Main Staff delay, and {to} stayed in force until then. Your limit then held for {weeks} weeks.',
     'stanceMatter.receipt.notPut': '{subject}: {from} to {to}. Not put to you because {reason}.',
+    'stanceMatter.receipt.notPutMany': '{subject}: {count} stance changes were not put to you because {reason}.',
+    'stanceMatter.receipt.notPutManyOg': '{subject}: {count} OG stance changes were not put to you because {reason}.',
     'stanceMatter.receipt.holdLapsed': '{subject}: your stance order ended early because {reason}.',
     'stanceMatter.receipt.answeredLapsed': '{subject}: your answer on the move from {from} to {to} lapsed because you changed command autonomy.',
     'stanceMatter.outcome.stood': 'Stood',

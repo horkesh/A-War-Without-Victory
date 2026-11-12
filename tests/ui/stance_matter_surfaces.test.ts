@@ -127,7 +127,7 @@ describe('stance matter: inbox, Records, holds and BCS', () => {
     const line = stanceMatterReceiptLine({
       id: 'STANCE_11_c', turn: 11, scope: 'corps', corpsId: 'c', corpsName: 'Drina Corps', sectorId: null,
       fromStance: 'balanced', toStance: 'offensive', outcome: 'countermanded', resolvedTurn: 12, constraint: null,
-      effectiveFromTurn: 14, untilTurn: 17, mainStaffDelayTurns: 2, patronShift: 0, notPutReason: null, lapseReason: null,
+      effectiveFromTurn: 14, untilTurn: 17, mainStaffDelayTurns: 2, patronShift: 0, notPutReason: null, notPutCount: 1, lapseReason: null,
     });
     expect(line).toBe('Drina Corps: you countermanded the move from Balanced to Offensive. The order went out after a Main Staff delay, and Offensive stayed in force until then. Balanced was then held for 4 weeks.');
     expect(line).not.toMatch(/tried to/);
@@ -135,7 +135,7 @@ describe('stance matter: inbox, Records, holds and BCS', () => {
       stanceMatterHistory: [{
         id: 'STANCE_11_c', turn: 11, scope: 'corps', corpsId: 'c', corpsName: 'Drina Corps', sectorId: null,
         fromStance: 'balanced', toStance: 'offensive', outcome: 'stood', resolvedTurn: 12, constraint: null,
-        effectiveFromTurn: null, untilTurn: null, mainStaffDelayTurns: 0, patronShift: 0, notPutReason: null, lapseReason: null,
+        effectiveFromTurn: null, untilTurn: null, mainStaffDelayTurns: 0, patronShift: 0, notPutReason: null, notPutCount: 1, lapseReason: null,
       }],
     }));
     expect(ledger.some((r) => r.familyId === 'stance-matter' && r.outcome === 'Stood')).toBe(true);

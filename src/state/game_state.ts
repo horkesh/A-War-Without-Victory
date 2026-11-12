@@ -2108,6 +2108,8 @@ export interface StanceMatterReceipt {
     patron_shift?: number;
     /** 'army_stance': an army-level stance override governs combat, so the corps change was not put. */
     not_put_reason?: 'cap' | 'cooldown' | 'held' | 'army_stance';
+    /** Number of changes this one not_put line stands for (same corps, scope and reason, same turn). Absent = 1. */
+    not_put_count?: number;
     lapse_reason?: 'og_dissolved' | 'presidential_operation' | 'autonomy_changed';
 }
 

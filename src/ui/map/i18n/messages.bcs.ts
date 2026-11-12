@@ -3744,6 +3744,8 @@ export const bcsMessages: Partial<Record<MessageKey, string>> = {
     'stanceMatter.receipt.constrained': '{subject}: ograničili ste prelazak u {to}: {constraint}, na {weeks} sedmice.',
     'stanceMatter.receipt.constrainedDelayed': '{subject}: ograničili ste prelazak u {to}: {constraint}. Naređenje je otišlo nakon kašnjenja u Glavnom štabu i {to} je do tada ostao na snazi. Zatim je vaše ograničenje važilo {weeks} sedmice.',
     'stanceMatter.receipt.notPut': '{subject}: {from} u {to}. Nije vam izneseno jer {reason}.',
+    'stanceMatter.receipt.notPutMany': '{subject}: {count} promjena stava nije vam izneseno jer {reason}.',
+    'stanceMatter.receipt.notPutManyOg': '{subject}: {count} promjena stava OG nije vam izneseno jer {reason}.',
     'stanceMatter.receipt.holdLapsed': '{subject}: vaše naređenje o stavu prestalo je ranije jer {reason}.',
     'stanceMatter.receipt.answeredLapsed': '{subject}: vaš odgovor o prelasku iz {from} u {to} je prestao važiti jer ste promijenili komandnu autonomiju.',
     'stanceMatter.outcome.stood': 'Ostalo',
