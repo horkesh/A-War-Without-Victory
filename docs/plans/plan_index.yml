@@ -202,6 +202,11 @@ lanes:
         tokens: 67476
         fits_context: false
         tasks: null
+  - lane: PS
+    title: "Player surface and agency review, steps 1-6"
+    lane_open: true
+    status: "ACTIVE — STEPS 1-5 IN FLIGHT; STEP 6 POSTURE MODEL PLANNED. Sequence in `docs/40_reports/proposals/20261111_PLAYER_SURFACE_AND_AGENCY_REVIEW.md` §4; owner chose"
+    plans: []
   - lane: R9
     title: "Release candidate, gold, and publication"
     lane_open: true
