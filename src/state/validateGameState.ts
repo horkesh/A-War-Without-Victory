@@ -4840,7 +4840,7 @@ export function validateGameStateShape(
 
         // stance_matter_state (posture model option 2): optional; shape-checked when present.
         if ('stance_matter_state' in mil && mil.stance_matter_state !== undefined) {
-            const sms = mil.stance_matter_state as unknown;
+            const sms: unknown = mil.stance_matter_state;
             if (sms === null || typeof sms !== 'object' || Array.isArray(sms)) {
                 errors.push('military.stance_matter_state must be an object when present');
             } else {

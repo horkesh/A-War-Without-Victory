@@ -489,11 +489,23 @@ describe('stance matters: save, manifest, inertness, attribution firewall', () =
             {}, { c_a: 'offensive' }, { c_b: 'defensive' }, { c_a: 'balanced', c_c: 'offensive' },
             { c_d: 'reorganize' }, { c_a: 'offensive', c_b: 'balanced' }, {}, { c_c: 'defensive', c_d: 'balanced' },
         ];
-        for (const stances of script) {
+        // OGs that flip into/out of Active Defense and are renumbered by a rebuild mid-run.
+        const ogLayout = (turn: number, stance: SectorStance): Record<string, CorpsFrontSector> => {
+            const offset = turn >= 14 ? 5 : 0; // rebuild at turn 14 renumbers every sector
+            return {
+                [`sector:c_a:${offset}`]: sector(`sector:c_a:${offset}`, 'c_a', 'RBiH', stance, ['a1', 'a2', 'a3']),
+                [`sector:c_b:${offset + 1}`]: sector(`sector:c_b:${offset + 1}`, 'c_b', 'RBiH', 'defend', ['b1', 'b2']),
+            };
+        };
+        for (const [i, stances] of script.entries()) {
+            const ogStance: SectorStance = i % 2 === 0 ? 'defend' : 'active_defense';
+            live.military.corps_front_sectors = ogLayout(live.meta.turn, ogStance);
+            bot.military.corps_front_sectors = ogLayout(bot.meta.turn, ogStance);
             runTurn(live, stances);
             for (const [id, st] of Object.entries(stances)) bot.military.corps_command![id]!.stance = st;
             bot.meta.turn += 1;
         }
+        expect((live.meta.stance_matter_history ?? []).some((r) => r.scope === 'og')).toBe(true);
         expect((live.meta.stance_matter_history ?? []).length).toBeGreaterThan(0);
         const a = strip(live) as GameState;
         const b = strip(bot) as GameState;

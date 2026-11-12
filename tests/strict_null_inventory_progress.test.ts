@@ -803,19 +803,27 @@ describe('strict null inventory progress', () => {
             // Sana's owner-approved phase-gate handoff adds the absent-safe optional
             // OperationAxisLatePhase.handoff field. It is opt-in on Sana only and adds
             // no type escape. 563 -> 564 / sim 362 -> 363.
-            optional_fields_game_state: 564,
+            // Posture model option 2 (2026-11-12) adds the optional stance-matter schema:
+            // StanceMatter / StanceMatterReceipt / PresidentialStanceHold optional fields, plus
+            // GameStateMeta.stance_matters / stance_matter_history and
+            // MilitaryState.stance_matter_state. Written only for a live president; absent in
+            // headless runs (40w artifacts byte-identical). No new type escape. 564 -> 591.
+            optional_fields_game_state: 591,
         });
         // Reason-code instrumentation (item 3): +1, `OperationAxis.launch_blocker_detail`.
         // `classifyDomain` routes it to `sim` on the /Corps|Operation/ interface-name rule,
         // so sim 335->336 and state is UNCHANGED at 186. Gated by
         // `AWWV_DEBUG_REASON_CODES=axis_reject`; absent on every default run.
-        expect(current.optional_field_domains.total).toBe(564);
+        // Posture model option 2 (2026-11-12): +1 sim (MilitaryState.stance_matter_state),
+        // +26 state (StanceMatter, StanceMatterReceipt, PresidentialStanceHold optional fields;
+        // StateMeta.stance_matters / stance_matter_history). 564 -> 591.
+        expect(current.optional_field_domains.total).toBe(591);
         expect(current.optional_field_domains.domain_counts).toMatchObject({
             derived: 10,
             ipc: 0,
             scenario: 0,
-            sim: 363,
-            state: 191,
+            sim: 364,
+            state: 217,
             ui_adapter: 0,
             unknown: 0,
         });

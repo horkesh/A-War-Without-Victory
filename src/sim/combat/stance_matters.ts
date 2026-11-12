@@ -463,6 +463,7 @@ export function generateStanceMatters(
         }
         const commander = getCorpsCommander(corpsId, state);
         const hasFigures = t !== undefined && Number.isFinite(t.avg_cohesion) && Number.isFinite(t.avg_strength);
+        const ceiling = patronCeilingFor(state, faction, corpsId, turn);
         candidates.push({
             rankDelta: Math.abs(HOLD_STANCE_RANK[next] - HOLD_STANCE_RANK[prev]),
             matter: {
@@ -470,12 +471,12 @@ export function generateStanceMatters(
                 from_stance: prev, to_stance: next,
                 ...(commander ? { commander_officer_id: commander.data.id } : {}),
                 reason: reasonFromTrace(t, next),
-                ...(hasFigures ? {
-                    avg_cohesion: round2(t!.avg_cohesion),
-                    avg_strength: round2(t!.avg_strength),
-                    sector_threat: round2(t!.sector_threat),
+                ...(hasFigures && t ? {
+                    avg_cohesion: round2(t.avg_cohesion),
+                    avg_strength: round2(t.avg_strength),
+                    sector_threat: round2(t.sector_threat),
                 } : {}),
-                ...(patronCeilingFor(state, faction, corpsId, turn) ? { patron_ceiling: patronCeilingFor(state, faction, corpsId, turn)! } : {}),
+                ...(ceiling ? { patron_ceiling: ceiling } : {}),
             },
         });
     }
@@ -488,8 +489,9 @@ export function generateStanceMatters(
     const ogSeqByCorps = new Map<string, number>();
     for (const cur of current) {
         const index = matches.get(cur.sector_id);
-        if (index === undefined) continue;
-        const prev = recorded[index]!.stance;
+        const previous = index === undefined ? undefined : recorded[index];
+        if (!previous) continue;
+        const prev = previous.stance;
         const crossed = (prev === 'active_defense') !== (cur.stance === 'active_defense');
         if (!crossed || caused.has(cur.corps_id)) continue;
         const seq = ogSeqByCorps.get(cur.corps_id) ?? 0;
@@ -588,17 +590,20 @@ export function generateStanceMatters(
  */
 export function refreshStanceBaselines(state: GameState, faction: FactionId): void {
     if (!isLivePresident(state) || state.meta.player_faction !== faction) return;
-    const matterState = ensureMatterState(state);
     const lastCorps: Record<string, CorpsStance> = {};
     for (const corps of getFactionCorps(state, faction)) {
         const stance = state.military.corps_command?.[corps.id]?.stance;
         if (isCorpsStance(stance)) lastCorps[corps.id] = stance;
     }
-    matterState.last_corps_stance = sortedRecord(lastCorps);
-    matterState.last_og = factionSectorsSorted(state, faction)
+    const lastOg = factionSectorsSorted(state, faction)
         .filter((s) => s.stance_source !== 'player' && isSectorStance(s.sector_stance))
         .map((s) => ({ corps_id: s.corps_id, stance: s.sector_stance, fingerprint: sectorFingerprint(s) }))
         .sort((a, b) => strictCompare(a.corps_id, b.corps_id) || strictCompare(a.fingerprint.join(','), b.fingerprint.join(',')));
+    // Nothing to record and no bookkeeping yet: write nothing (no empty state object).
+    if (!state.military.stance_matter_state && Object.keys(lastCorps).length === 0 && lastOg.length === 0) return;
+    const matterState = ensureMatterState(state);
+    matterState.last_corps_stance = sortedRecord(lastCorps);
+    matterState.last_og = lastOg;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

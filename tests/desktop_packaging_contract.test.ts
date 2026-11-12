@@ -94,6 +94,7 @@ test('electron-builder config matches the packaged runtime resource contract', a
             'src/desktop/front_visit_contract.cjs',
             'src/desktop/address_nation_contract.cjs',
             'src/desktop/decorate_unit_contract.cjs',
+            'src/desktop/stance_matter_ipc.cjs',
             'src/desktop/strategic_posture_review_contract.cjs',
             'src/desktop/ipc_mutex.cjs',
             'src/desktop/ipc_mutation_policy.cjs',
