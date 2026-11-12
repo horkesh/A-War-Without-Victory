@@ -14400,6 +14400,7 @@ Unrecorded pre-crash attempts, found in `tmp-paradox-qa-20260710/`: **RS-03** (p
 **The A5 session's last full-suite failure (exit 4, never investigated).** Rerun here, the suite had one real failure: `tests/ui_player_supply_visibility.test.ts` pinned "Bihac (Bi)" for an isolated formation's location, and the fallback-name fix now renders it correctly as "Bihać (Bi)". The two pins are updated. The runner itself exits only 0 or 1, so the 4 came from the shell wrapper around the crash.
 
 Pending on the owner's Windows machine: packaging, and the RS and HRHB packaged 24-turn reruns.
+
 ## 2026-11-11 — Truthful command, step 1: brigade posture is the commander's, Orders becomes Command (UI)
 
 Owner-approved step 1 of `docs/40_reports/proposals/20261111_PLAYER_SURFACE_AND_AGENCY_REVIEW.md` (option 1, presentation only, no sim change). Rebuilt in a cloud session from the transcript of the local session that crashed with this work uncommitted; the review doc itself is restored from the same transcript.
