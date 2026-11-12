@@ -251,7 +251,10 @@ export function FormationDetail({ railSlot = 'primary', breadcrumb }: FormationD
     : null;
   const brigadeEffectiveness = formation.kind === 'brigade' ? computeBrigadeEffectiveness(formation) : null;
   const reportGaps = [
-    ...((isBrigade && !formation.posture) || (!isBrigade && !formation.corpsStance) ? ['posture'] : []),
+    // A brigade without a posture is not a missing staff return: its commander has not
+    // set one yet, and the posture row already says so. Listing it here told the player a
+    // posture was "expected in a coming briefing", as if the president owed an order.
+    ...(!isBrigade && !formation.corpsStance ? ['posture'] : []),
     ...(lifecycleValue == null ? ['readiness'] : []),
     ...(Number.isFinite(formation.cohesion) ? [] : ['cohesion']),
     ...(Number.isFinite(formation.morale) ? [] : ['morale']),
