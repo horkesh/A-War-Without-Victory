@@ -302,8 +302,9 @@ describe('direct tactical map click routing', () => {
     expect(helperStart).toBeGreaterThan(-1);
     expect(helper).toContain("selectionIntent: 'stack-aware' | 'exact' = 'stack-aware'");
     expect(helper).toContain("if (selectionIntent === 'stack-aware' && osid && stackCount > 1) {");
-    expect(helper).toContain('store.setExpandedStackOsid(osid)');
-    expect(helper.indexOf('store.setExpandedStackOsid(osid)')).toBeLessThan(
+    // The stack opens with any neighbouring stacks the layout merged into it (#567 review).
+    expect(helper).toContain('store.setExpandedStackOsid(osid, readMergedOsids(properties))');
+    expect(helper.indexOf('store.setExpandedStackOsid(osid, readMergedOsids(properties))')).toBeLessThan(
       helper.indexOf('inspectMarkerContactOrFormation(formationId, properties)'),
     );
     expect(source).toContain("onCounterSelect: (item, intent) => handleFormationCounterSelection(item.id, item.properties, intent)");
@@ -314,8 +315,8 @@ describe('direct tactical map click routing', () => {
 
     expect(mapLibreHandlerStart).toBeGreaterThan(-1);
     expect(mapLibreHandler).toContain('if (stackSize > 1) {');
-    expect(mapLibreHandler).toContain('setExpandedStackOsid(osid)');
-    expect(mapLibreHandler.indexOf('setExpandedStackOsid(osid)')).toBeLessThan(
+    expect(mapLibreHandler).toContain('setExpandedStackOsid(osid, mergedOsids)');
+    expect(mapLibreHandler.indexOf('setExpandedStackOsid(osid, mergedOsids)')).toBeLessThan(
       mapLibreHandler.indexOf('inspectFormationFromMap(id, props)'),
     );
   });
