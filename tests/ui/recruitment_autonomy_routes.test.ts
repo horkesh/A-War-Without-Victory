@@ -28,7 +28,8 @@ describe('Army HQ recruitment and autonomy routes', () => {
   it('mounts both live surfaces in App and closes Army HQ before opening them', () => {
     const app = read('src/ui/map/App.tsx');
 
-    // Lazy-loaded since 2026-11-12 (entry-chunk budget); mounted inside Suspense.
+    // Lazy-loaded to keep the entry chunk under its limit.
+    expect(app).toContain("const AutonomyPanel = lazy(() =>");
     expect(app).toContain("import('./components/AutonomyPanel').then(m => ({ default: m.AutonomyPanel }))");
     expect(app).toContain('const [autonomyOpen, setAutonomyOpen] = useState(false);');
     expect(app).toContain('onOpenRecruitment={openRecruitmentModal}');

@@ -20,12 +20,12 @@ import { SidePickerOverlay } from './components/SidePickerOverlay';
 const RecruitmentModal = lazy(() =>
   import('./components/RecruitmentModal').then(m => ({ default: m.RecruitmentModal })),
 );
-// Lazy: mounted only while the president has it open, and it keeps the entry chunk under
-// the 3,000 kB warning (recruitment-on-desk lane, 2026-11-12).
+import { WarSummaryModal } from './components/WarSummaryModal';
+// Command Autonomy opens on demand from Army HQ, so it loads then and stays out of the
+// entry chunk (vite.config.ts chunk-size limit; the player-experience gate blocks on it).
 const AutonomyPanel = lazy(() =>
   import('./components/AutonomyPanel').then(m => ({ default: m.AutonomyPanel })),
 );
-import { WarSummaryModal } from './components/WarSummaryModal';
 import { TurnAftermathModal } from './components/TurnAftermathModal';
 import { OperationBriefingModal } from './components/OperationBriefingModal';
 import { SupplyPanel } from './components/SupplyPanel';
