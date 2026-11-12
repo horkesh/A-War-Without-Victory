@@ -240,16 +240,38 @@ export async function fetchRecruitmentCatalog({
     ipc: IPC;
     setLoadError: (msg: string | null) => void;
 }): Promise<RecruitmentCatalogBrigade[]> {
+    return (await fetchRecruitmentCatalogSnapshot({ ipc, setLoadError }))?.brigades ?? [];
+}
+
+export interface FetchedRecruitmentCatalog {
+    brigades: RecruitmentCatalogBrigade[];
+    /** Turn / autonomy of the state the catalog was evaluated on; null from an older main process. */
+    turn: number | null;
+    autonomyLevel: number | null;
+}
+
+/** The catalog plus the turn and autonomy it was evaluated at. Null when unavailable. */
+export async function fetchRecruitmentCatalogSnapshot({
+    ipc,
+    setLoadError,
+}: {
+    ipc: IPC;
+    setLoadError: (msg: string | null) => void;
+}): Promise<FetchedRecruitmentCatalog | null> {
     try {
         const result = await ipc.getRecruitmentCatalog();
-        if (!result || typeof result !== 'object') return [];
+        if (!result || typeof result !== 'object') return null;
         const raw = (result as { brigades?: unknown[] }).brigades;
-        if (!Array.isArray(raw)) return [];
-        return raw as RecruitmentCatalogBrigade[];
+        if (!Array.isArray(raw)) return null;
+        const turn = typeof result.turn === 'number' && Number.isInteger(result.turn) ? result.turn : null;
+        const autonomyLevel = typeof result.autonomy_level === 'number' && Number.isFinite(result.autonomy_level)
+            ? result.autonomy_level
+            : null;
+        return { brigades: raw as RecruitmentCatalogBrigade[], turn, autonomyLevel };
     } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
         setLoadError(message);
-        return [];
+        return null;
     }
 }
 

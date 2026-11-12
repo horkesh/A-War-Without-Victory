@@ -23,6 +23,7 @@ import { isPresidentialCadenceHold } from '../../data/presidentialCadenceHold';
 import { deriveInboxItems } from '../../data/inboxItems';
 import { Z } from '../../../shared/zIndex';
 import { t } from '../../i18n';
+import { useRecruitmentMatterInput } from '../../utils/useRecruitmentMatter';
 
 export interface WarroomStatusBarProps {
   onReviewPriorities?: () => void;
@@ -186,14 +187,16 @@ export function WarroomStatusBar({ onReviewPriorities, onReviewItem, onReviewTar
   const loadedGameState = useGameStore((s) => s.loadedGameState);
   const osidDisplayNames = useGameStore((s) => s.osidDisplayNames);
   const turnAftermath = useGameStore((s) => s.turnAftermath);
+  const recruitmentInput = useRecruitmentMatterInput();
 
   const docket = useMemo(
     () => buildWarroomPriorityDocketView({
       state: loadedGameState,
       osidNameMap: osidDisplayNames,
       reviewedAftermathTurn: turnAftermath?.turn ?? null,
+      ...recruitmentInput,
     }),
-    [loadedGameState, osidDisplayNames, turnAftermath?.turn],
+    [loadedGameState, osidDisplayNames, turnAftermath?.turn, recruitmentInput],
   );
   const blockers = useMemo(
     () => derivePresidentialBlockers(loadedGameState, osidDisplayNames),

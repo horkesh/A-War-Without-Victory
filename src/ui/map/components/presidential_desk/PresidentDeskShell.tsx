@@ -1,7 +1,8 @@
 import { useEffect, useRef } from 'react';
 import type { EventDefinition } from '../../../../sim/events/event_types';
 import type { InboxItem } from '../../data/inboxItems';
-import { countActionableItems, deriveInboxItems } from '../../data/inboxItems';
+import { countActionableItems, deriveInboxItems, withRecruitmentInboxItem } from '../../data/inboxItems';
+import { useRecruitmentMatterInput } from '../../utils/useRecruitmentMatter';
 import { derivePresidentialBlockers } from '../../data/presidentialBlockers';
 import { buildPreAdvanceCommandReviewView } from '../../data/preAdvanceCommandReview';
 import type { LoadedGameState } from '../../data/types';
@@ -68,12 +69,19 @@ export function PresidentDeskShell({
   reviewedAftermathTurn,
 }: PresidentDeskShellProps) {
   const shellRef = useRef<HTMLDivElement | null>(null);
-  const items = deriveInboxItems(state, osidNameMap, eventCatalog);
+  const recruitmentInput = useRecruitmentMatterInput();
+  const items = withRecruitmentInboxItem(
+    deriveInboxItems(state, osidNameMap, eventCatalog),
+    recruitmentInput.recruitmentMatter,
+    recruitmentInput.municipalityNames,
+    state?.turn ?? 0,
+  );
   const actionableCount = countActionableItems(items);
   const advanceReview = buildPreAdvanceCommandReviewView({
     state,
     osidNameMap,
     reviewedAftermathTurn,
+    ...recruitmentInput,
   });
   const presidentialBlockers = derivePresidentialBlockers(state, osidNameMap);
   const requiredItemIds = new Set(presidentialBlockers.map((blocker) => blocker.id));

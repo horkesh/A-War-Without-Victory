@@ -43,6 +43,8 @@ export interface ShellNavigationState {
   setFocusedChronicleDecisionRecordId?: (id: string | null) => void;
   setCodexOpen: (open: boolean) => void;
   setChronicleOpen: (open: boolean) => void;
+  /** Optional: open Recruitment on a brigade (the Desk's recruitment matter). App consumes it. */
+  requestRecruitmentOpen?: (brigadeId: string | null) => void;
   /** Optional: set by gameStore when advance-turn handoff is received from the Warroom shell. */
   setAdvanceTurnPending?: (v: boolean) => void;
   /** Optional: Warroom calendar fast path when pre-advance review is not blocked. */
@@ -235,6 +237,8 @@ export function applyShellHandoffCommand(state: ShellNavigationState, command: S
     // Warroom wall calendar hotspot — show the React advance-turn confirmation modal.
     // setAdvanceTurnPending is optional on ShellNavigationState; gameStore always provides it.
     const loadedState = isLoadedGameState(state.loadedGameState) ? state.loadedGameState : null;
+    // The recruitment matter is advisory (never `blocked`), so this gate reads the review
+    // without it; the full Advance modal and the Desk include it.
     const review = buildPreAdvanceCommandReviewView({
       state: loadedState,
       osidNameMap: null,

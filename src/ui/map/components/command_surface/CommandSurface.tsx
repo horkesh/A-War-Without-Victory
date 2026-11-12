@@ -38,6 +38,8 @@ import { resolveCommandBannerArt, resolveCommandCardArt } from '../../data/comma
 import { resolveDirectiveActArt } from '../../data/directiveActArt';
 import { useGameStore } from '../../store/gameStore';
 import { useIPC } from '../../desktop/useIPC';
+import { useRecruitmentMatterInput } from '../../utils/useRecruitmentMatter';
+import { buildRecruitmentMatterCopy } from '../../data/recruitmentMatterCopy';
 import { openPresidentialDecisionRoomNavigationTarget } from '../../utils/presidentialDecisionRoomNavigation';
 import { turnToDateString } from '../../utils/formatters';
 import { t, type MessageKey } from '../../i18n';
@@ -207,7 +209,12 @@ export function CommandSurface({ initialCategoryId = null, onClose, onNavigateTa
     return () => window.clearTimeout(timeout);
   }, [receipt]);
 
-  const baseView = useMemo(() => buildPresidentialDecisionRoomView({ state, osidNameMap }), [state, osidNameMap]);
+  const recruitmentInput = useRecruitmentMatterInput();
+  const setAsideRecruitmentMatter = useGameStore((s) => s.setAsideRecruitmentMatter);
+  const baseView = useMemo(
+    () => buildPresidentialDecisionRoomView({ state, osidNameMap, ...recruitmentInput }),
+    [state, osidNameMap, recruitmentInput],
+  );
   const areas = useMemo(() => PRESIDENTIAL_COMMAND_CATEGORIES.map((category) => {
     const cards = baseView.cards.filter((card) => cardBelongsToPresidentialCommandCategory(card, category.id));
     const counts: Record<MatterGroup, number> = { needs: 0, review: 0, actions: 0, watch: 0, record: 0 };
@@ -255,8 +262,8 @@ export function CommandSurface({ initialCategoryId = null, onClose, onNavigateTa
   const selectedCardId = cardId && orderedCards.some((card) => card.id === cardId) ? cardId : orderedCards[0]?.id ?? null;
 
   const view = useMemo(
-    () => buildPresidentialDecisionRoomView({ state, osidNameMap, selectedCardId }),
-    [state, osidNameMap, selectedCardId],
+    () => buildPresidentialDecisionRoomView({ state, osidNameMap, selectedCardId, ...recruitmentInput }),
+    [state, osidNameMap, selectedCardId, recruitmentInput],
   );
   const dossier = view.activeDossier && view.activeDossier.cardId === selectedCardId ? view.activeDossier : null;
   const selectedCard = selectedCardId ? baseView.cards.find((card) => card.id === selectedCardId) : undefined;
@@ -295,7 +302,12 @@ export function CommandSurface({ initialCategoryId = null, onClose, onNavigateTa
 
   // The review / source handoff for the selected matter (what the old dossier's review did).
   let review: { target: PresidentialDecisionRoomNavigationTarget; label: string } | null = null;
-  if (dossier) {
+  const recruitmentMatter = recruitmentInput.recruitmentMatter;
+  const recruitmentSelected = Boolean(dossier && recruitmentMatter && dossier.cardId === recruitmentMatter.id);
+  const recruitmentCopy = recruitmentSelected && recruitmentMatter
+    ? buildRecruitmentMatterCopy(recruitmentMatter, recruitmentInput.municipalityNames)
+    : null;
+  if (dossier && !recruitmentSelected) {
     const sourceTarget = baseView.cards.find((card) => card.id === dossier.cardId)?.sourceHandoffTarget;
     const target = dossier.navigationTarget.kind === 'decision-room'
       ? sourceTarget ?? dossier.sourceHandoff?.navigationTarget ?? dossier.navigationTarget
@@ -452,6 +464,27 @@ export function CommandSurface({ initialCategoryId = null, onClose, onNavigateTa
               <SurfaceDetailFooter>
                 {dossier.directive && state && (
                   <DirectiveCard directive={dossier.directive} gameState={state} onReceipt={setReceipt} />
+                )}
+                {recruitmentCopy && recruitmentMatter && (
+                  <div className="flex flex-wrap gap-3">
+                    <button
+                      type="button"
+                      data-testid="recruitment-matter-open"
+                      data-brigade-id={recruitmentMatter.focusBrigadeId ?? ''}
+                      onClick={() => { navigate({ kind: 'recruitment', brigadeId: recruitmentMatter.focusBrigadeId }); }}
+                      className="h-14 flex-1 rounded-md bg-[#c9a75c] px-5 text-[18px] font-bold text-[#15120b] transition hover:bg-[#d8b86c]"
+                    >
+                      {recruitmentCopy.primaryActionLabel}
+                    </button>
+                    <button
+                      type="button"
+                      data-testid="recruitment-matter-set-aside"
+                      onClick={() => { setAsideRecruitmentMatter(); setCardId(null); }}
+                      className="h-14 rounded-md border border-[#3a4150] bg-[#1b2029] px-5 text-[16px] font-semibold text-[#e8dcbc] transition hover:border-accent-gold/60"
+                    >
+                      {recruitmentCopy.setAsideLabel}
+                    </button>
+                  </div>
                 )}
                 {(review || (dossier.fieldInspectionTarget && onInspectFieldPlan)) && (
                   <div className="flex flex-wrap gap-3">

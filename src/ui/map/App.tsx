@@ -111,9 +111,10 @@ import { isWarroomLocalCommand, type WarroomOverlaySurface } from './utils/warro
 import { getPeacePlanDismissalKey, shouldShowPeacePlanModal } from './utils/peacePlanDismissal';
 import { decodeShellHandoffCommand, isShellHandoffCommand, type ArmyHQRecordsSubTab, type ShellHandoffCommand } from '../shared/shellHandoff';
 import { shouldShowOpeningBrief } from './data/openingBriefGate';
+import { deriveRecruitmentMatter } from './data/recruitmentMatter';
 import {
   applyRecruitmentAndSync,
-  fetchRecruitmentCatalog,
+  fetchRecruitmentCatalogSnapshot,
   resolveBrowserEventDecision,
   startCampaignFromSidePicker,
 } from './desktop/campaignRecruitmentActions';
@@ -653,6 +654,8 @@ function App() {
   const [recruitmentApplying, setRecruitmentApplying] = useState(false);
   const [recruitmentCatalog, setRecruitmentCatalog] = useState<RecruitmentCatalogBrigade[]>([]);
   const recruitmentCatalogRequestId = useRef(0);
+  const [recruitmentFocusBrigadeId, setRecruitmentFocusBrigadeId] = useState<string | null>(null);
+  const recruitmentOpenRequest = useGameStore((s) => s.recruitmentOpenRequest);
   const initialShellHandoffApplied = useRef(false);
 
   useEffect(() => {
@@ -757,6 +760,7 @@ function App() {
     setActiveEventDecisionId(null);
     setRecentlyAcceptedEventDecisionId(null);
     setCommandBriefingSuppressedTurn(null);
+    useGameStore.getState().resetRecruitmentWatch();
   }, []);
 
   useEffect(() => {
@@ -1105,21 +1109,62 @@ function App() {
     }
   };
 
-  const refreshRecruitmentCatalog = async () => {
+  /**
+   * Fetch the state-aware catalog. Besides feeding the modal, every fetch is folded into the
+   * UI-only recruitment watch that puts newly raisable brigades on the President's Desk
+   * (owner 2026-11-12). `silent` skips the modal's loading shimmer (the per-turn refresh).
+   */
+  const refreshRecruitmentCatalog = async (options: { silent?: boolean } = {}) => {
     if (!ipc.isAvailable) return;
     const requestId = ++recruitmentCatalogRequestId.current;
-    setRecruitmentLoading(true);
-    const catalog = await fetchRecruitmentCatalog({ ipc, setLoadError });
+    if (!options.silent) setRecruitmentLoading(true);
+    const snapshot = await fetchRecruitmentCatalogSnapshot({ ipc, setLoadError });
     if (requestId !== recruitmentCatalogRequestId.current) return;
-    setRecruitmentCatalog(catalog);
+    setRecruitmentCatalog(snapshot?.brigades ?? []);
     setRecruitmentLoading(false);
+    const store = useGameStore.getState();
+    const faction = store.loadedGameState?.player_faction ?? null;
+    if (snapshot && faction && snapshot.turn !== null && snapshot.autonomyLevel !== null) {
+      store.observeRecruitmentCatalog({
+        faction,
+        turn: snapshot.turn,
+        autonomyLevel: snapshot.autonomyLevel,
+        brigades: snapshot.brigades,
+      });
+    }
   };
 
-  const openRecruitmentModal = () => {
+  const openRecruitmentModal = (brigadeId?: string | null) => {
     setAutonomyOpen(false);
+    setRecruitmentFocusBrigadeId(typeof brigadeId === 'string' ? brigadeId : null);
     setRecruitmentOpen(true);
     void refreshRecruitmentCatalog();
   };
+
+  // Recruitment on the Desk: re-read the catalog once per week (and when the autonomy panel
+  // closes, since the level decides decision vs notice) so newly raisable brigades reach
+  // the president without a visit to Army HQ → Personnel. Presentation only.
+  const recruitmentWatchTurn = loadedGameState?.turn ?? null;
+  const recruitmentWatchFaction = loadedGameState?.player_faction ?? null;
+  const recruitmentWatchGameOver = loadedGameState?.gameOver === true;
+  useEffect(() => {
+    if (!ipc.isAvailable || recruitmentWatchTurn === null || !recruitmentWatchFaction || recruitmentWatchGameOver) return;
+    if (autonomyOpen) return;
+    void refreshRecruitmentCatalog({ silent: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- refresh is re-created each render; the keys are the trigger.
+  }, [ipc.isAvailable, recruitmentWatchTurn, recruitmentWatchFaction, recruitmentWatchGameOver, autonomyOpen]);
+
+  // A matter's "Open Recruitment" (Command Surface, Desk, Advance review) lands here.
+  useEffect(() => {
+    if (!recruitmentOpenRequest) return;
+    useGameStore.getState().clearRecruitmentOpenRequest();
+    setCommandStripOpen(false);
+    setCommandStripCategoryId(null);
+    setWarroomDecisionRoomOpen(false);
+    setWarroomDeskOpen(false);
+    openRecruitmentModal(recruitmentOpenRequest.brigadeId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- consume each request once.
+  }, [recruitmentOpenRequest]);
 
   const handleSelectFaction = async (payload: StartNewCampaignPayload) => {
     resetCampaignScopedUiState();
@@ -1635,6 +1680,13 @@ function App() {
     if (action === 'dismiss_intelligence_notification') {
       setSelectedIntelligenceBriefId(itemId);
     }
+    if (action === 'recruitment') {
+      const matter = deriveRecruitmentMatter(gs.recruitmentWatch, {
+        playerFaction: gs.loadedGameState?.player_faction ?? null,
+        turn: gs.loadedGameState?.turn ?? null,
+      });
+      gs.requestRecruitmentOpen(matter?.focusBrigadeId ?? null);
+    }
   };
 
   const openInboxHome = () => {
@@ -1899,6 +1951,7 @@ function App() {
         applying={recruitmentApplying}
         playerFaction={playerFaction}
         brigades={recruitmentCatalog}
+        initialBrigadeId={recruitmentFocusBrigadeId}
         onRefresh={() => void refreshRecruitmentCatalog()}
         onApply={(brigadeId, equipmentClass) => void handleApplyRecruitment(brigadeId, equipmentClass)}
         onClose={() => setRecruitmentOpen(false)}

@@ -62,6 +62,9 @@ const PACKET_THUMBNAILS: Partial<Record<InboxItemType, string>> = {
   paramilitary_request: packetThumbParamilitary,
   peace_plan: packetThumbPeacePlan,
   reserve_request: packetThumbReserveRequest,
+  // Raising a brigade is a reserve/mobilization act; reuse the reserve-request plate until
+  // the owner supplies a recruitment one (owner generates all art).
+  recruitment: packetThumbReserveRequest,
   situation: packetThumbEventDecision,
 };
 

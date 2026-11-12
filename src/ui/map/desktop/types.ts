@@ -38,6 +38,10 @@ export type RecruitmentEligibilityReason =
 
 export interface RecruitmentCatalogResult extends DesktopOkError {
     brigades?: RecruitmentCatalogBrigade[];
+    /** Turn of the state the catalog was evaluated on. */
+    turn?: number;
+    /** Autonomy level of that state (0 Full Control … 3 Observer). */
+    autonomy_level?: number;
 }
 
 export interface ApplyRecruitmentResult extends DesktopOkError {
