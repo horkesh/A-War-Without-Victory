@@ -4,7 +4,7 @@ import { dirname, join, relative, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { discoverTests } from './discover_test_files.mjs';
 import { SECTOR_PROPERTY_TEST } from './run_vitest_balanced.mjs';
-import { renderAliasEntryLines, renderSetupFilesLine } from './vitest_shared_config.mjs';
+import { renderAliasEntryLines, renderSetupFilesLine, resolveVitestCli } from './vitest_shared_config.mjs';
 
 const ROOT = process.cwd();
 const GENERATED_CONFIG_DIR = '.tmp_vitest_slice';
@@ -71,10 +71,10 @@ export function writeVitestSliceConfig(root, files, configPath = join(root, GENE
     [
       "import { defineConfig } from 'vitest/config';",
       "import { join } from 'node:path';",
-      "import { discoverTests, toRepoRelative } from '../tools/test/discover_test_files.mjs';",
+      "import { discoverTests, resolveRootModules, toRepoRelative } from '../tools/test/discover_test_files.mjs';",
       '',
       'const rootDir = process.cwd();',
-      'const rootModules = join(rootDir, \'node_modules\');',
+      'const rootModules = resolveRootModules(rootDir);',
       'const discovered = discoverTests(rootDir);',
       'const environmentMatchGlobs = discovered.jsdomVitestFiles.map((file) => [',
       '  toRepoRelative(rootDir, [file])[0],',
@@ -117,7 +117,7 @@ export function runVitestSlice(argv, root = ROOT, runChild = spawnSync) {
     return 1;
   }
 
-  const vitestCli = join(root, 'node_modules', 'vitest', 'vitest.mjs');
+  const vitestCli = resolveVitestCli(root);
   if (!existsSync(vitestCli)) {
     console.error(`Missing vitest CLI at ${vitestCli}. Run npm install.`);
     return 1;

@@ -6,6 +6,9 @@ export interface DiscoveredTests {
   jsdomVitestFiles: string[];
 }
 
+export const TEST_FILE_SUFFIXES: string[];
+export function isTestEntrypoint(fileName: string): boolean;
+export function resolveRootModules(rootDir: string, anchorPackage?: string): string;
 export function listTsFiles(dir: string): string[];
 export function fileUsesVitest(path: string): boolean;
 export function fileNeedsJsdom(path: string): boolean;

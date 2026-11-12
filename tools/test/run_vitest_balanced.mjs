@@ -4,6 +4,7 @@ import { join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { balanceTestFiles, buildTestInventory } from './test_suite_inventory.mjs';
 import { createReceiptRun, receiptEnvironmentForLane } from './vitest_file_receipts.mjs';
+import { resolveVitestCli } from './vitest_shared_config.mjs';
 
 function strictCompare(left, right) {
   return left < right ? -1 : left > right ? 1 : 0;
@@ -72,10 +73,10 @@ export function renderBalancedVitestConfig(files) {
   return [
     "import { defineConfig } from 'vitest/config';",
     "import { join } from 'node:path';",
-    "import { discoverTests, toRepoRelative } from '../../tools/test/discover_test_files.mjs';",
+    "import { discoverTests, resolveRootModules, toRepoRelative } from '../../tools/test/discover_test_files.mjs';",
     '',
     'const rootDir = process.cwd();',
-    "const rootModules = join(rootDir, 'node_modules');",
+    'const rootModules = resolveRootModules(rootDir);',
     'const discovered = discoverTests(rootDir);',
     'const environmentMatchGlobs = discovered.jsdomVitestFiles.map((file) => [',
     '  toRepoRelative(rootDir, [file])[0],',
@@ -172,7 +173,7 @@ export async function runBalancedVitest(argv, root = process.cwd(), dependencies
     console.error(error instanceof Error ? error.message : String(error));
     return 1;
   }
-  const vitestCli = join(root, 'node_modules', 'vitest', 'vitest.mjs');
+  const vitestCli = resolveVitestCli(root);
   if (!existsSync(vitestCli)) {
     console.error(`Missing vitest CLI at ${vitestCli}. Run npm install.`);
     return 1;
