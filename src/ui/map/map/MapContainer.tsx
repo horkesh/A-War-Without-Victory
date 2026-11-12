@@ -33,7 +33,7 @@ import type {
 } from 'maplibre-gl';
 import type { FeatureCollection } from 'geojson';
 import type { PickingInfo } from '@deck.gl/core';
-import type { LoadedGameState } from '../data/types';
+import type { FormationView, LoadedGameState } from '../data/types';
 import type { FieldOperationPlanTarget } from '../utils/fieldInspectionTarget';
 import { strictCompare } from '../../../state/validateGameState';
 import { t, useLocale } from '../i18n';
@@ -338,6 +338,30 @@ function inspectMarkerContactOrFormation(formationId: string, properties?: Recor
   inspectFormationFromMap(formationId, properties);
 }
 
+function readMergedOsids(properties: Record<string, unknown> | null | undefined): string[] {
+  const merged = properties?.merged_osids;
+  return Array.isArray(merged) ? merged.filter((osid): osid is string => typeof osid === 'string') : [];
+}
+
+/** Every player-visible formation an expanded stack stands for: its own settlement plus merged ones. */
+function getExpandedStackFormations(
+  state: LoadedGameState,
+  osid: string,
+  mergedOsids: readonly string[],
+  centroids: Map<string, [number, number]>,
+): FormationView[] {
+  const seen = new Set<string>();
+  const formations: FormationView[] = [];
+  for (const stackOsid of [osid, ...mergedOsids]) {
+    for (const formation of getPlayerVisibleFormationStack(state, stackOsid, centroids)) {
+      if (seen.has(formation.id)) continue;
+      seen.add(formation.id);
+      formations.push(formation);
+    }
+  }
+  return formations;
+}
+
 function handleFormationCounterSelection(
   formationId: string,
   properties: Record<string, unknown>,
@@ -347,7 +371,8 @@ function handleFormationCounterSelection(
   const osid = typeof properties.location_osid === 'string' ? properties.location_osid : null;
   const stackCount = typeof properties.stack_count === 'number' ? properties.stack_count : 1;
   if (selectionIntent === 'stack-aware' && osid && stackCount > 1) {
-    store.setExpandedStackOsid(osid);
+    // A badge can stand for neighbouring stacks the layout merged into this one; open all of them.
+    store.setExpandedStackOsid(osid, readMergedOsids(properties));
     return;
   }
   inspectMarkerContactOrFormation(formationId, properties);
@@ -970,6 +995,7 @@ export function MapContainer({
   }, [currentRevisionReady]);
   const stagedOrders = useGameStore((s) => s.stagedOrders);
   const expandedStackOsid = useGameStore((s) => s.expandedStackOsid);
+  const expandedStackMergedOsids = useGameStore((s) => s.expandedStackMergedOsids);
   const [overlayAnchor, setOverlayAnchor] = useState<{ x: number; y: number } | null>(null);
   const [contextMenu, setContextMenu] = useState<{
     type: 'formation' | 'front' | 'osid' | 'empty';
@@ -2037,10 +2063,11 @@ export function MapContainer({
           // If clicking a formation, also expand its stack if it's not already expanded
           const osid = props.location_osid as string | undefined;
           if (osid && loadedGameState) {
-            const stackSize = getPlayerVisibleFormationStack(loadedGameState, osid, osidCentroidsRef.current).length;
+            const mergedOsids = readMergedOsids(props);
+            const stackSize = getExpandedStackFormations(loadedGameState, osid, mergedOsids, osidCentroidsRef.current).length;
 
             if (stackSize > 1) {
-              setExpandedStackOsid(osid);
+              setExpandedStackOsid(osid, mergedOsids);
               setOverlayAnchor(point);
             } else if (isEnemyContactMarker(props)) {
               inspectSettlementFromMap(osid);
@@ -4728,7 +4755,7 @@ export function MapContainer({
           osid={expandedStackOsid}
           anchorX={overlayAnchor.x}
           anchorY={overlayAnchor.y}
-          formations={getPlayerVisibleFormationStack(loadedGameState, expandedStackOsid, osidCentroidsRef.current)}
+          formations={getExpandedStackFormations(loadedGameState, expandedStackOsid, expandedStackMergedOsids, osidCentroidsRef.current)}
           playerFaction={loadedGameState.player_faction}
           onClose={() => {
             setExpandedStackOsid(null);
@@ -4741,7 +4768,7 @@ export function MapContainer({
               setOverlayAnchor(null);
               return;
             }
-            const formation = getPlayerVisibleFormationStack(loadedGameState, expandedStackOsid, osidCentroidsRef.current)
+            const formation = getExpandedStackFormations(loadedGameState, expandedStackOsid, expandedStackMergedOsids, osidCentroidsRef.current)
               .find((candidate) => candidate.id === id);
             if (isPlayerEnemyContactFormation(loadedGameState, formation)) {
               inspectSettlementFromMap(expandedStackOsid);

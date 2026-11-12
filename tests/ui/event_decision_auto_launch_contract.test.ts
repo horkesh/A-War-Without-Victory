@@ -39,6 +39,22 @@ describe('event decision modal auto-launch contract', () => {
     expect(autoLaunchEffect).not.toContain('openArmyHQTab');
   });
 
+  it('does not re-open a decision while a continued (resumed) turn is still processing', () => {
+    const app = readApp();
+    const autoLaunchEffect = app.slice(
+      app.indexOf('auto-launch the EventDecisionModal'),
+      app.indexOf('const handleEventAcknowledge'),
+    );
+
+    // The resumed-pause effect closes the modal; without this guard auto-launch re-opens a
+    // required decision at once and the two effects alternate until the turn ends.
+    expect(autoLaunchEffect).toContain("if (turnPauseStatus?.status === 'resumed') return;");
+    expect(autoLaunchEffect).toContain('turnPauseStatus,');
+    expect(autoLaunchEffect.indexOf("if (turnPauseStatus?.status === 'resumed') return;")).toBeLessThan(
+      autoLaunchEffect.indexOf('selectNextPendingEventDecision'),
+    );
+  });
+
   it('defers event decision auto-launch while the war-start transition is active', () => {
     const app = readApp();
     const autoLaunchEffect = app.slice(
