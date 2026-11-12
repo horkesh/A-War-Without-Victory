@@ -1,8 +1,12 @@
 /**
  * Operation Briefing Modal — triggered when a player's operation reaches the assessment sub-phase.
  * Shows commander's assessment, intel summary, force ratio, supply status, and go/no-go decision buttons.
+ *
+ * Presentation: a medium Command Surface modal (player-surface review step 3, 2026-11-12):
+ * the shared `Modal` (focus trap, Esc, Z.CRITICAL_MODAL) with the surface panel, header,
+ * scrolling body of sections and a fixed action footer.
  */
-import { useMemo } from 'react';
+import { useMemo, type ReactNode } from 'react';
 import type { NamedOfficerView } from '../data/types';
 import { useGameStore } from '../store/gameStore';
 import { formatRank, getArchetype, formatPips, getRatingColor } from '../utils/officerCharacter';
@@ -16,6 +20,21 @@ import { t, type MessageKey } from '../i18n';
 import { deriveOperationOutcomeCategory, deriveRecommendationExplanation, deriveDelegationContext, normalizeCommandStrainLabel } from '../data/command_strain';
 import type { CommandCopyToken, RecommendationExplanation, ReadinessTrend, DelegationContext } from '../data/command_strain';
 import { FORCE_LAUNCH_COST } from '../utils/commandAuthority';
+import {
+    SurfaceHeader,
+    SurfaceModalBody,
+    SurfaceModalFooter,
+    SurfacePanel,
+    SurfaceSection,
+    SurfaceStat,
+    SURFACE_CHIP,
+    SURFACE_LABEL_MUTED,
+    SURFACE_MODAL_BACKDROP,
+    SURFACE_MODAL_PANEL_MEDIUM,
+    SURFACE_PRIMARY_BUTTON_COMPACT,
+    SURFACE_SECONDARY_BUTTON,
+    SURFACE_TONE,
+} from './surface/Surface';
 
 interface OperationBriefingModalProps {
     isOpen: boolean;
@@ -28,27 +47,44 @@ interface OperationBriefingModalProps {
     commandBridgeAvailable?: boolean;
 }
 
+/** A plain-language note block (delegation, trend, recommendation, constraint). */
+function BriefingNote({ label, tone = 'neutral', children }: { label?: string; tone?: 'neutral' | 'warn' | 'danger' | 'info'; children: ReactNode }) {
+    const toneClass = tone === 'danger'
+        ? 'border-red-400/45 bg-red-950/30'
+        : tone === 'warn'
+            ? 'border-amber-300/40 bg-[#221e14]'
+            : tone === 'info'
+                ? 'border-sky-400/40 bg-[#141c26]'
+                : 'border-[#2a303c] bg-[#161a22]';
+    return (
+        <div className={`flex flex-col gap-1.5 rounded-md border px-5 py-3.5 ${toneClass}`}>
+            {label && <span className={SURFACE_LABEL_MUTED}>{label}</span>}
+            {children}
+        </div>
+    );
+}
+
 function ReadinessBar({ label, value, thresholdLabel }: { label: string; value: number | null | undefined; thresholdLabel?: string }) {
     if (typeof value !== 'number' || !Number.isFinite(value)) {
         return (
-            <div className="mb-2">
-                <div className="flex justify-between text-xs mb-0.5">
-                    <span className="uppercase font-bold text-neutral-600">{label}</span>
-                    <span className="text-neutral-500 italic">{t('operationsSection.metricUnreported')}</span>
+            <div className="flex flex-col gap-1.5">
+                <div className="flex justify-between gap-4 text-[16px]">
+                    <span className="text-[#b9ad94]">{label}</span>
+                    <span className="text-[#9c917b]">{t('operationsSection.metricUnreported')}</span>
                 </div>
-                <div className="h-2 bg-panel-border rounded-sm overflow-hidden opacity-50" />
+                <div className="h-2.5 rounded-full bg-[#262b35]" />
             </div>
         );
     }
     const pct = Math.round(Math.max(0, Math.min(1, value)) * 100);
-    const color = pct >= 80 ? 'bg-green-500' : pct >= 50 ? 'bg-amber-500' : 'bg-red-500';
+    const color = pct >= 80 ? 'bg-emerald-400' : pct >= 50 ? 'bg-[#c9a75c]' : 'bg-red-400';
     return (
-        <div className="mb-2">
-            <div className="flex justify-between text-xs mb-0.5">
-                <span className="uppercase font-bold text-neutral-600">{label}</span>
-                <span className="text-neutral-500">{pct}%{thresholdLabel ? ` (${t('operationBriefing.need', { threshold: thresholdLabel })})` : ''}</span>
+        <div className="flex flex-col gap-1.5">
+            <div className="flex justify-between gap-4 text-[16px]">
+                <span className="text-[#b9ad94]">{label}</span>
+                <span className="font-mono font-semibold tabular-nums text-[#f1e6c8]">{pct}%{thresholdLabel ? ` (${t('operationBriefing.need', { threshold: thresholdLabel })})` : ''}</span>
             </div>
-            <div className="h-2 bg-panel-border rounded-sm overflow-hidden">
+            <div className="h-2.5 overflow-hidden rounded-full bg-[#262b35]">
                 <div className={`h-full ${color} transition-all`} style={{ width: `${pct}%` }} />
             </div>
         </div>
@@ -58,13 +94,13 @@ function ReadinessBar({ label, value, thresholdLabel }: { label: string; value: 
 function AssessmentBadge({ assessment }: { assessment?: string }) {
     switch (assessment) {
         case 'launch':
-            return <span className="px-2 py-0.5 text-xs uppercase font-bold bg-green-950/40 text-green-200 border border-green-500/50">{t('operationBriefing.recommendsLaunch')}</span>;
+            return <span className={`${SURFACE_CHIP} ${SURFACE_TONE.good}`}>{t('operationBriefing.recommendsLaunch')}</span>;
         case 'postpone':
-            return <span className="px-2 py-0.5 text-xs uppercase font-bold bg-amber-950/40 text-amber-200 border border-amber-500/50">{t('operationBriefing.recommendsPostpone')}</span>;
+            return <span className={`${SURFACE_CHIP} ${SURFACE_TONE.warn}`}>{t('operationBriefing.recommendsPostpone')}</span>;
         case 'abort':
-            return <span className="px-2 py-0.5 text-xs uppercase font-bold bg-red-950/40 text-red-200 border border-red-500/50">{t('operationBriefing.recommendsAbort')}</span>;
+            return <span className={`${SURFACE_CHIP} ${SURFACE_TONE.danger}`}>{t('operationBriefing.recommendsAbort')}</span>;
         default:
-            return <span className="px-2 py-0.5 text-xs uppercase font-bold bg-panel-card text-text-muted border border-panel-border">{t('operationBriefing.pendingAssessment')}</span>;
+            return <span className={`${SURFACE_CHIP} ${SURFACE_TONE.neutral}`}>{t('operationBriefing.pendingAssessment')}</span>;
     }
 }
 
@@ -88,10 +124,10 @@ function resolveBriefingCommander(
  */
 function ForceLaunchBadge({ caCost }: { caCost: number }) {
     return (
-        <div className="mx-4 mt-3 mb-1 px-3 py-1.5 border border-amber-400/40 bg-amber-950/30 flex items-center gap-2">
-            <span className="text-xs uppercase font-bold tracking-wider text-amber-200">{t('operationBriefing.presidentialOverride')}</span>
-            <span className="text-xs text-amber-300" style={{ opacity: 0.7 }}>{t('operationBriefing.costCa', { cost: caCost })}</span>
-        </div>
+        <BriefingNote tone="warn">
+            <span className="text-[16px] font-semibold text-amber-100">{t('operationBriefing.presidentialOverride')}</span>
+            <span className="text-[15px] text-amber-100/90">{t('operationBriefing.costCa', { cost: caCost })}</span>
+        </BriefingNote>
     );
 }
 
@@ -108,58 +144,43 @@ function CommandRecord({ assessmentAtLaunch, wasForce, caCost, corpsStrain, corp
     const outcomeCategory = deriveOperationOutcomeCategory(assessmentAtLaunch, wasForce);
 
     return (
-        <div className="mx-4 mt-3 mb-1 border border-panel-border bg-panel-card/70">
-            <div className="px-3 py-1.5 border-b border-panel-border bg-panel-card">
-                <span className="text-xs uppercase font-bold tracking-wider text-neutral-600">{t('operationBriefing.commandRecord')}</span>
-            </div>
-            <div className="px-3 py-2 space-y-1">
-                <div className="flex items-center gap-2">
-                    <span className="text-xs uppercase font-bold text-neutral-500 w-36 shrink-0">{t('operationBriefing.commanderRecommended')}</span>
-                    <AssessmentBadge assessment={assessmentAtLaunch} />
-                </div>
-                <div className="flex items-center gap-2">
-                    <span className="text-xs uppercase font-bold text-neutral-500 w-36 shrink-0">{t('operationBriefing.presidentialDecision')}</span>
-                    {outcomeCategory === 'direct_intervention' ? (
-                        <span className="px-2 py-0.5 text-xs uppercase font-bold bg-amber-950/40 text-amber-200 border border-amber-400">
-                            {t('operationBriefing.directIntervention')}
-                        </span>
+        <SurfaceSection label={t('operationBriefing.commandRecord')}>
+            <SurfacePanel className="flex flex-col gap-1">
+                <SurfaceStat label={t('operationBriefing.commanderRecommended')} value={<AssessmentBadge assessment={assessmentAtLaunch} />} />
+                <SurfaceStat
+                    label={t('operationBriefing.presidentialDecision')}
+                    value={outcomeCategory === 'direct_intervention' ? (
+                        <span className={`${SURFACE_CHIP} ${SURFACE_TONE.warn}`}>{t('operationBriefing.directIntervention')}</span>
                     ) : outcomeCategory === 'reluctant_compliance' ? (
-                        <span className="px-2 py-0.5 text-xs uppercase font-bold bg-amber-950/30 text-amber-200 border border-amber-500/50">
-                            {t('operationBriefing.approvedAgainstRecommendation')}
-                        </span>
+                        <span className={`${SURFACE_CHIP} ${SURFACE_TONE.warn}`}>{t('operationBriefing.approvedAgainstRecommendation')}</span>
                     ) : (
-                        <span className="px-2 py-0.5 text-xs uppercase font-bold bg-green-950/40 text-green-200 border border-green-500/50">
-                            {t('operationBriefing.ordinaryCompliance')}
-                        </span>
+                        <span className={`${SURFACE_CHIP} ${SURFACE_TONE.good}`}>{t('operationBriefing.ordinaryCompliance')}</span>
                     )}
-                </div>
+                />
                 {/* Reluctant compliance explanation — command chain complied under presidential direction, no CA spent */}
                 {outcomeCategory === 'reluctant_compliance' && (
-                    <div className="flex items-start gap-2 pt-1 border-t border-panel-border mt-1">
-                        <span className="text-xs uppercase font-bold text-neutral-500 w-36 shrink-0 mt-0.5">{t('operationBriefing.interpretation')}</span>
-                        <p className="text-xs text-amber-700 leading-snug">
+                    <div className="flex flex-col gap-1 border-b border-[#262b35] py-2">
+                        <span className="text-[16px] text-[#b9ad94]">{t('operationBriefing.interpretation')}</span>
+                        <p className="m-0 text-[16px] leading-relaxed text-amber-100">
                             {t('operationBriefing.reluctantComplianceDetail', { assessment: assessmentAtLaunch })}
                         </p>
                     </div>
                 )}
                 {/* CA cost row — only when force-launched (Direct Intervention). Reluctant compliance does NOT show CA cost: no CA was spent. */}
                 {wasForce && (
-                    <div className="flex items-center gap-2">
-                        <span className="text-xs uppercase font-bold text-neutral-500 w-36 shrink-0">{t('operationBriefing.commandAuthoritySpent')}</span>
-                        <span className="text-xs font-mono text-amber-700">{caCost} CA</span>
-                    </div>
+                    <SurfaceStat label={t('operationBriefing.commandAuthoritySpent')} value={caCost} tone="text-amber-100" />
                 )}
                 {/* Institutional strain follow-through — only when force-launched AND strain > 0 */}
                 {wasForce && typeof corpsStrain === 'number' && corpsStrain > 0 && (
-                    <div className="flex items-center gap-2 pt-1 border-t border-panel-border mt-1">
-                        <span className="text-xs uppercase font-bold text-neutral-500 w-36 shrink-0">{t('operationBriefing.commandStrain')}</span>
-                        <span className={`text-xs font-mono ${corpsStrainLabel === 'compromised' ? 'text-red-700' : 'text-amber-700'}`}>
-                            {t(corpsStrainLabel === 'compromised' ? 'operationBriefing.compromised' : 'operationBriefing.strained')} - {t('operationBriefing.strainDamageDetail')}
+                    <div className="flex flex-col gap-1 py-2">
+                        <span className="text-[16px] text-[#b9ad94]">{t('operationBriefing.commandStrain')}</span>
+                        <span className={`text-[16px] ${corpsStrainLabel === 'compromised' ? 'text-red-200' : 'text-amber-100'}`}>
+                            {t(corpsStrainLabel === 'compromised' ? 'operationBriefing.compromised' : 'operationBriefing.strained')}: {t('operationBriefing.strainDamageDetail')}
                         </span>
                     </div>
                 )}
-            </div>
-        </div>
+            </SurfacePanel>
+        </SurfaceSection>
     );
 }
 
@@ -171,10 +192,10 @@ function CommandRecord({ assessmentAtLaunch, wasForce, caCost, corpsStrain, corp
 // launch, strain = 0). Only fires when delegation status is non-obvious.
 // ═══════════════════════════════════════════════════════════════════════════
 
-const DELEGATION_CONFIG: Record<string, { icon: string; borderClass: string; textClass: string } | null> = {
+const DELEGATION_CONFIG: Record<string, { tone: 'warn' | 'info'; textClass: string } | null> = {
     normal_delegation: null,     // Silence = healthy
-    strained_delegation: { icon: '⚡', borderClass: 'border-amber-300/40', textClass: 'text-amber-700' },
-    presidential_direction: { icon: '◆', borderClass: 'border-blue-400/40', textClass: 'text-blue-200' },
+    strained_delegation: { tone: 'warn', textClass: 'text-amber-100' },
+    presidential_direction: { tone: 'info', textClass: 'text-sky-100' },
 };
 
 /** Compact delegation path indicator — one line showing who bears the decision burden.
@@ -186,14 +207,11 @@ function DelegationPathIndicator({ delegation }: { delegation: DelegationContext
     if (!config) return null;
 
     return (
-        <div className={`mx-4 my-1 px-3 py-1.5 border ${config.borderClass} bg-panel-card/60`}>
-            <div className="flex items-start gap-2">
-                <span className={`shrink-0 text-xs mt-px ${config.textClass}`}>{config.icon}</span>
-                <span className={`text-xs leading-snug ${config.textClass}`}>
-                    {delegation.labelToken ? t(delegation.labelToken.key, delegation.labelToken.params) : delegation.label}
-                </span>
-            </div>
-        </div>
+        <BriefingNote tone={config.tone}>
+            <span className={`text-[16px] leading-relaxed ${config.textClass}`}>
+                {delegation.labelToken ? t(delegation.labelToken.key, delegation.labelToken.params) : delegation.label}
+            </span>
+        </BriefingNote>
     );
 }
 
@@ -206,11 +224,11 @@ function DelegationPathIndicator({ delegation }: { delegation: DelegationContext
 
 const TREND_CONFIG: Record<string, { arrow: string; color: string } | null> = {
     nearing_launch: null,  // Silence = healthy
-    improving: { arrow: '↑', color: 'text-green-700' },
-    building: { arrow: '→', color: 'text-neutral-500' },
-    stagnating: { arrow: '→', color: 'text-amber-700' },
-    deteriorating: { arrow: '↓', color: 'text-red-700' },
-    not_viable: { arrow: '↓', color: 'text-red-700' },
+    improving: { arrow: '↑', color: 'text-emerald-200' },
+    building: { arrow: '→', color: 'text-[#ddd1b3]' },
+    stagnating: { arrow: '→', color: 'text-amber-200' },
+    deteriorating: { arrow: '↓', color: 'text-red-200' },
+    not_viable: { arrow: '↓', color: 'text-red-200' },
 };
 
 /** Compact readiness trend indicator — one line showing direction + optional timeline. */
@@ -221,26 +239,25 @@ function ReadinessTrendIndicator({ trend }: { trend: ReadinessTrend | undefined 
     if (!config) return null;
 
     return (
-        <div className="mx-4 my-1 px-3 py-1.5 border border-panel-border bg-panel-card/60">
-            <div className="flex items-start gap-2">
-                <span className={`shrink-0 font-bold text-xs mt-px ${config.color}`}>{config.arrow}</span>
-                <span className="text-xs text-neutral-600 leading-snug">{trend.label}</span>
+        <BriefingNote>
+            <div className="flex items-start gap-2.5">
+                <span aria-hidden="true" className={`shrink-0 text-[17px] font-bold ${config.color}`}>{config.arrow}</span>
+                <span className="text-[16px] leading-relaxed text-[#ddd1b3]">{trend.label}</span>
             </div>
             {trend.timelineLabel && (
-                <div className="flex items-center gap-2 mt-1">
-                    <span className="text-xs text-neutral-400 shrink-0">⏱</span>
-                    <span className="text-xs text-neutral-500">{trend.timelineLabel}</span>
+                <div className="flex items-center gap-3">
+                    <span className="text-[15px] text-[#b9ad94]">{trend.timelineLabel}</span>
                     {trend.timelineFraction != null && (
-                        <div className="flex-1 h-1 bg-panel-border rounded-sm overflow-hidden max-w-[80px]">
+                        <div className="h-1.5 max-w-[8rem] flex-1 overflow-hidden rounded-full bg-[#262b35]">
                             <div
-                                className={`h-full transition-all ${trend.timelineFraction >= 0.75 ? 'bg-amber-500' : 'bg-neutral-400'}`}
+                                className={`h-full transition-all ${trend.timelineFraction >= 0.75 ? 'bg-amber-300' : 'bg-[#8a806c]'}`}
                                 style={{ width: `${Math.round(trend.timelineFraction * 100)}%` }}
                             />
                         </div>
                     )}
                 </div>
             )}
-        </div>
+        </BriefingNote>
     );
 }
 
@@ -251,12 +268,6 @@ function ReadinessTrendIndicator({ trend }: { trend: ReadinessTrend | undefined 
 // Silence = healthy: renders null when assessment is 'launch'.
 // ═══════════════════════════════════════════════════════════════════════════
 
-const BLOCKER_ICON: Record<string, string> = {
-    intel: '🔍',
-    force_ratio: '⚔',
-    supply: '📦',
-};
-
 /** Compact recommendation explanation for the operation decision surface.
  *  Shows WHY the commander recommends postpone/abort and what the main blocker is. */
 function RecommendationDriverSection({ explanation }: {
@@ -265,23 +276,12 @@ function RecommendationDriverSection({ explanation }: {
     if (!explanation || !explanation.recommendationReason) return null;
 
     return (
-        <div className="mx-4 my-2 px-3 py-2 border border-panel-border bg-panel-card/70">
-            <div className="text-xs uppercase font-bold text-neutral-500 tracking-wider mb-1">{t('operationBriefing.recommendationDriver')}</div>
-            <div className="flex items-start gap-2">
-                {explanation.mainBlocker && (
-                    <span className="shrink-0 text-xs mt-px" aria-hidden="true">
-                        {BLOCKER_ICON[explanation.mainBlocker] ?? '•'}
-                    </span>
-                )}
-                <span className="text-xs text-neutral-700 leading-snug">{explanation.recommendationReason}</span>
-            </div>
+        <BriefingNote label={t('operationBriefing.recommendationDriver')}>
+            <p className="m-0 text-[16px] leading-relaxed text-[#ddd1b3]">{explanation.recommendationReason}</p>
             {explanation.wouldImproveIf && (
-                <div className="flex items-start gap-1.5 mt-1 pl-0.5">
-                    <span className="text-neutral-400 shrink-0 mt-px text-xs">&rarr;</span>
-                    <span className="text-xs text-neutral-500 leading-snug">{explanation.wouldImproveIf}</span>
-                </div>
+                <p className="m-0 text-[15px] leading-relaxed text-[#b9ad94]">→ {explanation.wouldImproveIf}</p>
             )}
-        </div>
+        </BriefingNote>
     );
 }
 
@@ -296,12 +296,12 @@ function RecommendationDriverSection({ explanation }: {
 type PrimaryConstraint = 'siege' | 'threat_pressure' | 'defensive_duty' | 'force_condition' | 'institutional_strain' | 'plan_lifecycle' | 'none';
 
 const CONSTRAINT_BADGE_MODAL: Record<PrimaryConstraint, { labelKey: MessageKey; className: string } | null> = {
-    siege: { labelKey: 'corpsSituation.constraint.siege', className: 'bg-red-950/40 text-red-200 border-red-500/50' },
-    threat_pressure: { labelKey: 'corpsSituation.constraint.threat', className: 'bg-red-950/40 text-red-200 border-red-500/50' },
-    defensive_duty: { labelKey: 'corpsSituation.constraint.garrison', className: 'bg-amber-950/40 text-amber-200 border-amber-500/50' },
-    force_condition: { labelKey: 'corpsSituation.constraint.readiness', className: 'bg-amber-950/40 text-amber-200 border-amber-500/50' },
-    institutional_strain: { labelKey: 'corpsSituation.constraint.institutional', className: 'bg-blue-950/40 text-blue-200 border-blue-500/50' },
-    plan_lifecycle: { labelKey: 'corpsSituation.constraint.planning', className: 'bg-panel-card text-text-muted border-panel-border' },
+    siege: { labelKey: 'corpsSituation.constraint.siege', className: SURFACE_TONE.danger },
+    threat_pressure: { labelKey: 'corpsSituation.constraint.threat', className: SURFACE_TONE.danger },
+    defensive_duty: { labelKey: 'corpsSituation.constraint.garrison', className: SURFACE_TONE.warn },
+    force_condition: { labelKey: 'corpsSituation.constraint.readiness', className: SURFACE_TONE.warn },
+    institutional_strain: { labelKey: 'corpsSituation.constraint.institutional', className: SURFACE_TONE.info },
+    plan_lifecycle: { labelKey: 'corpsSituation.constraint.planning', className: SURFACE_TONE.neutral },
     none: null,
 };
 
@@ -324,27 +324,23 @@ export function OperationConstraintContext({ assessment }: {
     const badge = CONSTRAINT_BADGE_MODAL[primaryConstraint];
 
     return (
-        <div className="mx-4 my-2 px-3 py-2 border border-panel-border bg-panel-card/70">
-            <div className="text-xs uppercase font-bold text-neutral-500 tracking-wider mb-1">{t('operationBriefing.corpsConstraint')}</div>
-            <div className="flex items-start gap-2">
+        <BriefingNote label={t('operationBriefing.corpsConstraint')}>
+            <div className="flex flex-wrap items-start gap-3">
                 {badge && (
-                    <span className={`shrink-0 text-xs font-bold tracking-wider uppercase px-1.5 py-0.5 border ${badge.className}`}>
+                    <span className={`${SURFACE_CHIP} ${badge.className}`}>
                         {t(badge.labelKey)}
                     </span>
                 )}
-                <span className="text-xs text-neutral-700 leading-snug">
+                <span className="min-w-0 flex-1 text-[16px] leading-relaxed text-[#ddd1b3]">
                     {dominantReasonToken ? t(dominantReasonToken.key, dominantReasonToken.params) : dominantReason}
                 </span>
             </div>
             {reliefPath && (
-                <div className="flex items-start gap-1.5 mt-1 pl-0.5">
-                    <span className="text-neutral-400 shrink-0 mt-px text-xs">&rarr;</span>
-                    <span className="text-xs text-neutral-500 leading-snug">
-                        {reliefPathToken ? t(reliefPathToken.key, reliefPathToken.params) : reliefPath}
-                    </span>
-                </div>
+                <p className="m-0 text-[15px] leading-relaxed text-[#b9ad94]">
+                    → {reliefPathToken ? t(reliefPathToken.key, reliefPathToken.params) : reliefPath}
+                </p>
             )}
-        </div>
+        </BriefingNote>
     );
 }
 
@@ -421,141 +417,144 @@ export function OperationBriefingModal({ isOpen, onClose, onLaunch, onPostpone, 
             onClose={onClose}
             zIndex={Z.CRITICAL_MODAL}
             ariaLabelledBy="operation-briefing-title"
-            backdropClassName="bg-black/60"
-            panelClassName="bg-panel-bg border-2 border-panel-border shadow-xl max-w-lg w-full text-text-primary"
+            backdropClassName={SURFACE_MODAL_BACKDROP}
+            panelClassName={SURFACE_MODAL_PANEL_MEDIUM}
         >
             <>
-                {/* Header — operation name + stamp */}
-                <div className="px-4 py-3 border-b-2 border-panel-border bg-panel-card/80 relative">
-                    <div className={`absolute top-1 right-3 opacity-15 font-black text-2xl -rotate-12 select-none uppercase ${assessment === 'launch' ? 'text-green-700' : assessment === 'abort' ? 'text-red-700' : 'text-amber-700'}`}>
-                        {t('operationBriefing.stamp')}
-                    </div>
-                    <div id="operation-briefing-title" className="text-xs uppercase font-bold text-neutral-500 tracking-wider">{t('operationBriefing.title')}</div>
-                    <div className="text-sm font-bold mt-0.5">{operation.display_name}</div>
-                    <div className="text-xs text-neutral-500">{corpsLabel} / {getPlayerSafeMilitaryFactionName(operation.faction)}</div>
-                </div>
+                {/* Header — operation name, corps and force, the commander's call */}
+                <SurfaceHeader
+                    eyebrow={t('operationBriefing.title')}
+                    title={<span id="operation-briefing-title">{operation.display_name}</span>}
+                    trailing={<AssessmentBadge assessment={assessment} />}
+                >
+                    <span className="text-[17px] text-[#c2b69c]">
+                        {corpsLabel} · {getPlayerSafeMilitaryFactionName(operation.faction)}
+                    </span>
+                </SurfaceHeader>
 
-                {/* Command Record — canonical decision surface for executing/recovery ops */}
-                {operation.phase !== 'planning' && operation.commander_assessment_at_launch != null ? (
-                    <CommandRecord
-                        assessmentAtLaunch={operation.commander_assessment_at_launch}
-                        wasForce={operation.was_force_launched === true}
-                        caCost={FORCE_LAUNCH_COST}
-                        corpsStrain={corpsStrain}
-                        corpsStrainLabel={corpsStrainLabel}
-                    />
-                ) : (
-                    /* Legacy fallback: force-launched ops without a snapshot (pre-feature) */
-                    operation.was_force_launched && operation.phase !== 'planning' && (
-                        <ForceLaunchBadge caCost={FORCE_LAUNCH_COST} />
-                    )
-                )}
+                <SurfaceModalBody className="gap-6">
+                    {/* Command Record — canonical decision surface for executing/recovery ops */}
+                    {operation.phase !== 'planning' && operation.commander_assessment_at_launch != null ? (
+                        <CommandRecord
+                            assessmentAtLaunch={operation.commander_assessment_at_launch}
+                            wasForce={operation.was_force_launched === true}
+                            caCost={FORCE_LAUNCH_COST}
+                            corpsStrain={corpsStrain}
+                            corpsStrainLabel={corpsStrainLabel}
+                        />
+                    ) : (
+                        /* Legacy fallback: force-launched ops without a snapshot (pre-feature) */
+                        operation.was_force_launched && operation.phase !== 'planning' && (
+                            <ForceLaunchBadge caCost={FORCE_LAUNCH_COST} />
+                        )
+                    )}
 
-                {/* Commander info */}
-                {commanderDisplay && (
-                    <div className="px-4 py-2 border-b border-panel-border bg-panel-card/60">
-                        <div className="text-xs uppercase font-bold text-neutral-500 mb-1">{t('operationBriefing.opsCommander')}</div>
-                        {commanderDisplay.kind === 'assigned' ? (
-                            <div className="flex items-center gap-3">
-                                <div>
-                                    <div className="text-xs font-bold">{formatRank(commanderDisplay.officer.rank)} {commanderDisplay.officer.name}</div>
-                                    <div className="text-xs text-text-muted italic">{getArchetype(commanderDisplay.officer)}</div>
-                                </div>
-                                <div className="flex gap-2 text-xs">
-                                    <span className={`font-mono ${getRatingColor(commanderDisplay.officer.competence)}`}>{formatPips(commanderDisplay.officer.competence)}</span>
-                                    <span className={`font-mono ${getRatingColor(commanderDisplay.officer.aggressiveness)}`}>{formatPips(commanderDisplay.officer.aggressiveness)}</span>
-                                </div>
+                    {/* Commander info */}
+                    {commanderDisplay && (
+                        <SurfaceSection label={t('operationBriefing.opsCommander')}>
+                            {commanderDisplay.kind === 'assigned' ? (
+                                <SurfacePanel className="flex flex-wrap items-center justify-between gap-4">
+                                    <div className="flex min-w-0 flex-col gap-0.5">
+                                        <span className="text-[19px] font-semibold text-[#f1e6c8]">{formatRank(commanderDisplay.officer.rank)} {commanderDisplay.officer.name}</span>
+                                        <span className="text-[16px] text-[#c2b69c]">{getArchetype(commanderDisplay.officer)}</span>
+                                    </div>
+                                    <div className="flex gap-4 font-mono text-[16px]">
+                                        <span className={getRatingColor(commanderDisplay.officer.competence)}>{formatPips(commanderDisplay.officer.competence)}</span>
+                                        <span className={getRatingColor(commanderDisplay.officer.aggressiveness)}>{formatPips(commanderDisplay.officer.aggressiveness)}</span>
+                                    </div>
+                                </SurfacePanel>
+                            ) : (
+                                <p className="m-0 text-[17px] text-[#c2b69c]">{commanderDisplay.label}</p>
+                            )}
+                        </SurfaceSection>
+                    )}
+
+                    {/* Readiness gauges, force balance and the commander's assessment */}
+                    <SurfaceSection label={t('operationBriefing.surface.readiness')}>
+                        <SurfacePanel className="flex flex-col gap-4">
+                            <ReadinessBar label={t('operationBriefing.intelligence')} value={reportedIntelConf} />
+                            <ReadinessBar label={t('operationBriefing.supply')} value={reportedSupplyReady} />
+                            <ReadinessBar label={t('operationBriefing.forceCohesion')} value={operation.readiness?.cohesion} />
+                            <div className="flex flex-col">
+                                {forceBalance && (
+                                    <SurfaceStat
+                                        label={t('operationBriefing.forceBalanceEstimate')}
+                                        value={<>{forceBalance.label} <span className="font-sans font-normal text-[#b9ad94]">({forceBalance.summary})</span></>}
+                                        tone={forceBalance.toneClass}
+                                    />
+                                )}
+                                <SurfaceStat
+                                    label={t('operationBriefing.commanderAssessment')}
+                                    value={(
+                                        <span className="inline-flex flex-wrap items-center justify-end gap-2">
+                                            <AssessmentBadge assessment={assessment} />
+                                            {postponements > 0 && (
+                                                <span className="font-sans text-[15px] font-normal text-[#b9ad94]">({t(postponements === 1 ? 'operationBriefing.priorPostponements.one' : 'operationBriefing.priorPostponements.many', { count: postponements })})</span>
+                                            )}
+                                        </span>
+                                    )}
+                                />
                             </div>
-                        ) : (
-                            <div className="text-xs italic text-text-secondary">{commanderDisplay.label}</div>
-                        )}
-                    </div>
-                )}
+                        </SurfacePanel>
+                    </SurfaceSection>
 
-                {/* Readiness gauges */}
-                <div className="px-4 py-3 space-y-1">
-                    <ReadinessBar label={t('operationBriefing.intelligence')} value={reportedIntelConf} />
-                    <ReadinessBar label={t('operationBriefing.supply')} value={reportedSupplyReady} />
-                    <ReadinessBar label={t('operationBriefing.forceCohesion')} value={operation.readiness?.cohesion} />
+                    {/* Delegation Visibility Wave 1: Decision Authority Path — shows who bears the
+                        decision burden. Silence = healthy: renders null for normal delegation.
+                        Only fires for planning-phase operations. */}
+                    <DelegationPathIndicator delegation={delegationContext} />
 
-                    {forceBalance && (
-                        <div className="flex items-center gap-2 mt-2 pt-2 border-t border-panel-border">
-                            <span className="text-xs uppercase font-bold text-neutral-600">{t('operationBriefing.forceBalanceEstimate')}</span>
-                            <span className={`text-xs font-bold ${forceBalance.toneClass}`}>
-                                {forceBalance.label}
-                            </span>
-                            <span className="text-xs text-neutral-400 uppercase">
-                                ({forceBalance.summary})
-                            </span>
-                        </div>
+                    {/* Wave 6: Readiness Trend — directional signal showing whether conditions
+                        are improving, stagnating, or deteriorating since last assessment.
+                        Silence = healthy: renders null when first-try launch. */}
+                    <ReadinessTrendIndicator trend={operation.readinessTrend} />
+
+                    {/* Wave 5: Recommendation Driver — shows WHY the commander recommends
+                        postpone/abort based on real assessment factors (intel, force ratio, supply).
+                        Silence = healthy: renders null when assessment is 'launch'. */}
+                    <RecommendationDriverSection explanation={recommendationExplanation} />
+
+                    {/* Wave 4: Corps Constraint Context — shows WHY the commander leans this way.
+                        Derived from the same situationAssessment as CorpsSituationSection (Army HQ).
+                        Silence = healthy: renders null when primaryConstraint === 'none'. */}
+                    <OperationConstraintContext assessment={situationAssessment} />
+
+                    {/* Order Interpretation Preview — fires even on clean approvals when strain > 0.
+                        Only in planning phase (decision-ready). DirectInterventionSection owns
+                        the override-cost display; this section owns pre-decision institutional context. */}
+                    {operation.phase === 'planning' && corpsStrain != null && (
+                        <OrderInterpretationSection
+                            strain={corpsStrain}
+                            commanderAssessment={assessment as 'launch' | 'postpone' | 'abort' | null | undefined}
+                            primaryConstraint={situationAssessment?.primaryConstraint}
+                            trendDirection={operation.readinessTrend?.direction}
+                            postponementCount={postponements}
+                        />
                     )}
-                </div>
 
-                {/* Assessment badge */}
-                <div className="px-4 py-2 border-t border-panel-border flex items-center gap-3">
-                    <span className="text-xs uppercase font-bold text-neutral-500">{t('operationBriefing.commanderAssessment')}</span>
-                    <AssessmentBadge assessment={assessment} />
-                    {postponements > 0 && (
-                        <span className="text-xs text-neutral-400">({t(postponements === 1 ? 'operationBriefing.priorPostponements.one' : 'operationBriefing.priorPostponements.many', { count: postponements })})</span>
-                    )}
-                </div>
+                    {/* Force-launch (Level 3 Direct Intervention) is issued from the Presidential
+                        Decision Room (DirectiveCard, force_launch directive), not from this review
+                        modal. This surface is read-only commander-decision review. */}
+                </SurfaceModalBody>
 
-                {/* Delegation Visibility Wave 1: Decision Authority Path — shows who bears the
-                    decision burden. Silence = healthy: renders null for normal delegation.
-                    Only fires for planning-phase operations. */}
-                <DelegationPathIndicator delegation={delegationContext} />
-
-                {/* Wave 6: Readiness Trend — directional signal showing whether conditions
-                    are improving, stagnating, or deteriorating since last assessment.
-                    Silence = healthy: renders null when first-try launch. */}
-                <ReadinessTrendIndicator trend={operation.readinessTrend} />
-
-                {/* Wave 5: Recommendation Driver — shows WHY the commander recommends
-                    postpone/abort based on real assessment factors (intel, force ratio, supply).
-                    Silence = healthy: renders null when assessment is 'launch'. */}
-                <RecommendationDriverSection explanation={recommendationExplanation} />
-
-                {/* Wave 4: Corps Constraint Context — shows WHY the commander leans this way.
-                    Derived from the same situationAssessment as CorpsSituationSection (Army HQ).
-                    Silence = healthy: renders null when primaryConstraint === 'none'. */}
-                <OperationConstraintContext assessment={situationAssessment} />
-
-                {/* Order Interpretation Preview — fires even on clean approvals when strain > 0.
-                    Only in planning phase (decision-ready). DirectInterventionSection owns
-                    the override-cost display; this section owns pre-decision institutional context. */}
-                {operation.phase === 'planning' && corpsStrain != null && (
-                    <OrderInterpretationSection
-                        strain={corpsStrain}
-                        commanderAssessment={assessment as 'launch' | 'postpone' | 'abort' | null | undefined}
-                        primaryConstraint={situationAssessment?.primaryConstraint}
-                        trendDirection={operation.readinessTrend?.direction}
-                        postponementCount={postponements}
-                    />
-                )}
-
-                {/* Force-launch (Level 3 Direct Intervention) is issued from the Presidential
-                    Decision Room (DirectiveCard, force_launch directive), not from this review
-                    modal. This surface is read-only commander-decision review. */}
-
-                {/* Action buttons */}
-                <div className="px-4 py-3 border-t-2 border-panel-border bg-panel-card/70 flex gap-2 flex-wrap">
+                {/* Action footer */}
+                <SurfaceModalFooter className="justify-between">
                     {!isDecisionReady && (
-                        <div className="basis-full text-xs text-neutral-500 italic">
+                        <p className="m-0 basis-full text-[16px] text-[#c2b69c]">
                             {t('operationBriefing.reviewReadOnly')}
-                        </div>
+                        </p>
                     )}
                     {isDecisionReady && !commandBridgeAvailable && (
-                        <div className="basis-full text-xs text-neutral-500 italic">
+                        <p className="m-0 basis-full text-[16px] text-[#c2b69c]">
                             {t('attention.bridgeUnavailableReadOnly')}
-                        </div>
+                        </p>
                     )}
                     {isDecisionReady && (
-                        <>
+                        <div className="flex flex-wrap gap-3">
                             <button
                                 type="button"
                                 onClick={onLaunch}
                                 disabled={!commandBridgeAvailable}
-                                className="kbd-focus px-3 py-1.5 text-xs uppercase font-bold bg-green-600 hover:bg-green-700 text-white border border-green-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                                className={`kbd-focus ${SURFACE_PRIMARY_BUTTON_COMPACT}`}
                             >
                                 {t('operationBriefing.launchOperation')}
                             </button>
@@ -563,7 +562,7 @@ export function OperationBriefingModal({ isOpen, onClose, onLaunch, onPostpone, 
                                 type="button"
                                 onClick={onOrderProbe}
                                 disabled={!commandBridgeAvailable}
-                                className="kbd-focus px-3 py-1.5 text-xs uppercase font-bold bg-blue-600 hover:bg-blue-700 text-white border border-blue-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                                className={`kbd-focus ${SURFACE_SECONDARY_BUTTON}`}
                             >
                                 {t('operationBriefing.orderProbe')}
                             </button>
@@ -571,7 +570,7 @@ export function OperationBriefingModal({ isOpen, onClose, onLaunch, onPostpone, 
                                 type="button"
                                 onClick={onPostpone}
                                 disabled={!commandBridgeAvailable || postponements >= 2}
-                                className="kbd-focus px-3 py-1.5 text-xs uppercase font-bold bg-amber-950/50 hover:bg-amber-900/60 text-amber-100 border border-amber-500/60 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                                className={`kbd-focus ${SURFACE_SECONDARY_BUTTON}`}
                             >
                                 {t('operationBriefing.postpone')}{postponements >= 2 ? ` (${t('operationBriefing.maxReached')})` : ''}
                             </button>
@@ -579,21 +578,20 @@ export function OperationBriefingModal({ isOpen, onClose, onLaunch, onPostpone, 
                                 type="button"
                                 onClick={onAbort}
                                 disabled={!commandBridgeAvailable}
-                                className="kbd-focus px-3 py-1.5 text-xs uppercase font-bold bg-red-950/50 hover:bg-red-900/60 text-red-100 border border-red-500/60 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                                className="kbd-focus h-12 rounded-md border border-red-400/60 bg-red-950/50 px-5 text-[16px] font-semibold text-red-100 transition hover:bg-red-900/60 disabled:cursor-default disabled:opacity-45"
                             >
                                 {t('operationBriefing.abortOperation')}
                             </button>
-                        </>
+                        </div>
                     )}
-                    <div className="flex-1" />
                     <button
                         type="button"
                         onClick={onClose}
-                        className="kbd-focus px-3 py-1.5 text-xs uppercase font-bold bg-panel-card hover:bg-panel-border text-text-primary border border-panel-border transition-colors"
+                        className={`kbd-focus ${SURFACE_SECONDARY_BUTTON}`}
                     >
                         {t('common.close')}
                     </button>
-                </div>
+                </SurfaceModalFooter>
             </>
         </Modal>
     );

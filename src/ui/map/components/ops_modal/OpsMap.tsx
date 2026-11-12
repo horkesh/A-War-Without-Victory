@@ -123,6 +123,23 @@ export function OpsMap({
     const clickStateRef = useRef({ onOsidClick, enabled, validTargetOsids, selectableOsids });
     clickStateRef.current = { onOsidClick, enabled, validTargetOsids, selectableOsids };
 
+    // The map sits in the planning surface's left column, which changes size with the
+    // window (and the interface scale). Resize after layout, in rAF (ui_map life lesson).
+    useEffect(() => {
+        const container = mapContainerRef.current;
+        if (!container || typeof ResizeObserver === 'undefined') return;
+        let frame = 0;
+        const observer = new ResizeObserver(() => {
+            cancelAnimationFrame(frame);
+            frame = requestAnimationFrame(() => mapRef.current?.resize());
+        });
+        observer.observe(container);
+        return () => {
+            cancelAnimationFrame(frame);
+            observer.disconnect();
+        };
+    }, []);
+
     // Initialize map once
     useEffect(() => {
         if (!mapContainerRef.current || !loadedGameState) return;
@@ -390,19 +407,19 @@ export function OpsMap({
                         ? `<span style="color:#56d364">${t('opsModal.selectable')}</span>`
                         : `<span style="color:#f47068">${t('opsModal.outOfRange')}</span>`;
 
-                    let html = `<div style="font-size:12px;line-height:1.5;">`;
+                    let html = `<div style="font-size:14px;line-height:1.5;">`;
                     html += `<strong>${name}</strong> ${selLabel}<br>`;
-                    html += `<span style="color:#8b9bb0">${t('opsModal.heldBy')} </span>${controllerLabel}<br>`;
+                    html += `<span style="color:#b9ad94">${t('opsModal.heldBy')} </span>${controllerLabel}<br>`;
                     if (terrain) {
                         const elev = Math.round(terrain.elevation_mean_m);
                         const slope = Math.round(terrain.slope_index * 100);
                         const friction = terrain.terrain_friction_index;
                         const terrainType = friction > 0.5 ? t('opsModal.mountain') : friction > 0.3 ? t('opsModal.hilly') : friction > 0.15 ? t('opsModal.rolling') : t('opsModal.flat');
                         const defBonus = friction > 0.5 ? '+50%' : friction > 0.3 ? '+30%' : friction > 0.15 ? '+15%' : '—';
-                        html += `<span style="color:#8b9bb0">${t('opsModal.elevation')} </span>${elev}m`;
-                        html += ` <span style="color:#6b7d93">(${terrainType})</span><br>`;
-                        html += `<span style="color:#8b9bb0">${t('opsModal.slope')} </span>${slope}%`;
-                        html += ` <span style="color:#8b9bb0">${t('opsModal.defBonus')} </span>${defBonus}<br>`;
+                        html += `<span style="color:#b9ad94">${t('opsModal.elevation')} </span>${elev}m`;
+                        html += ` <span style="color:#9c917b">(${terrainType})</span><br>`;
+                        html += `<span style="color:#b9ad94">${t('opsModal.slope')} </span>${slope}%`;
+                        html += ` <span style="color:#b9ad94">${t('opsModal.defBonus')} </span>${defBonus}<br>`;
                         if (terrain.river_crossing_penalty > 0) {
                             html += `<span style="color:#58a6ff">${t('opsModal.riverCrossingPenalty')}</span><br>`;
                         }
@@ -519,11 +536,11 @@ export function OpsMap({
             </PhysicalRendererSurface>
             {/* WP4j: Compact map legend — Plan phase only */}
             {enabled && (
-                <div className="absolute bottom-4 left-4 z-20 pointer-events-auto
-                                bg-[rgba(20,18,15,0.85)] backdrop-blur-sm rounded-md
-                                border border-[rgba(180,160,130,0.15)] px-3 py-2 text-xs">
-                    <div className="text-accent-gold font-bold uppercase tracking-wider mb-1">{t('opsModal.legend')}</div>
-                    <div className="space-y-0.5 text-text-secondary">
+                <div className="absolute bottom-4 left-4 z-20 pointer-events-auto max-w-[calc(100%-2rem)]
+                                rounded-md border border-[#2a303c] bg-[#141821] px-4 py-3 text-[14px]
+                                shadow-[0_12px_40px_rgba(0,0,0,0.5)]">
+                    <div className="mb-1.5 font-mono text-[13px] font-semibold uppercase tracking-[0.16em] text-[#e0c27a]">{t('opsModal.legend')}</div>
+                    <div className="space-y-1 text-[#ddd1b3]">
                         <div><span className="inline-block w-2 h-2 rounded-full bg-red-800 mr-1" /> {t('opsPlanning.legend.objective')} &middot; <span className="text-accent-gold">&#9733;</span> {t('opsPlanning.compactLegend.schwerpunkt')} &middot; <span className="inline-block w-2 h-2 rounded-full bg-[#2d6a4f] mr-1" /> {t('opsPlanning.phase.staging')}</div>
                         <div><span className="inline-block w-3 h-0.5 bg-[rgba(255,220,120,0.8)] mr-1" /> {t('opsPlanning.compactLegend.corpsFront')} &middot; {t('opsPlanning.compactLegend.brightSelectable')} &middot; {t('opsPlanning.compactLegend.dimOutOfRange')}</div>
                     </div>
