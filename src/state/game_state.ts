@@ -2013,6 +2013,128 @@ export interface ProposalDecisionRecord extends PendingProposalReview {
     resolved_turn: number;
 }
 
+// ═══════════════════════════════════════════════════════════════════════════
+// Stance matters (posture model option 2, plan 2026-11-12-posture-model-option2-stance-matters.md)
+// At autonomy 2 a player-army corps or OG commander's stance change is reported to the
+// president, who may confirm, countermand or constrain it before the next turn. Silence =
+// the commander's choice stands. Written only on the live-president path
+// (src/sim/combat/stance_matters.ts isStanceMatterPathActive); absent in headless runs.
+// ═══════════════════════════════════════════════════════════════════════════
+
+export type StanceMatterScope = 'corps' | 'og';
+export type StanceMatterAnswer = 'confirm' | 'countermand' | 'constrain';
+/** Narrowing constraints drawn from the existing stance vocabulary. Corps: ceilings on CorpsStance. OG: allowed SectorStance subsets. */
+export type StanceMatterConstraint = 'ceiling_balanced' | 'ceiling_defensive' | 'no_active_defense' | 'hold_no_counterattacks';
+export type StanceMatterReason =
+    | 'reorganize_critical'
+    | 'threat_high'
+    | 'readiness_low'
+    | 'opportunity'
+    | 'doctrine'
+    | 'campaign_plan'
+    | 'army_directive'
+    | 'alliance_front'
+    | 'patron_ceiling'
+    | 'enemy_massing'
+    | 'situation_eased'
+    | 'other';
+
+export interface StanceMatter {
+    /** Deterministic: "STANCE_<turn>_<corpsId>" or "STANCE_<turn>_<corpsId>_og<n>". */
+    id: string;
+    turn: number;
+    faction: FactionId;
+    scope: StanceMatterScope;
+    corps_id: FormationId;
+    /** OG matters: the sector id at the time of the matter (positional; not stable across turns). */
+    sector_id?: string;
+    /** OG matters: hashed, sorted front-edge fingerprint used to follow the OG across sector rebuilds. */
+    sector_fingerprint?: string[];
+    from_stance: string;
+    to_stance: string;
+    /** Serving corps commander (named officer id) when the matter was raised. */
+    commander_officer_id?: string;
+    reason: StanceMatterReason;
+    /** Staff assessment figures (rounded): subordinate average cohesion, average strength share [0,1], sector threat. */
+    avg_cohesion?: number;
+    avg_strength?: number;
+    sector_threat?: number;
+    /** HRHB: ceiling imposed by the active Zagreb patron directive on this corps, when one applies. */
+    patron_ceiling?: CorpsStance;
+    /** Last turn the president can answer; the matter lapses as 'stood' when this turn resolves. */
+    deadline_turn: number;
+    /** Constraints that actually narrow the commander's choice. Empty when none apply. */
+    constraint_options: StanceMatterConstraint[];
+    /** False when this commander was countermanded within the overrule window; only confirm and constrain remain. */
+    countermand_allowed: boolean;
+    /** Preview of the countermand cost: Main Staff delay (turns) and patron_confidence shift. */
+    main_staff_delay_turns: number;
+    patron_shift: number;
+    /** Set by the desktop IPC; consumed by the resolve-stance-matters pipeline step. */
+    answer?: StanceMatterAnswer;
+    constraint?: StanceMatterConstraint;
+    answered_turn?: number;
+}
+
+export type StanceMatterOutcome =
+    | 'stood'
+    | 'confirmed'
+    | 'countermanded'
+    | 'constrained'
+    /** Change made by the commander but not put to the president (cap, cooldown or hold). */
+    | 'not_put'
+    /** A hold ended early: its OG dissolved, or the president's own operation order superseded it. */
+    | 'hold_lapsed';
+
+export interface StanceMatterReceipt {
+    id: string;
+    turn: number;
+    faction: FactionId;
+    scope: StanceMatterScope;
+    corps_id: FormationId;
+    sector_id?: string;
+    from_stance: string;
+    to_stance: string;
+    outcome: StanceMatterOutcome;
+    resolved_turn: number;
+    constraint?: StanceMatterConstraint;
+    /** First turn the hold applies (after any Main Staff delay). */
+    effective_from_turn?: number;
+    /** Last turn the hold applies. */
+    until_turn?: number;
+    main_staff_delay_turns?: number;
+    patron_shift?: number;
+    not_put_reason?: 'cap' | 'cooldown' | 'held';
+    lapse_reason?: 'og_dissolved' | 'presidential_operation' | 'autonomy_changed';
+}
+
+export interface PresidentialStanceHold {
+    matter_id: string;
+    faction: FactionId;
+    scope: StanceMatterScope;
+    corps_id: FormationId;
+    /** OG holds: fingerprint, refreshed each turn to the matched sector. */
+    sector_fingerprint?: string[];
+    /** 'fixed' = keep `stance` (countermand); 'ceiling' = narrow to `stance` (corps) or `allowed` (OG). */
+    mode: 'fixed' | 'ceiling';
+    stance?: string;
+    allowed?: SectorStance[];
+    effective_from_turn: number;
+    until_turn: number;
+}
+
+export interface StanceMatterState {
+    /** Player corps stance at the end of the last bot pass (the "before" for the next turn). */
+    last_corps_stance: Record<string, CorpsStance>;
+    /** Player OG stances at the end of the last bot pass, with fingerprints, sorted by (corps_id, fingerprint). */
+    last_og: Array<{ corps_id: FormationId; stance: SectorStance; fingerprint: string[] }>;
+    /** No new matter for a corps (and its OGs) before this turn. */
+    cooldown_until_by_corps: Record<string, number>;
+    /** Turn of the last countermand/constraint per corps (overrule window). */
+    last_overrule_turn_by_corps: Record<string, number>;
+    holds: PresidentialStanceHold[];
+}
+
 /**
  * World-level deterministic bookkeeping (Engine Invariants §11).
  * Conceptually "WorldState": current_turn (weeks), phase, seed.
@@ -2140,6 +2262,10 @@ export interface StateMeta {
     pending_proposal_reviews?: PendingProposalReview[];
     /** Durable Records receipt for resolved ordinary autonomy proposals. */
     proposal_decision_history?: ProposalDecisionRecord[];
+    /** Open (and just-answered) corps/OG stance matters for the president (autonomy 2, live only). */
+    stance_matters?: StanceMatter[];
+    /** Durable receipts of stance matters (bounded, sorted by resolved_turn then id). */
+    stance_matter_history?: StanceMatterReceipt[];
     /**
      * LANE-NIGHTSHIFT-N3 (D#2, 2026-05-03): frozen endgame snapshot.
      *
@@ -2803,6 +2929,8 @@ production_facilities?: Record<string, ProductionFacilityState>;
 logistics_priority?: Record<FactionId, Record<string, number>>;
 /** Sector-level defensive intent translated into brigade posture orders each turn. */
 sector_stance_orders?: SectorStanceOrder[];
+/** Stance-matter bookkeeping and presidential stance holds (live president at autonomy 2 only). @persistence optional-persisted */
+stance_matter_state?: StanceMatterState;
 /** Militia strength [0, 100] per municipality per faction; Peace-phase §4.2. */
 war_militia_strength?: Record<MunicipalityId, Record<FactionId, number>>;
 /** JNA withdrawal and asset transfer; Peace-phase §4.6. Does not start war. */
