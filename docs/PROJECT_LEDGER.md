@@ -14420,6 +14420,26 @@ Codex review on #567 (two P2 findings, both confirmed in code) and the advisory 
 - **Baseline pins.** `apr1992_188w` final save, run summary and weekly report hashes moved. Measured by running the scenario on main (matches the pins) and on this branch and comparing field by field: 0 numeric, 0 boolean, 0 structural differences; 15 (final save) and 10 (weekly report) string-only differences, all census spellings in event headlines and bodies (Bihać, Žepa, Glamoč, Busovača, Brčko, Višegrad, Ahmići, Velika Kladuša), plus the run summary's own state hash. Simulation unchanged. Re-blessed with `UPDATE_BASELINES=1 npm run test:baselines` (manifest: those 3 hashes only).
 - Gates: `tsc --noEmit` exit 0; `tests/ui` plus the counter and click-selection suites (see commit).
 
+## 2026-11-11 — Truthful command, step 1: brigade posture is the commander's, Orders becomes Command (UI)
+
+Owner-approved step 1 of `docs/40_reports/proposals/20261111_PLAYER_SURFACE_AND_AGENCY_REVIEW.md` (option 1, presentation only, no sim change). Rebuilt in a cloud session from the transcript of the local session that crashed with this work uncommitted; the review doc itself is restored from the same transcript.
+- Unit panel: brigade posture is labelled "Commander's posture:"; the unset value is now "Not yet set by the commander" (was "Awaiting first posture order", which read as a task the player could not do). Corps and army HQ panels share the new unset value.
+- The brigade Orders tab is renamed Command (non-brigades keep Orders). It names the commanding corps, keeps the delegated-command note (test id unchanged), adds an "Open this corps in Army HQ" button (`formation-detail-open-corps-hq`, opens the corps briefing), and lists the directives that reach the brigade.
+- Autonomy level descriptions rewritten to the engine: 0 staff issues no player orders; 1 staff runs orders, stance and operation proposals wait for approval, recruitment stays the player's; 2 (default) staff runs operations and recruitment without asking; 3 adds auto-resolution of event decisions with an authored historical response.
+- EN and BCS (BCS with diacritics, including the four autonomy strings that had lost them). Text 13 px or larger.
+- Gates: `npx tsc --noEmit` exit 0; affected files (formation_detail_parity, corps_detail_sector_truth, own_force_report_gap) 3/3 files, 57/57 tests including two new Command-tab tests; full `npm run test:vitest` exit 0 (only the deliberate child-process failure controls fail). Not rendered in the dev build or the packaged app.
+
+## 2026-11-12 — Truthful command step 1 rendered: two fixes from the screen check (UI)
+
+Local reconciliation after the 2026-11-11 crash: the crashed worktree's `FormationDetail.tsx` and the review doc are blob-identical to this branch (backup `backup/truthful-command-crash`, `23be14100`); the local copy lacked only the i18n keys and tests the cloud rebuild added, so the cloud branch is the base and nothing local was missing.
+
+Rendered in the dev build (RBiH, 6 Apr 1992, 1st Mountain Brigade) at 2293 × 960 and 1280 × 720 with a headless Playwright drive (script and images: `F:/AWWV-coordination/crash_recovery_20261112/truthful_command_shots_final/`). Command tab, "Commander's posture: Not yet set by the commander", "Open this corps in Army HQ" (opens the 1st Corps briefing) and the four autonomy descriptions all present at both sizes.
+- **Fixed: the overview still told the player a posture was coming.** Under the new posture line, the report-gap notice read "Staff returns incomplete - posture expected in a coming briefing" (review A1's second half). A brigade with no posture is not a missing staff return; the commander has not set one. Brigade posture is no longer listed as a report gap (corps stance still is). `tests/ui/own_force_report_gap.test.ts` pins it.
+- **Fixed: autonomy descriptions under the 13 px floor.** The Command Autonomy panel rendered every line at `text-xs` (12 px measured). All 19 uses are now `text-[13px]` (13 px measured at both sizes); new `tests/ui/autonomy_panel_text_floor.test.ts`.
+- Unit panel computed minimum font 13 px on both tabs at both sizes.
+- Seen, not changed here: at 1280 × 720 the Find pill overlaps the bottom of the right-hand autonomy panel; `12462b47e`-equivalent on `claude/r8-name-sweep-recovery` (right panels clear the Find button) covers it once both land. The 1st Corps' first OG reads "OG Bileća" (review M3), confirmed live; separate task. Lower-case municipality names in the Situation sidebar ("Aginci (bosanska dubica)") are the A5 name-sweep defect, fixed on the recovery branch.
+- Gates: `npx tsc --noEmit` exit 0; focused unit-panel and autonomy tests 9 files green; full suite reran on the final head (see the commit).
+
 ## 2026-11-12 — Campaign soundtrack: the first pass was already shuffled; guard tests added, no playback change (AUDIO, QA)
 
 The owner heard "the same track over and over" in tonight's packaged runs. Read from RS-08, the first pass of the eight-track campaign suite looked like a fixed order (what_the_maps_cannot_show → after_the_guns → a_country_before_dawn → …), and the owner approved the fix: "Sure, shuffle them." Measured before changing anything:
