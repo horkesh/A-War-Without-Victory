@@ -4535,6 +4535,25 @@ export const warPhases: NamedPhase[] = [
             log.length = 0;
         }
     },
+    {
+        // Turn-end clear of `CorpsCommandState.player_ordered_stance` (finding S4, 2026-11-12).
+        // The field documents "Cleared at turn end" and the level-1 reject IPC promises a
+        // one-turn hold (electron-main.cjs reject-proposal), but nothing cleared it, so a
+        // rejected corps stayed frozen and generateStanceMatters skipped it forever. Last war
+        // step, after every consumer (bot stance guard, level-1 proposal generation, stance
+        // matters). Touches only corps that carry the field: bots and headless runs never set
+        // it, so they are byte-identical. Old saves carrying it recover at the end of their
+        // next turn. Sorted iteration; no wall clock.
+        name: 'clear-player-ordered-stances',
+        run: (context) => {
+            const corpsCommand = context.state.military?.corps_command;
+            if (!corpsCommand) return;
+            for (const corpsId of Object.keys(corpsCommand).sort(strictCompare)) {
+                const cmd = corpsCommand[corpsId];
+                if (cmd && cmd.player_ordered_stance != null) delete cmd.player_ordered_stance;
+            }
+        },
+    },
 ];
 
 /**

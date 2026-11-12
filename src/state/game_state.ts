@@ -1078,7 +1078,7 @@ export interface CorpsCommandState {
     commander_state?: CommanderState;
     /** Turn number when command stabilization cooldown expires (Wave 4). Set after Stabilize action. */
     stabilization_cooldown_until?: number;
-    /** Player's raw ordered stance before officer interpretation. Set when player issues stance order. Cleared at turn end. */
+    /** Player's ordered stance (level-1 accept/reject of a SET_STANCE proposal). Holds for the turn it was issued; cleared at turn end by the `clear-player-ordered-stances` war step. */
     player_ordered_stance?: string | null;
     /** Formula bot's recommended stance computed this turn. Set by generateCorpsStanceOrders; read by Level 1 proposal generation. */
     ai_recommended_stance?: CorpsStance;
