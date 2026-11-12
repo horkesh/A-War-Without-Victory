@@ -636,7 +636,7 @@ const POCKET_GARRISON_KINDS: ReadonlySet<string> = new Set(['brigade', 'og', 'op
  * combat formation? Components are discovered lazily, so only unclaimed edge OSIDs pay for a
  * BFS. Deterministic: adjacency lists are sorted and the answer is a pure set-membership test.
  */
-function buildUnmannedPocketPredicate(
+export function buildUnmannedPocketPredicate(
     state: SectorTopologyNarrowReadState,
     faction: FactionId,
     adjacency: Map<Osid, Osid[]>,
