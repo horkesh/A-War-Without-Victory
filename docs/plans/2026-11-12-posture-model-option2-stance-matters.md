@@ -1,6 +1,6 @@
 # Posture model option 2: corps and OG stance matters for the president
 
-**Status.** Active plan, 2026-11-12, revision 2 (panel round-1 conditions integrated). Owner chose option 2 on 2026-11-12 (review `docs/40_reports/proposals/20261111_PLAYER_SURFACE_AND_AGENCY_REVIEW.md` §2). Implementation branch `claude/stance-proposals-a2b85d`, stacked on `claude/truthful-command` (step 1, unmerged; merge that first) so the step-1 copy is corrected in the same change. Panel record: `docs/40_reports/governance/20261112_POSTURE_MODEL_OPTION2_PANEL.md` (covers the FORAWWV §XII amendment by name).
+**Status.** Active plan, 2026-11-12, revision 3 (panel rounds 1 and 2 integrated; unanimous sign-off). Owner chose option 2 on 2026-11-12 (review `docs/40_reports/proposals/20261111_PLAYER_SURFACE_AND_AGENCY_REVIEW.md` §2). Implementation branch `claude/stance-proposals-a2b85d`, stacked on `claude/truthful-command` (step 1, unmerged; merge that first) so the step-1 copy is corrected in the same change. Panel record: `docs/40_reports/governance/20261112_POSTURE_MODEL_OPTION2_PANEL.md` (covers the FORAWWV §XII amendment by name).
 
 ## Outcome
 
@@ -98,6 +98,25 @@ Nothing defers or replays a commander's decision, so a run with no answers follo
 7. Before merge (owner schedules, not run here): 188-week validation and `npm run test:baselines`.
 
 **Wait gate.** Until `F:/AWWV-coordination/crash_recovery_20261112/shake_status.txt` contains `hrhb03_exit`: reading, design, plan, panels and code editing only; checks 1 and 3-6 wait.
+
+## Rev 3: round-2 conditions (binding; they override earlier text where they differ)
+
+- **Overrule window key.** Keyed to the corps id in `stance_matter_state.last_overrule_turn_by_corps`, never cleared by a level change or a change of commander (red-team 7; game-designer residual on the 2→1→2 round trip).
+- **No cowing from stance overrules.** A stance overrule calls a new `recordPresidentialStanceOverrule` in `order_interpretation.ts`: it sets `last_override_turn` and appends `recent_overrides` (officer-resentment receipts) but does not increment `override_count`, so stance overrules can never combine with Stop-op or force-op to cow a commander into compliance (red-team 8). The costs that bite are the eight-week Confirm-only window, the RS delay, the HRHB patron shift and the record.
+- **Army stance override.** When `army_stance[faction]` is set and not `balanced`, `getEffectiveCorpsStance` ignores the corps stance, so no corps matter is raised; the change is recorded `not_put` with reason `army_stance` (red-team 4).
+- **Answers and level changes.** The IPC refuses answers unless the level is 2. An answer recorded before a level change lapses as `answered_lapsed`, never `stood` (red-team 6).
+- **Patron ordering.** Constraint options are computed from the stance after the Zagreb ceiling. An HRHB overrule costs `patron_confidence` only when the held stance differs from what the directive already forces (red-team 9).
+- **Baselines.** `last_corps_stance` and `last_og` refresh at the end of every live turn at any level (player set, not auto-control), after the final clamp, so the held stance is the baseline and a re-entered level 2 raises no stale matter (red-team 10; corps-commander residual c).
+- **OG matching** is one-to-one, greedy by Jaccard then `strictCompare` on the recorded fingerprint, on copies of sector data (red-team 11; scenario-tester). FNV-1a over UTF-8 bytes, unsigned 32-bit, rendered as fixed-width hex (so lexical order is numeric), de-duplicated (systems residual).
+- **Hold suspended.** When an OG hold is skipped because a live operation runs in it, the hold records `suspended_turn`; the panel and the receipt say "hold suspended: an operation is running here" (red-team 5). A corps hold does not stop a running operation, and the corps panel says so.
+- **Delayed countermand copy.** A delayed receipt states the stance actually in force during the delay and the week the order takes effect. No copy says or implies the president "tried to stop" anything (red-team 2; historian).
+- **Attribution firewall.** A test proves condemnation, attribution, the Pyrrhic grade and the verdict are identical with and without stance-matter records and holds, and a guard test fails if any grade, condemnation or verdict module imports `stance_matters.ts` or reads the new fields (red-team 1).
+- **Clamp placement.** The OG clamp runs at the end of the faction pass, outside the `if (spatial)` block. The `getEffectiveCorpsStance` cap starts at the hold's effective-from turn. The OG intersection uses the clamped corps stance. A missing army-commander stubbornness counts as 0 (followed). Every hold read returns early when `stance_matter_state` is absent (corps-commander a-d; historian a; systems 1).
+- **Generation writes only the three new fields** (no lazy init elsewhere, no re-sorting of live sector arrays), proven by deep-equal after stripping across an OG renumbering (scenario-tester 2).
+- **Advance.** An open matter never blocks advance or triggers auto-pause; test in `player_decision_manifest` and the desktop advance check (scenario-tester 1).
+- **Proof additions.** Headless `final_save.json` contains no `stance_matter` key. Live: RS 26 turns and HRHB 20 turns with `desktop_calibration_compare.ts --autonomy-level production --event-policy bot_equivalent --final-save-dir`; strip by loading the final save, deleting `meta.stance_matters`, `meta.stance_matter_history`, `military.stance_matter_state`, re-serialising with `serializeState`, sha256; equal per-turn control counts and stripped sha, matters > 0 on the branch (scenario-tester 3-4). The script lives at `tools/diagnostics/stance_matter_strip_compare.ts`.
+- **Canon text.** FORAWWV §XII.1 adds: decisions taken under delegation are the president's; delegation, silence, Main Staff delay and patron limits never transfer responsibility; silence is the calibration path and holds exist only after a presidential answer (red-team 3; scenario-tester 5; historian b). Rulebook line 13 says answering a stance matter is review inside command-through-generals, not a sixth lever. PTG row 254 (sector override) is corrected: no live president-approval path exists (canon residuals 1-2).
+- **Deferral.** 188w and `test:baselines` are deferred to the owner only because headless byte identity holds by construction; if any headless sha differs, the 188w run is required before merge. The ledger notes that live-harness full-state hashes now include matter records (scenario-tester 6-7).
 
 ## Completion
 
