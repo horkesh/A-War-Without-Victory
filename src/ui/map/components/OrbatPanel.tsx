@@ -15,6 +15,7 @@ import { resolveCurrentSectorForFormation } from '../utils/sectorUtils';
 import { compareLocalizedFormationNames } from '../data/formationNameLocalizations';
 import { getPlayerSafeCorpsName, getPlayerSafeMilitaryFactionName } from '../utils/playerSafeText';
 import { formatReportedPersonnel, sumReportedPersonnel } from '../utils/reportedMetrics';
+import { isHeldOg } from '../utils/heldOg';
 
 export function OrbatPanel() {
     const [locale] = useLocale();
@@ -57,6 +58,8 @@ export function OrbatPanel() {
             (s) => s.corps_id === selectedOrbatCorpsId
         );
     }, [loadedGameState?.corpsFrontSectors, selectedOrbatCorpsId]);
+    // Owner ruling M3: the summary names and counts real OGs only (one or more brigades).
+    const heldOgSectors = useMemo(() => corpsSectors.filter(isHeldOg), [corpsSectors]);
 
     const sectorIdByBrigadeId = useMemo(() => {
         const map = new Map<string, string>();
@@ -183,8 +186,8 @@ export function OrbatPanel() {
 
             <div className="shrink-0 border-t border-[#262b35] bg-[#12161e] px-5 py-3">
                 <p className="m-0 text-[14px] leading-snug text-[#b9ad94]">
-                    {corpsSectors.length > 0
-                        ? t('orbat.sectorSummary', { count: corpsSectors.length, sectors: corpsSectors.map((s) => getPlayerFacingSectorName(s.sector_id, corpsSectors)).join(', ') })
+                    {heldOgSectors.length > 0
+                        ? t('orbat.sectorSummary', { count: heldOgSectors.length, sectors: heldOgSectors.map((s) => getPlayerFacingSectorName(s.sector_id, corpsSectors)).join(', ') })
                         : t('orbat.noActiveSectors')
                     }
                 </p>

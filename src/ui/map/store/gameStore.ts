@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import type { LoadedGameState } from '../data/types';
 import { parseGameState } from '../data/GameStateAdapter';
+import { loadOsidAdjacency } from '../data/DataLoader';
 import { shouldMarkPeaceWarTransitionSeenOnLoad } from '../data/peaceWarTransitionGate';
 import type { TurnAftermathDigest, TurnAftermathView } from '../data/turnAftermath';
 import type { ArmyHQRecordsSubTab } from '../../shared/shellHandoff';
@@ -368,6 +369,26 @@ const CLEARED_OPERATION_CONTEXT = {
   isOperationsPanelOpen: false,
   operationTargetOsids: [] as string[],
 };
+
+// M3 (2026-11-12): OSID contact adjacency for the adapter's isolated-pocket view rule. Loaded once
+// (DataLoader caches it), awaited at most POCKET_ADJACENCY_WAIT_MS per load, never required.
+const POCKET_ADJACENCY_WAIT_MS = 3000;
+let pocketAdjacency: ReadonlyMap<string, readonly string[]> | null = null;
+let pocketAdjacencyRequest: Promise<void> | null = null;
+
+function requestPocketAdjacency(): Promise<void> {
+  if (pocketAdjacency || typeof fetch !== 'function') return Promise.resolve();
+  if (!pocketAdjacencyRequest) {
+    pocketAdjacencyRequest = loadOsidAdjacency()
+      .then((adjacency) => { pocketAdjacency = adjacency; })
+      .catch(() => { pocketAdjacencyRequest = null; });
+  }
+  const request = pocketAdjacencyRequest;
+  return new Promise<void>((resolve) => {
+    const timer = setTimeout(resolve, POCKET_ADJACENCY_WAIT_MS);
+    void request.then(() => { clearTimeout(timer); resolve(); });
+  });
+}
 
 export const useGameStore = create<GameStore>((set, get) => ({
   devMode: isDevMode(),
@@ -834,7 +855,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
         }
       };
 
-      schedule(() => {
+      // M3 (2026-11-12): wait once for the cached OSID adjacency so the adapter can leave
+      // unreachable brigade-less pockets out of every corps list. A failed fetch resolves
+      // without it; the load never blocks on it.
+      void requestPocketAdjacency().then(() => schedule(() => {
         const fingerprint = buildStateFingerprint(jsonOrText);
         const previousLoadedGameState = get().loadedGameState;
         let state: LoadedGameState;
@@ -862,6 +886,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
             ...(pendingSequence ? { replaySaveSequence: pendingSequence } : {}),
             ...(pendingManifest ? { replaySaveManifest: pendingManifest } : {}),
             ...(get().runtimeFeatureFlags ? { runtimeFeatureFlags: get().runtimeFeatureFlags ?? undefined } : {}),
+            ...(pocketAdjacency ? { osidAdjacency: pocketAdjacency } : {}),
           });
         } catch (e) {
           const message = e instanceof Error ? e.message : String(e);
@@ -956,7 +981,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
             reject(e);
           }
         });
-      });
+      }));
     });
   },
   loadSaveIfChanged: async (jsonOrText: unknown | string) => {

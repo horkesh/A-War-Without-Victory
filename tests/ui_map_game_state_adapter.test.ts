@@ -13,6 +13,7 @@ import {
 } from '../src/ui/map/data/presidentialDecisionRoom.js';
 import { buildReserveRequestSummary } from '../src/ui/map/data/reserveRequestPresentation.js';
 import { setLocale } from '../src/ui/map/i18n/index.js';
+import { isHeldOg } from '../src/ui/map/utils/heldOg.js';
 import { extractWarData } from '../src/ui/warroom/data/war_data_extractor.js';
 import { getOperationalSitrepView } from '../src/ui/shared/operational_sitrep_views.js';
 import { readFileSync } from 'node:fs';
@@ -3094,6 +3095,145 @@ test('M3: reserve-only or rear-only brigades still make the sector an OG', () =>
     const rearOnly = sectorState('arbih_2nd_corps', ['tuzla'], []);
     rearOnly.military.corps_front_sectors.s0.rear_brigade_ids = ['x1'];
     assert.strictEqual(parseGameState(rearOnly).corpsFrontSectors?.[0]?.display_name, 'OG Tuzla');
+});
+
+// M3 isolated pockets. Map: main RBiH front M1-M2 (brigade b_main at M1), RS ring E1/E2, RBiH
+// island I1 touching only E2, and RBiH C1 connected to M2 (reachable).
+function pocketState(opts: { islandBrigade?: boolean }): any {
+    const sector = (id: string, friendly: string, assigned: string[]) => ({
+        sector_id: id, corps_id: 'arbih_2nd_corps', faction: 'RBiH', opposing_factions: ['RS'],
+        edge_ids: ['e_' + id], territory_osids: [friendly],
+        sub_segments: [{ sub_segment_id: 'ss_' + id, edge_ids: ['e_' + id], friendly_osids: [friendly], enemy_osids: [] }],
+        length_edges: 1, assigned_brigade_ids: assigned, reserve_brigade_ids: [],
+        density: 0, threat_ratio: 0, defensive_power: 0, sector_stance: 'defend', stance_source: 'bot',
+    });
+    const brigade = (location: string) => ({ faction: 'RBiH', kind: 'brigade', status: 'active', created_turn: 0, location_osid: location, corps_id: 'arbih_2nd_corps', tags: [] });
+    return {
+        meta: { turn: 5, phase: 'war' },
+        military: {
+            formations: {
+                arbih_2nd_corps: { faction: 'RBiH', name: '2nd Corps', kind: 'corps', status: 'active', created_turn: 0, tags: [] },
+                b_main: brigade('op:tuzla:m1'),
+                ...(opts.islandBrigade ? { b_island: brigade('op:zvornik:i1') } : {}),
+            },
+            corps_front_sectors: {
+                main: sector('sector:arbih_2nd_corps:1', 'op:tuzla:m2', ['b_main']),
+                island: sector('sector:arbih_2nd_corps:0', 'op:zvornik:i1', opts.islandBrigade ? ['b_island'] : []),
+                connected: sector('sector:arbih_2nd_corps:2', 'op:kalesija:c1', []),
+            },
+        } as any,
+        political: { political_controllers: {
+            'op:tuzla:m1': 'RBiH', 'op:tuzla:m2': 'RBiH', 'op:zvornik:i1': 'RBiH', 'op:kalesija:c1': 'RBiH',
+            'op:zvornik:e1': 'RS', 'op:zvornik:e2': 'RS',
+        } } as any,
+    };
+}
+const pocketAdjacency = new Map<string, string[]>([
+    ['op:tuzla:m1', ['op:tuzla:m2']],
+    ['op:tuzla:m2', ['op:tuzla:m1', 'op:zvornik:e1', 'op:zvornik:e2', 'op:kalesija:c1']],
+    ['op:kalesija:c1', ['op:tuzla:m2']],
+    ['op:zvornik:e1', ['op:tuzla:m2']],
+    ['op:zvornik:e2', ['op:tuzla:m2', 'op:zvornik:i1']],
+    ['op:zvornik:i1', ['op:zvornik:e2']],
+]);
+
+test('M3: an unreachable brigade-less pocket is not listed under any corps (with adjacency)', () => {
+    const parsed = parseGameState(pocketState({}), { osidAdjacency: pocketAdjacency });
+    const ids = (parsed.corpsFrontSectors ?? []).map((s) => s.sector_id).sort();
+    assert.deepStrictEqual(ids, ['sector:arbih_2nd_corps:1', 'sector:arbih_2nd_corps:2']);
+    assert.deepStrictEqual(parsed.hiddenIsolatedPocketSectorIds, ['sector:arbih_2nd_corps:0']);
+    // The reachable brigade-less sector is listed, as an unheld front.
+    const connected = parsed.corpsFrontSectors?.find((s) => s.sector_id === 'sector:arbih_2nd_corps:2');
+    assert.strictEqual(connected?.display_name, 'Unheld front near Kalesija');
+    assert.strictEqual(connected?.unheld_front, true);
+});
+
+test('M3: an isolated pocket with exactly one brigade is an OG and stays listed', () => {
+    const parsed = parseGameState(pocketState({ islandBrigade: true }), { osidAdjacency: pocketAdjacency });
+    const island = parsed.corpsFrontSectors?.find((s) => s.sector_id === 'sector:arbih_2nd_corps:0');
+    assert.strictEqual(island?.display_name, 'OG Zvornik');
+    assert.strictEqual(island?.unheld_front, undefined);
+    assert.strictEqual(parsed.hiddenIsolatedPocketSectorIds, undefined);
+});
+
+test('M3: without adjacency the pocket stays listed, named as an unheld front', () => {
+    const parsed = parseGameState(pocketState({}));
+    const island = parsed.corpsFrontSectors?.find((s) => s.sector_id === 'sector:arbih_2nd_corps:0');
+    assert.strictEqual(island?.display_name, 'Unheld front near Zvornik');
+    assert.strictEqual(parsed.hiddenIsolatedPocketSectorIds, undefined);
+});
+
+// M3 (a): duplicate unheld-front names get one distinct qualifier and never repeat the place.
+function unheldDupState(fronts: Array<{ id: string; osids: string[] }>): any {
+    const corps_front_sectors: Record<string, unknown> = {};
+    for (const front of fronts) {
+        corps_front_sectors[front.id] = {
+            sector_id: front.id, corps_id: 'arbih_1st_corps', faction: 'RBiH', opposing_factions: ['RS'],
+            edge_ids: ['e_' + front.id], territory_osids: front.osids,
+            sub_segments: [{ sub_segment_id: 'ss_' + front.id, edge_ids: ['e_' + front.id], friendly_osids: front.osids, enemy_osids: [] }],
+            length_edges: 1, assigned_brigade_ids: [], reserve_brigade_ids: [],
+            density: 0, threat_ratio: 0, defensive_power: 0, sector_stance: 'defend', stance_source: 'bot',
+        };
+    }
+    return {
+        meta: { turn: 5, phase: 'war' },
+        military: {
+            formations: { arbih_1st_corps: { faction: 'RBiH', name: '1st Corps', kind: 'corps', status: 'active', created_turn: 0, tags: [] } },
+            corps_front_sectors,
+        } as any,
+        political: { political_controllers: {} } as any,
+    };
+}
+
+test('M3: duplicate unheld fronts get a distinct municipality qualifier, never the place again', () => {
+    const parsed = parseGameState(unheldDupState([
+        { id: 'sector:arbih_1st_corps:9', osids: ['op:cajnice:a', 'op:cajnice:b', 'op:gorazde:c'] },
+        { id: 'sector:arbih_1st_corps:17', osids: ['op:cajnice:d', 'op:cajnice:e', 'op:foca:f'] },
+        { id: 'sector:arbih_1st_corps:3', osids: ['op:gorazde:g'] },
+    ]));
+    const byId = new Map((parsed.corpsFrontSectors ?? []).map((s) => [s.sector_id, s.display_name]));
+    assert.strictEqual(byId.get('sector:arbih_1st_corps:17'), 'Unheld front near Čajniče (Foča)');
+    assert.strictEqual(byId.get('sector:arbih_1st_corps:9'), 'Unheld front near Čajniče (Goražde)');
+    // A unique unheld-front name is left alone.
+    assert.strictEqual(byId.get('sector:arbih_1st_corps:3'), 'Unheld front near Goražde');
+    for (const name of byId.values()) {
+        assert.ok((name.match(/Čajniče/g) ?? []).length <= 1, `place repeated in "${name}"`);
+    }
+    assert.strictEqual(new Set(byId.values()).size, byId.size, 'names must be unique within the faction');
+});
+
+test('M3: duplicate unheld fronts with no distinct municipality fall back to ordinals (EN and BCS)', () => {
+    const fronts = [
+        { id: 'sector:arbih_1st_corps:9', osids: ['op:cajnice:a'] },
+        { id: 'sector:arbih_1st_corps:17', osids: ['op:cajnice:b'] },
+    ];
+    const en = parseGameState(unheldDupState(fronts));
+    assert.deepStrictEqual(
+        (en.corpsFrontSectors ?? []).map((s) => s.display_name).sort(),
+        ['Unheld front near Čajniče I', 'Unheld front near Čajniče II'],
+    );
+    try {
+        setLocale('bcs');
+        const bcs = parseGameState(unheldDupState(fronts));
+        assert.deepStrictEqual(
+            (bcs.corpsFrontSectors ?? []).map((s) => s.display_name).sort(),
+            ['Nebranjeni front (Čajniče) I', 'Nebranjeni front (Čajniče) II'],
+        );
+    } finally {
+        setLocale('en');
+    }
+});
+
+// M3 (b): every "OGs" count counts real OGs only (one or more brigades).
+test('M3: heldOgCountByCorps counts only sectors with brigades and never hidden pockets', () => {
+    const parsed = parseGameState(pocketState({}), { osidAdjacency: pocketAdjacency });
+    // main (b_main) is an OG; connected brigade-less is an unheld front; island pocket is hidden.
+    assert.deepStrictEqual(parsed.heldOgCountByCorps, { arbih_2nd_corps: 1 });
+    const withIslandBrigade = parseGameState(pocketState({ islandBrigade: true }), { osidAdjacency: pocketAdjacency });
+    assert.deepStrictEqual(withIslandBrigade.heldOgCountByCorps, { arbih_2nd_corps: 2 });
+    const visible = parsed.corpsFrontSectors ?? [];
+    assert.strictEqual(visible.filter(isHeldOg).length, 1);
+    assert.strictEqual(visible.length, 2, 'the unheld front is listed but not counted');
 });
 
 test('ADR-0006: attested OG/TG/OZ names resolve from corps + region (display-only)', () => {

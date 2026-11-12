@@ -27,6 +27,7 @@ import { t, useLocale, type MessageKey } from '../i18n';
 import { getLocalizedFormationName } from '../data/formationNameLocalizations';
 import { inspectOnField, openArmyHQBriefingForCorps } from '../utils/shellNavigation';
 import { resolveCurrentSectorForFormation } from '../utils/sectorUtils';
+import { sectorLabelNeedsTypePrefix } from '../utils/sectorTypePrefix';
 import { buildMunicipalityDisplayNameMap, getMunicipalityDisplayName } from '../utils/municipalityDisplayName';
 import { SURFACE_CHIP, SURFACE_TONE, SurfaceSection } from './surface/Surface';
 import {
@@ -431,7 +432,9 @@ export function FormationDetail({ breadcrumb }: FormationDetailProps) {
                       value={sectorLabel}
                       detail={role}
                       hint={sectorLabel}
-                      aria-label={t('formationDetail.inspectSector', { sector: sectorLabel })}
+                      aria-label={sectorLabelNeedsTypePrefix(sectorLabel, (currentSector as { unheld_front?: boolean }).unheld_front === true)
+                        ? t('formationDetail.inspectSector', { sector: sectorLabel })
+                        : t('formationDetail.inspectSectorNamed', { sector: sectorLabel })}
                       onClick={() => inspectOnField(useGameStore.getState(), {
                         kind: 'field-formation-in-sector',
                         formationId: selectedFormationId,

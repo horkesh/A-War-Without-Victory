@@ -57,6 +57,7 @@ import { hideWithdrawnEmptySyntheticJnaCommands } from './syntheticJnaCommandVis
 import { getMunicipalitySupportLabel } from '../../../sim/combat/municipality_support.js';
 import { splitKiaWiaMia } from '../../../sim/combat/attack_casualty_distribution.js';
 import { strictCompare } from '../../../state/validateGameState.js';
+import { countHeldOgsByCorps } from '../utils/heldOg.js';
 import { computeFullVerdict } from '../../../sim/negotiation/scoring.js';
 import { DIMENSION_WEIGHTS } from '../../../sim/events/strategic_dimensions.js';
 import type { GameVerdict } from '../../../state/negotiation_types.js';
@@ -749,6 +750,106 @@ export function disambiguateSectorDisplayNames(
     }
 }
 
+const UNHELD_FRONT_ORDINALS = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'];
+
+/**
+ * M3: two unheld fronts of one faction must not share a name, and an unheld-front name never
+ * repeats its place ("Unheld front near Čajniče I (Čajniče)" was seen after a branch merge).
+ * Within each faction's group of identical unheld-front names (sector-id order), every sector
+ * takes the first municipality of its own coverage ranking that is not the place and is not
+ * taken by another member: "Unheld front near Čajniče (Goražde)". If any member has none, the
+ * whole group gets roman ordinals instead: "Unheld front near Čajniče II". Names that are
+ * already unique are left alone, so a later generic OG disambiguation pass finds nothing to
+ * qualify. Display-only.
+ */
+export function disambiguateUnheldFrontNames(
+    sectors: CorpsFrontSectorView[],
+    rankedMunNamesBySector: Map<string, string[]>,
+): void {
+    const groups = new Map<string, CorpsFrontSectorView[]>();
+    for (const sector of sectors) {
+        if (!sector.unheld_front) continue;
+        const key = `${sector.faction}\u0000${sector.display_name}`;
+        const group = groups.get(key);
+        if (group) group.push(sector);
+        else groups.set(key, [sector]);
+    }
+    for (const group of groups.values()) {
+        if (group.length < 2) continue;
+        group.sort((a, b) => strictCompare(a.sector_id, b.sector_id));
+        const place = group[0]!.front_place_name;
+        const taken = new Set<string>();
+        const qualifiers = group.map((sector) => {
+            const pick = (rankedMunNamesBySector.get(sector.sector_id) ?? [])
+                .find((name) => name !== place && !taken.has(name));
+            if (pick) taken.add(pick);
+            return pick;
+        });
+        const allQualified = qualifiers.every((q): q is string => typeof q === 'string');
+        group.forEach((sector, index) => {
+            const ordinal = UNHELD_FRONT_ORDINALS[index] ?? String(index + 1);
+            if (place) {
+                sector.display_name = allQualified
+                    ? t('corpsFront.unheldFrontNearQualified', { place, qualifier: qualifiers[index]! })
+                    : t('corpsFront.unheldFrontNearOrdinal', { place, ordinal });
+            } else {
+                sector.display_name = t('corpsFront.unheldFrontOrdinal', { ordinal });
+            }
+        });
+    }
+}
+
+/** Formation kinds that can hold a front (mirrors the engine's sector roster kinds). */
+const POCKET_GARRISON_KINDS: ReadonlySet<string> = new Set(['brigade', 'og', 'operational_group', 'hv_phantom']);
+
+/**
+ * Owner ruling M3 (2026-11-12): "If it's an isolated pocket, ie one that is unreachable, then it
+ * should automatically not be an OG." Display-only predicate: true when EVERY given friendly
+ * OSID lies in a friendly connected area (OSID contact adjacency + political control) that holds
+ * no active friendly brigade / OG / HV phantom — i.e. no friendly unit can reach it overland.
+ * Areas are discovered lazily and memoized per faction; adjacency order does not affect the answer.
+ */
+function buildIsolatedUnmannedPocketPredicate(
+    controllers: Record<string, string | null | undefined> | undefined,
+    formations: Record<string, Record<string, unknown>>,
+    adjacency: ReadonlyMap<string, readonly string[]>,
+): (faction: string, osids: readonly string[]) => boolean {
+    const pc = controllers ?? {};
+    const garrisoned = new Map<string, Set<string>>();
+    for (const formation of Object.values(formations)) {
+        const faction = typeof formation.faction === 'string' ? formation.faction : '';
+        const location = typeof formation.location_osid === 'string' ? formation.location_osid : '';
+        if (!faction || !location || formation.status !== 'active') continue;
+        const kind = typeof formation.kind === 'string' ? formation.kind : undefined;
+        if (kind !== undefined && !POCKET_GARRISON_KINDS.has(kind)) continue;
+        let set = garrisoned.get(faction);
+        if (!set) { set = new Set(); garrisoned.set(faction, set); }
+        set.add(location);
+    }
+    const unmannedByFactionOsid = new Map<string, boolean>();
+    const isUnmanned = (faction: string, start: string): boolean => {
+        const key = `${faction}::${start}`;
+        const known = unmannedByFactionOsid.get(key);
+        if (known !== undefined) return known;
+        if (pc[start] !== faction) return false;
+        const factionGarrison = garrisoned.get(faction);
+        const component: string[] = [start];
+        const seen = new Set<string>([start]);
+        let manned = factionGarrison?.has(start) ?? false;
+        for (let head = 0; head < component.length; head++) {
+            for (const nb of adjacency.get(component[head]!) ?? []) {
+                if (seen.has(nb) || pc[nb] !== faction) continue;
+                seen.add(nb);
+                component.push(nb);
+                if (factionGarrison?.has(nb)) manned = true;
+            }
+        }
+        for (const osid of component) unmannedByFactionOsid.set(`${faction}::${osid}`, !manned);
+        return !manned;
+    };
+    return (faction, osids) => osids.length > 0 && osids.every((osid) => isUnmanned(faction, osid));
+}
+
 function getAirdropAllocationValue(state: GameState, enclaveId: string): number {
     return finiteNumber((state.military.airdrop_allocation as Record<string, number> | undefined)?.[enclaveId]);
 }
@@ -996,6 +1097,12 @@ export interface ParseGameStateOptions {
     replaySaveManifest?: import('../../../sim/replay/replay_manifest.js').ReplaySaveManifest;
     /** Non-persisted runtime flags supplied by the desktop bridge. */
     runtimeFeatureFlags?: LoadedGameState['runtimeFeatureFlags'];
+    /**
+     * Optional OSID contact adjacency (DataLoader.loadOsidAdjacency). When present, the view
+     * drops brigade-less sectors that sit in a cut-off friendly pocket with no friendly brigade
+     * (owner ruling M3, 2026-11-12). Display-only; never touches engine state.
+     */
+    osidAdjacency?: ReadonlyMap<string, readonly string[]>;
 }
 
 /**
@@ -2559,9 +2666,17 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
     const opsecSectorSet = new Set(
         rawOpsecSectors.filter((value): value is string => typeof value === 'string')
     );
+    const hiddenIsolatedPocketSectorIds: string[] = [];
     if (rawSectors && typeof rawSectors === 'object' && !Array.isArray(rawSectors)) {
+        const isIsolatedUnmannedPocket = options?.osidAdjacency
+            ? buildIsolatedUnmannedPocketPredicate(
+                state.political?.political_controllers as Record<string, string | null | undefined> | undefined,
+                formationsRecord,
+                options.osidAdjacency,
+            )
+            : null;
         const out: CorpsFrontSectorView[] = [];
-        const sectorRankedMunNames = new Map<string, string[]>();
+        const rankedMunNamesBySector = new Map<string, string[]>();
         for (const sectorId of Object.keys(rawSectors).sort((a, b) => a.localeCompare(b))) {
             const s = rawSectors[sectorId] ?? {};
             const corpsId = typeof s.corps_id === 'string' ? s.corps_id : '';
@@ -2597,11 +2712,11 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
                     }
                 }
             }
-            const rankedMuns = [...munCounts.entries()]
+            const rankedMunNames = [...munCounts.entries()]
                 .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
                 .map(([m]) => humanizeMunicipalitySlug(m));
-            sectorRankedMunNames.set(sectorId, rankedMuns);
-            const topMuns = rankedMuns.slice(0, 2);
+            rankedMunNamesBySector.set(typeof s.sector_id === 'string' ? s.sector_id : sectorId, rankedMunNames);
+            const topMuns = rankedMunNames.slice(0, 2);
             // ADR-0006 Phase 3B: prefer the standing TG/OG identity (CorpsFrontSector.display_name,
             // e.g. "TG Drina", "1. OG (Tuzla)", "OZ Mostar") when present in state; otherwise fall
             // back to the computed "{corps} \u2013 {top muns}" label. This is the canonical UI
@@ -2628,6 +2743,16 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
             const unheldFront = assignedBrigadeIds.length === 0
                 && reserveBrigadeIds.length === 0
                 && rearBrigadeIds.length === 0;
+            // Owner ruling M3 (2026-11-12): an unreachable brigade-less pocket is not listed under
+            // any corps at all — hidden from OG lists, the order of battle and corps counts — not
+            // merely renamed. Needs the optional OSID adjacency; without it the sector stays
+            // visible as an unheld front.
+            if (unheldFront && isIsolatedUnmannedPocket?.(faction, [
+                ...subSegments.flatMap((ss) => (Array.isArray(ss.friendly_osids) ? ss.friendly_osids as string[] : [])),
+            ])) {
+                hiddenIsolatedPocketSectorIds.push(typeof s.sector_id === 'string' ? s.sector_id : sectorId);
+                continue;
+            }
             const displayName = unheldFront
                 ? (frontPlaceName
                     ? t('corpsFront.unheldFrontNear', { place: frontPlaceName })
@@ -2680,6 +2805,7 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
                 })),
             });
         }
+        disambiguateUnheldFrontNames(out, rankedMunNamesBySector);
         // Merge sector combat ratings if available
         const rawRatings = state.military.sector_combat_ratings as Record<string, Record<string, unknown>> | undefined;
         if (rawRatings && typeof rawRatings === 'object') {
@@ -2696,7 +2822,7 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
                 sv.combat_personnel = typeof r.personnel === 'number' ? r.personnel : undefined;
             }
         }
-        disambiguateSectorDisplayNames(out, sectorRankedMunNames);
+        disambiguateSectorDisplayNames(out, rankedMunNamesBySector);
         if (out.length > 0) corpsFrontSectors = out;
     }
 
@@ -2923,10 +3049,18 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
         displacementByOsid: Object.keys(displacementByOsid).length > 0 ? displacementByOsid : undefined,
         nationalDisplacement,
         fogOfWar,
-        sectorIntel: sectorIntelRecords.length > 0 ? sectorIntelRecords : undefined,
+        sectorIntel: (() => {
+            // Hidden isolated pockets (M3) are not listed anywhere, including threat assessment.
+            if (hiddenIsolatedPocketSectorIds.length === 0) return sectorIntelRecords.length > 0 ? sectorIntelRecords : undefined;
+            const hidden = new Set(hiddenIsolatedPocketSectorIds);
+            const visible = sectorIntelRecords.filter((record) => !hidden.has(record.friendly_sector_id));
+            return visible.length > 0 ? visible : undefined;
+        })(),
         movementOrdersSettlement: movementOrdersSettlement.length > 0 ? movementOrdersSettlement : undefined,
         repositionOrders: repositionOrders.length > 0 ? repositionOrders : undefined,
         corpsFrontSectors,
+        ...(hiddenIsolatedPocketSectorIds.length > 0 ? { hiddenIsolatedPocketSectorIds: [...hiddenIsolatedPocketSectorIds].sort((a, b) => a.localeCompare(b)) } : {}),
+        ...(corpsFrontSectors ? { heldOgCountByCorps: countHeldOgsByCorps(corpsFrontSectors) } : {}),
         unresolvedSectorBrigades: (() => {
             const raw = state.military?.unresolved_sector_brigades as string[] | undefined;
             if (!Array.isArray(raw) || raw.length === 0) return undefined;

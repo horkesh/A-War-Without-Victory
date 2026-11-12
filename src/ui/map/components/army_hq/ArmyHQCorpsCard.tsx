@@ -32,6 +32,7 @@ import { isWithdrawnEmptySyntheticJnaCommand } from '../../data/syntheticJnaComm
 import { t, type MessageKey } from '../../i18n';
 
 import { readinessGradeLabel, type ReadinessGrade } from './ForceReadiness';
+import { isHeldOg } from '../../utils/heldOg';
 
 interface ArmyHQCorpsCardProps {
     corps: FormationView;
@@ -119,6 +120,8 @@ export function ArmyHQCorpsCard({
     readinessGrade, hasThreat,
 }: ArmyHQCorpsCardProps) {
     const descriptionId = useId();
+    // Owner ruling M3: count real OGs only (one or more brigades), never unheld fronts.
+    const heldOgCount = sectors.filter(isHeldOg).length;
     const data = useMemo(() => {
         const personnelSummary = sumReportedPersonnel(brigades);
         const totalPersonnel = personnelSummary.reportedTotal;
@@ -382,7 +385,7 @@ export function ArmyHQCorpsCard({
                     </div>
                     <div className="flex flex-col">
                         <span className="text-[13px] text-text-secondary uppercase tracking-tighter">{t('armyHqCorps.front')}</span>
-                        <span className="text-text-secondary font-bold">{t('armyHqCorps.sectorShortCount', { count: sectors.length })}</span>
+                        <span className="text-text-secondary font-bold">{t('armyHqCorps.sectorShortCount', { count: heldOgCount })}</span>
                     </div>
                 </div>
 
@@ -515,7 +518,7 @@ export function ArmyHQCorpsCard({
                     <div className="flex items-center gap-3 text-[13px] tabular-nums font-mono text-text-secondary uppercase">
                         <span><b className="text-text-primary">{data.totalPersonnelLabel}</b> {t('armyHqCorps.personnelShort')}</span>
                         <span><b className="text-text-primary">{brigades.length}</b> {t('armyHqCorps.brigadeShort')}</span>
-                        <span><b className="text-text-primary">{sectors.length}</b> {t('armyHqCorps.sectorShort')}</span>
+                        <span><b className="text-text-primary">{heldOgCount}</b> {t('armyHqCorps.sectorShort')}</span>
                     </div>
                 </div>
             </div>

@@ -360,11 +360,12 @@ test('baked April 1992 HVO Bosnian Posavina frontage is not claimed by Central B
             corps_id: sector.corps_id,
         }));
 
-    // One owner, from the Posavina corps. The sector index is not the contract: M3 (2026-11-12)
-    // removed brigade-less island sectors that used to sit ahead of it in the numbering.
-    assert.strictEqual(owners.length, 1, JSON.stringify(owners));
-    assert.strictEqual(owners[0]!.corps_id, 'hvo_northwest_bosnia');
-    assert.match(owners[0]!.sector_id, /^sector:hvo_northwest_bosnia:\d+$/);
+    assert.deepStrictEqual(owners, [
+        {
+            sector_id: 'sector:hvo_northwest_bosnia:5',
+            corps_id: 'hvo_northwest_bosnia',
+        },
+    ]);
 }, 120_000);
 
 test('rebuilt April 1992 Bosanska Krupa frontage belongs to 2nd Krajina Corps', async () => {

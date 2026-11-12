@@ -27,6 +27,7 @@ import { isSectorAssignmentExemptCorpsId } from '../../../sim/combat/corps_front
 import { t, useLocale } from '../i18n';
 import { compareLocalizedFormationNames, getLocalizedFormationName } from '../data/formationNameLocalizations';
 import { buildSectorFormationAssignment, getSectorCoverageTier, type SectorCoverageTier } from '../utils/sectorUtils';
+import { isHeldOg } from '../utils/heldOg';
 
 const FACTION_ORDER = ['RS', 'RBiH', 'HRHB'] as const;
 
@@ -486,7 +487,7 @@ export function OOBSidebar() {
                                   onOrbatClick={corpsId !== '_ungrouped'
                                     ? () => setSelectedOrbatCorpsId(corpsId)
                                     : undefined}
-                                  sectorCount={corpsSectors.length}
+                                  sectorCount={corpsSectors.filter(isHeldOg).length}
                                   activeOperationName={displayedOp?.display_name}
                                   activeOperationPhase={displayedOp?.phase}
                                   activeOperationPhaseUnreported={displayedOp?.phase_unreported}
