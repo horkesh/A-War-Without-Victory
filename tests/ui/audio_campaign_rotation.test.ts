@@ -142,6 +142,55 @@ it('uses injected renderer randomness and avoids a repeated boundary even with i
   expect(random).toHaveBeenCalledTimes(21);
 });
 
+// Seeded test-only source so the first-pass assertions below are reproducible.
+const seeded = (seed: number) => () => {
+  seed = (seed + 0x6d2b79f5) | 0;
+  let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+  t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+  return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+};
+
+it('shuffles the first pass too: different random sources start a campaign on different tracks', () => {
+  const firstPasses = Array.from({ length: 32 }, (_, seed) => {
+    const next = createMusicShuffleBag(CAMPAIGN_MUSIC_IDS, seeded(seed + 1));
+    return Array.from({ length: 8 }, () => next());
+  });
+  for (const pass of firstPasses) expect(new Set(pass)).toEqual(new Set(CAMPAIGN_MUSIC_IDS));
+  // Owner 2026-11-12: every new campaign must not open on the same music.
+  expect(new Set(firstPasses.map(pass => pass[0])).size).toBeGreaterThanOrEqual(6);
+  expect(new Set(firstPasses.map(pass => pass.join('|'))).size).toBe(32);
+  // The first pass is never the fixed manifest order.
+  expect(firstPasses.some(pass => pass.join('|') !== CAMPAIGN_MUSIC_IDS.join('|'))).toBe(true);
+});
+
+it('draws the first pass from the default renderer randomness at first request', () => {
+  const spy = vi.spyOn(Math, 'random').mockReturnValue(0);
+  try {
+    // The bag shuffles lazily, at the first request, not at construction.
+    const lowFirst = createMusicShuffleBag(CAMPAIGN_MUSIC_IDS)();
+    spy.mockReturnValue(.999);
+    const highFirst = createMusicShuffleBag(CAMPAIGN_MUSIC_IDS)();
+    expect(lowFirst).not.toBe(highFirst);
+    expect(spy).toHaveBeenCalledTimes(14);
+  } finally { spy.mockRestore(); }
+});
+
+for (const value of [0, .999]) {
+  it(`plays the opening first and then a shuffled first campaign track (random=${value})`, async () => {
+    const spy = vi.spyOn(Math, 'random').mockReturnValue(value);
+    try {
+      bus.resetAudioForTests(); FakeAudio.elements = [];
+      const view = render(createElement(AudioSurfaceBedController, { appScreen: 'mainMenu' }));
+      fireEvent.pointerDown(window); await flush();
+      view.rerender(createElement(AudioSurfaceBedController, { appScreen: 'game' }));
+      expect(bus.getAudioState().requestedMusicId).toBe('opening_titles');
+      opening().finish(); await flush();
+      // random=0 and random=.999 produce different Fisher-Yates first passes.
+      expect(campaignId()).toBe(value === 0 ? 'campaign_lines_on_paper' : 'campaign_a_country_before_dawn');
+    } finally { spy.mockRestore(); }
+  });
+}
+
 it('ignores former-owner campaign events after remounting the same requested track', async () => {
   const first = await mountGame(); const old = current(); const id = campaignId();
   first.unmount();
