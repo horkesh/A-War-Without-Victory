@@ -16,8 +16,15 @@ import { OrbatPanel } from './components/OrbatPanel';
 import { OrderQueue } from './components/OrderQueue';
 import { Tooltip } from './components/Tooltip';
 import { SidePickerOverlay } from './components/SidePickerOverlay';
-import { RecruitmentModal } from './components/RecruitmentModal';
-import { AutonomyPanel } from './components/AutonomyPanel';
+// Lazy like AutonomyPanel below: mounted only while open (entry-chunk budget, 2026-11-12).
+const RecruitmentModal = lazy(() =>
+  import('./components/RecruitmentModal').then(m => ({ default: m.RecruitmentModal })),
+);
+// Lazy: mounted only while the president has it open, and it keeps the entry chunk under
+// the 3,000 kB warning (recruitment-on-desk lane, 2026-11-12).
+const AutonomyPanel = lazy(() =>
+  import('./components/AutonomyPanel').then(m => ({ default: m.AutonomyPanel })),
+);
 import { WarSummaryModal } from './components/WarSummaryModal';
 import { TurnAftermathModal } from './components/TurnAftermathModal';
 import { OperationBriefingModal } from './components/OperationBriefingModal';
@@ -1945,23 +1952,29 @@ function App() {
           decisionMode: 'emergent',
         })}
       />
-      <RecruitmentModal
-        isOpen={recruitmentOpen}
-        loading={recruitmentLoading}
-        applying={recruitmentApplying}
-        playerFaction={playerFaction}
-        brigades={recruitmentCatalog}
-        initialBrigadeId={recruitmentFocusBrigadeId}
-        onRefresh={() => void refreshRecruitmentCatalog()}
-        onApply={(brigadeId, equipmentClass) => void handleApplyRecruitment(brigadeId, equipmentClass)}
-        onClose={() => setRecruitmentOpen(false)}
-      />
+      {recruitmentOpen && (
+        <Suspense fallback={null}>
+          <RecruitmentModal
+            isOpen={recruitmentOpen}
+            loading={recruitmentLoading}
+            applying={recruitmentApplying}
+            playerFaction={playerFaction}
+            brigades={recruitmentCatalog}
+            initialBrigadeId={recruitmentFocusBrigadeId}
+            onRefresh={() => void refreshRecruitmentCatalog()}
+            onApply={(brigadeId, equipmentClass) => void handleApplyRecruitment(brigadeId, equipmentClass)}
+            onClose={() => setRecruitmentOpen(false)}
+          />
+        </Suspense>
+      )}
       {autonomyOpen && (
-        <AutonomyPanel
-          onClose={() => setAutonomyOpen(false)}
-          playerFaction={playerFaction}
-          namedOfficerData={loadedGameState?.namedOfficerData}
-        />
+        <Suspense fallback={null}>
+          <AutonomyPanel
+            onClose={() => setAutonomyOpen(false)}
+            playerFaction={playerFaction}
+            namedOfficerData={loadedGameState?.namedOfficerData}
+          />
+        </Suspense>
       )}
       <WarSummaryModal
         isOpen={summaryOpen}
