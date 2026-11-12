@@ -23,13 +23,16 @@ const VANCE_OWEN_PLAN: PeacePlanDefinition = {
         RS: 'rejected',
         HRHB: 'accepted',
     },
-    // VOPP: Serb-majority provinces ~43% of BiH territory. Source: Owen Balkan Odyssey pp. 98-105
-    // RBiH 39% = ~33% Bosniak-majority provinces + ~6% Sarajevo special district (majority Bosniak/mixed).
-    // RS 43% = three Serb-majority provinces. HRHB 18% = three Croat-majority provinces.
+    // Measured on the signed 25 Mar 1993 map (S/25479), area-weighted as the game measures
+    // (docs/40_reports/20261107_PEACE_PLANS_RESEARCH.md): Serb-led provinces 2/4/6 43.0%
+    // (BB1 p.218: 43%), Croat-led 3/8/10 25.3%, Bosniak-led 1/5/9 26.5% plus Sarajevo
+    // province 7 (shared) 4.9% and an unnumbered corridor 0.3% → RBiH 32 incl. Sarajevo.
+    // The former HRHB 18 was about 7 points too low. The settlement itself is applied
+    // from the map (peace_settlement.ts), not from these percentages.
     proposed_split: {
-        RBiH: 39,
+        RBiH: 32,
         RS: 43,
-        HRHB: 18,
+        HRHB: 25,
     },
     institutional_model: '10_provinces',
     override_change_on_reject: {
@@ -43,11 +46,13 @@ const VANCE_OWEN_PLAN: PeacePlanDefinition = {
         HRHB: -5,
     },
     narrative: 'UN mediators Cyrus Vance and Lord Owen propose dividing Bosnia into 10 '
-        + 'decentralized provinces — three Bosniak-majority, three Serb-majority, three '
-        + 'Croat-majority, and a mixed Sarajevo district. The plan would require the VRS to '
-        + 'withdraw from roughly 30% of the territory it currently holds. The Bosnian Serb '
-        + 'assembly has indicated fierce opposition. Rejection by RS will dramatically increase '
-        + 'international pressure and may trigger sanctions from Belgrade itself.',
+        + 'decentralized provinces — three Bosniak-led, three Serb-led, three Croat-led, and a '
+        + 'shared Sarajevo province. The Serbs would keep 43 percent of the country, giving up '
+        + 'about a third of what the VRS holds. Republika Srpska would cease to exist as a unit: '
+        + 'its three provinces would not touch, with the Croat-led Posavina province cutting the '
+        + 'corridor. The Bosnian Serb assembly has indicated fierce opposition. Rejection by RS '
+        + 'will dramatically increase international pressure and may trigger sanctions from '
+        + 'Belgrade itself.',
 };
 
 /**
@@ -69,10 +74,14 @@ const OWEN_STOLTENBERG_PLAN: PeacePlanDefinition = {
         RS: 'accepted',
         HRHB: 'accepted',
     },
+    // 20 Aug 1993 Geneva map (S/26337): published 30 / 52.5 / 17.5 (the text sets 30% as
+    // the Muslim floor). Measured on the georeferenced map: RS 52.3, Muslim 28.7, Croat
+    // 16.0, UN Sarajevo district 3.0. The former 33/52/15 mixed the August map with the
+    // September Invincible figure (33/49/17.5), and 15 had no source.
     proposed_split: {
-        RBiH: 33,
-        RS: 52,
-        HRHB: 15,
+        RBiH: 30,
+        RS: 52.5,
+        HRHB: 17.5,
     },
     institutional_model: 'union_3_republics',
     override_change_on_reject: {
@@ -88,9 +97,10 @@ const OWEN_STOLTENBERG_PLAN: PeacePlanDefinition = {
     narrative: 'Lord Owen and Thorvald Stoltenberg propose a "Union of Three Republics" — '
         + 'effectively partitioning Bosnia into three ethnically-defined entities with a weak '
         + 'central government. Unlike Vance-Owen, this plan acknowledges the reality of ethnic '
-        + 'separation. The Bosnian government sees it as rewarding ethnic cleansing. The Serbs '
-        + 'find the territorial allocation insufficient given their military holdings. Rejection '
-        + 'signals deepening intractability.',
+        + 'separation. The Bosnian Serb assembly accepts it; the Croat assembly accepts while '
+        + 'demanding more land; the Bosnian government sees it as rewarding ethnic cleansing and '
+        + 'a landlocked republic. No republic would keep an army. Rejection signals deepening '
+        + 'intractability.',
 };
 
 /**
@@ -107,10 +117,13 @@ const CONTACT_GROUP_PLAN: PeacePlanDefinition = {
         RS: 'rejected',
         HRHB: 'accepted',
     },
+    // UN map 4128: RS 48.9, Federation 48.2 + Sarajevo neutral zone 2.8 (51/49 published).
+    // The Bosniak/Croat split inside the Federation is NOT part of the plan; 35/16 is the
+    // research's inferred faction layer on that map (RBiH 33.1 + neutral zone, HRHB 15.2).
     proposed_split: {
-        RBiH: 33,
+        RBiH: 35,
         RS: 49,
-        HRHB: 18,
+        HRHB: 16,
     },
     institutional_model: '51_49_entities',
     override_change_on_reject: {
@@ -134,8 +147,8 @@ const CONTACT_GROUP_PLAN: PeacePlanDefinition = {
 // Dayton Peace Agreement (General Framework Agreement for Peace, Annex 2)
 // Initialed Dayton, Ohio, 21 November 1995; signed Paris, 14 December 1995.
 // proposed_split: RS=49% from Dayton Annex 2 IEBL (51/49 entity split).
-//   Within Federation: RBiH=33%, HRHB=18% — consistent with Contact Group framework
-//   which Dayton ratified (Washington Agreement canton geography; Burg & Shoup 1999 Ch. 8).
+//   Within Federation: see the measured faction layer below (RBiH 32, HRHB 19); the Contact Group
+//   contributed only the 51:49 parameter (docs/40_reports/20261107_PEACE_PLANS_RESEARCH.md §6).
 // credibility_change_on_reject: RS=-30 (highest in sequence; rejecting Dayton post-Krajina
 //   post-Deliberate Force was diplomatic self-destruction; ICTY IT-95-5/18-T Vol. 4 §§4900–4940).
 export const DAYTON_PLAN: PeacePlanDefinition = {
@@ -147,10 +160,13 @@ export const DAYTON_PLAN: PeacePlanDefinition = {
         RS: 'accepted',
         HRHB: 'accepted',
     },
+    // Published 51/49. Measured on the post-1995 municipal structure: RS 48.3, Federation
+    // 50.8 (inferred faction layer RBiH 31.3 / HRHB 19.5), Brčko District 0.9. Only the
+    // 51:49 parameter carried over from the Contact Group; the map is substantially different.
     proposed_split: {
-        RBiH: 33,
+        RBiH: 32,
         RS: 49,
-        HRHB: 18,
+        HRHB: 19,
     },
     institutional_model: 'two_entities',
     override_change_on_reject: {
@@ -163,7 +179,7 @@ export const DAYTON_PLAN: PeacePlanDefinition = {
         RS: -30,
         HRHB: -15,
     },
-    narrative: 'The Dayton Peace Agreement (November 1995) establishes two entities — Republika Srpska (49%) and the Bosnian-Croat Federation (51%) — with IFOR enforcing the ceasefire. The territorial allocation ratifies the Contact Group framework that RS rejected by referendum in 1994.',
+    narrative: 'The Dayton Peace Agreement (November 1995) establishes two entities — Republika Srpska (49%) and the Bosniak-Croat Federation (51%) — with IFOR enforcing the ceasefire. It keeps the Contact Group\'s 51:49 parameter on a new map: Sarajevo unified in the Federation with a corridor to Goražde, Srebrenica and Žepa in Republika Srpska, western Bosnia returned in part. For the first time Republika Srpska is recognised by name, keeps its army and the Posavina corridor; Brčko goes to arbitration.',
 };
 
 /**

@@ -12,11 +12,18 @@
  *
  * "The least bad version of a tragedy."
  */
-import { useState, useMemo, useRef } from 'react';
+import { lazy, Suspense, useState, useMemo, useRef } from 'react';
 import { useGameStore } from '../store/gameStore';
 import { useIPC } from '../desktop/useIPC';
 import type { FactionVerdict, DimensionGrade, GameVerdict } from '../../../state/negotiation_types.js';
 import { WarCostSummary } from './WarCostSummary';
+import { TreatyLedger } from '../dayton_conference/TreatyLedger';
+import { operativeOwners } from '../dayton_conference/annexes';
+
+// Dayton screens load on demand, out of the entry chunk (vite.config.ts chunk-size limit).
+const DaytonSettlementViewer = lazy(() => import('./DaytonSettlementViewer').then(m => ({ default: m.DaytonSettlementViewer })));
+const BoundaryMap = lazy(() => import('../dayton_conference/BoundaryMap').then(m => ({ default: m.BoundaryMap })));
+const DaytonSigningBeat = lazy(() => import('../dayton_conference/DaytonSigningBeat').then(m => ({ default: m.DaytonSigningBeat })));
 import type { CostLedger } from '../../../sim/endgame/cost_ledger.js';
 import type { ComparisonResult, MilestoneComparison, MilestoneComparisonStatus } from '../../../sim/endgame/endgame_comparison.js';
 import { getPeacePlanById } from '../../../sim/negotiation/peace_plan_data.js';
@@ -401,6 +408,8 @@ export function VerdictScreen({ onLoadSaveState, onLoadSaveError }: VerdictScree
     const [locale] = useLocale();
     const [verdictSelection, setVerdictSelection] = useState<{ verdict: GameVerdict; faction: string } | null>(null);
     const [activeLowerSection, setActiveLowerSection] = useState<VerdictLowerSection>('report');
+    // DC A5: the signing beat sits between final review and the Verdict, once per mount.
+    const [signingSeen, setSigningSeen] = useState(false);
 
     // LANE-NIGHTSHIFT-DYNAMIC-CODEX-SLICE: build ghost entries via useMemo.
     // CRITICAL: useMemo MUST be called before any early return to satisfy
@@ -447,6 +456,28 @@ export function VerdictScreen({ onLoadSaveState, onLoadSaveError }: VerdictScree
     const date = metadataDate && metadataDate !== 'UNKNOWN' ? metadataDate : turnToDateString(turn);
     const years = Math.floor(turn / 52);
     const weeks = turn % 52;
+
+    // DC A5: a signed Dayton opens on the initialling table, then the Verdict.
+    const signedAgreement = loadedGameState.daytonAgreement?.version === 1 ? loadedGameState.daytonAgreement : undefined;
+    if (signedAgreement && !signingSeen) {
+        return (
+            <div className="fixed inset-0" style={wrappedOpen ? { display: 'none' } : { zIndex: Z.GAME_OVER }}
+                 data-awwv-endgame-surface="signing">
+                <Modal
+                    isOpen={!wrappedOpen}
+                    dismissible={false}
+                    zIndex={Z.GAME_OVER}
+                    ariaLabel={t('dayton.signing.kicker')}
+                    backdropClassName="bg-[#1c1b17]"
+                    panelClassName="h-full w-full overflow-hidden"
+                >
+                    <Suspense fallback={null}>
+                        <DaytonSigningBeat agreement={signedAgreement} fallbackDate={date} onContinue={() => setSigningSeen(true)} />
+                    </Suspense>
+                </Modal>
+            </div>
+        );
+    }
 
     // Gather territory stats for the statistics section
     const controllers = loadedGameState.controlBySettlement ?? {};
@@ -529,7 +560,7 @@ export function VerdictScreen({ onLoadSaveState, onLoadSaveError }: VerdictScree
                 zIndex={Z.GAME_OVER}
                 ariaLabel={t('gameOver.title')}
                 backdropClassName="bg-black/90 backdrop-blur-sm"
-                panelClassName="w-[min(980px,calc(var(--interface-viewport-width,100vw)-24px))] max-h-[calc(var(--interface-viewport-height,100vh)*0.92)] bg-panel-bg border border-panel-border rounded-lg shadow-2xl flex flex-col overflow-hidden"
+                panelClassName={`${loadedGameState.daytonAgreement?.version === 1 ? 'w-[min(1440px,calc(var(--interface-viewport-width,100vw)-24px))]' : 'w-[min(980px,calc(var(--interface-viewport-width,100vw)-24px))]'} max-h-[calc(var(--interface-viewport-height,100vh)*0.92)] bg-panel-bg border border-panel-border rounded-lg shadow-2xl flex flex-col overflow-hidden`}
             >
                 <CinematicVerdict
                     verdict={verdict}
@@ -615,6 +646,24 @@ export function VerdictScreen({ onLoadSaveState, onLoadSaveError }: VerdictScree
                         );
                     })}
                 </div>
+
+                {loadedGameState.daytonAgreement?.version === 1 ? (
+                    <Suspense fallback={null}>
+                        {/* The grade judges the war; this shows what the table changed (owner, 2026-11-08). */}
+                        <TreatyLedger treaty={loadedGameState.daytonAgreement.treaty} signed />
+                        {/* DC A3: the signed line against the front it ended. */}
+                        <div className="rounded border border-[#a78e5c] bg-[#efe5cf] p-3">
+                            <BoundaryMap special={loadedGameState.daytonAgreement.map.specialOsids}
+                                owners={operativeOwners(loadedGameState.daytonAgreement.terms)} stages={[
+                                { id: 'front', controllers: loadedGameState.daytonAgreement.map.wartimeControllers },
+                                { id: 'signed', controllers: loadedGameState.daytonAgreement.map.controllers },
+                            ]} />
+                        </div>
+                        <DaytonSettlementViewer agreement={loadedGameState.daytonAgreement} mode="signed" />
+                    </Suspense>
+                ) : verdict.dayton_result ? (
+                    <p className="text-sm text-text-secondary">{t('dayton.agreement.legacy')}</p>
+                ) : null}
 
                 {/* Selected Faction Report */}
                 <div>

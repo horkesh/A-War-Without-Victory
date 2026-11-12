@@ -489,6 +489,7 @@ describe('Patron Events', () => {
             turn: SREBRENICA_AFTERMATH.trigger_week,
             war_start_turn: 0,
         });
+        state.military.event_last_fired_turn = { srebrenica_falls_1995: 162 }; // the town fell
         const neg = state.military.negotiation!;
 
         const rsOverrideBefore = neg.patron_relationships.RS.override_authority;
@@ -502,11 +503,26 @@ describe('Patron Events', () => {
         expect(neg.patron_relationships.HRHB.override_authority).toBeGreaterThan(hrhbOverrideBefore);
     });
 
+    it('Srebrenica aftermath does not fire when Srebrenica held (RD run review, 2026-11-07)', () => {
+        const state = makeState({ turn: SREBRENICA_AFTERMATH.trigger_week, war_start_turn: 0 });
+        const neg = state.military.negotiation!;
+        const rsBefore = neg.patron_relationships.RS.override_authority;
+        evaluatePatronEvents(state);
+        expect(neg.patron_relationships.RS.override_authority).toBe(rsBefore);
+        expect(neg.patron_relationships.RS.relationship_events).not.toContain('srebrenica_aftermath');
+        // It fires at the first later week once the town has fallen.
+        state.meta.turn = SREBRENICA_AFTERMATH.trigger_week + 3;
+        state.military.event_last_fired_turn = { srebrenica_falls_1995: SREBRENICA_AFTERMATH.trigger_week + 2 };
+        evaluatePatronEvents(state);
+        expect(neg.patron_relationships.RS.relationship_events).toContain('srebrenica_aftermath');
+    });
+
     it('Srebrenica reduces RS international_standing dimension by 30', () => {
         const state = makeState({
             turn: SREBRENICA_AFTERMATH.trigger_week,
             war_start_turn: 0,
         });
+        state.military.event_last_fired_turn = { srebrenica_falls_1995: 162 }; // the town fell
         const neg = state.military.negotiation!;
         // Set international_standing base to 50, event_modifier to 0
         neg.strategic_dimensions!.RS.international_standing = { base_value: 50, event_modifier: 0, effective_value: 50 };

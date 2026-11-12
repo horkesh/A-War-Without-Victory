@@ -26,14 +26,15 @@
  * fallback path in the adapter still works for older saves where the
  * snapshot field is absent.
  *
- * Sensitive-history: NEUTRAL by construction. The snapshot freezes the
- * already-computed verdict; it does NOT change rupture, controller flips,
- * OOB, or atrocity-related logic. § 6 sign-off not required (parity with
- * existing observability/freeze patterns).
+ * Sensitive-history: the freeze first re-runs the rupture check (idempotent; DC A6
+ * follow-up 1, Pyrrhic panel 2026-11-09), then freezes the
+ * already-computed verdict; it does NOT change controller flips,
+ * OOB, or atrocity-related logic. The rupture re-check carries the panel's sign-off.
  */
 
 import type { GameState, EndgameSnapshot } from '../../state/game_state.js';
 import { computeFullVerdict } from '../negotiation/scoring.js';
+import { evaluateRuptureConsequences } from '../negotiation/rupture_consequences.js';
 import { buildCostLedger } from './cost_ledger.js';
 import { compareToHistorical } from './endgame_comparison.js';
 import { computePeaceDysfunctionBreakdown } from '../negotiation/peace_dysfunction.js';
@@ -59,6 +60,12 @@ function tryDerive<T>(fn: () => T): T | undefined {
 export function freezeEndgameSnapshot(state: GameState): void {
     const meta = state.meta as { endgame_snapshot?: EndgameSnapshot; turn?: number; outcome?: string; game_over?: boolean };
     if (meta.endgame_snapshot) return; // idempotency guard
+
+    // DC A6 follow-up 1 (Pyrrhic panel 2026-11-09, unanimous): every writer that ends the war
+    // calls this before the turn's evaluate-rupture-consequences step runs, so a rupture whose
+    // conditions first hold on the final turn would be missing from the frozen verdict. Check
+    // once more here. Idempotent by id; never reached on a save whose snapshot is frozen.
+    evaluateRuptureConsequences(state);
 
     const verdict = tryDerive(() => computeFullVerdict(state));
     const costLedger = tryDerive(() => buildCostLedger(state));

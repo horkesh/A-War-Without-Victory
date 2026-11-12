@@ -1,0 +1,85 @@
+/* DC A5: the signing beat on Codex's blank initialling document, and the forced table's ultimatum. */
+.dayton-signing-frame { container-type: inline-size; }
+.dayton-signing-frame > * { position: absolute; }
+.dayton-signing-frame > img { position: static; }
+.dayton-signing-map {
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  mix-blend-mode: multiply;
+  cursor: zoom-in;
+}
+.dayton-signing-map:focus-visible { outline: 3px solid #b09b70; outline-offset: 4px; }
+.dayton-signing-map .dayton-board-line { opacity: .88; }
+.dayton-signing-line {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: #2a241b;
+  font-family: Georgia, serif;
+  line-height: 1.2;
+  mix-blend-mode: multiply;
+}
+.dayton-signing-date { font-size: .88cqw; font-style: italic; }
+.dayton-signing-cost { font-size: .82cqw; }
+.dayton-room-window[data-wide="true"] .dayton-signing-date { font-size: .56cqw; }
+.dayton-room-window[data-wide="true"] .dayton-signing-cost { font-size: .6cqw; }
+.dayton-signing-signature {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  color: #2a241b;
+  mix-blend-mode: multiply;
+}
+.dayton-signing-signature svg {
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 88%;
+  fill: none;
+  stroke: #1d2b4a;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.dayton-signing-signature span { font-family: Georgia, serif; font-size: .64cqw; line-height: 1.15; text-align: center; white-space: nowrap; }
+.dayton-room-window[data-wide="true"] .dayton-signing-signature span { font-size: .48cqw; }
+.dayton-signing-signature .dayton-signing-note { position: absolute; top: 100%; margin-top: .3em; font-style: italic; }
+.dayton-signing-signature .dayton-signing-imposed { color: #6b1f1a; }
+.dayton-signing-annexes { margin: 0; font-size: .85rem; line-height: 1.4; opacity: .85; }
+@media (prefers-reduced-motion: no-preference) {
+  .dayton-signing-signature path { stroke-dasharray: 260; stroke-dashoffset: 260; animation: dayton-ink 1.1s ease-out forwards; }
+  [data-testid="dayton-signing-HRHB"] path { animation-delay: .5s; }
+  [data-testid="dayton-signing-RS"] path { animation-delay: 1s; }
+}
+@keyframes dayton-ink { to { stroke-dashoffset: 0; } }
+
+.dayton-signing-aside {
+  position: absolute;
+  z-index: 1;
+  inset-block-start: .85rem;
+  inset-inline-end: .85rem;
+  width: min(25rem, calc(100% - 1.7rem));
+  max-height: calc(100% - 1.7rem);
+  overflow: auto;
+  display: grid;
+  gap: .7rem;
+  padding: .85rem 1rem;
+  border-inline-start: 2px solid #b09b70;
+  background: #171611ed;
+  box-shadow: 0 8px 24px #0005;
+}
+.dayton-signing-aside h2:focus { outline: none; }
+.dayton-signing-aside .dayton-live-kicker { color: #e7ce8d; margin: 0; }
+@container interface-viewport (max-width: 640px) {
+  .dayton-signing-aside { inset-block-start: auto; inset-block-end: .85rem; max-height: 55%; }
+}
+
+.dayton-ultimatum { display: grid; gap: .45rem; padding: .75rem .9rem; border: 1px solid #8a2a2a99; border-radius: 3px; background: #2a14128c; }
+.dayton-ultimatum h3 { margin: 0; font-size: .78rem; font-weight: 750; letter-spacing: .12em; text-transform: uppercase; color: #e8a89d; }
+.dayton-ultimatum h4 { margin: .2rem 0 0; font-size: .74rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: #e7ce8d; }
+.dayton-ultimatum p { margin: 0; line-height: 1.45; }
+.dayton-ultimatum[data-compact] { padding: .45rem .6rem; font-size: .85rem; max-width: 34rem; }

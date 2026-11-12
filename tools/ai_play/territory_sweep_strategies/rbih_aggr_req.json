@@ -1,0 +1,21 @@
+{
+  "name": "rbih_aggr_req",
+  "faction": "RBiH",
+  "events": {
+    "default": "martial",
+    "overrides": {
+      "strategic_posture_review_rbih": "press_offensive",
+      "carter_ceasefire_1994": "exploit",
+      "holbrooke_ceasefire_demand_oct95": "continue_offensive",
+      "us_halts_federation_advance_1995": "push_further",
+      "rbih_federation_army_integration_1994": "full_integration",
+      "rbih_arms_embargo_lift_advocacy_1993": "seek_clandestine_arms"
+    }
+  },
+  "request_ops": {
+    "enabled": true,
+    "max_queries_per_turn": 24,
+    "prefer_consolidation": true,
+    "accept_delay": true
+  }
+}

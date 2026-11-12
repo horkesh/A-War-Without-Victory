@@ -79,12 +79,12 @@ lanes:
         tasks: null
   - lane: R6
     title: "Historical gameplay depth and final calibration"
-    lane_open: true
-    status: "TOLJENAK VALIDATED; GLOBAL NO-GO. n94 clean707/707/706/706, zero n91/n92 losses; eight baseline pins adopted from reproduced default CI bytes. No tuning; six mi"
+    lane_open: false
+    status: "CLOSED — owner, 2026-11-08. Calibration signed off 2026-11-06 at 712/711/712/710 (live = headless, all three player factions; strict health PASS; Farz guard enf"
     plans:
       - path: docs/plans/2026-07-31-historical-gameplay-depth-calibration-plan.md
         exists: true
-        tokens: 20440
+        tokens: 20471
         fits_context: true
         tasks: null
       - path: docs/plans/2026-08-06-exhaustion-scoring-redesign-plan.md
@@ -124,12 +124,12 @@ lanes:
         tasks: null
   - lane: R7
     title: "Content, historical attribution, audio, accessibility, and opening experience"
-    lane_open: true
-    status: "ACTIVE — AUDIO AND BROADER ACCEPTANCE OPEN. WR01 delivered in #517; stale-pin refresh landed in #518. Human listening/sensitivity remains open. Offline playback"
+    lane_open: false
+    status: "CLOSED — owner, 2026-11-08. Every R7 gate is closed: audio cue wiring, offline playback and human listening/sensitivity (all 17 interface cues accepted; ambient"
     plans:
       - path: docs/plans/2026-07-31-content-history-localization-audio-plan.md
         exists: true
-        tokens: 13585
+        tokens: 13676
         fits_context: true
         tasks: docs/plans/tasks/2026-07-31-content-history-localization-audio-plan.yml
       - path: docs/plans/2026-08-23-opening-screens-implementation-plan.md
@@ -169,7 +169,27 @@ lanes:
         tasks: null
       - path: docs/plans/2026-11-06-visual-polish-follow-ups-plan.md
         exists: true
-        tokens: 1479
+        tokens: 1549
+        fits_context: true
+        tasks: null
+  - lane: RD
+    title: "Dayton settlement and end map"
+    lane_open: false
+    status: "CLOSED — owner, 2026-11-07. Peace plans settle on their maps; the OSID-level Dayton map has no isolated pockets outside the Posavina canton; the verdict reads t"
+    plans:
+      - path: docs/plans/2026-11-07-rd-dayton-settlement-lane.md
+        exists: true
+        tokens: 1240
+        fits_context: true
+        tasks: null
+  - lane: DC
+    title: "Dayton conference redesign"
+    lane_open: true
+    status: "ACTIVE — owner, 2026-11-07; Claude implements, Codex supplies art (owner, 2026-11-08). Reworks the Dayton table (conference room, live bargaining, data contract"
+    plans:
+      - path: docs/plans/2026-11-08-dc-dayton-conference-plan.md
+        exists: true
+        tokens: 13624
         fits_context: true
         tasks: null
   - lane: R8
@@ -179,7 +199,7 @@ lanes:
     plans:
       - path: docs/plans/2026-07-31-full-campaign-electron-validation-plan.md
         exists: true
-        tokens: 66362
+        tokens: 67476
         fits_context: false
         tasks: null
   - lane: R9

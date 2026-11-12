@@ -1,0 +1,8 @@
+{
+  "name": "para_allow_RS",
+  "faction": "RS",
+  "events": {
+    "default": "bot"
+  },
+  "paramilitary": "allow"
+}

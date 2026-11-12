@@ -42,7 +42,7 @@ describe('generateCounterOffer', () => {
             id: 'RBiH_001',
             plan_id: 'owen_stoltenberg',
             chain_depth: 2,
-            proposed_split: { RBiH: 33, RS: 52, HRHB: 15 },
+            proposed_split: { RBiH: 30, RS: 52.5, HRHB: 17.5 },
             institutional_model: 'union_3_republics',
         };
 
@@ -78,7 +78,7 @@ describe('generateCounterOffer', () => {
             created_turn: 70,
         });
         expect(counter?.delta.response).toBe('conditional_accept');
-        expect(counter?.delta.proposed_split).toEqual({ RBiH: 33, RS: 52, HRHB: 15 });
+        expect(counter?.delta.proposed_split).toEqual({ RBiH: 30, RS: 52.5, HRHB: 17.5 });
         expect(counter?.delta.source_citation).toContain('BB1 p.49');
     });
 
@@ -122,7 +122,7 @@ describe('generateCounterOffer', () => {
                 delta: {
                     plan_id: 'owen_stoltenberg',
                     response: 'conditional_accept',
-                    proposed_split: { RBiH: 33, RS: 52, HRHB: 15 },
+                    proposed_split: { RBiH: 30, RS: 52.5, HRHB: 17.5 },
                     source_citation: 'BB1 p.49',
                 },
                 chain_depth: 1,
@@ -135,7 +135,7 @@ describe('generateCounterOffer', () => {
                 delta: {
                     plan_id: 'owen_stoltenberg',
                     response: 'conditional_accept',
-                    proposed_split: { RBiH: 33, RS: 52, HRHB: 15 },
+                    proposed_split: { RBiH: 30, RS: 52.5, HRHB: 17.5 },
                     source_citation: 'BB1 p.49',
                 },
                 chain_depth: 1,
@@ -147,7 +147,7 @@ describe('generateCounterOffer', () => {
             parentOfferId: 'HRHB_001',
             planId: 'owen_stoltenberg',
             response: 'conditional_accept',
-            proposedSplit: { RBiH: 33, RS: 52, HRHB: 15 },
+            proposedSplit: { RBiH: 30, RS: 52.5, HRHB: 17.5 },
         });
 
         expect(submitted).toMatchObject({

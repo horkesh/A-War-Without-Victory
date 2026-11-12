@@ -1,0 +1,13 @@
+{
+  "name": "rs_delay_martial_q24",
+  "faction": "RS",
+  "events": {
+    "default": "martial"
+  },
+  "request_ops": {
+    "enabled": true,
+    "max_queries_per_turn": 24,
+    "prefer_consolidation": true,
+    "accept_delay": true
+  }
+}

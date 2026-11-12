@@ -23,8 +23,8 @@ function OfficerQualityChip({ label, value }: { label: string; value: number }) 
             className="inline-flex items-center gap-1 rounded border border-panel-border/50 bg-black/20 px-1.5 py-0.5"
             title={`${label}: ${displayValue}`}
         >
-            <span className="text-xs uppercase tracking-[0.12em] text-text-secondary">{label}</span>
-            <span className="font-mono text-xs font-bold tabular-nums" style={{ color: getRatingColor(value) }}>
+            <span className="text-[13px] uppercase tracking-[0.12em] text-text-secondary">{label}</span>
+            <span className="font-mono text-[13px] font-bold tabular-nums" style={{ color: getRatingColor(value) }}>
                 {displayValue}
             </span>
         </span>
@@ -110,7 +110,7 @@ export function PersonnelContent({ onOpenRecruitment, onOpenAutonomy }: Personne
         };
     }, [state, faction, locale]);
 
-    if (!data) return <div className="text-text-secondary italic text-[12px] py-8 text-center">{t('personnel.noGameState')}</div>;
+    if (!data) return <div className="text-text-secondary italic text-[13px] py-8 text-center">{t('personnel.noGameState')}</div>;
 
     return (
         <div className="space-y-4">
@@ -123,7 +123,7 @@ export function PersonnelContent({ onOpenRecruitment, onOpenAutonomy }: Personne
                     data-testid="personnel-open-recruitment"
                     onClick={onOpenRecruitment}
                     disabled={!onOpenRecruitment}
-                    className="min-h-12 rounded border border-amber-400/35 bg-amber-400/10 px-3 py-2 text-left text-[12px] font-bold uppercase text-amber-300 transition-colors hover:bg-amber-400/20 disabled:cursor-not-allowed disabled:opacity-40"
+                    className="min-h-12 rounded border border-amber-400/35 bg-amber-400/10 px-3 py-2 text-left text-[13px] font-bold uppercase text-amber-300 transition-colors hover:bg-amber-400/20 disabled:cursor-not-allowed disabled:opacity-40"
                 >
                     {t('recruitment.title')}
                 </button>
@@ -132,7 +132,7 @@ export function PersonnelContent({ onOpenRecruitment, onOpenAutonomy }: Personne
                     data-testid="personnel-open-autonomy"
                     onClick={onOpenAutonomy}
                     disabled={!onOpenAutonomy}
-                    className="min-h-12 rounded border border-sky-400/35 bg-sky-400/10 px-3 py-2 text-left text-[12px] font-bold uppercase text-sky-200 transition-colors hover:bg-sky-400/20 disabled:cursor-not-allowed disabled:opacity-40"
+                    className="min-h-12 rounded border border-sky-400/35 bg-sky-400/10 px-3 py-2 text-left text-[13px] font-bold uppercase text-sky-200 transition-colors hover:bg-sky-400/20 disabled:cursor-not-allowed disabled:opacity-40"
                 >
                     {t('autonomy.title')}
                 </button>
@@ -142,7 +142,7 @@ export function PersonnelContent({ onOpenRecruitment, onOpenAutonomy }: Personne
             <FrontVisitSection />
 
             <div className="bg-panel-card border border-panel-border rounded-lg p-3">
-                <div className="text-xs uppercase tracking-[0.2em] text-text-secondary font-bold mb-2 pb-1 border-b border-panel-border">
+                <div className="text-[13px] uppercase tracking-[0.2em] text-text-secondary font-bold mb-2 pb-1 border-b border-panel-border">
                     {t('personnel.commandDossier')}
                 </div>
                 <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-4">
@@ -187,7 +187,7 @@ export function PersonnelContent({ onOpenRecruitment, onOpenAutonomy }: Personne
             </div>
 
             <div className="bg-panel-card border border-panel-border rounded-lg p-3">
-                <div className="text-xs uppercase tracking-[0.2em] text-text-secondary font-bold mb-2 pb-1 border-b border-panel-border">
+                <div className="text-[13px] uppercase tracking-[0.2em] text-text-secondary font-bold mb-2 pb-1 border-b border-panel-border">
                     {t('personnel.forceOverview')}
                 </div>
                 <div className="grid grid-cols-4 gap-3">
@@ -200,7 +200,7 @@ export function PersonnelContent({ onOpenRecruitment, onOpenAutonomy }: Personne
 
             {data.mobilization && (
                 <div className="bg-panel-card border border-panel-border rounded-lg p-3">
-                    <div className="text-xs uppercase tracking-[0.2em] text-text-secondary font-bold mb-2 pb-1 border-b border-panel-border">
+                    <div className="text-[13px] uppercase tracking-[0.2em] text-text-secondary font-bold mb-2 pb-1 border-b border-panel-border">
                         {t('personnel.mobilization')}
                     </div>
                     <div className="grid grid-cols-5 gap-3">
@@ -212,10 +212,10 @@ export function PersonnelContent({ onOpenRecruitment, onOpenAutonomy }: Personne
                     </div>
                     {data.mobilization.top_pools.length > 0 && (
                         <div className="mt-3 pt-2 border-t border-panel-border/50">
-                            <div className="text-xs uppercase tracking-wider text-text-secondary mb-1">{t('personnel.largestAvailablePools')}</div>
+                            <div className="text-[13px] uppercase tracking-wider text-text-secondary mb-1">{t('personnel.largestAvailablePools')}</div>
                             <div className="grid grid-cols-2 gap-1.5">
                                 {data.mobilization.top_pools.map((pool) => (
-                                    <div key={pool.mun_id} className="flex items-center justify-between gap-3 text-xs px-2 py-1 rounded-sm bg-panel-bg border border-panel-border/40">
+                                    <div key={pool.mun_id} className="flex items-center justify-between gap-3 text-[13px] px-2 py-1 rounded-sm bg-panel-bg border border-panel-border/40">
                                         <span className="text-text-secondary truncate">{getPlayerSafeMunicipalityName(pool.mun_id)}</span>
                                         <span className="text-text-primary tabular-nums font-mono shrink-0">{formatReportedWhole(pool.available)}</span>
                                     </div>
@@ -227,7 +227,7 @@ export function PersonnelContent({ onOpenRecruitment, onOpenAutonomy }: Personne
             )}
 
             <div className="bg-panel-card border border-panel-border rounded-lg p-3">
-                <div className="text-xs uppercase tracking-[0.2em] text-text-secondary font-bold mb-2 pb-1 border-b border-panel-border">
+                <div className="text-[13px] uppercase tracking-[0.2em] text-text-secondary font-bold mb-2 pb-1 border-b border-panel-border">
                     {t('personnel.orderOfBattle')}
                 </div>
                 <div className="space-y-2">
@@ -242,11 +242,11 @@ export function PersonnelContent({ onOpenRecruitment, onOpenAutonomy }: Personne
                         return (
                             <div key={command.id} className="border border-panel-border/50 rounded-md overflow-hidden">
                                 <div className="flex items-center justify-between px-3 py-2 bg-panel-bg">
-                                    <span className="text-xs font-bold text-amber-400 uppercase tracking-wider">{commandName}</span>
-                                    <span className="text-xs text-text-secondary tabular-nums">{t('personnel.brigadeSummary', { count: commandBrigades.length, personnel: commandPers })}</span>
+                                    <span className="text-[13px] font-bold text-amber-400 uppercase tracking-wider">{commandName}</span>
+                                    <span className="text-[13px] text-text-secondary tabular-nums">{t('personnel.brigadeSummary', { count: commandBrigades.length, personnel: commandPers })}</span>
                                 </div>
                                 {commandContext && (
-                                    <div className="px-3 pt-1 text-xs uppercase tracking-[0.16em] text-text-secondary">
+                                    <div className="px-3 pt-1 text-[13px] uppercase tracking-[0.16em] text-text-secondary">
                                         {commandContext}
                                     </div>
                                 )}
@@ -259,7 +259,7 @@ export function PersonnelContent({ onOpenRecruitment, onOpenAutonomy }: Personne
                                             data-command-id={command.id}
                                             data-command-kind={command.kind}
                                             data-formation-id={b.id}
-                                            className="flex w-full items-center justify-between text-xs py-0.5 text-left hover:text-amber-200 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-amber-400/70"
+                                            className="flex w-full items-center justify-between text-[13px] py-0.5 text-left hover:text-amber-200 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-amber-400/70"
                                             onClick={() => {
                                                 inspectOnField(useGameStore.getState(), command.kind === 'army_hq'
                                                     ? { kind: 'field-formation-in-army-reserve', formationId: b.id, armyHqId: command.id, osid: b.location_osid ?? null }
@@ -286,22 +286,22 @@ export function PersonnelContent({ onOpenRecruitment, onOpenAutonomy }: Personne
             </div>
 
             <div className="bg-panel-card border border-panel-border rounded-lg p-3">
-                <div className="text-xs uppercase tracking-[0.2em] text-text-secondary font-bold mb-2 pb-1 border-b border-panel-border">
+                <div className="text-[13px] uppercase tracking-[0.2em] text-text-secondary font-bold mb-2 pb-1 border-b border-panel-border">
                     {data.officerRosterReported
                         ? t('personnel.officerRoster', { active: data.activeOfficers.length, reserve: data.reserveOfficers.length })
                         : t('personnel.officerRosterUnreported')}
                 </div>
                 {!data.officerRosterReported && (
-                    <div className="mb-2 rounded border border-panel-border/50 bg-panel-bg/70 px-2 py-1.5 text-xs italic text-text-secondary">
+                    <div className="mb-2 rounded border border-panel-border/50 bg-panel-bg/70 px-2 py-1.5 text-[13px] italic text-text-secondary">
                         {t('personnel.officerRosterSourceUnreported')}
                     </div>
                 )}
                 <div className="grid grid-cols-1 gap-2 xl:grid-cols-3">
                     {data.activeOfficers.map(o => (
-                        <div key={o.id} className="border border-panel-border/50 rounded-md bg-panel-bg px-2.5 py-2 text-xs">
+                        <div key={o.id} className="border border-panel-border/50 rounded-md bg-panel-bg px-2.5 py-2 text-[13px]">
                             <div className="min-w-0">
                                 <div className="font-bold text-text-primary truncate">{o.name}</div>
-                                <div className="text-text-secondary text-xs uppercase">
+                                <div className="text-text-secondary text-[13px] uppercase">
                                     {formatOfficerRank(o.rank)}
                                     {o.assigned_corps_id ? ` - ${data.commandNameById.get(o.assigned_corps_id) ?? t('personnel.attachedCommand')}` : ''}
                                 </div>
@@ -328,10 +328,10 @@ export function PersonnelContent({ onOpenRecruitment, onOpenAutonomy }: Personne
                 </div>
                 {data.reserveOfficers.length > 0 && (
                     <div className="mt-2.5 pt-2 border-t border-panel-border/50">
-                        <div className="text-xs uppercase tracking-wider text-text-secondary mb-1">{t('personnel.reservePool')}</div>
+                        <div className="text-[13px] uppercase tracking-wider text-text-secondary mb-1">{t('personnel.reservePool')}</div>
                         <div className="flex flex-wrap gap-1.5">
                             {data.reserveOfficers.map(o => (
-                                <span key={o.id} className="text-xs px-2 py-0.5 border border-panel-border/40 rounded text-text-secondary bg-panel-bg">
+                                <span key={o.id} className="text-[13px] px-2 py-0.5 border border-panel-border/40 rounded text-text-secondary bg-panel-bg">
                                     {o.name}
                                 </span>
                             ))}
@@ -385,9 +385,9 @@ function DossierCard({
             : 'text-text-primary';
     return (
         <div className="min-w-0 rounded border border-panel-border/55 bg-panel-bg/65 px-2.5 py-2">
-            <div className="text-xs font-bold uppercase tracking-[0.13em] text-text-secondary">{label}</div>
+            <div className="text-[13px] font-bold uppercase tracking-[0.13em] text-text-secondary">{label}</div>
             <div className={`mt-1 text-[17px] font-bold tabular-nums ${valueClass}`}>{value}</div>
-            <div className="mt-1 max-h-24 overflow-y-auto text-xs leading-snug text-text-secondary">{detail}</div>
+            <div className="mt-1 max-h-24 overflow-y-auto text-[13px] leading-snug text-text-secondary">{detail}</div>
         </div>
     );
 }
@@ -407,8 +407,8 @@ function OfficerTraitPill({
 
     return (
         <span className={`inline-flex max-w-full items-start gap-1 rounded-sm border px-1.5 py-0.5 ${toneClass}`}>
-            <span className="shrink-0 text-xs leading-none font-bold uppercase tracking-[0.12em]">{label}</span>
-            <span className="min-w-0 whitespace-normal break-words text-xs leading-snug text-text-primary">{value}</span>
+            <span className="shrink-0 text-[13px] leading-none font-bold uppercase tracking-[0.12em]">{label}</span>
+            <span className="min-w-0 whitespace-normal break-words text-[13px] leading-snug text-text-primary">{value}</span>
         </span>
     );
 }
@@ -417,7 +417,7 @@ function StatCard({ label, value }: { label: string; value: string }) {
     return (
         <div className="text-center">
             <div className="text-[15px] font-bold text-text-primary tabular-nums leading-tight">{value}</div>
-            <div className="text-xs text-text-secondary uppercase tracking-wider">{label}</div>
+            <div className="text-[13px] text-text-secondary uppercase tracking-wider">{label}</div>
         </div>
     );
 }

@@ -30,6 +30,22 @@ import { getDecisionHeaderForEventCategory } from '../data/presidentialDeskAsset
 import { isDisplayEventEffect } from '../utils/eventEffectDisplay';
 import { turnToDateString } from '../utils/formatters';
 import { t, useLocale, type Locale, type MessageKey } from '../i18n';
+import {
+    SurfaceColumns,
+    SurfaceContent,
+    SurfaceDetail,
+    SurfaceDetailFooter,
+    SurfaceFacts,
+    SurfaceSections,
+    SurfaceStat,
+    SURFACE_CHIP,
+    SURFACE_LABEL,
+    SURFACE_LABEL_MUTED,
+    SURFACE_MODAL_BACKDROP,
+    SURFACE_MODAL_PANEL_FULL,
+    SURFACE_SECONDARY_BUTTON,
+    SURFACE_TONE,
+} from './surface/Surface';
 
 type EventDecisionDossier = PendingEventDecision & {
     narrative?: string;
@@ -345,16 +361,17 @@ function EffectPreview({ option }: { option: EventResponseOption }) {
     const rows = buildPreviewRows(option);
     if (rows.length === 0) {
         return (
-            <p className="mt-2 rounded border border-panel-border/70 bg-panel-bg/60 px-3 py-2 text-xs text-text-secondary">
+            <p className="m-0 text-[15px] leading-relaxed text-[#9c917b]">
                 {t('eventDecision.noImmediateEffects')}
             </p>
         );
     }
     return (
-        <ul className="mt-2 space-y-1 text-xs text-text-secondary">
+        <ul className="m-0 flex list-none flex-col gap-1 p-0 text-[15px] leading-relaxed text-[#ddd1b3]">
             {rows.map((row, i) => (
-                <li key={i} className="rounded border border-panel-border/70 bg-panel-bg/60 px-3 py-1.5">
-                    {row}
+                <li key={i} className="grid grid-cols-[0.875rem_minmax(0,1fr)] gap-2">
+                    <span aria-hidden="true" className="text-[#c9a75c]">•</span>
+                    <span>{row}</span>
                 </li>
             ))}
         </ul>
@@ -405,23 +422,25 @@ function ResponseButton({
     const staffRecommended = !historical && isStaffRecommendedOption(option, decision);
     const historicalDescription = `${t('eventDecision.historicalDefaultDescription')}${sourceNote ? ` ${t('eventDecision.sourceInline', { source: sourceNote.replace(/[.。]+$/u, '') })}` : ''}`;
     const chooseLabel = t('eventDecision.chooseResponseAria', { response: option.label });
+    // Surface redesign (2026-11-10): each response is a matter card — the choice itself
+    // is the big button; why it is marked, what it says and what follows read below it.
     return (
-        <div className="rounded border border-panel-border bg-panel-card/90 p-3">
+        <div className="flex flex-col gap-3 rounded-md border border-[#2a303c] bg-[#161a22] px-5 py-4">
             <button
                 type="button"
                 data-testid="event-decision-response"
                 aria-label={chooseLabel}
                 title={chooseLabel}
                 onClick={onChoose}
-                className="w-full text-left rounded border border-panel-border
-                           bg-panel-bg px-4 py-2.5 font-sans text-[13px] font-semibold text-text-primary
-                           transition-colors hover:border-accent-gold/50 hover:bg-panel-hover"
+                className="w-full rounded-md border border-[#c9a75c]/60 bg-[#232936] px-5 py-3.5 text-left
+                           text-[18px] font-semibold leading-snug text-[#f6ecd2]
+                           transition hover:border-[#c9a75c] hover:bg-[#2b3241]"
             >
-                <span className="flex flex-wrap items-center gap-2">
+                <span className="flex flex-wrap items-center gap-2.5">
                     <span>{option.label}</span>
                     {historical && (
                         <span
-                            className="rounded-sm border border-accent-gold/60 bg-accent-gold/15 px-2 py-0.5 text-xs font-bold uppercase tracking-[0.12em] text-accent-gold"
+                            className={`${SURFACE_CHIP} border-accent-gold/60 text-accent-gold`}
                             title={historicalDescription}
                         >
                             {t('eventDecision.historicalDefault')}
@@ -429,7 +448,7 @@ function ResponseButton({
                     )}
                     {staffRecommended && (
                         <span
-                            className="rounded-sm border border-sky-400/60 bg-sky-500/15 px-2 py-0.5 text-xs font-bold uppercase tracking-[0.12em] text-sky-200"
+                            className={`${SURFACE_CHIP} ${SURFACE_TONE.info}`}
                             title={t('eventDecision.staffRecommendationDescription')}
                         >
                             {t('eventDecision.staffRecommendation')}
@@ -438,17 +457,17 @@ function ResponseButton({
                 </span>
             </button>
             {historical && (
-                <p className="mt-2 text-xs leading-relaxed text-text-secondary">
+                <p className="m-0 text-[15px] leading-relaxed text-[#c2b69c]">
                     {historicalDescription}
                 </p>
             )}
             {staffRecommended && (
-                <p className="mt-2 text-xs leading-relaxed text-text-secondary">
+                <p className="m-0 text-[15px] leading-relaxed text-[#c2b69c]">
                     {t('eventDecision.staffRecommendationDescription')}
                 </p>
             )}
             {option.description && (
-                <p className="mt-2 text-xs text-text-secondary leading-relaxed">
+                <p className="m-0 text-[16px] leading-relaxed text-[#ddd1b3]">
                     {option.description}
                 </p>
             )}
@@ -511,15 +530,15 @@ function DecisionContextSection({
 
     return (
         <section
-            className="mb-4 rounded border border-panel-border bg-panel-card/80 p-4"
+            className="flex flex-col gap-2"
             data-testid="decision-context-section"
         >
-            <div className="mb-2 text-xs font-bold uppercase tracking-[0.15em] text-accent-gold">
+            <div className={SURFACE_LABEL}>
                 {t('eventDecision.decisionContext')}
             </div>
             {showDiagnostics && eventDef && (family || sourceTier) && (
                 <div
-                    className="mb-2 text-xs leading-relaxed text-text-secondary"
+                    className="text-[15px] leading-relaxed text-[#c2b69c]"
                     data-testid="decision-context-family-source"
                 >
                     {t('eventDecision.familySource', {
@@ -530,7 +549,7 @@ function DecisionContextSection({
             )}
             {showDiagnostics && ancestors.length > 0 && (
                 <div
-                    className="mb-2 text-xs leading-relaxed text-text-secondary"
+                    className="text-[15px] leading-relaxed text-[#c2b69c]"
                     data-testid="decision-context-ancestry"
                 >
                     {t('eventDecision.ancestry', { values: ancestorLabels.join(', ') })}
@@ -538,7 +557,7 @@ function DecisionContextSection({
             )}
             {dossierExcerpt && (
                 <div
-                    className="text-xs leading-relaxed text-text-secondary"
+                    className="text-[16px] leading-relaxed text-[#ddd1b3]"
                     data-testid="decision-context-dossier"
                 >
                     {t('eventDecision.sourceDossier', { dossier: dossierExcerpt })}
@@ -572,16 +591,22 @@ export function EventDecisionModal({ decision, onRespond, eventCatalog, state, a
     // the faction colour for the neutral accent, so no faction brands the atrocity (D8 panel).
     const section6Alt = section6StillAlt(authoredImage);
 
+    // Surface redesign (owner, 2026-11-10): one surface in the Command Surface's style —
+    // the event's still and title on top; the situation, the staff's view and the record
+    // on the left; the president's possible responses on the right, each a full-size
+    // choice with what it says and what follows. A paused turn's "Continue turn" sits in
+    // a footer that never scrolls away.
     return (
         <Modal
             isOpen={true}
             dismissible={false}
             zIndex={Z.CRITICAL_MODAL}
             ariaLabelledBy="event-decision-title"
-            backdropClassName="bg-black/70"
-            panelClassName="bg-panel-bg border border-panel-border rounded-lg max-w-[720px] w-[92%] max-h-[calc(var(--interface-viewport-height,100vh)*0.88)] overflow-y-auto shadow-xl backdrop-blur-sm"
+            backdropClassName={SURFACE_MODAL_BACKDROP}
+            panelClassName={SURFACE_MODAL_PANEL_FULL}
         >
             <div
+                className="flex min-h-0 flex-1 flex-col"
                 onKeyDownCapture={(event) => {
                     const key = event.key.toLowerCase();
                     if (SHELL_HOTKEYS_BLOCKED_BY_REQUIRED_DECISION.has(key) || /^[1-9]$/.test(key)) {
@@ -598,152 +623,135 @@ export function EventDecisionModal({ decision, onRespond, eventCatalog, state, a
                     titleId="event-decision-title"
                     accentClassName={section6Alt ? 'text-accent-gold' : factionColor}
                 />
-                <div className="p-6">
-
-                    {turnPause && (
-                        <div
-                            className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded border border-accent-gold/45 bg-accent-gold/10 px-4 py-3"
-                            data-testid="event-decision-turn-paused"
-                            role="status"
-                        >
-                            <div className="min-w-0 flex-1">
-                                <div className="text-xs font-bold uppercase tracking-[0.15em] text-accent-gold">
-                                    {t('eventDecision.turnPaused.title')}
+                <SurfaceColumns layout="content-wide-detail">
+                    <SurfaceContent>
+                        <SurfaceSections>
+                            <section className="flex flex-col gap-3">
+                                <div className={SURFACE_LABEL}>
+                                    {t('eventDecision.situation')}
                                 </div>
-                                <p className="mt-1 text-[12px] leading-relaxed text-text-secondary">
-                                    {t('eventDecision.turnPaused.body')}
+                                <p className="m-0 text-[18px] leading-relaxed text-[#ddd1b3]">
+                                    {localizedDecision.narrative || localizedDecision.situation || t('eventDecision.defaultSituation')}
                                 </p>
-                            </div>
-                            <button
-                                type="button"
-                                onClick={turnPause.onContinue}
-                                data-testid="event-decision-continue-turn"
-                                className="shrink-0 border border-panel-border/70 bg-panel-bg/70 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.12em] text-text-secondary transition-colors hover:border-accent-gold/60 hover:text-text-primary"
-                            >
-                                {t('eventDecision.turnPaused.continue')}
-                            </button>
-                        </div>
-                    )}
-
-                    {/* Response options are first-class controls, not footnotes below
-                        long dossier copy. Keeping them directly under the title
-                        prevents required decisions from looking non-actionable. */}
-                    <div
-                        className="mb-4"
-                        data-testid="event-decision-response-rail"
-                        data-event-id={localizedDecision.event_id}
-                    >
-                        <div className="text-xs font-bold uppercase tracking-[0.15em] text-accent-gold mb-3">
-                            {t('eventDecision.presidentialResponse')}
-                        </div>
-                        <div className="space-y-3">
-                        {localizedDecision.response_options.map(option => (
-                            <ResponseButton
-                                key={option.id}
-                                option={option}
-                                decision={localizedDecision}
-                                sourceNote={safeSourceNote}
-                                showDiagnostics={diagMode}
-                                onChoose={() => onRespond(localizedDecision.event_id, option.id)}
-                            />
-                        ))}
-                        </div>
-                    </div>
-
-                    <div className="mb-4 grid gap-3 md:grid-cols-[1fr_220px]">
-                        <section className="rounded border border-panel-border bg-panel-card/80 p-4">
-                            <div className="mb-2 text-xs font-bold uppercase tracking-[0.15em] text-accent-gold">
-                                {t('eventDecision.situation')}
-                            </div>
-                            <p className="text-[13px] leading-relaxed text-text-primary">
-                                {localizedDecision.narrative || localizedDecision.situation || t('eventDecision.defaultSituation')}
-                            </p>
-                            {localizedDecision.staff_assessment && (
-                                <div className="mt-3 rounded border border-panel-border/70 bg-panel-bg/60 px-3 py-2">
-                                    <div className="mb-1 text-xs font-bold uppercase tracking-[0.12em] text-text-muted">
-                                        {assessmentLabel === 'Staff assessment' ? t('eventDecision.staffAssessment') : assessmentLabel}
-                                    </div>
-                                    <p className="text-[12px] leading-relaxed text-text-secondary">
-                                        {playerSafeDossierText(localizedDecision.staff_assessment, diagMode)}
-                                    </p>
-                                </div>
-                            )}
-                            {localizedDecision.trigger_evidence && localizedDecision.trigger_evidence.length > 0 && (
-                                <div className="mt-3 rounded border border-panel-border/70 bg-panel-bg/60 px-3 py-2">
-                                    <div className="mb-1 text-xs font-bold uppercase tracking-[0.12em] text-text-muted">
-                                        {t('eventDecision.triggerEvidence')}
-                                    </div>
-                                    <ul className="space-y-1 text-[12px] leading-relaxed text-text-secondary">
-                                        {localizedDecision.trigger_evidence.map((evidence) => (
-                                            <li key={evidence}>{playerSafeDossierText(evidence, diagMode)}</li>
-                                        ))}
-                                    </ul>
-                                </div>
-                            )}
-                        </section>
-                        <aside className="rounded border border-panel-border bg-panel-card/80 p-4 text-xs text-text-secondary">
-                            <div className="mb-2 text-xs font-bold uppercase tracking-[0.15em] text-accent-gold">
-                                {t('eventDecision.dossier')}
-                            </div>
-                            <div className="space-y-2">
-                                <div>
-                                    <span className="block text-xs uppercase tracking-[0.12em] text-text-muted">{t('eventDecision.category')}</span>
-                                    <span className="text-text-primary">{category}</span>
-                                </div>
-                                <div>
-                                    <span className="block text-xs uppercase tracking-[0.12em] text-text-muted">{t('eventDecision.factionDate')}</span>
-                                    <span className="text-text-primary">
-                                        {eventDecisionFactionLabel(localizedDecision.faction)} / {decisionDate}
-                                    </span>
-                                </div>
-                                {safeSourceNote && (
-                                    <div>
-                                        <span className="block text-xs uppercase tracking-[0.12em] text-text-muted">{t('eventDecision.sourceNote')}</span>
-                                        <span className="text-text-primary">{safeSourceNote}</span>
+                                {localizedDecision.staff_assessment && (
+                                    <div className="flex flex-col gap-1.5 rounded-md border border-[#2a303c] bg-[#161a22] px-5 py-4">
+                                        <div className={SURFACE_LABEL_MUTED}>
+                                            {assessmentLabel === 'Staff assessment' ? t('eventDecision.staffAssessment') : assessmentLabel}
+                                        </div>
+                                        <p className="m-0 text-[17px] leading-relaxed text-[#ddd1b3]">
+                                            {playerSafeDossierText(localizedDecision.staff_assessment, diagMode)}
+                                        </p>
                                     </div>
                                 )}
+                                {localizedDecision.trigger_evidence && localizedDecision.trigger_evidence.length > 0 && (
+                                    <SurfaceFacts
+                                        label={t('eventDecision.triggerEvidence')}
+                                        facts={localizedDecision.trigger_evidence.map((evidence) => playerSafeDossierText(evidence, diagMode))}
+                                    />
+                                )}
+                            </section>
+
+                            {/* Phase H Packet 3 — Decision Context (Component A). See H1 scoping §4.2A. */}
+                            <DecisionContextSection
+                                decision={localizedDecision}
+                                eventCatalog={eventCatalog}
+                                state={state}
+                                diagMode={diagMode}
+                                locale={locale}
+                            />
+
+                            <section className="flex flex-col">
+                                <div className={`pb-1 ${SURFACE_LABEL}`}>
+                                    {t('eventDecision.dossier')}
+                                </div>
+                                <SurfaceStat label={t('eventDecision.category')} value={category} />
+                                <SurfaceStat
+                                    label={t('eventDecision.factionDate')}
+                                    value={`${eventDecisionFactionLabel(localizedDecision.faction)} / ${decisionDate}`}
+                                />
+                                {safeSourceNote && (
+                                    <div className="flex flex-col gap-1 py-2">
+                                        <span className="text-[16px] text-[#b9ad94]">{t('eventDecision.sourceNote')}</span>
+                                        <span className="text-[16px] leading-relaxed text-[#ddd1b3]">{safeSourceNote}</span>
+                                    </div>
+                                )}
+                            </section>
+
+                            {!hasHistoricalDefault && (
+                                <div className="rounded-md border border-accent-gold/30 bg-accent-gold/10 px-5 py-4 text-[16px] leading-relaxed text-[#ddd1b3]">
+                                    {t('eventDecision.historicalDefaultSourceReview')}
+                                </div>
+                            )}
+
+                            <p className="m-0 text-[15px] leading-relaxed text-[#9c917b]">
+                                {t('eventDecision.recordTrail')}
+                            </p>
+                        </SurfaceSections>
+                    </SurfaceContent>
+
+                    <SurfaceDetail aria-label={t('eventDecision.presidentialResponse')}>
+                        {errorMessage && (
+                            <div className="flex shrink-0 flex-col gap-3 border-b border-red-500/45 bg-red-500/10 px-7 py-4">
+                                <div role="alert" className="text-[16px] leading-relaxed text-red-100">
+                                    {errorMessage}
+                                </div>
+                                {onDismissError && (
+                                    <button
+                                        type="button"
+                                        className={`self-start ${SURFACE_SECONDARY_BUTTON}`}
+                                        onClick={onDismissError}
+                                    >
+                                        {t('eventDecision.returnToMap')}
+                                    </button>
+                                )}
                             </div>
-                        </aside>
-                    </div>
-
-                    {/* Phase H Packet 3 — Decision Context (Component A) renders
-                        after the dossier sidebar / source-note, before the
-                        response option list. See H1 scoping §4.2A. */}
-                    <DecisionContextSection
-                        decision={localizedDecision}
-                        eventCatalog={eventCatalog}
-                        state={state}
-                        diagMode={diagMode}
-                        locale={locale}
-                    />
-
-                    {!hasHistoricalDefault && (
-                        <div className="mb-4 rounded border border-accent-gold/30 bg-accent-gold/10 px-4 py-3 text-[12px] leading-relaxed text-text-secondary">
-                            {t('eventDecision.historicalDefaultSourceReview')}
+                        )}
+                        {/* Response options are first-class controls: the whole right column. */}
+                        <div
+                            className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto px-7 py-6"
+                            data-testid="event-decision-response-rail"
+                            data-event-id={localizedDecision.event_id}
+                        >
+                            <div className={SURFACE_LABEL}>
+                                {t('eventDecision.presidentialResponse')}
+                            </div>
+                            {localizedDecision.response_options.map(option => (
+                                <ResponseButton
+                                    key={option.id}
+                                    option={option}
+                                    decision={localizedDecision}
+                                    sourceNote={safeSourceNote}
+                                    showDiagnostics={diagMode}
+                                    onChoose={() => onRespond(localizedDecision.event_id, option.id)}
+                                />
+                            ))}
                         </div>
-                    )}
-
-                    {errorMessage && (
-                        <div className="mb-4 rounded border border-red-400/45 bg-red-950/35 px-4 py-3">
-                            <div role="alert" className="text-[12px] leading-relaxed text-red-100">
-                                {errorMessage}
-                            </div>
-                            {onDismissError && (
+                        {turnPause && (
+                            <SurfaceDetailFooter>
+                                <div
+                                    className="flex flex-col gap-1"
+                                    data-testid="event-decision-turn-paused"
+                                    role="status"
+                                >
+                                    <div className={SURFACE_LABEL}>
+                                        {t('eventDecision.turnPaused.title')}
+                                    </div>
+                                    <p className="m-0 text-[15px] leading-relaxed text-[#c2b69c]">
+                                        {t('eventDecision.turnPaused.body')}
+                                    </p>
+                                </div>
                                 <button
                                     type="button"
-                                    className="mt-3 rounded border border-red-300/45 bg-black/25 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.12em] text-red-50 transition-colors hover:border-red-200 hover:bg-red-900/35"
-                                    onClick={onDismissError}
+                                    onClick={turnPause.onContinue}
+                                    data-testid="event-decision-continue-turn"
+                                    className={SURFACE_SECONDARY_BUTTON}
                                 >
-                                    Return to map
+                                    {t('eventDecision.turnPaused.continue')}
                                 </button>
-                            )}
-                        </div>
-                    )}
-
-                    <div className="rounded border border-panel-border bg-panel-card/70 px-4 py-3 text-xs leading-relaxed text-text-secondary">
-                        {t('eventDecision.recordTrail')}
-                    </div>
-                </div>
+                            </SurfaceDetailFooter>
+                        )}
+                    </SurfaceDetail>
+                </SurfaceColumns>
             </div>
         </Modal>
     );

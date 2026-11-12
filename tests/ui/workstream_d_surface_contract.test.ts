@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 
 const appSource = readFileSync('src/ui/map/App.tsx', 'utf8');
 const decisionRoomSource = readFileSync(
-  'src/ui/map/components/army_hq/PresidentialDecisionRoomPanel.tsx',
+  'src/ui/map/components/command_surface/CommandSurface.tsx',
   'utf8',
 );
 const warroomStatusSource = readFileSync(
@@ -32,18 +32,28 @@ describe('Workstream D surface ownership', () => {
     expect(appSource).toMatch(/statusDock=\{\([\s\S]{0,120}!presidentialBlockingSurfaceActive/);
   });
 
-  it('gives the Decision Room one vertical scroll owner below a fixed close header', () => {
-    expect(appSource).toContain('data-decision-room-scroll-owner="true"');
-    expect(appSource).toMatch(/data-decision-room-scroll-owner="true"[\s\S]{0,500}overflow-y-auto/);
-    expect(appSource).toMatch(/data-decision-room-fixed-header="true"[\s\S]{0,250}shrink-0/);
-    expect(appSource.indexOf('data-decision-room-fixed-header="true"')).toBeLessThan(
-      appSource.indexOf('data-decision-room-scroll-owner="true"'),
-    );
-    expect(appSource).toMatch(/data-testid="warroom-decision-room-host"[\s\S]{0,300}overflow-hidden/);
-    expect(decisionRoomSource).not.toContain('overflow-y-auto');
-    expect(decisionRoomSource).not.toContain('max-h-[min(70vh,52rem)]');
-    expect(decisionRoomSource).toMatch(/data-decision-room-dossier-actions="true"[\s\S]{0,250}border-t/);
-    expect(decisionRoomSource).not.toMatch(/data-decision-room-dossier-actions="true"[\s\S]{0,250}sticky bottom-0/);
+  it('keeps the Command Surface header fixed and lets each column scroll on its own', () => {
+    // Owner redesign 2026-11-10: a full-height surface; the header never scrolls, the
+    // area rail, the matters and the detail each own their vertical scroll, and the
+    // detail's action footer stays in view below its scrolling body.
+    // The frame, header, columns and detail live in the shared surface parts.
+    const sharedSurfaceSource = readFileSync('src/ui/map/components/surface/Surface.tsx', 'utf8');
+    expect(decisionRoomSource).toMatch(/<SurfaceFrame[\s\S]{0,300}data-testid="warroom-decision-room-host"/);
+    expect(sharedSurfaceSource).toMatch(/const frameClass = cx\(\s*'[^']*flex-col overflow-hidden/);
+    expect(decisionRoomSource).toContain('<SurfaceHeader');
+    expect(sharedSurfaceSource).toMatch(/<header className="flex shrink-0/);
+    expect(decisionRoomSource).toContain('<SurfaceColumns');
+    expect(sharedSurfaceSource).toContain("'grid min-h-0 flex-1'");
+    expect(decisionRoomSource).toContain('data-testid="command-card-strip"');
+    expect(sharedSurfaceSource).toContain("'flex min-h-0 flex-col gap-2 overflow-y-auto");
+    expect(decisionRoomSource).toContain('<SurfaceContent>');
+    expect(sharedSurfaceSource).toContain("'flex min-h-0 flex-col overflow-y-auto'");
+    expect(decisionRoomSource).toMatch(/<SurfaceDetailBody[\s\S]{0,80}data-testid="decision-room-dossier-scroll"/);
+    expect(sharedSurfaceSource).toContain("'min-h-0 flex-1 overflow-y-auto'");
+    expect(decisionRoomSource).toContain('<SurfaceDetailFooter>');
+    expect(sharedSurfaceSource).toMatch(/'flex shrink-0 flex-col gap-3 border-t/);
+    expect(decisionRoomSource).not.toContain('sticky bottom-0');
+    expect(sharedSurfaceSource).not.toContain('sticky bottom-0');
   });
 
   it('keeps Warroom essential copy readable and metadata at least 10px', () => {

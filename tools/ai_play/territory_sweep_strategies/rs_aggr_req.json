@@ -1,0 +1,19 @@
+{
+  "name": "rs_aggr_req",
+  "faction": "RS",
+  "events": {
+    "default": "martial",
+    "overrides": {
+      "rs_strategic_goals": "aggressive",
+      "strategic_posture_review_rs": "press_gains",
+      "deliberate_force_rs_compliance_1995": "absorb_strikes_hold_position",
+      "holbrooke_us_belgrade_channel_1995": "defy_us_framework"
+    }
+  },
+  "request_ops": {
+    "enabled": true,
+    "max_queries_per_turn": 24,
+    "prefer_consolidation": true,
+    "accept_delay": true
+  }
+}

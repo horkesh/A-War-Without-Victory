@@ -11,7 +11,7 @@ test('Personnel reserve-officer details scroll instead of clipping the available
   );
 
   expect(source).not.toMatch(/line-clamp-2 text-xs leading-snug text-text-secondary/);
-  expect(source).toMatch(/max-h-24 overflow-y-auto text-xs leading-snug text-text-secondary/);
+  expect(source).toContain('max-h-24 overflow-y-auto text-[13px] leading-snug text-text-secondary');
 });
 
 test('force, mobilization, and casualty labels state their non-comparable scopes', () => {

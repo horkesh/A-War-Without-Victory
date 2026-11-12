@@ -1,0 +1,3108 @@
+{
+  "schema_version": 1,
+  "source": "data/source/peace_plans/plan_maps_research.json",
+  "research_report": "docs/40_reports/20261107_PEACE_PLANS_RESEARCH.md",
+  "keys": [
+    "RBiH",
+    "RS",
+    "HRHB",
+    "special"
+  ],
+  "rules": [
+    "single assignment gives that key 100",
+    "split parts map by prefix (RBiH/, RS/, HRHB/, Federation/RBiH, Federation/HRHB, special/, corridor, NEUTRAL, Brcko District)",
+    "unlabelled FED share -> plan Federation faction for the municipality, else Dayton Federation layer, else RBiH",
+    "Dayton Federation/split (Mostar) -> half RBiH, half HRHB",
+    "special = shared or international administration; the engine leaves it with its wartime holder"
+  ],
+  "plans": {
+    "vance_owen": {
+      "banja_luka": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "banovici": {
+        "RBiH": 100,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "bihac": {
+        "RBiH": 100,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "bijeljina": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "bileca": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "bosanska_dubica": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "bosanska_gradiska": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "bosanska_kostajnica": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "inferred"
+      },
+      "bosanska_krupa": {
+        "RBiH": 100,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "bosanski_brod": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 100,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "bosanski_novi": {
+        "RBiH": 100,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "bosanski_petrovac": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "bosanski_samac": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 100,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "bosansko_grahovo": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "bratunac": {
+        "RBiH": 100,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "brcko": {
+        "RBiH": 0,
+        "RS": 70,
+        "HRHB": 0,
+        "special": 30,
+        "confidence": "documented"
+      },
+      "breza": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 100,
+        "confidence": "documented"
+      },
+      "bugojno": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 100,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "busovaca": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 100,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "cajnice": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "capljina": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 100,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "cazin": {
+        "RBiH": 100,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "celinac": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "centar_sarajevo": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 100,
+        "confidence": "documented"
+      },
+      "citluk": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 100,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "derventa": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 100,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "doboj": {
+        "RBiH": 55,
+        "RS": 45,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "donji_vakuf": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 100,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "duvno": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 100,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "foca": {
+        "RBiH": 66,
+        "RS": 34,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "fojnica": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 100,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "gacko": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "glamoc": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "gorazde": {
+        "RBiH": 100,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "gornji_vakuf": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 100,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "gracanica": {
+        "RBiH": 100,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "gradacac": {
+        "RBiH": 53,
+        "RS": 0,
+        "HRHB": 47,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "grude": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 100,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "hadzici": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 100,
+        "confidence": "inferred"
+      },
+      "hanpijesak": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "ilidza": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 100,
+        "confidence": "inferred"
+      },
+      "ilijas": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 100,
+        "confidence": "inferred"
+      },
+      "jablanica": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 100,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "jajce": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 100,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "kakanj": {
+        "RBiH": 95,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 5,
+        "confidence": "documented"
+      },
+      "kalesija": {
+        "RBiH": 100,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "kalinovik": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "kiseljak": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 17,
+        "special": 83,
+        "confidence": "documented"
+      },
+      "kladanj": {
+        "RBiH": 100,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "kljuc": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "konjic": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 100,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "kotor_varos": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "kresevo": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 100,
+        "confidence": "documented"
+      },
+      "kupres": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 100,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "laktasi": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "listica": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 100,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "livno": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 100,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "ljubinje": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "ljubuski": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 100,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "lopare": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "lukavac": {
+        "RBiH": 100,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "maglaj": {
+        "RBiH": 100,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "modrica": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 100,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "mostar": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 100,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "mrkonjic_grad": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "neum": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 100,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "nevesinje": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "novi_grad_sarajevo": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 100,
+        "confidence": "inferred"
+      },
+      "novi_travnik": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 100,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "novo_sarajevo": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 100,
+        "confidence": "documented"
+      },
+      "odzak": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 100,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "olovo": {
+        "RBiH": 100,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "inferred"
+      },
+      "orasje": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 100,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "pale": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "inferred"
+      },
+      "posusje": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 100,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "prijedor": {
+        "RBiH": 61,
+        "RS": 39,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "prnjavor": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "prozor": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 100,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "rogatica": {
+        "RBiH": 100,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "rudo": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "sanski_most": {
+        "RBiH": 47,
+        "RS": 53,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "sekovici": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "sipovo": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "skender_vakuf": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "sokolac": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "srbac": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "srebrenica": {
+        "RBiH": 100,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "srebrenik": {
+        "RBiH": 100,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "stari_grad_sarajevo": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 100,
+        "confidence": "documented"
+      },
+      "stolac": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 100,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "tesanj": {
+        "RBiH": 100,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "teslic": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "titov_drvar": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "travnik": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 100,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "trebinje": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "trnovo": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 100,
+        "confidence": "inferred"
+      },
+      "tuzla": {
+        "RBiH": 100,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "ugljevik": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "vares": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 100,
+        "confidence": "documented"
+      },
+      "velika_kladusa": {
+        "RBiH": 100,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "visegrad": {
+        "RBiH": 100,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "visoko": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 100,
+        "confidence": "documented"
+      },
+      "vitez": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 100,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "vlasenica": {
+        "RBiH": 100,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "vogosca": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 100,
+        "confidence": "inferred"
+      },
+      "zavidovici": {
+        "RBiH": 100,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "zenica": {
+        "RBiH": 100,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "zepce": {
+        "RBiH": 100,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "zivinice": {
+        "RBiH": 100,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "zvornik": {
+        "RBiH": 100,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      }
+    },
+    "owen_stoltenberg": {
+      "banja_luka": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "banovici": {
+        "RBiH": 100,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "bihac": {
+        "RBiH": 67.4,
+        "RS": 32.6,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "bijeljina": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "bileca": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "bosanska_dubica": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "bosanska_gradiska": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "bosanska_kostajnica": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "bosanska_krupa": {
+        "RBiH": 44.4,
+        "RS": 55.6,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "bosanski_brod": {
+        "RBiH": 0,
+        "RS": 32.6,
+        "HRHB": 67.4,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "bosanski_novi": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "bosanski_petrovac": {
+        "RBiH": 9.5,
+        "RS": 90.5,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "bosanski_samac": {
+        "RBiH": 0,
+        "RS": 75.5,
+        "HRHB": 24.5,
+        "special": 0,
+        "confidence": "inferred"
+      },
+      "bosansko_grahovo": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "bratunac": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "brcko": {
+        "RBiH": 61.6,
+        "RS": 38.4,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "breza": {
+        "RBiH": 85.1,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 14.9,
+        "confidence": "documented"
+      },
+      "bugojno": {
+        "RBiH": 47.5,
+        "RS": 0,
+        "HRHB": 52.5,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "busovaca": {
+        "RBiH": 44.1,
+        "RS": 0,
+        "HRHB": 55.9,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "cajnice": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "capljina": {
+        "RBiH": 14.5,
+        "RS": 0,
+        "HRHB": 85.5,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "cazin": {
+        "RBiH": 100,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "celinac": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "centar_sarajevo": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 100,
+        "confidence": "documented"
+      },
+      "citluk": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 100,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "derventa": {
+        "RBiH": 0,
+        "RS": 85.7,
+        "HRHB": 14.3,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "doboj": {
+        "RBiH": 20.5,
+        "RS": 79.5,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "inferred"
+      },
+      "donji_vakuf": {
+        "RBiH": 41.8,
+        "RS": 0,
+        "HRHB": 58.2,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "duvno": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 100,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "foca": {
+        "RBiH": 6.1,
+        "RS": 93.9,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "fojnica": {
+        "RBiH": 86.1,
+        "RS": 0,
+        "HRHB": 13.9,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "gacko": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "glamoc": {
+        "RBiH": 0,
+        "RS": 69.2,
+        "HRHB": 30.8,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "gorazde": {
+        "RBiH": 73,
+        "RS": 27,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "gornji_vakuf": {
+        "RBiH": 32.3,
+        "RS": 0,
+        "HRHB": 67.7,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "gracanica": {
+        "RBiH": 100,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "gradacac": {
+        "RBiH": 75.3,
+        "RS": 24.7,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "inferred"
+      },
+      "grude": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 100,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "hadzici": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 100,
+        "confidence": "documented"
+      },
+      "hanpijesak": {
+        "RBiH": 21.8,
+        "RS": 78.2,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "inferred"
+      },
+      "ilidza": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 100,
+        "confidence": "documented"
+      },
+      "ilijas": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 100,
+        "confidence": "documented"
+      },
+      "jablanica": {
+        "RBiH": 50.7,
+        "RS": 0,
+        "HRHB": 49.3,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "jajce": {
+        "RBiH": 22.4,
+        "RS": 32,
+        "HRHB": 45.6,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "kakanj": {
+        "RBiH": 100,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "kalesija": {
+        "RBiH": 90.4,
+        "RS": 9.6,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "kalinovik": {
+        "RBiH": 28.9,
+        "RS": 71.1,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "inferred"
+      },
+      "kiseljak": {
+        "RBiH": 92.6,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 7.4,
+        "confidence": "documented"
+      },
+      "kladanj": {
+        "RBiH": 100,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "kljuc": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "konjic": {
+        "RBiH": 97.6,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 2.4,
+        "confidence": "documented"
+      },
+      "kotor_varos": {
+        "RBiH": 20.3,
+        "RS": 79.7,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "inferred"
+      },
+      "kresevo": {
+        "RBiH": 100,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "kupres": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 100,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "laktasi": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "listica": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 100,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "livno": {
+        "RBiH": 0,
+        "RS": 9.9,
+        "HRHB": 90.1,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "ljubinje": {
+        "RBiH": 10.8,
+        "RS": 83.8,
+        "HRHB": 5.4,
+        "special": 0,
+        "confidence": "inferred"
+      },
+      "ljubuski": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 100,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "lopare": {
+        "RBiH": 35.3,
+        "RS": 64.7,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "lukavac": {
+        "RBiH": 100,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "maglaj": {
+        "RBiH": 100,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "modrica": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "mostar": {
+        "RBiH": 57.1,
+        "RS": 0,
+        "HRHB": 42.9,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "mrkonjic_grad": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "neum": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 100,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "nevesinje": {
+        "RBiH": 37.4,
+        "RS": 62.6,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "novi_grad_sarajevo": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 100,
+        "confidence": "documented"
+      },
+      "novi_travnik": {
+        "RBiH": 6.7,
+        "RS": 0,
+        "HRHB": 93.3,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "novo_sarajevo": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 100,
+        "confidence": "documented"
+      },
+      "odzak": {
+        "RBiH": 0,
+        "RS": 19.2,
+        "HRHB": 80.8,
+        "special": 0,
+        "confidence": "inferred"
+      },
+      "olovo": {
+        "RBiH": 100,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "orasje": {
+        "RBiH": 0,
+        "RS": 40,
+        "HRHB": 60,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "pale": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "posusje": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 100,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "prijedor": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "prnjavor": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "prozor": {
+        "RBiH": 12.5,
+        "RS": 0,
+        "HRHB": 87.5,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "rogatica": {
+        "RBiH": 18,
+        "RS": 82,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "rudo": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "sanski_most": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "sekovici": {
+        "RBiH": 32,
+        "RS": 68,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "sipovo": {
+        "RBiH": 0,
+        "RS": 63.1,
+        "HRHB": 36.9,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "skender_vakuf": {
+        "RBiH": 2.2,
+        "RS": 81.3,
+        "HRHB": 16.5,
+        "special": 0,
+        "confidence": "inferred"
+      },
+      "sokolac": {
+        "RBiH": 30.5,
+        "RS": 69.5,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "srbac": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "srebrenica": {
+        "RBiH": 63.7,
+        "RS": 36.3,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "srebrenik": {
+        "RBiH": 100,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "stari_grad_sarajevo": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 100,
+        "confidence": "documented"
+      },
+      "stolac": {
+        "RBiH": 51.7,
+        "RS": 34.2,
+        "HRHB": 14.1,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "tesanj": {
+        "RBiH": 100,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "teslic": {
+        "RBiH": 24.6,
+        "RS": 75.4,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "inferred"
+      },
+      "titov_drvar": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "travnik": {
+        "RBiH": 100,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "trebinje": {
+        "RBiH": 0,
+        "RS": 88.2,
+        "HRHB": 11.8,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "trnovo": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 100,
+        "confidence": "documented"
+      },
+      "tuzla": {
+        "RBiH": 100,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "ugljevik": {
+        "RBiH": 12.7,
+        "RS": 87.3,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "vares": {
+        "RBiH": 100,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "velika_kladusa": {
+        "RBiH": 100,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "visegrad": {
+        "RBiH": 3.3,
+        "RS": 96.7,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "visoko": {
+        "RBiH": 95.2,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 4.8,
+        "confidence": "documented"
+      },
+      "vitez": {
+        "RBiH": 23.9,
+        "RS": 0,
+        "HRHB": 76.1,
+        "special": 0,
+        "confidence": "inferred"
+      },
+      "vlasenica": {
+        "RBiH": 8,
+        "RS": 92,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "vogosca": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 100,
+        "confidence": "documented"
+      },
+      "zavidovici": {
+        "RBiH": 100,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "zenica": {
+        "RBiH": 100,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "zepce": {
+        "RBiH": 100,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "zivinice": {
+        "RBiH": 100,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "zvornik": {
+        "RBiH": 23.7,
+        "RS": 76.3,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "inferred"
+      }
+    },
+    "contact_group": {
+      "banja_luka": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "banovici": {
+        "RBiH": 100,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "bihac": {
+        "RBiH": 69,
+        "RS": 31,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "bijeljina": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "bileca": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "bosanska_dubica": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "bosanska_gradiska": {
+        "RBiH": 8.3,
+        "RS": 91.7,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "bosanska_kostajnica": {
+        "RBiH": 8.9,
+        "RS": 91.1,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "bosanska_krupa": {
+        "RBiH": 81.8,
+        "RS": 18.2,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "inferred"
+      },
+      "bosanski_brod": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 100,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "bosanski_novi": {
+        "RBiH": 20.5,
+        "RS": 79.5,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "inferred"
+      },
+      "bosanski_petrovac": {
+        "RBiH": 4.2,
+        "RS": 95.8,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "bosanski_samac": {
+        "RBiH": 0,
+        "RS": 28.4,
+        "HRHB": 71.6,
+        "special": 0,
+        "confidence": "inferred"
+      },
+      "bosansko_grahovo": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "bratunac": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "brcko": {
+        "RBiH": 54.5,
+        "RS": 45.5,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "breza": {
+        "RBiH": 100,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "bugojno": {
+        "RBiH": 100,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "busovaca": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 100,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "cajnice": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "capljina": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 100,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "cazin": {
+        "RBiH": 100,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "celinac": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "centar_sarajevo": {
+        "RBiH": 30.2,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 69.8,
+        "confidence": "documented"
+      },
+      "citluk": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 100,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "derventa": {
+        "RBiH": 0,
+        "RS": 47.3,
+        "HRHB": 52.7,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "doboj": {
+        "RBiH": 49.5,
+        "RS": 50.5,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "donji_vakuf": {
+        "RBiH": 100,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "duvno": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 100,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "foca": {
+        "RBiH": 21.7,
+        "RS": 78.3,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "inferred"
+      },
+      "fojnica": {
+        "RBiH": 100,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "gacko": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "glamoc": {
+        "RBiH": 0,
+        "RS": 72.1,
+        "HRHB": 27.9,
+        "special": 0,
+        "confidence": "inferred"
+      },
+      "gorazde": {
+        "RBiH": 60.3,
+        "RS": 39.7,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "gornji_vakuf": {
+        "RBiH": 100,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "gracanica": {
+        "RBiH": 100,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "gradacac": {
+        "RBiH": 72.8,
+        "RS": 27.2,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "inferred"
+      },
+      "grude": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 100,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "hadzici": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 100,
+        "confidence": "documented"
+      },
+      "hanpijesak": {
+        "RBiH": 37.1,
+        "RS": 62.9,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "ilidza": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 100,
+        "confidence": "documented"
+      },
+      "ilijas": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 100,
+        "confidence": "documented"
+      },
+      "jablanica": {
+        "RBiH": 100,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "jajce": {
+        "RBiH": 0,
+        "RS": 16.6,
+        "HRHB": 83.4,
+        "special": 0,
+        "confidence": "inferred"
+      },
+      "kakanj": {
+        "RBiH": 100,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "kalesija": {
+        "RBiH": 77.6,
+        "RS": 22.4,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "inferred"
+      },
+      "kalinovik": {
+        "RBiH": 8.7,
+        "RS": 91.3,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "kiseljak": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 100,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "kladanj": {
+        "RBiH": 100,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "kljuc": {
+        "RBiH": 11.6,
+        "RS": 88.4,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "konjic": {
+        "RBiH": 100,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "kotor_varos": {
+        "RBiH": 36.2,
+        "RS": 63.8,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "kresevo": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 100,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "kupres": {
+        "RBiH": 0,
+        "RS": 13.3,
+        "HRHB": 86.7,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "laktasi": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "listica": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 100,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "livno": {
+        "RBiH": 0,
+        "RS": 11.4,
+        "HRHB": 88.6,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "ljubinje": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "ljubuski": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 100,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "lopare": {
+        "RBiH": 15.6,
+        "RS": 84.4,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "inferred"
+      },
+      "lukavac": {
+        "RBiH": 100,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "maglaj": {
+        "RBiH": 100,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "modrica": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "mostar": {
+        "RBiH": 100,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "mrkonjic_grad": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "neum": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 100,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "nevesinje": {
+        "RBiH": 19,
+        "RS": 81,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "inferred"
+      },
+      "novi_grad_sarajevo": {
+        "RBiH": 53.9,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 46.1,
+        "confidence": "documented"
+      },
+      "novi_travnik": {
+        "RBiH": 100,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "novo_sarajevo": {
+        "RBiH": 26.2,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 73.8,
+        "confidence": "documented"
+      },
+      "odzak": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 100,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "olovo": {
+        "RBiH": 100,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "orasje": {
+        "RBiH": 0,
+        "RS": 49.6,
+        "HRHB": 50.4,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "pale": {
+        "RBiH": 18,
+        "RS": 82,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "inferred"
+      },
+      "posusje": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 100,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "prijedor": {
+        "RBiH": 9.6,
+        "RS": 90.4,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "prnjavor": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "prozor": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 100,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "rogatica": {
+        "RBiH": 66.6,
+        "RS": 33.4,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "rudo": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "sanski_most": {
+        "RBiH": 57.7,
+        "RS": 42.3,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "sekovici": {
+        "RBiH": 40.1,
+        "RS": 59.9,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "sipovo": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "skender_vakuf": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "sokolac": {
+        "RBiH": 29.7,
+        "RS": 70.3,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "inferred"
+      },
+      "srbac": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "srebrenica": {
+        "RBiH": 63.5,
+        "RS": 36.5,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "srebrenik": {
+        "RBiH": 100,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "stari_grad_sarajevo": {
+        "RBiH": 14.8,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 85.2,
+        "confidence": "documented"
+      },
+      "stolac": {
+        "RBiH": 0,
+        "RS": 24.1,
+        "HRHB": 75.9,
+        "special": 0,
+        "confidence": "inferred"
+      },
+      "tesanj": {
+        "RBiH": 100,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "teslic": {
+        "RBiH": 37.5,
+        "RS": 62.5,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "titov_drvar": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "travnik": {
+        "RBiH": 100,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "trebinje": {
+        "RBiH": 0,
+        "RS": 89,
+        "HRHB": 11,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "trnovo": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 100,
+        "confidence": "documented"
+      },
+      "tuzla": {
+        "RBiH": 100,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "ugljevik": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "vares": {
+        "RBiH": 100,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "velika_kladusa": {
+        "RBiH": 100,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "visegrad": {
+        "RBiH": 7.9,
+        "RS": 92.1,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "visoko": {
+        "RBiH": 100,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "vitez": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 100,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "vlasenica": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "vogosca": {
+        "RBiH": 12.8,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 87.2,
+        "confidence": "documented"
+      },
+      "zavidovici": {
+        "RBiH": 100,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "zenica": {
+        "RBiH": 100,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "zepce": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 100,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "zivinice": {
+        "RBiH": 100,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "zvornik": {
+        "RBiH": 26.3,
+        "RS": 73.7,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "inferred"
+      }
+    },
+    "dayton": {
+      "banja_luka": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "banovici": {
+        "RBiH": 100,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "bihac": {
+        "RBiH": 100,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "bijeljina": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "bileca": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "bosanska_dubica": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "bosanska_gradiska": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "bosanska_kostajnica": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "bosanska_krupa": {
+        "RBiH": 86.1,
+        "RS": 13.9,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "bosanski_brod": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "bosanski_novi": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "bosanski_petrovac": {
+        "RBiH": 83.4,
+        "RS": 16.6,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "bosanski_samac": {
+        "RBiH": 0,
+        "RS": 82.4,
+        "HRHB": 17.6,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "bosansko_grahovo": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 100,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "bratunac": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "brcko": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 100,
+        "confidence": "documented"
+      },
+      "breza": {
+        "RBiH": 100,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "bugojno": {
+        "RBiH": 100,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "busovaca": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 100,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "cajnice": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "capljina": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 100,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "cazin": {
+        "RBiH": 100,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "celinac": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "centar_sarajevo": {
+        "RBiH": 100,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "citluk": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 100,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "derventa": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "doboj": {
+        "RBiH": 5.8,
+        "RS": 94.2,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "donji_vakuf": {
+        "RBiH": 100,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "duvno": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 100,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "foca": {
+        "RBiH": 12.7,
+        "RS": 87.3,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "fojnica": {
+        "RBiH": 100,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "gacko": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "glamoc": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 100,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "gorazde": {
+        "RBiH": 67.3,
+        "RS": 32.7,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "gornji_vakuf": {
+        "RBiH": 100,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "gracanica": {
+        "RBiH": 66.2,
+        "RS": 33.8,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "gradacac": {
+        "RBiH": 65.2,
+        "RS": 34.8,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "grude": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 100,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "hadzici": {
+        "RBiH": 100,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "hanpijesak": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "ilidza": {
+        "RBiH": 82.4,
+        "RS": 17.6,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "ilijas": {
+        "RBiH": 100,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "jablanica": {
+        "RBiH": 100,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "jajce": {
+        "RBiH": 0,
+        "RS": 15.5,
+        "HRHB": 84.5,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "kakanj": {
+        "RBiH": 100,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "kalesija": {
+        "RBiH": 71.2,
+        "RS": 28.8,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "kalinovik": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "kiseljak": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 100,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "kladanj": {
+        "RBiH": 100,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "kljuc": {
+        "RBiH": 40.2,
+        "RS": 59.8,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "konjic": {
+        "RBiH": 100,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "kotor_varos": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "kresevo": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 100,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "kupres": {
+        "RBiH": 0,
+        "RS": 7.2,
+        "HRHB": 92.8,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "laktasi": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "listica": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 100,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "livno": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 100,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "ljubinje": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "ljubuski": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 100,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "lopare": {
+        "RBiH": 31.5,
+        "RS": 68.5,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "lukavac": {
+        "RBiH": 100,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "maglaj": {
+        "RBiH": 100,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "modrica": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "mostar": {
+        "RBiH": 46.5,
+        "RS": 7.1,
+        "HRHB": 46.5,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "mrkonjic_grad": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "neum": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 100,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "nevesinje": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "novi_grad_sarajevo": {
+        "RBiH": 100,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "novi_travnik": {
+        "RBiH": 100,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "novo_sarajevo": {
+        "RBiH": 19.6,
+        "RS": 80.4,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "odzak": {
+        "RBiH": 0,
+        "RS": 30,
+        "HRHB": 70,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "olovo": {
+        "RBiH": 100,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "orasje": {
+        "RBiH": 0,
+        "RS": 24.5,
+        "HRHB": 75.5,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "pale": {
+        "RBiH": 15.1,
+        "RS": 84.9,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "posusje": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 100,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "prijedor": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "prnjavor": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "prozor": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 100,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "rogatica": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "rudo": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "sanski_most": {
+        "RBiH": 78.8,
+        "RS": 21.2,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "sekovici": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "sipovo": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "skender_vakuf": {
+        "RBiH": 0,
+        "RS": 83.7,
+        "HRHB": 16.3,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "sokolac": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "srbac": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "srebrenica": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "srebrenik": {
+        "RBiH": 100,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "stari_grad_sarajevo": {
+        "RBiH": 36.7,
+        "RS": 63.3,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "stolac": {
+        "RBiH": 0,
+        "RS": 48.5,
+        "HRHB": 51.5,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "tesanj": {
+        "RBiH": 100,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "teslic": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "titov_drvar": {
+        "RBiH": 0,
+        "RS": 12,
+        "HRHB": 88,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "travnik": {
+        "RBiH": 100,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "trebinje": {
+        "RBiH": 0,
+        "RS": 73.7,
+        "HRHB": 26.3,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "trnovo": {
+        "RBiH": 75.9,
+        "RS": 24.1,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "tuzla": {
+        "RBiH": 100,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "ugljevik": {
+        "RBiH": 15.3,
+        "RS": 84.7,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "vares": {
+        "RBiH": 100,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "velika_kladusa": {
+        "RBiH": 100,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "visegrad": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "visoko": {
+        "RBiH": 100,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "vitez": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 100,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "vlasenica": {
+        "RBiH": 0,
+        "RS": 100,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "vogosca": {
+        "RBiH": 100,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "zavidovici": {
+        "RBiH": 100,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "zenica": {
+        "RBiH": 100,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "zepce": {
+        "RBiH": 0,
+        "RS": 0,
+        "HRHB": 100,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "zivinice": {
+        "RBiH": 100,
+        "RS": 0,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      },
+      "zvornik": {
+        "RBiH": 24.7,
+        "RS": 75.3,
+        "HRHB": 0,
+        "special": 0,
+        "confidence": "documented"
+      }
+    }
+  }
+}

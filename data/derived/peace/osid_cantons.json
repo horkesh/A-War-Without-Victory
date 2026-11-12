@@ -1,0 +1,2859 @@
+{
+ "schema": "osid_cantons/v1",
+ "note": "Derived by tools/peace/derive_osid_cantons.cjs from data/source/peace_plans/federation_cantons.json, data/source/bih_census_1991.json and data/source/municipality_post1995_to_mun1990.json. basis: settlement (the cell's Federation settlements), municipality (its 1990 municipality has one Federation canton), null (left to Federation law).",
+ "counts": {
+  "settlement": 444,
+  "municipality": 39,
+  "none": 229
+ },
+ "cells": {
+  "op:banja_luka:banja_luka_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:banja_luka:dragocaj": {
+   "canton": null,
+   "basis": null
+  },
+  "op:banja_luka:kola": {
+   "canton": null,
+   "basis": null
+  },
+  "op:banja_luka:melina_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:banja_luka:motike": {
+   "canton": null,
+   "basis": null
+  },
+  "op:banja_luka:pavici_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:banja_luka:piskavica_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:banja_luka:potkozarje_3": {
+   "canton": null,
+   "basis": null
+  },
+  "op:banja_luka:rekavice_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:banovici:banovici_2": {
+   "canton": "tuzla",
+   "basis": "settlement"
+  },
+  "op:banovici:banovici_selo_2": {
+   "canton": "tuzla",
+   "basis": "settlement"
+  },
+  "op:banovici:repnik_2": {
+   "canton": "tuzla",
+   "basis": "settlement"
+  },
+  "op:banovici:seona": {
+   "canton": "tuzla",
+   "basis": "settlement"
+  },
+  "op:bihac:bihac_2": {
+   "canton": "una_sana",
+   "basis": "settlement"
+  },
+  "op:bihac:brekovica_2": {
+   "canton": "una_sana",
+   "basis": "settlement"
+  },
+  "op:bihac:orasac_2": {
+   "canton": "una_sana",
+   "basis": "settlement"
+  },
+  "op:bihac:racic": {
+   "canton": "una_sana",
+   "basis": "settlement"
+  },
+  "op:bihac:ripac": {
+   "canton": "una_sana",
+   "basis": "settlement"
+  },
+  "op:bihac:trubar": {
+   "canton": "una_sana",
+   "basis": "settlement"
+  },
+  "op:bihac:velika_gata": {
+   "canton": "una_sana",
+   "basis": "settlement"
+  },
+  "op:bijeljina:bijeljina_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:bijeljina:bukovica_donja": {
+   "canton": null,
+   "basis": null
+  },
+  "op:bijeljina:cadjavica_gornja_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:bijeljina:crnjelovo_donje": {
+   "canton": null,
+   "basis": null
+  },
+  "op:bijeljina:dvorovi_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:bijeljina:glavicice": {
+   "canton": null,
+   "basis": null
+  },
+  "op:bijeljina:janja_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:bijeljina:pucile_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:bijeljina:suho_polje_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:bijeljina:velika_obarska_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:bileca:bileca_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:bileca:korita": {
+   "canton": null,
+   "basis": null
+  },
+  "op:bileca:mirilovici": {
+   "canton": null,
+   "basis": null
+  },
+  "op:bileca:vranjska": {
+   "canton": null,
+   "basis": null
+  },
+  "op:bileca:zausje": {
+   "canton": null,
+   "basis": null
+  },
+  "op:bosanska_dubica:aginci": {
+   "canton": null,
+   "basis": null
+  },
+  "op:bosanska_dubica:donja_slabinja_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:bosanska_dubica:hadzibajir_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:bosanska_dubica:knezica_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:bosanska_dubica:kozarska_dubica": {
+   "canton": null,
+   "basis": null
+  },
+  "op:bosanska_dubica:medjedja_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:bosanska_dubica:medjuvodje": {
+   "canton": null,
+   "basis": null
+  },
+  "op:bosanska_dubica:vojskova": {
+   "canton": null,
+   "basis": null
+  },
+  "op:bosanska_gradiska:cerovljani": {
+   "canton": null,
+   "basis": null
+  },
+  "op:bosanska_gradiska:gornji_podgradci": {
+   "canton": null,
+   "basis": null
+  },
+  "op:bosanska_gradiska:gradiska_3": {
+   "canton": null,
+   "basis": null
+  },
+  "op:bosanska_gradiska:grbavci": {
+   "canton": null,
+   "basis": null
+  },
+  "op:bosanska_gradiska:kozinci": {
+   "canton": null,
+   "basis": null
+  },
+  "op:bosanska_gradiska:kruskik_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:bosanska_gradiska:mackovac": {
+   "canton": null,
+   "basis": null
+  },
+  "op:bosanska_gradiska:masici_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:bosanska_gradiska:nova_topola_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:bosanska_gradiska:orahova": {
+   "canton": null,
+   "basis": null
+  },
+  "op:bosanska_kostajnica:kostajnica": {
+   "canton": null,
+   "basis": null
+  },
+  "op:bosanska_kostajnica:petrinja": {
+   "canton": null,
+   "basis": null
+  },
+  "op:bosanska_krupa:arapusa_2": {
+   "canton": "una_sana",
+   "basis": "settlement"
+  },
+  "op:bosanska_krupa:donji_dubovik_2": {
+   "canton": "una_sana",
+   "basis": "settlement"
+  },
+  "op:bosanska_krupa:gornja_suvaja": {
+   "canton": "una_sana",
+   "basis": "settlement"
+  },
+  "op:bosanska_krupa:ivanjska_2": {
+   "canton": "una_sana",
+   "basis": "settlement"
+  },
+  "op:bosanska_krupa:jasenica_2": {
+   "canton": "una_sana",
+   "basis": "settlement"
+  },
+  "op:bosanska_krupa:jezerski_2": {
+   "canton": "una_sana",
+   "basis": "settlement"
+  },
+  "op:bosanska_krupa:otoka_2": {
+   "canton": "una_sana",
+   "basis": "settlement"
+  },
+  "op:bosanska_krupa:veliki_badic": {
+   "canton": "una_sana",
+   "basis": "settlement"
+  },
+  "op:bosanska_krupa:vranjska_2": {
+   "canton": "una_sana",
+   "basis": "settlement"
+  },
+  "op:bosanski_brod:brod": {
+   "canton": null,
+   "basis": null
+  },
+  "op:bosanski_brod:donja_vrela": {
+   "canton": null,
+   "basis": null
+  },
+  "op:bosanski_brod:lijesce_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:bosanski_brod:novo_selo_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:bosanski_novi:blagaj_japra": {
+   "canton": null,
+   "basis": null
+  },
+  "op:bosanski_novi:dobrljin_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:bosanski_novi:krslje_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:bosanski_novi:matavazi_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:bosanski_novi:novi_grad_3": {
+   "canton": null,
+   "basis": null
+  },
+  "op:bosanski_novi:poljavnice": {
+   "canton": null,
+   "basis": null
+  },
+  "op:bosanski_novi:suhaca_4": {
+   "canton": null,
+   "basis": null
+  },
+  "op:bosanski_novi:svodna_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:bosanski_petrovac:bosanski_petrovac_2": {
+   "canton": "una_sana",
+   "basis": "settlement"
+  },
+  "op:bosanski_petrovac:dobro_selo_2": {
+   "canton": "una_sana",
+   "basis": "settlement"
+  },
+  "op:bosanski_petrovac:jasenovac_2": {
+   "canton": "una_sana",
+   "basis": "settlement"
+  },
+  "op:bosanski_petrovac:kolonic_2": {
+   "canton": "una_sana",
+   "basis": "settlement"
+  },
+  "op:bosanski_petrovac:krnjeusa": {
+   "canton": "una_sana",
+   "basis": "settlement"
+  },
+  "op:bosanski_petrovac:prkosi": {
+   "canton": "una_sana",
+   "basis": "settlement"
+  },
+  "op:bosanski_petrovac:vodjenica": {
+   "canton": "una_sana",
+   "basis": "settlement"
+  },
+  "op:bosanski_petrovac:vrtoce": {
+   "canton": "una_sana",
+   "basis": "settlement"
+  },
+  "op:bosanski_samac:crkvina_2": {
+   "canton": "posavina",
+   "basis": "municipality"
+  },
+  "op:bosanski_samac:domaljevac_2": {
+   "canton": "posavina",
+   "basis": "settlement"
+  },
+  "op:bosanski_samac:novo_selo_2": {
+   "canton": "posavina",
+   "basis": "municipality"
+  },
+  "op:bosanski_samac:samac_2": {
+   "canton": "posavina",
+   "basis": "municipality"
+  },
+  "op:bosanski_samac:tisina": {
+   "canton": "posavina",
+   "basis": "settlement"
+  },
+  "op:bosansko_grahovo:bosansko_grahovo_2": {
+   "canton": "canton_10",
+   "basis": "settlement"
+  },
+  "op:bosansko_grahovo:crni_lug": {
+   "canton": "canton_10",
+   "basis": "settlement"
+  },
+  "op:bosansko_grahovo:malesevci": {
+   "canton": "canton_10",
+   "basis": "settlement"
+  },
+  "op:bosansko_grahovo:ugarci": {
+   "canton": "canton_10",
+   "basis": "settlement"
+  },
+  "op:bratunac:bratunac_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:bratunac:glogova": {
+   "canton": null,
+   "basis": null
+  },
+  "op:bratunac:jezestica_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:bratunac:pobudje_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:bratunac:polom": {
+   "canton": null,
+   "basis": null
+  },
+  "op:bratunac:slapasnica": {
+   "canton": null,
+   "basis": null
+  },
+  "op:bratunac:vranesevici": {
+   "canton": null,
+   "basis": null
+  },
+  "op:bratunac:zapolje_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:brcko:bijela_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:brcko:boce_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:brcko:brcko": {
+   "canton": null,
+   "basis": null
+  },
+  "op:brcko:brezovo_polje_selo_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:brcko:brka_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:brcko:bukvik_gornji_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:brcko:donji_rahic": {
+   "canton": null,
+   "basis": null
+  },
+  "op:brcko:gornji_rahic_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:brcko:krepsic": {
+   "canton": null,
+   "basis": null
+  },
+  "op:brcko:maoca_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:brcko:palanka": {
+   "canton": null,
+   "basis": null
+  },
+  "op:brcko:potocari_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:brcko:skakava_donja": {
+   "canton": null,
+   "basis": null
+  },
+  "op:breza:koritnik": {
+   "canton": "zenica_doboj",
+   "basis": "settlement"
+  },
+  "op:breza:mahala": {
+   "canton": "zenica_doboj",
+   "basis": "settlement"
+  },
+  "op:breza:podgora": {
+   "canton": "zenica_doboj",
+   "basis": "settlement"
+  },
+  "op:breza:zupca_2": {
+   "canton": "zenica_doboj",
+   "basis": "settlement"
+  },
+  "op:bugojno:brizina": {
+   "canton": "central_bosnia",
+   "basis": "settlement"
+  },
+  "op:bugojno:gracanica": {
+   "canton": "central_bosnia",
+   "basis": "settlement"
+  },
+  "op:bugojno:kopcic_2": {
+   "canton": "central_bosnia",
+   "basis": "settlement"
+  },
+  "op:bugojno:kula_2": {
+   "canton": "central_bosnia",
+   "basis": "settlement"
+  },
+  "op:bugojno:medini": {
+   "canton": "central_bosnia",
+   "basis": "settlement"
+  },
+  "op:bugojno:prijaci": {
+   "canton": "central_bosnia",
+   "basis": "settlement"
+  },
+  "op:bugojno:rovna": {
+   "canton": "central_bosnia",
+   "basis": "settlement"
+  },
+  "op:bugojno:udurlije": {
+   "canton": "central_bosnia",
+   "basis": "settlement"
+  },
+  "op:bugojno:vesela_2": {
+   "canton": "central_bosnia",
+   "basis": "settlement"
+  },
+  "op:bugojno:vrpec": {
+   "canton": "central_bosnia",
+   "basis": "settlement"
+  },
+  "op:bugojno:vucipolje_3": {
+   "canton": "central_bosnia",
+   "basis": "settlement"
+  },
+  "op:busovaca:bare_2": {
+   "canton": "central_bosnia",
+   "basis": "settlement"
+  },
+  "op:busovaca:buselji_2": {
+   "canton": "central_bosnia",
+   "basis": "settlement"
+  },
+  "op:busovaca:busovaca_2": {
+   "canton": "central_bosnia",
+   "basis": "settlement"
+  },
+  "op:busovaca:dobraljevo_2": {
+   "canton": "central_bosnia",
+   "basis": "settlement"
+  },
+  "op:busovaca:gornja_rovna": {
+   "canton": "central_bosnia",
+   "basis": "settlement"
+  },
+  "op:busovaca:kacuni_2": {
+   "canton": "central_bosnia",
+   "basis": "settlement"
+  },
+  "op:busovaca:polje_2": {
+   "canton": "central_bosnia",
+   "basis": "settlement"
+  },
+  "op:busovaca:putis_2": {
+   "canton": "central_bosnia",
+   "basis": "settlement"
+  },
+  "op:cajnice:batotici": {
+   "canton": null,
+   "basis": null
+  },
+  "op:cajnice:cajnice_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:cajnice:miljeno_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:cajnice:todorovici": {
+   "canton": null,
+   "basis": null
+  },
+  "op:cajnice:zaborak": {
+   "canton": null,
+   "basis": null
+  },
+  "op:capljina:capljina_2": {
+   "canton": "herzegovina_neretva",
+   "basis": "settlement"
+  },
+  "op:capljina:tasovcici_2": {
+   "canton": "herzegovina_neretva",
+   "basis": "settlement"
+  },
+  "op:capljina:visici_2": {
+   "canton": "herzegovina_neretva",
+   "basis": "settlement"
+  },
+  "op:cazin:cazin_2": {
+   "canton": "una_sana",
+   "basis": "settlement"
+  },
+  "op:cazin:coralici": {
+   "canton": "una_sana",
+   "basis": "settlement"
+  },
+  "op:cazin:liskovac_2": {
+   "canton": "una_sana",
+   "basis": "settlement"
+  },
+  "op:cazin:mrazovac": {
+   "canton": "una_sana",
+   "basis": "settlement"
+  },
+  "op:cazin:mutnik_2": {
+   "canton": "una_sana",
+   "basis": "settlement"
+  },
+  "op:cazin:ostrozac_2": {
+   "canton": "una_sana",
+   "basis": "settlement"
+  },
+  "op:cazin:prosici": {
+   "canton": "una_sana",
+   "basis": "settlement"
+  },
+  "op:cazin:stijena_3": {
+   "canton": "una_sana",
+   "basis": "settlement"
+  },
+  "op:cazin:sturlic_2": {
+   "canton": "una_sana",
+   "basis": "settlement"
+  },
+  "op:cazin:varoska_rijeka_3": {
+   "canton": "una_sana",
+   "basis": "settlement"
+  },
+  "op:celinac:celinac_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:celinac:josavka_donja_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:celinac:kablovi_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:celinac:snjegotina_srednja": {
+   "canton": null,
+   "basis": null
+  },
+  "op:centar_sarajevo:radava": {
+   "canton": "sarajevo",
+   "basis": "settlement"
+  },
+  "op:centar_sarajevo:sarajevo_dio_centar_sajarevo": {
+   "canton": "sarajevo",
+   "basis": "settlement"
+  },
+  "op:citluk:citluk_2": {
+   "canton": "herzegovina_neretva",
+   "basis": "settlement"
+  },
+  "op:citluk:krehin_gradac_2": {
+   "canton": "herzegovina_neretva",
+   "basis": "settlement"
+  },
+  "op:citluk:veliki_ogradjenik_2": {
+   "canton": "herzegovina_neretva",
+   "basis": "settlement"
+  },
+  "op:derventa:cerani_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:derventa:derventa_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:derventa:lug": {
+   "canton": null,
+   "basis": null
+  },
+  "op:derventa:luzani_bosanski": {
+   "canton": null,
+   "basis": null
+  },
+  "op:derventa:misinci_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:derventa:velika_socanica_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:derventa:zivinice": {
+   "canton": null,
+   "basis": null
+  },
+  "op:doboj:boljanic_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:doboj:brijesnica_velika": {
+   "canton": "tuzla",
+   "basis": "settlement"
+  },
+  "op:doboj:bukovica_velika_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:doboj:cerovica_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:doboj:civcije_bukovicke": {
+   "canton": null,
+   "basis": null
+  },
+  "op:doboj:grapska_gornja_2": {
+   "canton": "tuzla",
+   "basis": "settlement"
+  },
+  "op:doboj:klokotnica_2": {
+   "canton": "tuzla",
+   "basis": "settlement"
+  },
+  "op:doboj:kotorsko_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:doboj:kozuhe_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:doboj:makljenovac": {
+   "canton": null,
+   "basis": null
+  },
+  "op:doboj:matuzici_2": {
+   "canton": "zenica_doboj",
+   "basis": "settlement"
+  },
+  "op:doboj:stanari_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:doboj:zelinja_gornja_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:donji_vakuf:babin_potok_2": {
+   "canton": "central_bosnia",
+   "basis": "settlement"
+  },
+  "op:donji_vakuf:donji_vakuf_2": {
+   "canton": "central_bosnia",
+   "basis": "settlement"
+  },
+  "op:donji_vakuf:jemanlici": {
+   "canton": "central_bosnia",
+   "basis": "settlement"
+  },
+  "op:donji_vakuf:komar_2": {
+   "canton": "central_bosnia",
+   "basis": "settlement"
+  },
+  "op:donji_vakuf:korenici": {
+   "canton": "central_bosnia",
+   "basis": "settlement"
+  },
+  "op:donji_vakuf:kutanja": {
+   "canton": "central_bosnia",
+   "basis": "settlement"
+  },
+  "op:donji_vakuf:oborci_2": {
+   "canton": "central_bosnia",
+   "basis": "settlement"
+  },
+  "op:donji_vakuf:pribraca_2": {
+   "canton": "central_bosnia",
+   "basis": "settlement"
+  },
+  "op:donji_vakuf:prusac_2": {
+   "canton": "central_bosnia",
+   "basis": "settlement"
+  },
+  "op:donji_vakuf:torlakovac_2": {
+   "canton": "central_bosnia",
+   "basis": "settlement"
+  },
+  "op:duvno:dobrici": {
+   "canton": "canton_10",
+   "basis": "settlement"
+  },
+  "op:duvno:kongora": {
+   "canton": "canton_10",
+   "basis": "settlement"
+  },
+  "op:duvno:kovaci": {
+   "canton": "canton_10",
+   "basis": "settlement"
+  },
+  "op:duvno:prisoje_2": {
+   "canton": "canton_10",
+   "basis": "settlement"
+  },
+  "op:duvno:rosko_polje_2": {
+   "canton": "canton_10",
+   "basis": "settlement"
+  },
+  "op:duvno:stipanjici_2": {
+   "canton": "canton_10",
+   "basis": "settlement"
+  },
+  "op:duvno:suica_2": {
+   "canton": "canton_10",
+   "basis": "settlement"
+  },
+  "op:duvno:tomislavgrad_2": {
+   "canton": "canton_10",
+   "basis": "settlement"
+  },
+  "op:duvno:vinica_2": {
+   "canton": "canton_10",
+   "basis": "settlement"
+  },
+  "op:foca:brod_3": {
+   "canton": "bosnian_podrinje",
+   "basis": "municipality"
+  },
+  "op:foca:brusna_2": {
+   "canton": "bosnian_podrinje",
+   "basis": "municipality"
+  },
+  "op:foca:donje_zesce": {
+   "canton": "bosnian_podrinje",
+   "basis": "settlement"
+  },
+  "op:foca:foca_3": {
+   "canton": "bosnian_podrinje",
+   "basis": "municipality"
+  },
+  "op:foca:izbisno": {
+   "canton": "bosnian_podrinje",
+   "basis": "settlement"
+  },
+  "op:foca:kosman": {
+   "canton": "bosnian_podrinje",
+   "basis": "municipality"
+  },
+  "op:foca:mazlina": {
+   "canton": "bosnian_podrinje",
+   "basis": "settlement"
+  },
+  "op:foca:miljevina_2": {
+   "canton": "bosnian_podrinje",
+   "basis": "municipality"
+  },
+  "op:foca:patkovina": {
+   "canton": "bosnian_podrinje",
+   "basis": "settlement"
+  },
+  "op:foca:prevrac": {
+   "canton": "bosnian_podrinje",
+   "basis": "municipality"
+  },
+  "op:foca:tjentiste_2": {
+   "canton": "bosnian_podrinje",
+   "basis": "municipality"
+  },
+  "op:foca:ustikolina": {
+   "canton": "bosnian_podrinje",
+   "basis": "settlement"
+  },
+  "op:foca:velenici_2": {
+   "canton": "bosnian_podrinje",
+   "basis": "municipality"
+  },
+  "op:foca:zavait_3": {
+   "canton": "bosnian_podrinje",
+   "basis": "municipality"
+  },
+  "op:fojnica:bakovici_2": {
+   "canton": "central_bosnia",
+   "basis": "settlement"
+  },
+  "op:fojnica:fojnica_2": {
+   "canton": "central_bosnia",
+   "basis": "settlement"
+  },
+  "op:fojnica:plocari_polje": {
+   "canton": "central_bosnia",
+   "basis": "settlement"
+  },
+  "op:fojnica:turkovici": {
+   "canton": "central_bosnia",
+   "basis": "settlement"
+  },
+  "op:fojnica:zivcici_2": {
+   "canton": "central_bosnia",
+   "basis": "settlement"
+  },
+  "op:gacko:avtovac_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:gacko:bahori": {
+   "canton": null,
+   "basis": null
+  },
+  "op:gacko:gacko_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:gacko:gradina": {
+   "canton": null,
+   "basis": null
+  },
+  "op:gacko:izgori": {
+   "canton": null,
+   "basis": null
+  },
+  "op:gacko:nadinici": {
+   "canton": null,
+   "basis": null
+  },
+  "op:glamoc:glamoc_2": {
+   "canton": "canton_10",
+   "basis": "settlement"
+  },
+  "op:glamoc:halapic": {
+   "canton": "canton_10",
+   "basis": "settlement"
+  },
+  "op:glamoc:kovacevci_2": {
+   "canton": "canton_10",
+   "basis": "settlement"
+  },
+  "op:glamoc:pribelja": {
+   "canton": "canton_10",
+   "basis": "settlement"
+  },
+  "op:glamoc:stekerovci_2": {
+   "canton": "canton_10",
+   "basis": "settlement"
+  },
+  "op:glamoc:vidimlije_2": {
+   "canton": "canton_10",
+   "basis": "settlement"
+  },
+  "op:gorazde:bacci": {
+   "canton": "bosnian_podrinje",
+   "basis": "settlement"
+  },
+  "op:gorazde:citluk_2": {
+   "canton": "bosnian_podrinje",
+   "basis": "settlement"
+  },
+  "op:gorazde:faocici_2": {
+   "canton": "bosnian_podrinje",
+   "basis": "settlement"
+  },
+  "op:gorazde:glamoc": {
+   "canton": "bosnian_podrinje",
+   "basis": "settlement"
+  },
+  "op:gorazde:gorazde_2": {
+   "canton": "bosnian_podrinje",
+   "basis": "settlement"
+  },
+  "op:gorazde:hrancici": {
+   "canton": "bosnian_podrinje",
+   "basis": "settlement"
+  },
+  "op:gorazde:kamen": {
+   "canton": "bosnian_podrinje",
+   "basis": "settlement"
+  },
+  "op:gorazde:kola": {
+   "canton": "bosnian_podrinje",
+   "basis": "settlement"
+  },
+  "op:gorazde:kolovarice": {
+   "canton": "bosnian_podrinje",
+   "basis": "settlement"
+  },
+  "op:gorazde:mravinjac_2": {
+   "canton": "bosnian_podrinje",
+   "basis": "settlement"
+  },
+  "op:gorazde:osjecani_2": {
+   "canton": "bosnian_podrinje",
+   "basis": "settlement"
+  },
+  "op:gorazde:podkozara_donja_2": {
+   "canton": "bosnian_podrinje",
+   "basis": "settlement"
+  },
+  "op:gorazde:semihova_2": {
+   "canton": "bosnian_podrinje",
+   "basis": "settlement"
+  },
+  "op:gorazde:slatina_2": {
+   "canton": "bosnian_podrinje",
+   "basis": "municipality"
+  },
+  "op:gorazde:sopotnica": {
+   "canton": "bosnian_podrinje",
+   "basis": "settlement"
+  },
+  "op:gorazde:ustipraca_2": {
+   "canton": "bosnian_podrinje",
+   "basis": "municipality"
+  },
+  "op:gorazde:zorovici": {
+   "canton": "bosnian_podrinje",
+   "basis": "settlement"
+  },
+  "op:gornji_vakuf:crkvice": {
+   "canton": "central_bosnia",
+   "basis": "settlement"
+  },
+  "op:gornji_vakuf:drazev_dolac": {
+   "canton": "central_bosnia",
+   "basis": "settlement"
+  },
+  "op:gornji_vakuf:gornji_vakuf_uskoplje_2": {
+   "canton": "central_bosnia",
+   "basis": "settlement"
+  },
+  "op:gornji_vakuf:jagnjid_2": {
+   "canton": "central_bosnia",
+   "basis": "settlement"
+  },
+  "op:gornji_vakuf:pajic_polje_2": {
+   "canton": "central_bosnia",
+   "basis": "settlement"
+  },
+  "op:gornji_vakuf:vaganjac": {
+   "canton": "central_bosnia",
+   "basis": "settlement"
+  },
+  "op:gornji_vakuf:voljevac": {
+   "canton": "central_bosnia",
+   "basis": "settlement"
+  },
+  "op:gornji_vakuf:zdrimci": {
+   "canton": "central_bosnia",
+   "basis": "settlement"
+  },
+  "op:gracanica:dzakule": {
+   "canton": "tuzla",
+   "basis": "settlement"
+  },
+  "op:gracanica:gracanica_2": {
+   "canton": "tuzla",
+   "basis": "settlement"
+  },
+  "op:gracanica:malesici": {
+   "canton": "tuzla",
+   "basis": "settlement"
+  },
+  "op:gracanica:miricina_2": {
+   "canton": "tuzla",
+   "basis": "settlement"
+  },
+  "op:gracanica:petrovo_2": {
+   "canton": "tuzla",
+   "basis": "municipality"
+  },
+  "op:gradacac:donja_tramosnica_2": {
+   "canton": "tuzla",
+   "basis": "settlement"
+  },
+  "op:gradacac:gradacac_2": {
+   "canton": "tuzla",
+   "basis": "settlement"
+  },
+  "op:gradacac:jelovce_selo": {
+   "canton": "tuzla",
+   "basis": "settlement"
+  },
+  "op:gradacac:mionica": {
+   "canton": "tuzla",
+   "basis": "settlement"
+  },
+  "op:gradacac:pelagicevo": {
+   "canton": "tuzla",
+   "basis": "settlement"
+  },
+  "op:gradacac:zelinja_donja_2": {
+   "canton": "tuzla",
+   "basis": "settlement"
+  },
+  "op:grude:grude_2": {
+   "canton": "west_herzegovina",
+   "basis": "settlement"
+  },
+  "op:grude:sovici_3": {
+   "canton": "west_herzegovina",
+   "basis": "settlement"
+  },
+  "op:hadzici:binjezevo": {
+   "canton": "sarajevo",
+   "basis": "settlement"
+  },
+  "op:hadzici:budmolici": {
+   "canton": "sarajevo",
+   "basis": "settlement"
+  },
+  "op:hadzici:hadzici": {
+   "canton": "sarajevo",
+   "basis": "settlement"
+  },
+  "op:hadzici:lokve": {
+   "canton": "sarajevo",
+   "basis": "settlement"
+  },
+  "op:hadzici:luke": {
+   "canton": "sarajevo",
+   "basis": "settlement"
+  },
+  "op:hadzici:misevici_2": {
+   "canton": "sarajevo",
+   "basis": "settlement"
+  },
+  "op:hadzici:pazaric": {
+   "canton": "sarajevo",
+   "basis": "settlement"
+  },
+  "op:hadzici:tarcin_2": {
+   "canton": "sarajevo",
+   "basis": "settlement"
+  },
+  "op:hanpijesak:godjenje_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:hanpijesak:han_pijesak_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:hanpijesak:nevacka_3": {
+   "canton": null,
+   "basis": null
+  },
+  "op:ilidza:kasindo": {
+   "canton": "sarajevo",
+   "basis": "settlement"
+  },
+  "op:ilidza:rakovica_2": {
+   "canton": "sarajevo",
+   "basis": "settlement"
+  },
+  "op:ilidza:rudnik_2": {
+   "canton": "sarajevo",
+   "basis": "settlement"
+  },
+  "op:ilidza:sarajevo_dio_ilidza_2": {
+   "canton": "sarajevo",
+   "basis": "settlement"
+  },
+  "op:ilidza:sarajevo_dio_novi_grad_sarajevo": {
+   "canton": "sarajevo",
+   "basis": "municipality"
+  },
+  "op:ilijas:dragoradi": {
+   "canton": "sarajevo",
+   "basis": "settlement"
+  },
+  "op:ilijas:krivajevici": {
+   "canton": "sarajevo",
+   "basis": "settlement"
+  },
+  "op:ilijas:medojevici": {
+   "canton": "sarajevo",
+   "basis": "settlement"
+  },
+  "op:ilijas:podlugovi": {
+   "canton": "sarajevo",
+   "basis": "settlement"
+  },
+  "op:ilijas:sirovine": {
+   "canton": "sarajevo",
+   "basis": "settlement"
+  },
+  "op:ilijas:srednje": {
+   "canton": "sarajevo",
+   "basis": "settlement"
+  },
+  "op:ilijas:visojevica": {
+   "canton": "sarajevo",
+   "basis": "settlement"
+  },
+  "op:jablanica:doljani_2": {
+   "canton": "herzegovina_neretva",
+   "basis": "settlement"
+  },
+  "op:jablanica:jablanica_2": {
+   "canton": "herzegovina_neretva",
+   "basis": "settlement"
+  },
+  "op:jablanica:ostrozac_2": {
+   "canton": "herzegovina_neretva",
+   "basis": "settlement"
+  },
+  "op:jablanica:slatina_2": {
+   "canton": "herzegovina_neretva",
+   "basis": "settlement"
+  },
+  "op:jajce:barevo_2": {
+   "canton": "central_bosnia",
+   "basis": "settlement"
+  },
+  "op:jajce:bravnice": {
+   "canton": "central_bosnia",
+   "basis": "settlement"
+  },
+  "op:jajce:divicani_2": {
+   "canton": "central_bosnia",
+   "basis": "settlement"
+  },
+  "op:jajce:grdovo": {
+   "canton": "central_bosnia",
+   "basis": "settlement"
+  },
+  "op:jajce:jajce_3": {
+   "canton": "central_bosnia",
+   "basis": "settlement"
+  },
+  "op:jajce:jezero_2": {
+   "canton": "central_bosnia",
+   "basis": "settlement"
+  },
+  "op:jajce:kruscica": {
+   "canton": "central_bosnia",
+   "basis": "settlement"
+  },
+  "op:jajce:lupnica": {
+   "canton": "central_bosnia",
+   "basis": "settlement"
+  },
+  "op:jajce:prisoje": {
+   "canton": "central_bosnia",
+   "basis": "settlement"
+  },
+  "op:jajce:vinac_2": {
+   "canton": "central_bosnia",
+   "basis": "settlement"
+  },
+  "op:kakanj:biljesevo": {
+   "canton": "zenica_doboj",
+   "basis": "settlement"
+  },
+  "op:kakanj:brnjic_2": {
+   "canton": "zenica_doboj",
+   "basis": "settlement"
+  },
+  "op:kakanj:bukovlje_2": {
+   "canton": "zenica_doboj",
+   "basis": "settlement"
+  },
+  "op:kakanj:donja_papratnica": {
+   "canton": "zenica_doboj",
+   "basis": "settlement"
+  },
+  "op:kakanj:kakanj_2": {
+   "canton": "zenica_doboj",
+   "basis": "settlement"
+  },
+  "op:kakanj:poljani_2": {
+   "canton": "zenica_doboj",
+   "basis": "settlement"
+  },
+  "op:kakanj:seoce_2": {
+   "canton": "zenica_doboj",
+   "basis": "settlement"
+  },
+  "op:kakanj:slapnica_2": {
+   "canton": "zenica_doboj",
+   "basis": "settlement"
+  },
+  "op:kakanj:sopotnica": {
+   "canton": "zenica_doboj",
+   "basis": "settlement"
+  },
+  "op:kakanj:ticici_2": {
+   "canton": "zenica_doboj",
+   "basis": "settlement"
+  },
+  "op:kakanj:trsce_2": {
+   "canton": "zenica_doboj",
+   "basis": "settlement"
+  },
+  "op:kakanj:vukanovici": {
+   "canton": "zenica_doboj",
+   "basis": "settlement"
+  },
+  "op:kakanj:zgosca": {
+   "canton": "zenica_doboj",
+   "basis": "settlement"
+  },
+  "op:kalesija:gojcin_2": {
+   "canton": "tuzla",
+   "basis": "settlement"
+  },
+  "op:kalesija:kalesija_grad_2": {
+   "canton": "tuzla",
+   "basis": "settlement"
+  },
+  "op:kalesija:kalesija_selo": {
+   "canton": "tuzla",
+   "basis": "settlement"
+  },
+  "op:kalesija:kikaci": {
+   "canton": "tuzla",
+   "basis": "settlement"
+  },
+  "op:kalesija:seher_2": {
+   "canton": "tuzla",
+   "basis": "settlement"
+  },
+  "op:kalesija:tojsici_2": {
+   "canton": "tuzla",
+   "basis": "settlement"
+  },
+  "op:kalinovik:golubici_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:kalinovik:kalinovik_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:kalinovik:obalj": {
+   "canton": null,
+   "basis": null
+  },
+  "op:kalinovik:sela_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:kalinovik:tomislja": {
+   "canton": null,
+   "basis": null
+  },
+  "op:kalinovik:varos_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:kalinovik:vlaholje": {
+   "canton": null,
+   "basis": null
+  },
+  "op:kiseljak:azapovici_2": {
+   "canton": "central_bosnia",
+   "basis": "settlement"
+  },
+  "op:kiseljak:bilalovac_2": {
+   "canton": "central_bosnia",
+   "basis": "settlement"
+  },
+  "op:kiseljak:brnjaci_2": {
+   "canton": "central_bosnia",
+   "basis": "settlement"
+  },
+  "op:kiseljak:bukovica": {
+   "canton": "central_bosnia",
+   "basis": "settlement"
+  },
+  "op:kiseljak:drazevici": {
+   "canton": "central_bosnia",
+   "basis": "settlement"
+  },
+  "op:kiseljak:gromiljak_2": {
+   "canton": "central_bosnia",
+   "basis": "settlement"
+  },
+  "op:kiseljak:kiseljak_2": {
+   "canton": "central_bosnia",
+   "basis": "settlement"
+  },
+  "op:kladanj:brgule": {
+   "canton": "tuzla",
+   "basis": "settlement"
+  },
+  "op:kladanj:kladanj_3": {
+   "canton": "tuzla",
+   "basis": "settlement"
+  },
+  "op:kladanj:olovci_2": {
+   "canton": "tuzla",
+   "basis": "settlement"
+  },
+  "op:kladanj:staric_2": {
+   "canton": "tuzla",
+   "basis": "settlement"
+  },
+  "op:kladanj:tarevo_2": {
+   "canton": "tuzla",
+   "basis": "settlement"
+  },
+  "op:kladanj:tuholj_2": {
+   "canton": "tuzla",
+   "basis": "settlement"
+  },
+  "op:kladanj:vucinici_2": {
+   "canton": "tuzla",
+   "basis": "settlement"
+  },
+  "op:kljuc:cadjavica": {
+   "canton": "una_sana",
+   "basis": "municipality"
+  },
+  "op:kljuc:donje_ratkovo_2": {
+   "canton": "una_sana",
+   "basis": "settlement"
+  },
+  "op:kljuc:donji_vrbljani_2": {
+   "canton": "una_sana",
+   "basis": "municipality"
+  },
+  "op:kljuc:hadzici": {
+   "canton": "una_sana",
+   "basis": "settlement"
+  },
+  "op:kljuc:kljuc_2": {
+   "canton": "una_sana",
+   "basis": "settlement"
+  },
+  "op:kljuc:krasulje_2": {
+   "canton": "una_sana",
+   "basis": "settlement"
+  },
+  "op:kljuc:sanica_2": {
+   "canton": "una_sana",
+   "basis": "settlement"
+  },
+  "op:konjic:bijela_2": {
+   "canton": "herzegovina_neretva",
+   "basis": "settlement"
+  },
+  "op:konjic:bradina": {
+   "canton": "herzegovina_neretva",
+   "basis": "settlement"
+  },
+  "op:konjic:brdjani": {
+   "canton": "herzegovina_neretva",
+   "basis": "settlement"
+  },
+  "op:konjic:buturovic_polje_2": {
+   "canton": "herzegovina_neretva",
+   "basis": "settlement"
+  },
+  "op:konjic:celebici_2": {
+   "canton": "herzegovina_neretva",
+   "basis": "settlement"
+  },
+  "op:konjic:dzepi_2": {
+   "canton": "herzegovina_neretva",
+   "basis": "settlement"
+  },
+  "op:konjic:glavaticevo_2": {
+   "canton": "herzegovina_neretva",
+   "basis": "settlement"
+  },
+  "op:konjic:gorani_2": {
+   "canton": "herzegovina_neretva",
+   "basis": "settlement"
+  },
+  "op:konjic:jasenik_2": {
+   "canton": "herzegovina_neretva",
+   "basis": "settlement"
+  },
+  "op:konjic:konjic_2": {
+   "canton": "herzegovina_neretva",
+   "basis": "settlement"
+  },
+  "op:konjic:ljuta": {
+   "canton": "herzegovina_neretva",
+   "basis": "settlement"
+  },
+  "op:konjic:sitnik": {
+   "canton": "herzegovina_neretva",
+   "basis": "settlement"
+  },
+  "op:konjic:turija": {
+   "canton": "herzegovina_neretva",
+   "basis": "settlement"
+  },
+  "op:kotor_varos:kotor_varos_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:kotor_varos:krusevo_brdo_i": {
+   "canton": null,
+   "basis": null
+  },
+  "op:kotor_varos:maslovare_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:kotor_varos:prisocka_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:kotor_varos:vagani_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:kotor_varos:vrbanjci_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:kresevo:kresevo_2": {
+   "canton": "central_bosnia",
+   "basis": "settlement"
+  },
+  "op:kresevo:mratinici": {
+   "canton": "central_bosnia",
+   "basis": "settlement"
+  },
+  "op:kresevo:polje_2": {
+   "canton": "central_bosnia",
+   "basis": "settlement"
+  },
+  "op:kupres:bucovaca": {
+   "canton": "canton_10",
+   "basis": "settlement"
+  },
+  "op:kupres:donji_malovan": {
+   "canton": "canton_10",
+   "basis": "settlement"
+  },
+  "op:kupres:goravci": {
+   "canton": "canton_10",
+   "basis": "settlement"
+  },
+  "op:kupres:kupres_2": {
+   "canton": "canton_10",
+   "basis": "settlement"
+  },
+  "op:kupres:novo_selo_2": {
+   "canton": "canton_10",
+   "basis": "settlement"
+  },
+  "op:laktasi:drugovici_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:laktasi:laktasi_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:laktasi:maglajani": {
+   "canton": null,
+   "basis": null
+  },
+  "op:laktasi:trn_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:listica:kocerin_2": {
+   "canton": "west_herzegovina",
+   "basis": "settlement"
+  },
+  "op:listica:lise": {
+   "canton": "west_herzegovina",
+   "basis": "settlement"
+  },
+  "op:listica:ljuti_dolac": {
+   "canton": "west_herzegovina",
+   "basis": "settlement"
+  },
+  "op:listica:siroki_brijeg_2": {
+   "canton": "west_herzegovina",
+   "basis": "settlement"
+  },
+  "op:livno:gubin_2": {
+   "canton": "canton_10",
+   "basis": "settlement"
+  },
+  "op:livno:livno_2": {
+   "canton": "canton_10",
+   "basis": "settlement"
+  },
+  "op:livno:misi_2": {
+   "canton": "canton_10",
+   "basis": "settlement"
+  },
+  "op:livno:priluka_2": {
+   "canton": "canton_10",
+   "basis": "settlement"
+  },
+  "op:livno:prolog_2": {
+   "canton": "canton_10",
+   "basis": "settlement"
+  },
+  "op:livno:zabljak_2": {
+   "canton": "canton_10",
+   "basis": "settlement"
+  },
+  "op:livno:zastinje": {
+   "canton": "canton_10",
+   "basis": "settlement"
+  },
+  "op:ljubinje:bancici": {
+   "canton": null,
+   "basis": null
+  },
+  "op:ljubinje:ljubinje_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:ljubuski:grab": {
+   "canton": "west_herzegovina",
+   "basis": "settlement"
+  },
+  "op:ljubuski:ljubuski_2": {
+   "canton": "west_herzegovina",
+   "basis": "settlement"
+  },
+  "op:ljubuski:radisici_2": {
+   "canton": "west_herzegovina",
+   "basis": "settlement"
+  },
+  "op:ljubuski:studenci_2": {
+   "canton": "west_herzegovina",
+   "basis": "settlement"
+  },
+  "op:ljubuski:vitina_2": {
+   "canton": "west_herzegovina",
+   "basis": "settlement"
+  },
+  "op:lopare:celic_3": {
+   "canton": "tuzla",
+   "basis": "settlement"
+  },
+  "op:lopare:humci_2": {
+   "canton": "tuzla",
+   "basis": "settlement"
+  },
+  "op:lopare:jablanica_2": {
+   "canton": "tuzla",
+   "basis": "settlement"
+  },
+  "op:lopare:koraj_4": {
+   "canton": "tuzla",
+   "basis": "settlement"
+  },
+  "op:lopare:lopare_2": {
+   "canton": "tuzla",
+   "basis": "municipality"
+  },
+  "op:lopare:lopare_selo_2": {
+   "canton": "tuzla",
+   "basis": "settlement"
+  },
+  "op:lopare:mrtvica_2": {
+   "canton": "tuzla",
+   "basis": "municipality"
+  },
+  "op:lopare:nahvioci": {
+   "canton": "tuzla",
+   "basis": "settlement"
+  },
+  "op:lopare:priboj_2": {
+   "canton": "tuzla",
+   "basis": "municipality"
+  },
+  "op:lukavac:bikodze": {
+   "canton": "tuzla",
+   "basis": "settlement"
+  },
+  "op:lukavac:brijesnica_donja_2": {
+   "canton": "tuzla",
+   "basis": "settlement"
+  },
+  "op:lukavac:dobosnica_2": {
+   "canton": "tuzla",
+   "basis": "settlement"
+  },
+  "op:lukavac:lukavac_2": {
+   "canton": "tuzla",
+   "basis": "settlement"
+  },
+  "op:lukavac:orahovica_2": {
+   "canton": "tuzla",
+   "basis": "settlement"
+  },
+  "op:lukavac:poljice_2": {
+   "canton": "tuzla",
+   "basis": "settlement"
+  },
+  "op:lukavac:smoluca_donja_2": {
+   "canton": "tuzla",
+   "basis": "settlement"
+  },
+  "op:maglaj:cobe_2": {
+   "canton": "zenica_doboj",
+   "basis": "settlement"
+  },
+  "op:maglaj:donja_bocinja_2": {
+   "canton": "zenica_doboj",
+   "basis": "settlement"
+  },
+  "op:maglaj:gornja_bocinja": {
+   "canton": "zenica_doboj",
+   "basis": "settlement"
+  },
+  "op:maglaj:jablanica": {
+   "canton": "zenica_doboj",
+   "basis": "settlement"
+  },
+  "op:maglaj:kosova_2": {
+   "canton": "zenica_doboj",
+   "basis": "settlement"
+  },
+  "op:maglaj:lijesnica": {
+   "canton": "zenica_doboj",
+   "basis": "settlement"
+  },
+  "op:maglaj:maglaj_2": {
+   "canton": "zenica_doboj",
+   "basis": "settlement"
+  },
+  "op:maglaj:misurici_2": {
+   "canton": "zenica_doboj",
+   "basis": "settlement"
+  },
+  "op:maglaj:strupina": {
+   "canton": "zenica_doboj",
+   "basis": "settlement"
+  },
+  "op:modrica:garevac_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:modrica:modrica": {
+   "canton": null,
+   "basis": null
+  },
+  "op:modrica:skugric_gornji_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:modrica:vranjak_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:mostar:blagaj_2": {
+   "canton": "herzegovina_neretva",
+   "basis": "settlement"
+  },
+  "op:mostar:gornja_dreznica": {
+   "canton": "herzegovina_neretva",
+   "basis": "settlement"
+  },
+  "op:mostar:hodbina_2": {
+   "canton": "herzegovina_neretva",
+   "basis": "settlement"
+  },
+  "op:mostar:jasenica": {
+   "canton": "herzegovina_neretva",
+   "basis": "settlement"
+  },
+  "op:mostar:kruzanj_2": {
+   "canton": "herzegovina_neretva",
+   "basis": "settlement"
+  },
+  "op:mostar:mostar_istok_2": {
+   "canton": "herzegovina_neretva",
+   "basis": "settlement"
+  },
+  "op:mostar:mostar_zapad_2": {
+   "canton": "herzegovina_neretva",
+   "basis": "settlement"
+  },
+  "op:mostar:potoci": {
+   "canton": "herzegovina_neretva",
+   "basis": "settlement"
+  },
+  "op:mostar:vranjevici_2": {
+   "canton": "herzegovina_neretva",
+   "basis": "settlement"
+  },
+  "op:mrkonjic_grad:baljvine_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:mrkonjic_grad:bjelajce_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:mrkonjic_grad:gerzovo_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:mrkonjic_grad:majdan_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:mrkonjic_grad:mrkonjic_grad_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:mrkonjic_grad:podrasnica_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:neum:gornje_hrasno_2": {
+   "canton": "herzegovina_neretva",
+   "basis": "settlement"
+  },
+  "op:neum:gradac_2": {
+   "canton": "herzegovina_neretva",
+   "basis": "settlement"
+  },
+  "op:neum:neum_2": {
+   "canton": "herzegovina_neretva",
+   "basis": "settlement"
+  },
+  "op:nevesinje:hrusta_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:nevesinje:krekovi_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:nevesinje:nevesinje_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:nevesinje:sopilja": {
+   "canton": null,
+   "basis": null
+  },
+  "op:nevesinje:zovi_do": {
+   "canton": null,
+   "basis": null
+  },
+  "op:novi_grad_sarajevo:recica": {
+   "canton": "sarajevo",
+   "basis": "settlement"
+  },
+  "op:novi_grad_sarajevo:sarajevo_dio_novi_grad_sarajevo": {
+   "canton": "sarajevo",
+   "basis": "settlement"
+  },
+  "op:novi_travnik:novi_travnik_2": {
+   "canton": "central_bosnia",
+   "basis": "settlement"
+  },
+  "op:novi_travnik:orasac_2": {
+   "canton": "central_bosnia",
+   "basis": "settlement"
+  },
+  "op:novi_travnik:rankovici_2": {
+   "canton": "central_bosnia",
+   "basis": "settlement"
+  },
+  "op:novi_travnik:rat_2": {
+   "canton": "central_bosnia",
+   "basis": "settlement"
+  },
+  "op:novi_travnik:ruda_2": {
+   "canton": "central_bosnia",
+   "basis": "settlement"
+  },
+  "op:novi_travnik:senkovici_2": {
+   "canton": "central_bosnia",
+   "basis": "settlement"
+  },
+  "op:novi_travnik:trenica_2": {
+   "canton": "central_bosnia",
+   "basis": "settlement"
+  },
+  "op:novo_sarajevo:lukavica": {
+   "canton": "sarajevo",
+   "basis": "settlement"
+  },
+  "op:novo_sarajevo:sarajevo_dio_novo_sarajevo": {
+   "canton": "sarajevo",
+   "basis": "settlement"
+  },
+  "op:odzak:donja_dubica": {
+   "canton": "posavina",
+   "basis": "settlement"
+  },
+  "op:odzak:gornji_svilaj": {
+   "canton": "posavina",
+   "basis": "settlement"
+  },
+  "op:odzak:potocani_2": {
+   "canton": "posavina",
+   "basis": "settlement"
+  },
+  "op:olovo:gurdici_2": {
+   "canton": "zenica_doboj",
+   "basis": "settlement"
+  },
+  "op:olovo:kamensko_2": {
+   "canton": "zenica_doboj",
+   "basis": "settlement"
+  },
+  "op:olovo:milankovici_2": {
+   "canton": "zenica_doboj",
+   "basis": "settlement"
+  },
+  "op:olovo:olovo_2": {
+   "canton": "zenica_doboj",
+   "basis": "settlement"
+  },
+  "op:olovo:slivnje": {
+   "canton": "zenica_doboj",
+   "basis": "settlement"
+  },
+  "op:orasje:donja_mahala": {
+   "canton": "posavina",
+   "basis": "settlement"
+  },
+  "op:orasje:orasje": {
+   "canton": "posavina",
+   "basis": "settlement"
+  },
+  "op:orasje:ostra_luka": {
+   "canton": "posavina",
+   "basis": "settlement"
+  },
+  "op:pale:bulozi": {
+   "canton": "bosnian_podrinje",
+   "basis": "settlement"
+  },
+  "op:pale:gornje_pale": {
+   "canton": "bosnian_podrinje",
+   "basis": "municipality"
+  },
+  "op:pale:hotocina": {
+   "canton": "bosnian_podrinje",
+   "basis": "municipality"
+  },
+  "op:pale:mokro": {
+   "canton": "bosnian_podrinje",
+   "basis": "municipality"
+  },
+  "op:pale:pale": {
+   "canton": "bosnian_podrinje",
+   "basis": "municipality"
+  },
+  "op:pale:podgrab": {
+   "canton": "bosnian_podrinje",
+   "basis": "settlement"
+  },
+  "op:pale:praca": {
+   "canton": "bosnian_podrinje",
+   "basis": "settlement"
+  },
+  "op:pale:vrazalice": {
+   "canton": "bosnian_podrinje",
+   "basis": "settlement"
+  },
+  "op:posusje:posusje_2": {
+   "canton": "west_herzegovina",
+   "basis": "settlement"
+  },
+  "op:posusje:sutina_2": {
+   "canton": "west_herzegovina",
+   "basis": "settlement"
+  },
+  "op:posusje:vir_2": {
+   "canton": "west_herzegovina",
+   "basis": "settlement"
+  },
+  "op:prijedor:brezicani": {
+   "canton": null,
+   "basis": null
+  },
+  "op:prijedor:cejreci": {
+   "canton": null,
+   "basis": null
+  },
+  "op:prijedor:kamicani": {
+   "canton": null,
+   "basis": null
+  },
+  "op:prijedor:kozarac_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:prijedor:ljubija_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:prijedor:maricka_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:prijedor:omarska_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:prijedor:prijedor_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:prijedor:raljas": {
+   "canton": null,
+   "basis": null
+  },
+  "op:prijedor:rasavci_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:prnjavor:crkvena_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:prnjavor:donji_strpci_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:prnjavor:donji_vijacani_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:prnjavor:gornja_mravica": {
+   "canton": null,
+   "basis": null
+  },
+  "op:prnjavor:gornji_smrtici": {
+   "canton": null,
+   "basis": null
+  },
+  "op:prnjavor:konjuhovci_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:prnjavor:lisnja_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:prnjavor:prnjavor_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:prozor:jaklici": {
+   "canton": "herzegovina_neretva",
+   "basis": "settlement"
+  },
+  "op:prozor:ljubunci_2": {
+   "canton": "herzegovina_neretva",
+   "basis": "settlement"
+  },
+  "op:prozor:lug_2": {
+   "canton": "herzegovina_neretva",
+   "basis": "settlement"
+  },
+  "op:prozor:paros": {
+   "canton": "herzegovina_neretva",
+   "basis": "settlement"
+  },
+  "op:prozor:prozor_2": {
+   "canton": "herzegovina_neretva",
+   "basis": "settlement"
+  },
+  "op:prozor:rumboci_2": {
+   "canton": "herzegovina_neretva",
+   "basis": "settlement"
+  },
+  "op:prozor:ustirama_3": {
+   "canton": "herzegovina_neretva",
+   "basis": "settlement"
+  },
+  "op:prozor:uzdol_2": {
+   "canton": "herzegovina_neretva",
+   "basis": "settlement"
+  },
+  "op:rogatica:brcigovo": {
+   "canton": null,
+   "basis": null
+  },
+  "op:rogatica:kovanj": {
+   "canton": null,
+   "basis": null
+  },
+  "op:rogatica:kramer_selo_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:rogatica:pljesevica": {
+   "canton": null,
+   "basis": null
+  },
+  "op:rogatica:rogatica_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:rogatica:stara_gora": {
+   "canton": null,
+   "basis": null
+  },
+  "op:rogatica:varosiste_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:rogatica:zepa_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:rudo:gornja_strmica": {
+   "canton": null,
+   "basis": null
+  },
+  "op:rudo:mrsovo_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:rudo:rudo_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:sanski_most:budimlic_japra_2": {
+   "canton": "una_sana",
+   "basis": "settlement"
+  },
+  "op:sanski_most:donja_kozica": {
+   "canton": "una_sana",
+   "basis": "settlement"
+  },
+  "op:sanski_most:ilidza_2": {
+   "canton": "una_sana",
+   "basis": "settlement"
+  },
+  "op:sanski_most:jelasinovci": {
+   "canton": "una_sana",
+   "basis": "settlement"
+  },
+  "op:sanski_most:kljevci": {
+   "canton": "una_sana",
+   "basis": "settlement"
+  },
+  "op:sanski_most:lusci_palanka_2": {
+   "canton": "una_sana",
+   "basis": "settlement"
+  },
+  "op:sanski_most:ostra_luka": {
+   "canton": "una_sana",
+   "basis": "settlement"
+  },
+  "op:sanski_most:sanski_most_2": {
+   "canton": "una_sana",
+   "basis": "settlement"
+  },
+  "op:sanski_most:skucani_vakuf_2": {
+   "canton": "una_sana",
+   "basis": "settlement"
+  },
+  "op:sanski_most:stari_majdan": {
+   "canton": "una_sana",
+   "basis": "settlement"
+  },
+  "op:sekovici:kastijelj_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:sekovici:sekovici_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:sekovici:udbina_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:sipovo:brdjani": {
+   "canton": null,
+   "basis": null
+  },
+  "op:sipovo:gornji_mujdzici_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:sipovo:pribeljci_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:sipovo:sipovo_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:sipovo:volari_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:skender_vakuf:donji_koricani": {
+   "canton": "central_bosnia",
+   "basis": "settlement"
+  },
+  "op:skender_vakuf:imljani_2": {
+   "canton": "central_bosnia",
+   "basis": "municipality"
+  },
+  "op:skender_vakuf:javorani_2": {
+   "canton": "central_bosnia",
+   "basis": "municipality"
+  },
+  "op:skender_vakuf:knezevo_2": {
+   "canton": "central_bosnia",
+   "basis": "municipality"
+  },
+  "op:sokolac:donji_kalimanici": {
+   "canton": null,
+   "basis": null
+  },
+  "op:sokolac:knezina_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:sokolac:meljine_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:sokolac:sahbegovici": {
+   "canton": null,
+   "basis": null
+  },
+  "op:sokolac:sasevci_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:sokolac:sokolac_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:sokolac:vidrici": {
+   "canton": null,
+   "basis": null
+  },
+  "op:srbac:kobas": {
+   "canton": null,
+   "basis": null
+  },
+  "op:srbac:nozicko": {
+   "canton": null,
+   "basis": null
+  },
+  "op:srbac:sitnesi_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:srbac:srbac_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:srebrenica:bostahovine_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:srebrenica:brezovice_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:srebrenica:donji_potocari_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:srebrenica:ljeskovik_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:srebrenica:luka_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:srebrenica:mala_daljegosta_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:srebrenica:milacevici": {
+   "canton": null,
+   "basis": null
+  },
+  "op:srebrenica:obadi": {
+   "canton": null,
+   "basis": null
+  },
+  "op:srebrenica:osmace_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:srebrenica:radovcici": {
+   "canton": null,
+   "basis": null
+  },
+  "op:srebrenica:srebrenica_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:srebrenica:suceska": {
+   "canton": null,
+   "basis": null
+  },
+  "op:srebrenica:sulice_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:srebrenik:duboki_potok_2": {
+   "canton": "tuzla",
+   "basis": "settlement"
+  },
+  "op:srebrenik:sladna_2": {
+   "canton": "tuzla",
+   "basis": "settlement"
+  },
+  "op:srebrenik:spionica_donja_2": {
+   "canton": "tuzla",
+   "basis": "settlement"
+  },
+  "op:srebrenik:spionica_srednja_2": {
+   "canton": "tuzla",
+   "basis": "settlement"
+  },
+  "op:srebrenik:srebrenik_2": {
+   "canton": "tuzla",
+   "basis": "settlement"
+  },
+  "op:srebrenik:tinja_gornja_2": {
+   "canton": "tuzla",
+   "basis": "settlement"
+  },
+  "op:stari_grad_sarajevo:faletici": {
+   "canton": "sarajevo",
+   "basis": "settlement"
+  },
+  "op:stari_grad_sarajevo:sarajevo_dio_stari_grad_sarajevo": {
+   "canton": "sarajevo",
+   "basis": "settlement"
+  },
+  "op:stolac:hatelji_2": {
+   "canton": "herzegovina_neretva",
+   "basis": "settlement"
+  },
+  "op:stolac:pjesivac_kula_2": {
+   "canton": "herzegovina_neretva",
+   "basis": "settlement"
+  },
+  "op:stolac:prenj": {
+   "canton": "herzegovina_neretva",
+   "basis": "settlement"
+  },
+  "op:stolac:rotimlja_2": {
+   "canton": "herzegovina_neretva",
+   "basis": "settlement"
+  },
+  "op:stolac:stolac_2": {
+   "canton": "herzegovina_neretva",
+   "basis": "settlement"
+  },
+  "op:tesanj:kalosevic_2": {
+   "canton": "zenica_doboj",
+   "basis": "settlement"
+  },
+  "op:tesanj:lepenica": {
+   "canton": "zenica_doboj",
+   "basis": "settlement"
+  },
+  "op:tesanj:novi_miljanovci_2": {
+   "canton": "zenica_doboj",
+   "basis": "settlement"
+  },
+  "op:tesanj:novo_selo": {
+   "canton": "zenica_doboj",
+   "basis": "settlement"
+  },
+  "op:tesanj:piljuzici_2": {
+   "canton": "zenica_doboj",
+   "basis": "settlement"
+  },
+  "op:tesanj:radusa_2": {
+   "canton": "zenica_doboj",
+   "basis": "settlement"
+  },
+  "op:tesanj:sije_2": {
+   "canton": "zenica_doboj",
+   "basis": "settlement"
+  },
+  "op:tesanj:tesanj_2": {
+   "canton": "zenica_doboj",
+   "basis": "settlement"
+  },
+  "op:tesanj:ularice_2": {
+   "canton": "zenica_doboj",
+   "basis": "settlement"
+  },
+  "op:teslic:blatnica_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:teslic:buletic_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:teslic:cecava_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:teslic:donji_ruzevic": {
+   "canton": null,
+   "basis": null
+  },
+  "op:teslic:kamenica_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:teslic:teslic_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:teslic:vitkovci": {
+   "canton": null,
+   "basis": null
+  },
+  "op:titov_drvar:drvar_2": {
+   "canton": "canton_10",
+   "basis": "settlement"
+  },
+  "op:titov_drvar:prekaja_2": {
+   "canton": "canton_10",
+   "basis": "settlement"
+  },
+  "op:titov_drvar:sipovljani_2": {
+   "canton": "canton_10",
+   "basis": "settlement"
+  },
+  "op:travnik:cukle_2": {
+   "canton": "central_bosnia",
+   "basis": "settlement"
+  },
+  "op:travnik:gluha_bukovica": {
+   "canton": "central_bosnia",
+   "basis": "settlement"
+  },
+  "op:travnik:gornje_krcevine": {
+   "canton": "central_bosnia",
+   "basis": "settlement"
+  },
+  "op:travnik:ovcarevo_2": {
+   "canton": "central_bosnia",
+   "basis": "settlement"
+  },
+  "op:travnik:paklarevo": {
+   "canton": "central_bosnia",
+   "basis": "settlement"
+  },
+  "op:travnik:podstinje": {
+   "canton": "central_bosnia",
+   "basis": "settlement"
+  },
+  "op:travnik:puticevo_2": {
+   "canton": "central_bosnia",
+   "basis": "settlement"
+  },
+  "op:travnik:travnik_2": {
+   "canton": "central_bosnia",
+   "basis": "settlement"
+  },
+  "op:travnik:turbe_2": {
+   "canton": "central_bosnia",
+   "basis": "settlement"
+  },
+  "op:travnik:varosluk": {
+   "canton": "central_bosnia",
+   "basis": "settlement"
+  },
+  "op:trebinje:bihovo_2": {
+   "canton": "herzegovina_neretva",
+   "basis": "settlement"
+  },
+  "op:trebinje:hum": {
+   "canton": "herzegovina_neretva",
+   "basis": "municipality"
+  },
+  "op:trebinje:ivanica": {
+   "canton": "herzegovina_neretva",
+   "basis": "settlement"
+  },
+  "op:trebinje:trebimlja_2": {
+   "canton": "herzegovina_neretva",
+   "basis": "settlement"
+  },
+  "op:trebinje:trebinje_2": {
+   "canton": "herzegovina_neretva",
+   "basis": "municipality"
+  },
+  "op:trebinje:velicani": {
+   "canton": "herzegovina_neretva",
+   "basis": "settlement"
+  },
+  "op:trebinje:zakovo_2": {
+   "canton": "herzegovina_neretva",
+   "basis": "settlement"
+  },
+  "op:trnovo:delijas": {
+   "canton": "sarajevo",
+   "basis": "settlement"
+  },
+  "op:trnovo:gornja_presjenica": {
+   "canton": "sarajevo",
+   "basis": "settlement"
+  },
+  "op:trnovo:kijevo_2": {
+   "canton": "sarajevo",
+   "basis": "settlement"
+  },
+  "op:trnovo:tosici": {
+   "canton": "sarajevo",
+   "basis": "settlement"
+  },
+  "op:trnovo:trnovo": {
+   "canton": "sarajevo",
+   "basis": "settlement"
+  },
+  "op:trnovo:tusila": {
+   "canton": "sarajevo",
+   "basis": "settlement"
+  },
+  "op:tuzla:gornja_tuzla": {
+   "canton": "tuzla",
+   "basis": "settlement"
+  },
+  "op:tuzla:husino_2": {
+   "canton": "tuzla",
+   "basis": "settlement"
+  },
+  "op:tuzla:lipnica_gornja_2": {
+   "canton": "tuzla",
+   "basis": "settlement"
+  },
+  "op:tuzla:obodnica_donja_2": {
+   "canton": "tuzla",
+   "basis": "settlement"
+  },
+  "op:tuzla:sicki_brod_2": {
+   "canton": "tuzla",
+   "basis": "settlement"
+  },
+  "op:tuzla:simin_han_2": {
+   "canton": "tuzla",
+   "basis": "settlement"
+  },
+  "op:tuzla:tuzla_2": {
+   "canton": "tuzla",
+   "basis": "settlement"
+  },
+  "op:ugljevik:donja_trnova_2": {
+   "canton": "tuzla",
+   "basis": "settlement"
+  },
+  "op:ugljevik:jasikovac": {
+   "canton": "tuzla",
+   "basis": "settlement"
+  },
+  "op:ugljevik:srednja_trnova_2": {
+   "canton": "tuzla",
+   "basis": "settlement"
+  },
+  "op:ugljevik:teocak_krstac_2": {
+   "canton": "tuzla",
+   "basis": "settlement"
+  },
+  "op:ugljevik:ugljevik_2": {
+   "canton": "tuzla",
+   "basis": "municipality"
+  },
+  "op:ugljevik:zabrdje_2": {
+   "canton": "tuzla",
+   "basis": "municipality"
+  },
+  "op:vares:budozelje_2": {
+   "canton": "zenica_doboj",
+   "basis": "settlement"
+  },
+  "op:vares:gornja_borovica_2": {
+   "canton": "zenica_doboj",
+   "basis": "settlement"
+  },
+  "op:vares:ravne": {
+   "canton": "zenica_doboj",
+   "basis": "settlement"
+  },
+  "op:vares:toljenak": {
+   "canton": "zenica_doboj",
+   "basis": "settlement"
+  },
+  "op:vares:vares_2": {
+   "canton": "zenica_doboj",
+   "basis": "settlement"
+  },
+  "op:velika_kladusa:poljana_2": {
+   "canton": "una_sana",
+   "basis": "settlement"
+  },
+  "op:velika_kladusa:vejinac_2": {
+   "canton": "una_sana",
+   "basis": "settlement"
+  },
+  "op:velika_kladusa:velika_kladusa_2": {
+   "canton": "una_sana",
+   "basis": "settlement"
+  },
+  "op:velika_kladusa:zboriste_2": {
+   "canton": "una_sana",
+   "basis": "settlement"
+  },
+  "op:visegrad:donji_dobrun_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:visegrad:drinsko": {
+   "canton": null,
+   "basis": null
+  },
+  "op:visegrad:kamenica_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:visegrad:medjedja_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:visegrad:okrugla": {
+   "canton": null,
+   "basis": null
+  },
+  "op:visegrad:prelovo_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:visegrad:velji_lug": {
+   "canton": null,
+   "basis": null
+  },
+  "op:visegrad:visegrad_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:visegrad:zlijeb": {
+   "canton": null,
+   "basis": null
+  },
+  "op:visoko:bradve_2": {
+   "canton": "zenica_doboj",
+   "basis": "settlement"
+  },
+  "op:visoko:buzic_mahala_2": {
+   "canton": "zenica_doboj",
+   "basis": "settlement"
+  },
+  "op:visoko:gornja_vratnica_2": {
+   "canton": "zenica_doboj",
+   "basis": "settlement"
+  },
+  "op:visoko:podvinjci_2": {
+   "canton": "zenica_doboj",
+   "basis": "settlement"
+  },
+  "op:visoko:podvinje_2": {
+   "canton": "zenica_doboj",
+   "basis": "settlement"
+  },
+  "op:visoko:rajcici_2": {
+   "canton": "zenica_doboj",
+   "basis": "settlement"
+  },
+  "op:visoko:stuparici_2": {
+   "canton": "zenica_doboj",
+   "basis": "settlement"
+  },
+  "op:visoko:visoko_2": {
+   "canton": "zenica_doboj",
+   "basis": "settlement"
+  },
+  "op:vitez:kruscica": {
+   "canton": "central_bosnia",
+   "basis": "settlement"
+  },
+  "op:vitez:preocica_3": {
+   "canton": "central_bosnia",
+   "basis": "settlement"
+  },
+  "op:vitez:vitez_2": {
+   "canton": "central_bosnia",
+   "basis": "settlement"
+  },
+  "op:vlasenica:bacici": {
+   "canton": null,
+   "basis": null
+  },
+  "op:vlasenica:cerska_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:vlasenica:grabovica": {
+   "canton": null,
+   "basis": null
+  },
+  "op:vlasenica:milici_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:vlasenica:pomol_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:vlasenica:sebiocina": {
+   "canton": null,
+   "basis": null
+  },
+  "op:vlasenica:vlasenica_2": {
+   "canton": null,
+   "basis": null
+  },
+  "op:vogosca:hotonj": {
+   "canton": "sarajevo",
+   "basis": "settlement"
+  },
+  "op:vogosca:svrake": {
+   "canton": "sarajevo",
+   "basis": "settlement"
+  },
+  "op:vogosca:vogosca_3": {
+   "canton": "sarajevo",
+   "basis": "settlement"
+  },
+  "op:zavidovici:cardak_2": {
+   "canton": "zenica_doboj",
+   "basis": "settlement"
+  },
+  "op:zavidovici:cinovici": {
+   "canton": "zenica_doboj",
+   "basis": "settlement"
+  },
+  "op:zavidovici:hajderovici_2": {
+   "canton": "zenica_doboj",
+   "basis": "settlement"
+  },
+  "op:zavidovici:ribnica_dio": {
+   "canton": "zenica_doboj",
+   "basis": "settlement"
+  },
+  "op:zavidovici:vozuca_2": {
+   "canton": "zenica_doboj",
+   "basis": "settlement"
+  },
+  "op:zavidovici:zavidovici_2": {
+   "canton": "zenica_doboj",
+   "basis": "settlement"
+  },
+  "op:zenica:briznik_2": {
+   "canton": "zenica_doboj",
+   "basis": "settlement"
+  },
+  "op:zenica:gornja_vraca": {
+   "canton": "zenica_doboj",
+   "basis": "settlement"
+  },
+  "op:zenica:gornja_zenica_2": {
+   "canton": "zenica_doboj",
+   "basis": "settlement"
+  },
+  "op:zenica:janjici": {
+   "canton": "zenica_doboj",
+   "basis": "settlement"
+  },
+  "op:zenica:orahovica_2": {
+   "canton": "zenica_doboj",
+   "basis": "settlement"
+  },
+  "op:zenica:serici_2": {
+   "canton": "zenica_doboj",
+   "basis": "settlement"
+  },
+  "op:zenica:stranjani_2": {
+   "canton": "zenica_doboj",
+   "basis": "settlement"
+  },
+  "op:zenica:zenica_2": {
+   "canton": "zenica_doboj",
+   "basis": "settlement"
+  },
+  "op:zepce:ozimica_2": {
+   "canton": "zenica_doboj",
+   "basis": "settlement"
+  },
+  "op:zepce:viniste_2": {
+   "canton": "zenica_doboj",
+   "basis": "settlement"
+  },
+  "op:zepce:zeljezno_polje_2": {
+   "canton": "zenica_doboj",
+   "basis": "settlement"
+  },
+  "op:zepce:zepce_2": {
+   "canton": "zenica_doboj",
+   "basis": "settlement"
+  },
+  "op:zivinice:basigovci_2": {
+   "canton": "tuzla",
+   "basis": "settlement"
+  },
+  "op:zivinice:dubrave_gornje": {
+   "canton": "tuzla",
+   "basis": "settlement"
+  },
+  "op:zivinice:gracanica_2": {
+   "canton": "tuzla",
+   "basis": "settlement"
+  },
+  "op:zivinice:zivinice_gornje_2": {
+   "canton": "tuzla",
+   "basis": "settlement"
+  },
+  "op:zivinice:zivinice_grad_2": {
+   "canton": "tuzla",
+   "basis": "settlement"
+  },
+  "op:zvornik:djulici": {
+   "canton": "tuzla",
+   "basis": "municipality"
+  },
+  "op:zvornik:donja_kamenica": {
+   "canton": "tuzla",
+   "basis": "municipality"
+  },
+  "op:zvornik:gornji_sepak_2": {
+   "canton": "tuzla",
+   "basis": "municipality"
+  },
+  "op:zvornik:kozluk_2": {
+   "canton": "tuzla",
+   "basis": "municipality"
+  },
+  "op:zvornik:krizevici": {
+   "canton": "tuzla",
+   "basis": "municipality"
+  },
+  "op:zvornik:novo_selo": {
+   "canton": "tuzla",
+   "basis": "municipality"
+  },
+  "op:zvornik:rastosnica_2": {
+   "canton": "tuzla",
+   "basis": "settlement"
+  },
+  "op:zvornik:sapna": {
+   "canton": "tuzla",
+   "basis": "settlement"
+  },
+  "op:zvornik:zvornik": {
+   "canton": "tuzla",
+   "basis": "municipality"
+  }
+ }
+}

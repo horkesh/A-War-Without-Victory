@@ -46,8 +46,8 @@ export function CombatSummaryPanel({ summary, formations, onSelectFormation, com
     const territorySign = territoryNet == null ? '' : territoryNet > 0 ? '+' : territoryNet < 0 ? '' : '+/-';
 
     return (
-        <div className={`pt-2 mb-3 text-xs ${noTopBorder ? '' : 'border-t border-panel-border'}`}>
-            <div className="text-text-secondary font-semibold mb-1.5 text-xs uppercase tracking-wide">
+        <div className={`pt-2 mb-3 text-[13px] ${noTopBorder ? '' : 'border-t border-panel-border'}`}>
+            <div className="text-text-secondary font-semibold mb-1.5 text-[13px] uppercase tracking-wide">
                 {t('combatRecord.title')}
             </div>
 
@@ -170,11 +170,11 @@ export function CombatSummaryPanel({ summary, formations, onSelectFormation, com
                 (summary.most_victories_brigade_id || summary.most_casualties_brigade_id) && (
                     <div className="mt-1.5 space-y-1.5">
                         {summary.most_victories_brigade_id && (
-                            <div className="flex justify-between items-center text-xs p-1.5 bg-accent-gold/5 border border-accent-gold/20 rounded">
+                            <div className="flex justify-between items-center text-[13px] p-1.5 bg-accent-gold/5 border border-accent-gold/20 rounded">
                                 <div className="flex items-center gap-1.5">
                                     <span className="text-accent-gold" title={t('combatRecord.mostVictoriousBrigade')}>â­</span>
                                     <div className="flex flex-col">
-                                        <span className="text-xs uppercase tracking-wide text-text-secondary">{t('combatRecord.wallOfValor')}</span>
+                                        <span className="text-[13px] uppercase tracking-wide text-text-secondary">{t('combatRecord.wallOfValor')}</span>
                                         <button
                                             type="button"
                                             className="text-text-primary hover:text-interactive text-left font-semibold truncate max-w-[120px]"
@@ -184,15 +184,15 @@ export function CombatSummaryPanel({ summary, formations, onSelectFormation, com
                                         </button>
                                     </div>
                                 </div>
-                                <span className="text-accent-gold font-mono text-xs">{t('combatRecord.mvp')}</span>
+                                <span className="text-accent-gold font-mono text-[13px]">{t('combatRecord.mvp')}</span>
                             </div>
                         )}
                         {summary.most_casualties_brigade_id && (
-                            <div className="flex justify-between items-center text-xs p-1.5 bg-[#d45555]/5 border border-[#d45555]/20 rounded">
+                            <div className="flex justify-between items-center text-[13px] p-1.5 bg-[#d45555]/5 border border-[#d45555]/20 rounded">
                                 <div className="flex items-center gap-1.5">
                                     <span className="text-[#d45555]" title={t('combatRecord.highestCasualtiesBrigade')}>ðŸ©¸</span>
                                     <div className="flex flex-col">
-                                        <span className="text-xs uppercase tracking-wide text-text-secondary">{t('combatRecord.bleedingEdge')}</span>
+                                        <span className="text-[13px] uppercase tracking-wide text-text-secondary">{t('combatRecord.bleedingEdge')}</span>
                                         <button
                                             type="button"
                                             className="text-text-primary hover:text-interactive text-left font-semibold truncate max-w-[120px]"
@@ -202,7 +202,7 @@ export function CombatSummaryPanel({ summary, formations, onSelectFormation, com
                                         </button>
                                     </div>
                                 </div>
-                                <span className="text-[#d45555] font-mono text-xs">{t('combatRecord.heaviestLosses')}</span>
+                                <span className="text-[#d45555] font-mono text-[13px]">{t('combatRecord.heaviestLosses')}</span>
                             </div>
                         )}
                     </div>

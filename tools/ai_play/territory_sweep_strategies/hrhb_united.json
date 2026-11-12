@@ -1,0 +1,14 @@
+{
+  "name": "hrhb_united",
+  "faction": "HRHB",
+  "events": {
+    "default": "bot",
+    "overrides": {
+      "hrhb_political_goal": "united_front",
+      "hrhb_1992_graz_cooperation_collapse": "formal_alliance_persists",
+      "gornji_vakuf_clashes_1993": "negotiate",
+      "hrhb_central_bosnia_defense_1993": "federate_early",
+      "hrhb_federation_army_integration_1994": "full_integration"
+    }
+  }
+}

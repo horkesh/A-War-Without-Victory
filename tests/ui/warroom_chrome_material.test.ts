@@ -11,7 +11,6 @@ import React, { createElement } from 'react';
 import { cleanup, render, screen, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { setLocale } from '../../src/ui/map/i18n/index.js';
-import { PRESIDENTIAL_COMMAND_CATEGORIES } from '../../src/ui/map/data/presidentialCategories.js';
 
 let storeState: Record<string, any> = {
   loadedGameState: null,
@@ -35,8 +34,6 @@ vi.mock('../../src/ui/map/store/gameStore', () => ({
 const { PresidentialInbox, DOSSIER_LAYOUT } = await import('../../src/ui/map/components/PresidentialInbox.js');
 // @ts-expect-error TS1378: top-level await is supported by vitest runtime.
 const { WarroomShellLayer } = await import('../../src/ui/map/components/warroom/WarroomShellLayer.js');
-// @ts-expect-error TS1378: top-level await is supported by vitest runtime.
-const { CommandCardStrip } = await import('../../src/ui/map/components/warroom/CommandCardStrip.js');
 
 beforeEach(() => {
   storeState = {
@@ -84,24 +81,6 @@ describe('warroom navigation rail', () => {
     expect(nav.getAttribute('data-material')).toBe('rail');
     for (const label of ["President's Desk", 'Command Surface', 'War Map', 'Advance']) {
       expect(within(nav).getByRole('button', { name: label })).toBeTruthy();
-    }
-  });
-});
-
-describe('command cards are art first', () => {
-  it('keeps the blurb in the card but reveals it only on hover or focus', () => {
-    render(React.createElement(CommandCardStrip, {
-      initialCategoryId: null,
-      onOpenCategory: vi.fn(),
-      onClose: vi.fn(),
-    }));
-    for (const category of PRESIDENTIAL_COMMAND_CATEGORIES) {
-      const card = screen.getByTestId(`command-card-${category.id}`);
-      expect(card.className).toMatch(/\bgroup\b/);
-      const blurb = screen.getByTestId(`command-card-blurb-${category.id}`);
-      expect(blurb.className).toMatch(/opacity-0/);
-      expect(blurb.className).toMatch(/group-(hover|focus-visible):opacity-100/);
-      expect(blurb.textContent?.length ?? 0).toBeGreaterThan(0);
     }
   });
 });

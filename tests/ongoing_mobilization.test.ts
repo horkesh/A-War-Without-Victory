@@ -153,7 +153,7 @@ describe('runOngoingMobilization', () => {
                     faction: 'RBiH',
                     mun_id: 'MUN_X',
                     type: 'weapons_shipment',
-                    staged_turn: 5,
+                    staged_turn: 4, // staged on player turn 4; applies while turn 5 resolves (Local Support timing)
                 }
             }
   } as any,

@@ -1533,16 +1533,18 @@ async function selectDecisionRoomCard(surface, titlePattern, options = {}) {
     .filter({ hasText: titlePattern })
     .first();
   if (!(await card.count().catch(() => 0))) return false;
-  const dossierButton = card.locator('button').filter({ hasText: /Dossier/i }).first();
-  if (!(await dossierButton.count().catch(() => 0))) return false;
-  await dossierButton.scrollIntoViewIfNeeded().catch(() => {});
+  // Command Surface (2026-11-10): the matter card itself is the select button.
+  await card.scrollIntoViewIfNeeded().catch(() => {});
   try {
-    await dossierButton.click({ timeout: options.timeout ?? 8000 });
+    await card.click({ timeout: options.timeout ?? 8000 });
   } catch {
     return false;
   }
   await sleep(options.afterMs ?? 900);
-  return true;
+  const cardTestId = await card.getAttribute('data-testid').catch(() => null);
+  const selectedId = await surface.locator('[data-testid="decision-room-active-dossier"]').first()
+    .getAttribute('data-card-id').catch(() => null);
+  return Boolean(cardTestId && selectedId && cardTestId === `decision-room-priority-card-${selectedId}`);
 }
 
 async function openPendingEventDecisionFromDesk(frame, eventId) {
@@ -1618,10 +1620,24 @@ async function clickExactVisibleButton(surface, exactText, label, options = {}) 
 function officerResponseLabel(officerMatter) {
   if (officerMatter?.eventType === 'officer_available') return 'File availability notice';
   if (officerMatter?.eventType === 'replacement_suggested') return 'Keep current commander';
+  // Command reactions (kept in step with selectOfficerSuccessionResponse).
+  if (['order_modified', 'order_pushback', 'order_refused', 'army_directive_pushback'].includes(officerMatter?.eventType)) return 'ACCEPT';
   return 'Acknowledge';
 }
 
 function selectOfficerSuccessionResponse(officerMatter, policy) {
+  // Command reactions the Desk routes to the Decision Room; the player accepts them in the
+  // Army HQ briefing the dossier hands off to ("Open Briefing" -> order interpretations -> Accept).
+  if (['order_modified', 'order_pushback', 'order_refused', 'army_directive_pushback'].includes(officerMatter?.eventType)) {
+    return {
+      responseLabel: 'ACCEPT',
+      expectedDecision: officerMatter?.overrideAction === 'override-officer-interpretation' ? 'override_confirmed' : 'acknowledged',
+      route: 'army-hq-briefing',
+      policy: policy.requested,
+      policyVersion: policy.version,
+      candidateOfficerId: officerMatter?.officerId ?? null,
+    };
+  }
   if (officerMatter?.eventType !== 'replacement_suggested') {
     return {
       responseLabel: officerMatter?.eventType === 'officer_available' ? 'File availability notice' : 'Acknowledge',
@@ -3143,6 +3159,40 @@ async function openArmyHqFromCurrentSurface(frame, label, options = {}) {
   return false;
 }
 
+/**
+ * Accept a command reaction the way a player does: the Decision Room dossier's source handoff
+ * ("Open Briefing") opens the Army HQ briefing, whose order-interpretation card carries Accept.
+ * Falls back to the Army HQ route only when the dossier offers no enabled handoff.
+ */
+async function acceptOfficerEventInArmyHqBriefing(frame, eventId) {
+  const handoff = frame.locator('[data-testid="decision-room-dossier-review"]').first();
+  if (await handoff.isVisible().catch(() => false) && await handoff.isEnabled().catch(() => false)) {
+    await handoff.scrollIntoViewIfNeeded();
+    await handoff.click({ timeout: 8000 });
+    await sleep(900);
+  }
+  const armyHq = frame.locator('[data-testid="army-hq-modal"]').first();
+  if (!await armyHq.isVisible().catch(() => false)) {
+    await clearOpenSurfaces(frame);
+    if (!await openArmyHqFromCurrentSurface(frame, `officer reaction ${eventId} army hq`)) return false;
+  }
+  await armyHq.waitFor({ state: 'visible', timeout: 5000 });
+  const briefingTab = frame.locator('#army-hq-tab-briefing').first();
+  if (await briefingTab.getAttribute('aria-selected').catch(() => null) !== 'true') {
+    await briefingTab.click({ timeout: 5000 });
+  }
+  await frame.locator('#army-hq-tabpanel-briefing').first().waitFor({ state: 'visible', timeout: 5000 });
+  const accept = frame
+    .locator(`[data-testid="order-interpretation-card"][data-event-id="${eventId}"] [data-testid="order-interpretation-accept"]`)
+    .first();
+  if (!await accept.count().catch(() => 0)) return false;
+  await accept.scrollIntoViewIfNeeded();
+  if (!await accept.isVisible().catch(() => false) || !await accept.isEnabled().catch(() => false)) return false;
+  await accept.click({ timeout: 8000 });
+  await sleep(1200);
+  return true;
+}
+
 async function openCommandSurfaceFromWarroom(frame, label = 'command surface') {
   await closeOpenSurface(frame);
   return await openWarroomRoute(frame, 'command-surface', label, { afterMs: 1000 });
@@ -3178,7 +3228,7 @@ async function acceptStrategicProposalThroughUi(frame, proposal, options = {}) {
   if (!openedCategory) throw new Error(`Required proposal category failed: ${reviewId}`);
   const card = frame.locator(`[data-testid="decision-room-priority-card-${priorityCardId}"]`).first();
   await card.waitFor({ state: 'visible', timeout: 5000 });
-  const dossier = card.getByRole('button', { name: 'Dossier', exact: true }).first();
+  const dossier = card; // Command Surface: the matter card is the select button
   await dossier.waitFor({ state: 'visible', timeout: 5000 });
   await dossier.click({ timeout: 5000 });
   const host = frame.locator('[data-testid="warroom-decision-room-host"]').first();
@@ -3188,8 +3238,6 @@ async function acceptStrategicProposalThroughUi(frame, proposal, options = {}) {
     `[data-testid="decision-room-active-dossier"][data-card-id="${priorityCardId}"]`,
   ).first();
   await dossierPanel.waitFor({ state: 'visible', timeout: 5000 });
-  const dossierReview = dossierPanel.locator('[data-testid="decision-room-dossier-review"]').first();
-  await dossierReview.waitFor({ state: 'visible', timeout: 5000 });
   const dossierText = await dossierPanel.innerText({ timeout: 5000 });
   let dossierTruth = null;
   let dossierTruthError = null;
@@ -3413,31 +3461,37 @@ async function decisionRoomDeepDive(page, frame, faction, events, labelPrefix = 
   if (await decisionRoomHosts.count() !== 1) throw new Error('Decision Room host identity is not unique');
   const decisionRoomHost = decisionRoomHosts;
   if (!await decisionRoomHost.isVisible()) throw new Error('Decision Room host is not visible');
+  // Command Surface (owner redesign 2026-11-10): the six areas replace the lenses.
   const lensResults = [];
-  const lensIds = await decisionRoomHost.locator('[data-testid^="decision-room-lens-"]').evaluateAll((nodes) => (
-    nodes.map((node) => (node.getAttribute('data-testid') ?? '').replace('decision-room-lens-', '')).filter(Boolean)
+  const areaIds = await decisionRoomHost.locator('[data-testid^="command-card-cat_"]').evaluateAll((nodes) => (
+    nodes.map((node) => (node.getAttribute('data-testid') ?? '').replace('command-card-', '')).filter(Boolean)
   ));
-  if (lensIds.length === 0) throw new Error('Decision Room exposed no lenses');
-  for (const lensId of lensIds) {
-    const clicked = await clickTestId(decisionRoomHost, `decision-room-lens-${lensId}`, `lens ${lensId}`, { afterMs: 650 });
-    const active = await decisionRoomHost.locator(`[data-testid="decision-room-lens-${lensId}"]`).getAttribute('aria-pressed') === 'true';
-    const result = { lensId, clicked, active };
-    if (!clicked || !active) throw new Error(`Decision Room lens failed: ${JSON.stringify(result)}`);
+  if (areaIds.length === 0) throw new Error('Command Surface exposed no areas');
+  let reviewArea = null;
+  for (const areaId of areaIds) {
+    const clicked = await clickTestId(decisionRoomHost, `command-card-${areaId}`, `area ${areaId}`, { afterMs: 650 });
+    const active = await decisionRoomHost.locator(`[data-testid="command-card-${areaId}"]`).getAttribute('aria-pressed') === 'true';
+    const shown = await decisionRoomHost.locator('[data-testid="presidential-decision-room"]').getAttribute('data-command-category-id');
+    const result = { lensId: areaId, clicked, active, shown };
+    if (!clicked || !active || shown !== areaId) throw new Error(`Command Surface area failed: ${JSON.stringify(result)}`);
     lensResults.push(result);
-    await snapshot(page, frame, faction, events, `${labelPrefix}-lens-${safeName(lensId)}`, { lensResult: result });
+    if (!reviewArea && await decisionRoomHost.locator('[data-testid="decision-room-dossier-review"]').count() === 1) reviewArea = areaId;
+    await snapshot(page, frame, faction, events, `${labelPrefix}-area-${safeName(areaId)}`, { lensResult: result });
   }
+  if (reviewArea) await clickTestId(decisionRoomHost, `command-card-${reviewArea}`, `area ${reviewArea}`, { afterMs: 650 });
 
   const review = decisionRoomHost.locator('[data-testid="decision-room-dossier-review"]');
-  if (await review.count() !== 1) throw new Error('Decision Room dossier review identity is not unique');
-  const reviewDisabled = await review.isDisabled();
-  const reviewText = compactText(await review.innerText(), 120);
-  const navigationKind = await review.getAttribute('data-navigation-kind');
+  const reviewCount = await review.count();
+  if (reviewCount > 1) throw new Error('Decision Room dossier review identity is not unique');
+  // A matter whose only action is in place (a directive) or that has nowhere else to go
+  // shows no review handoff; that is not an error.
+  const reviewDisabled = reviewCount === 0;
+  const reviewText = reviewCount === 1 ? compactText(await review.innerText(), 120) : '';
+  const navigationKind = reviewCount === 1 ? await review.getAttribute('data-navigation-kind') : null;
   let reviewClicked = false;
   let reviewVisualChanged = false;
   if (reviewDisabled) {
-    if (!/Current dossier/i.test(reviewText)) {
-      throw new Error(`Decision Room disabled review has no truthful reason: ${reviewText}`);
-    }
+    // nothing to follow
   } else {
     const beforeReview = await page.screenshot({ fullPage: false });
     await review.click({ timeout: 5000 });
@@ -3479,25 +3533,26 @@ async function commandSurfaceDeepDive(page, frame, faction, events, options = {}
     const priorityCardCount = await decisionRoom.locator('[data-testid^="decision-room-priority-card-"]').count();
     const decisionRoomText = compactText(await decisionRoom.innerText(), 2200);
     const dossierCount = await decisionRoom.locator('[data-testid="decision-room-dossier-review"]').count();
-    const allLensPressed = await decisionRoom.locator('[data-testid="decision-room-lens-all"]').getAttribute('aria-pressed');
+    // Command Surface: no lenses; the area button's pressed state is the selection.
+    const allLensPressed = await frame.locator(`[data-testid="${cardId}"]`).getAttribute('aria-pressed');
     if (priorityCardCount === 0) {
-      if (!decisionRoomText.includes('No items in this command category.')) {
+      if (!decisionRoomText.includes('Nothing waits here this week.')) {
         throw new Error(`Empty command category has no explicit empty state: ${expectedCommandCategoryId}`);
       }
       if (dossierCount !== 0) {
         throw new Error(`Empty command category retained an unrelated dossier: ${expectedCommandCategoryId}`);
       }
-      if (allLensPressed !== 'false') {
-        throw new Error(`Empty command category left the All lens pressed: ${expectedCommandCategoryId}`);
+      if (allLensPressed !== 'true') {
+        throw new Error(`Empty command area is not shown as selected: ${expectedCommandCategoryId}`);
       }
       if (expectedCommandCategoryId === 'cat_conscience') {
-        const asideCount = await decisionRoom.locator('aside').count();
+        const asideCount = await decisionRoom.locator('[data-testid="decision-room-active-dossier"]').count();
         if (asideCount !== 0) {
           throw new Error(`Empty command category retained a dossier container: ${expectedCommandCategoryId}`);
         }
         emptyCommandCategoryProof = {
           categoryId: expectedCommandCategoryId,
-          emptyText: 'No items in this command category.',
+          emptyText: 'Nothing waits here this week.',
           priorityCardCount,
           dossierCount,
           asideCount,
@@ -5112,7 +5167,7 @@ async function handleCurrentSurface(page, frame, faction, events, options = {}) 
       `[data-testid="decision-room-priority-card-counter-offer:${counterOfferId}"]`,
     ).first();
     await card.waitFor({ state: 'visible', timeout: 5000 });
-    const dossier = card.getByRole('button', { name: 'Dossier', exact: true }).first();
+    const dossier = card; // Command Surface: the matter card is the select button
     await dossier.click({ timeout: 5000 });
     await sleep(700);
     await snapshot(page, frame, faction, events, 'counter-offer-before-response', {
@@ -5252,7 +5307,7 @@ async function handleCurrentSurface(page, frame, faction, events, options = {}) 
     }
     const card = frame.locator(`[data-testid="decision-room-priority-card-command:elite-deploy:${requestId}"]`).first();
     await card.waitFor({ state: 'visible', timeout: 5000 });
-    const dossier = card.getByRole('button', { name: 'Dossier', exact: true }).first();
+    const dossier = card; // Command Surface: the matter card is the select button
     await dossier.click({ timeout: 5000 });
     await sleep(700);
     const host = frame.locator('[data-testid="warroom-decision-room-host"]').first();
@@ -5353,6 +5408,8 @@ async function handleCurrentSurface(page, frame, faction, events, options = {}) 
     });
     const responded = officerResponse.route === 'personnel'
       ? await clickHistoricalOfficerSuccessionOffer(frame, officerMatter)
+      : officerResponse.route === 'army-hq-briefing'
+        ? await acceptOfficerEventInArmyHqBriefing(frame, officerEventId)
       : await clickExactVisibleButton(
         frame,
         responseLabel,
@@ -6544,7 +6601,10 @@ function classifyExpectedAmbientLifecycleAbort(record, lifecycleSignals) {
     && parsed.hostname === '127.0.0.1'
     && parsed.search === ''
     && parsed.hash === ''
-    && /^\/assets\/ambient_(?:warroom|field|archive)-[A-Za-z0-9_-]+\.ogg$/.test(parsed.pathname);
+    // Any bundled audio cue (ambient beds and, with music on by default since
+    // 2026-11-10, the music tracks): the element-level request-start + browser-abort
+    // pairing below is what proves the abort, not the file name.
+    && /^\/assets\/[a-z0-9_]+-[A-Za-z0-9_-]+\.ogg$/.test(parsed.pathname);
   if (!exactLocalAmbient) return null;
   const starts = lifecycleSignals.filter((signal) => signal.kind === 'request-start'
     && signal.url === record.url

@@ -60,7 +60,7 @@ export function MapModeLegend() {
       <div
         data-testid="map-mode-legend"
         className="absolute bottom-24 z-10 rounded border border-panel-border bg-panel-bg px-3 py-2 text-text-primary shadow-lg"
-        style={{ left: 'calc(15.5rem + 1rem)', minWidth: 268 }}
+        style={{ left: 'calc(17rem + 1rem)', minWidth: 268 }}
       >
         <div className="mb-2 text-xs font-semibold uppercase tracking-[0.08em] text-accent-gold">
           {t('map.legend.counters.title')}
@@ -110,7 +110,7 @@ export function MapModeLegend() {
     <div
       data-testid="map-mode-legend"
       className="absolute bottom-24 z-10 rounded border border-panel-border bg-panel-bg px-3 py-2 text-text-primary shadow-lg"
-      style={{ left: 'calc(15.5rem + 1rem)', minWidth: 140 }}
+      style={{ left: 'calc(17rem + 1rem)', minWidth: 140 }}
     >
       <div className="mb-1.5 text-xs font-semibold uppercase tracking-[0.08em] text-accent-gold">{t(legend.titleKey)}</div>
       <div className="flex flex-col gap-1">

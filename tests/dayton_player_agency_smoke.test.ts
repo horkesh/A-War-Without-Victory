@@ -176,8 +176,11 @@ describe('player-agency smoke (b): patron override forces the authored peace', (
         expect(ov).toContain('dial:unitary:RS');
         expect(ov).toContain('competency:comp_defense:RS');
         expect(ov).toContain('constitutional:arch_ohr_authority:RS');
-        // territorial demands forced through against the RS holder.
-        expect(ov).toContain('territorial:gorazde_corridor:RS');
+        // Territorial: Belgrade forces only within its area budget (override 85 → 2.0% of BiH;
+        // owner ruling 2026-11-07). The Goražde package (4.2%) is over it and Brčko is protected.
+        expect(result.territorial_packages_accepted).not.toContain('brcko_district');
+        expect(ov).not.toContain('territorial:gorazde_corridor:RS');
+        expect(ov).not.toContain('territorial:brcko_district:RS');
         // NOTE (modeled-asymmetry, not a gap): ICTY non-cooperation is RS's OWN
         // preferred posture (it shields Pale from the tribunal), so RS does NOT object
         // and no override is needed for it — yet it still persists onto the result

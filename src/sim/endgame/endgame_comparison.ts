@@ -106,6 +106,9 @@ function buildMilestoneComparison(
         });
 }
 
+/** Divergence note for a Srebrenica enclave overrun with no rupture recorded (the Chronicle localizes it). */
+export const SREBRENICA_OVERRUN_NOTE = 'Srebrenica enclave was overrun';
+
 /**
  * Compare player war against historical baseline. Pure, deterministic.
  * Both inputs are explicit, serializable values — no hidden state.
@@ -175,9 +178,16 @@ export function compareToHistorical(
     const hasSrebrenicaRupture = costLedger.rupture_consequences.some(
         r => r.id === 'srebrenica_genocide_1995'
     );
+    // DC A6 follow-up 1 (Pyrrhic panel 2026-11-09): "survived" only while RBiH holds the
+    // enclave's capital at the end. An enclave overrun before the genocide window (no rupture)
+    // reads as overrun: a counterfactual line, never the July 1995 record. The recorded
+    // rupture keeps precedence.
+    const srebrenicaLost = costLedger.entries.find(e => e.faction === 'RBiH')?.enclaves_lost.includes('srebrenica') === true;
     if (hasSrebrenicaRupture) {
         ruptureDivergence.push('srebrenica_genocide_1995');
         notes.push('Srebrenica genocide occurred');
+    } else if (srebrenicaLost) {
+        notes.push(SREBRENICA_OVERRUN_NOTE);
     } else {
         notes.push('Srebrenica enclave survived');
     }

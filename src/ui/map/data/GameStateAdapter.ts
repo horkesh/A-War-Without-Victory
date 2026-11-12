@@ -84,6 +84,10 @@ import {
     deriveFactionSupplyConditionFromOsidReport,
 } from '../../../sim/combat/supply_condition.js';
 import { PEACE_PLANS } from '../../../sim/negotiation/peace_plan_data.js';
+import { frontPackagesForPlayer } from '../../../sim/negotiation/front_packages.js';
+import { demandPrice, isHolderProtected, isOnTheTable, packageOsids, playerMayConcede } from '../../../sim/negotiation/patron_leverage.js';
+import { settlementControllersFor } from '../../../sim/negotiation/peace_settlement.js';
+import { getTerritorialPackageById } from '../../../sim/negotiation/territorial_packages.js';
 import war1992Events from '../../../../data/scenarios/events/war_1992.json';
 import war1993Events from '../../../../data/scenarios/events/war_1993.json';
 import war1994Events from '../../../../data/scenarios/events/war_1994.json';
@@ -2976,6 +2980,8 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
         pendingPeacePlan: derivePendingPeacePlan(state),
         pendingCounterOffers: derivePendingCounterOffers(state),
         pendingDayton: derivePendingDayton(state),
+        daytonAgreement: readDaytonAgreement(state.military?.negotiation?.dayton_agreement),
+        settlementMap: deriveSettlementMap(state),
         pendingProposalReviews,
         strategicDimensions: deriveStrategicDimensions(state),
         negotiatingCapital: deriveNegotiatingCapital(state),
@@ -4132,6 +4138,69 @@ function derivePatronOverrideAuthority(state: any): LoadedGameState['patronOverr
     return Object.keys(out).length > 0 ? out : undefined;
 }
 
+export function readDaytonAgreement(value: unknown): LoadedGameState['daytonAgreement'] {
+    const agreement = value as LoadedGameState['daytonAgreement'];
+    if (agreement?.version !== 1) return undefined;
+    const isRecord = (item: unknown): item is Record<string, unknown> =>
+        item !== null && typeof item === 'object' && !Array.isArray(item);
+    const { map, terms } = agreement;
+    if (!map || !terms
+        || !isRecord(map.controllers) || !isRecord(map.wartimeControllers)
+        || !Array.isArray(map.specialOsids) || !map.specialOsids.every(id => typeof id === 'string')
+        || !isRecord(map.territoryPct) || !Object.values(map.territoryPct).every(Number.isFinite)
+        || !isRecord(terms.institutional_choices)
+        || ![terms.competency_allocation, terms.constitutional_choices, terms.return_justice]
+            .every(item => item === undefined || isRecord(item))) {
+        return undefined;
+    }
+    // DC A5: the signing beat reads `signing`; a malformed one is dropped, never rendered.
+    const signing = agreement.signing;
+    if (signing !== undefined && !(Number.isFinite(signing?.turn) && Number.isFinite(signing?.war?.weeks)
+        && Number.isFinite(signing?.war?.dead?.military) && Number.isFinite(signing?.war?.dead?.civilian)
+        && Number.isFinite(signing?.war?.displaced))) {
+        const { signing: _dropped, ...rest } = agreement;
+        return rest;
+    }
+    return agreement;
+}
+
+/**
+ * The settled map of a signed peace (RD, 2026-11-07): the plan, the OSID-level settled
+ * controllers (recomputed by the sim's settlementControllersFor, never re-derived here), the
+ * shared/international cells, the settled territory share, and the cells whose holder
+ * changes from the front at signature to the map signed. Undefined without a settlement.
+ * Rendering (verdict comparison, inspection mode) belongs to the Dayton conference lane.
+ */
+export function deriveSettlementMap(state: any): LoadedGameState['settlementMap'] {
+    const frozen = readDaytonAgreement(state?.military?.negotiation?.dayton_agreement);
+    if (frozen?.version === 1) {
+        const { controllers, wartimeControllers, specialOsids, territoryPct } = frozen.map;
+        return {
+            planId: 'dayton', controllers, specialOsids, territoryPct,
+            changedOsids: Object.keys(controllers).filter(id => wartimeControllers[id] !== controllers[id]).sort(strictCompare),
+        };
+    }
+    const settlement = state?.military?.negotiation?.settlement;
+    if (!settlement || typeof settlement.plan_id !== 'string') return undefined;
+    const controllers = settlementControllersFor(state as GameState);
+    if (!controllers) return undefined;
+    const wartime: Record<string, string | null | undefined> = state.political?.political_controllers ?? {};
+    const changedOsids = Object.keys(controllers)
+        .filter((osid) => wartime[osid] !== controllers[osid])
+        .sort(strictCompare);
+    const territoryPct: Record<string, number> = {};
+    for (const [faction, pct] of Object.entries(settlement.territory_pct ?? {}).sort((a, b) => strictCompare(a[0], b[0]))) {
+        territoryPct[faction] = Number(pct);
+    }
+    return {
+        planId: settlement.plan_id,
+        controllers,
+        specialOsids: Array.isArray(settlement.special_osids) ? [...settlement.special_osids].sort(strictCompare) : [],
+        territoryPct,
+        changedOsids,
+    };
+}
+
 /** Read persisted pending_dayton packet from state. Pipeline owns trigger; adapter only shapes. */
 export function derivePendingDayton(state: any): LoadedGameState['pendingDayton'] {
     if (state.meta?.game_over) return undefined;
@@ -4139,14 +4208,48 @@ export function derivePendingDayton(state: any): LoadedGameState['pendingDayton'
     if (!neg?.pending_dayton) return undefined;
     if (neg.dayton_result) return undefined;
     const pd = neg.pending_dayton;
+    const playerFaction = typeof state.meta?.player_faction === 'string' ? state.meta.player_faction : null;
+    // Captured-ground packages are derived from the current front and the Dayton map
+    // (sim/negotiation/front_packages.ts); the resolver rebuilds the same set at signature.
+    const frontPackages = playerFaction && state.political?.political_controllers
+        ? frontPackagesForPlayer(state as GameState, playerFaction).map((p) => ({
+            id: p.id,
+            name: p.name,
+            defaultHolder: p.default_holder,
+            demandCost: demandPrice(p, playerFaction),
+            concedeCost: p.capital_cost_to_concede,
+            claimant: p.claimant,
+            areaPct: p.area_pct,
+            osids: packageOsids(p),
+            // Same rule as the map packages: no Concede on the player's protected ground.
+            ...(!playerMayConcede(p, playerFaction) ? { protectedCore: true } : {}),
+        }))
+        : [];
+    const forced = pd.forced && typeof pd.forced === 'object'
+        ? { onFaction: String(pd.forced.on_faction ?? ''), by: String(pd.forced.by ?? '') }
+        : undefined;
     return {
-        territorialPackages: (pd.territorial_packages ?? []).map((p: any) => ({
-            id: String(p.id ?? ''),
-            name: String(p.name ?? ''),
-            defaultHolder: String(p.default_holder ?? ''),
-            demandCost: Number(p.demand_cost ?? 0),
-            concedeCost: Number(p.concede_cost ?? 0),
-        })),
+        territorialPackages: (pd.territorial_packages ?? []).map((p: any) => {
+            const id = String(p.id ?? '');
+            const knownPackage = getTerritorialPackageById(id);
+            return {
+                id,
+                name: String(p.name ?? ''),
+                defaultHolder: String(p.default_holder ?? ''),
+                // Engine price when the package is known (protected premium, DC A6); else the packet's.
+                demandCost: knownPackage && playerFaction ? demandPrice(knownPackage, playerFaction) : Number(p.demand_cost ?? 0),
+                concedeCost: Number(p.concede_cost ?? 0),
+                osids: knownPackage ? packageOsids(knownPackage) : [],
+                // The player's own protected ground cannot be conceded (Brčko excepted).
+                ...(knownPackage && playerFaction && !playerMayConcede(knownPackage, playerFaction) ? { protectedCore: true } : {}),
+                // The other side's protected ground: a price class, never pressed by a patron (DC A6).
+                ...(knownPackage && playerFaction && knownPackage.default_holder !== playerFaction && isHolderProtected(knownPackage) && isOnTheTable(knownPackage) ? { theirCore: true } : {}),
+                // Never on the table for anyone (Mostar and western Herzegovina): no Demand offered.
+                ...(knownPackage && playerFaction && knownPackage.default_holder !== playerFaction && !isOnTheTable(knownPackage) ? { offTable: true } : {}),
+            };
+        }),
+        frontPackages,
+        ...(forced ? { forced } : {}),
         institutionalPackages: (pd.institutional_packages ?? []).map((p: any) => ({
             id: String(p.id ?? ''),
             name: String(p.name ?? ''),
@@ -4155,7 +4258,19 @@ export function derivePendingDayton(state: any): LoadedGameState['pendingDayton'
         })),
         factionCapital: pd.faction_capital ?? {},
         patronOverride: pd.patron_override ?? {},
+        ...(isDelegationFolder(pd.delegation_folder, playerFaction) ? { delegationFolder: pd.delegation_folder } : {}),
+        rounds: Array.isArray(pd.rounds)
+            ? pd.rounds.filter((r: any) => r && Number.isFinite(r.round) && r.proposal && r.responses && typeof r.responses === 'object')
+            : [],
     };
+}
+
+/** Accept a stored delegation folder only when it is well formed and belongs to the player. */
+function isDelegationFolder(value: any, playerFaction: string | null): boolean {
+    return Boolean(value && typeof value === 'object' && value.faction === playerFaction
+        && value.settlements && Number.isFinite(value.settlements.held) && Number.isFinite(value.settlements.total)
+        && value.enclaves && Array.isArray(value.enclaves.held) && Array.isArray(value.enclaves.lost)
+        && Array.isArray(value.condemnation) && value.patron && Array.isArray(value.refused_plans) && value.war);
 }
 
 function derivePendingPeacePlan(state: any): LoadedGameState['pendingPeacePlan'] {

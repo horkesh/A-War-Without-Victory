@@ -116,7 +116,8 @@ function lowDimStore(): DimensionStore {
 
 function makeSimpleProposal(): DaytonProposal {
     return {
-        territorial_demands: ['gorazde_corridor'],
+        // An RS-held package (the Goražde corridor is Federation ground in the draft since 2026-11-08).
+        territorial_demands: ['sarajevo_suburbs'],
         territorial_concessions: [],
         institutional_choices: {
             military: 'centralized',
@@ -373,14 +374,15 @@ describe('Bot Negotiation', () => {
 describe('Proposal Cost', () => {
     it('computes territorial concession costs correctly', () => {
         const proposal: DaytonProposal = {
-            territorial_demands: ['gorazde_corridor', 'brcko_district'],
+            territorial_demands: ['sarajevo_suburbs', 'brcko_district'],
             territorial_concessions: [],
             institutional_choices: {},
         };
 
-        // Cost to RS: gorazde (10 concede) + brcko (18 concede) = 28
+        // Cost to RS: Sarajevo suburbs (12 concede) + Brčko, which is protected ground (owner
+        // ruling 2026-11-07, patron_leverage.ts), priced as a class (DC A6): max(40, 3 x 18) = 54.
         const costToRS = computeProposalCostToFaction(proposal, 'RS');
-        expect(costToRS).toBe(28);
+        expect(costToRS).toBe(12 + 54);
 
         // Cost to RBiH: 0 (RS holds both)
         const costToRBiH = computeProposalCostToFaction(proposal, 'RBiH');
@@ -592,7 +594,9 @@ describe('Dayton Resolution', () => {
                 RS: lowCapital(),
                 HRHB: highCapital(),
             },
-            patron: { RS: { override_authority: 80 } },
+            // 90 → Belgrade's area budget is 2.75% of BiH (owner ruling 2026-11-07): enough
+            // for Sarajevo Suburbs (1.6%), not for the Goražde package (4.2%); Brčko is protected.
+            patron: { RS: { override_authority: 90 } },
             // Player (RBiH) gets ample composite capital so the new engine-level player
             // budget guard does NOT clamp this 75-cost demand stack — the test exercises
             // the PATRON-override path (RS holds firm; its patron forces acceptance),
@@ -610,8 +614,11 @@ describe('Dayton Resolution', () => {
 
         const result = resolveDaytonNegotiation(state, proposal);
 
-        // With patron override at 80, some packages should be forced
-        expect(result.patron_overrides_applied.length).toBeGreaterThan(0);
+        // The patron forces the smallest refused pieces within its budget, never protected ground.
+        expect(result.patron_overrides_applied.some((o) => o.startsWith('territorial:'))).toBe(true);
+        expect(result.territorial_packages_accepted).not.toContain('brcko_district');
+        expect(result.patron_overrides_applied).not.toContain('territorial:brcko_district:RS');
+        expect(result.patron_overrides_applied).not.toContain('territorial:gorazde_corridor:RS');
     });
 
     it('final_territory_split sums to approximately 100', () => {

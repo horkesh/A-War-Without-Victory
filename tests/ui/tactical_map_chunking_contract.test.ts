@@ -36,7 +36,13 @@ describe('tactical map chunking contract', () => {
       expect(
         chunk.startsWith('vendor-')
           || chunk.startsWith('event-catalog-')
-          || ['codex-essay-index', 'oob-brigades', 'oob-brigade-designations', 'operational-osid-areas'].includes(chunk),
+          || [
+              'codex-essay-index', 'oob-brigades', 'oob-brigade-designations', 'operational-osid-areas',
+              // Settlement map read model (PR #557): static JSON leaves.
+              'operational-contact-graph', 'peace-settlement-shares', 'mun1990-names',
+              // Dayton conference read model (PR #560): static JSON leaves.
+              'peace-plan-cells', 'peace-osid-cantons', 'painted-control-oct1995',
+          ].includes(chunk),
         `manual chunk "${chunk}" is not a vendor or static-data chunk`,
       ).toBe(true);
     }

@@ -1,0 +1,42 @@
+{
+  "imagePixels": {
+    "x": 1998,
+    "y": 420,
+    "width": 612,
+    "height": 593
+  },
+  "cornerOrder": [
+    "top-left",
+    "top-right",
+    "bottom-right",
+    "bottom-left"
+  ],
+  "corners": [
+    [
+      1998,
+      420
+    ],
+    [
+      2610,
+      420
+    ],
+    [
+      2610,
+      1013
+    ],
+    [
+      1998,
+      1013
+    ]
+  ],
+  "coordinateConvention": "Pixel edges in the plate coordinate space",
+  "light": "board-light-4k.png",
+  "lightNeutral": 128,
+  "lightGain": "sample / 128; clamp the resulting display RGB",
+  "patch": {
+    "left": 1700,
+    "top": 409,
+    "right": 2912,
+    "bottom": 1033
+  }
+}

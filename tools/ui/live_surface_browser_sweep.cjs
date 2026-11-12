@@ -894,7 +894,13 @@ async function selectArmyHqCorpsWithSectorBrigadeInspect(page, summary) {
       summary.evidence.armyHqSectorBrigadeProofFormationId = found.formationId;
       return found;
     }
-    await tryClickByText(page, 'Back');
+    // The corps detail's own back control (surface redesign 2026-11-10 relabelled it
+    // "Back to the staff overview"); fall back to a text match for older builds.
+    if (await visibleSelectorCount(page, '[data-testid="army-hq-corps-back"]') > 0) {
+      await clickVisibleSelectorAt(page, '[data-testid="army-hq-corps-back"]', 0, 'Army HQ corps back');
+    } else {
+      await tryClickByText(page, 'Back');
+    }
   }
 
   throw new Error(`No Army HQ corps sector exposed a visible brigade inspect-on-field control after inspecting ${corpsCount} corps cards`);
@@ -1069,7 +1075,8 @@ async function resetToWarMap(page) {
     const desk = isVisible(document.querySelector('[data-testid="desk-close-overlay"]'))
       || hasVisibleText('section[aria-label], aside, h2', /President's Desk|Strategic Situation/);
     const armyHqDialog = visibleDialogs.find((dialog) => /Army HQ|Army Headquarters/i.test(dialog.label));
-    const chronicle = hasVisibleText('h1', /^War Chronicle$/i);
+    const chronicle = isVisible(document.querySelector('[data-testid="chronicle-overlay"]'))
+      || hasVisibleText('h1', /^War Chronicle$/i);
     const codex = isVisible(document.querySelector('[data-testid="codex-panel"]'));
     const commandStrip = isVisible(document.querySelector('[data-testid="command-card-strip"]'));
     const decisionRoom = isVisible(document.querySelector('[data-testid="warroom-decision-room-host"]'));
@@ -1211,7 +1218,8 @@ async function getVisibleShellSurfaces(page) {
     const armyHqText = armyHqDialog?.text ?? '';
     const records = Boolean(armyHqDialog && /Archive Routes|Records archive summary|Decision Consequences|Turn Records/.test(armyHqText));
     const armyHq = Boolean(armyHqDialog && !records);
-    const chronicle = hasVisibleText('h1', /^War Chronicle$/i);
+    const chronicle = isVisible(document.querySelector('[data-testid="chronicle-overlay"]'))
+      || hasVisibleText('h1', /^War Chronicle$/i);
     const codex = isVisible(document.querySelector('[data-testid="codex-panel"]'));
     return [
       ...(desk ? ['Desk'] : []),

@@ -18,7 +18,7 @@ describe('RBiH v47 evidence-backed readability floor', () => {
   it('keeps Chronicle category chips readable with a compact line box', () => {
     const source = readComponent('chronicle', 'ChronicleCard.tsx');
 
-    expect(source).toContain('rounded text-xs leading-none font-bold uppercase');
+    expect(source).toContain('rounded text-[13px] leading-none font-bold uppercase');
     expect(source).not.toContain('rounded text-[7px] font-bold uppercase');
     expect(source).not.toContain('text-[7px]');
     expect(source).toContain("entry.ghost ? 'text-amber-200/80 italic' : 'text-stone-300/90'");
@@ -28,18 +28,19 @@ describe('RBiH v47 evidence-backed readability floor', () => {
     const personnel = readComponent('army_hq', 'PersonnelContent.tsx');
     const briefing = readComponent('army_hq', 'ChiefOfStaffBriefing.tsx');
 
-    expect(personnel).toContain('shrink-0 text-xs leading-none font-bold uppercase tracking-[0.12em]');
+    expect(personnel).toContain('shrink-0 text-[13px] leading-none font-bold uppercase tracking-[0.12em]');
     expect(personnel).not.toContain('text-[7px] font-bold uppercase tracking-[0.12em] opacity-75');
     expect(personnel).not.toContain('min-w-0 truncate text-xs text-text-primary');
-    expect(briefing).toContain('className={`text-xs leading-relaxed italic ${DOSSIER_INK.body}`}');
+    expect(briefing).toContain('className={`text-[13px] leading-relaxed italic ${DOSSIER_INK.body}`}');
     expect(briefing).not.toContain('text-[9.5px]');
   });
 
   it('keeps the disabled front-visit action readable', () => {
     const source = readComponent('army_hq', 'FrontVisitSection.tsx');
 
-    // On paper the disabled action keeps a readable mid ink (neutral-500 on the paper token), never a 40 % alpha.
-    expect(source).toContain("'border-neutral-400/50 text-neutral-500 bg-black/5 cursor-not-allowed'");
+    // On paper the disabled action keeps a readable ink, never a 40 % alpha. neutral-500 measured
+    // 3.65:1 on the paper in the packaged R8 shakedown (2026-11-10); neutral-600 clears 4.5:1.
+    expect(source).toContain("'border-neutral-400/50 text-neutral-600 bg-black/5 cursor-not-allowed'");
     expect(source).not.toContain('text-text-secondary/40');
   });
 
@@ -55,7 +56,7 @@ describe('RBiH v47 evidence-backed readability floor', () => {
   it('wraps the latest archived decision title instead of hiding it behind an ellipsis', () => {
     const source = readComponent('army_hq', 'RecordsContent.tsx');
 
-    expect(source).toContain('max-w-[14rem] break-words text-xs leading-snug text-text-primary');
+    expect(source).toContain('max-w-[14rem] break-words text-[13px] leading-snug text-text-primary');
     expect(source).not.toContain('max-w-[14rem] truncate text-xs text-text-primary');
   });
 
@@ -130,7 +131,7 @@ describe('RBiH v47 evidence-backed readability floor', () => {
     const oob = readComponent('OOBSidebar.tsx');
     const statusStrip = readComponent('BottomStatusStrip.tsx');
 
-    expect(emptyState).toContain('text-xs uppercase tracking-[0.22em] text-text-secondary');
+    expect(emptyState).toContain('text-[13px] uppercase tracking-[0.22em] text-text-secondary');
     expect(emptyState).not.toContain('text-text-secondary/70');
     expect(corpsCard).not.toContain('text-text-secondary/60 text-xs uppercase tracking-wide');
     expect(oob).not.toContain('text-xs text-accent-gold/70 truncate');
@@ -149,7 +150,7 @@ describe('RBiH v47 evidence-backed readability floor', () => {
     expect(theme).toContain("RS: 'text-[#a62d2d]'");
     expect(theme).toContain("RBiH: 'text-[#286a32]'");
     expect(theme).toContain("HRHB: 'text-[#285f94]'");
-    expect(source).toContain('text-xs font-normal text-neutral-600 normal-case');
+    expect(source).toContain('text-[13px] font-normal text-neutral-600 normal-case');
     expect(source).not.toContain('text-xs font-normal text-neutral-400 normal-case');
     expect(source).not.toContain('text-xs uppercase font-bold text-neutral-500');
   });

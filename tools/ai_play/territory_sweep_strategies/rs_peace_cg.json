@@ -1,0 +1,10 @@
+{
+  "name": "rs_peace_cg",
+  "faction": "RS",
+  "events": {
+    "default": "bot"
+  },
+  "peace_plans": {
+    "contact_group": "accept"
+  }
+}

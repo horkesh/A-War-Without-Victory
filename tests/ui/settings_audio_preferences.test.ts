@@ -84,7 +84,7 @@ describe('SettingsScreen audio preferences', () => {
             target: { value: '25' },
         });
 
-        expect(loadAudioPreferences(window.localStorage)).toEqual({ musicEnabled: false, musicVolume: 0.5, muted: true,
+        expect(loadAudioPreferences(window.localStorage)).toEqual({ musicEnabled: true, musicVolume: 0.5, musicDefaultsVersion: 2, muted: true,
             masterVolume: 0.25,
         });
     });
@@ -116,7 +116,7 @@ describe('SettingsScreen audio preferences', () => {
             target: { value: '35' },
         });
 
-        expect(loadAudioPreferences(window.localStorage)).toEqual({ musicEnabled: false, musicVolume: 0.5, muted: true,
+        expect(loadAudioPreferences(window.localStorage)).toEqual({ musicEnabled: true, musicVolume: 0.5, musicDefaultsVersion: 2, muted: true,
             masterVolume: 0.35,
         });
     });

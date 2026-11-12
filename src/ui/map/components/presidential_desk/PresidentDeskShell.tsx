@@ -10,6 +10,24 @@ import { turnToDateString } from '../../utils/formatters';
 import { ConsequenceStrip } from './ConsequenceStrip';
 import { DeskAuthorityHeader } from './DeskAuthorityHeader';
 import { DeskPacket } from './DeskPacket';
+import { PRESIDENTIAL_DESK_BANNER } from '../../data/presidentialDeskAssets';
+import {
+  SurfaceBanner,
+  SurfaceCloseButton,
+  SurfaceColumns,
+  SurfaceContent,
+  SurfaceDetail,
+  SurfaceDetailBody,
+  SurfaceDetailFooter,
+  SurfaceFrame,
+  SurfaceHeader,
+  SurfaceRail,
+  SurfaceSections,
+  SurfaceStat,
+  SURFACE_LABEL_MUTED,
+  SURFACE_SECONDARY_BUTTON,
+  SURFACE_STATUS_TONE,
+} from '../surface/Surface';
 
 export interface PresidentDeskShellProps {
   state: LoadedGameState | null;
@@ -49,7 +67,7 @@ export function PresidentDeskShell({
   onReviewAdvance,
   reviewedAftermathTurn,
 }: PresidentDeskShellProps) {
-  const shellRef = useRef<HTMLElement | null>(null);
+  const shellRef = useRef<HTMLDivElement | null>(null);
   const items = deriveInboxItems(state, osidNameMap, eventCatalog);
   const actionableCount = countActionableItems(items);
   const advanceReview = buildPreAdvanceCommandReviewView({
@@ -67,13 +85,24 @@ export function PresidentDeskShell({
     if (onClose) shellRef.current?.focus();
   }, [onClose]);
 
+  const advanceTone = blocked ? 'danger' : reviewRecommended ? 'warn' : 'good';
+  const advanceStatus = blocked
+    ? t('desk.advance.signatureRequired')
+    : reviewRecommended
+      ? t('desk.advance.staffReview')
+      : t('desk.advance.noActRequired');
+
+  // Surface redesign (owner, 2026-11-10): the Desk is one surface below the toolbar in the
+  // Command Surface's style — Authority and what it buys on the left, the matters that need
+  // the president in the middle, the situation, what followed and the week's two handoffs
+  // (Army HQ, Advance) on the right, in a footer that never scrolls away. The date is in
+  // the fixed header, so it never scrolls away either.
   return (
-    <section
+    <SurfaceFrame
       ref={shellRef}
       role={onClose ? 'dialog' : 'region'}
       aria-label={t('desk.region.ariaLabel')}
       aria-modal={onClose ? 'false' : undefined}
-      tabIndex={onClose ? -1 : undefined}
       data-testid="president-desk-shell"
       data-awwv-counter-occluder="true"
       onKeyDown={(event) => {
@@ -83,148 +112,105 @@ export function PresidentDeskShell({
           onClose();
         }
       }}
-      // Static, generous clearance (not measured) — a prior ResizeObserver-
-      // based dynamic-measurement approach (fc04f2902, reverted a39b29673)
-      // was unit-test-clean but regressed RS's early-game historical-event
-      // determinism in the interactive packaged harness, most likely via the
-      // extra render cycle its mount-time state update introduced. bottom-16
-      // (64px) proved insufficient once WarroomStatusBar's priority docket
-      // wraps to more than one row; bottom-28 (112px) comfortably covers a
-      // multi-row wrap with no additional state, effect, or render.
-      className="pointer-events-none absolute right-3 top-[var(--awwv-toolbar-clearance,5.5rem)] bottom-28 z-[3] flex w-[min(32rem,calc(100vw-1.5rem))] flex-col gap-3 overflow-hidden md:right-6 xl:right-10"
     >
-      {onClose && (
-        <button
-          type="button"
-          onClick={onClose}
-          aria-label={t('desk.closeOverlayAria')}
-          data-testid="desk-close-overlay"
-          className="pointer-events-auto shrink-0 self-end border border-panel-border/80 bg-[#11141b] px-3 py-1.5 text-xs font-bold uppercase tracking-[0.14em] text-text-secondary shadow-[0_16px_48px_rgba(0,0,0,0.42)] transition-colors hover:border-accent-gold/45 hover:text-accent-gold"
-        >
-          {t('common.close')}
-        </button>
-      )}
-      {/*
-        THE DATE, PINNED. Outside the scroll region on purpose: everything below scrolls, and the
-        Strategic Situation card that used to be the Desk's only date scrolls away with it.
-
-        This is what discharges R7's "the date is always visible" requirement. It used to be
-        discharged by sliding the whiteboard date along the wall until it cleared this column —
-        which put it on bare wall at 1920px and on top of the corkboard map at 1366px. Design §2
-        and §3 accept the occlusion instead: at the 1280x720 design minimum the board is entirely
-        behind this panel and no placement rule recovers it, so the date is read from here and the
-        board is written on properly.
-
-        Not folded into DeskAuthorityHeader, which §4.6 suggested: that component returns null
-        without commandAuthority, so the date would disappear on exactly the saves carrying the
-        least context.
-      */}
-      <div
-        data-testid="desk-pinned-date"
-        className="pointer-events-auto shrink-0 border border-panel-border/80 bg-[#11141b] px-3 py-1.5 text-xs font-bold uppercase tracking-[0.16em] text-text-secondary shadow-[0_16px_48px_rgba(0,0,0,0.42)]"
-      >
-        {state ? turnToDateString(state.turn) : t('desk.situation.noCampaign')}
-      </div>
-      <div
-        data-testid="president-desk-scroll-region"
-        // No top clearance. This used to carry mt-[max(0px,calc(26.71vw-7.5625rem))], which pushed
-        // every painted Desk card down by up to a quarter of the viewport so the authored
-        // whiteboard date stayed visible past this column. With the date pinned above and
-        // occlusion accepted (§2), that clearance is cost with no remaining purpose.
-        className="min-h-0 flex flex-1 flex-col gap-3 overflow-x-hidden overflow-y-auto overscroll-contain pb-3 [-webkit-mask-image:linear-gradient(to_bottom,black_calc(100%_-_1.5rem),transparent)] [mask-image:linear-gradient(to_bottom,black_calc(100%_-_1.5rem),transparent)]"
-      >
-        <div className="shrink-0">
-          <DeskAuthorityHeader state={state} />
-        </div>
-
-        <div className="pointer-events-auto w-full shrink-0 border border-panel-border/80 bg-[#11141b] p-4 shadow-[0_24px_80px_rgba(0,0,0,0.52)]">
-          <DeskPacket items={items} onAction={onAction} requiredItemIds={requiredItemIds} />
-        </div>
-
-        <aside className="pointer-events-auto w-full shrink-0 border border-panel-border/80 bg-[#11141b] p-4 shadow-[0_24px_80px_rgba(0,0,0,0.46)]">
-        <div className="border-b border-panel-border/70 pb-3">
-          <div className="text-xs font-bold uppercase tracking-[0.22em] text-accent-gold">{t('desk.strategicSituation')}</div>
-          <h2 className="mt-1 text-[18px] font-bold leading-tight text-text-primary">{factionTitle(state)}</h2>
-          <div className="mt-1 text-xs text-text-secondary">
-            {state ? t('desk.situation.dateTurn', { date: turnToDateString(state.turn) }) : t('desk.situation.noCampaign')}
-          </div>
-        </div>
-
-        <div className="mt-3 grid grid-cols-2 gap-2">
-          <div className="border border-panel-border/70 bg-black/20 px-2.5 py-2">
-            <div className="text-xs font-bold uppercase tracking-[0.16em] text-text-muted">{t('desk.items.label')}</div>
-            <div className="mt-1 text-[18px] font-bold text-text-primary">{actionableCount}</div>
-          </div>
-          <div className="border border-panel-border/70 bg-black/20 px-2.5 py-2">
-            <div className="text-xs font-bold uppercase tracking-[0.16em] text-text-muted">{t('desk.advance.label')}</div>
-            <div className={`mt-1 text-[13px] font-bold ${
-              blocked ? 'text-red-200' : reviewRecommended ? 'text-amber-200' : 'text-green-200'
-            }`}>
-              {blocked
-                ? t('desk.advance.signatureRequired')
-                : reviewRecommended
-                  ? t('desk.advance.staffReview')
-                  : t('desk.advance.noActRequired')}
-            </div>
-          </div>
-        </div>
-
-        <div className="mt-3 grid grid-cols-2 gap-2">
-          <button
-            type="button"
-            onClick={onOpenArmyHQ}
-            data-testid="desk-action-army-hq"
-            className="border border-accent-gold/45 bg-accent-gold/12 px-3 py-2 text-left text-xs font-bold uppercase tracking-[0.14em] text-accent-gold transition-colors hover:bg-accent-gold/20"
-          >
-            {t('desk.action.callArmyHQ')}
-          </button>
-          <button
-            type="button"
-            onClick={
-              blocked && singleBlocker
-                ? () => onAction(singleBlocker.action, singleBlocker.id)
-                : (blocked || reviewRecommended) && onReviewAdvance
-                  ? onReviewAdvance
-                  : onAdvance
-            }
-            data-testid={
-              blocked && singleBlocker
-                ? 'desk-action-open-required-signature'
-                : blocked
-                ? 'desk-action-review-blockers'
-                : reviewRecommended
-                  ? 'desk-action-review-priorities'
-                  : 'desk-action-advance-clearance'
-            }
-            className={[
-              'border px-3 py-2 text-left text-xs font-bold uppercase tracking-[0.14em] transition-colors',
-              blocked
-                ? 'border-red-300/45 bg-red-500/12 text-red-100 hover:bg-red-500/20'
-                : reviewRecommended
-                  ? 'border-amber-300/45 bg-amber-500/12 text-amber-100 hover:bg-amber-500/20'
-                : 'border-accent-gold/50 bg-accent-gold/14 text-accent-gold hover:bg-accent-gold/22',
-            ].join(' ')}
-          >
-            {blocked
-              ? singleBlocker
-                ? t('desk.action.openRequiredSignature')
-                : t('desk.action.reviewBlockers')
-              : reviewRecommended
-                ? t('desk.action.reviewStaffRecommendation')
-                : t('desk.action.advanceHoldingPolicy')}
-          </button>
-        </div>
-
-        <div className="mt-4">
-          <ConsequenceStrip
-            state={state}
-            onOpenRecords={onOpenRecords}
-            onOpenDecisionRecords={onOpenDecisionRecords}
-            onOpenChronicle={onOpenChronicle ?? onOpenRecords}
+      <SurfaceHeader
+        eyebrow={t('desk.packet.eyebrow')}
+        title={(
+          <span data-testid="desk-pinned-date">
+            {state ? turnToDateString(state.turn) : t('desk.situation.noCampaign')}
+          </span>
+        )}
+        close={onClose && (
+          <SurfaceCloseButton
+            onClick={onClose}
+            aria-label={t('desk.closeOverlayAria')}
+            data-testid="desk-close-overlay"
           />
-        </div>
-        </aside>
-      </div>
-    </section>
+        )}
+        trailing={(
+          <div data-testid="desk-advance-status" className={`rounded border px-4 py-2 text-[16px] ${SURFACE_STATUS_TONE[advanceTone]}`}>
+            {advanceStatus}
+          </div>
+        )}
+      />
+      {/* Authority is the left column's subject on the Desk, so the header carries no meter. */}
+
+      <SurfaceColumns layout="rail-content-detail">
+        <SurfaceRail as="div" aria-label={t('deskAuthority.title')}>
+          <DeskAuthorityHeader state={state} />
+        </SurfaceRail>
+
+        <SurfaceContent
+          data-testid="president-desk-scroll-region"
+          className="overscroll-contain [-webkit-mask-image:linear-gradient(to_bottom,black_calc(100%_-_1.5rem),transparent)] [mask-image:linear-gradient(to_bottom,black_calc(100%_-_1.5rem),transparent)]"
+        >
+          <SurfaceBanner art={PRESIDENTIAL_DESK_BANNER} title={t('desk.packet.title')} blurb={t('desk.banner.blurb')} />
+          <SurfaceSections>
+            <DeskPacket items={items} onAction={onAction} requiredItemIds={requiredItemIds} />
+          </SurfaceSections>
+        </SurfaceContent>
+
+        <SurfaceDetail aria-label={t('desk.strategicSituation')}>
+          <SurfaceDetailBody eyebrow={t('desk.strategicSituation')} title={factionTitle(state)}>
+            {/* The date and the Advance status live in the fixed header; not repeated here. */}
+            <div className="flex flex-col">
+              <SurfaceStat label={t('desk.items.label')} value={actionableCount} />
+            </div>
+            <ConsequenceStrip
+              state={state}
+              onOpenRecords={onOpenRecords}
+              onOpenDecisionRecords={onOpenDecisionRecords}
+              onOpenChronicle={onOpenChronicle ?? onOpenRecords}
+            />
+          </SurfaceDetailBody>
+          <SurfaceDetailFooter>
+            <span className={SURFACE_LABEL_MUTED}>{t('desk.footer.heading')}</span>
+            <button
+              type="button"
+              onClick={
+                blocked && singleBlocker
+                  ? () => onAction(singleBlocker.action, singleBlocker.id)
+                  : (blocked || reviewRecommended) && onReviewAdvance
+                    ? onReviewAdvance
+                    : onAdvance
+              }
+              data-testid={
+                blocked && singleBlocker
+                  ? 'desk-action-open-required-signature'
+                  : blocked
+                  ? 'desk-action-review-blockers'
+                  : reviewRecommended
+                    ? 'desk-action-review-priorities'
+                    : 'desk-action-advance-clearance'
+              }
+              className={[
+                'min-h-14 rounded-md px-6 py-3 text-[18px] font-bold leading-snug transition',
+                blocked
+                  ? 'border border-red-300/50 bg-red-500/15 text-red-100 hover:bg-red-500/25'
+                  : reviewRecommended
+                    ? 'border border-amber-300/50 bg-amber-500/15 text-amber-100 hover:bg-amber-500/25'
+                  : 'bg-[#c9a75c] text-[#15120b] hover:bg-[#d8b86c]',
+              ].join(' ')}
+            >
+              {blocked
+                ? singleBlocker
+                  ? t('desk.action.openRequiredSignature')
+                  : t('desk.action.reviewBlockers')
+                : reviewRecommended
+                  ? t('desk.action.reviewStaffRecommendation')
+                  : t('desk.action.advanceHoldingPolicy')}
+            </button>
+            <button
+              type="button"
+              onClick={onOpenArmyHQ}
+              data-testid="desk-action-army-hq"
+              className={SURFACE_SECONDARY_BUTTON}
+            >
+              {t('desk.action.callArmyHQ')}
+            </button>
+          </SurfaceDetailFooter>
+        </SurfaceDetail>
+      </SurfaceColumns>
+    </SurfaceFrame>
   );
 }

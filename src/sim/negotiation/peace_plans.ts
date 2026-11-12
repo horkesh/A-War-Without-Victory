@@ -17,6 +17,8 @@ import { getPoliticalPersonality, computePoliticalAssessment } from '../politica
 import { computePoliticalPeacePlanResponse } from '../political/political_peace_plan.js';
 import { freezeEndgameSnapshot } from '../endgame/endgame_snapshot.js';
 import { resolveEventDecisionCore } from '../events/resolve_decision_core.js';
+import { applyPeaceSettlement, isSettlementPlan } from './peace_settlement.js';
+import { warDeadTotals } from './war_dead.js';
 
 const CANONICAL_FACTIONS: FactionId[] = ['RBiH', 'RS', 'HRHB'];
 const DAYTON_PLAN_ID = 'dayton';
@@ -479,6 +481,10 @@ export function resolvePeacePlan(
         turn_offered: neg.pending_peace_plan.turn_offered,
         responses: allResponses,
         resolved: true,
+        // DC A1: stamp the toll at the moment of the answer, so the Dayton delegation
+        // folder can state the dead since each refusal from the Verdict's own sources.
+        resolved_turn: state.meta.turn,
+        dead_at_resolution: warDeadTotals(state),
     };
     neg.peace_plan_history.push(historyEntry);
 
@@ -513,6 +519,10 @@ export function resolvePeacePlan(
         if (!state.military.event_flags) state.military.event_flags = {};
         state.military.event_flags['war_ended_early'] = true;
         state.military.event_flags['early_peace_implemented'] = planId;
+        // Owner, 2026-11-07: the parties agreed to the plan's MAP, not the front line.
+        // Record the settlement (plan map + constitutional status) before the endgame
+        // snapshot freezes the verdict. Wartime control is not rewritten.
+        if (isSettlementPlan(planId)) applyPeaceSettlement(state, planId);
         // LANE-NIGHTSHIFT-N3 (D#2, 2026-05-03): freeze endgame snapshot so
         // verdict / cost ledger / historical comparison are preserved across
         // save/load round-trip even if subsequent engine activity perturbs

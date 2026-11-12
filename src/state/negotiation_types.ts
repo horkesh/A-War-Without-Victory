@@ -101,6 +101,10 @@ export interface PeacePlanResponse {
     turn_offered: number;
     responses: Record<string, 'accepted' | 'rejected' | 'pending'>;
     resolved: boolean;
+    /** Turn the answers were recorded (DC A1). Absent on older saves. */
+    resolved_turn?: number;
+    /** The war's dead, all sides, when the answers were recorded (sim/negotiation/war_dead.ts). Absent on older saves. */
+    dead_at_resolution?: { military: number; civilian: number };
 }
 
 export type CounterOfferFaction = 'RBiH' | 'RS' | 'HRHB';
@@ -166,9 +170,32 @@ export interface NegotiationState {
     pyrrhic_scores?: Record<string, number>;
     /** Result of the Dayton negotiation (set when Dayton resolves). */
     dayton_result?: DaytonResult;
+    /** Frozen public treaty from an explicit desktop signature. Absent on older saves and automatic close-outs. */
+    dayton_agreement?: DaytonAgreementRecord;
     /** Pending Dayton negotiation menu, persisted by pipeline when trigger fires.
-     *  UI adapter reads this — never computes it. Cleared implicitly when dayton_result is set. */
+     *  UI adapter reads this; it derives only the captured-ground packages (front_packages.ts) from state. Cleared implicitly when dayton_result is set. */
     pending_dayton?: PendingDaytonPacket;
+    /**
+     * Set when the player faction declines Dayton (declineDaytonNegotiation). The menu is
+     * withdrawn; the war continues until `imposition_turn`, when the faction's coercion
+     * event fires and the table reopens as a forced menu (`pending_dayton.forced`).
+     */
+    dayton_decline?: {
+        faction: string;
+        declined_turn: number;
+        imposition_turn: number;
+        /** The war's dead (Verdict sources) when the decline was recorded (DC A5); absent on older saves. */
+        dead_at_decline?: { military: number; civilian: number };
+        /** Settlements the declining faction held when it declined (DC A5); absent on older saves. */
+        held_at_decline?: number;
+    };
+    /**
+     * The peace settlement (owner, 2026-11-07): set when a plan is accepted by every
+     * party or Dayton is signed/imposed. Holds the plan's map at OSID level, the settled
+     * territory share and each party's constitutional status. Wartime control is not
+     * rewritten; the verdict reads territory and status caps from here.
+     */
+    settlement?: import('../sim/negotiation/peace_settlement.js').PeaceSettlement;
     /** v0.6.0: Strategic dimensions per faction — hybrid base_value + event_modifier. */
     strategic_dimensions?: DimensionStore;
     /** Ring 2: Locked rupture consequences — permanent, non-reversible records. */
@@ -192,7 +219,81 @@ export interface PendingDaytonPacket {
     }>;
     faction_capital: Record<string, number>;
     patron_override: Record<string, number>;
+    /**
+     * Set on the table reopened after a declined Dayton is enforced (owner, 2026-11-07):
+     * there is no decline option, Submit is the only way out, and a menu left unanswered
+     * into the next turn is signed on the historical Dayton map.
+     */
+    forced?: { on_faction: string; by: 'united_states' | 'belgrade' | 'zagreb'; opened_turn: number };
+    /**
+     * The player delegation's folder (DC amendment A1): the campaign's receipt at the
+     * moment the table opens. Optional; built by sim/negotiation/delegation_folder.ts
+     * for the player's faction only. Older saves without it show the folder unavailable.
+     */
+    delegation_folder?: DelegationFolder;
+    /**
+     * Tabled rounds (DC amendment A2; sim/negotiation/dayton_rounds.ts), at most three.
+     * Absent until the player tables a draft; absent in headless resolutions.
+     */
+    rounds?: DaytonRound[];
 }
+
+/** One tabled round: the player's draft and every other delegation's answer. */
+export interface DaytonRound {
+    round: number;
+    turn: number;
+    /** Patron authority added by earlier rounds when this round was answered. */
+    pressure: number;
+    proposal: DaytonProposal;
+    responses: Record<string, DaytonBotResponse>;
+}
+
+/** Built once when the Dayton table opens; see sim/negotiation/delegation_folder.ts. */
+export interface DelegationFolder {
+    faction: string;
+    turn: number;
+    /** Settlement counts (one measure for now and peak). */
+    settlements: { held: number; total: number; peak: number; peak_turn: number };
+    enclaves: { held: string[]; lost: string[] };
+    /** Condemnation flags the verdict would apply if the war ended now. */
+    condemnation: string[];
+    patron: { override_authority: number; force_threshold: number; can_force: boolean };
+    refused_plans: Array<{
+        plan_id: string;
+        turn_offered: number;
+        proposed_split: { RBiH: number; RS: number; HRHB: number };
+        refused_by: string[];
+        player_answer: 'accepted' | 'rejected' | 'pending';
+        /** Weeks since the answers were recorded (the offer turn on older saves). */
+        weeks_since: number;
+        /** The dead on all sides since the answers (Verdict sources); null when the save predates the stamp. */
+        dead_since: { military: number; civilian: number } | null;
+        /** Civilians displaced in turns after the answers. */
+        displaced_since: number;
+    }>;
+    /** All-sides totals over the whole war so far; the dead come from the Verdict's sources. */
+    war: WarCostLine;
+    /**
+     * Settlements this faction holds in an enclave it overran, which its grade does not credit
+     * (DC A6 follow-up 1, `enclave_credit.ts`). Absent when none, and on older saves.
+     */
+    overrun_uncredited?: number;
+    /**
+     * What declining Dayton cost (DC A5): set on the forced table's folder when the player's
+     * faction declined. `dead_since` and `held_then` are null on saves from before the stamp.
+     */
+    declined?: {
+        declined_turn: number;
+        weeks_since: number;
+        dead_since: { military: number; civilian: number } | null;
+        displaced_since: number;
+        held_then: number | null;
+        held_now: number;
+    };
+}
+
+/** The war's cost line: weeks of war, the dead on all sides (Verdict sources), civilians displaced. */
+export interface WarCostLine { weeks: number; dead: { military: number; civilian: number }; displaced: number }
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Dayton Negotiation
@@ -211,6 +312,24 @@ export interface TerritorialPackage {
     capital_cost_to_concede: number;
     /** OSID keyword fragments for map matching. */
     osid_keywords: string[];
+    /**
+     * Parties for whom this whole package is protected ground (patron_leverage.ts), on top
+     * of the municipality list: a price class (DC A6), carried only by the holder's own
+     * willingness and never forced by a patron; HRHB's stays off the table.
+     */
+    protected_for?: string[];
+    // ── Captured-ground packages (front_packages.ts), derived per state, never persisted.
+    //    For these, default_holder is the Dayton-map assignee (who gets it if unraised).
+    /** Explicit OSIDs, used instead of osid_keywords. */
+    osids?: string[];
+    /** The party holding this ground against the Dayton map. */
+    claimant?: string;
+    /** Share of BiH area, percent. */
+    area_pct?: number;
+    /** Municipality (mun1990 id) the package lies in. */
+    municipality?: string;
+    /** Encircled cells the claimant's ground surrounds, carried with the package (also in osids). */
+    encircled_osids?: string[];
 }
 
 /** An institutional negotiation point at Dayton. */
@@ -265,8 +384,14 @@ export interface DaytonBotResponse {
     decision: 'accept' | 'reject' | 'counter';
     /** If counter, the bot's counter-proposal. */
     counter_proposal?: DaytonProposal;
-    /** Reason for the decision (for UI display). */
+    /** Reason for the decision (diagnostic text; carries cost figures, never shown in the room). */
     reason: string;
+    /**
+     * Plain-language category of the answer for the room (DC A2): accepted on its own
+     * terms, accepted because its patron pressed it, close (a counter that asks for a
+     * little), far (a counter that rewrites most of the draft), or refused outright.
+     */
+    reason_code?: 'accept' | 'accept_patron' | 'counter_close' | 'counter_far' | 'counter_protected' | 'reject';
     /** Total capital cost of the proposal to this bot faction. */
     proposal_cost: number;
     /** Bot's available capital. */
@@ -298,6 +423,14 @@ export interface DaytonResult {
     /** True when Brčko resolved to the arbitration condominium district of both Entities. */
     brcko_arbitration?: boolean;
     /**
+     * Set when the player faction declined Dayton and the settlement was signed at the
+     * forced table after the grace period (DAYTON_DECLINE_GRACE_WEEKS), by the player or
+     * by the unanswered-table fallback. `by` names the coercing power:
+     * the United States for RBiH, Belgrade for RS, Zagreb for HRHB. Absent on a signed
+     * (not imposed) settlement and on older saves.
+     */
+    imposed?: { on_faction: string; by: 'united_states' | 'belgrade' | 'zagreb'; turn: number };
+    /**
      * Derived entity-autonomy index (D2, 0-100): weighted mean of the 6
      * institutional choices, where decentralized = high autonomy. 100 = maximally
      * decentralized (historical Dayton default). Read-only display + verdict input.
@@ -327,6 +460,39 @@ export interface DaytonResult {
     constitutional_choices?: Record<string, string>;
     /** DIMENSION 5: final return/justice choice id -> option id. */
     return_justice?: Record<string, string>;
+}
+
+/** Authoritative presentation record for a Dayton offer or signature. */
+export interface DaytonAgreementRecord {
+    version: 1;
+    terms: DaytonResult;
+    map: {
+        /** OSID assignments under the treaty. */
+        controllers: Record<string, FactionId>;
+        /** Political controllers immediately before the signature. */
+        wartimeControllers: Record<string, FactionId | null>;
+        specialOsids: string[];
+        /** Area-weighted shares against the same denominator as the engine settlement. */
+        territoryPct: Record<string, number>;
+    };
+    /** What the table changed against the mediator's draft (sim/negotiation/treaty_against_draft.ts). Absent on older records. */
+    treaty?: TreatyAgainstDraft;
+    /** The signing beat (DC A5): the turn signed and the war's cost line at that moment. Absent on older records. */
+    signing?: { turn: number; war: WarCostLine };
+}
+
+/** The treaty against the mediator's draft: shares, ground and powers won, given up and refused. */
+export interface TreatyAgainstDraft {
+    faction: string;
+    /** Shares under the mediator's draft (no clause raised). */
+    draft_share: Record<string, number>;
+    /** Shares under the signed map. */
+    signed_share: Record<string, number>;
+    land_won: Array<{ id: string; name: string }>;
+    land_given: Array<{ id: string; name: string }>;
+    land_refused: Array<{ id: string; name: string }>;
+    powers_won: Array<{ kind: 'competency' | 'constitutional' | 'dial'; id: string; asked: string; signed: string }>;
+    powers_refused: Array<{ kind: 'competency' | 'constitutional' | 'dial'; id: string; asked: string; signed: string }>;
 }
 
 /**

@@ -6,6 +6,14 @@ import { Z } from '../../shared/zIndex';
 import { t, type MessageKey } from '../i18n';
 import { getDecisionHeaderForFamily } from '../data/presidentialDeskAssets';
 import { DecisionModalImageHeader } from './DecisionModalImageHeader';
+import {
+    SurfaceFigure,
+    SurfaceModalBody,
+    SurfaceModalFooter,
+    SURFACE_MODAL_BACKDROP,
+    SURFACE_MODAL_PANEL_COMPACT,
+    SURFACE_SECONDARY_BUTTON,
+} from './surface/Surface';
 
 type ConvoyDecision = 'allow' | 'block' | 'divert';
 
@@ -52,6 +60,9 @@ export function ConvoyDecisionModal({ convoy, onClose, onDecide }: ConvoyDecisio
         setError(result.error ?? t('convoyDecision.stageFailed'));
     };
 
+    // Surface redesign (owner, 2026-11-10): a compact surface — convoy plate and enclave,
+    // route/supply/staged figures, the brief, and the three choices as full-size cards;
+    // Close in a fixed footer.
     return (
         <Modal
             isOpen={true}
@@ -59,49 +70,39 @@ export function ConvoyDecisionModal({ convoy, onClose, onDecide }: ConvoyDecisio
             zIndex={Z.CRITICAL_MODAL}
             ariaLabelledBy="convoy-decision-title"
             ariaDescribedBy="convoy-decision-summary"
-            backdropClassName="bg-black/70 backdrop-blur-sm"
-            panelClassName="w-[95%] max-w-[560px] rounded-lg border border-[rgba(180,160,130,0.22)] bg-[rgba(20,18,15,0.96)] shadow-2xl"
+            backdropClassName={SURFACE_MODAL_BACKDROP}
+            panelClassName={SURFACE_MODAL_PANEL_COMPACT}
         >
-            <div className="text-text-primary">
-                {headerImage && (
-                    <DecisionModalImageHeader
-                        imageUrl={headerImage}
-                        imageAlt="Humanitarian convoy"
-                        eyebrow={t('convoyDecision.title')}
-                        title={getPlayerSafeEnclaveName(convoy.target_enclave)}
-                        titleId="convoy-decision-title"
+            {headerImage && (
+                <DecisionModalImageHeader
+                    imageUrl={headerImage}
+                    imageAlt={t('convoyDecision.title')}
+                    eyebrow={t('convoyDecision.title')}
+                    title={getPlayerSafeEnclaveName(convoy.target_enclave)}
+                    titleId="convoy-decision-title"
+                />
+            )}
+            <SurfaceModalBody>
+                <div id="convoy-decision-summary" className="grid grid-cols-3 gap-3">
+                    <SurfaceFigure label={t('convoyDecision.route')} value={getPlayerSafePoliticalFactionName(convoy.route_faction)} />
+                    <SurfaceFigure label={t('convoyDecision.supply')} value={<span className="font-mono">{convoy.supply_amount}</span>} />
+                    <SurfaceFigure
+                        label={t('convoyDecision.staged')}
+                        value={convoy.decision ? t(DECISION_COPY[convoy.decision].labelKey) : t('common.none')}
                     />
-                )}
-                <div className="px-5 pb-5">
-
-                <div id="convoy-decision-summary" className="grid grid-cols-3 gap-2 py-4">
-                    <div className="rounded border border-[rgba(180,160,130,0.14)] bg-[rgba(180,160,130,0.06)] p-2">
-                        <div className="text-xs uppercase tracking-[0.14em] text-text-secondary/70">{t('convoyDecision.route')}</div>
-                        <div className="mt-1 text-sm font-semibold text-white">
-                            {getPlayerSafePoliticalFactionName(convoy.route_faction)}
-                        </div>
-                    </div>
-                    <div className="rounded border border-[rgba(180,160,130,0.14)] bg-[rgba(180,160,130,0.06)] p-2">
-                        <div className="text-xs uppercase tracking-[0.14em] text-text-secondary/70">{t('convoyDecision.supply')}</div>
-                        <div className="mt-1 text-sm font-semibold text-white">{convoy.supply_amount}</div>
-                    </div>
-                    <div className="rounded border border-[rgba(180,160,130,0.14)] bg-[rgba(180,160,130,0.06)] p-2">
-                        <div className="text-xs uppercase tracking-[0.14em] text-text-secondary/70">{t('convoyDecision.staged')}</div>
-                        <div className="mt-1 text-sm font-semibold text-white capitalize">{convoy.decision ?? t('common.none')}</div>
-                    </div>
                 </div>
 
-                <p className="text-[12px] leading-relaxed text-text-secondary">
+                <p className="m-0 text-[17px] leading-relaxed text-[#ddd1b3]">
                     {t('convoyDecision.body')}
                 </p>
 
                 {error && (
-                    <div role="alert" className="mt-3 rounded border border-red-400/35 bg-red-500/12 px-3 py-2 text-[12px] text-red-200">
+                    <div role="alert" className="rounded-md border border-red-400/45 bg-red-500/10 px-4 py-3 text-[15px] font-semibold text-red-100">
                         {error}
                     </div>
                 )}
 
-                <div className="mt-5 grid grid-cols-3 gap-2">
+                <div className="grid gap-3 sm:grid-cols-3">
                     {(Object.keys(DECISION_COPY) as ConvoyDecision[]).map((decision) => {
                         const copy = DECISION_COPY[decision];
                         const disabled = pendingDecision !== null || convoy.decision === decision;
@@ -111,27 +112,26 @@ export function ConvoyDecisionModal({ convoy, onClose, onDecide }: ConvoyDecisio
                                 type="button"
                                 onClick={() => void handleDecision(decision)}
                                 disabled={disabled}
-                                className={`rounded-md border px-3 py-3 text-left transition-colors disabled:cursor-not-allowed disabled:opacity-45 ${copy.className}`}
+                                className={`flex flex-col gap-1.5 rounded-md border px-4 py-3.5 text-left transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${copy.className}`}
                             >
-                                <div className="text-xs font-bold uppercase tracking-[0.12em]">
+                                <span className="text-[18px] font-semibold">
                                     {pendingDecision === decision ? t('convoyDecision.staging') : t(copy.labelKey)}
-                                </div>
-                                <div className="mt-1 text-xs leading-snug opacity-80">{t(copy.detailKey)}</div>
+                                </span>
+                                <span className="text-[15px] leading-snug text-[#ddd1b3]">{t(copy.detailKey)}</span>
                             </button>
                         );
                     })}
                 </div>
-                <div className="mt-4 flex justify-end border-t border-panel-border pt-4">
-                    <button
-                        type="button"
-                        onClick={onClose}
-                        className="rounded border border-panel-border px-3 py-1.5 text-xs font-bold uppercase tracking-[0.12em] text-text-secondary hover:text-text-primary"
-                    >
-                        {t('common.close')}
-                    </button>
-                </div>
-                </div>
-            </div>
+            </SurfaceModalBody>
+            <SurfaceModalFooter>
+                <button
+                    type="button"
+                    onClick={onClose}
+                    className={SURFACE_SECONDARY_BUTTON}
+                >
+                    {t('common.close')}
+                </button>
+            </SurfaceModalFooter>
         </Modal>
     );
 }

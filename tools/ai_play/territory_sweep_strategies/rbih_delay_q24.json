@@ -1,0 +1,13 @@
+{
+  "name": "rbih_delay_q24",
+  "faction": "RBiH",
+  "events": {
+    "default": "bot"
+  },
+  "request_ops": {
+    "enabled": true,
+    "max_queries_per_turn": 24,
+    "prefer_consolidation": true,
+    "accept_delay": true
+  }
+}

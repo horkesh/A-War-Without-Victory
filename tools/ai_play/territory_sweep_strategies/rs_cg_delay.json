@@ -1,0 +1,16 @@
+{
+  "name": "rs_cg_delay",
+  "faction": "RS",
+  "events": {
+    "default": "bot"
+  },
+  "peace_plans": {
+    "contact_group": "accept"
+  },
+  "request_ops": {
+    "enabled": true,
+    "max_queries_per_turn": 12,
+    "prefer_consolidation": true,
+    "accept_delay": true
+  }
+}

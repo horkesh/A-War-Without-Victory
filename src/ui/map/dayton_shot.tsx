@@ -15,12 +15,37 @@ import ReactDOM from 'react-dom/client';
 import { createElement } from 'react';
 import './styles/globals.css';
 import { DaytonNegotiationModal } from './components/DaytonNegotiationModal';
+import { DaytonSigningBeat } from './dayton_conference/DaytonSigningBeat';
 import { useGameStore } from './store/gameStore';
 import { setLocale } from './i18n';
 import { makeMockLoadedGameState } from './__mocks__/loadedGameState';
 import type { LoadedGameState } from './data/types';
+import type { DaytonRound, DelegationFolder, DaytonAgreementRecord } from '../../state/negotiation_types.js';
+import rbihFolder from './__mocks__/dayton_delegation_folder.rbih.json';
+import paintedOct1995 from '../../../data/source/calibration/painted_control_oct1995.json';
+import { computeSettlementControllersFromFront, planCellAssignments, settlementTerritoryPct } from '../../sim/negotiation/peace_settlement.js';
+import { getTerritorialPackageById } from '../../sim/negotiation/territorial_packages.js';
+import { resolveOsidsForKeywords } from '../../sim/negotiation/package_area_resolver.js';
 
 const params = new URLSearchParams(window.location.search);
+
+/**
+ * DC A3 harness: a real Dayton map from the painted October 1995 front (the engine's own
+ * settlement pass), with each demanded fixed package handed to RBiH for the draft stage.
+ */
+function mockAgreement(demands: string[]) {
+    const front = paintedOct1995.by_settlement_id as Record<string, string>;
+    const controllers: Record<string, string> = { ...computeSettlementControllersFromFront(front, 'dayton', {}, planCellAssignments('dayton')).controllers };
+    for (const id of demands) {
+        const pkg = getTerritorialPackageById(id);
+        if (pkg) for (const o of resolveOsidsForKeywords(pkg.osid_keywords ?? [])) if (o in controllers) controllers[o] = 'RBiH';
+    }
+    return {
+        version: 1,
+        terms: { brcko_status: 'arbitration', institutional_choices: {} },
+        map: { controllers, wartimeControllers: front, specialOsids: [], territoryPct: settlementTerritoryPct(controllers) },
+    };
+}
 
 // ── Deterministic bot counter-offer stub (mirrors the unit test) ───────────────
 if (params.get('mock') === '1') {
@@ -29,9 +54,10 @@ if (params.get('mock') === '1') {
     // mirrors the established warroom.ts idiom and stays out of the strict-null
     // type-escape inventory.
     (window as Window & { awwv?: Record<string, unknown> }).awwv = {
-        previewDayton: async () => ({
+        previewDayton: async (proposal: { territorial_demands?: string[] }) => ({
             ok: true,
             playerFaction: 'RBiH',
+            agreement: mockAgreement(proposal.territorial_demands ?? []),
             botResponses: {
                 RS: {
                     decision: 'counter',
@@ -62,9 +88,9 @@ if (params.get('locale') === 'bcs') {
 // Same realistic packet the unit test exercises (Brčko tri-state present).
 const PENDING: NonNullable<LoadedGameState['pendingDayton']> = {
     territorialPackages: [
-        { id: 'gorazde_corridor', name: 'Goražde Corridor', defaultHolder: 'RS', demandCost: 12, concedeCost: 8 },
-        { id: 'brcko_district', name: 'Brčko District', defaultHolder: 'RS', demandCost: 20, concedeCost: 15 },
-        { id: 'sarajevo_suburbs', name: 'Sarajevo Suburbs', defaultHolder: 'RBiH', demandCost: 10, concedeCost: 6 },
+        { id: 'gorazde_corridor', name: 'Goražde Corridor', defaultHolder: 'RBiH', demandCost: 0, concedeCost: 10, protectedCore: true },
+        { id: 'brcko_district', name: 'Brčko District', defaultHolder: 'RS', demandCost: 60, concedeCost: 18, theirCore: true },
+        { id: 'sarajevo_suburbs', name: 'Sarajevo Suburbs', defaultHolder: 'RS', demandCost: 15, concedeCost: 12 },
     ],
     institutionalPackages: [
         { id: 'military', name: 'Military Structure', centralizedCost: 15, decentralizedCost: 10 },
@@ -81,6 +107,58 @@ useGameStore.setState({
     loadError: null,
 });
 
+// ?conference=1 mounts the live Hope Hotel room; the delegation folder is the one
+// buildDelegationFolder produced from the retained RBiH pending fixture (real numbers).
+const conference = params.get('conference') === '1';
+// ?rounds=N seeds N tabled rounds (DC A2): RS counters, HRHB accepts once its patron presses.
+const seededRounds: DaytonRound[] = Array.from({ length: Math.min(3, Number(params.get('rounds') ?? 0) || 0) }, (_, i) => ({
+    round: i + 1,
+    turn: 187,
+    pressure: 10 * Math.min(2, i),
+    proposal: { territorial_demands: ['gorazde_corridor', 'brcko_district'], territorial_concessions: [], institutional_choices: {} },
+    responses: {
+        RS: {
+            decision: 'counter', reason: '', reason_code: i === 0 ? 'counter_far' : 'counter_close', proposal_cost: 0, available_capital: 0,
+            counter_proposal: { territorial_demands: ['gorazde_corridor'], territorial_concessions: [], institutional_choices: {} },
+        },
+        HRHB: { decision: 'accept', reason: '', reason_code: i === 0 ? 'accept' : 'accept_patron', proposal_cost: 0, available_capital: 0 },
+    },
+}));
+// ?forced=united_states|belgrade|zagreb (DC A5): the table reopened after a decline, with the
+// folder's decline line (fixture folder, eight weeks after a decline at turn 179).
+const forcedBy = params.get('forced') as 'united_states' | 'belgrade' | 'zagreb' | null;
+const folder = rbihFolder as DelegationFolder;
+const forcedFolder: DelegationFolder = forcedBy ? {
+    ...folder,
+    declined: {
+        declined_turn: folder.turn - 8, weeks_since: 8,
+        dead_since: { military: 1460, civilian: 390 }, displaced_since: 21400,
+        held_then: folder.settlements.held + 9, held_now: folder.settlements.held,
+    },
+} : folder;
+const dayton = conference
+    ? { ...PENDING, delegationFolder: forcedFolder, rounds: forcedBy ? [] : seededRounds,
+        ...(forcedBy ? { forced: { onFaction: 'RBiH', by: forcedBy } } : {}) }
+    : PENDING;
+
+// ?signing=1 (DC A5): the initialling beat on the harness's Dayton map; add &imposed=1 for the forced signature.
+const signing = params.get('signing') === '1';
+const signedAgreement = {
+    ...mockAgreement(['gorazde_corridor']),
+    terms: { brcko_status: 'arbitration', institutional_choices: {}, territorial_packages_accepted: ['gorazde_corridor'],
+        territorial_packages_rejected: ['brcko_district'], final_territory_split: {}, patron_overrides_applied: [],
+        ...(params.get('imposed') === '1' ? { imposed: { on_faction: 'RBiH', by: 'united_states', turn: folder.turn } } : {}) },
+    treaty: {
+        faction: 'RBiH', draft_share: { RBiH: 32.1, RS: 48.4, HRHB: 19.5 }, signed_share: { RBiH: 33.0, RS: 47.3, HRHB: 19.7 },
+        land_won: [{ id: 'gorazde_corridor', name: 'Goražde Corridor' }], land_given: [], land_refused: [{ id: 'brcko_district', name: 'Brčko District' }],
+        powers_won: [], powers_refused: [],
+    },
+    signing: { turn: folder.turn, war: folder.war },
+} as DaytonAgreementRecord;
+
 ReactDOM.createRoot(document.getElementById('root')!).render(
-    createElement(DaytonNegotiationModal, { dayton: PENDING }),
+    signing
+        ? createElement('div', { style: { position: 'fixed', inset: 0 } },
+            createElement(DaytonSigningBeat, { agreement: signedAgreement, fallbackDate: '', onContinue: () => window.location.assign('?conference=1&mock=1') }))
+        : createElement(DaytonNegotiationModal, { dayton, conference }),
 );

@@ -38,7 +38,6 @@ import {
   plainReason,
   type DirectiveObjectionView,
 } from '../../data/opDirectiveObjection';
-import { resolveDirectiveActArt } from '../../data/directiveActArt';
 import { getPlayerSafeCorpsName, getPlayerSafeOfficerName } from '../../utils/playerSafeText';
 import { getOsidDisplayName } from '../../utils/osidDisplayName';
 import { buildObjectiveTargetOptions } from '../../utils/objectiveTargetOptions';
@@ -345,27 +344,27 @@ export function DirectiveCard({ directive, gameState, onReceipt }: DirectiveCard
   if (!ipc.isAvailable) {
     return (
       <section
-        className="mt-2 overflow-hidden rounded border border-amber-400/30 bg-amber-400/[0.06]"
+        className="overflow-hidden rounded-md border border-amber-400/30 bg-amber-400/[0.05]"
         aria-label={t('directive.sectionAria')}
       >
-        <div className="px-3 py-2">
+        <div className="px-4 py-3">
           <div className="flex items-start justify-between gap-2">
             <div className="min-w-0">
-              <div className="text-xs font-bold uppercase tracking-[0.16em] text-amber-300">
+              <div className="text-sm font-bold uppercase tracking-[0.16em] text-amber-300">
                 {t('directive.issueDirective')}
               </div>
-              <div className="mt-0.5 break-words text-xs font-bold leading-snug text-text-primary">
+              <div className="mt-1 break-words text-[17px] font-semibold leading-snug text-text-primary">
                 {leverLabel(directive.lever)}{tgt ? ` · ${tgt}` : ''}
               </div>
             </div>
-            <span className="shrink-0 rounded border border-amber-400/35 bg-amber-400/10 px-1.5 py-0.5 text-xs font-bold uppercase tracking-[0.08em] text-amber-300">
+            <span className="shrink-0 rounded border border-amber-400/40 bg-amber-400/10 px-2.5 py-1 font-mono text-[14px] font-semibold text-amber-200">
               {cost === 0 ? t('directive.costFree') : t('directive.costAuthority', { cost })}
             </span>
           </div>
           <div
             role="status"
             aria-label={t('directive.bridgeUnavailable.aria')}
-            className="mt-2 rounded border border-panel-border/60 bg-panel-bg/60 p-2 text-xs text-text-secondary"
+            className="mt-2 rounded border border-panel-border/60 bg-panel-bg/60 p-2 text-sm text-text-secondary"
           >
             {t('attention.bridgeUnavailableReadOnly')}
           </div>
@@ -623,32 +622,28 @@ export function DirectiveCard({ directive, gameState, onReceipt }: DirectiveCard
     }
   };
 
-  // §9 act-layer dossier header: a 16:9 period still chosen by the directive's
-  // lever (reusing the existing consequence_stills art via the shared resolver).
-  // When nothing resolves the card renders its text-only header below — the act
-  // surface always works with zero art.
-  const headerArt = resolveDirectiveActArt(directive.lever, gameState.player_faction);
-
+  // The lever's period still (resolveDirectiveActArt) heads the Command Surface
+  // detail panel that hosts this card, so the card itself carries no art.
   if (collapsed) return null;
 
   return (
     <section
-      className="mt-2 overflow-hidden rounded border border-amber-400/30 bg-amber-400/[0.06]"
+      className="overflow-hidden rounded-md border border-amber-400/30 bg-amber-400/[0.05]"
       aria-label={t('directive.sectionAria')}
     >
-      <div className="px-3 py-2">
+      <div className="px-4 py-3">
       {/* Keep the command and its cost ahead of supporting artwork so the player
           sees the actionable control without discovering a hidden scroll. */}
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
-          <div className="text-xs font-bold uppercase tracking-[0.16em] text-amber-300">
+          <div className="text-sm font-bold uppercase tracking-[0.16em] text-amber-300">
             {t('directive.issueDirective')}
           </div>
-          <div className="mt-0.5 break-words text-xs font-bold leading-snug text-text-primary">
+          <div className="mt-1 break-words text-[17px] font-semibold leading-snug text-text-primary">
             {leverLabel(directive.lever)}{tgt ? ` · ${tgt}` : ''}
           </div>
         </div>
-        <span className="shrink-0 rounded border border-amber-400/35 bg-amber-400/10 px-1.5 py-0.5 text-xs font-bold uppercase tracking-[0.08em] text-amber-300">
+        <span className="shrink-0 rounded border border-amber-400/40 bg-amber-400/10 px-2.5 py-1 font-mono text-[14px] font-semibold text-amber-200">
           {cost === 0 ? t('directive.costFree') : t('directive.costAuthority', { cost })}
         </span>
       </div>
@@ -657,7 +652,7 @@ export function DirectiveCard({ directive, gameState, onReceipt }: DirectiveCard
         <div
           role="group"
           aria-label={t('directive.reserveCommitment.aria')}
-          className="mt-2 rounded border border-panel-border/60 bg-panel-bg/60 p-2 text-[12px] leading-snug"
+          className="mt-2 rounded border border-panel-border/60 bg-panel-bg/60 p-2 text-[13px] leading-snug"
         >
           <p className="mb-1 font-semibold text-text-primary">{t('directive.reserveCommitment.title')}</p>
           {[
@@ -685,8 +680,8 @@ export function DirectiveCard({ directive, gameState, onReceipt }: DirectiveCard
           Nothing committed; no CA spent. */}
       {impossibleReason && (
         <div role="alert" aria-label={t('directive.cannotIssue.aria')} className="mt-2 rounded border border-panel-border/60 bg-panel-bg/60 p-2">
-          <p className="text-xs font-bold uppercase tracking-wider text-text-secondary">{t('directive.cannotIssue.heading')}</p>
-          <p className="mt-0.5 text-xs text-text-primary">
+          <p className="text-sm font-bold uppercase tracking-wider text-text-secondary">{t('directive.cannotIssue.heading')}</p>
+          <p className="mt-0.5 text-sm text-text-primary">
             {t('directive.cannotIssue.body', { reason: plainReason(impossibleReason) })}
           </p>
         </div>
@@ -704,10 +699,10 @@ export function DirectiveCard({ directive, gameState, onReceipt }: DirectiveCard
               : 'border-amber-500/50 bg-amber-500/5'
           }`}
         >
-          <p className="text-xs font-bold uppercase tracking-wider text-amber-400">
+          <p className="text-sm font-bold uppercase tracking-wider text-amber-400">
             {pendingObjection.severity === 'abort' ? t('directive.objection.recommendsAgainst') : t('directive.objection.urgesDelay')}
           </p>
-          <p className="mt-1 text-xs italic text-text-primary">{pendingObjection.prose}</p>
+          <p className="mt-1 text-sm italic text-text-primary">{pendingObjection.prose}</p>
           <div className="mt-2 flex items-center gap-2">
             <button
               type="button"
@@ -716,7 +711,7 @@ export function DirectiveCard({ directive, gameState, onReceipt }: DirectiveCard
               title={pendingObjection.rejection_reason !== undefined
                 ? t('directive.objection.forceAnywayDisabledTitle')
                 : t('directive.objection.forceAnywayTitle')}
-              className="text-xs font-mono uppercase tracking-wider px-2 py-1 rounded border border-red-500/50 text-red-400 disabled:opacity-40 hover:bg-red-500/10"
+              className="text-sm font-mono uppercase tracking-wider px-2 py-1 rounded border border-red-500/50 text-red-400 disabled:opacity-40 hover:bg-red-500/10"
             >
               {t('directive.objection.forceAnyway')}
             </button>
@@ -724,7 +719,7 @@ export function DirectiveCard({ directive, gameState, onReceipt }: DirectiveCard
               type="button"
               onClick={handleStandDown}
               disabled={busy}
-              className="text-xs font-mono uppercase tracking-wider px-2 py-1 rounded border border-panel-border/50 text-text-primary disabled:opacity-40 hover:bg-panel-bg"
+              className="text-sm font-mono uppercase tracking-wider px-2 py-1 rounded border border-panel-border/50 text-text-primary disabled:opacity-40 hover:bg-panel-bg"
             >
               {t('directive.objection.standDown')}
             </button>
@@ -737,8 +732,8 @@ export function DirectiveCard({ directive, gameState, onReceipt }: DirectiveCard
           reason; the ISSUE button is disabled. */}
       {isLeadershipGesture && gestureReady && gestureUnavailableReason && (
         <div role="status" aria-label={t('directive.gesture.unavailableAria')} className="mt-2 rounded border border-panel-border/60 bg-panel-bg/60 p-2">
-          <p className="text-xs font-bold uppercase tracking-wider text-text-secondary">{t('directive.gesture.cannotAct')}</p>
-          <p className="mt-0.5 text-xs text-text-primary">{gestureUnavailableReason}</p>
+          <p className="text-sm font-bold uppercase tracking-wider text-text-secondary">{t('directive.gesture.cannotAct')}</p>
+          <p className="mt-0.5 text-sm text-text-primary">{gestureUnavailableReason}</p>
         </div>
       )}
 
@@ -755,7 +750,7 @@ export function DirectiveCard({ directive, gameState, onReceipt }: DirectiveCard
               value={targetPickerValue}
               onChange={(e) => { setTargetOsidInput(e.target.value); if (impossibleReason) setImpossibleReason(null); }}
               aria-label={t('directive.targetPicker.aria')}
-              className="w-full rounded border border-panel-border/50 bg-panel-bg px-2 py-1 text-xs text-text-primary"
+              className="w-full rounded border border-panel-border/50 bg-panel-bg px-2 py-1 text-sm text-text-primary"
             >
               <option value="">{t('directive.targetPicker.placeholder')}</option>
               {targetPickerOptions.map((option) => (
@@ -769,16 +764,16 @@ export function DirectiveCard({ directive, gameState, onReceipt }: DirectiveCard
             onChange={(e) => { setTargetOsidInput(e.target.value); if (impossibleReason) setImpossibleReason(null); }}
             placeholder={t('directive.targetInput.placeholder')}
             aria-label={t('directive.targetInput.aria')}
-            className="w-full rounded border border-panel-border/50 bg-panel-bg px-2 py-1 text-xs font-mono text-text-primary"
+            className="w-full rounded border border-panel-border/50 bg-panel-bg px-2 py-1 text-sm font-mono text-text-primary"
           />
         </div>
       )}
       {!pendingObjection && !impossibleReason && ambiguousTargetMatches.length > 0 && (
         <div role="alert" aria-label={t('directive.targetInput.ambiguousAria')} className="mt-2 rounded border border-amber-500/50 bg-amber-500/5 p-2">
-          <p className="text-xs font-bold uppercase tracking-wider text-amber-400">
+          <p className="text-sm font-bold uppercase tracking-wider text-amber-400">
             {t('directive.targetInput.ambiguousHeading')}
           </p>
-          <p className="mt-0.5 text-xs text-text-primary">
+          <p className="mt-0.5 text-sm text-text-primary">
             {t('directive.targetInput.ambiguousBody', { matches: ambiguousTargetMatches.join(', ') })}
           </p>
         </div>
@@ -801,14 +796,14 @@ export function DirectiveCard({ directive, gameState, onReceipt }: DirectiveCard
                 : 'border-panel-border/60 bg-panel-bg/60'
           }`}
         >
-          <p className="text-xs font-bold uppercase tracking-wider text-text-secondary">
+          <p className="text-sm font-bold uppercase tracking-wider text-text-secondary">
             {t('directive.stakes.heading')}
           </p>
           {/* FORCE-LAUNCH OVER A SHOWN NO-GO (#327): name the objection the president is about
               to override, so the patron cost reads as a consequence of overruling the commander,
               not an arbitrary charge. Only on the proposal-override path (overridesShownObjection). */}
           {forceLaunchOverridesObjection && (
-            <p className="mt-0.5 text-xs text-text-primary">
+            <p className="mt-0.5 text-sm text-text-primary">
               {corpsCommander
                 ? t('directive.stakes.forceLaunchObjection', {
                     commander: getPlayerSafeOfficerName(corpsCommander.name),
@@ -816,12 +811,12 @@ export function DirectiveCard({ directive, gameState, onReceipt }: DirectiveCard
                 : t('directive.stakes.forceLaunchObjectionGeneric')}
             </p>
           )}
-          <p className="mt-0.5 text-xs text-text-primary">{stakesSeverityLabel(frictionStakes.severity)}</p>
+          <p className="mt-0.5 text-sm text-text-primary">{stakesSeverityLabel(frictionStakes.severity)}</p>
           {frictionStakes.revoltLikely && (
-            <p className="mt-0.5 text-xs text-red-300">{t('directive.stakes.revoltLikely')}</p>
+            <p className="mt-0.5 text-sm text-red-300">{t('directive.stakes.revoltLikely')}</p>
           )}
           {frictionStakes.patronConfidenceAtRisk < 0 && (
-            <p className="mt-0.5 text-xs text-text-secondary">
+            <p className="mt-0.5 text-sm text-text-secondary">
               {t('directive.stakes.patronAtRisk', { delta: frictionStakes.patronConfidenceAtRisk })}
             </p>
           )}
@@ -850,13 +845,13 @@ export function DirectiveCard({ directive, gameState, onReceipt }: DirectiveCard
               : t('directive.issue.costTitle', { cost, current: authCurrent }))
             : t('directive.issue.insufficientTitle', { cost, current: authCurrent });
         return (
-          <div className={`mt-2 grid gap-2 ${isReviewProposal || isEliteDeploy ? 'grid-cols-1 sm:grid-cols-3' : 'grid-cols-[1fr_auto]'}`}>
+          <div className={`mt-3 grid gap-3 ${isReviewProposal || isEliteDeploy ? 'grid-cols-1 sm:grid-cols-3' : 'grid-cols-[1fr_auto]'}`}>
             <button
               type="button"
               onClick={handleConfirm}
               disabled={issueDisabled}
               title={issueTitle}
-              className="h-7 min-w-0 truncate whitespace-nowrap rounded border border-amber-400/35 bg-amber-400/12 px-2 text-xs font-bold uppercase tracking-[0.08em] text-amber-300 transition hover:bg-amber-400/20 disabled:cursor-default disabled:border-panel-border/55 disabled:bg-panel-bg/50 disabled:text-text-muted"
+              className="h-12 min-w-0 truncate whitespace-nowrap rounded-md border border-transparent bg-[#c9a75c] px-4 text-[17px] font-bold text-[#15120b] transition hover:bg-[#d8b86c] disabled:cursor-default disabled:border-[#3a4150] disabled:bg-[#1b2029] disabled:text-[#b9ad94]"
             >
               {busy
                 ? (needsObjection ? t('directive.button.consulting') : t('directive.button.issuing'))
@@ -872,7 +867,7 @@ export function DirectiveCard({ directive, gameState, onReceipt }: DirectiveCard
                 onClick={() => { void handleWithhold(); }}
                 disabled={busy}
                 title={t('directive.issue.freeTitle')}
-                className="h-7 min-w-0 truncate whitespace-nowrap rounded border border-panel-border/60 bg-panel-bg/50 px-2 text-xs font-bold uppercase tracking-[0.08em] text-text-secondary transition hover:border-text-secondary/70 hover:text-text-primary disabled:opacity-40"
+                className="h-12 min-w-0 truncate whitespace-nowrap rounded-md border border-panel-border/60 bg-panel-bg/50 px-4 text-[15px] font-semibold text-text-secondary transition hover:border-text-secondary/70 hover:text-text-primary disabled:opacity-40"
               >
                 {busy ? t('directive.button.withholding') : t('directive.button.withhold')}
               </button>
@@ -883,7 +878,7 @@ export function DirectiveCard({ directive, gameState, onReceipt }: DirectiveCard
                 onClick={() => { void handleHoldAtMainStaff(); }}
                 disabled={busy}
                 title={t('directive.reserveHold.title')}
-                className="h-7 min-w-0 truncate whitespace-nowrap rounded border border-sky-400/35 bg-sky-400/10 px-2 text-xs font-bold uppercase tracking-[0.08em] text-sky-200 transition hover:bg-sky-400/20 disabled:opacity-40"
+                className="h-12 min-w-0 truncate whitespace-nowrap rounded-md border border-sky-400/35 bg-sky-400/10 px-4 text-[15px] font-semibold text-sky-200 transition hover:bg-sky-400/20 disabled:opacity-40"
               >
                 {busy ? t('directive.button.holdingReserve') : t('directive.button.holdReserve')}
               </button>
@@ -893,7 +888,7 @@ export function DirectiveCard({ directive, gameState, onReceipt }: DirectiveCard
               onClick={handleCancel}
               disabled={busy}
               title={isReviewProposal ? t('directive.button.cancelShort') : t('directive.button.cancel')}
-              className="h-7 min-w-0 truncate whitespace-nowrap rounded border border-panel-border/60 bg-panel-bg/50 px-2 text-xs font-bold uppercase tracking-[0.08em] text-text-secondary transition hover:border-text-secondary/70 hover:text-text-primary disabled:opacity-40"
+              className="h-12 min-w-0 truncate whitespace-nowrap rounded-md border border-panel-border/60 bg-panel-bg/50 px-4 text-[15px] font-semibold text-text-secondary transition hover:border-text-secondary/70 hover:text-text-primary disabled:opacity-40"
             >
               {isReviewProposal ? t('directive.button.cancelShort') : t('directive.button.cancel')}
             </button>
@@ -904,7 +899,7 @@ export function DirectiveCard({ directive, gameState, onReceipt }: DirectiveCard
         <div
           role="status"
           aria-label={t('directive.receipt.aria')}
-          className={`mt-2 rounded border p-2 text-xs ${
+          className={`mt-2 rounded border p-2 text-sm ${
             receipt.kind === 'error'
               ? 'border-red-500/45 bg-red-500/5 text-red-200'
               : receipt.kind === 'cancelled'
@@ -916,19 +911,6 @@ export function DirectiveCard({ directive, gameState, onReceipt }: DirectiveCard
         </div>
       )}
       </div>
-      {headerArt && (
-        <div
-          data-testid="directive-card-header-art"
-          className="relative h-24 w-full overflow-hidden border-t border-amber-400/25 bg-black/40"
-        >
-          <img
-            src={headerArt}
-            alt=""
-            aria-hidden="true"
-            className="absolute inset-0 h-full w-full object-cover"
-          />
-        </div>
-      )}
     </section>
   );
 }

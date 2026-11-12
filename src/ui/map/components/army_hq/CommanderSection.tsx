@@ -34,17 +34,17 @@ export function CommanderSection({ corps, gameState, operations }: CommanderSect
             {commander ? (
                 <div className="space-y-4">
                     {isActing && (
-                        <div className="text-xs font-bold uppercase tracking-widest text-amber-500 bg-amber-500/5 px-3 py-1.5 border border-amber-500/20">
+                        <div className="text-[13px] font-bold uppercase tracking-widest text-amber-500 bg-amber-500/5 px-3 py-1.5 border border-amber-500/20">
                             {t('commanderSection.actingCommander')}
                         </div>
                     )}
                     {commander.is_cowed && (
-                        <div className="text-xs font-bold uppercase tracking-widest text-blue-400 bg-blue-500/5 px-3 py-1.5 border border-blue-500/20">
+                        <div className="text-[13px] font-bold uppercase tracking-widest text-blue-400 bg-blue-500/5 px-3 py-1.5 border border-blue-500/20">
                             {t('commanderSection.deferredCompliance')}
                         </div>
                     )}
                     {!isActing && !commander.is_cowed && commander.political_reliability <= 2 && (
-                        <div className="text-xs font-bold uppercase tracking-widest text-amber-500 bg-amber-500/5 px-3 py-1.5 border border-amber-500/20">
+                        <div className="text-[13px] font-bold uppercase tracking-widest text-amber-500 bg-amber-500/5 px-3 py-1.5 border border-amber-500/20">
                             {t('commanderSection.lowLoyalty')}
                         </div>
                     )}
@@ -52,18 +52,18 @@ export function CommanderSection({ corps, gameState, operations }: CommanderSect
                 </div>
             ) : syntheticCommand ? (
                 <div className="space-y-3">
-                    <div className="text-xs font-bold uppercase tracking-widest text-amber-400 bg-amber-500/5 px-3 py-1.5 border border-amber-500/20">
+                    <div className="text-[13px] font-bold uppercase tracking-widest text-amber-400 bg-amber-500/5 px-3 py-1.5 border border-amber-500/20">
                         {t('commanderSection.syntheticJnaStaff')}
                     </div>
-                    <div className="text-[12px] text-text-primary p-3 bg-panel-bg border border-panel-border">
-                        <div className="text-xs uppercase tracking-widest text-text-secondary mb-1">
+                    <div className="text-[13px] text-text-primary p-3 bg-panel-bg border border-panel-border">
+                        <div className="text-[13px] uppercase tracking-widest text-text-secondary mb-1">
                             {t('commanderSection.operationCommander')}
                         </div>
                         <div className="font-semibold">
                             {syntheticCommand.commanderName ?? t('commanderSection.syntheticJnaStaffFallback')}
                         </div>
                         {syntheticCommand.operationName && (
-                            <div className="mt-1 text-xs text-text-secondary">
+                            <div className="mt-1 text-[13px] text-text-secondary">
                                 {syntheticCommand.operationName}
                             </div>
                         )}
@@ -72,14 +72,14 @@ export function CommanderSection({ corps, gameState, operations }: CommanderSect
             ) : commanderDisplay ? (
                 commanderDisplay.source === 'unreported' ? (
                 <div className="space-y-4">
-                    <div className="text-[12px] text-text-secondary italic p-3 bg-panel-bg border border-panel-border">
+                    <div className="text-[13px] text-text-secondary italic p-3 bg-panel-bg border border-panel-border">
                         {t('commanderSection.sourceUnreported')}
                     </div>
                 </div>
                 ) : (
                 <div className="space-y-4">
                     {commanderDisplay.acting && (
-                        <div className="text-xs font-bold uppercase tracking-widest text-amber-500 bg-amber-500/5 px-3 py-1.5 border border-amber-500/20">
+                        <div className="text-[13px] font-bold uppercase tracking-widest text-amber-500 bg-amber-500/5 px-3 py-1.5 border border-amber-500/20">
                             {t('commanderSection.actingCommander')}
                         </div>
                     )}
@@ -88,7 +88,7 @@ export function CommanderSection({ corps, gameState, operations }: CommanderSect
                 )
             ) : (
                 <div className="space-y-4">
-                    <div className="text-[12px] text-red-500/80 italic p-3 bg-red-500/5 border border-red-500/20">
+                    <div className="text-[13px] text-red-500/80 italic p-3 bg-red-500/5 border border-red-500/20">
                         {t('commanderSection.vacancy')}
                     </div>
                 </div>

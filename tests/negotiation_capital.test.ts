@@ -263,4 +263,21 @@ describe('Negotiation Capital', () => {
         expect(state.military.negotiation!.capital.RS.operations_launched).toBe(1);
         expect(state.military.negotiation!.capital.RS.operations_successful).toBe(1);
     });
+
+    it('records an enclave as lost when another faction holds its capital (RD run review, 2026-11-07)', () => {
+        const state = makeState({
+            political: {
+                political_controllers: {
+                    'op:srebrenica:srebrenica_2': 'RS',
+                    'op:rogatica:zepa_2': 'RS',
+                    'op:gorazde:gorazde_2': 'RBiH',
+                    'op:centar_sarajevo:centar_sarajevo': 'RBiH',
+                },
+            },
+        } as unknown as Partial<GameState>);
+        computeNegotiationBreakdown(state);
+        const cap = state.military.negotiation!.capital.RBiH;
+        expect(cap.enclaves_lost).toEqual(['srebrenica', 'zepa']);
+        expect(cap.enclaves_held).toEqual(['sarajevo', 'gorazde', 'bihac']);
+    });
 });

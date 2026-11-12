@@ -1,0 +1,681 @@
+[
+ {
+  "osid": "op:bosanska_krupa:arapusa_2",
+  "wartime": "RS",
+  "entity": "FED",
+  "faction": "RBiH",
+  "confidence": "approximate"
+ },
+ {
+  "osid": "op:bosanska_krupa:gornja_suvaja",
+  "wartime": "RS",
+  "entity": "FED",
+  "faction": "RBiH",
+  "confidence": "verified"
+ },
+ {
+  "osid": "op:bosanska_krupa:ivanjska_2",
+  "wartime": "RS",
+  "entity": "FED",
+  "faction": "RBiH",
+  "confidence": "approximate"
+ },
+ {
+  "osid": "op:bosanska_krupa:jasenica_2",
+  "wartime": "RS",
+  "entity": "FED",
+  "faction": "RBiH",
+  "confidence": "verified"
+ },
+ {
+  "osid": "op:bosanska_krupa:vranjska_2",
+  "wartime": "RS",
+  "entity": "FED",
+  "faction": "RBiH",
+  "confidence": "verified"
+ },
+ {
+  "osid": "op:bosanski_petrovac:bosanski_petrovac_2",
+  "wartime": "RS",
+  "entity": "FED",
+  "faction": "RBiH",
+  "confidence": "verified"
+ },
+ {
+  "osid": "op:bosanski_petrovac:dobro_selo_2",
+  "wartime": "RS",
+  "entity": "FED",
+  "faction": "RBiH",
+  "confidence": "verified"
+ },
+ {
+  "osid": "op:bosanski_petrovac:jasenovac_2",
+  "wartime": "RS",
+  "entity": "FED",
+  "faction": "RBiH",
+  "confidence": "approximate"
+ },
+ {
+  "osid": "op:bosanski_petrovac:kolonic_2",
+  "wartime": "RS",
+  "entity": "FED",
+  "faction": "RBiH",
+  "confidence": "verified"
+ },
+ {
+  "osid": "op:bosanski_petrovac:krnjeusa",
+  "wartime": "RS",
+  "entity": "FED",
+  "faction": "RBiH",
+  "confidence": "verified"
+ },
+ {
+  "osid": "op:bosanski_petrovac:prkosi",
+  "wartime": "RS",
+  "entity": "FED",
+  "faction": "RBiH",
+  "confidence": "verified"
+ },
+ {
+  "osid": "op:bosanski_petrovac:vodjenica",
+  "wartime": "RS",
+  "entity": "FED",
+  "faction": "RBiH",
+  "confidence": "verified"
+ },
+ {
+  "osid": "op:bosanski_petrovac:vrtoce",
+  "wartime": "RS",
+  "entity": "FED",
+  "faction": "RBiH",
+  "confidence": "verified"
+ },
+ {
+  "osid": "op:bratunac:pobudje_2",
+  "wartime": "RBiH",
+  "entity": "RS",
+  "faction": "RS",
+  "confidence": "verified"
+ },
+ {
+  "osid": "op:brcko:bijela_2",
+  "wartime": "RBiH",
+  "entity": "special",
+  "faction": null,
+  "confidence": "verified"
+ },
+ {
+  "osid": "op:brcko:boce_2",
+  "wartime": "RBiH",
+  "entity": "special",
+  "faction": null,
+  "confidence": "verified"
+ },
+ {
+  "osid": "op:brcko:brcko",
+  "wartime": "RS",
+  "entity": "special",
+  "faction": null,
+  "confidence": "verified"
+ },
+ {
+  "osid": "op:brcko:brezovo_polje_selo_2",
+  "wartime": "RS",
+  "entity": "special",
+  "faction": null,
+  "confidence": "verified"
+ },
+ {
+  "osid": "op:brcko:brka_2",
+  "wartime": "RBiH",
+  "entity": "special",
+  "faction": null,
+  "confidence": "verified"
+ },
+ {
+  "osid": "op:brcko:bukvik_gornji_2",
+  "wartime": "RBiH",
+  "entity": "special",
+  "faction": null,
+  "confidence": "verified"
+ },
+ {
+  "osid": "op:brcko:donji_rahic",
+  "wartime": "RS",
+  "entity": "special",
+  "faction": null,
+  "confidence": "verified"
+ },
+ {
+  "osid": "op:brcko:gornji_rahic_2",
+  "wartime": "RBiH",
+  "entity": "special",
+  "faction": null,
+  "confidence": "verified"
+ },
+ {
+  "osid": "op:brcko:krepsic",
+  "wartime": "RS",
+  "entity": "special",
+  "faction": null,
+  "confidence": "verified"
+ },
+ {
+  "osid": "op:brcko:maoca_2",
+  "wartime": "RBiH",
+  "entity": "special",
+  "faction": null,
+  "confidence": "verified"
+ },
+ {
+  "osid": "op:brcko:palanka",
+  "wartime": "RBiH",
+  "entity": "special",
+  "faction": null,
+  "confidence": "verified"
+ },
+ {
+  "osid": "op:brcko:potocari_2",
+  "wartime": "RS",
+  "entity": "special",
+  "faction": null,
+  "confidence": "verified"
+ },
+ {
+  "osid": "op:brcko:skakava_donja",
+  "wartime": "RS",
+  "entity": "special",
+  "faction": null,
+  "confidence": "verified"
+ },
+ {
+  "osid": "op:cajnice:batotici",
+  "wartime": "RBiH",
+  "entity": "RS",
+  "faction": "RS",
+  "confidence": "verified"
+ },
+ {
+  "osid": "op:cajnice:miljeno_2",
+  "wartime": "RBiH",
+  "entity": "RS",
+  "faction": "RS",
+  "confidence": "verified"
+ },
+ {
+  "osid": "op:cajnice:todorovici",
+  "wartime": "RBiH",
+  "entity": "RS",
+  "faction": "RS",
+  "confidence": "verified"
+ },
+ {
+  "osid": "op:foca:brusna_2",
+  "wartime": "RBiH",
+  "entity": "RS",
+  "faction": "RS",
+  "confidence": "verified"
+ },
+ {
+  "osid": "op:foca:donje_zesce",
+  "wartime": "RS",
+  "entity": "FED",
+  "faction": "RBiH",
+  "confidence": "verified"
+ },
+ {
+  "osid": "op:foca:ustikolina",
+  "wartime": "RS",
+  "entity": "FED",
+  "faction": "RBiH",
+  "confidence": "approximate"
+ },
+ {
+  "osid": "op:gorazde:podkozara_donja_2",
+  "wartime": "RBiH",
+  "entity": "RS",
+  "faction": "RS",
+  "confidence": "approximate"
+ },
+ {
+  "osid": "op:gorazde:slatina_2",
+  "wartime": "RBiH",
+  "entity": "RS",
+  "faction": "RS",
+  "confidence": "verified"
+ },
+ {
+  "osid": "op:gorazde:ustipraca_2",
+  "wartime": "RBiH",
+  "entity": "RS",
+  "faction": "RS",
+  "confidence": "verified"
+ },
+ {
+  "osid": "op:gradacac:donja_tramosnica_2",
+  "wartime": "RBiH",
+  "entity": "RS",
+  "faction": "RS",
+  "confidence": "approximate"
+ },
+ {
+  "osid": "op:ilidza:rakovica_2",
+  "wartime": "RS",
+  "entity": "FED",
+  "faction": "RBiH",
+  "confidence": "verified"
+ },
+ {
+  "osid": "op:ilidza:rudnik_2",
+  "wartime": "RS",
+  "entity": "FED",
+  "faction": "RBiH",
+  "confidence": "verified"
+ },
+ {
+  "osid": "op:ilidza:sarajevo_dio_ilidza_2",
+  "wartime": "RS",
+  "entity": "FED",
+  "faction": "RBiH",
+  "confidence": "verified"
+ },
+ {
+  "osid": "op:jajce:barevo_2",
+  "wartime": "RS",
+  "entity": "FED",
+  "faction": "HRHB",
+  "confidence": "approximate"
+ },
+ {
+  "osid": "op:jajce:bravnice",
+  "wartime": "RS",
+  "entity": "FED",
+  "faction": "HRHB",
+  "confidence": "approximate"
+ },
+ {
+  "osid": "op:jajce:divicani_2",
+  "wartime": "RS",
+  "entity": "FED",
+  "faction": "HRHB",
+  "confidence": "approximate"
+ },
+ {
+  "osid": "op:jajce:grdovo",
+  "wartime": "RS",
+  "entity": "FED",
+  "faction": "HRHB",
+  "confidence": "approximate"
+ },
+ {
+  "osid": "op:jajce:jajce_3",
+  "wartime": "RS",
+  "entity": "FED",
+  "faction": "HRHB",
+  "confidence": "approximate"
+ },
+ {
+  "osid": "op:jajce:kruscica",
+  "wartime": "RS",
+  "entity": "FED",
+  "faction": "HRHB",
+  "confidence": "approximate"
+ },
+ {
+  "osid": "op:jajce:lupnica",
+  "wartime": "RS",
+  "entity": "FED",
+  "faction": "HRHB",
+  "confidence": "approximate"
+ },
+ {
+  "osid": "op:jajce:vinac_2",
+  "wartime": "RS",
+  "entity": "FED",
+  "faction": "HRHB",
+  "confidence": "approximate"
+ },
+ {
+  "osid": "op:kalesija:seher_2",
+  "wartime": "RBiH",
+  "entity": "RS",
+  "faction": "RS",
+  "confidence": "approximate"
+ },
+ {
+  "osid": "op:kljuc:hadzici",
+  "wartime": "RS",
+  "entity": "FED",
+  "faction": "RBiH",
+  "confidence": "verified"
+ },
+ {
+  "osid": "op:kljuc:kljuc_2",
+  "wartime": "RS",
+  "entity": "FED",
+  "faction": "RBiH",
+  "confidence": "verified"
+ },
+ {
+  "osid": "op:kljuc:krasulje_2",
+  "wartime": "RS",
+  "entity": "FED",
+  "faction": "RBiH",
+  "confidence": "verified"
+ },
+ {
+  "osid": "op:kljuc:sanica_2",
+  "wartime": "RS",
+  "entity": "FED",
+  "faction": "RBiH",
+  "confidence": "verified"
+ },
+ {
+  "osid": "op:kupres:bucovaca",
+  "wartime": "RS",
+  "entity": "FED",
+  "faction": "HRHB",
+  "confidence": "verified"
+ },
+ {
+  "osid": "op:kupres:donji_malovan",
+  "wartime": "RS",
+  "entity": "FED",
+  "faction": "HRHB",
+  "confidence": "verified"
+ },
+ {
+  "osid": "op:kupres:goravci",
+  "wartime": "RS",
+  "entity": "FED",
+  "faction": "HRHB",
+  "confidence": "verified"
+ },
+ {
+  "osid": "op:kupres:kupres_2",
+  "wartime": "RS",
+  "entity": "FED",
+  "faction": "HRHB",
+  "confidence": "verified"
+ },
+ {
+  "osid": "op:mostar:kruzanj_2",
+  "wartime": "RS",
+  "entity": "FED",
+  "faction": "RBiH",
+  "confidence": "approximate"
+ },
+ {
+  "osid": "op:mostar:vranjevici_2",
+  "wartime": "RS",
+  "entity": "FED",
+  "faction": "RBiH",
+  "confidence": "approximate"
+ },
+ {
+  "osid": "op:odzak:donja_dubica",
+  "wartime": "RS",
+  "entity": "FED",
+  "faction": "HRHB",
+  "confidence": "approximate"
+ },
+ {
+  "osid": "op:odzak:gornji_svilaj",
+  "wartime": "RS",
+  "entity": "FED",
+  "faction": "HRHB",
+  "confidence": "approximate"
+ },
+ {
+  "osid": "op:odzak:potocani_2",
+  "wartime": "RS",
+  "entity": "FED",
+  "faction": "HRHB",
+  "confidence": "approximate"
+ },
+ {
+  "osid": "op:orasje:ostra_luka",
+  "wartime": "HRHB",
+  "entity": "RS",
+  "faction": "RS",
+  "confidence": "unresolved"
+ },
+ {
+  "osid": "op:pale:bulozi",
+  "wartime": "RS",
+  "entity": "FED",
+  "faction": "RBiH",
+  "confidence": "verified"
+ },
+ {
+  "osid": "op:pale:podgrab",
+  "wartime": "RBiH",
+  "entity": "RS",
+  "faction": "RS",
+  "confidence": "approximate"
+ },
+ {
+  "osid": "op:pale:vrazalice",
+  "wartime": "RS",
+  "entity": "FED",
+  "faction": "RBiH",
+  "confidence": "verified"
+ },
+ {
+  "osid": "op:rogatica:brcigovo",
+  "wartime": "RBiH",
+  "entity": "RS",
+  "faction": "RS",
+  "confidence": "verified"
+ },
+ {
+  "osid": "op:rogatica:zepa_2",
+  "wartime": "RBiH",
+  "entity": "RS",
+  "faction": "RS",
+  "confidence": "verified"
+ },
+ {
+  "osid": "op:sanski_most:ilidza_2",
+  "wartime": "RS",
+  "entity": "FED",
+  "faction": "RBiH",
+  "confidence": "verified"
+ },
+ {
+  "osid": "op:sanski_most:jelasinovci",
+  "wartime": "RS",
+  "entity": "FED",
+  "faction": "RBiH",
+  "confidence": "verified"
+ },
+ {
+  "osid": "op:sanski_most:kljevci",
+  "wartime": "RS",
+  "entity": "FED",
+  "faction": "RBiH",
+  "confidence": "verified"
+ },
+ {
+  "osid": "op:sanski_most:lusci_palanka_2",
+  "wartime": "RS",
+  "entity": "FED",
+  "faction": "RBiH",
+  "confidence": "verified"
+ },
+ {
+  "osid": "op:sanski_most:sanski_most_2",
+  "wartime": "RS",
+  "entity": "FED",
+  "faction": "RBiH",
+  "confidence": "verified"
+ },
+ {
+  "osid": "op:sanski_most:skucani_vakuf_2",
+  "wartime": "RS",
+  "entity": "FED",
+  "faction": "RBiH",
+  "confidence": "verified"
+ },
+ {
+  "osid": "op:skender_vakuf:donji_koricani",
+  "wartime": "RS",
+  "entity": "FED",
+  "faction": "HRHB",
+  "confidence": "approximate"
+ },
+ {
+  "osid": "op:srebrenica:bostahovine_2",
+  "wartime": "RBiH",
+  "entity": "RS",
+  "faction": "RS",
+  "confidence": "verified"
+ },
+ {
+  "osid": "op:srebrenica:donji_potocari_2",
+  "wartime": "RBiH",
+  "entity": "RS",
+  "faction": "RS",
+  "confidence": "verified"
+ },
+ {
+  "osid": "op:srebrenica:ljeskovik_2",
+  "wartime": "RBiH",
+  "entity": "RS",
+  "faction": "RS",
+  "confidence": "verified"
+ },
+ {
+  "osid": "op:srebrenica:luka_2",
+  "wartime": "RBiH",
+  "entity": "RS",
+  "faction": "RS",
+  "confidence": "verified"
+ },
+ {
+  "osid": "op:srebrenica:milacevici",
+  "wartime": "RBiH",
+  "entity": "RS",
+  "faction": "RS",
+  "confidence": "verified"
+ },
+ {
+  "osid": "op:srebrenica:osmace_2",
+  "wartime": "RBiH",
+  "entity": "RS",
+  "faction": "RS",
+  "confidence": "verified"
+ },
+ {
+  "osid": "op:srebrenica:radovcici",
+  "wartime": "RBiH",
+  "entity": "RS",
+  "faction": "RS",
+  "confidence": "verified"
+ },
+ {
+  "osid": "op:srebrenica:srebrenica_2",
+  "wartime": "RBiH",
+  "entity": "RS",
+  "faction": "RS",
+  "confidence": "verified"
+ },
+ {
+  "osid": "op:srebrenica:suceska",
+  "wartime": "RBiH",
+  "entity": "RS",
+  "faction": "RS",
+  "confidence": "verified"
+ },
+ {
+  "osid": "op:srebrenica:sulice_2",
+  "wartime": "RBiH",
+  "entity": "RS",
+  "faction": "RS",
+  "confidence": "verified"
+ },
+ {
+  "osid": "op:stari_grad_sarajevo:faletici",
+  "wartime": "RS",
+  "entity": "FED",
+  "faction": "RBiH",
+  "confidence": "verified"
+ },
+ {
+  "osid": "op:stolac:pjesivac_kula_2",
+  "wartime": "RS",
+  "entity": "FED",
+  "faction": "HRHB",
+  "confidence": "approximate"
+ },
+ {
+  "osid": "op:titov_drvar:drvar_2",
+  "wartime": "RS",
+  "entity": "FED",
+  "faction": "HRHB",
+  "confidence": "verified"
+ },
+ {
+  "osid": "op:titov_drvar:prekaja_2",
+  "wartime": "RS",
+  "entity": "FED",
+  "faction": "HRHB",
+  "confidence": "approximate"
+ },
+ {
+  "osid": "op:titov_drvar:sipovljani_2",
+  "wartime": "RS",
+  "entity": "FED",
+  "faction": "HRHB",
+  "confidence": "verified"
+ },
+ {
+  "osid": "op:trebinje:ivanica",
+  "wartime": "RS",
+  "entity": "FED",
+  "faction": "HRHB",
+  "confidence": "approximate"
+ },
+ {
+  "osid": "op:trnovo:gornja_presjenica",
+  "wartime": "RS",
+  "entity": "FED",
+  "faction": "RBiH",
+  "confidence": "verified"
+ },
+ {
+  "osid": "op:trnovo:kijevo_2",
+  "wartime": "RBiH",
+  "entity": "RS",
+  "faction": "RS",
+  "confidence": "approximate"
+ },
+ {
+  "osid": "op:trnovo:tosici",
+  "wartime": "RS",
+  "entity": "FED",
+  "faction": "RBiH",
+  "confidence": "unresolved"
+ },
+ {
+  "osid": "op:ugljevik:srednja_trnova_2",
+  "wartime": "RBiH",
+  "entity": "RS",
+  "faction": "RS",
+  "confidence": "approximate"
+ },
+ {
+  "osid": "op:visegrad:medjedja_2",
+  "wartime": "RBiH",
+  "entity": "RS",
+  "faction": "RS",
+  "confidence": "verified"
+ },
+ {
+  "osid": "op:zvornik:djulici",
+  "wartime": "RBiH",
+  "entity": "RS",
+  "faction": "RS",
+  "confidence": "verified"
+ }
+]

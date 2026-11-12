@@ -1,0 +1,29 @@
+/* The treaty against the mediator's draft (owner, 2026-11-08). Uses the surrounding text
+   colour so it reads on the parchment review panel and on the dark Verdict alike. */
+.dayton-treaty {
+  display: grid;
+  gap: .45rem;
+  padding: .75rem .9rem;
+  border: 1px solid currentColor;
+  border-color: color-mix(in srgb, currentColor 35%, transparent);
+  border-radius: 3px;
+}
+.dayton-treaty h3 {
+  margin: 0;
+  font-size: .78rem;
+  font-weight: 750;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  opacity: .8;
+}
+.dayton-treaty p { margin: 0; line-height: 1.45; }
+.dayton-treaty-delta { font-size: 1.15rem; font-weight: 700; }
+.dayton-treaty-delta[data-direction="up"]::before { content: "▲ "; color: #5f9a63; }
+.dayton-treaty-delta[data-direction="down"]::before { content: "▼ "; color: #c0645a; }
+.dayton-treaty dl { display: grid; gap: .3rem; margin: 0; }
+.dayton-treaty-row { display: grid; grid-template-columns: minmax(8rem, max-content) 1fr; gap: .2rem .8rem; }
+.dayton-treaty-row dt { font-weight: 650; }
+.dayton-treaty-row dd { margin: 0; }
+@container interface-viewport (max-width: 640px) {
+  .dayton-treaty-row { grid-template-columns: 1fr; }
+}

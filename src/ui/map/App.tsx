@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { PresidentialToolbar } from './components/PresidentialToolbar';
 import { SelectionPanel } from './components/SelectionPanel';
 import { CorpsFrontPanel } from './components/CorpsFrontPanel';
@@ -40,7 +40,11 @@ import { ReserveRequestModal } from './components/ReserveRequestModal';
 import { OfficerMatterModal } from './components/OfficerMatterModal';
 import { IntelligenceBriefModal } from './components/IntelligenceBriefModal';
 import { CounterOfferModal } from './components/CounterOfferModal';
-import { DaytonNegotiationModal } from './components/DaytonNegotiationModal';
+// The Dayton conference opens once per campaign, so its screens load on demand and
+// stay out of the entry chunk (vite.config.ts chunk-size limit).
+const DaytonNegotiationModal = lazy(() =>
+  import('./components/DaytonNegotiationModal').then(m => ({ default: m.DaytonNegotiationModal })),
+);
 import { DiplomacyPanel } from './components/DiplomacyPanel';
 import { MainMenu } from './components/MainMenu';
 import { PauseMenu } from './components/PauseMenu';
@@ -61,10 +65,9 @@ import { AudioSurfaceBedController } from './components/AudioSurfaceBedControlle
 import { WarroomShellLayer } from './components/warroom/WarroomShellLayer';
 import { AdvanceTurnModal } from './components/warroom/AdvanceTurnModal';
 import { WarroomStatusBar } from './components/warroom/WarroomStatusBar';
-import { CommandCardStrip } from './components/warroom/CommandCardStrip';
+import { CommandSurface } from './components/command_surface/CommandSurface';
 import type { PresidentialCommandCategoryId } from './data/presidentialCategories';
 import { PresidentDeskShell } from './components/presidential_desk/PresidentDeskShell';
-import { PresidentialDecisionRoomPanel } from './components/army_hq/PresidentialDecisionRoomPanel';
 import { Z } from '../shared/zIndex';
 import { RootErrorBoundary } from './components/RootErrorBoundary';
 import { PanelBreadcrumb } from './components/PanelBreadcrumb';
@@ -80,6 +83,9 @@ import {
 } from './data/officerResentmentReceipts';
 import { getOsidDisplayName } from './utils/osidDisplayName';
 import { t, useLocale } from './i18n';
+import { getDecisionHeaderForFamily } from './data/presidentialDeskAssets';
+import { resolveCommandBannerArt } from './data/commandSurfaceArt';
+import { SurfaceHeader, SURFACE_CLOSE_BUTTON, SURFACE_PRIMARY_BUTTON } from './components/surface/Surface';
 import { getPlayerSafeMilitaryFactionName } from './utils/playerSafeText';
 import {
   isCurrentTacticalInteractionReady,
@@ -410,6 +416,19 @@ const WARROOM_OVERLAY_COPY: Record<NativeWarroomOverlaySurface, {
   },
 };
 
+/** Art for each Warroom preview: the intelligence plate, the command and home-front cards. */
+function warroomOverlayArt(surface: NativeWarroomOverlaySurface, faction: string | null | undefined): string | null {
+  if (surface === 'intelligence') return getDecisionHeaderForFamily('intelligence_notification');
+  if (surface === 'staff') return resolveCommandBannerArt('cat_command', faction ?? null);
+  return resolveCommandBannerArt('cat_home_front', faction ?? null);
+}
+
+/**
+ * Warroom preview for Intelligence, Army HQ staff and Faction (surface redesign, owner
+ * 2026-11-10): a compact surface in the Command Surface's style below the toolbar —
+ * header with Close, the room's art, what it holds in plain 18px prose, and one big gold
+ * button into the full record.
+ */
 function WarroomNativeOverlay({
   surface,
   onClose,
@@ -420,8 +439,10 @@ function WarroomNativeOverlay({
   onDrillIn: () => void;
 }) {
   const dialogRef = useRef<HTMLElement | null>(null);
+  const faction = useGameStore((s) => s.loadedGameState?.player_faction ?? null);
   const copy = WARROOM_OVERLAY_COPY[surface];
   const title = t(copy.titleKey);
+  const art = warroomOverlayArt(surface, faction);
 
   useEffect(() => {
     dialogRef.current?.focus();
@@ -442,32 +463,37 @@ function WarroomNativeOverlay({
           onClose();
         }
       }}
-      className="pointer-events-auto absolute left-4 top-24 z-[7] w-[min(30rem,calc(100vw-2rem))] border border-panel-border/80 bg-[#11141b] p-4 shadow-[0_24px_80px_rgba(0,0,0,0.58)] md:left-6 xl:left-10"
+      className="pointer-events-auto absolute left-1/2 top-[4.5rem] z-[7] flex max-h-[calc(100%-11.5rem)] w-[min(56rem,calc(100%-3rem))] -translate-x-1/2 flex-col overflow-hidden rounded-lg border border-accent-gold/35 bg-[#11141b] text-text-primary shadow-[0_30px_90px_rgba(0,0,0,0.65)] outline-none"
     >
-      <div className="flex items-start justify-between gap-4 border-b border-panel-border/70 pb-3">
-        <div>
-          <div className="text-xs font-bold uppercase tracking-[0.22em] text-accent-gold">{t(copy.eyebrowKey)}</div>
-          <h2 className="mt-1 text-[18px] font-bold leading-tight text-text-primary">{title}</h2>
-        </div>
+      <SurfaceHeader
+        eyebrow={t(copy.eyebrowKey)}
+        title={title}
+        close={(
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label={t('warroom.overlay.closeAria', { title })}
+            data-testid={`warroom-overlay-${surface}-close`}
+            className={SURFACE_CLOSE_BUTTON}
+          >
+            {t('warroom.overlay.close')}
+          </button>
+        )}
+      />
+      <div className="min-h-0 flex-1 overflow-y-auto">
+        {art && <img src={art} alt="" className="block h-52 w-full object-cover" />}
+        <p className="m-0 px-8 py-6 text-[18px] leading-relaxed text-[#ddd1b3]">{t(copy.bodyKey)}</p>
+      </div>
+      <div className="flex shrink-0 border-t border-[#262b35] bg-[#12161e] px-8 pb-6 pt-5">
         <button
           type="button"
-          onClick={onClose}
-          aria-label={t('warroom.overlay.closeAria', { title })}
-          data-testid={`warroom-overlay-${surface}-close`}
-          className="border border-panel-border/80 bg-black/20 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.14em] text-text-secondary transition-colors hover:border-accent-gold/45 hover:text-accent-gold"
+          onClick={onDrillIn}
+          data-testid={`warroom-overlay-${surface}-drill-in`}
+          className={`flex-1 ${SURFACE_PRIMARY_BUTTON}`}
         >
-          {t('warroom.overlay.close')}
+          {t(copy.drillInLabelKey)}
         </button>
       </div>
-      <p className="mt-3 text-[12px] leading-relaxed text-text-secondary">{t(copy.bodyKey)}</p>
-      <button
-        type="button"
-        onClick={onDrillIn}
-        data-testid={`warroom-overlay-${surface}-drill-in`}
-        className="mt-4 border border-accent-gold/45 bg-accent-gold/12 px-3 py-2 text-left text-xs font-bold uppercase tracking-[0.14em] text-accent-gold transition-colors hover:bg-accent-gold/20"
-      >
-        {t(copy.drillInLabelKey)}
-      </button>
     </section>
   );
 }
@@ -1456,14 +1482,6 @@ function App() {
     setDiplomacyOpen(false);
     setAppScreen('warroom');
   };
-  const openCommandCategory = () => {
-    if (activeEventDecisionId !== null) return;
-    setCommandStripOpen(false);
-    setCommandStripCategoryId(null);
-    setWarroomDeskOpen(false);
-    setWarroomOverlaySurface(null);
-    setWarroomDecisionRoomOpen(true);
-  };
   const openWarroomOverlay = (surface: WarroomOverlaySurface) => {
     if (activeEventDecisionId !== null) return;
     rememberWarroomFocus();
@@ -2106,7 +2124,9 @@ function App() {
           save sitting at the Dayton step must not cover the boot Main Menu with
           this non-dismissible modal. Shows once the player is past the menu. */}
       {appScreen !== 'mainMenu' && loadedGameState?.pendingDayton && !loadedGameState?.gameOver && (
-        <DaytonNegotiationModal dayton={loadedGameState.pendingDayton} />
+        <Suspense fallback={null}>
+          <DaytonNegotiationModal key={campaignViewportEpoch} dayton={loadedGameState.pendingDayton} conference />
+        </Suspense>
       )}
       <PeaceWarTransitionOverlay />
       <VerdictScreen onLoadSaveState={handleMainMenuLoadGame} onLoadSaveError={setLoadError} />
@@ -2205,49 +2225,19 @@ function App() {
               reviewedAftermathTurn={turnAftermath?.turn ?? null}
             />
           )}
-          {commandStripOpen && (
-            <CommandCardStrip
-              initialCategoryId={commandStripCategoryId}
-              onOpenCategory={openCommandCategory}
-              onClose={() => closeCommandStrip()}
+          {(commandStripOpen || warroomDecisionRoomOpen) && (
+            // One Command Surface (owner redesign 2026-11-10) serves both entries: the
+            // toolbar/hotspot "command strip" and every Decision Room deep link.
+            <CommandSurface
+              initialCategoryId={commandStripOpen ? commandStripCategoryId : null}
+              onClose={() => {
+                if (commandStripOpen) closeCommandStrip();
+                setWarroomDecisionRoomOpen(false);
+                if (!commandStripOpen) restoreWarroomFocus();
+              }}
+              onNavigateTarget={reviewPreAdvanceTarget}
+              onInspectFieldPlan={inspectFieldOperationPlanFromDossier}
             />
-          )}
-          {warroomDecisionRoomOpen && (
-            <div
-              role="dialog"
-              aria-label={t('warroomDecisionRoom.host.aria')}
-              aria-modal="false"
-              data-testid="warroom-decision-room-host"
-              className="pointer-events-auto absolute inset-x-3 bottom-20 z-[6] mx-auto flex max-h-[76%] max-w-6xl flex-col overflow-hidden rounded-md border border-accent-gold/35 bg-[#0f131a]/98 shadow-[0_28px_90px_rgba(0,0,0,0.7)] backdrop-blur-sm xl:left-10 xl:right-10"
-            >
-              <div
-                data-decision-room-fixed-header="true"
-                className="z-20 flex shrink-0 items-end justify-between gap-2 border-b border-panel-border/70 bg-[#0f131a] px-4 pb-3 pt-4"
-              >
-                <div>
-                  <div className="text-xs font-bold uppercase tracking-[0.1em] text-accent-gold">{t('warroomDecisionRoom.host.eyebrow')}</div>
-                  <h2 className="mt-0.5 text-[15px] font-bold leading-tight text-text-primary">{t('warroomDecisionRoom.host.title')}</h2>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setWarroomDecisionRoomOpen(false);
-                    restoreWarroomFocus();
-                  }}
-                  aria-label={t('warroomDecisionRoom.host.closeAria')}
-                  data-testid="warroom-decision-room-close"
-                  className="shrink-0 rounded border border-panel-border bg-black/60 px-2.5 py-1 text-xs font-bold uppercase tracking-[0.08em] text-text-secondary transition-colors hover:border-accent-gold/45 hover:text-accent-gold"
-                >
-                  {t('warroomDecisionRoom.host.close')}
-                </button>
-              </div>
-              <div data-decision-room-scroll-owner="true" className="min-h-0 overflow-y-auto px-4 pb-4 pt-3">
-                <PresidentialDecisionRoomPanel
-                  onNavigateTarget={reviewPreAdvanceTarget}
-                  onInspectFieldPlan={inspectFieldOperationPlanFromDossier}
-                />
-              </div>
-            </div>
           )}
           {warroomOverlaySurface && (
             <WarroomNativeOverlay
@@ -2318,7 +2308,10 @@ function App() {
           role="status"
           aria-live="polite"
           data-testid="action-receipt-toast"
-          className="pointer-events-none fixed left-1/2 top-20 w-[min(34rem,calc(100vw-2rem))] -translate-x-1/2 rounded border border-emerald-400/45 bg-[#10151d] px-4 py-3 text-center text-sm font-semibold text-emerald-100 shadow-2xl"
+          // Bottom-left corner: centred at the top it covered the next decision's header
+          // (top-20) or the toolbar labels (top-3) in the R8 shakedown, 2026-11-10. The
+          // bottom-right holds the find hint and Advance bar; decisions sit centred.
+          className="pointer-events-none fixed bottom-4 left-4 w-[min(22rem,calc(100vw-2rem))] rounded border border-emerald-400/45 bg-[#10151d] px-4 py-3 text-left text-sm font-semibold text-emerald-100 shadow-2xl"
           style={{ zIndex: Z.MODAL_HARD }}
         >
           {actionReceiptMessage}

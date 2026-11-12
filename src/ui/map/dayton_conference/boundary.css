@@ -1,0 +1,91 @@
+/* Boundary Map and the wall board's live line (DC A3). Colours repeat in BoundaryMap.tsx. */
+
+.dayton-boundary { display: grid; gap: .75rem; color: #2a2016; }
+.dayton-boundary-title { font-weight: 700; font-size: 1.05rem; }
+
+.dayton-boundary-stages { display: flex; flex-wrap: wrap; gap: .35rem; }
+.dayton-boundary-stages [role="radio"] {
+  display: inline-flex; align-items: center; gap: .4rem;
+  padding: .35rem .7rem; border: 1px solid #8a7450; border-radius: 3px;
+  background: #efe5cf; color: #3a2e1f; font-size: .82rem; font-weight: 700;
+}
+.dayton-boundary-stages [role="radio"][aria-checked="true"] { background: #3a2e1f; color: #f4ead2; border-color: #3a2e1f; }
+.dayton-boundary-stages [role="radio"]:focus-visible { outline: 2px solid #c48a2a; outline-offset: 2px; }
+.dayton-boundary-step {
+  display: inline-grid; place-items: center; width: 1.2rem; height: 1.2rem;
+  border-radius: 50%; border: 1px solid currentColor; font-size: .7rem;
+}
+.dayton-boundary-shares { font-size: .85rem; font-weight: 600; }
+
+/* Same raster frame as Codex's base map (3840 × 3719); never crop or fit to the land. */
+.dayton-boundary-figure {
+  position: relative; isolation: isolate; width: 100%; max-width: 52rem; margin-inline: auto;
+  aspect-ratio: 3840 / 3719; background: #e9dcc0; border: 1px solid #a78e5c;
+}
+.dayton-boundary-figure > img,
+.dayton-boundary-figure > svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.dayton-boundary-fills { mix-blend-mode: multiply; }
+.dayton-boundary-fills path:hover { opacity: .8; }
+.dayton-boundary-overlay { pointer-events: none; }
+.dayton-boundary-loading { position: absolute; inset: auto 0 45% 0; text-align: center; }
+
+.dayton-boundary-pulse {
+  fill: none; stroke: #1d140a; stroke-width: 1.5;
+  animation: dayton-boundary-pulse 1.6s ease-in-out infinite;
+}
+@keyframes dayton-boundary-pulse { 0%, 100% { stroke-opacity: .95; } 50% { stroke-opacity: .2; } }
+@media (prefers-reduced-motion: reduce) {
+  .dayton-boundary-pulse { animation: none; stroke-opacity: .9; }
+}
+
+.dayton-boundary-legend { display: flex; flex-wrap: wrap; gap: .4rem 1rem; font-size: .8rem; }
+.dayton-boundary-legend li, .dayton-boundary-ghosts label { display: inline-flex; align-items: center; gap: .4rem; }
+.dayton-boundary .swatch {
+  display: inline-block; width: .95rem; height: .95rem; border: 1px solid #5a4a33; border-radius: 2px; flex: none;
+}
+.swatch[data-swatch="fed"] { background: #a3c6aa; }
+.swatch[data-swatch="rs"] { background: #e3a899; }
+.swatch[data-swatch="special"] { background: #e6d3a0; }
+.swatch[data-swatch="hrhb"] { background: repeating-linear-gradient(45deg, #7094c0 0 3px, #a3c6aa 3px 7px); }
+.swatch[data-swatch="changed"] { background: transparent; border: 2px solid #1d140a; }
+.dayton-boundary-ghosts .swatch { background: transparent; border-width: 2px; }
+
+.dayton-boundary-ghosts { border: 1px solid #c8b898; border-radius: 3px; padding: .5rem .75rem; display: grid; gap: .3rem; font-size: .82rem; }
+.dayton-boundary-ghosts legend { font-weight: 700; padding-inline: .25rem; }
+
+.dayton-boundary-changes { font-size: .82rem; display: grid; gap: .35rem; }
+.dayton-boundary-changes h4 { font-weight: 700; }
+.dayton-boundary-changes summary { cursor: pointer; font-weight: 600; }
+.dayton-boundary-changes ul { max-height: 12rem; overflow: auto; padding-inline-start: 1rem; list-style: disc; }
+.dayton-boundary-credit { font-size: .72rem; color: #6a5a40; }
+.dayton-boundary-credit a { text-decoration: underline; }
+
+/* The live line on the board paper: multiplied, so the photograph's own light and the pins carry through. */
+.dayton-room-board { position: absolute; pointer-events: none; mix-blend-mode: multiply; }
+.dayton-board-line { display: block; width: 100%; height: 100%; opacity: .92; }
+
+/* The Boundary Map opens full-bleed over the room, not as a side panel. */
+.dayton-live-panel[data-dayton-panel="map"] { inset-inline-start: .85rem; width: auto; }
+.dayton-live-panel[data-dayton-panel="map"] .dayton-boundary-figure { max-width: min(52rem, calc((100vh - 14rem) * 1.0325)); }
+
+/* Inspection by place (DC stage 3). */
+.dayton-boundary-fills path { cursor: pointer; }
+.dayton-boundary-selected { fill: none; stroke: #111; stroke-width: 3px; }
+.dayton-boundary-change { all: unset; cursor: pointer; text-decoration: underline dotted; }
+.dayton-boundary-change:focus-visible { outline: 2px solid #8a5a00; outline-offset: 2px; }
+.dayton-boundary-change[aria-pressed="true"] { font-weight: 700; }
+.dayton-place-find { display: flex; flex-wrap: wrap; gap: .4rem .6rem; align-items: center; font-size: .85rem; }
+.dayton-place-find label { font-weight: 700; }
+.dayton-place-find input { flex: 1 1 14rem; min-width: 0; padding: .3rem .5rem; border: 1px solid #a78e5c; background: #fbf6ea; color: #2b2418; }
+.dayton-place { border: 1px solid #a78e5c; background: #f6eedb; color: #2b2418; padding: .7rem .85rem; display: grid; gap: .5rem; font-size: .85rem; }
+.dayton-place header { display: flex; justify-content: space-between; align-items: baseline; gap: .5rem; }
+.dayton-place h4 { font-weight: 700; font-size: .95rem; }
+.dayton-place-facts, .dayton-place-powers { display: grid; gap: .3rem; }
+.dayton-place-facts div { display: flex; flex-wrap: wrap; gap: .4rem; }
+.dayton-place-facts dt, .dayton-place-powers dt { font-weight: 700; }
+.dayton-place-powers dt span { font-weight: 400; }
+.dayton-place-powers dd { margin-inline-start: .8rem; }
+.dayton-place-pending { border-inline-start: 3px solid #a0570f; padding-inline-start: .5rem; }
+.dayton-place-hint { font-style: italic; }
+/* The water and outline plates sit above the fills; clicks pass through to the place under them. */
+.dayton-boundary-figure > img { pointer-events: none; }

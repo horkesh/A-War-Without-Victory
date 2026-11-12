@@ -25,7 +25,7 @@
   overflow: auto;
 }
 .interface-scale-layer [data-testid="settings-panel"] {
-  max-width: min(500px, calc(var(--interface-viewport-width) - 2rem));
+  max-width: min(76rem, calc(var(--interface-viewport-width) - 3rem));
   max-height: calc(var(--interface-viewport-height) - 2rem);
 }
 .interface-scale-layer [data-stack-picker-panel] { max-height: calc(var(--interface-viewport-height) - 2rem); width: min(32rem, calc(var(--interface-viewport-width) - 2rem)); }
@@ -46,13 +46,13 @@
 [data-testid="tactical-map-load-error"] button {
   font-size: calc(12px * var(--interface-scale, 1));
 }
-.interface-scale-settings { margin: 0 0 1.25rem; padding-bottom: 1rem; border-bottom: 1px solid #8a7a6040; color: #d0c8b8; font-size: 0.8rem; }
-.interface-scale-settings label { font-weight: 700; }
-.interface-scale-settings p { margin: 0.4rem 0 0.7rem; color: #a89c88; }
-.interface-scale-settings select, .interface-scale-settings button { background: #24211c; padding: 0.4rem 0.6rem; border: 1px solid #8a7a6060; border-radius: 3px; }
+.interface-scale-settings { margin: 0 0 0.25rem; padding: 1rem 1.25rem; border: 1px solid #2a303c; border-radius: 6px; background: #161a22; color: #f1e6c8; font-size: 15px; }
+.interface-scale-settings label { font-weight: 600; font-size: 17px; }
+.interface-scale-settings p { margin: 0.25rem 0 0.75rem; color: #b9ad94; font-size: 15px; line-height: 1.4; }
+.interface-scale-settings select, .interface-scale-settings button { height: 2.75rem; background: #1b2029; padding: 0 0.85rem; border: 1px solid #3a4150; border-radius: 6px; color: #f1e6c8; font-size: 15px; }
 .command-palette-opener { position: fixed; right: 1rem; bottom: 3.25rem; display: flex; align-items: center; gap: 0.6rem; border: 1px solid #8a7a6070; border-radius: 3px; background: #1a1815f5; color: #dacbaf; padding: 0.45rem 0.7rem; font: 0.75rem var(--font-command); }
 .command-palette-opener:disabled { opacity: 0.45; }
-.command-palette-opener kbd { color: #a79c85; font-size: 0.68rem; }
+.command-palette-opener kbd { color: #a79c85; font-size: 0.75rem; }
 .command-palette { width: min(40rem, calc(var(--interface-viewport-width, 100vw) - 2rem)); max-height: calc(var(--interface-viewport-height, 100vh) - 2rem) !important; overflow: auto; border: 1px solid #8a7a6080; border-radius: 5px; background: #1a1815; box-shadow: 0 1rem 4rem #0009; padding: 1rem; color: #e5decc; }
 .command-palette__heading { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 0.8rem; font: 1rem var(--font-command); }
 .command-palette__heading button { padding: 0.2rem 0.6rem; font-size: 1.3rem; }
@@ -769,14 +769,12 @@ body {
   text-shadow: 0 0 8px rgba(196, 163, 90, 0.6);
 }
 
-/* Weathered Panels */
+/* Weathered Panels — map side rails. Surface redesign (2026-11-10): the same opaque
+   #11141b plane and gold border as the player surfaces, so the rails read as one family. */
 .weathered-panel {
-  background-image:
-    linear-gradient(rgba(26, 24, 21, 0.95), rgba(26, 24, 21, 0.95)),
-    url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.005' numOctaves='5' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
-  background-blend-mode: overlay;
-  border: 1px solid rgba(180, 160, 130, 0.2);
-  box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.5), 0 5px 15px rgba(0, 0, 0, 0.8);
+  background-color: #11141b;
+  border: 1px solid rgba(201, 167, 92, 0.3);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.6);
 }
 
 .bg-glass {

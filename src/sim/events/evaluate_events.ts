@@ -563,6 +563,23 @@ function recordFiringReceipts(
  * `terminalTurn + 1` (closure, requires_enabled, window, phase, condition). No combat,
  * no decision, no other event evaluation. Canonical order → deterministic.
  */
+/**
+ * Fire one catalog event now, outside natural evaluation, exactly as a natural firing
+ * would record it (effects, flags, fired_event_ids / counts / last-fired turn). Used for
+ * records that belong to an engine action rather than to a turn's trigger scan, e.g.
+ * `dayton_signed_1995`, which fires when Dayton is actually signed or imposed (owner,
+ * 2026-11-07). No-op for decision events or a once-only event that already fired.
+ * Returns true when it fired.
+ */
+export function fireEventDefinitionNow(state: GameState, def: EventDefinition, turn: number): boolean {
+    if (def.response_options && def.response_options.length > 0) return false;
+    if (!canEventFire(def, state, turn)) return false;
+    const firedIds = (state.military.fired_event_ids ??= []);
+    applyFiringEffects(state, def, turn);
+    recordFiringReceipts(state, def, turn, firedIds);
+    return true;
+}
+
 export function fireOwedFollowUpsAtTermination(
     state: GameState,
     registry: EventDefinition[],

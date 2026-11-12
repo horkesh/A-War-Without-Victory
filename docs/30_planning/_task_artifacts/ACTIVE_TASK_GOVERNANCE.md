@@ -2,63 +2,79 @@
 
 ## Task
 
-**Name:** Agent setup modernization preparation (P0–P4)
+**Name:** DC — Dayton conference redesign (owner, 2026-11-08: "Adopt all, start")
 
-Prepare the owner-authorized instruction modernization in the isolated worktree from base
-`8913cca6f714e07acf59785ce526c19dc5fc9973`. The active scope is documentation, project skill
-semantics, napkin routing, discovery/import preparation, disposable verification, and retained
-evidence. This task does not change game code, scenarios, baselines, saves, packages, releases, or
-live runtime settings. Preparation does not itself activate instructions in Claude, Codex, or Cursor.
+Implement the active DC plan with its seven adopted amendments on `claude/dayton-conference`
+(worktree `F:/AWWV-worktrees/dayton-conference`, base `efa394894` on
+`codex/dayton-conference-prototype`). Claude owns implementation; Codex owns the visual assets.
+Order: binder contradictions and the opening boundary first, then the war in the room, bounded
+rounds and the live hero map, then constitution depth, then production art and the signing beat.
 
 ## Canonical owner
 
-- `docs/20_engineering/AGENT_WORKFLOW.md` owns the shared agent execution contract.
-- `docs/plans/2026-09-12-agent-setup-modernization-plan.md`, as explicitly activated by the owner
-  for isolated preparation, owns this packet's scope, sequence, checks, and activation boundary.
-- Host-specific entrypoints own only their runtime tools, models, permissions, and actual hook
-  coverage; they may not weaken the shared contract.
+- `docs/plans/2026-11-08-dc-dayton-conference-plan.md` owns scope, stage order, amendments A1–A7,
+  and the verification gates; the Dragon copy mirrors it.
+- `src/sim/negotiation/peace_settlement.ts` owns the settlement map; `dayton_negotiation.ts` owns
+  resolution and the agreement record; `power_overlap.ts` owns the one-operative-assignment rule.
+- `docs/10_canon/WAR_TERMINATION_SPEC.md` owns end-of-war rules; historian and sensitive-history
+  panels own newly authored historical positions (held enclave, cell-level boundary).
 
 ## Demoted path
 
-Universal startup reading, dispatcher-only synthesis, fixed multi-role review loops, automatic
-napkin rewrites, fixed three-task stops, and unconditional smoke checks are demoted from active
-entrypoints. Detailed local-executor instructions remain owned by `tools/local_executor/README.md`.
-The preexisting RE governance record below is historical continuity and grants no authority to this
-task.
+The six legacy institutional toggles are no longer a player control; they are a projection of the
+competency and constitutional rows. The standalone fixture room (`dayton_conference/main.tsx`)
+grants no authority. The RE record below is historical continuity only.
 
 ## Decision boundary
 
-Routine reversible preparation decisions follow the authorized plan and project evidence. Canon
-authority, acceptance criteria, costly scope expansion, merge/push/release/publication, user-level
-skill replacement, and live instruction activation retain their recorded owner or panel boundaries.
-`.claude/settings.json` hooks remain unchanged and enforce only in Claude hosts that load them.
+Routine reversible implementation follows the plan. Rule changes that move territory (opening
+assignments, held enclave, corridor policy, protected classes) go through the plan's stage 0 owner
+record and the historian / sensitive-history gates before activation. Merge, activation and
+packaging remain the owner's.
 
 ## Done means
 
-+ P0 records a semantic disposition for every unequal same-name skill pair.
-+ P1–P4 have scoped, reviewable diffs with valid metadata, working references, retained napkin
-  provenance, preview/refusal import evidence where owned, focused checks, and independent review
-  where required.
-+ Host-specific adapters remain deliberate wrappers; live installation and coordinated activation
-  remain explicit later actions.
++ Each stage's exit criteria in the plan are met with retained evidence under
+  `F:/AWWV-worktrees/.dayton-design/`.
++ Focused tests and typecheck per slice; full suite and the 188-week campaign for territory-moving
+  work; packaged sign-and-reload proof before a slice is called done.
 
 ## UI/report truth
 
-No game UI, player-visible behavior, scenario output, baseline, save, or product report truth
-changes. The only user-facing effect after a future coordinated activation is agent instruction and
-skill routing.
+The Dayton binder shows one row per power; the modal's legacy toggle section is gone. Later slices
+change the conference presentation (folder, rounds, map, binder, signing). No scenario, baseline or
+save-schema change in the first slice.
 
 ## Roadmap slot
 
-This is process maintenance outside R6–R9 product acceptance. It does not change command-board
-priority, close a release gate, or authorize a build, package, scenario campaign, baseline run, or
-publication.
+DC is the active lane (DC → R8 → R9); it blocks R8. No gate closes with this slice.
 
 ## What this unlocks
 
-A coordinated owner can review one compact shared contract, host-specific entrypoints, narrowed
-process skills, a routed napkin index, and preview-first skill import evidence before deciding
-whether and when to deploy and activate them in affected runtimes.
+A Dayton endgame that explains the boundary, the price, the trade and the decision path to a
+first-time player, on top of RD's end-map contract.
+
+## Exact milestone changes
+
+- MASTER_ROADMAP §DC: ownership text changed from "Owned by Codex" to "Claude implements, Codex
+  supplies art (owner, 2026-11-08)"; plan link now points to the repo plan. No milestone added,
+  removed, closed or reopened.
+
+## Exact renumbering
+
+None. Lane order DC → R8 → R9 unchanged; R7 listening still parallel.
+
+## Items moved
+
+- The DC plan moved from Dragon-only into `docs/plans/2026-11-08-dc-dayton-conference-plan.md`
+  (the Dragon file remains as a mirror).
+- The roadmap's three DC first items are now scheduled inside the plan as amendment A6.
+
+## Sequencing risks avoided
+
+- No R8 packaged-campaign acceptance may start on the pre-amendment Dayton table.
+- Territory-moving boundary work is gated behind the historian cell audit, so no 188-week re-pin
+  is attempted before the opening assignments are evidenced.
 
 ## Historical record — RE 1.0 Engine Integrity
 

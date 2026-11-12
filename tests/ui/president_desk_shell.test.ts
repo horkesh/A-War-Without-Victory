@@ -100,8 +100,9 @@ describe('PresidentDeskShell', () => {
   it('renders the ready advance action as an advance-control, not a blocked warning', () => {
     renderDesk();
 
+    // Surface redesign 2026-11-10: the ready Advance is the gold primary button.
     const action = screen.getByTestId('desk-action-advance-clearance');
-    expect(action.className).toContain('text-accent-gold');
+    expect(action.className).toContain('bg-[#c9a75c]');
     expect(action.className).not.toContain('text-red-100');
   });
 
@@ -183,8 +184,17 @@ describe('PresidentDeskShell', () => {
     }
   });
 
-  it('keeps direct desk cards at intrinsic height so the shell owns scrolling above the status dock', () => {
-    const { container } = renderDesk();
+  it('keeps the header fixed and lets each Desk column scroll on its own', () => {
+    // Surface redesign 2026-11-10: one surface; the frame never scrolls, the matters
+    // column is the scroll region and owns no nested scroller, and every card keeps
+    // its intrinsic height.
+    const { container } = renderDesk({
+      state: makeState({
+        pendingParamilitaryRequests: [
+          { faction: 'RS', target_osid: 'bratunac_1', strength: 120, estimated_civilian_risk: 14 },
+        ],
+      }),
+    });
 
     const shell = screen.getByTestId('president-desk-shell');
     expect(shell.className).toContain('overflow-hidden');
@@ -192,8 +202,8 @@ describe('PresidentDeskShell', () => {
     const scrollRegion = screen.getByTestId('president-desk-scroll-region');
     expect(scrollRegion.className).toContain('overflow-y-auto');
     expect(scrollRegion.className).toContain('overscroll-contain');
-    const cards = Array.from(scrollRegion.children);
-    expect(cards.length).toBeGreaterThanOrEqual(3);
+    const cards = Array.from(scrollRegion.querySelectorAll('article'));
+    expect(cards.length).toBeGreaterThanOrEqual(1);
     for (const card of cards) {
       expect(card.className).toContain('shrink-0');
     }
@@ -202,6 +212,8 @@ describe('PresidentDeskShell', () => {
     expect(packet).toBeTruthy();
     expect(packet?.querySelector('.overflow-y-auto')).toBeNull();
     expect(scrollRegion.querySelectorAll('.overflow-y-auto')).toHaveLength(0);
+    // The date sits in the fixed header, outside every scrolling column.
+    expect(scrollRegion.contains(screen.getByTestId('desk-pinned-date'))).toBe(false);
   });
 
   it('can close when rendered as a warroom overlay', () => {

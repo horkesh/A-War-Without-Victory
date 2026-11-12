@@ -18,6 +18,7 @@ import {
     type CompetencyOwner,
     type CompetencyWeightClass,
 } from './competency_packages.js';
+import { effectiveOperativePowers } from './power_overlap.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Package definitions
@@ -233,6 +234,51 @@ function ownerAutonomy(owner: CompetencyOwner): number {
     if (owner === 'entity') return 100;
     if (owner === 'shared') return 50;
     return 0;
+}
+
+/**
+ * Operative entity-autonomy index (0-100): ONE reading of the treaty's division of
+ * powers (DC walkthrough 2026-11-08). Each power counts once: the 16 Annex-4
+ * competencies, with a legacy-only toggle projected onto its competency row
+ * (power_overlap.ts) and every unset row at its historical 1995 owner. The legacy
+ * six-toggle index and the extended index both double-counted defense, police,
+ * courts, education and taxation, and they disagreed about the historical default
+ * (100 against 58.6), so naming any competency, even at its default, moved the
+ * dysfunction reading. Entity-ward = high autonomy.
+ */
+export function computeOperativeAutonomyIndex(terms: {
+    institutional_choices?: Record<string, 'centralized' | 'decentralized'>;
+    competency_allocation?: Record<string, string>;
+}): number {
+    const effective = effectiveOperativePowers({
+        institutional_choices: terms.institutional_choices,
+        competency_allocation: terms.competency_allocation as Record<string, CompetencyOwner> | undefined,
+    }).competency;
+    let weighted = 0;
+    let totalWeight = 0;
+    for (const comp of [...COMPETENCY_PACKAGES].sort((a, b) => strictCompareLocal(a.id, b.id))) {
+        const weight = COMPETENCY_CLASS_WEIGHT[comp.weight_class] ?? 0;
+        if (weight <= 0) continue;
+        weighted += ownerAutonomy((effective[comp.id] as CompetencyOwner | undefined) ?? comp.default_owner) * weight;
+        totalWeight += weight;
+    }
+    if (totalWeight <= 0) return 100;
+    return Math.round((weighted / totalWeight) * 10) / 10;
+}
+
+/** The operative index of the historical 1995 division of powers (every row at its Annex-4 owner). */
+const HISTORICAL_OPERATIVE_AUTONOMY = computeOperativeAutonomyIndex({});
+
+/**
+ * The treaty's entity autonomy on the scale the dysfunction model and the verdict
+ * were built on: the historical Dayton division of powers = 100, a fully state-run
+ * treaty = 0, anything more entity-ward than history saturates at 100. One measure,
+ * so the historical default reads 100 whether or not any row is named.
+ */
+export function computeTreatyAutonomyIndex(terms: Parameters<typeof computeOperativeAutonomyIndex>[0]): number {
+    const operative = computeOperativeAutonomyIndex(terms);
+    if (HISTORICAL_OPERATIVE_AUTONOMY <= 0) return 100;
+    return Math.min(100, Math.round((operative / HISTORICAL_OPERATIVE_AUTONOMY) * 1000) / 10);
 }
 
 /**

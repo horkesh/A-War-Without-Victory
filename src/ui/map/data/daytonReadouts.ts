@@ -25,23 +25,10 @@
  *                                brckoComponent, fragmentationComponent, cap threshold
  */
 
+import { computeTreatyAutonomyIndex } from '../../../sim/negotiation/institutional_packages.js';
+
 export type InstitutionChoice = 'centralized' | 'decentralized';
 export type BrckoOutcome = 'federation' | 'rs' | 'arbitration';
-
-/** Per-dimension autonomy weights — mirror of institutional_packages.ts. */
-const AUTONOMY_DIMENSION_WEIGHTS: Readonly<Record<string, number>> = Object.freeze({
-    military: 0.25,
-    economy: 0.20,
-    police: 0.18,
-    judiciary: 0.15,
-    presidency: 0.12,
-    education: 0.10,
-});
-
-/** The 6 canonical institutional dimension ids, sorted (matches engine). */
-const INSTITUTION_IDS: readonly string[] = Object.freeze(
-    Object.keys(AUTONOMY_DIMENSION_WEIGHTS).slice().sort(stableCompare),
-);
 
 /** Dysfunction blend weights — mirror of peace_dysfunction.ts DYSFUNCTION_WEIGHTS. */
 const DYSFUNCTION_WEIGHTS = Object.freeze({
@@ -74,26 +61,19 @@ function round1(v: number): number {
 }
 
 /**
- * Live entity-autonomy index (0-100). Mirror of computeEntityAutonomyIndex:
- * decentralized = high autonomy; an unset dimension defaults to decentralized
- * (the historical Dayton default), so an empty map reads as maximally autonomous.
+ * Live entity-autonomy index (0-100): the engine's single treaty measure
+ * (computeTreatyAutonomyIndex — competencies counted once, historical Dayton = 100).
+ * Legacy toggles project onto their competency rows; pass the operative competency
+ * allocation when the draft has one.
  */
 export function computeAutonomyPreview(
     choices: Readonly<Record<string, InstitutionChoice>>,
+    competencyAllocation?: Readonly<Record<string, string>>,
 ): number {
-    let weighted = 0;
-    let totalWeight = 0;
-    for (const id of INSTITUTION_IDS) {
-        const weight = AUTONOMY_DIMENSION_WEIGHTS[id] ?? 0;
-        if (weight <= 0) continue;
-        const choice = choices?.[id] ?? 'decentralized';
-        const autonomy = choice === 'decentralized' ? 100 : 0;
-        weighted += autonomy * weight;
-        totalWeight += weight;
-    }
-    if (totalWeight <= 0) return 100;
-    // weighted/totalWeight is already on a 0-100 scale (each autonomy term is 0 or 100).
-    return round1(weighted / totalWeight);
+    return computeTreatyAutonomyIndex({
+        institutional_choices: { ...choices },
+        competency_allocation: competencyAllocation ? { ...competencyAllocation } : undefined,
+    });
 }
 
 /** Autonomy sub-component (0-100): distance above the functional floor. */
@@ -155,8 +135,9 @@ export function computeDysfunctionPreview(
     choices: Readonly<Record<string, InstitutionChoice>>,
     split: Readonly<Record<string, number>>,
     brcko: BrckoOutcome,
+    competencyAllocation?: Readonly<Record<string, string>>,
 ): DysfunctionPreview {
-    const autonomyIndex = computeAutonomyPreview(choices);
+    const autonomyIndex = computeAutonomyPreview(choices, competencyAllocation);
     const aComp = autonomyComponent(autonomyIndex);
     const fComp = fragmentationComponent(split);
     const bComp = brckoComponent(brcko);
