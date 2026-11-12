@@ -151,7 +151,7 @@ describe('App boot - Main Menu first, faction choice menu-only (#80)', () => {
 
         expect(warroomStart).toBeGreaterThan(-1);
         expect(menuStart).toBeGreaterThan(warroomStart);
-        expect(warroomBlock).toContain('!peaceWarTransitionActive && openingBriefPending && !warroomDeskOpen && (');
+        expect(warroomBlock).toContain('!peaceWarTransitionActive && openingBriefPending && !warroomDeskOpen && !commandStripOpen && !warroomDecisionRoomOpen && !warroomOverlaySurface && (');
         expect(warroomBlock).toContain('<PresidentialInbox onAction={handlePresidentialInboxAction} eventCatalog={eventCatalogFull} material="dossier" />');
     });
 

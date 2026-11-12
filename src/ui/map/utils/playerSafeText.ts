@@ -1,5 +1,6 @@
 import { normalizeFactionId } from '../../../state/identity.js';
 import { formatCorpsDisplayName, toTitleCase } from './formatters';
+import { municipalityDisplayName, restoreBosnianPlaceNames } from '../../shared/bosnianPlaceNames';
 
 const MILITARY_FACTION_LABELS: Record<string, string> = {
     RS: 'VRS',
@@ -278,7 +279,7 @@ function extractCorpsRuns(tokens: string[]): { corps: string[]; leftover: string
  * Conservative: if the name already looks human (a space + capital, no `_`),
  * it is returned unchanged.
  */
-export function getPlayerSafeOperationName(
+function humanizeOperationName(
     name: string | null | undefined,
     opOrCorpsId?: string | null,
     fallback = 'Active operation',
@@ -316,7 +317,7 @@ export function getPlayerSafeOperationName(
     const prefixMatch = safeName.match(/^([A-Za-z]+):\s*(.+)$/);
     if (prefixMatch) {
         const prefix = prefixMatch[1].trim();
-        const rest = getPlayerSafeOperationName(prefixMatch[2], opOrCorpsId, prefixMatch[2].trim());
+        const rest = humanizeOperationName(prefixMatch[2], opOrCorpsId, prefixMatch[2].trim());
         return `${prefix}: ${rest}`;
     }
 
@@ -372,7 +373,7 @@ export function getPlayerSafeEnclaveName(
     if (!safeName) return fallback;
 
     const humanized = humanizeIdentifierLabel(safeName);
-    return humanized || fallback;
+    return humanized ? restoreBosnianPlaceNames(humanized) : fallback;
 }
 
 export function getPlayerSafeBrigadeName(
@@ -394,9 +395,11 @@ export function getPlayerSafeMunicipalityName(
     municipalityId: string | null | undefined,
     fallback = 'Target municipality',
 ): string {
+    const known = municipalityDisplayName(municipalityId);
+    if (known) return known;
     const humanized = humanizeIdentifierLabel(municipalityId);
     if (!humanized) return fallback;
-    return humanized === humanized.toLocaleLowerCase() ? toTitleCase(humanized) : humanized;
+    return restoreBosnianPlaceNames(humanized === humanized.toLocaleLowerCase() ? toTitleCase(humanized) : humanized);
 }
 
 export function getPlayerSafeCorridorLabel(
@@ -408,4 +411,13 @@ export function getPlayerSafeCorridorLabel(
 
     const label = MILITARY_FACTION_LABELS[safeFaction];
     return label ? `${label}-controlled corridor` : fallback;
+}
+
+/** Player-facing operation name. Engine names are ASCII ("Operation Foca"); shown as "Operation Foča". */
+export function getPlayerSafeOperationName(
+    name: string | null | undefined,
+    opOrCorpsId?: string | null,
+    fallback = 'Active operation',
+): string {
+    return restoreBosnianPlaceNames(humanizeOperationName(name, opOrCorpsId, fallback));
 }

@@ -79,4 +79,74 @@ describe('RecruitmentModal player copy', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Recruit' }));
     expect(onApply).toHaveBeenCalledWith(LIGHT_INFANTRY_BRIGADE.id, 'light_infantry');
   });
+
+  it('moves already-raised brigades out of the lists into a closed section at the bottom', () => {
+    const onApply = vi.fn();
+    const raisedA: RecruitmentCatalogBrigade = {
+      ...LIGHT_INFANTRY_BRIGADE,
+      id: 'rbih_raised_a',
+      name: 'Raised Alpha Brigade',
+      eligible: false,
+      reason_codes: ['already_recruited', 'no_manpower'],
+    };
+    const raisedB: RecruitmentCatalogBrigade = { ...raisedA, id: 'rbih_raised_b', name: 'Raised Bravo Brigade' };
+    const late: RecruitmentCatalogBrigade = {
+      ...LIGHT_INFANTRY_BRIGADE,
+      id: 'rbih_late',
+      name: 'Late Brigade',
+      available_from: 8,
+      eligible: false,
+      reason_codes: ['not_yet_available'],
+    };
+
+    const { container } = render(React.createElement(RecruitmentModal, {
+      isOpen: true,
+      loading: false,
+      applying: false,
+      playerFaction: 'RBiH',
+      brigades: [raisedA, late, LIGHT_INFANTRY_BRIGADE, raisedB],
+      onClose: vi.fn(),
+      onRefresh: vi.fn(),
+      onApply,
+    }));
+
+    const unavailableSection = container.querySelector('[aria-labelledby="recruitment-unavailable-title"]');
+    expect(unavailableSection?.textContent).toContain('Late Brigade');
+    expect(unavailableSection?.textContent).not.toContain('Raised Alpha Brigade');
+    expect(container.textContent).not.toContain('Already recruited');
+
+    const raisedSection = container.querySelector('[data-testid="recruitment-raised"]') as HTMLDetailsElement | null;
+    expect(raisedSection).toBeTruthy();
+    expect(raisedSection?.open).toBe(false);
+    expect(raisedSection?.querySelector('summary')?.textContent).toContain('Already raised (2)');
+    expect(raisedSection?.textContent).toContain('Raised Alpha Brigade');
+    expect(raisedSection?.textContent).toContain('Raised Bravo Brigade');
+    expect(raisedSection?.querySelectorAll('button, select, input').length).toBe(0);
+    // Raised section is the last block in the scroll body.
+    expect(raisedSection?.nextElementSibling).toBeNull();
+
+    // The harness path: Recruit acts on the first eligible brigade, untouched by the raised list.
+    fireEvent.click(screen.getByTestId('recruitment-apply'));
+    expect(onApply).toHaveBeenCalledWith(LIGHT_INFANTRY_BRIGADE.id, 'light_infantry');
+  });
+
+  it('labels the already-raised section in BCS', () => {
+    setLocale('bcs');
+    const raised: RecruitmentCatalogBrigade = {
+      ...LIGHT_INFANTRY_BRIGADE,
+      eligible: false,
+      reason_codes: ['already_recruited'],
+    };
+    const { container } = render(React.createElement(RecruitmentModal, {
+      isOpen: true,
+      loading: false,
+      applying: false,
+      playerFaction: 'RBiH',
+      brigades: [raised],
+      onClose: vi.fn(),
+      onRefresh: vi.fn(),
+      onApply: vi.fn(),
+    }));
+    expect(container.querySelector('[data-testid="recruitment-raised"] summary')?.textContent).toContain('Već formirane (1)');
+  });
 });

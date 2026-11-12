@@ -407,10 +407,10 @@ describe('op-proposal decision cards (Phase 2 slice 1)', () => {
 
     expect(card).toMatchObject({
       corps_name: '2nd Krajina Corps',
-      op_name: 'Advance from Racic (Bihac)',
-      objective: 'Advance from Racic (Bihac)',
+      op_name: 'Advance from Račić (Bihać)',
+      objective: 'Advance from Račić (Bihać)',
       objective_origin_osid: 'op:bihac:racic',
-      targets: ['Orasac (Bihac)'],
+      targets: ['Orašac (Bihać)'],
       target_osids: ['op:bihac:orasac_2'],
     });
     expect([
