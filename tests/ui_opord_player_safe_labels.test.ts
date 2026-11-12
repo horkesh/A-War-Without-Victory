@@ -185,8 +185,12 @@ describe('Army-HQ raw enum + faction-slug resolution (QA Batch F)', () => {
         expect(opsSource).not.toContain("op.recovery_reason.toUpperCase().replace(/_/g, ' ')");
 
         const historySource = readFileSync('src/ui/map/components/OperationHistoryPanel.tsx', 'utf8');
-        expect(historySource).toContain("tg_cohesion_exhausted: { label: 'Tactical group exhausted'");
-        expect(historySource).toContain("tg_max_lifecycle: { label: 'Operational duration reached'");
+        // Step 3 surfaces (2026-11-12): history recovery labels moved to i18n (EN + BCS).
+        const enMessages = readFileSync('src/ui/map/i18n/messages.en.ts', 'utf8');
+        expect(historySource).toContain("tg_cohesion_exhausted: { labelKey: 'operationHistory.recovery.tgCohesionExhausted'");
+        expect(historySource).toContain("tg_max_lifecycle: { labelKey: 'operationHistory.recovery.tgMaxLifecycle'");
+        expect(enMessages).toContain("'operationHistory.recovery.tgCohesionExhausted': 'Tactical group exhausted'");
+        expect(enMessages).toContain("'operationHistory.recovery.tgMaxLifecycle': 'Operational duration reached'");
         expect(opsSource).toContain('AXIS_STATUS_LABELS[axis.status]');
         expect(opsSource).toContain('GRADE_FACTOR_LABELS[key]');
         // FULL DECISION-ROOM CONVERGENCE: the request-op input moved OUT of Army HQ

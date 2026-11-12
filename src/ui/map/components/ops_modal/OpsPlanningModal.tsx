@@ -13,6 +13,15 @@ import { Z } from '../../../shared/zIndex';
 import { getOpsPhaseAdvanceMessage, getOpsPhaseGateMessage, planHasObjectiveAndBrigade } from './phaseGate';
 import { t } from '../../i18n';
 import { getNextAxisId, hasOpsPlanningDraftAssignments } from './opsPlanningDraft';
+import { formatCorpsDisplayName } from '../../utils/formatters';
+import {
+    SurfaceCloseButton,
+    SurfaceColumns,
+    SurfaceDetail,
+    SurfaceHeader,
+    SURFACE_MODAL_PANEL_FULL,
+    SURFACE_SECONDARY_BUTTON,
+} from '../surface/Surface';
 
 const PHASE_LABEL_KEYS: Record<OpsPhase, Parameters<typeof t>[0]> = {
     commander: 'opsPlanning.phaseLabel.commander',
@@ -338,188 +347,200 @@ export function OpsPlanningModal() {
     }, [plan.axes, selectableOsids, validTargetOsids]);
     const canAdvanceToG2 = planHasObjectiveAndBrigade(plan);
 
+    const corpsDisplayName = (() => {
+        const corpsFormation = loadedGameState?.formations.find((f) => f.id === corpsId);
+        return corpsFormation ? formatCorpsDisplayName(corpsFormation.name, corpsFormation.id) : '';
+    })();
+
     if (!isOpen || !corpsId) return null;
 
     const currentIdx = PHASE_ORDER.indexOf(phase);
 
     return (
         <div
-            className="fixed inset-0 bg-black/60"
+            className="fixed inset-0 bg-[#05070a]/80"
             style={{ zIndex: Z.MODAL }}
             data-testid="ops-planning-modal"
             data-corps-id={corpsId}
             data-origin-sector-id={originSectorId ?? ''}
             data-phase={phase}
         >
-            {/* Full-bleed map background */}
-            <OpsMap
-                corpsId={corpsId}
-                onOsidClick={handleOsidClick}
-                objectives={allObjectives}
-                validTargetOsids={validTargetOsids}
-                selectableOsids={selectableOsids}
-                availableObjectiveOsids={availableObjectiveOsids}
-                stagingOsid={plan.axes.find((a) => a.id === plan.activeAxisId)?.stagingOsid ?? plan.defaultStagingOsid}
-                schwerpunktOsid={plan.schwerpunktOsid}
-                axes={plan.axes}
-                faction={faction}
-                enabled={phase === 'plan'}
-                onCentroidLookupReady={setCentroidLookup}
-            />
-
-            {/* Phase indicator — top center */}
-            <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2
-                            bg-[rgba(20,18,15,0.88)] backdrop-blur-xl rounded-full px-4 py-2
-                            border border-[rgba(180,160,130,0.15)]">
-                {PHASE_ORDER.map((p, i) => {
-                    const phaseLabel = t(PHASE_LABEL_KEYS[p]);
-                    const locked = i > highestPhase;
-                    const phaseAriaLabel = locked
-                        ? t('opsPlanning.phaseNav.lockedAria', { phase: phaseLabel, step: i + 1 })
-                        : t('opsPlanning.phaseNav.aria', { phase: phaseLabel, step: i + 1 });
-                    return (
-                    <button
-                        key={p}
-                        type="button"
-                        onClick={() => goToPhase(p)}
-                        data-testid={`ops-planning-phase-${p}`}
-                        data-phase={p}
-                        data-locked={locked ? 'true' : undefined}
-                        aria-label={phaseAriaLabel}
-                        title={phaseAriaLabel}
-                        aria-current={i === currentIdx ? 'step' : undefined}
-                        className="flex items-center gap-2 group"
-                    >
-                        {/* WP4c: Enlarged phase dots */}
-                        <div className={`w-3.5 h-3.5 rounded-full transition-all ${
-                            i === currentIdx
-                                ? 'bg-accent-gold shadow-[0_0_8px_rgba(196,163,90,0.5)]'
-                                : i <= highestPhase
-                                    ? 'bg-accent-gold/40 group-hover:bg-accent-gold/70'
-                                    : 'bg-[rgba(180,160,130,0.15)]'
-                        }`} />
-                        <span className={`text-xs font-bold uppercase tracking-[0.15em] transition-colors ${
-                            i === currentIdx ? 'text-accent-gold' : i <= highestPhase ? 'text-text-secondary' : 'text-text-secondary/30'
-                        }`}>
-                            {phaseLabel}
-                            <span aria-hidden="true" className="text-[7px] text-text-secondary/30 ml-1">{` ${i + 1}`}</span>
-                        </span>
-                        {i < PHASE_ORDER.length - 1 && (
-                            <div aria-hidden="true" className={`w-6 h-px ${i < currentIdx ? 'bg-accent-gold/40' : 'bg-[rgba(180,160,130,0.1)]'}`} />
-                        )}
-                    </button>
-                    );
-                })}
-            </div>
-
-            {phaseGateMessage && (
-                <div
-                    role="status"
-                    className="absolute top-16 left-1/2 -translate-x-1/2 z-30 rounded-md border border-accent-gold/25
-                               bg-[rgba(20,18,15,0.92)] px-3 py-2 text-xs font-semibold text-accent-gold shadow-lg"
-                >
-                    {phaseGateMessage}
-                </div>
-            )}
-
-            {discardConfirmOpen && (
-                <div
-                    role="dialog"
-                    aria-modal="true"
-                    aria-labelledby="ops-planning-discard-title"
-                    className="absolute top-16 right-4 z-40 w-[320px] rounded-lg border border-red-400/30
-                               bg-[rgba(20,18,15,0.96)] p-4 text-text-primary shadow-2xl backdrop-blur-xl"
-                >
-                    <div
-                        id="ops-planning-discard-title"
-                        className="text-xs font-bold uppercase tracking-[0.18em] text-red-300"
-                    >
-                        {t('opsPlanning.discard.title')}
-                    </div>
-                    <p className="mt-2 text-xs leading-relaxed text-text-secondary">
-                        {t('opsPlanning.discard.body')}
-                    </p>
-                    <div className="mt-4 flex justify-end gap-2">
-                        <button
-                            type="button"
-                            onClick={() => setDiscardConfirmOpen(false)}
-                            className="rounded border border-[rgba(180,160,130,0.2)] px-3 py-1.5
-                                       text-xs font-bold uppercase tracking-[0.14em] text-text-secondary
-                                       hover:border-accent-gold/35 hover:text-white"
-                        >
-                            {t('opsPlanning.discard.keepPlanning')}
-                        </button>
-                        <button
-                            type="button"
-                            onClick={confirmDiscardOpsPlanning}
-                            className="rounded border border-red-400/35 bg-red-500/15 px-3 py-1.5
-                                       text-xs font-bold uppercase tracking-[0.14em] text-red-200
-                                       hover:bg-red-500/25"
-                        >
-                            {t('opsPlanning.discard.discardDraft')}
-                        </button>
-                    </div>
-                </div>
-            )}
-
-            {/* Phase content */}
-            {phase === 'commander' && (
-                <div data-testid="ops-planning-phase-panel" data-phase="commander">
-                    <CommanderPhase onAdvance={advancePhase} />
-                </div>
-            )}
-            {phase === 'plan' && (
-                <div data-testid="ops-planning-phase-panel" data-phase="plan">
-                <PlanPhase
-                    plan={plan}
-                    onUpdate={updatePlan}
-                    corpsId={corpsId}
-                    onAdvance={advancePhase}
-                    centroidLookup={centroidLookup}
-                    availableObjectiveOsids={availableObjectiveOsids}
-                    canSuggestPlan={hasCommander}
-                    canAdvanceToG2={canAdvanceToG2}
-                />
-                </div>
-            )}
-            {phase === 'g2_assessment' && (
-                <div data-testid="ops-planning-phase-panel" data-phase="g2_assessment">
-                <G2Phase
-                    plan={plan}
-                    prediction={prediction}
-                    loading={predLoading}
-                    error={predError}
-                    corpsId={corpsId}
-                    onAdvance={advancePhase}
-                />
-                </div>
-            )}
-            {phase === 'authorize' && (
-                <div data-testid="ops-planning-phase-panel" data-phase="authorize">
-                <AuthorizePhase
-                    plan={plan}
-                    prediction={prediction}
-                    corpsId={corpsId}
-                    officerId={selectedOfficerId}
-                    originSectorId={originSectorId}
-                />
-                </div>
-            )}
-
-            {/* Close button — top right */}
-            {/* WP4d: Enlarged close button with title */}
-            <button
-                type="button"
-                onClick={requestCloseOpsPlanning}
-                title={t('opsModal.closePlanningTitle')}
-                data-testid="ops-planning-close"
-                className="absolute top-4 right-4 z-30 w-10 h-10 flex items-center justify-center
-                           text-text-secondary hover:text-white rounded-full
-                           bg-[rgba(20,18,15,0.6)] hover:bg-[rgba(20,18,15,0.9)]
-                           backdrop-blur-sm transition-colors border border-[rgba(180,160,130,0.1)]"
+            <div
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="ops-planning-title"
+                className={`absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 ${SURFACE_MODAL_PANEL_FULL}`}
             >
-                &#10005;
-            </button>
+                <SurfaceHeader
+                    eyebrow={corpsDisplayName
+                        ? t('opsPlanning.surface.eyebrowCorps', { corps: corpsDisplayName })
+                        : t('opsPlanning.surface.eyebrow')}
+                    title={plan.opName || t('opsPlanning.surface.untitled')}
+                    titleId="ops-planning-title"
+                    close={(
+                        <SurfaceCloseButton
+                            onClick={requestCloseOpsPlanning}
+                            title={t('opsModal.closePlanningTitle')}
+                            data-testid="ops-planning-close"
+                        />
+                    )}
+                >
+                    {/* Phase stepper: four numbered steps; later steps unlock in order. */}
+                    <nav aria-label={t('opsPlanning.surface.stepsAria')} className="flex flex-wrap items-center gap-2">
+                        {PHASE_ORDER.map((p, i) => {
+                            const phaseLabel = t(PHASE_LABEL_KEYS[p]);
+                            const locked = i > highestPhase;
+                            const current = i === currentIdx;
+                            const phaseAriaLabel = locked
+                                ? t('opsPlanning.phaseNav.lockedAria', { phase: phaseLabel, step: i + 1 })
+                                : t('opsPlanning.phaseNav.aria', { phase: phaseLabel, step: i + 1 });
+                            return (
+                                <button
+                                    key={p}
+                                    type="button"
+                                    onClick={() => goToPhase(p)}
+                                    data-testid={`ops-planning-phase-${p}`}
+                                    data-phase={p}
+                                    data-locked={locked ? 'true' : undefined}
+                                    aria-label={phaseAriaLabel}
+                                    title={phaseAriaLabel}
+                                    aria-current={i === currentIdx ? 'step' : undefined}
+                                    className={`flex h-11 items-center gap-2.5 rounded-md border px-3.5 transition ${
+                                        current
+                                            ? 'border-[#c9a75c] bg-[#232936] text-[#f1e6c8]'
+                                            : locked
+                                                ? 'border-[#262b35] bg-[#12161e] text-[#8a806c]'
+                                                : 'border-[#3a4150] bg-[#1b2029] text-[#e2d6b8] hover:border-accent-gold/60'
+                                    }`}
+                                >
+                                    <span
+                                        aria-hidden="true"
+                                        className={`inline-flex h-7 w-7 items-center justify-center rounded-full font-mono text-[14px] font-semibold ${
+                                            current
+                                                ? 'bg-[#c9a75c] text-[#15120b]'
+                                                : i <= highestPhase
+                                                    ? 'border border-[#c9a75c]/60 text-[#e0c27a]'
+                                                    : 'border border-[#3a4150] text-[#8a806c]'
+                                        }`}
+                                    >
+                                        {i + 1}
+                                    </span>
+                                    <span className="text-[16px] font-semibold">{phaseLabel}</span>
+                                </button>
+                            );
+                        })}
+                    </nav>
+                </SurfaceHeader>
+
+                <SurfaceColumns layout="content-wide-detail">
+                    {/* Planning map: the corps front, objectives, staging and axes. */}
+                    <div className="relative min-h-0 overflow-hidden bg-[#0b0d12]">
+                        <OpsMap
+                            corpsId={corpsId}
+                            onOsidClick={handleOsidClick}
+                            objectives={allObjectives}
+                            validTargetOsids={validTargetOsids}
+                            selectableOsids={selectableOsids}
+                            availableObjectiveOsids={availableObjectiveOsids}
+                            stagingOsid={plan.axes.find((a) => a.id === plan.activeAxisId)?.stagingOsid ?? plan.defaultStagingOsid}
+                            schwerpunktOsid={plan.schwerpunktOsid}
+                            axes={plan.axes}
+                            faction={faction}
+                            enabled={phase === 'plan'}
+                            onCentroidLookupReady={setCentroidLookup}
+                        />
+
+                        {phaseGateMessage && (
+                            <div
+                                role="status"
+                                className="absolute left-1/2 top-4 z-30 max-w-[min(36rem,calc(100%-2rem))] -translate-x-1/2 rounded-md border border-[#c9a75c]/70
+                                           bg-[#1b2029] px-5 py-3 text-[16px] font-semibold text-[#f1e6c8] shadow-[0_12px_40px_rgba(0,0,0,0.55)]"
+                            >
+                                {phaseGateMessage}
+                            </div>
+                        )}
+
+                        {discardConfirmOpen && (
+                            <div
+                                role="dialog"
+                                aria-modal="true"
+                                aria-labelledby="ops-planning-discard-title"
+                                className="absolute right-4 top-4 z-40 flex w-[min(28rem,calc(100%-2rem))] flex-col gap-3 rounded-lg border border-red-400/50
+                                           bg-[#141821] p-5 text-text-primary shadow-[0_20px_60px_rgba(0,0,0,0.6)]"
+                            >
+                                <div id="ops-planning-discard-title" className="text-[19px] font-semibold text-red-100">
+                                    {t('opsPlanning.discard.title')}
+                                </div>
+                                <p className="m-0 text-[16px] leading-relaxed text-[#ddd1b3]">
+                                    {t('opsPlanning.discard.body')}
+                                </p>
+                                <div className="flex flex-wrap justify-end gap-3 pt-1">
+                                    <button
+                                        type="button"
+                                        onClick={() => setDiscardConfirmOpen(false)}
+                                        className={SURFACE_SECONDARY_BUTTON}
+                                    >
+                                        {t('opsPlanning.discard.keepPlanning')}
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={confirmDiscardOpsPlanning}
+                                        className="h-12 rounded-md border border-red-400/60 bg-red-950/60 px-5 text-[16px] font-semibold text-red-100 transition hover:bg-red-900/70"
+                                    >
+                                        {t('opsPlanning.discard.discardDraft')}
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Phase content: scrolling body and a fixed action footer. */}
+                    <SurfaceDetail>
+                        {phase === 'commander' && (
+                            <div className="flex min-h-0 flex-1 flex-col" data-testid="ops-planning-phase-panel" data-phase="commander">
+                                <CommanderPhase onAdvance={advancePhase} />
+                            </div>
+                        )}
+                        {phase === 'plan' && (
+                            <div className="flex min-h-0 flex-1 flex-col" data-testid="ops-planning-phase-panel" data-phase="plan">
+                                <PlanPhase
+                                    plan={plan}
+                                    onUpdate={updatePlan}
+                                    corpsId={corpsId}
+                                    onAdvance={advancePhase}
+                                    centroidLookup={centroidLookup}
+                                    availableObjectiveOsids={availableObjectiveOsids}
+                                    canSuggestPlan={hasCommander}
+                                    canAdvanceToG2={canAdvanceToG2}
+                                />
+                            </div>
+                        )}
+                        {phase === 'g2_assessment' && (
+                            <div className="flex min-h-0 flex-1 flex-col" data-testid="ops-planning-phase-panel" data-phase="g2_assessment">
+                                <G2Phase
+                                    plan={plan}
+                                    prediction={prediction}
+                                    loading={predLoading}
+                                    error={predError}
+                                    corpsId={corpsId}
+                                    onAdvance={advancePhase}
+                                />
+                            </div>
+                        )}
+                        {phase === 'authorize' && (
+                            <div className="flex min-h-0 flex-1 flex-col" data-testid="ops-planning-phase-panel" data-phase="authorize">
+                                <AuthorizePhase
+                                    plan={plan}
+                                    prediction={prediction}
+                                    corpsId={corpsId}
+                                    officerId={selectedOfficerId}
+                                    originSectorId={originSectorId}
+                                />
+                            </div>
+                        )}
+                    </SurfaceDetail>
+                </SurfaceColumns>
+            </div>
         </div>
     );
 }

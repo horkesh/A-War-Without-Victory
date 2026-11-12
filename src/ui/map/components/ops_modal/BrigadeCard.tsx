@@ -17,26 +17,26 @@ interface BrigadeCardProps {
 }
 
 function getMarchColor(turns: number | null): string {
-    if (turns === null || turns === 99) return 'text-text-secondary/50';
-    if (turns <= 1) return 'text-green-400';
-    if (turns <= 3) return 'text-amber-400';
-    return 'text-red-400';
+    if (turns === null || turns === 99) return 'text-[#9c917b]';
+    if (turns <= 1) return 'text-emerald-200';
+    if (turns <= 3) return 'text-amber-200';
+    return 'text-red-200';
 }
 
 // WP2c: Verbal cohesion descriptor
 function getCohesionLabel(coh: number | null): { text: string; color: string } {
     if (coh == null) return { text: t('operationsSection.metricUnreported'), color: 'text-text-secondary' };
-    if (coh >= 70) return { text: t('opsModal.strong'), color: 'text-green-400' };
-    if (coh >= 40) return { text: t('opsModal.adequate'), color: 'text-amber-400' };
-    return { text: t('peace.critical').toUpperCase(), color: 'text-red-400' };
+    if (coh >= 70) return { text: t('opsModal.strong'), color: 'text-emerald-200' };
+    if (coh >= 40) return { text: t('opsModal.adequate'), color: 'text-amber-200' };
+    return { text: t('peace.critical').toUpperCase(), color: 'text-red-200' };
 }
 
 // WP2d: Fatigue descriptor
 function getFatigueLabel(fat: number | null): { text: string; color: string } {
     if (fat == null) return { text: t('operationsSection.metricUnreported'), color: 'text-text-secondary' };
-    if (fat <= 2) return { text: t('opsModal.fresh'), color: 'text-green-400' };
-    if (fat <= 5) return { text: t('opsModal.tired'), color: 'text-amber-400' };
-    return { text: t('oob.exhausted').toUpperCase(), color: 'text-red-400' };
+    if (fat <= 2) return { text: t('opsModal.fresh'), color: 'text-emerald-200' };
+    if (fat <= 5) return { text: t('opsModal.tired'), color: 'text-amber-200' };
+    return { text: t('oob.exhausted').toUpperCase(), color: 'text-red-200' };
 }
 
 const UNIT_TYPE_LABEL_KEYS: Record<string, MessageKey> = {
@@ -109,94 +109,90 @@ export const BrigadeCard = memo(function BrigadeCard({ brigade, isAssigned, isAu
             type="button"
             onClick={isUnavailable ? undefined : () => onToggle(brigade.id)}
             disabled={isUnavailable}
+            aria-pressed={isAssigned}
             // WP2f: title attribute on card
             title={reportedTitle}
             className={`
-                relative w-[160px] min-w-[160px] h-[140px] rounded-md border p-2.5 text-left transition-all
+                relative flex w-full flex-col gap-1.5 rounded-md border px-3.5 py-3 text-left transition
                 ${isUnavailable
-                    ? 'opacity-30 cursor-not-allowed border-[rgba(180,160,130,0.05)] bg-[rgba(20,18,15,0.4)]'
+                    ? 'cursor-default border-[#262b35] bg-[#12161e] opacity-60'
                     : isAssigned
-                        ? 'border-l-[3px] shadow-lg bg-[rgba(40,36,30,0.8)] hover:bg-[rgba(50,46,38,0.9)]'
-                        : 'border-[rgba(180,160,130,0.08)] bg-[rgba(30,28,24,0.5)] hover:bg-[rgba(40,36,30,0.7)] hover:border-[rgba(180,160,130,0.2)]'
+                        ? 'border-[#c9a75c] border-l-4 bg-[#232936]'
+                        : 'border-[#2a303c] bg-[#161a22] hover:border-[#4a4436]'
                 }
             `}
             style={{
-                // WP2g: Combat ineffective red border
-                ...(isUnavailable && isCombatIneffective ? { borderLeftColor: '#c24040', borderLeftWidth: '3px' } : {}),
+                // WP2g: Combat ineffective red edge
+                ...(isUnavailable && isCombatIneffective ? { borderLeftColor: '#c24040', borderLeftWidth: '4px' } : {}),
                 ...(isAssigned && !isUnavailable ? { borderLeftColor: factionColor } : {}),
             }}
         >
-            {/* Suggested badge */}
-            {isAutoProposed && isAssigned && (
-                <div className="absolute top-1 right-1 text-[7px] font-bold uppercase tracking-wider
-                                px-1 py-0.5 rounded bg-accent-gold/15 text-accent-gold">
-                    {t('opsModal.suggested')}
-                </div>
-            )}
-
-            {/* Unavailable overlay */}
-            {isUnavailable && (
-                <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="text-xs font-bold uppercase tracking-wider text-red-400/60 rotate-[-15deg]">
-                        {isCombatIneffective ? t('opsModal.combatIneffective') : t('formationDetail.disrupted')}
+            {/* Brigade name, with the suggested chip when staff proposed it */}
+            <span className="flex items-start justify-between gap-2">
+                <span className="min-w-0 truncate text-[16px] font-semibold leading-snug text-[#f1e6c8]">
+                    {brigadeName}
+                </span>
+                {isAutoProposed && isAssigned && (
+                    <span className="shrink-0 rounded border border-[#c9a75c]/60 px-2 py-0.5 font-mono text-[13px] font-semibold text-[#e0c27a]">
+                        {t('opsModal.suggested')}
                     </span>
-                </div>
-            )}
-
-            {/* Brigade name */}
-            <div className="text-xs font-bold text-white truncate" style={{ fontFamily: 'var(--font-command)' }}>
-                {brigadeName}
-            </div>
+                )}
+            </span>
 
             {/* WP2e: Unit type indicator */}
             {unitType && (
-                <div className="text-xs font-bold uppercase tracking-wider text-accent-gold/70 mt-0.5">
+                <span className="text-[14px] text-[#b9ad94]">
                     {unitType}
-                </div>
+                </span>
+            )}
+
+            {/* Unavailable: why */}
+            {isUnavailable && (
+                <span className="text-[14px] font-semibold text-red-200">
+                    {isCombatIneffective ? t('opsModal.combatIneffective') : t('formationDetail.disrupted')}
+                </span>
             )}
 
             {/* Personnel */}
-            <div className="text-[18px] font-bold text-white mt-1 leading-none">
+            <span className="font-mono text-[22px] font-semibold leading-none tabular-nums text-[#f6ecd2]">
                 {personnelLabel}
-            </div>
+            </span>
 
             {/* WP2a: Equipment labels - always show both, spelled out */}
-            <div className="flex gap-2 mt-1.5 text-xs text-text-secondary">
-                <span>{t('formationDetail.tanks').toUpperCase()} <span className="text-white font-bold">{formatOptionalInteger(reportedTanks, locale)}</span></span>
-                <span className="text-text-secondary/30">&middot;</span>
-                <span>{t('peace.artyCount', { count: '' }).trim().toUpperCase()} <span className="text-white font-bold">{formatOptionalInteger(reportedArty, locale)}</span></span>
-            </div>
+            <span className="flex flex-wrap gap-x-3 gap-y-0.5 text-[14px] text-[#b9ad94]">
+                <span>{t('formationDetail.tanks')} <span className="font-semibold text-[#f1e6c8]">{formatOptionalInteger(reportedTanks, locale)}</span></span>
+                <span>{t('peace.artyCount', { count: '' }).trim()} <span className="font-semibold text-[#f1e6c8]">{formatOptionalInteger(reportedArty, locale)}</span></span>
+            </span>
 
             {/* Cohesion bar */}
-            <div className="mt-1.5">
-                <div className="h-1 bg-[rgba(180,160,130,0.08)] rounded-full overflow-hidden">
+            <span className="flex flex-col gap-1">
+                <span className="block h-1.5 overflow-hidden rounded-full bg-[#262b35]">
                     {reportedCohesion != null && (
-                        <div
-                            className="h-full rounded-full transition-all"
+                        <span
+                            className="block h-full rounded-full transition-all"
                             style={{
                                 width: `${Math.min(100, Math.max(0, reportedCohesion))}%`,
                                 backgroundColor: reportedCohesion >= 70 ? '#4a9a55' : reportedCohesion >= 40 ? '#c4a35a' : '#c24040',
                             }}
                         />
                     )}
-                </div>
-                {/* WP2b: Cohesion/Fatigue readability - 9px, full opacity */}
+                </span>
                 {/* WP2c/2d: Verbal descriptors with colors */}
-                <div className="flex justify-between text-xs text-text-secondary mt-0.5">
-                    <span>{t('tacticalCard.cohShort').toUpperCase()} {formatOptionalMetric(reportedCohesion, locale)} <span className={cohLabel.color}>{cohLabel.text}</span></span>
-                    <span>{t('tacticalCard.fatShort').toUpperCase()} {formatOptionalMetric(reportedFatigue, locale)} <span className={fatLabel.color}>{fatLabel.text}</span></span>
-                </div>
-            </div>
+                <span className="flex flex-wrap justify-between gap-x-2 text-[14px] text-[#b9ad94]">
+                    <span>{t('tacticalCard.cohShort')} {formatOptionalMetric(reportedCohesion, locale)} <span className={cohLabel.color}>{cohLabel.text}</span></span>
+                    <span>{t('tacticalCard.fatShort')} {formatOptionalMetric(reportedFatigue, locale)} <span className={fatLabel.color}>{fatLabel.text}</span></span>
+                </span>
+            </span>
 
             {/* March time */}
-            <div className={`text-xs font-bold mt-1 ${getMarchColor(marchTurns)}`}>
+            <span className={`text-[14px] font-semibold ${getMarchColor(marchTurns)}`}>
                 {marchTurns === null || marchTurns === 99
-                    ? '\u2014'
+                    ? '—'
                     : marchTurns === 0
                         ? t('opsModal.march.inPosition', undefined, locale)
                         : formatMarchDisplay(marchTurns, locale)
                 }
-            </div>
+            </span>
         </button>
     );
 });

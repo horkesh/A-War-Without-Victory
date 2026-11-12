@@ -1,5 +1,6 @@
 /**
- * Brigade tray — bottom-anchored panel with parameters strip + scrollable brigade cards.
+ * Brigade tray: the Plan phase's Parameters and Brigades sections (a card grid) in the
+ * planning surface's detail column.
  */
 import { useCallback, useMemo } from 'react';
 import type { FormationView } from '../../data/types';
@@ -8,6 +9,8 @@ import { BrigadeCard } from './BrigadeCard';
 import { PlanParameters } from './PlanParameters';
 import type { ProposedBrigade } from './autoPropose';
 import { t, useLocale } from '../../i18n';
+import { SurfaceSection } from '../surface/Surface';
+import { OPS_TONE_TEXT } from './opsSurface';
 
 interface BrigadeTrayProps {
     plan: OpsPlanState;
@@ -70,33 +73,29 @@ export function BrigadeTray({ plan, onUpdate, corpsBrigades, autoProposed, facti
     const assignedCount = activeAxis?.brigadeIds.length ?? 0;
 
     return (
-        <div className="absolute bottom-0 left-0 right-0 z-20 pointer-events-auto">
-            <div className="bg-[rgba(20,18,15,0.94)] backdrop-blur-xl
-                            border-t border-[rgba(180,160,130,0.15)] p-3">
-                {/* Parameters strip */}
-                <div className="mb-3 overflow-x-auto">
-                    <PlanParameters plan={plan} onUpdate={onUpdate} />
-                </div>
+        <>
+            {/* Operation parameters */}
+            <SurfaceSection label={t('opsPlanning.surface.parametersSection', undefined, locale)}>
+                <PlanParameters plan={plan} onUpdate={onUpdate} />
+            </SurfaceSection>
 
-                {/* Assembly time badge */}
+            {/* Brigades: assigned first, then suggested, then by strength */}
+            <SurfaceSection label={t('opsPlanning.phase.brigades', undefined, locale)}>
                 {activeAxis && activeAxis.brigadeIds.length > 0 && (
-                    <div className="flex items-center gap-2 mb-2">
-                        <span className="text-xs font-bold uppercase tracking-[0.2em] text-text-secondary">
-                            {t('opsModal.fullAssembly', undefined, locale)}
-                        </span>
-                        <span className={`text-xs font-bold ${
-                            maxMarch <= 1 ? 'text-green-400' : maxMarch <= 3 ? 'text-amber-400' : 'text-red-400'
+                    <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 text-[16px]">
+                        <span className="text-[#b9ad94]">{t('opsModal.fullAssembly', undefined, locale)}</span>
+                        <span className={`font-semibold ${
+                            maxMarch <= 1 ? OPS_TONE_TEXT.good : maxMarch <= 3 ? OPS_TONE_TEXT.warn : OPS_TONE_TEXT.danger
                         }`}>
                             {t(maxMarch === 1 ? 'opsModal.march.turn.one' : 'opsModal.march.turn.many', { count: maxMarch }, locale)}
                         </span>
-                        <span className="text-xs text-text-secondary">
+                        <span className="text-[#c2b69c]">
                             {t(assignedCount === 1 ? 'opsModal.assignedSummary.one' : 'opsModal.assignedSummary.many', { count: assignedCount }, locale)}
                         </span>
                     </div>
                 )}
 
-                {/* Scrollable brigade cards */}
-                <div className="flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: 'thin' }}>
+                <div className="grid grid-cols-[repeat(auto-fill,minmax(13.5rem,1fr))] gap-3">
                     {sortedBrigades.map((brigade) => {
                         const proposed = proposedMap.get(brigade.id);
                         return (
@@ -111,13 +110,13 @@ export function BrigadeTray({ plan, onUpdate, corpsBrigades, autoProposed, facti
                             />
                         );
                     })}
-                    {sortedBrigades.length === 0 && (
-                        <div className="text-xs text-text-secondary/50 italic py-8 text-center w-full">
-                            {t('opsModal.noBrigadesForCorps', undefined, locale)}
-                        </div>
-                    )}
                 </div>
-            </div>
-        </div>
+                {sortedBrigades.length === 0 && (
+                    <p className="m-0 text-[16px] text-[#c2b69c]">
+                        {t('opsModal.noBrigadesForCorps', undefined, locale)}
+                    </p>
+                )}
+            </SurfaceSection>
+        </>
     );
 }
