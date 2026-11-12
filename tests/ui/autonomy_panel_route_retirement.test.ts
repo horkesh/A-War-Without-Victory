@@ -14,7 +14,7 @@ describe('autonomy control route ownership', () => {
     const registry = readRepoFile('src/ui/map/data/decisionSurfaceRegistry.ts');
     const inboxItems = readRepoFile('src/ui/map/data/inboxItems.ts');
 
-    expect(app).toContain("import { AutonomyPanel }");
+    expect(app).toContain("const AutonomyPanel = lazy(() =>");
     expect(app).toContain('<AutonomyPanel');
     expect(app).not.toContain('autonomyPanelOpen');
     expect(app).not.toContain("action === 'autonomy_panel'");
