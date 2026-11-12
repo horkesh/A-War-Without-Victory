@@ -7,6 +7,7 @@ import type { ArmyHQRecordsSubTab } from '../../shared/shellHandoff';
 import type { FieldInspectionTarget } from '../utils/fieldInspectionTarget';
 import type { ReplaySaveManifest } from '../../../sim/replay/replay_manifest';
 import type { GameState as RawGameState } from '../../../state/game_state';
+import { strictCompare } from '../../../state/validateGameState';
 import type { TurnPauseStatus } from '../desktop/types';
 
 /** Last turn report shape from desktop (advance-turn). Used for succession in FormationDetail. */
@@ -158,7 +159,12 @@ export interface GameStore {
   setHoveredSectorId: (id: string | null) => void;
 
   expandedStackOsid: string | null;
-  setExpandedStackOsid: (osid: string | null) => void;
+  /**
+   * Settlements whose counters the layout merged into the expanded stack (its badge counts
+   * their formations too), so the stack picker lists every formation the badge stands for.
+   */
+  expandedStackMergedOsids: string[];
+  setExpandedStackOsid: (osid: string | null, mergedOsids?: readonly string[]) => void;
 
   /** Selected corps (click on corps header in sidebar). */
   selectedCorpsId: string | null;
@@ -405,7 +411,13 @@ export const useGameStore = create<GameStore>((set, get) => ({
   setHoveredSectorId: (id) => set({ hoveredSectorId: id }),
 
   expandedStackOsid: null,
-  setExpandedStackOsid: (osid) => set({ expandedStackOsid: osid }),
+  expandedStackMergedOsids: [],
+  setExpandedStackOsid: (osid, mergedOsids = []) => set({
+    expandedStackOsid: osid,
+    expandedStackMergedOsids: osid
+      ? [...new Set(mergedOsids)].filter((merged) => merged !== osid).sort(strictCompare)
+      : [],
+  }),
 
   tooltipTarget: null,
   tooltipPosition: null,
@@ -570,6 +582,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       opsPlanningModalOpen: false,
       operationTargetOsids: [] as string[],
       expandedStackOsid: null,
+      expandedStackMergedOsids: [] as string[],
       hoveredOsids: [] as string[],
       hoveredSectorId: null,
       hoveredCorpsId: null,
@@ -908,6 +921,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
               hoveredCorpsId: null,
               hoveredSectorId: null,
               expandedStackOsid: null,
+              expandedStackMergedOsids: [],
               // Modal state: close all modals that reference save-specific entities
               orderModeForFormation: null,
               pendingAttackConfirmation: null,

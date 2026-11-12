@@ -9,6 +9,35 @@
   Compacted 2026-09-10: 1723 sections moved out, 62 kept live.
 -->
 
+## 2026-11-12 — Test tooling: lockfile peers, worktree module resolution, .test.tsx discovery, runner timeout
+
+Test infrastructure only; no product, simulation, or calibration code changed.
+
+- **Lockfile.** `package-lock.json` was in sync only under `--legacy-peer-deps`; a bare `npm ci`
+  failed EUSAGE because `electron-builder`'s optional peer `electron-builder-squirrel-windows@25.1.8`
+  (with `archiver@5.3.2` and ~28 transitive packages) was missing. Regenerated with
+  `npm install --package-lock-only`: additions only plus three `dev`→`devOptional` flags, no version
+  changes. Both `npm ci` and CI's `npm ci --legacy-peer-deps` now pass (real bare install proven in a
+  clean copy). CI keeps its exact install command. Lockfile-only changes trigger the desktop
+  package/probe gates in CI by design (`tests/desktop_release_ci_guardrails.test.ts`).
+- **Worktree React resolution.** `tools/test/vitest_shared_config.mjs` owns `resolveRootModules`
+  (first ancestor `node_modules` holding `react`, as Node resolves) and `resolveVitestCli`. All three
+  config surfaces (`vitest.config.ts`, balanced, slice) and the three runners use them. In the main
+  checkout and CI this is still `<root>/node_modules`; a worktree without node_modules now resolves
+  the main checkout's copy instead of failing every UI test with "Failed to resolve react". The walk
+  only reads; no links are created or removed.
+- **`.test.tsx` discovery.** `discover_test_files.mjs` now discovers `.test.ts` and `.test.tsx`
+  (`TEST_FILE_SUFFIXES`), including `.browser.test.tsx` for jsdom. No `.test.tsx` existed before; the
+  witness `tests/test_discovery_tsx_entrypoint.test.tsx` renders JSX and pins its own discovery.
+- **Runner timeout.** The real-child "deliberately failing Vitest child" test in
+  `tests/run_vitest_balanced.test.ts` goes from 30 s to 180 s; same assertion (exit status 1).
+
+Gates: `npx tsc --noEmit` exit 0; affected tests 64/64 from a worktree with no node_modules;
+`npm ci --legacy-peer-deps` in the worktree exit 0; full `npm run test:vitest` exit 0
+(4 shards 365/365/365/363 files + 85 serial; only the deliberate `tests/fixtures/vitest_balanced`
+controls are red). Known residue, not fixed here: in a worktree with NO node_modules, 17 tests in 5
+files still fail because they (or tools they spawn) hard-code `<cwd>/node_modules/tsx/dist/cli.mjs`.
+
 ## 2026-10-31 — Verdict Load Save delegates returned state to App replacement owner — NOT ADOPTED
 
 The real Verdict footer, including the fallback no-verdict screen, discarded `loadStateDialog`'s returned `stateJson`. Both now share one pending-guarded handler that accepts only `ok` + non-empty canonical state and hands it once to App's existing `handleMainMenuLoadGame` campaign-replacement path; cancel/error/missing/empty/rejection do nothing and no control renders without a replacement owner. RED 8 failed / 6 passed; GREEN focused 14/14 and four-file 79/79. Package/native qualification and adoption remain pending; no full suite, typecheck, or native run.
@@ -14299,26 +14328,6 @@ Codex removed the Mercedes badge from `act_front_visit_detail_HRHB.webp` (#564 a
 
 Codex delivered the four round-2 aftermath headers (brief §5) in image-only PR #565 at 79596fe5a (13/13 checks green). Reviewed against A1–A8: 3000 × 480, no faces, no text or pseudo-text, no logos or flags, period objects (field radio and map, rotary-era desk phone with cork board, field notes, ashtray and coffee); the left half is dark and low-detail, and the right edge under Close is dark wood or wall. The only nit is a tiny mark on the lamp base in `gain`, which is not readable at display size. All four APPROVED. They are on this branch byte-identical to the PR. `getAftermathHeaderForTone` (`presidentialDeskAssets.ts`) picks the wide cut per tone and falls back to the 16:9 consequence still, which still serves the Desk's "What followed" thumbnails; `TurnAftermathModal` uses it. `decision_modal_art_wiring` covers the four distinct wide headers; typecheck clean; 2 files 23/23. Rendered (dev build, RBiH, view from `buildTurnAftermathView` with each tone): the band is 1,231 × 178 at 1280 × 720 and 1,759 × 178 at 2293 × 960, every tone loads its 3,000 px wide cut, no overflow, minimum text 13 px, and Close report sits on dark wood.
 
-## 2026-11-11 — Truthful command, step 1: brigade posture is the commander's, Orders becomes Command (UI)
-
-Owner-approved step 1 of `docs/40_reports/proposals/20261111_PLAYER_SURFACE_AND_AGENCY_REVIEW.md` (option 1, presentation only, no sim change). Rebuilt in a cloud session from the transcript of the local session that crashed with this work uncommitted; the review doc itself is restored from the same transcript.
-- Unit panel: brigade posture is labelled "Commander's posture:"; the unset value is now "Not yet set by the commander" (was "Awaiting first posture order", which read as a task the player could not do). Corps and army HQ panels share the new unset value.
-- The brigade Orders tab is renamed Command (non-brigades keep Orders). It names the commanding corps, keeps the delegated-command note (test id unchanged), adds an "Open this corps in Army HQ" button (`formation-detail-open-corps-hq`, opens the corps briefing), and lists the directives that reach the brigade.
-- Autonomy level descriptions rewritten to the engine: 0 staff issues no player orders; 1 staff runs orders, stance and operation proposals wait for approval, recruitment stays the player's; 2 (default) staff runs operations and recruitment without asking; 3 adds auto-resolution of event decisions with an authored historical response.
-- EN and BCS (BCS with diacritics, including the four autonomy strings that had lost them). Text 13 px or larger.
-- Gates: `npx tsc --noEmit` exit 0; affected files (formation_detail_parity, corps_detail_sector_truth, own_force_report_gap) 3/3 files, 57/57 tests including two new Command-tab tests; full `npm run test:vitest` exit 0 (only the deliberate child-process failure controls fail). Not rendered in the dev build or the packaged app.
-
-## 2026-11-12 — Truthful command step 1 rendered: two fixes from the screen check (UI)
-
-Local reconciliation after the 2026-11-11 crash: the crashed worktree's `FormationDetail.tsx` and the review doc are blob-identical to this branch (backup `backup/truthful-command-crash`, `23be14100`); the local copy lacked only the i18n keys and tests the cloud rebuild added, so the cloud branch is the base and nothing local was missing.
-
-Rendered in the dev build (RBiH, 6 Apr 1992, 1st Mountain Brigade) at 2293 × 960 and 1280 × 720 with a headless Playwright drive (script and images: `F:/AWWV-coordination/crash_recovery_20261112/truthful_command_shots_final/`). Command tab, "Commander's posture: Not yet set by the commander", "Open this corps in Army HQ" (opens the 1st Corps briefing) and the four autonomy descriptions all present at both sizes.
-- **Fixed: the overview still told the player a posture was coming.** Under the new posture line, the report-gap notice read "Staff returns incomplete - posture expected in a coming briefing" (review A1's second half). A brigade with no posture is not a missing staff return; the commander has not set one. Brigade posture is no longer listed as a report gap (corps stance still is). `tests/ui/own_force_report_gap.test.ts` pins it.
-- **Fixed: autonomy descriptions under the 13 px floor.** The Command Autonomy panel rendered every line at `text-xs` (12 px measured). All 19 uses are now `text-[13px]` (13 px measured at both sizes); new `tests/ui/autonomy_panel_text_floor.test.ts`.
-- Unit panel computed minimum font 13 px on both tabs at both sizes.
-- Seen, not changed here: at 1280 × 720 the Find pill overlaps the bottom of the right-hand autonomy panel; `12462b47e`-equivalent on `claude/r8-name-sweep-recovery` (right panels clear the Find button) covers it once both land. The 1st Corps' first OG reads "OG Bileća" (review M3), confirmed live; separate task. Lower-case municipality names in the Situation sidebar ("Aginci (bosanska dubica)") are the A5 name-sweep defect, fixed on the recovery branch.
-- Gates: `npx tsc --noEmit` exit 0; focused unit-panel and autonomy tests 9 files green; full suite reran on the final head (see the commit).
-
 ## 2026-11-10 — Units no longer vanish from the map at the edges or beside panels (UI, MAP)
 
 Owner: "Why do units disappear from the map?" Reproduced in the running game (dev build, 2293 × 960, RBiH opening turn): 20 of 78 fielded RBiH brigades/OGs were not drawn. The game data was complete (turn-24 packaged save: every brigade passes the map's visibility rules; only corps/army HQs and inactive paramilitaries are never drawn; 8 of 61 enemy brigades hidden by fog of war as designed). Two display causes:
@@ -14431,6 +14440,47 @@ Package `dist-packaged/r8-shakedown-20261112n` built once from `f68daaac7` (this
 - **RS-07 (75-min cap): FAIL on runtime diagnostics only.** 24 turns, final tour and exact Save/load proof all complete; 0 page errors, 0 console messages, 0 unexpected stderr; about 69 min under load from four parallel sessions. Exit 1 on 4 network failures, all `net::ERR_ABORTED` cancellations: three `hillshade.pmtiles` range requests initiated in the same millisecond and aborted together with `mapNavigationWindow: null`, and one `cat_war_direction_banner_RS-*.webp` image. The hillshade abort is the attempt-09 item "left to recur before any rule change" (round 13 entry): it has now recurred. Not a game failure, but not explained either.
 
 **Open question, decided:** diagnose why the hillshade source cancels range fetches outside any map navigation (likely a covering surface or layer change tearing down the source) and why a surface banner fetch is cancelled, before deciding between an engine fix and a harness classification rule. RS stays OPEN for R8 exit criterion 1; RBiH-14 and HRHB-03 stand.
+
+## 2026-11-12 — PR #567 review fixes: no decision-modal loop on a resumed turn; merged counter stacks open every formation; baseline pins re-blessed for the census spellings (UI, QA)
+
+Codex review on #567 (two P2 findings, both confirmed in code) and the advisory Baseline pins check.
+- **Resumed turn (App.tsx).** When the player continues a paused turn while a required decision is pending, the resumed-pause effect closes the modal and the auto-launch effect re-opened it at once, so the two alternated until the turn ended. Auto-launch now waits while `turnPauseStatus.status === 'resumed'`. The main process sends `null` when the turn ends (`ipc_mutation_policy.cjs`), so the guard releases then and a required decision re-opens as intended. Pinned in `tests/ui/event_decision_auto_launch_contract.test.ts`.
+- **Merged counter stacks.** When the layout merges a nearby same-side stack into another, the badge counts both, but selection opened only the top stack's settlement and `merged_osids` had no consumer; the DOM path also forwarded the counter's own `stack_count`. Now the store keeps `expandedStackMergedOsids` next to `expandedStackOsid`, both click paths pass the displayed count and the merged settlements, and the stack picker lists the formations of every merged settlement (deduplicated). New `tests/ui/formation_counter_merged_stack_selection.test.ts` (a fixture that really merges, the DOM and Deck selection properties, the store).
+- **Baseline pins.** `apr1992_188w` final save, run summary and weekly report hashes moved. Measured by running the scenario on main (matches the pins) and on this branch and comparing field by field: 0 numeric, 0 boolean, 0 structural differences; 15 (final save) and 10 (weekly report) string-only differences, all census spellings in event headlines and bodies (Bihać, Žepa, Glamoč, Busovača, Brčko, Višegrad, Ahmići, Velika Kladuša), plus the run summary's own state hash. Simulation unchanged. Re-blessed with `UPDATE_BASELINES=1 npm run test:baselines` (manifest: those 3 hashes only).
+- Gates: `tsc --noEmit` exit 0; `tests/ui` plus the counter and click-selection suites (see commit).
+
+## 2026-11-11 — Truthful command, step 1: brigade posture is the commander's, Orders becomes Command (UI)
+
+Owner-approved step 1 of `docs/40_reports/proposals/20261111_PLAYER_SURFACE_AND_AGENCY_REVIEW.md` (option 1, presentation only, no sim change). Rebuilt in a cloud session from the transcript of the local session that crashed with this work uncommitted; the review doc itself is restored from the same transcript.
+- Unit panel: brigade posture is labelled "Commander's posture:"; the unset value is now "Not yet set by the commander" (was "Awaiting first posture order", which read as a task the player could not do). Corps and army HQ panels share the new unset value.
+- The brigade Orders tab is renamed Command (non-brigades keep Orders). It names the commanding corps, keeps the delegated-command note (test id unchanged), adds an "Open this corps in Army HQ" button (`formation-detail-open-corps-hq`, opens the corps briefing), and lists the directives that reach the brigade.
+- Autonomy level descriptions rewritten to the engine: 0 staff issues no player orders; 1 staff runs orders, stance and operation proposals wait for approval, recruitment stays the player's; 2 (default) staff runs operations and recruitment without asking; 3 adds auto-resolution of event decisions with an authored historical response.
+- EN and BCS (BCS with diacritics, including the four autonomy strings that had lost them). Text 13 px or larger.
+- Gates: `npx tsc --noEmit` exit 0; affected files (formation_detail_parity, corps_detail_sector_truth, own_force_report_gap) 3/3 files, 57/57 tests including two new Command-tab tests; full `npm run test:vitest` exit 0 (only the deliberate child-process failure controls fail). Not rendered in the dev build or the packaged app.
+
+## 2026-11-12 — Truthful command step 1 rendered: two fixes from the screen check (UI)
+
+Local reconciliation after the 2026-11-11 crash: the crashed worktree's `FormationDetail.tsx` and the review doc are blob-identical to this branch (backup `backup/truthful-command-crash`, `23be14100`); the local copy lacked only the i18n keys and tests the cloud rebuild added, so the cloud branch is the base and nothing local was missing.
+
+Rendered in the dev build (RBiH, 6 Apr 1992, 1st Mountain Brigade) at 2293 × 960 and 1280 × 720 with a headless Playwright drive (script and images: `F:/AWWV-coordination/crash_recovery_20261112/truthful_command_shots_final/`). Command tab, "Commander's posture: Not yet set by the commander", "Open this corps in Army HQ" (opens the 1st Corps briefing) and the four autonomy descriptions all present at both sizes.
+- **Fixed: the overview still told the player a posture was coming.** Under the new posture line, the report-gap notice read "Staff returns incomplete - posture expected in a coming briefing" (review A1's second half). A brigade with no posture is not a missing staff return; the commander has not set one. Brigade posture is no longer listed as a report gap (corps stance still is). `tests/ui/own_force_report_gap.test.ts` pins it.
+- **Fixed: autonomy descriptions under the 13 px floor.** The Command Autonomy panel rendered every line at `text-xs` (12 px measured). All 19 uses are now `text-[13px]` (13 px measured at both sizes); new `tests/ui/autonomy_panel_text_floor.test.ts`.
+- Unit panel computed minimum font 13 px on both tabs at both sizes.
+- Seen, not changed here: at 1280 × 720 the Find pill overlaps the bottom of the right-hand autonomy panel; `12462b47e`-equivalent on `claude/r8-name-sweep-recovery` (right panels clear the Find button) covers it once both land. The 1st Corps' first OG reads "OG Bileća" (review M3), confirmed live; separate task. Lower-case municipality names in the Situation sidebar ("Aginci (bosanska dubica)") are the A5 name-sweep defect, fixed on the recovery branch.
+- Gates: `npx tsc --noEmit` exit 0; focused unit-panel and autonomy tests 9 files green; full suite reran on the final head (see the commit).
+
+## 2026-11-12 — Operations surfaces: planning, briefing, AAR and history in the Command Surface style (UI)
+
+Step 3 of `docs/40_reports/proposals/20261111_PLAYER_SURFACE_AND_AGENCY_REVIEW.md`; plan `docs/plans/2026-11-12-operations-surfaces-plan.md`. Presentation only: no operation logic, staging, IPC or store change (operations-expert check: the sim authority files are untouched; plan state, phase gates, auto-propose, `submitOperation` and the OpsMap click rules are byte-identical). Branch `claude/ops-surfaces-e1fb18`, built on `main` + `origin/claude/r8-name-sweep-recovery` + `origin/claude/truthful-command`.
+- **Operation planning** (`ops_modal/*`): one opaque surface with the shared parts. Header: corps eyebrow, operation name, a numbered four-step stepper, Close (`ops-planning-close`). Columns: the planning map on the left (MapLibre resized in rAF on container change), the phase on the right with its primary action in a fixed footer. The G-2 clipboard and the operations order leave paper for dark panels; the legend and terrain tooltip are opaque. New helper `ops_modal/opsSurface.tsx`; one scoped `.ops-terrain-tooltip` rule appended to `styles/globals.css`.
+- **Briefing**: shared `Modal` (`Z.CRITICAL_MODAL`, `operation-briefing-title`) with `SURFACE_MODAL_PANEL_MEDIUM`, header, sections, fixed action footer.
+- **AAR and operation history** (Army HQ Records tab): surface sections and cards. History labels that were hardcoded English (outcomes, recovery reasons, grade factors, commander assessment, provenance notes, fallbacks) move to i18n, EN text unchanged, BCS with diacritics.
+- All text 13px or larger; no `backdrop-blur`, `amber-400`, `text-xs` or translucent panel fills left in these files. Test ids and `data-*` hooks unchanged; `tools/ui/paradox_local_qa.cjs` does not select these screens.
+- **Bug fixed (pre-existing, found in the browser):** `OperationBriefingModal` called two `useMemo` hooks after `return null`. The App wrapper keeps it mounted with a null context, so opening any briefing threw "Rendered more hooks than during the previous render". Now plain derivations; same values. Also: officer rating colours never showed (a class name was passed as `style.color`), and the G-2 report header printed a literal `\u2014`.
+- **Finding:** the detailed planner (`OpsPlanningModal`) is NOT mounted in the live game. It was retired on 2026-07-17 (`edc0c3ea2`) under the presidential command model, and `tests/ui/presidential_command_model_surface.test.ts` pins it unmounted. The review listed it as a live screen. It is restyled anyway (unit tests render it); its browser evidence used a temporary, uncommitted mount in `App.tsx`. Whether to delete it is an owner decision.
+- Tests updated to the new markup: `modal_palette_unification`, `operation_aar_records_review` (tab state via `aria-pressed`), `oob_operations_panel`, `ui_opord_player_safe_labels`.
+- Evidence (`F:/AWWV-coordination/surface_steps/step3/`, script `step3_evidence.cjs`): dev map build driven in Chromium at 2293×960 and 1280×720 — briefing, Records AAR, Records operation history, and planner commander / commander selected / plan / G-2 / authorize / discard. Computed minimum font 13px on every screen, zero offenders (`fonts.json`, `planner_fonts_*.json`). The planner map needed main's real PMTiles (this worktree holds LFS pointers); they were hard-linked in for the run and the pointers restored.
+- Gates: `NODE_OPTIONS=--max-old-space-size=8192 npx tsc --noEmit` exit 0; affected tests 36 files green; `tests/ui` 391 files / 3337 tests exit 0; entry chunk `tactical_map-*.js` 3,007,526 B vs 2,957,514 B on `origin/main` and 3,005,389 B on the pre-change base (+2,137 B from this change; the rest is the merged name sweep). Full suite `npm run test:vitest` exit 0 (shards 365+1 skipped, 365, 363+2 skipped, 364+2 skipped, 85 files; the only reds are the deliberate `tests/fixtures/vitest_balanced` controls).
 
 ## 2026-11-12 — Records and end states as surfaces: review step 4 (UI)
 

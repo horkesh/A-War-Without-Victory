@@ -1,6 +1,7 @@
 /**
  * Phase 2 — Plan orchestrator.
- * Renders ObjectiveList (top-right), BrigadeTray (bottom), and manages auto-propose.
+ * Renders plan status, ObjectiveList and BrigadeTray as sections of the planning
+ * surface's detail column (G2 assessment in the fixed footer), and manages auto-propose.
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useGameStore } from '../../store/gameStore';
@@ -11,6 +12,8 @@ import { autoProposeBrigades, estimateMarchTurns } from './autoPropose';
 import type { ProposedBrigade } from './autoPropose';
 import { getOsidDisplayName } from '../../utils/osidDisplayName';
 import { t } from '../../i18n';
+import { SurfaceDetailFooter, SurfaceFigure, SurfaceSection, SURFACE_PRIMARY_BUTTON } from '../surface/Surface';
+import { OpsNotice, OpsPhaseBody } from './opsSurface';
 
 interface PlanPhaseProps {
     plan: OpsPlanState;
@@ -163,93 +166,64 @@ export function PlanPhase({
 
     return (
         <div
-            className="absolute inset-0 z-10 pointer-events-none"
+            className="flex min-h-0 flex-1 flex-col"
             data-testid="ops-planning-phase-panel"
             data-phase="plan"
         >
-            {/* Planning status panel — top left */}
-            <div className="absolute top-16 left-4 w-[340px] pointer-events-auto">
-                <div className="rounded-lg border border-[rgba(180,160,130,0.16)] bg-[rgba(20,18,15,0.9)] backdrop-blur-xl p-3">
-                    <div className="flex items-center justify-between mb-2">
-                        <div className="text-xs font-bold uppercase tracking-[0.2em] text-accent-gold">
-                            {t('opsPlanning.phase.planStatus')}
-                        </div>
+            <OpsPhaseBody>
+                {/* Plan status: active axis and staging; Suggest plan fills both. */}
+                <SurfaceSection
+                    label={t('opsPlanning.phase.planStatus')}
+                    action={(
                         <button
                             type="button"
                             onClick={suggestPlan}
                             disabled={!canSuggestPlan}
-                            className="rounded border border-accent-gold/30 bg-accent-gold/12 px-2 py-1
-                                       text-xs font-bold uppercase tracking-[0.14em] text-accent-gold
-                                       transition-colors hover:bg-accent-gold/22 disabled:cursor-not-allowed
-                                       disabled:border-[rgba(180,160,130,0.14)] disabled:bg-[rgba(180,160,130,0.05)]
-                                       disabled:text-text-secondary/35"
+                            className="h-10 rounded-md border border-[#c9a75c]/60 bg-[#1b2029] px-4 text-[15px] font-semibold text-[#f1e6c8] transition hover:border-[#c9a75c] disabled:cursor-default disabled:opacity-45"
                             title={canSuggestPlan ? t('opsPlanning.phase.suggestTitle') : t('opsPlanning.phase.suggestNeedsCommander')}
                         >
                             {t('opsPlanning.phase.suggestPlan')}
                         </button>
-                    </div>
-                    {suggestionMessage && (
-                        <div className="mb-2 rounded border border-accent-gold/20 bg-accent-gold/10 px-2 py-1 text-xs text-accent-gold">
-                            {suggestionMessage}
-                        </div>
                     )}
-                    <div className="grid grid-cols-2 gap-2">
-                        <div className="rounded border border-[rgba(180,160,130,0.16)] bg-[rgba(180,160,130,0.06)] px-2 py-1.5">
-                            <div className="text-xs uppercase tracking-[0.14em] text-text-secondary/70">{t('opsPlanning.phase.axis')}</div>
-                            <div className="text-xs font-bold text-white truncate">{selectedAxisName}</div>
-                        </div>
-                        <div className="rounded border border-[rgba(180,160,130,0.16)] bg-[rgba(180,160,130,0.06)] px-2 py-1.5">
-                            <div className="text-xs uppercase tracking-[0.14em] text-text-secondary/70">{t('opsPlanning.phase.staging')}</div>
-                            <div className="text-xs font-bold text-white truncate">
-                                {selectedStagingLabel}
-                            </div>
-                        </div>
-                        <div className="rounded border border-[rgba(180,160,130,0.16)] bg-[rgba(180,160,130,0.06)] px-2 py-1.5">
-                            <div className="text-xs uppercase tracking-[0.14em] text-text-secondary/70">{t('opsPlanning.phase.objectives')}</div>
-                            <div className="text-xs font-bold text-white">{selectedAxisObjectives}</div>
-                        </div>
-                        <div className="rounded border border-[rgba(180,160,130,0.16)] bg-[rgba(180,160,130,0.06)] px-2 py-1.5">
-                            <div className="text-xs uppercase tracking-[0.14em] text-text-secondary/70">{t('opsPlanning.phase.brigades')}</div>
-                            <div className="text-xs font-bold text-white">{selectedAxisBrigades}</div>
-                        </div>
+                >
+                    {suggestionMessage && <OpsNotice role="status">{suggestionMessage}</OpsNotice>}
+                    <div className="grid grid-cols-2 gap-3">
+                        <SurfaceFigure label={t('opsPlanning.phase.axis')} value={selectedAxisName} />
+                        <SurfaceFigure label={t('opsPlanning.phase.staging')} value={selectedStagingLabel} />
                     </div>
-                </div>
-            </div>
+                    <p className="m-0 text-[15px] leading-relaxed text-[#b9ad94]">{t('opsPlanning.surface.planMapHint')}</p>
+                </SurfaceSection>
 
-            {/* Objective list — top right */}
-            <ObjectiveList
-                plan={plan}
-                onUpdate={onUpdate}
-                osidDisplayNames={osidDisplayNames}
-                onAdvance={onAdvance}
-                availableObjectiveCount={availableObjectiveOsids.length}
-                canAdvanceToG2={canAdvanceToG2}
-            />
+                <ObjectiveList
+                    plan={plan}
+                    onUpdate={onUpdate}
+                    osidDisplayNames={osidDisplayNames}
+                    availableObjectiveCount={availableObjectiveOsids.length}
+                    canAdvanceToG2={canAdvanceToG2}
+                />
 
-            {/* Brigade tray — bottom */}
-            <BrigadeTray
-                plan={plan}
-                onUpdate={onUpdate}
-                corpsBrigades={corpsBrigades}
-                autoProposed={autoProposed}
-                factionColor={factionColor}
-            />
+                <BrigadeTray
+                    plan={plan}
+                    onUpdate={onUpdate}
+                    corpsBrigades={corpsBrigades}
+                    autoProposed={autoProposed}
+                    factionColor={factionColor}
+                />
+            </OpsPhaseBody>
 
-            {/* Advance button — fixed right side, vertically centered */}
-            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-auto">
+            <SurfaceDetailFooter>
+                <p className="m-0 text-[16px] text-[#c2b69c]">
+                    {t('opsPlanning.surface.planFooter', { objectives: selectedAxisObjectives, brigades: selectedAxisBrigades })}
+                </p>
                 <button
                     type="button"
                     onClick={onAdvance}
                     disabled={!canAdvanceToG2}
-                    className="px-5 py-3 rounded-lg font-bold text-sm uppercase tracking-wider
-                               transition-all border disabled:opacity-20 disabled:cursor-not-allowed
-                               bg-accent-gold/15 text-accent-gold border-accent-gold/25
-                               hover:bg-accent-gold/25 hover:shadow-[0_0_20px_rgba(196,163,90,0.2)]
-                               shadow-lg backdrop-blur-sm"
+                    className={SURFACE_PRIMARY_BUTTON}
                 >
                     {t('opsPlanning.phase.g2Assessment')}
                 </button>
-            </div>
+            </SurfaceDetailFooter>
         </div>
     );
 }

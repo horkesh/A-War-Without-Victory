@@ -15,11 +15,11 @@ interface LegendItemProps {
 function LegendItem({ swatch, label, detail }: LegendItemProps) {
     return (
         <div className="flex items-center gap-2 py-0.5">
-            <div className="w-5 h-3 flex-shrink-0 flex items-center justify-center">
+            <div className="flex h-5 w-8 flex-shrink-0 items-center justify-center rounded-sm bg-[#d6ccb7] px-0.5" aria-hidden="true">
                 {swatch}
             </div>
-            <span className="text-xs text-[#2a2218]">{label}</span>
-            {detail && <span className="text-xs text-[#4a4238] ml-auto">{detail}</span>}
+            <span className="text-[15px] text-[#ddd1b3]">{label}</span>
+            {detail && <span className="text-[14px] text-[#b9ad94] ml-auto">{detail}</span>}
         </div>
     );
 }
@@ -56,7 +56,7 @@ export function MapLegendTab() {
         <div className="space-y-4" style={{ fontFamily: 'var(--font-command)' }}>
             {/* Territory Colors */}
             <div>
-                <div className="text-xs font-bold text-[#1a1610] uppercase tracking-wider mb-2">
+                <div className="font-mono text-[13px] font-semibold uppercase tracking-[0.16em] text-[#e0c27a] mb-2">
                     {t('opsPlanning.legend.territory')}
                 </div>
                 <div className="space-y-0.5">
@@ -77,7 +77,7 @@ export function MapLegendTab() {
 
             {/* Front Lines */}
             <div>
-                <div className="text-xs font-bold text-[#1a1610] uppercase tracking-wider mb-2">
+                <div className="font-mono text-[13px] font-semibold uppercase tracking-[0.16em] text-[#e0c27a] mb-2">
                     {t('opsPlanning.legend.frontLines')}
                 </div>
                 <div className="space-y-0.5">
@@ -96,7 +96,7 @@ export function MapLegendTab() {
 
             {/* Operation Markers */}
             <div>
-                <div className="text-xs font-bold text-[#1a1610] uppercase tracking-wider mb-2">
+                <div className="font-mono text-[13px] font-semibold uppercase tracking-[0.16em] text-[#e0c27a] mb-2">
                     {t('opsPlanning.legend.operationMarkers')}
                 </div>
                 <div className="space-y-0.5">
@@ -106,7 +106,7 @@ export function MapLegendTab() {
                         detail={t('opsPlanning.legend.darkRedFill')}
                     />
                     <LegendItem
-                        swatch={<div className="text-accent-gold text-[14px] leading-none">&#9733;</div>}
+                        swatch={<div className="text-accent-gold text-[15px] leading-none">&#9733;</div>}
                         label={t('opsPlanning.legend.schwerpunkt')}
                         detail={t('opsPlanning.legend.goldStar')}
                     />
@@ -120,7 +120,7 @@ export function MapLegendTab() {
 
             {/* Selection States */}
             <div>
-                <div className="text-xs font-bold text-[#1a1610] uppercase tracking-wider mb-2">
+                <div className="font-mono text-[13px] font-semibold uppercase tracking-[0.16em] text-[#e0c27a] mb-2">
                     {t('opsPlanning.legend.selection')}
                 </div>
                 <div className="space-y-0.5">
@@ -130,7 +130,7 @@ export function MapLegendTab() {
                         detail={t('opsPlanning.legend.pointerCursor')}
                     />
                     <LegendItem
-                        swatch={<div className="w-4 h-3 rounded-sm bg-[rgba(0,0,0,0.45)]" />}
+                        swatch={<div className="w-4 h-3 rounded-sm bg-[rgba(0,0,0,0.45)] border border-[#4a5160]" />}
                         label={t('opsPlanning.legend.outOfRange')}
                         detail={t('opsPlanning.legend.noCursor')}
                     />
@@ -139,32 +139,32 @@ export function MapLegendTab() {
 
             {/* Terrain Modifiers */}
             <div>
-                <div className="text-xs font-bold text-[#1a1610] uppercase tracking-wider mb-2">
+                <div className="font-mono text-[13px] font-semibold uppercase tracking-[0.16em] text-[#e0c27a] mb-2">
                     {t('opsPlanning.legend.terrainDefense')}
                 </div>
                 <div className="space-y-0.5">
                     <LegendItem
-                        swatch={<span className="text-[12px]">&#9968;</span>}
+                        swatch={<span className="text-[15px]">&#9968;</span>}
                         label={t('opsPlanning.legend.mountain')}
                         detail={t('opsPlanning.legend.defense50')}
                     />
                     <LegendItem
-                        swatch={<span className="text-[12px]">&#9651;</span>}
+                        swatch={<span className="text-[15px]">&#9651;</span>}
                         label={t('opsPlanning.legend.hilly')}
                         detail={t('opsPlanning.legend.defense30')}
                     />
                     <LegendItem
-                        swatch={<span className="text-[12px]">&#127795;</span>}
+                        swatch={<span className="text-[15px]">&#127795;</span>}
                         label={t('opsPlanning.legend.rollingForest')}
                         detail={t('opsPlanning.legend.defense15')}
                     />
                     <LegendItem
-                        swatch={<span className="text-[12px]">&#9866;</span>}
+                        swatch={<span className="text-[15px]">&#9866;</span>}
                         label={t('opsPlanning.legend.flat')}
                         detail={t('opsPlanning.legend.noBonus')}
                     />
                     <LegendItem
-                        swatch={<span className="text-[12px] text-blue-500">&#126;</span>}
+                        swatch={<span className="text-[15px] text-sky-300">&#126;</span>}
                         label={t('opsPlanning.legend.riverCrossing')}
                         detail={t('opsPlanning.legend.attackPenalty')}
                     />
