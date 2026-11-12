@@ -110,6 +110,13 @@ function projectMeta(meta, playerFaction) {
   projected.proposal_decision_history = playerFaction
     ? rowsForFaction(meta?.proposal_decision_history, playerFaction)
     : [];
+  // Posture model option 2: the player's own stance matters and their receipts.
+  projected.stance_matters = playerFaction
+    ? rowsForFaction(meta?.stance_matters, playerFaction)
+    : [];
+  projected.stance_matter_history = playerFaction
+    ? rowsForFaction(meta?.stance_matter_history, playerFaction)
+    : [];
   if (isRecord(meta?.autonomy_overrides) && playerFaction) {
     projected.autonomy_overrides = sortedRecordFromEntries(
       Object.entries(meta.autonomy_overrides)
@@ -589,6 +596,14 @@ function projectMilitary(state, playerFaction, opportunityOwnership) {
     : [])
     .filter((id) => ownFormationIds.has(id))
     .sort(strictCompare);
+  // Posture model option 2: only the player's own presidential stance holds are shown.
+  if (isRecord(military.stance_matter_state) && Array.isArray(military.stance_matter_state.holds)) {
+    projected.stance_matter_state = {
+      holds: military.stance_matter_state.holds
+        .filter((hold) => isRecord(hold) && hold.faction === playerFaction)
+        .map(cloneJson),
+    };
+  }
 
   for (const key of [
     'front_posture',

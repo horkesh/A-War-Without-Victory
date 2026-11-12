@@ -198,6 +198,14 @@ export const PRESIDENTIAL_DECISION_OWNERSHIP: readonly PresidentialDecisionOwner
     receiptDurability: 'durable',
     receiptDisposition: 'The canonical opportunity state and resolution ledger retain the response and downstream outcome.',
   },
+  {
+    familyId: 'stance_matter',
+    producer: 'src/sim/combat/stance_matters.ts -> meta.stance_matters',
+    blockerPredicate: 'advisory; silence means the commander\'s stance stands',
+    receiptOwner: 'meta.stance_matter_history',
+    receiptDurability: 'durable',
+    receiptDisposition: 'Every stance matter, answered or not, and every change not put to the president remains in the bounded stance-matter history.',
+  },
 ] as const;
 
 /**
@@ -424,6 +432,36 @@ export const PRESIDENTIAL_DECISION_SOURCE_PROOFS: readonly PresidentialDecisionS
         anchors: ['const resolutions = [...(state.military?.operation_opportunity_resolutions ?? [])];'],
       },
     ],
+  },
+  {
+    familyId: 'stance_matter',
+    producer: [{
+      path: 'src/sim/combat/stance_matters.ts',
+      anchors: ['export function generateStanceMatters(', 'state.meta.stance_matters = [...kept, ...raised]'],
+    }],
+    action: [
+      { path: 'src/ui/map/App.tsx', anchors: ["if (action === 'decision_room')"] },
+      {
+        path: 'src/ui/map/data/presidentialDecisionRoom.ts',
+        anchors: ['function addStanceMatterCards('],
+      },
+    ],
+    receipt: [
+      {
+        path: 'src/sim/combat/stance_matters.ts',
+        anchors: ['export function resolveStanceMatters(', 'state.meta.stance_matter_history = history.length > STANCE_MATTER_HISTORY_CAP'],
+      },
+      {
+        path: 'src/desktop/player_visible_state.cjs',
+        anchors: ['projected.stance_matter_history = playerFaction'],
+      },
+    ],
+    consumers: [{
+      channel: 'records',
+      label: 'decision-consequence ledger',
+      path: 'src/ui/map/data/decisionConsequenceLedger.ts',
+      anchors: ["familyId: 'stance-matter'"],
+    }],
   },
 ] as const;
 

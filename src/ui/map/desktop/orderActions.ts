@@ -1,7 +1,7 @@
 import type { IPC } from './useIPC';
 import type { LoadedGameState } from '../data/types';
 import { buildTurnAftermathDigest, buildTurnAftermathView, classifyTurnAftermathWeight, type TurnAftermathDigest, type TurnAftermathReportInput, type TurnAftermathView } from '../data/turnAftermath';
-import type { LastTurnReport, StagedOrder } from '../store/gameStore';
+import type { LastTurnReport } from '../store/gameStore';
 import { playerFacingErrorCopy } from '../utils/errorCopy';
 
 interface AdvanceTurnDeps {
@@ -90,65 +90,7 @@ export async function advanceTurnAndSync({
     }
 }
 
-interface PostureOrderDeps {
-    ipc: IPC;
-    addStagedOrder: (order: Omit<StagedOrder, 'id'>) => void;
-    setLoadError: (msg: string | null) => void;
-}
-
-/**
- * Stages a posture order via IPC and adds it to the local order queue.
- */
-export async function stagePostureOrderAction(
-    { ipc, addStagedOrder, setLoadError }: PostureOrderDeps,
-    formationId: string,
-    posture: string,
-): Promise<void> {
-    const result = await ipc.stagePostureOrder(formationId, posture);
-    if (!result.ok) {
-        setLoadError(result.error ?? 'Posture order failed.');
-        return;
-    }
-    addStagedOrder({ type: 'posture', formationId, postureName: posture });
-}
-/**
- * Stages an AoR order via IPC when the player clicks a settlement in AoR mode.
- * Shifts the settlement from its current owner to the selected brigade.
- */
-/**
- * Stages a Brigade-to-Sector assignment via IPC from the map-click path.
- * This must flow through the canonical sector override contract, not the
- * older front-assignment lane.
- */
-export async function stageAssignBrigadeToSectorAction(
-    { ipc, addStagedOrder, setLoadError }: PostureOrderDeps,
-    brigadeId: string,
-    sectorId: string,
-): Promise<void> {
-    const result = await ipc.assignBrigadeToSector(brigadeId, sectorId);
-    if (!result.ok) {
-        setLoadError(result.error ?? 'Sector assignment failed.');
-        return;
-    }
-    addStagedOrder({ type: 'sector', formationId: brigadeId, targetSectorId: sectorId });
-}
-
-/**
- * Permanently assigns a brigade to a sector (player sector override).
- * Persists in brigade_sector_override until manually cleared.
- * Pass sectorId=null to clear an existing override.
- */
-export async function assignBrigadeToSectorOverrideAction(
-    { ipc, addStagedOrder, setLoadError }: PostureOrderDeps,
-    brigadeId: string,
-    sectorId: string | null,
-): Promise<void> {
-    const result = await ipc.assignBrigadeToSector(brigadeId, sectorId);
-    if (!result.ok) {
-        setLoadError(result.error ?? 'Sector assignment failed.');
-        return;
-    }
-    if (sectorId) {
-        addStagedOrder({ type: 'sector', formationId: brigadeId, targetSectorId: sectorId });
-    }
-}
+// Retired 2026-11-12 (posture model option 2): stagePostureOrderAction,
+// stageAssignBrigadeToSectorAction and assignBrigadeToSectorOverrideAction had no screen.
+// The president never sets brigade posture or moves brigades between OGs; corps and OG
+// stance changes reach him as stance matters (src/sim/combat/stance_matters.ts).

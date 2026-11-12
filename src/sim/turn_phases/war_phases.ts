@@ -227,6 +227,14 @@ import {
     VRS_EQUIPMENT_DECAY_START_WEEK
 } from '../../state/formation_constants.js';
 import { generateLevel1StanceProposals, generateLevel1OpProposals } from '../ai_commander/proposal_generation.js';
+import type { CorpsStanceTrace } from '../combat/bot_corps_stance.js';
+import {
+    clearCorpsHoldsForPresidentialOperation,
+    generateStanceMatters,
+    isLivePresident,
+    isStanceMatterGenerationActive,
+    resolveStanceMatters,
+} from '../combat/stance_matters.js';
 import { generateCorpsStanceOrders } from '../combat/bot_corps_stance.js';
 import { accrueRecruitmentResources, runOngoingRecruitment } from '../recruitment_turn.js';
 // REASON-CODE INSTRUMENTATION: env-gated, inert by default. See reason_code_debug.ts.
@@ -434,6 +442,9 @@ function injectAuthoredOperations(state: GameState): void {
         cmd.active_operations.push(op);
         assignOperationCommander(state, op, corpsId, corpsFaction);
         cmd.stance = 'offensive';
+        // The president's own operation order supersedes his stance hold on this corps
+        // (posture model option 2). Inert without a hold.
+        clearCorpsHoldsForPresidentialOperation(state, corpsId, turn);
         // Clear any prior rejection on successful injection.
         cmd.authored_op_rejection = undefined;
     }
@@ -972,6 +983,9 @@ function injectOpDirectives(state: GameState, adjacency?: Map<string, string[]>)
         cmd.active_operations.push(op);
         assignOperationCommander(state, op, corpsId, plan.corpsFaction);
         cmd.stance = 'offensive';
+        // The president's own operation order supersedes his stance hold on this corps
+        // (posture model option 2). Inert without a hold.
+        clearCorpsHoldsForPresidentialOperation(state, corpsId, turn);
         // Clear any prior rejection on successful injection.
         cmd.op_directive_rejection = undefined;
 
@@ -2330,6 +2344,18 @@ export const warPhases: NamedPhase[] = [
         }
     },
     {
+        // Posture model option 2 (plan 2026-11-12; Engine Invariants §14.10c): resolve the
+        // stance matters raised last turn BEFORE the bot pass. Silence = 'stood' (no effect);
+        // Countermand / Constrain write a presidential stance hold. Runs after
+        // apply-autonomy-transition with no level gate (a level change lapses matters and
+        // ends holds). Live president only; inert when no stance-matter data exists.
+        name: 'resolve-stance-matters',
+        run: (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            resolveStanceMatters(context.state);
+        },
+    },
+    {
         name: 'ai-army-decisions',
         run: async (context) => {
             if (context.state.meta.phase !== 'war') return;
@@ -2580,13 +2606,24 @@ export const warPhases: NamedPhase[] = [
             } catch {
                 corpsTerrainData = { by_sid: {} };
             }
+            // Posture model option 2: a read-only formula trace for the live president's
+            // army only (never collected in headless runs; collecting it writes nothing).
+            const stanceMatterPlayer = isLivePresident(context.state) ? context.state.meta.player_faction ?? null : null;
+            const stanceTrace = stanceMatterPlayer && isStanceMatterGenerationActive(context.state)
+                ? new Map<string, CorpsStanceTrace>()
+                : undefined;
             for (const faction of factions) {
                 const supplyByOsid = context.report.supply_resolution?.supply_state_by_osid;
-                generateAllCorpsOrders(context.state, faction, edges, sidToMun, reverseMap, osidEdges, supplyByOsid, corpsEthnicMap, corpsAdjacency, corpsSpatial?.preCombat, corpsOsidPopulationMap, corpsTerrainData);
+                generateAllCorpsOrders(context.state, faction, edges, sidToMun, reverseMap, osidEdges, supplyByOsid, corpsEthnicMap, corpsAdjacency, corpsSpatial?.preCombat, corpsOsidPopulationMap, corpsTerrainData, faction === stanceMatterPlayer ? stanceTrace : undefined);
                 corpsReport.push(...extractCorpsAiReport(context.state, faction));
             }
             if (corpsReport.length > 0) {
                 context.report.corps_ai_report = corpsReport;
+            }
+            // Raise stance matters (autonomy 2) and refresh the stance baselines (any level).
+            // Live president only; writes only the three stance-matter fields.
+            if (stanceMatterPlayer) {
+                generateStanceMatters(context.state, stanceMatterPlayer, stanceTrace ?? new Map());
             }
         }
     },

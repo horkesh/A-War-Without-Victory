@@ -435,6 +435,8 @@ interface WindowAwwv {
     overrideAiDecision: (level: number, targetId: string, faction: string) => Promise<{ ok: boolean; error?: string }>;
     acceptProposal: (proposalId: string) => Promise<{ ok: boolean; error?: string }>;
     rejectProposal: (proposalId: string) => Promise<{ ok: boolean; error?: string }>;
+    /** Posture model option 2: answer a corps/OG stance matter. */
+    resolveStanceMatter: (payload: { matterId: string; answer: 'confirm' | 'countermand' | 'constrain'; constraint?: string }) => Promise<{ ok: boolean; error?: string }>;
     // Phase 2 slice 1 "Back the Officer": Level 3 Direct Intervention on an op proposal.
     forceLaunchProposal: (proposalId: string) => Promise<{ ok: boolean; error?: string }>;
     // Proactive presidential force-launch of a HELD-ready plan the officer never
@@ -857,6 +859,10 @@ export function useIPC() {
 
             rejectProposal: awwv
                 ? (proposalId: string) => awwv.rejectProposal(proposalId)
+                : makeNoop<{ ok: boolean; error?: string }>(),
+
+            resolveStanceMatter: awwv && typeof awwv.resolveStanceMatter === 'function'
+                ? (payload: { matterId: string; answer: 'confirm' | 'countermand' | 'constrain'; constraint?: string }) => awwv.resolveStanceMatter(payload)
                 : makeNoop<{ ok: boolean; error?: string }>(),
 
             forceLaunchProposal: awwv

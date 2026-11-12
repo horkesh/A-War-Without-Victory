@@ -40,6 +40,7 @@ import {
 } from '../../data/opDirectiveObjection';
 import { getPlayerSafeCorpsName, getPlayerSafeOfficerName } from '../../utils/playerSafeText';
 import { getOsidDisplayName } from '../../utils/osidDisplayName';
+import { StanceMatterActions } from '../StanceMatterActions';
 import { buildObjectiveTargetOptions } from '../../utils/objectiveTargetOptions';
 import { t, type MessageKey } from '../../i18n';
 import { strictCompare } from '../../../../state/validateGameState.js';
@@ -74,6 +75,7 @@ function leverLabel(lever: PresidentialDecisionRoomDirective['lever']): string {
     case 'replace_co': return t('directive.lever.replace_co');
     case 'elite_deploy': return t('directive.lever.elite_deploy');
     case 'review_proposal': return t('directive.lever.review_proposal');
+    case 'stance_matter': return t('directive.lever.stance_matter');
     case 'front_visit': return t('directive.lever.front_visit');
     case 'address_nation': return t('directive.lever.address_nation');
     case 'decorate_unit': return t('directive.lever.decorate_unit');
@@ -140,7 +142,24 @@ function resolveTargetOsidInput(
   return { targetOsid: trimmed, ambiguousMatches: [] };
 }
 
-export function DirectiveCard({ directive, gameState, onReceipt }: DirectiveCardProps) {
+export function DirectiveCard(props: DirectiveCardProps) {
+  // Posture model option 2: a stance matter has its own three answers (Confirm /
+  // Countermand / Constrain) shared with the sector panel; it is not a CA-cost lever.
+  if (props.directive.lever === 'stance_matter') {
+    const matterId = typeof props.directive.payload.matterId === 'string' ? props.directive.payload.matterId : '';
+    const matter = props.gameState.stanceMatters?.find((m) => m.id === matterId);
+    if (!matter) return null;
+    return (
+      <StanceMatterActions
+        matter={matter}
+        onAnswered={(message) => props.onReceipt?.({ kind: 'success', message })}
+      />
+    );
+  }
+  return <LeverDirectiveCard {...props} />;
+}
+
+function LeverDirectiveCard({ directive, gameState, onReceipt }: DirectiveCardProps) {
   const ipc = useIPC();
   const setLoadError = useGameStore((s) => s.setLoadError);
   const osidDisplayNames = useGameStore((s) => s.osidDisplayNames);

@@ -23,6 +23,7 @@ import {
 } from './bot_constants.js';
 import { buildAdjacencyFromEdges } from './war_adjacency.js';
 import { assignOperationCommander } from './officer_system.js';
+import { corpsHoldForbidsNewOffensive } from './stance_matter_holds.js';
 import {
     countHealthyBrigades,
     getCorpsSubordinates,
@@ -134,6 +135,9 @@ export function attemptCorridorBreach(
             const corridorSubordinates = getCorpsSubordinates(state, corps.id);
             if (!hasAvailableSlot(cmd, corridorSubordinates.length)) continue;
             if (cmd.stance === 'reorganize') continue;
+            // A presidential stance hold below offensive forbids a new breach (posture
+            // model option 2). Inert without a hold.
+            if (corpsHoldForbidsNewOffensive(state, corps.id, turn)) continue;
             if (cmd.corps_exhaustion > MAX_EXHAUSTION_FOR_OPERATION) continue;
 
             const subordinates = getCorpsSubordinates(state, corps.id);

@@ -57,6 +57,9 @@ export const DIRECTIVE_LEVER_TO_ACT_ID: Readonly<Record<DirectiveLever, string>>
   // review_proposal — approving/withholding a general's autonomy proposal is a
   // command-staff personnel decision; reuse the personnel-change still.
   review_proposal: 'act_replace_commander',
+  // stance_matter — answering a commander's reported stance change is a decision about
+  // a serving commander; reuse the same command-staff still until dedicated art lands.
+  stance_matter: 'act_replace_commander',
   front_visit: 'act_front_visit',
   // Leadership gestures (design §10 deferred actions) carry their own per-faction
   // command-card art (act_address_nation_<faction>.webp / act_decorate_unit_<faction>.webp,

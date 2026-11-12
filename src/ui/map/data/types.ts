@@ -1049,6 +1049,67 @@ export interface SectorIntelRecordView {
     visible_brigade_ids: string[];
 }
 
+/** Posture model option 2: a corps/OG commander's stance change put to the president. */
+export interface StanceMatterView {
+    id: string;
+    turn: number;
+    scope: 'corps' | 'og';
+    corpsId: string;
+    /** Player-safe corps name (never a raw id). */
+    corpsName: string;
+    sectorId: string | null;
+    /** Player-safe OG name when the sector is named; else null. */
+    ogName: string | null;
+    fromStance: string;
+    toStance: string;
+    commanderName: string | null;
+    reason: string;
+    avgCohesion: number | null;
+    avgStrength: number | null;
+    sectorThreat: number | null;
+    patronCeiling: string | null;
+    deadlineTurn: number;
+    constraintOptions: Array<'ceiling_balanced' | 'ceiling_defensive' | 'no_active_defense' | 'hold_no_counterattacks'>;
+    countermandAllowed: boolean;
+    mainStaffDelayTurns: number;
+    patronShift: number;
+    answer: 'confirm' | 'countermand' | 'constrain' | null;
+    constraint: string | null;
+}
+
+export interface StanceMatterReceiptView {
+    id: string;
+    turn: number;
+    scope: 'corps' | 'og';
+    corpsId: string;
+    corpsName: string;
+    sectorId: string | null;
+    fromStance: string;
+    toStance: string;
+    outcome: 'stood' | 'confirmed' | 'countermanded' | 'constrained' | 'not_put' | 'hold_lapsed' | 'answered_lapsed';
+    resolvedTurn: number;
+    constraint: string | null;
+    effectiveFromTurn: number | null;
+    untilTurn: number | null;
+    mainStaffDelayTurns: number;
+    patronShift: number;
+    notPutReason: string | null;
+    lapseReason: string | null;
+}
+
+export interface StanceHoldView {
+    matterId: string;
+    scope: 'corps' | 'og';
+    corpsId: string;
+    sectorId: string | null;
+    mode: 'fixed' | 'ceiling';
+    stance: string | null;
+    allowed: string[];
+    effectiveFromTurn: number;
+    untilTurn: number;
+    suspendedTurn: number | null;
+}
+
 export interface LoadedGameState {
     /** Own active brigade holdings and abstract condition reports; UI-only, explicit player scope. */
     equipmentSummary?: OwnEquipmentSummary;
@@ -1699,6 +1760,17 @@ export interface LoadedGameState {
         sourceCitation: string;
         rider?: string;
     }>;
+
+    /**
+     * Posture model option 2: open corps/OG stance matters for the president (autonomy 2).
+     * Mapped from state.meta.stance_matters (player faction only). Unanswered = the
+     * commander's change stands.
+     */
+    stanceMatters?: StanceMatterView[];
+    /** Stance-matter receipts, newest first (state.meta.stance_matter_history). */
+    stanceMatterHistory?: StanceMatterReceiptView[];
+    /** Active and pending presidential stance holds (state.military.stance_matter_state.holds). */
+    stanceHolds?: StanceHoldView[];
 
     /** Pending autonomy proposal reviews (Level 1 Assisted). Mapped from state.meta.pending_proposal_reviews. */
     pendingProposalReviews?: Array<{

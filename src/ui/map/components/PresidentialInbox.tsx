@@ -89,6 +89,7 @@ export function typeLabel(type: string): string {
     if (type === 'officer_event') return t('inbox.type.personnel');
     if (type === 'operation_opportunity') return t('inbox.type.opportunity');
     if (type === 'autonomy_proposal') return t('inbox.type.proposal');
+    if (type === 'stance_matter') return t('inbox.type.stanceMatter');
     if (type === 'intelligence_notification') return t('inbox.type.intel');
     if (type === 'situation') return t('inbox.type.situation');
     return t('inbox.type.reviewItem');

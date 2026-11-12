@@ -31,6 +31,7 @@ const {
 } = require('./autonomy_ipc_contract.cjs');
 const { stageAuthoredOperation, stageCanonAttackOrder } = require('./author_op_staging.cjs');
 const { stageOpHalt } = require('./op_halt.cjs');
+const { recordStanceMatterAnswer } = require('./stance_matter_ipc.cjs');
 const { stageOpDirective } = require('./op_directive_staging.cjs');
 const { stageCoReplacement } = require('./co_replacement.cjs');
 const { createSerialMutex } = require('./ipc_mutex.cjs');
@@ -4134,6 +4135,18 @@ app.whenReady().then(() => {
       faction,
     });
     writeCanonicalCurrentState(sim, state);
+    return { ok: true };
+  });
+
+  // Posture model option 2: record the president's answer to a corps/OG stance matter
+  // (Confirm / Countermand / Constrain). Intent only; resolve-stance-matters owns effects.
+  ipcMain.handle('resolve-stance-matter', async (event, payload) => {
+    if (!currentGameStateJson) return { ok: false, error: 'no_state' };
+    const sim = getDesktopSim();
+    const state = readCanonicalCurrentState(sim);
+    const result = recordStanceMatterAnswer(state, payload);
+    if (!result.ok) return result;
+    writeCanonicalCurrentState(sim, state, event.sender);
     return { ok: true };
   });
 

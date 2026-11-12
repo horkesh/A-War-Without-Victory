@@ -511,6 +511,31 @@ export function recordPresidentialOverride(
 }
 
 /**
+ * Record a presidential stance overrule (posture model option 2: Countermand or
+ * Constrain on a stance matter) against the corps's serving commander.
+ *
+ * Appends to the officer's rolling `recent_overrides` record (the existing
+ * command-relationship substrate), but deliberately touches neither `override_count`
+ * nor `last_override_turn`: those two drive the cowed threshold, and a stance overrule
+ * must never combine with Stop-op or force-op to cow a commander into fuller
+ * compliance (panel 2026-11-12, red-team condition 8).
+ * No-op when the corps has no active named commander. Deterministic.
+ */
+export function recordPresidentialStanceOverrule(
+    state: GameState,
+    corpsId: string,
+    turn: number,
+): void {
+    const commander = getCorpsCommander(corpsId, state);
+    if (!commander) return;
+    const officerState = commander.state;
+    const history = officerState.recent_overrides ?? [];
+    history.push({ turn, resolution: 'override' });
+    history.sort((a, b) => a.turn - b.turn);
+    officerState.recent_overrides = history;
+}
+
+/**
  * Handle player override of an officer interpretation event.
  * Increments override_count, checks for cowed condition (via recordPresidentialOverride).
  * NOTE: Applying original_order.stance back to CorpsCommandState is an IPC concern (Phase 2).

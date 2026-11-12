@@ -2083,8 +2083,10 @@ export type StanceMatterOutcome =
     | 'constrained'
     /** Change made by the commander but not put to the president (cap, cooldown or hold). */
     | 'not_put'
-    /** A hold ended early: its OG dissolved, or the president's own operation order superseded it. */
-    | 'hold_lapsed';
+    /** A hold ended early: its OG dissolved, the president's own operation order superseded it, or autonomy left level 2. */
+    | 'hold_lapsed'
+    /** An answer was recorded but autonomy left level 2 before it could take effect (never reported as 'stood'). */
+    | 'answered_lapsed';
 
 export interface StanceMatterReceipt {
     id: string;
@@ -2104,7 +2106,8 @@ export interface StanceMatterReceipt {
     until_turn?: number;
     main_staff_delay_turns?: number;
     patron_shift?: number;
-    not_put_reason?: 'cap' | 'cooldown' | 'held';
+    /** 'army_stance': an army-level stance override governs combat, so the corps change was not put. */
+    not_put_reason?: 'cap' | 'cooldown' | 'held' | 'army_stance';
     lapse_reason?: 'og_dissolved' | 'presidential_operation' | 'autonomy_changed';
 }
 
@@ -2115,12 +2118,16 @@ export interface PresidentialStanceHold {
     corps_id: FormationId;
     /** OG holds: fingerprint, refreshed each turn to the matched sector. */
     sector_fingerprint?: string[];
+    /** OG holds: the matched sector's current (positional) id, for display; refreshed with the fingerprint. */
+    sector_id?: string;
     /** 'fixed' = keep `stance` (countermand); 'ceiling' = narrow to `stance` (corps) or `allowed` (OG). */
     mode: 'fixed' | 'ceiling';
     stance?: string;
     allowed?: SectorStance[];
     effective_from_turn: number;
     until_turn: number;
+    /** OG holds: last turn the hold was not applied because a live operation ran in the OG. */
+    suspended_turn?: number;
 }
 
 export interface StanceMatterState {

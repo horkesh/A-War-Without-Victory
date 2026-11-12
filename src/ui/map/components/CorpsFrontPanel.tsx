@@ -19,6 +19,7 @@ import { getOsidDisplayName } from '../utils/osidDisplayName';
 import { inspectOnField } from '../utils/shellNavigation';
 import { getPlayerFacingSectorName } from '../../shared/playerFacingLabels';
 import { OwnForceReportGapNotice } from './OwnForceReportGapNotice';
+import { SectorStanceStep } from './SectorStanceStep';
 
 /** Strength class badge with color coding. */
 function StrengthBadge({
@@ -706,6 +707,7 @@ export function CorpsFrontPanel({ railSlot = 'primary', breadcrumb }: CorpsFront
                       </span>
                     )}
                   </div>
+                  <SectorStanceStep sectorId={sector.sector_id} corpsId={sector.corps_id} gameState={loadedGameState} />{/* posture model option 2 */}
                   {hasReportedLogisticsPriority && (
                     <div className="flex flex-col">
                       <span className="text-[13px] uppercase font-bold text-neutral-600" title={logisticsPriorityTitle}>{t('corpsFront.supplyPriority')}</span>

@@ -72,11 +72,29 @@ const STANCE_RANK: Record<CorpsStance, number> = {
  * Writes stance directly to state.corps_command.
  * Deterministic: sorted corps iteration, no randomness.
  */
+/**
+ * Read-only record of why the formula chose a corps stance (posture model option 2).
+ * Filled only when a caller passes a trace map: the stance-matter path for a live
+ * president. Never written to GameState; collecting it changes no simulation output.
+ */
+export interface CorpsStanceTrace {
+    stance: CorpsStance;
+    /** The last formula layer that changed the stance. */
+    driver:
+        | 'reorganize_critical' | 'threat_high' | 'opportunity'
+        | 'doctrine' | 'campaign_plan' | 'readiness_low' | 'faction_rule'
+        | 'patron_ceiling' | 'army_directive' | 'alliance_front';
+    avg_cohesion: number;
+    avg_strength: number;
+    sector_threat: number;
+}
+
 export function generateCorpsStanceOrders(
     state: GameState,
     faction: FactionId,
     edges: EdgeRecord[],
-    sidToMun: Map<SettlementId, string>
+    sidToMun: Map<SettlementId, string>,
+    trace?: Map<string, CorpsStanceTrace>,
 ): void {
     const corpsCommand = state.military.corps_command;
     if (!corpsCommand) return;
@@ -114,6 +132,13 @@ export function generateCorpsStanceOrders(
         ) {
             stance = 'offensive';
         }
+        let driver: CorpsStanceTrace['driver'] = stance === 'reorganize'
+            ? 'reorganize_critical'
+            : stance === 'defensive' ? 'threat_high' : 'opportunity';
+        let tracedStance: CorpsStance = stance;
+        const noteDriver = (layer: CorpsStanceTrace['driver']): void => {
+            if (stance !== tracedStance) { driver = layer; tracedStance = stance; }
+        };
 
         // --- Doctrine phase influence (D3) ---
         const doctrinePhase = getActiveDoctrinePhase(faction, turn, state.military.war_timeline);
@@ -121,6 +146,7 @@ export function generateCorpsStanceOrders(
             // Doctrine provides a default bias when the situation is ambiguous
             stance = doctrinePhase.default_corps_stance;
         }
+        noteDriver('doctrine');
 
         // --- Campaign plan integration (gathering plan overrides doctrine default) ---
         const plan: CampaignPlan | null | undefined = state.military.campaign_plans?.[faction];
@@ -135,6 +161,7 @@ export function generateCorpsStanceOrders(
                 }
             }
         }
+        noteDriver('campaign_plan');
 
         // --- N1297: Organizational readiness gate ---
         // If the previous turn's commander assessment shows zero main_effort brigades,
@@ -149,6 +176,7 @@ export function generateCorpsStanceOrders(
                 stance = 'defensive';
             }
         }
+        noteDriver('readiness_low');
 
         // --- Faction-specific overrides (E1-E3 personality) ---
 
@@ -274,6 +302,8 @@ export function generateCorpsStanceOrders(
             }
         }
 
+        noteDriver('faction_rule');
+
         // Patron directive ceiling: Zagreb's political orders constrain HVO corps stances.
         // Hybrid scope per 2026-05-17 decision — see patron_directive_scope.ts.
         // Posavina (hvo_northwest_bosnia) is historically exempt via timeline data.
@@ -283,6 +313,7 @@ export function generateCorpsStanceOrders(
                 stance = activeDirective.stance_ceiling as CorpsStance;
             }
         }
+        noteDriver('patron_ceiling');
 
         // Army stance is informational only — corps determine their own stance
         // organically from combat readiness (personnel, cohesion, fatigue).
@@ -304,6 +335,7 @@ export function generateCorpsStanceOrders(
                 }
             }
         }
+        noteDriver('army_directive');
 
         // --- HRHB↔RBiH mobilization override (highest priority except reorganize) ---
         // During the 4-turn mobilization buildup before HRHB-RBiH combat is enabled,
@@ -324,6 +356,18 @@ export function generateCorpsStanceOrders(
                     }
                 }
             }
+        }
+        noteDriver('alliance_front');
+
+        // Read-only trace for the stance-matter path (posture model option 2). No state write.
+        if (trace) {
+            trace.set(corps.id, {
+                stance,
+                driver,
+                avg_cohesion: avgCoh,
+                avg_strength: avgPers,
+                sector_threat: sectorThreat,
+            });
         }
 
         // Always record the formula AI's recommendation for Level 1 proposal generation.

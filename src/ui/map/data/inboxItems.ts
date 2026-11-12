@@ -35,8 +35,9 @@ import {
 import { isPresidentialCadenceHold } from './presidentialCadenceHold';
 import { APR1992_PRESIDENTIAL_INITIATIVE_REGISTRY } from '../../../sim/presidency/presidential_initiatives.js';
 import { sidePickerFactionLabel } from '../utils/sidePickerLabels';
+import { stanceMatterTitle } from './stanceMatterCopy';
 
-export type InboxItemType = 'event_decision' | 'peace_plan' | 'dayton_negotiation' | 'convoy_decision' | 'paramilitary_request' | 'reserve_request' | 'officer_event' | 'operation_opportunity' | 'autonomy_proposal' | 'intelligence_notification' | 'situation';
+export type InboxItemType = 'event_decision' | 'peace_plan' | 'dayton_negotiation' | 'convoy_decision' | 'paramilitary_request' | 'reserve_request' | 'officer_event' | 'operation_opportunity' | 'autonomy_proposal' | 'stance_matter' | 'intelligence_notification' | 'situation';
 export type InboxSeverity = 'blocking' | 'urgent' | 'normal' | 'info';
 
 export interface InboxItem {
@@ -375,6 +376,22 @@ export function deriveInboxItems(
                 priority: 20,
             });
         }
+    }
+
+    // 3b. Posture model option 2: unanswered corps/OG stance matters (advisory; silence
+    //     lets the commander's change stand, so these never block Advance).
+    const stanceMatterSurface = getDecisionSurface('stance_matter');
+    for (const matter of state.stanceMatters ?? []) {
+        if (matter.answer) continue;
+        items.push({
+            id: `command:stance-matter:${matter.id}`,
+            type: 'stance_matter',
+            severity: 'normal',
+            title: t('inbox.item.stanceMatter.title'),
+            subtitle: stanceMatterTitle(matter),
+            action: stanceMatterSurface.inboxAction,
+            priority: 36,
+        });
     }
 
     // 4. Paramilitary requests — defensive faction filter so RS-only items
