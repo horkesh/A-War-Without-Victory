@@ -319,8 +319,8 @@ describe('Formation Detail parity display', () => {
     const view = render(React.createElement(FormationDetail, { railSlot: 'primary' }));
     const copy = view.container.textContent ?? '';
 
-    expect(copy).toContain('Home municipality: Vogošća');
-    expect(copy).not.toContain('Home municipality: vogosca');
+    expect(copy).toContain('Home municipalityVogošća');
+    expect(copy).not.toContain('Home municipalityvogosca');
   });
 
   it('does not guess a municipality name while canonical properties are unavailable', () => {
@@ -328,8 +328,8 @@ describe('Formation Detail parity display', () => {
     const view = render(React.createElement(FormationDetail, { railSlot: 'primary' }));
     const copy = view.container.textContent ?? '';
 
-    expect(copy).toContain('Home municipality: —');
-    expect(copy).not.toContain('Home municipality: Vogosca');
+    expect(copy).toContain('Home municipality—');
+    expect(copy).not.toContain('Home municipalityVogosca');
   });
 
   it('shows recent engagements newest first', () => {
@@ -549,7 +549,7 @@ describe('Formation Detail parity display', () => {
     const view = render(React.createElement(FormationDetail, { railSlot: 'primary' }));
 
     const overview = view.container.textContent ?? '';
-    expect(overview).toContain("Commander's posture:");
+    expect(overview).toContain("Commander's posture");
     expect(screen.queryByRole('tab', { name: 'Orders' })).toBeNull();
 
     fireEvent.click(screen.getByRole('tab', { name: 'Command' }));
@@ -570,7 +570,7 @@ describe('Formation Detail parity display', () => {
     const view = render(React.createElement(FormationDetail, { railSlot: 'primary' }));
 
     expect(screen.getByRole('tab', { name: 'Orders' })).toBeTruthy();
-    expect(view.container.textContent).not.toContain("Commander's posture:");
+    expect(view.container.textContent).not.toContain("Commander's posture");
   });
 
   it('does not badge a stale missing override as the active sector assignment', () => {
@@ -615,7 +615,7 @@ describe('Formation Detail parity display', () => {
     const view = render(React.createElement(FormationDetail, { railSlot: 'primary' }));
     const copy = view.container.textContent ?? '';
 
-    expect(copy).toContain('Lifecycle:');
+    expect(copy).toContain('Lifecycle');
     expect(copy).not.toContain('Readiness:Ready');
   });
 
@@ -794,7 +794,7 @@ describe('Formation Detail parity display', () => {
 
     expect(copy).toContain('Southern line');
     expect(copy).toContain('Rear/support');
-    expect(copy).toContain('Lifecycle:Forming');
+    expect(copy).toContain('LifecycleForming');
     expect(copy).not.toContain('Readiness pending');
   });
 

@@ -103,21 +103,23 @@ afterEach(() => {
 });
 
 describe('OOBSidebar drilldown routing', () => {
-  it('labels section accordions with explicit expand and collapse actions', () => {
+  it('shows the sidebar sections as rail tabs with their counts (map rail system)', () => {
     render(React.createElement(OOBSidebar));
 
-    const sectorsToggle = screen.getByTestId('oob-section-sectors-toggle');
-    expect(sectorsToggle.getAttribute('aria-label')).toBe('Expand OGs');
-    expect(sectorsToggle.getAttribute('title')).toBe('Expand OGs');
-    expect(sectorsToggle.getAttribute('aria-expanded')).toBe('false');
-    expect(sectorsToggle.textContent).toContain('OGs');
-    expect(sectorsToggle.textContent).toContain('1');
+    const sectorsTab = screen.getByTestId('oob-section-sectors-toggle');
+    expect(sectorsTab.getAttribute('role')).toBe('tab');
+    expect(sectorsTab.getAttribute('aria-label')).toBe('OGs, 1');
+    expect(sectorsTab.getAttribute('aria-selected')).toBe('false');
+    expect(sectorsTab.textContent).toContain('OGs');
+    expect(sectorsTab.textContent).toContain('1');
+    expect(screen.getByTestId('oob-section-army-toggle').getAttribute('aria-selected')).toBe('true');
+    expect(screen.queryByTestId('oob-sector-row')).toBeNull();
 
-    fireEvent.click(sectorsToggle);
+    fireEvent.click(sectorsTab);
 
-    expect(sectorsToggle.getAttribute('aria-label')).toBe('Collapse OGs');
-    expect(sectorsToggle.getAttribute('title')).toBe('Collapse OGs');
-    expect(sectorsToggle.getAttribute('aria-expanded')).toBe('true');
+    expect(sectorsTab.getAttribute('aria-selected')).toBe('true');
+    expect(screen.getByTestId('oob-section-army-toggle').getAttribute('aria-selected')).toBe('false');
+    expect(screen.getAllByTestId('oob-sector-row').length).toBeGreaterThan(0);
   });
 
   it('renders HQ reserve brigades and routes their labels to Army HQ formation drilldown', () => {

@@ -73,7 +73,18 @@ export const LEFT_DETAIL_PANEL_STYLE: CSSProperties = {
 };
 
 /**
- * Right-edge panel — flush to the right side of the screen (e.g. settlement info).
+ * The one map rail (owner review 2026-11-11, step 2): every entity panel the player opens
+ * from the map (unit, OG, settlement, corps, army reserve, ORBAT) takes this slot and width,
+ * beside the order-of-battle sidebar. 24rem at 1280 wide, up to 28rem on an ultrawide.
+ */
+export const MAP_RAIL_WIDTH = 'clamp(24rem, calc(var(--interface-viewport-width, 100vw) * 0.2), 28rem)';
+
+export function getMapRailStyle(): CSSProperties {
+  return { ...LEFT_DETAIL_PANEL_STYLE, width: MAP_RAIL_WIDTH, direction: 'ltr' };
+}
+
+/**
+ * Right-edge panel — flush to the right side of the screen (Inbox, map Operations panel).
  */
 export const RIGHT_PANEL_STYLE: CSSProperties = {
   position: 'absolute',

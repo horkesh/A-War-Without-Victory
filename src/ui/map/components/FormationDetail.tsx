@@ -2,9 +2,8 @@ import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useGameStore } from '../store/gameStore';
 import { getOsidDisplayName } from '../utils/osidDisplayName';
 import { sortRecentEngagements } from '../utils/recentEngagements';
-import { FACTION_COLORS_SUBTLE } from '../utils/theme';
 import { useIPC } from '../desktop/useIPC';
-import { getPanelRailStyle } from './panelRail';
+import { getMapRailStyle } from './panelRail';
 import { turnToDateString, formatCount } from '../utils/formatters';
 import { getArmyCrest } from '../utils/factionAssets';
 import { getFormationCommander, resolveCorpsCommanderDisplay } from '../utils/officerUtils';
@@ -17,7 +16,6 @@ import type { FormationView } from '../data/types';
 import { getPrestigeTier, getPrestigeTierColor, getHighestTier, getDecorationName } from '../utils/decorationUtils';
 import { TabBar, tabId, tabPanelId } from './TabBar';
 import { computeBrigadeEffectiveness, effectivenessBandLabel } from '../utils/combatEffectiveness';
-import { Icon } from './icons/Icon';
 import { getPlayerFacingCorpsName, getPlayerFacingSectorName } from '../../shared/playerFacingLabels';
 import {
   getPlayerSafeFormationPostureLabel,
@@ -30,6 +28,19 @@ import { getLocalizedFormationName } from '../data/formationNameLocalizations';
 import { inspectOnField, openArmyHQBriefingForCorps } from '../utils/shellNavigation';
 import { resolveCurrentSectorForFormation } from '../utils/sectorUtils';
 import { buildMunicipalityDisplayNameMap, getMunicipalityDisplayName } from '../utils/municipalityDisplayName';
+import { SURFACE_CHIP, SURFACE_TONE, SurfaceSection } from './surface/Surface';
+import {
+  MAP_RAIL_BUTTON,
+  MAP_RAIL_MUTED,
+  MapRailBody,
+  MapRailCloseButton,
+  MapRailFrame,
+  MapRailHeader,
+  MapRailLink,
+  MapRailNote,
+  MapRailStat,
+  MapRailStats,
+} from './surface/MapRail';
 
 type DetailTab = 'overview' | 'record' | 'orders';
 
@@ -66,6 +77,15 @@ const ENGAGEMENT_OUTCOME_LABEL_KEYS: Record<string, MessageKey> = {
   catastrophic: 'aar.outcome.collapse',
 };
 
+/** Narrative arc → surface chip tone. */
+const NARRATIVE_ARC_TONE: Record<string, string> = {
+  veteran: SURFACE_TONE.warn,
+  bloodied: SURFACE_TONE.danger,
+  risen: SURFACE_TONE.good,
+  shattered: SURFACE_TONE.neutral,
+  garrison: SURFACE_TONE.info,
+};
+
 function formatNarrativeArcLabel(arc: string): string {
   return getPlayerSafeFormationNarrativeArcLabel(arc, t('formationDetail.campaignHistory'));
 }
@@ -82,6 +102,11 @@ function formatEngagementOutcomeLabel(outcome: string): string {
 
 function formatEngagementRole(role: string): string {
   return ENGAGEMENT_ROLE_LABELS[role] ?? t('formationDetail.participant');
+}
+
+/** Rail rows carry the label on the left; the trailing colon of the old inline copy goes. */
+function railLabel(label: string): string {
+  return label.replace(/\s*:\s*$/, '');
 }
 
 function sanitizeHistoryMoment(description: string, osidDisplayNames: Record<string, string> | null): string {
@@ -168,35 +193,56 @@ function isReportedEquipmentCondition(condition: EquipmentConditionReport): cond
     && Number.isFinite(condition?.non_operational);
 }
 
-function EquipmentConditionBar({ condition }: { condition: EquipmentConditionReport }) {
-  if (!isReportedEquipmentCondition(condition)) {
-    return null;
-  }
+/** Equipment condition in words ("80% working, 15% worn, 5% out of action"). */
+function equipmentConditionText(condition: EquipmentConditionReport): string {
+  if (!isReportedEquipmentCondition(condition)) return t('mapRail.equipmentConditionUnreported');
+  return t('mapRail.equipmentCondition', {
+    working: Math.round(condition.operational * 100).toString(),
+    worn: Math.round(condition.degraded * 100).toString(),
+    out: Math.round(condition.non_operational * 100).toString(),
+  });
+}
 
+/** One heavy-equipment line: name and count, the condition in words underneath. */
+function EquipmentRow({ label, count, condition, testId }: { label: string; count: number; condition: ReactNode; testId?: string }) {
   return (
-    <div className="flex-1 h-1.5 bg-black/40 rounded flex overflow-hidden">
-      <div style={{ width: `${condition.operational * 100}%` }} className="bg-[#55d48a]" />
-      <div style={{ width: `${condition.degraded * 100}%` }} className="bg-[#d4d455]" />
-      <div style={{ width: `${condition.non_operational * 100}%` }} className="bg-[#d45555]" />
+    <div className="flex flex-col gap-0.5 border-b border-[#262b35] py-2 last:border-b-0">
+      <div className="flex items-baseline justify-between gap-4">
+        <span className="text-[15px] text-[#ddd1b3]">{label}</span>
+        <span className="text-[15px] font-semibold tabular-nums text-[#f1e6c8]">{count}</span>
+      </div>
+      <span data-testid={testId} className="text-[14px] text-[#9c917b]">{condition}</span>
     </div>
   );
 }
 
+/** A 0–100 figure with a thin bar (cohesion, morale). */
+function MeterValue({ value, color }: { value: number; color: string }) {
+  const pct = Math.max(0, Math.min(100, value));
+  return (
+    <span className="inline-flex items-center gap-2">
+      <span aria-hidden="true" className="inline-block h-1.5 w-20 overflow-hidden rounded-full bg-[#262b35]">
+        <span className="block h-full rounded-full" style={{ width: `${pct}%`, backgroundColor: color }} />
+      </span>
+      <span>{Math.round(value)}</span>
+    </span>
+  );
+}
+
 /**
- * Right panel when a formation marker is clicked: name, kind, faction, strength, fatigue, orders.
+ * The unit rail: opens in the one map-rail slot when a formation is selected.
  */
 interface FormationDetailProps {
   railSlot?: 'primary' | 'secondary';
   breadcrumb?: ReactNode;
 }
 
-export function FormationDetail({ railSlot = 'primary', breadcrumb }: FormationDetailProps) {
+export function FormationDetail({ breadcrumb }: FormationDetailProps) {
   const ipc = useIPC();
   const [locale] = useLocale();
   const [activeTab, setActiveTab] = useState<DetailTab>('overview');
   const operationsPanelOpen = useGameStore((s) => s.isOperationsPanelOpen);
   const selectedFormationId = useGameStore((s) => s.selectedFormationId);
-  const selectedCorpsId = useGameStore((s) => s.selectedCorpsId);
   const osidDisplayNames = useGameStore((s) => s.osidDisplayNames);
   const osidPropertiesMap = useGameStore((s) => s.osidPropertiesMap);
   const loadedGameState = useGameStore((s) => s.loadedGameState);
@@ -217,21 +263,14 @@ export function FormationDetail({ railSlot = 'primary', breadcrumb }: FormationD
 
   if (!loadedGameState || !formation) {
     return (
-      <div
-        className="panel-slide-in-right flex flex-col bg-[#11141b] border border-accent-gold/30 rounded-lg shadow-xl overflow-hidden"
-        style={getPanelRailStyle(railSlot, '24rem', 'left')}
-      >
-        <div className="h-10 bg-panel-card border-b border-panel-border panel-shimmer" />
-        <div className="p-3 space-y-3">
-          <div className="h-4 w-1/2 bg-panel-card rounded panel-shimmer" />
-          <div className="h-6 w-3/4 bg-panel-card rounded panel-shimmer" />
-          <div className="space-y-2">
-            <div className="h-3 w-full bg-panel-card rounded panel-shimmer" />
-            <div className="h-3 w-full bg-panel-card rounded panel-shimmer" />
-          </div>
-          <div className="h-24 w-full bg-panel-card rounded panel-shimmer" />
+      <MapRailFrame className="panel-slide-in-right" style={getMapRailStyle()}>
+        <div className="h-16 border-b border-[#262b35] bg-[#141821] panel-shimmer" />
+        <div className="space-y-3 p-5">
+          <div className="h-4 w-1/2 rounded bg-[#161a22] panel-shimmer" />
+          <div className="h-6 w-3/4 rounded bg-[#161a22] panel-shimmer" />
+          <div className="h-24 w-full rounded bg-[#161a22] panel-shimmer" />
         </div>
-      </div>
+      </MapRailFrame>
     );
   }
 
@@ -285,17 +324,12 @@ export function FormationDetail({ railSlot = 'primary', breadcrumb }: FormationD
   const decorations = formation.decorations ?? [];
   const prestigeTier = getPrestigeTier(decorations);
   const prestigeRingClass = prestigeTier === 1
-    ? 'ring-1 ring-yellow-400/55 shadow-[0_0_18px_rgba(250,204,21,0.14)]'
+    ? 'ring-1 ring-yellow-400/55'
     : prestigeTier === 2
     ? 'ring-1 ring-slate-300/45'
     : prestigeTier === 3
     ? 'ring-1 ring-amber-700/35'
     : '';
-  const headerBgClass = prestigeTier === 1
-    ? 'bg-gradient-to-r from-yellow-950/60 via-panel-card to-panel-card'
-    : prestigeTier === 2
-    ? 'bg-gradient-to-r from-slate-700/40 via-panel-card to-panel-card'
-    : 'bg-panel-card';
 
   // Sector helpers
   const sectors = loadedGameState.corpsFrontSectors ?? [];
@@ -311,511 +345,349 @@ export function FormationDetail({ railSlot = 'primary', breadcrumb }: FormationD
     { id: 'orders', label: isBrigade ? t('formationDetail.command') : t('formationDetail.orders') },
   ];
 
+  const crest = getArmyCrest(formation.faction);
+  const parent = isBrigade && formation.corps_id
+    ? loadedGameState.formations.find((f) => f.id === formation.corps_id) ?? null
+    : null;
+  const commander = getFormationCommander(formation, loadedGameState);
+  const corpsCommanderDisplay = !commander && isCommandFormation(formation)
+    ? resolveCorpsCommanderDisplay(formation.id, formation.faction, loadedGameState)
+    : null;
+  const highestTier = getHighestTier(formation.decorations);
+  const hasEquipment = Boolean(formation.composition && (
+    formation.composition.tanks > 0 || formation.composition.artillery > 0 || formation.composition.aa_systems > 0
+  ));
+
   return (
-    <div
+    <MapRailFrame
       data-testid="formation-detail-panel"
       data-formation-id={formation.id}
-      className={`panel-power-on weathered-panel panel-slide-in-right flex flex-col rounded-lg shadow-xl overflow-hidden ${prestigeRingClass}`}
-      style={getPanelRailStyle(railSlot, '24rem', 'left')}
+      className={`panel-slide-in-right ${prestigeRingClass}`}
+      style={getMapRailStyle()}
     >
-      {/* Header */}
-      <div className={`flex items-center justify-between px-3 py-2 ${headerBgClass} rounded-t-lg border-b border-panel-border shrink-0`}>
-        <div className="flex min-w-0 items-center gap-2">
-          {getArmyCrest(formation.faction) && (
-            <img src={getArmyCrest(formation.faction)} alt="" className="w-4 h-4 object-contain" />
-          )}
-          <span className="font-sans text-[13px] text-accent-gold uppercase tracking-wide font-semibold">
-            {t('formationDetail.formation')}
+      <MapRailHeader
+        breadcrumb={breadcrumb}
+        mark={crest ? <img src={crest} alt="" className="h-4 w-4 object-contain" /> : undefined}
+        eyebrow={t('mapRail.eyebrow.unit')}
+        title={formationName}
+        chips={isBrigade && decorations.length > 0 ? (
+          <span className="inline-flex items-center gap-px" title={t('formationDetail.decorationsEarned', { count: decorations.length })}>
+            {decorations.slice(0, 5).map((dec, i) => (
+              <span key={`${dec.tier}-${dec.type}-${i}`} className={`select-none text-[14px] leading-none ${getPrestigeTierColor(dec.tier === 'tier_3' ? 1 : dec.tier === 'tier_2' ? 2 : 3)}`}>★</span>
+            ))}
+            {decorations.length > 5 && (
+              <span className="ml-0.5 text-[13px] text-[#b9ad94]">+{decorations.length - 5}</span>
+            )}
           </span>
-          {breadcrumb}
-          {isBrigade && decorations.length > 0 && (
-            <div className="flex items-center gap-px ml-0.5" title={t('formationDetail.decorationsEarned', { count: decorations.length })}>
-              {decorations.slice(0, 5).map((dec, i) => (
-                <span key={`${dec.tier}-${dec.type}-${i}`} className={`text-[13px] leading-none select-none ${getPrestigeTierColor(dec.tier === 'tier_3' ? 1 : dec.tier === 'tier_2' ? 2 : 3)}`}>★</span>
-              ))}
-              {decorations.length > 5 && (
-                <span className="text-[13px] text-text-secondary ml-0.5">+{decorations.length - 5}</span>
-              )}
-            </div>
-          )}
-        </div>
-        <div className="flex items-center gap-2">
-          <button
+        ) : undefined}
+        close={(
+          <MapRailCloseButton
             onClick={() => setSelectedFormationId(null)}
             data-testid="formation-detail-close"
             aria-label={t('formationDetail.closePanel')}
             title={t('formationDetail.closePanel')}
-            className="text-text-secondary hover:text-interactive text-sm leading-none p-1 rounded hover:bg-white/10"
-          >
-            ✕
-          </button>
-        </div>
-      </div>
+          />
+        )}
+      />
 
       <TabBar tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} idPrefix="formation-detail" />
 
-      <div
+      <MapRailBody
         id={tabPanelId('formation-detail', activeTab)}
         role="tabpanel"
         aria-labelledby={tabId('formation-detail', activeTab)}
-        className="p-3 flex-1 space-y-2.5 overflow-auto min-h-0 min-w-0 relative"
       >
-        {/* Faction crest watermark */}
-        {getArmyCrest(formation.faction) && (
-          <div
-            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-[0.03] pointer-events-none"
-            style={{
-              backgroundImage: `url(${getArmyCrest(formation.faction)})`,
-              backgroundSize: 'contain',
-              backgroundPosition: 'center',
-              backgroundRepeat: 'no-repeat',
-              width: '180px',
-              height: '180px',
-            }}
-          />
-        )}
-
         {/* ────────── OVERVIEW TAB ────────── */}
         {activeTab === 'overview' && (
           <>
-            <div className={`font-mono text-sm font-medium ${FACTION_COLORS_SUBTLE[formation.faction] ?? 'text-text-primary'}`}>
-              {formationName}
-            </div>
-
-            {/* Parent assignment (brigades) — corps or army HQ */}
-            {isBrigade && formation.corps_id && (() => {
-              const parent = loadedGameState.formations.find(f => f.id === formation.corps_id);
-              if (!parent) return null;
-              const isArmyHq = parent.kind === 'army_hq';
-              return (
-                <button
-                  type="button"
+            <SurfaceSection label={t('mapRail.section.command')}>
+              {/* Parent assignment (brigades) — corps or army HQ */}
+              {parent && (
+                <MapRailLink
+                  label={railLabel(parent.kind === 'army_hq' ? t('formationDetail.subordinatedTo') : t('formationDetail.corps'))}
+                  value={parent.kind === 'army_hq' ? getLocalizedFormationName(parent, locale) : safeCorpsLabel(parent.id, loadedGameState.formations)}
                   onClick={() => {
-                    inspectOnField(useGameStore.getState(), isArmyHq
+                    inspectOnField(useGameStore.getState(), parent.kind === 'army_hq'
                       ? { kind: 'field-formation-in-army-reserve', formationId: formation.id, armyHqId: parent.id, osid: formation.location_osid }
                       : { kind: 'field-formation-in-corps', formationId: formation.id, corpsId: parent.id, osid: formation.location_osid });
                   }}
-                  className="w-full text-left px-2 py-1.5 bg-accent-blue/5 border border-accent-blue/20 rounded-md flex items-center justify-between text-[13px] hover:bg-accent-blue/10 transition-colors group"
-                >
-                  <div className="flex items-center gap-2">
-                    <span className="text-accent-blue uppercase font-bold tracking-tighter">
-                      {isArmyHq ? t('formationDetail.subordinatedTo') : t('formationDetail.corps')}
-                    </span>
-                    <span className="text-accent-blue font-bold uppercase group-hover:underline">
-                      {isArmyHq ? getLocalizedFormationName(parent, locale) : safeCorpsLabel(parent.id, loadedGameState.formations)}
-                    </span>
-                  </div>
-                  <div className="w-1.5 h-1.5 rounded-full bg-accent-blue/40 group-hover:bg-accent-blue transition-colors" />
-                </button>
-              );
-            })()}
+                />
+              )}
 
-            {/* Sector assignment (brigades) */}
-            {(() => {
-              if (isBrigade && formation.corps_id && currentSector) {
-                const sectorLabel = safeSectorLabel(currentSector.sector_id, sectors);
-                return (
-                  <button
-                    type="button"
-                    onClick={() => inspectOnField(useGameStore.getState(), {
-                      kind: 'field-formation-in-sector',
-                      formationId: selectedFormationId,
-                      sectorId: currentSector.sector_id,
-                      corpsId: currentSector.corps_id ?? formation.corps_id ?? null,
-                      osid: formation.location_osid,
-                    })}
-                    className="w-full text-left px-2 py-1.5 bg-accent-gold/5 border border-accent-gold/20 rounded-md flex items-center justify-between text-[13px] hover:bg-accent-gold/10 transition-colors group"
-                    title={sectorLabel}
-                    aria-label={t('formationDetail.inspectSector', { sector: sectorLabel })}
-                  >
-                    <div className="flex items-center gap-2">
-                      <span className="text-accent-gold uppercase font-bold tracking-tighter">{t('formationDetail.sector')}</span>
-                      <span className="text-accent-gold font-bold uppercase group-hover:underline">
-                        {sectorLabel}
-                      </span>
-                      {currentSectorIsOverride && (
-                        <span className="px-1 py-0 bg-accent-gold/20 text-accent-gold text-[13px] uppercase rounded border border-accent-gold/30 font-bold">
-                          {t('formationDetail.override')}
-                        </span>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-text-secondary italic">
-                        {currentSectorIsOverride
-                          ? t('formationDetail.override')
-                          : currentSector.assigned_brigade_ids.includes(formation.id)
-                            ? t('formationDetail.frontline')
-                            : (currentSector.rear_brigade_ids ?? []).includes(formation.id)
-                              ? t('formationDetail.rearSupport')
-                              : t('formationDetail.reserve')}
-                      </span>
-                      <div className="w-1.5 h-1.5 rounded-full bg-accent-gold/40 group-hover:bg-accent-gold transition-colors" />
-                    </div>
-                  </button>
-                );
-              }
-              if (isBrigade) {
-                return (
-                  <div className="w-full px-2 py-1.5 bg-white/5 border border-white/10 rounded-md text-[13px]">
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="text-text-secondary uppercase font-bold tracking-tighter">
-                        {t('formationDetail.sector')}
-                      </span>
-                      <span className="text-text-secondary italic">
-                        {t('formationDetail.noActiveSector')}
-                      </span>
-                    </div>
-                    <div className="mt-0.5 text-[13px] text-text-secondary/80">
-                      {t('formationDetail.noActiveSectorHelp')}
-                    </div>
-                  </div>
-                );
-              }
-              if (formation.kind === 'corps' || formation.kind === 'corps_asset') {
-                const corpsSectors = sectors.filter(s => s.corps_id === formation.id);
-                if (corpsSectors.length > 0) {
+              {/* Sector assignment (brigades) */}
+              {(() => {
+                if (isBrigade && formation.corps_id && currentSector) {
+                  const sectorLabel = safeSectorLabel(currentSector.sector_id, sectors);
+                  const role = currentSectorIsOverride
+                    ? t('formationDetail.override')
+                    : currentSector.assigned_brigade_ids.includes(formation.id)
+                      ? t('formationDetail.frontline')
+                      : (currentSector.rear_brigade_ids ?? []).includes(formation.id)
+                        ? t('formationDetail.rearSupport')
+                        : t('formationDetail.reserve');
                   return (
-                    <div className="px-2 py-1 bg-white/5 border border-white/10 rounded flex items-center justify-between text-[13px]">
-                      <span className="text-text-secondary uppercase">{t('formationDetail.operationalSectors')}</span>
-                      <span className="text-text-primary font-bold">{t('formationDetail.activeCount', { count: corpsSectors.length })}</span>
-                    </div>
+                    <MapRailLink
+                      label={railLabel(t('formationDetail.sector'))}
+                      value={sectorLabel}
+                      detail={role}
+                      hint={sectorLabel}
+                      aria-label={t('formationDetail.inspectSector', { sector: sectorLabel })}
+                      onClick={() => inspectOnField(useGameStore.getState(), {
+                        kind: 'field-formation-in-sector',
+                        formationId: selectedFormationId,
+                        sectorId: currentSector.sector_id,
+                        corpsId: currentSector.corps_id ?? formation.corps_id ?? null,
+                        osid: formation.location_osid,
+                      })}
+                    />
                   );
                 }
-              }
-              return null;
-            })()}
+                if (isBrigade) {
+                  return (
+                    <MapRailStats>
+                      <MapRailStat label={railLabel(t('formationDetail.sector'))} value={<span className={MAP_RAIL_MUTED}>{t('formationDetail.noActiveSector')}</span>} />
+                      <p className="m-0 pb-1.5 text-[14px] leading-snug text-[#9c917b]">{t('formationDetail.noActiveSectorHelp')}</p>
+                    </MapRailStats>
+                  );
+                }
+                if (isCommandFormation(formation)) {
+                  const corpsSectors = sectors.filter(s => s.corps_id === formation.id);
+                  if (corpsSectors.length > 0) {
+                    return (
+                      <MapRailStats>
+                        <MapRailStat label={railLabel(t('formationDetail.operationalSectors'))} value={corpsSectors.length} />
+                      </MapRailStats>
+                    );
+                  }
+                }
+                return null;
+              })()}
 
-            {/* Posture & readiness */}
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[13px] px-2 py-1 bg-black/20 rounded border border-panel-border/30">
-              <span className="text-text-secondary">{isBrigade ? t('formationDetail.postureSetByCommander') : t('formationDetail.posture')}</span>
-              <span className="text-text-primary font-semibold">{postureValue}</span>
-              {lifecycleValue && (
-                <>
-                  <span className="text-text-secondary ml-1">{t('formationDetail.readiness')}</span>
-                  <span className="text-text-primary">{lifecycleValue}</span>
-                </>
-              )}
-            </div>
-            <OwnForceReportGapNotice fields={reportGaps} />
-
-            {/* Stranded (Isolated) indicator */}
-            {formation.strandedStatus === 'holding' && (
-              <div className="flex items-center gap-1.5 px-2 py-1 rounded bg-red-900/30 border border-red-500/30">
-                <span className="text-[13px] font-bold uppercase tracking-wider text-red-400">{t('formationDetail.isolated')}</span>
-                {formation.strandedSinceTurn != null && (
-                  <span className="text-[13px] text-red-400/60">
-                    {t('formationDetail.sinceDate', { date: turnToDateString(formation.strandedSinceTurn) })}
-                  </span>
+              {/* Posture & readiness */}
+              <MapRailStats>
+                <MapRailStat
+                  label={railLabel(isBrigade ? t('formationDetail.postureSetByCommander') : t('formationDetail.posture'))}
+                  value={postureValue}
+                />
+                {lifecycleValue && (
+                  <MapRailStat label={railLabel(t('formationDetail.readiness'))} value={lifecycleValue} />
                 )}
-              </div>
-            )}
-            {formation.strandedStatus === 'reconnected' && (
-              <div className="flex items-center gap-1.5 px-2 py-1 rounded bg-green-900/30 border border-green-500/30">
-                <span className="text-[13px] font-bold uppercase tracking-wider text-green-400">{t('formationDetail.reconnected')}</span>
-              </div>
-            )}
+                {formation.movementStatus && formation.movementStatus !== 'deployed' && (
+                  <MapRailStat
+                    label={railLabel(t('formationDetail.movement'))}
+                    value={formatMovementStatusLabel(formation.movementStatus)}
+                    tone={formation.movementStatus === 'in_transit' ? 'text-sky-200' : 'text-amber-200'}
+                    title={formation.movementStance
+                      ? t('formationDetail.movementStance', { stance: getPlayerSafeSectorStanceLabel(formation.movementStance) })
+                      : undefined}
+                  />
+                )}
+              </MapRailStats>
+              <OwnForceReportGapNotice fields={reportGaps} />
+
+              {/* Stranded (Isolated) indicator */}
+              {formation.strandedStatus === 'holding' && (
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className={`${SURFACE_CHIP} ${SURFACE_TONE.danger}`}>{t('formationDetail.isolated')}</span>
+                  {formation.strandedSinceTurn != null && (
+                    <span className="text-[14px] text-red-200/80">
+                      {t('formationDetail.sinceDate', { date: turnToDateString(formation.strandedSinceTurn) })}
+                    </span>
+                  )}
+                </div>
+              )}
+              {formation.strandedStatus === 'reconnected' && (
+                <span className={`${SURFACE_CHIP} ${SURFACE_TONE.good} self-start`}>{t('formationDetail.reconnected')}</span>
+              )}
+            </SurfaceSection>
 
             {/* Officer info */}
-            {(() => {
-              const commander = getFormationCommander(formation, loadedGameState);
-              if (commander) {
-                const isArmy = formation.kind === 'army_hq' || formation.kind === 'army';
-                const label = isArmy ? t('formationDetail.armyCommander') : t('formationDetail.corpsCommander');
-                return (
-                  <div className="pt-2 border-t border-panel-border">
-                    <OfficerProfile officer={commander} label={label} compact emphasis={isArmy ? 'defense' : 'aggression'} />
-                  </div>
-                );
-              }
-              if (formation.kind === 'corps' || formation.kind === 'corps_asset') {
-                const commanderDisplay = resolveCorpsCommanderDisplay(formation.id, formation.faction, loadedGameState);
-                if (commanderDisplay) {
-                  return (
-                    <div className="pt-2 border-t border-panel-border">
-                      <CommanderDisplayPanel display={commanderDisplay} label={t('formationDetail.corpsCommander')} compact />
-                    </div>
-                  );
-                }
-              }
-              if (isBrigade && formation.officer_quality != null) {
-                return (
-                  <div className="pt-2 border-t border-panel-border space-y-2">
-                    <EliteCommanderSummary commander={formation.eliteCommander} />
-                    <div className="flex items-center justify-between text-[13px]">
-                      <span className="text-text-secondary">{t('formationDetail.officerCadreQuality')}</span>
-                      <span className="text-text-primary font-mono bg-black/30 px-1.5 py-0.5 rounded border border-panel-border/50">
-                        {Math.round(formation.officer_quality * 100)}%
-                      </span>
-                    </div>
-                  </div>
-                );
-              }
-              if (isBrigade && formation.eliteCommander) {
-                return (
-                  <div className="pt-2 border-t border-panel-border">
-                    <EliteCommanderSummary commander={formation.eliteCommander} />
-                  </div>
-                );
-              }
-              return null;
-            })()}
-
-            {/* Highest Decoration */}
-            {(() => {
-              const highestTier = getHighestTier(formation.decorations);
-              if (!highestTier) return null;
-              const faction = formation.faction ?? '';
-              const displayName = getDecorationName(faction, highestTier);
-              const tierColor = highestTier === 'tier_3' ? 'text-yellow-400 border-yellow-500/30 bg-yellow-900/20'
-                : highestTier === 'tier_2' ? 'text-slate-300 border-slate-400/30 bg-slate-800/20'
-                : 'text-amber-600 border-amber-600/30 bg-amber-900/20';
-              return (
-                <div className="pt-2 border-t border-panel-border flex items-center justify-between">
-                  <span className="text-[13px] text-text-secondary">{t('formationDetail.unitDistinction')}</span>
-                  <span className={`px-2 py-0.5 text-[13px] font-bold tracking-wider rounded border ${tierColor}`}>
-                    ★ {displayName}
-                  </span>
-                </div>
-              );
-            })()}
-
-            {formation.honor && (
-              <div className="pt-1 flex items-center justify-between text-[13px]">
-                <span className="text-text-secondary">{t('formationDetail.historicalHonor')}</span>
-                <span className="px-1.5 py-0.5 bg-accent-gold/20 text-accent-gold text-[13px] font-semibold uppercase tracking-wider rounded border border-accent-gold/30">
-                  {formation.honor}
-                </span>
-              </div>
-            )}
-
-            {/* TO&E */}
-            {formation.composition && (
-              <div className="pt-2 border-t border-panel-border space-y-2">
-                <div className="text-[13px] text-text-secondary">{t('formationDetail.toeEquipment')}</div>
-                <div className="space-y-1.5 text-[13px]">
-                  {formation.composition.tanks > 0 && (
-                    <div className="flex justify-between items-center">
-                      <span className="text-text-secondary w-16">{t('formationDetail.tanks')}</span>
-                      <div className="flex-1 flex items-center gap-2">
-                        <EquipmentConditionBar condition={formation.composition.tank_condition} />
-                        <span className="text-text-primary tabular-nums w-6 text-right font-mono">{formation.composition.tanks}</span>
-                      </div>
-                    </div>
-                  )}
-                  {formation.composition.artillery > 0 && (
-                    <div className="flex justify-between items-center">
-                      <span className="text-text-secondary w-16">{t('formationDetail.artillery')}</span>
-                      <div className="flex-1 flex items-center gap-2">
-                        <EquipmentConditionBar condition={formation.composition.artillery_condition} />
-                        <span className="text-text-primary tabular-nums w-6 text-right font-mono">{formation.composition.artillery}</span>
-                      </div>
-                    </div>
-                  )}
-                  {formation.composition.aa_systems > 0 && (
-                    <div className="flex justify-between items-center">
-                      <span className="text-text-secondary w-24">{t('formationDetail.aaSys')}</span>
-                      <div className="flex-1 flex items-center gap-2">
-                        <span
-                          data-testid="formation-aa-condition-unreported"
-                          className="flex-1 text-[13px] italic text-text-secondary"
-                        />
-                        <span className="text-text-primary tabular-nums w-6 text-right font-mono">{formation.composition.aa_systems}</span>
-                      </div>
-                    </div>
-                  )}
-                  {formation.equipment_decay != null && (
-                    <div className="flex justify-between items-center text-[13px] pt-1">
-                      <span className="text-text-secondary">{t('formationDetail.overallSupplyEffectiveness')}</span>
-                      <span className="text-text-primary font-mono">{Math.round(formation.equipment_decay * 100)}%</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* Stats grid */}
-            <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-[13px] [&>span]:min-w-0 [&>span]:break-words px-2 py-1 bg-black/10 rounded">
-              {Number.isFinite(formation.cohesion) && (
-                <>
-                  <span className="text-text-secondary flex items-center gap-1"><Icon name="cohesion" size={12} /> {t('formationDetail.cohesion')}</span>
-                  <span className="text-text-primary tabular-nums flex items-center gap-1">
-                    {(() => {
-                  const c = formation.cohesion as number;
-                  const blocks = 10;
-                  const filled = Math.round((c / 100) * blocks);
-                  const color = c >= 70 ? '#d4a055' : c >= 40 ? '#d48a55' : '#d45555';
-                  return (
-                    <>
-                      <span style={{ color, letterSpacing: '1px', fontSize: '13px' }}>
-                        {'■'.repeat(filled)}<span style={{ opacity: 0.2 }}>{'■'.repeat(blocks - filled)}</span>
-                      </span>
-                      <span className="text-text-secondary text-[13px]">{Math.round(c)}</span>
-                    </>
-                  );
-                    })()}
-                  </span>
-                </>
-              )}
-              {Number.isFinite(formation.morale) && (
-                <>
-                  <span className="text-text-secondary flex items-center gap-1"><Icon name="morale" size={12} /> {t('formationDetail.morale')}</span>
-                  <span className="text-text-primary tabular-nums flex items-center gap-1">
-                    {(() => {
-                      const m = formation.morale as number;
-                      const blocks = 10;
-                      const filled = Math.round((m / 100) * blocks);
-                      const color = m >= 60 ? '#55d48a' : m >= 30 ? '#d4d455' : '#d45555';
-                      return (
-                        <>
-                          <span style={{ color, letterSpacing: '1px', fontSize: '13px' }}>
-                            {'■'.repeat(filled)}<span style={{ opacity: 0.2 }}>{'■'.repeat(blocks - filled)}</span>
-                          </span>
-                          <span className="text-text-secondary text-[13px]">{Math.round(m)}</span>
-                        </>
-                      );
-                    })()}
-                  </span>
-                </>
-              )}
-              {typeof formation.fatigue === 'number' && Number.isFinite(formation.fatigue) && (
-                <>
-                  <span className="text-text-secondary flex items-center gap-1"><Icon name="fatigue" size={12} /> {t('formationDetail.fatigue')}</span>
-                  <span className="text-text-primary tabular-nums">{Math.round(formation.fatigue)}</span>
-                </>
-              )}
-              {(
-                <>
-                  <span className="text-text-secondary flex items-center gap-1"><Icon name="personnel" size={12} /> {t('formationDetail.personnel')}</span>
-                  <span className="text-text-primary tabular-nums">
-                    {Number.isFinite(formation.personnel) ? t('formationDetail.personnelMen', { count: formatCount(formation.personnel) }) : t('corpsFront.unreported')}
-                  </span>
-                </>
-              )}
-              {formation.kind === 'brigade' && (() => {
-                const eff = brigadeEffectiveness;
-                if (!eff) return null;
-                if (eff.missingFields.length > 0) {
-                  return null;
-                }
-                const band = effectivenessBandLabel(eff);
-                const color = band.grade === 'A' ? '#56d364' : band.grade === 'B' ? '#e8c56d' : band.grade === 'C' ? '#e8a838' : '#f47068';
-                // Find the worst modifier to highlight
-                const mods = eff.modifiers;
-                const worst = Object.entries(mods).reduce((a, b) => b[1] < a[1] ? b : a);
-                const worstLabel = worst[1] < 0.85
-                  ? `${formatEffectivenessModifierLabel(worst[0])} ${Math.round(worst[1] * 100)}%`
-                  : '';
-                const title = worstLabel
-                  ? `${t('effectiveness.exactTooltip', { value: formatCount(eff.value) })} - ${worstLabel}`
-                  : t('effectiveness.exactTooltip', { value: formatCount(eff.value) });
-                return (
-                  <>
-                    <span className="text-text-secondary flex items-center gap-1"><Icon name="star" size={12} /> {t('formationDetail.effectiveness')}</span>
-                    <span
-                      data-testid="formation-detail-effectiveness"
-                      style={{ color }}
-                      title={title}
-                      tabIndex={0}
-                      aria-label={title}
-                      className="group font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent-gold"
-                    >
-                      {band.grade} <span className="text-text-primary">{t(band.labelKey)}</span>
-                      <span className="sr-only group-focus:not-sr-only group-focus:block text-[13px] font-normal text-text-secondary">{title}</span>
-                    </span>
-                  </>
-                );
-              })()}
-              {formation.entrenchment_turns != null && formation.entrenchment_turns > 0 && (
-                <>
-                  <span className="text-text-secondary flex items-center gap-1"><Icon name="entrenchment" size={12} /> {t('formationDetail.entrenched')}</span>
-                  <span className="text-text-primary tabular-nums">{t(formation.entrenchment_turns === 1 ? 'formationDetail.turnCount.one' : 'formationDetail.turnCount', { count: Math.round(formation.entrenchment_turns!).toString() })}</span>
-                </>
-              )}
-              {formation.dig_in_progress != null && formation.dig_in_progress > 0 && (
-                <>
-                  <span className="text-text-secondary">{t('formationDetail.digInProgress')}</span>
-                  <span className="text-text-primary tabular-nums">{Math.round(formation.dig_in_progress * 100)}%</span>
-                </>
-              )}
-              {formation.disrupted_turns != null && formation.disrupted_turns > 0 && (
-                <>
-                  <span className="font-bold uppercase flex items-center gap-1" style={{ color: '#d45555' }}><Icon name="disrupted" size={12} /> {t('formationDetail.disrupted')}</span>
-                  <span className="tabular-nums font-semibold" style={{ color: '#d45555' }}>
-                    {t(formation.disrupted_turns === 1 ? 'formationDetail.turnsRemaining.one' : 'formationDetail.turnsRemaining', { count: formation.disrupted_turns.toString() })}
-                  </span>
-                </>
-              )}
-              {isCommandFormation(formation) && formation.corpsExhaustion != null && (
-                <>
-                  <span className="text-text-secondary flex items-center gap-1"><Icon name="fatigue" size={12} /> {t('formationDetail.exhaustion')}</span>
-                  <span className="text-text-primary tabular-nums">{formatReportedPercentValue(formation.corpsExhaustion)}</span>
-                </>
-              )}
-              {isCommandFormation(formation) && formation.corpsCommandSpan != null && (
-                <>
-                  <span className="text-text-secondary">{t('formationDetail.commandSpan')}</span>
-                  <span className="text-text-primary tabular-nums">{formatReportedCommandSpan(formation.corpsCommandSpan)}</span>
-                </>
-              )}
-            </div>
-
-            {formation.movementStatus && formation.movementStatus !== 'deployed' && (
-              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[13px] px-2 py-1.5 bg-black/20 rounded border border-panel-border/40">
-                <span className="text-text-secondary uppercase font-bold text-[13px]">{t('formationDetail.movement')}</span>
-                <span className={`px-2 py-0.5 text-[13px] font-bold uppercase rounded border ${
-                  formation.movementStatus === 'in_transit'
-                    ? 'bg-accent-blue/20 text-accent-blue border-accent-blue/40'
-                    : 'bg-[#d4a055]/20 text-[#d4a055] border-[#d4a055]/40'
-                }`}>
-                  {formatMovementStatusLabel(formation.movementStatus)}
-                </span>
-                {formation.movementStance && (
-                  <span className="text-text-secondary italic">
-                    {t('formationDetail.movementStance', { stance: getPlayerSafeSectorStanceLabel(formation.movementStance) })}
-                  </span>
+            {commander ? (
+              <OfficerProfile
+                officer={commander}
+                label={formation.kind === 'army_hq' || formation.kind === 'army' ? t('formationDetail.armyCommander') : t('formationDetail.corpsCommander')}
+                compact
+                emphasis={formation.kind === 'army_hq' || formation.kind === 'army' ? 'defense' : 'aggression'}
+              />
+            ) : corpsCommanderDisplay ? (
+              <CommanderDisplayPanel display={corpsCommanderDisplay} label={t('formationDetail.corpsCommander')} compact />
+            ) : isBrigade && (formation.officer_quality != null || formation.eliteCommander) ? (
+              <div className="flex flex-col gap-2">
+                <EliteCommanderSummary commander={formation.eliteCommander} />
+                {formation.officer_quality != null && (
+                  <MapRailStats>
+                    <MapRailStat label={t('formationDetail.officerCadreQuality')} value={`${Math.round(formation.officer_quality * 100)}%`} />
+                  </MapRailStats>
                 )}
               </div>
+            ) : null}
+
+            {/* Condition */}
+            <SurfaceSection label={t('mapRail.section.condition')}>
+              <MapRailStats>
+                {Number.isFinite(formation.cohesion) && (() => {
+                  const c = formation.cohesion as number;
+                  return (
+                    <MapRailStat
+                      label={t('formationDetail.cohesion')}
+                      value={<MeterValue value={c} color={c >= 70 ? '#d4a055' : c >= 40 ? '#d48a55' : '#d45555'} />}
+                    />
+                  );
+                })()}
+                {Number.isFinite(formation.morale) && (() => {
+                  const m = formation.morale as number;
+                  return (
+                    <MapRailStat
+                      label={t('formationDetail.morale')}
+                      value={<MeterValue value={m} color={m >= 60 ? '#55d48a' : m >= 30 ? '#d4d455' : '#d45555'} />}
+                    />
+                  );
+                })()}
+                {typeof formation.fatigue === 'number' && Number.isFinite(formation.fatigue) && (
+                  <MapRailStat label={t('formationDetail.fatigue')} value={Math.round(formation.fatigue)} />
+                )}
+                <MapRailStat
+                  label={t('formationDetail.personnel')}
+                  value={Number.isFinite(formation.personnel)
+                    ? t('formationDetail.personnelMen', { count: formatCount(formation.personnel) })
+                    : <span className={MAP_RAIL_MUTED}>{t('corpsFront.unreported')}</span>}
+                />
+                {formation.kind === 'brigade' && (() => {
+                  const eff = brigadeEffectiveness;
+                  if (!eff || eff.missingFields.length > 0) return null;
+                  const band = effectivenessBandLabel(eff);
+                  const color = band.grade === 'A' ? '#56d364' : band.grade === 'B' ? '#e8c56d' : band.grade === 'C' ? '#e8a838' : '#f47068';
+                  // Find the worst modifier to highlight
+                  const mods = eff.modifiers;
+                  const worst = Object.entries(mods).reduce((a, b) => b[1] < a[1] ? b : a);
+                  const worstLabel = worst[1] < 0.85
+                    ? `${formatEffectivenessModifierLabel(worst[0])} ${Math.round(worst[1] * 100)}%`
+                    : '';
+                  const title = worstLabel
+                    ? `${t('effectiveness.exactTooltip', { value: formatCount(eff.value) })} - ${worstLabel}`
+                    : t('effectiveness.exactTooltip', { value: formatCount(eff.value) });
+                  return (
+                    <MapRailStat
+                      label={t('formationDetail.effectiveness')}
+                      value={(
+                        <span
+                          data-testid="formation-detail-effectiveness"
+                          style={{ color }}
+                          title={title}
+                          tabIndex={0}
+                          aria-label={title}
+                          className="group font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent-gold"
+                        >
+                          {band.grade} <span className="text-[#f1e6c8]">{t(band.labelKey)}</span>
+                          <span className="sr-only group-focus:not-sr-only group-focus:block text-[13px] font-normal text-[#b9ad94]">{title}</span>
+                        </span>
+                      )}
+                    />
+                  );
+                })()}
+                {formation.entrenchment_turns != null && formation.entrenchment_turns > 0 && (
+                  <MapRailStat
+                    label={t('formationDetail.entrenched')}
+                    value={t(formation.entrenchment_turns === 1 ? 'formationDetail.turnCount.one' : 'formationDetail.turnCount', { count: Math.round(formation.entrenchment_turns!).toString() })}
+                  />
+                )}
+                {formation.dig_in_progress != null && formation.dig_in_progress > 0 && (
+                  <MapRailStat label={t('formationDetail.digInProgress')} value={`${Math.round(formation.dig_in_progress * 100)}%`} />
+                )}
+                {formation.disrupted_turns != null && formation.disrupted_turns > 0 && (
+                  <MapRailStat
+                    label={<span className="text-red-200">{t('formationDetail.disrupted')}</span>}
+                    value={t(formation.disrupted_turns === 1 ? 'formationDetail.turnsRemaining.one' : 'formationDetail.turnsRemaining', { count: formation.disrupted_turns.toString() })}
+                    tone="text-red-200"
+                  />
+                )}
+                {isCommandFormation(formation) && formation.corpsExhaustion != null && (
+                  <MapRailStat label={t('formationDetail.exhaustion')} value={formatReportedPercentValue(formation.corpsExhaustion)} />
+                )}
+                {isCommandFormation(formation) && formation.corpsCommandSpan != null && (
+                  <MapRailStat label={t('formationDetail.commandSpan')} value={formatReportedCommandSpan(formation.corpsCommandSpan)} />
+                )}
+              </MapRailStats>
+            </SurfaceSection>
+
+            {/* Heavy equipment: counts with the condition in words (no one-row bar chart). */}
+            {formation.composition && (hasEquipment || formation.equipment_decay != null) && (
+              <SurfaceSection label={t('mapRail.section.equipment')}>
+                <MapRailStats>
+                  {formation.composition.tanks > 0 && (
+                    <EquipmentRow label={t('formationDetail.tanks')} count={formation.composition.tanks} condition={equipmentConditionText(formation.composition.tank_condition)} />
+                  )}
+                  {formation.composition.artillery > 0 && (
+                    <EquipmentRow label={t('formationDetail.artillery')} count={formation.composition.artillery} condition={equipmentConditionText(formation.composition.artillery_condition)} />
+                  )}
+                  {formation.composition.aa_systems > 0 && (
+                    <EquipmentRow
+                      label={t('formationDetail.aaSys')}
+                      count={formation.composition.aa_systems}
+                      condition={t('mapRail.equipmentConditionUnreported')}
+                      testId="formation-aa-condition-unreported"
+                    />
+                  )}
+                  {formation.equipment_decay != null && (
+                    <MapRailStat label={t('formationDetail.overallSupplyEffectiveness')} value={`${Math.round(formation.equipment_decay * 100)}%`} />
+                  )}
+                </MapRailStats>
+              </SurfaceSection>
             )}
 
-            {formation.location_osid && (
-              <div className="text-[13px] min-w-0">
-                <span className="text-text-secondary">{t('formationDetail.location')} </span>
-                <button
-                  type="button"
-                  data-testid="formation-location-link"
-                  data-osid={formation.location_osid}
-                  onClick={() => inspectOnField(useGameStore.getState(), { kind: 'field-formation-at-settlement', formationId: formation.id, osid: formation.location_osid! })}
-                  className="text-left text-text-primary break-all underline decoration-dotted underline-offset-2 hover:text-interactive"
-                >
-                  {getOsidDisplayName(formation.location_osid, osidDisplayNames)}
-                </button>
-              </div>
+            {/* Position */}
+            {(formation.location_osid || isBrigade) && (
+              <SurfaceSection label={t('mapRail.section.where')}>
+                <MapRailStats>
+                  {formation.location_osid && (
+                    <MapRailStat
+                      label={railLabel(t('formationDetail.location'))}
+                      value={(
+                        <button
+                          type="button"
+                          data-testid="formation-location-link"
+                          data-osid={formation.location_osid}
+                          onClick={() => inspectOnField(useGameStore.getState(), { kind: 'field-formation-at-settlement', formationId: formation.id, osid: formation.location_osid! })}
+                          className="kbd-focus break-words text-right text-[#f1e6c8] underline decoration-dotted underline-offset-2 hover:text-accent-gold"
+                        >
+                          {getOsidDisplayName(formation.location_osid, osidDisplayNames)}
+                        </button>
+                      )}
+                    />
+                  )}
+                  {isBrigade && (
+                    <MapRailStat
+                      label={railLabel(t('formationDetail.homeMunicipality'))}
+                      value={formation.municipalityId
+                        ? getMunicipalityDisplayName(formation.municipalityId, municipalityDisplayNames)
+                        : <span className={MAP_RAIL_MUTED}>{t('mapRail.notReportedYet')}</span>}
+                    />
+                  )}
+                </MapRailStats>
+              </SurfaceSection>
             )}
 
-            {isBrigade && (
-              <div className="text-[13px] min-w-0">
-                <span className="text-text-secondary">{t('formationDetail.homeMunicipality')} </span>
-                <span className="text-text-primary break-all">
-                      {formation.municipalityId ? getMunicipalityDisplayName(formation.municipalityId, municipalityDisplayNames) : '—'}
-                </span>
-              </div>
-            )}
-
-            {/* Narrative arc badge (brief — full history on Record tab) */}
-            {formation.narrativeArc && (
-              <div className="pt-2 border-t border-panel-border flex items-center justify-between">
-                <span className="text-[13px] text-text-secondary">{t('formationDetail.narrativeArc')}</span>
-                <span className={`px-2 py-0.5 text-[13px] font-bold uppercase tracking-wider rounded border ${
-                  formation.narrativeArc === 'veteran' ? 'text-yellow-400 border-yellow-500/30 bg-yellow-900/20'
-                  : formation.narrativeArc === 'bloodied' ? 'text-[#d45555] border-[#d45555]/30 bg-[#d45555]/10'
-                  : formation.narrativeArc === 'risen' ? 'text-[#55d48a] border-[#55d48a]/30 bg-[#55d48a]/10'
-                  : formation.narrativeArc === 'shattered' ? 'text-slate-400 border-slate-400/30 bg-slate-700/20'
-                  : formation.narrativeArc === 'garrison' ? 'text-accent-blue border-accent-blue/30 bg-accent-blue/10'
-                  : 'text-text-primary border-panel-border bg-black/20'
-                }`}>
-                  {formatNarrativeArcLabel(formation.narrativeArc)}
-                </span>
-              </div>
+            {/* Standing: distinction, honour, narrative arc (full history on the Record tab) */}
+            {(highestTier || formation.honor || formation.narrativeArc) && (
+              <SurfaceSection label={t('mapRail.section.standing')}>
+                <MapRailStats>
+                  {highestTier && (
+                    <MapRailStat
+                      label={t('formationDetail.unitDistinction')}
+                      value={<span className={`${SURFACE_CHIP} ${highestTier === 'tier_3' ? SURFACE_TONE.warn : SURFACE_TONE.neutral}`}>★ {getDecorationName(formation.faction ?? '', highestTier)}</span>}
+                    />
+                  )}
+                  {formation.honor && (
+                    <MapRailStat label={t('formationDetail.historicalHonor')} value={<span className={`${SURFACE_CHIP} ${SURFACE_TONE.warn}`}>{formation.honor}</span>} />
+                  )}
+                  {formation.narrativeArc && (
+                    <MapRailStat
+                      label={t('formationDetail.narrativeArc')}
+                      value={<span className={`${SURFACE_CHIP} ${NARRATIVE_ARC_TONE[formation.narrativeArc] ?? SURFACE_TONE.neutral}`}>{formatNarrativeArcLabel(formation.narrativeArc)}</span>}
+                    />
+                  )}
+                </MapRailStats>
+              </SurfaceSection>
             )}
           </>
         )}
@@ -830,122 +702,102 @@ export function FormationDetail({ railSlot = 'primary', breadcrumb }: FormationD
                 the legacy 0.30/0.55/0.15). The split lives in the adapter so this
                 component never runtime-imports from src/sim/combat/ (#73). */}
             {isBrigade && (
-              <div className="p-2 bg-black/20 rounded border border-panel-border/40 space-y-1.5">
-                <div className="flex items-start justify-between gap-2">
-                  <div className="text-[13px] text-text-secondary uppercase font-bold tracking-widest">{t('formationDetail.campaignLosses')}</div>
-                  {casualtySplitIsDerived && (
-                    <div className="text-[13px] text-amber-300 uppercase font-bold tracking-widest">{t('formationDetail.estimatedSplit')}</div>
-                  )}
-                </div>
+              <SurfaceSection
+                label={t('formationDetail.campaignLosses')}
+                action={casualtySplitIsDerived ? <span className={`${SURFACE_CHIP} ${SURFACE_TONE.warn}`}>{t('formationDetail.estimatedSplit')}</span> : undefined}
+              >
                 {casualtySplitProvenanceLabel && (
-                  <div className={`text-[13px] leading-snug ${casualtySplitIsDerived ? 'text-amber-300/90 italic' : 'text-text-secondary'}`}>
-                    {casualtySplitProvenanceLabel}
-                  </div>
+                  <MapRailNote className={casualtySplitIsDerived ? 'text-amber-200/90' : undefined}>{casualtySplitProvenanceLabel}</MapRailNote>
                 )}
-                <div className="grid grid-cols-3 gap-2 text-center">
-                  <div>
-                    <div className="text-[13px] text-text-secondary uppercase">{t('formationDetail.kia')}</div>
-                    <div className={`text-sm font-mono font-bold ${casualtySplitIsDerived ? 'text-amber-300' : ''}`} style={casualtySplitIsDerived ? undefined : { color: '#d45555' }}>
-                      {formatCampaignLossInteger(formation.campaignKia, casualtySplitIsDerived)}
+                <div className="grid grid-cols-3 gap-2">
+                  {([
+                    ['kia', t('formationDetail.kia'), formation.campaignKia, 'text-red-200'],
+                    ['wia', t('formationDetail.wia'), formation.campaignWia, 'text-amber-100'],
+                    ['mia', t('formationDetail.miaPow'), formation.campaignMia, 'text-[#ddd1b3]'],
+                  ] as const).map(([key, label, value, tone]) => (
+                    <div key={key} className="flex min-w-0 flex-col gap-1 rounded-md border border-[#2a303c] bg-[#161a22] px-3 py-2">
+                      <div className="text-[13px] leading-snug text-[#b9ad94]">{label}</div>
+                      <div className={`text-[16px] font-semibold tabular-nums ${casualtySplitIsDerived ? 'text-amber-200' : tone}`}>
+                        {formatCampaignLossInteger(value, casualtySplitIsDerived)}
+                      </div>
                     </div>
-                  </div>
-                  <div>
-                    <div className="text-[13px] text-text-secondary uppercase">{t('formationDetail.wia')}</div>
-                    <div className={`text-sm font-mono font-bold ${casualtySplitIsDerived ? 'text-amber-300' : ''}`} style={casualtySplitIsDerived ? undefined : { color: '#d4d455' }}>
-                      {formatCampaignLossInteger(formation.campaignWia, casualtySplitIsDerived)}
-                    </div>
-                  </div>
-                  <div>
-                    <div className="text-[13px] text-text-secondary uppercase">{t('formationDetail.miaPow')}</div>
-                    <div className={`text-sm font-mono font-bold ${casualtySplitIsDerived ? 'text-amber-300' : 'text-text-secondary'}`}>
-                      {formatCampaignLossInteger(formation.campaignMia, casualtySplitIsDerived)}
-                    </div>
-                  </div>
+                  ))}
                 </div>
-              </div>
+              </SurfaceSection>
             )}
 
-            {formation.last_repulsed_from && (
-              <div className="text-[13px] text-text-secondary min-w-0">
-                <span>{t('formationDetail.lastRepulsedFrom')} </span>
-                <span className="font-mono text-text-primary break-all">{getOsidDisplayName(formation.last_repulsed_from.osid, osidDisplayNames)}</span>
-                <span> {t('formationDetail.dateParen', { date: turnToDateString(formation.last_repulsed_from.turn) })}</span>
-              </div>
-            )}
-            {formation.last_retreat_from && (
-              <div className="text-[13px] text-text-secondary min-w-0">
-                <span>{t('formationDetail.retreatedFrom')} </span>
-                <span className="font-mono text-text-primary break-all">{getOsidDisplayName(formation.last_retreat_from.osid, osidDisplayNames)}</span>
-                <span> {t('formationDetail.dateParen', { date: turnToDateString(formation.last_retreat_from.turn) })}</span>
+            {(formation.last_repulsed_from || formation.last_retreat_from) && (
+              <div className="flex flex-col gap-1">
+                {formation.last_repulsed_from && (
+                  <MapRailNote>
+                    <span>{t('formationDetail.lastRepulsedFrom')} </span>
+                    <span className="font-semibold text-[#f1e6c8]">{getOsidDisplayName(formation.last_repulsed_from.osid, osidDisplayNames)}</span>
+                    <span> {t('formationDetail.dateParen', { date: turnToDateString(formation.last_repulsed_from.turn) })}</span>
+                  </MapRailNote>
+                )}
+                {formation.last_retreat_from && (
+                  <MapRailNote>
+                    <span>{t('formationDetail.retreatedFrom')} </span>
+                    <span className="font-semibold text-[#f1e6c8]">{getOsidDisplayName(formation.last_retreat_from.osid, osidDisplayNames)}</span>
+                    <span> {t('formationDetail.dateParen', { date: turnToDateString(formation.last_retreat_from.turn) })}</span>
+                  </MapRailNote>
+                )}
               </div>
             )}
 
             {isBrigade && (
-              <div className="space-y-2">
+              <div className="flex flex-col gap-4">
                 {formation.combatSummary ? (
                   <CombatSummaryPanel summary={formation.combatSummary} compact noTopBorder />
                 ) : (
-                  <div className="pt-2 mb-3 text-[13px]">
-                    <div className="text-text-secondary font-semibold mb-1.5 text-[13px] uppercase tracking-wide">
-                      {t('combatRecord.emptyTitle')}
-                    </div>
-                    <div className="text-text-secondary italic">{t('formationDetail.combatRecordUnavailable')}</div>
-                  </div>
+                  <SurfaceSection label={t('combatRecord.emptyTitle')}>
+                    <MapRailNote>{t('formationDetail.combatRecordUnavailable')}</MapRailNote>
+                  </SurfaceSection>
                 )}
-                <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-[13px] [&>span]:min-w-0 [&>span]:break-words px-1">
-                  {formation.brigade_history && (
-                    <>
-                      {formation.brigade_history.longest_victory_streak > 0 && (
-                        <>
-                          <span className="text-text-secondary">{t('formationDetail.highestWinStreak')}</span>
-                          <span className="text-accent-gold tabular-nums font-semibold">{formation.brigade_history.longest_victory_streak}</span>
-                        </>
-                      )}
-                      {formation.brigade_history.turns_under_siege > 0 && (
-                        <>
-                          <span className="text-text-secondary">{t('formationDetail.turnsUnderSiege')}</span>
-                          <span className="text-text-primary tabular-nums">{formation.brigade_history.turns_under_siege}</span>
-                        </>
-                      )}
-                    </>
-                  )}
-                </div>
+                {formation.brigade_history && (formation.brigade_history.longest_victory_streak > 0 || formation.brigade_history.turns_under_siege > 0) && (
+                  <MapRailStats>
+                    {formation.brigade_history.longest_victory_streak > 0 && (
+                      <MapRailStat label={t('formationDetail.highestWinStreak')} value={formation.brigade_history.longest_victory_streak} tone="text-[#e0c27a]" />
+                    )}
+                    {formation.brigade_history.turns_under_siege > 0 && (
+                      <MapRailStat label={t('formationDetail.turnsUnderSiege')} value={formation.brigade_history.turns_under_siege} />
+                    )}
+                  </MapRailStats>
+                )}
 
                 {formation.brigade_history?.total_equipment_destroyed &&
                   (formation.brigade_history.total_equipment_destroyed.tanks > 0 ||
                     formation.brigade_history.total_equipment_destroyed.artillery > 0) && (
-                    <div className="mt-2 p-1.5 border border-dashed border-[#55d48a]/30 bg-[#55d48a]/5 rounded flex justify-between items-center">
-                      <span className="text-[13px] text-[#55d48a] uppercase font-semibold">{t('formationDetail.equipmentDestroyed')}</span>
-                      <div className="flex gap-2 text-[13px] font-mono">
+                    <SurfaceSection label={t('formationDetail.equipmentDestroyed')}>
+                      <MapRailStats>
                         {formation.brigade_history.total_equipment_destroyed.tanks > 0 && (
-                          <span title={t('formationDetail.tanksApcsKnockedOut')}>🛻 {formation.brigade_history.total_equipment_destroyed.tanks}</span>
+                          <MapRailStat label={t('formationDetail.tanksApcsKnockedOut')} value={formation.brigade_history.total_equipment_destroyed.tanks} />
                         )}
                         {formation.brigade_history.total_equipment_destroyed.artillery > 0 && (
-                          <span title={t('formationDetail.artilleryDestroyed')}>💥 {formation.brigade_history.total_equipment_destroyed.artillery}</span>
+                          <MapRailStat label={t('formationDetail.artilleryDestroyed')} value={formation.brigade_history.total_equipment_destroyed.artillery} />
                         )}
                         {formation.brigade_history.total_equipment_destroyed.aa_systems > 0 && (
-                          <span title={t('formationDetail.aaSystemsDestroyed')}>🎯 {formation.brigade_history.total_equipment_destroyed.aa_systems}</span>
+                          <MapRailStat label={t('formationDetail.aaSystemsDestroyed')} value={formation.brigade_history.total_equipment_destroyed.aa_systems} />
                         )}
-                      </div>
-                    </div>
+                      </MapRailStats>
+                    </SurfaceSection>
                   )}
 
                 {formation.recent_engagements && formation.recent_engagements.length > 0 && (
-                  <div className="pt-2">
-                    <div className="text-[13px] text-text-secondary mb-1">{t('formationDetail.recentEngagements')}</div>
-                    <div className="space-y-1">
+                  <SurfaceSection label={t('formationDetail.recentEngagements')}>
+                    <ul className="m-0 flex list-none flex-col gap-1.5 p-0">
                       {sortRecentEngagements(formation.recent_engagements)
                         .map((engagement, idx) => (
-                        <div key={`${engagement.turn}-${engagement.osid}-${engagement.role}-${idx}`} className="text-[13px] leading-4 border-l-2 pl-1.5 border-panel-border/30">
-                          <span className="text-text-secondary">{formatEngagementTurnLabel(engagement.turn)} </span>
-                          <span className="text-text-primary">{formatEngagementOutcomeLabel(engagement.outcome)}</span>
-                          <span className="text-text-secondary"> {t('formationDetail.asRoleAt', { role: formatEngagementRole(engagement.role) })} </span>
-                          <span className="font-mono text-text-primary">{getOsidDisplayName(engagement.osid, osidDisplayNames)}</span>
-                          {engagement.territory_flipped && <span className="text-accent-gold ml-1">⚑</span>}
-                        </div>
+                        <li key={`${engagement.turn}-${engagement.osid}-${engagement.role}-${idx}`} className="border-l-2 border-[#3a4150] pl-2.5 text-[15px] leading-snug">
+                          <span className="text-[#b9ad94]">{formatEngagementTurnLabel(engagement.turn)} </span>
+                          <span className="text-[#f1e6c8]">{formatEngagementOutcomeLabel(engagement.outcome)}</span>
+                          <span className="text-[#b9ad94]"> {t('formationDetail.asRoleAt', { role: formatEngagementRole(engagement.role) })} </span>
+                          <span className="font-semibold text-[#f1e6c8]">{getOsidDisplayName(engagement.osid, osidDisplayNames)}</span>
+                          {engagement.territory_flipped && <span className="ml-1 text-[#e0c27a]">⚑</span>}
+                        </li>
                       ))}
-                    </div>
-                  </div>
+                    </ul>
+                  </SurfaceSection>
                 )}
               </div>
             )}
@@ -956,27 +808,17 @@ export function FormationDetail({ railSlot = 'primary', breadcrumb }: FormationD
 
             {/* Unit History — bottom of Record tab */}
             {formation.narrativeArc && (
-              <div className="pt-3 border-t border-panel-border space-y-2 min-w-0">
-                <div className="flex items-center justify-between">
-                  <span className="text-[13px] text-text-secondary uppercase font-bold tracking-widest">{t('formationDetail.unitHistory')}</span>
-                  <span className={`px-2 py-0.5 text-[13px] font-bold uppercase tracking-wider rounded border ${
-                    formation.narrativeArc === 'veteran' ? 'text-yellow-400 border-yellow-500/30 bg-yellow-900/20'
-                    : formation.narrativeArc === 'bloodied' ? 'text-[#d45555] border-[#d45555]/30 bg-[#d45555]/10'
-                    : formation.narrativeArc === 'risen' ? 'text-[#55d48a] border-[#55d48a]/30 bg-[#55d48a]/10'
-                    : formation.narrativeArc === 'shattered' ? 'text-slate-400 border-slate-400/30 bg-slate-700/20'
-                    : formation.narrativeArc === 'garrison' ? 'text-accent-blue border-accent-blue/30 bg-accent-blue/10'
-                    : 'text-text-primary border-panel-border bg-black/20'
-                  }`}>
-                    {formatNarrativeArcLabel(formation.narrativeArc)}
-                  </span>
-                </div>
+              <SurfaceSection
+                label={t('formationDetail.unitHistory')}
+                action={<span className={`${SURFACE_CHIP} ${NARRATIVE_ARC_TONE[formation.narrativeArc] ?? SURFACE_TONE.neutral}`}>{formatNarrativeArcLabel(formation.narrativeArc)}</span>}
+              >
                 {formation.warNarrative && (
-                  <div className="text-[13px] text-text-primary leading-4 italic whitespace-pre-wrap break-words">
+                  <MapRailNote className="whitespace-pre-wrap break-words text-[#ddd1b3]">
                     {sanitizeHistoryMoment(formation.warNarrative, osidDisplayNames)}
-                  </div>
+                  </MapRailNote>
                 )}
                 {formation.notableMoments && formation.notableMoments.length > 0 && (
-                  <div className="space-y-0.5 pt-1 min-w-0">
+                  <ul className="m-0 flex list-none flex-col gap-1 p-0">
                     {[...formation.notableMoments]
                       .sort((a, b) => {
                         const aTurn = Number.isFinite(a.turn) && a.turn > 0 ? a.turn : Number.POSITIVE_INFINITY;
@@ -984,159 +826,121 @@ export function FormationDetail({ railSlot = 'primary', breadcrumb }: FormationD
                         return aTurn - bTurn;
                       })
                       .map((m, i) => (
-                      <div key={i} className="text-[13px] text-text-secondary break-words">
-                        <span className="text-text-primary">{formatHistoryMomentDate(m.turn)}:</span>{' '}
+                      <li key={i} className="break-words text-[15px] leading-snug text-[#b9ad94]">
+                        <span className="text-[#f1e6c8]">{formatHistoryMomentDate(m.turn)}:</span>{' '}
                         {m.turn <= 0
                           ? t('formationDetail.initialDeploymentRecord')
                           : sanitizeHistoryMoment(m.description, osidDisplayNames)}
-                      </div>
+                      </li>
                     ))}
-                  </div>
+                  </ul>
                 )}
-              </div>
+              </SurfaceSection>
             )}
           </>
         )}
 
-        {/* ────────── ORDERS TAB ────────── */}
+        {/* ────────── COMMAND TAB ────────── */}
         {activeTab === 'orders' && (
           <>
             {/* Truthful command (owner review 2026-11-11): the president never orders a
                 brigade. Say who does, and route to the directives that reach it. */}
             {isBrigade && (
-              <div className="space-y-3">
-                <div className="space-y-1">
-                  <div className="text-[13px] text-accent-gold uppercase tracking-widest font-bold opacity-80">
-                    {t('formationDetail.command.whoHeading')}
-                  </div>
-                  <div className="text-[14px] font-semibold text-text-primary">
+              <>
+                <SurfaceSection label={t('formationDetail.command.whoHeading')}>
+                  <div className="text-[17px] font-semibold text-[#f1e6c8]">
                     {formatLoanCommandDestination(formation.corps_id, loadedGameState.formations)}
                   </div>
-                  <p
-                    data-testid="formation-detail-delegated-command-note"
-                    className="text-[13px] leading-relaxed text-text-secondary"
-                  >
+                  <MapRailNote data-testid="formation-detail-delegated-command-note">
                     {t('formationDetail.delegatedCommand')}
-                  </p>
-                </div>
-                <div className="space-y-1.5">
-                  <div className="text-[13px] text-accent-gold uppercase tracking-widest font-bold opacity-80">
-                    {t('formationDetail.command.youHeading')}
-                  </div>
+                  </MapRailNote>
+                </SurfaceSection>
+                <SurfaceSection label={t('formationDetail.command.youHeading')}>
                   {formation.corps_id && (
                     <button
                       type="button"
                       data-testid="formation-detail-open-corps-hq"
                       onClick={() => openArmyHQBriefingForCorps(useGameStore.getState(), formation.corps_id ?? null)}
-                      className="w-full rounded border border-accent-gold/50 bg-accent-gold/10 px-3 py-2 text-left text-[13px] font-semibold text-accent-gold transition-colors hover:bg-accent-gold/20"
+                      className={`${MAP_RAIL_BUTTON} w-full justify-start border-[#c9a75c]/60 text-left`}
                     >
                       {t('formationDetail.command.openCorps')}
                     </button>
                   )}
-                  <p className="text-[13px] leading-relaxed text-text-secondary">{t('formationDetail.command.directives')}</p>
-                  <p className="text-[13px] leading-relaxed text-text-secondary">{t('formationDetail.command.autonomyHint')}</p>
-                </div>
-              </div>
+                  <MapRailNote>{t('formationDetail.command.directives')}</MapRailNote>
+                  <MapRailNote>{t('formationDetail.command.autonomyHint')}</MapRailNote>
+                </SurfaceSection>
+              </>
             )}
             {!ipc.isAvailable && formation.eliteLoanState && (
-              <div className="text-[13px] text-text-secondary italic px-2 py-1.5 bg-black/10 border border-panel-border/30 rounded">
-                {t('formationDetail.commandBridgeUnavailable')}
-              </div>
+              <MapRailNote>{t('formationDetail.commandBridgeUnavailable')}</MapRailNote>
             )}
             {/* Elite loan status (elite brigades only) */}
             {formation.eliteLoanState && (
-              <div className="space-y-2 pb-3 border-b border-panel-border">
-                <span className="text-[13px] text-accent-gold uppercase tracking-widest font-bold opacity-70">{t('formationDetail.armyReserveStatus')}</span>
+              <SurfaceSection label={t('formationDetail.armyReserveStatus')}>
                 {formation.eliteLoanState.permanently_degraded ? (
-                  <div className="px-2 py-1.5 bg-[#d45555]/10 border border-[#d45555]/30 rounded text-[13px] text-[#d45555] font-semibold">
-                    {t('formationDetail.eliteDegraded')}
-                  </div>
+                  <span className={`${SURFACE_CHIP} ${SURFACE_TONE.danger} self-start whitespace-normal`}>{t('formationDetail.eliteDegraded')}</span>
                 ) : formation.eliteLoanState.on_loan ? (
-                  <div className="space-y-1.5">
-                    <div className="px-2 py-1.5 bg-[#d4a855]/10 border border-[#d4a855]/40 rounded text-[13px] space-y-0.5">
-                      <div className="flex items-center justify-between">
-                        <span className="text-[#d4a855] font-bold uppercase text-[13px]">{t('formationDetail.onLoan')}</span>
-                        <span className="text-text-secondary text-[13px]">
-                          {t('formationDetail.weeksDeployed', { weeks: formation.eliteLoanState.turns_deployed.toString() })}
-                        </span>
-                      </div>
-                      <div className="text-text-secondary">
+                  <div className="flex flex-col gap-2">
+                    <MapRailStats>
+                      <MapRailStat
+                        label={t('formationDetail.onLoan')}
+                        value={t('formationDetail.weeksDeployed', { weeks: formation.eliteLoanState.turns_deployed.toString() })}
+                        tone="text-amber-200"
+                      />
+                      <p className="m-0 pb-1.5 text-[15px] text-[#b9ad94]">
                         {'->'} {formatLoanCommandDestination(
                           formation.eliteLoanState.loaned_to_corps,
                           loadedGameState.formations,
                         )}
-                      </div>
-                    </div>
+                      </p>
+                    </MapRailStats>
                     <button
                       type="button"
                       disabled={!ipc.isAvailable}
                       onClick={() => void ipc.recallEliteBrigade(formation.id).then(r => { if (!r.ok) setLoadError(r.error ?? t('formationDetail.recallFailed')); })}
-                      className={`w-full px-2 py-1.5 border rounded text-[13px] font-bold transition-colors ${ipc.isAvailable ? 'bg-[#d45555]/20 border-[#d45555]/40 text-[#d45555] hover:bg-[#d45555]/30' : 'bg-white/5 border-white/10 text-text-secondary cursor-not-allowed'}`}
+                      className={`${MAP_RAIL_BUTTON} w-full`}
                     >
                       {t('formationDetail.recallToReserve')}
                     </button>
                   </div>
                 ) : formation.eliteLoanState.in_cooldown ? (
-                  <div className="px-2 py-1.5 bg-black/20 border border-panel-border/40 rounded text-[13px] text-text-secondary">
-                    {t('formationDetail.cooldownReturning')}
-                  </div>
+                  <MapRailNote>{t('formationDetail.cooldownReturning')}</MapRailNote>
                 ) : (
-                  <div className="px-2 py-1.5 bg-[#55d48a]/10 border border-[#55d48a]/30 rounded text-[13px] text-[#55d48a] font-semibold">
-                    {t('formationDetail.readyForDeployment')}
-                  </div>
+                  <span className={`${SURFACE_CHIP} ${SURFACE_TONE.good} self-start`}>{t('formationDetail.readyForDeployment')}</span>
                 )}
-              </div>
+              </SurfaceSection>
             )}
 
-            {/* Home-distance effectiveness widget (brigades only) */}
+            {/* Home-distance effectiveness (brigades only) */}
             {isBrigade && effPct != null && (
-              <div className="space-y-2">
-                {/* Layer 1: badge */}
-                <div className="flex items-center justify-between px-2 py-1.5 bg-black/20 rounded border border-panel-border/40">
-                  <span className="text-[13px] text-text-secondary uppercase font-bold tracking-widest">{t('formationDetail.fieldEffectiveness')}</span>
-                  {isHome ? (
-                    <span className="px-1.5 py-0.5 bg-[#55d48a]/20 text-[#55d48a] text-[13px] font-bold rounded border border-[#55d48a]/30 uppercase">
-                      {t('formationDetail.homeTurf')}
-                    </span>
-                  ) : (
-                    <span
-                      className={`px-1.5 py-0.5 text-[13px] font-bold rounded border uppercase ${
-                        effPct >= 90 ? 'bg-[#55d48a]/10 text-[#55d48a] border-[#55d48a]/30'
-                        : effPct >= 80 ? 'bg-[#d4d455]/10 text-[#d4d455] border-[#d4d455]/30'
-                        : 'bg-[#d45555]/10 text-[#d45555] border-[#d45555]/30'
-                      }`}
-                    >
-                      {t('formationDetail.effPercent', { percent: effPct.toString(), elite: isElite ? t('formationDetail.eliteParen') : '' })}
-                    </span>
-                  )}
-                </div>
-
-                {/* Layer 2: dual power stats */}
-                {!isHome && hops != null && (
-                  <div className="px-2 py-1.5 bg-black/10 rounded border border-panel-border/20 text-[13px] space-y-1">
-                    <div className="flex justify-between items-center">
-                      <span className="text-text-secondary">{t('formationDetail.powerAtHome')}</span>
-                      <span className="text-[#55d48a] font-mono font-semibold">
-                        {formatHomePower(formation.personnel)}
-                      </span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-text-secondary">{t('formationDetail.powerHere', { percent: effPct.toString() })}</span>
-                      <span className={`font-mono font-semibold ${effPct >= 90 ? 'text-[#d4d455]' : 'text-[#d45555]'}`}>
-                        {formatHomePower(Number.isFinite(formation.personnel) ? (formation.personnel as number) * (effPct / 100) : null)}
-                      </span>
-                    </div>
-                    <div className="text-[13px] text-text-secondary pt-0.5">
-                      {t('formationDetail.hopsFromHome', { hops: hops.toString() })}
-                    </div>
-                  </div>
+              <SurfaceSection
+                label={t('formationDetail.fieldEffectiveness')}
+                action={isHome ? (
+                  <span className={`${SURFACE_CHIP} ${SURFACE_TONE.good}`}>{t('formationDetail.homeTurf')}</span>
+                ) : (
+                  <span className={`${SURFACE_CHIP} ${effPct >= 90 ? SURFACE_TONE.good : effPct >= 80 ? SURFACE_TONE.warn : SURFACE_TONE.danger}`}>
+                    {t('formationDetail.effPercent', { percent: effPct.toString(), elite: isElite ? t('formationDetail.eliteParen') : '' })}
+                  </span>
                 )}
-              </div>
+              >
+                {!isHome && hops != null && (
+                  <>
+                    <MapRailStats>
+                      <MapRailStat label={t('formationDetail.powerAtHome')} value={formatHomePower(formation.personnel)} tone="text-emerald-200" />
+                      <MapRailStat
+                        label={t('formationDetail.powerHere', { percent: effPct.toString() })}
+                        value={formatHomePower(Number.isFinite(formation.personnel) ? (formation.personnel as number) * (effPct / 100) : null)}
+                        tone={effPct >= 90 ? 'text-amber-100' : 'text-red-200'}
+                      />
+                    </MapRailStats>
+                    <MapRailNote>{t('formationDetail.hopsFromHome', { hops: hops.toString() })}</MapRailNote>
+                  </>
+                )}
+              </SurfaceSection>
             )}
-
           </>
         )}
-      </div>
-    </div>
+      </MapRailBody>
+    </MapRailFrame>
   );
 }

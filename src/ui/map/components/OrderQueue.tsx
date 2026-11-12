@@ -94,7 +94,7 @@ export function OrderQueue() {
         onClick={() => setCollapsed(false)}
         aria-label={t('orderQueue.expandAria')}
         aria-expanded={false}
-        className="flex items-center w-full text-left bg-panel-bg/95 backdrop-blur-sm border border-panel-border rounded-t-lg hover:bg-panel-hover transition-colors"
+        className="kbd-focus flex w-full items-center justify-between gap-2 rounded-t-lg border border-accent-gold/35 bg-[#141821] px-4 py-2.5 text-left transition-colors hover:bg-[#1b2029]"
         style={{
           position: 'absolute',
           left: 0,
@@ -104,17 +104,17 @@ export function OrderQueue() {
           direction: 'ltr',
         }}
       >
-        <span className="px-3 py-2 font-sans text-xs text-accent-gold uppercase tracking-wide font-semibold">
+        <span className="font-mono text-[13px] font-semibold uppercase tracking-[0.16em] text-[#e0c27a]">
           {orderQueueTitle(stagedOrders.length)}
         </span>
-        <span className="text-text-secondary text-xs ml-1">▶</span>
+        <span aria-hidden="true" className="text-[14px] text-[#c9a75c]">▴</span>
       </button>
     );
   }
 
   return (
     <div
-      className="flex flex-col bg-panel-bg/95 backdrop-blur-sm border border-panel-border rounded-t-lg shadow-lg max-h-48 overflow-hidden"
+      className="flex max-h-64 flex-col overflow-hidden rounded-t-lg border border-accent-gold/35 bg-[#11141b] text-text-primary shadow-[0_24px_70px_rgba(0,0,0,0.6)]"
       style={{
         position: 'absolute',
         left: 0,
@@ -124,8 +124,8 @@ export function OrderQueue() {
         direction: 'ltr',
       }}
     >
-      <div className="flex items-center justify-between px-3 py-2 border-b border-panel-border shrink-0">
-        <span className="font-sans text-xs text-accent-gold uppercase tracking-wide font-semibold">
+      <div className="flex shrink-0 items-center justify-between gap-2 border-b border-[#262b35] bg-[#141821] px-4 py-2.5">
+        <span className="font-mono text-[13px] font-semibold uppercase tracking-[0.16em] text-[#e0c27a]">
           {orderQueueTitle(stagedOrders.length)}
         </span>
         <div className="flex items-center gap-1">
@@ -133,7 +133,7 @@ export function OrderQueue() {
             <button
               type="button"
               onClick={() => clearStagedOrders()}
-              className="text-xs font-mono uppercase text-text-secondary hover:text-interactive px-1.5 py-0.5 rounded border border-panel-border hover:bg-panel-hover"
+              className="kbd-focus rounded border border-[#3a4150] bg-[#1b2029] px-2.5 py-1 text-[13px] font-semibold text-[#e8dcbc] hover:border-accent-gold/60"
             >
               {t('orderQueue.clearAll')}
             </button>
@@ -141,35 +141,35 @@ export function OrderQueue() {
           <button
             type="button"
             onClick={() => setCollapsed(true)}
-            className="text-text-secondary hover:text-interactive text-xs leading-none p-0.5"
+            className="kbd-focus rounded border border-[#3a4150] bg-[#1b2029] px-2 py-1 text-[13px] leading-none text-[#c9a75c] hover:border-accent-gold/60"
             aria-label={t('orderQueue.collapseAria')}
             aria-expanded={true}
           >
-            ▼
+            ▾
           </button>
         </div>
       </div>
-      <ul className="overflow-auto divide-y divide-panel-border/50 shrink min-h-0">
+      <ul className="m-0 min-h-0 shrink list-none divide-y divide-[#262b35] overflow-auto p-0">
         {stagedOrders.map((order) => {
           const targetLabel = orderTargetLabel(order, osidDisplayNames, sectors);
           return (
             <li
               key={order.id}
-              className="flex items-center gap-2 px-3 py-2 text-xs group"
+              className="group grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-0.5 px-4 py-2 text-[14px]"
             >
-              <span className="shrink-0 font-mono text-text-secondary uppercase w-24">
+              <span className="col-span-2 text-[13px] font-semibold uppercase tracking-[0.12em] text-[#b9ad94]">
                 {orderTypeLabel(order.type)}
               </span>
-              <span className="truncate text-text-primary min-w-0">
+              <span className="min-w-0 truncate font-semibold text-[#f1e6c8]">
                 {formationName(order.formationId, formationNamesById)}
               </span>
-              <span className="truncate text-text-secondary min-w-0" title={targetLabel}>
+              <span className="col-start-1 min-w-0 truncate text-[#c2b69c]" title={targetLabel}>
                 {targetLabel}
               </span>
               <button
                 type="button"
                 onClick={() => removeStagedOrder(order.id)}
-                className="shrink-0 ml-auto text-xs font-mono uppercase text-text-secondary hover:text-interactive px-1.5 py-0.5 rounded border border-panel-border opacity-70 group-hover:opacity-100"
+                className="kbd-focus col-start-2 row-span-2 row-start-2 self-center rounded border border-[#3a4150] bg-[#1b2029] px-2.5 py-1 text-[13px] font-semibold text-[#e8dcbc] hover:border-accent-gold/60"
               >
                 {t('orderQueue.remove')}
               </button>

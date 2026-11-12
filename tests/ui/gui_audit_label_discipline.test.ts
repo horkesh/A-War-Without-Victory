@@ -1777,7 +1777,7 @@ describe('GUI audit label discipline', () => {
   it('keeps settlement support panel copy on i18n keys', () => {
     const selectionSource = readFileSync('src/ui/map/components/SelectionPanel.tsx', 'utf8');
 
-    expect(selectionSource).toContain("t('selection.settlementInfo')");
+    expect(selectionSource).toContain("t('mapRail.eyebrow.settlement')");
     expect(selectionSource).toContain("t('selection.localSupport')");
     expect(selectionSource).toContain("t('selection.noLocalSupportStaged')");
     expect(selectionSource).not.toMatch(/Settlement Info|Local support staged|Failed to stage local support|none staged/);

@@ -7,7 +7,8 @@ import { useGameStore } from '../store/gameStore';
 import { FACTION_COLORS } from '../utils/theme';
 import { getOperationId, getOperationPhaseLabel } from '../utils/operations';
 import { buildCorpsColorMap } from '../map/builders/buildCorpsFrontLinesGeoJSON';
-import { getPanelRailStyle } from './panelRail';
+import { getMapRailStyle } from './panelRail';
+import { MapRailCloseButton, MapRailFrame, MapRailHeader } from './surface/MapRail';
 import { CombatSummaryPanel } from './CombatSummaryPanel';
 import { getFormationCommander, resolveCorpsCommanderDisplay } from '../utils/officerUtils';
 import { OfficerProfile } from './OfficerProfile';
@@ -60,7 +61,7 @@ interface CorpsDetailProps {
   breadcrumb?: ReactNode;
 }
 
-export function CorpsDetail({ railSlot = 'primary', breadcrumb }: CorpsDetailProps) {
+export function CorpsDetail({ breadcrumb }: CorpsDetailProps) {
   const [activeTab, setActiveTab] = useState<CorpsTab>('overview');
   const [locale] = useLocale();
   const selectedCorpsId = useGameStore((s) => s.selectedCorpsId);
@@ -123,22 +124,14 @@ export function CorpsDetail({ railSlot = 'primary', breadcrumb }: CorpsDetailPro
 
   if (!loadedGameState || !corpsFormation) {
     return (
-      <div
-        data-awwv-counter-occluder="true"
-        className="panel-slide-in-right flex flex-col bg-[#11141b] border border-accent-gold/30 rounded-lg shadow-xl overflow-hidden"
-        style={getPanelRailStyle(railSlot, '24rem', 'left')}
-      >
-        <div className="h-10 bg-panel-card border-b border-panel-border panel-shimmer" />
-        <div className="p-3 space-y-3">
-          <div className="h-6 w-3/4 bg-panel-card rounded panel-shimmer" />
-          <div className="space-y-2">
-            <div className="h-4 w-full bg-panel-card rounded panel-shimmer" />
-            <div className="h-4 w-full bg-panel-card rounded panel-shimmer" />
-            <div className="h-4 w-2/3 bg-panel-card rounded panel-shimmer" />
-          </div>
-          <div className="h-32 w-full bg-panel-card rounded panel-shimmer" />
+      <MapRailFrame data-awwv-counter-occluder="true" className="panel-slide-in-right" style={getMapRailStyle()}>
+        <div className="h-16 border-b border-[#262b35] bg-[#141821] panel-shimmer" />
+        <div className="space-y-3 p-5">
+          <div className="h-6 w-3/4 rounded bg-[#161a22] panel-shimmer" />
+          <div className="h-4 w-full rounded bg-[#161a22] panel-shimmer" />
+          <div className="h-32 w-full rounded bg-[#161a22] panel-shimmer" />
         </div>
-      </div>
+      </MapRailFrame>
     );
   }
 
@@ -213,44 +206,40 @@ export function CorpsDetail({ railSlot = 'primary', breadcrumb }: CorpsDetailPro
   };
 
   return (
-    <div
+    <MapRailFrame
       data-testid="corps-detail-panel"
       data-awwv-counter-occluder="true"
-      className="panel-slide-in-right flex flex-col bg-[#11141b] border border-accent-gold/30 rounded-lg shadow-xl overflow-hidden"
-      style={getPanelRailStyle(railSlot, '24rem', 'left')}
+      className="panel-slide-in-right"
+      style={getMapRailStyle()}
     >
-      {/* Header */}
-      <div className="flex items-center justify-between px-3 py-2 bg-panel-card border-b border-panel-border shrink-0">
-        <div className="flex items-center gap-2 min-w-0">
-          <span className="inline-block w-3 h-3 rounded-sm shrink-0" style={{ backgroundColor: corpsColor }} />
-          <span className="font-sans text-[13px] text-accent-gold uppercase tracking-wide font-semibold truncate">
-            {corpsDisplayName}
-          </span>
-          {breadcrumb}
-        </div>
-        <button
-          onClick={() => useGameStore.setState({
-            selectedCorpsId: null,
-            selectedCorpsFrontSectorId: null,
-            selectedFormationId: null,
-            selectedOperationKey: null,
-          })}
-          aria-label={t('corpsDetail.closePanel')}
-          title={t('corpsDetail.closePanel')}
-          className="text-text-secondary hover:text-interactive text-sm leading-none shrink-0 ml-2"
-        >
-          ✕
-        </button>
-      </div>
+      <MapRailHeader
+        breadcrumb={breadcrumb}
+        mark={<span aria-hidden="true" className="inline-block h-3 w-3 shrink-0 rounded-sm" style={{ backgroundColor: corpsColor }} />}
+        eyebrow={t('mapRail.eyebrow.corps')}
+        title={corpsDisplayName}
+        subtitle={getPlayerSafeMilitaryFactionName(corpsFormation.faction)}
+        close={(
+          <MapRailCloseButton
+            onClick={() => useGameStore.setState({
+              selectedCorpsId: null,
+              selectedCorpsFrontSectorId: null,
+              selectedFormationId: null,
+              selectedOperationKey: null,
+            })}
+            aria-label={t('corpsDetail.closePanel')}
+            title={t('corpsDetail.closePanel')}
+          />
+        )}
+      />
 
       <TabBar tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} />
 
       {/* Tab content */}
-      <div className="flex-1 overflow-auto min-h-0 text-[13px]">
+      <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden text-[15px]">
 
         {/* ── OVERVIEW ── */}
         {activeTab === 'overview' && (
-          <div className="p-3 space-y-3">
+          <div className="space-y-4 px-5 py-4">
             <div className="text-text-secondary text-[13px]">
               <span className={FACTION_COLORS[corpsFormation.faction] ?? 'text-text-primary'}>
                 {getPlayerSafeMilitaryFactionName(corpsFormation.faction)}
@@ -401,7 +390,7 @@ export function CorpsDetail({ railSlot = 'primary', breadcrumb }: CorpsDetailPro
         {activeTab === 'orbat' && (
           <div className="py-1">
             {subordinates.length === 0 ? (
-              <div className="p-3 text-text-secondary italic text-[13px]">{t('corpsDetail.noSubordinateBrigades')}</div>
+              <div className="px-5 py-4 text-[15px] text-[#b9ad94]">{t('corpsDetail.noSubordinateBrigades')}</div>
             ) : (
               [...subordinates]
                 .sort((a, b) => compareLocalizedFormationNames(a, b, locale))
@@ -430,7 +419,7 @@ export function CorpsDetail({ railSlot = 'primary', breadcrumb }: CorpsDetailPro
 
         {/* ── SECTORS ── */}
         {activeTab === 'sectors' && (
-          <div className="p-3 space-y-1">
+          <div className="space-y-1.5 px-5 py-4">
             {corpsSectors.length === 0 ? (
               <div className="text-text-secondary italic text-[13px]">{t('corpsDetail.noSectorsAssigned')}</div>
             ) : (
@@ -507,7 +496,7 @@ export function CorpsDetail({ railSlot = 'primary', breadcrumb }: CorpsDetailPro
 
         {/* ── OPS ── */}
         {activeTab === 'ops' && (
-          <div className="p-3 space-y-2.5">
+          <div className="space-y-3 px-5 py-4">
             <div className="text-[13px] uppercase tracking-widest text-text-secondary font-bold">
               {t('corpsDetail.fieldSnapshot')}
             </div>
@@ -593,7 +582,7 @@ export function CorpsDetail({ railSlot = 'primary', breadcrumb }: CorpsDetailPro
 
         {/* ── ORDERS ── */}
         {activeTab === 'orders' && (
-          <div className="p-3 space-y-3">
+          <div className="space-y-4 px-5 py-4">
             <div className="text-[13px] text-text-secondary uppercase tracking-widest font-bold">
               {t('operationHistory.title')}
             </div>
@@ -607,6 +596,6 @@ export function CorpsDetail({ railSlot = 'primary', breadcrumb }: CorpsDetailPro
         )}
 
       </div>
-    </div>
+    </MapRailFrame>
   );
 }

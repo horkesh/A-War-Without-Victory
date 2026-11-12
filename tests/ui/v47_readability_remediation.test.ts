@@ -139,20 +139,21 @@ describe('RBiH v47 evidence-backed readability floor', () => {
     expect(statusStrip).not.toContain("'text-text-secondary/50 hover:text-text-secondary'");
   });
 
-  it('keeps sector-intelligence paper labels readable while marking blackout ink as intentional', () => {
+  it('keeps the sector panel on the dark map rail, with no paper, watermark or blackout ink', () => {
+    // Map rail system (owner review 2026-11-11, M2): the cream "dossier paper" sector panel is
+    // gone; it is a dark rail like every other map panel, and unreported figures read as words.
     const source = readComponent('CorpsFrontPanel.tsx');
-    const theme = readRepo('src', 'ui', 'map', 'utils', 'theme.ts');
 
-    expect(source).toContain('data-readability-ignore="true"');
-    expect(source).toContain('bg-[#f0e8d8] text-neutral-800');
-    expect(source).not.toContain('bg-[#f0e8d8]/95 text-neutral-800');
-    expect(source).toContain("FACTION_COLORS_ON_LIGHT[sector.faction] ?? 'text-neutral-800'");
-    expect(theme).toContain("RS: 'text-[#a62d2d]'");
-    expect(theme).toContain("RBiH: 'text-[#286a32]'");
-    expect(theme).toContain("HRHB: 'text-[#285f94]'");
-    expect(source).toContain('text-[13px] font-normal text-neutral-600 normal-case');
-    expect(source).not.toContain('text-xs font-normal text-neutral-400 normal-case');
-    expect(source).not.toContain('text-xs uppercase font-bold text-neutral-500');
+    expect(source).toContain('<MapRailFrame');
+    expect(source).toContain('style={getMapRailStyle()}');
+    expect(source).not.toContain('bg-[#f0e8d8]');
+    expect(source).not.toContain('FACTION_COLORS_ON_LIGHT');
+    expect(source).not.toContain("t('corpsFront.secret')");
+    expect(source).not.toContain('bg-black text-black');
+    expect(source).not.toMatch(/text-neutral-\d/);
+    expect(source).toContain("t('mapRail.notReportedYet')");
+    expect(source).toContain("t('mapRail.notAssessedYet')");
+    expect(source).not.toContain('text-xs uppercase font-bold');
   });
 
   it('suppresses duplicate map hover cards while an entity dossier is open', () => {

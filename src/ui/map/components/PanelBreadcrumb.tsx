@@ -148,7 +148,7 @@ export function PanelBreadcrumb({ railState }: PanelBreadcrumbProps) {
   if (railState.trail.length === 0) return null;
 
   return (
-    <div className="flex min-w-0 items-center gap-1 text-[13px] uppercase tracking-[0.12em] text-text-secondary">
+    <div className="flex min-w-0 flex-wrap items-center gap-1.5 text-[13px] text-[#b9ad94]">
       {railState.trail.map((level) => {
         const typeLabel = panelTypeLabel(level.panel);
         const label = levelLabel(level, locale);
@@ -156,11 +156,12 @@ export function PanelBreadcrumb({ railState }: PanelBreadcrumbProps) {
           <button
             key={`${level.panel}:${level.id}`}
             type="button"
-            className="kbd-focus rounded border border-panel-border/70 bg-black/20 px-1.5 py-0.5 text-[13px] font-semibold text-text-secondary hover:border-accent-gold/50 hover:text-accent-gold"
+            className="kbd-focus max-w-full truncate rounded border border-[#3a4150] bg-[#1b2029] px-2 py-0.5 text-[13px] font-semibold text-[#c2b69c] hover:border-accent-gold/60 hover:text-accent-gold"
             aria-label={t('panelBreadcrumb.backTo', { label: typeLabel })}
             title={t('panelBreadcrumb.backTo', { label })}
             onClick={() => selectBreadcrumbLevel(level)}
           >
+            <span aria-hidden="true" className="mr-1 text-[#c9a75c]">‹</span>
             {label}
           </button>
         );
