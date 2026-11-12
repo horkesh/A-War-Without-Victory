@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
+import { withoutComments } from '../helpers/sourceComments';
 
 /**
  * Surface redesign, step 4 (2026-11-12): the records and end-state screens are
@@ -28,7 +29,7 @@ function read(file: string): string {
 describe('records and end-state surfaces', () => {
   for (const file of FILES) {
     it(`${file} has no legacy glass or sub-13px text`, () => {
-      const source = read(file);
+      const source = withoutComments(read(file));
       expect(source).not.toMatch(/backdrop-blur/);
       expect(source).not.toMatch(/amber-400/);
       expect(source).not.toMatch(/\btext-(?:xs|\[(?:[0-9]|1[0-2])(?:\.\d+)?px\])/);

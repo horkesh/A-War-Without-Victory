@@ -1,6 +1,6 @@
 # Records and end states as surfaces — step 4 of the player-surface review (2026-11-12)
 
-**Status:** ACTIVE (branch `claude/records-surfaces-5a7f7f`; the owner decides the PR and merge).
+**Status:** ACTIVE — built and gated on branch `claude/records-surfaces-5a7f7f`, pushed; the owner decides the PR and merge. Evidence and gate results: PROJECT_LEDGER entry of 2026-11-12 "Records and end states as surfaces".
 **Source:** step 4 of [the player-surface and agency review](../40_reports/proposals/20261111_PLAYER_SURFACE_AND_AGENCY_REVIEW.md) §4. Steps 2 (map rails) and 3 (operations family) run in parallel sessions on disjoint files.
 **Builds on:** the surface redesign (#566) and its shared parts in `src/ui/map/components/surface/Surface.tsx`; merged in first: `claude/r8-name-sweep-recovery`, then `claude/truthful-command`.
 
