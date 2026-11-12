@@ -31,6 +31,7 @@
  * Migrated from legacy ui_legacy/data/GameStateAdapter.ts — import paths updated.
  */
 import { summarizeOwnEquipment } from '../../shared/equipmentSummary';
+import { municipalityDisplayName, restoreBosnianPlaceNames } from '../../shared/bosnianPlaceNames';
 
 import type {
     AoROrderView, AttackOrderView,
@@ -614,44 +615,8 @@ function normalizePercent(value: unknown): number | null {
     return Math.max(0, Math.min(100, Math.round(percent * 100) / 100));
 }
 
-const MUNICIPALITY_DISPLAY_NAMES: Record<string, string> = {
-    banja_luka: 'Banja Luka', banovici: 'Banovići', bihac: 'Bihać', bijeljina: 'Bijeljina',
-    bileca: 'Bileća', bosanska_dubica: 'Bosanska Dubica', bosanska_gradiska: 'Bosanska Gradiška',
-    bosanska_kostajnica: 'Bosanska Kostajnica', bosanska_krupa: 'Bosanska Krupa',
-    bosanski_brod: 'Bosanski Brod', bosanski_novi: 'Bosanski Novi',
-    bosanski_petrovac: 'Bosanski Petrovac', bosanski_samac: 'Bosanski Šamac',
-    bosansko_grahovo: 'Bosansko Grahovo', bratunac: 'Bratunac', brcko: 'Brčko',
-    breza: 'Breza', bugojno: 'Bugojno', busovaca: 'Busovača', cajnice: 'Čajniče',
-    capljina: 'Čapljina', cazin: 'Cazin', celinac: 'Čelinac',
-    centar_sarajevo: 'Centar Sarajevo', citluk: 'Čitluk', derventa: 'Derventa',
-    doboj: 'Doboj', donji_vakuf: 'Donji Vakuf', duvno: 'Duvno', foca: 'Foča',
-    fojnica: 'Fojnica', gacko: 'Gacko', glamoc: 'Glamoč', gorazde: 'Goražde',
-    gornji_vakuf: 'Gornji Vakuf', gracanica: 'Gračanica', gradacac: 'Gradačac',
-    grude: 'Grude', hadzici: 'Hadžići', hanpijesak: 'Han Pijesak',
-    ilidza: 'Ilidža', ilijas: 'Ilijaš', jablanica: 'Jablanica', jajce: 'Jajce',
-    kakanj: 'Kakanj', kalesija: 'Kalesija', kalinovik: 'Kalinovik', kiseljak: 'Kiseljak',
-    kladanj: 'Kladanj', kljuc: 'Ključ', konjic: 'Konjic', kotor_varos: 'Kotor Varoš',
-    kresevo: 'Kreševo', kupres: 'Kupres', laktasi: 'Laktaši', listica: 'Lištica',
-    livno: 'Livno', ljubinje: 'Ljubinje', ljubuski: 'Ljubuški', lopare: 'Lopare',
-    lukavac: 'Lukavac', maglaj: 'Maglaj', modrica: 'Modrića', mostar: 'Mostar',
-    mrkonjic_grad: 'Mrkonjić Grad', neum: 'Neum', nevesinje: 'Nevesinje',
-    novi_grad_sarajevo: 'Novi Grad Sarajevo', novi_travnik: 'Novi Travnik',
-    novo_sarajevo: 'Novo Sarajevo', odzak: 'Odžak', olovo: 'Olovo', orasje: 'Orašje',
-    pale: 'Pale', posusje: 'Posušje', prijedor: 'Prijedor', prnjavor: 'Prnjavor',
-    prozor: 'Prozor', rogatica: 'Rogatica', rudo: 'Rudo', sanski_most: 'Sanski Most',
-    sekovici: 'Šekovići', sipovo: 'Šipovo', skender_vakuf: 'Skender Vakuf',
-    sokolac: 'Sokolac', srbac: 'Srbac', srebrenica: 'Srebrenica', srebrenik: 'Srebrenik',
-    stari_grad_sarajevo: 'Stari Grad Sarajevo', stolac: 'Stolac', tesanj: 'Tešanj',
-    teslic: 'Teslić', titov_drvar: 'Drvar', travnik: 'Travnik', trebinje: 'Trebinje',
-    trnovo: 'Trnovo', tuzla: 'Tuzla', ugljevik: 'Ugljevik', vares: 'Vareš',
-    velika_kladusa: 'Velika Kladuša', visegrad: 'Višegrad', visoko: 'Visoko',
-    vitez: 'Vitez', vlasenica: 'Vlasenica', vogosca: 'Vogošća',
-    zavidovici: 'Zavidovići', zenica: 'Zenica', zepce: 'Žepče',
-    zivinice: 'Živinice', zvornik: 'Zvornik',
-};
-
 function humanizeMunicipalitySlug(slug: string): string {
-    return MUNICIPALITY_DISPLAY_NAMES[slug]
+    return municipalityDisplayName(slug)
         ?? slug.split(/[-_]/).map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
 }
 
@@ -743,6 +708,47 @@ function resolveAttestedOgName(corpsId: string, munCounts: Map<string, number>):
     return undefined;
 }
 
+/**
+ * Two sectors of one faction must never show the same OG/TG/OZ name (the player saw
+ * "OG Donji Vakuf" twice in an RS run). A whole-corps OZ name and the "OG {dominant mun}"
+ * fallback both repeat whenever sectors share a corps or a dominant municipality.
+ * Within each faction's group of identical names, every sector keeps the name and gains
+ * the first municipality in its own coverage ranking that no other member of the group
+ * shares as a qualifier: "OG Donji Vakuf (Bugojno)". When no such municipality exists the
+ * qualifier falls back to a roman ordinal in sector-id order. Display-only.
+ */
+export function disambiguateSectorDisplayNames(
+    sectors: Array<{ sector_id: string; faction: string; display_name: string }>,
+    rankedMunNamesBySector: Map<string, string[]>,
+): void {
+    const groups = new Map<string, Array<{ sector_id: string; faction: string; display_name: string }>>();
+    for (const sector of sectors) {
+        const key = `${sector.faction}\u0000${sector.display_name}`;
+        const group = groups.get(key);
+        if (group) group.push(sector);
+        else groups.set(key, [sector]);
+    }
+    const romans = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'];
+    for (const group of groups.values()) {
+        if (group.length < 2) continue;
+        group.sort((a, b) => (a.sector_id < b.sector_id ? -1 : a.sector_id > b.sector_id ? 1 : 0));
+        const base = group[0]!.display_name;
+        const taken = new Set<string>();
+        const qualifiers = group.map((sector) => {
+            const ranked = rankedMunNamesBySector.get(sector.sector_id) ?? [];
+            const pick = ranked.find((name) => !taken.has(name) && !base.includes(name));
+            if (pick) taken.add(pick);
+            return pick;
+        });
+        const allQualified = qualifiers.every((q) => typeof q === 'string');
+        group.forEach((sector, index) => {
+            sector.display_name = allQualified
+                ? `${base} (${qualifiers[index]})`
+                : `${base} ${romans[index] ?? String(index + 1)}`;
+        });
+    }
+}
+
 function getAirdropAllocationValue(state: GameState, enclaveId: string): number {
     return finiteNumber((state.military.airdrop_allocation as Record<string, number> | undefined)?.[enclaveId]);
 }
@@ -754,8 +760,8 @@ const ENCLAVE_UI_DEFINITIONS: Array<{
     osid_prefixes?: string[];
     osid_list?: string[];
 }> = [
-    { id: 'bihac_pocket', display_name: 'Bihac Pocket', faction: 'RBiH', osid_prefixes: ['op:bihac:', 'op:cazin:', 'op:velika_kladusa:', 'op:bosanska_krupa:'] },
-    { id: 'gorazde', display_name: 'Gorazde', faction: 'RBiH', osid_list: [
+    { id: 'bihac_pocket', display_name: 'Bihać Pocket', faction: 'RBiH', osid_prefixes: ['op:bihac:', 'op:cazin:', 'op:velika_kladusa:', 'op:bosanska_krupa:'] },
+    { id: 'gorazde', display_name: 'Goražde', faction: 'RBiH', osid_list: [
         'op:gorazde:bacci', 'op:gorazde:citluk_2',
         'op:gorazde:faocici_2', 'op:gorazde:gorazde_2',
         'op:gorazde:hrancici',
@@ -775,7 +781,7 @@ const ENCLAVE_UI_DEFINITIONS: Array<{
         'op:srebrenica:srebrenica_2', 'op:srebrenica:suceska',
         'op:srebrenica:sulice_2',
     ] },
-    { id: 'zepa', display_name: 'Zepa', faction: 'RBiH', osid_list: ['op:rogatica:zepa_2'] },
+    { id: 'zepa', display_name: 'Žepa', faction: 'RBiH', osid_list: ['op:rogatica:zepa_2'] },
     // HRHB enclaves (Bosniak-Croat conflict)
     { id: 'kiseljak', display_name: 'Kiseljak', faction: 'HRHB', osid_list: [
         'op:kiseljak:azapovici_2',
@@ -783,14 +789,14 @@ const ENCLAVE_UI_DEFINITIONS: Array<{
         'op:kiseljak:kiseljak_2',
         'op:kresevo:kresevo_2', 'op:kresevo:polje_2',
     ] },
-    { id: 'lasva_valley', display_name: 'Lasva Valley', faction: 'HRHB', osid_list: [
+    { id: 'lasva_valley', display_name: 'Lašva Valley', faction: 'HRHB', osid_list: [
         'op:vitez:vitez_2',
         'op:busovaca:bare_2', 'op:busovaca:buselji_2',
         'op:busovaca:busovaca_2', 'op:busovaca:polje_2',
         'op:novi_travnik:rankovici_2', 'op:novi_travnik:rat_2',
         'op:novi_travnik:ruda_2',
     ] },
-    { id: 'zepce', display_name: 'Zepce', faction: 'HRHB', osid_list: [
+    { id: 'zepce', display_name: 'Žepče', faction: 'HRHB', osid_list: [
         'op:zepce:ozimica_2', 'op:zepce:viniste_2',
         'op:zepce:zepce_2',
     ] },
@@ -2555,6 +2561,7 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
     );
     if (rawSectors && typeof rawSectors === 'object' && !Array.isArray(rawSectors)) {
         const out: CorpsFrontSectorView[] = [];
+        const sectorRankedMunNames = new Map<string, string[]>();
         for (const sectorId of Object.keys(rawSectors).sort((a, b) => a.localeCompare(b))) {
             const s = rawSectors[sectorId] ?? {};
             const corpsId = typeof s.corps_id === 'string' ? s.corps_id : '';
@@ -2590,10 +2597,11 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
                     }
                 }
             }
-            const topMuns = [...munCounts.entries()]
+            const rankedMuns = [...munCounts.entries()]
                 .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
-                .slice(0, 2)
                 .map(([m]) => humanizeMunicipalitySlug(m));
+            sectorRankedMunNames.set(sectorId, rankedMuns);
+            const topMuns = rankedMuns.slice(0, 2);
             // ADR-0006 Phase 3B: prefer the standing TG/OG identity (CorpsFrontSector.display_name,
             // e.g. "TG Drina", "1. OG (Tuzla)", "OZ Mostar") when present in state; otherwise fall
             // back to the computed "{corps} \u2013 {top muns}" label. This is the canonical UI
@@ -2604,7 +2612,7 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
             // (display-only; never written back to hashed state). Falls through to computed label
             // when this sector's corps/region has no attested name.
             const standingIdentity = (typeof s.display_name === 'string' && s.display_name.length > 0)
-                ? s.display_name
+                ? restoreBosnianPlaceNames(s.display_name)
                 : resolveAttestedOgName(corpsId, munCounts);
             // Fallback OG name (owner 2026-08-06): "OG {dominant municipality}" (OG first, then
             // the place \u2014 e.g. "OG Banja Luka"), matching real designations like "OG West". The
@@ -2674,6 +2682,7 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
                 sv.combat_personnel = typeof r.personnel === 'number' ? r.personnel : undefined;
             }
         }
+        disambiguateSectorDisplayNames(out, sectorRankedMunNames);
         if (out.length > 0) corpsFrontSectors = out;
     }
 

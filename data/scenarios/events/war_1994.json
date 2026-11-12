@@ -1143,10 +1143,10 @@
   {
     "id": "gorazde_crisis_1994",
     "image": "event_enclave_valley_town.webp",
-    "title": "Gorazde Crisis",
-    "narrative": "The VRS launches a major offensive against the Gorazde safe area, overrunning UN observation posts and pushing into the outskirts of the town. Limited NATO air strikes prove insufficient to halt the advance. The crisis exposes the hollow nature of safe area protection and the mismatch between UN mandates and military reality.",
+    "title": "Goražde Crisis",
+    "narrative": "The VRS launches a major offensive against the Goražde safe area, overrunning UN observation posts and pushing into the outskirts of the town. Limited NATO air strikes prove insufficient to halt the advance. The crisis exposes the hollow nature of safe area protection and the mismatch between UN mandates and military reality.",
     "category": "military",
-    "historical_source": "UN Report on Srebrenica (A/54/549, 1999), Gorazde context; ICTY Karadzic Trial Judgment (IT-95-5/18-T), Gorazde findings",
+    "historical_source": "UN Report on Srebrenica (A/54/549, 1999), Goražde context; ICTY Karadzic Trial Judgment (IT-95-5/18-T), Goražde findings",
     "source_tier": "icty_icj_un",
     "source_note": "The listed adjudicative and institutional sources bound the chronology, actors, and findings described. The essay is original synthesis and does not extend individual liability, command responsibility, or institutional findings beyond the cited record.",
     "trigger": {
@@ -1168,7 +1168,7 @@
       },
       {
         "kind": "narrative",
-        "text": "The VRS attacks the Gorazde safe area. Limited NATO strikes fail to stop the offensive, exposing the fragility of safe area protection."
+        "text": "The VRS attacks the Goražde safe area. Limited NATO strikes fail to stop the offensive, exposing the fragility of safe area protection."
       }
     ]
   },
@@ -2030,7 +2030,7 @@
         "branch_tag": "hrhb_washington_reluctant",
         "historical_marker": "counterfactual",
         "label": "Condition acceptance on central Bosnia amendments",
-        "description": "Accept the Contact Group framework but condition the signature on central Bosnia territorial amendments — Vitez, Kiseljak, Busovaca. The Federation channel holds tactically; Zagreb tolerates the conditional posture without full alignment.",
+        "description": "Accept the Contact Group framework but condition the signature on central Bosnia territorial amendments — Vitez, Kiseljak, Busovača. The Federation channel holds tactically; Zagreb tolerates the conditional posture without full alignment.",
         "effects": [
           {
             "kind": "morale_change",
@@ -2091,7 +2091,7 @@
       "accept_with_amendments": {
         "RBiH": {
           "headline": "Mostar conditions acceptance on central Bosnia",
-          "body": "HRHB signs the Contact Group framework with central Bosnia territorial amendments (Vitez, Kiseljak, Busovaca). Sarajevo sees the Federation channel hold tactically while local territorial disputes remain unresolved."
+          "body": "HRHB signs the Contact Group framework with central Bosnia territorial amendments (Vitez, Kiseljak, Busovača). Sarajevo sees the Federation channel hold tactically while local territorial disputes remain unresolved."
         },
         "RS": {
           "headline": "HZ HB signs with amendments",
@@ -2840,8 +2840,8 @@
   {
     "id": "bihac_5th_corps_offensive_1994",
     "image": "event_highland_offensive.webp",
-    "title": "5th Corps Breaks Out of Bihac",
-    "narrative": "Sarajevo Presidency files, autumn 1994. General Atif Dudakovic and the 5th Corps in Bihac are the principal armed expression of the Sarajevo line against the Fikret Abdic / APWB split declared at Velika Kladusa on 27 September 1993. Dudakovic has presented an offensive plan: push from the pocket into Grabez and toward Bosanska Krupa against the VRS, while overrunning APWB-held Velika Kladusa to the north. The political record is in your hands. Press the offensive, hold the perimeter, seek negotiation with APWB and indirect channels to RS/RSK, or accept ceasefire terms that would functionally recognize the APWB split.",
+    "title": "5th Corps Breaks Out of Bihać",
+    "narrative": "Sarajevo Presidency files, autumn 1994. General Atif Dudakovic and the 5th Corps in Bihać are the principal armed expression of the Sarajevo line against the Fikret Abdic / APWB split declared at Velika Kladuša on 27 September 1993. Dudakovic has presented an offensive plan: push from the pocket into Grabez and toward Bosanska Krupa against the VRS, while overrunning APWB-held Velika Kladuša to the north. The political record is in your hands. Press the offensive, hold the perimeter, seek negotiation with APWB and indirect channels to RS/RSK, or accept ceasefire terms that would functionally recognize the APWB split.",
     "category": "military",
     "family": "rbih_bihac_response",
     "source_tier": "balkan_battlegrounds",
@@ -2890,20 +2890,20 @@
     },
     "effect": {
       "kind": "narrative",
-      "text": "The Sarajevo Presidency records a 5th Corps Bihac-pocket posture for autumn 1994."
+      "text": "The Sarajevo Presidency records a 5th Corps Bihać-pocket posture for autumn 1994."
     },
     "effects": [
       {
         "kind": "narrative",
-        "text": "Dudakovic and the 5th Corps await the Sarajevo political record on the autumn-1994 Bihac-pocket posture."
+        "text": "Dudakovic and the 5th Corps await the Sarajevo political record on the autumn-1994 Bihać-pocket posture."
       }
     ],
     "requires_player_response": true,
     "responding_faction": "RBiH",
     "bot_response_logic": "historical",
     "historical_default_response_id": "press_offensive",
-    "source_note": "B6 worksheet 2026-05-27 + v1.3 packet §3.6 forward-looking guard: B6 is Ring-2 operational/posture (no atrocity authorization surface). Any future `csq_rbih_bihac_*` row consuming `bihac_5th_corps_1994_response` outcomes MUST NOT re-author atrocity authorization, cleansing, hostage-taking, or any sensitive-act response option. Cost floors on `consolidate_defend` and `accept_ceasefire_terms` per Game Designer Wave 1 review on packet v1.1 edit 13 prevent counterfactual dominance of the historical `press_offensive` line. BB Vol. II pp. 406-417 region (Bihac 1994 chronology, 5th Corps offensive, October high-water mark, November-December counter-attack), UNSCR 958 of 19 November 1994 (NATO close-air-support authority extended to Bihac safe area), NATO 21 November 1994 Udbina airfield close-air-support action.",
-    "staff_assessment": "Pressing the offensive mirrors the documented Dudakovic posture and the historical APWB liquidation (briefly) at Velika Kladusa in late October 1994; the strategic value lies in eliminating the APWB rear threat and catalyzing the international engagement decision tree leading to Operation Storm 1995 and Mistral/Sana 1995. Consolidating the defense reduces immediate casualties but permits APWB persistence and weakens 5th Corps political-recruit posture into 1995. Seeking negotiation signals conditional military pressure to APWB and RS. Accepting ceasefire terms functionally recognizes the APWB split, sharply degrades 5th Corps capability for 1995 operations, and pays a federation-level cohesion cost.",
+    "source_note": "B6 worksheet 2026-05-27 + v1.3 packet §3.6 forward-looking guard: B6 is Ring-2 operational/posture (no atrocity authorization surface). Any future `csq_rbih_bihac_*` row consuming `bihac_5th_corps_1994_response` outcomes MUST NOT re-author atrocity authorization, cleansing, hostage-taking, or any sensitive-act response option. Cost floors on `consolidate_defend` and `accept_ceasefire_terms` per Game Designer Wave 1 review on packet v1.1 edit 13 prevent counterfactual dominance of the historical `press_offensive` line. BB Vol. II pp. 406-417 region (Bihać 1994 chronology, 5th Corps offensive, October high-water mark, November-December counter-attack), UNSCR 958 of 19 November 1994 (NATO close-air-support authority extended to Bihać safe area), NATO 21 November 1994 Udbina airfield close-air-support action.",
+    "staff_assessment": "Pressing the offensive mirrors the documented Dudakovic posture and the historical APWB liquidation (briefly) at Velika Kladuša in late October 1994; the strategic value lies in eliminating the APWB rear threat and catalyzing the international engagement decision tree leading to Operation Storm 1995 and Mistral/Sana 1995. Consolidating the defense reduces immediate casualties but permits APWB persistence and weakens 5th Corps political-recruit posture into 1995. Seeking negotiation signals conditional military pressure to APWB and RS. Accepting ceasefire terms functionally recognizes the APWB split, sharply degrades 5th Corps capability for 1995 operations, and pays a federation-level cohesion cost.",
     "trigger_evidence": [
       "The 5th Corps offensive plan from Dudakovic is before the Presidency.",
       "APWB at Velika Kladusa and VRS positions on Grabez/Bosanska Krupa axis define the autumn-1994 operational picture.",
@@ -2914,8 +2914,8 @@
         "id": "press_offensive",
         "branch_tag": "rbih_abdic_press_offensive",
         "historical_marker": "historical_default",
-        "label": "Press the offensive — push Grabez, overrun Velika Kladusa",
-        "description": "Authorize Dudakovic's plan. 5th Corps presses into Grabez and toward Bosanska Krupa against VRS positions while overrunning APWB-held Velika Kladusa. The advance achieves operational momentum into late October; the joint VRS/RSK/APWB counter-attack from November rolls the gains back, and the pocket survives only via NATO close-air-support escalation on 21 November 1994.",
+        "label": "Press the offensive — push Grabez, overrun Velika Kladuša",
+        "description": "Authorize Dudakovic's plan. 5th Corps presses into Grabez and toward Bosanska Krupa against VRS positions while overrunning APWB-held Velika Kladuša. The advance achieves operational momentum into late October; the joint VRS/RSK/APWB counter-attack from November rolls the gains back, and the pocket survives only via NATO close-air-support escalation on 21 November 1994.",
         "effects": [
           {
             "kind": "morale_change",
@@ -2930,7 +2930,7 @@
           },
           {
             "kind": "narrative",
-            "text": "The 5th Corps advances from the Bihac pocket toward the Grabez and Grmec approaches before the later joint counteroffensive."
+            "text": "The 5th Corps advances from the Bihać pocket toward the Grabez and Grmec approaches before the later joint counteroffensive."
           }
         ],
         "sets_flags": {
@@ -2967,7 +2967,7 @@
         "branch_tag": "rbih_abdic_consolidate_defend",
         "historical_marker": "counterfactual",
         "label": "Consolidate the defense — hold the perimeter",
-        "description": "Refuse Dudakovic's offensive plan. The 5th Corps holds the Bihac perimeter and does not press into Grabez or against APWB. Immediate casualties drop; APWB persists at Velika Kladusa through 1994-1995; the 5th Corps' political-recruit posture softens without the offensive-momentum narrative. The autumn-1994 NATO escalation decision tree does not engage on the Bihac axis.",
+        "description": "Refuse Dudakovic's offensive plan. The 5th Corps holds the Bihać perimeter and does not press into Grabez or against APWB. Immediate casualties drop; APWB persists at Velika Kladuša through 1994-1995; the 5th Corps' political-recruit posture softens without the offensive-momentum narrative. The autumn-1994 NATO escalation decision tree does not engage on the Bihać axis.",
         "effects": [
           {
             "kind": "morale_change",
@@ -3008,8 +3008,8 @@
         "id": "seek_negotiation",
         "branch_tag": "rbih_abdic_seek_negotiation",
         "historical_marker": "counterfactual",
-        "label": "Seek negotiation — open Bihac-pocket ceasefire channels",
-        "description": "Direct Dudakovic to open talks with APWB on a Bihac-pocket ceasefire, with indirect channels to RS/RSK. Sarajevo's military pressure on the pocket axis is signaled as conditional. Talks open; no resolution arrives; the autumn-1994 operational picture stalls without the offensive momentum and without the immediate political cost of full recognition.",
+        "label": "Seek negotiation — open Bihać-pocket ceasefire channels",
+        "description": "Direct Dudakovic to open talks with APWB on a Bihać-pocket ceasefire, with indirect channels to RS/RSK. Sarajevo's military pressure on the pocket axis is signaled as conditional. Talks open; no resolution arrives; the autumn-1994 operational picture stalls without the offensive momentum and without the immediate political cost of full recognition.",
         "effects": [
           {
             "kind": "negotiation_capital",
@@ -3050,8 +3050,8 @@
         "id": "accept_ceasefire_terms",
         "branch_tag": "rbih_abdic_accept_ceasefire",
         "historical_marker": "counterfactual",
-        "label": "Accept ceasefire terms — concede Velika Kladusa to APWB",
-        "description": "Accept the counter-attackers' terms in advance: territorial concession to APWB at Velika Kladusa, halt of all 5th Corps offensive operations. The crisis is averted without NATO escalation. The cost is functional recognition of the APWB split, sharply degraded 5th Corps capability for 1995 operations, and federation-level cohesion damage. The 5th Corps cadres read the decision as Sarajevo betrayal at the moment of crisis.",
+        "label": "Accept ceasefire terms — concede Velika Kladuša to APWB",
+        "description": "Accept the counter-attackers' terms in advance: territorial concession to APWB at Velika Kladuša, halt of all 5th Corps offensive operations. The crisis is averted without NATO escalation. The cost is functional recognition of the APWB split, sharply degraded 5th Corps capability for 1995 operations, and federation-level cohesion damage. The 5th Corps cadres read the decision as Sarajevo betrayal at the moment of crisis.",
         "effects": [
           {
             "kind": "morale_change",
@@ -3097,38 +3097,38 @@
     "notifications_to_other_factions": {
       "press_offensive": {
         "RS": {
-          "headline": "Sarajevo authorizes 5th Corps Bihac offensive",
-          "body": "The Presidency clears Dudakovic to press Grabez and overrun Velika Kladusa. Pale reads the decision as Sarajevo committing to a Bihac-axis military solution; VRS coordinates the counter-attack with RSK and APWB."
+          "headline": "Sarajevo authorizes 5th Corps Bihać offensive",
+          "body": "The Presidency clears Dudakovic to press Grabez and overrun Velika Kladuša. Pale reads the decision as Sarajevo committing to a Bihać-axis military solution; VRS coordinates the counter-attack with RSK and APWB."
         },
         "HRHB": {
           "headline": "5th Corps cleared for autumn-1994 offensive",
-          "body": "Sarajevo authorizes the Bihac-pocket offensive. Mostar reads the decision as Sarajevo holding the line against the Abdic split and signals continued Federation military coordination."
+          "body": "Sarajevo authorizes the Bihać-pocket offensive. Mostar reads the decision as Sarajevo holding the line against the Abdic split and signals continued Federation military coordination."
         }
       },
       "consolidate_defend": {
         "RS": {
           "headline": "Sarajevo refuses 5th Corps offensive",
-          "body": "The Presidency holds Dudakovic to a defensive posture. Pale reads the decision as Sarajevo tolerating the APWB existence; pressure on the eastern enclaves rises as the Bihac axis quiets."
+          "body": "The Presidency holds Dudakovic to a defensive posture. Pale reads the decision as Sarajevo tolerating the APWB existence; pressure on the eastern enclaves rises as the Bihać axis quiets."
         },
         "HRHB": {
-          "headline": "RBiH adopts defensive Bihac posture",
-          "body": "Sarajevo holds the 5th Corps to the perimeter. Mostar notes the softer Sarajevo line on the internal Bosniak fracture and the absent NATO escalation on the Bihac axis."
+          "headline": "RBiH adopts defensive Bihać posture",
+          "body": "Sarajevo holds the 5th Corps to the perimeter. Mostar notes the softer Sarajevo line on the internal Bosniak fracture and the absent NATO escalation on the Bihać axis."
         }
       },
       "seek_negotiation": {
         "RS": {
-          "headline": "Sarajevo seeks Bihac-pocket ceasefire channels",
-          "body": "The Presidency opens talks with APWB and indirect channels through RSK. Pale reads the signal as Sarajevo's military pressure on the Bihac axis being conditional."
+          "headline": "Sarajevo seeks Bihać-pocket ceasefire channels",
+          "body": "The Presidency opens talks with APWB and indirect channels through RSK. Pale reads the signal as Sarajevo's military pressure on the Bihać axis being conditional."
         },
         "HRHB": {
-          "headline": "RBiH opens Bihac ceasefire negotiations",
+          "headline": "RBiH opens Bihać ceasefire negotiations",
           "body": "Sarajevo seeks talks with APWB and indirect RS/RSK channels. Mostar weighs the precedent for federation-level negotiation discipline."
         }
       },
       "accept_ceasefire_terms": {
         "RS": {
-          "headline": "Sarajevo accepts Bihac ceasefire terms",
-          "body": "The Presidency concedes Velika Kladusa to APWB and halts 5th Corps offensive operations. Pale reads the decision as the Sarajevo line breaking on the internal Bosniak fracture; the autumn-1994 NATO escalation does not arrive."
+          "headline": "Sarajevo accepts Bihać ceasefire terms",
+          "body": "The Presidency concedes Velika Kladuša to APWB and halts 5th Corps offensive operations. Pale reads the decision as the Sarajevo line breaking on the internal Bosniak fracture; the autumn-1994 NATO escalation does not arrive."
         },
         "HRHB": {
           "headline": "RBiH accepts APWB-favorable ceasefire",
@@ -3143,7 +3143,7 @@
         "delta": 0
       }
     ],
-    "historical_source": "BB Vol. II pp. 406-417 region (Bihac 1994 chronology; 5th Corps autumn offensive; October high-water mark at Grabez and Velika Kladusa; November-December VRS/RSK/APWB counter-attack). UN Security Council Resolution 958 (19 November 1994) extending NATO close-air-support authority to the Bihac safe area. NATO operation records for the 21 November 1994 Udbina airfield close-air-support action. ICTY Karadzic Trial Judgment (IT-95-5/18-T, 24 March 2016) references the Bihac 1994 crisis as part of the VRS-RS strategic chronology. Balkan Battlegrounds Vol. II Abdic / APWB declaration of 27 September 1993 and APWB military operations through 1994-1995."
+    "historical_source": "BB Vol. II pp. 406-417 region (Bihać 1994 chronology; 5th Corps autumn offensive; October high-water mark at Grabez and Velika Kladuša; November-December VRS/RSK/APWB counter-attack). UN Security Council Resolution 958 (19 November 1994) extending NATO close-air-support authority to the Bihać safe area. NATO operation records for the 21 November 1994 Udbina airfield close-air-support action. ICTY Karadzic Trial Judgment (IT-95-5/18-T, 24 March 2016) references the Bihać 1994 crisis as part of the VRS-RS strategic chronology. Balkan Battlegrounds Vol. II Abdic / APWB declaration of 27 September 1993 and APWB military operations through 1994-1995."
   },
   {
     "id": "operation_cincar_1994",
@@ -3203,10 +3203,10 @@
   {
     "id": "bihac_crisis_1994",
     "image": "event_highland_offensive.webp",
-    "title": "Bihac Crisis Deepens",
-    "narrative": "The VRS, supported by forces from the Republic of Serbian Krajina and Abdic's APWB militia, launches a major counteroffensive against the Bihac pocket. The 5th Corps is pushed back toward the town itself, and the crisis threatens the complete fall of the enclave. NATO air strikes against VRS airfields prove too limited to change the situation.",
+    "title": "Bihać Crisis Deepens",
+    "narrative": "The VRS, supported by forces from the Republic of Serbian Krajina and Abdic's APWB militia, launches a major counteroffensive against the Bihać pocket. The 5th Corps is pushed back toward the town itself, and the crisis threatens the complete fall of the enclave. NATO air strikes against VRS airfields prove too limited to change the situation.",
     "category": "military",
-    "historical_source": "ICTY Karadzic Trial Judgment (IT-95-5/18-T), Bihac findings; Balkan Battlegrounds, Vol. I, p. 27",
+    "historical_source": "ICTY Karadzic Trial Judgment (IT-95-5/18-T), Bihać findings; Balkan Battlegrounds, Vol. I, p. 27",
     "source_tier": "icty_icj_un",
     "source_note": "The Karadzic Trial Judgment supplies adjudicated Bihać-enclave context; Balkan Battlegrounds Vol. I p. 27 independently anchors the November 1994 air attacks, UN response, and NATO strikes associated with the crisis. The essay and dynamic annotations are original synthesis and do not claim that limited air action alone determined the enclave's survival.",
     "trigger": {
@@ -3233,7 +3233,7 @@
       },
       {
         "kind": "narrative",
-        "text": "The Bihac pocket faces collapse as VRS and allied forces close in. NATO strikes prove inadequate to lift the siege."
+        "text": "The Bihać pocket faces collapse as VRS and allied forces close in. NATO strikes prove inadequate to lift the siege."
       }
     ]
   },

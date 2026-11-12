@@ -105,7 +105,7 @@ describe('Codex essay localization coverage', () => {
         expect(corpus).not.toContain('on 11 october, sanski most');
     });
 
-    it('keeps Bihac and 5th Corps operational prose bounded to sourced facts', () => {
+    it('keeps Bihać and 5th Corps operational prose bounded to sourced facts', () => {
         const bihacEssay = essays.find((essay) => essay.id === 'essay_bihac_5th_corps_offensive_1994');
         const sanaEssay = essays.find((essay) => essay.id === 'essay_operation_sana_1995');
         const bihacEvent = war1994Events.find((event) => event.id === 'bihac_5th_corps_offensive_1994');
@@ -118,8 +118,8 @@ describe('Codex essay localization coverage', () => {
         // the 5th Corps push from the pocket toward Grabez/Bosanska Krupa against
         // the VRS, and the Abdic/APWB split. Assert against the current canonized text.
         expect(bihacEvent?.narrative).toContain('push from the pocket into Grabez and toward Bosanska Krupa against the VRS');
-        expect(bihacEvent?.narrative).toContain('Fikret Abdic / APWB split declared at Velika Kladusa on 27 September 1993');
-        expect(sanaEvent?.narrative).toContain('Bosanski Petrovac fell on 15 September, Kljuc two days later');
+        expect(bihacEvent?.narrative).toContain('Fikret Abdic / APWB split declared at Velika Kladuša on 27 September 1993');
+        expect(sanaEvent?.narrative).toContain('Bosanski Petrovac fell on 15 September, Ključ two days later');
         expect(sanaEssay?.content).toContain('Bosanski Petrovac fell on 15 September, Ključ two days later');
 
         const corpus = JSON.stringify({

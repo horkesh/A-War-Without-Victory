@@ -54,6 +54,12 @@ let eventChoiceTranscript = [];
 let campaignModeSelectionEvidence = null;
 let officerSuccessionChoiceTranscript = [];
 
+function isUnrankedOptionalEventDecision(decision) {
+  if (!decision || decision.requires_player_response === true) return false;
+  if (decision.historical_default_response_id || decision.staff_recommended_response_id) return false;
+  return !(decision.response_options ?? []).some((option) => option.historical_marker === 'historical_default');
+}
+
 function selectHistoricalEventChoice(decision) {
   const options = decision?.response_options ?? [];
   const declared = decision?.historical_default_response_id;
@@ -89,6 +95,36 @@ function parseRbihParamilitaryPolicyOverride(argv, historical, selectedFactions)
   };
 }
 
+// drina_cleansing_decision_1992 is a Ring 3 sensitive decision authored with NO historical
+// default and NO staff recommendation, and the game offers no way to leave it unanswered.
+// A Historical-choice run therefore cannot pick an answer for it on its own: the operator
+// must name one here, and the transcript records it as a player-selected counterfactual
+// that claims no historicity. The selector only fills that gap; it refuses to act if the
+// event ever gains an authored default or staff recommendation.
+const RS_DRINA_POLICY_OPTIONS = ['restrained', 'systematic'];
+
+function parseRsDrinaPolicyOverride(argv, historical, selectedFactions) {
+  const prefix = '--rs-drina-policy=';
+  const optionArgs = argv.filter((arg) => arg === '--rs-drina-policy' || arg.startsWith(prefix));
+  const values = optionArgs.map((arg) => arg === '--rs-drina-policy' ? '' : arg.slice(prefix.length));
+  if (values.length === 0) return null;
+  if (values.length !== 1) throw new Error('--rs-drina-policy must be provided exactly once');
+  const requested = values[0];
+  if (!RS_DRINA_POLICY_OPTIONS.includes(requested)) {
+    throw new Error(`Unknown --rs-drina-policy option: ${requested || 'empty'}`);
+  }
+  if (!historical) throw new Error('--rs-drina-policy requires --historical-choice');
+  if (selectedFactions.length !== 1 || selectedFactions[0] !== 'RS') {
+    throw new Error('--rs-drina-policy is available for RS only');
+  }
+  return {
+    requested,
+    version: 1,
+    provenance: 'explicit_operator_selection_for_unranked_sensitive_decision',
+    eventId: 'drina_cleansing_decision_1992',
+  };
+}
+
 function hasMeaningfulSourceContent(value, prefix) {
   if (typeof value !== 'string') return false;
   const labelIndex = value.toLocaleLowerCase('en-US').lastIndexOf(prefix.toLocaleLowerCase('en-US'));
@@ -114,7 +150,29 @@ async function policyEventResponseControl(surface) {
   });
   const decision = (raw.military?.pending_event_decisions ?? []).find(row => row.event_id === eventId && row.faction === raw.meta?.player_faction);
   if (!decision) throw new Error(`Historical-choice surface lacks exact player event: ${eventId}`);
-  let selected = selectHistoricalEventChoice(decision);
+  let selected;
+  if (rsDrinaPolicyOverride && eventId === rsDrinaPolicyOverride.eventId) {
+    if (raw.meta?.player_faction !== 'RS' || decision.faction !== 'RS') {
+      throw new Error(`RS Drina selector reached mismatched player: ${raw.meta?.player_faction ?? 'missing'}`);
+    }
+    const options = decision.response_options ?? [];
+    if (decision.historical_default_response_id
+      || decision.staff_recommended_response_id
+      || options.some((option) => option.historical_marker === 'historical_default')) {
+      throw new Error('RS Drina selector refuses a decision that now has an authored default or staff recommendation');
+    }
+    const matchingOptions = options.filter((option) => option.id === rsDrinaPolicyOverride.requested);
+    if (matchingOptions.length === 0) throw new Error(`RS Drina selector is missing option ${rsDrinaPolicyOverride.requested}`);
+    if (matchingOptions.length !== 1) throw new Error(`RS Drina selector has ambiguous option ${rsDrinaPolicyOverride.requested}`);
+    selected = {
+      ...matchingOptions[0],
+      basis: 'player_selected_counterfactual',
+      historicityClaim: 'none_counterfactual_player_choice',
+      requestedOverride: { ...rsDrinaPolicyOverride },
+    };
+  } else {
+    selected = selectHistoricalEventChoice(decision);
+  }
   if (rbihParamilitaryPolicyOverride && eventId === rbihParamilitaryPolicyOverride.eventId) {
     if (raw.meta?.player_faction !== 'RBiH' || decision.faction !== 'RBiH') {
       throw new Error(`RBiH paramilitary override reached mismatched player: ${raw.meta?.player_faction ?? 'missing'}`);
@@ -245,6 +303,11 @@ const factions = args.has('--all-factions')
   ? ['RS', 'RBiH', 'HRHB']
   : [process.argv.find((arg) => arg.startsWith('--faction='))?.split('=')[1] ?? 'RS'];
 const rbihParamilitaryPolicyOverride = parseRbihParamilitaryPolicyOverride(
+  process.argv,
+  historicalChoice,
+  factions,
+);
+const rsDrinaPolicyOverride = parseRsDrinaPolicyOverride(
   process.argv,
   historicalChoice,
   factions,
@@ -815,6 +878,7 @@ const provenance = {
   requiredMapOrigin,
   officerSuccessionPolicy,
   ...(rbihParamilitaryPolicyOverride ? { rbihParamilitaryPolicyOverride } : {}),
+  ...(rsDrinaPolicyOverride ? { rsDrinaPolicyOverride } : {}),
   electronMainSha256: fileSha256(path.join(repo, 'src', 'desktop', 'electron-main.cjs')),
   warroomIndexSha256: fileSha256(path.join(repo, 'dist', 'warroom', 'index.html')),
   tacticalMapIndexSha256: fileSha256(path.join(repo, 'dist', 'tactical-map', 'index.html')),
@@ -1845,8 +1909,18 @@ async function readState(frame) {
     ));
   const eventDecisionReceiptIds = eventDecisionReceipts.map((receipt) => receipt.eventId);
   const canonicalReserveRequests = raw.military?.pending_reserve_requests;
-  const playerPendingEventDecisions = pendingEventDecisions
+  const playerFactionEventDecisions = pendingEventDecisions
     .filter(({ decision }) => !playerFaction || !decision?.faction || decision.faction === playerFaction);
+  // Historical-choice runs leave an OPTIONAL decision with no ranked answer unanswered, as a
+  // player may; it is reported separately and never treated as a pending blocker.
+  const unansweredOptionalEventDecisionIds = historicalChoice
+    ? playerFactionEventDecisions
+      .filter(({ decision }) => isUnrankedOptionalEventDecision(decision))
+      .map(({ id }) => id)
+      .filter(Boolean)
+    : [];
+  const playerPendingEventDecisions = playerFactionEventDecisions
+    .filter(({ id }) => !unansweredOptionalEventDecisionIds.includes(id));
   const paramilitaryRequests = playerPendingParamilitaryRequests.length;
   const blockerInventory = buildPlayerBlockerInventory(raw, playerFaction, {
     eventDecisions: playerPendingEventDecisions.length,
@@ -1871,6 +1945,7 @@ async function readState(frame) {
     pendingEventDecisionIds: playerPendingEventDecisions
       .map(({ id }) => id)
       .filter(Boolean),
+    unansweredOptionalEventDecisionIds,
     eventDecisionReceiptIds,
     eventDecisionReceipts,
     eventFireCounts: Object.fromEntries(Object.entries(raw.military?.event_fire_counts ?? {})
@@ -4142,8 +4217,19 @@ async function mapInteractionProbe(page, frame, faction, events, labelPrefix = '
   const directionalFormationDetail = frame.locator('[data-testid="formation-detail-panel"]').first();
   const directionalSectorPanel = frame.locator('[data-testid="corps-front-panel"]').first();
   const directionalCorpsPanel = frame.locator('[data-testid="corps-detail-panel"]').first();
+  // A directional click that lands on a stacked counter opens the stack expansion dialog,
+  // whose full-screen backdrop then intercepts every later map click.
+  const directionalStackExpansion = frame.locator('[role="dialog"][aria-label="Formation stack"]').first();
+  const closeDirectionalStackExpansion = async (label) => {
+    const dismissed = await clickMatch(frame, /Dismiss Expansion/i, `dismiss stack expansion ${label}`, { afterMs: 300 });
+    if (!dismissed) await page.keyboard.press('Escape');
+    await directionalStackExpansion.waitFor({ state: 'hidden', timeout: 5000 });
+  };
   let successfulDirectionalSelections = 0;
   for (const pos of positions) {
+    if (await directionalStackExpansion.isVisible().catch(() => false)) {
+      await closeDirectionalStackExpansion(`before ${pos.label}`);
+    }
     if (await selectionPanel.isVisible().catch(() => false)) {
       await selectionPanel.locator('button').first().click({ timeout: 5000 });
       await selectionPanel.waitFor({ state: 'hidden', timeout: 5000 });
@@ -4213,6 +4299,15 @@ async function mapInteractionProbe(page, frame, faction, events, labelPrefix = '
         });
         await directionalCorpsPanel.locator('button').first().click({ timeout: 5000 });
         await directionalCorpsPanel.waitFor({ state: 'hidden', timeout: 5000 });
+        continue;
+      }
+      if (await directionalStackExpansion.isVisible().catch(() => false)) {
+        clickResults.push({ label: pos.label, clicked: true, selected: 'stack-expansion' });
+        await snapshot(page, frame, faction, events, `${labelPrefix}-map-click-${pos.label}-stack`, {
+          mapClick: pos,
+          selected: 'stack-expansion',
+        });
+        await closeDirectionalStackExpansion(pos.label);
         continue;
       }
       clickResults.push({ label: pos.label, clicked: true, selected: false });
@@ -5067,6 +5162,33 @@ async function handleCurrentSurface(page, frame, faction, events, options = {}) 
     await snapshot(page, frame, faction, events, 'dayton-after-response', { clicked, cleared, after });
     if (!cleared) throw new Error('Pending Dayton negotiation remained after visible response');
     return { handled: true, action: 'dayton-decline-talks' };
+  }
+  const pausedContinue = frame.locator('[data-testid="event-decision-continue-turn"]').first();
+  if (historicalChoice && !pendingEventId && await pausedContinue.isVisible().catch(() => false)) {
+    const visibleEventId = await frame.locator('[data-testid="event-decision-response-rail"]').first()
+      .getAttribute('data-event-id').catch(() => null);
+    if (visibleEventId && (pendingState?.unansweredOptionalEventDecisionIds ?? []).includes(visibleEventId)) {
+      await snapshot(page, frame, faction, events, 'optional-event-left-unanswered-before', { eventId: visibleEventId });
+      const continued = await clickTestId(
+        frame,
+        'event-decision-continue-turn',
+        `continue paused turn leaving ${visibleEventId} unanswered`,
+        { afterMs: 1500 },
+      );
+      if (!continued) throw new Error(`Paused turn could not continue past optional decision: ${visibleEventId}`);
+      eventChoiceTranscript.push({
+        eventId: visibleEventId,
+        responseId: null,
+        basis: 'left_unanswered_optional_no_ranked_answer',
+        historicityClaim: 'none',
+        turn: pendingState?.turn ?? null,
+        faction: pendingState?.playerFaction ?? null,
+        playerInput: true,
+        status: 'left_unanswered',
+      });
+      await snapshot(page, frame, faction, events, 'optional-event-left-unanswered-after', { eventId: visibleEventId });
+      return { handled: true, action: `event-left-unanswered:${visibleEventId}` };
+    }
   }
   if (pendingEventId) {
     const responseRail = frame.locator('[data-testid="event-decision-response-rail"]').first();
@@ -6382,7 +6504,9 @@ function installAmbientLifecycleObserver() {
   const metadata = new WeakMap();
   const ambientUrl = (element) => {
     const url = element.currentSrc || element.src || '';
-    return /\/assets\/ambient_(?:warroom|field|archive)-[A-Za-z0-9_-]+\.ogg(?:$|[?#])/.test(url) ? url : '';
+    // Any bundled audio cue: ambient beds and, with music on by default since 2026-11-10,
+    // the music tracks (same file shape the abort classifier accepts).
+    return /\/assets\/[a-z0-9_]+-[A-Za-z0-9_-]+\.ogg(?:$|[?#])/.test(url) ? url : '';
   };
   const getMetadata = (element) => {
     let value = metadata.get(element);
@@ -6555,6 +6679,19 @@ function installAmbientLifecycleObserver() {
   for (const binding of mediaEventBindings) {
     document.addEventListener(binding.eventKind, binding.listener, true);
   }
+  // `new Audio(url)` (audio_engine.ts) starts loading a detached element whose events never
+  // reach `document`, and its `loadstart` fires before the first play(). Observe at
+  // construction so a music track's request-start is recorded (R8 RBiH attempt 09).
+  const OriginalAudio = window.Audio;
+  if (typeof OriginalAudio === 'function') {
+    const ObservedAudio = function ObservedAudio(...args) {
+      const element = new OriginalAudio(...args);
+      try { observeElement(element); } catch {}
+      return element;
+    };
+    ObservedAudio.prototype = OriginalAudio.prototype;
+    window.Audio = ObservedAudio;
+  }
 }
 
 async function installAmbientLifecycleObserverBeforeStartup(page) {
@@ -6627,13 +6764,66 @@ function classifyExpectedAmbientLifecycleAbort(record, lifecycleSignals) {
   return { requestStart, browserAbort: browserAborts[0] };
 }
 
+/**
+ * Chromium's media loader cancels and reissues range requests while a track plays (at
+ * load and mid-track), reporting `net::ERR_ABORTED` with NO element `abort` event. Such an
+ * abort is benign when the same element had already started loading that exact URL, went
+ * on to play it (`loadeddata`/`canplay`/`playing`), and never reported `error` for that
+ * source. A track that genuinely failed never plays or reports `error`, so it still counts.
+ * (R8 RBiH attempt 12: 14 music aborts, every element played through.)
+ */
+function classifyRecoveredMediaElementAbort(record, lifecycleSignals) {
+  if (record.failure?.errorText !== 'net::ERR_ABORTED'
+    || record.method !== 'GET'
+    || record.resourceType !== 'media'
+    || record.isMainFrame
+    || !Number.isFinite(record.requestInitiatedAtMs)) return null;
+  let parsed;
+  try {
+    parsed = new URL(record.url);
+  } catch {
+    return null;
+  }
+  const bundledCue = parsed.protocol === 'http:'
+    && parsed.hostname === '127.0.0.1'
+    && parsed.search === ''
+    && parsed.hash === ''
+    && /^\/assets\/[a-z0-9_]+-[A-Za-z0-9_-]+\.ogg$/.test(parsed.pathname);
+  if (!bundledCue) return null;
+  const sameSource = (signal) => signal.url === record.url && signal.origin === parsed.origin
+    && typeof signal.elementId === 'string' && Number.isInteger(signal.sourceEpoch);
+  const starts = lifecycleSignals.filter((signal) => signal.kind === 'request-start' && sameSource(signal)
+    && Number.isFinite(signal.observedAtMs)
+    && signal.observedAtMs <= record.requestInitiatedAtMs + 2_000);
+  for (const start of starts) {
+    const identity = `${start.elementId}:${start.sourceEpoch}`;
+    const epochSignals = lifecycleSignals.filter((signal) => sameSource(signal)
+      && `${signal.elementId}:${signal.sourceEpoch}` === identity);
+    if (epochSignals.some((signal) => signal.kind === 'error')) continue;
+    const played = epochSignals.find((signal) => ['loadeddata', 'canplay', 'playing'].includes(signal.kind));
+    if (played) return { requestStart: start, played };
+  }
+  return null;
+}
+
 function attributeAmbientLifecycleAborts(networkFailures, lifecycleSignals, expectedAmbientLifecycleAborts) {
   const availableSignals = [...lifecycleSignals];
   const attributedFailureIndexes = new Set();
   for (let index = 0; index < networkFailures.length; index += 1) {
     const record = networkFailures[index];
     const attribution = classifyExpectedAmbientLifecycleAbort(record, availableSignals);
-    if (!attribution) continue;
+    if (!attribution) {
+      const recovered = classifyRecoveredMediaElementAbort(record, lifecycleSignals);
+      if (recovered) {
+        expectedAmbientLifecycleAborts.push({
+          ...record,
+          ambientLifecycle: recovered,
+          allowlist: 'media-element-played-through-abort',
+        });
+        attributedFailureIndexes.add(index);
+      }
+      continue;
+    }
     const consumed = new Set([attribution.requestStart, attribution.browserAbort]);
     availableSignals.splice(0, availableSignals.length, ...availableSignals.filter((signal) => !consumed.has(signal)));
     expectedAmbientLifecycleAborts.push({

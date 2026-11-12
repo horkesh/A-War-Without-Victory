@@ -88,7 +88,7 @@ describe('Event timeline historical integrity', () => {
         expect(siege.trigger.requires_events).toContain('croat_bosniak_war_begins_1993');
     });
 
-    it('Ahmici uses the HRHB Vitez basing cell while preserving its historical contract', () => {
+    it('Ahmići uses the HRHB Vitez basing cell while preserving its historical contract', () => {
         const ahmici = allEvents.find((e: any) => e.id === 'ahmici_massacre_1993');
 
         expect(ahmici).toBeDefined();
@@ -118,7 +118,7 @@ describe('Event timeline historical integrity', () => {
             },
             {
                 kind: 'narrative',
-                text: 'The Ahmici massacre shocks the international community. HVO credibility suffers a devastating blow.',
+                text: 'The Ahmići massacre shocks the international community. HVO credibility suffers a devastating blow.',
             },
         ]);
     });
@@ -156,7 +156,7 @@ describe('Event timeline historical integrity', () => {
         expect(effects.some((effect: any) => /control|territory|flip/.test(effect.kind))).toBe(false);
     });
 
-    it('Zepa requires Srebrenica', () => {
+    it('Žepa requires Srebrenica', () => {
         const zepa = allEvents.find((e: any) => e.id === 'zepa_falls_1995');
         expect(zepa.trigger.requires_events).toContain('srebrenica_falls_1995');
     });
@@ -175,7 +175,7 @@ describe('Event timeline historical integrity', () => {
         expect(JSON.stringify(formation.trigger.condition)).not.toContain('jna_withdrawn');
     });
 
-    it('Srebrenica and Zepa fall rows are event-authored territorial receipts', () => {
+    it('Srebrenica and Žepa fall rows are event-authored territorial receipts', () => {
         const srebrenica = allEvents.find((e: any) => e.id === 'srebrenica_falls_1995');
         const zepa = allEvents.find((e: any) => e.id === 'zepa_falls_1995');
 

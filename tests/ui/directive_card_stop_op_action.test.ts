@@ -733,7 +733,7 @@ describe('DirectiveCard stop-op action host', () => {
       getFrontVisitAvailability: vi.fn(async () => ({
         ok: true,
         available: false,
-        reason: 'No front is reachable.',
+        reason: 'all_cut_off',
         reachableBranchIds: [],
         unreachableBranchIds: ['visit_sarajevo'],
       })),
@@ -742,7 +742,7 @@ describe('DirectiveCard stop-op action host', () => {
     render(React.createElement(DirectiveCard, { directive: frontVisitDirective, gameState: baseGameState }));
 
     expect((await screen.findByRole('status', { name: 'Leadership action unavailable' })).textContent).toContain(
-      'No front is reachable.',
+      'No front is reachable — every offered front is cut off.',
     );
     const issue = screen.getByRole('button', { name: 'Issue (10)' });
     expect(issue.hasAttribute('disabled')).toBe(true);

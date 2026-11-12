@@ -637,7 +637,7 @@ export function CorpsFrontPanel({ railSlot = 'primary', breadcrumb }: CorpsFront
                         {!hasReliableSectorThreatIntel ? (
                           <span className="text-neutral-600 italic">{t('corpsFront.redacted')}</span>
                         ) : !hasFriendlyLine ? (
-                          <span className="text-red-600 font-bold uppercase tracking-tight">{t('corpsFront.noFriendlyLine')}</span>
+                          <span className="text-red-700 font-bold uppercase tracking-tight">{t('corpsFront.noFriendlyLine')}</span>
                         ) : (
                           <ThreatBadge ratio={sector.threat_ratio} />
                         )}
@@ -653,7 +653,7 @@ export function CorpsFrontPanel({ railSlot = 'primary', breadcrumb }: CorpsFront
                     <div className="flex flex-col">
                       <span className="text-[13px] uppercase font-bold text-neutral-600">{t('corpsFront.morale')}</span>
                       <div
-                        className={`font-medium tabular-nums ${(displayMoraleAvg ?? 50) < 25 ? 'text-red-600' : (displayMoraleAvg ?? 50) < 50 ? 'text-amber-600' : ''}`}
+                        className={`font-medium tabular-nums ${(displayMoraleAvg ?? 50) < 25 ? 'text-red-700' : (displayMoraleAvg ?? 50) < 50 ? 'text-amber-600' : ''}`}
                         data-testid="corps-front-combat-morale"
                       >
                         <FuzzyIntel value={displayMoraleAvg} confidence={1} fuzzyThreshold={0.4} redactThreshold={0.4} />
@@ -662,7 +662,7 @@ export function CorpsFrontPanel({ railSlot = 'primary', breadcrumb }: CorpsFront
                     <div className="flex flex-col">
                       <span className="text-[13px] uppercase font-bold text-neutral-600">{t('corpsFront.cohesion')}</span>
                       <div
-                        className={`font-medium tabular-nums ${(displayCohesionAvg ?? 50) < 25 ? 'text-red-600' : (displayCohesionAvg ?? 50) < 50 ? 'text-amber-600' : ''}`}
+                        className={`font-medium tabular-nums ${(displayCohesionAvg ?? 50) < 25 ? 'text-red-700' : (displayCohesionAvg ?? 50) < 50 ? 'text-amber-600' : ''}`}
                         data-testid="corps-front-combat-cohesion"
                       >
                         <FuzzyIntel value={displayCohesionAvg} confidence={1} fuzzyThreshold={0.4} redactThreshold={0.4} />
@@ -671,7 +671,7 @@ export function CorpsFrontPanel({ railSlot = 'primary', breadcrumb }: CorpsFront
                     <div className="flex flex-col">
                       <span className="text-[13px] uppercase font-bold text-neutral-600">{t('corpsFront.fatigue')}</span>
                       <div
-                        className={`font-medium tabular-nums ${(displayFatigueAvg ?? 0) > 20 ? 'text-red-600' : (displayFatigueAvg ?? 0) > 10 ? 'text-amber-600' : ''}`}
+                        className={`font-medium tabular-nums ${(displayFatigueAvg ?? 0) > 20 ? 'text-red-700' : (displayFatigueAvg ?? 0) > 10 ? 'text-amber-600' : ''}`}
                         data-testid="corps-front-combat-fatigue"
                       >
                         <FuzzyIntel value={displayFatigueAvg} confidence={1} fuzzyThreshold={0.4} redactThreshold={0.4} />

@@ -54,7 +54,7 @@ test('Mistral 2 wording stays neutral and avoids triumphalist operation framing'
         assert.strictEqual(text.includes(forbidden), false, forbidden);
     }
 
-    assert.ok(text.includes('HV/HVO forces advance from the Grahovo-Glamoc area during Operation Mistral 2'));
+    assert.ok(text.includes('HV/HVO forces advance from the Grahovo-Glamoč area during Operation Mistral 2'));
     assert.ok(text.includes('Jajce -- the symbolic prize lost in October 1992 amid mutual HVO-ARBiH recriminations -- is recaptured'));
     assert.ok(text.includes('VRS positions in western Bosnia come under severe pressure'));
     assert.ok(text.includes('advance through western Bosnia, taking substantial territory and forcing VRS withdrawals'));
