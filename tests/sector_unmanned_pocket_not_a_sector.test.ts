@@ -50,7 +50,7 @@ describe('unmanned cut-off pocket is not a sector (M3)', () => {
         expect([...result.values()].flat()).not.toContain('E2__I1');
     });
 
-    test('island with a brigade in it still forms a front via the nearest claimed corps', () => {
+    test('island with exactly one brigade in it still forms a front (owner: one brigade is an OG)', () => {
         const result = partition({ b1: brigade('b1', 'M1'), b2: brigade('b2', 'I1') });
         expect(result.get('corps_a')).toEqual(['E1__M2', 'E2__I1']);
     });
