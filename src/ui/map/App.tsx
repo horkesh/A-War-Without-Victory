@@ -17,8 +17,12 @@ import { OrderQueue } from './components/OrderQueue';
 import { Tooltip } from './components/Tooltip';
 import { SidePickerOverlay } from './components/SidePickerOverlay';
 import { RecruitmentModal } from './components/RecruitmentModal';
-import { AutonomyPanel } from './components/AutonomyPanel';
 import { WarSummaryModal } from './components/WarSummaryModal';
+// Command Autonomy opens on demand from Army HQ, so it loads then and stays out of the
+// entry chunk (vite.config.ts chunk-size limit; the player-experience gate blocks on it).
+const AutonomyPanel = lazy(() =>
+  import('./components/AutonomyPanel').then(m => ({ default: m.AutonomyPanel })),
+);
 import { TurnAftermathModal } from './components/TurnAftermathModal';
 import { OperationBriefingModal } from './components/OperationBriefingModal';
 import { SupplyPanel } from './components/SupplyPanel';
@@ -1904,11 +1908,13 @@ function App() {
         onClose={() => setRecruitmentOpen(false)}
       />
       {autonomyOpen && (
-        <AutonomyPanel
-          onClose={() => setAutonomyOpen(false)}
-          playerFaction={playerFaction}
-          namedOfficerData={loadedGameState?.namedOfficerData}
-        />
+        <Suspense fallback={null}>
+          <AutonomyPanel
+            onClose={() => setAutonomyOpen(false)}
+            playerFaction={playerFaction}
+            namedOfficerData={loadedGameState?.namedOfficerData}
+          />
+        </Suspense>
       )}
       <WarSummaryModal
         isOpen={summaryOpen}
