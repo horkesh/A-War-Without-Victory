@@ -388,17 +388,22 @@ export function OperationBriefingModal({ isOpen, onClose, onLaunch, onPostpone, 
         'This corps',
     );
 
+    // These two derivations used to be useMemo hooks placed after the early return above.
+    // The App wrapper keeps this component mounted while the context is null, so the first
+    // open rendered more hooks than the previous render and React threw ("Rendered more
+    // hooks"). Plain derivations after the return: same values, no hook-order hazard.
+
     // Delegation Visibility Wave 1: Derive pre-decision delegation context (planning phase only)
-    const delegationContext = useMemo(() => {
+    const delegationContext = (() => {
         if (operation.phase !== 'planning' || !assessment || corpsStrain == null) return undefined;
         return deriveDelegationContext(
             assessment as 'launch' | 'postpone' | 'abort',
             corpsStrain,
         );
-    }, [operation.phase, assessment, corpsStrain]);
+    })();
 
     // Wave 5: Derive recommendation explanation from assessment snapshot + commander personality
-    const recommendationExplanation = useMemo(() => {
+    const recommendationExplanation = (() => {
         if (!assessment || assessment === 'launch') return null;
         return deriveRecommendationExplanation(
             reportedIntelConf,
@@ -409,7 +414,7 @@ export function OperationBriefingModal({ isOpen, onClose, onLaunch, onPostpone, 
             assessment as 'launch' | 'postpone' | 'abort',
             postponements,
         );
-    }, [reportedIntelConf, reportedSupplyReady, forceRatio, assessment, postponements, commanderDisplay]);
+    })();
 
     return (
         <Modal
