@@ -576,6 +576,13 @@ export function repairDisconnectedTerritory(
  * BFS outward through OSID adjacency to find the nearest already-claimed OSID and inherit
  * its corps. This correctly assigns Bihać, Srebrenica, etc. to the geographically nearest
  * corps rather than the alphabetically-first one.
+ *
+ * Owner ruling M3 (2026-11-12, "Not a sector"): when `formations` is supplied, an unclaimed
+ * friendly OSID whose friendly connected component holds NO friendly combat formation
+ * (brigade / OG / HV phantom) is a cut-off, unmanned pocket (e.g. the single RS-surrounded
+ * village op:bileca:zausje at April 1992). Its front edges are given to no corps, so it forms
+ * no corps front sector. Its OSIDs keep their political control and are otherwise untouched.
+ * A pocket WITH a friendly formation in it keeps the nearest-claimed-corps fallback.
  */
 export function partitionFrontEdges(
     osidFrontEdges: Array<{ edge_id: string; a: string; b: string; side_a: string | null; side_b: string | null }>,
@@ -584,7 +591,8 @@ export function partitionFrontEdges(
     state: SectorTopologyNarrowReadState,
     reverseMap: Map<string, string[]> | null,
     corpsIds: FormationId[],
-    adjacency: Map<Osid, Osid[]>
+    adjacency: Map<Osid, Osid[]>,
+    formations?: Record<FormationId, SectorTopologyWorkingFormation>,
 ): Map<FormationId, string[]> {
     const result = new Map<FormationId, string[]>();
 
@@ -592,6 +600,10 @@ export function partitionFrontEdges(
     const sorted = [...osidFrontEdges]
         .filter(e => e.side_a === faction || e.side_b === faction)
         .sort((a, b) => strictCompare(a.edge_id, b.edge_id));
+
+    const isUnmannedPocket = formations
+        ? buildUnmannedPocketPredicate(state, faction, adjacency, formations)
+        : null;
 
     for (const edge of sorted) {
         // Identify the friendly-side OSID
@@ -601,6 +613,8 @@ export function partitionFrontEdges(
         // Edge on unclaimed or disconnected OSID (pocket/island). BFS outward through
         // OSID adjacency (ignoring control, any territory) to find nearest claimed OSID.
         if (!corpsId) {
+            // Owner ruling M3: a cut-off pocket with no friendly formation in it is not a sector.
+            if (isUnmannedPocket?.(friendlyOsid)) continue;
             corpsId = bfsNearestClaimedCorps(friendlyOsid, osidToCorps, adjacency) ?? corpsIds[0];
             if (!corpsId) continue; // Only if faction has NO corps at all
         }
@@ -611,6 +625,53 @@ export function partitionFrontEdges(
     }
 
     return result;
+}
+
+/** Formation kinds that can physically hold a front (mirrors sector roster kinds). */
+const POCKET_GARRISON_KINDS: ReadonlySet<string> = new Set(['brigade', 'og', 'operational_group', 'hv_phantom']);
+
+/**
+ * Build a memoized predicate: is `osid` inside a friendly connected component (same full
+ * adjacency + explicit political control as mapOsidsToCorps) that holds no active friendly
+ * combat formation? Components are discovered lazily, so only unclaimed edge OSIDs pay for a
+ * BFS. Deterministic: adjacency lists are sorted and the answer is a pure set-membership test.
+ */
+function buildUnmannedPocketPredicate(
+    state: SectorTopologyNarrowReadState,
+    faction: FactionId,
+    adjacency: Map<Osid, Osid[]>,
+    formations: Record<FormationId, SectorTopologyWorkingFormation>,
+): (osid: Osid) => boolean {
+    const pc = state.political.political_controllers ?? {};
+    const garrisonedOsids = new Set<string>();
+    for (const fid of Object.keys(formations).sort(strictCompare)) {
+        const f = formations[fid];
+        if (!f || f.faction !== faction || f.status !== 'active' || !f.location_osid) continue;
+        if (f.kind !== undefined && !POCKET_GARRISON_KINDS.has(f.kind)) continue;
+        garrisonedOsids.add(f.location_osid);
+    }
+    const unmannedByOsid = new Map<string, boolean>();
+    return (start: Osid): boolean => {
+        const known = unmannedByOsid.get(start);
+        if (known !== undefined) return known;
+        if (pc[start] !== faction) {
+            unmannedByOsid.set(start, false);
+            return false;
+        }
+        const component: string[] = [start];
+        const seen = new Set<string>([start]);
+        let manned = garrisonedOsids.has(start);
+        for (let head = 0; head < component.length; head++) {
+            for (const nb of adjacency.get(component[head]! as Osid) ?? []) {
+                if (seen.has(nb) || pc[nb] !== faction) continue;
+                seen.add(nb);
+                component.push(nb);
+                if (garrisonedOsids.has(nb)) manned = true;
+            }
+        }
+        for (const osid of component) unmannedByOsid.set(osid, !manned);
+        return !manned;
+    };
 }
 
 /**

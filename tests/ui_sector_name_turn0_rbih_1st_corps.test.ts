@@ -1,23 +1,21 @@
 /**
- * Review item M3 (20261111 player-surface review): the 1st Corps' sector 0 reads "OG Bileća"
- * in a turn-0 RBiH game.
+ * Review item M3 (20261111 player-surface review): the 1st Corps' sector 0 read "OG Bileća"
+ * in a turn-0 RBiH game. It was the single RBiH-held village op:bileca:zausje, cut off by RS
+ * ground with no brigade in it, handed to the 1st Corps by partitionFrontEdges' island fallback.
  *
- * Pinned finding: the label is geographically TRUE. sector:arbih_1st_corps:0 is the single
- * RBiH-held village op:bileca:zausje, an island surrounded by RS ground with no brigade in it.
- * mapOsidsToCorps leaves it unmapped (no brigade home, no friendly path), and
- * partitionFrontEdges' island fallback (bfsNearestClaimedCorps) hands its front edges to the
- * corps owning the hop-nearest claimed OSID (op:gacko:bahori, claimed by the 1st Corps from its
- * Foča/Goražde brigades). Whether such islands should belong to the 1st or 4th Corps, or be shown
- * as an OG at all, is a sim-side/design question and is NOT changed here.
+ * Owner ruling (2026-11-12): "Not a sector". A cut-off pocket with no friendly combat formation
+ * forms no corps front sector (see tests/sector_unmanned_pocket_not_a_sector.test.ts).
  *
- * Invariant pinned for every 1st Corps sector: the adapter's fallback "OG <municipality>" names a
- * municipality that actually appears among the sector's own front-line friendly OSIDs, so the
- * label always says where the sector really is.
+ * Pinned here against the real April 1992 RBiH start:
+ * - no RBiH sector holds Zaušje (or the equally cut-off, brigade-less Gacko village gacko_2);
+ * - the 1st Corps' first sector is a real, staffed front;
+ * - every 1st Corps "OG <place>" names a municipality among the sector's own front OSIDs.
  */
 import { describe, expect, test } from 'vitest';
 
 import { startNewCampaign } from '../src/desktop/desktop_sim.js';
 import { parseGameState } from '../src/ui/map/data/GameStateAdapter.js';
+import { strictCompare } from '../src/state/validateGameState.js';
 
 function placeToSlug(place: string): string {
     return place
@@ -28,19 +26,40 @@ function placeToSlug(place: string): string {
         .replace(/^_+|_+$/g, '');
 }
 
-describe('turn-0 RBiH 1st Corps sector names (M3)', () => {
-    test('sector names point at the sector\'s own municipalities; sector 0 is the Zaušje island', async () => {
-        const { state } = await startNewCampaign(process.cwd(), 'RBiH', 'apr_1992');
-        const view = parseGameState(state);
-        const sectors = (view.corpsFrontSectors ?? []).filter((s) => s.corps_id === 'arbih_1st_corps');
-        expect(sectors.length).toBeGreaterThan(0);
+const CUT_OFF_UNMANNED_VILLAGES = ['op:bileca:zausje', 'op:gacko:gacko_2'];
 
-        const sector0 = sectors.find((s) => s.sector_id === 'sector:arbih_1st_corps:0');
-        expect(sector0).toBeDefined();
-        const sector0Friendly = (sector0!.sub_segments ?? []).flatMap((ss) => ss.friendly_osids);
-        expect([...new Set(sector0Friendly)]).toEqual(['op:bileca:zausje']);
-        expect(sector0!.assigned_brigade_ids).toEqual([]);
-        expect(sector0!.display_name).toBe('OG Bileća');
+describe('turn-0 RBiH 1st Corps sectors (M3)', () => {
+    test('cut-off brigade-less villages form no sector; first 1st Corps sector is a real front', async () => {
+        const { state } = await startNewCampaign(process.cwd(), 'RBiH', 'apr_1992');
+
+        const rawSectors = (state.military.corps_front_sectors ?? {}) as Record<string, {
+            faction?: string;
+            corps_id?: string;
+            territory_osids?: string[];
+            sub_segments?: Array<{ friendly_osids?: string[] }>;
+        }>;
+        for (const [sectorId, sector] of Object.entries(rawSectors)) {
+            if (sector.faction !== 'RBiH') continue;
+            const held = new Set([
+                ...(sector.territory_osids ?? []),
+                ...(sector.sub_segments ?? []).flatMap((ss) => ss.friendly_osids ?? []),
+            ]);
+            for (const village of CUT_OFF_UNMANNED_VILLAGES) {
+                expect(held.has(village), `${sectorId} still holds ${village}`).toBe(false);
+            }
+        }
+
+        const view = parseGameState(state);
+        const sectors = (view.corpsFrontSectors ?? [])
+            .filter((s) => s.corps_id === 'arbih_1st_corps')
+            .sort((a, b) => strictCompare(a.sector_id, b.sector_id));
+        expect(sectors.length).toBeGreaterThan(0);
+        expect(sectors.some((s) => s.display_name === 'OG Bileća')).toBe(false);
+
+        const first = sectors[0]!;
+        const firstFront = new Set((first.sub_segments ?? []).flatMap((ss) => ss.friendly_osids));
+        expect(first.assigned_brigade_ids.length, `${first.sector_id} has no brigade`).toBeGreaterThan(0);
+        expect(firstFront.size).toBeGreaterThan(1);
 
         for (const sector of sectors) {
             const name = sector.display_name;
