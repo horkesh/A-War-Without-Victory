@@ -3726,6 +3726,8 @@ export const bcsMessages: Partial<Record<MessageKey, string>> = {
     'corpsFront.forceBalanceHostile': 'Protivnik',
     'corpsFront.forceBalanceTitle': '{label}: {summary}',
     'corpsFront.noFriendlyLine': 'Nema prijateljske linije',
+    'corpsFront.unheldFrontNear': 'Nebranjeni front ({place})',
+    'corpsFront.unheldFront': 'Nebranjeni front',
     'corpsFront.unitCondition': 'Stanje jedinice',
     'corpsFront.morale': 'Moral',
     'corpsFront.cohesion': 'Kohezija',

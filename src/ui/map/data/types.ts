@@ -884,6 +884,15 @@ export interface CorpsFrontSectorView {
     corps_id: string;
     corps_name: string;
     display_name: string;
+    /**
+     * Owner ruling M3 (2026-11-12): a sector with no brigades (assigned, reserve or rear) is not an
+     * Operational Group. The engine keeps it as front partition (ADR-0006); the view marks it so
+     * every surface shows it as an unheld stretch of front. When true, `display_name` already holds
+     * the localized "Unheld front near {place}" label and no OG name.
+     */
+    unheld_front?: boolean;
+    /** Dominant municipality of the sector's front (1991 census spelling), for place-only labels. */
+    front_place_name?: string;
     faction: string;
     opposing_factions: string[];
     edge_ids: string[];

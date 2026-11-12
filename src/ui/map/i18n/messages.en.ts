@@ -3880,6 +3880,8 @@ export const enMessages = {
     'corpsFront.forceBalanceHostile': 'Hostile',
     'corpsFront.forceBalanceTitle': '{label}: {summary}',
     'corpsFront.noFriendlyLine': 'No friendly line',
+    'corpsFront.unheldFrontNear': 'Unheld front near {place}',
+    'corpsFront.unheldFront': 'Unheld front',
     'corpsFront.unitCondition': 'Unit Condition',
     'corpsFront.morale': 'Morale',
     'corpsFront.cohesion': 'Cohesion',

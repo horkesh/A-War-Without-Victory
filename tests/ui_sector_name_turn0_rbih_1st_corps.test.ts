@@ -10,6 +10,7 @@
  * - no RBiH sector holds Zaušje (or the equally cut-off, brigade-less Gacko village gacko_2);
  * - the 1st Corps' first sector is a real, staffed front;
  * - every 1st Corps "OG <place>" names a municipality among the sector's own front OSIDs.
+ * - a sector with no brigades (any faction) is shown as "Unheld front near <place>", never an OG.
  */
 import { describe, expect, test } from 'vitest';
 
@@ -60,6 +61,22 @@ describe('turn-0 RBiH 1st Corps sectors (M3)', () => {
         const firstFront = new Set((first.sub_segments ?? []).flatMap((ss) => ss.friendly_osids));
         expect(first.assigned_brigade_ids.length, `${first.sector_id} has no brigade`).toBeGreaterThan(0);
         expect(firstFront.size).toBeGreaterThan(1);
+
+        // Owner ruling: a sector with no brigades is never shown as an OG, across every faction.
+        for (const sector of view.corpsFrontSectors ?? []) {
+            const brigadeCount = sector.assigned_brigade_ids.length
+                + sector.reserve_brigade_ids.length
+                + (sector.rear_brigade_ids ?? []).length;
+            if (brigadeCount === 0) {
+                expect(sector.unheld_front, sector.sector_id).toBe(true);
+                expect(sector.display_name, sector.sector_id).not.toMatch(/\bOG\b|\bTG\b|\bOZ\b/);
+                expect(sector.display_name).toBe(sector.front_place_name
+                    ? `Unheld front near ${sector.front_place_name}`
+                    : 'Unheld front');
+            } else {
+                expect(sector.unheld_front, sector.sector_id).toBeUndefined();
+            }
+        }
 
         for (const sector of sectors) {
             const name = sector.display_name;
