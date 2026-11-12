@@ -1247,6 +1247,8 @@ export interface LoadedGameState {
     corpsFrontSectors?: CorpsFrontSectorView[];
     /** Owner ruling M3: brigade-less sectors in an unreachable pocket, left out of corpsFrontSectors (needs osidAdjacency). */
     hiddenIsolatedPocketSectorIds?: string[];
+    /** Owner ruling M3: held-OG count per corps (sectors with one or more brigades). Use this, not corpsFrontSectors.length, for any "OGs" count. */
+    heldOgCountByCorps?: Record<string, number>;
     /**
      * Brigade IDs that could not be assigned to any sector this turn (engine truth: military.unresolved_sector_brigades).
      * Filtered to the player's faction in the adapter. Codex principle #6: unresolved is honest — do not hide these.

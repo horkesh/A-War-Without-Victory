@@ -56,6 +56,7 @@ import { hideWithdrawnEmptySyntheticJnaCommands } from './syntheticJnaCommandVis
 import { getMunicipalitySupportLabel } from '../../../sim/combat/municipality_support.js';
 import { splitKiaWiaMia } from '../../../sim/combat/attack_casualty_distribution.js';
 import { strictCompare } from '../../../state/validateGameState.js';
+import { countHeldOgsByCorps } from '../utils/heldOg.js';
 import { computeFullVerdict } from '../../../sim/negotiation/scoring.js';
 import { DIMENSION_WEIGHTS } from '../../../sim/events/strategic_dimensions.js';
 import type { GameVerdict } from '../../../state/negotiation_types.js';
@@ -741,6 +742,55 @@ function resolveAttestedOgName(corpsId: string, munCounts: Map<string, number>):
         if (entry.anchor_mun === dominantMun) return entry.name;
     }
     return undefined;
+}
+
+const UNHELD_FRONT_ORDINALS = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'];
+
+/**
+ * M3: two unheld fronts of one faction must not share a name, and an unheld-front name never
+ * repeats its place ("Unheld front near Čajniče I (Čajniče)" was seen after a branch merge).
+ * Within each faction's group of identical unheld-front names (sector-id order), every sector
+ * takes the first municipality of its own coverage ranking that is not the place and is not
+ * taken by another member: "Unheld front near Čajniče (Goražde)". If any member has none, the
+ * whole group gets roman ordinals instead: "Unheld front near Čajniče II". Names that are
+ * already unique are left alone, so a later generic OG disambiguation pass finds nothing to
+ * qualify. Display-only.
+ */
+export function disambiguateUnheldFrontNames(
+    sectors: CorpsFrontSectorView[],
+    rankedMunNamesBySector: Map<string, string[]>,
+): void {
+    const groups = new Map<string, CorpsFrontSectorView[]>();
+    for (const sector of sectors) {
+        if (!sector.unheld_front) continue;
+        const key = `${sector.faction}\u0000${sector.display_name}`;
+        const group = groups.get(key);
+        if (group) group.push(sector);
+        else groups.set(key, [sector]);
+    }
+    for (const group of groups.values()) {
+        if (group.length < 2) continue;
+        group.sort((a, b) => strictCompare(a.sector_id, b.sector_id));
+        const place = group[0]!.front_place_name;
+        const taken = new Set<string>();
+        const qualifiers = group.map((sector) => {
+            const pick = (rankedMunNamesBySector.get(sector.sector_id) ?? [])
+                .find((name) => name !== place && !taken.has(name));
+            if (pick) taken.add(pick);
+            return pick;
+        });
+        const allQualified = qualifiers.every((q): q is string => typeof q === 'string');
+        group.forEach((sector, index) => {
+            const ordinal = UNHELD_FRONT_ORDINALS[index] ?? String(index + 1);
+            if (place) {
+                sector.display_name = allQualified
+                    ? t('corpsFront.unheldFrontNearQualified', { place, qualifier: qualifiers[index]! })
+                    : t('corpsFront.unheldFrontNearOrdinal', { place, ordinal });
+            } else {
+                sector.display_name = t('corpsFront.unheldFrontOrdinal', { ordinal });
+            }
+        });
+    }
 }
 
 /** Formation kinds that can hold a front (mirrors the engine's sector roster kinds). */
@@ -2620,6 +2670,7 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
             )
             : null;
         const out: CorpsFrontSectorView[] = [];
+        const rankedMunNamesBySector = new Map<string, string[]>();
         for (const sectorId of Object.keys(rawSectors).sort((a, b) => a.localeCompare(b))) {
             const s = rawSectors[sectorId] ?? {};
             const corpsId = typeof s.corps_id === 'string' ? s.corps_id : '';
@@ -2655,10 +2706,11 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
                     }
                 }
             }
-            const topMuns = [...munCounts.entries()]
+            const rankedMunNames = [...munCounts.entries()]
                 .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
-                .slice(0, 2)
                 .map(([m]) => humanizeMunicipalitySlug(m));
+            rankedMunNamesBySector.set(typeof s.sector_id === 'string' ? s.sector_id : sectorId, rankedMunNames);
+            const topMuns = rankedMunNames.slice(0, 2);
             // ADR-0006 Phase 3B: prefer the standing TG/OG identity (CorpsFrontSector.display_name,
             // e.g. "TG Drina", "1. OG (Tuzla)", "OZ Mostar") when present in state; otherwise fall
             // back to the computed "{corps} \u2013 {top muns}" label. This is the canonical UI
@@ -2747,6 +2799,7 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
                 })),
             });
         }
+        disambiguateUnheldFrontNames(out, rankedMunNamesBySector);
         // Merge sector combat ratings if available
         const rawRatings = state.military.sector_combat_ratings as Record<string, Record<string, unknown>> | undefined;
         if (rawRatings && typeof rawRatings === 'object') {
@@ -3000,6 +3053,7 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
         repositionOrders: repositionOrders.length > 0 ? repositionOrders : undefined,
         corpsFrontSectors,
         ...(hiddenIsolatedPocketSectorIds.length > 0 ? { hiddenIsolatedPocketSectorIds: [...hiddenIsolatedPocketSectorIds].sort((a, b) => a.localeCompare(b)) } : {}),
+        ...(corpsFrontSectors ? { heldOgCountByCorps: countHeldOgsByCorps(corpsFrontSectors) } : {}),
         unresolvedSectorBrigades: (() => {
             const raw = state.military?.unresolved_sector_brigades as string[] | undefined;
             if (!Array.isArray(raw) || raw.length === 0) return undefined;
