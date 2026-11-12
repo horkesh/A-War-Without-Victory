@@ -132,10 +132,12 @@ describe('own-force report gap presentation', () => {
 
     const { container } = render(createElement(FormationDetail, { railSlot: 'primary' }));
 
-    expect(container.textContent).toContain('Awaiting first posture order');
+    expect(container.textContent).toContain('Not yet set by the commander');
     expect(container.textContent).toContain('1');
     expect(container.textContent).not.toMatch(/[Uu]nreported/);
-    expectOwnForceReportGap(container, ['posture', 'cohesion', 'morale', 'fatigue', 'personnel']);
+    // Brigade posture is the commander's to set, so its absence is not a report gap.
+    expectOwnForceReportGap(container, ['cohesion', 'morale', 'fatigue', 'personnel']);
+    expect(container.querySelector('[data-awwv-report-gap]')?.getAttribute('data-awwv-report-gap')).not.toContain('posture');
   });
 
   it('omits per-field Unreported labels in own-force readiness summaries', () => {
