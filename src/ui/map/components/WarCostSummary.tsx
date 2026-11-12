@@ -9,6 +9,7 @@ import type { ComparisonResult } from '../../../sim/endgame/endgame_comparison.j
 import { formatHistoricalDivergenceNote } from '../data/historicalDivergenceNotes.js';
 import { getPlayerSafeMilitaryFactionName } from '../utils/playerSafeText';
 import { t, useLocale } from '../i18n';
+import { SURFACE_LABEL, SURFACE_LABEL_MUTED, SurfaceFigure, SurfacePanel, SurfaceStat } from './surface/Surface';
 export { formatHistoricalDivergenceNote } from '../data/historicalDivergenceNotes.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -106,14 +107,16 @@ export function WarCostSummary({ costLedger, comparison }: WarCostSummaryProps) 
     useLocale();
     const opportunityLedger = costLedger.operation_opportunities;
 
+    // Surface redesign, step 4 (2026-11-12): surface section labels, stat rows and
+    // figure tiles; text 13 px and up. Figures and wording unchanged.
     return (
-        <div data-tutorial-step="cost-ledger" className="p-6 space-y-4 border-t border-panel-border">
-            <div className="text-xs uppercase tracking-[0.3em] text-text-secondary font-semibold">
+        <div data-tutorial-step="cost-ledger" className="flex flex-col gap-6">
+            <h4 className={`m-0 ${SURFACE_LABEL}`}>
                 {t('warCost.title')}
-            </div>
+            </h4>
 
             {/* Key figures */}
-            <div className="grid grid-cols-2 gap-x-6 gap-y-1.5">
+            <SurfacePanel className="grid grid-cols-2 gap-x-8">
                 <CostRow
                     label={t('warCost.totalMilitaryKilled')}
                     value={costLedger.total_military_killed.toLocaleString()}
@@ -134,15 +137,15 @@ export function WarCostSummary({ costLedger, comparison }: WarCostSummaryProps) 
                     label={t('warCost.militaryCasualtiesVsHistory')}
                     value={formatCasualtyRatio(comparison.casualty_ratio)}
                 />
-            </div>
+            </SurfacePanel>
 
             {/* Operation opportunity reckoning */}
             {opportunityLedger && opportunityLedger.total_decisions > 0 && (
-                <div>
-                    <div className="text-xs uppercase tracking-wider text-text-secondary font-semibold mb-2">
+                <div className="flex flex-col gap-3">
+                    <div className={SURFACE_LABEL_MUTED}>
                         {t('warCost.opportunityDecisions')}
                     </div>
-                    <div className="grid grid-cols-3 gap-2 mb-3">
+                    <div className="grid grid-cols-3 gap-3">
                         <OpportunityMetric
                             label={t('warCost.decisions')}
                             value={String(opportunityLedger.total_decisions)}
@@ -156,22 +159,22 @@ export function WarCostSummary({ costLedger, comparison }: WarCostSummaryProps) 
                             value={String(opportunityLedger.successes)}
                         />
                     </div>
-                    <div className="space-y-1">
+                    <div className="flex flex-col">
                         {opportunityLedger.entries.map((entry) => (
                             <div
                                 key={entry.proposal_id}
-                                className="flex items-center justify-between gap-3 text-xs text-text-secondary"
+                                className="flex items-baseline justify-between gap-4 border-b border-[#262b35] py-2.5 text-[16px] text-[#c2b69c] last:border-b-0"
                             >
-                                <div className="min-w-0">
-                                    <span className="text-text-primary font-medium">
+                                <div className="flex min-w-0 flex-wrap items-baseline gap-x-3 gap-y-0.5">
+                                    <span className="font-semibold text-[#f1e6c8]">
                                         {entry.display_name}
                                     </span>
-                                    <span className="ml-2 uppercase text-xs tracking-wider text-text-secondary/80">
+                                    <span className="text-[15px] text-[#b9ad94]">
                                         {getPlayerSafeMilitaryFactionName(entry.faction)} / {formatOpportunityResponse(entry.response)}
                                     </span>
                                 </div>
                                 <div className="shrink-0 text-right tabular-nums">
-                                    <span className="text-text-primary">
+                                    <span className="text-[#f1e6c8]">
                                         {formatExitClass(entry.exit_class)}
                                     </span>
                                     {entry.total_attacks > 0 && (
@@ -188,27 +191,27 @@ export function WarCostSummary({ costLedger, comparison }: WarCostSummaryProps) 
 
             {/* Prosecutorial findings */}
             {costLedger.findings && costLedger.findings.length > 0 && (
-                <div>
-                    <div className="text-xs uppercase tracking-wider text-text-secondary font-semibold mb-2">
+                <div className="flex flex-col gap-3">
+                    <div className={SURFACE_LABEL_MUTED}>
                         {t('warCost.prosecutorialFindings')}
                     </div>
-                    <div className="space-y-2">
+                    <div className="flex flex-col gap-3">
                         {costLedger.findings.map((finding) => (
                             <div
                                 key={finding.id}
-                                className="border-l border-panel-border pl-3 text-xs text-text-secondary leading-relaxed"
+                                className="flex flex-col gap-1.5 border-l-2 border-[#3a4150] pl-4 text-[16px] leading-relaxed text-[#ddd1b3]"
                             >
-                                <div className="flex items-baseline justify-between gap-3">
-                                    <span className="text-text-primary font-semibold">
+                                <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+                                    <span className="text-[17px] font-semibold text-[#f1e6c8]">
                                         {finding.title}
                                     </span>
-                                    <span className="shrink-0 uppercase text-xs tracking-wider text-text-secondary/80">
+                                    <span className="shrink-0 font-mono text-[14px] font-semibold uppercase tracking-[0.12em] text-[#b9ad94]">
                                         {formatFindingBadge(finding)}
                                     </span>
                                 </div>
                                 <div>{finding.text}</div>
                                 {finding.sources.length > 0 && (
-                                    <div className="mt-1 text-xs text-text-secondary/75">
+                                    <div className="text-[15px] text-[#9c917b]">
                                         {t('warCost.sources')}: {finding.sources.join('; ')}
                                     </div>
                                 )}
@@ -220,33 +223,33 @@ export function WarCostSummary({ costLedger, comparison }: WarCostSummaryProps) 
 
             {/* Territory divergence */}
             {Object.keys(comparison.territory_divergence).length > 0 && (
-                <div>
-                    <div className="text-xs uppercase tracking-wider text-text-secondary font-semibold mb-2">
+                <div className="flex flex-col gap-2">
+                    <div className={SURFACE_LABEL_MUTED}>
                         {t('warCost.territoryVsDayton')}
                     </div>
-                    <div className="space-y-1">
+                    <ul className="m-0 flex list-none flex-col gap-1.5 p-0">
                         {Object.entries(comparison.territory_divergence).map(([key, delta]) => (
-                            <div key={key} className="text-xs text-text-secondary">
+                            <li key={key} className="text-[16px] leading-relaxed text-[#ddd1b3]">
                                 {formatTerritoryDivergence(key, delta)}
-                            </div>
+                            </li>
                         ))}
-                    </div>
+                    </ul>
                 </div>
             )}
 
             {/* Divergence notes */}
             {comparison.divergence_notes.length > 0 && (
-                <div>
-                    <div className="text-xs uppercase tracking-wider text-text-secondary font-semibold mb-2">
+                <div className="flex flex-col gap-2">
+                    <div className={SURFACE_LABEL_MUTED}>
                         {t('warCost.historicalDivergence')}
                     </div>
-                    <div className="space-y-1">
+                    <ul className="m-0 flex list-none flex-col gap-1.5 p-0">
                         {comparison.divergence_notes.map((note, i) => (
-                            <div key={i} className="text-xs text-text-secondary leading-relaxed">
+                            <li key={i} className="text-[16px] leading-relaxed text-[#ddd1b3]">
                                 {formatHistoricalDivergenceNote(note)}
-                            </div>
+                            </li>
                         ))}
-                    </div>
+                    </ul>
                 </div>
             )}
         </div>
@@ -258,23 +261,9 @@ export function WarCostSummary({ costLedger, comparison }: WarCostSummaryProps) 
 // ═══════════════════════════════════════════════════════════════════════════
 
 function CostRow({ label, value }: { label: string; value: string }) {
-    return (
-        <div className="flex justify-between text-xs">
-            <span className="text-text-secondary">{label}</span>
-            <span className="text-text-primary tabular-nums font-medium">{value}</span>
-        </div>
-    );
+    return <SurfaceStat label={label} value={value} />;
 }
 
 function OpportunityMetric({ label, value }: { label: string; value: string }) {
-    return (
-        <div className="rounded border border-panel-border bg-panel-card/35 px-3 py-2">
-            <div className="text-xs uppercase tracking-wider text-text-secondary/80">
-                {label}
-            </div>
-            <div className="text-[15px] font-bold tabular-nums text-text-primary">
-                {value}
-            </div>
-        </div>
-    );
+    return <SurfaceFigure label={label} value={value} tone="font-mono tabular-nums text-[#f1e6c8]" />;
 }

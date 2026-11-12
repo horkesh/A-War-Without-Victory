@@ -1,13 +1,16 @@
 /**
- * EconomyPanel — v0.4.3 Economy & War Production
+ * EconomyPanel — v0.4.3 Economy & War Production ("War Footing").
  *
- * Right-side GlassPanel showing:
+ * Shows:
  * - Supply reserve gauges (general + heavy per faction)
  * - Production facility cards (name, location, condition bar)
  * - Smuggling routes (capacity bar, active/disrupted status)
  * - Embargo status
+ *
+ * Surface redesign, step 4 (2026-11-12): one surface in the Command Surface style
+ * (was a translucent right-side panel): header, the readout as figure tiles, then the four
+ * sections in a two-column grid. Presentation only; filtering and ordering unchanged.
  */
-import { GlassPanel } from './GlassPanel';
 import { FACTION_COLORS } from '../utils/theme';
 import type { LoadedGameState } from '../data/types';
 import {
@@ -16,6 +19,22 @@ import {
 } from '../utils/playerSafeText';
 import { t } from '../i18n';
 import { strictCompare } from '../../../state/validateGameState';
+import {
+    SURFACE_CHIP,
+    SURFACE_TONE,
+    SurfaceCloseButton,
+    SurfaceColumns,
+    SurfaceContent,
+    SurfaceFigure,
+    SurfaceFrame,
+    SurfaceHeader,
+    SurfacePanel,
+    SurfaceSection,
+    SurfaceSections,
+} from './surface/Surface';
+import { useSurfaceEscape } from './surface/useSurfaceEscape';
+import { surfaceFactionName } from './surface/surfaceFactionName';
+import { SurfaceModalLayer } from './surface/SurfaceModalLayer';
 
 const FACTIONS = ['RS', 'RBiH', 'HRHB'] as const;
 
@@ -43,7 +62,7 @@ function ConditionBar({ value, max = 1 }: { value: number; max?: number }) {
         pct >= 40 ? 'bg-yellow-400' :
         'bg-red-500';
     return (
-        <div className="relative flex-1 h-1.5 bg-panel-border/40 rounded-full overflow-hidden">
+        <div className="relative h-2.5 flex-1 overflow-hidden rounded-full bg-[#262b35]">
             <div
                 className={`absolute left-0 top-0 h-full rounded-full transition-all ${color}`}
                 style={{ width: `${pct}%` }}
@@ -52,7 +71,7 @@ function ConditionBar({ value, max = 1 }: { value: number; max?: number }) {
     );
 }
 
-function ReserveGauge({ label, value, color }: { label: string; value: number | null | undefined; color: string }) {
+function ReserveGauge({ label, value }: { label: string; value: number | null | undefined }) {
     const reported = typeof value === 'number' && Number.isFinite(value);
     const pct = reported ? Math.max(0, Math.min(100, value)) : 0;
     const barColor =
@@ -60,15 +79,15 @@ function ReserveGauge({ label, value, color }: { label: string; value: number | 
         pct >= 20 ? 'bg-yellow-400' :
         'bg-red-500';
     return (
-        <div className="flex items-center gap-1.5 min-w-0">
-            <span className={`w-[42px] shrink-0 text-xs ${color}`}>{label}</span>
-            <div className="relative flex-1 h-1.5 bg-panel-border/40 rounded-full overflow-hidden">
+        <div className="grid min-w-0 grid-cols-[5.5rem_minmax(0,1fr)_auto] items-center gap-3">
+            <span className="text-[16px] text-[#b9ad94]">{label}</span>
+            <div className="relative h-2.5 overflow-hidden rounded-full bg-[#262b35]">
                 <div
                     className={`absolute left-0 top-0 h-full rounded-full transition-all ${barColor}`}
                     style={{ width: reported ? `${pct}%` : '0%' }}
                 />
             </div>
-            <span className={`shrink-0 text-right text-xs tabular-nums text-text-secondary ${reported ? 'w-6' : 'w-16 italic'}`}>
+            <span className={`text-right font-mono text-[16px] tabular-nums ${reported ? 'min-w-[2.5rem] font-semibold text-[#f1e6c8]' : 'italic text-[#b9ad94]'}`}>
                 {reported ? Math.round(pct) : t('corpsFront.unreported')}
             </span>
         </div>
@@ -79,7 +98,12 @@ function reserveValueIsStrained(value: unknown): boolean {
     return typeof value === 'number' && Number.isFinite(value) && value < 20;
 }
 
+function EmptyLine({ children }: { children: string }) {
+    return <p className="m-0 text-[16px] italic text-[#b9ad94]">{children}</p>;
+}
+
 export function EconomyPanel({ state, onClose }: EconomyPanelProps) {
+    useSurfaceEscape(true, onClose);
     const reserves = state.factionReserves;
     const playerFaction = state.player_faction;
     const isPlayerFaction = playerFaction === 'RS' || playerFaction === 'RBiH' || playerFaction === 'HRHB';
@@ -102,147 +126,133 @@ export function EconomyPanel({ state, onClose }: EconomyPanelProps) {
     const disruptedRouteCount = routes.filter((route) => route.disrupted).length;
 
     return (
-        <GlassPanel position="right" title={t('economy.title')} onClose={onClose} width="340px">
-            <section className="space-y-2 mb-4 rounded border border-panel-border bg-panel-card/60 p-2">
-                <h3 className="text-xs uppercase tracking-wide text-accent-gold font-semibold">
-                    {t('economy.summaryTitle')}
-                </h3>
-                <div className="grid grid-cols-3 gap-2 text-xs">
-                    <div>
-                        <div className="text-text-secondary">{t('economy.summaryStrainedReserves')}</div>
-                        <div className="font-mono text-amber-300">{strainedReserveCount}</div>
-                    </div>
-                    <div>
-                        <div className="text-text-secondary">{t('economy.summaryFacilities')}</div>
-                        <div className="font-mono text-text-primary">{facilities.length}</div>
-                    </div>
-                    <div>
-                        <div className="text-text-secondary">{t('economy.summaryDisruptedRoutes')}</div>
-                        <div className="font-mono text-red-400">{disruptedRouteCount}</div>
-                    </div>
-                </div>
-            </section>
-            {/* Supply Reserves */}
-            <section className="space-y-2 mb-4">
-                <h3 className="text-xs uppercase tracking-wide text-accent-gold font-semibold">
-                    {t('economy.supplyReserves')}
-                </h3>
-                {reserves ? (
-                    <div className="space-y-2">
-                        {reserveFactions.map((faction) => {
-                            const r = reserves[faction];
-                            const color = FACTION_COLORS[faction] ?? 'text-text-primary';
-                            return (
-                                <div key={faction} className="space-y-0.5">
-                                    <span className={`text-xs font-semibold ${color}`}>{getPlayerSafeMilitaryFactionName(faction)}</span>
-                                    <ReserveGauge label={t('economy.supply')} value={r?.generalSupply} color="text-text-secondary" />
-                                    <ReserveGauge label={t('economy.ammo')} value={r?.heavyMunitions} color="text-text-secondary" />
-                                </div>
-                            );
-                        })}
-                    </div>
-                ) : (
-                    <div className="text-text-secondary text-xs italic">{t('economy.reservesDisabled')}</div>
-                )}
-            </section>
-
-            {/* Production Facilities */}
-            <section className="space-y-2 mb-4">
-                <h3 className="text-xs uppercase tracking-wide text-accent-gold font-semibold">
-                    {t('economy.productionFacilities')}
-                </h3>
-                {facilities.length > 0 ? (
-                    <div className="space-y-1.5">
-                        {facilities.map((f) => (
-                            <div key={f.id} className="flex items-center gap-2 text-xs">
-                                <div className="flex-1 min-w-0">
-                                    <div className="flex items-center gap-1">
-                                        <span className="text-text-primary truncate">{f.name}</span>
-                                        {f.controller && (
-                                            <span className={`text-xs ${FACTION_COLORS[f.controller] ?? 'text-text-secondary'}`}>
-                                                [{getPlayerSafePoliticalFactionName(f.controller)}]
-                                            </span>
-                                        )}
-                                    </div>
-                                    <div className="flex items-center gap-1 mt-0.5">
-                                        <span className="text-text-secondary w-[72px] shrink-0 truncate">{getPlayerSafeFacilityTypeLabel(f.type)}</span>
-                                        <ConditionBar value={f.condition} />
-                                        <span className="text-text-secondary tabular-nums w-[28px] text-right">
-                                            {Math.round(f.condition * 100)}%
-                                        </span>
-                                    </div>
-                                </div>
+        <SurfaceModalLayer>
+        <SurfaceFrame
+            layerClassName=""
+            data-testid="economy-panel"
+            aria-modal="true"
+            aria-labelledby="economy-panel-title"
+        >
+            <SurfaceHeader
+                eyebrow={surfaceFactionName(playerFaction)}
+                title={<span id="economy-panel-title">{t('economy.title')}</span>}
+                close={<SurfaceCloseButton onClick={onClose} />}
+            />
+            <SurfaceColumns layout="single">
+                <SurfaceContent>
+                    <SurfaceSections className="max-w-[96rem]">
+                        <SurfaceSection label={t('economy.summaryTitle')}>
+                            <div className="grid grid-cols-3 gap-3">
+                                <SurfaceFigure label={t('economy.summaryStrainedReserves')} value={strainedReserveCount} tone="font-mono text-amber-200" />
+                                <SurfaceFigure label={t('economy.summaryFacilities')} value={facilities.length} tone="font-mono text-[#f1e6c8]" />
+                                <SurfaceFigure label={t('economy.summaryDisruptedRoutes')} value={disruptedRouteCount} tone="font-mono text-red-200" />
                             </div>
-                        ))}
-                    </div>
-                ) : (
-                    <div className="text-text-secondary text-xs italic">
-                        {isPlayerFaction ? t('economy.noFriendlyFacilities') : t('economy.noFacilities')}
-                    </div>
-                )}
-            </section>
+                        </SurfaceSection>
 
-            {/* Smuggling Routes */}
-            <section className="space-y-2 mb-4">
-                <h3 className="text-xs uppercase tracking-wide text-accent-gold font-semibold">
-                    {t('economy.smugglingRoutes')}
-                </h3>
-                {routes.length > 0 ? (
-                    <div className="space-y-1.5">
-                        {routes.map((r) => (
-                            <div key={r.id} className="flex items-center gap-2 text-xs">
-                                <div className="flex-1 min-w-0">
-                                    <div className="flex items-center gap-1">
-                                        <span className="text-text-primary truncate">{r.name}</span>
-                                        <span className={`text-xs ${FACTION_COLORS[r.faction] ?? 'text-text-secondary'}`}>
-                                            [{getPlayerSafeMilitaryFactionName(r.faction)}]
-                                        </span>
-                                        {r.disrupted && (
-                                            <span className="text-red-400 text-xs uppercase tracking-wider">{t('economy.disrupted')}</span>
-                                        )}
+                        <div className="grid grid-cols-2 gap-x-8 gap-y-7">
+                            <SurfaceSection label={t('economy.supplyReserves')}>
+                                {reserves ? (
+                                    <div className="flex flex-col gap-3">
+                                        {reserveFactions.map((faction) => {
+                                            const r = reserves[faction];
+                                            const color = FACTION_COLORS[faction] ?? 'text-text-primary';
+                                            return (
+                                                <SurfacePanel key={faction} className="flex flex-col gap-2.5">
+                                                    <span className={`text-[17px] font-semibold ${color}`}>{getPlayerSafeMilitaryFactionName(faction)}</span>
+                                                    <ReserveGauge label={t('economy.supply')} value={r?.generalSupply} />
+                                                    <ReserveGauge label={t('economy.ammo')} value={r?.heavyMunitions} />
+                                                </SurfacePanel>
+                                            );
+                                        })}
                                     </div>
-                                    <div className="flex items-center gap-1 mt-0.5">
-                                        <span className="text-text-secondary w-[32px] shrink-0">{t('economy.cap')}</span>
-                                        <ConditionBar value={r.capacity} max={100} />
-                                        <span className="text-text-secondary tabular-nums w-[28px] text-right">
-                                            {Math.round(r.capacity)}
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                ) : (
-                    <div className="text-text-secondary text-xs italic">
-                        {isPlayerFaction ? t('economy.noFriendlyRoutes') : t('economy.noRoutes')}
-                    </div>
-                )}
-            </section>
+                                ) : (
+                                    <EmptyLine>{t('economy.reservesDisabled')}</EmptyLine>
+                                )}
+                            </SurfaceSection>
 
-            {/* Embargo Status */}
-            <section className="space-y-1">
-                <h3 className="text-xs uppercase tracking-wide text-accent-gold font-semibold">
-                    {t('economy.embargoStatus')}
-                </h3>
-                <div className="text-xs text-text-secondary space-y-0.5">
-                    {embargoEntries.length > 0 ? (
-                        embargoEntries.sort(([a], [b]) => strictCompare(a, b)).map(([faction, status]) => (
-                            <div key={faction} className="flex items-center gap-1">
-                                <span className={`w-[42px] ${FACTION_COLORS[faction] ?? 'text-text-primary'}`}>{getPlayerSafeMilitaryFactionName(faction)}</span>
-                                <span className="tabular-nums">
-                                    {t('economy.pipeline', { pct: Math.round(status.pipeline * 100) })}
-                                </span>
-                                <span className="tabular-nums ml-1">
-                                    {t('economy.smuggling', { pct: Math.round(status.smuggling * 100) })}
-                                </span>
-                            </div>
-                        ))
-                    ) : (
-                        <span className="italic">{isPlayerFaction ? t('economy.noFriendlyEmbargo') : t('economy.noEmbargo')}</span>
-                    )}
-                </div>
-            </section>
-        </GlassPanel>
+                            <SurfaceSection label={t('economy.productionFacilities')}>
+                                {facilities.length > 0 ? (
+                                    <div className="flex flex-col gap-2">
+                                        {facilities.map((f) => (
+                                            <SurfacePanel key={f.id} className="flex flex-col gap-2">
+                                                <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
+                                                    <span className="text-[17px] font-semibold text-[#f1e6c8]">{f.name}</span>
+                                                    {f.controller && (
+                                                        <span className={`text-[15px] ${FACTION_COLORS[f.controller] ?? 'text-[#b9ad94]'}`}>
+                                                            {getPlayerSafePoliticalFactionName(f.controller)}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                                <div className="grid grid-cols-[9rem_minmax(0,1fr)_auto] items-center gap-3">
+                                                    <span className="truncate text-[15px] text-[#b9ad94]">{getPlayerSafeFacilityTypeLabel(f.type)}</span>
+                                                    <ConditionBar value={f.condition} />
+                                                    <span className="min-w-[3rem] text-right font-mono text-[15px] tabular-nums text-[#f1e6c8]">
+                                                        {Math.round(f.condition * 100)}%
+                                                    </span>
+                                                </div>
+                                            </SurfacePanel>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <EmptyLine>{isPlayerFaction ? t('economy.noFriendlyFacilities') : t('economy.noFacilities')}</EmptyLine>
+                                )}
+                            </SurfaceSection>
+
+                            <SurfaceSection label={t('economy.smugglingRoutes')}>
+                                {routes.length > 0 ? (
+                                    <div className="flex flex-col gap-2">
+                                        {routes.map((r) => (
+                                            <SurfacePanel key={r.id} className="flex flex-col gap-2">
+                                                <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                                                    <span className="text-[17px] font-semibold text-[#f1e6c8]">{r.name}</span>
+                                                    <span className={`text-[15px] ${FACTION_COLORS[r.faction] ?? 'text-[#b9ad94]'}`}>
+                                                        {getPlayerSafeMilitaryFactionName(r.faction)}
+                                                    </span>
+                                                    <span className="flex-grow" />
+                                                    {r.disrupted && (
+                                                        <span className={`${SURFACE_CHIP} ${SURFACE_TONE.danger}`}>{t('economy.disrupted')}</span>
+                                                    )}
+                                                </div>
+                                                <div className="grid grid-cols-[5.5rem_minmax(0,1fr)_auto] items-center gap-3">
+                                                    <span className="text-[15px] text-[#b9ad94]">{t('economy.cap')}</span>
+                                                    <ConditionBar value={r.capacity} max={100} />
+                                                    <span className="min-w-[2.5rem] text-right font-mono text-[15px] tabular-nums text-[#f1e6c8]">
+                                                        {Math.round(r.capacity)}
+                                                    </span>
+                                                </div>
+                                            </SurfacePanel>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <EmptyLine>{isPlayerFaction ? t('economy.noFriendlyRoutes') : t('economy.noRoutes')}</EmptyLine>
+                                )}
+                            </SurfaceSection>
+
+                            <SurfaceSection label={t('economy.embargoStatus')}>
+                                {embargoEntries.length > 0 ? (
+                                    <div className="flex flex-col gap-2">
+                                        {embargoEntries.sort(([a], [b]) => strictCompare(a, b)).map(([faction, status]) => (
+                                            <SurfacePanel key={faction} className="flex flex-wrap items-baseline gap-x-5 gap-y-1">
+                                                <span className={`text-[17px] font-semibold ${FACTION_COLORS[faction] ?? 'text-[#f1e6c8]'}`}>{getPlayerSafeMilitaryFactionName(faction)}</span>
+                                                <span className="font-mono text-[16px] tabular-nums text-[#ddd1b3]">
+                                                    {t('economy.pipeline', { pct: Math.round(status.pipeline * 100) })}
+                                                </span>
+                                                <span className="font-mono text-[16px] tabular-nums text-[#ddd1b3]">
+                                                    {t('economy.smuggling', { pct: Math.round(status.smuggling * 100) })}
+                                                </span>
+                                            </SurfacePanel>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <EmptyLine>{isPlayerFaction ? t('economy.noFriendlyEmbargo') : t('economy.noEmbargo')}</EmptyLine>
+                                )}
+                            </SurfaceSection>
+                        </div>
+                    </SurfaceSections>
+                </SurfaceContent>
+            </SurfaceColumns>
+        </SurfaceFrame>
+        </SurfaceModalLayer>
     );
 }
 

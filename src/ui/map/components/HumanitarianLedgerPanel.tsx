@@ -10,12 +10,29 @@
  * tragic/factual and victim-neutral; there is no celebratory or "achievement"
  * styling, no winner, no ranking-for-reward. User-facing COPY/TONE is PENDING
  * OWNER SIGN-OFF before release (see the i18n keys under `humanitarianLedger.*`).
+ *
+ * Surface redesign, step 4 (2026-11-12): one surface in the Command Surface style
+ * (was a small translucent panel at the right edge). LAYOUT ONLY: every string,
+ * figure, row order and colour role (killed red, displaced amber) is unchanged;
+ * nothing is ranked, highlighted or framed as a result.
  */
 import { useMemo } from 'react';
 import type { LoadedGameState } from '../data/types';
 import { t } from '../i18n';
 import { strictCompare } from '../../../state/validateGameState';
 import { turnToDateString } from '../utils/formatters';
+import {
+  SurfaceCloseButton,
+  SurfaceColumns,
+  SurfaceContent,
+  SurfaceFrame,
+  SurfaceHeader,
+  SurfacePanel,
+  SurfaceSection,
+  SurfaceSections,
+} from './surface/Surface';
+import { useSurfaceEscape } from './surface/useSurfaceEscape';
+import { SurfaceModalLayer } from './surface/SurfaceModalLayer';
 
 interface HumanitarianLedgerPanelProps {
   state: LoadedGameState;
@@ -40,7 +57,12 @@ function fmt(n: number): string {
   return Math.round(n).toLocaleString();
 }
 
+const TH = 'py-2 text-[15px] font-semibold text-[#b9ad94]';
+const TD = 'py-2.5 text-[16px]';
+const NUM = 'font-mono font-semibold tabular-nums';
+
 export function HumanitarianLedgerPanel({ state, open, onClose }: HumanitarianLedgerPanelProps) {
+  useSurfaceEscape(open, onClose);
   const nd = state.nationalDisplacement;
 
   const byPeople = useMemo(() => {
@@ -73,119 +95,115 @@ export function HumanitarianLedgerPanel({ state, open, onClose }: HumanitarianLe
   const hasAny = byPeople.rows.length > 0 || byPerpetrator.length > 0 || overTime.length > 0;
 
   return (
-    <div
-      className="absolute right-4 top-16 z-30 w-[26rem] rounded-lg border border-panel-border bg-panel-bg/95 backdrop-blur-sm shadow-xl overflow-hidden"
+    <SurfaceModalLayer>
+    <SurfaceFrame
+      layerClassName=""
+      data-testid="humanitarian-ledger-panel"
+      aria-modal="true"
+      aria-labelledby="humanitarian-ledger-title"
       style={{ direction: 'ltr' }}
     >
-      <div className="flex items-center justify-between px-4 py-2.5 bg-panel-card border-b border-panel-border">
-        <div>
-          <div className="font-sans text-xs text-accent-gold uppercase tracking-wide font-semibold">
-            {t('humanitarianLedger.title')}
-          </div>
-          <div className="text-xs text-text-secondary italic mt-0.5">{t('humanitarianLedger.subtitle')}</div>
-        </div>
-        <button
-          type="button"
-          onClick={onClose}
-          className="text-text-secondary hover:text-interactive text-sm leading-none"
-          aria-label="Close"
-        >
-          x
-        </button>
-      </div>
+      <SurfaceHeader
+        eyebrow={t('humanitarianLedger.subtitle')}
+        title={<span id="humanitarian-ledger-title">{t('humanitarianLedger.title')}</span>}
+        close={<SurfaceCloseButton onClick={onClose} />}
+      />
+      <SurfaceColumns layout="single">
+        <SurfaceContent>
+          <SurfaceSections className="max-w-[88rem]">
+            {!hasAny ? (
+              <p className="m-0 text-[17px] italic text-[#b9ad94]">{t('humanitarianLedger.empty')}</p>
+            ) : (
+              <>
+                <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,32rem),1fr))] gap-x-8 gap-y-7">
+                  {/* Killed + fled abroad, by people */}
+                  {byPeople.rows.length > 0 && (
+                    <SurfaceSection label={t('humanitarianLedger.section.byPeople')}>
+                      <SurfacePanel>
+                        <table className="w-full border-collapse">
+                          <thead>
+                            <tr className="border-b border-[#262b35]">
+                              <th className={`${TH} text-left`}>{t('humanitarianLedger.col.people')}</th>
+                              <th className={`${TH} px-3 text-right`}>{t('humanitarianLedger.col.killed')}</th>
+                              <th className={`${TH} text-right`}>{t('humanitarianLedger.col.fledAbroad')}</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {byPeople.rows.map((r) => (
+                              <tr key={r.faction} className="border-b border-[#262b35]/60">
+                                <td className={`${TD} text-left text-[#f1e6c8]`}>{peopleLabel(r.faction)}</td>
+                                <td className={`${TD} ${NUM} px-3 text-right text-red-300`}>{fmt(r.killed)}</td>
+                                <td className={`${TD} ${NUM} text-right text-amber-300`}>{fmt(r.fledAbroad)}</td>
+                              </tr>
+                            ))}
+                            <tr className="border-t border-[#3a4150]">
+                              <td className={`${TD} text-left text-[#b9ad94]`}>{t('humanitarianLedger.label.total')}</td>
+                              <td className={`${TD} ${NUM} px-3 text-right text-red-300`}>{fmt(byPeople.total.killed)}</td>
+                              <td className={`${TD} ${NUM} text-right text-amber-300`}>{fmt(byPeople.total.fledAbroad)}</td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </SurfacePanel>
+                    </SurfaceSection>
+                  )}
 
-      <div className="max-h-[34rem] overflow-auto p-3 space-y-3">
-        {!hasAny ? (
-          <div className="text-xs text-text-secondary italic">{t('humanitarianLedger.empty')}</div>
-        ) : (
-          <>
-            {/* Killed + fled abroad, by people */}
-            {byPeople.rows.length > 0 && (
-              <div className="rounded border border-panel-border bg-panel-card/70 p-3 space-y-2">
-                <div className="text-xs uppercase tracking-wide text-text-secondary font-semibold">
-                  {t('humanitarianLedger.section.byPeople')}
+                  {/* Forced displacement, by responsible side x victim */}
+                  {byPerpetrator.length > 0 && (
+                    <SurfaceSection label={t('humanitarianLedger.section.byPerpetrator')}>
+                      <SurfacePanel>
+                        <table className="w-full border-collapse">
+                          <thead>
+                            <tr className="border-b border-[#262b35]">
+                              <th className={`${TH} text-left`}>{t('humanitarianLedger.col.perpetrator')}</th>
+                              <th className={`${TH} px-3 text-left`}>{t('humanitarianLedger.col.victims')}</th>
+                              <th className={`${TH} px-3 text-right`}>{t('humanitarianLedger.col.displaced')}</th>
+                              <th className={`${TH} text-right`}>{t('humanitarianLedger.col.killedShort')}</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {byPerpetrator.map((r) => (
+                              <tr key={`${r.perpetrator}|${r.victim}`} className="border-b border-[#262b35]/60 last:border-b-0">
+                                <td className={`${TD} text-left text-[#f1e6c8]`}>{peopleLabel(r.perpetrator)}</td>
+                                <td className={`${TD} px-3 text-left text-[#c2b69c]`}>{peopleLabel(r.victim)}</td>
+                                <td className={`${TD} ${NUM} px-3 text-right text-amber-300`}>{fmt(r.displaced)}</td>
+                                <td className={`${TD} ${NUM} text-right text-red-300`}>{fmt(r.killed)}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </SurfacePanel>
+                    </SurfaceSection>
+                  )}
                 </div>
-                <table className="w-full text-xs">
-                  <thead>
-                    <tr className="text-text-secondary">
-                      <th className="text-left font-medium py-0.5">{t('humanitarianLedger.col.people')}</th>
-                      <th className="text-right font-medium py-0.5 px-2">{t('humanitarianLedger.col.killed')}</th>
-                      <th className="text-right font-medium py-0.5">{t('humanitarianLedger.col.fledAbroad')}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {byPeople.rows.map((r) => (
-                      <tr key={r.faction} className="border-t border-panel-border/30">
-                        <td className="text-left py-0.5 text-text-primary">{peopleLabel(r.faction)}</td>
-                        <td className="text-right py-0.5 px-2 font-mono tabular-nums text-red-300">{fmt(r.killed)}</td>
-                        <td className="text-right py-0.5 font-mono tabular-nums text-amber-300">{fmt(r.fledAbroad)}</td>
-                      </tr>
-                    ))}
-                    <tr className="border-t border-panel-border/60">
-                      <td className="text-left py-0.5 text-text-secondary">{t('humanitarianLedger.label.total')}</td>
-                      <td className="text-right py-0.5 px-2 font-mono tabular-nums text-red-300">{fmt(byPeople.total.killed)}</td>
-                      <td className="text-right py-0.5 font-mono tabular-nums text-amber-300">{fmt(byPeople.total.fledAbroad)}</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
+
+                {/* Displaced per week */}
+                {overTime.length > 0 && (
+                  <SurfaceSection label={t('humanitarianLedger.section.overTime')}>
+                    <SurfacePanel>
+                      <div className="flex h-36 items-end gap-[2px]" role="img" aria-label={t('humanitarianLedger.section.overTime')}>
+                        {overTime.map((p) => {
+                          const heightPct = maxWeek > 0 ? Math.max(2, (p.refugeesCreated / maxWeek) * 100) : 2;
+                          return (
+                            <div
+                              key={p.turn}
+                              className="flex-1 rounded-t bg-amber-300/55"
+                              style={{ height: `${heightPct}%` }}
+                              title={`${turnToDateString(p.turn)}: ${fmt(p.refugeesCreated)}`}
+                            />
+                          );
+                        })}
+                      </div>
+                    </SurfacePanel>
+                  </SurfaceSection>
+                )}
+
+                <p className="m-0 max-w-[60rem] text-[15px] italic leading-relaxed text-[#b9ad94]">{t('humanitarianLedger.note.verbatim')}</p>
+              </>
             )}
-
-            {/* Forced displacement, by responsible side x victim */}
-            {byPerpetrator.length > 0 && (
-              <div className="rounded border border-panel-border bg-panel-card/70 p-3 space-y-2">
-                <div className="text-xs uppercase tracking-wide text-text-secondary font-semibold">
-                  {t('humanitarianLedger.section.byPerpetrator')}
-                </div>
-                <table className="w-full text-xs">
-                  <thead>
-                    <tr className="text-text-secondary">
-                      <th className="text-left font-medium py-0.5">{t('humanitarianLedger.col.perpetrator')}</th>
-                      <th className="text-left font-medium py-0.5 px-2">{t('humanitarianLedger.col.victims')}</th>
-                      <th className="text-right font-medium py-0.5 px-2">{t('humanitarianLedger.col.displaced')}</th>
-                      <th className="text-right font-medium py-0.5">{t('humanitarianLedger.col.killedShort')}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {byPerpetrator.map((r) => (
-                      <tr key={`${r.perpetrator}|${r.victim}`} className="border-t border-panel-border/30">
-                        <td className="text-left py-0.5 text-text-primary">{peopleLabel(r.perpetrator)}</td>
-                        <td className="text-left py-0.5 px-2 text-text-secondary">{peopleLabel(r.victim)}</td>
-                        <td className="text-right py-0.5 px-2 font-mono tabular-nums text-amber-300">{fmt(r.displaced)}</td>
-                        <td className="text-right py-0.5 font-mono tabular-nums text-red-300">{fmt(r.killed)}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-
-            {/* Displaced per week sparkline */}
-            {overTime.length > 0 && (
-              <div className="rounded border border-panel-border bg-panel-card/70 p-3 space-y-2">
-                <div className="text-xs uppercase tracking-wide text-text-secondary font-semibold">
-                  {t('humanitarianLedger.section.overTime')}
-                </div>
-                <div className="flex items-end gap-[2px] h-20" role="img" aria-label={t('humanitarianLedger.section.overTime')}>
-                  {overTime.map((p) => {
-                    const heightPct = maxWeek > 0 ? Math.max(2, (p.refugeesCreated / maxWeek) * 100) : 2;
-                    return (
-                      <div
-                        key={p.turn}
-                        className="flex-1 bg-amber-400/50 rounded-t"
-                        style={{ height: `${heightPct}%` }}
-                        title={`${turnToDateString(p.turn)}: ${fmt(p.refugeesCreated)}`}
-                      />
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            <div className="text-xs text-text-secondary/80 italic">{t('humanitarianLedger.note.verbatim')}</div>
-          </>
-        )}
-      </div>
-    </div>
+          </SurfaceSections>
+        </SurfaceContent>
+      </SurfaceColumns>
+    </SurfaceFrame>
+    </SurfaceModalLayer>
   );
 }
