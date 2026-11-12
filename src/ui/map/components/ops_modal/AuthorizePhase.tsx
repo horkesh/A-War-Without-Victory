@@ -17,6 +17,16 @@ import type { AuthorableOpWarningView } from '../../data/backTheOfficer';
 import type { ValidatableOpDef } from '../../../../sim/combat/operation_validation';
 import type { FactionId } from '../../../../state/game_state';
 import { t, type MessageKey } from '../../i18n';
+import {
+    SurfaceDetailFooter,
+    SurfaceSection,
+    SurfaceStat,
+    SURFACE_CHIP,
+    SURFACE_LABEL,
+    SURFACE_SECONDARY_BUTTON,
+    SURFACE_TONE,
+} from '../surface/Surface';
+import { OpsNotice, OpsPhaseBody } from './opsSurface';
 
 interface AuthorizePhaseProps {
     plan: OpsPlanState;
@@ -205,162 +215,145 @@ export function AuthorizePhase({ plan, prediction, corpsId, officerId, originSec
         });
     };
 
+    const primaryAction = 'flex flex-1 flex-col items-center justify-center gap-0.5 rounded-md bg-[#c9a75c] px-6 py-3 text-[18px] font-bold text-[#15120b] transition hover:bg-[#d8b86c] disabled:cursor-default disabled:opacity-45';
+    const secondaryAction = 'flex flex-col items-center justify-center rounded-md border border-[#3a4150] bg-[#1b2029] px-5 py-3 text-[16px] font-semibold text-[#e8dcbc] transition hover:border-accent-gold/60 disabled:cursor-default disabled:opacity-45';
+
     return (
         <div
-            className="absolute inset-0 z-10 flex flex-col items-center justify-center"
+            className="flex min-h-0 flex-1 flex-col"
             data-testid="ops-planning-phase-panel"
             data-phase="authorize"
         >
-            {/* Dim overlay */}
-            <div className="absolute inset-0 bg-black/40" />
+            <OpsPhaseBody>
+                {/* The operation order (OPORD) */}
+                <SurfaceSection label={t('opsPlanning.surface.orderSection')}>
+                    <OpordDocument
+                        plan={plan}
+                        prediction={prediction}
+                        commanderName={commanderName}
+                        corpsName={corpsName}
+                        faction={faction}
+                        date={date}
+                        isStamped={isStamped}
+                        osidDisplayNames={osidDisplayNames}
+                    />
+                </SurfaceSection>
 
-            {/* OPORD Document */}
-            <div className="relative z-10 max-h-[calc(var(--interface-viewport-height,100vh)*0.8)] overflow-y-auto">
-                <OpordDocument
-                    plan={plan}
-                    prediction={prediction}
-                    commanderName={commanderName}
-                    corpsName={corpsName}
-                    faction={faction}
-                    date={date}
-                    isStamped={isStamped}
-                    osidDisplayNames={osidDisplayNames}
-                />
-            </div>
-
-            {/* WP4i: Skip animation button */}
-            {isStamped && !transmitted && (
-                <div className="relative z-10 mt-4 text-center">
-                    <button
-                        type="button"
-                        onClick={() => setTransmitted(true)}
-                        className="text-xs text-text-secondary/50 hover:text-text-secondary transition-colors"
+                {/* Free War Phase 4, #67 (Slice 1): author-new-op eligibility + CA cost.
+                    Read-only surfacing; the Authorize gate is `authorizeBlocked` (Slice 2). */}
+                {!isStamped && eligibility && (
+                    <SurfaceSection
+                        label={t('opsPlanning.authorize.eligibility.title')}
+                        action={(
+                            <span
+                                className={`${SURFACE_CHIP} ${eligibility.affordable ? SURFACE_TONE.good : SURFACE_TONE.danger}`}
+                                title={eligibility.affordable
+                                    ? t('opsPlanning.authorize.eligibility.affordableTitle')
+                                    : t('opsPlanning.authorize.eligibility.unaffordableTitle')}
+                            >
+                                {t('opsPlanning.authorize.eligibility.caCost')}: {eligibility.ca_cost}
+                            </span>
+                        )}
                     >
-                        {t('opsPlanning.authorize.skipAnimation')}
-                    </button>
-                </div>
-            )}
-
-            {/* Transmitted message */}
-            {transmitted && (
-                <div className="relative z-10 mt-4 text-center animate-[fadeIn_0.5s_ease-out]">
-                    <div className="text-accent-gold font-bold text-sm uppercase tracking-[0.3em]">
-                        {t('opsPlanning.authorize.transmittedStamp')}
-                    </div>
-                    <div className="text-text-secondary text-xs mt-1">{t('opsPlanning.authorize.directiveTransmitted')}</div>
-                </div>
-            )}
-
-            {/* Free War Phase 4, #67 (Slice 1): author-new-op eligibility + CA cost.
-                Read-only surfacing — does NOT gate the Authorize button (Slice 2). */}
-            {!isStamped && eligibility && (
-                <div className="relative z-10 mt-5 w-[min(calc(var(--interface-viewport-width,100vw)*0.9),42rem)] rounded-lg border border-[rgba(180,160,130,0.15)]
-                                bg-[rgba(20,18,15,0.6)] px-4 py-3 text-left">
-                    <div className="flex items-center justify-between mb-2">
-                        <span className="text-xs uppercase tracking-[0.2em] text-text-secondary/80">
-                            {t('opsPlanning.authorize.eligibility.title')}
-                        </span>
-                        <span
-                            className={`text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded
-                                ${eligibility.affordable
-                                    ? 'bg-[#2d6a4f]/20 text-[#4a9a55] border border-[#2d6a4f]/30'
-                                    : 'bg-red-500/15 text-red-400 border border-red-500/30'}`}
-                            title={eligibility.affordable
-                                ? t('opsPlanning.authorize.eligibility.affordableTitle')
-                                : t('opsPlanning.authorize.eligibility.unaffordableTitle')}
-                        >
-                            {t('opsPlanning.authorize.eligibility.caCost')}: {eligibility.ca_cost}
-                        </span>
-                    </div>
-                    {/* Operation-slot accounting — slot exhaustion is silent in-engine. */}
-                    <div className="flex items-center justify-between mb-2 text-xs">
-                        <span className="text-text-secondary/70">
-                            {t('opsPlanning.authorize.eligibility.slots')}: {eligibility.slots_used}/{eligibility.slots_max}
-                        </span>
+                        {/* Operation-slot accounting — slot exhaustion is silent in-engine. */}
+                        <SurfaceStat
+                            label={t('opsPlanning.authorize.eligibility.slots')}
+                            value={`${eligibility.slots_used}/${eligibility.slots_max}`}
+                            tone={eligibility.has_available_slot ? undefined : 'text-red-200'}
+                        />
                         {!eligibility.has_available_slot && (
-                            <span className="font-bold uppercase tracking-wider text-red-400">
+                            <span className="text-[15px] font-semibold text-red-200">
                                 {t('opsPlanning.authorize.eligibility.slotExhausted')}
                             </span>
                         )}
-                    </div>
-                    {eligibility.has_available_slot && eligibilityErrors.length === 0 && eligibilityWarnings.length === 0 ? (
-                        <div className="text-xs text-[#4a9a55]">
-                            {t('opsPlanning.authorize.eligibility.clean')}
-                        </div>
-                    ) : (
-                        <ul className="space-y-1">
-                            {!eligibility.has_available_slot && (
-                                <li className="flex items-start gap-2 text-xs text-red-400">
-                                    <span className="font-bold uppercase text-xs mt-[1px]">
-                                        {t('opsPlanning.authorize.eligibility.block')}
-                                    </span>
-                                    <span>{t('opsPlanning.authorize.eligibility.slotExhaustedDetail')}</span>
-                                </li>
-                            )}
-                            {eligibilityErrors.map((w, i) => (
-                                <li key={`e${i}`} className="flex items-start gap-2 text-xs text-red-400">
-                                    <span className="font-bold uppercase text-xs mt-[1px]">
-                                        {t('opsPlanning.authorize.eligibility.block')}
-                                    </span>
-                                    <span>{playerSafeEligibilityMessage(w)}</span>
-                                </li>
-                            ))}
-                            {eligibilityWarnings.map((w, i) => (
-                                <li key={`w${i}`} className="flex items-start gap-2 text-xs text-amber-400/90">
-                                    <span className="font-bold uppercase text-xs mt-[1px]">
-                                        {t('opsPlanning.authorize.eligibility.warn')}
-                                    </span>
-                                    <span>{playerSafeEligibilityMessage(w)}</span>
-                                </li>
-                            ))}
-                        </ul>
-                    )}
-                </div>
-            )}
+                        {eligibility.has_available_slot && eligibilityErrors.length === 0 && eligibilityWarnings.length === 0 ? (
+                            <OpsNotice tone="good">{t('opsPlanning.authorize.eligibility.clean')}</OpsNotice>
+                        ) : (
+                            <ul className="m-0 flex list-none flex-col gap-2 p-0">
+                                {!eligibility.has_available_slot && (
+                                    <li className="flex items-start gap-3 rounded-md border border-red-400/45 bg-red-950/40 px-4 py-2.5 text-[16px] text-red-100">
+                                        <span className="shrink-0 font-mono text-[13px] font-semibold uppercase tracking-[0.12em]">
+                                            {t('opsPlanning.authorize.eligibility.block')}
+                                        </span>
+                                        <span>{t('opsPlanning.authorize.eligibility.slotExhaustedDetail')}</span>
+                                    </li>
+                                )}
+                                {eligibilityErrors.map((w, i) => (
+                                    <li key={`e${i}`} className="flex items-start gap-3 rounded-md border border-red-400/45 bg-red-950/40 px-4 py-2.5 text-[16px] text-red-100">
+                                        <span className="shrink-0 font-mono text-[13px] font-semibold uppercase tracking-[0.12em]">
+                                            {t('opsPlanning.authorize.eligibility.block')}
+                                        </span>
+                                        <span>{playerSafeEligibilityMessage(w)}</span>
+                                    </li>
+                                ))}
+                                {eligibilityWarnings.map((w, i) => (
+                                    <li key={`w${i}`} className="flex items-start gap-3 rounded-md border border-amber-300/45 bg-[#2a2416] px-4 py-2.5 text-[16px] text-amber-100">
+                                        <span className="shrink-0 font-mono text-[13px] font-semibold uppercase tracking-[0.12em]">
+                                            {t('opsPlanning.authorize.eligibility.warn')}
+                                        </span>
+                                        <span>{playerSafeEligibilityMessage(w)}</span>
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
+                    </SurfaceSection>
+                )}
+            </OpsPhaseBody>
 
-            {/* Action buttons */}
-            {!isStamped && (
-                <div className="relative z-10 mt-6 flex gap-3">
-                    {isLowIntel ? (
-                        <>
-                            <button
-                                type="button"
-                                onClick={handleProbe}
-                                disabled={isSubmitting}
-                                className="px-6 py-3 rounded-lg bg-amber-500/20 text-amber-400 font-bold text-sm
-                                           uppercase tracking-wider hover:bg-amber-500/30 transition-colors
-                                           border border-amber-500/30 disabled:opacity-50"
-                            >
-                                {t('opsPlanning.authorize.orderProbePrimary')}
-                                <div className="text-xs font-normal mt-0.5 opacity-70">{t('opsPlanning.authorize.orderProbeSub')}</div>
-                            </button>
+            <SurfaceDetailFooter>
+                {/* Transmitted message */}
+                {transmitted && (
+                    <div role="status" className="flex flex-col gap-1 animate-[fadeIn_0.5s_ease-out]">
+                        <span className={SURFACE_LABEL}>{t('opsPlanning.authorize.transmittedStamp')}</span>
+                        <span className="text-[16px] text-[#c2b69c]">{t('opsPlanning.authorize.directiveTransmitted')}</span>
+                    </div>
+                )}
+
+                {/* WP4i: Skip animation button */}
+                {isStamped && !transmitted && (
+                    <button type="button" onClick={() => setTransmitted(true)} className={SURFACE_SECONDARY_BUTTON}>
+                        {t('opsPlanning.authorize.skipAnimation')}
+                    </button>
+                )}
+
+                {/* Action buttons */}
+                {!isStamped && (
+                    <div className="flex flex-wrap gap-3">
+                        {isLowIntel ? (
+                            <>
+                                <button
+                                    type="button"
+                                    onClick={handleProbe}
+                                    disabled={isSubmitting}
+                                    className={primaryAction}
+                                >
+                                    <span>{t('opsPlanning.authorize.orderProbePrimary')}</span>
+                                    <span className="text-[14px] font-normal">{t('opsPlanning.authorize.orderProbeSub')}</span>
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={handleAuthorize}
+                                    disabled={isSubmitting || authorizeBlocked}
+                                    className={secondaryAction}
+                                >
+                                    {t('opsPlanning.authorize.authorizeAnyway')}
+                                </button>
+                            </>
+                        ) : (
                             <button
                                 type="button"
                                 onClick={handleAuthorize}
                                 disabled={isSubmitting || authorizeBlocked}
-                                className="px-4 py-3 rounded-lg bg-[rgba(40,36,30,0.6)] text-text-secondary font-bold text-xs
-                                           uppercase tracking-wider hover:bg-[rgba(60,54,44,0.7)] transition-colors
-                                           border border-[rgba(180,160,130,0.1)] disabled:opacity-50"
+                                title={authorizeBlocked ? t('opsPlanning.authorize.eligibility.unaffordableTitle') : undefined}
+                                className={primaryAction}
                             >
-                                {t('opsPlanning.authorize.authorizeAnyway')}
+                                <span>{t('opsPlanning.authorize.authorizePrimary')}</span>
+                                <span className="text-[14px] font-normal">{t('opsPlanning.authorize.authorizeSub')}</span>
                             </button>
-                        </>
-                    ) : (
-                        <button
-                            type="button"
-                            onClick={handleAuthorize}
-                            disabled={isSubmitting || authorizeBlocked}
-                            title={authorizeBlocked ? t('opsPlanning.authorize.eligibility.unaffordableTitle') : undefined}
-                            className="px-8 py-3 rounded-lg bg-[#2d6a4f]/20 text-[#4a9a55] font-bold text-sm
-                                       uppercase tracking-wider hover:bg-[#2d6a4f]/30 transition-colors
-                                       border border-[#2d6a4f]/30 disabled:opacity-50"
-                        >
-                            {t('opsPlanning.authorize.authorizePrimary')}
-                            <div className="text-xs font-normal mt-0.5 opacity-70">{t('opsPlanning.authorize.authorizeSub')}</div>
-                        </button>
-                    )}
-                </div>
-            )}
+                        )}
+                    </div>
+                )}
+            </SurfaceDetailFooter>
         </div>
     );
 }

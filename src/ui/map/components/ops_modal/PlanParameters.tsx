@@ -1,10 +1,12 @@
 /**
- * Operation parameters strip — op name, type, tempo, tolerance, artillery prep.
- * NO checkboxes — pill buttons for radio selections, toggle for artillery.
- * Each group in a visually distinct bordered box.
+ * Operation parameters — op name, type, tempo, tolerance, artillery prep.
+ * NO checkboxes — option buttons (aria-pressed) for radio selections, toggle for artillery.
+ * Each group: a muted label, a plain description, then its options.
  */
 import type { OpType, Tempo, Tolerance, OpsPlanState } from './types';
 import { t, type MessageKey } from '../../i18n';
+import { SURFACE_LABEL_MUTED } from '../surface/Surface';
+import { opsOptionClass } from './opsSurface';
 
 interface PlanParametersProps {
     plan: OpsPlanState;
@@ -90,33 +92,17 @@ const PILL_LABEL_KEYS: Record<string, MessageKey> = {
     repulsed: 'opsPlanning.param.label.repulsed',
 };
 
-function pillClass(isActive: boolean): string {
-    return isActive
-        ? 'bg-accent-gold/20 text-accent-gold border border-accent-gold/40 shadow-[0_0_6px_rgba(196,163,90,0.15)]'
-        : 'bg-transparent text-text-secondary/70 border border-transparent hover:text-text-secondary hover:bg-[rgba(180,160,130,0.06)]';
-}
+const OPTION_BUTTON = 'flex min-w-[8.5rem] flex-1 flex-col items-start gap-0.5 rounded-md border px-3 py-2 text-left transition';
 
-// WP1d: REGARDLESS danger pill class
-function dangerPillClass(isActive: boolean): string {
-    return isActive
-        ? 'bg-red-500/15 text-red-400 border border-red-400/30 shadow-[0_0_6px_rgba(239,68,68,0.15)] animate-[dangerPulse_2s_ease-in-out_infinite]'
-        : 'bg-transparent text-text-secondary/70 border border-transparent hover:text-text-secondary hover:bg-[rgba(180,160,130,0.06)]';
-}
-
-/** Wrapper for each parameter group — bordered box with header label + description. */
+/** One parameter: label, plain description, then its options. */
 function ParamGroup({ label, description, children }: { label: string; description: string; children: React.ReactNode }) {
     return (
-        <div className="flex flex-col gap-1.5 rounded-md border border-[rgba(180,160,130,0.12)]
-                        bg-[rgba(20,18,15,0.4)] px-2.5 py-1.5">
-            <div className="flex items-baseline gap-2">
-                <span className="text-xs font-bold uppercase tracking-[0.18em] text-text-secondary/60">
-                    {label}
-                </span>
-                <span className="text-xs text-text-secondary/45 italic">
-                    {description}
-                </span>
+        <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-0.5">
+                <span className={SURFACE_LABEL_MUTED}>{label}</span>
+                <span className="text-[15px] text-[#c2b69c]">{description}</span>
             </div>
-            <div className="flex gap-0.5">
+            <div className="flex flex-wrap gap-2">
                 {children}
             </div>
         </div>
@@ -129,22 +115,10 @@ const TOLERANCES: Tolerance[] = ['decisive_victory', 'victory', 'costly_victory'
 
 export function PlanParameters({ plan, onUpdate }: PlanParametersProps) {
     return (
-        <div className="flex items-stretch gap-2 flex-wrap">
-            {/* WP1d: CSS keyframe for REGARDLESS pulse */}
-            <style>{`
-                @keyframes dangerPulse {
-                    0%, 100% { box-shadow: 0 0 4px rgba(239,68,68,0.1); }
-                    50% { box-shadow: 0 0 12px rgba(239,68,68,0.3); }
-                }
-            `}</style>
-
+        <div className="flex flex-col gap-5">
             {/* Operation name */}
-            <div className="flex flex-col gap-1.5 rounded-md border border-[rgba(180,160,130,0.12)]
-                            bg-[rgba(20,18,15,0.4)] px-2.5 py-1.5">
-                <label
-                    htmlFor="plan-params-op-name"
-                    className="text-xs font-bold uppercase tracking-[0.18em] text-text-secondary/60"
-                >
+            <div className="flex flex-col gap-2">
+                <label htmlFor="plan-params-op-name" className={SURFACE_LABEL_MUTED}>
                     {t('opsPlanning.param.name')}
                 </label>
                 <input
@@ -152,9 +126,7 @@ export function PlanParameters({ plan, onUpdate }: PlanParametersProps) {
                     type="text"
                     value={plan.opName}
                     onChange={(e) => onUpdate({ opName: e.target.value })}
-                    className="bg-[rgba(40,36,30,0.5)] border border-[rgba(180,160,130,0.1)] rounded px-2 py-0.5
-                               text-xs text-white w-52 focus:border-accent-gold/40 focus:outline-none"
-                    style={{ fontFamily: 'var(--font-command)' }}
+                    className="h-11 w-full rounded-md border border-[#3a4150] bg-[#1b2029] px-3 text-[17px] text-[#f1e6c8] focus:border-accent-gold/70 focus:outline-none"
                 />
             </div>
 
@@ -165,12 +137,12 @@ export function PlanParameters({ plan, onUpdate }: PlanParametersProps) {
                         key={opType}
                         type="button"
                         onClick={() => onUpdate({ opType })}
+                        aria-pressed={plan.opType === opType}
                         title={t(PILL_TITLE_KEYS[opType])}
-                        className={`px-2 py-0.5 rounded text-xs font-bold uppercase tracking-wider transition-all flex flex-col items-center
-                            ${pillClass(plan.opType === opType)}`}
+                        className={`${OPTION_BUTTON} ${opsOptionClass(plan.opType === opType)}`}
                     >
-                        <span>{t(OP_TYPE_MESSAGE_KEYS[opType])}</span>
-                        <span className="text-xs font-normal normal-case tracking-normal text-text-secondary/55">
+                        <span className="text-[15px] font-semibold">{t(OP_TYPE_MESSAGE_KEYS[opType])}</span>
+                        <span className="text-[14px] text-[#b9ad94]">
                             {t(PILL_SUBTITLES[opType])}
                         </span>
                     </button>
@@ -184,12 +156,12 @@ export function PlanParameters({ plan, onUpdate }: PlanParametersProps) {
                         key={tempo}
                         type="button"
                         onClick={() => onUpdate({ tempo })}
+                        aria-pressed={plan.tempo === tempo}
                         title={t(PILL_TITLE_KEYS[tempo])}
-                        className={`px-2 py-0.5 rounded text-xs font-bold uppercase tracking-wider transition-all flex flex-col items-center
-                            ${pillClass(plan.tempo === tempo)}`}
+                        className={`${OPTION_BUTTON} ${opsOptionClass(plan.tempo === tempo)}`}
                     >
-                        <span>{t(TEMPO_MESSAGE_KEYS[tempo])}</span>
-                        <span className="text-xs font-normal normal-case tracking-normal text-text-secondary/55">
+                        <span className="text-[15px] font-semibold">{t(TEMPO_MESSAGE_KEYS[tempo])}</span>
+                        <span className="text-[14px] text-[#b9ad94]">
                             {t(PILL_SUBTITLES[tempo])}
                         </span>
                     </button>
@@ -206,14 +178,12 @@ export function PlanParameters({ plan, onUpdate }: PlanParametersProps) {
                             key={tolerance}
                             type="button"
                             onClick={() => onUpdate({ tolerance })}
+                            aria-pressed={isActive}
                             title={t(PILL_TITLE_KEYS[tolerance])}
-                            className={`px-2 py-0.5 rounded text-xs font-bold uppercase tracking-wider transition-all flex flex-col items-center
-                                ${isDanger ? dangerPillClass(isActive) : pillClass(isActive)}`}
+                            className={`${OPTION_BUTTON} ${opsOptionClass(isActive, isDanger)}`}
                         >
-                            <span>{t(TOLERANCE_MESSAGE_KEYS[tolerance])}</span>
-                            <span className={`text-xs font-normal normal-case tracking-normal ${
-                                isDanger ? 'text-red-400/70' : 'text-text-secondary/50'
-                            }`}>
+                            <span className="text-[15px] font-semibold">{t(TOLERANCE_MESSAGE_KEYS[tolerance])}</span>
+                            <span className={`text-[14px] ${isDanger ? 'text-red-200' : 'text-[#b9ad94]'}`}>
                                 {t(PILL_SUBTITLES[tolerance])}
                             </span>
                         </button>
@@ -223,28 +193,23 @@ export function PlanParameters({ plan, onUpdate }: PlanParametersProps) {
 
             {/* Artillery prep toggle */}
             <ParamGroup label={t('opsPlanning.param.support')} description={t('opsPlanning.param.supportDescription')}>
-                <div className="flex flex-col items-center">
-                    <button
-                        type="button"
-                        onClick={() => onUpdate({ artilleryPreparation: !plan.artilleryPreparation })}
-                        title={plan.artilleryPreparation
-                            ? t('opsPlanning.param.artyOnTitle')
-                            : t('opsPlanning.param.artyOffTitle')}
-                        className={`px-2.5 py-0.5 rounded text-xs font-bold uppercase tracking-wider transition-all
-                            ${plan.artilleryPreparation
-                                ? 'bg-red-500/15 text-red-400 border border-red-400/30 shadow-[0_0_6px_rgba(239,68,68,0.12)]'
-                                : 'bg-transparent text-text-secondary/70 border border-transparent hover:text-text-secondary hover:bg-[rgba(180,160,130,0.06)]'
-                            }`}
-                    >
-                        {plan.artilleryPreparation ? `\u25C6 ${t('opsPlanning.param.artyOn')}` : `\u25C7 ${t('opsPlanning.param.artyOff')}`}
-                    </button>
+                <button
+                    type="button"
+                    onClick={() => onUpdate({ artilleryPreparation: !plan.artilleryPreparation })}
+                    aria-pressed={plan.artilleryPreparation}
+                    title={plan.artilleryPreparation
+                        ? t('opsPlanning.param.artyOnTitle')
+                        : t('opsPlanning.param.artyOffTitle')}
+                    className={`${OPTION_BUTTON} ${opsOptionClass(plan.artilleryPreparation, plan.artilleryPreparation)}`}
+                >
+                    <span className="text-[15px] font-semibold">
+                        {plan.artilleryPreparation ? `◆ ${t('opsPlanning.param.artyOn')}` : `◇ ${t('opsPlanning.param.artyOff')}`}
+                    </span>
                     {/* WP1e: Artillery prep info text */}
-                    <span className={`text-xs mt-0.5 ${
-                        plan.artilleryPreparation ? 'text-red-400/60' : 'text-text-secondary/40'
-                    }`}>
+                    <span className={`text-[14px] ${plan.artilleryPreparation ? 'text-red-200' : 'text-[#b9ad94]'}`}>
                         {plan.artilleryPreparation ? t('opsPlanning.param.artyOnDetail') : t('opsPlanning.param.artyOffDetail')}
                     </span>
-                </div>
+                </button>
             </ParamGroup>
         </div>
     );
