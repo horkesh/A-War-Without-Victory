@@ -3032,7 +3032,10 @@ test('parseGameState maps the canonical operational SITREP packet from extractWa
 // ADR-0006 — attested historical OG/TG/OZ display_names wired into the read-model.
 // Verifies that parseGameState resolves the corps + dominant-municipality coverage to the
 // historically-attested label (display-only; never touches hashed state).
-function sectorState(corpsId: string, munSlugs: string[]): any {
+// One brigade on the roster: owner ruling M3 (2026-11-12) — "grouping of brigades should be the
+// main definition of OG. Even when there is only one brigade in it." A brigade-less sector is
+// shown as an unheld front instead (covered by the M3 tests below).
+function sectorState(corpsId: string, munSlugs: string[], assignedBrigadeIds: string[] = ['b1']): any {
     const friendlyOsids = munSlugs.map((m, i) => `op:${m}:${m}_${i + 1}`);
     return {
         meta: { turn: 5, phase: 'war' },
@@ -3050,7 +3053,7 @@ function sectorState(corpsId: string, munSlugs: string[]): any {
                     territory_osids: friendlyOsids,
                     sub_segments: [{ sub_segment_id: 'subseg:0', edge_ids: friendlyOsids.map((_, i) => 'e' + i), friendly_osids: friendlyOsids, enemy_osids: [] }],
                     length_edges: friendlyOsids.length,
-                    assigned_brigade_ids: [],
+                    assigned_brigade_ids: assignedBrigadeIds,
                     reserve_brigade_ids: [],
                     density: 0, threat_ratio: 0, defensive_power: 0,
                     sector_stance: 'defend', stance_source: 'bot',
@@ -3060,6 +3063,38 @@ function sectorState(corpsId: string, munSlugs: string[]): any {
         political: { political_controllers: {} } as any,
     };
 }
+
+test('M3: a sector with exactly one brigade is an OG', () => {
+    const parsed = parseGameState(sectorState('arbih_2nd_corps', ['tuzla', 'tuzla', 'olovo'], ['b1']));
+    const sector = parsed.corpsFrontSectors?.[0];
+    assert.strictEqual(sector?.display_name, 'OG Tuzla');
+    assert.strictEqual(sector?.unheld_front, undefined);
+    assert.strictEqual(sector?.front_place_name, 'Tuzla');
+});
+
+test('M3: a brigade-less sector is an unheld front, never an OG (attested or computed)', () => {
+    const computed = parseGameState(sectorState('arbih_2nd_corps', ['tuzla', 'tuzla', 'olovo'], []));
+    assert.strictEqual(computed.corpsFrontSectors?.[0]?.display_name, 'Unheld front near Tuzla');
+    assert.strictEqual(computed.corpsFrontSectors?.[0]?.unheld_front, true);
+
+    // An attested anchor (vrs_drina + Foča = "TG Foča") must not name an unheld front either.
+    const attested = parseGameState(sectorState('vrs_drina', ['foca', 'foca'], []));
+    assert.strictEqual(attested.corpsFrontSectors?.[0]?.display_name, 'Unheld front near Foča');
+
+    const authored = sectorState('vrs_drina', ['foca', 'foca'], []);
+    authored.military.corps_front_sectors.s0.display_name = 'Authored Name';
+    assert.strictEqual(parseGameState(authored).corpsFrontSectors?.[0]?.display_name, 'Unheld front near Foča');
+});
+
+test('M3: reserve-only or rear-only brigades still make the sector an OG', () => {
+    const reserveOnly = sectorState('arbih_2nd_corps', ['tuzla'], []);
+    reserveOnly.military.corps_front_sectors.s0.reserve_brigade_ids = ['r1'];
+    assert.strictEqual(parseGameState(reserveOnly).corpsFrontSectors?.[0]?.display_name, 'OG Tuzla');
+
+    const rearOnly = sectorState('arbih_2nd_corps', ['tuzla'], []);
+    rearOnly.military.corps_front_sectors.s0.rear_brigade_ids = ['x1'];
+    assert.strictEqual(parseGameState(rearOnly).corpsFrontSectors?.[0]?.display_name, 'OG Tuzla');
+});
 
 test('ADR-0006: attested OG/TG/OZ names resolve from corps + region (display-only)', () => {
     const drinaFoca = parseGameState(sectorState('vrs_drina', ['foca', 'foca', 'kalinovik']));

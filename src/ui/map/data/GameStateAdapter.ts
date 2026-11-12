@@ -2620,16 +2620,30 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
             // resolveAttestedOgName's dominant pick). Attested OG/TG/OZ names (state display_name
             // or the ADR-0006 table) are preferred verbatim; this is the geographic default for
             // corps/regions with no attested designation. Display-only; never written to state.
-            const displayName = standingIdentity
-                ?? (topMuns.length > 0
-                    ? `OG ${topMuns[0]}`
-                    : `${corpsName} OG`);
+            // Owner ruling M3 (2026-11-12): "OG is supposed to be operating group, grouping of
+            // brigades." A sector with no brigade on its roster (assigned, reserve or rear) keeps its
+            // engine front partition (ADR-0006) but is never named or shown as an OG, attested or
+            // computed. It reads as an unheld stretch of front near its dominant municipality.
+            const frontPlaceName = topMuns[0];
+            const unheldFront = assignedBrigadeIds.length === 0
+                && reserveBrigadeIds.length === 0
+                && rearBrigadeIds.length === 0;
+            const displayName = unheldFront
+                ? (frontPlaceName
+                    ? t('corpsFront.unheldFrontNear', { place: frontPlaceName })
+                    : t('corpsFront.unheldFront'))
+                : standingIdentity
+                    ?? (frontPlaceName
+                        ? `OG ${frontPlaceName}`
+                        : `${corpsName} OG`);
 
             out.push({
                 sector_id: typeof s.sector_id === 'string' ? s.sector_id : sectorId,
                 corps_id: corpsId,
                 corps_name: corpsName,
                 display_name: displayName,
+                ...(unheldFront ? { unheld_front: true } : {}),
+                ...(frontPlaceName ? { front_place_name: frontPlaceName } : {}),
                 faction,
                 opposing_factions: opposingFactions,
                 edge_ids: edgeIds,

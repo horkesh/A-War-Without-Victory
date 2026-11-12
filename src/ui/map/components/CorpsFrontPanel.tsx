@@ -483,7 +483,7 @@ export function CorpsFrontPanel({ breadcrumb }: CorpsFrontPanelProps) {
       <MapRailHeader
         breadcrumb={breadcrumb}
         mark={<span aria-hidden="true" className="inline-block h-3 w-3 shrink-0 rounded-sm" style={{ backgroundColor: corpsColor }} />}
-        eyebrow={t('mapRail.eyebrow.og')}
+        eyebrow={sector.unheld_front ? t('mapRail.eyebrow.unheldFront') : t('mapRail.eyebrow.og')}
         title={sectorLabel}
         subtitle={`${getPlayerSafeMilitaryFactionName(sector.faction)} · ${t('mapRail.sectorAsOf', { date: displayDate, turn: String(loadedGameState.turn) })}`}
         chips={opsecActive ? <span className={`${SURFACE_CHIP} ${SURFACE_TONE.warn}`}>{t('corpsFront.opsec')}</span> : undefined}
@@ -608,7 +608,10 @@ export function CorpsFrontPanel({ breadcrumb }: CorpsFrontPanelProps) {
                         {!hasReliableSectorThreatIntel ? (
                           <span className="text-[#9c917b] italic">{t('mapRail.notAssessedYet')}</span>
                         ) : !hasFriendlyLine ? (
-                          <span className="text-red-300 font-bold uppercase tracking-tight">{t('corpsFront.noFriendlyLine')}</span>
+                          // An unheld front already says so in its name (M3 owner ruling); no second "No friendly line".
+                          sector.unheld_front
+                            ? <span className="text-[#9c917b]">{t('mapRail.noForceBalanceUnheld')}</span>
+                            : <span className="text-red-300 font-bold uppercase tracking-tight">{t('corpsFront.noFriendlyLine')}</span>
                         ) : (
                           <ThreatBadge ratio={sector.threat_ratio} />
                         )}

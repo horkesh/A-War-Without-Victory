@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import { useGameStore } from '../store/gameStore';
 import { CorpsCard } from './CorpsCard';
 import { OwnForceReportGapNotice } from './OwnForceReportGapNotice';
@@ -290,7 +290,8 @@ export function OOBSidebar() {
     return n;
   }, [armyByFaction, reserveByFaction]);
   const totalOperations = loadedGameState ? filterPlayerFacingOperations(loadedGameState).length : 0;
-  const totalSectors = loadedGameState ? getPlayerVisibleFactions(loadedGameState.corpsFrontSectors ?? [], playerFaction).length : 0;
+  // OGs tab count: held OGs only (an unheld front is not an OG, M3 owner ruling).
+  const totalSectors = loadedGameState ? getPlayerVisibleFactions(loadedGameState.corpsFrontSectors ?? [], playerFaction).filter((s) => !s.unheld_front).length : 0;
   const mobilizationSummary = loadedGameState?.mobilizationSummary;
 
   if (!loadedGameState) {
@@ -681,10 +682,20 @@ export function OOBSidebar() {
                 <MapRailNote>{t('oob.noSectorData')}</MapRailNote>
               ) : (
                 FACTION_ORDER.filter((f) => f === playerFaction && sectorsByFaction.has(f)).map((faction) => {
-                  const sectors = sectorsByFaction.get(faction)!;
+                  // M3 owner ruling: a brigade-less sector is an unheld front, not an OG. Held OGs
+                  // first; unheld fronts follow under their own label.
+                  const allSectors = sectorsByFaction.get(faction)!;
+                  const sectors = [
+                    ...allSectors.filter((s) => !s.unheld_front),
+                    ...allSectors.filter((s) => s.unheld_front),
+                  ];
+                  const firstUnheldId = sectors.find((s) => s.unheld_front)?.sector_id;
                   return (
                     <div key={faction} className="space-y-1.5">
                       {sectors.map((sector) => {
+                        const unheldHeading = sector.sector_id === firstUnheldId
+                          ? <div key={`${sector.sector_id}:heading`} className={`${SURFACE_LABEL_MUTED} pt-2`}>{t('mapRail.unheldFronts')}</div>
+                          : null;
                         const color = corpsColorMap[sector.corps_id] ?? '#888';
                         const sectorAssignment = buildSectorFormationAssignment(
                           sector,
@@ -700,6 +711,8 @@ export function OOBSidebar() {
                           corps: ownerName,
                         });
                         return (
+                          <Fragment key={sector.sector_id}>
+                          {unheldHeading}
                           <button
                             key={sector.sector_id}
                             type="button"
@@ -748,6 +761,7 @@ export function OOBSidebar() {
                               </div>
                             </div>
                           </button>
+                          </Fragment>
                         );
                       })}
                     </div>

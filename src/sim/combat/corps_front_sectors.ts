@@ -2712,7 +2712,7 @@ function getRecoveredFrontClaimSetup(
             mapOsidsToCorps(state, faction, corpsIds, adjacency, formations, reverseMap),
         );
         const partitionedCorpsEdges = _perfTime('recoverDroppedFrontEdges:faction-front-claim-setup:front-edge-partition', () =>
-            partitionFrontEdges(osidFrontEdges, faction, mappedOsidToCorps, state, reverseMap, corpsIds, adjacency),
+            partitionFrontEdges(osidFrontEdges, faction, mappedOsidToCorps, state, reverseMap, corpsIds, adjacency, formations),
         );
         _perfTime('recoverDroppedFrontEdges:faction-front-claim-setup:cross-corps-consolidation', () => {
             consolidateCrossCorpsFronts(
@@ -3577,7 +3577,7 @@ function buildFactionSectors(
 
     // Step 3: Partition front edges to corps
     const corpsEdges = _perfTime(`buildFactionSectors:${faction}:front-edge-partition`, () => partitionFrontEdges(
-        osidFrontEdges, faction, osidToCorps, state, reverseMap, corpsIds, adjacency
+        osidFrontEdges, faction, osidToCorps, state, reverseMap, corpsIds, adjacency, formations
     ));
     // Step 3b: Consolidate cross-corps front splits.
     _perfTime(`buildFactionSectors:${faction}:front-edge-consolidation`, () => {
