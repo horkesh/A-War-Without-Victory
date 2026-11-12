@@ -12,6 +12,7 @@ export interface BalancedWorkerPlan {
   files: string[];
 }
 
+export const SECTOR_PROPERTY_TEST: string;
 export function deterministicShardValues(total: number, shardIndex: number, shardCount: number): number[];
 export function partitionInventory(inventory: TestInventoryRow[], shardCount: number): BalancedTestPlan;
 export function aggregateChildStatuses(statuses: number[]): 0 | 1;
