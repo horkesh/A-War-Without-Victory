@@ -10,7 +10,6 @@ import { buildOsidAdjacency, buildSharedBoundaryAdjacency, type Osid } from '../
 import { buildCorpsFrontSectors } from '../src/sim/combat/corps_front_sectors.js';
 import { MAX_SECTOR_EDGES } from '../src/sim/combat/corps_front_sectors_constants.js';
 import { splitNonContiguousSectors } from '../src/sim/combat/sector_splitting.js';
-import { buildUnmannedPocketPredicate } from '../src/sim/combat/sector_territory.js';
 import type { CorpsFrontSector, GameState } from '../src/state/game_state.js';
 import { deserializeState } from '../src/state/serialize.js';
 import { strictCompare } from '../src/state/validateGameState.js';
@@ -296,25 +295,10 @@ describe.skipIf(!hasFixture)('real save sector truth contracts', () => {
     const serializedMissing = collectMissingFactionSideOwners(state, serializedSectors);
 
     const centroids = await loadOperationalCentroids(ROOT);
-    const contactEdges = loadContactGraphEdges();
-    const rebuilt = Object.values(buildCorpsFrontSectors(state, contactEdges, null, centroids));
+    const rebuilt = Object.values(buildCorpsFrontSectors(state, loadContactGraphEdges(), null, centroids));
     const rebuiltMissing = collectMissingFactionSideOwners(state, rebuilt);
 
-    // Owner ruling M3 (2026-11-12): a cut-off friendly pocket with no brigade in it is not an OG and
-    // forms no sector, so its war-edge sides are legitimately unowned. Every other side must be owned.
-    const adjacency = buildOsidAdjacency(contactEdges as unknown as EdgeRecord[]);
-    const unmannedByFaction = new Map<string, (osid: Osid) => boolean>();
-    const isUnmannedPocket = (faction: string, osid: string): boolean => {
-      let predicate = unmannedByFaction.get(faction);
-      if (!predicate) {
-        predicate = buildUnmannedPocketPredicate(state, faction as any, adjacency, state.military.formations as any);
-        unmannedByFaction.set(faction, predicate);
-      }
-      return predicate(osid as Osid);
-    };
-    const rebuiltMissingOutsidePockets = rebuiltMissing.filter((miss) => !isUnmannedPocket(miss.faction, miss.osid));
-
     expect(serializedMissing).toEqual([]);
-    expect(rebuiltMissingOutsidePockets).toEqual([]);
+    expect(rebuiltMissing).toEqual([]);
   });
 });

@@ -136,11 +136,8 @@ describe('final sector truth reconciliation', () => {
         vi.restoreAllMocks();
     });
 
-    // Owner ruling M3 (2026-11-12): "If it's an isolated pocket, ie one that is unreachable, then it
-    // should automatically not be an OG. OG is supposed to be operating group, grouping of brigades."
-    // A cut-off front fragment with no brigade forms no sector, even in final-save projection; the
-    // same fragment holding one brigade still forms one.
-    function addIslandFront(state: GameState, edges: EdgeRecord[]): void {
+    it('preserves an unstaffed faction-side front fragment during final-save projection', () => {
+        const { state, edges } = makeState();
         state.political.political_controllers!['op:test:island'] = 'RS';
         state.military.war_front_edges_osid = [
             ...(state.military.war_front_edges_osid ?? []),
@@ -157,33 +154,24 @@ describe('final sector truth reconciliation', () => {
             a: 'op:test:island',
             b: 'op:test:island_enemy',
         } as EdgeRecord);
-    }
 
-    it('drops an unmanned cut-off front fragment during final-save projection (M3)', () => {
-        const { state, edges } = makeState();
-        addIslandFront(state, edges);
-        const sectors = buildCorpsFrontSectors(state, edges, null, undefined, undefined, false, true);
+        const sectors = buildCorpsFrontSectors(
+            state,
+            edges,
+            null,
+            undefined,
+            undefined,
+            false,
+            true,
+        );
         const islandSector = Object.values(sectors).find((sector) =>
             sector.edge_ids.includes('op:test:island__op:test:island_enemy'),
         );
-        expect(islandSector).toBeUndefined();
-        // The staffed main front is unaffected.
-        expect(Object.values(sectors).some((sector) => sector.edge_ids.includes('op:test:front__op:test:enemy'))).toBe(true);
-    });
 
-    it('keeps a cut-off front fragment that holds exactly one brigade (M3)', () => {
-        const { state, edges } = makeState();
-        addIslandFront(state, edges);
-        state.military.formations.brig_island = makeFormation('brig_island', {
-            corps_id: 'corps_a',
-            location_osid: 'op:test:island',
-            home_osid: 'op:test:island',
-        });
-        const sectors = buildCorpsFrontSectors(state, edges, null, undefined, undefined, false, true);
-        const islandSector = Object.values(sectors).find((sector) =>
-            sector.edge_ids.includes('op:test:island__op:test:island_enemy'),
-        );
         expect(islandSector).toBeDefined();
+        expect(islandSector?.assigned_brigade_ids).toEqual([]);
+        expect(islandSector?.reserve_brigade_ids).toEqual([]);
+        expect(islandSector?.unstaffed_front).toBe(true);
     });
 
     it('does not classify an intentionally isolated holding brigade as a sector-pipeline failure', () => {

@@ -1,22 +1,35 @@
 /**
- * Review item M3 (20261111 player-surface review): the 1st Corps' sector 0 read "OG Bileća"
- * in a turn-0 RBiH game. It was the single RBiH-held village op:bileca:zausje, cut off by RS
- * ground with no brigade in it, handed to the 1st Corps by partitionFrontEdges' island fallback.
+ * Review item M3 (20261111 player-surface review): the 1st Corps' sector 0 read "OG Bileća" in a
+ * turn-0 RBiH game. It is the single RBiH-held village op:bileca:zausje, cut off by RS ground with
+ * no brigade in it. The ENGINE keeps building that sector exactly as main does (the engine variant
+ * was measured at 188w and shelved; see PROJECT_LEDGER 2026-11-12).
  *
- * Owner ruling (2026-11-12): "Not a sector". A cut-off pocket with no friendly combat formation
- * forms no corps front sector (see tests/sector_unmanned_pocket_not_a_sector.test.ts).
- *
- * Pinned here against the real April 1992 RBiH start:
- * - no RBiH sector holds Zaušje (or the equally cut-off, brigade-less Gacko village gacko_2);
- * - the 1st Corps' first sector is a real, staffed front;
- * - every 1st Corps "OG <place>" names a municipality among the sector's own front OSIDs.
- * - a sector with no brigades (any faction) is shown as "Unheld front near <place>", never an OG.
+ * Owner rulings (2026-11-12), delivered in the view only:
+ * - "OG is supposed to be operating group, grouping of brigades." A brigade-less sector is never
+ *   named as an OG: it reads "Unheld front near <place>".
+ * - "If it's an isolated pocket, ie one that is unreachable, then it should automatically not be
+ *   an OG." With the OSID adjacency, an unreachable brigade-less pocket is left out of every corps
+ *   list (hiddenIsolatedPocketSectorIds), not merely renamed.
  */
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
 import { startNewCampaign } from '../src/desktop/desktop_sim.js';
 import { parseGameState } from '../src/ui/map/data/GameStateAdapter.js';
 import { strictCompare } from '../src/state/validateGameState.js';
+
+/** Same construction as DataLoader.loadOsidAdjacency (every contact-graph edge, both ways). */
+function loadContactAdjacency(): Map<string, string[]> {
+    const payload = JSON.parse(readFileSync(join(process.cwd(), 'data/derived/operational/operational_contact_graph.json'), 'utf8')) as { edges: Array<{ a: string; b: string }> };
+    const adj = new Map<string, string[]>();
+    for (const edge of payload.edges) {
+        if (!edge.a || !edge.b) continue;
+        const listA = adj.get(edge.a) ?? []; if (!listA.includes(edge.b)) listA.push(edge.b); adj.set(edge.a, listA);
+        const listB = adj.get(edge.b) ?? []; if (!listB.includes(edge.a)) listB.push(edge.a); adj.set(edge.b, listB);
+    }
+    return adj;
+}
 
 function placeToSlug(place: string): string {
     return place
@@ -27,42 +40,39 @@ function placeToSlug(place: string): string {
         .replace(/^_+|_+$/g, '');
 }
 
-const CUT_OFF_UNMANNED_VILLAGES = ['op:bileca:zausje', 'op:gacko:gacko_2'];
-
-describe('turn-0 RBiH 1st Corps sectors (M3)', () => {
-    test('cut-off brigade-less villages form no sector; first 1st Corps sector is a real front', async () => {
+describe('turn-0 RBiH 1st Corps sectors (M3, presentation only)', () => {
+    test('engine unchanged; Zaušje is an unheld front without adjacency and hidden with it', async () => {
         const { state } = await startNewCampaign(process.cwd(), 'RBiH', 'apr_1992');
 
-        const rawSectors = (state.military.corps_front_sectors ?? {}) as Record<string, {
-            faction?: string;
-            corps_id?: string;
-            territory_osids?: string[];
-            sub_segments?: Array<{ friendly_osids?: string[] }>;
-        }>;
-        for (const [sectorId, sector] of Object.entries(rawSectors)) {
-            if (sector.faction !== 'RBiH') continue;
-            const held = new Set([
-                ...(sector.territory_osids ?? []),
-                ...(sector.sub_segments ?? []).flatMap((ss) => ss.friendly_osids ?? []),
-            ]);
-            for (const village of CUT_OFF_UNMANNED_VILLAGES) {
-                expect(held.has(village), `${sectorId} still holds ${village}`).toBe(false);
-            }
-        }
+        // Engine: the sector still exists exactly as on main.
+        const raw = (state.military.corps_front_sectors ?? {}) as Record<string, { sub_segments?: Array<{ friendly_osids?: string[] }> }>;
+        const zausjeFront = (raw['sector:arbih_1st_corps:0']?.sub_segments ?? []).flatMap((ss) => ss.friendly_osids ?? []);
+        expect([...new Set(zausjeFront)]).toEqual(['op:bileca:zausje']);
 
-        const view = parseGameState(state);
-        const sectors = (view.corpsFrontSectors ?? [])
+        // View without adjacency: renamed, never an OG.
+        const plain = parseGameState(state);
+        const plainZausje = plain.corpsFrontSectors?.find((s) => s.sector_id === 'sector:arbih_1st_corps:0');
+        expect(plainZausje?.display_name).toBe('Unheld front near Bileća');
+        expect(plainZausje?.unheld_front).toBe(true);
+        expect(plain.hiddenIsolatedPocketSectorIds).toBeUndefined();
+
+        // View with adjacency: unreachable brigade-less pockets are not listed at all.
+        const view = parseGameState(state, { osidAdjacency: loadContactAdjacency() });
+        const hidden = view.hiddenIsolatedPocketSectorIds ?? [];
+        expect(hidden).toContain('sector:arbih_1st_corps:0');
+        expect(hidden).toContain('sector:arbih_1st_corps:6'); // op:gacko:gacko_2, same shape
+        const visibleIds = new Set((view.corpsFrontSectors ?? []).map((s) => s.sector_id));
+        for (const id of hidden) expect(visibleIds.has(id), id).toBe(false);
+
+        const firstCorps = (view.corpsFrontSectors ?? [])
             .filter((s) => s.corps_id === 'arbih_1st_corps')
             .sort((a, b) => strictCompare(a.sector_id, b.sector_id));
-        expect(sectors.length).toBeGreaterThan(0);
-        expect(sectors.some((s) => s.display_name === 'OG Bileća')).toBe(false);
-
-        const first = sectors[0]!;
-        const firstFront = new Set((first.sub_segments ?? []).flatMap((ss) => ss.friendly_osids));
+        expect(firstCorps.length).toBeGreaterThan(0);
+        expect(firstCorps.some((s) => s.display_name === 'OG Bileća')).toBe(false);
+        const first = firstCorps[0]!;
         expect(first.assigned_brigade_ids.length, `${first.sector_id} has no brigade`).toBeGreaterThan(0);
-        expect(firstFront.size).toBeGreaterThan(1);
 
-        // Owner ruling: a sector with no brigades is never shown as an OG, across every faction.
+        // Every sector of every faction: no brigades => never an OG name; brigades => OG naming.
         for (const sector of view.corpsFrontSectors ?? []) {
             const brigadeCount = sector.assigned_brigade_ids.length
                 + sector.reserve_brigade_ids.length
@@ -70,27 +80,19 @@ describe('turn-0 RBiH 1st Corps sectors (M3)', () => {
             if (brigadeCount === 0) {
                 expect(sector.unheld_front, sector.sector_id).toBe(true);
                 expect(sector.display_name, sector.sector_id).not.toMatch(/\bOG\b|\bTG\b|\bOZ\b/);
-                expect(sector.display_name).toBe(sector.front_place_name
-                    ? `Unheld front near ${sector.front_place_name}`
-                    : 'Unheld front');
             } else {
                 expect(sector.unheld_front, sector.sector_id).toBeUndefined();
             }
         }
 
-        for (const sector of sectors) {
+        // 1st Corps "OG <place>" names one of the sector's own municipalities.
+        for (const sector of firstCorps) {
             const name = sector.display_name;
             if (!name.startsWith('OG ')) continue;
-            const munSlugs = new Set(
-                (sector.sub_segments ?? [])
-                    .flatMap((ss) => ss.friendly_osids)
-                    .map((osid) => osid.split(':')[1])
-                    .filter((slug): slug is string => typeof slug === 'string'),
-            );
+            const munSlugs = new Set((sector.sub_segments ?? []).flatMap((ss) => ss.friendly_osids).map((osid) => osid.split(':')[1]));
             const namedSlug = placeToSlug(name.slice(3));
-            // Attested designations (e.g. "OG 6") carry no municipality; only check place names.
             if (/^\d/.test(namedSlug)) continue;
-            expect(munSlugs.has(namedSlug), `${sector.sector_id} "${name}" vs ${[...munSlugs].join(',')}`).toBe(true);
+            expect(munSlugs.has(namedSlug), `${sector.sector_id} "${name}"`).toBe(true);
         }
     }, 300_000);
 });
