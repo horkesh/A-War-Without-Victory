@@ -266,9 +266,9 @@ describe('Formation Detail parity display', () => {
 
     render(React.createElement(FormationDetail, { railSlot: 'secondary' }));
 
-    const sectorButton = screen.getByRole('button', { name: 'Inspect OG Assigned OG' });
+    const sectorButton = screen.getByRole('button', { name: 'Inspect Assigned OG' });
     expect(sectorButton.getAttribute('title')).toBe('Assigned OG');
-    expect(sectorButton.getAttribute('aria-label')).toBe('Inspect OG Assigned OG');
+    expect(sectorButton.getAttribute('aria-label')).toBe('Inspect Assigned OG');
     expect(`${sectorButton.getAttribute('title')} ${sectorButton.getAttribute('aria-label')} ${sectorButton.textContent}`).not.toMatch(/sector_rbih|sector:rbih/i);
   });
 
