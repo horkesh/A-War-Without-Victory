@@ -1011,6 +1011,10 @@ function App() {
   useEffect(() => {
     if (activeEventDecisionId !== null) return;
     if (peaceWarTransitionActive) return;
+    // A turn the player continued past a paused decision is still processing. The
+    // resumed-pause effect below closes that decision's modal; re-opening it here would
+    // make the two effects alternate until the turn ends. Wait for the turn instead.
+    if (turnPauseStatus?.status === 'resumed') return;
     if (openingBriefPending) return;
     if (showPeacePlanModal) return;
     if (turnAftermathOpen) return;
@@ -1030,6 +1034,7 @@ function App() {
     playerFaction,
     activeEventDecisionId,
     peaceWarTransitionActive,
+    turnPauseStatus,
     openingBriefPending,
     showPeacePlanModal,
     turnAftermathOpen,
