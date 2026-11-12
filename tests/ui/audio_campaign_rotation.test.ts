@@ -7,6 +7,7 @@ import * as bus from '../../src/ui/map/audio/audio_engine';
 import { applyAudioPreferences, saveAudioPreferences } from '../../src/ui/map/audio/audio_preferences';
 import { AudioSurfaceBedController } from '../../src/ui/map/components/AudioSurfaceBedController';
 import { useGameStore } from '../../src/ui/map/store/gameStore';
+import { withoutComments } from '../helpers/sourceComments';
 
 class FakeAudio extends EventTarget {
   static elements: FakeAudio[] = [];
@@ -221,3 +222,79 @@ for (const eventType of ['ended', 'error']) {
     expect(campaignId()).toBe(id); expect(current()).toBe(audio); expect(audio.currentTime).toBe(48);
   });
 }
+
+// A new campaign is a new opening session: fresh bag, opening first, no
+// resumed track from the previous campaign. Loading a save is not a new
+// campaign and keeps resume-in-place (covered above).
+const latest = (slug: string) => FakeAudio.elements.filter(audio => audio.src.includes(slug)).at(-1)!;
+const openings = () => FakeAudio.elements.filter(audio => audio.src.includes('opening'));
+
+it('a second new campaign in one session plays the opening, then a fresh bag, not the old track', async () => {
+  const spy = vi.spyOn(Math, 'random').mockReturnValue(.999);
+  try {
+    bus.resetAudioForTests(); FakeAudio.elements = [];
+    const view = render(createElement(AudioSurfaceBedController, { appScreen: 'mainMenu' }));
+    fireEvent.pointerDown(window); await flush();
+    bus.beginNewCampaignMusic();
+    view.rerender(createElement(AudioSurfaceBedController, { appScreen: 'warroom' })); await flush();
+    expect(bus.getAudioState().requestedMusicId).toBe('opening_titles');
+    const firstOpening = opening(); firstOpening.finish(); await flush();
+    expect(campaignId()).toBe('campaign_a_country_before_dawn');
+    const old = latest('a_country_before_dawn'); old.currentTime = 50;
+    view.rerender(createElement(AudioSurfaceBedController, { appScreen: 'mainMenu' })); await flush();
+    expect(menu().paused).toBe(false);
+
+    bus.beginNewCampaignMusic();
+    view.rerender(createElement(AudioSurfaceBedController, { appScreen: 'warroom' })); await flush();
+    expect(bus.getAudioState().requestedMusicId).toBe('opening_titles');
+    const secondOpening = openings().at(-1)!;
+    expect(secondOpening).not.toBe(firstOpening); expect(secondOpening.paused).toBe(false);
+    expect(old.paused).toBe(true); expect(menu().paused).toBe(true);
+    secondOpening.finish(); await flush();
+    // The old bag would continue with lines_on_paper; a fresh identity-order
+    // bag starts again at a_country_before_dawn, on a new element from 0 s.
+    expect(campaignId()).toBe('campaign_a_country_before_dawn');
+    const fresh = latest('a_country_before_dawn');
+    expect(fresh).not.toBe(old); expect(fresh.currentTime).toBe(0); expect(fresh.paused).toBe(false);
+    expect(old.paused).toBe(true);
+  } finally { spy.mockRestore(); }
+});
+
+it('a new campaign started from inside play stops the old track and plays the opening at once', async () => {
+  await mountGame(); const old = current(); old.currentTime = 30;
+  bus.beginNewCampaignMusic(); await flush();
+  expect(bus.getAudioState().requestedMusicId).toBe('opening_titles');
+  expect(old.paused).toBe(true);
+  const firstNew = openings().at(-1)!; expect(firstNew.paused).toBe(false);
+  firstNew.finish(); await flush();
+  expect(campaignId()).toMatch(/^campaign_/);
+  expect(current().paused).toBe(false); expect(FakeAudio.elements.filter(a => !a.paused)).toHaveLength(1);
+});
+
+it('a new campaign while the opening is audible lets it finish into the fresh bag', async () => {
+  const view = render(createElement(AudioSurfaceBedController, { appScreen: 'mainMenu' }));
+  fireEvent.pointerDown(window); await flush(); opening().currentTime = 12;
+  bus.beginNewCampaignMusic();
+  view.rerender(createElement(AudioSurfaceBedController, { appScreen: 'warroom' })); await flush();
+  expect(openings()).toHaveLength(1); expect(opening().currentTime).toBe(12); expect(opening().paused).toBe(false);
+  opening().finish(); await flush(); campaignId();
+});
+
+it('a new campaign with music unheard skips the opening and starts the fresh bag', async () => {
+  saveAudioPreferences({ ...preferences, musicEnabled: false });
+  const view = render(createElement(AudioSurfaceBedController, { appScreen: 'mainMenu' }));
+  fireEvent.pointerDown(window); await flush();
+  bus.beginNewCampaignMusic();
+  view.rerender(createElement(AudioSurfaceBedController, { appScreen: 'warroom' }));
+  applyAudioPreferences(preferences); await flush();
+  campaignId(); expect(openings()).toHaveLength(0);
+});
+
+it('App resets campaign music on both fresh-campaign paths and not on save load', async () => {
+  const { readFileSync } = await import('node:fs');
+  const app = withoutComments(readFileSync('src/ui/map/App.tsx', 'utf8'));
+  const body = (start: string, end: string) => app.slice(app.indexOf(start), app.indexOf(end, app.indexOf(start)));
+  expect(body('const handleSelectFaction', 'const handleMainMenuLoadGame')).toContain('beginNewCampaignMusic()');
+  expect(body("'awwv-shell:fresh-campaign-started'", 'setRecentlyAcceptedEventDecisionId(null)')).toContain('beginNewCampaignMusic()');
+  expect(body('const handleMainMenuLoadGame', 'catch (err)')).not.toContain('beginNewCampaignMusic');
+});

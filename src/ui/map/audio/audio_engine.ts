@@ -63,6 +63,8 @@ let nextCampaignTrack = createMusicShuffleBag(CAMPAIGN_MUSIC_IDS);
 let campaignTrackId: string | null = null;
 let consecutiveCampaignFailures = 0;
 let campaignExhausted = false;
+// A new campaign started from the menu plays the opening on entering play.
+let campaignOpeningPending = false;
 
 let state: AudioBusState = {
     enabled: false,
@@ -325,16 +327,59 @@ export function setMusicSurface(surface: 'mainMenu' | 'campaign', allowOpening =
     const previousSurface = musicSurface;
     musicSurface = surface;
     if (surface === 'campaign') {
-        const opening = playbackElementsByCueId.get('opening_titles');
-        const openingStarted = opening && !opening.error
-            && (playbackAttemptByElement.get(opening)?.status === 'success' || opening.currentTime > 0);
-        if (state.requestedMusicId === 'opening_titles' && openingStarted) return;
+        if (state.requestedMusicId === 'opening_titles' && isOpeningStarted()) return;
+        if (campaignOpeningPending) {
+            campaignOpeningPending = false;
+            playOpeningMusic();
+            return;
+        }
         requestCampaignMusic();
     } else if (previousSurface === null && allowOpening) {
         playOpeningMusic();
     } else {
         void playMusic('menu_theme');
     }
+}
+
+function isOpeningStarted(): boolean {
+    const opening = playbackElementsByCueId.get('opening_titles');
+    return Boolean(opening && !opening.error && !opening.ended
+        && (playbackAttemptByElement.get(opening)?.status === 'success' || opening.currentTime > 0));
+}
+
+function isMusicAudible(): boolean {
+    return state.musicPlaybackEnabled && state.enabled && !state.muted && state.userGestureUnlocked;
+}
+
+/**
+ * A new campaign is a new opening session (owner 2026-11-12): draw a fresh
+ * bag and play the opening first instead of resuming the previous campaign's
+ * track. An opening already audible finishes into the fresh bag; an unheard
+ * opening is skipped, as on game entry. Loading a save does not call this and
+ * keeps resume-in-place. Presentation only: nothing here is persisted.
+ */
+export function beginNewCampaignMusic(): void {
+    const openingAudible = state.requestedMusicId === 'opening_titles' && isOpeningStarted();
+    // Keep the menu theme until the screen leaves the menu; release anything else.
+    if (!openingAudible && state.requestedMusicId !== 'menu_theme') stopMusicPlayback();
+    const released = openingAudible ? CAMPAIGN_MUSIC_IDS : [...CAMPAIGN_MUSIC_IDS, 'opening_titles'];
+    for (const cueId of released) {
+        if (!playbackElementsByCueId.has(cueId)) continue;
+        stopPlayback(cueId);
+        playbackElementsByCueId.delete(cueId);
+    }
+    nextCampaignTrack = createMusicShuffleBag(CAMPAIGN_MUSIC_IDS);
+    campaignTrackId = null;
+    consecutiveCampaignFailures = 0;
+    campaignExhausted = false;
+    campaignOpeningPending = false;
+    if (openingAudible) return;
+    if (musicSurface !== 'campaign') {
+        campaignOpeningPending = isMusicAudible();
+        return;
+    }
+    if (isMusicAudible()) playOpeningMusic();
+    else requestCampaignMusic();
 }
 
 function requestCampaignMusic(): void {
@@ -441,6 +486,7 @@ export function stopMusic(): void {
     // An exhausted set is retried only by a new controller owner.
     campaignExhausted = false;
     consecutiveCampaignFailures = 0;
+    campaignOpeningPending = false;
 }
 
 export function setMusicPlaybackEnabled(enabled: boolean): void {
@@ -519,6 +565,7 @@ export function resetAudioForTests(): void {
     stopMusic();
     nextCampaignTrack = createMusicShuffleBag(CAMPAIGN_MUSIC_IDS);
     campaignTrackId = null;
+    campaignOpeningPending = false;
     stopAllPlayback();
     playbackElementsByCueId.clear();
     playbackAttemptByElement.clear();
