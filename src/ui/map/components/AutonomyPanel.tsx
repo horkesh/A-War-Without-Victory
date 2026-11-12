@@ -209,10 +209,10 @@ function ProposalCard({ proposal, opCard, onInspectOfficer, inspectable }: Propo
         >
             {/* Corps / domain header */}
             <div className="flex items-center justify-between gap-2">
-                <span className="text-xs font-mono text-[#c4a04a] font-semibold tracking-wide truncate">
+                <span className="text-[13px] font-mono text-[#c4a04a] font-semibold tracking-wide truncate">
                     {isOp ? t('autonomy.proposal.opOrderFor', { corps: corpsLabel }) : corpsLabel}
                 </span>
-                <span className="text-xs font-mono text-[#a9a398] uppercase tracking-[0.15em] shrink-0">
+                <span className="text-[13px] font-mono text-[#a9a398] uppercase tracking-[0.15em] shrink-0">
                     {formatProposalDomain(proposal.domain)}
                 </span>
             </div>
@@ -220,7 +220,7 @@ function ProposalCard({ proposal, opCard, onInspectOfficer, inspectable }: Propo
             {/* Phase 2 slice 1: named-officer voice for an op proposal. */}
             {isOp && opCard && (
                 <div className="space-y-1">
-                    <div className="flex items-center justify-between gap-2 text-xs font-mono">
+                    <div className="flex items-center justify-between gap-2 text-[13px] font-mono">
                         {opCard.commander && inspectable && onInspectOfficer ? (
                             <button
                                 type="button"
@@ -247,7 +247,7 @@ function ProposalCard({ proposal, opCard, onInspectOfficer, inspectable }: Propo
                         )}
                     </div>
                     {opCard.commander_assessment && (
-                        <div className="text-xs font-mono uppercase tracking-[0.12em] text-[#a9a398]">
+                        <div className="text-[13px] font-mono uppercase tracking-[0.12em] text-[#a9a398]">
                             {t(ASSESSMENT_LABEL_KEYS[opCard.commander_assessment])}
                         </div>
                     )}
@@ -256,7 +256,7 @@ function ProposalCard({ proposal, opCard, onInspectOfficer, inspectable }: Propo
 
             {/* Stance change arrow (non-op proposals) */}
             {!isOp && (proposal.current_value || proposal.proposed_value) && (
-                <div className="flex items-center gap-1.5 text-xs font-mono">
+                <div className="flex items-center gap-1.5 text-[13px] font-mono">
                     <span className="text-[#8a8578]">{formatProposalValue(proposal.current_value)}</span>
                     <span className="text-[#c4a04a]/60">→</span>
                     <span className="text-[#d4d0c8]">{formatProposalValue(proposal.proposed_value)}</span>
@@ -264,13 +264,13 @@ function ProposalCard({ proposal, opCard, onInspectOfficer, inspectable }: Propo
             )}
 
             {/* Description (truncated) */}
-            <p className="text-xs text-[#b8b3a8] leading-snug line-clamp-2">
+            <p className="text-[13px] text-[#b8b3a8] leading-snug line-clamp-2">
                 {proposal.description}
             </p>
 
             {/* Action row */}
             {statusIndicator ? (
-                <div className={`inline-flex items-center px-2 py-0.5 rounded border text-xs font-mono uppercase tracking-[0.15em] ${statusIndicator.cls}`}>
+                <div className={`inline-flex items-center px-2 py-0.5 rounded border text-[13px] font-mono uppercase tracking-[0.15em] ${statusIndicator.cls}`}>
                     {statusIndicator.label}
                 </div>
             ) : (
@@ -280,7 +280,7 @@ function ProposalCard({ proposal, opCard, onInspectOfficer, inspectable }: Propo
                 // the pending proposal so the player can READ it, but the approve/deny
                 // decision is issued at the one command desk. (Mirrors how OperationsSection
                 // was reduced to read-only "Review Command Decision".)
-                <div className="inline-flex items-center px-2 py-0.5 rounded border border-[#c4a04a]/25 bg-[#c4a04a]/[0.06] text-xs font-mono uppercase tracking-[0.15em] text-[#c4a04a]">
+                <div className="inline-flex items-center px-2 py-0.5 rounded border border-[#c4a04a]/25 bg-[#c4a04a]/[0.06] text-[13px] font-mono uppercase tracking-[0.15em] text-[#c4a04a]">
                     {t('autonomy.proposal.decideInDecisionRoom')}
                 </div>
             )}
@@ -383,17 +383,17 @@ export function AutonomyPanel({ onClose, playerFaction, namedOfficerData }: Auto
                 <div className="space-y-5">
                     {/* IPC unavailable notice */}
                     {!bridge && (
-                        <div className="text-xs font-mono text-[#b8b3a8] bg-black/30 border border-white/10 rounded px-2.5 py-1.5">
+                        <div className="text-[13px] font-mono text-[#b8b3a8] bg-black/30 border border-white/10 rounded px-2.5 py-1.5">
                             {t('autonomy.electronRequired')}
                         </div>
                     )}
 
                     {/* ── Autonomy Level Selector ── */}
                     <div className="space-y-2">
-                        <div className="text-xs font-mono text-[#a9a398] uppercase tracking-[0.2em]">
+                        <div className="text-[13px] font-mono text-[#a9a398] uppercase tracking-[0.2em]">
                             {t('autonomy.level')}
                         </div>
-                        <p className="text-xs leading-relaxed text-[#b8b3a8]">
+                        <p className="text-[13px] leading-relaxed text-[#b8b3a8]">
                             {t('autonomy.nextTurnEffect')}
                         </p>
 
@@ -423,7 +423,7 @@ export function AutonomyPanel({ onClose, playerFaction, namedOfficerData }: Auto
                                                 }`}
                                             />
                                             <span
-                                                className={`text-xs font-mono font-medium ${
+                                                className={`text-[13px] font-mono font-medium ${
                                                     isActive ? 'text-[#c4a04a]' : 'text-[#d4d0c8]'
                                                 }`}
                                             >
@@ -432,13 +432,13 @@ export function AutonomyPanel({ onClose, playerFaction, namedOfficerData }: Auto
                                         </div>
                                         <div className="flex items-center gap-1.5 shrink-0">
                                             {isPending && (
-                                                <span className="text-xs font-mono text-[#c4a04a] uppercase tracking-wide">
+                                                <span className="text-[13px] font-mono text-[#c4a04a] uppercase tracking-wide">
                                                     {t('autonomy.pending')}
                                                 </span>
                                             )}
                                         </div>
                                     </div>
-                                    <div className="text-xs text-[#a9a398] mt-1 ml-3.5 leading-relaxed">
+                                    <div className="text-[13px] text-[#a9a398] mt-1 ml-3.5 leading-relaxed">
                                         {t(LEVEL_DESC_KEYS[level])}
                                     </div>
                                 </button>
@@ -447,7 +447,7 @@ export function AutonomyPanel({ onClose, playerFaction, namedOfficerData }: Auto
 
                         {/* Level error */}
                         {levelError && (
-                            <div className="text-xs font-mono text-amber-300 bg-amber-900/20 border border-amber-500/30 rounded px-2 py-1">
+                            <div className="text-[13px] font-mono text-amber-300 bg-amber-900/20 border border-amber-500/30 rounded px-2 py-1">
                                 {levelError}
                             </div>
                         )}
@@ -457,11 +457,11 @@ export function AutonomyPanel({ onClose, playerFaction, namedOfficerData }: Auto
                     {currentLevel === 1 && proposals.length > 0 && (
                         <div className="space-y-2">
                             <div className="flex items-center justify-between">
-                                <div className="text-xs font-mono text-[#a9a398] uppercase tracking-[0.2em]">
+                                <div className="text-[13px] font-mono text-[#a9a398] uppercase tracking-[0.2em]">
                                     {t('autonomy.pendingProposals')}
                                 </div>
                                 {unresolvedCount > 0 && (
-                                    <span className="text-xs font-mono text-[#c4a04a] bg-[#c4a04a]/10 border border-[#c4a04a]/25 rounded px-1.5 py-0.5">
+                                    <span className="text-[13px] font-mono text-[#c4a04a] bg-[#c4a04a]/10 border border-[#c4a04a]/25 rounded px-1.5 py-0.5">
                                         {unresolvedCount}
                                     </span>
                                 )}
@@ -485,7 +485,7 @@ export function AutonomyPanel({ onClose, playerFaction, namedOfficerData }: Auto
                             </div>
 
                             {unresolvedCount === 0 && (
-                                <div className="text-xs font-mono text-[#a9a398] text-center py-1">
+                                <div className="text-[13px] font-mono text-[#a9a398] text-center py-1">
                                     {t('autonomy.allResolved')}
                                 </div>
                             )}
@@ -501,7 +501,7 @@ export function AutonomyPanel({ onClose, playerFaction, namedOfficerData }: Auto
                         <button
                             onClick={() => void refresh()}
                             disabled={busy}
-                            className="w-full py-1.5 text-xs font-mono uppercase tracking-[0.15em] text-[#a9a398] hover:text-[#d4d0c8] border border-white/10 hover:border-white/20 rounded transition-all disabled:opacity-40"
+                            className="w-full py-1.5 text-[13px] font-mono uppercase tracking-[0.15em] text-[#a9a398] hover:text-[#d4d0c8] border border-white/10 hover:border-white/20 rounded transition-all disabled:opacity-40"
                         >
                             {t('autonomy.refresh')}
                         </button>
