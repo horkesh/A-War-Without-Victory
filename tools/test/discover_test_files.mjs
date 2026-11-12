@@ -1,5 +1,20 @@
 import { readFileSync, readdirSync, statSync } from 'node:fs';
-import { basename, extname, join, relative } from 'node:path';
+import { basename, join, relative } from 'node:path';
+
+// Re-exported so generated vitest configs (balanced, slice) reach the resolver through the
+// one import path they already rewrite for retained fixture configs. It is owned by
+// vitest_shared_config.mjs.
+export { resolveRootModules } from './vitest_shared_config.mjs';
+
+/**
+ * Test entrypoint suffixes. `.test.tsx` was silently never discovered before 2026-11-12,
+ * so a component test written as .tsx was never run by any surface.
+ */
+export const TEST_FILE_SUFFIXES = ['.test.ts', '.test.tsx'];
+
+export function isTestEntrypoint(fileName) {
+  return TEST_FILE_SUFFIXES.some((suffix) => fileName.endsWith(suffix));
+}
 
 function shouldSkipDir(name) {
   return name === 'node_modules' || name === 'dist' || name === '.git';
@@ -15,7 +30,7 @@ export function listTsFiles(dir) {
       out.push(...listTsFiles(full));
       continue;
     }
-    if (extname(full) === '.ts' && basename(full).endsWith('.test.ts')) out.push(full);
+    if (isTestEntrypoint(basename(full))) out.push(full);
   }
   return out.sort((a, b) => a.localeCompare(b));
 }
@@ -29,7 +44,7 @@ export function fileNeedsJsdom(path) {
   const content = readFileSync(path, 'utf8');
   const base = basename(path);
   if (/@vitest-environment\s+jsdom/.test(content)) return true;
-  if (base.endsWith('.browser.test.ts')) return true;
+  if (base.endsWith('.browser.test.ts') || base.endsWith('.browser.test.tsx')) return true;
   return base === 'warroom_smoke.test.ts' || base === 'warroom_player_visibility.test.ts';
 }
 

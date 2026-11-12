@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { discoverTests, toRepoRelative } from '../tools/test/discover_test_files.mjs';
+import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { TEST_FILE_SUFFIXES, discoverTests, toRepoRelative } from '../tools/test/discover_test_files.mjs';
+import { resolveRootModules, resolveVitestCli } from '../tools/test/vitest_shared_config.mjs';
 
 describe('test discovery contracts', () => {
     it('routes desktop contract guardrails through vitest instead of node:test', () => {
@@ -242,6 +246,79 @@ describe('test discovery contracts', () => {
             // passWithNoTests, so a filter that matches no discovered file exits nonzero.
             const absent = names(process.cwd(), {});
             expect([...absent.all].filter((file) => file.includes('scenario_runner_read_context_wiring'))).toEqual([]);
+        });
+    });
+
+    describe('entrypoint suffixes', () => {
+        it('discovers .test.ts and .test.tsx entrypoints and nothing else', () => {
+            const rootDir = mkdtempSync(join(tmpdir(), 'awwv-discovery-'));
+            try {
+                const testsDir = join(rootDir, 'tests');
+                mkdirSync(join(testsDir, 'nested'), { recursive: true });
+                const vitestBody = "import { it } from 'vitest';\nit('x', () => {});\n";
+                writeFileSync(join(testsDir, 'a.test.ts'), vitestBody);
+                writeFileSync(join(testsDir, 'b.test.tsx'), vitestBody);
+                writeFileSync(join(testsDir, 'nested', 'c.browser.test.tsx'), vitestBody);
+                writeFileSync(join(testsDir, 'helper.tsx'), vitestBody);
+                writeFileSync(join(testsDir, 'helper.ts'), vitestBody);
+                writeFileSync(join(testsDir, 'd.test.js'), vitestBody);
+
+                const discovered = discoverTests(rootDir);
+                expect(toRepoRelative(rootDir, discovered.vitestFiles)).toEqual([
+                    'tests/a.test.ts',
+                    'tests/b.test.tsx',
+                    'tests/nested/c.browser.test.tsx',
+                ]);
+                expect(toRepoRelative(rootDir, discovered.jsdomVitestFiles)).toEqual([
+                    'tests/nested/c.browser.test.tsx',
+                ]);
+                expect(TEST_FILE_SUFFIXES).toEqual(['.test.ts', '.test.tsx']);
+            } finally {
+                rmSync(rootDir, { recursive: true, force: true });
+            }
+        });
+
+        it('includes the real .test.tsx witness in the repository discovery', () => {
+            const rootDir = process.cwd();
+            const files = toRepoRelative(rootDir, discoverTests(rootDir).vitestFiles);
+            expect(files).toContain('tests/test_discovery_tsx_entrypoint.test.tsx');
+        });
+    });
+
+    describe('root node_modules resolution', () => {
+        it('is <cwd>/node_modules wherever that directory holds react (main checkout, CI)', () => {
+            const rootDir = process.cwd();
+            const local = join(rootDir, 'node_modules');
+            if (existsSync(join(local, 'react', 'package.json'))) {
+                expect(resolveRootModules(rootDir)).toBe(local);
+            } else {
+                // A worktree without its own node_modules: the resolver must find an ancestor copy.
+                expect(existsSync(join(resolveRootModules(rootDir), 'react', 'package.json'))).toBe(true);
+            }
+        });
+
+        it('walks up to the nearest ancestor node_modules holding the anchor package', () => {
+            const base = mkdtempSync(join(tmpdir(), 'awwv-modules-'));
+            try {
+                mkdirSync(join(base, 'node_modules', 'react'), { recursive: true });
+                writeFileSync(join(base, 'node_modules', 'react', 'package.json'), '{}');
+                const worktree = join(base, '.claude', 'worktrees', 'wt');
+                mkdirSync(worktree, { recursive: true });
+                expect(resolveRootModules(worktree)).toBe(join(base, 'node_modules'));
+
+                // A nearer node_modules without the anchor does not capture the lookup.
+                mkdirSync(join(worktree, 'node_modules', 'other'), { recursive: true });
+                expect(resolveRootModules(worktree)).toBe(join(base, 'node_modules'));
+
+                // A nearer node_modules that holds the anchor wins, exactly as Node resolves it.
+                mkdirSync(join(worktree, 'node_modules', 'react'), { recursive: true });
+                writeFileSync(join(worktree, 'node_modules', 'react', 'package.json'), '{}');
+                expect(resolveRootModules(worktree)).toBe(join(worktree, 'node_modules'));
+
+                expect(resolveVitestCli(worktree)).toBe(join(worktree, 'node_modules', 'vitest', 'vitest.mjs'));
+            } finally {
+                rmSync(base, { recursive: true, force: true });
+            }
         });
     });
 });

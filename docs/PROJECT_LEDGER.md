@@ -9,6 +9,35 @@
   Compacted 2026-09-10: 1723 sections moved out, 62 kept live.
 -->
 
+## 2026-11-12 — Test tooling: lockfile peers, worktree module resolution, .test.tsx discovery, runner timeout
+
+Test infrastructure only; no product, simulation, or calibration code changed.
+
+- **Lockfile.** `package-lock.json` was in sync only under `--legacy-peer-deps`; a bare `npm ci`
+  failed EUSAGE because `electron-builder`'s optional peer `electron-builder-squirrel-windows@25.1.8`
+  (with `archiver@5.3.2` and ~28 transitive packages) was missing. Regenerated with
+  `npm install --package-lock-only`: additions only plus three `dev`→`devOptional` flags, no version
+  changes. Both `npm ci` and CI's `npm ci --legacy-peer-deps` now pass (real bare install proven in a
+  clean copy). CI keeps its exact install command. Lockfile-only changes trigger the desktop
+  package/probe gates in CI by design (`tests/desktop_release_ci_guardrails.test.ts`).
+- **Worktree React resolution.** `tools/test/vitest_shared_config.mjs` owns `resolveRootModules`
+  (first ancestor `node_modules` holding `react`, as Node resolves) and `resolveVitestCli`. All three
+  config surfaces (`vitest.config.ts`, balanced, slice) and the three runners use them. In the main
+  checkout and CI this is still `<root>/node_modules`; a worktree without node_modules now resolves
+  the main checkout's copy instead of failing every UI test with "Failed to resolve react". The walk
+  only reads; no links are created or removed.
+- **`.test.tsx` discovery.** `discover_test_files.mjs` now discovers `.test.ts` and `.test.tsx`
+  (`TEST_FILE_SUFFIXES`), including `.browser.test.tsx` for jsdom. No `.test.tsx` existed before; the
+  witness `tests/test_discovery_tsx_entrypoint.test.tsx` renders JSX and pins its own discovery.
+- **Runner timeout.** The real-child "deliberately failing Vitest child" test in
+  `tests/run_vitest_balanced.test.ts` goes from 30 s to 180 s; same assertion (exit status 1).
+
+Gates: `npx tsc --noEmit` exit 0; affected tests 64/64 from a worktree with no node_modules;
+`npm ci --legacy-peer-deps` in the worktree exit 0; full `npm run test:vitest` exit 0
+(4 shards 365/365/365/363 files + 85 serial; only the deliberate `tests/fixtures/vitest_balanced`
+controls are red). Known residue, not fixed here: in a worktree with NO node_modules, 17 tests in 5
+files still fail because they (or tools they spawn) hard-code `<cwd>/node_modules/tsx/dist/cli.mjs`.
+
 ## 2026-10-31 — Verdict Load Save delegates returned state to App replacement owner — NOT ADOPTED
 
 The real Verdict footer, including the fallback no-verdict screen, discarded `loadStateDialog`'s returned `stateJson`. Both now share one pending-guarded handler that accepts only `ok` + non-empty canonical state and hands it once to App's existing `handleMainMenuLoadGame` campaign-replacement path; cancel/error/missing/empty/rejection do nothing and no control renders without a replacement owner. RED 8 failed / 6 passed; GREEN focused 14/14 and four-file 79/79. Package/native qualification and adoption remain pending; no full suite, typecheck, or native run.
