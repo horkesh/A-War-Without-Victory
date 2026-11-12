@@ -27,7 +27,7 @@ import {
 } from '../utils/playerSafeText';
 import { t, useLocale, type MessageKey } from '../i18n';
 import { getLocalizedFormationName } from '../data/formationNameLocalizations';
-import { inspectOnField } from '../utils/shellNavigation';
+import { inspectOnField, openArmyHQBriefingForCorps } from '../utils/shellNavigation';
 import { resolveCurrentSectorForFormation } from '../utils/sectorUtils';
 import { buildMunicipalityDisplayNameMap, getMunicipalityDisplayName } from '../utils/municipalityDisplayName';
 
@@ -305,7 +305,7 @@ export function FormationDetail({ railSlot = 'primary', breadcrumb }: FormationD
   const tabs: { id: DetailTab; label: string }[] = [
     { id: 'overview', label: t('formationDetail.overview') },
     { id: 'record', label: t('formationDetail.record') },
-    { id: 'orders', label: t('formationDetail.orders') },
+    { id: 'orders', label: isBrigade ? t('formationDetail.command') : t('formationDetail.orders') },
   ];
 
   return (
@@ -484,7 +484,7 @@ export function FormationDetail({ railSlot = 'primary', breadcrumb }: FormationD
 
             {/* Posture & readiness */}
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[13px] px-2 py-1 bg-black/20 rounded border border-panel-border/30">
-              <span className="text-text-secondary">{t('formationDetail.posture')}</span>
+              <span className="text-text-secondary">{isBrigade ? t('formationDetail.postureSetByCommander') : t('formationDetail.posture')}</span>
               <span className="text-text-primary font-semibold">{postureValue}</span>
               {lifecycleValue && (
                 <>
@@ -998,12 +998,41 @@ export function FormationDetail({ railSlot = 'primary', breadcrumb }: FormationD
         {/* ────────── ORDERS TAB ────────── */}
         {activeTab === 'orders' && (
           <>
+            {/* Truthful command (owner review 2026-11-11): the president never orders a
+                brigade. Say who does, and route to the directives that reach it. */}
             {isBrigade && (
-              <div
-                data-testid="formation-detail-delegated-command-note"
-                className="text-[13px] text-text-secondary px-2 py-1.5 bg-black/10 border border-panel-border/30 rounded"
-              >
-                {t('formationDetail.delegatedCommand')}
+              <div className="space-y-3">
+                <div className="space-y-1">
+                  <div className="text-[13px] text-accent-gold uppercase tracking-widest font-bold opacity-80">
+                    {t('formationDetail.command.whoHeading')}
+                  </div>
+                  <div className="text-[14px] font-semibold text-text-primary">
+                    {formatLoanCommandDestination(formation.corps_id, loadedGameState.formations)}
+                  </div>
+                  <p
+                    data-testid="formation-detail-delegated-command-note"
+                    className="text-[13px] leading-relaxed text-text-secondary"
+                  >
+                    {t('formationDetail.delegatedCommand')}
+                  </p>
+                </div>
+                <div className="space-y-1.5">
+                  <div className="text-[13px] text-accent-gold uppercase tracking-widest font-bold opacity-80">
+                    {t('formationDetail.command.youHeading')}
+                  </div>
+                  {formation.corps_id && (
+                    <button
+                      type="button"
+                      data-testid="formation-detail-open-corps-hq"
+                      onClick={() => openArmyHQBriefingForCorps(useGameStore.getState(), formation.corps_id ?? null)}
+                      className="w-full rounded border border-accent-gold/50 bg-accent-gold/10 px-3 py-2 text-left text-[13px] font-semibold text-accent-gold transition-colors hover:bg-accent-gold/20"
+                    >
+                      {t('formationDetail.command.openCorps')}
+                    </button>
+                  )}
+                  <p className="text-[13px] leading-relaxed text-text-secondary">{t('formationDetail.command.directives')}</p>
+                  <p className="text-[13px] leading-relaxed text-text-secondary">{t('formationDetail.command.autonomyHint')}</p>
+                </div>
               </div>
             )}
             {!ipc.isAvailable && formation.eliteLoanState && (
