@@ -57,7 +57,7 @@ Nothing defers or replays a commander's decision, so a run with no answers follo
 - The president's own operation order (`inject-op-directive`, `inject-authored-operations`) clears that corps' hold, recorded as `hold_lapsed` / `presidential_operation`.
 - Holds and stale `last_og` entries are pruned when expired; cooldown entries pruned when past.
 
-**Overrule cost.** Countermand and Constrain call the existing `recordPresidentialOverride(state, corpsId, turn)` (`override_count`, `last_override_turn`, `recent_overrides`; officer-resentment receipts read them). Confirm is free.
+**Overrule cost.** Superseded by rev 3 (below): Countermand and Constrain call `recordPresidentialStanceOverrule`, which appends to the commander's `recent_overrides` without touching the cowing fields. Confirm is free.
 
 **Faction asymmetry (one mechanism, data only).**
 - *Main Staff delay.* `resistance = COMMAND_FRICTION_FACTION_WEIGHT[faction] × stubbornness` of the army commander serving now (`getArmyCommander` from live state; stubbornness from its officer data, written from `army_co_roster.json` by A4). `≥ 4.0` → effective one turn late; `≥ 5.0` → two turns; never more, never a refusal. Today: RS 1.0 × 5 = 5.0 → two weeks; RBiH 0.5 × 4 or 2 → followed; HRHB 0.25 × 2-3 → followed. Copy is institutional: "Main Staff: order takes effect in 2 weeks. Current stance holds until then."
@@ -102,7 +102,7 @@ Nothing defers or replays a commander's decision, so a run with no answers follo
 ## Rev 3: round-2 conditions (binding; they override earlier text where they differ)
 
 - **Overrule window key.** Keyed to the corps id in `stance_matter_state.last_overrule_turn_by_corps`, never cleared by a level change or a change of commander (red-team 7; game-designer residual on the 2→1→2 round trip).
-- **No cowing from stance overrules.** A stance overrule calls a new `recordPresidentialStanceOverrule` in `order_interpretation.ts`: it sets `last_override_turn` and appends `recent_overrides` (officer-resentment receipts) but does not increment `override_count`, so stance overrules can never combine with Stop-op or force-op to cow a commander into compliance (red-team 8). The costs that bite are the eight-week Confirm-only window, the RS delay, the HRHB patron shift and the record.
+- **No cowing from stance overrules.** A stance overrule calls a new `recordPresidentialStanceOverrule` in `order_interpretation.ts`: it appends to `recent_overrides` only and touches neither `override_count` nor `last_override_turn` (both drive the cowed threshold), so stance overrules can never combine with Stop-op or force-op to cow a commander into compliance (red-team 8). The costs that bite are the eight-week Confirm-only window, the RS delay, the HRHB patron shift and the record.
 - **Army stance override.** When `army_stance[faction]` is set and not `balanced`, `getEffectiveCorpsStance` ignores the corps stance, so no corps matter is raised; the change is recorded `not_put` with reason `army_stance` (red-team 4).
 - **Answers and level changes.** The IPC refuses answers unless the level is 2. An answer recorded before a level change lapses as `answered_lapsed`, never `stood` (red-team 6).
 - **Patron ordering.** Constraint options are computed from the stance after the Zagreb ceiling. An HRHB overrule costs `patron_confidence` only when the held stance differs from what the directive already forces (red-team 9).

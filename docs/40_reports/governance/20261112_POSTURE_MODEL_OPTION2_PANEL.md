@@ -24,7 +24,7 @@
 
 ## Decisions taken by the integrator between rounds
 
-- Countermand cost: a stance overrule records officer resentment (`last_override_turn`, `recent_overrides`) without incrementing `override_count`, so it can never help cow a commander (red-team 8, which offered this option). The costs that bite are the eight-week Confirm-only window, the RS delay, the HRHB patron shift and the record.
+- Countermand cost: a stance overrule appends to the commander's `recent_overrides` record and touches neither `override_count` nor `last_override_turn` (both drive the cowed threshold), so it can never help cow a commander (red-team 8, which offered this option). The costs that bite are the eight-week Confirm-only window, the RS delay, the HRHB patron shift and the record.
 - Overrule window keyed to the corps id and kept across level changes and commander changes (red-team 7 and the game designer's round-trip residual agree on outcome).
 
 ## FORAWWV §XII.1 amendment (signed off by this panel)
