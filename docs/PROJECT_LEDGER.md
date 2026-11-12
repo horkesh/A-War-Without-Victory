@@ -14325,3 +14325,30 @@ What changed:
 - **Contracts the ruling overrides:** `final_sector_truth_reconciliation` used to pin that an unstaffed, cut-off front fragment survives final-save projection. It now pins the reverse, and adds a one-brigade fragment that does survive. `real_save_sector_truth_contracts` ("every live war-edge side owned") now exempts only sides whose friendly OSID sits in an unmanned pocket, using the engine's exported `buildUnmannedPocketPredicate`. On the committed week-188 save those are the RBiH-held Srebrenica villages `obadi` and `osmace_2`, which have no brigade.
 - **Gates** (run after the `all_shakedowns_done` coordination gate): `NODE_OPTIONS=--max-old-space-size=8192 npx tsc --noEmit` exit 0. Final full `npm run test:vitest`: every slice passed except `replay_payload_mode_contract`, which hit its 20 s test timeout under full-suite load and passes alone (13.2 s, exit 0), plus the deliberate `tests/fixtures/vitest_balanced` controls. In the previous full run, `runtime_dependency_resolution` hit its 10 s hook timeout the same way and passes alone.
 - **Merge follow-ups** with the map-rail branch (`claude/map-rail-system-4fe8c9`), for whichever merges second: the sector rail eyebrow (`mapRail.eyebrow.og`) should read "Front" when `unheld_front` is set, and `corpsFront.noFriendlyLine` should be hidden in CorpsFrontPanel's Overview Force balance cell. Not touched: the ChiefOfStaffBriefing precise defence alert's "OG " prefix (EN) may double an "OG X" label.
+
+## 2026-11-12 — M3 188-week check: CHECKPOINT DROP, owner decides (no tuning)
+
+The owner approved the 188-week check ("Sure, run 188s"). Commands: `npm run sim:scenario:run:188w` on origin/main 651a56ae6 (a clean detached worktree) and on branch head 35bccad7a (the label commit after it is UI-only). Both were scored with `node tools/verify_checkpoints.cjs <run>` and `node tools/engine_health_gate.cjs <run> --horizon 188w`, and nothing was blessed or updated.
+
+| | main 651a56ae6 | branch 35bccad7a |
+|---|---|---|
+| final_state_hash | 349281ffc35785cd | 3d040a4c3d66cd1b |
+| Jan93 / Apr94 / Apr95 / Oct95 matched | 712 / 711 / 712 / 710 | 712 / 707 / 704 / 698 |
+| Anchors | 31/31 | 31/31 |
+| Engine health gate | PASS (exit 0) | **FAIL** (exit 1): consistency_failures 34 > 3 |
+| Enclave guard / Farz | intact | intact (9 cells; 4 Farz objectives captured) |
+| Killed / wounded (health metrics) | 51,608 / 190,749 | 52,566 / 194,182 |
+| Attack casualties attacker / defender | 160,233 / 142,814 | 163,674 / 149,988 |
+| Flips / orders | 231 / 787 | 222 / 840 |
+| Destroyed brigades (run_summary) | 18 | 15 |
+
+**Verdict: NO-GO pending the owner.** Three checkpoints drop and the health gate fails. Nothing was tuned. Cells the branch loses relative to main (none gained), replayed against the current painted references:
+- Apr94 (−4): `bratunac:pobudje_2` (ref RS, branch RBiH); `prozor:ljubunci_2`, `prozor:lug_2`, `prozor:paros` (ref HRHB, branch RBiH).
+- Apr95 (−8): the four above, plus `konjic:bijela_2`, `konjic:glavaticevo_2`, `konjic:ljuta`, `travnik:gornje_krcevine` (ref RBiH, branch RS).
+- Oct95 (−12): `pobudje_2`, the three Prozor cells, the three Konjic cells above plus `konjic:sitnik`, `kalinovik:golubici_2`, and `donji_vakuf:jemanlici`, `donji_vakuf:korenici`, `sanski_most:kljevci` (ref RBiH, branch RS).
+
+Observation, raw: 4 of the 12 Oct95 losses (`pobudje_2`, `jemanlici`, `korenici`, `kljevci`) are brigade-less pockets that, under the ruling, form no sector at week 188. On main each of them changes hands by week 188 to match the reference; on the branch none does. The same four cells account for 33 of the 34 consistency failures (`validate_run_consistency`: "has no sector owner" / "war-front faction-side missing from sector layer"). That validator still requires every war-edge side to be sector-owned. The 34th failure is a gap sub-segment in `sector:vrs_1st_krajina:0`. The other lost cells (Prozor, Konjic, Kalinovik, Travnik) are knock-on combat differences, not pockets. Choosing between keeping the rule (and re-basing those contracts) and narrowing it is the owner's call.
+
+## 2026-11-12 — Sector label: no doubled "OG OG", no prefix on unheld fronts (UI)
+
+The owner asked: "Label bug should be fixed." `src/ui/map/utils/sectorTypePrefix.ts` decides whether copy should put its own type word in front of a sector name. It doesn't when the name already carries OG/TG/OZ/sektor ("OG Tuzla", "TG Foča", "Doboj OG 9", "\"Vogošća\" OG", "OZ Central Bosnia", "Assigned OG", "Dodijeljeni sektor"), and never for an unheld front (EN or BCS name, or `unheld_front`). Two places used it: the Chief of Staff's precise defence alert ("OG " / "Sektor " prefix, which produced "OG OG X") and FormationDetail's "Inspect OG {sector}" label, which now uses `formationDetail.inspectSectorNamed` ("Inspect {sector}" / "Pregledaj {sector}") for self-typed names. A repo search found no other place that prefixes sector names. Test: `tests/ui/sector_type_prefix_labels.test.ts` (helper cases; EN and BCS precise alert for a typed name, a bare place and an unheld front).
