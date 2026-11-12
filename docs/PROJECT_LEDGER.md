@@ -14302,3 +14302,5 @@ Codex delivered the four round-2 aftermath headers (brief §5) in image-only PR 
 ## 2026-11-12 — DC (Dayton conference) lane closed; R8 is the active lane (ROADMAP, PROCESS)
 
 Docs-only closeout. The Dayton conference lane merged as #560 (`4a67bd516`) and Codex handoff CL-055 records every item in the DC plan's Next list as done, so DC now reads CLOSED in the plan's status line, `MASTER_ROADMAP.md` (current block, lane order, sequence, workstream row), `COMMAND_BOARD.md` (status line, row 7a, R8 row, sequence) and `plan_index.yml` (`lane_open: false`, regenerated with `node tools/derive_plan_index.cjs`). R8 packaged campaigns is the active lane, then R9. No code, canon, calibration or gate change.
+
+- `.claude/current-lane.txt` now declares R8 (it named DC, and `tools/hooks/guard_scope_drift.sh` reads it); changed at the request of the session coordinating the merge train, matching the roadmap order the owner set.
