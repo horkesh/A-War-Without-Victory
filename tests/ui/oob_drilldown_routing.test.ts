@@ -536,7 +536,7 @@ describe('OOBSidebar drilldown routing', () => {
     expect(copy).toContain('Exhaustion:--');
     expect(copy).toContain('Strategic reserve--');
     expect(copy).toContain('Dobrinja 1--');
-    expect(copy).toContain('Ilidza 10');
+    expect(copy).toContain('Ilidža 10');
     expect(copy).not.toMatch(/NaN|undefined/);
   });
 });
