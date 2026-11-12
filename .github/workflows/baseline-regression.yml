@@ -138,7 +138,7 @@ jobs:
 
       - name: Fast unit tests
         if: steps.changes.outputs.relevant == 'true'
-        run: npm run test:vitest:fast
+        run: npm run test:vitest:fast -- --partition-sector-property
 
       - name: No relevant changes — fast tests skipped (green-fast)
         if: steps.changes.outputs.relevant != 'true'

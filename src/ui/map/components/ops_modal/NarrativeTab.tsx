@@ -1,7 +1,8 @@
 /**
- * Narrative assessment tab — military document format.
- * Renders prediction sections in typewriter font with classified stamp.
+ * Narrative assessment tab — the G-2 report in military document order, on the dark
+ * surface (no paper sheet), with the classification mark.
  */
+import { SurfaceStat, SURFACE_LABEL, SURFACE_LABEL_MUTED } from '../surface/Surface';
 import type { PredictionResult } from './usePrediction';
 import { FACTION_ARMY_HEADERS } from './types';
 import { getPlayerSafeOperationBalancePresentation } from '../../../../shared/playerSafeOperationBalance';
@@ -49,92 +50,85 @@ export function NarrativeTab({ prediction, commanderName, corpsName, faction, da
     const recommendedActionLabel = formatPlanningRecommendation(prediction.overall.recommendedAction);
 
     return (
-        <div className="relative" style={{ fontFamily: 'var(--font-command)' }}>
-            {/* Classified stamp */}
-            <div className="absolute top-4 right-4 rotate-[-12deg] text-red-600/20 text-2xl font-bold uppercase tracking-[0.3em]
-                            border-2 border-red-600/20 px-3 py-1 rounded pointer-events-none select-none">
+        <div className="relative flex flex-col gap-5">
+            {/* Classification mark */}
+            <div className="absolute right-0 top-0 rotate-[-8deg] select-none rounded border-2 border-red-400/40 px-3 py-1
+                            font-mono text-[15px] font-semibold uppercase tracking-[0.25em] text-red-300/70 pointer-events-none">
                 {t('opsPlanning.narrative.classified')}
             </div>
 
-            {/* Header block — WP3b: darkened text colors for WCAG AA */}
-            <div className="text-center mb-6 space-y-0.5">
-                <div className="text-xs uppercase tracking-[0.3em] text-[#3a3228]">{headers.republic}</div>
-                <div className="text-xs uppercase tracking-[0.3em] text-[#3a3228]">{headers.army}</div>
-                <div className="text-xs font-bold text-[#1a1610] mt-2">{corpsName} \u2014 {t('opsPlanning.narrative.g2Office')}</div>
-                <div className="text-xs text-[#4a4238]">
-                    Ref: G2/{date.replace(/-/g, '')}/OPS \u2022 {date}
-                </div>
+            {/* Header block */}
+            <div className="flex flex-col gap-1 pr-32">
+                <span className={SURFACE_LABEL_MUTED}>{headers.republic}</span>
+                <span className={SURFACE_LABEL_MUTED}>{headers.army}</span>
+                <span className="mt-1 text-[19px] font-semibold text-[#f1e6c8]">{corpsName} — {t('opsPlanning.narrative.g2Office')}</span>
+                <span className="font-mono text-[14px] text-[#b9ad94]">
+                    Ref: G2/{date.replace(/-/g, '')}/OPS • {date}
+                </span>
             </div>
 
-            <div className="border-t border-[#c0b090] mb-4" />
-
-            {/* WP3d: Quick Assessment summary box */}
-            <div className="mb-4 p-3 rounded border border-[#c0b090] bg-[#f0ead8]">
-                <div className="text-xs font-bold uppercase tracking-wider text-[#1a1610] mb-2">{t('opsPlanning.narrative.quickAssessment')}</div>
-                <div className="grid grid-cols-2 gap-1 text-xs">
-                    <span className="text-[#3a3228]">{t('opsPlanning.narrative.forceBalance')}</span>
-                    <span className={`font-bold uppercase ${forceBalance?.toneClass ?? 'text-[#1a1610]'}`}>{forceBalance?.label ?? t('corpsFront.unreported')}</span>
-                    <span className="text-[#3a3228]">{t('opsPlanning.narrative.intelConfidence')}</span>
-                    <span className="font-bold text-[#1a1610]">{prediction.overall.intelConfidence == null ? t('corpsFront.unreported') : `${Math.round(prediction.overall.intelConfidence * 100)}%`}</span>
-                    <span className="text-[#3a3228]">{t('opsPlanning.narrative.predicted')}</span>
-                    <span className="font-bold text-[#1a1610]">{predictedOutcomeLabel}</span>
-                    <span className="text-[#3a3228]">{t('opsPlanning.narrative.recommendation')}</span>
-                    <span className="font-bold text-[#1a1610]">{recommendedActionLabel}</span>
-                </div>
+            {/* WP3d: Quick Assessment summary */}
+            <div className="flex flex-col gap-2 rounded-md border border-[#2a303c] bg-[#12161e] px-4 py-3">
+                <span className={SURFACE_LABEL}>{t('opsPlanning.narrative.quickAssessment')}</span>
+                <SurfaceStat
+                    label={t('opsPlanning.narrative.forceBalance')}
+                    value={forceBalance?.label ?? t('corpsFront.unreported')}
+                    tone={forceBalance?.toneClass}
+                />
+                <SurfaceStat
+                    label={t('opsPlanning.narrative.intelConfidence')}
+                    value={prediction.overall.intelConfidence == null ? t('corpsFront.unreported') : `${Math.round(prediction.overall.intelConfidence * 100)}%`}
+                />
+                <SurfaceStat label={t('opsPlanning.narrative.predicted')} value={predictedOutcomeLabel} />
+                <SurfaceStat label={t('opsPlanning.narrative.recommendation')} value={recommendedActionLabel} />
             </div>
 
-            {/* Sections — WP3b: darkened text + WP3e: inline translations */}
+            {/* Sections — WP3e: inline translations */}
             {sections.length > 0 ? (
                 sections.map((section, idx) => (
-                    <div key={idx} className="mb-4">
-                        <div className="text-xs font-bold text-[#1a1610] uppercase tracking-wider mb-1">
+                    <div key={idx} className="flex flex-col gap-1.5">
+                        <span className={SURFACE_LABEL}>
                             {idx + 1}. {translateTitle(section.title)}
-                        </div>
-                        <div className="text-xs text-[#2a2218] leading-relaxed whitespace-pre-wrap">
+                        </span>
+                        <p className="m-0 whitespace-pre-wrap text-[17px] leading-relaxed text-[#ddd1b3]">
                             {section.content}
-                        </div>
+                        </p>
                     </div>
                 ))
             ) : (
                 // Fallback: generate from quantitative data
-                <div className="space-y-4">
-                    <div>
-                        <div className="text-xs font-bold text-[#1a1610] uppercase tracking-wider mb-1">
-                            {t('opsPlanning.narrative.enemyTitle')}
-                        </div>
-                        <div className="text-xs text-[#2a2218] leading-relaxed">
+                <div className="flex flex-col gap-4">
+                    <div className="flex flex-col gap-1.5">
+                        <span className={SURFACE_LABEL}>{t('opsPlanning.narrative.enemyTitle')}</span>
+                        <p className="m-0 text-[17px] leading-relaxed text-[#ddd1b3]">
                             {t('opsPlanning.narrative.enemyLine', {
                                 summary: forceBalance?.summary ?? t('corpsFront.unreported'),
                                 confidence: prediction.overall.intelConfidence == null ? t('corpsFront.unreported') : (prediction.overall.intelConfidence * 100).toFixed(0),
                             })}
-                        </div>
+                        </p>
                     </div>
-                    <div>
-                        <div className="text-xs font-bold text-[#1a1610] uppercase tracking-wider mb-1">
-                            {t('opsPlanning.narrative.ownTitle')}
-                        </div>
-                        <div className="text-xs text-[#2a2218] leading-relaxed">
+                    <div className="flex flex-col gap-1.5">
+                        <span className={SURFACE_LABEL}>{t('opsPlanning.narrative.ownTitle')}</span>
+                        <p className="m-0 text-[17px] leading-relaxed text-[#ddd1b3]">
                             {t('opsPlanning.narrative.ownLine', {
                                 casualties: prediction.overall.estimatedCasualties == null ? t('corpsFront.unreported') : prediction.overall.estimatedCasualties.toLocaleString(),
                                 outcome: predictedOutcomeLabel,
                             })}
-                        </div>
+                        </p>
                     </div>
-                    <div>
-                        <div className="text-xs font-bold text-[#1a1610] uppercase tracking-wider mb-1">
-                            {t('opsPlanning.narrative.assessmentTitle')}
-                        </div>
-                        <div className="text-xs text-[#2a2218] leading-relaxed">
+                    <div className="flex flex-col gap-1.5">
+                        <span className={SURFACE_LABEL}>{t('opsPlanning.narrative.assessmentTitle')}</span>
+                        <p className="m-0 text-[17px] leading-relaxed text-[#ddd1b3]">
                             {t('opsPlanning.narrative.assessmentLine', { action: recommendedActionLabel })}
-                        </div>
+                        </p>
                     </div>
                 </div>
             )}
 
             {/* Signature */}
-            <div className="border-t border-[#c0b090] mt-6 pt-3">
-                <div className="text-xs text-[#4a4238]">{t('opsPlanning.narrative.g2Chief')}</div>
-                <div className="text-xs font-bold text-[#1a1610] mt-1">{commanderName}</div>
+            <div className="flex flex-col gap-1 border-t border-[#262b35] pt-3">
+                <span className="text-[15px] text-[#b9ad94]">{t('opsPlanning.narrative.g2Chief')}</span>
+                <span className="text-[17px] font-semibold text-[#f1e6c8]">{commanderName}</span>
             </div>
         </div>
     );

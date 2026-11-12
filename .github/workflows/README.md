@@ -43,7 +43,7 @@ for `pull_request` (not `pull_request_target`) workflows.
 
 | Job | Required? | `PATH_SET` | Heavy steps gated |
 |---|---|---|---|
-| `test` (Baseline Regression) | yes | `code` | `npm ci` + `test:vitest:fast` |
+| `test` (Baseline Regression) | yes | `code` | `npm ci` + `test:vitest:fast -- --partition-sector-property` |
 | `full-suite` (Full Suite + Structural Fingerprint) | yes | full-suite set | `npm ci` + startup snapshot rebuild + `test:vitest:balanced` + `qa:player-experience` |
 | `structural-fingerprint` (Full Suite + Structural Fingerprint) | yes | full-suite set | `npm ci` + startup snapshot rebuild + fresh canonical-188w-at-40-weeks structural-fingerprint compare |
 | `scenario-anchors` (Baseline Regression) | yes | `sim` | `npm ci` + `test:vitest:scenario:anchors` |
@@ -73,6 +73,11 @@ pointer stubs instead of PMTiles binaries, the browser-gate launcher sets
 `VITE_AWWV_DISABLE_PMTILES=1` for that proof run only; the tactical map then
 boots without PMTiles basemap sources while preserving the player-flow, routing,
 console-error, and surface-polish assertions.
+
+The Baseline Regression `test` job opts into four seed partitions for the sector
+partition integration property file on its existing runner. All four workers
+must pass before the same fast slice runs its serial remainder with only that
+file excluded. Local fast commands keep the default serial behavior.
 
 The balanced Vitest entrypoint preserves complete discovery while reducing wall time.
 `tools/test/test_suite_inventory.mjs` sorts the discovered file inventory, classifies

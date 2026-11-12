@@ -3,16 +3,16 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join, relative, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { discoverTests } from './discover_test_files.mjs';
-import { renderAliasEntryLines, renderSetupFilesLine } from './vitest_shared_config.mjs';
+import { SECTOR_PROPERTY_TEST } from './run_vitest_balanced.mjs';
+import { renderAliasEntryLines, renderSetupFilesLine, resolveVitestCli } from './vitest_shared_config.mjs';
 
 const ROOT = process.cwd();
-const VITEST_CLI = join(ROOT, 'node_modules', 'vitest', 'vitest.mjs');
 const GENERATED_CONFIG_DIR = '.tmp_vitest_slice';
 const GENERATED_CONFIG_FILE = join(GENERATED_CONFIG_DIR, 'vitest.slice.config.mjs');
 const VALID_SLICES = new Set(['fast', 'scenario']);
 
 function parseArgs(argv) {
-  const out = { slice: undefined, listOnly: false, passthrough: [] };
+  const out = { slice: undefined, listOnly: false, partitionSectorProperty: false, passthrough: [] };
   let passthroughMode = false;
 
   for (let i = 0; i < argv.length; i += 1) {
@@ -29,6 +29,10 @@ function parseArgs(argv) {
       out.listOnly = true;
       continue;
     }
+    if (arg === '--partition-sector-property') {
+      out.partitionSectorProperty = true;
+      continue;
+    }
     if (out.slice == null) {
       out.slice = arg;
       continue;
@@ -37,7 +41,10 @@ function parseArgs(argv) {
   }
 
   if (!VALID_SLICES.has(out.slice)) {
-    throw new Error(`Usage: node tools/test/run_vitest_slice.mjs <fast|scenario> [--list] [-- <vitest args...>]`);
+    throw new Error(`Usage: node tools/test/run_vitest_slice.mjs <fast|scenario> [--list] [--partition-sector-property] [-- <vitest args...>]`);
+  }
+  if (out.partitionSectorProperty && (out.slice !== 'fast' || out.passthrough.length > 0)) {
+    throw new Error('--partition-sector-property requires the unfiltered fast slice.');
   }
 
   return out;
@@ -64,10 +71,10 @@ export function writeVitestSliceConfig(root, files, configPath = join(root, GENE
     [
       "import { defineConfig } from 'vitest/config';",
       "import { join } from 'node:path';",
-      "import { discoverTests, toRepoRelative } from '../tools/test/discover_test_files.mjs';",
+      "import { discoverTests, resolveRootModules, toRepoRelative } from '../tools/test/discover_test_files.mjs';",
       '',
       'const rootDir = process.cwd();',
-      'const rootModules = join(rootDir, \'node_modules\');',
+      'const rootModules = resolveRootModules(rootDir);',
       'const discovered = discoverTests(rootDir);',
       'const environmentMatchGlobs = discovered.jsdomVitestFiles.map((file) => [',
       '  toRepoRelative(rootDir, [file])[0],',
@@ -101,7 +108,7 @@ export function writeVitestSliceConfig(root, files, configPath = join(root, GENE
   return configPath;
 }
 
-export function runVitestSlice(argv, root = ROOT) {
+export function runVitestSlice(argv, root = ROOT, runChild = spawnSync) {
   let cli;
   try {
     cli = parseArgs(argv);
@@ -110,8 +117,9 @@ export function runVitestSlice(argv, root = ROOT) {
     return 1;
   }
 
-  if (!existsSync(VITEST_CLI)) {
-    console.error(`Missing vitest CLI at ${VITEST_CLI}. Run npm install.`);
+  const vitestCli = resolveVitestCli(root);
+  if (!existsSync(vitestCli)) {
+    console.error(`Missing vitest CLI at ${vitestCli}. Run npm install.`);
     return 1;
   }
 
@@ -123,6 +131,12 @@ export function runVitestSlice(argv, root = ROOT) {
     return 1;
   }
 
+  if (cli.partitionSectorProperty
+      && (files.length < 2 || files.filter(file => toPosixPath(relative(root, file)) === SECTOR_PROPERTY_TEST).length !== 1)) {
+    console.error(`Expected ${SECTOR_PROPERTY_TEST} and a serial remainder in the fast slice.`);
+    return 1;
+  }
+
   if (cli.listOnly) {
     process.stdout.write(`${cli.slice} vitest files (${files.length})\n`);
     for (const file of files) {
@@ -131,23 +145,34 @@ export function runVitestSlice(argv, root = ROOT) {
     return 0;
   }
 
-  writeVitestSliceConfig(root, files);
-
-  const result = spawnSync(
-    process.execPath,
-    [VITEST_CLI, ...buildVitestSliceArgs(root, files, cli.passthrough)],
-    {
+  const runNode = (args) => {
+    const result = runChild(process.execPath, args, {
+      cwd: root,
       stdio: 'inherit',
       shell: false,
+    });
+    if (result.error) {
+      console.error(result.error);
+      return 1;
     }
-  );
+    return result.status ?? 1;
+  };
 
-  if (result.error) {
-    console.error(result.error);
-    return 1;
+  const passthrough = [...cli.passthrough];
+  if (cli.partitionSectorProperty) {
+    const exactMatch = SECTOR_PROPERTY_TEST.replaceAll('.', '\\.');
+    console.log(`[fast-vitest] partitioning one property file; serial remainder has ${files.length - 1} files`);
+    const status = runNode([
+      join(root, 'tools', 'test', 'run_vitest_balanced.mjs'),
+      '--shards=4', `--match=^${exactMatch}$`,
+      '--', '--reporter=dot', '--silent',
+    ]);
+    if (status !== 0) return status;
+    passthrough.push('--exclude', SECTOR_PROPERTY_TEST);
   }
 
-  return result.status ?? 1;
+  writeVitestSliceConfig(root, files);
+  return runNode([vitestCli, ...buildVitestSliceArgs(root, files, passthrough)]);
 }
 
 const thisFile = resolve(fileURLToPath(import.meta.url));

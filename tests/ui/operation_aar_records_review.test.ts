@@ -981,7 +981,7 @@ describe('Army HQ Records operation AAR review', () => {
 
         render(createElement(RecordsContent));
 
-        expect(screen.getByRole('button', { name: /^History/i }).className).toContain('text-accent-gold');
+        expect(screen.getByRole('button', { name: /^History/i }).getAttribute('aria-pressed')).toBe('true');
         expect(screen.getByText('Operational Deep Review')).toBeTruthy();
         expect(screen.getByText('Result: Partial')).toBeTruthy();
         expect(screen.getByRole('button', { name: /Operation Iron Corridor/i }).getAttribute('aria-current')).toBe('true');
