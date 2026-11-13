@@ -93,10 +93,10 @@ describe('R5 and M2: BCS diacritics and English-only rail copy', () => {
   });
 
   it('has none of the transliterations the sweep removed', () => {
-    const words = /\b(?:Preskoci|Preporuceno|preporucuje|izvjestaj|polozaj|podrska|drzano|predsjednicki|zabiljezen|napadaca|Stab armije|moze|zrtve|Elasticna|ELASTICNO)\b/;
+    const words = /\b(?:Preskoci|Preporuceno|preporucuje|izvjestaj|polozaj|podrska|drzano|predsjednicki|zabiljezen|napadaca|Stab armije|moze|zrtve|Elasticna|ELASTICNO|puknuce|Klizac|nego sto)\b/;
     const offenders = Object.entries(bcsMessages)
       // The parked operation planner keeps its strings untouched (owner, 2026-11-12).
-      .filter(([key]) => !key.startsWith('opsPlanning.') && !key.startsWith('verdict.'))
+      .filter(([key]) => !key.startsWith('opsPlanning.'))
       .filter(([, value]) => typeof value === 'string' && words.test(value))
       .map(([key]) => key);
     expect(offenders).toEqual([]);
