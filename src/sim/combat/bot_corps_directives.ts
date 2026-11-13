@@ -89,7 +89,8 @@ import { getAvailableBrigades, hasActiveOperation, hasAvailableSlot, findBrigade
 
 /**
  * Sum active (non-expired) event aggression modifiers for a faction.
- * Wired into the corps aggression computation (was a broken stub before v0.6.0).
+ * Currently has no caller: event aggression modifiers are recorded in state but
+ * do not feed bot or corps aggression (realism audit F6; wiring deferred post-1.0).
  */
 export function getEventAggressionBonus(faction: FactionId, state: GameState): number {
     const mods = state.military.event_aggression_modifiers ?? [];

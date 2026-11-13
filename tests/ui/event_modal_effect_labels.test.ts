@@ -13,7 +13,7 @@ describe('event acknowledgement modal effect labels', () => {
       duration_turns: 8,
     });
 
-    expect(renderedCopy).toBe('ARBiH operational aggression -0.1 for 8 weeks');
+    expect(renderedCopy).toBe('ARBiH operational aggression -0.1 for 8 weeks (recorded only; operations ignore it in this build)');
     expect(renderedCopy).not.toContain('aggression_modifier');
     expect(APP_SOURCE).toContain('formatAcknowledgementEventEffect');
     expect(APP_SOURCE).toContain('eventModal.effect.aggressionModifier');
@@ -31,7 +31,7 @@ describe('event acknowledgement modal effect labels', () => {
         duration_turns: 8,
       });
 
-      expect(renderedCopy).toBe('ARBiH operativna agresivnost -0.1 tokom 8 poteza');
+      expect(renderedCopy).toBe('ARBiH operativna agresivnost -0.1 tokom 8 poteza (samo zabilježeno; operacije to u ovoj verziji ne uzimaju u obzir)');
       expect(renderedCopy).not.toMatch(/operational aggression|for 8 weeks|aggression_modifier/);
     } finally {
       setLocale('en', undefined);

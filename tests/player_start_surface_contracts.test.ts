@@ -77,7 +77,7 @@ function displayedEffectRow(effect: EventEffect): string | null {
   if (!isDisplayEventEffect(effect) || effect.kind === 'narrative') return null;
   if (effect.kind === 'morale_change') return `${factionLabel(effect.faction)} morale ${signedDelta(effect.delta)}`;
   if (effect.kind === 'alliance_change') return `${factionLabel('RBiH')} / ${factionLabel('HRHB')} alliance ${signedDelta(effect.delta)}`;
-  if (effect.kind === 'aggression_modifier') return `${factionLabel(effect.faction)} operational aggression ${signedDelta(effect.delta)} for ${effect.duration_turns} weeks`;
+  if (effect.kind === 'aggression_modifier') return `${factionLabel(effect.faction)} operational aggression ${signedDelta(effect.delta)} for ${effect.duration_turns} weeks (recorded only; operations ignore it in this build)`;
   throw new Error(`Unhandled display-safe foundational effect: ${effect.kind}`);
 }
 

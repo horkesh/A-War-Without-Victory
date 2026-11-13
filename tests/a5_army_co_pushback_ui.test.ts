@@ -126,8 +126,10 @@ describe('ArmyCoPushbackPanel', () => {
         const row = getByTestId('army-co-pushback-objection-RS');
         expect(row).toBeTruthy();
         expect(row.textContent).toContain('RS Main Staff');
+        expect(row.textContent).toContain('standing directive: Press the offensive');
+        expect(row.textContent).toContain('You did not issue it');
         expect(row.textContent).toContain('Mladic');
-        expect(row.textContent).toContain('PRESS_OFFENSIVE');
+        expect(row.textContent).not.toContain('PRESS_OFFENSIVE');
         expect(row.textContent).toContain('pushes back');
         expect(row.textContent).not.toMatch(/\bTurn\s+30\b/);
     });

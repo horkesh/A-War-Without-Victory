@@ -367,6 +367,40 @@ describe('desktop player-visible state projection', () => {
     });
   });
 
+  it('shows every own attacker and keeps a concentrated enemy assault fogged (realism audit F10)', () => {
+    const state = makeState() as any;
+    state.military.formations.rs_brigade_2 = {
+      ...state.military.formations.rs_brigade,
+      id: 'rs_brigade_2',
+      name: 'Own Second Brigade',
+    };
+    state.turn_summaries[0].battles = [
+      {
+        osid: 'op:enemy:front', attacker_faction: 'RS', defender_faction: 'RBiH',
+        primary_attacker_id: 'rs_brigade', primary_defender_id: 'rbih_visible',
+        all_attacker_ids: ['rs_brigade', 'rs_brigade_2'],
+        outcome: 'victory', attacker_casualties: 10, defender_casualties: 12, territory_flipped: false, was_concentrated: true,
+      },
+      {
+        osid: 'op:own:front', attacker_faction: 'RBiH', defender_faction: 'RS',
+        primary_attacker_id: 'rbih_visible', primary_defender_id: 'rs_brigade',
+        all_attacker_ids: ['rbih_visible', 'rbih_hidden'],
+        outcome: 'repulsed', attacker_casualties: 30, defender_casualties: 5, territory_flipped: false, was_concentrated: true,
+      },
+    ];
+
+    const projected = loadProjector().projectPlayerVisibleState(state);
+    const [own, enemy] = projected.turn_summaries[0].battles;
+
+    expect(own.all_attacker_ids).toEqual(['rs_brigade', 'rs_brigade_2']);
+    expect(own.was_concentrated).toBe(true);
+    expect(enemy.all_attacker_ids).toHaveLength(1);
+    expect(enemy.all_attacker_ids[0]).toBe(enemy.primary_attacker_id);
+    expect(JSON.stringify(enemy)).not.toContain('rbih_hidden');
+    expect(JSON.stringify(enemy)).not.toContain('rbih_visible');
+    expect(enemy.was_concentrated).toBe(true);
+  });
+
   it('redacts opponent identities from player-visible battle history', () => {
     const projected = loadProjector().projectPlayerVisibleState(makeState());
     const summary = projected.turn_summaries[0];

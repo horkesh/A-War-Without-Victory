@@ -95,12 +95,14 @@ The Vozuća salient sat **on the boundary between the VRS 1st Krajina Corps (rig
 
 | Unit | Subordination | Role |
 |---|---|---|
-| **3rd Ozren Light Infantry Brigade** | 1st Krajina Corps | Held southern face of salient (Vozuća–Krivaja). Primary contact with 3rd Corps. |
-| **4th Ozren Light Infantry Brigade** | 1st Krajina Corps | Held eastern face (Banovići direction). Primary contact with 2nd Corps. |
-| **1st & 2nd Ozren Light Infantry Brigades** | 1st Krajina Corps | Held the wider Ozren massif (Doboj/Petrovo). Pinned by ARBiH 21st/22nd Div fixing attacks; did not reinforce. |
+| **4th Ozren Light Infantry Brigade** | 1st Krajina Corps | Held the southern tip of the salient around Vozuća itself (HQ Vozuća). The May-June 1995 ARBiH attack aimed to surround it in Vozuća; in September 1995 its front positions were penetrated by the 22nd Division drive from Pribitkovići. Sources: BB1 p.462 (VRS order of battle, "HQ Vozuca"); BB1 p.385; BB1 p.386; BB2 p.489, endnote 3 ("far south around Vozuca itself"). |
+| **3rd Ozren Light Infantry Brigade** | 1st Krajina Corps | Western sector of the salient opposite Maglaj (HQ Gornja Paklenica), north of the Vozuća breakthrough sector. Sources: BB2 p.489, endnote 3; BB1 p.462. |
+| **1st & 2nd Ozren Light Infantry Brigades** | 1st Krajina Corps | 1st Ozren held the northeastern sector along the Spreča; 2nd Ozren held the southeastern sector opposite Lukavac (BB2 p.489, endnote 3). The 2nd Ozren's front was penetrated together with the 4th's in September 1995 (BB1 p.386). |
 | **Srbac Brigade (1st Krajina Corps)** | 1st Krajina Corps | Reinforcement element, listed at Battle of Vozuća. |
 | **Vučja Brigade / Motajica Battalion** | 1st Krajina Corps (Brana-94 OOB) | Defensive presence (per Brana-94 records; 1995 status partially unconfirmed). |
 | **16th Motorised Brigade** | 1st Krajina Corps | Reserve. Redeployed to Mt. Ozren only on 3 Oct 1995 — too late to affect Vozuća; this lateness is itself evidence of strategic reserve exhaustion. |
+
+Erratum (realism audit `docs/40_reports/proposals/20261114_PRE_1_0_REALISM_AUDIT.md` §4): an earlier version of this table placed the 3rd Ozren Brigade at Vozuća and the 4th Ozren on the eastern face. Balkan Battlegrounds places the 4th Ozren Light Infantry Brigade at Vozuća and the 3rd Ozren opposite Maglaj. Page numbers above are printed page numbers; the repo extracts are `data/derived/knowledge_base/balkan_battlegrounds/pages/BB1_p0422.json` (p.385), `BB1_p0423.json` (p.386), `BB1_p0499.json` (p.462) and `BB2_p0508.json` (p.489).
 
 ### 4.3 VRS strength
 
@@ -190,7 +192,7 @@ The 1994 attempt (Brana-94) had **better numerical odds** (17,000 vs 3,000, rati
 
 ### 7.5 Force ratio at the decisive sector
 
-At the Krivaja right-bank axis (the actual breakthrough point), estimates suggest ARBiH concentrated **6–8 brigade-equivalents (~6,000–8,000 troops)** against the VRS 3rd Ozren Brigade plus elements of the 4th Ozren and Srbac — perhaps **2,000–2,500 defenders**, a local ratio of **~3:1 to 4:1** at the point of attack. Combined with NATO-degraded VRS artillery, this exceeded the historical 3:1 attacker threshold.
+At the Krivaja right-bank axis (the actual breakthrough point), estimates suggest ARBiH concentrated **6–8 brigade-equivalents (~6,000–8,000 troops)** against the VRS 4th Ozren Brigade at Vozuća plus the 1st Srbac Light Infantry Brigade east of Zavidovići (BB1 pp.385-386, BB2 p.489) — perhaps **2,000–2,500 defenders**, a local ratio of **~3:1 to 4:1** at the point of attack. Combined with NATO-degraded VRS artillery, this exceeded the historical 3:1 attacker threshold.
 
 ---
 
@@ -274,7 +276,7 @@ Conversely, Sana-95's opening on 13 September made VRS prioritise western reinfo
 
 1. **Precise brigade count of 25th Div** — sources list its Kakanj brigades (309th, 311th, 329th) but the 25th's full OOB in September 1995 needs Balkan Battlegrounds Vol. 2 cross-check.
 2. **22nd Division composition** — confirmed present per ICTY summary, but brigade-level detail not located. Likely Lukavac/Banovići-area brigades (the 2nd Corps numbered brigades 210th, 213th seen on insignia).
-3. **VRS local commander names** — Wikipedia lists "Unknown commanders" for the Serb side; the 3rd Ozren Brigade commander identity in September 1995 would require Serbian-language source work.
+3. **VRS local commander names** — Wikipedia lists "Unknown commanders" for the Serb side; the 4th Ozren Brigade commander identity in September 1995 would require Serbian-language source work.
 4. **Exact date the pocket closed** — sources give 11 September for the 2nd/3rd Corps link-up at Vozuća, but the surrounding pocket's complete reduction extended into the 12–20 September pursuit phase. No single "pocket closed" date is cited.
 5. **Casualty breakdown by ARBiH corps** — overall ~129 KIA stated, but allocation between 2nd Corps and 3rd Corps is not given.
 

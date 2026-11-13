@@ -174,7 +174,6 @@ describe('player-safe tooltip models', () => {
     const model = buildPlayerSafeFrontTooltipModel({
       edgeId: 'op:tuzla::op:doboj',
       frontEdgesOsid: [{ edge_id: 'op:tuzla::op:doboj', a: 'op:tuzla', b: 'op:doboj', side_a: 'RBiH', side_b: 'RS' }],
-      frontPressureByEdge: { 'op:tuzla::op:doboj': { value: 1.2, max_abs: 2, last_updated_turn: 5 } },
       formations,
       fogOfWar: { visibleEnemyOsids: ['op:doboj'], visibleEnemySectorIds: [] },
       corpsFrontSectors: [{
@@ -215,7 +214,6 @@ describe('player-safe tooltip models', () => {
     const model = buildPlayerSafeFrontTooltipModel({
       edgeId: 'op:tuzla::op:doboj',
       frontEdgesOsid: [{ edge_id: 'op:tuzla::op:doboj', a: 'op:tuzla', b: 'op:doboj', side_a: 'RBiH', side_b: 'RS' }],
-      frontPressureByEdge: { 'op:tuzla::op:doboj': { value: 0, max_abs: 1 } },
       formations,
       fogOfWar: { visibleEnemyOsids: ['op:doboj'], visibleEnemySectorIds: [] },
       corpsFrontSectors: [{
@@ -252,7 +250,6 @@ describe('player-safe tooltip models', () => {
     const model = buildPlayerSafeFrontTooltipModel({
       edgeId: 'op:tuzla::op:doboj',
       frontEdgesOsid: [{ edge_id: 'op:tuzla::op:doboj', a: 'op:tuzla', b: 'op:doboj', side_a: 'RBiH', side_b: 'RS' }],
-      frontPressureByEdge: { 'op:tuzla::op:doboj': { value: 0, max_abs: 1 } },
       formations,
       fogOfWar: undefined,
       corpsFrontSectors: [],
@@ -262,32 +259,18 @@ describe('player-safe tooltip models', () => {
     expect(model.enemyContactSummary).toBeNull();
   });
 
-  it('does not render missing front pressure as balanced pressure', () => {
+  it('carries no legacy front-pressure line, whose engine source is never computed (realism audit F9)', () => {
     const model = buildPlayerSafeFrontTooltipModel({
       edgeId: 'op:tuzla::op:doboj',
       frontEdgesOsid: [{ edge_id: 'op:tuzla::op:doboj', a: 'op:tuzla', b: 'op:doboj', side_a: 'RBiH', side_b: 'RS' }],
-      frontPressureByEdge: {},
       formations: [],
       fogOfWar: undefined,
       corpsFrontSectors: [],
       playerFaction: 'RBiH',
     });
 
-    expect(model.pressureLine).toBe('Pressure unreported');
-  });
-
-  it('keeps explicit zero front pressure as balanced', () => {
-    const model = buildPlayerSafeFrontTooltipModel({
-      edgeId: 'op:tuzla::op:doboj',
-      frontEdgesOsid: [{ edge_id: 'op:tuzla::op:doboj', a: 'op:tuzla', b: 'op:doboj', side_a: 'RBiH', side_b: 'RS' }],
-      frontPressureByEdge: { 'op:tuzla::op:doboj': { value: 0, max_abs: 1 } },
-      formations: [],
-      fogOfWar: undefined,
-      corpsFrontSectors: [],
-      playerFaction: 'RBiH',
-    });
-
-    expect(model.pressureLine).toBe('Balanced');
+    expect(model).not.toHaveProperty('pressureLine');
+    expect(JSON.stringify(model)).not.toMatch(/[Pp]ressure unreported|Balanced/);
   });
 
 
@@ -328,7 +311,6 @@ describe('player-safe tooltip models', () => {
     const model = buildPlayerSafeFrontTooltipModel({
       edgeId: 'op:tuzla::op:doboj',
       frontEdgesOsid: [{ edge_id: 'op:tuzla::op:doboj', a: 'op:tuzla', b: 'op:doboj', side_a: 'RBiH', side_b: 'RS' }],
-      frontPressureByEdge: { 'op:tuzla::op:doboj': { value: 0, max_abs: 1 } },
       formations,
       fogOfWar: { visibleEnemyOsids: [], visibleEnemySectorIds: [] },
       corpsFrontSectors: [],
@@ -342,7 +324,6 @@ describe('player-safe tooltip models', () => {
     const model = buildPlayerSafeFrontTooltipModel({
       edgeId: 'op:tuzla::op:doboj',
       frontEdgesOsid: [{ edge_id: 'op:tuzla::op:doboj', a: 'op:tuzla', b: 'op:doboj', side_a: 'RBiH', side_b: 'RS' }],
-      frontPressureByEdge: { 'op:tuzla::op:doboj': { value: 0, max_abs: 1 } },
       formations: [],
       fogOfWar: { visibleEnemyOsids: [], visibleEnemySectorIds: [] },
       corpsFrontSectors: [{
@@ -392,7 +373,6 @@ describe('player-safe tooltip models', () => {
     const model = buildPlayerSafeFrontTooltipModel({
       edgeId: 'op:tuzla::op:doboj',
       frontEdgesOsid: [{ edge_id: 'op:tuzla::op:doboj', a: 'op:tuzla', b: 'op:doboj', side_a: 'RBiH', side_b: 'RS' }],
-      frontPressureByEdge: { 'op:tuzla::op:doboj': { value: 0, max_abs: 1 } },
       formations,
       fogOfWar: { visibleEnemyOsids: [], visibleEnemySectorIds: [] },
       corpsFrontSectors: [{
@@ -442,7 +422,6 @@ describe('player-safe tooltip models', () => {
     const model = buildPlayerSafeFrontTooltipModel({
       edgeId: 'op:tuzla::op:doboj',
       frontEdgesOsid: [{ edge_id: 'op:tuzla::op:doboj', a: 'op:tuzla', b: 'op:doboj', side_a: 'RBiH', side_b: 'RS' }],
-      frontPressureByEdge: { 'op:tuzla::op:doboj': { value: 0, max_abs: 1 } },
       formations,
       fogOfWar: { visibleEnemyOsids: [], visibleEnemySectorIds: [] },
       corpsFrontSectors: [{
@@ -493,7 +472,6 @@ describe('player-safe tooltip models', () => {
     const model = buildPlayerSafeFrontTooltipModel({
       edgeId: 'op:tuzla:front::op:doboj:front',
       frontEdgesOsid: [{ edge_id: 'op:tuzla:front::op:doboj:front', a: 'op:tuzla:front', b: 'op:doboj:front', side_a: 'RBiH', side_b: 'RS' }],
-      frontPressureByEdge: { 'op:tuzla:front::op:doboj:front': { value: 0, max_abs: 1 } },
       formations,
       fogOfWar: { visibleEnemyOsids: [], visibleEnemySectorIds: [] },
       corpsFrontSectors: [{
@@ -526,7 +504,6 @@ describe('player-safe tooltip models', () => {
     const model = buildPlayerSafeFrontTooltipModel({
       edgeId: 'op:tuzla::op:doboj',
       frontEdgesOsid: [{ edge_id: 'op:tuzla::op:doboj', a: 'op:tuzla', b: 'op:doboj', side_a: 'RBiH', side_b: 'RS' }],
-      frontPressureByEdge: { 'op:tuzla::op:doboj': { value: 0, max_abs: 1 } },
       formations: [],
       fogOfWar: { visibleEnemyOsids: [], visibleEnemySectorIds: [] },
       corpsFrontSectors: [{

@@ -21,13 +21,18 @@ export interface TurnBattle {
     /** Pioneer brigade (first/lead attacker). */
     primary_attacker_id: FormationId;
     primary_defender_id: FormationId | null;
-    /** All participating attacker IDs (for concentrated assaults). */
+    /**
+     * Every brigade that attacked this OSID this turn: the lead first, then the rest
+     * by strictCompare. Saves written before the realism-audit F10 fix hold only the
+     * lead here, so a one-entry list means "at least one brigade" on old saves.
+     */
     all_attacker_ids: FormationId[];
     /** Outcome from attacker's perspective. */
     outcome: CombatOutcome;
     attacker_casualties: number;
     defender_casualties: number;
     territory_flipped: boolean;
+    /** True when two or more brigades attacked this OSID this turn. */
     was_concentrated: boolean;
     /** Public-safe execution-friction annotation; no hidden enemy truth. */
     execution_friction?: PublicIntelFrictionAnnotation;
