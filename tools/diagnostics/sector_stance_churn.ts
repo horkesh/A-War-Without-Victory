@@ -32,7 +32,10 @@ process.env.AWWV_DEBUG_REASON_CODES = 'sector_stance';
 const PREFIX = '[sector_stance] ';
 
 interface Receipt {
-    phase: 'commander' | 'pre_combat';
+    phase: 'commander' | 'pre_combat' | 'entrenchment';
+    brigades?: number;
+    entrenchment_sum?: number;
+    buckets?: Record<string, number>;
     turn: number;
     faction?: string;
     corps_id: string;
@@ -181,12 +184,40 @@ async function main(): Promise<void> {
         flip_reasons: sorted(t.flip_reasons), dwell_before_flip: sorted(t.dwell_before_flip),
         ceiling_violation_kinds: sorted(t.ceiling_violation_kinds),
     });
+    // Entrenchment at combat time (phase 'entrenchment'), summed over all turns: per faction and
+    // OG stance, brigade-turns, mean entrenchment_turns and the bucket distribution.
+    type Ent = { brigade_turns: number; sum: number; buckets: Record<string, number> };
+    const ent = new Map<string, Ent>();
+    const entOf = (key: string): Ent => {
+        let e = ent.get(key);
+        if (!e) { e = { brigade_turns: 0, sum: 0, buckets: {} }; ent.set(key, e); }
+        return e;
+    };
+    for (const r of receipts) {
+        if (r.phase !== 'entrenchment') continue;
+        for (const key of [`${r.faction ?? 'unknown'}|${r.stance ?? 'defend'}`, `${r.faction ?? 'unknown'}|all`, `all|${r.stance ?? 'defend'}`, 'all|all']) {
+            const e = entOf(key);
+            e.brigade_turns += r.brigades ?? 0;
+            e.sum += r.entrenchment_sum ?? 0;
+            for (const [b, n] of Object.entries(r.buckets ?? {})) e.buckets[b] = (e.buckets[b] ?? 0) + n;
+        }
+    }
+    const entrenchment = Object.fromEntries([...ent.keys()].sort().map((key) => {
+        const e = ent.get(key)!;
+        return [key, {
+            brigade_turns: e.brigade_turns,
+            mean: e.brigade_turns > 0 ? Math.round((e.sum / e.brigade_turns) * 1000) / 1000 : 0,
+            buckets: sorted(e.buckets),
+        }];
+    }));
+
     const report = {
-        schema: 'sector_stance_churn.v2',
+        schema: 'sector_stance_churn.v3',
         weeks,
         receipts: receipts.length,
         total: view(total),
         by_faction: Object.fromEntries(factions.map((f) => [f, view(tallies.get(f)!)])),
+        entrenchment,
     };
     mkdirSync(dirname(outPath), { recursive: true });
     writeFileSync(outPath, `${JSON.stringify(report, null, 2)}\n`);

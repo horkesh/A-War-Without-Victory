@@ -14,6 +14,7 @@ import {
     type OobCorps
 } from '../scenario/oob_loader.js';
 import type { DisplacementStepReport } from '../state/displacement.js';
+import type { StanceEntrenchmentBasis } from './combat/sector_stance_entrenchment.js';
 import type { TakeoverDisplacementReport } from '../state/displacement_takeover.js';
 import type { ExhaustionStats } from '../state/exhaustion.js';
 // REASON-CODE INSTRUMENTATION (topic `formation_refusal`) — see reason_code_debug.ts.
@@ -386,6 +387,8 @@ export interface TurnContext {
     pendingDisplacementEventStream?: DisplacementEvent[];
     /** Formation IDs released by operations completed in this turn's offensive advance. */
     completedOperationParticipantIds?: Set<FormationId>;
+    /** Stationary brigades' provisional entrenchment growth, re-based to the OG stance rate once the stance is final. Turn-local. */
+    stanceEntrenchmentBasis?: Map<FormationId, StanceEntrenchmentBasis>;
 }
 
 export type PhaseHandler = (context: TurnContext) => void | Promise<void>;
