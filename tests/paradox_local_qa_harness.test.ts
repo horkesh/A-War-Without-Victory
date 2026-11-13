@@ -2191,6 +2191,37 @@ test('tile fetch abort attribution requires and consumes an exact renderer Abort
     assert.equal(wrongPortFailures.length, 1);
 });
 
+test('tile AbortSignal observer keeps recording aborts while the body is still being read', async () => {
+    // R8 RS-07 event 509: six hillshade ranges aborted together; the three whose fetch()
+    // had already resolved (headers in, body still streaming) left no signal because the
+    // observer detached its listener on resolve, so their exact aborts went unexplained.
+    const origin = 'http://127.0.0.1:3002';
+    const response = { status: 206 };
+    const window: Record<string, unknown> = {
+        location: { origin },
+        fetch: async () => response,
+    };
+    runInNewContext(`(${extractFunctionSource(readHarness(), 'installTileFetchAbortObserver')})()`, {
+        window, Request, Headers, URL, Date, performance: { timeOrigin: 7 },
+    });
+    const signals = window.__AWWV_QA_TILE_FETCH_ABORT_SIGNALS__ as Array<Record<string, unknown>>;
+    const observedFetch = window.fetch as (input: string, init?: RequestInit) => Promise<unknown>;
+    const tileUrl = `${origin}/data/derived/tiles/hillshade.pmtiles`;
+
+    const midBody = new AbortController();
+    assert.equal(await observedFetch(tileUrl, { signal: midBody.signal, headers: { range: 'bytes=0-99' } }), response);
+    midBody.abort();
+    const beforeHeaders = new AbortController();
+    beforeHeaders.abort();
+    await observedFetch(tileUrl, { signal: beforeHeaders.signal, headers: { range: 'bytes=100-199' } });
+    await observedFetch(`${origin}/assets/not-a-tile.webp`, { signal: new AbortController().signal });
+
+    assert.deepEqual(signals.map((entry) => [entry.id, entry.range, entry.afterResponseHeaders]), [
+        ['tile-fetch:7:1', 'bytes=0-99', true],
+        ['tile-fetch:7:2', 'bytes=100-199', false],
+    ]);
+});
+
 test('tile AbortSignal observer is installed as an init script and attributed after Save/load', () => {
     const harness = readHarness();
     assert.match(harness, /page\.addInitScript\(installTileFetchAbortObserver/);

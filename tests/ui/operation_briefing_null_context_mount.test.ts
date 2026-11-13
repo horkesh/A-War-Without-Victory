@@ -7,11 +7,8 @@
 // render". Every earlier test mounted the modal with a context already set, so
 // none saw the crash that hit every live open.
 //
-// STATUS ON MAIN: the crash fix is commit 9b7d9da1a on branch
-// claude/ops-surfaces-e1fb18 (not merged when this test landed). Until it is,
-// the null-then-context case is marked `it.fails` so it documents the expected
-// behaviour without turning main red. When that branch merges, this case starts
-// FAILING as an it.fails: change it to a plain `it` then.
+// The crash fix is commit 9b7d9da1a (operations surfaces, #570): no hooks after
+// the early return.
 import { createElement } from 'react';
 import { act, cleanup, render } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -100,8 +97,7 @@ describe('OperationBriefingModal hosted like App.tsx', () => {
     expect(container.textContent).toBe('');
   });
 
-  // Fails on main until 9b7d9da1a (claude/ops-surfaces-e1fb18) lands; see header.
-  it.fails('opens from a null context without a hooks-order error', () => {
+  it('opens from a null context without a hooks-order error', () => {
     const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
     const { container } = render(createElement(Host));
 

@@ -1,6 +1,7 @@
 import { defineConfig } from 'vitest/config';
 import { join } from 'path';
 import { discoverTests, toRepoRelative } from './tools/test/discover_test_files.mjs';
+import { resolveRootModules } from './tools/test/vitest_shared_config.mjs';
 
 const rootDir = process.cwd();
 const discovered = discoverTests(rootDir);
@@ -13,7 +14,9 @@ const environmentMatchGlobs: Array<[string, 'jsdom']> = discovered.jsdomVitestFi
 // Prevent dual-React: UI workspace (src/ui/map/node_modules) has its own
 // react, react-dom, and use-sync-external-store. Force all imports to the
 // root copies so Zustand hooks and react-dom/server share one dispatcher.
-const rootModules = join(rootDir, 'node_modules');
+// resolveRootModules is <rootDir>/node_modules in the main checkout and CI; in a git
+// worktree without its own node_modules it finds the copy Node itself would load.
+const rootModules = resolveRootModules(rootDir);
 
 // The root workspace lock now gives maplibre-gl and the @deck.gl/* family one
 // physical production/test identity. Keep the React/Zustand aliases because
