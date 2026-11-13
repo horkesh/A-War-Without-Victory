@@ -215,11 +215,52 @@ describe('early-war flips path (SC2/P3)', () => {
             state, 3,
             [{ mun_id: 'town', from_faction: 'RBiH', to_faction: 'RS' }],
             [{ mun_id: 'town', initiated_turn: 3 }],
-            settlements, new Map(), census
+            settlements, {}, census
         );
         const agg = state.displacement.displacement_humanitarian_aggregates ?? {};
         expect(Object.keys(agg.RS ?? {})).toEqual(['RBiH']);
         expect(state.displacement.civilian_casualties?.RS).toBeUndefined();
         expect(state.displacement.civilian_casualties?.HRHB).toBeUndefined();
+    });
+});
+
+/** For each people: civilian_casualties[people].killed vs killed summed into the aggregates. */
+function killedBothWays(state: GameState): { casualties: Record<string, number>; aggregates: Record<string, number> } {
+    const casualties: Record<string, number> = {};
+    for (const [p, v] of Object.entries(state.displacement.civilian_casualties ?? {})) casualties[p] = v.killed;
+    const aggregates: Record<string, number> = {};
+    for (const byPeople of Object.values(state.displacement.displacement_humanitarian_aggregates ?? {})) {
+        for (const [p, slot] of Object.entries(byPeople)) {
+            if (slot.civilian_casualties_caused > 0) aggregates[p] = (aggregates[p] ?? 0) + slot.civilian_casualties_caused;
+        }
+    }
+    return { casualties, aggregates };
+}
+
+describe('the two ledger "Killed" figures agree by construction (SC3 invariant)', () => {
+    beforeEach(() => resetDisplacementPressureCache());
+
+    it('pressure path, census split across three peoples with different flee-abroad rates', () => {
+        const { state, settlements, edges, census } = encircledPocketFixture();
+        updateDisplacement(state, settlements, edges, census);
+        const { casualties, aggregates } = killedBothWays(state);
+        expect(aggregates).toEqual(casualties);
+        // Refugees created per people equal that people's displaced total (600 / 300 / 100).
+        const rs = state.displacement.displacement_humanitarian_aggregates?.RS ?? {};
+        expect([rs.RBiH?.refugees_created, rs.RS?.refugees_created, rs.HRHB?.refugees_created]).toEqual([600, 300, 100]);
+    });
+
+    it('pressure path, national fallback and two causers', () => {
+        const { state, settlements, census } = encircledPocketFixture();
+        state.political.political_controllers!['op:pocket:b'] = 'HRHB';
+        (state.political as unknown as Record<string, unknown>).war_alliance_rbih_hrhb = -1;
+        state.meta.turn = 60;
+        const edges = [{ a: 'op:pocket:a', b: 'op:ring:c' }, { a: 'op:pocket:a', b: 'op:pocket:b' }];
+        (state.military as unknown as Record<string, Record<string, unknown>>).front_segments['op:pocket:a__op:pocket:b'] =
+            { edge_id: 'op:pocket:a__op:pocket:b', active: true };
+        delete (census as Record<string, unknown>).pocket;
+        updateDisplacement(state, settlements, edges, census);
+        const { casualties, aggregates } = killedBothWays(state);
+        expect(aggregates).toEqual(casualties);
     });
 });

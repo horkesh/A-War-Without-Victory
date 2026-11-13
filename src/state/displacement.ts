@@ -382,10 +382,9 @@ function pushDisplacementEventLogFromMun(
     settlements: Map<string, SettlementRecord>,
     byFaction: Record<FactionId, number>,
     turn: number,
-    lostAmount: number = 0,
-    causedBy?: FactionId,
-    killedByFaction?: Record<FactionId, number>,
-    fledByFaction?: Record<FactionId, number>,
+    routableByFaction: Record<FactionId, number>,
+    causedBy: FactionId,
+    killedByFaction: Record<FactionId, number>,
 ): void {
     const entries = Array.from(settlements.entries())
         .filter(([, rec]) => (rec.mun1990_id ?? rec.mun_code) === munId)
@@ -403,47 +402,39 @@ function pushDisplacementEventLogFromMun(
     if (!state.displacement.displacement_event_log) state.displacement.displacement_event_log = [];
     if (totalDisplaced <= 0) return;
 
+    // SC3 (displacement attribution lane, 2026-11-13): each people's figures come from that
+    // people's own computed counts, never pro rata by displaced. Per people: routed = its
+    // routable count, killed = exactly the killed recorded into civilian_casualties, fled
+    // abroad = the rest of its loss. So for every caller, civilian_casualties[people].killed
+    // equals the killed summed into the aggregates for that people (Engine Invariants).
+    // Each figure is spread across the municipality's settlements by population with floors,
+    // the last settlement taking the remainder.
     const factions: FactionId[] = ['RBiH', 'RS', 'HRHB'];
-    const lostByFaction: Record<FactionId, number> = { RBiH: 0, RS: 0, HRHB: 0 };
-    let lostRem = lostAmount;
-    for (let i = 0; i < factions.length; i++) {
-        const f = factions[i];
-        const total = byFaction[f] ?? 0;
-        lostByFaction[f] = i < factions.length - 1
-            ? Math.floor((lostAmount * total) / totalDisplaced)
-            : Math.max(0, lostRem);
-        lostRem -= lostByFaction[f];
-    }
+    const spread = (amount: number): number[] => {
+        let rem = amount;
+        return entries.map((e, i) => {
+            const part = i < entries.length - 1 ? Math.floor((amount * e.pop) / totalPop) : rem;
+            rem -= part;
+            return part;
+        });
+    };
 
     for (const fid of factions) {
         const total = byFaction[fid] ?? 0;
-        const lostF = lostByFaction[fid] ?? 0;
-        const routedF = Math.max(0, total - lostF);
-        if (total <= 0 && lostF <= 0) continue;
-        let routedRem = routedF;
-        let lostRemF = lostF;
+        if (total <= 0) continue;
+        const routedF = Math.max(0, Math.min(total, routableByFaction[fid] ?? 0));
+        const lostF = total - routedF;
+        const killedF = Math.max(0, Math.min(lostF, killedByFaction[fid] ?? 0));
+        const fledF = lostF - killedF;
+        const routedBy = spread(routedF);
+        const killedBy = spread(killedF);
+        const fledBy = spread(fledF);
         for (let i = 0; i < entries.length; i++) {
-            const { osid, pop } = entries[i];
-            const share = pop / totalPop;
-            const routedHere = i < entries.length - 1 ? Math.floor(routedF * share) : routedRem;
-            const lostHere = i < entries.length - 1 ? Math.floor(lostF * share) : lostRemF;
-            routedRem -= routedHere;
-            lostRemF -= lostHere;
-            if (routedHere <= 0 && lostHere <= 0) continue;
-            // When separate killed/fled breakdowns are provided, use them.
-            // Otherwise fall back to legacy behavior (all lost → killed).
-            const factionKilled = killedByFaction?.[fid] ?? 0;
-            const factionFled = fledByFaction?.[fid] ?? 0;
-            const factionLostTotal = factionKilled + factionFled;
-            let killedHere: number;
-            let fledHere: number;
-            if (factionLostTotal > 0) {
-                killedHere = lostHere > 0 ? Math.round(lostHere * factionKilled / factionLostTotal) : 0;
-                fledHere = lostHere - killedHere;
-            } else {
-                killedHere = lostHere;
-                fledHere = 0;
-            }
+            const { osid } = entries[i];
+            const routedHere = routedBy[i];
+            const killedHere = killedBy[i];
+            const fledHere = fledBy[i];
+            if (routedHere <= 0 && killedHere <= 0 && fledHere <= 0) continue;
             const causerUnrecorded = causedBy === UNKNOWN_CAUSER_BUCKET;
             appendDisplacementEvent(state, {
                 turn,
@@ -562,7 +553,7 @@ export function applyDisplacementFromFlips(
                 HRHB: Math.floor(byFaction.HRHB * getFactionFleeAbroadFraction('HRHB')),
             };
 
-            pushDisplacementEventLogFromMun(state, munId, _settlements, byFaction, turn, lostAmount, toFaction, killedByFac, fledByFac);
+            pushDisplacementEventLogFromMun(state, munId, _settlements, byFaction, turn, routableByFaction, toFaction, killedByFac);
             for (const fid of CANONICAL_FACTIONS) {
                 if (killedByFac[fid] > 0 || fledByFac[fid] > 0) {
                     recordCivilianDisplacementCasualties(state, fid, killedByFac[fid], fledByFac[fid]);
@@ -1045,7 +1036,7 @@ export function updateDisplacement(
                         HRHB: Math.floor(byFaction.HRHB * getFactionFleeAbroadFraction('HRHB')),
                     };
 
-                    pushDisplacementEventLogFromMun(state, munId, settlements, byFaction, currentTurn, shareLost, causerFid, killedByFac, fledByFac);
+                    pushDisplacementEventLogFromMun(state, munId, settlements, byFaction, currentTurn, { RBiH: rRBiH, RS: rRS, HRHB: rHRHB }, causerFid, killedByFac);
 
                     // Record to civilian_casualties (was missing — only event log was written)
                     for (const fid of CANONICAL_FACTIONS) {
