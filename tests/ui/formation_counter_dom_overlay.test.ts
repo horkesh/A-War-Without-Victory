@@ -114,7 +114,8 @@ describe('accessible formation counter overlay', () => {
     expect(stack.getAttribute('aria-label')).toBe('Review 3 formations in stack');
     const badge = stack.querySelector<HTMLElement>('[data-awwv-formation-stack-count]');
     expect(badge?.textContent).toBe('3');
-    expect(badge?.style.opacity).not.toBe('0');
+    // Deck paints the visible badge with its counter; the DOM copy is a transparent target.
+    expect(badge?.style.opacity).toBe('0');
     expect(badge?.getAttribute('aria-hidden')).toBe('true');
     container.remove();
   });
@@ -213,13 +214,13 @@ describe('accessible formation counter overlay', () => {
       renderFeatures(container, [formation('c', 0, 1), formation('a', 0, 1)], secondSelect);
     });
 
+    // c and a share one settlement, so they still form one stack: cascade c, top a, badge.
     const controls = [...container.querySelectorAll<HTMLButtonElement>('[data-awwv-counter-roving-key]')];
-    expect(controls.map((button) => button.dataset.awwvCounterRovingKey)).toEqual(['counter:c', 'counter:a']);
+    expect(controls.map((button) => button.dataset.awwvCounterRovingKey)).toEqual(['counter:c', 'counter:a', 'stack:op:test:stack']);
     expect(controls[0]).toBe(beforeC);
     expect(controls[1]).toBe(beforeA);
     expect(staleB.isConnected).toBe(false);
     expect(container.querySelector('[data-awwv-formation-counter-id="b"]')).toBeNull();
-    expect(container.querySelector('[data-awwv-formation-stack-osid]')).toBeNull();
     expect(controls[1]!.getAttribute('aria-label')).toBe('Formation a');
 
     dispatchNativeGesture(controls[1]!, 'click');
@@ -230,7 +231,7 @@ describe('accessible formation counter overlay', () => {
     container.remove();
   });
 
-  it('deterministically separates stack controls that project onto the same hit area', () => {
+  it('deterministically joins stacks that project onto the same hit area into one badge', () => {
     const container = document.createElement('div');
     document.body.appendChild(container);
     const features = [
@@ -256,20 +257,12 @@ describe('accessible formation counter overlay', () => {
       onCounterSelect: vi.fn(),
     });
 
+    // Two same-side stacks on one pixel cannot both stay readable within the allowed
+    // shift, so the second joins the first: one badge carrying all four units, no
+    // counter buried under another stack.
     const stacks = [...container.querySelectorAll<HTMLButtonElement>('[data-awwv-formation-stack-osid]')];
-    expect(stacks).toHaveLength(2);
-    const rect = (button: HTMLButtonElement) => ({
-      left: Number.parseFloat(button.style.left),
-      top: Number.parseFloat(button.style.top),
-      right: Number.parseFloat(button.style.left) + Number.parseFloat(button.style.width),
-      bottom: Number.parseFloat(button.style.top) + Number.parseFloat(button.style.height),
-    });
-    const [first, second] = stacks.map(rect);
-    const overlap = first!.right > second!.left
-      && first!.left < second!.right
-      && first!.bottom > second!.top
-      && first!.top < second!.bottom;
-    expect(overlap).toBe(false);
+    expect(stacks.map((button) => button.dataset.awwvFormationStackOsid)).toEqual(['op:sarajevo:centar']);
+    expect(stacks[0]?.getAttribute('aria-label')).toBe('Review 4 formations in stack');
 
     const positionsByOsid = (buttons: HTMLButtonElement[]) => buttons
       .map((button) => [button.dataset.awwvFormationStackOsid, button.style.left, button.style.top])

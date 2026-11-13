@@ -1,3 +1,12 @@
+/**
+ * EnclaveDashboard — the Humanitarian & Siege Ledger of the player's enclaves.
+ *
+ * Surface redesign, step 4 (2026-11-12): one surface in the Command Surface style
+ * (was a small translucent panel at the right edge): header, the readout as figure
+ * tiles, the enclaves as cards in the middle, and the airdrop budget with its Stage
+ * action in the right column when any enclave can receive drops. Presentation only;
+ * the budget arithmetic and the staging IPC call are unchanged.
+ */
 import { useEffect, useMemo, useState } from 'react';
 import type { EnclaveResilienceView, LoadedGameState } from '../data/types';
 import { AIRDROP_GENERAL_SUPPLY_PER_ENCLAVE, AIRDROP_MAX_SUPPLY_PER_TURN } from '../../../state/supply_reserve_constants';
@@ -5,6 +14,29 @@ import { useIPC } from '../desktop/useIPC';
 import { getPlayerSafeEnclaveName, getPlayerSafePoliticalFactionName } from '../utils/playerSafeText';
 import { t, type MessageKey } from '../i18n';
 import { strictCompare } from '../../../state/validateGameState';
+import {
+  SURFACE_CHIP,
+  SURFACE_LABEL_MUTED,
+  SURFACE_PRIMARY_BUTTON_COMPACT,
+  SURFACE_TONE,
+  SurfaceCloseButton,
+  SurfaceColumns,
+  SurfaceContent,
+  SurfaceDetail,
+  SurfaceDetailBody,
+  SurfaceDetailFooter,
+  SurfaceFigure,
+  SurfaceFrame,
+  SurfaceHeader,
+  SurfacePanel,
+  SurfaceSection,
+  SurfaceSections,
+  SurfaceStat,
+} from './surface/Surface';
+import { useDialogFocus } from '../../shared/Modal';
+import { useSurfaceEscape } from './surface/useSurfaceEscape';
+import { surfaceFactionName } from './surface/surfaceFactionName';
+import { SurfaceModalLayer } from './surface/SurfaceModalLayer';
 
 interface EnclaveDashboardProps {
   state: LoadedGameState;
@@ -13,12 +45,12 @@ interface EnclaveDashboardProps {
 }
 
 const SUPPLY_CLASSES: Record<'adequate' | 'strained' | 'critical', string> = {
-  adequate: 'text-green-400',
-  strained: 'text-amber-300',
-  critical: 'text-red-400',
+  adequate: 'text-emerald-200',
+  strained: 'text-amber-200',
+  critical: 'text-red-200',
 };
 
-const SUPPLY_UNREPORTED_CLASS = 'text-text-secondary';
+const SUPPLY_UNREPORTED_CLASS = 'text-[#b9ad94]';
 
 const SUPPLY_LABEL_KEYS: Record<'adequate' | 'strained' | 'critical', MessageKey> = {
   adequate: 'enclave.supplyState.adequate',
@@ -37,25 +69,27 @@ function getEnclaveRisk(enclave: EnclaveResilienceView) {
     return {
       label: t('enclave.risk.critical'),
       detail: t('enclave.risk.criticalDetail', { resilience: enclave.resilience.toFixed(1), turns: enclave.isolation_turns }),
-      className: 'text-red-400',
+      className: SURFACE_TONE.danger,
     };
   }
   if (enclave.supply_state === 'strained' || enclave.isolation_turns >= 4) {
     return {
       label: t('enclave.risk.heightened'),
       detail: t('enclave.risk.heightenedDetail', { turns: enclave.isolation_turns }),
-      className: 'text-amber-300',
+      className: SURFACE_TONE.warn,
     };
   }
   return {
     label: t('enclave.risk.holding'),
     detail: t('enclave.risk.holdingDetail'),
-    className: 'text-green-400',
+    className: SURFACE_TONE.good,
   };
 }
 
 export function EnclaveDashboard({ state, open, onClose }: EnclaveDashboardProps) {
   const ipc = useIPC();
+  useSurfaceEscape(open, onClose);
+  const dialogFocus = useDialogFocus(open);
   const [allocations, setAllocations] = useState<Record<string, number>>({});
   const [actionMessage, setActionMessage] = useState<string | null>(null);
   const enclaves = useMemo(
@@ -115,163 +149,159 @@ export function EnclaveDashboard({ state, open, onClose }: EnclaveDashboardProps
 
   if (!open) return null;
 
+  const hasAirdrop = eligibleEnclaveIds.length > 0;
+
   return (
-    <div
-      className="absolute right-4 top-16 z-30 w-[24rem] rounded-lg border border-panel-border bg-panel-bg/95 backdrop-blur-sm shadow-xl overflow-hidden"
+    <SurfaceModalLayer>
+    <SurfaceFrame
+      layerClassName=""
+      ref={dialogFocus.ref}
+      onKeyDownCapture={dialogFocus.onKeyDown}
+      data-testid="enclave-dashboard"
+      aria-modal="true"
+      aria-labelledby="enclave-dashboard-title"
       style={{ direction: 'ltr' }}
     >
-      <div className="flex items-center justify-between px-4 py-2.5 bg-panel-card border-b border-panel-border">
-        <div className="font-sans text-xs text-accent-gold uppercase tracking-wide font-semibold">
-          {t('enclave.title')}
-        </div>
-        <button
-          type="button"
-          onClick={onClose}
-          aria-label={t('enclave.close')}
-          title={t('enclave.close')}
-          className="text-text-secondary hover:text-interactive text-sm leading-none"
-        >
-          x
-        </button>
-      </div>
-      <div className="max-h-[32rem] overflow-auto p-3 space-y-3">
-        <div className="rounded border border-panel-border bg-panel-card/70 p-3 space-y-2">
-          <div className="text-xs uppercase tracking-wide text-accent-gold font-semibold">
-            {t('enclave.summaryTitle')}
-          </div>
-          <div className="grid grid-cols-3 gap-2 text-xs">
-            <div>
-              <div className="text-text-secondary">{t('enclave.summaryCritical')}</div>
-              <div className="font-mono text-red-400">{criticalCount}</div>
-            </div>
-            <div>
-              <div className="text-text-secondary">{t('enclave.summaryHeightened')}</div>
-              <div className="font-mono text-amber-300">{heightenedCount}</div>
-            </div>
-            <div>
-              <div className="text-text-secondary">{t('enclave.summaryAirdropReady')}</div>
-              <div className="font-mono text-sky-300">{eligibleEnclaveIds.length}</div>
-            </div>
-          </div>
-        </div>
-        {eligibleEnclaveIds.length > 0 && (
-          <div className="rounded border border-panel-border bg-panel-card/70 p-3 space-y-2">
-            <div className="flex items-center justify-between text-xs">
-              <span className="text-text-secondary">{t('enclave.airdropBudget')}</span>
-              <span className="text-text-primary font-mono">{allocated.toFixed(1)} / {airdropBudget.toFixed(1)}</span>
-            </div>
-            <div className="h-2 rounded bg-black/30 overflow-hidden">
-              <div className="h-full bg-sky-400/80" style={{ width: `${allocatedPct}%` }} />
-            </div>
-            <div className="text-xs text-text-secondary">{t('enclave.remaining', { value: remaining.toFixed(1) })}</div>
-            <button
-              type="button"
-              onClick={() => void stageAllocations()}
-              disabled={!canStageAirdrop}
-              title={airdropStageDisabledReason}
-              className="w-full rounded border border-panel-border px-2 py-1 text-xs text-text-primary hover:bg-panel-hover disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {t('enclave.stageAirdropAllocation')}
-            </button>
-            {actionMessage && <div className="text-xs text-accent-gold">{actionMessage}</div>}
-          </div>
-        )}
-        {enclaves.length === 0 ? (
-          <div className="text-xs text-text-secondary italic">{t('enclave.noData')}</div>
-        ) : (
-          enclaves.map(([enclaveId, enclave]) => {
-            const resiliencePct = Math.max(0, Math.min(100, (enclave.resilience / 30) * 100));
-            const hardeningMarkerPct = (8 / 30) * 100;
-            const supplyState = enclave.supply_state;
-            const airdropStatus = enclave.airdrop_status ?? 'not_eligible';
-            const risk = getEnclaveRisk(enclave);
-            const currentAllocation = allocations[enclaveId] ?? 0;
-            const maxAllocation = remaining + currentAllocation;
-            return (
-              <div key={enclaveId} className="rounded border border-panel-border bg-panel-card/70 p-3 space-y-2">
-                <div className="flex items-center justify-between gap-2">
-                  <div>
-                    <div className="font-sans text-sm text-text-primary font-semibold">
-                      {getPlayerSafeEnclaveName(enclave.display_name ?? enclaveId)}
-                    </div>
-                    <div className="text-xs uppercase tracking-wide text-text-secondary">
-                      {getPlayerSafePoliticalFactionName(enclave.faction, t('common.unknown'))}
-                    </div>
-                  </div>
-                  <div className={`text-xs font-mono ${enclave.hardening_active ? 'text-accent-gold' : 'text-text-secondary'}`}>
-                    {enclave.hardening_active ? t('enclave.hardeningActive') : t('enclave.hardeningInactive')}
-                  </div>
-                </div>
-
-                <div className={`text-xs font-semibold uppercase tracking-wide ${risk.className}`}>
-                  {risk.label}
-                </div>
-                <div className="text-xs text-text-secondary">
-                  {risk.detail}
-                </div>
-
-                <div className="space-y-1">
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="text-text-secondary">{t('enclave.resilience')}</span>
-                    <span className="text-text-primary font-mono">{enclave.resilience.toFixed(1)} / 30</span>
-                  </div>
-                  <div className="relative h-2 rounded bg-black/30 overflow-hidden">
-                    <div className="absolute inset-y-0 left-0 bg-accent-gold" style={{ width: `${resiliencePct}%` }} />
-                    <div className="absolute inset-y-0 border-l border-white/60" style={{ left: `${hardeningMarkerPct}%` }} />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-2 text-xs">
-                  <div>
-                    <div className="text-text-secondary">{t('enclave.isolationTurns')}</div>
-                    <div className="text-text-primary font-mono">{enclave.isolation_turns}</div>
-                  </div>
-                  <div>
-                    <div className="text-text-secondary">{t('enclave.supplyState')}</div>
-                    <div className={`font-mono uppercase ${supplyState ? SUPPLY_CLASSES[supplyState] : SUPPLY_UNREPORTED_CLASS}`}>
-                      {supplyState ? t(SUPPLY_LABEL_KEYS[supplyState]) : t('corpsFront.unreported')}
-                    </div>
-                  </div>
-                  <div className="col-span-2">
-                    <div className="text-text-secondary">{t('enclave.airdrop')}</div>
-                    <div className="text-text-primary font-mono">{t(AIRDROP_LABEL_KEYS[airdropStatus])}</div>
-                  </div>
-                  {eligibleEnclaveIdSet.has(enclaveId) && (
-                    <div className="col-span-2">
-                      <label
-                        htmlFor={`enclave-allocation-${enclaveId}`}
-                        className="text-text-secondary mb-1 block"
-                      >
-                        {t('enclave.allocatedSupply')}
-                      </label>
-                      <input
-                        id={`enclave-allocation-${enclaveId}`}
-                        type="number"
-                        min={0}
-                        max={maxAllocation}
-                        step={0.1}
-                        value={currentAllocation.toFixed(1)}
-                        disabled={!ipc.isAvailable}
-                        onChange={(event) => {
-                          const value = Number(event.target.value);
-                          const clampedValue = Number.isFinite(value)
-                            ? Math.min(Math.max(value, 0), maxAllocation)
-                            : 0;
-                          setAllocations((prev) => ({
-                            ...prev,
-                            [enclaveId]: clampedValue,
-                          }));
-                        }}
-                        className="w-full rounded border border-panel-border bg-panel-bg px-2 py-1 text-text-primary disabled:opacity-50 disabled:cursor-not-allowed"
-                      />
-                    </div>
-                  )}
-                </div>
+      <SurfaceHeader
+        eyebrow={surfaceFactionName(state.player_faction)}
+        title={<span id="enclave-dashboard-title">{t('enclave.title')}</span>}
+        close={<SurfaceCloseButton onClick={onClose} aria-label={t('enclave.close')} />}
+      />
+      <SurfaceColumns layout={hasAirdrop ? 'content-detail' : 'single'}>
+        <SurfaceContent>
+          <SurfaceSections className={hasAirdrop ? undefined : 'max-w-[96rem]'}>
+            <SurfaceSection label={t('enclave.summaryTitle')}>
+              <div className="grid grid-cols-3 gap-3">
+                <SurfaceFigure label={t('enclave.summaryCritical')} value={criticalCount} tone="font-mono text-red-200" />
+                <SurfaceFigure label={t('enclave.summaryHeightened')} value={heightenedCount} tone="font-mono text-amber-200" />
+                <SurfaceFigure label={t('enclave.summaryAirdropReady')} value={eligibleEnclaveIds.length} tone="font-mono text-sky-200" />
               </div>
-            );
-          })
+            </SurfaceSection>
+
+            {enclaves.length === 0 ? (
+              <p className="m-0 text-[17px] italic text-[#b9ad94]">{t('enclave.noData')}</p>
+            ) : (
+              <div className="grid grid-cols-[repeat(auto-fill,minmax(min(100%,26rem),1fr))] gap-3">
+                {enclaves.map(([enclaveId, enclave]) => {
+                  const resiliencePct = Math.max(0, Math.min(100, (enclave.resilience / 30) * 100));
+                  const hardeningMarkerPct = (8 / 30) * 100;
+                  const supplyState = enclave.supply_state;
+                  const airdropStatus = enclave.airdrop_status ?? 'not_eligible';
+                  const risk = getEnclaveRisk(enclave);
+                  const currentAllocation = allocations[enclaveId] ?? 0;
+                  const maxAllocation = remaining + currentAllocation;
+                  return (
+                    <SurfacePanel key={enclaveId} className="flex flex-col gap-3" data-enclave-id={enclaveId}>
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex min-w-0 flex-col gap-1">
+                          <span className="text-[20px] font-semibold leading-tight text-[#f1e6c8]">
+                            {getPlayerSafeEnclaveName(enclave.display_name ?? enclaveId)}
+                          </span>
+                          <span className="text-[15px] text-[#b9ad94]">
+                            {getPlayerSafePoliticalFactionName(enclave.faction, t('common.unknown'))}
+                          </span>
+                        </div>
+                        <span className={`${SURFACE_CHIP} ${risk.className}`}>{risk.label}</span>
+                      </div>
+
+                      <p className="m-0 text-[16px] leading-relaxed text-[#ddd1b3]">{risk.detail}</p>
+
+                      <div className="flex flex-col gap-1.5">
+                        <div className="flex items-baseline justify-between gap-3">
+                          <span className="text-[16px] text-[#b9ad94]">{t('enclave.resilience')}</span>
+                          <span className="font-mono text-[16px] font-semibold tabular-nums text-[#f1e6c8]">{enclave.resilience.toFixed(1)} / 30</span>
+                        </div>
+                        <div className="relative h-2.5 overflow-hidden rounded-full bg-[#262b35]">
+                          <div className="absolute inset-y-0 left-0 bg-[#c9a75c]" style={{ width: `${resiliencePct}%` }} />
+                          <div className="absolute inset-y-0 border-l border-white/60" style={{ left: `${hardeningMarkerPct}%` }} />
+                        </div>
+                      </div>
+
+                      <span className={`text-[15px] font-semibold ${enclave.hardening_active ? 'text-[#e0c27a]' : 'text-[#b9ad94]'}`}>
+                        {enclave.hardening_active ? t('enclave.hardeningActive') : t('enclave.hardeningInactive')}
+                      </span>
+
+                      <div className="flex flex-col">
+                        <SurfaceStat label={t('enclave.isolationTurns')} value={enclave.isolation_turns} />
+                        <SurfaceStat
+                          label={t('enclave.supplyState')}
+                          value={supplyState ? t(SUPPLY_LABEL_KEYS[supplyState]) : t('corpsFront.unreported')}
+                          tone={supplyState ? SUPPLY_CLASSES[supplyState] : SUPPLY_UNREPORTED_CLASS}
+                        />
+                        <SurfaceStat label={t('enclave.airdrop')} value={t(AIRDROP_LABEL_KEYS[airdropStatus])} />
+                      </div>
+
+                      {eligibleEnclaveIdSet.has(enclaveId) && (
+                        <div className="flex flex-col gap-1.5">
+                          <label
+                            htmlFor={`enclave-allocation-${enclaveId}`}
+                            className="text-[15px] text-[#b9ad94]"
+                          >
+                            {t('enclave.allocatedSupply')}
+                          </label>
+                          <input
+                            id={`enclave-allocation-${enclaveId}`}
+                            type="number"
+                            min={0}
+                            max={maxAllocation}
+                            step={0.1}
+                            value={currentAllocation.toFixed(1)}
+                            disabled={!ipc.isAvailable}
+                            onChange={(event) => {
+                              const value = Number(event.target.value);
+                              const clampedValue = Number.isFinite(value)
+                                ? Math.min(Math.max(value, 0), maxAllocation)
+                                : 0;
+                              setAllocations((prev) => ({
+                                ...prev,
+                                [enclaveId]: clampedValue,
+                              }));
+                            }}
+                            className="h-11 w-full rounded-md border border-[#3a4150] bg-[#0f1218] px-3 font-mono text-[16px] text-[#f1e6c8] focus:border-accent-gold/60 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+                          />
+                        </div>
+                      )}
+                    </SurfacePanel>
+                  );
+                })}
+              </div>
+            )}
+          </SurfaceSections>
+        </SurfaceContent>
+
+        {hasAirdrop && (
+          <SurfaceDetail aria-label={t('enclave.airdropBudget')}>
+            <SurfaceDetailBody eyebrow={t('enclave.airdrop')} title={t('enclave.airdropBudget')}>
+              <div className="flex flex-col gap-2">
+                <div className="flex items-baseline justify-between gap-3">
+                  <span className={SURFACE_LABEL_MUTED}>{t('enclave.allocatedSupply')}</span>
+                  <span className="font-mono text-[22px] font-semibold tabular-nums text-[#f1e6c8]">{allocated.toFixed(1)} / {airdropBudget.toFixed(1)}</span>
+                </div>
+                <div className="h-3 overflow-hidden rounded-full bg-[#262b35]">
+                  <div className="h-full bg-sky-300/80" style={{ width: `${allocatedPct}%` }} />
+                </div>
+                <p className="m-0 text-[17px] text-[#ddd1b3]">{t('enclave.remaining', { value: remaining.toFixed(1) })}</p>
+              </div>
+            </SurfaceDetailBody>
+            <SurfaceDetailFooter>
+              {actionMessage && <p role="status" aria-live="polite" className="m-0 text-[16px] text-[#e0c27a]">{actionMessage}</p>}
+              {airdropStageDisabledReason && !actionMessage && (
+                <p className="m-0 text-[15px] text-[#b9ad94]">{airdropStageDisabledReason}</p>
+              )}
+              <button
+                type="button"
+                onClick={() => void stageAllocations()}
+                disabled={!canStageAirdrop}
+                title={airdropStageDisabledReason}
+                className={`w-full ${SURFACE_PRIMARY_BUTTON_COMPACT}`}
+              >
+                {t('enclave.stageAirdropAllocation')}
+              </button>
+            </SurfaceDetailFooter>
+          </SurfaceDetail>
         )}
-      </div>
-    </div>
+      </SurfaceColumns>
+    </SurfaceFrame>
+    </SurfaceModalLayer>
   );
 }

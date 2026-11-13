@@ -162,6 +162,7 @@ test('historical event policy accepts exact visible tooltip or same-modal dossie
     const policy = loadAsyncFunction<(surface: any) => Promise<any>>(harness, 'policyEventResponseControl', {
         historicalChoice: true,
         rbihParamilitaryPolicyOverride: null,
+        rsDrinaPolicyOverride: null,
         selectHistoricalEventChoice,
         hasMeaningfulSourceContent,
     });
@@ -188,6 +189,7 @@ test('historical event policy rejects absent, empty, hidden, foreign, or ambiguo
     const policy = loadAsyncFunction<(surface: any) => Promise<any>>(harness, 'policyEventResponseControl', {
         historicalChoice: true,
         rbihParamilitaryPolicyOverride: null,
+        rsDrinaPolicyOverride: null,
         selectHistoricalEventChoice,
         hasMeaningfulSourceContent,
     });
@@ -711,6 +713,11 @@ test('directional map probes record empty terrain but require at least one visib
     assert.match(mapProbe, /selected:\s*'formation'/);
     assert.match(mapProbe, /selected:\s*'sector'/);
     assert.match(mapProbe, /selected:\s*'corps'/);
+    // A click on a stacked counter opens the stack dialog; it is recorded and closed, never
+    // left open to intercept the next probe click (rs-02, turn 16).
+    assert.match(mapProbe, /\[role="dialog"\]\[aria-label="Formation stack"\]/);
+    assert.match(mapProbe, /selected:\s*'stack-expansion'/);
+    assert.match(mapProbe, /if \(await directionalStackExpansion\.isVisible[\s\S]*?closeDirectionalStackExpansion\(`before/);
     assert.match(mapProbe, /selected:\s*false/);
     assert.match(mapProbe, /successfulDirectionalSelections === 0/);
     assert.match(mapProbe, /Directional map probe selected no settlements/);
@@ -885,9 +892,10 @@ test('sector warnings remain fatal when final serialized state cannot prove same
 test('ambient abort attribution requires one exact element/source epoch and consumes it once', () => {
     const harness = readHarness();
     const classifySource = extractFunctionSource(harness, 'classifyExpectedAmbientLifecycleAbort');
+    const recoveredSource = extractFunctionSource(harness, 'classifyRecoveredMediaElementAbort');
     const attributeSource = extractFunctionSource(harness, 'attributeAmbientLifecycleAborts');
     const attribute = runInNewContext(
-        `(() => { const classifyExpectedAmbientLifecycleAbort = ${classifySource}; return (${attributeSource}); })()`,
+        `(() => { const classifyExpectedAmbientLifecycleAbort = ${classifySource}; const classifyRecoveredMediaElementAbort = ${recoveredSource}; return (${attributeSource}); })()`,
         { URL },
     ) as (failures: Array<Record<string, unknown>>, stops: Array<Record<string, unknown>>, expected: Array<Record<string, unknown>>) => void;
     const url = 'http://127.0.0.1:3002/assets/ambient_field-D4f9a2.ogg';
@@ -930,6 +938,54 @@ test('ambient abort attribution requires one exact element/source epoch and cons
     const wrongOriginExpected: Array<Record<string, unknown>> = [];
     attribute(wrongOriginFailures, [start('media:1', 1, wrongOrigin), abort('media:1', 1, wrongOrigin)], wrongOriginExpected);
     assert.equal(wrongOriginExpected.length, 0);
+});
+
+test('a media range-request abort is excused only when the same element played that source without error', () => {
+    const harness = readHarness();
+    const classifySource = extractFunctionSource(harness, 'classifyExpectedAmbientLifecycleAbort');
+    const recoveredSource = extractFunctionSource(harness, 'classifyRecoveredMediaElementAbort');
+    const attributeSource = extractFunctionSource(harness, 'attributeAmbientLifecycleAborts');
+    const attribute = runInNewContext(
+        `(() => { const classifyExpectedAmbientLifecycleAbort = ${classifySource}; const classifyRecoveredMediaElementAbort = ${recoveredSource}; return (${attributeSource}); })()`,
+        { URL },
+    ) as (failures: Array<Record<string, unknown>>, signals: Array<Record<string, unknown>>, expected: Array<Record<string, unknown>>) => void;
+    const music = 'http://127.0.0.1:3002/assets/the_long_winter-CRQ6dHRh.ogg';
+    const failure = (requestInitiatedAtMs: number, failureUrl = music) => ({
+        failure: { errorText: 'net::ERR_ABORTED' }, method: 'GET', url: failureUrl,
+        resourceType: 'media', isMainFrame: false, eventCount: 22,
+        teardownStarted: false, observedAtMs: requestInitiatedAtMs + 5, requestInitiatedAtMs,
+    });
+    const signal = (kind: string, observedAtMs: number, elementId = 'media:2', signalUrl = music) => ({
+        kind, elementId, sourceEpoch: 1, url: signalUrl, origin: 'http://127.0.0.1:3002', observedAtMs,
+    });
+    // Attempt 12's shape: load-time abort and a later mid-track range abort, element plays.
+    const played = [signal('request-start', 1_000), signal('canplay', 1_050), signal('playing', 1_050)];
+    const failures = [failure(1_000), failure(60_000)];
+    const expected: Array<Record<string, unknown>> = [];
+    attribute(failures, played, expected);
+    assert.equal(failures.length, 0);
+    assert.deepEqual(expected.map((entry) => entry.allowlist), ['media-element-played-through-abort', 'media-element-played-through-abort']);
+
+    for (const signals of [
+        [signal('request-start', 1_000)], // never played
+        [...played, signal('error', 1_500)], // played, then errored
+        [signal('request-start', 5_000), signal('playing', 5_050)], // started after the request
+        [signal('request-start', 1_000, 'media:2', 'http://127.0.0.1:3002/assets/a_country_before_dawn-PtkU-Fjj.ogg'),
+            signal('playing', 1_050, 'media:2', 'http://127.0.0.1:3002/assets/a_country_before_dawn-PtkU-Fjj.ogg')], // other track
+    ]) {
+        const rejected = [failure(1_000)];
+        const rejectedExpected: Array<Record<string, unknown>> = [];
+        attribute(rejected, signals, rejectedExpected);
+        assert.equal(rejectedExpected.length, 0);
+        assert.equal(rejected.length, 1);
+    }
+    const external = [failure(1_000, 'http://127.0.0.1:3002/media/voice.ogg')];
+    const externalExpected: Array<Record<string, unknown>> = [];
+    attribute(external, [
+        signal('request-start', 1_000, 'media:3', 'http://127.0.0.1:3002/media/voice.ogg'),
+        signal('playing', 1_050, 'media:3', 'http://127.0.0.1:3002/media/voice.ogg'),
+    ], externalExpected);
+    assert.equal(externalExpected.length, 0);
 });
 
 function mediaTimeRanges(pairs: Array<[number, number]>) {
@@ -981,7 +1037,7 @@ function ambientSignals(window: Window & typeof globalThis): any[] {
 test('ambient lifecycle observer records browser media progress with exact element state and ignores other audio', () => {
     const dom = new JSDOM(`
         <audio id="ambient" src="http://127.0.0.1:3002/assets/ambient_field-D4f9a2.ogg"></audio>
-        <audio id="ui" src="http://127.0.0.1:3002/assets/ui_click-D4f9a2.ogg"></audio>
+        <audio id="ui" src="http://127.0.0.1:3002/media/ui_click.ogg"></audio>
     `);
     const { window } = dom;
     const ambient = window.document.querySelector<HTMLAudioElement>('#ambient')!;
@@ -2133,6 +2189,37 @@ test('tile fetch abort attribution requires and consumes an exact renderer Abort
     attribute(wrongPortFailures, [signal('tile-1', 1_900, wrongPortUrl)], wrongPortExpected);
     assert.equal(wrongPortExpected.length, 0, 'a different localhost origin must not inherit the tile allowance');
     assert.equal(wrongPortFailures.length, 1);
+});
+
+test('tile AbortSignal observer keeps recording aborts while the body is still being read', async () => {
+    // R8 RS-07 event 509: six hillshade ranges aborted together; the three whose fetch()
+    // had already resolved (headers in, body still streaming) left no signal because the
+    // observer detached its listener on resolve, so their exact aborts went unexplained.
+    const origin = 'http://127.0.0.1:3002';
+    const response = { status: 206 };
+    const window: Record<string, unknown> = {
+        location: { origin },
+        fetch: async () => response,
+    };
+    runInNewContext(`(${extractFunctionSource(readHarness(), 'installTileFetchAbortObserver')})()`, {
+        window, Request, Headers, URL, Date, performance: { timeOrigin: 7 },
+    });
+    const signals = window.__AWWV_QA_TILE_FETCH_ABORT_SIGNALS__ as Array<Record<string, unknown>>;
+    const observedFetch = window.fetch as (input: string, init?: RequestInit) => Promise<unknown>;
+    const tileUrl = `${origin}/data/derived/tiles/hillshade.pmtiles`;
+
+    const midBody = new AbortController();
+    assert.equal(await observedFetch(tileUrl, { signal: midBody.signal, headers: { range: 'bytes=0-99' } }), response);
+    midBody.abort();
+    const beforeHeaders = new AbortController();
+    beforeHeaders.abort();
+    await observedFetch(tileUrl, { signal: beforeHeaders.signal, headers: { range: 'bytes=100-199' } });
+    await observedFetch(`${origin}/assets/not-a-tile.webp`, { signal: new AbortController().signal });
+
+    assert.deepEqual(signals.map((entry) => [entry.id, entry.range, entry.afterResponseHeaders]), [
+        ['tile-fetch:7:1', 'bytes=0-99', true],
+        ['tile-fetch:7:2', 'bytes=100-199', false],
+    ]);
 });
 
 test('tile AbortSignal observer is installed as an init script and attributed after Save/load', () => {
@@ -4416,6 +4503,7 @@ test('RBiH paramilitary override chooses only the existing visible counterfactua
                 provenance: 'explicit_visible_player_policy_selector',
                 eventId: 'rbih_paramilitary_policy_1992',
             },
+            rsDrinaPolicyOverride: null,
             selectHistoricalEventChoice,
             hasMeaningfulSourceContent: () => false,
         },
@@ -4476,6 +4564,147 @@ test('RBiH paramilitary override chooses only the existing visible counterfactua
     assert.match(clickSource, /policyEventResponseControl/);
     assert.match(clickSource, /assertExactEventDecisionReceipt/);
     assert.match(clickSource, /receipt\.responseId !== transcriptRow\.responseId/);
+});
+
+test('Historical runs leave only an OPTIONAL decision with no ranked answer unanswered', () => {
+    const harness = readHarness();
+    const isUnranked = loadFunction<(decision: unknown) => boolean>(harness, 'isUnrankedOptionalEventDecision');
+    const options = [{ id: 'a' }, { id: 'b' }];
+    assert.equal(isUnranked({ requires_player_response: false, response_options: options }), true);
+    assert.equal(isUnranked({ response_options: options }), true);
+    assert.equal(isUnranked({ requires_player_response: true, response_options: options }), false);
+    assert.equal(isUnranked({ response_options: options, staff_recommended_response_id: 'a' }), false);
+    assert.equal(isUnranked({ response_options: options, historical_default_response_id: 'b' }), false);
+    assert.equal(isUnranked({ response_options: [{ id: 'a', historical_marker: 'historical_default' }] }), false);
+    assert.equal(isUnranked(null), false);
+
+    const handle = extractFunctionSource(harness, 'handleCurrentSurface');
+    assert.match(handle, /historicalChoice && !pendingEventId && await pausedContinue\.isVisible/);
+    assert.match(handle, /unansweredOptionalEventDecisionIds \?\? \[\]\)\.includes\(visibleEventId\)/);
+    assert.match(handle, /basis: 'left_unanswered_optional_no_ranked_answer'/);
+    const read = extractFunctionSource(harness, 'readState');
+    assert.match(read, /const unansweredOptionalEventDecisionIds = historicalChoice/);
+    assert.match(read, /!unansweredOptionalEventDecisionIds\.includes\(id\)/);
+});
+
+test('RS Drina selector accepts only one explicit known option on a Historical RS run', () => {
+    const harness = readHarness();
+    const parse = loadFunction<(
+        argv: string[],
+        historical: boolean,
+        factions: string[],
+    ) => Record<string, unknown> | null>(harness, 'parseRsDrinaPolicyOverride', {
+        RS_DRINA_POLICY_OPTIONS: ['restrained', 'systematic'],
+    });
+
+    assert.equal(parse(['node', 'qa.cjs', '--historical-choice', '--faction=RS'], true, ['RS']), null);
+    assert.deepEqual(JSON.parse(JSON.stringify(parse(['--rs-drina-policy=restrained'], true, ['RS']))), {
+        requested: 'restrained',
+        version: 1,
+        provenance: 'explicit_operator_selection_for_unranked_sensitive_decision',
+        eventId: 'drina_cleansing_decision_1992',
+    });
+    assert.throws(() => parse(['--rs-drina-policy=restrained', '--rs-drina-policy=restrained'], true, ['RS']), /exactly once/i);
+    assert.throws(() => parse(['--rs-drina-policy'], true, ['RS']), /unknown.*empty/i);
+    assert.throws(() => parse(['--rs-drina-policy=cleanse'], true, ['RS']), /unknown.*cleanse/i);
+    assert.throws(() => parse(['--rs-drina-policy=restrained'], false, ['RS']), /historical-choice/i);
+    assert.throws(() => parse(['--rs-drina-policy=restrained'], true, ['RBiH']), /RS only/i);
+    assert.throws(() => parse(['--rs-drina-policy=restrained'], true, ['RS', 'RBiH']), /RS only/i);
+    assert.ok(
+        harness.indexOf('const rsDrinaPolicyOverride = parseRsDrinaPolicyOverride(')
+            < harness.indexOf('reserveEvidenceDirectory();'),
+        'invalid selector requests must fail before any native launch preparation',
+    );
+    assert.match(harness, /\.\.\.\(rsDrinaPolicyOverride \? \{ rsDrinaPolicyOverride \} : \{\}\)/);
+});
+
+test('RS Drina selector picks the named visible control only while the decision has no ranked default', async () => {
+    const harness = readHarness();
+    const selectHistoricalEventChoice = loadFunction<(decision: any) => any>(harness, 'selectHistoricalEventChoice');
+    const override = {
+        requested: 'restrained',
+        version: 1,
+        provenance: 'explicit_operator_selection_for_unranked_sensitive_decision',
+        eventId: 'drina_cleansing_decision_1992',
+    };
+    const policyWith = (rsDrinaPolicyOverride: unknown) => loadAsyncFunction<(surface: any) => Promise<any>>(
+        harness,
+        'policyEventResponseControl',
+        {
+            historicalChoice: true,
+            rbihParamilitaryPolicyOverride: null,
+            rsDrinaPolicyOverride,
+            selectHistoricalEventChoice,
+            hasMeaningfulSourceContent: () => false,
+        },
+    );
+    const controls = [
+        { id: 'systematic-control', label: 'Open command-accountability proceedings' },
+        { id: 'restrained-control', label: 'Impose immediate civilian-protection restraints' },
+    ];
+    const responseList = {
+        nth: (index: number) => controls[index],
+        evaluateAll: async (callback: (nodes: any[]) => unknown) => callback(controls.map((control) => ({
+            firstElementChild: { firstElementChild: { textContent: control.label } },
+        }))),
+    };
+    let railEventId = 'drina_cleansing_decision_1992';
+    const rail = { getAttribute: async () => railEventId };
+    const modal = { locator: (selector: string) => selector.includes('rail')
+        ? { count: async () => 1, first: () => rail }
+        : responseList };
+    const baseOptions = [
+        { id: 'systematic', label: controls[0].label },
+        { id: 'restrained', label: controls[1].label },
+    ];
+    const surface = (extra: Record<string, unknown> = {}, options: unknown[] = baseOptions, playerFaction = 'RS', decisionFaction = 'RS') => ({
+        locator: () => ({ count: async () => 1, first: () => modal }),
+        evaluate: async () => ({
+            meta: { turn: 10, player_faction: playerFaction },
+            military: {
+                pending_event_decisions: [{
+                    event_id: railEventId,
+                    faction: decisionFaction,
+                    response_options: options,
+                    ...extra,
+                }],
+            },
+        }),
+    });
+
+    await assert.rejects(policyWith(null)(surface()), /No ranked authored historical default/);
+
+    const policy = policyWith(override);
+    const selected = await policy(surface());
+    assert.equal(selected.loc.id, 'restrained-control');
+    assert.equal(selected.choice.responseId, 'restrained');
+    assert.equal(selected.choice.basis, 'player_selected_counterfactual');
+    assert.equal(selected.choice.historicityClaim, 'none_counterfactual_player_choice');
+    assert.deepEqual(JSON.parse(JSON.stringify(selected.choice.requestedOverride)), override);
+
+    await assert.rejects(policy(surface({ staff_recommended_response_id: 'systematic' })), /refuses/i);
+    await assert.rejects(policy(surface({ historical_default_response_id: 'systematic' })), /refuses/i);
+    await assert.rejects(policy(surface({}, [
+        { id: 'systematic', label: controls[0].label, historical_marker: 'historical_default' },
+        { id: 'restrained', label: controls[1].label },
+    ])), /refuses/i);
+    await assert.rejects(policy(surface({}, [baseOptions[0]])), /missing option restrained/i);
+    await assert.rejects(policy(surface({}, [
+        baseOptions[0],
+        baseOptions[1],
+        { id: 'restrained', label: controls[1].label },
+    ])), /ambiguous option restrained/i);
+    await assert.rejects(policy(surface({}, baseOptions, 'RBiH')), /exact player event/i);
+    // The dedicated guard: an RBiH player holding an RBiH-owned copy of the same event id.
+    await assert.rejects(policy(surface({}, baseOptions, 'RBiH', 'RBiH')), /RS Drina selector reached mismatched player: RBiH/);
+
+    // Any other event keeps the ordinary ranked selection while the selector is set.
+    railEventId = 'some_other_rs_event';
+    const other = await policy(surface({ staff_recommended_response_id: 'systematic' }));
+    assert.equal(other.choice.responseId, 'systematic');
+    assert.equal(other.choice.basis, 'staff_recommendation');
+    assert.equal(other.choice.requestedOverride, undefined);
+    await assert.rejects(policy(surface()), /No ranked authored historical default/);
 });
 
 test('readability gate includes tiny text, ancestor clipping, inaccessible truncation, contrast, and occlusion', () => {

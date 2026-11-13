@@ -230,11 +230,11 @@ describe('CorpsDetail sector truth', () => {
 
     const { container } = render(React.createElement(CorpsDetail, { railSlot: 'primary' }));
 
-    expect(container.textContent).toContain('Awaiting first posture order');
+    expect(container.textContent).toContain('Not yet set by the commander');
     expect(container.textContent).not.toMatch(/Wait For Weather|wait_for_weather/i);
 
     fireEvent.click(screen.getByRole('tab', { name: /OGs/i }));
-    expect(container.textContent).toContain('Awaiting first posture order');
+    expect(container.textContent).toContain('Not yet set by the commander');
     expect(container.textContent).not.toMatch(/Probe Then Pause|probe_then_pause/i);
   });
 

@@ -1051,3 +1051,8 @@ body {
     opacity: 0 !important;
   }
 }
+
+/* Operation-planning map terrain tooltip: a dark surface card, not MapLibre's white bubble
+   (player-surface review step 3, 2026-11-12). */
+.ops-terrain-tooltip .maplibregl-popup-content { background: #141821; color: #f1e6c8; border: 1px solid #3a4150; border-radius: 6px; padding: 10px 12px; box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5); }
+.ops-terrain-tooltip .maplibregl-popup-tip { display: none; }

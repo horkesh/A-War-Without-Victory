@@ -741,7 +741,7 @@ describe('Tactical map render smoke', () => {
     expect(getPlayerSafeCorpsName(undefined, 'arbih_5th_corps')).toBe('This corps');
     expect(getPlayerSafeDecisionTitle(undefined)).toBe('Pending decision');
     expect(getPlayerSafeEnclaveName(undefined)).toBe('Friendly enclave');
-    expect(getPlayerSafeEnclaveName('bihac_pocket')).toBe('Bihac Pocket');
+    expect(getPlayerSafeEnclaveName('bihac_pocket')).toBe('Bihać Pocket');
     expect(getPlayerSafeMunicipalityName('gornji_vakuf')).toBe('Gornji Vakuf');
     expect(getPlayerSafeCorridorLabel('RS')).toBe('VRS-controlled corridor');
     expect(getPlayerSafeCorridorLabel('RBiH')).toBe('ARBiH-controlled corridor');

@@ -96,7 +96,8 @@ describe('deck click selection priority', () => {
   it('matches fallback hit testing to rendered stack pixel offsets', () => {
     const result = pickNearestFormationAtPoint({
       zoom: 9,
-      point: { x: 104, y: 94 },
+      // zeta (cascade slot 2) is painted up-left of alpha: centre (94, 94) at zoom 9.
+      point: { x: 93, y: 93 },
       formations: [
         {
           geometry: { type: 'Point', coordinates: [17, 43] },

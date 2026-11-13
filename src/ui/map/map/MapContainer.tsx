@@ -33,7 +33,7 @@ import type {
 } from 'maplibre-gl';
 import type { FeatureCollection } from 'geojson';
 import type { PickingInfo } from '@deck.gl/core';
-import type { LoadedGameState } from '../data/types';
+import type { FormationView, LoadedGameState } from '../data/types';
 import type { FieldOperationPlanTarget } from '../utils/fieldInspectionTarget';
 import { strictCompare } from '../../../state/validateGameState';
 import { t, useLocale } from '../i18n';
@@ -285,6 +285,7 @@ import {
   type DeckLayerRenderInputs,
 } from './renderChurnGuards';
 import { inspectOnField } from '../utils/shellNavigation';
+import { aspectFittedMaxBounds } from './aspectFittedBounds';
 
 const BOSNIA_CENTER: [number, number] = [17.7, 43.87];
 // Bounds widened both west and east so the camera can recenter on Bihać
@@ -296,6 +297,10 @@ const BOSNIA_MAX_BOUNDS: [[number, number], [number, number]] = [
   [19.92, 45.270542],
 ];
 const TACTICAL_MAP_PITCH_DEGREES = 30;
+// Low enough that the whole country fits a 960 px-tall window beside the side panels
+// (measured: zoom 6.45 at 2293 × 960); the aspect-fitted bounds still stop the camera
+// from showing beyond Bosnia's north–south extent.
+const TACTICAL_MAP_MIN_ZOOM = 6.3;
 const DEFAULT_ZOOM = 8;
 const TACTICAL_MAP_EDGE_PADDING = { top: 124, right: 420, bottom: 184, left: 380 };
 const SIDEBAR_HOVER_LAYER_ID = 'sidebar-hover-outline';
@@ -333,6 +338,30 @@ function inspectMarkerContactOrFormation(formationId: string, properties?: Recor
   inspectFormationFromMap(formationId, properties);
 }
 
+function readMergedOsids(properties: Record<string, unknown> | null | undefined): string[] {
+  const merged = properties?.merged_osids;
+  return Array.isArray(merged) ? merged.filter((osid): osid is string => typeof osid === 'string') : [];
+}
+
+/** Every player-visible formation an expanded stack stands for: its own settlement plus merged ones. */
+function getExpandedStackFormations(
+  state: LoadedGameState,
+  osid: string,
+  mergedOsids: readonly string[],
+  centroids: Map<string, [number, number]>,
+): FormationView[] {
+  const seen = new Set<string>();
+  const formations: FormationView[] = [];
+  for (const stackOsid of [osid, ...mergedOsids]) {
+    for (const formation of getPlayerVisibleFormationStack(state, stackOsid, centroids)) {
+      if (seen.has(formation.id)) continue;
+      seen.add(formation.id);
+      formations.push(formation);
+    }
+  }
+  return formations;
+}
+
 function handleFormationCounterSelection(
   formationId: string,
   properties: Record<string, unknown>,
@@ -342,7 +371,8 @@ function handleFormationCounterSelection(
   const osid = typeof properties.location_osid === 'string' ? properties.location_osid : null;
   const stackCount = typeof properties.stack_count === 'number' ? properties.stack_count : 1;
   if (selectionIntent === 'stack-aware' && osid && stackCount > 1) {
-    store.setExpandedStackOsid(osid);
+    // A badge can stand for neighbouring stacks the layout merged into this one; open all of them.
+    store.setExpandedStackOsid(osid, readMergedOsids(properties));
     return;
   }
   inspectMarkerContactOrFormation(formationId, properties);
@@ -965,6 +995,7 @@ export function MapContainer({
   }, [currentRevisionReady]);
   const stagedOrders = useGameStore((s) => s.stagedOrders);
   const expandedStackOsid = useGameStore((s) => s.expandedStackOsid);
+  const expandedStackMergedOsids = useGameStore((s) => s.expandedStackMergedOsids);
   const [overlayAnchor, setOverlayAnchor] = useState<{ x: number; y: number } | null>(null);
   const [contextMenu, setContextMenu] = useState<{
     type: 'formation' | 'front' | 'osid' | 'empty';
@@ -1005,6 +1036,21 @@ export function MapContainer({
     };
     return () => {
       delete win.__awwvLiveSurfaceOpenMapContextMenu;
+    };
+  }, []);
+
+  // Dev-only read access for the live counter audit (tools/ui/counter_visibility_probe.cjs).
+  useEffect(() => {
+    if (!import.meta.env.DEV) return;
+    const win = window as Window & { __awwvCounterAuditSources?: unknown };
+    win.__awwvCounterAuditSources = {
+      map: () => mapRef.current,
+      deckOverlay: () => deckOverlayRef.current,
+      formations: () => lastFormationsGeoJsonRef.current,
+      viewportClip: () => buildFormationCounterViewportClip(mapRef.current),
+    };
+    return () => {
+      delete win.__awwvCounterAuditSources;
     };
   }, []);
 
@@ -1662,8 +1708,10 @@ export function MapContainer({
         pitch: TACTICAL_MAP_PITCH_DEGREES,
         minPitch: TACTICAL_MAP_PITCH_DEGREES,
         maxPitch: TACTICAL_MAP_PITCH_DEGREES,
-        maxBounds: BOSNIA_MAX_BOUNDS,
-        minZoom: 7.8,
+        // Bounds fitted to the window's shape so a wide, short screen can still zoom
+        // out to the whole country (aspectFittedBounds.ts); kept fitted on resize below.
+        maxBounds: aspectFittedMaxBounds(BOSNIA_MAX_BOUNDS, mapContainer.clientWidth, mapContainer.clientHeight),
+        minZoom: TACTICAL_MAP_MIN_ZOOM,
         dragRotate: false,
         touchPitch: false,
         attributionControl: false,
@@ -1686,6 +1734,13 @@ export function MapContainer({
         console.error('[MapLibre] map error:', e.error);
       });
       mapRef.current = map;
+      // Keep the camera bounds fitted to the window's shape. A null max-bounds means an
+      // operation focus owns the camera (fieldOperationFocusController); leave it alone.
+      map.on('resize', () => {
+        if (!map.getMaxBounds()) return;
+        const canvas = map.getCanvas();
+        map.setMaxBounds(aspectFittedMaxBounds(BOSNIA_MAX_BOUNDS, canvas.clientWidth, canvas.clientHeight));
+      });
       releaseMapTransitionCameraReader = setMapTransitionCameraReader(() => {
         const center = map.getCenter();
         return {
@@ -2008,10 +2063,11 @@ export function MapContainer({
           // If clicking a formation, also expand its stack if it's not already expanded
           const osid = props.location_osid as string | undefined;
           if (osid && loadedGameState) {
-            const stackSize = getPlayerVisibleFormationStack(loadedGameState, osid, osidCentroidsRef.current).length;
+            const mergedOsids = readMergedOsids(props);
+            const stackSize = getExpandedStackFormations(loadedGameState, osid, mergedOsids, osidCentroidsRef.current).length;
 
             if (stackSize > 1) {
-              setExpandedStackOsid(osid);
+              setExpandedStackOsid(osid, mergedOsids);
               setOverlayAnchor(point);
             } else if (isEnemyContactMarker(props)) {
               inspectSettlementFromMap(osid);
@@ -4699,7 +4755,7 @@ export function MapContainer({
           osid={expandedStackOsid}
           anchorX={overlayAnchor.x}
           anchorY={overlayAnchor.y}
-          formations={getPlayerVisibleFormationStack(loadedGameState, expandedStackOsid, osidCentroidsRef.current)}
+          formations={getExpandedStackFormations(loadedGameState, expandedStackOsid, expandedStackMergedOsids, osidCentroidsRef.current)}
           playerFaction={loadedGameState.player_faction}
           onClose={() => {
             setExpandedStackOsid(null);
@@ -4712,7 +4768,7 @@ export function MapContainer({
               setOverlayAnchor(null);
               return;
             }
-            const formation = getPlayerVisibleFormationStack(loadedGameState, expandedStackOsid, osidCentroidsRef.current)
+            const formation = getExpandedStackFormations(loadedGameState, expandedStackOsid, expandedStackMergedOsids, osidCentroidsRef.current)
               .find((candidate) => candidate.id === id);
             if (isPlayerEnemyContactFormation(loadedGameState, formation)) {
               inspectSettlementFromMap(expandedStackOsid);

@@ -339,7 +339,7 @@
     "responding_faction": "RBiH",
     "effect": {
       "kind": "narrative",
-      "text": "The Bihac pocket collapses. 5th Corps is destroyed or captured."
+      "text": "The Bihać pocket collapses. 5th Corps is destroyed or captured."
     },
     "effects": [
       {
@@ -350,7 +350,7 @@
       {
         "kind": "cost_ledger_annotation",
         "tag": "bihac_pocket_collapse_1994",
-        "text": "The Bihac pocket collapses; 5th Corps is destroyed or captured.",
+        "text": "The Bihać pocket collapses; 5th Corps is destroyed or captured.",
         "faction": "RBiH"
       }
     ],
@@ -377,7 +377,7 @@
     "id": "csq_northwest_rs_consolidation_1995",
     "image": "event_highland_offensive.webp",
     "title": "Northwest Front Freed",
-    "narrative": "With Bihac eliminated as an open wound, the VRS 2nd Krajina Corps redeploys. Fifteen to twenty brigades that had been tied down for two years walk out of the Bihac perimeter and onto trucks for central Bosnia. The strategic picture shifts faster than any single operation could ever shift it. The RS political leadership smells the end of the war — on its terms.",
+    "narrative": "With Bihać eliminated as an open wound, the VRS 2nd Krajina Corps redeploys. Fifteen to twenty brigades that had been tied down for two years walk out of the Bihać perimeter and onto trucks for central Bosnia. The strategic picture shifts faster than any single operation could ever shift it. The RS political leadership smells the end of the war — on its terms.",
     "category": "military",
     "trigger": {
       "turn_min": 122,
@@ -420,7 +420,7 @@
     "id": "csq_bihac_refugee_crisis_1994",
     "image": "event_displacement_column.webp",
     "title": "A Quarter Million on the Move",
-    "narrative": "The displaced of Bihac do not stop at the first line of safety. Croatia's temporary camps overflow within weeks; the columns reach the Neretva, the Lasva, the Bosna. ARBiH supply officers compete with UNHCR for the same trucks, the same fuel, the same calories. International coverage hardens — but the people are already cold, and damage to the RBiH manpower system is already done.",
+    "narrative": "The displaced of Bihać do not stop at the first line of safety. Croatia's temporary camps overflow within weeks; the columns reach the Neretva, the Lašva, the Bosna. ARBiH supply officers compete with UNHCR for the same trucks, the same fuel, the same calories. International coverage hardens — but the people are already cold, and damage to the RBiH manpower system is already done.",
     "category": "humanitarian",
     "trigger": {
       "turn_min": 122,
@@ -588,7 +588,7 @@
     "id": "csq_accelerated_safe_areas_1993",
     "image": "event_un_presence.webp",
     "title": "Safe Areas With Teeth",
-    "narrative": "UNSCR 819, 824, and 836 arrive in the counterfactual with the mandate and the rules of engagement the historical resolutions lacked. Dutch and French detachments arrive at Srebrenica, Gorazde, Zepa, and Bihac with artillery and close-air-support tasking, not only with logistic and observer roles. VRS corps commanders in Drinski and eastern axes receive written guidance that operations against those perimeters will be met with NATO response. The arithmetic of the enclaves changes: they cease to be siege objectives and begin to be diplomatic preconditions.",
+    "narrative": "UNSCR 819, 824, and 836 arrive in the counterfactual with the mandate and the rules of engagement the historical resolutions lacked. Dutch and French detachments arrive at Srebrenica, Goražde, Žepa, and Bihać with artillery and close-air-support tasking, not only with logistic and observer roles. VRS corps commanders in Drinski and eastern axes receive written guidance that operations against those perimeters will be met with NATO response. The arithmetic of the enclaves changes: they cease to be siege objectives and begin to be diplomatic preconditions.",
     "category": "diplomatic",
     "trigger": {
       "turn_min": 61,
@@ -603,7 +603,7 @@
     "responding_faction": "RBiH",
     "effect": {
       "kind": "narrative",
-      "text": "UN Safe Areas arrive with a defence mandate; RS operations against Bihac, Srebrenica, Gorazde, and Zepa are constrained."
+      "text": "UN Safe Areas arrive with a defence mandate; RS operations against Bihać, Srebrenica, Goražde, and Žepa are constrained."
     },
     "effects": [
       {
@@ -629,7 +629,7 @@
       {
         "kind": "cost_ledger_annotation",
         "tag": "accelerated_safe_areas_1993",
-        "text": "UN Safe Areas arrive with a defence mandate; RS operations against Bihac, Srebrenica, Gorazde, and Zepa are constrained.",
+        "text": "UN Safe Areas arrive with a defence mandate; RS operations against Bihać, Srebrenica, Goražde, and Žepa are constrained.",
         "faction": "RBiH"
       }
     ],
@@ -716,7 +716,7 @@
   {
     "id": "csq_drina_partisan_resistance_1992",
     "title": "The Forests Above the Drina",
-    "narrative": "The Drina valley is not cleared. Bosniak populations remain in their villages above Zvornik, Bratunac, and Vlasenica; in Foca, the town emptied during the spring has filled again from the surrounding woods. What had been civilian reservists of the Territorial Defence reconstitutes slowly, in small groups and without a clear command, but it reconstitutes. By late 1992 the VRS commands of Drinski and eastern Bosnia are reporting ambushes on supply columns and disappearances of small patrols in the high forests above the Drina.",
+    "narrative": "The Drina valley is not cleared. Bosniak populations remain in their villages above Zvornik, Bratunac, and Vlasenica; in Foča, the town emptied during the spring has filled again from the surrounding woods. What had been civilian reservists of the Territorial Defence reconstitutes slowly, in small groups and without a clear command, but it reconstitutes. By late 1992 the VRS commands of Drinski and eastern Bosnia are reporting ambushes on supply columns and disappearances of small patrols in the high forests above the Drina.",
     "category": "military",
     "trigger": {
       "turn_min": 8,
@@ -772,7 +772,7 @@
     "id": "csq_drina_supply_disruption_1993",
     "image": "event_supply_convoy_RS.webp",
     "title": "The Corridor Costs More",
-    "narrative": "The ambush pattern proves chronic. The Foca-Visegrad-Zvornik corridor, never paved and always exposed, takes losses at a rate the VRS cannot replace from a VJ whose own political calculations are shifting. Belgrade, which had sustained the VRS through 1992 on the assumption the rear was secure, begins to treat Drina logistics as a separate and more expensive problem. Convoys leave later, arrive lighter, and return with casualties.",
+    "narrative": "The ambush pattern proves chronic. The Foča-Višegrad-Zvornik corridor, never paved and always exposed, takes losses at a rate the VRS cannot replace from a VJ whose own political calculations are shifting. Belgrade, which had sustained the VRS through 1992 on the assumption the rear was secure, begins to treat Drina logistics as a separate and more expensive problem. Convoys leave later, arrive lighter, and return with casualties.",
     "category": "military",
     "trigger": {
       "turn_min": 30,
@@ -896,7 +896,7 @@
     "sets_flags": {
       "drina_refugee_wave_suppressed": true
     },
-    "historical_source": "Counterfactual state consequence: in the absence of systematic cleansing, the enclave system that anchored the Srebrenica, Zepa, and Gorazde siege patterns in the historical record does not emerge. Described in third-person historical voice per docs/10_canon/SENSITIVE_HISTORY_DESIGN_GATE.md §4. Plan: docs/plans/2026-03-24-v090-consequence-system-plan.md Chain 1.",
+    "historical_source": "Counterfactual state consequence: in the absence of systematic cleansing, the enclave system that anchored the Srebrenica, Žepa, and Goražde siege patterns in the historical record does not emerge. Described in third-person historical voice per docs/10_canon/SENSITIVE_HISTORY_DESIGN_GATE.md §4. Plan: docs/plans/2026-03-24-v090-consequence-system-plan.md Chain 1.",
     "source_tier": "design_counterfactual",
     "source_note": "This is a conditional simulation consequence, not a claim that the displayed outcome occurred historically. The historical_source field records the parent design chain and any contextual historical anchor; player-facing prose appears only when the authored state predicate fires."
   },
@@ -1443,8 +1443,8 @@
   },
   {
     "id": "csq_hvo_central_bosnia_offensive_1993",
-    "title": "Ahmici and the Rupture",
-    "narrative": "On 16 April 1993 the HVO Viteska Brigade enters Ahmici at dawn. The village burns before the day is out; 116 civilians are killed in the operation. From that morning onward the alliance that had existed on paper for ten months is a written fiction and the war between HVO and ARBiH is a matter of specific coordinates. Mate Boban's Herceg-Bosna pursues the Banovina-border programme it had always intended; Zagreb's material support, which had been hedged under the joint-front arrangement, flows more openly. Viteska, Busovaca, and the Nikola Subic-Zrinski brigades move against ARBiH positions in the Lasva and Neretva valleys. The arithmetic is simple: the HVO has the initiative for a season, and it will use it.",
+    "title": "Ahmići and the Rupture",
+    "narrative": "On 16 April 1993 the HVO Viteska Brigade enters Ahmići at dawn. The village burns before the day is out; 116 civilians are killed in the operation. From that morning onward the alliance that had existed on paper for ten months is a written fiction and the war between HVO and ARBiH is a matter of specific coordinates. Mate Boban's Herceg-Bosna pursues the Banovina-border programme it had always intended; Zagreb's material support, which had been hedged under the joint-front arrangement, flows more openly. Viteska, Busovača, and the Nikola Subic-Zrinski brigades move against ARBiH positions in the Lašva and Neretva valleys. The arithmetic is simple: the HVO has the initiative for a season, and it will use it.",
     "category": "military",
     "trigger": {
       "turn_min": 54,
@@ -1540,14 +1540,14 @@
       "hvo_arbih_war_active": true,
       "ahmici_1993": true
     },
-    "historical_source": "ICTY Kordic Trial Judgment (IT-95-14/2-T) on the Ahmici massacre of 16 April 1993 and the Lasva Valley operations. ICTY Prlic et al. Trial Judgment (IT-04-74-T) on Zagreb-HRHB command coupling. Per war-or-game + corps-army-commander design consult 2026-04-23: the event must break the RBiH-HRHB alliance (floor below hostility threshold), bump HVO morale/cohesion to un-stick combat-readiness, and shift offensive priorities to central-Bosnia municipalities. Phase 2 (ARBiH counter-offensive, three-enclave defensive posture) emerges organically via normal ARBiH offensive doctrine once alliance is locked hostile. Issue #9.",
+    "historical_source": "ICTY Kordic Trial Judgment (IT-95-14/2-T) on the Ahmići massacre of 16 April 1993 and the Lašva Valley operations. ICTY Prlic et al. Trial Judgment (IT-04-74-T) on Zagreb-HRHB command coupling. Per war-or-game + corps-army-commander design consult 2026-04-23: the event must break the RBiH-HRHB alliance (floor below hostility threshold), bump HVO morale/cohesion to un-stick combat-readiness, and shift offensive priorities to central-Bosnia municipalities. Phase 2 (ARBiH counter-offensive, three-enclave defensive posture) emerges organically via normal ARBiH offensive doctrine once alliance is locked hostile. Issue #9.",
     "source_tier": "design_counterfactual",
     "source_note": "This is a conditional simulation consequence, not a claim that the displayed outcome occurred historically. The historical_source field records the parent design chain and any contextual historical anchor; player-facing prose appears only when the authored state predicate fires."
   },
   {
     "id": "csq_alliance_holds_past_w35",
     "title": "An Alliance That Did Not Break",
-    "narrative": "The Mostar guns never opened up. The Ahmici road never burned. Past week thirty-five — the date the historians had circled — the RBiH-HRHB alliance is still functioning. The Washington table the Americans imagined is now a different table: not a cease-fire forced on belligerents, but a coordination of two fronts that never split. Cohesion in the joint sectors holds.",
+    "narrative": "The Mostar guns never opened up. The Ahmići road never burned. Past week thirty-five — the date the historians had circled — the RBiH-HRHB alliance is still functioning. The Washington table the Americans imagined is now a different table: not a cease-fire forced on belligerents, but a coordination of two fronts that never split. Cohesion in the joint sectors holds.",
     "category": "diplomatic",
     "trigger": {
       "turn_min": 35,
@@ -5519,8 +5519,8 @@
   {
     "id": "csq_winter_supply_attrition_HRHB",
     "image": "event_supply_shortage_HRHB.webp",
-    "title": "The Lasva Valley Cold",
-    "narrative": "The Lasva Valley brigades enter the second war winter with depots that registered adequate on the autumn manifest and are not adequate by December. The supply road from the Croatia border worked at summer rate; at winter rate the same trucks deliver two-thirds of the same load. Diesel rations tighten. The forward depots run on improvisation. Cohesion thins not in headline incidents but in the smaller decisions — patrols shortened, training cycles deferred, ammunition expenditures rationed. The political class issues a calm communiqué; the front-line officers know what the calm communiqué is for.",
+    "title": "The Lašva Valley Cold",
+    "narrative": "The Lašva Valley brigades enter the second war winter with depots that registered adequate on the autumn manifest and are not adequate by December. The supply road from the Croatia border worked at summer rate; at winter rate the same trucks deliver two-thirds of the same load. Diesel rations tighten. The forward depots run on improvisation. Cohesion thins not in headline incidents but in the smaller decisions — patrols shortened, training cycles deferred, ammunition expenditures rationed. The political class issues a calm communiqué; the front-line officers know what the calm communiqué is for.",
     "category": "military",
     "trigger": {
       "turn_min": 50,
@@ -5584,7 +5584,7 @@
     "sets_flags": {
       "winter_supply_attrition_active_HRHB": true
     },
-    "historical_source": "LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-11 (Wave-8/9 mirror — HRHB variant of csq_winter_supply_attrition). Predicate structurally identical to the Wave-8 progenitor and Wave-9-redo RBiH variant; only the faction parameter differs. Mirrors documented 1993-94 / 1994-95 HVO Lasva Valley and Posušje-Tomislavgrad winter supply strain under Croatia-side reorganization (BB II Ch.41-42; Hoare 2004 on HVO logistics). Faction-symmetric mechanism — same predicate fires for any faction the event is parameterized against. AUDIT-ONLY annotation; no §6 surface.",
+    "historical_source": "LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-11 (Wave-8/9 mirror — HRHB variant of csq_winter_supply_attrition). Predicate structurally identical to the Wave-8 progenitor and Wave-9-redo RBiH variant; only the faction parameter differs. Mirrors documented 1993-94 / 1994-95 HVO Lašva Valley and Posušje-Tomislavgrad winter supply strain under Croatia-side reorganization (BB II Ch.41-42; Hoare 2004 on HVO logistics). Faction-symmetric mechanism — same predicate fires for any faction the event is parameterized against. AUDIT-ONLY annotation; no §6 surface.",
     "source_tier": "design_counterfactual",
     "source_note": "This is a conditional simulation consequence, not a claim that the displayed outcome occurred historically. The historical_source field records the parent design chain and any contextual historical anchor; player-facing prose appears only when the authored state predicate fires."
   },
@@ -5665,7 +5665,7 @@
   {
     "id": "csq_doctrine_drift_HRHB",
     "image": "event_staff_planning_room.webp",
-    "title": "The Manual on the Lasva Shelf",
+    "title": "The Manual on the Lašva Shelf",
     "narrative": "The corps reorganization that was attempted two years earlier has drifted off the agenda. The new chain-of-command tables sit on the shelf in the corps headquarters; the cadre that knew the new structure has rotated; the cadre that replaced them never adopted it. The brigades that had been training to it have stopped. The combat-power column does not register a cliff — it registers a slow droop. The institutional memory of the reform survives in the older officers, who do not all survive. The political class explains the drift away as 'consolidation.'",
     "category": "military",
     "trigger": {
@@ -5731,7 +5731,7 @@
     "sets_flags": {
       "doctrine_drift_active_HRHB": true
     },
-    "historical_source": "LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-11 (Wave-10 mirror — HRHB variant of csq_doctrine_drift). Predicate gates on the prior corps_reorganization_active_HRHB flag (Wave-5 lineage) AND late-war exhaustion thresholds — chains off the existing HRHB doctrine inflection event without inventing new substrate. Mirrors documented late-war HVO institutional erosion as the post-Washington Agreement reorganization cadre rotated out under sustained Lasva Valley combat (BB II Ch.42, 49; Burg & Shoup 2000; Hoare 2004 on HVO command turnover). Faction-symmetric mechanism — same predicate fires for any faction it is parameterized against. AUDIT-ONLY annotation; no §6 surface.",
+    "historical_source": "LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-11 (Wave-10 mirror — HRHB variant of csq_doctrine_drift). Predicate gates on the prior corps_reorganization_active_HRHB flag (Wave-5 lineage) AND late-war exhaustion thresholds — chains off the existing HRHB doctrine inflection event without inventing new substrate. Mirrors documented late-war HVO institutional erosion as the post-Washington Agreement reorganization cadre rotated out under sustained Lašva Valley combat (BB II Ch.42, 49; Burg & Shoup 2000; Hoare 2004 on HVO command turnover). Faction-symmetric mechanism — same predicate fires for any faction it is parameterized against. AUDIT-ONLY annotation; no §6 surface.",
     "source_tier": "design_counterfactual",
     "source_note": "This is a conditional simulation consequence, not a claim that the displayed outcome occurred historically. The historical_source field records the parent design chain and any contextual historical anchor; player-facing prose appears only when the authored state predicate fires."
   },
@@ -5869,8 +5869,8 @@
   {
     "id": "csq_arbih_resistance_revival_HRHB",
     "image": "event_central_bosnia_front.webp",
-    "title": "The Lasva Valley Holds",
-    "narrative": "The HVO formations in the Lasva Valley have been losing ground for three quarters. The territorial trend line is unmistakable; the casualty lists are long; the political class has begun preparing the public for the worst. Then the line stops moving. Not because the attacker stopped — because the defender stopped retreating. The recruitment offices in the surviving Croat-majority municipalities register a surge that the political mobilizers had not engineered. The morale column ticks up first, then the recruitment column. The institutional explanation is existential pressure; the front-line explanation is shorter.",
+    "title": "The Lašva Valley Holds",
+    "narrative": "The HVO formations in the Lašva Valley have been losing ground for three quarters. The territorial trend line is unmistakable; the casualty lists are long; the political class has begun preparing the public for the worst. Then the line stops moving. Not because the attacker stopped — because the defender stopped retreating. The recruitment offices in the surviving Croat-majority municipalities register a surge that the political mobilizers had not engineered. The morale column ticks up first, then the recruitment column. The institutional explanation is existential pressure; the front-line explanation is shorter.",
     "category": "military",
     "trigger": {
       "turn_min": 50,
@@ -5931,7 +5931,7 @@
     "sets_flags": {
       "resistance_revival_active_HRHB": true
     },
-    "historical_source": "LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-11 (Wave-9-redo mirror — HRHB variant of csq_arbih_resistance_revival). Predicate structurally identical to the Wave-9-redo RBiH variant; only the faction parameter and mutex flag differ. Mirrors documented 1993-1994 HVO Lasva Valley defensive consolidation under sustained ARBiH pressure — Vitez, Busovača, and the Kiseljak pocket holdouts where existential-pressure recruitment surges emerged from sustained territorial regression rather than from political mobilization (BB II Ch.41-42; Burg & Shoup 2000 on HVO Lasva Valley defense doctrine). Faction-symmetric mechanism — predicate fires for any faction the event is parameterized against. AUDIT-ONLY annotation; no §6 surface (no enclave_resilience_aggregate, no rupture wiring, no political_controllers writes).",
+    "historical_source": "LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-11 (Wave-9-redo mirror — HRHB variant of csq_arbih_resistance_revival). Predicate structurally identical to the Wave-9-redo RBiH variant; only the faction parameter and mutex flag differ. Mirrors documented 1993-1994 HVO Lašva Valley defensive consolidation under sustained ARBiH pressure — Vitez, Busovača, and the Kiseljak pocket holdouts where existential-pressure recruitment surges emerged from sustained territorial regression rather than from political mobilization (BB II Ch.41-42; Burg & Shoup 2000 on HVO Lašva Valley defense doctrine). Faction-symmetric mechanism — predicate fires for any faction the event is parameterized against. AUDIT-ONLY annotation; no §6 surface (no enclave_resilience_aggregate, no rupture wiring, no political_controllers writes).",
     "source_tier": "design_counterfactual",
     "source_note": "This is a conditional simulation consequence, not a claim that the displayed outcome occurred historically. The historical_source field records the parent design chain and any contextual historical anchor; player-facing prose appears only when the authored state predicate fires."
   },
@@ -5939,7 +5939,7 @@
     "id": "csq_war_exhaustion_high_streak_HRHB",
     "image": "event_recruitment_office_empty.webp",
     "title": "The West Mostar Quotas",
-    "narrative": "The recruitment offices in West Mostar and the Lasva Valley stop posting the standard quota numbers and start posting a smaller, quieter set. The first wave that volunteered through the Croat Defence Council in 1992 has aged through the casualty lists. The second cohort, conscripted under emergency mobilization in 1993, has rotated through the same lists. The third cohort looks at the front-line casualty registers and at the political class's communiqués and registers what the political class will not say. The general staff acknowledges the new constraint. The war continues; the manpower budget contracts.",
+    "narrative": "The recruitment offices in West Mostar and the Lašva Valley stop posting the standard quota numbers and start posting a smaller, quieter set. The first wave that volunteered through the Croat Defence Council in 1992 has aged through the casualty lists. The second cohort, conscripted under emergency mobilization in 1993, has rotated through the same lists. The third cohort looks at the front-line casualty registers and at the political class's communiqués and registers what the political class will not say. The general staff acknowledges the new constraint. The war continues; the manpower budget contracts.",
     "category": "humanitarian",
     "trigger": {
       "turn_min": 70,
@@ -5999,7 +5999,7 @@
     "sets_flags": {
       "war_exhaustion_high_streak_active_HRHB": true
     },
-    "historical_source": "LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-12 (Wave-8 mirror — HRHB variant of csq_war_exhaustion_high_streak; the RS variant ships as csq_war_exhaustion_high_streak_RS). Predicate structurally identical to the Wave-8 RBiH progenitor; only the faction parameter and mutex flag differ. Mirrors documented 1994-1995 HVO manpower-pool attenuation in the Croat-majority municipalities of Herzegovina and central Bosnia under sustained Lasva Valley combat losses (Hoare 'How Bosnia Armed' 2004; BB II Ch.41-42, 49). Faction-symmetric mechanism — predicate fires for any faction the event is parameterized against. AUDIT-ONLY annotation; no §6 surface.",
+    "historical_source": "LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-12 (Wave-8 mirror — HRHB variant of csq_war_exhaustion_high_streak; the RS variant ships as csq_war_exhaustion_high_streak_RS). Predicate structurally identical to the Wave-8 RBiH progenitor; only the faction parameter and mutex flag differ. Mirrors documented 1994-1995 HVO manpower-pool attenuation in the Croat-majority municipalities of Herzegovina and central Bosnia under sustained Lašva Valley combat losses (Hoare 'How Bosnia Armed' 2004; BB II Ch.41-42, 49). Faction-symmetric mechanism — predicate fires for any faction the event is parameterized against. AUDIT-ONLY annotation; no §6 surface.",
     "source_tier": "design_counterfactual",
     "source_note": "This is a conditional simulation consequence, not a claim that the displayed outcome occurred historically. The historical_source field records the parent design chain and any contextual historical anchor; player-facing prose appears only when the authored state predicate fires."
   },
@@ -6147,8 +6147,8 @@
   {
     "id": "csq_arbih_doctrine_modernization_HRHB",
     "image": "event_staff_planning_room.webp",
-    "title": "The Lasva Manual Ages Up",
-    "narrative": "The HVO officer rolls have absorbed two years of attrition and replacement. The replacements that came up through the Lasva Valley combat — not through the pre-war JNA academies or the HV cadre exchange — have been reorganizing the books in their off-hours. A new manual circulates without a stamp. The brigades that adopt it first are recognizable a quarter later. The combat-power column registers the inflection. The political mobilizers in West Mostar do not understand it; the front-line officers do not explain it.",
+    "title": "The Lašva Manual Ages Up",
+    "narrative": "The HVO officer rolls have absorbed two years of attrition and replacement. The replacements that came up through the Lašva Valley combat — not through the pre-war JNA academies or the HV cadre exchange — have been reorganizing the books in their off-hours. A new manual circulates without a stamp. The brigades that adopt it first are recognizable a quarter later. The combat-power column registers the inflection. The political mobilizers in West Mostar do not understand it; the front-line officers do not explain it.",
     "category": "military",
     "trigger": {
       "turn_min": 80,
@@ -6209,7 +6209,7 @@
     "sets_flags": {
       "doctrine_modernization_active_HRHB": true
     },
-    "historical_source": "LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-12 (Wave-10 mirror — HRHB variant of csq_arbih_doctrine_modernization). Predicate gates on dimension_above(internal_cohesion) AND a prior corps_reorganization flag — chains off the Wave-5 lineage HVO reorganization event without inventing new substrate. The HRHB chain references corps_reorganization_active_HRHB (the existing HVO reform inflection) rather than doctrine_reform_initiated_RBiH (the RBiH-side analogue) so faction-internal causality is preserved. Reuses equipment_quality_modifier substrate. Mirrors documented late-war HVO informal doctrine evolution as the Lasva-cadre cohort adopted post-Washington Agreement training norms (Hoare 'How Bosnia Armed' 2004; Burg & Shoup 2000 on HVO command turnover; BB II Ch.42-49). Faction-symmetric mechanism. AUDIT-ONLY annotation; no §6 surface.",
+    "historical_source": "LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-12 (Wave-10 mirror — HRHB variant of csq_arbih_doctrine_modernization). Predicate gates on dimension_above(internal_cohesion) AND a prior corps_reorganization flag — chains off the Wave-5 lineage HVO reorganization event without inventing new substrate. The HRHB chain references corps_reorganization_active_HRHB (the existing HVO reform inflection) rather than doctrine_reform_initiated_RBiH (the RBiH-side analogue) so faction-internal causality is preserved. Reuses equipment_quality_modifier substrate. Mirrors documented late-war HVO informal doctrine evolution as the Lašva-cadre cohort adopted post-Washington Agreement training norms (Hoare 'How Bosnia Armed' 2004; Burg & Shoup 2000 on HVO command turnover; BB II Ch.42-49). Faction-symmetric mechanism. AUDIT-ONLY annotation; no §6 surface.",
     "source_tier": "design_counterfactual",
     "source_note": "This is a conditional simulation consequence, not a claim that the displayed outcome occurred historically. The historical_source field records the parent design chain and any contextual historical anchor; player-facing prose appears only when the authored state predicate fires."
   },
@@ -6271,7 +6271,7 @@
     "sets_flags": {
       "post_cease_fire_recruitment_decline_active_HRHB": true
     },
-    "historical_source": "LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-12 (Wave-9-redo mirror — HRHB variant of csq_post_cease_fire_recruitment_decline). Predicate structurally identical to the Wave-9-redo RBiH variant; only the faction parameter and mutex flag differ. The engine's only first-class alliance is RBiH-HRHB, so the cease-fire framing references the post-Washington Agreement period for both factions; the HRHB-side recruitment droop tracks the same alliance-above threshold but drains the HVO mobilization narrative rather than the ARBiH one. Mirrors documented 1994 Washington Agreement period and intermittent local cease-fires producing recruitment droop on the HVO side as the political class in West Mostar demobilized rhetoric while the Lasva Valley front lines remained active (BB II Ch.41-42; Burg & Shoup 2000). Faction-symmetric mechanism — predicate fires for any faction the event is parameterized against. AUDIT-ONLY annotation; no §6 surface.",
+    "historical_source": "LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-12 (Wave-9-redo mirror — HRHB variant of csq_post_cease_fire_recruitment_decline). Predicate structurally identical to the Wave-9-redo RBiH variant; only the faction parameter and mutex flag differ. The engine's only first-class alliance is RBiH-HRHB, so the cease-fire framing references the post-Washington Agreement period for both factions; the HRHB-side recruitment droop tracks the same alliance-above threshold but drains the HVO mobilization narrative rather than the ARBiH one. Mirrors documented 1994 Washington Agreement period and intermittent local cease-fires producing recruitment droop on the HVO side as the political class in West Mostar demobilized rhetoric while the Lašva Valley front lines remained active (BB II Ch.41-42; Burg & Shoup 2000). Faction-symmetric mechanism — predicate fires for any faction the event is parameterized against. AUDIT-ONLY annotation; no §6 surface.",
     "source_tier": "design_counterfactual",
     "source_note": "This is a conditional simulation consequence, not a claim that the displayed outcome occurred historically. The historical_source field records the parent design chain and any contextual historical anchor; player-facing prose appears only when the authored state predicate fires."
   },
@@ -6408,7 +6408,7 @@
     "sets_flags": {
       "post_cease_fire_recruitment_decline_active_RS": true
     },
-    "historical_source": "LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-13 (Wave-9-redo mirror — RS variant of csq_post_cease_fire_recruitment_decline; the RBiH variant ships as the Wave-9-redo progenitor and the HRHB variant ships as Wave-12 csq_post_cease_fire_recruitment_decline_HRHB). Predicate structurally identical; only the faction parameter and mutex flag differ. The engine's only first-class alliance is RBiH-HRHB so the alliance_above predicate is reused as a faction-agnostic 'war activity ebbs' proxy per the Wave-9-redo and Wave-12 precedents. Mirrors documented 1994-1995 VRS recruitment-droop episodes during local cease-fire periods around the Sarajevo and Bihac axes when the political class in Pale demobilized rhetoric while front-line activity continued (BB II Ch.43-46; Burg & Shoup 2000). Faction-symmetric mechanism — predicate fires for any faction the event is parameterized against. AUDIT-ONLY annotation; no §6 surface.",
+    "historical_source": "LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-13 (Wave-9-redo mirror — RS variant of csq_post_cease_fire_recruitment_decline; the RBiH variant ships as the Wave-9-redo progenitor and the HRHB variant ships as Wave-12 csq_post_cease_fire_recruitment_decline_HRHB). Predicate structurally identical; only the faction parameter and mutex flag differ. The engine's only first-class alliance is RBiH-HRHB so the alliance_above predicate is reused as a faction-agnostic 'war activity ebbs' proxy per the Wave-9-redo and Wave-12 precedents. Mirrors documented 1994-1995 VRS recruitment-droop episodes during local cease-fire periods around the Sarajevo and Bihać axes when the political class in Pale demobilized rhetoric while front-line activity continued (BB II Ch.43-46; Burg & Shoup 2000). Faction-symmetric mechanism — predicate fires for any faction the event is parameterized against. AUDIT-ONLY annotation; no §6 surface.",
     "source_tier": "design_counterfactual",
     "source_note": "This is a conditional simulation consequence, not a claim that the displayed outcome occurred historically. The historical_source field records the parent design chain and any contextual historical anchor; player-facing prose appears only when the authored state predicate fires."
   },
@@ -6625,7 +6625,7 @@
     "sets_flags": {
       "back_channel_active_HRHB": true
     },
-    "historical_source": "LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-13 (Wave-4 mirror — HRHB variant of csq_back_channel_communication; the RBiH variant ships as the Wave-4 progenitor). Predicate structurally identical to the Wave-4 RBiH authoring; only the faction parameter and mutex flag differ. Faction-internal causality preserved — chains off HRHB patron_pressure and patron_confidence values rather than the RBiH-side analogue. Mirrors documented HVO/Croatia back-channel deconfliction with Western mediators during 1993-1994 Lasva Valley fighting (BB II Ch.41-42; Burg & Shoup 2000 on HRHB / mediator deconfliction). Faction-symmetric mechanism — predicate fires for any faction the event is parameterized against. AUDIT-ONLY annotation; no §6 surface.",
+    "historical_source": "LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-13 (Wave-4 mirror — HRHB variant of csq_back_channel_communication; the RBiH variant ships as the Wave-4 progenitor). Predicate structurally identical to the Wave-4 RBiH authoring; only the faction parameter and mutex flag differ. Faction-internal causality preserved — chains off HRHB patron_pressure and patron_confidence values rather than the RBiH-side analogue. Mirrors documented HVO/Croatia back-channel deconfliction with Western mediators during 1993-1994 Lašva Valley fighting (BB II Ch.41-42; Burg & Shoup 2000 on HRHB / mediator deconfliction). Faction-symmetric mechanism — predicate fires for any faction the event is parameterized against. AUDIT-ONLY annotation; no §6 surface.",
     "source_tier": "design_counterfactual",
     "source_note": "This is a conditional simulation consequence, not a claim that the displayed outcome occurred historically. The historical_source field records the parent design chain and any contextual historical anchor; player-facing prose appears only when the authored state predicate fires."
   },
@@ -6753,7 +6753,7 @@
     "id": "csq_extended_truce_streak_HRHB",
     "image": "event_ceasefire.webp",
     "title": "The Mostar Quarter Holds",
-    "narrative": "The alliance with the Federation holds across a full quarter without major casualties on the Croat-majority axis. The HVO recruitment offices in West Mostar and Posusje report stabilization rather than droop. The training cycles, which had been compressed under combat-replacement pressure during the Lasva-Vitez period, lengthen again. The brigade staffs catch up on the paperwork they had been deferring. The cohesion column, which had been drifting downward for six quarters, drifts upward by a small but measurable amount. The war continues; the institution recovers some breath.",
+    "narrative": "The alliance with the Federation holds across a full quarter without major casualties on the Croat-majority axis. The HVO recruitment offices in West Mostar and Posušje report stabilization rather than droop. The training cycles, which had been compressed under combat-replacement pressure during the Lašva-Vitez period, lengthen again. The brigade staffs catch up on the paperwork they had been deferring. The cohesion column, which had been drifting downward for six quarters, drifts upward by a small but measurable amount. The war continues; the institution recovers some breath.",
     "category": "political",
     "trigger": {
       "turn_min": 70,
@@ -7195,7 +7195,7 @@
     "id": "csq_demobilization_pressure_wave_HRHB",
     "image": "event_recruitment_office_empty.webp",
     "title": "Demobilization Pressure Wave (HRHB)",
-    "narrative": "After a quiet quarter the West Mostar and Posusje families return to the streets and Zagreb adds its voice. The general mobilization order is not formally rescinded; it is, in practice, walked back. Recruitment offices reduce quotas. Aggressive doctrine is shelved in favor of holding the lines won. The war does not end; it slows.",
+    "narrative": "After a quiet quarter the West Mostar and Posušje families return to the streets and Zagreb adds its voice. The general mobilization order is not formally rescinded; it is, in practice, walked back. Recruitment offices reduce quotas. Aggressive doctrine is shelved in favor of holding the lines won. The war does not end; it slows.",
     "category": "political",
     "trigger": {
       "turn_min": 100,
@@ -7261,7 +7261,7 @@
   {
     "id": "csq_paramilitary_refusal_streak_HRHB",
     "title": "The Volunteer Battalions Recede (HRHB)",
-    "narrative": "The Croat-majority paramilitary detachments — the volunteer companies that had drifted forward toward the Lasva and Mostar contact lines during the worst months — pull back to the rear. Not all at once, and not by any single order: the political register of the population shifts, the volunteer offices stop pushing, and the irregulars who had attached themselves to HVO brigades return to their towns. The brigade staffs note the absence; the political officers note the relief. A small recovery of cohesion accrues to the regular formations.",
+    "narrative": "The Croat-majority paramilitary detachments — the volunteer companies that had drifted forward toward the Lašva and Mostar contact lines during the worst months — pull back to the rear. Not all at once, and not by any single order: the political register of the population shifts, the volunteer offices stop pushing, and the irregulars who had attached themselves to HVO brigades return to their towns. The brigade staffs note the absence; the political officers note the relief. A small recovery of cohesion accrues to the regular formations.",
     "category": "political",
     "trigger": {
       "turn_min": 70,
@@ -7451,7 +7451,7 @@
     "id": "csq_industrial_conscription_wave_HRHB",
     "image": "event_mobilization_HRHB.webp",
     "title": "Industrial Conscription Wave (HRHB)",
-    "narrative": "The exhaustion of the Lasva and Neretva fronts pushes the HZ-HB rear into emergency mobilization. The West Mostar and Grude workshops release their reserved categories. The municipal exemptions are suspended. The recruitment numbers climb sharply for a quarter, but the bills come quickly: cohesion frays, draft evasion rises, and the decision is registered in the political truth of the war.",
+    "narrative": "The exhaustion of the Lašva and Neretva fronts pushes the HZ-HB rear into emergency mobilization. The West Mostar and Grude workshops release their reserved categories. The municipal exemptions are suspended. The recruitment numbers climb sharply for a quarter, but the bills come quickly: cohesion frays, draft evasion rises, and the decision is registered in the political truth of the war.",
     "category": "political",
     "trigger": {
       "turn_min": 50,
@@ -7512,7 +7512,7 @@
     "sets_flags": {
       "industrial_wave_active_HRHB": true
     },
-    "historical_source": "LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-15 (Wave-3 mirror — HRHB variant of csq_industrial_conscription_wave; closes industrial-conscription triad alongside Wave-15 RS variant). Predicate structurally identical to the Wave-3 RBiH authoring; only the faction parameter and mutex flag differ. Mirrors documented 1993-1994 HVO industrial mobilization expansion under territorial pressure during the Lasva-Vitez and Mostar campaigns (BB II Ch.41-42). Faction-symmetric mechanism — predicate fires for any faction the event is parameterized against. AUDIT-ONLY annotation; no §6 surface.",
+    "historical_source": "LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-15 (Wave-3 mirror — HRHB variant of csq_industrial_conscription_wave; closes industrial-conscription triad alongside Wave-15 RS variant). Predicate structurally identical to the Wave-3 RBiH authoring; only the faction parameter and mutex flag differ. Mirrors documented 1993-1994 HVO industrial mobilization expansion under territorial pressure during the Lašva-Vitez and Mostar campaigns (BB II Ch.41-42). Faction-symmetric mechanism — predicate fires for any faction the event is parameterized against. AUDIT-ONLY annotation; no §6 surface.",
     "source_tier": "design_counterfactual",
     "source_note": "This is a conditional simulation consequence, not a claim that the displayed outcome occurred historically. The historical_source field records the parent design chain and any contextual historical anchor; player-facing prose appears only when the authored state predicate fires."
   },
@@ -7940,7 +7940,7 @@
     "id": "csq_spring_thaw_supply_recovery_HRHB",
     "image": "event_supply_convoy_HRHB.webp",
     "title": "The Spring Thaw (HRHB)",
-    "narrative": "The Lasva Valley roads dry. The two-axle trucks come back out of mothballs. The supply routes that had required four-wheel-drive in the worst weeks of the winter now move at truck speed, and the Lasva and Posušje depots that had been chronically below summer-rate adequacy refill at the marginal pace the route can sustain. The combat units in the central enclaves note the difference in their breakfast rations. The political class issues no communique; the front-line quartermasters do not need one.",
+    "narrative": "The Lašva Valley roads dry. The two-axle trucks come back out of mothballs. The supply routes that had required four-wheel-drive in the worst weeks of the winter now move at truck speed, and the Lašva and Posušje depots that had been chronically below summer-rate adequacy refill at the marginal pace the route can sustain. The combat units in the central enclaves note the difference in their breakfast rations. The political class issues no communique; the front-line quartermasters do not need one.",
     "category": "military",
     "trigger": {
       "turn_min": 70,
@@ -8004,7 +8004,7 @@
     "sets_flags": {
       "spring_thaw_supply_recovery_active_HRHB": true
     },
-    "historical_source": "LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-17 (Wave-16 successor handoff — closes spring-thaw triad). Recovery counterpart to Wave-11 csq_winter_supply_attrition_HRHB; predicate structurally identical to Wave-16 RBiH and RS variants; only the faction parameter and mutex flag differ. Mirrors documented 1993 / 1994 HVO spring-thaw quartermaster relief on the Lasva Valley and Posušje-Tomislavgrad supply spine once the mountain routes reopened (BB II Ch.41-42; Hoare 'How Bosnia Armed' 2004 on HVO logistics). Faction-symmetric mechanism. AUDIT-ONLY annotation; no §6 surface.",
+    "historical_source": "LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-17 (Wave-16 successor handoff — closes spring-thaw triad). Recovery counterpart to Wave-11 csq_winter_supply_attrition_HRHB; predicate structurally identical to Wave-16 RBiH and RS variants; only the faction parameter and mutex flag differ. Mirrors documented 1993 / 1994 HVO spring-thaw quartermaster relief on the Lašva Valley and Posušje-Tomislavgrad supply spine once the mountain routes reopened (BB II Ch.41-42; Hoare 'How Bosnia Armed' 2004 on HVO logistics). Faction-symmetric mechanism. AUDIT-ONLY annotation; no §6 surface.",
     "source_tier": "design_counterfactual",
     "source_note": "This is a conditional simulation consequence, not a claim that the displayed outcome occurred historically. The historical_source field records the parent design chain and any contextual historical anchor; player-facing prose appears only when the authored state predicate fires."
   },
@@ -8690,7 +8690,7 @@
     "sets_flags": {
       "winter_supply_attrition_active_RS": true
     },
-    "historical_source": "LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-18 (Wave-9/Wave-11 mirror — RS variant of csq_winter_supply_attrition; closes the winter-attrition triad). Predicate structurally mirrors the RBiH and HRHB variants. Mirrors documented VRS winter corridor strain around Posavina, eastern Bosnia, and the Brcko bottleneck (Balkan Battlegrounds Vol. II Ch.30-34). Ring 1 logistics consequence; no §6 surface.",
+    "historical_source": "LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-18 (Wave-9/Wave-11 mirror — RS variant of csq_winter_supply_attrition; closes the winter-attrition triad). Predicate structurally mirrors the RBiH and HRHB variants. Mirrors documented VRS winter corridor strain around Posavina, eastern Bosnia, and the Brčko bottleneck (Balkan Battlegrounds Vol. II Ch.30-34). Ring 1 logistics consequence; no §6 surface.",
     "source_tier": "design_counterfactual",
     "source_note": "This is a conditional simulation consequence, not a claim that the displayed outcome occurred historically. The historical_source field records the parent design chain and any contextual historical anchor; player-facing prose appears only when the authored state predicate fires."
   },

@@ -27,7 +27,7 @@ import {
 } from '../utils/playerSafeText';
 import { t, useLocale, type MessageKey } from '../i18n';
 import { getLocalizedFormationName } from '../data/formationNameLocalizations';
-import { inspectOnField } from '../utils/shellNavigation';
+import { inspectOnField, openArmyHQBriefingForCorps } from '../utils/shellNavigation';
 import { resolveCurrentSectorForFormation } from '../utils/sectorUtils';
 import { buildMunicipalityDisplayNameMap, getMunicipalityDisplayName } from '../utils/municipalityDisplayName';
 
@@ -251,7 +251,10 @@ export function FormationDetail({ railSlot = 'primary', breadcrumb }: FormationD
     : null;
   const brigadeEffectiveness = formation.kind === 'brigade' ? computeBrigadeEffectiveness(formation) : null;
   const reportGaps = [
-    ...((isBrigade && !formation.posture) || (!isBrigade && !formation.corpsStance) ? ['posture'] : []),
+    // A brigade without a posture is not a missing staff return: its commander has not
+    // set one yet, and the posture row already says so. Listing it here told the player a
+    // posture was "expected in a coming briefing", as if the president owed an order.
+    ...(!isBrigade && !formation.corpsStance ? ['posture'] : []),
     ...(lifecycleValue == null ? ['readiness'] : []),
     ...(Number.isFinite(formation.cohesion) ? [] : ['cohesion']),
     ...(Number.isFinite(formation.morale) ? [] : ['morale']),
@@ -305,7 +308,7 @@ export function FormationDetail({ railSlot = 'primary', breadcrumb }: FormationD
   const tabs: { id: DetailTab; label: string }[] = [
     { id: 'overview', label: t('formationDetail.overview') },
     { id: 'record', label: t('formationDetail.record') },
-    { id: 'orders', label: t('formationDetail.orders') },
+    { id: 'orders', label: isBrigade ? t('formationDetail.command') : t('formationDetail.orders') },
   ];
 
   return (
@@ -395,7 +398,7 @@ export function FormationDetail({ railSlot = 'primary', breadcrumb }: FormationD
                   className="w-full text-left px-2 py-1.5 bg-accent-blue/5 border border-accent-blue/20 rounded-md flex items-center justify-between text-[13px] hover:bg-accent-blue/10 transition-colors group"
                 >
                   <div className="flex items-center gap-2">
-                    <span className="text-accent-blue/60 uppercase font-bold tracking-tighter">
+                    <span className="text-accent-blue uppercase font-bold tracking-tighter">
                       {isArmyHq ? t('formationDetail.subordinatedTo') : t('formationDetail.corps')}
                     </span>
                     <span className="text-accent-blue font-bold uppercase group-hover:underline">
@@ -426,7 +429,7 @@ export function FormationDetail({ railSlot = 'primary', breadcrumb }: FormationD
                     aria-label={t('formationDetail.inspectSector', { sector: sectorLabel })}
                   >
                     <div className="flex items-center gap-2">
-                      <span className="text-accent-gold/60 uppercase font-bold tracking-tighter">{t('formationDetail.sector')}</span>
+                      <span className="text-accent-gold uppercase font-bold tracking-tighter">{t('formationDetail.sector')}</span>
                       <span className="text-accent-gold font-bold uppercase group-hover:underline">
                         {sectorLabel}
                       </span>
@@ -484,7 +487,7 @@ export function FormationDetail({ railSlot = 'primary', breadcrumb }: FormationD
 
             {/* Posture & readiness */}
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[13px] px-2 py-1 bg-black/20 rounded border border-panel-border/30">
-              <span className="text-text-secondary">{t('formationDetail.posture')}</span>
+              <span className="text-text-secondary">{isBrigade ? t('formationDetail.postureSetByCommander') : t('formationDetail.posture')}</span>
               <span className="text-text-primary font-semibold">{postureValue}</span>
               {lifecycleValue && (
                 <>
@@ -998,12 +1001,41 @@ export function FormationDetail({ railSlot = 'primary', breadcrumb }: FormationD
         {/* ────────── ORDERS TAB ────────── */}
         {activeTab === 'orders' && (
           <>
+            {/* Truthful command (owner review 2026-11-11): the president never orders a
+                brigade. Say who does, and route to the directives that reach it. */}
             {isBrigade && (
-              <div
-                data-testid="formation-detail-delegated-command-note"
-                className="text-[13px] text-text-secondary px-2 py-1.5 bg-black/10 border border-panel-border/30 rounded"
-              >
-                {t('formationDetail.delegatedCommand')}
+              <div className="space-y-3">
+                <div className="space-y-1">
+                  <div className="text-[13px] text-accent-gold uppercase tracking-widest font-bold opacity-80">
+                    {t('formationDetail.command.whoHeading')}
+                  </div>
+                  <div className="text-[14px] font-semibold text-text-primary">
+                    {formatLoanCommandDestination(formation.corps_id, loadedGameState.formations)}
+                  </div>
+                  <p
+                    data-testid="formation-detail-delegated-command-note"
+                    className="text-[13px] leading-relaxed text-text-secondary"
+                  >
+                    {t('formationDetail.delegatedCommand')}
+                  </p>
+                </div>
+                <div className="space-y-1.5">
+                  <div className="text-[13px] text-accent-gold uppercase tracking-widest font-bold opacity-80">
+                    {t('formationDetail.command.youHeading')}
+                  </div>
+                  {formation.corps_id && (
+                    <button
+                      type="button"
+                      data-testid="formation-detail-open-corps-hq"
+                      onClick={() => openArmyHQBriefingForCorps(useGameStore.getState(), formation.corps_id ?? null)}
+                      className="w-full rounded border border-accent-gold/50 bg-accent-gold/10 px-3 py-2 text-left text-[13px] font-semibold text-accent-gold transition-colors hover:bg-accent-gold/20"
+                    >
+                      {t('formationDetail.command.openCorps')}
+                    </button>
+                  )}
+                  <p className="text-[13px] leading-relaxed text-text-secondary">{t('formationDetail.command.directives')}</p>
+                  <p className="text-[13px] leading-relaxed text-text-secondary">{t('formationDetail.command.autonomyHint')}</p>
+                </div>
               </div>
             )}
             {!ipc.isAvailable && formation.eliteLoanState && (
