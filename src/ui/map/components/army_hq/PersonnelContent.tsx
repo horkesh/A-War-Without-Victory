@@ -24,7 +24,8 @@ function OfficerQualityChip({ label, value }: { label: string; value: number }) 
             title={`${label}: ${displayValue}`}
         >
             <span className="text-[13px] uppercase tracking-[0.12em] text-text-secondary">{label}</span>
-            <span className="font-mono text-[13px] font-bold tabular-nums" style={{ color: getRatingColor(value) }}>
+            {/* getRatingColor returns a Tailwind class, never a CSS colour value. */}
+            <span className={`font-mono text-[13px] font-bold tabular-nums ${getRatingColor(value)}`}>
                 {displayValue}
             </span>
         </span>
