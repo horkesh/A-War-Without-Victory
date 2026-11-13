@@ -1,6 +1,7 @@
 import { useSyncExternalStore } from 'react';
 import { enMessages, type MessageKey } from './messages.en';
 import { bcsMessages } from './messages.bcs';
+import { corpsNameKey, isBcsCase, renamedCorpsIdForSavedName, resolveBcsCase } from './bcsCases';
 
 export const SUPPORTED_LOCALES = ['en', 'bcs'] as const;
 export type Locale = (typeof SUPPORTED_LOCALES)[number];
@@ -72,17 +73,28 @@ export function subscribeLocale(listener: () => void): () => void {
     return () => subscribers.delete(listener);
 }
 
-function interpolate(template: string, params: MessageParams | undefined): string {
+/**
+ * `{name}` interpolates a parameter as passed. `{name:gen}` (BCS templates) also
+ * asks for a grammatical case: a corps name or a registered fallback phrase is
+ * declined (see ./bcsCases.ts). The case suffix is ignored outside BCS.
+ */
+function interpolate(template: string, params: MessageParams | undefined, locale: Locale): string {
     if (!params) return template;
-    return template.replace(/\{([a-zA-Z0-9_]+)\}/g, (match, key: string) => {
+    return template.replace(/\{([a-zA-Z0-9_]+)(?::([a-z]+))?\}/g, (match, key: string, grammaticalCase?: string) => {
         const value = params[key];
-        return value == null ? match : String(value);
+        if (value == null) return match;
+        // A renamed corps passed by its saved data name shows its current label.
+        const renamedId = renamedCorpsIdForSavedName(String(value));
+        const text = renamedId
+            ? dictionaries[locale][corpsNameKey(renamedId)] ?? enMessages[corpsNameKey(renamedId)]
+            : String(value);
+        return locale === 'bcs' && isBcsCase(grammaticalCase) ? resolveBcsCase(text, grammaticalCase) : text;
     });
 }
 
 export function t(key: MessageKey, params?: MessageParams, locale: Locale = getActiveLocale()): string {
     const template = dictionaries[locale][key] ?? enMessages[key];
-    return interpolate(template, params);
+    return interpolate(template, params, locale);
 }
 
 export function useLocale(): [Locale, (nextLocale: Locale) => void] {
@@ -91,3 +103,4 @@ export function useLocale(): [Locale, (nextLocale: Locale) => void] {
 }
 
 export type { MessageKey };
+export type { BcsCase } from './bcsCases';

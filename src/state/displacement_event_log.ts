@@ -51,7 +51,17 @@ export const UNKNOWN_CAUSER_BUCKET = '_unknown';
  * The aggregate fields are written but not read in D-PRE — consumers rebind
  * in D-CONTENT.
  */
-export function appendDisplacementEvent(state: GameState, event: DisplacementEvent): void {
+export function appendDisplacementEvent(
+    state: GameState,
+    event: DisplacementEvent,
+    /**
+     * `causerUnrecorded`: the writer could not determine who caused the harm. The
+     * aggregates then book it to UNKNOWN_CAUSER_BUCKET instead of falling back to the
+     * origin OSID's controller, which for a besieged pocket is its own defender
+     * (displacement attribution lane, 2026-11-13).
+     */
+    opts?: { causerUnrecorded?: boolean },
+): void {
     // 1. Legacy log push (unchanged behavior — D-PRE keeps consumers happy).
     if (!state.displacement.displacement_event_log) {
         state.displacement.displacement_event_log = [];
@@ -71,7 +81,9 @@ export function appendDisplacementEvent(state: GameState, event: DisplacementEve
     //     is replicated here at append time, so the aggregate matches the
     //     consumer's computation when controllers are stable across turns
     //     (the regime under which D-CONTENT will rebind).
-    const causedByEffective = event.caused_by ?? resolveCauserFromControllers(state, event.origin_osid);
+    const causedByEffective = opts?.causerUnrecorded
+        ? undefined
+        : event.caused_by ?? resolveCauserFromControllers(state, event.origin_osid);
     const causerKey = causedByEffective ?? UNKNOWN_CAUSER_BUCKET;
     const refugeesCreated = (event.displaced ?? 0) + (event.killed ?? 0) + (event.fled_abroad ?? 0);
     const civCasCaused = event.killed ?? 0;

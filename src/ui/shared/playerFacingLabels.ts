@@ -1,3 +1,5 @@
+import { localizedCorpsName } from '../map/utils/formatters.js';
+
 type IdNameSource =
   | Map<string, string>
   | Record<string, string | undefined>
@@ -22,7 +24,10 @@ export function getPlayerFacingCorpsName(
   source: IdNameSource,
   fallback = 'This corps',
 ): string {
-  return getNameFromSource(corpsId, source) ?? fallback;
+  const name = getNameFromSource(corpsId, source);
+  if (!name) return fallback;
+  // In BCS a known corps-level command shows its BCS name, whatever the source holds.
+  return localizedCorpsName(name, corpsId) ?? name;
 }
 
 export function getAssignedCommandLabel(

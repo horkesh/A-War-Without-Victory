@@ -232,7 +232,10 @@ const JNA_PHANTOM_DEFS: PhantomDef[] = [
         no_equipment_handoff: true,
     },
     {
-        // JNA 37th Corps forward elements at Nevesinje (BB1 p.480).
+        // JNA 4th Military District forces at Nevesinje, April 1992: the 13th (Bileća)
+        // and 2nd (Titograd) Corps took eastern Herzegovina (BB1 printed p.154). The
+        // 37th (Užice) Corps forward HQ at Nevesinje in BB1 p.480 is the autumn 1991
+        // Dubrovnik campaign, not 1992.
         // Represent JNA command authority + mobilized local Serb reservists.
         id: 'jna_nevesinje_garrison' as FormationId,
         name: 'JNA Nevesinje Garrison',

@@ -707,8 +707,10 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
         ],
     },
     {
-        // JNA Herzegovina Takeover — JNA 37th Corps (forward HQ Nevesinje, BB1 p.480)
-        // directs early seizure of Bosniak areas in eastern Herzegovina, April 1992.
+        // JNA Herzegovina Takeover — the JNA 4th Military District (13th Bileća and
+        // 2nd Titograd Corps, BB1 printed p.154; displayed as "JNA 4th Military
+        // District (Herzegovina)") directs early seizure of Bosniak areas in eastern
+        // Herzegovina, April 1992. (BB1 p.480's 37th Corps HQ at Nevesinje is 1991.)
         // Uses synthetic 'jna_herzegovina_command' corps to run PARALLEL with vrs_herzegovina
         // ops (Visegrad, Foca). Brigades are "on loan" from vrs_herzegovina — the op system
         // doesn't require corps_id match. Paramilitaries + JNA garrison provide manpower.

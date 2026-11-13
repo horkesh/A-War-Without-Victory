@@ -14,7 +14,7 @@ import { Z } from '../../shared/zIndex';
 import { Modal } from '../../shared/Modal';
 import { getAftermathHeaderForTone } from '../data/presidentialDeskAssets';
 import { t, type MessageKey } from '../i18n';
-import { formatPersonnel, formatCount, turnToDateString } from '../utils/formatters';
+import { formatCorpsDisplayName, formatPersonnel, formatCount, turnToDateString } from '../utils/formatters';
 import {
   SurfaceColumns,
   SurfaceContent,
@@ -312,7 +312,7 @@ export function TurnAftermathModal({
                       <div key={row.id} data-testid="turn-aftermath-command-record-row" className="px-5 py-3">
                         <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
                           <div>
-                            <span className="text-[17px] font-semibold text-[#f1e6c8]">{row.corpsName}</span>
+                            <span className="text-[17px] font-semibold text-[#f1e6c8]">{formatCorpsDisplayName(row.corpsName, row.id, row.corpsName)}</span>
                             <span className="ml-2 text-[15px] text-[#b9ad94]">{row.officerName}</span>
                           </div>
                           <span className={`${SURFACE_CHIP} ${row.interpretation === 'reinterpreted' ? 'border-amber-400/40 text-amber-200' : 'border-[#3a4150] text-[#c2b69c]'}`}>

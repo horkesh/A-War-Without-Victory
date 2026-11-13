@@ -273,7 +273,7 @@ describe('Chief of Staff briefing localization', () => {
 
         const text = flatten(generateCoSBriefing(items, state, 'RBiH'));
 
-        expect(text).toContain('Zabrinut sam zbog 1st Corps - kohezija je opasno niska. Trebamo razmotriti reorganizaciju.');
+        expect(text).toContain('Zabrinut sam zbog 1. korpusa - kohezija je opasno niska. Trebamo razmotriti reorganizaciju.');
         expect(text).toContain('Operacija River Line čeka vaše odobrenje. Preporučujem prvo pregledati odnos snaga.');
         expect(text).toContain('Naša linija kod Tuzla corridor je opasno tanka. Ako neprijatelj ispita taj pravac, možda nećemo izdržati.');
         expect(text).not.toContain('I am concerned about');
@@ -328,10 +328,10 @@ describe('Chief of Staff briefing localization', () => {
         const preciseText = flatten(generateCoSBriefing(items, state, 'RS'));
         const aggressiveText = flatten(generateCoSBriefing(items, state, 'HRHB'));
 
-        expect(preciseText).toContain('1st Corps prijavljuje kritičnu koheziju. Spremnost snaga je degradirana. Preporučujem reorganizaciju.');
+        expect(preciseText).toContain('1. korpus prijavljuje kritičnu koheziju. Spremnost snaga je degradirana. Preporučujem reorganizaciju.');
         expect(preciseText).toContain('Operacija River Line je završila pripremu. Čeka odluku KRENI/STANI.');
         expect(preciseText).toContain('Sektor Tuzla corridor ima premalo ljudstva u odnosu na širinu fronta. Ranjivost: visoka.');
-        expect(aggressiveText).toContain('1st Corps je u nevolji. Moramo ih ojačati ili povući.');
+        expect(aggressiveText).toContain('1. korpus je u nevolji. Moramo ih ojačati ili povući.');
         expect(aggressiveText).toContain('River Line je spremna za pokretanje. Što duže čekamo, neprijatelj se više priprema.');
         expect(aggressiveText).toContain('Tuzla corridor je izložen - jedan pritisak i linija puca. Trebaju nam brigade tamo odmah.');
         expect(preciseText + aggressiveText).not.toContain('reports critical cohesion');
@@ -401,7 +401,7 @@ describe('Chief of Staff briefing localization', () => {
 
         const text = flatten(generateCoSBriefing(items, state, 'RBiH'));
 
-        expect(text).toContain('Zabrinut sam zbog 1. korpus - kohezija je opasno niska.');
+        expect(text).toContain('Zabrinut sam zbog 1. korpusa - kohezija je opasno niska.');
         expect(text).toContain('Operacija Neretva');
         expect(text).toContain('Tuzlanski koridor');
         expect(text).not.toContain('Kohezija je niska');
@@ -467,8 +467,8 @@ describe('Chief of Staff briefing localization', () => {
         const preciseText = flatten(generateCoSBriefing([], state, 'RS'));
         const aggressiveText = flatten(generateCoSBriefing([], state, 'HRHB'));
 
-        expect(cautiousText).toContain('Moram napomenuti da su komandni odnosi sa 1. korpus i dalje pod pritiskom nakon nedavnih predsjedničkih intervencija.');
-        expect(preciseText).toContain('Status komandnog autoriteta: komandni odnos sa Drinski korpus je narušen.');
+        expect(cautiousText).toContain('Moram napomenuti da su komandni odnosi sa 1. korpusom i dalje pod pritiskom nakon nedavnih predsjedničkih intervencija.');
+        expect(preciseText).toContain('Status komandnog autoriteta: komandni odnos sa Drinskim korpusom je narušen.');
         expect(aggressiveText).toContain('Štab HVO Main Corps je još uz nas, ali su intervencije ostavile trag.');
         expect(cautiousText + preciseText + aggressiveText).not.toContain('command relations with');
         expect(cautiousText + preciseText + aggressiveText).not.toContain('Command Authority Status');

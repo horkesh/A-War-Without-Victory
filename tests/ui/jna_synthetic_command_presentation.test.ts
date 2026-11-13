@@ -169,7 +169,7 @@ describe('synthetic JNA command presentation', () => {
         ));
 
         const inspectCommand = screen.getByRole('button', {
-            name: /Inspect JNA Herzegovina Command command card/i,
+            name: /Inspect JNA 4th Military District \(Herzegovina\) command card/i,
         });
         expect(inspectCommand.getAttribute('aria-label')).toContain('0 fielded brigades');
 

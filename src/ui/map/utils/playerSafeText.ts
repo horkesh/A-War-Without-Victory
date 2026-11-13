@@ -1,5 +1,6 @@
 import { normalizeFactionId } from '../../../state/identity.js';
 import { formatCorpsDisplayName, toTitleCase } from './formatters';
+import type { BcsCase } from '../i18n/bcsCases';
 import { municipalityDisplayName, restoreBosnianPlaceNames } from '../../shared/bosnianPlaceNames';
 import { t, type MessageKey } from '../i18n';
 
@@ -223,8 +224,9 @@ export function getPlayerSafeCorpsName(
     name: string | null | undefined,
     id: string | null | undefined,
     fallback = 'This corps',
+    grammaticalCase: BcsCase = 'nom',
 ): string {
-    return formatCorpsDisplayName(name, id, fallback);
+    return formatCorpsDisplayName(name, id, fallback, grammaticalCase);
 }
 
 export function getPlayerSafeDecisionTitle(eventTitle: string | null | undefined): string {

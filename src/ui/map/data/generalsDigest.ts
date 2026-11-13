@@ -39,6 +39,7 @@
 import { strictCompare } from '../../../state/validateGameState.js';
 import { shouldNarrateTerritorySummary } from './territorySummaryGuard.js';
 import { t } from '../i18n/index.js';
+import { formatCorpsDisplayName } from '../utils/formatters.js';
 
 /** Canonical player factions. */
 export type DigestFaction = 'RBiH' | 'RS' | 'HRHB';
@@ -325,15 +326,16 @@ export function generalsDigestGloss(digest: GeneralsDigestTurn): string {
     // Operations under way — the headline of what the generals are doing.
     const pressing = digest.activeOps.filter((op) => op.pressing);
     const planning = digest.activeOps.filter((op) => !op.pressing);
+    // The stored digest keeps the English slug name; the corps id gives BCS its own name.
     for (const op of pressing) {
         clauses.push(t('chronicle.generated.generals.clause.pressed', {
-            corpsName: op.corpsName,
+            corpsName: formatCorpsDisplayName(op.corpsName, op.corpsId, op.corpsName),
             opName: op.opName,
         }));
     }
     for (const op of planning) {
         clauses.push(t('chronicle.generated.generals.clause.prepared', {
-            corpsName: op.corpsName,
+            corpsName: formatCorpsDisplayName(op.corpsName, op.corpsId, op.corpsName),
             opName: op.opName,
         }));
     }

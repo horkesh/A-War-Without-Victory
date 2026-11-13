@@ -26,7 +26,9 @@ export interface ThreatItem {
 }
 
 function frontLabel(corpsName?: string, fallback?: string): string {
-    return t('threatAssessment.frontLabel', { name: corpsName ?? fallback ?? t('threatAssessment.frontFallback') });
+    const name = corpsName ?? fallback;
+    // Without a command the fallback is the whole label ("Front", not "Front front").
+    return name ? t('threatAssessment.frontLabel', { name }) : t('threatAssessment.frontFallback');
 }
 
 /** Map raw engine strength_category enum values to player-safe uncertainty language. */

@@ -9,6 +9,40 @@
   Compacted 2026-09-10: 1723 sections moved out, 62 kept live.
 -->
 
+## 2026-11-13 — Displacement attribution (SC1-SC3) and the ledger's side column
+
+Signed by the owner-delegated **eight-seat bright-line panel** (Historian, calibration,
+Engine/systems, Red-team, Game Designer, Narrative Designer, Canon Compliance, War-or-Game),
+unanimous GO in round 3. Record: `SENSITIVE_HISTORY_DESIGN_GATE.md` §1, §2a, §4, §6; report
+`docs/40_reports/implemented/20261113_DISPLACEMENT_ATTRIBUTION_PANEL.md`.
+
+- **Finding.** The siege/encirclement/breach path in `updateDisplacement` never fires in a campaign.
+  It gets legacy `S…` edges while control is keyed by `op:` OSIDs, so it sees 0 front edges, and
+  `front_segments` is empty. `applyDisplacementFromFlips` is unreachable as well. Live `caused_by`
+  comes only from takeover (the side that took or held control) and paramilitary sweeps (the sweeping
+  side). Siege harm is not modelled.
+- **SC1.** The dormant pressure path books the pressing side: the holder is whoever controls the
+  municipality; causers must be at war with it; the cause is shared pro rata over front contacts, then
+  enemy-held OSIDs; otherwise "not recorded", booked explicitly (`appendDisplacementEvent(..., {
+  causerUnrecorded })`). It never books the holder and never guesses. The kill fraction is keyed on
+  the same causer.
+- **SC2.** A missing census entry splits by the national 1991 sums of the census file (pinned by a
+  test, tagged `census_fallback_national`). The flips path books its loss to the losing side's people
+  only. `LOST_POPULATION_FRACTION` and the "all lost = killed Bosniaks" fallback are gone.
+- **SC3.** `pushDisplacementEventLogFromMun` allocates each people's figures from its own counts. The
+  two ledger "Killed" figures now agree by construction (Engine Invariants §14.8a item 12).
+- **Ledger.** The second table is back as "Displaced or killed, by side controlling the area", with
+  columns "Side controlling the area" and "People" (BCS "Strana koja je kontrolisala područje" /
+  "Narod"). A scope note sits above the rows: siege and shelling harm is not counted, so the figures
+  understate the harm done by besieging forces; 1991 Yugoslavs and others are counted with Bosniaks.
+- **Measured, each change alone.** 40w `44375b6b1484e128` and 188w `2a2bb1ff54155f00` (both identical
+  to the unchanged-main baseline). Checkpoints 712/711/712/710; engine health gate PASS. Byte-identical:
+  aggregates, `civilian_casualties`, `civilian_casualties_caused`, international standing,
+  condemnation flags, fired events. Killed 2,706 / 33,903 / 3,288 in both fields; no same-side rows.
+  The P4 UI change was run at 40w only: hash unchanged.
+- **Open.** `hanpijesak` vs `han_pijesak` census key. Pressure-path revival is its own lane, under
+  binding conditions in the §6 record. HVO-against-Bosniaks realism FAIL (`REAL_WAR_MASTER.md`).
+
 ## 2026-11-13 — Canon/data fixes S10 (NamedPhase count) and S11 (Delić tenure week)
 
 **S10, docs only.** `Phase_Specifications_v0_9_0.md` said the War-phase pipeline had 151 NamedPhase
@@ -14812,6 +14846,18 @@ Step 5, the last step of `docs/40_reports/proposals/20261111_PLAYER_SURFACE_AND_
 - Rendered proof: `tools/ui/step5_shell_browser_proof.mjs` drives the dev map build through a real RBiH campaign at 2293×960 and 1280×720 in EN and BCS. Shots and `step5_report*.json` are in `F:/AWWV-coordination/surface_steps/step5/`. Every run shows the War Footing entry (16 px), the Economy surface opening over the Desk and Esc returning to it, the toolbar at 13 px minimum, and no Inbox over the Command Surface. No page errors. The BCS 1280×720 combination was rerun after a Vite reload caused by a mid-run source edit.
 - Gates: `npx tsc --noEmit` exit 0; focused 12 files / 208 tests green. `desktop:map:build` exit 0: entry chunk 2,968.99 kB against main `bdb34c821` at 2,971.86 kB (−2.87 kB), no chunk warning, EconomyPanel its own 7.24 kB chunk. Headless `sim:scenario:run:40w` matches main byte for byte on all 14 artifacts, `final_state_hash` `d01ef44601086ddf`; `run_meta.json` differs only in `git_commit`.
 - Seen, not changed: the 1992 event "Šta je Bosna?" renders as "Sta je Bosna?" in BCS (text in `data/scenarios/events/war_1992.json`, scenario data, so it belongs to a data lane); the `game_over` cue has no caller (the verdict surface should play it; that file belongs to the sensitive-copy session); `operationsPanel` and some event/decision strings still carry English loanwords ("docket-a", "stack trace"); and `opsPlanning.*` BCS strings keep their missing diacritics while the planner is parked.
+
+## 2026-11-13 — BCS corps names in grammatical case; JNA Herzegovina entry relabelled (UI + copy)
+
+Findings SC8/SC9 from the sensitive-copy lane (#584), plus an owner rename. Branch `claude/bcs-corps-cases` on main `ce81f11d5` (#585). Display and copy only: no engine, state, data or IPC change; `data/source/oob_corps.json` and the baked startup snapshot are untouched. The parked operation planner (`ops_modal/*`, `opsPlanning.*`) is untouched.
+- Case forms: new `src/ui/map/i18n/bcsCases.ts` holds nominative, genitive, dative, accusative, instrumental and locative for all 19 corps-level commands (ordinal korpus, adjective korpus, Glavni štab/stožer + army, and the invariant HVO "OZ …" names) and for the four BCS fallback phrases ("ovaj korpus", "komanda jednog korpusa", …). A BCS template asks for a case on the placeholder, e.g. `'Povuci {name} iz {corps:gen}'`. `t()` declines a known corps (matched by BCS nominative, English data name, saved name or id) in BCS only; an unknown value is left as passed; English ignores the suffix. `formatCorpsDisplayName` / `getPlayerSafeCorpsName` take an optional case for text built from segments.
+- Templates: 58 BCS templates that take `{corps}`/`{corpsName}` now declare a case; sentences restructured where the bare case read badly ("Stav 1. korpusa", "Zahtjev 2. korpusa za rezervu", "postavljen za komandanta 3. korpusa", "Operacija … u toku pod komandom 2. korpusa"). Chief of Staff alert "Zabrinut sam zbog 1. korpusa". The 3 `opsPlanning.*` templates stay as they were (they already read correctly).
+- Paths that bypassed the helper now use it: the turn aftermath command record, the Chief of Staff alert `subject.label` path, dossier donors (genitive, and the last-pair conjunction "i"), `backTheOfficer` corps names, the shared `getPlayerFacingCorpsName` (inbox, reserve panel), operation history, the chronicle generals digest, the decision-room Replace-commander / Direct-corps titles, and the Army HQ strategic-objective owner. English output of every unchanged corps is the same strings as before. Threat-assessment "Front front" fixed (the fallback is the whole label).
+- Owner rename (2026-11-13): the entry `jna_herzegovina_command` ("JNA Herzegovina Command" was not a documented formation) is shown as "JNA 4th Military District (Herzegovina)" / "4. vojna oblast JNA (Hercegovina)". Historian: BB1 printed p.154 (KB page 190) has the 13th (Bileća) and 2nd (Titograd) Corps of Strugar's Fourth Military District taking Stolac and Herzegovina south of Mostar in April 1992; the entry's Nevesinje-Foča-Mostar-heights operation spans both corps, so the district name is the honest cover. The "37th Corps forward HQ Nevesinje" cited in two sim comments is BB1 p.480, the autumn 1991 Dubrovnik campaign, not 1992; both comments corrected (comments only). Only the display label changed: id and the saved data `name` stay "JNA Herzegovina Command" (saves, startup snapshot and the simulation are byte-identical), and the saved name still resolves to the new label (`RENAMED_CORPS_SAVED_NAMES`). The WebSearch cross-check found no ICTY judgment text for April 1992 here; it confirmed the 13th Bileća Corps became the VRS Herzegovina Corps on 19 May 1992. Not changed, noted only (owner has not approved): HVO id/label mismatches (`hvo_northwest_bosnia`, `hvo_tomislavgrad`), missing ARBiH 6th/7th Corps, era-dependent HVO OZ → ZP names.
+- Tests: new `tests/ui/bcs_corps_cases.test.ts` (every corps has all six forms and its nominative equals the BCS message; spot-checked forms; every BCS corps template declares a case, cases appear only in BCS and only on placeholders the English template has; rendered sentences in BCS and English; dossier donors; aftermath row; the rename by id and by saved name). Updated pins: `chief_of_staff_briefing_i18n` (the BCS alert no longer pins "1st Corps"), `generals_digest_chronicle`, `sensitive_copy_lane` (recorded rename), and three JNA label tests.
+- Rendered proof (BCS, real RBiH and RS campaigns, `tools/ui/bcs_corps_cases_browser_proof.mjs`): Army HQ Briefing and Summary in `F:/AWWV-coordination/surface_steps/bcs_corps_cases_v4/` and `…_v2/`: corps list "1. krajiški korpus / Drinski korpus / Istočnobosanski korpus …", RBiH "1.–5. korpus", the objective owner "4. vojna oblast JNA (Hercegovina)". The strain and alert sentences need a live strain or cohesion alert and were verified by the unit tests, not in the render.
+- Gates: `tsc` 0; full `npm run test:vitest` red only on `desktop_sim_bundle_smoke`, `startup_snapshot_contract` (both also red when the same files run on a clean main checkout `ce81f11d5` on this host) and the deliberate `vitest_balanced` controls. `strict_null_inventory_progress` caught one non-null assertion of mine; green after removing it. `npm run desktop:map:build` exit 0, entry chunk 2,977.09 kB, no warning. Headless `sim:scenario:run:40w` against main `ce81f11d5`: `final_state_hash` `44375b6b1484e128` on both, 14 of 15 artifacts byte-identical, `run_meta.json` differs only in `provenance.git_commit` and `out_dir`.
+- Seen, not changed: in BCS the Army HQ officer card still shows English ("Assault Commander", "Skilled", the officer bio "JNA officer leading the VRS main staff…", "CRITICAL REVIEWS"). The Army HQ Briefing is the first place a player meets these. They are not corps names, so they belong to a copy lane of their own.
 
 ## 2026-11-13 — Replay frames report real casualty and displaced-or-killed totals (SC6)
 
