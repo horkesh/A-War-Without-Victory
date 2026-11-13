@@ -12,4 +12,6 @@ Pinned repository: [VSCO-2-CE](https://github.com/sgossner/VSCO-2-CE/tree/440300
 
 Owner authorized adoption on 2026-11-06. All eight final OGGs are copied byte-for-byte; no rendering, sample edits, mixing or normalization. [Runtime inventory](../AUDIO_ASSET_PROVENANCE.json) records each stable campaign cue, exact binary hash, duration, reused audition master loudness measurement and source. Lines on Paper (-20.6 LUFS) and A Table for Strangers (-22.3 LUFS) retain their approved quieter balance and documented target deviations; approval does not imply numerical-target success.
 
+Runtime roles since 2026-11-13 (owner: "Make them differ", then "Use a campaign track"): Lines on Paper loops as the main-menu theme (`menu_theme`, see [menu_theme.md](menu_theme.md)) and has left the campaign rotation. The other seven stay in the shuffled campaign rotation, joined by What Remains of Home (`campaign_what_remains_of_home`, see [campaign_what_remains_of_home.md](campaign_what_remains_of_home.md)), so the rotation still has eight tracks. No binary changed.
+
 Music remains renderer-only, requires opt-in and a trusted gesture, and respects mute and volumes. Separate historical-sensitivity, packaged runtime, canon, release and global R7 gates remain separate.

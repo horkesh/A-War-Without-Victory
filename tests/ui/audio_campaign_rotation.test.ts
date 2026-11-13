@@ -8,6 +8,7 @@ import { applyAudioPreferences, saveAudioPreferences } from '../../src/ui/map/au
 import { AudioSurfaceBedController } from '../../src/ui/map/components/AudioSurfaceBedController';
 import { useGameStore } from '../../src/ui/map/store/gameStore';
 import { withoutComments } from '../helpers/sourceComments';
+import { getMusicConfig } from '../../src/ui/map/audio/sound_manifest';
 
 class FakeAudio extends EventTarget {
   static elements: FakeAudio[] = [];
@@ -32,7 +33,10 @@ class FakeAudio extends EventTarget {
 const preferences = { muted: false, masterVolume: .5, musicEnabled: true, musicVolume: .4 };
 const flush = async () => { await Promise.resolve(); await Promise.resolve(); };
 const opening = () => FakeAudio.elements.find(audio => audio.src.includes('opening'))!;
-const menu = () => FakeAudio.elements.find(audio => audio.src.includes('what_remains_of_home.ogg'))!;
+// Owner 2026-11-13: the menu loops Lines on Paper, not the opening's melody.
+const menu = () => FakeAudio.elements.find(audio => audio.src.includes('/lines_on_paper.ogg'))!;
+// Exact file match: 'what_remains_of_home' is also a prefix of the opening's file.
+const trackFile = (slug: string) => (audio: FakeAudio) => audio.src.includes(`/${slug}.ogg`);
 beforeEach(() => {
   FakeAudio.unsupported = false; bus.resetAudioForTests(); FakeAudio.elements = []; FakeAudio.pending = []; FakeAudio.defer = false;
   vi.stubGlobal('Audio', FakeAudio); window.localStorage.clear(); saveAudioPreferences(preferences);
@@ -40,8 +44,8 @@ beforeEach(() => {
 });
 afterEach(() => { cleanup(); bus.resetAudioForTests(); vi.unstubAllGlobals(); window.localStorage.clear(); });
 
-const campaignSlugs = ['a_country_before_dawn', 'lines_on_paper', 'the_long_winter', 'no_answer_on_the_radio', 'the_life_we_remember', 'a_table_for_strangers', 'what_the_maps_cannot_show', 'after_the_guns'];
-const current = () => FakeAudio.elements.find(audio => audio.src.includes(bus.getAudioState().requestedMusicId!.replace('campaign_', '')))!;
+const campaignSlugs = ['a_country_before_dawn', 'what_remains_of_home', 'the_long_winter', 'no_answer_on_the_radio', 'the_life_we_remember', 'a_table_for_strangers', 'what_the_maps_cannot_show', 'after_the_guns'];
+const current = () => FakeAudio.elements.find(trackFile(bus.getAudioState().requestedMusicId!.replace('campaign_', '')))!;
 const campaignId = () => {
   const id = bus.getAudioState().requestedMusicId;
   expect(id).toMatch(/^campaign_/);
@@ -187,7 +191,7 @@ for (const value of [0, .999]) {
       expect(bus.getAudioState().requestedMusicId).toBe('opening_titles');
       opening().finish(); await flush();
       // random=0 and random=.999 produce different Fisher-Yates first passes.
-      expect(campaignId()).toBe(value === 0 ? 'campaign_lines_on_paper' : 'campaign_a_country_before_dawn');
+      expect(campaignId()).toBe(value === 0 ? 'campaign_what_remains_of_home' : 'campaign_a_country_before_dawn');
     } finally { spy.mockRestore(); }
   });
 }
@@ -226,7 +230,7 @@ for (const eventType of ['ended', 'error']) {
 // A new campaign is a new opening session: fresh bag, opening first, no
 // resumed track from the previous campaign. Loading a save is not a new
 // campaign and keeps resume-in-place (covered above).
-const latest = (slug: string) => FakeAudio.elements.filter(audio => audio.src.includes(slug)).at(-1)!;
+const latest = (slug: string) => FakeAudio.elements.filter(trackFile(slug)).at(-1)!;
 const openings = () => FakeAudio.elements.filter(audio => audio.src.includes('opening'));
 
 it('a second new campaign in one session plays the opening, then a fresh bag, not the old track', async () => {
@@ -251,7 +255,7 @@ it('a second new campaign in one session plays the opening, then a fresh bag, no
     expect(secondOpening).not.toBe(firstOpening); expect(secondOpening.paused).toBe(false);
     expect(old.paused).toBe(true); expect(menu().paused).toBe(true);
     secondOpening.finish(); await flush();
-    // The old bag would continue with lines_on_paper; a fresh identity-order
+    // The old bag would continue with what_remains_of_home; a fresh identity-order
     // bag starts again at a_country_before_dawn, on a new element from 0 s.
     expect(campaignId()).toBe('campaign_a_country_before_dawn');
     const fresh = latest('a_country_before_dawn');
@@ -297,4 +301,30 @@ it('App resets campaign music on both fresh-campaign paths and not on save load'
   expect(body('const handleSelectFaction', 'const handleMainMenuLoadGame')).toContain('beginNewCampaignMusic()');
   expect(body("'awwv-shell:fresh-campaign-started'", 'setRecentlyAcceptedEventDecisionId(null)')).toContain('beginNewCampaignMusic()');
   expect(body('const handleMainMenuLoadGame', 'catch (err)')).not.toContain('beginNewCampaignMusic');
+});
+
+it('the menu theme differs from the opening: Lines on Paper loops, What Remains of Home rotates', () => {
+  // Owner 2026-11-13: "Make them differ", then "Use a campaign track".
+  expect(getMusicConfig('menu_theme')).toMatchObject({ src: 'audio/music/lines_on_paper.ogg', loop: true });
+  expect(getMusicConfig('opening_titles')).toMatchObject({ src: 'audio/music/what_remains_of_home_opening.ogg', loop: false });
+  expect(getMusicConfig('campaign_what_remains_of_home')).toMatchObject({ src: 'audio/music/what_remains_of_home.ogg', loop: false });
+  expect(getMusicConfig('campaign_lines_on_paper')).toBeUndefined();
+  const menuFile = getMusicConfig('menu_theme')?.src ?? '';
+  expect(menuFile.startsWith('audio/music/what_remains_of_home')).toBe(false);
+  const rotationFiles = CAMPAIGN_MUSIC_IDS.map(id => getMusicConfig(id)!.src);
+  expect(new Set(rotationFiles).size).toBe(8);
+  expect(rotationFiles.includes(menuFile)).toBe(false);
+  expect(rotationFiles.includes(getMusicConfig('opening_titles')!.src)).toBe(false);
+});
+
+it('plays the opening, then campaign, then Lines on Paper as the menu loop on return', async () => {
+  const view = render(createElement(AudioSurfaceBedController, { appScreen: 'mainMenu' }));
+  fireEvent.pointerDown(window); await flush();
+  expect(bus.getAudioState().requestedMusicId).toBe('opening_titles');
+  view.rerender(createElement(AudioSurfaceBedController, { appScreen: 'game' }));
+  opening().finish(); await flush(); campaignId();
+  view.rerender(createElement(AudioSurfaceBedController, { appScreen: 'mainMenu' })); await flush();
+  expect(bus.getAudioState().requestedMusicId).toBe('menu_theme');
+  expect(menu().paused).toBe(false); expect(menu().loop).toBe(true);
+  expect(FakeAudio.elements.filter(a => !a.paused)).toEqual([menu()]);
 });
