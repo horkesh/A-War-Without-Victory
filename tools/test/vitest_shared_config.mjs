@@ -1,3 +1,6 @@
+import { existsSync } from 'node:fs';
+import { dirname, join, resolve } from 'node:path';
+
 /**
  * Single source of truth for the parts of the vitest config that MUST be identical
  * everywhere tests run.
@@ -33,6 +36,36 @@ export const VITEST_ALIASED_PACKAGES = [
     'use-sync-external-store',
     'zustand',
 ];
+
+/**
+ * The node_modules directory that holds `anchorPackage`, found the way Node's own
+ * resolution walks: the first `node_modules` at or above `rootDir` that contains
+ * `<anchorPackage>/package.json`.
+ *
+ * In the main checkout and in CI this is exactly `<rootDir>/node_modules`, so behaviour
+ * there is unchanged. A git worktree under `.claude/worktrees/` usually has no
+ * node_modules of its own; Node walks up to the main checkout's copy, but the old literal
+ * `join(rootDir, 'node_modules')` aliased React to a directory that did not exist, so
+ * every UI test failed with "Failed to resolve react" (2026-11-12). The walk only reads;
+ * it never creates or removes links. When nothing is found it falls back to
+ * `<rootDir>/node_modules`, so the failure message stays the familiar one.
+ */
+export function resolveRootModules(rootDir, anchorPackage = 'react') {
+    const start = resolve(rootDir);
+    let dir = start;
+    for (;;) {
+        const candidate = join(dir, 'node_modules');
+        if (existsSync(join(candidate, anchorPackage, 'package.json'))) return candidate;
+        const parent = dirname(dir);
+        if (parent === dir) return join(start, 'node_modules');
+        dir = parent;
+    }
+}
+
+/** The vitest CLI entrypoint, found through the same walk as the aliases. */
+export function resolveVitestCli(rootDir) {
+    return join(resolveRootModules(rootDir, 'vitest'), 'vitest', 'vitest.mjs');
+}
 
 /** Installed before each test file's module graph is evaluated. */
 export const VITEST_SETUP_FILE = 'tools/test/jsdom_browser_polyfills.ts';

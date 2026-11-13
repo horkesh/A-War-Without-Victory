@@ -67,9 +67,11 @@ describe('RBiH v47 evidence-backed readability floor', () => {
       source.indexOf('/* Distance-from-history v1'),
     );
 
-    expect(dilemmaSection).toContain('rounded text-xs leading-none font-bold uppercase');
+    // Surface redesign step 4 (2026-11-12): the chip is at the 13 px floor in surface colours.
+    expect(dilemmaSection).toContain('rounded text-[13px] leading-none font-bold uppercase');
     expect(dilemmaSection).not.toContain('rounded text-[7px] font-bold uppercase');
-    expect(dilemmaSection).toContain("'bg-neutral-500/15 text-neutral-400'");
+    expect(dilemmaSection).not.toContain('text-xs');
+    expect(dilemmaSection).toContain("'border-[#3a4150] text-[#b9ad94]'");
     expect(dilemmaSection).not.toMatch(/text-neutral-(?:600|700)/);
     expect(source).not.toContain('text-neutral-700 text-xs max-w-[260px]');
     expect(source).not.toContain('text-neutral-600 text-[13px] mb-2');

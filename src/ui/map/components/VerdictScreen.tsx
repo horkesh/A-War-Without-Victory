@@ -57,6 +57,25 @@ import {
 } from '../utils/playerSafeText.js';
 import { turnToDateString } from '../utils/formatters.js';
 import { isFieldedTacticalFormation } from '../../shared/playerVisibility';
+import {
+    SURFACE_LABEL,
+    SURFACE_LABEL_MUTED,
+    SURFACE_MODAL_BACKDROP,
+    SURFACE_MODAL_PANEL_COMPACT,
+    SURFACE_MODAL_PANEL_FULL,
+    SURFACE_PRIMARY_BUTTON_COMPACT,
+    SURFACE_SECONDARY_BUTTON,
+    SurfaceContent,
+    SurfaceEmpty,
+    SurfaceHeader,
+    SurfaceModalBody,
+    SurfaceModalFooter,
+    SurfacePanel,
+    SurfaceRailItem,
+    SurfaceSection,
+    SurfaceSections,
+    SurfaceStat,
+} from './surface/Surface';
 
 function verdictGhostClassificationLabel(classification: GhostRecordClassification): string {
     switch (classification) {
@@ -548,6 +567,11 @@ export function VerdictScreen({ onLoadSaveState, onLoadSaveError }: VerdictScree
         activeLowerSection === section ? 'block' : 'hidden sm:block'
     );
 
+    // Surface redesign, step 4 (2026-11-12): the verdict is one surface in the Command
+    // Surface style — header, the three factions in the left rail, the scene as the
+    // banner of the middle column and the report, record, reckoning, campaign records
+    // and replay under it as sections, the actions in a footer that never scrolls away.
+    // Layout only: every figure, grade and sentence is the same as before.
     return (
         <div className="fixed inset-0"
              style={wrappedOpen ? { display: 'none' } : { zIndex: Z.GAME_OVER }}
@@ -559,9 +583,56 @@ export function VerdictScreen({ onLoadSaveState, onLoadSaveError }: VerdictScree
                 dismissible={false}
                 zIndex={Z.GAME_OVER}
                 ariaLabel={t('gameOver.title')}
-                backdropClassName="bg-black/90 backdrop-blur-sm"
-                panelClassName={`${loadedGameState.daytonAgreement?.version === 1 ? 'w-[min(1440px,calc(var(--interface-viewport-width,100vw)-24px))]' : 'w-[min(980px,calc(var(--interface-viewport-width,100vw)-24px))]'} max-h-[calc(var(--interface-viewport-height,100vh)*0.92)] bg-panel-bg border border-panel-border rounded-lg shadow-2xl flex flex-col overflow-hidden`}
+                backdropClassName={SURFACE_MODAL_BACKDROP}
+                panelClassName={SURFACE_MODAL_PANEL_FULL}
             >
+                <SurfaceHeader eyebrow={t('gameOver.header', { date })} title={t('gameOver.title')} />
+
+                {/* Below md (narrow browser builds; the desktop window is never narrower than 1280 px) the
+                    three factions sit in a row above the full-width report, as before the surface
+                    redesign; from md up they are the left rail. */}
+                <div className="grid min-h-0 flex-1 grid-rows-[auto_minmax(0,1fr)] md:grid-rows-1 md:grid-cols-[clamp(17rem,calc(var(--interface-viewport-width,100vw)*0.19),21rem)_minmax(0,1fr)]"
+                     data-awwv-verdict-columns>
+                    <div aria-label={t('verdict.metric.focus')}
+                         data-awwv-verdict-faction-rail
+                         className="grid grid-cols-3 gap-2 border-b border-[#262b35] bg-[#0f1218] px-3 py-3 md:flex md:min-h-0 md:flex-col md:overflow-y-auto md:border-b-0 md:border-r md:px-4 md:py-5">
+                        {factionIds.map((fid) => {
+                            const v = verdict.faction_verdicts[fid];
+                            const active = fid === selectedFaction;
+                            return (
+                                <SurfaceRailItem
+                                    key={fid}
+                                    selected={active}
+                                    onClick={() => setVerdictSelection({ verdict, faction: fid })}
+                                    style={active ? { boxShadow: `inset 3px 0 0 ${FACTION_HEX[fid]}` } : undefined}
+                                    title={<span className={FACTION_COLORS_SUBTLE[fid] ?? ''}>{FACTION_SHORT[fid] ?? fid}</span>}
+                                    status={v ? (
+                                        <span className="flex flex-col items-start gap-1.5">
+                                            <span className="flex items-baseline gap-2">
+                                                <span className="font-mono text-[18px] font-semibold tabular-nums text-[#f1e6c8]">
+                                                    {v.pyrrhic_score.toFixed(1)}
+                                                </span>
+                                                <span className="text-[16px] font-bold"
+                                                      style={{ color: GRADE_COLORS[v.grade] ?? '#9a9080' }}>
+                                                    {v.grade}
+                                                </span>
+                                            </span>
+                                            <span
+                                                className={`inline-block rounded px-2 py-0.5 text-[14px] font-semibold ${getOutcomeClassStyle(v.outcome_class)}`}
+                                                data-awwv-faction-tab-outcome={fid}
+                                            >
+                                                {formatOutcomeClass(v.outcome_class)}
+                                            </span>
+                                        </span>
+                                    ) : undefined}
+                                />
+                            );
+                        })}
+                    </div>
+
+                    <SurfaceContent
+                        data-awwv-mobile-verdict-flow
+                        data-awwv-mobile-section-active={activeLowerSection}>
                 <CinematicVerdict
                     verdict={verdict}
                     costLedger={loadedGameState.costLedger}
@@ -571,11 +642,8 @@ export function VerdictScreen({ onLoadSaveState, onLoadSaveError }: VerdictScree
                     durationLabel={years > 0 ? `${years}y ${weeks}w` : `${weeks} weeks`}
                 />
 
-                <div className="flex min-h-0 flex-1 flex-col"
-                     data-awwv-mobile-verdict-flow
-                     data-awwv-mobile-section-active={activeLowerSection}>
                     {lowerSections.length > 1 && (
-                        <div className="shrink-0 border-b border-panel-border bg-panel-card/25 px-3 py-2 sm:hidden">
+                        <div className="shrink-0 border-b border-[#262b35] bg-[#141821] px-4 py-3 sm:hidden">
                             <div className="grid grid-cols-2 gap-2">
                                 {lowerSections.map(section => {
                                     const active = activeLowerSection === section;
@@ -585,10 +653,10 @@ export function VerdictScreen({ onLoadSaveState, onLoadSaveError }: VerdictScree
                                             type="button"
                                             onClick={() => setActiveLowerSection(section)}
                                             data-awwv-mobile-flow-tab={section}
-                                            className={`min-h-9 border px-2 text-xs font-bold uppercase tracking-wider transition-colors ${
+                                            className={`min-h-11 rounded border px-2 text-[14px] font-semibold transition-colors ${
                                                 active
-                                                    ? 'border-accent-gold/60 bg-accent-gold/15 text-accent-gold'
-                                                    : 'border-panel-border bg-black/20 text-text-secondary hover:bg-white/5'
+                                                    ? 'border-[#c9a75c] bg-[#232936] text-[#f1e6c8]'
+                                                    : 'border-[#3a4150] bg-[#1b2029] text-[#c2b69c] hover:border-accent-gold/60'
                                             }`}
                                             aria-pressed={active}
                                         >
@@ -600,53 +668,9 @@ export function VerdictScreen({ onLoadSaveState, onLoadSaveError }: VerdictScree
                         </div>
                     )}
 
-                    <div className="min-h-0 flex-1 overflow-auto">
-                        <section className={mobileSectionClass('report')}
+                    <SurfaceSections>
+                        <section className={`flex-col gap-6 ${activeLowerSection === 'report' ? 'flex' : 'hidden sm:flex'}`}
                                  data-awwv-mobile-section="report">
-                {/* Faction Selector Tabs */}
-                <div className="flex border-b border-panel-border">
-                    {factionIds.map((fid) => {
-                        const v = verdict.faction_verdicts[fid];
-                        const active = fid === selectedFaction;
-                        return (
-                            <button
-                                key={fid}
-                                onClick={() => setVerdictSelection({ verdict, faction: fid })}
-                                aria-pressed={active}
-                                className={`flex-1 px-2 py-2 text-center transition-colors sm:px-4 sm:py-3 ${
-                                    active
-                                        ? 'bg-panel-card border-b-2'
-                                        : 'bg-transparent hover:bg-panel-card/30'
-                                }`}
-                                style={active ? { borderBottomColor: FACTION_HEX[fid] } : undefined}
-                            >
-                                <div className={`text-xs font-bold uppercase tracking-wider ${FACTION_COLORS_SUBTLE[fid] ?? ''}`}>
-                                    {FACTION_SHORT[fid] ?? fid}
-                                </div>
-                                {v && (
-                                    <>
-                                        <div className="flex items-center justify-center gap-1.5 mt-1 sm:gap-2">
-                                            <span className="text-[16px] font-bold text-text-primary tabular-nums sm:text-[18px]">
-                                                {v.pyrrhic_score.toFixed(1)}
-                                            </span>
-                                            <span className="text-[13px] font-bold sm:text-[14px]"
-                                                  style={{ color: GRADE_COLORS[v.grade] ?? '#9a9080' }}>
-                                                {v.grade}
-                                            </span>
-                                        </div>
-                                        <div
-                                            className={`mt-1 inline-block px-1.5 py-0.5 rounded text-xs font-bold uppercase tracking-wider sm:px-2 ${getOutcomeClassStyle(v.outcome_class)}`}
-                                            data-awwv-faction-tab-outcome={fid}
-                                        >
-                                            {formatOutcomeClass(v.outcome_class)}
-                                        </div>
-                                    </>
-                                )}
-                            </button>
-                        );
-                    })}
-                </div>
-
                 {loadedGameState.daytonAgreement?.version === 1 ? (
                     <Suspense fallback={null}>
                         {/* The grade judges the war; this shows what the table changed (owner, 2026-11-08). */}
@@ -662,7 +686,7 @@ export function VerdictScreen({ onLoadSaveState, onLoadSaveError }: VerdictScree
                         <DaytonSettlementViewer agreement={loadedGameState.daytonAgreement} mode="signed" />
                     </Suspense>
                 ) : verdict.dayton_result ? (
-                    <p className="text-sm text-text-secondary">{t('dayton.agreement.legacy')}</p>
+                    <p className="m-0 text-[16px] text-[#c2b69c]">{t('dayton.agreement.legacy')}</p>
                 ) : null}
 
                 {/* Selected Faction Report */}
@@ -677,9 +701,7 @@ export function VerdictScreen({ onLoadSaveState, onLoadSaveError }: VerdictScree
                             daytonResult={verdict.dayton_result}
                         />
                     ) : (
-                        <div className="p-8 text-center text-text-secondary text-sm">
-                            No verdict data for this faction.
-                        </div>
+                        <SurfaceEmpty title="No verdict data for this faction." />
                     )}
                 </div>
                         </section>
@@ -693,15 +715,15 @@ export function VerdictScreen({ onLoadSaveState, onLoadSaveError }: VerdictScree
                     a score, badge, or reward. Shown on the report tab on mobile so
                     the gravest event in the war is never buried behind a sub-tab. */}
                 {hasRuptureReceipts && (
-                    <section className={`border-t border-red-900/40 px-6 py-4 bg-red-950/20 sm:block ${mobileSectionClass('report')}`}
+                    <section className={`rounded-md border border-red-400/35 bg-[#1a1316] px-6 py-5 sm:block ${mobileSectionClass('report')}`}
                              data-awwv-mobile-section="report"
                              data-awwv-rupture-receipts={ruptureReceipts.length}>
-                        <div className="text-xs uppercase tracking-[0.3em] text-red-300/70 font-semibold mb-2">
+                        <div className="mb-3 font-mono text-[13px] font-semibold uppercase tracking-[0.16em] text-red-200">
                             Historical Record
                         </div>
-                        <ul className="space-y-3">
+                        <ul className="m-0 flex list-none flex-col gap-3 p-0">
                             {ruptureReceipts.map((r) => (
-                                <li key={r.id} className="text-xs text-text-secondary leading-relaxed"
+                                <li key={r.id} className="max-w-[62rem] text-[17px] leading-relaxed text-[#ddd1b3]"
                                     data-awwv-rupture-receipt="true"
                                     data-awwv-rupture-receipt-variant={r.variant}>
                                     {r.content}
@@ -713,7 +735,7 @@ export function VerdictScreen({ onLoadSaveState, onLoadSaveError }: VerdictScree
 
                 {/* War Reckoning — per-war cost ledger and historical comparison */}
                 {hasReckoning && (
-                    <section className={`border-t border-panel-border sm:block ${mobileSectionClass('reckoning')}`}
+                    <section className={`border-t border-[#262b35] pt-6 sm:block ${mobileSectionClass('reckoning')}`}
                              data-awwv-mobile-section="reckoning">
                         <WarCostSummary
                             costLedger={loadedGameState.costLedger!}
@@ -727,13 +749,13 @@ export function VerdictScreen({ onLoadSaveState, onLoadSaveError }: VerdictScree
 
                 {/* Campaign Codex context records. Ring 2 narrative only. */}
                 {hasCodex && (
-                    <section className={`border-t border-panel-border px-6 py-4 bg-panel-card/20 sm:block ${mobileSectionClass('codex')}`}
+                    <section className={`border-t border-[#262b35] pt-6 sm:block ${mobileSectionClass('codex')}`}
                              data-awwv-mobile-section="codex"
                              data-awwv-codex-ghosts={codexGhosts.length}>
-                        <div className="text-xs uppercase tracking-[0.3em] text-text-secondary font-semibold mb-2">
+                        <h4 className={`m-0 mb-3 ${SURFACE_LABEL}`}>
                             {t('codex.campaignContext.title')}
-                        </div>
-                        <ul className="space-y-3">
+                        </h4>
+                        <ul className="m-0 flex list-none flex-col gap-3 p-0">
                             {codexGhosts.map((g) => {
                                 // T2-A / content C5: render the authored EN/BCS
                                 // narrative body. §6-adjacent bodies resolve to
@@ -751,16 +773,16 @@ export function VerdictScreen({ onLoadSaveState, onLoadSaveError }: VerdictScree
                                     ? proseBlocks.filter((_block, index) => index !== headingIndex)
                                     : proseBlocks;
                                 return (
-                                <li key={g.ghost_id} className="text-xs text-text-secondary"
+                                <li key={g.ghost_id} className="flex flex-col gap-1.5 rounded-md border border-[#2a303c] bg-[#161a22] px-5 py-4 text-[16px] text-[#c2b69c]"
                                     data-awwv-ghost-variant={g.variant}
                                     data-awwv-ghost-classification={g.classification}
                                     data-awwv-ghost-has-prose={prose !== null ? 'true' : 'false'}>
-                                    <div className="text-text-primary font-semibold">{rowTitle}</div>
-                                    <div className="text-[12px] uppercase tracking-[0.1em] text-text-secondary/70">
+                                    <div className="text-[18px] font-semibold text-[#f1e6c8]">{rowTitle}</div>
+                                    <div className={SURFACE_LABEL_MUTED}>
                                         {verdictGhostClassificationLabel(g.classification)}
                                     </div>
                                     {bodyBlocks.length > 0 && (
-                                        <div className="mt-1 space-y-1 text-text-secondary/90 leading-relaxed"
+                                        <div className="flex max-w-[62rem] flex-col gap-2 leading-relaxed text-[#ddd1b3]"
                                              data-awwv-ghost-prose>
                                             {bodyBlocks.map((block, index) => block.kind === 'heading' ? (
                                                 <div key={index} className="font-semibold">{block.text}</div>
@@ -782,7 +804,7 @@ export function VerdictScreen({ onLoadSaveState, onLoadSaveError }: VerdictScree
                     has been plumbed into the loaded adapter. Read-only; does
                     NOT advance turns or mutate engine state. */}
                 {hasReplay && (
-                    <section className={`border-t border-panel-border sm:block ${mobileSectionClass('replay')}`}
+                    <section className={`border-t border-[#262b35] pt-6 sm:block ${mobileSectionClass('replay')}`}
                              data-awwv-mobile-section="replay"
                              data-awwv-endgame-section="replay">
                         <ReplayScrubber
@@ -792,35 +814,38 @@ export function VerdictScreen({ onLoadSaveState, onLoadSaveError }: VerdictScree
                         />
                     </section>
                 )}
-                    </div>
+                    </SurfaceSections>
+                    </SurfaceContent>
                 </div>
 
                 {/* Footer */}
-                <div className="shrink-0 border-t border-panel-border bg-panel-card/30 px-4 py-2 sm:px-6 sm:py-4">
-                    <div className="mb-2 text-center text-xs italic text-text-secondary sm:mb-3">
+                <SurfaceModalFooter className="justify-between">
+                    <p className="m-0 min-w-0 flex-1 text-[16px] italic text-text-secondary">
                         {t('verdict.footer.tagline')}
-                    </div>
-                    <div className="flex flex-wrap justify-center gap-2 sm:gap-3">
-                        <button
-                            onClick={() => useGameStore.getState().setWrappedOpen(true)}
-                            className="min-h-8 px-3 py-1.5 text-xs font-bold uppercase tracking-wider rounded border border-amber-400/40 bg-amber-400/10 text-amber-400 hover:bg-amber-400/20 transition-colors sm:min-h-9 sm:px-6 sm:py-2"
-                        >
-                            {t('gameOver.viewYourWar')}
-                        </button>
-                        <button
-                            onClick={() => window.location.reload()}
-                            className="min-h-8 px-3 py-1.5 text-xs font-bold uppercase tracking-wider rounded border border-accent-gold/40 bg-accent-gold/10 text-accent-gold hover:bg-accent-gold/20 transition-colors sm:min-h-9 sm:px-6 sm:py-2"
-                        >
-                            {t('gameOver.newGame')}
-                        </button>
+                    </p>
+                    <div className="flex flex-wrap justify-end gap-3">
                         <VerdictLoadSaveButton
                             ipc={ipc}
                             onLoadSaveState={onLoadSaveState}
                             onLoadSaveError={onLoadSaveError}
-                            className="min-h-8 px-3 py-1.5 text-xs font-bold uppercase tracking-wider rounded border border-panel-border text-text-secondary hover:bg-white/5 transition-colors disabled:opacity-60 sm:min-h-9 sm:px-6 sm:py-2"
+                            className={SURFACE_SECONDARY_BUTTON}
                         />
+                        <button
+                            type="button"
+                            onClick={() => window.location.reload()}
+                            className={SURFACE_SECONDARY_BUTTON}
+                        >
+                            {t('gameOver.newGame')}
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => useGameStore.getState().setWrappedOpen(true)}
+                            className={SURFACE_PRIMARY_BUTTON_COMPACT}
+                        >
+                            {t('gameOver.viewYourWar')}
+                        </button>
                     </div>
-                </div>
+                </SurfaceModalFooter>
             </Modal>
         </div>
     );
@@ -833,21 +858,21 @@ export function VerdictScreen({ onLoadSaveState, onLoadSaveError }: VerdictScree
 export function EndgameMilestoneComparison({ rows }: { rows: EndgameMilestoneRow[] }) {
     useLocale();
     return (
-        <div className="px-6 pb-5 space-y-2"
+        <div className="flex flex-col gap-3 pt-6"
              data-awwv-milestone-comparison={rows.length}>
-            <div className="text-xs uppercase tracking-[0.3em] text-text-secondary font-semibold">
+            <div className={SURFACE_LABEL_MUTED}>
                 {t('verdict.milestone.title')}
             </div>
-            <div className="space-y-2">
+            <div className="flex flex-col gap-2">
                 {rows.map(row => (
                     <div key={row.id}
-                         className="grid grid-cols-[1.4fr_0.6fr_0.6fr_0.7fr_0.7fr] gap-3 items-start rounded border border-panel-border bg-panel-card/30 px-3 py-2"
+                         className="grid grid-cols-[1.4fr_0.6fr_0.6fr_0.7fr_0.7fr] items-start gap-4 rounded-md border border-[#2a303c] bg-[#161a22] px-5 py-4"
                          data-awwv-milestone-status={row.status}>
-                        <div>
-                            <div className="text-xs text-text-primary font-semibold">
+                        <div className="flex min-w-0 flex-col gap-1">
+                            <div className="text-[17px] font-semibold text-[#f1e6c8]">
                                 {row.label}
                             </div>
-                            <div className="text-xs text-text-secondary leading-relaxed mt-0.5">
+                            <div className="text-[15px] leading-relaxed text-[#c2b69c]">
                                 {row.summary}
                             </div>
                         </div>
@@ -864,11 +889,11 @@ export function EndgameMilestoneComparison({ rows }: { rows: EndgameMilestoneRow
 
 function MilestoneCell({ label, value }: { label: string; value: string }) {
     return (
-        <div className="min-w-0">
-            <div className="text-xs uppercase tracking-wider text-text-secondary/70">
+        <div className="flex min-w-0 flex-col gap-1">
+            <div className="text-[14px] text-[#9c917b]">
                 {label}
             </div>
-            <div className="text-xs text-text-primary tabular-nums leading-snug break-words">
+            <div className="break-words text-[15px] leading-snug tabular-nums text-[#f1e6c8]">
                 {value}
             </div>
         </div>
@@ -896,42 +921,42 @@ export function FactionReport({
     const cap = verdict.capital_breakdown;
 
     return (
-        <div className="p-6 space-y-5">
+        <div className="flex flex-col gap-7">
             {/* Pyrrhic Score Hero — always-visible primary signal, NOT collapsible. */}
-            <div data-testid="faction-report-score" className="text-center py-4">
-                <div className="text-xs uppercase tracking-[0.3em] text-text-secondary mb-1">
+            <div data-testid="faction-report-score" className="flex flex-col items-center gap-3 rounded-md border border-[#2a303c] bg-[#161a22] px-6 py-6 text-center">
+                <div className={SURFACE_LABEL_MUTED}>
                     {t('verdict.report.pyrrhicScore')}
                 </div>
-                <div className={`text-[48px] font-bold tabular-nums leading-none ${FACTION_COLORS_SUBTLE[verdict.faction] ?? ''}`}>
+                <div className={`text-[56px] font-bold tabular-nums leading-none ${FACTION_COLORS_SUBTLE[verdict.faction] ?? ''}`}>
                     {verdict.pyrrhic_score.toFixed(1)}
                 </div>
-                <div className="mt-2 inline-flex items-center gap-2 px-3 py-1 rounded-full border"
+                <div className="inline-flex items-center gap-2 rounded-full border px-4 py-1"
                      style={{ borderColor: GRADE_COLORS[verdict.grade] ?? '#9a9080' }}>
-                    <span className="text-[20px] font-bold"
+                    <span className="text-[22px] font-bold"
                           style={{ color: GRADE_COLORS[verdict.grade] ?? '#9a9080' }}>
                         {verdict.grade}
                     </span>
                 </div>
                 {/* Outcome Classification */}
-                <div className="mt-3 text-center">
-                    <span className={`inline-block px-3 py-1 rounded text-xs font-bold uppercase tracking-wider ${getOutcomeClassStyle(verdict.outcome_class)}`}>
+                <div className="text-center">
+                    <span className={`inline-block rounded px-3 py-1.5 text-[15px] font-semibold ${getOutcomeClassStyle(verdict.outcome_class)}`}>
                         {formatOutcomeClass(verdict.outcome_class)}
                     </span>
                 </div>
                 {/* Condemnation Flags — shown only when present */}
                 {verdict.condemnation_flags && verdict.condemnation_flags.length > 0 && (
-                    <div className="mt-3 p-3 rounded bg-red-950/40 border border-red-800/40">
-                        <div className="text-xs uppercase tracking-wider text-red-400/80 font-semibold mb-1.5">
+                    <div className="w-full max-w-[44rem] rounded-md border border-red-400/40 bg-[#1a1316] px-5 py-4 text-left">
+                        <div className="mb-2 font-mono text-[13px] font-semibold uppercase tracking-[0.16em] text-red-200">
                             {t('verdict.report.internationalCondemnation')}
                         </div>
                         {verdict.condemnation_flags.map((flag: string, i: number) => (
-                            <div key={i} className="text-xs text-red-300/90 leading-relaxed">
+                            <div key={i} className="text-[16px] leading-relaxed text-red-100">
                                 {formatCondemnationFlag(flag)}
                             </div>
                         ))}
                     </div>
                 )}
-                <div className="mt-2 text-xs text-text-secondary italic max-w-md mx-auto leading-relaxed">
+                <div className="mx-auto max-w-[44rem] text-[17px] italic leading-relaxed text-[#ddd1b3]">
                     {verdict.grade_description}
                 </div>
             </div>
@@ -949,15 +974,15 @@ export function FactionReport({
                 open
                 className="block"
             >
-                <summary className="sm:hidden cursor-pointer list-none flex items-center justify-between rounded border border-panel-border bg-panel-card px-3 py-2 mb-2">
-                    <span className="text-xs uppercase tracking-wider text-text-secondary font-semibold">
+                <summary className="sm:hidden mb-2 flex min-h-11 cursor-pointer list-none items-center justify-between rounded border border-[#3a4150] bg-[#1b2029] px-4 py-2">
+                    <span className={SURFACE_LABEL}>
                         {t('verdict.report.capitalDimensions')}
                     </span>
-                    <span className="text-xs uppercase tracking-[0.12em] text-text-muted">
+                    <span className="text-[14px] text-[#b9ad94]">
                         {t('verdict.report.dimensionBars', { count: verdict.dimension_grades.length })}
                     </span>
                 </summary>
-                <div className="hidden sm:block text-xs uppercase tracking-wider text-text-secondary font-semibold mb-3">
+                <div className={`mb-3 hidden sm:block ${SURFACE_LABEL}`}>
                     {t('verdict.report.capitalDimensions')}
                 </div>
                 <div className="space-y-2">
@@ -973,18 +998,18 @@ export function FactionReport({
                 open
                 className="block"
             >
-                <summary className="sm:hidden cursor-pointer list-none flex items-center justify-between rounded border border-panel-border bg-panel-card px-3 py-2 mb-2">
-                    <span className="text-xs uppercase tracking-wider text-text-secondary font-semibold">
+                <summary className="sm:hidden mb-2 flex min-h-11 cursor-pointer list-none items-center justify-between rounded border border-[#3a4150] bg-[#1b2029] px-4 py-2">
+                    <span className={SURFACE_LABEL}>
                         {t('verdict.report.finalStatistics')}
                     </span>
-                    <span className="text-xs uppercase tracking-[0.12em] text-text-muted">
+                    <span className="text-[14px] text-[#b9ad94]">
                         {t('verdict.report.tapToToggle')}
                     </span>
                 </summary>
-                <div className="hidden sm:block text-xs uppercase tracking-wider text-text-secondary font-semibold mb-3">
+                <div className={`mb-3 hidden sm:block ${SURFACE_LABEL}`}>
                     {t('verdict.report.finalStatistics')}
                 </div>
-                <div className="grid grid-cols-2 gap-x-6 gap-y-1.5">
+                <div className="grid grid-cols-2 gap-x-8 rounded-md border border-[#2a303c] bg-[#161a22] px-5 py-2">
                     <StatRow label={t('verdict.report.stat.territory')} value={`${((factionOsids / totalOsids) * 100).toFixed(1)}% (${factionOsids} settlements)`} />
                     {cap && (
                         <>
@@ -1025,18 +1050,18 @@ export function FactionReport({
                     open
                     className="block"
                 >
-                    <summary className="sm:hidden cursor-pointer list-none flex items-center justify-between rounded border border-panel-border bg-panel-card px-3 py-2 mb-2">
-                        <span className="text-xs uppercase tracking-wider text-text-secondary font-semibold">
+                    <summary className="sm:hidden mb-2 flex min-h-11 cursor-pointer list-none items-center justify-between rounded border border-[#3a4150] bg-[#1b2029] px-4 py-2">
+                        <span className={SURFACE_LABEL}>
                             {t('verdict.daytonAgreement')}
                         </span>
-                        <span className="text-xs uppercase tracking-[0.12em] text-text-muted">
+                        <span className="text-[14px] text-[#b9ad94]">
                             {t('verdict.tapToToggle')}
                         </span>
                     </summary>
-                    <div className="hidden sm:block text-xs uppercase tracking-wider text-text-secondary font-semibold mb-3">
+                    <div className={`mb-3 hidden sm:block ${SURFACE_LABEL}`}>
                         {t('verdict.daytonAgreement')}
                     </div>
-                    <div className="space-y-2 text-xs text-text-secondary">
+                    <div className="flex flex-col gap-2 text-[16px] leading-relaxed text-[#c2b69c]">
                         {daytonResult.territorial_packages_accepted.length > 0 && (
                             <div>
                                 <span className="text-text-primary font-semibold">{t('verdict.packagesAccepted')} </span>
@@ -1134,20 +1159,20 @@ function DimensionBar({ dg, factionColor }: { dg: DimensionGrade; factionColor: 
     const barWidth = Math.max(2, Math.min(100, dg.score));
 
     return (
-        <div className="flex items-center gap-3">
-            <div className="w-[140px] text-xs text-text-secondary truncate">
+        <div className="grid grid-cols-[minmax(12rem,15rem)_minmax(0,1fr)_2.75rem_2rem] items-center gap-4">
+            <div className="truncate text-[16px] text-[#c2b69c]">
                 {formatDimensionLabel(dg)}
             </div>
-            <div className="flex-1 h-2 bg-black/30 rounded-full overflow-hidden">
+            <div className="h-2.5 overflow-hidden rounded-full bg-[#262b35]">
                 <div
                     className="h-full rounded-full transition-all"
                     style={{ width: `${barWidth}%`, backgroundColor: factionColor, opacity: 0.7 }}
                 />
             </div>
-            <div className="w-[32px] text-right text-xs tabular-nums text-text-primary">
+            <div className="text-right font-mono text-[16px] tabular-nums text-[#f1e6c8]">
                 {Math.round(dg.score)}
             </div>
-            <div className="w-[24px] text-xs font-bold text-right" style={{ color: gradeColor }}>
+            <div className="text-right text-[16px] font-bold" style={{ color: gradeColor }}>
                 {dg.grade}
             </div>
         </div>
@@ -1155,12 +1180,7 @@ function DimensionBar({ dg, factionColor }: { dg: DimensionGrade; factionColor: 
 }
 
 function StatRow({ label, value }: { label: string; value: string }) {
-    return (
-        <div className="flex justify-between text-xs">
-            <span className="text-text-secondary">{label}</span>
-            <span className="text-text-primary tabular-nums font-medium">{value}</span>
-        </div>
-    );
+    return <SurfaceStat label={label} value={value} />;
 }
 
 function titleCase(s: string): string {
@@ -1239,74 +1259,72 @@ function FallbackGameOver({
                 dismissible={false}
                 zIndex={Z.GAME_OVER}
                 ariaLabel={t('gameOver.title')}
-                backdropClassName="bg-black/80 backdrop-blur-sm"
-                panelClassName="w-[560px] max-h-[calc(var(--interface-viewport-height,100vh)*0.85)] bg-panel-bg border border-panel-border rounded-lg shadow-2xl flex flex-col overflow-hidden"
+                backdropClassName={SURFACE_MODAL_BACKDROP}
+                panelClassName={SURFACE_MODAL_PANEL_COMPACT}
             >
-                <div className="px-8 py-6 border-b border-panel-border bg-panel-card/50 text-center">
-                    <div className="text-xs font-mono uppercase tracking-[0.4em] text-accent-gold/60 mb-2">
-                        {date} &mdash; A War Without Victory
-                    </div>
-                    <div className="text-xl font-bold text-text-primary uppercase tracking-wide mb-1">
-                        {display.title}
-                    </div>
-                    <div className="text-xs text-text-secondary italic leading-relaxed max-w-sm mx-auto">
-                        {display.subtitle}
-                    </div>
-                </div>
-                <div className="flex-1 overflow-auto p-6 space-y-4">
-                    <div className="text-xs uppercase tracking-wider text-text-secondary font-semibold mb-2">{t('gameOver.finalStandings')}</div>
-                    {factionIds.map((fid) => {
-                        const color = FACTION_HEX[fid] ?? '#888';
-                        const osids = factionOsids[fid] ?? 0;
-                        const pct = ((osids / totalOsids) * 100).toFixed(1);
-                        const brigades = factionBrigades[fid] ?? 0;
-                        return (
-                            <div key={fid} className="p-3 rounded border border-panel-border bg-panel-card/50">
-                                <div className="flex items-center justify-between mb-2">
-                                    <div className="flex items-center gap-2">
-                                        <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: color }} />
-                                        <span className={`text-[12px] font-bold uppercase tracking-wide ${FACTION_COLORS_SUBTLE[fid] ?? 'text-text-primary'}`}>{getPlayerSafeMilitaryFactionName(fid, fid)}</span>
-                                    </div>
-                                    <span className="text-xs text-text-primary tabular-nums font-bold">{pct}%</span>
-                                </div>
-                                <div className="flex gap-4 text-xs text-text-secondary">
-                                    <span>{formatFallbackOsidsControlled(osids)}</span>
-                                    <span>{formatFallbackActiveBrigades(brigades)}</span>
-                                </div>
-                                <div className="mt-1.5 h-1.5 bg-black/30 rounded-full overflow-hidden">
-                                    <div className="h-full rounded-full" style={{ width: `${pct}%`, backgroundColor: color }} />
-                                </div>
-                            </div>
-                        );
-                    })}
-                    <div className="text-xs text-text-secondary text-center pt-2 border-t border-panel-border">
+                <SurfaceHeader eyebrow={t('gameOver.header', { date })} title={display.title} />
+                <SurfaceModalBody>
+                    {display.subtitle && (
+                        <p className="m-0 max-w-[48rem] text-[18px] leading-relaxed text-[#ddd1b3]">{display.subtitle}</p>
+                    )}
+                    <SurfaceSection label={t('gameOver.finalStandings')}>
+                        <div className="flex flex-col gap-2.5">
+                            {factionIds.map((fid) => {
+                                const color = FACTION_HEX[fid] ?? '#888';
+                                const osids = factionOsids[fid] ?? 0;
+                                const pct = ((osids / totalOsids) * 100).toFixed(1);
+                                const brigades = factionBrigades[fid] ?? 0;
+                                return (
+                                    <SurfacePanel key={fid} className="flex flex-col gap-2">
+                                        <div className="flex items-center justify-between gap-3">
+                                            <div className="flex items-center gap-2.5">
+                                                <span aria-hidden="true" className="h-3 w-3 rounded-sm" style={{ backgroundColor: color }} />
+                                                <span className={`text-[18px] font-semibold ${FACTION_COLORS_SUBTLE[fid] ?? 'text-text-primary'}`}>{getPlayerSafeMilitaryFactionName(fid, fid)}</span>
+                                            </div>
+                                            <span className="font-mono text-[18px] font-semibold tabular-nums text-[#f1e6c8]">{pct}%</span>
+                                        </div>
+                                        <div className="flex flex-wrap gap-x-6 gap-y-1 text-[16px] text-[#c2b69c]">
+                                            <span>{formatFallbackOsidsControlled(osids)}</span>
+                                            <span>{formatFallbackActiveBrigades(brigades)}</span>
+                                        </div>
+                                        <div className="h-2.5 overflow-hidden rounded-full bg-[#262b35]">
+                                            <div className="h-full rounded-full" style={{ width: `${pct}%`, backgroundColor: color }} />
+                                        </div>
+                                    </SurfacePanel>
+                                );
+                            })}
+                        </div>
+                    </SurfaceSection>
+                    <p className="m-0 border-t border-[#262b35] pt-3 text-[16px] text-[#b9ad94]">
                         {t('gameOver.campaignLasted', {
                             turn,
                             years: formatFallbackYearCount(years),
                             weeks: formatFallbackWeekCount(weeks),
                         })}
-                    </div>
-                </div>
-                <div className="px-6 py-4 border-t border-panel-border bg-panel-card/30 flex justify-center gap-3">
-                    <button
-                        onClick={() => useGameStore.getState().setWrappedOpen(true)}
-                        className="px-6 py-2 text-xs font-bold uppercase tracking-wider rounded border border-amber-400/40 bg-amber-400/10 text-amber-400 hover:bg-amber-400/20 transition-colors"
-                    >
-                        {t('gameOver.viewYourWar')}
-                    </button>
-                    <button
-                        onClick={() => window.location.reload()}
-                        className="px-6 py-2 text-xs font-bold uppercase tracking-wider rounded border border-accent-gold/40 bg-accent-gold/10 text-accent-gold hover:bg-accent-gold/20 transition-colors"
-                    >
-                        {t('gameOver.newGame')}
-                    </button>
+                    </p>
+                </SurfaceModalBody>
+                <SurfaceModalFooter>
                     <VerdictLoadSaveButton
                         ipc={ipc}
                         onLoadSaveState={onLoadSaveState}
                         onLoadSaveError={onLoadSaveError}
-                        className="px-6 py-2 text-xs font-bold uppercase tracking-wider rounded border border-panel-border text-text-secondary hover:bg-white/5 transition-colors disabled:opacity-60"
+                        className={SURFACE_SECONDARY_BUTTON}
                     />
-                </div>
+                    <button
+                        type="button"
+                        onClick={() => window.location.reload()}
+                        className={SURFACE_SECONDARY_BUTTON}
+                    >
+                        {t('gameOver.newGame')}
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => useGameStore.getState().setWrappedOpen(true)}
+                        className={SURFACE_PRIMARY_BUTTON_COMPACT}
+                    >
+                        {t('gameOver.viewYourWar')}
+                    </button>
+                </SurfaceModalFooter>
             </Modal>
         </div>
     );

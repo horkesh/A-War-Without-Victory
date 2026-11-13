@@ -22,6 +22,7 @@ import {
   consumeRequestedDecisionRoomLens,
   getDecisionRoomLensRequestSnapshot,
   subscribeDecisionRoomLensRequest,
+  type DecisionRoomLensRequest,
 } from '../../utils/decisionRoomLensRequest';
 import {
   buildPresidentialDecisionRoomView,
@@ -184,6 +185,29 @@ function AuthorizeAllButton({ cards, onReceipt }: { cards: PresidentialDecisionR
   );
 }
 
+/**
+ * Where a Decision Room deep link lands: a requested card selects it and its area; an
+ * area opens it; a legacy lens opens the first area holding a card of that kind.
+ * `areaId: null` keeps the current area. Null when the request changes nothing.
+ */
+function resolveLensRequestFocus(
+  requested: DecisionRoomLensRequest,
+  cards: readonly PresidentialDecisionRoomCard[],
+  areas: readonly { id: PresidentialCommandCategoryId; cards: readonly PresidentialDecisionRoomCard[] }[],
+): { areaId: PresidentialCommandCategoryId | null; cardId: string | null } | null {
+  const requestedCard = requested.cardId ? cards.find((card) => card.id === requested.cardId) : undefined;
+  if (requestedCard) {
+    const home = areas.find((area) => area.cards.some((card) => card.id === requestedCard.id));
+    return { areaId: home?.id ?? null, cardId: requestedCard.id };
+  }
+  if (requested.commandCategoryId) return { areaId: requested.commandCategoryId, cardId: null };
+  if (requested.lens !== 'all') {
+    const home = areas.find((area) => area.cards.some((card) => card.category === requested.lens));
+    if (home) return { areaId: home.id, cardId: null };
+  }
+  return null;
+}
+
 export interface CommandSurfaceProps {
   /** Area to open on (a toolbar or hotspot entry); null opens the first area with matters. */
   initialCategoryId?: PresidentialCommandCategoryId | null;
@@ -230,28 +254,24 @@ export function CommandSurface({ initialCategoryId = null, onClose, onNavigateTa
 
   // Deep links: a requested card selects it and its area; an area opens it; a legacy
   // lens opens the first area holding a card of that kind.
+  // The request is set before the surface mounts, so the first render already shows the
+  // requested area and card: rendering the default area for one frame and switching in
+  // the effect started (then dropped) the wrong area's banner load (R8 RS-07, event 484).
   const lensRequest = useSyncExternalStore(subscribeDecisionRoomLensRequest, getDecisionRoomLensRequestSnapshot, getDecisionRoomLensRequestSnapshot);
+  // Applied during render (React's "adjust state while rendering"), so React re-renders
+  // before committing; clearing it in an effect afterwards cannot open a gap frame.
+  const [appliedLensRequest, setAppliedLensRequest] = useState<DecisionRoomLensRequest | null>(null);
+  if (lensRequest !== null && lensRequest !== appliedLensRequest) {
+    setAppliedLensRequest(lensRequest);
+    const focus = resolveLensRequestFocus(lensRequest, baseView.cards, areas);
+    if (focus) {
+      if (focus.areaId) setAreaId(focus.areaId);
+      setCardId(focus.cardId);
+    }
+  }
   useEffect(() => {
-    if (lensRequest === null) return;
-    const requested = consumeRequestedDecisionRoomLens();
-    if (requested === null) return;
-    const requestedCard = requested.cardId ? baseView.cards.find((card) => card.id === requested.cardId) : undefined;
-    if (requestedCard) {
-      const home = areas.find((area) => area.cards.some((card) => card.id === requestedCard.id));
-      if (home) setAreaId(home.id);
-      setCardId(requestedCard.id);
-      return;
-    }
-    if (requested.commandCategoryId) {
-      setAreaId(requested.commandCategoryId);
-      setCardId(null);
-      return;
-    }
-    if (requested.lens !== 'all') {
-      const home = areas.find((area) => area.cards.some((card) => card.category === requested.lens));
-      if (home) { setAreaId(home.id); setCardId(null); }
-    }
-  }, [lensRequest, baseView.cards, areas]);
+    if (lensRequest !== null) consumeRequestedDecisionRoomLens();
+  }, [lensRequest]);
 
   const firstBusyArea = areas.find((area) => area.counts.needs > 0) ?? areas.find((area) => area.cards.length > 0) ?? areas[0] ?? EMPTY_AREA;
   const activeArea = areas.find((area) => area.id === areaId) ?? firstBusyArea;
