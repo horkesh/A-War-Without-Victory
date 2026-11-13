@@ -11,6 +11,9 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import type { SettlementRecord } from '../../src/map/settlements.js';
 import {
     resetDisplacementPressureCache,
+    applyDisplacementFromFlips,
+    CENSUS_FALLBACK_NATIONAL_REASON,
+    NATIONAL_POPULATION_1991_SUMS,
     resolvePressingFactions,
     splitAmountByCauser,
     updateDisplacement,
@@ -149,5 +152,74 @@ describe('updateDisplacement pressure path (SC1 end to end)', () => {
         // P1a: Bosniaks displaced by RS use the RS-displacing-Bosniaks rate (4%).
         // 10% of 10,000 encircled = 1,000 displaced; 60% Bosniak = 600; 4% killed = 24.
         expect(state.displacement.civilian_casualties?.RBiH?.killed).toBe(24);
+    });
+});
+
+describe('no-census fallback (SC2)', () => {
+    it('pins the national 1991 sums to the census file', async () => {
+        const { readFileSync } = await import('node:fs');
+        const census = JSON.parse(readFileSync('data/derived/municipality_population_1991.json', 'utf8')) as {
+            by_mun1990_id: Record<string, { breakdown?: Record<string, number> } & Record<string, unknown>>;
+        };
+        const sums = { total: 0, bosniak: 0, serb: 0, croat: 0, other: 0 };
+        for (const id of Object.keys(census.by_mun1990_id).sort()) {
+            const e = (census.by_mun1990_id[id].breakdown ?? census.by_mun1990_id[id]) as Record<string, number>;
+            for (const k of Object.keys(sums) as Array<keyof typeof sums>) sums[k] += e[k] ?? 0;
+        }
+        expect(sums).toEqual({ ...NATIONAL_POPULATION_1991_SUMS });
+    });
+
+    it('every OSID municipality slug resolves to a census entry (hanpijesak is the one known miss)', async () => {
+        const { readFileSync } = await import('node:fs');
+        const pc = JSON.parse(readFileSync('data/derived/operational/operational_political_control.json', 'utf8')) as {
+            by_settlement_id: Record<string, unknown>;
+        };
+        const census = JSON.parse(readFileSync('data/derived/municipality_population_1991.json', 'utf8')) as {
+            by_mun1990_id: Record<string, unknown>;
+        };
+        const slugs = new Set(Object.keys(pc.by_settlement_id).filter((k) => k.startsWith('op:')).map((k) => k.split(':')[1]));
+        const missing = [...slugs].filter((s) => !(s in census.by_mun1990_id)).sort();
+        // `hanpijesak` (OSID slug) vs `han_pijesak` (census key): its fix is its own measured change.
+        expect(missing).toEqual(['hanpijesak']);
+    });
+
+    it('splits a pocket without a census entry by the national sums, tags it, and books no extra killed Bosniaks', () => {
+        resetDisplacementPressureCache();
+        const { state, settlements, edges } = encircledPocketFixture();
+        const report = updateDisplacement(state, settlements, edges, {} as MunicipalityPopulation1991Map);
+        const rec = report.by_municipality.find((r) => r.mun_id === 'pocket');
+        expect(rec?.reason).toContain(CENSUS_FALLBACK_NATIONAL_REASON);
+        // 1,000 displaced split nationally: Serbs floor(1000*1366013/4360093)=313,
+        // Croats floor(1000*760847/4360093)=174, Bosniaks+others 513. Caused by RS:
+        // killed Bosniaks 4% = 20, Serbs 2% = 6, Croats 1% = 1.
+        const cc = state.displacement.civilian_casualties ?? {};
+        expect(cc.RBiH?.killed).toBe(20);
+        expect(cc.RS?.killed).toBe(6);
+        expect(cc.HRHB?.killed).toBe(1);
+    });
+});
+
+describe('early-war flips path (SC2/P3)', () => {
+    it('books the loss to the losing side\'s people only, caused by the capturer', () => {
+        const state = stateWith({ 'op:town:a': 'RS', 'op:town:b': 'RS', 'op:home:c': 'RBiH' }, {}, 3);
+        state.displacement.displacement_state = {
+            town: { mun_id: 'town', original_population: 10000, displaced_out: 0, displaced_in: 0, lost_population: 0, last_updated_turn: 2 },
+        };
+        const settlements = new Map<string, SettlementRecord>();
+        for (const sid of ['op:town:a', 'op:town:b', 'op:home:c']) {
+            const mun = sid.split(':')[1];
+            settlements.set(sid, { sid, source_id: sid, mun_code: mun, mun, mun1990_id: mun, properties: { population_total: 100 } });
+        }
+        const census = { town: { total: 10000, bosniak: 5000, serb: 4000, croat: 1000, other: 0 } } as MunicipalityPopulation1991Map;
+        applyDisplacementFromFlips(
+            state, 3,
+            [{ mun_id: 'town', from_faction: 'RBiH', to_faction: 'RS' }],
+            [{ mun_id: 'town', initiated_turn: 3 }],
+            settlements, new Map(), census
+        );
+        const agg = state.displacement.displacement_humanitarian_aggregates ?? {};
+        expect(Object.keys(agg.RS ?? {})).toEqual(['RBiH']);
+        expect(state.displacement.civilian_casualties?.RS).toBeUndefined();
+        expect(state.displacement.civilian_casualties?.HRHB).toBeUndefined();
     });
 });

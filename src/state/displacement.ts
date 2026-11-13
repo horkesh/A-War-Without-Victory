@@ -33,8 +33,10 @@ const ENCIRCLEMENT_DISPLACEMENT_FRACTION = 0.10; // 10% per turn when encircled
 const BREACH_PERSISTENCE_TURNS = 2; // M turns of breaches
 const BREACH_DISPLACEMENT_FRACTION = 0.03; // 3% per turn when breaches persist
 
-// Displacement routing constants (receiving cap from getReceivingCapacityFraction; Sarajevo lower)
-const LOST_POPULATION_FRACTION = 0.20; // 20% of displaced population becomes lost (when no 1991 census)
+// Displacement routing: receiving cap from getReceivingCapacityFraction (Sarajevo lower).
+// LOST_POPULATION_FRACTION (20% "lost", all booked as killed Bosniaks when no census) was
+// removed 2026-11-13 (SC2): the no-census case now splits by the national 1991 sums and
+// uses the same killed / fled-abroad rules as the census path.
 
 // Ethnicity-based loss: imported from displacement_loss_constants.ts (single source of truth)
 const FLEE_ABROAD_FRACTION_RS = 0.30; // Serbs: 30% of displaced leave BiH (Serbia to flee to)
@@ -520,15 +522,21 @@ export function applyDisplacementFromFlips(
         );
         if (displacementAmount <= 0) continue;
 
-        const byFactionForLog = population1991ByMun
-            ? splitDisplacedByEthnicity(munId, displacementAmount, population1991ByMun)
-            : { RBiH: displacementAmount, RS: 0, HRHB: 0 };
+        // SC2/P3 (displacement attribution lane): the amount is sized from the LOSING side's
+        // own population share, so its victims are that people only. The former census split
+        // across all peoples booked part of it to the capturer's own people, and the no-census
+        // branch booked every lost person as a killed Bosniak.
+        const byFaction: { RBiH: number; RS: number; HRHB: number } = { RBiH: 0, RS: 0, HRHB: 0 };
+        if (fromFaction === 'RBiH' || fromFaction === 'RS' || fromFaction === 'HRHB') {
+            byFaction[fromFaction] = displacementAmount;
+        } else {
+            Object.assign(byFaction, splitDisplacedByEthnicity(munId, displacementAmount, population1991ByMun));
+        }
         let lostAmount: number;
         let routedAmount: number;
         let routableByFaction: { RBiH: number; RS: number; HRHB: number } | undefined;
 
-        if (population1991ByMun) {
-            const byFaction = splitDisplacedByEthnicity(munId, displacementAmount, population1991ByMun);
+        {
             const toFaction = flip.to_faction;
             const rRBiH = Math.floor(
                 byFaction.RBiH * (1 - getDisplacementKillFraction('RBiH', toFaction)) * (1 - getFactionFleeAbroadFraction('RBiH'))
@@ -554,17 +562,12 @@ export function applyDisplacementFromFlips(
                 HRHB: Math.floor(byFaction.HRHB * getFactionFleeAbroadFraction('HRHB')),
             };
 
-            pushDisplacementEventLogFromMun(state, munId, _settlements, byFactionForLog, turn, lostAmount, toFaction, killedByFac, fledByFac);
+            pushDisplacementEventLogFromMun(state, munId, _settlements, byFaction, turn, lostAmount, toFaction, killedByFac, fledByFac);
             for (const fid of CANONICAL_FACTIONS) {
                 if (killedByFac[fid] > 0 || fledByFac[fid] > 0) {
                     recordCivilianDisplacementCasualties(state, fid, killedByFac[fid], fledByFac[fid]);
                 }
             }
-        } else {
-            lostAmount = Math.floor(displacementAmount * LOST_POPULATION_FRACTION);
-            routedAmount = displacementAmount - lostAmount;
-            pushDisplacementEventLogFromMun(state, munId, _settlements, byFactionForLog, turn, lostAmount, flip.to_faction);
-            recordCivilianDisplacementCasualties(state, 'RBiH', lostAmount, 0);
         }
 
         const beforeOut = dispState.displaced_out;
@@ -663,16 +666,56 @@ export function applyDisplacementFromFlips(
 }
 
 /**
- * Split displaced amount by source mun's 1991 ethnic share. Returns { RBiH, RS, HRHB } (other assigned to RBiH).
+ * SC2 (displacement attribution lane, 2026-11-13): national sums of
+ * `data/derived/municipality_population_1991.json` over its 110 municipalities. They fall
+ * about 16,940 short of the published 1991 total (4,377,033, Statistički bilten 234),
+ * mostly in the Bosniak figure; the shares agree within 0.2 points. Used ONLY when a
+ * municipality has no census entry (or no census is loaded), in place of the former
+ * "all of it is Bosniak" default. Pinned to the file by
+ * tests/state/displacement_attribution.test.ts.
  */
+export const NATIONAL_POPULATION_1991_SUMS = {
+    total: 4_360_093,
+    bosniak: 1_886_276,
+    serb: 1_366_013,
+    croat: 760_847,
+    other: 346_957,
+} as const;
+
+/** Reason tag on a step record whose split used the national sums (auditable fallback). */
+export const CENSUS_FALLBACK_NATIONAL_REASON = 'census_fallback_national';
+
+/**
+ * Split displaced amount by source mun's 1991 ethnic share. Returns { RBiH, RS, HRHB } (other assigned to RBiH).
+ * Without a census entry for the municipality, splits by the national sums and reports it.
+ */
+function splitDisplacedByEthnicityWithSource(
+    fromMunId: MunicipalityId,
+    amount: number,
+    population1991ByMun: MunicipalityPopulation1991Map | undefined
+): { split: { RBiH: number; RS: number; HRHB: number }; nationalFallback: boolean } {
+    const entry = population1991ByMun?.[fromMunId];
+    if (!entry || entry.total <= 0) {
+        const n = NATIONAL_POPULATION_1991_SUMS;
+        const rs = Math.floor((amount * n.serb) / n.total);
+        const hrhb = Math.floor((amount * n.croat) / n.total);
+        return { split: { RBiH: amount - rs - hrhb, RS: rs, HRHB: hrhb }, nationalFallback: true };
+    }
+    return { split: splitByCensusEntry(entry, amount), nationalFallback: false };
+}
+
 function splitDisplacedByEthnicity(
     fromMunId: MunicipalityId,
     amount: number,
-    population1991ByMun: MunicipalityPopulation1991Map
+    population1991ByMun: MunicipalityPopulation1991Map | undefined
 ): { RBiH: number; RS: number; HRHB: number } {
-    const entry = population1991ByMun[fromMunId];
-    if (!entry || entry.total <= 0)
-        return { RBiH: amount, RS: 0, HRHB: 0 };
+    return splitDisplacedByEthnicityWithSource(fromMunId, amount, population1991ByMun).split;
+}
+
+function splitByCensusEntry(
+    entry: { total: number; bosniak: number; serb: number; croat: number },
+    amount: number
+): { RBiH: number; RS: number; HRHB: number } {
     const total = entry.total;
     const rbih = Math.floor((amount * entry.bosniak) / total);
     const rs = Math.floor((amount * entry.serb) / total);
@@ -958,15 +1001,21 @@ export function updateDisplacement(
 
             lostAmount = 0;
             routedAmount = 0;
-            if (population1991ByMun) routableByFaction = { RBiH: 0, RS: 0, HRHB: 0 };
+            routableByFaction = { RBiH: 0, RS: 0, HRHB: 0 };
             for (const share of causerShares) {
                 if (share.amount <= 0) continue;
                 // P1a: the kill fraction is keyed on this share's causer. NOTE: when this path
                 // is revived, this rate becomes calibration-moving (own lane + panel); it is an
                 // expulsion rate, not a model of siege mortality.
                 const causerFid: FactionId = share.faction;
-                if (population1991ByMun && routableByFaction) {
-                    const byFaction = splitDisplacedByEthnicity(munId, share.amount, population1991ByMun);
+                {
+                    // SC2: without a census entry the split uses the national sums (tagged),
+                    // never "all of it is Bosniak", and goes through the same killed / fled rules.
+                    const { split: byFaction, nationalFallback } =
+                        splitDisplacedByEthnicityWithSource(munId, share.amount, population1991ByMun);
+                    if (nationalFallback && !reasons.includes(CENSUS_FALLBACK_NATIONAL_REASON)) {
+                        reasons.push(CENSUS_FALLBACK_NATIONAL_REASON);
+                    }
                     const rRBiH = Math.floor(
                         byFaction.RBiH * (1 - killFractionForCauser('RBiH', causerFid)) * (1 - getFactionFleeAbroadFraction('RBiH'))
                     );
@@ -1004,13 +1053,6 @@ export function updateDisplacement(
                             recordCivilianDisplacementCasualties(state, fid, killedByFac[fid], fledByFac[fid]);
                         }
                     }
-                } else {
-                    const shareLost = Math.floor(share.amount * LOST_POPULATION_FRACTION);
-                    lostAmount += shareLost;
-                    routedAmount += share.amount - shareLost;
-                    pushDisplacementEventLogFromMun(state, munId, settlements, { RBiH: share.amount, RS: 0, HRHB: 0 }, currentTurn, shareLost, causerFid);
-                    // Record to civilian_casualties for non-ethnic-split path
-                    recordCivilianDisplacementCasualties(state, 'RBiH', shareLost, 0);
                 }
             }
 
