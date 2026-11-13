@@ -356,7 +356,7 @@ describe('DecisionConsequenceRecordsPanel', () => {
 
       expect(screen.getByRole('region', { name: 'Zapisi posljedica odluka' })).toBeTruthy();
       expect(screen.getByText('Posljedice odluka')).toBeTruthy();
-      expect(screen.getByText('Jos nema arhiviranih posljedica predsjedničkih odluka.')).toBeTruthy();
+      expect(screen.getByText('Još nema arhiviranih posljedica predsjedničkih odluka.')).toBeTruthy();
       expect(screen.queryByText('Odluka zabilježena')).toBeNull();
       expect(screen.queryByText(`Odluka događaja / ${turnToDateString(8)}`)).toBeNull();
       expect(screen.queryByText('Arhivirano u: Hronika')).toBeNull();

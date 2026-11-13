@@ -2110,7 +2110,7 @@ export const bcsMessages: Partial<Record<MessageKey, string>> = {
     'operationsPanel.momentum': 'Momentum:',
     'operationsPanel.supply': 'Zalihe:',
     'operationsPanel.supplyNotAssessed': 'Snabdjevna spremnost još nije procijenjena',
-    'operationsPanel.na': 'Nije prijavljeno',
+    'operationsPanel.na': 'bez izvještaja',
     'operationsPanel.failures': 'Neuspjesi:',
     'operationsPanel.avgCohesion': 'Prosj. kohezija:',
     'operationsPanel.avgHealth': 'Prosj. zdravlje:',

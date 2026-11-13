@@ -86,7 +86,7 @@ describe('EventDecisionModal presidential dossier', () => {
       expect(text).not.toMatch(/The May 1992 platform debate|Zagreb's directive and Herceg-Bosna institutions/);
       if (eventId === 'rbih_state_identity') {
         expect(text).toContain('Republika Bosna i Hercegovina moral +3');
-        expect(text).toContain('Zapis kampanje azuriran: Gradjanska multietnicka republika');
+        expect(text).toContain('Zapis kampanje ažuriran: Gradjanska multietnicka republika');
         expect(text).not.toContain('Republic of Bosnia and Herzegovina');
         expect(text).not.toContain('morale +3');
         expect(text).not.toContain('international standing');
@@ -189,7 +189,7 @@ describe('EventDecisionModal presidential dossier', () => {
     expect(text).toContain('Potrebna odluka');
     expect(text).toContain('Situacija');
     expect(text).toContain('Dosije');
-    expect(text).toContain('Predsjednicki odgovor');
+    expect(text).toContain('Predsjednički odgovor');
     expect(text).toContain('Historijski zadano');
     expect(text).toContain('Trag zapisa');
     expect(text).not.toContain('Decision Required');

@@ -2153,7 +2153,7 @@ export const enMessages = {
     'operationsPanel.momentum': 'Momentum:',
     'operationsPanel.supply': 'Supply:',
     'operationsPanel.supplyNotAssessed': 'Supply readiness not yet assessed',
-    'operationsPanel.na': 'No staff report',
+    'operationsPanel.na': 'unreported',
     'operationsPanel.failures': 'Failures:',
     'operationsPanel.avgCohesion': 'Avg cohesion:',
     'operationsPanel.avgHealth': 'Avg health:',

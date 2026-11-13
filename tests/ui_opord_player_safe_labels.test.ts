@@ -170,7 +170,7 @@ describe('Army-HQ raw enum + faction-slug resolution (QA Batch F)', () => {
         expect(sectorPanelSource).toContain('stanceLabel(corpsStance)');
         // Commander recommendation no longer renders the raw launch/postpone/abort enum.
         expect(sectorPanelSource).toContain('commanderAssessmentLabel(op.commander_assessment)');
-        expect(sectorPanelSource).toContain("launch: 'Recommends launch'");
+        expect(sectorPanelSource).toContain("launch: 'operationHistory.assessment.launch'");
     });
 
     it('resolves commander assessment, recovery reason, axis status, and grade factors in OperationsSection', () => {

@@ -62,7 +62,6 @@ tasks:
       - src/ui/map/components/AudioCueObserver.tsx
       - src/ui/map/components/AudioSurfaceBedController.tsx
       - src/ui/map/components/PeacePlanModal.tsx
-      - src/ui/map/components/GameOverModal.tsx
       - src/ui/map/components/onboarding/OnboardingOverlay.tsx
       - src/ui/map/components/SettingsScreen.tsx
       - src/ui/map/components/warroom/AdvanceTurnModal.tsx

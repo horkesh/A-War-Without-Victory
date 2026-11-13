@@ -625,7 +625,7 @@ describe('Army HQ timing copy', () => {
         operationOpportunityProposals: [makeOpportunity({
           status: 'eligible_pending_review',
           recommendation: 'approve',
-          description: 'Stab vidi otvoren operativni prozor.',
+          description: 'Štab vidi otvoren operativni prozor.',
         })],
         backTheOfficerOps: [
           {
@@ -659,7 +659,7 @@ describe('Army HQ timing copy', () => {
 
     const copy = document.body.textContent ?? '';
     expect(copy).toContain('General-major Neko Komandant');
-    expect(copy).toContain('Podrzite Neko Komandant i TG Sana');
+    expect(copy).toContain('Podržite Neko Komandant i TG Sana');
     expect(document.body.innerHTML).toContain('1200 ljudi izdvojeno iz ovog korpusa');
     expect(copy).not.toMatch(/Major General|men lent|Back Major/);
   });
