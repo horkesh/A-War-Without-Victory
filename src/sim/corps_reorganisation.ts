@@ -174,7 +174,7 @@ function isCorpsFormation(f: FormationState | undefined): boolean {
 
 function isActiveCorps(state: GameState, corpsId: string): boolean {
     const f = state.military.formations?.[corpsId];
-    return isCorpsFormation(f) && f!.status === 'active';
+    return isCorpsFormation(f) && f?.status === 'active';
 }
 
 /** True while the brigade is committed to a live operation of its current corps or out on an elite loan. */
@@ -267,15 +267,16 @@ export function processCorpsReorganisationEvents(
         }
         const cancelled: string[] = [];
         const dropped: string[] = [];
-        const cmd = state.military.corps_command?.[e.corps_id];
-        if (cmd) {
+        const commands = state.military.corps_command;
+        const cmd = commands?.[e.corps_id];
+        if (commands && cmd) {
             const ops = [...(cmd.active_operations ?? [])].sort((a, b) => strictCompare(a.name, b.name) || a.started_turn - b.started_turn);
             for (const op of ops) {
                 cancelOperation(state, e.corps_id, cmd, op, turn);
                 cancelled.push(op.name);
             }
             if (cmd.queued_operations?.length) dropped.push(...cmd.queued_operations);
-            delete state.military.corps_command![e.corps_id];
+            delete commands[e.corps_id];
             changed = true;
         }
         const successorCmd = state.military.corps_command?.[successor];
