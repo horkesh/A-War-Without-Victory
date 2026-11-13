@@ -6,9 +6,10 @@
  * §6 "Sensitive-copy lane" row.
  *
  * Pins the panel's rulings that a later edit could quietly undo:
- *   - the Humanitarian Ledger names victims as peoples and shows NO responsible
- *     side, because the engine books siege losses to the side holding the town;
- *     rows stay in key order (Ring 3 #7);
+ *   - the Humanitarian Ledger names victims as peoples and, since the displacement
+ *     attribution lane (2026-11-13), the side controlling the area as forces, with
+ *     the scope and simulation notes above the rows; rows stay in key order with
+ *     no per-side total (Ring 3 #7);
  *   - the Srebrenica receipt has one English source (sim builder == i18n EN) and a BCS form;
  *   - BCS corps names come from i18n by corps id; EN stays the data name;
  *   - the replay scrubber shows no figure the engine never writes.
@@ -20,7 +21,7 @@ import { createElement } from 'react';
 import { afterEach, describe, expect, it } from 'vitest';
 import {
     HumanitarianLedgerPanel,
-    displacedOrKilledByPeople,
+    displacedOrKilledBySide,
 } from '../../src/ui/map/components/HumanitarianLedgerPanel';
 import { ruptureReceiptText } from '../../src/ui/map/components/VerdictScreen';
 import { buildDynamicSections } from '../../src/sim/codex/dynamic_section_builder.js';
@@ -50,13 +51,16 @@ const ledgerState = {
             RS: { killed: 60, fledAbroad: 600 },
         },
         humanitarianAggregates: {
-            RS: { RBiH: { refugeesCreated: 5000, refugeesReceived: 0, civilianCasualtiesCaused: 80 } },
-            // Siege pressure on a pocket RBiH holds: recorded with RBiH as "causer".
-            RBiH: {
-                RBiH: { refugeesCreated: 700, refugeesReceived: 0, civilianCasualtiesCaused: 7 },
-                RS: { refugeesCreated: 1200, refugeesReceived: 0, civilianCasualtiesCaused: 12 },
+            _unknown: {
+                RBiH: { refugeesCreated: 300, refugeesReceived: 0, civilianCasualtiesCaused: 3 },
+                RS: { refugeesCreated: 0, refugeesReceived: 0, civilianCasualtiesCaused: 0 },
             },
-            _unknown: { RBiH: { refugeesCreated: 300, refugeesReceived: 0, civilianCasualtiesCaused: 3 } },
+            RS: {
+                RBiH: { refugeesCreated: 5000, refugeesReceived: 0, civilianCasualtiesCaused: 80 },
+                // Receiver-only slot (takeover arrivals): never a row.
+                RS: { refugeesCreated: 0, refugeesReceived: 4000, civilianCasualtiesCaused: 0 },
+            },
+            RBiH: { RS: { refugeesCreated: 1200, refugeesReceived: 0, civilianCasualtiesCaused: 12 } },
         },
         refugeesByTurn: [],
     },
@@ -70,52 +74,73 @@ function secondTableRows(container: HTMLElement): string[][] {
     );
 }
 
-describe('Humanitarian Ledger labels (R2\')', () => {
-    it('sums every caused_by bucket into one row per victim group, in key order', () => {
-        expect(displacedOrKilledByPeople(ledgerState.nationalDisplacement!.humanitarianAggregates)).toEqual([
-            { victim: 'RBiH', displaced: 6000, killed: 90 },
-            { victim: 'RS', displaced: 1200, killed: 12 },
+describe('Humanitarian Ledger labels (R2\'; displacement attribution lane)', () => {
+    it('one row per (side controlling the area, people), key order, "not recorded" last, no receiver-only rows', () => {
+        expect(displacedOrKilledBySide(ledgerState.nationalDisplacement!.humanitarianAggregates)).toEqual([
+            { side: 'RBiH', victim: 'RS', displaced: 1200, killed: 12 },
+            { side: 'RS', victim: 'RBiH', displaced: 5000, killed: 80 },
+            { side: '_unknown', victim: 'RBiH', displaced: 300, killed: 3 },
         ]);
     });
 
-    it('EN: peoples only, no responsible-side column (siege losses are booked to the holder)', () => {
+    it('EN: names the side controlling the area as forces, victims as peoples, notes above the rows', () => {
         setLocale('en');
         const { container } = render(createElement(HumanitarianLedgerPanel, { state: ledgerState, open: true, onClose: () => {} }));
         const rows = secondTableRows(container);
-        expect(rows.map((r) => r[0])).toEqual(['Bosniaks', 'Serbs']);
-        expect(rows[0][1].replace(/\D/g, '')).toBe('6000');
+        expect(rows.map((r) => [r[0], r[1]])).toEqual([
+            ['RBiH forces', 'Serbs'],
+            ['RS forces', 'Bosniaks'],
+            ['Responsible side not recorded', 'Bosniaks'],
+        ]);
+        expect(rows[1][2].replace(/\D/g, '')).toBe('5000');
         const text = container.textContent ?? '';
-        expect(text).toContain('Displaced or killed, by people');
+        expect(text).toContain('Displaced or killed, by side controlling the area');
+        expect(text).toContain('Side controlling the area');
+        expect(text).toContain('including the siege of Sarajevo, are not counted');
+        expect(text).toContain('understate the harm done by besieging forces');
         expect(text).toContain('do not describe the historical war');
-        for (const side of ['RBiH forces', 'RS forces', 'Herzeg-Bosnia forces', 'Responsible', 'Unattributed']) {
-            expect(text).not.toContain(side);
+        for (const banned of ['Against', 'Responsible:', 'Total by side', 'Unattributed']) {
+            expect(text).not.toContain(banned);
         }
+        // Both notes sit inside the table block, above the rows (a crop of the rows carries them).
+        const notes = container.querySelector('[data-testid="humanitarian-ledger-side-notes"]');
+        const table = container.querySelectorAll('table')[1];
+        expect(notes?.textContent).toContain('are not counted');
+        expect(notes?.textContent).toContain('do not describe the historical war');
+        expect(notes?.parentElement).toBe(table.parentElement);
+        expect(notes!.compareDocumentPosition(table) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     });
 
     it('BCS: no English label survives', () => {
         setLocale('bcs');
         const { container } = render(createElement(HumanitarianLedgerPanel, { state: ledgerState, open: true, onClose: () => {} }));
-        expect(secondTableRows(container).map((r) => r[0])).toEqual(['Bošnjaci', 'Srbi']);
+        expect(secondTableRows(container).map((r) => [r[0], r[1]])).toEqual([
+            ['Snage RBiH', 'Srbi'],
+            ['Snage RS', 'Bošnjaci'],
+            ['Odgovorna strana nije zabilježena', 'Bošnjaci'],
+        ]);
         const text = container.textContent ?? '';
-        for (const english of ['Bosniaks', 'Serbs', 'Croats', 'forces', 'Unattributed', 'Displaced', 'Killed']) {
+        for (const english of ['Bosniaks', 'Serbs', 'Croats', 'forces', 'Unattributed', 'Displaced', 'Killed', 'Side controlling']) {
             expect(text).not.toContain(english);
         }
         expect(text).toContain('Hrvati');
-        expect(text).toContain('Raseljeni ili ubijeni, po narodu');
+        expect(text).toContain('Raseljeni ili ubijeni, po strani koja je kontrolisala područje');
+        expect(text).toContain('potcjenjuju štetu koju su nanijele opsadne snage');
     });
 
-    it('source: no hard-coded people names, no responsible column, no value sort', () => {
+    it('source: no hard-coded names, no value sort, no per-side total, no refugeesReceived rows', () => {
         const source = withoutComments(read('src/ui/map/components/HumanitarianLedgerPanel.tsx'));
-        expect(source).not.toMatch(/'(Bosniaks|Serbs|Croats|Unattributed)'/);
+        expect(source).not.toMatch(/'(Bosniaks|Serbs|Croats|Unattributed|RBiH forces|RS forces)'/);
         expect(source).not.toContain('PENDING OWNER SIGN-OFF');
-        expect(source).not.toContain('humanitarianLedger.col.perpetrator');
-        expect(source).not.toContain('humanitarianLedger.side.');
         expect(source).not.toMatch(/\.sort\([^)]*(displaced|killed|refugeesCreated)/);
+        expect(source).not.toMatch(/refugeesReceived/);
     });
 
-    it('the side labels ship for the siege-attribution follow-up, named as forces', () => {
+    it('the side labels are named as forces, never as peoples', () => {
         expect(enMessages['humanitarianLedger.side.RS']).toBe('RS forces');
         expect(bcsMessages['humanitarianLedger.side.HRHB']).toBe('Snage Herceg-Bosne');
+        expect(enMessages['humanitarianLedger.col.victims']).toBe('People');
+        expect(bcsMessages['humanitarianLedger.col.victims']).toBe('Narod');
     });
 });
 
