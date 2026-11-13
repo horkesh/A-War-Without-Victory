@@ -370,10 +370,17 @@ try {
   operationAars = JSON.parse(fs.readFileSync(path.join(runDir, 'operation_aars.json'), 'utf8'));
 } catch { /* A missing or unreadable AAR fails the objective gate below. */ }
 if (!Array.isArray(operationAars)) operationAars = [];
+// A Farz still executing or recovering at the last turn has no AAR yet; the gate then reads
+// the live operation from the final save (same operation-owned capture standard).
+const liveOperations = [];
+for (const [corpsId, cmd] of Object.entries((save.military && save.military.corps_command) || {})) {
+  for (const op of (cmd && cmd.active_operations) || []) liveOperations.push({ corps_id: corpsId, op });
+}
 const farz = checkFarzObjectiveCaptures({
   cells: FARZ_CELLS, at188, events, battleById, aars: operationAars, corpsOf,
-  windowStart: FARZ_WINDOW_START,
+  windowStart: FARZ_WINDOW_START, liveOperations, finalTurn: save.meta && save.meta.turn,
 });
+if (farz.provisional) console.log('  (Farz has no AAR yet: still in progress at the last turn; read from the live operation)');
 console.log('  P-A authored Farz objective receipts — operation-owned combat in the late window');
 for (const row of farz.rows) {
   console.log(`    ${row.name.padEnd(26)} ${row.ok ? `t${row.turn} ** CAPTURED **${row.via === 'uragan' ? ' (2nd Corps, Uragan 95)' : ''}` : '*** MISSING OR UNATTRIBUTED ***'}`);

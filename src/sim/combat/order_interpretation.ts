@@ -360,6 +360,11 @@ function computeInterpretation(
 // ═══════════════════════════════════════════════════════════════════════════
 
 /**
+ * NO LIVE CALLER (posture model option 2: the president issues no direct corps stance
+ * order), kept on purpose: this is the officer compliance model that the op-directive
+ * objection copy (ui/map/data/opDirectiveObjection.ts) mirrors, and retiring it is a
+ * design decision, not a dead-code cleanup (stance lane, 2026-11-13).
+ *
  * Interpret a player-issued stance order through the corps commander's personality.
  * May emit a PendingOfficerEvent if the officer deviates.
  * Mutates state.military.pending_officer_events on non-full compliance.
@@ -426,6 +431,8 @@ export function interpretStanceOrder(
 }
 
 /**
+ * NO LIVE CALLER; kept with interpretStanceOrder (see its note).
+ *
  * Preview what interpretStanceOrder would produce without mutating state.
  * Read-only: does NOT push any event to state.
  */

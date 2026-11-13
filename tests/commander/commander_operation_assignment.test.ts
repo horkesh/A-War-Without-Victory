@@ -262,3 +262,31 @@ describe('commander operation commander assignment', () => {
         expect(tickPreparation(game, admitted, CORPS_ID, 'RS', 1).ready).toBe(true);
     });
 });
+
+describe('commander sector stances (S1)', () => {
+    it('never overwrites a player-set OG stance; bot OGs take the commander stance', () => {
+        const game = state();
+        const makeSector = (index: number, source: 'bot' | 'player') => ({
+            sector_id: `sector:${CORPS_ID}:${index}`, corps_id: CORPS_ID, faction: 'RS',
+            opposing_factions: ['RBiH'], edge_ids: [`e${index}`], sub_segments: [], length_edges: 1,
+            territory_osids: [], assigned_brigade_ids: [], reserve_brigade_ids: [], rear_brigade_ids: [],
+            density: 0, threat_ratio: 0, defensive_power: 0,
+            sector_stance: 'fortify', stance_source: source,
+        }) as NonNullable<MilitaryState['corps_front_sectors']>[string];
+        game.military.corps_front_sectors = {
+            [`sector:${CORPS_ID}:0`]: makeSector(0, 'player'),
+            [`sector:${CORPS_ID}:1`]: makeSector(1, 'bot'),
+        };
+        const out: CommanderOutput = {
+            ...output(operation()),
+            operations: [],
+            sector_stances: [
+                { sector_id: `sector:${CORPS_ID}:0`, stance: 'active_defense' },
+                { sector_id: `sector:${CORPS_ID}:1`, stance: 'active_defense' },
+            ],
+        };
+        applyCommanderOutput(game, CORPS_ID, out);
+        expect(game.military.corps_front_sectors[`sector:${CORPS_ID}:0`]).toMatchObject({ sector_stance: 'fortify', stance_source: 'player' });
+        expect(game.military.corps_front_sectors[`sector:${CORPS_ID}:1`]).toMatchObject({ sector_stance: 'active_defense', stance_source: 'bot' });
+    });
+});

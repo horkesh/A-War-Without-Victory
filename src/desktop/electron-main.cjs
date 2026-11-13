@@ -2594,29 +2594,9 @@ app.whenReady().then(() => {
     }
   });
 
-  ipcMain.handle('stage-posture-order', async (_event, payload) => {
-    const { brigadeId, posture } = payload || {};
-    if (!currentGameStateJson || typeof brigadeId !== 'string' || typeof posture !== 'string') {
-      return { ok: false, error: 'No game loaded or invalid payload' };
-    }
-    try {
-      const sim = getDesktopSim();
-      const state = sim.deserializeState(currentGameStateJson);
-      if (!state.brigade_posture_orders) state.brigade_posture_orders = [];
-      // Replace existing order for same brigade, or append
-      const idx = state.brigade_posture_orders.findIndex(o => o.brigade_id === brigadeId);
-      const order = { brigade_id: brigadeId, posture };
-      if (idx >= 0) {
-        state.brigade_posture_orders[idx] = order;
-      } else {
-        state.brigade_posture_orders.push(order);
-      }
-      writeCanonicalCurrentState(sim, state, _event.sender);
-      return { ok: true };
-    } catch (e) {
-      return { ok: false, error: e.message || String(e) };
-    }
-  });
+  // Retired 2026-11-13: the stage-posture-order channel. The preload never exposed it after posture
+  // model option 2 (the president does not set brigade posture), and it wrote a top-level
+  // `state.brigade_posture_orders` that no turn step reads.
 
   ipcMain.handle('stage-move-order', async (_event, payload) => {
     const { brigadeId, targetMunicipalityId } = payload || {};

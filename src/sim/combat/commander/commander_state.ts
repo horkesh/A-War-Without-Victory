@@ -222,10 +222,25 @@ export interface ForceQualityPlanSnapshot {
 
 export interface SectorActivityEntry {
     readonly sector_id: string;
+    /** `stableSectorKey` of the sector: survives the per-turn renumbering that `sector_id` does not. */
+    readonly stable_key?: string;
     readonly turn: number;
     readonly activity: 'quiet' | 'skirmish' | 'active' | 'contested' | 'overrun';
     readonly enemy_strength_estimate: number;
     readonly own_casualties: number;
+}
+
+/**
+ * The commander's standing posture for one OG, carried across turns. Sectors are renumbered
+ * every turn, so the entry is keyed by `stableSectorKey` (corps id + smallest edge id).
+ */
+export interface SectorStanceMemoryEntry {
+    readonly stable_key: string;
+    readonly stance: SectorStance;
+    /** Turn this stance was adopted. */
+    readonly since_turn: number;
+    /** Last turn a recommendation confirmed this stance. */
+    readonly confirmed_turn: number;
 }
 
 // ---------------------------------------------------------------------------
@@ -460,6 +475,8 @@ export interface CommanderState {
     lessons?: readonly CommanderLesson[];
     /** Last turn's decision trace (most recent only; history in operation_history). */
     decision_trace?: CommanderDecisionTrace;
+    /** Standing OG postures, sorted by stable_key (minimum-dwell hysteresis, emit.ts). */
+    sector_stance_memory?: SectorStanceMemoryEntry[];
 }
 
 // ---------------------------------------------------------------------------

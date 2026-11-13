@@ -232,7 +232,6 @@ interface WindowAwwv {
     setAiCommanderConfig: (payload: { mode: string; anthropic_api_key?: string }) => Promise<{ ok: boolean; error?: string }>;
     getAdvisorRecommendation: (payload: { faction?: string; context_type?: string }) => Promise<IpcAdvisorRecommendationResult>;
     stageAttackOrder: (brigadeId: string, targetSettlementId: string) => Promise<{ ok: boolean; error?: string }>;
-    stagePostureOrder: (brigadeId: string, posture: string) => Promise<{ ok: boolean; error?: string }>;
     stageMoveOrder: (brigadeId: string, targetMunicipalityId: string) => Promise<{ ok: boolean; error?: string }>;
     stageDeployOrder: (brigadeId: string) => Promise<{ ok: boolean; error?: string }>;
     stageUndeployOrder: (brigadeId: string) => Promise<{ ok: boolean; error?: string }>;
@@ -543,10 +542,6 @@ export function useIPC() {
 
             stageAttackOrder: awwv
                 ? (brigadeId: string, targetSettlementId: string) => awwv.stageAttackOrder(brigadeId, targetSettlementId)
-                : makeNoop<{ ok: boolean; error?: string }>(),
-
-            stagePostureOrder: awwv
-                ? (brigadeId: string, posture: string) => awwv.stagePostureOrder(brigadeId, posture)
                 : makeNoop<{ ok: boolean; error?: string }>(),
 
             stageMoveOrder: awwv

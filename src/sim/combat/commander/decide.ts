@@ -34,6 +34,7 @@ import { spatialFriendlyDistance } from '../../spatial_context.js';
 import { isEnclaveMovementDestinationAllowed } from '../enclave_resilience.js';
 import { isSectorRosterEligibleFormation } from '../sector_roster_eligibility.js';
 import { TRUTHFUL_SECTOR_REACHABILITY_MAX_HOPS } from '../brigade_assignment.js';
+import { stableSectorKey } from '../sector_intel.js';
 import type {
     CommanderBeliefState,
     CommanderBriefing,
@@ -93,9 +94,21 @@ const OFFENSIVE_SIGNS_CONFIDENCE_BOOST = 0.15;
 // DecisionResult
 // ═══════════════════════════════════════════════════════════════════════════
 
+/**
+ * A recommended OG stance. `trigger` says what drove it: 'contact' (ground lost or fighting
+ * in the sector this turn) applies at once; 'intel' (enemy intent, a quiet front) waits for
+ * the posture's minimum dwell (emit.ts OG_STANCE_MIN_DWELL_TURNS). Absent counts as 'intel'.
+ */
+export interface StanceRecommendation {
+    sector_id: string;
+    new_stance: SectorStance;
+    reason: string;
+    trigger?: 'contact' | 'intel';
+}
+
 export interface DecisionResult {
     /** Sectors that should change stance. */
-    stance_changes: Array<{ sector_id: string; new_stance: SectorStance; reason: string }>;
+    stance_changes: StanceRecommendation[];
     /** Reserves to shift between zones. */
     reserve_shifts: Array<{ brigade_id: FormationId; from_zone: ZoneId; to_zone: ZoneId; reason: string }>;
     /** Direct same-corps relief for an empty, legally reachable front sector. */
@@ -516,6 +529,7 @@ function classifySectorActivity(
 
         entries.push({
             sector_id: sector.sector_id,
+            stable_key: stableSectorKey(sector),
             turn,
             activity,
             enemy_strength_estimate: enemyStrengthEstimate,
@@ -564,8 +578,8 @@ function computeStanceChanges(
     personality: OfficerPersonality,
     sectors: readonly CorpsFrontSector[],
     beliefState: CommanderBeliefState | null,
-): Array<{ sector_id: string; new_stance: SectorStance; reason: string }> {
-    const changes: Array<{ sector_id: string; new_stance: SectorStance; reason: string }> = [];
+): StanceRecommendation[] {
+    const changes: StanceRecommendation[] = [];
 
     // Build threat_ratio lookup by sector_id
     const threatRatioBySector = new Map<string, number>();
@@ -585,15 +599,19 @@ function computeStanceChanges(
         activityBySector.set(entry.sector_id, entry);
     }
 
-    // Build quiet-turns count from previous activity log
+    // Build quiet-turns count from previous activity log. Sectors are renumbered every
+    // turn, so the streak follows the sector's stable key (content), falling back to the
+    // positional id only for entries written before stable keys existed.
+    const activityKey = (entry: SectorActivityEntry): string => entry.stable_key ?? entry.sector_id;
     const quietTurnsBySector = new Map<string, number>();
     if (previousState) {
         // Count consecutive quiet turns from the end of the log
         const logBySector = new Map<string, SectorActivityEntry[]>();
         for (const entry of previousState.sector_activity_log) {
-            const existing = logBySector.get(entry.sector_id) ?? [];
+            const key = activityKey(entry);
+            const existing = logBySector.get(key) ?? [];
             existing.push(entry);
-            logBySector.set(entry.sector_id, existing);
+            logBySector.set(key, existing);
         }
         for (const [sectorId, entries] of logBySector) {
             // Sort by turn descending to count consecutive quiet from most recent
@@ -620,7 +638,7 @@ function computeStanceChanges(
     const sortedSectorIds = [...activityBySector.keys()].sort(strictCompare);
     for (const sectorId of sortedSectorIds) {
         const activity = activityBySector.get(sectorId)!;
-        const prevQuietTurns = quietTurnsBySector.get(sectorId) ?? 0;
+        const prevQuietTurns = quietTurnsBySector.get(activityKey(activity)) ?? 0;
         const totalQuiet = activity.activity === 'quiet' ? prevQuietTurns + 1 : 0;
 
         // Check enemy intent from belief layer (preferred) or raw intel (fallback)
@@ -676,9 +694,13 @@ function computeStanceChanges(
             reason = `quiet for ${totalQuiet} turns — screening posture`;
         }
 
-        // Only emit a change if we have a recommendation
+        // Only emit a change if we have a recommendation. Ground lost or fighting in the
+        // sector this turn is contact and re-postures at once; anything else is intel.
         if (newStance !== null) {
-            changes.push({ sector_id: sectorId, new_stance: newStance, reason });
+            const contact = activity.activity === 'overrun'
+                || activity.activity === 'contested'
+                || activity.activity === 'active';
+            changes.push({ sector_id: sectorId, new_stance: newStance, reason, trigger: contact ? 'contact' : 'intel' });
         }
     }
 

@@ -200,7 +200,7 @@ import {
 } from '../combat/triggered_operations.js';
 import { computeMilitiaGarrisons } from '../combat/militia_garrison.js';
 import { activateOGs, updateOGLifecycle } from '../combat/operational_groups.js';
-import { deriveSectorIntel } from '../combat/sector_intel.js';
+import { deriveSectorIntel, stableSectorKey } from '../combat/sector_intel.js';
 import { resolveAttackOrders } from '../combat/resolve_attack_orders.js';
 import { resolveAttackOrdersOsid, displaceFormationsInEnemyTerritory } from '../combat/attack_resolution_osid.js';
 import { applyBrigadeMovementOrders } from '../combat/brigade_movement_orders.js';
@@ -238,7 +238,7 @@ import {
 import { generateCorpsStanceOrders } from '../combat/bot_corps_stance.js';
 import { accrueRecruitmentResources, runOngoingRecruitment } from '../recruitment_turn.js';
 // REASON-CODE INSTRUMENTATION: env-gated, inert by default. See reason_code_debug.ts.
-import { isReasonCodeTopicEnabled } from '../combat/reason_code_debug.js';
+import { emitSectorStanceRecord, isReasonCodeTopicEnabled } from '../combat/reason_code_debug.js';
 import type { EmergentFormationRefusalRecord } from '../../state/recruitment_types.js';
 import { reroutePoolSurplus } from '../recruitment_engine.js';
 import { computeHomeDefenseActive } from '../compute_home_defense.js';
@@ -2873,6 +2873,26 @@ export const warPhases: NamedPhase[] = [
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
             applySectorStanceOrders(context.state);
+            // Observation only: the OG stance in effect when combat resolves this turn.
+            if (isReasonCodeTopicEnabled('sector_stance')) {
+                const sectors = context.state.military.corps_front_sectors ?? {};
+                const corpsCommand = context.state.military.corps_command ?? {};
+                for (const sectorId of Object.keys(sectors).sort(strictCompare)) {
+                    const sector = sectors[sectorId];
+                    if (!sector) continue;
+                    emitSectorStanceRecord({
+                        phase: 'pre_combat',
+                        turn: context.state.meta.turn,
+                        faction: sector.faction,
+                        corps_id: sector.corps_id,
+                        corps_stance: corpsCommand[sector.corps_id]?.stance ?? null,
+                        sector_id: sector.sector_id,
+                        stable_key: stableSectorKey(sector),
+                        stance: sector.sector_stance ?? null,
+                        stance_source: sector.stance_source ?? null,
+                    });
+                }
+            }
         }
     },
     {

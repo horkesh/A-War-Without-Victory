@@ -71,10 +71,7 @@ turn pipeline or replace the player's negotiation. The signing narrative require
   - Returns: `{ ok: boolean, error?: string }`
   - Behavior: sets `state.brigade_attack_orders[brigadeId] = targetSettlementId`, reserializes, sends state via `game-state-updated`. The 3D operational warmap ATTACK mode and Selection panel use this via DesktopBridge `stageAttackOrder()`.
 
-- `stage-posture-order` (invoke)
-  - Payload: `{ brigadeId: string, posture: string }`
-  - Returns: `{ ok: boolean, error?: string }`
-  - Behavior: compatibility-era channel. Pushes or replaces entry in `state.brigade_posture_orders` for the brigade, reserializes, sends state via `game-state-updated`. This is not a current player-facing direct-command affordance in the React tactical map; president-facing posture intent should route through the current Army HQ/corps/sector command surfaces.
+- `stage-posture-order`: retired 2026-11-13. Under posture model option 2 the president does not set brigade posture; corps and OG stance changes reach the president as stance matters. The preload had already stopped exposing it, and it wrote a top-level `state.brigade_posture_orders` that no turn step reads.
 
 - `stage-move-order` (invoke)
   - Payload: `{ brigadeId: string, targetMunicipalityId: string }`

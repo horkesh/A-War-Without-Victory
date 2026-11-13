@@ -137,4 +137,55 @@ describe('Farz objective gate', () => {
         lostBattle.set(events[1].battle_id, { ...battles.get(events[1].battle_id)!, attacker_won: false });
         expect(checkFarzObjectiveCaptures({ ...input, battleById: lostBattle }).ok).toBe(false);
     });
+
+    describe('Farz still in progress at the last turn (no AAR yet)', () => {
+        // The live operation as the final save holds it; its id rebuilds to `operationId`.
+        const liveFarz = {
+            corps_id: 'arbih_3rd_corps',
+            op: {
+                name: 'Operation Farz 95',
+                army_hq_op_id: 'ahq:RBiH:3:farz_95',
+                started_turn: 161,
+                phase: 'recovery',
+                objectives: cells.map(([, osid]) => osid),
+                participating_brigades: ['third_corps_brigade'],
+            },
+        };
+        const liveInput = { ...input, aars: [], liveOperations: [liveFarz], finalTurn: 188 };
+
+        it('reads operation-owned captures from the live operation', () => {
+            const result = checkFarzObjectiveCaptures(liveInput);
+            expect(result.ok).toBe(true);
+            expect(result.provisional).toBe(true);
+        });
+
+        it('still fails when Farz did not take its objectives', () => {
+            // One objective never captured.
+            expect(checkFarzObjectiveCaptures({ ...liveInput, events: events.slice(0, 1) }).ok).toBe(false);
+            // Captured, but lost again by the last turn.
+            expect(checkFarzObjectiveCaptures({ ...liveInput,
+                at188: { ...input.at188, [cells[1][1]]: 'RS' } }).ok).toBe(false);
+            // Captured by combat no Farz operation owned.
+            const otherOwner = new Map(battles);
+            otherOwner.set(events[1].battle_id, { ...battles.get(events[1].battle_id)!, operation_id: 'arbih_3rd_corps:Operation Other:t161' });
+            expect(checkFarzObjectiveCaptures({ ...liveInput, battleById: otherOwner }).ok).toBe(false);
+            // An objective the operation was never given.
+            expect(checkFarzObjectiveCaptures({ ...liveInput, liveOperations: [{ ...liveFarz,
+                op: { ...liveFarz.op, objectives: [cells[0][1]] } }] }).ok).toBe(false);
+        });
+
+        it('fails closed with no live Farz, two live Farz, a non-Farz Army HQ op, or no final turn', () => {
+            expect(checkFarzObjectiveCaptures({ ...liveInput, liveOperations: [] }).ok).toBe(false);
+            expect(checkFarzObjectiveCaptures({ ...liveInput, liveOperations: [liveFarz, liveFarz] }).ok).toBe(false);
+            expect(checkFarzObjectiveCaptures({ ...liveInput, liveOperations: [{ ...liveFarz,
+                op: { ...liveFarz.op, army_hq_op_id: 'ahq:RBiH:3:other_95' } }] }).ok).toBe(false);
+            expect(checkFarzObjectiveCaptures({ ...liveInput, finalTurn: undefined }).ok).toBe(false);
+        });
+
+        it('a closed Farz AAR wins over the live operation', () => {
+            const result = checkFarzObjectiveCaptures({ ...liveInput, aars: [aar] });
+            expect(result.ok).toBe(true);
+            expect(result.provisional).toBe(false);
+        });
+    });
 });

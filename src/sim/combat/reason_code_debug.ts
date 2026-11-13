@@ -111,6 +111,10 @@ import { stableStringify } from '../../utils/stable_json.js';
  *                   pipeline mutation boundaries.
  *  front_distribution — selected-formation pre-write receipts at front-distribution
  *                       writer boundaries and invocation/no-write coverage.
+ *  sector_stance  — stdout-only OG (sector) stance receipts: the commander's chosen
+ *                   stance with its reason, and the stance in effect when combat
+ *                   resolves. Sectors are rebuilt after combat, so the turn-end
+ *                   save shows neither.
  */
 export type ReasonCodeTopic =
     | 'battle_stack'
@@ -140,7 +144,8 @@ export type ReasonCodeTopic =
     | 'southern_move_confidence_lookup'
     | 'local_occupation_candidate'
     | 'reconciliation_write'
-    | 'preplanned_eligibility';
+    | 'preplanned_eligibility'
+    | 'sector_stance';
 
 const ALL_TOPICS: readonly ReasonCodeTopic[] = [
     'axis_reject',
@@ -171,6 +176,7 @@ const ALL_TOPICS: readonly ReasonCodeTopic[] = [
     'local_occupation_candidate',
     'reconciliation_write',
     'preplanned_eligibility',
+    'sector_stance',
 ];
 
 /**
@@ -290,6 +296,17 @@ export function emitPreplannedEligibilityRecord(record: Record<string, unknown>)
         console.log(`${PREPLANNED_ELIGIBILITY_PREFIX} ${stableStringify({ schema_version: 1, ...record })}`);
     } catch {
         // Observation and serialization failures are isolated from operation injection.
+    }
+}
+
+/** Default-off stdout receipts for OG (sector) stances. Never writes GameState or reports. */
+export const SECTOR_STANCE_PREFIX = '[sector_stance]';
+export function emitSectorStanceRecord(record: Record<string, unknown>): void {
+    if (!isReasonCodeTopicEnabled('sector_stance')) return;
+    try {
+        console.log(`${SECTOR_STANCE_PREFIX} ${stableStringify({ schema_version: 1, ...record })}`);
+    } catch {
+        // Observation and stdout failures cannot affect stance selection.
     }
 }
 

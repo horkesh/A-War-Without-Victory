@@ -38,7 +38,7 @@ import type {
 import { strictCompare } from '../../state/validateGameState.js';
 import { getFactionCorps } from './bot_corps_helpers.js';
 import type { CorpsStanceTrace } from './bot_corps_stance.js';
-import { CORPS_STANCE_ALLOWED_SECTOR_STANCES } from './combat_math.js';
+import { CORPS_STANCE_ALLOWED_SECTOR_STANCES, narrowSectorStance, SECTOR_STANCE_RANK } from './combat_math.js';
 import { COMMAND_FRICTION_FACTION_WEIGHT, PATRON_OVERRIDE_FLOOR } from './command_lever_consequences.js';
 import { applyDimensionShift } from '../events/strategic_dimensions.js';
 import { getArmyCommander, getCorpsCommander } from './officer_system.js';
@@ -67,10 +67,6 @@ export const OG_CONSTRAINT_ALLOWED: Record<'no_active_defense' | 'hold_no_counte
     hold_no_counterattacks: ['defend', 'fortify', 'screening'],
 };
 
-/** Sector stance aggressiveness for deterministic narrowing. */
-const SECTOR_STANCE_RANK: Record<SectorStance, number> = {
-    screening: 0, fortify: 1, defend: 2, elastic: 3, active_defense: 4,
-};
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Gates
@@ -263,14 +259,8 @@ export function ogConstraintOptions(to: SectorStance, corpsStance: string): Stan
     return out;
 }
 
-/** Narrow a sector stance into `allowedSet` (highest aggressiveness not above the current; else the least aggressive). */
-export function narrowSectorStance(current: SectorStance, allowedSet: readonly SectorStance[]): SectorStance {
-    if (allowedSet.length === 0) return 'defend';
-    if (allowedSet.includes(current)) return current;
-    const sorted = [...allowedSet].sort((a, b) => (SECTOR_STANCE_RANK[a] - SECTOR_STANCE_RANK[b]) || strictCompare(a, b));
-    const below = sorted.filter((s) => SECTOR_STANCE_RANK[s] <= SECTOR_STANCE_RANK[current]);
-    return below.length > 0 ? below[below.length - 1]! : sorted[0]!;
-}
+/** Re-exported: the narrowing rule lives beside the corps ceiling table in combat_math. */
+export { narrowSectorStance };
 
 // ═══════════════════════════════════════════════════════════════════════════
 // OG clamp (end of the faction pass, after the commander loop)

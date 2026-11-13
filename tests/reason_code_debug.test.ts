@@ -55,6 +55,7 @@ const ALL_TOPICS: ReasonCodeTopic[] = [
     'local_occupation_candidate',
     'reconciliation_write',
     'preplanned_eligibility',
+    'sector_stance',
 ];
 
 function setFlag(value: string | undefined): void {
