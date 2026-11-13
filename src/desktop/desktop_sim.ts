@@ -810,8 +810,14 @@ export async function getRecruitmentCatalog(baseDir: string): Promise<{
     };
 }
 
-/** State-aware catalog used by the desktop player surface. */
+/**
+ * State-aware catalog used by the desktop player surface. `turn` and `autonomy_level` come
+ * from the same state so the renderer's Desk recruitment matter compares like with like.
+ * Read-only: eligibility is `evaluateRecruitmentEligibility`, unchanged.
+ */
 export async function getPlayerRecruitmentCatalog(state: GameState, baseDir: string): Promise<{
+    turn: number;
+    autonomy_level: number;
     brigades: Array<{
         id: string;
         faction: string;
@@ -832,12 +838,16 @@ export async function getPlayerRecruitmentCatalog(state: GameState, baseDir: str
         loadSettlementGraph(settlementGraphOptions(baseDir)),
         loadOperationalData(baseDir),
     ]);
+    const turn = state.meta.turn;
+    const autonomy_level = state.meta.autonomy_level ?? 0;
     const resources = state.military.recruitment_state;
-    if (!resources) return { brigades: [] };
+    if (!resources) return { turn, autonomy_level, brigades: [] };
     const context = buildRecruitmentContext(state, graph.settlements, municipalityHqSettlement, operationalData);
     const playerFaction = state.meta.player_faction;
 
     return {
+        turn,
+        autonomy_level,
         brigades: brigades.map((brigade) => {
             const eligibility = evaluateRecruitmentEligibility(
                 state,

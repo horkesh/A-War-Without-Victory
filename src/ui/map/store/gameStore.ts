@@ -11,6 +11,12 @@ import type { ReplaySaveManifest } from '../../../sim/replay/replay_manifest';
 import type { GameState as RawGameState } from '../../../state/game_state';
 import { strictCompare } from '../../../state/validateGameState';
 import type { TurnPauseStatus } from '../desktop/types';
+import {
+  advanceRecruitmentWatch,
+  setAsideRecruitmentMatter as setAsideRecruitmentWatch,
+  type RecruitmentCatalogSnapshot,
+  type RecruitmentWatch,
+} from '../data/recruitmentMatter';
 
 /** Last turn report shape from desktop (advance-turn). Used for succession in FormationDetail. */
 export interface LastTurnReport {
@@ -115,6 +121,22 @@ export interface GameStore {
   /** OSID → feature properties from operational_settlements (for tooltips); null until loaded */
   osidPropertiesMap: Record<string, Record<string, unknown>> | null;
   setOsidPropertiesMap: (map: Record<string, Record<string, unknown>> | null) => void;
+
+  /**
+   * Recruitment on the Desk (owner 2026-11-12). UI-only memory of what the president has
+   * been told about raisable brigades; never written to GameState or a save.
+   */
+  recruitmentWatch: RecruitmentWatch | null;
+  /** Fold the latest `get-recruitment-catalog` snapshot into the watch. */
+  observeRecruitmentCatalog: (snapshot: RecruitmentCatalogSnapshot) => void;
+  /** "Not now" (decision) / "Noted" (notice). */
+  setAsideRecruitmentMatter: () => void;
+  /** Forget the watch (new campaign, load). */
+  resetRecruitmentWatch: () => void;
+  /** A request to open Recruitment on a brigade; App consumes it. `seq` keeps repeats distinct. */
+  recruitmentOpenRequest: { brigadeId: string | null; seq: number } | null;
+  requestRecruitmentOpen: (brigadeId: string | null) => void;
+  clearRecruitmentOpenRequest: () => void;
 
   /** Map mode: Political Control / Ethnic / Supply / Front Pressure (Phase C2) */
   mapMode: MapMode;
@@ -475,6 +497,20 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
   osidPropertiesMap: null,
   setOsidPropertiesMap: (map) => set({ osidPropertiesMap: map }),
+
+  recruitmentWatch: null,
+  observeRecruitmentCatalog: (snapshot) => set((current) => ({
+    recruitmentWatch: advanceRecruitmentWatch(current.recruitmentWatch, snapshot),
+  })),
+  setAsideRecruitmentMatter: () => set((current) => (
+    current.recruitmentWatch ? { recruitmentWatch: setAsideRecruitmentWatch(current.recruitmentWatch) } : {}
+  )),
+  resetRecruitmentWatch: () => set({ recruitmentWatch: null }),
+  recruitmentOpenRequest: null,
+  requestRecruitmentOpen: (brigadeId) => set((current) => ({
+    recruitmentOpenRequest: { brigadeId, seq: (current.recruitmentOpenRequest?.seq ?? 0) + 1 },
+  })),
+  clearRecruitmentOpenRequest: () => set({ recruitmentOpenRequest: null }),
 
   mapMode: 'political',
   setMapMode: (mode) => set({ mapMode: mode }),

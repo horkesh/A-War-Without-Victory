@@ -22,6 +22,7 @@ const FAMILY_LABEL_KEYS: Partial<Record<InboxItem['type'], MessageKey>> = {
   operation_opportunity: 'decisionSurface.operationOpportunity.playerLabel',
   autonomy_proposal: 'decisionSurface.autonomy.playerLabel',
   intelligence_notification: 'decisionSurface.intelligence.playerLabel',
+  recruitment: 'recruitment.desk.family',
   situation: 'decisionSurface.situation.playerLabel',
 };
 

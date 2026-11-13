@@ -51,5 +51,10 @@ export function openPresidentialDecisionRoomNavigationTarget(
   if (target.kind === 'chronicle') {
     return openChronicle(state);
   }
+  if (target.kind === 'recruitment') {
+    if (!state.requestRecruitmentOpen) return false;
+    state.requestRecruitmentOpen(target.brigadeId);
+    return true;
+  }
   return false;
 }
