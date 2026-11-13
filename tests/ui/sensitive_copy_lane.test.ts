@@ -12,7 +12,8 @@
  *     no per-side total (Ring 3 #7);
  *   - the Srebrenica receipt has one English source (sim builder == i18n EN) and a BCS form;
  *   - BCS corps names come from i18n by corps id; EN stays the data name;
- *   - the replay scrubber shows no figure the engine never writes.
+ *   - the replay scrubber shows no figure the engine never writes; its displaced
+ *     figure counts the killed and says so (SC6, 2026-11-13).
  */
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -33,6 +34,8 @@ import { bcsMessages } from '../../src/ui/map/i18n/messages.bcs';
 import { formatCorpsDisplayName } from '../../src/ui/map/utils/formatters';
 import { RENAMED_CORPS_SAVED_NAMES } from '../../src/ui/map/i18n/bcsCases';
 import { withoutComments } from '../helpers/sourceComments';
+import { ReplayScrubber } from '../../src/ui/map/components/replay/ReplayScrubber';
+import type { ReplaySaveManifest } from '../../src/sim/replay/replay_manifest';
 
 afterEach(() => {
     cleanup();
@@ -221,14 +224,74 @@ describe('BCS corps names (S9)', () => {
 });
 
 describe('Replay scrubber (R8)', () => {
-    it('is built from the shared surface parts, has no hard-coded English, and hides the always-zero figures', () => {
+    it('is built from the shared surface parts and has no hard-coded English', () => {
         const source = withoutComments(read('src/ui/map/components/replay/ReplayScrubber.tsx'));
         expect(source).toMatch(/from '\.\.\/surface\/Surface'/);
         expect(source).not.toMatch(/\btext-(?:xs|\[(?:[0-9]|1[0-2])(?:\.\d+)?px\])/);
         for (const literal of ['Scrub Your War', 'Inspect Map', 'no saved snapshots', "'n/a'", "'settlement'"]) {
             expect(source).not.toContain(literal);
         }
-        expect(source).not.toContain('totalDisplaced');
-        expect(source).not.toContain('totalCasualties');
+    });
+
+    // SC6 (2026-11-13): the figures read the casualty ledger and the displacement
+    // aggregates. The displaced figure counts the killed, so §4 requires the label
+    // "Displaced or killed"; a plain "Displaced" label must not come back.
+    it('labels the displaced figure as including the killed, in EN and BCS', () => {
+        expect(enMessages['replay.casualties']).toBe('Military casualties');
+        expect(bcsMessages['replay.casualties']).toBe('Vojni gubici');
+        expect(enMessages['replay.displacedOrKilled']).toBe('Displaced or killed');
+        expect(bcsMessages['replay.displacedOrKilled']).toBe('Raseljeni ili ubijeni');
+        expect(enMessages).not.toHaveProperty('replay.displaced');
+        expect(bcsMessages).not.toHaveProperty('replay.displaced');
+    });
+
+    const manifest = (totalCasualties: number | null, totalDisplacedOrKilled: number | null): ReplaySaveManifest => ({
+        schema_version: 2,
+        frame_count: 1,
+        frames: [{
+            turn: 40, date: '1993-01-03', activeFormations: 230,
+            totalCasualties, totalDisplacedOrKilled,
+            controlByFaction: [{ faction: 'RS', osids: 296 }],
+        }],
+    });
+
+    function figure(container: HTMLElement, name: string): HTMLElement | null {
+        return container.querySelector(`[data-awwv-replay-figure="${name}"]`);
+    }
+
+    it('renders both figures with locale number formatting', () => {
+        const en = render(createElement(ReplayScrubber, { saveManifest: manifest(52645, 1377237) }));
+        expect(figure(en.container, 'casualties')?.textContent).toBe('Military casualties52,645');
+        expect(figure(en.container, 'displaced-or-killed')?.textContent).toBe('Displaced or killed1,377,237');
+        cleanup();
+
+        setLocale('bcs');
+        const bcs = render(createElement(ReplayScrubber, { saveManifest: manifest(52645, 1377237) }));
+        expect(figure(bcs.container, 'casualties')?.textContent).toBe('Vojni gubici52.645');
+        expect(figure(bcs.container, 'displaced-or-killed')?.textContent).toBe('Raseljeni ili ubijeni1.377.237');
+    });
+
+    it('hides a figure the frame does not record instead of showing 0 (§4 false zero)', () => {
+        const { container } = render(createElement(ReplayScrubber, { saveManifest: manifest(null, null) }));
+        expect(figure(container, 'casualties')).toBeNull();
+        expect(figure(container, 'displaced-or-killed')).toBeNull();
+        expect(container.textContent).toContain('Active formations');
+    });
+
+    it('a v1 manifest (figures never recorded) shows neither figure', () => {
+        const v1 = {
+            schema_version: 1 as const,
+            frame_count: 1,
+            frames: [{ turn: 40, date: '1993-01-03', activeFormations: 230, totalCasualties: 0, totalDisplaced: 0, controlByFaction: [] }],
+        };
+        const { container } = render(createElement(ReplayScrubber, { saveManifest: v1 }));
+        expect(figure(container, 'casualties')).toBeNull();
+        expect(figure(container, 'displaced-or-killed')).toBeNull();
+    });
+
+    it('shows a true zero when the frame records one', () => {
+        const { container } = render(createElement(ReplayScrubber, { saveManifest: manifest(0, 0) }));
+        expect(figure(container, 'casualties')?.textContent).toBe('Military casualties0');
+        expect(figure(container, 'displaced-or-killed')?.textContent).toBe('Displaced or killed0');
     });
 });

@@ -309,14 +309,16 @@ describe('LANE-REPLAY-SAVE-SEQUENCE replay save emit', () => {
                         front_posture_regions: {},
                         front_pressure: {},
                         militia_pools: {},
-                        casualty_totals_by_faction: {
-                            RS: { killed: 2 },
-                            RBiH: { killed: 3, wounded: 4 },
+                        casualty_ledger: {
+                            RS: { killed: 2, wounded: 0, missing_captured: 0, equipment_lost: { tanks: 0, artillery: 0, aa_systems: 0 }, per_formation: {}, per_militia_pool: {} },
+                            RBiH: { killed: 3, wounded: 4, missing_captured: 0, equipment_lost: { tanks: 0, artillery: 0, aa_systems: 0 }, per_formation: {}, per_militia_pool: {} },
+                            HRHB: { killed: 0, wounded: 0, missing_captured: 0, equipment_lost: { tanks: 0, artillery: 0, aa_systems: 0 }, per_formation: {}, per_militia_pool: {} },
                         },
                     },
                     displacement: {
                         displacement_humanitarian_aggregates: {
-                            total_displaced: 25,
+                            RS: { RBiH: { refugees_created: 20, refugees_received: 0, civilian_casualties_caused: 1 } },
+                            RBiH: { RS: { refugees_created: 5, refugees_received: 0, civilian_casualties_caused: 0 } },
                         },
                     },
                 } as unknown as GameState, 0),
@@ -335,19 +337,19 @@ describe('LANE-REPLAY-SAVE-SEQUENCE replay save emit', () => {
                 frames: Array<{
                     turn: number | null;
                     activeFormations: number;
-                    totalCasualties: number;
-                    totalDisplaced: number;
+                    totalCasualties: number | null;
+                    totalDisplacedOrKilled: number | null;
                     controlByFaction: Array<{ faction: string; osids: number }>;
                 }>;
             };
 
-            expect(manifest.schema_version).toBe(1);
+            expect(manifest.schema_version).toBe(2);
             expect(manifest.frame_count).toBe(2);
             expect(manifest.frames.map((frame) => frame.turn)).toEqual([1, 2]);
             expect(manifest.frames[0]).toMatchObject({
                 activeFormations: 1,
                 totalCasualties: 9,
-                totalDisplaced: 25,
+                totalDisplacedOrKilled: 25,
                 controlByFaction: [
                     { faction: 'RBiH', osids: 1 },
                     { faction: 'RS', osids: 1 },

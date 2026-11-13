@@ -239,7 +239,7 @@ describe('gameStore.loadSave — post-load UI state reset', () => {
     it('consumes replay sidecars once and clears them after later plain loads', async () => {
         useGameStore.getState().setPendingReplaySaveSequence([JSON.parse(makeMinimalSaveJson(1))]);
         useGameStore.getState().setPendingReplaySaveManifest({
-            schema_version: 1,
+            schema_version: 2,
             frame_count: 1,
             frames: [],
         });
@@ -264,7 +264,7 @@ describe('gameStore.loadSave — post-load UI state reset', () => {
     it('clears pending replay sidecars after a malformed load attempt', async () => {
         useGameStore.getState().setPendingReplaySaveSequence([JSON.parse(makeMinimalSaveJson(1))]);
         useGameStore.getState().setPendingReplaySaveManifest({
-            schema_version: 1,
+            schema_version: 2,
             frame_count: 1,
             frames: [],
         });

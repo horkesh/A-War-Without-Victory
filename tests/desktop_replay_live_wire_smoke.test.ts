@@ -34,10 +34,21 @@ describe('desktop_replay_live_wire_smoke — electron-main.cjs', () => {
         const autoSaveIdx = electronMain.indexOf('autoSave();');
         // There may be multiple autoSave() calls; find the one inside advance-turn.
         // The advance-turn handler is the only one that follows with sendReplayManifestToRenderer.
-        expect(electronMain).toContain('sendReplayManifestToRenderer(JSON.stringify(liveManifest))');
+        const liveSend = 'sendReplayManifestToRenderer(sim.playerVisibleReplayManifestJson(JSON.stringify(liveManifest), warOver))';
+        expect(electronMain).toContain(liveSend);
         // Verify the manifest send comes AFTER autoSave() in file order
-        const manifestSendIdx = electronMain.indexOf('sendReplayManifestToRenderer(JSON.stringify(liveManifest))');
+        const manifestSendIdx = electronMain.indexOf(liveSend);
         expect(manifestSendIdx).toBeGreaterThan(autoSaveIdx);
+    });
+
+    it('withholds the all-sides casualty total from the renderer until the war is over (fog of war)', () => {
+        expect(electronMain).toContain('const warOver = result.state?.meta?.game_over === true;');
+        expect(electronMain).not.toContain('sendReplayManifestToRenderer(JSON.stringify(liveManifest))');
+        const helperStart = electronMain.indexOf('async function loadStatePathIntoDesktop');
+        const helperEnd = electronMain.indexOf('\n}', helperStart);
+        const helperBody = electronMain.slice(helperStart, helperEnd);
+        expect(helperBody).toContain('sim.playerVisibleReplayManifestJson(');
+        expect(helperBody).toContain("state?.meta?.game_over === true");
     });
 
     it('start-new-campaign handler resets liveReplayManifestFrames', () => {
@@ -149,7 +160,7 @@ describe('desktop_replay_live_wire_smoke — desktop_sim.ts', () => {
     });
 
     it('re-exports buildReplaySaveManifest from sim/replay', () => {
-        expect(desktopSim).toContain('export { buildReplaySaveManifest }');
+        expect(desktopSim).toContain('export { buildReplaySaveManifest, playerVisibleReplayManifestJson }');
         expect(desktopSim).toContain('replay_manifest.js');
     });
 

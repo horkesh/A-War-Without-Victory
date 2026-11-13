@@ -3096,7 +3096,7 @@ export const bcsMessages: Partial<Record<MessageKey, string>> = {
     'replay.next': 'Sljed.',
     'replay.activeFormations': 'Aktivne formacije',
     'replay.casualties': 'Vojni gubici',
-    'replay.displaced': 'Raseljeni',
+    'replay.displacedOrKilled': 'Raseljeni ili ubijeni',
     'replay.control': 'Kontrola',
     'replay.heading': 'Rat sedmicu po sedmicu',
     'replay.position': '{current} / {total}',
