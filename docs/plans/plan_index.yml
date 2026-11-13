@@ -195,7 +195,7 @@ lanes:
   - lane: R8
     title: "Full-campaign packaged-Electron validation and diaries"
     lane_open: true
-    status: "PACKAGED CAMPAIGNS NEXT — CALIBRATION BLOCKER CLEARED 2026-11-07. Live-equivalent player/bot map parity holds at 712/711/712/710: 0 cells differ for each player"
+    status: "DRY RUNS NOW; QUALIFYING CAMPAIGNS AFTER THE ENGINE FREEZE (2026-11-13). Live-equivalent player/bot map parity held at 712/711/712/710 on 2026-11-07 (0 cells di"
     plans:
       - path: docs/plans/2026-07-31-full-campaign-electron-validation-plan.md
         exists: true
@@ -205,7 +205,7 @@ lanes:
   - lane: PS
     title: "Player surface and agency review, steps 1-6"
     lane_open: true
-    status: "ACTIVE — STEPS 1-5 IN FLIGHT; STEP 6 POSTURE MODEL BUILT (188w GO, merging). Sequence in `docs/40_reports/proposals/20261111_PLAYER_SURFACE_AND_AGENCY_REVIEW.md"
+    status: "STEPS 1-6 ALL MERGED — READY FOR THE OWNER TO CLOSE (2026-11-13). Step 1 [#568](https://github.com/horkesh/A-War-Without-Victory/pull/568), step 2 [#579](https:"
     plans:
       - path: docs/plans/2026-11-12-posture-model-option2-stance-matters.md
         exists: true
