@@ -1,5 +1,5 @@
 **Stance engine follow-up (PR #583) — 2026-11-13: 712 / 711 / 711 / 710.**
-- OG stances now respect the corps ceiling and hold a 3-turn minimum dwell (Systems Manual §6.7). Measured 188w: `final_state_hash` `bcc1ad6fe64dc817`; enclave and Farz guards intact; consistency 0; strict health PASS; final control identical to main.
+- OG stances now respect the corps ceiling and hold a 3-turn minimum dwell (Systems Manual §6.7). Measured 188w on the tree merged with main: `final_state_hash` `05c1e1381aa50783`; enclave and Farz guards intact; consistency 0; strict health PASS; final control identical to main.
 - Apr95 drops 712 → 711, accepted by the orchestrator: Gornje Krčevine (Travnik) is retaken at t161 (COHA expiry), not t155. 3rd Corps commander operations Ponos/Vidik now target Paklarevo and pre-empt the catalog "Paklarevo Local Concentration" (power 1.08 on main), so Vlašić Ridge must take Paklarevo first. The hold does not block a lost-ground reaction. The 7th Corps lane re-measures this cell next. Note: "both ridge objectives fall by 155" (2026-11-07 below) no longer holds.
 - The Farz guard now also reads a Farz still recovering at the last turn from the final save (same operation-owned standard).
 
