@@ -24,7 +24,7 @@ Phase 3A (Pressure Eligibility), Phase 3B (Pressure to Exhaustion Coupling), and
 
 ## Pipeline additions through v0.9.0
 
-The War-phase pipeline (151 NamedPhase steps as of v0.9.x; see `src/sim/turn_phases/war_phases.ts`) accumulates substrate work without breaking the single-phase model. Notable v0.7.x → v0.9.x additions integrated into the War phase:
+The War-phase pipeline (193 NamedPhase steps as of v0.9.9-beta.1, pinned by `tests/war_phase_step_order.test.ts`; see `src/sim/turn_phases/war_phases.ts`) accumulates substrate work without breaking the single-phase model. Notable v0.7.x → v0.9.x additions integrated into the War phase:
 
 - **Officer system pipeline steps** (v0.7+): `update-officer-quality`, `officer-succession`, `tick-elite-loans`. See Systems Manual §7.5–§7.7.
 - **Operation preparation state machine** (v0.7+): five sub-phases (intel_gathering → force_staging → supply_check → assessment → ready) embedded inside `advance-sector-offensives`. See Systems Manual §7.6.

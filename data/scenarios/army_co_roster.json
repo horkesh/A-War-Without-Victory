@@ -34,7 +34,7 @@
         },
         {
           "officer_id": "arbih_delic",
-          "tenure_start": 60,
+          "tenure_start": 61,
           "tenure_end_default": null,
           "stubbornness": 2,
           "replacement_trigger": "combat-death|extreme-relief",

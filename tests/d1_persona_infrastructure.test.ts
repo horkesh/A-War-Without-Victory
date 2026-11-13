@@ -211,9 +211,9 @@ describe('D1 persona infrastructure', () => {
     // ─── T6: auto-swap on A4 successor schedule ─────────────────────────
 
     it('T6: auto-swap returns successor persona when turn >= successor tenure_start', () => {
-        // RBiH: Halilović w0 → Delić w60.
+        // RBiH: Halilović w0 → Delić w61 (appointed 8 June 1993 = week 61; week 0 = 6 April 1992).
         const before = loadPersonaByTenure('RBiH', 'army_co', 30) as Persona;
-        const at = loadPersonaByTenure('RBiH', 'army_co', 60) as Persona;
+        const at = loadPersonaByTenure('RBiH', 'army_co', 61) as Persona;
         const after = loadPersonaByTenure('RBiH', 'army_co', 90) as Persona;
         expect(before).not.toBeNull();
         expect(before.id).toBe('halilovic');
