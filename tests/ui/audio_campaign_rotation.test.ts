@@ -45,7 +45,9 @@ beforeEach(() => {
 afterEach(() => { cleanup(); bus.resetAudioForTests(); vi.unstubAllGlobals(); window.localStorage.clear(); });
 
 const campaignSlugs = ['a_country_before_dawn', 'what_remains_of_home', 'the_long_winter', 'no_answer_on_the_radio', 'the_life_we_remember', 'a_table_for_strangers', 'what_the_maps_cannot_show', 'after_the_guns'];
-const current = () => FakeAudio.elements.find(trackFile(bus.getAudioState().requestedMusicId!.replace('campaign_', '')))!;
+// The newest element for the requested track is the one the engine owns: a new
+// campaign or a decode retry releases the old element and creates a fresh one.
+const current = () => FakeAudio.elements.filter(trackFile(bus.getAudioState().requestedMusicId!.replace('campaign_', ''))).at(-1)!;
 const campaignId = () => {
   const id = bus.getAudioState().requestedMusicId;
   expect(id).toMatch(/^campaign_/);
@@ -261,6 +263,23 @@ it('a second new campaign in one session plays the opening, then a fresh bag, no
     const fresh = latest('a_country_before_dawn');
     expect(fresh).not.toBe(old); expect(fresh.currentTime).toBe(0); expect(fresh.paused).toBe(false);
     expect(old.paused).toBe(true);
+  } finally { spy.mockRestore(); }
+});
+
+// CI flake 2026-11-13 (#574): the unseeded test below fails whenever the fresh
+// bag draws the old campaign's track (1 in 8). Force that collision.
+it('a new campaign that redraws the old track plays it on the fresh element, not the stale one', async () => {
+  const spy = vi.spyOn(Math, 'random').mockReturnValue(.999);
+  try {
+    bus.resetAudioForTests(); FakeAudio.elements = [];
+    await mountGame(); const old = current(); old.currentTime = 30;
+    expect(campaignId()).toBe('campaign_a_country_before_dawn');
+    bus.beginNewCampaignMusic(); await flush();
+    openings().at(-1)!.finish(); await flush();
+    expect(campaignId()).toBe('campaign_a_country_before_dawn');
+    expect(current()).not.toBe(old); expect(old.paused).toBe(true);
+    expect(current().paused).toBe(false); expect(current().currentTime).toBe(0);
+    expect(FakeAudio.elements.filter(a => !a.paused)).toEqual([current()]);
   } finally { spy.mockRestore(); }
 });
 
