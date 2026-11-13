@@ -157,3 +157,48 @@ describe('S4: player_ordered_stance is cleared at turn end', () => {
         expect(state.meta.stance_matters?.map((m) => [m.corps_id, m.from_stance, m.to_stance])).toEqual([[CORPS, 'reorganize', cmd.stance]]);
     });
 });
+
+
+describe('Codex #580: a defensive hold stops a concentrating commander plan from launching (real bot pass)', () => {
+    const concentratingPlan = {
+        plan_id: 'plan:vrs_c0:t3', objective_description: 'Test objective', target_osids: ['op:test:objective'],
+        required_brigades: 2, assigned_brigades: ['b1', 'b2'], staging_zone: 'zone:vrs_c0:op:test:approach',
+        status: 'concentrating', created_turn: 3, target_ready_turn: 5, concentration_progress: 0.5, viability_score: 1,
+        source: 'opportunity',
+    };
+    const runningOp = {
+        name: 'Running Op', type: 'sector_attack', phase: 'execution', started_turn: 3, phase_started_turn: 4,
+        target_settlements: [], participating_brigades: ['b1'],
+    };
+    type Cmd = { commander_state: Record<string, unknown> & { current_plan?: { status: string; suspension_reason?: string } | null }; active_operations: Array<{ name: string; started_turn: number }> };
+    const prepared = (hold: boolean): GameState => {
+        const state = makeState();
+        // A real commander state from a pass at turn 4, then a plan due to become ready at turn 5
+        // and an operation that was already running when the hold took effect.
+        state.meta.turn = 4;
+        runPass(state);
+        state.meta.turn = 5;
+        const cmd = state.military.corps_command![CORPS] as unknown as Cmd;
+        cmd.commander_state = { ...cmd.commander_state, current_plan: concentratingPlan as never };
+        cmd.active_operations = [runningOp as never];
+        if (hold) {
+            withHolds(state, [{ matter_id: 'STANCE_4_vrs_c0', faction: 'RS', scope: 'corps', corps_id: CORPS, mode: 'ceiling', stance: 'defensive', effective_from_turn: 5, until_turn: 8 }]);
+        }
+        return state;
+    };
+
+    it('the held plan is suspended, no new operation starts, and the running operation continues', () => {
+        const state = prepared(true);
+        runPass(state);
+        const cmd = state.military.corps_command![CORPS] as unknown as Cmd;
+        expect(cmd.commander_state.current_plan?.status).toBe('suspended');
+        expect(cmd.commander_state.current_plan?.suspension_reason).toBe('presidential hold forbids new offensives');
+        expect(cmd.active_operations.filter((op) => op.started_turn === 5)).toEqual([]);
+        // The hold does not touch the operation already running: same outcome as without a hold.
+        const control = prepared(false);
+        runPass(control);
+        const names = (s: GameState) => (s.military.corps_command![CORPS] as unknown as Cmd).active_operations.filter((op) => op.started_turn < 5).map((op) => op.name);
+        expect(names(state)).toEqual(names(control));
+        expect(names(state)).toContain('Running Op');
+    });
+});

@@ -2086,7 +2086,13 @@ export type StanceMatterOutcome =
     /** A hold ended early: its OG dissolved, the president's own operation order superseded it, or autonomy left level 2. */
     | 'hold_lapsed'
     /** An answer was recorded but autonomy left level 2 before it could take effect (never reported as 'stood'). */
-    | 'answered_lapsed';
+    | 'answered_lapsed'
+    /**
+     * A countermand or constraint delayed by the Main Staff took effect this turn. The
+     * resolution receipt only records the order and its effective date; this one records
+     * that it happened. Never written for a hold that lapsed first.
+     */
+    | 'hold_in_force';
 
 export interface StanceMatterReceipt {
     id: string;

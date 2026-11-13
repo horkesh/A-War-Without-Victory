@@ -13,6 +13,7 @@
 
 import { t, type MessageKey } from '../i18n';
 import type { StanceMatterReceiptView, StanceMatterView } from './types';
+import { turnToDateString } from '../utils/formatters';
 
 const CORPS_STANCE_KEYS: Record<string, MessageKey> = {
   offensive: 'corpsCard.stance.offensive',
@@ -91,6 +92,9 @@ export function stanceMatterReceiptLine(receipt: StanceMatterReceiptView): strin
       ? receipt.untilTurn - receipt.effectiveFromTurn + 1
       : 0,
     constraint: stanceMatterConstraintLabel(receipt.constraint),
+    // A delayed order is written as pending: it takes effect on this date (Codex #580).
+    date: receipt.effectiveFromTurn !== null ? turnToDateString(receipt.effectiveFromTurn) : '',
+    until: receipt.untilTurn !== null ? turnToDateString(receipt.untilTurn) : '',
   };
   switch (receipt.outcome) {
     case 'stood': return t('stanceMatter.receipt.stood', params);
@@ -110,8 +114,13 @@ export function stanceMatterReceiptLine(receipt: StanceMatterReceiptView): strin
         : t('stanceMatter.receipt.notPut', { ...params, reason });
     }
     case 'hold_lapsed':
-      return t('stanceMatter.receipt.holdLapsed', { ...params, reason: t(LAPSE_KEYS[receipt.lapseReason ?? ''] ?? LAPSE_KEYS.autonomy_changed!) });
+      // A lapse receipt carries the hold's first turn: resolved before it means it never took effect.
+      return t(receipt.resolvedTurn < receipt.turn ? 'stanceMatter.receipt.holdLapsedPending' : 'stanceMatter.receipt.holdLapsed', { ...params, reason: t(LAPSE_KEYS[receipt.lapseReason ?? ''] ?? LAPSE_KEYS.autonomy_changed!) });
     case 'answered_lapsed': return t('stanceMatter.receipt.answeredLapsed', params);
+    case 'hold_in_force':
+      return receipt.constraint
+        ? t('stanceMatter.receipt.inForceConstrained', params)
+        : t('stanceMatter.receipt.inForceCountermanded', params);
     default: return t('stanceMatter.receipt.stood', params);
   }
 }

@@ -35,6 +35,7 @@ const STANCE_MATTER_OUTCOME_KEYS: Record<string, MessageKey> = {
   not_put: 'stanceMatter.outcome.notPut',
   hold_lapsed: 'stanceMatter.outcome.holdLapsed',
   answered_lapsed: 'stanceMatter.outcome.answeredLapsed',
+  hold_in_force: 'stanceMatter.outcome.holdInForce',
 };
 
 export interface DecisionConsequenceCopyToken {

@@ -209,7 +209,7 @@ lanes:
     plans:
       - path: docs/plans/2026-11-12-posture-model-option2-stance-matters.md
         exists: true
-        tokens: 5317
+        tokens: 5562
         fits_context: true
         tasks: null
   - lane: R9

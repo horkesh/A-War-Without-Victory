@@ -104,6 +104,20 @@ export function corpsHoldForbidsNewOffensive(state: GameState, corpsId: string, 
 }
 
 /**
+ * True when an active corps hold keeps this corps at Defensive or below, where a commander
+ * may not start a new offensive plan (managePlan's stance guard). The commander planner also
+ * reads this to stop a plan that was already concentrating from becoming ready, because a
+ * ready plan launches its operation in the same pass. Operations already running are not
+ * touched. Inert without a hold.
+ */
+export function corpsHoldForbidsNewPlans(state: GameState | undefined, corpsId: string, turn: number): boolean {
+    if (!state?.military?.stance_matter_state?.holds?.length) return false;
+    const hold = activeCorpsHold(state, corpsId, turn);
+    if (!hold || !isCorpsStance(hold.stance)) return false;
+    return HOLD_STANCE_RANK[hold.stance] <= HOLD_STANCE_RANK.defensive;
+}
+
+/**
  * Cap a combat-effective corps stance by an active hold (used by getEffectiveCorpsStance,
  * so an army general offensive cannot bypass the president's hold). Inert without a hold.
  */

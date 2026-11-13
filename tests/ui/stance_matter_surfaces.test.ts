@@ -133,8 +133,23 @@ describe('stance matter: inbox, Records, holds and BCS', () => {
       fromStance: 'balanced', toStance: 'offensive', outcome: 'countermanded', resolvedTurn: 12, constraint: null,
       effectiveFromTurn: 14, untilTurn: 17, mainStaffDelayTurns: 2, patronShift: 0, notPutReason: null, notPutCount: 1, lapseReason: null,
     });
-    expect(line).toBe('Drina Corps: you countermanded the move from Balanced to Offensive. The order went out after a Main Staff delay, and Offensive stayed in force until then. Balanced was then held for 4 weeks.');
-    expect(line).not.toMatch(/tried to/);
+    // At resolution the delayed order is pending: the stance in force and the date it takes effect (Codex #580).
+    expect(line).toBe('Drina Corps: you countermanded the move from Balanced to Offensive. The order is with the Main Staff, so Offensive stays in force until 13 Jul 1992. From then, Balanced is to be held for 4 weeks.');
+    expect(line).not.toMatch(/tried to|was held|went out/);
+    const delayed = {
+      id: 'STANCE_11_c', turn: 11, scope: 'corps' as const, corpsId: 'c', corpsName: 'Drina Corps', sectorId: null,
+      fromStance: 'balanced', toStance: 'offensive', resolvedTurn: 14, constraint: null,
+      effectiveFromTurn: 14, untilTurn: 17, mainStaffDelayTurns: 2, patronShift: 0, notPutReason: null, notPutCount: 1, lapseReason: null,
+    };
+    expect(stanceMatterReceiptLine({ ...delayed, id: 'STANCE_11_c:in_force', outcome: 'hold_in_force' }))
+      .toBe('Drina Corps: the Main Staff passed on your countermand. Balanced is held from now until 3 Aug 1992.');
+    expect(stanceMatterReceiptLine({ ...delayed, id: 'STANCE_11_c:in_force', outcome: 'hold_in_force', constraint: 'ceiling_defensive' }))
+      .toBe('Drina Corps: the Main Staff passed on your limit (Hold the line, no new offensives). It holds from now until 3 Aug 1992.');
+    // A hold dropped while still with the Main Staff says it never took effect.
+    expect(stanceMatterReceiptLine({ ...delayed, id: 'STANCE_11_c:lapse', turn: 14, resolvedTurn: 13, outcome: 'hold_lapsed', lapseReason: 'autonomy_changed' }))
+      .toBe('Drina Corps: your stance order was dropped before it took effect because you changed command autonomy.');
+    expect(stanceMatterReceiptLine({ ...delayed, id: 'STANCE_11_c:lapse', turn: 14, resolvedTurn: 15, outcome: 'hold_lapsed', lapseReason: 'autonomy_changed' }))
+      .toBe('Drina Corps: your stance order ended early because you changed command autonomy.');
     const ledger = buildDecisionConsequenceLedger(makeState({
       stanceMatterHistory: [{
         id: 'STANCE_11_c', turn: 11, scope: 'corps', corpsId: 'c', corpsName: 'Drina Corps', sectorId: null,

@@ -1095,7 +1095,7 @@ export interface StanceMatterReceiptView {
     sectorId: string | null;
     fromStance: string;
     toStance: string;
-    outcome: 'stood' | 'confirmed' | 'countermanded' | 'constrained' | 'not_put' | 'hold_lapsed' | 'answered_lapsed';
+    outcome: 'stood' | 'confirmed' | 'countermanded' | 'constrained' | 'not_put' | 'hold_lapsed' | 'answered_lapsed' | 'hold_in_force';
     resolvedTurn: number;
     constraint: string | null;
     effectiveFromTurn: number | null;

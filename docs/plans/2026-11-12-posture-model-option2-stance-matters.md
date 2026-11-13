@@ -121,3 +121,8 @@ Nothing defers or replays a commander's decision, so a run with no answers follo
 ## Completion
 
 Unanimous panel record, canon amendment in the same change, implementation, inertness proof, gates green, PROJECT_LEDGER entry, branch pushed (no PR, no merge), short report listing what is left for the owner.
+
+## Rev 4: PR #580 review fixes (2026-11-13)
+
+- **Held corps launch no new plan operation.** A corps hold at defensive or below suspends a commander plan that is still concentrating (`advanceExistingPlan`, `corpsHoldForbidsNewPlans`), because a ready plan emits its operation in the same pass, before the final clamp. Plans already ready or executing have launched and continue. The normal suspension timeout applies; once the hold ends the plan resumes, or the commander plans again. A Balanced hold does not stop plans. Inert without a hold.
+- **Delayed receipts record what has happened.** At resolution a delayed countermand or constraint reads as an order with the Main Staff: the commander's stance stays in force until the effective date, then the hold is to apply. A `hold_in_force` receipt is written on the effective turn. A hold that lapses before then reads "dropped before it took effect". Non-delayed receipts use the present tense ("is held for the next N weeks").

@@ -733,6 +733,32 @@ export function resolveStanceMatters(state: GameState): void {
             ms.holds = [];
         }
         ms.holds = sortHolds(ms.holds.filter((h) => h.until_turn >= turn));
+        // A hold delayed by the Main Staff that takes effect this turn gets its own receipt,
+        // so Records state the stance in force only once it is (Codex #580). Holds created
+        // this turn start now without a delay and are covered by their resolution receipt.
+        const createdThisTurn = new Set(receipts.filter((r) => r.outcome === 'countermanded' || r.outcome === 'constrained').map((r) => r.id));
+        for (const hold of ms.holds) {
+            if (hold.effective_from_turn !== turn || createdThisTurn.has(hold.matter_id)) continue;
+            const ordered = (state.meta.stance_matter_history ?? []).find((r) => r.id === hold.matter_id
+                && (r.outcome === 'countermanded' || r.outcome === 'constrained'));
+            const holdStance = hold.stance ?? (hold.allowed ?? []).join('|');
+            receipts.push({
+                id: `${hold.matter_id}:in_force`,
+                turn: hold.effective_from_turn,
+                faction: hold.faction,
+                scope: hold.scope,
+                corps_id: hold.corps_id,
+                ...(hold.sector_id ? { sector_id: hold.sector_id } : {}),
+                from_stance: ordered?.from_stance ?? holdStance,
+                to_stance: ordered?.to_stance ?? holdStance,
+                outcome: 'hold_in_force',
+                resolved_turn: turn,
+                ...(ordered?.constraint ? { constraint: ordered.constraint } : {}),
+                effective_from_turn: hold.effective_from_turn,
+                until_turn: hold.until_turn,
+                main_staff_delay_turns: ordered?.main_staff_delay_turns ?? 0,
+            });
+        }
         const cooldowns: Record<string, number> = {};
         for (const key of Object.keys(ms.cooldown_until_by_corps).sort(strictCompare)) {
             const until = ms.cooldown_until_by_corps[key]!;

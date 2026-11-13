@@ -394,6 +394,39 @@ describe('stance matters: faction asymmetry (data only)', () => {
         expect(state.meta.stance_matter_history?.find((r) => r.id === 'STANCE_11_c_a')).toMatchObject({ effective_from_turn: 14, until_turn: 17 });
     });
 
+    it('RS delayed overrule: Records log the order at resolution and the hold only when it takes effect (Codex #580)', () => {
+        const state = stateWithMatter({ faction: 'RS', stubbornness: 5 });
+        recordStanceMatterAnswer(state, { matterId: 'STANCE_11_c_a', answer: 'countermand' });
+        const inForce = () => state.meta.stance_matter_history?.filter((r) => r.outcome === 'hold_in_force') ?? [];
+        runTurn(state, { c_a: 'offensive' });   // turn 12: resolved, pending until 14
+        expect(state.meta.stance_matter_history?.find((r) => r.id === 'STANCE_11_c_a')).toMatchObject({
+            outcome: 'countermanded', resolved_turn: 12, effective_from_turn: 14, main_staff_delay_turns: 2,
+        });
+        expect(inForce()).toEqual([]);
+        runTurn(state, { c_a: 'offensive' });   // turn 13: still with the Main Staff
+        expect(inForce()).toEqual([]);
+        runTurn(state, { c_a: 'offensive' });   // turn 14: takes effect
+        expect(inForce()).toEqual([expect.objectContaining({
+            id: 'STANCE_11_c_a:in_force', resolved_turn: 14, from_stance: 'balanced', to_stance: 'offensive',
+            effective_from_turn: 14, until_turn: 17, main_staff_delay_turns: 2,
+        })]);
+        runTurn(state, { c_a: 'offensive' });   // turn 15: recorded once
+        expect(inForce()).toHaveLength(1);
+    });
+
+    it('RS delayed overrule that lapses before taking effect never records it in force', () => {
+        const state = stateWithMatter({ faction: 'RS', stubbornness: 5 });
+        recordStanceMatterAnswer(state, { matterId: 'STANCE_11_c_a', answer: 'countermand' });
+        runTurn(state, { c_a: 'offensive' });   // turn 12: resolved, pending until 14
+        state.meta.autonomy_level = 1;
+        runTurn(state, { c_a: 'offensive' });   // turn 13: the hold ends before it took effect
+        state.meta.autonomy_level = 2;
+        runTurn(state, { c_a: 'offensive' });   // turn 14
+        const lapse = state.meta.stance_matter_history?.find((r) => r.outcome === 'hold_lapsed');
+        expect(lapse).toMatchObject({ resolved_turn: 13, turn: 14, lapse_reason: 'autonomy_changed' });
+        expect(state.meta.stance_matter_history?.some((r) => r.outcome === 'hold_in_force')).toBe(false);
+    });
+
     it('RBiH: 0.5 x 4 stays below threshold, so the order is followed at once', () => {
         expect(computeMainStaffDelayTurns(makeState({ faction: 'RBiH', stubbornness: 4 }), 'RBiH')).toBe(0);
     });
