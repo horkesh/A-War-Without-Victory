@@ -9,7 +9,8 @@
 import { useState, type ReactNode } from 'react';
 import { useGameStore } from '../store/gameStore';
 import { useIPC } from '../desktop/useIPC';
-import { getPanelRailStyle } from './panelRail';
+import { getMapRailStyle } from './panelRail';
+import { MapRailCloseButton, MapRailFrame, MapRailHeader } from './surface/MapRail';
 import {
     getArmyReserveAttentionSummary,
     getArmyReserveRequestCauseCopy,
@@ -85,7 +86,7 @@ function eliteDeployCardId(requestId: string): string {
     return `command:elite-deploy:${requestId}`;
 }
 
-export function ArmyReservePanel({ railSlot = 'primary', breadcrumb, onOpenDecisionRoomTarget }: ArmyReservePanelProps) {
+export function ArmyReservePanel({ breadcrumb, onOpenDecisionRoomTarget }: ArmyReservePanelProps) {
     const [locale] = useLocale();
     const ipc = useIPC();
     const selectedArmyHqId = useGameStore((s) => s.selectedArmyHqId);
@@ -181,26 +182,21 @@ export function ArmyReservePanel({ railSlot = 'primary', breadcrumb, onOpenDecis
         p >= 75 ? '#d45555' : p >= 50 ? '#d4a855' : '#55d48a';
 
     return (
-        <div
-            className="panel-slide-in-right flex flex-col bg-[#11141b] border border-accent-gold/30 rounded-lg shadow-xl overflow-hidden"
-            style={getPanelRailStyle(railSlot, '24rem', 'left')}
-        >
-            {/* Header */}
-            <div className="flex items-center justify-between px-3 py-2 border-b border-panel-border/60 bg-black/30 shrink-0">
-                <div className="min-w-0">
-                    <div className="text-[13px] font-bold text-text-primary tracking-wide uppercase">{t('armyReserve.title')}</div>
-                    <div className="text-[13px] text-text-secondary">{armyHq.name}</div>
-                    {breadcrumb}
-                </div>
-                <button
-                    type="button"
-                    onClick={() => useGameStore.setState({ selectedArmyHqId: null, selectedFormationId: null })}
-                    className="text-text-secondary hover:text-text-primary text-lg leading-none px-1"
-                    aria-label={t('armyReserve.closePanelAria')}
-                >×</button>
-            </div>
+        <MapRailFrame className="panel-slide-in-right" style={getMapRailStyle()}>
+            <MapRailHeader
+                breadcrumb={breadcrumb}
+                eyebrow={t('mapRail.eyebrow.armyReserve')}
+                title={armyHq.name}
+                close={(
+                    <MapRailCloseButton
+                        onClick={() => useGameStore.setState({ selectedArmyHqId: null, selectedFormationId: null })}
+                        aria-label={t('armyReserve.closePanelAria')}
+                        title={t('armyReserve.closePanelAria')}
+                    />
+                )}
+            />
 
-            <div className="flex-1 overflow-y-auto p-2.5 space-y-3 text-[13px]">
+            <div className="min-h-0 flex-1 space-y-5 overflow-y-auto overflow-x-hidden px-5 py-4 text-[15px]">
                 {!ipc.isAvailable && hasLiveReserveActions && (
                     <div className="text-[13px] text-text-secondary italic px-2 py-1.5 bg-black/10 border border-panel-border/30 rounded">
                         {t('formationDetail.commandBridgeUnavailable')}
@@ -209,7 +205,7 @@ export function ArmyReservePanel({ railSlot = 'primary', breadcrumb, onOpenDecis
 
                 {/* ── Reserve Pool ─────────────────────────────────────── */}
                 <section>
-                    <div className="text-[13px] text-accent-gold uppercase tracking-widest font-bold opacity-70 mb-2">
+                    <div className="uppercase font-mono text-[13px] font-semibold tracking-[0.16em] text-[#e0c27a] mb-2.5">
                         {t('armyReserve.reservePool', { count: elites.length })}
                     </div>
                     {elites.length === 0 ? (
@@ -348,7 +344,7 @@ export function ArmyReservePanel({ railSlot = 'primary', breadcrumb, onOpenDecis
 
                 {/* ── Active Loans Snapshot ─────────────────────────────── */}
                 <section>
-                    <div className="text-[13px] text-accent-gold uppercase tracking-widest font-bold opacity-70 mb-2">
+                    <div className="uppercase font-mono text-[13px] font-semibold tracking-[0.16em] text-[#e0c27a] mb-2.5">
                         {t('armyReserve.activeLoans', { count: activeLoans.length })}
                     </div>
                     {activeLoans.length === 0 ? (
@@ -404,7 +400,7 @@ export function ArmyReservePanel({ railSlot = 'primary', breadcrumb, onOpenDecis
                 {/* ── Pending Requests ──────────────────────────────────── */}
                 {pendingRequests.length > 0 && (
                     <section>
-                        <div className="text-[13px] text-accent-gold uppercase tracking-widest font-bold opacity-70 mb-2">
+                        <div className="uppercase font-mono text-[13px] font-semibold tracking-[0.16em] text-[#e0c27a] mb-2.5">
                             {t('armyReserve.pendingRequests', { count: pendingRequests.length })}
                         </div>
                         {reserveAttentionSummary && (
@@ -634,6 +630,6 @@ export function ArmyReservePanel({ railSlot = 'primary', breadcrumb, onOpenDecis
                     </section>
                 )}
             </div>
-        </div>
+        </MapRailFrame>
     );
 }

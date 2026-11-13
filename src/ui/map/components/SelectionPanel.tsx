@@ -4,7 +4,10 @@ import { SettlementDetailContent } from './SettlementDetailContent';
 import { getFactionFlag } from '../utils/factionAssets';
 import { useIPC } from '../desktop/useIPC';
 import { useEffect, useState, type ReactNode } from 'react';
-import { getPanelRailStyle } from './panelRail';
+import { getMapRailStyle } from './panelRail';
+import { getOsidDisplayName } from '../utils/osidDisplayName';
+import { SURFACE_LABEL } from './surface/Surface';
+import { MAP_RAIL_BUTTON, MapRailBody, MapRailCloseButton, MapRailFrame, MapRailHeader } from './surface/MapRail';
 import { buildOsidToSectorMap } from '../utils/sectorUtils';
 import { getOperationId } from '../utils/operations';
 import { getCurrentEthnicForOsid } from '../map/builders/buildEthnicGeoJSON';
@@ -74,20 +77,14 @@ export function SelectionPanel({ railSlot = 'primary', breadcrumb }: SelectionPa
 
   if (!loadedGameState || !osidPropertiesMap?.[selectedOsid]) {
     return (
-      <div
-        className="panel-power-on weathered-panel panel-slide-in-right flex flex-col rounded-lg shadow-xl overflow-hidden"
-        style={{ ...getPanelRailStyle(railSlot, '20rem'), direction: 'ltr' }}
-      >
-        <div className="h-10 bg-panel-card border-b border-panel-border panel-shimmer" />
-        <div className="p-3 space-y-3">
-          <div className="h-6 w-3/4 bg-panel-card rounded panel-shimmer" />
-          <div className="space-y-2">
-            <div className="h-4 w-full bg-panel-card rounded panel-shimmer" />
-            <div className="h-4 w-full bg-panel-card rounded panel-shimmer" />
-          </div>
-          <div className="h-40 w-full bg-panel-card rounded panel-shimmer" />
+      <MapRailFrame className="panel-slide-in-right" style={getMapRailStyle()}>
+        <div className="h-16 border-b border-[#262b35] bg-[#141821] panel-shimmer" />
+        <div className="space-y-3 p-5">
+          <div className="h-6 w-3/4 rounded bg-[#161a22] panel-shimmer" />
+          <div className="h-4 w-full rounded bg-[#161a22] panel-shimmer" />
+          <div className="h-40 w-full rounded bg-[#161a22] panel-shimmer" />
         </div>
-      </div>
+      </MapRailFrame>
     );
   }
 
@@ -282,39 +279,38 @@ export function SelectionPanel({ railSlot = 'primary', breadcrumb }: SelectionPa
     setSupportMessage(result.ok ? t('selection.localSupportStaged') : (result.error ?? t('selection.localSupportFailed')));
   };
 
+  const controller = loadedGameState?.controlBySettlement?.[selectedOsid];
+  const controllerFlag = controller ? getFactionFlag(controller) : null;
+
   return (
-    <div
+    <MapRailFrame
       data-testid="selection-panel"
       data-rail-slot={railSlot}
-      className="panel-power-on weathered-panel panel-slide-in-right flex flex-col rounded-lg shadow-xl"
-      style={{ ...getPanelRailStyle(railSlot, '20rem'), direction: 'ltr' }}
+      className="panel-slide-in-right"
+      style={getMapRailStyle()}
     >
-      <div className="flex items-center justify-between px-3 py-2 bg-panel-card rounded-t-lg border-b border-panel-border shrink-0">
-        <div className="flex min-w-0 items-center gap-2">
-          {loadedGameState?.controlBySettlement?.[selectedOsid] && getFactionFlag(loadedGameState.controlBySettlement[selectedOsid]) && (
-            <img
-              src={getFactionFlag(loadedGameState.controlBySettlement[selectedOsid])}
-              alt="Faction Flag"
-              className="w-5 h-3.5 object-cover rounded-sm drop-shadow-sm border border-black/20"
-            />
-          )}
-          <span className="font-sans text-[13px] text-accent-gold uppercase tracking-wide font-semibold">
-            {t('selection.settlementInfo')}
-          </span>
-          {breadcrumb}
-        </div>
-        <button
-          type="button"
-          onClick={() => setSelectedOsid(null)}
-          aria-label={t('selection.close')}
-          title={t('selection.close')}
-          className="kbd-focus text-text-secondary hover:text-interactive text-sm leading-none rounded"
-        >
-          ✕
-        </button>
-      </div>
+      <MapRailHeader
+        breadcrumb={breadcrumb}
+        mark={controllerFlag ? (
+          <img
+            src={controllerFlag}
+            alt={t('selection.controllerFlag')}
+            className="h-3.5 w-5 rounded-sm border border-black/20 object-cover"
+          />
+        ) : undefined}
+        eyebrow={t('mapRail.eyebrow.settlement')}
+        title={getOsidDisplayName(selectedOsid, osidDisplayNames)}
+        subtitle={selectedMunId ? getPlayerSafeMunicipalityName(selectedMunId) : undefined}
+        close={(
+          <MapRailCloseButton
+            onClick={() => setSelectedOsid(null)}
+            aria-label={t('selection.close')}
+            title={t('selection.close')}
+          />
+        )}
+      />
 
-      <div className="p-3 overflow-auto">
+      <MapRailBody className="gap-3 pt-0">
         <SettlementDetailContent
           osid={selectedOsid}
           osidDisplayNames={osidDisplayNames}
@@ -359,12 +355,12 @@ export function SelectionPanel({ railSlot = 'primary', breadcrumb }: SelectionPa
           <div
             data-testid="settlement-local-support"
             data-target-mun-id={selectedMunId}
-            className="mt-3 rounded border border-panel-border bg-panel-card p-2.5 space-y-1.5"
+            className="mt-2 flex flex-col gap-2.5 rounded-md border border-[#2a303c] bg-[#161a22] px-4 py-3"
           >
-            <div className="font-sans text-[13px] uppercase tracking-wide text-accent-gold font-semibold">
+            <div className={SURFACE_LABEL}>
               {t('selection.localSupport')}
             </div>
-            <div className="text-[13px] text-text-secondary">
+            <div className="text-[15px] text-[#c2b69c]">
               {activeSupport
                 ? t('selection.localSupportTarget', {
                   label: getLocalizedMunicipalitySupportLabel(activeSupport.type),
@@ -378,27 +374,22 @@ export function SelectionPanel({ railSlot = 'primary', breadcrumb }: SelectionPa
               disabled={!canStageSupport}
               aria-describedby={localSupportUnavailableReason ? 'settlement-local-support-unavailable' : undefined}
               title={localSupportUnavailableReason ?? undefined}
-              className="px-3 py-1 text-[13px] font-mono uppercase tracking-wide bg-panel-bg hover:bg-panel-hover text-text-primary border border-panel-border rounded transition-all disabled:opacity-50"
+              className={MAP_RAIL_BUTTON}
             >
               {t('selection.stageSupport', { label: supportLabel })}
             </button>
-            <div className="text-[13px] text-text-secondary">
+            <div className="text-[14px] text-[#b9ad94]">
               {t('selection.targetMunicipality', { municipality: getPlayerSafeMunicipalityName(selectedMunId) })}
             </div>
             {localSupportUnavailableReason && (
-              <div id="settlement-local-support-unavailable" className="text-[13px] text-amber-300/85">
+              <div id="settlement-local-support-unavailable" className="text-[14px] text-amber-200/90">
                 {localSupportUnavailableReason}
               </div>
             )}
-            {supportMessage && <div className="text-[13px] text-text-secondary">{supportMessage}</div>}
+            {supportMessage && <div className="text-[14px] text-[#b9ad94]">{supportMessage}</div>}
           </div>
         )}
-        {!loadedGameState && (
-          <div className="text-[13px] text-text-secondary italic mt-3">
-            Load a save file to see control, formations, and population change.
-          </div>
-        )}
-      </div>
-    </div>
+      </MapRailBody>
+    </MapRailFrame>
   );
 }

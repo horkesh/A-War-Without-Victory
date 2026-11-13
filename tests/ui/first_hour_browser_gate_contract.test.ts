@@ -462,7 +462,7 @@ describe('live surface browser sweep contract', () => {
     expect(read('src/ui/map/components/CodexPanel.tsx')).toContain('data-testid="codex-selected-essay"');
     expect(read('src/ui/map/components/CodexPanel.tsx')).toContain('data-testid="codex-selected-essay-body"');
     expect(read('src/ui/map/components/command_surface/CommandSurface.tsx')).toContain('data-testid="warroom-decision-room-close"');
-    expect(read('src/ui/map/components/OOBSidebar.tsx')).toContain('testId="oob-section-sectors-toggle"');
+    expect(read('src/ui/map/components/OOBSidebar.tsx')).toContain("testId: 'oob-section-sectors-toggle'");
     expect(read('src/ui/map/components/OOBSidebar.tsx')).toContain('data-coverage-tier={coverageTier}');
     expect(read('src/ui/map/components/OOBSidebar.tsx')).toContain('data-current-brigade-count={sectorAssignment.allCurrentIds.length}');
     expect(read('src/ui/map/components/CorpsDetail.tsx')).toContain('data-testid="corps-detail-sector-row"');

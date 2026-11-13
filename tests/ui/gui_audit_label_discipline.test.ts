@@ -223,7 +223,8 @@ describe('GUI audit label discipline', () => {
     const localSupport = selection.container.querySelector('[data-testid="settlement-local-support"]');
 
     expect(panel?.getAttribute('data-rail-slot')).toBe('primary');
-    expect(panel?.style.right).toBe('0px');
+    // Map rail system: the settlement panel opens in the one rail slot beside the sidebar.
+    expect(panel?.style.left).toMatch(/^calc\(17(?:\.5)?rem/);
     expect(localSupport?.getAttribute('data-target-mun-id')).toBe('actual_municipality');
     expect(selection.container.textContent).toContain('Actual Municipality');
     expect(selection.container.textContent).toContain('Desktop command bridge unavailable. Local support orders are read-only in this browser view.');
@@ -1777,7 +1778,7 @@ describe('GUI audit label discipline', () => {
   it('keeps settlement support panel copy on i18n keys', () => {
     const selectionSource = readFileSync('src/ui/map/components/SelectionPanel.tsx', 'utf8');
 
-    expect(selectionSource).toContain("t('selection.settlementInfo')");
+    expect(selectionSource).toContain("t('mapRail.eyebrow.settlement')");
     expect(selectionSource).toContain("t('selection.localSupport')");
     expect(selectionSource).toContain("t('selection.noLocalSupportStaged')");
     expect(selectionSource).not.toMatch(/Settlement Info|Local support staged|Failed to stage local support|none staged/);

@@ -66,10 +66,12 @@ describe('retained Electron shakedown readability gates', () => {
     expect(contrast('#f87171', '#252220')).toBeGreaterThanOrEqual(4.5);
   });
 
-  it('uses an AA active-state color on the Corps Front paper surface', () => {
+  it('uses an AA active-state color on the dark Corps Front rail (map rail system, 2026-11-12)', () => {
     const source = readFileSync(resolve(repoRoot, 'src/ui/map/components/CorpsFrontPanel.tsx'), 'utf8');
 
-    expect(source).toContain("opsecActive ? 'text-amber-800 font-bold' : 'text-neutral-700'");
-    expect(contrast('#92400e', '#f0e8d8')).toBeGreaterThanOrEqual(4.5);
+    expect(source).toContain("tone={opsecActive ? 'text-amber-200' : undefined}");
+    expect(source).not.toContain('bg-[#f0e8d8]');
+    // amber-200 on the rail stat card (#161a22).
+    expect(contrast('#fde68a', '#161a22')).toBeGreaterThanOrEqual(4.5);
   });
 });
