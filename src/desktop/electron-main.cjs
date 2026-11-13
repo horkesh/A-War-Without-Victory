@@ -495,7 +495,11 @@ function writeCanonicalCurrentState(sim, state, excludeSender, metadata, options
 async function loadStatePathIntoDesktop(filePath, excludeSender) {
   const sim = getDesktopSim();
   const { state } = await sim.loadStateFromPath(filePath, getBaseDir());
-  const manifestJson = readReplaySaveManifestSidecar(filePath);
+  // Fog of war: an all-sides casualty total is withheld unless the loaded war is over.
+  const manifestJson = sim.playerVisibleReplayManifestJson(
+    readReplaySaveManifestSidecar(filePath),
+    state?.meta?.game_over === true,
+  );
   const sequenceJson = manifestJson ? null : readReplaySaveSequenceSidecar(filePath);
   persistCurrentStateSnapshots(sim, state);
   liveReplayManifestFrames = [];
@@ -2494,12 +2498,16 @@ app.whenReady().then(() => {
       // manifest so the VerdictScreen Replay tab works for campaigns played in-app.
       // buildReplayFrameSummary is a pure read-only projection (no Math.random /
       // Date.now). Does NOT store full GameState[] (memory safety).
+      // The main process keeps every frame's full figures; the renderer gets the
+      // all-sides military-casualty total only once the war is over (fog of war,
+      // see playerVisibleReplayManifestJson).
       if (typeof sim.buildReplayFrameSummary === 'function') {
         const liveSummaryFrame = sim.buildReplayFrameSummary(result.state);
         if (liveSummaryFrame) {
           liveReplayManifestFrames.push(liveSummaryFrame);
           const liveManifest = sim.buildReplaySaveManifest(liveReplayManifestFrames);
-          sendReplayManifestToRenderer(JSON.stringify(liveManifest));
+          const warOver = result.state?.meta?.game_over === true;
+          sendReplayManifestToRenderer(sim.playerVisibleReplayManifestJson(JSON.stringify(liveManifest), warOver));
         }
       }
       return { ok: true, report: result.report ?? null };

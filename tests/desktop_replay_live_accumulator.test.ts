@@ -37,6 +37,7 @@ function makeMinimalState(turn: number, date: string, rsOsids: number, rbihOsids
             casualty_ledger: {
                 RS: { killed: 300, wounded: 800, missing_captured: 100 },
                 RBiH: { killed: 200, wounded: 550, missing_captured: 50 },
+                HRHB: { killed: 0, wounded: 0, missing_captured: 0 },
             },
         },
         political: {

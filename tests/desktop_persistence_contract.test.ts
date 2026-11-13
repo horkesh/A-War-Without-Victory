@@ -141,13 +141,15 @@ describe('desktop persistence contract', () => {
       return { loadStatePathIntoDesktop, ledger: () => liveReplayManifestFrames };
     })()`, {
       getDesktopSim: () => ({
-        loadStateFromPath: async (filePath: string, baseDir: string) => { order.push(`load:${filePath}:${baseDir}`); return { state: { id: 'loaded' } }; },
+        loadStateFromPath: async (filePath: string, baseDir: string) => { order.push(`load:${filePath}:${baseDir}`); return { state: { id: 'loaded', meta: { game_over: false } } }; },
+        // Fog of war: the sidecar is projected before anything reaches the renderer.
+        playerVisibleReplayManifestJson: (json: string, warOver: boolean) => { order.push(`project-manifest:${json}:${warOver}`); return 'visible-manifest-json'; },
       }),
       getBaseDir: () => 'explicit-root',
       readReplaySaveManifestSidecar: () => { order.push('read-manifest'); return 'manifest-json'; },
       readReplaySaveSequenceSidecar: () => { order.push('read-sequence'); return 'sequence-json'; },
       persistCurrentStateSnapshots: () => { order.push('persist-autosave'); },
-      sendReplayManifestToRenderer: () => { order.push('send-manifest'); },
+      sendReplayManifestToRenderer: (json: string) => { order.push(`send-manifest:${json}`); },
       sendReplaySequenceToRenderer: () => { order.push('send-sequence'); },
       sendGameStateToRenderer: () => { order.push('broadcast-state'); },
       projectCurrentGameStateForRenderer: () => { order.push('project-state'); return 'projected-json'; },
@@ -161,8 +163,9 @@ describe('desktop persistence contract', () => {
     expect(order).toEqual([
       'load:resume.json:explicit-root',
       'read-manifest',
+      'project-manifest:manifest-json:false',
       'persist-autosave',
-      'send-manifest',
+      'send-manifest:visible-manifest-json',
       'broadcast-state',
       'project-state',
     ]);
@@ -184,7 +187,10 @@ describe('desktop persistence contract', () => {
       const loadStatePathIntoDesktop = ${helper};
       return { loadStatePathIntoDesktop, ledger: () => liveReplayManifestFrames };
     })()`, {
-      getDesktopSim: () => ({ loadStateFromPath: async () => ({ state: { id: 'loaded' } }) }),
+      getDesktopSim: () => ({
+        loadStateFromPath: async () => ({ state: { id: 'loaded' } }),
+        playerVisibleReplayManifestJson: (json: string) => json,
+      }),
       getBaseDir: () => 'explicit-root',
       readReplaySaveManifestSidecar: () => 'manifest-json',
       readReplaySaveSequenceSidecar: () => null,

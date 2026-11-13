@@ -312,6 +312,7 @@ describe('LANE-REPLAY-SAVE-SEQUENCE replay save emit', () => {
                         casualty_ledger: {
                             RS: { killed: 2, wounded: 0, missing_captured: 0, equipment_lost: { tanks: 0, artillery: 0, aa_systems: 0 }, per_formation: {}, per_militia_pool: {} },
                             RBiH: { killed: 3, wounded: 4, missing_captured: 0, equipment_lost: { tanks: 0, artillery: 0, aa_systems: 0 }, per_formation: {}, per_militia_pool: {} },
+                            HRHB: { killed: 0, wounded: 0, missing_captured: 0, equipment_lost: { tanks: 0, artillery: 0, aa_systems: 0 }, per_formation: {}, per_militia_pool: {} },
                         },
                     },
                     displacement: {

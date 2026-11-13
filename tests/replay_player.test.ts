@@ -215,6 +215,7 @@ describe('replayPlayer (LANE-NIGHTSHIFT-REPLAY-PLAYBACK-CONSUMER)', () => {
                 casualty_ledger: {
                     RBiH: { killed: 11, wounded: 3, missing_captured: 0 },
                     RS: { killed: 7, wounded: 0, missing_captured: 0 },
+                    HRHB: { killed: 0, wounded: 0, missing_captured: 0 },
                 },
             },
             displacement: {

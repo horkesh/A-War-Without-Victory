@@ -50,6 +50,36 @@ export function isReadableReplaySaveManifest(value: unknown): value is ReadableR
 }
 
 /**
+ * The manifest as the renderer may see it.
+ *
+ * Fog of war: during play the player-visible projection scopes
+ * `military.casualty_ledger` to the player's own side, so an all-sides
+ * military-casualty total is hidden information until the war ends (the Verdict
+ * cost ledger then lists every side's losses). Before the war is over every
+ * frame's `totalCasualties` is withheld as `null`; the main process keeps the
+ * full frames and sends them once `warOver` is true. Displaced-or-killed is not
+ * withheld: the projection passes `displacement_humanitarian_aggregates` whole.
+ *
+ * Takes and returns JSON so electron-main.cjs can apply it to a sidecar read from
+ * disk as well as to the live manifest. Unreadable input is returned unchanged
+ * (the renderer rejects it); v1 input comes back as v2 with null figures.
+ */
+export function playerVisibleReplayManifestJson(manifestJson: string | null, warOver: boolean): string | null {
+    if (!manifestJson) return manifestJson;
+    let parsed: unknown;
+    try {
+        parsed = JSON.parse(manifestJson);
+    } catch {
+        return manifestJson;
+    }
+    if (!isReadableReplaySaveManifest(parsed)) return manifestJson;
+    const frames = readReplayManifestFrames(parsed);
+    return JSON.stringify(buildReplaySaveManifest(
+        warOver ? frames : frames.map((frame) => ({ ...frame, totalCasualties: null })),
+    ));
+}
+
+/**
  * The frames of a readable manifest as current summaries. v1 frames keep turn,
  * date, formations and control; their casualty and displaced figures become
  * `null` because v1 never recorded them.

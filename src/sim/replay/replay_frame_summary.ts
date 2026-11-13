@@ -1,4 +1,4 @@
-import type { GameState } from '../../state/game_state.js';
+import { CANONICAL_FACTIONS, type GameState } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { asRecord } from '../../state/schema_validators.js';
 
@@ -69,9 +69,13 @@ function nonNegativeCount(value: unknown): number {
  *
  * The engine creates the ledger on its first casualty write
  * (`initializeCasualtyLedger` in battle_resolution, attack_resolution_osid,
- * frontline_attrition, siege_attrition), so a `military` record without a ledger
- * means no casualty has been recorded yet: a true 0. A frame with no `military`
- * record, or a ledger that is not an object, reports `null`.
+ * frontline_attrition, siege_attrition), with a row for every side, so a
+ * `military` record without a ledger means no casualty has been recorded yet:
+ * a true 0. `null` when the frame has no `military` record, the ledger is not an
+ * object, or the ledger lacks a canonical side. The last case is the
+ * player-visible projection (`src/desktop/player_visible_state.cjs` scopes the
+ * ledger to the player's side): a one-side sum under an all-sides label would
+ * understate the war, so it is hidden instead.
  */
 function readTotalCasualties(frame: ReplayFrameLike): number | null {
     const military = parseReplayFrameSubobject(frame.military);
@@ -79,6 +83,7 @@ function readTotalCasualties(frame: ReplayFrameLike): number | null {
     if (military.casualty_ledger === undefined) return 0;
     const ledger = parseReplayFrameSubobject(military.casualty_ledger);
     if (!ledger) return null;
+    if (!CANONICAL_FACTIONS.every((faction) => asRecord(ledger[faction]) !== null)) return null;
     let total = 0;
     for (const faction of Object.keys(ledger).sort(strictCompare)) {
         const row = asRecord(ledger[faction]);

@@ -4,6 +4,7 @@ import { buildReplayFrameSummary } from '../src/sim/replay/replay_frame_summary.
 import {
     buildReplaySaveManifest,
     isReadableReplaySaveManifest,
+    playerVisibleReplayManifestJson,
     readReplayManifestFrames,
 } from '../src/sim/replay/replay_manifest.js';
 import { replaySummaryPlayer } from '../src/sim/replay/replay_summary_player.js';
@@ -115,25 +116,38 @@ describe('replay_frame_summary reads the fields the engine writes', () => {
         }
     });
 
-    it('skips malformed rows and negative or non-finite counts', () => {
+    it('skips negative or non-finite counts and malformed aggregate rows', () => {
         const summary = summarize(makeFrame({
-            military: { casualty_ledger: { RBiH: ledgerRow(10, -5, Number.NaN), RS: 'x' } },
-            displacement: { displacement_humanitarian_aggregates: { RS: { RBiH: aggregate(Number.POSITIVE_INFINITY, 0), RS: null } } },
+            military: { casualty_ledger: { RBiH: ledgerRow(10, -5, Number.NaN), RS: ledgerRow(0, 0, 0), HRHB: ledgerRow(1, 0, 0) } },
+            displacement: { displacement_humanitarian_aggregates: { RS: { RBiH: aggregate(Number.POSITIVE_INFINITY, 0), RS: null }, RBiH: 'x' } },
         }));
-        expect(summary.totalCasualties).toBe(10);
+        expect(summary.totalCasualties).toBe(11);
         expect(summary.totalDisplacedOrKilled).toBe(0);
+    });
+
+    it('hides a one-side ledger (the player-visible projection) instead of passing it off as all sides', () => {
+        // src/desktop/player_visible_state.cjs keeps only the player's row.
+        const projected = summarize(makeFrame({ military: { casualty_ledger: { RS: ledgerRow(500, 1500, 100) } } }));
+        expect(projected.totalCasualties).toBeNull();
+        // An empty scoped ledger (projection of a frame with no ledger yet) is hidden too.
+        expect(summarize(makeFrame({ military: { casualty_ledger: {} } })).totalCasualties).toBeNull();
+        const malformedSide = summarize(makeFrame({
+            military: { casualty_ledger: { RBiH: ledgerRow(1, 1, 1), RS: 'x', HRHB: ledgerRow(1, 1, 1) } },
+        }));
+        expect(malformedSide.totalCasualties).toBeNull();
     });
 
     it('does not depend on key insertion order', () => {
         const a = summarize(makeFrame({
-            military: { casualty_ledger: { RS: ledgerRow(1, 2, 3), RBiH: ledgerRow(4, 5, 6) } },
+            military: { casualty_ledger: { RS: ledgerRow(1, 2, 3), RBiH: ledgerRow(4, 5, 6), HRHB: ledgerRow(7, 8, 9) } },
             displacement: { displacement_humanitarian_aggregates: { RS: { RBiH: aggregate(10, 1) }, RBiH: { RS: aggregate(20, 2) } } },
         }));
         const b = summarize(makeFrame({
-            military: { casualty_ledger: { RBiH: ledgerRow(4, 5, 6), RS: ledgerRow(1, 2, 3) } },
+            military: { casualty_ledger: { HRHB: ledgerRow(7, 8, 9), RBiH: ledgerRow(4, 5, 6), RS: ledgerRow(1, 2, 3) } },
             displacement: { displacement_humanitarian_aggregates: { RBiH: { RS: aggregate(20, 2) }, RS: { RBiH: aggregate(10, 1) } } },
         }));
         expect(a).toEqual(b);
+        expect(a.totalCasualties).toBe(45);
     });
 });
 
@@ -164,6 +178,31 @@ describe('replay manifest schema v2', () => {
         const [read] = readReplayManifestFrames(v1);
         expect(read).toEqual({ ...frame, totalCasualties: null, totalDisplacedOrKilled: null });
         expect(replaySummaryPlayer(v1).getTurn(0)?.summary.totalDisplacedOrKilled).toBeNull();
+    });
+
+    it('withholds the all-sides casualty total from the renderer until the war is over (fog of war)', () => {
+        const json = JSON.stringify(buildReplaySaveManifest([frame]));
+        const duringWar = JSON.parse(playerVisibleReplayManifestJson(json, false)!);
+        expect(duringWar.schema_version).toBe(2);
+        expect(duringWar.frames[0].totalCasualties).toBeNull();
+        // The projection passes the displacement aggregates whole, so this stays.
+        expect(duringWar.frames[0].totalDisplacedOrKilled).toBe(98765);
+        expect(duringWar.frames[0].controlByFaction).toEqual(frame.controlByFaction);
+
+        const afterWar = JSON.parse(playerVisibleReplayManifestJson(json, true)!);
+        expect(afterWar.frames[0]).toEqual(frame);
+        // Deterministic bytes for identical input.
+        expect(playerVisibleReplayManifestJson(json, true)).toBe(playerVisibleReplayManifestJson(json, true));
+    });
+
+    it('passes null and unreadable sidecars through, and upgrades v1 sidecars to v2 with null figures', () => {
+        expect(playerVisibleReplayManifestJson(null, true)).toBeNull();
+        expect(playerVisibleReplayManifestJson('not json', true)).toBe('not json');
+        const v1 = JSON.stringify({ schema_version: 1, frame_count: 1, frames: [{ ...frame, totalCasualties: 0, totalDisplaced: 0 }] });
+        const upgraded = JSON.parse(playerVisibleReplayManifestJson(v1, true)!);
+        expect(upgraded.schema_version).toBe(2);
+        expect(upgraded.frames[0].totalCasualties).toBeNull();
+        expect(upgraded.frames[0].totalDisplacedOrKilled).toBeNull();
     });
 
     it('rejects unknown schema versions', () => {
