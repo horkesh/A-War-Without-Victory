@@ -1,8 +1,10 @@
 # A War Without Victory — Master Roadmap
 
-**Current state — 2026-11-07:** Calibration is CLOSED. The owner signed off all four checkpoints under `live-equivalent-desktop-v1` on 2026-11-06 at **712/711/712/710** out of 712 (January 1993, April 1994, April 1995, October 1995) and closed the lane. At 188 turns the live game and headless differ in 0 cells with RBiH, RS or HRHB as player. The Farz P-A receipt defect is fixed and its guard is enforced (`__w188_n63`, strict health PASS); the baseline manifest is pinned on n63. Brka and Ilijaš Krivajevići stay open by owner direction and are not calibration levers. The 2026-10-27 calibration hold, and the R6/R8 candidates it governed, are superseded and preserved in the [status history archive](../_old/plans/superseded/2026-10-27-master-roadmap-status-history.md). See the [calibration master](../40_reports/CALIBRATION_MASTER.md). Older status prose below is historical context; this block controls current work.
+**Current state — 2026-11-13:** Main stands at **712/711/711/710** out of 712 (January 1993, April 1994, April 1995, October 1995) on headless 188 turns, strict health PASS. The owner signed off 712/711/712/710 under `live-equivalent-desktop-v1` on 2026-11-06. #583 (stance engine) then moved April 1995 to 711: Gornje Krčevine is retaken at week 161 instead of 155 because of operation scheduling, and the orchestrator accepted that cell on 2026-11-13. Brka and Ilijaš Krivajevići stay open by owner direction and are not calibration levers. See the [calibration master](../40_reports/CALIBRATION_MASTER.md).
 
-**Owner scope ruling — 2026-10-27:** Dynamic enemy garrison forecasts receive the existing confidence uncertainty once; actual resolution is unchanged. Historical harness benchmarks remain regression checks, while gameplay calibration requires live-equivalent execution and matched inputs/policies. No target/reference repaint or artificial overlays in desktop. Consistency review and final aggregate remain pending; calibration stays HOLD.
+**Merged since 2026-11-12:** posture model option 2 (#580), truthful command and surface steps 2-5 (#568, #579, #570, #572, #585), sensitive copy (#584), displacement attribution (#587), replay totals (#586), BCS corps cases and the JNA relabel (#589), ARBiH 7th Corps Phase A (#590), the stance engine bundle (#583), the Apr 1992 startup snapshot re-bake (#588), test tooling (#569, #582), and the DC and R6/R7 closeouts (#559, #575).
+
+**Sequence — 2026-11-13:** RF pre-freeze fidelity pass (§4.1, BC14-BC19) → ENGINE FREEZE → R8 qualifying campaigns → R9. R8 dry runs before the freeze are allowed; they never count as qualifying. After the freeze, a calibration-moving change needs an owner OK. Gates: `RF-ENGINE-FREEZE` and `RF-CALIBRATION-RESIGNOFF` in [open_gates.yml](../open_gates.yml). The 2026-10-27 owner scope ruling and the status prose it governed are preserved in the [archive](MASTER_ROADMAP_ARCHIVE.md#roadmap-header-prose-moved-2026-11-13).
 
 **Owner delegation — 2026-10-06:** Codex is the approval authority for routine
 work within the current goal and drives prioritization, implementation, targeted
@@ -14,63 +16,15 @@ recommendation. Required evidence, review panels and cost-control gates remain.
 
 **Authority:** This file is the sole source of truth for unfinished product work.
 
-**DC — Dayton conference redesign (owner, 2026-11-07; re-owned 2026-11-08). CLOSED 2026-11-12: merged as #560 (`4a67bd516`); every item in the plan's Next list is recorded done (Codex handoff CL-055). R8 is now the active lane.** Claude owned implementation (branch `claude/dayton-conference`), Codex owned the visual assets; plan [in the repo](2026-11-08-dc-dayton-conference-plan.md) with seven adopted amendments (A1–A7), mirrored on Dragon (`F:/AWWV-worktrees/.dayton-design/DAYTON_CONFERENCE_IMPLEMENTATION_PLAN.md`), entry point [the RD handoff](../../handoffs/20261107_dayton_end_map_to_conference.md), gates `DC-*`. RD (settlement and end map) closed 2026-11-07. DC blocked R8 because packaged campaigns run through the Dayton table; that block is lifted.
+**DC — Dayton conference redesign. CLOSED 2026-11-12: merged as #560 (`4a67bd516`); Codex handoff CL-055 records every Next item done.** Plan [in the repo](2026-11-08-dc-dayton-conference-plan.md), entry point [the RD handoff](../../handoffs/20261107_dayton_end_map_to_conference.md), gates `DC-*`. RD closed 2026-11-07. DC no longer blocks R8.
 
-**R8 — packaged player campaigns (after RD).** The owner's 2026-10-24 parity priority (players reach the bots' calibration through ordinary play) is met at map level in the live-equivalent path: 0 cells differ for each player faction at 188 turns. Calibration no longer blocks R8. What remains is the packaged-Electron evidence in the [Electron-validation plan](2026-07-31-full-campaign-electron-validation-plan.md): three 24-turn shakedowns (RBiH, RS, HRHB) on one fresh package, then three full 188-turn campaigns with diaries, per-faction Save/load, same-input determinism and strict runtime/audio. The [player hard gates](2026-07-31-full-campaign-electron-validation-plan.md#player-campaign-acceptance-contract--owner-decision-2026-10-24) still apply. No packaged campaign has run on the current source.
+**R8 — packaged player campaigns.** Players reach the bots' calibration through ordinary play (owner priority, 2026-10-24). What remains is the packaged-Electron evidence in the [Electron-validation plan](2026-07-31-full-campaign-electron-validation-plan.md): three 24-turn shakedowns (RBiH, RS, HRHB) on one fresh package, then three full 188-turn campaigns with diaries, per-faction Save/load, same-input determinism and strict runtime/audio. The [player hard gates](2026-07-31-full-campaign-electron-validation-plan.md#player-campaign-acceptance-contract--owner-decision-2026-10-24) still apply. Qualifying runs start after the engine freeze; no qualifying campaign has run yet.
 
 **Execution view:** [COMMAND_BOARD.md](COMMAND_BOARD.md) is a derived convenience view; this roadmap wins if they differ.
 
 **Plan index:** [README.md](README.md)
 
 **Open gates:** [open_gates.yml](../open_gates.yml) — named gates and their evidence, checked by `npm run gates`. Derived; this roadmap wins.
-
-**Full-duration campaign evidence (188w) — 2026-09-16:** the owner-authorized January-only operations repair
-takes all eight required cells through owned military captures by week 39 — Baljvine t28,
-Orašac t29, Jezero t32, Donji Korićani t34, Donji Vakuf town t35, Korenići t36, Lupnica t36 and
-Prusac t39 — carrying the four retained Jajce pockets alongside the four repaired cells.
-The clean 188-week measurement at `ac3e5e152` scores **700/712, 702, 697, 667**, improving every
-checkpoint over the preceding `8db305596` source (696/690/687/659) against unchanged
-694/674/668/641 floors. January meets its authorized 700 contract exactly, with all eight
-required cells taken through operation-owned combat and zero passive transfers. Health,
-consistency, all 31 anchors, nine enclave guards and all assignment seals pass; the audit
-records 188 turn seals, one final seal and zero unresolved seals. Independent evidence review
-is GO on the January contract.
-
-The repair is a contract fix, not tuning: `applyCommanderOutput` admitted new bot operations
-without calling the `assignOperationCommander` lifecycle writer that Systems Manual §7.5
-requires, so named bot operations ran on unnamed 3/3 preparation defaults. Restoring ordinary
-assignment shortened preparation from five turns to four and moved the Orašac opening ahead of
-the week-30 seasonal boundary.
-
-Overall calibration remains **NO-GO**. The checkpoint validator exits 1 with
-`GUARD BREACHED — §6 panel matter`: western cascade is **30 against base 40, below minimum 38**
-— recovered from 25 at `8db305596`, still short — and the Farz P-A discriminator records the
-t168 capture by the 327th (3rd Corps) where a 2nd Corps capture at t>=160 is required. Prozor
-retains its turn-41 injection error, identical in the `8db305596` reference and therefore
-inherited. Saved artifacts expose generic Guja competing with Mistral 1, changed Mistral 2
-objectives and delayed Southern Move. These broader scheduling/attribution repairs require
-their own bounded scope; no speculative tuning or additional campaign follows this packet.
-Preserve all floors, authored/control boundaries and the approved coverage rule. Main promotion
-and pin refresh remain held. The [public viewer](https://horkesh.github.io/A-War-Without-Victory/?run=ac3e5e152)
-already publishes this run at `gh-pages` commit `3096f4e0b` (2026-09-14), re-verified live on
-2026-09-16; publication permits inspection and does not accept the remaining failures.
-See the [repair receipt](../40_reports/implemented/20260902_APRIL_1994_OPERATIONAL_CALIBRATION.md#owner-authorized-january-only-operations-repair--2026-09-14).
-
-**January objective corrections — 2026-09-17 (candidate `41a148bf9`).** Two bounded commits follow the
-188-week measurement above. `772a67808` reads the bounded isolated-position predicate from the live
-RBiH–HRHB alliance (the attacker must still hold the dominant ring share) and bounds the head-of-queue
-roster reservation by the plan's own `available_from`; `41a148bf9` appends `op:stolac:pjesivac_kula_2` to
-Operation Jackal's `stolac_sweep` after Stolac (Hatelji stays excluded). On the clean committed source the
-independent run **n403** (reproducing n401/n402) measures **701/712** at t39 = 4 January 1993 with **11**
-mismatches; April 1994/1995 and October 1995 are **NOT REACHED**. Čardak's year-level requirement is met
-(operation-owned combat capture t23 = 1992-09-14, `arbih_3rd_corps:Operacija Izlaz:t21`) and the
-Pješivac-Kula bounded objective-omission correction is **CLOSED**. The packet's January minimum of **700**
-is distinct from the 188-week floors (**694/674/668/641**). Overall January and campaign calibration remain
-**OPEN**; Prusac is **OPEN**; the Vranjevići/Kružanj interpretation is **UNRESOLVED** with the deletion
-proposal **withdrawn**. Later territorial outcomes do not veto a January correction, without waiving
-determinism, valid state, legal movement/capture, population accounting, political permissions or command
-ownership. See [CALIBRATION_MASTER](../40_reports/CALIBRATION_MASTER.md) and the
-[durable evidence record](../../logs/january-1993-operations-20260917/EVIDENCE_RECORD.md).
 
 ## ★ PROBE CHANNEL — CLOSED 2026-08-26. Scope: `docs/plans/2026-08-26-probe-channel-scope.md`
 
@@ -86,19 +40,10 @@ ownership. See [CALIBRATION_MASTER](../40_reports/CALIBRATION_MASTER.md) and the
 
 ---
 
-## Current Execution Snapshot (2026-09-12)
+## Current Execution Snapshot (2026-11-13)
 
-- **Calibration: OPEN AND ONGOING** (owner, 2026-09-01). Reference, `init_control`, objective, axis,
-  timing, roster and outcome work is live. Calibration runs ON TOP OF engine health, never instead of
-  it: engine-health defects are fixed before tuning.
-- **Baseline authority is [CALIBRATION_MASTER.md](../40_reports/CALIBRATION_MASTER.md), not this file.**
-  The owner-authorized #518 refresh measures clean `2a8eb4244` at **702/678/672/667** against
-  unchanged floors **694/674/668/641**, with all 31 anchors matching `n392`. The April candidate
-  must be remeasured; neither the old 703 April result nor existing pins certify combined behavior.
-- **Lane order: DC (done) → R8 (active) → R9** (owner, 2026-11-07; DC merged #560, 2026-11-12; RD closed; R7 closed 2026-11-08). Earlier: RD → R8 → R9, R7 → R8 → R9. R1–R7 are complete (R6 and R7 closed by the owner on 2026-11-08); RC's narrow pre-1.0 packet
-  and RE are closed. RE gates nothing. Section 5 carries each lane's verdict and plan link.
-- **WR01 is closed** by #515–#517, including the recorded owner-accepted six-capture exception.
-  R7 is closed (owner, 2026-11-08); distinct R8 readability/runtime/package failures remain open.
+- **Calibration runs on top of engine health, never instead of it.** The baseline authority is [CALIBRATION_MASTER.md](../40_reports/CALIBRATION_MASTER.md), not this file.
+- **Lane order: RF → ENGINE FREEZE → R8 qualifying campaigns → R9.** DC closed (#560), RD closed, R6 and R7 closed by the owner on 2026-11-08; RC's narrow pre-1.0 packet and RE are closed. Section 5 carries each lane's verdict and plan link; §4.1 carries the RF items.
 - **Open gates are enumerated in [open_gates.yml](../open_gates.yml)**, not in prose here. Run
   `npm run gates`.
 - **Publication boundary unchanged.** Signing, store upload, public release creation and a public
@@ -171,7 +116,7 @@ These are verification barriers and authority boundaries, not unresolved product
 
 ## 4. Program Sequence
 
-**Current sequence (2026-11-12):** DC (Dayton conference redesign) closed, merged #560 -> final R8 packaged acceptance -> R9 freeze/readiness. R7 closed 2026-11-08.
+**Current sequence (2026-11-13):** RF pre-freeze fidelity pass (BC14-BC19 below) -> ENGINE FREEZE -> R8 qualifying packaged campaigns -> R9 freeze/readiness. DC (Dayton conference redesign) closed, merged #560; R7 closed 2026-11-08. RF items merge one at a time, each re-measured on top of the one before; the order is BC14, BC15, BC16, BC17, then BC19 as triaged, with BC18 last if built.
 Final calibration was signed off on 2026-11-06 and the owner closed the lane; D1 and BC04's current owner/panel conditions remain intact.
 
 ### 4.1 Finite behavior-closure register (2026-09-07)
@@ -200,6 +145,14 @@ live in the existing R8 plan; its previously proposed B10–B13/F1 are now regis
 | BC08 inherited test residual / verification | QA + owning Systems/Game Design | **CLOSED — verification/disposition.** Current simulation suites pass; one environmental full-suite failure classified, not erased. [Receipt](../40_reports/audits/20260907_BC08_CURRENT_ENGINE_HEALTH_VERIFICATION.md). |
 | BC09 shared production inputs / R8 | Systems + QA | **LOCAL PACKET REVIEWED (GO).** [Phase 1 evidence](2026-09-07-r8-runtime-input-ai-integrity-plan.md): shared validation; real IPC 25/25 and one-turn baseline bytes match. Final acceptance deferred; BC07 policy separate. |
 | BC10 optional AI ownership/replay / R8 | Commander + Systems + QA | **PLANNED:** [runtime packet Phase 2](2026-09-07-r8-runtime-input-ai-integrity-plan.md). Canonical commander owns final emit; recorded inputs replay without API calls. Cadet preserved; required Phase 0 review before code. |
+| BC14 RF-1 ARBiH 7th Corps / RF | Calibration + Historian + Corps/Operations + war-or-game; Pyrrhic merge gate | **PHASE A MERGED ([#590](https://github.com/horkesh/A-War-Without-Victory/pull/590), inert); PHASE B IN DIAGNOSIS ([#591](https://github.com/horkesh/A-War-Without-Victory/pull/591), draft, calibration-moving).** Queue slot 1. First Phase B run 712/710/708/703 with the Farz guard breached: the smaller 3rd Corps over-advances north into painted-RS cells. Third run is diagnosis-first, at most two attempts; step 6 is not shipped alone because the player would see an empty corps. It also re-measures the April 1995 Gornje Krčevine cell. Merges only if the bar holds, else it is parked with an archive tag. The 3rd Corps paralysis on main (7C5) is never restored to recover a cell. |
+| BC15 RF-2 stance effects / RF | Calibration + Historian + Corps/Operations + war-or-game; Pyrrhic merge gate | **OPEN — queue slot 2, in progress, no PR yet.** The stance engine bundle merged in [#583](https://github.com/horkesh/A-War-Without-Victory/pull/583). Remaining: stance-based entrenchment rates and the patrol intel source, which never applied because entrenchment ran before the turn's sector rebuild (turning them on cost April 1995 708 and October 1995 705); stance AI follow-ups (SE2, SE4); live = headless re-check for the stance bundle (SE8). One calibration change per measured run. |
+| BC16 RF-3 siege displacement path / RF, §6 | Calibration + Historian + §6 panel (unanimous independent seats) | **OPEN — queue slot 3, in progress, no PR yet.** Attribution merged in [#587](https://github.com/horkesh/A-War-Without-Victory/pull/587), byte-identical, because the siege path never runs in a campaign (legacy settlement ids against OSID control). Remaining: revive the path (DA1, DA3) under the binding conditions in SENSITIVE_HISTORY_DESIGN_GATE §6. Changes population and recruitment, and who is shown displacing whom, so a panel is required. |
+| BC17 RF-4 officer tenure data / RF | Historian + Calibration (data) | **NOT STARTED — queue slot 4.** Praljak starts at week 64 but replaced Petković on 24 July 1993 (week 67); Roso and the second Petković tenure are unchecked; Hadžihasanović commands 0 turns of the 3rd Corps and Alagić commands the 4th Corps from week 81 (7C2). Uses the docs-history write-up. Needs a historian check, then a startup-snapshot re-bake. |
+| BC18 RF-5 HVO-ARBiH 1993 war / RF | Owner decision, then Calibration + Historian + §6 panel | **OWNER DECISION PENDING.** Diagnosis only so far (no merge). The humanitarian record shows HVO-against-Bosniak displacement of 1,279 against 43,267 the other way in 188 weeks (DA2), because the sim has no HVO-ARBiH war. Build it or not, and its scope, is the owner's call. If built it is the last RF slot. |
+| BC19 RF-6 realism-audit fixes / RF | war-or-game + orchestrator triage | **AUDIT REPORT ONLY.** The orchestrator triages each finding into an RF slot or the post-1.0 backlog (§10). No fix lands without its own measured run. |
+
+BC11-BC13 are not in use. RF rows are pre-freeze fidelity work, not a new plan: each is amended in its own PR, and the gates `RF-ENGINE-FREEZE` and `RF-CALIBRATION-RESIGNOFF` in [open_gates.yml](../open_gates.yml) close the pass.
 
 **Acceptance boundary:** settle every row before final calibration acceptance, retain one-change-per-
 controlled-run and applicable paired deterministic proof, then finish R8 packaged acceptance and R9.
@@ -243,8 +196,8 @@ on matching contracts/inputs. No baseline refresh, remote configuration change o
 | R7 | Content, historical attribution, audio, accessibility, and opening experience | **CLOSED — owner, 2026-11-08.** Every R7 gate is closed: audio cue wiring, offline playback and human listening/sensitivity (all 17 interface cues accepted; ambient beds retired for 1.0), WR01 and the baseline pins. In-game audio checks pass to R8 packaged play; remaining Army HQ paper slices are post-1.0 backlog. [Closure record](../../logs/r7-english-readability/closeout-human-audio-listen-round2.md). | [Content/history/audio plan](2026-07-31-content-history-localization-audio-plan.md) · [accepted functional opening plan](2026-08-23-opening-screens-implementation-plan.md) · [cinematic opening and typography amendment](2026-08-28-cinematic-opening-typography-implementation-plan.md) · [presentation and English-readability amendment](2026-09-05-r7-presentation-and-english-readability-amendment-plan.md) · [ARBiH names](2026-09-07-arbih-brigade-honorific-name-correction-plan.md) · [WR01 warroom presentation design](2026-09-10-warroom-whiteboard-date-and-corkboard-map-design.md) · [visual polish and art-direction packet](2026-11-05-visual-polish-art-direction-plan.md) (CLOSED 2026-11-06) / [visual polish follow-ups](2026-11-06-visual-polish-follow-ups-plan.md) · [command palette and scalable UI](2026-11-06-command-palette-ui-scale-plan.md) (VERIFIED LOCAL; integration pending) | Closed. Phase 3 localization stays post-1.0. |
 | RD | Dayton settlement and end map | **CLOSED — owner, 2026-11-07.** Peace plans settle on their maps; the OSID-level Dayton map has no isolated pockets outside the Posavina canton; the verdict reads the settled share; the settled map reaches the renderer. Table changes stay as interim rules owned by DC. All `RD-*` gates closed; baseline re-pinned with owner approval (enclave-loss fix, territory unchanged). | [RD plan](2026-11-07-rd-dayton-settlement-lane.md) · [closeout](../40_reports/20261107_RD_CLOSEOUT.md) | Met: 188w pins re-pinned with the reason recorded, maximum territory re-measured for all three factions, canon propagated, independent, sensitive-history and run reviews recorded. |
 | DC | Dayton conference redesign | **CLOSED 2026-11-12 — merged #560 (`4a67bd516`); Codex handoff CL-055 records every Next item done.** Claude implemented, Codex supplied art (owner, 2026-11-08). Reworked the Dayton table (conference room, live bargaining, data contract) on top of RD's end-map contract. First items under the player-agency principle: an enclave held at signature, protected ground as expensive rather than impossible, the decliner's eight weeks (plan amendment A6). No longer blocks R8. | [DC plan](2026-11-08-dc-dayton-conference-plan.md) · [RD handoff](../../handoffs/20261107_dayton_end_map_to_conference.md) | All `DC-*` gates closed; 188w pins intact or owner re-pinned; the conference hands signed terms to `applyPeaceSettlement`. |
-| R8 | Full-campaign packaged-Electron validation and diaries | **PACKAGED CAMPAIGNS NEXT — CALIBRATION BLOCKER CLEARED 2026-11-07.** Live-equivalent player/bot map parity holds at 712/711/712/710: 0 cells differ for each player faction at 188 turns. The October NO-GO candidates are superseded history. Packaged 24-turn shakedowns and 188-turn diaries for RBiH, RS and HRHB have not run on the current source. | [Electron-validation plan](2026-07-31-full-campaign-electron-validation-plan.md) · [player criteria](2026-07-31-full-campaign-electron-validation-plan.md#player-campaign-acceptance-contract--owner-decision-2026-10-24) | Per-faction packaged 24/188 runs with diaries, Save/load, same-input determinism, protected/canon and strict runtime/audio remain open. No tuning or pin adoption follows from R8 runs. |
-| PS | Player surface and agency review, steps 1-6 | **ACTIVE — STEPS 1-5 IN FLIGHT; STEP 6 POSTURE MODEL BUILT (188w GO, merging).** Sequence in `docs/40_reports/proposals/20261111_PLAYER_SURFACE_AND_AGENCY_REVIEW.md` §4; owner chose posture option 2, 2026-11-12. Gates no R8/R9 item. | [Posture plan](2026-11-12-posture-model-option2-stance-matters.md) | Each step: redesign gates, EN and BCS copy. Posture: no bot, headless or calibration change. |
+| R8 | Full-campaign packaged-Electron validation and diaries | **DRY RUNS NOW; QUALIFYING CAMPAIGNS AFTER THE ENGINE FREEZE (2026-11-13).** Live-equivalent player/bot map parity held at 712/711/712/710 on 2026-11-07 (0 cells differ per player faction at 188 turns); main is now 712/711/711/710 and live = headless is re-proved at the freeze (`RF-ENGINE-FREEZE`). Dry runs find product and harness faults early, for example the RS-07 aborts fixed in [#571](https://github.com/horkesh/A-War-Without-Victory/pull/571), but never count as qualifying. Packaged 24-turn shakedowns and 188-turn diaries for RBiH, RS and HRHB have not run on the frozen source. | [Electron-validation plan](2026-07-31-full-campaign-electron-validation-plan.md) · [player criteria](2026-07-31-full-campaign-electron-validation-plan.md#player-campaign-acceptance-contract--owner-decision-2026-10-24) | Per-faction packaged 24/188 runs with diaries, Save/load, same-input determinism, protected/canon and strict runtime/audio remain open. No tuning or pin adoption follows from R8 runs. |
+| PS | Player surface and agency review, steps 1-6 | **STEPS 1-6 ALL MERGED — READY FOR THE OWNER TO CLOSE (2026-11-13).** Step 1 [#568](https://github.com/horkesh/A-War-Without-Victory/pull/568), step 2 [#579](https://github.com/horkesh/A-War-Without-Victory/pull/579), step 3 [#570](https://github.com/horkesh/A-War-Without-Victory/pull/570), step 4 [#572](https://github.com/horkesh/A-War-Without-Victory/pull/572), step 5 [#585](https://github.com/horkesh/A-War-Without-Victory/pull/585), step 6 posture model [#580](https://github.com/horkesh/A-War-Without-Victory/pull/580), with the redesign base [#566](https://github.com/horkesh/A-War-Without-Victory/pull/566). Sequence in `docs/40_reports/proposals/20261111_PLAYER_SURFACE_AND_AGENCY_REVIEW.md` §4; owner chose posture option 2, 2026-11-12. Only the owner closes a lane. Gates no R8/R9 item. | [Posture plan](2026-11-12-posture-model-option2-stance-matters.md) | Each step: redesign gates, EN and BCS copy. Posture: no bot, headless or calibration change. |
 | R9 | Release candidate, gold, and publication | Build preparation passes (§4.2); freeze/readiness after R8 | [Release plan](2026-07-31-release-candidate-gold-publication-plan.md) | One immutable RC passes clean-machine/security/license/store proofs; artifacts are reproducible; publication remains separately authorized. |
 
 The linked plan is the task-level contract for each row. A workstream may not gain a second active plan; amend the linked plan and this register together.

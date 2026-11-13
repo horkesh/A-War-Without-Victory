@@ -1,131 +1,42 @@
 # AWWV Command Board
 
-**Verified local UI packet (2026-11-07):** [Command palette and scalable UI](2026-11-06-command-palette-ui-scale-plan.md) has independent/source, full-suite, browser and isolated-native proof. Local source c51125157; integration pending. This changes no R7/R8/calibration acceptance status.
-
-**Status — 2026-11-12:** Derived dispatch view. Calibration is closed (712/711/712/710). RD closed; the Dayton conference redesign (DC) closed, merged #560; R8 is the active lane, then R9. Superseded status: [status archive](../_old/plans/superseded/2026-10-27-master-roadmap-status-history.md#superseded-derived-command-board-status).
-
-**Owner scope ruling — 2026-10-27:** Dynamic enemy garrison forecasts receive the existing confidence uncertainty once; actual resolution is unchanged. Historical harness benchmarks remain regression checks, while gameplay calibration requires live-equivalent execution and matched inputs/policies. No target/reference repaint or artificial overlays in desktop. Consistency review and final aggregate remain pending; calibration stays HOLD.
+**Status — 2026-11-13:** Derived dispatch view. Main stands at 712/711/711/710 (Apr 1995 711 accepted after #583). The sequence is RF pre-freeze fidelity pass → ENGINE FREEZE → R8 qualifying packaged campaigns → R9. DC closed (#560); R6 and R7 closed (owner, 2026-11-08); the PS steps 1-6 are all merged and wait for the owner to close the lane. Superseded status prose: [status archive](../_old/plans/superseded/2026-10-27-master-roadmap-status-history.md#superseded-derived-command-board-status) and [roadmap archive](MASTER_ROADMAP_ARCHIVE.md#command-board-history-moved-2026-11-13).
 
 **Authority:** [MASTER_ROADMAP.md](MASTER_ROADMAP.md) is the sole authority for unfinished work and wins if this board differs.
 
-**Open gates:** [open_gates.yml](../open_gates.yml) enumerates every named gate and the evidence that would close it — `npm run gates` lists the open rows, and `tests/open_gates_register.test.ts` fails if a gate is claimed closed without evidence that exists. It is derived like this board; the roadmap still wins.
+**Open gates:** [open_gates.yml](../open_gates.yml) enumerates every named gate and the evidence that would close it — `npm run gates` lists the open rows, and `tests/open_gates_register.test.ts` fails if a gate is claimed closed without evidence that exists. It is derived like this board; the roadmap still wins. The RF pass closes through `RF-CALIBRATION-RESIGNOFF` and `RF-ENGINE-FREEZE`.
 
 ## Activation
 
-The owner activated full roadmap execution on 2026-07-31. Local implementation, tests, evidence,
-local commits, transient validation builds, documentation propagation, and non-destructive
-workspace maintenance are authorized within the roadmap. Remote push and final merge are not.
-
-Signing, store upload, public release creation, and a public `1.0` tag remain outside that authority and require a separate explicit `Publish 1.0` instruction.
+The owner activated full roadmap execution on 2026-07-31. Local implementation, tests, evidence, local commits, transient validation builds, documentation propagation, and non-destructive workspace maintenance are authorized within the roadmap. Signing, store upload, public release creation, and a public `1.0` tag remain outside that authority and require a separate explicit `Publish 1.0` instruction.
 
 ## Dispatch Queue
 
 | Order | ID | Status | Next executable action | Plan |
 |---:|---|---|---|---|
-| 1 | R1 | **COMPLETE -- CLOSED 2026-08-01** | None. | [Seamless map transition](2026-07-31-seamless-command-room-map-transition-plan.md) |
-| 2 | R2 | **COMPLETE -- CLOSED 2026-08-03** | None; v14 is the accepted clean RS campaign proof. | [RS friction remediation](2026-07-31-rs-104week-friction-remediation-plan.md) |
-| 3 | R3 | **COMPLETE** | None. | [TG convergence](2026-07-31-operational-tactical-group-closeout-implementation-plan.md) |
-| 4 | R4 | **COMPLETE** | None; Phase 6 and its packaging follow-up are closed. | [Command/event/Codex convergence](2026-07-31-command-event-codex-convergence-plan.md) |
-| 5 | R5 | **COMPLETE -- CLOSED 2026-08-05** | None. The accepted performance floor is approximately 1.09 seconds per turn; the 100 ms target and incremental-reuse Task 6 are retired from 1.0 scope. | [Engine quality](2026-07-31-engine-quality-performance-stability-plan.md) |
-| 6 | R6 | **CLOSED — owner, 2026-11-08** | None. Signed off 2026-11-06 at 712/711/712/710, live = headless. | [Calibration authority](../40_reports/CALIBRATION_MASTER.md) |
-| 6.5 | RC | **PRE-1.0 NARROW SCOPE COMPLETE -- CLOSED 2026-08-15** | None. V3 selection plus reversible D-shape is retained; D-topology is reserved post-1.0. | [Collapse build spec](../40_reports/proposals/20260609_COLLAPSE_PIPELINE_BUILD_SPEC.md) / [D-shape result](2026-08-15-collapse-d-shape-design.md) |
-| 7 | R7 | **CLOSED — owner, 2026-11-08** | None. Every R7 gate is closed; all 17 interface cues accepted, ambient beds retired for 1.0. In-game audio checks pass to R8. [Closure record](../../logs/r7-english-readability/closeout-human-audio-listen-round2.md). | [Content/history/audio](2026-07-31-content-history-localization-audio-plan.md) / [accepted functional opening](2026-08-23-opening-screens-implementation-plan.md) / [cinematic opening and typography amendment](2026-08-28-cinematic-opening-typography-implementation-plan.md) / [presentation and English-readability amendment](2026-09-05-r7-presentation-and-english-readability-amendment-plan.md) / [visual polish packet](2026-11-05-visual-polish-art-direction-plan.md) |
-| 7.5 | RE | **CLOSED — owner, 2026-09-01** | None. RE gates nothing; engine-health defects are still fixed before tuning. | [Closed recovery record](2026-08-28-packaged-probe-recovery-plan.md) / [closed RE contract](2026-08-26-engine-integrity-plan.md) |
-| 7a | DC | **CLOSED 2026-11-12 — merged #560 (`4a67bd516`)** | None. Dayton conference redesign done (Codex handoff CL-055); RD closed. No longer blocks R8. | [Handoff](../../handoffs/20261107_dayton_end_map_to_conference.md) |
-| 8 | R8 | **PACKAGED CAMPAIGNS NEXT — CALIBRATION BLOCKER CLEARED 2026-11-07** | Calibration signed off at 712/711/712/710 with live = headless for all three player factions. Packaged 24-turn shakedowns, 188-turn campaigns with diaries, Save/load, same-input determinism and strict runtime/audio have not run on the current source. DC closed 2026-11-12 (#560); R8 is the active lane. | [Active plan](2026-07-31-full-campaign-electron-validation-plan.md#active-owner-priority--playerbot-capability-parity-2026-10-24) |
+| 1-5 | R1-R5 | **COMPLETE — CLOSED** (R1 2026-08-01, R2 2026-08-03, R3, R4 2026-08-06, R5 2026-08-05) | None. | [R1](2026-07-31-seamless-command-room-map-transition-plan.md) · [R2](2026-07-31-rs-104week-friction-remediation-plan.md) · [R3](2026-07-31-operational-tactical-group-closeout-implementation-plan.md) · [R4](2026-07-31-command-event-codex-convergence-plan.md) · [R5](2026-07-31-engine-quality-performance-stability-plan.md) |
+| 6 | R6 | **CLOSED — owner, 2026-11-08** | None. Signed off 2026-11-06 at 712/711/712/710, live = headless. Main is now 712/711/711/710 (see RF). | [Calibration authority](../40_reports/CALIBRATION_MASTER.md) |
+| 6.5 | RC | **PRE-1.0 NARROW SCOPE COMPLETE — CLOSED 2026-08-15** | None. D-topology is reserved post-1.0. | [Collapse build spec](../40_reports/proposals/20260609_COLLAPSE_PIPELINE_BUILD_SPEC.md) |
+| 7 | R7 | **CLOSED — owner, 2026-11-08** | None. All 17 interface cues accepted, ambient beds retired for 1.0. | [Content/history/audio](2026-07-31-content-history-localization-audio-plan.md) |
+| 7.5 | RE | **CLOSED — owner, 2026-09-01** | None. RE gates nothing; engine-health defects are still fixed before tuning. | [Closed RE contract](2026-08-26-engine-integrity-plan.md) |
+| 7a | DC | **CLOSED 2026-11-12 — merged #560** | None. | [Handoff](../../handoffs/20261107_dayton_end_map_to_conference.md) |
+| 7b | PS | **STEPS 1-6 ALL MERGED — READY FOR THE OWNER TO CLOSE** | Owner decision. Steps: #568, #579, #570, #572, #585, posture model #580. | [Posture plan](2026-11-12-posture-model-option2-stance-matters.md) |
+| 7c | RF | **ACTIVE — pre-freeze fidelity pass** (roadmap §4.1, BC14-BC19) | Merge one item at a time, in this order, each re-measured on the one before: **BC14** 7th Corps (Phase A #590 merged; Phase B [#591](https://github.com/horkesh/A-War-Without-Victory/pull/591) draft, in diagnosis), **BC15** stance effects, **BC16** siege displacement path (§6 panel), **BC17** officer tenure data, **BC19** realism-audit fixes as triaged. **BC18** HVO-ARBiH 1993 war waits for an owner decision and, if built, goes last. Then `RF-CALIBRATION-RESIGNOFF` and `RF-ENGINE-FREEZE`. | Roadmap §4.1 (no separate plan) |
+| 8 | R8 | **DRY RUNS NOW; QUALIFYING CAMPAIGNS AFTER THE ENGINE FREEZE** | Dry runs find product and harness faults and never count. After the freeze: three 24-turn shakedowns on one package, then three 188-turn campaigns with scored diaries, per-faction Save/load, same-input determinism, strict runtime/audio. | [Active plan](2026-07-31-full-campaign-electron-validation-plan.md#active-owner-priority--playerbot-capability-parity-2026-10-24) |
 | 9 | R9 | **FREEZE WAITING ON R8; LIMITED PREPARATION AT §4.2** | Freeze an immutable RC, produce reproducible clean-machine evidence, and prepare publication inputs. | [Release candidate/gold](2026-07-31-release-candidate-gold-publication-plan.md) |
 
-**R7 readability execution — 2026-09-09:** The authorized date-label expansion now has nine-case initial/maximum-scroll proof, preserving the fixed Desk column, header and artwork. Final UI/typecheck/build checks and independent review pass; Desk/date commit `88996a23d` and its hook pass. Clean POST-A completes 188 weeks with health/hash checks passing; PRE/POST-A/POST-B match all eight artifacts and inputs. The fixed run budget is consumed. Earlier phases and unaffected global Vitest/player-experience receipts remain reviewed. Baseline investigation is GO: pins match accepted n392, while four consumed inputs changed before R7; PRE/POST-B match all eight artifacts. Retain the six-pin failing baseline gate and dirty POST-B disclosure. No R7 closure or downstream lane is claimed. See the amendment and designated report.
-
-**R7 closeout audit — 2026-09-09:** The existing parent plan now carries the listening/approval
-checklist. The supplied set is 20 assets (17 neutral UI cues and three ambient beds); 16 optional
-placeholders remain absent. A named human listening/sensitivity acceptance receipt was not located
-in the scoped search. Retained package evidence proves the 20 emitted OGGs match source, but does
-not record playback/control observations or zero remote audio requests. **Owner sequencing:**
-human listening waits for the owner's eventual game inspection; it is not the next engineering
-task. The owner scheduled the bounded R8 usability packet and three 24-turn shakedowns below.
-Audio/offline acceptance and the six-pin baseline gate remain open.
-
-**R7 name correction integrated:** [ARBiH honorific-name packet](2026-09-07-arbih-brigade-honorific-name-correction-plan.md); IDs and mechanical fields preserved, saved/displayed text changed. Remaining R7 gates stay open.
-
-**WR01 CLOSED — 2026-09-12:** #515/#516 implement the marker date and pinned corkboard map;
-#517 records the owner-accepted six-capture exception. The [design closeout](2026-09-10-warroom-whiteboard-date-and-corkboard-map-design.md#9-sequencing)
-owns the evidence. R8's separate readability/runtime findings remain open. The inherited six-pin
-defect was reconciled by owner-authorized #518; the April candidate still needs fresh acceptance.
-
-**BC05 scheduled separately (2026-09-07):** bounded NATO deadline/loader repair is
-**implemented and independently reviewed (GO), 115 focused tests pass**. n392 disproves the inherited
-Lukavac dead-gate premise: it fires at t70, with 3/6 RS Trnovo
-cells and a `comply` decision. **Owner disposition implemented: separate Lukavac event removed and
-independently reviewed (GO)**. Military Operation Trnovo is preserved; its execution belongs to calibration and is outside
-this packet. Campaign/downstream acceptance remains open. [BC05 scope/evidence](2026-07-31-full-campaign-electron-validation-plan.md#bc05-bounded-nato-repair-and-lukavac-disposition--2026-09-07).
-
-**BC06 — owner scheduled 2026-09-07; bounded repair implemented/reviewed (GO).**
-Voluntary posture controls and authored third-use posture/front-visit choices are wired; pending
-guards and decision/notification receipts are repaired. Owner-authorized per-unit decoration
-targeting now passes all three local faction action paths (2026-09-08 follow-up). The owner-delegated
-2026-09-08 disposition retains static address/decoration behavior for 1.0 and defers six new
-escalation stages post-1.0 as an explicit scope exception. Final packaged acceptance remains open. No campaign or calibration change is
-claimed. [BC06 scope/evidence](2026-07-31-full-campaign-electron-validation-plan.md#bc06-bounded-posture-and-gesture-repair--2026-09-07).
-
-**BC09 — LOCAL PACKET REVIEWED (GO) (2026-09-08).** Shared input validation
-and real IPC 25/25 preserve failed-advance state/save/broadcast boundaries; the valid synthetic
-turn matches untouched baseline bytes. [Evidence and matrix](2026-09-07-r8-runtime-input-ai-integrity-plan.md).
-Integrated unchanged into main as `fa900ba89`. Final acceptance remains deferred; BC10 is not activated.
-
-**BC07 — DISPOSED — RETAIN (GO).** Preserve the committed stability
-values; hybrid/ethnic starts bypass them while mode-less operational starts can consume them.
-[Disposition and acceptance order](2026-07-31-full-campaign-electron-validation-plan.md#bc07-stability-data-disposition--2026-09-08).
-
-**Repository audit packets — BC09 reviewed (GO); cleanup Tasks 1–8 complete (GO):** [Master §4.2](MASTER_ROADMAP.md#42-repository-audit-integration-2026-09-07) assigns three subordinate packets:
-
-| Packet | Existing owner and sequence |
-|---|---|
-| [Deletion cleanup](2026-09-07-bounded-deletion-cleanup-plan.md) | R8; Tasks 1–8 reviewed GO. A 13-worktree recheck found no executable RE consumer; script handoff ready. Final R8 acceptance remains separate. |
-| [Runtime integrity](2026-09-07-r8-runtime-input-ai-integrity-plan.md) | R8; BC09 Phase 1 is integrated and supplied the verified BC07 retention disposition. BC10 remains planned after BC01/06 and BC09. |
-| [Build preparation](2026-09-07-r9-build-validation-preparation-plan.md) | Phases 1–3 complete/review GO. Package/resource/route proof and combined suite pass (13,520 passed / 31 skipped); final R8 gates remain. |
-
-All precede final calibration and packaged acceptance. Owner-authorized cleanup Task 1
-follows the integrated BC09 repair and BC07 retention decision; no campaign has run. Other packet registration creates
-no execution authority or new workstream; D1 and separately authorized BC04 work are preserved.
+Non-calibration lanes (UI, copy, i18n, tooling, docs, CI) merge any time they are green, before or after the freeze. After the freeze, a calibration-moving change needs an owner OK.
 
 ## Current Critical Path
 
+`RF (BC14 → BC15 → BC16 → BC17 → BC19; BC18 on the owner's decision) -> RF-CALIBRATION-RESIGNOFF -> RF-ENGINE-FREEZE -> R8 qualifying campaigns and diaries -> R9 -> owner says "Publish 1.0"`
 
-`DC (Dayton conference, closed #560) -> R8 packaged campaigns/diaries and owner inspection -> R9` (2026-11-08: calibration signed off 2026-11-06; R7 closed 2026-11-08).
-
-**Finite closure register (2026-09-07; BC01 separately scheduled):** [Master §4.1](MASTER_ROADMAP.md#41-finite-behavior-closure-register-2026-09-07) owns BC01 CLOSED (owner accepted verified repair and retired territory similarity, 2026-09-07; [verification](../40_reports/audits/20260907_BC01_PLAYER_OPPORTUNITY_IMPLEMENTATION_VERIFICATION.md)), BC02 CLOSED by the owner-approved verified Electron load/display repair, BC03 CLOSED by verified repair and owner-approved deferrals, BC04 campaign acceptance and BC05–BC06 remain open; BC07 retention is settled; BC09 Phase 1 is locally reviewed GO with final acceptance deferred, BC10 remains planned, and BC08 is closed by bounded disposition: BC01 opportunity decisions; BC02 sector/rating truth; BC03 narrated Dayton; BC04 chronology/P1/P2; BC05 NATO/Lukavac gates; BC06 posture/gesture controls; BC07 stability-data policy; BC08 inherited tests. FIX means planned disposition when scheduled; VERIFY/DISPOSITION needs bounded evidence. D1 HOLD FOR R8 remains. Registration creates no new lane, RE revival, broader repair authorization, or automatic baseline refresh. BC02 changed no canonical save bytes, campaign result, calibration or baseline. BC03 is closed; BC03 is committed as c95e25241; BC04 P1 is owner-authorized, implemented and independently reviewed; campaign acceptance is deferred to the next calibration, preserving clean before/after attribution; extra P1 repeat/ON runs are owner-retired. P2 completed-week targets are historically ratified; the owner approved the bounded same-turn follow-up/display packet and scoped panel-condition amendment. P2 is implemented, focused checks passed, and independent review returned GO; campaign acceptance remains deferred. Diagnostic calibration stays open; final calibration follows accepted behavior settlement. n392 is 702/678/672/665 against unchanged floors 694/674/668/641; the older 688 breach is historical, and improvement attribution remains unknown.
-
-**BC08 CLOSED by verification/disposition, 2026-09-07.** The historical red invocation is retained. The 2026-09-08 combined-branch full gate now passes: 13,717 tests passed, 31 skipped, exit 0, with child-scoped Git Bash. See the [health repair receipt](2026-09-07-bounded-deletion-cleanup-plan.md#combined-branch-health-repair-closeout--2026-09-08). Final R8 acceptance remains open. [Report](../40_reports/audits/20260907_BC08_CURRENT_ENGINE_HEALTH_VERIFICATION.md).
-
-**Unscheduled work landed 2026-09-01/04, recorded so it is not mistaken for roadmap progress.**
-PRs #491-#497 changed no lane row's status. #491 fixed the tactical toolbar collision and added the
-geometric verifier `tools/ui/verify_toolbar_fit.mjs`, which still reports **PARTIAL** coverage --
-it exercises only the chips present in the one tracked save it loads. #492-#495 covered
-calibration-state reporting for merge children and merged-away OSID rendering; #494 made the
-744-drawn-versus-712-simulated OSID gap an executable invariant. **#496/#497 net position:** the
-committed `operational_initial_master.json` and its derive script disagree on **269 of 712 rows**;
-the ~227 `stability_score` rows are real and reach the sim through `control_flip.ts:384`, while the
-42 `contested_control` flips are **cosmetic** (no reader in `src/sim/`, zeroed for every OSID at
-init). The earlier "168 rows" and "`contested_control` is the headline" figures were retracted by
-those same PRs.
-
-**Closed RE/probe history:** the [master execution snapshot](MASTER_ROADMAP.md#current-execution-snapshot-2026-09-07)
-governs current work. The [closed RE contract](2026-08-26-engine-integrity-plan.md)
-retains P1/P2A acceptance and the corrected Node-22 pair at `177882fc2`; mixed-tree/Node-24
-runs remain inadmissible as RE evidence. The [closed recovery record](2026-08-28-packaged-probe-recovery-plan.md)
-retains the terminal `NO_VERDICT`, exact rollback at `48909e1d6`, and consumed authority.
-These records authorize no RE retry, diagnosis, instrumentation or successor proof route.
-RE is closed and gates nothing; its retired gates and deferred mechanics do not re-enter
-the critical path. Engine health remains a standing requirement, with defects fixed before tuning.
-
-**Canon landed 2026-08-17:** `SENSITIVE_HISTORY_DESIGN_GATE.md` §10, "Provenance and the Integrity of the Historical Record", ratified by unanimous Pyrrhic panel. `FORAWWV.md` §XIII temporal scope is drafted but **HELD** behind the provenance channel-separation and determinism-scan packets, and is not canon.
-
-RC's narrow pre-1.0 scope is complete. Frontage-days and same-turn selection were retired; the retained v3 two-turn selector preserves the registered Sipovo/Drvar distinction. Reversible D-shape then fixed the event-only persistence clock and produced one bounded live HRHB write at Bucovaca while preserving all anchors, health gates, deterministic artifacts, and Section 6 exclusions. Neighbour-cascade D-topology is reserved post-1.0 and must not be replaced by struck breadth tuning. RE gates nothing; the remaining R7 gates and §4.1 settlement sequence govern R8 acceptance.
+**Finite closure register:** [Master §4.1](MASTER_ROADMAP.md#41-finite-behavior-closure-register-2026-09-07) owns BC01-BC10 (BC01, BC02, BC03, BC08 closed; BC04, BC05, BC06 packaged or campaign acceptance open; BC07 retention settled; BC09 Phase 1 reviewed GO with final acceptance deferred; BC10 planned) and the RF rows BC14-BC19. FIX means planned repair when scheduled; VERIFY/DISPOSITION needs bounded evidence. New findings never silently enlarge the register. Dated 2026-09 detail for BC05-BC09 now lives in the [roadmap archive](MASTER_ROADMAP_ARCHIVE.md#command-board-history-moved-2026-11-13).
 
 ## Fixed Decisions
 
 - Five presidential levers; Decision Room owns action.
+- Posture is the commanders' to set; the president approves or declines proposals (posture model option 2, owner 2026-11-12).
 - Quiet historical intervals use positive-hold briefings, never fabricated decisions.
 - TG constants: 12-turn maximum, 4 cohesion drain, dissolve at 15, four-turn Army-HQ cap tail.
 - ADR-0007 Phase C remains retired; narrower live Standing-OG behavior is documented.
@@ -166,8 +77,3 @@ Do not add a competing active queue. Route new findings through [Master Roadmap 
 ## Completion
 
 This board becomes all green only when R1-R9, RC, and RE satisfy the [master definition of program completion](MASTER_ROADMAP.md#12-definition-of-program-completion). Prepared for publication and published are separate states.
-# 2026-10-26 source correction note
-
-Combat fatigue now has one OSID resolver owner per resolved battle; focused proof and its limits are recorded in [the implementation report](../40_reports/implemented/20261026_COMBAT_FATIGUE_SINGLE_OWNER.md). This bounded source correction does not close the current calibration, full-suite, package or native gates.
-
-**Authorized historical-calibration phase — 2026-10-26:** “Begin it” authorizes calibration on the corrected engine with all benchmarks/gates unchanged. The retained Circle and HVO reviews support no permanent edit; the Circle duration change is blocked, and HVO personnel duplication remains unresolved. Zero-drift morale source correction: RED 23/25 (two expected failures), GREEN 25/25, 69/69 focused across six files, TypeScript 0, independent GO. This is not a health-cap resolution or runtime qualification. Current measured result remains 703/712, four formerly-correct losses, health 13>3; no campaign ran in this packet. Next step is clean-source binding and independent prelaunch review. [Report](../40_reports/implemented/20261026_CORRECTED_ENGINE_CALIBRATION_PACKET.md).
