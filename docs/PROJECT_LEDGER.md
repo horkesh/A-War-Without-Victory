@@ -35,6 +35,40 @@ builds from scenario data, not the baked artifact); checkpoints **712/711/712/71
 (188w and 40w); `verify_checkpoints` guard intact; `test:baselines` and structural fingerprint pass.
 Gates: tsc exit 0; both tests 20/20.
 
+## 2026-11-13 — Displacement attribution (SC1-SC3) and the ledger's side column
+
+Signed by the owner-delegated **eight-seat bright-line panel** (Historian, calibration,
+Engine/systems, Red-team, Game Designer, Narrative Designer, Canon Compliance, War-or-Game),
+unanimous GO in round 3. Record: `SENSITIVE_HISTORY_DESIGN_GATE.md` §1, §2a, §4, §6; report
+`docs/40_reports/implemented/20261113_DISPLACEMENT_ATTRIBUTION_PANEL.md`.
+
+- **Finding.** The siege/encirclement/breach path in `updateDisplacement` never fires in a campaign.
+  It gets legacy `S…` edges while control is keyed by `op:` OSIDs, so it sees 0 front edges, and
+  `front_segments` is empty. `applyDisplacementFromFlips` is unreachable as well. Live `caused_by`
+  comes only from takeover (the side that took or held control) and paramilitary sweeps (the sweeping
+  side). Siege harm is not modelled.
+- **SC1.** The dormant pressure path books the pressing side: the holder is whoever controls the
+  municipality; causers must be at war with it; the cause is shared pro rata over front contacts, then
+  enemy-held OSIDs; otherwise "not recorded", booked explicitly (`appendDisplacementEvent(..., {
+  causerUnrecorded })`). It never books the holder and never guesses. The kill fraction is keyed on
+  the same causer.
+- **SC2.** A missing census entry splits by the national 1991 sums of the census file (pinned by a
+  test, tagged `census_fallback_national`). The flips path books its loss to the losing side's people
+  only. `LOST_POPULATION_FRACTION` and the "all lost = killed Bosniaks" fallback are gone.
+- **SC3.** `pushDisplacementEventLogFromMun` allocates each people's figures from its own counts. The
+  two ledger "Killed" figures now agree by construction (Engine Invariants §14.8a item 12).
+- **Ledger.** The second table is back as "Displaced or killed, by side controlling the area", with
+  columns "Side controlling the area" and "People" (BCS "Strana koja je kontrolisala područje" /
+  "Narod"). A scope note sits above the rows: siege and shelling harm is not counted, so the figures
+  understate the harm done by besieging forces; 1991 Yugoslavs and others are counted with Bosniaks.
+- **Measured, each change alone.** 40w `44375b6b1484e128` and 188w `2a2bb1ff54155f00` (both identical
+  to the unchanged-main baseline). Checkpoints 712/711/712/710; engine health gate PASS. Byte-identical:
+  aggregates, `civilian_casualties`, `civilian_casualties_caused`, international standing,
+  condemnation flags, fired events. Killed 2,706 / 33,903 / 3,288 in both fields; no same-side rows.
+  The P4 UI change was run at 40w only: hash unchanged.
+- **Open.** `hanpijesak` vs `han_pijesak` census key. Pressure-path revival is its own lane, under
+  binding conditions in the §6 record. HVO-against-Bosniaks realism FAIL (`REAL_WAR_MASTER.md`).
+
 ## 2026-11-13 — Canon/data fixes S10 (NamedPhase count) and S11 (Delić tenure week)
 
 **S10, docs only.** `Phase_Specifications_v0_9_0.md` said the War-phase pipeline had 151 NamedPhase

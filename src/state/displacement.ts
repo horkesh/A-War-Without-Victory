@@ -11,10 +11,11 @@ import { CANONICAL_FACTIONS } from './game_state.js';
 
 import { buildAdjacencyMapCached, type AdjacencyMap } from '../map/adjacency_map.js';
 import { computeFrontEdges } from '../map/front_edges.js';
+import { areRbihHrhbAllied, DEFAULT_RBIH_HRHB_WAR_EARLIEST_TURN } from '../sim/early_war/alliance_update.js';
 import type { EdgeRecord } from '../map/settlements.js';
 import { getReceivingCapacityFraction } from './displacement_routing_data.js';
 import { DISPLACEMENT_KILLED_FRACTION, getDisplacementKillFraction, getFactionFleeAbroadFraction } from './displacement_loss_constants.js';
-import { appendDisplacementEvent } from './displacement_event_log.js';
+import { appendDisplacementEvent, UNKNOWN_CAUSER_BUCKET } from './displacement_event_log.js';
 import { recordCivilianDisplacementCasualties } from './displacement_state_utils.js';
 import { computeFrontBreaches, type FrontBreach } from './front_breaches.js';
 import { LARGE_URBAN_MUN_IDS } from './large_urban_mun_data.js';
@@ -32,8 +33,10 @@ const ENCIRCLEMENT_DISPLACEMENT_FRACTION = 0.10; // 10% per turn when encircled
 const BREACH_PERSISTENCE_TURNS = 2; // M turns of breaches
 const BREACH_DISPLACEMENT_FRACTION = 0.03; // 3% per turn when breaches persist
 
-// Displacement routing constants (receiving cap from getReceivingCapacityFraction; Sarajevo lower)
-const LOST_POPULATION_FRACTION = 0.20; // 20% of displaced population becomes lost (when no 1991 census)
+// Displacement routing: receiving cap from getReceivingCapacityFraction (Sarajevo lower).
+// LOST_POPULATION_FRACTION (20% "lost", all booked as killed Bosniaks when no census) was
+// removed 2026-11-13 (SC2): the no-census case now splits by the national 1991 sums and
+// uses the same killed / fled-abroad rules as the census path.
 
 // Ethnicity-based loss: imported from displacement_loss_constants.ts (single source of truth)
 const FLEE_ABROAD_FRACTION_RS = 0.30; // Serbs: 30% of displaced leave BiH (Serbia to flee to)
@@ -379,10 +382,9 @@ function pushDisplacementEventLogFromMun(
     settlements: Map<string, SettlementRecord>,
     byFaction: Record<FactionId, number>,
     turn: number,
-    lostAmount: number = 0,
-    causedBy?: FactionId,
-    killedByFaction?: Record<FactionId, number>,
-    fledByFaction?: Record<FactionId, number>,
+    routableByFaction: Record<FactionId, number>,
+    causedBy: FactionId,
+    killedByFaction: Record<FactionId, number>,
 ): void {
     const entries = Array.from(settlements.entries())
         .filter(([, rec]) => (rec.mun1990_id ?? rec.mun_code) === munId)
@@ -400,59 +402,52 @@ function pushDisplacementEventLogFromMun(
     if (!state.displacement.displacement_event_log) state.displacement.displacement_event_log = [];
     if (totalDisplaced <= 0) return;
 
+    // SC3 (displacement attribution lane, 2026-11-13): each people's figures come from that
+    // people's own computed counts, never pro rata by displaced. Per people: routed = its
+    // routable count, killed = exactly the killed recorded into civilian_casualties, fled
+    // abroad = the rest of its loss. So for every caller, civilian_casualties[people].killed
+    // equals the killed summed into the aggregates for that people (Engine Invariants).
+    // Each figure is spread across the municipality's settlements by population with floors,
+    // the last settlement taking the remainder.
     const factions: FactionId[] = ['RBiH', 'RS', 'HRHB'];
-    const lostByFaction: Record<FactionId, number> = { RBiH: 0, RS: 0, HRHB: 0 };
-    let lostRem = lostAmount;
-    for (let i = 0; i < factions.length; i++) {
-        const f = factions[i];
-        const total = byFaction[f] ?? 0;
-        lostByFaction[f] = i < factions.length - 1
-            ? Math.floor((lostAmount * total) / totalDisplaced)
-            : Math.max(0, lostRem);
-        lostRem -= lostByFaction[f];
-    }
+    const spread = (amount: number): number[] => {
+        let rem = amount;
+        return entries.map((e, i) => {
+            const part = i < entries.length - 1 ? Math.floor((amount * e.pop) / totalPop) : rem;
+            rem -= part;
+            return part;
+        });
+    };
 
     for (const fid of factions) {
         const total = byFaction[fid] ?? 0;
-        const lostF = lostByFaction[fid] ?? 0;
-        const routedF = Math.max(0, total - lostF);
-        if (total <= 0 && lostF <= 0) continue;
-        let routedRem = routedF;
-        let lostRemF = lostF;
+        if (total <= 0) continue;
+        const routedF = Math.max(0, Math.min(total, routableByFaction[fid] ?? 0));
+        const lostF = total - routedF;
+        const killedF = Math.max(0, Math.min(lostF, killedByFaction[fid] ?? 0));
+        const fledF = lostF - killedF;
+        const routedBy = spread(routedF);
+        const killedBy = spread(killedF);
+        const fledBy = spread(fledF);
         for (let i = 0; i < entries.length; i++) {
-            const { osid, pop } = entries[i];
-            const share = pop / totalPop;
-            const routedHere = i < entries.length - 1 ? Math.floor(routedF * share) : routedRem;
-            const lostHere = i < entries.length - 1 ? Math.floor(lostF * share) : lostRemF;
-            routedRem -= routedHere;
-            lostRemF -= lostHere;
-            if (routedHere <= 0 && lostHere <= 0) continue;
-            // When separate killed/fled breakdowns are provided, use them.
-            // Otherwise fall back to legacy behavior (all lost → killed).
-            const factionKilled = killedByFaction?.[fid] ?? 0;
-            const factionFled = fledByFaction?.[fid] ?? 0;
-            const factionLostTotal = factionKilled + factionFled;
-            let killedHere: number;
-            let fledHere: number;
-            if (factionLostTotal > 0) {
-                killedHere = lostHere > 0 ? Math.round(lostHere * factionKilled / factionLostTotal) : 0;
-                fledHere = lostHere - killedHere;
-            } else {
-                killedHere = lostHere;
-                fledHere = 0;
-            }
+            const { osid } = entries[i];
+            const routedHere = routedBy[i];
+            const killedHere = killedBy[i];
+            const fledHere = fledBy[i];
+            if (routedHere <= 0 && killedHere <= 0 && fledHere <= 0) continue;
+            const causerUnrecorded = causedBy === UNKNOWN_CAUSER_BUCKET;
             appendDisplacementEvent(state, {
                 turn,
                 origin_mun: munId,
                 origin_osid: osid,
                 dest_mun: munId,
                 ethnicity: fid,
-                caused_by: causedBy,
+                caused_by: causerUnrecorded ? undefined : causedBy,
                 displaced: routedHere,
                 killed: killedHere,
                 fled_abroad: fledHere,
                 settled: 0,
-            });
+            }, causerUnrecorded ? { causerUnrecorded: true } : undefined);
         }
     }
 }
@@ -518,15 +513,21 @@ export function applyDisplacementFromFlips(
         );
         if (displacementAmount <= 0) continue;
 
-        const byFactionForLog = population1991ByMun
-            ? splitDisplacedByEthnicity(munId, displacementAmount, population1991ByMun)
-            : { RBiH: displacementAmount, RS: 0, HRHB: 0 };
+        // SC2/P3 (displacement attribution lane): the amount is sized from the LOSING side's
+        // own population share, so its victims are that people only. The former census split
+        // across all peoples booked part of it to the capturer's own people, and the no-census
+        // branch booked every lost person as a killed Bosniak.
+        const byFaction: { RBiH: number; RS: number; HRHB: number } = { RBiH: 0, RS: 0, HRHB: 0 };
+        if (fromFaction === 'RBiH' || fromFaction === 'RS' || fromFaction === 'HRHB') {
+            byFaction[fromFaction] = displacementAmount;
+        } else {
+            Object.assign(byFaction, splitDisplacedByEthnicity(munId, displacementAmount, population1991ByMun));
+        }
         let lostAmount: number;
         let routedAmount: number;
         let routableByFaction: { RBiH: number; RS: number; HRHB: number } | undefined;
 
-        if (population1991ByMun) {
-            const byFaction = splitDisplacedByEthnicity(munId, displacementAmount, population1991ByMun);
+        {
             const toFaction = flip.to_faction;
             const rRBiH = Math.floor(
                 byFaction.RBiH * (1 - getDisplacementKillFraction('RBiH', toFaction)) * (1 - getFactionFleeAbroadFraction('RBiH'))
@@ -552,17 +553,12 @@ export function applyDisplacementFromFlips(
                 HRHB: Math.floor(byFaction.HRHB * getFactionFleeAbroadFraction('HRHB')),
             };
 
-            pushDisplacementEventLogFromMun(state, munId, _settlements, byFactionForLog, turn, lostAmount, toFaction, killedByFac, fledByFac);
+            pushDisplacementEventLogFromMun(state, munId, _settlements, byFaction, turn, routableByFaction, toFaction, killedByFac);
             for (const fid of CANONICAL_FACTIONS) {
                 if (killedByFac[fid] > 0 || fledByFac[fid] > 0) {
                     recordCivilianDisplacementCasualties(state, fid, killedByFac[fid], fledByFac[fid]);
                 }
             }
-        } else {
-            lostAmount = Math.floor(displacementAmount * LOST_POPULATION_FRACTION);
-            routedAmount = displacementAmount - lostAmount;
-            pushDisplacementEventLogFromMun(state, munId, _settlements, byFactionForLog, turn, lostAmount, flip.to_faction);
-            recordCivilianDisplacementCasualties(state, 'RBiH', lostAmount, 0);
         }
 
         const beforeOut = dispState.displaced_out;
@@ -661,22 +657,187 @@ export function applyDisplacementFromFlips(
 }
 
 /**
- * Split displaced amount by source mun's 1991 ethnic share. Returns { RBiH, RS, HRHB } (other assigned to RBiH).
+ * SC2 (displacement attribution lane, 2026-11-13): national sums of
+ * `data/derived/municipality_population_1991.json` over its 110 municipalities. They fall
+ * about 16,940 short of the published 1991 total (4,377,033, Statistički bilten 234),
+ * mostly in the Bosniak figure; the shares agree within 0.2 points. Used ONLY when a
+ * municipality has no census entry (or no census is loaded), in place of the former
+ * "all of it is Bosniak" default. Pinned to the file by
+ * tests/state/displacement_attribution.test.ts.
  */
+export const NATIONAL_POPULATION_1991_SUMS = {
+    total: 4_360_093,
+    bosniak: 1_886_276,
+    serb: 1_366_013,
+    croat: 760_847,
+    other: 346_957,
+} as const;
+
+/** Reason tag on a step record whose split used the national sums (auditable fallback). */
+export const CENSUS_FALLBACK_NATIONAL_REASON = 'census_fallback_national';
+
+/**
+ * Split displaced amount by source mun's 1991 ethnic share. Returns { RBiH, RS, HRHB } (other assigned to RBiH).
+ * Without a census entry for the municipality, splits by the national sums and reports it.
+ */
+function splitDisplacedByEthnicityWithSource(
+    fromMunId: MunicipalityId,
+    amount: number,
+    population1991ByMun: MunicipalityPopulation1991Map | undefined
+): { split: { RBiH: number; RS: number; HRHB: number }; nationalFallback: boolean } {
+    const entry = population1991ByMun?.[fromMunId];
+    if (!entry || entry.total <= 0) {
+        const n = NATIONAL_POPULATION_1991_SUMS;
+        const rs = Math.floor((amount * n.serb) / n.total);
+        const hrhb = Math.floor((amount * n.croat) / n.total);
+        return { split: { RBiH: amount - rs - hrhb, RS: rs, HRHB: hrhb }, nationalFallback: true };
+    }
+    return { split: splitByCensusEntry(entry, amount), nationalFallback: false };
+}
+
 function splitDisplacedByEthnicity(
     fromMunId: MunicipalityId,
     amount: number,
-    population1991ByMun: MunicipalityPopulation1991Map
+    population1991ByMun: MunicipalityPopulation1991Map | undefined
 ): { RBiH: number; RS: number; HRHB: number } {
-    const entry = population1991ByMun[fromMunId];
-    if (!entry || entry.total <= 0)
-        return { RBiH: amount, RS: 0, HRHB: 0 };
+    return splitDisplacedByEthnicityWithSource(fromMunId, amount, population1991ByMun).split;
+}
+
+function splitByCensusEntry(
+    entry: { total: number; bosniak: number; serb: number; croat: number },
+    amount: number
+): { RBiH: number; RS: number; HRHB: number } {
     const total = entry.total;
     const rbih = Math.floor((amount * entry.bosniak) / total);
     const rs = Math.floor((amount * entry.serb) / total);
     const hrhb = Math.floor((amount * entry.croat) / total);
     const other = amount - rbih - rs - hrhb;
     return { RBiH: rbih + other, RS: rs, HRHB: hrhb };
+}
+
+/**
+ * SC1 (displacement attribution lane, 2026-11-13): the side that caused pressure-path
+ * (siege, encirclement, breach) displacement is the PRESSING side, never the side
+ * holding the pocket. ICTY attributes siege harm to the besieging force (Galić
+ * IT-98-29-T), and the condemnation backstop in `scoring.ts` reads this as the causer.
+ *
+ * The HOLDER is the side controlling the municipality's settlements (most OSIDs; the
+ * pool's side wins a tie it is part of), NOT the pool's side: every pool displaces the
+ * whole municipality's population, so keying on the pool would rebook a pocket's people
+ * to its own defender (red-team, panel round 1). A causer must be at war with the holder
+ * that turn (RBiH-HRHB only after their war starts and while not allied).
+ *
+ * Where two sides press one pocket (East Mostar 1993-94, Maglaj 1993-94) the cause is
+ * shared PRO RATA, never winner-take-all. Weights, first tier that has any:
+ *   1. front edges from each enemy faction against the holder's settlements in the municipality;
+ *   2. front edges from each enemy faction touching the municipality at all;
+ *   3. the municipality's OSIDs held by each enemy faction (a pocket with no front data).
+ * Front edges count only when their endpoints use the same ids as `munSettlementIds`
+ * (OSIDs); today this path receives legacy-id edges, so tiers 1-2 match nothing and the
+ * resolver degrades to tier 3 or the unknown bucket, never to the holder.
+ * With none of these the causer is not guessed: the result is the UNKNOWN_CAUSER_BUCKET
+ * ("Responsible side not recorded"). The holder is never returned.
+ * Deterministic: CANONICAL_FACTIONS order.
+ *
+ * Known limits (§6 Displacement attribution record): forces that are not a faction (the
+ * Abdić APZB around Bihać) count under whichever canonical side holds those settlements;
+ * a pocket's own minority leaving under siege had mixed causes the model cannot separate.
+ */
+export function resolvePressingFactions(
+    state: GameState,
+    munId: MunicipalityId,
+    poolFaction: FactionId,
+    munSettlementIds: ReadonlySet<string>,
+    frontEdges: ReadonlyArray<{ a: string; b: string; side_a: string | null; side_b: string | null }>
+): { holder: FactionId; causers: Array<{ faction: FactionId; weight: number }> } {
+    const weights = (counts: Map<FactionId, number>): Array<{ faction: FactionId; weight: number }> =>
+        CANONICAL_FACTIONS
+            .map((f) => ({ faction: f, weight: counts.get(f) ?? 0 }))
+            .filter((w) => w.weight > 0);
+
+    // Who holds the municipality: count its OSIDs by controller.
+    const heldInMun = new Map<FactionId, number>();
+    const pc = state.political.political_controllers ?? {};
+    for (const osid of Object.keys(pc).sort(strictCompare)) {
+        const side = pc[osid] ?? null;
+        if (side === null || !(CANONICAL_FACTIONS as readonly string[]).includes(side)) continue;
+        if (osid.startsWith('op:') && osid.split(':')[1] === munId) {
+            heldInMun.set(side, (heldInMun.get(side) ?? 0) + 1);
+        }
+    }
+    let holder: FactionId = poolFaction;
+    let holderCount = heldInMun.get(poolFaction) ?? 0;
+    for (const f of CANONICAL_FACTIONS) {
+        const c = heldInMun.get(f) ?? 0;
+        if (c > holderCount) {
+            holder = f;
+            holderCount = c;
+        }
+    }
+
+    const turn = state.meta?.turn ?? 0;
+    const rbihHrhbAtWar =
+        turn >= (state.meta?.rbih_hrhb_war_earliest_turn ?? DEFAULT_RBIH_HRHB_WAR_EARLIEST_TURN) &&
+        !areRbihHrhbAllied(state);
+    const isOther = (side: string | null): side is FactionId => {
+        if (side === null || side === holder || !(CANONICAL_FACTIONS as readonly string[]).includes(side)) return false;
+        const rbihHrhbPair = (side === 'RBiH' && holder === 'HRHB') || (side === 'HRHB' && holder === 'RBiH');
+        return !rbihHrhbPair || rbihHrhbAtWar;
+    };
+
+    const againstHolder = new Map<FactionId, number>();
+    const touching = new Map<FactionId, number>();
+    for (const edge of frontEdges) {
+        const aIn = munSettlementIds.has(edge.a);
+        const bIn = munSettlementIds.has(edge.b);
+        if (!aIn && !bIn) continue;
+        if (aIn && edge.side_a === holder && isOther(edge.side_b)) {
+            againstHolder.set(edge.side_b, (againstHolder.get(edge.side_b) ?? 0) + 1);
+        }
+        if (bIn && edge.side_b === holder && isOther(edge.side_a)) {
+            againstHolder.set(edge.side_a, (againstHolder.get(edge.side_a) ?? 0) + 1);
+        }
+        if (isOther(edge.side_a)) touching.set(edge.side_a, (touching.get(edge.side_a) ?? 0) + 1);
+        if (isOther(edge.side_b)) touching.set(edge.side_b, (touching.get(edge.side_b) ?? 0) + 1);
+    }
+    const tier1 = weights(againstHolder);
+    if (tier1.length > 0) return { holder, causers: tier1 };
+    const tier2 = weights(touching);
+    if (tier2.length > 0) return { holder, causers: tier2 };
+
+    const inMun = new Map<FactionId, number>();
+    for (const [side, count] of heldInMun) {
+        if (isOther(side)) inMun.set(side, count);
+    }
+    const tier3 = weights(inMun);
+    if (tier3.length > 0) return { holder, causers: tier3 };
+    return { holder, causers: [{ faction: UNKNOWN_CAUSER_BUCKET, weight: 1 }] };
+}
+
+/**
+ * Kill fraction for a people displaced by `causer` (P1a). An unrecorded causer is not a
+ * faction, so it takes the plain default rather than falling into a faction-specific rate.
+ */
+function killFractionForCauser(displaced: FactionId, causer: FactionId): number {
+    return causer === UNKNOWN_CAUSER_BUCKET ? DISPLACEMENT_KILLED_FRACTION : getDisplacementKillFraction(displaced, causer);
+}
+
+/**
+ * Split `amount` across causer weights: floor shares in the given order, remainder to
+ * the last causer, so the parts always sum to `amount`. Deterministic.
+ */
+export function splitAmountByCauser(
+    amount: number,
+    causers: ReadonlyArray<{ faction: FactionId; weight: number }>
+): Array<{ faction: FactionId; amount: number }> {
+    const total = causers.reduce((s, c) => s + c.weight, 0);
+    if (causers.length === 0 || total <= 0) return [];
+    let rem = amount;
+    return causers.map((c, i) => {
+        const part = i < causers.length - 1 ? Math.floor((amount * c.weight) / total) : rem;
+        rem -= part;
+        return { faction: c.faction, amount: part };
+    });
 }
 
 /**
@@ -818,48 +979,72 @@ export function updateDisplacement(
             let routedAmount: number;
             let routableByFaction: { RBiH: number; RS: number; HRHB: number } | undefined;
 
-            if (population1991ByMun) {
-                const byFaction = splitDisplacedByEthnicity(munId, displacementAmount, population1991ByMun);
-                const controllerFid: FactionId = factionId;
-                const rRBiH = Math.floor(
-                    byFaction.RBiH * (1 - getDisplacementKillFraction('RBiH', controllerFid)) * (1 - getFactionFleeAbroadFraction('RBiH'))
-                );
-                const rRS = Math.floor(
-                    byFaction.RS * (1 - getDisplacementKillFraction('RS', controllerFid)) * (1 - getFactionFleeAbroadFraction('RS'))
-                );
-                const rHRHB = Math.floor(
-                    byFaction.HRHB * (1 - getDisplacementKillFraction('HRHB', controllerFid)) * (1 - getFactionFleeAbroadFraction('HRHB'))
-                );
-                routableByFaction = { RBiH: rRBiH, RS: rRS, HRHB: rHRHB };
-                routedAmount = rRBiH + rRS + rHRHB;
-                lostAmount = displacementAmount - routedAmount;
+            // SC1: the causer is the pressing side, not the pool's (holding) side. It also keys
+            // the kill fraction (P1a), whose documented meaning is "X displaced by Y".
+            const munSettlementIds = new Set<string>();
+            for (const [sid, rec] of settlements.entries()) {
+                if ((rec.mun1990_id ?? rec.mun_code) === munId) munSettlementIds.add(sid);
+            }
+            const causerShares = splitAmountByCauser(
+                displacementAmount,
+                resolvePressingFactions(state, munId, factionId, munSettlementIds, frontEdges).causers
+            );
 
-                // Compute separate killed/fled breakdowns per faction
-                const killedByFac: Record<FactionId, number> = {
-                    RBiH: Math.floor(byFaction.RBiH * getDisplacementKillFraction('RBiH', controllerFid)),
-                    RS: Math.floor(byFaction.RS * getDisplacementKillFraction('RS', controllerFid)),
-                    HRHB: Math.floor(byFaction.HRHB * getDisplacementKillFraction('HRHB', controllerFid)),
-                };
-                const fledByFac: Record<FactionId, number> = {
-                    RBiH: Math.floor(byFaction.RBiH * getFactionFleeAbroadFraction('RBiH')),
-                    RS: Math.floor(byFaction.RS * getFactionFleeAbroadFraction('RS')),
-                    HRHB: Math.floor(byFaction.HRHB * getFactionFleeAbroadFraction('HRHB')),
-                };
+            lostAmount = 0;
+            routedAmount = 0;
+            routableByFaction = { RBiH: 0, RS: 0, HRHB: 0 };
+            for (const share of causerShares) {
+                if (share.amount <= 0) continue;
+                // P1a: the kill fraction is keyed on this share's causer. NOTE: when this path
+                // is revived, this rate becomes calibration-moving (own lane + panel); it is an
+                // expulsion rate, not a model of siege mortality.
+                const causerFid: FactionId = share.faction;
+                {
+                    // SC2: without a census entry the split uses the national sums (tagged),
+                    // never "all of it is Bosniak", and goes through the same killed / fled rules.
+                    const { split: byFaction, nationalFallback } =
+                        splitDisplacedByEthnicityWithSource(munId, share.amount, population1991ByMun);
+                    if (nationalFallback && !reasons.includes(CENSUS_FALLBACK_NATIONAL_REASON)) {
+                        reasons.push(CENSUS_FALLBACK_NATIONAL_REASON);
+                    }
+                    const rRBiH = Math.floor(
+                        byFaction.RBiH * (1 - killFractionForCauser('RBiH', causerFid)) * (1 - getFactionFleeAbroadFraction('RBiH'))
+                    );
+                    const rRS = Math.floor(
+                        byFaction.RS * (1 - killFractionForCauser('RS', causerFid)) * (1 - getFactionFleeAbroadFraction('RS'))
+                    );
+                    const rHRHB = Math.floor(
+                        byFaction.HRHB * (1 - killFractionForCauser('HRHB', causerFid)) * (1 - getFactionFleeAbroadFraction('HRHB'))
+                    );
+                    routableByFaction.RBiH += rRBiH;
+                    routableByFaction.RS += rRS;
+                    routableByFaction.HRHB += rHRHB;
+                    const shareRouted = rRBiH + rRS + rHRHB;
+                    const shareLost = share.amount - shareRouted;
+                    routedAmount += shareRouted;
+                    lostAmount += shareLost;
 
-                pushDisplacementEventLogFromMun(state, munId, settlements, byFaction, currentTurn, lostAmount, controllerFid, killedByFac, fledByFac);
+                    // Compute separate killed/fled breakdowns per faction
+                    const killedByFac: Record<FactionId, number> = {
+                        RBiH: Math.floor(byFaction.RBiH * killFractionForCauser('RBiH', causerFid)),
+                        RS: Math.floor(byFaction.RS * killFractionForCauser('RS', causerFid)),
+                        HRHB: Math.floor(byFaction.HRHB * killFractionForCauser('HRHB', causerFid)),
+                    };
+                    const fledByFac: Record<FactionId, number> = {
+                        RBiH: Math.floor(byFaction.RBiH * getFactionFleeAbroadFraction('RBiH')),
+                        RS: Math.floor(byFaction.RS * getFactionFleeAbroadFraction('RS')),
+                        HRHB: Math.floor(byFaction.HRHB * getFactionFleeAbroadFraction('HRHB')),
+                    };
 
-                // Record to civilian_casualties (was missing — only event log was written)
-                for (const fid of CANONICAL_FACTIONS) {
-                    if (killedByFac[fid] > 0 || fledByFac[fid] > 0) {
-                        recordCivilianDisplacementCasualties(state, fid, killedByFac[fid], fledByFac[fid]);
+                    pushDisplacementEventLogFromMun(state, munId, settlements, byFaction, currentTurn, { RBiH: rRBiH, RS: rRS, HRHB: rHRHB }, causerFid, killedByFac);
+
+                    // Record to civilian_casualties (was missing — only event log was written)
+                    for (const fid of CANONICAL_FACTIONS) {
+                        if (killedByFac[fid] > 0 || fledByFac[fid] > 0) {
+                            recordCivilianDisplacementCasualties(state, fid, killedByFac[fid], fledByFac[fid]);
+                        }
                     }
                 }
-            } else {
-                lostAmount = Math.floor(displacementAmount * LOST_POPULATION_FRACTION);
-                routedAmount = displacementAmount - lostAmount;
-                pushDisplacementEventLogFromMun(state, munId, settlements, { RBiH: displacementAmount, RS: 0, HRHB: 0 }, currentTurn, lostAmount, factionId);
-                // Record to civilian_casualties for non-ethnic-split path
-                recordCivilianDisplacementCasualties(state, 'RBiH', lostAmount, 0);
             }
 
             // Update displacement state
