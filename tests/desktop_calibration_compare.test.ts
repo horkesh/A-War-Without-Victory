@@ -8,9 +8,10 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import { advanceTurn, serializeState, startNewCampaign } from '../src/desktop/desktop_sim.js';
 import type { GameState } from '../src/state/game_state.js';
+import { resolveTsxCli } from '../tools/test/vitest_shared_config.mjs';
 
 const cli = resolve(process.cwd(), 'tools', 'ai_play', 'desktop_calibration_compare.ts');
-const tsx = resolve(process.cwd(), 'node_modules', 'tsx', 'dist', 'cli.mjs');
+const tsx = resolveTsxCli(process.cwd());
 
 function runZeroTurnComparison(eventPolicy = 'defer', paramilitaryPolicy = 'defer') {
   return spawnSync(process.execPath, [

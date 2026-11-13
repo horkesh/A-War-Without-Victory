@@ -27,6 +27,7 @@
 
 import { spawnSync } from 'node:child_process';
 import { describe, expect, it } from 'vitest';
+import { resolveTsxCli } from '../tools/test/vitest_shared_config.mjs';
 
 import {
     buildSensitiveHistoryAudit,
@@ -84,7 +85,7 @@ describe('sensitive_history_canon_gate_audit — strict CI gate', () => {
 
     it('the actual --strict --violations-only CLI exits zero when only INFO remains', () => {
         const result = spawnSync(process.execPath, [
-            'node_modules/tsx/dist/cli.mjs',
+            resolveTsxCli(process.cwd()),
             'tools/diagnostics/sensitive_history_canon_gate_audit.ts',
             '--strict',
             '--violations-only',

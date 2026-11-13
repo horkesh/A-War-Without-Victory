@@ -32,8 +32,11 @@ const OUT_ROOT = 'runs';
 const EXPECTED = join('data', 'calibration', 'structural_fingerprint_188w.json');
 const FINGERPRINT_TOOL = join('tools', 'diagnostics', 'structural_fingerprint.cjs');
 
-function runScenario() {
-  const tsxCli = join(REPO_ROOT, 'node_modules', 'tsx', 'dist', 'cli.mjs');
+async function runScenario() {
+  // Shared resolver (ESM, so a dynamic import from this CJS file): a worktree without its own
+  // node_modules finds the main checkout's tsx; CI and the main checkout get <root>/node_modules.
+  const { resolveTsxCli } = await import('../test/vitest_shared_config.mjs');
+  const tsxCli = resolveTsxCli(REPO_ROOT);
   const runner = join(REPO_ROOT, 'tools', 'scenario_runner', 'run_scenario_with_preflight.ts');
   const result = spawnSync(
     process.execPath,
@@ -68,9 +71,9 @@ function runScenario() {
   return outDir;
 }
 
-function main(argv) {
+async function main(argv) {
   const update = argv.includes('--update');
-  const outDir = runScenario();
+  const outDir = await runScenario();
 
   const mode = update ? '--update' : '--check';
   const result = spawnSync(
@@ -84,10 +87,11 @@ function main(argv) {
 }
 
 if (require.main === module) {
-  try {
-    process.exit(main(process.argv.slice(2)));
-  } catch (err) {
-    process.stderr.write(`${err instanceof Error ? err.message : String(err)}\n`);
-    process.exit(1);
-  }
+  main(process.argv.slice(2)).then(
+    (code) => process.exit(code),
+    (err) => {
+      process.stderr.write(`${err instanceof Error ? err.message : String(err)}\n`);
+      process.exit(1);
+    },
+  );
 }

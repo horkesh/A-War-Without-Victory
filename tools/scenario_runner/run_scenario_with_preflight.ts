@@ -11,6 +11,8 @@ import { spawn } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
+import { resolveTsxCli } from '../test/vitest_shared_config.mjs';
+
 import { checkDataPrereqs, formatMissingRemediation } from '../../src/data_prereq/check_data_prereqs.js';
 import {
   PROVENANCE_OVERRIDE_ENV_VAR,
@@ -149,7 +151,7 @@ const args = process.argv.slice(2);
 const repoRoot = process.cwd();
 const child = spawn(
   process.execPath,
-  [join(repoRoot, 'node_modules', 'tsx', 'dist', 'cli.mjs'), join(repoRoot, 'tools', 'scenario_runner', 'run_scenario.ts'), ...args],
+  [resolveTsxCli(repoRoot), join(repoRoot, 'tools', 'scenario_runner', 'run_scenario.ts'), ...args],
   {
     stdio: 'inherit',
     cwd: repoRoot

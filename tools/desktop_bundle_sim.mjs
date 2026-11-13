@@ -8,12 +8,13 @@ import { spawnSync } from 'node:child_process';
 import { mkdir } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { resolveTsxCli } from './test/vitest_shared_config.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = join(__dirname, '..');
 const outDir = join(root, 'dist', 'desktop');
 const outFile = join(outDir, 'desktop_sim.cjs');
-const tsxCli = join(root, 'node_modules', 'tsx', 'dist', 'cli.mjs');
+const tsxCli = resolveTsxCli(root);
 const startupSnapshotCheckScript = join(root, 'tools', 'scenario_runner', 'build_startup_snapshot.ts');
 
 const startupSnapshotCheck = spawnSync(
