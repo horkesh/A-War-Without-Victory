@@ -17,7 +17,15 @@
  */
 
 import type { GameState, FormationId, FactionId } from '../../state/game_state.js';
-import { isEnclaveBrigade } from './enclave_resilience.js';
+import { ENCLAVE_DEFINITIONS, isEnclaveBrigade, osidBelongsToEnclave } from './enclave_resilience.js';
+
+/** EXPERIMENT E1b (hvo-arbih-war-diagnosis, branch-only, NOT FOR MERGE): a brigade standing inside
+ *  its own faction's defined enclave area is besieged, not stranded; enclave_resilience owns it. */
+export const EXPERIMENT_E1B_ENCLAVE_AREA_NOT_STRANDED = true;
+function isInOwnEnclaveArea(f: { faction?: string | null; location_osid?: string | null }): boolean {
+    if (!f.location_osid || !f.faction) return false;
+    return ENCLAVE_DEFINITIONS.some((e) => e.faction === f.faction && osidBelongsToEnclave(f.location_osid as string, e));
+}
 import { strictCompare } from '../../state/validateGameState.js';
 import type { Osid } from './osid_adjacency.js';
 import { isFriendlyFaction } from '../early_war/alliance_update.js';
@@ -311,6 +319,7 @@ export function updateStrandedBrigadeLifecycle(
 
         // Exclude enclave brigades (managed by enclave_resilience.ts)
         if (isEnclaveBrigade(f)) continue;
+        if (EXPERIMENT_E1B_ENCLAVE_AREA_NOT_STRANDED && isInOwnEnclaveArea(f)) continue;
 
         // Exclude brigades in active operations
         if (isInActiveOperation(state, fid, f.corps_id)) continue;

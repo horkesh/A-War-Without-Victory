@@ -63,6 +63,11 @@ import {
 import type { CorpsStance } from '../../state/game_state.js';
 
 /** Stance aggressiveness rank for ceiling enforcement (higher = more aggressive). */
+/** EXPERIMENT E2 toggle (hvo-arbih-war-diagnosis, branch-only, NOT FOR MERGE). */
+export const EXPERIMENT_E2_LIFT_HVO_OPEN_WAR_DEFENSIVE = true;
+/** EXPERIMENT E3 toggle (branch-only): Herzegovina corps not capped defensive during open RBiH-HRHB war. */
+export const EXPERIMENT_E3_LIFT_HERZEGOVINA_CAP_IN_BILATERAL_WAR = false;
+
 const STANCE_RANK: Record<CorpsStance, number> = {
     reorganize: 0, defensive: 1, balanced: 2, offensive: 3,
 };
@@ -279,7 +284,9 @@ export function generateCorpsStanceOrders(
                 const allianceValue = state.political.war_alliance_rbih_hrhb ?? 1.0;
                 if (allianceValue < 0.0) {
                     // Open war: HVO holds its central Bosnia enclaves while ARBiH attacks.
-                    if (!HERZEGOVINA_MUNS.has(corpsHomeMun ?? '')) {
+                    // EXPERIMENT E2 (hvo-arbih-war-diagnosis, branch-only): lift this cap so
+                    // the patron directive ceiling governs.
+                    if (!EXPERIMENT_E2_LIFT_HVO_OPEN_WAR_DEFENSIVE && !HERZEGOVINA_MUNS.has(corpsHomeMun ?? '')) {
                         if (stance !== 'reorganize') stance = 'defensive';
                     }
                 } else if (allianceValue < 0.2) {

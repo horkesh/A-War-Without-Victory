@@ -181,6 +181,9 @@ export interface TakeoverDisplacementReport {
     routing: DisplacementRoutingRecord[];
 }
 
+/** EXPERIMENT toggle (branch-only): seed bilateral minority timers on the RBiH-HRHB front at war start. */
+export const EXPERIMENT_BILATERAL_WAR_START_SEED = false;
+
 function isRbihHrhbPair(a: FactionId, b: FactionId): boolean {
     return (a === 'RBiH' && b === 'HRHB') || (a === 'HRHB' && b === 'RBiH');
 }
@@ -612,6 +615,48 @@ export function processDisplacementTakeover(
                     report.timers_started += 1;
                 }
             }
+        }
+    }
+
+    // 0b) EXPERIMENT (hvo-arbih-war-diagnosis, branch-only, NOT FOR MERGE):
+    //     The step-0 war-start seed above runs once, on the first war turn of 1992,
+    //     when RBiH and HRHB are allied, so it never seeds the bilateral pair. When
+    //     the RBiH-HRHB war starts (war_started_turn), seed the other side's minority
+    //     in every OSID on an RBiH-HRHB front edge. Symmetric, front-gated, no OSID
+    //     or municipality named; control is untouched.
+    const bilateralWarStart = state.political.rbih_hrhb_state?.war_started_turn;
+    if (
+        EXPERIMENT_BILATERAL_WAR_START_SEED
+        && typeof bilateralWarStart === 'number'
+        && currentTurn === bilateralWarStart + 1
+    ) {
+        const pc = state.political.political_controllers ?? {};
+        const bilateralFront = new Set<string>();
+        for (const fe of state.military.war_front_edges_osid ?? []) {
+            if (!fe.a || !fe.b) continue;
+            const ca = pc[fe.a];
+            const cb = pc[fe.b];
+            if (ca && cb && isRbihHrhbPair(ca, cb)) {
+                bilateralFront.add(fe.a);
+                bilateralFront.add(fe.b);
+            }
+        }
+        for (const osid of [...bilateralFront].sort(strictCompare)) {
+            const controller = pc[osid];
+            if (controller !== 'RBiH' && controller !== 'HRHB') continue;
+            const minority: FactionId = controller === 'RBiH' ? 'HRHB' : 'RBiH';
+            if (!areFactionsAtWar(state, minority, controller)) continue;
+            const timerKey = `${osid}|${minority}`;
+            if (timerMap[timerKey]) continue;
+            const munId = osid.split(':')[1] as MunicipalityId | undefined;
+            if (!munId) continue;
+            timerMap[timerKey] = {
+                mun_id: munId,
+                from_faction: minority,
+                to_faction: controller,
+                started_turn: currentTurn
+            };
+            report.timers_started += 1;
         }
     }
 
