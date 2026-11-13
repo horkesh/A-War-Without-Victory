@@ -153,9 +153,7 @@ export function CorpsDetail({ breadcrumb }: CorpsDetailProps) {
     ...(corpsFormation.corpsExhaustion == null ? ['exhaustion'] : []),
     ...(totalPersonnelLabel === t('corpsFront.unreported') ? ['personnel'] : []),
   ];
-  const corpsDisplayName = corpsFormation.name === corpsFormation.id
-    ? getPlayerSafeCorpsName(null, corpsFormation.id)
-    : corpsFormation.name;
+  const corpsDisplayName = getPlayerSafeCorpsName(corpsFormation.name, corpsFormation.id);
 
   const tabs = [
     { id: 'overview' as const, label: t('settlement.tab.overview') },

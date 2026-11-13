@@ -123,13 +123,13 @@ describe('ReplayScrubber autoplay controls', () => {
             vi.advanceTimersByTime(700);
         });
         expect(screen.getByText('2 / 3')).toBeTruthy();
-        expect(screen.getByText('200')).toBeTruthy();
+        expect(screen.getByText('11')).toBeTruthy();
 
         act(() => {
             vi.advanceTimersByTime(700);
         });
         expect(screen.getByText('3 / 3')).toBeTruthy();
-        expect(screen.getByText('300')).toBeTruthy();
+        expect(screen.getByText('12')).toBeTruthy();
         expect(screen.getByTestId('replay-scrubber').getAttribute('data-awwv-replay-playback-status')).toBe('paused');
     });
 

@@ -1119,8 +1119,12 @@ const RUPTURE_RECEIPTS: readonly RuptureReceiptSpec[] = [
     {
         rupture_id: 'srebrenica_genocide_1995',
         target_essay_event_id: 'srebrenica_falls_1995',
+        // Wording signed by the sensitive-copy panel (2026-11-13; record in
+        // SENSITIVE_HISTORY_DESIGN_GATE.md §6). The Verdict screen renders the
+        // EN/BCS i18n key `verdict.record.srebrenicaGenocide`; its English
+        // value must equal this string (pinned by tests/ui/sensitive_copy_lane.test.ts).
         summary:
-            'This campaign recorded the fall of the Srebrenica safe area and the genocide that followed — a locked consequence established by the Tribunal, surfaced here as a permanent entry in the historical record.',
+            'The Srebrenica safe area fell in this campaign, and the genocide that followed is recorded here. In July 1995 Bosnian Serb forces killed Bosniak men and boys from Srebrenica. The International Criminal Tribunal for the former Yugoslavia found that these killings were genocide (Krstić, IT-98-33-T, 2001), and its Appeals Chamber upheld that finding in 2004. The International Court of Justice reached the same finding in 2007 (Bosnia and Herzegovina v. Serbia and Montenegro). This entry is permanent.',
         variant: 'divergence',
     },
 ];
