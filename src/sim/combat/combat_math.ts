@@ -243,6 +243,27 @@ export const CORPS_STANCE_ALLOWED_SECTOR_STANCES: Record<string, SectorStance[]>
     reorganize: ['fortify', 'defend', 'screening'],
 };
 
+/** Sector stance aggressiveness, used to narrow a stance into an allowed set deterministically. */
+export const SECTOR_STANCE_RANK: Record<SectorStance, number> = {
+    screening: 0, fortify: 1, defend: 2, elastic: 3, active_defense: 4,
+};
+
+/** Narrow a sector stance into `allowedSet` (highest aggressiveness not above the current; else the least aggressive). */
+export function narrowSectorStance(current: SectorStance, allowedSet: readonly SectorStance[]): SectorStance {
+    if (allowedSet.length === 0) return 'defend';
+    if (allowedSet.includes(current)) return current;
+    const sorted = [...allowedSet].sort((a, b) => (SECTOR_STANCE_RANK[a] - SECTOR_STANCE_RANK[b]) || strictCompare(a, b));
+    const below = sorted.filter((s) => SECTOR_STANCE_RANK[s] <= SECTOR_STANCE_RANK[current]);
+    return below.length > 0 ? below[below.length - 1]! : sorted[0]!;
+}
+
+/** The sector stance a corps stance permits: `stance` itself when allowed, else its nearest allowed stance. */
+export function clampSectorStanceToCorpsStance(stance: SectorStance, corpsStance: string | undefined): SectorStance {
+    const allowed = CORPS_STANCE_ALLOWED_SECTOR_STANCES[corpsStance ?? 'balanced']
+        ?? CORPS_STANCE_ALLOWED_SECTOR_STANCES.balanced!;
+    return narrowSectorStance(stance, allowed);
+}
+
 /**
  * Compute the reactive distance weight for a given number of BFS hops.
  * Returns 0 for unreachable or beyond max hops.

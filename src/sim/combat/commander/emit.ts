@@ -51,7 +51,7 @@ import { isBrigadeEligibleForOperationObjectives } from '../enclave_resilience.j
 import { pickOperationName } from '../operation_names.js';
 import { emitCommanderCreationRecord, emitLocalOccupationCandidateRecord, emitSectorStanceRecord, isReasonCodeTopicEnabled } from '../reason_code_debug.js';
 import { buildTerrainCache, predictCombatOutcome, type CombatPrediction } from '../combat_predictor.js';
-import { buildOfficerCombatLookup } from '../combat_math.js';
+import { buildOfficerCombatLookup, clampSectorStanceToCorpsStance } from '../combat_math.js';
 import { isOutcomeSufficientForAttack } from '../bot_brigade_targeting.js';
 import {
     getCohesionCautionBiasMultiplier,
@@ -3555,6 +3555,12 @@ function buildSectorStances(
         if (stanceMap.has(change.sector_id)) {
             stanceMap.set(change.sector_id, change.new_stance);
         }
+    }
+
+    // The corps stance is the ceiling: an OG stance it does not permit narrows to the
+    // nearest permitted one (CORPS_STANCE_ALLOWED_SECTOR_STANCES).
+    for (const [sectorId, stance] of stanceMap) {
+        stanceMap.set(sectorId, clampSectorStanceToCorpsStance(stance, briefing.corps_stance));
     }
 
     if (isReasonCodeTopicEnabled('sector_stance')) {
