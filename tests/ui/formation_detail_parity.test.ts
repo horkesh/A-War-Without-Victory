@@ -376,7 +376,7 @@ describe('Formation Detail parity display', () => {
   it('keeps sector responsibility read-only for fielded brigades', () => {
     const view = render(React.createElement(FormationDetail, { railSlot: 'primary' }));
 
-    fireEvent.click(screen.getByRole('tab', { name: 'Orders' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'Command' }));
 
     expect(view.container.textContent).toContain('managed by the corps commander');
     expect(screen.queryByText('Clear override')).toBeNull();
@@ -387,8 +387,8 @@ describe('Formation Detail parity display', () => {
   it('resets to overview when the selected formation changes', async () => {
     render(React.createElement(FormationDetail, { railSlot: 'primary' }));
 
-    fireEvent.click(screen.getByRole('tab', { name: 'Orders' }));
-    expect(screen.getByRole('tab', { name: 'Orders' }).getAttribute('aria-selected')).toBe('true');
+    fireEvent.click(screen.getByRole('tab', { name: 'Command' }));
+    expect(screen.getByRole('tab', { name: 'Command' }).getAttribute('aria-selected')).toBe('true');
 
     useGameStore.setState({ selectedFormationId: 'rbih_record_brigade' });
 
@@ -422,7 +422,7 @@ describe('Formation Detail parity display', () => {
 
     const view = render(React.createElement(FormationDetail, { railSlot: 'primary' }));
 
-    fireEvent.click(screen.getByRole('tab', { name: 'Orders' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'Command' }));
     expect(view.container.textContent).not.toContain('Sector assignment');
     expect(screen.queryByText('Clear override')).toBeNull();
     expect(screen.queryByRole('button', { name: /Southern line/i })).toBeNull();
@@ -433,7 +433,7 @@ describe('Formation Detail parity display', () => {
 
     const view = render(React.createElement(FormationDetail, { railSlot: 'primary' }));
 
-    fireEvent.click(screen.getByRole('tab', { name: 'Orders' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'Command' }));
     expect(view.container.textContent).not.toContain('Sector assignment');
     expect(screen.queryByText('Clear override')).toBeNull();
     expect(screen.queryByRole('button', { name: /Northern line/i })).toBeNull();
@@ -450,7 +450,7 @@ describe('Formation Detail parity display', () => {
     const view = render(React.createElement(FormationDetail, { railSlot: 'primary' }));
 
     const copy = view.container.textContent ?? '';
-    expect(copy).toContain('Awaiting first posture order');
+    expect(copy).toContain('Not yet set by the commander');
     expect(view.container.querySelector('[data-awwv-report-gap]')?.getAttribute('data-awwv-report-gap')).toContain('posture');
     expect(copy).toContain('13%');
     expect(copy).not.toContain('Hold');
@@ -478,7 +478,7 @@ describe('Formation Detail parity display', () => {
     const view = render(React.createElement(FormationDetail, { railSlot: 'primary' }));
 
     const copy = view.container.textContent ?? '';
-    expect(copy).toContain('Awaiting first posture order');
+    expect(copy).toContain('Not yet set by the commander');
     expect(copy).not.toContain('Hold');
   });
 
@@ -495,7 +495,7 @@ describe('Formation Detail parity display', () => {
     expect(overviewCopy).toContain('Southern line');
     expect(overviewCopy).not.toContain('Northern lineOverride');
 
-    fireEvent.click(screen.getByRole('tab', { name: 'Orders' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'Command' }));
     expect(screen.queryByTestId('formation-detail-sector-option')).toBeNull();
     expect(view.container.textContent).toContain('managed by the corps commander');
   });
@@ -536,13 +536,41 @@ describe('Formation Detail parity display', () => {
 
   it('explains delegated command ownership without exposing retired sector controls', () => {
     const view = render(React.createElement(FormationDetail, { railSlot: 'primary' }));
-    fireEvent.click(screen.getByRole('tab', { name: 'Orders' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'Command' }));
 
     const copy = view.container.textContent ?? '';
     expect(copy).toContain('Field orders and OG responsibility are managed by the corps commander.');
     expect(copy).toContain('Presidential intervention is issued through Army HQ directives.');
     expect(screen.queryByText('Clear override')).toBeNull();
     expect(view.container.querySelector('[data-testid="formation-detail-sector-option"]')).toBeNull();
+  });
+
+  it('names the commander as the owner of brigade posture and routes the president to the corps directives', () => {
+    const view = render(React.createElement(FormationDetail, { railSlot: 'primary' }));
+
+    const overview = view.container.textContent ?? '';
+    expect(overview).toContain("Commander's posture:");
+    expect(screen.queryByRole('tab', { name: 'Orders' })).toBeNull();
+
+    fireEvent.click(screen.getByRole('tab', { name: 'Command' }));
+    const copy = view.container.textContent ?? '';
+    expect(copy).toContain('Who commands this brigade');
+    expect(copy).toContain("You do not set a brigade's posture; its commanders do.");
+    expect(copy).toContain('At Assisted, corps stance changes and operation plans wait for your approval.');
+
+    fireEvent.click(screen.getByTestId('formation-detail-open-corps-hq'));
+    const store = useGameStore.getState();
+    expect(store.armyHQOpen).toBe(true);
+    expect(store.armyHQTab).toBe('briefing');
+    expect(store.armyHQExpandedCorpsId).toBe('rbih_1st_corps');
+  });
+
+  it('keeps the Orders tab name and generic posture label for non-brigade formations', () => {
+    useGameStore.setState({ selectedFormationId: 'rbih_1st_corps' });
+    const view = render(React.createElement(FormationDetail, { railSlot: 'primary' }));
+
+    expect(screen.getByRole('tab', { name: 'Orders' })).toBeTruthy();
+    expect(view.container.textContent).not.toContain("Commander's posture:");
   });
 
   it('does not badge a stale missing override as the active sector assignment', () => {
@@ -793,7 +821,7 @@ describe('Formation Detail parity display', () => {
     useGameStore.setState({ loadedGameState: state, selectedFormationId: 'rbih_hq_guard_brigade' });
 
     const view = render(React.createElement(FormationDetail, { railSlot: 'primary' }));
-    fireEvent.click(screen.getByRole('tab', { name: 'Orders' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'Command' }));
 
     const copy = view.container.textContent ?? '';
     expect(copy).toContain('Power at home (100%)No staff report');
@@ -823,7 +851,7 @@ describe('Formation Detail parity display', () => {
     useGameStore.setState({ loadedGameState: state, selectedFormationId: 'rbih_hq_guard_brigade' });
 
     const view = render(React.createElement(FormationDetail, { railSlot: 'primary' }));
-    fireEvent.click(screen.getByRole('tab', { name: 'Orders' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'Command' }));
 
     const copy = view.container.textContent ?? '';
     expect(copy).toContain('Assigned command unreported');
@@ -922,13 +950,13 @@ describe('Formation Detail parity display', () => {
     });
 
     render(React.createElement(FormationDetail, { railSlot: 'primary' }));
-    fireEvent.click(screen.getByRole('tab', { name: 'Orders' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'Command' }));
     expect((screen.getByRole('button', { name: /Recall to Reserve/i }) as HTMLButtonElement).disabled).toBe(true);
 
     useGameStore.setState({ selectedFormationId: 'rbih_heroic_brigade' });
     cleanup();
     const view = render(React.createElement(FormationDetail, { railSlot: 'primary' }));
-    fireEvent.click(screen.getByRole('tab', { name: 'Orders' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'Command' }));
     expect(view.container.textContent).toContain('managed by the corps commander');
     expect(view.container.textContent).not.toContain('Desktop command bridge unavailable');
     expect(screen.queryByText('Clear override')).toBeNull();

@@ -4,6 +4,7 @@ import { spawn } from 'node:child_process';
 import { join, sep } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { describe, expect, it } from 'vitest';
+import { resolveVitestCli } from '../tools/test/vitest_shared_config.mjs';
 import {
   createReceiptRun,
   receiptEnvironmentForLane,
@@ -27,7 +28,7 @@ type ReceiptEvent = {
 };
 
 const root = process.cwd();
-const vitestCli = join(root, 'node_modules', 'vitest', 'vitest.mjs');
+const vitestCli = resolveVitestCli(root);
 const retainedRunsRoot = join(
   root,
   'tmp/player-bot-capability-parity-20261024/suite-scratch-repair/runs',

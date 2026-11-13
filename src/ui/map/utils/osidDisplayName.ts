@@ -1,4 +1,5 @@
 import type { FeatureCollection } from 'geojson';
+import { municipalityDisplayName, osidPlaceNames, restoreBosnianPlaceNames } from '../../shared/bosnianPlaceNames.js';
 
 /**
  * Humanize an OSID string when no GeoJSON lookup is available:
@@ -6,6 +7,9 @@ import type { FeatureCollection } from 'geojson';
  */
 export function humanizeOsid(osid: string): string {
   if (!osid || typeof osid !== 'string') return osid;
+  // Census spelling for every known OSID (generated from the operational GeoJSON).
+  const known = osidPlaceNames(osid);
+  if (known) return formatSettlementDisplayName(known[0], known[1]);
   // Extract parts: "op:municipality:slug" → municipality and slug
   const parts = osid.split(':');
   const slug = parts.length >= 3 ? parts[2] : parts[parts.length - 1] ?? osid;
@@ -17,15 +21,16 @@ export function humanizeOsid(osid: string): string {
   // Strip trailing numeric cluster suffix (e.g. "_2", "_13")
   const withoutSuffix = clean.replace(/_\d+$/, '');
 
-  const name = (withoutSuffix || clean)
+  const rawName = (withoutSuffix || clean)
     .split('_')
     .map((word) => (word ? word.charAt(0).toUpperCase() + word.slice(1).toLowerCase() : ''))
     .join(' ')
-    .trim() || osid;
+    .trim();
+  const name = restoreBosnianPlaceNames(rawName) || osid;
 
   // Append municipality in parentheses when different from the name
   if (mun) {
-    const munDisplay = mun
+    const munDisplay = municipalityDisplayName(mun) ?? mun
       .split('_')
       .map((w) => (w ? w.charAt(0).toUpperCase() + w.slice(1).toLowerCase() : ''))
       .join(' ');

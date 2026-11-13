@@ -219,7 +219,7 @@ describe('operational SITREP views', () => {
     const view = getOperationalSitrepView(rawState, 'HRHB');
 
     expect(view.front.edges.map((edge) => edge.id)).toEqual(['livno_real']);
-    expect(view.front.edges[0]?.label).toBe('West (Livno) - East (Glamoc)');
+    expect(view.front.edges[0]?.label).toBe('West (Livno) - East (Glamoč)');
     expect(view.front.edges[0]?.label).not.toContain('op:');
     expect(view.front.edges[0]?.label).not.toContain('_');
   });

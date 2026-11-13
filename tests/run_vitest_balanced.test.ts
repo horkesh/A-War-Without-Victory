@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { VITEST_ALIASED_PACKAGES, VITEST_SETUP_FILE } from '../tools/test/vitest_shared_config.mjs';
+import { VITEST_ALIASED_PACKAGES, VITEST_SETUP_FILE, resolveVitestCli } from '../tools/test/vitest_shared_config.mjs';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { describe, expect, it } from 'vitest';
@@ -101,13 +101,17 @@ describe('balanced Vitest execution plan', () => {
       'tests/fixtures/vitest_balanced/deliberate_failure.fixture.ts',
     ]), 'utf8');
     const status = await runVitestChild(
-      join(root, 'node_modules', 'vitest', 'vitest.mjs'),
+      resolveVitestCli(root),
       configPath,
       ['--reporter=dot', '--silent'],
       root,
     );
     expect(status).toBe(1);
-  }, 30_000);
+    // A cold child Vitest (config load, jsdom setup, one fixture) finishes in a few seconds
+    // alone but timed out at 30 s under full-suite load on 2026-11-12 while passing 16/16
+    // in isolation. The assertion is the exit status, not the speed, so the budget is
+    // load-tolerant: the suite-wide 120 s plus headroom for a contended host.
+  }, 180_000);
 
   it('returns failure when a planned worker child fails', async () => {
     const status = await runBalancedVitest(['--shards=1'], root, {

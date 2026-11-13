@@ -2694,14 +2694,14 @@ test('parseGameState derives player-scoped pending operation opportunity proposa
     assert.deepEqual(
         proposal.objectives.map((objective) => [objective.osid, objective.label, objective.role]),
         [
-            ['op:bihac:bihac_2', 'Bihac', 'objective'],
+            ['op:bihac:bihac_2', 'Bihać', 'objective'],
             ['op:bosanska_krupa:bosanska_krupa_2', 'Bosanska Krupa', 'objective'],
         ],
     );
     assert.deepEqual(
         proposal.staging.map((staging) => [staging.osid, staging.label, staging.role]),
         [
-            ['op:bihac:izacic', 'Izacic (Bihac)', 'staging'],
+            ['op:bihac:izacic', 'Izacic (Bihać)', 'staging'],
         ],
     );
     assert.equal(proposal.objectives.some((objective) => objective.label.includes('op:')), false);
@@ -2714,7 +2714,7 @@ test('parseGameState derives player-scoped pending operation opportunity proposa
             variant.staging.map((staging) => staging.label),
         ]),
         [
-            ['north_hook', 'Northern Hook', ['Otoka (Bosanska Krupa)'], ['Bihac']],
+            ['north_hook', 'Northern Hook', ['Otoka (Bosanska Krupa)'], ['Bihać']],
         ],
     );
     assert.deepEqual(

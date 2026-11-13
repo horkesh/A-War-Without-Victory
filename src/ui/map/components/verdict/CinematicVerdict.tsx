@@ -7,6 +7,7 @@ import { formatHistoricalDivergenceNote } from '../../data/historicalDivergenceN
 import { buildVerdictShareSummary } from '../../data/verdictShareSummary.js';
 import { t, useLocale } from '../../i18n';
 import { formatFindingSeverity } from '../WarCostSummary';
+import { SURFACE_LABEL } from '../surface/Surface';
 
 export interface CinematicVerdictProps {
     verdict: GameVerdict;
@@ -98,50 +99,52 @@ export function CinematicVerdict({
                 className="absolute inset-x-0 top-0 h-px opacity-80"
                 style={{ background: `linear-gradient(90deg, transparent, ${accent}, transparent)` }}
             />
-            <div className="relative grid gap-3 px-4 py-3 sm:gap-5 sm:px-7 sm:py-5 lg:grid-cols-[1.25fr_0.75fr]">
-                <div className="min-w-0">
-                    <div className="text-xs text-text-secondary">
+            {/* Surface redesign, step 4 (2026-11-12): the scene is the verdict surface's
+                banner — 34px headline, 18px reading text, figure tiles; every string unchanged. */}
+            <div className="relative grid gap-x-10 gap-y-6 px-8 py-7 xl:grid-cols-[minmax(0,1.3fr)_minmax(0,0.7fr)]">
+                <div className="flex min-w-0 flex-col gap-3">
+                    <div className="font-mono text-[14px] font-semibold tracking-[0.08em] text-[#e2d6b8]">
                         {metricText(dateLabel)} / {metricText(durationLabel)} / {verdict.outcome_label}
                     </div>
-                    <h1 className="mt-1 text-[24px] font-semibold leading-tight text-text-primary sm:mt-2 sm:text-[34px]">
+                    <h1 className="m-0 text-[34px] font-semibold leading-tight text-[#f6ecd2]">
                         {scene.headline}
                     </h1>
-                    <p className="mt-2 max-w-[62ch] text-[12px] leading-relaxed text-text-secondary sm:mt-3 sm:text-[13px]">
+                    <p className="m-0 max-w-[62ch] text-[18px] leading-relaxed text-[#e2d6b8]">
                         {scene.subheadline}
                     </p>
-                    <div className="mt-3 grid grid-cols-3 gap-2 sm:mt-5 sm:gap-3">
+                    <div className="grid grid-cols-3 gap-3 pt-2">
                         <VerdictMetric label={t('verdict.metric.focus')} value={scene.focusFaction ?? t('verdict.campaign')} accent={accent} />
                         <VerdictMetric label={t('verdict.metric.outcome')} value={scene.focusOutcomeLabel} accent={accent} />
                         <VerdictMetric label={t('verdict.metric.costSignal')} value={formatFindingSeverity(scene.costEmphasis.severity)} accent={accent} />
                     </div>
                 </div>
 
-                <div className="min-w-0 border-t border-panel-border/70 pt-3 sm:pt-4 lg:border-l lg:border-t-0 lg:pl-5 lg:pt-0">
-                    <div className="text-xs font-semibold text-text-primary">
+                <div className="flex min-w-0 flex-col gap-3 border-t border-[#3a4150] pt-5 xl:border-l xl:border-t-0 xl:pl-8 xl:pt-0">
+                    <div className="text-[18px] font-semibold text-[#f1e6c8]">
                         {scene.costEmphasis.title}
                     </div>
-                    <p className="mt-1 text-xs leading-relaxed text-text-secondary sm:mt-2 sm:text-[12px]">
+                    <p className="m-0 text-[16px] leading-relaxed text-[#ddd1b3]">
                         {scene.costEmphasis.text}
                     </p>
                     {comparisonCallouts.length > 0 && (
-                        <div className="mt-2 space-y-1 sm:mt-4 sm:space-y-2" data-awwv-cinematic-comparison={comparisonCallouts.length}>
+                        <div className="flex flex-col gap-2" data-awwv-cinematic-comparison={comparisonCallouts.length}>
                             {comparisonCallouts.map(callout => (
-                                <div key={callout} className="border-l-2 pl-2 text-xs leading-relaxed text-text-secondary sm:pl-3 sm:text-xs"
+                                <div key={callout} className="border-l-2 pl-3 text-[16px] leading-relaxed text-[#ddd1b3]"
                                      style={{ borderLeftColor: accent }}>
                                     {formatHistoricalDivergenceNote(callout)}
                                 </div>
                             ))}
                         </div>
                     )}
-                    <div className="mt-2 border-t border-panel-border/70 pt-2 sm:mt-4 sm:pt-3">
+                    <div className="mt-1 flex flex-col gap-2 border-t border-[#3a4150] pt-3">
                         <div className="flex items-center justify-between gap-3">
-                            <div className="text-xs font-semibold text-text-primary">
+                            <div className={SURFACE_LABEL}>
                                 {t('verdict.shareSummary')}
                             </div>
                             <button
                                 type="button"
                                 onClick={copySummary}
-                                className="shrink-0 border border-panel-border px-3 py-1 text-xs font-semibold text-text-secondary hover:bg-white/5"
+                                className="h-10 shrink-0 rounded border border-[#3a4150] bg-[#1b2029] px-4 text-[15px] font-semibold text-[#e8dcbc] transition hover:border-accent-gold/60"
                             >
                                 {t('verdict.copy')}
                             </button>
@@ -150,7 +153,7 @@ export function CinematicVerdict({
                             role="region"
                             tabIndex={0}
                             aria-label={t('verdict.shareSummary')}
-                            className="mt-2 hidden max-h-28 overflow-auto whitespace-pre-wrap break-words text-xs leading-relaxed text-text-secondary sm:block"
+                            className="m-0 hidden max-h-32 overflow-auto whitespace-pre-wrap break-words rounded border border-[#2a303c] bg-[#0f1218] px-3 py-2 font-mono text-[14px] leading-relaxed text-[#c2b69c] sm:block"
                         >
                             {shareSummary}
                         </pre>
@@ -163,9 +166,9 @@ export function CinematicVerdict({
 
 function VerdictMetric({ label, value, accent }: { label: string; value: string; accent: string }) {
     return (
-        <div className="min-w-0 border-t border-panel-border/70 pt-2">
-            <div className="text-xs text-text-secondary/70">{label}</div>
-            <div className="mt-1 break-words text-[12px] font-semibold text-text-primary" style={{ color: accent }}>
+        <div className="flex min-w-0 flex-col gap-1 rounded-md border border-[#2a303c] bg-[#11141b] px-4 py-3">
+            <div className="text-[15px] leading-snug text-[#b9ad94]">{label}</div>
+            <div className="break-words text-[19px] font-semibold leading-snug" style={{ color: accent }}>
                 {value}
             </div>
         </div>

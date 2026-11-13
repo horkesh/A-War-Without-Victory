@@ -1,10 +1,14 @@
 /**
  * Peace Phase Status Panel — displayed during peace/Phase 0.
  * Shows: capital balances, declaration pressure, referendum countdown, alliance value, events.
+ *
+ * Surface redesign, step 4 (2026-11-12): the pre-war status stays docked at the left,
+ * because the map is what this phase shows, but it is an opaque surface card: gold
+ * border, the surface header and section labels, text 13 px and up, a gold End week.
  */
 import { useState, useCallback } from 'react';
 import { useGameStore } from '../store/gameStore';
-import { FACTION_COLORS } from '../utils/theme';
+import { factionHex } from '../../shared/factionPalette';
 import { useIPC } from '../desktop/useIPC';
 import { advanceTurnAndSync } from '../desktop/orderActions';
 import { getTurnAftermathAdvanceDeps } from '../desktop/turnAftermathAdvanceDeps';
@@ -14,16 +18,23 @@ import {
 } from '../utils/playerSafeText';
 import { turnToDateString } from '../utils/formatters';
 import { t } from '../i18n';
+import {
+    SURFACE_CHIP,
+    SURFACE_LABEL,
+    SURFACE_PRIMARY_BUTTON_COMPACT,
+    SURFACE_TONE,
+    SurfaceSection,
+} from './surface/Surface';
 
 function ProgressBar({ value, max, color, label }: { value: number; max: number; color: string; label: string }) {
     const pct = Math.min(100, (value / max) * 100);
     return (
-        <div className="space-y-0.5">
-            <div className="flex justify-between text-xs">
-                <span className="text-text-secondary uppercase tracking-wider">{label}</span>
-                <span className="text-text-primary tabular-nums">{Math.round(value)}/{max}</span>
+        <div className="flex flex-col gap-1.5">
+            <div className="flex items-baseline justify-between gap-3">
+                <span className="text-[15px] text-[#b9ad94]">{label}</span>
+                <span className="font-mono text-[15px] font-semibold tabular-nums text-[#f1e6c8]">{Math.round(value)}/{max}</span>
             </div>
-            <div className="h-1.5 bg-black/30 rounded-full overflow-hidden">
+            <div className="h-2.5 overflow-hidden rounded-full bg-[#262b35]">
                 <div className="h-full rounded-full transition-all duration-300" style={{ width: `${pct}%`, backgroundColor: color }} />
             </div>
         </div>
@@ -36,12 +47,12 @@ function AllianceBar({ value }: { value: number }) {
     const color = value > 0.2 ? '#22c55e' : value > -0.2 ? '#eab308' : '#ef4444';
     const label = value > 0.5 ? t('peace.allied') : value > 0.2 ? t('peace.cooperative') : value > -0.2 ? t('peace.strained') : value > -0.5 ? t('peace.hostile') : t('peace.openWar');
     return (
-        <div className="space-y-0.5">
-            <div className="flex justify-between text-xs">
-                <span className="text-text-secondary uppercase tracking-wider">{t('peace.bosniakCroatAlliance')}</span>
-                <span style={{ color }} className="font-semibold">{label}</span>
+        <div className="flex flex-col gap-1.5">
+            <div className="flex items-baseline justify-between gap-3">
+                <span className="text-[15px] text-[#b9ad94]">{t('peace.bosniakCroatAlliance')}</span>
+                <span style={{ color }} className="text-[15px] font-semibold">{label}</span>
             </div>
-            <div className="h-1.5 bg-black/30 rounded-full overflow-hidden relative">
+            <div className="relative h-2.5 overflow-hidden rounded-full bg-[#262b35]">
                 <div className="absolute inset-0 flex">
                     <div className="h-full rounded-full transition-all duration-300" style={{ width: `${pct}%`, backgroundColor: color }} />
                 </div>
@@ -109,64 +120,63 @@ export function PeaceStatusPanel() {
     );
 
     return (
-        <div className="absolute top-2 left-2 z-50 w-[320px] max-h-[calc(var(--interface-viewport-height,100vh)*0.9)] overflow-auto">
-            <div className="bg-panel-bg/95 border border-panel-border rounded-lg shadow-2xl backdrop-blur-md">
-                {/* Header */}
-                <div className="px-4 py-3 border-b border-panel-border bg-panel-card/50">
-                    <div className="text-xs font-mono uppercase tracking-[0.3em] text-accent-gold/70 mb-0.5">{t('peace.preWarPhase')}</div>
-                    <div className="text-sm font-bold text-text-primary uppercase tracking-wide">
-                        {date}
-                    </div>
-                    {peaceReferendum && !peaceReferendum.held && peaceReferendum.deadline_turn != null && (
-                        <div className="text-xs text-amber-400 mt-1">
-                            {t('peace.referendumDeadline', { date: turnToDateString(peaceReferendum.deadline_turn) })}
-                            {turn != null && <span className="text-text-secondary"> ({t('peace.turnsRemaining', { count: peaceReferendum.deadline_turn - turn })})</span>}
-                        </div>
-                    )}
-                    {peaceReferendum?.held && peaceReferendum.war_start_turn != null && (
-                        <div className="text-xs text-red-400 font-bold mt-1">
-                            {t('peace.warBegins', { date: turnToDateString(peaceReferendum.war_start_turn) })}
-                            {turn != null && peaceReferendum.war_start_turn > turn && (
-                                <span className="text-text-secondary"> ({t('peace.turnsRemaining', { count: peaceReferendum.war_start_turn - turn })})</span>
-                            )}
-                        </div>
-                    )}
-                </div>
+        <aside
+            data-testid="peace-status-panel"
+            aria-label={t('peace.preWarPhase')}
+            className="absolute left-4 top-[4.5rem] z-50 flex max-h-[calc(var(--interface-viewport-height,100vh)-7rem)] w-[clamp(21rem,calc(var(--interface-viewport-width,100vw)*0.2),27rem)] flex-col overflow-hidden rounded-lg border border-accent-gold/35 bg-[#11141b] text-text-primary shadow-[0_30px_90px_rgba(0,0,0,0.65)]"
+        >
+            <header className="flex shrink-0 flex-col gap-1 border-b border-[#262b35] bg-[#141821] px-5 py-4">
+                <span className={SURFACE_LABEL}>{t('peace.preWarPhase')}</span>
+                <h2 className="m-0 text-[24px] font-semibold leading-tight text-[#f1e6c8]">{date}</h2>
+                {peaceReferendum && !peaceReferendum.held && peaceReferendum.deadline_turn != null && (
+                    <p className="m-0 pt-1 text-[15px] leading-snug text-amber-200">
+                        {t('peace.referendumDeadline', { date: turnToDateString(peaceReferendum.deadline_turn) })}
+                        {turn != null && <span className="text-[#b9ad94]"> ({t('peace.turnsRemaining', { count: peaceReferendum.deadline_turn - turn })})</span>}
+                    </p>
+                )}
+                {peaceReferendum?.held && peaceReferendum.war_start_turn != null && (
+                    <p className="m-0 pt-1 text-[15px] font-semibold leading-snug text-red-200">
+                        {t('peace.warBegins', { date: turnToDateString(peaceReferendum.war_start_turn) })}
+                        {turn != null && peaceReferendum.war_start_turn > turn && (
+                            <span className="font-normal text-[#b9ad94]"> ({t('peace.turnsRemaining', { count: peaceReferendum.war_start_turn - turn })})</span>
+                        )}
+                    </p>
+                )}
+            </header>
 
-                {/* Faction Cards */}
-                <div className="p-3 space-y-3">
+            <div className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto px-5 py-5">
+                <div className="flex flex-col gap-3">
                     {peaceFactions.map((f) => {
-                        const color = FACTION_COLORS[f.id as keyof typeof FACTION_COLORS] ?? '#888';
+                        const color = factionHex(f.id);
                         const isPlayer = f.id === playerFaction;
                         return (
                             <div
                                 key={f.id}
-                                className={`p-2.5 rounded border space-y-2 ${isPlayer ? 'border-accent-gold/40 bg-accent-gold/5' : 'border-panel-border bg-panel-card/50'}`}
+                                className={`flex flex-col gap-2.5 rounded-md border px-4 py-3.5 ${isPlayer ? 'border-[#c9a75c] bg-[#232936]' : 'border-[#2a303c] bg-[#161a22]'}`}
                             >
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-2">
-                                        <div className="w-2.5 h-2.5 rounded-sm" style={{ backgroundColor: color }} />
-                                        <span className="text-xs font-bold text-text-primary uppercase tracking-wide">
-                                            {getPlayerSafeMilitaryFactionName(f.id)}
-                                        </span>
-                                    </div>
+                                <div className="flex flex-wrap items-center gap-2">
+                                    <span aria-hidden="true" className="h-3 w-3 shrink-0 rounded-sm" style={{ backgroundColor: color }} />
+                                    <span className="text-[17px] font-semibold text-[#f1e6c8]">
+                                        {getPlayerSafeMilitaryFactionName(f.id)}
+                                    </span>
+                                    <span className="flex-grow" />
                                     {isPlayer && (
-                                        <span className="text-xs bg-accent-gold/20 text-accent-gold px-1.5 py-0.5 rounded border border-accent-gold/30 font-bold uppercase tracking-wider">
+                                        <span className={`${SURFACE_CHIP} ${SURFACE_TONE.info}`}>
                                             {t('peace.you')}
                                         </span>
                                     )}
                                     {f.declared && (
-                                        <span className="text-xs bg-red-900/30 text-red-400 px-1.5 py-0.5 rounded border border-red-500/30 font-bold uppercase">
+                                        <span className={`${SURFACE_CHIP} ${SURFACE_TONE.danger}`}>
                                             {t('peace.declared')}
                                         </span>
                                     )}
                                 </div>
-                                <div className="text-xs text-text-secondary">{getPlayerSafePoliticalFactionName(f.id)}</div>
+                                <div className="text-[15px] text-[#b9ad94]">{getPlayerSafePoliticalFactionName(f.id)}</div>
 
                                 {isPlayer ? (
                                     <ProgressBar value={f.capital} max={100} color={color} label={t('peace.preWarCapital')} />
                                 ) : (
-                                    <div className="text-xs text-text-secondary uppercase tracking-wider">
+                                    <div className="text-[15px] text-[#ddd1b3]">
                                         {f.declared
                                             ? t('peace.politicalCourseDeclared')
                                             : t('peace.declarationPosture', { status: getDeclarationPressureStatus(f.declaration_pressure, f.declared) })}
@@ -175,45 +185,44 @@ export function PeaceStatusPanel() {
                             </div>
                         );
                     })}
-
-                    {/* Alliance */}
-                    {peaceAllianceValue != null && (
-                        <div className="pt-2 border-t border-panel-border">
-                            <AllianceBar value={peaceAllianceValue} />
-                        </div>
-                    )}
-
-                    {/* Events */}
-                    {peaceEvents && peaceEvents.length > 0 && (
-                        <div className="pt-2 border-t border-panel-border space-y-1">
-                            <div className="text-xs uppercase tracking-wider text-text-secondary font-semibold">{t('peace.eventsThisTurn')}</div>
-                            {peaceEvents.map((e, i) => (
-                                <div key={i} className="text-xs text-text-primary bg-black/20 px-2 py-1 rounded">
-                                    <span className="font-semibold text-accent-gold">{peaceEventTypeLabel(e.type)}</span>
-                                    {e.faction && <span className="text-text-secondary ml-1">({getPlayerSafeMilitaryFactionName(e.faction)})</span>}
-                                </div>
-                            ))}
-                        </div>
-                    )}
-
-                    {/* End Turn */}
-                    <div className="pt-3 border-t border-panel-border">
-                        {hasInvestments && (
-                            <div className="text-xs text-amber-400 mb-2 flex items-center gap-1">
-                                <span className="inline-block w-1.5 h-1.5 rounded-full bg-amber-400" />
-                                {t('peace.investmentsPending')}
-                            </div>
-                        )}
-                        <button
-                            onClick={handleEndTurn}
-                            disabled={!ipc.isAvailable || advancing}
-                            className="w-full py-2 rounded text-xs font-bold uppercase tracking-[0.2em] transition-all duration-200 border border-accent-gold/40 bg-accent-gold/10 text-accent-gold hover:bg-accent-gold/20 disabled:opacity-40 disabled:cursor-not-allowed"
-                        >
-                            {advancing ? t('peace.advancing') : t('peace.endTurn')}
-                        </button>
-                    </div>
                 </div>
+
+                {peaceAllianceValue != null && (
+                    <div className="border-t border-[#262b35] pt-4">
+                        <AllianceBar value={peaceAllianceValue} />
+                    </div>
+                )}
+
+                {peaceEvents && peaceEvents.length > 0 && (
+                    <SurfaceSection label={t('peace.eventsThisTurn')}>
+                        <ul className="m-0 flex list-none flex-col gap-1.5 p-0">
+                            {peaceEvents.map((e, i) => (
+                                <li key={i} className="rounded-md border border-[#2a303c] bg-[#161a22] px-3.5 py-2.5 text-[15px] text-[#ddd1b3]">
+                                    <span className="font-semibold text-[#e0c27a]">{peaceEventTypeLabel(e.type)}</span>
+                                    {e.faction && <span className="ml-1 text-[#b9ad94]">({getPlayerSafeMilitaryFactionName(e.faction)})</span>}
+                                </li>
+                            ))}
+                        </ul>
+                    </SurfaceSection>
+                )}
             </div>
-        </div>
+
+            <div className="flex shrink-0 flex-col gap-3 border-t border-[#262b35] bg-[#12161e] px-5 pb-5 pt-4">
+                {hasInvestments && (
+                    <div className="flex items-center gap-2 text-[15px] text-amber-200">
+                        <span aria-hidden="true" className="inline-block h-2 w-2 shrink-0 rounded-full bg-amber-300" />
+                        {t('peace.investmentsPending')}
+                    </div>
+                )}
+                <button
+                    type="button"
+                    onClick={handleEndTurn}
+                    disabled={!ipc.isAvailable || advancing}
+                    className={`w-full ${SURFACE_PRIMARY_BUTTON_COMPACT}`}
+                >
+                    {advancing ? t('peace.advancing') : t('peace.endTurn')}
+                </button>
+            </div>
+        </aside>
     );
 }
