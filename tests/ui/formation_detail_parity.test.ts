@@ -556,7 +556,8 @@ describe('Formation Detail parity display', () => {
     const copy = view.container.textContent ?? '';
     expect(copy).toContain('Who commands this brigade');
     expect(copy).toContain("You do not set a brigade's posture; its commanders do.");
-    expect(copy).toContain('At Assisted, corps stance changes and operation plans wait for your approval.');
+    expect(copy).toContain('At the default, Delegated, corps and OG stance changes come to you on the Command Surface and stand unless you answer.');
+    expect(copy).toContain("A brigade's own posture is never put to you.");
 
     fireEvent.click(screen.getByTestId('formation-detail-open-corps-hq'));
     const store = useGameStore.getState();

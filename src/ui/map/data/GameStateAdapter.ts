@@ -38,6 +38,7 @@ import type {
     CorpsFrontSectorView, EnclaveResilienceView, FactionId, FogOfWarView, FormationView, FrictionEventView, LoadedGameState,
     MilitiaPoolView, MobilizationSummaryView, MovementOrderSettlementView, NamedOfficerStateView, NamedOfficerView,
     OperationView, RepositionOrderView, RecruitmentView,
+    StanceHoldView, StanceMatterReceiptView, StanceMatterView,
 } from './types';
 import {
     getPlayerSafeCorpsName,
@@ -3140,6 +3141,7 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
         daytonAgreement: readDaytonAgreement(state.military?.negotiation?.dayton_agreement),
         settlementMap: deriveSettlementMap(state),
         pendingProposalReviews,
+        ...deriveStanceMatterViews(state, playerFaction, corpsFrontSectors),
         strategicDimensions: deriveStrategicDimensions(state),
         negotiatingCapital: deriveNegotiatingCapital(state),
         eventFlags: state.military?.event_flags ?? undefined,
@@ -4703,6 +4705,109 @@ function derivePendingCounterOffers(state: any): LoadedGameState['pendingCounter
     }
 
     return result.length > 0 ? result : undefined;
+}
+
+/**
+ * Posture model option 2: project the player's stance matters, receipts and holds into
+ * player-safe views (corps/OG names, never raw ids). Read-only; deterministic order.
+ */
+function deriveStanceMatterViews(
+    state: any,
+    playerFaction: string | null | undefined,
+    sectors: CorpsFrontSectorView[] | undefined,
+): Pick<LoadedGameState, 'stanceMatters' | 'stanceMatterHistory' | 'stanceHolds'> {
+    const formationsRecord = (state.military?.formations ?? {}) as Record<string, { name?: unknown }>;
+    const corpsName = (corpsId: string): string => {
+        const name = formationsRecord[corpsId]?.name;
+        return getPlayerSafeCorpsName(typeof name === 'string' ? name : null, corpsId);
+    };
+    const ogName = (sectorId: string | null): string | null => {
+        if (!sectorId) return null;
+        const view = sectors?.find((sector) => sector.sector_id === sectorId);
+        return view && typeof view.display_name === 'string' && view.display_name.length > 0 ? view.display_name : null;
+    };
+    const num = (value: unknown): number | null => (typeof value === 'number' && Number.isFinite(value) ? value : null);
+    const str = (value: unknown): string | null => (typeof value === 'string' && value.length > 0 ? value : null);
+    const mine = (row: any): boolean => row && typeof row === 'object' && playerFactionMatch(row.faction, playerFaction);
+
+    const matters = (Array.isArray(state.meta?.stance_matters) ? state.meta.stance_matters : [])
+        .filter(mine)
+        .map((m: any): StanceMatterView => ({
+            id: String(m.id ?? ''),
+            turn: typeof m.turn === 'number' ? m.turn : 0,
+            scope: m.scope === 'og' ? 'og' : 'corps',
+            corpsId: String(m.corps_id ?? ''),
+            corpsName: corpsName(String(m.corps_id ?? '')),
+            sectorId: str(m.sector_id),
+            ogName: ogName(str(m.sector_id)),
+            fromStance: String(m.from_stance ?? ''),
+            toStance: String(m.to_stance ?? ''),
+            commanderName: (() => {
+                const id = str(m.commander_officer_id);
+                const data = id ? (state.military?.named_officer_data ?? []).find((o: any) => o?.id === id) : null;
+                return data && typeof data.name === 'string' ? data.name : null;
+            })(),
+            reason: String(m.reason ?? 'other'),
+            avgCohesion: num(m.avg_cohesion),
+            avgStrength: num(m.avg_strength),
+            sectorThreat: num(m.sector_threat),
+            patronCeiling: str(m.patron_ceiling),
+            deadlineTurn: typeof m.deadline_turn === 'number' ? m.deadline_turn : 0,
+            constraintOptions: (Array.isArray(m.constraint_options) ? m.constraint_options : [])
+                .filter((c: unknown): c is StanceMatterView['constraintOptions'][number] => c === 'ceiling_balanced'
+                    || c === 'ceiling_defensive' || c === 'no_active_defense' || c === 'hold_no_counterattacks'),
+            countermandAllowed: m.countermand_allowed === true,
+            mainStaffDelayTurns: num(m.main_staff_delay_turns) ?? 0,
+            patronShift: num(m.patron_shift) ?? 0,
+            answer: m.answer === 'confirm' || m.answer === 'countermand' || m.answer === 'constrain' ? m.answer : null,
+            constraint: str(m.constraint),
+        }))
+        .sort((a: StanceMatterView, b: StanceMatterView) => (a.turn - b.turn) || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
+
+    const history = (Array.isArray(state.meta?.stance_matter_history) ? state.meta.stance_matter_history : [])
+        .filter(mine)
+        .map((r: any): StanceMatterReceiptView => ({
+            id: String(r.id ?? ''),
+            turn: typeof r.turn === 'number' ? r.turn : 0,
+            scope: r.scope === 'og' ? 'og' : 'corps',
+            corpsId: String(r.corps_id ?? ''),
+            corpsName: corpsName(String(r.corps_id ?? '')),
+            sectorId: str(r.sector_id),
+            fromStance: String(r.from_stance ?? ''),
+            toStance: String(r.to_stance ?? ''),
+            outcome: r.outcome,
+            resolvedTurn: typeof r.resolved_turn === 'number' ? r.resolved_turn : 0,
+            constraint: str(r.constraint),
+            effectiveFromTurn: num(r.effective_from_turn),
+            untilTurn: num(r.until_turn),
+            mainStaffDelayTurns: num(r.main_staff_delay_turns) ?? 0,
+            patronShift: num(r.patron_shift) ?? 0,
+            notPutReason: str(r.not_put_reason),
+            notPutCount: num(r.not_put_count) ?? 1,
+            lapseReason: str(r.lapse_reason),
+        }))
+        .reverse();
+
+    const holds = (Array.isArray(state.military?.stance_matter_state?.holds) ? state.military.stance_matter_state.holds : [])
+        .filter(mine)
+        .map((h: any): StanceHoldView => ({
+            matterId: String(h.matter_id ?? ''),
+            scope: h.scope === 'og' ? 'og' : 'corps',
+            corpsId: String(h.corps_id ?? ''),
+            sectorId: str(h.sector_id),
+            mode: h.mode === 'ceiling' ? 'ceiling' : 'fixed',
+            stance: str(h.stance),
+            allowed: Array.isArray(h.allowed) ? h.allowed.filter((s: unknown): s is string => typeof s === 'string') : [],
+            effectiveFromTurn: typeof h.effective_from_turn === 'number' ? h.effective_from_turn : 0,
+            untilTurn: typeof h.until_turn === 'number' ? h.until_turn : 0,
+            suspendedTurn: num(h.suspended_turn),
+        }));
+
+    return {
+        ...(matters.length > 0 ? { stanceMatters: matters } : {}),
+        ...(history.length > 0 ? { stanceMatterHistory: history } : {}),
+        ...(holds.length > 0 ? { stanceHolds: holds } : {}),
+    };
 }
 
 function derivePendingProposalReviews(

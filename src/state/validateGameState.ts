@@ -4064,6 +4064,23 @@ export function validateGameStateShape(
             if ('game_over' in m && m.game_over !== undefined && typeof m.game_over !== 'boolean') {
                 errors.push('meta.game_over must be boolean when present');
             }
+            // Posture model option 2: stance matters and their receipts (optional).
+            for (const key of ['stance_matters', 'stance_matter_history'] as const) {
+                if (key in m && (m as Record<string, unknown>)[key] !== undefined) {
+                    const rows = (m as Record<string, unknown>)[key];
+                    if (!Array.isArray(rows)) {
+                        errors.push(`meta.${key} must be an array when present`);
+                    } else {
+                        rows.forEach((row: unknown, i: number) => {
+                            const r = row as Record<string, unknown> | null;
+                            if (!r || typeof r !== 'object' || typeof r.id !== 'string'
+                                || typeof r.corps_id !== 'string' || !Number.isInteger(r.turn)) {
+                                errors.push(`meta.${key}[${i}] is malformed`);
+                            }
+                        });
+                    }
+                }
+            }
             if ('proposal_decision_history' in m && m.proposal_decision_history !== undefined) {
                 validateProposalDecisionHistory(m.proposal_decision_history, errors);
             }
@@ -4817,6 +4834,40 @@ export function validateGameStateShape(
                             errors.push(`military.named_officer_data[${i}].override_tolerance must be an integer in [1,5] when present`);
                         }
                     }
+                }
+            }
+        }
+
+        // stance_matter_state (posture model option 2): optional; shape-checked when present.
+        if ('stance_matter_state' in mil && mil.stance_matter_state !== undefined) {
+            const sms: unknown = mil.stance_matter_state;
+            if (sms === null || typeof sms !== 'object' || Array.isArray(sms)) {
+                errors.push('military.stance_matter_state must be an object when present');
+            } else {
+                const rec = sms as Record<string, unknown>;
+                // Keys are checked when present: the player-visible projection carries holds only.
+                for (const key of ['last_corps_stance', 'cooldown_until_by_corps', 'last_overrule_turn_by_corps']) {
+                    const v = rec[key];
+                    if (v !== undefined && (v === null || typeof v !== 'object' || Array.isArray(v))) {
+                        errors.push(`military.stance_matter_state.${key} must be an object when present`);
+                    }
+                }
+                for (const key of ['last_og', 'holds']) {
+                    if (rec[key] !== undefined && !Array.isArray(rec[key])) {
+                        errors.push(`military.stance_matter_state.${key} must be an array when present`);
+                    }
+                }
+                if (Array.isArray(rec.holds)) {
+                    rec.holds.forEach((h: unknown, i: number) => {
+                        const hold = h as Record<string, unknown> | null;
+                        if (!hold || typeof hold !== 'object'
+                            || typeof hold.matter_id !== 'string' || typeof hold.corps_id !== 'string'
+                            || (hold.scope !== 'corps' && hold.scope !== 'og')
+                            || (hold.mode !== 'fixed' && hold.mode !== 'ceiling')
+                            || !Number.isInteger(hold.effective_from_turn) || !Number.isInteger(hold.until_turn)) {
+                            errors.push(`military.stance_matter_state.holds[${i}] is malformed`);
+                        }
+                    });
                 }
             }
         }

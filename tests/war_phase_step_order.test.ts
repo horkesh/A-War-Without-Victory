@@ -61,6 +61,13 @@ describe('war-phase step ordering', () => {
         assertBefore('inject-op-directive', 'apply-co-replacements');
         assertBefore('apply-co-replacements', 'ai-corps-decisions');
         assertBefore('apply-autonomy-transition', 'generate-bot-corps-orders');
+        // Posture model option 2: stance matters resolve after the autonomy transition
+        // (so a level change is seen) and before the bot pass applies any hold.
+        assertBefore('apply-autonomy-transition', 'resolve-stance-matters');
+        assertBefore('resolve-stance-matters', 'generate-bot-corps-orders');
+        // The level-1 stance order holds through the turn and is cleared last.
+        assertBefore('clear-displacement-event-log', 'clear-player-ordered-stances');
+        expect(stepNames[stepNames.length - 1]).toBe('clear-player-ordered-stances');
         assertBefore('generate-bot-corps-orders', 'generate-level1-op-proposals');
 
         // Event truth must update JNA lifecycle before phantom/operation reconciliation.
@@ -283,6 +290,10 @@ describe('war-phase step ordering', () => {
         //        headless start has none, so turn-1 event dimension shifts are not dropped.
         // +1 from enforce-dayton-imposition (2026-11-07, owner: a declined Dayton is imposed
         //        after 4 weeks); no-op unless negotiation.dayton_decline exists.
-        expect(stepNames.length).toBe(193);
+        // +1 from resolve-stance-matters (2026-11-12, posture model option 2): resolves last
+        //        turn's corps/OG stance matters before the bot pass; live president only.
+        // +1 from clear-player-ordered-stances (2026-11-12, finding S4): turn-end clear of
+        //        CorpsCommandState.player_ordered_stance; touches only corps that carry it.
+        expect(stepNames.length).toBe(195);
     });
 });

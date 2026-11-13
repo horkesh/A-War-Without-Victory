@@ -27,12 +27,12 @@ describe('presidential command convergence diagnostic', () => {
     const report = buildCurrentReport();
 
     expect(report.summary).toEqual({
-      familyCount: 9,
-      reachableActionFamilyCount: 9,
-      durableReceiptFamilyCount: 9,
+      familyCount: 10,
+      reachableActionFamilyCount: 10,
+      durableReceiptFamilyCount: 10,
       conditionalReceiptFamilyCount: 0,
       unresolvedFindingCount: 0,
-      sourceVerifiedFamilyCount: 9,
+      sourceVerifiedFamilyCount: 10,
     });
     expect(report.rows.map((row) => row.familyId)).toEqual([
       'autonomy_proposal',
@@ -44,6 +44,7 @@ describe('presidential command convergence diagnostic', () => {
       'paramilitary_request',
       'peace_plan',
       'reserve_request',
+      'stance_matter',
     ]);
     expect(report.findings).toEqual([]);
     const autonomyRow = report.rows.find((row) => row.familyId === 'autonomy_proposal');

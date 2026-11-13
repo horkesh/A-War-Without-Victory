@@ -847,6 +847,47 @@ describe('plan', () => {
         expect(result.action).toBe('advanced');
     });
 
+    it('a presidential hold at Defensive keeps a concentrating plan from becoming ready until it lapses (posture model option 2)', () => {
+        const zoneId = 'zone:test_corps:0' as ZoneId;
+        const ids = ['b1', 'b2'].map(id => id as FormationId);
+        const zones = [makeZone({ zone_id: zoneId, posture: 'projecting', front_edge_count: 10, surplus_brigades: ids, assigned_brigades: ids })];
+        const evals = ids.map(id => makeEval({ brigade_id: id, current_zone: zoneId, is_combat_effective: true }));
+        const forces = makeForces(evals, zones);
+        const plan: CommanderPlan = {
+            plan_id: 'plan_held', objective_description: 'Test Op', target_osids: ['op:enemy:e1'], required_brigades: 2,
+            assigned_brigades: ids, staging_zone: zoneId, status: 'concentrating', created_turn: 8, target_ready_turn: 10,
+            concentration_progress: 0.5, viability_score: 1.0, source: 'opportunity',
+        };
+        // Hold the line, no new offensives: in force turns 10-11, set at turn 9.
+        const stateRef = { military: { stance_matter_state: { last_corps_stance: {}, last_og: [], cooldown_until_by_corps: {}, last_overrule_turn_by_corps: {}, holds: [
+            { matter_id: 'STANCE_9_test_corps', faction: 'RBiH', scope: 'corps', corps_id: 'test_corps', mode: 'ceiling', stance: 'defensive', effective_from_turn: 10, until_turn: 11 },
+        ] } } } as unknown as GameState;
+        const held = makeMinimalBriefing({ previous_state: null, state_ref: stateRef });
+
+        // Control: without the hold the plan is ready at turn 10 (and a ready plan emits its operation).
+        expect(managePlan(makeMinimalBriefing({ previous_state: null }), zones, forces, evals, plan, 10).plan!.status).toBe('ready');
+
+        const t10 = managePlan(held, zones, forces, evals, plan, 10);
+        expect(t10.action).toBe('suspended');
+        expect(t10.plan!.status).toBe('suspended');
+        expect(t10.decision_trace?.hard_constraints).toEqual(['presidential_stance_hold']);
+        const t11 = managePlan(held, zones, forces, evals, t10.plan!, 11);
+        expect(t11.plan!.status).toBe('suspended');
+        expect(t11.plan!.suspended_since_turn).toBe(10);
+        // Turn 12: the hold has lapsed and the plan goes ahead.
+        const t12 = managePlan(held, zones, forces, evals, t11.plan!, 12);
+        expect(t12.plan!.status).toBe('ready');
+
+        // A plan that was already ready launched its operation before the hold: it continues.
+        const ready = managePlan(held, zones, forces, evals, { ...plan, status: 'ready' }, 10);
+        expect(ready.action).toBe('launched');
+
+        // A Balanced ceiling does not stop plans (a Balanced corps may still plan offensives).
+        const balancedRef = JSON.parse(JSON.stringify(stateRef)) as GameState;
+        balancedRef.military.stance_matter_state!.holds![0]!.stance = 'balanced';
+        expect(managePlan(makeMinimalBriefing({ previous_state: null, state_ref: balancedRef }), zones, forces, evals, plan, 10).plan!.status).toBe('ready');
+    });
+
     it('suspends plan when threat escalates', () => {
         const zoneId = 'zone:test_corps:0' as ZoneId;
         const brigIds = ['b1', 'b2', 'b3'].map(id => id as FormationId);

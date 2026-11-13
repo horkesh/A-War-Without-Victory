@@ -27,6 +27,7 @@ export type DecisionResolverSurface =
   | 'officer_matter_modal'
   | 'operation_opportunity_dossier'
   | 'proposal_review_dossier'
+  | 'stance_matter_dossier'
   | 'counter_offer_modal'
   | 'intelligence_brief_modal'
   | 'situation_brief'
@@ -126,6 +127,13 @@ const SURFACE_COPY_KEYS: Record<DecisionSurfaceFamilyId, {
     sourceLabel: 'decisionSurface.autonomy.sourceLabel',
     fallbackTitle: 'decisionSurface.autonomy.fallbackTitle',
     fallbackSummary: 'decisionSurface.autonomy.fallbackSummary',
+  },
+  stance_matter: {
+    playerLabel: 'decisionSurface.stanceMatter.playerLabel',
+    actionLabel: 'decisionSurface.stanceMatter.actionLabel',
+    sourceLabel: 'decisionSurface.stanceMatter.sourceLabel',
+    fallbackTitle: 'decisionSurface.stanceMatter.fallbackTitle',
+    fallbackSummary: 'decisionSurface.stanceMatter.fallbackSummary',
   },
   operation_opportunity: {
     playerLabel: 'decisionSurface.operationOpportunity.playerLabel',
@@ -338,6 +346,22 @@ export const DECISION_SURFACE_REGISTRY = {
     copySanitizer: (raw) => rawCopy(raw, 'Command proposal', 'A proposal requires presidential review.'),
     resolveAction: 'Resolve proposal',
     consequenceRecord: 'Political decision log',
+  }),
+  stance_matter: manifestSurface({
+    familyId: 'stance_matter',
+    inboxType: 'stance_matter',
+    playerLabel: 'Stance change',
+    severity: 'advisory',
+    ownerShell: 'decision_room',
+    resolverSurface: 'stance_matter_dossier',
+    opensAs: 'shell_panel',
+    gatePolicy: 'advisory',
+    inboxAction: 'decision_room',
+    actionLabel: 'Open Command Surface',
+    sourceLabel: 'Corps commander',
+    copySanitizer: (raw) => rawCopy(raw, 'Stance change', 'A commander has changed stance. It stands unless you answer.'),
+    resolveAction: 'Confirm, countermand or constrain',
+    consequenceRecord: 'Stance record',
   }),
   operation_opportunity: manifestSurface({
     familyId: 'operation_opportunity',

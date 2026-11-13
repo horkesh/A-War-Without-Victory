@@ -35,6 +35,7 @@ const FAMILY_LABEL_KEYS: Record<DecisionConsequenceRecord['familyId'], MessageKe
   'paramilitary-authorization': 'decisionConsequences.family.paramilitaryAuthorization',
   'patron-relations': 'decisionConsequences.family.patronRelations',
   'officer-personnel': 'decisionConsequences.family.officerPersonnel',
+  'stance-matter': 'decisionConsequences.family.stanceMatter',
 };
 
 function routeLabel(record: DecisionConsequenceRecord): string {

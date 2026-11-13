@@ -32,7 +32,9 @@ import { buildOsidAdjacency, type Osid } from './osid_adjacency.js';
 import { analyzeFactionGraphCached, type FactionGraphAnalysis } from './osid_graph_analysis.js';
 
 // ── Submodule imports for orchestrator ──────────────────────────────────
-import { setArmyStandingOrder, coordinateMultiCorpsOffensive, generateCorpsStanceOrders } from './bot_corps_stance.js';
+import { setArmyStandingOrder, coordinateMultiCorpsOffensive, generateCorpsStanceOrders, type CorpsStanceTrace } from './bot_corps_stance.js';
+import { clampHeldCorpsStances } from './stance_matter_holds.js';
+import { clampHeldOgStances } from './stance_matters.js';
 import { evaluateOperationProgress } from './sector_offensive.js';
 import { generateOGActivationOrders, generateEmergencyDefensiveOperations } from './bot_corps_operations.js';
 import { attemptCorridorBreach } from './bot_corps_corridor.js';
@@ -378,6 +380,8 @@ export function generateAllCorpsOrders(
     spatial?: SpatialContext | null,
     osidPopulationMap?: OsidPopulationMap,
     terrainData?: import('../../map/terrain_scalars.js').TerrainScalarsData | null,
+    /** Read-only formula trace for the stance-matter path (live president only). */
+    stanceTrace?: Map<string, CorpsStanceTrace>,
 ): void {
     // 0. Generate army HQ overrides for this turn (merge with any existing from gathering)
     const armyOverrides = generateArmyHQOverrides(state, faction);
@@ -395,7 +399,9 @@ export function generateAllCorpsOrders(
     evaluateOperationProgress(state, faction);
 
     // 2. Corps stance selection
-    generateCorpsStanceOrders(state, faction, edges, sidToMun);
+    generateCorpsStanceOrders(state, faction, edges, sidToMun, stanceTrace);
+    // Presidential stance holds (posture model option 2). Clamp point 1 of 3; inert without a hold.
+    clampHeldCorpsStances(state, faction);
     reassignCorpsForBilateralWar(state, faction);
 
     // 3. Named operations now launch from sectors inside the commander loop (step 6).
@@ -407,6 +413,8 @@ export function generateAllCorpsOrders(
 
     // 4. Attempt corridor breach
     attemptCorridorBreach(state, faction, edges, sidToMun);
+    // Clamp point 2 of 3: before evaluateSectorStances reads cmd.stance for the OG ceiling.
+    clampHeldCorpsStances(state, faction);
 
     // 5. OG activation
     generateOGActivationOrders(state, faction, edges);
@@ -488,6 +496,11 @@ export function generateAllCorpsOrders(
             status: 'skipped_no_spatial',
         });
     }
+
+    // Clamp point 3 of 3 (the hold is the last writer), then OG holds after the commander
+    // loop, which rewrites every OG stance. Both inert without a hold.
+    clampHeldCorpsStances(state, faction);
+    clampHeldOgStances(state, faction);
 
     // Final cleanup: prune any 0-edge ghost sectors (pocket containment artifacts)
     if (state.military.corps_front_sectors) {

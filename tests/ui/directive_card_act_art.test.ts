@@ -41,6 +41,9 @@ describe('DirectiveCard act-layer lever → art map', () => {
       // review_proposal (approve/withhold a general's autonomy proposal) reuses the
       // personnel-change still — it is a command-staff personnel decision.
       review_proposal: 'act_replace_commander',
+      // stance_matter (confirm / countermand / constrain a commander's stance change) reuses
+      // the same command-staff still until dedicated art lands.
+      stance_matter: 'act_replace_commander',
       front_visit: 'act_front_visit',
       // Leadership gestures (§10) carry their own per-faction command-card art,
       // resolved via the faction-aware override layer (act_address_nation_<faction>.webp

@@ -58,6 +58,7 @@ import type {
 import { BESIEGED_SURPLUS_HOP_LIMIT } from './allocate.js';
 import { CRITICAL_MORALE_THRESHOLD } from '../combat_math.js';
 import { MAX_EXHAUSTION_FOR_OPERATION } from '../bot_constants.js';
+import { corpsHoldForbidsNewPlans } from '../stance_matter_holds.js';
 import {
     isEliteAuthoredForHistoricalOperation,
     isEliteReservedForHistoricalOperation,
@@ -1120,6 +1121,43 @@ function advanceExistingPlan(
 
     // If previously suspended, resume to concentrating
     const effectiveStatus: CommanderPlanStatus = plan.status === 'suspended' ? 'concentrating' : plan.status;
+
+    // Presidential stance hold (posture model option 2): a hold at Defensive or below stops a
+    // concentrating plan from becoming ready, since a ready plan launches its operation in this
+    // same pass. The plan is suspended (normal timeout applies); a stored ready/executing plan
+    // has already launched, so running operations continue. Inert without a hold.
+    if (effectiveStatus === 'concentrating' && corpsHoldForbidsNewPlans(briefing.state_ref, briefing.corps_id, turn)) {
+        const holdReason = 'presidential hold forbids new offensives';
+        const suspendedSince = plan.status === 'suspended' ? (plan.suspended_since_turn ?? turn) : turn;
+        if (plan.status === 'suspended' && turn - suspendedSince >= MAX_SUSPENSION_TURNS) {
+            return {
+                plan: { ...plan, status: 'abandoned' },
+                action: 'abandoned',
+                reason: `suspended for ${turn - suspendedSince} turns: ${holdReason}`,
+                decision_trace: {
+                    turn,
+                    winning_intent_id: null,
+                    candidates: [],
+                    hard_constraints: ['plan_abandoned_suspension_timeout'],
+                    lessons_applied: [],
+                    relationships_applied: [],
+                },
+            };
+        }
+        return {
+            plan: { ...plan, status: 'suspended', suspension_reason: holdReason, suspended_since_turn: suspendedSince },
+            action: 'suspended',
+            reason: holdReason,
+            decision_trace: {
+                turn,
+                winning_intent_id: null,
+                candidates: [],
+                hard_constraints: ['presidential_stance_hold'],
+                lessons_applied: [],
+                relationships_applied: [],
+            },
+        };
+    }
 
     // Compute concentration progress — time-based, not location-based.
     // Concentration orders are planning artefacts; no downstream system physically

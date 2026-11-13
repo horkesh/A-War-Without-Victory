@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { advanceTurnAndSync, stageAssignBrigadeToSectorAction } from '../src/ui/map/desktop/orderActions.js';
+import { advanceTurnAndSync } from '../src/ui/map/desktop/orderActions.js';
 
 describe('ui map order actions', () => {
   function makeLoadedState(turn: number): any {
@@ -108,35 +108,6 @@ describe('ui map order actions', () => {
     expect(setTurnAftermathOpen).not.toHaveBeenCalled();
   });
 
-  it('routes map-click sector assignment through the canonical sector override IPC', async () => {
-    const assignBrigadeToSector = vi.fn().mockResolvedValue({ ok: true });
-    const assignBrigadeToFront = vi.fn().mockResolvedValue({ ok: true });
-    const addStagedOrder = vi.fn();
-    const setLoadError = vi.fn();
-
-    await stageAssignBrigadeToSectorAction(
-      {
-        ipc: {
-          assignBrigadeToSector,
-          assignBrigadeToFront,
-        } as any,
-        addStagedOrder,
-        setLoadError,
-      },
-      'rbih_1st_brigade',
-      'sector:arbih_3rd_corps:zavidovici',
-    );
-
-    expect(assignBrigadeToSector).toHaveBeenCalledWith(
-      'rbih_1st_brigade',
-      'sector:arbih_3rd_corps:zavidovici',
-    );
-    expect(assignBrigadeToFront).not.toHaveBeenCalled();
-    expect(addStagedOrder).toHaveBeenCalledWith({
-      type: 'sector',
-      formationId: 'rbih_1st_brigade',
-      targetSectorId: 'sector:arbih_3rd_corps:zavidovici',
-    });
-    expect(setLoadError).not.toHaveBeenCalled();
-  });
+  // The map-click sector-assignment helper was retired 2026-11-12 (posture model option 2):
+  // it had no screen, and the president does not move brigades between OGs.
 });
