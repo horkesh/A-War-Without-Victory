@@ -1,13 +1,12 @@
 # Audio provenance: `menu_theme`
 
-- Work: **What Remains of Home**. Calm menu v3, 125.035 seconds; whole-track loop preserves the approved clean ending.
-- Composition: A War Without Victory project, original authored score. No reference audio/MIDI, anthem, folk quotation, voices or combat imitation.
-- Composition license: FIRST_PARTY, for distribution with AWWV.
-- Recorded sample credit: Versilian Studios / Sam Gossner; sample cutting Elan Hickler / Soundemote, **VSCO 2 Community Edition**, CC0-1.0.
-- Pinned library: https://github.com/sgossner/VSCO-2-CE/tree/440300901dfe9275fd84e0b7763af1f8443ae62e
-- Retained license: [VSCO-2-CE-CC0.txt](VSCO-2-CE-CC0.txt), SHA-256 `36ffd9dc085d529a7e60e1276d73ae5a030b020313e6c5408593a6ae2af39673`.
-- Source-by-source URLs, sample hashes, frozen recipes, score and export hashes: [audition provenance](../WHAT_REMAINS_OF_HOME_AUDITION.json). The music uses recorded samples; it is not a new live performance.
-- Runtime adoption: user authorized the selected opening and calm menu integration on 2026-11-05. Approved OGG copied byte-for-byte; no recipe rerendering or sample editing.
-- Bundle filenames and hashes: [AUDIO_ASSET_PROVENANCE.json](../AUDIO_ASSET_PROVENANCE.json). Runtime plays music by default (owner, 2026-11-10) after a trusted gesture; mute/volume controls remain independent.
+- Current work: **Lines on Paper**, 190.761 seconds, looped whole on the main menu.
+- Why: owner decision of 2026-11-13 that the menu theme must differ from the opening ("Make them differ", then "Use a campaign track"). The opening (`opening_titles`) and the former menu loop shared one melody.
+- Source: one of the eight Campaign Suite Revised v2 compositions approved on 2026-11-06. Full composition, sample and licence record: [campaign_suite_two.md](campaign_suite_two.md); audition provenance: [CAMPAIGN_SUITE_TWO_AUDITION.json](../CAMPAIGN_SUITE_TWO_AUDITION.json).
+- Composition license: FIRST_PARTY, for distribution with AWWV. Recorded samples: VSCO 2 Community Edition, CC0-1.0 (Sam Gossner and Simon Dalzell / Versilian Studios; sample cutting Elan Hickler / Soundemote; upright piano Ivy Audio / Simon Dalzell). Retained license: [VSCO-2-CE-CC0.txt](VSCO-2-CE-CC0.txt).
+- The approved OGG is copied byte-for-byte; same binary as before, previously cue `campaign_lines_on_paper`, which has left the campaign rotation.
+- Bundle filenames and hashes: [AUDIO_ASSET_PROVENANCE.json](../AUDIO_ASSET_PROVENANCE.json). Runtime plays music by default (owner, 2026-11-10) after a trusted gesture; mute and volume controls remain independent.
 
-The earlier procedural `menu_original.ogg` remains retained unchanged and inventoried as a previous version: original fixed-seed synthesis from `tools/audio/generate_original_soundscape.py`, FIRST_PARTY, with no third-party samples. It is no longer the runtime menu mapping.
+Previous versions, both still bundled and inventoried unchanged:
+- **What Remains of Home** (`what_remains_of_home.ogg`), the menu theme from 2026-11-05 to 2026-11-13. It is now the campaign cue `campaign_what_remains_of_home`; see [campaign_what_remains_of_home.md](campaign_what_remains_of_home.md).
+- The earlier procedural `menu_original.ogg`: original fixed-seed synthesis from `tools/audio/generate_original_soundscape.py`, FIRST_PARTY, with no third-party samples. It is not a runtime mapping.

@@ -167,10 +167,12 @@ registerCue({ id: 'ambient_diplomatic_table', category: 'ambient', defaultVolume
 registerCue({ id: 'ambient_late_war_exhaustion', category: 'ambient', defaultVolume: 0.16, filePath: 'audio/ambient/late_war_exhaustion.mp3', loop: true });
 registerCue({ id: 'ambient_dayton_aftermath', category: 'ambient', defaultVolume: 0.16, filePath: 'audio/ambient/dayton_aftermath.mp3', loop: true });
 
-registerMusic({ id: 'menu_theme', src: 'audio/music/what_remains_of_home.ogg', volume: 0.4, loop: true, assetStatus: 'provided' });
+// Owner 2026-11-13: the menu theme differs from the opening and uses a campaign
+// track (Lines on Paper); What Remains of Home joins the campaign rotation.
+registerMusic({ id: 'menu_theme', src: 'audio/music/lines_on_paper.ogg', volume: 0.4, loop: true, assetStatus: 'provided' });
 registerMusic({ id: 'opening_titles', src: 'audio/music/what_remains_of_home_opening.ogg', volume: 0.4, loop: false, assetStatus: 'provided' });
 registerMusic({ id: 'campaign_a_country_before_dawn', src: 'audio/music/a_country_before_dawn.ogg', volume: 0.4, loop: false, assetStatus: 'provided' });
-registerMusic({ id: 'campaign_lines_on_paper', src: 'audio/music/lines_on_paper.ogg', volume: 0.4, loop: false, assetStatus: 'provided' });
+registerMusic({ id: 'campaign_what_remains_of_home', src: 'audio/music/what_remains_of_home.ogg', volume: 0.4, loop: false, assetStatus: 'provided' });
 registerMusic({ id: 'campaign_the_long_winter', src: 'audio/music/the_long_winter.ogg', volume: 0.4, loop: false, assetStatus: 'provided' });
 registerMusic({ id: 'campaign_no_answer_on_the_radio', src: 'audio/music/no_answer_on_the_radio.ogg', volume: 0.4, loop: false, assetStatus: 'provided' });
 registerMusic({ id: 'campaign_the_life_we_remember', src: 'audio/music/the_life_we_remember.ogg', volume: 0.4, loop: false, assetStatus: 'provided' });
