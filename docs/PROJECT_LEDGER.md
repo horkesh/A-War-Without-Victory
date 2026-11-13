@@ -23,7 +23,10 @@ Linux build is byte-identical to the Windows-built committed file, so no normali
 the check was NOT weakened. Then made blocking.
 
 **Bite proof:** throwaway draft PR (do not merge) changes `available_until_turn` of `vrs_tomanic` in
-`apr1992_officers.json` 110→111 without re-baking; result recorded in the PR #593 description.
+`apr1992_officers.json` 110→111 without re-baking (draft PR #595, run 43516194108). The `full-suite` step log reads
+`Startup snapshot drift detected for apr_1992: .../apr_1992_initial_save.json` then
+`##[error]Process completed with exit code 1.` — the step failed and the job stopped before the rebuild.
+#595 is closed unmerged.
 
 **Other workflows that rebuild before testing:** `baseline-regression.yml` (83,137,189,262),
 `desktop-release-guard.yml` (63,153), `release.yml` (83,134), and the `structural-fingerprint` job of
