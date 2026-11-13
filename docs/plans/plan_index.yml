@@ -184,12 +184,12 @@ lanes:
         tasks: null
   - lane: DC
     title: "Dayton conference redesign"
-    lane_open: true
-    status: "ACTIVE — owner, 2026-11-07; Claude implements, Codex supplies art (owner, 2026-11-08). Reworks the Dayton table (conference room, live bargaining, data contract"
+    lane_open: false
+    status: "CLOSED 2026-11-12 — merged #560 (`4a67bd516`); Codex handoff CL-055 records every Next item done. Claude implemented, Codex supplied art (owner, 2026-11-08). Re"
     plans:
       - path: docs/plans/2026-11-08-dc-dayton-conference-plan.md
         exists: true
-        tokens: 13624
+        tokens: 13664
         fits_context: true
         tasks: null
   - lane: R8
