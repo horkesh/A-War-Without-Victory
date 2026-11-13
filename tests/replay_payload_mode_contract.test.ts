@@ -49,7 +49,7 @@ describe('scenario replay payload mode contract', () => {
                 frame_count: number;
                 frames: unknown[];
             };
-            expect(manifest.schema_version).toBe(1);
+            expect(manifest.schema_version).toBe(2);
             expect(manifest.frame_count).toBe(2);
             expect(manifest.frames).toHaveLength(2);
 

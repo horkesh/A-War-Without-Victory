@@ -256,7 +256,8 @@ turn pipeline or replace the player's negotiation. The signing narrative require
 
 - `replay-manifest-updated` (event)
   - Payload: `manifestJson: string`
-  - Behavior: optional replay sidecar broadcast emitted before `game-state-updated` on state loads when a sibling `replay_save_manifest.json` exists. Renderer stages the parsed manifest and attaches it to `LoadedGameState.replaySaveManifest` during the next `loadSave()`.
+  - Behavior: optional replay sidecar broadcast emitted before `game-state-updated` on state loads when a sibling `replay_save_manifest.json` exists, and after each advanced turn for the live-play manifest. Renderer stages the parsed manifest and attaches it to `LoadedGameState.replaySaveManifest` during the next `loadSave()`.
+  - Fog of war (2026-11-13): main passes every manifest through `playerVisibleReplayManifestJson(json, meta.game_over === true)` before sending. Until the war is over each frame's `totalCasualties` (all sides) is `null`, because the player-visible projection scopes `casualty_ledger` to the player's side; `totalDisplacedOrKilled` is sent as is. Schema v1 sidecars arrive as v2 with both figures `null` (v1 figures were always 0).
 
 - `replay-sequence-updated` (event)
   - Payload: `sequenceJson: string`
