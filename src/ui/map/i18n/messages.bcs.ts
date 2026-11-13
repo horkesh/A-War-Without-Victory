@@ -1555,6 +1555,7 @@ export const bcsMessages: Partial<Record<MessageKey, string>> = {
     'sectorsSection.segments': 'Podsegmenti: {count}',
     'sectorsSection.stageFailed': 'Nije uspjelo pripremanje sektorskog stava.',
     'sectorsSection.title': 'Sektori',
+    'sectorsSection.unheldFronts': 'Nebranjeni frontovi ({count})',
     'sectorsSection.assignedSector': 'Dodijeljeni sektor',
     'sectorsSection.empty': 'Nema sektorskih dodjela',
     'sectorsSection.emptyHelp': 'Ovaj korpus trenutno ne drži frontovske sektore.',

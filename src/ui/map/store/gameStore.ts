@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import type { LoadedGameState } from '../data/types';
-import { parseGameState } from '../data/GameStateAdapter';
+import { parseGameState, type ParseGameStateOptions } from '../data/GameStateAdapter';
+import { subscribeLocale } from '../i18n';
 import { loadOsidAdjacency } from '../data/DataLoader';
 import { shouldMarkPeaceWarTransitionSeenOnLoad } from '../data/peaceWarTransitionGate';
 import type { TurnAftermathDigest, TurnAftermathView } from '../data/turnAftermath';
@@ -396,6 +397,29 @@ function requestPocketAdjacency(): Promise<void> {
   });
 }
 
+// The adapter builds player-facing labels with t() (e.g. M3 "Unheld front near X" /
+// "Nebranjeni front (X)"). Remember what each parsed view came from so a language switch can
+// rebuild the live view (and the replay return state) in the new locale. Display-only.
+const parseInputByView = new WeakMap<LoadedGameState, { json: unknown; options: ParseGameStateOptions }>();
+
+function rememberParseInput(view: LoadedGameState, json: unknown, options: ParseGameStateOptions): void {
+  parseInputByView.set(view, { json, options });
+}
+
+function reparseInActiveLocale(view: LoadedGameState | null): LoadedGameState | null {
+  if (!view) return view;
+  const input = parseInputByView.get(view);
+  if (!input) return view;
+  try {
+    const next = parseGameState(input.json, input.options);
+    rememberParseInput(next, input.json, input.options);
+    return next;
+  } catch (error) {
+    console.error('[gameStore] Failed to re-localize the loaded state:', error);
+    return view;
+  }
+}
+
 export const useGameStore = create<GameStore>((set, get) => ({
   devMode: isDevMode(),
   diagMode: isDiagMode(),
@@ -747,10 +771,12 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const finalState = get().replayInspectionReturnState ?? current;
     let inspected: LoadedGameState;
     try {
-      inspected = parseGameState(frame, {
+      const frameOptions: ParseGameStateOptions = {
         ...(finalState.replaySaveSequence ? { replaySaveSequence: finalState.replaySaveSequence } : {}),
         ...(finalState.replaySaveManifest ? { replaySaveManifest: finalState.replaySaveManifest } : {}),
-      });
+      };
+      inspected = parseGameState(frame, frameOptions);
+      rememberParseInput(inspected, frame, frameOptions);
     } catch (e) {
       const message = e instanceof Error ? e.message : String(e);
       set({ loadError: message });
@@ -895,12 +921,14 @@ export const useGameStore = create<GameStore>((set, get) => ({
           // the read-only `replayPlayer()` consumer downstream.
           const pendingSequence = (get().pendingReplaySaveSequence ?? null) as ReadonlyArray<unknown> | null;
           const pendingManifest = get().pendingReplaySaveManifest;
-          state = parseGameState(json, {
+          const parseOptions: ParseGameStateOptions = {
             ...(pendingSequence ? { replaySaveSequence: pendingSequence } : {}),
             ...(pendingManifest ? { replaySaveManifest: pendingManifest } : {}),
             ...(get().runtimeFeatureFlags ? { runtimeFeatureFlags: get().runtimeFeatureFlags ?? undefined } : {}),
             ...(pocketAdjacency ? { osidAdjacency: pocketAdjacency } : {}),
-          });
+          };
+          state = parseGameState(json, parseOptions);
+          rememberParseInput(state, json, parseOptions);
         } catch (e) {
           const message = e instanceof Error ? e.message : String(e);
           set({
@@ -1049,3 +1077,14 @@ export const useGameStore = create<GameStore>((set, get) => ({
   flashOsid: null,
   setFlashOsid: (osid) => set({ flashOsid: osid }),
 }));
+
+// Codex review on #577: setLocale() does not rebuild loadedGameState, so adapter-built labels
+// stayed in the language they were parsed in. Rebuild the live view (and the replay return state)
+// whenever the locale changes; selection and modal state are untouched.
+subscribeLocale(() => {
+  const { loadedGameState, replayInspectionReturnState } = useGameStore.getState();
+  const nextLoaded = reparseInActiveLocale(loadedGameState);
+  const nextReturn = reparseInActiveLocale(replayInspectionReturnState);
+  if (nextLoaded === loadedGameState && nextReturn === replayInspectionReturnState) return;
+  useGameStore.setState({ loadedGameState: nextLoaded, replayInspectionReturnState: nextReturn });
+});

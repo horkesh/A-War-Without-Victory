@@ -1590,6 +1590,7 @@ export const enMessages = {
     'sectorsSection.segments': 'Subsegments: {count}',
     'sectorsSection.stageFailed': 'Failed to stage OG stance.',
     'sectorsSection.title': 'OGs',
+    'sectorsSection.unheldFronts': 'Unheld fronts ({count})',
     'sectorsSection.assignedSector': 'Assigned OG',
     'sectorsSection.empty': 'No OG assignments',
     'sectorsSection.emptyHelp': 'No front OGs are currently held by this corps.',
