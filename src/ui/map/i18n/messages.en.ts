@@ -6265,7 +6265,7 @@ export const enMessages = {
     'corps.name.arbih_4th_corps': '4th Corps',
     'corps.name.arbih_5th_corps': '5th Corps',
     'corps.name.vrs_main_staff': 'Main Staff VRS',
-    'corps.name.jna_herzegovina_command': 'JNA Herzegovina Command',
+    'corps.name.jna_herzegovina_command': 'JNA 4th Military District (Herzegovina)',
     'corps.name.vrs_1st_krajina': '1st Krajina Corps',
     'corps.name.vrs_2nd_krajina': '2nd Krajina Corps',
     'corps.name.vrs_drina': 'Drina Corps',

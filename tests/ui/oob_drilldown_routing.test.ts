@@ -194,11 +194,11 @@ describe('OOBSidebar drilldown routing', () => {
 
     const { container } = render(React.createElement(OOBSidebar));
 
-    expect(container.textContent).toContain('JNA Herzegovina Command');
+    expect(container.textContent).toContain('JNA 4th Military District (Herzegovina)');
     expect(container.textContent).toContain('0 fielded brigades');
     expect(container.textContent).not.toContain('JNA phantom battalion');
     expect(container.textContent).not.toContain('No formations.');
-    expect(screen.getByRole('button', { name: 'Inspect JNA Herzegovina Command command card: 0 personnel; 0 fielded brigades' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Inspect JNA 4th Military District (Herzegovina) command card: 0 personnel; 0 fielded brigades' })).toBeTruthy();
   });
 
   it('routes sector rows with their corps context preserved', () => {

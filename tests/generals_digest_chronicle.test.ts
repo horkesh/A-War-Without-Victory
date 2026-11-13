@@ -369,7 +369,7 @@ describe('generals-digest Chronicle beats (D2 task #42)', () => {
         const text = `${entries[0].title} ${entries[0].detail}`;
 
         expect(text).toContain('Sedmica vaših generala');
-        expect(text).toContain('2nd Corps');
+        expect(text).toContain('Operation Olovo u toku pod komandom 2. korpusa');
         expect(text).toContain('Operation Olovo');
         expect(text).toContain('2 naselja zauzeta');
         expect(text).not.toMatch(/Your generals|settlements taken|casualties borne|war fought in your name|ground gained/i);

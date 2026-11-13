@@ -164,7 +164,8 @@ function resolveCommander(
 }
 
 function corpsName(corpsId: string, corpsNameById: Map<string, string>): string {
-  return corpsNameById.get(corpsId) ?? 'Unreported command';
+  const name = corpsNameById.get(corpsId);
+  return name ? getPlayerSafeCorpsName(name, corpsId, name) : 'Unreported command';
 }
 
 function buildDonorLineageFromParticipations(

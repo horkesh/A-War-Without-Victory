@@ -1,5 +1,5 @@
 import { getActiveLocale, t, type Locale, type MessageKey } from '../i18n';
-import { enMessages } from '../i18n/messages.en';
+import { BCS_CORPS_CASE_FORMS, RENAMED_CORPS_SAVED_NAMES, knownCorpsId, resolveBcsCase, type BcsCase } from '../i18n/bcsCases';
 
 const SHORT_MONTHS_BY_LOCALE: Record<Locale, readonly string[]> = {
     en: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
@@ -123,9 +123,10 @@ export function turnToISODate(turn: number): string {
 /**
  * BCS display names for the corps-level commands in `data/source/oob_corps.json`
  * (S9, sensitive-copy lane 2026-11-13; historical forms ruled on by the Pyrrhic
- * panel). The English value of each key equals the data `name`, which stays the
- * English display and the saved value: the data and the save format are
- * untouched, and only the BCS render changes. Nominative forms only.
+ * panel). The English value of each key equals the data `name` (the saved value),
+ * except for a corps whose label was renamed without touching saves
+ * (RENAMED_CORPS_SAVED_NAMES in ../i18n/bcsCases.ts). These messages hold the
+ * nominative; the other BCS cases live in ../i18n/bcsCases.ts.
  */
 const CORPS_NAME_KEYS: Readonly<Record<string, MessageKey>> = {
     arbih_general_staff: 'corps.name.arbih_general_staff',
@@ -149,39 +150,48 @@ const CORPS_NAME_KEYS: Readonly<Record<string, MessageKey>> = {
     hvo_tomislavgrad: 'corps.name.hvo_tomislavgrad',
 };
 
-let corpsIdByEnglishName: Map<string, string> | null = null;
-
-/** Corps id for a known corps, from its id or (when only the name is at hand) its English data name. */
-function knownCorpsId(name: string, id: string): string | null {
-    if (id && CORPS_NAME_KEYS[id]) return id;
-    if (name && CORPS_NAME_KEYS[name]) return name;
-    if (!name) return null;
-    corpsIdByEnglishName ??= new Map(
-        Object.entries(CORPS_NAME_KEYS).map(([corpsId, key]) => [enMessages[key], corpsId] as const),
-    );
-    return corpsIdByEnglishName.get(name) ?? null;
-}
-
-/** BCS name for a known corps-level command, or null (English, or not a known corps). */
-export function localizedCorpsName(name: string | null | undefined, id: string | null | undefined): string | null {
-    if (getActiveLocale() !== 'bcs') return null;
-    const corpsId = knownCorpsId((name ?? '').trim(), (id ?? '').trim());
-    return corpsId ? t(CORPS_NAME_KEYS[corpsId]) : null;
+/**
+ * Display label for a known corps-level command, or null (nothing to replace).
+ * The id, the English label, a saved data name and the BCS nominative all
+ * resolve. In BCS it is the requested grammatical case (nominative by default).
+ * In English only a renamed corps (RENAMED_CORPS_SAVED_NAMES) gets its label;
+ * every other English name stays as the caller has it.
+ */
+export function localizedCorpsName(
+    name: string | null | undefined,
+    id: string | null | undefined,
+    grammaticalCase: BcsCase = 'nom',
+): string | null {
+    const corpsId = knownCorpsId(name, id);
+    if (!corpsId || !CORPS_NAME_KEYS[corpsId]) return null;
+    if (getActiveLocale() !== 'bcs') {
+        // English keeps the data name and its helpers' short forms; only a renamed corps differs.
+        return RENAMED_CORPS_SAVED_NAMES[corpsId] ? t(CORPS_NAME_KEYS[corpsId]) : null;
+    }
+    return grammaticalCase === 'nom' ? t(CORPS_NAME_KEYS[corpsId]) : BCS_CORPS_CASE_FORMS[corpsId][grammaticalCase];
 }
 
 /**
  * Format a corps formation's display name.
  * Strips faction prefix and converts to title case if name === id.
- * In BCS, a known corps-level command shows its historical BCS name.
+ * In BCS, a known corps-level command shows its historical BCS name, in the
+ * requested case (for a template that cannot mark the case on its placeholder,
+ * such as text assembled from segments). A registered BCS fallback phrase is
+ * declined too; any other fallback is returned as passed.
  */
 export function formatCorpsDisplayName(
     name: string | null | undefined,
     id: string | null | undefined,
     fallback = 'This corps',
+    grammaticalCase: BcsCase = 'nom',
 ): string {
-    const localized = localizedCorpsName(name, id);
+    const localized = localizedCorpsName(name, id, grammaticalCase);
     if (localized) return localized;
+    const display = unlocalizedCorpsDisplayName(name, id, fallback);
+    return grammaticalCase !== 'nom' && getActiveLocale() === 'bcs' ? resolveBcsCase(display, grammaticalCase) : display;
+}
 
+function unlocalizedCorpsDisplayName(name: string | null | undefined, id: string | null | undefined, fallback: string): string {
     const safeName = (name ?? '').trim();
     const safeId = (id ?? '').trim();
 
