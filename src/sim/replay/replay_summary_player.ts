@@ -1,4 +1,4 @@
-import type { ReplaySaveManifest } from './replay_manifest.js';
+import { readReplayManifestFrames, type ReadableReplaySaveManifest } from './replay_manifest.js';
 import type { ReplayFrameSummary } from './replay_frame_summary.js';
 import type { ReplayMetadata } from './replay_player.js';
 
@@ -26,10 +26,9 @@ function clampIndex(index: number, length: number): number {
     return i;
 }
 
-export function replaySummaryPlayer(manifest: ReplaySaveManifest | null | undefined): ReplaySummaryPlayer {
-    const summaries = manifest?.schema_version === 1 && Array.isArray(manifest.frames)
-        ? manifest.frames
-        : [];
+export function replaySummaryPlayer(manifest: ReadableReplaySaveManifest | null | undefined): ReplaySummaryPlayer {
+    // v2 frames as written; v1 frames with their never-recorded figures as null.
+    const summaries = readReplayManifestFrames(manifest);
     const frames: readonly ReplaySummaryFrame[] = summaries.map((summary) => ({ summary }));
     const length = frames.length;
     let cursor = length > 0 ? 0 : -1;

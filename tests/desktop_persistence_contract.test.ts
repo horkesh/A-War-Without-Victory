@@ -141,13 +141,15 @@ describe('desktop persistence contract', () => {
       return { loadStatePathIntoDesktop, ledger: () => liveReplayManifestFrames };
     })()`, {
       getDesktopSim: () => ({
-        loadStateFromPath: async (filePath: string, baseDir: string) => { order.push(`load:${filePath}:${baseDir}`); return { state: { id: 'loaded' } }; },
+        loadStateFromPath: async (filePath: string, baseDir: string) => { order.push(`load:${filePath}:${baseDir}`); return { state: { id: 'loaded', meta: { game_over: false } } }; },
+        // Fog of war: the sidecar is projected before anything reaches the renderer.
+        playerVisibleReplayManifestJson: (json: string, warOver: boolean) => { order.push(`project-manifest:${json}:${warOver}`); return 'visible-manifest-json'; },
       }),
       getBaseDir: () => 'explicit-root',
       readReplaySaveManifestSidecar: () => { order.push('read-manifest'); return 'manifest-json'; },
       readReplaySaveSequenceSidecar: () => { order.push('read-sequence'); return 'sequence-json'; },
       persistCurrentStateSnapshots: () => { order.push('persist-autosave'); },
-      sendReplayManifestToRenderer: () => { order.push('send-manifest'); },
+      sendReplayManifestToRenderer: (json: string) => { order.push(`send-manifest:${json}`); },
       sendReplaySequenceToRenderer: () => { order.push('send-sequence'); },
       sendGameStateToRenderer: () => { order.push('broadcast-state'); },
       projectCurrentGameStateForRenderer: () => { order.push('project-state'); return 'projected-json'; },
@@ -161,8 +163,9 @@ describe('desktop persistence contract', () => {
     expect(order).toEqual([
       'load:resume.json:explicit-root',
       'read-manifest',
+      'project-manifest:manifest-json:false',
       'persist-autosave',
-      'send-manifest',
+      'send-manifest:visible-manifest-json',
       'broadcast-state',
       'project-state',
     ]);
@@ -172,6 +175,45 @@ describe('desktop persistence contract', () => {
     const handlerEnd = source.indexOf("ipcMain.handle('list-save-records'", handlerStart);
     const handler = source.slice(handlerStart, handlerEnd);
     expect(handler).toContain('loadStatePathIntoDesktop(result.filePaths[0], _event.sender)');
+  });
+
+  // Codex review on #586: a war ended by a decision, peace plan or Dayton (not by
+  // advance-turn) must still reveal the replay's all-sides casualty total.
+  it('publishes the unmasked live replay manifest from the war-ending choke point', () => {
+    const source = readFileSync(resolve(process.cwd(), 'src/desktop/electron-main.cjs'), 'utf8');
+    const writer = extractFunctionSource(source, 'writeCanonicalCurrentState');
+    const publish = extractFunctionSource(source, 'publishLiveReplayManifestOnWarEnd');
+    const run = (state: unknown, frames: unknown[]) => {
+      const events: string[] = [];
+      const subject = runInNewContext(`(() => {
+        let liveReplayManifestFrames = frames;
+        const writeCanonicalCurrentState = ${writer};
+        const publishLiveReplayManifestOnWarEnd = ${publish};
+        return { writeCanonicalCurrentState };
+      })()`, {
+        frames,
+        getBaseDir: () => 'root',
+        currentGameStateJson: 'state-json',
+        persistCurrentStateSnapshots: () => { events.push('persist'); },
+        sendGameStateToRenderer: () => { events.push('state'); },
+        sendReplayManifestToRenderer: (json: string) => { events.push(`manifest:${json}`); },
+      }) as { writeCanonicalCurrentState: (sim: unknown, state: unknown) => void };
+      subject.writeCanonicalCurrentState({
+        writeOwedTerminationRecords: () => { events.push('owed'); },
+        buildReplaySaveManifest: (f: unknown[]) => ({ schema_version: 2, frame_count: f.length, frames: f }),
+        playerVisibleReplayManifestJson: (json: string, warOver: boolean) => `${warOver ? 'full' : 'masked'}:${json}`,
+      }, state);
+      return events;
+    };
+    const frame = { turn: 3, totalCasualties: 900 };
+    expect(run({ meta: { game_over: true } }, [frame])).toEqual([
+      'owed',
+      'persist',
+      'state',
+      `manifest:full:${JSON.stringify({ schema_version: 2, frame_count: 1, frames: [frame] })}`,
+    ]);
+    expect(run({ meta: { game_over: false } }, [frame])).toEqual(['persist', 'state']);
+    expect(run({ meta: { game_over: true } }, [])).toEqual(['owed', 'persist', 'state']);
   });
 
   it('does not release replay or renderer state when imported-state autosave fails', async () => {
@@ -184,7 +226,10 @@ describe('desktop persistence contract', () => {
       const loadStatePathIntoDesktop = ${helper};
       return { loadStatePathIntoDesktop, ledger: () => liveReplayManifestFrames };
     })()`, {
-      getDesktopSim: () => ({ loadStateFromPath: async () => ({ state: { id: 'loaded' } }) }),
+      getDesktopSim: () => ({
+        loadStateFromPath: async () => ({ state: { id: 'loaded' } }),
+        playerVisibleReplayManifestJson: (json: string) => json,
+      }),
       getBaseDir: () => 'explicit-root',
       readReplaySaveManifestSidecar: () => 'manifest-json',
       readReplaySaveSequenceSidecar: () => null,

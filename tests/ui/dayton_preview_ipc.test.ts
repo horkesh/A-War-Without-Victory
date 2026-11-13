@@ -122,6 +122,9 @@ function loadDaytonHandlers(state = makeState(), useCanonicalSerialization = fal
         ipcMain: { handle: (channel: string, handler: DaytonHandler) => handlers.set(channel, handler) },
         autoSave: vi.fn(),
         sendGameStateToRenderer: vi.fn(),
+        // Module-level live replay ledger that writeCanonicalCurrentState reads when a war ends.
+        liveReplayManifestFrames: [] as unknown[],
+        sendReplayManifestToRenderer: vi.fn(),
     };
     runInNewContext(`${canonical}\n${dayton}`, context);
     return { invoke: (channel: DaytonChannel, payload: unknown) => handlers.get(channel)!({}, payload), sim, context };

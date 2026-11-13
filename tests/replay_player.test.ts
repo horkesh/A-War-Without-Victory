@@ -212,14 +212,16 @@ describe('replayPlayer (LANE-NIGHTSHIFT-REPLAY-PLAYBACK-CONSUMER)', () => {
                     a: { status: 'destroyed' },
                     b: { status: 'active' },
                 },
-                casualty_totals_by_faction: {
-                    RBiH: { killed: 11, wounded: 3 },
-                    RS: { killed: 7 },
+                casualty_ledger: {
+                    RBiH: { killed: 11, wounded: 3, missing_captured: 0 },
+                    RS: { killed: 7, wounded: 0, missing_captured: 0 },
+                    HRHB: { killed: 0, wounded: 0, missing_captured: 0 },
                 },
             },
             displacement: {
                 displacement_humanitarian_aggregates: {
-                    total_displaced: 1234,
+                    RS: { RBiH: { refugees_created: 1000, refugees_received: 0, civilian_casualties_caused: 40 } },
+                    RBiH: { RS: { refugees_created: 234, refugees_received: 0, civilian_casualties_caused: 2 } },
                 },
             },
         } as unknown as GameState;
@@ -232,7 +234,7 @@ describe('replayPlayer (LANE-NIGHTSHIFT-REPLAY-PLAYBACK-CONSUMER)', () => {
         expect(summary.date).toBe('1992-W13');
         expect(summary.activeFormations).toBe(2);
         expect(summary.totalCasualties).toBe(21);
-        expect(summary.totalDisplaced).toBe(1234);
+        expect(summary.totalDisplacedOrKilled).toBe(1234);
         expect(summary.controlByFaction).toEqual([
             { faction: 'HRHB', osids: 1 },
             { faction: 'RBiH', osids: 2 },
@@ -242,7 +244,7 @@ describe('replayPlayer (LANE-NIGHTSHIFT-REPLAY-PLAYBACK-CONSUMER)', () => {
 
     it('T8: plays sparse replay manifests without requiring full GameState frames', () => {
         const manifest: ReplaySaveManifest = {
-            schema_version: 1,
+            schema_version: 2,
             frame_count: 2,
             frames: [
                 {
@@ -250,7 +252,7 @@ describe('replayPlayer (LANE-NIGHTSHIFT-REPLAY-PLAYBACK-CONSUMER)', () => {
                     date: '1992-W10',
                     activeFormations: 4,
                     totalCasualties: 12,
-                    totalDisplaced: 100,
+                    totalDisplacedOrKilled: 100,
                     controlByFaction: [{ faction: 'RBiH', osids: 2 }],
                 },
                 {
@@ -258,7 +260,7 @@ describe('replayPlayer (LANE-NIGHTSHIFT-REPLAY-PLAYBACK-CONSUMER)', () => {
                     date: '1992-W11',
                     activeFormations: 5,
                     totalCasualties: 20,
-                    totalDisplaced: 110,
+                    totalDisplacedOrKilled: 110,
                     controlByFaction: [{ faction: 'RS', osids: 3 }],
                 },
             ],
@@ -274,6 +276,6 @@ describe('replayPlayer (LANE-NIGHTSHIFT-REPLAY-PLAYBACK-CONSUMER)', () => {
             lastTurnDate: '1992-W11',
         });
         expect(player.seekToTurn(99)).toBe(1);
-        expect(player.getCurrent()?.summary.totalDisplaced).toBe(110);
+        expect(player.getCurrent()?.summary.totalDisplacedOrKilled).toBe(110);
     });
 });

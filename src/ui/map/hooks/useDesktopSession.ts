@@ -3,6 +3,11 @@ import { useGameStore, type LastTurnReport } from '../store/gameStore';
 import { useIPC } from '../desktop/useIPC';
 import type { GameStateUpdateMetadata } from '../desktop/types';
 import type { CampaignReplacementCoordinator } from '../utils/campaignViewportLifecycle';
+import {
+    buildReplaySaveManifest,
+    isReadableReplaySaveManifest,
+    readReplayManifestFrames,
+} from '../../../sim/replay/replay_manifest';
 
 type ProbeReactionWindow = Window & {
     __AWWV_RUNTIME_PROBE_ACTIVE?: boolean;
@@ -162,8 +167,10 @@ export function useDesktopSession({
             if (!active || !manifestJson) return;
             try {
                 const parsed = JSON.parse(manifestJson);
-                if (parsed?.schema_version === 1 && Array.isArray(parsed.frames) && parsed.frames.length > 0) {
-                    setPendingReplaySaveManifest(parsed);
+                // v1 sidecars (written before 2026-11-13) are still read; their
+                // casualty and displaced figures were always 0 and become null here.
+                if (isReadableReplaySaveManifest(parsed) && parsed.frames.length > 0) {
+                    setPendingReplaySaveManifest(buildReplaySaveManifest(readReplayManifestFrames(parsed)));
                 } else {
                     setPendingReplaySaveManifest(null);
                 }

@@ -245,14 +245,14 @@ describe('VerdictScreen mount — verdict content', () => {
         storeState = {
             loadedGameState: endgame({
                 replaySaveManifest: {
-                    schema_version: 1,
+                    schema_version: 2,
                     frame_count: 1,
                     frames: [{
                         turn: 188,
                         date: '1995-10-01',
                         activeFormations: 37,
                         totalCasualties: 46500,
-                        totalDisplaced: 900000,
+                        totalDisplacedOrKilled: 900000,
                         controlByFaction: [{ faction: 'RS', osids: 42 }],
                     }],
                 },
@@ -261,10 +261,13 @@ describe('VerdictScreen mount — verdict content', () => {
         const h = render();
         expect(h).toContain('Replay');
         expect(h).toContain('Active formations');
-        // Sensitive-copy panel 2026-11-13: the summary's casualty and displaced
-        // readers return 0 for every real frame, so neither figure is shown.
-        expect(h).not.toContain('46500');
-        expect(h).not.toContain('900000');
+        // SC6 (2026-11-13): the summary reads the casualty ledger and the
+        // displacement aggregates, so both figures are shown again; the displaced
+        // figure counts the killed and its label says so (§4).
+        expect(h).toContain('Military casualties');
+        expect(h).toContain('46,500');
+        expect(h).toContain('Displaced or killed');
+        expect(h).toContain('900,000');
         expect(h).not.toContain('RS:42');
         expect(h).toContain('VRS 42 settlements');
     });

@@ -34,12 +34,20 @@ function makeMinimalState(turn: number, date: string, rsOsids: number, rbihOsids
                 brigade_b: { status: 'active', kind: 'brigade', faction: 'RBiH' },
                 brigade_c: { status: 'destroyed', kind: 'brigade', faction: 'RS' },
             },
-            casualty_totals_by_faction: { RS: 1200, RBiH: 800 },
+            casualty_ledger: {
+                RS: { killed: 300, wounded: 800, missing_captured: 100 },
+                RBiH: { killed: 200, wounded: 550, missing_captured: 50 },
+                HRHB: { killed: 0, wounded: 0, missing_captured: 0 },
+            },
         },
         political: {
             political_controllers: controllers,
         },
-        displacement: {},
+        displacement: {
+            displacement_humanitarian_aggregates: {
+                RS: { RBiH: { refugees_created: 4000, refugees_received: 0, civilian_casualties_caused: 60 } },
+            },
+        },
     } as unknown as GameState;
 }
 
@@ -52,7 +60,9 @@ describe('desktop_replay_live_accumulator — frame accumulation', () => {
         expect(frame.turn).toBe(1);
         expect(frame.date).toBe('1992-04-06');
         expect(typeof frame.activeFormations).toBe('number');
-        expect(typeof frame.totalCasualties).toBe('number');
+        // SC6: the live manifest carries the real ledger and aggregate totals.
+        expect(frame.totalCasualties).toBe(2000);
+        expect(frame.totalDisplacedOrKilled).toBe(4000);
         expect(Array.isArray(frame.controlByFaction)).toBe(true);
     });
 
@@ -72,7 +82,7 @@ describe('desktop_replay_live_accumulator — frame accumulation', () => {
         const frames = states.map(buildReplayFrameSummary);
         const manifest = buildReplaySaveManifest(frames);
 
-        expect(manifest.schema_version).toBe(1);
+        expect(manifest.schema_version).toBe(2);
         expect(manifest.frame_count).toBe(3);
         expect(manifest.frames.length).toBe(3);
     });
@@ -110,7 +120,8 @@ describe('desktop_replay_live_accumulator — frame accumulation', () => {
         expect(frame.turn).toBeNull();
         expect(frame.date).toBeNull();
         expect(frame.activeFormations).toBe(0);
-        expect(frame.totalCasualties).toBe(0);
+        expect(frame.totalCasualties).toBeNull();
+        expect(frame.totalDisplacedOrKilled).toBeNull();
         expect(frame.controlByFaction).toEqual([]);
     });
 
@@ -124,7 +135,7 @@ describe('desktop_replay_live_accumulator — frame accumulation', () => {
 
     it('buildReplaySaveManifest with empty frames array returns frame_count 0', () => {
         const manifest = buildReplaySaveManifest([]);
-        expect(manifest.schema_version).toBe(1);
+        expect(manifest.schema_version).toBe(2);
         expect(manifest.frame_count).toBe(0);
         expect(manifest.frames).toEqual([]);
     });

@@ -11,7 +11,7 @@ import type { ReplaySaveManifest } from '../../src/sim/replay/replay_manifest';
 
 function makeManifest(): ReplaySaveManifest {
     return {
-        schema_version: 1,
+        schema_version: 2,
         frame_count: 3,
         frames: [
             {
@@ -19,7 +19,7 @@ function makeManifest(): ReplaySaveManifest {
                 date: '1992-04-06',
                 activeFormations: 10,
                 totalCasualties: 100,
-                totalDisplaced: 1_000,
+                totalDisplacedOrKilled: 1_000,
                 controlByFaction: [{ faction: 'RBiH', osids: 12 }],
             },
             {
@@ -27,7 +27,7 @@ function makeManifest(): ReplaySaveManifest {
                 date: '1992-04-13',
                 activeFormations: 11,
                 totalCasualties: 200,
-                totalDisplaced: 2_000,
+                totalDisplacedOrKilled: 2_000,
                 controlByFaction: [{ faction: 'RS', osids: 14 }],
             },
             {
@@ -35,7 +35,7 @@ function makeManifest(): ReplaySaveManifest {
                 date: '1992-04-20',
                 activeFormations: 12,
                 totalCasualties: 300,
-                totalDisplaced: 3_000,
+                totalDisplacedOrKilled: 3_000,
                 controlByFaction: [{ faction: 'HRHB', osids: 16 }],
             },
         ],
@@ -48,7 +48,7 @@ function renderScrubber(): void {
 
 function makeUndatedManifest(): ReplaySaveManifest {
     return {
-        schema_version: 1,
+        schema_version: 2,
         frame_count: 2,
         frames: [
             {
@@ -56,7 +56,7 @@ function makeUndatedManifest(): ReplaySaveManifest {
                 date: '',
                 activeFormations: 10,
                 totalCasualties: 100,
-                totalDisplaced: 1_000,
+                totalDisplacedOrKilled: 1_000,
                 controlByFaction: [],
             },
             {
@@ -64,7 +64,7 @@ function makeUndatedManifest(): ReplaySaveManifest {
                 date: '',
                 activeFormations: 11,
                 totalCasualties: 200,
-                totalDisplaced: 2_000,
+                totalDisplacedOrKilled: 2_000,
                 controlByFaction: [],
             },
         ],
