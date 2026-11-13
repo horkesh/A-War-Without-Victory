@@ -115,7 +115,7 @@ describe('FactionReport mobile subdivision (UI-5 / Batch 44)', () => {
         expect(html).toContain('Casualties Inflicted');
         expect(html).toContain('Casualties Taken');
         expect(html).toContain('Civilians Protected');
-        expect(html).toContain('Refugees Created');
+        expect(html).toContain('Displaced or killed');
         expect(html).toContain('Refugees Received');
         expect(html).toContain('Operations Launched');
         expect(html).toContain('Operations Successful');

@@ -379,7 +379,7 @@ function buildProsecutorialFindings(
             severity: 'grave',
             title: 'Civilian displacement record',
             text:
-                `The negotiation capital record attributes ${formatInteger(totalRefugeesCreated)} refugees created ` +
+                `The negotiation capital record attributes ${formatInteger(totalRefugeesCreated)} people displaced or killed ` +
                 'to the war path. The figure is reported as an integer civilian record, not as a percentage or efficiency measure.',
             sources: [COST_LEDGER_SOURCES.unhcr, COST_LEDGER_SOURCES.sensitiveHistoryGate],
         });
@@ -430,7 +430,7 @@ function buildProsecutorialFindings(
                 `${entry.faction} capital records contain ${formatInteger(entry.war_crimes_events)} ` +
                 `${plural(entry.war_crimes_events, 'war-crime event')}, ${formatInteger(entry.civilian_casualties_caused)} ` +
                 'civilian casualties caused, and ' +
-                `${formatInteger(entry.refugees_created)} refugees created. The ledger records these facts without mitigation or reward language.`,
+                `${formatInteger(entry.refugees_created)} people displaced or killed. The ledger records these facts without mitigation or reward language.`,
             sources: [COST_LEDGER_SOURCES.sensitiveHistoryGate],
         });
     }

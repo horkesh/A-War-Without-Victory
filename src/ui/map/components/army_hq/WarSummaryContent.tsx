@@ -99,10 +99,10 @@ export function WarSummaryContent({ focusSection = 'overview', onNavigateTarget 
         atArmsByFaction,
         mobilizedPoolByFaction,
         mobilizedTotalByFaction,
-        totalDisplaced,
-        displacedByFaction,
-        totalDisplacedReported,
-        displacedByFactionReported,
+        totalDisplacedOrKilled,
+        displacedOrKilledByFaction,
+        totalDisplacedOrKilledReported,
+        displacedOrKilledByFactionReported,
         warExhaustionByFaction,
     } = data;
     const casualtyLedgerReported = casualtyLedger != null;
@@ -210,11 +210,11 @@ export function WarSummaryContent({ focusSection = 'overview', onNavigateTarget 
                                 <div className="space-y-1 text-[13px]">
                                     <div className="flex items-center justify-between gap-3">
                                         <span className="text-text-secondary">{t('warSummary.label.theaterDisplaced')}</span>
-                                        <span className="text-text-primary tabular-nums">{reportedK(totalDisplaced, totalDisplacedReported)}</span>
+                                        <span className="text-text-primary tabular-nums">{reportedK(totalDisplacedOrKilled, totalDisplacedOrKilledReported)}</span>
                                     </div>
                                     <div className="flex items-center justify-between gap-3">
                                         <span className="text-text-secondary">{t('warSummary.label.ownDisplaced')}</span>
-                                        <span className="text-text-primary tabular-nums">{reportedK(displacedByFaction[playerFaction], displacedByFactionReported)}</span>
+                                        <span className="text-text-primary tabular-nums">{reportedK(displacedOrKilledByFaction[playerFaction] ?? 0, displacedOrKilledByFactionReported)}</span>
                                     </div>
                                     <div className="max-w-prose text-[13px] text-text-secondary leading-snug">
                                         {t('warSummary.note.enemyDisplacement')}
@@ -381,11 +381,11 @@ export function WarSummaryContent({ focusSection = 'overview', onNavigateTarget 
                                 <div className="flex flex-wrap gap-x-4 gap-y-1 text-[13px]">
                                     <div>
                                         <span className="text-text-secondary">{t('warSummary.label.totalDisplaced')} </span>
-                                        <span className="text-text-primary tabular-nums">{reportedK(totalDisplaced, totalDisplacedReported)}</span>
+                                        <span className="text-text-primary tabular-nums">{reportedK(totalDisplacedOrKilled, totalDisplacedOrKilledReported)}</span>
                                     </div>
                                     {WAR_SUMMARY_FACTIONS.map((f) => {
-                                        const n = displacedByFaction[f] ?? 0;
-                                        if (!displacedByFactionReported) return null;
+                                        const n = displacedOrKilledByFaction[f] ?? 0;
+                                        if (!displacedOrKilledByFactionReported) return null;
                                         if (n === 0) return null;
                                         return (
                                             <div key={f} className="flex items-center gap-1">

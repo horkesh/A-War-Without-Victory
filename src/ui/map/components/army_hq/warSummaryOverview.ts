@@ -15,10 +15,12 @@ export interface WarSummaryOverviewModel {
     mobilizedPoolByFaction: Record<string, number>;
     mobilizedTotalByFaction: Record<string, number>;
     personnelByFaction: Record<string, number>;
-    totalDisplaced: number;
-    displacedByFaction: Record<string, number>;
-    totalDisplacedReported: boolean;
-    displacedByFactionReported: boolean;
+    /** People displaced or killed, all sides (engine `refugees_created`: routed + killed + fled abroad). */
+    totalDisplacedOrKilled: number;
+    /** The same figure keyed by the people who suffered it. */
+    displacedOrKilledByFaction: Record<string, number>;
+    totalDisplacedOrKilledReported: boolean;
+    displacedOrKilledByFactionReported: boolean;
     /**
      * Cluster C — faction-level war exhaustion passthrough.
      * Sourced from state.warPhaseExhaustion (which is
@@ -77,26 +79,23 @@ export function buildWarSummaryOverviewModel(state: LoadedGameState): WarSummary
         if (total > 0) mobilizedTotalByFaction[f] = total;
     }
 
-    let totalDisplaced = 0;
-    const displacedByFaction: Record<string, number> = {};
-    let totalDisplacedReported = false;
-    let displacedByFactionReported = false;
-    if (state.departedByOsid) {
-        totalDisplacedReported = true;
-        displacedByFactionReported = true;
-        for (const factionCounts of Object.values(state.departedByOsid)) {
-            for (const [faction, count] of Object.entries(factionCounts)) {
-                if (typeof count !== 'number') continue;
-                displacedByFaction[faction] = (displacedByFaction[faction] ?? 0) + count;
-                totalDisplaced += count;
-            }
-        }
-    } else if (state.displacementByMun) {
-        totalDisplacedReported = true;
-        for (const mun of Object.values(state.displacementByMun)) {
-            totalDisplaced += mun.displacedOut ?? 0;
+    // One definition, shared with the Humanitarian Ledger, the replay, the Verdict and the war
+    // dispatches: people displaced OR KILLED. The engine's `refugees_created` is
+    // displaced (routed) + killed + fled abroad; killed and fled are additional to the routed
+    // count, not subsets of it. `departedByOsid` counts the routed only, so it is not used here.
+    let totalDisplacedOrKilled = 0;
+    const displacedOrKilledByFaction: Record<string, number> = {};
+    const displacementReported = state.nationalDisplacement != null || state.departedByOsid != null;
+    for (const victims of Object.values(state.nationalDisplacement?.humanitarianAggregates ?? {})) {
+        for (const [people, aggregate] of Object.entries(victims)) {
+            const count = aggregate.refugeesCreated;
+            if (!Number.isFinite(count) || count <= 0) continue;
+            displacedOrKilledByFaction[people] = (displacedOrKilledByFaction[people] ?? 0) + count;
+            totalDisplacedOrKilled += count;
         }
     }
+    const totalDisplacedOrKilledReported = displacementReported;
+    const displacedOrKilledByFactionReported = displacementReported;
 
     const playerFaction = WAR_SUMMARY_FACTIONS.includes(state.player_faction as (typeof WAR_SUMMARY_FACTIONS)[number])
         ? state.player_faction as (typeof WAR_SUMMARY_FACTIONS)[number]
@@ -125,10 +124,10 @@ export function buildWarSummaryOverviewModel(state: LoadedGameState): WarSummary
         mobilizedPoolByFaction,
         mobilizedTotalByFaction,
         personnelByFaction: atArmsByFaction,
-        totalDisplaced,
-        displacedByFaction,
-        totalDisplacedReported,
-        displacedByFactionReported,
+        totalDisplacedOrKilled,
+        displacedOrKilledByFaction,
+        totalDisplacedOrKilledReported,
+        displacedOrKilledByFactionReported,
         warExhaustionByFaction,
         warWearinessByFaction,
     };

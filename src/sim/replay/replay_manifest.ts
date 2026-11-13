@@ -55,9 +55,11 @@ export function isReadableReplaySaveManifest(value: unknown): value is ReadableR
  * Fog of war: during play the player-visible projection scopes
  * `military.casualty_ledger` to the player's own side, so an all-sides
  * military-casualty total is hidden information until the war ends (the Verdict
- * cost ledger then lists every side's losses). Before the war is over every
- * frame's `totalCasualties` is withheld as `null`; the main process keeps the
- * full frames and sends them once `warOver` is true. Displaced-or-killed is not
+ * cost ledger then lists every side's losses). The all-sides active-formation
+ * count is hidden for the same reason: it includes the other sides' order of
+ * battle. Before the war is over every frame's `totalCasualties` and
+ * `activeFormations` are withheld as `null`; the main process keeps the full
+ * frames and sends them once `warOver` is true. Displaced-or-killed is not
  * withheld: the projection passes `displacement_humanitarian_aggregates` whole.
  *
  * Takes and returns JSON so electron-main.cjs can apply it to a sidecar read from
@@ -75,7 +77,7 @@ export function playerVisibleReplayManifestJson(manifestJson: string | null, war
     if (!isReadableReplaySaveManifest(parsed)) return manifestJson;
     const frames = readReplayManifestFrames(parsed);
     return JSON.stringify(buildReplaySaveManifest(
-        warOver ? frames : frames.map((frame) => ({ ...frame, totalCasualties: null })),
+        warOver ? frames : frames.map((frame) => ({ ...frame, totalCasualties: null, activeFormations: null })),
     ));
 }
 

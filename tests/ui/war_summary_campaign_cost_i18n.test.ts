@@ -171,8 +171,8 @@ describe('War Summary campaign cost localization', () => {
         expect(screen.getByText('Vojna snaga')).toBeTruthy();
         expect(screen.getByText('Ljudstvo pod oružjem')).toBeTruthy();
         expect(screen.getByText('Raseljavanje')).toBeTruthy();
-        expect(screen.getByText('Raseljeni u teatru')).toBeTruthy();
-        expect(screen.getByText('Raseljeni na vlastitoj strani')).toBeTruthy();
+        expect(screen.getByText('Raseljeni ili ubijeni u teatru')).toBeTruthy();
+        expect(screen.getByText('Raseljeni ili ubijeni na vlastitoj strani')).toBeTruthy();
         expect(screen.getByText('Neprijateljsko raseljavanje nije ovdje razbijeno kao tačni ukupni brojevi po frakciji u igračevom sigurnom prikazu.')).toBeTruthy();
         expect(screen.getByText('Cijena kampanje')).toBeTruthy();
         expect(within(campaignCost).getByText('Težina')).toBeTruthy();
@@ -244,8 +244,8 @@ describe('War Summary campaign cost localization', () => {
         const copy = document.body.textContent ?? '';
         expect(copy).toMatch(/Killed\s*No staff report/i);
         expect(copy).toMatch(/Wounded\s*No staff report/i);
-        expect(copy).toMatch(/Theater-wide displaced\s*No staff report/i);
-        expect(copy).toMatch(/Own-side displaced\s*No staff report/i);
+        expect(copy).toMatch(/Theater-wide displaced or killed\s*No staff report/i);
+        expect(copy).toMatch(/Own-side displaced or killed\s*No staff report/i);
         expect(copy).not.toMatch(/Killed\s*0/i);
         expect(copy).not.toMatch(/Wounded\s*0/i);
     });
@@ -264,8 +264,8 @@ describe('War Summary campaign cost localization', () => {
         const copy = document.body.textContent ?? '';
         expect(copy).toMatch(/Killed\s*0/i);
         expect(copy).toMatch(/Wounded\s*0/i);
-        expect(copy).toMatch(/Theater-wide displaced\s*0/i);
-        expect(copy).toMatch(/Own-side displaced\s*0/i);
+        expect(copy).toMatch(/Theater-wide displaced or killed\s*0/i);
+        expect(copy).toMatch(/Own-side displaced or killed\s*0/i);
         expect(copy).not.toMatch(/Killed\s*No staff report/i);
     });
 

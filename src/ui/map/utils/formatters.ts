@@ -17,6 +17,16 @@ export function turnToDateString(turn: number): string {
     return `${startDate.getUTCDate()} ${month} ${startDate.getUTCFullYear()}`;
 }
 
+/** Formats a bare ISO date (YYYY-MM-DD) like `turnToDateString`; null when the text is not one. */
+export function isoDateToDateString(iso: string): string | null {
+    const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso.trim());
+    if (!match) return null;
+    const month = Number(match[2]);
+    const day = Number(match[3]);
+    if (month < 1 || month > 12 || day < 1 || day > 31) return null;
+    return `${day} ${SHORT_MONTHS_BY_LOCALE[getActiveLocale()][month - 1]} ${Number(match[1])}`;
+}
+
 /**
  * Formats the interval completed by a raw turn receipt. Turn N closes the
  * seven days before the turn-N boundary date. Turn zero has no preceding
@@ -207,10 +217,33 @@ function unlocalizedCorpsDisplayName(name: string | null | undefined, id: string
     return fallback;
 }
 
+export interface LocaleNumberOptions {
+    useGrouping?: boolean;
+    minimumFractionDigits?: number;
+    maximumFractionDigits?: number;
+}
+
+/**
+ * Locale-correct number text that does not depend on the runtime's ICU data.
+ * Chromium and Electron render `bs-BA` with English commas (52,645), so BCS is
+ * built from explicit separators: "." between thousands, "," before decimals.
+ */
+export function formatLocaleNumber(
+    value: number,
+    options: LocaleNumberOptions = {},
+    bcs: boolean = getActiveLocale() === 'bcs',
+): string {
+    const parts = new Intl.NumberFormat('en-US', options).formatToParts(value);
+    if (!bcs) return parts.map((part) => part.value).join('');
+    return parts
+        .map((part) => (part.type === 'group' ? '.' : part.type === 'decimal' ? ',' : part.value))
+        .join('');
+}
+
 /** Exact reported count, rounded to a whole person/item in the active UI locale. */
 export function formatCount(value: number | null | undefined): string {
     if (typeof value !== 'number' || !Number.isFinite(value)) return t('corpsFront.unreported');
-    return Math.round(value).toLocaleString(getActiveLocale() === 'bcs' ? 'bs-BA' : 'en-US');
+    return formatLocaleNumber(Math.round(value));
 }
 
 function compactNumber(value: number | null | undefined, personnel: boolean): string {
@@ -220,7 +253,7 @@ function compactNumber(value: number | null | undefined, personnel: boolean): st
     const decimals = scale === 1_000_000 || (personnel && scale === 1_000) ? 1 : 0;
     // Select scale before rounding (999,999 remains thousands); round signed deltas symmetrically.
     const rounded = Number((magnitude / scale).toFixed(decimals));
-    const number = rounded.toLocaleString(getActiveLocale() === 'bcs' ? 'bs-BA' : 'en-US', {
+    const number = formatLocaleNumber(rounded, {
         useGrouping: false,
         minimumFractionDigits: personnel && scale > 1 ? 1 : 0,
         maximumFractionDigits: decimals,

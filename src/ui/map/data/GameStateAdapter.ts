@@ -2498,8 +2498,10 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
             displacementEventLogRaw.push({ turn: turnNum, origin_osid: originOsid || undefined, dest_osid: destOsid || undefined, origin_mun: originMun || undefined, ethnicity: ethnicity || undefined, displaced, killed, fled_abroad: fledAbroad, settled, caused_by: causedBy });
             if (originOsid) {
                 if (!displacementByOsid[originOsid]) displacementByOsid[originOsid] = { out: 0, lost: 0, in: 0 };
-                // displaced = total people removed (includes killed + fled as subsets)
-                // killed + fled_abroad are subsets of displaced, NOT additional
+                // displaced = the people routed to another place. killed and fled_abroad are
+                // ADDITIONAL to it, not subsets (the engine's refugees_created is
+                // displaced + killed + fled_abroad). `out` is therefore routed-only;
+                // `lost` is the killed and fled on top of it.
                 displacementByOsid[originOsid].out += displaced;
                 displacementByOsid[originOsid].lost += killed + fledAbroad;
             }
@@ -2507,7 +2509,9 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
                 if (!displacementByOsid[destOsid]) displacementByOsid[destOsid] = { out: 0, lost: 0, in: 0 };
                 displacementByOsid[destOsid].in += settled;
             }
-            // displaced = total removals (killed + fled are subsets, not additional)
+            // Routed people only: this per-OSID departed count excludes the killed and fled
+            // abroad. The war-wide displaced-or-killed total comes from the humanitarian
+            // aggregates instead (see warSummaryOverview.ts).
             const totalRemoved = displaced;
             if (totalRemoved > 0 && ethnicity) {
                 if (originOsid) {
