@@ -16,7 +16,10 @@ import { OrbatPanel } from './components/OrbatPanel';
 import { OrderQueue } from './components/OrderQueue';
 import { Tooltip } from './components/Tooltip';
 import { SidePickerOverlay } from './components/SidePickerOverlay';
-import { RecruitmentModal } from './components/RecruitmentModal';
+// Lazy like AutonomyPanel below: mounted only while open (entry-chunk budget, 2026-11-12).
+const RecruitmentModal = lazy(() =>
+  import('./components/RecruitmentModal').then(m => ({ default: m.RecruitmentModal })),
+);
 import { WarSummaryModal } from './components/WarSummaryModal';
 // Command Autonomy opens on demand from Army HQ, so it loads then and stays out of the
 // entry chunk (vite.config.ts chunk-size limit; the player-experience gate blocks on it).
@@ -115,12 +118,15 @@ import { isWarroomLocalCommand, type WarroomOverlaySurface } from './utils/warro
 import { getPeacePlanDismissalKey, shouldShowPeacePlanModal } from './utils/peacePlanDismissal';
 import { decodeShellHandoffCommand, isShellHandoffCommand, type ArmyHQRecordsSubTab, type ShellHandoffCommand } from '../shared/shellHandoff';
 import { shouldShowOpeningBrief } from './data/openingBriefGate';
+import { deriveRecruitmentMatter } from './data/recruitmentMatter';
 import {
   applyRecruitmentAndSync,
-  fetchRecruitmentCatalog,
+  fetchRecruitmentCatalogSnapshot,
+  type FetchedRecruitmentCatalog,
   resolveBrowserEventDecision,
   startCampaignFromSidePicker,
 } from './desktop/campaignRecruitmentActions';
+import { createRecruitmentWatchSync } from './desktop/recruitmentWatchSync';
 import { beginMapTransition } from './perf/mapTransitionTiming';
 import { createCampaignReplacementCoordinator } from './utils/campaignViewportLifecycle';
 import type { FieldOperationPlanTarget } from './utils/fieldInspectionTarget';
@@ -581,12 +587,22 @@ function App() {
     currentTurn: loadedGameState?.turn,
     currentFingerprint: loadedStateFingerprint,
   });
+  // Recruitment on the Desk: one sync owns the catalog fetch and the UI-only watch. The fetch
+  // is read through a ref so the sync (and the replacement coordinator below) stay stable.
+  const recruitmentFetchRef = useRef<() => Promise<FetchedRecruitmentCatalog | null>>(async () => null);
+  const recruitmentWatchSync = useMemo(() => createRecruitmentWatchSync({
+    fetchSnapshot: () => recruitmentFetchRef.current(),
+    getStore: () => useGameStore.getState(),
+  }), []);
   const markCampaignReplacementSucceeded = useCallback(() => {
     setTacticalMapReadiness({ ready: false, renderedTurn: null, renderedFingerprint: null });
     setFieldOperationPlanFocus(null);
     setFieldOperationPlanReturnCardId(null);
+    // Every replacement (main-menu load, new war, desktop session) starts a fresh
+    // recruitment watch, even at the same faction and turn; the epoch bump re-fetches.
+    recruitmentWatchSync.campaignReplaced();
     setCampaignViewportEpoch((epoch) => epoch + 1);
-  }, []);
+  }, [recruitmentWatchSync]);
   useEffect(() => {
     if (appScreen !== 'game') {
       setFieldOperationPlanFocus(null);
@@ -656,7 +672,8 @@ function App() {
   const [recruitmentLoading, setRecruitmentLoading] = useState(false);
   const [recruitmentApplying, setRecruitmentApplying] = useState(false);
   const [recruitmentCatalog, setRecruitmentCatalog] = useState<RecruitmentCatalogBrigade[]>([]);
-  const recruitmentCatalogRequestId = useRef(0);
+  const [recruitmentFocusBrigadeId, setRecruitmentFocusBrigadeId] = useState<string | null>(null);
+  const recruitmentOpenRequest = useGameStore((s) => s.recruitmentOpenRequest);
   const initialShellHandoffApplied = useRef(false);
 
   useEffect(() => {
@@ -761,6 +778,8 @@ function App() {
     setActiveEventDecisionId(null);
     setRecentlyAcceptedEventDecisionId(null);
     setCommandBriefingSuppressedTurn(null);
+    // The recruitment watch is reset on a SUCCESSFUL replacement instead
+    // (markCampaignReplacementSucceeded), so a failed load keeps the current one.
   }, []);
 
   useEffect(() => {
@@ -1109,21 +1128,52 @@ function App() {
     }
   };
 
-  const refreshRecruitmentCatalog = async () => {
+  /**
+   * Fetch the state-aware catalog. Besides feeding the modal, every fetch is folded into the
+   * UI-only recruitment watch that puts newly raisable brigades on the President's Desk
+   * (owner 2026-11-12). `silent` skips the modal's loading shimmer (the per-turn refresh).
+   */
+  recruitmentFetchRef.current = () => fetchRecruitmentCatalogSnapshot({ ipc, setLoadError });
+  const refreshRecruitmentCatalog = async (options: { silent?: boolean } = {}) => {
     if (!ipc.isAvailable) return;
-    const requestId = ++recruitmentCatalogRequestId.current;
-    setRecruitmentLoading(true);
-    const catalog = await fetchRecruitmentCatalog({ ipc, setLoadError });
-    if (requestId !== recruitmentCatalogRequestId.current) return;
-    setRecruitmentCatalog(catalog);
+    if (!options.silent) setRecruitmentLoading(true);
+    const snapshot = await recruitmentWatchSync.refresh();
+    if (snapshot === 'stale') return;
+    setRecruitmentCatalog(snapshot?.brigades ?? []);
     setRecruitmentLoading(false);
   };
 
-  const openRecruitmentModal = () => {
+  const openRecruitmentModal = (brigadeId?: string | null) => {
     setAutonomyOpen(false);
+    setRecruitmentFocusBrigadeId(typeof brigadeId === 'string' ? brigadeId : null);
     setRecruitmentOpen(true);
     void refreshRecruitmentCatalog();
   };
+
+  // Recruitment on the Desk: re-read the catalog once per week (and when the autonomy panel
+  // closes, since the level decides decision vs notice) so newly raisable brigades reach
+  // the president without a visit to Army HQ → Personnel. Presentation only.
+  const recruitmentWatchTurn = loadedGameState?.turn ?? null;
+  const recruitmentWatchFaction = loadedGameState?.player_faction ?? null;
+  const recruitmentWatchGameOver = loadedGameState?.gameOver === true;
+  useEffect(() => {
+    if (!ipc.isAvailable || recruitmentWatchTurn === null || !recruitmentWatchFaction || recruitmentWatchGameOver) return;
+    if (autonomyOpen) return;
+    void refreshRecruitmentCatalog({ silent: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- refresh is re-created each render; the keys are the trigger.
+  }, [ipc.isAvailable, recruitmentWatchTurn, recruitmentWatchFaction, recruitmentWatchGameOver, autonomyOpen, campaignViewportEpoch]);
+
+  // A matter's "Open Recruitment" (Command Surface, Desk, Advance review) lands here.
+  useEffect(() => {
+    if (!recruitmentOpenRequest) return;
+    useGameStore.getState().clearRecruitmentOpenRequest();
+    setCommandStripOpen(false);
+    setCommandStripCategoryId(null);
+    setWarroomDecisionRoomOpen(false);
+    setWarroomDeskOpen(false);
+    openRecruitmentModal(recruitmentOpenRequest.brigadeId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- consume each request once.
+  }, [recruitmentOpenRequest]);
 
   const handleSelectFaction = async (payload: StartNewCampaignPayload) => {
     resetCampaignScopedUiState();
@@ -1639,6 +1689,13 @@ function App() {
     if (action === 'dismiss_intelligence_notification') {
       setSelectedIntelligenceBriefId(itemId);
     }
+    if (action === 'recruitment') {
+      const matter = deriveRecruitmentMatter(gs.recruitmentWatch, {
+        playerFaction: gs.loadedGameState?.player_faction ?? null,
+        turn: gs.loadedGameState?.turn ?? null,
+      });
+      gs.requestRecruitmentOpen(matter?.focusBrigadeId ?? null);
+    }
   };
 
   const openInboxHome = () => {
@@ -1897,16 +1954,21 @@ function App() {
           decisionMode: 'emergent',
         })}
       />
-      <RecruitmentModal
-        isOpen={recruitmentOpen}
-        loading={recruitmentLoading}
-        applying={recruitmentApplying}
-        playerFaction={playerFaction}
-        brigades={recruitmentCatalog}
-        onRefresh={() => void refreshRecruitmentCatalog()}
-        onApply={(brigadeId, equipmentClass) => void handleApplyRecruitment(brigadeId, equipmentClass)}
-        onClose={() => setRecruitmentOpen(false)}
-      />
+      {recruitmentOpen && (
+        <Suspense fallback={null}>
+          <RecruitmentModal
+            isOpen={recruitmentOpen}
+            loading={recruitmentLoading}
+            applying={recruitmentApplying}
+            playerFaction={playerFaction}
+            brigades={recruitmentCatalog}
+            initialBrigadeId={recruitmentFocusBrigadeId}
+            onRefresh={() => void refreshRecruitmentCatalog()}
+            onApply={(brigadeId, equipmentClass) => void handleApplyRecruitment(brigadeId, equipmentClass)}
+            onClose={() => setRecruitmentOpen(false)}
+          />
+        </Suspense>
+      )}
       {autonomyOpen && (
         <Suspense fallback={null}>
           <AutonomyPanel
