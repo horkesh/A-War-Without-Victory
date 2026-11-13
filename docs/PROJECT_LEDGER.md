@@ -9,6 +9,30 @@
   Compacted 2026-09-10: 1723 sections moved out, 62 kept live.
 -->
 
+## 2026-11-13 — CI guard: a stale committed startup snapshot now fails the full-suite job
+
+Closes the gap recorded in the entry below. `full-suite-and-fingerprint.yml` (`full-suite` job) now runs
+`npm run desktop:startup-snapshot:check` (read-only; byte comparison of the committed
+`data/derived/startup/apr_1992_initial_save.json` with a fresh build) BEFORE the "Rebuild startup
+snapshot for this platform" step, gated on the same `relevant` output, and it blocks the job.
+
+**Linux parity (answers the open question):** probe run on PR #593 with `continue-on-error: true`; the
+step log (not the conclusion, which reads "success" for a tolerated failure) shows
+`Startup snapshot OK: .../data/derived/startup/apr_1992_initial_save.json` on the ubuntu runner. A
+Linux build is byte-identical to the Windows-built committed file, so no normalisation was needed and
+the check was NOT weakened. Then made blocking.
+
+**Bite proof:** throwaway draft PR (do not merge) changes `available_until_turn` of `vrs_tomanic` in
+`apr1992_officers.json` 110→111 without re-baking; result recorded in the PR #593 description.
+
+**Other workflows that rebuild before testing:** `baseline-regression.yml` (83,137,189,262),
+`desktop-release-guard.yml` (63,153), `release.yml` (83,134), and the `structural-fingerprint` job of
+the full-suite workflow. They need no separate guard: the full-suite job runs on every PR touching
+`src/`, `tools/`, `tests/`, `data/scenarios/`, `data/derived/` and others, and is the merge-blocking
+check, so a stale committed snapshot cannot reach main. Caveat: the guard is skipped when
+`relevant=false` (docs-only PRs), which cannot change snapshot inputs. `release.yml` rebuilds
+legitimately for packaging; a drift there is already caught earlier on the PR.
+
 ## 2026-11-13 — Startup snapshot re-baked for the Delić handover (#581 follow-up)
 
 #581 moved Halilović/Delić from week 60 to 61 in `apr1992_officers.json` but did not regenerate the
