@@ -162,6 +162,7 @@ import { updateExhaustion } from '../combat/exhaustion.js';
 import { recordWarWearinessBandCrossings } from '../../state/exhaustion.js';
 import { detectFronts } from '../combat/front_emergence.js';
 import { buildCorpsFrontSectors, assignBrigadesToSubSegments, REASSIGNMENT_ENTRENCHMENT_RETAIN } from '../combat/corps_front_sectors.js';
+import { carrySectorStances } from '../combat/sector_stance_carry.js';
 import { ENABLE_TG_OG_PROMOTION } from '../combat/tactical_group_config.js';
 import { applyOgPromotions, projectPromotionDisplayNames } from '../combat/tactical_group_promotion.js';
 import { distributeBrigadesToFront } from '../combat/brigade_front_distribution.js';
@@ -1705,9 +1706,12 @@ export const warPhases: NamedPhase[] = [
             const od = getOperationalData(context);
             if (!od?.opData?.operationalToCanonical || !od?.edges?.length) return;
             const spatial = getSpatialContextCache(context);
+            const previousSectors = context.state.military.corps_front_sectors;
             context.state.military.corps_front_sectors = buildCorpsFrontSectors(
                 context.state, od.edges, od.opData.operationalToCanonical, od.centroids, spatial?.preCombat
             );
+            // Rebuilt sectors keep the OG stance they had before the rebuild (sector_stance_carry.ts).
+            carrySectorStances(previousSectors, context.state.military.corps_front_sectors);
         }
     },
     // Note: brigade_front_assignment survives only as a compatibility fallback.
