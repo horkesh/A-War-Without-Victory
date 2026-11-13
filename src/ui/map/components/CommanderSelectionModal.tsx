@@ -20,7 +20,7 @@ import { findPlayerFacingOperationByKey } from '../../shared/playerVisibility';
 import { Z } from '../../shared/zIndex';
 import { Modal } from '../../shared/Modal';
 import { t } from '../i18n';
-import { getPlayerSafeOperationName } from '../utils/playerSafeText';
+import { getPlayerSafeCorpsName, getPlayerSafeOperationName } from '../utils/playerSafeText';
 
 interface CommanderSelectionModalProps {
     isOpen: boolean;
@@ -84,7 +84,7 @@ export function CommanderSelectionModal({ isOpen, onClose, onSelect }: Commander
         const corpsNameById = new Map(
             loadedGameState.formations
                 .filter((f) => f.kind === 'corps' || f.kind === 'corps_asset' || f.kind === 'army_hq')
-                .map((f) => [f.id, f.name]),
+                .map((f) => [f.id, getPlayerSafeCorpsName(f.name, f.id, f.name)]),
         );
         const operationNameByRaw = new Map(
             (loadedGameState.operations ?? [])

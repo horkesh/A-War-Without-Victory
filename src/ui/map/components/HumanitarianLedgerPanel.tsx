@@ -4,12 +4,27 @@
  * §6-ADJACENT: this surface DISPLAYS atrocity magnitudes (killed, fled abroad,
  * forced displacement, perpetrator attribution). It is a pure read-model view of
  * `LoadedGameState.nationalDisplacement`, which the adapter exposes VERBATIM from
- * persisted engine state. No figure is derived, scaled, or invented here.
+ * persisted engine state. No figure is scaled or invented here; the only
+ * arithmetic is the plain sum described below for the second table.
  *
  * Register/tone: this is a LEDGER OF HUMAN COST, not a scoreboard. Framing is
  * tragic/factual and victim-neutral; there is no celebratory or "achievement"
- * styling, no winner, no ranking-for-reward. User-facing COPY/TONE is PENDING
- * OWNER SIGN-OFF before release (see the i18n keys under `humanitarianLedger.*`).
+ * styling, no winner, no ranking-for-reward. Copy (EN + BCS) was ruled on by the
+ * Pyrrhic sensitive-history panel on 2026-11-13; the record and its binding
+ * conditions live in docs/10_canon/SENSITIVE_HISTORY_DESIGN_GATE.md (§4 and the
+ * §6 "Sensitive-copy lane" record). In short:
+ *   - Victims are named as peoples.
+ *   - NO responsible-side column. The engine's `caused_by` is not a reliable
+ *     perpetrator: siege and encirclement displacement (`src/state/displacement.ts`,
+ *     the pressure path) is booked to the side HOLDING the besieged municipality,
+ *     for every census group in it, so a "responsible" column would pin the
+ *     besieger's victims on the defender. The second table therefore sums
+ *     `displacement_humanitarian_aggregates` over every `caused_by` key and shows
+ *     one row per victim group. The side labels (`humanitarianLedger.side.*`)
+ *     ship as keys for the engine follow-up that fixes siege attribution, which
+ *     needs its own §6 panel before a responsible column may return.
+ *   - Rows stay in key order, never sorted by value; no highlight of the largest
+ *     row; no marker on the player's side.
  *
  * Surface redesign, step 4 (2026-11-12): one surface in the Command Surface style
  * (was a small translucent panel at the right edge). LAYOUT ONLY: every string,
@@ -18,7 +33,7 @@
  */
 import { useMemo } from 'react';
 import type { LoadedGameState } from '../data/types';
-import { t } from '../i18n';
+import { t, useLocale, type MessageKey } from '../i18n';
 import { strictCompare } from '../../../state/validateGameState';
 import { turnToDateString } from '../utils/formatters';
 import {
@@ -41,17 +56,39 @@ interface HumanitarianLedgerPanelProps {
   onClose: () => void;
 }
 
-const UNKNOWN_CAUSER_BUCKET = '_unknown';
+/** Victims, by people. Keys are ethnicity-aligned faction ids. */
+const PEOPLE_KEYS: Record<string, MessageKey> = {
+  RBiH: 'humanitarianLedger.people.RBiH',
+  RS: 'humanitarianLedger.people.RS',
+  HRHB: 'humanitarianLedger.people.HRHB',
+};
 
-/** Map ethnicity-aligned faction id to the people-name. Victim-neutral. */
 function peopleLabel(key: string): string {
-  switch (key) {
-    case 'RBiH': return 'Bosniaks';
-    case 'RS': return 'Serbs';
-    case 'HRHB': return 'Croats';
-    case UNKNOWN_CAUSER_BUCKET: return 'Unattributed';
-    default: return key;
+  const messageKey = PEOPLE_KEYS[key];
+  return messageKey ? t(messageKey) : key;
+}
+
+type HumanitarianAggregates = NonNullable<LoadedGameState['nationalDisplacement']>['humanitarianAggregates'];
+
+/**
+ * Displaced-or-killed and killed per victim group, summed over every `caused_by`
+ * key (no responsible side is shown; see the header). Key order, never by value.
+ */
+export function displacedOrKilledByPeople(
+  aggregates: HumanitarianAggregates | undefined,
+): Array<{ victim: string; displaced: number; killed: number }> {
+  const byVictim = new Map<string, { victim: string; displaced: number; killed: number }>();
+  for (const victims of Object.values(aggregates ?? {})) {
+    for (const [victim, agg] of Object.entries(victims)) {
+      const row = byVictim.get(victim) ?? { victim, displaced: 0, killed: 0 };
+      row.displaced += agg.refugeesCreated;
+      row.killed += agg.civilianCasualtiesCaused;
+      byVictim.set(victim, row);
+    }
   }
+  return [...byVictim.values()]
+    .filter((r) => r.displaced > 0 || r.killed > 0)
+    .sort((a, b) => strictCompare(a.victim, b.victim));
 }
 
 function fmt(n: number): string {
@@ -63,6 +100,7 @@ const TD = 'py-2.5 text-[16px]';
 const NUM = 'font-mono font-semibold tabular-nums';
 
 export function HumanitarianLedgerPanel({ state, open, onClose }: HumanitarianLedgerPanelProps) {
+  useLocale();
   useSurfaceEscape(open, onClose);
   const dialogFocus = useDialogFocus(open);
   const nd = state.nationalDisplacement;
@@ -78,16 +116,10 @@ export function HumanitarianLedgerPanel({ state, open, onClose }: HumanitarianLe
     return { rows, total };
   }, [nd?.civilianCasualtiesByEthnicity]);
 
-  const byPerpetrator = useMemo(() => {
-    const rows: Array<{ perpetrator: string; victim: string; displaced: number; killed: number }> = [];
-    for (const [perpetrator, victims] of Object.entries(nd?.humanitarianAggregates ?? {}).sort((a, b) => strictCompare(a[0], b[0]))) {
-      for (const [victim, agg] of Object.entries(victims).sort((a, b) => strictCompare(a[0], b[0]))) {
-        if (agg.refugeesCreated <= 0 && agg.civilianCasualtiesCaused <= 0) continue;
-        rows.push({ perpetrator, victim, displaced: agg.refugeesCreated, killed: agg.civilianCasualtiesCaused });
-      }
-    }
-    return rows;
-  }, [nd?.humanitarianAggregates]);
+  const byPerpetrator = useMemo(
+    () => displacedOrKilledByPeople(nd?.humanitarianAggregates),
+    [nd?.humanitarianAggregates],
+  );
 
   const overTime = nd?.refugeesByTurn ?? [];
   const maxWeek = useMemo(() => overTime.reduce((m, p) => Math.max(m, p.refugeesCreated), 0), [overTime]);
@@ -151,24 +183,22 @@ export function HumanitarianLedgerPanel({ state, open, onClose }: HumanitarianLe
                     </SurfaceSection>
                   )}
 
-                  {/* Forced displacement, by responsible side x victim */}
+                  {/* Displaced or killed, by people (no responsible side; see header) */}
                   {byPerpetrator.length > 0 && (
                     <SurfaceSection label={t('humanitarianLedger.section.byPerpetrator')}>
                       <SurfacePanel>
                         <table className="w-full border-collapse">
                           <thead>
                             <tr className="border-b border-[#262b35]">
-                              <th className={`${TH} text-left`}>{t('humanitarianLedger.col.perpetrator')}</th>
-                              <th className={`${TH} px-3 text-left`}>{t('humanitarianLedger.col.victims')}</th>
+                              <th className={`${TH} text-left`}>{t('humanitarianLedger.col.people')}</th>
                               <th className={`${TH} px-3 text-right`}>{t('humanitarianLedger.col.displaced')}</th>
                               <th className={`${TH} text-right`}>{t('humanitarianLedger.col.killedShort')}</th>
                             </tr>
                           </thead>
                           <tbody>
                             {byPerpetrator.map((r) => (
-                              <tr key={`${r.perpetrator}|${r.victim}`} className="border-b border-[#262b35]/60 last:border-b-0">
-                                <td className={`${TD} text-left text-[#f1e6c8]`}>{peopleLabel(r.perpetrator)}</td>
-                                <td className={`${TD} px-3 text-left text-[#c2b69c]`}>{peopleLabel(r.victim)}</td>
+                              <tr key={r.victim} className="border-b border-[#262b35]/60 last:border-b-0">
+                                <td className={`${TD} text-left text-[#f1e6c8]`}>{peopleLabel(r.victim)}</td>
                                 <td className={`${TD} ${NUM} px-3 text-right text-amber-300`}>{fmt(r.displaced)}</td>
                                 <td className={`${TD} ${NUM} text-right text-red-300`}>{fmt(r.killed)}</td>
                               </tr>
