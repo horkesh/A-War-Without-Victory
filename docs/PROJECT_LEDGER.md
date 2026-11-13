@@ -44,6 +44,18 @@ Figures: tsc exit 0; affected files 8 / 42 tests pass; 40w run final hash `d2609
 (no engine change; differs from the older `44375b6b1484e128` only through the #590 corps-name strings).
 Full local suite: see PR.
 
+## 2026-11-13 — Docs history fixes: Delić date, 6th Corps, CODE_AUDIT 7th Corps, army CO succession weeks
+
+Docs only; no `data/`, `src/` or tests. `ARBIH_ORDER_OF_BATTLE_MASTER.md`: Delić commanded the Main Staff
+from 8 Jun 1993 (November 1993 is when Halilović left the staff); the 6th Corps existed early Jun 1993 to
+1994 and not in 1995. `20260516_CODE_AUDIT.md` L501: the 7th Corps "late 1992" claim is annotated, the
+record kept. New report `docs/40_reports/20261113_ARMY_CO_SUCCESSION_DATES_AND_STALE_LINES.md`:
+Praljak is week 67 (roster 64), Roso week 83 (roster 80), Petković's return unresolved and after 23 Feb 1994;
+plus the FORAWWV stale-line list (L307-308), not edited because the file is panel-gated. SC12: the only
+rupture "July 1995 window" claim was in the Sensitive History Gate, fixed in #584; nothing else asserts it.
+The 7th Corps lane (#590) already covered the 7th Corps, Domet-1, Jajce and 370th items. Roster data is
+unchanged, pending a calibration lane.
+
 ## 2026-11-13 — Startup snapshot re-baked for the Delić handover (#581 follow-up)
 
 #581 moved Halilović/Delić from week 60 to 61 in `apr1992_officers.json` but did not regenerate the
@@ -14953,3 +14965,9 @@ From the sensitive-copy lane's out-of-scope register (`F:/AWWV-coordination/cras
 - Gates: `npx tsc --noEmit` exit 0. The new `tests/replay_frame_summary_schema_boundary.test.ts` fails 6 tests on main's reader and passes 14/14 here. Headless 40w on main `c1299da25` and on the merged head: `final_state_hash` `44375b6b1484e128` both, every artifact byte-identical except `replay_save_manifest.json` (intended) and `run_meta.json` (path, commit). `npm run desktop:map:build` exit 0, entry chunk 2,977.04 kB. Full `npm run test:vitest` (Git Bash first): red only on the deliberate `vitest_balanced` controls and on main's stale startup snapshot after #581 (Delić `available_until_turn` 61 in data, 60 in the baked snapshot), which fails `startup_snapshot_contract` (2) and `desktop_sim_bundle_smoke`; not touched here.
 - Rendered proof: `F:/AWWV-coordination/surface_steps/replay_figures/` (real and v1 manifest, EN/BCS, 2293×960 and 1280×720; min font 13 px, no overflow, no page errors), rig `tools/ui/replay_figures_browser_proof.mjs`. Seen there: Chromium formats `bs-BA` counts with commas (`52,645`), so every BCS `formatCount` figure shows English grouping; follow-up.
 - Codex review (P2): a war ended between turns (decision, peace plan, Dayton) never re-sent the unmasked manifest, so its casualty card stayed hidden. `writeCanonicalCurrentState`, the choke point every war-ending path uses, now calls `publishLiveReplayManifestOnWarEnd`, which sends the full live frames once `meta.game_over` is set; pinned by a new behavioural test in `tests/desktop_persistence_contract.test.ts`.
+
+## 2026-11-14 — Pre-1.0 realism audit (RF-6, docs only)
+
+- Report: `docs/40_reports/proposals/20261114_PRE_1_0_REALISM_AUDIT.md`. Read-only audit of main `0450a2e8d` for realism defects, railroads and dead mechanics; no code, data or calibration changed.
+- Evidence: headless 188w on main (`runs/apr1992_definitive_188w__6deb5845c150c196__w188_n0`, clean tree, Node 22.23.2, `final_state_hash` `0ec6d6112fd0e954`, checkpoints 712/711/711/710, anchors 31/31), one 60w diagnostic run for the Bihać supply question, and a historian check (UNHCR, ICTY, BB).
+- 15 ranked findings with a freeze recommendation each. Recommended RF: legacy-id sustainability collapse pinning negotiation momentum at 1.0 (Washington and ceasefire IVP gates always true); ARBiH 1994 exchange ratios about ten times the historical bound; Bosniak flight abroad hardcoded to 0% (fold into RF-3). Recommended "now": the battle summary drops all but the first attacker; UI surfaces that show dead legacy values; `supply_below` firing on disabled reserves; `war_supply_pressure` pinned at 100. Errata: Velika Kladuša retaken 17 Dec 1994, not November (BB2 p.535).
