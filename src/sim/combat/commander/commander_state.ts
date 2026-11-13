@@ -222,6 +222,8 @@ export interface ForceQualityPlanSnapshot {
 
 export interface SectorActivityEntry {
     readonly sector_id: string;
+    /** `stableSectorKey` of the sector: survives the per-turn renumbering that `sector_id` does not. */
+    readonly stable_key?: string;
     readonly turn: number;
     readonly activity: 'quiet' | 'skirmish' | 'active' | 'contested' | 'overrun';
     readonly enemy_strength_estimate: number;

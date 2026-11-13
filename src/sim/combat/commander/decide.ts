@@ -34,6 +34,7 @@ import { spatialFriendlyDistance } from '../../spatial_context.js';
 import { isEnclaveMovementDestinationAllowed } from '../enclave_resilience.js';
 import { isSectorRosterEligibleFormation } from '../sector_roster_eligibility.js';
 import { TRUTHFUL_SECTOR_REACHABILITY_MAX_HOPS } from '../brigade_assignment.js';
+import { stableSectorKey } from '../sector_intel.js';
 import type {
     CommanderBeliefState,
     CommanderBriefing,
@@ -528,6 +529,7 @@ function classifySectorActivity(
 
         entries.push({
             sector_id: sector.sector_id,
+            stable_key: stableSectorKey(sector),
             turn,
             activity,
             enemy_strength_estimate: enemyStrengthEstimate,
@@ -597,15 +599,19 @@ function computeStanceChanges(
         activityBySector.set(entry.sector_id, entry);
     }
 
-    // Build quiet-turns count from previous activity log
+    // Build quiet-turns count from previous activity log. Sectors are renumbered every
+    // turn, so the streak follows the sector's stable key (content), falling back to the
+    // positional id only for entries written before stable keys existed.
+    const activityKey = (entry: SectorActivityEntry): string => entry.stable_key ?? entry.sector_id;
     const quietTurnsBySector = new Map<string, number>();
     if (previousState) {
         // Count consecutive quiet turns from the end of the log
         const logBySector = new Map<string, SectorActivityEntry[]>();
         for (const entry of previousState.sector_activity_log) {
-            const existing = logBySector.get(entry.sector_id) ?? [];
+            const key = activityKey(entry);
+            const existing = logBySector.get(key) ?? [];
             existing.push(entry);
-            logBySector.set(entry.sector_id, existing);
+            logBySector.set(key, existing);
         }
         for (const [sectorId, entries] of logBySector) {
             // Sort by turn descending to count consecutive quiet from most recent
@@ -632,7 +638,7 @@ function computeStanceChanges(
     const sortedSectorIds = [...activityBySector.keys()].sort(strictCompare);
     for (const sectorId of sortedSectorIds) {
         const activity = activityBySector.get(sectorId)!;
-        const prevQuietTurns = quietTurnsBySector.get(sectorId) ?? 0;
+        const prevQuietTurns = quietTurnsBySector.get(activityKey(activity)) ?? 0;
         const totalQuiet = activity.activity === 'quiet' ? prevQuietTurns + 1 : 0;
 
         // Check enemy intent from belief layer (preferred) or raw intel (fallback)
