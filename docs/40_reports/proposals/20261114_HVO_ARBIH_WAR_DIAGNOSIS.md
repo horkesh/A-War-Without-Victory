@@ -113,4 +113,97 @@ Full brief with paragraph citations: side-session notes `hvo_arbih_1993_historia
 - **HVO OOB size.** It matters for how strong the war is, but it is not why the war is absent.
 - **The painted references.** They agree with the history (§3).
 
-EXPERIMENTS_AND_RECOMMENDATION_PLACEHOLDER
+## 5. Experiments (8 measured 188w runs, budget per ORCHESTRATION.md §4b)
+
+**Setup.**
+- Branch `claude/hvo-arbih-war-diagnosis`, from `origin/main` 0450a2e8d. Each change is a named `EXPERIMENT_*` toggle; none is for merge.
+- Each run was checked with `tools/verify_checkpoints.cjs` (checkpoints and guards), `tools/engine_health_gate.cjs --horizon 188w --strict` and the conflict metrics from §2.
+- "Bosniaks/Croats displaced" means displaced + fled abroad + killed, attributed to the other side, over the whole run.
+- Runs 2 and 4 were inert, and that is the finding.
+
+| # | Change (toggle) | Hash | Jan93 / Apr94 / Apr95 / Oct95 | Guards | Strict health | HVO→ARBiH attacks (captures) | HVO operations vs ARBiH | Bosniaks displaced by HVO | Croats displaced by ARBiH |
+|---|---|---|---|---|---|---|---|---|---|
+| base | none | `0ec6d611` | 712/711/711/710 | intact | PASS | 2 (2) | Prozor–Rama (authored) | 1,279 | 43,267 |
+| 1 | **E1** `enclave` tag on the 10 Lašva/Kiseljak HVO brigades (OOB data) | `a6dd4fb7` | 712/709/709/**700** | **breach**: 3 unwarranted ARBiH captures at Brčko, t173–178 | PASS (consistency 1) | 2 (2) | none | 1,279 | 43,357 |
+| 2 | E1 + **E2** lift the open-war HVO-defensive stance rule | `a6dd4fb7` | same as 1 | | | **inert**: an enclave-tagged brigade may only attack inside its own (already HVO) enclave | | | |
+| 3 | **E1b** stranded lifecycle skips brigades inside their own faction's defined enclave area (engine; replaces E1) | `fb79372d` | 712/711/**712**/709 | **breach**: Farz Bočinja receipt missing | **FAIL** (consistency 4: Sanski Most/Ključ 1995) | 2 (2) | none | 1,279 | 43,267 |
+| 4 | E1b + E2 | `fb79372d` | same as 3 | | | **inert**: `reassignCorpsForBilateralWar` re-pins the HVO defensive with no targets (`bot_corps_ai.ts:195,338`) | | | |
+| 5 | E1b + E2 + **E2b** symmetric bilateral-front diversion (HVO gets ARBiH's targets/stance/aggression) | `54e18faa` | 712/709/710/705 | intact | PASS | 3 (3) | **Operacija Snaga, Pljusak, Oseka** (HVO Central Bosnia, t49–59) | 1,618 | 43,267 |
+| 6 | **E4** seed bilateral minority timers on the RBiH–HRHB front at war start (displacement only) | `abdce324` | 712/709/709/708 | intact | PASS | 2 (2) | none | **60,074** | **142,979** |
+| 7 | **E4b** as E4, but seeded timers get one 0.25 wave and no sustained drain | `ac1d8c8c` | 712/**711/711**/707 | intact | PASS | 2 (2) | none | **17,885** | **70,935** |
+| 8 | run 5 + **E3** Herzegovina corps not capped defensive during open bilateral war | `2cf0bf5d` | 712/710/709/704 | intact | PASS | **6 (3)**, incl. East Mostar t68 (repulsed) and Blagaj t66 | Snaga, Pljusak, Oseka, **Operacija Kobac** (Mostar, t58–64), Zamah | 1,618 | 43,340 |
+
+**What the runs show.**
+
+1. **The military war needs three gates opened together.** Those gates are the stranded decay, the stance rule and the diversion asymmetry. Each one alone is inert or only damages late 1995. With all three open (run 5), HVO Central Bosnia plans its own April–May 1993 offensive for the first time: three operations, t49–59. With the Herzegovina cap also lifted (run 8), the HVO attacks East Mostar in July 1993 and is repulsed, and East Mostar holds as it historically did.
+2. **The resulting HVO war is still small.** It is 6 attacks against 30 by the ARBiH, and the Lašva operations produce 1 battle among them. What remains:
+   - the HRHB cohesion floor drops 40→30 at w53;
+   - the HVO keeps a `costly_victory` minimum predicted outcome on its directive;
+   - the HVO OOB is thin: 700-man brigades against a historical Vitez brigade of about 1,500.
+3. **The checkpoint cost is −1 to −6 per checkpoint, with guards intact (runs 5 and 8).**
+   - **The direct cost is one cell, Gornja Rovna (Busovača).** The HVO takes it at t52 and the ARBiH never retakes it, because no ARBiH operation targets it. This is the old "HVO over-capture" mode, and it now needs an ARBiH answer rather than a stance cap.
+   - **Every other lost cell is a late-war cascade**: Brčko, Goražde, Donji Vakuf, Sanski Most, Ilijaš. This is the known 1995 knife-edge.
+4. **Displacement is decided by one rule, the war-start seed.**
+   - The bounded seed (run 7) lifts HVO-caused Bosniak displacement from 1,279 to 17,885, the judicial floor of the historical range.
+   - The cost to checkpoints is one October 1995 cell net, against the main baseline.
+   - A symmetric rule over-displaces Croats: 70,935 against about 25,000–50,000. There are 203,024 Croats in ARBiH-held cells against 74,521 Bosniaks in HVO-held cells, and the ARBiH's captures already produce 43k. The historical asymmetry was one of policy, not geography: the Prlić TJ finds a joint criminal enterprise to remove the Muslim population, and Croats in Tuzla, Sarajevo and much of Zenica stayed. So the asymmetry should come from a policy decision, not from a constant tuned per faction (§6).
+5. **The health gate is blind to all of this.** In the baseline, nine HVO brigades sit stranded at cohesion 0 for about 50 weeks, yet `stranded_brigades` reads 0 at t188.
+
+## 6. Options for the owner
+
+**RF entry test (ORCHESTRATION.md §4b).** All three parts pass, measured above:
+- **(a) correctness defect.** There is a player-visible lie: the events report an HVO offensive and a siege of East Mostar that do not happen on the map. Several mechanics never fire: the "Herzegovina Offensive" and "Central Bosnia Offensive" patron directives and the "Lasva Valley Offensive" war aim. A whole corps sits stranded at cohesion 0 for 50 weeks.
+- **(b) fidelity gap.** The Historian rates Ahmići, Mostar and the Lašva valley as among the best-known events of the war. A literate player playing RBiH sees almost no Bosniaks displaced by the HVO and 43k Croats displaced by their own army.
+- **(c) measured.** Eight runs plus the baseline census.
+
+**Queue context.** RF-1 (7th Corps), RF-2 (stance effects) and RF-3 (siege displacement, §6) hold the three calibration slots, and RF-4 (officer tenure) waits. There are file overlaps:
+- Options C and D touch `bot_corps_stance.ts` and `bot_corps_ai.ts` (RF-2's files) and the 3rd Corps sector (RF-1's).
+- Option B touches `displacement_takeover.ts`, the file RF-3 changes, and needs the same §6 bright-line panel.
+
+| Option | What it changes | Measured | Player experiences | Risk | Cost and queue trade |
+|---|---|---|---|---|---|
+| **A. Tell the truth (presentation only)** | Condition the 1993 HVO events on what the engine did: the Lašva offensive and East Mostar siege cards fire only if HVO operations or attacks happened. Re-time or reword the Washington cards so the decision is not offered four weeks after the engine signed. Fix the Ahmići event, which has no `humanitarian_impact` while Stupni Do has 2. | n/a | Cards stop claiming what the map denies. The displacement ledger still shows 1.3k and 43k. | Low. Sensitive copy needs the small §4 copy panel. | Non-calibration N-lane. Takes no RF slot. |
+| **B. Bilateral displacement on war start, decided by policy** | E4b's front-gated seed, with the rate set by a presidential policy decision on minorities in the war zone. Bots take the historical default: HRHB authorizes it, per the Prlić JCE finding; RBiH does not, and Croat departures come from captures and flight. Authorized expulsions feed the §2a condemnation signals, closing the known "refugee-only expulsion escapes both gates" residual. | Run 7 (symmetric 0.25): 712/711/711/707, guards and health PASS, 17.9k / 70.9k. A policy split would be about 17.9k / 43–50k (not measured). | As HRHB president, a decision in early 1993: expel or not. Expelling buys a "secure" rear and earns the condemnation grade cap. As RBiH president, the ledger now shows the HVO expulsions. | Medium. Population feeds recruitment, so every front shifts slightly. Needs the eight-seat §6 bright-line panel. | One calibration lane after RF-3 (same file, same panel), before or after RF-4. Est. 4–6 runs. |
+| **C. The HVO can fight its war** | E1b + E2 + E2b + E3 as a proper lane: enclave pockets besieged, not stranded; symmetric bilateral diversion; Herzegovina corps free in open war; plus an ARBiH answer to HVO over-captures (catalog opportunity, not pre-planned), the HVO attack threshold, and an OOB check of the HVO Central Bosnia strengths. | Run 8: 712/710/709/704, guards and health PASS, HVO attacks 2→6, East Mostar attacked and held, no Mostar control change. | An April 1993 HVO offensive in the Lašva valley and a July Mostar assault. As RBiH president you defend first and counterattack in June, as in history. | High. Late-1995 cascades (−6 at Oct95), the Gornja Rovna over-capture, and an RS-front knock-on from freeing HVO corps. | One calibration lane after RF-1 and RF-2 merge. Est. 8+ runs. Displaces RF-4 or extends the queue. |
+| **D. B + C + a Washington decision** | Everything above, plus a presidential Washington decision for both sides, replacing the preconditions-only signature at t98. | not measured | The full arc: ultimatum, war, siege, counteroffensive, and the choice to sign. | Highest. | Two lanes, post-1.0 in practice. |
+
+**Sensitive history.** Ahmići, Stupni Do, the Mostar siege and the Heliodrom/Dretelj camps are adjudicated crimes.
+- **What the policy must preserve.** Any option that makes them emerge rather than narrated (B, C, D) needs the §6 panel. The policy must:
+  - keep the judicial characterisations: the JCE finding (Prlić), and the ARBiH crimes at Grabovica, Uzdol and Trusina recorded but not equated;
+  - keep the bright line: atrocity caps the grade and never rewards;
+  - never let the player stage a named massacre. The engine produces expulsion and displacement; the named events stay discrete narrative ruptures under the §2 rules.
+- **Option A also needs the §4 copy panel**, because it changes when sensitive cards fire.
+
+## 7. Recommendation
+
+1. **Do A now** as a non-calibration N-lane. The cards currently tell the player about an HVO offensive and a siege that the map does not show. That is a correctness defect, and it costs no RF slot.
+2. **Build B before 1.0**, as RF-5, queued directly after RF-3, because they share `displacement_takeover.ts` and the §6 bright-line panel.
+   - It is the measured fix for the asymmetry the owner asked about.
+   - It is small: one rule plus one presidential policy decision.
+   - Its symmetric form already passes the merge bar except for one October 1995 cell.
+   - It is the honest model: the HVO expulsions happened inside ground the HVO held, so no territorial change is needed or wanted, and the owner rule on ownership transfer is untouched.
+3. **Defer C to post-1.0**, and park this branch with an `archive/` tag as its starting point.
+   - C works as a mechanism: three gates opened together produce a real HVO offensive and a Mostar assault, with guards intact.
+   - But it is still too small to matter, it costs up to six late-war cells, and it collides with RF-1 and RF-2 files.
+   - The territorial outcome is already right.
+   - Exception: **E1b alone is a defensible engine-correctness fix.** A besieged pocket inside a defined enclave should not count as stranded. Run 3 shows it would need its own Farz/consistency work, so it goes in C, not B.
+
+## 8. Findings outside this lane (report only)
+
+1. **Health-gate blind spot.** `stranded_brigades` is measured only at t188. Nine HVO brigades stranded at cohesion 0 for about 50 weeks read as 0. Suggest a max-concurrent or brigade-weeks metric.
+2. **Narrative/mechanics mismatch** (Option A). "Coordinated HVO operations strike from Jablanica to the Lašva Valley" (t54), "HVO Besieges East Mostar" (t57) and the "Lasva Valley Offensive" war aim describe things the engine never does.
+3. **The Ahmići event has no `humanitarian_impact` effect**, while Stupni Do (2), the camps (3), Grabovica/Uzdol (2) and Trusina (1) have one (`events/war_1993.json`).
+4. **Washington timing.** The engine signs at t98 (14 Feb 1994), against a historical 1/18 Mar 1994. The presidential "Washington Agreement" cards fire at t102–105, after the fact.
+5. **Directive leak.** At t60 the HVO Central Bosnia war-aim targets (Busovača and Fojnica cells) also sit on `hvo_southeast_herzegovina`'s directive.
+6. **Two orphan HVO formations, `F_HRHB_0003`/`0004`.** They are at Travnik with `corps_id` undefined, 0 battles in 188 turns and 3,000 and 1,834 men.
+7. **Historian gaps.**
+   - `HISTORICAL_TIMELINE_MASTER.md` stops at 25 Jan 1993. The brief lists 38 dated anchors to add.
+   - `HVO_ORDER_OF_BATTLE_MASTER.md` line 519 calls Stupni Do an "ARBiH response massacre". It was an HVO attack on a Bosniak village. The same file misspells Blaškić and has unsourced East Mostar death and HV-strength figures.
+   - The BB knowledge base lacks BB1 pp. 226–270 (the Croat–Muslim war chapters).
+8. **Tracked-file trap** (known, N-4). Every run with `--map` rewrites `data/derived/latest_run_final_save.json`.
+
+## 9. Reproduce
+
+- Experiment branch: `claude/hvo-arbih-war-diagnosis` (toggles named in §5; flip and run `npm run sim:scenario:run:188w`).
+- Metrics script, snapshot inspector and census script: copied to `tools/diagnostics/hvo_arbih_war/` on the experiment branch.
+- Historian brief: side-session notes `hvo_arbih_1993_historian_brief.md` (the orchestrator's coordination folder).
