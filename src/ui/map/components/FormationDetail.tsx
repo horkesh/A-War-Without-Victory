@@ -29,6 +29,7 @@ import { t, useLocale, type MessageKey } from '../i18n';
 import { getLocalizedFormationName } from '../data/formationNameLocalizations';
 import { inspectOnField, openArmyHQBriefingForCorps } from '../utils/shellNavigation';
 import { resolveCurrentSectorForFormation } from '../utils/sectorUtils';
+import { sectorLabelNeedsTypePrefix } from '../utils/sectorTypePrefix';
 import { buildMunicipalityDisplayNameMap, getMunicipalityDisplayName } from '../utils/municipalityDisplayName';
 
 type DetailTab = 'overview' | 'record' | 'orders';
@@ -426,7 +427,9 @@ export function FormationDetail({ railSlot = 'primary', breadcrumb }: FormationD
                     })}
                     className="w-full text-left px-2 py-1.5 bg-accent-gold/5 border border-accent-gold/20 rounded-md flex items-center justify-between text-[13px] hover:bg-accent-gold/10 transition-colors group"
                     title={sectorLabel}
-                    aria-label={t('formationDetail.inspectSector', { sector: sectorLabel })}
+                    aria-label={sectorLabelNeedsTypePrefix(sectorLabel, (currentSector as { unheld_front?: boolean }).unheld_front === true)
+                      ? t('formationDetail.inspectSector', { sector: sectorLabel })
+                      : t('formationDetail.inspectSectorNamed', { sector: sectorLabel })}
                   >
                     <div className="flex items-center gap-2">
                       <span className="text-accent-gold uppercase font-bold tracking-tighter">{t('formationDetail.sector')}</span>

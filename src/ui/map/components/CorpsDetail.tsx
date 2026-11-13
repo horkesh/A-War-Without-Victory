@@ -35,6 +35,7 @@ import { t, useLocale } from '../i18n';
 import { buildSectorFormationAssignment, getSectorCoverageTier, resolveCurrentSectorForFormation, type SectorCoverageTier } from '../utils/sectorUtils';
 import { compareLocalizedFormationNames } from '../data/formationNameLocalizations';
 import { getPlayerFacingSectorName } from '../../shared/playerFacingLabels';
+import { isHeldOg } from '../utils/heldOg';
 
 type CorpsTab = 'overview' | 'orbat' | 'sectors' | 'ops' | 'orders';
 
@@ -83,6 +84,9 @@ export function CorpsDetail({ railSlot = 'primary', breadcrumb }: CorpsDetailPro
     () => loadedGameState?.corpsFrontSectors?.filter((s) => s.corps_id === selectedCorpsId) ?? [],
     [loadedGameState?.corpsFrontSectors, selectedCorpsId]
   );
+
+  // Owner ruling M3: the OG count counts real OGs only (one or more brigades), never unheld fronts.
+  const heldOgCount = useMemo(() => corpsSectors.filter(isHeldOg).length, [corpsSectors]);
 
   const subordinates = useMemo(
     () => loadedGameState?.formations.filter(
@@ -171,8 +175,8 @@ export function CorpsDetail({ railSlot = 'primary', breadcrumb }: CorpsDetailPro
     {
       id: 'sectors'  as const,
       label: t('sectorsSection.title'),
-      count: corpsSectors.length,
-      countLabel: t('corpsDetail.tabCount.sectors', { count: corpsSectors.length }),
+      count: heldOgCount,
+      countLabel: t('corpsDetail.tabCount.sectors', { count: heldOgCount }),
     },
     {
       id: 'ops'      as const,
