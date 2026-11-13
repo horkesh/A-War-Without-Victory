@@ -10,9 +10,34 @@ const FARZ_HQ_ID = /^ahq:RBiH:\d+:farz_95$/;
 // as a Farz receipt. Identified by its exact corps-qualified AAR id, never by name alone.
 const URAGAN_AAR_ID = /^arbih_2nd_corps:Operation Uragan 95:t\d+$/;
 
-function checkFarzObjectiveCaptures({ cells, at188, events, battleById, aars, corpsOf, windowStart }) {
+/**
+ * An AAR is written only when an operation closes, so a Farz still executing or recovering
+ * at the run's last turn has none. Its receipt owner is then built from the live operation
+ * in the final save, held to the same standard: the id is the AAR's own
+ * `corps:name:t<started_turn>` form, so every objective still needs a logged, battle-recorded,
+ * operation-owned combat capture inside the window. Only the AAR's self-reported capture
+ * list is replaced, by the operation's authored objective list.
+ */
+function provisionalFarzOwner(liveOperations, finalTurn) {
+  const live = (liveOperations || []).filter(({ op }) => FARZ_HQ_ID.test(op?.army_hq_op_id || ''));
+  if (live.length !== 1 || !Number.isFinite(finalTurn)) return null;
+  const { corps_id: corpsId, op } = live[0];
+  return {
+    operation_id: `${corpsId}:${op.name}:t${op.started_turn}`,
+    army_hq_telemetry: { army_hq_op_id: op.army_hq_op_id },
+    started_turn: op.started_turn,
+    ended_turn: finalTurn,
+    objectives_logged_captured: [...(op.objectives || [])],
+    participating_brigades: [...(op.participating_brigades || [])],
+    provisional: true,
+  };
+}
+
+function checkFarzObjectiveCaptures({ cells, at188, events, battleById, aars, corpsOf, windowStart, liveOperations, finalTurn }) {
   const authored = aars.filter((aar) => FARZ_HQ_ID.test(aar.army_hq_telemetry?.army_hq_op_id || ''));
-  const aar = authored.length === 1 ? authored[0] : null;
+  const aar = authored.length === 1
+    ? authored[0]
+    : authored.length === 0 ? provisionalFarzOwner(liveOperations, finalTurn) : null;
   const partners = aars.filter((a) => URAGAN_AAR_ID.test(a.operation_id || '') && a.started_turn >= windowStart);
   const partner = aar && partners.length === 1 ? partners[0] : null;
   const participants = [...(aar?.participating_brigades || []), ...(partner?.participating_brigades || [])];
@@ -37,7 +62,7 @@ function checkFarzObjectiveCaptures({ cells, at188, events, battleById, aars, co
       ok: !!event && at188[osid] === 'RBiH',
     };
   });
-  return { aar, partner, authoredCount: authored.length, secondCorpsParticipated, rows,
+  return { aar, partner, authoredCount: authored.length, provisional: !!aar?.provisional, secondCorpsParticipated, rows,
     ok: !!aar && aar.started_turn >= windowStart && rows.every((row) => row.ok) };
 }
 
