@@ -50,6 +50,7 @@ Data (`data/source/oob_corps.json`) and the save format are untouched: the EN di
 4. `src/sim/replay/replay_frame_summary.ts` readers read fields the engine never writes; fix, then restore the figures with the §4 labels.
 5. Era-dependent HVO OZ → ZP names; the EN data label "JNA Herzegovina Command" is not a documented formation (owner rename); `hvo_northwest_bosnia` / `hvo_tomislavgrad` ids do not match their labels; ARBiH 6th and 7th Corps absent from the data.
 6. `verdict.scene.headline.earlyPeace` is an "X, not Y" construction; BCS verdict-scene strings miss diacritics (step-5 sweep owns diacritics).
-7. Corps names still reach the screen without the helper in some paths (for example `TurnAftermathModal` rows); sweep them.
+7. Corps names still reach the screen without the helper in some paths (for example `TurnAftermathModal` rows and the Chief of Staff alert subject label); sweep them.
+8. BCS grammar: 60 BCS templates take `{corps}` / `{corpsName}`, and some put it where BCS needs an oblique case ("Zabrinut sam zbog 1. korpus" wants the genitive "1. korpusa"; "sa 1. korpus" wants the instrumental). The BCS names are nominative only. Rephrase those templates to a nominative slot or add inflected name keys, in a BCS copy pass.
 
 Evidence (votes, packets): the panel's round files were kept in the lane session's scratchpad; the decisions above are their complete content as integrated.

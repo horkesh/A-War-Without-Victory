@@ -283,7 +283,7 @@ describe('VerdictScreen interaction — faction tab switching', () => {
         expect(screen.getAllByText('Daytonski sporazum').length).toBeGreaterThanOrEqual(1);
         expect(screen.getByText('Poređenje prekretnica')).toBeDefined();
         expect(screen.getByText('Historija')).toBeDefined();
-        expect(screen.getByText('Ti')).toBeDefined();
+        expect(screen.getByText('Ova kampanja')).toBeDefined();
         expect(screen.getByText('Razlika')).toBeDefined();
         expect(screen.getByText('Status')).toBeDefined();
         expect(screen.getAllByText('Trajanje rata').length).toBeGreaterThanOrEqual(2);
