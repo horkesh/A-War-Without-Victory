@@ -21,7 +21,6 @@ import { computeSectorCombatRatings } from './sector_combat_rating.js';
 import { captureSectorTopologySolveInput } from './sector_topology_snapshot.js';
 import { solveCorpsFrontSectorsPure } from './sector_topology_solver.js';
 import { commitSectorTopologySolve } from './sector_topology_commit.js';
-import { carrySectorStances } from './sector_stance_carry.js';
 
 export interface FinalSectorTruthReconciliationReport {
     sectors_rebuilt: number;
@@ -244,7 +243,6 @@ function runFullGeometryReconciliation(
     geometrySolveStrategy: 'pipeline' | 'test-only-imperative-legacy' = 'test-only-imperative-legacy',
 ): FinalSectorTruthReconciliationReport {
     const activeFormationLocations = captureActiveFormationLocations(state);
-    const previousSectors = state.military.corps_front_sectors;
     let sectors: Record<string, CorpsFrontSector>;
     if (geometrySolveStrategy === 'test-only-imperative-legacy') {
         // R5 Phase 2e Task 9 (2026-08-04): restored production path. The
@@ -281,8 +279,6 @@ function runFullGeometryReconciliation(
         commitSectorTopologySolve(state, input, output);
         sectors = output.sectors;
     }
-    // Rebuilt sectors keep the OG stance they had before the rebuild (sector_stance_carry.ts).
-    carrySectorStances(previousSectors, sectors);
 
     const sectorList = Object.values(sectors);
     if (sectorList.length === 0) {
