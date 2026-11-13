@@ -908,10 +908,16 @@ async function selectArmyHqCorpsWithSectorBrigadeInspect(page, summary) {
 
 async function ensureExpanded(page, selector) {
   await waitForVisibleSelector(page, selector);
-  const expanded = await page.$eval(selector, (el) => el.getAttribute('aria-expanded') === 'true');
+  // Disclosures report aria-expanded; the order-of-battle sections are rail tabs (map rail
+  // system, 2026-11-12) and report aria-selected. Either one means the content is showing.
+  const isOpen = (el) => el.getAttribute('aria-expanded') === 'true' || el.getAttribute('aria-selected') === 'true';
+  const expanded = await page.$eval(selector, isOpen);
   if (!expanded) await activateVisibleControl(page, selector);
   await page.waitForFunction(
-    (targetSelector) => document.querySelector(targetSelector)?.getAttribute('aria-expanded') === 'true',
+    (targetSelector) => {
+      const el = document.querySelector(targetSelector);
+      return el?.getAttribute('aria-expanded') === 'true' || el?.getAttribute('aria-selected') === 'true';
+    },
     { timeout: 15000 },
     selector,
   );

@@ -9,22 +9,22 @@ import { t, type MessageKey } from '../../src/ui/map/i18n/index.js';
 import { useGameStore } from '../../src/ui/map/store/gameStore.js';
 import type { LoadedGameState } from '../../src/ui/map/data/types.js';
 
-/** Tailwind v3.4 default palette values, already installed locally (no new dependency). */
-const TAILWIND_LIGHT_PALETTE: Record<string, Record<number, string>> = {
-  green: { 100: '#dcfce7', 600: '#16a34a', 700: '#15803d', 800: '#166534' },
-  amber: { 100: '#fef3c7', 600: '#d97706', 800: '#92400e' },
-  orange: { 100: '#ffedd5', 600: '#ea580c', 800: '#9a3412' },
-  red: { 100: '#fee2e2', 800: '#991b1b' },
-  neutral: { 100: '#f5f5f5' },
+/**
+ * Tailwind v3.4 default palette values for the tones the dark map rail uses
+ * (map rail system, 2026-11-12: the sector panel is no longer cream paper).
+ */
+const TAILWIND_RAIL_PALETTE: Record<string, Record<number, string>> = {
+  emerald: { 200: '#a7f3d0', 300: '#6ee7b7' },
+  amber: { 100: '#fef3c7', 200: '#fde68a' },
+  orange: { 300: '#fdba74' },
+  red: { 200: '#fecaca', 300: '#fca5a5' },
 };
 
-/** Real light surfaces the CorpsFrontPanel dossier actually paints beneath strength badges. */
-const DECLARED_LIGHT_SURFACES = new Set([
-  '#f0e8d8', // dossier paper (bg-[#f0e8d8])
-  '#f5f5f5', // neutral-100 assessment cards
-  '#ffffff', // white cards
-  '#dcfce7', // green-100 fortress chip
-  '#fee2e2', // red-100 critical chip
+/** Real opaque rail surfaces the CorpsFrontPanel paints beneath strength badges. */
+const DECLARED_RAIL_SURFACES = new Set([
+  '#11141b', // rail plane (MAP_RAIL_PLANE)
+  '#161a22', // rail cards
+  '#141821', // rail header
 ]);
 
 function srgbToLinear(channel: number): number {
@@ -53,24 +53,22 @@ function classTokens(element: Element): string[] {
 function renderedTextColor(element: Element): string | null {
   for (const token of classTokens(element)) {
     if (token === 'text-white') return '#ffffff';
-    const match = /^text-(green|amber|orange|red|neutral)-(\d{3})$/.exec(token);
+    const arbitrary = /^text-\[(#[0-9a-f]{6})\]$/i.exec(token);
+    if (arbitrary) return arbitrary[1].toLowerCase();
+    const match = /^text-(emerald|amber|orange|red)-(\d{3})$/.exec(token);
     if (!match) continue;
-    const hex = TAILWIND_LIGHT_PALETTE[match[1]]?.[Number(match[2])];
+    const hex = TAILWIND_RAIL_PALETTE[match[1]]?.[Number(match[2])];
     if (hex) return hex;
   }
   return null;
 }
 
-/** Resolve the nearest real painted background, including the badge's own chip background. */
+/** Resolve the nearest opaque painted background (translucent chip tints sit on the card below). */
 function renderedBackground(element: Element): string | null {
   for (let node: Element | null = element; node; node = node.parentElement) {
     for (const token of classTokens(node)) {
-      if (token === 'bg-[#f0e8d8]') return '#f0e8d8';
-      if (token === 'bg-white') return '#ffffff';
-      const match = /^bg-(green|amber|orange|red|neutral)-(\d{3})$/.exec(token);
-      if (!match) continue;
-      const hex = TAILWIND_LIGHT_PALETTE[match[1]]?.[Number(match[2])];
-      if (hex) return hex;
+      const arbitrary = /^bg-\[(#[0-9a-f]{6})\]$/i.exec(token);
+      if (arbitrary) return arbitrary[1].toLowerCase();
     }
   }
   return null;
@@ -224,10 +222,10 @@ describe('CorpsFrontPanel field routing', () => {
   });
 
   it.each([
-    [3, 'OVERMATCHED', 'text-red-800'],
-    [1.3, 'PRESSURE', 'text-amber-800'],
-    [0.4, 'SUPERIOR', 'text-emerald-800'],
-  ] as const)('uses readable light-surface force-balance color for ratio %s', (ratio, label, toneClass) => {
+    [3, 'OVERMATCHED', 'text-red-300'],
+    [1.3, 'PRESSURE', 'text-amber-200'],
+    [0.4, 'SUPERIOR', 'text-emerald-300'],
+  ] as const)('uses readable rail force-balance color for ratio %s', (ratio, label, toneClass) => {
     const state = makeState();
     state.corpsFrontSectors![0]!.threat_ratio = ratio;
     useGameStore.setState({ loadedGameState: state });
@@ -348,7 +346,7 @@ describe('CorpsFrontPanel field routing', () => {
 
     const { container } = render(React.createElement(CorpsFrontPanel, { railSlot: 'primary' }));
 
-    expect(container.textContent).toMatch(/Operational security:\s*Inactive/i);
+    expect(container.textContent).toMatch(/Operational security\s*Inactive/i);
     expect(container.textContent).toMatch(/Supply Priority\s*1\.0x\s*\(neutral\)/i);
   });
 
@@ -442,9 +440,9 @@ describe('CorpsFrontPanel field routing', () => {
 
     render(React.createElement(CorpsFrontPanel, { railSlot: 'primary' }));
 
-    expect(screen.getByTestId('corps-front-combat-morale').textContent).toBe('');
-    expect(screen.getByTestId('corps-front-combat-cohesion').textContent).toBe('');
-    expect(screen.getByTestId('corps-front-combat-fatigue').textContent).toBe('');
+    expect(screen.getByTestId('corps-front-combat-morale').textContent).toBe('Not reported yet');
+    expect(screen.getByTestId('corps-front-combat-cohesion').textContent).toBe('Not reported yet');
+    expect(screen.getByTestId('corps-front-combat-fatigue').textContent).toBe('Not reported yet');
     expect(screen.getByTestId('corps-front-panel').querySelector('[data-awwv-report-gap]')?.getAttribute('data-awwv-report-gap')).toContain('morale');
   });
 
@@ -468,7 +466,7 @@ describe('CorpsFrontPanel field routing', () => {
 
     const { container } = render(React.createElement(CorpsFrontPanel, { railSlot: 'primary' }));
 
-    expect(container.textContent).toMatch(/Operational security:\s*Inactive/i);
+    expect(container.textContent).toMatch(/Operational security\s*Inactive/i);
     expect(screen.getByTestId('corps-front-combat-morale').textContent).toBe('0');
     expect(screen.getByTestId('corps-front-combat-cohesion').textContent).toBe('0');
     expect(screen.getByTestId('corps-front-combat-fatigue').textContent).toBe('0');
@@ -963,7 +961,7 @@ describe('CorpsFrontPanel field routing', () => {
     expect(container.textContent).not.toMatch(/Confidence:\s*No staff report/i);
     expect(screen.getByTestId('corps-front-combat-personnel').textContent).toMatch(/1[,.]200/);
     expect(screen.getByTestId('corps-front-combat-morale').textContent).toContain('64');
-    expect(container.textContent).toMatch(/Force Balance\s*Redacted/i);
+    expect(container.textContent).toMatch(/Force Balance\s*Not yet assessed/i);
     expect(container.textContent).not.toMatch(/Balanced|Hostile pressure low|High/i);
   });
 
@@ -992,13 +990,13 @@ describe('CorpsFrontPanel field routing', () => {
     const { container } = render(React.createElement(CorpsFrontPanel, { railSlot: 'primary' }));
     const reportGap = container.querySelector('[data-awwv-report-gap]')?.getAttribute('data-awwv-report-gap') ?? '';
 
-    expect(screen.getByTestId('corps-front-combat-personnel').textContent).toBe('');
-    expect(screen.getByTestId('corps-front-combat-offensive-power').textContent).toBe('');
-    expect(screen.getByTestId('corps-front-combat-defensive-power').textContent).toBe('');
-    expect(screen.getByTestId('corps-front-combat-defense-per-edge').textContent).toBe('');
-    expect(screen.getByTestId('corps-front-combat-morale').textContent).toBe('');
-    expect(screen.getByTestId('corps-front-combat-cohesion').textContent).toBe('');
-    expect(screen.getByTestId('corps-front-combat-fatigue').textContent).toBe('');
+    expect(screen.getByTestId('corps-front-combat-personnel').textContent).toBe('Not reported yet');
+    expect(screen.getByTestId('corps-front-combat-offensive-power').textContent).toBe('Not reported yet');
+    expect(screen.getByTestId('corps-front-combat-defensive-power').textContent).toBe('Not reported yet');
+    expect(screen.getByTestId('corps-front-combat-defense-per-edge').textContent).toBe('Not reported yet');
+    expect(screen.getByTestId('corps-front-combat-morale').textContent).toBe('Not reported yet');
+    expect(screen.getByTestId('corps-front-combat-cohesion').textContent).toBe('Not reported yet');
+    expect(screen.getByTestId('corps-front-combat-fatigue').textContent).toBe('Not reported yet');
     expect(reportGap).toContain('offensive power');
     expect(reportGap).toContain('fatigue');
   });
@@ -1192,9 +1190,8 @@ describe('CorpsFrontPanel field routing', () => {
 
     const { container } = render(React.createElement(CorpsFrontPanel, { railSlot: 'primary' }));
 
-    expect(container.textContent).toMatch(/Date:\s*1 Jun 1992/i);
-    expect(container.textContent).toMatch(/Week:\s*8/i);
-    expect(container.textContent).not.toMatch(/Week:\s*\d+\s+\w+\s+1991/i);
+    expect(container.textContent).toMatch(/1 Jun 1992, week 8/i);
+    expect(container.textContent).not.toMatch(/week\s*\d+\s+\w+\s+1991/i);
   });
 
   it('routes operation objective focus through settlement inspection and clears stale shell context', () => {
@@ -1417,7 +1414,7 @@ describe('CorpsFrontPanel field routing', () => {
   });
 
   it.each(['fortress', 'strong', 'adequate', 'thin', 'critical'] as const)(
-    'renders the %s strength badge at WCAG AA contrast on its real light surface',
+    'renders the %s strength badge at WCAG AA contrast on its real rail surface',
     (strengthClass) => {
       const state = makeState();
       (state.corpsFrontSectors![0] as unknown as Record<string, unknown>).combat_strength_class = strengthClass;
@@ -1430,8 +1427,8 @@ describe('CorpsFrontPanel field routing', () => {
       const bg = renderedBackground(badge);
 
       expect(fg, `${strengthClass} badge must declare a text color`).not.toBeNull();
-      expect(bg, `${strengthClass} badge must resolve a real light background`).not.toBeNull();
-      expect(DECLARED_LIGHT_SURFACES.has(bg!), `${strengthClass} background ${bg} is not a declared light surface`).toBe(true);
+      expect(bg, `${strengthClass} badge must resolve a real rail background`).not.toBeNull();
+      expect(DECLARED_RAIL_SURFACES.has(bg!), `${strengthClass} background ${bg} is not a declared rail surface`).toBe(true);
       expect(
         contrast(fg!, bg!),
         `${strengthClass} ${fg} on ${bg} must reach 4.5:1`,
