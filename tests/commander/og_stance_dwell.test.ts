@@ -44,6 +44,14 @@ describe('OG stance minimum dwell', () => {
         expect(lapsed.why).toBe('lapsed');
     });
 
+    it('a posture adopted by a corps-ceiling clamp still stands the full dwell before lapsing', () => {
+        // Screening confirmed at 10, clamped to Fortify at 12 (since 12, confirmation still 10).
+        const clamped = held('fortify', 12, 10);
+        expect(resolveOgStance(clamped, undefined, 13).stance).toBe('fortify');
+        expect(resolveOgStance(clamped, undefined, 14).stance).toBe('fortify');
+        expect(resolveOgStance(clamped, undefined, 12 + OG_STANCE_MIN_DWELL_TURNS).stance).toBe('defend');
+    });
+
     it('a confirming recommendation refreshes the confirmation turn', () => {
         const result = resolveOgStance(held('fortify', 10, 10), rec('fortify', 'intel'), 14);
         expect(result).toEqual({ stance: 'fortify', confirmed_turn: 14, why: 'confirmed' });

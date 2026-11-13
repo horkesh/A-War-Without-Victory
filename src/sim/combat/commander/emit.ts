@@ -3566,7 +3566,11 @@ export function resolveOgStance(
         }
         return { stance: previous.stance, confirmed_turn: previous.confirmed_turn, why: 'held' };
     }
-    if (previous.stance !== 'defend' && turn - previous.confirmed_turn >= OG_STANCE_MIN_DWELL_TURNS) {
+    // A lapse needs both an old reason and the full dwell: a posture adopted by a corps-ceiling
+    // clamp keeps the confirmation turn of the stance it replaced, but must still stand.
+    if (previous.stance !== 'defend'
+        && turn - previous.confirmed_turn >= OG_STANCE_MIN_DWELL_TURNS
+        && dwell >= OG_STANCE_MIN_DWELL_TURNS) {
         return { stance: 'defend', confirmed_turn: turn, why: 'lapsed' };
     }
     return { stance: previous.stance, confirmed_turn: previous.confirmed_turn, why: 'standing' };
