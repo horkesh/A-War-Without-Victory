@@ -156,15 +156,20 @@ export const PRESIDENTIAL_COMMAND_CATEGORIES: readonly PresidentialCommandCatego
 const PARAMILITARY_CARD_ID = 'paramilitary:pending';
 const SUPPLY_VISIBILITY_CARD_ID = 'supply:player-visibility';
 const HISTORICAL_OPERATION_REVIEW_CARD_PREFIX = 'command:review-proposal:';
+/** Mirrors RECRUITMENT_MATTER_ID_PREFIX in data/recruitmentMatter.ts. */
+const RECRUITMENT_CARD_PREFIX = 'recruitment:';
 
 /** True when a card belongs to the Conscience & Atrocity bright-line card. */
 function isConscienceCard(cardId: string): boolean {
   return cardId === PARAMILITARY_CARD_ID;
 }
 
-/** True when a card belongs to the Home Front supply/economy card. */
+/**
+ * True when a card belongs to Home Front: supply/economy pressure, and recruitment
+ * (mobilization; command-surface design §3 lists recruitment under Home Front).
+ */
 function isHomeFrontCard(cardId: string): boolean {
-  return cardId === SUPPLY_VISIBILITY_CARD_ID;
+  return cardId === SUPPLY_VISIBILITY_CARD_ID || cardId.startsWith(RECRUITMENT_CARD_PREFIX);
 }
 
 /** Signature-required historical operations belong with war direction, not diplomacy. */

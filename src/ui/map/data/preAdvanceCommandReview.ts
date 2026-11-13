@@ -3,6 +3,7 @@ import {
   buildPresidentialDecisionRoomView,
   type PresidentialDecisionRoomCard,
   type PresidentialDecisionRoomCategory,
+  type PresidentialDecisionRoomInput,
   type PresidentialDecisionRoomMetrics,
   type PresidentialDecisionRoomNavigationTarget,
   type PresidentialDecisionRoomSeverity,
@@ -49,7 +50,8 @@ export interface PreAdvanceCommandReviewView {
   metrics: PreAdvanceCommandReviewMetrics;
 }
 
-export interface PreAdvanceCommandReviewInput {
+export interface PreAdvanceCommandReviewInput
+  extends Pick<PresidentialDecisionRoomInput, 'recruitmentMatter' | 'municipalityNames'> {
   state: LoadedGameState | null;
   osidNameMap?: Record<string, string> | null;
   /** Current-session aftermath already presented to the player. Not persisted. */

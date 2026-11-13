@@ -23,6 +23,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useGameStore } from '../../store/gameStore';
 import { useIPC } from '../../desktop/useIPC';
+import { useRecruitmentMatterInput } from '../../utils/useRecruitmentMatter';
 import { advanceTurnAndSync } from '../../desktop/orderActions';
 import { getTurnAftermathAdvanceDeps } from '../../desktop/turnAftermathAdvanceDeps';
 import {
@@ -205,13 +206,15 @@ export function AdvanceTurnModal({ onReviewPriorities, onReviewItem, onResolveBl
   const setLoadError = useGameStore((s) => s.setLoadError);
   const ipc = useIPC();
   const [advancing, setAdvancing] = useState(false);
+  const recruitmentInput = useRecruitmentMatterInput();
   const review = useMemo(
     () => buildPreAdvanceCommandReviewView({
       state: loadedGameState,
       osidNameMap: osidDisplayNames,
       reviewedAftermathTurn: turnAftermath?.turn ?? null,
+      ...recruitmentInput,
     }),
-    [loadedGameState, osidDisplayNames, turnAftermath?.turn],
+    [loadedGameState, osidDisplayNames, turnAftermath?.turn, recruitmentInput],
   );
   const blockers = useMemo(
     () => derivePresidentialBlockers(loadedGameState, osidDisplayNames),
