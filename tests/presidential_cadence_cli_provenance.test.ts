@@ -3,6 +3,7 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { describe, expect, it } from 'vitest';
+import { resolveTsxCli } from '../tools/test/vitest_shared_config.mjs';
 
 describe('presidential cadence CLI source-save provenance', () => {
   it('rejects a turn-0 save advertised as end turn 1 without writing output', () => {
@@ -10,7 +11,7 @@ describe('presidential cadence CLI source-save provenance', () => {
     mkdirSync(evidenceDir, { recursive: true });
     const outputPath = join(evidenceDir, 'forged-report.json');
     const result = spawnSync(process.execPath, [
-      resolve('node_modules/tsx/dist/cli.mjs'),
+      resolveTsxCli(process.cwd()),
       resolve('tools/diagnostics/presidential_cadence_report.ts'),
       '--save',
       resolve('docs/40_reports/playtests/evidence/20260731_session16_rs_104week_player/autosaves/initial-autosave.json'),

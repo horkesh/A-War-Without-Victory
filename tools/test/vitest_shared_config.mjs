@@ -67,6 +67,16 @@ export function resolveVitestCli(rootDir) {
     return join(resolveRootModules(rootDir, 'vitest'), 'vitest', 'vitest.mjs');
 }
 
+/**
+ * The tsx CLI entrypoint (`node <this> script.ts`), found through the same walk. Every
+ * test and tool that spawns tsx resolves it here instead of hard-coding
+ * `<cwd>/node_modules/tsx/dist/cli.mjs`, which does not exist in a worktree that has no
+ * node_modules of its own. Main checkout and CI: exactly `<rootDir>/node_modules/tsx/dist/cli.mjs`.
+ */
+export function resolveTsxCli(rootDir) {
+    return join(resolveRootModules(rootDir, 'tsx'), 'tsx', 'dist', 'cli.mjs');
+}
+
 /** Installed before each test file's module graph is evaluated. */
 export const VITEST_SETUP_FILE = 'tools/test/jsdom_browser_polyfills.ts';
 
