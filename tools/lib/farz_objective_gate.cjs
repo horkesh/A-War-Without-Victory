@@ -44,16 +44,23 @@ function checkFarzObjectiveCaptures({ cells, at188, events, battleById, aars, co
   const secondCorpsParticipated = participants.some((id) => corpsOf(id) === 'arbih_2nd_corps');
 
   // A logged, operation-owned combat capture by `owner`, made inside the Farz window.
-  const receipt = (owner, corps, osid) => (owner && Array.isArray(owner.objectives_logged_captured)
+  // The capturer must belong to one of `corps`, or (`countParticipants`) be one of the
+  // owner's own logged participants from any corps: an Army HQ operation can take donor
+  // brigades from other commands (RF-3 SD1, orchestrator ruling 2026-11-14: the General
+  // Staff's 120th took Spreča inside Farz and the AAR logs it, but the corps-only reading
+  // reported it unattributed). A non-participant from another corps still fails.
+  const receipt = (owner, corps, osid, countParticipants = false) => (owner && Array.isArray(owner.objectives_logged_captured)
     && owner.objectives_logged_captured.includes(osid)
     && events.find((e) => e.settlement_id === osid && e.to === 'RBiH'
       && e.mechanism === 'combat' && e.turn >= Math.max(windowStart, aar.started_turn)
       && e.turn <= aar.ended_turn
-      && corps.includes(corpsOf(e.attacker_brigade))
+      && (corps.includes(corpsOf(e.attacker_brigade))
+        || (countParticipants && Array.isArray(owner.participating_brigades)
+          && owner.participating_brigades.includes(e.attacker_brigade)))
       && classifyCombatCapture(e, battleById.get(e.battle_id)).operation_ids?.includes(owner.operation_id))) || null;
 
   const rows = cells.map(([name, osid]) => {
-    const own = aar ? receipt(aar, ['arbih_2nd_corps', 'arbih_3rd_corps'], osid) : null;
+    const own = aar ? receipt(aar, ['arbih_2nd_corps', 'arbih_3rd_corps'], osid, true) : null;
     const viaPartner = !own && aar ? receipt(partner, ['arbih_2nd_corps'], osid) : null;
     const event = own || viaPartner;
     return {
