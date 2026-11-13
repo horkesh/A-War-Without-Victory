@@ -416,7 +416,7 @@ export function getPlayerSafeCorridorLabel(
     if (!safeFaction) return fallback;
 
     const label = militaryFactionLabel(safeFaction);
-    return label ? `${label}-controlled corridor` : fallback;
+    return label ? t('desk.faction.corridor', { force: label }) : fallback;
 }
 
 /** Player-facing operation name. Engine names are ASCII ("Operation Foca"); shown as "Operation Foča". */

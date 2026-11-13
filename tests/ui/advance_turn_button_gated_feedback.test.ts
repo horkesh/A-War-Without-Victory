@@ -547,8 +547,8 @@ describe('ADVANCE_TURN gated feedback', () => {
     }));
 
     expect(screen.getByText('STO')).toBeTruthy();
-    expect(screen.getByText('RATNA MAPA')).toBeTruthy();
-    expect(screen.getByText('ARMIJSKI HQ')).toBeTruthy();
+    expect(screen.getByText('RATNA KARTA')).toBeTruthy();
+    expect(screen.getByText('ŠTAB ARMIJE')).toBeTruthy();
     expect(screen.getByText('ZAPISI')).toBeTruthy();
     expect(screen.getByText('HRONIKA')).toBeTruthy();
     expect(screen.getByText('KODEKS')).toBeTruthy();
@@ -556,7 +556,7 @@ describe('ADVANCE_TURN gated feedback', () => {
     expect(screen.getByText(/SLJEDEĆI POTEZ/)).toBeTruthy();
     expect(screen.getByRole('group', { name: 'Ovlast: 4/8' })).toBeTruthy();
     expect(screen.getByTitle('Kampanjska hronika')).toBeTruthy();
-    expect(screen.getAllByTitle('Posjeti Armijski HQ [H]').length).toBeGreaterThan(0);
+    expect(screen.getAllByTitle('Posjeti Štab armije [H]').length).toBeGreaterThan(0);
     expect(screen.queryByText('CHRONICLE')).toBeNull();
     expect(screen.queryByText('SUMMARY')).toBeNull();
     expect(screen.queryByText('EVENTS')).toBeNull();

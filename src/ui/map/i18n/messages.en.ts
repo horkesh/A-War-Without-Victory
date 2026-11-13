@@ -5590,6 +5590,7 @@ export const enMessages = {
     'desk.faction.military.rs': 'VRS',
     'desk.faction.military.rbih': 'ARBiH',
     'desk.faction.military.hrhb': 'HVO',
+    'desk.faction.corridor': '{force}-controlled corridor',
     'desk.action.openEconomy': 'Open War Footing',
     'desk.economy.blurb': 'Supply reserves, war production, smuggling routes and the embargo.',
     'formationDetail.role.attacker': 'attacker',
