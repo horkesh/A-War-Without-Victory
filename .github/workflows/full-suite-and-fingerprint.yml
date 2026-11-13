@@ -107,6 +107,11 @@ jobs:
       - run: npm ci --legacy-peer-deps
         if: steps.changes.outputs.relevant == 'true'
 
+      - name: Startup snapshot freshness guard (read-only, before rebuild)
+        if: steps.changes.outputs.relevant == 'true'
+        continue-on-error: true
+        run: npm run desktop:startup-snapshot:check
+
       - name: Rebuild startup snapshot for this platform
         if: steps.changes.outputs.relevant == 'true'
         run: npm run desktop:startup-snapshot:build
