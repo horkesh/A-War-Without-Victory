@@ -49,7 +49,7 @@ import { spatialFriendlyDistance, spatialSameComponent } from '../../spatial_con
 import { buildCommanderOperation, buildProbeOperation, derivePrimarySectorForBrigades, getMaxOperationSlots, getOperationSlotUsageForOperations } from '../corps_operation_helpers.js';
 import { isBrigadeEligibleForOperationObjectives } from '../enclave_resilience.js';
 import { pickOperationName } from '../operation_names.js';
-import { emitCommanderCreationRecord, emitLocalOccupationCandidateRecord, isReasonCodeTopicEnabled } from '../reason_code_debug.js';
+import { emitCommanderCreationRecord, emitLocalOccupationCandidateRecord, emitSectorStanceRecord, isReasonCodeTopicEnabled } from '../reason_code_debug.js';
 import { buildTerrainCache, predictCombatOutcome, type CombatPrediction } from '../combat_predictor.js';
 import { buildOfficerCombatLookup } from '../combat_math.js';
 import { isOutcomeSufficientForAttack } from '../bot_brigade_targeting.js';
@@ -89,7 +89,7 @@ import type { DecisionResult } from './decide.js';
 import { augmentOffensiveTargetsWithShifts } from './bot_priority_shift_augmentation.js';
 import { botOrdersPerfTime } from '../_perf_profile_bot_orders.js';
 import { shouldLaunchProbeInstead, type ProbeLaunchDecisionTrace } from '../bot_corps_directives.js';
-import { getStalestSectorIntelConfidence } from '../sector_intel.js';
+import { getStalestSectorIntelConfidence, stableSectorKey } from '../sector_intel.js';
 import { computePlanningDuration } from '../sector_offensive_axis_helpers.js';
 import { canFormationReachAssemblyInTime } from '../sector_offensive_launch_helpers.js';
 import { mayEliteJoinOperation } from '../historical_elite_reservations.js';
@@ -3554,6 +3554,21 @@ function buildSectorStances(
     for (const change of decisions.stance_changes) {
         if (stanceMap.has(change.sector_id)) {
             stanceMap.set(change.sector_id, change.new_stance);
+        }
+    }
+
+    if (isReasonCodeTopicEnabled('sector_stance')) {
+        const reasonBySector = new Map(decisions.stance_changes.map(c => [c.sector_id, c.reason] as const));
+        for (const sector of corpsSectors) {
+            emitSectorStanceRecord({
+                phase: 'commander',
+                turn: briefing.turn,
+                corps_id: briefing.corps_id,
+                sector_id: sector.sector_id,
+                stable_key: stableSectorKey(sector),
+                stance: stanceMap.get(sector.sector_id) ?? null,
+                reason: reasonBySector.get(sector.sector_id) ?? 'default',
+            });
         }
     }
 
