@@ -9,6 +9,39 @@
   Compacted 2026-09-10: 1723 sections moved out, 62 kept live.
 -->
 
+## 2026-11-13 — Canon/data fixes S10 (NamedPhase count) and S11 (Delić tenure week)
+
+**S10, docs only.** `Phase_Specifications_v0_9_0.md` said the War-phase pipeline had 151 NamedPhase
+steps. The real count is **195** at merge time (193 when measured; +2 from the stance-matters steps merged from main) (`warPhases` in `src/sim/turn_phases/war_phases.ts`, pinned by
+`tests/war_phase_step_order.test.ts`; the 22 `earlyWarPhases` are a separate list). Corrected the
+spec and the two live repeats in `GAME_STATE_RATING_MASTER.md` ("151 steps", "151-step war
+pipeline"). Left as dated history: older ledger/report/napkin entries that quote the count at the time.
+
+**S11, sim data.** Rasim Delić was appointed ABiH Commander of the Main Staff by the Presidency's
+decision of **8 June 1993** (ICTY Halilović/Delić filings; web cross-check; Halilović stayed as Chief
+until 1 November 1993). Scenario week 0 is 6 April 1992, so 8 June 1993 falls in **week 61**
+(7–13 June); week 60 begins 31 May. Moved the handover from 60 to 61 in every place that encodes it:
+`data/scenarios/army_co_roster.json` (`arbih_delic.tenure_start`),
+`data/scenarios/officers/apr1992_officers.json` (Halilović `available_until_turn`, Delić
+`available_from_turn`), and the two `tools/claude_plays_vrs/personas` files; `tests/d1_persona_infrastructure.test.ts`
+T6 now probes week 61. `FORAWWV.md:307` says "Delić (w60+)"; left untouched (panel-gated, and "w60+"
+is not contradicted by 61).
+
+**Figures (apr1992_definitive_188w, 40w and 188w, run in this worktree).** Checkpoints
+**712 / 711 / 712 / 710**, identical to main; `verify_checkpoints` guard intact (9/9 enclave cells,
+Farz 4/4, cascade 49); engine health gate PASS at both horizons (188w matched 710, K:W 3.696;
+40w matched 712, K:W 3.858); 40w structural fingerprint `bc629e89a585dfde` unchanged. Against a main
+baseline run, `control_delta`, `formation_delta`, `activity_summary`, `weekly_report` and `end_report`
+are byte-identical; only `final_save` and `run_summary` differ, by the one-turn handover (Halilović
+`turns_in_command` 59→60, Delić 128→127, the turn-60 army CO decision trace now Halilović's).
+188w `final_state_hash` `2a2bb1ff54155f00`; 40w `44375b6b1484e128` (the Delić handover is at turn 61, past the 40w horizon).
+
+**Re-bless.** `data/derived/scenario/baselines/manifest.json` (188w golden `final_save`/`run_summary`
+SHA256) re-blessed with `UPDATE_BASELINES=1`: the only drift is the intended one-turn officer handover
+shown above; no territory moved. `npm run test:baselines` green after.
+
+Gates: `npx tsc --noEmit` exit 0; 18 affected vitest files 302/302; docs guards 9/9.
+
 ## 2026-11-13 — Test tooling: tsx and vitest/tsc CLIs resolve from a worktree without node_modules
 
 Test infrastructure and developer tooling only; no product, simulation, or calibration code changed.
