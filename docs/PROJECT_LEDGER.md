@@ -9,6 +9,32 @@
   Compacted 2026-09-10: 1723 sections moved out, 62 kept live.
 -->
 
+## 2026-11-13 — Startup snapshot re-baked for the Delić handover (#581 follow-up)
+
+#581 moved Halilović/Delić from week 60 to 61 in `apr1992_officers.json` but did not regenerate the
+baked `data/derived/startup/apr_1992_initial_save.json`, so live play (which starts from the baked
+artifact) still had the old roster and `tests/startup_snapshot_contract.test.ts` plus
+`tests/desktop_sim_bundle_smoke.test.ts` (build aborts on a stale snapshot) failed locally on main.
+Rebuilt with `npm run desktop:startup-snapshot:build`; the diff is exactly two fields
+(`named_officer_data/31/available_until_turn` 60→61, `/32/available_from_turn` 60→61).
+
+**Why CI stayed green (steps, from run 43399675965, `full-suite` job):** checkout; change detection
+(relevant=true, data/scenarios touched); `npm ci`; **"Rebuild startup snapshot for this platform"
+(`desktop:startup-snapshot:build`, a `--write`)**; full balanced vitest (success, NOT skipped); player
+experience gate. The rebuild overwrites the committed artifact in the runner before any test reads
+it, so the contract test compares a fresh build to itself. `desktop:startup-snapshot:check` (the
+read-only drift check) is not called by any workflow; the same rebuild step precedes the tests in
+the structural-fingerprint, baseline-regression, desktop-release-guard and release jobs. Gap: a
+committed-artifact drift can never fail CI. Smallest guard (proposed, not built, because whether a
+Linux build is byte-identical to the committed artifact is unproven): run
+`npm run desktop:startup-snapshot:check` before the rebuild step in `full-suite`, first with
+`continue-on-error` to learn whether it is clean on Linux, then make it blocking.
+
+Figures: 40w `44375b6b1484e128` and 188w `2a2bb1ff54155f00` hashes unchanged (the headless runner
+builds from scenario data, not the baked artifact); checkpoints **712/711/712/710**; engine health PASS
+(188w and 40w); `verify_checkpoints` guard intact; `test:baselines` and structural fingerprint pass.
+Gates: tsc exit 0; both tests 20/20.
+
 ## 2026-11-13 — Displacement attribution (SC1-SC3) and the ledger's side column
 
 Signed by the owner-delegated **eight-seat bright-line panel** (Historian, calibration,
