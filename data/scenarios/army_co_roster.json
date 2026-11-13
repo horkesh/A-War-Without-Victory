@@ -22,7 +22,7 @@
       ]
     },
     "RBiH": {
-      "main_staff_formation_id": "arbih_main_staff",
+      "main_staff_formation_id": "arbih_general_staff",
       "schedule": [
         {
           "officer_id": "arbih_halilovic",

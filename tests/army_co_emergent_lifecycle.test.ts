@@ -361,7 +361,7 @@ describe('Army commander emergent lifecycle', () => {
             type: 'replacement_suggested',
             current_commander_id: 'arbih_halilovic',
             officer_id: 'arbih_delic',
-            corps_id: 'arbih_main_staff',
+            corps_id: 'arbih_general_staff',
         }));
         expect(playerState.military.pending_officer_events).not.toContainEqual(expect.objectContaining({
             type: 'officer_available',

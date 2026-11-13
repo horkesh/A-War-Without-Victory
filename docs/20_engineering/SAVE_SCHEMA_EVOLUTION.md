@@ -18,6 +18,11 @@ not emit these receipts. Earlier cadence/conservation coverage is archived with 
 under `logs/claude-channel-20261004/341-candidate-archive/`. No migration or schema bump is
 introduced by the withdrawal.
 
+**2026-11-13 writer:** corps reorganisation events (`src/sim/corps_reorganisation.ts`,
+`corps_transfer` / `corps_retire`) record their first completion turn here under their event
+id. The receipt is informational: both events are standing rules re-evaluated every turn, so a
+missing receipt in an old save changes nothing. No migration or schema bump.
+
 
 Use this procedure for every `GameState` shape change that can appear in a saved game.
 

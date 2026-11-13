@@ -17725,7 +17725,7 @@
         "location_osid": "op:bugojno:kula_2",
         "max_personnel": 1800,
         "morale": 60,
-        "name": "705th Mountain",
+        "name": "305th Mountain",
         "officer_quality": 0.1,
         "ops": {
           "fatigue": 0,
@@ -17799,7 +17799,7 @@
         "location_osid": "op:travnik:gornje_krcevine",
         "max_personnel": 1800,
         "morale": 60,
-        "name": "706th Muslim Mountain",
+        "name": "306th Mountain",
         "officer_quality": 0.05,
         "ops": {
           "fatigue": 0,
@@ -17874,7 +17874,7 @@
         "location_osid": "op:bugojno:vesela_2",
         "max_personnel": 1800,
         "morale": 60,
-        "name": "707th Mountain",
+        "name": "307th Mountain",
         "officer_quality": 0.1,
         "ops": {
           "fatigue": 0,
@@ -17948,7 +17948,7 @@
         "location_osid": "op:travnik:turbe_2",
         "max_personnel": 1800,
         "morale": 60,
-        "name": "712th Mountain",
+        "name": "312th Motorized",
         "officer_quality": 0.05,
         "ops": {
           "fatigue": 0,
@@ -18022,7 +18022,7 @@
         "location_osid": "op:travnik:podstinje",
         "max_personnel": 1800,
         "morale": 60,
-        "name": "727th Brigade",
+        "name": "27th Krajina Mountain",
         "officer_quality": 0.1,
         "ops": {
           "fatigue": 0,
@@ -31958,7 +31958,7 @@
       {
         "aggressiveness": 4,
         "available_from_turn": 0,
-        "available_until_turn": 60,
+        "available_until_turn": 61,
         "bio_short": "JNA-background officer leading the RBiH army command at scenario start.",
         "can_improve": true,
         "casualty_vulnerability": 0.05,
@@ -31987,7 +31987,7 @@
       },
       {
         "aggressiveness": 3,
-        "available_from_turn": 60,
+        "available_from_turn": 61,
         "can_improve": false,
         "casualty_vulnerability": 0.05,
         "competence": 4,

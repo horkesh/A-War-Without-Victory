@@ -1391,6 +1391,22 @@ export const warPhases: NamedPhase[] = [
         }
     },
     {
+        // Corps reorganisation (dated brigade transfers, corps retirement). Runs right after
+        // activate-corps so a corps activated this turn can receive its brigades, and BEFORE
+        // partition-corps-front-sectors so sectors reflect the new corps on the same turn.
+        // DETERMINISM GATE: zero mutation unless an event in
+        // data/source/formation_lifecycle_events.json `corps_reorganisation` has triggered.
+        name: 'apply-corps-reorganisation',
+        run: async (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            const { loadCorpsReorganisationEvents, processCorpsReorganisationEvents } = await import('../corps_reorganisation.js');
+            const events = await loadCorpsReorganisationEvents(context.input.dataBaseDir);
+            if (events.length === 0) return;
+            const report = processCorpsReorganisationEvents(context.state, events);
+            if (report) context.report.corps_reorganisation = report;
+        }
+    },
+    {
         name: 'load-operational-data',
         run: async (context) => {
             if (context.state.meta.phase !== 'war') return;

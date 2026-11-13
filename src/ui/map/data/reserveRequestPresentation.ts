@@ -44,6 +44,7 @@ const RECALL_REASON_KEYS: Record<string, MessageKey> = {
   casualty_threshold: 'armyReserve.recall.casualties',
   morale_collapse: 'armyReserve.recall.moraleCollapse',
   permanent_degradation: 'armyReserve.status.degraded',
+  corps_reorganisation: 'armyReserve.recall.corpsReorganisation',
 };
 
 export function buildReserveRequestPresentation(
