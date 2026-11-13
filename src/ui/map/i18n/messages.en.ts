@@ -3231,7 +3231,7 @@ export const enMessages = {
     'replay.next': 'Next',
     'replay.activeFormations': 'Active formations',
     'replay.casualties': 'Military casualties',
-    'replay.displaced': 'Displaced',
+    'replay.displacedOrKilled': 'Displaced or killed',
     'replay.control': 'Control',
     'replay.heading': 'The war week by week',
     'replay.position': '{current} / {total}',

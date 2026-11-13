@@ -122,7 +122,7 @@ function makeFrame(turn: number, date: string) {
         date,
         activeFormations: 35,
         totalCasualties: turn * 500,
-        totalDisplaced: turn * 5000,
+        totalDisplacedOrKilled: turn * 5000,
         controlByFaction: [
             { faction: 'RS', osids: 420 },
             { faction: 'RBiH', osids: 250 },
@@ -143,7 +143,7 @@ describe('VerdictScreen Replay tab — live-play multi-frame manifest', () => {
     it('Replay tab is visible when a multi-frame live manifest is present', () => {
         storeState = {
             loadedGameState: livePlayEndgame({
-                schema_version: 1,
+                schema_version: 2,
                 frame_count: 3,
                 frames: [
                     makeFrame(1, '1992-04-06'),
@@ -159,7 +159,7 @@ describe('VerdictScreen Replay tab — live-play multi-frame manifest', () => {
     it('Replay tab shows frame data from the first frame (scrubber starts at index 0)', () => {
         storeState = {
             loadedGameState: livePlayEndgame({
-                schema_version: 1,
+                schema_version: 2,
                 frame_count: 3,
                 frames: [
                     makeFrame(1, '1992-04-06'),
@@ -189,7 +189,7 @@ describe('VerdictScreen Replay tab — live-play multi-frame manifest', () => {
     it('Replay tab is NOT visible when frame_count is 0', () => {
         storeState = {
             loadedGameState: livePlayEndgame({
-                schema_version: 1,
+                schema_version: 2,
                 frame_count: 0,
                 frames: [],
             }),
@@ -201,7 +201,7 @@ describe('VerdictScreen Replay tab — live-play multi-frame manifest', () => {
     it('controlByFaction values from frames are surfaced with player-safe labels', () => {
         storeState = {
             loadedGameState: livePlayEndgame({
-                schema_version: 1,
+                schema_version: 2,
                 frame_count: 1,
                 frames: [makeFrame(188, '1995-10-01')],
             }),

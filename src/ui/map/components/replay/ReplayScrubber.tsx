@@ -15,23 +15,25 @@
  * Command Surface restyle (R8, sensitive-copy lane 2026-11-13): shared surface
  * parts, 13 px text floor, every string through i18n. Copy ruled on by the
  * Pyrrhic sensitive-history panel (record in SENSITIVE_HISTORY_DESIGN_GATE.md
- * §6). The casualty and displaced figures are NOT shown: `buildReplayFrameSummary`
- * reads `military.casualty_totals_by_faction` / `casualties_by_faction` /
- * `casualties` and `displacement_humanitarian_aggregates.total_displaced`, none
- * of which the engine writes, so both report 0 for every frame. A zero for a
- * war is a false statement that understates harm. The figures return once the
- * summary reads real engine fields; the casualty label is then "Military
- * casualties" (`replay.casualties`), and a displaced figure that includes the
- * killed must say so (§4).
+ * §6).
+ *
+ * Casualty and displaced figures (replay real-totals lane, 2026-11-13; SC6):
+ * `buildReplayFrameSummary` reads the engine's own records, the casualty ledger
+ * for "Military casualties" (killed + wounded + missing/captured, all sides) and
+ * the displacement aggregates for "Displaced or killed" (`refugees_created`,
+ * which counts the killed, so §4 requires the label to say so). A figure the
+ * frame does not record arrives as `null` and its card is hidden, never shown
+ * as 0 (§4 "False zero"); v1 manifests, whose figures were always 0, read as
+ * `null` for both.
  */
 import { useEffect, useMemo, useState, useCallback } from 'react';
 import type { GameState } from '../../../../state/game_state.js';
-import type { ReplaySaveManifest } from '../../../../sim/replay/replay_manifest.js';
+import type { ReadableReplaySaveManifest } from '../../../../sim/replay/replay_manifest.js';
 import { buildReplayFrameSummary } from '../../../../sim/replay/replay_frame_summary.js';
 import { replayPlayer } from '../../../../sim/replay/replay_player.js';
 import { replaySummaryPlayer } from '../../../../sim/replay/replay_summary_player.js';
 import { getActiveLocale, t, useLocale } from '../../i18n';
-import { turnToDateString } from '../../utils/formatters';
+import { formatCount, turnToDateString } from '../../utils/formatters';
 import { FACTION_MILITARY_LABELS } from '../../utils/theme';
 import {
     SURFACE_LABEL,
@@ -45,7 +47,7 @@ import {
 export interface ReplayScrubberProps {
     /** Save sequence (read-only). When empty/null, the scrubber renders an empty notice. */
     saveSequence?: readonly GameState[] | null | undefined;
-    saveManifest?: ReplaySaveManifest | null | undefined;
+    saveManifest?: ReadableReplaySaveManifest | null | undefined;
     /** Optional full-frame map inspection callback. Hidden for sparse manifests. */
     onInspectFrame?: (frame: GameState, frameIndex: number) => void;
 }
@@ -73,9 +75,9 @@ const STEP_BUTTON = `${SURFACE_SECONDARY_BUTTON} min-w-[6.5rem]`;
 const JUMP_BUTTON =
     'min-h-11 rounded-md px-3 text-[15px] font-semibold tabular-nums text-[#c2b69c] transition hover:bg-[#1b2029] hover:text-[#f1e6c8]';
 
-function ReplayFigure({ label, children }: { label: string; children: React.ReactNode }) {
+function ReplayFigure({ label, figure, children }: { label: string; figure?: string; children: React.ReactNode }) {
     return (
-        <div className="min-w-0 rounded-md border border-[#262b35] bg-[#141821] px-4 py-3">
+        <div className="min-w-0 rounded-md border border-[#262b35] bg-[#141821] px-4 py-3" data-awwv-replay-figure={figure}>
             <div className={SURFACE_LABEL_MUTED}>{label}</div>
             <div className="mt-1.5 break-words font-mono text-[18px] font-semibold leading-relaxed tabular-nums text-[#f1e6c8]">
                 {children}
@@ -298,6 +300,16 @@ export function ReplayScrubber({ saveSequence, saveManifest, onInspectFrame }: R
                 data-awwv-replay-summary="true"
             >
                 <ReplayFigure label={t('replay.activeFormations')}>{summary.activeFormations}</ReplayFigure>
+                {summary.totalCasualties != null && (
+                    <ReplayFigure label={t('replay.casualties')} figure="casualties">
+                        {formatCount(summary.totalCasualties)}
+                    </ReplayFigure>
+                )}
+                {summary.totalDisplacedOrKilled != null && (
+                    <ReplayFigure label={t('replay.displacedOrKilled')} figure="displaced-or-killed">
+                        {formatCount(summary.totalDisplacedOrKilled)}
+                    </ReplayFigure>
+                )}
                 <ReplayFigure label={t('replay.control')}>
                     {summary.controlByFaction.length === 0
                         ? t('verdict.notRecorded')

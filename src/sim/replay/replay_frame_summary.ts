@@ -2,14 +2,10 @@ import type { GameState } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { asRecord } from '../../state/schema_validators.js';
 
-// BATCH C §3.10: replay frames are diagnostic-only — `military` and
-// `displacement` sub-objects are widened to free-form Record reads here so the
-// summary can pull fields that are not part of the typed engine state shape
-// (e.g. `casualty_totals_by_faction`). The helper returns `undefined` for
-// missing or non-object inputs; the previous casts produced the same `undefined`
-// for the missing case but downstream TypeError on the non-object case. The
-// new behavior is documented stricter-at-boundary, looser-downstream — replay
-// summaries never feed back into sim state.
+// BATCH C §3.10: replay frames are diagnostic-only. `military` and
+// `displacement` sub-objects are read through `asRecord` so a malformed frame
+// (a non-object sub-object) cannot throw downstream. Replay summaries never feed
+// back into sim state.
 function parseReplayFrameSubobject(value: unknown): Record<string, unknown> | undefined {
     if (value === undefined) return undefined;
     return asRecord(value) ?? undefined;
@@ -24,8 +20,24 @@ export interface ReplayFrameSummary {
     turn: number | null;
     date: string | null;
     activeFormations: number;
-    totalCasualties: number;
-    totalDisplaced: number;
+    /**
+     * Military casualties so far, all sides: killed + wounded + missing/captured
+     * from `military.casualty_ledger`, the ledger the Verdict cost ledger and the
+     * war-dead totals read. `null` when the frame carries no readable record: a
+     * figure the engine did not record is hidden, never shown as 0
+     * (SENSITIVE_HISTORY_DESIGN_GATE §4, "False zero").
+     */
+    totalCasualties: number | null;
+    /**
+     * People displaced or killed so far, all sides: the sum of `refugees_created`
+     * over `displacement.displacement_humanitarian_aggregates`. Each displacement
+     * event adds displaced + killed + fled abroad, so the figure INCLUDES THE
+     * KILLED and its label must say so (§4: "Displaced or killed"). It is the
+     * measure behind the Humanitarian Ledger's "Displaced or killed, by people"
+     * table and the Verdict cost ledger's displacement record. `null` when the
+     * frame carries no aggregates record.
+     */
+    totalDisplacedOrKilled: number | null;
     controlByFaction: ReplayControlSummary[];
 }
 
@@ -47,34 +59,55 @@ function readDate(frame: ReplayFrameLike): string | null {
     return typeof date === 'string' && date.length > 0 ? date : null;
 }
 
-function sumNumbers(value: unknown): number {
-    if (typeof value === 'number' && Number.isFinite(value)) return value;
-    if (Array.isArray(value)) {
-        return value.reduce((sum, item) => sum + sumNumbers(item), 0);
-    }
-    if (value && typeof value === 'object') {
-        return Object.keys(value as Record<string, unknown>)
-            .sort(strictCompare)
-            .reduce((sum, key) => sum + sumNumbers((value as Record<string, unknown>)[key]), 0);
-    }
-    return 0;
+function nonNegativeCount(value: unknown): number {
+    return typeof value === 'number' && Number.isFinite(value) && value > 0 ? value : 0;
 }
 
-function readTotalCasualties(frame: ReplayFrameLike): number {
+/**
+ * Military casualties from `military.casualty_ledger`: per side, killed +
+ * wounded + missing/captured, summed in sorted side order.
+ *
+ * The engine creates the ledger on its first casualty write
+ * (`initializeCasualtyLedger` in battle_resolution, attack_resolution_osid,
+ * frontline_attrition, siege_attrition), so a `military` record without a ledger
+ * means no casualty has been recorded yet: a true 0. A frame with no `military`
+ * record, or a ledger that is not an object, reports `null`.
+ */
+function readTotalCasualties(frame: ReplayFrameLike): number | null {
     const military = parseReplayFrameSubobject(frame.military);
-    return sumNumbers(
-        military?.casualty_totals_by_faction
-        ?? military?.casualties_by_faction
-        ?? military?.casualties
-        ?? null,
-    );
+    if (!military) return null;
+    if (military.casualty_ledger === undefined) return 0;
+    const ledger = parseReplayFrameSubobject(military.casualty_ledger);
+    if (!ledger) return null;
+    let total = 0;
+    for (const faction of Object.keys(ledger).sort(strictCompare)) {
+        const row = asRecord(ledger[faction]);
+        if (!row) continue;
+        total += nonNegativeCount(row.killed)
+            + nonNegativeCount(row.wounded)
+            + nonNegativeCount(row.missing_captured);
+    }
+    return total;
 }
 
-function readTotalDisplaced(frame: ReplayFrameLike): number {
+/**
+ * Displaced or killed from `displacement.displacement_humanitarian_aggregates`:
+ * the sum of `refugees_created` over every caused-by key and every people key,
+ * in sorted order. `null` when the frame carries no aggregates record.
+ */
+function readTotalDisplacedOrKilled(frame: ReplayFrameLike): number | null {
     const displacement = parseReplayFrameSubobject(frame.displacement);
-    const aggregate = displacement?.displacement_humanitarian_aggregates as Record<string, unknown> | undefined;
-    const direct = aggregate?.total_displaced ?? displacement?.total_displaced;
-    return typeof direct === 'number' && Number.isFinite(direct) ? direct : 0;
+    const aggregates = parseReplayFrameSubobject(displacement?.displacement_humanitarian_aggregates);
+    if (!aggregates) return null;
+    let total = 0;
+    for (const causer of Object.keys(aggregates).sort(strictCompare)) {
+        const byPeople = asRecord(aggregates[causer]);
+        if (!byPeople) continue;
+        for (const people of Object.keys(byPeople).sort(strictCompare)) {
+            total += nonNegativeCount(asRecord(byPeople[people])?.refugees_created);
+        }
+    }
+    return total;
 }
 
 function readActiveFormations(frame: ReplayFrameLike): number {
@@ -106,8 +139,8 @@ export function buildReplayFrameSummary(frame: GameState | null | undefined): Re
             turn: null,
             date: null,
             activeFormations: 0,
-            totalCasualties: 0,
-            totalDisplaced: 0,
+            totalCasualties: null,
+            totalDisplacedOrKilled: null,
             controlByFaction: [],
         };
     }
@@ -118,7 +151,7 @@ export function buildReplayFrameSummary(frame: GameState | null | undefined): Re
         date: readDate(replayFrame),
         activeFormations: readActiveFormations(replayFrame),
         totalCasualties: readTotalCasualties(replayFrame),
-        totalDisplaced: readTotalDisplaced(replayFrame),
+        totalDisplacedOrKilled: readTotalDisplacedOrKilled(replayFrame),
         controlByFaction: readControlByFaction(replayFrame),
     };
 }
