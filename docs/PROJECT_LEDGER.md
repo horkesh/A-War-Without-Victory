@@ -44,6 +44,30 @@ Figures: tsc exit 0; affected files 8 / 42 tests pass; 40w run final hash `d2609
 (no engine change; differs from the older `44375b6b1484e128` only through the #590 corps-name strings).
 Full local suite: see PR.
 
+## 2026-11-13 — Integration steward pass 1: roadmap, board, gates and canon backlog brought in line with main
+
+Docs only; no `src/` or `data/` change, no calibration change. Main is at checkpoints **712/711/711/710** after
+#583 (Apr 1995 711 accepted by the orchestrator, 2026-11-13); the roadmap still said 712/711/712/710.
+
+- **Roadmap:** current-state block, sequence line (RF → ENGINE FREEZE → R8 qualifying campaigns → R9) and the list
+  of what merged since 2026-11-12. §4.1 gains BC14-BC19 for the RF pre-freeze items (7th Corps, stance effects,
+  siege displacement path, officer tenure data, HVO-ARBiH war with "owner decision pending", realism-audit fixes).
+  No new plan file. PS row now reads steps 1-6 all merged (#568, #579, #570, #572, #585, #580), ready for the owner to
+  close; the lane stays open until the owner closes it. R8 row says dry runs now, qualifying runs after the freeze.
+- **Size cap:** to stay under the 60,000-character roadmap assertion, three superseded blocks moved verbatim to
+  `MASTER_ROADMAP_ARCHIVE.md` (2026-09 calibration status prose, the 2026-09-12 execution snapshot, the header
+  prose, the closed probe-channel section) and the 2026-09 sections of `COMMAND_BOARD.md` moved there too. The board was re-derived from the roadmap.
+- **Gates:** new lane RF with `RF-CALIBRATION-RESIGNOFF` and `RF-ENGINE-FREEZE`; `DC-CONFERENCE-REDESIGN` closed
+  (DC merged #560, the roadmap row was already closed); `REPO-CANON-PROPAGATION` closed (below).
+- **`.claude/current-lane.txt`:** now RF, so RF calibration runs and R8 dry runs count as in-lane.
+- **Canon backlog:** all fourteen items in `docs/CANON_PROPAGATION_NEEDED.md` were checked against current code.
+  None was already in canon; all are now in `Systems_Manual_v0_9_0.md` with current values (§2, §6.3, §6.4, §6.8, §6.9,
+  §7.4, §7.6, §14.5 note). Five differed from the 2026-03-28 wording (strained-supply gate removed, probe-40 gate not
+  live, feasibility function renamed, retreat chain lost its largest-component step, SpatialContext extras). Also
+  corrected: launch minimum 2 brigades, `MAX_PARTICIPATING_BRIGADES` 20, the §7.6 attack-threshold known issue.
+  Engine Invariants §14.5 (retreat) is panel-gated and untouched; listed in the file for the orchestrator.
+- `plan_index.yml` regenerated: open lanes PS (until the owner closes it), R8, R9.
+
 ## 2026-11-13 — Docs history fixes: Delić date, 6th Corps, CODE_AUDIT 7th Corps, army CO succession weeks
 
 Docs only; no `data/`, `src/` or tests. `ARBIH_ORDER_OF_BATTLE_MASTER.md`: Delić commanded the Main Staff
