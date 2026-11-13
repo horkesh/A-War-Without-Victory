@@ -13,6 +13,7 @@
 
 import type {
     CorpsFrontSector,
+    CorpsOperation,
     FactionId,
     FormationId,
     GameState,
@@ -216,7 +217,7 @@ export function updateSectorIntelFromCombat(
     rec.last_updated_turn = turn;
     rec.strength_category = computeStrengthCategory(enemySector, 1.0);
     rec.posture_observed = computePosture(enemySector, state, 1.0);
-    rec.offensive_signs = computeOffensiveSigns(enemySector, state, 1.0, profile.recon_range);
+    rec.offensive_signs = computeOffensiveSigns(friendlySector, enemySector, state, 1.0, profile.recon_range);
     rec.visible_brigade_ids = computeVisibleBrigades(enemySector, 1.0, profile.recon_range).sort(strictCompare);
     rec.osid_confidence = [{
         osid: defenderOsid,
@@ -247,7 +248,7 @@ function buildRecord(
         front_edge_count: edgeCount,
         strength_category: computeStrengthCategory(enemySector, confidence),
         posture_observed: computePosture(enemySector, state, confidence),
-        offensive_signs: computeOffensiveSigns(enemySector, state, confidence, reconRange),
+        offensive_signs: computeOffensiveSigns(friendlySector, enemySector, state, confidence, reconRange),
         confidence,
         turns_in_contact: turnsInContact,
         visible_brigade_ids: computeVisibleBrigades(enemySector, confidence, reconRange).sort(strictCompare),
@@ -364,13 +365,58 @@ function computePosture(sector: CorpsFrontSector, state: GameState, confidence: 
     return 'defensive';
 }
 
-function computeOffensiveSigns(sector: CorpsFrontSector, state: GameState, confidence: number, _reconRange: number): boolean {
+function computeOffensiveSigns(
+    friendlySector: CorpsFrontSector,
+    sector: CorpsFrontSector,
+    state: GameState,
+    confidence: number,
+    _reconRange: number,
+): boolean {
     // Offensive signs are rough contact intelligence, not full strength/posture truth.
     // Late-war attack sectors can remain below CONFIDENCE_FULL_STRENGTH because intel
     // decays even in contact, but defenders should still notice staging pressure.
     if (confidence < CONFIDENCE_ROUGH_STRENGTH) return false;
     const corpsCommand = state.military.corps_command?.[sector.corps_id];
-    return corpsCommand?.active_operations?.some(op => op.type === 'sector_attack' || op.type === 'feint' || op.type === 'probe') ?? false;
+    // SE4: only an offensive OPPOSITE this OG is a sign here. Until 2026-11-13 any attack,
+    // feint or probe the enemy corps ran anywhere on its front marked every OG facing that
+    // corps as "enemy massing", so whole fronts fortified for one distant operation.
+    return corpsCommand?.active_operations?.some(op =>
+        (op.type === 'sector_attack' || op.type === 'feint' || op.type === 'probe')
+        && isOperationOppositeSector(op, friendlySector, state),
+    ) ?? false;
+}
+
+/**
+ * Is an enemy operation visibly aimed at, or assembling opposite, this friendly OG?
+ *  - an objective (flat list, any axis, target settlement or probe target) lies in the OG's ground;
+ *  - its staging OSID (operation or axis) lies on the enemy ground the OG faces;
+ *  - one of its participating brigades stands on the enemy ground the OG faces.
+ */
+export function isOperationOppositeSector(
+    op: CorpsOperation,
+    friendlySector: CorpsFrontSector,
+    state: GameState,
+): boolean {
+    const ownGround = new Set<string>(friendlySector.territory_osids ?? []);
+    const facing = new Set<string>();
+    for (const sub of friendlySector.sub_segments) {
+        for (const osid of sub.friendly_osids) ownGround.add(osid);
+        for (const osid of sub.enemy_osids) facing.add(osid);
+    }
+    const objectives: string[] = [
+        ...(op.objectives ?? []),
+        ...(op.target_settlements ?? []),
+        ...(op.axes ?? []).flatMap(axis => axis.objectives ?? []),
+    ];
+    if (op.active_probe?.target_osid) objectives.push(op.active_probe.target_osid);
+    if (objectives.some(osid => ownGround.has(osid))) return true;
+    const staging = [op.staging_osid, ...(op.axes ?? []).map(axis => axis.staging_osid)];
+    if (staging.some(osid => osid != null && facing.has(osid))) return true;
+    const formations = state.military.formations ?? {};
+    return op.participating_brigades.some(bid => {
+        const loc = (formations[bid] as { location_osid?: string } | undefined)?.location_osid;
+        return loc != null && facing.has(loc);
+    });
 }
 
 function computeVisibleBrigades(sector: CorpsFrontSector, confidence: number, reconRange: number): FormationId[] {
