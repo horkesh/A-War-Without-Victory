@@ -1,0 +1,153 @@
+/**
+ * Displacement attribution lane (SC1-SC3, 2026-11-13).
+ *
+ * The pressure path in `updateDisplacement` never fires in a real campaign (it is fed
+ * legacy-id edges while control is OSID-keyed), so these synthetic fixtures are the only
+ * place its attribution is exercised. Panel record:
+ * docs/40_reports/implemented/20261113_DISPLACEMENT_ATTRIBUTION_PANEL.md.
+ */
+import { beforeEach, describe, expect, it } from 'vitest';
+
+import type { SettlementRecord } from '../../src/map/settlements.js';
+import {
+    resetDisplacementPressureCache,
+    resolvePressingFactions,
+    splitAmountByCauser,
+    updateDisplacement,
+} from '../../src/state/displacement.js';
+import { appendDisplacementEvent, UNKNOWN_CAUSER_BUCKET } from '../../src/state/displacement_event_log.js';
+import { CURRENT_SCHEMA_VERSION, type GameState } from '../../src/state/game_state.js';
+import type { MunicipalityPopulation1991Map } from '../../src/state/population_share.js';
+
+type Edge = { a: string; b: string; side_a: string | null; side_b: string | null };
+
+function stateWith(controllers: Record<string, string>, extra: Partial<GameState['political']> = {}, turn = 10): GameState {
+    return {
+        schema_version: CURRENT_SCHEMA_VERSION,
+        meta: { turn, seed: 'attribution' },
+        factions: [],
+        military: { formations: {}, front_segments: {}, militia_pools: {} },
+        political: { political_controllers: controllers, ...extra },
+        displacement: {},
+    } as unknown as GameState;
+}
+
+const POCKET = new Set(['op:pocket:a', 'op:pocket:b']);
+
+describe('resolvePressingFactions (SC1)', () => {
+    it('keys the holder on who controls the municipality, not on the pool', () => {
+        const state = stateWith({ 'op:pocket:a': 'RBiH', 'op:pocket:b': 'RBiH', 'op:ring:c': 'RS' });
+        const edges: Edge[] = [{ a: 'op:pocket:a', b: 'op:ring:c', side_a: 'RBiH', side_b: 'RS' }];
+        for (const pool of ['RBiH', 'RS', 'HRHB']) {
+            const r = resolvePressingFactions(state, 'pocket', pool, POCKET, edges);
+            expect(r.holder).toBe('RBiH');
+            expect(r.causers).toEqual([{ faction: 'RS', weight: 1 }]);
+        }
+    });
+
+    it('shares the cause pro rata between two enemies pressing one pocket', () => {
+        const state = stateWith(
+            { 'op:pocket:a': 'RBiH', 'op:pocket:b': 'RBiH', 'op:w:x': 'HRHB', 'op:e:y': 'RS' },
+            { war_alliance_rbih_hrhb: -1 } as Partial<GameState['political']>,
+            60
+        );
+        const edges: Edge[] = [
+            { a: 'op:e:y', b: 'op:pocket:a', side_a: 'RS', side_b: 'RBiH' },
+            { a: 'op:pocket:a', b: 'op:w:x', side_a: 'RBiH', side_b: 'HRHB' },
+            { a: 'op:pocket:b', b: 'op:w:x', side_a: 'RBiH', side_b: 'HRHB' },
+        ];
+        const r = resolvePressingFactions(state, 'pocket', 'RBiH', POCKET, edges);
+        expect(r.causers).toEqual([
+            { faction: 'RS', weight: 1 },
+            { faction: 'HRHB', weight: 2 },
+        ]);
+        expect(splitAmountByCauser(301, r.causers)).toEqual([
+            { faction: 'RS', amount: 100 },
+            { faction: 'HRHB', amount: 201 },
+        ]);
+    });
+
+    it('does not blame an ally (RBiH-HRHB before their war)', () => {
+        const state = stateWith({ 'op:pocket:a': 'RBiH', 'op:pocket:b': 'RBiH', 'op:w:x': 'HRHB' }, {}, 10);
+        const edges: Edge[] = [{ a: 'op:pocket:a', b: 'op:w:x', side_a: 'RBiH', side_b: 'HRHB' }];
+        const r = resolvePressingFactions(state, 'pocket', 'RBiH', POCKET, edges);
+        expect(r.causers).toEqual([{ faction: UNKNOWN_CAUSER_BUCKET, weight: 1 }]);
+    });
+
+    it('falls back to enemies inside the municipality, then to "not recorded", never the holder', () => {
+        const split = stateWith({ 'op:pocket:a': 'RBiH', 'op:pocket:b': 'RS' });
+        const r1 = resolvePressingFactions(split, 'pocket', 'RBiH', POCKET, []);
+        expect(r1.causers).toEqual([{ faction: 'RS', weight: 1 }]);
+
+        const alone = stateWith({ 'op:pocket:a': 'RBiH', 'op:pocket:b': 'RBiH', 'op:far:z': 'RS' });
+        const r2 = resolvePressingFactions(alone, 'pocket', 'RBiH', POCKET, []);
+        expect(r2.causers).toEqual([{ faction: UNKNOWN_CAUSER_BUCKET, weight: 1 }]);
+        expect(r2.causers.map((c) => c.faction)).not.toContain('RBiH');
+    });
+
+    it('ignores legacy-id edges that do not match the OSID settlement ids', () => {
+        const state = stateWith({ 'op:pocket:a': 'RBiH', 'op:pocket:b': 'RBiH' });
+        const legacy: Edge[] = [{ a: 'S100013', b: 'S100056', side_a: 'RBiH', side_b: 'RS' }];
+        const r = resolvePressingFactions(state, 'pocket', 'RBiH', POCKET, legacy);
+        expect(r.causers).toEqual([{ faction: UNKNOWN_CAUSER_BUCKET, weight: 1 }]);
+    });
+});
+
+describe('appendDisplacementEvent with an unrecorded causer', () => {
+    it('books to the unknown bucket instead of the origin controller', () => {
+        const state = stateWith({ 'op:pocket:a': 'RBiH' });
+        appendDisplacementEvent(
+            state,
+            { turn: 1, origin_mun: 'pocket', origin_osid: 'op:pocket:a', dest_mun: 'pocket', ethnicity: 'RBiH', displaced: 10, killed: 2, fled_abroad: 0, settled: 0 },
+            { causerUnrecorded: true }
+        );
+        const agg = state.displacement.displacement_humanitarian_aggregates ?? {};
+        expect(agg[UNKNOWN_CAUSER_BUCKET]?.RBiH?.civilian_casualties_caused).toBe(2);
+        expect(agg.RBiH).toBeUndefined();
+    });
+});
+
+/** An RBiH pocket that is the faction's only municipality (so "encircled" fires), ringed by RS. */
+function encircledPocketFixture() {
+    const controllers = { 'op:pocket:a': 'RBiH', 'op:pocket:b': 'RBiH', 'op:ring:c': 'RS', 'op:ring:d': 'RS' };
+    const state = stateWith(controllers);
+    (state.military as unknown as Record<string, unknown>).front_segments = {
+        'op:pocket:a__op:ring:c': { edge_id: 'op:pocket:a__op:ring:c', active: true },
+    };
+    (state.military as unknown as Record<string, unknown>).front_pressure = {};
+    state.military.militia_pools = {
+        'pocket:RBiH': { mun_id: 'pocket', faction: 'RBiH', available: 1000, committed: 0, exhausted: 0, updated_turn: 9 },
+        'pocket:RS': { mun_id: 'pocket', faction: 'RS', available: 0, committed: 0, exhausted: 0, updated_turn: 9 },
+    } as unknown as GameState['military']['militia_pools'];
+    state.displacement.displacement_state = {
+        pocket: { mun_id: 'pocket', original_population: 10000, displaced_out: 0, displaced_in: 0, lost_population: 0, last_updated_turn: 9 },
+    };
+    const settlements = new Map<string, SettlementRecord>();
+    for (const sid of Object.keys(controllers)) {
+        const mun = sid.split(':')[1];
+        settlements.set(sid, { sid, source_id: sid, mun_code: mun, mun, mun1990_id: mun, properties: { population_total: 100 } });
+    }
+    const edges = [{ a: 'op:pocket:a', b: 'op:ring:c' }];
+    const census: MunicipalityPopulation1991Map = {
+        pocket: { total: 10000, bosniak: 6000, serb: 3000, croat: 1000, other: 0 },
+        ring: { total: 10000, bosniak: 0, serb: 10000, croat: 0, other: 0 },
+    } as MunicipalityPopulation1991Map;
+    return { state, settlements, edges, census };
+}
+
+describe('updateDisplacement pressure path (SC1 end to end)', () => {
+    beforeEach(() => resetDisplacementPressureCache());
+
+    it('books an encircled pocket\'s losses to the besieger, for every people in it', () => {
+        const { state, settlements, edges, census } = encircledPocketFixture();
+        updateDisplacement(state, settlements, edges, census);
+        const agg = state.displacement.displacement_humanitarian_aggregates ?? {};
+        const causers = Object.keys(agg).filter((c) =>
+            Object.values(agg[c] ?? {}).some((s) => s.refugees_created > 0 || s.civilian_casualties_caused > 0)
+        );
+        expect(causers).toEqual(['RS']);
+        // P1a: Bosniaks displaced by RS use the RS-displacing-Bosniaks rate (4%).
+        // 10% of 10,000 encircled = 1,000 displaced; 60% Bosniak = 600; 4% killed = 24.
+        expect(state.displacement.civilian_casualties?.RBiH?.killed).toBe(24);
+    });
+});
