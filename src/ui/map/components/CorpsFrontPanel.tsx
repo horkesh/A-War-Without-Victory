@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import { Suspense, lazy, useEffect, useMemo, useState, type ReactNode } from 'react';
 import type { OperationView } from '../data/types';
 import { useGameStore } from '../store/gameStore';
 import { FACTION_COLORS } from '../utils/theme';
@@ -21,6 +21,8 @@ import { getOsidDisplayName } from '../utils/osidDisplayName';
 import { inspectOnField } from '../utils/shellNavigation';
 import { getPlayerFacingSectorName } from '../../shared/playerFacingLabels';
 import { OwnForceReportGapNotice } from './OwnForceReportGapNotice';
+// Lazy: the OG stance step and its detail copy stay out of the map entry chunk.
+const SectorStanceStep = lazy(() => import('./SectorStanceStep'));
 
 /** Strength class badge with color coding. */
 function StrengthBadge({
@@ -563,6 +565,10 @@ export function CorpsFrontPanel({ breadcrumb }: CorpsFrontPanelProps) {
                       tone={intelConfidence == null ? undefined : intelConfidence < 0.3 ? 'text-red-200' : intelConfidence < 0.7 ? 'text-amber-200' : 'text-emerald-200'}
                     />
                   </MapRailStats>
+                  {/* Posture model option 2: the OG stance step sits right under the stance rows. */}
+                  <Suspense fallback={null}>
+                    <SectorStanceStep sectorId={sector.sector_id} corpsId={sector.corps_id} gameState={loadedGameState} />
+                  </Suspense>
                   <OwnForceReportGapNotice fields={reportGaps} />
                 </SurfaceSection>
                 {/* Combat Power Summary */}

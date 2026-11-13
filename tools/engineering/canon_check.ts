@@ -7,10 +7,11 @@
 import { spawnSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
+import { resolveTsxCli, resolveVitestCli } from '../test/vitest_shared_config.mjs';
 
 type Step = { name: string; command: string; args: string[] };
-const tsxCli = join(process.cwd(), 'node_modules', 'tsx', 'dist', 'cli.mjs');
-const vitestCli = join(process.cwd(), 'node_modules', 'vitest', 'vitest.mjs');
+const tsxCli = resolveTsxCli(process.cwd());
+const vitestCli = resolveVitestCli(process.cwd());
 
 if (!existsSync(tsxCli)) {
   throw new Error(`Missing tsx CLI at ${tsxCli}. Run npm install.`);

@@ -1,5 +1,10 @@
 /** Focused pre-calibration checks; never launches a calibration or native session. */
 import {spawnSync} from 'node:child_process';
+import {join} from 'node:path';
+import {resolveRootModules,resolveVitestCli} from './vitest_shared_config.mjs';
+
+const root=process.cwd();
+const tscCli=join(resolveRootModules(root,'typescript'),'typescript','bin','tsc');
 
 const tests = [
  'tests/contextual_data_root_contract.test.ts',
@@ -34,8 +39,8 @@ const tests = [
 ];
 
 for (const [name,args,timeout] of [
- ['focused-regressions',['node_modules/vitest/vitest.mjs','run',...tests,'--pool=forks','--maxWorkers=2','--minWorkers=1','--reporter=dot'],180_000],
- ['nonincremental-types',['node_modules/typescript/bin/tsc','--noEmit','--incremental','false'],120_000],
+ ['focused-regressions',[resolveVitestCli(root),'run',...tests,'--pool=forks','--maxWorkers=2','--minWorkers=1','--reporter=dot'],180_000],
+ ['nonincremental-types',[tscCli,'--noEmit','--incremental','false'],120_000],
 ]) {
  console.log(JSON.stringify({check:name,timeout_ms:timeout,attempts:1}));
  const result=spawnSync(process.execPath,args,{cwd:process.cwd(),stdio:'inherit',timeout});

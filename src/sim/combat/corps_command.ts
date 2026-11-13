@@ -16,6 +16,7 @@ import type {
 } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { releaseOperationCommander } from './officer_system.js';
+import { capEffectiveStanceByHold } from './stance_matter_holds.js';
 import { hasActiveOperation, findBrigadeOperation, removeOperation } from './corps_operation_helpers.js';
 import {
     completeOperationLifecycle,
@@ -180,7 +181,13 @@ export function getEffectiveCorpsStance(state: GameState, corpsId: FormationId):
     const corps = state.military.formations?.[corpsId];
     if (!corps) return 'balanced';
 
-    const armyStance = state.military.army_stance?.[corps.faction];
+    // A presidential stance hold (posture model option 2) caps the result so an army
+    // general offensive cannot bypass it. Inert without a hold.
+    return capEffectiveStanceByHold(state, corpsId, uncappedEffectiveCorpsStance(state, corps.faction, corpsId));
+}
+
+function uncappedEffectiveCorpsStance(state: GameState, faction: FactionId, corpsId: FormationId): CorpsStance {
+    const armyStance = state.military.army_stance?.[faction];
     if (!armyStance || armyStance === 'balanced') {
         return state.military.corps_command?.[corpsId]?.stance ?? 'balanced';
     }

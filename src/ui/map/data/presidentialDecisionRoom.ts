@@ -15,6 +15,10 @@ import { t, type MessageKey } from '../i18n';
 import { turnToDateString } from '../utils/formatters';
 import { getDecisionSurface } from './decisionSurfaceRegistry';
 import {
+  stanceMatterSummary,
+  stanceMatterTitle,
+} from './stanceMatterCopy';
+import {
   STOP_OP_COST,
   REPLACE_CO_COST,
   ELITE_DEPLOY_COST,
@@ -161,6 +165,7 @@ export interface PresidentialDecisionRoomDirective {
     | 'replace_co'
     | 'elite_deploy'
     | 'review_proposal'
+    | 'stance_matter'
     | 'front_visit'
     | 'address_nation'
     | 'decorate_unit'
@@ -1254,6 +1259,45 @@ function ordinaryOperationProposalEvidence(
     `Force ratio: ${proposal.force_ratio ?? unreported}`,
     `Opportunity cost: ${proposal.opportunity_cost ?? unreported}`,
   ];
+}
+
+/**
+ * Posture model option 2: one Command Surface matter per open corps/OG stance matter.
+ * The commander has already acted under delegation; the president may Confirm,
+ * Countermand or Constrain before he advances the turn, and silence lets the change
+ * stand. Advisory (never blocks Advance). Cost 0 in command authority: the price of an
+ * overrule is shown on the card (commander relationship, Main Staff delay, Zagreb).
+ * Deterministic: matters iterate by (turn, id).
+ */
+function addStanceMatterCards(state: LoadedGameState, cards: CandidateCard[]): void {
+  if (!state.player_faction) return;
+  for (const matter of state.stanceMatters ?? []) {
+    cards.push({
+      id: `command:stance-matter:${matter.id}`,
+      category: 'command',
+      severity: matter.answer ? 'info' : 'warning',
+      title: stanceMatterTitle(matter),
+      // Short summary here; the reasoning, staff view and overrule cost render in the lazily
+      // loaded StanceMatterActions (detail copy is kept out of the map entry chunk).
+      explanation: stanceMatterSummary(matter),
+      sourceOwner: t('decisionRoom.card.command.sourceOwner'),
+      sourceLabel: t('stanceMatter.sourceLabel'),
+      actionLabel: t('stanceMatter.actionLabel'),
+      evidence: [],
+      navigationTarget: matter.scope === 'og' && matter.sectorId
+        ? { kind: 'field', target: { kind: 'field-sector-in-corps', sectorId: matter.sectorId, corpsId: matter.corpsId } }
+        : { kind: 'army-hq-corps-briefing', corpsId: matter.corpsId },
+      directive: {
+        lever: 'stance_matter',
+        corpsId: matter.corpsId,
+        cost: 0,
+        payload: { matterId: matter.id },
+      },
+      urgencySort: matter.answer ? 9 : 7,
+      sourceSort: `command:stance-matter:${matter.id}`,
+      deadlineTurn: matter.deadlineTurn,
+    });
+  }
 }
 
 function addProposalReviewDirectiveCards(
@@ -2393,6 +2437,7 @@ export function buildPresidentialDecisionRoomView(input: PresidentialDecisionRoo
   addRequestOpDirectiveCards(state, candidates);
   addStopOpDirectiveCards(state, candidates);
   addProposalReviewDirectiveCards(state, candidates, osidNameMap);
+  addStanceMatterCards(state, candidates);
   addForceLaunchDirectiveCards(state, candidates);
   addProactiveForceLaunchDirectiveCards(state, candidates);
   addHardTurnCards(state, osidNameMap, candidates);

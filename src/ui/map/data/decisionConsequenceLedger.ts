@@ -25,6 +25,18 @@ import {
 } from '../utils/playerSafeText.js';
 import { t, type MessageKey } from '../i18n/index.js';
 import { playerFactionMatch } from './playerFactionMatch.js';
+import { stanceMatterReceiptLine } from './stanceMatterCopy.js';
+
+const STANCE_MATTER_OUTCOME_KEYS: Record<string, MessageKey> = {
+  stood: 'stanceMatter.outcome.stood',
+  confirmed: 'stanceMatter.outcome.confirmed',
+  countermanded: 'stanceMatter.outcome.countermanded',
+  constrained: 'stanceMatter.outcome.constrained',
+  not_put: 'stanceMatter.outcome.notPut',
+  hold_lapsed: 'stanceMatter.outcome.holdLapsed',
+  answered_lapsed: 'stanceMatter.outcome.answeredLapsed',
+  hold_in_force: 'stanceMatter.outcome.holdInForce',
+};
 
 export interface DecisionConsequenceCopyToken {
   key: MessageKey;
@@ -55,7 +67,8 @@ export type DecisionConsequenceFamilyId =
   | 'humanitarian-convoy'
   | 'paramilitary-authorization'
   | 'patron-relations'
-  | 'officer-personnel';
+  | 'officer-personnel'
+  | 'stance-matter';
 
 export interface DecisionConsequenceLedgerSummary {
   total: number;
@@ -677,6 +690,23 @@ export function buildDecisionConsequenceLedger(
       },
       detail: t(detailToken.key, detailToken.params),
       detailToken,
+      recordTarget: 'records',
+    });
+  }
+
+  // Posture model option 2: every stance matter leaves a record, including the ones the
+  // president let stand and the changes that were not put to him.
+  for (const receipt of state.stanceMatterHistory ?? []) {
+    const outcomeKey = STANCE_MATTER_OUTCOME_KEYS[receipt.outcome] ?? 'stanceMatter.outcome.stood';
+    records.push({
+      id: `stance-matter:${receipt.id}:${receipt.outcome}:${receipt.resolvedTurn}`,
+      turn: receipt.resolvedTurn,
+      familyId: 'stance-matter',
+      family: t('decisionConsequences.family.stanceMatter'),
+      title: t('stanceMatter.recordTitle', { subject: receipt.corpsName }),
+      outcome: t(outcomeKey),
+      outcomeToken: { key: outcomeKey },
+      detail: stanceMatterReceiptLine(receipt),
       recordTarget: 'records',
     });
   }

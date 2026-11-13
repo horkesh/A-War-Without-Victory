@@ -16,6 +16,7 @@ const EXPECTED_FAMILIES = [
     'officer_event',
     'autonomy_proposal',
     'operation_opportunity',
+    'stance_matter',
 ] as const;
 
 describe('player decision manifest', () => {
@@ -35,6 +36,7 @@ describe('player decision manifest', () => {
             { id: 'officer_event', source: 'military.pending_officer_events', destination: 'army-hq', receipt: 'military.officer_decision_history' },
             { id: 'autonomy_proposal', source: 'meta.pending_proposal_reviews', destination: 'decision-room', receipt: 'meta.proposal_decision_history' },
             { id: 'operation_opportunity', source: 'meta.pending_proposal_reviews + military.operation_opportunities', destination: 'decision-room', receipt: 'military.operation_opportunity_resolutions' },
+            { id: 'stance_matter', source: 'meta.stance_matters', destination: 'decision-room', receipt: 'meta.stance_matter_history' },
         ]);
     });
 
@@ -43,6 +45,10 @@ describe('player decision manifest', () => {
             meta: {
                 player_faction: 'RBiH',
                 autonomy_level_pending: 2,
+                stance_matters: [
+                    { id: 'STANCE_10_arbih_2nd_corps', turn: 10, faction: 'RBiH', corps_id: 'arbih_2nd_corps' },
+                    { id: 'STANCE_10_drina_corps', turn: 10, faction: 'RS', corps_id: 'drina_corps' },
+                ],
                 pending_proposal_reviews: [
                     {
                         id: 'PROP_12_military_1',
@@ -165,12 +171,13 @@ describe('player decision manifest', () => {
             officer_event: 'advisory',
             autonomy_proposal: 'advisory',
             operation_opportunity: 'advisory',
+            stance_matter: 'advisory',
         });
 
-        expect(summary.totalCount).toBe(9);
+        expect(summary.totalCount).toBe(10);
         expect(summary.blockingCount).toBe(5);
         expect(summary.families.map((family) => family.id)).toEqual(EXPECTED_FAMILIES);
-        expect(summary.families.map((family) => family.count)).toEqual([1, 1, 1, 1, 1, 1, 1, 1, 1]);
+        expect(summary.families.map((family) => family.count)).toEqual([1, 1, 1, 1, 1, 1, 1, 1, 1, 1]);
         expect(listBlockingPlayerDecisions(state, 'RBiH').map((item) => item.familyId)).toEqual([
             'event_decision',
             'peace_plan',
@@ -331,6 +338,7 @@ describe('player decision manifest', () => {
             ['officer_event', 0, 0],
             ['autonomy_proposal', 0, 0],
             ['operation_opportunity', 1, 0],
+            ['stance_matter', 0, 0],
         ]);
         expect(listBlockingPlayerDecisions(state).map((item) => item.familyId)).toEqual([]);
     });

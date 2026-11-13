@@ -9,7 +9,8 @@ export type PlayerDecisionFamilyId =
     | 'reserve_request'
     | 'officer_event'
     | 'autonomy_proposal'
-    | 'operation_opportunity';
+    | 'operation_opportunity'
+    | 'stance_matter';
 
 export type PlayerDecisionGatePolicy = 'hard_block' | 'modal_required' | 'advisory';
 export type PlayerDecisionRecommendedDestination = 'inbox' | 'decision-room' | 'army-hq';
@@ -146,6 +147,19 @@ export const PLAYER_DECISION_FAMILIES: readonly PlayerDecisionFamilyDefinition[]
         recommendedDestination: 'decision-room',
         receiptPath: 'military.operation_opportunity_resolutions',
     },
+    {
+        // Posture model option 2: a corps/OG commander's stance change reported to the
+        // president. ADVISORY by design: silence means the commander's choice stands, so
+        // an open matter must never block advance (panel 2026-11-12).
+        id: 'stance_matter',
+        statePath: 'meta.stance_matters',
+        inboxType: 'stance_matter',
+        ownerSurface: 'decision_room',
+        resolver: 'resolve-stance-matter',
+        gatePolicy: 'advisory',
+        recommendedDestination: 'decision-room',
+        receiptPath: 'meta.stance_matter_history',
+    },
 ] as const;
 
 function isRecord(value: unknown): value is RawRecord {
@@ -233,7 +247,21 @@ function labelForFamily(familyId: PlayerDecisionFamilyId): string {
         case 'officer_event': return 'Officer event';
         case 'autonomy_proposal': return 'Autonomy proposal';
         case 'operation_opportunity': return 'Operation opportunity';
+        case 'stance_matter': return 'Stance matter';
     }
+}
+
+function stanceMatterInstances(state: GameStateLike, playerFaction: string | null): PlayerDecisionInstance[] {
+    const family = requiredFamily('stance_matter');
+    return arrayFrom(getMeta(state).stance_matters)
+        .filter((item) => matchesPlayerFaction(item, playerFaction))
+        .filter((item) => item.answer === undefined)
+        .map((item, index) => instance(
+            family,
+            stringFrom(item.id) ?? `stance_matter:${index}`,
+            false,
+            stringFrom(item.faction),
+        ));
 }
 
 function eventDecisionInstances(state: GameStateLike, playerFaction: string | null): PlayerDecisionInstance[] {
@@ -379,6 +407,7 @@ function collectInstances(state: GameStateLike, playerFaction: string | null): P
             ...operationReviews,
             ...operationOpportunityFallbackInstances(state, playerFaction, countedReviewProposalIds),
         ],
+        stanceMatterInstances(state, playerFaction),
     ];
 }
 
