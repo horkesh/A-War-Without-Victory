@@ -326,3 +326,19 @@ proposal **withdrawn**. Later territorial outcomes do not veto a January correct
 determinism, valid state, legal movement/capture, population accounting, political permissions or command
 ownership. See [CALIBRATION_MASTER](../40_reports/CALIBRATION_MASTER.md) and the
 [durable evidence record](../../logs/january-1993-operations-20260917/EVIDENCE_RECORD.md).
+
+## Probe channel section moved 2026-11-14
+
+Kept verbatim from the roadmap.
+
+## ★ PROBE CHANNEL — CLOSED 2026-08-26. Scope: `docs/plans/2026-08-26-probe-channel-scope.md`
+
+**Owner rulings, both of which bind downstream work:**
+1. The quiet war was ruled correct modelling; once the cause was found it was ruled *"blindness"*.
+   **Ruling 2 supersedes ruling 1 on the CAUSE.** What survives from 1: a besieged corps still does
+   not mount offensives (`arbih_1st_corps` stopped flailing, it did not start attacking). Full quotes
+   and data in the closed scope; `REAL_WAR_MASTER #40` carries both.
+2. **Do not re-raise "the war is too quiet" as a defect**, and do not treat a post-fix tempo rise as
+   a regression. Any control pinning `sector_attack` near 44 was pinning a number the BUG produced.
+
+**Closed evidence:** stable sector-pair identity, edgeless-ghost exclusion and `occupies_on_victory` landed. The fixed-home probe exclusion was reverted (the tag covered 180/184 brigades); any future proposal requires an explicit tag and an enumerated predicted set before execution. Measurements, non-blocking follow-ups, the unmeasured orphan-rate proof and the post-1.0 enclave-targeting disposition are retained in the [closed probe scope](2026-08-26-probe-channel-scope.md).

@@ -21,7 +21,7 @@ Docs only; no `src/` or `data/` change, no calibration change. Main is at checkp
   close; the lane stays open until the owner closes it. R8 row says dry runs now, qualifying runs after the freeze.
 - **Size cap:** to stay under the 60,000-character roadmap assertion, three superseded blocks moved verbatim to
   `MASTER_ROADMAP_ARCHIVE.md` (2026-09 calibration status prose, the 2026-09-12 execution snapshot, the header
-  prose) and the 2026-09 sections of `COMMAND_BOARD.md` moved there too. The board was re-derived from the roadmap.
+  prose, the closed probe-channel section) and the 2026-09 sections of `COMMAND_BOARD.md` moved there too. The board was re-derived from the roadmap.
 - **Gates:** new lane RF with `RF-CALIBRATION-RESIGNOFF` and `RF-ENGINE-FREEZE`; `DC-CONFERENCE-REDESIGN` closed
   (DC merged #560, the roadmap row was already closed); `REPO-CANON-PROPAGATION` closed (below).
 - **`.claude/current-lane.txt`:** now RF, so RF calibration runs and R8 dry runs count as in-lane.
