@@ -110,7 +110,7 @@ describe('appendDisplacementEvent with an unrecorded causer', () => {
 });
 
 /**
- * An RBiH pocket ringed by RS, cut off from RBiH's main body (`home`, three settlements),
+ * An RBiH pocket ringed by RS, cut off from RBiH's main body (`home`, fifteen settlements),
  * so "encircled" fires. (Before DA1 the test was "the faction holds no other
  * municipality", which no campaign could meet.)
  */
@@ -131,12 +131,17 @@ function encircledPocketFixture() {
     state.displacement.displacement_state = {
         pocket: { mun_id: 'pocket', original_population: 10000, displaced_out: 0, displaced_in: 0, lost_population: 0, last_updated_turn: 9 },
     };
+    const edges = [{ a: 'op:pocket:a', b: 'op:ring:c' }, { a: 'op:home:e', b: 'op:home:f' }, { a: 'op:home:f', b: 'op:home:g' }];
+    // Enough home settlements that the pocket is under POCKET_MAX_SHARE of RBiH's held settlements (P5).
+    for (let i = 1; i <= 12; i++) {
+        (controllers as Record<string, string>)[`op:home:x${i}`] = 'RBiH';
+        edges.push({ a: i === 1 ? 'op:home:g' : `op:home:x${i - 1}`, b: `op:home:x${i}` });
+    }
     const settlements = new Map<string, SettlementRecord>();
     for (const sid of Object.keys(controllers)) {
         const mun = sid.split(':')[1];
         settlements.set(sid, { sid, source_id: sid, mun_code: mun, mun, mun1990_id: mun, properties: { population_total: 100 } });
     }
-    const edges = [{ a: 'op:pocket:a', b: 'op:ring:c' }, { a: 'op:home:e', b: 'op:home:f' }, { a: 'op:home:f', b: 'op:home:g' }];
     const census: MunicipalityPopulation1991Map = {
         pocket: { total: 10000, bosniak: 6000, serb: 3000, croat: 1000, other: 0 },
         ring: { total: 10000, bosniak: 0, serb: 10000, croat: 0, other: 0 },

@@ -13,6 +13,7 @@ import { describe, expect, it } from 'vitest';
 import type { EdgeRecord, SettlementRecord } from '../../src/map/settlements.js';
 import {
     ENCIRCLEMENT_DISPLACEMENT_FRACTION,
+    POCKET_MAX_SHARE,
     UNSUPPLIED_DISPLACEMENT_FRACTION,
     updateDisplacement,
 } from '../../src/state/displacement.js';
@@ -21,6 +22,9 @@ import type { MunicipalityPopulation1991Map } from '../../src/state/population_s
 import { warPhases } from '../../src/sim/turn_phases/war_phases.js';
 
 const STEP = warPhases.find((p) => p.name === 'update-displacement')!;
+
+/** Extra home settlements so the pocket (2) is under POCKET_MAX_SHARE of RBiH's held settlements. */
+const HOME_EXTRA = 12;
 
 interface World {
     state: GameState;
@@ -55,6 +59,11 @@ function world(opts: { linked: boolean; supplied: boolean; splitPocket?: boolean
         { a: 'op:home:f', b: 'op:home:g' },
     ];
     if (opts.linked) edges.push({ a: 'op:pocket:b', b: 'op:home:g' });
+    // The home body must be large enough that the two-settlement pocket is a pocket (P5).
+    for (let i = 1; i <= HOME_EXTRA; i++) {
+        controllers[`op:home:x${i}`] = 'RBiH';
+        edges.push({ a: i === 1 ? 'op:home:g' : `op:home:x${i - 1}`, b: `op:home:x${i}` });
+    }
     const settlements = new Map<string, SettlementRecord>();
     for (const sid of Object.keys(controllers)) {
         const mun = sid.split(':')[1];
@@ -185,6 +194,17 @@ describe('the siege counter lives in GameState (survives a save round trip)', ()
             .find((f) => f.id === 'RBiH')!.supply_sources = ['S_home'];
         await runWarStep(w);
         expect(w.state.displacement.displacement_state.pocket.unsupplied_pressure_turns).toBeUndefined();
+    });
+});
+
+describe('pockets only (DA1 P5)', () => {
+    it('a cut-off body holding more than POCKET_MAX_SHARE of its side is a split, not a siege', async () => {
+        const w = world({ linked: false, supplied: true });
+        // Hand the extra home settlements to RS: RBiH now holds 5, the cut-off pocket 2 (40%).
+        for (let i = 1; i <= HOME_EXTRA; i++) w.state.political.political_controllers![`op:home:x${i}`] = 'RS';
+        await runWarStep(w);
+        expect(2 / 5).toBeGreaterThan(POCKET_MAX_SHARE);
+        expect(causersWithHarm(w.state)).toEqual([]);
     });
 });
 

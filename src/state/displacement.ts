@@ -42,6 +42,16 @@ export const UNSUPPLIED_DISPLACEMENT_FRACTION = 0.001;
  * two triggers do not add: the rate is the larger of the two, never their sum.
  */
 export const ENCIRCLEMENT_DISPLACEMENT_FRACTION = 0.001;
+/**
+ * DA1 P5: a cut-off body counts as an encircled POCKET only when it holds at most this
+ * share of its side's settlements. The besieged pockets of the war are small: Sarajevo,
+ * Goražde, Srebrenica, Žepa, the Bihać pocket (about 8% of RBiH-held settlements), and the
+ * HVO's Lašva valley, Kiseljak, Žepče and Orašje pockets in 1993-94. A front that splits
+ * a side's territory into two large regions is not a siege: during the 1993 Croat-Bosniak
+ * war the simulation cuts the Tuzla region (about 30% of RBiH-held settlements) off from
+ * central Bosnia, which historically stayed linked through Kladanj and Olovo.
+ */
+export const POCKET_MAX_SHARE = 0.15;
 // The breach trigger (3% per turn after persistent front breaches) was removed in DA1: it
 // read `front_pressure`, which no campaign writes (legacy edge keys), and capture-driven
 // displacement already has one writer, `displacement_takeover.ts`.
@@ -105,6 +115,14 @@ function rbihHrhbAtWar(state: GameState): boolean {
     return turn >= (state.meta?.rbih_hrhb_war_earliest_turn ?? DEFAULT_RBIH_HRHB_WAR_EARLIEST_TURN) && !areRbihHrhbAllied(state);
 }
 
+/** Per faction: body index of each held settlement, the main body, own-settlement count per body. */
+interface TerritorialBodies {
+    bodyOf: Map<string, number>;
+    main: number;
+    size: number[];
+    total: number;
+}
+
 /**
  * Per faction: which connected body of its territory each settlement it holds belongs to,
  * and which body is its main one (the most settlements; ties go to the body found first
@@ -120,9 +138,9 @@ function computeTerritorialBodies(
     controllerOf: ReadonlyMap<string, FactionId>,
     neighbours: ReadonlyMap<string, readonly string[]>,
     atWarRbihHrhb: boolean
-): Map<FactionId, { bodyOf: Map<string, number>; main: number }> {
+): Map<FactionId, TerritorialBodies> {
     const ids = [...controllerOf.keys()].sort(strictCompare);
-    const result = new Map<FactionId, { bodyOf: Map<string, number>; main: number }>();
+    const result = new Map<FactionId, TerritorialBodies>();
     for (const faction of CANONICAL_FACTIONS) {
         const passable = (side: FactionId | undefined): boolean => {
             if (side === undefined) return false;
@@ -156,7 +174,8 @@ function computeTerritorialBodies(
         for (let b = 0; b < ownCount.length; b++) {
             if (main < 0 || ownCount[b] > ownCount[main]) main = b;
         }
-        result.set(faction, { bodyOf, main });
+        const total = ownCount.reduce((s, n) => s + n, 0);
+        result.set(faction, { bodyOf, main, size: ownCount, total });
     }
     return result;
 }
@@ -657,7 +676,10 @@ export function updateDisplacement(
         const supplied = holderSids.some((sid) => reachable?.has(sid) === true);
         const body = bodies.get(holder);
         const encircled = underPressure && body !== undefined && body.main >= 0 &&
-            holderSids.every((sid) => body.bodyOf.get(sid) !== body.main);
+            holderSids.every((sid) => {
+                const b = body.bodyOf.get(sid);
+                return b !== undefined && b !== body.main && body.size[b] <= POCKET_MAX_SHARE * body.total;
+            });
 
         let unsuppliedTurns = 0;
         if (underPressure && !supplied) {
