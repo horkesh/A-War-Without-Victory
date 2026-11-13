@@ -31958,7 +31958,7 @@
       {
         "aggressiveness": 4,
         "available_from_turn": 0,
-        "available_until_turn": 60,
+        "available_until_turn": 61,
         "bio_short": "JNA-background officer leading the RBiH army command at scenario start.",
         "can_improve": true,
         "casualty_vulnerability": 0.05,
@@ -31987,7 +31987,7 @@
       },
       {
         "aggressiveness": 3,
-        "available_from_turn": 60,
+        "available_from_turn": 61,
         "can_improve": false,
         "casualty_vulnerability": 0.05,
         "competence": 4,
