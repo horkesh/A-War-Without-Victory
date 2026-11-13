@@ -103,6 +103,13 @@ export interface OobCorps {
     kind: 'corps' | 'army_hq';
     /** Turn when this corps becomes available (Peace-phase Overhaul: phased activation). Default 0. */
     available_from: number;
+    /**
+     * When true the corps is never created before `available_from`, not even at scenario start.
+     * Scenario-start creation otherwise ignores `available_from` for any corps whose HQ town
+     * the faction holds. For corps formed mid-war (the ARBiH 7th Corps, 26 Feb 1994); the war
+     * step `activate-corps` creates it on its turn.
+     */
+    strict_available_from?: boolean;
     /** Initial officer quality [0,1]. Army HQs reflect general staff competence at war start. */
     initial_officer_quality?: number;
     /** Initial cohesion [0,100]. Army HQs reflect organizational readiness at war start. */
@@ -350,6 +357,7 @@ export async function loadOobCorps(baseDir: string): Promise<OobCorps[]> {
             ...(hq_osid && { hq_osid }),
             kind: corpsKind,
             available_from,
+            ...(r.strict_available_from === true && { strict_available_from: true }),
             ...(corps_initial_officer_quality != null && { initial_officer_quality: corps_initial_officer_quality }),
             ...(corps_initial_cohesion != null && { initial_cohesion: corps_initial_cohesion }),
             ...(corps_initial_morale != null && { initial_morale: corps_initial_morale }),

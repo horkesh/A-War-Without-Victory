@@ -580,7 +580,7 @@ function emitVaroslukSkippedGroupShadow(
     actualClass: LocalOccupationCandidateClass | null,
 ): void {
     if (briefing.faction !== 'RBiH'
-        || briefing.corps_id !== 'arbih_3rd_corps'
+        || briefing.corps_id !== 'arbih_7th_corps'
         || actualClass !== 'adjacency-only_single'
         || actualResult.target_osid !== 'op:travnik:varosluk') return;
 

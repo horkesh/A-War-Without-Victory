@@ -993,7 +993,7 @@ export const MISTRAL_1_95_OPPORTUNITY: OperationOpportunityDef = {
 // docs/40_reports/proposals/20260522_WAVE_14_JAJCE_AXIS_SPLIT.md.
 // ═══════════════════════════════════════════════════════════════════════════
 
-const JAJCE_PRIMARY_CORPS = 'arbih_3rd_corps';
+const JAJCE_PRIMARY_CORPS = 'arbih_7th_corps';
 const JAJCE_DEFENDER_WEAKNESS_FLOOR = 0.25;
 const JAJCE_READINESS_FLOOR = 0.32;
 const JAJCE_AXIS_COORDINATION_FLOOR = 0.30;
@@ -1143,13 +1143,13 @@ const politicalAuthorizationJajce: AxisPredicate = () => ({
 
 const corpsReadinessJajce: AxisPredicate = (state) => {
     if (!state.military.corps_command?.[JAJCE_PRIMARY_CORPS]) {
-        return { green: false, reason: 'ARBiH 3rd Corps command not present for Jajce recovery' };
+        return { green: false, reason: 'ARBiH 7th Corps command not present for Jajce recovery' };
     }
     const traits = computeCorpsOperationReadiness(state, JAJCE_PRIMARY_CORPS as FormationId);
     if (traits.operation_readiness < JAJCE_READINESS_FLOOR) {
-        return { green: false, reason: 'ARBiH 3rd Corps readiness below Jajce recovery floor' };
+        return { green: false, reason: 'ARBiH 7th Corps readiness below Jajce recovery floor' };
     }
-    return { green: true, reason: 'ARBiH 3rd Corps readiness sufficient for Jajce recovery' };
+    return { green: true, reason: 'ARBiH 7th Corps readiness sufficient for Jajce recovery' };
 };
 
 const logisticsJajce: AxisPredicate = (state) => {
@@ -1180,9 +1180,9 @@ const weatherSeasonJajce: AxisPredicate = (_state, turn) => {
 const commanderConfidenceJajce: AxisPredicate = (state) => {
     const commanderState = state.military.corps_command?.[JAJCE_PRIMARY_CORPS]?.commander_state;
     if (!commanderState) {
-        return { green: false, reason: 'ARBiH 3rd Corps commander state unavailable for Jajce recovery' };
+        return { green: false, reason: 'ARBiH 7th Corps commander state unavailable for Jajce recovery' };
     }
-    return { green: true, reason: 'ARBiH 3rd Corps commander state present for Jajce recovery' };
+    return { green: true, reason: 'ARBiH 7th Corps commander state present for Jajce recovery' };
 };
 
 const enemyWeaknessJajce: AxisPredicate = (state, turn) => {
@@ -1223,13 +1223,13 @@ const allianceContextJajce: AxisPredicate = (state) => {
 
 const forceQualityJajce: AxisPredicate = (state) => {
     if (!state.military.corps_command?.[JAJCE_PRIMARY_CORPS]) {
-        return { green: false, reason: 'ARBiH 3rd Corps command not present for Jajce recovery' };
+        return { green: false, reason: 'ARBiH 7th Corps command not present for Jajce recovery' };
     }
     const traits = computeCorpsOperationReadiness(state, JAJCE_PRIMARY_CORPS as FormationId);
     if (traits.axis_coordination < JAJCE_AXIS_COORDINATION_FLOOR) {
-        return { green: false, reason: 'ARBiH 3rd Corps axis coordination below Jajce recovery threshold' };
+        return { green: false, reason: 'ARBiH 7th Corps axis coordination below Jajce recovery threshold' };
     }
-    return { green: true, reason: 'ARBiH 3rd Corps axis coordination supports Jajce recovery' };
+    return { green: true, reason: 'ARBiH 7th Corps axis coordination supports Jajce recovery' };
 };
 
 export const JAJCE_95_OPPORTUNITY: OperationOpportunityDef = {

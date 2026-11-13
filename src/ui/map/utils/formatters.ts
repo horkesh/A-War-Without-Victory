@@ -135,6 +135,7 @@ const CORPS_NAME_KEYS: Readonly<Record<string, MessageKey>> = {
     arbih_3rd_corps: 'corps.name.arbih_3rd_corps',
     arbih_4th_corps: 'corps.name.arbih_4th_corps',
     arbih_5th_corps: 'corps.name.arbih_5th_corps',
+    arbih_7th_corps: 'corps.name.arbih_7th_corps',
     vrs_main_staff: 'corps.name.vrs_main_staff',
     jna_herzegovina_command: 'corps.name.jna_herzegovina_command',
     vrs_1st_krajina: 'corps.name.vrs_1st_krajina',

@@ -32163,14 +32163,15 @@
       {
         "aggressiveness": 4,
         "available_from_turn": 80,
-        "available_until_turn": 120,
         "can_improve": false,
         "casualty_vulnerability": 0.15,
-        "compatible_corps_ids": [],
+        "compatible_corps_ids": [
+          "arbih_3rd_corps"
+        ],
         "competence": 5,
         "defensive_skill": 3,
         "faction": "RBiH",
-        "home_corps_id": "arbih_3rd_corps",
+        "home_corps_id": "arbih_7th_corps",
         "id": "arbih_alagic",
         "improvement_rate": 0,
         "is_historical_start": false,
