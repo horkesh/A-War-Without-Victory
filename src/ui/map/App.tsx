@@ -122,9 +122,11 @@ import { deriveRecruitmentMatter } from './data/recruitmentMatter';
 import {
   applyRecruitmentAndSync,
   fetchRecruitmentCatalogSnapshot,
+  type FetchedRecruitmentCatalog,
   resolveBrowserEventDecision,
   startCampaignFromSidePicker,
 } from './desktop/campaignRecruitmentActions';
+import { createRecruitmentWatchSync } from './desktop/recruitmentWatchSync';
 import { beginMapTransition } from './perf/mapTransitionTiming';
 import { createCampaignReplacementCoordinator } from './utils/campaignViewportLifecycle';
 import type { FieldOperationPlanTarget } from './utils/fieldInspectionTarget';
@@ -585,12 +587,22 @@ function App() {
     currentTurn: loadedGameState?.turn,
     currentFingerprint: loadedStateFingerprint,
   });
+  // Recruitment on the Desk: one sync owns the catalog fetch and the UI-only watch. The fetch
+  // is read through a ref so the sync (and the replacement coordinator below) stay stable.
+  const recruitmentFetchRef = useRef<() => Promise<FetchedRecruitmentCatalog | null>>(async () => null);
+  const recruitmentWatchSync = useMemo(() => createRecruitmentWatchSync({
+    fetchSnapshot: () => recruitmentFetchRef.current(),
+    getStore: () => useGameStore.getState(),
+  }), []);
   const markCampaignReplacementSucceeded = useCallback(() => {
     setTacticalMapReadiness({ ready: false, renderedTurn: null, renderedFingerprint: null });
     setFieldOperationPlanFocus(null);
     setFieldOperationPlanReturnCardId(null);
+    // Every replacement (main-menu load, new war, desktop session) starts a fresh
+    // recruitment watch, even at the same faction and turn; the epoch bump re-fetches.
+    recruitmentWatchSync.campaignReplaced();
     setCampaignViewportEpoch((epoch) => epoch + 1);
-  }, []);
+  }, [recruitmentWatchSync]);
   useEffect(() => {
     if (appScreen !== 'game') {
       setFieldOperationPlanFocus(null);
@@ -660,7 +672,6 @@ function App() {
   const [recruitmentLoading, setRecruitmentLoading] = useState(false);
   const [recruitmentApplying, setRecruitmentApplying] = useState(false);
   const [recruitmentCatalog, setRecruitmentCatalog] = useState<RecruitmentCatalogBrigade[]>([]);
-  const recruitmentCatalogRequestId = useRef(0);
   const [recruitmentFocusBrigadeId, setRecruitmentFocusBrigadeId] = useState<string | null>(null);
   const recruitmentOpenRequest = useGameStore((s) => s.recruitmentOpenRequest);
   const initialShellHandoffApplied = useRef(false);
@@ -767,7 +778,8 @@ function App() {
     setActiveEventDecisionId(null);
     setRecentlyAcceptedEventDecisionId(null);
     setCommandBriefingSuppressedTurn(null);
-    useGameStore.getState().resetRecruitmentWatch();
+    // The recruitment watch is reset on a SUCCESSFUL replacement instead
+    // (markCampaignReplacementSucceeded), so a failed load keeps the current one.
   }, []);
 
   useEffect(() => {
@@ -1121,24 +1133,14 @@ function App() {
    * UI-only recruitment watch that puts newly raisable brigades on the President's Desk
    * (owner 2026-11-12). `silent` skips the modal's loading shimmer (the per-turn refresh).
    */
+  recruitmentFetchRef.current = () => fetchRecruitmentCatalogSnapshot({ ipc, setLoadError });
   const refreshRecruitmentCatalog = async (options: { silent?: boolean } = {}) => {
     if (!ipc.isAvailable) return;
-    const requestId = ++recruitmentCatalogRequestId.current;
     if (!options.silent) setRecruitmentLoading(true);
-    const snapshot = await fetchRecruitmentCatalogSnapshot({ ipc, setLoadError });
-    if (requestId !== recruitmentCatalogRequestId.current) return;
+    const snapshot = await recruitmentWatchSync.refresh();
+    if (snapshot === 'stale') return;
     setRecruitmentCatalog(snapshot?.brigades ?? []);
     setRecruitmentLoading(false);
-    const store = useGameStore.getState();
-    const faction = store.loadedGameState?.player_faction ?? null;
-    if (snapshot && faction && snapshot.turn !== null && snapshot.autonomyLevel !== null) {
-      store.observeRecruitmentCatalog({
-        faction,
-        turn: snapshot.turn,
-        autonomyLevel: snapshot.autonomyLevel,
-        brigades: snapshot.brigades,
-      });
-    }
   };
 
   const openRecruitmentModal = (brigadeId?: string | null) => {
@@ -1159,7 +1161,7 @@ function App() {
     if (autonomyOpen) return;
     void refreshRecruitmentCatalog({ silent: true });
     // eslint-disable-next-line react-hooks/exhaustive-deps -- refresh is re-created each render; the keys are the trigger.
-  }, [ipc.isAvailable, recruitmentWatchTurn, recruitmentWatchFaction, recruitmentWatchGameOver, autonomyOpen]);
+  }, [ipc.isAvailable, recruitmentWatchTurn, recruitmentWatchFaction, recruitmentWatchGameOver, autonomyOpen, campaignViewportEpoch]);
 
   // A matter's "Open Recruitment" (Command Surface, Desk, Advance review) lands here.
   useEffect(() => {
