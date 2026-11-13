@@ -294,6 +294,8 @@ describe('war-phase step ordering', () => {
         //        turn's corps/OG stance matters before the bot pass; live president only.
         // +1 from clear-player-ordered-stances (2026-11-12, finding S4): turn-end clear of
         //        CorpsCommandState.player_ordered_stance; touches only corps that carry it.
-        expect(stepNames.length).toBe(195);
+        // +1 from apply-corps-reorganisation (2026-11-13, 7th Corps Phase A): dated brigade
+        //        transfers / corps retirement after activate-corps; inert without events.
+        expect(stepNames.length).toBe(196);
     });
 });

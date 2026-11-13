@@ -75,7 +75,9 @@ export type EliteRecallReason =
     | 'casualty_threshold'
     | 'morale_collapse'
     | 'cohesion_collapse'
-    | 'permanent_degradation';
+    | 'permanent_degradation'
+    /** The brigade was transferred to another corps (corps_reorganisation.ts forced transfer). */
+    | 'corps_reorganisation';
 
 export interface ArmyReserveRequest {
     /** Deterministic request ID for player/UI actions. */

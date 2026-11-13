@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "description": "Formation lifecycle events: disbands, merges, renames triggered by territory loss or scripted timing.",
+  "description": "Formation lifecycle events: disbands, merges, renames triggered by territory loss or scripted timing. Week-triggered events fire while trigger_turn <= turn (< until_turn when set). `corps_reorganisation` holds dated brigade transfers and corps retirements (src/sim/corps_reorganisation.ts).",
   "events": [
     {
       "type": "disband",
@@ -15,6 +15,27 @@
       "trigger_condition": "territory_loss",
       "trigger_municipality": "modrica",
       "reason": "Modriča fell to VRS — brigade destroyed"
-    }
-  ]
+    },
+    { "type": "rename", "formation_id": "arbih_705th_slavna_mountain", "trigger_condition": "week", "trigger_turn": 0, "until_turn": 154, "new_name": "305th Mountain", "reason": "3rd Corps number until the 7th Corps renumbering (BB2 p.468, p.470 n.6)" },
+    { "type": "rename", "formation_id": "arbih_705th_slavna_mountain", "trigger_condition": "week", "trigger_turn": 154, "new_name": "705th Mountain", "reason": "7th Corps renumbering, in use by Domet-1, 20 Mar 1995 (BB1 pp.301-302; BB1 App. H)" },
+    { "type": "rename", "formation_id": "arbih_706th_muslim_mountain", "trigger_condition": "week", "trigger_turn": 0, "until_turn": 154, "new_name": "306th Mountain", "reason": "3rd Corps number until the 7th Corps renumbering (BB2 p.468, p.470 n.7)" },
+    { "type": "rename", "formation_id": "arbih_706th_muslim_mountain", "trigger_condition": "week", "trigger_turn": 154, "new_name": "706th Muslim Mountain", "reason": "7th Corps renumbering (BB1 App. H)" },
+    { "type": "rename", "formation_id": "arbih_707th_slavna_mountain", "trigger_condition": "week", "trigger_turn": 0, "until_turn": 154, "new_name": "307th Mountain", "reason": "3rd Corps number until the 7th Corps renumbering (BB2 p.468, p.470 n.4)" },
+    { "type": "rename", "formation_id": "arbih_707th_slavna_mountain", "trigger_condition": "week", "trigger_turn": 154, "new_name": "707th Mountain", "reason": "7th Corps renumbering (BB1 App. H)" },
+    { "type": "rename", "formation_id": "arbih_708th_mountain", "trigger_condition": "week", "trigger_turn": 0, "until_turn": 154, "new_name": "308th Mountain", "reason": "3rd Corps number until the 7th Corps renumbering (Wikipedia, 7th Corps ARBiH; medium confidence)" },
+    { "type": "rename", "formation_id": "arbih_708th_mountain", "trigger_condition": "week", "trigger_turn": 154, "new_name": "708th Mountain", "reason": "7th Corps renumbering (BB1 App. H)" },
+    { "type": "rename", "formation_id": "arbih_712th_mountain", "trigger_condition": "week", "trigger_turn": 0, "until_turn": 154, "new_name": "312th Motorized", "reason": "3rd Corps number until the 7th Corps renumbering; raised as a motorised brigade (Wikipedia, 7th Corps ARBiH; medium confidence)" },
+    { "type": "rename", "formation_id": "arbih_712th_mountain", "trigger_condition": "week", "trigger_turn": 154, "new_name": "712th Mountain", "reason": "7th Corps renumbering (BB1 App. H)" },
+    { "type": "rename", "formation_id": "arbih_717th_slavna_mountain", "trigger_condition": "week", "trigger_turn": 0, "until_turn": 154, "new_name": "317th Mountain", "reason": "3rd Corps number until the 7th Corps renumbering (BB2 p.510)" },
+    { "type": "rename", "formation_id": "arbih_717th_slavna_mountain", "trigger_condition": "week", "trigger_turn": 154, "new_name": "717th Mountain", "reason": "7th Corps renumbering (BB1 App. H)" },
+    { "type": "rename", "formation_id": "arbih_725th_light", "trigger_condition": "week", "trigger_turn": 0, "until_turn": 154, "new_name": "325th Mountain", "reason": "3rd Corps number until the 7th Corps renumbering (BB2 p.493, p.510)" },
+    { "type": "rename", "formation_id": "arbih_725th_light", "trigger_condition": "week", "trigger_turn": 154, "new_name": "725th Light", "reason": "7th Corps renumbering (BB1 App. H)" },
+    { "type": "rename", "formation_id": "arbih_727th_slavna", "trigger_condition": "week", "trigger_turn": 0, "until_turn": 154, "new_name": "27th Krajina Mountain", "reason": "Was the 27th Krajina Mountain Brigade, not a 327th (BB2 p.470 n.5; BB2 p.468 'previously the 327th' is a BB error)" },
+    { "type": "rename", "formation_id": "arbih_727th_slavna", "trigger_condition": "week", "trigger_turn": 154, "new_name": "727th Brigade", "reason": "7th Corps renumbering (BB1 App. H)" },
+    { "type": "rename", "formation_id": "arbih_733rd_mountain", "trigger_condition": "week", "trigger_turn": 0, "until_turn": 154, "new_name": "333rd Mountain", "reason": "3rd Corps number until the 7th Corps renumbering (BB2 p.493)" },
+    { "type": "rename", "formation_id": "arbih_733rd_mountain", "trigger_condition": "week", "trigger_turn": 154, "new_name": "733rd Mountain", "reason": "7th Corps renumbering (BB1 App. H)" },
+    { "type": "rename", "formation_id": "arbih_770th_slavna_mountain", "trigger_condition": "week", "trigger_turn": 0, "until_turn": 154, "new_name": "370th Mountain", "reason": "3rd Corps number until the 7th Corps renumbering (BB2 p.468, p.470 n.3)" },
+    { "type": "rename", "formation_id": "arbih_770th_slavna_mountain", "trigger_condition": "week", "trigger_turn": 154, "new_name": "770th Mountain", "reason": "7th Corps renumbering (BB1 App. H)" }
+  ],
+  "corps_reorganisation": []
 }

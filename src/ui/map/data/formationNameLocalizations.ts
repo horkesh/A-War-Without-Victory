@@ -29,6 +29,8 @@ export interface BrigadeDesignationCatalogRow {
   english_gloss: string;
   official_bcs: string | null;
   playable_bcs?: string;
+  /** Earlier designations the engine may carry for a dated period (formation_lifecycle_events.json renames). */
+  historical_designations?: Array<{ english_gloss: string; official_bcs: string | null }>;
   unit_type: FormationUnitType;
   echelon: 'brigade' | 'battalion' | 'regiment' | 'unit_group';
   source_basis: string;
@@ -238,6 +240,10 @@ export function getLocalizedFormationName(
   if (locale !== 'bcs') return formation.name;
   if (formation.kind && !['brigade', 'operational_group'].includes(formation.kind)) return formation.name;
   const designation = DESIGNATION_BY_ID.get(formation.id);
+  // A dated earlier designation (e.g. a 7th Corps brigade still carrying its 3rd Corps
+  // 3xx number) is in force while the engine's formation name matches it.
+  const historical = designation?.historical_designations?.find((h) => h.english_gloss === formation.name);
+  if (historical) return historical.official_bcs ?? localizeGenericBrigadeName(formation.name);
   return designation?.official_bcs
     ?? designation?.playable_bcs
     ?? EXACT_BCS_NAMES[formation.id]

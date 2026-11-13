@@ -39,8 +39,8 @@ ARBiH organized into **7 corps** (formed gradually 1992-1993):
 3. **3rd Corps** (Zenica) - Industrial base, central Bosnia
 4. **4th Corps** (Mostar) - Formed late, Herzegovina
 5. **5th Corps** (Bihać) - Isolated pocket, internal division (Abdić)
-6. **6th Corps** (Konjic) - Formed late, central Herzegovina
-7. **7th Corps** (Travnik) - Central Bosnia, formed 1993
+6. **6th Corps** (Konjic) - June 1993 to 1994, then folded back into the 4th Corps (BB2 p.391, p.436); not modelled (its units sit under the 4th and 1st Corps)
+7. **7th Corps** (Travnik) - Central Bosnia, decided 26 Feb 1994 from the western half of the 3rd Corps
 
 **Plus isolated enclaves:**
 - Srebrenica, Goražde, Žepa (Drina Valley) - Under siege, separate commands
@@ -225,17 +225,21 @@ ARBiH organized into **7 corps** (formed gradually 1992-1993):
 
 ## 7TH CORPS (TRAVNIK)
 
-**HQ:** Travnik
-**Strength:** Formed 1993, ~15,000-18,000 (1993-1994) → 20,000-25,000 (1995)
+**HQ:** Travnik. **Commander:** Brig. Gen. Mehmed Alagić.
+**Formed:** decided 26 Feb 1994 (Presidency decision; Alagić appointed the same day); first operational report 7 Apr 1994. BB already credits the "newly established 7th Corps" with the 16 Mar 1994 Donji Vakuf attack (BB2 pp.465-466). Built from the 3rd Corps' OG Bosanska Krajina (Travnik) and OG Zapad (Bugojno).
+**Strength:** ~20,000-25,000 (1995)
 
-**Area:** Central Bosnia (Travnik region)
-**Mission:** Operations against VRS, central Bosnia
+**Area:** Central Bosnia (Travnik, Bugojno, Gornji and Donji Vakuf, Vitez, Busovača, Novi Travnik)
 
-**Key Unit:** 370th "Donji Vakuf" Mountain Brigade (elite mountain unit)
+**Brigade numbering:** the brigades kept their 3rd Corps numbers through 1994 (BB2 p.470 nn.3-7, p.510) and carried 7xx numbers by March 1995: 305→705, 306→706, 307→707, 308→708, 312→712, 317→717, 325→725, 27th Krajina→727 (BB2 p.468's "previously the 327th" is a BB error; the 327th stayed at Maglaj in the 3rd Corps), 333→733, 370→770. The 17th Krajina kept its number. The 737th's predecessor is unconfirmed (possibly the 37th Brigade, Travnik, or formed directly in Feb 1994).
+
+**Elite formations (BB1 App. H asterisk):** 17th Krajina, 705th, 727th, 737th and the 7th "Bošnjak" Reconnaissance-Sabotage Battalion. The 370th/770th "Donji Vakuf" brigade is not marked elite; "Slavna" is an honorific.
 
 **Major Operations:**
-- Mt. Vlašić Breakthrough (April 1995): Broke through VRS 1st Krajina Corps
-- 1995 Federation Offensives: Coordinated operations with 3rd Corps, HV
+- Meokrnje-Javorak breakthrough (28 Apr 1994, BB2 p.491)
+- Domet-1, Vlašić (20-24 Mar 1995): took the Vlašić heights and TV relay (BB1 pp.301-302)
+- Donji Vakuf (13 Sept 1995), Komar heights, east bank of the Vrbas
+- Ključ-Sanski Most (Sept-Oct 1995): with "other ARBiH commands" some 10,000 troops reinforced the 5th Corps (BB1 p.391); the 17th, 707th, 708th, 712th and 717th fought there (BB1 nn.795, 802, 811)
 
 ---
 

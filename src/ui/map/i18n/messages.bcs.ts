@@ -3608,6 +3608,7 @@ export const bcsMessages: Partial<Record<MessageKey, string>> = {
     'armyReserve.recall.playerRecall': 'Igrač povukao',
     'armyReserve.recall.casualties': 'Gubici',
     'armyReserve.recall.moraleCollapse': 'Slom morala',
+    'armyReserve.recall.corpsReorganisation': 'Prešla u drugi korpus',
     'armyReserve.recall.unknown': 'Zabilježeno povlačenje rezerve',
     'opportunity.requiredAxes': '{green}/{total} obavezno',
     'opportunity.requiredAxesUnreported': 'Obavezne ose nisu prijavljene',

@@ -73,6 +73,7 @@ The following table lists every `name:` literal from early_war_phases.ts, war_ph
 | War - Operational Setup | `location-osid-backfill` | No | war_phases.ts:448 |
 | War - Operational Setup | `init-brigade-history` | No | war_phases.ts:462 |
 | War - Operational Setup | `activate-corps` | No | war_phases.ts:474 |
+| War - Operational Setup | `apply-corps-reorganisation` | No | war_phases.ts (after `activate-corps`) |
 | War - Operational Setup | `load-operational-data` | No | war_phases.ts:494 |
 | War - Operational Setup | `supply-osid` | Indirect | war_phases.ts:513 |
 | War - Operational Setup | `compute-spatial-context-pre-combat` | No | war_phases.ts:542 |

@@ -2006,6 +2006,12 @@ export async function buildScenarioStartupState(
 
     if (scenario.start_lifecycle_phase === 'war') {
         initializeCorpsCommand(state);
+        {
+            // Dated designations (e.g. 3rd Corps 3xx numbers of later 7th Corps brigades)
+            // are in force from the opening screen, not only after the first turn.
+            const { loadLifecycleEvents, applyDatedRenames } = await import('../sim/formation_lifecycle_events.js');
+            applyDatedRenames(state, await loadLifecycleEvents(baseDir));
+        }
         spawnJnaPhantomBrigades(state, { emitControlEvents: false });
         state.political.control_events ??= [];
         state.political.initial_political_controllers = { ...state.political.political_controllers };

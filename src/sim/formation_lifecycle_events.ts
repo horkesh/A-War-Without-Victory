@@ -20,6 +20,13 @@ export interface LifecycleEventDef {
     trigger_condition: 'territory_loss' | 'week' | 'personnel_collapse';
     trigger_municipality?: string;
     trigger_turn?: number;
+    /**
+     * Optional exclusive end for `week` triggers: the event fires while
+     * trigger_turn <= turn < until_turn. Lets a dated designation (e.g. a 3rd Corps
+     * 3xx brigade number) hold until a later rename takes over, independent of the
+     * order of entries in the data file.
+     */
+    until_turn?: number;
     target_id?: string;
     new_name?: string;
     reason: string;
@@ -87,7 +94,8 @@ export function processLifecycleEvents(
                 }
                 break;
             case 'week':
-                shouldFire = event.trigger_turn != null && turn >= event.trigger_turn;
+                shouldFire = event.trigger_turn != null && turn >= event.trigger_turn
+                    && (event.until_turn == null || turn < event.until_turn);
                 break;
             case 'personnel_collapse':
                 shouldFire = (formation.personnel ?? 0) < 100;
@@ -127,6 +135,19 @@ export function processLifecycleEvents(
     }
 
     return fired;
+}
+
+/**
+ * Apply only the dated (week-triggered) rename events. Used at scenario start so the
+ * opening screen already shows the designation in force; the per-turn
+ * process-lifecycle-events step keeps it current afterwards. Names are presentation
+ * only: no simulation rule reads formation.name.
+ */
+export function applyDatedRenames(state: GameState, events: LifecycleEventDef[]): number {
+    return processLifecycleEvents(
+        state,
+        events.filter((e) => e.type === 'rename' && e.trigger_condition === 'week'),
+    );
 }
 
 /**
