@@ -1,12 +1,13 @@
 /**
- * StanceMatterActions: the president's answer to a corps/OG stance matter (posture
- * model option 2). One component, two hosts: the Command Surface card
- * (DirectiveCard, lever `stance_matter`) and the sector panel stance step
- * (SectorStanceStep). Confirm / Countermand / Constrain; the answer can be changed until
- * the turn advances. Silence lets the commander's change stand.
+ * StanceMatterActions: the president's answer to a corps/OG stance matter (posture model
+ * option 2). One component, two hosts: the Command Surface card (DirectiveCard, lever
+ * `stance_matter`, with `showDetail`) and the sector panel stance step (SectorStanceStep).
+ * Confirm / Countermand / Constrain; the answer can be changed until the turn advances.
+ * Silence lets the commander's change stand.
  *
- * Records intent only through `resolve-stance-matter`; the war pipeline resolves it.
- * A failed send shows `corpsFront.stageStanceFailed`.
+ * Lazily loaded by both hosts, together with its detail copy (`stanceMatterDetail.ts`), so
+ * none of it sits in the map entry chunk. Records intent only through `resolve-stance-matter`;
+ * the war pipeline resolves it. A failed send shows `corpsFront.stageStanceFailed`.
  */
 
 import { useState } from 'react';
@@ -14,7 +15,13 @@ import type { StanceMatterView } from '../data/types';
 import { useIPC } from '../desktop/useIPC';
 import { useGameStore } from '../store/gameStore';
 import { t } from '../i18n';
-import { stanceMatterAnswerLine, stanceMatterConstraintLabel } from '../data/stanceMatterCopy';
+import { stanceMatterConstraintLabel } from '../data/stanceMatterCopy';
+import {
+  stanceDetailText,
+  stanceMatterAnswerLine,
+  stanceMatterEvidence,
+  stanceMatterExplanation,
+} from '../data/stanceMatterDetail';
 import {
   SURFACE_LABEL_MUTED,
   SURFACE_PRIMARY_BUTTON_COMPACT,
@@ -23,11 +30,13 @@ import {
 
 export interface StanceMatterActionsProps {
   matter: StanceMatterView;
-  /** Called after a successful send (hosts refresh or publish a receipt). */
+  /** Also show the explanation, reasoning, staff view and overrule cost (Command Surface host). */
+  showDetail?: boolean;
+  /** Called after a successful send (hosts publish a receipt). */
   onAnswered?: (message: string) => void;
 }
 
-export function StanceMatterActions({ matter, onAnswered }: StanceMatterActionsProps) {
+export function StanceMatterActions({ matter, showDetail = false, onAnswered }: StanceMatterActionsProps) {
   const ipc = useIPC();
   const setLoadError = useGameStore((s) => s.setLoadError);
   const [busy, setBusy] = useState(false);
@@ -52,7 +61,7 @@ export function StanceMatterActions({ matter, onAnswered }: StanceMatterActionsP
       }
       // The main process pushes the updated state to the renderer after the write.
       setShowConstraints(false);
-      onAnswered?.(t('stanceMatter.sent'));
+      onAnswered?.(stanceDetailText('sent'));
     } finally {
       setBusy(false);
     }
@@ -60,6 +69,14 @@ export function StanceMatterActions({ matter, onAnswered }: StanceMatterActionsP
 
   return (
     <div className="flex flex-col gap-3" data-testid="stance-matter-actions" data-matter-id={matter.id}>
+      {showDetail && (
+        <>
+          <p className="text-[15px] text-[#e8dcbc]" data-testid="stance-matter-explanation">{stanceMatterExplanation(matter)}</p>
+          <ul className="flex flex-col gap-1 text-[14px] text-[#cfc3a6]" data-testid="stance-matter-evidence">
+            {stanceMatterEvidence(matter).map((line) => <li key={line}>{line}</li>)}
+          </ul>
+        </>
+      )}
       {answerLine && (
         <p className="text-[15px] text-[#e8dcbc]" data-testid="stance-matter-answer">{answerLine}</p>
       )}
@@ -70,7 +87,7 @@ export function StanceMatterActions({ matter, onAnswered }: StanceMatterActionsP
           disabled={busy || !ipc.isAvailable || matter.answer === 'confirm'}
           onClick={() => { void send('confirm'); }}
         >
-          {t('stanceMatter.button.confirm')}
+          {stanceDetailText('button.confirm')}
         </button>
         {canOverrule && (
           <button
@@ -79,7 +96,7 @@ export function StanceMatterActions({ matter, onAnswered }: StanceMatterActionsP
             disabled={busy || !ipc.isAvailable || matter.answer === 'countermand'}
             onClick={() => { void send('countermand'); }}
           >
-            {t('stanceMatter.button.countermand')}
+            {stanceDetailText('button.countermand')}
           </button>
         )}
         {canConstrain && (
@@ -90,13 +107,13 @@ export function StanceMatterActions({ matter, onAnswered }: StanceMatterActionsP
             disabled={busy || !ipc.isAvailable}
             onClick={() => setShowConstraints((open) => !open)}
           >
-            {t('stanceMatter.button.constrain')}
+            {stanceDetailText('button.constrain')}
           </button>
         )}
       </div>
       {canConstrain && showConstraints && (
-        <div className="flex flex-col gap-2" role="group" aria-label={t('stanceMatter.constrainHeading')}>
-          <div className={SURFACE_LABEL_MUTED}>{t('stanceMatter.constrainHeading')}</div>
+        <div className="flex flex-col gap-2" role="group" aria-label={stanceDetailText('constrainHeading')}>
+          <div className={SURFACE_LABEL_MUTED}>{stanceDetailText('constrainHeading')}</div>
           {matter.constraintOptions.map((option) => (
             <button
               key={option}
@@ -111,9 +128,11 @@ export function StanceMatterActions({ matter, onAnswered }: StanceMatterActionsP
         </div>
       )}
       {!ipc.isAvailable && (
-        <p className="text-[14px] text-[#b9ad94]">{t('stanceMatter.bridgeUnavailable')}</p>
+        <p className="text-[14px] text-[#b9ad94]">{stanceDetailText('bridgeUnavailable')}</p>
       )}
       {error && <p className="text-[14px] text-red-200" role="alert">{error}</p>}
     </div>
   );
 }
+
+export default StanceMatterActions;

@@ -11,7 +11,8 @@ import { SectorStanceStep } from '../../src/ui/map/components/SectorStanceStep';
 import { buildPresidentialDecisionRoomView } from '../../src/ui/map/data/presidentialDecisionRoom';
 import { deriveInboxItems } from '../../src/ui/map/data/inboxItems';
 import { buildDecisionConsequenceLedger } from '../../src/ui/map/data/decisionConsequenceLedger';
-import { stanceMatterReceiptLine, stanceHoldLine } from '../../src/ui/map/data/stanceMatterCopy';
+import { stanceMatterReceiptLine } from '../../src/ui/map/data/stanceMatterCopy';
+import { STANCE_MATTER_DETAIL_BCS, STANCE_MATTER_DETAIL_EN, stanceHoldLine } from '../../src/ui/map/data/stanceMatterDetail';
 import { setLocale } from '../../src/ui/map/i18n';
 import type { LoadedGameState, StanceMatterView } from '../../src/ui/map/data/types';
 import type { PresidentialDecisionRoomDirective } from '../../src/ui/map/data/presidentialDecisionRoom';
@@ -59,7 +60,8 @@ describe('stance matter: Command Surface card', () => {
     expect(card!.directive).toMatchObject({ lever: 'stance_matter', cost: 0, payload: { matterId: 'STANCE_11_arbih_2nd_corps' } });
     expect(card!.title).toBe('2nd Corps: Balanced to Offensive');
     expect(card!.explanation).toContain('stands unless you answer');
-    expect(card!.evidence.join(' ')).toContain('Commander\'s reasoning');
+    // The reasoning, staff view and costs render in the lazily loaded StanceMatterActions.
+    expect(card!.evidence).toEqual([]);
     expect(card!.title).not.toMatch(/arbih_|STANCE_/);
     expect(view.advanceReadiness.blockedByExistingSystems).toBe(false);
   });
@@ -68,6 +70,8 @@ describe('stance matter: Command Surface card', () => {
     const bridge = installIpc();
     const state = makeState({ stanceMatters: [matter()] });
     render(React.createElement(DirectiveCard, { directive: STANCE_DIRECTIVE, gameState: state }));
+    // The answer block is lazily loaded with its detail copy.
+    expect((await screen.findByTestId('stance-matter-evidence')).textContent).toContain('Commander\'s reasoning');
     fireEvent.click(screen.getByRole('button', { name: 'Countermand' }));
     await waitFor(() => expect(bridge.resolveStanceMatter).toHaveBeenCalledWith({ matterId: 'STANCE_11_arbih_2nd_corps', answer: 'countermand' }));
     fireEvent.click(screen.getByRole('button', { name: 'Constrain' }));
@@ -77,11 +81,11 @@ describe('stance matter: Command Surface card', () => {
     await waitFor(() => expect(bridge.resolveStanceMatter).toHaveBeenCalledWith({ matterId: 'STANCE_11_arbih_2nd_corps', answer: 'confirm' }));
   });
 
-  it('offers Confirm only inside the overrule window', () => {
+  it('offers Confirm only inside the overrule window', async () => {
     installIpc();
     const state = makeState({ stanceMatters: [matter({ countermandAllowed: false, constraintOptions: [] })] });
     render(React.createElement(DirectiveCard, { directive: STANCE_DIRECTIVE, gameState: state }));
-    expect(screen.getByRole('button', { name: 'Confirm' })).toBeTruthy();
+    expect(await screen.findByRole('button', { name: 'Confirm' })).toBeTruthy();
     expect(screen.queryByRole('button', { name: 'Countermand' })).toBeNull();
     expect(screen.queryByRole('button', { name: 'Constrain' })).toBeNull();
   });
@@ -90,7 +94,7 @@ describe('stance matter: Command Surface card', () => {
     const bridge = { resolveStanceMatter: vi.fn(async () => ({ ok: false, error: 'overrule_window' })) };
     Object.defineProperty(window, 'awwv', { configurable: true, value: bridge });
     render(React.createElement(DirectiveCard, { directive: STANCE_DIRECTIVE, gameState: makeState({ stanceMatters: [matter()] }) }));
-    fireEvent.click(screen.getByRole('button', { name: 'Countermand' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Countermand' }));
     await waitFor(() => expect(screen.getByRole('alert').textContent).toBe('Could not send your stance decision.'));
   });
 });
@@ -153,5 +157,10 @@ describe('stance matter: inbox, Records, holds and BCS', () => {
     const card = view.cards.find((c) => c.id === 'command:stance-matter:STANCE_11_arbih_2nd_corps');
     expect(card!.title).toBe('2nd Corps: Uravnoteženo u Ofanzivno');
     expect(card!.explanation).toContain('ostaje ako ne odgovorite');
+  });
+
+  it('has a BCS line for every detail line', () => {
+    expect(Object.keys(STANCE_MATTER_DETAIL_BCS).sort()).toEqual(Object.keys(STANCE_MATTER_DETAIL_EN).sort());
+    for (const value of Object.values(STANCE_MATTER_DETAIL_BCS)) expect(value.trim().length).toBeGreaterThan(0);
   });
 });

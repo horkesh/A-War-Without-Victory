@@ -1,7 +1,11 @@
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { PresidentialToolbar } from './components/PresidentialToolbar';
 import { SelectionPanel } from './components/SelectionPanel';
-import { CorpsFrontPanel } from './components/CorpsFrontPanel';
+// The sector (OG) panel mounts only while a sector is selected, so it loads then and stays
+// out of the entry chunk (vite.config.ts chunk-size limit, 2026-11-13).
+const CorpsFrontPanel = lazy(() =>
+  import('./components/CorpsFrontPanel').then(m => ({ default: m.CorpsFrontPanel })),
+);
 import { FormationDetail } from './components/FormationDetail';
 import { ArmyReservePanel } from './components/ArmyReservePanel';
 import { CorpsDetail } from './components/CorpsDetail';
@@ -1918,7 +1922,9 @@ function App() {
           <PresidentialInbox onAction={handlePresidentialInboxAction} eventCatalog={eventCatalogFull} />
         )}
         {tacticalDetailRailsVisible && railState.panel === 'settlement' && <SelectionPanel breadcrumb={panelBreadcrumb} />}
-        {tacticalDetailRailsVisible && railState.panel === 'sector' && <CorpsFrontPanel breadcrumb={panelBreadcrumb} />}
+        {tacticalDetailRailsVisible && railState.panel === 'sector' && (
+          <Suspense fallback={null}><CorpsFrontPanel breadcrumb={panelBreadcrumb} /></Suspense>
+        )}
         {tacticalDetailRailsVisible && railState.panel === 'corps' && <CorpsDetail breadcrumb={panelBreadcrumb} />}
         {/* ArmyDetail retired — faction click opens Army HQ modal */}
         {tacticalDetailRailsVisible && railState.panel === 'army_reserve' && <ArmyReservePanel breadcrumb={panelBreadcrumb} onOpenDecisionRoomTarget={openDecisionRoomTarget} />}

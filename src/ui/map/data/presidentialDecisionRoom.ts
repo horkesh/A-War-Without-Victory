@@ -15,9 +15,7 @@ import { t, type MessageKey } from '../i18n';
 import { turnToDateString } from '../utils/formatters';
 import { getDecisionSurface } from './decisionSurfaceRegistry';
 import {
-  stanceMatterAnswerLine,
-  stanceMatterEvidence,
-  stanceMatterExplanation,
+  stanceMatterSummary,
   stanceMatterTitle,
 } from './stanceMatterCopy';
 import {
@@ -1274,17 +1272,18 @@ function ordinaryOperationProposalEvidence(
 function addStanceMatterCards(state: LoadedGameState, cards: CandidateCard[]): void {
   if (!state.player_faction) return;
   for (const matter of state.stanceMatters ?? []) {
-    const answerLine = stanceMatterAnswerLine(matter);
     cards.push({
       id: `command:stance-matter:${matter.id}`,
       category: 'command',
       severity: matter.answer ? 'info' : 'warning',
       title: stanceMatterTitle(matter),
-      explanation: stanceMatterExplanation(matter),
+      // Short summary here; the reasoning, staff view and overrule cost render in the lazily
+      // loaded StanceMatterActions (detail copy is kept out of the map entry chunk).
+      explanation: stanceMatterSummary(matter),
       sourceOwner: t('decisionRoom.card.command.sourceOwner'),
       sourceLabel: t('stanceMatter.sourceLabel'),
       actionLabel: t('stanceMatter.actionLabel'),
-      evidence: [...stanceMatterEvidence(matter), ...(answerLine ? [answerLine] : [])],
+      evidence: [],
       navigationTarget: matter.scope === 'og' && matter.sectorId
         ? { kind: 'field', target: { kind: 'field-sector-in-corps', sectorId: matter.sectorId, corpsId: matter.corpsId } }
         : { kind: 'army-hq-corps-briefing', corpsId: matter.corpsId },

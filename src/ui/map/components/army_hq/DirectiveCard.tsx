@@ -25,7 +25,7 @@
  * IPCs — no determinism touch.
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Suspense, lazy, useCallback, useEffect, useMemo, useState } from 'react';
 import type { LoadedGameState } from '../../data/types';
 import {
   buildReserveRequestPresentation,
@@ -40,7 +40,8 @@ import {
 } from '../../data/opDirectiveObjection';
 import { getPlayerSafeCorpsName, getPlayerSafeOfficerName } from '../../utils/playerSafeText';
 import { getOsidDisplayName } from '../../utils/osidDisplayName';
-import { StanceMatterActions } from '../StanceMatterActions';
+// Lazy: the stance-matter answer and its detail copy stay out of the map entry chunk.
+const StanceMatterActions = lazy(() => import('../StanceMatterActions'));
 import { buildObjectiveTargetOptions } from '../../utils/objectiveTargetOptions';
 import { t, type MessageKey } from '../../i18n';
 import { strictCompare } from '../../../../state/validateGameState.js';
@@ -168,10 +169,13 @@ export function DirectiveCard(props: DirectiveCardProps) {
     const matter = props.gameState.stanceMatters?.find((m) => m.id === matterId);
     if (!matter) return null;
     return (
-      <StanceMatterActions
-        matter={matter}
-        onAnswered={(message) => props.onReceipt?.({ kind: 'success', message })}
-      />
+      <Suspense fallback={null}>
+        <StanceMatterActions
+          matter={matter}
+          showDetail
+          onAnswered={(message) => props.onReceipt?.({ kind: 'success', message })}
+        />
+      </Suspense>
     );
   }
   return <LeverDirectiveCard {...props} />;
