@@ -85,7 +85,12 @@ export function buildWarSummaryOverviewModel(state: LoadedGameState): WarSummary
     // count, not subsets of it. `departedByOsid` counts the routed only, so it is not used here.
     let totalDisplacedOrKilled = 0;
     const displacedOrKilledByFaction: Record<string, number> = {};
-    const displacementReported = state.nationalDisplacement != null || state.departedByOsid != null;
+    // Reported only when the humanitarian aggregates themselves are recorded. `departedByOsid`
+    // or a casualty-only `nationalDisplacement` say nothing about this measure, so they must
+    // not turn an unavailable total into a known zero.
+    const displacementReported =
+        state.nationalDisplacement?.humanitarianAggregatesRecorded === true
+        || Object.keys(state.nationalDisplacement?.humanitarianAggregates ?? {}).length > 0;
     for (const victims of Object.values(state.nationalDisplacement?.humanitarianAggregates ?? {})) {
         for (const [people, aggregate] of Object.entries(victims)) {
             const count = aggregate.refugeesCreated;

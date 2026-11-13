@@ -2577,6 +2577,7 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
         }
         const humanitarianAggregates: Record<string, Record<string, { refugeesCreated: number; refugeesReceived: number; civilianCasualtiesCaused: number }>> = {};
         const rawHumAgg = state.displacement?.displacement_humanitarian_aggregates;
+        const humanitarianAggregatesRecorded = !!rawHumAgg && typeof rawHumAgg === 'object' && !Array.isArray(rawHumAgg);
         if (rawHumAgg && typeof rawHumAgg === 'object' && !Array.isArray(rawHumAgg)) {
             for (const [causer, victims] of Object.entries(rawHumAgg as Record<string, Record<string, Record<string, unknown>>>).sort((a, b) => a[0].localeCompare(b[0]))) {
                 if (!victims || typeof victims !== 'object') continue;
@@ -2605,9 +2606,10 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
         if (
             Object.keys(civilianCasualtiesByEthnicity).length > 0 ||
             Object.keys(humanitarianAggregates).length > 0 ||
-            refugeesByTurn.length > 0
+            refugeesByTurn.length > 0 ||
+            humanitarianAggregatesRecorded
         ) {
-            nationalDisplacement = { civilianCasualtiesByEthnicity, humanitarianAggregates, refugeesByTurn };
+            nationalDisplacement = { civilianCasualtiesByEthnicity, humanitarianAggregates, refugeesByTurn, humanitarianAggregatesRecorded };
         }
     }
 

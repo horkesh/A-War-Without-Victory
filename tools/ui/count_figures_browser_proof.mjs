@@ -140,7 +140,7 @@ try {
       await page.evaluate(() => { const host = document.getElementById('proof-host'); host.scrollTop = host.scrollHeight; });
       await page.waitForTimeout(300);
       const summary = await shot(`war_summary${tag}`, size, { text: await text('#proof-host') });
-      expectIn(summary, bcs ? /Raseljeni ili ubijeni u teatru\s*1,4M/ : /Theater-wide displaced or killed\s*1\.4M/, 'theater-wide total reads displaced or killed');
+      expectIn(summary, bcs ? /Raseljeni ili ubijeni na ratištu\s*1,4M/ : /Theater-wide displaced or killed\s*1\.4M/, 'theater-wide total reads displaced or killed');
       rejectIn(summary, /Total displaced|Ukupno raseljen/i, 'old "Total displaced" label');
       await unmount();
 

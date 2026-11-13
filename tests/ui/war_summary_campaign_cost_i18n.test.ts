@@ -171,7 +171,7 @@ describe('War Summary campaign cost localization', () => {
         expect(screen.getByText('Vojna snaga')).toBeTruthy();
         expect(screen.getByText('Ljudstvo pod oružjem')).toBeTruthy();
         expect(screen.getByText('Raseljavanje')).toBeTruthy();
-        expect(screen.getByText('Raseljeni ili ubijeni u teatru')).toBeTruthy();
+        expect(screen.getByText('Raseljeni ili ubijeni na ratištu')).toBeTruthy();
         expect(screen.getByText('Raseljeni ili ubijeni na vlastitoj strani')).toBeTruthy();
         expect(screen.getByText('Neprijateljsko raseljavanje nije ovdje razbijeno kao tačni ukupni brojevi po frakciji u igračevom sigurnom prikazu.')).toBeTruthy();
         expect(screen.getByText('Cijena kampanje')).toBeTruthy();
@@ -257,6 +257,12 @@ describe('War Summary campaign cost localization', () => {
             casualtyLedger: { RBiH: { killed: 0, wounded: 0, missing_captured: 0 } },
             departedByOsid: { 'op:test:zero': { RBiH: 0 } },
             displacementByMun: undefined,
+            nationalDisplacement: {
+                civilianCasualtiesByEthnicity: {},
+                humanitarianAggregates: {},
+                refugeesByTurn: [],
+                humanitarianAggregatesRecorded: true,
+            },
         } as LoadedGameState;
 
         render(createElement(WarSummaryContent, { focusSection: 'overview' }));
@@ -267,6 +273,27 @@ describe('War Summary campaign cost localization', () => {
         expect(copy).toMatch(/Theater-wide displaced or killed\s*0/i);
         expect(copy).toMatch(/Own-side displaced or killed\s*0/i);
         expect(copy).not.toMatch(/Killed\s*No staff report/i);
+    });
+
+    it('reads departures alone, or casualty-only records, as unreported displaced-or-killed, never 0', () => {
+        storeState.loadedGameState = {
+            ...makeMockLoadedGameState(),
+            player_faction: 'RBiH',
+            departedByOsid: { 'op:test:a': { RBiH: 4000 } },
+            displacementByMun: undefined,
+            nationalDisplacement: {
+                civilianCasualtiesByEthnicity: { RBiH: { killed: 10, fledAbroad: 5 } },
+                humanitarianAggregates: {},
+                refugeesByTurn: [],
+                humanitarianAggregatesRecorded: false,
+            },
+        } as LoadedGameState;
+
+        render(createElement(WarSummaryContent, { focusSection: 'overview' }));
+
+        const copy = document.body.textContent ?? '';
+        expect(copy).toMatch(/Theater-wide displaced or killed\s*No staff report/i);
+        expect(copy).toMatch(/Own-side displaced or killed\s*No staff report/i);
     });
 
     it('keeps seven-digit civilian deaths exact while displacement remains compact', () => {
