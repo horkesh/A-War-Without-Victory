@@ -64,9 +64,9 @@ import type { CorpsStance } from '../../state/game_state.js';
 
 /** Stance aggressiveness rank for ceiling enforcement (higher = more aggressive). */
 /** EXPERIMENT E2 toggle (hvo-arbih-war-diagnosis, branch-only, NOT FOR MERGE). */
-export const EXPERIMENT_E2_LIFT_HVO_OPEN_WAR_DEFENSIVE = false;
+export const EXPERIMENT_E2_LIFT_HVO_OPEN_WAR_DEFENSIVE = true;
 /** EXPERIMENT E3 toggle (branch-only): Herzegovina corps not capped defensive during open RBiH-HRHB war. */
-export const EXPERIMENT_E3_LIFT_HERZEGOVINA_CAP_IN_BILATERAL_WAR = false;
+export const EXPERIMENT_E3_LIFT_HERZEGOVINA_CAP_IN_BILATERAL_WAR = true;
 
 const STANCE_RANK: Record<CorpsStance, number> = {
     reorganize: 0, defensive: 1, balanced: 2, offensive: 3,

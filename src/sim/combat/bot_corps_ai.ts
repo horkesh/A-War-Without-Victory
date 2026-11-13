@@ -186,7 +186,7 @@ function munFromBilateralOsid(osid: string | undefined): string | null {
 
 /** EXPERIMENT E2b (hvo-arbih-war-diagnosis, branch-only, NOT FOR MERGE): the HVO diverted corps gets the
  *  same bilateral-front directive and stance as the ARBiH one (targets, stance, aggression). */
-export const EXPERIMENT_E2B_SYMMETRIC_BILATERAL_DIVERSION = false;
+export const EXPERIMENT_E2B_SYMMETRIC_BILATERAL_DIVERSION = true;
 
 function createBilateralDirective(
     sectorIds: string[],

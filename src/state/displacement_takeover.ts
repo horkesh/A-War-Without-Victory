@@ -182,7 +182,7 @@ export interface TakeoverDisplacementReport {
 }
 
 /** EXPERIMENT toggle (branch-only): seed bilateral minority timers on the RBiH-HRHB front at war start. */
-export const EXPERIMENT_BILATERAL_WAR_START_SEED = true;
+export const EXPERIMENT_BILATERAL_WAR_START_SEED = false;
 /** EXPERIMENT E4b: initial-wave fraction for war-start bilateral seeds (no sustained drain). */
 export const EXPERIMENT_BILATERAL_SEED_INITIAL_FRACTION = 0.25;
 
