@@ -9,6 +9,18 @@
   Compacted 2026-09-10: 1723 sections moved out, 62 kept live.
 -->
 
+## 2026-11-13 — Docs history fixes: Delić date, 6th Corps, CODE_AUDIT 7th Corps, army CO succession weeks
+
+Docs only; no `data/`, `src/` or tests. `ARBIH_ORDER_OF_BATTLE_MASTER.md`: Delić commanded the Main Staff
+from 8 Jun 1993 (November 1993 is when Halilović left the staff); the 6th Corps existed early Jun 1993 to
+1994 and not in 1995. `20260516_CODE_AUDIT.md` L501: the 7th Corps "late 1992" claim is annotated, the
+record kept. New report `docs/40_reports/20261113_ARMY_CO_SUCCESSION_DATES_AND_STALE_LINES.md`:
+Praljak is week 67 (roster 64), Roso week 83 (roster 80), Petković's return unresolved and after 23 Feb 1994;
+plus the FORAWWV stale-line list (L307-308), not edited because the file is panel-gated. SC12: the only
+rupture "July 1995 window" claim was in the Sensitive History Gate, fixed in #584; nothing else asserts it.
+The 7th Corps lane (#590) already covered the 7th Corps, Domet-1, Jajce and 370th items. Roster data is
+unchanged, pending a calibration lane.
+
 ## 2026-11-13 — Startup snapshot re-baked for the Delić handover (#581 follow-up)
 
 #581 moved Halilović/Delić from week 60 to 61 in `apr1992_officers.json` but did not regenerate the
