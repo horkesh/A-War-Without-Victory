@@ -8,17 +8,31 @@
  * game (`window.location.reload()`) or loading a save (which replaces the
  * game state and clears `gameOver`). No `onClose` callback exists or is
  * needed.
+ *
+ * Surface redesign, step 4 (2026-11-12): the Modal panel is a compact surface frame
+ * (surface header, standings as panels, fixed action footer). Wording unchanged.
  */
 import { useEffect } from 'react';
 import { playCue } from '../audio/audio_engine';
 import { useGameStore } from '../store/gameStore';
-import { FACTION_COLORS } from '../utils/theme';
+import { factionHex } from '../../shared/factionPalette';
 import { useIPC } from '../desktop/useIPC';
 import { Z } from '../../shared/zIndex';
 import { Modal } from '../../shared/Modal';
 import { t, useLocale, type Locale, type MessageKey } from '../i18n';
 import { turnToDateString } from '../utils/formatters';
 import { isFieldedTacticalFormation } from '../../shared/playerVisibility';
+import {
+    SURFACE_MODAL_BACKDROP,
+    SURFACE_MODAL_PANEL_COMPACT,
+    SURFACE_PRIMARY_BUTTON_COMPACT,
+    SURFACE_SECONDARY_BUTTON,
+    SurfaceHeader,
+    SurfaceModalBody,
+    SurfaceModalFooter,
+    SurfacePanel,
+    SurfaceSection,
+} from './surface/Surface';
 
 const OUTCOME_LABEL_KEYS: Record<string, { title: MessageKey; subtitle: MessageKey }> = {
     victory_RBiH: { title: 'gameOver.outcome.victory_RBiH.title', subtitle: 'gameOver.outcome.victory_RBiH.subtitle' },
@@ -83,73 +97,66 @@ export function GameOverModal() {
             dismissible={false}
             zIndex={Z.GAME_OVER}
             ariaLabelledBy="game-over-title"
-            backdropClassName="bg-black/80 backdrop-blur-sm"
-            panelClassName="w-[560px] max-h-[calc(var(--interface-viewport-height,100vh)*0.85)] bg-panel-bg border border-panel-border rounded-lg shadow-2xl flex flex-col overflow-hidden"
+            backdropClassName={SURFACE_MODAL_BACKDROP}
+            panelClassName={SURFACE_MODAL_PANEL_COMPACT}
         >
             <>
-                {/* Header */}
-                <div className="px-8 py-6 border-b border-panel-border bg-panel-card/50 text-center">
-                    <div className="text-xs font-mono uppercase tracking-[0.4em] text-accent-gold/60 mb-2">
-                        {t('gameOver.header', { date })}
-                    </div>
-                    <div id="game-over-title" className="text-xl font-bold text-text-primary uppercase tracking-wide mb-1">
-                        {title}
-                    </div>
-                    <div className="text-xs text-text-secondary italic leading-relaxed max-w-sm mx-auto">
-                        {subtitle}
-                    </div>
-                </div>
+                <SurfaceHeader eyebrow={t('gameOver.header', { date })} title={title} titleId="game-over-title" />
 
-                {/* Faction Standings */}
-                <div className="flex-1 overflow-auto p-6 space-y-4">
-                    <div className="text-xs uppercase tracking-wider text-text-secondary font-semibold mb-2">{t('gameOver.finalStandings')}</div>
-                    {factionIds.map((fid) => {
-                        const color = FACTION_COLORS[fid as keyof typeof FACTION_COLORS] ?? '#888';
-                        const osids = factionOsids[fid] ?? 0;
-                        const pct = ((osids / totalOsids) * 100).toFixed(1);
-                        const brigades = factionBrigades[fid] ?? 0;
-                        return (
-                            <div key={fid} className="p-3 rounded border border-panel-border bg-panel-card/50">
-                                <div className="flex items-center justify-between mb-2">
-                                    <div className="flex items-center gap-2">
-                                        <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: color }} />
-                                        <span className="text-[12px] font-bold text-text-primary uppercase tracking-wide">{fid}</span>
-                                    </div>
-                                    <span className="text-xs text-text-primary tabular-nums font-bold">{pct}%</span>
-                                </div>
-                                <div className="flex gap-4 text-xs text-text-secondary">
-                                    <span>{formatSettlementsControlled(osids, locale)}</span>
-                                    <span>{t('gameOver.activeBrigades', { count: brigades })}</span>
-                                </div>
-                                <div className="mt-1.5 h-1.5 bg-black/30 rounded-full overflow-hidden">
-                                    <div className="h-full rounded-full" style={{ width: `${pct}%`, backgroundColor: color }} />
-                                </div>
-                            </div>
-                        );
-                    })}
+                <SurfaceModalBody>
+                    {subtitle && <p className="m-0 max-w-[48rem] text-[18px] leading-relaxed text-[#ddd1b3]">{subtitle}</p>}
+                    <SurfaceSection label={t('gameOver.finalStandings')}>
+                        <div className="flex flex-col gap-2.5">
+                            {factionIds.map((fid) => {
+                                const color = factionHex(fid);
+                                const osids = factionOsids[fid] ?? 0;
+                                const pct = ((osids / totalOsids) * 100).toFixed(1);
+                                const brigades = factionBrigades[fid] ?? 0;
+                                return (
+                                    <SurfacePanel key={fid} className="flex flex-col gap-2">
+                                        <div className="flex items-center justify-between gap-3">
+                                            <div className="flex items-center gap-2.5">
+                                                <span aria-hidden="true" className="h-3 w-3 rounded-sm" style={{ backgroundColor: color }} />
+                                                <span className="text-[18px] font-semibold text-[#f1e6c8]">{fid}</span>
+                                            </div>
+                                            <span className="font-mono text-[18px] font-semibold tabular-nums text-[#f1e6c8]">{pct}%</span>
+                                        </div>
+                                        <div className="flex flex-wrap gap-x-6 gap-y-1 text-[16px] text-[#c2b69c]">
+                                            <span>{formatSettlementsControlled(osids, locale)}</span>
+                                            <span>{t('gameOver.activeBrigades', { count: brigades })}</span>
+                                        </div>
+                                        <div className="h-2.5 overflow-hidden rounded-full bg-[#262b35]">
+                                            <div className="h-full rounded-full" style={{ width: `${pct}%`, backgroundColor: color }} />
+                                        </div>
+                                    </SurfacePanel>
+                                );
+                            })}
+                        </div>
+                    </SurfaceSection>
 
-                    <div className="text-xs text-text-secondary text-center pt-2 border-t border-panel-border">
+                    <p className="m-0 border-t border-[#262b35] pt-3 text-[16px] text-[#b9ad94]">
                         {t('gameOver.campaignDuration', { weeks: turn, years: Math.floor(turn / 52), remainder: turn % 52 })}
-                    </div>
-                </div>
+                    </p>
+                </SurfaceModalBody>
 
-                {/* Footer */}
-                <div className="px-6 py-4 border-t border-panel-border bg-panel-card/30 flex justify-center gap-3">
-                    <button
-                        onClick={() => window.location.reload()}
-                        className="px-6 py-2 text-xs font-bold uppercase tracking-wider rounded border border-accent-gold/40 bg-accent-gold/10 text-accent-gold hover:bg-accent-gold/20 transition-colors"
-                    >
-                        {t('mainMenu.newGame')}
-                    </button>
+                <SurfaceModalFooter>
                     {ipc.isAvailable && (
                         <button
+                            type="button"
                             onClick={() => ipc.loadStateDialog?.()}
-                            className="px-6 py-2 text-xs font-bold uppercase tracking-wider rounded border border-panel-border text-text-secondary hover:bg-white/5 transition-colors"
+                            className={SURFACE_SECONDARY_BUTTON}
                         >
                             {t('gameOver.loadSave')}
                         </button>
                     )}
-                </div>
+                    <button
+                        type="button"
+                        onClick={() => window.location.reload()}
+                        className={SURFACE_PRIMARY_BUTTON_COMPACT}
+                    >
+                        {t('mainMenu.newGame')}
+                    </button>
+                </SurfaceModalFooter>
             </>
         </Modal>
     );

@@ -89,22 +89,16 @@ describe('turn-0 RBiH 1st Corps sectors (M3, presentation only)', () => {
         for (const sector of firstCorps) {
             const name = sector.display_name;
             if (!name.startsWith('OG ')) continue;
-            const munSlugs = new Set(
-                (sector.sub_segments ?? [])
-                    .flatMap((ss) => ss.friendly_osids)
-                    .map((osid) => osid.split(':')[1])
-                    .filter((slug): slug is string => typeof slug === 'string'),
-            );
-            // With the R8 name sweep merged, labels read "OG <place> [I|II…] (<municipality>)":
-            // the place, or the municipality in brackets, must be one of the sector's own.
-            const rest = name.slice(3);
-            const bracket = /\(([^)]+)\)\s*$/.exec(rest)?.[1];
-            const base = rest.replace(/\s*\([^)]*\)\s*$/, '').replace(/\s+[IVX]+$/, '');
-            const namedSlug = placeToSlug(base);
-            // Attested designations (e.g. "OG 6") carry no municipality; only check place names.
-            if (/^\d/.test(namedSlug)) continue;
-            const named = [namedSlug, ...(bracket ? [placeToSlug(bracket)] : [])];
-            expect(named.some((slug) => munSlugs.has(slug)), `${sector.sector_id} "${name}" vs ${[...munSlugs].join(',')}`).toBe(true);
+            const munSlugs = new Set((sector.sub_segments ?? []).flatMap((ss) => ss.friendly_osids).map((osid) => osid.split(':')[1]));
+            // R8 name sweep: duplicate OG names gain "(Qualifier)" or a roman ordinal. Both the base
+            // place and a municipality qualifier must be the sector's own municipalities.
+            const match = /^(.*?)(?: \(([^)]+)\))?(?: [IVX]+)?$/.exec(name.slice(3));
+            const places = [match?.[1] ?? name.slice(3), match?.[2]].filter((p): p is string => typeof p === 'string');
+            for (const place of places) {
+                const namedSlug = placeToSlug(place);
+                if (/^\d/.test(namedSlug)) continue;
+                expect(munSlugs.has(namedSlug), `${sector.sector_id} "${name}" (${place})`).toBe(true);
+            }
         }
     }, 300_000);
 });

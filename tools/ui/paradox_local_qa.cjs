@@ -6307,6 +6307,7 @@ function installTileFetchAbortObserver() {
       headers.set('x-awwv-qa-tile-request-id', id);
       const observedRequest = new Request(request, { headers });
       const range = headers.get('range') ?? '';
+      let afterResponseHeaders = false;
       const recordAbort = () => window.__AWWV_QA_TILE_FETCH_ABORT_SIGNALS__.push({
         id,
         url: observedRequest.url,
@@ -6314,11 +6315,17 @@ function installTileFetchAbortObserver() {
         range,
         origin: window.location.origin,
         observedAtMs: Date.now(),
+        afterResponseHeaders,
       });
+      // The listener stays attached after fetch() resolves: the caller (pmtiles) still reads
+      // the body, and an abort during that read fails the request with net::ERR_ABORTED too.
+      // Detaching on resolve lost exactly those signals (R8 RS-07, event 509: ids 231-233
+      // completed in the network process and were cancelled during body delivery).
       if (observedRequest.signal.aborted) recordAbort();
       else observedRequest.signal.addEventListener('abort', recordAbort, { once: true });
-      return originalFetch(observedRequest).finally(() => {
-        observedRequest.signal.removeEventListener('abort', recordAbort);
+      return originalFetch(observedRequest).then((response) => {
+        afterResponseHeaders = true;
+        return response;
       });
     } catch {
       return originalFetch(input, init);

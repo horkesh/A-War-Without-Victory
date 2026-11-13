@@ -292,7 +292,7 @@ export function OOBSidebar() {
   }, [armyByFaction, reserveByFaction]);
   const totalOperations = loadedGameState ? filterPlayerFacingOperations(loadedGameState).length : 0;
   // OGs tab count: held OGs only (an unheld front is not an OG, M3 owner ruling).
-  const totalSectors = loadedGameState ? getPlayerVisibleFactions(loadedGameState.corpsFrontSectors ?? [], playerFaction).filter((s) => !s.unheld_front).length : 0;
+  const totalSectors = loadedGameState ? getPlayerVisibleFactions(loadedGameState.corpsFrontSectors ?? [], playerFaction).filter(isHeldOg).length : 0;
   const mobilizationSummary = loadedGameState?.mobilizationSummary;
 
   if (!loadedGameState) {

@@ -2,7 +2,7 @@
  * Sectors section for expanded corps card.
  * Warroom dark palette.
  */
-import { useEffect, useMemo, useState } from 'react';
+import { Fragment, useEffect, useMemo, useState } from 'react';
 import type { CorpsFrontSectorView, FormationView } from '../../data/types';
 import type { TurnBattle } from '../../../../state/turn_summary';
 import { useGameStore } from '../../store/gameStore';
@@ -21,6 +21,7 @@ import { EmptyState } from '../EmptyState';
 import { t, useLocale, type MessageKey } from '../../i18n';
 import { getLocalizedFormationName } from '../../data/formationNameLocalizations';
 import { buildSectorFormationAssignment, getSectorCoverageTier } from '../../utils/sectorUtils';
+import { isHeldOg } from '../../utils/heldOg';
 
 interface SectorsSectionProps {
     corpsId: string;
@@ -525,6 +526,11 @@ export function SectorsSection({ corpsId, sectors, factionBattles, defaultOpen =
         [factionBattles, sectors, sectorOsidSets],
     );
     const effectiveExpandedId = expandedId === undefined ? defaultExpandedId : expandedId;
+    // Owner ruling M3: the "OGs" count counts real OGs only (one or more brigades). Brigade-less
+    // sectors stay reachable below their own "Unheld fronts" sub-heading.
+    const heldOgSectors = useMemo(() => sectors.filter(isHeldOg), [sectors]);
+    const unheldSectors = useMemo(() => sectors.filter((sector) => !isHeldOg(sector)), [sectors]);
+    const orderedSectors = useMemo(() => [...heldOgSectors, ...unheldSectors], [heldOgSectors, unheldSectors]);
 
     useEffect(() => {
         if (expandedId == null) return;
@@ -532,7 +538,7 @@ export function SectorsSection({ corpsId, sectors, factionBattles, defaultOpen =
     }, [expandedId, sectors]);
 
     return (
-        <CollapsibleSection sectionKey={`sec-${corpsId}`} title={t('sectorsSection.title')} count={sectors.length} defaultOpen={defaultOpen}>
+        <CollapsibleSection sectionKey={`sec-${corpsId}`} title={t('sectorsSection.title')} count={heldOgSectors.length} defaultOpen={defaultOpen}>
             {sectors.length === 0 ? (
                 <EmptyState
                     message={t('sectorsSection.empty')}
@@ -541,7 +547,7 @@ export function SectorsSection({ corpsId, sectors, factionBattles, defaultOpen =
                 />
             ) : (
                 <div className="space-y-2">
-                    {sectors.map((sector) => {
+                    {orderedSectors.map((sector, index) => {
                         const sectorOsids = sectorOsidSets.get(sector.sector_id) ?? new Set<string>();
                         const battleCount = factionBattles.filter((b) => sectorOsids.has(b.osid)).length;
                         const hasBattle = battleCount > 0;
@@ -559,8 +565,16 @@ export function SectorsSection({ corpsId, sectors, factionBattles, defaultOpen =
                             : t('sectorsSection.expandSectorAria', { sector: sectorLabel });
 
                         return (
+                            <Fragment key={sector.sector_id}>
+                            {index === heldOgSectors.length && unheldSectors.length > 0 && (
+                                <div
+                                    data-testid="army-hq-unheld-fronts-heading"
+                                    className="pt-1 text-[13px] font-bold uppercase tracking-tighter text-text-secondary"
+                                >
+                                    {t('sectorsSection.unheldFronts', { count: unheldSectors.length })}
+                                </div>
+                            )}
                             <div
-                                key={sector.sector_id}
                                 data-testid="army-hq-sector-row"
                                 data-sector-id={sector.sector_id}
                                 data-coverage-tier={coverageTier}
@@ -640,6 +654,7 @@ export function SectorsSection({ corpsId, sectors, factionBattles, defaultOpen =
                                     </div>
                                 )}
                             </div>
+                            </Fragment>
                         );
                     })}
                 </div>

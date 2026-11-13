@@ -45,7 +45,13 @@ export function buildFormationCounterDomOverlayItems(args: {
     const anchor = stack.anchor;
     const memberCount = stack.counters.length;
     stack.counters.forEach((counter, paintIndex) => {
-      const properties = (counter.feature.properties ?? {}) as Record<string, unknown>;
+      // The badge stands for the whole stack, merged neighbours included: selection needs the
+      // displayed count and the merged settlements, not the counter's own settlement count.
+      const properties = {
+        ...((counter.feature.properties ?? {}) as Record<string, unknown>),
+        stack_count: stack.count,
+        merged_osids: [...stack.mergedOsids],
+      } as Record<string, unknown>;
       const iconId = String(properties.icon_id ?? '');
       if (!counter.id || !iconId) return;
       const isTop = counter.role === 'stack-top';

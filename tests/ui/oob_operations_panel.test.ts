@@ -167,7 +167,7 @@ describe('OOB and operations panel operation labels', () => {
 
     expect(source).toContain('function getOperationDisplayName');
     expect(source).toContain('operationDisplayName?: string | null');
-    expect(source).toContain("getPlayerSafeOperationName(operationName, corpsId, 'Operation')");
+    expect(source).toContain("getPlayerSafeOperationName(operationName, corpsId, t('operationHistory.fallback.operation'))");
     expect(source).not.toContain('>{op.operation_name}</span>');
   });
 
