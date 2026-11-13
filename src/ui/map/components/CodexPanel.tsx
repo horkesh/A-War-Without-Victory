@@ -36,20 +36,34 @@ import {
 import { turnToDateString } from '../utils/formatters.js';
 import { parseGhostEntryProse, resolveGhostEntryProse } from '../data/ghostEntryProse.js';
 import { buildConsequenceReceipts } from '../data/consequenceReceipts.js';
+import {
+    SURFACE_CHIP,
+    SURFACE_LABEL,
+    SURFACE_LABEL_MUTED,
+    SurfaceCloseButton,
+    SurfaceColumns,
+    SurfaceContent,
+    SurfaceDetail,
+    SurfaceEmpty,
+    SurfaceHeader,
+    SurfaceRail,
+} from './surface/Surface';
 
 const YEARS = [1992, 1993, 1994, 1995] as const;
 
-const CATEGORY_COLORS: Record<string, { bg: string; text: string }> = {
-    military: { bg: 'bg-red-400/15', text: 'text-red-400' },
-    political: { bg: 'bg-blue-400/15', text: 'text-blue-400' },
-    diplomatic: { bg: 'bg-cyan-400/15', text: 'text-cyan-400' },
-    humanitarian: { bg: 'bg-amber-400/15', text: 'text-amber-400' },
+// Surface redesign, step 4 (2026-11-12): category chips in the surface chip style.
+// `onPaper` uses dark ink for the essay sheet header.
+const CATEGORY_COLORS: Record<string, { surface: string; paper: string }> = {
+    military: { surface: 'border-red-400/50 text-red-200', paper: 'border-red-800/50 text-red-900' },
+    political: { surface: 'border-sky-400/40 text-sky-200', paper: 'border-sky-800/50 text-sky-900' },
+    diplomatic: { surface: 'border-cyan-400/40 text-cyan-200', paper: 'border-cyan-800/50 text-cyan-900' },
+    humanitarian: { surface: 'border-amber-300/50 text-amber-200', paper: 'border-amber-800/50 text-amber-900' },
 };
 
-function CategoryBadge({ category }: { category: string }) {
-    const colors = CATEGORY_COLORS[category] ?? { bg: 'bg-neutral-400/15', text: 'text-neutral-400' };
+function CategoryBadge({ category, onPaper = false }: { category: string; onPaper?: boolean }) {
+    const colors = CATEGORY_COLORS[category] ?? { surface: 'border-[#3a4150] text-[#c2b69c]', paper: 'border-neutral-500/50 text-neutral-800' };
     return (
-        <span className={`shrink-0 whitespace-nowrap px-1.5 py-0.5 text-xs font-bold uppercase tracking-[0.12em] rounded ${colors.bg} ${colors.text}`}>
+        <span className={`shrink-0 whitespace-nowrap rounded border px-2 py-0.5 font-mono text-[13px] font-semibold uppercase tracking-[0.12em] ${onPaper ? colors.paper : colors.surface}`}>
             {category}
         </span>
     );
@@ -118,7 +132,7 @@ function TierBadge({ tier }: { tier: CodexTier }) {
         <span
             data-testid="codex-tier-badge"
             data-tier={tier}
-            className="shrink-0 whitespace-nowrap px-1 py-0.5 text-xs font-bold uppercase tracking-[0.1em] rounded bg-neutral-500/15 text-neutral-400"
+            className="shrink-0 whitespace-nowrap rounded border border-[#3a4150] px-2 py-0.5 font-mono text-[13px] font-semibold uppercase tracking-[0.1em] text-[#b9ad94]"
         >
             {tierLabel(tier)}
         </span>
@@ -327,382 +341,44 @@ export function CodexPanel({ isOpen, onClose, requestedEventId, eventCatalog, st
 
     if (!isOpen) return null;
 
+    const hasLiveRecords = liveDynamicCodex.receipts.length > 0 || liveDynamicCodex.ghosts.length > 0;
+    const hasDistance = Boolean(distanceFromHistory && distanceFromHistory.totalDecided > 0);
+    const showUnlockState = Boolean(unlockState && diagMode);
+    const hasSideColumn = hasLiveRecords || visibleDilemmaSpine.length > 0 || hasDistance || showUnlockState;
+    const dateLabel = turnToDateString(loadedGameState?.turn ?? 0);
+
+    // Surface redesign, step 4 (2026-11-12): the Codex is one surface in the Command
+    // Surface style. Header (date, title, count, Close); the years and essays in the left
+    // rail; the selected essay in the middle on its paper reading sheet (visual-polish
+    // lane D); campaign records, choices and distance from history in the right column,
+    // which appears only when one of them has content. Each column scrolls on its own.
+    // Text 13 px and up. Every essay, record and label is rendered exactly as before.
     return (
-        <div data-testid="codex-panel" className="fixed inset-0 flex items-center justify-center bg-black/70 backdrop-blur-sm" style={{ zIndex: Z.CODEX }}>
-            <div className="w-[760px] max-w-[calc(var(--interface-viewport-width,100vw)*0.95)] h-[calc(var(--interface-viewport-height,100vh)*0.8)] bg-[#0c0e14] border border-neutral-700/50 rounded-lg shadow-2xl flex flex-col overflow-hidden">
-                <div className="flex items-center justify-between px-3 py-1.5 border-b border-neutral-700/50 bg-[#10131a]">
-                    <div className="flex items-center gap-2.5">
-                        <div className="text-amber-400 text-[15px] font-bold tracking-[0.13em] uppercase">
-                            {t('codex.title')}
-                        </div>
-                        <div className="text-xs text-neutral-400">
+        <div
+            data-testid="codex-panel"
+            role="presentation"
+            className="fixed inset-0 bg-[#05070a]/80"
+            style={{ zIndex: Z.CODEX }}
+        >
+            <section
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="codex-panel-title"
+                className="absolute bottom-6 left-1/2 top-[4.5rem] flex w-[min(110rem,calc(100%-3rem))] -translate-x-1/2 flex-col overflow-hidden rounded-lg border border-accent-gold/35 bg-[#11141b] text-text-primary shadow-[0_30px_90px_rgba(0,0,0,0.65)]"
+            >
+                <SurfaceHeader
+                    eyebrow={dateLabel}
+                    title={<span id="codex-panel-title">{t('codex.title')}</span>}
+                    trailing={(
+                        <span className="text-[16px] text-[#b9ad94]">
                             {t(availableCount === 1 ? 'codex.essayAvailableSingular' : 'codex.essayAvailablePlural', { count: availableCount })}
-                        </div>
-                    </div>
-                    <button
-                        type="button"
-                        onClick={onClose}
-                        data-testid="codex-close"
-                        className="text-neutral-400 hover:text-neutral-200 transition-colors text-xs px-2 py-0.5"
-                    >
-                        ESC
-                    </button>
-                </div>
+                        </span>
+                    )}
+                    close={<SurfaceCloseButton onClick={onClose} data-testid="codex-close" />}
+                />
 
-                {/* Phase 3 Thread 2 "the dilemma spine" — "The Choices That Made
-                    This War". Read-only backbone of the seven keystone
-                    "impossible choice" decisions: title, faced / not-yet-faced
-                    badge, chosen branch (when faced), and a control that opens
-                    the linked codex essay. Rows with a null essayId surface the
-                    dilemma without an essay link. Renders nothing when the spine
-                    is empty/absent (flag-off / pre-Thread-2 saves). */}
-                {(liveDynamicCodex.receipts.length > 0 || liveDynamicCodex.ghosts.length > 0) && (
-                    <section
-                        data-testid="codex-live-campaign-records"
-                        className="border-b border-neutral-700/40 bg-[#0d0f16] px-3 pt-2 pb-6 max-h-44 overflow-y-auto [-webkit-mask-image:linear-gradient(to_bottom,black_calc(100%_-_1.5rem),transparent)] [mask-image:linear-gradient(to_bottom,black_calc(100%_-_1.5rem),transparent)]"
-                    >
-                        <div className="text-amber-400 text-xs font-bold tracking-[0.12em] uppercase mb-1.5">
-                            {t('codex.campaignContext.title')}
-                        </div>
-                        <ul className="space-y-2">
-                            {liveDynamicCodex.receipts.map((receipt) => (
-                                <li
-                                    key={receipt.id}
-                                    data-testid="codex-realized-receipt"
-                                    data-receipt-record-id={receipt.receiptRecordId}
-                                    data-claim-predicate={receipt.claimPredicate.expression}
-                                    data-claim-owner-paths={receipt.claimPredicate.owner_paths.join('|')}
-                                    className="text-xs leading-relaxed text-neutral-300"
-                                >
-                                    <div className="font-semibold text-neutral-200">
-                                        {t('chronicle.generated.consequence.title', {
-                                            predictedLabel: receipt.predictedLabel,
-                                        })}
-                                    </div>
-                                    <div className="mt-1 text-neutral-400">
-                                        {t('chronicle.generated.consequence.detail', {
-                                            decisionOptionLabel: receipt.decisionOptionLabel,
-                                            date: turnToDateString(receipt.decisionTurn),
-                                        })}
-                                    </div>
-                                </li>
-                            ))}
-                            {liveDynamicCodex.ghosts.map((ghost) => {
-                                const prose = resolveGhostEntryProse(ghost.ghost_id, locale);
-                                const proseBlocks = prose === null
-                                    ? []
-                                    : parseGhostEntryProse(prose, ghost.classification);
-                                const headingIndex = proseBlocks.findIndex((block) => block.kind === 'heading');
-                                const rowTitle = headingIndex >= 0
-                                    ? proseBlocks[headingIndex].text
-                                    : t('chronicle.card.ghost');
-                                const bodyBlocks = headingIndex >= 0
-                                    ? proseBlocks.filter((_block, index) => index !== headingIndex)
-                                    : proseBlocks;
-                                return (
-                                    <li
-                                        key={ghost.ghost_id}
-                                        data-testid="codex-live-ghost"
-                                        data-ghost-id={ghost.ghost_id}
-                                        data-ghost-classification={ghost.classification}
-                                        data-claim-predicate={ghost.claim_predicate.expression}
-                                        data-claim-owner-paths={ghost.claim_predicate.owner_paths.join('|')}
-                                        className="text-xs leading-relaxed text-neutral-300"
-                                    >
-                                        <div className="font-semibold text-neutral-200">
-                                            {rowTitle}
-                                        </div>
-                                        <div className="text-[12px] uppercase tracking-[0.1em] text-neutral-500">
-                                            {ghostClassificationLabel(ghost.classification)}
-                                        </div>
-                                        {bodyBlocks.length > 0 && (
-                                            <div data-testid="codex-live-ghost-prose" className="mt-1 space-y-1 text-neutral-400">
-                                                {bodyBlocks.map((block, index) => block.kind === 'heading' ? (
-                                                    <div key={index} className="font-semibold text-neutral-300">
-                                                        {block.text}
-                                                    </div>
-                                                ) : (
-                                                    <p key={index}>{block.text}</p>
-                                                ))}
-                                            </div>
-                                        )}
-                                    </li>
-                                );
-                            })}
-                        </ul>
-                    </section>
-                )}
-
-                {visibleDilemmaSpine.length > 0 && (
-                    <div
-                        data-testid="codex-dilemma-spine-section"
-                        className="border-b border-neutral-700/40 bg-[#0d0f16] px-3 py-2"
-                    >
-                        <div className="text-amber-400 text-xs font-bold tracking-[0.12em] uppercase mb-1.5">
-                            {t('codex.dilemmaSpine.title')}
-                        </div>
-                        <ul className="space-y-1">
-                            {visibleDilemmaSpine.map((dilemma) => {
-                                const essayUnlocked = dilemma.essayId
-                                    ? Boolean(resolvedEssays.get(dilemma.essayId)?.isUnlocked)
-                                    : false;
-                                return (
-                                    <li
-                                        key={dilemma.dilemmaId}
-                                        data-testid="codex-dilemma-row"
-                                        data-dilemma-id={dilemma.dilemmaId}
-                                        data-faced={dilemma.faced ? 'true' : 'false'}
-                                        className="flex items-start gap-2 text-xs leading-snug"
-                                    >
-                                        <span
-                                            data-testid="codex-dilemma-faced-badge"
-                                            className={`mt-[1px] shrink-0 px-1 py-0.5 rounded text-xs leading-none font-bold uppercase tracking-[0.1em] ${
-                                                dilemma.faced
-                                                    ? 'bg-amber-400/15 text-amber-400'
-                                                    : 'bg-neutral-500/15 text-neutral-400'
-                                            }`}
-                                        >
-                                            {dilemma.faced ? t('codex.dilemma.faced') : t('codex.dilemma.notYet')}
-                                        </span>
-                                        <div className="flex-1 min-w-0">
-                                            <div className="text-neutral-200">{dilemma.title}</div>
-                                            {dilemma.faced && dilemma.chosenBranchLabel && (
-                                                <div
-                                                    data-testid="codex-dilemma-branch"
-                                                    className="text-neutral-400 text-xs mt-0.5"
-                                                >
-                                                    {t('codex.dilemma.chose', { choice: dilemma.chosenBranchLabel })}
-                                                    {dilemma.decisionTurn !== null && (
-                                                        <span className="text-neutral-400"> ({turnToDateString(dilemma.decisionTurn)})</span>
-                                                    )}
-                                                </div>
-                                            )}
-                                        </div>
-                                        {dilemma.essayId ? (
-                                            <button
-                                                type="button"
-                                                data-testid="codex-dilemma-essay-link"
-                                                disabled={!essayUnlocked}
-                                                onClick={() => {
-                                                    const essay = essays.find((e) => e.id === dilemma.essayId);
-                                                    if (essay) setExpandedYear(essay.year);
-                                                    setSelectedEssayId(dilemma.essayId);
-                                                }}
-                                                className={`shrink-0 text-xs uppercase tracking-[0.1em] px-1.5 py-0.5 rounded transition-colors ${
-                                                    essayUnlocked
-                                                        ? 'text-amber-400 hover:bg-amber-400/10'
-                                                        : 'text-neutral-400 cursor-default'
-                                                }`}
-                                            >
-                                                {essayUnlocked ? t('codex.dilemma.readEssay') : t('codex.dilemma.locked')}
-                                            </button>
-                                        ) : (
-                                            <span
-                                                data-testid="codex-dilemma-no-essay"
-                                                className="shrink-0 text-xs uppercase tracking-[0.1em] text-neutral-400 px-1.5 py-0.5"
-                                            >
-                                                {t('codex.dilemma.noEssay')}
-                                            </span>
-                                        )}
-                                    </li>
-                                );
-                            })}
-                        </ul>
-                    </div>
-                )}
-
-                {/* Distance-from-history v1 — "Your War vs History". Read-only
-                    summary of how far the player's emergent war has drifted from
-                    the historical 1992-95, measured as event-decision divergence.
-                    The player-authored divergence count is led. Renders nothing
-                    when the read-model is absent OR no decisions have a historical
-                    default to compare against (totalDecided === 0). */}
-                {distanceFromHistory && distanceFromHistory.totalDecided > 0 && (
-                    <div
-                        data-testid="codex-distance-from-history-section"
-                        className="border-b border-neutral-700/40 bg-[#0d0f16] px-3 py-2"
-                    >
-                        <div className="text-amber-400 text-xs font-bold tracking-[0.12em] uppercase mb-1">
-                            {t('codex.distance.title')}
-                        </div>
-                        <div
-                            data-testid="codex-distance-from-history-summary"
-                            className="text-xs text-neutral-300 mb-1.5"
-                        >
-                            <span className="text-amber-400 font-bold">
-                                {t(
-                                    distanceFromHistory.playerDiverged === 1
-                                        ? 'codex.distance.playerDeparture.one'
-                                        : 'codex.distance.playerDeparture.many',
-                                    { count: distanceFromHistory.playerDiverged },
-                                )}
-                            </span>
-                            {' '}
-                            <span className="text-neutral-400">
-                                {t(
-                                    distanceFromHistory.totalDecided === 1
-                                        ? 'codex.distance.totalDivergence.one'
-                                        : 'codex.distance.totalDivergence.many',
-                                    {
-                                        diverged: distanceFromHistory.diverged,
-                                        total: distanceFromHistory.totalDecided,
-                                        pct: distanceFromHistory.divergencePct,
-                                    },
-                                )}
-                            </span>
-                        </div>
-                        {distanceFromHistory.divergences.length > 0 && (
-                            <ul className="space-y-0.5">
-                                {distanceFromHistory.divergences.map((d) => (
-                                    <li
-                                        key={d.eventId}
-                                        data-testid="codex-distance-from-history-row"
-                                        data-event-id={d.eventId}
-                                        data-source={d.source}
-                                        className="flex items-start gap-2 text-xs leading-snug"
-                                    >
-                                        <span className="text-neutral-600 shrink-0">{turnToDateString(d.turn)}</span>
-                                        <div className="flex-1 min-w-0">
-                                            <span className="text-neutral-200">{d.title}</span>
-                                            <span className="text-neutral-500">
-                                                {' '}{t('codex.distance.rowChoicePrefix')}{' '}
-                                                <span className="text-neutral-300">{d.chosen}</span>
-                                                {' '}{t('codex.distance.rowHistory', { historical: d.historical })}
-                                            </span>
-                                        </div>
-                                        {d.source === 'player' && (
-                                            <span
-                                                data-testid="codex-distance-from-history-player-badge"
-                                                className="shrink-0 text-xs font-bold uppercase tracking-[0.1em] px-1 py-0.5 rounded bg-amber-400/15 text-amber-400"
-                                            >
-                                                {t('codex.distance.yours')}
-                                            </span>
-                                        )}
-                                    </li>
-                                ))}
-                            </ul>
-                        )}
-                    </div>
-                )}
-
-                {/* Phase H Packet 5 (Component C) — Unlock State section.
-                    Renders only when BOTH `state` and `eventCatalog` props
-                    were provided. Pure data display: aggregate headline +
-                    three sub-lists (fired / enabled-but-not-fired /
-                    closed). Sub-list rows capped at
-                    UNLOCK_STATE_MAX_ROWS_PER_LIST; the section heading
-                    always shows the full count. Developer diagnostic ONLY:
-                    gated behind the dedicated `diagMode` store flag (explicit
-                    `?diag=1` opt-in) so the raw internal event IDs never leak
-                    into the player-facing Codex — hidden by default for players
-                    AND for dev:map playtesters (dev:map runs with generic dev
-                    mode auto-enabled, which deliberately does NOT include this
-                    diagnostics surface). */}
-                {unlockState && diagMode && (
-                    <div
-                        data-testid="codex-unlock-state-section"
-                        className="border-b border-neutral-700/40 bg-[#0d0f16] px-3 py-2"
-                    >
-                        <div className="text-amber-400 text-xs font-bold tracking-[0.12em] uppercase mb-1">
-                            Unlock State
-                        </div>
-                        <div
-                            data-testid="codex-unlock-state-summary"
-                            className="text-xs text-neutral-400 mb-2"
-                        >
-                            Foundational: {unlockState.summary.foundational_count}
-                            {' | '}Fired downstream: {unlockState.summary.downstream_fired_count}
-                            {' | '}Closed: {unlockState.summary.closed_count}
-                            {' | '}Max depth: {unlockState.summary.max_depth}
-                        </div>
-                        <div className="flex gap-3">
-                            <div
-                                data-testid="codex-unlock-fired-list"
-                                className="flex-1"
-                            >
-                                <div className="text-xs uppercase tracking-[0.1em] text-neutral-500 mb-0.5">
-                                    Fired ({unlockState.fired.length})
-                                </div>
-                                <ul className="space-y-0.5">
-                                    {unlockState.fired.slice(0, UNLOCK_STATE_MAX_ROWS_PER_LIST).map((id) => {
-                                        const meta = formatUnlockRow(id, eventCatalog!);
-                                        return (
-                                            <li
-                                                key={id}
-                                                data-testid="codex-unlock-fired-row"
-                                                data-event-id={id}
-                                                className="text-xs text-neutral-300 leading-snug"
-                                            >
-                                                <span>{id}</span>
-                                                {' '}
-                                                <span className="text-neutral-500">[family={meta.family}]</span>
-                                                {' '}
-                                                <span className="text-neutral-500">[source={meta.sourceTier}]</span>
-                                            </li>
-                                        );
-                                    })}
-                                </ul>
-                            </div>
-                            <div
-                                data-testid="codex-unlock-enabled-list"
-                                className="flex-1"
-                            >
-                                <div className="text-xs uppercase tracking-[0.1em] text-neutral-500 mb-0.5">
-                                    Enabled (pending) ({unlockState.enabled.length})
-                                </div>
-                                <ul className="space-y-0.5">
-                                    {unlockState.enabled.slice(0, UNLOCK_STATE_MAX_ROWS_PER_LIST).map((id) => {
-                                        const meta = formatUnlockRow(id, eventCatalog!);
-                                        return (
-                                            <li
-                                                key={id}
-                                                data-testid="codex-unlock-enabled-row"
-                                                data-event-id={id}
-                                                className="text-xs text-neutral-300 leading-snug"
-                                            >
-                                                <span>{id}</span>
-                                                {' '}
-                                                <span className="text-neutral-500">[family={meta.family}]</span>
-                                                {' '}
-                                                <span className="text-neutral-500">[source={meta.sourceTier}]</span>
-                                            </li>
-                                        );
-                                    })}
-                                </ul>
-                            </div>
-                            <div
-                                data-testid="codex-unlock-closed-list"
-                                className="flex-1"
-                            >
-                                <div className="text-xs uppercase tracking-[0.1em] text-neutral-500 mb-0.5">
-                                    Closed ({unlockState.closed.length})
-                                </div>
-                                <ul className="space-y-0.5">
-                                    {unlockState.closed.slice(0, UNLOCK_STATE_MAX_ROWS_PER_LIST).map((id) => {
-                                        const meta = formatUnlockRow(id, eventCatalog!);
-                                        return (
-                                            <li
-                                                key={id}
-                                                data-testid="codex-unlock-closed-row"
-                                                data-event-id={id}
-                                                className="text-xs text-neutral-300 leading-snug"
-                                            >
-                                                <span>{id}</span>
-                                                {' '}
-                                                <span className="text-neutral-500">[family={meta.family}]</span>
-                                                {' '}
-                                                <span className="text-neutral-500">[source={meta.sourceTier}]</span>
-                                            </li>
-                                        );
-                                    })}
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                )}
-
-                <div className="flex flex-1 min-h-0">
-                    <div className="w-[220px] border-r border-neutral-700/30 overflow-y-auto bg-[#0d0f16]">
+                <SurfaceColumns layout={hasSideColumn ? 'rail-content-detail' : 'rail-content'}>
+                    <SurfaceRail aria-label={t('codex.title')} className="gap-1">
                         {YEARS.map((year) => {
                             const yearRows = rowsByYear.get(year) ?? [];
                             if (yearRows.length === 0) return null;
@@ -710,16 +386,19 @@ export function CodexPanel({ isOpen, onClose, requestedEventId, eventCatalog, st
                             const unlockedCount = yearRows.filter((row) => row.unlocked).length;
 
                             return (
-                                <div key={year}>
+                                <div key={year} className="flex flex-col gap-1">
                                     <button
                                         type="button"
                                         onClick={() => setExpandedYear(isExpanded ? null : year)}
-                                        className="w-full flex items-center justify-between px-2.5 py-1 text-left hover:bg-white/5 transition-colors border-b border-neutral-800/50"
+                                        aria-expanded={isExpanded}
+                                        className={`flex w-full items-center justify-between rounded-md border px-3.5 py-2.5 text-left transition ${
+                                            isExpanded ? 'border-[#3a4150] bg-[#171b23]' : 'border-transparent hover:border-[#3a4150] hover:bg-[#171b23]'
+                                        }`}
                                     >
-                                        <span className="text-xs font-bold text-neutral-300 tracking-[0.08em]">
+                                        <span className="font-mono text-[18px] font-semibold tracking-[0.08em] text-[#f1e6c8]">
                                             {year}
                                         </span>
-                                        <span className="text-xs text-neutral-500">
+                                        <span className="inline-flex h-7 min-w-7 items-center justify-center rounded-full bg-[#262b35] px-2 font-mono text-[14px] font-semibold text-[#e2d6b8]">
                                             {unlockedCount}
                                         </span>
                                     </button>
@@ -732,12 +411,12 @@ export function CodexPanel({ isOpen, onClose, requestedEventId, eventCatalog, st
                                         const showTierHeader = rowIndex === 0 || yearRows[rowIndex - 1].tier !== row.tier;
 
                                         return (
-                                            <div key={essay.id}>
+                                            <div key={essay.id} className="flex flex-col">
                                                 {showTierHeader && (
                                                     <div
                                                         data-testid="codex-tier-header"
                                                         data-tier={row.tier}
-                                                        className="px-2.5 pt-1.5 pb-0.5 text-xs font-bold uppercase tracking-[0.14em] text-neutral-400 bg-[#0b0d13]"
+                                                        className={`px-3.5 pb-1.5 pt-3 ${SURFACE_LABEL_MUTED}`}
                                                     >
                                                         {tierLabel(row.tier)}
                                                     </div>
@@ -746,36 +425,37 @@ export function CodexPanel({ isOpen, onClose, requestedEventId, eventCatalog, st
                                                     type="button"
                                                     onClick={() => { if (row.unlocked) setSelectedEssayId(essay.id); }}
                                                     disabled={!row.unlocked}
+                                                    aria-pressed={isSelected}
                                                     data-testid="codex-essay-row"
                                                     data-essay-id={essay.id}
                                                     data-essay-year={essay.year}
                                                     data-awwv-codex-state={row.unlocked ? (ghost ? 'ghost' : 'unlocked') : 'locked-hint'}
                                                     data-tier={row.tier}
                                                     data-selected={isSelected ? 'true' : 'false'}
-                                                    className={`w-full text-left px-2.5 py-1.5 border-b border-neutral-800/30 transition-all ${
+                                                    className={`w-full rounded-md border px-3.5 py-3 text-left transition ${
                                                         !row.unlocked
-                                                            ? 'opacity-50 cursor-default border-l-2 border-l-transparent'
+                                                            ? 'cursor-default border-transparent opacity-60'
                                                             : isSelected
-                                                                ? 'bg-amber-400/10 border-l-2 border-l-amber-400'
-                                                                : 'hover:bg-white/3 border-l-2 border-l-transparent'
+                                                                ? 'border-[#c9a75c] bg-[#232936]'
+                                                                : 'border-transparent hover:border-[#3a4150] hover:bg-[#171b23]'
                                                     }`}
                                                 >
                                                     <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mb-0.5">
                                                         <CategoryBadge category={resolved?.category ?? essay.category} />
                                                         <TierBadge tier={row.tier} />
                                                         {ghost && (
-                                                            <span className="text-xs text-amber-500 uppercase tracking-wider">
+                                                            <span className="font-mono text-[13px] font-semibold uppercase tracking-[0.1em] text-amber-200">
                                                                 {t('codex.ghost')}
                                                             </span>
                                                         )}
                                                     </div>
-                                                    <div className={`text-xs leading-snug ${row.unlocked ? 'text-neutral-200' : 'text-neutral-400'}`}>
+                                                    <div className={`pt-1.5 text-[17px] font-semibold leading-snug ${row.unlocked ? 'text-[#f1e6c8]' : 'text-[#b9ad94]'}`}>
                                                         {row.unlocked ? (resolved?.title ?? essay.title) : t('codex.lockedHistoricalEntry')}
                                                     </div>
                                                     {!row.unlocked && row.hint && (
                                                         <div
                                                             data-testid="codex-unlock-hint"
-                                                            className="text-xs text-neutral-500 italic mt-0.5"
+                                                            className="pt-1 text-[15px] italic text-[#9c917b]"
                                                         >
                                                             {row.hint}
                                                         </div>
@@ -787,114 +467,463 @@ export function CodexPanel({ isOpen, onClose, requestedEventId, eventCatalog, st
                                 </div>
                             );
                         })}
-                    </div>
+                    </SurfaceRail>
 
-                    <div className="flex-1 overflow-y-auto p-2.5">
+                    <SurfaceContent>
                         {!selectedEssay ? (
-                            <div className="flex items-center justify-center h-full">
-                                <div className="text-center">
-                                    <div className="text-neutral-400 text-[13px] mb-2">{t('codex.selectEssay')}</div>
-                                    <div className="text-neutral-400 text-xs max-w-[260px]">
-                                        {t('codex.selectEssayHelp')}
-                                    </div>
-                                </div>
-                            </div>
+                            <SurfaceEmpty centered title={t('codex.selectEssay')} body={t('codex.selectEssayHelp')} />
                         ) : !selectedResolvedEssay?.isUnlocked ? (
-                            <div className="flex items-center justify-center h-full">
-                                <div className="text-center">
-                                    <div className="text-neutral-400 text-[13px] mb-2">{selectedResolvedEssay?.title ?? selectedEssay.title}</div>
-                                    <div className="text-xs text-neutral-400 border border-neutral-700/30 rounded-md px-2.5 py-2 bg-neutral-800/20 max-w-[300px]">
-                                        {t('codex.lockedHelp')}
-                                    </div>
-                                </div>
-                            </div>
+                            <SurfaceEmpty centered title={selectedResolvedEssay?.title ?? selectedEssay.title} body={t('codex.lockedHelp')} />
                         ) : (
-                            <div
-                                className="bg-paper paper-grain border border-neutral-400/60 rounded-lg shadow-md relative overflow-hidden max-w-[560px] mx-auto"
-                                data-testid="codex-selected-essay"
-                                data-essay-id={selectedEssay.id}
-                                data-essay-year={selectedEssay.year}
-                                data-codex-state={selectedResolvedEssay.isGhost ? 'ghost' : 'unlocked'}
-                            >
-                                <div className="absolute top-2.5 right-3.5 opacity-[0.06] font-black text-[22px] -rotate-12 select-none uppercase text-neutral-800 pointer-events-none">
-                                    {t('codex.title')}
-                                </div>
+                            <div className="px-8 py-8">
+                                <div
+                                    className="bg-paper paper-grain relative mx-auto max-w-[50rem] overflow-hidden rounded-lg border border-neutral-400/60 shadow-md"
+                                    data-testid="codex-selected-essay"
+                                    data-essay-id={selectedEssay.id}
+                                    data-essay-year={selectedEssay.year}
+                                    data-codex-state={selectedResolvedEssay.isGhost ? 'ghost' : 'unlocked'}
+                                >
+                                    <div className="pointer-events-none absolute right-5 top-4 -rotate-12 select-none text-[28px] font-black uppercase text-neutral-800 opacity-[0.06]">
+                                        {t('codex.title')}
+                                    </div>
 
-                                <div className="px-3 py-1.5 border-b border-neutral-500/30 bg-black/5 rounded-t-lg">
-                                    <div className="flex items-center gap-2 mb-1">
-                                        <CategoryBadge category={selectedResolvedEssay.category} />
-                                        <span className="text-xs uppercase text-neutral-600 tracking-[0.15em]">
-                                            {selectedEssay.year}
-                                        </span>
-                                        {selectedResolvedEssay.isGhost && (
-                                            <span className="text-xs uppercase text-amber-700 tracking-[0.15em] font-bold">
-                                                {t('codex.ghostEntry')}
+                                    <div className="flex flex-col gap-2 border-b border-neutral-500/30 bg-black/5 px-8 pb-5 pt-6">
+                                        <div className="flex flex-wrap items-center gap-3">
+                                            <CategoryBadge category={selectedResolvedEssay.category} onPaper />
+                                            <span className="font-mono text-[14px] font-semibold uppercase tracking-[0.15em] text-neutral-800">
+                                                {selectedEssay.year}
                                             </span>
+                                            {selectedResolvedEssay.isGhost && (
+                                                <span className="font-mono text-[14px] font-bold uppercase tracking-[0.15em] text-amber-900">
+                                                    {t('codex.ghostEntry')}
+                                                </span>
+                                            )}
+                                        </div>
+                                        <h3 className="m-0 text-[28px] font-bold leading-tight text-neutral-900" style={{ fontFamily: 'var(--font-command)' }}>
+                                            {selectedResolvedEssay.title}
+                                        </h3>
+                                        <div className="text-[16px] italic text-neutral-800">
+                                            {selectedResolvedEssay.isGhost ? t('codex.historicalGhostEntry') : t('codex.historicalContext')}
+                                        </div>
+                                    </div>
+
+                                    <div
+                                        className="px-8 py-6"
+                                        data-testid="codex-selected-essay-body"
+                                        data-awwv-codex-selected-state={selectedResolvedEssay.isGhost ? 'ghost' : 'unlocked'}
+                                    >
+                                        {selectedResolvedEssay.paragraphs.length > 0 ? (
+                                            <div className="flex flex-col gap-4 text-[18px] leading-relaxed text-neutral-900" style={{ fontFamily: 'var(--font-command)' }}>
+                                                {selectedResolvedEssay.paragraphs.map((paragraph, index) => (
+                                                    paragraph.kind === 'canonical' ? (
+                                                        <p key={index} className="m-0">{paragraph.text}</p>
+                                                    ) : (
+                                                        <div
+                                                            key={index}
+                                                            className={`rounded border-l-4 px-4 py-3 ${
+                                                                paragraph.kind === 'ghost'
+                                                                    ? 'border-l-amber-700 bg-amber-100/70 italic text-neutral-900'
+                                                                    : 'border-l-slate-500 bg-slate-100/60 text-neutral-900'
+                                                            }`}
+                                                        >
+                                                            <div className="mb-1.5 font-mono text-[13px] font-bold uppercase tracking-[0.15em] text-neutral-800">
+                                                                {paragraph.kind === 'ghost'
+                                                                    ? t('codex.historicalGhost')
+                                                                    : paragraph.variant === 'divergence'
+                                                                        ? t('codex.playerWarDivergence')
+                                                                        : t('codex.dynamicNote')}
+                                                            </div>
+                                                            <p className="m-0">{paragraph.text}</p>
+                                                        </div>
+                                                    )
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <div className="py-3 text-center text-[17px] italic text-neutral-800" style={{ fontFamily: 'var(--font-command)' }}>
+                                                {t('codex.contentPending')}
+                                            </div>
                                         )}
                                     </div>
-                                    <div className="text-[12px] font-bold text-neutral-800 leading-tight" style={{ fontFamily: 'var(--font-command)' }}>
-                                        {selectedResolvedEssay.title}
-                                    </div>
-                                    <div className="text-xs text-neutral-600 mt-1 italic">
-                                        {selectedResolvedEssay.isGhost ? t('codex.historicalGhostEntry') : t('codex.historicalContext')}
-                                    </div>
-                                </div>
 
-                                <div
-                                    className="px-3 py-2.5"
-                                    data-testid="codex-selected-essay-body"
-                                    data-awwv-codex-selected-state={selectedResolvedEssay.isGhost ? 'ghost' : 'unlocked'}
-                                >
-                                    {selectedResolvedEssay.paragraphs.length > 0 ? (
-                                        <div className="text-xs text-neutral-700 leading-relaxed" style={{ fontFamily: 'var(--font-command)' }}>
-                                            {selectedResolvedEssay.paragraphs.map((paragraph, index) => (
-                                                paragraph.kind === 'canonical' ? (
-                                                    <p key={index} className="mb-2 last:mb-0">{paragraph.text}</p>
-                                                ) : (
-                                                    <div
-                                                        key={index}
-                                                        className={`mb-2 last:mb-0 rounded border-l-2 px-2 py-1.5 ${
-                                                            paragraph.kind === 'ghost'
-                                                                ? 'border-l-amber-700 bg-amber-100/70 text-neutral-800 italic'
-                                                                : 'border-l-slate-500 bg-slate-100/60 text-neutral-700'
-                                                        }`}
-                                                    >
-                                                        <div className="text-xs uppercase tracking-[0.15em] font-bold mb-1 text-neutral-600">
-                                                            {paragraph.kind === 'ghost'
-                                                                ? t('codex.historicalGhost')
-                                                                : paragraph.variant === 'divergence'
-                                                                    ? t('codex.playerWarDivergence')
-                                                                    : t('codex.dynamicNote')}
-                                                        </div>
-                                                        <p>{paragraph.text}</p>
-                                                    </div>
-                                                )
-                                            ))}
-                                        </div>
-                                    ) : (
-                                        <div className="text-xs text-neutral-400 italic text-center py-3" style={{ fontFamily: 'var(--font-command)' }}>
-                                            {t('codex.contentPending')}
+                                    {selectedResolvedEssay.sources && selectedResolvedEssay.sources.length > 0 && (
+                                        <div className="border-t border-neutral-500/30 bg-black/5 px-8 py-5">
+                                            <div className="mb-2 font-mono text-[13px] font-bold uppercase tracking-[0.15em] text-neutral-800">
+                                                {t('codex.sources')}
+                                            </div>
+                                            <ul className="m-0 flex list-none flex-col gap-1 p-0 text-[15px] text-neutral-800">
+                                                {selectedResolvedEssay.sources.map((src, index) => (
+                                                    <li key={index} className="leading-snug">{src}</li>
+                                                ))}
+                                            </ul>
                                         </div>
                                     )}
                                 </div>
+                            </div>
+                        )}
+                    </SurfaceContent>
 
-                                {selectedResolvedEssay.sources && selectedResolvedEssay.sources.length > 0 && (
-                                    <div className="px-3 py-1.5 border-t bg-black/5 border-neutral-500/30 rounded-b-lg">
-                                        <div className="text-xs uppercase text-neutral-600 font-bold tracking-[0.15em] mb-1">
-                                            {t('codex.sources')}
-                                        </div>
-                                        <ul className="text-xs text-neutral-500 space-y-0.5">
-                                            {selectedResolvedEssay.sources.map((src, index) => (
-                                                <li key={index} className="leading-snug">{src}</li>
+                    {hasSideColumn && (
+                        <SurfaceDetail aria-label={t('codex.campaignContext.title')}>
+                            <div className="flex min-h-0 flex-1 flex-col gap-7 overflow-y-auto px-7 py-6">
+                                {/* Live campaign records: realized consequences and campaign-context
+                                    ghost records of this campaign. Rendered verbatim. */}
+                                {hasLiveRecords && (
+                                    <section
+                                        data-testid="codex-live-campaign-records"
+                                        aria-label={t('codex.campaignContext.title')}
+                                        className="flex flex-col gap-3"
+                                    >
+                                        <h4 className={`m-0 ${SURFACE_LABEL}`}>
+                                            {t('codex.campaignContext.title')}
+                                        </h4>
+                                        <ul className="m-0 flex list-none flex-col gap-3 p-0">
+                                            {liveDynamicCodex.receipts.map((receipt) => (
+                                                <li
+                                                    key={receipt.id}
+                                                    data-testid="codex-realized-receipt"
+                                                    data-receipt-record-id={receipt.receiptRecordId}
+                                                    data-claim-predicate={receipt.claimPredicate.expression}
+                                                    data-claim-owner-paths={receipt.claimPredicate.owner_paths.join('|')}
+                                                    className="flex flex-col gap-1.5 rounded-md border border-[#2a303c] bg-[#161a22] px-5 py-4 text-[16px] leading-relaxed text-[#c2b69c]"
+                                                >
+                                                    <div className="text-[17px] font-semibold text-[#f1e6c8]">
+                                                        {t('chronicle.generated.consequence.title', {
+                                                            predictedLabel: receipt.predictedLabel,
+                                                        })}
+                                                    </div>
+                                                    <div>
+                                                        {t('chronicle.generated.consequence.detail', {
+                                                            decisionOptionLabel: receipt.decisionOptionLabel,
+                                                            date: turnToDateString(receipt.decisionTurn),
+                                                        })}
+                                                    </div>
+                                                </li>
                                             ))}
+                                            {liveDynamicCodex.ghosts.map((ghost) => {
+                                                const prose = resolveGhostEntryProse(ghost.ghost_id, locale);
+                                                const proseBlocks = prose === null
+                                                    ? []
+                                                    : parseGhostEntryProse(prose, ghost.classification);
+                                                const headingIndex = proseBlocks.findIndex((block) => block.kind === 'heading');
+                                                const rowTitle = headingIndex >= 0
+                                                    ? proseBlocks[headingIndex].text
+                                                    : t('chronicle.card.ghost');
+                                                const bodyBlocks = headingIndex >= 0
+                                                    ? proseBlocks.filter((_block, index) => index !== headingIndex)
+                                                    : proseBlocks;
+                                                return (
+                                                    <li
+                                                        key={ghost.ghost_id}
+                                                        data-testid="codex-live-ghost"
+                                                        data-ghost-id={ghost.ghost_id}
+                                                        data-ghost-classification={ghost.classification}
+                                                        data-claim-predicate={ghost.claim_predicate.expression}
+                                                        data-claim-owner-paths={ghost.claim_predicate.owner_paths.join('|')}
+                                                        className="flex flex-col gap-1.5 rounded-md border border-[#2a303c] bg-[#161a22] px-5 py-4 text-[16px] leading-relaxed text-[#c2b69c]"
+                                                    >
+                                                        <div className="text-[17px] font-semibold text-[#f1e6c8]">
+                                                            {rowTitle}
+                                                        </div>
+                                                        <div className={SURFACE_LABEL_MUTED}>
+                                                            {ghostClassificationLabel(ghost.classification)}
+                                                        </div>
+                                                        {bodyBlocks.length > 0 && (
+                                                            <div data-testid="codex-live-ghost-prose" className="flex flex-col gap-2 pt-1 text-[#ddd1b3]">
+                                                                {bodyBlocks.map((block, index) => block.kind === 'heading' ? (
+                                                                    <div key={index} className="font-semibold text-[#f1e6c8]">
+                                                                        {block.text}
+                                                                    </div>
+                                                                ) : (
+                                                                    <p key={index} className="m-0">{block.text}</p>
+                                                                ))}
+                                                            </div>
+                                                        )}
+                                                    </li>
+                                                );
+                                            })}
+                                        </ul>
+                                    </section>
+                                )}
+
+                                {/* Phase 3 Thread 2 "the dilemma spine" — "The Choices That Made
+                                    This War". Read-only backbone of the seven keystone
+                                    "impossible choice" decisions: title, faced / not-yet-faced
+                                    badge, chosen branch (when faced), and a control that opens
+                                    the linked codex essay. Rows with a null essayId surface the
+                                    dilemma without an essay link. Renders nothing when the spine
+                                    is empty/absent (flag-off / pre-Thread-2 saves). */}
+                                {visibleDilemmaSpine.length > 0 && (
+                                    <div
+                                        data-testid="codex-dilemma-spine-section"
+                                        className="flex flex-col gap-3"
+                                    >
+                                        <h4 className={`m-0 ${SURFACE_LABEL}`}>
+                                            {t('codex.dilemmaSpine.title')}
+                                        </h4>
+                                        <ul className="m-0 flex list-none flex-col gap-2 p-0">
+                                            {visibleDilemmaSpine.map((dilemma) => {
+                                                const essayUnlocked = dilemma.essayId
+                                                    ? Boolean(resolvedEssays.get(dilemma.essayId)?.isUnlocked)
+                                                    : false;
+                                                return (
+                                                    <li
+                                                        key={dilemma.dilemmaId}
+                                                        data-testid="codex-dilemma-row"
+                                                        data-dilemma-id={dilemma.dilemmaId}
+                                                        data-faced={dilemma.faced ? 'true' : 'false'}
+                                                        className="flex flex-col gap-2 rounded-md border border-[#2a303c] bg-[#161a22] px-4 py-3.5 text-[16px] leading-snug"
+                                                    >
+                                                        <div className="flex items-start justify-between gap-3">
+                                                            <div className="min-w-0 flex-1 text-[17px] font-semibold text-[#f1e6c8]">{dilemma.title}</div>
+                                                            <span
+                                                                data-testid="codex-dilemma-faced-badge"
+                                                                className={`shrink-0 whitespace-nowrap border px-2.5 py-1 font-mono rounded text-[13px] leading-none font-bold uppercase tracking-[0.1em] ${
+                                                                    dilemma.faced
+                                                                        ? 'border-amber-300/50 text-amber-200'
+                                                                        : 'border-[#3a4150] text-[#b9ad94]'
+                                                                }`}
+                                                            >
+                                                                {dilemma.faced ? t('codex.dilemma.faced') : t('codex.dilemma.notYet')}
+                                                            </span>
+                                                        </div>
+                                                        {dilemma.faced && dilemma.chosenBranchLabel && (
+                                                            <div
+                                                                data-testid="codex-dilemma-branch"
+                                                                className="text-[15px] text-[#c2b69c]"
+                                                            >
+                                                                {t('codex.dilemma.chose', { choice: dilemma.chosenBranchLabel })}
+                                                                {dilemma.decisionTurn !== null && (
+                                                                    <span className="text-[#9c917b]"> ({turnToDateString(dilemma.decisionTurn)})</span>
+                                                                )}
+                                                            </div>
+                                                        )}
+                                                        {dilemma.essayId ? (
+                                                            <button
+                                                                type="button"
+                                                                data-testid="codex-dilemma-essay-link"
+                                                                disabled={!essayUnlocked}
+                                                                onClick={() => {
+                                                                    const essay = essays.find((e) => e.id === dilemma.essayId);
+                                                                    if (essay) setExpandedYear(essay.year);
+                                                                    setSelectedEssayId(dilemma.essayId);
+                                                                }}
+                                                                className={`self-start rounded border px-3 py-1.5 text-[15px] font-semibold transition ${
+                                                                    essayUnlocked
+                                                                        ? 'border-[#3a4150] bg-[#1b2029] text-[#e8dcbc] hover:border-accent-gold/60 hover:text-accent-gold'
+                                                                        : 'cursor-default border-transparent text-[#9c917b]'
+                                                                }`}
+                                                            >
+                                                                {essayUnlocked ? t('codex.dilemma.readEssay') : t('codex.dilemma.locked')}
+                                                            </button>
+                                                        ) : (
+                                                            <span
+                                                                data-testid="codex-dilemma-no-essay"
+                                                                className="text-[15px] text-[#9c917b]"
+                                                            >
+                                                                {t('codex.dilemma.noEssay')}
+                                                            </span>
+                                                        )}
+                                                    </li>
+                                                );
+                                            })}
                                         </ul>
                                     </div>
                                 )}
+
+                                {/* Distance-from-history v1 — "Your War vs History". Read-only
+                                    summary of how far the player's emergent war has drifted from
+                                    the historical 1992-95, measured as event-decision divergence.
+                                    The player-authored divergence count is led. Renders nothing
+                                    when the read-model is absent OR no decisions have a historical
+                                    default to compare against (totalDecided === 0). */}
+                                {distanceFromHistory && distanceFromHistory.totalDecided > 0 && (
+                                    <div
+                                        data-testid="codex-distance-from-history-section"
+                                        className="flex flex-col gap-3"
+                                    >
+                                        <h4 className={`m-0 ${SURFACE_LABEL}`}>
+                                            {t('codex.distance.title')}
+                                        </h4>
+                                        <div
+                                            data-testid="codex-distance-from-history-summary"
+                                            className="text-[16px] leading-relaxed text-[#ddd1b3]"
+                                        >
+                                            <span className="font-semibold text-[#e0c27a]">
+                                                {t(
+                                                    distanceFromHistory.playerDiverged === 1
+                                                        ? 'codex.distance.playerDeparture.one'
+                                                        : 'codex.distance.playerDeparture.many',
+                                                    { count: distanceFromHistory.playerDiverged },
+                                                )}
+                                            </span>
+                                            {' '}
+                                            <span className="text-[#c2b69c]">
+                                                {t(
+                                                    distanceFromHistory.totalDecided === 1
+                                                        ? 'codex.distance.totalDivergence.one'
+                                                        : 'codex.distance.totalDivergence.many',
+                                                    {
+                                                        diverged: distanceFromHistory.diverged,
+                                                        total: distanceFromHistory.totalDecided,
+                                                        pct: distanceFromHistory.divergencePct,
+                                                    },
+                                                )}
+                                            </span>
+                                        </div>
+                                        {distanceFromHistory.divergences.length > 0 && (
+                                            <ul className="m-0 flex list-none flex-col p-0">
+                                                {distanceFromHistory.divergences.map((d) => (
+                                                    <li
+                                                        key={d.eventId}
+                                                        data-testid="codex-distance-from-history-row"
+                                                        data-event-id={d.eventId}
+                                                        data-source={d.source}
+                                                        className="flex items-start gap-3 border-b border-[#262b35] py-2.5 text-[15px] leading-snug last:border-b-0"
+                                                    >
+                                                        <span className="shrink-0 font-mono text-[14px] text-[#9c917b]">{turnToDateString(d.turn)}</span>
+                                                        <div className="min-w-0 flex-1">
+                                                            <span className="text-[#f1e6c8]">{d.title}</span>
+                                                            <span className="text-[#9c917b]">
+                                                                {' '}{t('codex.distance.rowChoicePrefix')}{' '}
+                                                                <span className="text-[#ddd1b3]">{d.chosen}</span>
+                                                                {' '}{t('codex.distance.rowHistory', { historical: d.historical })}
+                                                            </span>
+                                                        </div>
+                                                        {d.source === 'player' && (
+                                                            <span
+                                                                data-testid="codex-distance-from-history-player-badge"
+                                                                className={`${SURFACE_CHIP} shrink-0 border-amber-300/50 text-amber-200`}
+                                                            >
+                                                                {t('codex.distance.yours')}
+                                                            </span>
+                                                        )}
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        )}
+                                    </div>
+                                )}
+
+                                {/* Phase H Packet 5 (Component C) — Unlock State section.
+                                    Renders only when BOTH `state` and `eventCatalog` props
+                                    were provided. Pure data display: aggregate headline +
+                                    three sub-lists (fired / enabled-but-not-fired /
+                                    closed). Sub-list rows capped at
+                                    UNLOCK_STATE_MAX_ROWS_PER_LIST; the section heading
+                                    always shows the full count. Developer diagnostic ONLY:
+                                    gated behind the dedicated `diagMode` store flag (explicit
+                                    `?diag=1` opt-in) so the raw internal event IDs never leak
+                                    into the player-facing Codex — hidden by default for players
+                                    AND for dev:map playtesters (dev:map runs with generic dev
+                                    mode auto-enabled, which deliberately does NOT include this
+                                    diagnostics surface). */}
+                                {unlockState && diagMode && (
+                                    <div
+                                        data-testid="codex-unlock-state-section"
+                                        className="flex flex-col gap-3"
+                                    >
+                                        <h4 className={`m-0 ${SURFACE_LABEL}`}>
+                                            Unlock State
+                                        </h4>
+                                        <div
+                                            data-testid="codex-unlock-state-summary"
+                                            className="font-mono text-[14px] text-[#c2b69c]"
+                                        >
+                                            Foundational: {unlockState.summary.foundational_count}
+                                            {' | '}Fired downstream: {unlockState.summary.downstream_fired_count}
+                                            {' | '}Closed: {unlockState.summary.closed_count}
+                                            {' | '}Max depth: {unlockState.summary.max_depth}
+                                        </div>
+                                        <div className="flex flex-col gap-4">
+                                            <div
+                                                data-testid="codex-unlock-fired-list"
+                                                className="flex flex-col gap-1"
+                                            >
+                                                <div className={SURFACE_LABEL_MUTED}>
+                                                    Fired ({unlockState.fired.length})
+                                                </div>
+                                                <ul className="m-0 flex list-none flex-col gap-0.5 p-0">
+                                                    {unlockState.fired.slice(0, UNLOCK_STATE_MAX_ROWS_PER_LIST).map((id) => {
+                                                        const meta = formatUnlockRow(id, eventCatalog!);
+                                                        return (
+                                                            <li
+                                                                key={id}
+                                                                data-testid="codex-unlock-fired-row"
+                                                                data-event-id={id}
+                                                                className="break-words font-mono text-[13px] leading-snug text-[#ddd1b3]"
+                                                            >
+                                                                <span>{id}</span>
+                                                                {' '}
+                                                                <span className="text-[#9c917b]">[family={meta.family}]</span>
+                                                                {' '}
+                                                                <span className="text-[#9c917b]">[source={meta.sourceTier}]</span>
+                                                            </li>
+                                                        );
+                                                    })}
+                                                </ul>
+                                            </div>
+                                            <div
+                                                data-testid="codex-unlock-enabled-list"
+                                                className="flex flex-col gap-1"
+                                            >
+                                                <div className={SURFACE_LABEL_MUTED}>
+                                                    Enabled (pending) ({unlockState.enabled.length})
+                                                </div>
+                                                <ul className="m-0 flex list-none flex-col gap-0.5 p-0">
+                                                    {unlockState.enabled.slice(0, UNLOCK_STATE_MAX_ROWS_PER_LIST).map((id) => {
+                                                        const meta = formatUnlockRow(id, eventCatalog!);
+                                                        return (
+                                                            <li
+                                                                key={id}
+                                                                data-testid="codex-unlock-enabled-row"
+                                                                data-event-id={id}
+                                                                className="break-words font-mono text-[13px] leading-snug text-[#ddd1b3]"
+                                                            >
+                                                                <span>{id}</span>
+                                                                {' '}
+                                                                <span className="text-[#9c917b]">[family={meta.family}]</span>
+                                                                {' '}
+                                                                <span className="text-[#9c917b]">[source={meta.sourceTier}]</span>
+                                                            </li>
+                                                        );
+                                                    })}
+                                                </ul>
+                                            </div>
+                                            <div
+                                                data-testid="codex-unlock-closed-list"
+                                                className="flex flex-col gap-1"
+                                            >
+                                                <div className={SURFACE_LABEL_MUTED}>
+                                                    Closed ({unlockState.closed.length})
+                                                </div>
+                                                <ul className="m-0 flex list-none flex-col gap-0.5 p-0">
+                                                    {unlockState.closed.slice(0, UNLOCK_STATE_MAX_ROWS_PER_LIST).map((id) => {
+                                                        const meta = formatUnlockRow(id, eventCatalog!);
+                                                        return (
+                                                            <li
+                                                                key={id}
+                                                                data-testid="codex-unlock-closed-row"
+                                                                data-event-id={id}
+                                                                className="break-words font-mono text-[13px] leading-snug text-[#ddd1b3]"
+                                                            >
+                                                                <span>{id}</span>
+                                                                {' '}
+                                                                <span className="text-[#9c917b]">[family={meta.family}]</span>
+                                                                {' '}
+                                                                <span className="text-[#9c917b]">[source={meta.sourceTier}]</span>
+                                                            </li>
+                                                        );
+                                                    })}
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
-                        )}
-                    </div>
-                </div>
-            </div>
+                        </SurfaceDetail>
+                    )}
+                </SurfaceColumns>
+            </section>
         </div>
     );
 }

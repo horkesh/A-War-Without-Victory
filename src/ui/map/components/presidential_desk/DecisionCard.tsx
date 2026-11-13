@@ -22,6 +22,7 @@ const FAMILY_LABEL_KEYS: Partial<Record<InboxItem['type'], MessageKey>> = {
   operation_opportunity: 'decisionSurface.operationOpportunity.playerLabel',
   autonomy_proposal: 'decisionSurface.autonomy.playerLabel',
   intelligence_notification: 'decisionSurface.intelligence.playerLabel',
+  recruitment: 'recruitment.desk.family',
   situation: 'decisionSurface.situation.playerLabel',
 };
 
@@ -109,17 +110,18 @@ export function DecisionCard({ item, onAction }: DecisionCardProps) {
           <p className="m-0 break-words text-[16px] leading-relaxed text-[#c2b69c]">{item.subtitle}</p>
         </div>
       </div>
-      <button
-        type="button"
-        onClick={() => actionable && onAction(item.action, item.id)}
-        disabled={!actionable}
-        data-testid="desk-card-action"
-        className={actionable
-          ? (required ? SURFACE_PRIMARY_BUTTON_COMPACT : SURFACE_SECONDARY_BUTTON)
-          : 'h-12 rounded-md border border-[#2a303c] px-5 text-[16px] font-semibold text-[#7d7462]'}
-      >
-        {actionLabel(item)}
-      </button>
+      {/* A matter with nothing to open (a situation update read here on the Desk) gets no
+          button: a dead "Open President's Desk" inside the Desk is noise (R8 RBiH attempt 08). */}
+      {actionable && (
+        <button
+          type="button"
+          onClick={() => onAction(item.action, item.id)}
+          data-testid="desk-card-action"
+          className={required ? SURFACE_PRIMARY_BUTTON_COMPACT : SURFACE_SECONDARY_BUTTON}
+        >
+          {actionLabel(item)}
+        </button>
+      )}
     </article>
   );
 }

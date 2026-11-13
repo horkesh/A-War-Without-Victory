@@ -505,12 +505,15 @@ export function SettlementDetailContent({
         )}
       </div>
 
-      <div className={isPanel ? 'font-sans text-sm text-accent-gold uppercase tracking-wide font-bold border-b border-panel-border pb-2 mb-3' : 'font-sans text-[13px] font-semibold text-accent-gold uppercase tracking-wide border-b border-panel-border pb-1 mb-2'}>
-        {name}
-      </div>
+      {/* In the map rail the settlement's name is the rail header's title (SelectionPanel). */}
+      {!isPanel && (
+        <div className="font-sans text-[13px] font-semibold text-accent-gold uppercase tracking-wide border-b border-panel-border pb-1 mb-2">
+          {name}
+        </div>
+      )}
 
       {isPanel && (
-        <div className="shrink-0 border-b border-panel-border bg-panel-card/50 flex gap-0" role="tablist" aria-label={t('settlement.sections')}>
+        <div className="-mx-5 flex shrink-0 gap-1 border-b border-[#262b35] bg-[#12161e] px-3" role="tablist" aria-label={t('settlement.sections')}>
           {settlementTabs.map(({ id, label }) => (
             <button
               key={id}
@@ -520,10 +523,10 @@ export function SettlementDetailContent({
               aria-controls={`settlement-panel-${id}`}
               id={`settlement-tab-${id}`}
               onClick={() => setActiveTab(id)}
-              className={`kbd-focus px-3 py-2 text-[13px] font-bold uppercase border-b-2 transition-colors ${
+              className={`kbd-focus -mb-px min-w-0 flex-1 border-b-2 px-1.5 py-2.5 text-[14px] font-semibold leading-tight transition-colors ${
                 activeTab === id
-                  ? 'border-accent-gold text-accent-gold bg-panel-bg'
-                  : 'border-transparent text-text-secondary hover:text-text-primary hover:bg-panel-card/50'
+                  ? 'border-[#c9a75c] text-[#f1e6c8]'
+                  : 'border-transparent text-[#b9ad94] hover:text-[#f1e6c8]'
               }`}
             >
               {label}
@@ -533,7 +536,7 @@ export function SettlementDetailContent({
       )}
 
       <div
-        className={isPanel ? 'space-y-2.5 p-4' : 'space-y-2.5'}
+        className={isPanel ? 'space-y-3 pt-4 text-[14px]' : 'space-y-2.5'}
         data-testid={isPanel ? `settlement-panel-${activeTab}` : undefined}
         id={isPanel ? `settlement-panel-${activeTab}` : undefined}
         role={isPanel ? 'tabpanel' : undefined}

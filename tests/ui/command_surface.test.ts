@@ -118,6 +118,35 @@ describe('Command Surface deep links', () => {
     renderSurface(makeState(paramilitary));
     expect(screen.getByTestId('decision-room-active-dossier').getAttribute('data-card-id')).toBe('paramilitary:pending');
   });
+
+  // R8 RS-07 event 484: the surface first rendered the default area (and started its
+  // banner load), then the deep-link effect switched areas and the browser cancelled
+  // that image. The mounted surface must never rewrite its area, card or banner source.
+  it('mounts straight onto the requested area and card, never switching after mount', () => {
+    const mountRewrites = (request: () => void, props: Partial<Parameters<typeof CommandSurface>[0]> = {}) => {
+      const observer = new MutationObserver(() => {});
+      observer.observe(document.body, {
+        subtree: true,
+        attributes: true,
+        attributeOldValue: true,
+        attributeFilter: ['data-command-category-id', 'data-card-id', 'src'],
+      });
+      request();
+      renderSurface(makeState(paramilitary), props);
+      const records = observer.takeRecords();
+      observer.disconnect();
+      // A same-value write starts no new load; a changed value is the switch we forbid.
+      return records
+        .map((record) => ({ name: record.attributeName, from: record.oldValue, to: (record.target as Element).getAttribute(record.attributeName ?? '') }))
+        .filter((change) => change.from !== change.to)
+        .map((change) => `${change.name}: ${change.from} -> ${change.to}`);
+    };
+    expect(mountRewrites(() => requestDecisionRoomLens('all', 'cat_home_front'))).toEqual([]);
+    expect(screen.getByTestId('presidential-decision-room').getAttribute('data-command-category-id')).toBe('cat_home_front');
+    cleanup();
+    expect(mountRewrites(() => requestDecisionRoomLens('decision', null, 'paramilitary:pending'), { initialCategoryId: 'cat_record' })).toEqual([]);
+    expect(screen.getByTestId('decision-room-active-dossier').getAttribute('data-card-id')).toBe('paramilitary:pending');
+  });
 });
 
 describe('Command Surface actions', () => {

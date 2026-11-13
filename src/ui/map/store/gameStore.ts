@@ -1,13 +1,22 @@
 import { create } from 'zustand';
 import type { LoadedGameState } from '../data/types';
-import { parseGameState } from '../data/GameStateAdapter';
+import { parseGameState, type ParseGameStateOptions } from '../data/GameStateAdapter';
+import { subscribeLocale } from '../i18n';
+import { loadOsidAdjacency } from '../data/DataLoader';
 import { shouldMarkPeaceWarTransitionSeenOnLoad } from '../data/peaceWarTransitionGate';
 import type { TurnAftermathDigest, TurnAftermathView } from '../data/turnAftermath';
 import type { ArmyHQRecordsSubTab } from '../../shared/shellHandoff';
 import type { FieldInspectionTarget } from '../utils/fieldInspectionTarget';
 import type { ReplaySaveManifest } from '../../../sim/replay/replay_manifest';
 import type { GameState as RawGameState } from '../../../state/game_state';
+import { strictCompare } from '../../../state/validateGameState';
 import type { TurnPauseStatus } from '../desktop/types';
+import {
+  advanceRecruitmentWatch,
+  setAsideRecruitmentMatter as setAsideRecruitmentWatch,
+  type RecruitmentCatalogSnapshot,
+  type RecruitmentWatch,
+} from '../data/recruitmentMatter';
 
 /** Last turn report shape from desktop (advance-turn). Used for succession in FormationDetail. */
 export interface LastTurnReport {
@@ -113,6 +122,22 @@ export interface GameStore {
   osidPropertiesMap: Record<string, Record<string, unknown>> | null;
   setOsidPropertiesMap: (map: Record<string, Record<string, unknown>> | null) => void;
 
+  /**
+   * Recruitment on the Desk (owner 2026-11-12). UI-only memory of what the president has
+   * been told about raisable brigades; never written to GameState or a save.
+   */
+  recruitmentWatch: RecruitmentWatch | null;
+  /** Fold the latest `get-recruitment-catalog` snapshot into the watch. */
+  observeRecruitmentCatalog: (snapshot: RecruitmentCatalogSnapshot) => void;
+  /** "Not now" (decision) / "Noted" (notice). */
+  setAsideRecruitmentMatter: () => void;
+  /** Forget the watch (new campaign, load). */
+  resetRecruitmentWatch: () => void;
+  /** A request to open Recruitment on a brigade; App consumes it. `seq` keeps repeats distinct. */
+  recruitmentOpenRequest: { brigadeId: string | null; seq: number } | null;
+  requestRecruitmentOpen: (brigadeId: string | null) => void;
+  clearRecruitmentOpenRequest: () => void;
+
   /** Map mode: Political Control / Ethnic / Supply / Front Pressure (Phase C2) */
   mapMode: MapMode;
   setMapMode: (mode: MapMode) => void;
@@ -158,7 +183,12 @@ export interface GameStore {
   setHoveredSectorId: (id: string | null) => void;
 
   expandedStackOsid: string | null;
-  setExpandedStackOsid: (osid: string | null) => void;
+  /**
+   * Settlements whose counters the layout merged into the expanded stack (its badge counts
+   * their formations too), so the stack picker lists every formation the badge stands for.
+   */
+  expandedStackMergedOsids: string[];
+  setExpandedStackOsid: (osid: string | null, mergedOsids?: readonly string[]) => void;
 
   /** Selected corps (click on corps header in sidebar). */
   selectedCorpsId: string | null;
@@ -369,6 +399,49 @@ const CLEARED_OPERATION_CONTEXT = {
   operationTargetOsids: [] as string[],
 };
 
+// M3 (2026-11-12): OSID contact adjacency for the adapter's isolated-pocket view rule. Loaded once
+// (DataLoader caches it), awaited at most POCKET_ADJACENCY_WAIT_MS per load, never required.
+const POCKET_ADJACENCY_WAIT_MS = 3000;
+let pocketAdjacency: ReadonlyMap<string, readonly string[]> | null = null;
+let pocketAdjacencyRequest: Promise<void> | null = null;
+
+function requestPocketAdjacency(): Promise<void> {
+  if (pocketAdjacency || typeof fetch !== 'function') return Promise.resolve();
+  if (!pocketAdjacencyRequest) {
+    pocketAdjacencyRequest = loadOsidAdjacency()
+      .then((adjacency) => { pocketAdjacency = adjacency; })
+      .catch(() => { pocketAdjacencyRequest = null; });
+  }
+  const request = pocketAdjacencyRequest;
+  return new Promise<void>((resolve) => {
+    const timer = setTimeout(resolve, POCKET_ADJACENCY_WAIT_MS);
+    void request.then(() => { clearTimeout(timer); resolve(); });
+  });
+}
+
+// The adapter builds player-facing labels with t() (e.g. M3 "Unheld front near X" /
+// "Nebranjeni front (X)"). Remember what each parsed view came from so a language switch can
+// rebuild the live view (and the replay return state) in the new locale. Display-only.
+const parseInputByView = new WeakMap<LoadedGameState, { json: unknown; options: ParseGameStateOptions }>();
+
+function rememberParseInput(view: LoadedGameState, json: unknown, options: ParseGameStateOptions): void {
+  parseInputByView.set(view, { json, options });
+}
+
+function reparseInActiveLocale(view: LoadedGameState | null): LoadedGameState | null {
+  if (!view) return view;
+  const input = parseInputByView.get(view);
+  if (!input) return view;
+  try {
+    const next = parseGameState(input.json, input.options);
+    rememberParseInput(next, input.json, input.options);
+    return next;
+  } catch (error) {
+    console.error('[gameStore] Failed to re-localize the loaded state:', error);
+    return view;
+  }
+}
+
 export const useGameStore = create<GameStore>((set, get) => ({
   devMode: isDevMode(),
   diagMode: isDiagMode(),
@@ -405,7 +478,13 @@ export const useGameStore = create<GameStore>((set, get) => ({
   setHoveredSectorId: (id) => set({ hoveredSectorId: id }),
 
   expandedStackOsid: null,
-  setExpandedStackOsid: (osid) => set({ expandedStackOsid: osid }),
+  expandedStackMergedOsids: [],
+  setExpandedStackOsid: (osid, mergedOsids = []) => set({
+    expandedStackOsid: osid,
+    expandedStackMergedOsids: osid
+      ? [...new Set(mergedOsids)].filter((merged) => merged !== osid).sort(strictCompare)
+      : [],
+  }),
 
   tooltipTarget: null,
   tooltipPosition: null,
@@ -418,6 +497,20 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
   osidPropertiesMap: null,
   setOsidPropertiesMap: (map) => set({ osidPropertiesMap: map }),
+
+  recruitmentWatch: null,
+  observeRecruitmentCatalog: (snapshot) => set((current) => ({
+    recruitmentWatch: advanceRecruitmentWatch(current.recruitmentWatch, snapshot),
+  })),
+  setAsideRecruitmentMatter: () => set((current) => (
+    current.recruitmentWatch ? { recruitmentWatch: setAsideRecruitmentWatch(current.recruitmentWatch) } : {}
+  )),
+  resetRecruitmentWatch: () => set({ recruitmentWatch: null }),
+  recruitmentOpenRequest: null,
+  requestRecruitmentOpen: (brigadeId) => set((current) => ({
+    recruitmentOpenRequest: { brigadeId, seq: (current.recruitmentOpenRequest?.seq ?? 0) + 1 },
+  })),
+  clearRecruitmentOpenRequest: () => set({ recruitmentOpenRequest: null }),
 
   mapMode: 'political',
   setMapMode: (mode) => set({ mapMode: mode }),
@@ -570,6 +663,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       opsPlanningModalOpen: false,
       operationTargetOsids: [] as string[],
       expandedStackOsid: null,
+      expandedStackMergedOsids: [] as string[],
       hoveredOsids: [] as string[],
       hoveredSectorId: null,
       hoveredCorpsId: null,
@@ -713,10 +807,12 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const finalState = get().replayInspectionReturnState ?? current;
     let inspected: LoadedGameState;
     try {
-      inspected = parseGameState(frame, {
+      const frameOptions: ParseGameStateOptions = {
         ...(finalState.replaySaveSequence ? { replaySaveSequence: finalState.replaySaveSequence } : {}),
         ...(finalState.replaySaveManifest ? { replaySaveManifest: finalState.replaySaveManifest } : {}),
-      });
+      };
+      inspected = parseGameState(frame, frameOptions);
+      rememberParseInput(inspected, frame, frameOptions);
     } catch (e) {
       const message = e instanceof Error ? e.message : String(e);
       set({ loadError: message });
@@ -834,7 +930,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
         }
       };
 
-      schedule(() => {
+      // M3 (2026-11-12): wait once for the cached OSID adjacency so the adapter can leave
+      // unreachable brigade-less pockets out of every corps list. A failed fetch resolves
+      // without it; the load never blocks on it.
+      void requestPocketAdjacency().then(() => schedule(() => {
         const fingerprint = buildStateFingerprint(jsonOrText);
         const previousLoadedGameState = get().loadedGameState;
         let state: LoadedGameState;
@@ -858,11 +957,14 @@ export const useGameStore = create<GameStore>((set, get) => ({
           // the read-only `replayPlayer()` consumer downstream.
           const pendingSequence = (get().pendingReplaySaveSequence ?? null) as ReadonlyArray<unknown> | null;
           const pendingManifest = get().pendingReplaySaveManifest;
-          state = parseGameState(json, {
+          const parseOptions: ParseGameStateOptions = {
             ...(pendingSequence ? { replaySaveSequence: pendingSequence } : {}),
             ...(pendingManifest ? { replaySaveManifest: pendingManifest } : {}),
             ...(get().runtimeFeatureFlags ? { runtimeFeatureFlags: get().runtimeFeatureFlags ?? undefined } : {}),
-          });
+            ...(pocketAdjacency ? { osidAdjacency: pocketAdjacency } : {}),
+          };
+          state = parseGameState(json, parseOptions);
+          rememberParseInput(state, json, parseOptions);
         } catch (e) {
           const message = e instanceof Error ? e.message : String(e);
           set({
@@ -908,6 +1010,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
               hoveredCorpsId: null,
               hoveredSectorId: null,
               expandedStackOsid: null,
+              expandedStackMergedOsids: [],
               // Modal state: close all modals that reference save-specific entities
               orderModeForFormation: null,
               pendingAttackConfirmation: null,
@@ -956,7 +1059,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
             reject(e);
           }
         });
-      });
+      }));
     });
   },
   loadSaveIfChanged: async (jsonOrText: unknown | string) => {
@@ -1010,3 +1113,14 @@ export const useGameStore = create<GameStore>((set, get) => ({
   flashOsid: null,
   setFlashOsid: (osid) => set({ flashOsid: osid }),
 }));
+
+// Codex review on #577: setLocale() does not rebuild loadedGameState, so adapter-built labels
+// stayed in the language they were parsed in. Rebuild the live view (and the replay return state)
+// whenever the locale changes; selection and modal state are untouched.
+subscribeLocale(() => {
+  const { loadedGameState, replayInspectionReturnState } = useGameStore.getState();
+  const nextLoaded = reparseInActiveLocale(loadedGameState);
+  const nextReturn = reparseInActiveLocale(replayInspectionReturnState);
+  if (nextLoaded === loadedGameState && nextReturn === replayInspectionReturnState) return;
+  useGameStore.setState({ loadedGameState: nextLoaded, replayInspectionReturnState: nextReturn });
+});

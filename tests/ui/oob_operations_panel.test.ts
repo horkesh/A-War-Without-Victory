@@ -167,7 +167,7 @@ describe('OOB and operations panel operation labels', () => {
 
     expect(source).toContain('function getOperationDisplayName');
     expect(source).toContain('operationDisplayName?: string | null');
-    expect(source).toContain("getPlayerSafeOperationName(operationName, corpsId, 'Operation')");
+    expect(source).toContain("getPlayerSafeOperationName(operationName, corpsId, t('operationHistory.fallback.operation'))");
     expect(source).not.toContain('>{op.operation_name}</span>');
   });
 
@@ -559,7 +559,7 @@ describe('OOB and operations panel operation labels', () => {
   it('renders OOB operation objective progress as player-facing one-based progress', () => {
     const { container } = render(createElement(OOBSidebar));
 
-    fireEvent.click(screen.getByRole('button', { name: /Operations/i }));
+    fireEvent.click(screen.getByTestId('oob-section-operations-toggle'));
 
     expect(container.textContent).toContain('1/1');
     expect(container.textContent).not.toContain('0/1');
@@ -579,7 +579,7 @@ describe('OOB and operations panel operation labels', () => {
 
     const { container } = render(createElement(OOBSidebar));
 
-    fireEvent.click(screen.getByRole('button', { name: /Operations/i }));
+    fireEvent.click(screen.getByTestId('oob-section-operations-toggle'));
 
     expect(container.textContent).toContain('--');
     expect(container.textContent).not.toContain('Objective progress unreported');
@@ -599,7 +599,7 @@ describe('OOB and operations panel operation labels', () => {
 
     const { container } = render(createElement(OOBSidebar));
 
-    fireEvent.click(screen.getByRole('button', { name: /Operations/i }));
+    fireEvent.click(screen.getByTestId('oob-section-operations-toggle'));
 
     expect(container.textContent).toContain('Supply: --');
     expect(container.textContent).not.toContain('Supply: No staff report');
@@ -613,7 +613,7 @@ describe('OOB and operations panel operation labels', () => {
     });
 
     render(createElement(OOBSidebar));
-    fireEvent.click(screen.getByRole('button', { name: /Operations/i }));
+    fireEvent.click(screen.getByTestId('oob-section-operations-toggle'));
     fireEvent.click(screen.getByRole('button', { name: /Operation Breakthrough/i }));
 
     const state = useGameStore.getState();
@@ -653,7 +653,7 @@ describe('OOB and operations panel operation labels', () => {
     });
 
     const { container } = render(createElement(OOBSidebar));
-    fireEvent.click(screen.getByRole('button', { name: /Operations/i }));
+    fireEvent.click(screen.getByTestId('oob-section-operations-toggle'));
 
     expect(container.textContent).toContain('Status pending');
     expect(container.textContent).not.toContain('Planning');

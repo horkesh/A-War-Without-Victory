@@ -258,6 +258,118 @@ export function getIconDataUrl(iconId: string): string {
   return '';
 }
 
+export const STACK_BADGE_ICON_SIZE = 64;
+
+export function getStackBadgeLabel(count: number): string {
+  return count > 99 ? '99+' : String(Math.max(0, Math.floor(count)));
+}
+
+/**
+ * Stack-count badge sprite. Drawn by the same Deck icon layer as the counters, right after
+ * its own top counter, so the badge can never float apart from (or above other) counters.
+ */
+export function getStackBadgeIconId(count: number): string {
+  return `stack_badge__${getStackBadgeLabel(count)}`;
+}
+
+export function getStackBadgeIconDataUrl(count: number): string {
+  const key = getStackBadgeIconId(count);
+  const cached = dataUrlCache.get(key);
+  if (cached) return cached;
+  const canvas = document.createElement('canvas');
+  canvas.width = STACK_BADGE_ICON_SIZE;
+  canvas.height = STACK_BADGE_ICON_SIZE;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return '';
+  drawStackBadgeIcon(ctx, getStackBadgeLabel(count));
+  const url = canvas.toDataURL('image/png');
+  dataUrlCache.set(key, url);
+  return url;
+}
+
+/** Draws a stack badge sprite (STACK_BADGE_ICON_SIZE square) at the context origin. */
+export function drawStackBadgeIcon(ctx: CanvasRenderingContext2D, label: string): void {
+  const center = STACK_BADGE_ICON_SIZE / 2;
+  ctx.beginPath();
+  ctx.arc(center, center, center - 4, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(18, 18, 16, 1)';
+  ctx.fill();
+  ctx.lineWidth = 5;
+  ctx.strokeStyle = 'rgba(245, 203, 92, 1)';
+  ctx.stroke();
+  ctx.fillStyle = '#f8e6ad';
+  ctx.font = `800 ${label.length >= 3 ? 24 : label.length === 2 ? 30 : 36}px "${UI_DATA_FONT_FAMILY}", sans-serif`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(label, center, center + 2);
+}
+
+export type CounterIconAtlasEntry = { x: number; y: number; width: number; height: number; mask: false };
+export type CounterIconAtlas = {
+  canvas: HTMLCanvasElement;
+  mapping: Record<string, CounterIconAtlasEntry>;
+};
+
+const ATLAS_WIDTH = 2048;
+const ATLAS_CELL_WIDTH = ICON_WIDTH + 4;
+const ATLAS_CELL_HEIGHT = ICON_HEIGHT + 4;
+const ATLAS_MAX_KEYS = 600;
+const atlasKnownKeys = new Set<string>();
+let atlasCache: CounterIconAtlas | null = null;
+
+/**
+ * One pre-packed sprite atlas for the tactical counter layers (counters, white highlight
+ * variants, stack badges), drawn in full by us and handed to Deck as `iconAtlas`.
+ *
+ * Deck 9.2's auto-packing grows its atlas by copying the old texture into a bigger one;
+ * in the Electron/WebGL build that copy comes out blank, so every counter already on the
+ * map vanished whenever a new sprite (a new morale step, a new badge count) appeared,
+ * leaving stack badges with nothing under them (R8, 2026-11-10). This atlas only grows:
+ * it is redrawn from scratch into a fresh canvas when an unseen key arrives, so Deck
+ * uploads a brand-new texture and nothing is ever copied.
+ * Keys: formation icon ids (`white__` prefix for highlights) and `stack_badge__<label>`.
+ */
+export function getCounterIconAtlas(keys: Iterable<string>): CounterIconAtlas | null {
+  if (typeof document === 'undefined') return null;
+  let grew = false;
+  for (const key of keys) {
+    if (!key || atlasKnownKeys.has(key)) continue;
+    atlasKnownKeys.add(key);
+    grew = true;
+  }
+  if (!grew && atlasCache) return atlasCache;
+  if (atlasKnownKeys.size > ATLAS_MAX_KEYS) {
+    // Bound the texture: keep only what this call needs.
+    atlasKnownKeys.clear();
+    for (const key of keys) if (key) atlasKnownKeys.add(key);
+  }
+  const ordered = [...atlasKnownKeys].sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
+  const columns = Math.floor(ATLAS_WIDTH / ATLAS_CELL_WIDTH);
+  const rows = Math.max(1, Math.ceil(ordered.length / columns));
+  const canvas = document.createElement('canvas');
+  canvas.width = ATLAS_WIDTH;
+  canvas.height = rows * ATLAS_CELL_HEIGHT;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return null;
+  const mapping: Record<string, CounterIconAtlasEntry> = {};
+  ordered.forEach((key, index) => {
+    const x = (index % columns) * ATLAS_CELL_WIDTH + 2;
+    const y = Math.floor(index / columns) * ATLAS_CELL_HEIGHT + 2;
+    ctx.save();
+    ctx.translate(x, y);
+    if (key.startsWith('stack_badge__')) {
+      drawStackBadgeIcon(ctx, key.slice('stack_badge__'.length));
+      mapping[key] = { x, y, width: STACK_BADGE_ICON_SIZE, height: STACK_BADGE_ICON_SIZE, mask: false };
+    } else {
+      drawFormationIcon(ctx, key);
+      mapping[key] = { x, y, width: ICON_WIDTH, height: ICON_HEIGHT, mask: false };
+    }
+    ctx.restore();
+  });
+  atlasCache = { canvas, mapping };
+  return atlasCache;
+}
+
 export function ensureFormationIcons(map: MapLibreMap, iconIds: string[]): void {
   const uniqueIds = [...new Set(iconIds)].sort((a, b) => a.localeCompare(b));
   for (const iconId of uniqueIds) {

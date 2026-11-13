@@ -31,6 +31,7 @@
 import { spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, resolve } from 'node:path';
+import { resolveVitestCli } from './vitest_shared_config.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const repoRoot = resolve(here, '..', '..');
@@ -57,5 +58,5 @@ if (userArgs.length === 0) {
     run(join(here, 'run_vitest_balanced.mjs'), BALANCED_ARGS);
 } else {
     // A filter was supplied: run it directly, unsharded, so every named file is reachable.
-    run(join(repoRoot, 'node_modules', 'vitest', 'vitest.mjs'), ['run', ...userArgs]);
+    run(resolveVitestCli(repoRoot), ['run', ...userArgs]);
 }

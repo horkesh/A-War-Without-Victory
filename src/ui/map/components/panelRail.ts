@@ -37,12 +37,20 @@ export interface PanelRailState {
  * Shared inline style for all entity slide-out panels to the right of the OOBSidebar.
  * Width is specified per-panel: { ...DETAIL_PANEL_STYLE, width: '24rem' }
  */
+/**
+ * Right-edge panels stop above the floating Find (Ctrl/⌘ K) button, which sits fixed at
+ * `bottom: 3.25rem; right: 1rem` (globals.css `.command-palette-opener`, about 2rem tall).
+ * Running them down to the bottom bar put that button over their last rows: a
+ * "Dismiss" button and settlement figures in R8 RBiH attempt 08.
+ */
+export const RIGHT_RAIL_BOTTOM = 'calc(var(--awwv-bottom-bar-clearance, 2.5rem) + 3rem)';
+
 export const DETAIL_PANEL_STYLE: CSSProperties = {
   position: 'absolute',
   right: 0,
   // Toolbar-safe clearance is injected by App via CSS variable.
   top: 'var(--awwv-toolbar-clearance, 5.5rem)',
-  bottom: 'var(--awwv-bottom-bar-clearance, 2.5rem)',
+  bottom: RIGHT_RAIL_BOTTOM,
   zIndex: Z.PANEL_RAIL_PRIMARY,
   overflow: 'hidden',
 };
@@ -65,13 +73,24 @@ export const LEFT_DETAIL_PANEL_STYLE: CSSProperties = {
 };
 
 /**
- * Right-edge panel — flush to the right side of the screen (e.g. settlement info).
+ * The one map rail (owner review 2026-11-11, step 2): every entity panel the player opens
+ * from the map (unit, OG, settlement, corps, army reserve, ORBAT) takes this slot and width,
+ * beside the order-of-battle sidebar. 24rem at 1280 wide, up to 28rem on an ultrawide.
+ */
+export const MAP_RAIL_WIDTH = 'clamp(24rem, calc(var(--interface-viewport-width, 100vw) * 0.2), 28rem)';
+
+export function getMapRailStyle(): CSSProperties {
+  return { ...LEFT_DETAIL_PANEL_STYLE, width: MAP_RAIL_WIDTH, direction: 'ltr' };
+}
+
+/**
+ * Right-edge panel — flush to the right side of the screen (Inbox, map Operations panel).
  */
 export const RIGHT_PANEL_STYLE: CSSProperties = {
   position: 'absolute',
   right: 0,
   top: 'var(--awwv-toolbar-clearance, 5.5rem)',
-  bottom: 'var(--awwv-bottom-bar-clearance, 2.5rem)',
+  bottom: RIGHT_RAIL_BOTTOM,
   zIndex: Z.PANEL_RAIL_TERTIARY,
   overflow: 'hidden',
 };

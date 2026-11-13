@@ -28,6 +28,7 @@ import { formatTurnLabel } from '../utils/formatters';
 import { getArmyReserveToolbarSignal } from '../utils/armyReserveSeverity';
 import { shouldShowWarroomReturn, isEmbeddedTacticalMap } from '../utils/warroomReturn';
 import { openChronicle } from '../utils/shellNavigation';
+import { useRecruitmentMatterInput } from '../utils/useRecruitmentMatter';
 import { playerFacingErrorCopy } from '../utils/errorCopy';
 import { t } from '../i18n/index.js';
 import {
@@ -162,9 +163,10 @@ export function PresidentialToolbar({
     // Reads canonical adapter-owned presidentialReviewQueue (criticalCount / pendingCount).
     // Visual-only; no new state; deterministic count-threshold derivation.
     const preAdvanceSeverityTone = derivePreAdvanceSeverityTone(loadedGameState?.presidentialReviewQueue);
+    const recruitmentInput = useRecruitmentMatterInput();
     const preAdvanceReview = useMemo(
-        () => buildPreAdvanceCommandReviewView({ state: loadedGameState, osidNameMap: osidDisplayNames }),
-        [loadedGameState, osidDisplayNames],
+        () => buildPreAdvanceCommandReviewView({ state: loadedGameState, osidNameMap: osidDisplayNames, ...recruitmentInput }),
+        [loadedGameState, osidDisplayNames, recruitmentInput],
     );
     const advanceBlocked = preAdvanceReview.status === 'blocked';
     const advanceGateTitle = advanceBlocked

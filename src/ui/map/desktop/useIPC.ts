@@ -224,7 +224,7 @@ interface WindowAwwv {
      */
     subscribeReplaySequenceUpdated: (cb: (sequenceJson: string) => void) => () => void;
     subscribeReplayManifestUpdated: (cb: (manifestJson: string) => void) => () => void;
-    getRecruitmentCatalog: () => Promise<{ brigades?: unknown[]; error?: string }>;
+    getRecruitmentCatalog: () => Promise<{ brigades?: unknown[]; turn?: number; autonomy_level?: number; error?: string }>;
     applyRecruitment: (brigadeId: string, equipmentClass: string) => Promise<{ ok: boolean; newFormationId?: string; error?: string }>;
     getSettings: () => Promise<{ ok: boolean; settings?: unknown; error?: string }>;
     saveSettings: (settings: unknown, options?: SettingsSaveOptions) => Promise<{ ok: boolean; error?: string }>;
@@ -515,7 +515,7 @@ export function useIPC() {
 
             getRecruitmentCatalog: awwv
                 ? () => awwv.getRecruitmentCatalog()
-                : makeNoop<{ brigades?: unknown[]; error?: string }>(),
+                : makeNoop<{ brigades?: unknown[]; turn?: number; autonomy_level?: number; error?: string }>(),
 
             applyRecruitment: awwv
                 ? (brigadeId: string, equipmentClass: string) => awwv.applyRecruitment(brigadeId, equipmentClass)

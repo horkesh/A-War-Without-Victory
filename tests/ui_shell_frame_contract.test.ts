@@ -95,8 +95,8 @@ describe('tactical shell frame contract', () => {
   it('opens useful OOB sections by default for the unselected command view', () => {
     const oob = read('src/ui/map/components/OOBSidebar.tsx');
 
-    expect(oob).toContain('situation: true');
-    expect(oob).toContain('army: true');
+    // Map rail system: the sidebar opens on the Army tab (the old accordions opened Situation and Army).
+    expect(oob).toContain("useState<OobSection>('army')");
   });
 
   it('keeps Warroom and pre-advance priority handoffs delegated to the shared Decision Room router', () => {

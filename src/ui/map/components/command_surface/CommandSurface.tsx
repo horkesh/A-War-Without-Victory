@@ -22,6 +22,7 @@ import {
   consumeRequestedDecisionRoomLens,
   getDecisionRoomLensRequestSnapshot,
   subscribeDecisionRoomLensRequest,
+  type DecisionRoomLensRequest,
 } from '../../utils/decisionRoomLensRequest';
 import {
   buildPresidentialDecisionRoomView,
@@ -38,6 +39,8 @@ import { resolveCommandBannerArt, resolveCommandCardArt } from '../../data/comma
 import { resolveDirectiveActArt } from '../../data/directiveActArt';
 import { useGameStore } from '../../store/gameStore';
 import { useIPC } from '../../desktop/useIPC';
+import { useRecruitmentMatterInput } from '../../utils/useRecruitmentMatter';
+import { buildRecruitmentMatterCopy } from '../../data/recruitmentMatterCopy';
 import { openPresidentialDecisionRoomNavigationTarget } from '../../utils/presidentialDecisionRoomNavigation';
 import { turnToDateString } from '../../utils/formatters';
 import { t, type MessageKey } from '../../i18n';
@@ -182,6 +185,29 @@ function AuthorizeAllButton({ cards, onReceipt }: { cards: PresidentialDecisionR
   );
 }
 
+/**
+ * Where a Decision Room deep link lands: a requested card selects it and its area; an
+ * area opens it; a legacy lens opens the first area holding a card of that kind.
+ * `areaId: null` keeps the current area. Null when the request changes nothing.
+ */
+function resolveLensRequestFocus(
+  requested: DecisionRoomLensRequest,
+  cards: readonly PresidentialDecisionRoomCard[],
+  areas: readonly { id: PresidentialCommandCategoryId; cards: readonly PresidentialDecisionRoomCard[] }[],
+): { areaId: PresidentialCommandCategoryId | null; cardId: string | null } | null {
+  const requestedCard = requested.cardId ? cards.find((card) => card.id === requested.cardId) : undefined;
+  if (requestedCard) {
+    const home = areas.find((area) => area.cards.some((card) => card.id === requestedCard.id));
+    return { areaId: home?.id ?? null, cardId: requestedCard.id };
+  }
+  if (requested.commandCategoryId) return { areaId: requested.commandCategoryId, cardId: null };
+  if (requested.lens !== 'all') {
+    const home = areas.find((area) => area.cards.some((card) => card.category === requested.lens));
+    if (home) return { areaId: home.id, cardId: null };
+  }
+  return null;
+}
+
 export interface CommandSurfaceProps {
   /** Area to open on (a toolbar or hotspot entry); null opens the first area with matters. */
   initialCategoryId?: PresidentialCommandCategoryId | null;
@@ -207,7 +233,12 @@ export function CommandSurface({ initialCategoryId = null, onClose, onNavigateTa
     return () => window.clearTimeout(timeout);
   }, [receipt]);
 
-  const baseView = useMemo(() => buildPresidentialDecisionRoomView({ state, osidNameMap }), [state, osidNameMap]);
+  const recruitmentInput = useRecruitmentMatterInput();
+  const setAsideRecruitmentMatter = useGameStore((s) => s.setAsideRecruitmentMatter);
+  const baseView = useMemo(
+    () => buildPresidentialDecisionRoomView({ state, osidNameMap, ...recruitmentInput }),
+    [state, osidNameMap, recruitmentInput],
+  );
   const areas = useMemo(() => PRESIDENTIAL_COMMAND_CATEGORIES.map((category) => {
     const cards = baseView.cards.filter((card) => cardBelongsToPresidentialCommandCategory(card, category.id));
     const counts: Record<MatterGroup, number> = { needs: 0, review: 0, actions: 0, watch: 0, record: 0 };
@@ -223,28 +254,24 @@ export function CommandSurface({ initialCategoryId = null, onClose, onNavigateTa
 
   // Deep links: a requested card selects it and its area; an area opens it; a legacy
   // lens opens the first area holding a card of that kind.
+  // The request is set before the surface mounts, so the first render already shows the
+  // requested area and card: rendering the default area for one frame and switching in
+  // the effect started (then dropped) the wrong area's banner load (R8 RS-07, event 484).
   const lensRequest = useSyncExternalStore(subscribeDecisionRoomLensRequest, getDecisionRoomLensRequestSnapshot, getDecisionRoomLensRequestSnapshot);
+  // Applied during render (React's "adjust state while rendering"), so React re-renders
+  // before committing; clearing it in an effect afterwards cannot open a gap frame.
+  const [appliedLensRequest, setAppliedLensRequest] = useState<DecisionRoomLensRequest | null>(null);
+  if (lensRequest !== null && lensRequest !== appliedLensRequest) {
+    setAppliedLensRequest(lensRequest);
+    const focus = resolveLensRequestFocus(lensRequest, baseView.cards, areas);
+    if (focus) {
+      if (focus.areaId) setAreaId(focus.areaId);
+      setCardId(focus.cardId);
+    }
+  }
   useEffect(() => {
-    if (lensRequest === null) return;
-    const requested = consumeRequestedDecisionRoomLens();
-    if (requested === null) return;
-    const requestedCard = requested.cardId ? baseView.cards.find((card) => card.id === requested.cardId) : undefined;
-    if (requestedCard) {
-      const home = areas.find((area) => area.cards.some((card) => card.id === requestedCard.id));
-      if (home) setAreaId(home.id);
-      setCardId(requestedCard.id);
-      return;
-    }
-    if (requested.commandCategoryId) {
-      setAreaId(requested.commandCategoryId);
-      setCardId(null);
-      return;
-    }
-    if (requested.lens !== 'all') {
-      const home = areas.find((area) => area.cards.some((card) => card.category === requested.lens));
-      if (home) { setAreaId(home.id); setCardId(null); }
-    }
-  }, [lensRequest, baseView.cards, areas]);
+    if (lensRequest !== null) consumeRequestedDecisionRoomLens();
+  }, [lensRequest]);
 
   const firstBusyArea = areas.find((area) => area.counts.needs > 0) ?? areas.find((area) => area.cards.length > 0) ?? areas[0] ?? EMPTY_AREA;
   const activeArea = areas.find((area) => area.id === areaId) ?? firstBusyArea;
@@ -255,8 +282,8 @@ export function CommandSurface({ initialCategoryId = null, onClose, onNavigateTa
   const selectedCardId = cardId && orderedCards.some((card) => card.id === cardId) ? cardId : orderedCards[0]?.id ?? null;
 
   const view = useMemo(
-    () => buildPresidentialDecisionRoomView({ state, osidNameMap, selectedCardId }),
-    [state, osidNameMap, selectedCardId],
+    () => buildPresidentialDecisionRoomView({ state, osidNameMap, selectedCardId, ...recruitmentInput }),
+    [state, osidNameMap, selectedCardId, recruitmentInput],
   );
   const dossier = view.activeDossier && view.activeDossier.cardId === selectedCardId ? view.activeDossier : null;
   const selectedCard = selectedCardId ? baseView.cards.find((card) => card.id === selectedCardId) : undefined;
@@ -295,7 +322,12 @@ export function CommandSurface({ initialCategoryId = null, onClose, onNavigateTa
 
   // The review / source handoff for the selected matter (what the old dossier's review did).
   let review: { target: PresidentialDecisionRoomNavigationTarget; label: string } | null = null;
-  if (dossier) {
+  const recruitmentMatter = recruitmentInput.recruitmentMatter;
+  const recruitmentSelected = Boolean(dossier && recruitmentMatter && dossier.cardId === recruitmentMatter.id);
+  const recruitmentCopy = recruitmentSelected && recruitmentMatter
+    ? buildRecruitmentMatterCopy(recruitmentMatter, recruitmentInput.municipalityNames)
+    : null;
+  if (dossier && !recruitmentSelected) {
     const sourceTarget = baseView.cards.find((card) => card.id === dossier.cardId)?.sourceHandoffTarget;
     const target = dossier.navigationTarget.kind === 'decision-room'
       ? sourceTarget ?? dossier.sourceHandoff?.navigationTarget ?? dossier.navigationTarget
@@ -443,7 +475,7 @@ export function CommandSurface({ initialCategoryId = null, onClose, onNavigateTa
                 ref={detailScrollRef}
                 data-testid="decision-room-dossier-scroll"
                 art={detailArt}
-                eyebrow={categoryLabel(dossier.category)}
+                eyebrow={recruitmentCopy?.familyLabel ?? categoryLabel(dossier.category)}
                 title={dossier.title}
                 explanation={dossier.explanation}
                 facts={dossier.evidence}
@@ -452,6 +484,27 @@ export function CommandSurface({ initialCategoryId = null, onClose, onNavigateTa
               <SurfaceDetailFooter>
                 {dossier.directive && state && (
                   <DirectiveCard directive={dossier.directive} gameState={state} onReceipt={setReceipt} />
+                )}
+                {recruitmentCopy && recruitmentMatter && (
+                  <div className="flex flex-wrap gap-3">
+                    <button
+                      type="button"
+                      data-testid="recruitment-matter-open"
+                      data-brigade-id={recruitmentMatter.focusBrigadeId ?? ''}
+                      onClick={() => { navigate({ kind: 'recruitment', brigadeId: recruitmentMatter.focusBrigadeId }); }}
+                      className="h-14 flex-1 rounded-md bg-[#c9a75c] px-5 text-[18px] font-bold text-[#15120b] transition hover:bg-[#d8b86c]"
+                    >
+                      {recruitmentCopy.primaryActionLabel}
+                    </button>
+                    <button
+                      type="button"
+                      data-testid="recruitment-matter-set-aside"
+                      onClick={() => { setAsideRecruitmentMatter(); setCardId(null); }}
+                      className="h-14 rounded-md border border-[#3a4150] bg-[#1b2029] px-5 text-[16px] font-semibold text-[#e8dcbc] transition hover:border-accent-gold/60"
+                    >
+                      {recruitmentCopy.setAsideLabel}
+                    </button>
+                  </div>
                 )}
                 {(review || (dossier.fieldInspectionTarget && onInspectFieldPlan)) && (
                   <div className="flex flex-wrap gap-3">

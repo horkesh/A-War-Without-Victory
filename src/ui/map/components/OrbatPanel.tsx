@@ -1,8 +1,8 @@
 import { useEffect, useMemo } from 'react';
 import { useGameStore } from '../store/gameStore';
-import { LEFT_DETAIL_PANEL_STYLE } from './panelRail';
+import { getMapRailStyle } from './panelRail';
+import { MapRailCloseButton, MapRailFrame, MapRailHeader, MapRailStat, MapRailStats } from './surface/MapRail';
 import { BrigadeRow } from './BrigadeRow';
-import { FACTION_COLORS } from '../utils/theme';
 import { getFormationCommander, resolveCorpsCommanderDisplay } from '../utils/officerUtils';
 import { OfficerProfile } from './OfficerProfile';
 import { CommanderDisplayPanel } from './CommanderDisplayPanel';
@@ -13,8 +13,9 @@ import { getPlayerFacingSectorName } from '../../shared/playerFacingLabels';
 import { isFieldedTacticalFormation } from '../../shared/playerVisibility';
 import { resolveCurrentSectorForFormation } from '../utils/sectorUtils';
 import { compareLocalizedFormationNames } from '../data/formationNameLocalizations';
-import { getPlayerSafeCorpsName } from '../utils/playerSafeText';
+import { getPlayerSafeCorpsName, getPlayerSafeMilitaryFactionName } from '../utils/playerSafeText';
 import { formatReportedPersonnel, sumReportedPersonnel } from '../utils/reportedMetrics';
+import { isHeldOg } from '../utils/heldOg';
 
 export function OrbatPanel() {
     const [locale] = useLocale();
@@ -57,6 +58,8 @@ export function OrbatPanel() {
             (s) => s.corps_id === selectedOrbatCorpsId
         );
     }, [loadedGameState?.corpsFrontSectors, selectedOrbatCorpsId]);
+    // Owner ruling M3: the summary names and counts real OGs only (one or more brigades).
+    const heldOgSectors = useMemo(() => corpsSectors.filter(isHeldOg), [corpsSectors]);
 
     const sectorIdByBrigadeId = useMemo(() => {
         const map = new Map<string, string>();
@@ -92,49 +95,34 @@ export function OrbatPanel() {
         partial: (personnel) => t('corpsFront.partialPersonnel', { personnel }),
         unreported: t('orbat.metricUnreported'),
     });
-    const factionClass = FACTION_COLORS[corps.faction] ?? 'text-text-primary';
     const corpsDisplayName = getPlayerSafeCorpsName(corps.name, corps.id);
 
     return (
-        <div
-            className="panel-power-on weathered-panel flex flex-col rounded-lg shadow-xl overflow-hidden paper-grain relative"
-            style={{ ...LEFT_DETAIL_PANEL_STYLE, width: '24rem' }}
-        >
-            <div className="bg-panel-header border-b border-panel-border px-4 py-3 flex items-center justify-between shrink-0 relative z-10">
-                <div className="flex flex-col">
-                    <span className="text-[13px] uppercase text-text-secondary tracking-widest font-bold">{t('orbat.orderOfBattle')}</span>
-                    <h2 className={`text-lg font-bold uppercase tracking-tight leading-tight ${factionClass}`}>
-                        {corpsDisplayName}
-                    </h2>
-                </div>
-                <button
-                    type="button"
-                    onClick={() => setSelectedOrbatCorpsId(null)}
-                    className="w-8 h-8 flex items-center justify-center rounded border border-panel-border bg-panel-bg hover:bg-panel-hover text-text-secondary transition-colors"
-                    title={t('orbat.closePanel')}
-                    aria-label={t('orbat.closePanel')}
-                >
-                    &times;
-                </button>
-            </div>
+        <MapRailFrame className="panel-slide-in-right" style={getMapRailStyle()}>
+            <MapRailHeader
+                eyebrow={t('orbat.orderOfBattle')}
+                title={corpsDisplayName}
+                subtitle={getPlayerSafeMilitaryFactionName(corps.faction)}
+                close={(
+                    <MapRailCloseButton
+                        onClick={() => setSelectedOrbatCorpsId(null)}
+                        title={t('orbat.closePanel')}
+                        aria-label={t('orbat.closePanel')}
+                    />
+                )}
+            />
 
-            <div className="flex-1 overflow-auto p-4 space-y-4">
+            <div className="min-h-0 flex-1 space-y-4 overflow-y-auto overflow-x-hidden px-5 py-4 text-[15px]">
                 {commander ? (
                     <OfficerProfile officer={commander} label={t('formationDetail.corpsCommander')} />
                 ) : commanderDisplay && (
                     <CommanderDisplayPanel display={commanderDisplay} label={t('formationDetail.corpsCommander')} />
                 )}
 
-                <div className="grid grid-cols-2 gap-3">
-                    <div className="p-2 bg-black/10 rounded border border-panel-border/30">
-                        <div className="text-[13px] uppercase text-text-secondary font-semibold">{t('orbat.totalPersonnel')}</div>
-                        <div className="text-sm font-mono text-text-primary">{totalPersonnel}</div>
-                    </div>
-                    <div className="p-2 bg-black/10 rounded border border-panel-border/30">
-                        <div className="text-[13px] uppercase text-text-secondary font-semibold">{t('orbat.brigades')}</div>
-                        <div className="text-sm font-mono text-text-primary">{brigades.length}</div>
-                    </div>
-                </div>
+                <MapRailStats>
+                    <MapRailStat label={t('orbat.totalPersonnel')} value={totalPersonnel} />
+                    <MapRailStat label={t('orbat.brigades')} value={brigades.length} />
+                </MapRailStats>
 
                 <div className="space-y-1">
                     <div className="text-[13px] uppercase text-text-secondary tracking-wider font-bold mb-2 pb-1 border-b border-panel-border/30">
@@ -196,14 +184,14 @@ export function OrbatPanel() {
                 </div>
             </div>
 
-            <div className="px-4 py-2 bg-black/40 border-t border-panel-border flex justify-between items-center shrink-0">
-                <span className="text-[13px] font-mono text-text-secondary uppercase">
-                    {corpsSectors.length > 0
-                        ? t('orbat.sectorSummary', { count: corpsSectors.length, sectors: corpsSectors.map((s) => getPlayerFacingSectorName(s.sector_id, corpsSectors)).join(', ') })
+            <div className="shrink-0 border-t border-[#262b35] bg-[#12161e] px-5 py-3">
+                <p className="m-0 text-[14px] leading-snug text-[#b9ad94]">
+                    {heldOgSectors.length > 0
+                        ? t('orbat.sectorSummary', { count: heldOgSectors.length, sectors: heldOgSectors.map((s) => getPlayerFacingSectorName(s.sector_id, corpsSectors)).join(', ') })
                         : t('orbat.noActiveSectors')
                     }
-                </span>
+                </p>
             </div>
-        </div>
+        </MapRailFrame>
     );
 }

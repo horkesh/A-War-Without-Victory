@@ -208,14 +208,13 @@ describe('own-force report gap presentation', () => {
 
     const { container } = render(createElement(OOBSidebar));
 
+    // Map rail system: manpower sits in the Army tab, operations in their own tab.
     fireEvent.click(screen.getByTestId('oob-section-mobilization-toggle'));
-    const operationsToggle = Array.from(container.querySelectorAll('button'))
-      .find((button) => button.textContent?.includes('Operations'));
-    expect(operationsToggle).toBeTruthy();
-    fireEvent.click(operationsToggle!);
-
     expect(container.textContent).not.toMatch(/[Uu]nreported/);
     expectOwnForceReportGap(container, ['Available', 'Strategic reserve']);
+
+    fireEvent.click(screen.getByTestId('oob-section-operations-toggle'));
+    expect(container.textContent).not.toMatch(/[Uu]nreported/);
     const operationNotice = Array.from(container.querySelectorAll('[data-awwv-report-gap]'))
       .find((notice) => notice.getAttribute('data-awwv-report-gap')?.includes('Supply'));
     expect(operationNotice?.textContent).toContain('Staff returns incomplete');

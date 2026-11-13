@@ -142,6 +142,24 @@ function resolveTargetOsidInput(
   return { targetOsid: trimmed, ambiguousMatches: [] };
 }
 
+/**
+ * Player-facing text for a leadership gesture's availability reason. The desktop contracts
+ * return machine codes (on_cooldown, already_pending, exhausted, all_cut_off, no_event, ...);
+ * none may reach the screen verbatim.
+ */
+function gestureReasonText(
+  kind: 'frontVisit' | 'addressNation' | 'decorateUnit',
+  reason: string | null | undefined,
+  onCooldown: boolean,
+  allCutOff: boolean,
+): string {
+  if (reason === 'on_cooldown' || (!reason && onCooldown)) return t(`directive.${kind}.onCooldown`);
+  if (reason === 'already_pending') return t('directive.gesture.alreadyPending');
+  if (reason === 'exhausted') return t('directive.gesture.exhausted');
+  if (kind === 'frontVisit' && (reason === 'all_cut_off' || allCutOff)) return t('directive.frontVisit.allCutOff');
+  return t(`directive.${kind}.unavailable`);
+}
+
 export function DirectiveCard(props: DirectiveCardProps) {
   // Posture model option 2: a stance matter has its own three answers (Confirm /
   // Countermand / Constrain) shared with the sector panel; it is not a CA-cost lever.
@@ -299,10 +317,7 @@ function LeverDirectiveCard({ directive, gameState, onReceipt }: DirectiveCardPr
         setGestureUnavailableReason(null);
       } else {
         setGestureUnavailableReason(
-          r.reason
-            ?? (r.onCooldown ? t('directive.frontVisit.onCooldown')
-              : !reachable ? t('directive.frontVisit.allCutOff')
-              : t('directive.frontVisit.unavailable')),
+          gestureReasonText('frontVisit', r.reason, Boolean(r.onCooldown), !reachable),
         );
       }
       return;
@@ -312,10 +327,7 @@ function LeverDirectiveCard({ directive, gameState, onReceipt }: DirectiveCardPr
       setGestureReady(true);
       if (!r.ok) { setGestureUnavailableReason(t('directive.addressNation.unknown')); return; }
       setGestureUnavailableReason(
-        r.available ? null
-          : (r.reason
-            ?? (r.onCooldown ? t('directive.addressNation.onCooldown')
-              : t('directive.addressNation.unavailable'))),
+        r.available ? null : gestureReasonText('addressNation', r.reason, Boolean(r.onCooldown), false),
       );
       return;
     }
@@ -340,10 +352,7 @@ function LeverDirectiveCard({ directive, gameState, onReceipt }: DirectiveCardPr
     setGestureReady(true);
     if (!r.ok) { setGestureUnavailableReason(t('directive.decorateUnit.unknown')); return; }
     setGestureUnavailableReason(
-      r.available ? null
-        : (r.reason
-          ?? (r.onCooldown ? t('directive.decorateUnit.onCooldown')
-            : t('directive.decorateUnit.unavailable'))),
+      r.available ? null : gestureReasonText('decorateUnit', r.reason, Boolean(r.onCooldown), false),
     );
   }, [ipc, isLeadershipGesture, isFrontVisit, isAddressNation, isStrategicPostureReview]);
 

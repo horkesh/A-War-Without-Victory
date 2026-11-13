@@ -36,8 +36,10 @@ import { isPresidentialCadenceHold } from './presidentialCadenceHold';
 import { APR1992_PRESIDENTIAL_INITIATIVE_REGISTRY } from '../../../sim/presidency/presidential_initiatives.js';
 import { sidePickerFactionLabel } from '../utils/sidePickerLabels';
 import { stanceMatterTitle } from './stanceMatterCopy';
+import type { RecruitmentMatter } from './recruitmentMatter';
+import { buildRecruitmentMatterCopy } from './recruitmentMatterCopy';
 
-export type InboxItemType = 'event_decision' | 'peace_plan' | 'dayton_negotiation' | 'convoy_decision' | 'paramilitary_request' | 'reserve_request' | 'officer_event' | 'operation_opportunity' | 'autonomy_proposal' | 'stance_matter' | 'intelligence_notification' | 'situation';
+export type InboxItemType = 'event_decision' | 'peace_plan' | 'dayton_negotiation' | 'convoy_decision' | 'paramilitary_request' | 'reserve_request' | 'officer_event' | 'operation_opportunity' | 'autonomy_proposal' | 'stance_matter' | 'intelligence_notification' | 'recruitment' | 'situation';
 export type InboxSeverity = 'blocking' | 'urgent' | 'normal' | 'info';
 
 export interface InboxItem {
@@ -59,7 +61,7 @@ export interface InboxItem {
     /** Keep a selected informational situation visible in the Desk packet. */
     includeInDeskPacket?: boolean;
     /** Which panel/modal to open when clicked */
-    action: 'event_modal' | 'peace_plan_modal' | 'dayton_modal' | 'paramilitary_review' | 'convoy_decision_modal' | 'army_reserve' | 'army_hq_personnel' | 'army_hq_briefing' | 'decision_room' | 'dismiss_intelligence_notification' | 'none';
+    action: 'event_modal' | 'peace_plan_modal' | 'dayton_modal' | 'paramilitary_review' | 'convoy_decision_modal' | 'army_reserve' | 'army_hq_personnel' | 'army_hq_briefing' | 'decision_room' | 'dismiss_intelligence_notification' | 'recruitment' | 'none';
     /** Priority for sorting (lower = higher priority) */
     priority: number;
 }
@@ -73,7 +75,7 @@ function priorityDestinationForInboxAction(action: InboxItem['action']): Preside
         || action === 'dayton_modal'
         || action === 'paramilitary_review'
         || action === 'convoy_decision_modal') return 'inbox';
-    if (action === 'army_reserve' || action === 'army_hq_personnel' || action === 'army_hq_briefing') return 'army-hq';
+    if (action === 'army_reserve' || action === 'army_hq_personnel' || action === 'army_hq_briefing' || action === 'recruitment') return 'army-hq';
     return 'none';
 }
 
@@ -710,6 +712,56 @@ export function deriveInboxItems(
 
 function isFinalParamilitaryDecision(decision: unknown): boolean {
     return decision === 'allow' || decision === 'deny' || decision === 'regular';
+}
+
+/**
+ * The recruitment matter as a Desk item (owner 2026-11-12). Kept out of
+ * `deriveInboxItems` because its source is the UI store's catalog watch, not the
+ * loaded state; the Desk adds it with `withRecruitmentInboxItem`. Never blocks Advance.
+ */
+export function buildRecruitmentInboxItem(
+    matter: RecruitmentMatter,
+    municipalityNames: Readonly<Record<string, string>> | null | undefined,
+    currentTurn: number,
+): InboxItem {
+    const copy = buildRecruitmentMatterCopy(matter, municipalityNames);
+    const decision = matter.mode === 'decision';
+    const draft: InboxItemDraft = {
+        id: matter.id,
+        type: 'recruitment',
+        severity: decision ? 'normal' : 'info',
+        title: copy.title,
+        subtitle: copy.summary,
+        actionLabel: copy.primaryActionLabel,
+        sourceIds: [...matter.ready, ...matter.raised].map((brigade) => brigade.id),
+        action: 'recruitment',
+        includeInDeskPacket: true,
+        priority: decision ? 30 : 60,
+    };
+    const priorityModel = buildPresidentialPriorityReadModel({
+        id: draft.id,
+        required: false,
+        recordOnly: false,
+        hasPresidentialLever: decision,
+        sourceId: draft.id,
+        currentTurn,
+        urgency: draft.priority,
+        deadlineTurn: null,
+        recommendedDestination: priorityDestinationForInboxAction(draft.action),
+    });
+    return { ...draft, priorityBand: priorityModel.priorityBand, priorityModel };
+}
+
+/** Desk items plus this week's recruitment matter, in agenda order. */
+export function withRecruitmentInboxItem(
+    items: readonly InboxItem[],
+    matter: RecruitmentMatter | null | undefined,
+    municipalityNames: Readonly<Record<string, string>> | null | undefined,
+    currentTurn: number,
+): InboxItem[] {
+    if (!matter) return [...items];
+    return [...items, buildRecruitmentInboxItem(matter, municipalityNames, currentTurn)]
+        .sort((left, right) => comparePresidentialPriorityReadModels(left.priorityModel, right.priorityModel));
 }
 
 /**

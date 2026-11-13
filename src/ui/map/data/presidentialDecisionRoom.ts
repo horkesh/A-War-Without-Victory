@@ -49,6 +49,8 @@ import { playerFactionMatch } from './playerFactionMatch';
 import { buildReserveRequestPresentation } from './reserveRequestPresentation';
 import { getOsidDisplayName } from '../utils/osidDisplayName';
 import { derivePresidentialBlockers } from './presidentialBlockers';
+import type { RecruitmentMatter } from './recruitmentMatter';
+import { buildRecruitmentMatterCopy } from './recruitmentMatterCopy';
 import {
   buildPresidentialPriorityReadModel,
   comparePresidentialPriorityReadModels,
@@ -208,6 +210,8 @@ export type PresidentialDecisionRoomNavigationTarget =
   | { kind: 'enclave-dashboard' }
   | { kind: 'inbox'; itemId?: string }
   | { kind: 'chronicle' }
+  /** Open Recruitment straight on a brigade (null opens it on the first raisable one). */
+  | { kind: 'recruitment'; brigadeId: string | null }
   | { kind: 'none' };
 
 export interface PresidentialDecisionRoomCard {
@@ -315,6 +319,13 @@ export interface PresidentialDecisionRoomInput {
   state: LoadedGameState | null;
   osidNameMap?: Record<string, string> | null;
   selectedCardId?: string | null;
+  /**
+   * This week's recruitment matter (`deriveRecruitmentMatter`), read from the UI store by
+   * the surface that builds the view. Absent = no recruitment card (pure callers, tests).
+   */
+  recruitmentMatter?: RecruitmentMatter | null;
+  /** mun1990 id → display name, for where a brigade would form. */
+  municipalityNames?: Readonly<Record<string, string>> | null;
 }
 
 type CandidateCard = Omit<PresidentialDecisionRoomCard, 'sortKey' | 'directive' | 'priorityBand' | 'priorityModel'> & {
@@ -1404,6 +1415,40 @@ function addProposalReviewDirectiveCards(
  * order; the front-visit card is a fixed singleton. No nondeterministic or
  * time-based sources.
  */
+/**
+ * Recruitment on the Desk (owner 2026-11-12). One grouped card per week, in Home Front
+ * (presidentialCategories, by the `recruitment:` id prefix). At Full Control / Assisted it
+ * is a decision the president owns (a lever, a warning: recommended before Advance); at
+ * Delegated / Observer it is an info notice of what the staff raised or has ready.
+ */
+function addRecruitmentMatterCard(
+  matter: RecruitmentMatter | null,
+  municipalityNames: Readonly<Record<string, string>> | null,
+  cards: CandidateCard[],
+): void {
+  if (!matter) return;
+  const copy = buildRecruitmentMatterCopy(matter, municipalityNames);
+  const decision = matter.mode === 'decision';
+  const brigadeIds = [...matter.ready, ...matter.raised].map((brigade) => brigade.id);
+  cards.push({
+    id: matter.id,
+    category: decision ? 'command' : 'briefing',
+    severity: decision ? 'warning' : 'info',
+    title: copy.title,
+    explanation: copy.explanation,
+    sourceOwner: copy.familyLabel,
+    sourceLabel: copy.familyLabel,
+    actionLabel: copy.primaryActionLabel,
+    preserveActionLabel: true,
+    evidence: copy.facts,
+    navigationTarget: { kind: 'recruitment', brigadeId: matter.focusBrigadeId },
+    ...(brigadeIds.length > 0 ? { sourceIds: brigadeIds } : {}),
+    countWeight: 1,
+    urgencySort: decision ? 30 : 60,
+    sourceSort: matter.id,
+  });
+}
+
 function addCommandPersonnelCards(
   state: LoadedGameState,
   cards: CandidateCard[],
@@ -1945,7 +1990,8 @@ function priorityDestinationForNavigation(
     || target.kind === 'army-hq-aftermath-record'
     || target.kind === 'army-hq-operation-record'
     || target.kind === 'army-hq-decision-record'
-    || target.kind === 'army-hq-corps-briefing') return 'army-hq';
+    || target.kind === 'army-hq-corps-briefing'
+    || target.kind === 'recruitment') return 'army-hq';
   if (target.kind === 'field') return 'field';
   if (target.kind === 'enclave-dashboard') return 'enclave-dashboard';
   if (target.kind === 'chronicle') return 'chronicle';
@@ -2388,6 +2434,7 @@ export function buildPresidentialDecisionRoomView(input: PresidentialDecisionRoo
   addSupplyVisibilityCard(state, candidates);
   addBriefingCards(state, candidates);
   addCommandPersonnelCards(state, candidates, osidNameMap);
+  addRecruitmentMatterCard(input.recruitmentMatter ?? null, input.municipalityNames ?? null, candidates);
   addRequestOpDirectiveCards(state, candidates);
   addStopOpDirectiveCards(state, candidates);
   addProposalReviewDirectiveCards(state, candidates, osidNameMap);

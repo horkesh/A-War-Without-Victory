@@ -195,7 +195,7 @@ export function CorpsCard({
 
   const headerContent = (
     <>
-      <span className={`min-w-0 truncate font-sans text-[13px] font-semibold uppercase tracking-wide ${factionClass}`}>{displayName}</span>
+      <span className={`min-w-0 truncate text-[15px] font-semibold leading-snug ${factionClass}`}>{displayName}</span>
       <span className="flex min-w-0 flex-wrap items-center justify-between gap-x-1.5 gap-y-0.5 text-[13px] tabular-nums">
         <span className="flex items-center gap-0.5">
           <span data-testid="corps-card-personnel-icon" data-color={personnelTone.colorState}>
@@ -217,7 +217,7 @@ export function CorpsCard({
   const cardFront = (
     <div
       data-testid="oob-corps-card"
-      className={`min-w-0 max-w-full rounded-lg border border-panel-border bg-panel-card/90 overflow-visible border-l-3 ${stanceBorder}`}
+      className={`min-w-0 max-w-full rounded-md border border-[#2a303c] bg-[#161a22] overflow-visible border-l-3 ${stanceBorder}`}
       style={{ position: 'relative', zIndex: Z.CORPS_CARD_LABEL }}
     >
       {onHeaderClick ? (
@@ -226,12 +226,12 @@ export function CorpsCard({
           onClick={(e) => { e.stopPropagation(); onHeaderClick(); }}
           aria-label={corpsHeaderLabel}
           title={corpsHeaderLabel}
-          className="w-full min-w-0 flex-col items-stretch px-3 py-2 bg-panel-bg border-b border-panel-border flex gap-1 hover:bg-panel-hover transition-colors cursor-pointer"
+          className="w-full min-w-0 flex-col items-stretch px-3 py-2 bg-[#141821] border-b border-[#262b35] flex gap-1 hover:bg-[#1b2029] transition-colors cursor-pointer"
         >
           {headerContent}
         </button>
       ) : (
-        <div className="w-full min-w-0 flex-col items-stretch px-3 py-2 bg-panel-bg border-b border-panel-border flex gap-1 cursor-default">
+        <div className="w-full min-w-0 flex-col items-stretch px-3 py-2 bg-[#141821] border-b border-[#262b35] flex gap-1 cursor-default">
           {headerContent}
         </div>
       )}
@@ -257,7 +257,7 @@ export function CorpsCard({
         className="cursor-pointer hover:bg-panel-hover/40 transition-colors"
       >
         {(commanderName || commanderSourceUnreported) && (
-          <div className="px-3 py-1 text-[13px] bg-panel-bg border-b border-panel-border/50 text-text-secondary">
+          <div className="px-3 py-1 text-[13px] bg-[#141821] border-b border-[#262b35] text-[#b9ad94]">
             <div>{commanderLabel ? `${commanderLabel}:` : t('corpsCard.commanderColon')}</div>
             <div className={`${commanderSourceUnreported ? 'text-text-secondary italic' : 'text-text-primary font-semibold'}`}>
               {commanderSourceUnreported ? t('corpsCard.commanderUnreported') : <>{commanderName}{commanderActing ? t('corpsCard.actingSuffix') : ''}</>}
@@ -270,18 +270,18 @@ export function CorpsCard({
 
         {/* R4: Labeled equipment summary row */}
         {(equip.tanks.total > 0 || equip.arty.total > 0) && (
-          <div className="px-3 py-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[13px] tabular-nums bg-panel-bg/50 border-b border-panel-border/50 text-text-secondary">
+          <div className="px-3 py-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[13px] tabular-nums border-b border-[#262b35] text-[#b9ad94]">
             {equip.tanks.total > 0 && (
               <span className="flex items-center gap-1" title={formatEquipmentTitle('tanks', equip.tanks)}>
                 <Icon name="tanks" size={13} />
-                <span className="text-text-secondary text-[13px] uppercase tracking-wide">{t('corpsCard.tanks')}</span>
+                <span className="text-[#b9ad94] text-[13px]">{t('corpsCard.tanks')}</span>
                 <span className="text-text-primary font-semibold">{formatEquipmentSummary(equip.tanks)}</span>
               </span>
             )}
             {equip.arty.total > 0 && (
               <span className="flex items-center gap-1" title={formatEquipmentTitle('artillery', equip.arty)}>
                 <Icon name="artillery" size={13} />
-                <span className="text-text-secondary text-[13px] uppercase tracking-wide">{t('corpsCard.arty')}</span>
+                <span className="text-[#b9ad94] text-[13px]">{t('corpsCard.arty')}</span>
                 <span className="text-text-primary font-semibold">{formatEquipmentSummary(equip.arty)}</span>
               </span>
             )}
@@ -291,7 +291,7 @@ export function CorpsCard({
 
       <div className="px-3 py-1.5 flex flex-wrap items-center gap-2">
         <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
-          <span className="text-[13px] uppercase text-accent-gold font-sans tracking-wide font-semibold flex items-center gap-1" title={t('corpsCard.stanceTitle')}>
+          <span className="uppercase font-mono text-[13px] font-semibold tracking-[0.14em] text-[#e0c27a] flex items-center gap-1" title={t('corpsCard.stanceTitle')}>
             <Icon name={STANCE_ICON[stanceKey] ?? 'balanced'} size={11} />
             {t('corpsCard.stance')}
           </span>
@@ -335,11 +335,11 @@ export function CorpsCard({
 
   const cardBack = (
     <div
-      className={`rounded-lg border border-panel-border bg-panel-card/90 overflow-hidden border-l-3 ${stanceBorder}`}
+      className={`rounded-md border border-[#2a303c] bg-[#161a22] overflow-hidden border-l-3 ${stanceBorder}`}
     >
       {/* Back header with flip-back button */}
-      <div className="w-full px-3 py-2 bg-panel-bg border-b border-panel-border flex items-center justify-between gap-2">
-        <span className={`font-sans text-[13px] font-semibold uppercase tracking-wide ${factionClass}`}>{displayName}</span>
+      <div className="w-full px-3 py-2 bg-[#141821] border-b border-[#262b35] flex items-center justify-between gap-2">
+        <span className={`text-[15px] font-semibold leading-snug ${factionClass}`}>{displayName}</span>
         <button
           type="button"
           onClick={() => setIsFlipped(false)}
@@ -354,7 +354,7 @@ export function CorpsCard({
       <div className="px-3 py-2 space-y-2">
         {/* Commander profile */}
         <div>
-          <div className="text-[13px] uppercase tracking-wider text-text-secondary font-bold mb-1">{commanderLabel ?? t('corpsCard.commander')}</div>
+          <div className="uppercase font-mono text-[13px] font-semibold tracking-[0.14em] text-[#b9ad94] mb-1">{commanderLabel ?? t('corpsCard.commander')}</div>
           {commanderName ? (
             <>
               <div className="text-[13px] text-text-primary font-semibold">
@@ -373,7 +373,7 @@ export function CorpsCard({
 
         {/* Sector overview */}
         <div>
-          <div className="text-[13px] uppercase tracking-wider text-text-secondary font-bold mb-1">{t('corpsCard.frontSectors')}</div>
+          <div className="uppercase font-mono text-[13px] font-semibold tracking-[0.14em] text-[#b9ad94] mb-1">{t('corpsCard.frontSectors')}</div>
           <div className="text-[13px] text-text-primary tabular-nums">
             {sectorCount != null && sectorCount > 0
               ? t(sectorCount === 1 ? 'corpsCard.sectorCount.one' : 'corpsCard.sectorCount.many', { count: sectorCount })
@@ -384,7 +384,7 @@ export function CorpsCard({
 
         {/* Operation status */}
         <div>
-          <div className="text-[13px] uppercase tracking-wider text-text-secondary font-bold mb-1">{t('corpsCard.operations')}</div>
+          <div className="uppercase font-mono text-[13px] font-semibold tracking-[0.14em] text-[#b9ad94] mb-1">{t('corpsCard.operations')}</div>
           {activeOperationName ? (
             <div className="flex items-center gap-2">
               <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse shrink-0" />

@@ -11,6 +11,8 @@ interface RecruitmentModalProps {
   applying: boolean;
   playerFaction?: string | null;
   brigades: RecruitmentCatalogBrigade[];
+  /** Brigade to open on (the Desk's recruitment matter); falls back to the first raisable one. */
+  initialBrigadeId?: string | null;
   onClose: () => void;
   onRefresh: () => void;
   onApply: (brigadeId: string, equipmentClass: string) => void;
@@ -48,12 +50,25 @@ function getReasonLabel(brigade: RecruitmentCatalogBrigade, reason: RecruitmentE
     : t(REASON_LABEL_KEYS[reason]);
 }
 
+/** The requested brigade when it can still be raised, else the first raisable one. */
+export function selectInitialRecruitmentBrigade(
+  eligible: readonly RecruitmentCatalogBrigade[],
+  requestedBrigadeId: string | null | undefined,
+): RecruitmentCatalogBrigade | undefined {
+  return (requestedBrigadeId ? eligible.find((b) => b.id === requestedBrigadeId) : undefined) ?? eligible[0];
+}
+
+function isAlreadyRaised(brigade: RecruitmentCatalogBrigade): boolean {
+  return (brigade.reason_codes ?? []).includes('already_recruited');
+}
+
 export function RecruitmentModal({
   isOpen,
   loading,
   applying,
   playerFaction,
   brigades,
+  initialBrigadeId = null,
   onClose,
   onRefresh,
   onApply,
@@ -63,7 +78,17 @@ export function RecruitmentModal({
     [brigades, playerFaction]
   );
   const eligible = useMemo(() => playerBrigades.filter((b) => b.eligible !== false), [playerBrigades]);
-  const unavailable = useMemo(() => playerBrigades.filter((b) => b.eligible === false), [playerBrigades]);
+  // Wargame convention (HOI4 deployment, AGEOD reinforcements, WitE build queues): a unit that is
+  // already in the field leaves the raise list. Raised brigades are kept only as a closed,
+  // read-only tally at the bottom so the player can still check what exists.
+  const raised = useMemo(
+    () => playerBrigades.filter((b) => b.eligible === false && isAlreadyRaised(b)),
+    [playerBrigades]
+  );
+  const unavailable = useMemo(
+    () => playerBrigades.filter((b) => b.eligible === false && !isAlreadyRaised(b)),
+    [playerBrigades]
+  );
 
   const [selectedBrigadeId, setSelectedBrigadeId] = useState('');
   const [equipmentClass, setEquipmentClass] = useState('');
@@ -71,10 +96,10 @@ export function RecruitmentModal({
 
   useEffect(() => {
     if (!isOpen) return;
-    const first = eligible[0];
+    const first = selectInitialRecruitmentBrigade(eligible, initialBrigadeId);
     setSelectedBrigadeId(first?.id ?? '');
     setEquipmentClass(first?.default_equipment_class ?? 'light');
-  }, [isOpen, eligible]);
+  }, [isOpen, eligible, initialBrigadeId]);
 
   return (
     <Modal
@@ -163,6 +188,22 @@ export function RecruitmentModal({
                     ))}
                   </ul>
                 </section>
+              )}
+              {raised.length > 0 && (
+                <details data-testid="recruitment-raised" className="group border-t border-panel-border pt-4">
+                  <summary className="flex min-h-10 cursor-pointer list-none items-center gap-2 text-xs font-semibold uppercase text-text-secondary hover:text-text-primary [&::-webkit-details-marker]:hidden">
+                    <span aria-hidden="true" className="inline-block text-sm transition-transform group-open:rotate-90">▸</span>
+                    {t('recruitment.alreadyRaised', { count: raised.length })}
+                  </summary>
+                  <p className="mt-1 text-xs text-text-secondary">{t('recruitment.alreadyRaisedNote')}</p>
+                  <ul className="mt-3 grid grid-cols-1 gap-x-6 gap-y-1 sm:grid-cols-2">
+                    {raised.map((brigade) => (
+                      <li key={brigade.id} className="truncate text-sm text-text-secondary" title={brigade.name}>
+                        {brigade.name}
+                      </li>
+                    ))}
+                  </ul>
+                </details>
               )}
             </>
           )}
