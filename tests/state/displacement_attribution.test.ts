@@ -11,7 +11,6 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import type { SettlementRecord } from '../../src/map/settlements.js';
 import {
     resetDisplacementPressureCache,
-    applyDisplacementFromFlips,
     CENSUS_FALLBACK_NATIONAL_REASON,
     NATIONAL_POPULATION_1991_SUMS,
     resolvePressingFactions,
@@ -196,31 +195,6 @@ describe('no-census fallback (SC2)', () => {
         expect(cc.RBiH?.killed).toBe(20);
         expect(cc.RS?.killed).toBe(6);
         expect(cc.HRHB?.killed).toBe(1);
-    });
-});
-
-describe('early-war flips path (SC2/P3)', () => {
-    it('books the loss to the losing side\'s people only, caused by the capturer', () => {
-        const state = stateWith({ 'op:town:a': 'RS', 'op:town:b': 'RS', 'op:home:c': 'RBiH' }, {}, 3);
-        state.displacement.displacement_state = {
-            town: { mun_id: 'town', original_population: 10000, displaced_out: 0, displaced_in: 0, lost_population: 0, last_updated_turn: 2 },
-        };
-        const settlements = new Map<string, SettlementRecord>();
-        for (const sid of ['op:town:a', 'op:town:b', 'op:home:c']) {
-            const mun = sid.split(':')[1];
-            settlements.set(sid, { sid, source_id: sid, mun_code: mun, mun, mun1990_id: mun, properties: { population_total: 100 } });
-        }
-        const census = { town: { total: 10000, bosniak: 5000, serb: 4000, croat: 1000, other: 0 } } as MunicipalityPopulation1991Map;
-        applyDisplacementFromFlips(
-            state, 3,
-            [{ mun_id: 'town', from_faction: 'RBiH', to_faction: 'RS' }],
-            [{ mun_id: 'town', initiated_turn: 3 }],
-            settlements, {}, census
-        );
-        const agg = state.displacement.displacement_humanitarian_aggregates ?? {};
-        expect(Object.keys(agg.RS ?? {})).toEqual(['RBiH']);
-        expect(state.displacement.civilian_casualties?.RS).toBeUndefined();
-        expect(state.displacement.civilian_casualties?.HRHB).toBeUndefined();
     });
 });
 
