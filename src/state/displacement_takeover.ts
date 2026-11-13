@@ -320,7 +320,7 @@ function getRoutingOrder(sourceMun: MunicipalityId, faction: FactionId): Municip
     return orderedUnique([...primary, ...fallback, ...LARGE_URBAN_MUN_IDS]);
 }
 
-function getBilateralRoutingOrder(sourceMun: MunicipalityId, faction: FactionId, toFaction?: FactionId): MunicipalityId[] {
+export function getBilateralRoutingOrder(sourceMun: MunicipalityId, faction: FactionId, toFaction?: FactionId): MunicipalityId[] {
     if (!toFaction || !isRbihHrhbPair(faction, toFaction)) return getRoutingOrder(sourceMun, faction);
     const fallback = FALLBACK_ROUTES_BY_FACTION[faction] ?? [];
     if (faction === 'HRHB') return orderedUnique(['mostar', 'livno', ...fallback, ...LARGE_URBAN_MUN_IDS]);

@@ -10,7 +10,6 @@ import { beforeEach, describe, expect, it } from 'vitest';
 
 import type { SettlementRecord } from '../../src/map/settlements.js';
 import {
-    resetDisplacementPressureCache,
     CENSUS_FALLBACK_NATIONAL_REASON,
     NATIONAL_POPULATION_1991_SUMS,
     resolvePressingFactions,
@@ -109,9 +108,16 @@ describe('appendDisplacementEvent with an unrecorded causer', () => {
     });
 });
 
-/** An RBiH pocket that is the faction's only municipality (so "encircled" fires), ringed by RS. */
+/**
+ * An RBiH pocket ringed by RS, cut off from RBiH's main body (`home`, three settlements),
+ * so "encircled" fires. (Before DA1 the test was "the faction holds no other
+ * municipality", which no campaign could meet.)
+ */
 function encircledPocketFixture() {
-    const controllers = { 'op:pocket:a': 'RBiH', 'op:pocket:b': 'RBiH', 'op:ring:c': 'RS', 'op:ring:d': 'RS' };
+    const controllers = {
+        'op:pocket:a': 'RBiH', 'op:pocket:b': 'RBiH', 'op:ring:c': 'RS', 'op:ring:d': 'RS',
+        'op:home:e': 'RBiH', 'op:home:f': 'RBiH', 'op:home:g': 'RBiH',
+    };
     const state = stateWith(controllers);
     (state.military as unknown as Record<string, unknown>).front_segments = {
         'op:pocket:a__op:ring:c': { edge_id: 'op:pocket:a__op:ring:c', active: true },
@@ -129,7 +135,7 @@ function encircledPocketFixture() {
         const mun = sid.split(':')[1];
         settlements.set(sid, { sid, source_id: sid, mun_code: mun, mun, mun1990_id: mun, properties: { population_total: 100 } });
     }
-    const edges = [{ a: 'op:pocket:a', b: 'op:ring:c' }];
+    const edges = [{ a: 'op:pocket:a', b: 'op:ring:c' }, { a: 'op:home:e', b: 'op:home:f' }, { a: 'op:home:f', b: 'op:home:g' }];
     const census: MunicipalityPopulation1991Map = {
         pocket: { total: 10000, bosniak: 6000, serb: 3000, croat: 1000, other: 0 },
         ring: { total: 10000, bosniak: 0, serb: 10000, croat: 0, other: 0 },
@@ -138,7 +144,6 @@ function encircledPocketFixture() {
 }
 
 describe('updateDisplacement pressure path (SC1 end to end)', () => {
-    beforeEach(() => resetDisplacementPressureCache());
 
     it('books an encircled pocket\'s losses to the besieger, for every people in it', () => {
         const { state, settlements, edges, census } = encircledPocketFixture();
@@ -183,7 +188,6 @@ describe('no-census fallback (SC2)', () => {
     });
 
     it('splits a pocket without a census entry by the national sums, tags it, and books no extra killed Bosniaks', () => {
-        resetDisplacementPressureCache();
         const { state, settlements, edges } = encircledPocketFixture();
         const report = updateDisplacement(state, settlements, edges, {} as MunicipalityPopulation1991Map);
         const rec = report.by_municipality.find((r) => r.mun_id === 'pocket');
@@ -201,7 +205,9 @@ describe('no-census fallback (SC2)', () => {
 /** For each people: civilian_casualties[people].killed vs killed summed into the aggregates. */
 function killedBothWays(state: GameState): { casualties: Record<string, number>; aggregates: Record<string, number> } {
     const casualties: Record<string, number> = {};
-    for (const [p, v] of Object.entries(state.displacement.civilian_casualties ?? {})) casualties[p] = v.killed;
+    for (const [p, v] of Object.entries(state.displacement.civilian_casualties ?? {})) {
+        if (v.killed > 0) casualties[p] = v.killed; // a people with only fled-abroad has killed 0
+    }
     const aggregates: Record<string, number> = {};
     for (const byPeople of Object.values(state.displacement.displacement_humanitarian_aggregates ?? {})) {
         for (const [p, slot] of Object.entries(byPeople)) {
@@ -212,7 +218,6 @@ function killedBothWays(state: GameState): { casualties: Record<string, number>;
 }
 
 describe('the two ledger "Killed" figures agree by construction (SC3 invariant)', () => {
-    beforeEach(() => resetDisplacementPressureCache());
 
     it('pressure path, census split across three peoples with different flee-abroad rates', () => {
         const { state, settlements, edges, census } = encircledPocketFixture();
