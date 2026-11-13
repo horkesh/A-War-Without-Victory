@@ -12,7 +12,7 @@
 ## 2026-11-13 — Canon/data fixes S10 (NamedPhase count) and S11 (Delić tenure week)
 
 **S10, docs only.** `Phase_Specifications_v0_9_0.md` said the War-phase pipeline had 151 NamedPhase
-steps. The real count is **193** (`warPhases` in `src/sim/turn_phases/war_phases.ts`, pinned by
+steps. The real count is **195** at merge time (193 when measured; +2 from the stance-matters steps merged from main) (`warPhases` in `src/sim/turn_phases/war_phases.ts`, pinned by
 `tests/war_phase_step_order.test.ts`; the 22 `earlyWarPhases` are a separate list). Corrected the
 spec and the two live repeats in `GAME_STATE_RATING_MASTER.md` ("151 steps", "151-step war
 pipeline"). Left as dated history: older ledger/report/napkin entries that quote the count at the time.
