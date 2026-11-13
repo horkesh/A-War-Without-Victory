@@ -82,11 +82,11 @@ function CommandAuthorityGauge({ current, max }: { current: number; max: number 
             <span id="command-authority-description" className="sr-only">
                 {t('presidentialToolbar.commandAuthorityDescription')}
             </span>
-            <span className="hidden 2xl:inline text-xs font-mono font-bold uppercase tracking-[0.12em] text-text-secondary">{t('presidentialToolbar.auth')}</span>
+            <span className="hidden 2xl:inline text-[13px] font-mono font-bold uppercase tracking-[0.12em] text-text-secondary">{t('presidentialToolbar.auth')}</span>
             <div className="hidden xl:block w-14 h-1.5 bg-white/10 rounded-full overflow-hidden">
                 <div className={`h-full ${barColor} transition-all duration-500`} style={{ width: `${pct}%` }} />
             </div>
-            <span className={`text-xs font-mono font-bold ${color}`}>{current}</span>
+            <span className={`text-[13px] font-mono font-bold ${color}`}>{current}</span>
         </div>
     );
 }
@@ -343,7 +343,7 @@ export function PresidentialToolbar({
                         onClick={handleOpenDesk}
                         disabled={modalLocked}
                         data-testid="toolbar-route-desk"
-                        className={`shrink-0 whitespace-nowrap px-2 py-1 text-xs font-mono font-bold uppercase tracking-[0.15em] transition-colors disabled:opacity-30 disabled:cursor-not-allowed ${
+                        className={`shrink-0 whitespace-nowrap px-2 py-1 text-[13px] font-mono font-bold uppercase tracking-[0.15em] transition-colors disabled:opacity-30 disabled:cursor-not-allowed ${
                             showWarroomReturn
                                 ? 'text-amber-400 hover:text-amber-300'
                                 : 'text-text-secondary hover:text-amber-400'
@@ -357,7 +357,7 @@ export function PresidentialToolbar({
                         onClick={handleOpenMap}
                         disabled={shellRouteDisabled}
                         data-testid="toolbar-route-war-map"
-                        className="shrink-0 whitespace-nowrap px-2 py-1 text-xs font-mono font-bold uppercase tracking-[0.15em] text-text-secondary hover:text-amber-400 transition-colors disabled:opacity-30"
+                        className="shrink-0 whitespace-nowrap px-2 py-1 text-[13px] font-mono font-bold uppercase tracking-[0.15em] text-text-secondary hover:text-amber-400 transition-colors disabled:opacity-30"
                         title="Clear field selections"
                     >
                         {t('presidentialToolbar.warMap')}
@@ -367,7 +367,7 @@ export function PresidentialToolbar({
                         onClick={handleOpenHQ}
                         disabled={shellRouteDisabled}
                         data-testid="toolbar-route-army-hq"
-                        className="shrink-0 whitespace-nowrap px-2 py-1 text-xs font-mono font-bold uppercase tracking-[0.15em] text-text-secondary hover:text-amber-400 transition-colors disabled:opacity-30"
+                        className="shrink-0 whitespace-nowrap px-2 py-1 text-[13px] font-mono font-bold uppercase tracking-[0.15em] text-text-secondary hover:text-amber-400 transition-colors disabled:opacity-30"
                         title={t('presidentialToolbar.visitArmyHq')}
                     >
                         {t('presidentialToolbar.armyHq')}
@@ -381,7 +381,7 @@ export function PresidentialToolbar({
                         onClick={handleOpenRecords}
                         disabled={shellRouteDisabled}
                         data-testid="toolbar-route-records"
-                        className="hidden lg:inline-block shrink-0 whitespace-nowrap px-2 py-1 text-xs font-mono font-bold uppercase tracking-[0.15em] text-text-secondary hover:text-amber-400 transition-colors disabled:opacity-30"
+                        className="hidden lg:inline-block shrink-0 whitespace-nowrap px-2 py-1 text-[13px] font-mono font-bold uppercase tracking-[0.15em] text-text-secondary hover:text-amber-400 transition-colors disabled:opacity-30"
                         title={t('presidentialToolbar.openRecordsTitle')}
                     >
                         {t('presidentialToolbar.records')}
@@ -391,7 +391,7 @@ export function PresidentialToolbar({
                         onClick={handleOpenChronicle}
                         disabled={shellRouteDisabled}
                         data-testid="toolbar-route-chronicle"
-                        className="hidden lg:inline-block shrink-0 whitespace-nowrap px-2 py-1 text-xs font-mono font-bold uppercase tracking-[0.15em] text-text-secondary hover:text-amber-400 transition-colors disabled:opacity-30"
+                        className="hidden lg:inline-block shrink-0 whitespace-nowrap px-2 py-1 text-[13px] font-mono font-bold uppercase tracking-[0.15em] text-text-secondary hover:text-amber-400 transition-colors disabled:opacity-30"
                         title={t('presidentialToolbar.chronicleTitle')}
                     >
                         {t('presidentialToolbar.chronicle')}
@@ -402,20 +402,20 @@ export function PresidentialToolbar({
                         disabled={shellRouteDisabled}
                         data-testid="toolbar-route-codex"
                         data-coachmark-id="codex"
-                        className="hidden lg:inline-block shrink-0 whitespace-nowrap px-2 py-1 text-xs font-mono font-bold uppercase tracking-[0.15em] text-text-secondary hover:text-amber-400 transition-colors disabled:opacity-30"
+                        className="hidden lg:inline-block shrink-0 whitespace-nowrap px-2 py-1 text-[13px] font-mono font-bold uppercase tracking-[0.15em] text-text-secondary hover:text-amber-400 transition-colors disabled:opacity-30"
                         title={t('presidentialToolbar.historicalReference')}
                     >
                         {t('presidentialToolbar.codex')}
                     </button>
                     {loadedGameState ? (
                         <span
-                            className="font-mono text-[12px] text-text-primary tracking-wider uppercase truncate min-w-0"
+                            className="font-mono text-[13px] text-text-primary tracking-wider uppercase truncate min-w-0"
                             title={t('presidentialToolbar.currentDateTitle')}
                         >
                             {formatTurnLabel(loadedGameState.label)}
                         </span>
                     ) : (
-                        <div className="font-mono text-xs text-text-secondary italic uppercase">
+                        <div className="font-mono text-[13px] text-text-secondary italic uppercase">
                             {t('presidentialToolbar.noStateLoaded')}
                         </div>
                     )}
@@ -424,7 +424,7 @@ export function PresidentialToolbar({
                             type="button"
                             disabled={modalLocked}
                             onClick={() => setDevDrawerOpen((open) => !open)}
-                            className="px-1.5 py-0.5 text-xs font-mono uppercase tracking-[0.3em] bg-amber-900/40 text-amber-500 border border-amber-500/30 rounded-full hover:bg-amber-900/60 disabled:opacity-30 disabled:cursor-not-allowed"
+                            className="px-1.5 py-0.5 text-[13px] font-mono uppercase tracking-[0.3em] bg-amber-900/40 text-amber-500 border border-amber-500/30 rounded-full hover:bg-amber-900/60 disabled:opacity-30 disabled:cursor-not-allowed"
                             aria-pressed={devDrawerOpen}
                         >
                             {t('presidentialToolbar.dev')}
@@ -472,7 +472,7 @@ export function PresidentialToolbar({
                         <button
                             onClick={handleReviewPriorities}
                             disabled={modalLocked}
-                            className="flex shrink-0 items-center gap-1.5 whitespace-nowrap px-2.5 py-1 text-xs font-mono font-bold uppercase tracking-wide bg-red-900/30 text-red-400 border border-red-500/30 rounded animate-pulse hover:bg-red-900/50 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                            className="flex shrink-0 items-center gap-1.5 whitespace-nowrap px-2.5 py-1 text-[13px] font-mono font-bold uppercase tracking-wide bg-red-900/30 text-red-400 border border-red-500/30 rounded animate-pulse hover:bg-red-900/50 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                             title={t('presidentialToolbar.openAttentionQueue')}
                             aria-label={t(pendingReviews === 1 ? 'presidentialToolbar.reviewSingular' : 'presidentialToolbar.reviewPlural', { count: pendingReviews })}
                         >
@@ -491,7 +491,7 @@ export function PresidentialToolbar({
                         <button
                             onClick={handleOpenArmyReserve}
                             disabled={modalLocked}
-                            className={`flex shrink-0 items-center gap-1.5 whitespace-nowrap px-2.5 py-1 text-xs font-mono font-bold uppercase tracking-wide border rounded transition-colors disabled:opacity-30 disabled:cursor-not-allowed ${
+                            className={`flex shrink-0 items-center gap-1.5 whitespace-nowrap px-2.5 py-1 text-[13px] font-mono font-bold uppercase tracking-wide border rounded transition-colors disabled:opacity-30 disabled:cursor-not-allowed ${
                                 reserveSignal.tone === 'critical'
                                     ? 'bg-amber-900/30 text-amber-400 border-amber-500/30 hover:bg-amber-900/50'
                                     : 'bg-sky-900/30 text-sky-300 border-sky-400/30 hover:bg-sky-900/50'
@@ -514,7 +514,7 @@ export function PresidentialToolbar({
                         <button
                             onClick={handleOpenHQ}
                             disabled={modalLocked}
-                            className="flex shrink-0 items-center gap-1.5 whitespace-nowrap px-2.5 py-1 text-xs font-mono font-bold uppercase tracking-wide bg-amber-900/30 text-amber-400 border border-amber-500/30 rounded hover:bg-amber-900/50 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                            className="flex shrink-0 items-center gap-1.5 whitespace-nowrap px-2.5 py-1 text-[13px] font-mono font-bold uppercase tracking-wide bg-amber-900/30 text-amber-400 border border-amber-500/30 rounded hover:bg-amber-900/50 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                             title={t('presidentialToolbar.tensionsRising')}
                             aria-label={t('presidentialToolbar.tensionsRising')}
                         >
@@ -536,7 +536,7 @@ export function PresidentialToolbar({
                         disabled={modalLocked || advancing || !loadedGameState || (!advanceBlocked && !ipc.isAvailable)}
                         title={advanceGateTitle}
                         aria-label={advanceBlocked ? advanceGateTitle : undefined}
-                        className={`shrink-0 whitespace-nowrap px-4 py-1.5 text-xs font-mono font-bold uppercase tracking-[0.15em] border rounded transition-all disabled:opacity-30 disabled:cursor-not-allowed active:scale-95 ${
+                        className={`shrink-0 whitespace-nowrap px-4 py-1.5 text-[13px] font-mono font-bold uppercase tracking-[0.15em] border rounded transition-all disabled:opacity-30 disabled:cursor-not-allowed active:scale-95 ${
                             advanceBlocked
                                 ? 'bg-red-500/10 text-red-300 border-red-500/45 hover:bg-red-500/20 hover:border-red-400/60'
                                 : 'bg-amber-400/10 text-amber-400 border-amber-400/30 hover:bg-amber-400/20 hover:border-amber-400/50'
@@ -561,7 +561,7 @@ export function PresidentialToolbar({
                 aria-label={t('presidentialToolbar.armyHqLabel', { army: armyName ?? t('presidentialToolbar.army') })}
                 title={t('presidentialToolbar.visitArmyHq')}
             >
-                <span className="text-xs font-mono font-bold uppercase tracking-[0.18em] text-amber-400/60 group-hover:text-amber-400 transition-colors mb-0.5">
+                <span className="text-[13px] font-mono font-bold uppercase tracking-[0.18em] text-amber-400/60 group-hover:text-amber-400 transition-colors mb-0.5">
                     {armyName ?? playerFaction ?? t('presidentialToolbar.command')}
                 </span>
                 {crestUrl && (
@@ -598,10 +598,10 @@ export function PresidentialToolbar({
             {/* Error bar */}
             {loadError && (
                 <div className={`fixed ${devMode ? 'top-[4.5rem]' : 'top-12'} left-0 right-0 z-10 bg-red-900/60 backdrop-blur-md border-b border-red-500/30 px-4 py-1 flex items-center justify-between`}>
-                    <span className="text-xs font-mono text-red-200 uppercase tracking-widest">
+                    <span className="text-[13px] font-mono text-red-200 uppercase tracking-widest">
                         {playerFacingErrorCopy(loadError)}
                     </span>
-                    <button onClick={() => setLoadError(null)} className="text-red-200/50 hover:text-red-200 text-xs font-mono uppercase">
+                    <button onClick={() => setLoadError(null)} className="text-red-200/50 hover:text-red-200 text-[13px] font-mono uppercase">
                         {t('presidentialToolbar.dismiss')}
                     </button>
                 </div>

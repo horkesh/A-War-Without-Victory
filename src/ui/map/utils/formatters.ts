@@ -50,8 +50,10 @@ export function formatCampaignWeekLabel(turn: number | null | undefined): string
 
 /**
  * Humanizes a turn label (e.g., "Turn 32") by replacing the raw counter with the calendar date.
+ * A save or state without a label yields an empty string rather than a crash in the toolbar.
  */
-export function formatTurnLabel(label: string): string {
+export function formatTurnLabel(label: string | null | undefined): string {
+    if (typeof label !== 'string' || label.length === 0) return '';
     const match = label.match(/Turn\s+(\d+)/i);
     if (!match) return label;
     const turn = parseInt(match[1], 10);

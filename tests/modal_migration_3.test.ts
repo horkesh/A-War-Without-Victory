@@ -4,15 +4,17 @@
  * verification.
  *
  * Successor lane to LANE-V094-MODAL-MIGRATION-2 (Wave 2 ship). This file
- * pins the per-migration contract for the 4 must-respond / terminal modals
+ * pins the per-migration contract for the must-respond / terminal modals
  * migrated alongside the substrate `dismissible` extension:
  *
- *   1. GameOverModal           — `src/ui/map/components/GameOverModal.tsx`
- *   2. PeacePlanModal          — `src/ui/map/components/PeacePlanModal.tsx`
- *   3. DaytonNegotiationModal  — `src/ui/map/components/DaytonNegotiationModal.tsx`
- *   4. EventDecisionModal      — `src/ui/map/components/EventDecisionModal.tsx`
+ *   1. PeacePlanModal          — `src/ui/map/components/PeacePlanModal.tsx`
+ *   2. DaytonNegotiationModal  — `src/ui/map/components/DaytonNegotiationModal.tsx`
+ *   3. EventDecisionModal      — `src/ui/map/components/EventDecisionModal.tsx`
  *
- * Per-modal contract (all four):
+ * GameOverModal was the fourth target; it was never mounted (VerdictScreen's
+ * fallback owns the end state) and was deleted in surface step 5 (2026-11-13).
+ *
+ * Per-modal contract (all three):
  *   M1  — module imports `Modal` from `src/ui/shared/Modal`
  *   M2  — module continues to import `Z` from canonical `src/ui/shared/zIndex`
  *   M3  — no residual numeric `zIndex: <literal>` shell-tier value (regression
@@ -58,12 +60,6 @@ interface MigrationTarget {
 }
 
 const TARGETS: ReadonlyArray<MigrationTarget> = [
-    {
-        label: 'GameOverModal',
-        path: 'src/ui/map/components/GameOverModal.tsx',
-        ariaLabelledBy: 'game-over-title',
-        zTier: 'Z.GAME_OVER',
-    },
     {
         label: 'PeacePlanModal',
         path: 'src/ui/map/components/PeacePlanModal.tsx',

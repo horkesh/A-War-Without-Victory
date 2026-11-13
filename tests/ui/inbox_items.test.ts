@@ -1102,9 +1102,9 @@ describe('deriveInboxItems — autonomy proposals', () => {
         const proposal = items.find(i => i.type === 'autonomy_proposal')!;
 
         expect(opportunity.title).toBe('Operativna prilika');
-        expect(opportunity.subtitle).toBe('Stab preporucuje odobrenje.');
+        expect(opportunity.subtitle).toBe('Štab preporučuje odobrenje.');
         expect(proposal.title).toBe('Komandni prijedlog');
-        expect(proposal.subtitle).toBe('Vojni prijedlog trazi pregled.');
+        expect(proposal.subtitle).toBe('Vojni prijedlog traži pregled.');
         expect(`${opportunity.title} ${opportunity.subtitle} ${proposal.title} ${proposal.subtitle}`)
             .not.toMatch(/Operation Opportunity|Staff recommends|authorization|Command Proposal|proposal requires your review/i);
     });
@@ -1143,9 +1143,9 @@ describe('deriveInboxItems — autonomy proposals', () => {
         const copy = `${opportunity.title} ${opportunity.subtitle} ${proposal.title} ${proposal.subtitle}`;
 
         expect(opportunity.title).toBe('Operativna prilika');
-        expect(opportunity.subtitle).toBe('operativni prijedlog trazi pregled.');
+        expect(opportunity.subtitle).toBe('operativni prijedlog traži pregled.');
         expect(proposal.title).toBe('Komandni prijedlog');
-        expect(proposal.subtitle).toBe('Vojni prijedlog trazi pregled.');
+        expect(proposal.subtitle).toBe('Vojni prijedlog traži pregled.');
         expect(copy).not.toMatch(/Launch operation|staff recommendation|approve|Reinforce|Corps sector|proposal requires your review/i);
     });
 

@@ -870,7 +870,7 @@ describe('buildPresidentialDecisionRoomView', () => {
     expect(cardsById['paramilitary:pending'].title).toBe('Odobrenje paravojske na čekanju');
     expect(cardsById['paramilitary:pending'].evidence).toContain('rizik ratnih zločina');
     expect(cardsById['manifest:peace_plan'].title).toBe('Odgovor na mirovni plan na čekanju');
-    expect(cardsById['sitrep:front-exposed'].title).toBe('Tanko drzani frontovi');
+    expect(cardsById['sitrep:front-exposed'].title).toBe('Tanko držani frontovi');
     expect(cardsById['chronicle:review-memory'].title).toBe('Pamćenje Hronike ažurirano');
     expect(cardsById['review:pending'].title).not.toBe('Presidential reviews pending');
   });
@@ -1978,8 +1978,8 @@ describe('buildPresidentialDecisionRoomView', () => {
 
     expect(evidence).toContain('Hitnost:');
     expect(evidence).toContain('Komanda davaoca:');
-    expect(evidence).toContain('Polazni polozaj:');
-    expect(evidence).toContain('Oslabljeni polozaj:');
+    expect(evidence).toContain('Polazni položaj:');
+    expect(evidence).toContain('Oslabljeni položaj:');
     expect(evidence).not.toMatch(/Severity:|Donor command:|Source position:|Weakened position:/);
   });
 

@@ -3,7 +3,6 @@ import { afterEach, expect, it, vi } from 'vitest';
 import { createElement } from 'react';
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { SettingsScreen } from '../../src/ui/map/components/SettingsScreen';
-import { GameOverModal } from '../../src/ui/map/components/GameOverModal';
 import { OnboardingOverlay } from '../../src/ui/map/components/onboarding/OnboardingOverlay';
 import { AdvanceTurnModal } from '../../src/ui/map/components/warroom/AdvanceTurnModal';
 import { advanceTurnAndSync } from '../../src/ui/map/desktop/orderActions';
@@ -24,16 +23,6 @@ it('offers restrained Settings open, explicit control-click and close cues', () 
   expect(playCue).toHaveBeenCalledWith('ui_click');
   fireEvent.click(screen.getByRole('button', { name: /^Close$/ }));
   expect(playCue).toHaveBeenCalledWith('ui_close_panel'); expect(onClose).toHaveBeenCalledTimes(1);
-});
-
-it('offers one terminal cue when the existing game-over surface becomes visible', () => {
-  const state = { turn: 40, gameOver: false, formations: [], controlBySettlement: {} } as unknown as LoadedGameState;
-  useGameStore.setState({ loadedGameState: state });
-  render(createElement(GameOverModal)); expect(playCue).not.toHaveBeenCalled();
-  act(() => useGameStore.setState({ loadedGameState: { ...state, gameOver: true } }));
-  expect(playCue).toHaveBeenCalledWith('game_over');
-  act(() => useGameStore.setState({ loadedGameState: { ...state, gameOver: true, turn: 41 } }));
-  expect(playCue).toHaveBeenCalledTimes(1);
 });
 
 it('offers tutorial completion feedback after local preview advancement, but not skip', async () => {

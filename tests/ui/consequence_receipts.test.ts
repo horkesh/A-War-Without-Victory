@@ -392,7 +392,7 @@ describe('buildConsequenceReceipts', () => {
 
         expect(text).toContain('Prkos pokrovitelju');
         expect(text).toContain('Odbijen zahtjev Beograda');
-        expect(text).toContain('Materijalna podrska Beograda smanjena za 25%');
+        expect(text).toContain('Materijalna podrška Beograda smanjena za 25%');
         expect(text).not.toMatch(/Patron defiance|Refused|materiel cut|front fell|refusal stands/i);
     });
 

@@ -182,7 +182,7 @@ describe('Army HQ readiness and threat copy', () => {
         expect(items[0]?.recommendation).toBe('Reinforce front OGs');
 
         const html = bcsMarkup(createElement(ForceReadiness, { items }));
-        expect(html).toContain('Pojacati prednje sektore');
+        expect(html).toContain('Pojačati prednje sektore');
         expect(html).not.toContain('Reinforce front OGs');
     });
 
@@ -306,6 +306,6 @@ describe('Army HQ readiness and threat copy', () => {
         expect(copy).not.toMatch(/hostile offensive preparation|hostile defenses consolidating|weak intelligence picture/i);
         expect(copy).not.toMatch(/Strength estimate|sector reporting|sectors reporting|Entrenchment|defensive posture|Blind sector|Reconnaissance/i);
         expect(copy).not.toMatch(/sector-offensive|sector-hardened|sector-gap|sector:/i);
-        expect(copy).toMatch(/procjena|izvjestaj|slika/i);
+        expect(copy).toMatch(/procjena|izvještaj|slika/i);
     });
 });

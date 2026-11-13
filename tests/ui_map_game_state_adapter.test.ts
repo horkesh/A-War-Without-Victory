@@ -330,7 +330,7 @@ test('reserve transfer sentences respect the active BCS locale', () => {
         );
         const summary = buildReserveRequestSummary(presentation);
 
-        assert.match(presentation.weakenedPosition, /na polozaju Visoko/);
+        assert.match(presentation.weakenedPosition, /na položaju Visoko/);
         assert.doesNotMatch(presentation.weakenedPosition, /\sat\s/);
         assert.doesNotMatch(summary, /\b(?:from|to|Weakened position)\b|\sat\s/);
     } finally {

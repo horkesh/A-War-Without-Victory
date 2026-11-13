@@ -211,11 +211,11 @@ describe('SettlementDetailContent supply status surface', () => {
     }));
 
     const panel = screen.getByTestId('settlement-detail-panel');
-    expect(panel.textContent).toContain('Bosnjaci');
+    expect(panel.textContent).toContain('Bošnjaci');
     expect(panel.textContent).toContain('Srbi');
     expect(panel.textContent).toContain('Hrvati');
     expect(panel.textContent).toContain('Ostali');
-    expect(panel.textContent).toContain('Gusto naseljeno ruralno podrucje');
+    expect(panel.textContent).toContain('Gusto naseljeno ruralno područje');
     expect(panel.textContent).toContain('Odbrana +30%');
     expect(panel.textContent).not.toMatch(/Bosniak|Serb|Croat|Other|Rural Dense|\+30% Def|rural_dense/);
   });
