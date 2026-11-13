@@ -113,13 +113,19 @@ describe('desktop attack-order canon staging', () => {
       'utf8',
     );
     const start = source.indexOf("ipcMain.handle('stage-attack-order'");
-    const end = source.indexOf("ipcMain.handle('stage-posture-order'", start);
+    // The next handler after the attack handler (the posture-order channel was retired).
+    const end = source.indexOf("ipcMain.handle('stage-move-order'", start);
     const handler = source.slice(start, end);
 
     expect(start).toBeGreaterThanOrEqual(0);
     expect(end).toBeGreaterThan(start);
     expect(handler).toContain('const result = stageCanonAttackOrder(state, payload);');
     expect(handler).not.toMatch(/state\.brigade_attack_orders|state\.military\.brigade_attack_orders/);
+  });
+
+  it('has no brigade posture-order channel (posture model option 2)', async () => {
+    const source = await readFile(join(process.cwd(), 'src', 'desktop', 'electron-main.cjs'), 'utf8');
+    expect(source).not.toContain("ipcMain.handle('stage-posture-order'");
   });
 
   it('rejects an arbitrary brigade attack without mutating existing orders', () => {
