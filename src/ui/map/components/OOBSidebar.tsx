@@ -417,7 +417,7 @@ export function OOBSidebar() {
                           {/* HQ Reserve Units — rendered above corps with distinct styling */}
                           {hqEntries.map(([hqId, hqBrigades]) => {
                             const hqFormation = corpsFormationById.get(hqId);
-                            const hqName = hqFormation ? getLocalizedFormationName(hqFormation, locale) : 'Main Staff';
+                            const hqName = hqFormation ? getLocalizedFormationName(hqFormation, locale) : t('oob.mainStaffFallback');
                             return (
                               <div
                                 key={hqId}
@@ -471,7 +471,7 @@ export function OOBSidebar() {
                                 <CorpsCard
                                   corpsId={corpsId}
                                   corpsName={corpsId === '_ungrouped'
-                                    ? 'Ungrouped'
+                                    ? t('oob.ungrouped')
                                     : getPlayerSafeCorpsName(corpsFormationById.get(corpsId)?.name, corpsId)}
                                   brigades={brigades}
                                   faction={faction}

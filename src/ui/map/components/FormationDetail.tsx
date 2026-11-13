@@ -57,9 +57,9 @@ function formatEngagementTurnLabel(turn: number): string {
   return turnToDateString(turn);
 }
 
-const ENGAGEMENT_ROLE_LABELS: Record<string, string> = {
-  attacker: 'attacker',
-  defender: 'defender',
+const ENGAGEMENT_ROLE_LABEL_KEYS: Record<string, MessageKey> = {
+  attacker: 'formationDetail.role.attacker',
+  defender: 'formationDetail.role.defender',
 };
 
 const MOVEMENT_STATUS_LABEL_KEYS: Record<NonNullable<FormationView['movementStatus']>, MessageKey> = {
@@ -102,7 +102,8 @@ function formatEngagementOutcomeLabel(outcome: string): string {
 }
 
 function formatEngagementRole(role: string): string {
-  return ENGAGEMENT_ROLE_LABELS[role] ?? t('formationDetail.participant');
+  const key = ENGAGEMENT_ROLE_LABEL_KEYS[role];
+  return key ? t(key) : t('formationDetail.participant');
 }
 
 /** Rail rows carry the label on the left; the trailing colon of the old inline copy goes. */
@@ -132,17 +133,18 @@ function safeSectorLabel(sectorId: string, sectors: Array<{ sector_id?: string |
   return isUnsafeRawLabel(label) ? t('formationDetail.assignedSector') : label;
 }
 
-const EFFECTIVENESS_MODIFIER_LABELS: Record<string, string> = {
-  fatigue: 'Fatigue',
-  officer: 'Officer cadre',
-  homeDistance: 'Distance from home',
-  morale: 'Morale',
-  disruption: 'Disruption',
-  supply: 'Supply',
+const EFFECTIVENESS_MODIFIER_LABEL_KEYS: Record<string, MessageKey> = {
+  fatigue: 'formationDetail.modifier.fatigue',
+  officer: 'formationDetail.modifier.officer',
+  homeDistance: 'formationDetail.modifier.homeDistance',
+  morale: 'formationDetail.modifier.morale',
+  disruption: 'formationDetail.modifier.disruption',
+  supply: 'formationDetail.modifier.supply',
 };
 
 function formatEffectivenessModifierLabel(key: string): string {
-  return EFFECTIVENESS_MODIFIER_LABELS[key] ?? t('formationDetail.staffRecord');
+  const labelKey = EFFECTIVENESS_MODIFIER_LABEL_KEYS[key];
+  return labelKey ? t(labelKey) : t('formationDetail.staffRecord');
 }
 
 function formatOptionalInteger(value: number | null | undefined): string {

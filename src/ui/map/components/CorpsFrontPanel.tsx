@@ -157,11 +157,14 @@ const PREP_LABEL_KEYS: Record<string, MessageKey> = {
 };
 
 /** Player-facing phrasing for a commander's launch recommendation (raw enum: launch/postpone/abort). */
-const COMMANDER_ASSESSMENT_LABELS: Record<string, string> = {
-  launch: 'Recommends launch', postpone: 'Urges delay', abort: 'Advises abort',
+const COMMANDER_ASSESSMENT_LABEL_KEYS: Record<string, MessageKey> = {
+  launch: 'operationHistory.assessment.launch',
+  postpone: 'operationHistory.assessment.postpone',
+  abort: 'operationHistory.assessment.abort',
 };
 function commanderAssessmentLabel(assessment: string): string {
-  return COMMANDER_ASSESSMENT_LABELS[assessment] ?? t('corpsFront.unreported');
+  const key = COMMANDER_ASSESSMENT_LABEL_KEYS[assessment];
+  return key ? t(key) : t('corpsFront.unreported');
 }
 
 function stanceLabel(stance: string | null | undefined): string {

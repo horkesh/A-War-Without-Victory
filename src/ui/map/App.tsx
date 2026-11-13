@@ -33,7 +33,11 @@ const AutonomyPanel = lazy(() =>
 import { TurnAftermathModal } from './components/TurnAftermathModal';
 import { OperationBriefingModal } from './components/OperationBriefingModal';
 import { SupplyPanel } from './components/SupplyPanel';
-import { EconomyPanel } from './components/EconomyPanel';
+// War Footing opens on demand from the President's Desk (surface step 5), so it loads then
+// and stays out of the entry chunk like RecruitmentModal and AutonomyPanel.
+const EconomyPanel = lazy(() =>
+  import('./components/EconomyPanel').then(m => ({ default: m.EconomyPanel })),
+);
 import { HumanitarianLedgerPanel } from './components/HumanitarianLedgerPanel';
 import { EnclaveDashboard } from './components/EnclaveDashboard';
 import { EventModal } from './components/EventModal';
@@ -2051,7 +2055,9 @@ function App() {
         <SupplyPanel state={loadedGameState} />
       )}
       {economyOpen && loadedGameState && (
-        <EconomyPanel state={loadedGameState} onClose={() => setEconomyOpen(false)} />
+        <Suspense fallback={null}>
+          <EconomyPanel state={loadedGameState} onClose={() => setEconomyOpen(false)} />
+        </Suspense>
       )}
       {loadedGameState && (
         <HumanitarianLedgerPanel
@@ -2320,6 +2326,7 @@ function App() {
                 }
                 leaveWarroomForGame();
               }}
+              onOpenEconomy={() => setEconomyOpen(true)}
               onClose={() => {
                 closeWarroomDesk();
               }}
