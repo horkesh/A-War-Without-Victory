@@ -162,14 +162,16 @@ const ATROCITY_COST_GAIN = 0.85;
  *       because a pattern requirement is a "free atrocity budget" the §6 bright line
  *       forbids, and the record (Bijeljina/Zvornik/Višegrad/Foča 1992) shows a single
  *       authorized cleansing was already atrocity-grade (ICTY Vasiljević/Kunarac/Krajišnik).
- *   (2) `civilian_casualties_caused ≥ 15000` — CATASTROPHIC siege/encirclement-driven
- *       civilian harm, backstopping the `updateDisplacement` blind spot (that pipeline
- *       never calls `recordWarCrime`). Attributed to the CAUSER faction. 15,000 sits 2.7×
- *       above a lone Sarajevo-scale siege (~3,500-5,500 civilian dead, ICTY Galić — a
- *       single brutal siege must NOT trip this) and 1.84× below RS's modeled multi-
- *       municipality campaign (~27,541) — the "brutal single siege vs catastrophic
- *       campaign" line. `refugees_created` is deliberately NOT gated (too coarse: ordinary
- *       front movement displaces on all sides).
+ *   (2) `civilian_casualties_caused ≥ 15000` — catastrophic civilian harm, booked to the
+ *       side that took or held control of the area (takeover displacement) or that
+ *       conducted the paramilitary action. Siege harm is not modelled: the
+ *       `updateDisplacement` pressure path is dormant in campaigns, and when revived it
+ *       books the besieger, never the holder (displacement attribution lane, 2026-11-13,
+ *       SENSITIVE_HISTORY_DESIGN_GATE.md §6). 15,000 sits 1.84× below RS's modeled
+ *       multi-municipality campaign (~27,541). Its comparison with a lone Sarajevo-scale
+ *       siege (~3,500-5,500 civilian dead, ICTY Galić) rests on a quantity the engine does
+ *       not model; re-measure it in any lane that models siege harm. `refugees_created`
+ *       is deliberately NOT gated (too coarse: ordinary front movement displaces on all sides).
  * Panel history: v1 (blended atrocitySubScore≥0.5) RETIRED — calendar-contaminated +
  * siege-false-positive + cliff-gameable. See docs/plans/2026-08-10-emergent-cumulative-
  * condemnation-amendment.md.

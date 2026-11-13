@@ -1,5 +1,14 @@
 # Real War Master
 
+## Open FAIL: the HVO cleansing of Bosniaks barely registers in the humanitarian record (2026-11-13)
+
+Raised by the War-or-Game seat of the displacement attribution panel (`SENSITIVE_HISTORY_DESIGN_GATE.md` §6). The Humanitarian Ledger now shows displaced-or-killed by the side controlling the area, so this gap is visible to the player.
+
+- Canonical 188w baseline (main `c1299da25`, `runs/apr1992_definitive_188w__6deb5845c150c196__w188_n0`), `displacement_humanitarian_aggregates`: Herzeg-Bosnia forces against Bosniaks 1,279 displaced or killed (31 killed); RBiH forces against Croats 43,267 (797 killed).
+- History runs the other way for 1993. ICTY Prlić et al. (IT-04-74-A, 2017) upheld a joint criminal enterprise to ethnically cleanse Muslims from Herceg-Bosna (Mostar, Stolac, Čapljina, Prozor, the Lašva Valley); Kordić (IT-95-14/2-A) and Blaškić (IT-95-14-A) cover the Lašva Valley.
+- Cause: the HVO-ARBiH war of 1993-94 is largely absent from the simulation (see the Option J/K reviews below), so the takeover writer has almost no HVO captures of Bosniak areas to book.
+- **Verdict: FAIL, open.** Fix it in the engine (the HVO-ARBiH war), never through the ledger or its labels.
+
 ## Accounting-regime change: militia casualties are now recorded (2026-09-01)
 
 Every casualty total in this document that predates this entry — including the `n388` table

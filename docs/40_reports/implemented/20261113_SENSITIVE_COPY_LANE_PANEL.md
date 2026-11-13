@@ -44,6 +44,8 @@ Data (`data/source/oob_corps.json`) and the save format are untouched: the EN di
 
 ## Follow-ups (not in this change)
 
+Items 1-3 were closed later the same day by the displacement attribution lane (`20261113_DISPLACEMENT_ATTRIBUTION_PANEL.md`, eight-seat panel). It found that the siege path is dormant in campaigns, made it book the besieger, replaced the Bosniak-only fallback, made the two "Killed" figures agree by construction, and restored the side column as "Side controlling the area".
+
 1. Engine: attribute siege and encirclement displacement to the besieger or a separate bucket (`src/state/displacement.ts`, pressure path). Changes perpetrator attribution, so it needs its own §6 panel.
 2. Engine: the non-ethnic-split fallback in `src/state/displacement.ts` books all lost population as killed Bosniaks (Historian: distorts the victim table; schedule soon).
 3. The two ledger tables carry per-people "Killed" figures from different fields (`civilian_casualties` vs the displacement aggregates); reconcile them or label them as different measures (four seats).
