@@ -14521,6 +14521,12 @@ Docs-only closeout. The Dayton conference lane merged as #560 (`4a67bd516`) and 
 
 - `.claude/current-lane.txt` now declares R8 (it named DC, and `tools/hooks/guard_scope_drift.sh` reads it); changed at the request of the session coordinating the merge train, matching the roadmap order the owner set.
 
+## 2026-11-12 — Army HQ Personnel shows officer rating colours; briefing null-context mount is now tested (UI, QA)
+
+Two items the step 3 operations-surfaces session found outside its scope; the owner approved fixing them now.
+- **Personnel rating colours.** `army_hq/PersonnelContent.tsx` passed `getRatingColor()` (a Tailwind class name such as `text-green-400`) into `style.color`, so the browser dropped it and every Command/Initiative/Defense chip rendered in the default colour. It is now a class. The other callers (`OfficerProfile`, `CommanderSelectionModal`, `OperationBriefingModal`) already used it as a class; `ops_modal/*` is parked and untouched. New `tests/ui/personnel_rating_colours.test.ts`: chips carry the tone class with no inline colour (fails on the old code), and every tone is at least 4.5:1 on the chip background (about `#161512`). Rendered in the dev map build at 1280×720: 12 chips, computed colours green-400, orange-400 and text-primary as the ratings require (`F:/AWWV-coordination/surface_steps/personnel/`).
+- **Briefing hooks test.** No test opened `OperationBriefingModal` the way `App.tsx` hosts it (mounted closed with a null context, then the same instance given a context), so the "Rendered more hooks" crash on every open went unseen. New `tests/ui/operation_briefing_null_context_mount.test.ts` does that. Written as `it.fails` before the crash fix (`9b7d9da1a`) reached main; a plain `it` threw the hooks error on the old modal. After merging main (operations surfaces, #570, which carries the fix) it is a plain `it` and passes.
+
 ## 2026-11-12 — Recruitment reaches the president: newly raisable brigades on the Desk and the Command Surface (UI)
 
 Owner, 2026-11-12: "When a brigade is eligible for recruitment, that should be put front and center to the president, not wait until he visits recruitment tab." Until now a raisable brigade was visible only in Army HQ → Personnel → Recruitment.
