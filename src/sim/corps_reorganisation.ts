@@ -76,12 +76,29 @@ export interface CorpsRetireEventDef {
     reason: string;
 }
 
-export type CorpsReorganisationEventDef = CorpsTransferEventDef | CorpsRetireEventDef;
+/**
+ * Dated appointment of a named officer to command a corps (e.g. Alagić to the new 7th Corps).
+ * Fires once. Waits while the corps is inactive or the officer is not yet in play or is
+ * commanding a live operation; lapses (receipted, no effect) if the officer is killed or retired.
+ * The incumbent goes to reserve; the officer's previous command falls vacant and is filled by
+ * ordinary officer succession later the same turn.
+ */
+export interface CommanderHandoverEventDef {
+    id: string;
+    type: 'commander_handover';
+    trigger_turn: number;
+    corps_id: string;
+    officer_id: string;
+    reason: string;
+}
+
+export type CorpsReorganisationEventDef = CorpsTransferEventDef | CorpsRetireEventDef | CommanderHandoverEventDef;
 
 export interface CorpsReorganisationReport {
     transferred: Array<{ event_id: string; formation_id: string; from_corps_id: string | null; to_corps_id: string; forced: boolean }>;
     deferred: Array<{ event_id: string; formation_id: string }>;
     retired: Array<{ event_id: string; corps_id: string; successor_corps_id: string; cancelled_operations: string[]; dropped_queued_operations: string[] }>;
+    handovers?: Array<{ event_id: string; corps_id: string; officer_id: string; previous_corps_id: string | null; replaced_officer_id: string | null; lapsed: boolean }>;
     completed_event_ids: string[];
 }
 
@@ -158,6 +175,10 @@ export function validateCorpsReorganisationEvents(raw: unknown): CorpsReorganisa
                 successor_corps_id: e.successor_corps_id,
                 reason,
             });
+        } else if (e.type === 'commander_handover') {
+            if (typeof e.corps_id !== 'string' || !e.corps_id) throw new CorpsReorganisationDataError(`${id}: corps_id required`);
+            if (typeof e.officer_id !== 'string' || !e.officer_id) throw new CorpsReorganisationDataError(`${id}: officer_id required`);
+            out.push({ id, type: 'commander_handover', trigger_turn: e.trigger_turn, corps_id: e.corps_id, officer_id: e.officer_id, reason });
         } else {
             throw new CorpsReorganisationDataError(`${id}: unknown type ${String(e.type)}`);
         }
@@ -355,6 +376,44 @@ export function processCorpsReorganisationEvents(
         // nothing left to do. Receipts are informational; the rule itself stays standing.
         receipts(state)[e.id] = turn;
         report.completed_event_ids.push(e.id);
+        changed = true;
+    }
+
+    // 3. Commander handovers (once each), after transfers so the corps already holds its brigades.
+    for (const e of sorted) {
+        if (e.type !== 'commander_handover' || e.trigger_turn > turn) continue;
+        if (state.military.formation_lifecycle_events_fired?.[e.id] != null) continue;
+        const target = resolveLiveCorpsId(e.corps_id, retired);
+        if (!isActiveCorps(state, target)) continue;
+        const officers = state.military.named_officers;
+        const officer = officers?.[e.officer_id];
+        if (!officers || !officer) continue; // not yet in play
+        const handover = { event_id: e.id, corps_id: target, officer_id: e.officer_id, previous_corps_id: officer.assigned_corps_id ?? null, replaced_officer_id: null as string | null, lapsed: false };
+        if (officer.status === 'killed' || officer.status === 'retired') {
+            handover.lapsed = true;
+        } else if (officer.assigned_operation) {
+            continue; // finishes commanding the operation first
+        } else if (!(officer.status === 'active' && officer.assigned_corps_id === target)) {
+            for (const oid of Object.keys(officers).sort(strictCompare)) {
+                const other = officers[oid];
+                if (oid === e.officer_id || !other) continue;
+                if (other.status === 'active' && other.assigned_corps_id === target) {
+                    other.status = 'reserve';
+                    other.assigned_corps_id = null;
+                    other.acting_commander = false;
+                    handover.replaced_officer_id = oid;
+                }
+            }
+            officer.status = 'active';
+            officer.assigned_corps_id = target;
+            officer.turns_in_command = 0;
+            officer.acting_commander = false;
+            officer.effective_competence_penalty = 0;
+            officer.penalty_turns_remaining = 0;
+        }
+        receipts(state)[e.id] = turn;
+        report.completed_event_ids.push(e.id);
+        (report.handovers ??= []).push(handover);
         changed = true;
     }
 

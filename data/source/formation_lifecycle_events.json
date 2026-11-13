@@ -37,5 +37,7 @@
     { "type": "rename", "formation_id": "arbih_770th_slavna_mountain", "trigger_condition": "week", "trigger_turn": 0, "until_turn": 154, "new_name": "370th Mountain", "reason": "3rd Corps number until the 7th Corps renumbering (BB2 p.468, p.470 n.3)" },
     { "type": "rename", "formation_id": "arbih_770th_slavna_mountain", "trigger_condition": "week", "trigger_turn": 154, "new_name": "770th Mountain", "reason": "7th Corps renumbering (BB1 App. H)" }
   ],
-  "corps_reorganisation": []
+  "corps_reorganisation": [
+    { "id": "arbih_7th_corps_commander_alagic", "type": "commander_handover", "trigger_turn": 99, "corps_id": "arbih_7th_corps", "officer_id": "arbih_alagic", "reason": "Brig. Gen. Mehmed Alagić appointed to command the new 7th Corps, Travnik, 26 Feb 1994 (BB2 p.468, p.493)" }
+  ]
 }

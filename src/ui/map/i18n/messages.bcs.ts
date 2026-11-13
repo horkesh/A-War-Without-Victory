@@ -6217,6 +6217,7 @@ export const bcsMessages: Partial<Record<MessageKey, string>> = {
     'corps.name.arbih_3rd_corps': '3. korpus',
     'corps.name.arbih_4th_corps': '4. korpus',
     'corps.name.arbih_5th_corps': '5. korpus',
+    'corps.name.arbih_7th_corps': '7. korpus',
     'corps.name.vrs_main_staff': 'Glavni štab VRS',
     'corps.name.jna_herzegovina_command': '4. vojna oblast JNA (Hercegovina)',
     'corps.name.vrs_1st_krajina': '1. krajiški korpus',

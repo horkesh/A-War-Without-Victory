@@ -61,7 +61,7 @@ describe('corps reorganisation — inertness', () => {
         expect(JSON.stringify(state)).toBe(before);
     });
 
-    it('the shipped data file validates (Phase A ships no reorganisation events)', async () => {
+    it('the shipped data file validates', async () => {
         const events = await loadCorpsReorganisationEvents(process.cwd());
         expect(Array.isArray(events)).toBe(true);
     });
@@ -290,6 +290,52 @@ describe('corps_transfer of a brigade out on an elite loan', () => {
         processCorpsReorganisationEvents(state, [TRANSFER]);
         expect(state.military.formations.b705.corps_id).toBe('arbih_3rd_corps');
         expect(state.military.formations.b705.elite_loan_state?.on_loan).toBe(true);
+    });
+});
+
+describe('commander_handover', () => {
+    const HANDOVER: CorpsReorganisationEventDef = { id: 'h', type: 'commander_handover', trigger_turn: 99, corps_id: 'arbih_7th_corps', officer_id: 'arbih_alagic', reason: '' };
+    const officer = (extra: Record<string, unknown>) => ({ officer_id: 'x', status: 'reserve', assigned_corps_id: null, turns_in_command: 5, battles: 0, victories: 0, effective_competence_penalty: -2, penalty_turns_remaining: 4, acting_commander: true, ...extra });
+
+    it('seats the officer, sends the incumbent to reserve and leaves the old command vacant', () => {
+        const state = makeState(99, [corps('arbih_4th_corps'), corps('arbih_7th_corps')]);
+        cmd(state, 'arbih_4th_corps');
+        cmd(state, 'arbih_7th_corps');
+        state.military.named_officers = {
+            arbih_alagic: officer({ status: 'active', assigned_corps_id: 'arbih_4th_corps' }),
+            generic_7th: officer({ status: 'active', assigned_corps_id: 'arbih_7th_corps' }),
+        } as any;
+        const report = processCorpsReorganisationEvents(state, [HANDOVER])!;
+        const o = state.military.named_officers as any;
+        expect(o.arbih_alagic).toMatchObject({ status: 'active', assigned_corps_id: 'arbih_7th_corps', turns_in_command: 0, acting_commander: false, effective_competence_penalty: 0, penalty_turns_remaining: 0 });
+        expect(o.generic_7th).toMatchObject({ status: 'reserve', assigned_corps_id: null });
+        expect(report.handovers).toEqual([{ event_id: 'h', corps_id: 'arbih_7th_corps', officer_id: 'arbih_alagic', previous_corps_id: 'arbih_4th_corps', replaced_officer_id: 'generic_7th', lapsed: false }]);
+        expect(state.military.formation_lifecycle_events_fired).toEqual({ h: 99 });
+        // Fires once: a later succession move is not undone.
+        o.arbih_alagic.assigned_corps_id = 'arbih_4th_corps';
+        state.meta.turn = 100;
+        expect(processCorpsReorganisationEvents(state, [HANDOVER])).toBeNull();
+        expect(o.arbih_alagic.assigned_corps_id).toBe('arbih_4th_corps');
+    });
+
+    it('waits while the officer commands a live operation or the corps is not active, and lapses if he is dead', () => {
+        const state = makeState(99, [corps('arbih_7th_corps', { status: 'inactive' })]);
+        state.military.named_officers = { arbih_alagic: officer({ status: 'active', assigned_operation: 'Op' }) } as any;
+        expect(processCorpsReorganisationEvents(state, [HANDOVER])).toBeNull();
+        state.military.formations.arbih_7th_corps.status = 'active';
+        cmd(state, 'arbih_7th_corps');
+        processCorpsReorganisationEvents(state, [HANDOVER]);
+        expect((state.military.named_officers as any).arbih_alagic.assigned_corps_id).toBeNull();
+        expect(state.military.formation_lifecycle_events_fired?.h).toBeUndefined();
+        (state.military.named_officers as any).arbih_alagic = officer({ status: 'killed' });
+        const r = processCorpsReorganisationEvents(state, [HANDOVER])!;
+        expect(r.handovers?.[0].lapsed).toBe(true);
+        expect((state.military.named_officers as any).arbih_alagic.status).toBe('killed');
+    });
+
+    it('the shipped data seats Alagić in the 7th Corps on the formation week', async () => {
+        const events = await loadCorpsReorganisationEvents(process.cwd());
+        expect(events.find((e) => e.type === 'commander_handover')).toMatchObject({ corps_id: 'arbih_7th_corps', officer_id: 'arbih_alagic', trigger_turn: 99 });
     });
 });
 

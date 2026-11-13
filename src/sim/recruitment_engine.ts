@@ -826,6 +826,7 @@ export function runBotRecruitment(
     if (includeCorps) {
         for (const c of oobCorps) {
             if (state.military.formations[c.id]) continue;
+            if (c.strict_available_from && c.available_from > currentTurn) continue;
             const isOpeningArmyHq = c.kind === 'army_hq' && c.available_from <= currentTurn;
             if (!isOpeningArmyHq && !factionHasPresenceInMun(state, c.faction, c.hq_mun, sidToMun)) continue;
             const hq_sid = resolveValidHqSid(state, c.faction, c.hq_mun, municipalityHqSettlement, sidToMun);
