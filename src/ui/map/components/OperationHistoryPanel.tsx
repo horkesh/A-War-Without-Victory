@@ -18,7 +18,7 @@ import {
     getPlayerSafeOperationName,
     getPlayerSafeOperationPhaseLabel,
 } from '../utils/playerSafeText';
-import { turnToDateString } from '../utils/formatters';
+import { formatCorpsDisplayName, turnToDateString } from '../utils/formatters';
 import { deriveOperationOutcomeCategory, buildOperationTrendSummary } from '../data/command_strain';
 import { t, type MessageKey } from '../i18n';
 import { projectOperationLifecycle } from '../data/operationLifecycleProjection';
@@ -171,7 +171,8 @@ type ActiveOp = NonNullable<LoadedGameState['activeOperations']>[number];
 type Tab = 'active' | 'history';
 
 function getCorpsDisplayName(corpsNameById: Map<string, string>, corpsId: string): string {
-    return corpsNameById.get(corpsId) ?? t('operationHistory.fallback.corps');
+    const name = corpsNameById.get(corpsId);
+    return name ? formatCorpsDisplayName(name, corpsId, name) : t('operationHistory.fallback.corps');
 }
 
 // --- Sub-components ---

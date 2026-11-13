@@ -30,6 +30,7 @@ import { setLocale } from '../../src/ui/map/i18n';
 import { enMessages } from '../../src/ui/map/i18n/messages.en';
 import { bcsMessages } from '../../src/ui/map/i18n/messages.bcs';
 import { formatCorpsDisplayName } from '../../src/ui/map/utils/formatters';
+import { RENAMED_CORPS_SAVED_NAMES } from '../../src/ui/map/i18n/bcsCases';
 import { withoutComments } from '../helpers/sourceComments';
 
 afterEach(() => {
@@ -173,10 +174,12 @@ describe('Verdict strings (R3)', () => {
 describe('BCS corps names (S9)', () => {
     const corps = (JSON.parse(read('data/source/oob_corps.json')) as { corps: Array<{ id: string; name: string }> }).corps;
 
-    it('every corps in the data has an i18n key whose English value is the data name', () => {
+    it('every corps in the data has an i18n key whose English value is the data name (or a recorded rename)', () => {
         for (const c of corps) {
             const key = `corps.name.${c.id}` as keyof typeof enMessages;
-            expect(enMessages[key], c.id).toBe(c.name);
+            // A renamed label keeps the saved data name, which must be the recorded old name.
+            if (RENAMED_CORPS_SAVED_NAMES[c.id]) expect(c.name, c.id).toBe(RENAMED_CORPS_SAVED_NAMES[c.id]);
+            else expect(enMessages[key], c.id).toBe(c.name);
             expect(bcsMessages[key], c.id).toBeTruthy();
         }
     });

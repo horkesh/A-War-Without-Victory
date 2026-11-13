@@ -184,9 +184,8 @@ function objectiveCommand(state: LoadedGameState, faction: string): string | nul
     const corpsId = request?.corps_id ?? operation?.corps_id;
     if (!corpsId) return null;
     const formationName = state.formations.find((formation) => formation.id === corpsId)?.name;
-    return formationName
-        ? getPlayerSafeCorpsName(formationName, corpsId)
-        : operation?.corps_name ?? null;
+    const name = formationName ?? operation?.corps_name;
+    return name ? getPlayerSafeCorpsName(name, corpsId, name) : null;
 }
 
 function objectiveResponsibleOwner(

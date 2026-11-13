@@ -204,7 +204,12 @@ function findCorpsName(state: LoadedGameState, corpsId: string | undefined): str
 }
 
 function subjectLabel(item: BriefingItem, state: LoadedGameState, fallback: string): string {
-    if (item.subject?.type === 'corps') return findCorpsName(state, item.subject.id) ?? item.subject.label ?? fallback;
+    if (item.subject?.type === 'corps') {
+        // The item's own label is the engine's English corps name: it goes through the
+        // corps-name helper like a formation name does (SC9).
+        return findCorpsName(state, item.subject.id)
+            ?? getPlayerSafeCorpsName(item.subject.label, item.subject.id, fallback);
+    }
     if (item.subject?.label) return item.subject.label;
     if (item.target.label) return item.target.label;
     return fallback;
@@ -298,8 +303,10 @@ export function generateCoSBriefing(
             const corpsName = subjectLabel(cohesionItem, state, t('chiefOfStaff.corpsCommandFallback'));
             const corpsId = subjectCorpsId(cohesionItem);
             if (tone === 'cautious') {
+                // BCS "zbog" takes the genitive: "Zabrinut sam zbog 1. korpusa".
+                const concernName = getPlayerSafeCorpsName(corpsName, corpsId, corpsName, 'gen');
                 segments.push(text(t('chiefOfStaff.alert.cohesion.cautious.prefix')));
-                segments.push(corpsId ? link(corpsName, corpsId) : text(corpsName));
+                segments.push(corpsId ? link(concernName, corpsId) : text(concernName));
                 segments.push(text(t('chiefOfStaff.alert.cohesion.cautious.suffix')));
             } else if (tone === 'precise') {
                 segments.push(corpsId ? link(corpsName, corpsId) : text(corpsName));

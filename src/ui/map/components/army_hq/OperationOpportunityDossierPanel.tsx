@@ -3,8 +3,8 @@ import type { LoadedGameState, OperationOpportunityAxisState, OperationOpportuni
 import type { BackTheOfficerView } from '../../data/backTheOfficer';
 import { useIPC } from '../../desktop/useIPC';
 import { useGameStore } from '../../store/gameStore';
-import { t, type MessageKey } from '../../i18n';
-import { turnToDateString } from '../../utils/formatters';
+import { getActiveLocale, t, type MessageKey } from '../../i18n';
+import { formatCorpsDisplayName, formatCount, turnToDateString } from '../../utils/formatters';
 
 type OpportunityUiDecision = OperationOpportunityProposalView['available_actions'][number]['id'];
 type OpportunityResolveOptions = { redirectVariantId?: string };
@@ -77,16 +77,18 @@ function formatOfficerRank(rank: string | undefined): string {
 
 function joinNames(items: string[]): string {
     if (items.length <= 1) return items[0] ?? '';
-    return `${items.slice(0, -1).join(', ')} ${items[items.length - 1]}`;
+    // "A, B and C" / "A, B i C": the last pair needs its conjunction.
+    return new Intl.ListFormat(getActiveLocale() === 'bcs' ? 'bs' : 'en', { type: 'conjunction' }).format(items);
 }
 
-function formatBackTheOfficerFraming(view: BackTheOfficerView): string {
+export function formatBackTheOfficerFraming(view: BackTheOfficerView): string {
     const commander = view.commander?.name ?? t('opportunity.backTheOfficer.fieldCommander');
     const identity = view.tg_name ?? view.op_name;
     if (view.donors.length === 0) {
         return t('opportunity.backTheOfficer.framingOwnCorps', { commander, identity });
     }
-    const donors = joinNames(view.donors.map((donor) => donor.corps_name));
+    // The donors follow "from" ("iz" + genitive in BCS: "iz 2. korpusa i Drinskog korpusa").
+    const donors = joinNames(view.donors.map((donor) => formatCorpsDisplayName(donor.corps_name, donor.corps_id, donor.corps_name, 'gen')));
     if (view.total_personnel_lent > 0) {
         return t('opportunity.backTheOfficer.framingDonorsWithPersonnel', {
             commander,
@@ -267,8 +269,8 @@ function DossierCard({
                                         ? t('opportunity.backTheOfficer.donorPersonnelLent', { count: donor.personnel_lent })
                                         : undefined}
                                 >
-                                    {donor.corps_name}
-                                    {donor.personnel_lent > 0 ? ` (${donor.personnel_lent.toLocaleString('en-US')})` : ''}
+                                    {formatCorpsDisplayName(donor.corps_name, donor.corps_id, donor.corps_name)}
+                                    {donor.personnel_lent > 0 ? ` (${formatCount(donor.personnel_lent)})` : ''}
                                 </span>
                             ))}
                         </div>
