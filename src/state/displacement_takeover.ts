@@ -55,12 +55,9 @@ const POSAVINA_CROAT_FLEE_ABROAD = 0.70;
 export const BILATERAL_KILL_FRACTION = 0.03;
 export const BILATERAL_HRHB_FLEE_ABROAD = 0.35;
 
-/**
- * Border-adjacent municipalities where displaced Bosniaks flee abroad (Croatia, Germany, Austria, Sweden).
- * Historically, Bosniaks near international borders had realistic escape routes.
- * Interior populations (Sarajevo, Central Bosnia, Drina enclaves) displaced internally.
- */
-/** Krajina Bosniaks: ~35% fled via organized ICRC/UNHCR convoys to Croatia (Karlovac transit camp).
+/** Krajina Bosniaks: ~55% ended abroad, largely via ICRC/UNHCR convoys to Croatia (Karlovac transit camp).
+ * F4 (2026-11-14): was 0.35; ICTY OTP 47-municipality figures leave ~56% abroad for Muslims outside
+ * the Drina valley (range 0.45-0.65). The Aug 1992 Vlašić convoys to Travnik stayed in the country.
  * This was the PRIMARY escape mechanism for Prijedor, Sanski Most, Bosanski Novi.
  * Convoys ran after international pressure forced camp closures (Aug 1992). */
 const KRAJINA_BOSNIAK_CONVOY_MUN_IDS = new Set<MunicipalityId>([
@@ -68,24 +65,11 @@ const KRAJINA_BOSNIAK_CONVOY_MUN_IDS = new Set<MunicipalityId>([
     'bosanska_dubica', 'bosanska_kostajnica', 'bosanska_gradiska',
     'banja_luka', 'celinac', 'laktasi', 'prnjavor',
 ]);
-const KRAJINA_BOSNIAK_FLEE_ABROAD = 0.35;
+const KRAJINA_BOSNIAK_FLEE_ABROAD = 0.55;
 
-const BOSNIAK_BORDER_ADJACENT_MUN_IDS = new Set<MunicipalityId>([
-    // Krajina — near Croatian border (non-convoy municipalities)
-    'kljuc', 'kotor_varos', 'skender_vakuf', 'mrkonjic_grad', 'sipovo',
-    'bosanski_petrovac', 'titov_drvar', 'bosansko_grahovo', 'glamoc',
-    'srbac',
-    // Posavina — near Croatia/Serbia border
-    'brcko', 'bosanski_samac', 'odzak', 'orasje',
-    'derventa', 'modrica', 'bosanski_brod', 'bijeljina',
-    'lopare', 'ugljevik',
-    // Herzegovina — near Croatian border
-    'mostar', 'capljina', 'stolac', 'jablanica', 'konjic',
-    'trebinje', 'bileca', 'nevesinje', 'ljubinje', 'gacko',
-    // Bihać pocket — near Croatian border
-    'bihac', 'cazin', 'velika_kladusa', 'bosanska_krupa',
-]);
-const BOSNIAK_BORDER_FLEE_ABROAD = 0.10;
+// F4 (2026-11-14): the Bosniak border-municipality override (0.10) is deleted. Below the Bosniak
+// default it contradicted the record (Bijeljina 67% abroad; Herzegovina detainees released to third
+// countries); those municipalities now take the default.
 
 // Enclave-overrun special case (historical high-lethality second displacement).
 export const ENCLAVE_OVERRUN_KILL_FRACTION = 0.35;
@@ -202,7 +186,6 @@ function getFleeAbroadFraction(sourceMun: MunicipalityId, fromFaction: FactionId
     if (toFaction && isRbihHrhbPair(fromFaction, toFaction) && fromFaction === 'HRHB') return BILATERAL_HRHB_FLEE_ABROAD;
     if (fromFaction === 'HRHB' && POSAVINA_MUN_IDS.has(sourceMun)) return POSAVINA_CROAT_FLEE_ABROAD;
     if (fromFaction === 'RBiH' && KRAJINA_BOSNIAK_CONVOY_MUN_IDS.has(sourceMun)) return KRAJINA_BOSNIAK_FLEE_ABROAD;
-    if (fromFaction === 'RBiH' && BOSNIAK_BORDER_ADJACENT_MUN_IDS.has(sourceMun)) return BOSNIAK_BORDER_FLEE_ABROAD;
     return getFactionFleeAbroadFraction(fromFaction);
 }
 

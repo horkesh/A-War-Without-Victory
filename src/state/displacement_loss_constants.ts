@@ -40,18 +40,29 @@ export function getDisplacementKillFraction(displacedFaction: FactionId, control
     return DISPLACEMENT_KILLED_FRACTION;
 }
 
-/** Serbs: ~30% of displaced leave BiH (Serbia to flee to). */
+// Flight abroad (F4, RF-3 Historian seat 2026-11-14). Share of each people's displaced who
+// ended up abroad. ICTY OTP demographic report (Tabeau, Bijak et al., 2003, 47 municipalities,
+// OSCE voters register 1997-98, minimums after early returns): Muslims 48%, Croats 78%,
+// Serbs 23% (a floor; FRY excluded Serbs from Serb-held areas). Host-country build-up at
+// Dayton: ~1.2M abroad (Germany ~320k, ~60% Muslim; FRY ~250k, mostly Serb; Croatia ~170k).
+// Bosniaks were the largest group abroad, about 45-55% of all those abroad.
+
+/** Serbs: ~30% of displaced leave BiH (range 0.25-0.40; ICTY OTP floor 0.23). */
 export const FLEE_ABROAD_FRACTION_RS = 0.30;
 
-/** Croats: ~25% leave BiH (Croatia to flee to). */
-export const FLEE_ABROAD_FRACTION_HRHB = 0.25;
+/** Croats: ~40% leave BiH, mostly to Croatia (range 0.30-0.55; ICTY OTP 0.78 for Croats from Serb-held municipalities). */
+export const FLEE_ABROAD_FRACTION_HRHB = 0.40;
 
-/** Bosniaks: no external state to flee to. */
-export const FLEE_ABROAD_FRACTION_RBIH = 0.0;
+/**
+ * Bosniaks: ~40% leave BiH, to Western Europe and Croatia (range 0.30-0.50; ICTY OTP 0.48).
+ * Was 0.0 ("no external state to flee to"), which made Bosniaks the people least likely to
+ * leave the country (realism audit F4).
+ */
+export const FLEE_ABROAD_FRACTION_RBIH = 0.40;
 
-// TODO Phase F step 26: when siege_ratio >= SIEGE_RATIO_FULL for a municipality,
-// override FLEE_ABROAD_FRACTION to 0 for all factions — no one can leave a fully surrounded enclave.
-// Requires passing siege state into displacement calculation (src/state/displacement.ts).
+// Sealed pockets: nobody leaves a besieged pocket for abroad (Srebrenica, Žepa, Goražde, the
+// Bihać pocket, Sarajevo after mid-1992). The siege path in displacement.ts books its
+// departures with no flight abroad; they go to own-side territory (F4, 2026-11-14).
 
 /** Flee-abroad fraction for an ethnicity-aligned faction. */
 export function getFactionFleeAbroadFraction(faction: FactionId): number {

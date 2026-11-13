@@ -14,7 +14,6 @@ import { computeFrontEdges, type FrontEdge } from '../map/front_edges.js';
 import { areRbihHrhbAllied, DEFAULT_RBIH_HRHB_WAR_EARLIEST_TURN } from '../sim/early_war/alliance_update.js';
 import type { EdgeRecord } from '../map/settlements.js';
 import { getReceivingCapacityFraction } from './displacement_routing_data.js';
-import { getFactionFleeAbroadFraction } from './displacement_loss_constants.js';
 import { appendDisplacementEvent, UNKNOWN_CAUSER_BUCKET } from './displacement_event_log.js';
 import { getBilateralRoutingOrder } from './displacement_takeover.js';
 import { recordCivilianDisplacementCasualties } from './displacement_state_utils.js';
@@ -108,6 +107,10 @@ function pressureInputsFromEdges(state: GameState, settlementEdges: EdgeRecord[]
     const supplied = new Map<string, ReadonlySet<string>>();
     for (const f of supply.factions) supplied.set(f.faction_id, new Set(f.reachable_controlled));
     return { frontEdges: computeFrontEdges(state, settlementEdges), suppliedByFaction: supplied };
+}
+
+function isCanonicalFaction(side: unknown): side is FactionId {
+    return typeof side === 'string' && (CANONICAL_FACTIONS as readonly string[]).includes(side);
 }
 
 function rbihHrhbAtWar(state: GameState): boolean {
@@ -621,7 +624,7 @@ export function updateDisplacement(
     const controllerOf = new Map<string, FactionId>();
     for (const sid of [...settlements.keys()].sort(strictCompare)) {
         const side = pc[sid];
-        if (side && (CANONICAL_FACTIONS as readonly string[]).includes(side)) controllerOf.set(sid, side as FactionId);
+        if (isCanonicalFaction(side)) controllerOf.set(sid, side);
     }
     const neighbourSets = new Map<string, Set<string>>();
     for (const e of settlementEdges) {
@@ -742,14 +745,16 @@ export function updateDisplacement(
             const causerFid: FactionId = share.faction;
             // DA1 P3: people leaving a siege are not killed by leaving; the expulsion kill rate
             // (P1a) does not apply. Deaths in place from shelling, sniping and starvation are
-            // a separate quantity this path does not model. Flight abroad keeps its rate.
+            // a separate quantity this path does not model.
+            // F4: nobody leaves a besieged pocket for abroad (Srebrenica's 1993 and 1995
+            // evacuations went to Tuzla and Kladanj, Krstić TJ; Sarajevo after mid-1992), so
+            // every departure here is routed to own-side territory.
             const byFaction: Record<FactionId, number> = { RBiH: 0, RS: 0, HRHB: 0 };
             byFaction[holder] = share.amount;
             const routable: Record<FactionId, number> = { RBiH: 0, RS: 0, HRHB: 0 };
             const killedByFac: Record<FactionId, number> = { RBiH: 0, RS: 0, HRHB: 0 };
             const fledByFac: Record<FactionId, number> = { RBiH: 0, RS: 0, HRHB: 0 };
-            fledByFac[holder] = Math.floor(share.amount * getFactionFleeAbroadFraction(holder));
-            routable[holder] = share.amount - fledByFac[holder];
+            routable[holder] = share.amount;
             routableByPeople[holder] += routable[holder];
             lostAmount += share.amount - (routable.RBiH + routable.RS + routable.HRHB);
 
