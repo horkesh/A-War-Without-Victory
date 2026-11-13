@@ -192,7 +192,7 @@ describe('War Summary campaign cost localization', () => {
 
         render(createElement(WarSummaryContent, { focusSection: 'overview' }));
 
-        const text = screen.getByText('Operativni izvjestaj').parentElement?.textContent ?? '';
+        const text = screen.getByText('Operativni izvještaj').parentElement?.textContent ?? '';
         expect(text).toContain('Široko rasprostranjeni tanko držani frontovski sektori traže pregled štaba.');
         expect(text).toContain('Frakcija ispunjava uslove za kolaps.');
         expect(text).not.toContain('Widespread thinly held front sectors need staff review.');
@@ -354,7 +354,7 @@ describe('War Summary campaign cost localization', () => {
 
         render(createElement(WarSummaryContent, { focusSection: 'overview' }));
 
-        const section = screen.getByRole('region', { name: 'Strateski ciljevi' });
+        const section = screen.getByRole('region', { name: 'Strateški ciljevi' });
         expect(screen.getByTestId('war-summary-posture').textContent)
             .toBe('Nije potreban potpis predsjednika; sadašnja politika ostaje na snazi.');
         expect(section.textContent).toContain('Nije podnesen zahtjev štaba');
@@ -369,10 +369,10 @@ describe('War Summary campaign cost localization', () => {
 
         render(createElement(WarSummaryContent, { focusSection: 'overview' }));
 
-        const section = screen.getByRole('region', { name: 'Strateski ciljevi' });
-        expect(section.textContent).toContain('Zastiti opstanak drzave');
+        const section = screen.getByRole('region', { name: 'Strateški ciljevi' });
+        expect(section.textContent).toContain('Zaštiti opstanak države');
         expect(section.textContent).toContain('Odgovorna institucija');
-        expect(section.textContent).toContain('Sljedeca dostupna poluga');
+        expect(section.textContent).toContain('Sljedeća dostupna poluga');
         expect(section.textContent).toContain('Posljednja relevantna posljedica');
         expect(section.textContent).toContain('Nije prijavljeno');
     });

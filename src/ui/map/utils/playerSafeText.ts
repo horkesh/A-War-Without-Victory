@@ -1,18 +1,25 @@
 import { normalizeFactionId } from '../../../state/identity.js';
 import { formatCorpsDisplayName, toTitleCase } from './formatters';
 import { municipalityDisplayName, restoreBosnianPlaceNames } from '../../shared/bosnianPlaceNames';
+import { t, type MessageKey } from '../i18n';
 
-const MILITARY_FACTION_LABELS: Record<string, string> = {
-    RS: 'VRS',
-    RBiH: 'ARBiH',
-    HRHB: 'HVO',
+// Faction names go through i18n (surface step 5, 2026-11-13) so BCS shows BCS names.
+const MILITARY_FACTION_LABEL_KEYS: Record<string, MessageKey> = {
+    RS: 'desk.faction.military.rs',
+    RBiH: 'desk.faction.military.rbih',
+    HRHB: 'desk.faction.military.hrhb',
 };
 
-const POLITICAL_FACTION_LABELS: Record<string, string> = {
-    RS: 'Republika Srpska',
-    RBiH: 'Republic of Bosnia and Herzegovina',
-    HRHB: 'Croatian Republic of Herzeg-Bosnia',
+const POLITICAL_FACTION_LABEL_KEYS: Record<string, MessageKey> = {
+    RS: 'desk.faction.political.rs',
+    RBiH: 'desk.faction.political.rbih',
+    HRHB: 'desk.faction.political.hrhb',
 };
+
+function militaryFactionLabel(factionId: string): string | null {
+    const key = MILITARY_FACTION_LABEL_KEYS[factionId];
+    return key ? t(key) : null;
+}
 
 const DISPLACEMENT_GROUP_LABELS: Record<string, string> = {
     rbih: 'Bosniaks',
@@ -191,8 +198,8 @@ export function getPlayerSafePoliticalFactionName(
     fallback = 'Unknown faction',
 ): string {
     if (!factionId) return fallback;
-    const label = POLITICAL_FACTION_LABELS[normalizeFactionId(factionId)];
-    return label || fallback;
+    const key = POLITICAL_FACTION_LABEL_KEYS[normalizeFactionId(factionId)];
+    return key ? t(key) : fallback;
 }
 
 export function getPlayerSafeMilitaryFactionName(
@@ -200,8 +207,7 @@ export function getPlayerSafeMilitaryFactionName(
     fallback = 'Unknown force',
 ): string {
     if (!factionId) return fallback;
-    const label = MILITARY_FACTION_LABELS[normalizeFactionId(factionId)];
-    return label || fallback;
+    return militaryFactionLabel(normalizeFactionId(factionId)) ?? fallback;
 }
 
 export function getPlayerSafeDisplacementGroupLabel(
@@ -409,8 +415,8 @@ export function getPlayerSafeCorridorLabel(
     const safeFaction = (routeFaction ?? '').trim();
     if (!safeFaction) return fallback;
 
-    const label = MILITARY_FACTION_LABELS[safeFaction];
-    return label ? `${label}-controlled corridor` : fallback;
+    const label = militaryFactionLabel(safeFaction);
+    return label ? t('desk.faction.corridor', { force: label }) : fallback;
 }
 
 /** Player-facing operation name. Engine names are ASCII ("Operation Foca"); shown as "Operation Foča". */

@@ -399,7 +399,7 @@ describe('AAR and tooltip friction labels', () => {
     const { container } = render(createElement(AARPanel, { isOpen: true, onClose: () => {}, embedded: true }));
 
     expect(container.textContent).toContain('Rizik zasjede');
-    expect(container.textContent).toContain('ogranicena pouzdanost');
+    expect(container.textContent).toContain('ograničena pouzdanost');
     expect(container.textContent).toContain('Koncentracija 3');
     expect(container.textContent).not.toMatch(/ambush_risk|low confidence|defender_opsec/);
     expect(container.textContent).not.toMatch(/3x|3×|concentrated/);

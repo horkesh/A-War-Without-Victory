@@ -140,7 +140,7 @@ export function RecordsContent({ eventCatalog }: RecordsContentProps = {}) {
                 </div>
                 {operationLifecycle.excludedHistoryRows.length > 0 && (
                     <div
-                        className="mt-3 border-l-2 border-amber-400/50 px-2 py-1 text-[13px] text-text-secondary"
+                        className="mt-3 border-l-2 border-[#c9a75c]/60 px-2 py-1 text-[13px] text-text-secondary"
                         data-testid="records-operation-exclusion-scope"
                     >
                         {t(
@@ -176,7 +176,7 @@ export function RecordsContent({ eventCatalog }: RecordsContentProps = {}) {
                         onClick={() => setSubTab(id)}
                         className={`px-3 py-1.5 text-[13px] font-bold uppercase tracking-[0.15em] rounded-md border transition-all ${
                             subTab === id
-                                ? 'bg-amber-400/15 border-amber-400/30 text-amber-400'
+                                ? 'border-[#c9a75c] bg-[#232936] text-[#f1e6c8]'
                                 : 'bg-panel-card border-panel-border text-text-secondary hover:text-text-primary hover:bg-white/5'
                         }`}
                     >

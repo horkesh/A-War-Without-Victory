@@ -19,7 +19,7 @@ describe('Warroom Settings modal i18n', () => {
 
     const copy = document.body.textContent ?? '';
     expect(copy).toContain('Sistemske postavke');
-    expect(copy).toContain('Glavna jacina zvuka');
+    expect(copy).toContain('Glavna jačina zvuka');
     expect(copy).toContain('CRT linije');
     expect(copy).toContain('Primijeni i zatvori');
     expect(copy).not.toMatch(/SYSTEM SETTINGS|Master Volume|CRT Scanline Effect|APPLY & CLOSE/i);

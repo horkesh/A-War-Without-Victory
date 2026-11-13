@@ -171,11 +171,10 @@ export function ArmyReservePanel({ breadcrumb, onOpenDecisionRoomTarget }: ArmyR
             setLoadError(t('formationDetail.commandBridgeUnavailable'));
             return;
         }
-        const result = await ipc.recallEliteBrigade(
-            brigadeId,
-            'Loan terminated by player; brigade ordered back to base reserve.'
-        );
-        if (!result.ok) setLoadError(result.error ?? 'Recall failed');
+        // The engine writes its own receipt text for a recall (same path as FormationDetail),
+        // so no player-locale string reaches saved state.
+        const result = await ipc.recallEliteBrigade(brigadeId);
+        if (!result.ok) setLoadError(result.error ?? t('formationDetail.recallFailed'));
     }
 
     const priorityColor = (p: number) =>

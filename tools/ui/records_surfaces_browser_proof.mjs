@@ -338,15 +338,7 @@ try {
         await setStore({ loadedGameState: verdictState(false) });
         await page.waitForTimeout(600);
         await shot(`game_over_fallback${tag}`, size, '[data-awwv-endgame-surface="fallback"] [role="dialog"]');
-        await setStore({ loadedGameState: null });
-        await page.waitForTimeout(300);
-        await mountComponent('/components/GameOverModal.tsx', 'GameOverModal', {});
-        await setStore({ loadedGameState: { ...verdictState(false), gameOver: true } });
-        // The fallback VerdictScreen would sit on top; hide it for the GameOverModal shot.
-        await page.evaluate(() => document.querySelectorAll('[data-awwv-endgame-surface]').forEach((el) => { el.style.display = 'none'; }));
-        await page.waitForTimeout(500);
-        await shot(`game_over_modal${tag}`, size, '[role="dialog"][aria-labelledby="game-over-title"]');
-        await unmountComponent();
+        // GameOverModal was deleted in surface step 5 (2026-11-13); the fallback above owns the end state.
         await setStore({ loadedGameState: null });
       }
       await setLocale('en'); // the locale persists; the next boot drives English menus

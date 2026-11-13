@@ -112,7 +112,7 @@ function consequenceCatalog(): Map<string, EventDefinition> {
             id,
             title: sourceLabels?.en.consequence ?? 'Recorded consequence',
             localizations: {
-                bcs: { title: sourceLabels?.bcs.consequence ?? 'Zabiljezena posljedica' },
+                bcs: { title: sourceLabels?.bcs.consequence ?? 'Zabilježena posljedica' },
             },
             trigger: { turn_min: 1, phase: 'war' },
             effect: { kind: 'narrative', text: 'Recorded.' },
@@ -329,7 +329,7 @@ describe('CodexPanel dynamic essay proof', () => {
         });
 
         expect(screen.getByText('Posljedica ostvarena: Pregled provedbe')).toBeTruthy();
-        expect(screen.getByText(/Vasa odluka "Prihvati uslove"/)).toBeTruthy();
+        expect(screen.getByText(/Vaša odluka "Prihvati uslove"/)).toBeTruthy();
         expect(screen.getByText('Kodeks kampanje')).toBeTruthy();
         expect(screen.getAllByText('Kodeks')).toHaveLength(1);
         expect(screen.queryByText(/The campaign record ties/)).toBeNull();

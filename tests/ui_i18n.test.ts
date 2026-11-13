@@ -119,8 +119,8 @@ describe('UI localization substrate', () => {
         expect(en).not.toMatch(/each turn|per turn/i);
 
         const bcs = t('toolbar.commandAuthority.description', undefined, 'bcs');
-        expect(bcs).toBe('Ovlast je predsjednicki resurs za izuzetnu intervenciju u komandni lanac. Obnavlja se iz politickog položaja i stabilnosti komande.');
-        expect(bcs).toMatch(/politickog položaja/i);
+        expect(bcs).toBe('Ovlast je predsjednički resurs za izuzetnu intervenciju u komandni lanac. Obnavlja se iz političkog položaja i stabilnosti komande.');
+        expect(bcs).toMatch(/političkog položaja/i);
         expect(bcs).not.toMatch(/\+\d/);
         expect(bcs).not.toMatch(/po potezu/);
     });
@@ -157,6 +157,6 @@ describe('UI localization substrate', () => {
         ].join('\n');
 
         expect(targetedCopy).not.toMatch(/\bOSID\b/i);
-        expect(targetedCopy).toMatch(/polozaj|naselj|navedeni ciljevi/);
+        expect(targetedCopy).toMatch(/položaj|naselj|navedeni ciljevi/);
     });
 });

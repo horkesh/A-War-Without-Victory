@@ -196,7 +196,7 @@ describe('SettlementTimeline localization', () => {
 
     const { container } = render(createElement(SettlementTimeline, { events }));
 
-    expect(container.textContent).toContain('Pod kontrolom ARBiH na pocetku scenarija');
+    expect(container.textContent).toContain('Pod kontrolom ARBiH na početku scenarija');
     expect(container.textContent).toContain('VRS preuzima kontrolu');
     expect(container.textContent).toContain('Borba - skupa pobjeda');
     expect(container.textContent).toContain('VRS napada ARBiH - teritorija zauzeta');
@@ -364,13 +364,13 @@ describe('SettlementTimeline localization', () => {
     const copy = container.textContent ?? '';
 
     expect(copy).toContain('Operacija Proboj pokrenuta');
-    expect(copy).toContain('ARBiH cilja ovo podrucje');
-    expect(copy).toContain('Operacija Proboj - cilj drzan na kraju operacije');
-    expect(copy).toContain('100 raseljenih: Bosnjaci tokom 2 sedmice');
-    expect(copy).toContain('5 civila izgubljeno: Bosnjaci');
+    expect(copy).toContain('ARBiH cilja ovo područje');
+    expect(copy).toContain('Operacija Proboj - cilj držan na kraju operacije');
+    expect(copy).toContain('100 raseljenih: Bošnjaci tokom 2 sedmice');
+    expect(copy).toContain('5 civila izgubljeno: Bošnjaci');
     expect(copy).toContain('3 ubijeno, 2 izbjeglo u inostranstvo');
-    expect(copy).toContain('Etnicka vecina promijenjena');
-    expect(copy).toContain('Bosnjaci -> Srbi');
+    expect(copy).toContain('Etnička većina promijenjena');
+    expect(copy).toContain('Bošnjaci → Srbi');
     expect(copy).not.toMatch(/launched|targeting this area|objective held|displaced|over \d+ weeks|killed|fled abroad|civilians lost|Ethnic majority shifted/);
     expect(copy).not.toContain('operation_raw_id');
   });
