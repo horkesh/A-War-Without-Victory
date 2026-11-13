@@ -90,9 +90,15 @@ describe('turn-0 RBiH 1st Corps sectors (M3, presentation only)', () => {
             const name = sector.display_name;
             if (!name.startsWith('OG ')) continue;
             const munSlugs = new Set((sector.sub_segments ?? []).flatMap((ss) => ss.friendly_osids).map((osid) => osid.split(':')[1]));
-            const namedSlug = placeToSlug(name.slice(3));
-            if (/^\d/.test(namedSlug)) continue;
-            expect(munSlugs.has(namedSlug), `${sector.sector_id} "${name}"`).toBe(true);
+            // R8 name sweep: duplicate OG names gain "(Qualifier)" or a roman ordinal. Both the base
+            // place and a municipality qualifier must be the sector's own municipalities.
+            const match = /^(.*?)(?: \(([^)]+)\))?(?: [IVX]+)?$/.exec(name.slice(3));
+            const places = [match?.[1] ?? name.slice(3), match?.[2]].filter((p): p is string => typeof p === 'string');
+            for (const place of places) {
+                const namedSlug = placeToSlug(place);
+                if (/^\d/.test(namedSlug)) continue;
+                expect(munSlugs.has(namedSlug), `${sector.sector_id} "${name}" (${place})`).toBe(true);
+            }
         }
     }, 300_000);
 });
