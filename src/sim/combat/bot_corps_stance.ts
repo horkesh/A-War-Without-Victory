@@ -64,7 +64,7 @@ import type { CorpsStance } from '../../state/game_state.js';
 
 /** Stance aggressiveness rank for ceiling enforcement (higher = more aggressive). */
 /** EXPERIMENT E2 toggle (hvo-arbih-war-diagnosis, branch-only, NOT FOR MERGE). */
-export const EXPERIMENT_E2_LIFT_HVO_OPEN_WAR_DEFENSIVE = true;
+export const EXPERIMENT_E2_LIFT_HVO_OPEN_WAR_DEFENSIVE = false;
 /** EXPERIMENT E3 toggle (branch-only): Herzegovina corps not capped defensive during open RBiH-HRHB war. */
 export const EXPERIMENT_E3_LIFT_HERZEGOVINA_CAP_IN_BILATERAL_WAR = false;
 
@@ -267,7 +267,10 @@ export function generateCorpsStanceOrders(
         } else if (faction === 'HRHB') {
             // E3: HRHB Herzegovina corps: defensive (never give up heartland)
             const HERZEGOVINA_MUNS = new Set(strategy.corridor_municipalities);
-            if (corpsHomeMun && HERZEGOVINA_MUNS.has(corpsHomeMun)) {
+            const inOpenBilateralWar = EXPERIMENT_E3_LIFT_HERZEGOVINA_CAP_IN_BILATERAL_WAR
+                && !(state.political.rbih_hrhb_state?.washington_signed)
+                && (state.political.war_alliance_rbih_hrhb ?? 1) < 0;
+            if (corpsHomeMun && HERZEGOVINA_MUNS.has(corpsHomeMun) && !inOpenBilateralWar) {
                 if (stance === 'offensive' || stance === 'balanced') {
                     stance = 'defensive';
                 }

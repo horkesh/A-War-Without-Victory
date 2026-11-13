@@ -184,6 +184,10 @@ function munFromBilateralOsid(osid: string | undefined): string | null {
     return parts.length >= 2 ? parts[1] : null;
 }
 
+/** EXPERIMENT E2b (hvo-arbih-war-diagnosis, branch-only, NOT FOR MERGE): the HVO diverted corps gets the
+ *  same bilateral-front directive and stance as the ARBiH one (targets, stance, aggression). */
+export const EXPERIMENT_E2B_SYMMETRIC_BILATERAL_DIVERSION = false;
+
 function createBilateralDirective(
     sectorIds: string[],
     holdOsids: string[],
@@ -192,13 +196,13 @@ function createBilateralDirective(
 ): CorpsDirective {
     return {
         assigned_front_ids: [...sectorIds].sort(strictCompare),
-        offensive_targets: faction === 'RBiH' ? [...enemyOsids].sort(strictCompare) : [],
+        offensive_targets: (faction === 'RBiH' || EXPERIMENT_E2B_SYMMETRIC_BILATERAL_DIVERSION) ? [...enemyOsids].sort(strictCompare) : [],
         hold_osids: [...holdOsids].sort(strictCompare),
         avoid_osids: [],
         max_attackers_per_target: 1,
         reserve_fraction: 0.2,
         min_attack_outcome: faction === 'HRHB' ? 'costly_victory' : 'stalemate',
-        aggression_modifier: faction === 'HRHB' ? -0.05 : 0.1,
+        aggression_modifier: (faction === 'HRHB' && !EXPERIMENT_E2B_SYMMETRIC_BILATERAL_DIVERSION) ? -0.05 : 0.1,
     };
 }
 
@@ -335,7 +339,7 @@ export function reassignCorpsForBilateralWar(state: GameState, faction: FactionI
     rhs.bilateral_diverted_corps[faction] = selected.corpsId;
     const selectedCmd = command[selected.corpsId];
     if (selectedCmd) {
-        selectedCmd.stance = (faction === 'HRHB' ? 'defensive' : 'offensive') as CorpsStance;
+        selectedCmd.stance = ((faction === 'HRHB' && !EXPERIMENT_E2B_SYMMETRIC_BILATERAL_DIVERSION) ? 'defensive' : 'offensive') as CorpsStance;
         selectedCmd.directive = createBilateralDirective(
             selected.sectorIds,
             selected.holdOsids,

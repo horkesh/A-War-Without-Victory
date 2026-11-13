@@ -182,7 +182,9 @@ export interface TakeoverDisplacementReport {
 }
 
 /** EXPERIMENT toggle (branch-only): seed bilateral minority timers on the RBiH-HRHB front at war start. */
-export const EXPERIMENT_BILATERAL_WAR_START_SEED = false;
+export const EXPERIMENT_BILATERAL_WAR_START_SEED = true;
+/** EXPERIMENT E4b: initial-wave fraction for war-start bilateral seeds (no sustained drain). */
+export const EXPERIMENT_BILATERAL_SEED_INITIAL_FRACTION = 0.25;
 
 function isRbihHrhbPair(a: FactionId, b: FactionId): boolean {
     return (a === 'RBiH' && b === 'HRHB') || (a === 'HRHB' && b === 'RBiH');
@@ -660,6 +662,12 @@ export function processDisplacementTakeover(
         }
     }
 
+    const isBilateralSeedTimer = (t: HostileTakeoverTimerState): boolean =>
+        EXPERIMENT_BILATERAL_WAR_START_SEED
+        && typeof bilateralWarStart === 'number'
+        && t.started_turn === bilateralWarStart + 1
+        && isRbihHrhbPair(t.from_faction, t.to_faction);
+
     // 1) Start takeover timers from flipped OSIDs (battle-driven).
     //    Seeds timers for ALL minority factions — not just the defender.
     //    Example: VRS captures HRHB OSID with Bosniak minority → seeds both HRHB and RBiH timers.
@@ -761,9 +769,11 @@ export function processDisplacementTakeover(
             }
 
             const isFrontAdjMatured = allFrontAdjacent || frontOsids.has(osid);
-            const initFraction = getInitialDisplacementFraction(
-                timer.to_faction, timer.from_faction, munId, isFrontAdjMatured
-            ) ?? INITIAL_DISPLACEMENT_FRACTION;
+            const initFraction = isBilateralSeedTimer(timer)
+                ? EXPERIMENT_BILATERAL_SEED_INITIAL_FRACTION
+                : getInitialDisplacementFraction(
+                    timer.to_faction, timer.from_faction, munId, isFrontAdjMatured
+                ) ?? INITIAL_DISPLACEMENT_FRACTION;
             const displacementAmount = Math.min(
                 Math.max(0, Math.floor(osidPop * hostileShare * initFraction)),
                 remainingPop
@@ -887,6 +897,8 @@ export function processDisplacementTakeover(
                 hostileShare = Math.min(hostileShare, 0.80);
             }
 
+            // EXPERIMENT E4b: war-start bilateral seeds get one bounded wave, no sustained drain.
+            if (isBilateralSeedTimer(timer)) continue;
             const initialMinority = Math.floor(osidPop * hostileShare);
             const cumulativeDisplaced = timer.cumulative_displaced ?? 0;
             const remainingMinority = Math.max(0, initialMinority - cumulativeDisplaced);
