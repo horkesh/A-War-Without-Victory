@@ -55,13 +55,15 @@ import peacePlanUrl from '../assets/audio/designed/peace_plan_offered.ogg';
 import gameOverUrl from '../assets/audio/designed/game_over.ogg';
 import tutorialCompleteUrl from '../assets/audio/designed/tutorial_objective_complete.ogg';
 
-// Original sampled compositions: 35-second opening, then calm 125-second menu.
-import menuThemeUrl from '../assets/audio/music/what_remains_of_home.ogg';
+// Original sampled compositions: 35-second opening; the menu loops Lines on
+// Paper (owner 2026-11-13) so it no longer repeats the opening's melody.
+import menuThemeUrl from '../assets/audio/music/lines_on_paper.ogg';
 import openingTitlesUrl from '../assets/audio/music/what_remains_of_home_opening.ogg';
 
-// Approved Revised v2 campaign originals, requested lazily by the bus.
+// Campaign rotation, requested lazily by the bus: seven approved Revised v2
+// originals plus the full What Remains of Home theme (formerly the menu loop).
 import campaign0Url from '../assets/audio/music/a_country_before_dawn.ogg';
-import campaign1Url from '../assets/audio/music/lines_on_paper.ogg';
+import campaign1Url from '../assets/audio/music/what_remains_of_home.ogg';
 import campaign2Url from '../assets/audio/music/the_long_winter.ogg';
 import campaign3Url from '../assets/audio/music/no_answer_on_the_radio.ogg';
 import campaign4Url from '../assets/audio/music/the_life_we_remember.ogg';
@@ -102,7 +104,7 @@ export const AUDIO_ASSET_URLS: Readonly<Record<string, string>> = Object.freeze(
     menu_theme: menuThemeUrl,
     opening_titles: openingTitlesUrl,
     campaign_a_country_before_dawn: campaign0Url,
-    campaign_lines_on_paper: campaign1Url,
+    campaign_what_remains_of_home: campaign1Url,
     campaign_the_long_winter: campaign2Url,
     campaign_no_answer_on_the_radio: campaign3Url,
     campaign_the_life_we_remember: campaign4Url,

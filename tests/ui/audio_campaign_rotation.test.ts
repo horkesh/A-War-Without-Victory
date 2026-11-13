@@ -7,6 +7,8 @@ import * as bus from '../../src/ui/map/audio/audio_engine';
 import { applyAudioPreferences, saveAudioPreferences } from '../../src/ui/map/audio/audio_preferences';
 import { AudioSurfaceBedController } from '../../src/ui/map/components/AudioSurfaceBedController';
 import { useGameStore } from '../../src/ui/map/store/gameStore';
+import { withoutComments } from '../helpers/sourceComments';
+import { getMusicConfig } from '../../src/ui/map/audio/sound_manifest';
 
 class FakeAudio extends EventTarget {
   static elements: FakeAudio[] = [];
@@ -31,7 +33,10 @@ class FakeAudio extends EventTarget {
 const preferences = { muted: false, masterVolume: .5, musicEnabled: true, musicVolume: .4 };
 const flush = async () => { await Promise.resolve(); await Promise.resolve(); };
 const opening = () => FakeAudio.elements.find(audio => audio.src.includes('opening'))!;
-const menu = () => FakeAudio.elements.find(audio => audio.src.includes('what_remains_of_home.ogg'))!;
+// Owner 2026-11-13: the menu loops Lines on Paper, not the opening's melody.
+const menu = () => FakeAudio.elements.find(audio => audio.src.includes('/lines_on_paper.ogg'))!;
+// Exact file match: 'what_remains_of_home' is also a prefix of the opening's file.
+const trackFile = (slug: string) => (audio: FakeAudio) => audio.src.includes(`/${slug}.ogg`);
 beforeEach(() => {
   FakeAudio.unsupported = false; bus.resetAudioForTests(); FakeAudio.elements = []; FakeAudio.pending = []; FakeAudio.defer = false;
   vi.stubGlobal('Audio', FakeAudio); window.localStorage.clear(); saveAudioPreferences(preferences);
@@ -39,8 +44,10 @@ beforeEach(() => {
 });
 afterEach(() => { cleanup(); bus.resetAudioForTests(); vi.unstubAllGlobals(); window.localStorage.clear(); });
 
-const campaignSlugs = ['a_country_before_dawn', 'lines_on_paper', 'the_long_winter', 'no_answer_on_the_radio', 'the_life_we_remember', 'a_table_for_strangers', 'what_the_maps_cannot_show', 'after_the_guns'];
-const current = () => FakeAudio.elements.find(audio => audio.src.includes(bus.getAudioState().requestedMusicId!.replace('campaign_', '')))!;
+const campaignSlugs = ['a_country_before_dawn', 'what_remains_of_home', 'the_long_winter', 'no_answer_on_the_radio', 'the_life_we_remember', 'a_table_for_strangers', 'what_the_maps_cannot_show', 'after_the_guns'];
+// The newest element for the requested track is the one the engine owns: a new
+// campaign or a decode retry releases the old element and creates a fresh one.
+const current = () => FakeAudio.elements.filter(trackFile(bus.getAudioState().requestedMusicId!.replace('campaign_', ''))).at(-1)!;
 const campaignId = () => {
   const id = bus.getAudioState().requestedMusicId;
   expect(id).toMatch(/^campaign_/);
@@ -142,6 +149,55 @@ it('uses injected renderer randomness and avoids a repeated boundary even with i
   expect(random).toHaveBeenCalledTimes(21);
 });
 
+// Seeded test-only source so the first-pass assertions below are reproducible.
+const seeded = (seed: number) => () => {
+  seed = (seed + 0x6d2b79f5) | 0;
+  let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+  t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+  return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+};
+
+it('shuffles the first pass too: different random sources start a campaign on different tracks', () => {
+  const firstPasses = Array.from({ length: 32 }, (_, seed) => {
+    const next = createMusicShuffleBag(CAMPAIGN_MUSIC_IDS, seeded(seed + 1));
+    return Array.from({ length: 8 }, () => next());
+  });
+  for (const pass of firstPasses) expect(new Set(pass)).toEqual(new Set(CAMPAIGN_MUSIC_IDS));
+  // Owner 2026-11-12: every new campaign must not open on the same music.
+  expect(new Set(firstPasses.map(pass => pass[0])).size).toBeGreaterThanOrEqual(6);
+  expect(new Set(firstPasses.map(pass => pass.join('|'))).size).toBe(32);
+  // The first pass is never the fixed manifest order.
+  expect(firstPasses.some(pass => pass.join('|') !== CAMPAIGN_MUSIC_IDS.join('|'))).toBe(true);
+});
+
+it('draws the first pass from the default renderer randomness at first request', () => {
+  const spy = vi.spyOn(Math, 'random').mockReturnValue(0);
+  try {
+    // The bag shuffles lazily, at the first request, not at construction.
+    const lowFirst = createMusicShuffleBag(CAMPAIGN_MUSIC_IDS)();
+    spy.mockReturnValue(.999);
+    const highFirst = createMusicShuffleBag(CAMPAIGN_MUSIC_IDS)();
+    expect(lowFirst).not.toBe(highFirst);
+    expect(spy).toHaveBeenCalledTimes(14);
+  } finally { spy.mockRestore(); }
+});
+
+for (const value of [0, .999]) {
+  it(`plays the opening first and then a shuffled first campaign track (random=${value})`, async () => {
+    const spy = vi.spyOn(Math, 'random').mockReturnValue(value);
+    try {
+      bus.resetAudioForTests(); FakeAudio.elements = [];
+      const view = render(createElement(AudioSurfaceBedController, { appScreen: 'mainMenu' }));
+      fireEvent.pointerDown(window); await flush();
+      view.rerender(createElement(AudioSurfaceBedController, { appScreen: 'game' }));
+      expect(bus.getAudioState().requestedMusicId).toBe('opening_titles');
+      opening().finish(); await flush();
+      // random=0 and random=.999 produce different Fisher-Yates first passes.
+      expect(campaignId()).toBe(value === 0 ? 'campaign_what_remains_of_home' : 'campaign_a_country_before_dawn');
+    } finally { spy.mockRestore(); }
+  });
+}
+
 it('ignores former-owner campaign events after remounting the same requested track', async () => {
   const first = await mountGame(); const old = current(); const id = campaignId();
   first.unmount();
@@ -172,3 +228,122 @@ for (const eventType of ['ended', 'error']) {
     expect(campaignId()).toBe(id); expect(current()).toBe(audio); expect(audio.currentTime).toBe(48);
   });
 }
+
+// A new campaign is a new opening session: fresh bag, opening first, no
+// resumed track from the previous campaign. Loading a save is not a new
+// campaign and keeps resume-in-place (covered above).
+const latest = (slug: string) => FakeAudio.elements.filter(trackFile(slug)).at(-1)!;
+const openings = () => FakeAudio.elements.filter(audio => audio.src.includes('opening'));
+
+it('a second new campaign in one session plays the opening, then a fresh bag, not the old track', async () => {
+  const spy = vi.spyOn(Math, 'random').mockReturnValue(.999);
+  try {
+    bus.resetAudioForTests(); FakeAudio.elements = [];
+    const view = render(createElement(AudioSurfaceBedController, { appScreen: 'mainMenu' }));
+    fireEvent.pointerDown(window); await flush();
+    bus.beginNewCampaignMusic();
+    view.rerender(createElement(AudioSurfaceBedController, { appScreen: 'warroom' })); await flush();
+    expect(bus.getAudioState().requestedMusicId).toBe('opening_titles');
+    const firstOpening = opening(); firstOpening.finish(); await flush();
+    expect(campaignId()).toBe('campaign_a_country_before_dawn');
+    const old = latest('a_country_before_dawn'); old.currentTime = 50;
+    view.rerender(createElement(AudioSurfaceBedController, { appScreen: 'mainMenu' })); await flush();
+    expect(menu().paused).toBe(false);
+
+    bus.beginNewCampaignMusic();
+    view.rerender(createElement(AudioSurfaceBedController, { appScreen: 'warroom' })); await flush();
+    expect(bus.getAudioState().requestedMusicId).toBe('opening_titles');
+    const secondOpening = openings().at(-1)!;
+    expect(secondOpening).not.toBe(firstOpening); expect(secondOpening.paused).toBe(false);
+    expect(old.paused).toBe(true); expect(menu().paused).toBe(true);
+    secondOpening.finish(); await flush();
+    // The old bag would continue with what_remains_of_home; a fresh identity-order
+    // bag starts again at a_country_before_dawn, on a new element from 0 s.
+    expect(campaignId()).toBe('campaign_a_country_before_dawn');
+    const fresh = latest('a_country_before_dawn');
+    expect(fresh).not.toBe(old); expect(fresh.currentTime).toBe(0); expect(fresh.paused).toBe(false);
+    expect(old.paused).toBe(true);
+  } finally { spy.mockRestore(); }
+});
+
+// CI flake 2026-11-13 (#574): the unseeded test below fails whenever the fresh
+// bag draws the old campaign's track (1 in 8). Force that collision.
+it('a new campaign that redraws the old track plays it on the fresh element, not the stale one', async () => {
+  const spy = vi.spyOn(Math, 'random').mockReturnValue(.999);
+  try {
+    bus.resetAudioForTests(); FakeAudio.elements = [];
+    await mountGame(); const old = current(); old.currentTime = 30;
+    expect(campaignId()).toBe('campaign_a_country_before_dawn');
+    bus.beginNewCampaignMusic(); await flush();
+    openings().at(-1)!.finish(); await flush();
+    expect(campaignId()).toBe('campaign_a_country_before_dawn');
+    expect(current()).not.toBe(old); expect(old.paused).toBe(true);
+    expect(current().paused).toBe(false); expect(current().currentTime).toBe(0);
+    expect(FakeAudio.elements.filter(a => !a.paused)).toEqual([current()]);
+  } finally { spy.mockRestore(); }
+});
+
+it('a new campaign started from inside play stops the old track and plays the opening at once', async () => {
+  await mountGame(); const old = current(); old.currentTime = 30;
+  bus.beginNewCampaignMusic(); await flush();
+  expect(bus.getAudioState().requestedMusicId).toBe('opening_titles');
+  expect(old.paused).toBe(true);
+  const firstNew = openings().at(-1)!; expect(firstNew.paused).toBe(false);
+  firstNew.finish(); await flush();
+  expect(campaignId()).toMatch(/^campaign_/);
+  expect(current().paused).toBe(false); expect(FakeAudio.elements.filter(a => !a.paused)).toHaveLength(1);
+});
+
+it('a new campaign while the opening is audible lets it finish into the fresh bag', async () => {
+  const view = render(createElement(AudioSurfaceBedController, { appScreen: 'mainMenu' }));
+  fireEvent.pointerDown(window); await flush(); opening().currentTime = 12;
+  bus.beginNewCampaignMusic();
+  view.rerender(createElement(AudioSurfaceBedController, { appScreen: 'warroom' })); await flush();
+  expect(openings()).toHaveLength(1); expect(opening().currentTime).toBe(12); expect(opening().paused).toBe(false);
+  opening().finish(); await flush(); campaignId();
+});
+
+it('a new campaign with music unheard skips the opening and starts the fresh bag', async () => {
+  saveAudioPreferences({ ...preferences, musicEnabled: false });
+  const view = render(createElement(AudioSurfaceBedController, { appScreen: 'mainMenu' }));
+  fireEvent.pointerDown(window); await flush();
+  bus.beginNewCampaignMusic();
+  view.rerender(createElement(AudioSurfaceBedController, { appScreen: 'warroom' }));
+  applyAudioPreferences(preferences); await flush();
+  campaignId(); expect(openings()).toHaveLength(0);
+});
+
+it('App resets campaign music on both fresh-campaign paths and not on save load', async () => {
+  const { readFileSync } = await import('node:fs');
+  const app = withoutComments(readFileSync('src/ui/map/App.tsx', 'utf8'));
+  const body = (start: string, end: string) => app.slice(app.indexOf(start), app.indexOf(end, app.indexOf(start)));
+  expect(body('const handleSelectFaction', 'const handleMainMenuLoadGame')).toContain('beginNewCampaignMusic()');
+  expect(body("'awwv-shell:fresh-campaign-started'", 'setRecentlyAcceptedEventDecisionId(null)')).toContain('beginNewCampaignMusic()');
+  expect(body('const handleMainMenuLoadGame', 'catch (err)')).not.toContain('beginNewCampaignMusic');
+});
+
+it('the menu theme differs from the opening: Lines on Paper loops, What Remains of Home rotates', () => {
+  // Owner 2026-11-13: "Make them differ", then "Use a campaign track".
+  expect(getMusicConfig('menu_theme')).toMatchObject({ src: 'audio/music/lines_on_paper.ogg', loop: true });
+  expect(getMusicConfig('opening_titles')).toMatchObject({ src: 'audio/music/what_remains_of_home_opening.ogg', loop: false });
+  expect(getMusicConfig('campaign_what_remains_of_home')).toMatchObject({ src: 'audio/music/what_remains_of_home.ogg', loop: false });
+  expect(getMusicConfig('campaign_lines_on_paper')).toBeUndefined();
+  const menuFile = getMusicConfig('menu_theme')?.src ?? '';
+  expect(menuFile.startsWith('audio/music/what_remains_of_home')).toBe(false);
+  const rotationFiles = CAMPAIGN_MUSIC_IDS.map(id => getMusicConfig(id)!.src);
+  expect(new Set(rotationFiles).size).toBe(8);
+  expect(rotationFiles.includes(menuFile)).toBe(false);
+  expect(rotationFiles.includes(getMusicConfig('opening_titles')!.src)).toBe(false);
+});
+
+it('plays the opening, then campaign, then Lines on Paper as the menu loop on return', async () => {
+  const view = render(createElement(AudioSurfaceBedController, { appScreen: 'mainMenu' }));
+  fireEvent.pointerDown(window); await flush();
+  expect(bus.getAudioState().requestedMusicId).toBe('opening_titles');
+  view.rerender(createElement(AudioSurfaceBedController, { appScreen: 'game' }));
+  opening().finish(); await flush(); campaignId();
+  view.rerender(createElement(AudioSurfaceBedController, { appScreen: 'mainMenu' })); await flush();
+  expect(bus.getAudioState().requestedMusicId).toBe('menu_theme');
+  expect(menu().paused).toBe(false); expect(menu().loop).toBe(true);
+  expect(FakeAudio.elements.filter(a => !a.paused)).toEqual([menu()]);
+});

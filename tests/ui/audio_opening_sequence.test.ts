@@ -28,7 +28,8 @@ class FakeAudio extends EventTarget {
 const preferences = { muted: false, masterVolume: .5, musicEnabled: true, musicVolume: .4 };
 const flush = async () => { await Promise.resolve(); await Promise.resolve(); };
 const opening = () => FakeAudio.elements.find(audio => audio.src.includes('opening'))!;
-const menu = () => FakeAudio.elements.find(audio => audio.src.includes('what_remains_of_home.ogg'))!;
+// Owner 2026-11-13: the menu loops Lines on Paper, not the opening's melody.
+const menu = () => FakeAudio.elements.find(audio => audio.src.includes('/lines_on_paper.ogg'))!;
 beforeEach(() => {
   bus.resetAudioForTests(); FakeAudio.elements = []; FakeAudio.pending = []; FakeAudio.defer = false;
   vi.stubGlobal('Audio', FakeAudio); window.localStorage.clear(); saveAudioPreferences(preferences);

@@ -22,7 +22,7 @@ export function createMusicShuffleBag(ids: readonly string[], random: () => numb
 
 export const CAMPAIGN_MUSIC_IDS = Object.freeze([
     'campaign_a_country_before_dawn',
-    'campaign_lines_on_paper',
+    'campaign_what_remains_of_home',
     'campaign_the_long_winter',
     'campaign_no_answer_on_the_radio',
     'campaign_the_life_we_remember',

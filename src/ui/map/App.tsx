@@ -69,6 +69,7 @@ import { VerdictScreen } from './components/VerdictScreen';
 import { ReplayInspectionBanner } from './components/replay/ReplayInspectionBanner';
 import { AudioCueObserver } from './components/AudioCueObserver';
 import { AudioSurfaceBedController } from './components/AudioSurfaceBedController';
+import { beginNewCampaignMusic } from './audio/audio_engine';
 import { WarroomShellLayer } from './components/warroom/WarroomShellLayer';
 import { AdvanceTurnModal } from './components/warroom/AdvanceTurnModal';
 import { WarroomStatusBar } from './components/warroom/WarroomStatusBar';
@@ -1188,6 +1189,8 @@ function App() {
     setCampaignStarting(false);
     if (ok) {
       useGameStore.getState().setPeaceWarTransitionSeen(false);
+      // A new campaign opens with the opening and a fresh soundtrack shuffle.
+      beginNewCampaignMusic();
       setAppScreen('warroom');
       setSidePickerOpen(false);
       setSidePickerDismissed(false);
@@ -1739,6 +1742,7 @@ function App() {
 
       if (event.data?.type === 'awwv-shell:fresh-campaign-started') {
         resetCampaignScopedUiState();
+        beginNewCampaignMusic();
         const view = new URLSearchParams(window.location.search).get('view');
         setAppScreen(view === 'warroom' ? 'warroom' : 'game');
         setOpeningBriefDismissed(false);
