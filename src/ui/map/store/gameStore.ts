@@ -1,6 +1,8 @@
 import { create } from 'zustand';
 import type { LoadedGameState } from '../data/types';
-import { parseGameState } from '../data/GameStateAdapter';
+import { parseGameState, type ParseGameStateOptions } from '../data/GameStateAdapter';
+import { subscribeLocale } from '../i18n';
+import { loadOsidAdjacency } from '../data/DataLoader';
 import { shouldMarkPeaceWarTransitionSeenOnLoad } from '../data/peaceWarTransitionGate';
 import type { TurnAftermathDigest, TurnAftermathView } from '../data/turnAftermath';
 import type { ArmyHQRecordsSubTab } from '../../shared/shellHandoff';
@@ -375,6 +377,49 @@ const CLEARED_OPERATION_CONTEXT = {
   operationTargetOsids: [] as string[],
 };
 
+// M3 (2026-11-12): OSID contact adjacency for the adapter's isolated-pocket view rule. Loaded once
+// (DataLoader caches it), awaited at most POCKET_ADJACENCY_WAIT_MS per load, never required.
+const POCKET_ADJACENCY_WAIT_MS = 3000;
+let pocketAdjacency: ReadonlyMap<string, readonly string[]> | null = null;
+let pocketAdjacencyRequest: Promise<void> | null = null;
+
+function requestPocketAdjacency(): Promise<void> {
+  if (pocketAdjacency || typeof fetch !== 'function') return Promise.resolve();
+  if (!pocketAdjacencyRequest) {
+    pocketAdjacencyRequest = loadOsidAdjacency()
+      .then((adjacency) => { pocketAdjacency = adjacency; })
+      .catch(() => { pocketAdjacencyRequest = null; });
+  }
+  const request = pocketAdjacencyRequest;
+  return new Promise<void>((resolve) => {
+    const timer = setTimeout(resolve, POCKET_ADJACENCY_WAIT_MS);
+    void request.then(() => { clearTimeout(timer); resolve(); });
+  });
+}
+
+// The adapter builds player-facing labels with t() (e.g. M3 "Unheld front near X" /
+// "Nebranjeni front (X)"). Remember what each parsed view came from so a language switch can
+// rebuild the live view (and the replay return state) in the new locale. Display-only.
+const parseInputByView = new WeakMap<LoadedGameState, { json: unknown; options: ParseGameStateOptions }>();
+
+function rememberParseInput(view: LoadedGameState, json: unknown, options: ParseGameStateOptions): void {
+  parseInputByView.set(view, { json, options });
+}
+
+function reparseInActiveLocale(view: LoadedGameState | null): LoadedGameState | null {
+  if (!view) return view;
+  const input = parseInputByView.get(view);
+  if (!input) return view;
+  try {
+    const next = parseGameState(input.json, input.options);
+    rememberParseInput(next, input.json, input.options);
+    return next;
+  } catch (error) {
+    console.error('[gameStore] Failed to re-localize the loaded state:', error);
+    return view;
+  }
+}
+
 export const useGameStore = create<GameStore>((set, get) => ({
   devMode: isDevMode(),
   diagMode: isDiagMode(),
@@ -726,10 +771,12 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const finalState = get().replayInspectionReturnState ?? current;
     let inspected: LoadedGameState;
     try {
-      inspected = parseGameState(frame, {
+      const frameOptions: ParseGameStateOptions = {
         ...(finalState.replaySaveSequence ? { replaySaveSequence: finalState.replaySaveSequence } : {}),
         ...(finalState.replaySaveManifest ? { replaySaveManifest: finalState.replaySaveManifest } : {}),
-      });
+      };
+      inspected = parseGameState(frame, frameOptions);
+      rememberParseInput(inspected, frame, frameOptions);
     } catch (e) {
       const message = e instanceof Error ? e.message : String(e);
       set({ loadError: message });
@@ -847,7 +894,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
         }
       };
 
-      schedule(() => {
+      // M3 (2026-11-12): wait once for the cached OSID adjacency so the adapter can leave
+      // unreachable brigade-less pockets out of every corps list. A failed fetch resolves
+      // without it; the load never blocks on it.
+      void requestPocketAdjacency().then(() => schedule(() => {
         const fingerprint = buildStateFingerprint(jsonOrText);
         const previousLoadedGameState = get().loadedGameState;
         let state: LoadedGameState;
@@ -871,11 +921,14 @@ export const useGameStore = create<GameStore>((set, get) => ({
           // the read-only `replayPlayer()` consumer downstream.
           const pendingSequence = (get().pendingReplaySaveSequence ?? null) as ReadonlyArray<unknown> | null;
           const pendingManifest = get().pendingReplaySaveManifest;
-          state = parseGameState(json, {
+          const parseOptions: ParseGameStateOptions = {
             ...(pendingSequence ? { replaySaveSequence: pendingSequence } : {}),
             ...(pendingManifest ? { replaySaveManifest: pendingManifest } : {}),
             ...(get().runtimeFeatureFlags ? { runtimeFeatureFlags: get().runtimeFeatureFlags ?? undefined } : {}),
-          });
+            ...(pocketAdjacency ? { osidAdjacency: pocketAdjacency } : {}),
+          };
+          state = parseGameState(json, parseOptions);
+          rememberParseInput(state, json, parseOptions);
         } catch (e) {
           const message = e instanceof Error ? e.message : String(e);
           set({
@@ -970,7 +1023,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
             reject(e);
           }
         });
-      });
+      }));
     });
   },
   loadSaveIfChanged: async (jsonOrText: unknown | string) => {
@@ -1024,3 +1077,14 @@ export const useGameStore = create<GameStore>((set, get) => ({
   flashOsid: null,
   setFlashOsid: (osid) => set({ flashOsid: osid }),
 }));
+
+// Codex review on #577: setLocale() does not rebuild loadedGameState, so adapter-built labels
+// stayed in the language they were parsed in. Rebuild the live view (and the replay return state)
+// whenever the locale changes; selection and modal state are untouched.
+subscribeLocale(() => {
+  const { loadedGameState, replayInspectionReturnState } = useGameStore.getState();
+  const nextLoaded = reparseInActiveLocale(loadedGameState);
+  const nextReturn = reparseInActiveLocale(replayInspectionReturnState);
+  if (nextLoaded === loadedGameState && nextReturn === replayInspectionReturnState) return;
+  useGameStore.setState({ loadedGameState: nextLoaded, replayInspectionReturnState: nextReturn });
+});

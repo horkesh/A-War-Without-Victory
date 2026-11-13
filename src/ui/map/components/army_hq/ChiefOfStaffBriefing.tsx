@@ -15,6 +15,7 @@ import type { CommandStrainLabel, CommandStrainSource } from '../../data/command
 import { shouldNarrateTerritorySummary } from '../../data/territorySummaryGuard';
 import { getActiveLocale, t, type MessageKey } from '../../i18n';
 import { getPlayerSafeCorpsName } from '../../utils/playerSafeText';
+import { sectorLabelNeedsTypePrefix } from '../../utils/sectorTypePrefix';
 import { projectOperationLifecycle } from '../../data/operationLifecycleProjection';
 import { DOSSIER_INK, DossierPaper } from './DossierPaper';
 
@@ -338,7 +339,15 @@ export function generateCoSBriefing(
                 segments.push(corpsId ? link(sectorName, corpsId) : text(sectorName));
                 segments.push(text(t('chiefOfStaff.alert.defense.cautious.suffix')));
             } else if (tone === 'precise') {
-                segments.push(text(t('chiefOfStaff.alert.defense.precise.prefix')));
+                // The sector name usually names its own type ("OG Tuzla", "TG Foča") or is an
+                // unheld front (owner ruling M3); only a bare place gets the "OG " / "Sektor " prefix.
+                const thinSectorId = thinItem.subject?.type === 'sector' ? thinItem.subject.id : undefined;
+                const sectorView = thinSectorId
+                    ? state.corpsFrontSectors?.find((sector) => sector.sector_id === thinSectorId)
+                    : undefined;
+                if (sectorLabelNeedsTypePrefix(sectorName, sectorView?.unheld_front === true)) {
+                    segments.push(text(t('chiefOfStaff.alert.defense.precise.prefix')));
+                }
                 segments.push(corpsId ? link(sectorName, corpsId) : text(sectorName));
                 segments.push(text(t('chiefOfStaff.alert.defense.precise.suffix')));
             } else {
