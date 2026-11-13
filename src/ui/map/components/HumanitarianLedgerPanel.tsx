@@ -31,6 +31,7 @@ import {
   SurfaceSection,
   SurfaceSections,
 } from './surface/Surface';
+import { useDialogFocus } from '../../shared/Modal';
 import { useSurfaceEscape } from './surface/useSurfaceEscape';
 import { SurfaceModalLayer } from './surface/SurfaceModalLayer';
 
@@ -63,6 +64,7 @@ const NUM = 'font-mono font-semibold tabular-nums';
 
 export function HumanitarianLedgerPanel({ state, open, onClose }: HumanitarianLedgerPanelProps) {
   useSurfaceEscape(open, onClose);
+  const dialogFocus = useDialogFocus(open);
   const nd = state.nationalDisplacement;
 
   const byPeople = useMemo(() => {
@@ -98,6 +100,8 @@ export function HumanitarianLedgerPanel({ state, open, onClose }: HumanitarianLe
     <SurfaceModalLayer>
     <SurfaceFrame
       layerClassName=""
+      ref={dialogFocus.ref}
+      onKeyDownCapture={dialogFocus.onKeyDown}
       data-testid="humanitarian-ledger-panel"
       aria-modal="true"
       aria-labelledby="humanitarian-ledger-title"

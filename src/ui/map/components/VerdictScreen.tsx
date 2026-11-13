@@ -65,14 +65,12 @@ import {
     SURFACE_MODAL_PANEL_FULL,
     SURFACE_PRIMARY_BUTTON_COMPACT,
     SURFACE_SECONDARY_BUTTON,
-    SurfaceColumns,
     SurfaceContent,
     SurfaceEmpty,
     SurfaceHeader,
     SurfaceModalBody,
     SurfaceModalFooter,
     SurfacePanel,
-    SurfaceRail,
     SurfaceRailItem,
     SurfaceSection,
     SurfaceSections,
@@ -590,8 +588,14 @@ export function VerdictScreen({ onLoadSaveState, onLoadSaveError }: VerdictScree
             >
                 <SurfaceHeader eyebrow={t('gameOver.header', { date })} title={t('gameOver.title')} />
 
-                <SurfaceColumns layout="rail-content">
-                    <SurfaceRail as="div" aria-label={t('verdict.metric.focus')}>
+                {/* Below md (narrow browser builds; the desktop window is never narrower than 1280 px) the
+                    three factions sit in a row above the full-width report, as before the surface
+                    redesign; from md up they are the left rail. */}
+                <div className="grid min-h-0 flex-1 grid-rows-[auto_minmax(0,1fr)] md:grid-rows-1 md:grid-cols-[clamp(17rem,calc(var(--interface-viewport-width,100vw)*0.19),21rem)_minmax(0,1fr)]"
+                     data-awwv-verdict-columns>
+                    <div aria-label={t('verdict.metric.focus')}
+                         data-awwv-verdict-faction-rail
+                         className="grid grid-cols-3 gap-2 border-b border-[#262b35] bg-[#0f1218] px-3 py-3 md:flex md:min-h-0 md:flex-col md:overflow-y-auto md:border-b-0 md:border-r md:px-4 md:py-5">
                         {factionIds.map((fid) => {
                             const v = verdict.faction_verdicts[fid];
                             const active = fid === selectedFaction;
@@ -624,7 +628,7 @@ export function VerdictScreen({ onLoadSaveState, onLoadSaveError }: VerdictScree
                                 />
                             );
                         })}
-                    </SurfaceRail>
+                    </div>
 
                     <SurfaceContent
                         data-awwv-mobile-verdict-flow
@@ -812,7 +816,7 @@ export function VerdictScreen({ onLoadSaveState, onLoadSaveError }: VerdictScree
                 )}
                     </SurfaceSections>
                     </SurfaceContent>
-                </SurfaceColumns>
+                </div>
 
                 {/* Footer */}
                 <SurfaceModalFooter className="justify-between">

@@ -33,6 +33,7 @@ import {
   SurfaceSections,
   SurfaceStat,
 } from './surface/Surface';
+import { useDialogFocus } from '../../shared/Modal';
 import { useSurfaceEscape } from './surface/useSurfaceEscape';
 import { surfaceFactionName } from './surface/surfaceFactionName';
 import { SurfaceModalLayer } from './surface/SurfaceModalLayer';
@@ -88,6 +89,7 @@ function getEnclaveRisk(enclave: EnclaveResilienceView) {
 export function EnclaveDashboard({ state, open, onClose }: EnclaveDashboardProps) {
   const ipc = useIPC();
   useSurfaceEscape(open, onClose);
+  const dialogFocus = useDialogFocus(open);
   const [allocations, setAllocations] = useState<Record<string, number>>({});
   const [actionMessage, setActionMessage] = useState<string | null>(null);
   const enclaves = useMemo(
@@ -153,6 +155,8 @@ export function EnclaveDashboard({ state, open, onClose }: EnclaveDashboardProps
     <SurfaceModalLayer>
     <SurfaceFrame
       layerClassName=""
+      ref={dialogFocus.ref}
+      onKeyDownCapture={dialogFocus.onKeyDown}
       data-testid="enclave-dashboard"
       aria-modal="true"
       aria-labelledby="enclave-dashboard-title"

@@ -32,6 +32,7 @@ import {
     SurfaceSection,
     SurfaceSections,
 } from './surface/Surface';
+import { useDialogFocus } from '../../shared/Modal';
 import { useSurfaceEscape } from './surface/useSurfaceEscape';
 import { surfaceFactionName } from './surface/surfaceFactionName';
 import { SurfaceModalLayer } from './surface/SurfaceModalLayer';
@@ -104,6 +105,7 @@ function EmptyLine({ children }: { children: string }) {
 
 export function EconomyPanel({ state, onClose }: EconomyPanelProps) {
     useSurfaceEscape(true, onClose);
+    const dialogFocus = useDialogFocus(true);
     const reserves = state.factionReserves;
     const playerFaction = state.player_faction;
     const isPlayerFaction = playerFaction === 'RS' || playerFaction === 'RBiH' || playerFaction === 'HRHB';
@@ -129,6 +131,8 @@ export function EconomyPanel({ state, onClose }: EconomyPanelProps) {
         <SurfaceModalLayer>
         <SurfaceFrame
             layerClassName=""
+            ref={dialogFocus.ref}
+            onKeyDownCapture={dialogFocus.onKeyDown}
             data-testid="economy-panel"
             aria-modal="true"
             aria-labelledby="economy-panel-title"

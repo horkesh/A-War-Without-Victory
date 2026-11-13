@@ -13,7 +13,12 @@ const out = opt('--out', 'F:/AWWV-coordination/surface_steps/step4');
 const only = opt('--only', null);
 fs.mkdirSync(out, { recursive: true });
 
-const SIZES = [{ width: 2293, height: 960 }, { width: 1280, height: 720 }];
+// --sizes 1280x720,390x844 overrides the default pair; --report names the JSON written to --out.
+const SIZES = opt('--sizes', '2293x960,1280x720').split(',').map((s) => {
+  const [width, height] = s.split('x').map(Number);
+  return { width, height };
+});
+const reportName = opt('--report', 'step4_report.json');
 
 function makeFV(faction, score, extra = {}) {
   return {
@@ -136,7 +141,10 @@ try {
   page.on('pageerror', (e) => errors.push(String(e.stack ?? e.message).slice(0, 600)));
 
   async function boot(size) {
-    await page.setViewportSize(size);
+    // The start menus are laid out for the desktop window; a narrow browser size boots at
+    // the desktop minimum and is applied once the campaign is running.
+    const narrow = size.width < 768;
+    await page.setViewportSize(narrow ? { width: 1280, height: 720 } : size);
     await page.goto(`${origin}/?dev=1`, { waitUntil: 'networkidle', timeout: 90000 });
     await page.waitForTimeout(1000);
     await page.keyboard.press('Enter'); // past the splash
@@ -151,6 +159,10 @@ try {
     await page.getByRole('button', { name: /^begin/i }).click();
     await page.getByRole('button', { name: /^war map$/i }).waitFor({ state: 'visible', timeout: 60000 });
     await page.waitForTimeout(2500);
+    if (narrow) {
+      await page.setViewportSize(size);
+      await page.waitForTimeout(800);
+    }
     if (process.env.STEP4_DEBUG_SHOT) await page.screenshot({ path: path.join(out, `boot_${size.width}x${size.height}.png`) });
   }
 
@@ -342,6 +354,6 @@ try {
   }
   report.push({ pageErrors: errors });
 } finally {
-  fs.writeFileSync(path.join(out, 'step4_report.json'), JSON.stringify(report, null, 2));
+  fs.writeFileSync(path.join(out, reportName), JSON.stringify(report, null, 2));
   await browser.close();
 }
