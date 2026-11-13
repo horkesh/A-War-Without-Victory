@@ -183,7 +183,9 @@ describe('WarCostSummary player-facing labels', () => {
         const text = container.textContent ?? '';
 
         expect(text).toContain('Under-resourced approval');
-        expect(text).toContain('Serb command / Locked condemnation');
+        expect(text).toContain('RS command / Permanent condemnation');
+        // Sensitive-copy panel 2026-11-13: the responsible side is named as a command, never a people.
+        expect(text).not.toContain('Serb command');
         expect(text).not.toContain('under_resource');
         expect(text).not.toContain('RS / rupture');
         expect(text).not.toMatch(/\b(grave|record|rupture)\b/);

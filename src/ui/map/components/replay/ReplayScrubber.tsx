@@ -11,6 +11,18 @@
  * only.
  *
  * Faction-agnostic. Visible only when the parent passes a non-empty sequence.
+ *
+ * Command Surface restyle (R8, sensitive-copy lane 2026-11-13): shared surface
+ * parts, 13 px text floor, every string through i18n. Copy ruled on by the
+ * Pyrrhic sensitive-history panel (record in SENSITIVE_HISTORY_DESIGN_GATE.md
+ * §6). The casualty and displaced figures are NOT shown: `buildReplayFrameSummary`
+ * reads `military.casualty_totals_by_faction` / `casualties_by_faction` /
+ * `casualties` and `displacement_humanitarian_aggregates.total_displaced`, none
+ * of which the engine writes, so both report 0 for every frame. A zero for a
+ * war is a false statement that understates harm. The figures return once the
+ * summary reads real engine fields; the casualty label is then "Military
+ * casualties" (`replay.casualties`), and a displaced figure that includes the
+ * killed must say so (§4).
  */
 import { useEffect, useMemo, useState, useCallback } from 'react';
 import type { GameState } from '../../../../state/game_state.js';
@@ -18,9 +30,17 @@ import type { ReplaySaveManifest } from '../../../../sim/replay/replay_manifest.
 import { buildReplayFrameSummary } from '../../../../sim/replay/replay_frame_summary.js';
 import { replayPlayer } from '../../../../sim/replay/replay_player.js';
 import { replaySummaryPlayer } from '../../../../sim/replay/replay_summary_player.js';
-import { t } from '../../i18n';
+import { getActiveLocale, t, useLocale } from '../../i18n';
 import { turnToDateString } from '../../utils/formatters';
 import { FACTION_MILITARY_LABELS } from '../../utils/theme';
+import {
+    SURFACE_LABEL,
+    SURFACE_LABEL_MUTED,
+    SURFACE_PRIMARY_BUTTON_COMPACT,
+    SURFACE_SECONDARY_BUTTON,
+    SurfaceEmpty,
+    SurfacePanel,
+} from '../surface/Surface';
 
 export interface ReplayScrubberProps {
     /** Save sequence (read-only). When empty/null, the scrubber renders an empty notice. */
@@ -32,14 +52,36 @@ export interface ReplayScrubberProps {
 
 const REPLAY_AUTOPLAY_INTERVAL_MS = 650;
 
+/** BCS count forms: 1, 21, 31 … take the singular; 11 does not. */
+function settlementCount(osids: number): string {
+    const singular = getActiveLocale() === 'bcs'
+        ? osids % 10 === 1 && osids % 100 !== 11
+        : osids === 1;
+    return t(singular ? 'replay.settlementsOne' : 'replay.settlementsMany', { count: osids });
+}
+
 function formatControlFactionTotal(faction: string, osids: number): string {
     const label = FACTION_MILITARY_LABELS[faction] ?? faction;
-    const noun = osids === 1 ? 'settlement' : 'settlements';
-    return `${label} ${osids} ${noun}`;
+    return `${label} ${settlementCount(osids)}`;
 }
 
 function replayDateLabel(turn: number, date: string | null | undefined): string {
     return date?.trim() || turnToDateString(turn);
+}
+
+const STEP_BUTTON = `${SURFACE_SECONDARY_BUTTON} min-w-[6.5rem]`;
+const JUMP_BUTTON =
+    'min-h-11 rounded-md px-3 text-[15px] font-semibold tabular-nums text-[#c2b69c] transition hover:bg-[#1b2029] hover:text-[#f1e6c8]';
+
+function ReplayFigure({ label, children }: { label: string; children: React.ReactNode }) {
+    return (
+        <div className="min-w-0 rounded-md border border-[#262b35] bg-[#141821] px-4 py-3">
+            <div className={SURFACE_LABEL_MUTED}>{label}</div>
+            <div className="mt-1.5 break-words font-mono text-[18px] font-semibold leading-relaxed tabular-nums text-[#f1e6c8]">
+                {children}
+            </div>
+        </div>
+    );
 }
 
 /**
@@ -49,6 +91,7 @@ function replayDateLabel(turn: number, date: string | null | undefined): string 
  * when the input sequence reference changes. No engine state is mutated.
  */
 export function ReplayScrubber({ saveSequence, saveManifest, onInspectFrame }: ReplayScrubberProps): JSX.Element {
+    useLocale();
     const player = useMemo(
         () => replayPlayer(saveSequence ?? []),
         [saveSequence],
@@ -129,11 +172,8 @@ export function ReplayScrubber({ saveSequence, saveManifest, onInspectFrame }: R
 
     if (turnCount === 0) {
         return (
-            <div
-                className="px-6 py-4 text-xs text-text-secondary italic"
-                data-awwv-replay-empty="true"
-            >
-                Replay is unavailable for this war &mdash; no saved snapshots.
+            <div data-awwv-replay-empty="true">
+                <SurfaceEmpty title={t('replay.empty')} />
             </div>
         );
     }
@@ -155,128 +195,114 @@ export function ReplayScrubber({ saveSequence, saveManifest, onInspectFrame }: R
 
     return (
         <div
-            className="px-6 py-4 bg-panel-card/20 border-t border-panel-border"
+            className="flex flex-col gap-4"
             data-awwv-replay-surface="scrubber"
             data-awwv-replay-turn-count={turnCount}
             data-awwv-replay-cursor={cursor}
             data-awwv-replay-playback-status={isPlaying ? 'playing' : 'paused'}
             data-testid="replay-scrubber"
         >
-            <div className="text-xs uppercase tracking-[0.3em] text-text-secondary font-semibold mb-2">
-                Replay &mdash; Scrub Your War
-            </div>
+            <h4 className={`m-0 ${SURFACE_LABEL}`}>{t('replay.heading')}</h4>
 
-            <div className="flex items-center gap-3 mb-2">
-                <span className="text-xs text-text-secondary tabular-nums">
-                    {currentDateLabel}
-                </span>
-                {current && onInspectFrame && (
+            <SurfacePanel className="flex flex-col gap-4">
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+                    <span className="text-[20px] font-semibold tabular-nums text-[#f6ecd2]">
+                        {currentDateLabel}
+                    </span>
+                    <span className="font-mono text-[15px] tabular-nums text-[#b9ad94]">
+                        {t('replay.position', { current: cursor + 1, total: turnCount })}
+                    </span>
+                    {current && onInspectFrame && (
+                        <button
+                            type="button"
+                            onClick={() => onInspectFrame(current, cursor)}
+                            className={`${SURFACE_SECONDARY_BUTTON} ml-auto`}
+                            data-awwv-replay-inspect="true"
+                        >
+                            {t('replay.inspectMap')}
+                        </button>
+                    )}
+                </div>
+
+                <input
+                    type="range"
+                    min={0}
+                    max={turnCount - 1}
+                    step={1}
+                    value={cursor}
+                    onChange={onScrub}
+                    aria-label={t('replay.turnScrubber')}
+                    className="h-2 w-full cursor-pointer accent-[#c9a75c]"
+                    data-awwv-replay-input="slider"
+                />
+
+                <div className="flex items-center justify-between">
                     <button
                         type="button"
-                        onClick={() => onInspectFrame(current, cursor)}
-                        className="rounded border border-accent-gold/40 bg-accent-gold/10 px-2 py-1 text-xs font-bold uppercase tracking-[0.18em] text-accent-gold transition-colors hover:bg-accent-gold/20"
-                        data-awwv-replay-inspect="true"
+                        onClick={() => onJump(0)}
+                        className={JUMP_BUTTON}
+                        data-awwv-replay-jump="first"
                     >
-                        Inspect Map
+                        {replayDateLabel(metadata.firstTurn ?? 0, metadata.firstTurnDate)}
                     </button>
-                )}
-                <span className="text-xs text-text-secondary/60 ml-auto tabular-nums">
-                    {cursor + 1} / {turnCount}
-                </span>
-            </div>
+                    <button
+                        type="button"
+                        onClick={() => onJump(turnCount - 1)}
+                        className={JUMP_BUTTON}
+                        data-awwv-replay-jump="last"
+                    >
+                        {replayDateLabel(metadata.lastTurn ?? turnCount - 1, metadata.lastTurnDate)}
+                    </button>
+                </div>
 
-            <input
-                type="range"
-                min={0}
-                max={turnCount - 1}
-                step={1}
-                value={cursor}
-                onChange={onScrub}
-                aria-label={t('replay.turnScrubber')}
-                className="w-full h-1.5 accent-accent-gold cursor-pointer"
-                data-awwv-replay-input="slider"
-            />
-
-            <div className="mt-3 flex flex-wrap items-center gap-2 text-xs uppercase tracking-[0.16em] text-text-secondary/70">
-                <button
-                    type="button"
-                    onClick={() => onStep(-1)}
-                    disabled={!canStep || cursor <= 0}
-                    aria-label={t('replay.previousTurn')}
-                    className="rounded border border-panel-border/70 bg-black/10 px-2 py-1 font-semibold text-text-secondary transition-colors hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-40"
-                    data-awwv-replay-step="prev"
-                >
-                    {t('replay.prev')}
-                </button>
-                <button
-                    type="button"
-                    onClick={onTogglePlay}
-                    disabled={!canStep}
-                    aria-label={isPlaying ? t('replay.pausePlayback') : t('replay.playPlayback')}
-                    className="rounded border border-accent-gold/40 bg-accent-gold/10 px-3 py-1 font-bold text-accent-gold transition-colors hover:bg-accent-gold/20 disabled:cursor-not-allowed disabled:opacity-40"
-                    data-awwv-replay-play-toggle="true"
-                    data-awwv-replay-playback-status={isPlaying ? 'playing' : 'paused'}
-                >
-                    {isPlaying ? t('replay.pause') : t('replay.play')}
-                </button>
-                <button
-                    type="button"
-                    onClick={() => onStep(1)}
-                    disabled={!canStep || cursor >= turnCount - 1}
-                    aria-label={t('replay.nextTurn')}
-                    className="rounded border border-panel-border/70 bg-black/10 px-2 py-1 font-semibold text-text-secondary transition-colors hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-40"
-                    data-awwv-replay-step="next"
-                >
-                    {t('replay.next')}
-                </button>
-                <span className="ml-auto normal-case tracking-normal text-text-secondary/50">
-                    {t('replay.autoplayCadence')}
-                </span>
-            </div>
-
-            <div className="flex items-center justify-between mt-2 text-xs text-text-secondary/70">
-                <button
-                    type="button"
-                    onClick={() => onJump(0)}
-                    className="px-2 py-0.5 rounded hover:bg-white/5 transition-colors"
-                    data-awwv-replay-jump="first"
-                >
-                    {replayDateLabel(metadata.firstTurn ?? 0, metadata.firstTurnDate)}
-                </button>
-                <button
-                    type="button"
-                    onClick={() => onJump(turnCount - 1)}
-                    className="px-2 py-0.5 rounded hover:bg-white/5 transition-colors"
-                    data-awwv-replay-jump="last"
-                >
-                    {replayDateLabel(metadata.lastTurn ?? turnCount - 1, metadata.lastTurnDate)}
-                </button>
-            </div>
+                <div className="flex flex-wrap items-center gap-3">
+                    <button
+                        type="button"
+                        onClick={() => onStep(-1)}
+                        disabled={!canStep || cursor <= 0}
+                        aria-label={t('replay.previousTurn')}
+                        className={STEP_BUTTON}
+                        data-awwv-replay-step="prev"
+                    >
+                        {t('replay.prev')}
+                    </button>
+                    <button
+                        type="button"
+                        onClick={onTogglePlay}
+                        disabled={!canStep}
+                        aria-label={isPlaying ? t('replay.pausePlayback') : t('replay.playPlayback')}
+                        className={`${SURFACE_PRIMARY_BUTTON_COMPACT} min-w-[7rem]`}
+                        data-awwv-replay-play-toggle="true"
+                        data-awwv-replay-playback-status={isPlaying ? 'playing' : 'paused'}
+                    >
+                        {isPlaying ? t('replay.pause') : t('replay.play')}
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => onStep(1)}
+                        disabled={!canStep || cursor >= turnCount - 1}
+                        aria-label={t('replay.nextTurn')}
+                        className={STEP_BUTTON}
+                        data-awwv-replay-step="next"
+                    >
+                        {t('replay.next')}
+                    </button>
+                    <span className="ml-auto text-[15px] italic text-[#b9ad94]">
+                        {t('replay.autoplayCadence')}
+                    </span>
+                </div>
+            </SurfacePanel>
 
             <div
-                className="mt-4 grid grid-cols-2 gap-2 text-xs text-text-secondary sm:grid-cols-4"
+                className="grid grid-cols-1 gap-3 sm:grid-cols-[repeat(auto-fit,minmax(14rem,1fr))]"
                 data-awwv-replay-summary="true"
             >
-                <div className="min-w-0 rounded border border-panel-border/70 bg-black/10 px-2 py-2">
-                    <div className="text-xs uppercase tracking-[0.18em] text-text-secondary/60">{t('replay.activeFormations')}</div>
-                    <div className="mt-1 font-mono text-text-primary tabular-nums">{summary.activeFormations}</div>
-                </div>
-                <div className="min-w-0 rounded border border-panel-border/70 bg-black/10 px-2 py-2">
-                    <div className="text-xs uppercase tracking-[0.18em] text-text-secondary/60">{t('replay.casualties')}</div>
-                    <div className="mt-1 font-mono text-text-primary tabular-nums">{String(summary.totalCasualties)}</div>
-                </div>
-                <div className="min-w-0 rounded border border-panel-border/70 bg-black/10 px-2 py-2">
-                    <div className="text-xs uppercase tracking-[0.18em] text-text-secondary/60">{t('replay.displaced')}</div>
-                    <div className="mt-1 font-mono text-text-primary tabular-nums">{String(summary.totalDisplaced)}</div>
-                </div>
-                <div className="min-w-0 rounded border border-panel-border/70 bg-black/10 px-2 py-2">
-                    <div className="text-xs uppercase tracking-[0.18em] text-text-secondary/60">{t('replay.control')}</div>
-                    <div className="mt-1 break-words font-mono leading-relaxed text-text-primary tabular-nums">
-                        {summary.controlByFaction.length === 0
-                            ? 'n/a'
-                            : summary.controlByFaction.map((row) => formatControlFactionTotal(row.faction, row.osids)).join(' ')}
-                    </div>
-                </div>
+                <ReplayFigure label={t('replay.activeFormations')}>{summary.activeFormations}</ReplayFigure>
+                <ReplayFigure label={t('replay.control')}>
+                    {summary.controlByFaction.length === 0
+                        ? t('verdict.notRecorded')
+                        : summary.controlByFaction.map((row) => formatControlFactionTotal(row.faction, row.osids)).join(', ')}
+                </ReplayFigure>
             </div>
         </div>
     );

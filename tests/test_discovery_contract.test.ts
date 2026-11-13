@@ -3,7 +3,7 @@ import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { TEST_FILE_SUFFIXES, discoverTests, toRepoRelative } from '../tools/test/discover_test_files.mjs';
-import { resolveRootModules, resolveVitestCli } from '../tools/test/vitest_shared_config.mjs';
+import { resolveRootModules, resolveTsxCli, resolveVitestCli } from '../tools/test/vitest_shared_config.mjs';
 
 describe('test discovery contracts', () => {
     it('routes desktop contract guardrails through vitest instead of node:test', () => {
@@ -319,6 +319,26 @@ describe('test discovery contracts', () => {
             } finally {
                 rmSync(base, { recursive: true, force: true });
             }
+        });
+
+        it('resolves the tsx CLI the same way: ancestor copy in a worktree, <root> where tsx is local', () => {
+            const base = mkdtempSync(join(tmpdir(), 'awwv-tsx-'));
+            try {
+                mkdirSync(join(base, 'node_modules', 'tsx', 'dist'), { recursive: true });
+                writeFileSync(join(base, 'node_modules', 'tsx', 'package.json'), '{}');
+                const worktree = join(base, '.claude', 'worktrees', 'wt');
+                mkdirSync(worktree, { recursive: true });
+                expect(resolveTsxCli(worktree)).toBe(join(base, 'node_modules', 'tsx', 'dist', 'cli.mjs'));
+
+                // A local copy (main checkout, CI) wins, so behaviour there is unchanged.
+                mkdirSync(join(worktree, 'node_modules', 'tsx', 'dist'), { recursive: true });
+                writeFileSync(join(worktree, 'node_modules', 'tsx', 'package.json'), '{}');
+                expect(resolveTsxCli(worktree)).toBe(join(worktree, 'node_modules', 'tsx', 'dist', 'cli.mjs'));
+            } finally {
+                rmSync(base, { recursive: true, force: true });
+            }
+            // The real repo: whichever copy it resolves must exist.
+            expect(existsSync(resolveTsxCli(process.cwd()))).toBe(true);
         });
     });
 });

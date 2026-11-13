@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import Ajv2020 from 'ajv/dist/2020.js';
 import { describe, expect, it } from 'vitest';
+import { resolveTsxCli } from '../tools/test/vitest_shared_config.mjs';
 import {
   OSID_EXTERIOR_BORDER_BY_OSID,
   type ExteriorBorderState,
@@ -107,7 +108,7 @@ describe('operational exterior border data', () => {
   it('reproduces both checked-in outputs byte-for-byte', () => {
     expect(() => execFileSync(
       process.execPath,
-      [resolve('node_modules/tsx/dist/cli.mjs'), 'scripts/map/derive_operational_exterior_border.ts', '--check'],
+      [resolveTsxCli(resolve('.')),'scripts/map/derive_operational_exterior_border.ts', '--check'],
       { cwd: resolve('.'), encoding: 'utf8', stdio: 'pipe' },
     )).not.toThrow();
   }, 60_000);

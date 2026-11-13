@@ -9,6 +9,58 @@
   Compacted 2026-09-10: 1723 sections moved out, 62 kept live.
 -->
 
+## 2026-11-13 — Test tooling: tsx and vitest/tsc CLIs resolve from a worktree without node_modules
+
+Test infrastructure and developer tooling only; no product, simulation, or calibration code changed.
+This closes the residue named in the 2026-11-12 entry below.
+
+- **One resolver.** `tools/test/vitest_shared_config.mjs` gains `resolveTsxCli(rootDir)`, built on the
+  existing `resolveRootModules` walk (first ancestor `node_modules` holding the package, as Node
+  resolves). Main checkout and CI: exactly `<root>/node_modules/tsx/dist/cli.mjs`, unchanged. A
+  worktree with no `node_modules` gets the main checkout's copy. Read-only; no links created or removed.
+- **Callers moved onto it.** Tests: `desktop_calibration_compare`, `operational_exterior_border_data`,
+  `presidential_cadence_cli_provenance`, `sensitive_history_canon_gate_audit_strict_gate`. Tools:
+  `desktop_bundle_sim.mjs`, `diagnostics/ci_structural_fingerprint.cjs` (now async; dynamic import of
+  the ESM helper), `engineering/canon_check.ts` (tsx + vitest), `scenario_runner/run_scenario_with_preflight.ts`
+  (so every `sim:scenario:run:*` works from a worktree), `test/run_execution_contract.mjs` (vitest + tsc).
+  `tests/test_discovery_contract.test.ts` pins `resolveTsxCli` for both layouts.
+- **Not changed.** `.github/workflows/baseline-pins.yml` (CI has a local `node_modules`), `Run:` usage
+  comments in tools, `tests/cpu_profile_analysis.test.ts` (builds a URL string only), and the
+  `require(path.join(repo,'node_modules',...))` Playwright/pngjs probes under `tools/ui/` (packages, not
+  the tsx binary; listed as a follow-up).
+
+Gates: before, in a no-node_modules worktree, the 6 affected files gave 5 failed files / 17 failed
+tests (8 passed of 25). After, 7/7 files and 39/39 tests pass, including `desktop_sim_bundle_smoke`.
+Run from the main checkout with its own `node_modules`: 5/5 files, 36/36. `npm run ci:structural-fingerprint:check`
+from the worktree exit 0 (fingerprint `bc629e89a585dfde` matches). `npx tsc --noEmit` exit 0. Full `npm run test:vitest` from the worktree exit 0 (sharded files all
+passed, 85 serial files / 1594 tests passed; only the deliberate `tests/fixtures/vitest_balanced` controls are red).
+
+## 2026-11-13 — Sensitive copy: Humanitarian Ledger, Verdict record, BCS corps names, replay restyle
+
+Player-visible copy only (EN + BCS) plus one sim-side string; no simulation behaviour, data or save
+format changed. Signed by an owner-delegated five-seat Pyrrhic panel (historian, narrative-design,
+canon compliance, red-team, game-design), unanimous GO after one amendment. Record:
+`SENSITIVE_HISTORY_DESIGN_GATE.md` §1, §4, §6; report
+`docs/40_reports/implemented/20261113_SENSITIVE_COPY_LANE_PANEL.md`.
+
+- **Humanitarian Ledger (R2').** People labels through i18n. The responsible-side column is
+  withdrawn: the engine books siege displacement to the side holding the besieged town, so the
+  column would have named the defender as perpetrator of the besieger's victims. The second table is
+  "Displaced or killed, by people". Figures that include the killed say so. New note line: the
+  figures come from the campaign's simulation and do not describe the historical war.
+- **Verdict (R3).** "Historical record" heading; "No outcome data is available for this side.";
+  Srebrenica receipt reworded (names Bosnian Serb forces and the Bosniak victims; cites Krstić
+  IT-98-33-T and ICJ 2007) with one English source: `dynamic_section_builder.ts` summary equals the
+  i18n EN (parity test). Cost Ledger badges name commands, not peoples; "Permanent condemnation";
+  milestone column "This campaign".
+- **BCS corps names (S9).** `formatCorpsDisplayName` maps the 19 corps-level ids in `oob_corps.json`
+  to `corps.name.*` in BCS; EN keeps the data name.
+- **Replay scrubber (R8).** Command Surface style, 13 px floor, i18n; casualty and displaced figures
+  hidden because their readers read fields the engine never writes (always 0).
+- **Canon.** §1 Ring 1 rupture window corrected to the code (turn ≥ 160, no upper bound). §4 now binds
+  the Humanitarian Ledger and the receipt and adds: responsible party named as forces; a figure that
+  includes the killed says so; never a people as the responsible party; no false zero.
+
 ## 2026-11-12 — Test tooling: lockfile peers, worktree module resolution, .test.tsx discovery, runner timeout
 
 Test infrastructure only; no product, simulation, or calibration code changed.

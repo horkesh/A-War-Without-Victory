@@ -261,7 +261,10 @@ describe('VerdictScreen mount — verdict content', () => {
         const h = render();
         expect(h).toContain('Replay');
         expect(h).toContain('Active formations');
-        expect(h).toContain('46500');
+        // Sensitive-copy panel 2026-11-13: the summary's casualty and displaced
+        // readers return 0 for every real frame, so neither figure is shown.
+        expect(h).not.toContain('46500');
+        expect(h).not.toContain('900000');
         expect(h).not.toContain('RS:42');
         expect(h).toContain('VRS 42 settlements');
     });
@@ -281,7 +284,7 @@ describe('VerdictScreen mount — verdict content', () => {
             startReplayInspection: () => undefined,
         };
         const h = render();
-        expect(h).toContain('Inspect Map');
+        expect(h).toContain('Inspect map');
         expect(h).toContain('data-awwv-replay-inspect');
     });
 });
@@ -387,18 +390,18 @@ function rawStateWithRuptures(ruptureIds: string[]): any {
 describe('VerdictScreen mount — §6 Srebrenica rupture-receipt (#78)', () => {
     beforeEach(() => { storeState = { loadedGameState: endgame() }; });
 
-    it('renders the Historical Record receipt when the Srebrenica rupture is recorded', () => {
+    it('renders the Historical record receipt when the Srebrenica rupture is recorded', () => {
         storeState = {
             loadedGameState: endgame({
                 rawGameState: rawStateWithRuptures(['srebrenica_genocide_1995']),
             }),
         };
         const h = render();
-        expect(h).toContain('Historical Record');
+        expect(h).toContain('Historical record');
         expect(h).toContain('data-awwv-rupture-receipt="true"');
-        // Panel-approved somber summary surfaces verbatim.
+        // Panel-approved summary (sensitive-copy panel 2026-11-13) surfaces verbatim.
         expect(h).toContain('genocide that followed');
-        expect(h).toContain('permanent entry in the historical record');
+        expect(h).toContain('This entry is permanent.');
         // §6: the receipt is NEVER framed as a player outcome.
         expect(h).toContain('data-awwv-rupture-receipt-variant="divergence"');
         expect(h).not.toContain('data-awwv-rupture-receipt-variant="outcome"');
