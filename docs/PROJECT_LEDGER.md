@@ -14514,6 +14514,13 @@ Step 4 of `docs/40_reports/proposals/20261111_PLAYER_SURFACE_AND_AGENCY_REVIEW.m
 
 **Review follow-up (2026-11-13, #572 Codex findings).** (1) Economy, the enclave dashboard and the humanitarian ledger are `aria-modal` dialogs on `SurfaceModalLayer` but did not hold keyboard focus; each now wires the shared `useDialogFocus` (as `SettingsScreen` and `ArmyHQModal` do): focus moves into the dialog on open, Tab and Shift+Tab wrap inside it, and focus returns to the opener on close. New `tests/ui/records_surfaces_focus.test.ts` covers all three and fails against the previous Economy panel. (2) The verdict's faction rail applied at every width; below `md` the three factions now sit in a row above the full-width report (the pre-redesign stacked flow), with the rail from `md` up. Render check: the 1280×720 verdict shots differ from the earlier evidence only outside the dialog frame (the live map behind it); new 390×844 shots (`verdict_390x844.png` and siblings, report `step4_verdict_narrow_report.json`) show min font 13 px and no horizontal overflow. The drive gained `--sizes` and `--report`; narrow sizes boot at 1280×720 and resize once the campaign runs. Seen, not changed: at 390 px the banner's metric tiles truncate words ("Survi"). Gates: tsc exit 0, `tests/ui` exit 0 (395/395 files), `desktop:map:build` exit 0, entry chunk 2,987.59 kB as Vite reports it (2,993,075 bytes on disk; +0.5 kB).
 
+
+## 2026-11-12 — DC (Dayton conference) lane closed; R8 is the active lane (ROADMAP, PROCESS)
+
+Docs-only closeout. The Dayton conference lane merged as #560 (`4a67bd516`) and Codex handoff CL-055 records every item in the DC plan's Next list as done, so DC now reads CLOSED in the plan's status line, `MASTER_ROADMAP.md` (current block, lane order, sequence, workstream row), `COMMAND_BOARD.md` (status line, row 7a, R8 row, sequence) and `plan_index.yml` (`lane_open: false`, regenerated with `node tools/derive_plan_index.cjs`). R8 packaged campaigns is the active lane, then R9. No code, canon, calibration or gate change.
+
+- `.claude/current-lane.txt` now declares R8 (it named DC, and `tools/hooks/guard_scope_drift.sh` reads it); changed at the request of the session coordinating the merge train, matching the roadmap order the owner set.
+
 ## 2026-11-12 — Campaign soundtrack: the first pass was already shuffled; guard tests added, no playback change (AUDIO, QA)
 
 The owner heard "the same track over and over" in tonight's packaged runs. Read from RS-08, the first pass of the eight-track campaign suite looked like a fixed order (what_the_maps_cannot_show → after_the_guns → a_country_before_dawn → …), and the owner approved the fix: "Sure, shuffle them." Measured before changing anything:
