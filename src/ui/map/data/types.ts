@@ -884,6 +884,15 @@ export interface CorpsFrontSectorView {
     corps_id: string;
     corps_name: string;
     display_name: string;
+    /**
+     * Owner ruling M3 (2026-11-12): a sector with no brigades (assigned, reserve or rear) is not an
+     * Operational Group. The engine keeps it as front partition (ADR-0006); the view marks it so
+     * every surface shows it as an unheld stretch of front. When true, `display_name` already holds
+     * the localized "Unheld front near {place}" label and no OG name.
+     */
+    unheld_front?: boolean;
+    /** Dominant municipality of the sector's front (1991 census spelling), for place-only labels. */
+    front_place_name?: string;
     faction: string;
     opposing_factions: string[];
     edge_ids: string[];
@@ -1236,6 +1245,10 @@ export interface LoadedGameState {
     movementOrdersSettlement?: MovementOrderSettlementView[];
     repositionOrders?: RepositionOrderView[];
     corpsFrontSectors?: CorpsFrontSectorView[];
+    /** Owner ruling M3: brigade-less sectors in an unreachable pocket, left out of corpsFrontSectors (needs osidAdjacency). */
+    hiddenIsolatedPocketSectorIds?: string[];
+    /** Owner ruling M3: held-OG count per corps (sectors with one or more brigades). Use this, not corpsFrontSectors.length, for any "OGs" count. */
+    heldOgCountByCorps?: Record<string, number>;
     /**
      * Brigade IDs that could not be assigned to any sector this turn (engine truth: military.unresolved_sector_brigades).
      * Filtered to the player's faction in the adapter. Codex principle #6: unresolved is honest — do not hide these.
