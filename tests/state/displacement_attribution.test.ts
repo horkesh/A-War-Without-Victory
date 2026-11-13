@@ -85,7 +85,7 @@ describe('resolvePressingFactions (SC1)', () => {
         const alone = stateWith({ 'op:pocket:a': 'RBiH', 'op:pocket:b': 'RBiH', 'op:far:z': 'RS' });
         const r2 = resolvePressingFactions(alone, 'pocket', 'RBiH', POCKET, []);
         expect(r2.causers).toEqual([{ faction: UNKNOWN_CAUSER_BUCKET, weight: 1 }]);
-        expect(r2.causers.map((c) => c.faction)).not.toContain('RBiH');
+        expect(r2.causers.every((c) => c.faction !== 'RBiH')).toBe(true);
     });
 
     it('ignores legacy-id edges that do not match the OSID settlement ids', () => {
