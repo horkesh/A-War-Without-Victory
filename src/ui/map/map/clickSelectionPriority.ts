@@ -1,4 +1,6 @@
-type FrontFeatureLike = { properties?: Record<string, unknown> } | null | undefined;
+import { STACK_CASCADE_MAX, getStackCascadeOffset } from '../layers/formationCounterLayout';
+
+type FrontFeatureLike ={ properties?: Record<string, unknown> } | null | undefined;
 
 type ScreenPoint = { x: number; y: number };
 
@@ -57,15 +59,9 @@ export function getFormationStackPixelOffset(
   const stackCount = typeof feature.properties?.stack_count === 'number'
     ? Math.max(1, Math.floor(feature.properties.stack_count))
     : 1;
-  if (stackIndex === 0 || stackCount <= 1) return [0, 0];
-
-  const slot = stackIndex - 1;
-  const columns = Math.min(4, Math.max(1, Math.ceil(Math.sqrt(stackCount - 1))));
-  const column = slot % columns;
-  const row = Math.floor(slot / columns);
-  const horizontalStep = Math.max(8, Math.round(iconHeight * 0.35));
-  const verticalStep = Math.max(6, Math.round(iconHeight * 0.2));
-  return [Math.round((column - (columns - 1) / 2) * horizontalStep), -(row + 1) * verticalStep];
+  // Members past the drawn cascade sit under the top counter (they are carried by the badge).
+  if (stackIndex === 0 || stackCount <= 1 || stackIndex >= STACK_CASCADE_MAX) return [0, 0];
+  return getStackCascadeOffset(stackIndex, iconHeight);
 }
 
 export function pickNearestFormationAtPoint(

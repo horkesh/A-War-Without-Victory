@@ -37,12 +37,20 @@ export interface PanelRailState {
  * Shared inline style for all entity slide-out panels to the right of the OOBSidebar.
  * Width is specified per-panel: { ...DETAIL_PANEL_STYLE, width: '24rem' }
  */
+/**
+ * Right-edge panels stop above the floating Find (Ctrl/⌘ K) button, which sits fixed at
+ * `bottom: 3.25rem; right: 1rem` (globals.css `.command-palette-opener`, about 2rem tall).
+ * Running them down to the bottom bar put that button over their last rows: a
+ * "Dismiss" button and settlement figures in R8 RBiH attempt 08.
+ */
+export const RIGHT_RAIL_BOTTOM = 'calc(var(--awwv-bottom-bar-clearance, 2.5rem) + 3rem)';
+
 export const DETAIL_PANEL_STYLE: CSSProperties = {
   position: 'absolute',
   right: 0,
   // Toolbar-safe clearance is injected by App via CSS variable.
   top: 'var(--awwv-toolbar-clearance, 5.5rem)',
-  bottom: 'var(--awwv-bottom-bar-clearance, 2.5rem)',
+  bottom: RIGHT_RAIL_BOTTOM,
   zIndex: Z.PANEL_RAIL_PRIMARY,
   overflow: 'hidden',
 };
@@ -71,7 +79,7 @@ export const RIGHT_PANEL_STYLE: CSSProperties = {
   position: 'absolute',
   right: 0,
   top: 'var(--awwv-toolbar-clearance, 5.5rem)',
-  bottom: 'var(--awwv-bottom-bar-clearance, 2.5rem)',
+  bottom: RIGHT_RAIL_BOTTOM,
   zIndex: Z.PANEL_RAIL_TERTIARY,
   overflow: 'hidden',
 };

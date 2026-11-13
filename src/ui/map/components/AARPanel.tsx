@@ -23,6 +23,7 @@ import type { FieldInspectionTarget } from '../utils/fieldInspectionTarget';
 import { inspectOnField } from '../utils/shellNavigation';
 import { resolveMapFormationInspectionTarget } from '../map/mapSelectionRouting';
 import { projectOperationLifecycle } from '../data/operationLifecycleProjection';
+import { SurfaceCloseButton, SurfaceHeader, SURFACE_LABEL, SURFACE_LABEL_MUTED } from './surface/Surface';
 
 type BattleCasualtyPayload = TurnBattle & {
     attacker_casualties?: number | null;
@@ -30,21 +31,24 @@ type BattleCasualtyPayload = TurnBattle & {
     casualties_reported?: boolean;
 };
 
-// --- Faction colors ---
+/** Formation link inside a battle row: underlined on hover, gold when focused. */
+const AAR_LINK = 'text-[15px] text-[#ddd1b3] underline-offset-2 transition-colors hover:text-[#e0c27a] hover:underline';
+
+// --- Faction tag inks (lightened for the dark surface; same hues as the map) ---
 const FACTION_COLOR: Record<string, string> = {
-    RS: '#c04040',
-    RBiH: '#4a9a55',
-    HRHB: '#4080b8',
+    RS: '#e58a8a',
+    RBiH: '#86c890',
+    HRHB: '#8bb7e4',
 };
 
 // --- Arc display ---
 const ARC_COLOR: Record<string, string> = {
-    veteran: 'text-green-400',
-    bloodied: 'text-amber-400',
-    shattered: 'text-red-400',
-    risen: 'text-emerald-300',
-    destroyed: 'text-neutral-500',
-    garrison: 'text-neutral-400',
+    veteran: 'text-emerald-200',
+    bloodied: 'text-amber-200',
+    shattered: 'text-red-200',
+    risen: 'text-emerald-100',
+    destroyed: 'text-[#9c917b]',
+    garrison: 'text-[#b9ad94]',
 };
 
 // --- Outcome display ---
@@ -57,12 +61,12 @@ const OUTCOME_LABEL_KEY: Record<string, MessageKey> = {
     catastrophic: 'aar.outcome.collapse',
 };
 const OUTCOME_COLOR: Record<string, string> = {
-    decisive_victory: 'text-green-300',
-    victory: 'text-green-400',
-    costly_victory: 'text-amber-400',
-    stalemate: 'text-neutral-400',
-    repulsed: 'text-red-400',
-    catastrophic: 'text-red-600',
+    decisive_victory: 'text-emerald-100',
+    victory: 'text-emerald-200',
+    costly_victory: 'text-amber-200',
+    stalemate: 'text-[#b9ad94]',
+    repulsed: 'text-red-200',
+    catastrophic: 'text-red-300',
 };
 const INTEL_FRICTION_LABEL_KEY: Record<string, MessageKey> = {
     stale_intel: 'aar.friction.staleIntel',
@@ -113,27 +117,28 @@ function Section({
 }) {
     const [open, setOpen] = useState(defaultOpen);
     return (
-        <div className="border-t border-panel-border/50 pt-2 mb-2">
+        <section className="flex flex-col gap-2.5" aria-label={title}>
             <button
                 type="button"
-                className="w-full flex justify-between items-center text-xs uppercase tracking-wide text-text-secondary font-semibold mb-1.5 hover:text-text-primary transition-colors"
+                aria-expanded={open}
+                className="flex w-full items-center justify-between gap-3 border-b border-[#262b35] pb-2 text-left transition hover:text-[#f1e6c8]"
                 onClick={() => setOpen((v) => !v)}
             >
-                <span>{title}</span>
-                <span className="flex items-center gap-1.5">
-                    {count != null && <span className="text-text-muted font-mono">{count}</span>}
-                    <span className="text-text-muted">{open ? '▲' : '▼'}</span>
+                <span className={SURFACE_LABEL}>{title}</span>
+                <span className="flex items-center gap-2 text-[15px] text-[#b9ad94]">
+                    {count != null && <span className="font-mono tabular-nums">{count}</span>}
+                    <span aria-hidden="true">{open ? '▲' : '▼'}</span>
                 </span>
             </button>
             {open && children}
-        </div>
+        </section>
     );
 }
 
 function FactionTag({ faction }: { faction: string }) {
     return (
         <span
-            className="text-xs font-mono px-1 rounded border"
+            className="shrink-0 whitespace-nowrap rounded border px-1.5 py-0.5 font-mono text-[13px] font-semibold"
             style={{ color: FACTION_COLOR[faction] ?? '#aaa', borderColor: `${FACTION_COLOR[faction] ?? '#555'}44` }}
         >
             {getPlayerSafeMilitaryFactionName(faction)}
@@ -144,7 +149,7 @@ function FactionTag({ faction }: { faction: string }) {
 function DisplacementGroupTag({ group }: { group: string }) {
     return (
         <span
-            className="text-xs font-mono px-1 rounded border"
+            className="shrink-0 whitespace-nowrap rounded border px-1.5 py-0.5 font-mono text-[13px] font-semibold"
             style={{ color: FACTION_COLOR[group] ?? '#aaa', borderColor: `${FACTION_COLOR[group] ?? '#555'}44` }}
         >
             {getPlayerSafeDisplacementGroupLabel(group)}
@@ -161,21 +166,22 @@ function DefenderBreakdown({ contributions, onSelectFormation, osid, formationNa
     const [expanded, setExpanded] = useState(false);
     const sorted = [...contributions].sort((a, b) => b.reactive_weight - a.reactive_weight);
     return (
-        <div className="ml-6 mt-0.5">
+        <div className="flex flex-col gap-1">
             <button
                 type="button"
-                className="text-xs text-text-muted hover:text-interactive transition-colors"
+                aria-expanded={expanded}
+                className="self-start text-[15px] text-[#b9ad94] transition-colors hover:text-[#f1e6c8]"
                 onClick={() => setExpanded(!expanded)}
             >
                 {expanded ? '▾' : '▸'} {t('aar.defenders', { count: sorted.length })}
             </button>
             {expanded && (
-                <div className="mt-0.5 space-y-px">
+                <div className="flex flex-col gap-1 pl-4">
                     {sorted.map((c) => {
                         const brigadeLabel = getPlayerSafeBrigadeName(formationNameById.get(c.brigade_id));
                         return (
-                        <div key={c.brigade_id} className="text-xs text-text-muted tabular-nums flex items-center gap-1">
-                            <span className="text-text-secondary w-3 text-right">{c.distance_hops === 0 ? '⊕' : `${c.distance_hops}↷`}</span>
+                        <div key={c.brigade_id} className="flex items-center gap-2 text-[15px] tabular-nums text-[#a99e86]">
+                            <span className="w-6 text-right text-[#c2b69c]">{c.distance_hops === 0 ? '⊕' : `${c.distance_hops}↷`}</span>
                             {c.is_home_municipality && <span title={t('aar.homeMunicipality')}>⌂</span>}
                             {onSelectFormation ? (
                                 <button
@@ -184,7 +190,7 @@ function DefenderBreakdown({ contributions, onSelectFormation, osid, formationNa
                                     data-role="defender-contribution"
                                     data-formation-id={c.brigade_id}
                                     data-osid={osid ?? undefined}
-                                    className="hover:text-interactive transition-colors truncate"
+                                    className={`${AAR_LINK} truncate`}
                                     onClick={() => onSelectFormation(c.brigade_id, osid)}
                                 >
                                     {brigadeLabel}
@@ -216,7 +222,7 @@ function BattleRow({
 }) {
     const label = getOsidDisplayName(battle.osid, osidDisplayNames);
     const outcomeLabel = OUTCOME_LABEL_KEY[battle.outcome] ? t(OUTCOME_LABEL_KEY[battle.outcome]) : t('aar.outcome.recorded');
-    const outcomeColor = OUTCOME_COLOR[battle.outcome] ?? 'text-text-secondary';
+    const outcomeColor = OUTCOME_COLOR[battle.outcome] ?? 'text-[#c2b69c]';
     const countLabel = battle.was_concentrated
         ? t('aar.concentratedAttackShort', { count: battle.all_attacker_ids.length })
         : null;
@@ -236,31 +242,31 @@ function BattleRow({
         <div
             data-testid="aar-battle-row"
             data-osid={battle.osid}
-            className="text-xs py-1 border-b border-panel-border/30 last:border-0"
+            className="flex flex-col gap-1.5 rounded-md border border-[#2a303c] bg-[#161a22] px-4 py-3 text-[15px]"
         >
-            <div className="flex justify-between items-start">
-                <div className="flex items-center gap-1.5 min-w-0">
+            <div className="flex items-start justify-between gap-3">
+                <div className="flex min-w-0 flex-wrap items-center gap-2">
                     <FactionTag faction={battle.attacker_faction} />
-                    <span className="text-text-secondary">→</span>
+                    <span aria-hidden="true" className="text-[#b9ad94]">→</span>
                     <FactionTag faction={battle.defender_faction} />
-                    {countLabel && <span className="text-xs text-text-muted font-mono">{countLabel}</span>}
-                    <span className="text-text-primary capitalize truncate">{label}</span>
-                    {battle.territory_flipped && <span className="text-amber-400 text-xs">⬡ {t('aar.flip')}</span>}
+                    <span className="min-w-0 truncate text-[17px] font-semibold capitalize text-[#f1e6c8]">{label}</span>
+                    {countLabel && <span className="font-mono text-[14px] text-[#b9ad94]">{countLabel}</span>}
+                    {battle.territory_flipped && <span className="text-[15px] text-amber-200">⬡ {t('aar.flip')}</span>}
                 </div>
-                <span className={`${outcomeColor} font-mono text-xs shrink-0 ml-2`}>{outcomeLabel}</span>
+                <span className={`${outcomeColor} shrink-0 whitespace-nowrap font-mono text-[15px] font-semibold`}>{outcomeLabel}</span>
             </div>
             {hasReportedLosses && (
-                <div className="text-xs text-text-muted tabular-nums mt-0.5 ml-6">
+                <div className="tabular-nums text-[#c2b69c]">
                     {t('aar.attackerShort')} −{attackerCasualties.toLocaleString()}  ·  {t('aar.defenderShort')} −{defenderCasualties.toLocaleString()}
                 </div>
             )}
             {!casualtiesReported && (
-                <div className="text-xs text-text-muted tabular-nums mt-0.5 ml-6">
+                <div className="tabular-nums text-[#a99e86]">
                     {t('aar.casualtiesUnreported')}
                 </div>
             )}
             {battle.execution_friction && (
-                <div className="text-xs text-amber-300 mt-0.5 ml-6">
+                <div className="text-amber-200">
                     {battle.execution_friction.labels.map((label) => t(INTEL_FRICTION_LABEL_KEY[label] ?? 'aar.friction.commandFriction')).join(' / ')}
                     {battle.execution_friction.attacker_confidence_band
                         ? ` (${t('aar.confidenceBand', {
@@ -270,14 +276,14 @@ function BattleRow({
                 </div>
             )}
             {onSelectFormation && (
-                <div className="text-xs text-text-muted mt-0.5 ml-6 flex gap-2">
+                <div className="flex flex-wrap items-center gap-2 text-[#a99e86]">
                     <button
                         type="button"
                         data-testid="aar-formation-link"
                         data-role="attacker"
                         data-formation-id={battle.primary_attacker_id}
                         data-osid={battle.osid}
-                        className="hover:text-interactive transition-colors"
+                        className={AAR_LINK}
                         onClick={() => onSelectFormation(battle.primary_attacker_id, battle.osid)}
                     >
                         {primaryAttackerLabel}
@@ -291,7 +297,7 @@ function BattleRow({
                                 data-role="defender"
                                 data-formation-id={battle.primary_defender_id}
                                 data-osid={battle.osid}
-                                className="hover:text-interactive transition-colors"
+                                className={AAR_LINK}
                                 onClick={() => onSelectFormation(battle.primary_defender_id!, battle.osid)}
                             >
                                 {primaryDefenderLabel}
@@ -314,35 +320,35 @@ function BattleRow({
 
 function ArcRow({ t }: { t: ArcTransition }) {
     return (
-        <div className="text-xs py-0.5 flex items-center gap-2">
+        <div className="text-[15px] py-1 flex items-center gap-2">
             <FactionTag faction={t.faction} />
-            <span className="text-text-primary truncate flex-1">{t.formation_name}</span>
-            <span className={`${ARC_COLOR[t.from_arc] ?? 'text-text-secondary'} text-xs`}>{getPlayerSafeFormationNarrativeArcLabel(t.from_arc)}</span>
-            <span className="text-text-muted text-xs">→</span>
-            <span className={`${ARC_COLOR[t.to_arc] ?? 'text-text-secondary'} text-xs font-semibold`}>{getPlayerSafeFormationNarrativeArcLabel(t.to_arc)}</span>
+            <span className="text-[#f1e6c8] truncate flex-1">{t.formation_name}</span>
+            <span className={`${ARC_COLOR[t.from_arc] ?? 'text-[#c2b69c]'} text-[15px]`}>{getPlayerSafeFormationNarrativeArcLabel(t.from_arc)}</span>
+            <span className="text-[#a99e86] text-[15px]">→</span>
+            <span className={`${ARC_COLOR[t.to_arc] ?? 'text-[#c2b69c]'} text-[15px] font-semibold`}>{getPlayerSafeFormationNarrativeArcLabel(t.to_arc)}</span>
         </div>
     );
 }
 
 function DecorationRow({ award }: { award: DecorationAward }) {
     return (
-        <div className="text-xs py-0.5 flex items-center gap-2">
+        <div className="text-[15px] py-1 flex items-center gap-2">
             <FactionTag faction={award.faction} />
-            <span className="text-text-primary truncate flex-1">{award.formation_name}</span>
-            <span className="text-accent-gold text-xs font-semibold">{getDecorationName(award.faction, award.decoration.tier)}</span>
+            <span className="text-[#f1e6c8] truncate flex-1">{award.formation_name}</span>
+            <span className="text-accent-gold text-[15px] font-semibold">{getDecorationName(award.faction, award.decoration.tier)}</span>
         </div>
     );
 }
 
 function TerritoryNet({ net }: { net: Partial<Record<string, number>> }) {
     const entries = Object.entries(net).sort(([a], [b]) => a.localeCompare(b));
-    if (!entries.length) return <span className="text-text-muted text-xs">{t('aar.noChanges')}</span>;
+    if (!entries.length) return <span className="text-[#a99e86] text-[15px]">{t('aar.noChanges')}</span>;
     return (
-        <div className="flex gap-4 text-xs tabular-nums">
+        <div className="flex gap-4 text-[15px] tabular-nums">
             {entries.map(([faction, delta]) => (
                 <span key={faction} className="flex items-center gap-1">
                     <FactionTag faction={faction} />
-                    <span className={delta! > 0 ? 'text-green-400' : delta! < 0 ? 'text-red-400' : 'text-text-secondary'}>
+                    <span className={delta! > 0 ? 'text-emerald-200' : delta! < 0 ? 'text-red-200' : 'text-[#c2b69c]'}>
                         {delta! > 0 ? '+' : ''}{delta}
                     </span>
                 </span>
@@ -389,7 +395,7 @@ export function AARPanel({ isOpen, onClose, embedded }: AARPanelProps) {
     const operationalActivity = operationLifecycle.hasAnyActivity ? (
         <div
             data-testid="aar-operation-activity"
-            className="border-l-2 border-accent-gold/50 px-3 py-2 text-[12px] leading-relaxed text-text-secondary"
+            className="rounded-md border border-[#2a303c] border-l-4 border-l-[#c9a75c] bg-[#161a22] px-5 py-4 text-[16px] leading-relaxed text-[#ddd1b3]"
         >
             {t('aar.operationActivity', {
                 executing: operationLifecycle.counts.executing,
@@ -404,10 +410,10 @@ export function AARPanel({ isOpen, onClose, embedded }: AARPanelProps) {
     );
 
     const body = (
-                <div className={embedded ? "text-xs" : "p-3 overflow-auto text-xs flex-1"}>
+                <div className={embedded ? "flex flex-col gap-6 text-[15px]" : "flex flex-1 flex-col gap-6 overflow-auto px-7 py-6 text-[15px]"}>
                     {!summary ? (
                         operationalActivity ?? (
-                            <div className="text-text-muted text-center py-8">
+                            <div className="py-8 text-[17px] text-[#c2b69c]">
                                 {t('aar.noReport')}
                             </div>
                         )
@@ -439,11 +445,11 @@ export function AARPanel({ isOpen, onClose, embedded }: AARPanelProps) {
                                             {summary.notable_flips.map((flip) => {
                                                 const label = getOsidDisplayName(flip.osid, osidDisplayNames);
                                                 return (
-                                                    <div key={flip.osid} className="text-xs flex gap-1.5 items-center">
-                                                        <span className="text-text-muted">⬡</span>
-                                                        <span className="text-text-primary capitalize">{label}</span>
+                                                    <div key={flip.osid} className="text-[15px] flex gap-1.5 items-center">
+                                                        <span className="text-[#a99e86]">⬡</span>
+                                                        <span className="text-[#f1e6c8] capitalize">{label}</span>
                                                         {flip.from && <FactionTag faction={flip.from} />}
-                                                        <span className="text-text-muted">→</span>
+                                                        <span className="text-[#a99e86]">→</span>
                                                         {flip.to && <FactionTag faction={flip.to} />}
                                                     </div>
                                                 );
@@ -462,34 +468,34 @@ export function AARPanel({ isOpen, onClose, embedded }: AARPanelProps) {
                                 }>
                                     {summary.decoration_awards.length > 0 && (
                                         <div className="mb-1.5">
-                                            <div className="text-xs uppercase tracking-wide text-accent-gold mb-1">{t('aar.decorationsAwarded')}</div>
+                                            <div className={`${SURFACE_LABEL_MUTED} mb-1.5`}>{t('aar.decorationsAwarded')}</div>
                                             {summary.decoration_awards.map((a) => <DecorationRow key={`${a.formation_id}-${a.decoration.tier}`} award={{ ...a, formation_name: formationNameById.get(a.formation_id) ?? a.formation_name }} />)}
                                         </div>
                                     )}
                                     {summary.arc_transitions.length > 0 && (
                                         <div className="mb-1.5">
-                                            <div className="text-xs uppercase tracking-wide text-text-secondary mb-1">{t('aar.arcChanges')}</div>
+                                            <div className={`${SURFACE_LABEL_MUTED} mb-1.5`}>{t('aar.arcChanges')}</div>
                                             {summary.arc_transitions.map((t) => <ArcRow key={t.formation_id} t={t} />)}
                                         </div>
                                     )}
                                     {summary.formation_spawns.length > 0 && (
                                         <div className="mb-1.5">
-                                            <div className="text-xs uppercase tracking-wide text-green-400 mb-1">{t('aar.formationsActivated')}</div>
+                                            <div className={`${SURFACE_LABEL_MUTED} mb-1.5`}>{t('aar.formationsActivated')}</div>
                                             {summary.formation_spawns.map((s) => (
-                                                <div key={s.formation_id} className="text-xs py-0.5 flex gap-2">
+                                                <div key={s.formation_id} className="text-[15px] py-1 flex gap-2">
                                                     <FactionTag faction={s.faction} />
-                                                    <span className="text-text-primary">{s.formation_name}</span>
+                                                    <span className="text-[#f1e6c8]">{s.formation_name}</span>
                                                 </div>
                                             ))}
                                         </div>
                                     )}
                                     {summary.formation_destructions.length > 0 && (
                                         <div className="mb-1.5">
-                                            <div className="text-xs uppercase tracking-wide text-red-400 mb-1">{t('aar.formationsDestroyed')}</div>
+                                            <div className={`${SURFACE_LABEL_MUTED} mb-1.5`}>{t('aar.formationsDestroyed')}</div>
                                             {summary.formation_destructions.map((d) => (
-                                                <div key={d.formation_id} className="text-xs py-0.5 flex gap-2">
+                                                <div key={d.formation_id} className="text-[15px] py-1 flex gap-2">
                                                     <FactionTag faction={d.faction} />
-                                                    <span className="text-text-secondary line-through">{d.formation_name}</span>
+                                                    <span className="text-[#c2b69c] line-through">{d.formation_name}</span>
                                                 </div>
                                             ))}
                                         </div>
@@ -507,11 +513,11 @@ export function AARPanel({ isOpen, onClose, embedded }: AARPanelProps) {
                                         return (
                                             <div key={faction} className="flex items-center gap-2 py-0.5">
                                                 <FactionTag faction={faction} />
-                                                <div className="text-xs tabular-nums flex gap-3 text-text-secondary">
+                                                <div className="text-[15px] tabular-nums flex gap-3 text-[#c2b69c]">
                                                     {sup != null && (
                                                         <span>
                                                             {t('aar.supply')}{' '}
-                                                            <span className={sup > 0 ? 'text-green-400' : 'text-red-400'}>
+                                                            <span className={sup > 0 ? 'text-emerald-200' : 'text-red-200'}>
                                                                 {sup > 0 ? '+' : ''}{sup.toFixed(1)}
                                                             </span>
                                                         </span>
@@ -519,7 +525,7 @@ export function AARPanel({ isOpen, onClose, embedded }: AARPanelProps) {
                                                     {mun != null && (
                                                         <span>
                                                             {t('aar.munitions')}{' '}
-                                                            <span className={mun > 0 ? 'text-green-400' : 'text-red-400'}>
+                                                            <span className={mun > 0 ? 'text-emerald-200' : 'text-red-200'}>
                                                                 {mun > 0 ? '+' : ''}{mun.toFixed(1)}
                                                             </span>
                                                         </span>
@@ -534,15 +540,15 @@ export function AARPanel({ isOpen, onClose, embedded }: AARPanelProps) {
                             {/* Displacement */}
                             {summary.displacement_total > 0 && (
                                 <Section title={t('aar.section.displacement')} defaultOpen={false}>
-                                    <div className="space-y-0.5 text-xs">
+                                    <div className="space-y-0.5 text-[15px]">
                                         <div className="flex justify-between">
-                                            <span className="text-text-secondary">{t('aar.totalDisplaced')}</span>
-                                            <span className="tabular-nums text-text-primary">{summary.displacement_total.toLocaleString()}</span>
+                                            <span className="text-[#c2b69c]">{t('aar.totalDisplaced')}</span>
+                                            <span className="tabular-nums text-[#f1e6c8]">{summary.displacement_total.toLocaleString()}</span>
                                         </div>
                                         {summary.displacement_hotspot && (
                                             <div className="flex justify-between">
-                                                <span className="text-text-secondary">{t('aar.hotspot')}</span>
-                                                <span className="text-amber-400">{toTitleCase(summary.displacement_hotspot)}</span>
+                                                <span className="text-[#c2b69c]">{t('aar.hotspot')}</span>
+                                                <span className="text-amber-200">{toTitleCase(summary.displacement_hotspot)}</span>
                                             </div>
                                         )}
                                         {Object.entries(summary.displacement_by_ethnicity)
@@ -550,7 +556,7 @@ export function AARPanel({ isOpen, onClose, embedded }: AARPanelProps) {
                                             .map(([eth, count]) => (
                                                 <div key={eth} className="flex justify-between">
                                                     <DisplacementGroupTag group={eth} />
-                                                    <span className="tabular-nums text-text-secondary">{count?.toLocaleString()}</span>
+                                                    <span className="tabular-nums text-[#c2b69c]">{count?.toLocaleString()}</span>
                                                 </div>
                                             ))
                                         }
@@ -562,11 +568,11 @@ export function AARPanel({ isOpen, onClose, embedded }: AARPanelProps) {
                             {summary.notable_events.length > 0 && (
                                 <Section title={t('aar.section.notableEvents')} count={summary.notable_events.length}>
                                     {summary.notable_events.map((e) => (
-                                        <div key={e.kind + (e.faction ?? '') + (e.osid ?? '')} className="text-xs py-0.5 flex gap-2 items-start">
-                                            <span className="text-accent-gold text-xs uppercase tracking-wide shrink-0 mt-0.5">
+                                        <div key={e.kind + (e.faction ?? '') + (e.osid ?? '')} className="text-[15px] py-1 flex gap-2 items-start">
+                                            <span className="shrink-0 font-mono text-[13px] font-semibold uppercase tracking-[0.12em] text-[#e0c27a] mt-0.5">
                                                 {notableEventLabel(e.kind)}
                                             </span>
-                                            <span className="text-text-secondary">{e.description}</span>
+                                            <span className="text-[#c2b69c]">{e.description}</span>
                                         </div>
                                     ))}
                                 </Section>
@@ -599,20 +605,16 @@ export function AARPanel({ isOpen, onClose, embedded }: AARPanelProps) {
             <button
                 type="button"
                 aria-label={t('aar.close')}
-                className="absolute inset-0 bg-black/40 pointer-events-auto cursor-default"
+                className="absolute inset-0 bg-[#05070a]/70 pointer-events-auto cursor-default"
                 onClick={onClose}
             />
-            <div className="relative panel-slide-in-right pointer-events-auto w-[22rem] max-h-[calc(var(--interface-viewport-height,100vh)-4rem)] mt-12 mr-2 flex flex-col bg-panel-bg/97 backdrop-blur-sm border border-panel-border rounded-lg shadow-2xl overflow-hidden">
-                <div className="flex items-center justify-between px-4 py-2.5 bg-panel-card border-b border-panel-border shrink-0">
-                    <div>
-                        <span className="font-sans text-xs text-accent-gold uppercase tracking-wide font-semibold">{t('aar.title')}</span>
-                        {summary && <span className="text-xs text-text-secondary ml-2 font-mono">{formatTurnLabel(loadedGameState.label)}</span>}
-                    </div>
-                    <button type="button" onClick={onClose} aria-label={t('aar.close')} className="text-text-secondary hover:text-interactive text-sm leading-none">&#x2715;</button>
-                </div>
-                <div className="p-3 overflow-auto text-xs flex-1">
-                    {body}
-                </div>
+            <div className="relative panel-slide-in-right pointer-events-auto mr-4 mt-[4.5rem] flex max-h-[calc(var(--interface-viewport-height,100vh)-6rem)] w-[min(40rem,calc(var(--interface-viewport-width,100vw)-2rem))] flex-col overflow-hidden rounded-lg border border-accent-gold/35 bg-[#11141b] shadow-[0_30px_90px_rgba(0,0,0,0.65)]">
+                <SurfaceHeader
+                    eyebrow={summary ? formatTurnLabel(loadedGameState.label) : t('aar.title')}
+                    title={t('aar.title')}
+                    close={<SurfaceCloseButton onClick={onClose} aria-label={t('aar.close')} />}
+                />
+                {body}
             </div>
         </div>
     );

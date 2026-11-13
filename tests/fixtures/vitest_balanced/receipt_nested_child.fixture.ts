@@ -6,6 +6,7 @@ import {
   renderBalancedVitestConfig,
   runVitestChild,
 } from '../../../tools/test/run_vitest_balanced.mjs';
+import { resolveVitestCli } from '../../../tools/test/vitest_shared_config.mjs';
 
 test('runs an expected failing nested child without explicit receipt ownership', async () => {
   const root = process.cwd();
@@ -27,7 +28,7 @@ test('runs an expected failing nested child without explicit receipt ownership',
     'utf8',
   );
   const status = await runVitestChild(
-    join(root, 'node_modules', 'vitest', 'vitest.mjs'),
+    resolveVitestCli(root),
     config,
     ['--reporter=dot', '--silent'],
     root,

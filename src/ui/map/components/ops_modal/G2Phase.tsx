@@ -1,6 +1,6 @@
 /**
- * Phase 3 — G2 Assessment clipboard.
- * Slides in from right. Two player-facing tabs: narrative assessment + map legend.
+ * Phase 3 — G2 Assessment, in the planning surface's detail column.
+ * Snapshot figures, then two player-facing tabs: narrative assessment + map legend.
  *
  * Note: RawIntelTab is intentionally excluded from normal play (debug-only — not shown
  * in normal play). The "Assessment" tab (NarrativeTab) is the canonical player-facing
@@ -16,6 +16,15 @@ import { formatCorpsDisplayName, turnToISODate } from '../../utils/formatters';
 import { resolveCorpsCommanderDisplay } from '../../utils/officerUtils';
 import { t } from '../../i18n';
 import { formatPlanningPredictedOutcome } from './planningAssessmentLabels';
+import {
+    SurfaceDetailFooter,
+    SurfaceFigure,
+    SurfacePanel,
+    SurfaceSection,
+    SURFACE_LABEL_MUTED,
+    SURFACE_PRIMARY_BUTTON,
+} from '../surface/Surface';
+import { OpsNotice, OpsPhaseBody, opsOptionClass } from './opsSurface';
 
 // Two player-facing tabs — raw_intel demoted to debug-only
 type G2Tab = 'assessment' | 'map_legend';
@@ -57,151 +66,111 @@ export function G2Phase({ plan, prediction, loading, error, corpsId, onAdvance }
                 ? t('opsPlanning.g2.proceedLowIntel')
                 : t('opsPlanning.g2.proceedAuthorization');
 
+    const tabClass = (active: boolean) =>
+        `h-10 rounded-md border px-4 text-[15px] font-semibold transition ${opsOptionClass(active)}`;
+
     return (
         <div
-            className="absolute inset-0 z-10 pointer-events-none"
+            className="flex min-h-0 flex-1 flex-col"
             data-testid="ops-planning-phase-panel"
             data-phase="g2_assessment"
         >
-            {/* Assessment snapshot — left side */}
-            <div className="absolute top-16 left-4 w-[380px] pointer-events-auto
-                            rounded-lg border border-[rgba(180,160,130,0.16)]
-                            bg-[rgba(20,18,15,0.9)] backdrop-blur-xl p-3">
-                <div className="flex items-center justify-between mb-2">
-                    <div className="text-xs font-bold uppercase tracking-[0.2em] text-accent-gold">
-                        {t('opsPlanning.g2.snapshot')}
+            <OpsPhaseBody>
+                {/* Assessment snapshot */}
+                <SurfaceSection
+                    label={t('opsPlanning.g2.snapshot')}
+                    action={<span className={SURFACE_LABEL_MUTED}>{t('opsPlanning.g2.preAuthorization')}</span>}
+                >
+                    <div className="grid grid-cols-2 gap-3">
+                        <SurfaceFigure label={t('opsPlanning.g2.corps')} value={corpsName || corpsId} />
+                        <SurfaceFigure label={t('opsPlanning.g2.date')} value={date || t('opsPlanning.g2.notAvailable')} />
+                        <SurfaceFigure label={t('opsPlanning.phase.objectives')} value={totalObjectives} />
+                        <SurfaceFigure label={t('opsPlanning.phase.brigades')} value={totalAssignedBrigades} />
+                        {prediction && (
+                            <SurfaceFigure
+                                className="col-span-2"
+                                label={t('opsPlanning.g2.predictedOutcome')}
+                                value={prediction.overall.predictedOutcome == null
+                                    ? t('corpsFront.unreported')
+                                    : formatPlanningPredictedOutcome(prediction.overall.predictedOutcome)}
+                            />
+                        )}
                     </div>
-                    <div className="text-xs uppercase tracking-[0.14em] text-text-secondary/70">
-                        {t('opsPlanning.g2.preAuthorization')}
-                    </div>
-                </div>
-                <div className="grid grid-cols-2 gap-2">
-                    <div className="rounded border border-[rgba(180,160,130,0.16)] bg-[rgba(180,160,130,0.06)] px-2 py-1.5">
-                        <div className="text-xs uppercase tracking-[0.14em] text-text-secondary/70">{t('opsPlanning.g2.corps')}</div>
-                        <div className="text-xs font-bold text-white truncate">{corpsName || corpsId}</div>
-                    </div>
-                    <div className="rounded border border-[rgba(180,160,130,0.16)] bg-[rgba(180,160,130,0.06)] px-2 py-1.5">
-                        <div className="text-xs uppercase tracking-[0.14em] text-text-secondary/70">{t('opsPlanning.g2.date')}</div>
-                        <div className="text-xs font-bold text-white">{date || t('opsPlanning.g2.notAvailable')}</div>
-                    </div>
-                    <div className="rounded border border-[rgba(180,160,130,0.16)] bg-[rgba(180,160,130,0.06)] px-2 py-1.5">
-                        <div className="text-xs uppercase tracking-[0.14em] text-text-secondary/70">{t('opsPlanning.phase.objectives')}</div>
-                        <div className="text-xs font-bold text-white">{totalObjectives}</div>
-                    </div>
-                    <div className="rounded border border-[rgba(180,160,130,0.16)] bg-[rgba(180,160,130,0.06)] px-2 py-1.5">
-                        <div className="text-xs uppercase tracking-[0.14em] text-text-secondary/70">{t('opsPlanning.phase.brigades')}</div>
-                        <div className="text-xs font-bold text-white">{totalAssignedBrigades}</div>
-                    </div>
-                </div>
-                {prediction && (
-                    <div className="mt-2 rounded border border-[rgba(180,160,130,0.16)] bg-[rgba(180,160,130,0.06)] px-2 py-1.5">
-                        <div className="text-xs uppercase tracking-[0.14em] text-text-secondary/70">{t('opsPlanning.g2.predictedOutcome')}</div>
-                        <div className="text-xs font-bold text-white">
-                            {prediction.overall.predictedOutcome == null
-                                ? t('corpsFront.unreported')
-                                : formatPlanningPredictedOutcome(prediction.overall.predictedOutcome)}
-                        </div>
-                    </div>
-                )}
-            </div>
+                </SurfaceSection>
 
-            {/* Clipboard — right side (WP3a: widened from 360px to 480px) */}
-            <div className="absolute top-16 right-4 bottom-4 w-[620px] pointer-events-auto
-                            flex flex-col overflow-hidden">
-                {/* Binder clip */}
-                <div className="h-8 bg-[#4a4238] rounded-t-lg flex items-center justify-center relative">
-                    <div className="w-16 h-3 bg-[#6a6258] rounded-sm border border-[#3a3228]" />
-                </div>
-
-                {/* Paper body (WP3b: WCAG contrast fix — lighter background) */}
-                <div className="flex-1 overflow-y-auto bg-[#faf6ef] rounded-b-lg border-x border-b border-[#c0b090] p-4"
-                     style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'4\' height=\'4\' viewBox=\'0 0 4 4\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cpath d=\'M1 3h1v1H1V3zm2-2h1v1H3V1z\' fill=\'%23c0b09020\' fill-rule=\'evenodd\'/%3E%3C/svg%3E")' }}>
-
-                    {/* Tab buttons */}
-                    <div className="flex gap-1 mb-4">
+                {/* G-2 report: staff assessment or the map legend */}
+                <section className="flex flex-col gap-3" aria-label={t('opsPlanning.surface.g2Report')}>
+                    <div className="flex flex-wrap gap-2">
                         <button
                             type="button"
                             onClick={() => setActiveTab('assessment')}
-                            className={`px-3 py-1 rounded text-xs font-bold uppercase tracking-wider transition-colors
-                                ${activeTab === 'assessment'
-                                    ? 'bg-[#3a3228] text-[#faf6ef]'
-                                    : 'bg-[#d6ccb7] text-[#4a4238] hover:bg-[#c0b090]'
-                                }`}
+                            aria-pressed={activeTab === 'assessment'}
+                            className={tabClass(activeTab === 'assessment')}
                         >
                             {t('opsPlanning.g2.tab.assessment')}
                         </button>
                         <button
                             type="button"
                             onClick={() => setActiveTab('map_legend')}
-                            className={`px-3 py-1 rounded text-xs font-bold uppercase tracking-wider transition-colors
-                                ${activeTab === 'map_legend'
-                                    ? 'bg-[#3a3228] text-[#faf6ef]'
-                                    : 'bg-[#d6ccb7] text-[#4a4238] hover:bg-[#c0b090]'
-                                }`}
+                            aria-pressed={activeTab === 'map_legend'}
+                            className={tabClass(activeTab === 'map_legend')}
                         >
                             {t('opsPlanning.g2.tab.mapLegend')}
                         </button>
                     </div>
 
-                    {/* Content */}
-                    {loading && (
-                        <div className="space-y-3">
-                            {[75, 90, 65, 82, 70].map((w, i) => (
-                                <div key={i} className="h-3 bg-[#c0b090]/30 rounded animate-pulse"
-                                     style={{ width: `${w}%` }} />
-                            ))}
-                        </div>
-                    )}
+                    <SurfacePanel className="flex flex-col gap-4 px-6 py-5">
+                        {loading && (
+                            <div className="flex flex-col gap-3" aria-hidden="true">
+                                {[75, 90, 65, 82, 70].map((w, i) => (
+                                    <div key={i} className="h-4 animate-pulse rounded bg-[#262b35]" style={{ width: `${w}%` }} />
+                                ))}
+                            </div>
+                        )}
 
-                    {error && (
-                        <div className="text-xs text-red-700 bg-red-100 rounded p-2 space-y-1">
-                            <div className="font-bold">{t('opsPlanning.g2.errorTitle')}</div>
-                            <div>{t('opsPlanning.g2.errorBody')}</div>
-                        </div>
-                    )}
+                        {error && (
+                            <OpsNotice tone="danger" role="alert">
+                                <div className="font-semibold">{t('opsPlanning.g2.errorTitle')}</div>
+                                <div>{t('opsPlanning.g2.errorBody')}</div>
+                            </OpsNotice>
+                        )}
 
-                    {!loading && !error && !prediction && !hasObjectives && (
-                        <div className="text-xs text-[#4a4238] italic text-center py-8">
-                            {t('opsPlanning.g2.completePlan')}
-                        </div>
-                    )}
+                        {!loading && !error && !prediction && !hasObjectives && (
+                            <p className="m-0 text-[17px] text-[#c2b69c]">{t('opsPlanning.g2.completePlan')}</p>
+                        )}
 
-                    {!loading && !error && !prediction && hasObjectives && (
-                        <div className="text-xs text-[#4a4238] italic text-center py-8">
-                            {t('opsPlanning.g2.awaitingPrediction')}
-                        </div>
-                    )}
+                        {!loading && !error && !prediction && hasObjectives && (
+                            <p className="m-0 text-[17px] text-[#c2b69c]">{t('opsPlanning.g2.awaitingPrediction')}</p>
+                        )}
 
-                    {/* WP3c: Map Legend tab */}
-                    {activeTab === 'map_legend' && <MapLegendTab />}
+                        {/* WP3c: Map Legend tab */}
+                        {activeTab === 'map_legend' && <MapLegendTab />}
 
-                    {!loading && prediction && activeTab === 'assessment' && (
-                        <NarrativeTab
-                            prediction={prediction}
-                            commanderName={commanderName}
-                            corpsName={corpsName}
-                            faction={faction}
-                            date={date}
-                        />
-                    )}
-                </div>
+                        {!loading && prediction && activeTab === 'assessment' && (
+                            <NarrativeTab
+                                prediction={prediction}
+                                commanderName={commanderName}
+                                corpsName={corpsName}
+                                faction={faction}
+                                date={date}
+                            />
+                        )}
+                    </SurfacePanel>
+                </section>
+            </OpsPhaseBody>
 
-                {/* Action button — below clipboard */}
-                <div className="mt-2 flex justify-end">
-                    <button
-                        type="button"
-                        onClick={onAdvance}
-                        disabled={!canProceed}
-                        className={`px-4 py-2 rounded-lg font-bold text-xs uppercase tracking-wider transition-colors border disabled:opacity-50 disabled:cursor-not-allowed
-                            ${isLowIntel
-                                ? 'bg-amber-400/20 text-amber-400 border-amber-400/20 hover:bg-amber-400/30'
-                                : 'bg-accent-gold/20 text-accent-gold border-accent-gold/20 hover:bg-accent-gold/30'
-                            }`}
-                    >
-                        {proceedLabel}
-                    </button>
-                </div>
-            </div>
+            <SurfaceDetailFooter>
+                <button
+                    type="button"
+                    onClick={onAdvance}
+                    disabled={!canProceed}
+                    className={isLowIntel
+                        ? 'h-14 rounded-md border border-amber-300/60 bg-[#2a2416] px-6 text-[18px] font-bold text-amber-100 transition hover:bg-[#352d1a] disabled:cursor-default disabled:opacity-45'
+                        : SURFACE_PRIMARY_BUTTON}
+                >
+                    {proceedLabel}
+                </button>
+            </SurfaceDetailFooter>
         </div>
     );
 }

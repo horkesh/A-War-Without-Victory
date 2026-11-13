@@ -252,7 +252,7 @@ describe('GUI audit Batch F Warroom shell ownership', () => {
         const app = read('src/ui/map/App.tsx');
 
         expect(app).toMatch(
-            /\{!peaceWarTransitionActive && openingBriefPending && !warroomDeskOpen && \([\s\S]*?<PresidentialInbox[\s\S]*?\)\}[\s\S]*?\{warroomDeskOpen && \([\s\S]*?<PresidentDeskShell/,
+            /\{!peaceWarTransitionActive && openingBriefPending && !warroomDeskOpen && !commandStripOpen && !warroomDecisionRoomOpen && !warroomOverlaySurface && \([\s\S]*?<PresidentialInbox[\s\S]*?\)\}[\s\S]*?\{warroomDeskOpen && \([\s\S]*?<PresidentDeskShell/,
         );
     });
 
