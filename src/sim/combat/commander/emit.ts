@@ -76,16 +76,18 @@ import type {
     OfficerPersonality,
     OperationHistoryEntry,
     SectorActivityEntry,
+    SectorStanceMemoryEntry,
     ThreatAssessment,
     ZoneAssessment,
     ZoneId,
     ZonePosture,
 } from './commander_state.js';
+import { BELIEF_INTENT_STALENESS_TURNS } from './belief.js';
 import type { AllocationResult } from './allocate.js';
 import type { PlanDecision } from './plan.js';
 import { isBoundedIsolatedEnemyPosition, MIN_BRIGADES_FOR_PLAN } from './plan.js';
 import { COMMITMENT_RATIO_UNBOUNDED_PERSISTED } from './zone_detection.js';
-import type { DecisionResult } from './decide.js';
+import type { DecisionResult, StanceRecommendation } from './decide.js';
 import { augmentOffensiveTargetsWithShifts } from './bot_priority_shift_augmentation.js';
 import { botOrdersPerfTime } from '../_perf_profile_bot_orders.js';
 import { shouldLaunchProbeInstead, type ProbeLaunchDecisionTrace } from '../bot_corps_directives.js';
@@ -1508,24 +1510,27 @@ export function emitCommanderOutput(
     );
 
     // 3. Build sector stances
-    const sectorStances = botOrdersPerfTime(
+    const { stances: sectorStances, memory: sectorStanceMemory } = botOrdersPerfTime(
         'commander.runCommanderForCorps.decide.emitCommanderOutput.buildSectorStances',
         () => buildSectorStances(briefing, decisions),
     );
 
     // 4. Build updated commander state
-    const updatedState = botOrdersPerfTime(
-        'commander.runCommanderForCorps.decide.emitCommanderOutput.buildUpdatedState',
-        () => buildUpdatedState(
-            briefing,
-            zones,
-            forces,
-            threats,
-            planDecision,
-            decisions,
-            beliefState ?? null,
+    const updatedState: CommanderState = {
+        ...botOrdersPerfTime(
+            'commander.runCommanderForCorps.decide.emitCommanderOutput.buildUpdatedState',
+            () => buildUpdatedState(
+                briefing,
+                zones,
+                forces,
+                threats,
+                planDecision,
+                decisions,
+                beliefState ?? null,
+            ),
         ),
-    );
+        sector_stance_memory: sectorStanceMemory,
+    };
 
     // 5. Garrison locks directly from allocation (same shape, pass through)
     const garrisonLocks = allocation.garrison_locks;
@@ -3535,53 +3540,83 @@ function buildOperationsImpl(
 // buildSectorStances — from decisions
 // ═══════════════════════════════════════════════════════════════════════════
 
+/**
+ * Minimum turns an OG keeps a posture before an intel-driven change (enemy intent, a quiet
+ * front) or a lapse back to 'defend'. It is the commander's own intel-trust window: an intent
+ * reading stays believed this long without confirmation (belief.ts). Contact re-postures at once.
+ */
+export const OG_STANCE_MIN_DWELL_TURNS = BELIEF_INTENT_STALENESS_TURNS;
+
+/** The OG posture this turn, given the standing posture and this turn's recommendation. */
+export function resolveOgStance(
+    previous: SectorStanceMemoryEntry | undefined,
+    recommendation: StanceRecommendation | undefined,
+    turn: number,
+): { stance: SectorStance; confirmed_turn: number; why: 'new' | 'recommended' | 'held' | 'confirmed' | 'lapsed' | 'standing' } {
+    if (!previous) {
+        return { stance: recommendation?.new_stance ?? 'defend', confirmed_turn: turn, why: 'new' };
+    }
+    const dwell = turn - previous.since_turn;
+    if (recommendation) {
+        if (recommendation.new_stance === previous.stance) {
+            return { stance: previous.stance, confirmed_turn: turn, why: 'confirmed' };
+        }
+        if (recommendation.trigger === 'contact' || dwell >= OG_STANCE_MIN_DWELL_TURNS) {
+            return { stance: recommendation.new_stance, confirmed_turn: turn, why: 'recommended' };
+        }
+        return { stance: previous.stance, confirmed_turn: previous.confirmed_turn, why: 'held' };
+    }
+    if (previous.stance !== 'defend' && turn - previous.confirmed_turn >= OG_STANCE_MIN_DWELL_TURNS) {
+        return { stance: 'defend', confirmed_turn: turn, why: 'lapsed' };
+    }
+    return { stance: previous.stance, confirmed_turn: previous.confirmed_turn, why: 'standing' };
+}
+
 function buildSectorStances(
     briefing: CommanderBriefing,
     decisions: DecisionResult,
-): Array<{ sector_id: string; stance: SectorStance }> {
-    const stanceMap = new Map<string, SectorStance>();
-
-    // Default all corps sectors to 'defend'
+): { stances: Array<{ sector_id: string; stance: SectorStance }>; memory: SectorStanceMemoryEntry[] } {
     const corpsSectors = briefing.sectors
         .filter(s => s.corps_id === briefing.corps_id)
         .sort((a, b) => strictCompare(a.sector_id, b.sector_id));
+    const recommendationBySector = new Map<string, StanceRecommendation>();
+    for (const change of decisions.stance_changes) recommendationBySector.set(change.sector_id, change);
+    const previousByKey = new Map<string, SectorStanceMemoryEntry>();
+    for (const entry of briefing.previous_state?.sector_stance_memory ?? []) previousByKey.set(entry.stable_key, entry);
 
+    const stances: Array<{ sector_id: string; stance: SectorStance }> = [];
+    const memory: SectorStanceMemoryEntry[] = [];
+    const observe = isReasonCodeTopicEnabled('sector_stance');
     for (const sector of corpsSectors) {
-        stanceMap.set(sector.sector_id, 'defend');
-    }
-
-    // Apply stance changes from decisions
-    for (const change of decisions.stance_changes) {
-        if (stanceMap.has(change.sector_id)) {
-            stanceMap.set(change.sector_id, change.new_stance);
-        }
-    }
-
-    // The corps stance is the ceiling: an OG stance it does not permit narrows to the
-    // nearest permitted one (CORPS_STANCE_ALLOWED_SECTOR_STANCES).
-    for (const [sectorId, stance] of stanceMap) {
-        stanceMap.set(sectorId, clampSectorStanceToCorpsStance(stance, briefing.corps_stance));
-    }
-
-    if (isReasonCodeTopicEnabled('sector_stance')) {
-        const reasonBySector = new Map(decisions.stance_changes.map(c => [c.sector_id, c.reason] as const));
-        for (const sector of corpsSectors) {
+        const stableKey = stableSectorKey(sector);
+        const previous = previousByKey.get(stableKey);
+        const recommendation = recommendationBySector.get(sector.sector_id);
+        const resolved = resolveOgStance(previous, recommendation, briefing.turn);
+        // The corps stance is the ceiling: an OG stance it does not permit narrows to the
+        // nearest permitted one (CORPS_STANCE_ALLOWED_SECTOR_STANCES).
+        const stance = clampSectorStanceToCorpsStance(resolved.stance, briefing.corps_stance);
+        stances.push({ sector_id: sector.sector_id, stance });
+        memory.push({
+            stable_key: stableKey,
+            stance,
+            since_turn: previous && previous.stance === stance ? previous.since_turn : briefing.turn,
+            confirmed_turn: resolved.confirmed_turn,
+        });
+        if (observe) {
             emitSectorStanceRecord({
                 phase: 'commander',
                 turn: briefing.turn,
                 corps_id: briefing.corps_id,
                 sector_id: sector.sector_id,
-                stable_key: stableSectorKey(sector),
-                stance: stanceMap.get(sector.sector_id) ?? null,
-                reason: reasonBySector.get(sector.sector_id) ?? 'default',
+                stable_key: stableKey,
+                stance,
+                reason: recommendation?.reason ?? 'default',
+                resolution: resolved.why,
             });
         }
     }
-
-    // Convert to sorted array
-    return [...stanceMap.entries()]
-        .sort((a, b) => strictCompare(a[0], b[0]))
-        .map(([sector_id, stance]) => ({ sector_id, stance }));
+    memory.sort((a, b) => strictCompare(a.stable_key, b.stable_key));
+    return { stances, memory };
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

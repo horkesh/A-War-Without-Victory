@@ -93,9 +93,21 @@ const OFFENSIVE_SIGNS_CONFIDENCE_BOOST = 0.15;
 // DecisionResult
 // ═══════════════════════════════════════════════════════════════════════════
 
+/**
+ * A recommended OG stance. `trigger` says what drove it: 'contact' (ground lost or fighting
+ * in the sector this turn) applies at once; 'intel' (enemy intent, a quiet front) waits for
+ * the posture's minimum dwell (emit.ts OG_STANCE_MIN_DWELL_TURNS). Absent counts as 'intel'.
+ */
+export interface StanceRecommendation {
+    sector_id: string;
+    new_stance: SectorStance;
+    reason: string;
+    trigger?: 'contact' | 'intel';
+}
+
 export interface DecisionResult {
     /** Sectors that should change stance. */
-    stance_changes: Array<{ sector_id: string; new_stance: SectorStance; reason: string }>;
+    stance_changes: StanceRecommendation[];
     /** Reserves to shift between zones. */
     reserve_shifts: Array<{ brigade_id: FormationId; from_zone: ZoneId; to_zone: ZoneId; reason: string }>;
     /** Direct same-corps relief for an empty, legally reachable front sector. */
@@ -564,8 +576,8 @@ function computeStanceChanges(
     personality: OfficerPersonality,
     sectors: readonly CorpsFrontSector[],
     beliefState: CommanderBeliefState | null,
-): Array<{ sector_id: string; new_stance: SectorStance; reason: string }> {
-    const changes: Array<{ sector_id: string; new_stance: SectorStance; reason: string }> = [];
+): StanceRecommendation[] {
+    const changes: StanceRecommendation[] = [];
 
     // Build threat_ratio lookup by sector_id
     const threatRatioBySector = new Map<string, number>();
@@ -676,9 +688,13 @@ function computeStanceChanges(
             reason = `quiet for ${totalQuiet} turns — screening posture`;
         }
 
-        // Only emit a change if we have a recommendation
+        // Only emit a change if we have a recommendation. Ground lost or fighting in the
+        // sector this turn is contact and re-postures at once; anything else is intel.
         if (newStance !== null) {
-            changes.push({ sector_id: sectorId, new_stance: newStance, reason });
+            const contact = activity.activity === 'overrun'
+                || activity.activity === 'contested'
+                || activity.activity === 'active';
+            changes.push({ sector_id: sectorId, new_stance: newStance, reason, trigger: contact ? 'contact' : 'intel' });
         }
     }
 

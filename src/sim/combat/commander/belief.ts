@@ -34,8 +34,12 @@ const NO_CONTACT_DECAY = 0.9;
 /** Baseline enemy strength when no intel. */
 const BASELINE_ENEMY_STRENGTH = 500;
 
-/** Turns without confirmation before intent degrades to 'unknown'. */
-const STALENESS_THRESHOLD = 3;
+/**
+ * Turns without confirmation before intent degrades to 'unknown': how long a commander
+ * trusts an intent reading. Also the minimum dwell of an intel-driven OG stance (emit.ts).
+ */
+export const BELIEF_INTENT_STALENESS_TURNS = 3;
+const STALENESS_THRESHOLD = BELIEF_INTENT_STALENESS_TURNS;
 
 /** Default confidence when no previous data. */
 const DEFAULT_CONFIDENCE = 0.3;
