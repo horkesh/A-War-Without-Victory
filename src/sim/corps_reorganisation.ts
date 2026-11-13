@@ -47,6 +47,7 @@ import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import type { CorpsCommandState, FormationId, FormationState, GameState } from '../state/game_state.js';
 import { strictCompare } from '../state/validateGameState.js';
+import { recallEliteLoan } from './combat/army_reserve_system.js';
 import { removeFromActiveOperation } from './combat/brigade_dissolution.js';
 import { initializeCorpsCommand } from './combat/corps_command.js';
 import { removeOperation } from './combat/corps_operation_helpers.js';
@@ -331,7 +332,16 @@ export function processCorpsReorganisationEvents(
             continue;
         }
         const from = f.corps_id ?? null;
-        if (committed) releaseFromCorpsOperations(state, fid as FormationId, from);
+        if (committed) {
+            // An elite loan is closed through its own recall lifecycle (episode closed,
+            // detached from the receiving corps' operation, back to base) and its receiving
+            // corps' attached/loaned lists are cleared too, so the brigade cannot keep
+            // fighting for the loan host after it has changed corps.
+            const loanHost = f.elite_loan_state?.on_loan ? f.elite_loan_state.loaned_to_corps : null;
+            if (f.elite_loan_state?.on_loan) recallEliteLoan(state, fid as FormationId, 'corps_reorganisation', turn);
+            if (loanHost && loanHost !== from) releaseFromCorpsOperations(state, fid as FormationId, loanHost);
+            releaseFromCorpsOperations(state, fid as FormationId, from);
+        }
         f.corps_id = target as FormationId;
         report.transferred.push({ event_id: e.id, formation_id: fid, from_corps_id: from, to_corps_id: target, forced: committed });
         changed = true;

@@ -252,6 +252,47 @@ describe('corps_retire', () => {
     });
 });
 
+describe('corps_transfer of a brigade out on an elite loan', () => {
+    it('closes the loan through the recall lifecycle and leaves the host operation at the forced deadline', () => {
+        const turn = 99 + DEFAULT_TRANSFER_MAX_DEFER_TURNS;
+        const state = makeState(turn, [
+            corps('arbih_3rd_corps'), corps('arbih_7th_corps'), corps('arbih_2nd_corps'),
+            brigade('b705', 'arbih_3rd_corps', {
+                home_osid: 'op:bugojno:home', base_osid: 'op:bugojno:base', location_osid: 'op:tuzla:front',
+                elite_loan_state: { on_loan: true, loaned_to_corps: 'arbih_2nd_corps', loan_start_turn: 90, last_recall_turn: null, loan_start_personnel: 1500, permanently_degraded: false, current_episode_id: 0 },
+            } as any),
+            brigade('b201', 'arbih_2nd_corps'),
+        ]);
+        const hostOp = op('Host Op', ['b705', 'b201'], { attached_brigades: ['b705'] });
+        cmd(state, 'arbih_3rd_corps');
+        cmd(state, 'arbih_7th_corps');
+        cmd(state, 'arbih_2nd_corps', [hostOp]);
+        state.military.elite_brigade_tracker = {
+            b705: { episodes: [{ loan_start_turn: 90, personnel_start: 1500, casualties_taken: 0, battles_fought: 2, osids_captured: 1 }], total_casualties_taken: 0, total_battles: 0, total_osids_captured: 0 },
+        } as any;
+
+        const report = processCorpsReorganisationEvents(state, [TRANSFER])!;
+        const f = state.military.formations.b705;
+        expect(f.corps_id).toBe('arbih_7th_corps');
+        expect(report.transferred[0]).toMatchObject({ formation_id: 'b705', forced: true });
+        expect(f.elite_loan_state).toMatchObject({ on_loan: false, loaned_to_corps: null, last_recall_turn: turn, current_episode_id: null });
+        expect((state.military.elite_brigade_tracker as any).b705.episodes[0]).toMatchObject({ loan_end_turn: turn, recall_reason: 'corps_reorganisation' });
+        expect(f.location_osid).toBe('op:bugojno:base');
+        expect(hostOp.participating_brigades).toEqual(['b201']);
+        expect(hostOp.attached_brigades).toEqual([]);
+    });
+
+    it('defers while the loan is live and the deadline has not passed', () => {
+        const state = makeState(99, [corps('arbih_3rd_corps'), corps('arbih_7th_corps'),
+            brigade('b705', 'arbih_3rd_corps', { elite_loan_state: { on_loan: true, loaned_to_corps: 'arbih_2nd_corps' } as any })]);
+        cmd(state, 'arbih_3rd_corps');
+        cmd(state, 'arbih_7th_corps');
+        processCorpsReorganisationEvents(state, [TRANSFER]);
+        expect(state.military.formations.b705.corps_id).toBe('arbih_3rd_corps');
+        expect(state.military.formations.b705.elite_loan_state?.on_loan).toBe(true);
+    });
+});
+
 describe('determinism', () => {
     it('produces identical state regardless of formation insertion order and event order', () => {
         const build = (reverse: boolean) => {

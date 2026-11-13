@@ -3744,6 +3744,7 @@ export const enMessages = {
     'armyReserve.recall.playerRecall': 'Player Recall',
     'armyReserve.recall.casualties': 'Casualties',
     'armyReserve.recall.moraleCollapse': 'Morale Collapse',
+    'armyReserve.recall.corpsReorganisation': 'Moved to another corps',
     'armyReserve.recall.unknown': 'Reserve recall recorded',
     'opportunity.defensiveCommitment': 'Defensive commitment authorized; no offensive operation was launched.',
   'opportunity.launchedReceipt': 'Staff launched {operation}.',
