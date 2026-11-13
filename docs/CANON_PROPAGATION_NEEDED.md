@@ -19,6 +19,8 @@ The fourteen items opened on 2026-03-28 were each checked against `src/` and `do
 
 Two older statements were corrected in the same pass: the launch minimum is 2 brigades (not 3), and `MAX_PARTICIPATING_BRIGADES` is 20 (not 12). §7.6's attack-threshold "known issue" was replaced, because the default is now `costly_victory`.
 
+Panel sign-off on this Systems Manual diff is not yet recorded; the gate `REPO-CANON-PROPAGATION` in `docs/open_gates.yml` stays open until the orchestrator convenes the panel or records a waiver.
+
 ## Still open
 
 These are stale canon text found during the triage. They are not applied here.

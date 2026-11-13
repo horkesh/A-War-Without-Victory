@@ -23,7 +23,7 @@ Docs only; no `src/` or `data/` change, no calibration change. Main is at checkp
   `MASTER_ROADMAP_ARCHIVE.md` (2026-09 calibration status prose, the 2026-09-12 execution snapshot, the header
   prose, the closed probe-channel section) and the 2026-09 sections of `COMMAND_BOARD.md` moved there too. The board was re-derived from the roadmap.
 - **Gates:** new lane RF with `RF-CALIBRATION-RESIGNOFF` and `RF-ENGINE-FREEZE`; `DC-CONFERENCE-REDESIGN` closed
-  (DC merged #560, the roadmap row was already closed); `REPO-CANON-PROPAGATION` closed (below).
+  (DC merged #560, the roadmap row was already closed). `REPO-CANON-PROPAGATION` stays open: its panel sign-off condition is not yet recorded (below).
 - **`.claude/current-lane.txt`:** now RF, so RF calibration runs and R8 dry runs count as in-lane.
 - **Canon backlog:** all fourteen items in `docs/CANON_PROPAGATION_NEEDED.md` were checked against current code.
   None was already in canon; all are now in `Systems_Manual_v0_9_0.md` with current values (§2, §6.3, §6.4, §6.8, §6.9,
