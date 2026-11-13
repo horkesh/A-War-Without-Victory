@@ -204,6 +204,6 @@ Full brief with paragraph citations: side-session notes `hvo_arbih_1993_historia
 
 ## 9. Reproduce
 
-- Experiment branch: `claude/hvo-arbih-war-diagnosis` (toggles named in §5; flip and run `npm run sim:scenario:run:188w`).
+- Experiment branch: `claude/hvo-arbih-war-diagnosis` (toggles named in §5; flip and run `npm run sim:scenario:run:188w`). Run 8's exact toggle state: `claude/hvo-arbih-war-diagnosis-run8-toggles`.
 - Metrics script, snapshot inspector and census script: copied to `tools/diagnostics/hvo_arbih_war/` on the experiment branch.
 - Historian brief: side-session notes `hvo_arbih_1993_historian_brief.md` (the orchestrator's coordination folder).
