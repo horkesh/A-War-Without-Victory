@@ -46,6 +46,7 @@ import type { SupplyReservesReport, SiegeTurnCounterReport } from '../state/supp
 import type { Phase3DCollapseResolutionResult } from './collapse/phase3d_collapse_resolution.js';
 import type { SpawnFormationsReport, ReinforceBrigadesReport, WiaTricklebackReport } from './formation_spawn.js';
 import type { FormationHqRelocationReport } from './formation_hq_relocation.js';
+import type { CorpsReorganisationReport } from './corps_reorganisation.js';
 import type { PhaseEPressureDiffusionReport } from './emergence/pressure_diffusion.js';
 import type { buildDisplacementCapacityReport } from './displacement_pipeline/displacement_capacity_hooks.js';
 import type { AllianceUpdateReport } from './early_war/alliance_update.js';
@@ -199,6 +200,8 @@ export interface TurnReport {
     formation_spawn?: SpawnFormationsReport;
     control_flip?: ControlFlipReport;
     formation_hq_relocation?: FormationHqRelocationReport;
+    /** Corps reorganisation (brigade transfers / corps retirement). Absent when no event has triggered. */
+    corps_reorganisation?: CorpsReorganisationReport;
     authority_degradation?: AuthorityDegradationReport;
     war_control_strain?: ControlStrainReport;
     displacement_hooks?: DisplacementHooksReport;
