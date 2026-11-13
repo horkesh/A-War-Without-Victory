@@ -6,6 +6,8 @@
 **Scope:** ARBiH (5th, 7th, 1st Corps) fall 1995 offensives, the HV/HVO context enabling them, and engine-modeling gaps.
 **Source hierarchy:** ICTY trial/appeals judgments → Balkan Battlegrounds Vol. 2 (CIA OREA, 2002) → standard secondary sources (Burg & Shoup, *The War in Bosnia-Herzegovina*; Hoare, *How Bosnia Armed*; Magaš & Žanić eds., *The War in Croatia and BiH*; Tanner, *Croatia*). Wikipedia used only to fill date-level detail where the canonical sources lack day-by-day granularity. Where sources diverge, the higher-tier source is taken as authoritative and the divergence is flagged.
 
+**Corrections (2026-11-13, 7th Corps lane, historian check against BB1/BB2):** the Vlašić heights and TV relay fell in **March 1995** (Domet-1, 20-24 Mar), not September; in September the 7th Corps took Donji Vakuf (13 Sept), the Komar heights and the east bank of the Vrbas. **Jajce** was retaken by the **HV/HVO** in Maestral (13 Sept), not by a combined ARBiH/HVO force (BB1 pp.381-382). The **6th Corps** existed from June 1993 until 1994 (units back to the 4th Corps; BB2 p.391, p.436), not into 1995. The §3.1 division list is contradicted by BB1 App. H (pp.476-477) and is struck through below. Sanski Most (10 Oct) fell to the 5th Corps' 502nd Brigade, the General Staff Guards Brigade and the 5th MP Battalion (BB1 n.814); 7th Corps brigades fought the Ključ-Sanski Most approaches. Detail: `docs/knowledge/ARBIH_ORDER_OF_BATTLE_MASTER.md`, 7th Corps section.
+
 ---
 
 ## 0. Executive Summary
@@ -22,7 +24,7 @@ The principal ARBiH operations of the period were:
 |---|---|---|---|---|
 | **Sana 95** | ARBiH 5th + 7th Corps | 13 Sept – 11 Oct 1995 | Bihać → Sanski Most / Ključ / Bos. Petrovac / Bos. Krupa | ~3,500–4,000 km² captured |
 | **Una 95** | ARBiH 5th Corps (505th + supporting bdes) | mid–late Sept 1995 | Una valley north of Bihać (Bos. Krupa, Otoka, Bos. Novi axis) | Krupa town captured, Novi outskirts |
-| **Vlašić / Donji Vakuf push** | ARBiH 7th Corps + HVO | 13–20 Sept 1995 | Vlašić plateau, Donji Vakuf | Vlašić TV repeater + plateau, Donji Vakuf town (13 Sept) |
+| **Donji Vakuf push** | ARBiH 7th Corps + HVO | 13–20 Sept 1995 | Donji Vakuf, Komar, east bank of the Vrbas | Donji Vakuf town (13 Sept); Vlašić itself had fallen in March 1995 (Domet-1) |
 | **HV/HVO *Maestral 2*** | HV + HVO | 8–15 Sept 1995 | Drvar / Šipovo / Jajce / Mrkonjić Grad / Bos. Grahovo (Glamoč Aug) | ~2,500 km², Jajce liberated 13 Sept |
 | **HV/HVO *Južni Potez* ("Southern Move")** | HV + HVO | 8–11 Oct 1995 | Mrkonjić Grad → outskirts Banja Luka, Sanski Most → Prijedor approach | Halted 25 km from Banja Luka by ceasefire |
 | **1st Corps Treskavica / Trnovo** | ARBiH 1st + 4th Corps | 15 June – August 1995 (Treskavica), reverberating into Sept | Treskavica massif, Trnovo, Bjelašnica foothills | Treskavica captured June–July, contributed to Sarajevo siege loosening |
@@ -84,7 +86,7 @@ With HV/HVO *Maestral 2* simultaneously taking Drvar (10 Sept), Šipovo (13 Sept
 | 30 Aug | NATO *Deliberate Force* begins; RRF artillery from Mt Igman fires on Sarajevo siege belt |
 | 8 Sept | HV/HVO *Maestral 2* begins — Drvar/Šipovo/Jajce axes open |
 | 10 Sept | Drvar falls (HVO) |
-| 13 Sept | Jajce falls (HVO + ARBiH 7th); Šipovo falls; Donji Vakuf falls (ARBiH 7th) |
+| 13 Sept | Jajce falls (HV/HVO); Šipovo falls; Donji Vakuf falls (ARBiH 7th) |
 | **13 Sept** | **Operation *Sana 95* main attack begins** |
 | 14–15 Sept | Bosanski Petrovac falls (5th Corps) |
 | 16 Sept | Bosanska Krupa falls; Mrkonjić Grad falls (HVO) |
@@ -145,10 +147,11 @@ The 7th Corps (HQ Travnik, Gen. Mehmed Alagić) operated in central Bosnia and w
 
 ### 3.1 Force composition (BB2 pp. 631–635)
 
-By September 1995 the 7th Corps had been organised into two divisions:
-- **17th "Krajina" Division** (Gen. Fikret Ćuskić) — 7th, 17th, 27th, 37th, 77th, 707th, 717th brigades. The "Krajina" lineage refers to Bosnian Krajina origin (refugees from the lost northwest), not Croatian Krajina.
-- **77th Division** — 727th, 737th, 747th, 770th, 777th brigades.
-- **3rd Corps** detachments in the OG Bosanska Krajina (operational group) sometimes attached.
+**Corrected (BB1 App. H pp.476-477, Oct 1995):** the **77th Division** (Bugojno) held the 705th, 707th, 717th and 770th; the 17th Krajina, 706th, 708th, 712th, 725th, 727th, 733rd and 737th brigades sat directly under the corps. The original list below cites "BB2 pp.631-635", which cannot be checked, and conflicts with App. H:
+
+- ~~**17th "Krajina" Division** (Gen. Fikret Ćuskić) — 7th, 17th, 27th, 37th, 77th, 707th, 717th brigades.~~
+- ~~**77th Division** — 727th, 737th, 747th, 770th, 777th brigades.~~
+- ~~**3rd Corps** detachments in the OG Bosanska Krajina (operational group) sometimes attached.~~
 
 Total: ~25,000–30,000 effectives.
 
@@ -157,13 +160,13 @@ Total: ~25,000–30,000 effectives.
 **Operation *Vlašić 95* and the Donji Vakuf axis (13–20 September 1995):**
 - Simultaneous with Sana 95 and Maestral 2.
 - 7th Corps + HVO Operative Group Vlašić attacked along three axes:
-  1. **Vlašić plateau** — frontal assault to clear the Vlašić TV repeater (a 1,943 m commanding feature) and the VRS positions on Mt Vlašić. Captured 13–15 Sept.
-  2. **Donji Vakuf** — taken **13 September** by 7th Corps + HVO. This was the first town to fall in the federation September offensive. Donji Vakuf had been held by VRS 19th Donjovakufska Light Bde — its loss opened the road to Jajce from the south.
-  3. **Jajce axis** — 7th Corps elements link up with HVO units (HVO 1st Guards) attacking from the Kupres/Šipovo direction. **Jajce falls 13 September** to combined ARBiH/HVO force (HVO entering town centre).
+  1. **Vlašić** — already in ARBiH hands: the 7th Corps took the heights and the TV relay in **Domet-1, 20-24 March 1995** (BB1 p.301; Reuters 25 Mar 1995 cited at BB1 p.401). In September the corps attacked from Vlašić onto the Komar heights and the east bank of the Vrbas.
+  2. **Donji Vakuf** — taken **13 September** by the 7th Corps. Donji Vakuf had been held by VRS 19th Donjovakufska Light Bde.
+  3. **Jajce** — retaken by the **HV/HVO** in Maestral on **13 September** (BB1 p.381); its fall "pinched out" the 7th Corps' western front (BB1 p.382). Not an ARBiH capture.
 
 **Late September push:**
 - 7th Corps continues east toward Mrkonjić Grad and northeast onto the Manjača plateau but slows.
-- **6–10 October:** 7th Corps elements operate alongside 5th Corps in the **Sanski Most** assault from the south/east while 5th Corps comes from the west. Coordinated reduction of Sanski Most ends 10 October.
+- **Mid-September to 10 October:** some 10,000 troops "from the 7th Corps and other ARBiH commands" reinforce the 5th Corps (BB1 p.391). The 17th Krajina joins 5th Corps OG South around 18 Sept; around 6-9 Oct the 707th and 717th hold the Sana line at Ključ while the 708th and 712th block at Krasulje; on 9 Oct the 17th, 707th and 717th lead the attack (BB1 nn.795, 802, 811). **Sanski Most falls 10 October** to the 5th Corps' 502nd Brigade, the General Staff Guards Brigade and the 5th MP Battalion (BB1 n.814).
 - The 7th Corps was also positioned to push toward **Mrkonjić Grad/Kotor Varoš/Banja Luka** but the 12 October ceasefire froze them roughly 30–40 km from Banja Luka.
 
 **Coordination with HVO:**
@@ -224,7 +227,7 @@ Trigger: **Markale II** mortar massacre, 28 August 1995 (37 killed, 90 wounded; 
 
 Effective 1 January 1995 (BB2 ch. 11):
 - Old Operational Group (OG) structure → seven Corps + subordinate Divisions.
-- **Corps numbered 1 (Sarajevo), 2 (Tuzla), 3 (Zenica), 4 (Mostar/Konjic), 5 (Bihać), 6 (Konjic — disbanded into 4th later in 1995), 7 (Travnik).** A 6th Corps existed briefly in 1994–early 1995 and was absorbed.
+- **Corps numbered 1 (Sarajevo), 2 (Tuzla), 3 (Zenica), 4 (Mostar/Konjic), 5 (Bihać), 7 (Travnik).** The 6th Corps (Konjic) existed from June 1993 until 1994, when its units returned to the 4th Corps (BB2 p.391, p.436); it was gone before 1995. The 7th Corps was decided on 26 Feb 1994.
 - Divisions created as intermediate echelon between Corps and Brigade (e.g., 17th "Krajina" Div, 12th "Sarajevo" Div, 14th Div, 28th "Podrinje" Div in Srebrenica before its fall).
 - Total ARBiH manpower under arms by mid-1995: roughly **200,000–230,000** (Hoare ch. 8, Burg & Shoup p. 332 give 250,000 inclusive of reserve).
 - This was the first time the ARBiH had the staff structure to *plan and run multi-corps simultaneous offensives*. Without it, neither Sana, Vlašić, nor the coordinated Sanski Most reduction would have been runnable.

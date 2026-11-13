@@ -5,8 +5,6 @@
     {"id": "arbih_3rd_corps", "faction": "RBiH", "name": "3rd Corps (Zenica)", "kind": "corps"},
     {"id": "arbih_4th_corps", "faction": "RBiH", "name": "4th Corps (Mostar)", "kind": "corps"},
     {"id": "arbih_5th_corps", "faction": "RBiH", "name": "5th Corps (Bihać)", "kind": "corps"},
-    {"id": "arbih_6th_corps", "faction": "RBiH", "name": "6th Corps (Konjic)", "kind": "corps"},
-    {"id": "arbih_7th_corps", "faction": "RBiH", "name": "7th Corps (Travnik)", "kind": "corps"},
     {"id": "hvo_central_bosnia", "faction": "HRHB", "name": "Central Bosnia OZ", "kind": "corps"},
     {"id": "hvo_herzegovina", "faction": "HRHB", "name": "Southeast Herzegovina OZ", "kind": "corps"},
     {"id": "hvo_northwest_bosnia", "faction": "HRHB", "name": "Northwest Bosnia OZ (Posavina)", "kind": "corps"},
