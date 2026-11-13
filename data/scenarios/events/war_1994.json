@@ -536,6 +536,35 @@
     ]
   },
   {
+    "id": "arbih_7th_corps_formed_1994",
+    "image": "event_staff_planning_room.webp",
+    "title": "General Staff Forms the 7th Corps",
+    "narrative": "The General Staff forms the 7th Corps at Travnik under Brigadier General Mehmed Alagić, giving the Travnik and Bugojno fronts a command of their own. The western brigades of the 3rd Corps pass to it, with Operational Groups Bosanska Krajina and West. The brigades keep their 3rd Corps numbers for now. The new staff needs a week or two before the corps fights as one.",
+    "category": "military",
+    "historical_source": "Balkan Battlegrounds, Vol. II, pp. 468, 493, 510 (7th Corps decided 26 February 1994; HQ Travnik; Alagić commanding)",
+    "source_tier": "balkan_battlegrounds",
+    "source_note": "Balkan Battlegrounds Vol. II records the 7th Corps at Travnik under Alagić, formed from the 3rd Corps' western operational groups, and still lists its brigades under their 3xx numbers through 1994. The transition cost is a model assumption.",
+    "trigger": {
+      "turn_min": 99,
+      "turn_max": 99,
+      "phase": "war"
+    },
+    "once": true,
+    "effect": {
+      "kind": "narrative",
+      "text": "The General Staff forms the 7th Corps at Travnik under Alagić. The western brigades of the 3rd Corps pass to it."
+    },
+    "localizations": {
+      "bcs": {
+        "title": "Generalštab formira 7. korpus",
+        "narrative": "Generalštab formira 7. korpus u Travniku pod komandom brigadnog generala Mehmeda Alagića, kako bi travnički i bugojanski front dobili vlastitu komandu. Zapadne brigade 3. korpusa prelaze u njegov sastav, s operativnim grupama Bosanska Krajina i Zapad. Brigade za sada zadržavaju brojeve iz 3. korpusa. Novom štabu treba sedmica ili dvije prije nego što korpus počne djelovati kao cjelina.",
+        "source_note": "Balkan Battlegrounds, knj. II, bilježi 7. korpus u Travniku pod Alagićem, formiran od zapadnih operativnih grupa 3. korpusa, i kroz cijelu 1994. navodi njegove brigade pod brojevima 3xx. Cijena prelaza je pretpostavka modela.",
+        "historical_source": "Balkan Battlegrounds, knj. II, str. 468, 493, 510",
+        "source_tier": "balkan_battlegrounds"
+      }
+    }
+  },
+  {
     "id": "rs_washington_rejection_1994",
     "title": "Washington Agreement — Pale's Non-Engagement",
     "narrative": "Washington shuttle diplomacy (Christopher, Galbraith, Redman) has produced a bipolar Federation framework between Sarajevo and Mostar — the Croat-Muslim peace and constitutional architecture of the Federation of Bosnia and Herzegovina. Belgrade has been informed; Pale has not been invited. Karadzic and Krajisnik read the framework as a constraint on the Six Strategic Goals: a Federation entity occupying 51 percent of Bosnia narrows the corridor, contests the Drina-valley axis, and forecloses Sarajevo division ahead of any negotiated map. The Pale Assembly must record its written posture toward the Washington track: reject the bipolar Federation as the documented historical line, propose a trilateral alternative that brings RS into a parallel republic frame, condition any engagement on territorial recognition of the Six Goals platform, or accept observer status to maintain a channel to the framework Belgrade has not yet endorsed against.",

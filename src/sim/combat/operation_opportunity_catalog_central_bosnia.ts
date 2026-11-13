@@ -23,13 +23,16 @@ import { getFactionLiveSupplyPressure } from './supply_condition.js';
 import { isEligibleOperationFormation, MIN_ATTACK_PERSONNEL } from '../../state/formation_constants.js';
 import { MAX_EXHAUSTION_FOR_OPERATION } from './bot_constants.js';
 
-const PRIMARY_CORPS = 'arbih_3rd_corps';
-// The historical Donji Vakuf push is associated with the 7th Corps under
-// Alagic, but the current source OOB keeps the authored Bugojno/Komar brigade
-// pool under `arbih_3rd_corps`. Host the catalog entry where the live brigades
-// and sector truth exist; otherwise final operation reconciliation strips the
-// operation empty before launch.
-const DONJI_VAKUF_PRIMARY_CORPS = 'arbih_3rd_corps';
+// The Travnik/Vlašić and Bugojno/Donji Vakuf operations belong to the ARBiH 7th Corps
+// (Alagić, Travnik), formed 26 Feb 1994 from the western half of the 3rd Corps. Its
+// brigades move to it at week 99 (formation_lifecycle_events.json corps_reorganisation),
+// before any operation here opens, so the catalog hosts them where the live brigades and
+// sector truth are; a host corps that does not own the brigades would be stripped empty
+// by final operation reconciliation.
+const PRIMARY_CORPS = 'arbih_7th_corps';
+/** Zenica brigades kept on the Vlašić ridge as a 3rd Corps supporting axis. */
+const VLASIC_SUPPORT_CORPS = 'arbih_3rd_corps';
+const DONJI_VAKUF_PRIMARY_CORPS = 'arbih_7th_corps';
 const KUPRES_CINCAR_PRIMARY_CORPS = 'hvo_tomislavgrad';
 const BEHAR_I_PRIMARY_CORPS = 'arbih_1st_corps';
 
@@ -246,18 +249,25 @@ const VLASIC_AXES: readonly OpportunityAxisDef[] = [
             'arbih_737th_muslim_light' as FormationId,
             'arbih_705th_slavna_mountain' as FormationId,
             // MODELED theater allocation under owner paint-calibration
-            // authority, not a documented March 1995 order. The 314th is an
-            // existing mandatory 3rd Corps active unit; the 717th and 303rd
-            // are existing 3rd Corps reserve units. Eleven authored IDs
-            // include the inactive 706th, leaving ten potentially active
-            // catalogue slots before availability; the actual retained Guards
-            // loan means only nine expected participants here. The existing
-            // minimum formula stays Math.floor(11/2) = 5, with no guarantee of
-            // admission, delivery or historic participation.
-            'arbih_7th_vitezka_muslim_liberation' as FormationId,
+            // authority, not a documented March 1995 order. The 717th is a
+            // 7th Corps reserve unit; the Guards are a General Staff loan.
             'arbih_guards_brigade' as FormationId,
-            'arbih_314th_slavna_liberation' as FormationId,
             'arbih_717th_slavna_mountain' as FormationId,
+        ],
+        objectives: VLASIC_TRAVNIK_RIDGE_OBJECTIVES,
+        staging_osid: STAGING_TURBE,
+    },
+    {
+        // The Zenica brigades of the modeled allocation stay in the 3rd Corps when the 7th
+        // forms, so they support the ridge from their own corps (cross-corps axis, as in the
+        // Ozren continuation). Same objectives and staging. Splitting the former single axis
+        // of 11 keeps the minimum commitment at 5 (floor(8/2) + floor(3/2)).
+        axis_id: 'vlasic_zenica_support',
+        name: 'Zenica Support',
+        corps: VLASIC_SUPPORT_CORPS,
+        brigades: [
+            'arbih_7th_vitezka_muslim_liberation' as FormationId,
+            'arbih_314th_slavna_liberation' as FormationId,
             'arbih_303rd_vitezka_mountain' as FormationId,
         ],
         objectives: VLASIC_TRAVNIK_RIDGE_OBJECTIVES,
@@ -498,13 +508,13 @@ const enemyWeaknessVlasic: AxisPredicate = (state) => {
 
 const corpsReadinessVlasic: AxisPredicate = (state) => {
     if (!state.military.corps_command?.[PRIMARY_CORPS]) {
-        return { green: false, reason: '3rd Corps command not present in this scenario' };
+        return { green: false, reason: '7th Corps command not present in this scenario' };
     }
     const traits = computeCorpsOperationReadiness(state, PRIMARY_CORPS as FormationId);
     if (traits.operation_readiness < VLASIC_READINESS_FLOOR) {
-        return { green: false, reason: '3rd Corps readiness below Central Bosnia operation floor' };
+        return { green: false, reason: '7th Corps readiness below Central Bosnia operation floor' };
     }
-    return { green: true, reason: '3rd Corps readiness sufficient for Central Bosnia operation' };
+    return { green: true, reason: '7th Corps readiness sufficient for Central Bosnia operation' };
 };
 
 const logisticsVlasic: AxisPredicate = (state) => {
@@ -518,20 +528,20 @@ const logisticsVlasic: AxisPredicate = (state) => {
 const commanderConfidenceVlasic: AxisPredicate = (state) => {
     const commanderState = state.military.corps_command?.[PRIMARY_CORPS]?.commander_state;
     if (!commanderState) {
-        return { green: false, reason: '3rd Corps commander state unavailable' };
+        return { green: false, reason: '7th Corps commander state unavailable' };
     }
-    return { green: true, reason: '3rd Corps commander state present' };
+    return { green: true, reason: '7th Corps commander state present' };
 };
 
 const forceQualityVlasic: AxisPredicate = (state) => {
     if (!state.military.corps_command?.[PRIMARY_CORPS]) {
-        return { green: false, reason: '3rd Corps command not present in this scenario' };
+        return { green: false, reason: '7th Corps command not present in this scenario' };
     }
     const traits = computeCorpsOperationReadiness(state, PRIMARY_CORPS as FormationId);
     if (traits.axis_coordination < VLASIC_AXIS_COORDINATION_FLOOR) {
-        return { green: false, reason: '3rd Corps axis coordination below two-axis ridge threshold' };
+        return { green: false, reason: '7th Corps axis coordination below two-axis ridge threshold' };
     }
-    return { green: true, reason: '3rd Corps axis coordination supports a two-axis ridge operation' };
+    return { green: true, reason: '7th Corps axis coordination supports a two-axis ridge operation' };
 };
 
 const weatherSeasonVlasic: AxisPredicate = (_state, turn) => {
@@ -607,15 +617,15 @@ const enemyWeaknessPaklarevoModel: AxisPredicate = (state) => {
 
 const corpsReadinessPaklarevoModel: AxisPredicate = (state) => {
     const cmd = state.military.corps_command?.[PRIMARY_CORPS];
-    if (!cmd) return { green: false, reason: '3rd Corps command not present in this scenario' };
+    if (!cmd) return { green: false, reason: '7th Corps command not present in this scenario' };
     if (cmd.corps_exhaustion > MAX_EXHAUSTION_FOR_OPERATION) {
-        return { green: false, reason: `3rd Corps exhaustion ${cmd.corps_exhaustion} above ordinary operation threshold ${MAX_EXHAUSTION_FOR_OPERATION}` };
+        return { green: false, reason: `7th Corps exhaustion ${cmd.corps_exhaustion} above ordinary operation threshold ${MAX_EXHAUSTION_FOR_OPERATION}` };
     }
     const traits = computeCorpsOperationReadiness(state, PRIMARY_CORPS as FormationId);
     if (traits.operation_readiness < PAKLAREVO_MODEL_READINESS_FLOOR) {
-        return { green: false, reason: '3rd Corps readiness below Paklarevo local operation floor' };
+        return { green: false, reason: '7th Corps readiness below Paklarevo local operation floor' };
     }
-    return { green: true, reason: '3rd Corps exhaustion and readiness permit ordinary local preparation' };
+    return { green: true, reason: '7th Corps exhaustion and readiness permit ordinary local preparation' };
 };
 
 const logisticsPaklarevoModel: AxisPredicate = (state) => {
@@ -627,7 +637,7 @@ const logisticsPaklarevoModel: AxisPredicate = (state) => {
 
 const forceQualityPaklarevoModel: AxisPredicate = (state) => {
     const cmd = state.military.corps_command?.[PRIMARY_CORPS];
-    if (!cmd) return { green: false, reason: '3rd Corps command not present in this scenario' };
+    if (!cmd) return { green: false, reason: '7th Corps command not present in this scenario' };
     if (cmd.og_slots > 0 && cmd.active_ogs.length >= cmd.og_slots) {
         return { green: false, reason: 'No ordinary operational-group slot remains for the Paklarevo model' };
     }
@@ -636,7 +646,7 @@ const forceQualityPaklarevoModel: AxisPredicate = (state) => {
         if (!formation) return { green: false, reason: `${brigadeId} is missing` };
         if (formation.faction !== 'RBiH') return { green: false, reason: `${brigadeId} is not RBiH` };
         const owner = formation.corps_id ?? (formation as { own_corps_cmd?: string }).own_corps_cmd;
-        if (owner !== PRIMARY_CORPS) return { green: false, reason: `${brigadeId} is not a 3rd Corps formation` };
+        if (owner !== PRIMARY_CORPS) return { green: false, reason: `${brigadeId} is not a 7th Corps formation` };
         if (!isEligibleOperationFormation(formation)) return { green: false, reason: `${brigadeId} is not eligible for an operation` };
         if ((formation.personnel ?? 0) < MIN_ATTACK_PERSONNEL) return { green: false, reason: `${brigadeId} is below the ordinary attack floor` };
         if ((formation.disrupted_turns ?? 0) > 0) return { green: false, reason: `${brigadeId} is disrupted` };
@@ -660,7 +670,7 @@ const dateWindowDonjiVakuf: AxisPredicate = (_state, turn) => {
     // Lower bound178 is only a weekly approximation allowing ordinary earliest
     // execution on179; it does not assert a historical preparation day, force
     // execution, or change the upper bound, planning_duration, evaluators,
-    // readiness/logistics gates, 7th Corps proxy representation or any other field.
+    // readiness/logistics gates, 7th Corps hosting or any other field.
     if (turn < 178) return { green: false, reason: 'September 1995 Donji Vakuf window not yet open' };
     if (turn > 180) return { green: false, reason: 'September 1995 Donji Vakuf window has closed' };
     return { green: true, reason: 'within September 1995 Donji Vakuf operation window' };

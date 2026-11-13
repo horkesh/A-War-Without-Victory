@@ -8,7 +8,7 @@ import { getBrigadeAxis } from './operation_approach_osids.js';
  * This is deliberately an authored identity check, not a faction/target gate.
  */
 const VLASIC_OPERATION_NAME = 'Operation Vlasic Ridge';
-const VLASIC_CORPS_ID = 'arbih_3rd_corps';
+const VLASIC_CORPS_ID = 'arbih_7th_corps';
 const VLASIC_STAGING_OSID = VLASIC_RIDGE_95_OPPORTUNITY.staging_osid;
 const VLASIC_OBJECTIVES = new Set([
     'op:travnik:paklarevo',

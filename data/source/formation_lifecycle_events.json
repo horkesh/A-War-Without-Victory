@@ -38,6 +38,20 @@
     { "type": "rename", "formation_id": "arbih_770th_slavna_mountain", "trigger_condition": "week", "trigger_turn": 154, "new_name": "770th Mountain", "reason": "7th Corps renumbering (BB1 App. H)" }
   ],
   "corps_reorganisation": [
+    {
+      "id": "arbih_7th_corps_formation",
+      "type": "corps_transfer",
+      "trigger_turn": 99,
+      "target_corps_id": "arbih_7th_corps",
+      "formation_ids": [
+        "arbih_17th_vitezka_mountain", "arbih_705th_slavna_mountain", "arbih_706th_muslim_mountain",
+        "arbih_707th_slavna_mountain", "arbih_708th_mountain", "arbih_712th_mountain",
+        "arbih_717th_slavna_mountain", "arbih_725th_light", "arbih_727th_slavna",
+        "arbih_733rd_mountain", "arbih_737th_muslim_light", "arbih_770th_slavna_mountain"
+      ],
+      "transition": { "cohesion_cost": 4, "disrupted_turns": 2 },
+      "reason": "The 7th Corps (Travnik) takes over the 3rd Corps' OG Bosanska Krajina and OG Zapad, 26 Feb 1994 (BB2 p.468, p.493, p.510). Transition sized like two weeks of the reorganize stance: cohesion -4 (two weeks of its +2 recovery) and one week of disruption."
+    },
     { "id": "arbih_7th_corps_commander_alagic", "type": "commander_handover", "trigger_turn": 99, "corps_id": "arbih_7th_corps", "officer_id": "arbih_alagic", "reason": "Brig. Gen. Mehmed Alagić appointed to command the new 7th Corps, Travnik, 26 Feb 1994 (BB2 p.468, p.493)" }
   ]
 }

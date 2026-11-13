@@ -535,7 +535,11 @@ const RBIH_ARMY_PRIORITIES: ArmyOperationPriority[] = [
     { name: 'Central Corridor Defense', corps_id: 'arbih_3rd_corps', target_municipalities: ['zenica', 'kakanj', 'visoko', 'tesanj', 'maglaj', 'zavidovici', 'zepce'], start_week: 0, end_week: 56, weight: 80, min_outcome: 'repulsed' },
     // 3rd Corps: Central corridor counter — reclaim municipalities RS overruns (calibration: Phase M, Jan 1993 painted targets)
     { name: 'Central Corridor Counter', corps_id: 'arbih_3rd_corps', target_municipalities: ['tesanj', 'maglaj', 'zavidovici', 'kakanj', 'visoko', 'travnik', 'zepce'], start_week: 12, end_week: 56, weight: 150, min_outcome: 'stalemate' },
-    { name: 'Central Corridor Offensive', corps_id: 'arbih_3rd_corps', target_municipalities: ['zenica', 'travnik', 'kakanj', 'visoko', 'bugojno', 'gornji_vakuf', 'fojnica'], start_week: 56, end_week: 9999, weight: 60, min_outcome: 'stalemate' },
+    { name: 'Central Corridor Offensive', corps_id: 'arbih_3rd_corps', target_municipalities: ['zenica', 'travnik', 'kakanj', 'visoko', 'bugojno', 'gornji_vakuf', 'fojnica'], start_week: 56, end_week: 99, weight: 60, min_outcome: 'stalemate' },
+    // Week 99 (26 Feb 1994): the western half of the 3rd Corps becomes the 7th Corps (Travnik).
+    // The offensive priority splits along the new corps boundary, same weight and outcome.
+    { name: 'Central Corridor Offensive', corps_id: 'arbih_3rd_corps', target_municipalities: ['zenica', 'kakanj', 'visoko', 'fojnica'], start_week: 99, end_week: 9999, weight: 60, min_outcome: 'stalemate' },
+    { name: 'Lasva-Vrbas Offensive', corps_id: 'arbih_7th_corps', target_municipalities: ['travnik', 'bugojno', 'gornji_vakuf'], start_week: 99, end_week: 9999, weight: 60, min_outcome: 'stalemate' },
     // 3rd Corps: Bugojno-Konjic defense (calibration: Bugojno is 3rd Corps AOR — Zenica, not Mostar)
     { name: 'Bugojno-Konjic Defense', corps_id: 'arbih_3rd_corps', target_municipalities: ['bugojno', 'gornji_vakuf', 'konjic', 'prozor', 'jablanica'], start_week: 0, end_week: 56, weight: 100, min_outcome: 'repulsed' },
     // 4th Corps: Neretva defense

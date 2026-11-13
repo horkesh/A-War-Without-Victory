@@ -53,7 +53,7 @@ import { buildGeneralsDigestChronicleEntries } from './generalsDigestChronicle.j
 import { projectOperationLifecycle } from '../../data/operationLifecycleProjection.js';
 import type { LoadedGameState } from '../../data/types.js';
 import { shouldNarrateTerritorySummary } from '../../data/territorySummaryGuard.js';
-import { t, type MessageKey } from '../../i18n/index.js';
+import { getActiveLocale, t, type MessageKey } from '../../i18n/index.js';
 import type { EventDefinition } from '../../../../sim/events/event_types.js';
 import type { GameState } from '../../../../state/game_state.js';
 import { turnToDateString } from '../../utils/formatters.js';
@@ -605,7 +605,11 @@ export function generateChronicleEntries(
             for (const event of summary.events_fired) {
                 const id = event.id || '';
                 if (shouldSuppressTurnSummaryDecisionEvent(state, id, playerFaction, decisionEventIds)) continue;
-                const title = getPlayerSafeDisplayLabel(event.text, 'Recorded event');
+                // The engine records the English title; an event authored with a localized
+                // title (localizations.<locale>.title) shows it in that locale.
+                const locale = getActiveLocale();
+                const localizedTitle = locale === 'en' ? undefined : eventCatalog?.get(id)?.localizations?.[locale]?.title;
+                const title = getPlayerSafeDisplayLabel(localizedTitle ?? event.text, 'Recorded event');
 
                 if (isDiplomaticEvent(id)) {
                     entries.push({

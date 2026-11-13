@@ -64,6 +64,15 @@ export interface CorpsTransferEventDef {
     target_corps_id: string;
     formation_ids: string[];
     max_defer_turns?: number;
+    /**
+     * One-off cost of the reorganisation itself, paid by each brigade as it changes corps
+     * within the reorganisation window (trigger_turn .. trigger_turn + max_defer_turns).
+     * A brigade that appears later and is merely filed under the target corps pays nothing.
+     * cohesion_cost: cohesion points lost (floored at 0).
+     * disrupted_turns: sets formation.disrupted_turns to at least this value (the counter
+     * ticks before combat, so N gives N-1 disrupted combat weeks).
+     */
+    transition?: { cohesion_cost?: number; disrupted_turns?: number };
     reason: string;
 }
 
@@ -152,6 +161,19 @@ export function validateCorpsReorganisationEvents(raw: unknown): CorpsReorganisa
             if (e.max_defer_turns != null && (typeof e.max_defer_turns !== 'number' || !Number.isInteger(e.max_defer_turns) || e.max_defer_turns < 0)) {
                 throw new CorpsReorganisationDataError(`${id}: max_defer_turns must be a non-negative integer`);
             }
+            let transition: CorpsTransferEventDef['transition'];
+            if (e.transition != null) {
+                const t = e.transition as Record<string, unknown>;
+                const nonNeg = (v: unknown) => v == null || (typeof v === 'number' && Number.isFinite(v) && v >= 0);
+                if (typeof t !== 'object' || !nonNeg(t.cohesion_cost) || !nonNeg(t.disrupted_turns)
+                    || (t.disrupted_turns != null && !Number.isInteger(t.disrupted_turns))) {
+                    throw new CorpsReorganisationDataError(`${id}: transition costs must be non-negative numbers (disrupted_turns an integer)`);
+                }
+                transition = {
+                    ...(t.cohesion_cost != null ? { cohesion_cost: t.cohesion_cost as number } : {}),
+                    ...(t.disrupted_turns != null ? { disrupted_turns: t.disrupted_turns as number } : {}),
+                };
+            }
             out.push({
                 id,
                 type: 'corps_transfer',
@@ -159,6 +181,7 @@ export function validateCorpsReorganisationEvents(raw: unknown): CorpsReorganisa
                 target_corps_id: e.target_corps_id,
                 formation_ids: [...new Set(e.formation_ids as string[])].sort(strictCompare),
                 ...(e.max_defer_turns != null ? { max_defer_turns: e.max_defer_turns as number } : {}),
+                ...(transition ? { transition } : {}),
                 reason,
             });
         } else if (e.type === 'corps_retire') {
@@ -364,6 +387,11 @@ export function processCorpsReorganisationEvents(
             releaseFromCorpsOperations(state, fid as FormationId, from);
         }
         f.corps_id = target as FormationId;
+        if (e.transition && turn - e.trigger_turn <= maxDefer) {
+            const { cohesion_cost, disrupted_turns } = e.transition;
+            if (cohesion_cost && typeof f.cohesion === 'number') f.cohesion = Math.max(0, f.cohesion - cohesion_cost);
+            if (disrupted_turns) f.disrupted_turns = Math.max(f.disrupted_turns ?? 0, disrupted_turns);
+        }
         report.transferred.push({ event_id: e.id, formation_id: fid, from_corps_id: from, to_corps_id: target, forced: committed });
         changed = true;
     }
