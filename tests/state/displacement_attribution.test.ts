@@ -11,6 +11,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import type { SettlementRecord } from '../../src/map/settlements.js';
 import {
     CENSUS_FALLBACK_NATIONAL_REASON,
+    ENCIRCLEMENT_DISPLACEMENT_FRACTION,
     NATIONAL_POPULATION_1991_SUMS,
     resolvePressingFactions,
     splitAmountByCauser,
@@ -145,7 +146,7 @@ function encircledPocketFixture() {
 
 describe('updateDisplacement pressure path (SC1 end to end)', () => {
 
-    it('books an encircled pocket\'s losses to the besieger, for every people in it', () => {
+    it('books an encircled pocket\'s departures to the besieger, its own people only, none killed', () => {
         const { state, settlements, edges, census } = encircledPocketFixture();
         updateDisplacement(state, settlements, edges, census);
         const agg = state.displacement.displacement_humanitarian_aggregates ?? {};
@@ -153,9 +154,11 @@ describe('updateDisplacement pressure path (SC1 end to end)', () => {
             Object.values(agg[c] ?? {}).some((s) => s.refugees_created > 0 || s.civilian_casualties_caused > 0)
         );
         expect(causers).toEqual(['RS']);
-        // P1a: Bosniaks displaced by RS use the RS-displacing-Bosniaks rate (4%).
-        // 10% of 10,000 encircled = 1,000 displaced; 60% Bosniak = 600; 4% killed = 24.
-        expect(state.displacement.civilian_casualties?.RBiH?.killed).toBe(24);
+        // DA1 P3: the holder's people only (6,000 Bosniaks of 10,000) leave at the sourced
+        // weekly rate; leaving a siege carries no expulsion kill rate.
+        expect(Object.keys(agg.RS ?? {})).toEqual(['RBiH']);
+        expect(agg.RS?.RBiH?.refugees_created).toBe(Math.floor(6000 * ENCIRCLEMENT_DISPLACEMENT_FRACTION));
+        expect(state.displacement.civilian_casualties?.RBiH?.killed ?? 0).toBe(0);
     });
 });
 
@@ -187,18 +190,19 @@ describe('no-census fallback (SC2)', () => {
         expect(missing).toEqual(['hanpijesak']);
     });
 
-    it('splits a pocket without a census entry by the national sums, tags it, and books no extra killed Bosniaks', () => {
+    it('sizes a pocket without a census entry by the national sums, tags it, and books no killed', () => {
         const { state, settlements, edges } = encircledPocketFixture();
         const report = updateDisplacement(state, settlements, edges, {} as MunicipalityPopulation1991Map);
         const rec = report.by_municipality.find((r) => r.mun_id === 'pocket');
         expect(rec?.reason).toContain(CENSUS_FALLBACK_NATIONAL_REASON);
-        // 1,000 displaced split nationally: Serbs floor(1000*1366013/4360093)=313,
-        // Croats floor(1000*760847/4360093)=174, Bosniaks+others 513. Caused by RS:
-        // killed Bosniaks 4% = 20, Serbs 2% = 6, Croats 1% = 1.
+        // Held population 10,000 split nationally: Serbs floor(10000*1366013/4360093)=3132,
+        // Croats floor(10000*760847/4360093)=1745, Bosniaks+others 5,123 (the holder's people).
         const cc = state.displacement.civilian_casualties ?? {};
-        expect(cc.RBiH?.killed).toBe(20);
-        expect(cc.RS?.killed).toBe(6);
-        expect(cc.HRHB?.killed).toBe(1);
+        expect(cc.RBiH?.killed ?? 0).toBe(0);
+        expect(cc.RS?.killed ?? 0).toBe(0);
+        expect(cc.HRHB?.killed ?? 0).toBe(0);
+        expect(state.displacement.displacement_humanitarian_aggregates?.RS?.RBiH?.refugees_created)
+            .toBe(Math.floor(5123 * ENCIRCLEMENT_DISPLACEMENT_FRACTION));
     });
 });
 
@@ -224,9 +228,10 @@ describe('the two ledger "Killed" figures agree by construction (SC3 invariant)'
         updateDisplacement(state, settlements, edges, census);
         const { casualties, aggregates } = killedBothWays(state);
         expect(aggregates).toEqual(casualties);
-        // Refugees created per people equal that people's displaced total (600 / 300 / 100).
+        // Only the holder's people leave (DA1 P3): no Serb or Croat rows.
         const rs = state.displacement.displacement_humanitarian_aggregates?.RS ?? {};
-        expect([rs.RBiH?.refugees_created, rs.RS?.refugees_created, rs.HRHB?.refugees_created]).toEqual([600, 300, 100]);
+        expect([rs.RBiH?.refugees_created, rs.RS?.refugees_created, rs.HRHB?.refugees_created])
+            .toEqual([Math.floor(6000 * ENCIRCLEMENT_DISPLACEMENT_FRACTION), undefined, undefined]);
     });
 
     it('pressure path, national fallback and two causers', () => {

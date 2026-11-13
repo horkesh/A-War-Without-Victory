@@ -11,7 +11,11 @@
 import { describe, expect, it } from 'vitest';
 
 import type { EdgeRecord, SettlementRecord } from '../../src/map/settlements.js';
-import { updateDisplacement } from '../../src/state/displacement.js';
+import {
+    ENCIRCLEMENT_DISPLACEMENT_FRACTION,
+    UNSUPPLIED_DISPLACEMENT_FRACTION,
+    updateDisplacement,
+} from '../../src/state/displacement.js';
 import { CURRENT_SCHEMA_VERSION, type GameState } from '../../src/state/game_state.js';
 import type { MunicipalityPopulation1991Map } from '../../src/state/population_share.js';
 import { warPhases } from '../../src/sim/turn_phases/war_phases.js';
@@ -181,6 +185,23 @@ describe('the siege counter lives in GameState (survives a save round trip)', ()
             .find((f) => f.id === 'RBiH')!.supply_sources = ['S_home'];
         await runWarStep(w);
         expect(w.state.displacement.displacement_state.pocket.unsupplied_pressure_turns).toBeUndefined();
+    });
+});
+
+describe('sourced rate (DA1 P3)', () => {
+    it('an encircled, unsupplied pocket takes the larger rate, never the sum', () => {
+        const w = world({ linked: false, supplied: false });
+        let report = updateDisplacement(w.state, w.settlements, w.edges, w.census);
+        for (let t = 11; t <= 12; t++) {
+            w.state.meta.turn = t;
+            report = updateDisplacement(w.state, w.settlements, w.edges, w.census);
+        }
+        const rec = report.by_municipality.find((r) => r.mun_id === 'pocket')!;
+        expect(rec.reason).toEqual(expect.arrayContaining(['encircled', 'unsupplied_pressure_3_turns']));
+        // The pocket's 6,000 Bosniaks (holder's people) at the larger of the two rates.
+        const rate = Math.max(UNSUPPLIED_DISPLACEMENT_FRACTION, ENCIRCLEMENT_DISPLACEMENT_FRACTION);
+        expect(rec.displacement_this_turn).toBe(Math.floor((6000 - 2 * Math.floor(6000 * rate)) * rate));
+        expect(w.state.displacement.civilian_casualties?.RBiH?.killed ?? 0).toBe(0);
     });
 });
 

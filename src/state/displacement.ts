@@ -14,7 +14,7 @@ import { computeFrontEdges, type FrontEdge } from '../map/front_edges.js';
 import { areRbihHrhbAllied, DEFAULT_RBIH_HRHB_WAR_EARLIEST_TURN } from '../sim/early_war/alliance_update.js';
 import type { EdgeRecord } from '../map/settlements.js';
 import { getReceivingCapacityFraction } from './displacement_routing_data.js';
-import { DISPLACEMENT_KILLED_FRACTION, getDisplacementKillFraction, getFactionFleeAbroadFraction } from './displacement_loss_constants.js';
+import { getFactionFleeAbroadFraction } from './displacement_loss_constants.js';
 import { appendDisplacementEvent, UNKNOWN_CAUSER_BUCKET } from './displacement_event_log.js';
 import { getBilateralRoutingOrder } from './displacement_takeover.js';
 import { recordCivilianDisplacementCasualties } from './displacement_state_utils.js';
@@ -26,10 +26,22 @@ import { computeSupplyReachability } from './supply_reachability.js';
 // lane (DA1, 2026-11-13) fed them the campaign's own OSID front and supply.
 /** Consecutive turns under front pressure without supply before the siege trigger fires. */
 export const UNSUPPLIED_PRESSURE_TURNS = 3;
-/** Share of the held population leaving per turn once the siege trigger fires. */
-export const UNSUPPLIED_DISPLACEMENT_FRACTION = 0.05;
-/** Share of the held population leaving per turn while the municipality is encircled. */
-export const ENCIRCLEMENT_DISPLACEMENT_FRACTION = 0.10;
+/**
+ * Share of the holder's own people leaving per turn (week) once the siege trigger fires.
+ * DA1 P3 calibration (Historian seat, 2026-11-13): after the 1992 departures (which the
+ * takeover writer books), outflow from besieged pockets ran about 0.05-0.2% a week:
+ * Srebrenica's 8,000-9,000 UNHCR evacuees of spring 1993 (Krstić TJ ¶19) average about
+ * 0.1% a week over the siege; government-held Sarajevo about 0.05-0.1% a week after 1992
+ * (UNCOE S/1994/674/Add.2 Annex VI; Tabeau, Galić demographic report 2002). The dormant
+ * 5% (and 10% encircled) per week were 50-500 times higher than any source supports.
+ */
+export const UNSUPPLIED_DISPLACEMENT_FRACTION = 0.001;
+/**
+ * Same rate while encircled. Sources show encirclement traps people rather than draining
+ * them (Goražde, Srebrenica, Bihać and East Mostar all grew from refugee inflow), so the
+ * two triggers do not add: the rate is the larger of the two, never their sum.
+ */
+export const ENCIRCLEMENT_DISPLACEMENT_FRACTION = 0.001;
 // The breach trigger (3% per turn after persistent front breaches) was removed in DA1: it
 // read `front_pressure`, which no campaign writes (legacy edge keys), and capture-driven
 // displacement already has one writer, `displacement_takeover.ts`.
@@ -521,14 +533,6 @@ export function resolvePressingFactions(
 }
 
 /**
- * Kill fraction for a people displaced by `causer` (P1a). An unrecorded causer is not a
- * faction, so it takes the plain default rather than falling into a faction-specific rate.
- */
-function killFractionForCauser(displaced: FactionId, causer: FactionId): number {
-    return causer === UNKNOWN_CAUSER_BUCKET ? DISPLACEMENT_KILLED_FRACTION : getDisplacementKillFraction(displaced, causer);
-}
-
-/**
  * Split `amount` across causer weights: floor shares in the given order, remainder to
  * the last causer, so the parts always sum to `amount`. Deterministic.
  */
@@ -669,11 +673,11 @@ export function updateDisplacement(
         const reasons: string[] = [];
         let fraction = 0;
         if (unsuppliedTurns >= UNSUPPLIED_PRESSURE_TURNS) {
-            fraction += UNSUPPLIED_DISPLACEMENT_FRACTION;
+            fraction = Math.max(fraction, UNSUPPLIED_DISPLACEMENT_FRACTION);
             reasons.push(`unsupplied_pressure_${unsuppliedTurns}_turns`);
         }
         if (encircled) {
-            fraction += ENCIRCLEMENT_DISPLACEMENT_FRACTION;
+            fraction = Math.max(fraction, ENCIRCLEMENT_DISPLACEMENT_FRACTION);
             reasons.push('encircled');
         }
         if (fraction <= 0) continue;
@@ -684,18 +688,25 @@ export function updateDisplacement(
         const munPop = munSids.reduce((s, sid) => s + (popOf.get(sid) ?? 0), 0);
         const holderPop = holderSids.reduce((s, sid) => s + (popOf.get(sid) ?? 0), 0);
         const heldRemaining = munPop > 0 ? Math.floor((remainingPopulation * holderPop) / munPop) : remainingPopulation;
+        // DA1 P3: only the holder's own people leave under siege. Sources do not attribute a
+        // pocket's minority leaving (Serbs leaving government-held Sarajevo or Goražde) to
+        // the besieger; those 1992 departures are booked by the takeover writer.
+        // SC2: without a census entry the share uses the national sums (tagged).
+        const { split: heldByPeople, nationalFallback } =
+            splitDisplacedByEthnicityWithSource(munId, heldRemaining, population1991ByMun);
+        if (nationalFallback) reasons.push(CENSUS_FALLBACK_NATIONAL_REASON);
+        const heldPeople = heldByPeople[holder as 'RBiH' | 'RS' | 'HRHB'] ?? 0;
 
-        let displacementAmount = Math.floor(heldRemaining * fraction);
+        let displacementAmount = Math.floor(heldPeople * fraction);
         // Phase 22: Sustainability collapse amplifies displacement
         if (state.displacement.sustainability_state?.[munId]?.collapsed ?? false) {
             displacementAmount = Math.floor(displacementAmount * COLLAPSE_DISPLACEMENT_MULTIPLIER);
             reasons.push('sustainability_collapsed');
         }
-        displacementAmount = Math.min(displacementAmount, heldRemaining);
+        displacementAmount = Math.min(displacementAmount, heldPeople);
         if (displacementAmount <= 0) continue;
 
-        // SC1: the causer is the pressing side, not the holder. It also keys the kill
-        // fraction (P1a), whose documented meaning is "X displaced by Y".
+        // SC1: the causer is the pressing side, not the holder.
         const causerShares = splitAmountByCauser(
             displacementAmount,
             resolvePressingFactions(state, munId, holder, new Set(munSids), frontEdges).causers
@@ -712,30 +723,22 @@ export function updateDisplacement(
                 dominantAmount = share.amount;
             }
             const causerFid: FactionId = share.faction;
-            // SC2: without a census entry the split uses the national sums (tagged),
-            // never "all of it is Bosniak", and goes through the same killed / fled rules.
-            const { split: byFaction, nationalFallback } =
-                splitDisplacedByEthnicityWithSource(munId, share.amount, population1991ByMun);
-            if (nationalFallback && !reasons.includes(CENSUS_FALLBACK_NATIONAL_REASON)) {
-                reasons.push(CENSUS_FALLBACK_NATIONAL_REASON);
-            }
+            // DA1 P3: people leaving a siege are not killed by leaving; the expulsion kill rate
+            // (P1a) does not apply. Deaths in place from shelling, sniping and starvation are
+            // a separate quantity this path does not model. Flight abroad keeps its rate.
+            const byFaction: Record<FactionId, number> = { RBiH: 0, RS: 0, HRHB: 0 };
+            byFaction[holder] = share.amount;
             const routable: Record<FactionId, number> = { RBiH: 0, RS: 0, HRHB: 0 };
             const killedByFac: Record<FactionId, number> = { RBiH: 0, RS: 0, HRHB: 0 };
             const fledByFac: Record<FactionId, number> = { RBiH: 0, RS: 0, HRHB: 0 };
-            for (const fid of CANONICAL_FACTIONS) {
-                const n = byFaction[fid as 'RBiH' | 'RS' | 'HRHB'] ?? 0;
-                routable[fid] = Math.floor(n * (1 - killFractionForCauser(fid, causerFid)) * (1 - getFactionFleeAbroadFraction(fid)));
-                killedByFac[fid] = Math.floor(n * killFractionForCauser(fid, causerFid));
-                fledByFac[fid] = Math.floor(n * getFactionFleeAbroadFraction(fid));
-                routableByPeople[fid] += routable[fid];
-            }
+            fledByFac[holder] = Math.floor(share.amount * getFactionFleeAbroadFraction(holder));
+            routable[holder] = share.amount - fledByFac[holder];
+            routableByPeople[holder] += routable[holder];
             lostAmount += share.amount - (routable.RBiH + routable.RS + routable.HRHB);
 
             pushDisplacementEventLogFromMun(state, munId, settlements, byFaction, currentTurn, routable, causerFid, killedByFac, holderSidSet);
-            for (const fid of CANONICAL_FACTIONS) {
-                if (killedByFac[fid] > 0 || fledByFac[fid] > 0) {
-                    recordCivilianDisplacementCasualties(state, fid, killedByFac[fid], fledByFac[fid]);
-                }
+            if (fledByFac[holder] > 0) {
+                recordCivilianDisplacementCasualties(state, holder, 0, fledByFac[holder]);
             }
         }
 
