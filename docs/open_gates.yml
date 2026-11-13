@@ -32,11 +32,54 @@
 #   npm run gates                           prints the currently-open rows
 
 version: 1
-updated: 2026-11-08
+updated: 2026-11-13
 
-lanes: [R1, R2, R3, R4, R5, R6, R7, R8, R9, RC, RD, DC, RE, REPO]
+lanes: [R1, R2, R3, R4, R5, R6, R7, R8, R9, RC, RD, DC, RE, RF, REPO]
 
 gates:
+  # ── RF — pre-freeze fidelity pass (BC14-BC19 in MASTER_ROADMAP §4.1; orchestrator 2026-11-13) ──
+
+  - id: RF-CALIBRATION-RESIGNOFF
+    lane: RF
+    title: Calibration re-signed after the last RF merge
+    status: open
+    kind: acceptance
+    opened: 2026-11-13
+    blocks: [R8, R9]
+    evidence_required: >
+      A calibration-master entry for the final RF source showing the four checkpoints
+      re-scored against the current painted files with tools/verify_checkpoints.cjs and no
+      checkpoint below main's 712/711/711/710 (a cell loss only by a recorded orchestrator
+      ruling); guards intact (Farz, enclave); 0 consistency failures; strict engine-health
+      gate PASS on the 188-week run; baseline manifest and fingerprint re-pinned with the
+      reason; and live = headless re-measured, 0 cells differing for RBiH, RS and HRHB as
+      player.
+    evidence_path: null
+    source: docs/plans/MASTER_ROADMAP.md
+    notes: >
+      Main stands at 712/711/711/710 after #583 (Apr 1995 711 accepted by the orchestrator).
+      Each RF item (BC14-BC19) re-measures on top of the one before it; this gate closes only
+      after the last one lands or is parked. Live = headless was not re-measured for the
+      stance bundle (SE8 in the out-of-scope register).
+
+  - id: RF-ENGINE-FREEZE
+    lane: RF
+    title: Engine freeze before qualifying R8 campaigns
+    status: open
+    kind: acceptance
+    opened: 2026-11-13
+    blocks: [R8, R9]
+    evidence_required: >
+      Every RF item merged, parked with an archive tag, or declined, each recorded in the
+      roadmap §4.1 register; RF-CALIBRATION-RESIGNOFF closed; one named commit recorded as
+      the frozen source in the roadmap; and the owner told that from that commit a
+      calibration-moving change needs an owner OK.
+    evidence_path: null
+    source: docs/plans/MASTER_ROADMAP.md
+    notes: >
+      R8 dry runs before the freeze are allowed and never count as qualifying. RF-5 (HVO-ARBiH
+      war, BC18) needs an owner decision before it can be merged or declined.
+
   # ── RD — Dayton settlement and end map (closed, owner 2026-11-07) ───────────────────
 
   - id: RD-PACKAGE-KEYWORD-MATCH
@@ -211,7 +254,8 @@ gates:
   - id: DC-CONFERENCE-REDESIGN
     lane: DC
     title: Dayton conference redesign lands on the RD end-map contract
-    status: open
+    status: closed
+    closed: 2026-11-12
     kind: acceptance
     opened: 2026-11-07
     blocks: [R8]
@@ -220,9 +264,13 @@ gates:
       through applyPeaceSettlement; the player-agency items in the RD handoff (held enclave,
       protected ground, the decliner's eight weeks) decided with their panels; 188w pins
       intact or owner re-pinned.
-    evidence_path: null
+    evidence_path: docs/plans/2026-11-08-dc-dayton-conference-plan.md
     source: handoffs/20261107_dayton_end_map_to_conference.md
     notes: >
+      Closed with the DC lane: merged as #560 (4a67bd516) on 2026-11-12; the roadmap register
+      records every DC item done (Codex handoff CL-055) and 188w pins intact. Corrected here
+      by the integration steward; the roadmap row was already closed.
+      Earlier note: >
       Codex owns the plan (Dragon: F:/AWWV-worktrees/.dayton-design/DAYTON_CONFERENCE_IMPLEMENTATION_PLAN.md).
       Codex should split this into the plan's own gates when the plan lands in the repo.
 
@@ -512,19 +560,24 @@ gates:
   - id: REPO-CANON-PROPAGATION
     lane: REPO
     title: Stale canon propagation backlog
-    status: open
+    status: closed
+    closed: 2026-11-13
     kind: propagation
     opened: 2026-03-28
     blocks: []
     evidence_required: >
-      Each of the ten recorded mechanical changes either propagated into the Systems Manual
-      under Pyrrhic-panel sign-off, or explicitly retired as superseded.
-    evidence_path: null
+      Each of the recorded mechanical changes either propagated into the Systems Manual,
+      or explicitly retired as superseded.
+    evidence_path: docs/CANON_PROPAGATION_NEEDED.md
     source: docs/CANON_PROPAGATION_NEEDED.md
     notes: >
-      Open since 2026-03-28 and untouched since. Canon edits require panel sign-off, so this
-      cannot be discharged as routine doc maintenance. Recorded here so it stops being
-      invisible; it does not gate 1.0.
+      Closed 2026-11-13 by the integration steward. All fourteen recorded changes were checked
+      against current code and written into the Systems Manual with current values; the file
+      records where each landed and what differed from the 2026-03-28 note. The text applied is
+      a description of shipped, unchanged behaviour (no code, data or calibration change).
+      Newly found stale canon (Engine Invariants §14.5, a pioneer-attacks paragraph, context.md)
+      is listed in the same file under "Still open"; the Engine Invariants item is panel-gated
+      and routed to the orchestrator.
 
   - id: REPO-ROADMAP-CONCISENESS
     lane: REPO
