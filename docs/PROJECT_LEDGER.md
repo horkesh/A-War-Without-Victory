@@ -9,6 +9,41 @@
   Compacted 2026-09-10: 1723 sections moved out, 62 kept live.
 -->
 
+## 2026-11-13 — Test-tooling leftovers (WT1-WT5, DC4, DC5, RT7, O2); evidence runs stop dirtying the tree
+
+Non-calibration; no `src/` or `data/` change, so the simulation is byte-identical to main by
+construction. Clears the register items left by #582 (worktree resolvers).
+
+- **WT1.** `tools/ui/pause_before_combat_probe.cjs` and `counter_visibility_probe.cjs` find
+  playwright/pngjs by walking up to the nearest `node_modules`, not `<repo>/node_modules`.
+- **WT2.** `tools/asset_worker/post/postprocess_assets.ts` and `mcp/server.ts` spawn tsx through
+  `resolveTsxCli` (`process.execPath` + CLI) instead of a bare `tsx` on PATH.
+- **WT4.** Stale `Run:` comments (`node node_modules/tsx/dist/cli.mjs`, `node_modules/.bin/tsx`)
+  now show `npx tsx` in 14 files under `tools/` plus `tests/cohesion_floor_vs_dissolution.test.ts`.
+  Historical reports and logs are left as written.
+- **WT5.** New `tests/run_execution_contract_resolution.test.ts` pins `run_execution_contract.mjs`
+  path resolution (walk-up from a nested worktree, nearest wins, fallback) and that every listed
+  test exists. The script itself ran end to end once from this worktree: 29 files / 293 tests
+  passed, non-incremental `tsc` exit 0.
+- **WT3.** The six real-child tests in `tests/vitest_balanced_receipts.test.ts` have a 120 s ceiling
+  (was 30 s) and a 60 s first-receipt wait (was 10 s); a hung child still fails.
+- **DC4.** The "125 steps" comment in `tests/war_phase_step_order.test.ts` now points at the
+  assertion (196) as the authority.
+- **DC5.** Writer: only `run_scenario.ts --map` (`copyFinalSaveToLatestRun`). Readers: about 15
+  real-save tests use it as a fixture, plus viewer/diagnostic tools, so untracking was rejected.
+  `sim:scenario:run:40w`, `40w:timed` and `188w` no longer pass `--map`; `sim:scenario:run:40w:map`
+  and `:default` do. Ownership doc row and ownership test updated. Verified: a 40w run from a clean
+  tree left `git status` free of `latest_run_final_save.json`.
+- **RT7.** New `tests/desktop_war_end_reveal_handlers.test.ts` runs the real `resolve-peace-plan`
+  and `resolve-dayton` handlers (sliced from `electron-main.cjs`) against the war-end replay
+  manifest reveal: full frames sent once, after the state; none on rejection, decline, retry or
+  no frames.
+- **O2.** Already covered by `tests/ui/operation_briefing_null_context_mount.test.ts` (#570); no change.
+
+Figures: tsc exit 0; affected files 8 / 42 tests pass; 40w run final hash `d26098607271f8c2`
+(no engine change; differs from the older `44375b6b1484e128` only through the #590 corps-name strings).
+Full local suite: see PR.
+
 ## 2026-11-13 — Startup snapshot re-baked for the Delić handover (#581 follow-up)
 
 #581 moved Halilović/Delić from week 60 to 61 in `apr1992_officers.json` but did not regenerate the
