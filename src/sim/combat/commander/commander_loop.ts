@@ -219,12 +219,15 @@ export function applyCommanderOutput(
     // 2. Mark this corps as AI-decided (so old formula bot skips it)
     corps.ai_decided = true;
 
-    // 3. Apply sector stances
+    // 3. Apply sector stances. A player-set OG stance is never overridden (the same rule
+    // evaluateSectorStances applies); it now survives sector rebuilds (sector_stance_carry.ts).
+    // Posture model option 2 gives the president no direct OG stance order, so no live
+    // path sets 'player' today: this keeps the rule true if one is added.
     const sectorLookup = state.military.corps_front_sectors;
     if (sectorLookup) {
         for (const stanceUpdate of output.sector_stances) {
             const sector = sectorLookup[stanceUpdate.sector_id];
-            if (sector) {
+            if (sector && sector.stance_source !== 'player') {
                 sector.sector_stance = stanceUpdate.stance as SectorStance;
                 sector.stance_source = 'bot';
             }
