@@ -490,6 +490,21 @@ function writeCanonicalCurrentState(sim, state, excludeSender, metadata, options
   } else {
     sendGameStateToRenderer(currentGameStateJson);
   }
+  publishLiveReplayManifestOnWarEnd(sim, state);
+}
+
+/**
+ * Fog of war ends with the war. Every live manifest sent during play withholds the
+ * all-sides casualty total; once the war is over (by a turn, a decision, a peace plan
+ * or Dayton, all of which pass through writeCanonicalCurrentState) the full frames go
+ * to the renderer. Sent after the state: the renderer stages the manifest before the
+ * state's loadSave runs (that path awaits a feature-flag IPC round trip first).
+ */
+function publishLiveReplayManifestOnWarEnd(sim, state) {
+  if (state?.meta?.game_over !== true || liveReplayManifestFrames.length === 0) return;
+  if (typeof sim.buildReplaySaveManifest !== 'function' || typeof sim.playerVisibleReplayManifestJson !== 'function') return;
+  const liveManifest = sim.buildReplaySaveManifest(liveReplayManifestFrames);
+  sendReplayManifestToRenderer(sim.playerVisibleReplayManifestJson(JSON.stringify(liveManifest), true));
 }
 
 async function loadStatePathIntoDesktop(filePath, excludeSender) {

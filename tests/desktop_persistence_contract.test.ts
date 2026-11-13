@@ -177,6 +177,45 @@ describe('desktop persistence contract', () => {
     expect(handler).toContain('loadStatePathIntoDesktop(result.filePaths[0], _event.sender)');
   });
 
+  // Codex review on #586: a war ended by a decision, peace plan or Dayton (not by
+  // advance-turn) must still reveal the replay's all-sides casualty total.
+  it('publishes the unmasked live replay manifest from the war-ending choke point', () => {
+    const source = readFileSync(resolve(process.cwd(), 'src/desktop/electron-main.cjs'), 'utf8');
+    const writer = extractFunctionSource(source, 'writeCanonicalCurrentState');
+    const publish = extractFunctionSource(source, 'publishLiveReplayManifestOnWarEnd');
+    const run = (state: unknown, frames: unknown[]) => {
+      const events: string[] = [];
+      const subject = runInNewContext(`(() => {
+        let liveReplayManifestFrames = frames;
+        const writeCanonicalCurrentState = ${writer};
+        const publishLiveReplayManifestOnWarEnd = ${publish};
+        return { writeCanonicalCurrentState };
+      })()`, {
+        frames,
+        getBaseDir: () => 'root',
+        currentGameStateJson: 'state-json',
+        persistCurrentStateSnapshots: () => { events.push('persist'); },
+        sendGameStateToRenderer: () => { events.push('state'); },
+        sendReplayManifestToRenderer: (json: string) => { events.push(`manifest:${json}`); },
+      }) as { writeCanonicalCurrentState: (sim: unknown, state: unknown) => void };
+      subject.writeCanonicalCurrentState({
+        writeOwedTerminationRecords: () => { events.push('owed'); },
+        buildReplaySaveManifest: (f: unknown[]) => ({ schema_version: 2, frame_count: f.length, frames: f }),
+        playerVisibleReplayManifestJson: (json: string, warOver: boolean) => `${warOver ? 'full' : 'masked'}:${json}`,
+      }, state);
+      return events;
+    };
+    const frame = { turn: 3, totalCasualties: 900 };
+    expect(run({ meta: { game_over: true } }, [frame])).toEqual([
+      'owed',
+      'persist',
+      'state',
+      `manifest:full:${JSON.stringify({ schema_version: 2, frame_count: 1, frames: [frame] })}`,
+    ]);
+    expect(run({ meta: { game_over: false } }, [frame])).toEqual(['persist', 'state']);
+    expect(run({ meta: { game_over: true } }, [])).toEqual(['owed', 'persist', 'state']);
+  });
+
   it('does not release replay or renderer state when imported-state autosave fails', async () => {
     const source = readFileSync(resolve(process.cwd(), 'src/desktop/electron-main.cjs'), 'utf8');
     const helper = extractFunctionSource(source, 'loadStatePathIntoDesktop');
