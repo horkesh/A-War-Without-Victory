@@ -51,9 +51,6 @@ export const ENCIRCLEMENT_DISPLACEMENT_FRACTION = 0.001;
 // removed 2026-11-13 (SC2): the no-census case now splits by the national 1991 sums and
 // uses the same killed / fled-abroad rules as the census path.
 
-// Phase 22: Sustainability collapse displacement multiplier
-const COLLAPSE_DISPLACEMENT_MULTIPLIER = 1.5; // 50% increase when municipality is collapsed
-
 /**
  * Build municipality → controlling faction set from OSID-keyed political_controllers.
  * OSID format: "op:municipality:slug". Returns map of munId → Set of factions with ≥1 OSID.
@@ -697,13 +694,11 @@ export function updateDisplacement(
         if (nationalFallback) reasons.push(CENSUS_FALLBACK_NATIONAL_REASON);
         const heldPeople = heldByPeople[holder as 'RBiH' | 'RS' | 'HRHB'] ?? 0;
 
-        let displacementAmount = Math.floor(heldPeople * fraction);
-        // Phase 22: Sustainability collapse amplifies displacement
-        if (state.displacement.sustainability_state?.[munId]?.collapsed ?? false) {
-            displacementAmount = Math.floor(displacementAmount * COLLAPSE_DISPLACEMENT_MULTIPLIER);
-            reasons.push('sustainability_collapsed');
-        }
-        displacementAmount = Math.min(displacementAmount, heldPeople);
+        // DA1 P4: the Phase 22 sustainability-collapse multiplier (x1.5) is no longer read
+        // here. `sustainability_state` runs on legacy settlement edges and marks 109 of 110
+        // municipalities collapsed every turn of a campaign, so the multiplier applied to
+        // every firing and no source supports it.
+        const displacementAmount = Math.min(Math.floor(heldPeople * fraction), heldPeople);
         if (displacementAmount <= 0) continue;
 
         // SC1: the causer is the pressing side, not the holder.
