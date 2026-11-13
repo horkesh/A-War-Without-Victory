@@ -86,6 +86,24 @@ function verdictGhostClassificationLabel(classification: GhostRecordClassificati
     }
 }
 
+/**
+ * Player-visible text of a recorded rupture receipt, by receipt id.
+ *
+ * The sim builder (`dynamic_section_builder.ts` RUPTURE_RECEIPTS) keeps its
+ * English summary untouched for the 40w hash and its tests; the Verdict screen
+ * renders the panel-approved EN/BCS copy instead (sensitive-copy lane panel,
+ * 2026-11-13, recorded in SENSITIVE_HISTORY_DESIGN_GATE.md §6). An unknown
+ * receipt id falls back to the builder's text so nothing recorded is hidden.
+ */
+const RUPTURE_RECEIPT_TEXT_KEYS: Readonly<Record<string, MessageKey>> = {
+    rupture_receipt_srebrenica_genocide_1995: 'verdict.record.srebrenicaGenocide',
+};
+
+export function ruptureReceiptText(receiptId: string, fallback: string): string {
+    const key = RUPTURE_RECEIPT_TEXT_KEYS[receiptId];
+    return key ? t(key) : fallback;
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 // Outcome Class & Condemnation Helpers (exported for testing)
 // ═══════════════════════════════════════════════════════════════════════════
@@ -701,7 +719,7 @@ export function VerdictScreen({ onLoadSaveState, onLoadSaveError }: VerdictScree
                             daytonResult={verdict.dayton_result}
                         />
                     ) : (
-                        <SurfaceEmpty title="No verdict data for this faction." />
+                        <SurfaceEmpty title={t('verdict.record.noFactionData')} />
                     )}
                 </div>
                         </section>
@@ -718,15 +736,15 @@ export function VerdictScreen({ onLoadSaveState, onLoadSaveError }: VerdictScree
                     <section className={`rounded-md border border-red-400/35 bg-[#1a1316] px-6 py-5 sm:block ${mobileSectionClass('report')}`}
                              data-awwv-mobile-section="report"
                              data-awwv-rupture-receipts={ruptureReceipts.length}>
-                        <div className="mb-3 font-mono text-[13px] font-semibold uppercase tracking-[0.16em] text-red-200">
-                            Historical Record
-                        </div>
+                        <h4 className="m-0 mb-3 text-[18px] font-semibold text-red-200">
+                            {t('verdict.record.heading')}
+                        </h4>
                         <ul className="m-0 flex list-none flex-col gap-3 p-0">
                             {ruptureReceipts.map((r) => (
                                 <li key={r.id} className="max-w-[62rem] text-[17px] leading-relaxed text-[#ddd1b3]"
                                     data-awwv-rupture-receipt="true"
                                     data-awwv-rupture-receipt-variant={r.variant}>
-                                    {r.content}
+                                    {ruptureReceiptText(r.id, r.content)}
                                 </li>
                             ))}
                         </ul>
@@ -946,9 +964,9 @@ export function FactionReport({
                 {/* Condemnation Flags — shown only when present */}
                 {verdict.condemnation_flags && verdict.condemnation_flags.length > 0 && (
                     <div className="w-full max-w-[44rem] rounded-md border border-red-400/40 bg-[#1a1316] px-5 py-4 text-left">
-                        <div className="mb-2 font-mono text-[13px] font-semibold uppercase tracking-[0.16em] text-red-200">
+                        <h4 className="m-0 mb-2 text-[18px] font-semibold text-red-200">
                             {t('verdict.report.internationalCondemnation')}
-                        </div>
+                        </h4>
                         {verdict.condemnation_flags.map((flag: string, i: number) => (
                             <div key={i} className="text-[16px] leading-relaxed text-red-100">
                                 {formatCondemnationFlag(flag)}

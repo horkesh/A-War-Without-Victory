@@ -18,7 +18,7 @@ function makeView(): TurnAftermathView {
         dateLabel: '24 Jun 1992',
         playerFaction: 'RBiH',
         headline: 'Neto teritorijalni dobitak: +1 OSID-a.',
-        narrativeLine: 'Sedmica zavrsava osvojenim prostorom, ali knjiga troška jos odreduje cijenu napredovanja.',
+        narrativeLine: 'Sedmica zavrsava osvojenim prostorom, ali knjiga troška još odreduje cijenu napredovanja.',
         tone: 'gain',
         territory: {
             friendlyNet: 1,
@@ -135,7 +135,7 @@ describe('TurnAftermathModal localization', () => {
 
         expect(screen.getByText('Posljedice poteza')).toBeTruthy();
         const closeReport = screen.getByTestId('turn-aftermath-close');
-        expect(closeReport.textContent).toBe('Zatvori izvjestaj');
+        expect(closeReport.textContent).toBe('Zatvori izvještaj');
         fireEvent.click(closeReport);
         expect(onClose).toHaveBeenCalledOnce();
         expect(screen.getByText('Teritorija')).toBeTruthy();

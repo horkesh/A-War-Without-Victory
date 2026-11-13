@@ -4,3 +4,4 @@ export declare function renderAliasEntryLines(indent: string): string[];
 export declare function renderSetupFilesLine(indent: string): string;
 export declare function resolveRootModules(rootDir: string, anchorPackage?: string): string;
 export declare function resolveVitestCli(rootDir: string): string;
+export declare function resolveTsxCli(rootDir: string): string;

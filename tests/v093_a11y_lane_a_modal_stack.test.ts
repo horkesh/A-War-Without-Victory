@@ -4,7 +4,7 @@
  *
  * Per `docs/40_reports/audits/20260506_V093_A11Y_PHASE_0_PANEL.md` Lane A
  * acceptance criteria C-A1..C-A8. Pins the canonical `<Modal>` wrapper's
- * a11y contract and audits each of the 12 migrated modals.
+ * a11y contract and audits each of the 11 migrated modals (GameOverModal retired in surface step 5, 2026-11-13).
  *
  * Sensitive-history compliance: Ring 1, faction-agnostic, no §6 surface.
  */
@@ -16,7 +16,7 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { Modal } from '../src/ui/shared/Modal';
 
-// Absolute paths of the 12 migrated modals (per Phase 0 audit §2.1 + Lane A
+// Absolute paths of the 11 migrated modals (per Phase 0 audit §2.1 + Lane A
 // scope). AdvanceTurnModal lives under `warroom/`.
 const MIGRATED_MODAL_FILES: ReadonlyArray<{ name: string; relPath: string; expectedLabelledBy: string }> = [
     { name: 'RecruitmentModal', relPath: 'src/ui/map/components/RecruitmentModal.tsx', expectedLabelledBy: 'recruitment-title' },
@@ -27,7 +27,6 @@ const MIGRATED_MODAL_FILES: ReadonlyArray<{ name: string; relPath: string; expec
     { name: 'OperationBriefingModal', relPath: 'src/ui/map/components/OperationBriefingModal.tsx', expectedLabelledBy: 'operation-briefing-title' },
     { name: 'AttackConfirmation', relPath: 'src/ui/map/components/AttackConfirmation.tsx', expectedLabelledBy: 'attack-confirmation-title' },
     { name: 'SidePickerOverlay', relPath: 'src/ui/map/components/SidePickerOverlay.tsx', expectedLabelledBy: 'side-picker-title' },
-    { name: 'GameOverModal', relPath: 'src/ui/map/components/GameOverModal.tsx', expectedLabelledBy: 'game-over-title' },
     { name: 'PeacePlanModal', relPath: 'src/ui/map/components/PeacePlanModal.tsx', expectedLabelledBy: 'peace-plan-title' },
     { name: 'DaytonNegotiationModal', relPath: 'src/ui/map/components/DaytonNegotiationModal.tsx', expectedLabelledBy: 'dayton-negotiation-title' },
     { name: 'EventDecisionModal', relPath: 'src/ui/map/components/EventDecisionModal.tsx', expectedLabelledBy: 'event-decision-title' },
@@ -50,7 +49,7 @@ describe('v0.9.3 a11y Lane A — Modal stack accessibility baseline', () => {
         expect(html).toContain('aria-modal="true"');
     });
 
-    it('T2 — All 12 migrated modals declare ariaLabelledBy with a matching id token in the same source file', () => {
+    it('T2 — All 11 migrated modals declare ariaLabelledBy with a matching id token in the same source file', () => {
         for (const { name, relPath, expectedLabelledBy } of MIGRATED_MODAL_FILES) {
             const src = readSrc(relPath);
             // ariaLabelledBy is passed as a prop to <Modal>.
@@ -200,7 +199,7 @@ describe('v0.9.3 a11y Lane A — Modal stack accessibility baseline', () => {
         expect(htmlNoDesc).not.toContain('aria-describedby');
     });
 
-    it('T7 — None of the 12 migrated modal files contains a <div onClick=...> clickable-div anti-pattern', () => {
+    it('T7 — None of the 11 migrated modal files contains a <div onClick=...> clickable-div anti-pattern', () => {
         // Static-source guard. We accept <Modal onClick=...> on Modal itself
         // (the wrapper handles backdrop / panel-internal stopPropagation),
         // and <button onClick=...>, but reject <div ...onClick=...>.

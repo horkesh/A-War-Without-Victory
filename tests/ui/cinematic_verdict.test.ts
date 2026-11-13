@@ -113,7 +113,7 @@ describe('CinematicVerdict', () => {
     it.each([
         ['record', 'Filed finding'],
         ['grave', 'Grave finding'],
-        ['rupture', 'Locked condemnation'],
+        ['rupture', 'Permanent condemnation'],
     ] as const)('renders the %s cost signal as player-facing copy', (severity, label) => {
         const html = renderToStaticMarkup(createElement(CinematicVerdict, {
             verdict: makeVerdict(),

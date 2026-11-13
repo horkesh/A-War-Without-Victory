@@ -888,7 +888,7 @@ describe('generateChronicleEntries', () => {
         expect(text).toContain('Bitka za');
         expect(text).toContain('Talas raseljavanja');
         expect(text).toContain('312th Brigade formirana');
-        expect(text).toContain('305th Brigade unistena');
+        expect(text).toContain('305th Brigade uništena');
         expect(text).toContain('Vitez Relief zakljucena');
         expect(text).toContain('Historija je vodila vlastitu knjigu');
         expect(text).not.toMatch(/\b(?:Battle of|Displacement wave|formed|destroyed|Officer of the Week|History kept its own ledger|friendly casualties|objectives held at close|attacks|stars)\b/);

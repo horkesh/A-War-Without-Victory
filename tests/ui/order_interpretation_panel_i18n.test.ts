@@ -103,7 +103,7 @@ describe('OrderInterpretationPanel i18n', () => {
         const copy = document.body.textContent ?? '';
 
         expect(screen.getByText(authoredReason)).toBeTruthy();
-        expect(copy).toContain('TUMACENJA NAREDBI - 3 NA CEKANJU');
+        expect(copy).toContain('TUMAČENJA NAREDBI - 3 NA ČEKANJU');
         expect(copy).toContain('IZMIJENJENO');
         expect(copy).toContain('PRIGOVOR');
         expect(copy).toContain('ODBIJENO');

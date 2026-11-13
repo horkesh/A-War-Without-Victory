@@ -144,10 +144,10 @@ describe('paramilitary Presidential Inbox items', () => {
         const paramilitary = deriveInboxItems(state, null).find((item) => item.type === 'paramilitary_request');
         const copy = `${paramilitary?.title} ${paramilitary?.subtitle}`;
 
-        expect(copy).toContain('2 zahtjeva za rasporedivanje kod Bijeljina');
-        expect(copy).toContain('150 predvidenih civilnih zrtava');
-        expect(copy).toContain('2 dogadaja ratnih zlocina');
-        expect(copy).toContain('-4,03 medunarodni ugled');
+        expect(copy).toContain('2 zahtjeva za raspoređivanje kod Bijeljina');
+        expect(copy).toContain('150 predviđenih civilnih žrtava');
+        expect(copy).toContain('2 događaja ratnih zločina');
+        expect(copy).toContain('-4,03 međunarodni ugled');
         expect(copy).toContain('Procijenjena snaga 225');
         expect(copy).not.toMatch(/deployment request|projected civilian casualties|war crimes events|international standing|Estimated strength/i);
     });

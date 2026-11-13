@@ -1,4 +1,5 @@
-import { getActiveLocale, t, type Locale } from '../i18n';
+import { getActiveLocale, t, type Locale, type MessageKey } from '../i18n';
+import { enMessages } from '../i18n/messages.en';
 
 const SHORT_MONTHS_BY_LOCALE: Record<Locale, readonly string[]> = {
     en: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
@@ -49,8 +50,10 @@ export function formatCampaignWeekLabel(turn: number | null | undefined): string
 
 /**
  * Humanizes a turn label (e.g., "Turn 32") by replacing the raw counter with the calendar date.
+ * A save or state without a label yields an empty string rather than a crash in the toolbar.
  */
-export function formatTurnLabel(label: string): string {
+export function formatTurnLabel(label: string | null | undefined): string {
+    if (typeof label !== 'string' || label.length === 0) return '';
     const match = label.match(/Turn\s+(\d+)/i);
     if (!match) return label;
     const turn = parseInt(match[1], 10);
@@ -118,14 +121,67 @@ export function turnToISODate(turn: number): string {
 }
 
 /**
+ * BCS display names for the corps-level commands in `data/source/oob_corps.json`
+ * (S9, sensitive-copy lane 2026-11-13; historical forms ruled on by the Pyrrhic
+ * panel). The English value of each key equals the data `name`, which stays the
+ * English display and the saved value: the data and the save format are
+ * untouched, and only the BCS render changes. Nominative forms only.
+ */
+const CORPS_NAME_KEYS: Readonly<Record<string, MessageKey>> = {
+    arbih_general_staff: 'corps.name.arbih_general_staff',
+    arbih_1st_corps: 'corps.name.arbih_1st_corps',
+    arbih_2nd_corps: 'corps.name.arbih_2nd_corps',
+    arbih_3rd_corps: 'corps.name.arbih_3rd_corps',
+    arbih_4th_corps: 'corps.name.arbih_4th_corps',
+    arbih_5th_corps: 'corps.name.arbih_5th_corps',
+    vrs_main_staff: 'corps.name.vrs_main_staff',
+    jna_herzegovina_command: 'corps.name.jna_herzegovina_command',
+    vrs_1st_krajina: 'corps.name.vrs_1st_krajina',
+    vrs_2nd_krajina: 'corps.name.vrs_2nd_krajina',
+    vrs_drina: 'corps.name.vrs_drina',
+    vrs_east_bosnian: 'corps.name.vrs_east_bosnian',
+    vrs_herzegovina: 'corps.name.vrs_herzegovina',
+    vrs_sarajevo_romanija: 'corps.name.vrs_sarajevo_romanija',
+    hvo_main_staff: 'corps.name.hvo_main_staff',
+    hvo_southeast_herzegovina: 'corps.name.hvo_southeast_herzegovina',
+    hvo_central_bosnia: 'corps.name.hvo_central_bosnia',
+    hvo_northwest_bosnia: 'corps.name.hvo_northwest_bosnia',
+    hvo_tomislavgrad: 'corps.name.hvo_tomislavgrad',
+};
+
+let corpsIdByEnglishName: Map<string, string> | null = null;
+
+/** Corps id for a known corps, from its id or (when only the name is at hand) its English data name. */
+function knownCorpsId(name: string, id: string): string | null {
+    if (id && CORPS_NAME_KEYS[id]) return id;
+    if (name && CORPS_NAME_KEYS[name]) return name;
+    if (!name) return null;
+    corpsIdByEnglishName ??= new Map(
+        Object.entries(CORPS_NAME_KEYS).map(([corpsId, key]) => [enMessages[key], corpsId] as const),
+    );
+    return corpsIdByEnglishName.get(name) ?? null;
+}
+
+/** BCS name for a known corps-level command, or null (English, or not a known corps). */
+export function localizedCorpsName(name: string | null | undefined, id: string | null | undefined): string | null {
+    if (getActiveLocale() !== 'bcs') return null;
+    const corpsId = knownCorpsId((name ?? '').trim(), (id ?? '').trim());
+    return corpsId ? t(CORPS_NAME_KEYS[corpsId]) : null;
+}
+
+/**
  * Format a corps formation's display name.
  * Strips faction prefix and converts to title case if name === id.
+ * In BCS, a known corps-level command shows its historical BCS name.
  */
 export function formatCorpsDisplayName(
     name: string | null | undefined,
     id: string | null | undefined,
     fallback = 'This corps',
 ): string {
+    const localized = localizedCorpsName(name, id);
+    if (localized) return localized;
+
     const safeName = (name ?? '').trim();
     const safeId = (id ?? '').trim();
 

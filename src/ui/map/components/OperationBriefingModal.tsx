@@ -385,7 +385,7 @@ export function OperationBriefingModal({ isOpen, onClose, onLaunch, onPostpone, 
     const corpsLabel = getPlayerSafeCorpsName(
         operation.corps_name ?? null,
         operation.corps_id,
-        'This corps',
+        t('operationBriefing.corpsFallback'),
     );
 
     // These two derivations used to be useMemo hooks placed after the early return above.

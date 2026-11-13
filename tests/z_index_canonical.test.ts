@@ -61,7 +61,6 @@ const MIGRATED_FILES = [
   // OnboardingOverlay is the canonical first-run owner. See
   // `tests/ui/onboarding_persistence_replacement.test.ts` for the migrated
   // coverage.
-  'src/ui/map/components/GameOverModal.tsx',
   'src/ui/map/components/GlassPanel.tsx',
   'src/ui/map/components/LoadErrorToast.tsx',
   'src/ui/map/components/LoadingSkeleton.tsx',

@@ -243,13 +243,13 @@ describe('PeacePlanModal', () => {
         }));
 
         const modalText = document.body.textContent ?? '';
-        expect(modalText).toContain('Predlozeno: 6 apr 1992');
+        expect(modalText).toContain('Predloženo: 6 apr 1992');
         expect(screen.getByText('Odgovori drugih strana')).toBeTruthy();
-        expect(screen.getByText('Potrebna odluka predsjednistva')).toBeTruthy();
+        expect(screen.getByText('Potrebna odluka predsjedništva')).toBeTruthy();
         expect(screen.getByRole('button', { name: 'Prihvati plan' })).toBeTruthy();
         expect(screen.getByRole('button', { name: 'Pregledaj kasnije' })).toBeTruthy();
         expect(screen.getByRole('button', { name: 'Odbij plan' })).toBeTruthy();
-        expect(modalText).toContain('Neodreden institucionalni model');
+        expect(modalText).toContain('Neodređen institucionalni model');
         expect(modalText).toContain('Druge delegacije nisu objavile svoje stavove.');
         expect(modalText).not.toContain('federal_union_model');
         expect(modalText).not.toContain('conditional_accept');

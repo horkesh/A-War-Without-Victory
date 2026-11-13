@@ -325,9 +325,9 @@ describe('ArmyReservePanel elite commander identity', () => {
     render(React.createElement(ArmyReservePanel, { railSlot: 'primary' }));
 
     const detail = screen.getByTestId('army-reserve-request-presentation-req-arbih-sparse');
-    expect(detail.textContent).toContain('Komanda koja trazi1st Corps');
+    expect(detail.textContent).toContain('Komanda koja traži1. korpus');
     expect(detail.textContent).toContain('Sektor primateljNije prijavljeno');
-    expect(detail.textContent).toContain('Predlozena snagaNije prijavljeno');
+    expect(detail.textContent).toContain('Predložena snagaNije prijavljeno');
     expect(detail.textContent).toContain('SpremnostNije prijavljeno');
     expect(detail.textContent).toContain('Vrijeme putovanjaNije prijavljeno');
   });

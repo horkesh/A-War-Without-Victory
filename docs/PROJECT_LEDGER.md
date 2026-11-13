@@ -9,6 +9,125 @@
   Compacted 2026-09-10: 1723 sections moved out, 62 kept live.
 -->
 
+## 2026-11-13 — Displacement attribution (SC1-SC3) and the ledger's side column
+
+Signed by the owner-delegated **eight-seat bright-line panel** (Historian, calibration,
+Engine/systems, Red-team, Game Designer, Narrative Designer, Canon Compliance, War-or-Game),
+unanimous GO in round 3. Record: `SENSITIVE_HISTORY_DESIGN_GATE.md` §1, §2a, §4, §6; report
+`docs/40_reports/implemented/20261113_DISPLACEMENT_ATTRIBUTION_PANEL.md`.
+
+- **Finding.** The siege/encirclement/breach path in `updateDisplacement` never fires in a campaign.
+  It gets legacy `S…` edges while control is keyed by `op:` OSIDs, so it sees 0 front edges, and
+  `front_segments` is empty. `applyDisplacementFromFlips` is unreachable as well. Live `caused_by`
+  comes only from takeover (the side that took or held control) and paramilitary sweeps (the sweeping
+  side). Siege harm is not modelled.
+- **SC1.** The dormant pressure path books the pressing side: the holder is whoever controls the
+  municipality; causers must be at war with it; the cause is shared pro rata over front contacts, then
+  enemy-held OSIDs; otherwise "not recorded", booked explicitly (`appendDisplacementEvent(..., {
+  causerUnrecorded })`). It never books the holder and never guesses. The kill fraction is keyed on
+  the same causer.
+- **SC2.** A missing census entry splits by the national 1991 sums of the census file (pinned by a
+  test, tagged `census_fallback_national`). The flips path books its loss to the losing side's people
+  only. `LOST_POPULATION_FRACTION` and the "all lost = killed Bosniaks" fallback are gone.
+- **SC3.** `pushDisplacementEventLogFromMun` allocates each people's figures from its own counts. The
+  two ledger "Killed" figures now agree by construction (Engine Invariants §14.8a item 12).
+- **Ledger.** The second table is back as "Displaced or killed, by side controlling the area", with
+  columns "Side controlling the area" and "People" (BCS "Strana koja je kontrolisala područje" /
+  "Narod"). A scope note sits above the rows: siege and shelling harm is not counted, so the figures
+  understate the harm done by besieging forces; 1991 Yugoslavs and others are counted with Bosniaks.
+- **Measured, each change alone.** 40w `44375b6b1484e128` and 188w `2a2bb1ff54155f00` (both identical
+  to the unchanged-main baseline). Checkpoints 712/711/712/710; engine health gate PASS. Byte-identical:
+  aggregates, `civilian_casualties`, `civilian_casualties_caused`, international standing,
+  condemnation flags, fired events. Killed 2,706 / 33,903 / 3,288 in both fields; no same-side rows.
+  The P4 UI change was run at 40w only: hash unchanged.
+- **Open.** `hanpijesak` vs `han_pijesak` census key. Pressure-path revival is its own lane, under
+  binding conditions in the §6 record. HVO-against-Bosniaks realism FAIL (`REAL_WAR_MASTER.md`).
+
+## 2026-11-13 — Canon/data fixes S10 (NamedPhase count) and S11 (Delić tenure week)
+
+**S10, docs only.** `Phase_Specifications_v0_9_0.md` said the War-phase pipeline had 151 NamedPhase
+steps. The real count is **195** at merge time (193 when measured; +2 from the stance-matters steps merged from main) (`warPhases` in `src/sim/turn_phases/war_phases.ts`, pinned by
+`tests/war_phase_step_order.test.ts`; the 22 `earlyWarPhases` are a separate list). Corrected the
+spec and the two live repeats in `GAME_STATE_RATING_MASTER.md` ("151 steps", "151-step war
+pipeline"). Left as dated history: older ledger/report/napkin entries that quote the count at the time.
+
+**S11, sim data.** Rasim Delić was appointed ABiH Commander of the Main Staff by the Presidency's
+decision of **8 June 1993** (ICTY Halilović/Delić filings; web cross-check; Halilović stayed as Chief
+until 1 November 1993). Scenario week 0 is 6 April 1992, so 8 June 1993 falls in **week 61**
+(7–13 June); week 60 begins 31 May. Moved the handover from 60 to 61 in every place that encodes it:
+`data/scenarios/army_co_roster.json` (`arbih_delic.tenure_start`),
+`data/scenarios/officers/apr1992_officers.json` (Halilović `available_until_turn`, Delić
+`available_from_turn`), and the two `tools/claude_plays_vrs/personas` files; `tests/d1_persona_infrastructure.test.ts`
+T6 now probes week 61. `FORAWWV.md:307` says "Delić (w60+)"; left untouched (panel-gated, and "w60+"
+is not contradicted by 61).
+
+**Figures (apr1992_definitive_188w, 40w and 188w, run in this worktree).** Checkpoints
+**712 / 711 / 712 / 710**, identical to main; `verify_checkpoints` guard intact (9/9 enclave cells,
+Farz 4/4, cascade 49); engine health gate PASS at both horizons (188w matched 710, K:W 3.696;
+40w matched 712, K:W 3.858); 40w structural fingerprint `bc629e89a585dfde` unchanged. Against a main
+baseline run, `control_delta`, `formation_delta`, `activity_summary`, `weekly_report` and `end_report`
+are byte-identical; only `final_save` and `run_summary` differ, by the one-turn handover (Halilović
+`turns_in_command` 59→60, Delić 128→127, the turn-60 army CO decision trace now Halilović's).
+188w `final_state_hash` `2a2bb1ff54155f00`; 40w `44375b6b1484e128` (the Delić handover is at turn 61, past the 40w horizon).
+
+**Re-bless.** `data/derived/scenario/baselines/manifest.json` (188w golden `final_save`/`run_summary`
+SHA256) re-blessed with `UPDATE_BASELINES=1`: the only drift is the intended one-turn officer handover
+shown above; no territory moved. `npm run test:baselines` green after.
+
+Gates: `npx tsc --noEmit` exit 0; 18 affected vitest files 302/302; docs guards 9/9.
+
+## 2026-11-13 — Test tooling: tsx and vitest/tsc CLIs resolve from a worktree without node_modules
+
+Test infrastructure and developer tooling only; no product, simulation, or calibration code changed.
+This closes the residue named in the 2026-11-12 entry below.
+
+- **One resolver.** `tools/test/vitest_shared_config.mjs` gains `resolveTsxCli(rootDir)`, built on the
+  existing `resolveRootModules` walk (first ancestor `node_modules` holding the package, as Node
+  resolves). Main checkout and CI: exactly `<root>/node_modules/tsx/dist/cli.mjs`, unchanged. A
+  worktree with no `node_modules` gets the main checkout's copy. Read-only; no links created or removed.
+- **Callers moved onto it.** Tests: `desktop_calibration_compare`, `operational_exterior_border_data`,
+  `presidential_cadence_cli_provenance`, `sensitive_history_canon_gate_audit_strict_gate`. Tools:
+  `desktop_bundle_sim.mjs`, `diagnostics/ci_structural_fingerprint.cjs` (now async; dynamic import of
+  the ESM helper), `engineering/canon_check.ts` (tsx + vitest), `scenario_runner/run_scenario_with_preflight.ts`
+  (so every `sim:scenario:run:*` works from a worktree), `test/run_execution_contract.mjs` (vitest + tsc).
+  `tests/test_discovery_contract.test.ts` pins `resolveTsxCli` for both layouts.
+- **Not changed.** `.github/workflows/baseline-pins.yml` (CI has a local `node_modules`), `Run:` usage
+  comments in tools, `tests/cpu_profile_analysis.test.ts` (builds a URL string only), and the
+  `require(path.join(repo,'node_modules',...))` Playwright/pngjs probes under `tools/ui/` (packages, not
+  the tsx binary; listed as a follow-up).
+
+Gates: before, in a no-node_modules worktree, the 6 affected files gave 5 failed files / 17 failed
+tests (8 passed of 25). After, 7/7 files and 39/39 tests pass, including `desktop_sim_bundle_smoke`.
+Run from the main checkout with its own `node_modules`: 5/5 files, 36/36. `npm run ci:structural-fingerprint:check`
+from the worktree exit 0 (fingerprint `bc629e89a585dfde` matches). `npx tsc --noEmit` exit 0. Full `npm run test:vitest` from the worktree exit 0 (sharded files all
+passed, 85 serial files / 1594 tests passed; only the deliberate `tests/fixtures/vitest_balanced` controls are red).
+
+## 2026-11-13 — Sensitive copy: Humanitarian Ledger, Verdict record, BCS corps names, replay restyle
+
+Player-visible copy only (EN + BCS) plus one sim-side string; no simulation behaviour, data or save
+format changed. Signed by an owner-delegated five-seat Pyrrhic panel (historian, narrative-design,
+canon compliance, red-team, game-design), unanimous GO after one amendment. Record:
+`SENSITIVE_HISTORY_DESIGN_GATE.md` §1, §4, §6; report
+`docs/40_reports/implemented/20261113_SENSITIVE_COPY_LANE_PANEL.md`.
+
+- **Humanitarian Ledger (R2').** People labels through i18n. The responsible-side column is
+  withdrawn: the engine books siege displacement to the side holding the besieged town, so the
+  column would have named the defender as perpetrator of the besieger's victims. The second table is
+  "Displaced or killed, by people". Figures that include the killed say so. New note line: the
+  figures come from the campaign's simulation and do not describe the historical war.
+- **Verdict (R3).** "Historical record" heading; "No outcome data is available for this side.";
+  Srebrenica receipt reworded (names Bosnian Serb forces and the Bosniak victims; cites Krstić
+  IT-98-33-T and ICJ 2007) with one English source: `dynamic_section_builder.ts` summary equals the
+  i18n EN (parity test). Cost Ledger badges name commands, not peoples; "Permanent condemnation";
+  milestone column "This campaign".
+- **BCS corps names (S9).** `formatCorpsDisplayName` maps the 19 corps-level ids in `oob_corps.json`
+  to `corps.name.*` in BCS; EN keeps the data name.
+- **Replay scrubber (R8).** Command Surface style, 13 px floor, i18n; casualty and displaced figures
+  hidden because their readers read fields the engine never writes (always 0).
+- **Canon.** §1 Ring 1 rupture window corrected to the code (turn ≥ 160, no upper bound). §4 now binds
+  the Humanitarian Ledger and the receipt and adds: responsible party named as forces; a figure that
+  includes the killed says so; never a people as the responsible party; no false zero.
+
 ## 2026-11-12 — Test tooling: lockfile peers, worktree module resolution, .test.tsx discovery, runner timeout
 
 Test infrastructure only; no product, simulation, or calibration code changed.
@@ -14721,3 +14840,21 @@ From the posture-model out-of-scope register (lane C: S1–S6). PR #583. Each en
 - S5: retired the unreachable `stage-posture-order` IPC with its bridge, type and hook declarations. S6: `interpretStanceOrder` / `previewInterpretation` kept and documented (the op-directive objection copy mirrors that compliance model).
 - Farz guard: `farz_objective_gate.cjs` reads a Farz still executing or recovering at the last turn from the final save. It previously failed with every objective taken, because AARs exist only for closed operations. Same operation-owned capture standard; tests prove real failures still fail. Main and S2 are unchanged.
 - Final (`final_state_hash` `bcc1ad6fe64dc817`, official `sim:scenario:run:188w` byte-identical to the probe run): **712 / 711 / 711 / 710**; enclave and Farz guards intact; consistency 0; strict health PASS; `control_delta` and `formation_delta` identical to main. Baseline manifest re-blessed (final_save, weekly_report, run_summary, activity_summary, end_report, watched_operations). Live = headless not re-measured.
+
+## 2026-11-13 — Shell clean-up: review step 5 (UI)
+
+Step 5, the last step of `docs/40_reports/proposals/20261111_PLAYER_SURFACE_AND_AGENCY_REVIEW.md`. Items from the findings register (`F:/AWWV-coordination/crash_recovery_20261112/out_of_scope_findings.md`, lane A plus M2, O7-O12 and the recruitment-alerts notes). Branch `claude/step5-shell-d7ecfe` on main `bdb34c821`. Presentation and copy only: no engine, state, IPC or read-model change. The parked operation planner (`ops_modal/*`, `opsPlanning.*` strings) is untouched on purpose (owner, 2026-11-12).
+- R1 War Footing: the owner chose the President's Desk (2026-11-12). The Desk's right column has an "Open War Footing" button (BCS "Otvori ratnu privredu") with a one-line description. The Economy surface opens over the Desk on the `Z.MODAL` tier and Esc returns to the Desk. `EconomyPanel` is now lazy-loaded (`React.lazy` + `Suspense`), so it no longer sits in the entry chunk.
+- R2: `GameOverModal.tsx` deleted (never mounted; the verdict's fallback owns the end state) with `tests/ui/game_over_i18n.test.ts`. Its entries were removed from `modal_migration_3`, `z_index_canonical`, `v093_a11y_lane_a_modal_stack`, `records_surfaces_type_floor`, the `audio_action_hooks` game-over case and `tools/ui/records_surfaces_browser_proof.mjs`. The `game_over` sound cue now has no caller (it never played, because its only caller was not mounted).
+- R4: political and military faction names in `playerSafeText.ts` go through new `desk.faction.political.*` / `desk.faction.military.*` keys, and the convoy corridor label through `desk.faction.corridor`. English output is unchanged; BCS shows "Hrvatska Republika Herceg-Bosna", "Republika Bosna i Hercegovina" and "koridor pod kontrolom ARBiH".
+- R5 BCS diacritics: the three named strings are fixed, and a full sweep of `messages.bcs.ts` corrected about 490 strings written without č/ć/š/ž/đ (chronicle glosses, decision-room cards, wrapped slides, command-strain situations, inbox items and others). Ambiguous words were checked in context: "sto" (desk) and "vas"/"nas" (you, us) stay where correct. `opsPlanning.*` keys were left alone (parked planner). After #584 merged, the verdict scene and replay scrubber strings got the same spelling-only fix at the sensitive-copy session's request ("puknuće", "što", "čita", "Klizač"); the wording itself is unchanged.
+- M2 and O9-O12 copy: FormationDetail role and modifier names, CorpsFrontPanel commander assessments (existing `operationHistory.assessment.*` keys), ArmyReservePanel recall error, OOBSidebar "Main Staff" and "Ungrouped", OperationBriefingModal "This corps" all go through i18n. The ArmyReservePanel recall no longer passes an English reason into saved state; the engine writes its own receipt, as FormationDetail's recall already did. Live strings lose "CA" (now "Authority"), "OiC" (now "Commander"), "Lost: 1T 0A" (now "tanks / artillery"), "Schwerpunkt" (now "Main effort" / "Težište"), "N/A" (now "unreported" / "bez izvještaja") and ASCII "->" (now "→"). The duplicate Authorize label and the remaining "->"/"N/A" sit in the parked planner and stay as they are. The BCS toolbar's "ARMIJSKI HQ" and "RATNA MAPA" now match the War Room nav ("ŠTAB ARMIJE", "RATNA KARTA").
+- R6: `formatTurnLabel` returns an empty string for a missing label instead of throwing.
+- Toolbar: player-facing text in `PresidentialToolbar` is 13 px (was `text-xs`/12 px); the dev strip is unchanged.
+- S7: the cost-0 chip reads "No Authority spent" ("Bez trošenja autoriteta"), because a stance overrule costs other things (record, window, RS delay, Zagreb).
+- S8: already fixed on main by #567, which hides the War Room Inbox dossier while the Desk or the Command Surface is open. The stance session's screenshot came from a branch older than that. Verified in the render, both from the War Room and after visiting the map with the Inbox open; no code change.
+- O7/O8: `RecordsContent` sub-tabs and exclusion note use the surface gold (`#c9a75c`) instead of `amber-400`; the force-balance `toneClass` uses the surface text tones (`emerald-200`/`amber-200`/`red-200`). The simulation reads only the label and summary from that helper.
+- Tests: new `tests/ui/surface_step5_shell.test.ts` (Desk entry renders and calls its handler; lazy import; no GameOverModal; BCS faction names; diacritics and literal guards; formatTurnLabel; toolbar floor; chip; palette).
+- Rendered proof: `tools/ui/step5_shell_browser_proof.mjs` drives the dev map build through a real RBiH campaign at 2293×960 and 1280×720 in EN and BCS. Shots and `step5_report*.json` are in `F:/AWWV-coordination/surface_steps/step5/`. Every run shows the War Footing entry (16 px), the Economy surface opening over the Desk and Esc returning to it, the toolbar at 13 px minimum, and no Inbox over the Command Surface. No page errors. The BCS 1280×720 combination was rerun after a Vite reload caused by a mid-run source edit.
+- Gates: `npx tsc --noEmit` exit 0; focused 12 files / 208 tests green. `desktop:map:build` exit 0: entry chunk 2,968.99 kB against main `bdb34c821` at 2,971.86 kB (−2.87 kB), no chunk warning, EconomyPanel its own 7.24 kB chunk. Headless `sim:scenario:run:40w` matches main byte for byte on all 14 artifacts, `final_state_hash` `d01ef44601086ddf`; `run_meta.json` differs only in `git_commit`.
+- Seen, not changed: the 1992 event "Šta je Bosna?" renders as "Sta je Bosna?" in BCS (text in `data/scenarios/events/war_1992.json`, scenario data, so it belongs to a data lane); the `game_over` cue has no caller (the verdict surface should play it; that file belongs to the sensitive-copy session); `operationsPanel` and some event/decision strings still carry English loanwords ("docket-a", "stack trace"); and `opsPlanning.*` BCS strings keep their missing diacritics while the planner is parked.

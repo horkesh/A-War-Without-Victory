@@ -13,6 +13,7 @@ import { useIPC } from '../../desktop/useIPC';
 import { useGameStore } from '../../store/gameStore';
 import { t } from '../../i18n';
 import type { MessageKey } from '../../i18n';
+import { getPlayerSafeCorpsName } from '../../utils/playerSafeText';
 import { RELIEF_MORALE_PENALTY } from '../../../../sim/combat/order_interpretation.js';
 
 // Phase 3 interpretation event types only (not personnel events)
@@ -113,7 +114,7 @@ export function OrderInterpretationPanel({ gameState, playerFaction }: OrderInte
                             </span>
                             {event.corps_name && (
                                 <span className="text-[13px] text-text-secondary font-mono">
-                                    — {event.corps_name}
+                                    — {getPlayerSafeCorpsName(event.corps_name, null, event.corps_name)}
                                 </span>
                             )}
                         </div>
