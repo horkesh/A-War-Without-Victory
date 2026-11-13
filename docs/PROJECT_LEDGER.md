@@ -35,6 +35,9 @@ the full-suite workflow. They need no separate guard: the full-suite job runs on
 check, so a stale committed snapshot cannot reach main. Caveat: the guard is skipped when
 `relevant=false` (docs-only PRs), which cannot change snapshot inputs. `release.yml` rebuilds
 legitimately for packaging; a drift there is already caught earlier on the PR.
+Codex review (P2): `data/source/` (`settlements_initial_master.json`, `oob_corps.json`) feeds the snapshot
+build but was not in the change detector, so a source-only PR would have skipped the guard. Added
+`data/source/` to `PREFIXES` in `.github/scripts/detect-full-suite-changes.sh`.
 
 ## 2026-11-13 — Startup snapshot re-baked for the Delić handover (#581 follow-up)
 
