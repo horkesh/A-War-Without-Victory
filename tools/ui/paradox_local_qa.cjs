@@ -8351,7 +8351,9 @@ let result = null;
       faction: entry.faction,
       eventCount: entry.events.length,
       screenshots: entry.events.length,
-      finalState: entry.playtest.finalState,
+      // The Dayton sign-and-verdict segment ends the campaign, so it has no playtest final state.
+      finalState: entry.playtest?.finalState ?? null,
+      ...(entry.daytonVerdictEvidence ? { daytonVerdictEvidence: entry.daytonVerdictEvidence } : {}),
       consoleMessages: entry.consoleMessages.length,
     })),
   }, null, 2));
