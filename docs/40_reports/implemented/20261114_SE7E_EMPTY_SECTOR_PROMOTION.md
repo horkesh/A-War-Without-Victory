@@ -159,6 +159,14 @@ Main's w4 behaviour is kept unchanged. That is the existing T1 path letting a fu
   - A fully empty sector can take a frontless neighbour's own rear as a tier-0 donor; the frontless sector then waits for a later pass. Main does this at w4 (1st Drvar to Krupa), and v3 keeps it.
   - A frontless sector whose whole own pool is dug in also waits. Systems Manual §6.5 says empty reachable sectors "receive explicit reassignment intent"; that is still not fully met for these cases. It is narrowed here, not regressed.
 - **SE7E-f:** the validator reports missed reinforcement on some fully empty sectors that T1 doesn't relieve (`vrs_drina:3`, t58-62/77/93/96/99-100). Existing path, unchanged.
+- **Second case (orchestrator, from RF-AI2 #619): VRS 1st Krajina sector 0.** Diagnostic run 6: v3 merged locally with #619's head `ce4329a`; never pushed; `7c3f8f009ccb43d1`; checkpoints 712/705/706/698, the same as #619 alone.
+  - Consistency is 1: `sector:vrs_1st_krajina:0` at **t188 only**. Its 15-edge front (Melina, Bosanski Novi, Prijedor Ljubija/Maričke/Raljaš, Sanski Most Donja Kozica/Ostra Luka) is new at t188: no 1st Krajina sector had those front OSIDs at t187. The ARBiH 506th's Sana advance redrew it (Stari Majdan t185, Sanski Most t186, Ilidža t187).
+  - Its only own brigade is a disrupted reserve (2nd Banja Luka, 280 men). The validator's donors are front brigades of sibling sector 4.
+  - No movement-authority relief issued at t188 can arrive by t188, so no T1 rule closes this in the final save. v3 also does not borrow a sibling while the sector has an own pool.
+  - Registered:
+    - **SE7E-g:** a pool made up only of disrupted brigades should not block sibling relief. This matters only for gaps that last more than one turn.
+    - **SE7E-h:** the validator's fresh-gap rule counts only flips on the final turn, not fronts that did not exist on the previous turn.
+  - On main the same pattern appears at t186-187 (`rs_2nd_krajina_infantry` disrupted) and clears by t188.
 - **War-or-game realism items seen in run 2 that also exist on main:**
   - no re-launch gate for operations or probes below a 0.5 power ratio;
   - `bot_discretionary` A↔B shuttles;
