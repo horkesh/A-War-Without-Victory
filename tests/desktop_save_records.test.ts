@@ -3,7 +3,11 @@ import { mkdtemp, rm, utimes, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
-import { listSaveRecords, resolveSaveRecordPath } from '../src/desktop/save_records.cjs';
+import { readFileSync, readdirSync } from 'node:fs';
+
+import { withoutComments } from './helpers/sourceComments';
+
+import { listSaveRecords, resolveSaveRecordPath, writeFileAtomically } from '../src/desktop/save_records.cjs';
 
 const dirs: string[] = [];
 
@@ -47,4 +51,28 @@ describe('desktop save records', () => {
         expect(() => resolveSaveRecordPath(dir, 'notes.txt')).toThrow(/Invalid save record filename/);
         expect(resolveSaveRecordPath(dir, 'autosave.json')).toBe(join(dir, 'autosave.json'));
     });
+
+    it('writes saves atomically: overwrites in full, leaves no temp file, never offers one', async () => {
+        const dir = await fixtureDir();
+        const target = join(dir, 'autosave.json');
+        const first = JSON.stringify({ meta: { turn: 3, player_faction: 'RBiH' }, pad: 'x'.repeat(2_000_000) });
+        const second = JSON.stringify({ meta: { turn: 4, player_faction: 'RBiH' }, pad: 'y'.repeat(3_000_000) });
+
+        writeFileAtomically(target, first);
+        expect(readFileSync(target, 'utf8')).toBe(first);
+        writeFileAtomically(target, second);
+        expect(readFileSync(target, 'utf8')).toBe(second);
+
+        expect(readdirSync(dir)).toEqual(['autosave.json']);
+        const records = await listSaveRecords(dir);
+        expect(records.map((record) => record.turn)).toEqual([4]);
+    });
+
+    it('writes to a sibling temp name and renames it over the target, so the target is never truncated', () => {
+        const source = withoutComments(readFileSync(join(__dirname, '../src/desktop/save_records.cjs'), 'utf8'));
+        const main = withoutComments(readFileSync(join(__dirname, '../src/desktop/electron-main.cjs'), 'utf8'));
+        expect(source).toMatch(/\.tmp`/);
+        expect(source).toMatch(/renameSync\(tempPath, filePath\)/);
+        // The save path of the packaged app must use the atomic writer, not an in-place write.
+        expect(main).toMatch(/writeFileAtomically\(filePath, currentCanonicalSaveJson\)/);    });
 });
