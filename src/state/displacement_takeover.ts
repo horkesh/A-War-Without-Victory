@@ -227,7 +227,8 @@ export function seedDisplacementTimerOnFlip(
     for (const displaced of allFactions) {
         if (displaced === toFaction) continue;
         const timerKey = `${osid}|${displaced}`;
-        if (timerMap[timerKey]) continue;
+        // A stale RF-5B policy timer (the OSID changed hands) yields to the new holder's timer.
+        if (timerMap[timerKey] && timerMap[timerKey].cause !== 'policy_expulsion') continue;
         timerMap[timerKey] = {
             mun_id: munId,
             from_faction: displaced,
@@ -786,7 +787,8 @@ export function processDisplacementTakeover(
             if (fromFaction === toFaction) continue;
             if (!areFactionsAtWar(state, fromFaction, toFaction)) continue;
             const timerKey = `${osidKey}|${fromFaction}`;
-            if (timerMap[timerKey]) continue;
+            // A stale RF-5B policy timer (the OSID changed hands) yields to the captor's timer.
+            if (timerMap[timerKey] && timerMap[timerKey].cause !== 'policy_expulsion') continue;
             timerMap[timerKey] = {
                 mun_id: munId,
                 from_faction: fromFaction,
@@ -834,6 +836,12 @@ export function processDisplacementTakeover(
         }
         // Alliance check: if factions no longer at war, delete timer
         if (currentController && !areFactionsAtWar(state, timer.from_faction, currentController)) {
+            delete timerMap[timerKey];
+            continue;
+        }
+        // RF-5B: a policy wave belongs to the faction whose policy it is. If that faction no
+        // longer holds the OSID (e.g. RS took it), the wave never fires and books nothing.
+        if (timer.cause === 'policy_expulsion' && currentController !== timer.to_faction) {
             delete timerMap[timerKey];
             continue;
         }
@@ -1092,7 +1100,8 @@ export function processDisplacementTakeover(
     for (const faction of [...policyWaveFactions].sort(strictCompare)) {
         const flag = minorityPolicyWarCrimeFlag(faction);
         if (state.military.event_flags?.[flag] === true) continue;
-        recordWarCrime(state, faction);
+        // The flag is set only when the record was actually written (capital present).
+        if (!recordWarCrime(state, faction)) continue;
         if (!state.military.event_flags) state.military.event_flags = {};
         state.military.event_flags[flag] = true;
     }

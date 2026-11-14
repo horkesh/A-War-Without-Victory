@@ -3,6 +3,9 @@
 // the other community in OSIDs it holds inside its POLICY_EXPULSION_SCOPE municipalities
 // (wave A after the standard delay, wave B POLICY_WAVE_B_DELAY_TURNS later). Control never
 // changes; the waves are booked to the holder and recorded as one authorized war crime.
+import fs from 'node:fs';
+import path from 'node:path';
+
 import { expect, test } from 'vitest';
 
 import type { SettlementRecord } from '../src/map/settlements.js';
@@ -10,10 +13,13 @@ import {
     POLICY_EXPULSION_SCOPE,
     POLICY_WAVE_B_DELAY_TURNS,
     minorityPolicyAppliedFlag,
+    minorityPolicyWarCrimeFlag,
+    seedDisplacementTimerOnFlip,
     processDisplacementTakeover
 } from '../src/state/displacement_takeover.js';
 import { CURRENT_SCHEMA_VERSION, type GameState } from '../src/state/game_state.js';
 import type { MunicipalityPopulation1991Map } from '../src/state/population_share.js';
+import { validateGameStateShape } from '../src/state/validateGameState.js';
 
 const pop1991: MunicipalityPopulation1991Map = {
     vitez: { total: 1000, bosniak: 410, serb: 50, croat: 450, other: 90 },
@@ -240,4 +246,121 @@ test('a policy wave against RBiH-aligned people counts declared Bosniaks only, n
         origin_osid: 'op:vitez:vitez',
         displaced: Math.floor(1000 * 0.3 * vitezFraction)
     });
+});
+
+test('a third side taking a seeded OSID drops the policy timer: nothing booked to HRHB, the captor seeds its own timer', () => {
+    const state = warState(50);
+    state.military.event_flags.hrhb_minority_policy = 'expel';
+    run(state);
+    expect(Object.keys(policyTimers(state))).toContain('op:vitez:vitez|RBiH');
+    // RS takes Vitez before wave A.
+    state.political.political_controllers!['op:vitez:vitez'] = 'RS';
+    seedDisplacementTimerOnFlip(state, 'op:vitez:vitez', 'HRHB', 'RS');
+    const timer = state.displacement.hostile_takeover_timers['op:vitez:vitez|RBiH'];
+    expect(timer).toMatchObject({ to_faction: 'RS', started_turn: 50 });
+    expect(timer.cause).toBeUndefined();
+    for (let t = 51; t <= 54; t++) {
+        state.meta.turn = t;
+        run(state);
+    }
+    expect(hrhbEvents(state)).toEqual([]);
+    expect(state.military.negotiation!.capital.HRHB.war_crimes_events_emergent).toBe(0);
+});
+
+test('a policy timer whose holder lost the OSID without a seeding flip is deleted, not fired', () => {
+    const state = warState(50);
+    state.military.event_flags.hrhb_minority_policy = 'expel';
+    run(state);
+    state.political.political_controllers!['op:vitez:vitez'] = 'RS';
+    state.meta.turn = 54;
+    run(state);
+    expect(policyTimers(state)['op:vitez:vitez|RBiH']).toBeUndefined();
+    expect(hrhbEvents(state)).toEqual([]);
+});
+
+test('alliance restored before the wave clears policy timers; the policy is not re-applied', () => {
+    const state = warState(50);
+    state.military.event_flags.hrhb_minority_policy = 'expel';
+    run(state);
+    state.political.war_alliance_rbih_hrhb = 0.8;
+    state.meta.turn = 54;
+    run(state);
+    expect(policyTimers(state)).toEqual({});
+    state.political.war_alliance_rbih_hrhb = 0.05;
+    state.meta.turn = 55;
+    run(state);
+    expect(policyTimers(state)).toEqual({});
+});
+
+test('a policy wave gives the expelling side no manpower: only the expelled community pool shrinks', () => {
+    const state = warState(50);
+    state.military.event_flags.hrhb_minority_policy = 'expel';
+    state.military.militia_pools = {
+        'vitez:RBiH': { mun_id: 'vitez', faction: 'RBiH', available: 1000, committed: 0, exhausted: 0, updated_turn: 0 },
+        'vitez:HRHB': { mun_id: 'vitez', faction: 'HRHB', available: 1000, committed: 0, exhausted: 0, updated_turn: 0 }
+    } as any;
+    for (let t = 50; t <= 54; t++) {
+        state.meta.turn = t;
+        run(state);
+    }
+    expect(hrhbEvents(state)).toHaveLength(1);
+    const hrhbPools = Object.values(state.military.militia_pools).filter((p: any) => p.faction === 'HRHB');
+    expect(hrhbPools.reduce((s: number, p: any) => s + p.available + p.committed, 0)).toBe(1000);
+    expect((state.military.militia_pools as any)['vitez:RBiH'].available).toBeLessThan(1000);
+});
+
+test('war crime is not flagged as recorded when the faction has no capital to record it on', () => {
+    const state = warState(50);
+    state.military.event_flags.hrhb_minority_policy = 'expel';
+    delete (state.military.negotiation!.capital as any).HRHB;
+    for (let t = 50; t <= 54; t++) {
+        state.meta.turn = t;
+        run(state);
+    }
+    expect(hrhbEvents(state)).toHaveLength(1);
+    expect(state.military.event_flags[minorityPolicyWarCrimeFlag('HRHB')]).toBeUndefined();
+});
+
+test('deterministic: two identical runs produce identical displacement state and logs', () => {
+    const simulate = () => {
+        const state = warState(50);
+        state.military.event_flags.hrhb_minority_policy = 'expel';
+        for (let t = 50; t <= 70; t++) {
+            state.meta.turn = t;
+            run(state);
+        }
+        return JSON.stringify({ d: state.displacement, f: state.military.event_flags, c: state.military.negotiation });
+    };
+    expect(simulate()).toBe(simulate());
+});
+
+test('validator: cause accepts policy_expulsion only', () => {
+    const base = warState(50);
+    const errorsFor = (cause: unknown) => {
+        const s = structuredClone(base) as any;
+        s.displacement.hostile_takeover_timers = {
+            'op:vitez:vitez|RBiH': { mun_id: 'vitez', from_faction: 'RBiH', to_faction: 'HRHB', started_turn: 50, ...(cause === undefined ? {} : { cause }) }
+        };
+        const r = validateGameStateShape(s);
+        return (r.ok ? [] : r.errors).filter((e: string) => e.includes('hostile_takeover_timers'));
+    };
+    expect(errorsFor(undefined)).toEqual([]);
+    expect(errorsFor('policy_expulsion')).toEqual([]);
+    expect(errorsFor('scripted')).toHaveLength(1);
+});
+
+test('single writer: only src/state/war_crimes_record.ts assigns war_crimes_events_emergent', () => {
+    const root = path.resolve(__dirname, '..', 'src');
+    const writers: string[] = [];
+    const walk = (dir: string) => {
+        for (const name of fs.readdirSync(dir)) {
+            const full = path.join(dir, name);
+            if (fs.statSync(full).isDirectory()) walk(full);
+            else if (/\.tsx?$/.test(name) && /war_crimes_events_emergent\s*=[^=]/.test(fs.readFileSync(full, 'utf8'))) {
+                writers.push(path.relative(root, full).split(path.sep).join('/'));
+            }
+        }
+    };
+    walk(root);
+    expect(writers).toEqual(['state/war_crimes_record.ts']);
 });

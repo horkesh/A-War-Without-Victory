@@ -14,9 +14,10 @@ import type { FactionId, GameState } from './game_state.js';
  * - `displacement_takeover.ts`: the first wave of a faction's recorded minority
  *   expulsion policy (RF-5B), once per faction.
  */
-export function recordWarCrime(state: GameState, faction: FactionId): void {
+export function recordWarCrime(state: GameState, faction: FactionId): boolean {
     const neg = state.military.negotiation;
-    if (!neg?.capital?.[faction]) return;
+    if (!neg?.capital?.[faction]) return false;
     neg.capital[faction].war_crimes_events = (neg.capital[faction].war_crimes_events ?? 0) + 1;
     neg.capital[faction].war_crimes_events_emergent = (neg.capital[faction].war_crimes_events_emergent ?? 0) + 1;
+    return true;
 }
