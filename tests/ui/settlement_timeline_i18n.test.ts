@@ -200,7 +200,7 @@ describe('SettlementTimeline localization', () => {
     expect(container.textContent).toContain('VRS preuzima kontrolu');
     expect(container.textContent).toContain('Borba - skupa pobjeda');
     expect(container.textContent).toContain('VRS napada ARBiH - teritorija zauzeta');
-    expect(container.textContent).toContain('1. brigada rasporedjena u naselju');
+    expect(container.textContent).toContain('1. brigada raspoređena u naselju');
     expect(container.textContent).toContain('1. brigada napustila naselje');
     expect(container.textContent).not.toMatch(/Controlled by|scenario start|took control|Battle|attacked|territory captured|stationed|departed/);
   });

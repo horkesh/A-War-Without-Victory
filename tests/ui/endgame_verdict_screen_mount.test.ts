@@ -209,7 +209,7 @@ describe('VerdictScreen mount — verdict content', () => {
     });
     it('footer', () => {
         const h = render();
-        expect(h).toContain('least bad version'); expect(h).toContain('View Your War'); expect(h).toContain('New Game');
+        expect(h).toContain('least bad version'); expect(h).toContain('Open campaign recap'); expect(h).toContain('New Game');
     });
 
     it('renders mixed ghost classifications under a neutral Campaign Codex heading', () => {

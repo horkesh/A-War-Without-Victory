@@ -69,7 +69,7 @@ describe('sensitive-history player-choice content boundary', () => {
         expect(aggressive.description).toContain('Assembly decision is part of the historical record');
         expect(event.localizations.bcs.response_options.aggressive).toEqual({
             label: 'Centralizovati operativnu komandu',
-            description: 'Skupstinska odluka je dio historijskog zapisa; ovdje odredjujete centralizovane operativne naredbe i izvjestavanje komandnog lanca. Upozorenje generala Mladica ostaje u zapisniku i obavezuje komandu.',
+            description: 'Skupštinska odluka je dio historijskog zapisa; ovdje određujete centralizovane operativne naredbe i izvještavanje komandnog lanca. Upozorenje generala Mladića ostaje u zapisniku i obavezuje komandu.',
         });
         expect(aggressive.effects.some((effect: Record<string, unknown>) => (
             effect.kind === 'humanitarian_impact'
