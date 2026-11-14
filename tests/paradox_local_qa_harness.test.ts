@@ -3661,6 +3661,10 @@ test('final blocker inventory covers every canonical player decision queue', () 
             operation_opportunities: [
                 { approver_faction: 'RS', status: 'eligible_pending_review', proposal_id: 'covered' },
                 { approver_faction: 'RS', status: 'eligible_pending_review', proposal_id: 'fallback' },
+                // Decision recorded this turn, applied by the war pipeline at advance: not a blocker.
+                { approver_faction: 'RS', status: 'eligible_pending_review', proposal_id: 'decided-this-turn' },
+                // A decision recorded on an earlier turn that the pipeline never consumed: still one.
+                { approver_faction: 'RS', status: 'eligible_pending_review', proposal_id: 'decided-last-turn' },
             ],
             negotiation: {
                 pending_peace_plan: { plan_id: 'peace' },
@@ -3672,7 +3676,12 @@ test('final blocker inventory covers every canonical player decision queue', () 
             },
         },
         meta: {
-            pending_proposal_reviews: [{ faction: 'RS', proposed_action: 'OPPORTUNITY:covered', accepted: null, resolved_turn: null }],
+            turn: 113,
+            pending_proposal_reviews: [
+                { faction: 'RS', proposed_action: 'OPPORTUNITY:covered', accepted: null, resolved_turn: null },
+                { faction: 'RS', proposed_action: 'OPPORTUNITY:decided-this-turn', opportunity_decision: 'approve', resolved_turn: 113 },
+                { faction: 'RS', proposed_action: 'OPPORTUNITY:decided-last-turn', opportunity_decision: 'approve', resolved_turn: 112 },
+            ],
         },
     }, 'RS', { eventDecisions: 1, proposals: 1, paramilitary: 1 });
 
@@ -3686,7 +3695,7 @@ test('final blocker inventory covers every canonical player decision queue', () 
         peacePlan: 1,
         counterOffers: 1,
         dayton: 1,
-        operationOpportunities: 1,
+        operationOpportunities: 2,
     });
     assert.match(harness, /raw\.military\?\.pending_reserve_requests/);
     assert.match(harness, /pendingCounterOfferIds/);

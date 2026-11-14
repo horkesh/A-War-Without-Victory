@@ -798,14 +798,23 @@ function resolveDecisionReceiptAutosavePath(
 function buildPlayerBlockerInventory(raw, playerFaction, known) {
   const military = raw?.military ?? {};
   const proposals = Array.isArray(raw?.meta?.pending_proposal_reviews) ? raw.meta.pending_proposal_reviews : [];
+  const currentTurn = raw?.meta?.turn;
+  // An opportunity is covered while its review is still open, AND once the player's decision for
+  // THIS turn is recorded on the review: the desktop bridge records intent only and the war
+  // pipeline applies it at advance, so the opportunity itself stays eligible_pending_review until
+  // then (resolve-operation-opportunity-decision in electron-main.cjs). Counting that state as a
+  // blocker stopped the R8 dry run at turn 113 right after three visible approvals.
   const coveredOpportunityIds = new Set(proposals
     .filter((proposal) => proposal
       && (!playerFaction || proposal.faction === playerFaction)
-      && proposal.accepted == null
-      && proposal.opportunity_decision == null
-      && proposal.resolved_turn == null
       && typeof proposal.proposed_action === 'string'
-      && proposal.proposed_action.startsWith('OPPORTUNITY:'))
+      && proposal.proposed_action.startsWith('OPPORTUNITY:')
+      && ((proposal.accepted == null
+        && proposal.opportunity_decision == null
+        && proposal.resolved_turn == null)
+        || (proposal.opportunity_decision != null
+          && Number.isInteger(currentTurn)
+          && proposal.resolved_turn === currentTurn)))
     .map((proposal) => proposal.proposed_action.slice('OPPORTUNITY:'.length)));
   const reserves = (Array.isArray(military.pending_reserve_requests) ? military.pending_reserve_requests : [])
     .filter((request) => request && (!playerFaction || request.faction === playerFaction)).length;
