@@ -204,7 +204,7 @@ describe('production modal-ready event catalog rendering', () => {
       }
       if (usesStaffRecommendation) {
         expect(screen.getAllByText('Staff recommendation'), row.id).toHaveLength(1);
-        expect(screen.getByText(/not a historical default and does not control bot calibration/), row.id).toBeTruthy();
+        expect(screen.getByText(/It is not the historical default; you may choose any option/), row.id).toBeTruthy();
         expect(screen.queryByText('Historical default'), row.id).toBeNull();
         expect(screen.queryByText(/historically attested choice/), row.id).toBeNull();
       } else {

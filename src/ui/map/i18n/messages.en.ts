@@ -6177,7 +6177,7 @@ export const enMessages = {
     'eventDecision.historicalDefaultDescription': 'This is the historically attested choice. You are free to choose any option.',
     'eventDecision.sourceInline': 'Source: {source}.',
     'eventDecision.staffRecommendation': 'Staff recommendation',
-    'eventDecision.staffRecommendationDescription': 'Staff recommendation for this abstract command decision. This is not a historical default and does not control bot calibration.',
+    'eventDecision.staffRecommendationDescription': 'Your staff recommends this option. It is not the historical default; you may choose any option.',
     'eventDecision.noImmediateEffects': 'No immediate mechanical effects.',
     'eventDecision.campaignRecordUpdated': 'Campaign record updated: {values}',
     'eventDecision.effect.moraleChange': '{faction} morale {delta}',

@@ -5541,7 +5541,7 @@ export const bcsMessages: Partial<Record<MessageKey, string>> = {
     'eventDecision.historicalDefaultDescription': 'Ovo je historijski potvrđen izbor. Slobodno možete izabrati bilo koju opciju.',
     'eventDecision.sourceInline': 'Izvor: {source}.',
     'eventDecision.staffRecommendation': 'Preporuka štaba',
-    'eventDecision.staffRecommendationDescription': 'Preporuka štaba za ovu apstraktnu komandnu odluku. Ovo nije historijski zadano i ne kontroliše kalibraciju bota.',
+    'eventDecision.staffRecommendationDescription': 'Vaš štab preporučuje ovu opciju. To nije historijski zadani izbor; slobodno možete izabrati bilo koju opciju.',
     'eventDecision.noImmediateEffects': 'Nema neposrednih mehaničkih efekata.',
     'eventDecision.campaignRecordUpdated': 'Zapis kampanje ažuriran: {values}',
     'eventDecision.effect.moraleChange': '{faction} moral {delta}',
