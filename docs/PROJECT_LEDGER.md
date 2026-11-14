@@ -9,6 +9,25 @@
   Compacted 2026-09-10: 1723 sections moved out, 62 kept live.
 -->
 
+## 2026-11-14 — Canon propagation panel: Systems Manual corrections, Engine Invariants §14.5 status
+
+Docs only; no `src/` or `data/` change, no calibration change. #599 wrote the 14-item canon backlog into
+the Systems Manual and closed gate `REPO-CANON-PROPAGATION` without panel sign-off (Codex P1; the
+reopening commit missed the auto-merge). A four-seat panel (canon-compliance as lead and integrator,
+systems-programmer, game-designer, determinism-auditor) reviewed every added sentence against `src/`.
+Round 1 found twelve defects in the text: a dead cooldown described as live, a counter-attack path wider
+than Engine Invariants §6.3 written as canon, a retreat BFS that is one ring deep by defect, planning,
+exhaustion and feasibility gates described more broadly than the code applies them, launch criteria
+(enemy OSIDs 1, supply readiness not a gate), a supply multiplier table contradicting the code, wrong
+casualty and snapshot wording, and missing tie-breaks. All are corrected; Engine Invariants §14.5 now
+records the verified retreat order, the removed largest-component fallback and the open debts; the
+`CALIBRATION_MASTER.md` deferred-debt paragraph matches. Round 2: determinism GO; the other three seats
+GO-WITH-CONDITIONS with every text condition applied. Round 3: the lead seat cleared its last condition
+(unanimous GO on the propagation). Open as a separate decision: reconcile Invariants §6.3 with the
+sector-wide counter-attack (the Manual labels it "not canon"). The gate is closed on
+`docs/40_reports/20261114_CANON_PROPAGATION_PANEL.md`. Also: 14 `archive/*` tags pushed for branches with
+no PR and no tag (nothing deleted).
+
 ## 2026-11-13 — CI guard: a stale committed startup snapshot now fails the full-suite job
 
 Closes the gap recorded in the entry below. `full-suite-and-fingerprint.yml` (`full-suite` job) now runs
@@ -15053,3 +15072,15 @@ From the out-of-scope register (BC2-BC4, ST2, ST3, ST5, SC4, SC5). Display and c
 - Gates: `npx tsc --noEmit` exit 0. Headless `sim:scenario:run:40w` on main `4d6b0a2c0` and on this branch: 14 of 15 artifacts byte-identical, `run_meta.json` differs only in `out_dir` and `provenance.git_commit` (the scenario hash `5437fee464408c02` is the same, the events are not part of it). Full `npm run test:vitest` (Git Bash first), run before the last four fixes below: red on `desktop_release_ci_guardrails` (a 60 s timeout on a host running several suites; it is red on main here too per the earlier ledger entries) and on my own new test, which broke `negative_source_assertion_hygiene` (fixed: it strips comments) and the three EN-only keys in `ui_i18n` (removed from `INTENTIONAL_EN_ONLY`, they are translated now); the paramilitary-policy tests failed only through the hash re-pin above and pass now. After the fixes `tests/ui` plus the i18n, paramilitary-policy, sensitive-history and adapter suites: 411 files, 3,575 tests, all green. `tests/settlement_contiguity.test.ts` ("Dayton map has no isolated pockets", 12 pieces) is red on this branch and on a clean main `4d6b0a2c0`; not touched here. `npm run desktop:map:build` exit 0, entry chunk 2,991.67 kB (under 3,000; 8 kB of headroom left, about 14 kB of it this lane's 60 `officerChar.*` keys and the officer prose table). Rendered proof, EN and BCS at 2293×960 and 1280×720, 13 px floor on every surface (`F:/AWWV-coordination/surface_steps/bcs_ui_leftovers/`, report.json there): Army HQ Briefing officer card and the Presidential Attention tiles ("KRITIČNI PREGLEDI", "Šta je Bosna?"), Personnel, Verdict of an early peace.
 - Seen, not changed: BCS shows English data names in the OOB sidebar ("Rezervni štab / General Staff ARBiH") and the Personnel tab ("ARBiH HQ"); essays (`essay_index.json`, ~305 strings without diacritics); the Wrapped slides in second person and the early-peace comparison callouts (gate §6 record); a dedicated live trigger for the Chief of Staff cohesion alert.
 - Rendered proof (EN and BCS, 2293×960 and 1280×720): `F:/AWWV-coordination/surface_steps/bcs_ui_leftovers/`, rig `tools/ui/bcs_ui_leftovers_browser_proof.mjs`.
+
+## 2026-11-14 — Stance effects lane: SE4, SE2, SE7 (measured), SE6 held
+
+From the stance-engine follow-up (#583) register `F:/AWWV-coordination/crash_recovery_20261112/out_of_scope_findings.md`, SE2/SE4/SE6/SE7. Draft PR, not merged; the orchestrator sequences it against the 7th Corps lane. Main at start: `0450a2e8d`, 188w headless 712/711/711/710, `final_state_hash` `0ec6d6112fd0e954`.
+
+- **SE4 (enemy massing is local).** `computeOffensiveSigns` marked every OG facing an enemy corps as "massing" when that corps ran any attack, feint or probe anywhere. It now needs the operation aimed at or assembling opposite the OG (objective in the OG's ground; staging OSID or a participant on the enemy ground it faces): `isOperationOppositeSector` in `sector_intel.ts`. Alone on main: 712/711/711/710, final control identical to main at all four checkpoints, hash `ce1633f2e7f89c17`; Fortify OG-turns 4707→3875, Active Defence 1760→1300, AD crossings 335→285.
+- **SE2 (one writer).** The commander loop owns bot OG stance. `evaluateSectorStances` (corps AI), whose write was overwritten every war turn, is deleted; its truce-line Screening and own-operation-staging Elastic rules are now commander inputs (`CommanderBriefing.sector_situations`, staging matched on brigades because sectors are renumbered), with a `'situation'` trigger that applies at once. Alone on main 712/711/711/708; on SE4 712/711/711/708, hash `253f690fa0153746`. Lost: Jemanlići, Korenići (Donji Vakuf, t183-184): the 707th's march completes to Komar instead of stopping to take Korenići. Tail knife-edge.
+- **SE7 (validator).** The "stale front gap" was a validator misclassification: the sector's only brigade was a disrupted reserve that Engine Invariant 14.9 forbids promoting. `stale_gap` now needs a brigade on the front; a zero-assigned gap with only sibling donors on ground that changed hands in the saved turn is logged as `fresh_gap` (relief is due next turn). Proved with the same SE6 build run to week 189: relieved, PASS. No sim change.
+- **SE6 (stance entrenchment) — HELD.** Movement grows stationary brigades at the Defend rate and records a basis; `applyStanceEntrenchment` re-bases to the stance in force once it is final (in `apply-sector-stance-orders`). The patrol intel source was already live (sector intel is derived before the post-combat rebuild): only entrenchment was dead. Alone on main 711/711/707/699; on SE4+SE2+SE7 712/707/704/701, hash `f94d51f392f50a9d`. Konjic south (Bijela, Glavatičevo, Ljuta) falls in every SE6 variant: by t127 the VRS Herzegovina Corps is healthier (Kalinovik cohesion 68 / 1534 men vs 40 / 1079) and the Konjic September Offensive meets 3.7× the reactive defence. Not honestly recovered in this lane.
+- Observation: the `sector_stance` reason-code topic now reports per-stance entrenchment at combat time; `tools/diagnostics/sector_stance_churn.ts` aggregates it (schema v3).
+- Gates: per step, guards intact (enclave, Farz), strict health PASS, consistency 0 (with the SE7 validator). `tsc` 0.
+- Re-measured after merging main `eb3c6d02d` (sim-neutral since `0450a2e8d`; hashes unchanged): merge set SE4+SE2+SE7 712/711/711/708, `253f690fa0153746`; without SE2 712/711/711/710, `ce1633f2e7f89c17`. Orchestrator rulings 2026-11-14: SE2 accepted with the Oct95 tail loss; per cell, `op:donji_vakuf:korenici` (main t183, 707th Slavna) and `op:donji_vakuf:jemanlici` (main t184, 707th) stay RS at w188 because the 707th's march to Komar completes at t183 instead of stopping at Korenići. Recorded as a KNOWN HISTORICAL MISS, not neutral noise: both were ARBiH-held by Oct 1995 (Donji Vakuf given up 13 Sep 1995, BB1 p.419). Battle frequency, 188w: main 524 battles (2.79/week; attackers HVO 58, RBiH 284, RS 182), merge set 521 (2.77/week; 58 / 280 / 183), -0.57%. Pyrrhic merge gate: GO with conditions (four seats). SE6 is held at `archive/claude/stance-effects-se6` (reverted on the branch), with SE10 `trenches travel` registered as its root defect. Baselines re-blessed on the merge set.

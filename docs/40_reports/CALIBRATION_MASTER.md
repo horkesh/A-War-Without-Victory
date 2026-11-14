@@ -1,3 +1,8 @@
+**Stance effects, RF-2 (PR #604) — 2026-11-14: 712 / 711 / 711 / 708.**
+- SE4: enemy massing counts only an operation aimed at or assembling opposite the OG. SE2: the commander loop is the only bot writer of OG stance, with truce-line Screening and own-operation Elastic as its inputs. SE7: validator only (no sim change). See Systems Manual §6.7 for SE4/SE2. Measured 188w on the branch merged with main `eb3c6d02d`: `final_state_hash` `253f690fa0153746`; enclave and Farz guards intact; consistency 0; strict health PASS. SE4 + SE7 alone: `ce1633f2e7f89c17`, final control identical to main.
+- Oct95 drops 710 → 708, accepted by the orchestrator (2026-11-14 RF-2 ruling): Jemanlići and Korenići (Donji Vakuf) are no longer taken at t183-184. The 707th's march to Komar completes instead of stopping to take Korenići; this is the known Donji Vakuf tail knife-edge. This is a KNOWN HISTORICAL MISS, not neutral noise: both villages were ARBiH-held by Oct 1995 (General Zec gave up Donji Vakuf on 13 Sep 1995, BB1 p.419), and main itself takes them about four weeks late (13 Sep ≈ t179).
+- SE6 (stance entrenchment rates) is HELD at tag `archive/claude/stance-effects-se6`: 712/707/704/701, because Konjic south is lost in every variant. The root defect is SE10 ("trenches travel": reactive contributors bring their own entrenchment and posture bonus). SE6 resumes after SE10 is fixed.
+
 **Stance engine follow-up (PR #583) — 2026-11-13: 712 / 711 / 711 / 710.**
 - OG stances now respect the corps ceiling and hold a 3-turn minimum dwell (Systems Manual §6.7). Measured 188w on the tree merged with main: `final_state_hash` `05c1e1381aa50783`; enclave and Farz guards intact; consistency 0; strict health PASS; final control identical to main.
 - Apr95 drops 712 → 711, accepted by the orchestrator: Gornje Krčevine (Travnik) is retaken at t161 (COHA expiry), not t155. 3rd Corps commander operations Ponos/Vidik now target Paklarevo and pre-empt the catalog "Paklarevo Local Concentration" (power 1.08 on main), so Vlašić Ridge must take Paklarevo first. The hold does not block a lost-ground reaction. The 7th Corps lane re-measures this cell next. Note: "both ridge objectives fall by 155" (2026-11-07 below) no longer holds.
@@ -5429,12 +5434,18 @@ and `gorazde_pocket_consolidation_1992` was restored to narrative/morale/flag ef
 Existing separately-canonical sensitive-history receipts are outside this prohibition and
 remain governed by `SENSITIVE_HISTORY_DESIGN_GATE.md`.
 
-**Deferred debt:** the 706th Muslim Mountain Brigade's escape from Gornje Krčevine currently
-falls through to a non-geographic largest-component/lexicographic destination
-(`op:breza:koritnik`) and dissolves in the same turn. Neither result is accepted simulation
-truth. The later repair must choose a geographically and command-valid route, use lexical
-ordering only as a final deterministic tie-break, and explicitly adjudicate whether an escaped
-brigade may dissolve in the same turn.
+**Deferred debt:** the 706th Muslim Mountain Brigade's escape from Gornje Krčevine once fell
+through to a non-geographic largest-component/lexicographic destination
+(`op:breza:koritnik`) and dissolved in the same turn. The largest-component fallback has since
+been removed from `findEmergencyRetreatOsid` (status recorded in Engine Invariants §14.5, panel
+review 2026-11-14). Still open: (a) the emergency search's BFS frontier is not advanced past
+the first ring, so `EMERGENCY_RETREAT_BFS_MAX_HOPS = 8` is inert
+(`attack_retreat_displacement.ts:338-351`); (b) when no destination exists,
+`forceRetreatWithPenalties` sets the brigade inactive with a `destruction_turn`, which needs an
+explicit adjudication against Engine Invariants §6.2; (c) the last routing steps are lexical-only,
+and any distance or enemy-adjacency ordering would be a calibration-moving change. Any repair
+must choose a geographically and command-valid route and use lexical ordering only as a final
+deterministic tie-break.
 
 Map publication:
 

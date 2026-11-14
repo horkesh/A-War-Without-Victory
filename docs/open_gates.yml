@@ -32,7 +32,7 @@
 #   npm run gates                           prints the currently-open rows
 
 version: 1
-updated: 2026-11-13
+updated: 2026-11-14
 
 lanes: [R1, R2, R3, R4, R5, R6, R7, R8, R9, RC, RD, DC, RE, RF, REPO]
 
@@ -561,23 +561,28 @@ gates:
     lane: REPO
     title: Stale canon propagation backlog
     status: closed
-    closed: 2026-11-13
+    closed: 2026-11-14
     kind: propagation
     opened: 2026-03-28
     blocks: []
     evidence_required: >
-      Each of the recorded mechanical changes either propagated into the Systems Manual,
-      or explicitly retired as superseded.
-    evidence_path: docs/CANON_PROPAGATION_NEEDED.md
+      Each of the ten recorded mechanical changes either propagated into the Systems Manual
+      under Pyrrhic-panel sign-off, or explicitly retired as superseded.
+    evidence_path: docs/40_reports/20261114_CANON_PROPAGATION_PANEL.md
     source: docs/CANON_PROPAGATION_NEEDED.md
     notes: >
-      Closed 2026-11-13 by the integration steward. All fourteen recorded changes were checked
-      against current code and written into the Systems Manual with current values; the file
-      records where each landed and what differed from the 2026-03-28 note. The text applied is
-      a description of shipped, unchanged behaviour (no code, data or calibration change).
-      Newly found stale canon (Engine Invariants §14.5, a pioneer-attacks paragraph, context.md)
-      is listed in the same file under "Still open"; the Engine Invariants item is panel-gated
-      and routed to the orchestrator.
+      Closed 2026-11-14 on the panel record. All fourteen recorded changes were checked
+      against current code and written into the Systems Manual (#599), which closed this gate
+      on 2026-11-13 without the panel (Codex P1; the reopening commit missed the merge). A
+      four-seat panel (canon-compliance as lead and integrator, systems-programmer,
+      game-designer, determinism-auditor) then found twelve defects in that text in round 1;
+      all were corrected, and Engine Invariants §14.5 was brought in line with the code.
+      Round 2: determinism GO; the other three seats GO-WITH-CONDITIONS with every text
+      condition applied. Round 3: the lead seat cleared its last condition, so the panel is
+      unanimous GO on the propagation. Still open as a separate decision, not part of this gate:
+      reconcile Engine Invariants §6.3 with the sector-wide counter-attack (amend §6.3, or
+      remove the defensive-stance path in bot_brigade_eval_attack.ts); the Manual labels it
+      "not canon" until then.
 
   - id: REPO-ROADMAP-CONCISENESS
     lane: REPO
