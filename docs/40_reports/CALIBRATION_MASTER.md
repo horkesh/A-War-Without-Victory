@@ -3,8 +3,8 @@
 
   | Cell | Checkpoints | Cause class |
   |---|---|---|
-  | Vesela, Prusac | Apr94, Apr95 (Vesela also Oct95) | match bought by a defect (VRS 2nd/1st Krajina wrongly asleep on main) |
-  | Lopare selo, Donja Trnova | Apr94, Apr95, Oct95 | main depended on the 2nd Corps being capped by this gate |
+  | Vesela, Prusac | Apr94, Apr95 (Vesela also Oct95) | match bought by a defect (VRS 2nd/1st Krajina wrongly asleep on main). The head outcome is AHISTORICAL: no source has the VRS taking either cell, and the Aug 1992 Serb attack on Prusac failed (ICTY Stanišić & Župljanin TJ Vol I ¶242) |
+  | Lopare selo, Donja Trnova | Apr94, Apr95, Oct95 | main depended on the 2nd Corps being capped by this gate. The head outcome is AHISTORICAL: the Majevica assaults began 11 May 1994 and took only hills (BB2 book pp.471-472) |
   | Vinac, Donji Vrbljani, Baljvine, Mrkonjić Grad, Podrašnica, Pribeljci, Šipovljani | Oct95 | t186-188 knife-edge: Mistral 2 / Southern Move assemble two turns late |
   | Jemanlići, Korenići, Varošluk | Oct95 | gained |
 
