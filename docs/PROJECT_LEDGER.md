@@ -48,6 +48,22 @@ that do not move calibration. Control and territory are byte-identical to main a
 - Independent review findings fixed: stale heavy-pool tests and browser proof, lead-first order kept in the desktop
   projection, aggression copy scoped to the standard army AI (the optional LLM commander prompt lists modifiers).
 
+## 2026-11-14 — 1993 HVO-ARBiH event cards made truthful (Option A; copy only)
+
+Owner Option A from the HVO-ARBiH diagnosis (#598). No trigger, effect, flag or state change; 40w byte-identical in
+every artifact and the 188w hash unchanged (see the report). Ten cards rewritten in EN with BCS added
+(`war_1993.json`, one consequence row): Gornji Vakuf becomes the 15 January ultimatum, East Mostar becomes
+"Mostar Divided" with the siege in the record register (Prlić), Maglaj, the central-Bosnia pocket decision
+(Tihomir Blaškić in Vitez; airbridge claim dropped), the alliance and fronts cards, Sovići-Doljani, Vitez-Kiseljak,
+Neretva '93 and "Ahmići and the Rupture" (massacre named; Mostar's orders stated as orders). War-room ticker: four
+siege/battle rows removed, six gated on event receipts, two reworded. Panel (gate §6, historian + narrative
+designer, independent): unanimous GO after two rounds; record in `SENSITIVE_HISTORY_DESIGN_GATE.md` §6.
+**Finding:** card text is partly state. `title` is copied into `turn_summaries[].events_fired` and a bot's response
+notification into `pending_event_notifications`, both in the hashed save and the baselines manifest. Those strings
+stay put; corrected English goes in `localizations.en`, resolved by the new `src/ui/map/data/eventDisplayCopy.ts`
+on every display surface (aftermath, chronicle, timeline, fired events, decisions, notifications, Wrapped,
+receipts). Report: `docs/40_reports/implemented/20261114_HVO_ARBIH_TRUTHFUL_CARDS_PANEL.md`.
+
 ## 2026-11-14 — Canon propagation panel: Systems Manual corrections, Engine Invariants §14.5 status
 
 Docs only; no `src/` or `data/` change, no calibration change. #599 wrote the 14-item canon backlog into

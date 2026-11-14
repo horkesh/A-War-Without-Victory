@@ -58,6 +58,7 @@ import type { EventDefinition } from '../../../../sim/events/event_types.js';
 import type { GameState } from '../../../../state/game_state.js';
 import { turnToDateString } from '../../utils/formatters.js';
 import { playerFactionMatch } from '../../data/playerFactionMatch.js';
+import { resolveEventDisplayTitle } from '../../data/eventDisplayCopy.js';
 import { getOsidDisplayName } from '../../utils/osidDisplayName.js';
 import { SREBRENICA_OVERRUN_NOTE } from '../../../../sim/endgame/endgame_comparison.js';
 
@@ -605,7 +606,7 @@ export function generateChronicleEntries(
             for (const event of summary.events_fired) {
                 const id = event.id || '';
                 if (shouldSuppressTurnSummaryDecisionEvent(state, id, playerFaction, decisionEventIds)) continue;
-                const title = getPlayerSafeDisplayLabel(event.text, 'Recorded event');
+                const title = getPlayerSafeDisplayLabel(resolveEventDisplayTitle(id, event.text), 'Recorded event');
 
                 if (isDiplomaticEvent(id)) {
                     entries.push({
