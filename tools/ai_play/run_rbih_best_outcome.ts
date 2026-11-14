@@ -11,7 +11,7 @@
  * strategies to find which comes closest to (or exceeds) the historical RBiH/
  * Federation outcome, and writes a findings log as it goes.
  *
- * Run: node node_modules/tsx/dist/cli.mjs tools/ai_play/run_rbih_best_outcome.ts
+ * Run: npx tsx tools/ai_play/run_rbih_best_outcome.ts
  */
 import { writeFileSync, appendFileSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';

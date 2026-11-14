@@ -37,7 +37,7 @@
  * PRACTICE, not arithmetically impossible, and the binding mechanism is the combat-decrement
  * clamp (`COMBAT_COHESION_FLOOR_CAP = 35`). A fix aimed at the drift clamp would move nothing.
  *
- * Full report: `node_modules/.bin/tsx tools/hooks/floor_vs_dissolution.ts`
+ * Full report: `npx tsx tools/hooks/floor_vs_dissolution.ts`
  * Plan: `docs/plans/2026-08-26-engine-integrity-plan.md` §3.8.
  */
 import { describe, it, expect } from 'vitest';

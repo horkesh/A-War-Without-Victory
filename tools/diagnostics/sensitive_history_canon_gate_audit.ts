@@ -26,7 +26,7 @@
  * CRITICAL + WARNING = 0 only.
  *
  * CLI:
- *   node node_modules/tsx/dist/cli.mjs tools/diagnostics/sensitive_history_canon_gate_audit.ts [options]
+ *   npx tsx tools/diagnostics/sensitive_history_canon_gate_audit.ts [options]
  *
  * Options:
  *   --json              Emit structured JSON; otherwise plain-text report.
