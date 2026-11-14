@@ -1,7 +1,7 @@
 // Checkout-location-independent paths for repo tooling.
 //
 // The repo root comes from this file's own location, never from a hard-coded drive letter, so a
-// tool keeps working when the checkout moves (e.g. F:\A-War-Without-Victory -> C:\Pyrrhic\...).
+// tool keeps working when the checkout moves (e.g. from an external drive to C:\Pyrrhic\...).
 //
 // Folders that live OUTSIDE the repo sit beside the MAIN checkout by default and can be moved with
 // an environment variable:
