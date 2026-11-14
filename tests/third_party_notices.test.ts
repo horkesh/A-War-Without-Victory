@@ -79,6 +79,11 @@ describe('THIRD_PARTY_NOTICES.md npm coverage', () => {
  * Bare imports in shipped source that resolve to a package outside the shipped set. Such a
  * package would be bundled into the app without a row in the notices. Type-only packages are
  * accepted through their @types/ name; Node built-ins and `electron` are part of the runtime.
+ *
+ * Source is read through the TypeScript scanner (ts.preProcessFile), which skips comments, so
+ * an import named in prose never counts. This file's `.not.toContain` assertions are about the
+ * generated notices and package sets, never source text; that is why it is listed in
+ * tests/negative_source_assertion_baseline.json.
  */
 function findUnshippedImports(files: Array<{ file: string; source: string }>, shippedSet: Set<string>) {
   const builtins = new Set(builtinModules);
