@@ -4,6 +4,7 @@
   "description": "A War Without Victory (AWWV) simulation prototype",
   "main": "src/desktop/electron-main.cjs",
   "private": true,
+  "license": "SEE LICENSE IN LICENSE",
   "type": "module",
   "workspaces": [
     "src/ui/map"
