@@ -16,7 +16,7 @@
  * READS:     GameState (operations, sectors, stance), bot_strategy profiles, ethnic composition
  * MUST NOT:  issue movement orders; assign brigades to sectors (T1 authority)
  *
- * UPSTREAM:  bot_strategy.ts (faction doctrine), commander_loop.ts emit (sector stance)
+ * UPSTREAM:  bot_strategy.ts (faction doctrine). OG (sector) stance is the commander loop's alone (SE2).
  * DOWNSTREAM: bot_brigade_ai_osid.ts (T2 reads directive to generate brigade orders)
  *
  * TRUTH INVARIANTS:
@@ -36,9 +36,7 @@ import type {
     FactionId,
     FormationState,
     GameState,
-    SectorStance,
 } from '../../state/game_state.js';
-import { CORPS_STANCE_ALLOWED_SECTOR_STANCES } from './combat_math.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import {
     FACTION_STRATEGIES,
@@ -62,14 +60,6 @@ import type { WarTimeline } from '../../state/war_timeline.js';
 import {
     getTruceBreakAggressionBonus,
     shouldGrazBlockAttack,
-    isGrazAccordsActive,
-    isHerzegovinaTruceActive,
-    isKiseljakExclusionActive,
-    isEastHerzegovinaPair,
-    GRAZ_KISELJAK_VRS_EXCLUSION,
-    GRAZ_KISELJAK_HRHB_EXCLUSION,
-    GRAZ_EXEMPT_RS_CORPS,
-    GRAZ_EXEMPT_HRHB_CORPS,
 } from '../local_truces.js';
 import { areRbihHrhbAllied, isRbihHrhbCombatEnabled } from '../early_war/alliance_update.js';
 import { getCorpsCommander, getEffectiveCompetence, assignOperationCommander } from './officer_system.js';
@@ -427,157 +417,4 @@ export function findFriendlyOsidsFromMunicipalities(
         if (ctrl === faction) result.push(osid);
     }
     return result;
-}
-
-// ── Sector stance evaluation (Layer B) ──────────────────────────────────────
-
-/**
- * Is this sector on a cold front (RS↔HRHB truce under Graz Accords)?
- * Simplified check for bot AI — mirrors frontline_attrition.ts isColdFront.
- * Applies to ALL RS↔HRHB fronts except Posavina exempt corps and
- * east Herzegovina before Op Jackal ends.
- */
-function isSectorColdFront(state: GameState, sector: CorpsFrontSector): boolean {
-    if (!isGrazAccordsActive(state)) return false;
-    const fac = sector.faction;
-    const opp = sector.opposing_factions;
-    const hasRsHrhb =
-        (fac === 'RS' && opp.includes('HRHB')) ||
-        (fac === 'HRHB' && opp.includes('RS'));
-    if (!hasRsHrhb) return false;
-
-    // A sector that also faces a non-truce opponent (e.g. SRK facing both RBiH
-    // and HRHB Kiseljak pocket) is NOT a cold front — it's an active combat zone.
-    // Cold front only applies when the ONLY opponents are the truce pair (RS↔HRHB).
-    const hasNonTruceFoe = fac === 'RS'
-        ? opp.some(f => f !== 'HRHB')
-        : opp.some(f => f !== 'RS');
-    if (hasNonTruceFoe) return false;
-
-    // Faction-level RS↔HRHB ceasefire (Herzegovina truce component)
-    if (isHerzegovinaTruceActive(state)) {
-        const corpsId = sector.corps_id;
-
-        // Posavina corps are exempt (active fighting)
-        if (corpsId && GRAZ_EXEMPT_RS_CORPS.has(corpsId)) return false;
-        if (corpsId && GRAZ_EXEMPT_HRHB_CORPS.has(corpsId)) return false;
-
-        // Op Jackal: east Herzegovina pair not yet frozen
-        if (corpsId && isEastHerzegovinaPair(corpsId)
-            && state.political.graz_east_herzegovina_active_turn == null) {
-            return false;
-        }
-
-        // All other RS↔HRHB contact is cold
-        return true;
-    }
-
-    // Kiseljak OSID exclusion
-    if (isKiseljakExclusionActive(state)) {
-        for (const ss of sector.sub_segments) {
-            for (const osid of ss.friendly_osids) {
-                if (GRAZ_KISELJAK_VRS_EXCLUSION.has(osid) || GRAZ_KISELJAK_HRHB_EXCLUSION.has(osid)) {
-                    return true;
-                }
-            }
-        }
-    }
-    return false;
-}
-
-/**
- * Evaluate and set sector stances for all bot-controlled sectors of a faction.
- * Runs after sector construction and combat ratings, before directive generation.
- *
- * Rules:
- * - Player-set stances (`stance_source === 'player'`) are never overridden.
- * - Corps stance constrains allowed sector stances.
- * - Cold fronts → screening.
- * - Threat-based selection otherwise.
- *
- * Deterministic: sorted sector iteration, pure threat-ratio logic.
- */
-export function evaluateSectorStances(state: GameState, faction: FactionId): void {
-    const sectorLookup = state.military.corps_front_sectors ?? {};
-    const corpsCommand = state.military.corps_command ?? {};
-
-    // Sorted iteration for determinism
-    const sectorIds = Object.keys(sectorLookup).sort(strictCompare);
-
-    for (const sid of sectorIds) {
-        const sector = sectorLookup[sid];
-        if (!sector || sector.faction !== faction) continue;
-
-        // Player override: never touch player-set stances
-        if (sector.stance_source === 'player') continue;
-
-        const cmd = corpsCommand[sector.corps_id];
-        const corpsStance: string = cmd?.stance ?? 'balanced';
-        const allowed = CORPS_STANCE_ALLOWED_SECTOR_STANCES[corpsStance]
-            ?? CORPS_STANCE_ALLOWED_SECTOR_STANCES['balanced']!;
-
-        let chosen: SectorStance = 'defend';
-
-        // Cold front → screening (no shooting on truce lines)
-        if (isSectorColdFront(state, sector)) {
-            chosen = 'screening';
-        }
-        // Active operation staging in this sector → elastic (need reserves for the op)
-        else if (hasStagingOperation(corpsCommand, sector)) {
-            chosen = 'elastic';
-        }
-        // Threat-based selection
-        else {
-            const tr = sector.threat_ratio;
-            const brigCount = sector.assigned_brigade_ids.length + sector.reserve_brigade_ids.length;
-
-            if (tr > 2.0 && brigCount <= 2) {
-                chosen = 'fortify'; // Outgunned, dig in
-            } else if (tr > 1.5) {
-                chosen = 'defend'; // Threatened but can hold
-            } else if (tr < 0.5 && hasOffensiveTargets(state, sector)) {
-                chosen = 'active_defense'; // Probe opportunity
-            } else if (tr < 0.3 && !hasOffensiveTargets(state, sector)) {
-                chosen = 'screening'; // Quiet sector, save effort
-            } else {
-                chosen = 'defend'; // Default
-            }
-        }
-
-        // Constrain by corps stance ceiling
-        if (!allowed.includes(chosen)) {
-            // Fall back to 'defend' if allowed, else first allowed stance
-            chosen = allowed.includes('defend') ? 'defend' : allowed[0]!;
-        }
-
-        sector.sector_stance = chosen;
-        sector.stance_source = 'bot';
-    }
-}
-
-/** Check if the corps has an active operation staging in this sector. */
-function hasStagingOperation(
-    corpsCommand: Record<string, { active_operations: { sector_id?: string; phase?: string }[] }>,
-    sector: CorpsFrontSector
-): boolean {
-    const cmd = corpsCommand[sector.corps_id];
-    if (!cmd) return false;
-    for (const op of cmd.active_operations) {
-        if (op.sector_id === sector.sector_id && (op.phase === 'planning' || op.phase === 'execution')) return true;
-    }
-    return false;
-}
-
-/** Check if this sector's corps has offensive targets that overlap this sector. */
-function hasOffensiveTargets(state: GameState, sector: CorpsFrontSector): boolean {
-    const cmd = state.military.corps_command?.[sector.corps_id];
-    if (!cmd?.directive) return false;
-    const targets = cmd.directive.offensive_targets ?? [];
-    if (targets.length === 0) return false;
-    // Check if any target is adjacent to sector's enemy OSIDs
-    const enemyOsids = new Set<string>();
-    for (const ss of sector.sub_segments) {
-        for (const o of ss.enemy_osids) enemyOsids.add(o);
-    }
-    return targets.some(t => enemyOsids.has(t));
 }

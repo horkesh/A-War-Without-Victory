@@ -278,7 +278,7 @@ When a sector is attacked, defense is not necessarily limited to a brigade physi
 | **Active Defense** | 0.85x | 0.6x | Aggressive patrolling and local counterattacks. |
 | **Screening** | 0.50x | 0.0x | Minimal presence. Observation only. No entrenchment. |
 
-Sector stances are constrained by the parent corps stance. An offensive corps cannot order its sectors to Fortify; a defensive corps cannot order Active Defense. The OG's commanders set sector stances, evaluated per sector from threat assessment; at autonomy 2 a move into or out of Active Defense reaches the president as a stance matter (§5.5). A posture, once adopted, stands for at least three turns unless the OG loses ground or is in heavy fighting, which changes it at once; a quiet week alone does not change it.
+Sector stances are constrained by the parent corps stance. An offensive corps cannot order its sectors to Fortify; a defensive corps cannot order Active Defense. The corps commander sets sector stances, per sector, from threat and intelligence. An OG on a truce line screens, and an OG from which the corps' own operation is staging or running goes Elastic to keep reserves free; both apply at once. Enemy massing counts only when the enemy operation is aimed at or assembling opposite that OG. At autonomy 2 a move into or out of Active Defense reaches the president as a stance matter (§5.5). A posture, once adopted, stands for at least three turns unless the OG loses ground or is in heavy fighting, which changes it at once; a quiet week alone does not change it.
 
 ### 6.4 Ops-only attack doctrine
 

@@ -1014,6 +1014,13 @@ function collectUndefendedFrontSubsegmentIssues(state) {
     const missedReinforcement = [];
     const unavoidableGap = [];
     const staleGap = [];
+    const freshGap = [];
+    const finalTurn = state.meta?.turn;
+    const flippedThisTurn = new Set(
+        (state.political?.control_events ?? [])
+            .filter((e) => finalTurn != null && e.turn === finalTurn)
+            .map((e) => e.settlement_id),
+    );
     for (const [sectorId, sector] of Object.entries(sectors).sort((a, b) => String(a[0]).localeCompare(String(b[0])))) {
         if (sector.unstaffed_front === true) continue;
         for (const subSegment of sector.sub_segments ?? []) {
@@ -1024,10 +1031,15 @@ function collectUndefendedFrontSubsegmentIssues(state) {
                     sub_segment_id: subSegment.sub_segment_id ?? 'unknown',
                     length_edges: lengthEdges,
                 };
+                // "Partially covered" means a brigade actually holds part of this sector's front.
+                // A sector whose only brigades sit in reserve or rear holds none of it; whether
+                // one of them (or a sibling sector's) could legally be promoted is exactly the
+                // donor question below, which already excludes disrupted, operation-bound and
+                // non-field brigades — the same bar the engine's zero-assigned rescue applies.
+                // Counting reserve/rear here flagged a front whose only brigade had just broken
+                // (disrupted) as a stale-gap FAILURE the engine is forbidden to repair (SE7).
                 const assigned = sector.assigned_brigade_ids?.length ?? 0;
-                const reserve = sector.reserve_brigade_ids?.length ?? 0;
-                const rear = sector.rear_brigade_ids?.length ?? 0;
-                if (assigned + reserve + rear > 0) {
+                if (assigned > 0) {
                     staleGap.push(issue);
                     continue;
                 }
@@ -1040,7 +1052,20 @@ function collectUndefendedFrontSubsegmentIssues(state) {
                     ...issue,
                     donor_candidates: donorCandidates,
                 };
-                if (donorCandidates.length > 0) {
+                // Engine Invariant 14.9 (movement authority: an empty, reachable, same-corps front is
+                // "resolved through movement authority rather than a direct location rewrite"):
+                // sector construction promotes only the sector's OWN reserve/rear; a sibling
+                // sector's brigade reaches an empty front through
+                // commander relief (T1 intent -> T2 order -> T3 movement), one turn later. A gap
+                // on ground whose control changed THIS turn, with only sibling donors, is that
+                // relief not yet due — the saved turn cannot show it as missed (SE7: the Sana '95
+                // front redrawn at t187-188 is relieved at t189).
+                const ownDonor = donorCandidates.some((c) => c.donor_sector_id === sector.sector_id);
+                const touchesFreshFlip = [...(subSegment.friendly_osids || []), ...(subSegment.enemy_osids || [])]
+                    .some((osid) => flippedThisTurn.has(osid));
+                if (donorCandidates.length > 0 && !ownDonor && touchesFreshFlip) {
+                    freshGap.push(classifiedIssue);
+                } else if (donorCandidates.length > 0) {
                     missedReinforcement.push(classifiedIssue);
                 } else {
                     unavoidableGap.push(classifiedIssue);
@@ -1052,6 +1077,7 @@ function collectUndefendedFrontSubsegmentIssues(state) {
         missed_reinforcement: missedReinforcement,
         unavoidable_gap: unavoidableGap,
         stale_gap: staleGap,
+        fresh_gap: freshGap,
     };
 }
 
@@ -1455,6 +1481,9 @@ function validateState(state, runLabel) {
         for (const issue of undefendedSubsegments.unavoidable_gap) {
             log(`  ~ ${issue.sub_segment_id} in ${issue.sector} remains gap=true with no legal same-corps donor under current rules (${issue.length_edges} edge(s))`);
         }
+    }
+    for (const issue of undefendedSubsegments.fresh_gap) {
+        log(`  ~ ${issue.sub_segment_id} in ${issue.sector} opened this turn (${issue.length_edges} edge(s)); sibling relief is due next turn (Engine Invariant 14.9)`);
     }
     log('');
 
