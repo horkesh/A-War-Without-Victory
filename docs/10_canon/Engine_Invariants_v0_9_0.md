@@ -509,7 +509,7 @@ Officers depart via `available_until_turn`. When an officer's turn arrives:
 
 Historical successor recommendations are deterministic (lookup by corps + faction + turn).
 
-**Corps schedule (2026-11-14, command-loop §5E):** when `data/scenarios/corps_co_roster.json` has a tenure in force for a corps, that holder fills the corps before any pool ranking and replaces a fallback holder at his tenure start. The schedule never rotates out the President's appointee (`co_replacement_record`) and never swaps a manually controlled player's commander (it raises a replacement matter). An officer recorded as surviving the war accrues no casualty-exposure clock. The mechanism is faction-symmetric and is a no-op with an empty schedule.
+**Corps schedule (2026-11-14, command-loop §5E):** when `data/scenarios/corps_co_roster.json` has a tenure in force for a corps, that holder fills the corps before any pool ranking and replaces a fallback holder at his tenure start. The schedule never rotates out a commander the President appointed (`co_replacement_record`), accepted or kept (`officer_decision_history`), and never swaps or transfers a manually controlled player's commander (it raises a replacement matter). An officer recorded as surviving the war accrues no casualty-exposure clock. The mechanism is faction-symmetric and is a no-op with an empty schedule.
 
 ### 15.2 War Crimes Records
 

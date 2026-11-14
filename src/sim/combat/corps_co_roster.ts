@@ -29,11 +29,15 @@ export interface CorpsCoTenure {
     /** Exclusive end turn; null = to the end of the war. */
     tenure_end: number | null;
     /**
-     * Fate at the end of this tenure. 'survived' also means the officer survived the
-     * war, so he never accrues the casualty-exposure clock (he can still be killed by
-     * a scheduled 'killed' tenure elsewhere, or by map events outside this clock).
-     * 'killed': the officer dies at tenure_end. 'relieved': removed from command at
-     * tenure_end.
+     * How this tenure ended in history. 'survived': handed over normally (or held to the
+     * end of the war). 'relieved': removed from command at tenure_end. 'killed': the
+     * officer died at tenure_end.
+     *
+     * Survival of the WAR is derived, not stated per tenure: an officer with at least one
+     * scheduled tenure and no 'killed' tenure is a war survivor and never accrues the
+     * casualty-exposure clock (see officerSurvivedWar). Today no other death path exists
+     * for corps commanders, so such an officer cannot die in a run; an event-driven
+     * command-casualty path (HQ overrun, encirclement) is an open item, not part of L4.
      */
     historical_fate: CorpsCoHistoricalFate;
     /** Citation (ICTY first, then Balkan Battlegrounds). Required. */
@@ -61,9 +65,18 @@ const FATES: readonly CorpsCoHistoricalFate[] = ['survived', 'killed', 'relieved
  * schedule never runs half-applied. Optional reference sets check that officer and
  * corps ids exist (used by the data test against the shipped officer and OOB files).
  */
+export interface CorpsCoRosterRefs {
+    officerIds?: ReadonlySet<string>;
+    corpsIds?: ReadonlySet<string>;
+    /** Officer facts for cross-checks (faction match, rank, availability window). */
+    officers?: ReadonlyMap<string, { faction: string; rank: string; available_from_turn: number; available_until_turn?: number }>;
+    /** Corps id -> faction. */
+    corpsFactions?: ReadonlyMap<string, string>;
+}
+
 export function validateCorpsCoRoster(
     raw: unknown,
-    refs?: { officerIds?: ReadonlySet<string>; corpsIds?: ReadonlySet<string> },
+    refs?: CorpsCoRosterRefs,
 ): CorpsCoRoster {
     if (!raw || typeof raw !== 'object') throw new CorpsCoRosterDataError('roster must be an object');
     const r = raw as Record<string, unknown>;
@@ -91,6 +104,16 @@ export function validateCorpsCoRoster(
             if (!FATES.includes(x.historical_fate as CorpsCoHistoricalFate)) throw new CorpsCoRosterDataError(`${where}: historical_fate must be one of ${FATES.join(', ')}`);
             if (x.historical_fate === 'killed' && x.tenure_end === null) throw new CorpsCoRosterDataError(`${where}: a 'killed' tenure needs a tenure_end`);
             if (typeof x.source !== 'string' || !x.source.trim()) throw new CorpsCoRosterDataError(`${where}: source required`);
+            const facts = refs?.officers?.get(x.officer_id);
+            if (facts) {
+                if (facts.rank === 'army_commander' || facts.rank === 'deputy') throw new CorpsCoRosterDataError(`${where}: ${x.officer_id} is ${facts.rank}, not a corps commander`);
+                const corpsFaction = refs?.corpsFactions?.get(corpsId);
+                if (corpsFaction && corpsFaction !== facts.faction) throw new CorpsCoRosterDataError(`${where}: ${x.officer_id} (${facts.faction}) cannot hold a ${corpsFaction} corps`);
+                if (x.tenure_start < facts.available_from_turn) throw new CorpsCoRosterDataError(`${where}: tenure starts before ${x.officer_id} is available (turn ${facts.available_from_turn})`);
+                if (facts.available_until_turn !== undefined && (x.tenure_end === null || (x.tenure_end as number) > facts.available_until_turn)) {
+                    throw new CorpsCoRosterDataError(`${where}: tenure runs past ${x.officer_id}'s availability (turn ${facts.available_until_turn})`);
+                }
+            }
             return {
                 officer_id: x.officer_id,
                 tenure_start: x.tenure_start,
@@ -112,6 +135,26 @@ export function validateCorpsCoRoster(
     for (const [officerId, fates] of [...officerFates.entries()].sort((a, b) => strictCompare(a[0], b[0]))) {
         if (fates.includes('killed') && fates.includes('survived')) {
             throw new CorpsCoRosterDataError(`${officerId}: marked both 'killed' and 'survived'`);
+        }
+    }
+    // One officer cannot hold two corps at once: overlapping tenures across corps would
+    // make the handover pass move him back and forth every turn.
+    const byOfficer = new Map<string, Array<{ corpsId: string; t: CorpsCoTenure }>>();
+    for (const corpsId of Object.keys(rosters).sort(strictCompare)) {
+        for (const t of rosters[corpsId]!.schedule) byOfficer.set(t.officer_id, [...(byOfficer.get(t.officer_id) ?? []), { corpsId, t }]);
+    }
+    for (const [officerId, list] of [...byOfficer.entries()].sort((a, b) => strictCompare(a[0], b[0]))) {
+        const sorted = [...list].sort((a, b) => a.t.tenure_start - b.t.tenure_start || strictCompare(a.corpsId, b.corpsId));
+        for (let i = 1; i < sorted.length; i++) {
+            const prev = sorted[i - 1]!;
+            if (prev.t.tenure_end === null || prev.t.tenure_end > sorted[i]!.t.tenure_start) {
+                throw new CorpsCoRosterDataError(`${officerId}: overlapping tenures in ${prev.corpsId} and ${sorted[i]!.corpsId}`);
+            }
+        }
+        // A killed officer has no tenure after his death.
+        const death = sorted.find((x) => x.t.historical_fate === 'killed');
+        if (death && sorted.some((x) => x.t.tenure_start >= (death.t.tenure_end as number))) {
+            throw new CorpsCoRosterDataError(`${officerId}: tenure after his scheduled death`);
         }
     }
     return {
@@ -144,18 +187,32 @@ export function nextScheduledTenure(roster: CorpsCoRoster | null | undefined, co
     return schedule.find((t) => t.tenure_start > turn) ?? null;
 }
 
-/** True when the schedule says this officer survived the war (no casualty-exposure clock). */
+/**
+ * True when the schedule records this officer as having survived the war: he has at
+ * least one scheduled tenure and none of them ended 'killed'. Such an officer never
+ * accrues the casualty-exposure clock. A tenure that ended 'relieved' does not make him
+ * a casualty (Galić, relieved Aug 1994, survived the war).
+ */
 export function officerSurvivedWar(roster: CorpsCoRoster | null | undefined, officerId: string): boolean {
     if (!roster) return false;
-    let survived = false;
+    let scheduled = false;
     for (const corpsId of Object.keys(roster.rosters)) {
         for (const t of roster.rosters[corpsId]!.schedule) {
             if (t.officer_id !== officerId) continue;
             if (t.historical_fate === 'killed') return false;
-            if (t.historical_fate === 'survived') survived = true;
+            scheduled = true;
         }
     }
-    return survived;
+    return scheduled;
+}
+
+/** Officers the schedule relieved from this corps by `turn`: the pool fallback never puts them back there. */
+export function officersRelievedFrom(roster: CorpsCoRoster | null | undefined, corpsId: string, turn: number): Set<string> {
+    const out = new Set<string>();
+    for (const t of roster?.rosters[corpsId]?.schedule ?? []) {
+        if (t.historical_fate === 'relieved' && t.tenure_end !== null && t.tenure_end <= turn) out.add(t.officer_id);
+    }
+    return out;
 }
 
 /**

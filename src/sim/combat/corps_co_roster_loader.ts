@@ -3,7 +3,7 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
-import { validateCorpsCoRoster, type CorpsCoRoster } from './corps_co_roster.js';
+import { validateCorpsCoRoster, type CorpsCoRoster, type CorpsCoRosterRefs } from './corps_co_roster.js';
 
 let rosterCache: CorpsCoRoster | null = null;
 let rosterCacheKey: string | null = null;
@@ -15,7 +15,7 @@ let rosterCacheKey: string | null = null;
  */
 export function loadCorpsCoRoster(
     path?: string,
-    refs?: { officerIds?: ReadonlySet<string>; corpsIds?: ReadonlySet<string> },
+    refs?: CorpsCoRosterRefs,
 ): CorpsCoRoster | null {
     const resolvedPath = resolve(path ?? 'data/scenarios/corps_co_roster.json');
     if (!refs && rosterCache && rosterCacheKey === resolvedPath) return rosterCache;

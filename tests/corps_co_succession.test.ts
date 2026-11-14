@@ -71,8 +71,13 @@ describe('shipped schedule', () => {
         const officerRows = (officersJson.officers ?? officersJson) as Array<{ id: string }>;
         const officerIds = new Set<string>(officerRows.map((o) => o.id));
         const corpsJson = JSON.parse(readFileSync('data/source/oob_corps.json', 'utf8'));
-        const corpsIds = new Set(((corpsJson.corps ?? corpsJson) as Array<{ id: string }>).map((c) => c.id));
-        const loaded = loadCorpsCoRoster(undefined, { officerIds, corpsIds });
+        const corpsRows = (corpsJson.corps ?? corpsJson) as Array<{ id: string; faction: string }>;
+        const corpsIds = new Set(corpsRows.map((c) => c.id));
+        const officers = new Map((officerRows as Array<{ id: string; faction: string; rank: string; available_from_turn: number; available_until_turn?: number }>)
+            .map((o) => [o.id, o]));
+        const corpsFactions = new Map(corpsRows.map((c) => [c.id, c.faction]));
+        // L8 must keep this test green with its data: ids, factions, ranks and availability all cross-checked.
+        const loaded = loadCorpsCoRoster(undefined, { officerIds, corpsIds, officers, corpsFactions });
         expect(loaded).not.toBeNull();
         expect(hasCorpsCoSchedule(loaded)).toBe(false);
         expect(hasCorpsCoSchedule(CANONICAL_CORPS_CO_ROSTER)).toBe(false);
@@ -229,8 +234,8 @@ describe('scheduled handover', () => {
 describe('scheduled relief', () => {
     it('retires a relieved officer with no later tenure, returns one with a later tenure to the reserve', () => {
         const s = state(82, [officer('p', { home_corps_id: 'c4' }), officer('q', { home_corps_id: 'c5' }), officer('r', { home_corps_id: 'c4' })], {
-            p: os('p', { status: 'active', assigned_corps_id: 'c4' }),
-            q: os('q', { status: 'active', assigned_corps_id: 'c5' }),
+            p: os('p', { status: 'active', assigned_corps_id: 'c4', turns_in_command: 30 }),
+            q: os('q', { status: 'active', assigned_corps_id: 'c5', turns_in_command: 30 }),
             r: os('r'),
         }, ['c4', 'c5']);
         const sched = roster({
@@ -239,6 +244,105 @@ describe('scheduled relief', () => {
         });
         processOfficerSuccession(s, new Set(), sched);
         expect(s.military.named_officers!.p!.status).toBe('retired');
-        expect(s.military.named_officers!.q!.status).not.toBe('retired'); // serves the 4th later
+        // q serves the 4th later: back to the reserve, and the pool never re-picks him for the corps he was relieved from.
+        expect(s.military.named_officers!.q).toMatchObject({ status: 'reserve', assigned_corps_id: null });
+        expect(s.military.named_officers!.r).toMatchObject({ status: 'active' });
+        s.meta.turn = 83;
+        processOfficerSuccession(s, new Set(), sched);
+        expect(s.military.named_officers!.q).toMatchObject({ status: 'reserve', assigned_corps_id: null });
+    });
+
+    it('a transfer recorded as relieved at T with the next tenure starting at T moves him, it does not retire him', () => {
+        const s = state(82, [officer('al', { home_corps_id: 'c3' }), officer('m', { home_corps_id: 'c3' })], {
+            al: os('al', { status: 'active', assigned_corps_id: 'c3', turns_in_command: 10 }),
+            m: os('m'),
+        }, ['c3', 'c7']);
+        processOfficerSuccession(s, new Set(), roster({ c3: { schedule: [tenure('al', 0, 82, 'relieved')] }, c7: { schedule: [tenure('al', 82, null)] } }));
+        expect(s.military.named_officers!.al).toMatchObject({ status: 'active', assigned_corps_id: 'c7' });
+    });
+
+    it('relieves only the stint that began before the relief date (an officer who returns is not relieved again)', () => {
+        const s = state(150, [officer('a', { home_corps_id: 'c1' })], {
+            a: os('a', { status: 'active', assigned_corps_id: 'c1', turns_in_command: 10 }), // seated at t140, after the t100 relief
+        }, ['c1']);
+        processOfficerSuccession(s, new Set(), roster({ c1: { schedule: [tenure('a', 0, 100, 'relieved')] } }));
+        expect(s.military.named_officers!.a).toMatchObject({ status: 'active', assigned_corps_id: 'c1' });
+    });
+});
+
+describe('panel conditions (populated schedule)', () => {
+    it('a manually controlled player is never pulled: a holder commanding his corps is not moved into a vacant corps', () => {
+        const s = state(82, [officer('h', { home_corps_id: 'c3' }), officer('pool', { home_corps_id: 'c3' })], {
+            h: os('h', { status: 'active', assigned_corps_id: 'c4' }),
+            pool: os('pool'),
+        }, ['c3', 'c4'], { player_faction: 'RBiH', autonomy_level: 0 });
+        processOfficerSuccession(s, new Set(), roster({ c3: { schedule: [tenure('h', 82, null)] } }));
+        expect(s.military.named_officers!.h).toMatchObject({ status: 'active', assigned_corps_id: 'c4' });
+        expect(s.military.named_officers!.pool).toMatchObject({ status: 'active', assigned_corps_id: 'c3' }); // vacancy filled the normal way
+    });
+
+    it('a replacement the President accepted, or a commander he kept, is never rotated out after he delegates', () => {
+        for (const record of [
+            { decision: 'replacement_accepted', event_type: 'replacement_suggested', officer_id: 'p', new_officer_id: 'p', corps_id: 'c3' },
+            { decision: 'acknowledged', event_type: 'replacement_suggested', officer_id: 'h', current_commander_id: 'p', outgoing_officer_id: 'p', corps_id: 'c3' },
+        ]) {
+            const s = state(22, [officer('p', { home_corps_id: 'c3' }), officer('h', { home_corps_id: 'c3' })], {
+                p: os('p', { status: 'active', assigned_corps_id: 'c3' }),
+                h: os('h'),
+            }, ['c3'], { player_faction: 'RBiH', autonomy_level: 2 });
+            s.military.officer_decision_history = [{ id: 'r1', turn: 10, faction: 'RBiH', event_id: 'e', ...record } as any];
+            processOfficerSuccession(s, new Set(), roster({ c3: { schedule: [tenure('h', 22, null)] } }));
+            expect(s.military.named_officers!.p).toMatchObject({ status: 'active', assigned_corps_id: 'c3' });
+        }
+    });
+
+    it('the schedule adds nothing to what the pre-existing acting-commander path does to the President\'s acting appointee', () => {
+        // The handover pass skips the appointee; the acting branch uses only the pool leg for him.
+        // (Main's pool leg itself retires an acting appointee whenever a reserve officer exists:
+        // a pre-existing defect, recorded out of scope.)
+        const build = () => {
+            const s = state(22, [officer('app', { home_corps_id: 'c3' }), officer('h', { home_corps_id: 'c3' })], {
+                app: os('app', { status: 'active', assigned_corps_id: 'c3', acting_commander: true }),
+                h: os('h'),
+            }, ['c3']);
+            (s.military.corps_command as any).c3.co_replacement_record = [{ relieved_officer_id: 'x', replacement_officer_id: 'app', turn: 10 }];
+            return s;
+        };
+        const withSchedule = build();
+        const without = build();
+        processOfficerSuccession(withSchedule, new Set(), roster({ c3: { schedule: [tenure('h', 22, null)] } }));
+        processOfficerSuccession(without, new Set(), EMPTY_CORPS_CO_ROSTER);
+        expect(JSON.stringify(withSchedule.military.named_officers)).toBe(JSON.stringify(without.military.named_officers));
+    });
+
+    it('a scheduled death also clears an operation command, so releasing the operation cannot revive him', () => {
+        const s = state(90, [officer('x', { home_corps_id: 'c1' })], {
+            x: os('x', { status: 'active', assigned_operation: 'Op' }),
+        }, ['c1']);
+        processOfficerSuccession(s, new Set(), roster({ c1: { schedule: [tenure('x', 0, 90, 'killed')] } }));
+        expect(s.military.named_officers!.x).toMatchObject({ status: 'killed', assigned_operation: undefined });
+    });
+
+    it('an officer relieved in history but alive at the end of the war leaves the exposure clock', () => {
+        const s = state(120, [officer('gal', { casualty_vulnerability: 0.1, home_corps_id: 'c1' })], {
+            gal: os('gal', { status: 'active', assigned_corps_id: 'c1', turns_in_command: 100 }),
+        }, ['c1']);
+        const r = processOfficerSuccession(s, new Set(['c1']), roster({ c1: { schedule: [tenure('gal', 0, 125, 'relieved')] } }));
+        expect(r.casualties).toEqual([]);
+    });
+
+    it('validation rejects cross-corps overlaps, tenures after a death, wrong faction, wrong rank and tenures outside availability', () => {
+        expect(() => roster({ c1: { schedule: [tenure('a', 0, 100)] }, c2: { schedule: [tenure('a', 90, null)] } })).toThrow(/overlapping tenures in c1 and c2/);
+        expect(() => roster({ c1: { schedule: [tenure('a', 0, 50, 'killed')] }, c2: { schedule: [tenure('a', 60, 70, 'relieved')] } })).toThrow(/after his scheduled death/);
+        const officers = new Map([
+            ['rs1', { faction: 'RS', rank: 'corps_commander', available_from_turn: 0 }],
+            ['dep', { faction: 'RBiH', rank: 'deputy', available_from_turn: 0 }],
+            ['late', { faction: 'RBiH', rank: 'corps_commander', available_from_turn: 30, available_until_turn: 80 }],
+        ]);
+        const refs = { officers, corpsFactions: new Map([['c1', 'RBiH']]) };
+        expect(() => validateCorpsCoRoster({ schema_version: 1, rosters: { c1: { schedule: [tenure('rs1', 0, null)] } } }, refs)).toThrow(/cannot hold a RBiH corps/);
+        expect(() => validateCorpsCoRoster({ schema_version: 1, rosters: { c1: { schedule: [tenure('dep', 0, null)] } } }, refs)).toThrow(/deputy/);
+        expect(() => validateCorpsCoRoster({ schema_version: 1, rosters: { c1: { schedule: [tenure('late', 10, 50)] } } }, refs)).toThrow(/before late is available/);
+        expect(() => validateCorpsCoRoster({ schema_version: 1, rosters: { c1: { schedule: [tenure('late', 30, null)] } } }, refs)).toThrow(/past late's availability/);
     });
 });

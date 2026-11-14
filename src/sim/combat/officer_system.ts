@@ -24,6 +24,7 @@ import { CANONICAL_ARMY_CO_ROSTER } from './army_co_roster_data.js';
 import { getBrigadeOfficerMod } from './combat_math.js';
 import {
     nextScheduledTenure,
+    officersRelievedFrom,
     officerSurvivedWar,
     scheduledTenure,
     tenuresEndedBy,
@@ -93,6 +94,8 @@ function findHistoricalSuccessor(
         if (
             scheduled
             && scheduled.id !== departing.id
+            && scheduled.faction === departing.faction
+            && scheduled.rank !== 'army_commander' && scheduled.rank !== 'deputy'
             && scheduled.available_from_turn <= turn
             && (scheduled.available_until_turn === undefined || scheduled.available_until_turn > turn)
             && isEnclaveCompatible(scheduled, commandedCorpsId, turn)
@@ -823,18 +826,26 @@ export function processOfficerSuccession(
             if (os.status !== 'active' && os.status !== 'reserve') continue;
             os.status = 'killed';
             os.assigned_corps_id = null;
+            // Clear an operation command too: releasing the operation later must not
+            // return a dead officer to the reserve (releaseOperationCommander keys on it).
+            os.assigned_operation = undefined;
             report.casualties.push(data.id);
             continue;
         }
-        // 'relieved'
+        // 'relieved': only the stint that began before the relief date. An officer who
+        // returns to this corps later (seated after tenure_end) is not relieved again.
         if (os.status !== 'active' || os.assigned_corps_id !== corpsId) continue;
+        // turns_in_command is incremented later this turn (step 4), so a commander seated
+        // at turn S reads 0 at S+1: his seat turn is turn - turns_in_command - 1.
+        const seatedTurn = turn - os.turns_in_command - 1;
+        if (tenure.tenure_end !== null && seatedTurn >= tenure.tenure_end) continue;
         if (isPresidentialAppointee(state, corpsId, data.id)) continue;
         if (data.faction === manualPlayerFaction) {
             suggestScheduledReplacement(data, corpsId);
             continue;
         }
         const servesLater = (corpsRoster.rosters ? Object.values(corpsRoster.rosters) : [])
-            .some(entry => entry.schedule.some(t => t.officer_id === data.id && t.tenure_start > turn));
+            .some(entry => entry.schedule.some(t => t.officer_id === data.id && t.tenure_start >= turn));
         os.status = servesLater ? 'reserve' : 'retired';
         os.assigned_corps_id = null;
         report.departures.push(data.id);
@@ -920,8 +931,12 @@ export function processOfficerSuccession(
         if (!incumbent && holderState0.status === 'reserve') continue;
         if (incumbent && incumbent.data.id === holder.id) continue;
         if (incumbent && isPresidentialAppointee(state, corpsFormId, incumbent.data.id)) continue;
-        if (incumbent && corpsFormation.faction === manualPlayerFaction) {
-            suggestScheduledReplacement(incumbent.data, corpsFormId, holder);
+        // A manually controlled player is never overruled: no automatic swap and no pull of
+        // a holder out of another of his corps. With an incumbent he gets a replacement
+        // matter; an empty corps is filled by the vacancy pass (schedule reserve first,
+        // then the pool), and the matter follows on a later turn once there is an incumbent.
+        if (corpsFormation.faction === manualPlayerFaction) {
+            if (incumbent) suggestScheduledReplacement(incumbent.data, corpsFormId, holder);
             continue;
         }
         if (incumbent) {
@@ -947,8 +962,14 @@ export function processOfficerSuccession(
         if (existingCommander) {
             // C.3: HVO acting commanders get replaced once their delay is served
             if (existingCommander.state.acting_commander) {
-                const availableReplacement = scheduledHolderForCorps(state, corpsRoster, officerData, officers, corpsFormId, turn, false)
-                    ?? findBestReplacement(officers, officerData, faction, corpsFormId, turn);
+                // The schedule never retires the President's appointee nor overrules a
+                // manually controlled player here; those keep the pre-existing pool path.
+                const scheduleMayAct = faction !== manualPlayerFaction
+                    && !isPresidentialAppointee(state, corpsFormId, existingCommander.data.id);
+                const availableReplacement = (scheduleMayAct
+                    ? scheduledHolderForCorps(state, corpsRoster, officerData, officers, corpsFormId, turn, false)
+                    : null)
+                    ?? findBestReplacement(officers, officerData, faction, corpsFormId, turn, officersRelievedFrom(corpsRoster, corpsFormId, turn));
                 if (!availableReplacement) continue;
                 if (existingCommander.data.faction === 'HRHB') {
                     // D.4: Read delays from war_timeline if available, else hardcoded fallback
@@ -971,7 +992,7 @@ export function processOfficerSuccession(
         // The dated schedule names the holder first (§5E); the pool ranking is the
         // counterfactual fallback when the schedule has no free holder.
         const replacement = scheduledHolderForCorps(state, corpsRoster, officerData, officers, corpsFormId, turn, false)
-            ?? findBestReplacement(officers, officerData, faction, corpsFormId, turn);
+            ?? findBestReplacement(officers, officerData, faction, corpsFormId, turn, officersRelievedFrom(corpsRoster, corpsFormId, turn));
 
         if (replacement) {
             const os = officers[replacement.id]!;
@@ -1035,10 +1056,23 @@ export function processOfficerSuccession(
     return report;
 }
 
-/** True when the President appointed this officer to this corps (REPLACE-CO lever). The schedule never rotates such an appointee out (§5E). */
+/**
+ * True when this officer holds this corps by the President's own choice, which the
+ * schedule never overrides (§5E): appointed by the REPLACE-CO lever
+ * (`co_replacement_record`), accepted by the President in a replacement matter, or kept
+ * by him when he declined one (both filed in `officer_decision_history`). The choice
+ * survives a later switch to staff control.
+ */
 function isPresidentialAppointee(state: GameState, corpsId: string, officerId: string): boolean {
     const records = state.military.corps_command?.[corpsId]?.co_replacement_record;
-    return Array.isArray(records) && records.some(r => r.replacement_officer_id === officerId);
+    if (Array.isArray(records) && records.some(r => r.replacement_officer_id === officerId)) return true;
+    const history = state.military.officer_decision_history;
+    if (!Array.isArray(history)) return false;
+    return history.some(r => r.corps_id === corpsId && (
+        (r.decision === 'replacement_accepted' && (r.new_officer_id ?? r.officer_id) === officerId)
+        || (r.event_type === 'replacement_suggested' && r.decision === 'acknowledged'
+            && (r.outgoing_officer_id ?? r.current_commander_id) === officerId)
+    ));
 }
 
 /** Competence penalty for an assignment outside the officer's home corps (unchanged rules, shared by the pool and the schedule). */
@@ -1097,12 +1131,15 @@ function findBestReplacement(
     faction: FactionId,
     corpsId: string,
     currentTurn: number,
+    /** Officers the corps schedule relieved from this corps (§5E); never re-picked for it. Empty with no schedule. */
+    excluded?: ReadonlySet<string>,
 ): NamedOfficer | null {
     const candidates: NamedOfficer[] = [];
 
     for (const data of officerData) {
         if (data.faction !== faction) continue;
         if (data.rank === 'army_commander' || data.rank === 'deputy') continue;
+        if (excluded?.has(data.id)) continue;
 
         const os = officers[data.id];
         if (!os || os.status !== 'reserve') continue;
