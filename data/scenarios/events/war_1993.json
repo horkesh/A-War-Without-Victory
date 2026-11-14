@@ -596,12 +596,12 @@
     "id": "hrhb_minority_policy_1993",
     "image": "event_central_bosnia_front.webp",
     "title": "Bosniak Civilians in HVO-Held Municipalities",
-    "narrative": "The war with the ARBiH is open. Bosniak civilians still live in large numbers in municipalities the HVO holds, and the HZ HB Presidency must record its policy toward them. In the historical record the HZ HB leadership chose their removal. The ICTY Trial Chamber in Prlić et al. (2013) found a joint criminal enterprise, in existence from mid-January 1993, whose purpose was HVO domination of the provinces claimed for Herceg-Bosna through the ethnic cleansing of the Muslim population; the Appeals Chamber affirmed the finding in 2017. Through 1993 Bosniaks were expelled from Prozor, west Mostar, Stolac, Čapljina and the Lašva valley, and men were held at the Heliodrom, Dretelj and Gabela.",
+    "narrative": "The HVO-ARBiH alliance has broken down. Bosniak civilians still live in large numbers in municipalities the HVO holds, and the HZ HB Presidency must record its policy toward them. In the historical record the HZ HB leadership chose to expel them. The ICTY Trial Chamber in Prlić et al. (2013) found a joint criminal enterprise, in existence from mid-January 1993, whose common purpose was domination by the Herceg-Bosna Croats of the provinces it claimed, through the ethnic cleansing of the Muslim population; the Appeals Chamber affirmed the finding in 2017. Through 1993 Bosniaks were expelled from Prozor, west Mostar, Stolac, Čapljina and the Lašva valley, and Bosniak men were held at the Heliodrom, Dretelj and Gabela detention centres.",
     "localizations": {
       "bcs": {
         "title": "Bošnjački civili u općinama pod kontrolom HVO-a",
-        "narrative": "Rat s ARBiH je otvoren. U općinama pod kontrolom HVO-a i dalje živi velik broj bošnjačkih civila, a Predsjedništvo HZ HB mora zabilježiti svoju politiku prema njima. U historijskom zapisu rukovodstvo HZ HB odlučilo se za njihovo uklanjanje. Pretresno vijeće MKSJ-a u predmetu Prlić i drugi (2013) utvrdilo je udruženi zločinački poduhvat, koji je postojao od sredine januara 1993, s ciljem dominacije HVO-a nad provincijama na koje je Herceg-Bosna polagala pravo putem etničkog čišćenja muslimanskog stanovništva; Žalbeno vijeće potvrdilo je to utvrđenje 2017. Tokom 1993. Bošnjaci su protjerani iz Prozora, zapadnog Mostara, Stoca, Čapljine i Lašvanske doline, a muškarci su zatočeni u Heliodromu, Dretelju i Gabeli.",
-        "staff_assessment": "Naredba o protjerivanju bilježi se kao ratni zločin rukovodstva HZ HB i smanjuje međunarodni ugled Herceg-Bosne. Ako naredba izostane, bošnjačko stanovništvo ostaje na mjestu.",
+        "narrative": "Savez HVO-a i ARBiH se raspao. U općinama pod kontrolom HVO-a i dalje živi velik broj bošnjačkih civila, a Predsjedništvo HZ HB mora zabilježiti svoju politiku prema njima. U historijskom zapisu rukovodstvo HZ HB odlučilo je da ih protjera. Pretresno vijeće MKSJ-a u predmetu Prlić i drugi (2013) utvrdilo je postojanje udruženog zločinačkog poduhvata od sredine januara 1993. godine, čiji je zajednički cilj bio dominacija Hrvata Herceg-Bosne nad provincijama na koje je polagala pravo, i to etničkim čišćenjem muslimanskog stanovništva; Žalbeno vijeće potvrdilo je to utvrđenje 2017. godine. Tokom 1993. Bošnjaci su protjerani iz Prozora, zapadnog Mostara, Stoca, Čapljine i Lašvanske doline, a bošnjački muškarci držani su u zatočeničkim centrima Heliodrom, Dretelj i Gabela.",
+        "staff_assessment": "Naredba o protjerivanju smanjuje međunarodni ugled Herceg-Bosne. Kada se protjerivanja provedu, bilježe se kao ratni zločin rukovodstva HZ HB. Bez naredbe, bošnjački civili na području pod kontrolom HVO-a ostaju na mjestu osim ako do njih ne dopru borbe.",
         "trigger_evidence": [
           "Savez HVO-a i ARBiH se raspao.",
           "Bošnjački civili i dalje žive u dijelovima srednje Bosne i Hercegovine pod kontrolom HVO-a."
@@ -609,11 +609,23 @@
         "response_options": {
           "expel": {
             "label": "Narediti protjerivanje bošnjačkih civila",
-            "description": "Narediti snagama HVO-a i civilnim vlastima HZ HB da u roku od otprilike mjesec dana protjeraju bošnjačke civile iz dijelova Lašvanske doline, Kiseljaka, Žepča, Gornjeg Vakufa i Jablanice pod kontrolom HVO-a, a od ljeta iz dijelova Mostara, Stoca, Čapljine, Ljubuškog i Prozora pod kontrolom HVO-a. Protjerano je između trećine i tri četvrtine Bošnjaka koji tamo žive: neki su ubijeni, većina je protjerana na teritoriju pod kontrolom ARBiH, a neki napuštaju zemlju. Naredba se bilježi kao ratni zločin rukovodstva HZ HB, a međunarodni ugled Herceg-Bosne opada. U historijskom zapisu to je politika koju je MKSJ utvrdio u predmetu Prlić i drugi."
+            "description": "Narediti snagama HVO-a i civilnim vlastima HZ HB da otprilike mjesec dana nakon naredbe protjeraju bošnjačke civile iz dijelova Viteza, Busovače, Kiseljaka, Žepča, Gornjeg Vakufa i Jablanice pod kontrolom HVO-a, a otprilike četiri mjeseca nakon naredbe iz dijelova Mostara, Stoca, Čapljine, Ljubuškog i Prozora pod kontrolom HVO-a. U svakoj od tih općina bit će protjerano između 30 i 75 posto Bošnjaka koji žive na području pod kontrolom HVO-a. Otprilike troje od stotinu njih bit će ubijeno; većina ostalih bit će protjerana na teritoriju pod kontrolom ARBiH, a neki će napustiti zemlju. Naredba smanjuje međunarodni ugled Herceg-Bosne, a protjerivanja se bilježe kao ratni zločin rukovodstva HZ HB. U historijskom zapisu to je politika koju je MKSJ utvrdio u predmetu Prlić i drugi."
           },
           "restrain": {
             "label": "Narediti da se bošnjački civili ne protjeruju",
-            "description": "Narediti snagama HVO-a i civilnim vlastima HZ HB da bošnjačke civile ostave na mjestu. Oni ostaju osim ako do njih ne dopru borbe. Protiv rukovodstva HZ HB ne bilježi se protjerivanje."
+            "description": "Narediti snagama HVO-a i civilnim vlastima HZ HB da bošnjačke civile ostave na mjestu. Oni ostaju osim ako do njih ne dopru borbe. Protiv rukovodstva HZ HB ne bilježi se naredba o protjerivanju."
+          }
+        },
+        "notifications_to_other_factions": {
+          "expel": {
+            "RBiH": {
+              "headline": "Herceg-Bosna naređuje protjerivanje bošnjačkih civila",
+              "body": "Predsjedništvo HZ HB naređuje protjerivanje bošnjačkih civila iz općina pod kontrolom HVO-a. Sarajevo očekuje da protjerani u narednim sedmicama stignu na teritoriju pod kontrolom ARBiH."
+            },
+            "RS": {
+              "headline": "Herceg-Bosna naređuje protjerivanje Bošnjaka iz područja pod kontrolom HVO-a",
+              "body": "Predsjedništvo HZ HB naređuje da se bošnjački civili protjeraju iz općina pod kontrolom HVO-a. Pale bilježi produbljivanje rata između HVO-a i ARBiH."
+            }
           }
         }
       }
@@ -622,7 +634,7 @@
     "family": "hrhb_minority_policy",
     "source_tier": "icty_icj_un",
     "emergence_class": "compound",
-    "historical_source": "ICTY Prlić et al. Trial Judgement (IT-04-74-T, 29 May 2013) and Appeal Judgement (IT-04-74-A, 29 November 2017): joint criminal enterprise from mid-January 1993; expulsions and forcible transfers in Prozor, Mostar, Stolac, Čapljina and Ljubuški; the Heliodrom, Dretelj and Gabela detention centres. ICTY Kordić and Čerkez Appeal Judgement (IT-95-14/2-A, 17 December 2004): the April 1993 Lašva valley attacks aimed at ethnically cleansing the area. Balkan Battlegrounds Vol. II, Annexes 40-42 (Ahmići, the Vitez enclave, Kiseljak).",
+    "historical_source": "ICTY Prlić et al. Trial Judgement (IT-04-74-T, 29 May 2013) and Appeal Judgement (IT-04-74-A, 29 November 2017): joint criminal enterprise from mid-January 1993; expulsions and forcible transfers in Gornji Vakuf, Jablanica (Sovići and Doljani), Prozor, Mostar, Stolac, Čapljina and Ljubuški; the Heliodrom, Dretelj and Gabela detention centres. ICTY Kordić and Čerkez Trial Judgement (IT-95-14/2-T, 26 February 2001): persecution of the Muslim population in the April 1993 HVO attacks in the Lašva valley and Kiseljak; Kordić's convictions affirmed in substance on appeal (IT-95-14/2-A, 17 December 2004). Balkan Battlegrounds Vol. I (HVO-VRS cooperation at Žepče) and Vol. II, Annexes 40-42 (Ahmići, the Vitez enclave, Kiseljak).",
     "source_note": "RF-5B (policy-driven bilateral displacement). The decision records a policy, never a target: it names no settlement and selects no population. The engine applies an expel policy once, when the RBiH-HRHB war is on, to the other community in OSIDs the faction holds inside the municipalities where the record finds the policy applied (POLICY_EXPULSION_SCOPE in src/state/displacement_takeover.ts, Historian-sourced): one wave per OSID (central Bosnia and Jablanica about four weeks after the order, Herzegovina about twelve weeks later), 30-75% by municipality, booked to HRHB, recorded as an authorized war crime (src/state/war_crimes_record.ts, SENSITIVE_HISTORY_DESIGN_GATE.md §2a(ii)(a)). The historical default follows the Prlić joint-criminal-enterprise finding, affirmed on appeal. No ARBiH joint criminal enterprise was charged or found (Hadžihasanović and Kubura, Halilović), so RBiH has no expulsion policy and Croats displaced in this war continue to come from captures. Named atrocities (Ahmići, Stupni Do, the camps) stay discrete Ring 2 events and are not reachable from this decision.",
     "trigger": {
       "turn_min": 40,
@@ -641,7 +653,7 @@
       "kind": "narrative",
       "text": "The HZ HB Presidency records its policy toward Bosniak civilians in HVO-held municipalities."
     },
-    "staff_assessment": "An expulsion order is recorded as a war crime of the HZ HB leadership and lowers Herceg-Bosna's international standing. Without the order, the Bosniak population stays in place.",
+    "staff_assessment": "An expulsion order lowers Herceg-Bosna's international standing. Once the expulsions are carried out, they are recorded as a war crime of the HZ HB leadership. Without the order, Bosniak civilians in HVO-held areas stay in place unless fighting reaches them.",
     "trigger_evidence": [
       "The HVO-ARBiH alliance has broken down.",
       "Bosniak civilians still live in HVO-held parts of central Bosnia and Herzegovina."
@@ -652,7 +664,7 @@
         "branch_tag": "hrhb_minority_policy_expel",
         "historical_marker": "historical_default",
         "label": "Order the expulsion of Bosniak civilians",
-        "description": "Order HVO forces and the HZ HB civil authorities to drive Bosniak civilians out of the HVO-held parts of the Lašva valley, Kiseljak, Žepče, Gornji Vakuf and Jablanica within about a month, and out of the HVO-held parts of Mostar, Stolac, Čapljina, Ljubuški and Prozor from the summer. Between a third and three quarters of the Bosniaks living there are expelled: some are killed, most are driven into ARBiH-held territory, and some leave the country. The order is recorded as a war crime of the HZ HB leadership, and Herceg-Bosna's international standing falls. In the historical record this was the policy the ICTY found in Prlić et al.",
+        "description": "Order HVO forces and the HZ HB civil authorities to drive Bosniak civilians out of the HVO-held parts of Vitez, Busovača, Kiseljak, Žepče, Gornji Vakuf and Jablanica about a month after the order, and out of the HVO-held parts of Mostar, Stolac, Čapljina, Ljubuški and Prozor about four months after it. In each of these municipalities, between 30 and 75 percent of the Bosniaks living in HVO-held areas will be driven out. About 3 in every 100 of them will be killed; most of the rest will be driven into ARBiH-held territory, and some will leave the country. The order lowers Herceg-Bosna's international standing, and the expulsions are recorded as a war crime of the HZ HB leadership. In the historical record this was the policy the ICTY found in Prlić et al.",
         "sets_flags": {
           "hrhb_minority_policy": "expel"
         },
@@ -671,7 +683,7 @@
         "branch_tag": "hrhb_minority_policy_restrain",
         "historical_marker": "counterfactual",
         "label": "Order that Bosniak civilians are not expelled",
-        "description": "Order HVO forces and the HZ HB civil authorities to leave Bosniak civilians in place. They stay unless fighting reaches them. No expulsion is recorded against the HZ HB leadership.",
+        "description": "Order HVO forces and the HZ HB civil authorities to leave Bosniak civilians in place. They stay unless fighting reaches them. No expulsion order is recorded against the HZ HB leadership.",
         "sets_flags": {
           "hrhb_minority_policy": "restrain"
         },
