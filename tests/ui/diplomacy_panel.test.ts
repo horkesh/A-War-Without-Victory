@@ -307,7 +307,7 @@ describe('DiplomacyPanel', () => {
         // The old "No active diplomatic packet" empty-state is now the patron-absent fallback.
         expect(screen.getByRole('dialog', { name: /patron relations/i })).toBeTruthy();
         expect(screen.getByText('No patron channel')).toBeTruthy();
-        expect(screen.getByText(/Your patron stance will surface here/i)).toBeTruthy();
+        expect(screen.getByText(/Your patron's stance appears here/i)).toBeTruthy();
         // No patron headline when there is no patron stance.
         expect(screen.queryByText('Your Patron')).toBeNull();
     });

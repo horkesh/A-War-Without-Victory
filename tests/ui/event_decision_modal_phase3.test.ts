@@ -82,10 +82,10 @@ describe('EventDecisionModal presidential dossier', () => {
       expect(text).not.toMatch(/What Is Bosnia|The Assembly Speaks|What Is Herceg-Bosna/);
       expect(text).not.toMatch(/Your Presidency must declare|The National Assembly has convened|Zagreb is on the line/);
       expect(text).not.toMatch(/Civic multi-ethnic republic|Adopt all six goals|Croat republic\s+[—-]\s+follow Zagreb/);
-      expect(text).not.toMatch(/Karadzic judgment context|ICTY Karadzic Trial Judgment|Kordic and Prlic judgments/);
+      expect(text).not.toMatch(/Karad[zž]i[cć] judgment context|ICTY Karad[zž]i[cć] Trial Judgment|Kordi[cć] and Prli[cć] judgments/);
       expect(text).not.toMatch(/The May 1992 platform debate|Zagreb's directive and Herceg-Bosna institutions/);
       if (eventId === 'rbih_state_identity') {
-        expect(text).toContain('Republika Bosna i Hercegovina moral +3');
+        expect(text).toContain('ARBiH moral +3');
         expect(text).toContain('Zapis kampanje ažuriran: Građanska multietnička republika');
         expect(text).not.toContain('Republic of Bosnia and Herzegovina');
         expect(text).not.toContain('morale +3');
@@ -128,7 +128,7 @@ describe('EventDecisionModal presidential dossier', () => {
 
   it('names General Ratko Mladic in the RS foundational decision without generic commander framing', () => {
     const eventDef = firstHourCatalog.get('rs_strategic_goals');
-    expect(eventDef?.narrative).toContain('General Ratko Mladic, commander of the VRS Main Staff');
+    expect(eventDef?.narrative).toContain('General Ratko Mladić, commander of the VRS Main Staff');
     expect(eventDef?.narrative).not.toMatch(/Your army commander/i);
     expect(JSON.stringify(eventDef?.response_options ?? [])).not.toMatch(/Your commander's warning|Your commander warned/i);
 
@@ -139,8 +139,8 @@ describe('EventDecisionModal presidential dossier', () => {
     }));
 
     const englishText = container.textContent ?? '';
-    expect(englishText).toContain('General Ratko Mladic, commander of the VRS Main Staff');
-    expect(englishText).toContain("General Mladic's warning");
+    expect(englishText).toContain('General Ratko Mladić, commander of the VRS Main Staff');
+    expect(englishText).toContain("General Mladić's warning");
     expect(englishText).not.toMatch(/Your army commander|Your commander's warning|Your commander warned/i);
     unmount();
 
@@ -250,9 +250,9 @@ describe('EventDecisionModal presidential dossier', () => {
     expect(screen.getByText('Historical default')).toBeTruthy();
     expect(screen.getByText(/historically attested choice/)).toBeTruthy();
     expect(screen.getByText('Keep the institutions aligned with the existing wartime project.')).toBeTruthy();
-    expect(screen.getByText('Herzeg-Bosna morale +4')).toBeTruthy();
-    expect(screen.getByText('Herzeg-Bosna patron pressure -2')).toBeTruthy();
-    expect(screen.getByText('Herzeg-Bosna Patron Confidence +6')).toBeTruthy();
+    expect(screen.getByText('HVO morale +4')).toBeTruthy();
+    expect(screen.getByText('HRHB patron pressure -2')).toBeTruthy();
+    expect(screen.getByText('HRHB Patron Confidence +6')).toBeTruthy();
     expect(screen.getByText('No immediate mechanical effects.')).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Choose response: Maintain the separate project' })).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Choose response: Seek a joint front' })).toBeTruthy();
@@ -319,7 +319,7 @@ describe('EventDecisionModal presidential dossier', () => {
       onRespond: () => undefined,
     }));
 
-    expect(screen.getByText('Republic of Bosnia and Herzegovina morale -1')).toBeTruthy();
+    expect(screen.getByText('ARBiH morale -1')).toBeTruthy();
     expect(container.textContent).not.toContain('recruitment');
     expect(container.textContent).not.toContain('combat effectiveness');
     expect(container.textContent).not.toContain('staff priorities');
@@ -343,7 +343,7 @@ describe('EventDecisionModal presidential dossier', () => {
       onRespond: () => undefined,
     }));
 
-    expect(screen.getByText(/Historical default source review required/i)).toBeTruthy();
+    expect(screen.getByText(/No response is marked as the historical choice/i)).toBeTruthy();
     expect(screen.queryByText('Recommended')).toBeNull();
     expect(screen.queryByText('Correct choice')).toBeNull();
   });

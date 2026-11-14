@@ -32,7 +32,7 @@ describe('sensitive-history player-choice content boundary', () => {
         expect(event.trigger).toEqual({ turn_min: 1, turn_max: 3, phase: 'war' });
         expect(event.narrative).toContain('Six strategic goals');
         expect(event.narrative).toContain('constitute genocide');
-        expect(event.historical_source).toContain('ICTY Mladic Trial Judgment');
+        expect(event.historical_source).toContain('ICTY Mladić Trial Judgment');
         expect(event.source_tier).toBe('icty_icj_un');
         expect(event.source_note).toContain('Sensitive History Design Gate');
         expect(directChoiceFields(event).some(isDirectRefusedSensitiveChoice)).toBe(false);
