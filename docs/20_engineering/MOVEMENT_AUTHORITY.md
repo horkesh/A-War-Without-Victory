@@ -120,7 +120,16 @@ held forever — leaving requires an authorized order or a combat consequence.
 
 1. During `generate-bot-corps-orders`, T1 identifies an empty same-corps sector and selects a deterministic legal donor. The donor must be roster-eligible, connected through friendly territory within the movement bound, permitted by enclave rules, and free of operation, dig-in, elite-loan, or active-transit commitments. Donating line sectors retain their minimum staffing floor.
    - A sector with no assigned, reserve or rear brigade is relieved from any legal same-corps donor (rear, then reserve, then surplus line; then friendly distance; then id).
-   - SE7E (2026-11-14): a sector with no assigned (front) brigade that still lists its own pool is also empty for T1. If it has an eligible own reserve, T1 leaves it to the reserve sector march (`evaluateSectorMarch`). Otherwise T1 commits the sector's own eligible rear brigade (nearest, then id) and never borrows another sector's brigade. Construction's zero-assigned rescue (3 hops, no dig-in, no pending order) and the bot sector march (assigned and reserve only) cannot move an own rear brigade beyond 3 hops. Before this, such a sector could stay frontless indefinitely (ARBiH 1st Corps Visoko-Kiseljak, t98-t188). Report: `docs/40_reports/implemented/20261114_SE7E_EMPTY_SECTOR_PROMOTION.md`.
+   - SE7E (2026-11-14), strictly additive. Sectors with no own pool are served first, exactly as before. Then a sector with no assigned (front) brigade that still lists its own pool is served:
+     - if it has an eligible own reserve, T1 leaves it to the reserve sector march (`evaluateSectorMarch`);
+     - otherwise T1 commits the sector's own eligible rear brigade if it is still free (nearest, then id), and never borrows another sector's brigade;
+     - it is skipped when one of its own reserve/rear brigades already stands on its front.
+   - Why: construction's zero-assigned rescue (3 hops, no dig-in, no pending order) and the bot sector march (assigned and reserve only) cannot move an own rear brigade beyond 3 hops. Before this, such a sector could stay frontless indefinitely (ARBiH 1st Corps Visoko-Kiseljak, t98-t188).
+   - Residuals:
+     - a fully empty sector served first may still take a frontless neighbour's rear;
+     - a frontless sector whose whole own pool is dug in waits.
+     - Systems Manual §6.5 ("empty reachable sectors receive explicit reassignment intent") is therefore not fully met for those two cases.
+   - Report: `docs/40_reports/implemented/20261114_SE7E_EMPTY_SECTOR_PROMOTION.md`.
 2. T1 emits a `sector_reassignment_order`. This records intent only; the brigade remains at its physical `location_osid`.
 3. During `generate-bot-brigade-orders`, T2 translates the reassignment into a column movement order after revalidating the destination and route.
 4. On later turns, `osid-column-movement` and `apply-brigade-movement` perform T3 movement. Arrival is proven by physical `location_osid`, not by assignment metadata.

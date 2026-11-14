@@ -13,19 +13,22 @@
 
 Calibration-moving (RF realism fix, register SD15). On main, ARBiH 1st Corps sector 4 (Visoko-Kiseljak) has no front brigade on t98-t188, the consistency-1 signature. Three passes each missed it. Construction's zero-assigned rescue reaches 3 hops and skips dug-in brigades. The bot sector march indexes assigned and reserve brigades only. Commander T1 relief counted a sector as empty only with no reserve or rear at all. So the free 182nd (rear, 4 hops) never moved, and the dug-in 147th, 185th and 146th stayed put. A weekly-save probe of main found 136 frontless sector-turns that still had an own pool; only that front persisted.
 
-`computeEmptySectorReliefReassignments` now treats a frontless sector with no eligible own reserve as empty and commits its own eligible rear brigade (nearest, then id). It never borrows another sector's brigade while it has its own pool. Fully empty sectors and donor eligibility are unchanged. It emits intent only; T2/T3 perform the march (182nd: order t99, arrives Rajčići t101, holds to t188).
+`computeEmptySectorReliefReassignments` is now strictly additive. Sectors with no own pool are served first, exactly as before. Then a frontless sector with no eligible own reserve commits its own eligible rear brigade if it is still free (nearest, then id). It never borrows another sector's brigade, and donor eligibility is unchanged. It emits intent only; T2/T3 perform the march.
 
 Measured in the cloud against main `4ff4a7665c0a35b5` (712/709/710/705):
-- Run 1 (every frontless sector, sibling donors allowed): rejected, guard breached.
-- Run 2 `ace4e553a491aecb`: 712/711/708/701.
-  - Consistency 0, strict health PASS, guards intact.
-  - Battles per week +0.2%; structural fingerprint unchanged.
-  - Oct95 −4 is one point past the −3 tolerance; this needs an orchestrator ruling.
-- v2 resumed from main's w97 save changes no cell. The Visoko-Kiseljak fix is neutral; every cell change comes from the same rule at t4, where RS 2nd Krajina keeps the 1st Drvar on frontless Ripac instead of moving it to Krupa. That divergence leaves mostly late-window knife-edges: Krupa ×3, the western cascade ×4 and Herzegovina ×2 lost; Prozor ×2, Jemanlići, Korenići and Varošluk gained.
-- Registered, not followed:
+- **v1:** rejected, guard breached.
+- **v2** (`ace4e553a491aecb`, 712/711/708/701): superseded.
+  - Its only early change (t4: frontless Ripac kept the 1st Drvar instead of fully empty Krupa getting it) diverged control.
+  - It breached two tolerances (Oct95 −4; the cascade, gated at 49, 46). The canon seat caught that the first write-up named only one of them.
+  - The historian seat rated its cell changes net less historical.
+- **v3** (`3253da2f9a6d2502`), final: 712/709/710/705; 0 control cells differ; cascade 49/49; consistency 0; strict health PASS; guards intact; battles per week 0.00%.
+  - Its only differing commander order in the whole campaign is t99: the 182nd marches from Fojnica Živčići and holds Rajčići t101-t188.
+- **Registered, not followed:**
   - SE7E-b: a dug-in reserve's sector march is rejected every turn and never released.
   - SE7E-c: the corps-wide `SIEGE_EXEMPT_CORPS` skip in `distributeBrigadesToFront`.
   - SE7E-d: a borrow order to a line holder is re-issued and dropped.
+  - SE7E-e: a fully empty sector can still take a frontless neighbour's rear; an all-dug-in pool waits.
+  - SE7E-f: some fully empty sectors flagged by the validator are not relieved.
 - Report `docs/40_reports/implemented/20261114_SE7E_EMPTY_SECTOR_PROMOTION.md`; `MOVEMENT_AUTHORITY.md` §3; CALIBRATION_MASTER entry.
 
 ## 2026-11-14 — RF-F1: sustainability and militia fatigue read the OSID front and supply
