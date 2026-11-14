@@ -100,6 +100,12 @@
   border: 1px solid #685c44;
   border-radius: 4px;
 }
+/* While a panel is open the room is inert and the panel sits over its right side; the object
+   buttons are unreachable then, so a partly covered one must not peek out at the panel's edge
+   (owner playtest R8V2). Visibility, not unmount: the opener button keeps focus restoration. */
+.dayton-live-room[inert] > .dayton-live-nav {
+  visibility: hidden;
+}
 .dayton-live-panel {
   position: absolute;
   z-index: 2;

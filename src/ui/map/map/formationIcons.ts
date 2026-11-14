@@ -59,6 +59,14 @@ export function drawTacticalSymbol(ctx: CanvasRenderingContext2D, kind: string, 
     ctx.beginPath();
     ctx.arc(centerX, centerY, symH * 0.35, 0, Math.PI * 2);
     ctx.fill();
+  } else if (normalized === 'enemy_contact') {
+    // Spotted enemy unit, unidentified: a bold question mark. The map legend names it
+    // ("Spotted enemy unit, unidentified"); a two-letter code here read as an
+    // untranslated abbreviation in both languages.
+    ctx.font = `bold ${h * 0.5}px "${UI_DATA_FONT_FAMILY}"`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('?', centerX, centerY);
   } else {
     // Fallback: abbreviated text
     ctx.font = `bold ${h * 0.42}px "${UI_DATA_FONT_FAMILY}"`;

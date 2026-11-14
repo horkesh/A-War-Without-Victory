@@ -154,6 +154,14 @@ describe('buildVerdictScene', () => {
 
         expect(scene.tone).toBe('catastrophic');
         expect(scene.headline).toContain('condemnation');
+        // The scene tone reads every side's record, while the focus faction may hold a good
+        // grade (RBiH: survival). The copy must therefore speak of the record, not claim the
+        // focused faction's verdict is condemned (owner playtest R8V1).
+        expect(scene.focusOutcomeClass).toBe('survival');
+        expect(scene.headline).toBe('The record carries a condemnation');
+        expect(scene.headline).not.toMatch(/^verdict/i);
+        expect(scene.subheadline).toContain('on any side');
+        expect(scene.subheadline).toContain('whatever grade a faction earned');
         expect(scene.costEmphasis.title).toBe('Srebrenica genocide');
         expect(scene.costEmphasis.severity).toBe('rupture');
     });
