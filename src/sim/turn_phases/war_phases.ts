@@ -3805,7 +3805,7 @@ export const warPhases: NamedPhase[] = [
         name: 'strategic-reserve-reinforcement',
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
-            context.report.strategic_reserve_reinforcement = reinforceFromStrategicReserves(context.state);
+            context.report.strategic_reserve_reinforcement = reinforceFromStrategicReserves(context.state, context.input.dataBaseDir);
         }
     },
     {

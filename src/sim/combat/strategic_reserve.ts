@@ -156,8 +156,10 @@ export interface StrategicReserveReinforcementReport {
  *
  * Runs AFTER reserve collection so freshly collected surplus is available same turn.
  * Deterministic: formations sorted by id.
+ * `baseDir` (the turn's `dataBaseDir`) locates data/source/strategic_priorities.json;
+ * omitted, the loader falls back to the process cwd.
  */
-export function reinforceFromStrategicReserves(state: GameState): StrategicReserveReinforcementReport {
+export function reinforceFromStrategicReserves(state: GameState, baseDir?: string): StrategicReserveReinforcementReport {
     const report: StrategicReserveReinforcementReport = {
         formations_reinforced: 0,
         manpower_distributed: 0,
@@ -181,8 +183,8 @@ export function reinforceFromStrategicReserves(state: GameState): StrategicReser
         const ob = fb?.location_osid;
         const fnA = fa?.recruit_pool_faction ?? fa?.faction;
         const fnB = fb?.recruit_pool_faction ?? fb?.faction;
-        const ra = (oa && fnA) ? priorityRank(getOsidPriority(oa, fnA)) : 2;
-        const rb = (ob && fnB) ? priorityRank(getOsidPriority(ob, fnB)) : 2;
+        const ra = (oa && fnA) ? priorityRank(getOsidPriority(oa, fnA, baseDir)) : 2;
+        const rb = (ob && fnB) ? priorityRank(getOsidPriority(ob, fnB, baseDir)) : 2;
         if (ra !== rb) return ra - rb;
         return strictCompare(a, b);
     });

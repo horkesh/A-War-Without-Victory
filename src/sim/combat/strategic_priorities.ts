@@ -57,6 +57,10 @@ let cachedRawForReload: RawJson | null = null;
 /**
  * Load strategic priorities from the canonical JSON file.
  * Cached after first call. Re-use the same index for every lookup.
+ *
+ * `baseDir` is the repo/data root (the turn pipeline passes `TurnInput.dataBaseDir`).
+ * Without it the path falls back to `process.cwd()`, which only works when the
+ * process runs from that root.
  */
 export function loadStrategicPriorities(baseDir?: string): StrategicPriorityIndex {
     if (cached) return cached;
@@ -113,9 +117,10 @@ function buildIndex(raw: RawJson): StrategicPriorityIndex {
  * Returns 'periphery' for unknown factions or unlisted OSIDs (the most
  * conservative classification — no reserve bias, no abandoned-periphery
  * penalty inversion).
+ * `baseDir` is forwarded to `loadStrategicPriorities` for the first (uncached) load.
  */
-export function getOsidPriority(osid: string, faction: FactionId): StrategicPriority {
-    const idx = loadStrategicPriorities();
+export function getOsidPriority(osid: string, faction: FactionId, baseDir?: string): StrategicPriority {
+    const idx = loadStrategicPriorities(baseDir);
     const entry = idx.byFaction.get(faction);
     if (!entry) return 'periphery';
     if (entry.core.has(osid)) return 'core';
