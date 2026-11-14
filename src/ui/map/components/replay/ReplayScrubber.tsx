@@ -33,7 +33,7 @@ import { buildReplayFrameSummary } from '../../../../sim/replay/replay_frame_sum
 import { replayPlayer } from '../../../../sim/replay/replay_player.js';
 import { replaySummaryPlayer } from '../../../../sim/replay/replay_summary_player.js';
 import { getActiveLocale, t, useLocale } from '../../i18n';
-import { formatCount, turnToDateString } from '../../utils/formatters';
+import { formatCount, isoDateToDateString, turnToDateString } from '../../utils/formatters';
 import { FACTION_MILITARY_LABELS } from '../../utils/theme';
 import {
     SURFACE_LABEL,
@@ -68,7 +68,11 @@ function formatControlFactionTotal(faction: string, osids: number): string {
 }
 
 function replayDateLabel(turn: number, date: string | null | undefined): string {
-    return date?.trim() || turnToDateString(turn);
+    const text = date?.trim();
+    if (!text) return turnToDateString(turn);
+    // The manifest stores a bare ISO date (derived from the turn when the frame has none);
+    // show it in the UI's locale like every other date, not as raw YYYY-MM-DD.
+    return isoDateToDateString(text) ?? text;
 }
 
 const STEP_BUTTON = `${SURFACE_SECONDARY_BUTTON} min-w-[6.5rem]`;
@@ -299,7 +303,11 @@ export function ReplayScrubber({ saveSequence, saveManifest, onInspectFrame }: R
                 className="grid grid-cols-1 gap-3 sm:grid-cols-[repeat(auto-fit,minmax(14rem,1fr))]"
                 data-awwv-replay-summary="true"
             >
-                <ReplayFigure label={t('replay.activeFormations')}>{summary.activeFormations}</ReplayFigure>
+                {summary.activeFormations != null && (
+                    <ReplayFigure label={t('replay.activeFormations')} figure="active-formations">
+                        {formatCount(summary.activeFormations)}
+                    </ReplayFigure>
+                )}
                 {summary.totalCasualties != null && (
                     <ReplayFigure label={t('replay.casualties')} figure="casualties">
                         {formatCount(summary.totalCasualties)}

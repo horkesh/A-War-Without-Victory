@@ -55,7 +55,7 @@ import {
     getPlayerSafeDisplayLabel,
     getPlayerSafeMilitaryFactionName,
 } from '../utils/playerSafeText.js';
-import { turnToDateString } from '../utils/formatters.js';
+import { formatCount, turnToDateString } from '../utils/formatters.js';
 import { isFieldedTacticalFormation } from '../../shared/playerVisibility';
 import {
     SURFACE_LABEL,
@@ -1033,12 +1033,12 @@ export function FactionReport({
                         <>
                             <StatRow label={t('verdict.report.stat.territoryKm2')} value={`${Math.round(cap.territory_controlled_km2).toLocaleString()} km\u00b2`} />
                             <StatRow label={t('verdict.report.stat.activeBrigades')} value={String(brigadeCount)} />
-                            <StatRow label={t('verdict.report.stat.personnel')} value={personnel.toLocaleString()} />
-                            <StatRow label={t('verdict.report.stat.casualtiesInflicted')} value={cap.military_casualties_inflicted.toLocaleString()} />
-                            <StatRow label={t('verdict.report.stat.casualtiesTaken')} value={cap.military_casualties_taken.toLocaleString()} />
-                            <StatRow label={t('verdict.report.stat.civiliansProtected')} value={cap.civilians_under_protection.toLocaleString()} />
-                            <StatRow label={t('verdict.report.stat.refugeesCreated')} value={cap.refugees_created.toLocaleString()} />
-                            <StatRow label={t('verdict.report.stat.refugeesReceived')} value={cap.refugees_received.toLocaleString()} />
+                            <StatRow label={t('verdict.report.stat.personnel')} value={formatCount(personnel)} />
+                            <StatRow label={t('verdict.report.stat.casualtiesInflicted')} value={formatCount(cap.military_casualties_inflicted)} />
+                            <StatRow label={t('verdict.report.stat.casualtiesTaken')} value={formatCount(cap.military_casualties_taken)} />
+                            <StatRow label={t('verdict.report.stat.civiliansProtected')} value={formatCount(cap.civilians_under_protection)} />
+                            <StatRow label={t('verdict.report.stat.refugeesCreated')} value={formatCount(cap.refugees_created)} />
+                            <StatRow label={t('verdict.report.stat.refugeesReceived')} value={formatCount(cap.refugees_received)} />
                             <StatRow label={t('verdict.report.stat.operationsLaunched')} value={String(cap.operations_launched)} />
                             <StatRow label={t('verdict.report.stat.operationsSuccessful')} value={String(cap.operations_successful)} />
                             {cap.enclaves_held.length > 0 && (
