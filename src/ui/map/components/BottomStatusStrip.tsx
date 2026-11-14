@@ -58,6 +58,7 @@ export interface BottomStatusStripProps {
 export function BottomStatusStrip({ eventCatalog }: BottomStatusStripProps = {}) {
   const loadedGameState = useGameStore((s) => s.loadedGameState);
   const turnAftermathDigest = useGameStore((s) => s.turnAftermathDigest);
+  const turnAftermathOpen = useGameStore((s) => s.turnAftermathOpen);
   const setTurnAftermathOpen = useGameStore((s) => s.setTurnAftermathOpen);
   const setTurnAftermathDigest = useGameStore((s) => s.setTurnAftermathDigest);
   const playerFaction = getPlayerFacingFaction(loadedGameState);
@@ -358,16 +359,21 @@ export function BottomStatusStrip({ eventCatalog }: BottomStatusStripProps = {})
       </div>
 
       {/* 4. Layer toggles — gear dropdown */}
-      {turnAftermathDigest && (
-        <div className="hidden min-w-0 max-w-[38vw] items-center gap-2 border border-white/10 bg-panel-card/70 px-2 py-0.5 text-xs text-text-secondary shadow-sm lg:flex">
+      {/* Command loop L2 (2026-11-14): once the week's dispatch is closed, the strip keeps
+          its headline and a button that reopens it. */}
+      {turnAftermathDigest && !turnAftermathOpen && (
+        <div
+          data-testid="status-strip-dispatch-reopen"
+          className="hidden min-w-0 max-w-[38vw] items-center gap-2 border border-white/10 bg-panel-card/70 px-2 py-0.5 text-xs text-text-secondary shadow-sm lg:flex"
+        >
           <span className="truncate">{turnAftermathDigest.headline}</span>
           <button
             type="button"
             onClick={() => setTurnAftermathOpen(true)}
-            className="shrink-0 text-xs font-bold uppercase tracking-wider text-accent-gold hover:text-amber-200"
-            aria-label={t('aftermath.digest.reviewAria')}
+            className="shrink-0 text-xs font-bold tracking-wider text-accent-gold hover:text-amber-200"
+            aria-label={t('dispatch.reopenAria')}
           >
-            {t('aftermath.digest.review')}
+            {t('dispatch.reopen')}
           </button>
           <button
             type="button"
