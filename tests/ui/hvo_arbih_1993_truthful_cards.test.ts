@@ -11,6 +11,7 @@ import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 
 import {
+    resolveEventDisplayNarrative,
     resolveEventDisplayTitle,
     resolveEventNotificationDisplay,
 } from '../../src/ui/map/data/eventDisplayCopy';
@@ -143,6 +144,13 @@ describe('eventDisplayCopy resolver', () => {
         expect(resolveEventDisplayTitle('central_bosnia_fighting_1993', 'Central Bosnia Fronts Harden', { locale: 'en' })).toBe('Central Bosnia Fronts Harden');
         expect(resolveEventDisplayTitle('no_such_event', 'Persisted', { locale: 'bcs' })).toBe('Persisted');
         expect(resolveEventDisplayTitle('csq_hvo_central_bosnia_offensive_1993', 'Ahmići and the Rupture', { locale: 'bcs' })).toBe('Ahmići i raskid');
+    });
+
+    it('resolves the narrative for the acknowledgement modal in the active locale', () => {
+        const en = row('east_mostar_siege_1993').narrative ?? '';
+        expect(resolveEventDisplayNarrative('east_mostar_siege_1993', en, { locale: 'en' })).toBe(en);
+        expect(resolveEventDisplayNarrative('east_mostar_siege_1993', en, { locale: 'bcs' })).toMatch(/^Mostar je podijeljen\./);
+        expect(resolveEventDisplayNarrative('no_such_event', 'x', { locale: 'bcs' })).toBe('x');
     });
 
     it('resolves notification copy by response and recipient, falling back to the persisted text', () => {

@@ -76,6 +76,21 @@ export function resolveEventDisplayTitle(
     return persistedTitle;
 }
 
+/**
+ * Display narrative for an event. The authored `narrative` is not persisted by a bot run, so
+ * English corrections are made in place; this only adds the active locale's translation.
+ */
+export function resolveEventDisplayNarrative(
+    eventId: string,
+    narrative: string,
+    options: { locale?: Locale; localizations?: LocalizationMap } = {},
+): string {
+    const locale = options.locale ?? getActiveLocale();
+    if (locale === 'en') return narrative;
+    const localizations = options.localizations ?? LOCALIZATIONS_BY_EVENT_ID.get(eventId);
+    return nonEmpty(localizations?.[locale]?.narrative) ?? narrative;
+}
+
 /** Display headline and body for a persisted event notification. */
 export function resolveEventNotificationDisplay(
     notification: {

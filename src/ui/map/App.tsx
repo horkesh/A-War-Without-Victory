@@ -92,6 +92,7 @@ import { useGameStore, isDevMode } from './store/gameStore';
 import { loadLatestRunSaveAsText, loadEventDefinitions, loadEventDefinitionsFull } from './data/DataLoader';
 import type { EventDefinition } from '../../sim/events/event_types';
 import { buildConsequenceReceipts, receiptsRealizedOnTurn } from './data/consequenceReceipts';
+import { resolveEventDisplayNarrative, resolveEventDisplayTitle } from './data/eventDisplayCopy';
 import { buildForcedOpReceipts, forcedOpReceiptsRealizedOnTurn } from './data/forcedOpReceipts';
 import {
   buildOfficerResentmentReceipts,
@@ -893,8 +894,9 @@ function App() {
         const def = defs.get(e.id);
         return {
           id: e.id,
-          title: def?.title ?? e.title,
-          narrative: def?.narrative ?? e.narrative ?? '',
+          // def.title is the persisted catalog title; display the authored correction/locale copy.
+          title: resolveEventDisplayTitle(e.id, def?.title ?? e.title),
+          narrative: resolveEventDisplayNarrative(e.id, def?.narrative ?? e.narrative ?? ''),
           category: def?.category ?? e.category ?? 'military',
           effects: def?.effects?.map(eff => ({
             kind: eff.kind,
