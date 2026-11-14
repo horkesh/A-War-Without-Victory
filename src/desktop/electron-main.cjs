@@ -20,6 +20,7 @@ const {
   resolvePendingProposalAccess,
   resolveOpportunityDecisionPayload,
   isResolvedProposalReviewRecord,
+  resolveProactiveForceLaunchRefusal,
   buildOpProposalCardData,
   buildForceableReadyPlanData,
   FORCE_LAUNCH_COST,
@@ -4362,17 +4363,12 @@ app.whenReady().then(() => {
 
     // REQUIRE no surfaced proposal for this plan — proactive force-launch is for
     // plans the officer never recommended. A surfaced proposal goes through the
-    // existing commit / override (force-launch-proposal) path instead.
-    const proposals = Array.isArray(state.meta?.pending_proposal_reviews)
-      ? state.meta.pending_proposal_reviews
-      : [];
-    const approveAction = `APPROVE_OP:${corpsId}:${planId}`;
-    const hasProposal = proposals.some((p) =>
-      p && p.proposed_action === approveAction
-      && (!playerFaction || p.faction === playerFaction)
-      && !isResolvedProposalReviewRecord(p),
-    );
-    if (hasProposal) return { ok: false, error: 'plan_has_pending_proposal' };
+    // existing commit / override (force-launch-proposal) path instead. A plan the
+    // President already answered this week (accepted or withheld proposal, or a
+    // staged response) is refused too: re-issuing it here would charge 25 CA and
+    // re-tag an ordinary commit as a force-launch (B11).
+    const proactiveRefusal = resolveProactiveForceLaunchRefusal(state, corpsId, planId);
+    if (proactiveRefusal) return { ok: false, error: proactiveRefusal };
 
     // Command-authority guard — stage nothing if unaffordable.
     const auth = state.military?.command_authority;

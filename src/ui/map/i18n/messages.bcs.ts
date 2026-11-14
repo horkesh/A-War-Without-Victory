@@ -6096,6 +6096,7 @@ export const bcsMessages: Partial<Record<MessageKey, string>> = {
     'directive.reserveHold.title': 'Zadrži ovu elitnu brigadu pri Glavnom štabu do pomoći enklavi ili kritičnog zahtjeva komandanta.',
     'directive.receipt.aria': 'Potvrda direktive',
     'directive.receipt.stagedNextTurn': 'Direktiva je pripremljena za sljedeći potez. Komandna vlast se troši odmah; naredba se izvršava kad napredujete.',
+    'directive.receipt.stagedNextTurnFree': 'Direktiva je pripremljena za sljedeći potez. Komandna vlast nije potrošena; naredba se izvršava kad napredujete.',
     'directive.receipt.leadershipDecisionOpened': 'Odluka je otvorena. Komandna vlast je potrošena; odaberite odgovor da biste primijenili njegove učinke.',
     'directive.receipt.failed': 'Direktiva nije pripremljena: {reason}.',
     'directive.receipt.cancelled': 'Direktiva je otkazana. Nije potrošena komandna vlast.',

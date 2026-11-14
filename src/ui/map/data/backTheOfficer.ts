@@ -995,6 +995,22 @@ export function buildForceableReadyPlans(
     proposedPlanKeys.add(`${parts[1]}:${parts.slice(2).join(':')}`);
   }
 
+  // Index every APPROVE_OP review on the raw state (pending or resolved) from the
+  // player's faction: the callers pass pending reviews only, so a just-accepted or
+  // just-withheld proposal would otherwise vanish from view (B11).
+  const answeredPlanKeys = new Set<string>();
+  const rawReviews = Array.isArray(meta?.pending_proposal_reviews) ? meta.pending_proposal_reviews : [];
+  for (const raw of rawReviews) {
+    const review = asRecord(raw);
+    if (!review) continue;
+    if (playerFaction && str(review.faction) !== playerFaction) continue;
+    const action = str(review.proposed_action);
+    if (!action) continue;
+    const parts = action.split(':');
+    if (parts[0] !== 'APPROVE_OP' || !parts[1] || !parts[2]) continue;
+    answeredPlanKeys.add(`${parts[1]}:${parts.slice(2).join(':')}`);
+  }
+
   const views: ForceableReadyPlanView[] = [];
   for (const corpsId of Object.keys(corpsCommand).sort(strictCompare)) {
     const cc = asRecord(corpsCommand[corpsId]);
@@ -1010,6 +1026,14 @@ export function buildForceableReadyPlans(
     if (!planId) continue;
     // Skip plans the officer already surfaced as a proposal (existing path owns those).
     if (proposedPlanKeys.has(`${corpsId}:${planId}`)) continue;
+    // B11 (R8 dry-run Council, 2026-11-14): skip plans the President already answered.
+    // accept/withhold resolves the review (so it leaves the pending list) and stages
+    // player_op_response while the plan stays 'ready' until Advance; such a plan is
+    // not "unrequested". Mirrors resolveProactiveForceLaunchRefusal in
+    // src/desktop/autonomy_ipc_contract.cjs, which the IPC enforces.
+    if (answeredPlanKeys.has(`${corpsId}:${planId}`)) continue;
+    const staged = asRecord(cc.player_op_response);
+    if (staged && str(staged.plan_id) === planId) continue;
 
     const commander = resolveCommander(commanderIdByCorps.get(corpsId), rosterById);
     views.push({

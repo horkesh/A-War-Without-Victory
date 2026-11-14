@@ -184,6 +184,35 @@ function parseApproveOpAction(action) {
   return { corpsId: parts[1], planId: parts.slice(2).join(':') };
 }
 
+/**
+ * Why a held-ready plan may NOT go through the proactive ("unrequested") force-launch
+ * path, or null when it may. A plan the officer surfaced as a pending APPROVE_OP
+ * proposal belongs to the proposal path. A plan the President has already answered
+ * (a staged player_op_response for it, or any resolved APPROVE_OP review for it from
+ * the player's faction) is not unrequested: the officer asked and the President
+ * replied (B11, R8 dry-run Council 2026-11-14). Read-only; deterministic.
+ */
+function resolveProactiveForceLaunchRefusal(state, corpsId, planId) {
+  const playerFaction = state && state.meta && typeof state.meta.player_faction === 'string'
+    ? state.meta.player_faction
+    : null;
+  const reviews = Array.isArray(state?.meta?.pending_proposal_reviews)
+    ? state.meta.pending_proposal_reviews
+    : [];
+  let answeredByReview = false;
+  for (const review of reviews) {
+    if (!review || (playerFaction && review.faction !== playerFaction)) continue;
+    const parsed = parseApproveOpAction(review.proposed_action);
+    if (!parsed || parsed.corpsId !== corpsId || parsed.planId !== planId) continue;
+    if (!isResolvedProposalReviewRecord(review)) return 'plan_has_pending_proposal';
+    answeredByReview = true;
+  }
+  if (answeredByReview) return 'plan_already_answered';
+  const response = state?.military?.corps_command?.[corpsId]?.player_op_response;
+  if (response && typeof response === 'object' && response.plan_id === planId) return 'plan_already_answered';
+  return null;
+}
+
 function findReadyPlan(cc, planId) {
   if (!cc || typeof cc !== 'object') return null;
   const commanderState = cc.commander_state && typeof cc.commander_state === 'object' ? cc.commander_state : null;
@@ -503,6 +532,8 @@ function buildForceableReadyPlanData(state, proposals) {
     const planId = safeStr(plan.plan_id);
     if (!planId) continue;
     if (proposedPlanKeys.has(`${corpsId}:${planId}`)) continue;
+    // B11: a plan the President already answered is not "unrequested".
+    if (resolveProactiveForceLaunchRefusal(state, corpsId, planId) !== null) continue;
 
     const commanderId = commanderIdByCorps.get(corpsId);
     const rosterRow = commanderId ? rosterById.get(commanderId) : undefined;
@@ -538,6 +569,7 @@ module.exports = {
   resolvePendingProposalAccess,
   resolveOpportunityDecisionPayload,
   isResolvedProposalReviewRecord,
+  resolveProactiveForceLaunchRefusal,
   buildOpProposalCardData,
   buildForceableReadyPlanData,
   FORCE_LAUNCH_COST,
