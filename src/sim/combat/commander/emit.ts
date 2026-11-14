@@ -2663,9 +2663,15 @@ function buildOperationsImpl(
                 // Filter: drop any objective OSID not reachable from this corps's front segments.
                 // Only apply when the corps has at least one reachable enemy OSID (i.e., the set
                 // is non-empty), to avoid incorrectly zeroing objectives for a corps with no sectors.
-                return reachableEnemyOsids.size > 0
+                const reachable = reachableEnemyOsids.size > 0
                     ? rawObjectives.filter(osid => reachableEnemyOsids.has(osid))
                     : rawObjectives;
+                // RF-AI2 bot objective lockout: honour the corps' failed-objective cooldown
+                // (sector_offensive.ts recordFailedObjectives). The local-occupation and probe
+                // paths already read it; this bot plan path did not, so a corps re-planned the
+                // objective that had just failed.
+                return reachable.filter(osid =>
+                    (briefing.failed_offensive_objectives?.[osid]?.cooldown_until_turn ?? 0) <= briefing.turn);
             },
         );
 
