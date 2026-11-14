@@ -107,6 +107,34 @@ describe('F1 sustainability OSID path', () => {
         expect(state.displacement.sustainability_state.main.sustainability_score).toBe(100);
     });
 
+    test('a faction with no supply entry is not judged cut off; an empty entry is', () => {
+        const absent = makeState({ 'op:m1': 'RBiH', 'op:m2': 'RBiH', 'op:p1': 'RBiH', 'op:p2': 'RBiH' });
+        const r1 = updateSustainability(absent, makeSettlements(), [], inputs({}));
+        expect(r1.by_municipality.every((r) => !r.is_surrounded)).toBe(true);
+        const empty = makeState({ 'op:m1': 'RBiH', 'op:m2': 'RBiH', 'op:p1': 'RBiH', 'op:p2': 'RBiH' });
+        const r2 = updateSustainability(empty, makeSettlements(), [], inputs({ RBiH: [] }));
+        expect(r2.by_municipality.every((r) => r.is_surrounded)).toBe(true);
+    });
+
+    test('ties between equally sized supplied holders go to CANONICAL_FACTIONS order', () => {
+        const state = makeState({ 'op:m1': 'RS', 'op:m2': 'HRHB', 'op:p1': 'RBiH', 'op:p2': 'RBiH' });
+        const report = updateSustainability(state, makeSettlements(), [], inputs({ RS: ['op:m1'], HRHB: ['op:m2'], RBiH: ['op:p1'] }));
+        expect(report.by_municipality.find((r) => r.mun_id === 'main')!.faction_id).toBe('RS');
+    });
+
+    test('collapse is permanent and its pressure goes to the current controller (canon rule)', () => {
+        const state = makeState({ 'op:m1': 'RBiH', 'op:m2': 'RBiH', 'op:p1': 'RBiH', 'op:p2': 'RBiH' });
+        state.displacement.sustainability_state = {
+            pocket: { mun_id: 'pocket', is_surrounded: true, unsupplied_turns: 10, sustainability_score: 0, collapsed: true, last_updated_turn: 9 },
+        } as GameState['displacement']['sustainability_state'];
+        state.political.political_controllers!['op:p1'] = 'RS';
+        state.political.political_controllers!['op:p2'] = 'RS';
+        const report = updateSustainability(state, makeSettlements(), [], inputs({ RBiH: ['op:m1', 'op:m2'], RS: ['op:p1', 'op:p2'] }));
+        const pocket = report.by_municipality.find((r) => r.mun_id === 'pocket')!;
+        expect(pocket).toMatchObject({ faction_id: 'RS', is_surrounded: false, collapsed: true });
+        expect(report.negotiation_pressure_increment).toBe(1);
+    });
+
     test('a municipality no faction holds produces no record', () => {
         const state = makeState({ 'op:m1': 'RBiH', 'op:m2': 'RBiH' });
         const report = updateSustainability(state, makeSettlements(), [], inputs({ RBiH: ['op:m1', 'op:m2'] }));

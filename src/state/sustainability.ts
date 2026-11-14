@@ -336,7 +336,7 @@ function applySustainabilityTurn(
 /**
  * OSID path (campaign). One evaluation per municipality with a militia pool, for one holder:
  * a faction whose OSIDs here are all cut off from supply if there is one, otherwise the faction
- * holding most of its OSIDs (ties: id order). `sustainability_state` is keyed by municipality,
+ * holding most of its OSIDs (ties: CANONICAL_FACTIONS order). `sustainability_state` is keyed by municipality,
  * so the old per-pool loop degraded a municipality once per pool (2-3 times a turn) and the
  * last pool's faction won.
  *
@@ -387,14 +387,16 @@ function updateSustainabilityOsid(
         }
         // A cut-off holder outranks a supplied one: Srebrenica and Žepa became minorities of
         // their municipalities' OSIDs, and a majority-holder rule would never see them (the
-        // RF-3 P6 lesson). Within each class: most OSIDs, then id order.
+        // RF-3 P6 lesson). Within each class: most OSIDs, then CANONICAL_FACTIONS order.
+        // A faction with no supply entry at all is not judged cut off (no evidence either way);
+        // a faction whose entry is an empty set is.
         let holder: FactionId | null = null;
         let holderCut = false;
         for (const side of CANONICAL_FACTIONS) {
             const held = heldBy.get(side);
             if (!held || held.length === 0) continue;
             const reachable = inputs.suppliedByFaction.get(side);
-            const cut = !held.some((osid) => reachable?.has(osid) === true);
+            const cut = reachable !== undefined && !held.some((osid) => reachable.has(osid));
             const better = holder === null
                 || (cut && !holderCut)
                 || (cut === holderCut && held.length > (heldBy.get(holder)?.length ?? 0));

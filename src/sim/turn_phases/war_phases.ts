@@ -4483,8 +4483,10 @@ export const warPhases: NamedPhase[] = [
         run: (context) => {
             const edges = context.input.settlementEdges;
             if (!edges) return;
-            // F1: front edges in the OSID id space when operational data is present (breach
-            // candidates key on them). Legacy edges otherwise (fixtures, CLI harnesses).
+            // F1: front edges in the OSID id space when operational data is present, so the
+            // step's ids match its other inputs. Breach candidates still read 0 here: they need
+            // `front_segments`/`front_pressure`, which the dormant legacy front substrate never
+            // populates in a campaign (F9/SD2, out of RF-F1 scope). Legacy edges otherwise.
             const od = getOperationalData(context);
             const derivedFrontEdges = od?.edges?.length
                 ? buildOsidDisplacementPressureInputs(context.state, od).frontEdges.slice()
