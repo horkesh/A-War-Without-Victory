@@ -1,3 +1,29 @@
+**Empty front sector commits its own rear, SE7E (PR #625) — 2026-11-14: measured on main before #619 as 712 / 709 / 710 / 705 (unchanged; consistency 1 → 0). Rebased onto main after #619 (712 / 705 / 706 / 698); the measured run and bless on main after #623 are pending (orchestrator ordering), and this entry will be updated with them.**
+- **What changed.** ARBiH 1st Corps sector 4 (Visoko-Kiseljak: Draževići, Rajčići, Stuparići) had no front brigade on t98-t188 on main (consistency 1, SD15).
+  - Its own pool could not be committed. The 147th, 185th and 146th were dug in (the 146th also caught in a bot march order the executor rejected every turn). The 182nd was free but 4 hops away.
+  - Construction's zero-assigned rescue reaches 3 hops and skips dug-in brigades. The bot sector march moves assigned and reserve brigades only.
+  - Commander T1 relief counted a sector as empty only with no reserve or rear at all.
+- **The rule** (`computeEmptySectorReliefReassignments`), strictly additive:
+  - sectors with no own pool are served first, exactly as before;
+  - then a frontless sector with no eligible own reserve commits its own eligible rear brigade if it is still free (nearest, then id);
+  - it never borrows another sector's brigade.
+  - Intent only (T2 reassignment march, T3 column movement); donor eligibility unchanged; at most one per sector per pass.
+  - `MOVEMENT_AUTHORITY.md` §3. Report `docs/40_reports/implemented/20261114_SE7E_EMPTY_SECTOR_PROMOTION.md`.
+- **Measured** against main `887310d` (`4ff4a7665c0a35b5`), cloud 188w:
+  - **Run 1, v1 (`567eb1f4a383e7f1`, 712/711/707/694): rejected.** It admitted every frontless sector with an own pool and allowed sibling donors. Guard breached.
+  - **Run 2, v2 (`ace4e553a491aecb`, 712/711/708/701): superseded.**
+    - Two tolerance breaches: Oct95 −4 and the cascade (gated at 49) 46.
+    - The only early change was at t4: frontless Ripac kept the 1st Drvar instead of Krupa getting it. The Pyrrhic gate's historian seat rated the resulting cell changes net less historical.
+  - **Run 4, v3 (`3253da2f9a6d2502`): final.**
+    - 712/709/710/705; 0 control cells differ at any checkpoint; cascade 49/49.
+    - Consistency 0; strict health PASS; enclave, Farz and eastern-provenance guards intact.
+    - Battles per week 2.697 (0.00% in every faction).
+    - The only commander order that differs from main in the whole campaign is t99, 182nd → sector 4. The 182nd marches from Fojnica Živčići and holds Rajčići t101-t188.
+  - Its hash equals that of v2 resumed from main's w97 save (the attribution run).
+- **Defect dependency (standing question).** No matched cell depends on the Visoko-Kiseljak gap: fixing it changes no control cell.
+- **Residuals** (registered): main's existing T1 priority, which v3 keeps, still lets a fully empty sector take a frontless neighbour's rear (t4: the 1st Drvar to Krupa, the historically active April 1992 front), and a frontless sector whose whole own pool is dug in waits. SE7E-b, SE7E-c, SE7E-d and SE7E-f are registered in the report.
+- **Baselines** re-pinned at the final head (`final_save.json` `3253da2f…`). Structural fingerprint `bc629e89a585dfde` unchanged.
+
 **Readiness gate light strike group + bot objective lockout, RF-AI2 (PR #619) — 2026-11-14: 712 / 705 / 706 / 698. Owner-accepted 2026-11-14 ("Yes, accept it") as an honest cost of fixing the corps gate. This is the new main reference.**
 - **Per-cell causes (vs 712/709/710/705):**
 
