@@ -27,6 +27,13 @@ type ReceiptEvent = {
   state: string;
 };
 
+// Each real-child test boots a whole vitest process (about 3 s idle). Under a loaded host (several
+// worktrees, a full suite, antivirus) that start can take several times longer, so the budget is a
+// ceiling for a genuine hang rather than a tight expectation. A hung child still fails the test.
+const REAL_CHILD_TEST_TIMEOUT_MS = 120_000;
+// The kill test waits for the child's first receipt line; same load tolerance, still bounded.
+const FIRST_RECEIPT_DEADLINE_MS = 60_000;
+
 const root = process.cwd();
 const vitestCli = resolveVitestCli(root);
 const retainedRunsRoot = join(
@@ -107,7 +114,7 @@ describe('balanced Vitest per-file receipts', () => {
       expect(result.events.map((event) => event.sequence), fixture)
         .toEqual(result.events.map((_, index) => index + 1));
     }
-  }, 30_000);
+  }, REAL_CHILD_TEST_TIMEOUT_MS);
 
   it('persists a collection start before synchronous work and does not fabricate a finish when killed', async () => {
     const run = createReceiptRun(root, receiptRoot, { shard_count: 1 });
@@ -122,7 +129,7 @@ describe('balanced Vitest per-file receipts', () => {
     const child = spawn(process.execPath, [
       vitestCli, 'run', '--config', config, '--reporter=dot', '--silent',
     ], { cwd: root, env, stdio: 'ignore', shell: false });
-    const deadline = Date.now() + 10_000;
+    const deadline = Date.now() + FIRST_RECEIPT_DEADLINE_MS;
     while (readFileSync(env.AWWV_VITEST_RECEIPT_FILE, 'utf8').length === 0 && Date.now() < deadline) {
       await new Promise((resolve) => setTimeout(resolve, 25));
     }
@@ -139,7 +146,7 @@ describe('balanced Vitest per-file receipts', () => {
       state: 'running',
       duration_ms: null,
     });
-  }, 30_000);
+  }, REAL_CHILD_TEST_TIMEOUT_MS);
 
   it('does not let a nested default helper inherit and contaminate its outer receipt lane', async () => {
     const result = await runFixture('receipt_nested_child', ['--reporter=dot', '--silent']);
@@ -149,7 +156,7 @@ describe('balanced Vitest per-file receipts', () => {
     ]));
     expect(result.events.map((event) => event.sequence))
       .toEqual(result.events.map((_, index) => index + 1));
-  }, 30_000);
+  }, REAL_CHILD_TEST_TIMEOUT_MS);
 
   it('continues lane sequence numbers strictly across two real file-runner instances', async () => {
     const result = await runFixtures(['receipt_pass', 'receipt_pass_second'], ['--reporter=dot', '--silent']);
@@ -163,7 +170,7 @@ describe('balanced Vitest per-file receipts', () => {
     expect(new Set(result.events.map((event) => event.run_id))).toEqual(new Set([result.run.runId]));
     expect(new Set(result.events.map((event) => event.worker_id))).toEqual(new Set(['worker-0']));
     expect(new Set(result.events.map((event) => event.lane))).toEqual(new Set(['parallel-0']));
-  }, 30_000);
+  }, REAL_CHILD_TEST_TIMEOUT_MS);
 
   it('does not claim execution finish when native file finalization rejects', async () => {
     const result = await runFixture(
@@ -174,7 +181,7 @@ describe('balanced Vitest per-file receipts', () => {
     expect(result.status).toBe(1);
     expect(result.events.some((event) => event.phase === 'execution_start')).toBe(true);
     expect(result.events.some((event) => event.phase === 'execution_finish')).toBe(false);
-  }, 30_000);
+  }, REAL_CHILD_TEST_TIMEOUT_MS);
 
   it('uses captured real clocks when a test leaves fake time active', async () => {
     const result = await runFixture('receipt_fake_clock', ['--reporter=dot', '--silent']);
@@ -186,7 +193,7 @@ describe('balanced Vitest per-file receipts', () => {
         expect(event.duration_ms).toBeGreaterThanOrEqual(0);
       }
     }
-  }, 30_000);
+  }, REAL_CHILD_TEST_TIMEOUT_MS);
 
   it('creates every run and lane receipt with create-new ownership outside generated configs', () => {
     const first = createReceiptRun(root, receiptRoot, { shard_count: 4 });
