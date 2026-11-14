@@ -79,11 +79,25 @@ Battles per week (orchestrator ruling): the 5% line applies to the total. RBiH's
 | P5 | pockets only | `93cfcbe7dbb2d325` | 712/709/707/703 | PASS |
 | F4 | flight abroad (flat) | `1dcf801a1f804c13` | 711/710/710/703 | PASS |
 | P6 | panel engine fixes | `1bf1f66936637a69` | 711/710/709/707 | PASS |
-| F4b | regional flight abroad | `efe1b8555b16029f` | 712/709/710/707 | PASS, consistency 1 (SE7 signature) |
+| F4b | regional flight abroad | `efe1b8555b16029f` | 712/709/710/707 | PASS, consistency 1 |
+| main after #604 (baseline for the final run) | | `253f690fa0153746` | 712/711/711/708 | PASS, consistency 0 |
+| **final: head merged with main (runs 11 and 12)** | | **`823ba7a929b6ba31` (reproduced)** | **712/709/710/705** | strict PASS, guards intact, consistency 1 (see below) |
+
+Final run against main after #604:
+- **Shortfall:** Jan93 0, Apr94 −2, Apr95 −1, Oct95 −3, total 6.
+- **Moved cells:** the Prozor pair at Apr94, Apr95 and Oct95 (one "Operacija Ponos" choice); Travnik `gornje_krcevine` gained at Apr95 ("Vlašić Ridge", t155); Travnik `varosluk` lost at Oct95 ("Donji Vakuf 95" timing).
+- **Battles per week:** total 521 → 507 (−2.7%); RBiH 280 → 271 (−3.2%); RS −2.2%; HRHB −1.7%.
+- **Old Farz reading:** the final run also passes the corps-only Farz reading used before 7c24106c4.
+
+**Consistency 1 is a pre-existing assignment gap** (orchestrator ruling 2026-11-14). Eligible reserve and rear brigades are never promoted into an empty front sector.
+- In this layout the ARBiH 1st Corps sector 4 (Visoko-Kiseljak, facing RS-held Ilidža Rudnik and Ilijaš Podlugovi) is empty from about w90 to w188. The 146th sits in reserve and the 147th, 182nd and 185th in the rear.
+- No cell changes hands in or next to the sector from w80 to w188.
+- Main has consistency 0 only because its 123rd stands there.
+- The fix is the SE7-engine follow-up (register SD15).
 
 P4 measured alone (run n5) breached the checkpoint guard (712/709/707/700: Farz Spreča receipt missing, unwarranted late captures at Doboj Boljanić and Gračanica Petrovo); P5 cured it.
 
-Humanitarian figures at F4b: killed Bosniak/Serb/Croat 33,903 / 3,293 / 2,718 (baseline 33,903 / 3,308 / 2,706); fled abroad 207,595 / 107,695 / 125,343 (baseline 88,732 / 108,077 / 109,012); "not recorded" 0. Enclave end populations: Srebrenica 54.9k (history 50-60k), Goražde 45.1k. Pockets book to the besieger (P5: Sarajevo +33.8k, Goražde +1,735, Srebrenica +883, Bihać +319, Orašje +1,540 to RS; Kiseljak and Žepče pro rata).
+Humanitarian figures at F4b: killed Bosniak/Serb/Croat 33,903 / 3,293 / 2,718 (baseline 33,903 / 3,308 / 2,706); fled abroad 207,595 / 107,695 / 125,343 (baseline 88,732 / 108,077 / 109,012); "not recorded" 0. Enclave end populations at F4b: Srebrenica 54.9k (history 50-60k), Goražde 45.1k (final run 44.7k; main 56k). Pockets book to the besieger (P5: Sarajevo +33.8k, Goražde +1,735, Srebrenica +883, Bihać +319, Orašje +1,540 to RS; Kiseljak and Žepče pro rata).
 
 Flight abroad also drains the RBiH manpower pool: at F4b committed militia ends at 768k against 868k on main, so later calibration must count it as a recruitment lever.
 
