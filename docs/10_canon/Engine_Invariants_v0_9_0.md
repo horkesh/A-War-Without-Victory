@@ -402,7 +402,7 @@ friendly-held OSID reachable from the lost position through friendly territory, 
 search of `EMERGENCY_RETREAT_BFS_MAX_HOPS = 8`, but its frontier is not advanced past the first
 ring); the corps HQ; then the first OSID, in sorted order, of the same friendly component. It
 never selects another component. If none exists it returns null and the caller applies the
-cut-off outcome. Only callers without topology keep a sorted first-friendly-OSID
+cut-off outcome. The first, second and fourth steps and the sorted-component step apply only when the lost position is still in the friendly set the caller supplies (a per-pass cache, so this can depend on battle order). Only callers without topology keep a sorted first-friendly-OSID
 compatibility fallback, which is lexical-only. Open debt: the cut-off outcome in
 `forceRetreatWithPenalties` currently sets the brigade inactive with a `destruction_turn`,
 which does not conform to 6.2 or the note above; the BFS depth defect and the same-turn
