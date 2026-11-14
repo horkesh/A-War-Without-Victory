@@ -24,7 +24,16 @@
 
 **Left as written (records or fixtures).** The `.agent/skill-distribution.json` backup and rollback paths are activation records. Its only consumer is a helper in `logs/` that runs from the retained packet's own manifest copy. Also left: the `engine_health_thresholds.json` rebaseline note (run provenance), the hook-guard and harness test strings (path-pattern fixtures), the `hook_registry` comments (they describe the defect that test pins), and the napkin July archive. `.claude/launch.json` was already relative on main.
 
-**Checked.** `npx tsc --noEmit` exit 0. 18 vitest files (the 7 named tests plus 11 that read the touched docs or tools) passed, 202 tests. `npm run test:baselines` reports all scenarios match. Helper probed from a disposable linked worktree: it resolved the main checkout and its sibling coordination folder.
+**Checked.**
+- `npx tsc --noEmit` exit 0 after every commit. It needs `NODE_OPTIONS=--max-old-space-size=8192`; at a 2 GB default heap it runs out of memory regardless of this change.
+- Tooling commits: 18 vitest files (the 7 named tests plus 11 that read the touched docs or tools) passed, 202 tests.
+- `src/` commits:
+  - 11 files (315 tests) covering strategic reserves and priorities passed.
+  - Then 13 files (134 tests) passed: the three new test files plus the existing turn-summary, negotiation-capital, lifecycle and priority tests.
+  - Each new test fails with its `src/` change reversed.
+- `npm run test:baselines` reports all scenarios match three times: before any `src/` change, after the strategic-priorities fix, and after the loader fixes.
+- An independent review approved the first tooling commit and both `src/` commits, with no blocking findings.
+- Helper probed from a disposable linked worktree: it resolved the main checkout and its sibling coordination folder.
 
 **Not done.** The PowerShell and Playwright scripts were not run on Windows here. Other machine-specific paths that do not match the F: inventory pattern are listed in the PR as out of scope. After these fixes, a run from outside the repo root still fails, now at `operational_settlements.geojson`. The sim broadly assumes it runs from the data root, and the remaining reads are a larger layer that needs its own lane:
 - the turn pipeline's `loadSettlementGraph()` fallbacks (`turn_pipeline_types.ts` `getOperationalSettlementGraph`, `turn_pipeline.ts`, six in `early_war_phases.ts`, `state/negotiation_capital.ts`)
