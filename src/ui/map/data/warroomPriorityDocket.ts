@@ -6,6 +6,7 @@ import {
   type PreAdvanceCommandReviewSourceHandoff,
   type PreAdvanceCommandReviewStatus,
 } from './preAdvanceCommandReview';
+import type { PresidentialDecisionRoomNavigationTarget } from './presidentialDecisionRoom';
 import { t } from '../i18n';
 
 export type WarroomPriorityDocketTone = 'danger' | 'attention' | 'clear' | 'quiet';
@@ -30,6 +31,16 @@ export interface WarroomPriorityDocketView {
 
 export interface WarroomPriorityDocketInput extends PreAdvanceCommandReviewInput {
   limit?: number;
+}
+
+/**
+ * Every docket row is clickable. A row whose card has no navigation target of its own opens that
+ * card in the Decision Room instead of sitting disabled; rows with a target return null here and
+ * keep their own.
+ */
+export function docketRowFallbackTarget(item: WarroomPriorityDocketItem): PresidentialDecisionRoomNavigationTarget | null {
+  if (item.navigationTarget.kind !== 'none') return null;
+  return { kind: 'decision-room', lens: 'all', cardId: item.id };
 }
 
 function docketTone(status: PreAdvanceCommandReviewStatus): WarroomPriorityDocketTone {
@@ -75,7 +86,9 @@ function statusLabel(status: PreAdvanceCommandReviewStatus, hasLoadedState: bool
 
 export function buildWarroomPriorityDocketView(input: WarroomPriorityDocketInput): WarroomPriorityDocketView {
   const review = buildPreAdvanceCommandReviewView(input);
-  const limit = input.limit ?? 4;
+  // No default cap: the docket lists every counted item (the panel scrolls). A caller that wants
+  // a short featured list passes `limit` explicitly.
+  const limit = input.limit ?? review.items.length;
   const safeLimit = Number.isFinite(limit) && limit > 0 ? Math.floor(limit) : 0;
 
   return {

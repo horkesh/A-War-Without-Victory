@@ -200,7 +200,7 @@ describe('buildWarroomPriorityDocketView', () => {
     expect(view.canOpenBoard).toBe(true);
   });
 
-  it('uses weighted grouped-decision counts in the docket summary', () => {
+  it('counts a grouped decision card as one row, and its decisions as pending reviews', () => {
     const view = buildWarroomPriorityDocketView({
       state: makeState({
         latestTurnSummary: null,
@@ -214,8 +214,11 @@ describe('buildWarroomPriorityDocketView', () => {
 
     expect(view.metrics.pendingReviews).toBe(2);
     expect(view.metrics.priorityCounts.required).toBe(2);
-    expect(view.metrics.advanceReviewCount).toBe(2);
-    expect(view.summary).toBe('2 advance items / 2 required / 4 recommended / 0 monitor / 0 record / 2 pending');
+    // The chip's number is the rows the list shows (one grouped convoy card); the two convoy
+    // decisions still weigh on the pending-review count.
+    expect(view.items).toHaveLength(1);
+    expect(view.metrics.advanceReviewCount).toBe(1);
+    expect(view.summary).toBe('1 advance item / 2 required / 4 recommended / 0 monitor / 0 record / 2 pending');
   });
 
   it('returns a safe unavailable state when no campaign is loaded', () => {

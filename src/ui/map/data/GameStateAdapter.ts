@@ -3696,6 +3696,11 @@ function derivePendingOfficerEvents(
     return events
         .filter((e: any) => !e.acknowledged)
         .filter((e: any) => playerFactionMatch(e.faction, playerFaction))
+        // The weekly `army_directive_pushback` answers a directive the President never gave. For his
+        // own faction it is a one-line Army HQ Records entry (read from the decision traces), never
+        // a pending matter: it feeds no card, tile, chip item or review-queue count (command-loop
+        // proposal 2A, step A0). The sim still emits it; enemy and headless rows are untouched.
+        .filter((e: any) => e.type !== 'army_directive_pushback')
         .map((e: any) => {
             const stats = getOfficerStats(e.officer_id);
             return {
