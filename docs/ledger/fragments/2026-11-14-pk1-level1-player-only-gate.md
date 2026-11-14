@@ -37,7 +37,7 @@ Unchanged after checking: FORAWWV (no §6 or enclave question; no bright-line pa
 **Tests.**
 - **Restored gate tests.** `tests/sim/autonomy/level1_player_only_gate.test.ts`, `tests/commander/operation_emit_overlap_guards.test.ts` and `tests/sim/autonomy/autonomy_phase_d.test.ts` passed, 110 tests.
   - The panel's systems seat re-ran the new test file with the old faction-blind rule mocked in; 5 of its 8 tests failed, so it separates the two rules.
-  - Two cases were added: headless with `player_faction` set, and a source pin that the production caller passes `faction`.
+  - Two cases were added: headless with `player_faction` set, and a source pin that the production caller passes `faction`. The three files now hold 112 tests.
 - **Two older tests the archived branch never ran.** The broader commander sweep failed `commander_operation_assignment` ("does not allocate an officer while Level-1 approval is absent") and `elite_formation_utilization` (local occupation, `playerAuthorityOutput`). Both built a level-1 state with no `player_faction`, so their RS corps became a bot under the new rule. Each now names RS as the player and adds a bot-side positive control.
 - **Harness.** `tests/paradox_local_qa_harness.test.ts` passed, 131 tests, including a new test for the level-2 default and the `--strategic-autonomy` parser.
 
