@@ -1,34 +1,45 @@
 {
-    "war_duration_weeks": 182,
+    "war_duration_weeks": 189,
+    "fighting_end_week": 183,
     "territory_final": {
         "RS": 49,
         "RBiH_HRHB_Federation": 51
     },
     "total_killed": 97207,
+    "military_killed_total": 57523,
     "military_killed": {
-        "RBiH": 31270,
-        "RS": 21173,
-        "HRHB": 7788
+        "RBiH": 30906,
+        "RS": 20775,
+        "HRHB": 5919
     },
-    "civilian_killed": 38476,
+    "civilian_killed": 39684,
     "total_displaced": 2200000,
     "srebrenica_killed": 8372,
     "milestones": [
         {
             "id": "srebrenica_genocide_1995",
             "label": "Srebrenica Genocide",
-            "historical_week": 171,
+            "historical_week": 170,
             "kind": "rupture",
             "event_id": "srebrenica_genocide_1995",
-            "source_notes": "July 1995; ICTY Krstic judgment and later tribunal findings"
+            "source_notes": "July 1995 (fall 11 Jul, killings 13-16 Jul: week 170); ICTY Krstić IT-98-33-T (2001) and IT-98-33-A (2004); ICJ Bosnia and Herzegovina v. Serbia and Montenegro (2007)"
+        },
+        {
+            "id": "ceasefire_1995",
+            "label": "Country-wide ceasefire in force",
+            "historical_week": 183,
+            "kind": "war_end",
+            "ending": "no_settlement",
+            "source_notes": "Ceasefire agreed 5 Oct 1995, in force on the morning of 12 Oct 1995 (week 183); BB1 p.429"
         },
         {
             "id": "dayton_accords",
-            "label": "Dayton Accords",
-            "historical_week": 182,
+            "label": "Dayton Agreement initialled",
+            "historical_week": 189,
             "kind": "war_end",
-            "source_notes": "November 1995 Dayton Agreement reference endpoint"
+            "ending": "settlement",
+            "source_notes": "General Framework Agreement initialled at Wright-Patterson Air Force Base, near Dayton, Ohio, 21 Nov 1995 (week 189); signed Paris 14 Dec 1995; UNSC Res. 1022 (22 Nov 1995), 1031 (15 Dec 1995)"
         }
     ],
-    "source_notes": "RDC 2007 (total killed), ICTY Krstic judgment (Srebrenica), UNHCR (displaced), Dayton Annex 2 (territory)"
+    "source_notes": "War end: Dayton initialled 21 Nov 1995 (week 189) for a campaign ended by a signed settlement; ceasefire in force 12 Oct 1995 (week 183) for a campaign ended without one. Killed or missing: Research and Documentation Center (RDC), Sarajevo, June 2007 release: 97,207 killed or missing, of whom 57,523 soldiers and 39,684 civilians (the Bosnian Book of the Dead itself, published January 2013, splits differently). military_killed is the RDC table by army of service (ARBiH 30,906; VRS 20,775, a floor; HVO 5,919), a different table that does not sum to 57,523. Displaced: UNHCR estimate, about 2.2 million refugees and internally displaced. Territory: Dayton 51/49 (Contact Group 1994, Geneva Agreed Basic Principles 8 Sep 1995; GFAP Annex 2 Inter-Entity Boundary Line). No ceasefire-line share is carried until one is sourced to the standard of Sensitive History Design Gate §6. Srebrenica: 8,372 is the Srebrenica-Potočari Memorial list of names; the ICTY found 7,000-8,000 killed (Krstić IT-98-33-T)."
 }

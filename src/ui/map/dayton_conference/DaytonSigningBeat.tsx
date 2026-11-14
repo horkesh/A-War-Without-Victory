@@ -147,6 +147,9 @@ export function DaytonSigningBeat({ agreement, fallbackDate, onContinue }: Dayto
                     {t(imposed ? 'dayton.signing.titleImposed' : 'dayton.signing.title')}
                 </h2>
                 <p className="dayton-signing-annexes">{t('dayton.signing.annexes')}</p>
+                {/* R8 council B9/H1: the plate dates the campaign's signing week only; the
+                    historical dates stand here as the record (historian ruling 2026-11-14). */}
+                <p className="dayton-signing-record" data-testid="dayton-signing-record">{t('dayton.signing.historicalRecord')}</p>
                 <TreatyLedger treaty={agreement.treaty} signed />
                 <div className="dayton-live-actions">
                     <button type="button" className="dayton-live-button" onClick={() => setMapOpen(true)}>

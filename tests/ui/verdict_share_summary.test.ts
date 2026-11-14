@@ -102,15 +102,21 @@ describe('buildVerdictShareSummary', () => {
         const second = buildVerdictShareSummary(input);
 
         expect(first).toBe(second);
+        // Begins with the headline lines, names the sides, leads the cost line with the totals,
+        // and compares the end of the war by date, never "N weeks shorter".
         expect(first).toBe([
             'A War Without Victory - Verdict',
-            'Outcome: RBiH - Pyrrhic Success (Grade C, Pyrrhic Score 49.0)',
+            'The Republic of Bosnia and Herzegovina kept its gains at ruinous cost',
+            'The cost ledger below records what the war took.',
+            'Outcome: Republic of Bosnia and Herzegovina - Pyrrhic Success (Grade C, Pyrrhic Score 49.0)',
             'War ended: Dayton reckoning, 1995-10-01',
-            'Cost Ledger: Civilian displacement record - The negotiation capital record attributes 1,950,000 refugees created to the war path.',
-            'Historical comparison: War lasted 12 weeks shorter than the historical 188 weeks',
-            'Faction outcomes: RBiH Pyrrhic Success; RS Failure; HRHB Negotiated Escape',
+            'Cost Ledger: War cost totals - 46,500 military killed and 38,000 civilian killed recorded by the Cost Ledger.',
+            'Historical comparison: This campaign ended in the week of 13 Nov 1995. Historically, the country-wide ceasefire came into force on 12 October 1995.',
+            'Faction outcomes: Republic of Bosnia and Herzegovina Pyrrhic Success; Republika Srpska Failure; Herzeg-Bosnia Negotiated Escape',
         ].join('\n'));
         expect(first).not.toMatch(/\bweek\s+\d+\b/i);
+        expect(first).not.toContain('War lasted');
+        expect(first).not.toContain('72%');
     });
 
     it('falls back deterministically when optional inputs are missing', () => {
@@ -134,13 +140,16 @@ describe('buildVerdictShareSummary', () => {
             focusFaction: 'RBiH',
         });
 
-        expect(text).toContain('A War Without Victory - Presuda');
-        expect(text).toContain('Ishod: RBiH - Pirov uspjeh (Ocjena C, Pirov rezultat 49.0)');
+        const lines = text.split('\n');
+        expect(lines[0]).toBe('A War Without Victory - Presuda');
+        expect(lines[1]).toBe('Republika Bosna i Hercegovina je zadržala dobitke uz razornu cijenu');
+        expect(text).toContain('Ishod: Republika Bosna i Hercegovina - Pirov uspjeh (Ocjena C, Pirov rezultat 49.0)');
         expect(text).toContain('Rat završen: Dayton reckoning, 1995-10-01');
-        expect(text).toContain('Knjiga cijene: Civilian displacement record - The negotiation capital record attributes 1,950,000 refugees created to the war path.');
-        expect(text).not.toContain('Historijsko poređenje: War lasted 12 weeks shorter than the historical 188 weeks');
-        expect(text).toContain('Historijsko poređenje: Rat je trajao 12 sedmica kraće od historijskih 188 sedmica.');
-        expect(text).toContain('Ishodi frakcija: RBiH Pirov uspjeh; RS Neuspjeh; HRHB Pregovarački izlaz');
+        expect(text).toContain('Knjiga cijene: Ukupna cijena rata - 46.500 poginulih vojnika i 38.000 poginulih civila zabilježeno u Knjizi cijene.');
+        expect(text).not.toContain('War lasted 12 weeks shorter');
+        expect(text).not.toContain('Rat je trajao 12 sedmica kraće');
+        expect(text).toContain('Historijsko poređenje: Ova kampanja završila je u sedmici koja je počela 13 nov 1995. U historijskom ratu primirje na cijeloj teritoriji zemlje stupilo je na snagu 12. oktobra 1995.');
+        expect(text).toContain('Ishodi frakcija: Republika Bosna i Hercegovina Pirov uspjeh; Republika Srpska Neuspjeh; Herceg-Bosna Pregovarački izlaz');
         expect(text).not.toMatch(/\bsedmica\s+\d+\b/i);
     });
 });

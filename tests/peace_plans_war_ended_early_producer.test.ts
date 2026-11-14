@@ -129,7 +129,12 @@ describe('LANE-D1 war_ended_early producer', () => {
         expect(finding?.text).toContain(turnToDateString(50));
         expect(finding?.text).not.toContain(planId);
         expect(finding?.text).not.toContain('week 50');
-        expect(finding?.text).toContain('not proof that political or civilian costs vanished');
+        // Plain campaign-record text: the harm recorded before the peace stays in the ledger.
+        expect(finding?.text).toBe(
+            `${getPeacePlanById(planId)?.name} was accepted in the week of ${turnToDateString(50)}. `
+            + 'The harm recorded up to that point remains in the ledger.',
+        );
+        expect(finding?.sources).toEqual([]);
     });
 
     it('does NOT set war_ended_early when any faction rejects', () => {

@@ -741,7 +741,7 @@ describe('v0.9.1 vocab — milestone comparison in Codex essays', () => {
         expect(srebrenicaSection?.condition).toBe('GAME_OVER AND MILESTONE:srebrenica_genocide_1995:absent');
     });
 
-    it('renders the Srebrenica absent milestone summary in the ghost essay', () => {
+    it('keeps the Srebrenica absent-milestone ghost section hidden: rupture rows are dropped', () => {
         const ctx: CodexRenderContext = {
             firedEventIds: new Set<string>(),
             gameOver: true,
@@ -765,7 +765,10 @@ describe('v0.9.1 vocab — milestone comparison in Codex essays', () => {
         };
         const resolved = resolveCodexEssay(srebrenicaEssay, ctx);
         const dyn = resolved.paragraphs.filter(p => p.kind === 'dynamic' && p.variant === 'ghost');
-        expect(dyn.some(p => p.text.includes('Srebrenica Genocide did not occur in this run.'))).toBe(true);
+        // A rupture is never an early/late/absent timing row (§4 panel 2026-11-14): the row an
+        // older save carries is dropped, so MILESTONE:srebrenica_genocide_1995:absent is false.
+        expect(dyn.some(p => p.text.includes('Srebrenica Genocide did not occur in this run.'))).toBe(false);
+        expect(resolved.paragraphs.some(p => p.text.includes('Srebrenica Genocide did not occur'))).toBe(false);
     });
 
     it('adds a Dayton milestone timing docket gated by the Dayton milestone', () => {
@@ -811,7 +814,8 @@ describe('v0.9.1 vocab — milestone comparison in Codex essays', () => {
         const dyn = resolved.paragraphs.filter(p => p.kind === 'dynamic' && p.variant === 'divergence');
         const text = dyn.map(p => p.text).join('\n');
         expect(text).toContain('Dayton Accords: historical 2 Oct 1995; player 13 Nov 1995; timing 6 weeks later; status Late.');
-        expect(text).toContain('Srebrenica Genocide: historical 17 Jul 1995; player not recorded; status Absent.');
+        // The legacy Srebrenica rupture row is dropped from the docket.
+        expect(text).not.toContain('Srebrenica Genocide: historical');
         expect(text).not.toMatch(/\bW\d+\b/);
         expect(text).not.toMatch(/historical W|player W|status (late|absent|early)/);
     });
@@ -956,7 +960,8 @@ describe('v0.9.1 vocab - diplomatic and siege continuity breadth wave', () => {
             historicalComparison: comparison,
         };
         expect(resolveCodexEssay(cohaBeginsEssay, longerCtx).paragraphs.some(p => p.text.includes('Human cost record'))).toBe(true);
-        expect(resolveCodexEssay(cohaExpiresEssay, longerCtx).paragraphs.some(p => p.variant === 'ghost' && p.text.includes('Srebrenica Genocide did not occur in this run'))).toBe(true);
+        // Rupture milestone rows are dropped, so the Srebrenica-absent ghost section stays hidden.
+        expect(resolveCodexEssay(cohaExpiresEssay, longerCtx).paragraphs.some(p => p.variant === 'ghost' && p.text.includes('Srebrenica Genocide did not occur in this run'))).toBe(false);
     });
 });
 
@@ -1215,7 +1220,8 @@ describe('v0.9.1 vocab - UN mandate and sanctions breadth wave', () => {
 
         expect(resolveCodexEssay(londonEssay, ctx).paragraphs.some(p => p.text.includes('Human cost record'))).toBe(true);
         expect(resolveCodexEssay(tribunalEssay, ctx).paragraphs.some(p => p.text.includes('RS war-crimes record [VRS]'))).toBe(true);
-        expect(resolveCodexEssay(srebrenicaSafeAreaEssay, ctx).paragraphs.some(p => p.variant === 'ghost' && p.text.includes('Srebrenica Genocide did not occur in this run'))).toBe(true);
+        // Rupture milestone rows are dropped, so the Srebrenica-absent ghost section stays hidden.
+        expect(resolveCodexEssay(srebrenicaSafeAreaEssay, ctx).paragraphs.some(p => p.variant === 'ghost' && p.text.includes('Srebrenica Genocide did not occur in this run'))).toBe(false);
         expect(resolveCodexEssay(forceAuthorityEssay, ctx).paragraphs.some(p => p.text.includes('Civilian displacement record'))).toBe(true);
         expect(resolveCodexEssay(noFlyEssay, ctx).paragraphs.some(p => p.text.includes('Dayton Accords occurred at player date 6 Nov 1995'))).toBe(true);
         expect(resolveCodexEssay(sharpGuardEssay, ctx).paragraphs.some(p => p.text.includes('Human cost record'))).toBe(true);

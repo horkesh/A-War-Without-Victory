@@ -274,7 +274,7 @@ describe('codexEssayResolver — comparison condition atoms', () => {
         )).toBe(true);
     });
 
-    it('MILESTONE atoms match by id and optional status', () => {
+    it('MILESTONE atoms match by id and optional status; rupture rows from older saves are dropped', () => {
         const ctx = withComparison({
             milestone_comparison: [
                 {
@@ -298,8 +298,11 @@ describe('codexEssayResolver — comparison condition atoms', () => {
             ],
         });
 
-        expect(evaluateEssayCondition('MILESTONE:srebrenica_genocide_1995', ctx)).toBe(true);
-        expect(evaluateEssayCondition('MILESTONE:srebrenica_genocide_1995:absent', ctx)).toBe(true);
+        // A rupture is never read as an early/late/absent timing row (§4 panel 2026-11-14):
+        // the Srebrenica row a pre-truth-pass save carries is dropped, so its atoms are false.
+        expect(evaluateEssayCondition('MILESTONE:srebrenica_genocide_1995', ctx)).toBe(false);
+        expect(evaluateEssayCondition('MILESTONE:srebrenica_genocide_1995:absent', ctx)).toBe(false);
+        expect(evaluateEssayCondition('MILESTONE:dayton_accords', ctx)).toBe(true);
         expect(evaluateEssayCondition('MILESTONE:dayton_accords:late', ctx)).toBe(true);
         expect(evaluateEssayCondition('MILESTONE:dayton_accords:early', ctx)).toBe(false);
         expect(evaluateEssayCondition('MILESTONE:washington_agreement', ctx)).toBe(false);
@@ -467,7 +470,26 @@ describe('codexEssayResolver — template interpolation tokens', () => {
         })).toEqual(['Note A', 'Note B']);
     });
 
-    it('milestone tokens render deterministic row summaries', () => {
+    it('milestone tokens render deterministic row summaries, without rupture rows', () => {
+        const legacyRows = {
+            milestone_comparison: [
+                {
+                    id: 'srebrenica_genocide_1995',
+                    label: 'Srebrenica Genocide',
+                    historical_week: 171,
+                    player_week: null,
+                    delta_weeks: null,
+                    status: 'absent' as const,
+                    summary: 'Srebrenica Genocide did not occur in this run.',
+                },
+            ],
+        };
+        // The dropped rupture row's single tokens render empty.
+        expect(resolveWith(
+            '[{milestone_srebrenica_genocide_1995_status}][{milestone_srebrenica_genocide_1995_summary}]',
+            legacyRows,
+        )).toEqual(['[][]']);
+
         expect(resolveWith('{milestone_comparison}', {
             milestone_comparison: [
                 {
@@ -490,7 +512,6 @@ describe('codexEssayResolver — template interpolation tokens', () => {
                 },
             ],
         })).toEqual([
-            'Srebrenica Genocide: historical 17 Jul 1995; player not recorded; status Absent. Srebrenica Genocide did not occur in this run.',
             'Dayton Accords: historical 2 Oct 1995; player 13 Nov 1995; timing 6 weeks later; status Late. Dayton Accords occurred at player date 13 Nov 1995 against historical date 2 Oct 1995.',
         ]);
     });

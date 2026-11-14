@@ -835,8 +835,8 @@ export function resolveDaytonNegotiation(
     // Comprehensive Dayton D3 (2026-06-07): compute the peace_dysfunction_index +
     // breakdown from the just-signed settlement and stamp it onto the result for
     // display / verdict. Pure read of the result we just assigned to state.
-    // Returns null in historical/unset mode (emergent-gated) and is then a no-op,
-    // keeping back-compat with pre-D3 outcomes. The same breakdown is independently
+    // Computed in every decision mode since the R8 ending truth pass (2026-11-14).
+    // The same breakdown is independently
     // frozen onto the endgame snapshot below (survives save/load round-trip).
     const dysfunction = computePeaceDysfunctionBreakdown(state);
     if (dysfunction) {

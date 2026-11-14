@@ -37,15 +37,27 @@ export function formatHistoricalDivergenceNote(note: string): string {
         });
     }
 
-    const casualtyMatch = /^Total military casualties were (\d+)% of historical levels$/.exec(note);
-    if (casualtyMatch) {
-        return t('warCost.divergence.casualtyTotal', { casualtyPct: Number(casualtyMatch[1]) });
+    // Saves frozen before the R8 ending truth pass carry "Total military casualties were N% of
+    // historical levels", which divided military killed by all deaths (council B6/H3) and states a
+    // percentage of history (§4). It is shown without the percentage; the Verdict rebuilds the
+    // corrected integer line from the ledger (verdictComparison.ts).
+    if (/^Total military casualties were \d+% of historical levels$/.test(note)) {
+        return t('warCost.divergence.casualtyLegacy');
+    }
+
+    const deadMatch = /^(Military killed|Civilians killed): ([\d,]+) in this campaign; ([\d,]+) in the historical war$/.exec(note);
+    if (deadMatch) {
+        return t(deadMatch[1] === 'Military killed' ? 'verdict.compare.militaryDead' : 'verdict.compare.civilianDead', {
+            campaign: deadMatch[2] ?? '',
+            history: deadMatch[3] ?? '',
+        });
     }
 
     const knownNotes: Record<string, string> = {
         'Srebrenica genocide occurred': t('warCost.divergence.srebrenicaOccurred'),
         'Srebrenica genocide occurred as in the historical war': t('warCost.divergence.srebrenicaOccurredHistorical'),
         'Srebrenica enclave survived': t('warCost.divergence.srebrenicaSurvived'),
+        'Srebrenica enclave was overrun': t('chronicle.generated.endgame.srebrenicaOverrunDetail'),
     };
     return knownNotes[note] ?? note;
 }

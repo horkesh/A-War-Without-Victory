@@ -230,8 +230,9 @@ export function DaytonNegotiationModal({ dayton, conference = false }: DaytonNeg
         return { RBiH: Math.round(fed * 0.7), RS: rs, HRHB: Math.round(fed * 0.3) };
     }, [playerFaction]);
     const dysfunction = useMemo(
-        () => computeDysfunctionPreview(projectedInstitutions, liveSplit, brckoOutcome, draftCompetencies),
-        [projectedInstitutions, liveSplit, brckoOutcome, draftCompetencies],
+        () => computeDysfunctionPreview(projectedInstitutions, liveSplit, brckoOutcome, draftCompetencies,
+            buildInstitutionalProposalFields(instArch).constitutional_choices),
+        [projectedInstitutions, liveSplit, brckoOutcome, draftCompetencies, instArch],
     );
 
     // ── Mutators (clear stale probe whenever the proposal changes) ─────────────

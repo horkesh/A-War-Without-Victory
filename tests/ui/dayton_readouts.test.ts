@@ -17,7 +17,7 @@ import {
 } from '../../src/ui/map/data/daytonReadouts';
 import { computeTreatyAutonomyIndex } from '../../src/sim/negotiation/institutional_packages';
 import { COMPETENCY_PACKAGES } from '../../src/sim/negotiation/competency_packages';
-import { PEACE_DYSFUNCTION_CAP_THRESHOLD } from '../../src/sim/negotiation/peace_dysfunction';
+import { DYSFUNCTION_WEIGHTS, PEACE_DYSFUNCTION_CAP_THRESHOLD } from '../../src/sim/negotiation/peace_dysfunction';
 
 const ALL_DECENTRAL: Record<string, InstitutionChoice> = {
     military: 'decentralized', economy: 'decentralized', police: 'decentralized',
@@ -102,8 +102,14 @@ describe('computeDysfunctionPreview (honest floor)', () => {
         expect(p.capsCleanWin).toBe(p.indexFloor >= OUTCOME_CAP_THRESHOLD);
     });
     it('refugee/condemnation are excluded → floor never exceeds the structural-only weights', () => {
-        // autonomy(0.30)+fragmentation(0.25)+brcko(0.10) = 0.65 of the blend max.
+        // The engine's structural weights (ending truth pass: the room reads them, gridlock
+        // included): autonomy + fragmentation + gridlock + brcko = 0.26+0.22+0.12+0.08 = 0.68.
+        const structural = DYSFUNCTION_WEIGHTS.autonomy + DYSFUNCTION_WEIGHTS.fragmentation
+            + DYSFUNCTION_WEIGHTS.gridlock + DYSFUNCTION_WEIGHTS.brcko;
         const p = computeDysfunctionPreview(ALL_DECENTRAL, { RBiH: 34, RS: 33, HRHB: 33 }, 'arbitration');
-        expect(p.indexFloor).toBeLessThanOrEqual(65 + 0.1);
+        expect(p.indexFloor).toBeLessThanOrEqual(structural * 100 + 0.1);
+        // The historical constitution's gridlock is counted, so a historical draft can warn.
+        expect(p.gridlockComponent).toBeGreaterThan(0);
+        expect(p.capsCleanWin).toBe(p.indexFloor >= OUTCOME_CAP_THRESHOLD);
     });
 });
