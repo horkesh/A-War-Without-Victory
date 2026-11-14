@@ -9,6 +9,16 @@
   Compacted 2026-09-10: 1723 sections moved out, 62 kept live.
 -->
 
+## 2026-11-14 — Owner playtest UI: centred desk status strip, rebalanced event notice (masthead is baked art)
+
+UI only; no sim, state or calibration change. Three owner playtest findings.
+
+1. **Status strip centred.** `WarroomStatusBar` (WAR | REQUIRED n | REVIEW BEFORE ADVANCE n) was pinned bottom-right (`right-[2%]`). It is now `left-1/2 -translate-x-1/2 w-max` with the `max-w` cap kept, so it centres at every window width, wraps only when it must, and the Priority Docket panel opens centred above it. The toolbar is at the top of the plate, so nothing at the bottom collides with it.
+2. **Event notice rebalanced.** `EventModal` had the still, chips and narrative in the left column (the narrative scrolled) and only the short Intelligence Assessment in a mostly blank right column. It is now still plus chips on the left (the still fills the column height, so there is no dead space under it), and the narrative first with the Intelligence Assessment box below it on the right. The panel is wider (`SURFACE_MODAL_PANEL_NOTICE`, 72rem) and the new `media-content` column layout is added to `Surface.tsx`. With no still the same content stacks in one column. Acknowledged, Close, Esc and backdrop dismissal are unchanged. `EventDecisionModal` (events with choices) has its own layout and is untouched; checked rendering in the desktop app.
+3. **Masthead not changed.** "Oslobođenje" is baked into the owner's desk art (`src/ui/warroom/assets/hq_rbih_*.webp`, last changed by 3f871bd47 and 4b7889229 on 2026-11-06), with the đ present. There is no CSS or text overlay to tone down, and an overlay over a cover-cropped photo would be fragile, so no code changes; the owner's art needs a lighter masthead (asset request via the orchestrator).
+
+Tests: new `tests/ui/event_modal_layout.test.ts` (column structure, narrative-before-effects, no-still fallback, strip centring classes); existing event modal, status bar and surface contract suites unchanged and green. Rendered before/after screenshots from the Electron app at 1920x1080 and 1366x768 are in the PR.
+
 ## 2026-11-14 — RF-3: the siege displacement path works; flight abroad set per region (PR #600)
 
 Calibration-moving and §6. The pressure path in `updateDisplacement` (siege, encirclement) never fired in a campaign: the war step handed it OSID settlements with legacy `S…` edges, so it saw 0 front edges. Its legacy supply search reached no settlement, and it processed each municipality once per pool. A failing test on the real `update-displacement` step proved this (5 of 7 checks).
