@@ -77,7 +77,10 @@ Seats: historian and narrative designer, independent. The implementer drafted an
   - `tests/ui/warroom_ticker_event_receipts`, `consequence_receipts`, and 39 chronicle, Wrapped, aftermath, inbox, notification and timeline UI files;
   - the new `tests/ui/hvo_arbih_1993_truthful_cards.test.ts`. It covers the map-truth wording guard, the persisted-title contract, the resolver and ticker gating.
   - `codex_sensitive_claim_inventory` was updated from 549 to 551 consequence claims. The two new claims are the csq card's BCS title and narrative, both `documented` / `design_counterfactual`.
-- Full suite: FULL_SUITE_PENDING
+- **Full suite** (`npm run test:vitest`, five balanced shards):
+  - Every test passed except one.
+  - The failure was `tests/negative_source_assertion_hygiene.test.ts`. It flagged the new test file because it read the event JSON with `readFileSync` and also asserted absence.
+  - The file now imports the JSON as data. After that, the hygiene scan reports OK with 97 baselined files (unchanged), and both files pass.
 - **40w** (`npm run sim:scenario:run:40w`): hash `d26098607271f8c2` before and after. `final_save.json`, `weekly_report.jsonl`, `run_summary.json`, `control_delta.json` and `displacement_event_log.jsonl` are byte-identical. None of the rewritten cards fires within 40 weeks.
 - **188w** (`npm run sim:scenario:run:188w`): hash `0ec6d6112fd0e954` before and after. Every artifact is byte-identical (`final_save.json`, `weekly_report.jsonl`, `run_summary.json`, `end_report.md`, `displacement_event_log.jsonl`, `operation_aars.json`, `brigade_temporal_log.jsonl` and the rest), except `run_meta.json`. That file differs only in `out_dir` and in the input-file digests for the two edited event files. The baselines manifest therefore still matches.
 - The tracked `data/derived/latest_run_final_save.json` that `--map` overwrites was restored after each run.

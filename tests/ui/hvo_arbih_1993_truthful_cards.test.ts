@@ -7,8 +7,10 @@
  * bot picks) stay as they were, because the engine copies them into the hashed save; their
  * corrected English lives in `localizations.en` and the UI resolves it at display time.
  */
-import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
+
+import consequenceRows from '../../data/scenarios/events/consequences.json';
+import war1993Rows from '../../data/scenarios/events/war_1993.json';
 
 import {
     resolveEventDisplayNarrative,
@@ -35,8 +37,9 @@ type Row = {
     }>;
 };
 
-const war1993 = JSON.parse(readFileSync('data/scenarios/events/war_1993.json', 'utf8')) as Row[];
-const consequences = JSON.parse(readFileSync('data/scenarios/events/consequences.json', 'utf8')) as Row[];
+// Parsed event data (player-visible copy), not source text.
+const war1993 = war1993Rows as unknown as Row[];
+const consequences = consequenceRows as unknown as Row[];
 const rows = new Map([...war1993, ...consequences].map((row) => [row.id, row]));
 const row = (id: string): Row => {
     const found = rows.get(id);
