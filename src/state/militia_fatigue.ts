@@ -49,7 +49,7 @@ function isMunicipalitySupplied(
     factionId: FactionId,
     munId: MunicipalityId,
     settlements: Map<string, SettlementRecord>,
-    reachableSettlements: Set<string>
+    reachableSettlements: ReadonlySet<string>
 ): boolean {
     // Find all settlements in this municipality
     const munSettlements: string[] = [];
@@ -72,6 +72,20 @@ function isMunicipalitySupplied(
     return false;
 }
 
+/** OSID path: does `factionId` politically control at least one settlement of `munId`? */
+function factionHoldsGroundIn(
+    state: GameState,
+    factionId: FactionId,
+    munId: MunicipalityId,
+    settlements: Map<string, SettlementRecord>
+): boolean {
+    const pc = state.political.political_controllers ?? {};
+    for (const [sid, settlement] of settlements.entries()) {
+        if ((settlement.mun1990_id ?? settlement.mun_code) === munId && pc[sid] === factionId) return true;
+    }
+    return false;
+}
+
 /**
  * Update militia pool fatigue based on municipal supply status and faction exhaustion.
  *
@@ -87,21 +101,31 @@ export function updateMilitiaFatigue(
     state: GameState,
     settlements: Map<string, SettlementRecord>,
     settlementEdges: EdgeRecord[],
-    exhaustionDeltas: Map<FactionId, number> // faction_id -> exhaustion delta this turn
+    exhaustionDeltas: Map<FactionId, number>, // faction_id -> exhaustion delta this turn
+    /**
+     * F1 (legacy S-id consumer sweep, 2026-11-14): per faction, the controlled OSIDs reachable
+     * from its supply sources, in the same id space as `settlements`. The campaign war step
+     * passes it (from `buildOsidDisplacementPressureInputs`); before F1 it handed OSID
+     * settlements with legacy `S…` edges, so every pool was "unsupplied" every turn. Without
+     * it, supply is derived from `settlementEdges` (fixtures and legacy CLI harnesses).
+     */
+    suppliedByFaction?: ReadonlyMap<string, ReadonlySet<string>>
 ): MilitiaFatigueStepReport {
     const militiaPools = state.military.militia_pools as Record<MunicipalityId, MilitiaPoolState> | undefined;
     if (!militiaPools || typeof militiaPools !== 'object') {
         return { by_municipality: [], by_faction: [] };
     }
 
-    // Compute supply reachability once
-    const adjacencyMap = buildAdjacencyMapCached(settlementEdges);
-    const supplyReport = computeSupplyReachability(state, adjacencyMap);
-
     // Build reachable sets by faction
-    const reachableByFaction = new Map<FactionId, Set<string>>();
-    for (const f of supplyReport.factions) {
-        reachableByFaction.set(f.faction_id, new Set(f.reachable_controlled));
+    const reachableByFaction = new Map<FactionId, ReadonlySet<string>>();
+    if (suppliedByFaction) {
+        for (const [factionId, reachable] of suppliedByFaction) reachableByFaction.set(factionId, reachable);
+    } else {
+        const adjacencyMap = buildAdjacencyMapCached(settlementEdges);
+        const supplyReport = computeSupplyReachability(state, adjacencyMap);
+        for (const f of supplyReport.factions) {
+            reachableByFaction.set(f.faction_id, new Set(f.reachable_controlled));
+        }
     }
 
     const records: MilitiaFatigueRecord[] = [];
@@ -126,7 +150,13 @@ export function updateMilitiaFatigue(
             : 0;
 
         const reachableSettlements = reachableByFaction.get(factionId) ?? new Set<string>();
-        const supplied = isMunicipalitySupplied(factionId, munId, settlements, reachableSettlements);
+        // F1, OSID path: supply isolation applies only where the pool's faction holds ground.
+        // A pool in a municipality its faction holds none of is lost territory, not a cut-off
+        // pocket (measured on main: 32-89 such pools per faction every turn, which alone would
+        // pin negotiation momentum within a few turns). It counts as not isolated.
+        const supplied = suppliedByFaction && !factionHoldsGroundIn(state, factionId, munId, settlements)
+            ? true
+            : isMunicipalitySupplied(factionId, munId, settlements, reachableSettlements);
 
         let fatigueAfter: number = fatigueBefore;
 
