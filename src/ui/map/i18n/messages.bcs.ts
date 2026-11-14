@@ -830,6 +830,7 @@ export const bcsMessages: Partial<Record<MessageKey, string>> = {
     'review.tier.required': 'Obavezno ({count})',
     'review.tier.recommended': 'Preporučeno ({count})',
     'review.docket.summary': '{count} {itemLabel}: {required} obavezno, {recommended} preporučeno',
+    'review.docket.handoffSummary': '{count} {handoffLabel}',
     'review.whyNow.required': 'Obavezno: napredovanje ostaje blokirano dok ne odgovorite.',
     'review.whyNow.stance': 'Nastavlja se ako ne djelujete.',
     'review.whyNow.default': 'Vrijedi pogledati prije napredovanja.',

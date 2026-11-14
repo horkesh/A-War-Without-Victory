@@ -63,17 +63,11 @@ function formatSummary(items: readonly WarroomPriorityDocketItem[]): string {
   });
 }
 
-function formatSourceHandoffSummary(
-  sourceHandoffs: WarroomPriorityDocketSourceHandoff[],
-  metrics: PreAdvanceCommandReviewMetrics,
-): string {
-  return t('warroom.docket.sourceHandoffSummary', {
-    sourceHandoffCount: sourceHandoffs.length,
-    sourceHandoffLabel: t(sourceHandoffs.length === 1 ? 'warroom.docket.sourceHandoff.one' : 'warroom.docket.sourceHandoff.many'),
-    required: metrics.priorityCounts.required,
-    recommended: metrics.priorityCounts.recommended,
-    monitor: metrics.priorityCounts.monitor,
-    record: metrics.priorityCounts.record,
+/** Just the number of handoffs: the band totals it used to repeat disagreed with the chip. */
+function formatSourceHandoffSummary(sourceHandoffs: WarroomPriorityDocketSourceHandoff[]): string {
+  return t('review.docket.handoffSummary', {
+    count: sourceHandoffs.length,
+    handoffLabel: t(sourceHandoffs.length === 1 ? 'warroom.docket.sourceHandoff.one' : 'warroom.docket.sourceHandoff.many'),
   });
 }
 
@@ -98,7 +92,7 @@ export function buildWarroomPriorityDocketView(input: WarroomPriorityDocketInput
     tone: docketTone(review.status),
     headline: review.headline,
     summary: formatSummary(review.items),
-    sourceHandoffSummary: formatSourceHandoffSummary(review.sourceHandoffs, review.metrics),
+    sourceHandoffSummary: formatSourceHandoffSummary(review.sourceHandoffs),
     canOpenBoard: review.canReviewPriorities,
     openBoardLabel: t('warroom.docket.openDecisionRoom'),
     items: review.items.slice(0, safeLimit),

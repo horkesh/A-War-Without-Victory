@@ -177,7 +177,7 @@ describe('buildWarroomPriorityDocketView', () => {
     expect(first.sourceHandoffs.map((handoff) => handoff.id)).toEqual([
       'army-hq-briefing',
     ]);
-    expect(first.sourceHandoffSummary).toBe('1 source handoff / 0 required / 5 recommended / 1 monitor / 3 record');
+    expect(first.sourceHandoffSummary).toBe('1 source handoff');
     expect(first.openBoardLabel).toBe('Open Decision Room');
   });
 
@@ -197,7 +197,7 @@ describe('buildWarroomPriorityDocketView', () => {
     expect(view.summary).toBe('0 advance items: 0 required, 0 recommended');
     expect(view.items).toEqual([]);
     expect(view.sourceHandoffs).toEqual([]);
-    expect(view.sourceHandoffSummary).toBe('0 source handoffs / 0 required / 4 recommended / 0 monitor / 0 record');
+    expect(view.sourceHandoffSummary).toBe('0 source handoffs');
     expect(view.canOpenBoard).toBe(true);
   });
 
@@ -232,7 +232,7 @@ describe('buildWarroomPriorityDocketView', () => {
     expect(view.headline).toBe('No state loaded');
     expect(view.items).toEqual([]);
     expect(view.sourceHandoffs).toEqual([]);
-    expect(view.sourceHandoffSummary).toBe('0 source handoffs / 0 required / 0 recommended / 0 monitor / 0 record');
+    expect(view.sourceHandoffSummary).toBe('0 source handoffs');
     expect(view.canOpenBoard).toBe(false);
   });
 
@@ -260,7 +260,7 @@ describe('buildWarroomPriorityDocketView', () => {
     setLocale('en');
 
     expect(view.summary).toBe('1 stavka za napredovanje: 0 obavezno, 1 preporučeno');
-    expect(view.sourceHandoffSummary).toBe('1 izvorni prijenos / 0 obavezno / 5 preporučeno / 1 praćenje / 3 zapis');
+    expect(view.sourceHandoffSummary).toBe('1 izvorni prijenos');
     expect(view.openBoardLabel).toBe('Otvori sobu odluka');
     expect(view.statusLabel).toBe('Pregled prije napredovanja');
     expect(view.summary + view.sourceHandoffSummary + view.openBoardLabel).not.toContain('advance items');

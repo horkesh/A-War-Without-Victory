@@ -830,6 +830,7 @@ export const enMessages = {
     'review.tier.required': 'Required ({count})',
     'review.tier.recommended': 'Recommended ({count})',
     'review.docket.summary': '{count} {itemLabel}: {required} required, {recommended} recommended',
+    'review.docket.handoffSummary': '{count} {handoffLabel}',
     'review.whyNow.required': 'Required: Advance stays blocked until you answer.',
     'review.whyNow.stance': 'Proceeds unless you act.',
     'review.whyNow.default': 'Worth a look before advancing.',
