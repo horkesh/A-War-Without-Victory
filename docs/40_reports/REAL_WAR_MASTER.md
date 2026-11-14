@@ -1,5 +1,14 @@
 # Real War Master
 
+## October 1995 ceasefire (council fix 3, 2026-11-14)
+
+Raised by the War-or-Game seat of the Pyrrhic merge gate on PR horkesh/A-War-Without-Victory#636. Runs: main `…_w188_n0`, head `…_w188_n4` (`2c9c5d5c6c7ad860`).
+
+- **FIXED: the war went on after Sarajevo accepted the October 1995 ceasefire.** On main there are 50 battles at t183-t188 and RS falls 348 → 313 OSIDs after acceptance. On the head there are 14 battles (t184 5, t185 1, t186 1, then none), every corps is Defensive from t184, and RS goes 348 → 341.
+- **OPEN: the stand-down lets an axis start a fresh assault.** An axis that had made progress before the ceasefire may take its current objective even if it had not yet attacked it. Farz 95 assaults `op:lukavac:brijesnica_donja_2` at t185 (casualties 525 attacker / 2,094 defender), with no attack on it at t183-t184. The HVO 1st Guards takes Drvar town at t186. The historical window is about 12-20 October 1995 (BB Vol. I p.429). Tightening this to "objectives actually under attack", or to one turn, breaches the Farz guard until Farz tempo is recalibrated. The guard is shaping this rule; the record says so.
+- **OPEN: HVO exhaustion rises faster under the ceasefire than without it** (+101 vs +73 over t185-t188, head vs Change A only). Front pressure is not damped during the ceasefire.
+- **OPEN: the US halt is dormant in the baseline.** At t179-t181 RS still holds more than 51% by area, so the retimed card never fires headless. The date is right; the area gate is calibration-dependent.
+
 ## Open items from the siege displacement lane (RF-3, 2026-11-14)
 
 Raised by the §6 panel and the Pyrrhic merge gate on PR horkesh/A-War-Without-Victory#600 (`SENSITIVE_HISTORY_DESIGN_GATE.md` §6 "Record (Siege displacement and flight abroad, 2026-11-14)"). Neither is a tuning target.

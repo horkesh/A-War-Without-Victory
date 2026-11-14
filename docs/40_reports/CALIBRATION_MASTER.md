@@ -3,7 +3,7 @@
 **Council fix 3, respect the peace (B10, H4, H6) — 2026-11-14: 712 / 709 / 710 / 677 (recorded, not a bar; calibration held).**
 - **What changed.** (A) The US halt moves to t179-181 and is suppressed after a ceasefire. (B) Accepting Holbrooke's October 1995 ceasefire binds every party from the following turn:
   - the operation channel closes on every path;
-  - planning offensives are called off, and executing ones conclude only the objective each axis was fighting for, then stand down;
+  - planning offensives are called off, and executing ones take only the current objective of each engaged axis, then stand down;
   - stances hold Defensive;
   - attacks are suppressed as under the COHA.
   (C) H6 cards are text only. Systems Manual §6.4 note; Engine Invariants "October 1995 ceasefire ownership"; report `docs/40_reports/implemented/20261114_COUNCIL_FIX3_RESPECT_THE_PEACE.md`.

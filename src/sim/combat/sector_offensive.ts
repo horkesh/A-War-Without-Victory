@@ -926,8 +926,9 @@ function beginRecovery(
  * `ceasefire`); the normal recovery tick then finalizes and removes them.
  *  - Planning: called off at once; it never launches.
  *  - Executing: on the first ceasefire turn the stand-down caps are recorded
- *    (oct1995_ceasefire.ts): each axis may conclude only the objective it was already fighting
- *    for. The operation is called off once every axis has moved past its cap or stopped.
+ *    (oct1995_ceasefire.ts): each axis that had engaged may take only its current objective.
+ *    The operation is called off once every axis has moved past its cap or stopped; if the
+ *    ordinary lifecycle ends it first, its ordinary recovery reason applies.
  * Emergency strategic-defence and reorganization operations are kept; operations already
  * recovering are untouched, so the call is idempotent. Corps are visited in strictCompare order.
  * Returns the called-off `corps:name:t<start>` ids.

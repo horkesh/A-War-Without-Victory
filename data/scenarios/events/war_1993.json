@@ -3489,21 +3489,25 @@
       "en": {
         "notifications_to_other_factions": {
           "reject_via_assembly": {
+            "HRHB": {
+              "headline": "Sarajevo Assembly rejects Owen-Stoltenberg",
+              "body": "The Bosnian Assembly refuses the Union of Three Republics plan as it stands. HVO leaders see Sarajevo preserve its sovereignty claim and negotiating leverage while accepting the cost to international standing."
+            },
             "RS": {
               "headline": "Sarajevo Assembly rejects Owen-Stoltenberg",
-              "body": "The Bosnian Assembly votes down the Owen-Stoltenberg package outright. Pale sees Sarajevo refuse partition on principle, prolonging the war and frustrating the ICFY mediators."
+              "body": "The Bosnian Assembly refuses the Owen-Stoltenberg package as it stands. Pale sees Sarajevo refuse partition on principle, prolonging the war and frustrating the ICFY mediators."
             }
           },
           "accept_for_optics": {
             "HRHB": {
               "headline": "Sarajevo Assembly ratifies the Owen-Stoltenberg package",
-              "body": "The Bosnian Assembly ratifies the Presidency's conditional acceptance of the Owen-Stoltenberg framework. HVO leaders see Sarajevo gain international standing while legitimizing partition in principle."
+              "body": "The Bosnian Assembly ratifies the Owen-Stoltenberg framework. HVO leaders see Sarajevo gain international standing while legitimizing partition in principle."
             }
           }
         }
       }
     },
-    "narrative": "Owen and Stoltenberg's plan for a Union of three republics is on the table. The Presidency has accepted it conditionally, on territorial terms for the Drina enclaves and the Posavina corridor. The decision now falls to the Assembly in Sarajevo: ratify the Presidency's conditional acceptance, or reject the partition formula outright.",
+    "narrative": "Owen and Stoltenberg's plan for a Union of three republics is on the table. Sarajevo is pressing the mediators for more territory before it will accept the map. The decision falls to the Assembly in Sarajevo: accept only on condition that territory seized by force is returned, or reject the partition formula outright.",
     "category": "diplomatic",
     "family": "rbih_owen_stoltenberg_response",
     "source_tier": "icty_icj_un",
@@ -3558,12 +3562,12 @@
     "staff_assessment": "Assembly rejection preserves the principle of a unified multi-ethnic Bosnia and the legal claim to the Drina enclaves at the cost of immediate international standing and negotiating-leverage erosion. Acceptance for optics could pressure Pale diplomatically but legitimizes the partition framework and carries Presidency/Assembly procedural rupture.",
     "trigger_evidence": [
       "The Owen-Stoltenberg plan for a Union of three republics has reached the Bosnian government.",
-      "The Presidency's acceptance is conditional on territorial terms for the Drina enclaves and Posavina.",
+      "Sarajevo is pressing the mediators for more territory before it will accept the map.",
       "The Assembly holds the final decision on the package."
     ],
     "effect": {
       "kind": "narrative",
-      "text": "The Owen-Stoltenberg plan reaches the Sarajevo Assembly. The Presidency's conditional acceptance is on the table; the Assembly must ratify or reject the partition framework."
+      "text": "The Owen-Stoltenberg plan reaches the Sarajevo Assembly, which must accept it on conditions or reject the partition framework."
     },
     "dimension_shifts": [
       {
@@ -3578,7 +3582,7 @@
         "branch_tag": "rbih_owen_stoltenberg_reject_via_assembly",
         "historical_marker": "historical_default",
         "label": "Assembly rejects outright (Drina enclaves & Posavina non-negotiable)",
-        "description": "The Sarajevo Assembly votes down the Presidency's conditional acceptance, refusing the Drina-enclaves and Posavina-corridor cession. The plan collapses; the war continues but the legal claim to Bosnia's full territory is preserved.",
+        "description": "The Sarajevo Assembly votes down the package. The plan collapses; the war continues, but the legal claim to Bosnia's full territory is preserved.",
         "aggression_affinity": 0.4,
         "risk_level": 0.6,
         "dimension_shifts": [
@@ -3611,8 +3615,8 @@
         "id": "accept_for_optics",
         "branch_tag": "rbih_owen_stoltenberg_accept_for_optics",
         "historical_marker": "counterfactual",
-        "label": "Assembly ratifies the Presidency's conditional acceptance",
-        "description": "An alternative parliamentary majority ratifies the Presidency's conditional acceptance. Sarajevo gains international standing while legitimizing the partition formula and accepting the Drina-enclaves and Posavina-corridor concessions in principle.",
+        "label": "Assembly ratifies the package",
+        "description": "An alternative parliamentary majority ratifies the package. Sarajevo gains international standing while legitimizing the partition formula in principle.",
         "aggression_affinity": -0.2,
         "risk_level": 0.4,
         "dimension_shifts": [

@@ -8,7 +8,8 @@
  * for every party:
  *   - the operation channel is closed: no new offensive CorpsOperation is admitted and the
  *     staff puts no offensive to the president;
- *   - offensives already planning or executing enter recovery once (reason `ceasefire`);
+ *   - offensives still planning enter recovery once (reason `ceasefire`); offensives already
+ *     executing take only the current objective of each engaged axis, then stand down;
  *   - corps stances are held at Defensive or below, and no army-wide offensive is ordered;
  *   - combat is suspended as under the COHA: brigade attack orders, counter-attacks included,
  *     are cleared at generation and suppressed with receipts at resolution. Movement stays, and
@@ -85,10 +86,12 @@ export function isOffensiveOperationType(type: CorpsOperation['type'] | string |
 
 // ─── Stand-down of offensives already executing ──────────────────────────────────────────────
 // The ceasefire freezes the line where it stands. An offensive that is executing on the first
-// ceasefire turn may conclude only the objective each axis is already fighting for (fighting went
-// on locally until about 20 October 1995); it takes no further objective and then stands down.
-// An axis that had not yet attacked gets cap -1 and stands down at once. Bounded by the ordinary
-// failure caps (MAX_CONSECUTIVE_FAILURES_ON_CURRENT), so a stand-down ends within a few turns.
+// ceasefire turn may take only the current objective of each axis that had already engaged
+// (attacked or captured), even an objective it had not yet attacked; it takes no further objective
+// and then stands down (fighting went on locally until about 20 October 1995). An axis that never
+// engaged gets cap -1 and stands down at once. Bounded by the ordinary failure caps
+// (MAX_CONSECUTIVE_FAILURES_ON_CURRENT). Tightening this to "the cell already under assault"
+// breaches the Farz guard while the simulated Farz runs late (REAL_WAR_MASTER, council fix 3).
 
 /** Key used in `objective_cap_by_axis` for a single-axis (legacy) operation. */
 export const SINGLE_AXIS_STAND_DOWN_KEY = '__op__';

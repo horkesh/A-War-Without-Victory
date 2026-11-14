@@ -1650,7 +1650,7 @@
         "id": "accept_partition",
         "branch_tag": "rbih_pragmatic",
         "historical_marker": "counterfactual",
-        "label": "Accept partition on existing Inter-Entity Boundary",
+        "label": "Accept partition on the present front line",
         "description": "Signal to Washington that Sarajevo will accept the present front line as the basis of partition. ARBiH operations stand down, the 5th Corps stays in the Bihać area, and the central Bosnian corps freeze in place. The Federation alliance may rupture if Mostar reads it as a concession that closes off Croat claims in western Bosnia. International standing would suffer if Sarajevo is seen to concede partition before talks open, and cohesion at home would fracture as the Assembly's nationalist current reads it as betrayal of the eastern enclaves and of Bosnia's unity.",
         "effects": [
           {
@@ -2298,7 +2298,7 @@
     "sets_flags": {
       "advance_halted": true
     },
-    "historical_source": "Holbrooke, 'To End a War' (1998). Peter Galbraith, 'Richard Holbrooke: a force for good', The Guardian, 14 December 2010 (the 17 September 1995 Zagreb meeting; US fear of a refugee flight from Banja Luka). BB Vol. II, Ch. 15. US State Dept. chronology. DECISIVE for the current authoring (2026-08-12): BB Vol. I p.462 endnote 823 — US pressure came in September after 'Maestral', and 'Nevertheless, Zagreb went ahead and ordered Juzni Potez in October'; BB Vol. I p.462 endnote 821 — Izetbegovic bowed reluctantly while setting conditions to buy the ARBiH more days, Delic begging him to let the fighting continue; BB Vol. I p.427 — Juzni Potez opened 8 Oct, Mrkonjić Grad fell 10 Oct. This is why the comply response suppresses RBiH only and NOT HRHB."
+    "historical_source": "Holbrooke, 'To End a War' (1998). Holbrooke, 'To End a War' (1998), on the 17 September 1995 meeting with Tuđman (Sanski Most, Prijedor and Bosanski Novi, but not Banja Luka; 'over two hundred thousand additional refugees'). Peter Galbraith, 'How Holbrooke Saved Banja Luka', Foreign Policy ('Remembering Richard Holbrooke'), 14 December 2010. BB Vol. II, Ch. 15. US State Dept. chronology. DECISIVE for the current authoring (2026-08-12): BB Vol. I p.462 endnote 823 — US pressure came in September after 'Maestral', and 'Nevertheless, Zagreb went ahead and ordered Juzni Potez in October'; BB Vol. I p.462 endnote 821 — Izetbegovic bowed reluctantly while setting conditions to buy the ARBiH more days, Delic begging him to let the fighting continue; BB Vol. I p.427 — Juzni Potez opened 8 Oct, Mrkonjić Grad fell 10 Oct. This is why the comply response suppresses RBiH only and NOT HRHB."
   },
   {
     "id": "ceasefire_1995",
@@ -2362,7 +2362,7 @@
         }
       }
     },
-    "narrative": "Holbrooke demands that Sarajevo observe the 60-day ceasefire announced on 5 October, so that peace talks in the United States can open. ARBiH is advancing in northwestern Bosnia. Complying sacrifices military momentum; refusing risks losing US air support and international legitimacy.",
+    "narrative": "Holbrooke demands that Sarajevo observe the 60-day ceasefire announced on 5 October, so that peace talks in the United States can open. ARBiH is advancing in northwestern Bosnia. Complying sacrifices military momentum; refusing risks losing American backing and international legitimacy.",
     "category": "diplomatic",
     "trigger": {
       "turn_min": 183,

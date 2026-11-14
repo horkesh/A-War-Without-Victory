@@ -84,6 +84,7 @@ const OUTCOME_COLOR: Record<string, string> = {
     orphaned_sector: 'text-amber-500',
     no_logged_attempt: 'text-text-secondary/60',
     manual_termination: 'text-blue-400',
+    ceasefire: 'text-blue-400',
 };
 
 const OUTCOME_LABEL_KEY: Record<string, MessageKey> = {
@@ -92,6 +93,7 @@ const OUTCOME_LABEL_KEY: Record<string, MessageKey> = {
     orphaned_sector: 'operationsSection.outcome.orphanedSector',
     no_logged_attempt: 'operationsSection.outcome.noLoggedAttempt',
     manual_termination: 'operationsSection.outcome.manualTermination',
+    ceasefire: 'operationsSection.outcome.ceasefire',
 };
 
 const WEEKLY_PHASE_LABEL_KEY: Record<string, MessageKey> = {
@@ -110,6 +112,7 @@ const RECOVERY_REASON_LABELS: Record<string, string> = {
     max_failures: 'Halted after repeated failures',
     orphaned_sector: 'Objective sector lost',
     manual_termination: 'Stood down by order',
+    ceasefire: 'Stood down for the ceasefire',
     no_logged_attempt: 'No assault attempted',
     tg_cohesion_exhausted: 'Tactical group exhausted',
     tg_max_lifecycle: 'Operational duration reached',

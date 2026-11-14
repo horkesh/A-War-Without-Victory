@@ -59,6 +59,7 @@ const RECOVERY_REASON_BADGE: Record<string, { labelKey: MessageKey; tone: Surfac
     orphaned_sector: { labelKey: 'operationHistory.recovery.orphanedSector', tone: 'warn' },
     no_logged_attempt: { labelKey: 'operationHistory.recovery.noLoggedAttempt', tone: 'neutral' },
     manual_termination: { labelKey: 'operationHistory.recovery.manualTermination', tone: 'info' },
+    ceasefire: { labelKey: 'operationHistory.recovery.ceasefire', tone: 'info' },
     tg_cohesion_exhausted: { labelKey: 'operationHistory.recovery.tgCohesionExhausted', tone: 'danger' },
     tg_max_lifecycle: { labelKey: 'operationHistory.recovery.tgMaxLifecycle', tone: 'warn' },
 };
