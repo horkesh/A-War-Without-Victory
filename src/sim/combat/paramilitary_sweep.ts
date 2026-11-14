@@ -28,6 +28,7 @@ import { strictCompare } from '../../state/validateGameState.js';
 import { defaultArmyLabelForSide, type PoliticalSideId } from '../../state/identity.js';
 import { appendDisplacementEvent } from '../../state/displacement_event_log.js';
 import { seedDisplacementTimerOnFlip } from '../../state/displacement_takeover.js';
+import { recordWarCrime } from '../../state/war_crimes_record.js';
 import {
     PARAMILITARY_UNIT_SIZE,
     PARAMILITARY_MARCH_TURNS,
@@ -847,17 +848,8 @@ export function detectOffensiveParamilitaryTargets(
     return report;
 }
 
-/** Record war_crimes_events increment on negotiation capital for a faction.
- *  Also increments the EMERGENT-only counter (`war_crimes_events_emergent`) — this
- *  is the sole writer of that field; scripted `humanitarian_impact` effects
- *  (applyHumanitarianImpact) deliberately do NOT touch it, keeping it clean for the
- *  §2a mass-atrocity condemnation flag (no calendar-driven contamination). */
-function recordWarCrime(state: GameState, faction: FactionId): void {
-    const neg = state.military.negotiation;
-    if (!neg?.capital?.[faction]) return;
-    neg.capital[faction].war_crimes_events = (neg.capital[faction].war_crimes_events ?? 0) + 1;
-    neg.capital[faction].war_crimes_events_emergent = (neg.capital[faction].war_crimes_events_emergent ?? 0) + 1;
-}
+// recordWarCrime lives in src/state/war_crimes_record.ts (RF-5B): the minority
+// expulsion policy in displacement_takeover.ts records through the same writer.
 
 function estimateParamilitaryCivilianRisk(mode: 'rear_pocket' | 'offensive'): number {
     const rate = mode === 'offensive'

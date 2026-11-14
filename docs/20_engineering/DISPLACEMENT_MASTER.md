@@ -18,6 +18,10 @@
 >
 > **Siege displacement lane (2026-11-14):** The continuous siege/encirclement path (§2.3) is now live
 > (it received legacy edges and never fired before), and flight abroad is set per people and region (§5).
+>
+> **RF-5B (2026-11-14):** A third trigger with no control change: the bot-only minority-expulsion policy
+> (§3.4). The HVO's 1993 expulsions of Bosniaks happened inside ground it already held, which the takeover
+> trigger could not see.
 
 ## 1. Overview
 
@@ -115,9 +119,9 @@ Runs every turn. The war step (`update-displacement` in `war_phases.ts`) feeds i
 
 ## 3. Trigger Types
 
-### 3.1 Hostile Takeover (OSID-Based) — **ONLY ACTIVE TRIGGER**
+### 3.1 Hostile Takeover (OSID-Based) — **PRIMARY TRIGGER**
 
-The sole displacement trigger as of 2026-03-01. All displacement flows through this path. As of 2026-03-05, sustained displacement is active: initial wave = 70% of minority, sustained trickle = 3%/turn on remaining 30% until < 10 people remain.
+The primary displacement trigger since 2026-03-01: capture displacement flows through this path. The other live writers are the siege path (§3.3, live since 2026-11-14), paramilitary sweeps and the bot-only policy expulsion (§3.4, RF-5B). As of 2026-03-05, sustained displacement is active: initial wave = 70% of minority, sustained trickle = 3%/turn on remaining 30% until < 10 people remain.
 
 **Two trigger sources:**
 
@@ -171,6 +175,26 @@ The larger of the two applies. Departures are booked to the pressing side with k
 The consecutive-turn counter is saved state: `DisplacementState.unsupplied_pressure_by_side` holds it per side, with the turn it was last counted. It replaces the old module-level cache (`pressureStateCache` and `resetDisplacementPressureCache()`), which is deleted, so the counter now survives save and load. `applyDisplacementFromFlips` and the `displacement-apply` step are also deleted; they were never reached.
 
 ---
+
+### 3.4 Policy Expulsion (RF-5B, bot-only)
+
+Owner: `processDisplacementTakeover` step 0b (`src/state/displacement_takeover.ts`). §6 broader bright-line panel record: `SENSITIVE_HISTORY_DESIGN_GATE.md` §6 (RF-5B).
+
+- **Who:** a faction listed in `BOT_MINORITY_EXPULSION_POLICY` (HRHB only) **while bot-controlled** (`state.meta.player_faction !== faction`). A human-controlled faction never expels; there is no player decision. RBiH has no entry: no ARBiH joint criminal enterprise or expulsion policy was charged or found (Hadžihasanović and Kubura; Halilović). The HRHB entry follows the Prlić et al. joint-criminal-enterprise finding (TJ 2013, affirmed 2017).
+- **When:** once per faction, on the first turn on which `rbih_hrhb_state.war_started_turn` is set and the pair is at war (in the 188w campaign: t50). The applied turn is recorded in event flag `hrhb_minority_policy_applied_turn`.
+- **Where:** every OSID the faction then holds inside a `POLICY_EXPULSION_SCOPE` municipality. A timer `${osid}|RBiH` with `cause: 'policy_expulsion'` is seeded; wave B timers start `POLICY_WAVE_B_DELAY_TURNS` (12) later.
+
+| Wave (matures) | Municipality: share of the OSID's declared Bosniaks displaced | Source (Historian seat) |
+|---|---|---|
+| A (seed + 4; t54, mid-April 1993) | Vitez 0.50, Busovača 0.40, Kiseljak 0.40, Žepče 0.30, Gornji Vakuf 0.40, Jablanica 0.75 | Kordić TJ ¶646, ¶511; BB2 p.444; Prlić TJ (Gornji Vakuf, Sovići/Doljani) |
+| B (seed + 16; t66, early July 1993) | Mostar 0.40, Stolac 0.75, Čapljina 0.75, Prozor 0.75, Ljubuški 0.50 | Prlić TJ v2 ¶¶814, 875, 922, 981, 1936, 277; Prlić TJ summary (Ljubuški) |
+| Out of scope | Kakanj, Travnik, Bugojno, Fojnica, Konjic, Novi Travnik, Vareš, Orašje, Livno, Tomislavgrad | HVO lost these towns or the record is Croat flight (BB1 p.217); Vareš overlaps the ARBiH capture; joint HVO-ARBiH front in Posavina; no expulsion finding |
+
+- **How much:** one wave per OSID of `floor(osidPop × bosniakShare × fraction)`, where `bosniakShare` counts **declared Bosniaks only** (the standing convention adds 1991 "others", largely Yugoslavs; the policy found by the court targeted the Muslim population). Pair kill share 3%; flight abroad per §5 (Bosniak 0.20; Čapljina and Stolac 0.40). Booked `caused_by` the holding faction. **No sustained drain** (Branch B skips policy timers). **No pass-through re-route**: the holder does not change, so people already sheltering in the municipality are not moved on (§10.6; panel Calibration C1: re-routing handed HRHB ~12k reserve manpower).
+- **Clears:** a recapture by the expelled side, a third side's capture (the holder no longer holds the OSID; a flip-seeded timer replaces a stale policy timer), or a restored alliance, before the wave.
+- **Bright line:** the first wave that displaces anyone records one authorized war crime for the faction (`recordWarCrime`, `src/state/war_crimes_record.ts`, sole writer of `war_crimes_events_emergent`), guarded by event flag `hrhb_minority_policy_war_crime_recorded`. §2a condemnation (emergent mode only).
+- **Changing it:** any change to the table, fractions, wave delay or target basis is its own measured change under the RF-5B §6 record; an RBiH entry needs a judicial finding and its own broader panel.
+- **Known limits:** men were historically detained (Heliodrom, Dretelj, Gabela) but are displaced with families here (camps stay unmodelled, Ring 3 #2); no incoming Croats fill vacated homes; Stari Vitez (held out) shares the Vitez town OSID; Žepče fires ~10 weeks early (fighting began late June 1993) and Mostar's first round ~8 weeks late (9 May); Busovača and Gornji Vakuf January 1993 episodes predate the war start; Prozor October 1992 (~5k, outside the JCE) and Vareš (October 1993) are not seeded; flight-abroad shares are not tiered per the Historian (Ljubuški 0.50, west Mostar 0.30, Central Bosnia 0.10); the April wave comes without an HVO attack behind it (the HVO offensive is owner Option C, post-1.0). Survivors are routed by the standing tables, never inside their own municipality and without regard to front lines: West Mostar, Stolac and Čapljina expellees reach Jablanica and Konjic rather than East Mostar and Blagaj; Kiseljak's reach Travnik across HVO-held ground; Ljubuški's reach Zenica rather than going abroad via Croatia. The 3% kill share is applied in Herzegovina, where deaths during removal were about 1%; it stands in for unmodelled detention-camp deaths (Dretelj, Heliodrom, Gabela). The Humanitarian Ledger and `refugees_created` count killed and abroad twice for takeover-path events, policy waves included, because the takeover writer's `displaced` already contains them (pre-existing on main; out-of-scope register). The ledger figure therefore overstates the people moved by about 30%; the run 7 people figure is 27,839. The rule keys on `player_faction`, not the autonomy level: a campaign with a human HRHB, including Observer level 3, has no policy waves, so it shows fewer 1993 HVO expulsions than history and drifts from the calibration line; no surface may present that as restraint or a better outcome. A `player_faction` change mid-campaign leaves timers already seeded in place. Livno's supply population factor rises at t188 (0.91 to 1.00, because its 1992 Krajina refugees are not moved on once east Mostar holds Bosniak expellees); this is inert only because Livno has no production facility, and the B5 no-reward re-run must re-check it if one is added or local production gains another consumer.
 
 ## 4. Routing System
 
@@ -384,6 +408,7 @@ interface HostileTakeoverTimerState {
     started_turn: number;       // turn timer began
     matured_turn?: number;      // set when initial displacement fires (undefined = still in countdown)
     cumulative_displaced?: number; // total persons displaced from this OSID (initial + sustained)
+    cause?: 'policy_expulsion';    // RF-5B: seeded by the minority-expulsion policy (§3.4); one wave, no Branch B
 }
 ```
 
@@ -394,6 +419,7 @@ interface HostileTakeoverTimerState {
 **Created by:**
 1. War-start seeding (Step 0): one timer per minority faction per OSID, at `warStartTurn + 1` (first executed war turn)
 2. Battle-driven flips (Step 1): one timer per flip, keyed by `${battle.osid}|${fromFaction}`
+3. Policy expulsion (Step 0b, RF-5B): once per bot faction with a policy, `cause: 'policy_expulsion'` (§3.4); deleted, never fired, when the holder loses the OSID
 
 - Only created when factions are at war (`areFactionsAtWar()`)
 - Existing timer for same key is not overwritten (first-come wins)
