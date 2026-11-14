@@ -733,7 +733,20 @@ function projectCanonicalDecisionReceipts(state, playerFaction) {
 
 function readCanonicalDecisionReceiptsFromAutosave(autosavePath, playerFaction) {
   if (!fs.existsSync(autosavePath)) throw new Error(`Canonical autosave missing for decision receipt proof: ${autosavePath}`);
-  return projectCanonicalDecisionReceipts(JSON.parse(fs.readFileSync(autosavePath, 'utf8')), playerFaction);
+  // A saved-turn write can overlap this read (the app wrote the file in place before the atomic
+  // write fix). A torn read is a SyntaxError on a multi-MB file: re-read a few times, and rethrow
+  // the last error so a genuinely corrupt save still fails loudly.
+  let lastError = null;
+  for (let attempt = 0; attempt < 6; attempt += 1) {
+    try {
+      return projectCanonicalDecisionReceipts(JSON.parse(fs.readFileSync(autosavePath, 'utf8')), playerFaction);
+    } catch (error) {
+      if (!(error instanceof SyntaxError)) throw error;
+      lastError = error;
+      Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 500);
+    }
+  }
+  throw lastError;
 }
 
 function resolveDecisionReceiptAutosavePath(
@@ -2876,11 +2889,23 @@ async function findCampaignOpeningOwner(page) {
 
 async function waitForCampaignOpeningOwner(page, timeoutMs = 90000) {
   const deadline = Date.now() + timeoutMs;
+  // The shell's legacy #mm-new-campaign menu can be visible for a moment before the embedded
+  // React opening mounts (longer on a loaded machine). Treat legacy as the owner only when no
+  // React opening has appeared within the grace window, so the race cannot pick the wrong path.
+  const LEGACY_GRACE_MS = 20000;
+  let legacySeenAtMs = null;
+  let legacyOpening = null;
   while (Date.now() < deadline) {
     const opening = await findCampaignOpeningOwner(page);
-    if (opening) return opening;
+    if (opening?.kind === 'react') return opening;
+    if (opening) {
+      legacyOpening = opening;
+      legacySeenAtMs ??= Date.now();
+      if (Date.now() - legacySeenAtMs >= LEGACY_GRACE_MS) return legacyOpening;
+    }
     await sleep(250);
   }
+  if (legacyOpening) return legacyOpening;
   const observed = page.frames().map((candidate) => candidate.url()).filter(Boolean);
   throw new Error(`Timed out waiting for a visible campaign opening owner; observed ${JSON.stringify(observed)}`);
 }
@@ -2996,7 +3021,14 @@ async function startCampaign(page, faction, events) {
   for (let i = 0; i < 10; i += 1) {
     const acknowledge = frame.getByRole('button', { name: /^Acknowledge$/i }).first();
     if (await acknowledge.isVisible().catch(() => false)) {
-      await acknowledge.click({ timeout: 10000 });
+      // The intro art fades and animates; under load the actionability wait can outlast 10s.
+      // Wait longer, then fall back to the intro's own "press any key" dismissal.
+      try {
+        await acknowledge.click({ timeout: 30000 });
+      } catch (error) {
+        events.push({ type: 'harness_note', note: `Acknowledge click retried via keyboard: ${String(error.message).split('\n')[0]}` });
+        await frame.locator('body').press('Enter').catch(() => {});
+      }
       await sleep(1000);
       continue;
     }
@@ -4348,7 +4380,43 @@ async function pollFrameEvaluation(frame, evaluator, arg, timeoutMs = 5000, inte
   throw new Error(`Frame DOM condition timed out after ${timeoutMs}ms; last result: ${JSON.stringify(lastResult)}`);
 }
 
+// The command OOB is a four-tab rail (Army default, owner review 2026-11-11), so the Situation
+// content and the Army corps cards are never mounted together. Read each tab's own geometry and
+// merge: corps cards come from the Army pass, Situation content/prose from the Situation pass,
+// and the horizontal-overflow figures keep the worse of the two. The sidebar is left on Army.
+async function selectOobTab(frame, testId) {
+  const toggle = frame.locator(`[data-testid="${testId}"]`).first();
+  if (await toggle.count() === 0) return false;
+  await toggle.click({ timeout: 5000 });
+  await sleep(250);
+  return true;
+}
+
 async function readMapChromeGeometry(frame) {
+  const armySelected = await selectOobTab(frame, 'oob-section-army-toggle');
+  const armyPass = await readMapChromeGeometryOnce(frame);
+  if (!armySelected || !armyPass.oob.present) return armyPass;
+  const situationSelected = await selectOobTab(frame, 'oob-section-situation-toggle');
+  if (!situationSelected) return armyPass;
+  const situationPass = await readMapChromeGeometryOnce(frame);
+  await selectOobTab(frame, 'oob-section-army-toggle');
+  if (!situationPass.oob.present) return armyPass;
+  return {
+    ...armyPass,
+    oob: {
+      ...armyPass.oob,
+      scrollWidth: Math.max(armyPass.oob.scrollWidth, situationPass.oob.scrollWidth),
+      overflowingDescendants: [
+        ...armyPass.oob.overflowingDescendants,
+        ...situationPass.oob.overflowingDescendants,
+      ].slice(0, 24),
+      situationContent: situationPass.oob.situationContent,
+      situationProse: situationPass.oob.situationProse,
+    },
+  };
+}
+
+async function readMapChromeGeometryOnce(frame) {
   return frame.evaluate(() => {
     const rectOf = (node) => {
       if (!(node instanceof HTMLElement)) return null;
