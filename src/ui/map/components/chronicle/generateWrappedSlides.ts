@@ -13,6 +13,7 @@ import { t } from '../../i18n';
 import { sidePickerFactionLabel } from '../../utils/sidePickerLabels.js';
 import { turnToDateString } from '../../utils/formatters.js';
 import { shouldNarrateTerritorySummary } from '../../data/territorySummaryGuard.js';
+import { resolveEventDisplayTitle as resolveDisplayCopyTitle } from '../../data/eventDisplayCopy.js';
 
 export interface WrappedSlide {
     id: string;
@@ -51,7 +52,7 @@ function resolveEventDisplayTitle(
 ): string {
     const title = def?.title;
     return typeof title === 'string' && title.trim().length > 0
-        ? title
+        ? resolveDisplayCopyTitle(fallbackId, title, def?.localizations ? { localizations: def.localizations } : {})
         : resolveEventFallbackLabel(fallbackId);
 }
 
