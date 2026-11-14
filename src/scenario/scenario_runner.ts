@@ -67,6 +67,7 @@ import {
 } from './scenario_read_context.js';
 import { runOneTurn } from '../state/turn_pipeline.js';
 import { computeSpatialContext } from '../sim/spatial_context.js';
+import { summarizeCorpsFireSupport } from '../sim/combat/corps_fire_support.js';
 import { strictCompare } from '../state/validateGameState.js';
 import { stableStringify } from '../utils/stable_json.js';
 import {
@@ -2210,6 +2211,49 @@ export function emitVlasicTraceLine(state: GameState, turnReport: TurnReport): v
  * Reads existing state/report fields only. Mutates nothing, recomputes no readiness,
  * writes no files. One `stableStringify` line on stdout prefixed `[mistral-prep-trace] `.
  */
+/**
+ * RF-AI2 CORPS STANCE / READINESS-GATE DIAGNOSTIC (opt-in, read-only).
+ *
+ * Emits ONLY when `AWWV_CORPS_STANCE_TRACE=1`. One `stableStringify` line per turn on
+ * stdout, prefixed `[corps-stance-trace] `, listing every corps (sorted) with its stance,
+ * the formula recommendation, the commander force-assessment tier counts the N1297
+ * readiness gate reads, the corps' massed fire support (corps_fire_support.ts), its
+ * campaign-plan suggestion and active operation count. Mutates nothing, writes no files.
+ */
+const CORPS_STANCE_TRACE_ENV_VAR = 'AWWV_CORPS_STANCE_TRACE';
+
+export function emitCorpsStanceTraceLine(state: GameState): void {
+    if (process.env[CORPS_STANCE_TRACE_ENV_VAR] !== '1') return;
+    const cc = state.military.corps_command ?? {};
+    const turn = state.meta.turn;
+    const corps: Record<string, unknown>[] = [];
+    for (const corpsId of Object.keys(cc).sort(strictCompare)) {
+        const cmd = cc[corpsId];
+        if (!cmd) continue;
+        const fa = cmd.commander_state?.force_assessment;
+        const faction = state.military.formations?.[corpsId]?.faction ?? null;
+        const plan = faction ? state.military.campaign_plans?.[faction] : undefined;
+        const fp = plan && plan.valid_until_turn >= turn
+            ? plan.front_priorities.find(p => p.corps_id === corpsId)
+            : undefined;
+        const fire = summarizeCorpsFireSupport(state, corpsId);
+        corps.push({
+            id: corpsId,
+            stance: cmd.stance ?? null,
+            rec: cmd.ai_recommended_stance ?? null,
+            me: fa?.tier_counts.main_effort ?? null,
+            ad: fa?.tier_counts.active_defense ?? null,
+            gar: fa?.tier_counts.garrison ?? null,
+            art: Math.round(fire.artillery * 10) / 10,
+            tank: Math.round(fire.tanks * 10) / 10,
+            fs: Math.round(fire.fire_support * 10) / 10,
+            plan: fp?.suggested_stance ?? null,
+            ops: cmd.active_operations?.length ?? 0,
+        });
+    }
+    console.log(`[corps-stance-trace] ${stableStringify({ turn, corps })}`);
+}
+
 const MISTRAL_PREP_TRACE_ENV_VAR = 'AWWV_MISTRAL_PREP_TRACE';
 const MISTRAL_PREP_TRACE_OPERATION_NAME = 'Operation Mistral 2';
 const MISTRAL_PREP_TRACE_TURN_MIN = 175;
@@ -3028,6 +3072,9 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             // MISTRAL 2 PREPARATION-HOLD DIAGNOSTIC: opt-in, read-only. Inert unless
             // AWWV_MISTRAL_PREP_TRACE=1; see emitMistralPrepTraceLine for the contract.
             emitMistralPrepTraceLine(state, turnReport, week_index /* zero-based loop index */);
+            // RF-AI2 CORPS STANCE DIAGNOSTIC: opt-in, read-only. Inert unless
+            // AWWV_CORPS_STANCE_TRACE=1; see emitCorpsStanceTraceLine for the contract.
+            emitCorpsStanceTraceLine(state);
 
             let weeklyCombatCausalityForReport: WeeklyCombatCausalitySummary | undefined;
             let weeklyControlChangeAttributionForReport: WeeklyControlChangeAttributionSummary | undefined;
