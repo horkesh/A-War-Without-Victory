@@ -806,9 +806,9 @@ function projectTurnSummaries(summaries, context, allowedEventIds) {
           ? battle.primary_defender_id
           : null;
         row.all_attacker_ids = ownIsAttacker
+          // Keep the engine order (lead first, then strictCompare); it is already deterministic.
           ? (Array.isArray(battle.all_attacker_ids) ? battle.all_attacker_ids : [])
             .filter((id) => ownFormationIds.has(id))
-            .sort(strictCompare)
           : [contactId(battle.attacker_faction, battle.osid)];
         if (ownIsDefender && Array.isArray(battle.defender_contributions)) {
           row.defender_contributions = battle.defender_contributions

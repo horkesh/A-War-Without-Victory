@@ -13,15 +13,16 @@ it('projects the same own-only equipment aggregate at both reporting boundaries'
  expect(extractWarData(raw,'RS').ownForces.equipmentSummary).toEqual(expected);
  expect(parseGameState({...raw,meta:{...raw.meta,player_faction:null}}).equipmentSummary?.brigadeCount).toBe(0);
 });
-it('renders holdings, an explicitly separate operational pool percentage, and completeness', () => {
+it('renders holdings and completeness without the dead heavy-equipment pool (realism audit F9)', () => {
  const summary = summarizeOwnEquipment(Object.values(formationReports), 'RS');
  const html = renderToStaticMarkup(h(EquipmentSummary,{summary}));
- expect(html).toContain('75%'); expect(html).toContain('5'); expect(html).toContain('No staff report');
- expect(html).toContain('1 / 1'); expect(html).toContain('abstract');
+ expect(html).toContain('5'); expect(html).toContain('No staff report'); expect(html).toContain('1 / 1');
+ expect(html).not.toContain('75%'); expect(html).not.toContain('equipment-operational-pool'); expect(html).not.toMatch(/abstract|pool/i);
 });
 
-it('marks a percentage from incomplete pool reporting as partial', () => {
- const rows = [...Object.values(formationReports), {faction:'RS',kind:'brigade',status:'active'}];
+it('marks holdings from incomplete reporting as partial', () => {
+ const rows = [...Object.values(formationReports), {faction:'RS',kind:'brigade',status:'active',composition:{tanks:2}}];
  const html = renderToStaticMarkup(h(EquipmentSummary,{summary:summarizeOwnEquipment(rows, 'RS')}));
- expect(html).toContain('75% reported (partial)'); expect(html).toContain('1 / 2');
+ expect(html).toContain('0 reported (partial)'); expect(html).toContain('2 / 2'); expect(html).toContain('1 / 2');
+ expect(html).not.toContain('7 reported (partial)');
 });

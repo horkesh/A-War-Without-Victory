@@ -377,8 +377,8 @@ describe('desktop player-visible state projection', () => {
     state.turn_summaries[0].battles = [
       {
         osid: 'op:enemy:front', attacker_faction: 'RS', defender_faction: 'RBiH',
-        primary_attacker_id: 'rs_brigade', primary_defender_id: 'rbih_visible',
-        all_attacker_ids: ['rs_brigade', 'rs_brigade_2'],
+        primary_attacker_id: 'rs_brigade_2', primary_defender_id: 'rbih_visible',
+        all_attacker_ids: ['rs_brigade_2', 'rs_brigade'],
         outcome: 'victory', attacker_casualties: 10, defender_casualties: 12, territory_flipped: false, was_concentrated: true,
       },
       {
@@ -392,7 +392,9 @@ describe('desktop player-visible state projection', () => {
     const projected = loadProjector().projectPlayerVisibleState(state);
     const [own, enemy] = projected.turn_summaries[0].battles;
 
-    expect(own.all_attacker_ids).toEqual(['rs_brigade', 'rs_brigade_2']);
+    // Lead first, as the engine wrote it; the projector must not re-sort.
+    expect(own.all_attacker_ids).toEqual(['rs_brigade_2', 'rs_brigade']);
+    expect(own.primary_attacker_id).toBe('rs_brigade_2');
     expect(own.was_concentrated).toBe(true);
     expect(enemy.all_attacker_ids).toHaveLength(1);
     expect(enemy.all_attacker_ids[0]).toBe(enemy.primary_attacker_id);
