@@ -38,6 +38,7 @@ import { assembleBeliefState } from './belief.js';
 import type { CorpsOperation } from '../../../state/game_state.js';
 import { botOrdersPerfTime } from '../_perf_profile_bot_orders.js';
 import { assignOperationCommander } from '../officer_system.js';
+import { isLevel1PlayerApprovalFaction } from '../../bot/staff_control.js';
 
 function operationsConflict(
     left: Pick<CorpsOperation, 'name' | 'sector_id' | 'objectives' | 'participating_brigades'>,
@@ -242,7 +243,11 @@ export function applyCommanderOutput(
     //    If player rejected → abandon the plan (set to null in updated_state).
     //    If no response yet → hold the plan at 'ready' (do not emit the operation).
     //    Guard against headless/test states where meta may be absent.
-    const autonomyLevel = state.meta?.autonomy_level ?? 0;
+    //    PLAYER FACTION ONLY (2026-11-14, R8 run m): the approval can only come from the human
+    //    player, so holding a bot faction's plan froze every RS/HRHB commander for the whole war
+    //    (zero bot-generated RS operations after week 20). Bot corps plan and launch as at Level 0/2.
+    const corpsFaction = state.military.formations?.[corpsId]?.faction;
+    const level1ApprovalApplies = isLevel1PlayerApprovalFaction(state, corpsFaction);
     const updatedPlan = output.updated_state.current_plan;
     const playerOpResp = corps.player_op_response;
     const activatedOperations: Array<typeof corps.active_operations[number]> = [];
@@ -273,7 +278,7 @@ export function applyCommanderOutput(
             }
         }
     };
-    if (autonomyLevel === 1) {
+    if (level1ApprovalApplies) {
         if (updatedPlan && updatedPlan.status === 'executing') {
             const planApproved =
                 playerOpResp !== undefined &&

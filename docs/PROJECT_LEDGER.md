@@ -15175,3 +15175,22 @@ From the stance-engine follow-up (#583) register `F:/AWWV-coordination/crash_rec
 - Found by the R8 sign-and-verdict segment (RBiH, signed Dayton, turn 188): the Verdict's Focus / Outcome / Cost Signal values draw in the scene tone accent on the metric card (`#11141b`), and the catastrophic accent `#c24040` read 3.6:1 at 19px, under the 4.5:1 floor (readability gate: "RBiH", "Survival", "Permanent condemnation").
 - Fix: `TONE_ACCENT.catastrophic` in `src/ui/map/components/verdict/CinematicVerdict.tsx` is now `#e05a5a` (5.0:1). The other three tone accents already cleared 4.5:1. Colour only; no copy, layout, sim or state change.
 - Test: `tests/ui/verdict_metric_contrast.test.ts` computes the contrast of every tone accent against the card colour read from the source and requires 4.5:1. `cinematic_verdict`, `endgame_snapshot_verdict_fidelity` and `records_surfaces_type_floor` still pass.
+
+## 2026-11-14 — Level 1 (Assisted) approval holds the player's corps only (PK1, R8 dry-run finding)
+
+- **Found.** The unheld-pockets diagnosis (`docs/40_reports/20261114_UNHELD_POCKETS_DIAGNOSIS.md` §8, PR #620) traced the owner's screenshot to R8 dry-run run m, which runs at autonomy level 1. The harness's "strategic autonomy" clicks `autonomy-level-1` and asserts it at the end of the run.
+  - `applyCommanderOutput` (`commander_loop.ts`) read the global `meta.autonomy_level` with no faction check, and only the desktop player UI ever writes `player_op_response`. So every bot corps plan waited at `ready` for an approval no one could give.
+  - Commander local occupation (`emit.ts`) was also switched off for every faction at Level 1.
+  - In run m, 5 RS corps and 1 HRHB corps were "held at ready: awaiting player approval at Level 1" (1KK since t5). RS started 6 operations after week 20, all authored and none after t69. Headless main started 19, including 13 bot-generated plus Zvezda 94.
+  - The 1992 islands that bot operations normally clear (Arapuša, Jezero+Volari, Lupnica, Baljvine) survived to 1995 as a result.
+- **Fix.** New `isLevel1PlayerApprovalFaction(state, faction)` in `src/sim/bot/staff_control.ts`: true only at exactly Level 1, for the human player's faction, and never under headless auto-control. Both gates use it.
+  - The player's corps keep the approval flow unchanged.
+  - Bot corps plan, launch and run local occupation exactly as at Levels 0 and 2.
+  - No state, schema or serialization change.
+- **Default level.** New desktop campaigns start at Level 2 (`desktop_sim.ts:412`). A real player hit the freeze only after choosing Level 1 ("Assisted") themselves. The R8 strategic runs hit it every time, so R8 evidence gathered before this fix understates the bot side.
+- **Calibration.** Zero drift: headless runs have no player faction and autonomy 0, and `npm run test:baselines` reports "Baseline regression: all scenarios match." `npx tsc --noEmit` exit 0.
+- **Tests.**
+  - New `tests/sim/autonomy/level1_player_only_gate.test.ts` (7 tests). Three of them were observed red on the old gate.
+  - `operation_emit_overlap_guards` Level-1 cases now name the player faction and add bot-side positive cases.
+  - `autonomy_phase_d` unchanged.
+  - 109 passed across the three files.
