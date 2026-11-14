@@ -11,3 +11,5 @@ Run them from the repo root against a 188w run directory (`R=runs/<run>`). They 
 - `node locate.cjs` georeferences the owner screenshot to OSIDs.
 
 Reference run: main `e07847268` (#600), final hash `53ffe8e9545686ad`, checkpoints 712/709/710/705.
+- `node savecheck.cjs <save.json>` inspects a desktop save: autonomy, pocket cells, RS commander status, operation history.
+- `node t136.cjs <save.json> <T> [label] [keys]` gives small pockets at turn T (replayed from control_events) and the operation tally.
