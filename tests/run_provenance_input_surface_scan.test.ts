@@ -261,6 +261,11 @@ const EXCLUSION_REGISTER: readonly Exclusion[] = [
         reason: 'Read by army_co_roster_data.ts. This is the R7 Phase 2 elite_commander class — competence and aggressiveness values that are demonstrably NOT run-inert.',
     },
     {
+        path: 'data/scenarios/corps_co_roster.json',
+        kind: 'deferred_stamp',
+        reason: 'Read by corps_co_roster_data.ts (command-loop §5E corps succession schedule). Shipped EMPTY, so run-inert today; lane L8 must move it into run_provenance.ts when the dated schedule lands, because a populated schedule decides corps commanders and is NOT run-inert.',
+    },
+    {
         path: 'data/source/calibration/painted_control_jan1993.json',
         kind: 'deferred_stamp',
         reason: 'Read by anomaly_checks_extended.ts as a mid-war reference map.',
@@ -390,8 +395,9 @@ describe('★ input-surface scan: every data read on the headless path is stampe
             `${deferred.length} real run inputs are read but NOT hashed:\n  ${deferred.join('\n  ')}\n`
             + 'Stamping any of them changes consumed_inputs.digest and moves the row count, which '
             + 'is why it is a deliberate follow-up rather than a silent fix.'
-        ).toBe(17); // 15 -> 16 (2026-11-07): plan_settlement_shares.json, a verdict input when a settlement occurs.
+        ).toBe(18); // 15 -> 16 (2026-11-07): plan_settlement_shares.json, a verdict input when a settlement occurs.
         // 16 -> 17 (2026-11-08): plan_cell_assignments.json, the audited Dayton cell table (DC stage 1).
+        // 17 -> 18 (2026-11-14): corps_co_roster.json, the §5E corps commander schedule (shipped empty; L8 stamps it).
         // 1 -> 2 (2026-11-07): plan_maps_research.json, named only in metadata, read by no code.
         // 2 -> 3 (2026-11-07): mun1990_names.json, display labels for captured-ground packages.
         // 3 -> 4 (2026-11-08): dayton_cell_assignments.json, named only in metadata, read by no code.

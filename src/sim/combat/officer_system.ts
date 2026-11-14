@@ -22,6 +22,14 @@ import {
 } from './army_co_lifecycle.js';
 import { CANONICAL_ARMY_CO_ROSTER } from './army_co_roster_data.js';
 import { getBrigadeOfficerMod } from './combat_math.js';
+import {
+    nextScheduledTenure,
+    officerSurvivedWar,
+    scheduledTenure,
+    tenuresEndedBy,
+    type CorpsCoRoster,
+} from './corps_co_roster.js';
+import { CANONICAL_CORPS_CO_ROSTER } from './corps_co_roster_data.js';
 import { selectManualPlayerFaction } from '../bot/staff_control.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -69,7 +77,31 @@ function findHistoricalSuccessor(
     allOfficers: NamedOfficer[],
     currentState: Record<string, NamedOfficerState>,
     turn: number,
+    corpsRoster?: CorpsCoRoster,
+    commandedCorpsId?: string | null,
 ): NamedOfficer | null {
+    // The dated corps schedule (§5E) names the successor first: the holder whose tenure
+    // is in force for the corps being vacated, else the next scheduled holder. Inert
+    // with an empty schedule.
+    if (commandedCorpsId && corpsRoster) {
+        const current = scheduledTenure(corpsRoster, commandedCorpsId, turn);
+        const tenure = current && current.officer_id !== departing.id
+            ? current
+            : nextScheduledTenure(corpsRoster, commandedCorpsId, turn);
+        const scheduled = tenure ? allOfficers.find((o) => o.id === tenure.officer_id) : undefined;
+        const scheduledState = scheduled ? currentState[scheduled.id] : undefined;
+        if (
+            scheduled
+            && scheduled.id !== departing.id
+            && scheduled.available_from_turn <= turn
+            && (scheduled.available_until_turn === undefined || scheduled.available_until_turn > turn)
+            && isEnclaveCompatible(scheduled, commandedCorpsId, turn)
+            && (!scheduledState || scheduledState.status === 'reserve')
+        ) {
+            return scheduled;
+        }
+    }
+
     const corpsId = departing.home_corps_id;
     if (!corpsId) return null;
 
@@ -591,7 +623,9 @@ export interface OfficerSuccessionReport {
  */
 export function processOfficerSuccession(
     state: GameState,
-    engagedCorpsIds: Set<string>
+    engagedCorpsIds: Set<string>,
+    /** Dated corps commander schedule (§5E). Injectable for tests; empty = inert. */
+    corpsRoster: CorpsCoRoster = CANONICAL_CORPS_CO_ROSTER,
 ): OfficerSuccessionReport {
     const report: OfficerSuccessionReport = {
         departures: [],
@@ -618,6 +652,36 @@ export function processOfficerSuccession(
     }
     const pendingEvents = state.military.pending_officer_events;
 
+    /**
+     * A manually controlled player decides his own corps successions: a scheduled
+     * change becomes a replacement matter (deduplicated against pending and resolved
+     * matters), never an automatic swap. Used only by the schedule paths (§5E).
+     */
+    function suggestScheduledReplacement(outgoing: NamedOfficer, corpsId: string, proposed?: NamedOfficer | null): void {
+        const successor = proposed ?? findHistoricalSuccessor(outgoing, officerData!, officers!, turn, corpsRoster, corpsId);
+        if (!successor) return;
+        const matterKey = officerReplacementMatterKey(outgoing.id, corpsId, successor.id);
+        const alreadyPending = pendingEvents.some(event => replacementMatterMatches(event, matterKey, outgoing.id, corpsId, successor.id));
+        const alreadyResolved = (state.military.officer_decision_history ?? []).some(record => replacementMatterMatches(
+            record as typeof record & { matter_key?: string },
+            matterKey,
+            outgoing.id,
+            corpsId,
+            successor.id,
+        ));
+        if (alreadyPending || alreadyResolved) return;
+        pendingEvents.push({
+            event_id: matterKey,
+            type: 'replacement_suggested',
+            faction: outgoing.faction,
+            turn,
+            officer_id: successor.id,
+            current_commander_id: outgoing.id,
+            corps_id: corpsId,
+            acknowledged: false,
+        });
+    }
+
     // 1. Historical departures
     for (const data of officerData) {
         // Army-command transitions are roster-owned. This prevents an officer
@@ -630,7 +694,7 @@ export function processOfficerSuccession(
             // Manual player faction: don't auto-retire, create a replacement_suggested event instead
             if (data.faction === manualPlayerFaction && os.status === 'active' && os.assigned_corps_id) {
                 // Find the suggested replacement (next officer for this corps by tier)
-                const suggestedReplacement = findHistoricalSuccessor(data, officerData, officers, turn);
+                const suggestedReplacement = findHistoricalSuccessor(data, officerData, officers, turn, corpsRoster, os.assigned_corps_id);
                 if (suggestedReplacement) {
                     const corpsId = os.assigned_corps_id;
                     const matterKey = officerReplacementMatterKey(data.id, corpsId, suggestedReplacement.id);
@@ -722,6 +786,10 @@ export function processOfficerSuccession(
 
         const data = officerData.find(o => o.id === id);
         if (!data) continue;
+        // §5E: an officer the schedule records as having survived the war never accrues
+        // the casualty-exposure clock (no ARBiH corps commander of 1992-95 was killed).
+        // Historical deaths are scheduled 'killed' tenures, applied below.
+        if (officerSurvivedWar(corpsRoster, id)) continue;
 
         const exposure = data.casualty_vulnerability
             * OFFICER_CASUALTY_EXPOSURE_RATE
@@ -742,6 +810,34 @@ export function processOfficerSuccession(
         officerState.status = 'killed';
         officerState.assigned_corps_id = null;
         report.casualties.push(candidate.id);
+    }
+
+    // 3b. Scheduled historical fates (§5E). Idempotent: a death applies only to a living
+    // officer; a relief applies only while he still holds that corps and is not the
+    // President's own appointee. Inert with an empty schedule.
+    for (const { corps_id: corpsId, tenure } of tenuresEndedBy(corpsRoster, turn)) {
+        const os = officers[tenure.officer_id];
+        const data = officerData.find(o => o.id === tenure.officer_id);
+        if (!os || !data) continue;
+        if (tenure.historical_fate === 'killed') {
+            if (os.status !== 'active' && os.status !== 'reserve') continue;
+            os.status = 'killed';
+            os.assigned_corps_id = null;
+            report.casualties.push(data.id);
+            continue;
+        }
+        // 'relieved'
+        if (os.status !== 'active' || os.assigned_corps_id !== corpsId) continue;
+        if (isPresidentialAppointee(state, corpsId, data.id)) continue;
+        if (data.faction === manualPlayerFaction) {
+            suggestScheduledReplacement(data, corpsId);
+            continue;
+        }
+        const servesLater = (corpsRoster.rosters ? Object.values(corpsRoster.rosters) : [])
+            .some(entry => entry.schedule.some(t => t.officer_id === data.id && t.tenure_start > turn));
+        os.status = servesLater ? 'reserve' : 'retired';
+        os.assigned_corps_id = null;
+        report.departures.push(data.id);
     }
 
     // Army commanders are not corps-assigned, so their combat exposure and
@@ -805,6 +901,43 @@ export function processOfficerSuccession(
         })
         .sort(strictCompare);
 
+    // 5a. Scheduled handovers (§5E). When a scheduled tenure is in force and its holder
+    // is free, the fallback holder steps aside (a generic acting commander retires; a
+    // named one returns to the reserve). The President's own appointee is never rotated
+    // out, and a manually controlled player gets a replacement matter instead of an
+    // automatic swap. Runs over every corps before vacancies are filled, so a corps the
+    // holder leaves is refilled in the same turn. Inert with an empty schedule.
+    for (const corpsFormId of corpsFormationIds) {
+        const corpsFormation = formations[corpsFormId]!;
+        if (corpsFormation.kind !== 'corps_asset') continue;
+        const holder = scheduledHolderForCorps(state, corpsRoster, officerData, officers, corpsFormId, turn, true);
+        if (!holder) continue;
+        const holderState0 = officers[holder.id]!;
+        const incumbent = getCorpsCommander(corpsFormId, state);
+        // A vacancy with the holder in the reserve is filled from the schedule below; a
+        // holder still commanding elsewhere is moved here now, so his old corps is
+        // refilled in the vacancy pass of this same turn.
+        if (!incumbent && holderState0.status === 'reserve') continue;
+        if (incumbent && incumbent.data.id === holder.id) continue;
+        if (incumbent && isPresidentialAppointee(state, corpsFormId, incumbent.data.id)) continue;
+        if (incumbent && corpsFormation.faction === manualPlayerFaction) {
+            suggestScheduledReplacement(incumbent.data, corpsFormId, holder);
+            continue;
+        }
+        if (incumbent) {
+            incumbent.state.status = incumbent.data.id.startsWith('generic_') ? 'retired' : 'reserve';
+            incumbent.state.assigned_corps_id = null;
+            incumbent.state.acting_commander = false;
+        }
+        const holderState = officers[holder.id]!;
+        holderState.status = 'active';
+        holderState.assigned_corps_id = corpsFormId;
+        holderState.turns_in_command = 0;
+        holderState.acting_commander = false;
+        applyAssignmentPenalty(holderState, holder, corpsFormId);
+        report.replacements.push({ corps_id: corpsFormId, old_officer: incumbent?.data.id ?? '', new_officer: holder.id });
+    }
+
     for (const corpsFormId of corpsFormationIds) {
         const corpsFormation = formations[corpsFormId]!;
         if (corpsFormation.kind !== 'corps_asset') continue;
@@ -814,7 +947,8 @@ export function processOfficerSuccession(
         if (existingCommander) {
             // C.3: HVO acting commanders get replaced once their delay is served
             if (existingCommander.state.acting_commander) {
-                const availableReplacement = findBestReplacement(officers, officerData, faction, corpsFormId, turn);
+                const availableReplacement = scheduledHolderForCorps(state, corpsRoster, officerData, officers, corpsFormId, turn, false)
+                    ?? findBestReplacement(officers, officerData, faction, corpsFormId, turn);
                 if (!availableReplacement) continue;
                 if (existingCommander.data.faction === 'HRHB') {
                     // D.4: Read delays from war_timeline if available, else hardcoded fallback
@@ -834,8 +968,10 @@ export function processOfficerSuccession(
             }
         }
 
-        // Find best available replacement from pool
-        const replacement = findBestReplacement(officers, officerData, faction, corpsFormId, turn);
+        // The dated schedule names the holder first (§5E); the pool ranking is the
+        // counterfactual fallback when the schedule has no free holder.
+        const replacement = scheduledHolderForCorps(state, corpsRoster, officerData, officers, corpsFormId, turn, false)
+            ?? findBestReplacement(officers, officerData, faction, corpsFormId, turn);
 
         if (replacement) {
             const os = officers[replacement.id]!;
@@ -843,21 +979,7 @@ export function processOfficerSuccession(
             os.assigned_corps_id = corpsFormId;
             os.turns_in_command = 0;
             os.acting_commander = false;
-
-            // Compute assignment penalty
-            const isHome = replacement.home_corps_id === corpsFormId;
-            const isCompatible = replacement.compatible_corps_ids?.includes(corpsFormId) ?? false;
-
-            if (!isHome && !isCompatible) {
-                os.effective_competence_penalty = INCOMPATIBLE_PENALTY;
-                os.penalty_turns_remaining = INCOMPATIBLE_PENALTY_TURNS;
-            } else if (!isHome && isCompatible) {
-                os.effective_competence_penalty = COMPATIBLE_PENALTY;
-                os.penalty_turns_remaining = COMPATIBLE_PENALTY_TURNS;
-            } else {
-                os.effective_competence_penalty = 0;
-                os.penalty_turns_remaining = 0;
-            }
+            applyAssignmentPenalty(os, replacement, corpsFormId);
 
             report.replacements.push({
                 corps_id: corpsFormId,
@@ -911,6 +1033,58 @@ export function processOfficerSuccession(
     }
 
     return report;
+}
+
+/** True when the President appointed this officer to this corps (REPLACE-CO lever). The schedule never rotates such an appointee out (§5E). */
+function isPresidentialAppointee(state: GameState, corpsId: string, officerId: string): boolean {
+    const records = state.military.corps_command?.[corpsId]?.co_replacement_record;
+    return Array.isArray(records) && records.some(r => r.replacement_officer_id === officerId);
+}
+
+/** Competence penalty for an assignment outside the officer's home corps (unchanged rules, shared by the pool and the schedule). */
+function applyAssignmentPenalty(os: NamedOfficerState, data: NamedOfficer, corpsId: string): void {
+    const isHome = data.home_corps_id === corpsId;
+    const isCompatible = data.compatible_corps_ids?.includes(corpsId) ?? false;
+    if (!isHome && !isCompatible) {
+        os.effective_competence_penalty = INCOMPATIBLE_PENALTY;
+        os.penalty_turns_remaining = INCOMPATIBLE_PENALTY_TURNS;
+    } else if (!isHome && isCompatible) {
+        os.effective_competence_penalty = COMPATIBLE_PENALTY;
+        os.penalty_turns_remaining = COMPATIBLE_PENALTY_TURNS;
+    } else {
+        os.effective_competence_penalty = 0;
+        os.penalty_turns_remaining = 0;
+    }
+}
+
+/**
+ * The scheduled holder for a corps this turn, when he is in play and free to take it:
+ * in the reserve, or (for a handover) commanding another corps without being the
+ * President's appointee there. Null when the schedule has no holder or he cannot serve
+ * (not yet arrived, dead, captured, enclave-incompatible); the fallback then applies.
+ */
+function scheduledHolderForCorps(
+    state: GameState,
+    corpsRoster: CorpsCoRoster,
+    officerData: NamedOfficer[],
+    officers: Record<string, NamedOfficerState>,
+    corpsId: string,
+    turn: number,
+    allowMoveFromCommand: boolean,
+): NamedOfficer | null {
+    const tenure = scheduledTenure(corpsRoster, corpsId, turn);
+    if (!tenure) return null;
+    const data = officerData.find(o => o.id === tenure.officer_id);
+    const os = officers[tenure.officer_id];
+    if (!data || !os) return null;
+    if (data.rank === 'army_commander' || data.rank === 'deputy') return null;
+    if (!isEnclaveCompatible(data, corpsId, turn)) return null;
+    if (os.status === 'reserve') return data;
+    if (os.status !== 'active' || !allowMoveFromCommand) return null;
+    if (os.assigned_corps_id === corpsId) return null; // already holds it
+    if (os.assigned_operation) return null; // finishes commanding the operation first
+    if (os.assigned_corps_id && isPresidentialAppointee(state, os.assigned_corps_id, data.id)) return null;
+    return data;
 }
 
 /**
