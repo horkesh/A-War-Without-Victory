@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 import { createHash } from 'node:crypto';
 import * as nodeFs from 'node:fs';
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { closeSync, mkdtempSync, openSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { tmpdir } from 'node:os';
 import * as nodePath from 'node:path';
@@ -163,6 +163,7 @@ test('historical event policy accepts exact visible tooltip or same-modal dossie
         historicalChoice: true,
         rbihParamilitaryPolicyOverride: null,
         rsDrinaPolicyOverride: null,
+        eventPolicyOverrides: new Map(),
         selectHistoricalEventChoice,
         hasMeaningfulSourceContent,
     });
@@ -190,6 +191,7 @@ test('historical event policy rejects absent, empty, hidden, foreign, or ambiguo
         historicalChoice: true,
         rbihParamilitaryPolicyOverride: null,
         rsDrinaPolicyOverride: null,
+        eventPolicyOverrides: new Map(),
         selectHistoricalEventChoice,
         hasMeaningfulSourceContent,
     });
@@ -3659,6 +3661,10 @@ test('final blocker inventory covers every canonical player decision queue', () 
             operation_opportunities: [
                 { approver_faction: 'RS', status: 'eligible_pending_review', proposal_id: 'covered' },
                 { approver_faction: 'RS', status: 'eligible_pending_review', proposal_id: 'fallback' },
+                // Decision recorded this turn, applied by the war pipeline at advance: not a blocker.
+                { approver_faction: 'RS', status: 'eligible_pending_review', proposal_id: 'decided-this-turn' },
+                // A decision recorded on an earlier turn that the pipeline never consumed: still one.
+                { approver_faction: 'RS', status: 'eligible_pending_review', proposal_id: 'decided-last-turn' },
             ],
             negotiation: {
                 pending_peace_plan: { plan_id: 'peace' },
@@ -3670,7 +3676,12 @@ test('final blocker inventory covers every canonical player decision queue', () 
             },
         },
         meta: {
-            pending_proposal_reviews: [{ faction: 'RS', proposed_action: 'OPPORTUNITY:covered', accepted: null, resolved_turn: null }],
+            turn: 113,
+            pending_proposal_reviews: [
+                { faction: 'RS', proposed_action: 'OPPORTUNITY:covered', accepted: null, resolved_turn: null },
+                { faction: 'RS', proposed_action: 'OPPORTUNITY:decided-this-turn', opportunity_decision: 'approve', resolved_turn: 113 },
+                { faction: 'RS', proposed_action: 'OPPORTUNITY:decided-last-turn', opportunity_decision: 'approve', resolved_turn: 112 },
+            ],
         },
     }, 'RS', { eventDecisions: 1, proposals: 1, paramilitary: 1 });
 
@@ -3684,7 +3695,7 @@ test('final blocker inventory covers every canonical player decision queue', () 
         peacePlan: 1,
         counterOffers: 1,
         dayton: 1,
-        operationOpportunities: 1,
+        operationOpportunities: 2,
     });
     assert.match(harness, /raw\.military\?\.pending_reserve_requests/);
     assert.match(harness, /pendingCounterOfferIds/);
@@ -4504,6 +4515,7 @@ test('RBiH paramilitary override chooses only the existing visible counterfactua
                 eventId: 'rbih_paramilitary_policy_1992',
             },
             rsDrinaPolicyOverride: null,
+            eventPolicyOverrides: new Map(),
             selectHistoricalEventChoice,
             hasMeaningfulSourceContent: () => false,
         },
@@ -4634,6 +4646,7 @@ test('RS Drina selector picks the named visible control only while the decision 
             historicalChoice: true,
             rbihParamilitaryPolicyOverride: null,
             rsDrinaPolicyOverride,
+            eventPolicyOverrides: new Map(),
             selectHistoricalEventChoice,
             hasMeaningfulSourceContent: () => false,
         },
@@ -4705,6 +4718,138 @@ test('RS Drina selector picks the named visible control only while the decision 
     assert.equal(other.choice.basis, 'staff_recommendation');
     assert.equal(other.choice.requestedOverride, undefined);
     await assert.rejects(policy(surface()), /No ranked authored historical default/);
+});
+
+test('the result writer streams JSON byte-identically to JSON.stringify so a 188-turn run cannot exceed the string limit', () => {
+    const harness = readHarness();
+    const writeStream = loadFunction<(fd: number, value: unknown) => void>(harness, 'writeJsonStream', { fs: nodeFs });
+    const dir = mkdtempSync(join(tmpdir(), 'awwv-json-stream-'));
+    try {
+        const big = 'é"\\\n 😀'.repeat(200_000);
+        const values: unknown[] = [
+            {},
+            [],
+            { a: [], b: {}, c: [[], {}, [1, [2, [3]]]], d: null, e: 'x"y\\z\n', f: 1.5e300, g: -0, h: true },
+            { skipped: undefined, fn: () => 1, nested: { skipped: undefined, kept: 0 } },
+            [undefined, () => 1, null, NaN, Infinity, 'ok'],
+            { when: new Date(Date.UTC(2026, 10, 14, 12, 0, 0)), m: new Map([[1, 2]]), s: new Set([1]) },
+            { toJSON() { return { shaped: [1, 2] }; } },
+            { events: Array.from({ length: 3000 }, (_, index) => ({ index, label: `step-${index}`, diagnostics: { rows: [index, index + 1] } })) },
+            { huge: big, list: [big, 'tail'] },
+            'a bare string',
+            42,
+        ];
+        values.forEach((value, index) => {
+            const file = join(dir, `case-${index}.json`);
+            const fd = openSync(file, 'w');
+            try { writeStream(fd, value); } finally { closeSync(fd); }
+            assert.equal(readFileSync(file, 'utf8'), JSON.stringify(value, null, 2), `case ${index}`);
+        });
+        assert.throws(() => {
+            const circular: Record<string, unknown> = {};
+            circular.self = circular;
+            const file = join(dir, 'circular.json');
+            const fd = openSync(file, 'w');
+            try { writeStream(fd, circular); } finally { closeSync(fd); }
+        }, /circular/i);
+    } finally {
+        rmSync(dir, { recursive: true, force: true });
+    }
+    assert.match(extractFunctionSource(harness, 'writeJsonAtomic'), /writeJsonStream\(fd, value\)/);
+});
+
+test('--dayton-sign-verdict signs through review, captures the signing beat and Verdict, and ends the run cleanly', () => {
+    const harness = readHarness();
+    assert.match(harness, /const daytonSignVerdict = args\.has\('--dayton-sign-verdict'\)/);
+    const sign = extractFunctionSource(harness, 'signDaytonAndCaptureVerdict');
+    // The order a player takes: arrive, open the draft, review, sign, signing beat, continue, Verdict.
+    const order = ['Current draft', 'Review agreement', 'Sign agreement', 'dayton-signing-beat',
+        'dayton-signing-continue', 'faction-report-score', "getByRole('tab')"]
+        .map((needle) => sign.indexOf(needle));
+    assert.ok(order.every((index) => index >= 0), `missing step: ${JSON.stringify(order)}`);
+    assert.deepEqual(order, [...order].sort((a, b) => a - b));
+    // The Dayton handler diverts to it only when the flag is set, before any decline click.
+    const handler = extractFunctionSource(harness, 'handleCurrentSurface');
+    assert.ok(handler.indexOf('if (daytonSignVerdict)') >= 0);
+    assert.ok(handler.indexOf('if (daytonSignVerdict)') < handler.indexOf("clickExactVisibleButton(frame, 'Decline Settlement'"));
+    // runFaction treats the sentinel as a finished run, and the readability gate still applies.
+    const runFaction = extractFunctionSource(harness, 'runFaction');
+    assert.match(runFaction, /\.catch\(\(error\) => settleDaytonVerdictSegment\(error, events\)\)/);
+    const settle = extractFunctionSource(harness, 'settleDaytonVerdictSegment');
+    assert.match(settle, /error instanceof DaytonVerdictCaptured/);
+    assert.match(settle, /collectReadabilityFailures\(events\)/);
+});
+
+test('--event-policy parses strictly and answers an unranked design-counterfactual decision only', async () => {
+    const harness = readHarness();
+    const parse = loadFunction<(argv: string[], historical: boolean) => Map<string, string>>(harness, 'parseEventPolicyOverrides');
+    assert.equal(parse([], true).size, 0);
+    assert.deepEqual(
+        [...parse(['--event-policy=strategic_posture_review_rbih:consolidate_defend'], true)],
+        [['strategic_posture_review_rbih', 'consolidate_defend']],
+    );
+    assert.throws(() => parse(['--event-policy=only_event'], true), /<eventId>:<responseId>/);
+    assert.throws(() => parse(['--event-policy=a:b:c'], true), /<eventId>:<responseId>/);
+    assert.throws(() => parse(['--event-policy=a:b', '--event-policy=a:c'], true), /twice/);
+    assert.throws(() => parse(['--event-policy=a:b'], false), /historical-choice/);
+
+    const selectHistoricalEventChoice = loadFunction<(decision: any) => any>(harness, 'selectHistoricalEventChoice');
+    const eventId = 'strategic_posture_review_rbih';
+    const policyWith = (eventPolicyOverrides: Map<string, string>) => loadAsyncFunction<(surface: any) => Promise<any>>(
+        harness,
+        'policyEventResponseControl',
+        {
+            historicalChoice: true,
+            rbihParamilitaryPolicyOverride: null,
+            rsDrinaPolicyOverride: null,
+            eventPolicyOverrides,
+            selectHistoricalEventChoice,
+            hasMeaningfulSourceContent: () => false,
+        },
+    );
+    const controls = [
+        { id: 'press-control', label: 'Press the offensive' },
+        { id: 'consolidate-control', label: 'Consolidate and defend' },
+    ];
+    const responseList = {
+        nth: (index: number) => controls[index],
+        evaluateAll: async (callback: (nodes: any[]) => unknown) => callback(controls.map((control) => ({
+            firstElementChild: { firstElementChild: { textContent: control.label } },
+        }))),
+    };
+    const rail = { getAttribute: async () => eventId };
+    const modal = { locator: (selector: string) => selector.includes('rail')
+        ? { count: async () => 1, first: () => rail }
+        : responseList };
+    const baseOptions = [
+        { id: 'press_offensive', label: controls[0].label },
+        { id: 'consolidate_defend', label: controls[1].label },
+    ];
+    const surface = (extra: Record<string, unknown> = {}, options: unknown[] = baseOptions) => ({
+        locator: () => ({ count: async () => 1, first: () => modal }),
+        evaluate: async () => ({
+            meta: { turn: 96, player_faction: 'RBiH' },
+            military: {
+                pending_event_decisions: [{ event_id: eventId, faction: 'RBiH', response_options: options, ...extra }],
+            },
+        }),
+    });
+
+    // Without a named policy the run still refuses to invent an answer.
+    await assert.rejects(policyWith(new Map())(surface()), /No ranked authored historical default/);
+
+    const policy = policyWith(new Map([[eventId, 'consolidate_defend']]));
+    const selected = await policy(surface());
+    assert.equal(selected.loc.id, 'consolidate-control');
+    assert.equal(selected.choice.responseId, 'consolidate_defend');
+    assert.equal(selected.choice.basis, 'player_selected_counterfactual');
+    assert.equal(selected.choice.historicityClaim, 'none_counterfactual_player_choice');
+    assert.equal(selected.choice.requestedOverride.provenance, 'explicit_operator_event_policy');
+
+    // It refuses once the event gains an authored answer, or the named option is missing.
+    await assert.rejects(policy(surface({ staff_recommended_response_id: 'press_offensive' })), /refuses/i);
+    await assert.rejects(policy(surface({ historical_default_response_id: 'press_offensive' })), /refuses/i);
+    await assert.rejects(policy(surface({}, [baseOptions[0]])), /missing or ambiguous/i);
 });
 
 test('readability gate includes tiny text, ancestor clipping, inaccessible truncation, contrast, and occlusion', () => {
