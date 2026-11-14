@@ -9,6 +9,10 @@
   Compacted 2026-09-10: 1723 sections moved out, 62 kept live.
 -->
 
+## 2026-11-14 — Proprietary LICENSE file
+
+Owner request. The repository had no licence file and no `license` field. A root `LICENSE` now states that the game (code, builds, data, maps, art, audio, text) is proprietary to Pyrrhic Games, all rights reserved. It grants a personal, non-commercial right to play copies from authorised channels; third-party components keep their own licences (OpenStreetMap-derived map data under ODbL 1.0 is named). It adds a no-affiliation note for the historical content and standard warranty and liability limits. `package.json` gets `"license": "SEE LICENSE IN LICENSE"`. No behaviour, data or packaging change. Bundling the licence into the installer and a full third-party notices file remain with the R9 licence/SBOM gate, as does register item LIC1 (the war map shows OSM-derived tiles without OSM attribution).
+
 ## 2026-11-14 — RF-3: the siege displacement path works; flight abroad set per region (PR #600)
 
 Calibration-moving and §6. The pressure path in `updateDisplacement` (siege, encirclement) never fired in a campaign: the war step handed it OSID settlements with legacy `S…` edges, so it saw 0 front edges. Its legacy supply search reached no settlement, and it processed each municipality once per pool. A failing test on the real `update-displacement` step proved this (5 of 7 checks).
