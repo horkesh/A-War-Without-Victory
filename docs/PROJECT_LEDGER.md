@@ -36,6 +36,9 @@ that do not move calibration. Control and territory are byte-identical to main a
   `weekly_report.jsonl`, reproduce unchanged. A main 188w run hashed `final_save.json` to the old pin, and
   branch vs main is identical outside `turn_summaries` (712 OSIDs, 278 control events, territory snapshots).
   Retained battles with more than one attacker: 40w 48 of 169, 188w 154 of 524 (main: 0), up to 8 brigades.
+  After #604 (stance effects) re-blessed main's pins, the branch merged main and re-ran `UPDATE_BASELINES=1`:
+  against main's post-#604 manifest only `final_save.json` (`64425e76…`) and `run_summary.json` (`2a1f5879…`)
+  differ; the other six, including `control_delta.json`, match main.
 - Evidence: `tsc --noEmit` exit 0 (needs `--max-old-space-size=8192` here); affected tests 176/176;
   `desktop:map:build` exit 0, entry chunk 2,980.84 kB. The tracked `latest_run_final_save.json` rewritten by the
   40w run was reverted. Full `npm run test:vitest` (balanced shards): every shard green except 2 tests in
