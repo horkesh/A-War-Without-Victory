@@ -2031,6 +2031,7 @@
     "responding_faction": "RBiH",
     "requires_player_response": true,
     "bot_response_logic": "strategic_weighted",
+    "staff_recommended_response_id": "decline_overture",
     "effect": {
       "kind": "narrative",
       "text": "One faction quietly offers a separate peace; the other is not in the room."
@@ -3150,6 +3151,7 @@
     "responding_faction": "RBiH",
     "requires_player_response": true,
     "bot_response_logic": "strategic_weighted",
+    "staff_recommended_response_id": "decline_proposal",
     "effect": {
       "kind": "narrative",
       "text": "A tripartite federation proposal is on the table; a binding response is required."
@@ -3646,6 +3648,7 @@
     "responding_faction": "RBiH",
     "requires_player_response": true,
     "bot_response_logic": "strategic_weighted",
+    "staff_recommended_response_id": "refuse_referendum",
     "effect": {
       "kind": "narrative",
       "text": "A partition referendum proposal is on the table."
@@ -4042,6 +4045,7 @@
     "responding_faction": "RBiH",
     "requires_player_response": true,
     "bot_response_logic": "strategic_weighted",
+    "staff_recommended_response_id": "engage_mediator",
     "effect": {
       "kind": "narrative",
       "text": "A third-party mediator offers to enter the negotiations; a binding response is required."
