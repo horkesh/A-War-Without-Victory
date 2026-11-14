@@ -13,7 +13,7 @@
 .dayton-boundary-stages [role="radio"]:focus-visible { outline: 2px solid #c48a2a; outline-offset: 2px; }
 .dayton-boundary-step {
   display: inline-grid; place-items: center; width: 1.2rem; height: 1.2rem;
-  border-radius: 50%; border: 1px solid currentColor; font-size: .7rem;
+  border-radius: 50%; border: 1px solid currentColor; font-size: .75rem;
 }
 .dayton-boundary-shares { font-size: .85rem; font-weight: 600; }
 
@@ -57,7 +57,7 @@
 .dayton-boundary-changes h4 { font-weight: 700; }
 .dayton-boundary-changes summary { cursor: pointer; font-weight: 600; }
 .dayton-boundary-changes ul { max-height: 12rem; overflow: auto; padding-inline-start: 1rem; list-style: disc; }
-.dayton-boundary-credit { font-size: .72rem; color: #6a5a40; }
+.dayton-boundary-credit { font-size: .75rem; color: #6a5a40; }
 .dayton-boundary-credit a { text-decoration: underline; }
 
 /* The live line on the board paper: multiplied, so the photograph's own light and the pins carry through. */

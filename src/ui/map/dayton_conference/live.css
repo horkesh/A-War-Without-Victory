@@ -138,7 +138,7 @@
   padding: .1rem .5rem;
   border: 1px solid #a78e5c;
   border-radius: 2px;
-  font-size: .72rem;
+  font-size: .75rem;
   font-weight: 700;
   letter-spacing: .06em;
   text-transform: uppercase;
@@ -167,7 +167,7 @@
   padding: .1rem .45rem;
   border: 1px solid #b89a5a;
   color: #e3c983 !important;
-  font-size: .72rem !important;
+  font-size: .75rem !important;
   letter-spacing: .14em;
   text-transform: uppercase;
 }
@@ -229,7 +229,7 @@
   align-items: center;
   justify-content: center;
   color: #fff;
-  font-size: .72rem;
+  font-size: .75rem;
   font-weight: 700;
   white-space: nowrap;
 }
