@@ -8,11 +8,12 @@
 import { chromium } from 'playwright';
 import fs from 'node:fs';
 import path from 'node:path';
+import { coordinationRoot } from '../lib/repo_paths.mjs';
 
 const args = process.argv.slice(2);
 const opt = (n, f) => (args.includes(n) ? args[args.indexOf(n) + 1] : f);
 const origin = opt('--url', 'http://127.0.0.1:5299');
-const out = opt('--out', 'F:/AWWV-coordination/surface_steps/bcs_corps_cases');
+const out = opt('--out', path.join(coordinationRoot(), 'surface_steps', 'bcs_corps_cases'));
 const faction = opt('--faction', 'rbih');
 const turns = Number(opt('--turns', '3'));
 const explore = args.includes('--explore');

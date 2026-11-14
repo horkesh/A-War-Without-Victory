@@ -31,16 +31,18 @@ boundary. It says nothing about whether the work is correct.
 ## The loop
 
 ```bash
-# 1. one worktree per job (one writer per checkout; never the planner's or Codex's checkout)
-git worktree add F:/AWWV-worktrees/<job> -b claude/<job> <base-ref>
+# 1. one worktree per job (one writer per checkout; never the planner's or Codex's checkout).
+#    Worktrees sit beside the main checkout: $AWWV_WORKTREES_ROOT, default ../AWWV-worktrees
+#    (paths below are relative to the main checkout, so they work wherever it lives).
+git worktree add ../AWWV-worktrees/<job> -b claude/<job> <base-ref>
 
 # 2. write the brief from BRIEF_TEMPLATE.md, then confirm the launch without running it
 node tools/opencode_implementer/run.mjs --job <job> --brief <brief.md> \
-  --dir F:/AWWV-worktrees/<job> --allow "src/sim/x.ts,tests/x.test.ts" --dry-run
+  --dir ../AWWV-worktrees/<job> --allow "src/sim/x.ts,tests/x.test.ts" --dry-run
 
 # 3. run it (Claude: run_in_background, then read RECEIPT.json when notified)
 node tools/opencode_implementer/run.mjs --job <job> --brief <brief.md> \
-  --dir F:/AWWV-worktrees/<job> --allow "src/sim/x.ts,tests/x.test.ts"
+  --dir ../AWWV-worktrees/<job> --allow "src/sim/x.ts,tests/x.test.ts"
 
 # 4. follow-up correction in the SAME implementer session (keeps its context, costs less)
 node tools/opencode_implementer/run.mjs --job <job>-fix --brief <fix.md> --dir ... --allow ... \

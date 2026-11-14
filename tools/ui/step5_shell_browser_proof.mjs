@@ -3,15 +3,17 @@
 // Economy surface opened from it, the toolbar, and the Command Surface beside the Presidential
 // Inbox, at 2293x960 and 1280x720 in English and BCS. It measures the toolbar's smallest
 // computed font size and whether the Inbox overlaps the Command Surface detail column.
-// Usage: node tools/ui/step5_shell_browser_proof.mjs --url http://127.0.0.1:5299 --out F:/AWWV-coordination/surface_steps/step5
+// Usage: node tools/ui/step5_shell_browser_proof.mjs --url http://127.0.0.1:5299 [--out <dir>]
+// --out defaults to $AWWV_COORDINATION_ROOT/surface_steps/step5 (see tools/lib/repo_paths.mjs).
 import { chromium } from 'playwright';
 import fs from 'node:fs';
 import path from 'node:path';
+import { coordinationRoot } from '../lib/repo_paths.mjs';
 
 const args = process.argv.slice(2);
 const opt = (n, f) => (args.includes(n) ? args[args.indexOf(n) + 1] : f);
 const origin = opt('--url', 'http://127.0.0.1:5299');
-const out = opt('--out', 'F:/AWWV-coordination/surface_steps/step5');
+const out = opt('--out', path.join(coordinationRoot(), 'surface_steps', 'step5'));
 const explore = args.includes('--explore');
 fs.mkdirSync(out, { recursive: true });
 

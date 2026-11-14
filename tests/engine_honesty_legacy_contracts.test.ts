@@ -56,7 +56,7 @@ describe('engine honesty legacy contracts', () => {
     } as unknown as GameState;
 
     await expect(
-      validateBrigadeRepositionOrder(state, 'b1', ['osid:foo'], 'F:\\AWWV_exec_clean'),
+      validateBrigadeRepositionOrder(state, 'b1', ['osid:foo'], process.cwd()),
     ).resolves.toEqual({
       valid: false,
       error: 'Brigade reposition orders are retired; use movement or sector assignment instead',
