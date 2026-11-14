@@ -7,14 +7,21 @@ Raised by the §6 panel and the Pyrrhic merge gate on PR horkesh/A-War-Without-V
 - **ARBiH holds two Prozor villages (`op:prozor:lug_2`, `op:prozor:paros`) from 1993.** With the siege path live, the 4th Corps picks Prozor for "Operacija Ponos" (t77-81) and takes both after the HVO counterattack. The HVO held Rama throughout (BB1 p.195, p.217); the ARBiH pushed on the municipality's eastern edge in Neretva '93, so two border villages are plausible but unrecorded (War-or-Game seat). Open; owner-accepted as part of RF-3's checkpoint loss. Do not recover it with a lever.
 - **Goražde ends short of its record.** The pocket ends at about 45.1k against 60-65k historically (UN Special Rapporteur E/CN.4/1995/4); main ended at about 56k. The 0.08 flight-abroad share for eastern Bosnia restores most of the refugee inflow; the remainder sits with known limit SD9 (the siege base excludes refugees) and onward routing. Open.
 
-## Open FAIL: the HVO cleansing of Bosniaks barely registers in the humanitarian record (2026-11-13)
+## PASS (RF-5B, 2026-11-14): the HVO's 1993 expulsions of Bosniaks are modelled in the engine
+
+Closed by RF-5B (PR horkesh/A-War-Without-Victory#623; `SENSITIVE_HISTORY_DESIGN_GATE.md` §6 "Record (RF-5B policy-driven bilateral displacement, 2026-11-14)"), in the engine, not the ledger. A bot-controlled HRHB applies its historical expulsion policy once the open RBiH-HRHB war begins: one bounded wave per held OSID in the Historian-sourced municipalities (Vitez, Busovača, Kiseljak, Žepče, Gornji Vakuf, Jablanica in mid-April 1993; Mostar, Stolac, Čapljina, Prozor, Ljubuški in early July 1993), with no control change.
+- Final head on main 887310d5e (188w hash `5c378ee919295488`, checkpoints 712/709/710/705 = main): **Bosniaks displaced by HRHB forces 27,839 people** (the takeover `displaced` field, killed and abroad included), inside the Historian band 20,000-35,000 (judicial floor ~15,000; centre 25,000-30,000; the Tabeau 40,266 figure was given no probative value, Prlić TJ v1 ¶355). Croats displaced by RBiH forces 34,475 people (working range 25,000-50,000). The 1993 ratio is now about 0.81:1, against 1:32 before.
+- Compare people, not the ledger sum: the ledger adds killed and abroad to a `displaced` figure that already contains them (pre-existing double count, out-of-scope register), so it shows about 30% more.
+- Known limits (men detained, no incoming Croats, routing by standing tables, Žepče early and Mostar late, the 3% Herzegovina kill share standing in for camp deaths, no waves when a human plays HRHB) are in `docs/20_engineering/DISPLACEMENT_MASTER.md` §3.4 and the §6 record.
+
+## Superseded FAIL (2026-11-13): the HVO cleansing of Bosniaks barely registered in the humanitarian record
 
 Raised by the War-or-Game seat of the displacement attribution panel (`SENSITIVE_HISTORY_DESIGN_GATE.md` §6). The Humanitarian Ledger now shows displaced-or-killed by the side controlling the area, so this gap is visible to the player.
 
 - Canonical 188w baseline (main `c1299da25`, `runs/apr1992_definitive_188w__6deb5845c150c196__w188_n0`), `displacement_humanitarian_aggregates`: Herzeg-Bosnia forces against Bosniaks 1,279 displaced or killed (31 killed); RBiH forces against Croats 43,267 (797 killed).
 - History runs the other way for 1993. ICTY Prlić et al. (IT-04-74-A, 2017) upheld a joint criminal enterprise to ethnically cleanse Muslims from Herceg-Bosna (Mostar, Stolac, Čapljina, Prozor, the Lašva Valley); Kordić (IT-95-14/2-A) and Blaškić (IT-95-14-A) cover the Lašva Valley.
 - Cause: the HVO-ARBiH war of 1993-94 is largely absent from the simulation (see the Option J/K reviews below), so the takeover writer has almost no HVO captures of Bosniak areas to book.
-- **Verdict: FAIL, open.** Fix it in the engine (the HVO-ARBiH war), never through the ledger or its labels.
+- **Verdict: FAIL, open.** Fix it in the engine (the HVO-ARBiH war), never through the ledger or its labels. *Closed 2026-11-14 by RF-5B, above.*
 
 ## Accounting-regime change: militia casualties are now recorded (2026-09-01)
 
