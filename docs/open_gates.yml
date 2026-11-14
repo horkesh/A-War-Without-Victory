@@ -41,7 +41,7 @@ gates:
 
   - id: RF-CALIBRATION-RESIGNOFF
     lane: RF
-    title: Calibration re-signed after the last RF merge
+    title: Calibration re-signed after the one calibration pass that follows the engine freeze
     status: open
     kind: acceptance
     opened: 2026-11-13
@@ -61,8 +61,13 @@ gates:
       and Jemanlici, a known historical miss) after #604, and 712/709/710/705 after #600
       (siege displacement, accepted by the owner 2026-11-14). #617 (RF-F1) left all four
       checkpoints unchanged and re-blessed the baseline manifest.
-      Each RF item (BC14-BC19) re-measures on top of the one before it; this gate closes only
-      after the last one lands or is parked. Live = headless was not re-measured for the
+      Owner decision 2026-11-14: calibration is held until the mechanics work is done. During
+      the RF pass the checkpoint scores are recorded per change in CALIBRATION_MASTER but are
+      not a merge bar; pure calibration (data, constant or op tuning toward the checkpoints,
+      tail timing, RF-4 officer dates as a lever) is held. Guards, health, determinism,
+      anchors and one change per measured run are unchanged, and a guard breach still stops a
+      merge. This gate closes after the ONE calibration pass that runs on the frozen engine.
+      Each RF item (BC14-BC19) is measured on top of the one before it. Live = headless was not re-measured for the
       stance bundle (SE8 in the out-of-scope register).
 
   - id: RF-ENGINE-FREEZE
@@ -74,9 +79,10 @@ gates:
     blocks: [R8, R9]
     evidence_required: >
       Every RF item merged, parked with an archive tag, or declined, each recorded in the
-      roadmap §4.1 register; RF-CALIBRATION-RESIGNOFF closed; one named commit recorded as
-      the frozen source in the roadmap; and the owner told that from that commit a
-      calibration-moving change needs an owner OK.
+      roadmap §4.1 register (BC17 is held for the calibration pass, not declined); one named
+      commit recorded as the frozen source in the roadmap; and the owner told that from that
+      commit a mechanics change needs an owner OK. The one calibration pass then runs on
+      the frozen engine under the unchanged gates (RF-CALIBRATION-RESIGNOFF closes it).
     evidence_path: null
     source: docs/plans/MASTER_ROADMAP.md
     notes: >
