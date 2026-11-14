@@ -64,7 +64,9 @@ async function main(): Promise<void> {
 
     // Classification: force every streak to the threshold so "unsupplied" shows directly.
     const clone = deserializeState(readFileSync(savePath, 'utf8'));
-    for (const s of Object.values(clone.displacement.displacement_state ?? {})) s.unsupplied_pressure_turns = 99;
+    for (const s of Object.values(clone.displacement.displacement_state ?? {})) {
+        s.unsupplied_pressure_by_side = { RBiH: { turns: 98, last_turn: clone.meta.turn - 1 }, RS: { turns: 98, last_turn: clone.meta.turn - 1 }, HRHB: { turns: 98, last_turn: clone.meta.turn - 1 } };
+    }
     const pressure = buildOsidDisplacementPressureInputs(clone, od);
     const report = updateDisplacement(clone, graph.settlements, edges, undefined, pressure);
 

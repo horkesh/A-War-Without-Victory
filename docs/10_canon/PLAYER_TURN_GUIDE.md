@@ -46,7 +46,6 @@ The following table lists every `name:` literal from early_war_phases.ts, war_ph
 | Peace / Early War | `early-control-flip` | No | early_war_phases.ts:250 |
 | Peace / Early War | `bilateral-flip-count` | No | early_war_phases.ts:263 |
 | Peace / Early War | `displacement-hooks` | No | early_war_phases.ts:271 |
-| Peace / Early War | `displacement-apply` | No | early_war_phases.ts:287 |
 | Peace / Early War | `control-strain` | No | early_war_phases.ts:308 |
 | Peace / Early War | `authority-update` | No | early_war_phases.ts:316 |
 | Peace / Early War | `jna-transition` | No | early_war_phases.ts:322 |
