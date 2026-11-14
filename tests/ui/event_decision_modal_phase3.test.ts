@@ -399,7 +399,7 @@ describe('EventDecisionModal presidential dossier', () => {
     }));
 
     expect(screen.getByText('Staff recommendation')).toBeTruthy();
-    expect(screen.getByText(/not a historical default and does not control bot calibration/i)).toBeTruthy();
+    expect(screen.getByText(/It is not the historical default; you may choose any option/i)).toBeTruthy();
     expect(screen.queryByText('Historical default')).toBeNull();
     expect(screen.queryByText(/historically attested choice/)).toBeNull();
   });

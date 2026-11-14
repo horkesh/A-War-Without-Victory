@@ -16,8 +16,8 @@ import { describe, expect, it } from 'vitest';
  * - `historical_default_response_id` claims the option is the historically attested choice
  *   (gold "Historical default" chip) AND becomes the headless/Observer bot pick, so adding one
  *   can move the 188w calibration baseline.
- * - `staff_recommended_response_id` is shown as "Staff recommendation ... not a historical
- *   default and does not control bot calibration"; the bot ignores it.
+ * - `staff_recommended_response_id` is shown as "Staff recommendation" ("Your staff recommends
+ *   this option. It is not the historical default ..."); the bot never reads it.
  */
 
 const EVENTS_DIR = resolve('data/scenarios/events');
