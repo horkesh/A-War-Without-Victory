@@ -118,6 +118,9 @@ export const HRHB_BRANCH_TAGS = [
     'hrhb_jajce_early_withdrawal',
     'hrhb_jajce_maintain_joint_defense',
     'hrhb_jajce_separate_command',
+    // ── RF-5B: minority policy at the bilateral war start (hrhb_minority_policy_1993) ──
+    'hrhb_minority_policy_expel',
+    'hrhb_minority_policy_restrain',
     'hrhb_posavina_counterattack_brod',
     'hrhb_posavina_hold_orasje',
     'hrhb_posavina_reduce_commitment',

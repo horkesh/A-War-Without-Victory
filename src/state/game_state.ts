@@ -1856,6 +1856,13 @@ export interface HostileTakeoverTimerState {
     matured_turn?: number;
     /** Cumulative persons displaced from this OSID (initial + all sustained rounds). */
     cumulative_displaced?: number;
+    /**
+     * RF-5B: why the timer exists when no control change seeded it. 'policy_expulsion' =
+     * seeded once by a faction's recorded minority policy ("expel") at the RBiH-HRHB war
+     * start (`displacement_takeover.ts` step 0b); it fires one bounded wave and never
+     * drains further. Absent = battle/flip-seeded (legacy behaviour).
+     */
+    cause?: 'policy_expulsion';
 }
 
 /**
