@@ -700,7 +700,16 @@ export interface CorpsOperation {
      *  reason — it reached this union only by being propagated from the removed
      *  opening-attack donation gate. Retained so pre-repair saves and run artifacts still
      *  load and read back correctly. */
-    recovery_reason?: 'completed' | 'max_failures' | 'orphaned_sector' | 'no_logged_attempt' | 'manual_termination' | 'probe_complete' | 'brigade_attrition' | 'political_blocked' | 'planning_invalidated' | 'no_launch_readiness' | 'defender_power_too_high' | 'participants_below_attack_floor' | 'participants_below_assembly_floor' | 'no_approach_osid' | 'zero_eligible_axis' | 'insufficient_donation' | 'offensive_ops_suppressed' | 'tg_cohesion_exhausted' | 'tg_max_lifecycle';
+    recovery_reason?: 'completed' | 'max_failures' | 'orphaned_sector' | 'no_logged_attempt' | 'manual_termination' | 'probe_complete' | 'brigade_attrition' | 'political_blocked' | 'planning_invalidated' | 'no_launch_readiness' | 'defender_power_too_high' | 'participants_below_attack_floor' | 'participants_below_assembly_floor' | 'no_approach_osid' | 'zero_eligible_axis' | 'insufficient_donation' | 'offensive_ops_suppressed' | 'ceasefire' | 'tg_cohesion_exhausted' | 'tg_max_lifecycle';
+    /**
+     * Council fix 3 (src/sim/combat/oct1995_ceasefire.ts): recorded once, on the first turn the
+     * October 1995 general ceasefire binds, on an offensive that was executing. Each axis (key
+     * `axis_id`, or `__op__` for a single-axis operation) may conclude only the objective it was
+     * already fighting for: its cap is that objective's index, or -1 when it had not yet attacked.
+     * Once every axis has moved past its cap or stopped executing, the operation stands down
+     * (recovery reason `ceasefire`). Optional; absent on every operation outside the ceasefire.
+     */
+    ceasefire_stand_down?: { from_turn: number; objective_cap_by_axis: Record<string, number> };
     /**
      * REASON-CODE INSTRUMENTATION, topic `tg_formation` — ENGINE-HEALTH B3 (2026-09-19).
      * Legacy single-axis counterpart of `OperationAxis.tg_formation_decline`. Absent on a
@@ -2042,6 +2051,7 @@ export type StanceMatterReason =
     | 'army_directive'
     | 'alliance_front'
     | 'patron_ceiling'
+    | 'ceasefire'
     | 'enemy_massing'
     | 'situation_eased'
     | 'other';

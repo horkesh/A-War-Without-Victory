@@ -116,6 +116,7 @@ import {
 // ADR-0006 Phase 3A: named TG commander + faction-asymmetric naming. Flag-gated (ENABLE_TG_FORMATION).
 import { assignTacticalCommander } from './officer_system.js';
 import { generateTacticalGroupName } from './tactical_group_naming.js';
+import { isCorpsBoundByOct1995Ceasefire } from './oct1995_ceasefire.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Constants
@@ -705,6 +706,8 @@ export function createLinkedPreparationProbe(
     const request = parent.active_probe;
     if (!cmd || !cmd.active_operations.includes(parent) || parent.phase !== 'planning') return null;
     if (!request || request.resolved) return null;
+    // October 1995 general ceasefire (council fix 3): no subordinate probe is admitted.
+    if (isCorpsBoundByOct1995Ceasefire(state, corpsId)) return null;
     if (cmd.active_operations.some((candidate) => {
         const link = candidate.preparation_probe_link;
         return link?.parent_operation_name === parent.name

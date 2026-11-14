@@ -101,6 +101,7 @@ import { FEDERATION_WESTERN_BOSNIA_OPPORTUNITIES } from './operation_opportunity
 import { DAYTON_CONTINUATION_OPPORTUNITIES } from './operation_opportunity_catalog_dayton_continuation.js';
 import { enterOperationRecovery } from './tactical_group_lifecycle.js';
 import { effectiveOperationMinimum } from './operation_minimum_policy.js';
+import { isFactionBoundByOct1995Ceasefire } from './oct1995_ceasefire.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Public types
@@ -902,6 +903,9 @@ export function evaluateOperationOpportunities(
         // where Sana was approved at t175, then re-proposed every turn
         // because the prior `live` filter only looked at pending/delayed.
         if (seenOpportunityIds.has(def.opportunity_id)) continue;
+        // October 1995 general ceasefire (council fix 3): the staff does not raise a new
+        // offensive for a bound faction. The entry is not enqueued, so it is not consumed.
+        if (isFactionBoundByOct1995Ceasefire(state, def.faction)) continue;
 
         const proposalId = buildProposalId(def.opportunity_id, turn);
         const expiresTurn = defaultExpiryTurn(turn);
@@ -1348,6 +1352,11 @@ export function preflightOpportunityAdmission(
 ): OpportunityAdmissionPreflight {
     const required = effectiveOperationMinimum('sector_attack');
     if (!state.military.corps_command?.[def.primary_corps]) {
+        return insufficientAdmission(0, required);
+    }
+    // October 1995 general ceasefire (council fix 3): refuse admission. A refusal leaves the
+    // proposal pending, so an approval given before the ceasefire is not consumed.
+    if (isFactionBoundByOct1995Ceasefire(state, def.faction)) {
         return insufficientAdmission(0, required);
     }
 
@@ -1940,6 +1949,9 @@ export function applyBotOpportunityDecisions(
         if (p.status !== 'eligible_pending_review') continue;
         if (playerFaction !== null && p.approver_faction === playerFaction
             && (state.meta.autonomy_level ?? 0) < 2) continue;
+        // October 1995 general ceasefire (council fix 3): no bot approval while it binds; a
+        // pending proposal waits and expires on its own clock.
+        if (isFactionBoundByOct1995Ceasefire(state, p.approver_faction)) continue;
         const def = catalog.find(d => d.opportunity_id === p.opportunity_id);
         if (!def) continue;
         targets.push({ proposalId: p.proposal_id, def, proposal: p });
@@ -1976,6 +1988,8 @@ export function generateOpportunityProposalReviews(
     catalog: readonly OperationOpportunityDef[] = OPERATION_OPPORTUNITY_CATALOG,
 ): PendingProposalReview[] {
     if ((state.meta.autonomy_level ?? 0) >= 2) return [];
+    // October 1995 general ceasefire (council fix 3): the staff puts no offensive to the president.
+    if (isFactionBoundByOct1995Ceasefire(state, playerFaction)) return [];
     const proposals = state.military.operation_opportunities;
     if (!proposals || proposals.length === 0) return [];
 

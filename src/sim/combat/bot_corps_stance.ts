@@ -49,6 +49,7 @@ import {
 } from './bot_constants.js';
 import { isRbihHrhbMobilizing } from '../early_war/alliance_update.js';
 import { getActivePatronDirective } from './patron_directive_scope.js';
+import { capStanceForOct1995Ceasefire, isFactionBoundByOct1995Ceasefire } from './oct1995_ceasefire.js';
 import type { CampaignPlan } from './army_hq_gathering_types.js';
 import {
     averageCohesion,
@@ -83,7 +84,7 @@ export interface CorpsStanceTrace {
     driver:
         | 'reorganize_critical' | 'threat_high' | 'opportunity'
         | 'doctrine' | 'campaign_plan' | 'readiness_low' | 'faction_rule'
-        | 'patron_ceiling' | 'army_directive' | 'alliance_front';
+        | 'patron_ceiling' | 'army_directive' | 'alliance_front' | 'ceasefire';
     avg_cohesion: number;
     avg_strength: number;
     sector_threat: number;
@@ -359,6 +360,11 @@ export function generateCorpsStanceOrders(
         }
         noteDriver('alliance_front');
 
+        // October 1995 general ceasefire (council fix 3): every bound corps holds at Defensive
+        // or below, including AI/army directives above. Inert unless the ceasefire flag is set.
+        stance = capStanceForOct1995Ceasefire(state, faction, stance);
+        noteDriver('ceasefire');
+
         // Read-only trace for the stance-matter path (posture model option 2). No state write.
         if (trace) {
             trace.set(corps.id, {
@@ -414,6 +420,12 @@ export function setArmyStandingOrder(
         if (allianceValue >= 0.2) {
             stance = 'balanced'; // Not at war — no army-wide offensive
         }
+    }
+
+    // October 1995 general ceasefire (council fix 3): no army-wide offensive while it binds the
+    // faction, which also keeps coordinateMultiCorpsOffensive from pre-setting corps to offensive.
+    if (stance === 'general_offensive' && isFactionBoundByOct1995Ceasefire(state, faction)) {
+        stance = 'balanced';
     }
 
     if (!state.military.army_stance) state.military.army_stance = {};

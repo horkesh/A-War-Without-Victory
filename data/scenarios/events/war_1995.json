@@ -2143,17 +2143,31 @@
     "source_tier": "balkan_battlegrounds",
     "source_note": "Editorial provenance: originally machine-drafted, then hand-corrected against Balkan Battlegrounds Vol. I. The correction reverses the compliance direction (Zagreb proceeded with Južni Potez despite US pressure; Sarajevo complied reluctantly while stalling), qualifies the claim that Banja Luka was there for the taking, and replaces the mid-October freeze with the 12 October ceasefire and the fighting that continued to 20 October. The post-Dayton return of Mrkonjić Grad and Šipovo to Republika Srpska is not narrated by Balkan Battlegrounds and is deliberately omitted rather than sourced elsewhere.",
     "trigger": {
-      "turn_min": 182,
-      "turn_max": 188,
+      "turn_min": 179,
+      "turn_max": 181,
       "phase": "war",
       "requires_events": [
         "federation_ground_offensive_1995"
       ],
       "condition": {
-        "type": "faction_area_ratio",
-        "faction": "RS",
-        "comparator": "at_most",
-        "value": 0.51
+        "type": "and",
+        "conditions": [
+          {
+            "type": "faction_area_ratio",
+            "faction": "RS",
+            "comparator": "at_most",
+            "value": 0.51
+          },
+          {
+            "type": "flag_not_set",
+            "flag": "ceasefire_oct1995_in_force"
+          },
+          {
+            "type": "event_fire_count",
+            "event_id": "ceasefire_1995",
+            "max_count": 0
+          }
+        ]
       }
     },
     "once": true,
@@ -2331,9 +2345,12 @@
       {
         "id": "accept_ceasefire",
         "label": "Accept the ceasefire -- go to Dayton",
-        "description": "Halt the advance and agree to a two-month ceasefire. US backing and international standing are preserved while offensive momentum is frozen for the Dayton path.",
+        "description": "Halt the advance and agree to a two-month ceasefire. US backing and international standing are preserved while offensive momentum is frozen for the Dayton path. While the ceasefire holds, every corps stands on the defensive, running offensives are called off and the staff proposes no new ones.",
         "historical_marker": "historical_default",
         "effects": [],
+        "sets_flags": {
+          "ceasefire_oct1995_in_force": true
+        },
         "dimension_shifts": [
           {
             "faction": "RBiH",

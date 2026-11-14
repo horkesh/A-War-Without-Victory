@@ -38,6 +38,7 @@ import { assembleBeliefState } from './belief.js';
 import type { CorpsOperation } from '../../../state/game_state.js';
 import { botOrdersPerfTime } from '../_perf_profile_bot_orders.js';
 import { assignOperationCommander } from '../officer_system.js';
+import { isCorpsBoundByOct1995Ceasefire, isOffensiveOperationType } from '../oct1995_ceasefire.js';
 
 function operationsConflict(
     left: Pick<CorpsOperation, 'name' | 'sector_id' | 'objectives' | 'participating_brigades'>,
@@ -249,10 +250,14 @@ export function applyCommanderOutput(
     let operationsAdmitted = false;
     // The exact same active operation satisfies a retried write; a conflicting
     // operation with a different identity leaves the approval pending.
+    // October 1995 general ceasefire (council fix 3): no offensive is admitted from the commander
+    // loop, including the no-plan probe / local-occupation fallback, which reads no stance.
+    const ceasefireClosesOffensives = isCorpsBoundByOct1995Ceasefire(state, corpsId);
     const admitCommanderOperations = (): void => {
         operationsAdmitted = true;
         for (const op of output.operations) {
             const candidate = op as typeof corps.active_operations[number];
+            if (ceasefireClosesOffensives && isOffensiveOperationType(candidate.type)) continue;
             const existing = corps.active_operations.find(active => operationsConflict(active, candidate));
             if (!existing) {
                 corps.active_operations.push(candidate);

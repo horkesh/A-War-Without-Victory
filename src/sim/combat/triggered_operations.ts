@@ -60,6 +60,7 @@ import {
 import type { ArmyHqOpId, ArmyHqOperation } from '../../state/game_state.js';
 import { resolveOperationFormation } from './operation_formation_resolver.js';
 import { isOperationObjectiveHostile } from './operation_objective_hostility.js';
+import { isFactionBoundByOct1995Ceasefire } from './oct1995_ceasefire.js';
 
 const MIN_OPERATION_PARTICIPANTS = 2;
 
@@ -1247,6 +1248,9 @@ export function checkTriggeredOperations(state: GameState): string[] {
         //      they keep firing via this legacy path exactly as before (188w 940251e4acaff3d4).
         if (def.army_hq_only) continue;
         if (ENABLE_TG_ARMY_HQ_OPS && def.army_hq_op_id != null) continue;
+        // October 1995 general ceasefire (council fix 3): the operation channel is closed for a
+        // bound faction; the definition is skipped, not declined or consumed.
+        if (isFactionBoundByOct1995Ceasefire(state, def.faction)) continue;
         prestageReservedTriggeredElites(state, def, turn);
         // Already accepted?
         if (state.military.triggered_operations_accepted?.[def.name]) continue;
@@ -1496,6 +1500,8 @@ export function injectArmyHqOperations(state: GameState): string[] {
         .sort((a, b) => strictCompare(a.army_hq_op_id, b.army_hq_op_id));
 
     for (const def of armyHqDefs) {
+        // October 1995 general ceasefire (council fix 3): closed channel, definition kept.
+        if (isFactionBoundByOct1995Ceasefire(state, def.faction)) continue;
         // Already accepted (one shot per def)?
         if (state.military.triggered_operations_accepted?.[def.name]) continue;
 
