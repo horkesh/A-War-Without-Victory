@@ -578,9 +578,11 @@ gates:
       game-designer, determinism-auditor) then found twelve defects in that text in round 1;
       all were corrected, and Engine Invariants §14.5 was brought in line with the code.
       Round 2: determinism GO; the other three seats GO-WITH-CONDITIONS with every text
-      condition applied. One lead-seat condition remains open and is recorded, not hidden:
-      reconcile Engine Invariants §6.3 with the sector-wide counter-attack, which the Manual
-      now labels "not canon". The orchestrator may reopen this gate if that is read as blocking.
+      condition applied. Round 3: the lead seat cleared its last condition, so the panel is
+      unanimous GO on the propagation. Still open as a separate decision, not part of this gate:
+      reconcile Engine Invariants §6.3 with the sector-wide counter-attack (amend §6.3, or
+      remove the defensive-stance path in bot_brigade_eval_attack.ts); the Manual labels it
+      "not canon" until then.
 
   - id: REPO-ROADMAP-CONCISENESS
     lane: REPO

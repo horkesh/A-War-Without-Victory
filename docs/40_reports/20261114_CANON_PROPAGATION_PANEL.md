@@ -35,9 +35,9 @@ All four seats returned conditions or NO-GO. The disputes overlapped almost comp
 | determinism-auditor | **GO** | Optional: explicit id tie-break in `rankDefendersByPower` (code change, out of scope). |
 | systems-programmer | GO-WITH-CONDITIONS, applied | Embargo gate wording; primary-defender tie wording; retreat reachability clause. All applied. |
 | game-designer | GO-WITH-CONDITIONS, applied | Stale sentence and missing open-debt entry in `CALIBRATION_MASTER.md`. Both applied. |
-| canon-compliance (lead, integrator) | GO-WITH-CONDITIONS | (a) embargo parenthetical: applied. (b) Reconcile Engine Invariants §6.3 with the sector-wide counter-attack: **not done**, see below. |
+| canon-compliance (lead, integrator) | GO-WITH-CONDITIONS, then **GO** in round 3 | (a) embargo parenthetical: applied. (b) Reconcile Engine Invariants §6.3 with the sector-wide counter-attack: asked directly in round 3 whether the labelling clears it; the lead seat answered that it does ("the Manual no longer presents it as normative, so the propagation is accurate"), on condition that the reconciliation stays open and visible. |
 
-**Integrator's reading.** Every condition that concerns the propagated text has been applied. The one that does not, lead condition (b), concerns a gap between code and an Invariant that existed before this PR: the Manual now labels the extension "not canon, pending reconciliation with §6.3", gives its gates as tuning values, and says it does not establish whether a presidential stance hold suppresses it. The gate is closed on that reading. The reconciliation stays on the open list below; if the orchestrator reads lead condition (b) as blocking, reopen `REPO-CANON-PROPAGATION`.
+**Integrator's reading.** Every condition on the propagated text has been applied, and the lead seat has cleared its own condition (b) in round 3, so the panel is unanimous GO on the propagation. The code-versus-Invariant gap is a separate decision for the owner or a panel, listed first below: amend §6.3, or remove the defensive-stance sector-wide counter-attack path in `bot_brigade_eval_attack.ts`. It stays open after the gate closes.
 
 ## Open items (recorded, not resolved here)
 

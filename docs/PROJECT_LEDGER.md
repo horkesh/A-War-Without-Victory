@@ -22,8 +22,9 @@ exhaustion and feasibility gates described more broadly than the code applies th
 casualty and snapshot wording, and missing tie-breaks. All are corrected; Engine Invariants §14.5 now
 records the verified retreat order, the removed largest-component fallback and the open debts; the
 `CALIBRATION_MASTER.md` deferred-debt paragraph matches. Round 2: determinism GO; the other three seats
-GO-WITH-CONDITIONS with every text condition applied. Open and recorded: reconcile Invariants §6.3 with
-the sector-wide counter-attack (the Manual labels it "not canon"). The gate is closed on
+GO-WITH-CONDITIONS with every text condition applied. Round 3: the lead seat cleared its last condition
+(unanimous GO on the propagation). Open as a separate decision: reconcile Invariants §6.3 with the
+sector-wide counter-attack (the Manual labels it "not canon"). The gate is closed on
 `docs/40_reports/20261114_CANON_PROPAGATION_PANEL.md`. Also: 14 `archive/*` tags pushed for branches with
 no PR and no tag (nothing deleted).
 
