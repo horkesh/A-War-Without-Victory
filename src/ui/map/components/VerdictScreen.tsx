@@ -51,6 +51,7 @@ import { FACTION_COLORS_SUBTLE } from '../utils/theme.js';
 import { Modal } from '../../shared/Modal.js';
 import { CinematicVerdict } from './verdict/CinematicVerdict.js';
 import { t, useLocale, type MessageKey } from '../i18n';
+import { useGameOverCue } from '../audio/gameOverCue';
 import {
     getPlayerSafeDisplayLabel,
     getPlayerSafeMilitaryFactionName,
@@ -437,7 +438,7 @@ export function VerdictScreen({ onLoadSaveState, onLoadSaveError }: VerdictScree
     const loadedGameState = useGameStore((s) => s.loadedGameState);
     const startReplayInspection = useGameStore((s) => s.startReplayInspection);
     // The Wrapped overlay (Z.MODAL_RAISED) is opened FROM this screen's own
-    // "View Your War" button but renders below GAME_OVER — without this,
+    // "Open campaign recap" button but renders below GAME_OVER — without this,
     // it mounts permanently invisible underneath the still-open Verdict
     // screen (see docs/40_reports/20260805_VERDICT_WRAPPED_ZINDEX_BUG.md).
     const wrappedOpen = useGameStore((s) => s.wrappedOpen);
@@ -484,6 +485,11 @@ export function VerdictScreen({ onLoadSaveState, onLoadSaveError }: VerdictScree
             return [];
         }
     }, [loadedGameState, turnForCodex]);
+
+    // ST3: this screen owns the `game_over` cue. It plays once when the verdict (or its
+    // fallback) opens; a signed Dayton shows the signing beat first and the cue waits for it.
+    useGameOverCue(Boolean(loadedGameState?.gameOver)
+        && (loadedGameState?.daytonAgreement?.version !== 1 || signingSeen));
 
     if (!loadedGameState?.gameOver) return null;
 
@@ -657,7 +663,9 @@ export function VerdictScreen({ onLoadSaveState, onLoadSaveError }: VerdictScree
                     historicalComparison={loadedGameState.historicalComparison}
                     focusFaction={selectedFaction}
                     dateLabel={date}
-                    durationLabel={years > 0 ? `${years}y ${weeks}w` : `${weeks} weeks`}
+                    durationLabel={years > 0
+                        ? `${formatFallbackYearCount(years)}, ${formatFallbackWeekCount(weeks)}`
+                        : formatFallbackWeekCount(weeks)}
                 />
 
                     {lowerSections.length > 1 && (

@@ -6,24 +6,24 @@
     "narrative": "The National Assembly has convened. Six strategic goals for the Serb people in Bosnia have been drafted: state separation, the Posavina corridor, the Drina valley border, the Una-Neretva border, the division of Sarajevo, and access to the sea. General Ratko Mladic, commander of the VRS Main Staff, has reviewed them. He warns the Assembly plainly: pursuing these goals — particularly the Drina corridor and Sarajevo — will require actions that constitute genocide. The Assembly awaits your decision.",
     "localizations": {
       "bcs": {
-        "title": "Skupstina govori",
-        "narrative": "Narodna skupstina se sastala. Nacrtano je sest strateskih ciljeva za srpski narod u Bosni: drzavno razdvajanje, posavski koridor, granica na Drini, granica Una-Neretva, podjela Sarajeva i izlaz na more. General Ratko Mladic, komandant Glavnog staba VRS-a, pregledao ih je i skupstini jasno upozorio da ce njihovo ostvarenje, posebno na Drini i u Sarajevu, traziti radnje koje cine genocid. Skupstina ceka vasu odluku.",
-        "staff_assessment": "Skupstinski paket zadrzava historijski maksimalisticki kurs i daje jasan politicki okvir VRS-u, ali upozorenje generala Ratka Mladica znaci da je cijena legitimnosti vec upisana u samu odluku.",
-        "source_note": "Presude Karadzicu i Mladicu dokumentuju sest strateskih ciljeva i upozorenje generala Ratka Mladica pred skupstinom.",
+        "title": "Skupština govori",
+        "narrative": "Narodna skupština se sastala. Nacrtano je šest strateških ciljeva za srpski narod u Bosni: državno razdvajanje, posavski koridor, granica na Drini, granica Una-Neretva, podjela Sarajeva i izlaz na more. General Ratko Mladić, komandant Glavnog staba VRS-a, pregledao ih je i skupštini jasno upozorio da će njihovo ostvarenje, posebno na Drini i u Sarajevu, tražiti radnje koje čine genocid. Skupština čeka vašu odluku.",
+        "staff_assessment": "Skupštinski paket zadržava historijski maksimalistički kurs i daje jasan politički okvir VRS-u, ali upozorenje generala Ratka Mladića znači da je cijena legitimnosti već upisana u samu odluku.",
+        "source_note": "Presude Karadžiću i Mladiću dokumentuju šest strateških ciljeva i upozorenje generala Ratka Mladića pred skupštinom.",
         "historical_source": "ICTY Karadzic Trial Judgment (IT-95-5/18-T, 2016); ICTY Mladic Trial Judgment (IT-09-92-T, 2017); ICJ Bosnia and Herzegovina v. Serbia and Montenegro (2007).",
         "source_tier": "icty_icj_un",
         "response_options": {
           "all_six": {
-            "label": "Usvojiti svih sest ciljeva",
-            "description": "Puna ofanzivna doktrina. Svi pravci su aktivni. Dolina Drine postaje objavljeni vojni cilj. Sarajevo ce biti podijeljeno. Upozorenje generala Mladica je zabiljezeno i zanemareno."
+            "label": "Usvojiti svih šest ciljeva",
+            "description": "Puna ofanzivna doktrina. Svi pravci su aktivni. Dolina Drine postaje objavljeni vojni cilj. Sarajevo će biti podijeljeno. Upozorenje generala Mladića je zabilježeno i zanemareno."
           },
           "selective": {
             "label": "Usvojiti ciljeve selektivno",
-            "description": "Osigurati koridor i zastititi srpske zajednice. Dolina Drine - ograniciti operacije. Sarajevo - drzati u obrucu, ali ne razoriti. Upozorenje generala Mladica oblikuje strategiju."
+            "description": "Osigurati koridor i zaštititi srpske zajednice. Dolina Drine - ograničiti operacije. Sarajevo - držati u obruču, ali ne razoriti. Upozorenje generala Mladića oblikuje strategiju."
           },
           "aggressive": {
             "label": "Centralizovati operativnu komandu",
-            "description": "Skupstinska odluka je dio historijskog zapisa; ovdje odredjujete centralizovane operativne naredbe i izvjestavanje komandnog lanca. Upozorenje generala Mladica ostaje u zapisniku i obavezuje komandu."
+            "description": "Skupštinska odluka je dio historijskog zapisa; ovdje određujete centralizovane operativne naredbe i izvještavanje komandnog lanca. Upozorenje generala Mladića ostaje u zapisniku i obavezuje komandu."
           }
         }
       }
@@ -1172,28 +1172,28 @@
     "narrative": "Your Presidency must declare its vision for the state. The platform drafted in May declares a multi-ethnic, civic republic where all citizens are equal regardless of ethnicity. But the war is testing that ideal. Serb and Croat soldiers serve in your army — for now. Some in your party argue that this is a Bosniak struggle, not a civic one. The international community watches closely. Your declaration will shape who fights for you, who supports you, and what you are fighting for.",
     "localizations": {
       "bcs": {
-        "title": "Sta je Bosna?",
-        "narrative": "Predsjednistvo mora proglasiti viziju drzave. Platforma iz maja govori o gradjanskoj, multietnickoj republici u kojoj su svi gradjani jednaki bez obzira na etnicku pripadnost. Rat vec ispituje taj ideal. Srpski i hrvatski vojnici jos sluze u vasoj armiji. Dio stranke tvrdi da je ovo bosnjacka borba, a ne gradjanska. Medjunarodna zajednica pazljivo posmatra. Vasa deklaracija odredit ce ko se bori za vas, ko vas podrzava i za sta se borite.",
-        "staff_assessment": "Sarajevsko Predsjednistvo cuva gradjanski zahtjev i medjunarodni polozaj tako sto republiku definise kroz jednako drzavljanstvo, uz prihvatanje trenja sa tvrdjim ratnim nacionalnim strujama.",
-        "source_note": "Kontekst presude Karadzicu o sporu oko drzavnosti Bosne; sastav ARBiH i Divjak navedeni su za ratnu multietnicku sluzbu.",
+        "title": "Šta je Bosna?",
+        "narrative": "Predsjedništvo mora proglasiti viziju države. Platforma iz maja govori o građanskoj, multietničkoj republici u kojoj su svi građani jednaki bez obzira na etničku pripadnost. Rat već ispituje taj ideal. Srpski i hrvatski vojnici još služe u vašoj armiji. Dio stranke tvrdi da je ovo bošnjačka borba, a ne građanska. Međunarodna zajednica pažljivo posmatra. Vaša deklaracija odredit će ko se bori za vas, ko vas podržava i za šta se borite.",
+        "staff_assessment": "Sarajevsko Predsjedništvo čuva građanski zahtjev i međunarodni položaj tako što republiku definiše kroz jednako državljanstvo, uz prihvatanje trenja sa tvrđim ratnim nacionalnim strujama.",
+        "source_note": "Kontekst presude Karadžiću o sporu oko državnosti Bosne; sastav ARBiH i Divjak navedeni su za ratnu multietničku službu.",
         "historical_source": "ICTY Karadzic Trial Judgment (IT-95-5/18-T, 2016); ICJ Bosnia and Herzegovina v. Serbia and Montenegro (2007).",
         "source_tier": "icty_icj_un",
         "trigger_evidence": [
-          "Majska platforma iz 1992. nalazi se pred Predsjednistvom.",
-          "Ratna mobilizacija prisiljava Sarajevo da imenuje politicku osnovu republike koju tvrdi da brani."
+          "Majska platforma iz 1992. nalazi se pred Predsjedništvom.",
+          "Ratna mobilizacija prisiljava Sarajevo da imenuje političku osnovu republike koju tvrdi da brani."
         ],
         "response_options": {
           "civic": {
-            "label": "Gradjanska multietnicka republika",
-            "description": "Jedna republika, svi gradjani jednaki. Srbi i Hrvati sluze uz Bosnjake. Svijet to postuje. Vasi nacionalisti to zamjeraju."
+            "label": "Građanska multietnička republika",
+            "description": "Jedna republika, svi građani jednaki. Srbi i Hrvati služe uz Bošnjake. Svijet to poštuje. Vaši nacionalisti to zamjeraju."
           },
           "bosniak_national": {
-            "label": "Bosnjacka nacionalna drzava",
-            "description": "Ovo je nasa zemlja i nasa borba. Oni koji stoje protiv nas nisu nasi gradjani. Jasan identitet, jasna svrha - ali gubite manjinske vojnike i medjunarodnu naklonost."
+            "label": "Bošnjačka nacionalna država",
+            "description": "Ovo je naša zemlja i naša borba. Oni koji stoje protiv nas nisu naši građani. Jasan identitet, jasna svrha - ali gubite manjinske vojnike i međunarodnu naklonost."
           },
           "pragmatic": {
-            "label": "Multietnicka u rijeci, bosnjacka u praksi",
-            "description": "Zadrzite gradjansku retoriku za kamere. Tiho gradite bosnjacke institucije. Ako se jaz izmedju rijeci i stvarnosti ikada otkrije, steta ce biti veca nego da ste bili otvoreni."
+            "label": "Multietnička u riječi, bošnjačka u praksi",
+            "description": "Zadržite građansku retoriku za kamere. Tiho gradite bošnjačke institucije. Ako se jaz između riječi i stvarnosti ikada otkrije, šteta će biti veća nego da ste bili otvoreni."
           }
         }
       }
@@ -2347,28 +2347,28 @@
     "narrative": "Zagreb is on the line. Your patron's directive is clear: Herceg-Bosna exists to secure Croat territory in Bosnia, with a view toward eventual unification with Croatia. But on the ground, your HVO fights alongside the ARBiH against Serb forces. Some of your commanders — notably Kljuic — argue the Croat future lies in a unified Bosnia, not a separate statelet. Your patron disagrees. Choose your path: it will define your alliances, your wars, and your fate at the negotiating table.",
     "localizations": {
       "bcs": {
-        "title": "Sta je Herceg-Bosna?",
-        "narrative": "Zagreb je na vezi. Direktiva patrona je jasna: Herceg-Bosna postoji da osigura hrvatski teritorij u Bosni, s pogledom prema mogucem ujedinjenju s Hrvatskom. Ali na terenu se HVO bori uz ARBiH protiv srpskih snaga. Neki komandanti, posebno Kljuic, tvrde da hrvatska buducnost lezi u jedinstvenoj Bosni, a ne u odvojenoj tvorevini. Patron se ne slaze. Izaberite put: on ce odrediti saveze, ratove i vas polozaj za pregovarackim stolom.",
-        "staff_assessment": "Vodstvo Herceg-Bosne dobija uskladjenost s patronom i jasniju institucionalnu koheziju slijedeci Zagreb, ali taj izbor saradnju sa Sarajevom cini krhkijom.",
-        "source_note": "Presude Kordicu i Prlicu, zajedno s kontekstom zagrebackih sastanaka i uklanjanja Kljuica, utemeljuju separatisticki politicki projekat Herceg-Bosne.",
+        "title": "Šta je Herceg-Bosna?",
+        "narrative": "Zagreb je na vezi. Direktiva patrona je jasna: Herceg-Bosna postoji da osigura hrvatski teritorij u Bosni, s pogledom prema mogućem ujedinjenju s Hrvatskom. Ali na terenu se HVO bori uz ARBiH protiv srpskih snaga. Neki komandanti, posebno Kljuić, tvrde da hrvatska budućnost leži u jedinstvenoj Bosni, a ne u odvojenoj tvorevini. Patron se ne slaže. Izaberite put: on će odrediti saveze, ratove i vaš položaj za pregovaračkim stolom.",
+        "staff_assessment": "Vodstvo Herceg-Bosne dobija usklađenost s patronom i jasniju institucionalnu koheziju slijedeći Zagreb, ali taj izbor saradnju sa Sarajevom čini krhkijom.",
+        "source_note": "Presude Kordiću i Prliću, zajedno s kontekstom zagrebačkih sastanaka i uklanjanja Kljuića, utemeljuju separatistički politički projekat Herceg-Bosne.",
         "historical_source": "ICTY Prlic et al. Trial Judgment (IT-04-74-T, 2013); ICTY Kordic and Cerkez Trial Judgment (IT-95-14/2-T, 2001).",
         "source_tier": "icty_icj_un",
         "trigger_evidence": [
-          "Zagrebacka direktiva i institucije Herceg-Bosne vec oblikuju politiku HVO-a.",
-          "HVO i ARBiH jos dijele protuvrsovske frontove, pa politicki smjer odmah postaje operativno pitanje."
+          "Zagrebačka direktiva i institucije Herceg-Bosne već oblikuju politiku HVO-a.",
+          "HVO i ARBiH još dijele frontove protiv VRS-a, pa politički smjer odmah postaje operativno pitanje."
         ],
         "response_options": {
           "croat_republic": {
             "label": "Hrvatska republika - slijediti Zagreb",
-            "description": "Herceg-Bosna je hrvatski politicki entitet. Kontrolisat cemo svoj teritorij po starim banovinskim granicama. Zagreb daje oruzje, oficire i svrhu. Bosnjaci ce postati protivnici."
+            "description": "Herceg-Bosna je hrvatski politički entitet. Kontrolisat ćemo svoj teritorij po starim banovinskim granicama. Zagreb daje oružje, oficire i svrhu. Bošnjaci će postati protivnici."
           },
           "united_front": {
-            "label": "Zajednicki front s ARBiH",
-            "description": "Mi smo Hrvati i Bosanci. Nasa borba je protiv Velike Srbije, uz nase saveznike. Zagreb ce biti bijesan. Tudjman moze presjeci podrsku. Ali udruzeni front protiv VRS-a bit ce snazan."
+            "label": "Zajednički front s ARBiH",
+            "description": "Mi smo Hrvati i Bosanci. Naša borba je protiv Velike Srbije, uz naše saveznike. Zagreb će biti bijesan. Tuđman može presjeći podršku. Ali udruženi front protiv VRS-a bit će snažan."
           },
           "strategic_ambiguity": {
-            "label": "Javno saradjuj, tiho se pripremaj",
-            "description": "Borite se protiv Srba zajedno. Iza kulisa gradite hrvatske institucije. Zagreb to podnosi. Savez drzi, za sada. Kad pukne, a puknut ce, izdaja ce vas kostati dvostruko."
+            "label": "Javno sarađuj, tiho se pripremaj",
+            "description": "Borite se protiv Srba zajedno. Iza kulisa gradite hrvatske institucije. Zagreb to podnosi. Savez drži, za sada. Kad pukne, a puknut će, izdaja će vas kostati dvostruko."
           }
         }
       }
