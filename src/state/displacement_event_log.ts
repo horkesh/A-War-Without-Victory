@@ -146,8 +146,8 @@ export function appendDisplacementEvent(
     //    per-turn event-log clear so the desktop settlement panel can show
     //    exact per-OSID departed / killed-or-fled / arrived figures instead of
     //    the coarse municipality-scaled approximation. Semantics mirror the
-    //    event-log adapter (GameStateAdapter): out = displaced (killed + fled
-    //    are subsets, not additional); lost = killed + fled_abroad; in = settled.
+    //    event-log adapter (GameStateAdapter): out = displaced (routed only; killed +
+    //    fled are additional, not subsets); lost = killed + fled_abroad; in = settled.
     //    Order-insensitive (sums commute); O(1) per event; bounded (~744 OSIDs).
     const flows = (state.displacement.displacement_flows_by_osid ??= {});
     const displaced = event.displaced ?? 0;

@@ -195,7 +195,7 @@ describe('refugee-flow Chronicle cadence beats (D2 mid-1995 void)', () => {
         const entries = buildRefugeeFlowChronicleEntries(rawStateWith({ 5: 700_000, 6: 3_460 }), 188);
         const text = entries.map((e) => `${e.title} ${e.detail}`).join('\n');
 
-        expect(text).toContain('Bilans izbjeglica');
+        expect(text).toContain('Raseljeni ili ubijeni: 500.000');
         expect(text).toContain('Talas raseljavanja');
         expect(text).toContain('700.000');
         expect(text).not.toMatch(/Refugee tally|Displacement wave|people from their homes|fresh wave of displacement|uprooted/i);

@@ -14,7 +14,7 @@ import { isOperationOpportunityReview } from './operationOpportunityDossiers';
 import { isResolvedProposalReview, parseHistoricalOperationAuthorizationAction } from './historicalOperationAuthorization';
 import { playerFactionMatch } from './playerFactionMatch';
 import { strictCompare } from '../../../state/validateGameState';
-import { turnToDateString } from '../utils/formatters';
+import { formatLocaleNumber, turnToDateString } from '../utils/formatters';
 import { getOsidDisplayName } from '../utils/osidDisplayName';
 import { getDecisionSurface, getDecisionSurfaceForInboxType } from './decisionSurfaceRegistry';
 import { plainReason } from './opDirectiveObjection';
@@ -169,9 +169,7 @@ function formatParamilitaryStandingImpact(value: number): string {
 }
 
 function formatParamilitaryModelPopulation(): string {
-    return new Intl.NumberFormat(getActiveLocale() === 'bcs' ? 'bs-BA' : 'en-US').format(
-        PARAMILITARY_TARGET_AVG_POPULATION,
-    );
+    return formatLocaleNumber(PARAMILITARY_TARGET_AVG_POPULATION);
 }
 
 type OfficerEvent = NonNullable<LoadedGameState['pendingOfficerEvents']>[number];
