@@ -1917,6 +1917,31 @@ export function defaultBotDecisionForOpportunity(
 export const OPPORTUNITY_PROPOSAL_ACTION_PREFIX = 'OPPORTUNITY:';
 
 /**
+ * Defensive opportunities are never put to the President (owner decision 2, 2026-11-14;
+ * command-loop proposal §5B; Engine Invariants §14.10b). The classification is a code-side
+ * lookup on the catalog tier, never a field copied into persisted opportunity state: T3 is the
+ * defensive-crisis subtype (approve commits reserves and spawns no operation). Every T1/T4
+ * catalog entry is a corps operation or campaign, so no catalog entry is a small local attack.
+ */
+export function isDefensiveOpportunity(def: OperationOpportunityDef): boolean {
+    return def.tier === 'T3';
+}
+
+/**
+ * A live president is present: player faction set and not headless auto-control. The defensive
+ * rule applies only then, so headless runs keep their review-then-auto-resolve timing and stay
+ * byte-identical (same gate as `isLivePresident` in stance_matters.ts, inlined to avoid an import cycle).
+ */
+function hasLivePresident(state: GameState): boolean {
+    return Boolean(state.meta?.player_faction) && state.meta?.headless_scenario_auto_control !== true;
+}
+
+/** True when this player-faction opportunity is decided by staff instead of the President's review queue. */
+function isStaffDecidedPlayerOpportunity(state: GameState, def: OperationOpportunityDef): boolean {
+    return hasLivePresident(state) && isDefensiveOpportunity(def);
+}
+
+/**
  * Apply default bot decisions for any pending opportunity whose
  * `approver_faction` is NOT a human-controlled player (levels 0/1). Runs synchronously after the
  * evaluator so bot opportunities are resolved on the same turn they become
@@ -1938,10 +1963,13 @@ export function applyBotOpportunityDecisions(
     const targets: Array<{ proposalId: string; def: OperationOpportunityDef; proposal: OperationOpportunityState }> = [];
     for (const p of proposals) {
         if (p.status !== 'eligible_pending_review') continue;
-        if (playerFaction !== null && p.approver_faction === playerFaction
-            && (state.meta.autonomy_level ?? 0) < 2) continue;
         const def = catalog.find(d => d.opportunity_id === p.opportunity_id);
         if (!def) continue;
+        // Below level 2 the President reviews his faction's opportunities, except defensive
+        // ones, which his staff decides at every level (§14.10b).
+        if (playerFaction !== null && p.approver_faction === playerFaction
+            && (state.meta.autonomy_level ?? 0) < 2
+            && !isStaffDecidedPlayerOpportunity(state, def)) continue;
         targets.push({ proposalId: p.proposal_id, def, proposal: p });
     }
     // Sort deterministically so bot decisions are stable across replays.
@@ -1993,6 +2021,8 @@ export function generateOpportunityProposalReviews(
         if (existingActions.has(`${OPPORTUNITY_PROPOSAL_ACTION_PREFIX}${p.proposal_id}`)) continue;
         const def = catalog.find(d => d.opportunity_id === p.opportunity_id);
         if (!def) continue;
+        // Defensive opportunities are never put to the President (§14.10b).
+        if (isStaffDecidedPlayerOpportunity(state, def)) continue;
         const recommendation = def.staff_recommendation;
         const desc = `${def.name} — staff recommendation: ${recommendation}`;
         out.push({
