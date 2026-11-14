@@ -85,8 +85,8 @@
  *   MODAL_RAISED_3 (1500)         — Warroom settlement info side panel
  *   WARROOM_OVERLAY (2000)        — Warroom legacy loading overlay / tooltip
  *   PAUSE_MENU (8000)             — Pause menu
- *   MODAL_HARD (8500)             — Settings, Credits, FirstTurn, Toast
- *   HARD_MODAL (9000)             — Main menu, Onboarding overlay
+ *   MODAL_HARD (8500)             — FirstTurn, Toast
+ *   HARD_MODAL (9000)             — Main menu, Onboarding overlay, Settings, Credits
  *   CRITICAL_MODAL (9999)         — Commander / Dayton / Operation / Event / OfficerEvent / PeacePlan / AdvanceTurn
  *   TOOLTIP (9999)                — Tooltip (sits at same tier as critical modals — last paint wins)
  *   TURN_AFTERMATH (10000)        — Turn aftermath card (above critical modals)
@@ -219,10 +219,10 @@ export const Z = Object.freeze({
   /** Pause menu — above all panels and modals, below MODAL_HARD. */
   PAUSE_MENU: 8000,
 
-  /** Settings / Credits / FirstTurn orientation card / LoadErrorToast. */
+  /** FirstTurn orientation card / LoadErrorToast. */
   MODAL_HARD: 8500,
 
-  /** Main menu / Onboarding overlay. */
+  /** Main menu / Onboarding overlay; Settings and Credits open over the main menu at this tier. */
   HARD_MODAL: 9000,
 
   /**

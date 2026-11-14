@@ -1,9 +1,10 @@
 /**
- * Credits screen - studio, sources, acknowledgments, dedication.
+ * Credits screen - studio, sources, map data attribution, acknowledgments, dedication.
  */
 import { type ReactNode } from 'react';
 import { Z } from '../../shared/zIndex';
 import { t, useLocale } from '../i18n';
+import { OSM_COPYRIGHT_URL } from './OsmAttribution';
 
 interface CreditsScreenProps {
     onClose: () => void;
@@ -13,15 +14,17 @@ export function CreditsScreen({ onClose }: CreditsScreenProps) {
     const [locale] = useLocale();
 
     return (
+        // Same tier as Settings and the main menu it opens from (HARD_MODAL, later in the DOM).
+        // At MODAL_HARD it rendered behind the main menu and could not be seen.
         <div className="fixed inset-0 flex items-center justify-center bg-black/80 backdrop-blur-sm"
-             style={{ zIndex: Z.MODAL_HARD }}>
+             style={{ zIndex: Z.HARD_MODAL }}>
             <button
                 type="button"
                 className="absolute inset-0 cursor-default border-0 bg-transparent p-0"
                 onClick={onClose}
                 aria-label={t('credits.closeCredits')}
             />
-            <div className="w-[90%] max-w-[480px] max-h-[calc(var(--interface-viewport-height,100vh)*0.8)] overflow-auto rounded-lg border border-[#8a7a60]/30 shadow-2xl p-8"
+            <div className="relative w-[90%] max-w-[480px] max-h-[calc(var(--interface-viewport-height,100vh)*0.8)] overflow-auto rounded-lg border border-[#8a7a60]/30 shadow-2xl p-8"
                  style={{
                      background: 'rgba(26, 24, 21, 0.97)',
                      fontFamily: 'var(--font-command)',
@@ -47,6 +50,19 @@ export function CreditsScreen({ onClose }: CreditsScreenProps) {
                     </p>
                     <p className="text-[#8a7a60] text-xs mt-1">
                         {t('credits.additionalSources')}
+                    </p>
+                </CreditSection>
+
+                <CreditSection title={t('credits.mapData')}>
+                    <p className="text-[#d5c9bc] text-[12px]" data-testid="credits-osm-attribution">
+                        {t('map.attribution.osm')}
+                    </p>
+                    <p className="text-[#8a7a60] text-xs mt-1">
+                        {t('credits.osmLicence')}{' '}
+                        <a href={OSM_COPYRIGHT_URL} target="_blank" rel="noopener noreferrer"
+                           className="text-[#c4a35a] underline-offset-2 hover:underline focus-visible:underline">
+                            openstreetmap.org/copyright
+                        </a>
                     </p>
                 </CreditSection>
 
