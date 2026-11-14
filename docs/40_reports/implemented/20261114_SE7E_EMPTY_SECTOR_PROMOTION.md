@@ -166,4 +166,8 @@ No change is a direct effect of the rule. The first control divergence is t14 at
 - **Full suite:** `npm run test:vitest` exit 0. `npx tsc --noEmit` exit 0 (with a larger Node heap; the default 2 GB heap OOMs in this container, and the pre-commit hook needed the same).
 - **Structural fingerprint:** `npm run ci:structural-fingerprint:check` exit 0, `bc629e89a585dfde`.
 - **Gates on run 2:** `verify_checkpoints.cjs` (guard intact; score regression Oct95 −4), `engine_health_gate.cjs --strict` PASS, `validate_run_consistency.cjs` PASS (0).
-- **Runs:** 2 measured candidates (8 allowed), plus the main reproduction, a main replay with weekly saves (observer-only, same hash), and two partial resumes (fidelity and attribution). The final-head bless is recorded in the PR.
+- **Runs:** 2 measured candidates plus the bless, 3 of 8 allowed. Also the main reproduction, a main replay with weekly saves (observer-only, same hash), and two partial resumes (fidelity and attribution).
+- **Baselines re-pinned at the final engine head** (`UPDATE_BASELINES=1 npm run test:baselines` at `7308909`, docs-only since `b51e49f`). All 8 artifacts reproduce run 2 byte for byte:
+  - `final_save.json` `ace4e553…`, `run_summary.json` `3a97eb5f…`, `end_report.md` `5376b4f8…`, `weekly_report.jsonl` `a0fe3752…`;
+  - `control_delta.json` `4b5f4642…`, `activity_summary.json` `53e1986b…`, `watched_operations.json` `b14c8e6a…`;
+  - `formation_delta.json` `8504e676…` (unchanged from main).
