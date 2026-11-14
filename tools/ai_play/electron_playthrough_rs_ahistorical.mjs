@@ -24,7 +24,12 @@ const MUNICIPALITY_IDS = Object.keys(
 // runtime: RS gets "Invalid municipality support type" for both) — staff_priority is
 // the faction-agnostic lever, so that's what RS rotates through.
 const SUPPORT_TYPES = ['staff_priority'];
-const OUT_DIR = 'C:/Users/User/AppData/Local/Temp/claude/F--A-War-Without-Victory/9734fb27-cf65-4213-8371-96c33f5cb07e/scratchpad/rs_ahistorical_run';
+// Output: --out <dir>, default <repo>/runs/ai_play/rs_ahistorical_run (runs/ is gitignored).
+// It used to be a fixed path in one past session's scratchpad on the owner's machine.
+const outArgIndex = process.argv.indexOf('--out');
+const OUT_DIR = outArgIndex >= 0 && process.argv[outArgIndex + 1]
+  ? resolve(process.argv[outArgIndex + 1])
+  : join(REPO_ROOT, 'runs', 'ai_play', 'rs_ahistorical_run');
 mkdirSync(OUT_DIR, { recursive: true });
 mkdirSync(join(OUT_DIR, 'screenshots'), { recursive: true });
 

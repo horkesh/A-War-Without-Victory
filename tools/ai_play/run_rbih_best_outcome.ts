@@ -11,10 +11,11 @@
  * strategies to find which comes closest to (or exceeds) the historical RBiH/
  * Federation outcome, and writes a findings log as it goes.
  *
- * Run: npx tsx tools/ai_play/run_rbih_best_outcome.ts
+ * Run: npx tsx tools/ai_play/run_rbih_best_outcome.ts [--out <dir>]
+ * Output defaults to <repo>/runs/ai_play/rbih_best_outcome_run (runs/ is gitignored).
  */
 import { writeFileSync, appendFileSync, mkdirSync } from 'node:fs';
-import { join } from 'node:path';
+import { join, resolve } from 'node:path';
 import {
     startCampaign, advance, serializeDecisionContext, injectDecision, stateHash,
     requestOp, stopOp, replaceCo, eliteDeploy, localSupport,
@@ -27,7 +28,11 @@ import type { DaytonProposal } from '../../src/state/negotiation_types.js';
 
 const FACTION: FactionId = 'RBiH';
 const TURN_CAP = 200; // safety margin past 188w
-const OUT_DIR = 'C:/Users/User/AppData/Local/Temp/claude/F--A-War-Without-Victory/9734fb27-cf65-4213-8371-96c33f5cb07e/scratchpad/rbih_best_outcome_run';
+// It used to be a fixed path in one past session's scratchpad on the owner's machine.
+const outArgIndex = process.argv.indexOf('--out');
+const OUT_DIR = outArgIndex >= 0 && process.argv[outArgIndex + 1]
+    ? resolve(process.argv[outArgIndex + 1])
+    : join(REPO_BASE_DIR, 'runs', 'ai_play', 'rbih_best_outcome_run');
 mkdirSync(OUT_DIR, { recursive: true });
 const LOG_PATH = join(OUT_DIR, 'log.jsonl');
 const SUMMARY_PATH = join(OUT_DIR, 'SUMMARY.md');

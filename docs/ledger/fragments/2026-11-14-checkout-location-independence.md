@@ -8,6 +8,7 @@
 - `tools/render_control_map.mjs`, `scripts/playwright_map_first_verify.mjs`, `scripts/playwright_shell_navigation_verify.mjs`: repo root from `import.meta.url`.
 - `tools/architect/*.ps1` (5 scripts): when `git rev-parse --show-toplevel` fails, the fallback root is `$PSScriptRoot`, not `F:\A-War-Without-Victory`.
 - `tools/peace/iebl_cell_audit/compute_cells.py`: reads repo data from `Path(__file__).resolve().parents[3]` instead of a removed Dayton worktree. Re-run from another cwd: exit 0, 252 cells, as its checkpoint records.
+- `tools/ai_play/run_rbih_best_outcome.ts` and `tools/ai_play/electron_playthrough_rs_ahistorical.mjs` (owner follow-up): output went to a fixed folder in one past Claude session's scratchpad (`C:/Users/User/AppData/Local/Temp/claude/F--A-War-Without-Victory/<session>/...`). Both now take `--out <dir>`, default `<repo>/runs/ai_play/<run>` (gitignored). Proven here: the RBiH script wrote to `--out`, and with no flag from the repo root it created `runs/ai_play/rbih_best_outcome_run/` and advanced turns. The Electron script created its `--out` folder before failing to launch Electron in this headless container.
 - Tests: `engine_honesty_legacy_contracts` passes `process.cwd()` as the unused `baseDir` (the validator voids it); the `dayton_walkthrough_fixes` header cites `$AWWV_WORKTREES_ROOT/...`.
 - Docs: README Repo Notes document both variables; `tools/opencode_implementer/README.md` uses `../AWWV-worktrees/<job>`; the brainstorming visual-companion skill no longer names a drive. `.agent/skill-distribution.json` gains an `external_path_records` note.
 
@@ -15,4 +16,4 @@
 
 **Checked.** `npx tsc --noEmit` exit 0. 18 vitest files (the 7 named tests plus 11 that read the touched docs or tools) passed, 202 tests. `npm run test:baselines` reports all scenarios match. Helper probed from a disposable linked worktree: it resolved the main checkout and its sibling coordination folder.
 
-**Not done.** The PowerShell and Playwright scripts were not run on Windows here. Other machine-specific paths that do not match the F: inventory pattern are listed in the PR as out of scope.
+**Not done.** The PowerShell and Playwright scripts were not run on Windows here. Other machine-specific paths that do not match the F: inventory pattern are listed in the PR as out of scope. Separate from checkout location: run from a cwd other than the repo root, the president-playthrough turn pipeline fails to open `data/source/strategic_priorities.json`, because a `loadStrategicPriorities()` caller does not pass `baseDir` (default `process.cwd()`). Not fixed here; it is `src/` behaviour.
