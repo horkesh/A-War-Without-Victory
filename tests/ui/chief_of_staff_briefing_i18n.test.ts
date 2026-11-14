@@ -77,7 +77,8 @@ describe('Chief of Staff briefing localization', () => {
 
         const text = flatten(generateCoSBriefing([], state, 'RBiH'));
 
-        expect(text).toContain('Vodili smo 1 okršaj - rezultati zabrinjavaju, uz 1 nepovoljan ishod.');
+        // Count-neutral wording: "Broj okršaja: N" needs no noun agreement for any N (BC4, found in the render).
+        expect(text).toContain('Broj okršaja ovaj potez: 1. Rezultati zabrinjavaju, broj nepovoljnih ishoda: 1.');
         expect(text).toContain('Izgubili smo 1 položaj ovaj potez. To je duboko zabrinjavajuće.');
         expect(text).not.toContain('We fought');
         expect(text).not.toContain('We lost 1 position');
@@ -188,7 +189,7 @@ describe('Chief of Staff briefing localization', () => {
         const aggressiveMixedText = flatten(generateCoSBriefing([], aggressiveMixedState, 'HRHB'));
         const combined = [preciseText, aggressiveWinText, aggressiveLossText, aggressiveMixedText].join('\n');
 
-        expect(preciseText).toContain('3 okršaja ovaj potez: 1 povoljan, 1 nepovoljan, 1 neodlucan.');
+        expect(preciseText).toContain('Broj okršaja ovaj potez: 3. Povoljnih: 1, nepovoljnih: 1, neodlučnih: 1.');
         expect(preciseText).toContain('Promjene teritorije: +1 zauzeto, -0 izgubljeno.');
         expect(aggressiveWinText).toContain('Vodili smo 2 bitke i dobili 2. Dobro, ali moramo nastaviti pritisak.');
         expect(aggressiveWinText).toContain('Zauzeli smo 2 položaja. Dobro. Nastaviti.');

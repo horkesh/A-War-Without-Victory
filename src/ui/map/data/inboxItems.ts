@@ -205,7 +205,7 @@ function officerEventDedupeKey(evt: OfficerEvent): string {
     return `${evt.type}:${subjectKey}`;
 }
 
-function localizedEventTitle(
+export function localizedEventTitle(
     eventId: string,
     fallback: string | null | undefined,
     eventCatalog: ReadonlyMap<string, EventDefinition> | undefined,

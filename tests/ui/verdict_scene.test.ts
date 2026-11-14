@@ -188,7 +188,7 @@ describe('buildVerdictScene', () => {
         });
 
         expect(scene.tone).toBe('early_peace');
-        expect(scene.headline).toContain('Early peace');
+        expect(scene.headline).toBe('A war ended by a peace agreement');
         expect(scene.costEmphasis.title).toBe('Early negotiated settlement');
         expect(scene.comparisonCallouts[0]).toBe('Total military casualties were 20% of historical levels');
     });
