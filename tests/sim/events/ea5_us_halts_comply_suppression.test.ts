@@ -121,8 +121,11 @@ describe('E-A5 us_halts_federation_advance_1995 — suppression lives on the com
 
     // ── Historical/bot path pin ───────────────────────────────────────────────
 
-    it('bot path still selects comply (accept_first → options[0])', () => {
-        expect(def.bot_response_logic).toBe('accept_first');
+    it('bot path still selects comply (authored historical default, option 0)', () => {
+        // EV1 (2026-11-14): was `accept_first` → options[0]. Now an authored historical default
+        // with `historical` logic (the acceptance report requires it); same pick, same hash.
+        expect(def.bot_response_logic).toBe('historical');
+        expect(def.historical_default_response_id).toBe('comply');
         expect(def.response_options![0]!.id).toBe('comply');
         expect(selectAIDefaultResponse(def).id).toBe('comply');
     });
