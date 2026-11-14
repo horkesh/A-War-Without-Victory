@@ -332,6 +332,35 @@ function getOsidCensusHostileShare(rec: SettlementRecord | undefined, fromFactio
     return Number.isFinite(share) ? Math.max(0, Math.min(1, share)) : null;
 }
 
+/**
+ * RF-5B: the community a recorded expulsion policy targets, as a share of the OSID's 1991
+ * population. The standing convention counts "others" (largely 1991 Yugoslavs) with
+ * Bosniaks; the policy the ICTY found targeted the Muslim population (Prlić TJ), so a
+ * policy wave against RBiH-aligned people counts declared Bosniaks only. In urban Mostar
+ * the convention would roughly double the wave. Falls back to the municipality share.
+ */
+function getPolicyTargetShare(
+    rec: SettlementRecord | undefined,
+    fromFaction: FactionId,
+    munId: MunicipalityId,
+    population1991ByMun?: MunicipalityPopulation1991Map
+): number {
+    if (fromFaction !== 'RBiH') {
+        return getOsidCensusHostileShare(rec, fromFaction)
+            ?? (() => {
+                const entry = population1991ByMun?.[munId];
+                const total = entry ? getPopulationTotal(entry) : 0;
+                return entry && total > 0 ? getFactionAlignedPopulation(entry, fromFaction) / total : 0;
+            })();
+    }
+    const total = getOsidCensusPopulation(rec);
+    const b = rec?.properties?.population_bosniaks;
+    if (total > 0 && typeof b === 'number' && Number.isFinite(b)) return Math.max(0, Math.min(1, b / total));
+    const entry = population1991ByMun?.[munId];
+    const munTotal = entry ? getPopulationTotal(entry) : 0;
+    return entry && munTotal > 0 ? Math.max(0, Math.min(1, entry.bosniak / munTotal)) : 0;
+}
+
 function getDynamicHostileShare(
     munId: MunicipalityId,
     fromFaction: FactionId,
@@ -843,6 +872,12 @@ export function processDisplacementTakeover(
 
             const isFrontAdjMatured = allFrontAdjacent || frontOsids.has(osid);
             const isPolicyTimer = timer.cause === 'policy_expulsion';
+            if (isPolicyTimer) {
+                hostileShare = Math.min(
+                    getPolicyTargetShare(osidRec, timer.from_faction, munId, population1991ByMun),
+                    0.95
+                );
+            }
             const initFraction = isPolicyTimer
                 ? (getPolicyExpulsionEntry(timer.to_faction, munId)?.fraction ?? 0)
                 : getInitialDisplacementFraction(

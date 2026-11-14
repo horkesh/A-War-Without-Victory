@@ -216,3 +216,28 @@ test('recapture by the expelled side clears the policy timer before it fires', (
     expect(policyTimers(state)).toEqual({});
     expect(state.military.negotiation!.capital.HRHB.war_crimes_events_emergent).toBe(0);
 });
+
+test('a policy wave against RBiH-aligned people counts declared Bosniaks only, not 1991 "others"', () => {
+    const state = warState(50);
+    state.military.event_flags.hrhb_minority_policy = 'expel';
+    const withOthers = new Map(osidSettlements);
+    withOthers.set('op:vitez:vitez', {
+        ...osidSettlements.get('op:vitez:vitez')!,
+        properties: {
+            population_total: 1000,
+            population_bosniaks: 300,
+            population_croats: 500,
+            population_serbs: 0,
+            population_others: 200
+        }
+    } as unknown as SettlementRecord);
+    for (let t = 50; t <= 54; t++) {
+        state.meta.turn = t;
+        processDisplacementTakeover(state, new Map(), { battles: [] }, pop1991, withOthers);
+    }
+    const vitezFraction = POLICY_EXPULSION_SCOPE.HRHB!.vitez.fraction;
+    expect(hrhbEvents(state)[0]).toMatchObject({
+        origin_osid: 'op:vitez:vitez',
+        displaced: Math.floor(1000 * 0.3 * vitezFraction)
+    });
+});
