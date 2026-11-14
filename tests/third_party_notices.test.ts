@@ -1,6 +1,8 @@
-import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
+import { builtinModules } from 'node:module';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
+import ts from 'typescript';
 import { afterAll, describe, expect, it } from 'vitest';
 import {
   NOTICES_FILE,
@@ -58,6 +60,76 @@ describe('THIRD_PARTY_NOTICES.md npm coverage', () => {
 
   it('matches a fresh generation from the installed packages byte for byte', () => {
     expect(buildNoticesForRoot(root).markdown).toBe(notices);
+  });
+
+  it('keeps build and data-pipeline tools out of the shipped set', () => {
+    // Measured 2026-11-14: nothing shipped imports these (desktop_sim.cjs bundles only
+    // @anthropic-ai/sdk; the map and warroom Vite builds bundle none of them). They are
+    // devDependencies, so electron-builder does not copy them into the app.
+    for (const name of [
+      '@modelcontextprotocol/sdk', '@napi-rs/canvas', '@turf/turf', 'adm-zip', 'deck.gl', 'geotiff',
+      'jsts', 'pdfjs-dist', 'pngjs', 'three', 'topojson-client', 'xlsx',
+    ]) {
+      expect(shippedNames, name).not.toContain(name);
+    }
+  });
+});
+
+/**
+ * Bare imports in shipped source that resolve to a package outside the shipped set. Such a
+ * package would be bundled into the app without a row in the notices. Type-only packages are
+ * accepted through their @types/ name; Node built-ins and `electron` are part of the runtime.
+ */
+function findUnshippedImports(files: Array<{ file: string; source: string }>, shippedSet: Set<string>) {
+  const builtins = new Set(builtinModules);
+  const violations: string[] = [];
+  for (const { file, source } of files) {
+    for (const { fileName: specifier } of ts.preProcessFile(source, true, true).importedFiles) {
+      if (specifier.startsWith('.') || specifier.startsWith('/') || specifier.includes(':')) continue;
+      const parts = specifier.split('/');
+      const name = specifier.startsWith('@') ? parts.slice(0, 2).join('/') : parts[0];
+      if (builtins.has(name)) continue;
+      const typesName = `@types/${name.startsWith('@') ? name.slice(1).replace('/', '__') : name}`;
+      if (shippedSet.has(name) || shippedSet.has(typesName)) continue;
+      violations.push(`${file} imports ${name}`);
+    }
+  }
+  return violations.sort();
+}
+
+function shippedSourceFiles(): Array<{ file: string; source: string }> {
+  const files: Array<{ file: string; source: string }> = [];
+  const walk = (dir: string) => {
+    for (const name of readdirSync(dir).sort()) {
+      if (['node_modules', 'stories', '__mocks__', '.storybook'].includes(name)) continue;
+      const path = join(dir, name);
+      const rel = path.slice(root.length + 1).replace(/\\/g, '/');
+      // src/cli holds data-authoring scripts; *.config.* are build configs. Neither ships.
+      if (rel === 'src/cli') continue;
+      if (statSync(path).isDirectory()) {
+        walk(path);
+      } else if (/\.(ts|tsx|cjs|mjs|js)$/.test(name) && !/\.d\.ts$/.test(name)
+        && !/\.(test|spec|stories)\./.test(name) && !/\.config\.(ts|js|mjs|cjs)$/.test(name)) {
+        files.push({ file: rel, source: readFileSync(path, 'utf8') });
+      }
+    }
+  };
+  walk(join(root, 'src'));
+  return files;
+}
+
+describe('shipped source imports', () => {
+  it('imports only packages that are in the shipped set, so bundled code always has a notice', () => {
+    const files = shippedSourceFiles();
+    expect(files.length).toBeGreaterThan(500);
+    expect(findUnshippedImports(files, shippedNames)).toEqual([]);
+  });
+
+  it('flags shipped code that imports a development-only package (positive control)', () => {
+    const files = [
+      { file: 'src/ui/map/example.ts', source: "import * as XLSX from 'xlsx';\nimport maplibregl from 'maplibre-gl';\nimport type { Feature } from 'geojson';\nimport { readFileSync } from 'node:fs';\nconst p = require('path');" },
+    ];
+    expect(findUnshippedImports(files, shippedNames)).toEqual(['src/ui/map/example.ts imports xlsx']);
   });
 });
 

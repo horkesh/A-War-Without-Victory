@@ -313,7 +313,8 @@ export function renderNotices({ packages, records, staticSections }) {
     'dependencies (copied into the packaged app), the tactical-map workspace dependencies (bundled by',
     'Vite), their transitive dependencies, and the runtime/build packages noted below. One row per',
     'name and version. Platform-specific native binaries are listed for every platform; a build',
-    'carries only its own.',
+    'carries only its own. Build, test and data-pipeline tools are development dependencies: they',
+    'do not ship and are not listed.',
     '',
   );
   const extras = packages.filter((pkg) => pkg.extraReason);
