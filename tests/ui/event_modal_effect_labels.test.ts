@@ -13,7 +13,7 @@ describe('event acknowledgement modal effect labels', () => {
       duration_turns: 8,
     });
 
-    expect(renderedCopy).toBe('ARBiH operational aggression -0.1 for 8 weeks (recorded only; the standard army AI ignores it in this build)');
+    expect(renderedCopy).toBe('ARBiH offensive drive -10% for 8 weeks (noted in the record; it does not change army planning)');
     expect(renderedCopy).not.toContain('aggression_modifier');
     expect(APP_SOURCE).toContain('formatAcknowledgementEventEffect');
     expect(APP_SOURCE).toContain('eventModal.effect.aggressionModifier');
@@ -31,8 +31,8 @@ describe('event acknowledgement modal effect labels', () => {
         duration_turns: 8,
       });
 
-      expect(renderedCopy).toBe('ARBiH operativna agresivnost -0.1 tokom 8 poteza (samo zabilježeno; standardna vojna umjetna inteligencija to u ovoj verziji zanemaruje)');
-      expect(renderedCopy).not.toMatch(/operational aggression|for 8 weeks|aggression_modifier/);
+      expect(renderedCopy).toBe('ARBiH ofanzivni zamah -10% tokom 8 poteza (zabilježeno; ne mijenja planiranje vojske)');
+      expect(renderedCopy).not.toMatch(/offensive drive|for 8 weeks|aggression_modifier/);
     } finally {
       setLocale('en', undefined);
     }

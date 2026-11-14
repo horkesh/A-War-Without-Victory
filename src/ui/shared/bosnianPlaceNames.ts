@@ -185,3 +185,82 @@ export function restoreBosnianPlaceNames(text: string): string {
     }
     return out;
 }
+
+// ---------------------------------------------------------------------------------------
+// Person and proper names (council fix 4, C13, 2026-11-14). Same scope rule: player-facing
+// prose only. Curated, not derived: every entry is a name that occurs in the game's text and
+// whose correct spelling carries a diacritic. "Tudjman" is left as the common English
+// transliteration; "Caco" carries no diacritic.
+// ---------------------------------------------------------------------------------------
+
+export const BOSNIAN_PERSON_AND_PROPER_NAMES: ReadonlyArray<BosnianPlaceName> = [
+    { ascii: 'Abdic', correct: 'Abdić' },
+    { ascii: 'Alagic', correct: 'Alagić' },
+    { ascii: 'Blaskic', correct: 'Blaškić' },
+    { ascii: 'Brdjanin', correct: 'Brđanin' },
+    { ascii: 'Celo', correct: 'Ćelo' },
+    { ascii: 'Cerkez', correct: 'Čerkez' },
+    { ascii: 'Coric', correct: 'Ćorić' },
+    { ascii: 'Delic', correct: 'Delić' },
+    { ascii: 'Dudakovic', correct: 'Dudaković' },
+    { ascii: 'Galic', correct: 'Galić' },
+    { ascii: 'Grabez', correct: 'Grabež' },
+    { ascii: 'Grmec', correct: 'Grmeč' },
+    { ascii: 'Hadzihasanovic', correct: 'Hadžihasanović' },
+    { ascii: 'Halilovic', correct: 'Halilović' },
+    { ascii: 'Izetbegovic', correct: 'Izetbegović' },
+    { ascii: 'Karadzic', correct: 'Karadžić' },
+    { ascii: 'Karavelic', correct: 'Karavelić' },
+    { ascii: 'Kordic', correct: 'Kordić' },
+    { ascii: 'Krajisnik', correct: 'Krajišnik' },
+    { ascii: 'Krstic', correct: 'Krstić' },
+    { ascii: 'Kupreskic', correct: 'Kupreškić' },
+    { ascii: 'Kvocka', correct: 'Kvočka' },
+    { ascii: 'Lukic', correct: 'Lukić' },
+    { ascii: 'Martinovic', correct: 'Martinović' },
+    { ascii: 'Milosevic', correct: 'Milošević' },
+    { ascii: 'Mladic', correct: 'Mladić' },
+    { ascii: 'Naletilic', correct: 'Naletilić' },
+    { ascii: 'Oric', correct: 'Orić' },
+    { ascii: 'Oslobodenje', correct: 'Oslobođenje' },
+    { ascii: 'Petkovic', correct: 'Petković' },
+    { ascii: 'Plavsic', correct: 'Plavšić' },
+    { ascii: 'Prlic', correct: 'Prlić' },
+    { ascii: 'Pusic', correct: 'Pušić' },
+    { ascii: 'Raznatovic', correct: 'Ražnatović' },
+    { ascii: 'Seselj', correct: 'Šešelj' },
+    { ascii: 'Siber', correct: 'Šiber' },
+    { ascii: 'Silajdzic', correct: 'Silajdžić' },
+    { ascii: 'Sovici', correct: 'Sovići' },
+    { ascii: 'Stakic', correct: 'Stakić' },
+    { ascii: 'Stanisic', correct: 'Stanišić' },
+    { ascii: 'Stojic', correct: 'Stojić' },
+    { ascii: 'Susak', correct: 'Šušak' },
+    { ascii: 'Tadic', correct: 'Tadić' },
+    { ascii: 'Uzdol', correct: 'Uždol' },
+    { ascii: 'Vasiljevic', correct: 'Vasiljević' },
+    { ascii: 'Zupljanin', correct: 'Župljanin' },
+];
+
+const PERSON_RESTORATIONS: ReadonlyArray<readonly [RegExp, string]> = BOSNIAN_PERSON_AND_PROPER_NAMES.map(
+    ({ ascii, correct }) => [
+        new RegExp(`(?<![\\p{L}\\p{N}_])${escapeRegExp(ascii)}(?![\\p{L}\\p{N}_])`, 'gu'),
+        correct,
+    ] as const,
+);
+
+/**
+ * Restores diacritics in ASCII-stripped place AND person names inside player-facing text
+ * ("Karadzic judgment" -> "Karadžić judgment"). Same case-sensitive whole-word matching as
+ * restoreBosnianPlaceNames, so identifiers (`karadzic_mladic_split_1995`) stay untouched.
+ * Used at display time for strings the engine persists (event titles, notifications), whose
+ * stored copy cannot change without moving the save hash.
+ */
+export function restoreBosnianProperNames(text: string): string {
+    if (!text || !/[A-Z]/.test(text)) return text;
+    let out = restoreBosnianPlaceNames(text);
+    for (const [pattern, correct] of PERSON_RESTORATIONS) {
+        out = out.replace(pattern, correct);
+    }
+    return out;
+}

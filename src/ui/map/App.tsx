@@ -182,10 +182,22 @@ function formatEventDuration(turns: number | undefined): string {
     : '';
 }
 
+/** Engine shares in [-1, 1] (alliance, offensive drive) read as whole points: 0.05 → 5. */
+function formatSignedEventShare(share: number | undefined): string {
+  return typeof share === 'number' && Number.isFinite(share) ? formatSignedEventDelta(Math.round(share * 100)) : '';
+}
+
 export function formatAcknowledgementEventEffect(effect: AcknowledgementEventEffect): string {
   if (effect.text) return effect.text;
+  // Council fix 4 (C4/C11): army attributes name the army (ARBiH, VRS, HVO); state attributes
+  // (patron pressure, negotiating position, territory, humanitarian record) name the state by
+  // its canonical short form (RBiH, RS, HRHB).
   const faction = effect.faction ? getPlayerSafeMilitaryFactionName(effect.faction) : null;
   const factionPrefix = faction ? `${faction} ` : '';
+  const stateFaction = effect.faction === 'RBiH' || effect.faction === 'RS' || effect.faction === 'HRHB'
+    ? effect.faction
+    : faction;
+  const statePrefix = stateFaction ? `${stateFaction} ` : '';
   const delta = formatSignedEventDelta(effect.delta);
   const duration = formatEventDuration(effect.duration_turns);
 
@@ -197,25 +209,25 @@ export function formatAcknowledgementEventEffect(effect: AcknowledgementEventEff
     case 'cohesion_change':
       return t('eventModal.effect.cohesionChange', { faction: factionPrefix, delta });
     case 'humanitarian_impact':
-      return t('eventModal.effect.humanitarianImpact', { faction: factionPrefix, delta: formatSignedEventDelta(effect.war_crimes_delta) });
+      return t('eventModal.effect.humanitarianImpact', { faction: statePrefix, delta: formatSignedEventDelta(effect.war_crimes_delta) });
     case 'patron_pressure':
-      return t('eventModal.effect.patronPressure', { faction: factionPrefix, delta });
+      return t('eventModal.effect.patronPressure', { faction: statePrefix, delta });
     case 'alliance_change':
-      return t('eventModal.effect.allianceChange', { delta });
+      return t('eventModal.effect.allianceChange', { delta: formatSignedEventShare(effect.delta) });
     case 'negotiation_capital':
-      return t('eventModal.effect.negotiationCapital', { faction: factionPrefix, delta });
+      return t('eventModal.effect.negotiationCapital', { faction: statePrefix, delta });
     case 'equipment_grant':
       return t('eventModal.effect.equipmentGrant', { faction: factionPrefix });
     case 'aggression_modifier':
-      return t('eventModal.effect.aggressionModifier', { faction: factionPrefix, delta, duration });
+      return t('eventModal.effect.aggressionModifier', { faction: factionPrefix, delta: formatSignedEventShare(effect.delta), duration });
     case 'control_change': {
       const count = effect.osids?.length ?? 0;
       return count > 0
-        ? t(count === 1 ? 'eventModal.effect.controlChange.one' : 'eventModal.effect.controlChange.many', { faction: factionPrefix, count })
-        : t('eventModal.effect.controlChange.recorded', { faction: factionPrefix });
+        ? t(count === 1 ? 'eventModal.effect.controlChange.one' : 'eventModal.effect.controlChange.many', { faction: statePrefix, count })
+        : t('eventModal.effect.controlChange.recorded', { faction: statePrefix });
     }
     case 'guerrilla_threat':
-      return t('eventModal.effect.guerrillaThreat', { faction: factionPrefix, duration });
+      return t('eventModal.effect.guerrillaThreat', { faction: statePrefix, duration });
     case 'offensive_ops_suppression':
       return t('eventModal.effect.offensiveSuppression', { faction: factionPrefix, duration });
     case 'alliance_lock':

@@ -740,6 +740,14 @@ function addCounterOfferCards(state: LoadedGameState, cards: CandidateCard[]): v
   }
 }
 
+/** The commander's launch assessment as words, never the raw engine value ("launch"). */
+function commanderAssessmentText(assessment: string): string {
+  if (assessment === 'launch') return t('operationHistory.assessment.launch');
+  if (assessment === 'postpone') return t('operationHistory.assessment.postpone');
+  if (assessment === 'abort') return t('operationHistory.assessment.abort');
+  return t('operationHistory.assessment.unavailable');
+}
+
 function addOpportunityCards(state: LoadedGameState, cards: CandidateCard[]): void {
   const playerFaction = state.player_faction ?? null;
   const opportunities = [...(state.operationOpportunityProposals ?? [])]
@@ -769,7 +777,7 @@ function addOpportunityCards(state: LoadedGameState, cards: CandidateCard[]): vo
           : t('opportunity.noLiveLaunch');
       const evidence = [
         launch?.commander_name,
-        launch?.assessment ? t('opportunity.commanderAssessment', { assessment: launch.assessment }) : null,
+        launch?.assessment ? t('opportunity.commanderAssessment', { assessment: commanderAssessmentText(launch.assessment) }) : null,
         ...(opportunity.decision_evidence ?? []),
         !directive && launch ? t('opportunity.stopNotAvailable') : null,
       ].filter((entry): entry is string => Boolean(entry));

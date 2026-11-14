@@ -11,9 +11,12 @@
  * Resolution order: active locale, then `en`, then the persisted text.
  */
 import type {
+    EventDefinition,
     EventDefinitionLocalization,
     EventNotificationText,
 } from '../../../sim/events/event_types.js';
+import { firstPlayerSafeText } from '../../shared/developerText.js';
+import { restoreBosnianProperNames } from '../../shared/bosnianPlaceNames.js';
 import type { FactionId } from '../../../state/game_state.js';
 import war1992Events from '../../../../data/scenarios/events/war_1992.json';
 import war1992HrhbSummerEvents from '../../../../data/scenarios/events/war_1992_hrhb_summer.json';
@@ -68,12 +71,25 @@ export function resolveEventDisplayTitle(
     options: { locale?: Locale; localizations?: LocalizationMap } = {},
 ): string {
     const localizations = options.localizations ?? LOCALIZATIONS_BY_EVENT_ID.get(eventId);
-    if (!localizations) return persistedTitle;
+    if (!localizations) return restoreBosnianProperNames(persistedTitle);
     for (const locale of localeChain(options.locale ?? getActiveLocale())) {
         const title = nonEmpty(localizations[locale]?.title);
-        if (title) return title;
+        if (title) return restoreBosnianProperNames(title);
     }
-    return persistedTitle;
+    return restoreBosnianProperNames(persistedTitle);
+}
+
+/**
+ * Display form of authored event prose (council fix 4, C13): restores diacritics in person and
+ * place names ("Karadzic" -> "Karadžić"). Corrections are made in the catalog where they can be;
+ * this covers what cannot change in place — copies stored in a save, and the two hash-pinned
+ * reviewed opening events (`opening_policy_transition.ts`), whose stored pending decision must
+ * match the catalog byte for byte.
+ */
+export function displayEventProse(text: string): string;
+export function displayEventProse(text: string | undefined): string | undefined;
+export function displayEventProse(text: string | undefined): string | undefined {
+    return text === undefined ? undefined : restoreBosnianProperNames(text);
 }
 
 /**
@@ -86,9 +102,35 @@ export function resolveEventDisplayNarrative(
     options: { locale?: Locale; localizations?: LocalizationMap } = {},
 ): string {
     const locale = options.locale ?? getActiveLocale();
-    if (locale === 'en') return narrative;
+    if (locale === 'en') return displayEventProse(narrative);
     const localizations = options.localizations ?? LOCALIZATIONS_BY_EVENT_ID.get(eventId);
-    return nonEmpty(localizations?.[locale]?.narrative) ?? narrative;
+    return displayEventProse(nonEmpty(localizations?.[locale]?.narrative) ?? narrative);
+}
+
+/**
+ * Player-facing source line for an event dossier, or null when there is none to show.
+ *
+ * `source_note`, `historical_source` and `source` are authoring provenance as much as citation:
+ * many carry worksheet ids, repo paths, design-gate references or data-row voice (council fix 4,
+ * C1). The line shown is the first candidate free of developer text, in this order: the active
+ * locale's `localizations.<locale>.source_note`, then `localizations.en.source_note` (the
+ * player-facing English citation line), then the raw fields. A note that only carries authoring
+ * provenance is hidden, never shown. Display only: the persisted copies are not touched.
+ */
+export function resolveEventSourceLine(
+    def: Pick<EventDefinition, 'source_note' | 'historical_source' | 'source' | 'localizations'> | undefined,
+    locale: Locale = getActiveLocale(),
+    persisted?: { source_note?: string; historical_source?: string; source?: string },
+): string | null {
+    const localizations = def?.localizations;
+    const localized = localeChain(locale).map((entry) => localizations?.[entry]?.source_note);
+    const line = firstPlayerSafeText([
+        ...localized,
+        persisted?.source_note ?? def?.source_note,
+        persisted?.historical_source ?? def?.historical_source,
+        persisted?.source ?? def?.source,
+    ]);
+    return line === null ? null : displayEventProse(line);
 }
 
 /** Display headline and body for a persisted event notification. */
@@ -109,8 +151,8 @@ export function resolveEventNotificationDisplay(
                 ?.[notification.response_id]?.[notification.target_faction];
             const headline = nonEmpty(text?.headline);
             const body = nonEmpty(text?.body);
-            if (headline && body) return { headline, body };
+            if (headline && body) return { headline: restoreBosnianProperNames(headline), body: restoreBosnianProperNames(body) };
         }
     }
-    return { headline: notification.headline, body: notification.body };
+    return { headline: restoreBosnianProperNames(notification.headline), body: restoreBosnianProperNames(notification.body) };
 }
