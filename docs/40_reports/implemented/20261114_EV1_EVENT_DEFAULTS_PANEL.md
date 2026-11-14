@@ -66,3 +66,12 @@ The two UI tests that pinned the old text now pin the new text. The reviewer als
 
 - Guard and resolution tests: `tests/events_required_response_has_default.test.ts`, `tests/ev1_history_mode_resolution.test.ts`, plus `tests/sensitive_history_player_choice_content.test.ts` — green.
 - 188w with all EV1 data: see the PR body for the final hash against main `53ffe8e9545686ad` and the baseline-regression result.
+
+## `us_halts` dossier (added after the acceptance report made the row production-ready)
+
+Authoring a historical default makes `us_halts` a production modal-ready row. That requires `historical` bot logic, a `historical_marker` on the default option, a `staff_assessment` and `trigger_evidence`. The prose was reviewed by independent Historian and Narrative Designer seats, both GO-with-changes, and integrated:
+
+- staff_assessment: "Washington wants the offensive halted short of Banja Luka so that a ceasefire can hold and peace talks can open. Accepting keeps American backing and a place at the table, and the front stays where the ceasefire finds it. Pushing on risks losing American support. In late September 1995 Sarajevo bowed to the pressure reluctantly and set conditions meant to buy the ARBiH more time. Zagreb, pressed since September, still ordered one more operation in October." (BB1 KB p.429 [p.392]; p.462 [p.425] nn.821, 823; p.427 [p.390])
+- trigger_evidence: "The Federation ground offensive is under way and Republika Srpska holds no more than about half the country." / "September–October 1995: the United States presses Zagreb and Sarajevo to halt the offensive before peace talks."
+
+Out-of-scope notes from these seats: the narrative's Holbrooke "200,000 refugees" line is not on the cited BB pages, and the sibling `holbrooke_ceasefire_demand_oct95` shows developer language to the player ("calibration baseline", "patron support/diplomatic legitimacy").

@@ -2161,10 +2161,10 @@
     "responding_faction": "RBiH",
     "bot_response_logic": "historical",
     "historical_default_response_id": "comply",
-    "staff_assessment": "Washington wants the Federation advance stopped short of Banja Luka so that peace talks can open. Accepting keeps American backing and a place at the table, and the front stays where the ceasefire finds it. Pushing on risks losing American support. In October 1995 Sarajevo accepted the halt reluctantly, setting conditions that gave the army a few more days, while Zagreb ordered one more operation. The historical default records what happened; it is not a recommendation.",
+    "staff_assessment": "Washington wants the offensive halted short of Banja Luka so that a ceasefire can hold and peace talks can open. Accepting keeps American backing and a place at the table, and the front stays where the ceasefire finds it. Pushing on risks losing American support. In late September 1995 Sarajevo bowed to the pressure reluctantly and set conditions meant to buy the ARBiH more time. Zagreb, pressed since September, still ordered one more operation in October.",
     "trigger_evidence": [
-      "The Federation ground offensive is under way and Republika Srpska holds about half of the country or less.",
-      "October 1995: the United States presses Sarajevo and Zagreb to stop the advance before peace talks."
+      "The Federation ground offensive is under way and Republika Srpska holds no more than about half the country.",
+      "September–October 1995: the United States presses Zagreb and Sarajevo to halt the offensive before peace talks."
     ],
     "effect": {
       "kind": "narrative",
