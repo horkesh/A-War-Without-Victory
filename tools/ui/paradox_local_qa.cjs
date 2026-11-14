@@ -5263,13 +5263,36 @@ async function handleCurrentSurface(page, frame, faction, events, options = {}) 
     return { handled: true, action: responseLabel === 'Reject Plan' ? 'peace-plan-reject' : 'peace-plan-accept' };
   }
   if ((pendingState?.pendingDayton ?? 0) > 0) {
-    if (!await frame.getByRole('button', { name: 'Decline Talks', exact: true }).first().isVisible().catch(() => false)) {
+    // The Dayton conference (DC lane) opens on an arrival screen, then the conference room, whose
+    // refusal is a two-step "Decline Settlement" / "Confirm Decline". The pre-conference
+    // "Decline Talks" button is kept as a fallback for the legacy modal.
+    const buttonVisible = (name) => frame.getByRole('button', { name, exact: true }).first()
+      .isVisible().catch(() => false);
+    const daytonSurfaceVisible = async () => (await buttonVisible('Decline Talks'))
+      || (await buttonVisible('Decline Settlement'))
+      || (await buttonVisible('Confirm Decline'))
+      || (await buttonVisible('Enter conference room'))
+      || (await buttonVisible('Skip arrival'));
+    if (!await daytonSurfaceVisible()) {
       await clearOpenSurfaces(frame);
       await openDeskInboxItem(frame, 'dayton_negotiation');
     }
     await snapshot(page, frame, faction, events, 'dayton-before-response', { before: pendingState });
-    const clicked = await clickExactVisibleButton(frame, 'Decline Talks', 'decline Dayton talks', { afterMs: 1600 });
-    if (!clicked) throw new Error('Pending Dayton negotiation exposed no visible Decline Talks escape action');
+    let clicked = false;
+    if (await buttonVisible('Enter conference room')) {
+      await clickExactVisibleButton(frame, 'Enter conference room', 'enter Dayton conference room', { afterMs: 1600 });
+      await snapshot(page, frame, faction, events, 'dayton-conference-room', { before: pendingState });
+    } else if (await buttonVisible('Skip arrival')) {
+      await clickExactVisibleButton(frame, 'Skip arrival', 'skip Dayton arrival', { afterMs: 1600 });
+    }
+    if (await buttonVisible('Decline Talks')) {
+      clicked = await clickExactVisibleButton(frame, 'Decline Talks', 'decline Dayton talks', { afterMs: 1600 });
+    } else if (await buttonVisible('Decline Settlement')) {
+      const first = await clickExactVisibleButton(frame, 'Decline Settlement', 'decline Dayton settlement', { afterMs: 900 });
+      await snapshot(page, frame, faction, events, 'dayton-decline-confirm', { first });
+      clicked = first && await clickExactVisibleButton(frame, 'Confirm Decline', 'confirm Dayton decline', { afterMs: 1800 });
+    }
+    if (!clicked) throw new Error('Pending Dayton negotiation exposed no visible Decline Settlement / Decline Talks escape action');
     const after = await readState(frame);
     const cleared = (after?.pendingDayton ?? Number.POSITIVE_INFINITY) < pendingState.pendingDayton;
     await snapshot(page, frame, faction, events, 'dayton-after-response', { clicked, cleared, after });
