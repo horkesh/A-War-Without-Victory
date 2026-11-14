@@ -39,6 +39,8 @@
 | main (887310d5e, after #617) | — | 4ff4a7665c0a35b5 | 712/709/710/705 | 1,078 |
 | 7 | + policy waves skip the pass-through re-route; merged on main | **5c378ee919295488** | **712/709/710/705** | **27,839** |
 | 8 | reproduction of run 7 at the final code head | 5c378ee919295488 | = run 7 | 27,839 |
+| main (405c4a8e3, after #619) | — | 7d4cf2cf698e3c41 | 712/705/706/698 | 1,078 |
+| merge slot | merged head (+ cast fix); reproduction, run twice (with the re-bless) | **ca6db798f436fedf** | **712/705/706/698** (0 cells differ) | **27,827** |
 
 **Notes on the runs.**
 - Runs 2-6 scored +2/+2/+3 because of two things. One was a coin-flip in a single planner choice: the 4th Corps launched a probe at t76 instead of forming Operacija Ponos, so the Prozor pair stayed HVO. The other was a reward for atrocity: the pass-through re-route moved about 23.5k of HRHB's own refugees out of the Lašva pocket into Livno, which added about 12k HRHB strategic reserve. Neither was a merge candidate.
@@ -91,6 +93,8 @@ Bot-only needs none of them and also removes Red-team F2 (the historical-mode ex
 - the canon record and known limits.
 
 **Round 3 (Red-team).** GO on the late-war figures, with binding B5.
+
+**Round 4 (Red-team and Calibration, on the post-#619 head).** HRHB personnel was +3.36% (t180) and +5.56% (t188) above main. All of it is the orphan pair of diagnosis finding #6 (F_HRHB_0003/0004, corps-less `generated_phase_i0` brigades at Travnik, 0 battles, no cells), which spawns at t171/t176 in this run and not in main. Total HRHB stock at t188 is −0.84%; territory, grade and outcome class are unchanged; internal cohesion is lower. Both seats: GO, not a reward. Calibration R4-1: `late_war_check.cjs` gains the stock clause and reports corps-less spawned brigades separately. Red-team: binding B6.
 
 **Result.** **Unanimous GO** once the record conditions landed in this change.
 
