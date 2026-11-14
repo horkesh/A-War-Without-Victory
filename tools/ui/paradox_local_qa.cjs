@@ -1385,6 +1385,9 @@ async function textDiagnostics(surface) {
     ) ?? null;
     const textOcclusion = (node, rect) => {
       if (outsideScrollableAncestor(node, rect)) return { occluded: false, occlusionHits: [] };
+      // Content in an inert layer (the Dayton room behind an open panel) is covered on purpose and
+      // is neither focusable nor read; an open panel over it is not an occlusion defect.
+      if (node.closest('[inert]')) return { occluded: false, occlusionHits: [] };
       const points = [
         [rect.left + rect.width / 2, rect.top + rect.height / 2],
         [rect.left + Math.min(3, rect.width / 2), rect.top + rect.height / 2],
@@ -5197,6 +5200,34 @@ async function signDaytonAndCaptureVerdict(page, frame, faction, events, pending
     verdictVisible,
     verdictText: compactText(await bodyText(frame).catch(() => ''), 2400),
   });
+  // The Verdict is one long scrolling report: capture it a screen at a time, top to bottom.
+  const verdictScrollShots = [];
+  for (let step = 1; step <= 12; step += 1) {
+    const scrolled = await frame.evaluate(() => {
+      const root = document.querySelector('[data-awwv-endgame-surface="verdict"]');
+      if (!root) return { found: false };
+      const candidates = Array.from(root.querySelectorAll('*')).filter((node) => {
+        if (!(node instanceof HTMLElement)) return false;
+        const overflowY = getComputedStyle(node).overflowY;
+        return (overflowY === 'auto' || overflowY === 'scroll') && node.scrollHeight > node.clientHeight + 40;
+      });
+      candidates.sort((a, b) => (b.clientHeight * b.clientWidth) - (a.clientHeight * a.clientWidth));
+      const pane = candidates[0];
+      if (!pane) return { found: false };
+      const before = pane.scrollTop;
+      pane.scrollTop = before + Math.round(pane.clientHeight * 0.85);
+      return { found: true, moved: pane.scrollTop > before, atBottom: pane.scrollTop + pane.clientHeight >= pane.scrollHeight - 4 };
+    }).catch(() => ({ found: false }));
+    if (!scrolled.found || !scrolled.moved) break;
+    await sleep(700);
+    verdictScrollShots.push(`verdict-scroll-${step}`);
+    await snapshot(page, frame, faction, events, `verdict-scroll-${step}`, { step, atBottom: scrolled.atBottom });
+    if (scrolled.atBottom) break;
+  }
+  await frame.evaluate(() => {
+    const root = document.querySelector('[data-awwv-endgame-surface="verdict"]');
+    root?.querySelectorAll('*').forEach((node) => { if (node instanceof HTMLElement && node.scrollTop > 0) node.scrollTop = 0; });
+  }).catch(() => {});
   const verdictTabs = [];
   const tabLocator = frame.getByRole('tab');
   const tabCount = await tabLocator.count().catch(() => 0);
@@ -5209,7 +5240,7 @@ async function signDaytonAndCaptureVerdict(page, frame, faction, events, pending
     verdictTabs.push(label);
     await snapshot(page, frame, faction, events, `verdict-tab-${index}`, { label });
   }
-  return { signed: true, verdictVisible, verdictTabs, signedAtTurn: pendingState?.turn ?? null };
+  return { signed: true, verdictVisible, verdictTabs, verdictScrollShots, signedAtTurn: pendingState?.turn ?? null };
 }
 
 async function advanceModalProbe(page, frame, faction, events) {
