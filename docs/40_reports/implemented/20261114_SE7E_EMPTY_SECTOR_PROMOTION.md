@@ -2,9 +2,21 @@
 
 Date: 2026-11-14. Lane SE7E (register SD15; RF realism-audit fix). Branch `claude/amazing-clarke-z50rpc`, PR horkesh/A-War-Without-Victory#625.
 
-**Rebase note (2026-11-14, after #619 merged).** The branch was rebuilt on main after #619 (and #628, #630-#634) as one engine commit plus docs. The engine and test files are byte-identical to v3 `ec4cf59`. The commit hashes cited below (`bafe9b7`, `b51e49f`, `ec4cf59`, `7308909`, `d531809`, …) belong to the pre-rebase branch history, whose head was `1b7ca40`; the PR #625 timeline records it, and every run's `run_meta.json` carries its commit. The baseline manifest is main's until the measured run and bless on main after RF-5B #623 (orchestrator ordering). This report will then add those numbers.
+**Rebase note (2026-11-14, after #619 merged).** The branch was rebuilt on main after #619 (and #628, #630-#634) as one engine commit plus docs. The engine and test files are byte-identical to v3 `ec4cf59`. The commit hashes cited below (`bafe9b7`, `b51e49f`, `ec4cf59`, `7308909`, `d531809`, …) belong to the pre-rebase branch history, whose head was `1b7ca40`; the PR #625 timeline records it, and every run's `run_meta.json` carries its commit. **Final measurement on main after #619/#623** (main `a92d99b`, PR head `4baea29`; cloud 188w; run 7 of the lane's 8 counted runs, plus a main reproduction):
 
-**Result (pre-#619 main).** Run 4, v3 `ec4cf59`, `3253da2f9a6d2502`:
+| | Hash | Checkpoints | Cascade | Consistency | Battles (RBiH/RS/HRHB) |
+|---|---|---|---:|---:|---|
+| main | `ca6db798f436fedf` | 712/705/706/698 | 43 | 1 (`arbih_1st_corps:4:0`) | 526 (292/185/49) |
+| SE7E | `f5b477ededa198bd` | 712/705/706/698 | 43 | **0** | 526 (292/185/49) |
+
+- `verify_checkpoints` exit 0, guard intact; strict health PASS on both runs.
+- 0 control cells differ at any checkpoint or at t188.
+- The 182nd: order t99, in transit t100, holds `op:visoko:rajcici_2` t101-t188, the same as on the pre-#619 base.
+- The VRS 1st Krajina final-turn gap seen with #619 alone (run 6) does not occur on this main, so SE7E-g/h stay registered but don't fire here.
+- CI independently computed `7c3f8f009ccb43d1` for the head rebased onto pre-#623 main, the same as run 6.
+- Baselines are re-pinned at this head (run 8, the bless).
+
+**Result on the pre-#619 base (the evidence the Pyrrhic gate reviewed).** Run 4, v3 `ec4cf59`, `3253da2f9a6d2502`:
 - Checkpoints 712 / 709 / 710 / 705, identical to main; 0 control cells differ at any checkpoint.
 - Consistency 1 → 0; strict health PASS; every guard intact, including the cascade gated at `--cascade-base 49`.
 - Battles per week 0.00% in every faction.

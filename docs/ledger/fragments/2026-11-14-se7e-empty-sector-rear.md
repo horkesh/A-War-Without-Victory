@@ -20,6 +20,12 @@ Measured in the cloud against main `4ff4a7665c0a35b5` (712/709/710/705):
 - **v3** (`3253da2f9a6d2502`), final: 712/709/710/705; 0 control cells differ; cascade 49/49; consistency 0; strict health PASS; guards intact; battles per week 0.00%.
   - Its only differing commander order in the whole campaign is t99: the 182nd marches from Fojnica Živčići and holds Rajčići t101-t188.
   - Brigade state differs: 30 formations at t188; RS 18 brigades destroyed against 16.
+- **Final, rebased onto main after #619/#623** (`a92d99b`; main `ca6db798f436fedf`):
+  - SE7E `f5b477ededa198bd`, 712/705/706/698, equal to main;
+  - 0 control cells differ;
+  - consistency 1 → 0; cascade 43 = main; strict health PASS; battles 526 = main;
+  - baselines re-pinned at this head;
+  - the RF-AI2 final-turn VRS 1st Krajina gap does not occur on this main.
 - **Pyrrhic gate** (canon, determinism, historian, war-or-game, integrator): GO WITH CONDITIONS. The conditions were the v3 baseline re-pin and disclosures, both done; what remains is rebase and re-bless.
 - **Second case** (RF-AI2, #619): VRS 1st Krajina sector 0. A diagnostic run of v3 merged with #619's head shows it is a gap on the final turn only, t188. That front is new at t188 (redrawn by the Sana advance t185-187), and its only own brigade is a disrupted reserve.
   - No movement-authority relief issued at t188 can arrive by t188, and v3 does not borrow a sibling while the sector has an own pool.
