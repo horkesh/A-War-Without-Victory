@@ -63,9 +63,9 @@ Displacement runs at three points in the **War turn pipeline** (canon: War_Speci
 
 **File:** `src/state/displacement_takeover.ts` → `processDisplacementTakeover()`
 
-Runs every turn after attack resolution. The **only active displacement trigger** as of 2026-03-01.
+Runs every turn after attack resolution. The primary displacement writer since 2026-03-01; it also owns the RF-5B policy seed (step 0b, §3.4). The siege path (§2.3) and paramilitary sweeps are the other live writers.
 
-**Three sub-steps per turn:**
+**Sub-steps per turn (step 0b, the RF-5B policy seed, runs between steps 0 and 1; see §3.4):**
 
 1. **Step 0 — War-start seeding:** On the first executed war turn (`currentTurn === warStartTurn + 1`), creates displacement timers for OSIDs in `political_controllers`. **Note:** `runTurn()` increments `state.meta.turn` BEFORE running phases, so `warStartTurn + 1` is the first actual execution turn (not `warStartTurn` itself). For each OSID, a timer is created for every minority faction at war with the controller — subject to **per-faction gating rules**:
 

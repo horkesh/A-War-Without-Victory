@@ -118,6 +118,8 @@ export const POLICY_WAVE_B_DELAY_TURNS = 12;
  * A human-controlled faction never expels: no player decision exists.
  */
 export const BOT_MINORITY_EXPULSION_POLICY: Partial<Record<FactionId, true>> = { HRHB: true };
+/** Deterministic iteration order for the policy seed (strictCompare order of the pair). */
+const BILATERAL_POLICY_HOLDER_ORDER: readonly FactionId[] = ['HRHB', 'RBiH'];
 
 /** Event flag recording the turn on which a faction's expulsion policy was applied (seeded). */
 export function minorityPolicyAppliedFlag(faction: FactionId): string {
@@ -750,7 +752,7 @@ export function processDisplacementTakeover(
     const bilateralWarStarted = typeof state.political.rbih_hrhb_state?.war_started_turn === 'number';
     if (bilateralWarStarted) {
         const pc = state.political.political_controllers ?? {};
-        for (const holder of Object.keys(BOT_MINORITY_EXPULSION_POLICY).sort(strictCompare) as FactionId[]) {
+        for (const holder of BILATERAL_POLICY_HOLDER_ORDER) {
             const other: FactionId = holder === 'HRHB' ? 'RBiH' : 'HRHB';
             if (!isRbihHrhbPair(holder, other)) continue;
             if (!hasMinorityExpulsionPolicy(state, holder)) continue;
