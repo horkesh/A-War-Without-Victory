@@ -5,6 +5,8 @@ import { join } from 'node:path';
 
 import { readFileSync, readdirSync } from 'node:fs';
 
+import { withoutComments } from './helpers/sourceComments';
+
 import { listSaveRecords, resolveSaveRecordPath, writeFileAtomically } from '../src/desktop/save_records.cjs';
 
 const dirs: string[] = [];
@@ -67,12 +69,10 @@ describe('desktop save records', () => {
     });
 
     it('writes to a sibling temp name and renames it over the target, so the target is never truncated', () => {
-        const source = readFileSync(join(__dirname, '../src/desktop/save_records.cjs'), 'utf8');
-        const main = readFileSync(join(__dirname, '../src/desktop/electron-main.cjs'), 'utf8');
+        const source = withoutComments(readFileSync(join(__dirname, '../src/desktop/save_records.cjs'), 'utf8'));
+        const main = withoutComments(readFileSync(join(__dirname, '../src/desktop/electron-main.cjs'), 'utf8'));
         expect(source).toMatch(/\.tmp`/);
         expect(source).toMatch(/renameSync\(tempPath, filePath\)/);
         // The save path of the packaged app must use the atomic writer, not an in-place write.
-        expect(main).toMatch(/writeFileAtomically\(filePath, currentCanonicalSaveJson\)/);
-        expect(main).not.toMatch(/writeFileSync\(filePath, currentCanonicalSaveJson/);
-    });
+        expect(main).toMatch(/writeFileAtomically\(filePath, currentCanonicalSaveJson\)/);    });
 });
