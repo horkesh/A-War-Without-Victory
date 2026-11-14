@@ -28,7 +28,7 @@ The owner activated full roadmap execution on 2026-07-31. Local implementation, 
 
 Non-calibration lanes (UI, copy, i18n, tooling, docs, CI) merge any time they are green, before or after the freeze. After the freeze, a calibration-moving change needs an owner OK.
 
-Command-loop lanes (proposal [#632](https://github.com/horkesh/A-War-Without-Victory/pull/632), owner decisions of 2026-11-14 evening in its §7): wave 1 L1 review chip, L2 and L2h weekly dispatch, L3 and L3b defensive operations without a signature, L4 corps succession mechanism (the only measured one); wave 2 L5 dossiers and L6 Authority prices; wave 3 L7 army clashes; L8 succession dates belong to the calibration pass. They merge in the proposal's order, not as a competing queue.
+Command-loop lanes (proposal [#632](https://github.com/horkesh/A-War-Without-Victory/pull/632), owner decisions of 2026-11-14 evening in its §7): wave 1 L1 review chip, L2 and L2h weekly dispatch, L3 and L3b defensive operations without a signature, L4 corps succession mechanism (the only measured one); wave 2 L5 dossiers and L6 Authority prices; wave 3 L7 army clashes; L8 succession dates belong to the calibration pass. L3 and L3b are merged ([#642](https://github.com/horkesh/A-War-Without-Victory/pull/642)); L3c (an empty-target plan stuck at ready) is assigned to the L3 lane. They merge in the proposal's order, not as a competing queue.
 
 ## Current Critical Path
 
