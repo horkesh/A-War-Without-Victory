@@ -66,8 +66,40 @@ async function listSaveRecords(savesDir) {
   });
 }
 
+/**
+ * Write bytes so a reader (or a crash) never sees a half-written save: write a sibling temp file,
+ * then rename it over the target. A multi-MB autosave rewritten in place was observed torn by a
+ * concurrent reader in the R8 dry run. Windows can refuse the rename while another process holds
+ * the target open (EPERM/EBUSY/EACCES), so retry briefly, then fall back to the direct write so a
+ * save is never lost to the safeguard itself. The temp name never ends in .json, so
+ * listSaveRecords cannot offer it.
+ */
+function writeFileAtomically(filePath, contents) {
+  const tempPath = `${filePath}.${process.pid}.tmp`;
+  fs.writeFileSync(tempPath, contents, 'utf-8');
+  const transient = new Set(['EPERM', 'EBUSY', 'EACCES']);
+  for (let attempt = 0; attempt < 5; attempt += 1) {
+    try {
+      fs.renameSync(tempPath, filePath);
+      return;
+    } catch (error) {
+      if (!transient.has(error && error.code)) {
+        fs.rmSync(tempPath, { force: true });
+        throw error;
+      }
+      Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 40 * (attempt + 1));
+    }
+  }
+  try {
+    fs.writeFileSync(filePath, contents, 'utf-8');
+  } finally {
+    fs.rmSync(tempPath, { force: true });
+  }
+}
+
 module.exports = {
   isSafeSaveRecordFilename,
+  writeFileAtomically,
   listSaveRecords,
   resolveSaveRecordPath,
 };
