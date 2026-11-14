@@ -302,7 +302,7 @@ function sc(a: string, b: string): number {
     return a < b ? -1 : a > b ? 1 : 0;
 }
 
-function deriveMunicipalityControllerByOsid(state: GameState): Map<string, FactionId | null> {
+export function deriveMunicipalityControllerByOsid(state: GameState): Map<string, FactionId | null> {
     const counts = new Map<string, Map<FactionId, number>>();
     const controllers = state.political.political_controllers ?? {};
 

@@ -282,7 +282,6 @@ export function WarSummaryContent({ focusSection = 'overview', onNavigateTarget 
                                             <span className="text-text-secondary">{t('warSummary.label.sustainment')}</span>
                                             <span className="text-text-primary tabular-nums">
                                                 {t('warSummary.value.sustainment', { critical: sitrep.sustainment.criticalCount, strained: sitrep.sustainment.strainedCount })}
-                                                {t('situation.sustainmentCollapsed', { count: sitrep.sustainment.collapsedMunicipalities.length })}
                                             </span>
                                         </div>
                                         <div className="flex items-center justify-between gap-3">

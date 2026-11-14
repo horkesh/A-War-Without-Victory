@@ -298,7 +298,6 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
         </div>
         <div data-oob-wrapping-prose="true" className="min-w-0 max-w-full text-text-secondary">
           {t('situation.sustainmentLine', { critical: sitrep.sustainment.criticalCount, strained: sitrep.sustainment.strainedCount })}
-          {sitrep.sustainment.collapsedMunicipalities.length > 0 ? t('situation.sustainmentCollapsed', { count: sitrep.sustainment.collapsedMunicipalities.length }) : ''}
         </div>
         <div data-oob-wrapping-prose="true" className="min-w-0 max-w-full text-text-secondary">
           {t('situation.operationsLine', {

@@ -13,6 +13,7 @@ import type { FactionId, GameState, SettlementId } from '../../../state/game_sta
 import { strictCompare } from '../../../state/validateGameState.js';
 import { classifyFactionFieldTier, type FogTier } from './fog_of_war.js';
 import type { PreviousTurnSnapshot } from './warroom_state.js';
+import { deriveMunicipalityControllerByOsid } from './war_data_extractor.js';
 
 // ---------------------------------------------------------------------------
 // TurnEvent
@@ -336,11 +337,16 @@ function detectSustainabilityCollapses(
 
     const prevCollapsed = new Set(prev.collapsedMunicipalities);
     const munIds = Object.keys(state.displacement.sustainability_state).sort(sc);
+    // political_controllers is keyed by settlement / OSID ("op:<mun>:<n>"), never by municipality
+    // id, so the holder is the majority holder of the municipality's OSIDs. A direct
+    // political_controllers[munId] lookup is always empty and attributed every collapse to the
+    // player.
+    const holderByMun = deriveMunicipalityControllerByOsid(state);
 
     for (const munId of munIds) {
         const ss = state.displacement.sustainability_state[munId];
         if (ss?.collapsed && !prevCollapsed.has(munId)) {
-            const controller = state.political.political_controllers?.[munId] ?? null;
+            const controller = holderByMun.get(munId) ?? null;
             events.push({
                 type: 'sustainability_collapse',
                 faction: controller ?? pf,
