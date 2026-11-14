@@ -1,3 +1,35 @@
+**Empty front sector promotes its own rear, SE7E (PR #625) — 2026-11-14: 712 / 711 / 708 / 701 (candidate; Oct95 −4 is one point beyond the −3 tolerance and needs an orchestrator ruling).**
+- **What changed.** ARBiH 1st Corps sector 4 (Visoko-Kiseljak: Draževići, Rajčići, Stuparići) had no front brigade on t98-t188 on main (consistency 1, SD15).
+  - Its own pool could not be committed. The 147th, 185th and 146th were dug in (the 146th also caught in a bot march order the executor rejected every turn). The 182nd was free but 4 hops away.
+  - Construction's zero-assigned rescue reaches 3 hops and skips dug-in brigades. The bot sector march moves assigned and reserve brigades only.
+  - Commander T1 relief counted a sector as empty only with no reserve or rear at all.
+  - Now (`computeEmptySectorReliefReassignments`): a frontless sector with no eligible own reserve commits its own eligible rear brigade (nearest, then id). It never borrows another sector's brigade. Fully empty sectors keep the old logic.
+  - Intent only (T2 reassignment march, T3 column movement); donor eligibility unchanged; at most one per sector per pass.
+  - `MOVEMENT_AUTHORITY.md` §3. Report `docs/40_reports/implemented/20261114_SE7E_EMPTY_SECTOR_PROMOTION.md`.
+- **Measured** against main `887310d` (`4ff4a7665c0a35b5`, 712/709/710/705), cloud 188w:
+  - **Run 1 (`567eb1f4a383e7f1`, 712/711/707/694), rejected.** It admitted every frontless sector with an own pool and allowed sibling donors. Guard breached (Farz P-A, P-B, Oct95 −11).
+  - **Run 2 (`ace4e553a491aecb`), candidate.**
+    - Consistency 1 → 0; strict health PASS.
+    - Enclave 9/9; Farz P1/P-A/P-B and eastern provenance intact; western cascade 46/49 (49/49 on main).
+    - Battles per week 2.702 (+0.2%): RBiH +6.6%, RS −5.6%, HRHB −12.3%.
+    - Structural fingerprint `bc629e89a585dfde` unchanged.
+- **The rule fires in two places:**
+  - **t4, RS 2nd Krajina:** sector 3 (Ripac / Gornja Suvaja) keeps its own rear, the 1st Drvar. On main, T1 took it to fill Krupa sector 0, and Ripac stayed frontless until w7.
+  - **t98-t101, ARBiH 1st Corps:** the 182nd marches from Fojnica Živčići to Rajčići and holds there to t188.
+- **Attribution.** v2 resumed from main's w97 save (`3253da2f9a6d2502`; resume verified byte-faithful) scores 712/709/710/705, with 0 control cells different at any turn. So **the Visoko-Kiseljak fix alone is calibration-neutral**, and every cell change comes from the t4 divergence and what follows from it (first control divergence t14, Arapuša).
+- **Cell changes in run 2** (per-cell traces in the report §4):
+  - **Lost:**
+    - Krupa Jasenica, Veliki Badić, Vranjska (on main the 505th takes them t179-183);
+    - Jajce Vinac and Ključ Krasulje (t187 on main), Mrkonjić Grad and Šipovo Pribeljci (t188 on main);
+    - Mostar Vranjevići and Nevesinje Hrusta (ARBiH captures at t112/t124 against an RS reference);
+    - Apr95 only: Komar (falls t132) and Gornje Krčevine (t161 instead of t155).
+  - **Gained:** Prozor Lug and Paroš from Apr94 on (the RF-3 "Ponos" open item), Donji Vakuf Jemanlići and Korenići (the RF-2 known historical miss), Travnik Varošluk (an RF-3 loss).
+  - 7 of the 9 Oct95 losses fall in t179-188. None is a direct effect: the Krupa villages lie on the 1992 sector-0 front, but they are lost because 1995 captures don't happen, not because anything changes in 1992.
+- **Defect dependency (standing question).**
+  - No matched cell depends on the Visoko-Kiseljak gap (attribution run).
+  - All 13 main-matched cells that run 2 loses come after main's t4 Ripac strip. The Krupa villages were taken against a line that strip created (1st Drvar at Gornja Suvaja t11-178, 17th Ključ at Ivanjska about t40-170). This dependence is chaotic and can't be proven causally.
+- **Baselines** re-pinned at the final head only (see the PR).
+
 **Legacy S-id consumer sweep, RF-F1 — 2026-11-14: 712 / 709 / 710 / 705 (unchanged; neutral in the historical-mode campaign).**
 - **What changed.** Sustainability and militia fatigue ran on legacy `S…` settlement edges against OSID control. On main 109 of 110 municipalities were surrounded and collapsed by t8 (104 already at t6) (each also degraded once per pool, 2-3 times a turn), every militia pool was "unsupplied", and negotiation momentum read 1.0 from t4. Both now use the OSID front and supply (`buildOsidDisplacementPressureInputs`). Sustainability evaluates each municipality once for one holder (a cut-off holder first, so Srebrenica and Žepa count); militia supply isolation counts only where the pool's faction holds ground. Systems Manual §24 System 1 note.
 - **Measured** against main after #600/#608 (`53ffe8e9545686ad`, 712/709/710/705): identical checkpoints; battles per week 0.00% for every faction; final control and formations identical; strict health PASS; enclave and Farz guards intact; consistency 1, the same pre-existing ARBiH 1st Corps sector-4 gap as main (SD15). What moves: `sustainability_state` (collapsed at t188 109 → 27), militia pool fatigue, negotiation pressure (t188 total 65,133 → 4,315), early IVP-penalty ledger lines (momentum 1.0 from about t19 instead of t4), HRHB war-weariness bands one week later (strained t48, cracking t80) through the momentum term of the external exhaustion modifier, which also moves `power_ratio` in the second decimal on 30 battle records with no outcome change.
