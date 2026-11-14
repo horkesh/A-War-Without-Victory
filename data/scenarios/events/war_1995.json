@@ -2160,6 +2160,7 @@
     "requires_player_response": true,
     "responding_faction": "RBiH",
     "bot_response_logic": "accept_first",
+    "historical_default_response_id": "comply",
     "effect": {
       "kind": "narrative",
       "text": "The United States pressures Federation forces to halt their advance short of Banja Luka. The front lines freeze along the 51/49% territorial division."
