@@ -239,11 +239,6 @@ import { generateCorpsStanceOrders } from '../combat/bot_corps_stance.js';
 import { accrueRecruitmentResources, runOngoingRecruitment } from '../recruitment_turn.js';
 // REASON-CODE INSTRUMENTATION: env-gated, inert by default. See reason_code_debug.ts.
 import { emitSectorStanceRecord, isReasonCodeTopicEnabled } from '../combat/reason_code_debug.js';
-import {
-    applyStanceEntrenchment,
-    emitPreCombatEntrenchmentRecords,
-    type StanceEntrenchmentBasis,
-} from '../combat/sector_stance_entrenchment.js';
 import type { EmergentFormationRefusalRecord } from '../../state/recruitment_types.js';
 import { reroutePoolSurplus } from '../recruitment_engine.js';
 import { computeHomeDefenseActive } from '../compute_home_defense.js';
@@ -1702,9 +1697,7 @@ export const warPhases: NamedPhase[] = [
             const od = getOperationalData(context);
             if (!od?.opData?.operationalToCanonical || !od?.edges?.length) return;
             const moveSpatial = getSpatialContextCache(context);
-            const entrenchmentBasis = new Map<FormationId, StanceEntrenchmentBasis>();
-            context.stanceEntrenchmentBasis = entrenchmentBasis;
-            const report = applyBrigadeMovementOrders(context.state, od.edges, od.opData.operationalToCanonical, moveSpatial?.preCombat.adjacency, entrenchmentBasis);
+            const report = applyBrigadeMovementOrders(context.state, od.edges, od.opData.operationalToCanonical, moveSpatial?.preCombat.adjacency);
             (context.report as TurnReport & { movement_report?: typeof report }).movement_report = report;
         }
     },
@@ -2896,12 +2889,6 @@ export const warPhases: NamedPhase[] = [
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
             applySectorStanceOrders(context.state);
-            // The OG stance for this turn's combat is now final: stationary brigades entrench at
-            // its rate instead of the provisional Defend rate (SE6).
-            if (context.stanceEntrenchmentBasis) {
-                applyStanceEntrenchment(context.state, context.stanceEntrenchmentBasis);
-                context.stanceEntrenchmentBasis = undefined;
-            }
             // Observation only: the OG stance in effect when combat resolves this turn.
             if (isReasonCodeTopicEnabled('sector_stance')) {
                 const sectors = context.state.military.corps_front_sectors ?? {};
@@ -2921,7 +2908,6 @@ export const warPhases: NamedPhase[] = [
                         stance_source: sector.stance_source ?? null,
                     });
                 }
-                emitPreCombatEntrenchmentRecords(context.state);
             }
         }
     },

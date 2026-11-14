@@ -32,9 +32,8 @@
  */
 
 import type { EdgeRecord } from '../../map/settlements.js';
-import type { BrigadeMovementOrder, FormationId, GameState } from '../../state/game_state.js';
+import type { BrigadeMovementOrder, FormationId, GameState, SectorStance } from '../../state/game_state.js';
 import { SECTOR_STANCE_ENTRENCHMENT_RATE } from './combat_math.js';
-import { MAX_ENTRENCHMENT_TURNS_FIELD, type StanceEntrenchmentBasis } from './sector_stance_entrenchment.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import type { OperationalToCanonicalReverseMap } from '../../data/operational_data.js';
@@ -56,7 +55,6 @@ export function applyBrigadeMovementOrders(
     edges: EdgeRecord[],
     reverseMap: OperationalToCanonicalReverseMap,
     preComputedAdjacency?: ReadonlyMap<string, readonly string[]>,
-    entrenchmentBasis?: Map<FormationId, StanceEntrenchmentBasis>,
 ): BrigadeMovementReport {
     const report: BrigadeMovementReport = { moves_applied: 0, entrenchment_incremented: 0, disrupted_decremented: 0 };
     const formations = state.military.formations ?? {};
@@ -64,12 +62,14 @@ export function applyBrigadeMovementOrders(
     const movementOrders = state.military.brigade_movement_orders ?? {};
     const retainedColumnOrders: Record<FormationId, BrigadeMovementOrder> = {};
 
-    // A stationary brigade entrenches at the Defend rate here. This step runs before the
-    // turn's sectors are partitioned and before any OG stance is chosen, so the stance in
-    // force for this turn's combat is not known yet; the stance rate (Layer B) is applied by
-    // applyStanceEntrenchment once it is (sector_stance_entrenchment.ts). `entrenchmentBasis`
-    // records what that step needs to re-base the growth.
-    const provisionalRate = SECTOR_STANCE_ENTRENCHMENT_RATE.defend;
+    // Build brigade→sector_stance lookup for entrenchment rate modifier (Layer B)
+    const brigadeStance = new Map<FormationId, SectorStance>();
+    const sectorLookup = state.military.corps_front_sectors ?? {};
+    for (const sec of Object.values(sectorLookup)) {
+        const stance = sec.sector_stance ?? 'defend';
+        for (const bid of sec.assigned_brigade_ids) brigadeStance.set(bid, stance);
+        for (const bid of sec.reserve_brigade_ids) brigadeStance.set(bid, stance);
+    }
     const formationIds = Object.keys(formations).filter(id => {
         const f = formations[id];
         return f?.status === 'active' && (f as { location_osid?: string }).location_osid != null && (f.kind === 'brigade' || f.kind === 'og' || f.kind === 'operational_group' || f.kind === 'jna_phantom' || f.kind === 'hv_phantom');
@@ -111,9 +111,10 @@ export function applyBrigadeMovementOrders(
             report.moves_applied += 1;
         } else {
             const et = (f as { entrenchment_turns?: number }).entrenchment_turns ?? 0;
-            const provisional = Math.min(MAX_ENTRENCHMENT_TURNS_FIELD, et + provisionalRate);
-            (f as { entrenchment_turns?: number }).entrenchment_turns = provisional;
-            entrenchmentBasis?.set(formationId, { before: et, provisional, location_osid: loc });
+            // Sector stance entrenchment rate modifier (Layer B)
+            const stanceRate = SECTOR_STANCE_ENTRENCHMENT_RATE[brigadeStance.get(formationId) ?? 'defend'];
+            const increment = stanceRate; // 0.0 for screening, 2.0 for fortify, 1.2 for defend
+            (f as { entrenchment_turns?: number }).entrenchment_turns = Math.min(12, et + increment);
             report.entrenchment_incremented += 1;
         }
     }
