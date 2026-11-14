@@ -277,6 +277,50 @@ test('a third side taking a seeded OSID drops the policy timer: nothing booked t
     expect(state.military.negotiation!.capital.HRHB.war_crimes_events_emergent).toBe(0);
 });
 
+for (const path of ['flip helper', 'battle capture'] as const) {
+    test(`a capture after the policy wave fired draws only on the people who remain (${path})`, () => {
+        // Vitez OSID: 1,000 people, 400 Bosniaks. The policy wave expels 200; RS then takes it.
+        const state = warState(50);
+        for (let t = 50; t <= 54; t++) {
+            state.meta.turn = t;
+            run(state);
+        }
+        const policyWave = Math.floor(400 * POLICY_EXPULSION_SCOPE.HRHB!.vitez.fraction);
+        expect(hrhbEvents(state).map((e) => e.displaced)).toEqual([policyWave]);
+
+        state.meta.turn = 55;
+        state.political.political_controllers!['op:vitez:vitez'] = 'RS';
+        if (path === 'flip helper') {
+            seedDisplacementTimerOnFlip(state, 'op:vitez:vitez', 'HRHB', 'RS');
+            run(state);
+        } else {
+            processDisplacementTakeover(
+                state,
+                new Map([['op:vitez:vitez', osidSettlements.get('op:vitez:vitez')!]]),
+                { battles: [{ settlement_flipped: true, location: 'op:vitez:vitez', osid: 'op:vitez:vitez', attacker_faction: 'RS', defender_faction: 'HRHB' }] },
+                pop1991,
+                osidSettlements
+            );
+        }
+        expect(state.displacement.hostile_takeover_timers['op:vitez:vitez|RBiH']).toMatchObject({
+            to_faction: 'RS',
+            cumulative_displaced: policyWave
+        });
+        for (let t = 56; t <= 90; t++) {
+            state.meta.turn = t;
+            run(state);
+        }
+        const bosniaksOut = (state.displacement.displacement_event_log ?? [])
+            .filter((e) => e.origin_osid === 'op:vitez:vitez' && e.ethnicity === 'RBiH')
+            .reduce((s, e) => s + e.displaced, 0);
+        const rsWave = (state.displacement.displacement_event_log ?? [])
+            .filter((e) => e.origin_osid === 'op:vitez:vitez' && e.caused_by === 'RS' && e.ethnicity === 'RBiH');
+        expect(rsWave.length).toBeGreaterThan(0);
+        expect(rsWave[0].displaced).toBeLessThanOrEqual(400 - policyWave);
+        expect(bosniaksOut).toBeLessThanOrEqual(400);
+    });
+}
+
 test('a policy timer whose holder lost the OSID without a seeding flip is deleted, not fired', () => {
     const state = warState(50);
     run(state);

@@ -243,8 +243,22 @@ export function seedDisplacementTimerOnFlip(
             from_faction: displaced,
             to_faction: toFaction,
             started_turn: currentTurn,
+            ...carriedPolicyDisplacement(timerMap[timerKey]),
         };
     }
+}
+
+/**
+ * RF-5B: when a capture replaces a policy timer whose wave already fired, the new timer
+ * inherits the people that wave expelled, so its own waves draw on the community that
+ * remains, never on the 1991 census again (the same people cannot be expelled twice).
+ */
+function carriedPolicyDisplacement(
+    existing: HostileTakeoverTimerState | undefined
+): { cumulative_displaced?: number } {
+    if (existing?.cause !== 'policy_expulsion' || existing.matured_turn === undefined) return {};
+    const prior = existing.cumulative_displaced ?? 0;
+    return prior > 0 ? { cumulative_displaced: prior } : {};
 }
 
 export interface TakeoverBattleRecord {
@@ -805,7 +819,8 @@ export function processDisplacementTakeover(
                 mun_id: munId,
                 from_faction: fromFaction,
                 to_faction: toFaction,
-                started_turn: currentTurn
+                started_turn: currentTurn,
+                ...carriedPolicyDisplacement(timerMap[timerKey])
             };
             report.timers_started += 1;
         }
@@ -903,10 +918,13 @@ export function processDisplacementTakeover(
                 : getInitialDisplacementFraction(
                     timer.to_faction, timer.from_faction, munId, isFrontAdjMatured
                 ) ?? INITIAL_DISPLACEMENT_FRACTION;
-            const displacementAmount = Math.min(
-                Math.max(0, Math.floor(osidPop * hostileShare * initFraction)),
-                remainingPop
-            );
+            // RF-5B: a capture that replaced a fired policy timer carries that wave's count; the
+            // initial wave then takes its fraction of the community that remains.
+            const priorDisplaced = timer.cumulative_displaced ?? 0;
+            const waveBase = priorDisplaced > 0
+                ? Math.floor(Math.max(0, Math.floor(osidPop * hostileShare) - priorDisplaced) * initFraction)
+                : Math.floor(osidPop * hostileShare * initFraction);
+            const displacementAmount = Math.min(Math.max(0, waveBase), remainingPop);
 
             if (displacementAmount > 0) {
                 const killFraction = getTakeoverKillFraction(munId, timer.from_faction, timer.to_faction);
@@ -999,7 +1017,7 @@ export function processDisplacementTakeover(
 
             // Mark timer as matured instead of deleting
             timer.matured_turn = currentTurn;
-            timer.cumulative_displaced = displacementAmount;  // Sustained pool accounts for initial fire
+            timer.cumulative_displaced = priorDisplaced + displacementAmount;  // Sustained pool accounts for initial fire
         } else {
             // ── Branch B: Sustained displacement ──
             // RF-5B: a policy wave is one bounded expulsion; it never drains further.

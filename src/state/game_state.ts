@@ -1854,7 +1854,11 @@ export interface HostileTakeoverTimerState {
     started_turn: number;
     /** Set when initial displacement fires. Undefined = still in 4-turn countdown. */
     matured_turn?: number;
-    /** Cumulative persons displaced from this OSID (initial + all sustained rounds). */
+    /**
+     * Cumulative persons displaced from this OSID (initial + all sustained rounds). Set before
+     * maturation only when a capture replaces a fired RF-5B policy timer: it then carries the
+     * people that wave already expelled, and the new initial wave draws on those who remain.
+     */
     cumulative_displaced?: number;
     /**
      * RF-5B: why the timer exists when no control change seeded it. 'policy_expulsion' =
