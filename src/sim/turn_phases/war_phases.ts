@@ -4471,7 +4471,7 @@ export const warPhases: NamedPhase[] = [
 
             // F1 (legacy S-id consumer sweep, 2026-11-14): settlements, front and supply all
             // in the OSID id space. The legacy `settlementEdges` marked 109/110 municipalities
-            // surrounded and collapsed by turn 6, pinning negotiation momentum at 1.0.
+            // surrounded and collapsed by turn 8, pinning negotiation momentum at 1.0.
             const graph = await getOperationalSettlementGraph(context);
             const od = getOperationalData(context);
             const osid = od?.edges?.length ? buildOsidDisplacementPressureInputs(context.state, od) : undefined;

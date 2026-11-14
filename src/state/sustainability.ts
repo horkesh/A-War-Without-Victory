@@ -237,7 +237,7 @@ function countPersistentBreaches(
  *
  * Before F1 the war step handed OSID settlements together with legacy `S…` edges: the BFS
  * found no neighbour and the legacy supply BFS reached nothing, so 109 of 110 municipalities
- * were "surrounded" and collapsed by turn 6, pinning negotiation momentum at 1.0 from turn 4.
+ * were "surrounded" and collapsed by turn 8, pinning negotiation momentum at 1.0 from turn 4.
  */
 export interface SustainabilityOsidInputs {
     /** Current front edges (OSID ids). */
@@ -341,8 +341,8 @@ function applySustainabilityTurn(
  * last pool's faction won.
  *
  * Surrounded = the holder holds OSIDs here and none is reachable from its supply sources over
- * friendly OSIDs. That is the canonical definition (a friendly path to a supplied friendly
- * municipality): any such path also connects this municipality to a supply source.
+ * friendly OSIDs. That matches the legacy Phase 22 rule of the path below (a friendly path to a
+ * supplied friendly municipality): any such path also connects this municipality to a supply source.
  */
 function updateSustainabilityOsid(
     state: GameState,

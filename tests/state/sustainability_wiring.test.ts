@@ -5,7 +5,7 @@
  * Defect proved here: both steps handed OSID settlements together with the legacy `S…` edges
  * production passes in `settlementEdges`. Sustainability found no BFS neighbour and no
  * supplied settlement, so on main 109 of 110 municipalities were surrounded and collapsed by
- * turn 6 and negotiation momentum read 1.0 from turn 4; militia fatigue marked every pool
+ * turn 8 and negotiation momentum read 1.0 from turn 4; militia fatigue marked every pool
  * unsupplied every turn.
  */
 import { describe, expect, it } from 'vitest';
