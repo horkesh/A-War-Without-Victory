@@ -40,6 +40,7 @@
     "tests/sim/events/event_acceptance_report.test.ts",
     "tests/standing_og_doctrine_contract.test.ts",
     "tests/supply_pressure_vs_condition_reconciliation.test.ts",
+    "tests/third_party_notices.test.ts",
     "tests/ui/advance_turn_button_gated_feedback.test.ts",
     "tests/ui/app_boot_main_menu.test.ts",
     "tests/ui/app_primary_command_quick_select_cleanup.test.ts",

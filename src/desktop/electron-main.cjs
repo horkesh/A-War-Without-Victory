@@ -10,7 +10,7 @@ if (typeof _electronModule === 'string') {
   );
   process.exit(1);
 }
-const { app, BrowserWindow, protocol, ipcMain, dialog, Menu, session, screen } = _electronModule;
+const { app, BrowserWindow, protocol, ipcMain, dialog, Menu, session, screen, shell } = _electronModule;
 const path = require('path');
 const fs = require('fs');
 const http = require('http');
@@ -544,6 +544,82 @@ function ensureCorpsCommandEntry(state, corpsId, stance = 'balanced') {
 if (protocol && protocol.registerSchemesAsPrivileged) {
   protocol.registerSchemesAsPrivileged([{ scheme: 'awwv', privileges: { standard: true, supportFetchAPI: true } }]);
 }
+
+// BEGIN external-link-policy (tests/desktop_external_link_policy.test.ts evaluates this block)
+// App windows show trusted app content only: the awwv:// shell and the loopback map server.
+// A link to the web (the OpenStreetMap credits) must open in the player's browser, never
+// inside an app window, where the site would run with this app's webPreferences and preload
+// bridge. So every popup is denied, and an allow-listed https link goes to the system browser
+// instead. A top-level or frame navigation away from app content is cancelled the same way.
+const EXTERNAL_LINK_HOSTS = new Set(['openstreetmap.org', 'www.openstreetmap.org']);
+
+function parseUrlOrNull(rawUrl) {
+  try {
+    return new URL(String(rawUrl));
+  } catch {
+    return null;
+  }
+}
+
+/** The normalised href when the URL may open in the system browser, otherwise null. */
+function allowedExternalUrl(rawUrl) {
+  const url = parseUrlOrNull(rawUrl);
+  if (!url || url.protocol !== 'https:') return null;
+  if (url.username || url.password || url.port) return null;
+  if (!EXTERNAL_LINK_HOSTS.has(url.hostname)) return null;
+  return url.href;
+}
+
+/** App content: the awwv:// shell, the loopback map or dev server, blank and blob documents. */
+function isInternalAppUrl(rawUrl) {
+  const url = parseUrlOrNull(rawUrl);
+  if (!url) return false;
+  if (url.protocol === 'awwv:' || url.protocol === 'about:') return true;
+  if (url.protocol === 'blob:') return isInternalAppUrl(url.pathname);
+  if (url.protocol === 'http:' || url.protocol === 'https:') {
+    return url.hostname === '127.0.0.1' || url.hostname === 'localhost' || url.hostname === '[::1]';
+  }
+  return false;
+}
+
+/** Cancel a navigation that leaves app content; hand an allow-listed link to the browser. */
+function routeExternalNavigation(event, rawUrl, openExternal) {
+  if (isInternalAppUrl(rawUrl)) return false;
+  event.preventDefault();
+  const href = allowedExternalUrl(rawUrl);
+  if (href) openExternal(href);
+  return true;
+}
+
+/** Install the policy on one webContents. Windows and webviews only; DevTools is left alone. */
+function installExternalLinkPolicy(contents, openExternal) {
+  const type = typeof contents.getType === 'function' ? contents.getType() : 'window';
+  if (type !== 'window' && type !== 'webview') return false;
+  contents.setWindowOpenHandler(({ url }) => {
+    const href = allowedExternalUrl(url);
+    if (href) openExternal(href);
+    return { action: 'deny' };
+  });
+  contents.on('will-navigate', (event, url) => {
+    routeExternalNavigation(event, event.url ?? url, openExternal);
+  });
+  // Sub-frames: the tactical map runs in an iframe of the awwv:// shell. will-navigate already
+  // covers the main frame, so it is skipped here and a link never opens twice.
+  contents.on('will-frame-navigate', (details) => {
+    if (details.isMainFrame) return;
+    routeExternalNavigation(details, details.url, openExternal);
+  });
+  return true;
+}
+// END external-link-policy
+
+app.on('web-contents-created', (_event, contents) => {
+  installExternalLinkPolicy(contents, (href) => {
+    shell.openExternal(href).catch((error) => {
+      console.error('[AWWV] Could not open an external link in the browser:', href, error);
+    });
+  });
+});
 
 function resourcePath(...segments) {
   if (app.isPackaged) {
