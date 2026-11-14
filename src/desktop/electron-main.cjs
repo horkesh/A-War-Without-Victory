@@ -20,6 +20,7 @@ const {
   resolvePendingProposalAccess,
   resolveOpportunityDecisionPayload,
   isResolvedProposalReviewRecord,
+  resolveProactiveForceLaunchRefusal,
   buildOpProposalCardData,
   buildForceableReadyPlanData,
   FORCE_LAUNCH_COST,
@@ -4323,7 +4324,8 @@ app.whenReady().then(() => {
   // it — exactly the channel the commander_loop Level-1 guard consumes next turn
   // to let the plan reach 'executing'. Mirrors force-launch-proposal but resolves
   // the plan from commander_state.current_plan (no proposal lookup), and REQUIRES
-  // status 'ready' with NO pending proposal for that plan (rejects otherwise — no
+  // status 'ready' with NO pending proposal and NO staged presidential answer for
+  // that plan (resolveProactiveForceLaunchRefusal; rejects otherwise — no
   // fallback). Debits PROACTIVE_FORCE_LAUNCH_COST (25) command authority.
   //
   // Determinism preserved: no clock, no RNG; human-only (the sim never sets
@@ -4360,19 +4362,15 @@ app.whenReady().then(() => {
     if (plan.plan_id !== planId) return { ok: false, error: 'plan_not_found' };
     if (plan.status !== 'ready') return { ok: false, error: 'plan_not_ready' };
 
-    // REQUIRE no surfaced proposal for this plan — proactive force-launch is for
-    // plans the officer never recommended. A surfaced proposal goes through the
-    // existing commit / override (force-launch-proposal) path instead.
-    const proposals = Array.isArray(state.meta?.pending_proposal_reviews)
-      ? state.meta.pending_proposal_reviews
-      : [];
-    const approveAction = `APPROVE_OP:${corpsId}:${planId}`;
-    const hasProposal = proposals.some((p) =>
-      p && p.proposed_action === approveAction
-      && (!playerFaction || p.faction === playerFaction)
-      && !isResolvedProposalReviewRecord(p),
-    );
-    if (hasProposal) return { ok: false, error: 'plan_has_pending_proposal' };
+    // REQUIRE no pending proposal for this plan — a surfaced proposal goes through the
+    // existing commit / override (force-launch-proposal) path instead. A plan with a
+    // staged presidential answer (accept-proposal or reject-proposal staged
+    // player_op_response and the commander loop has not consumed it) is refused too:
+    // re-issuing it here would charge 25 CA and re-tag an ordinary commit as a
+    // force-launch (B11). An auto-expired, unanswered proposal stages nothing, so its
+    // still-held plan stays forceable here.
+    const proactiveRefusal = resolveProactiveForceLaunchRefusal(state, corpsId, planId);
+    if (proactiveRefusal) return { ok: false, error: proactiveRefusal };
 
     // Command-authority guard — stage nothing if unaffordable.
     const auth = state.military?.command_authority;

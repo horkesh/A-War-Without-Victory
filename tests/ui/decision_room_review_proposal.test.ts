@@ -182,6 +182,10 @@ describe('Decision Room — proposal-review lever (single-surface approval)', ()
       kind: 'success',
       message: expect.stringContaining('Directive staged for next week'),
     });
+    // B11: accepting a staff proposal is free, so the receipt must not claim authority was spent.
+    const message = onReceipt.mock.calls[0]![0].message as string;
+    expect(message).toContain('No command authority was spent');
+    expect(message).not.toContain('Command authority is spent now');
   });
 
   it('Withhold routes through rejectProposal and shows a next-turn receipt', async () => {
@@ -195,9 +199,11 @@ describe('Decision Room — proposal-review lever (single-surface approval)', ()
       expect(rejectProposal).toHaveBeenCalledWith('proposal_bravo');
     });
     expect(acceptProposal).not.toHaveBeenCalled();
-    expect((await screen.findByRole('status', { name: 'Directive receipt' })).textContent).toContain(
-      'Directive staged for next week',
-    );
+    const receipt = (await screen.findByRole('status', { name: 'Directive receipt' })).textContent ?? '';
+    expect(receipt).toContain('Directive staged for next week');
+    // B11: withholding is free too.
+    expect(receipt).toContain('No command authority was spent');
+    expect(receipt).not.toContain('Command authority is spent now');
   });
 
   it('surfaces a failure receipt when the approval IPC refuses', async () => {
