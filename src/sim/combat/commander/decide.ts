@@ -265,11 +265,15 @@ function canReleaseReliefDonor(placement: ReliefDonorPlacement): boolean {
  * A sector with no reserve or rear of its own is relieved from any legal same-corps
  * donor (rear, then reserve, then surplus line; then distance; then id).
  *
- * SE7E — a frontless sector (no assigned brigade) that still lists its own pool:
+ * SE7E is strictly additive: it never changes a relief the rule above issues. Sectors with
+ * no own pool are served first (in the sorted order below), so they keep first call on
+ * every donor, including another frontless sector's rear brigade. Then a frontless sector
+ * (no assigned brigade) that still lists its own pool is served:
  * - An eligible own RESERVE belongs to the reserve sector march (`evaluateSectorMarch`:
  *   a reserve of a sector with no line holder marches to that front), so the sector is
  *   left to it.
- * - Otherwise the sector commits its own eligible REAR brigade (nearest, then id). No
+ * - Otherwise the sector commits its own eligible REAR brigade that is still free
+ *   (nearest, then id). No
  *   other path moves a rear brigade forward: sector construction promotes only an own
  *   brigade within its local radius that is not dug in or under an order
  *   (`ensureMinimumSectorCoverage`, zero-assigned rescue), and the bot sector march
@@ -277,10 +281,16 @@ function canReleaseReliefDonor(placement: ReliefDonorPlacement): boolean {
  *   here because it was not "truly empty", and it could stay frontless indefinitely
  *   (ARBiH 1st Corps Visoko–Kiseljak, t98–t188 on main).
  * - It never borrows another sector's brigade while it still has its own pool.
+ * - It is skipped when one of its own reserve/rear brigades already stands on its front
+ *   (the front is held; only the buckets lag).
  *
  * Donor eligibility is unchanged (dug in, under an order, moving, operation-bound,
  * disrupted and loaned brigades are excluded). At most one donor per empty sector per
- * pass, and a donor serves at most one sector (ADR-0007 bounded reserve commitment).
+ * pass, and a donor serves at most one sector (Engine Invariant 14.9: one deterministic
+ * reassignment intent per empty, reachable same-corps sector).
+ *
+ * Residuals (known): a frontless sector whose own rear was taken by a sector with no own
+ * pool, or whose whole own pool is dug in, waits for a later pass.
  */
 export function computeEmptySectorReliefReassignments(
     briefing: CommanderBriefing,
@@ -300,12 +310,19 @@ export function computeEmptySectorReliefReassignments(
             if (left.length_edges !== right.length_edges) return right.length_edges - left.length_edges;
             return strictCompare(left.sector_id, right.sector_id);
         });
-    const emptySectors = corpsSectors.filter((sector) =>
+    const frontlessSectors = corpsSectors.filter((sector) =>
         sector.edge_ids.length > 0
         && sector.unstaffed_front !== true
         && sector.assigned_brigade_ids.length === 0
         && getSectorFrontOsids(sector).length > 0,
     );
+    const listsOwnPool = (sector: CorpsFrontSector): boolean =>
+        sector.reserve_brigade_ids.length + (sector.rear_brigade_ids?.length ?? 0) > 0;
+    // SE7E additive order: sectors with no own pool first (each subset keeps the sorted order).
+    const emptySectors = [
+        ...frontlessSectors.filter((sector) => !listsOwnPool(sector)),
+        ...frontlessSectors.filter(listsOwnPool),
+    ];
     if (emptySectors.length === 0) return [];
 
     const operationParticipants = buildActiveOperationParticipantSet(briefing);
