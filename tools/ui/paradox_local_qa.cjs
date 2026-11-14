@@ -44,6 +44,29 @@ const contextChurnCycles = Number(process.argv.find((arg) => arg.startsWith('--c
 const finalCheckpointTour = args.has('--final-checkpoint-tour');
 const saveLoadProof = args.has('--save-load-proof');
 const saveLoadOnly = args.has('--save-load-only');
+// --dayton-sign-verdict: when Dayton opens, SIGN the agreement (instead of declining), capture the
+// signing beat and the Verdict screen, then finish the run cleanly. Use from a late-campaign save.
+const daytonSignVerdict = args.has('--dayton-sign-verdict');
+class DaytonVerdictCaptured extends Error {
+  constructor(evidence) {
+    super('Dayton signed and Verdict captured');
+    this.name = 'DaytonVerdictCaptured';
+    this.evidence = evidence;
+  }
+}
+const daytonVerdictSegment = { evidence: null };
+// Called from runFaction's playTurns(...).catch: the sentinel is a finished run (still subject to
+// the readability gate); any other error stays an error.
+function settleDaytonVerdictSegment(error, events) {
+  if (!(error instanceof DaytonVerdictCaptured)) throw error;
+  daytonVerdictSegment.evidence = error.evidence;
+  const failures = collectReadabilityFailures(events);
+  if (failures.length > 0) {
+    writeJsonAtomic(readabilityDiagnosticsPath, failures);
+    throw new Error(`Readability diagnostics detected: ${JSON.stringify(failures.slice(0, 40))}`);
+  }
+  return null;
+}
 const historicalChoice = args.has('--historical-choice');
 const archiveTurnAutosaves = args.has('--archive-turn-autosaves');
 const collectCdpNetworkV3 = args.has('--cdp-network-collection-v3');
@@ -2387,6 +2410,8 @@ function verifyArchivedEvidence(record, label) {
 }
 
 function finalizeEvidenceManifest(faction, initialEvidence, playtest) {
+  // The sign-and-verdict segment ends the campaign by design: no final autosave exists to seal.
+  if (playtest == null && daytonVerdictSegment.evidence) return null;
   const initial = verifyArchivedEvidence(initialEvidence?.initialAutosaveEvidence, `${faction} initial autosave`);
   const final = verifyArchivedEvidence(playtest?.finalAutosaveEvidence, `${faction} final autosave`);
   const manifest = {
@@ -5071,6 +5096,64 @@ async function warroomRouteTour(page, frame, faction, events) {
   return results;
 }
 
+// Sign Dayton through the conference (arrival, Current draft, Review agreement, Sign agreement),
+// walk the signing beat and the Verdict, and return the evidence. Throws if any step is absent.
+async function signDaytonAndCaptureVerdict(page, frame, faction, events, pendingState) {
+  const buttonVisible = (name) => frame.getByRole('button', { name, exact: true }).first()
+    .isVisible().catch(() => false);
+  if (await buttonVisible('Enter conference room')) {
+    await clickExactVisibleButton(frame, 'Enter conference room', 'enter Dayton conference room', { afterMs: 1600 });
+  } else if (await buttonVisible('Skip arrival')) {
+    await clickExactVisibleButton(frame, 'Skip arrival', 'skip Dayton arrival', { afterMs: 1600 });
+  }
+  await snapshot(page, frame, faction, events, 'dayton-sign-conference-room', { before: pendingState });
+  const draftObject = frame.getByRole('navigation', { name: 'Conference objects' })
+    .getByRole('button', { name: 'Current draft', exact: true }).first();
+  await draftObject.waitFor({ state: 'visible', timeout: 15000 });
+  await draftObject.click({ timeout: 10000 });
+  await sleep(1200);
+  await snapshot(page, frame, faction, events, 'dayton-sign-current-draft', { before: pendingState });
+  if (!await clickExactVisibleButton(frame, 'Review agreement', 'review Dayton agreement', { afterMs: 2000 })) {
+    throw new Error('Dayton conference exposed no visible Review agreement action');
+  }
+  const sign = frame.getByRole('button', { name: 'Sign agreement', exact: true }).first();
+  await sign.waitFor({ state: 'visible', timeout: 60000 });
+  const enableDeadline = Date.now() + 90000;
+  while (!await sign.isEnabled().catch(() => false)) {
+    if (Date.now() > enableDeadline) throw new Error('Dayton Sign agreement stayed disabled after Review agreement');
+    await sleep(500);
+  }
+  await snapshot(page, frame, faction, events, 'dayton-sign-review-agreement', { before: pendingState });
+  await sign.click({ timeout: 10000 });
+  const beat = frame.getByTestId('dayton-signing-beat');
+  await beat.waitFor({ state: 'visible', timeout: 90000 });
+  await sleep(1500);
+  await snapshot(page, frame, faction, events, 'dayton-signing-beat', {
+    signingText: compactText(await beat.innerText().catch(() => ''), 1200),
+  });
+  await frame.getByTestId('dayton-signing-continue').click({ timeout: 10000 });
+  await sleep(2500);
+  const verdictScore = frame.getByTestId('faction-report-score');
+  const verdictVisible = await verdictScore.waitFor({ state: 'visible', timeout: 30000 }).then(() => true).catch(() => false);
+  await snapshot(page, frame, faction, events, 'verdict-first-screen', {
+    verdictVisible,
+    verdictText: compactText(await bodyText(frame).catch(() => ''), 2400),
+  });
+  const verdictTabs = [];
+  const tabLocator = frame.getByRole('tab');
+  const tabCount = await tabLocator.count().catch(() => 0);
+  for (let index = 0; index < tabCount; index += 1) {
+    const tab = tabLocator.nth(index);
+    if (!await tab.isVisible().catch(() => false)) continue;
+    const label = compactText(await tab.innerText().catch(() => ''), 60);
+    await tab.click({ timeout: 10000 }).catch(() => {});
+    await sleep(900);
+    verdictTabs.push(label);
+    await snapshot(page, frame, faction, events, `verdict-tab-${index}`, { label });
+  }
+  return { signed: true, verdictVisible, verdictTabs, signedAtTurn: pendingState?.turn ?? null };
+}
+
 async function advanceModalProbe(page, frame, faction, events) {
   const clicked = await clickMatch(frame, /Advance|warroom-toolbar-advance|toolbar-route-advance/i, 'advance probe', { afterMs: 900 });
   if (!clicked) throw new Error('Required advance probe route failed');
@@ -5278,6 +5361,9 @@ async function handleCurrentSurface(page, frame, faction, events, options = {}) 
       await openDeskInboxItem(frame, 'dayton_negotiation');
     }
     await snapshot(page, frame, faction, events, 'dayton-before-response', { before: pendingState });
+    if (daytonSignVerdict) {
+      throw new DaytonVerdictCaptured(await signDaytonAndCaptureVerdict(page, frame, faction, events, pendingState));
+    }
     let clicked = false;
     if (await buttonVisible('Enter conference room')) {
       await clickExactVisibleButton(frame, 'Enter conference room', 'enter Dayton conference room', { afterMs: 1600 });
@@ -8020,8 +8106,9 @@ async function runFaction(faction, result) {
         throw new Error(`Command Authority lever exercise failed: ${JSON.stringify(strategicCommandAuthority)}`);
       }
     }
-    playtest = await playTurns(page, frame, faction, events, maxTurns);
-    if (saveLoadProof) {
+    playtest = await playTurns(page, frame, faction, events, maxTurns)
+      .catch((error) => settleDaytonVerdictSegment(error, events));
+    if (saveLoadProof && playtest) {
       playtest.saveLoadProof = await exerciseFinalSaveLoad(page, frame, faction, events, userDataDir, maxTurns);
     }
     const rawNetworkFailures = structuredClone(networkFailures);
@@ -8033,8 +8120,10 @@ async function runFaction(faction, result) {
       ambientLifecycleSignals,
       expectedAmbientLifecycleAborts,
     );
-    if (strategicRun && maxTurns > 0 && playtest.finalState?.autonomyLevel !== 1) {
-      throw new Error(`Strategic autonomy did not apply: expected level 1, observed ${playtest.finalState?.autonomyLevel}`);
+    if (playtest) {
+      if (strategicRun && maxTurns > 0 && playtest.finalState?.autonomyLevel !== 1) {
+        throw new Error(`Strategic autonomy did not apply: expected level 1, observed ${playtest.finalState?.autonomyLevel}`);
+      }
     }
     const cdpFinalization = await cdpCollectionLifecycle.finalize();
     cdpNetworkCollection = cdpFinalization.receipt;
@@ -8074,6 +8163,7 @@ async function runFaction(faction, result) {
       evidenceManifest,
       events,
       playtest,
+      ...(daytonVerdictSegment.evidence ? { daytonVerdictEvidence: daytonVerdictSegment.evidence } : {}),
       eventChoiceTranscript,
       officerSuccessionChoiceTranscript,
       campaignModeSelectionEvidence,

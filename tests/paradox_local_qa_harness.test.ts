@@ -4720,6 +4720,28 @@ test('RS Drina selector picks the named visible control only while the decision 
     await assert.rejects(policy(surface()), /No ranked authored historical default/);
 });
 
+test('--dayton-sign-verdict signs through review, captures the signing beat and Verdict, and ends the run cleanly', () => {
+    const harness = readHarness();
+    assert.match(harness, /const daytonSignVerdict = args\.has\('--dayton-sign-verdict'\)/);
+    const sign = extractFunctionSource(harness, 'signDaytonAndCaptureVerdict');
+    // The order a player takes: arrive, open the draft, review, sign, signing beat, continue, Verdict.
+    const order = ['Current draft', 'Review agreement', 'Sign agreement', 'dayton-signing-beat',
+        'dayton-signing-continue', 'faction-report-score', "getByRole('tab')"]
+        .map((needle) => sign.indexOf(needle));
+    assert.ok(order.every((index) => index >= 0), `missing step: ${JSON.stringify(order)}`);
+    assert.deepEqual(order, [...order].sort((a, b) => a - b));
+    // The Dayton handler diverts to it only when the flag is set, before any decline click.
+    const handler = extractFunctionSource(harness, 'handleCurrentSurface');
+    assert.ok(handler.indexOf('if (daytonSignVerdict)') >= 0);
+    assert.ok(handler.indexOf('if (daytonSignVerdict)') < handler.indexOf("clickExactVisibleButton(frame, 'Decline Settlement'"));
+    // runFaction treats the sentinel as a finished run, and the readability gate still applies.
+    const runFaction = extractFunctionSource(harness, 'runFaction');
+    assert.match(runFaction, /\.catch\(\(error\) => settleDaytonVerdictSegment\(error, events\)\)/);
+    const settle = extractFunctionSource(harness, 'settleDaytonVerdictSegment');
+    assert.match(settle, /error instanceof DaytonVerdictCaptured/);
+    assert.match(settle, /collectReadabilityFailures\(events\)/);
+});
+
 test('--event-policy parses strictly and answers an unranked design-counterfactual decision only', async () => {
     const harness = readHarness();
     const parse = loadFunction<(argv: string[], historical: boolean) => Map<string, string>>(harness, 'parseEventPolicyOverrides');
