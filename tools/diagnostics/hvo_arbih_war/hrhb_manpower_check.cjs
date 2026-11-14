@@ -1,7 +1,8 @@
 // node tools/diagnostics/hvo_arbih_war/hrhb_manpower_check.cjs <mainRunDir> <candidateRunDir>
 // RF-5B §6 panel Calibration condition (d), "no reward": HRHB brigade personnel at t66/t80/t90/t100
 // within main + 1%; end-state HRHB strategic reserve and HRHB pool committed within main + 2%;
-// Livno HRHB refugees within main + 500; Vitez HRHB refugees at least main - 500.
+// total HRHB refugees sheltering across all municipalities within main + 500 (panel round 2, replacing the
+// Livno proxy: refugees moved between towns by the pass-through are not added); Vitez HRHB refugees at least main - 500.
 const fs = require('fs');
 const path = require('path');
 const [mainDir, candDir] = process.argv.slice(2);
@@ -39,7 +40,7 @@ function endState(dir) {
   return {
     reserve: findReserve(s.military, 'HRHB'),
     committed,
-    livno: ds.livno?.displaced_in_by_faction?.HRHB ?? 0,
+    totalRefugees: Object.values(ds).reduce((sum, r) => sum + (r?.displaced_in_by_faction?.HRHB ?? 0), 0),
     vitez: ds.vitez?.displaced_in_by_faction?.HRHB ?? 0,
   };
 }
@@ -60,7 +61,7 @@ if (em.reserve && ec.reserve) {
   console.log(`reserve (${em.reserve.key}) main ${em.reserve.value} cand ${ec.reserve.value} (${pct(em.reserve.value, ec.reserve.value)}) ${pass ? 'PASS' : 'FAIL'}`);
 } else console.log('reserve: field not found', JSON.stringify(em.reserve), JSON.stringify(ec.reserve));
 { const pass = ec.committed <= em.committed * 1.02; ok = ok && pass; console.log(`HRHB pool committed main ${em.committed} cand ${ec.committed} (${pct(em.committed, ec.committed)}) ${pass ? 'PASS' : 'FAIL'}`); }
-{ const pass = ec.livno <= em.livno + 500; ok = ok && pass; console.log(`Livno HRHB refugees main ${em.livno} cand ${ec.livno} ${pass ? 'PASS' : 'FAIL'}`); }
+{ const pass = ec.totalRefugees <= em.totalRefugees + 500; ok = ok && pass; console.log(`Total HRHB refugees sheltering main ${em.totalRefugees} cand ${ec.totalRefugees} ${pass ? 'PASS' : 'FAIL'}`); }
 { const pass = ec.vitez >= em.vitez - 500; ok = ok && pass; console.log(`Vitez HRHB refugees main ${em.vitez} cand ${ec.vitez} ${pass ? 'PASS' : 'FAIL'}`); }
 console.log(ok ? 'NO-REWARD CHECK: PASS' : 'NO-REWARD CHECK: FAIL');
 process.exit(ok ? 0 : 1);

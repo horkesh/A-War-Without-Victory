@@ -361,7 +361,7 @@ test('single writer: only src/state/war_crimes_record.ts assigns war_crimes_even
         for (const name of fs.readdirSync(dir)) {
             const full = path.join(dir, name);
             if (fs.statSync(full).isDirectory()) walk(full);
-            else if (/\.tsx?$/.test(name) && /war_crimes_events_emergent\s*=[^=]/.test(fs.readFileSync(full, 'utf8'))) {
+            else if (/\.tsx?$/.test(name) && /war_crimes_events_emergent\s*(?:=[^=]|\+=|-=|\+\+|--)/.test(fs.readFileSync(full, 'utf8'))) {
                 writers.push(path.relative(root, full).split(path.sep).join('/'));
             }
         }
@@ -389,4 +389,18 @@ test('a policy wave does not move people already sheltering in the municipality 
     expect(vitez.displaced_in).toBe(500);
     expect(vitez.displaced_in_by_faction.HRHB).toBe(500);
     expect(state.displacement.displacement_state.livno).toBeUndefined();
+});
+
+test('warroom displacement snapshot does not report policy timers as hostile-takeover pressure', async () => {
+    const { extractDisplacement } = await import('../src/ui/warroom/data/war_data_extractor.js');
+    const state = warState(50);
+    state.meta.player_faction = 'RBiH';
+    state.displacement.hostile_takeover_timers = {
+        'op:mostar:zapad|RBiH': { mun_id: 'mostar', from_faction: 'RBiH', to_faction: 'HRHB', started_turn: 62, cause: 'policy_expulsion' },
+        'op:stolac:stolac|RBiH': { mun_id: 'stolac', from_faction: 'RBiH', to_faction: 'HRHB', started_turn: 62, cause: 'policy_expulsion' },
+        'op:zvornik:zvornik|RBiH': { mun_id: 'zvornik', from_faction: 'RBiH', to_faction: 'RS', started_turn: 48 }
+    } as any;
+    const snap = extractDisplacement(state, 'RBiH');
+    expect(snap.activeHostileTakeoverTimers).toBe(1);
+    expect(snap.hostileTakeoverMunicipalities).toEqual(['zvornik']);
 });
