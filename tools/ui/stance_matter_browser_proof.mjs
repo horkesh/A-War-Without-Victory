@@ -5,15 +5,17 @@
 // and BCS. Screenshots and a JSON report (smallest visible font, overflow) go to --out.
 // In the browser there is no desktop bridge, so the answer buttons render disabled with
 // the "desktop only" line; the IPC path is covered by tests/ui/stance_matter_surfaces.test.ts.
-// Usage: node tools/ui/stance_matter_browser_proof.mjs --url http://127.0.0.1:3002 --out F:/AWWV-coordination/surface_steps/stance
+// Usage: node tools/ui/stance_matter_browser_proof.mjs --url http://127.0.0.1:3002 [--out <dir>]
+// --out defaults to $AWWV_COORDINATION_ROOT/surface_steps/stance (see tools/lib/repo_paths.mjs).
 import { chromium } from 'playwright';
 import fs from 'node:fs';
 import path from 'node:path';
+import { coordinationRoot } from '../lib/repo_paths.mjs';
 
 const args = process.argv.slice(2);
 const opt = (n, f) => (args.includes(n) ? args[args.indexOf(n) + 1] : f);
 const origin = opt('--url', 'http://127.0.0.1:3002');
-const out = opt('--out', 'F:/AWWV-coordination/surface_steps/stance');
+const out = opt('--out', path.join(coordinationRoot(), 'surface_steps', 'stance'));
 fs.mkdirSync(out, { recursive: true });
 const SIZES = [{ width: 2293, height: 960 }, { width: 1280, height: 720 }];
 

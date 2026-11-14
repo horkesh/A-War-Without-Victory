@@ -23,9 +23,12 @@
  *                           show an outline colour
  */
 import { readFileSync, writeFileSync } from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { createCanvas } from '@napi-rs/canvas';
 
-const ROOT = 'F:/A-War-Without-Victory';
+// Repo root from this file's location (tools/ -> repo), so the checkout can live anywhere.
+const ROOT = path.resolve(fileURLToPath(new URL('..', import.meta.url)));
 const [SAVE_PATH, PAINTED_KEY, OUT_PATH, TITLE, CAVEAT] = process.argv.slice(2);
 if (!SAVE_PATH || !PAINTED_KEY || !OUT_PATH) {
   console.error('usage: node tools/render_control_map.mjs <save.json> <paintedKey|none> <out.png> "<title>" ["<caveat>"]');

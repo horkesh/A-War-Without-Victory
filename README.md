@@ -42,3 +42,7 @@ not the Windows/WSL launcher. Scope any PATH adjustment to the test child, not g
 - Root-level handoff and report artifacts may exist for historical context, but they are not architecture authority unless the docs above point back to them explicitly.
 - Archived root session artifacts now live under [`docs/70_archive/root_session_artifacts/`](docs/70_archive/root_session_artifacts/).
 - Test discovery is now convention-based rather than manually allowlisted. New Vitest files are picked up automatically, and files that declare `@vitest-environment jsdom` or use the `.browser.test.ts` suffix run under jsdom.
+- The checkout may live anywhere (the owner's copy moved from `F:\A-War-Without-Victory` to `C:\Pyrrhic\A-War-Without-Victory`). Live tools derive the repo root at runtime (`git rev-parse --show-toplevel`, `import.meta.url`, `$PSScriptRoot`, `Path(__file__)`); do not add drive-letter paths. Folders outside the repo sit beside the main checkout and can be moved with environment variables (resolved by [`tools/lib/repo_paths.mjs`](tools/lib/repo_paths.mjs), also from linked worktrees):
+  - `AWWV_WORKTREES_ROOT` — disposable linked worktrees; default `<main checkout>/../AWWV-worktrees`.
+  - `AWWV_COORDINATION_ROOT` — shared coordination evidence such as `tools/ui/*_browser_proof.mjs` output (`surface_steps/...`); default `<main checkout>/../AWWV-coordination`.
+  - Absolute `F:` paths in `logs/`, `docs/40_reports/`, `docs/plans/`, `data/derived/` and provenance notes are records of past runs and stay as written.

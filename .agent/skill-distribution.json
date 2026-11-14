@@ -137,6 +137,7 @@
     "apply_receipt": "logs/agent-setup-modernization/activation/live-apply-receipt.json",
     "codex_discovery": "9 intended enabled entries; no duplicates or catalog errors",
     "routing": "fresh actual-profile Codex/Sol-medium and Claude passed",
-    "cursor": "files installed; runtime acceptance open"
+    "cursor": "files installed; runtime acceptance open",
+    "external_path_records": "original_backup and rollback_packet are absolute locations recorded at activation (2026-09-12), when the checkout lived on F:. They are provenance, not live configuration: the handoff helper runs from the retained packet's own manifest copy (see boundary_receipt). After the checkout moved, look for the same folders beside the main checkout (AWWV-agent-setup-modernization-backup, and AWWV-worktrees or $AWWV_WORKTREES_ROOT)."
   }
 }

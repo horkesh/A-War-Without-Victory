@@ -12,9 +12,11 @@
  */
 import puppeteer from 'puppeteer';
 import { mkdirSync } from 'fs';
+import { fileURLToPath } from 'url';
 
 const BASE_URL = 'http://localhost:3003';
-const SCREENSHOT_DIR = 'F:/A-War-Without-Victory/docs/40_reports/implemented/screenshots';
+// Resolved from this file's location (scripts/ -> repo), so the checkout can live anywhere.
+const SCREENSHOT_DIR = fileURLToPath(new URL('../docs/40_reports/implemented/screenshots', import.meta.url));
 const results = [];
 
 mkdirSync(SCREENSHOT_DIR, { recursive: true });

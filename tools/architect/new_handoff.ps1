@@ -16,7 +16,7 @@ param(
 )
 
 $repoRoot = (git rev-parse --show-toplevel 2>$null)
-if (-not $repoRoot) { $repoRoot = "F:\A-War-Without-Victory" }
+if (-not $repoRoot) { $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..\..')).Path }
 
 $targetPath = Join-Path $repoRoot "handoffs\$Name.md"
 

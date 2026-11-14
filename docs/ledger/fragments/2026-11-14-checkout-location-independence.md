@@ -1,0 +1,18 @@
+## 2026-11-14 — Live tools no longer hard-code the F: checkout
+
+**Problem.** The owner is moving the local checkout from `F:\A-War-Without-Victory` (a USB drive) to `C:\Pyrrhic\A-War-Without-Victory`. Several live tools hard-coded `F:/A-War-Without-Victory`, `F:/AWWV-worktrees` or `F:/AWWV-coordination` and would read, write or fall back to the old drive after the move.
+
+**Change (tooling, tests and docs only; no `src/`, `data/`, scenario or calibration change).**
+- New `tools/lib/repo_paths.mjs`: `REPO_ROOT` from `import.meta.url`; out-of-repo folders from `AWWV_COORDINATION_ROOT` / `AWWV_WORKTREES_ROOT`, defaulting to `AWWV-coordination` / `AWWV-worktrees` beside the main checkout. The main checkout is found through `git rev-parse --git-common-dir`, so a run from a linked worktree resolves the same folders.
+- `tools/ui/*_browser_proof.mjs` (8 render proofs): the `--out` default is `$AWWV_COORDINATION_ROOT/surface_steps/<step>`. The task named only `records_surfaces_browser_proof.mjs`; the other seven had the same hard-coded default and were added after the inventory was taken.
+- `tools/render_control_map.mjs`, `scripts/playwright_map_first_verify.mjs`, `scripts/playwright_shell_navigation_verify.mjs`: repo root from `import.meta.url`.
+- `tools/architect/*.ps1` (5 scripts): when `git rev-parse --show-toplevel` fails, the fallback root is `$PSScriptRoot`, not `F:\A-War-Without-Victory`.
+- `tools/peace/iebl_cell_audit/compute_cells.py`: reads repo data from `Path(__file__).resolve().parents[3]` instead of a removed Dayton worktree. Re-run from another cwd: exit 0, 252 cells, as its checkpoint records.
+- Tests: `engine_honesty_legacy_contracts` passes `process.cwd()` as the unused `baseDir` (the validator voids it); the `dayton_walkthrough_fixes` header cites `$AWWV_WORKTREES_ROOT/...`.
+- Docs: README Repo Notes document both variables; `tools/opencode_implementer/README.md` uses `../AWWV-worktrees/<job>`; the brainstorming visual-companion skill no longer names a drive. `.agent/skill-distribution.json` gains an `external_path_records` note.
+
+**Left as written (records or fixtures).** The `.agent/skill-distribution.json` backup and rollback paths are activation records. Its only consumer is a helper in `logs/` that runs from the retained packet's own manifest copy. Also left: the `engine_health_thresholds.json` rebaseline note (run provenance), the hook-guard and harness test strings (path-pattern fixtures), the `hook_registry` comments (they describe the defect that test pins), and the napkin July archive. `.claude/launch.json` was already relative on main.
+
+**Checked.** `npx tsc --noEmit` exit 0. 18 vitest files (the 7 named tests plus 11 that read the touched docs or tools) passed, 202 tests. `npm run test:baselines` reports all scenarios match. Helper probed from a disposable linked worktree: it resolved the main checkout and its sibling coordination folder.
+
+**Not done.** The PowerShell and Playwright scripts were not run on Windows here. Other machine-specific paths that do not match the F: inventory pattern are listed in the PR as out of scope.
