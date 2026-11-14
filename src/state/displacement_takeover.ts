@@ -972,7 +972,10 @@ export function processDisplacementTakeover(
             // Re-route displaced_in population without casualties (pass-through).
             // These people were already displaced once; second displacement incurs no
             // additional killed/fled_abroad and does not increment displaced_total.
-            if (dispState.displaced_in > 0) {
+            // RF-5B (§6 panel, Calibration seat C1): a policy wave changes no holder, so the
+            // people sheltering in the municipality (the holder's own refugees above all) are
+            // not moved on; re-routing them handed the expelling side extra manpower.
+            if (!isPolicyTimer && dispState.displaced_in > 0) {
                 const byFaction = dispState.displaced_in_by_faction ?? {};
                 const fKeys = Object.keys(byFaction).sort(strictCompare);
                 for (const fid of fKeys) {

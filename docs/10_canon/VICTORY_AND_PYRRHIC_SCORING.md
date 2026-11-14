@@ -1,7 +1,8 @@
 # Victory Conditions and Pyrrhic Scoring — Canonical
 
 **Status:** CANON (v0.9.0 gate)
-**Last Updated:** 2026-09-01
+**Last Updated:** 2026-11-14
+**Amended:** 2026-11-14 (RF-5B): §3.4 source (2) counts the first wave of a bot faction's minority-expulsion policy as an authorized war crime. Nothing renumbered.
 **Authority:** Canon hierarchy, Tier 2 (above Rulebook, below Engine Invariants)
 **Owners:** Game Designer, Gameplay Programmer, Product Manager
 **Supersedes:** open question #5 in `MASTER_ROADMAP.md` ("Endgame scoring / victory conditions")
@@ -175,7 +176,7 @@ Six per-dimension letter grades (A+/A/B/C/D/F) threshold-gated on raw dimension 
 
 Condemnation flags come from **two sources**:
 1. Recorded discrete **ruptures** (`rupture_consequences[]` → `collectCondemnationFlags()`), each tied to a specific event supported by an authoritative legal finding under `SENSITIVE_HISTORY_DESIGN_GATE.md` §2 (ICTY, a final Court of BiH judgment of equivalent subject-matter weight, or an ICJ/UN finding), permanent once recorded. Currently one: `genocide_condemnation`, fired by the Srebrenica rupture (`src/sim/negotiation/rupture_consequences.ts`).
-2. An emergent-only, verdict-time, **non-rupture** `authorized_cleansing_condemnation` flag, computed from terminal modeled-atrocity state per `SENSITIVE_HISTORY_DESIGN_GATE.md §2a` — a general aggregate severity judgment (a union of ≥1 authorized paramilitary sweep OR catastrophic civilian harm booked to the side that took or held control of the area or conducted the paramilitary action; siege departures are booked to the besieger with none killed, and siege deaths are not modelled; corrected 2026-11-13 per the §6 displacement attribution record), NOT an accusation of any specific historical incident.
+2. An emergent-only, verdict-time, **non-rupture** `authorized_cleansing_condemnation` flag, computed from terminal modeled-atrocity state per `SENSITIVE_HISTORY_DESIGN_GATE.md §2a` — a general aggregate severity judgment (a union of ≥1 authorized war crime (a paramilitary sweep, or the first wave of a bot faction's minority-expulsion policy; `SENSITIVE_HISTORY_DESIGN_GATE.md` §2a(ii)(a)) OR catastrophic civilian harm booked to the side that took or held control of the area or conducted the paramilitary action; siege departures are booked to the besieger with none killed, and siege deaths are not modelled; corrected 2026-11-13 per the §6 displacement attribution record), NOT an accusation of any specific historical incident.
 
 Both feed `FactionVerdict.condemnation_flags[]` and `classifyOutcome`. **Only source (1) may be cited with an ICTY or Court of BiH finding, or a named historical event, in any narrative surface.** Below-C atrocity decisiveness for non-genocide cases is delivered by the §2a flag (→ `hollow_victory`), NOT the cost cap (which bottoms at C per §3.5); the additive `ATROCITY_COST_GAIN` term is retained (it still forces the C-cap for otherwise-cheap wars, invariant A1).
 

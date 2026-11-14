@@ -369,3 +369,24 @@ test('single writer: only src/state/war_crimes_record.ts assigns war_crimes_even
     walk(root);
     expect(writers).toEqual(['state/war_crimes_record.ts']);
 });
+
+test('a policy wave does not move people already sheltering in the municipality (no pass-through re-route)', () => {
+    const state = warState(50);
+    // HRHB refugees (Croats displaced earlier) sheltering in Vitez, plus a friendly HRHB municipality to route to.
+    state.political.political_controllers!['op:livno:livno'] = 'HRHB';
+    state.displacement.displacement_state = {
+        vitez: {
+            mun_id: 'vitez', original_population: 1000, displaced_out: 0, displaced_in: 500,
+            displaced_in_by_faction: { HRHB: 500 }, lost_population: 0, last_updated_turn: 0
+        }
+    } as any;
+    for (let t = 50; t <= 54; t++) {
+        state.meta.turn = t;
+        run(state);
+    }
+    expect(hrhbEvents(state)).toHaveLength(1); // the wave fired
+    const vitez = state.displacement.displacement_state.vitez as any;
+    expect(vitez.displaced_in).toBe(500);
+    expect(vitez.displaced_in_by_faction.HRHB).toBe(500);
+    expect(state.displacement.displacement_state.livno).toBeUndefined();
+});
