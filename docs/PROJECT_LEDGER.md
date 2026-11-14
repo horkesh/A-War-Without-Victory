@@ -38,7 +38,12 @@ that do not move calibration. Control and territory are byte-identical to main a
   Retained battles with more than one attacker: 40w 48 of 169, 188w 154 of 524 (main: 0), up to 8 brigades.
 - Evidence: `tsc --noEmit` exit 0 (needs `--max-old-space-size=8192` here); affected tests 176/176;
   `desktop:map:build` exit 0, entry chunk 2,980.84 kB. The tracked `latest_run_final_save.json` rewritten by the
-  40w run was reverted.
+  40w run was reverted. Full `npm run test:vitest` (balanced shards): every shard green except 2 tests in
+  `event_modal_effect_labels.test.ts`, whose copy was being edited during the run; they pass at the final commit
+  together with the other files touched after the suite started (36/36). The `vitest_balanced` fixture FAIL lines
+  are the runner's deliberate failure controls.
+- Independent review findings fixed: stale heavy-pool tests and browser proof, lead-first order kept in the desktop
+  projection, aggression copy scoped to the standard army AI (the optional LLM commander prompt lists modifiers).
 
 ## 2026-11-13 — Integration steward pass 1: roadmap, board, gates and canon backlog brought in line with main
 
