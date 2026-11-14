@@ -28,9 +28,14 @@ test('latest-run final-save artifact ownership stays aligned across docs, script
 
     const packageJson = JSON.parse(packageJsonRaw) as { scripts: Record<string, string> };
     assert.match(
-        packageJson.scripts['sim:scenario:run:40w'],
+        packageJson.scripts['sim:scenario:run:40w:map'],
         /run_scenario_with_preflight\.ts --scenario data\/scenarios\/apr1992_definitive_188w\.json --weeks 40 --unique --map --out runs/,
     );
+    // DC5: evidence runs must not rewrite the tracked file, so only the explicit `:map` / default
+    // viewer scripts pass `--map`.
+    for (const script of ['sim:scenario:run:40w', 'sim:scenario:run:40w:timed', 'sim:scenario:run:188w']) {
+        assert.doesNotMatch(packageJson.scripts[script], /--map\b/, `${script} must not pass --map`);
+    }
     assert.match(
         packageJson.scripts['sim:scenario:run:default'],
         /run_scenario_with_preflight\.ts --scenario data\/scenarios\/apr1992_definitive_52w\.json --unique --map --out runs/,

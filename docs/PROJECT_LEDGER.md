@@ -9,6 +9,77 @@
   Compacted 2026-09-10: 1723 sections moved out, 62 kept live.
 -->
 
+## 2026-11-13 — Test-tooling leftovers (WT1-WT5, DC4, DC5, RT7, O2); evidence runs stop dirtying the tree
+
+Non-calibration; no `src/` or `data/` change, so the simulation is byte-identical to main by
+construction. Clears the register items left by #582 (worktree resolvers).
+
+- **WT1.** `tools/ui/pause_before_combat_probe.cjs` and `counter_visibility_probe.cjs` find
+  playwright/pngjs by walking up to the nearest `node_modules`, not `<repo>/node_modules`.
+- **WT2.** `tools/asset_worker/post/postprocess_assets.ts` and `mcp/server.ts` spawn tsx through
+  `resolveTsxCli` (`process.execPath` + CLI) instead of a bare `tsx` on PATH.
+- **WT4.** Stale `Run:` comments (`node node_modules/tsx/dist/cli.mjs`, `node_modules/.bin/tsx`)
+  now show `npx tsx` in 14 files under `tools/` plus `tests/cohesion_floor_vs_dissolution.test.ts`.
+  Historical reports and logs are left as written.
+- **WT5.** New `tests/run_execution_contract_resolution.test.ts` pins `run_execution_contract.mjs`
+  path resolution (walk-up from a nested worktree, nearest wins, fallback) and that every listed
+  test exists. The script itself ran end to end once from this worktree: 29 files / 293 tests
+  passed, non-incremental `tsc` exit 0.
+- **WT3.** The six real-child tests in `tests/vitest_balanced_receipts.test.ts` have a 120 s ceiling
+  (was 30 s) and a 60 s first-receipt wait (was 10 s); a hung child still fails.
+- **DC4.** The "125 steps" comment in `tests/war_phase_step_order.test.ts` now points at the
+  assertion (196) as the authority.
+- **DC5.** Writer: only `run_scenario.ts --map` (`copyFinalSaveToLatestRun`). Readers: about 15
+  real-save tests use it as a fixture, plus viewer/diagnostic tools, so untracking was rejected.
+  `sim:scenario:run:40w`, `40w:timed` and `188w` no longer pass `--map`; `sim:scenario:run:40w:map`
+  and `:default` do. Ownership doc row and ownership test updated. Verified: a 40w run from a clean
+  tree left `git status` free of `latest_run_final_save.json`.
+- **RT7.** New `tests/desktop_war_end_reveal_handlers.test.ts` runs the real `resolve-peace-plan`
+  and `resolve-dayton` handlers (sliced from `electron-main.cjs`) against the war-end replay
+  manifest reveal: full frames sent once, after the state; none on rejection, decline, retry or
+  no frames.
+- **O2.** Already covered by `tests/ui/operation_briefing_null_context_mount.test.ts` (#570); no change.
+
+Figures: tsc exit 0; affected files 8 / 42 tests pass; 40w run final hash `d26098607271f8c2`
+(no engine change; differs from the older `44375b6b1484e128` only through the #590 corps-name strings).
+Full local suite: see PR.
+
+## 2026-11-13 — Integration steward pass 1: roadmap, board, gates and canon backlog brought in line with main
+
+Docs only; no `src/` or `data/` change, no calibration change. Main is at checkpoints **712/711/711/710** after
+#583 (Apr 1995 711 accepted by the orchestrator, 2026-11-13); the roadmap still said 712/711/712/710.
+
+- **Roadmap:** current-state block, sequence line (RF → ENGINE FREEZE → R8 qualifying campaigns → R9) and the list
+  of what merged since 2026-11-12. §4.1 gains BC14-BC19 for the RF pre-freeze items (7th Corps, stance effects,
+  siege displacement path, officer tenure data, HVO-ARBiH war with "owner decision pending", realism-audit fixes).
+  No new plan file. PS row now reads steps 1-6 all merged (#568, #579, #570, #572, #585, #580), ready for the owner to
+  close; the lane stays open until the owner closes it. R8 row says dry runs now, qualifying runs after the freeze.
+- **Size cap:** to stay under the 60,000-character roadmap assertion, three superseded blocks moved verbatim to
+  `MASTER_ROADMAP_ARCHIVE.md` (2026-09 calibration status prose, the 2026-09-12 execution snapshot, the header
+  prose, the closed probe-channel section) and the 2026-09 sections of `COMMAND_BOARD.md` moved there too. The board was re-derived from the roadmap.
+- **Gates:** new lane RF with `RF-CALIBRATION-RESIGNOFF` and `RF-ENGINE-FREEZE`; `DC-CONFERENCE-REDESIGN` closed
+  (DC merged #560, the roadmap row was already closed); `REPO-CANON-PROPAGATION` closed (below).
+- **`.claude/current-lane.txt`:** now RF, so RF calibration runs and R8 dry runs count as in-lane.
+- **Canon backlog:** all fourteen items in `docs/CANON_PROPAGATION_NEEDED.md` were checked against current code.
+  None was already in canon; all are now in `Systems_Manual_v0_9_0.md` with current values (§2, §6.3, §6.4, §6.8, §6.9,
+  §7.4, §7.6, §14.5 note). Five differed from the 2026-03-28 wording (strained-supply gate removed, probe-40 gate not
+  live, feasibility function renamed, retreat chain lost its largest-component step, SpatialContext extras). Also
+  corrected: launch minimum 2 brigades, `MAX_PARTICIPATING_BRIGADES` 20, the §7.6 attack-threshold known issue.
+  Engine Invariants §14.5 (retreat) is panel-gated and untouched; listed in the file for the orchestrator.
+- `plan_index.yml` regenerated: open lanes PS (until the owner closes it), R8, R9.
+
+## 2026-11-13 — Docs history fixes: Delić date, 6th Corps, CODE_AUDIT 7th Corps, army CO succession weeks
+
+Docs only; no `data/`, `src/` or tests. `ARBIH_ORDER_OF_BATTLE_MASTER.md`: Delić commanded the Main Staff
+from 8 Jun 1993 (November 1993 is when Halilović left the staff); the 6th Corps existed early Jun 1993 to
+1994 and not in 1995. `20260516_CODE_AUDIT.md` L501: the 7th Corps "late 1992" claim is annotated, the
+record kept. New report `docs/40_reports/20261113_ARMY_CO_SUCCESSION_DATES_AND_STALE_LINES.md`:
+Praljak is week 67 (roster 64), Roso week 83 (roster 80), Petković's return unresolved and after 23 Feb 1994;
+plus the FORAWWV stale-line list (L307-308), not edited because the file is panel-gated. SC12: the only
+rupture "July 1995 window" claim was in the Sensitive History Gate, fixed in #584; nothing else asserts it.
+The 7th Corps lane (#590) already covered the 7th Corps, Domet-1, Jajce and 370th items. Roster data is
+unchanged, pending a calibration lane.
+
 ## 2026-11-13 — Startup snapshot re-baked for the Delić handover (#581 follow-up)
 
 #581 moved Halilović/Delić from week 60 to 61 in `apr1992_officers.json` but did not regenerate the
@@ -14918,6 +14989,24 @@ From the sensitive-copy lane's out-of-scope register (`F:/AWWV-coordination/cras
 - Gates: `npx tsc --noEmit` exit 0. The new `tests/replay_frame_summary_schema_boundary.test.ts` fails 6 tests on main's reader and passes 14/14 here. Headless 40w on main `c1299da25` and on the merged head: `final_state_hash` `44375b6b1484e128` both, every artifact byte-identical except `replay_save_manifest.json` (intended) and `run_meta.json` (path, commit). `npm run desktop:map:build` exit 0, entry chunk 2,977.04 kB. Full `npm run test:vitest` (Git Bash first): red only on the deliberate `vitest_balanced` controls and on main's stale startup snapshot after #581 (Delić `available_until_turn` 61 in data, 60 in the baked snapshot), which fails `startup_snapshot_contract` (2) and `desktop_sim_bundle_smoke`; not touched here.
 - Rendered proof: `F:/AWWV-coordination/surface_steps/replay_figures/` (real and v1 manifest, EN/BCS, 2293×960 and 1280×720; min font 13 px, no overflow, no page errors), rig `tools/ui/replay_figures_browser_proof.mjs`. Seen there: Chromium formats `bs-BA` counts with commas (`52,645`), so every BCS `formatCount` figure shows English grouping; follow-up.
 - Codex review (P2): a war ended between turns (decision, peace plan, Dayton) never re-sent the unmasked manifest, so its casualty card stayed hidden. `writeCanonicalCurrentState`, the choke point every war-ending path uses, now calls `publishLiveReplayManifestOnWarEnd`, which sends the full live frames once `meta.game_over` is set; pinned by a new behavioural test in `tests/desktop_persistence_contract.test.ts`.
+
+## 2026-11-14 — Pre-1.0 realism audit (RF-6, docs only)
+
+- Report: `docs/40_reports/proposals/20261114_PRE_1_0_REALISM_AUDIT.md`. Read-only audit of main `0450a2e8d` for realism defects, railroads and dead mechanics; no code, data or calibration changed.
+- Evidence: headless 188w on main (`runs/apr1992_definitive_188w__6deb5845c150c196__w188_n0`, clean tree, Node 22.23.2, `final_state_hash` `0ec6d6112fd0e954`, checkpoints 712/711/711/710, anchors 31/31), one 60w diagnostic run for the Bihać supply question, and a historian check (UNHCR, ICTY, BB).
+- 15 ranked findings with a freeze recommendation each. Recommended RF: legacy-id sustainability collapse pinning negotiation momentum at 1.0 (Washington and ceasefire IVP gates always true); ARBiH 1994 exchange ratios about ten times the historical bound; Bosniak flight abroad hardcoded to 0% (fold into RF-3). Recommended "now": the battle summary drops all but the first attacker; UI surfaces that show dead legacy values; `supply_below` firing on disabled reserves; `war_supply_pressure` pinned at 100. Errata: Velika Kladuša retaken 17 Dec 1994, not November (BB2 p.535).
+
+## 2026-11-14 — The counts the player sees: BCS grouping, one displaced-or-killed definition, replay fog and dates (RT1-RT6, UI + copy + canon record)
+
+From the replay-totals lane's out-of-scope register (`F:/AWWV-coordination/crash_recovery_20261112/out_of_scope_findings.md`, RT1-RT6). Branch `claude/count-fixes`. No engine behaviour or state change.
+- RT3: Chromium and Electron render `bs-BA` as `52,645` and decimals as `1.5` (probed in the Playwright Chromium the rig uses; Node renders it correctly, so jsdom tests could not see it). New `formatLocaleNumber` in `src/ui/map/utils/formatters.ts` asks Intl only for `en-US` and swaps in `.` for grouping and `,` for decimals in BCS. `formatCount`, `formatPersonnel`, `fmtK` use it; so do the refugee-flow counts, the paramilitary population line, the paramilitary review modal, the Operations panel task-force strength, the Humanitarian Ledger and the Verdict stat rows. Not touched: `ops_modal/*` (parked) still has its own `bs-BA` call. `tests/ui/r7_number_formatters.test.ts` asserts the strings directly (`52.645`, `1.950.000`, `1,5k`) and spies on `Intl.NumberFormat` and `Number.prototype.toLocaleString` to prove no other locale is requested.
+- RT1/RT2: the engine's `refugees_created` is displaced (routed) + killed + fled abroad; killed and fled are additional, not subsets (the adapter, `displacement_event_log.ts` and `game_state.ts` comments said subsets; corrected). One definition now: displaced OR KILLED. War Summary reads `nationalDisplacement.humanitarianAggregates` (the Ledger's source) instead of the routed-only `departedByOsid`; fields renamed `totalDisplacedOrKilled` etc.; labels EN/BCS "Theater-wide displaced or killed" / "Raseljeni ili ubijeni na ratištu", own-side, and the sibling `warSummary.overview.*` keys. Verdict stat "Refugees Created" is now "Displaced or killed" / "Raseljeni ili ubijeni"; the chronicle refugee-tally and surge cards (fed by `displacement_recent_by_turn`, which also includes the killed) read "Displaced or killed: {count}" / "cost {count} people their homes or their lives" / "killed or driven out at once" (BCS "Raseljeni ili ubijeni: {count}", "oduzeo dom ili život", "ubijeno ili otjerano"); Cost Ledger findings in `cost_ledger.ts` say "people displaced or killed"; the war-dispatch prompt (`war_dispatches.ts`) says "Total displaced or killed (includes civilians killed and people who fled abroad)". Left as "displaced" because they count the routed only (turn summaries): AAR "Total displaced", campaign cost, Wrapped slide, Dayton folder (each sits beside a separate killed figure).
+- RT4: `playerVisibleReplayManifestJson` now also withholds `activeFormations` (all sides' order of battle) during play, as `null`; the scrubber hides the card; revealed at war end. `ReplayFrameSummary.activeFormations` is `number | null`. Schema stays v2.
+- RT5: `buildReplayFrameSummary` fills `date` from the turn when the frame has no `metadata.date`: `turnToIsoDate` (integer calendar arithmetic, no Date object; turn 0 = 1992-04-06, +7 days per turn; tested equal to `turnToDateString` for turns 0-400). The scrubber shows stored ISO dates in the UI locale (`isoDateToDateString`), never raw.
+- RT6: `SENSITIVE_HISTORY_DESIGN_GATE.md` §6 sensitive-copy record item (5) marked superseded (replay figures are shown since #586; the "replay summary readers" follow-up is closed) and an Amended line added. Copy conformance with the §4 killed-in-label rule. Sign-off per the §6 "Cost Ledger wording change" row (Codex P1 on #592): two independent seats, `/narrative-designer` and `/historian`, both GO-WITH-AMENDMENTS on the full set of label changes (Cost Ledger findings, War Summary, Verdict stat, chronicle cards, dispatch prompt), no attribution moved. Amendments applied: the chronicle cards no longer say "Refugee tally" or "driven from their homes" for a figure that includes the dead; BCS "na ratištu" replaces "u teatru". Advisory, open: the per-faction finding sets "civilian casualties caused" beside "people displaced or killed", which may double-count the killed (the existing §6 follow-up on reconciling the two killed figures).
+- Tests: `tests/replay_manifest_fog_and_date.test.ts` (new); updated pins in `ui_army_hq_war_summary_visibility`, `war_summary_campaign_cost_i18n`, `faction_report_mobile_subdivision`, `endgame_verdict_replay_tab_live`, `war_dispatches`.
+- Rendered proof: `tools/ui/count_figures_browser_proof.mjs` (dev map in Chromium, real RBiH campaign plus a fixture war), EN and BCS at 2293×960 and 1280×720: War Summary, Ledger (U hotkey), replay at war end and in play. Shots and `count_figures_report.json` in `F:/AWWV-coordination/surface_steps/count_figures/`. BCS shows `1.263.092`, `52.680`, `1.377.240`; in play the formation and casualty cards are absent.
+- Seen, not changed: 77 bare `.toLocaleString()` calls in 30 files still use the process locale (BCS can show English grouping); the BCS toolbar and War Summary header read "6 Apr 1992 (war)" with an English "(war)" and capital "Apr"; `tests/settlement_contiguity.test.ts` (Dayton isolated pockets) is red on main itself.
 
 ## 2026-11-14 — Stance effects lane: SE4, SE2, SE7 (measured), SE6 held
 

@@ -28,7 +28,7 @@
  * scenario runner's `final_state_hash` — sha256(serializeState(state)).
  *
  * Usage:
- *   node_modules/.bin/tsx tools/ai_play/parity_probe.ts [--turns N] [--faction RS]
+ *   npx tsx tools/ai_play/parity_probe.ts [--turns N] [--faction RS]
  */
 
 import { createHash } from 'node:crypto';

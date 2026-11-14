@@ -498,7 +498,7 @@ So `oob_corps.json` and `apr1992_officers.json` have *opposite* drift problems:
 ### Why this matters
 
 - The OpsPlanningModal Commander phase pulls officers via home/compatible matching. Officers with dead refs show up in the "OUT OF REGION (12)" unavailable list permanently. During my Turn-0 walk-through I observed that bottom unavailable list, which included Pandurević, Smiloš and others — those are exactly the officers tied to dead `vrs_ibk` / `vrs_hk`.
-- ARBiH 7th Corps existed historically (formed late 1992 in central Bosnia under Hadžihasanović). Modelling it would unlock 3 officers + add a corps to that faction's structure. Whether to add it is a content/canon call.
+- ARBiH 7th Corps existed historically (formed late 1992 in central Bosnia under Hadžihasanović). **[Correction 2026-11-13, historical record kept: the 7th Corps was decided on 26 Feb 1994 under Mehmed Alagić, not 1992. Hadžihasanović commanded the 3rd Corps, from which it was built. See `docs/knowledge/ARBIH_ORDER_OF_BATTLE_MASTER.md`.]** Modelling it would unlock 3 officers + add a corps to that faction's structure. Whether to add it is a content/canon call.
 - `jna_herzegovina_command` is a runtime-only ID with no `oob_corps.json` entry — that's a one-sided spec.
 
 ### Recommendation

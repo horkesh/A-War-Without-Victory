@@ -14,7 +14,7 @@
  * to end: prediction ids (future_consequences[*].opens_events) == real
  * causal-edge ids == fired events, and the read-model joins them correctly.
  *
- * Run: node node_modules/tsx/dist/cli.mjs tools/diagnostics/consequence_receipt_repro.ts
+ * Run: npx tsx tools/diagnostics/consequence_receipt_repro.ts
  */
 
 import { startNewCampaign, advanceTurn } from '../../src/desktop/desktop_sim.js';
