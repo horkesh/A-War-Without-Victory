@@ -118,7 +118,10 @@ Each run is the authoritative `npm run sim:scenario:run:188w` on a clean, commit
   - strict health PASS;
   - consistency PASS (0).
 - Battles per week 2.697: 507 battles, RBiH 271, RS 179, HRHB 57, identical to main.
-- Not byte-identical to main after t98. The war-or-game seat counted, on the attribution run (same hash): 10 battles with a different defender and 24 with different casualties or power ratio, and no outcome changes.
+- Not byte-identical to main after t98. Two seats counted battle-level differences, with different matching methods:
+  - scenario-tester seat, on the attribution run (same hash): 10 battles with a different defender and 24 with different casualties or power ratio;
+  - war-or-game seat, its own diff of run 4: 4 with a different defender, 28 with different casualties or power ratio (the first at t112, Lukavac), 6 shifted by a turn or swapped between t171 and t184.
+  - Both: **0 outcome changes**.
 - Premise on run 4's saves:
   - frontless sector-turns that still have an own pool: 136 → 48;
   - validator missed-reinforcement turns: 122 → 45;
@@ -168,4 +171,7 @@ Main's w4 behaviour is kept unchanged. That is the existing T1 path letting a fu
 - **Structural fingerprint:** `npm run ci:structural-fingerprint:check` exit 0, `bc629e89a585dfde` (on v2; on v3 the t40 state is main's).
 - **Determinism seat (on v2's code, unchanged in v3 except for the serving order):** ordering is total (tier, distance, `strictCompare` id; sector order has a `sector_id` tie-break); no time or randomness; T1 is intent only; no GameState or save change.
 - **Runs:** 3 measured candidates plus 1 bless at v2, and the final bless at v3: 5 of 8 allowed. Also the main reproduction, a main replay with weekly saves, and two partial resumes (fidelity and attribution).
-- **Baselines:** re-pinned at the final head. Hashes are listed in the PR.
+- **Baselines:** re-pinned at the final head (`UPDATE_BASELINES=1 npm run test:baselines` at `d531809`, docs-only since `ec4cf59`). All 8 artifacts reproduce run 4 byte for byte.
+  - Changed: `final_save.json` `3253da2f…`, `run_summary.json` `010c01d8…`, `end_report.md` `d9cfdfdd…`, `weekly_report.jsonl` `547e6c83…`.
+  - Back to main's pins, since control and formations are identical: `control_delta.json` `385b019d…`, `activity_summary.json` `485d13fc…`, `watched_operations.json` `ab972c4f…`, `formation_delta.json` `8504e676…`.
+  - This supersedes the run-2 pin in `eb66243`.
