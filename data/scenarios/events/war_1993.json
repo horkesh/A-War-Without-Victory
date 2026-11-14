@@ -17,12 +17,12 @@
     "requires_player_response": true,
     "priority": 50,
     "auto_resolve_turns": 2,
-    "historical_source": "Balkan Battlegrounds Vol. I pp.6-8; UN S/25479; UNSCR 820.",
+    "historical_source": "Balkan Battlegrounds Vol. I pp.6-8, 182; UNSCR 787 (16 November 1992), op. para. 1; UN S/25479; UNSCR 820.",
     "source_note": "The pressure is inferred from the Vance-Owen diplomatic sequence and Western/UN escalation around April 1993; this row avoids attributing an unsourced direct warning to any single mediator.",
     "staff_assessment": "Acknowledging the pressure preserves international confidence but costs leverage and internal cohesion; resisting protects Sarajevo's position while risking diplomatic isolation.",
     "trigger_evidence": [
-      "The Vance-Owen process is entering its final acceptance window.",
-      "UN S/25479 and UNSCR 820 show international pressure escalating around the plan.",
+      "Vance and Owen are pressing the parties to negotiate on their draft constitution for a decentralized Bosnia.",
+      "UN Security Council Resolution 787 (November 1992) calls on the parties to consider that draft as a basis for negotiation.",
       "Sarajevo's continued engagement is becoming central to preserving Western diplomatic support."
     ],
     "historical_default_response_id": "acknowledge_pressure",
@@ -115,7 +115,7 @@
     "id": "vance_owen_plan_1993",
     "image": "event_diplomatic_negotiation.webp",
     "title": "Vance-Owen Peace Plan Presented",
-    "narrative": "The Vance-Owen Peace Plan proposes dividing Bosnia into ten semi-autonomous provinces based on ethnic and geographic criteria. The Bosnian Croat leadership endorses it, and RBiH reluctantly signs and accepts under pressure, but the Bosnian Serb assembly in Pale rejects it, dooming the most comprehensive peace effort to date.",
+    "narrative": "In Geneva, the co-chairmen Cyrus Vance and David Owen table their peace plan: ten provinces drawn mainly on ethnic lines, under a weak central government. Serb-majority provinces would cover about 43 percent of the country, far less than the 65 to 70 percent Bosnian Serb forces now hold. Many in Sarajevo fear that provinces drawn on ethnic lines would reward the conquests of Bosnian Serb forces. Whether Sarajevo and Pale will accept is the open question.",
     "category": "diplomatic",
     "family": "rbih_vance_owen_acceptance",
     "source_tier": "icty_icj_un",
@@ -159,7 +159,7 @@
     "trigger_evidence": [
       "The Vance-Owen Peace Plan has been formally presented.",
       "Western and UN diplomacy is pressing the parties toward signatures.",
-      "Pale's assembly response remains the decisive obstacle after Sarajevo's pressured acceptance."
+      "Neither Sarajevo nor Pale has accepted the map; both answers are open."
     ],
     "historical_default_response_id": "accept",
     "pressure": {
@@ -3485,7 +3485,25 @@
     "id": "os_rbih_tactical_acceptance_1993",
     "image": "event_diplomatic_negotiation.webp",
     "title": "Owen-Stoltenberg: Accept or Resist?",
-    "narrative": "Owen and Stoltenberg present their Union of Three Republics plan aboard HMS Invincible (20 September 1993). The Presidency narrowly accepted, conditional on territorial concessions in eastern Bosnia (the Drina enclaves and Posavina corridor). The decision now falls to the Sarajevo Assembly (29 September 1993): ratify the Presidency's conditional acceptance, or reject the partition formula outright.",
+    "localizations": {
+      "en": {
+        "notifications_to_other_factions": {
+          "reject_via_assembly": {
+            "RS": {
+              "headline": "Sarajevo Assembly rejects Owen-Stoltenberg",
+              "body": "The Bosnian Assembly votes down the Owen-Stoltenberg package outright. Pale sees Sarajevo refuse partition on principle, prolonging the war and frustrating the ICFY mediators."
+            }
+          },
+          "accept_for_optics": {
+            "HRHB": {
+              "headline": "Sarajevo Assembly ratifies the Owen-Stoltenberg package",
+              "body": "The Bosnian Assembly ratifies the Presidency's conditional acceptance of the Owen-Stoltenberg framework. HVO leaders see Sarajevo gain international standing while legitimizing partition in principle."
+            }
+          }
+        }
+      }
+    },
+    "narrative": "Owen and Stoltenberg's plan for a Union of three republics is on the table. The Presidency has accepted it conditionally, on territorial terms for the Drina enclaves and the Posavina corridor. The decision now falls to the Assembly in Sarajevo: ratify the Presidency's conditional acceptance, or reject the partition formula outright.",
     "category": "diplomatic",
     "family": "rbih_owen_stoltenberg_response",
     "source_tier": "icty_icj_un",
@@ -3539,13 +3557,13 @@
     "source_note": "The row represents the documented two-step Owen-Stoltenberg sequence: Presidency narrow acceptance 20 September 1993 conditional on territorial concessions, followed by Assembly outright rejection 29 September 1993 citing the unrecoverable Drina enclaves and the Posavina corridor cession. The historical default `reject_via_assembly` is the documented joint outcome. The counterfactual `accept_for_optics` reflects an alternative parliamentary current that could have ratified the Presidency's conditional acceptance.",
     "staff_assessment": "Assembly rejection preserves the principle of a unified multi-ethnic Bosnia and the legal claim to the Drina enclaves at the cost of immediate international standing and negotiating-leverage erosion. Acceptance for optics could pressure Pale diplomatically but legitimizes the partition framework and carries Presidency/Assembly procedural rupture.",
     "trigger_evidence": [
-      "The Owen-Stoltenberg plan has reached the Bosnian government (per owen_stoltenberg_plan_1993).",
-      "Presidency accepted on 20 September 1993 aboard HMS Invincible conditional on Drina-enclaves and Posavina-corridor concessions (UN S/26486).",
-      "The Assembly session of 29 September 1993 is the decisive vote (UN S/26922)."
+      "The Owen-Stoltenberg plan for a Union of three republics has reached the Bosnian government.",
+      "The Presidency's acceptance is conditional on territorial terms for the Drina enclaves and Posavina.",
+      "The Assembly holds the final decision on the package."
     ],
     "effect": {
       "kind": "narrative",
-      "text": "The Owen-Stoltenberg plan reaches the Sarajevo Assembly. The Presidency's narrow Invincible acceptance is on the table; the Assembly must ratify or reject the partition framework."
+      "text": "The Owen-Stoltenberg plan reaches the Sarajevo Assembly. The Presidency's conditional acceptance is on the table; the Assembly must ratify or reject the partition framework."
     },
     "dimension_shifts": [
       {
@@ -3594,7 +3612,7 @@
         "branch_tag": "rbih_owen_stoltenberg_accept_for_optics",
         "historical_marker": "counterfactual",
         "label": "Assembly ratifies the Presidency's conditional acceptance",
-        "description": "An alternative parliamentary majority ratifies what the Presidency initialed aboard HMS Invincible. Sarajevo gains international standing while legitimizing the partition formula and accepting the Drina-enclaves and Posavina-corridor concessions in principle.",
+        "description": "An alternative parliamentary majority ratifies the Presidency's conditional acceptance. Sarajevo gains international standing while legitimizing the partition formula and accepting the Drina-enclaves and Posavina-corridor concessions in principle.",
         "aggression_affinity": -0.2,
         "risk_level": 0.4,
         "dimension_shifts": [
