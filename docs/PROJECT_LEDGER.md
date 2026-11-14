@@ -9,6 +9,55 @@
   Compacted 2026-09-10: 1723 sections moved out, 62 kept live.
 -->
 
+## 2026-11-14 — Canon propagation panel: Systems Manual corrections, Engine Invariants §14.5 status
+
+Docs only; no `src/` or `data/` change, no calibration change. #599 wrote the 14-item canon backlog into
+the Systems Manual and closed gate `REPO-CANON-PROPAGATION` without panel sign-off (Codex P1; the
+reopening commit missed the auto-merge). A four-seat panel (canon-compliance as lead and integrator,
+systems-programmer, game-designer, determinism-auditor) reviewed every added sentence against `src/`.
+Round 1 found twelve defects in the text: a dead cooldown described as live, a counter-attack path wider
+than Engine Invariants §6.3 written as canon, a retreat BFS that is one ring deep by defect, planning,
+exhaustion and feasibility gates described more broadly than the code applies them, launch criteria
+(enemy OSIDs 1, supply readiness not a gate), a supply multiplier table contradicting the code, wrong
+casualty and snapshot wording, and missing tie-breaks. All are corrected; Engine Invariants §14.5 now
+records the verified retreat order, the removed largest-component fallback and the open debts; the
+`CALIBRATION_MASTER.md` deferred-debt paragraph matches. Round 2: determinism GO; the other three seats
+GO-WITH-CONDITIONS with every text condition applied. Round 3: the lead seat cleared its last condition
+(unanimous GO on the propagation). Open as a separate decision: reconcile Invariants §6.3 with the
+sector-wide counter-attack (the Manual labels it "not canon"). The gate is closed on
+`docs/40_reports/20261114_CANON_PROPAGATION_PANEL.md`. Also: 14 `archive/*` tags pushed for branches with
+no PR and no tag (nothing deleted).
+
+## 2026-11-13 — CI guard: a stale committed startup snapshot now fails the full-suite job
+
+Closes the gap recorded in the entry below. `full-suite-and-fingerprint.yml` (`full-suite` job) now runs
+`npm run desktop:startup-snapshot:check` (read-only; byte comparison of the committed
+`data/derived/startup/apr_1992_initial_save.json` with a fresh build) BEFORE the "Rebuild startup
+snapshot for this platform" step, gated on the same `relevant` output, and it blocks the job.
+
+**Linux parity (answers the open question):** probe run on PR #593 with `continue-on-error: true`; the
+step log (not the conclusion, which reads "success" for a tolerated failure) shows
+`Startup snapshot OK: .../data/derived/startup/apr_1992_initial_save.json` on the ubuntu runner. A
+Linux build is byte-identical to the Windows-built committed file, so no normalisation was needed and
+the check was NOT weakened. Then made blocking.
+
+**Bite proof:** throwaway draft PR (do not merge) changes `available_until_turn` of `vrs_tomanic` in
+`apr1992_officers.json` 110→111 without re-baking (draft PR #595, run 43516194108). The `full-suite` step log reads
+`Startup snapshot drift detected for apr_1992: .../apr_1992_initial_save.json` then
+`##[error]Process completed with exit code 1.` — the step failed and the job stopped before the rebuild.
+#595 is closed unmerged.
+
+**Other workflows that rebuild before testing:** `baseline-regression.yml` (83,137,189,262),
+`desktop-release-guard.yml` (63,153), `release.yml` (83,134), and the `structural-fingerprint` job of
+the full-suite workflow. They need no separate guard: the full-suite job runs on every PR touching
+`src/`, `tools/`, `tests/`, `data/scenarios/`, `data/derived/` and others, and is the merge-blocking
+check, so a stale committed snapshot cannot reach main. Caveat: the guard is skipped when
+`relevant=false` (docs-only PRs), which cannot change snapshot inputs. `release.yml` rebuilds
+legitimately for packaging; a drift there is already caught earlier on the PR.
+Codex review (P2): `data/source/` (`settlements_initial_master.json`, `oob_corps.json`) feeds the snapshot
+build but was not in the change detector, so a source-only PR would have skipped the guard. Added
+`data/source/` to `PREFIXES` in `.github/scripts/detect-full-suite-changes.sh`.
+
 ## 2026-11-13 — Test-tooling leftovers (WT1-WT5, DC4, DC5, RT7, O2); evidence runs stop dirtying the tree
 
 Non-calibration; no `src/` or `data/` change, so the simulation is byte-identical to main by
@@ -15007,3 +15056,15 @@ From the replay-totals lane's out-of-scope register (`F:/AWWV-coordination/crash
 - Tests: `tests/replay_manifest_fog_and_date.test.ts` (new); updated pins in `ui_army_hq_war_summary_visibility`, `war_summary_campaign_cost_i18n`, `faction_report_mobile_subdivision`, `endgame_verdict_replay_tab_live`, `war_dispatches`.
 - Rendered proof: `tools/ui/count_figures_browser_proof.mjs` (dev map in Chromium, real RBiH campaign plus a fixture war), EN and BCS at 2293×960 and 1280×720: War Summary, Ledger (U hotkey), replay at war end and in play. Shots and `count_figures_report.json` in `F:/AWWV-coordination/surface_steps/count_figures/`. BCS shows `1.263.092`, `52.680`, `1.377.240`; in play the formation and casualty cards are absent.
 - Seen, not changed: 77 bare `.toLocaleString()` calls in 30 files still use the process locale (BCS can show English grouping); the BCS toolbar and War Summary header read "6 Apr 1992 (war)" with an English "(war)" and capital "Apr"; `tests/settlement_contiguity.test.ts` (Dayton isolated pockets) is red on main itself.
+
+## 2026-11-14 — Stance effects lane: SE4, SE2, SE7 (measured), SE6 held
+
+From the stance-engine follow-up (#583) register `F:/AWWV-coordination/crash_recovery_20261112/out_of_scope_findings.md`, SE2/SE4/SE6/SE7. Draft PR, not merged; the orchestrator sequences it against the 7th Corps lane. Main at start: `0450a2e8d`, 188w headless 712/711/711/710, `final_state_hash` `0ec6d6112fd0e954`.
+
+- **SE4 (enemy massing is local).** `computeOffensiveSigns` marked every OG facing an enemy corps as "massing" when that corps ran any attack, feint or probe anywhere. It now needs the operation aimed at or assembling opposite the OG (objective in the OG's ground; staging OSID or a participant on the enemy ground it faces): `isOperationOppositeSector` in `sector_intel.ts`. Alone on main: 712/711/711/710, final control identical to main at all four checkpoints, hash `ce1633f2e7f89c17`; Fortify OG-turns 4707→3875, Active Defence 1760→1300, AD crossings 335→285.
+- **SE2 (one writer).** The commander loop owns bot OG stance. `evaluateSectorStances` (corps AI), whose write was overwritten every war turn, is deleted; its truce-line Screening and own-operation-staging Elastic rules are now commander inputs (`CommanderBriefing.sector_situations`, staging matched on brigades because sectors are renumbered), with a `'situation'` trigger that applies at once. Alone on main 712/711/711/708; on SE4 712/711/711/708, hash `253f690fa0153746`. Lost: Jemanlići, Korenići (Donji Vakuf, t183-184): the 707th's march completes to Komar instead of stopping to take Korenići. Tail knife-edge.
+- **SE7 (validator).** The "stale front gap" was a validator misclassification: the sector's only brigade was a disrupted reserve that Engine Invariant 14.9 forbids promoting. `stale_gap` now needs a brigade on the front; a zero-assigned gap with only sibling donors on ground that changed hands in the saved turn is logged as `fresh_gap` (relief is due next turn). Proved with the same SE6 build run to week 189: relieved, PASS. No sim change.
+- **SE6 (stance entrenchment) — HELD.** Movement grows stationary brigades at the Defend rate and records a basis; `applyStanceEntrenchment` re-bases to the stance in force once it is final (in `apply-sector-stance-orders`). The patrol intel source was already live (sector intel is derived before the post-combat rebuild): only entrenchment was dead. Alone on main 711/711/707/699; on SE4+SE2+SE7 712/707/704/701, hash `f94d51f392f50a9d`. Konjic south (Bijela, Glavatičevo, Ljuta) falls in every SE6 variant: by t127 the VRS Herzegovina Corps is healthier (Kalinovik cohesion 68 / 1534 men vs 40 / 1079) and the Konjic September Offensive meets 3.7× the reactive defence. Not honestly recovered in this lane.
+- Observation: the `sector_stance` reason-code topic now reports per-stance entrenchment at combat time; `tools/diagnostics/sector_stance_churn.ts` aggregates it (schema v3).
+- Gates: per step, guards intact (enclave, Farz), strict health PASS, consistency 0 (with the SE7 validator). `tsc` 0.
+- Re-measured after merging main `eb3c6d02d` (sim-neutral since `0450a2e8d`; hashes unchanged): merge set SE4+SE2+SE7 712/711/711/708, `253f690fa0153746`; without SE2 712/711/711/710, `ce1633f2e7f89c17`. Orchestrator rulings 2026-11-14: SE2 accepted with the Oct95 tail loss; per cell, `op:donji_vakuf:korenici` (main t183, 707th Slavna) and `op:donji_vakuf:jemanlici` (main t184, 707th) stay RS at w188 because the 707th's march to Komar completes at t183 instead of stopping at Korenići. Recorded as a KNOWN HISTORICAL MISS, not neutral noise: both were ARBiH-held by Oct 1995 (Donji Vakuf given up 13 Sep 1995, BB1 p.419). Battle frequency, 188w: main 524 battles (2.79/week; attackers HVO 58, RBiH 284, RS 182), merge set 521 (2.77/week; 58 / 280 / 183), -0.57%. Pyrrhic merge gate: GO with conditions (four seats). SE6 is held at `archive/claude/stance-effects-se6` (reverted on the branch), with SE10 `trenches travel` registered as its root defect. Baselines re-blessed on the merge set.

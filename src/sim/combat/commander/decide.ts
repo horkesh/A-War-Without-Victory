@@ -48,6 +48,7 @@ import type {
     ZoneAssessment,
     ZoneBelief,
     ZoneId,
+    SectorSituation,
 } from './commander_state.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -57,7 +58,6 @@ import type {
 /** Turns of quiet before a sector is eligible for thinning to 'screening'. */
 const QUIET_TURNS_FOR_SCREENING = 5;
 // Sectors with threat_ratio at or above this threshold must not drop below 'defend'.
-// Matches the evaluateSectorStances threshold in bot_corps_directives.ts.
 const SCREENING_MAX_THREAT_RATIO = 1.5;
 
 /** Casualty threshold to classify sector activity as 'skirmish'. */
@@ -96,14 +96,16 @@ const OFFENSIVE_SIGNS_CONFIDENCE_BOOST = 0.15;
 
 /**
  * A recommended OG stance. `trigger` says what drove it: 'contact' (ground lost or fighting
- * in the sector this turn) applies at once; 'intel' (enemy intent, a quiet front) waits for
- * the posture's minimum dwell (emit.ts OG_STANCE_MIN_DWELL_TURNS). Absent counts as 'intel'.
+ * in the sector this turn) and 'situation' (a truce line, or the corps' own operation staging
+ * from the OG — facts the commander knows, not readings of the enemy) apply at once; 'intel'
+ * (enemy intent, a quiet front) waits for the posture's minimum dwell
+ * (emit.ts OG_STANCE_MIN_DWELL_TURNS). Absent counts as 'intel'.
  */
 export interface StanceRecommendation {
     sector_id: string;
     new_stance: SectorStance;
     reason: string;
-    trigger?: 'contact' | 'intel';
+    trigger?: 'contact' | 'intel' | 'situation';
 }
 
 export interface DecisionResult {
@@ -159,7 +161,7 @@ export function makeDecisions(
     // 3. Reactive stance changes
     const stanceChanges = computeStanceChanges(
         zones, threats, intelPicture, activityEntries, previousState, personality, briefing.sectors,
-        beliefState ?? null,
+        beliefState ?? null, briefing.sector_situations,
     );
 
     // 4. Reserve shifting
@@ -578,6 +580,7 @@ function computeStanceChanges(
     personality: OfficerPersonality,
     sectors: readonly CorpsFrontSector[],
     beliefState: CommanderBeliefState | null,
+    sectorSituations?: Readonly<Record<string, SectorSituation>>,
 ): StanceRecommendation[] {
     const changes: StanceRecommendation[] = [];
 
@@ -654,10 +657,22 @@ function computeStanceChanges(
         let newStance: SectorStance | null = null;
         let reason = '';
 
+        const situation = sectorSituations?.[sectorId];
+        let standing = false;
         if (activity.activity === 'overrun') {
             // Territory lost — fortify regardless of personality
             newStance = 'fortify';
             reason = 'territory overrun — maximum defensive posture';
+        } else if (situation?.truce_line) {
+            // A truce line: no shooting, a thin observation screen (Graz RS-HRHB truce).
+            newStance = 'screening';
+            reason = 'truce line — screening';
+            standing = true;
+        } else if (situation?.own_operation_staging) {
+            // Our own operation stages or runs from this OG: keep its reserves mobile.
+            newStance = 'elastic';
+            reason = 'own operation staging — elastic defence keeps reserves free';
+            standing = true;
         } else if (enemyMassing) {
             // Enemy concentration detected
             if (personality.aggression > 0.6) {
@@ -700,7 +715,10 @@ function computeStanceChanges(
             const contact = activity.activity === 'overrun'
                 || activity.activity === 'contested'
                 || activity.activity === 'active';
-            changes.push({ sector_id: sectorId, new_stance: newStance, reason, trigger: contact ? 'contact' : 'intel' });
+            changes.push({
+                sector_id: sectorId, new_stance: newStance, reason,
+                trigger: standing ? 'situation' : contact ? 'contact' : 'intel',
+            });
         }
     }
 
