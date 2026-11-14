@@ -582,20 +582,21 @@ export function splitAmountByCauser(
 /**
  * Update population displacement from siege and encirclement (the pressure path).
  *
- * DA1 (siege displacement lane, 2026-11-13): ONE pass per municipality, for the side
- * holding it (`resolveMunicipalityHolder`). It used to run once per militia pool, and
- * every pool displaced the whole municipality's population, so a municipality with three
- * pools was processed three times. Triggers, read from `pressure` (same id space as
- * `settlements`):
- *   - siege: the holder's settlements touch an at-war front and none of them is supplied,
- *     for UNSUPPLIED_PRESSURE_TURNS consecutive turns (counter persisted on the
- *     municipality's DisplacementState as `unsupplied_pressure_turns`, so it survives a
- *     save; it used to live in a module cache);
- *   - encirclement: under front pressure and every held settlement lies outside the
- *     holder's main territorial body (`computeTerritorialBodies`).
- * The amount is taken from the population of the settlements the holder controls (by
- * settlement population), booked to the pressing side (`resolvePressingFactions`), and
- * each people is routed to municipalities its own side holds.
+ * DA1 (siege displacement lane, 2026-11-13/14): one pass per (municipality, side holding
+ * settlements there). It used to run once per militia pool, and every pool displaced the
+ * whole municipality's population, so a municipality with three pools was processed three
+ * times. Triggers, read from `pressure` (same id space as `settlements`):
+ *   - siege: the side's settlements touch an at-war front and none of them is supplied,
+ *     for UNSUPPLIED_PRESSURE_TURNS consecutive turns (counter persisted per side in
+ *     DisplacementState.unsupplied_pressure_by_side with the turn last counted, so it
+ *     survives a save; it used to live in a module cache);
+ *   - encirclement: under front pressure and every held settlement lies in a body outside
+ *     the side's main territorial body holding at most POCKET_MAX_SHARE of its settlements
+ *     at turn 0 (`computeTerritorialBodies`).
+ * The side's own people leave at the sourced weekly rate, taken from the population of the
+ * settlements it controls; they are routed first (people with nowhere to go stay), booked
+ * to the pressing side (`resolvePressingFactions`, holder passed in), none killed and none
+ * abroad.
  *
  * Without `pressure`, inputs are derived from `settlementEdges` (fixtures and harnesses).
  */
