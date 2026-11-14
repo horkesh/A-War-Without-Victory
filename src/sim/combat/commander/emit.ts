@@ -3561,7 +3561,8 @@ export function resolveOgStance(
         if (recommendation.new_stance === previous.stance) {
             return { stance: previous.stance, confirmed_turn: turn, why: 'confirmed' };
         }
-        if (recommendation.trigger === 'contact' || dwell >= OG_STANCE_MIN_DWELL_TURNS) {
+        if (recommendation.trigger === 'contact' || recommendation.trigger === 'situation'
+            || dwell >= OG_STANCE_MIN_DWELL_TURNS) {
             return { stance: recommendation.new_stance, confirmed_turn: turn, why: 'recommended' };
         }
         return { stance: previous.stance, confirmed_turn: previous.confirmed_turn, why: 'held' };

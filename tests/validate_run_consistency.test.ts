@@ -32,6 +32,7 @@ type UndefendedSubsegmentIssues = {
     missed_reinforcement: Array<{ sector: string; sub_segment_id: string; length_edges: number; donor_candidates: DonorCandidate[] }>;
     unavoidable_gap: Array<{ sector: string; sub_segment_id: string; length_edges: number; donor_candidates: DonorCandidate[] }>;
     stale_gap: Array<{ sector: string; sub_segment_id: string; length_edges: number }>;
+    fresh_gap: Array<{ sector: string; sub_segment_id: string; length_edges: number }>;
 };
 
 const {
@@ -1148,6 +1149,7 @@ describe('validate_run_consistency assignment completeness', () => {
         expect(collectUndefendedFrontSubsegmentIssues(state)).toEqual({
             missed_reinforcement: [],
             stale_gap: [],
+            fresh_gap: [],
             unavoidable_gap: [
                 expect.objectContaining({
                     sector: 'sector:vrs_drina:0',
@@ -1332,11 +1334,43 @@ describe('validate_run_consistency assignment completeness', () => {
             stale_gap: [
                 { sector: 'sector:vrs_drina:0', sub_segment_id: 'subseg:sector:vrs_drina:0:1', length_edges: 3 },
             ],
+            fresh_gap: [],
         });
 
         const result = validateState(state, 'synthetic');
         expect(result.failures).toBeGreaterThanOrEqual(1);
         expect(result.lines.some((line) => line.includes('partially covered sector'))).toBe(true);
+    });
+
+    it('SE7: a front whose only brigade is a disrupted reserve is not a stale partial-cover gap', () => {
+        const state = {
+            meta: { turn: 188 },
+            political: { political_controllers: { 'op:test:front': 'RS', 'op:test:enemy': 'RBiH' }, control_events: [] },
+            military: {
+                formations: {
+                    broken: makeBrigade('broken', { location_osid: 'op:test:front', disrupted_turns: 1 }),
+                },
+                corps_command: {},
+                corps_front_sectors: {
+                    'sector:vrs_1st_krajina:0': {
+                        sector_id: 'sector:vrs_1st_krajina:0', corps_id: 'vrs_1st_krajina', faction: 'RS',
+                        length_edges: 3, edge_ids: ['e1', 'e2', 'e3'],
+                        assigned_brigade_ids: [], reserve_brigade_ids: ['broken'], rear_brigade_ids: [],
+                        territory_osids: ['op:test:front'],
+                        sub_segments: [{
+                            sub_segment_id: 'subseg:sector:vrs_1st_krajina:0:0', edge_ids: ['e1', 'e2', 'e3'],
+                            friendly_osids: ['op:test:front'], enemy_osids: ['op:test:enemy'],
+                            primary_brigade_ids: [], length_edges: 3, gap: true,
+                        }],
+                    },
+                },
+                unresolved_sector_brigades: [],
+            },
+        };
+        const issues = collectUndefendedFrontSubsegmentIssues(state);
+        expect(issues.stale_gap).toEqual([]);
+        expect(issues.missed_reinforcement).toEqual([]);
+        expect(issues.unavoidable_gap).toHaveLength(1);
     });
 
     it('does not duplicate canonical unstaffed-front packets as empty sectors or wide gaps', () => {
@@ -1379,6 +1413,7 @@ describe('validate_run_consistency assignment completeness', () => {
             missed_reinforcement: [],
             unavoidable_gap: [],
             stale_gap: [],
+            fresh_gap: [],
         });
     });
 
