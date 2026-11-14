@@ -15,6 +15,7 @@ import {
     SURFACE_SECONDARY_BUTTON,
 } from './surface/Surface';
 import { t, useLocale, type Locale } from '../i18n';
+import { formatLocaleNumber } from '../utils/formatters';
 
 type ParamilitaryDecision = 'allow' | 'deny';
 type ParamilitaryPolicy = 'always_allow' | 'always_deny';
@@ -30,9 +31,7 @@ function modeLabel(mode: string | undefined): string {
 }
 
 function formatNumber(value: number, locale: Locale): string {
-    return new Intl.NumberFormat(locale === 'bcs' ? 'bs-BA' : 'en-US', {
-        maximumFractionDigits: Number.isInteger(value) ? 0 : 20,
-    }).format(value);
+    return formatLocaleNumber(value, { maximumFractionDigits: Number.isInteger(value) ? 0 : 20 }, locale === 'bcs');
 }
 
 function formatStandingPoints(value: number, locale: Locale): string {

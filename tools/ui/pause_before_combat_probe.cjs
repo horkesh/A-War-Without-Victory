@@ -15,7 +15,15 @@
 const path = require('node:path');
 const fs = require('node:fs');
 const [repo, outDir, mode = 'click-answer', maxTurnsArg] = process.argv.slice(2);
-const { _electron: electron } = require(path.join(repo, 'node_modules', 'playwright'));
+// A worktree without its own node_modules resolves packages through the nearest ancestor that has them.
+const resolvePackage = (pkg) => {
+  for (let dir = path.resolve(repo); ; dir = path.dirname(dir)) {
+    const candidate = path.join(dir, 'node_modules', pkg);
+    if (fs.existsSync(path.join(candidate, 'package.json'))) return candidate;
+    if (path.dirname(dir) === dir) return path.join(repo, 'node_modules', pkg);
+  }
+};
+const { _electron: electron } = require(resolvePackage('playwright'));
 const maxTurns = Number(maxTurnsArg ?? '6');
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 fs.mkdirSync(outDir, { recursive: true });

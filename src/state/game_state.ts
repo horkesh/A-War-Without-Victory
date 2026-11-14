@@ -3690,9 +3690,9 @@ displacement_recent_by_turn: Record<number, number>;
  *
  * Outer key: origin/dest OSID.
  * Value:
- *   - out: cumulative `displaced` from this OSID (total removals; killed + fled
- *     are subsets, NOT additional — matches the event-log adapter semantics).
- *   - lost: cumulative `killed + fled_abroad` from this OSID (subset of out).
+ *   - out: cumulative `displaced` from this OSID (people routed elsewhere only;
+ *     killed + fled are ADDITIONAL to it, as in `refugees_created`).
+ *   - lost: cumulative `killed + fled_abroad` from this OSID (on top of out).
  *   - in: cumulative `settled` arrivals to this OSID.
  *   - by_ethnicity: optional cumulative `displaced` from this OSID keyed by the
  *     departing ethnicity-aligned faction (drives the per-OSID "fled here"

@@ -31,7 +31,7 @@ API) sits exactly on the per-turn injection seam the Electron UI uses.
 ## Run
 
 ```bash
-node node_modules/tsx/dist/cli.mjs tools/ai_play/run_president_rbih.ts
+npx tsx tools/ai_play/run_president_rbih.ts
 ```
 
 Expected tail: `=== DETERMINISM: PASS — byte-identical ===`.
