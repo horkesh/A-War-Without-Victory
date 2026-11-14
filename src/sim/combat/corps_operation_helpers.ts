@@ -390,6 +390,21 @@ export function buildCorpsOperation(
     };
 }
 
+/** Main-axis id written only by buildCommanderOperation (bot commander-planned ops). */
+function commanderMainAxisId(corpsId: string): string {
+    return `cmd_${corpsId}_main`;
+}
+
+/**
+ * True for an operation built by buildCommanderOperation, i.e. planned by the bot
+ * corps commander (not pre-planned, triggered, Army HQ, opportunity-catalog or
+ * player-authored). Read by the bot objective lockout (RF-AI2) so authored-op retry
+ * behaviour stays unchanged. The axis id is written by no other factory.
+ */
+export function isCommanderBuiltOperation(op: Pick<CorpsOperation, 'axes'>): boolean {
+    return (op.axes ?? []).some(axis => axis.axis_id.startsWith('cmd_') && axis.axis_id.endsWith('_main'));
+}
+
 /**
  * Factory for commander-generated sector-attack operations.
  *
@@ -418,7 +433,7 @@ export function buildCommanderOperation(
         // Wrap objectives + brigades into a single axis so the multi-axis execution
         // path in sector_offensive picks them up — fixes zero-eligible-attacker (ZEA).
         axes: [{
-            axis_id: `cmd_${corpsId}_main`,
+            axis_id: commanderMainAxisId(corpsId),
             name: 'Main Axis',
             assigned_brigades: participatingBrigades as FormationId[],
             objectives,
