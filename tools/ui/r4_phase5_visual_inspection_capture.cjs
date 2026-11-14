@@ -9,7 +9,13 @@
  * Launch + resume-save mechanics mirror tools/ui/paradox_local_qa.cjs.
  * Navigation selectors mirror tools/ui/first_hour_browser_gate.cjs.
  *
- * NOT a permanent tool. Read-only w.r.t. runs/ and existing tools/ui/*.cjs.
+ * NOT a permanent tool. Writes only to its --out folder; existing runs/ and
+ * tools/ui/*.cjs are read-only to it.
+ *
+ * Usage: node tools/ui/r4_phase5_visual_inspection_capture.cjs [--out=<dir>]
+ *   [--resume-save=<save.json>] [--packaged-executable=<exe>] [--only=endgame,codex]
+ * Relative paths resolve against the repo root. --out defaults to
+ * runs/r4_phase5_visual_inspection (runs/ is gitignored).
  */
 'use strict';
 
@@ -30,9 +36,9 @@ const resumeSavePath = path.resolve(repo, resumeArg || DEFAULT_SAVE);
 const packagedArg = process.argv.find((a) => a.startsWith('--packaged-executable='))?.slice('--packaged-executable='.length);
 const packagedExecutablePath = packagedArg ? path.resolve(repo, packagedArg) : null;
 
-const outDir = path.resolve(
-  'C:/Users/User/AppData/Local/Temp/claude/F--A-War-Without-Victory/55153a48-ce89-4ed8-857f-f9cc47dbaac6/scratchpad/visual_inspection',
-);
+// Output used to be a fixed folder in one past session's scratchpad on the owner's machine.
+const outArg = process.argv.find((a) => a.startsWith('--out='))?.slice('--out='.length);
+const outDir = path.resolve(repo, outArg || path.join('runs', 'r4_phase5_visual_inspection'));
 const userDataDir = path.join(outDir, 'user-data');
 fs.mkdirSync(outDir, { recursive: true });
 fs.mkdirSync(userDataDir, { recursive: true });
