@@ -9,7 +9,8 @@ import type { SettlementRecord } from '../map/settlements.js';
 import type { DisplacementState, FactionId, GameState, MilitiaPoolState, MunicipalityId, SustainabilityState } from './game_state.js';
 
 import { buildAdjacencyMapCached, type AdjacencyMap } from '../map/adjacency_map.js';
-import { computeFrontEdges } from '../map/front_edges.js';
+import { computeFrontEdges, type FrontEdge } from '../map/front_edges.js';
+import { CANONICAL_FACTIONS } from './game_state.js';
 import type { EdgeRecord } from '../map/settlements.js';
 import { getEffectiveSettlementSide } from './control_effective.js';
 import { computeFrontBreaches, type FrontBreach } from './front_breaches.js';
@@ -230,18 +231,217 @@ function countPersistentBreaches(
 }
 
 /**
+ * F1 (legacy S-id consumer sweep, 2026-11-14): front and supply in the SAME id space as the
+ * `settlements` map (OSIDs in a campaign). Built by the war step from the operational graph
+ * (`buildOsidDisplacementPressureInputs`).
+ *
+ * Before F1 the war step handed OSID settlements together with legacy `S…` edges: the BFS
+ * found no neighbour and the legacy supply BFS reached nothing, so 109 of 110 municipalities
+ * were "surrounded" and collapsed by turn 6, pinning negotiation momentum at 1.0 from turn 4.
+ */
+export interface SustainabilityOsidInputs {
+    /** Current front edges (OSID ids). */
+    frontEdges: ReadonlyArray<FrontEdge>;
+    /** Per faction: the controlled OSIDs reachable from its supply sources. */
+    suppliedByFaction: ReadonlyMap<string, ReadonlySet<string>>;
+}
+
+function isCanonicalFaction(side: unknown): side is FactionId {
+    return typeof side === 'string' && (CANONICAL_FACTIONS as readonly string[]).includes(side);
+}
+
+/**
+ * Apply one turn of degradation to a municipality's sustainability state and build its record.
+ * Shared by the OSID and legacy paths so the degradation rules exist once.
+ */
+function applySustainabilityTurn(
+    state: GameState,
+    munId: MunicipalityId,
+    factionId: FactionId,
+    supplied: boolean,
+    isSurrounded: boolean,
+    breachCount: number
+): SustainabilityRecord {
+    const currentTurn = state.meta.turn;
+    const sustState = getOrInitSustainabilityState(state, munId);
+
+    // Update unsupplied_turns
+    let unsuppliedTurns = sustState.unsupplied_turns;
+    if (!supplied) {
+        // If last_updated_turn was last turn, increment; otherwise reset to 1
+        if (sustState.last_updated_turn === currentTurn - 1) {
+            unsuppliedTurns += 1;
+        } else {
+            unsuppliedTurns = 1;
+        }
+    } else {
+        unsuppliedTurns = 0;
+    }
+
+    let degradation = 0;
+    const degradationReasons: string[] = [];
+
+    if (isSurrounded) {
+        degradation += BASE_DEGRADATION;
+        degradationReasons.push('surrounded');
+
+        if (unsuppliedTurns >= UNSUPPLIED_ACCELERATION_THRESHOLD) {
+            degradation += UNSUPPLIED_ACCELERATION;
+            degradationReasons.push(`unsupplied_${unsuppliedTurns}_turns`);
+        }
+
+        if (breachCount > 0) {
+            degradation += BREACH_DEGRADATION;
+            degradationReasons.push(`breaches_${breachCount}`);
+        }
+
+        const dispState = state.displacement.displacement_state?.[munId] as DisplacementState | undefined;
+        if (dispState && dispState.original_population > 0) {
+            const displacementRatio = dispState.displaced_out / dispState.original_population;
+            if (displacementRatio >= DISPLACEMENT_DEGRADATION_THRESHOLD) {
+                degradation += DISPLACEMENT_DEGRADATION;
+                degradationReasons.push(`displacement_${Math.floor(displacementRatio * 100)}%`);
+            }
+        }
+    }
+
+    // Apply degradation (sustainability_score never increases)
+    const scoreBefore = sustState.sustainability_score;
+    let scoreAfter = Math.max(0, scoreBefore - degradation);
+    const collapsed = scoreAfter <= 0;
+    if (collapsed) {
+        scoreAfter = 0;
+    }
+
+    sustState.is_surrounded = isSurrounded;
+    sustState.unsupplied_turns = unsuppliedTurns;
+    sustState.sustainability_score = scoreAfter;
+    sustState.collapsed = collapsed;
+    sustState.last_updated_turn = currentTurn;
+
+    return {
+        mun_id: munId,
+        faction_id: factionId,
+        is_surrounded: isSurrounded,
+        unsupplied_turns: unsuppliedTurns,
+        sustainability_score_before: scoreBefore,
+        sustainability_score_after: scoreAfter,
+        collapsed,
+        authority_degraded: scoreAfter < AUTHORITY_DEGRADED_THRESHOLD,
+        degradation_this_turn: degradation,
+        degradation_reasons: degradationReasons
+    };
+}
+
+/**
+ * OSID path (campaign). One evaluation per municipality with a militia pool, for one holder:
+ * a faction whose OSIDs here are all cut off from supply if there is one, otherwise the faction
+ * holding most of its OSIDs (ties: id order). `sustainability_state` is keyed by municipality,
+ * so the old per-pool loop degraded a municipality once per pool (2-3 times a turn) and the
+ * last pool's faction won.
+ *
+ * Surrounded = the holder holds OSIDs here and none is reachable from its supply sources over
+ * friendly OSIDs. That is the canonical definition (a friendly path to a supplied friendly
+ * municipality): any such path also connects this municipality to a supply source.
+ */
+function updateSustainabilityOsid(
+    state: GameState,
+    settlements: Map<string, SettlementRecord>,
+    militiaPools: Record<MunicipalityId, MilitiaPoolState>,
+    inputs: SustainabilityOsidInputs
+): SustainabilityStepReport {
+    const pc = state.political.political_controllers ?? {};
+
+    const osidsByMun = new Map<MunicipalityId, string[]>();
+    for (const sid of [...settlements.keys()].sort(strictCompare)) {
+        const rec = settlements.get(sid)!;
+        const mun = (rec.mun1990_id ?? rec.mun_code) as MunicipalityId;
+        const list = osidsByMun.get(mun) ?? [];
+        list.push(sid);
+        osidsByMun.set(mun, list);
+    }
+
+    const munIds = new Set<MunicipalityId>();
+    for (const key of Object.keys(militiaPools)) {
+        const pool = militiaPools[key];
+        if (!pool || typeof pool !== 'object' || typeof pool.faction !== 'string') continue;
+        munIds.add(typeof pool.mun_id === 'string' ? pool.mun_id : key);
+    }
+
+    const breaches = computeFrontBreaches(state, [...inputs.frontEdges]);
+    const breachEdges = new Map<string, FrontEdge>();
+    for (const e of inputs.frontEdges) breachEdges.set(e.edge_id, e);
+
+    const records: SustainabilityRecord[] = [];
+    let totalNegotiationPressureIncrement = 0;
+
+    for (const munId of [...munIds].sort(strictCompare)) {
+        const osids = osidsByMun.get(munId) ?? [];
+        const heldBy = new Map<FactionId, string[]>();
+        for (const osid of osids) {
+            const side = pc[osid];
+            if (!isCanonicalFaction(side)) continue;
+            const list = heldBy.get(side) ?? [];
+            list.push(osid);
+            heldBy.set(side, list);
+        }
+        // A cut-off holder outranks a supplied one: Srebrenica and Žepa became minorities of
+        // their municipalities' OSIDs, and a majority-holder rule would never see them (the
+        // RF-3 P6 lesson). Within each class: most OSIDs, then id order.
+        let holder: FactionId | null = null;
+        let holderCut = false;
+        for (const side of CANONICAL_FACTIONS) {
+            const held = heldBy.get(side);
+            if (!held || held.length === 0) continue;
+            const reachable = inputs.suppliedByFaction.get(side);
+            const cut = !held.some((osid) => reachable?.has(osid) === true);
+            const better = holder === null
+                || (cut && !holderCut)
+                || (cut === holderCut && held.length > (heldBy.get(holder)?.length ?? 0));
+            if (better) {
+                holder = side;
+                holderCut = cut;
+            }
+        }
+        if (holder === null) continue;
+        const supplied = !holderCut;
+        const munSet = new Set(osids);
+        let breachCount = 0;
+        for (const b of breaches) {
+            const e = breachEdges.get(b.edge_id);
+            if (e && (munSet.has(e.a) || munSet.has(e.b))) breachCount += 1;
+        }
+
+        const record = applySustainabilityTurn(state, munId, holder, supplied, !supplied, breachCount);
+        if (record.collapsed) totalNegotiationPressureIncrement += COLLAPSE_PRESSURE_INCREMENT;
+        records.push(record);
+    }
+
+    records.sort((a, b) => strictCompare(a.mun_id, b.mun_id));
+    return { by_municipality: records, negotiation_pressure_increment: totalNegotiationPressureIncrement };
+}
+
+/**
  * Update sustainability state for all municipalities.
+ *
+ * With `osid` (the campaign war step), front and supply come from the operational graph and
+ * each municipality is evaluated once. Without it, the legacy path derives them from
+ * `settlementEdges` (unit fixtures and legacy CLI harnesses whose edges share the
+ * settlements' id space).
  */
 export function updateSustainability(
     state: GameState,
     settlements: Map<string, SettlementRecord>,
-    settlementEdges: EdgeRecord[]
+    settlementEdges: EdgeRecord[],
+    osid?: SustainabilityOsidInputs
 ): SustainabilityStepReport {
-    const currentTurn = state.meta.turn;
     const militiaPools = state.military.militia_pools as Record<MunicipalityId, MilitiaPoolState> | undefined;
 
     if (!militiaPools || typeof militiaPools !== 'object') {
         return { by_municipality: [], negotiation_pressure_increment: 0 };
+    }
+    if (osid) {
+        return updateSustainabilityOsid(state, settlements, militiaPools, osid);
     }
 
     // Compute derived state
@@ -271,99 +471,17 @@ export function updateSustainability(
 
         const munId = typeof pool.mun_id === 'string' ? pool.mun_id : key;
 
-        // Get or initialize sustainability state
-        const sustState = getOrInitSustainabilityState(state, munId);
-
         // Check conditions
         const reachableSettlements = reachableByFaction.get(factionId) ?? new Set<string>();
         const supplied = isMunicipalitySupplied(factionId, munId, settlements, reachableSettlements);
         const surrounded = isMunicipalitySurrounded(munId, factionId, settlements, adjacencyMap, state, reachableSettlements);
         const breachCount = countPersistentBreaches(munId, settlements, breaches, frontEdges);
 
-        // Update unsupplied_turns
-        let unsuppliedTurns = sustState.unsupplied_turns;
-        if (!supplied) {
-            // If last_updated_turn was last turn, increment; otherwise reset to 1
-            if (sustState.last_updated_turn === currentTurn - 1) {
-                unsuppliedTurns += 1;
-            } else {
-                unsuppliedTurns = 1;
-            }
-        } else {
-            // Reset if supplied
-            unsuppliedTurns = 0;
-        }
-
-        // Update is_surrounded
-        const isSurrounded = surrounded;
-
-        // Calculate degradation
-        let degradation = 0;
-        const degradationReasons: string[] = [];
-
-        if (isSurrounded) {
-            // Base degradation when surrounded
-            degradation += BASE_DEGRADATION;
-            degradationReasons.push('surrounded');
-
-            // Unsupplied acceleration
-            if (unsuppliedTurns >= UNSUPPLIED_ACCELERATION_THRESHOLD) {
-                degradation += UNSUPPLIED_ACCELERATION;
-                degradationReasons.push(`unsupplied_${unsuppliedTurns}_turns`);
-            }
-
-            // Breach interaction
-            if (breachCount > 0) {
-                degradation += BREACH_DEGRADATION;
-                degradationReasons.push(`breaches_${breachCount}`);
-            }
-
-            // Displacement interaction
-            const dispState = state.displacement.displacement_state?.[munId] as DisplacementState | undefined;
-            if (dispState && dispState.original_population > 0) {
-                const displacementRatio = dispState.displaced_out / dispState.original_population;
-                if (displacementRatio >= DISPLACEMENT_DEGRADATION_THRESHOLD) {
-                    degradation += DISPLACEMENT_DEGRADATION;
-                    degradationReasons.push(`displacement_${Math.floor(displacementRatio * 100)}%`);
-                }
-            }
-        }
-
-        // Apply degradation (sustainability_score never increases)
-        const scoreBefore = sustState.sustainability_score;
-        let scoreAfter = Math.max(0, scoreBefore - degradation);
-        const collapsed = scoreAfter <= 0;
-        if (collapsed) {
-            scoreAfter = 0;
-        }
-
-        // Update state
-        sustState.is_surrounded = isSurrounded;
-        sustState.unsupplied_turns = unsuppliedTurns;
-        sustState.sustainability_score = scoreAfter;
-        sustState.collapsed = collapsed;
-        sustState.last_updated_turn = currentTurn;
-
-        // Authority degradation (scaffolding, no mechanics yet)
-        const authorityDegraded = scoreAfter < AUTHORITY_DEGRADED_THRESHOLD;
-
-        // Negotiation pressure increment (for collapsed municipalities)
-        if (collapsed) {
+        const record = applySustainabilityTurn(state, munId, factionId, supplied, surrounded, breachCount);
+        if (record.collapsed) {
             totalNegotiationPressureIncrement += COLLAPSE_PRESSURE_INCREMENT;
         }
-
-        records.push({
-            mun_id: munId,
-            faction_id: factionId,
-            is_surrounded: isSurrounded,
-            unsupplied_turns: unsuppliedTurns,
-            sustainability_score_before: scoreBefore,
-            sustainability_score_after: scoreAfter,
-            collapsed: collapsed,
-            authority_degraded: authorityDegraded,
-            degradation_this_turn: degradation,
-            degradation_reasons: degradationReasons
-        });
+        records.push(record);
     }
 
     // Sort records deterministically
