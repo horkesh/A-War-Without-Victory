@@ -212,6 +212,8 @@ When an officer departs (historical departure date, casualty, capture, or retire
 
 **Bot factions:** Automatic succession using historical successor lookup. The system finds the next officer with the same `home_corps_id`, available at the current turn, prioritized by pool tier (starter > tier_a > tier_b > tier_c).
 
+**Dated corps schedule:** where the corps schedule names a commander for the date, he takes the corps first and replaces a stand-in when his tenure begins. Your own appointee is never rotated out, and in Full Control you are asked instead of the change being made for you. Commanders who survived the war in history are not killed by length of service. The schedule ships empty, so until its dates are filled in the pool ranking above applies.
+
 **Faction-specific succession rules:**
 - **VRS:** Brain drain — officers leave at an increasing rate after week 40, reflecting the real degradation of the Serbian officer corps.
 - **ARBiH:** Pool regeneration — new officers emerge periodically with modest base competence but high improvement potential, reflecting the wartime professionalization of the Bosnian army. Early-war warlord friction reduces effectiveness.

@@ -309,6 +309,12 @@ Canonical historical succession is encoded in `data/scenarios/army_co_roster.jso
 
 Officer scalar fields (`stubbornness 1-5`, `override_tolerance 1-5`) are populated at scenario init by `army_co_roster_loader.ts`. Mid-run succession is handled by existing `processOfficerSuccession` (combat-death + relief paths) plus A4-introduced scheduled transitions when tenure_until is reached.
 
+**Corps commanders (command-loop proposal §5E, owner decision 3, 2026-11-14).** A dated, sourced corps schedule, `data/scenarios/corps_co_roster.json` (per corps: officer, tenure start and end, historical fate `survived` / `killed` / `relieved`, source), decides who commands each corps unless the President replaced the commander or the commander fell:
+- vacancies are filled from the schedule first; the pool ranking (`findBestReplacement`) is the counterfactual fallback, never the default for a scheduled corps;
+- when a scheduled tenure starts, the fallback holder steps aside; the President's own appointee (`co_replacement_record`) is never rotated out, and a manually controlled player receives a replacement matter instead of an automatic swap;
+- an officer the schedule records as having survived the war does not accrue the casualty-exposure clock; historical deaths and reliefs are scheduled data, not timers;
+- the mechanism is faction-symmetric (§X.4) and does nothing while the schedule is empty. The file ships empty; the dates are the post-freeze calibration pass.
+
 ### X.4 Faction-symmetric mechanism, faction-asymmetric data
 The mechanism (interpretation, persistence, briefing overlay, corps-role gating) is faction-symmetric: same code paths for RBiH, RS, HRHB. Faction asymmetry lives entirely in DATA: leader scalars (B2), officer rosters (A4), persona prose (D1). Static-grep guards in tests prevent per-faction string-equality branches in the mechanism layer.
 
