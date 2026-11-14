@@ -1698,7 +1698,7 @@ export const bcsMessages: Partial<Record<MessageKey, string>> = {
     'onboarding.04.title': 'Pregled prije odluke',
     'onboarding.04.body': 'Statusna traka ratne sobe prikazuje trenutnu fazu, prioritete i preglede na čekanju. Prioritetni dosije navodi šta štab označava kao hitno. Otvorite Štab armije za uvid u spremnost korpusa, zalihe i komandno trenje prije obaveze.',
     'onboarding.05.title': 'Predsjednički sto',
-    'onboarding.05.body': 'Prije nastavka poteza, predsjednički sto prikazuje svaki izbor na čekanju. Otvorite svaki, odlučite i vratite se. Riješite što možete; odgodite što morate.',
+    'onboarding.05.body': 'Prije nastavka poteza, predsjednički sto prikazuje svaki izbor na čekanju. Otvorite svaki, pogledajte šta traži od vas, odlučite i vratite se za sto. Riješite što možete; odgodite što morate.',
     'onboarding.06.title': 'Komandujete kroz generale',
     'onboarding.06.body': 'Komandujete kroz svoje generale, ne nad pojedinačnim jedinicama. Vi sami nikad ne gurate brigade - svaki napad ide kroz operaciju korpusa. Vaši komandanti predlažu operacije; vi odobravate, odbijate ili prisilno pokrećete protiv njihovog suda uz cijenu komandnog autoriteta. Vi zadajete smjer i nosite posljedice; oni vode bitku.',
     'onboarding.07.title': 'Nastavite i pročitajte posljedice',

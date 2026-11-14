@@ -1731,7 +1731,7 @@ export const enMessages = {
     'onboarding.04.title': 'Inspect Before You Decide',
     'onboarding.04.body': 'The Warroom status bar shows the current phase, priorities, and pending reviews. The priority docket lists what your staff flags as urgent. Open Army HQ to drill into corps readiness, supply, and command friction before you commit.',
     'onboarding.05.title': "President's Desk",
-    'onboarding.05.body': "Before you advance the week, the President's Desk lists every pending choice. Open each one, decide, and come back. Resolve what you can; defer what you must.",
+    'onboarding.05.body': "Before you advance the week, the President's Desk lists every pending choice. Open each one, see what it needs from you, decide, and return to the desk. Resolve what you can; defer what you must.",
     'onboarding.06.title': 'You Command Through Generals',
     'onboarding.06.body': "You command through your generals, not over individual units. You never push brigades yourself - every assault flows through a corps operation. Your commanders propose operations; you approve, decline, or force-launch over their judgment at the cost of command authority. You set direction and bear the consequences; they fight the battle.",
     'onboarding.07.title': 'Advance and Read the Aftermath',

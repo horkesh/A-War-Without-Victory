@@ -146,7 +146,8 @@ describe('eventDisplayCopy resolver', () => {
         expect(resolveEventDisplayTitle('east_mostar_siege_1993', 'HVO Besieges East Mostar', { locale: 'bcs' })).toBe('Podijeljeni Mostar');
         expect(resolveEventDisplayTitle('central_bosnia_fighting_1993', 'Central Bosnia Fronts Harden', { locale: 'en' })).toBe('Central Bosnia Fronts Harden');
         expect(resolveEventDisplayTitle('no_such_event', 'Persisted', { locale: 'bcs' })).toBe('Persisted');
-        expect(resolveEventDisplayTitle('csq_hvo_central_bosnia_offensive_1993', 'Ahmići and the Rupture', { locale: 'bcs' })).toBe('Ahmići i raskid');
+        expect(resolveEventDisplayTitle('csq_hvo_central_bosnia_offensive_1993', 'Ahmići and the Rupture', { locale: 'bcs' })).toBe('Masakr u Ahmićima i kraj saveza');
+        expect(resolveEventDisplayTitle('csq_hvo_central_bosnia_offensive_1993', 'Ahmići and the Rupture', { locale: 'en' })).toBe('The Ahmići Massacre and the End of the Alliance');
     });
 
     it('resolves the narrative for the acknowledgement modal in the active locale', () => {

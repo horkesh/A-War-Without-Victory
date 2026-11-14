@@ -588,7 +588,7 @@
     "id": "csq_accelerated_safe_areas_1993",
     "image": "event_un_presence.webp",
     "title": "Safe Areas With Teeth",
-    "narrative": "UNSCR 819, 824, and 836 arrive in the counterfactual with the mandate and the rules of engagement the historical resolutions lacked. Dutch and French detachments arrive at Srebrenica, Goražde, Žepa, and Bihać with artillery and close-air-support tasking, not only with logistic and observer roles. VRS corps commanders in Drinski and eastern axes receive written guidance that operations against those perimeters will be met with NATO response. The arithmetic of the enclaves changes: they cease to be siege objectives and begin to be diplomatic preconditions.",
+    "narrative": "UNSCR 819, 824, and 836 arrive in the counterfactual with the mandate and the rules of engagement the historical resolutions lacked. Dutch and French detachments arrive at Srebrenica, Goražde, Žepa, and Bihać with artillery and close-air-support tasking, not only with logistic and observer roles. VRS corps commanders on the Drina and eastern axes receive written guidance that operations against those perimeters will be met with NATO response. The arithmetic of the enclaves changes: they cease to be siege objectives and begin to be diplomatic preconditions.",
     "category": "diplomatic",
     "trigger": {
       "turn_min": 61,
