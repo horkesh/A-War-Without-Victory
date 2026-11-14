@@ -254,10 +254,26 @@ describe('empty-sector relief reassignment', () => {
     });
 
     describe('SE7E: a frontless sector that still lists its own reserve/rear', () => {
-        // The empty sector keeps a dug-in rear brigade one hop behind its front. Construction's
-        // zero-assigned rescue cannot commit a dug-in brigade, so before SE7E the sector was
-        // ignored by T1 relief (it was not "truly empty") and stayed frontless indefinitely.
-        function addOwnRear(briefing: any, id: string, locationOsid: string, posture = 'dig_in') {
+        // Chain: rear - a - b - c - front (empty sector's front). A deeper node hangs off rear.
+        // Construction's zero-assigned rescue reaches 3 hops and skips dug-in brigades; the bot
+        // sector march moves assigned and reserve brigades only. Before SE7E a frontless sector
+        // that listed any own reserve/rear was not "truly empty", so T1 never acted and an
+        // eligible own rear brigade beyond 3 hops never moved.
+        function addDeepNode(briefing: any, osid: string) {
+            briefing.spatial.adjacency.set(osid, ['op:test:rear']);
+            briefing.spatial.adjacency.set('op:test:rear', [
+                ...(briefing.spatial.adjacency.get('op:test:rear') ?? []),
+                osid,
+            ]);
+            briefing.spatial.friendlyOsidsByFaction.get('RBiH')!.add(osid);
+        }
+        function addOwn(
+            briefing: any,
+            id: string,
+            locationOsid: string,
+            bucket: 'rear' | 'reserve',
+            posture = 'defend',
+        ) {
             const own = structuredClone(briefing.state_ref.military.formations.relief_brigade);
             own.id = id;
             own.name = id;
@@ -269,59 +285,63 @@ describe('empty-sector relief reassignment', () => {
             const empty = briefing.sectors.find(
                 (sector: { sector_id: string }) => sector.sector_id === 'sector:test:empty',
             );
-            empty.rear_brigade_ids = [...(empty.rear_brigade_ids ?? []), id];
+            const key = bucket === 'rear' ? 'rear_brigade_ids' : 'reserve_brigade_ids';
+            empty[key] = [...(empty[key] ?? []), id];
             return own;
         }
+        const relief = (brigadeId: string, sectorId = 'sector:test:empty') => ({
+            brigade_id: brigadeId,
+            to_sector_id: sectorId,
+            reason: 'empty front sector requires corps relief',
+        });
 
-        it('relieves a frontless sector whose own pool is only dug in, from a sibling donor', () => {
+        it('commits its own eligible rear brigade beyond the construction radius, not a closer sibling', () => {
             const briefing = makeBriefing();
-            const own = addOwnRear(briefing, 'own_dug_in', 'op:test:c');
+            // Sibling rear donor at op:test:rear: 4 hops. Own rear at op:test:deep: 5 hops.
+            addDeepNode(briefing, 'op:test:deep');
+            const own = addOwn(briefing, 'own_far_rear', 'op:test:deep', 'rear');
+            const before = structuredClone(own);
+
+            expect(computeEmptySectorReliefReassignments(briefing)).toEqual([relief('own_far_rear')]);
+            expect(own).toEqual(before); // intent only: no location or posture write
+        });
+
+        it('commits its own rear when its own reserve is dug in', () => {
+            const briefing = makeBriefing();
+            addOwn(briefing, 'own_dug_in_reserve', 'op:test:c', 'reserve', 'dig_in');
+            addOwn(briefing, 'own_rear', 'op:test:a', 'rear');
+
+            expect(computeEmptySectorReliefReassignments(briefing)).toEqual([relief('own_rear')]);
+        });
+
+        it('leaves a sector with an eligible own reserve to the reserve sector march', () => {
+            const briefing = makeBriefing();
+            addOwn(briefing, 'own_reserve', 'op:test:c', 'reserve');
+            addOwn(briefing, 'own_rear', 'op:test:a', 'rear');
+
+            expect(computeEmptySectorReliefReassignments(briefing)).toEqual([]);
+        });
+
+        it('does not borrow a sibling brigade while its own pool is only dug in', () => {
+            const briefing = makeBriefing();
+            const own = addOwn(briefing, 'own_dug_in_rear', 'op:test:c', 'rear', 'dig_in');
             const ownBefore = structuredClone(own);
 
-            expect(computeEmptySectorReliefReassignments(briefing)).toEqual([{
-                brigade_id: 'relief_brigade',
-                to_sector_id: 'sector:test:empty',
-                reason: 'empty front sector requires corps relief',
-            }]);
-            // Dug-in exclusion is unchanged: the own brigade is neither selected nor touched.
-            expect(own).toEqual(ownBefore);
+            expect(computeEmptySectorReliefReassignments(briefing)).toEqual([]);
+            expect(own).toEqual(ownBefore); // dug-in exclusion unchanged
         });
 
-        it('prefers an eligible own reserve/rear brigade over a closer sibling donor', () => {
+        it('breaks a tie between equal own rear brigades by formation id', () => {
             const briefing = makeBriefing();
-            // The sibling rear donor stands at op:test:rear (4 hops from the empty front). The own
-            // rear brigade sits one node deeper (5 hops, well beyond construction's 3-hop rescue).
-            const deep = 'op:test:deep';
-            briefing.spatial.adjacency.set(deep, ['op:test:rear']);
-            briefing.spatial.adjacency.set('op:test:rear', [
-                ...(briefing.spatial.adjacency.get('op:test:rear') ?? []),
-                deep,
-            ]);
-            briefing.spatial.friendlyOsidsByFaction.get('RBiH')!.add(deep);
-            addOwnRear(briefing, 'own_far_rear', deep, 'defend');
+            addOwn(briefing, 'own_zulu', 'op:test:b', 'rear');
+            addOwn(briefing, 'own_alpha', 'op:test:b', 'rear');
 
-            expect(computeEmptySectorReliefReassignments(briefing)).toEqual([{
-                brigade_id: 'own_far_rear',
-                to_sector_id: 'sector:test:empty',
-                reason: 'empty front sector requires corps relief',
-            }]);
-        });
-
-        it('breaks a tie between equal own candidates by formation id', () => {
-            const briefing = makeBriefing();
-            addOwnRear(briefing, 'own_zulu', 'op:test:b', 'defend');
-            addOwnRear(briefing, 'own_alpha', 'op:test:b', 'defend');
-
-            expect(computeEmptySectorReliefReassignments(briefing)).toEqual([{
-                brigade_id: 'own_alpha',
-                to_sector_id: 'sector:test:empty',
-                reason: 'empty front sector requires corps relief',
-            }]);
+            expect(computeEmptySectorReliefReassignments(briefing)).toEqual([relief('own_alpha')]);
         });
 
         it('leaves a sector with a front brigade alone, whatever its reserve/rear lists say', () => {
             const briefing = makeBriefing();
-            addOwnRear(briefing, 'own_dug_in', 'op:test:c');
+            addOwn(briefing, 'own_rear', 'op:test:a', 'rear');
             const empty = briefing.sectors.find(
                 (sector: { sector_id: string }) => sector.sector_id === 'sector:test:empty',
             );
@@ -330,12 +350,11 @@ describe('empty-sector relief reassignment', () => {
             expect(computeEmptySectorReliefReassignments(briefing)).toEqual([]);
         });
 
-        it('commits at most one donor per frontless sector and never reuses a donor', () => {
+        it('commits at most one donor per sector and never reuses a donor', () => {
             const briefing = makeBriefing();
-            addOwnRear(briefing, 'own_dug_in', 'op:test:c');
-            const second = addOwnRear(briefing, 'second_free', 'op:test:b', 'defend');
-            // A second frontless sector on the same chain: it must not receive a donor that the
-            // first sector already took, and each sector gets one donor at most.
+            addOwn(briefing, 'own_rear', 'op:test:b', 'rear');
+            // A second, fully empty sector on the same front: the own rear brigade, already
+            // taken by the first sector, is not reused; the sibling rear donor goes there.
             const other = structuredClone(
                 briefing.sectors.find((s: { sector_id: string }) => s.sector_id === 'sector:test:empty'),
             );
@@ -344,18 +363,9 @@ describe('empty-sector relief reassignment', () => {
             other.sub_segments[0].sub_segment_id = 'sector:test:empty_2:sub';
             briefing.sectors.push(other);
 
-            const result = computeEmptySectorReliefReassignments(briefing);
-            expect(result).toEqual([
-                {
-                    brigade_id: second.id,
-                    to_sector_id: 'sector:test:empty',
-                    reason: 'empty front sector requires corps relief',
-                },
-                {
-                    brigade_id: 'relief_brigade',
-                    to_sector_id: 'sector:test:empty_2',
-                    reason: 'empty front sector requires corps relief',
-                },
+            expect(computeEmptySectorReliefReassignments(briefing)).toEqual([
+                relief('own_rear'),
+                relief('relief_brigade', 'sector:test:empty_2'),
             ]);
         });
     });

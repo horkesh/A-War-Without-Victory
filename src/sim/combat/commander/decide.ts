@@ -262,20 +262,25 @@ function canReleaseReliefDonor(placement: ReliefDonorPlacement): boolean {
  * This emits intent only; normal sector-march and column-movement phases perform
  * the physical move over subsequent turns.
  *
- * "Empty" means no front (assigned) brigade, whatever the sector's own reserve/rear
- * lists say (SE7E). Sector construction runs earlier in the same turn and already
- * promotes any own reserve/rear brigade that passes its local bar
- * (`ensureMinimumSectorCoverage`, zero-assigned rescue), so a sector that is still
- * frontless here owns a pool that construction could not commit — dug in, under
- * another order, beyond the local relief radius. Before SE7E such a sector was left
- * to construction alone and stayed empty indefinitely (ARBiH 1st Corps
- * Visoko–Kiseljak, t98–t188 on main).
+ * A sector with no reserve or rear of its own is relieved from any legal same-corps
+ * donor (rear, then reserve, then surplus line; then distance; then id).
  *
- * Donor eligibility is unchanged. Ordering: the empty sector's own reserve/rear first
- * (the standing OG's own second echelon, ADR-0006/ADR-0007), then placement tier,
- * then friendly distance, then formation id (strictCompare). At most one donor per
- * empty sector per pass, and a donor serves at most one sector (ADR-0007 bounded
- * reserve commitment).
+ * SE7E — a frontless sector (no assigned brigade) that still lists its own pool:
+ * - An eligible own RESERVE belongs to the reserve sector march (`evaluateSectorMarch`:
+ *   a reserve of a sector with no line holder marches to that front), so the sector is
+ *   left to it.
+ * - Otherwise the sector commits its own eligible REAR brigade (nearest, then id). No
+ *   other path moves a rear brigade forward: sector construction promotes only an own
+ *   brigade within its local radius that is not dug in or under an order
+ *   (`ensureMinimumSectorCoverage`, zero-assigned rescue), and the bot sector march
+ *   indexes assigned and reserve brigades only. Before SE7E such a sector was ignored
+ *   here because it was not "truly empty", and it could stay frontless indefinitely
+ *   (ARBiH 1st Corps Visoko–Kiseljak, t98–t188 on main).
+ * - It never borrows another sector's brigade while it still has its own pool.
+ *
+ * Donor eligibility is unchanged (dug in, under an order, moving, operation-bound,
+ * disrupted and loaned brigades are excluded). At most one donor per empty sector per
+ * pass, and a donor serves at most one sector (ADR-0007 bounded reserve commitment).
  */
 export function computeEmptySectorReliefReassignments(
     briefing: CommanderBriefing,
@@ -316,19 +321,17 @@ export function computeEmptySectorReliefReassignments(
     for (const targetSector of emptySectors) {
         const targetOsids = new Set(getSectorFrontOsids(targetSector));
         if (hasPendingReliefForTargets(briefing, targetOsids)) continue;
-        const ownPool = new Set<FormationId>([
-            ...targetSector.reserve_brigade_ids,
-            ...(targetSector.rear_brigade_ids ?? []),
-        ]);
+        const ownReserve = new Set<FormationId>(targetSector.reserve_brigade_ids);
+        const ownRear = new Set<FormationId>(targetSector.rear_brigade_ids ?? []);
+        const hasOwnPool = ownReserve.size + ownRear.size > 0;
         // An own reserve/rear brigade already standing on this front holds it in fact; only the
-        // buckets lag. Relief would march a donor onto a held position (or the brigade onto its
-        // own), so leave the sector to construction. A no-op for a sector with no own pool.
+        // buckets lag. Leave the sector to construction. A no-op for a sector with no own pool.
         if (briefing.brigades.some((brigade) =>
-            ownPool.has(brigade.id)
+            (ownReserve.has(brigade.id) || ownRear.has(brigade.id))
             && brigade.location_osid != null
             && targetOsids.has(brigade.location_osid))) continue;
 
-        const candidates = briefing.brigades
+        const eligible = briefing.brigades
             .filter((brigade) => {
                 if (brigade.faction !== briefing.faction || brigade.corps_id !== briefing.corps_id) return false;
                 if (!isSectorRosterEligibleFormation(brigade) || !brigade.location_osid) return false;
@@ -358,13 +361,20 @@ export function computeEmptySectorReliefReassignments(
                 }
                 return { brigade, placement: placements.get(brigade.id)!, distance };
             })
-            .filter((candidate) => candidate.distance >= 0)
-            .sort((left, right) =>
-                Number(!ownPool.has(left.brigade.id)) - Number(!ownPool.has(right.brigade.id))
-                || left.placement.tier - right.placement.tier
-                || left.distance - right.distance
-                || strictCompare(left.brigade.id, right.brigade.id),
-            );
+            .filter((candidate) => candidate.distance >= 0);
+
+        let candidates = eligible;
+        if (hasOwnPool) {
+            // SE7E (see the function comment): the reserve sector march owns an eligible own
+            // reserve; otherwise only the sector's own rear is committed.
+            if (eligible.some((candidate) => ownReserve.has(candidate.brigade.id))) continue;
+            candidates = eligible.filter((candidate) => ownRear.has(candidate.brigade.id));
+        }
+        candidates.sort((left, right) =>
+            left.placement.tier - right.placement.tier
+            || left.distance - right.distance
+            || strictCompare(left.brigade.id, right.brigade.id),
+        );
 
         const selected = candidates[0];
         if (!selected) continue;
