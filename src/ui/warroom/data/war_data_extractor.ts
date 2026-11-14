@@ -566,7 +566,7 @@ function extractTerritory(
     };
 }
 
-function extractDisplacement(state: GameState, pf: FactionId): DisplacementSnapshot {
+export function extractDisplacement(state: GameState, pf: FactionId): DisplacementSnapshot {
     const dispState = state.displacement.displacement_state ?? {};
     const controllers = state.political.political_controllers ?? {};
     const camps = state.displacement.displacement_camp_state ?? {};
@@ -588,7 +588,9 @@ function extractDisplacement(state: GameState, pf: FactionId): DisplacementSnaps
     const playerTakeoverTimers = Object.keys(timers)
         .sort(sc)
         .map((timerId) => timers[timerId])
-        .filter((timer) => timer?.from_faction === pf);
+        // RF-5B: a policy-expulsion timer is not hostile-takeover pressure (no control change;
+        // wave B timers sit 16 turns ahead of their wave). Its harm reaches the ledger when it fires.
+        .filter((timer) => timer?.from_faction === pf && timer?.cause !== 'policy_expulsion');
     const hostileTakeoverMunicipalities = Array.from(new Set(
         playerTakeoverTimers
             .map((timer) => timer?.mun_id)
