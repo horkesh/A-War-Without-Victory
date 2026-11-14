@@ -6039,7 +6039,7 @@ export const enMessages = {
     'directive.reserveHold.title': 'Keep this elite brigade at Main Staff until enclave relief or a critical commander request.',
     'directive.receipt.aria': 'Directive receipt',
     'directive.receipt.stagedNextTurn': 'Directive staged for next week. Command authority is spent now; the order is consumed when you advance.',
-    'directive.receipt.stagedNextTurnFree': 'Directive staged for next week. No command authority spent; the order is consumed when you advance.',
+    'directive.receipt.stagedNextTurnFree': 'Directive staged for next week. No command authority was spent; the order is consumed when you advance.',
     'directive.receipt.leadershipDecisionOpened': 'Decision opened. Command authority is spent now; choose a response to apply its effects.',
     'directive.receipt.failed': 'Directive was not staged: {reason}.',
     'directive.receipt.cancelled': 'Directive cancelled. No command authority was spent.',

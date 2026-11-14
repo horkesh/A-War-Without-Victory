@@ -931,8 +931,10 @@ export interface ForceableReadyProposalRow {
  *
  * Reads raw GameState (military.corps_command[*].commander_state.current_plan)
  * and the pending proposals so a plan that already has an APPROVE_OP proposal is
- * excluded (that one goes through the existing commit / override path instead).
- * Returns [] when no corps holds a ready plan. Sorted by corps id then plan id.
+ * excluded (that one goes through the existing commit / override path instead),
+ * and excludes a plan with a staged presidential answer (player_op_response for
+ * that plan; B11). Returns [] when no corps holds a ready plan. Sorted by corps id
+ * then plan id.
  */
 export function buildForceableReadyPlans(
   rawState: unknown,
@@ -995,20 +997,20 @@ export function buildForceableReadyPlans(
     proposedPlanKeys.add(`${parts[1]}:${parts.slice(2).join(':')}`);
   }
 
-  // Index every APPROVE_OP review on the raw state (pending or resolved) from the
-  // player's faction: the callers pass pending reviews only, so a just-accepted or
-  // just-withheld proposal would otherwise vanish from view (B11).
-  const answeredPlanKeys = new Set<string>();
+  // Parity with resolveProactiveForceLaunchRefusal (autonomy_ipc_contract.cjs): an
+  // UNRESOLVED APPROVE_OP review from the player's faction on the raw state also
+  // routes the plan to the proposal path, even if the caller passed no proposals.
   const rawReviews = Array.isArray(meta?.pending_proposal_reviews) ? meta.pending_proposal_reviews : [];
   for (const raw of rawReviews) {
     const review = asRecord(raw);
     if (!review) continue;
     if (playerFaction && str(review.faction) !== playerFaction) continue;
+    if (review.accepted != null || review.resolved_turn != null || review.opportunity_decision != null) continue;
     const action = str(review.proposed_action);
     if (!action) continue;
     const parts = action.split(':');
     if (parts[0] !== 'APPROVE_OP' || !parts[1] || !parts[2]) continue;
-    answeredPlanKeys.add(`${parts[1]}:${parts.slice(2).join(':')}`);
+    proposedPlanKeys.add(`${parts[1]}:${parts.slice(2).join(':')}`);
   }
 
   const views: ForceableReadyPlanView[] = [];
@@ -1026,12 +1028,13 @@ export function buildForceableReadyPlans(
     if (!planId) continue;
     // Skip plans the officer already surfaced as a proposal (existing path owns those).
     if (proposedPlanKeys.has(`${corpsId}:${planId}`)) continue;
-    // B11 (R8 dry-run Council, 2026-11-14): skip plans the President already answered.
-    // accept/withhold resolves the review (so it leaves the pending list) and stages
-    // player_op_response while the plan stays 'ready' until Advance; such a plan is
-    // not "unrequested". Mirrors resolveProactiveForceLaunchRefusal in
+    // B11 (R8 dry-run Council, 2026-11-14): skip plans with a staged presidential
+    // answer. accept/withhold resolves the review (so it leaves the pending list) and
+    // stages player_op_response, which stays until the commander loop consumes it,
+    // while the plan stays 'ready'; such a plan is not "unrequested". A review that
+    // auto-expired unanswered stages nothing, so its held plan stays listed (this card
+    // is the only way to release it). Mirrors resolveProactiveForceLaunchRefusal in
     // src/desktop/autonomy_ipc_contract.cjs, which the IPC enforces.
-    if (answeredPlanKeys.has(`${corpsId}:${planId}`)) continue;
     const staged = asRecord(cc.player_op_response);
     if (staged && str(staged.plan_id) === planId) continue;
 

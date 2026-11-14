@@ -8,8 +8,10 @@
  * PENDING proposal, so the just-approved plan reappeared as "unrequested", and the
  * proactive-force-launch-op IPC accepted it (25 CA, re-tagged as a force-launch).
  *
- * A plan the President has already answered (staged player_op_response, or any
- * APPROVE_OP review for it, pending or resolved) is never "unrequested".
+ * A plan with a staged presidential answer (player_op_response for that plan, which
+ * accept-proposal and reject-proposal both stage) is never "unrequested". A review that
+ * auto-expired unanswered (apply-autonomy-transition: accepted=false, no response)
+ * leaves the plan held at 'ready', and the proactive path must stay open for it.
  */
 
 import { createRequire } from 'node:module';
@@ -90,9 +92,10 @@ describe('B11: an answered plan is never offered as an unrequested operation', (
             }),
         ],
         [
-            'resolved review whose staged response was already consumed',
+            'accepted proposal whose launch is still blocked (response kept by the commander loop)',
             makeState({
-                review: { id: 'p1', faction: 'RBiH', proposed_action: ACTION, accepted: true, resolved_turn: 73 },
+                review: { id: 'p1', faction: 'RBiH', proposed_action: ACTION, accepted: true, resolved_turn: 72 },
+                response: { plan_id: 'plan_doljani', approved: true, turn: 72 },
             }),
         ],
         [
@@ -122,6 +125,26 @@ describe('B11: an answered plan is never offered as an unrequested operation', (
         expect(buildForceableReadyPlanData(state, []).map((v: { plan_id: string }) => v.plan_id))
             .toEqual(['plan_doljani']);
         expect(resolveProactiveForceLaunchRefusal(state, 'arbih_4th_corps', 'plan_doljani')).toBeNull();
+    });
+
+    it('keeps offering a plan whose proposal auto-expired unanswered (no staged response)', () => {
+        // apply-autonomy-transition marks an unanswered review accepted=false with a
+        // resolved_turn and stages nothing; the commander loop keeps the plan at 'ready'
+        // and never re-proposes it. The proactive path is the only way to release it.
+        const state = makeState({
+            review: { id: 'p1', faction: 'RBiH', proposed_action: ACTION, accepted: false, resolved_turn: 75 },
+        });
+        expect(buildForceableReadyPlans(state, [], pendingOnly(state)).map((v) => v.plan_id))
+            .toEqual(['plan_doljani']);
+        expect(buildForceableReadyPlanData(state, pendingOnly(state)).map((v: { plan_id: string }) => v.plan_id))
+            .toEqual(['plan_doljani']);
+        expect(resolveProactiveForceLaunchRefusal(state, 'arbih_4th_corps', 'plan_doljani')).toBeNull();
+    });
+
+    it('a pending review on the raw state routes the plan to the proposal path even if the caller passed none', () => {
+        const state = makeState({ review: { id: 'p1', faction: 'RBiH', proposed_action: ACTION } });
+        expect(buildForceableReadyPlans(state, [], [])).toEqual([]);
+        expect(buildForceableReadyPlanData(state, [])).toEqual([]);
     });
 
     it('a staged response or review for a DIFFERENT plan does not hide this one', () => {

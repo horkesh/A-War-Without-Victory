@@ -186,11 +186,17 @@ function parseApproveOpAction(action) {
 
 /**
  * Why a held-ready plan may NOT go through the proactive ("unrequested") force-launch
- * path, or null when it may. A plan the officer surfaced as a pending APPROVE_OP
- * proposal belongs to the proposal path. A plan the President has already answered
- * (a staged player_op_response for it, or any resolved APPROVE_OP review for it from
- * the player's faction) is not unrequested: the officer asked and the President
- * replied (B11, R8 dry-run Council 2026-11-14). Read-only; deterministic.
+ * path, or null when it may.
+ * - A pending APPROVE_OP proposal from the player's faction for the plan belongs to
+ *   the proposal path: 'plan_has_pending_proposal'.
+ * - A staged player_op_response for the plan means the President has already answered
+ *   it (accept-proposal and reject-proposal both stage one; it stays until the
+ *   commander loop consumes it): 'plan_already_answered' (B11, R8 dry-run Council
+ *   2026-11-14).
+ * A resolved review WITHOUT a staged response is not a refusal: apply-autonomy-transition
+ * auto-expires unanswered reviews as accepted=false with no response, the plan stays
+ * held at 'ready', and this path is the only way to release it.
+ * Read-only; deterministic.
  */
 function resolveProactiveForceLaunchRefusal(state, corpsId, planId) {
   const playerFaction = state && state.meta && typeof state.meta.player_faction === 'string'
@@ -199,15 +205,12 @@ function resolveProactiveForceLaunchRefusal(state, corpsId, planId) {
   const reviews = Array.isArray(state?.meta?.pending_proposal_reviews)
     ? state.meta.pending_proposal_reviews
     : [];
-  let answeredByReview = false;
   for (const review of reviews) {
     if (!review || (playerFaction && review.faction !== playerFaction)) continue;
+    if (isResolvedProposalReviewRecord(review)) continue;
     const parsed = parseApproveOpAction(review.proposed_action);
-    if (!parsed || parsed.corpsId !== corpsId || parsed.planId !== planId) continue;
-    if (!isResolvedProposalReviewRecord(review)) return 'plan_has_pending_proposal';
-    answeredByReview = true;
+    if (parsed && parsed.corpsId === corpsId && parsed.planId === planId) return 'plan_has_pending_proposal';
   }
-  if (answeredByReview) return 'plan_already_answered';
   const response = state?.military?.corps_command?.[corpsId]?.player_op_response;
   if (response && typeof response === 'object' && response.plan_id === planId) return 'plan_already_answered';
   return null;
@@ -466,7 +469,9 @@ function buildOpProposalCardData(state, proposals) {
  * for the LIVE get-autonomy-state IPC (AutonomyPanel does not see LoadedGameState).
  *
  * A plan is forceable iff corps.commander_state.current_plan.status === 'ready'
- * AND no pending proposal carries APPROVE_OP:<corps>:<plan_id> for it.
+ * AND no pending proposal carries APPROVE_OP:<corps>:<plan_id> for it
+ * AND resolveProactiveForceLaunchRefusal returns null (no staged presidential
+ * answer for it; B11).
  * Pure / defensive / deterministic — sorted by corps id then plan id. Never mutates.
  */
 function buildForceableReadyPlanData(state, proposals) {
