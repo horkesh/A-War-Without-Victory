@@ -7,6 +7,7 @@ import { useGameStore } from '../../store/gameStore';
 import { formatPersonnel } from '../../utils/formatters';
 import { getRatingColor } from '../../utils/officerCharacter';
 import { t, useLocale, type MessageKey } from '../../i18n';
+import { localizeOfficerProse } from '../../i18n/officerProse';
 import { getLocalizedFormationName } from '../../data/formationNameLocalizations';
 import { resolveCorpsCommanderDisplay, resolveOpeningCorpsCommanderOfficer } from '../../utils/officerUtils';
 import { getPlayerSafeMunicipalityName } from '../../utils/playerSafeText';
@@ -309,10 +310,10 @@ export function PersonnelContent({ onOpenRecruitment, onOpenAutonomy }: Personne
                                 {(o.command_style || o.known_for) && (
                                     <div className="mt-1 flex flex-wrap gap-1">
                                         {o.command_style && (
-                                            <OfficerTraitPill label={t('personnel.trait.doctrinal')} value={o.command_style} tone="doctrine" />
+                                            <OfficerTraitPill label={t('personnel.trait.doctrinal')} value={localizeOfficerProse(o.command_style) ?? o.command_style} tone="doctrine" />
                                         )}
                                         {o.known_for && (
-                                            <OfficerTraitPill label={t('personnel.trait.narrative')} value={o.known_for} tone="narrative" />
+                                            <OfficerTraitPill label={t('personnel.trait.narrative')} value={localizeOfficerProse(o.known_for) ?? o.known_for} tone="narrative" />
                                         )}
                                     </div>
                                 )}

@@ -341,7 +341,7 @@ describe('desktop persistence contract', () => {
     expect(snapshots).toContain('sim.serializeState(state)');
     expect(snapshots).toContain('currentGameStateJson = runtimeStateJson;');
     expect(snapshots).toContain('currentCanonicalSaveJson = canonicalSaveJson;');
-    expect(save).toContain("fs.writeFileSync(filePath, currentCanonicalSaveJson, 'utf-8');");
+    expect(save).toContain('writeFileAtomically(filePath, currentCanonicalSaveJson);');
     expect(save).not.toContain('currentGameStateJson');
   });
 

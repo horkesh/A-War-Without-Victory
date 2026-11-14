@@ -6,6 +6,8 @@ import { getArmyReserveAttentionSummary } from '../../utils/armyReserveSeverity'
 import { turnToDateString } from '../../utils/formatters';
 import { getPlayerSafeCorpsName } from '../../utils/playerSafeText';
 import { t } from '../../i18n';
+import type { EventDefinition } from '../../../../sim/events/event_types';
+import { localizedEventTitle } from '../../data/inboxItems';
 import { isRequiredPendingEventDecision } from '../../data/eventDecisionRouting';
 import { OrderInterpretationPanel } from './OrderInterpretationPanel';
 
@@ -13,6 +15,8 @@ interface PresidentialAttentionPanelProps {
     gameState: LoadedGameState;
     playerFaction: string;
     onOpenArmyReserve?: () => void;
+    /** Boot-time event catalog; supplies the BCS title of a pending decision. */
+    eventCatalog?: ReadonlyMap<string, EventDefinition>;
 }
 
 function CountCard({ label, value, tone = 'neutral' }: { label: string; value: number; tone?: 'neutral' | 'critical' | 'warning' }) {
@@ -31,7 +35,7 @@ function CountCard({ label, value, tone = 'neutral' }: { label: string; value: n
     );
 }
 
-export function PresidentialAttentionPanel({ gameState, playerFaction, onOpenArmyReserve }: PresidentialAttentionPanelProps) {
+export function PresidentialAttentionPanel({ gameState, playerFaction, onOpenArmyReserve, eventCatalog }: PresidentialAttentionPanelProps) {
     const ipc = useIPC();
     const setLoadError = useGameStore((s) => s.setLoadError);
     const reviewQueue = gameState.presidentialReviewQueue;
@@ -194,7 +198,7 @@ export function PresidentialAttentionPanel({ gameState, playerFaction, onOpenArm
                         <div key={decision.event_id} className="rounded border border-red-500/25 bg-red-950/10 p-3 space-y-2">
                             <div className="flex items-center justify-between gap-2">
                                 <div>
-                                    <div className="text-[13px] font-bold text-text-primary">{decision.event_title}</div>
+                                    <div className="text-[13px] font-bold text-text-primary">{localizedEventTitle(decision.event_id, decision.event_title, eventCatalog)}</div>
                                     <div className="text-[13px] text-text-secondary">{t('attention.pendingSinceWeek', { date: turnToDateString(decision.turn_fired) })}</div>
                                 </div>
                                 <span className="px-2 py-0.5 text-[13px] font-bold uppercase tracking-widest rounded border border-red-500/35 bg-red-500/10 text-red-400">
