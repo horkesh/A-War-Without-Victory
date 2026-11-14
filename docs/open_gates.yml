@@ -49,7 +49,7 @@ gates:
     evidence_required: >
       A calibration-master entry for the final RF source showing the four checkpoints
       re-scored against the current painted files with tools/verify_checkpoints.cjs and no
-      checkpoint below main's 712/711/711/708 (a cell loss only by a recorded orchestrator
+      checkpoint below main's 712/709/710/705 (a cell loss only by a recorded orchestrator
       ruling); guards intact (Farz, enclave); 0 consistency failures; strict engine-health
       gate PASS on the 188-week run; baseline manifest and fingerprint re-pinned with the
       reason; and live = headless re-measured, 0 cells differing for RBiH, RS and HRHB as
@@ -57,8 +57,9 @@ gates:
     evidence_path: null
     source: docs/plans/MASTER_ROADMAP.md
     notes: >
-      Main stands at 712/711/711/708: Apr 1995 711 accepted after #583, Oct 1995 708 (Korenici
-      and Jemanlici, a known historical miss) accepted after #604, both by the orchestrator.
+      Main stands at 712/709/710/705: Apr 1995 711 accepted after #583, Oct 1995 708 (Korenici
+      and Jemanlici, a known historical miss) after #604, and 712/709/710/705 after #600
+      (siege displacement, accepted by the owner 2026-11-14).
       Each RF item (BC14-BC19) re-measures on top of the one before it; this gate closes only
       after the last one lands or is parked. Live = headless was not re-measured for the
       stance bundle (SE8 in the out-of-scope register).
