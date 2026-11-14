@@ -1052,8 +1052,10 @@ function collectUndefendedFrontSubsegmentIssues(state) {
                     ...issue,
                     donor_candidates: donorCandidates,
                 };
-                // Engine Invariant 14.9: sector construction may promote the sector's OWN
-                // reserve/rear only; a sibling sector's brigade reaches an empty front through
+                // Engine Invariant 14.9 (movement authority: an empty, reachable, same-corps front is
+                // "resolved through movement authority rather than a direct location rewrite"):
+                // sector construction promotes only the sector's OWN reserve/rear; a sibling
+                // sector's brigade reaches an empty front through
                 // commander relief (T1 intent -> T2 order -> T3 movement), one turn later. A gap
                 // on ground whose control changed THIS turn, with only sibling donors, is that
                 // relief not yet due — the saved turn cannot show it as missed (SE7: the Sana '95

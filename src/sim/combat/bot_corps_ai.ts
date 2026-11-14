@@ -426,7 +426,8 @@ export function generateAllCorpsOrders(
     if (reverseMap) {
         graphAnalysis = analyzeFactionGraphCached(state, faction, adjacency, reverseMap);
     }
-    // 6b. OG (sector) stances are set by the commander loop below and nowhere else (SE2): the
+    // 6b. OG (sector) stances are set by the commander loop below, the only deterministic bot writer (SE2;
+    // the opt-in AI-commander override in ai_commander/corps_commander_ai.ts can also set them). The
     // truce-line screening and own-operation elastic rules are commander inputs
     // (briefing.sector_situations). Without spatial context no commander runs and OGs keep
     // the 'defend' they were built with.
