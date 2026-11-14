@@ -25,6 +25,25 @@ stay put; corrected English goes in `localizations.en`, resolved by the new `src
 on every display surface (aftermath, chronicle, timeline, fired events, decisions, notifications, Wrapped,
 receipts). Report: `docs/40_reports/implemented/20261114_HVO_ARBIH_TRUTHFUL_CARDS_PANEL.md`.
 
+## 2026-11-14 — Canon propagation panel: Systems Manual corrections, Engine Invariants §14.5 status
+
+Docs only; no `src/` or `data/` change, no calibration change. #599 wrote the 14-item canon backlog into
+the Systems Manual and closed gate `REPO-CANON-PROPAGATION` without panel sign-off (Codex P1; the
+reopening commit missed the auto-merge). A four-seat panel (canon-compliance as lead and integrator,
+systems-programmer, game-designer, determinism-auditor) reviewed every added sentence against `src/`.
+Round 1 found twelve defects in the text: a dead cooldown described as live, a counter-attack path wider
+than Engine Invariants §6.3 written as canon, a retreat BFS that is one ring deep by defect, planning,
+exhaustion and feasibility gates described more broadly than the code applies them, launch criteria
+(enemy OSIDs 1, supply readiness not a gate), a supply multiplier table contradicting the code, wrong
+casualty and snapshot wording, and missing tie-breaks. All are corrected; Engine Invariants §14.5 now
+records the verified retreat order, the removed largest-component fallback and the open debts; the
+`CALIBRATION_MASTER.md` deferred-debt paragraph matches. Round 2: determinism GO; the other three seats
+GO-WITH-CONDITIONS with every text condition applied. Round 3: the lead seat cleared its last condition
+(unanimous GO on the propagation). Open as a separate decision: reconcile Invariants §6.3 with the
+sector-wide counter-attack (the Manual labels it "not canon"). The gate is closed on
+`docs/40_reports/20261114_CANON_PROPAGATION_PANEL.md`. Also: 14 `archive/*` tags pushed for branches with
+no PR and no tag (nothing deleted).
+
 ## 2026-11-13 — CI guard: a stale committed startup snapshot now fails the full-suite job
 
 Closes the gap recorded in the entry below. `full-suite-and-fingerprint.yml` (`full-suite` job) now runs
