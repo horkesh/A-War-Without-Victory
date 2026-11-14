@@ -289,7 +289,7 @@ export function renderNotices({ packages, records, staticSections }) {
   const out = [];
   out.push('# Third-Party Notices', '');
   out.push(
-    'A War Without Victory is proprietary software of Pyrrhic Games (see `LICENSE`). It includes third-party',
+    'A War Without Victory is licensed under the PolyForm Noncommercial License 1.0.0 (see `LICENSE.md`). It includes third-party',
     'software, fonts, map and elevation data, and recorded audio samples. Each keeps its own licence, and',
     'those terms govern that component. This file lists them.',
     '',
@@ -330,7 +330,7 @@ export function renderNotices({ packages, records, staticSections }) {
   }
   out.push('');
   out.push(
-    'Where a package offers a choice of licences (for example `MIT OR GPL-3.0-or-later`), Pyrrhic Games',
+    'Where a package offers a choice of licences (for example `MIT OR GPL-3.0-or-later`), the project',
     'uses it under the first permissive option listed.',
     '',
   );
