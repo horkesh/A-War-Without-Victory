@@ -36,7 +36,7 @@ Cell losses:
 
 Gains: Jemanlići, Korenići, Varošluk.
 
-Historian and war-or-game on Ozren: an exposed VRS Ozren-defence weakness (VRS2), not AI2 overreach. The RS sector held 13.4k against 21.7k on main; rs_1st_armored left for Skender Vakuf. Status: pending the orchestrator's continue/park ruling.
+Historian and war-or-game on Ozren: an exposed VRS Ozren-defence weakness (VRS2), not AI2 overreach. The RS sector held 13.4k against 21.7k on main; rs_1st_armored left for Skender Vakuf. Owner-accepted 2026-11-14 ("Yes, accept it") as an honest cost of fixing the corps gate. New main reference: 712/705/706/698. Baselines are re-blessed at the final head. Follow-ups: VRS2 Ozren defence; the Mistral 2 / Southern Move assembly-slip trace; SE7E covering both sector gaps. Out-of-scope items registered: the Ripac casualty scale, the VRS sector-0 gap and the assembly slip.
 
 ## 2026-11-14 — RF-F1: sustainability and militia fatigue read the OSID front and supply
 

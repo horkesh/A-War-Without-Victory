@@ -1,4 +1,15 @@
-**Readiness gate light strike group + bot objective lockout, RF-AI2 (draft PR #619) — 2026-11-14: measured 712 / 705 / 706 / 698. NOT ADOPTED: pending the orchestrator's continue/park ruling; baselines not re-blessed.**
+**Readiness gate light strike group + bot objective lockout, RF-AI2 (PR #619) — 2026-11-14: 712 / 705 / 706 / 698. Owner-accepted 2026-11-14 ("Yes, accept it") as an honest cost of fixing the corps gate. This is the new main reference.**
+- **Per-cell causes (vs 712/709/710/705):**
+
+  | Cell | Checkpoints | Cause class |
+  |---|---|---|
+  | Vesela, Prusac | Apr94, Apr95 (Vesela also Oct95) | match bought by a defect (VRS 2nd/1st Krajina wrongly asleep on main) |
+  | Lopare selo, Donja Trnova | Apr94, Apr95, Oct95 | main depended on the 2nd Corps being capped by this gate |
+  | Vinac, Donji Vrbljani, Baljvine, Mrkonjić Grad, Podrašnica, Pribeljci, Šipovljani | Oct95 | t186-188 knife-edge: Mistral 2 / Southern Move assemble two turns late |
+  | Jemanlići, Korenići, Varošluk | Oct95 | gained |
+
+- **Follow-ups:** VRS2 Ozren defence; trace of the Mistral 2 / Southern Move assembly slip; SE7E covering both sector gaps.
+- **Re-pinned on this source:** baseline manifest (`data/derived/scenario/baselines/manifest.json`, apr1992_188w, 8 hashes). The final head was merged with main after #611/#622, and `7d4cf2cf698e3c41` reproduced.
 - **What changed.** The N1297 readiness gate (`bot_corps_stance.ts`) capped every corps without a motorized/mechanized `main_effort` brigade at `defensive`. That covered the 5th Corps all war and VRS corps classed mountain. Now a light strike group (>= 3 fit, combat-effective brigades in one zone) allows `balanced`. Bot commander-planned ops that end `zero_eligible_axis`/`max_failures` lock their objectives out for 8 × failure-count turns, and the bot plan path honours it. Systems Manual §6.
 - **Final run on main after #617** (`7d4cf2cf698e3c41`): shortfall 0 / −4 / −4 / −7 (15). Strict health PASS; all guards intact; consistency 2 (main's sector-4 gap plus a VRS 1st Krajina sector-0 gap, both SE7E class); battles +2.2%.
 - **Moved cells.** Vesela, Prusac (VRS "Grom"/"Vihor", t57-59). Lopare, Ugljevik (2nd Corps "Most", t82-85). Seven western tail cells (Mistral 2 / Southern Move start two turns late, last captures past t188). Gained Jemanlići, Korenići, Varošluk.
