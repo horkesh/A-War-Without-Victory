@@ -57,6 +57,15 @@ describe('recordFailedObjectives with the bot lockout', () => {
             expect(entry.cooldown_until_turn).toBeGreaterThan(77);
         });
 
+    it('lengthens the bot lockout with each repeated hard failure', () => {
+        const cmd = emptyCmd();
+        recordFailedObjectives(cmd, botOp('max_failures'), 77);
+        const first = cmd.failed_offensive_objectives![OBJ]!.cooldown_until_turn - 77;
+        recordFailedObjectives(cmd, botOp('zero_eligible_axis'), 100);
+        const second = cmd.failed_offensive_objectives![OBJ]!.cooldown_until_turn - 100;
+        expect(second).toBe(first * 2);
+    });
+
     it('keeps the two-failure threshold for authored ops', () => {
         const cmd = emptyCmd();
         recordFailedObjectives(cmd, authoredOp('max_failures'), 77);

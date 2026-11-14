@@ -892,7 +892,13 @@ export function recordFailedObjectives(cmd: CorpsCommandState, op: CorpsOperatio
     for (const osid of failedOsids) {
         const entry = cmd.failed_offensive_objectives[osid] ?? { failure_count: 0, cooldown_until_turn: 0 };
         entry.failure_count += 1;
-        if (hardBotFailure || entry.failure_count >= OBJECTIVE_FAILURE_THRESHOLD) {
+        if (hardBotFailure) {
+            // Each repeated hard failure on the same objective pushes the next bot try
+            // further out (8, 16, 24... turns). Run 4 measured the flat 8-turn window
+            // expiring on the very turn the 5th Corps re-assaulted Ripac (t164 -> t172),
+            // bleeding the 505th Brigade one turn before Operation Sana.
+            entry.cooldown_until_turn = turn + OBJECTIVE_FAILURE_COOLDOWN_TURNS * entry.failure_count;
+        } else if (entry.failure_count >= OBJECTIVE_FAILURE_THRESHOLD) {
             entry.cooldown_until_turn = turn + OBJECTIVE_FAILURE_COOLDOWN_TURNS;
         }
         cmd.failed_offensive_objectives[osid] = entry;
