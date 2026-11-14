@@ -391,13 +391,25 @@ rule.
 
 Note: per 6.2, "last stand" results in forced retreat with penalties, not destruction.
 
-**Known nonconformance (706th debt, 2026-08-26):** the terminal
-`findEmergencyRetreatOsid` fallback can currently choose the lexicographically first OSID in
-the largest friendly component when the source component has vanished and no corps formation
-has a location. This sent the 706th Muslim Mountain Brigade from Gornje Krčevine to
-`op:breza:koritnik`, followed by same-turn dissolution. That fallback is deterministic but
-violates the semantic rule above. The route and same-turn lifecycle question are open debt in
-`CALIBRATION_MASTER.md`; neither outcome is canonicalized by its current implementation.
+**Nonconformance status (706th debt, 2026-08-26; updated 2026-11-14):** the former terminal
+fallback of `findEmergencyRetreatOsid`, which chose the lexicographically first OSID of the
+largest friendly component when the source component had vanished, has been removed. It had
+sent the 706th Muslim Mountain Brigade from Gornje Krčevine to `op:breza:koritnik`, followed
+by same-turn dissolution. When topology is supplied, the function now selects only a
+friendly-held OSID reachable from the lost position through friendly territory, in this order:
+`home_osid`; `fallback_osid`; an adjacent friendly OSID (the first friendly neighbour in
+`strictCompare`-sorted adjacency order; the search is declared as a friendly-only breadth-first
+search of `EMERGENCY_RETREAT_BFS_MAX_HOPS = 8`, but its frontier is not advanced past the first
+ring); the corps HQ; then the first OSID, in sorted order, of the same friendly component. It
+never selects another component. If none exists it returns null and the caller applies the
+cut-off outcome. The first, second and fourth steps and the sorted-component step apply only when the lost position is still in the friendly set the caller supplies (a per-pass cache, so this can depend on battle order). Only callers without topology keep a sorted first-friendly-OSID
+compatibility fallback, which is lexical-only. Open debt: the cut-off outcome in
+`forceRetreatWithPenalties` currently sets the brigade inactive with a `destruction_turn`,
+which does not conform to 6.2 or the note above; the BFS depth defect and the same-turn
+lifecycle question remain open in `CALIBRATION_MASTER.md`. Ordering the last two steps by
+distance or enemy adjacency would be a calibration-moving change. The panel also found no
+implementation of 14.5a (breakthrough) in `src/sim`; that is unverified here and recorded for
+the owner.
 
 ### 14.5a Breakthrough Retreat
 

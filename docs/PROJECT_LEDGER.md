@@ -45,6 +45,55 @@ that do not move calibration. Control and territory are byte-identical to main a
 - Independent review findings fixed: stale heavy-pool tests and browser proof, lead-first order kept in the desktop
   projection, aggression copy scoped to the standard army AI (the optional LLM commander prompt lists modifiers).
 
+## 2026-11-14 — Canon propagation panel: Systems Manual corrections, Engine Invariants §14.5 status
+
+Docs only; no `src/` or `data/` change, no calibration change. #599 wrote the 14-item canon backlog into
+the Systems Manual and closed gate `REPO-CANON-PROPAGATION` without panel sign-off (Codex P1; the
+reopening commit missed the auto-merge). A four-seat panel (canon-compliance as lead and integrator,
+systems-programmer, game-designer, determinism-auditor) reviewed every added sentence against `src/`.
+Round 1 found twelve defects in the text: a dead cooldown described as live, a counter-attack path wider
+than Engine Invariants §6.3 written as canon, a retreat BFS that is one ring deep by defect, planning,
+exhaustion and feasibility gates described more broadly than the code applies them, launch criteria
+(enemy OSIDs 1, supply readiness not a gate), a supply multiplier table contradicting the code, wrong
+casualty and snapshot wording, and missing tie-breaks. All are corrected; Engine Invariants §14.5 now
+records the verified retreat order, the removed largest-component fallback and the open debts; the
+`CALIBRATION_MASTER.md` deferred-debt paragraph matches. Round 2: determinism GO; the other three seats
+GO-WITH-CONDITIONS with every text condition applied. Round 3: the lead seat cleared its last condition
+(unanimous GO on the propagation). Open as a separate decision: reconcile Invariants §6.3 with the
+sector-wide counter-attack (the Manual labels it "not canon"). The gate is closed on
+`docs/40_reports/20261114_CANON_PROPAGATION_PANEL.md`. Also: 14 `archive/*` tags pushed for branches with
+no PR and no tag (nothing deleted).
+
+## 2026-11-13 — CI guard: a stale committed startup snapshot now fails the full-suite job
+
+Closes the gap recorded in the entry below. `full-suite-and-fingerprint.yml` (`full-suite` job) now runs
+`npm run desktop:startup-snapshot:check` (read-only; byte comparison of the committed
+`data/derived/startup/apr_1992_initial_save.json` with a fresh build) BEFORE the "Rebuild startup
+snapshot for this platform" step, gated on the same `relevant` output, and it blocks the job.
+
+**Linux parity (answers the open question):** probe run on PR #593 with `continue-on-error: true`; the
+step log (not the conclusion, which reads "success" for a tolerated failure) shows
+`Startup snapshot OK: .../data/derived/startup/apr_1992_initial_save.json` on the ubuntu runner. A
+Linux build is byte-identical to the Windows-built committed file, so no normalisation was needed and
+the check was NOT weakened. Then made blocking.
+
+**Bite proof:** throwaway draft PR (do not merge) changes `available_until_turn` of `vrs_tomanic` in
+`apr1992_officers.json` 110→111 without re-baking (draft PR #595, run 43516194108). The `full-suite` step log reads
+`Startup snapshot drift detected for apr_1992: .../apr_1992_initial_save.json` then
+`##[error]Process completed with exit code 1.` — the step failed and the job stopped before the rebuild.
+#595 is closed unmerged.
+
+**Other workflows that rebuild before testing:** `baseline-regression.yml` (83,137,189,262),
+`desktop-release-guard.yml` (63,153), `release.yml` (83,134), and the `structural-fingerprint` job of
+the full-suite workflow. They need no separate guard: the full-suite job runs on every PR touching
+`src/`, `tools/`, `tests/`, `data/scenarios/`, `data/derived/` and others, and is the merge-blocking
+check, so a stale committed snapshot cannot reach main. Caveat: the guard is skipped when
+`relevant=false` (docs-only PRs), which cannot change snapshot inputs. `release.yml` rebuilds
+legitimately for packaging; a drift there is already caught earlier on the PR.
+Codex review (P2): `data/source/` (`settlements_initial_master.json`, `oob_corps.json`) feeds the snapshot
+build but was not in the change detector, so a source-only PR would have skipped the guard. Added
+`data/source/` to `PREFIXES` in `.github/scripts/detect-full-suite-changes.sh`.
+
 ## 2026-11-13 — Test-tooling leftovers (WT1-WT5, DC4, DC5, RT7, O2); evidence runs stop dirtying the tree
 
 Non-calibration; no `src/` or `data/` change, so the simulation is byte-identical to main by

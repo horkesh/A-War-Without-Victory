@@ -5429,12 +5429,18 @@ and `gorazde_pocket_consolidation_1992` was restored to narrative/morale/flag ef
 Existing separately-canonical sensitive-history receipts are outside this prohibition and
 remain governed by `SENSITIVE_HISTORY_DESIGN_GATE.md`.
 
-**Deferred debt:** the 706th Muslim Mountain Brigade's escape from Gornje Krčevine currently
-falls through to a non-geographic largest-component/lexicographic destination
-(`op:breza:koritnik`) and dissolves in the same turn. Neither result is accepted simulation
-truth. The later repair must choose a geographically and command-valid route, use lexical
-ordering only as a final deterministic tie-break, and explicitly adjudicate whether an escaped
-brigade may dissolve in the same turn.
+**Deferred debt:** the 706th Muslim Mountain Brigade's escape from Gornje Krčevine once fell
+through to a non-geographic largest-component/lexicographic destination
+(`op:breza:koritnik`) and dissolved in the same turn. The largest-component fallback has since
+been removed from `findEmergencyRetreatOsid` (status recorded in Engine Invariants §14.5, panel
+review 2026-11-14). Still open: (a) the emergency search's BFS frontier is not advanced past
+the first ring, so `EMERGENCY_RETREAT_BFS_MAX_HOPS = 8` is inert
+(`attack_retreat_displacement.ts:338-351`); (b) when no destination exists,
+`forceRetreatWithPenalties` sets the brigade inactive with a `destruction_turn`, which needs an
+explicit adjudication against Engine Invariants §6.2; (c) the last routing steps are lexical-only,
+and any distance or enemy-adjacency ordering would be a calibration-moving change. Any repair
+must choose a geographically and command-valid route and use lexical ordering only as a final
+deterministic tie-break.
 
 Map publication:
 
