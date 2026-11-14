@@ -96,6 +96,7 @@ import war1993Events from '../../../../data/scenarios/events/war_1993.json';
 import war1994Events from '../../../../data/scenarios/events/war_1994.json';
 import war1995Events from '../../../../data/scenarios/events/war_1995.json';
 import war1992HrhbSummerEvents from '../../../../data/scenarios/events/war_1992_hrhb_summer.json';
+import { resolveEventDisplayTitle, resolveEventNotificationDisplay } from './eventDisplayCopy.js';
 
 export type StrategicObjectiveStatus = 'secure' | 'contested' | 'critical' | 'unreported';
 export type StrategicObjectiveTrend = 'improving' | 'steady' | 'worsening' | 'unreported';
@@ -3440,8 +3441,9 @@ function deriveHistoricalEvents(state: any): LoadedGameState['historicalEventsBy
             const staticScope = getStaticEventDisplayInfo(rawId)?.scope ?? null;
             const scope = mergeHistoricalEventScopes(collectHistoricalEventScope(e), staticScope);
             const fallback = t('settlementTimeline.historicalEvent.fallback');
-            const text = rawText && rawText !== rawId && !looksLikeRawPlayerFacingToken(rawText)
-                ? getPlayerSafeDisplayLabel(rawText, fallback)
+            const displayText = rawText ? resolveEventDisplayTitle(rawId, rawText) : rawText;
+            const text = displayText && displayText !== rawId && !looksLikeRawPlayerFacingToken(displayText)
+                ? getPlayerSafeDisplayLabel(displayText, fallback)
                 : fallback;
             result.push({
                 turn,
@@ -3949,7 +3951,10 @@ function deriveFiredEvents(state: any, playerFaction: string | null): LoadedGame
         entries.push({
             id,
             turn,
-            title: getPlayerSafeDecisionTitle(staticInfo?.title ?? info?.text ?? getPlayerSafeDisplayLabel(id, 'Recorded decision')),
+            title: getPlayerSafeDecisionTitle(resolveEventDisplayTitle(
+                id,
+                staticInfo?.title ?? info?.text ?? getPlayerSafeDisplayLabel(id, 'Recorded decision'),
+            )),
             narrative: decision ? t('firedEvent.wrapper.narrative') : '',
             category: decision ? 'political' : 'military',
             effects: decision && response ? [{ kind: 'decision', description: t('firedEvent.wrapper.responseRecorded', { response }) }] : [],
@@ -4006,7 +4011,10 @@ function isPendingEventCategory(value: unknown): value is EventCategory {
 function sanitizePendingEventDecision(decision: RawPendingEventDecision): PendingEventDecisionView {
     return {
         event_id: String(decision.event_id ?? ''),
-        event_title: getPlayerSafeDecisionTitle(String(decision.event_title ?? '')),
+        event_title: getPlayerSafeDecisionTitle(resolveEventDisplayTitle(
+            String(decision.event_id ?? ''),
+            String(decision.event_title ?? ''),
+        )),
         ...(typeof decision.narrative === 'string' ? { narrative: decision.narrative } : {}),
         ...(typeof decision.situation === 'string' ? { situation: decision.situation } : {}),
         ...(typeof decision.staff_assessment === 'string' ? { staff_assessment: decision.staff_assessment } : {}),
@@ -4046,7 +4054,11 @@ function derivePendingEventNotifications(state: any): LoadedGameState['pendingEv
     const pending = state.military?.pending_event_notifications as
         LoadedGameState['pendingEventNotifications'];
     if (!pending || pending.length === 0) return undefined;
-    return pending;
+    // The persisted headline/body are engine copies; display corrected copy where authored.
+    return pending.map((notification) => ({
+        ...notification,
+        ...resolveEventNotificationDisplay(notification),
+    }));
 }
 
 function derivePresidentialReviewQueue({

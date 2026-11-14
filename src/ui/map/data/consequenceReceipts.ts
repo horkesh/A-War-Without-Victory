@@ -125,6 +125,9 @@ function resolveEventTitle(
             ? localizedTitle
             : resolveEventFallbackLabel(fallbackId, locale);
     }
+    // `localizations.en.title` is the corrected English display copy for a persisted title.
+    const englishDisplayTitle = def?.localizations?.en?.title;
+    if (typeof englishDisplayTitle === 'string' && englishDisplayTitle.trim().length > 0) return englishDisplayTitle;
     const title = def?.title;
     return typeof title === 'string' && title.trim().length > 0
         ? title
