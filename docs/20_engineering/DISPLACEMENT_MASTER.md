@@ -310,10 +310,9 @@ Sources: ICTY OTP demographic report (Tabeau, Bijak et al., 2003, 47 municipalit
 | `BOSNIAK_EXIT_FLEE_ABROAD` | 0.40 | `displacement_takeover.ts` | Bosniaks from Bijeljina, Posavina, Čapljina, Stolac (exits toward Serbia and Croatia): 40% |
 | `BILATERAL_HRHB_FLEE_ABROAD` | 0.35 | `displacement_takeover.ts` | Croats displaced by RBiH: 35% |
 | Drina enclave falls | 0 | `displacement_takeover.ts` | Nobody goes abroad when Srebrenica, Goražde or Žepa falls; deportees went to Tuzla and Kladanj (Krstić TJ) |
-
-The former Bosniak border override (0.10) is deleted. Siege-path departures carry no flight abroad at all.
 | `ENCLAVE_OVERRUN_KILL_FRACTION` | 0.35 | `displacement_takeover.ts` | Srebrenica/Gorazde/Zepa overrun: 35% killed |
-| `LOST_POPULATION_FRACTION` | 0.20 | `displacement.ts` | Fallback when no 1991 census data: 20% lost |
+
+The former Bosniak border override (0.10) is deleted. Siege-path departures carry no flight abroad at all. No-census municipalities split by the national 1991 sums (`census_fallback_national`); the former `LOST_POPULATION_FRACTION` (0.20) was removed in SC2.
 
 ### 5.3 Loss Calculation Order
 
@@ -321,7 +320,7 @@ For each displacement event:
 1. Compute `displacementAmount` from trigger
 2. `killed = floor(displacementAmount × killFraction)` (per-faction rate via `getDisplacementKillFraction()`, or 35% for enclave overrun)
 3. `survivors = displacementAmount - killed`
-4. `fledAbroad = floor(survivors × fleeAbroadFraction)` (faction-specific, Posavina override)
+4. `fledAbroad = floor(survivors × fleeAbroadFraction)` (per people, with regional overrides in §5.2; 0 when a Drina enclave falls)
 5. `routedToCamp = survivors - fledAbroad` (enters camp state machine)
 6. Record `killed` and `fledAbroad` in `state.civilian_casualties`
 
@@ -541,6 +540,7 @@ When RBiH-HRHB are **allied** (alliance > 0.20):
 When an enclave municipality is overrun (from_faction = RBiH, to_faction != RBiH):
 - Kill fraction increases from 10% to **35%** (`ENCLAVE_OVERRUN_KILL_FRACTION`)
 - Models the historical high-lethality events (Srebrenica massacre)
+- Flight abroad: **0** (deportees went to Tuzla and Kladanj)
 
 ### 10.2 Posavina Croats
 
