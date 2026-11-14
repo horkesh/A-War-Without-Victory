@@ -125,6 +125,23 @@ function parseRsDrinaPolicyOverride(argv, historical, selectedFactions) {
   };
 }
 
+// --event-policy=<eventId>:<responseId> (repeatable): operator-named answers for decisions that
+// are authored with no historical default (see policyEventResponseControl). Historical-choice only.
+function parseEventPolicyOverrides(argv, historical) {
+  const prefix = '--event-policy=';
+  const entries = argv.filter((arg) => arg.startsWith(prefix)).map((arg) => arg.slice(prefix.length));
+  const map = new Map();
+  for (const entry of entries) {
+    const [eventId, responseId, ...rest] = entry.split(':');
+    if (!eventId || !responseId || rest.length > 0) throw new Error(`--event-policy must be <eventId>:<responseId>: ${entry}`);
+    if (map.has(eventId)) throw new Error(`--event-policy given twice for ${eventId}`);
+    map.set(eventId, responseId);
+  }
+  if (map.size > 0 && !historical) throw new Error('--event-policy requires --historical-choice');
+  return map;
+}
+const eventPolicyOverrides = parseEventPolicyOverrides(process.argv, historicalChoice);
+
 function hasMeaningfulSourceContent(value, prefix) {
   if (typeof value !== 'string') return false;
   const labelIndex = value.toLocaleLowerCase('en-US').lastIndexOf(prefix.toLocaleLowerCase('en-US'));
@@ -169,6 +186,25 @@ async function policyEventResponseControl(surface) {
       basis: 'player_selected_counterfactual',
       historicityClaim: 'none_counterfactual_player_choice',
       requestedOverride: { ...rsDrinaPolicyOverride },
+    };
+  } else if (eventPolicyOverrides.has(eventId)) {
+    // Operator-named answer for a recurring design-counterfactual decision that is authored
+    // WITHOUT a historical default or staff recommendation (strategic_posture_review_rbih/_rs).
+    // It claims no historicity, and refuses to act once the event gains an authored answer.
+    const requested = eventPolicyOverrides.get(eventId);
+    const options = decision.response_options ?? [];
+    if (decision.historical_default_response_id
+      || decision.staff_recommended_response_id
+      || options.some((option) => option.historical_marker === 'historical_default')) {
+      throw new Error(`--event-policy refuses ${eventId}: it now has an authored default or staff recommendation`);
+    }
+    const matchingOptions = options.filter((option) => option.id === requested);
+    if (matchingOptions.length !== 1) throw new Error(`--event-policy ${eventId}: option ${requested} is missing or ambiguous`);
+    selected = {
+      ...matchingOptions[0],
+      basis: 'player_selected_counterfactual',
+      historicityClaim: 'none_counterfactual_player_choice',
+      requestedOverride: { eventId, requested, version: 1, provenance: 'explicit_operator_event_policy' },
     };
   } else {
     selected = selectHistoricalEventChoice(decision);

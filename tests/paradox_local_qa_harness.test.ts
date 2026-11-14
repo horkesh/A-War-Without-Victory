@@ -163,6 +163,7 @@ test('historical event policy accepts exact visible tooltip or same-modal dossie
         historicalChoice: true,
         rbihParamilitaryPolicyOverride: null,
         rsDrinaPolicyOverride: null,
+        eventPolicyOverrides: new Map(),
         selectHistoricalEventChoice,
         hasMeaningfulSourceContent,
     });
@@ -190,6 +191,7 @@ test('historical event policy rejects absent, empty, hidden, foreign, or ambiguo
         historicalChoice: true,
         rbihParamilitaryPolicyOverride: null,
         rsDrinaPolicyOverride: null,
+        eventPolicyOverrides: new Map(),
         selectHistoricalEventChoice,
         hasMeaningfulSourceContent,
     });
@@ -4504,6 +4506,7 @@ test('RBiH paramilitary override chooses only the existing visible counterfactua
                 eventId: 'rbih_paramilitary_policy_1992',
             },
             rsDrinaPolicyOverride: null,
+            eventPolicyOverrides: new Map(),
             selectHistoricalEventChoice,
             hasMeaningfulSourceContent: () => false,
         },
@@ -4634,6 +4637,7 @@ test('RS Drina selector picks the named visible control only while the decision 
             historicalChoice: true,
             rbihParamilitaryPolicyOverride: null,
             rsDrinaPolicyOverride,
+            eventPolicyOverrides: new Map(),
             selectHistoricalEventChoice,
             hasMeaningfulSourceContent: () => false,
         },
@@ -4705,6 +4709,78 @@ test('RS Drina selector picks the named visible control only while the decision 
     assert.equal(other.choice.basis, 'staff_recommendation');
     assert.equal(other.choice.requestedOverride, undefined);
     await assert.rejects(policy(surface()), /No ranked authored historical default/);
+});
+
+test('--event-policy parses strictly and answers an unranked design-counterfactual decision only', async () => {
+    const harness = readHarness();
+    const parse = loadFunction<(argv: string[], historical: boolean) => Map<string, string>>(harness, 'parseEventPolicyOverrides');
+    assert.equal(parse([], true).size, 0);
+    assert.deepEqual(
+        [...parse(['--event-policy=strategic_posture_review_rbih:consolidate_defend'], true)],
+        [['strategic_posture_review_rbih', 'consolidate_defend']],
+    );
+    assert.throws(() => parse(['--event-policy=only_event'], true), /<eventId>:<responseId>/);
+    assert.throws(() => parse(['--event-policy=a:b:c'], true), /<eventId>:<responseId>/);
+    assert.throws(() => parse(['--event-policy=a:b', '--event-policy=a:c'], true), /twice/);
+    assert.throws(() => parse(['--event-policy=a:b'], false), /historical-choice/);
+
+    const selectHistoricalEventChoice = loadFunction<(decision: any) => any>(harness, 'selectHistoricalEventChoice');
+    const eventId = 'strategic_posture_review_rbih';
+    const policyWith = (eventPolicyOverrides: Map<string, string>) => loadAsyncFunction<(surface: any) => Promise<any>>(
+        harness,
+        'policyEventResponseControl',
+        {
+            historicalChoice: true,
+            rbihParamilitaryPolicyOverride: null,
+            rsDrinaPolicyOverride: null,
+            eventPolicyOverrides,
+            selectHistoricalEventChoice,
+            hasMeaningfulSourceContent: () => false,
+        },
+    );
+    const controls = [
+        { id: 'press-control', label: 'Press the offensive' },
+        { id: 'consolidate-control', label: 'Consolidate and defend' },
+    ];
+    const responseList = {
+        nth: (index: number) => controls[index],
+        evaluateAll: async (callback: (nodes: any[]) => unknown) => callback(controls.map((control) => ({
+            firstElementChild: { firstElementChild: { textContent: control.label } },
+        }))),
+    };
+    const rail = { getAttribute: async () => eventId };
+    const modal = { locator: (selector: string) => selector.includes('rail')
+        ? { count: async () => 1, first: () => rail }
+        : responseList };
+    const baseOptions = [
+        { id: 'press_offensive', label: controls[0].label },
+        { id: 'consolidate_defend', label: controls[1].label },
+    ];
+    const surface = (extra: Record<string, unknown> = {}, options: unknown[] = baseOptions) => ({
+        locator: () => ({ count: async () => 1, first: () => modal }),
+        evaluate: async () => ({
+            meta: { turn: 96, player_faction: 'RBiH' },
+            military: {
+                pending_event_decisions: [{ event_id: eventId, faction: 'RBiH', response_options: options, ...extra }],
+            },
+        }),
+    });
+
+    // Without a named policy the run still refuses to invent an answer.
+    await assert.rejects(policyWith(new Map())(surface()), /No ranked authored historical default/);
+
+    const policy = policyWith(new Map([[eventId, 'consolidate_defend']]));
+    const selected = await policy(surface());
+    assert.equal(selected.loc.id, 'consolidate-control');
+    assert.equal(selected.choice.responseId, 'consolidate_defend');
+    assert.equal(selected.choice.basis, 'player_selected_counterfactual');
+    assert.equal(selected.choice.historicityClaim, 'none_counterfactual_player_choice');
+    assert.equal(selected.choice.requestedOverride.provenance, 'explicit_operator_event_policy');
+
+    // It refuses once the event gains an authored answer, or the named option is missing.
+    await assert.rejects(policy(surface({ staff_recommended_response_id: 'press_offensive' })), /refuses/i);
+    await assert.rejects(policy(surface({ historical_default_response_id: 'press_offensive' })), /refuses/i);
+    await assert.rejects(policy(surface({}, [baseOptions[0]])), /missing or ambiguous/i);
 });
 
 test('readability gate includes tiny text, ancestor clipping, inaccessible truncation, contrast, and occlusion', () => {
