@@ -1,5 +1,12 @@
 # Real War Master
 
+## Open items from the siege displacement lane (RF-3, 2026-11-14)
+
+Raised by the §6 panel and the Pyrrhic merge gate on PR horkesh/A-War-Without-Victory#600 (`SENSITIVE_HISTORY_DESIGN_GATE.md` §6 "Record (Siege displacement and flight abroad, 2026-11-14)"). Neither is a tuning target.
+
+- **ARBiH holds two Prozor villages (`op:prozor:lug_2`, `op:prozor:paros`) from 1993.** With the siege path live, the 4th Corps picks Prozor for "Operacija Ponos" (t77-81) and takes both after the HVO counterattack. The HVO held Rama throughout (BB1 p.195, p.217); the ARBiH pushed on the municipality's eastern edge in Neretva '93, so two border villages are plausible but unrecorded (War-or-Game seat). Open; owner-accepted as part of RF-3's checkpoint loss. Do not recover it with a lever.
+- **Goražde ends short of its record.** The pocket ends at about 45.1k against 60-65k historically (UN Special Rapporteur E/CN.4/1995/4); main ended at about 56k. The 0.08 flight-abroad share for eastern Bosnia restores most of the refugee inflow; the remainder sits with known limit SD9 (the siege base excludes refugees) and onward routing. Open.
+
 ## Open FAIL: the HVO cleansing of Bosniaks barely registers in the humanitarian record (2026-11-13)
 
 Raised by the War-or-Game seat of the displacement attribution panel (`SENSITIVE_HISTORY_DESIGN_GATE.md` §6). The Humanitarian Ledger now shows displaced-or-killed by the side controlling the area, so this gap is visible to the player.

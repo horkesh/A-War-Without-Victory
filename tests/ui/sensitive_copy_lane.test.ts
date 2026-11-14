@@ -98,8 +98,11 @@ describe('Humanitarian Ledger labels (R2\'; displacement attribution lane)', () 
         ]);
         expect(rows[1][2].replace(/\D/g, '')).toBe('5000');
         const text = container.textContent ?? '';
-        expect(text).toContain('Displaced or killed, by side controlling the area');
-        expect(text).toContain('Side controlling the area');
+        expect(text).toContain('Displaced or killed, by side controlling or besieging the area');
+        expect(text).toContain('Controlling or besieging side');
+        // RF-3 (siege displacement panel): rows also count people leaving a besieged area.
+        expect(text).toContain('left an area held by their own side while the named side besieged it');
+        expect(text).toContain('People killed by shelling or in sieges');
         expect(text).toContain('including the siege of Sarajevo, are not counted');
         expect(text).toContain('understate the harm done by besieging forces');
         expect(text).toContain('do not describe the historical war');
@@ -124,11 +127,13 @@ describe('Humanitarian Ledger labels (R2\'; displacement attribution lane)', () 
             ['Odgovorna strana nije zabilježena', 'Bošnjaci'],
         ]);
         const text = container.textContent ?? '';
-        for (const english of ['Bosniaks', 'Serbs', 'Croats', 'forces', 'Unattributed', 'Displaced', 'Killed', 'Side controlling']) {
+        for (const english of ['Bosniaks', 'Serbs', 'Croats', 'forces', 'Unattributed', 'Displaced', 'Killed', 'Side controlling', 'besieging']) {
             expect(text).not.toContain(english);
         }
         expect(text).toContain('Hrvati');
-        expect(text).toContain('Raseljeni ili ubijeni, po strani koja je kontrolisala područje');
+        expect(text).toContain('Raseljeni ili ubijeni, po strani koja je kontrolisala ili opsjedala područje');
+        expect(text).toContain('Strana koja je kontrolisala ili opsjedala');
+        expect(text).toContain('Uračunati su i ljudi koji su napustili područje pod kontrolom vlastite strane');
         expect(text).toContain('potcjenjuju štetu koju su nanijele opsadne snage');
     });
 

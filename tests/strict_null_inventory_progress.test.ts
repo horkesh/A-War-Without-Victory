@@ -808,7 +808,9 @@ describe('strict null inventory progress', () => {
             // GameStateMeta.stance_matters / stance_matter_history and
             // MilitaryState.stance_matter_state. Written only for a live president; absent in
             // headless runs (40w artifacts byte-identical). No new type escape. 564 -> 591.
-            optional_fields_game_state: 591,
+            // RF-3 siege displacement (DA1, 2026-11-14): DisplacementState.unsupplied_pressure_turns,
+            // the persisted siege counter (was a module cache). No new type escape. 591 -> 592.
+            optional_fields_game_state: 592,
         });
         // Reason-code instrumentation (item 3): +1, `OperationAxis.launch_blocker_detail`.
         // `classifyDomain` routes it to `sim` on the /Corps|Operation/ interface-name rule,
@@ -817,13 +819,14 @@ describe('strict null inventory progress', () => {
         // Posture model option 2 (2026-11-12): +1 sim (MilitaryState.stance_matter_state),
         // +26 state (StanceMatter, StanceMatterReceipt, PresidentialStanceHold optional fields;
         // StateMeta.stance_matters / stance_matter_history). 564 -> 591.
-        expect(current.optional_field_domains.total).toBe(591);
+        // RF-3 (DA1): +1 state (DisplacementState.unsupplied_pressure_turns). 591 -> 592 / state 217 -> 218.
+        expect(current.optional_field_domains.total).toBe(592);
         expect(current.optional_field_domains.domain_counts).toMatchObject({
             derived: 10,
             ipc: 0,
             scenario: 0,
             sim: 364,
-            state: 217,
+            state: 218,
             ui_adapter: 0,
             unknown: 0,
         });

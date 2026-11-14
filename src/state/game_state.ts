@@ -1804,6 +1804,13 @@ export interface DisplacementState {
     displaced_out_by_osid?: Record<string, number>;
     /** OSID-level tracking: destination OSID → count settled in. */
     displaced_in_by_osid?: Record<string, number>;
+    /**
+     * Pressure path (siege trigger), per side holding settlements here: consecutive turns its
+     * settlements were under front pressure with none supplied, and the turn last counted (a
+     * gap restarts the count). A side is absent when the condition does not hold; the field is
+     * absent when no side qualifies. Persisted so a save round trip keeps the count (DA1).
+     */
+    unsupplied_pressure_by_side?: Partial<Record<FactionId, { turns: number; last_turn: number }>>;
 }
 
 /** Per-event displacement record for tracking and reporting. Sorted by (turn, origin_mun). */

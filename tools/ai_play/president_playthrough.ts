@@ -34,7 +34,6 @@ import { loadEventDefinitions } from '../../src/sim/events/event_loader.js';
 import { writeOwedRecordsAtTermination } from '../../src/sim/endgame/owed_termination_records.js';
 import { assembleCommandBriefing, type CommandBriefing } from '../../src/sim/briefing/collect_briefing.js';
 import { serializeState, deserializeState } from '../../src/state/serialize.js';
-import { resetDisplacementPressureCache } from '../../src/state/displacement.js';
 import type { FactionId, GameState } from '../../src/state/game_state.js';
 import type {
     PendingEventDecision,
@@ -149,7 +148,6 @@ export async function startCampaign(
     // (one process = one campaign), but this harness can run multiple campaigns
     // back-to-back in one process, so a prior campaign's unsupplied-turn counters were
     // silently bleeding into the next one's displacement/internal_cohesion numbers.
-    resetDisplacementPressureCache();
     const { state } = await startNewCampaign(baseDir, faction as 'RBiH' | 'RS' | 'HRHB', scenarioKey);
     if (state.meta) state.meta.headless_scenario_auto_control = false;
     return state;

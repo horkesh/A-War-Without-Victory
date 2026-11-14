@@ -49,7 +49,7 @@ import { computeDimensionBaseValues, applyDimensionShift } from '../events/strat
 import { relieveOfficer, recordPresidentialOverride } from '../combat/order_interpretation.js';
 import { applyReplaceCoConsequence, applyForceOpConsequence, applyStopOpConsequence } from '../combat/command_lever_consequences.js';
 import { clamp } from '../../utils/math.js';
-import { updateDisplacement } from '../../state/displacement.js';
+import { updateDisplacement, type DisplacementPressureInputs } from '../../state/displacement.js';
 import { processDisplacementTakeover } from '../../state/displacement_takeover.js';
 import { getDoctrineTempoMultiplier, updateDoctrineState } from '../../state/doctrine.js';
 import { updateEmbargoProfiles } from '../../state/embargo.js';
@@ -1074,6 +1074,26 @@ function refreshHomeDistanceCache(context: TurnContext): void {
         adjacency,
         sortedIds,
     );
+}
+
+/**
+ * DA1 (siege displacement lane, 2026-11-13): the displacement pressure path's front and
+ * supply, recomputed after combat from the operational graph so they match this turn's
+ * OSID control. Without operational data nothing presses (no front, nobody supplied is
+ * irrelevant because no municipality is under pressure).
+ */
+export function buildOsidDisplacementPressureInputs(
+    state: GameState,
+    od: ReturnType<typeof getOperationalData>
+): DisplacementPressureInputs {
+    if (!od?.opData?.operationalToCanonical || !od.opData.canonicalToOperational || !od.edges?.length) {
+        return { frontEdges: [], suppliedByFaction: new Map() };
+    }
+    const frontEdges = computeFrontEdgesOsid(state, od.edges, od.opData.operationalToCanonical);
+    const reach = computeSupplyReachabilityOsid(state, od.edges, od.opData.canonicalToOperational, od.opData.operationalToCanonical);
+    const suppliedByFaction = new Map<string, ReadonlySet<string>>();
+    for (const f of reach.factions) suppliedByFaction.set(f.faction_id, new Set(f.reachable_osids));
+    return { frontEdges, suppliedByFaction };
 }
 
 export const warPhases: NamedPhase[] = [
@@ -4424,13 +4444,17 @@ export const warPhases: NamedPhase[] = [
             const edges = context.input.settlementEdges;
             if (!edges) return;
 
-            // Load settlement graph to get settlements map
+            // DA1 (siege displacement lane, 2026-11-13): settlements, edges, front and supply
+            // all in the OSID id space. The legacy `settlementEdges` gave 0 front edges here.
             const graph = await getOperationalSettlementGraph(context);
+            const od = getOperationalData(context);
+            const pressure = buildOsidDisplacementPressureInputs(context.state, od);
             context.report.displacement = updateDisplacement(
                 context.state,
                 graph.settlements,
-                edges,
-                context.input.municipalityPopulation1991
+                od?.edges?.length ? od.edges : graph.edges,
+                context.input.municipalityPopulation1991,
+                pressure
             );
         }
     },

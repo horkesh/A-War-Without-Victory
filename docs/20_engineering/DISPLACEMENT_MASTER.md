@@ -14,7 +14,10 @@
 > `seedDisplacementTimerOnFlip()`: battle resolution, rear pocket consolidation,
 > paramilitary sweep, JNA phantom captures. Previously only battle resolution fired.
 > Routing overhaul: per-municipality Krajina routing, Drina split (Zvornik→Tuzla,
-> Bratunac/Vlasenica→Srebrenica), Krajina flee-abroad 35%, enclave reinforcement rate 0.005.
+> Bratunac/Vlasenica→Srebrenica), Krajina flee-abroad (35% then; 55% since 2026-11-14), enclave reinforcement rate 0.005.
+>
+> **Siege displacement lane (2026-11-14):** The continuous siege/encirclement path (§2.3) is now live
+> (it received legacy edges and never fired before), and flight abroad is set per people and region (§5).
 
 ## 1. Overview
 
@@ -95,18 +98,18 @@ Evaluates displacement deltas for front-active settlements based on conflict int
 
 **File:** `src/state/displacement.ts` → `updateDisplacement()`
 
-Runs every turn. Evaluates three continuous pressure conditions per municipality:
+Runs every turn. The war step (`update-displacement` in `war_phases.ts`) feeds it the OSID front (`computeFrontEdgesOsid`) and OSID supply (`computeSupplyReachabilityOsid`) through `buildOsidDisplacementPressureInputs`. One pass runs per municipality and side holding settlements there:
 
 | Condition | Threshold | Displacement Rate |
 |-----------|-----------|-------------------|
-| Unsupplied | 3 consecutive turns (`UNSUPPLIED_PRESSURE_TURNS`) | 5%/turn (`UNSUPPLIED_DISPLACEMENT_FRACTION`) |
-| Encircled | Immediate (no path to other friendly mun) | 10%/turn (`ENCIRCLEMENT_DISPLACEMENT_FRACTION`) |
-| Front breaches | 2 persistent turns (`BREACH_PERSISTENCE_TURNS`) | 3%/turn (`BREACH_DISPLACEMENT_FRACTION`) |
+| Siege | The side's settlements touch an at-war front and none is supplied for 3 consecutive turns (`UNSUPPLIED_PRESSURE_TURNS`) | 0.1% per week of the holder's own people (`UNSUPPLIED_DISPLACEMENT_FRACTION`) |
+| Encirclement | Under front pressure, and every held settlement lies outside the side's main territorial body, in a body holding at most 15% (`POCKET_MAX_SHARE`) of the side's settlements at turn 0 | 0.1% per week of the holder's own people (`ENCIRCLEMENT_DISPLACEMENT_FRACTION`) |
 
-- **Sustainability collapse multiplier:** When a municipality is collapsed, displacement rates are multiplied by `COLLAPSE_DISPLACEMENT_MULTIPLIER = 1.5`
-- Encirclement check: BFS from any settlement in municipality through friendly-controlled settlements; encircled if no path reaches a different friendly municipality
-- Supply check: at least one settlement in the municipality must be in `reachableSettlements` (supply graph)
-- Breach check: count front breaches affecting settlements in the municipality
+- When both fire the larger rate applies, never the sum.
+- Only the holder's people leave and only the holder's manpower pool loses people. Departures are booked to the pressing side (`resolvePressingFactions`, pro rata between two besiegers), with killed 0 and no flight abroad. Each departure is routed to municipalities the holder's side holds; people with nowhere to go stay.
+- The rate is sourced from Krstić TJ (UNHCR evacuations from Srebrenica, 1993), UNCOE S/1994/674/Add.2 Annex VI and the Tabeau and Galić demographic report (2002).
+- The old 5%, 10% and 3% rates, the front-breach trigger (it read `front_pressure`, which nothing wrote) and the 1.5 sustainability-collapse multiplier (sustainability marks 109 of 110 municipalities collapsed) are removed.
+- Siege deaths in place (shelling, sniping, starvation) are still not modelled.
 
 ---
 
@@ -158,13 +161,14 @@ As of 2026-03-01, `processMinorityFlight()` is **not called** in `turn_pipeline.
 
 Ongoing displacement from operational conditions — no direct battle required.
 
-Three independent triggers, each checked per municipality per turn:
+Two triggers, each checked per municipality and per side holding settlements there (full rules in §2.3):
 
-1. **Unsupply:** Municipality has no supplied settlements for `UNSUPPLIED_PRESSURE_TURNS = 3` consecutive turns → displace `UNSUPPLIED_DISPLACEMENT_FRACTION = 0.05` (5%) of remaining population per turn
-2. **Encirclement:** No friendly-controlled path to any other friendly municipality → displace `ENCIRCLEMENT_DISPLACEMENT_FRACTION = 0.10` (10%) per turn
-3. **Front breaches:** Municipality has breaches persisting for `BREACH_PERSISTENCE_TURNS = 2` turns → displace `BREACH_DISPLACEMENT_FRACTION = 0.03` (3%) per turn
+1. **Siege:** the side's settlements touch an at-war front and none is supplied for `UNSUPPLIED_PRESSURE_TURNS = 3` consecutive turns → 0.1% per week of the holder's own people (`UNSUPPLIED_DISPLACEMENT_FRACTION = 0.001`)
+2. **Encirclement:** under front pressure and every held settlement lies in a body outside the side's main territory that held at most `POCKET_MAX_SHARE = 0.15` of the side's settlements at turn 0 → 0.1% per week (`ENCIRCLEMENT_DISPLACEMENT_FRACTION = 0.001`)
 
-Pressure state tracking uses a module-level cache (`pressureStateCache`) that tracks consecutive unsupplied turns per municipality. Must be reset at simulation start via `resetDisplacementPressureCache()`.
+The larger of the two applies. Departures are booked to the pressing side with killed 0 and no flight abroad.
+
+The consecutive-turn counter is saved state: `DisplacementState.unsupplied_pressure_by_side` holds it per side, with the turn it was last counted. It replaces the old module-level cache (`pressureStateCache` and `resetDisplacementPressureCache()`), which is deleted, so the counter now survives save and load. `applyDisplacementFromFlips` and the `displacement-apply` step are also deleted; they were never reached.
 
 ---
 
@@ -290,17 +294,25 @@ When per-municipality routing is exhausted or no route is defined:
 | Constant | Value | Meaning |
 |----------|-------|---------|
 | `DISPLACEMENT_KILLED_FRACTION` | Per-faction (see below) | **OVERHAULED n905 (2026-03-18).** No longer uniform. RBiH displaced by RS = 4%, HRHB displaced by RS = 1%, RS displaced by non-RS = 1%, default = 2%. Was 0.04 uniform. See `getDisplacementKillFraction()` in `displacement_loss_constants.ts`. |
-| `FLEE_ABROAD_FRACTION_RS` | 0.30 | 30% of surviving displaced Serbs leave BiH |
-| `FLEE_ABROAD_FRACTION_HRHB` | 0.25 | 25% of surviving displaced Croats leave BiH |
-| `FLEE_ABROAD_FRACTION_RBIH` | 0.00 | Bosniaks have no external state to flee to |
+| `FLEE_ABROAD_FRACTION_RS` | 0.30 | 30% of surviving displaced Serbs leave BiH (range 0.25-0.40; ICTY OTP floor 0.23) |
+| `FLEE_ABROAD_FRACTION_HRHB` | 0.40 | 40% of surviving displaced Croats leave BiH (was 0.25; range 0.30-0.55) |
+| `FLEE_ABROAD_FRACTION_RBIH` | 0.20 | 20% of surviving displaced Bosniaks leave BiH (was 0.00; range 0.15-0.30) |
+
+Sources: ICTY OTP demographic report (Tabeau, Bijak et al., 2003, 47 municipalities, OSCE voters register 1997-98) and host-country figures at Dayton (about 1.2 million abroad: Germany about 320,000, FRY about 250,000, Croatia about 170,000). The OTP shares (Muslims 48%, Croats 78%, Serbs 23%) are registrations after onward migration, so the shares at the moment of displacement are lower in the east and the defaults sit below them.
 
 ### 5.2 Special Cases
 
 | Constant | Value | Location | Meaning |
 |----------|-------|----------|---------|
 | `POSAVINA_CROAT_FLEE_ABROAD` | 0.70 | `displacement_takeover.ts` | Posavina Croats: 70% flee to Croatia |
+| `KRAJINA_BOSNIAK_FLEE_ABROAD` | 0.55 | `displacement_takeover.ts` | Krajina Bosniak convoys (ICRC/UNHCR to Croatia): 55% (was 0.35) |
+| `BOSNIAK_EAST_SARAJEVO_RING_FLEE_ABROAD` | 0.08 | `displacement_takeover.ts` | Bosniaks from eastern Bosnia and the Sarajevo ring: 8% (expellees went into Srebrenica, Žepa, Goražde, Sarajevo, Tuzla) |
+| `BOSNIAK_EXIT_FLEE_ABROAD` | 0.40 | `displacement_takeover.ts` | Bosniaks from Bijeljina, Posavina, Čapljina, Stolac (exits toward Serbia and Croatia): 40% |
+| `BILATERAL_HRHB_FLEE_ABROAD` | 0.35 | `displacement_takeover.ts` | Croats displaced by RBiH: 35% |
+| Drina enclave falls | 0 | `displacement_takeover.ts` | Nobody goes abroad when Srebrenica, Goražde or Žepa falls; those forcibly transferred went to Kladanj and Tuzla (Krstić TJ) |
 | `ENCLAVE_OVERRUN_KILL_FRACTION` | 0.35 | `displacement_takeover.ts` | Srebrenica/Gorazde/Zepa overrun: 35% killed |
-| `LOST_POPULATION_FRACTION` | 0.20 | `displacement.ts` | Fallback when no 1991 census data: 20% lost |
+
+The former Bosniak border override (0.10) is deleted. Siege-path departures carry no flight abroad at all. No-census municipalities split by the national 1991 sums (`census_fallback_national`); the former `LOST_POPULATION_FRACTION` (0.20) was removed in SC2.
 
 ### 5.3 Loss Calculation Order
 
@@ -308,7 +320,7 @@ For each displacement event:
 1. Compute `displacementAmount` from trigger
 2. `killed = floor(displacementAmount × killFraction)` (per-faction rate via `getDisplacementKillFraction()`, or 35% for enclave overrun)
 3. `survivors = displacementAmount - killed`
-4. `fledAbroad = floor(survivors × fleeAbroadFraction)` (faction-specific, Posavina override)
+4. `fledAbroad = floor(survivors × fleeAbroadFraction)` (per people, with regional overrides in §5.2; 0 when a Drina enclave falls)
 5. `routedToCamp = survivors - fledAbroad` (enters camp state machine)
 6. Record `killed` and `fledAbroad` in `state.civilian_casualties`
 
@@ -459,6 +471,7 @@ interface DisplacementState {
     last_updated_turn: number;
     displaced_out_by_osid?: Record<string, number>;   // OSID-level origin tracking
     displaced_in_by_osid?: Record<string, number>;    // OSID-level destination tracking
+    unsupplied_pressure_by_side?: Partial<Record<FactionId, { turns: number; last_turn: number }>>;  // siege counter per holding side, with the turn last counted
 }
 ```
 
@@ -527,12 +540,13 @@ When RBiH-HRHB are **allied** (alliance > 0.20):
 When an enclave municipality is overrun (from_faction = RBiH, to_faction != RBiH):
 - Kill fraction increases from 10% to **35%** (`ENCLAVE_OVERRUN_KILL_FRACTION`)
 - Models the historical high-lethality events (Srebrenica massacre)
+- Flight abroad: **0** (those forcibly transferred went to Kladanj and Tuzla)
 
 ### 10.2 Posavina Croats
 
 **Municipalities:** brcko, bosanski_samac, odzak, orasje, gradacac, derventa, modrica, bosanski_brod, bosanska_gradiska, doboj, bijeljina
 
-- Flee-abroad fraction: **70%** (vs standard 25% for Croats)
+- Flee-abroad fraction: **70%** (vs standard 40% for Croats)
 - Models the historical pattern where Posavina Croats overwhelmingly fled to Croatia
 
 ### 10.3 Sarajevo Siege

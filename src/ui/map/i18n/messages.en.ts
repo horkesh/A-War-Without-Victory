@@ -6239,12 +6239,12 @@ export const enMessages = {
     'humanitarianLedger.subtitle': 'The human cost of the war, as recorded.',
     'humanitarianLedger.empty': 'No displacement or casualties recorded yet.',
     'humanitarianLedger.section.byPeople': 'Killed and fled abroad, by people',
-    'humanitarianLedger.section.byPerpetrator': 'Displaced or killed, by side controlling the area',
+    'humanitarianLedger.section.byPerpetrator': 'Displaced or killed, by side controlling or besieging the area',
     'humanitarianLedger.section.overTime': 'Displaced or killed, by week',
     'humanitarianLedger.col.people': 'People',
     'humanitarianLedger.col.killed': 'Killed',
     'humanitarianLedger.col.fledAbroad': 'Fled abroad',
-    'humanitarianLedger.col.perpetrator': 'Side controlling the area',
+    'humanitarianLedger.col.perpetrator': 'Controlling or besieging side',
     'humanitarianLedger.col.victims': 'People',
     'humanitarianLedger.col.displaced': 'Displaced or killed',
     'humanitarianLedger.col.killedShort': 'Killed',
@@ -6259,7 +6259,7 @@ export const enMessages = {
     'humanitarianLedger.side.HRHB': 'Herzeg-Bosnia forces',
     'humanitarianLedger.side.notRecorded': 'Responsible side not recorded',
     // Displacement attribution lane (eight-seat panel 2026-11-13; SENSITIVE_HISTORY_DESIGN_GATE.md §6 record).
-    'humanitarianLedger.note.scope': 'Each row counts people of one community who were displaced or killed after the named side took or held control of their area, including civilians killed in paramilitary actions. People killed or displaced by shelling and siege, including the siege of Sarajevo, are not counted, so these figures understate the harm done by besieging forces. People who declared themselves Yugoslavs or others in the 1991 census are counted with Bosniaks.',
+    'humanitarianLedger.note.scope': 'Each row counts people of one community who were displaced or killed after the named side took or held control of their area, including civilians killed in paramilitary actions. It also counts people who left an area held by their own side while the named side besieged it. People killed by shelling or in sieges, including the siege of Sarajevo, are not counted, so these figures understate the harm done by besieging forces. People who declared themselves Yugoslavs or others in the 1991 census are counted with Bosniaks.',
     // Sensitive-copy lane (panel 2026-11-13; SENSITIVE_HISTORY_DESIGN_GATE.md §6 record).
     'verdict.record.heading': 'Historical record',
     'verdict.record.noFactionData': 'No outcome data is available for this side.',

@@ -205,7 +205,6 @@ export interface TurnReport {
     authority_degradation?: AuthorityDegradationReport;
     war_control_strain?: ControlStrainReport;
     displacement_hooks?: DisplacementHooksReport;
-    displacement_apply?: DisplacementStepReport;
     war_jna_transition?: JNATransitionReport;
     alliance_update?: AllianceUpdateReport;
     ceasefire_check?: CeasefireCheckReport;

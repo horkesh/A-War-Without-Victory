@@ -6194,12 +6194,12 @@ export const bcsMessages: Partial<Record<MessageKey, string>> = {
     'humanitarianLedger.subtitle': 'Ljudska cijena rata, kako je zabilježena.',
     'humanitarianLedger.empty': 'Još nema zabilježenog raseljavanja ni žrtava.',
     'humanitarianLedger.section.byPeople': 'Ubijeni i izbjegli u inozemstvo, po narodu',
-    'humanitarianLedger.section.byPerpetrator': 'Raseljeni ili ubijeni, po strani koja je kontrolisala područje',
+    'humanitarianLedger.section.byPerpetrator': 'Raseljeni ili ubijeni, po strani koja je kontrolisala ili opsjedala područje',
     'humanitarianLedger.section.overTime': 'Raseljeni ili ubijeni, po sedmicama',
     'humanitarianLedger.col.people': 'Narod',
     'humanitarianLedger.col.killed': 'Ubijeni',
     'humanitarianLedger.col.fledAbroad': 'Izbjegli u inozemstvo',
-    'humanitarianLedger.col.perpetrator': 'Strana koja je kontrolisala područje',
+    'humanitarianLedger.col.perpetrator': 'Strana koja je kontrolisala ili opsjedala',
     'humanitarianLedger.col.victims': 'Narod',
     'humanitarianLedger.col.displaced': 'Raseljeni ili ubijeni',
     'humanitarianLedger.col.killedShort': 'Ubijeni',
@@ -6214,7 +6214,7 @@ export const bcsMessages: Partial<Record<MessageKey, string>> = {
     'humanitarianLedger.side.HRHB': 'Snage Herceg-Bosne',
     'humanitarianLedger.side.notRecorded': 'Odgovorna strana nije zabilježena',
     // Displacement attribution lane (eight-seat panel 2026-11-13; SENSITIVE_HISTORY_DESIGN_GATE.md §6 record).
-    'humanitarianLedger.note.scope': 'Svaki red broji pripadnike jednog naroda koji su raseljeni ili ubijeni nakon što je navedena strana preuzela ili imala kontrolu nad njihovim područjem, uključujući civile ubijene u paravojnim akcijama. Ljudi ubijeni ili raseljeni zbog granatiranja i opsade, uključujući opsadu Sarajeva, nisu uračunati, pa ove brojke potcjenjuju štetu koju su nanijele opsadne snage. Osobe koje su se na popisu 1991. izjasnile kao Jugosloveni ili ostali računaju se s Bošnjacima.',
+    'humanitarianLedger.note.scope': 'Svaki red broji pripadnike jednog naroda koji su raseljeni ili ubijeni nakon što je navedena strana preuzela ili imala kontrolu nad njihovim područjem, uključujući civile ubijene u paravojnim akcijama. Uračunati su i ljudi koji su napustili područje pod kontrolom vlastite strane dok ga je navedena strana opsjedala. Ljudi ubijeni granatiranjem ili u opsadama, uključujući opsadu Sarajeva, nisu uračunati, pa ove brojke potcjenjuju štetu koju su nanijele opsadne snage. Osobe koje su se na popisu 1991. izjasnile kao Jugosloveni ili ostali računaju se s Bošnjacima.',
     // Sensitive-copy lane (panel 2026-11-13; SENSITIVE_HISTORY_DESIGN_GATE.md §6 record).
     'verdict.record.heading': 'Historijski zapis',
     'verdict.record.noFactionData': 'Za ovu stranu nema podataka o ishodu.',

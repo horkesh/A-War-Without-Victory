@@ -9,6 +9,20 @@
   Compacted 2026-09-10: 1723 sections moved out, 62 kept live.
 -->
 
+## 2026-11-14 — RF-3: the siege displacement path works; flight abroad set per region (PR #600)
+
+Calibration-moving and §6. The pressure path in `updateDisplacement` (siege, encirclement) never fired in a campaign: the war step handed it OSID settlements with legacy `S…` edges, so it saw 0 front edges. Its legacy supply search reached no settlement, and it processed each municipality once per pool. A failing test on the real `update-displacement` step proved this (5 of 7 checks).
+
+The step now runs on the OSID front and supply (`buildOsidDisplacementPressureInputs`, reusable by the F1 sweep), with one pass per municipality and holding side. Siege fires after 3 turns under pressure with no supply; encirclement applies to a cut-off pocket of at most 15% of the side at turn 0. The rate is a sourced 0.1% a week of the holder's own people (Krstić TJ ¶11, ¶14, ¶16; UNCOE; Tabeau), booked to the besieger, with none killed and none abroad. The old 5%/10%/3% rates, the breach trigger, the ×1.5 sustainability multiplier and the unreachable flips path are deleted.
+
+Bosniak flight abroad was 0. It is now set per region at the moment of displacement (ICTY OTP 47-municipality report, whose shares come after onward migration): default 0.20, eastern Bosnia and the Sarajevo ring 0.08, exits 0.40, Krajina 0.55; Croats 0.40; and 0 when a Drina enclave falls. The ledger copy now names the controlling or besieging side.
+
+The Farz guard counts the operation's own cross-corps participants, and real failures still fail. The eight-seat bright-line panel blocked twice in round 1 (Red-team on minority pockets and the duplicate holder; War-or-Game on enclaves emptying under flat flight abroad) and reached unanimous GO in round 2. The Pyrrhic merge gate returned GO with conditions.
+
+Final, on main after #604 (712/711/711/708): `823ba7a929b6ba31`, reproduced, scores 712/709/710/705. The total shortfall of 6 is owner-accepted. Battles per week fall 2.7% in total. The orchestrator ruled the RBiH −3.2% (−5.3% at F4b) an emergent effect of the sourced manpower correction, not a battle-frequency lever.
+
+Consistency 1 is pre-existing assignment behaviour (reserves never promoted into an empty front sector; ARBiH 1st Corps sector 4) that this layout exposes; SE7-engine follow-up. Killed is unchanged (Bosniaks 33,903). Bosniaks abroad rise from 89k to 208k. Srebrenica ends at 54.9k and Goražde at 44.7k (short, SD13). The baseline manifest is re-pinned; after merging #601/#602 (battle-record format) only `final_save.json` (`53ffe8e9…`) and `run_summary.json` (`8c045fcd…`) changed, and the other six pins, including `control_delta.json` and `weekly_report.jsonl`, reproduce unchanged. Register SD1-SD15; report `docs/40_reports/implemented/20261114_SIEGE_DISPLACEMENT_PANEL.md`.
+
 ## 2026-11-14 — Realism audit non-calibration fixes: F10 battle records, F9 UI truth, F6 canon copy, errata
 
 Fixes the findings of the pre-1.0 realism audit (`docs/40_reports/proposals/20261114_PRE_1_0_REALISM_AUDIT.md`)
