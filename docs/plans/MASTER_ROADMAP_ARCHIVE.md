@@ -387,3 +387,11 @@ BC19 row detail, verbatim: F1 is closed: #617 reads the OSID front and supply, c
 R8 row sentence before this pass: Live-equivalent player/bot map parity held at 712/711/712/710 on 2026-11-07 (0 cells differ per player faction at 188 turns); main was then 712/709/710/705 and live = headless is re-proved at the freeze.
 
 Further roadmap text trimmed in pass 8, verbatim: R8 first dry run detail: tour, byte-exact save/load at turn 188, strict runtime 0/0/0/0 and Dayton sign-and-Verdict passed. Packaged 24-turn shakedowns and 188-turn diaries for RBiH, RS and HRHB have not run on the frozen source. Sequence paragraph: R8 dry runs before the freeze are allowed; they never count as qualifying. RF-F1b: negotiation momentum still saturates at about week 19, so the Washington and ceasefire gates stay always-true; after SE7E, needs historian and game-designer, moves negotiation weeks.
+
+## Merged list moved 2026-11-15 (steward pass 10)
+
+Merged list before this pass, verbatim: **Merged since 2026-11-12:** RF-AI2 (#619); the PK1 Level-1 fix with its canon amendment, R8 strategic runs at level 2 (#631); EV1 required-event answers (#621); the command-loop proposal (#632), B11 (#633) and Council fix 4 (#634); the Council diary (#629); path portability (#628); the licence (#612) and OSM attribution with the third-party notices (#618); the Velika Kladuša date (#630); the desk status strip (#614). Earlier items (#622, #617, #616, #620, #615, #600, #604 with SE6 held at `archive/claude/stance-effects-se6`) are in the archive.
+
+Licence note: #612 merged its first, proprietary commit before the PolyForm switch was pushed; #641 re-landed the switch (PolyForm Noncommercial 1.0.0, LICENSE.md identical to Mandate's, package.json SPDX id, README, ADR-0008, notices header and generator template).
+
+Wording trimmed from the roadmap header in pass 10, verbatim: SE7E, an empty front sector commits its own rear brigade, calibration-neutral, consistency 1 → 0 (#625); command-loop L3 and L3b, defensive operations need no signature and an unanswered plan proposal releases the plan (#642); the PolyForm Noncommercial licence (#641, re-landing the switch #612 missed). BC19 row: RF-5B (#623, HVO 1993 expulsions, bot-only) is merged and main is unchanged.

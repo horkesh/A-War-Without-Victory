@@ -115,6 +115,14 @@ also fails on ASCII-stripped names and pins the hidden pinned-event wording.
 Mistral 2 error is not corrected. Nor is the Codex Srebrenica `ghost_summary`, and the pinned-event
 explanation wording waits for a catalog-versioning lane. All are listed in the §6 record.
 
+## 2026-11-14 — Command loop L3 + L3b: no signature for defensive operations; an unanswered plan proposal releases the plan
+
+- **L3 (owner decision 2; proposal §5B).** Defensive-crisis (T3) opportunities of the player faction are decided by staff on the bot path at every autonomy level and never become a review card. Before this, the President was asked to sign defences ("Operation Breza 94 Defense"), and approving one did nothing mechanically. Code: `isDefensiveOpportunity` (a code-side lookup on the catalog tier, never persisted) and the two review functions in `operation_opportunities.ts` (`applyBotOpportunityDecisions`, `generateOpportunityProposalReviews`). Every other catalog entry is a corps operation or campaign, so in Full Control and Assisted he sees those only; Delegated is unchanged. Live president only: headless auto-control keeps its review-then-auto-resolve timing.
+- **L3b (proposal §5C finding, Council L8).** In the Level-1 guard of `applyCommanderOutput`, a plan whose approval proposal expired unanswered is released (`current_plan` null, no operation admitted, the commander replans). Before this, the next Advance stamped the proposal declined without staging a response, so the plan sat at `ready` for the rest of the war, was never re-proposed, blocked new plans and left the 25-Authority "unrequested operation" card as its only release. Explicit accept and decline still go through the staged `player_op_response` (#633 B11 unchanged). Player faction only.
+- **Canon.** Engine Invariants §14.10b (two sentences and an amendment note) and Rulebook line 13 ("Levers and autonomy").
+- **Tests.** `tests/operation_opportunities_defensive_no_signature.test.ts` (catalog classification; T3 staff-decided at levels 0 and 1 with no card; T1 still reaches him; Delegated unchanged; headless keeps the review path; other factions unchanged). `tests/sim/autonomy/level1_expired_proposal_release.test.ts` (drives the real `apply-autonomy-transition` expiry: pending proposal held, expired proposal released, old held plan released, explicit decline and accept unchanged, other plan ids untouched, bot and headless unchanged).
+- **Inertness.** See the PR: equal 40-week headless artifact hashes against main and a live strip-and-compare. Evidence under `C:/Pyrrhic/AWWV-worktrees/_logs/cl-l3-defensive-ops-20261114/`.
+
 ## 2026-11-14 — Ledger fragments replace top-of-file ledger edits
 
 **Problem.** Every parallel PR added its entry at the top of `docs/PROJECT_LEDGER.md`, so any two PRs merging close together conflicted on the same line (#599, #605 and others).
@@ -128,6 +136,19 @@ explanation wording waits for a catalog-versioning lane. All are listed in the �
 **Checked.** No test or tool depends on where an entry sits: the ledger guard reads only Current Phase and Non-negotiables, the lifecycle gate excludes the ledger, the release workflow only mentions it in a comment. `tests/ledger_compile.test.ts` covers ordering, idempotence, validation and the guard decision.
 
 **Not done.** The union rule keeps both sides in a local merge (shown in a scratch repo; a blank line between the two entries can be lost), but it is unverified on GitHub's own merge check. `ACCEPT_DIRECT_LEDGER_EDIT` should be flipped to false once the lanes that started before this change have merged.
+
+## 2026-11-14 — Licence: PolyForm Noncommercial 1.0.0, as in Mandate (re-land of #612's second commit)
+
+Owner decision (2026-11-14): the licence follows the Mandate repository. #612 auto-merged its first commit, a proprietary all-rights-reserved `LICENSE`, about a minute before the switch to PolyForm was pushed. So main carried the wrong licence, while the PR title said PolyForm. The steward found the mismatch in pass 8.
+
+This change lands the switch:
+- `LICENSE` (proprietary) is removed. `LICENSE.md` is the official PolyForm Noncommercial 1.0.0 text, byte-identical to Mandate's, with "Required Notice: Copyright 2026 horkesh".
+- `package.json` declares `PolyForm-Noncommercial-1.0.0`.
+- The README gains a Licence section: third-party licences, OSM under ODbL 1.0, and a no-affiliation note.
+- ADR-0008 records the decision.
+- The `THIRD_PARTY_NOTICES.md` header and its generator template (`tools/licensing/third_party_notices.mjs`) no longer call the game proprietary software of Pyrrhic Games.
+
+The 2026-11-14 "Proprietary LICENSE file" entry in `PROJECT_LEDGER.md` is superseded by this one. No behaviour, data, save or packaging change. Bundling the licence into the installer stays with the R9 licence/SBOM gate.
 
 ## 2026-11-14 — Owner playtest UI: centred desk status strip, rebalanced event notice (masthead is baked art)
 
@@ -237,6 +258,46 @@ The eight-seat broader bright-line panel took four rounds and reached unanimous 
 Final, on main after #619 (`7d4cf2cf698e3c41`, 712/705/706/698): merged head `ca6db798f436fedf`, run twice, scores 712/705/706/698 with no cell differing at any checkpoint; Bosniaks displaced by HRHB forces 27,827 people, Croats displaced by RBiH forces 34,348; battles +1.5%; consistency 1 (main 2); total HRHB stock at t188 −0.84% (the t180/t188 personnel excess is the corps-less orphan pair of diagnosis finding #6, 0 battles; binding B6). Earlier, on main after #617 (`4ff4a7665c0a35b5`, 712/709/710/705): head `5c378ee919295488`, reproduced, scores 712/709/710/705, equal to main. The Oct95 noise cells net to 0 (Kljevci lost, Varošluk gained). Strict health PASS, guards intact, consistency 1 (the same pre-existing gap). Battles per week fall 0.8%. Bosniaks displaced by HRHB forces are now 27,839 people; Croats displaced by RBiH forces 34,475. HRHB manpower is at or below main (reserve −12.7%, committed −2.1%); the restrain counterfactual equals main. Eight lane runs. Canon: SENSITIVE_HISTORY_DESIGN_GATE §1, §2a(ii)(a), §3, §6 record, §9; VICTORY §3.4; Systems Manual; DISPLACEMENT_MASTER §3.4/§6.2; REAL_WAR_MASTER (FAIL closed). The baseline manifest is re-pinned. Report `docs/40_reports/implemented/20261114_RF5B_BILATERAL_DISPLACEMENT_PANEL.md`.
 
 Codex review on #623 (P2): a third-side capture after a policy wave fired now inherits the wave's count (`cumulative_displaced`), so the captor's waves draw only on the people who remain; previously the same people could be expelled twice. The final 188w run has no such capture, so the baseline hash is unchanged.
+
+## 2026-11-14 — SE7E: an empty front sector commits its own rear brigade (PR #625)
+
+Calibration-moving lane (RF realism fix, register SD15). Under the owner's 2026-11-14 hold, checkpoint scores are recorded, not gated.
+
+On main, ARBiH 1st Corps sector 4 (Visoko-Kiseljak) has no front brigade on t98-t188, the consistency-1 signature. Three passes each missed it:
+- Construction's zero-assigned rescue reaches 3 hops and skips dug-in brigades.
+- The bot sector march indexes assigned and reserve brigades only.
+- Commander T1 relief counted a sector as empty only with no reserve or rear at all.
+
+So the free 182nd (rear, 4 hops) never moved, and the dug-in 147th, 185th and 146th stayed put. A weekly-save probe of main found 136 frontless sector-turns that still had an own pool; only that front persisted.
+
+`computeEmptySectorReliefReassignments` is now strictly additive. Sectors with no own pool are served first, exactly as before. Then a frontless sector with no eligible own reserve commits its own eligible rear brigade if it is still free (nearest, then id). It never borrows another sector's brigade, and donor eligibility is unchanged. It emits intent only; T2/T3 perform the march.
+
+Measured in the cloud against main `4ff4a7665c0a35b5` (712/709/710/705):
+- **v1:** rejected, guard breached.
+- **v2** (`ace4e553a491aecb`, 712/711/708/701): superseded.
+  - Its only early change (t4: frontless Ripac kept the 1st Drvar instead of fully empty Krupa getting it) diverged control.
+  - It breached two tolerances (Oct95 −4; the cascade, gated at 49, 46). The canon seat caught that the first write-up named only one of them.
+  - The historian seat rated its cell changes net less historical.
+- **v3** (`3253da2f9a6d2502`), final: 712/709/710/705; 0 control cells differ; cascade 49/49; consistency 0; strict health PASS; guards intact; battles per week 0.00%.
+  - Its only differing commander order in the whole campaign is t99: the 182nd marches from Fojnica Živčići and holds Rajčići t101-t188.
+  - Brigade state differs: 30 formations at t188; RS 18 brigades destroyed against 16.
+- **Final, rebased onto main after #619/#623** (`a92d99b`; main `ca6db798f436fedf`):
+  - SE7E `f5b477ededa198bd`, 712/705/706/698, equal to main;
+  - 0 control cells differ;
+  - consistency 1 → 0; cascade 43 = main; strict health PASS; battles 526 = main;
+  - baselines re-pinned at this head;
+  - the RF-AI2 final-turn VRS 1st Krajina gap does not occur on this main.
+- **Pyrrhic gate** (canon, determinism, historian, war-or-game, integrator): GO WITH CONDITIONS. The conditions were the v3 baseline re-pin and disclosures, both done; what remains is rebase and re-bless.
+- **Second case** (RF-AI2, #619): VRS 1st Krajina sector 0. A diagnostic run of v3 merged with #619's head shows it is a gap on the final turn only, t188. That front is new at t188 (redrawn by the Sana advance t185-187), and its only own brigade is a disrupted reserve.
+  - No movement-authority relief issued at t188 can arrive by t188, and v3 does not borrow a sibling while the sector has an own pool.
+  - Registered: SE7E-g (a disrupted-only pool blocks sibling relief) and SE7E-h (the validator's fresh-gap rule ignores fronts that did not exist on the previous turn).
+- **Registered, not followed:**
+  - SE7E-b: a dug-in reserve's sector march is rejected every turn and never released.
+  - SE7E-c: the corps-wide `SIEGE_EXEMPT_CORPS` skip in `distributeBrigadesToFront`.
+  - SE7E-d: a borrow order to a line holder is re-issued and dropped.
+  - SE7E-e: a fully empty sector can still take a frontless neighbour's rear; an all-dug-in pool waits.
+  - SE7E-f: some fully empty sectors flagged by the validator are not relieved.
+- Report `docs/40_reports/implemented/20261114_SE7E_EMPTY_SECTOR_PROMOTION.md`; `MOVEMENT_AUTHORITY.md` §3; CALIBRATION_MASTER entry.
 
 ## 2026-11-14 — Third-party notices and visible OpenStreetMap attribution
 
