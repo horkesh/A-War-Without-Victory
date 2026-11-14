@@ -539,21 +539,28 @@ clears, and Authority at its cap in no more than a quarter of turns after week 2
 These four change what the game asks of the player or touch a protected sequence. Everything else in
 this proposal follows from canon and the consults.
 
+**Owner decisions, 2026-11-14 evening: all four as recommended.** Each item below carries its decision.
+
 1. **Should backing a staff offensive cost Authority?** Today saying yes to a general's plan is free,
    so Authority sits at 100 all war. **Recommendation: yes.** 10 for a corps operation, 20 for a big
    campaign or a historical operation. Saying no stays free. Income stays as it is.
+   **Decided 2026-11-14: yes.** Lane L6, wave 2.
 2. **Should the President stop being asked about defensive and small local operations?** He is now
    asked to sign defences, which a president never did. **Recommendation: yes.** Defensive operations
    are never put to him. Small local attacks are put to him only in Full Control; in Assisted he sees
    corps operations and campaigns only. (Delegated, the default, is unchanged: staff plans already
    launch without his signature there.)
+   **Decided 2026-11-14: yes.** Lane L3.
 3. **When should corps commanders start following history?** Today they die on a timer after about two
    years in command and are replaced by whoever sorts first, so Dudaković dies in autumn 1995.
    **Recommendation: fix the rule now**, as one measured change in the current fidelity pass. Put the
    exact dates in with the other officer dates in the single calibration pass after the freeze.
+   **Decided 2026-11-14: fix the rule now.** Lane L4 builds the mechanism with an empty schedule as one
+   measured RF change; the dates go in lane L8, the one calibration pass after the freeze.
 4. **When the President overrules his army chief, may "replace" remove the army chief himself
    (Halilović, Delić), or only the corps commander?** **Recommendation: only the corps commander in
    1.0.** The army chief changes on the historical dates, as now.
+   **Decided 2026-11-14: only the corps commander in 1.0.** Lane L7, wave 3.
 
 ## 8. Recorded for other lanes (not part of this proposal)
 
