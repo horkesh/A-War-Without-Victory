@@ -95,7 +95,7 @@ const AUTHORED_STEPS: ReadonlyArray<OnboardingStepDef> = [
         title: "President's Desk",
         titleKey: 'onboarding.05.title',
         bodyKey: 'onboarding.05.body',
-        body: "Before you advance the turn, the President's Desk surfaces every pending choice. Each row opens its resolver or the staff panel it came from -- open it, decide, return. Resolve what you can; defer what you must.",
+        body: "Before you advance the turn, the President's Desk lists every pending choice. Open each one, see what it needs from you, decide, and return to the desk. Resolve what you can; defer what you must.",
         target_ui_element: 'decision-room',
     },
     {

@@ -47,7 +47,7 @@ describe('R7 Phase 1.1 sensitive-history content', () => {
 
             expect(event.trigger.turn_min).toBe(staggeredTurn[id]);
             expect(event.trigger.turn_max).toBe(staggeredTurn[id]);
-            expect(`${event.historical_source} ${essay.sources.join(' ')}`).toMatch(/Halilovic.*IT-01-48-T/i);
+            expect(`${event.historical_source} ${essay.sources.join(' ')}`).toMatch(/Halilovi[cć].*IT-01-48-T/i);
             expect(`${event.historical_source} ${essay.sources.join(' ')}`).toMatch(/Balkan Battlegrounds Vol\. II, pp\. 434-435/i);
         }
     });
@@ -59,7 +59,7 @@ describe('R7 Phase 1.1 sensitive-history content', () => {
 
         expect(prose).toMatch(/Herceg-Bosna\/HVO/i);
         expect(prose).toMatch(/joint criminal enterprise/i);
-        expect(prose).toMatch(/Hadzihasanovic.*Kubura/i);
+        expect(prose).toMatch(/Had[zž]ihasanovi[cć].*Kubura/i);
         expect(prose).toMatch(/superior responsibility/i);
         expect(prose).not.toMatch(forbiddenSymmetry);
     });

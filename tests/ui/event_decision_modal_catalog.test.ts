@@ -8,6 +8,8 @@ import type { EventDefinition, EventEffect, EventResponseOption, DimensionShift 
 import { buildEventAcceptanceReport } from '../../tools/diagnostics/event_acceptance_report.js';
 import { getPlayerSafePoliticalFactionName } from '../../src/ui/map/utils/playerSafeText.js';
 import { isDisplayEventEffect } from '../../src/ui/map/utils/eventEffectDisplay.js';
+import { displayEventProse, resolveEventSourceLine } from '../../src/ui/map/data/eventDisplayCopy.js';
+import { restoreBosnianProperNames } from '../../src/ui/shared/bosnianPlaceNames.js';
 
 afterEach(() => cleanup());
 
@@ -42,7 +44,7 @@ function displayDimensionName(dimension: string | undefined): string {
   switch (dimension) {
     case 'military_credibility': return 'Military Credibility';
     case 'territorial_legitimacy': return 'Territorial Legitimacy';
-    case 'international_standing': return "Int'l Standing";
+    case 'international_standing': return 'International Standing';
     case 'patron_confidence': return 'Patron Confidence';
     case 'internal_cohesion': return 'Internal Cohesion';
     case 'negotiating_leverage': return 'Negotiating Leverage';
@@ -52,6 +54,20 @@ function displayDimensionName(dimension: string | undefined): string {
 
 function signedDelta(delta: number): string {
   return `${delta > 0 ? '+' : ''}${delta}`;
+}
+
+// Council fix 4 (C4/C11): state attributes name the state by its canonical short form, army
+// attributes name its army; engine shares in [-1, 1] read as whole points.
+function stateName(faction: string | undefined): string {
+  return faction === 'RBiH' || faction === 'RS' || faction === 'HRHB' ? faction : displayFactionName(faction);
+}
+
+function armyName(faction: string | undefined): string {
+  return ({ RBiH: 'ARBiH', RS: 'VRS', HRHB: 'HVO' } as Record<string, string>)[faction ?? ''] ?? displayFactionName(faction);
+}
+
+function points(share: number): number {
+  return Math.round(share * 100);
 }
 
 function playerSafeDossierText(value: string): string {
@@ -69,40 +85,41 @@ function playerSafeDossierText(value: string): string {
 }
 
 function describeEffect(effect: EventEffect): string | null {
-  const faction = 'faction' in effect ? displayFactionName(effect.faction) : '';
+  const faction = 'faction' in effect ? stateName(effect.faction) : '';
+  const army = 'faction' in effect ? armyName(effect.faction) : '';
   switch (effect.kind) {
     case 'narrative': return null;
-    case 'morale_change': return `${faction} morale ${signedDelta(effect.delta)}`;
-    case 'supply_delta': return `${faction} supply ${signedDelta(effect.delta)}`;
-    case 'cohesion_change': return `${faction} cohesion ${signedDelta(effect.delta)}`;
+    case 'morale_change': return `${army} morale ${signedDelta(effect.delta)}`;
+    case 'supply_delta': return `${army} supply ${signedDelta(effect.delta)}`;
+    case 'cohesion_change': return `${army} cohesion ${signedDelta(effect.delta)}`;
     case 'humanitarian_impact': return `${faction} humanitarian impact${effect.war_crimes_delta ? ` (${signedDelta(effect.war_crimes_delta)})` : ''}`;
     case 'patron_pressure': return `${faction} patron pressure ${signedDelta(effect.delta)}`;
-    case 'alliance_change': return `${displayFactionName('RBiH')} / ${displayFactionName('HRHB')} alliance ${signedDelta(effect.delta)}`;
-    case 'negotiation_capital': return `${faction} ${displayDimensionName(effect.dimension)} ${signedDelta(effect.delta)}`;
+    case 'alliance_change': return `RBiH–HRHB alliance ${signedDelta(points(effect.delta))}`;
+    case 'negotiation_capital': return `${faction} negotiating capital ${signedDelta(effect.delta)} (${effect.dimension === 'international_credibility' ? 'international credibility' : displayDimensionName(effect.dimension).toLocaleLowerCase()})`;
     case 'equipment_grant': {
       const granted = [
         effect.tanks ? `${effect.tanks} tanks` : '',
         effect.artillery ? `${effect.artillery} artillery` : '',
         effect.aa_systems ? `${effect.aa_systems} AA systems` : '',
       ].filter(Boolean).join(', ');
-      return `${faction} equipment added: ${granted || 'support'}`;
+      return `${army} equipment added: ${granted || 'support'}`;
     }
-    case 'aggression_modifier': return `${faction} operational aggression ${signedDelta(effect.delta)} for ${effect.duration_turns} weeks (recorded only; the standard army AI ignores it in this build)`;
+    case 'aggression_modifier': return `${army} offensive drive ${signedDelta(points(effect.delta))}% for ${effect.duration_turns} weeks (noted in the record; it does not change army planning)`;
     case 'control_change': return `${faction} territorial control changes in ${effect.osids.length} area${effect.osids.length === 1 ? '' : 's'}`;
     case 'guerrilla_threat': return `${faction} rear-area threat for ${effect.duration_turns} weeks`;
-    case 'recruitment_modifier': return `${faction} recruitment ${Math.round(effect.pool_multiplier * 100)}% for ${effect.duration_turns} weeks`;
-    case 'equipment_quality_modifier': return `${faction} combat effectiveness ${Math.round(effect.multiplier * 100)}% for ${effect.duration_turns} weeks`;
-    case 'doctrine_constraint': return `${faction} doctrine constraint for ${effect.duration_turns} weeks`;
-    case 'offensive_ops_suppression': return `${faction} offensive operations suppressed for ${effect.duration_turns} weeks`;
-    case 'alliance_lock': return `Alliance ${effect.mode === 'floor' ? 'floor' : 'ceiling'} ${effect.value} for ${effect.duration_turns} weeks`;
-    case 'bot_priority_shift': return `${getPlayerSafePoliticalFactionName(effect.faction)} staff priorities shift for ${effect.duration_turns} weeks`;
+    case 'recruitment_modifier': return `${army} recruitment ${Math.round(effect.pool_multiplier * 100)}% for ${effect.duration_turns} weeks`;
+    case 'equipment_quality_modifier': return `${army} combat effectiveness ${Math.round(effect.multiplier * 100)}% for ${effect.duration_turns} weeks`;
+    case 'doctrine_constraint': return `${army} doctrine constraint for ${effect.duration_turns} weeks`;
+    case 'offensive_ops_suppression': return `${army} offensive operations suppressed for ${effect.duration_turns} weeks`;
+    case 'alliance_lock': return `RBiH–HRHB alliance kept ${effect.mode === 'floor' ? 'at or above' : 'at or below'} ${points(effect.value)} for ${effect.duration_turns} weeks`;
+    case 'bot_priority_shift': return `${army} staff priorities shift for ${effect.duration_turns} weeks`;
     case 'cost_ledger_annotation': return effect.text ?? 'Campaign cost ledger annotation recorded';
   }
   return 'Effect recorded';
 }
 
 function describeDimensionShift(shift: DimensionShift): string {
-  return `${displayFactionName(shift.faction)} ${displayDimensionName(shift.dimension)} ${signedDelta(shift.delta)}`;
+  return `${stateName(shift.faction)} ${displayDimensionName(shift.dimension)} ${signedDelta(shift.delta)}`;
 }
 
 function describeFlagValue(value: string | number | boolean, option: EventResponseOption): string {
@@ -193,14 +210,20 @@ describe('production modal-ready event catalog rendering', () => {
         onRespond: () => undefined,
       }));
 
-      expect(screen.getByRole('dialog', { name: eventTitle(event) }), row.id).toBeTruthy();
+      expect(screen.getByRole('dialog', { name: restoreBosnianProperNames(eventTitle(event)) }), row.id).toBeTruthy();
       expect(screen.getByText('Situation'), row.id).toBeTruthy();
-      expect(screen.getByText(event.narrative ?? event.situation!), row.id).toBeTruthy();
-      expect(screen.getByText('Source note'), row.id).toBeTruthy();
-      expect(screen.getByText(playerSafeDossierText(sourceNote!)), row.id).toBeTruthy();
-      expect(screen.getByText(playerSafeDossierText(event.staff_assessment!)), row.id).toBeTruthy();
+      expect(screen.getByText(displayEventProse(event.narrative ?? event.situation!)), row.id).toBeTruthy();
+      // Council fix 4 (C1): the dossier shows the first source line free of developer text, or none.
+      const sourceLine = resolveEventSourceLine(event, 'en');
+      if (sourceLine) {
+        expect(screen.getByText('Source note'), row.id).toBeTruthy();
+        expect(screen.getByText(playerSafeDossierText(sourceLine)), row.id).toBeTruthy();
+      } else {
+        expect(screen.queryByText('Source note'), row.id).toBeNull();
+      }
+      expect(screen.getByText(playerSafeDossierText(displayEventProse(event.staff_assessment!))), row.id).toBeTruthy();
       for (const evidence of event.trigger_evidence ?? []) {
-        expect(screen.getByText(playerSafeDossierText(evidence)), row.id).toBeTruthy();
+        expect(screen.getByText(playerSafeDossierText(displayEventProse(evidence))), row.id).toBeTruthy();
       }
       if (usesStaffRecommendation) {
         expect(screen.getAllByText('Staff recommendation'), row.id).toHaveLength(1);
@@ -211,12 +234,12 @@ describe('production modal-ready event catalog rendering', () => {
         expect(screen.getAllByText('Historical default'), row.id).toHaveLength(1);
         expect(screen.getByText(/historically attested choice/), row.id).toBeTruthy();
       }
-      expect(screen.queryByText('Historical default source review required'), row.id).toBeNull();
+      if (!usesStaffRecommendation) expect(screen.queryByText(/No response is marked as the historical choice/), row.id).toBeNull();
       expect(screen.queryByText('No immediate mechanical effects.'), row.id).toBeNull();
 
       for (const option of event.response_options ?? []) {
         expect(screen.getByRole('button', { name: new RegExp(option.label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')) }), `${row.id}:${option.id}`).toBeTruthy();
-        if (option.description) expect(screen.getByText(option.description), `${row.id}:${option.id}`).toBeTruthy();
+        if (option.description) expect(screen.getByText(displayEventProse(option.description)), `${row.id}:${option.id}`).toBeTruthy();
         for (const preview of expectedPreviewRows(option)) {
           expect(screen.getAllByText(preview).length, `${row.id}:${option.id}`).toBeGreaterThan(0);
         }

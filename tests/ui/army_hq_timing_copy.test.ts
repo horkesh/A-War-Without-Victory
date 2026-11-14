@@ -503,7 +503,8 @@ describe('Army HQ timing copy', () => {
     const copy = document.body.textContent ?? '';
     expect(copy).toContain(`Review by ${turnToDateString(24)}`);
     expect(copy).toContain('Recommend authorization');
-    expect(copy).toContain('Not applicable');
+    // Council fix 4 (C7): not-applicable axes are hidden, so no "Not applicable" chip.
+    expect(copy).not.toContain('Not applicable');
     expect(copy).toContain('Adequate');
     expect(copy).not.toContain('Expires w24');
     expect(copy).not.toMatch(/\bIstice\s+s24\b/);
@@ -610,7 +611,7 @@ describe('Army HQ timing copy', () => {
 
     const copy = document.body.textContent ?? '';
     expect(copy).toContain('Preporuka: odobriti');
-    expect(copy).toContain('Nije primjenjivo');
+    expect(copy).not.toContain('Nije primjenjivo');
     expect(copy).toContain('Dovoljno');
     expect(copy).not.toMatch(/\bapprove\b/i);
     expect(copy).not.toMatch(/\beligible_pending_review\b/i);

@@ -48,7 +48,7 @@
     "sets_flags": {
       "coha_active": true
     },
-    "historical_source": "BB Vol. II. ICTY Karadzic Judgment."
+    "historical_source": "BB Vol. II. ICTY Karadžić Judgment."
   },
   {
     "id": "operation_flash_1995",
@@ -133,7 +133,7 @@
       "coha_active": false,
       "coha_expired": true
     },
-    "historical_source": "ICTY Karadzic Judgment (IT-95-5/18-T). ICTY Mladic Judgment (IT-09-92-T)."
+    "historical_source": "ICTY Karadžić Judgment (IT-95-5/18-T). ICTY Mladić Judgment (IT-09-92-T)."
   },
   {
     "id": "tuzla_gate_massacre_1995",
@@ -182,7 +182,7 @@
         "delta": -10
       }
     ],
-    "historical_source": "ICTY Karadzic Judgment (IT-95-5/18-T). Bosnian State Court, Novak Djukic conviction (2014). BB Vol. II."
+    "historical_source": "ICTY Karadžić Judgment (IT-95-5/18-T). Bosnian State Court, Novak Djukic conviction (2014). BB Vol. II."
   },
   {
     "id": "un_hostage_crisis_1995",
@@ -368,7 +368,7 @@
     "sets_flags": {
       "un_hostage_crisis_occurred": true
     },
-    "historical_source": "ICTY Karadzic Trial Judgment (IT-95-5/18-T, 24 March 2016) Count 11 (Taking of Hostages) §§5810-5876. ICTY Karadzic Appeal Judgment (IT-95-5/18-A, 20 March 2019). ICTY Mladic Trial Judgment (IT-09-92-T, 22 November 2017) Count 6 §§5169-5215. UN Security Council Resolution 998 (16 June 1995). UN Secretary-General Report S/1995/444 (30 May 1995). UN General Assembly A/54/549 §§198-215 (Srebrenica fall report context). BB Vol. II pp. 312-321 (operational chronology, 25 May - 18 June 1995)."
+    "historical_source": "ICTY Karadžić Trial Judgment (IT-95-5/18-T, 24 March 2016) Count 11 (Taking of Hostages) §§5810-5876. ICTY Karadžić Appeal Judgment (IT-95-5/18-A, 20 March 2019). ICTY Mladić Trial Judgment (IT-09-92-T, 22 November 2017) Count 6 §§5169-5215. UN Security Council Resolution 998 (16 June 1995). UN Secretary-General Report S/1995/444 (30 May 1995). UN General Assembly A/54/549 §§198-215 (Srebrenica fall report context). BB Vol. II pp. 312-321 (operational chronology, 25 May - 18 June 1995)."
   },
   {
     "id": "srebrenica_falls_1995",
@@ -377,7 +377,7 @@
     "narrative": "The VRS overruns the Srebrenica safe area in a carefully planned operation. Dutch UNPROFOR peacekeepers are unable to prevent the advance. In the days that follow, over 8,000 Bosniak men and boys are systematically executed in the worst massacre in Europe since World War II. The fall of Srebrenica becomes a defining moment of the war and of international failure.",
     "source_note": "Existing Srebrenica arc sources, including ICTY/ICJ and UN reporting, ground the row's provenance. This note adds no casualty figures, causal claims, prohibited player choices, or alternate-outcome prevention framing. SCOPE OF control_change.osids: this list is NOT a claim about which settlements were overrun in July 1995. It is a control-restoration set: five cells (srebrenica_2, donji_potocari_2, milacevici, bostahovine_2, suceska) are painted RBiH through apr1995 and RS at oct1995, while six (ljeskovik_2, sulice_2, luka_2, radovcici, obadi, brezovice_2) were already painted RS from apr1994 or earlier and are restored here as a backstop because the engine lacks the March-April 1993 VRS Final Push that historically took them. The casualty and displacement footprint is carried separately by enclave_formation_displacement.source_osids and by the flat war_crimes_delta, neither of which this list affects.",
     "category": "humanitarian",
-    "historical_source": "ICTY Karadzic Trial Judgment (IT-95-5/18-T), Srebrenica genocide findings; ICTY Mladic Trial Judgment (IT-09-92-T), Srebrenica; ICTY Krstic Trial Judgment (IT-98-33-T); ICJ Bosnia v. Serbia (2007), genocide finding; UN Report on Srebrenica (A/54/549, 1999)",
+    "historical_source": "ICTY Karadžić Trial Judgment (IT-95-5/18-T), Srebrenica genocide findings; ICTY Mladić Trial Judgment (IT-09-92-T), Srebrenica; ICTY Krstić Trial Judgment (IT-98-33-T); ICJ Bosnia v. Serbia (2007), genocide finding; UN Report on Srebrenica (A/54/549, 1999)",
     "source_tier": "icty_icj_un",
     "trigger": {
       "turn_min": 169,
@@ -505,7 +505,7 @@
     "narrative": "Following the fall of Srebrenica, the VRS turns its attention to the neighboring Žepa enclave. Despite desperate resistance by the small garrison, the enclave falls within two weeks. The civilian population is forcibly expelled. The international community, still reeling from Srebrenica, watches another safe area collapse.",
     "source_note": "Existing safe-area and Srebrenica/Žepa sources ground the row's provenance and institutional context. This note adds no casualty figures, causal claims, prohibited player choices, or alternate-outcome prevention framing.",
     "category": "territorial",
-    "historical_source": "ICTY Karadzic Trial Judgment (IT-95-5/18-T), Žepa findings; ICTY Tolimir Trial Judgment (IT-05-88/2-T)",
+    "historical_source": "ICTY Karadžić Trial Judgment (IT-95-5/18-T), Žepa findings; ICTY Tolimir Trial Judgment (IT-05-88/2-T)",
     "source_tier": "icty_icj_un",
     "trigger": {
       "turn_min": 160,
@@ -572,10 +572,10 @@
   {
     "id": "srebrenica_column_breakout_1995",
     "title": "The Column Leaves Srebrenica",
-    "narrative": "As the safe area falls, a column of Bosniak men and boys gathers near Susnjari and sets out on foot through the forests toward the front lines at Tuzla. The route is ambushed along its length. ICTY judgments in the Krstic, Popovic et al., and Mladic cases establish the column's flight and the killings that followed as part of the genocide at Srebrenica. The fate of the column is recorded here as historical fact.",
-    "source_note": "This row is an informational timeline record. The ICTY Krstic (IT-98-33), Popovic et al. (IT-05-88), and Mladic (IT-09-92) judgments and the UN Secretary-General's Srebrenica report (A/54/549) ground the row's provenance and institutional context. This sensitive genocide subject is canon-gated: it is a record only and must not be re-authored as a player choice, a prevent-or-save mechanic, or an alternate-outcome path. This note adds no casualty figures, causal claims, prohibited player choices, or alternate-outcome prevention framing.",
+    "narrative": "As the safe area falls, a column of Bosniak men and boys gathers near Susnjari and sets out on foot through the forests toward the front lines at Tuzla. The route is ambushed along its length. ICTY judgments in the Krstić, Popovic et al., and Mladić cases establish the column's flight and the killings that followed as part of the genocide at Srebrenica. The fate of the column is recorded here as historical fact.",
+    "source_note": "This row is an informational timeline record. The ICTY Krstić (IT-98-33), Popovic et al. (IT-05-88), and Mladić (IT-09-92) judgments and the UN Secretary-General's Srebrenica report (A/54/549) ground the row's provenance and institutional context. This sensitive genocide subject is canon-gated: it is a record only and must not be re-authored as a player choice, a prevent-or-save mechanic, or an alternate-outcome path. This note adds no casualty figures, causal claims, prohibited player choices, or alternate-outcome prevention framing.",
     "category": "humanitarian",
-    "historical_source": "ICTY Krstic Trial Judgement (IT-98-33-T), paras 546, 598 (the column; genocide finding); ICTY Krstic Appeals Judgement (IT-98-33-A, 2004); ICTY Popovic et al. Trial Judgement (IT-05-88-T); ICTY Mladic Trial Judgement (IT-09-92-T); ICJ Bosnia v. Serbia (2007), genocide finding; UN Report on Srebrenica (A/54/549, 1999)",
+    "historical_source": "ICTY Krstić Trial Judgement (IT-98-33-T), paras 546, 598 (the column; genocide finding); ICTY Krstić Appeals Judgement (IT-98-33-A, 2004); ICTY Popovic et al. Trial Judgement (IT-05-88-T); ICTY Mladić Trial Judgement (IT-09-92-T); ICJ Bosnia v. Serbia (2007), genocide finding; UN Report on Srebrenica (A/54/549, 1999)",
     "source_tier": "icty_icj_un",
     "trigger": {
       "turn_min": 171,
@@ -594,7 +594,7 @@
     "same_turn_requires_events": true,
     "effect": {
       "kind": "narrative",
-      "text": "The column out of Srebrenica is recorded as historical fact. ICTY judgments (Krstic, Popovic et al., Mladic) establish its flight and the killings along the route as part of the genocide."
+      "text": "The column out of Srebrenica is recorded as historical fact. ICTY judgments (Krstić, Popovic et al., Mladić) establish its flight and the killings along the route as part of the genocide."
     }
   },
   {
@@ -632,7 +632,7 @@
     "narrative": "A second mortar attack strikes the Markale marketplace in Sarajevo, killing 43 civilians. Coming after Srebrenica and Žepa, the massacre triggers the decisive Western response that has been building for months. NATO Secretary General Willy Claes declares that the threshold for intervention has been crossed.",
     "source_note": "Existing ICTY/UN and same-id essay sources ground the row's provenance and institutional context. This note adds no casualty figures, causal claims, prohibited player choices, or alternate-outcome prevention framing.",
     "category": "humanitarian",
-    "historical_source": "ICTY Karadzic Trial Judgment (IT-95-5/18-T), second Markale incident; UNPROFOR investigation report, August 1995",
+    "historical_source": "ICTY Karadžić Trial Judgment (IT-95-5/18-T), second Markale incident; UNPROFOR investigation report, August 1995",
     "source_tier": "icty_icj_un",
     "trigger": {
       "turn_min": 177,
@@ -762,9 +762,9 @@
     "title": "Federation Ground Offensive",
     "narrative": "Coordinated ARBiH and HVO ground forces, supported by Croatian Army units, launch a broad offensive across western and central Bosnia. The operation rapidly captures Šipovo, Jajce, Mrkonjić Grad, and Ključ, reducing Republika Srpska's territory from roughly 70% to near the 49% envisioned by the Contact Group plan. The VRS, battered by NATO strikes and stretched thin, cannot hold its extended lines.",
     "category": "military",
-    "historical_source": "ICTY Karadzic Trial Judgment (IT-95-5/18-T), autumn 1995 operations; Balkan Battlegrounds, Vol. I, pp. 380-395",
+    "historical_source": "ICTY Karadžić Trial Judgment (IT-95-5/18-T), autumn 1995 operations; Balkan Battlegrounds, Vol. I, pp. 380-395",
     "source_tier": "icty_icj_un",
-    "source_note": "The Karadzic Trial Judgment supplies adjudicated end-war context; Balkan Battlegrounds Vol. I pp. 380-395 independently anchors the coordinated September 1995 ground offensives and territorial contraction. The essay and dynamic human-cost section are original synthesis and do not reduce the settlement to a single military cause.",
+    "source_note": "The Karadžić Trial Judgment supplies adjudicated end-war context; Balkan Battlegrounds Vol. I pp. 380-395 independently anchors the coordinated September 1995 ground offensives and territorial contraction. The essay and dynamic human-cost section are original synthesis and do not reduce the settlement to a single military cause.",
     "trigger": {
       "turn_min": 165,
       "turn_max": 200,
@@ -853,7 +853,7 @@
     "sets_flags": {
       "rrf_deployed": true
     },
-    "historical_source": "UNSCR 998 (1995). ICTY Karadzic Judgment (IT-95-5/18-T). BB Vol. II, Ch. 14."
+    "historical_source": "UNSCR 998 (1995). ICTY Karadžić Judgment (IT-95-5/18-T). BB Vol. II, Ch. 14."
   },
   {
     "id": "operation_summer_95",
@@ -968,7 +968,7 @@
   {
     "id": "karadzic_mladic_split_1995",
     "title": "Karadzic Attempts to Remove Mladic",
-    "narrative": "The crisis erupts on the worst possible day. As Croatian forces launch Operation Storm, Karadzic announces from Pale that he is removing Mladic from command and assuming personal control of the army. He blames the general for losing Grahovo and Glamoč. The army's reaction is immediate and hostile -- officers rally behind their commander, ignoring the political leadership. For seven days, Republika Srpska's command structure is paralyzed by an internal power struggle. On August 11, Karadzic is forced to back down. Mladic remains. But the damage is done.",
+    "narrative": "The crisis erupts on the worst possible day. As Croatian forces launch Operation Storm, Karadžić announces from Pale that he is removing Mladić from command and assuming personal control of the army. He blames the general for losing Grahovo and Glamoč. The army's reaction is immediate and hostile -- officers rally behind their commander, ignoring the political leadership. For seven days, Republika Srpska's command structure is paralyzed by an internal power struggle. On August 11, Karadžić is forced to back down. Mladić remains. But the damage is done.",
     "category": "political",
     "family": "rs_command_split",
     "source_tier": "icty_icj_un",
@@ -1020,7 +1020,7 @@
       },
       {
         "kind": "narrative",
-        "text": "Karadzic attempts to remove Mladic from command. The VRS officer corps rallies behind the general. RS political-military leadership is paralyzed for a week."
+        "text": "Karadžić attempts to remove Mladić from command. The VRS officer corps rallies behind the general. RS political-military leadership is paralyzed for a week."
       }
     ],
     "response_options": [
@@ -1029,7 +1029,7 @@
         "branch_tag": "rs_mladic_remove",
         "historical_marker": "counterfactual",
         "label": "Press the dismissal -- assert political control",
-        "description": "Force Mladic out. You may lose the army's loyalty, but civilian authority over the military must be established. The officer corps will resist.",
+        "description": "Force Mladić out. You may lose the army's loyalty, but civilian authority over the military must be established. The officer corps will resist.",
         "effects": [
           {
             "kind": "cohesion_change",
@@ -1070,8 +1070,8 @@
         "id": "back_down",
         "branch_tag": "rs_mladic_back_down",
         "historical_marker": "historical_default",
-        "label": "Rescind the order -- Mladic stays",
-        "description": "Admit defeat. Mladic remains in command. Your authority is diminished, but the army's command structure is preserved at a critical moment.",
+        "label": "Rescind the order -- Mladić stays",
+        "description": "Admit defeat. Mladić remains in command. Your authority is diminished, but the army's command structure is preserved at a critical moment.",
         "effects": [
           {
             "kind": "morale_change",
@@ -1173,7 +1173,7 @@
     "id": "hv_hvo_cooperation_1995",
     "image": "event_patron_relations_HRHB.webp",
     "title": "Croatian Army Crosses the Border",
-    "narrative": "Zagreb is on the line. With Operation Storm launching on 4 August 1995, HV Guards Brigades have already crossed the international border into Bosnia-Herzegovina to support HVO formations in Livno, Glamoč, and Bosansko Grahovo. Defense Minister Gojko Susak is coordinating directly with Boban's successor and HVO Main Staff in Mostar; Tudjman's transcripts treat the operation as a joint HV-HVO undertaking. The 4th and 7th Guards Brigades — the same elite formations that took Knin — are being readied for the September push into western Bosnia. The HZ HB Presidency must decide the command relationship: accept HV command and integrate openly with Zagreb's operational direction, run HVO operations independently of HV columns, coordinate with the ARBiH 5th Corps inside the Federation framework, or pull HVO back to a neutral observer posture and let the HV operate alone.",
+    "narrative": "Zagreb is on the line. With Operation Storm launching on 4 August 1995, HV Guards Brigades have already crossed the international border into Bosnia-Herzegovina to support HVO formations in Livno, Glamoč, and Bosansko Grahovo. Defense Minister Gojko Šušak is coordinating directly with Boban's successor and HVO Main Staff in Mostar; Tudjman's transcripts treat the operation as a joint HV-HVO undertaking. The 4th and 7th Guards Brigades — the same elite formations that took Knin — are being readied for the September push into western Bosnia. The HZ HB Presidency must decide the command relationship: accept HV command and integrate openly with Zagreb's operational direction, run HVO operations independently of HV columns, coordinate with the ARBiH 5th Corps inside the Federation framework, or pull HVO back to a neutral observer posture and let the HV operate alone.",
     "category": "military",
     "family": "hrhb_hv_coordination",
     "source_tier": "balkan_battlegrounds",
@@ -1218,12 +1218,12 @@
       "kind": "narrative",
       "text": "The HZ HB Presidency must take a command-coordination posture toward HV Guards Brigades operating openly inside Bosnia-Herzegovina."
     },
-    "source_note": "On 4 August 1995 — the opening day of Operation Storm — HV Guards Brigades crossed the international border to operate openly inside Bosnia-Herzegovina alongside HVO units in the Livno-Glamoč-Bosansko Grahovo sector and again during Operation Mistral 2 (Šipovo, Mrkonjić Grad, Jajce, 8-13 September 1995). The historical action of the HZ HB Presidency was to accept HV command coordination per the Susak-Tudjman-Boban-successor channel documented in admitted Tudjman Presidential Transcripts and BB Vol. II Ch. 15. §3.6 forward-looking guard (Wave 2 Canon): any future csq_hrhb_hv_* event authored to consume hv_hvo_cooperation_1995 outcomes MUST NOT carry response options that re-author cleansing, forced-displacement, hostage-taking, civilian-targeting, or any sensitive-act response option. The Operation Storm aftermath is ICTY-litigated (Gotovina/Markac/Cermak IT-06-90-T appeals reversal on JCE) and consequence rows must stay within legitimate military coordination lanes; the Krajina civilian column events and post-Storm Knin/Krajina property crimes remain canon-gated and OUT-OF-SCOPE.",
+    "source_note": "On 4 August 1995 — the opening day of Operation Storm — HV Guards Brigades crossed the international border to operate openly inside Bosnia-Herzegovina alongside HVO units in the Livno-Glamoč-Bosansko Grahovo sector and again during Operation Mistral 2 (Šipovo, Mrkonjić Grad, Jajce, 8-13 September 1995). The historical action of the HZ HB Presidency was to accept HV command coordination per the Šušak-Tudjman-Boban-successor channel documented in admitted Tudjman Presidential Transcripts and BB Vol. II Ch. 15. §3.6 forward-looking guard (Wave 2 Canon): any future csq_hrhb_hv_* event authored to consume hv_hvo_cooperation_1995 outcomes MUST NOT carry response options that re-author cleansing, forced-displacement, hostage-taking, civilian-targeting, or any sensitive-act response option. The Operation Storm aftermath is ICTY-litigated (Gotovina/Markac/Cermak IT-06-90-T appeals reversal on JCE) and consequence rows must stay within legitimate military coordination lanes; the Krajina civilian column events and post-Storm Knin/Krajina property crimes remain canon-gated and OUT-OF-SCOPE.",
     "staff_assessment": "Accepting HV command coordination secures Zagreb's operational and logistical backbone (Guards Brigades, captured SVK depot stocks, ammunition, fuel) for the September push and maximizes HR HB's Dayton negotiating leverage; running independently or coordinating only with ARBiH carries patron-axis cost.",
     "trigger_evidence": [
-      "HV Guards Brigades are already in Livno-Glamoc-Bosansko Grahovo sector as of 4 August 1995.",
-      "Operation Mistral 2 (Sipovo, Mrkonjic Grad, Jajce) is being planned for September under combined HV-HVO command.",
-      "Susak is in direct channel with the HVO Main Staff in Mostar; Tudjman Presidential Transcripts treat the operation as joint."
+      "HV Guards Brigades are already in Livno-Glamoč-Bosansko Grahovo sector as of 4 August 1995.",
+      "Operation Mistral 2 (Šipovo, Mrkonjić Grad, Jajce) is being planned for September under combined HV-HVO command.",
+      "Šušak is in direct channel with the HVO Main Staff in Mostar; Tudjman Presidential Transcripts treat the operation as joint."
     ],
     "response_options": [
       {
@@ -1231,7 +1231,7 @@
         "branch_tag": "hrhb_hv_support_full",
         "historical_marker": "historical_default",
         "label": "Accept HV command coordination",
-        "description": "HVO formations integrate openly with HV Guards Brigades under the Susak-Tudjman operational channel. The 4th and 7th Guards lead Mistral 2; HVO Mostar Corps provides flank security and local infantry. Zagreb's logistical backbone — ammunition, fuel, captured SVK heavy weapons — flows directly to HVO units.",
+        "description": "HVO formations integrate openly with HV Guards Brigades under the Šušak-Tudjman operational channel. The 4th and 7th Guards lead Mistral 2; HVO Mostar Corps provides flank security and local infantry. Zagreb's logistical backbone — ammunition, fuel, captured SVK heavy weapons — flows directly to HVO units.",
         "effects": [
           {
             "kind": "morale_change",
@@ -1309,7 +1309,7 @@
         "branch_tag": "hrhb_federation_coordinate",
         "historical_marker": "counterfactual",
         "label": "Coordinate with ARBiH 5th Corps inside Federation",
-        "description": "HVO realigns command to the Federation framework, coordinating directly with ARBiH 5th Corps (Dudaković) on the Sana / Una axis rather than the HV Guards. Zagreb is unhappy but bound by the Washington Agreement to accept the realignment. The HVO Mostar Corps fights inside a Federation joint-staff structure, not under Susak's direction.",
+        "description": "HVO realigns command to the Federation framework, coordinating directly with ARBiH 5th Corps (Dudaković) on the Sana / Una axis rather than the HV Guards. Zagreb is unhappy but bound by the Washington Agreement to accept the realignment. The HVO Mostar Corps fights inside a Federation joint-staff structure, not under Šušak's direction.",
         "effects": [
           {
             "kind": "patron_pressure",
@@ -1428,7 +1428,7 @@
         }
       }
     },
-    "historical_source": "Balkan Battlegrounds Vol. II Ch. 15 (Operation Storm 4-8 August 1995; Operation Mistral 2 8-13 September 1995; HV Guards Brigades cross-border operations into Bosnia-Herzegovina; Šipovo, Mrkonjić Grad, Jajce recapture). ICTY Gotovina et al. Trial Judgment (IT-06-90-T, 15 April 2011) and Appeals Judgment (16 November 2012) — Croatia operations doctrine and JCE reversal on Krajina civilian-column attribution. ICTY Prlic et al. IT-04-74-T (29 May 2013) Vol. 1 §§591-640 and Vol. 3 — Susak operational channel to HVO Main Staff; Tudjman Presidential Transcripts admitted at Prlic Vol. 3 (Susak coordination with Boban-successor HVO command). Holbrooke, To End a War (1998), Ch. 9-11 (HV-HVO-ARBiH coalition position ahead of Dayton; Krajina recovered, western Bosnia favorable). UN S/1995/770 and S/1995/799 (Secretary-General reports September-October 1995 on western Bosnia front)."
+    "historical_source": "Balkan Battlegrounds Vol. II Ch. 15 (Operation Storm 4-8 August 1995; Operation Mistral 2 8-13 September 1995; HV Guards Brigades cross-border operations into Bosnia-Herzegovina; Šipovo, Mrkonjić Grad, Jajce recapture). ICTY Gotovina et al. Trial Judgment (IT-06-90-T, 15 April 2011) and Appeals Judgment (16 November 2012) — Croatia operations doctrine and JCE reversal on Krajina civilian-column attribution. ICTY Prlić et al. IT-04-74-T (29 May 2013) Vol. 1 §§591-640 and Vol. 3 — Šušak operational channel to HVO Main Staff; Tudjman Presidential Transcripts admitted at Prlić Vol. 3 (Šušak coordination with Boban-successor HVO command). Holbrooke, To End a War (1998), Ch. 9-11 (HV-HVO-ARBiH coalition position ahead of Dayton; Krajina recovered, western Bosnia favorable). UN S/1995/770 and S/1995/799 (Secretary-General reports September-October 1995 on western Bosnia front)."
   },
   {
     "id": "rbih_late_war_offensive_1995",
@@ -1479,8 +1479,8 @@
       "kind": "narrative",
       "text": "The Sarajevo Presidency must take a late-war operational posture toward the post-Storm / Deliberate Force / Mistral-2 window: launch the coordinated offensives that maximize territorial reintegration before Geneva closes, or hold/wait/concede."
     },
-    "source_note": "Following the July 1995 Srebrenica and Žepa rupture, the 4 August Operation Storm (HV liberation of Krajina), the 30 August-14 September NATO Operation Deliberate Force air campaign, and the joint HV-HVO Operation Mistral 2 (Šipovo / Mrkonjić Grad / Jajce, 8-13 September), the Sarajevo Presidency faced the decisive operational decision for the final war phase. The historical posture was launch_coordinated_offensives: ARBiH 5th Corps under Atif Dudaković executed Operation Sana (Bosanski Petrovac 14 Sept; Ključ 17 Sept; Sanski Most 10 Oct) breaking out of the Bihać pocket; ARBiH 3rd Corps and 7th Corps from central Bosnia provided flank weight against VRS positions in the Vlašić-Donji Vakuf-Jajce-Mrkonjić arc; the HV-HVO Mistral 2 axis advanced east-northeast through western Bosnia. By mid-October 1995 the coordinated offensives had recovered approximately 20% of pre-war RS-held territory and forced RS-Belgrade to the Holbrooke-led negotiation table on terms substantially worse than the mid-1995 Contact Group / Owen-Stoltenberg / Geneva positions. The 5-10 October ceasefire (Holbrooke-brokered, signed Sarajevo) and the November Dayton General Framework Agreement codified the territorial dividend at the 51:49 Federation/RS split. Sources: Balkan Battlegrounds Vol. II Ch. 15-16 (Operation Sana chronology + 5th Corps breakout + 3rd/7th Corps central-Bosnia flank + ARBiH coordination with HV-HVO Mistral 2); Richard Holbrooke, To End a War (Random House 1998) chs. 8-11 (Geneva Agreed Basic Principles 8 Sept; New York Further Agreed Principles 26 Sept; October ceasefire diplomacy; Dayton territorial framework); Alija Izetbegović, Inescapable Questions (Islamic Foundation 2003) chs. on the Final Offensive decision frame + multi-corps coordination + 51:49 territorial-floor calculus; ICTY Krstić IT-98-33-T (2 Aug 2001) §§ on the Srebrenica-rupture strategic context driving the post-July 1995 operational decision; ICTY Karadžić IT-95-5/18-T §§4985-5067 (Patriarch Paper + Belgrade-delegation channel + Dayton ratification track on the RS side that made coordination feasible); UN S/1995/770 + S/1995/799 + S/1995/827 (Secretary-General Sept-Oct 1995 reports on the western-Bosnia front + diplomatic framework); UN S/1995/999 + S/RES/1031 (Dayton General Framework Agreement initialing + 15 Dec 1995 ratification). Engine vocabulary substitutions per memory/engine_dimension_vocabulary.md: alliance_lock(hrhb) collapsed to alliance_change (Federation/HRHB joint-operation proxy); territorial_loss / territorial_gain collapsed to territorial_legitimacy (proxy for ~20% RS pre-war territory reintegration in launch_coordinated_offensives historical; opposite-sign in the counterfactual concession arc). §3.6 STRICT forward-looking guard (Wave 2 Canon): any future csq_rbih_late_war_* event authored to consume rbih_late_war_offensive_1995 outcomes MUST NOT carry response options that re-author cleansing, forced-displacement, civilian-targeting, hostage-taking, paramilitary-deployment, ethnic-targeting, or any sensitive-act response option. The historical Operation Sana liberation of western Bosnia did include some Serb-civilian displacement (ICTY context: Sefer Halilović trial IT-01-48-T on ARBiH General Staff command-and-control 1993-95 doctrine; UNHCR Sept-Oct 1995 western-Bosnia displacement reporting; general post-Storm humanitarian fallout in the Sanski Most / Mrkonjić sector; HRW September-October 1995 western-Bosnia reporting) — this packet's DECISION is operational-strategic (multi-corps coordination posture + Federation alliance posture + Dayton-table territorial-floor posture) and the consequence rows MUST NEVER reward displacement / cleansing / civilian-column attack pathways. The Sanski Most / Bosanski Petrovac / Ključ liberation events and the associated humanitarian surfaces remain canon-gated through their existing event surfaces (operation_sana_1995, ceasefire_1995, us_halts_federation_advance_1995). The HV-HVO Operation Storm / Mistral 2 sensitive humanitarian fallout (Krajina civilian columns, post-Storm Knin property crimes — Gotovina/Markač/Čermak IT-06-90-T appeals JCE reversal context) remains canon-gated through hv_hvo_cooperation_1995's §3.6 source_note. Each per-option {opt}_to_late_war_offensive future_consequence explanation downstream of B1 includes the canon-gate prose enumerating the displacement / cleansing prohibition.",
-    "staff_assessment": "The post-Storm + Deliberate Force + Mistral 2 window is the structural maximum for territorial reintegration before Holbrooke's Geneva-New York framework closes the table. Launching coordinated offensives with HV-HVO at the September peak maximizes military credibility, negotiating leverage, and territorial legitimacy at the Dayton table; defensive consolidation, waiting on diplomacy, or accepting partition each cost military credibility and territorial-legitimacy capture, and the accept_partition counterfactual collapses the Federation alliance and the Bosniak-state internal cohesion.",
+    "source_note": "Following the fall of the Srebrenica and Žepa safe areas to Bosnian Serb forces in July 1995 and the Srebrenica genocide; Croatia's Operation Storm against the self-declared Republic of Serb Krajina in Croatia (4-7 August), in which Croatian forces, with the ARBiH 5th Corps, took the territory and most of its Serb population fled; the 30 August-14 September NATO Operation Deliberate Force air campaign; and the joint HV-HVO Operation Mistral 2 (Jajce / Šipovo / Drvar, 8-15 September), the Sarajevo Presidency faced the decisive operational decision for the final war phase. The historical posture was launch_coordinated_offensives: ARBiH 5th Corps under Atif Dudaković executed Operation Sana (Bosanski Petrovac 14 Sept; Ključ 17 Sept; Sanski Most 10 Oct) breaking out of the Bihać pocket; ARBiH 3rd Corps and 7th Corps from central Bosnia provided flank weight against VRS positions in the Vlašić-Donji Vakuf-Jajce-Mrkonjić arc; the HV-HVO Mistral 2 axis advanced east-northeast through western Bosnia. By mid-October 1995 the coordinated offensives had recovered approximately 20% of pre-war RS-held territory and forced RS-Belgrade to the Holbrooke-led negotiation table on terms substantially worse than the mid-1995 Contact Group / Owen-Stoltenberg / Geneva positions. The 5-10 October ceasefire (Holbrooke-brokered, signed Sarajevo) and the November Dayton General Framework Agreement codified the territorial dividend at the 51:49 Federation/RS split. Sources: Balkan Battlegrounds Vol. II Ch. 15-16 (Operation Sana chronology + 5th Corps breakout + 3rd/7th Corps central-Bosnia flank + ARBiH coordination with HV-HVO Mistral 2); Richard Holbrooke, To End a War (Random House 1998) chs. 8-11 (Geneva Agreed Basic Principles 8 Sept; New York Further Agreed Principles 26 Sept; October ceasefire diplomacy; Dayton territorial framework); Alija Izetbegović, Inescapable Questions (Islamic Foundation 2003) chs. on the Final Offensive decision frame + multi-corps coordination + 51:49 territorial-floor calculus; ICTY Krstić IT-98-33-T (2 Aug 2001) §§ on the Srebrenica-rupture strategic context driving the post-July 1995 operational decision; ICTY Karadžić IT-95-5/18-T §§4985-5067 (Patriarch Paper + Belgrade-delegation channel + Dayton ratification track on the RS side that made coordination feasible); UN S/1995/770 + S/1995/799 + S/1995/827 (Secretary-General Sept-Oct 1995 reports on the western-Bosnia front + diplomatic framework); UN S/1995/999 + S/RES/1031 (Dayton General Framework Agreement initialing + 15 Dec 1995 ratification). Engine vocabulary substitutions per memory/engine_dimension_vocabulary.md: alliance_lock(hrhb) collapsed to alliance_change (Federation/HRHB joint-operation proxy); territorial_loss / territorial_gain collapsed to territorial_legitimacy (proxy for ~20% RS pre-war territory reintegration in launch_coordinated_offensives historical; opposite-sign in the counterfactual concession arc). §3.6 STRICT forward-looking guard (Wave 2 Canon): any future csq_rbih_late_war_* event authored to consume rbih_late_war_offensive_1995 outcomes MUST NOT carry response options that re-author cleansing, forced-displacement, civilian-targeting, hostage-taking, paramilitary-deployment, ethnic-targeting, or any sensitive-act response option. The historical Operation Sana liberation of western Bosnia did include some Serb-civilian displacement (ICTY context: Sefer Halilović trial IT-01-48-T on ARBiH General Staff command-and-control 1993-95 doctrine; UNHCR Sept-Oct 1995 western-Bosnia displacement reporting; general post-Storm humanitarian fallout in the Sanski Most / Mrkonjić sector; HRW September-October 1995 western-Bosnia reporting) — this packet's DECISION is operational-strategic (multi-corps coordination posture + Federation alliance posture + Dayton-table territorial-floor posture) and the consequence rows MUST NEVER reward displacement / cleansing / civilian-column attack pathways. The Sanski Most / Bosanski Petrovac / Ključ liberation events and the associated humanitarian surfaces remain canon-gated through their existing event surfaces (operation_sana_1995, ceasefire_1995, us_halts_federation_advance_1995). The HV-HVO Operation Storm / Mistral 2 sensitive humanitarian fallout (Krajina civilian columns, post-Storm Knin property crimes — Gotovina/Markač/Čermak IT-06-90-T appeals JCE reversal context) remains canon-gated through hv_hvo_cooperation_1995's §3.6 source_note. Each per-option {opt}_to_late_war_offensive future_consequence explanation downstream of B1 includes the canon-gate prose enumerating the displacement / cleansing prohibition.",
+    "staff_assessment": "The post-Storm + Deliberate Force + Mistral 2 window is the structural maximum for territorial reintegration before Holbrooke's Geneva-New York framework closes the table. Launching coordinated offensives with HV-HVO at the September peak maximizes military credibility, negotiating leverage, and territorial legitimacy at the Dayton table; defensive consolidation, waiting on diplomacy, or accepting partition each cost military credibility and territorial-legitimacy capture, and accepting partition also collapses the Federation alliance and the Bosniak-state internal cohesion.",
     "trigger_evidence": [
       "ARBiH 5th Corps (Dudaković) has broken out of the Bihać pocket and stands ready for a Sana-Una axis offensive against VRS positions in Bosanski Petrovac, Ključ, and Sanski Most.",
       "ARBiH 3rd Corps and 7th Corps in central Bosnia stand ready for flank operations in the Vlašić-Donji Vakuf-Jajce-Mrkonjić arc paired with HV-HVO Mistral 2.",
@@ -1693,7 +1693,7 @@
     "id": "holbrooke_us_belgrade_channel_1995",
     "image": "event_patron_relations_RS.webp",
     "title": "Holbrooke Routes Pressure Through Belgrade",
-    "narrative": "Holbrooke has arrived in Belgrade. Milosevic, not Karadzic, is now America's contact for Republika Srpska. The message is clear: accept the US framework or face combined diplomatic and military pressure.",
+    "narrative": "Holbrooke has arrived in Belgrade. Milošević, not Karadžić, is now America's contact for Republika Srpska. The message is clear: accept the US framework or face combined diplomatic and military pressure.",
     "category": "diplomatic",
     "source_note": "The listed formal instruments bound the dates, terms, and institutional action described; accompanying judgments or participant accounts supply context only. The essay is original synthesis and does not treat proposed or negotiated terms as implemented beyond the cited record.",
     "family": "rs_holbrooke_response",
@@ -1732,7 +1732,7 @@
     "historical_default_response_id": "comply_with_belgrade",
     "effect": {
       "kind": "narrative",
-      "text": "Holbrooke bypasses Pale and deals with Milosevic as RS proxy. Belgrade now controls the channel to the international community."
+      "text": "Holbrooke bypasses Pale and deals with Milošević as RS proxy. Belgrade now controls the channel to the international community."
     },
     "effects": [],
     "dimension_shifts": [
@@ -1747,8 +1747,8 @@
         "id": "comply_with_belgrade",
         "branch_tag": "rs_holbrooke_comply",
         "historical_marker": "historical_default",
-        "label": "Accept the Belgrade channel -- work through Milosevic",
-        "description": "Acknowledge that Milosevic now speaks for RS in Washington's eyes. Patron confidence recovers, but RS loses direct access to the peace process.",
+        "label": "Accept the Belgrade channel -- work through Milošević",
+        "description": "Acknowledge that Milošević now speaks for RS in Washington's eyes. Patron confidence recovers, but RS loses direct access to the peace process.",
         "effects": [],
         "dimension_shifts": [
           {
@@ -1770,7 +1770,7 @@
         "branch_tag": "rs_holbrooke_defy",
         "historical_marker": "counterfactual",
         "label": "Reject the US framework -- Pale speaks for Republika Srpska",
-        "description": "Refuse to be sidelined. Karadzic repudiates the Patriarch Paper delegation and insists on direct Pale representation. Milosevic publicly disowns the Pale leadership; sanctions-relief is foreclosed and the FRY supply pinch tightens. International standing collapses, but RS asserts its political identity.",
+        "description": "Refuse to be sidelined. Karadžić repudiates the Patriarch Paper delegation and insists on direct Pale representation. Milošević publicly disowns the Pale leadership; sanctions-relief is foreclosed and the FRY supply pinch tightens. International standing collapses, but RS asserts its political identity.",
         "effects": [
           {
             "kind": "supply_delta",
@@ -2087,7 +2087,7 @@
     "sets_flags": {
       "operation_sana_occurred": true
     },
-    "historical_source": "ICTY Karadzic Judgment (IT-95-5/18-T). BB Vol. II Ch. 15; BB Vol. II pp. 536-538 for 5th Corps/Bihać source trail."
+    "historical_source": "ICTY Karadžić Judgment (IT-95-5/18-T). BB Vol. II Ch. 15; BB Vol. II pp. 536-538 for 5th Corps/Bihać source trail."
   },
   {
     "id": "ceasefire_1995",
@@ -2287,7 +2287,7 @@
     "sets_flags": {
       "advance_halted": true
     },
-    "historical_source": "Holbrooke, 'To End a War' (1998). BB Vol. II, Ch. 15. US State Dept. chronology. DECISIVE for the current authoring (2026-08-12): BB Vol. I p.462 endnote 823 — US pressure came in September after 'Maestral', and 'Nevertheless, Zagreb went ahead and ordered Juzni Potez in October'; BB Vol. I p.462 endnote 821 — Izetbegovic bowed reluctantly while setting conditions to buy the ARBiH more days, Delic begging him to let the fighting continue; BB Vol. I p.427 — Juzni Potez opened 8 Oct, Mrkonjić Grad fell 10 Oct. This is why the comply response suppresses RBiH only and NOT HRHB."
+    "historical_source": "Holbrooke, 'To End a War' (1998). BB Vol. II, Ch. 15. US State Dept. chronology. DECISIVE for the current authoring (2026-08-12): BB Vol. I p.462 endnote 823 — US pressure came in September after 'Maestral', and 'Nevertheless, Zagreb went ahead and ordered Juzni Potez in October'; BB Vol. I p.462 endnote 821 — Izetbegović bowed reluctantly while setting conditions to buy the ARBiH more days, Delić begging him to let the fighting continue; BB Vol. I p.427 — Juzni Potez opened 8 Oct, Mrkonjić Grad fell 10 Oct. This is why the comply response suppresses RBiH only and NOT HRHB."
   },
   {
     "id": "holbrooke_ceasefire_demand_oct95",
@@ -2310,7 +2310,7 @@
     "bot_response_logic": "historical",
     "historical_default_response_id": "accept_ceasefire",
     "source_note": "Holbrooke, To End a War, and US State Department Oct. 5-12, 1995 records ground the ceasefire demand.",
-    "staff_assessment": "US pressure seeks to freeze Federation momentum and preserve the Dayton path. Accepting the ceasefire preserves US backing and diplomatic legitimacy while sacrificing offensive momentum; continuing offensive risks patron support/diplomatic legitimacy. The historical default is a calibration baseline, not a recommendation.",
+    "staff_assessment": "US pressure seeks to freeze Federation momentum and preserve the Dayton path. Accepting the ceasefire preserves US backing and diplomatic legitimacy while sacrificing offensive momentum; continuing offensive risks patron support/diplomatic legitimacy. The historical choice is marked for reference, not as a recommendation.",
     "trigger_evidence": [
       "Visible October 1995 diplomacy: Holbrooke presses for a ceasefire to keep negotiations moving toward Dayton.",
       "The Federation/RBiH northwestern offensive has active public momentum, making the halt demand politically immediate."
@@ -2508,7 +2508,7 @@
         "id": "hardline",
         "branch_tag": "rbih_dayton_hardline",
         "label": "Repudiate the Framework — Walk the Paris Signature",
-        "description": "Reject Dayton on the grounds that the Inter-Entity Boundary Line ratifies the eastern-enclave losses (Srebrenica, Žepa) and the dual-entity arrangement entrenches the partition logic of ethnic-cleansing-driven territorial outcomes. The Šilajdžić-track Assembly current prevails over Izetbegović's Presidency; the delegation walks the Paris signature on the institutional precedent of the September 1993 Owen-Stoltenberg Assembly rejection (B4). The Annex 7 refugee-return framework is foreclosed; IFOR deployment is foreclosed; U.S./Holbrooke-mediated stabilization is foreclosed; the war continues without realistic prospect of recovering eastern enclaves.",
+        "description": "Reject Dayton on the grounds that the Inter-Entity Boundary Line ratifies the eastern-enclave losses (Srebrenica, Žepa) and the dual-entity arrangement entrenches the partition logic of ethnic-cleansing-driven territorial outcomes. The Silajdžić-track Assembly current prevails over Izetbegović's Presidency; the delegation walks the Paris signature on the institutional precedent of the September 1993 Owen-Stoltenberg Assembly rejection. The Annex 7 refugee-return framework is foreclosed; IFOR deployment is foreclosed; U.S./Holbrooke-mediated stabilization is foreclosed; the war continues without realistic prospect of recovering eastern enclaves.",
         "historical_marker": "counterfactual",
         "aggression_affinity": 0.5,
         "risk_level": 0.8,
@@ -2613,7 +2613,7 @@
     "sets_flags": {
       "dayton_signed": true
     },
-    "historical_source": "ICTY Karadzic Judgment (IT-95-5/18-T). UNSCR 1031 (1995). Dayton General Framework Agreement (1995)."
+    "historical_source": "ICTY Karadžić Judgment (IT-95-5/18-T). UNSCR 1031 (1995). Dayton General Framework Agreement (1995)."
   },
   {
     "id": "us_forces_dayton_rbih_1995",
@@ -2999,7 +2999,7 @@
         "id": "hardline",
         "branch_tag": "hrhb_dayton_hardline",
         "label": "Capture the Delegation — Reject the Federation Entity",
-        "description": "The HR HB Presidency captures the Croat delegation position toward rejection of the Federation-entity framework. Refuse to dissolve HR HB as a parallel state; walk the Croat delegation back from Federation acceptance on the grounds that constitutive-nation status inside a Federation entity is inferior to a separate Croat political-territorial entity (the pre-Zubak hardline current per Prlić Vol. I §§556-590 and §§621-640). Zagreb's HV expeditionary support is withdrawn; the Federation framework ruptures (the B10/H9 alliance_lock chain collapses); HR HB is diplomatically isolated.",
+        "description": "The HR HB Presidency captures the Croat delegation position toward rejection of the Federation-entity framework. Refuse to dissolve HR HB as a parallel state; walk the Croat delegation back from Federation acceptance on the grounds that constitutive-nation status inside a Federation entity is inferior to a separate Croat political-territorial entity (the pre-Zubak hardline current per Prlić Vol. I §§556-590 and §§621-640). Zagreb's HV expeditionary support is withdrawn; the Federation framework breaks apart; HR HB is diplomatically isolated.",
         "historical_marker": "counterfactual",
         "aggression_affinity": 0.4,
         "risk_level": 0.8,

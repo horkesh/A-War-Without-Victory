@@ -5,6 +5,7 @@ import { useIPC } from '../../desktop/useIPC';
 import { useGameStore } from '../../store/gameStore';
 import { getActiveLocale, t, type MessageKey } from '../../i18n';
 import { formatCorpsDisplayName, formatCount, turnToDateString } from '../../utils/formatters';
+import { hasDeveloperText } from '../../../shared/developerText';
 
 type OpportunityUiDecision = OperationOpportunityProposalView['available_actions'][number]['id'];
 type OpportunityResolveOptions = { redirectVariantId?: string };
@@ -128,13 +129,16 @@ function actionButtonClass(actionId: OpportunityUiDecision): string {
 }
 
 function AxisPill({ axis }: { axis: OperationOpportunityProposalView['prerequisite_axes'][number] }) {
+    // An engine reason in evaluator voice ("5th Corps commander state present") shows as the
+    // plain axis state instead (council fix 4, C7).
+    const reason = axis.reason && !hasDeveloperText(axis.reason) ? axis.reason : t(AXIS_STATE_KEYS[axis.state]);
     return (
         <div
             className={`rounded border px-2 py-1 ${AXIS_STYLES[axis.state]}`}
-            title={axis.reason}
+            title={reason}
         >
             <div className="text-[13px] font-bold uppercase tracking-[0.12em]">{axis.label}</div>
-            <div className="text-[13px] leading-snug opacity-90 line-clamp-2">{axis.reason || t(AXIS_STATE_KEYS[axis.state])}</div>
+            <div className="text-[13px] leading-snug opacity-90 line-clamp-2">{reason}</div>
         </div>
     );
 }
@@ -329,9 +333,9 @@ function DossierCard({
                 </div>
             )}
 
-            {proposal.prerequisite_axes.length > 0 && (
+            {proposal.prerequisite_axes.some((axis) => axis.state !== 'not_applicable') && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-1.5">
-                    {proposal.prerequisite_axes.map((axis) => (
+                    {proposal.prerequisite_axes.filter((axis) => axis.state !== 'not_applicable').map((axis) => (
                         <AxisPill key={`${proposal.proposal_id}:${axis.axis}`} axis={axis} />
                     ))}
                 </div>

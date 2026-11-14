@@ -17,33 +17,33 @@ export const OFFICER_PROSE_BCS: Readonly<Record<string, string>> = {
     'JNA officer leading the VRS main staff at the opening of the war.':
         'Oficir JNA koji je na početku rata predvodio Glavni štab VRS.',
     'JNA-trained commander assigned to 1st Krajina Corps in the opening OOB.':
-        'Komandant školovan u JNA, raspoređen u 1. krajiški korpus u početnom rasporedu snaga.',
+        'Komandant školovan u JNA, raspoređen u 1. krajiški korpus na početku rata.',
     'JNA-background officer assigned to 2nd Krajina Corps at scenario start.':
-        'Oficir porijeklom iz JNA, raspoređen u 2. krajiški korpus na početku scenarija.',
+        'Oficir porijeklom iz JNA, raspoređen u 2. krajiški korpus na početku rata.',
     'JNA-trained commander assigned to East Bosnian Corps in the opening OOB.':
-        'Komandant školovan u JNA, raspoređen u Istočnobosanski korpus u početnom rasporedu snaga.',
+        'Komandant školovan u JNA, raspoređen u Istočnobosanski korpus na početku rata.',
     'JNA-background officer assigned to Sarajevo-Romanija Corps at scenario start.':
-        'Oficir porijeklom iz JNA, raspoređen u Sarajevsko-romanijski korpus na početku scenarija.',
+        'Oficir porijeklom iz JNA, raspoređen u Sarajevsko-romanijski korpus na početku rata.',
     'JNA-background officer assigned to Herzegovina Corps in the opening OOB.':
-        'Oficir porijeklom iz JNA, raspoređen u Hercegovački korpus u početnom rasporedu snaga.',
+        'Oficir porijeklom iz JNA, raspoređen u Hercegovački korpus na početku rata.',
     'JNA-background officer leading the RBiH army command at scenario start.':
-        'Oficir porijeklom iz JNA na čelu komande Armije RBiH na početku scenarija.',
+        'Oficir porijeklom iz JNA na čelu komande Armije RBiH na početku rata.',
     'JNA-trained officer assigned to 1st Corps around Sarajevo at scenario start.':
-        'Oficir školovan u JNA, raspoređen u 1. korpus oko Sarajeva na početku scenarija.',
+        'Oficir školovan u JNA, raspoređen u 1. korpus oko Sarajeva na početku rata.',
     'JNA-background officer assigned to 2nd Corps in the opening OOB.':
-        'Oficir porijeklom iz JNA, raspoređen u 2. korpus u početnom rasporedu snaga.',
+        'Oficir porijeklom iz JNA, raspoređen u 2. korpus na početku rata.',
     'JNA-background officer assigned to 5th Corps in the Bihac pocket.':
         'Oficir porijeklom iz JNA, raspoređen u 5. korpus u bihaćkom džepu.',
     'JNA-background officer leading HVO army command at scenario start.':
-        'Oficir porijeklom iz JNA na čelu komande vojske HVO-a na početku scenarija.',
+        'Oficir porijeklom iz JNA na čelu komande HVO-a na početku rata.',
     'JNA-background officer assigned to Central Bosnia HVO command at scenario start.':
-        'Oficir porijeklom iz JNA, raspoređen u OZ Srednja Bosna na početku scenarija.',
+        'Oficir porijeklom iz JNA, raspoređen u OZ Srednja Bosna na početku rata.',
     'HV-background officer assigned to Tomislavgrad command in the opening OOB.':
-        'Oficir porijeklom iz HV-a, raspoređen u OZ Sjeverozapadna Hercegovina u početnom rasporedu snaga.',
+        'Oficir porijeklom iz HV-a, raspoređen u OZ Sjeverozapadna Hercegovina na početku rata.',
     'Militia-origin commander assigned to Southeast Herzegovina in the opening OOB.':
-        'Komandant iz milicije, raspoređen u OZ Jugoistočna Hercegovina u početnom rasporedu snaga.',
+        'Komandant iz milicije, raspoređen u OZ Jugoistočna Hercegovina na početku rata.',
     'Military-origin commander assigned to Northwest Bosnia in the opening OOB.':
-        'Komandant vojnog porijekla, raspoređen u OZ Bosanska Posavina u početnom rasporedu snaga.',
+        'Komandant vojnog porijekla, raspoređen u OZ Bosanska Posavina na početku rata.',
 
     // command_style
     'Forceful, offensive-minded central command': 'Snažno, ofanzivno usmjereno središnje komandovanje',
@@ -80,16 +80,62 @@ export const OFFICER_PROSE_BCS: Readonly<Record<string, string>> = {
     'Northwest Bosnia opening command': 'Početna komanda OZ Bosanska Posavina',
 
     // political_alignment_note
-    'Modeled as an RS army-command appointment.': 'Modelirano kao imenovanje u komandu vojske RS-a.',
-    'Modeled as an RBiH army-command appointment.': 'Modelirano kao imenovanje u komandu Armije RBiH.',
-    'Modeled as an HRHB army-command appointment.': 'Modelirano kao imenovanje u komandu vojske HRHB-a.',
-    'Regular RS corps command appointment.': 'Redovno imenovanje na komandu korpusa RS-a.',
-    'Regular RBiH corps command appointment.': 'Redovno imenovanje na komandu korpusa RBiH.',
-    'Regular HRHB corps command appointment.': 'Redovno imenovanje na komandu korpusa HRHB-a.',
+    'Modeled as an RS army-command appointment.': 'Imenovan u komandu VRS-a.',
+    'Modeled as an RBiH army-command appointment.': 'Imenovan u komandu Armije RBiH.',
+    'Modeled as an HRHB army-command appointment.': 'Imenovan u komandu HVO-a.',
+    'Regular RS corps command appointment.': 'Redovno imenovanje na komandu korpusa VRS-a.',
+    'Regular RBiH corps command appointment.': 'Redovno imenovanje na komandu korpusa Armije RBiH.',
+    'Regular HRHB corps command appointment.': 'Redovno imenovanje u komandu HVO-a.',
 };
 
-/** The officer prose line in the active locale; English (the data) when no BCS line exists. */
+/**
+ * English display wording for data lines written in scenario-setup voice ("at scenario start",
+ * "in the opening OOB", "Modeled as ...") — council fix 4, C14. The officer data is copied into
+ * the save, so the line is corrected here at display time and the data string stays the key.
+ * Lines not listed display as written.
+ */
+export const OFFICER_PROSE_EN: Readonly<Record<string, string>> = {
+    // bio_short
+    'JNA-trained commander assigned to 1st Krajina Corps in the opening OOB.':
+        'JNA-trained commander of the 1st Krajina Corps when the war began.',
+    'JNA-background officer assigned to 2nd Krajina Corps at scenario start.':
+        'Former JNA officer with the 2nd Krajina Corps when the war began.',
+    'JNA-trained commander assigned to East Bosnian Corps in the opening OOB.':
+        'JNA-trained commander of the East Bosnian Corps when the war began.',
+    'JNA-background officer assigned to Sarajevo-Romanija Corps at scenario start.':
+        'Former JNA officer with the Sarajevo-Romanija Corps when the war began.',
+    'JNA-background officer assigned to Herzegovina Corps in the opening OOB.':
+        'Former JNA officer with the Herzegovina Corps when the war began.',
+    'JNA-background officer leading the RBiH army command at scenario start.':
+        'Former JNA officer at the head of the ARBiH command when the war began.',
+    'JNA-trained officer assigned to 1st Corps around Sarajevo at scenario start.':
+        'JNA-trained officer with the 1st Corps around Sarajevo when the war began.',
+    'JNA-background officer assigned to 2nd Corps in the opening OOB.':
+        'Former JNA officer with the 2nd Corps when the war began.',
+    'JNA-background officer assigned to 5th Corps in the Bihac pocket.':
+        'Former JNA officer with the 5th Corps in the Bihać pocket.',
+    'JNA-background officer leading HVO army command at scenario start.':
+        'Former JNA officer at the head of the HVO command when the war began.',
+    'JNA-background officer assigned to Central Bosnia HVO command at scenario start.':
+        'Former JNA officer in the HVO Central Bosnia Operative Zone when the war began.',
+    'HV-background officer assigned to Tomislavgrad command in the opening OOB.':
+        'Former HV officer in the HVO Northwest Herzegovina Operative Zone when the war began.',
+    'Militia-origin commander assigned to Southeast Herzegovina in the opening OOB.':
+        'Commander from the militia, in the HVO Southeast Herzegovina Operative Zone when the war began.',
+    'Military-origin commander assigned to Northwest Bosnia in the opening OOB.':
+        'Career soldier in the HVO Bosnian Posavina Operative Zone when the war began.',
+
+    // political_alignment_note
+    'Modeled as an RS army-command appointment.': 'Appointed to the VRS command.',
+    'Modeled as an RBiH army-command appointment.': 'Appointed to the ARBiH command.',
+    'Modeled as an HRHB army-command appointment.': 'Appointed to the HVO command.',
+    'Regular RS corps command appointment.': 'Regular VRS corps command appointment.',
+    'Regular RBiH corps command appointment.': 'Regular ARBiH corps command appointment.',
+    'Regular HRHB corps command appointment.': 'Regular HVO command appointment.',
+};
+
+/** The officer prose line in the active locale; the data line when no display line exists. */
 export function localizeOfficerProse(text: string | undefined): string | undefined {
     if (text === undefined) return undefined;
-    return getActiveLocale() === 'bcs' ? OFFICER_PROSE_BCS[text] ?? text : text;
+    return getActiveLocale() === 'bcs' ? OFFICER_PROSE_BCS[text] ?? text : OFFICER_PROSE_EN[text] ?? text;
 }

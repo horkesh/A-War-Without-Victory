@@ -196,7 +196,7 @@ describe('SettlementTimeline localization', () => {
 
     const { container } = render(createElement(SettlementTimeline, { events }));
 
-    expect(container.textContent).toContain('Pod kontrolom ARBiH na početku scenarija');
+    expect(container.textContent).toContain('Pod kontrolom ARBiH na početku kampanje');
     expect(container.textContent).toContain('VRS preuzima kontrolu');
     expect(container.textContent).toContain('Borba - skupa pobjeda');
     expect(container.textContent).toContain('VRS napada ARBiH - teritorija zauzeta');
@@ -260,8 +260,8 @@ describe('SettlementTimeline localization', () => {
 
     const { container } = render(createElement(SettlementTimeline, { events }));
 
-    expect(container.textContent).toContain('Controlled by VRS at scenario start');
-    expect(container.textContent).toContain('Controlled by HVO at scenario start');
+    expect(container.textContent).toContain('Controlled by VRS when the campaign began');
+    expect(container.textContent).toContain('Controlled by HVO when the campaign began');
     expect(container.textContent).not.toContain('VRS took control');
     expect(container.textContent).not.toContain('HVO took control');
   });

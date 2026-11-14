@@ -62,6 +62,9 @@ import { resolveEventDisplayTitle } from '../../data/eventDisplayCopy.js';
 import { getOsidDisplayName } from '../../utils/osidDisplayName.js';
 import { SREBRENICA_OVERRUN_NOTE } from '../../../../sim/endgame/endgame_comparison.js';
 
+/** The Srebrenica town settlement the rupture evaluator reads (rupture_consequences.ts). */
+const SREBRENICA_OSID = 'op:srebrenica:srebrenica_2';
+
 import {
     getPlayerSafeDisplacementGroupLabel,
     getPlayerSafeDisplayLabel,
@@ -265,7 +268,13 @@ function buildEndgameComparisonEntries(state: any): ChronicleEntry[] {
     // and the "never arrived" ghost appears only when the enclave really survived.
     const overrun = rawNotes.includes(SREBRENICA_OVERRUN_NOTE);
     const nonGhostNotes = rawNotes.filter((note) => note !== 'Srebrenica enclave survived' && note !== SREBRENICA_OVERRUN_NOTE);
-    const ghostSrebrenica = !ruptureDivergence.has('srebrenica_genocide_1995') && !overrun;
+    // §4 panel (council fix 4, 2026-11-14): the card says "the Srebrenica enclave did not fall",
+    // so it is shown only while that is true. The engine also notes "survived" when RS took the
+    // town before the enclave formed (nothing in enclaves_lost); a final control map that shows
+    // Srebrenica in other hands suppresses the card. With no control map it behaves as before.
+    const srebrenicaHolder = (state.controlBySettlement as Record<string, string | null> | undefined)?.[SREBRENICA_OSID];
+    const srebrenicaHeldByOthers = srebrenicaHolder !== undefined && srebrenicaHolder !== 'RBiH';
+    const ghostSrebrenica = !ruptureDivergence.has('srebrenica_genocide_1995') && !overrun && !srebrenicaHeldByOthers;
     const visibleComparisons = nonGhostNotes.length + (ghostSrebrenica || overrun ? 1 : 0);
 
     entries.push({
