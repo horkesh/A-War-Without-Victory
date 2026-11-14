@@ -66,6 +66,15 @@ describe('recordFailedObjectives with the bot lockout', () => {
         expect(second).toBe(first * 2);
     });
 
+    it('never shortens a longer lockout when a later soft failure is recorded', () => {
+        const cmd = emptyCmd();
+        recordFailedObjectives(cmd, botOp('max_failures'), 77);
+        recordFailedObjectives(cmd, botOp('zero_eligible_axis'), 80); // count 2 -> until 96
+        const longLock = cmd.failed_offensive_objectives![OBJ]!.cooldown_until_turn;
+        recordFailedObjectives(cmd, authoredOp('max_failures'), 81); // threshold path: 81 + 8
+        expect(cmd.failed_offensive_objectives![OBJ]!.cooldown_until_turn).toBe(longLock);
+    });
+
     it('keeps the two-failure threshold for authored ops', () => {
         const cmd = emptyCmd();
         recordFailedObjectives(cmd, authoredOp('max_failures'), 77);

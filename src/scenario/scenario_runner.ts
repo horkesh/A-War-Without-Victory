@@ -2183,35 +2183,6 @@ export function emitVlasicTraceLine(state: GameState, turnReport: TurnReport): v
 }
 
 /**
- * MISTRAL 2 PREPARATION-HOLD DIAGNOSTIC — opt-in, read-only, inert by default.
- *
- * WHY THIS EXISTS. The weekly report serializes neither `turnReport.preparation_events`
- * nor the operation's preparation fields, so the early Operation Mistral 2 preparation
- * trajectory cannot be read from a retained artifact. This trace prints one stable JSON
- * line per turn (turns 175-181) so that trajectory can be observed in a single run.
- * It exposes existing values only; it asserts no cause and no internal branch.
- *
- * ═══ GATE ═══
- *
- * Emits ONLY when `AWWV_MISTRAL_PREP_TRACE=1` is set. With the gate off the function
- * returns before touching state — zero effect on state, default artifacts or ordering.
- *
- * ═══ INDEXING AND PHASE ═══
- *
- * Called once per loop iteration, AFTER `runTurn` returns. The argument is the zero-based
- * LOOP index (`loop_index`), not a weekly `week_index`: `runTurn` sets `meta.turn` to
- * `loop_index + 1` before the war phases, so `turn = loop_index + 1`, the weekly row has
- * `week_index = turn` (`buildWeeklyReport`) and temporal rows use `week_index = loop_index`.
- * `preparation_events` are the existing per-tick events (POST-tick `sub_phase`, the tick's
- * own confidence). The `operation` block, `sector_intel_for_sector` and `brigades` are read
- * AFTER the whole turn pipeline: post-turn state, not pre-tick state.
- *
- * ═══ OBSERVATION ONLY ═══
- *
- * Reads existing state/report fields only. Mutates nothing, recomputes no readiness,
- * writes no files. One `stableStringify` line on stdout prefixed `[mistral-prep-trace] `.
- */
-/**
  * RF-AI2 CORPS STANCE / READINESS-GATE DIAGNOSTIC (opt-in, read-only).
  *
  * Emits ONLY when `AWWV_CORPS_STANCE_TRACE=1`. One `stableStringify` line per turn on
@@ -2254,6 +2225,35 @@ export function emitCorpsStanceTraceLine(state: GameState): void {
     console.log(`[corps-stance-trace] ${stableStringify({ turn, corps })}`);
 }
 
+/**
+ * MISTRAL 2 PREPARATION-HOLD DIAGNOSTIC — opt-in, read-only, inert by default.
+ *
+ * WHY THIS EXISTS. The weekly report serializes neither `turnReport.preparation_events`
+ * nor the operation's preparation fields, so the early Operation Mistral 2 preparation
+ * trajectory cannot be read from a retained artifact. This trace prints one stable JSON
+ * line per turn (turns 175-181) so that trajectory can be observed in a single run.
+ * It exposes existing values only; it asserts no cause and no internal branch.
+ *
+ * ═══ GATE ═══
+ *
+ * Emits ONLY when `AWWV_MISTRAL_PREP_TRACE=1` is set. With the gate off the function
+ * returns before touching state — zero effect on state, default artifacts or ordering.
+ *
+ * ═══ INDEXING AND PHASE ═══
+ *
+ * Called once per loop iteration, AFTER `runTurn` returns. The argument is the zero-based
+ * LOOP index (`loop_index`), not a weekly `week_index`: `runTurn` sets `meta.turn` to
+ * `loop_index + 1` before the war phases, so `turn = loop_index + 1`, the weekly row has
+ * `week_index = turn` (`buildWeeklyReport`) and temporal rows use `week_index = loop_index`.
+ * `preparation_events` are the existing per-tick events (POST-tick `sub_phase`, the tick's
+ * own confidence). The `operation` block, `sector_intel_for_sector` and `brigades` are read
+ * AFTER the whole turn pipeline: post-turn state, not pre-tick state.
+ *
+ * ═══ OBSERVATION ONLY ═══
+ *
+ * Reads existing state/report fields only. Mutates nothing, recomputes no readiness,
+ * writes no files. One `stableStringify` line on stdout prefixed `[mistral-prep-trace] `.
+ */
 const MISTRAL_PREP_TRACE_ENV_VAR = 'AWWV_MISTRAL_PREP_TRACE';
 const MISTRAL_PREP_TRACE_OPERATION_NAME = 'Operation Mistral 2';
 const MISTRAL_PREP_TRACE_TURN_MIN = 175;

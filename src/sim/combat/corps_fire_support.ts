@@ -6,8 +6,10 @@
  * DOMAIN:    Read-only summary of the heavy weapons a corps can mass for one main effort
  * ═══════════════════════════════════════════════════════════════
  *
- * DECIDES:   nothing on its own; a pure read used by the N1297 readiness gate
- *            (bot_corps_stance.ts) and the corps-stance diagnostic trace.
+ * DECIDES:   nothing; a pure read. Its only consumer is the opt-in corps-stance
+ *            diagnostic trace (scenario_runner.ts AWWV_CORPS_STANCE_TRACE). The N1297
+ *            readiness gate deliberately does NOT read it (RF-AI2 seats: firepower is
+ *            already priced in combat; a tube threshold would keep light corps asleep).
  * WRITES:    nothing.
  * READS:     active subordinate brigades' `composition` (artillery, tanks, condition).
  *
