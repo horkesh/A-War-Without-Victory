@@ -5285,6 +5285,17 @@ async function handleCurrentSurface(page, frame, faction, events, options = {}) 
     } else if (await buttonVisible('Skip arrival')) {
       await clickExactVisibleButton(frame, 'Skip arrival', 'skip Dayton arrival', { afterMs: 1600 });
     }
+    // In the conference room the refusal lives with the draft the player is shaping: open the
+    // "Current draft" object from the room's own nav (the backdrop repeats the label as a hotspot).
+    if (!await buttonVisible('Decline Talks') && !await buttonVisible('Decline Settlement')) {
+      const draftObject = frame.getByRole('navigation', { name: 'Conference objects' })
+        .getByRole('button', { name: 'Current draft', exact: true }).first();
+      if (await draftObject.isVisible().catch(() => false)) {
+        await draftObject.click({ timeout: 10000 });
+        await sleep(1200);
+        await snapshot(page, frame, faction, events, 'dayton-current-draft', { before: pendingState });
+      }
+    }
     if (await buttonVisible('Decline Talks')) {
       clicked = await clickExactVisibleButton(frame, 'Decline Talks', 'decline Dayton talks', { afterMs: 1600 });
     } else if (await buttonVisible('Decline Settlement')) {
