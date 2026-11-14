@@ -141,13 +141,36 @@ describe('F1 sustainability OSID path', () => {
         expect(report.by_municipality.map((r) => r.mun_id)).toEqual(['main']);
     });
 
-    test('deterministic: same inputs give byte-identical reports and state', () => {
-        const run = () => {
-            const state = makeState({ 'op:m1': 'RBiH', 'op:m2': 'RS', 'op:p1': 'HRHB', 'op:p2': 'RBiH' });
-            const report = updateSustainability(state, makeSettlements(), [], inputs({ RBiH: ['op:m1'], RS: ['op:m2'] }));
-            return JSON.stringify([report, state.displacement.sustainability_state]);
+    test('deterministic under input order: shuffled settlements, pools and front edges give byte-identical output', () => {
+        const controllers = { 'op:m1': 'RBiH', 'op:m2': 'RS', 'op:p1': 'HRHB', 'op:p2': 'RBiH' };
+        const front: FrontEdge[] = [
+            { edge_id: 'op:m1__op:m2', a: 'op:m1', b: 'op:m2', side_a: 'RBiH', side_b: 'RS' },
+            { edge_id: 'op:p1__op:p2', a: 'op:p1', b: 'op:p2', side_a: 'HRHB', side_b: 'RBiH' },
+        ];
+        const supplied = { RBiH: ['op:m1'], RS: ['op:m2'], HRHB: [] as string[] };
+        const run = (reverse: boolean) => {
+            const state = makeState(controllers);
+            const settlements = makeSettlements();
+            const ordered = reverse ? new Map([...settlements.entries()].reverse()) : settlements;
+            if (reverse) {
+                const pools = state.military.militia_pools as Record<string, MilitiaPoolState>;
+                state.military.militia_pools = Object.fromEntries(Object.entries(pools).reverse());
+            }
+            const edges = reverse ? [...front].reverse() : front;
+            const sup = new Map(Object.entries(supplied).map(([f, s]) => [f, new Set(reverse ? [...s].reverse() : s)] as const));
+            const ordSup = reverse ? new Map([...sup.entries()].reverse()) : sup;
+            const outs: string[] = [];
+            for (let t = 10; t <= 13; t++) {
+                state.meta.turn = t;
+                const sust = updateSustainability(state, ordered, [], { frontEdges: edges, suppliedByFaction: ordSup });
+                const mil = updateMilitiaFatigue(state, ordered, [], new Map(), ordSup);
+                outs.push(JSON.stringify([sust, mil]));
+            }
+            const ss = state.displacement.sustainability_state;
+            const sortedState = Object.fromEntries(Object.keys(ss).sort().map((k) => [k, ss[k]]));
+            return JSON.stringify([outs, sortedState]);
         };
-        expect(run()).toBe(run());
+        expect(run(true)).toBe(run(false));
     });
 });
 
