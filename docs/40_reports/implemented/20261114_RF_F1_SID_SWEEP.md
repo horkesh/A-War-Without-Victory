@@ -36,8 +36,9 @@ Historian seat (Pyrrhic gate): t2 Bosanski Brod and Derventa (HRHB, supplied acr
 | Run | Head | Hash | Jan93 | Apr94 | Apr95 | Oct95 |
 |---|---|---|---:|---:|---:|---:|
 | main ref | e07847268 | `53ffe8e9545686ad` | 712 | 709 | 710 | 705 |
-| 1 (saves every 4w) | f2e779012 | `4ff4a7665c0a35b5` | 712 | 709 | 710 | 705 |
-| 2 (final head) | 81c57fab9 | `4ff4a7665c0a35b5` | 712 | 709 | 710 | 705 |
+| 1 (saves every 4w; uncommitted tree, later committed as f2e779012) | dirty | `4ff4a7665c0a35b5` | 712 | 709 | 710 | 705 |
+| 2 (final engine code) | 81c57fab9, clean | `4ff4a7665c0a35b5` | 712 | 709 | 710 | 705 |
+| 3 (final engine code; comments/docs only since 81c57fab9) | cfc80891e, clean | `4ff4a7665c0a35b5` | 712 | 709 | 710 | 705 |
 
 - Battles per week 2.697 on both (RS 0.952, RBiH 1.441, HRHB 0.303): 0.00% in every faction.
 - Final political control and every formation's personnel and location identical to main.
@@ -68,4 +69,24 @@ Still dormant (the legacy front substrate, F9; registered): `sync-front-segments
 
 ## 7. Legacy-edge consumer inventory
 
-(see below)
+Read-only classification of every `settlementEdges` consumer (code reading, not run-measured except where §1-§3 say so). In a campaign `areasOfResponsibility` is `[]` at war start and `promotePoliticalControllersToOsid` re-keys control to `op:…`, so any `S…` lookup is "unknown"; the campaign also passes the legacy graph as `settlementGraph`, so `settlementEdges.length > 0 ? … : graph.edges` never falls back to OSID edges.
+
+| Step (war_phases.ts unless noted) | Status | Writes → readers | Notes |
+|---|---|---|---|
+| update-sustainability, update-militia-fatigue, update-negotiation-pressure | **FIXED here** | sustainability_state, pool fatigue, pressure → momentum | §2 |
+| update-displacement | fixed by RF-3 (#600) | displacement | |
+| evaluate-events (1185), `writeOwedRecordsAtTermination` (turn_pipeline.ts:191) | live, latent bug | events | only `corridor_severed` uses edges; with `S…` edges it reports "severed" whenever both ends are held. No shipping event uses it. |
+| early-war evaluate-events / bot posture | never runs | – | `runTurn` runs only the bottom-up early-war subset |
+| refreshFrontEdgeSnapshot (turn_pipeline.ts:243) | dead | `military.front_edges` → UI only | |
+| sync-front-segments, expand-region-posture, accumulate-front-pressure, accumulate-exhaustion, apply-formation-commitment, phase-e-pressure-update, front-emergence, phase5d-loss-of-control, phase3b/3c (flag off) | dead (F9/SD2 substrate) | front_segments, front_pressure, profile.exhaustion (delta 0), posture exposure and trends → UI/report | SD2 §5 |
+| update-formation-fatigue | live via OSID | formations.ops, report | supplied = previous turn's OSID critical-supply state; sector assignments otherwise supplied |
+| supply-resolution (1287) | **partial** | legacy reach/corridors/supply_state empty; `local_production` → recruitment; `production_bonus` live | creates the `report.supply_resolution` object supply-osid extends, so it cannot be removed |
+| generate-bot-corps-orders (2601), generate-player-stance-recommendations (2678) | **partial** | corps stance, emergency defensive ops | `computeSectorThreat` builds OSID adjacency from `S…` edges (bot_corps_helpers.ts:221): threat ≈ 0, no corps set defensive by threat, emergency defensive ops never created; corridor breach `sidToMun` misses (bot_corps_corridor.ts:70) |
+| resolve-attack-orders (3204) | live | combat | OSID branch returns first |
+| supply-pressure-exhaustion (3983) | partial | war_supply_pressure, war_exhaustion | live via sectors and the OSID report; the command-friction front term (0.02/edge, command_friction.ts:37) is always 0 |
+| phase-f-displacement (4045) | partial | settlement/municipality displacement reports | triggers live via sector edges; municipality aggregation never rises; report only |
+| update-enclave-integrity (4091) | **dead** | `political.enclaves = []` → IVP primary term, negotiation-capital enclave penalty, Sarajevo tunnel activation, convoys | looks up OSID control in the empty legacy supply state |
+| evaluate-humanitarian-convoys (4155) | dead | pending convoy decisions | no enclaves; also compares `S…` edges with OSID ids |
+| update-negotiation-offers (4522) | dead | report | `applyNegotiation` not passed; acceptance's legacy supply check finds nothing |
+
+Registered as follow-ups (unmeasured code readings; each needs a measured premise before entering RF): **F1g** corps-stance threat blind (largest live defect); **F1h** recruitment production halved (`connectivity` always 0 → ×0.5, supply_state_derivation.ts:376/388); **F1i** `political.enclaves` always empty (enclave penalty, Sarajevo tunnel, IVP primary term); **F1j** command-friction front term dead (a naive OSID fix adds 0.02 per OSID front edge toward the 10× cap: a recalibration decision); **F1k** `corridor_severed` false positive (latent).
