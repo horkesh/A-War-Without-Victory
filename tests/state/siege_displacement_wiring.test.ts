@@ -6,7 +6,7 @@
  * OSID settlements with legacy `S…` edges, so it found 0 front edges every turn; its
  * supply check ran a legacy BFS that reaches no settlement; and it processed the same
  * municipality once per militia pool (three times). Panel record:
- * docs/40_reports/implemented/20261113_SIEGE_DISPLACEMENT_PANEL.md.
+ * docs/40_reports/implemented/20261114_SIEGE_DISPLACEMENT_PANEL.md.
  */
 import { describe, expect, it } from 'vitest';
 
