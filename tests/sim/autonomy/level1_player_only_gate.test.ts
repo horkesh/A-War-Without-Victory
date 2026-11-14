@@ -14,6 +14,8 @@
  *   - Headless auto-control (no human player): nothing is held, even at Level 1.
  */
 
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import { describe, it, expect } from 'vitest';
 import type { CorpsCommandState, FactionId, GameState } from '../../../src/state/game_state.js';
 import { applyCommanderOutput } from '../../../src/sim/combat/commander/commander_loop.js';
@@ -169,6 +171,13 @@ describe('Level 1 holds only the human player\'s corps', () => {
         for (const faction of FACTIONS) expect(launched(state, faction)).toEqual([`op_${CORPS[faction]}`]);
     });
 
+    it('in a headless auto-control run nothing is held even when the scenario sets player_faction', () => {
+        // Engine Invariants §14.10b: the headless flag wins over a scenario-supplied player_faction.
+        const state = makeState(1, 'RBiH', true);
+        for (const faction of FACTIONS) applyExecutingPlan(state, faction);
+        for (const faction of FACTIONS) expect(launched(state, faction)).toEqual([`op_${CORPS[faction]}`]);
+    });
+
     it.each([0, 2])('at Level %i nothing is held for any faction (unchanged)', (level) => {
         const state = makeState(level, 'RBiH');
         for (const faction of FACTIONS) applyExecutingPlan(state, faction);
@@ -190,5 +199,19 @@ describe('isLevel1PlayerApprovalFaction', () => {
         expect(isLevel1PlayerApprovalFaction(makeState(3, 'RBiH'), 'RBiH')).toBe(false);
         expect(isLevel1PlayerApprovalFaction(makeState(1, undefined), 'RBiH')).toBe(false);
         expect(isLevel1PlayerApprovalFaction(makeState(1, 'RBiH', true), 'RBiH')).toBe(false);
+    });
+});
+
+describe('production caller passes the pass faction into applyCommanderOutput', () => {
+    // The canon claim that a player corps existing only in `corps_command` (no formation entry)
+    // cannot skip the Level-1 hold depends on this argument; without it the corps faction falls
+    // back to the formation record, which such a corps does not have.
+    it('generateAllCorpsOrders calls applyCommanderOutput(state, corps.id, output, faction)', () => {
+        const source = readFileSync(
+            fileURLToPath(new URL('../../../src/sim/combat/bot_corps_ai.ts', import.meta.url)),
+            'utf8',
+        );
+        const calls = source.match(/applyCommanderOutput\([^)]*\)/g) ?? [];
+        expect(calls).toEqual(['applyCommanderOutput(state, corps.id, output, faction)']);
     });
 });

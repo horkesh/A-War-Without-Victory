@@ -1751,7 +1751,10 @@ describe('empty-objective probe guard', () => {
         );
         expect(cooldownOutput.operations[0]).toMatchObject({ type: 'sector_attack', objectives: [target] });
 
+        // Level 1 withholds the standalone local task for the PLAYER's corps only (PK1,
+        // 2026-11-14): RS is the player here, so the task is withheld.
         state.meta.autonomy_level = 1;
+        state.meta.player_faction = 'RS';
         const playerAuthorityOutput = emitCommanderOutput(
             briefing,
             [makeZone({ corps_id: corpsId, faction: 'RS', osids: [approach, ring], enemy_adjacent_osids: [target] })],
@@ -1768,6 +1771,17 @@ describe('empty-objective probe guard', () => {
             makeNoThreats(),
         );
         expect(playerAuthorityOutput.operations.every((operation) => operation.type !== 'sector_attack')).toBe(true);
+        // Positive control: with RBiH as the player, this RS corps is a bot and keeps the task at Level 1.
+        state.meta.player_faction = 'RBiH';
+        const botAuthorityOutput = emitCommanderOutput(
+            briefing,
+            [makeZone({ corps_id: corpsId, faction: 'RS', osids: [approach, ring], enemy_adjacent_osids: [target] })],
+            makeForces([evaluation]),
+            { zones: [], garrison_locks: [], surplus_pool: [evaluation], total_garrison_budget: 1, can_launch_ops: true },
+            makeNullPlanDecision(), makePassiveDecisions(), makeNoThreats(),
+        );
+        expect(botAuthorityOutput.operations[0]).toMatchObject({ type: 'sector_attack', objectives: [target] });
+        delete state.meta.player_faction;
         state.meta.autonomy_level = 0;
 
         briefing.osid_population_map!.set(target, 200000);

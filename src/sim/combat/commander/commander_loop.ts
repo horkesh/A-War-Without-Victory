@@ -246,9 +246,10 @@ export function applyCommanderOutput(
     //    If player rejected → abandon the plan (set to null in updated_state).
     //    If no response yet → hold the plan at 'ready' (do not emit the operation).
     //    Guard against headless/test states where meta may be absent.
-    //    PLAYER FACTION ONLY (2026-11-14, R8 run m): the approval can only come from the human
-    //    player, so holding a bot faction's plan froze every RS/HRHB commander for the whole war
-    //    (zero bot-generated RS operations after week 20). Bot corps plan and launch as at Level 0/2.
+    //    PLAYER FACTION ONLY (2026-11-14, PK1, R8 run m): the approval can only come from the human
+    //    player, so holding a bot faction's plan held every non-player commander-generated plan for
+    //    as long as Level 1 was in force (run m: zero bot-generated RS operations after week 20).
+    //    Bot corps plan and launch as at Level 0/2. Engine Invariants §14.10b.
     const corpsFaction = corpsFactionHint ?? state.military.formations?.[corpsId]?.faction;
     const level1ApprovalApplies = isLevel1PlayerApprovalFaction(state, corpsFaction);
     const updatedPlan = output.updated_state.current_plan;
