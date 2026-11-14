@@ -29,8 +29,11 @@
  *
  * Usage:
  *   npx tsx tools/ai_play/parity_probe.ts [--turns N] [--faction RS]
+ * Works from any launch folder (see repo_root_cwd.ts).
  */
 
+// Must stay the first import: switches the process to the repo root before the sim loads.
+import { REPO_ROOT } from './repo_root_cwd.js';
 import { createHash } from 'node:crypto';
 import { join } from 'node:path';
 
@@ -49,7 +52,7 @@ import { startNewCampaign, advanceTurn } from '../../src/desktop/desktop_sim.js'
 import { serializeState } from '../../src/state/serialize.js';
 import type { FactionId, GameState } from '../../src/state/game_state.js';
 
-const REPO = process.cwd();
+const REPO = REPO_ROOT;
 const SCENARIO = 'data/scenarios/apr1992_definitive_188w.json';
 
 function arg(name: string, fallback: string): string {

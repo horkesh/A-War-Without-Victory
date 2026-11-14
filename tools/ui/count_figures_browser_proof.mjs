@@ -12,11 +12,12 @@
 import { chromium } from 'playwright';
 import fs from 'node:fs';
 import path from 'node:path';
+import { coordinationRoot } from '../lib/repo_paths.mjs';
 
 const args = process.argv.slice(2);
 const opt = (n, f) => (args.includes(n) ? args[args.indexOf(n) + 1] : f);
 const origin = opt('--url', 'http://127.0.0.1:3010');
-const out = opt('--out', 'F:/AWWV-coordination/surface_steps/count_figures');
+const out = opt('--out', path.join(coordinationRoot(), 'surface_steps', 'count_figures'));
 fs.mkdirSync(out, { recursive: true });
 const SIZES = [{ width: 2293, height: 960 }, { width: 1280, height: 720 }];
 

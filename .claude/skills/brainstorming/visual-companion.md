@@ -39,7 +39,7 @@ Do NOT use for:
 After creating the HTML file, tell the user:
 > "I've created a mockup at `docs/60_visualisations/<filename>.html`. Open it in your browser to see the visual."
 
-On Windows with the project at `F:\A-War-Without-Victory\`, the user can open directly:
+On Windows, from the repository root (wherever the checkout lives), the user can open directly:
 ```
 start docs/60_visualisations/<filename>.html
 ```

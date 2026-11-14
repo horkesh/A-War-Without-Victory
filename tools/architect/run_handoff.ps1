@@ -50,7 +50,7 @@ $ErrorActionPreference = "Stop"
 
 # Resolve paths
 $repoRoot = (git rev-parse --show-toplevel 2>$null)
-if (-not $repoRoot) { $repoRoot = "F:\A-War-Without-Victory" }
+if (-not $repoRoot) { $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..\..')).Path }
 
 $promptPath = Resolve-Path $PromptFile -ErrorAction Stop
 $promptContent = Get-Content -Path $promptPath -Raw

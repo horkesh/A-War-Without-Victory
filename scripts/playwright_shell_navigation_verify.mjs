@@ -11,10 +11,20 @@
  * Run: node scripts/playwright_shell_navigation_verify.mjs
  */
 import puppeteer from 'puppeteer';
-import { mkdirSync } from 'fs';
+import { existsSync, mkdirSync } from 'fs';
+import { fileURLToPath } from 'url';
 
 const BASE_URL = 'http://localhost:3003';
-const SCREENSHOT_DIR = 'F:/A-War-Without-Victory/docs/40_reports/implemented/screenshots';
+// Resolved from this file's location (scripts/ -> repo), so the checkout can live anywhere.
+const SCREENSHOT_DIR = fileURLToPath(new URL('../docs/40_reports/implemented/screenshots', import.meta.url));
+// Same browser choice as tools/ui/*.cjs: env override, then a standard Windows Chrome
+// install if present, else undefined so puppeteer uses its own downloaded browser.
+const CHROME_EXECUTABLE = process.env.PUPPETEER_EXECUTABLE_PATH
+  || process.env.AWWV_CHROME_EXECUTABLE
+  || [
+    'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
+    'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
+  ].find((candidate) => existsSync(candidate));
 const results = [];
 
 mkdirSync(SCREENSHOT_DIR, { recursive: true });
@@ -31,7 +41,7 @@ async function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
   const browser = await puppeteer.launch({
     headless: true,
     args: ['--no-sandbox'],
-    executablePath: 'C:/Program Files/Google/Chrome/Application/chrome.exe'
+    executablePath: CHROME_EXECUTABLE,
   });
   const page = await browser.newPage();
   await page.setViewport({ width: 1400, height: 900 });

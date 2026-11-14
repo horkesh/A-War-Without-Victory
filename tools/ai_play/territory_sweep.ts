@@ -13,8 +13,11 @@
  * the state and the strategy file.
  *
  * Outputs <out>/final_save.json, <out>/summary.json and <out>/decisions.jsonl.
+ * Works from any launch folder; relative --strategy / --out resolve against the launch folder.
  */
 
+// Must stay the first import: switches the process to the repo root before the sim loads.
+import { REPO_ROOT, fromLaunchDir } from './repo_root_cwd.js';
 import { mkdir, readFile, writeFile, appendFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 
@@ -118,10 +121,10 @@ function parseArgs(argv: string[]): Args {
     const strategyPath = get('--strategy');
     const out = get('--out');
     if (!strategyPath || !out) throw new Error('usage: --strategy <file.json> --out <dir> [--turns 188]');
-    return { strategyPath, out, turns: Number(get('--turns') ?? '188') };
+    return { strategyPath: fromLaunchDir(strategyPath), out: fromLaunchDir(out), turns: Number(get('--turns') ?? '188') };
 }
 
-const baseDir = process.cwd();
+const baseDir = REPO_ROOT;
 let catalog: Map<string, EventDefinition> = new Map();
 
 function dimDelta(option: { dimension_shifts?: Array<{ dimension: string; delta: number; faction?: string }> }, faction: string, dim: string): number {
