@@ -18,6 +18,9 @@
  * No engine changes, no new GameState fields.
  */
 
+// Must stay the first import: switches the process to the repo root before the sim loads,
+// so scripts built on this module work from any launch folder (see repo_root_cwd.ts).
+import './repo_root_cwd.js';
 import { createHash } from 'node:crypto';
 import {
     advanceTurn,

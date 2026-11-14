@@ -13,9 +13,11 @@
  *
  * Run: npx tsx tools/ai_play/run_rbih_best_outcome.ts [--out <dir>]
  * Output defaults to <repo>/runs/ai_play/rbih_best_outcome_run (runs/ is gitignored).
+ * Works from any launch folder; a relative --out resolves against the launch folder.
  */
+import { fromLaunchDir } from './repo_root_cwd.js';
 import { writeFileSync, appendFileSync, mkdirSync } from 'node:fs';
-import { join, resolve } from 'node:path';
+import { join } from 'node:path';
 import {
     startCampaign, advance, serializeDecisionContext, injectDecision, stateHash,
     requestOp, stopOp, replaceCo, eliteDeploy, localSupport,
@@ -31,7 +33,7 @@ const TURN_CAP = 200; // safety margin past 188w
 // It used to be a fixed path in one past session's scratchpad on the owner's machine.
 const outArgIndex = process.argv.indexOf('--out');
 const OUT_DIR = outArgIndex >= 0 && process.argv[outArgIndex + 1]
-    ? resolve(process.argv[outArgIndex + 1])
+    ? fromLaunchDir(process.argv[outArgIndex + 1])
     : join(REPO_BASE_DIR, 'runs', 'ai_play', 'rbih_best_outcome_run');
 mkdirSync(OUT_DIR, { recursive: true });
 const LOG_PATH = join(OUT_DIR, 'log.jsonl');
