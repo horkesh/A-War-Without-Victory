@@ -29,7 +29,7 @@ export const UNSUPPLIED_PRESSURE_TURNS = 3;
  * Share of the holder's own people leaving per turn (week) once the siege trigger fires.
  * DA1 P3 calibration (Historian seat, 2026-11-13): after the 1992 departures (which the
  * takeover writer books), outflow from besieged pockets ran about 0.05-0.2% a week:
- * Srebrenica's 8,000-9,000 UNHCR evacuees of spring 1993 (Krstić TJ ¶19) average about
+ * Srebrenica's 8,000-9,000 UNHCR evacuees of spring 1993 (Krstić TJ ¶16) average about
  * 0.1% a week over the siege; government-held Sarajevo about 0.05-0.1% a week after 1992
  * (UNCOE S/1994/674/Add.2 Annex VI; Tabeau, Galić demographic report 2002). The dormant
  * 5% (and 10% encircled) per week were 50-500 times higher than any source supports.

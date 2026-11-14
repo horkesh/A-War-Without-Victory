@@ -202,9 +202,10 @@ function areFactionsAtWar(state: GameState, a: FactionId, b: FactionId): boolean
 }
 
 function getFleeAbroadFraction(sourceMun: MunicipalityId, fromFaction: FactionId, toFaction?: FactionId): number {
-    // F4 amendment (panel round 1, Calibration seat): nobody displaced from a falling Drina
-    // enclave went abroad. The July 1995 deportees from Srebrenica and Žepa went to Tuzla and
-    // Kladanj (Krstić TJ); Bosniaks driven from Goražde's villages went into the pocket.
+    // F4 amendment (panel round 1, Calibration seat): people driven out when a Drina enclave
+    // falls go to own-side territory. Those forcibly transferred from Srebrenica and Žepa in
+    // July 1995 went to Kladanj and Tuzla (Krstić TJ); Bosniaks driven from Goražde's villages
+    // went into the pocket. Known limit: several hundred Žepa men crossed the Drina into Serbia.
     if (toFaction && isEnclaveOverrun(sourceMun, fromFaction, toFaction)) return 0;
     if (toFaction && isRbihHrhbPair(fromFaction, toFaction) && fromFaction === 'HRHB') return BILATERAL_HRHB_FLEE_ABROAD;
     if (fromFaction === 'HRHB' && POSAVINA_MUN_IDS.has(sourceMun)) return POSAVINA_CROAT_FLEE_ABROAD;

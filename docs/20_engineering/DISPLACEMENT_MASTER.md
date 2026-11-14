@@ -309,7 +309,7 @@ Sources: ICTY OTP demographic report (Tabeau, Bijak et al., 2003, 47 municipalit
 | `BOSNIAK_EAST_SARAJEVO_RING_FLEE_ABROAD` | 0.08 | `displacement_takeover.ts` | Bosniaks from eastern Bosnia and the Sarajevo ring: 8% (expellees went into Srebrenica, Žepa, Goražde, Sarajevo, Tuzla) |
 | `BOSNIAK_EXIT_FLEE_ABROAD` | 0.40 | `displacement_takeover.ts` | Bosniaks from Bijeljina, Posavina, Čapljina, Stolac (exits toward Serbia and Croatia): 40% |
 | `BILATERAL_HRHB_FLEE_ABROAD` | 0.35 | `displacement_takeover.ts` | Croats displaced by RBiH: 35% |
-| Drina enclave falls | 0 | `displacement_takeover.ts` | Nobody goes abroad when Srebrenica, Goražde or Žepa falls; deportees went to Tuzla and Kladanj (Krstić TJ) |
+| Drina enclave falls | 0 | `displacement_takeover.ts` | Nobody goes abroad when Srebrenica, Goražde or Žepa falls; those forcibly transferred went to Kladanj and Tuzla (Krstić TJ) |
 | `ENCLAVE_OVERRUN_KILL_FRACTION` | 0.35 | `displacement_takeover.ts` | Srebrenica/Gorazde/Zepa overrun: 35% killed |
 
 The former Bosniak border override (0.10) is deleted. Siege-path departures carry no flight abroad at all. No-census municipalities split by the national 1991 sums (`census_fallback_national`); the former `LOST_POPULATION_FRACTION` (0.20) was removed in SC2.
@@ -540,7 +540,7 @@ When RBiH-HRHB are **allied** (alliance > 0.20):
 When an enclave municipality is overrun (from_faction = RBiH, to_faction != RBiH):
 - Kill fraction increases from 10% to **35%** (`ENCLAVE_OVERRUN_KILL_FRACTION`)
 - Models the historical high-lethality events (Srebrenica massacre)
-- Flight abroad: **0** (deportees went to Tuzla and Kladanj)
+- Flight abroad: **0** (those forcibly transferred went to Kladanj and Tuzla)
 
 ### 10.2 Posavina Croats
 

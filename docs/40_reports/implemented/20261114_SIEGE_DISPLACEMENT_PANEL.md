@@ -21,7 +21,7 @@
 
 - **One pass per (municipality, side holding settlements there).** The war step feeds the OSID front (`computeFrontEdgesOsid`) and OSID supply (`computeSupplyReachabilityOsid`) through `buildOsidDisplacementPressureInputs`, which the F1 sweep can reuse.
 - **Triggers.** Siege: the side's settlements touch an at-war front and none is supplied for 3 consecutive turns (counter per side with the turn last counted, `DisplacementState.unsupplied_pressure_by_side`). Encirclement: under front pressure, every held settlement in a body outside the side's main territorial body holding at most 15% (`POCKET_MAX_SHARE`) of its settlements at turn 0. A front that splits a side into two large regions is not a siege (the 1993 Tuzla region).
-- **Rate.** 0.1% of the side's own people per week, the larger of the two triggers, never the sum (Krstić TJ: Srebrenica's 1993 UNHCR evacuations; UNCOE Annex VI; Tabeau 2002). The old 5%/10%/3% rates, the breach trigger and the ×1.5 sustainability-collapse multiplier are gone.
+- **Rate.** 0.1% of the side's own people per week, the larger of the two triggers, never the sum (Krstić TJ ¶11, ¶14, ¶16: Srebrenica's 1991 population, its swelling to 50,000-60,000, and the 1993 UNHCR evacuations; UNCOE Annex VI; Tabeau 2002). The old 5%/10%/3% rates, the breach trigger and the ×1.5 sustainability-collapse multiplier are gone.
 - **Attribution.** Booked to the pressing side (`resolvePressingFactions`, holder passed in), pro rata between two besiegers. Only the holder's own people leave; a pocket's minority leaving is booked by the takeover writer. None are killed by leaving; none go abroad; people with nowhere to go stay. Only the leaving side's pool loses manpower.
 - **Flight abroad at the moment of displacement (F4, then F4b).** Bosniak default 0.20 (was 0.0); eastern Bosnia and the Sarajevo ring 0.08 (27 ids); Bijeljina, Posavina, Čapljina, Stolac 0.40; Krajina convoys 0.55 (was 0.35); the 0.10 border override is gone; Croats 0.40 (was 0.25); Serbs 0.30; Posavina Croats 0.70; Croats displaced by RBiH 0.35; nobody goes abroad when a Drina enclave falls. The ICTY OTP figures (Muslims 48%, Srebrenica 18%, Zvornik 45%) are 1997-98 registrations after onward migration, which the model does not have.
 - **Ledger copy.** "Displaced or killed, by side controlling or besieging the area"; column "Controlling or besieging side"; the scope note adds "It also counts people who left an area held by their own side while the named side besieged it." and says siege killing is not counted (BCS in the canon record). "Fled abroad" is unchanged.
@@ -31,7 +31,7 @@
 
 | Seat | Round 1 | Round 2 |
 |---|---|---|
-| Historian | GO-WITH-CHANGES | pending |
+| Historian | GO-WITH-CHANGES | GO (pinpoint and wording fixes applied) |
 | Scenario-tester / calibration | GO-WITH-CHANGES | GO-WITH-CHANGES (two record sentences) |
 | Engine / systems | GO-WITH-CHANGES | GO |
 | Red-team | **BLOCK** (minority-pocket gap; holder computed twice) | GO |
