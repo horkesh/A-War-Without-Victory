@@ -34,7 +34,8 @@ const EXPECTED_APPROVED_FIRST_PACKET = [
 
 const EXPECTED_CONDITIONAL_PACKET: string[] = [];
 
-const EXPECTED_DEFERRED_PACKET = ['us_halts_federation_advance_1995'];
+// Emptied 2026-11-14 by EV1: us_halts_federation_advance_1995 was authored (see below).
+const EXPECTED_DEFERRED_PACKET: string[] = [];
 
 const EXPECTED_SENSITIVE_BLOCKED = [
     'rs_strategic_goals',
@@ -323,6 +324,10 @@ describe('event acceptance diagnostic report', () => {
             'carter_ceasefire_1994',
             'hv_hvo_cooperation_1995',
             'rbih_late_war_offensive_1995',
+            // Added 2026-11-14 by EV1: historian-authored default `comply` (BB Vol. I
+            // p.392, p.425 nn.821/823) with `historical` bot logic; it was the deferred
+            // packet's only candidate. Same bot pick as its former `accept_first`.
+            'us_halts_federation_advance_1995',
             'holbrooke_ceasefire_demand_oct95',
             'dayton_talks_begin_1995',
             'hrhb_dayton_acceptance_1995',
