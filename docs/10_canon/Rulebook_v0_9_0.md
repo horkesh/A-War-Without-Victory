@@ -475,6 +475,8 @@ Acceptance is computed, not guaranteed. The acceptance breakdown is deterministi
 
 Different end states reflect different balances of exhaustion, control, and external pressure. No total victory exists.
 
+**The October 1995 ceasefire (2026-11-14, council fix 3).** When Sarajevo accepts Holbrooke's ceasefire demand, the general ceasefire holds for every party from the following week until Dayton is signed, imposed or declined. No new offensive is launched, planned or put to the president; offensives still being prepared are called off; an offensive already under way concludes only the fight each axis was in and then stands down; every corps stands on the defensive; and no attack is made, counter-attacks included. Refusing the demand keeps the war going; declining Dayton reopens it (Systems Manual §6.4 implementation-note; Engine Invariants "October 1995 ceasefire ownership").
+
 A peace ends on the agreed map, not on the front line: when every party accepts a plan, or Dayton is signed or imposed, the settlement follows that plan's map and gives each party the status the plan granted it (for example, only Dayton recognises Republika Srpska by name with the Posavina corridor). The final Dayton map leaves no isolated pockets except the Federation's Posavina canton. Details: Systems Manual §20.2, `WAR_TERMINATION_SPEC.md`, `VICTORY_AND_PYRRHIC_SCORING.md`.
 
 ## 16. Player Agency and Limitations

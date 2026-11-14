@@ -58,6 +58,7 @@ The following table lists every `name:` literal from early_war_phases.ts, war_ph
 | War - Start of Turn | `cleanup-expired-event-modifiers` | No | war_phases.ts:278 |
 | War - Start of Turn | `update-event-readiness` | Indirect | war_phases.ts:284 |
 | War - Start of Turn | `evaluate-events` | Indirect | war_phases.ts:292 |
+| War - Start of Turn | `enforce-oct1995-ceasefire` | Indirect | war_phases.ts (2026-11-14, council fix 3): October 1995 ceasefire stand-down and stance hold; inert unless accepted |
 | War - Operational Setup | `compute-dimension-bases` | No | war_phases.ts:305 |
 | War - Operational Setup | `sync-front-segments` | No | war_phases.ts:315 |
 | War - Operational Setup | `normalize-front-posture` | No | war_phases.ts:327 |

@@ -810,7 +810,9 @@ describe('strict null inventory progress', () => {
             // headless runs (40w artifacts byte-identical). No new type escape. 564 -> 591.
             // RF-3 siege displacement (DA1, 2026-11-14): DisplacementState.unsupplied_pressure_turns,
             // the persisted siege counter (was a module cache). No new type escape. 591 -> 592.
-            optional_fields_game_state: 592,
+            // Council fix 3 (2026-11-14): CorpsOperation.ceasefire_stand_down, recorded only on an
+            // offensive executing when the October 1995 ceasefire binds. No new type escape. 592 -> 593.
+            optional_fields_game_state: 593,
         });
         // Reason-code instrumentation (item 3): +1, `OperationAxis.launch_blocker_detail`.
         // `classifyDomain` routes it to `sim` on the /Corps|Operation/ interface-name rule,
@@ -820,12 +822,13 @@ describe('strict null inventory progress', () => {
         // +26 state (StanceMatter, StanceMatterReceipt, PresidentialStanceHold optional fields;
         // StateMeta.stance_matters / stance_matter_history). 564 -> 591.
         // RF-3 (DA1): +1 state (DisplacementState.unsupplied_pressure_turns). 591 -> 592 / state 217 -> 218.
-        expect(current.optional_field_domains.total).toBe(592);
+        // Council fix 3: +1 sim (CorpsOperation.ceasefire_stand_down). 592 -> 593 / sim 364 -> 365.
+        expect(current.optional_field_domains.total).toBe(593);
         expect(current.optional_field_domains.domain_counts).toMatchObject({
             derived: 10,
             ipc: 0,
             scenario: 0,
-            sim: 364,
+            sim: 365,
             state: 218,
             ui_adapter: 0,
             unknown: 0,

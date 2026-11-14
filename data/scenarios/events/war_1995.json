@@ -1434,7 +1434,49 @@
     "id": "rbih_late_war_offensive_1995",
     "image": "event_highland_offensive.webp",
     "title": "The Final Offensive: Liberate or Negotiate?",
-    "narrative": "The eastern enclaves are lost. Operation Storm has shattered the Krajina Serbs and HV Guards Brigades stand on the international border with Bosnia-Herzegovina. NATO aircraft are striking VRS command nodes across western and central Bosnia under Operation Deliberate Force. The 5th Corps has broken out of the Bihać pocket; the 7th Corps stands ready in central Bosnia; HVO Mostar Corps is integrating openly with HV columns rolling east through Šipovo-Mrkonjić-Jajce. Holbrooke's shuttle is converging on Geneva. The Presidency faces the decisive late-war operational posture: launch coordinated offensives with HV-HVO across western Bosnia and push the 5th Corps deep on the Sana-Una axis to maximize the territorial reintegration of Republika Srpska before the negotiating table closes — or hold the line, wait for diplomacy, or accept de facto partition on the existing Inter-Entity Boundary.",
+    "localizations": {
+      "en": {
+        "notifications_to_other_factions": {
+          "launch_coordinated_offensives": {
+            "HRHB": {
+              "headline": "ARBiH commits to coordinated Federation offensives",
+              "body": "Sarajevo greenlights a multi-corps push coordinated with HV and HVO operations in western Bosnia. Mostar reads the moment as the Federation's chance to win ground before peace talks fix the map."
+            },
+            "RS": {
+              "headline": "ARBiH prepares to join HV-HVO offensives",
+              "body": "Sarajevo commits the 5th Corps toward the Sana-Una axis, with the 3rd and 7th Corps to press from central Bosnia. Pale assesses a coordinated Federation offensive aimed at taking ground before peace talks fix the map."
+            }
+          },
+          "defensive_consolidation": {
+            "HRHB": {
+              "headline": "ARBiH holds back from the western-Bosnia push",
+              "body": "Sarajevo declines to commit to the western-Bosnia offensive. Mostar reads the choice as Sarajevo abandoning the coordinated push; the Federation alliance frays at the operational seam."
+            }
+          },
+          "wait_for_diplomacy": {
+            "HRHB": {
+              "headline": "ARBiH defers operational tempo to diplomacy",
+              "body": "Sarajevo waits on Holbrooke's initiative. Mostar continues alongside HV but without coordinated ARBiH multi-corps weight; the Federation alliance loses tempo at the operational seam."
+            },
+            "RS": {
+              "headline": "ARBiH defers to the diplomatic track",
+              "body": "Sarajevo holds back from the planned push and defers to Holbrooke's peace initiative. Pale reads the deferral as an opportunity to press for an early settlement on more favorable terms."
+            }
+          },
+          "accept_partition": {
+            "HRHB": {
+              "headline": "Sarajevo signals partition acceptance",
+              "body": "ARBiH stands down; the Presidency signals to Holbrooke that Sarajevo will accept the present front line as the basis of partition. Mostar reads the concession as Federation-alliance rupture and the foreclosure of Croat territorial claims in western Bosnia."
+            },
+            "RS": {
+              "headline": "Sarajevo concedes the present front line",
+              "body": "ARBiH operations freeze; the Sarajevo Presidency signals partition acceptance. Pale assesses a diplomatic windfall and expects the present front lines to become the basis of a settlement."
+            }
+          }
+        }
+      }
+    },
+    "narrative": "Operation Storm has ended the Krajina Serb republic in Croatia and broken the siege of the Bihać pocket. HV and HVO forces hold Bosansko Grahovo and Glamoč, on the western edge of the VRS front. NATO has warned of significant air strikes if Goražde or the other safe areas are attacked, and Washington has sent Richard Holbrooke to the region with a new peace initiative. Zagreb and Sarajevo are planning offensives in western Bosnia. The Presidency must choose its posture: launch coordinated offensives with the HV and HVO, pushing the 5th Corps deep on the Sana-Una axis to take as much ground as possible before talks fix the map; or hold the line, wait on diplomacy, or accept the present front as the basis of partition.",
     "category": "military",
     "family": "rbih_late_war_response",
     "source_tier": "balkan_battlegrounds",
@@ -1477,16 +1519,16 @@
     "historical_default_response_id": "launch_coordinated_offensives",
     "effect": {
       "kind": "narrative",
-      "text": "The Sarajevo Presidency must take a late-war operational posture toward the post-Storm / Deliberate Force / Mistral-2 window: launch the coordinated offensives that maximize territorial reintegration before Geneva closes, or hold/wait/concede."
+      "text": "After Operation Storm, the Presidency must choose: launch coordinated offensives with the HV and HVO to win ground before peace talks fix the map, or hold the line, wait on diplomacy, or accept the present front."
     },
     "source_note": "Following the July 1995 Srebrenica and Žepa rupture, the 4 August Operation Storm (HV liberation of Krajina), the 30 August-14 September NATO Operation Deliberate Force air campaign, and the joint HV-HVO Operation Mistral 2 (Šipovo / Mrkonjić Grad / Jajce, 8-13 September), the Sarajevo Presidency faced the decisive operational decision for the final war phase. The historical posture was launch_coordinated_offensives: ARBiH 5th Corps under Atif Dudaković executed Operation Sana (Bosanski Petrovac 14 Sept; Ključ 17 Sept; Sanski Most 10 Oct) breaking out of the Bihać pocket; ARBiH 3rd Corps and 7th Corps from central Bosnia provided flank weight against VRS positions in the Vlašić-Donji Vakuf-Jajce-Mrkonjić arc; the HV-HVO Mistral 2 axis advanced east-northeast through western Bosnia. By mid-October 1995 the coordinated offensives had recovered approximately 20% of pre-war RS-held territory and forced RS-Belgrade to the Holbrooke-led negotiation table on terms substantially worse than the mid-1995 Contact Group / Owen-Stoltenberg / Geneva positions. The 5-10 October ceasefire (Holbrooke-brokered, signed Sarajevo) and the November Dayton General Framework Agreement codified the territorial dividend at the 51:49 Federation/RS split. Sources: Balkan Battlegrounds Vol. II Ch. 15-16 (Operation Sana chronology + 5th Corps breakout + 3rd/7th Corps central-Bosnia flank + ARBiH coordination with HV-HVO Mistral 2); Richard Holbrooke, To End a War (Random House 1998) chs. 8-11 (Geneva Agreed Basic Principles 8 Sept; New York Further Agreed Principles 26 Sept; October ceasefire diplomacy; Dayton territorial framework); Alija Izetbegović, Inescapable Questions (Islamic Foundation 2003) chs. on the Final Offensive decision frame + multi-corps coordination + 51:49 territorial-floor calculus; ICTY Krstić IT-98-33-T (2 Aug 2001) §§ on the Srebrenica-rupture strategic context driving the post-July 1995 operational decision; ICTY Karadžić IT-95-5/18-T §§4985-5067 (Patriarch Paper + Belgrade-delegation channel + Dayton ratification track on the RS side that made coordination feasible); UN S/1995/770 + S/1995/799 + S/1995/827 (Secretary-General Sept-Oct 1995 reports on the western-Bosnia front + diplomatic framework); UN S/1995/999 + S/RES/1031 (Dayton General Framework Agreement initialing + 15 Dec 1995 ratification). Engine vocabulary substitutions per memory/engine_dimension_vocabulary.md: alliance_lock(hrhb) collapsed to alliance_change (Federation/HRHB joint-operation proxy); territorial_loss / territorial_gain collapsed to territorial_legitimacy (proxy for ~20% RS pre-war territory reintegration in launch_coordinated_offensives historical; opposite-sign in the counterfactual concession arc). §3.6 STRICT forward-looking guard (Wave 2 Canon): any future csq_rbih_late_war_* event authored to consume rbih_late_war_offensive_1995 outcomes MUST NOT carry response options that re-author cleansing, forced-displacement, civilian-targeting, hostage-taking, paramilitary-deployment, ethnic-targeting, or any sensitive-act response option. The historical Operation Sana liberation of western Bosnia did include some Serb-civilian displacement (ICTY context: Sefer Halilović trial IT-01-48-T on ARBiH General Staff command-and-control 1993-95 doctrine; UNHCR Sept-Oct 1995 western-Bosnia displacement reporting; general post-Storm humanitarian fallout in the Sanski Most / Mrkonjić sector; HRW September-October 1995 western-Bosnia reporting) — this packet's DECISION is operational-strategic (multi-corps coordination posture + Federation alliance posture + Dayton-table territorial-floor posture) and the consequence rows MUST NEVER reward displacement / cleansing / civilian-column attack pathways. The Sanski Most / Bosanski Petrovac / Ključ liberation events and the associated humanitarian surfaces remain canon-gated through their existing event surfaces (operation_sana_1995, ceasefire_1995, us_halts_federation_advance_1995). The HV-HVO Operation Storm / Mistral 2 sensitive humanitarian fallout (Krajina civilian columns, post-Storm Knin property crimes — Gotovina/Markač/Čermak IT-06-90-T appeals JCE reversal context) remains canon-gated through hv_hvo_cooperation_1995's §3.6 source_note. Each per-option {opt}_to_late_war_offensive future_consequence explanation downstream of B1 includes the canon-gate prose enumerating the displacement / cleansing prohibition.",
-    "staff_assessment": "The post-Storm + Deliberate Force + Mistral 2 window is the structural maximum for territorial reintegration before Holbrooke's Geneva-New York framework closes the table. Launching coordinated offensives with HV-HVO at the September peak maximizes military credibility, negotiating leverage, and territorial legitimacy at the Dayton table; defensive consolidation, waiting on diplomacy, or accepting partition each cost military credibility and territorial-legitimacy capture, and the accept_partition counterfactual collapses the Federation alliance and the Bosniak-state internal cohesion.",
+    "staff_assessment": "Storm has changed the balance in western Bosnia, and the VRS is short of reserves. Coordinated offensives with the HV and HVO could win ground and leverage before talks fix the map, at a high cost and with no certainty that the VRS line will break. Holding the line, waiting on diplomacy or accepting the present front each cost military credibility and leverage. Accepting partition also risks the Federation alliance and cohesion at home.",
     "trigger_evidence": [
-      "ARBiH 5th Corps (Dudaković) has broken out of the Bihać pocket and stands ready for a Sana-Una axis offensive against VRS positions in Bosanski Petrovac, Ključ, and Sanski Most.",
-      "ARBiH 3rd Corps and 7th Corps in central Bosnia stand ready for flank operations in the Vlašić-Donji Vakuf-Jajce-Mrkonjić arc paired with HV-HVO Mistral 2.",
-      "HV-HVO Operation Mistral 2 is rolling east through western Bosnia (Šipovo, Mrkonjić Grad, Jajce recaptured 8-13 September) creating coordination opportunity on the western front.",
-      "NATO Operation Deliberate Force has degraded VRS artillery, ammunition, and command nodes across western and central Bosnia, opening a structurally unique offensive window.",
-      "Holbrooke's shuttle is converging on Geneva (Agreed Basic Principles 8 Sept; New York Further Agreed Principles 26 Sept) — the territorial picture at the negotiating table will be locked by what the ARBiH controls when the ceasefire is signed."
+      "Operation Storm has broken the siege of the Bihać pocket. The ARBiH 5th Corps (Dudaković) can now face east, toward VRS positions at Bosanski Petrovac, Ključ and Sanski Most.",
+      "The ARBiH 7th Corps in central Bosnia faces VRS positions at Donji Vakuf, which held against its attacks of 24 July and 12 August.",
+      "HV and HVO forces took Bosansko Grahovo and Glamoč in late July and now stand on the western flank of the VRS in western Bosnia.",
+      "NATO has warned that attacks on Goražde or the other safe areas will bring significant air strikes, and the UN's civilian veto over strikes has been dropped.",
+      "A new US peace initiative is under way. The Contact Group's 51/49 split remains the benchmark, and the ground each side holds when talks open will shape the map."
     ],
     "response_options": [
       {
@@ -1494,7 +1536,7 @@
         "branch_tag": "rbih_civic",
         "historical_marker": "historical_default",
         "label": "Launch coordinated offensives with HV-HVO",
-        "description": "ARBiH 5th Corps executes Operation Sana (Bosanski Petrovac / Ključ / Sanski Most) breaking out of Bihać; 3rd and 7th Corps from central Bosnia provide flank weight in the Vlašić-Jajce-Mrkonjić arc; ARBiH coordinates openly with HV-HVO Mistral 2 axis through the Federation joint-staff framework. By the October ceasefire, approximately 20% of pre-war RS-held territory has been recovered. Holbrooke arrives at Geneva with a substantially improved Bosniak-Croat territorial position.",
+        "description": "Commit the 5th Corps to an offensive out of the Bihać area toward Bosanski Petrovac, Ključ and Sanski Most, with the 3rd and 7th Corps pressing from central Bosnia, coordinated with HV and HVO operations in western Bosnia through Federation channels. The aim is to take as much ground as possible before talks fix the map. The cost in casualties is high, and the gains depend on the VRS line breaking.",
         "effects": [
           {
             "kind": "morale_change",
@@ -1539,7 +1581,7 @@
         "branch_tag": "rbih_federation_parallel_commands",
         "historical_marker": "counterfactual",
         "label": "Defensive consolidation -- hold existing front",
-        "description": "ARBiH does not commit to the Sana-Una breakout nor to a central-Bosnia flank operation. 5th Corps consolidates the Bihać pocket; 3rd and 7th Corps hold defensive positions. HVO is left to fight alongside HV alone on the Mistral 2 axis. Holbrooke arrives at Geneva with the pre-September Inter-Entity Boundary intact; Banja Luka and the Krajina remain RS. The Federation alliance frays as the HRHB delegation reads the choice as Bosniak abandonment of the western-Bosnia push.",
+        "description": "Hold the present front. The 5th Corps consolidates around Bihać, and the 3rd and 7th Corps stay on the defensive. Any HV-HVO push in western Bosnia goes ahead without ARBiH weight. Talks would open on the present lines, with Banja Luka firmly in VRS hands, and Mostar may read the choice as Sarajevo leaving the HVO to carry the western push alone. The Federation alliance would fray.",
         "effects": [
           {
             "kind": "alliance_change",
@@ -1574,7 +1616,7 @@
         "branch_tag": "rbih_dayton_accept",
         "historical_marker": "counterfactual",
         "label": "Wait for diplomacy -- defer to Holbrooke",
-        "description": "The Presidency reads Holbrooke's Geneva-New York framework as the principal lever and defers operational tempo to the diplomatic track. ARBiH does not launch the September push; the 5th Corps stays inside the Bihać pocket pending the ceasefire. HVO operations alongside HV continue but without the coordinated ARBiH multi-corps weight. US/Holbrooke will push harder for an early settlement on terms more favorable to RS because the September military pressure that historically forced Dayton's 51:49 split never materializes.",
+        "description": "Defer to the new US peace initiative and keep operations limited. The 5th Corps stays near Bihać pending a ceasefire, and any HV-HVO operations go ahead without coordinated ARBiH weight. Without more military pressure on the VRS, Washington may push for an early settlement on terms closer to the present front than to the 51/49 split.",
         "effects": [
           {
             "kind": "patron_pressure",
@@ -1609,7 +1651,7 @@
         "branch_tag": "rbih_pragmatic",
         "historical_marker": "counterfactual",
         "label": "Accept partition on existing Inter-Entity Boundary",
-        "description": "The Presidency signals to Holbrooke that Sarajevo will ratify the existing post-Srebrenica / pre-Storm Inter-Entity Boundary as the final partition line. ARBiH operations stand down; the 5th Corps does not exit the pocket; the central-Bosnia corps freeze positions. The Federation alliance ruptures as the HRHB delegation reads the choice as a Bosniak concession that forecloses Croat territorial reintegration claims in western Bosnia. International standing collapses on the perception that Sarajevo has conceded de facto partition before the Dayton table opens; internal cohesion fractures as the Assembly nationalist current reads the concession as betrayal of the eastern enclaves and the constitutional unity of BiH.",
+        "description": "Signal to Washington that Sarajevo will accept the present front line as the basis of partition. ARBiH operations stand down, the 5th Corps stays in the Bihać area, and the central Bosnian corps freeze in place. The Federation alliance may rupture if Mostar reads it as a concession that closes off Croat claims in western Bosnia. International standing would suffer if Sarajevo is seen to concede partition before talks open, and cohesion at home would fracture as the Assembly's nationalist current reads it as betrayal of the eastern enclaves and of Bosnia's unity.",
         "effects": [
           {
             "kind": "alliance_change",
@@ -2090,55 +2132,10 @@
     "historical_source": "ICTY Karadzic Judgment (IT-95-5/18-T). BB Vol. II Ch. 15; BB Vol. II pp. 536-538 for 5th Corps/Bihać source trail."
   },
   {
-    "id": "ceasefire_1995",
-    "image": "event_ceasefire.webp",
-    "title": "General Ceasefire Takes Effect",
-    "narrative": "A general ceasefire takes effect across Bosnia-Herzegovina. After three and a half years of fighting, the parties prepare for negotiations intended to turn the military halt into a peace settlement.",
-    "category": "diplomatic",
-    "historical_source": "General Framework Agreement for Peace (Dayton Agreement), 21 November 1995; Richard Holbrooke, To End a War (1998), account of the October 1995 ceasefire negotiations",
-    "source_tier": "corroborated_participant",
-    "source_note": "The Dayton text establishes the settlement reached after the ceasefire; Holbrooke's participant account supports the October negotiation sequence. The essay is original synthesis, and the memoir is used as a corroborated participant source rather than sole authority for casualty or legal findings.",
-    "trigger": {
-      "turn_min": 181,
-      "turn_max": 200,
-      "phase": "war",
-      "requires_events": [
-        "federation_ground_offensive_1995"
-      ],
-      "condition": {
-        "type": "flag_equals",
-        "flag": "coha_active",
-        "value": false
-      }
-    },
-    "once": true,
-    "effect": {
-      "kind": "narrative",
-      "text": "The ceasefire takes effect. After three and a half years, the guns fall silent across Bosnia-Herzegovina."
-    },
-    "effects": [
-      {
-        "kind": "morale_change",
-        "faction": "RBiH",
-        "delta": 10
-      },
-      {
-        "kind": "morale_change",
-        "faction": "RS",
-        "delta": 5
-      },
-      {
-        "kind": "morale_change",
-        "faction": "HRHB",
-        "delta": 5
-      }
-    ]
-  },
-  {
     "id": "us_halts_federation_advance_1995",
     "image": "event_patron_relations_RBiH.webp",
     "title": "Washington Halts the Federation Advance",
-    "narrative": "Banja Luka is within reach. Federation forces have driven the VRS from a third of its territory in six weeks. But the phone rings from Washington. Holbrooke is blunt: take Banja Luka and you will have 200,000 Serb refugees, a humanitarian catastrophe, and no peace agreement. Sarajevo bows, reluctantly, and sets conditions the Serbs can argue over so the offensive has a few more days to run. Zagreb listens, agrees, and orders one more operation anyway. The front lines freeze where the ceasefire date finds them, not where Washington asked. The 51/49 line that has defined every peace plan since July 1994 becomes reality not through negotiation, but through the calculated halt of a military advance.",
+    "narrative": "Washington calls. Republika Srpska now holds no more than about half the country, close to or below the 49 percent the Contact Group map gave it in July 1994, and the VRS is under pressure in western Bosnia. Holbrooke wants the offensive stopped short of Banja Luka. Washington fears that the city's fall to Federation or Croatian forces would put hundreds of thousands more refugees on the roads and upset the balance the peace talks depend on. Sarajevo must decide whether to halt where the front stands and keep American backing, or push on and risk losing it. Zagreb faces the same pressure.",
     "category": "diplomatic",
     "source_tier": "balkan_battlegrounds",
     "source_note": "Editorial provenance: originally machine-drafted, then hand-corrected against Balkan Battlegrounds Vol. I. The correction reverses the compliance direction (Zagreb proceeded with Južni Potez despite US pressure; Sarajevo complied reluctantly while stalling), qualifies the claim that Banja Luka was there for the taking, and replaces the mid-October freeze with the 12 October ceasefire and the fighting that continued to 20 October. The post-Dayton return of Mrkonjić Grad and Šipovo to Republika Srpska is not narrated by Balkan Battlegrounds and is deliberately omitted rather than sourced elsewhere.",
@@ -2175,14 +2172,14 @@
     "responding_faction": "RBiH",
     "bot_response_logic": "historical",
     "historical_default_response_id": "comply",
-    "staff_assessment": "Washington wants the offensive halted short of Banja Luka so that a ceasefire can hold and peace talks can open. Accepting keeps American backing and a place at the table, and the front stays where the ceasefire finds it. Pushing on risks losing American support. In late September 1995 Sarajevo bowed to the pressure reluctantly and set conditions meant to buy the ARBiH more time. Zagreb, pressed since September, still ordered one more operation in October.",
+    "staff_assessment": "Washington wants the offensive halted short of Banja Luka so that a ceasefire can hold and peace talks can open. Accepting keeps American backing and a place at the table, on the ground already held. Pushing on might win more ground, but risks losing American support. Zagreb faces the same pressure and will make its own choice.",
     "trigger_evidence": [
       "The Federation ground offensive is under way and Republika Srpska holds no more than about half the country.",
-      "September–October 1995: the United States presses Zagreb and Sarajevo to halt the offensive before peace talks."
+      "Mid-September 1995: the United States presses Zagreb and Sarajevo to halt the offensive short of Banja Luka."
     ],
     "effect": {
       "kind": "narrative",
-      "text": "The United States pressures Federation forces to halt their advance short of Banja Luka. The front lines freeze along the 51/49% territorial division."
+      "text": "The United States presses Federation forces to halt their advance short of Banja Luka so that a ceasefire and peace talks can follow."
     },
     "effects": [
       {
@@ -2241,7 +2238,7 @@
       {
         "id": "push_further",
         "label": "Push for Banja Luka before stopping",
-        "description": "Defy Washington. Take Banja Luka and negotiate from maximum strength. But you may lose American support entirely.",
+        "description": "Defy Washington. Take Banja Luka and negotiate from maximum strength, at the risk of losing American support entirely.",
         "effects": [
           {
             "kind": "morale_change",
@@ -2301,14 +2298,71 @@
     "sets_flags": {
       "advance_halted": true
     },
-    "historical_source": "Holbrooke, 'To End a War' (1998). BB Vol. II, Ch. 15. US State Dept. chronology. DECISIVE for the current authoring (2026-08-12): BB Vol. I p.462 endnote 823 — US pressure came in September after 'Maestral', and 'Nevertheless, Zagreb went ahead and ordered Juzni Potez in October'; BB Vol. I p.462 endnote 821 — Izetbegovic bowed reluctantly while setting conditions to buy the ARBiH more days, Delic begging him to let the fighting continue; BB Vol. I p.427 — Juzni Potez opened 8 Oct, Mrkonjić Grad fell 10 Oct. This is why the comply response suppresses RBiH only and NOT HRHB."
+    "historical_source": "Holbrooke, 'To End a War' (1998). Peter Galbraith, 'Richard Holbrooke: a force for good', The Guardian, 14 December 2010 (the 17 September 1995 Zagreb meeting; US fear of a refugee flight from Banja Luka). BB Vol. II, Ch. 15. US State Dept. chronology. DECISIVE for the current authoring (2026-08-12): BB Vol. I p.462 endnote 823 — US pressure came in September after 'Maestral', and 'Nevertheless, Zagreb went ahead and ordered Juzni Potez in October'; BB Vol. I p.462 endnote 821 — Izetbegovic bowed reluctantly while setting conditions to buy the ARBiH more days, Delic begging him to let the fighting continue; BB Vol. I p.427 — Juzni Potez opened 8 Oct, Mrkonjić Grad fell 10 Oct. This is why the comply response suppresses RBiH only and NOT HRHB."
+  },
+  {
+    "id": "ceasefire_1995",
+    "image": "event_ceasefire.webp",
+    "title": "General Ceasefire Takes Effect",
+    "narrative": "A general ceasefire takes effect across Bosnia-Herzegovina. After three and a half years of fighting, the parties prepare for negotiations intended to turn the military halt into a peace settlement.",
+    "category": "diplomatic",
+    "historical_source": "General Framework Agreement for Peace (Dayton Agreement), 21 November 1995; Richard Holbrooke, To End a War (1998), account of the October 1995 ceasefire negotiations",
+    "source_tier": "corroborated_participant",
+    "source_note": "The Dayton text establishes the settlement reached after the ceasefire; Holbrooke's participant account supports the October negotiation sequence. The essay is original synthesis, and the memoir is used as a corroborated participant source rather than sole authority for casualty or legal findings.",
+    "trigger": {
+      "turn_min": 181,
+      "turn_max": 200,
+      "phase": "war",
+      "requires_events": [
+        "federation_ground_offensive_1995"
+      ],
+      "condition": {
+        "type": "flag_equals",
+        "flag": "coha_active",
+        "value": false
+      }
+    },
+    "once": true,
+    "effect": {
+      "kind": "narrative",
+      "text": "The ceasefire takes effect. After three and a half years, the guns fall silent across Bosnia-Herzegovina."
+    },
+    "effects": [
+      {
+        "kind": "morale_change",
+        "faction": "RBiH",
+        "delta": 10
+      },
+      {
+        "kind": "morale_change",
+        "faction": "RS",
+        "delta": 5
+      },
+      {
+        "kind": "morale_change",
+        "faction": "HRHB",
+        "delta": 5
+      }
+    ]
   },
   {
     "id": "holbrooke_ceasefire_demand_oct95",
     "image": "event_patron_relations_RBiH.webp",
     "source_tier": "corroborated_participant",
     "title": "Holbrooke: Agree to the Ceasefire",
-    "narrative": "Holbrooke demands a two-month ceasefire to create space for Dayton negotiations. ARBiH is advancing in northwestern Bosnia. Complying sacrifices military momentum; refusing risks losing US air support and international legitimacy.",
+    "localizations": {
+      "en": {
+        "notifications_to_other_factions": {
+          "accept_ceasefire": {
+            "RS": {
+              "headline": "Sarajevo accepts Holbrooke ceasefire",
+              "body": "RBiH agrees to halt the northwestern offensive and keep the road to peace talks open. Pale sees front pressure pause, while Sarajevo improves patron confidence and international standing."
+            }
+          }
+        }
+      }
+    },
+    "narrative": "Holbrooke demands that Sarajevo observe the 60-day ceasefire announced on 5 October, so that peace talks in the United States can open. ARBiH is advancing in northwestern Bosnia. Complying sacrifices military momentum; refusing risks losing US air support and international legitimacy.",
     "category": "diplomatic",
     "trigger": {
       "turn_min": 183,
@@ -2324,14 +2378,14 @@
     "bot_response_logic": "historical",
     "historical_default_response_id": "accept_ceasefire",
     "source_note": "Holbrooke, To End a War, and US State Department Oct. 5-12, 1995 records ground the ceasefire demand.",
-    "staff_assessment": "US pressure seeks to freeze Federation momentum and preserve the Dayton path. Accepting the ceasefire preserves US backing and diplomatic legitimacy while sacrificing offensive momentum; continuing offensive risks patron support/diplomatic legitimacy. The historical default is a calibration baseline, not a recommendation.",
+    "staff_assessment": "US pressure seeks to freeze Federation momentum and keep the road to peace talks open. Accepting the ceasefire preserves US backing and diplomatic legitimacy while sacrificing offensive momentum; continuing offensive risks patron support/diplomatic legitimacy. The historical default is a calibration baseline, not a recommendation.",
     "trigger_evidence": [
-      "Visible October 1995 diplomacy: Holbrooke presses for a ceasefire to keep negotiations moving toward Dayton.",
+      "October 1995: Washington has announced a 60-day ceasefire and peace talks in the United States; Holbrooke presses Sarajevo to halt.",
       "The Federation/RBiH northwestern offensive has active public momentum, making the halt demand politically immediate."
     ],
     "effect": {
       "kind": "narrative",
-      "text": "Holbrooke demands ARBiH halt its northwestern offensive and accept a ceasefire to open the path to Dayton."
+      "text": "Holbrooke demands ARBiH halt its northwestern offensive and accept the ceasefire to open the way to peace talks in the United States."
     },
     "effects": [],
     "dimension_shifts": [
@@ -2344,8 +2398,8 @@
     "response_options": [
       {
         "id": "accept_ceasefire",
-        "label": "Accept the ceasefire -- go to Dayton",
-        "description": "Halt the advance and agree to a two-month ceasefire. US backing and international standing are preserved while offensive momentum is frozen for the Dayton path. While the ceasefire holds, every corps stands on the defensive, running offensives are called off and the staff proposes no new ones.",
+        "label": "Accept the ceasefire -- go to the peace talks",
+        "description": "Halt the advance and observe the 60-day ceasefire. US backing and international standing are preserved while offensive momentum is frozen ahead of the peace talks. While the ceasefire holds, every corps stands on the defensive, offensives already under way are wound down and the staff proposes no new ones.",
         "historical_marker": "historical_default",
         "effects": [],
         "sets_flags": {
@@ -2373,7 +2427,7 @@
       },
       {
         "id": "continue_offensive",
-        "label": "Continue the offensive -- maximum territory before Dayton",
+        "label": "Continue the offensive -- maximum territory before the talks",
         "description": "Defy Holbrooke and keep pressing for additional gains. Military credibility rises, but continuing offensive risks patron support/diplomatic legitimacy.",
         "effects": [],
         "dimension_shifts": [
