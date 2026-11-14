@@ -253,7 +253,7 @@ describe('VerdictScreen interaction — faction tab switching', () => {
         expect(screen.getByRole('button', { name: 'Izvještaj' })).toBeDefined();
         expect(screen.getByRole('button', { name: 'Obračun' })).toBeDefined();
         expect(screen.getByText('Najmanje loša verzija tragedije')).toBeDefined();
-        expect(screen.getByRole('button', { name: 'Pogledaj svoj rat' })).toBeDefined();
+        expect(screen.getByRole('button', { name: 'Otvori pregled kampanje' })).toBeDefined();
         expect(screen.getByRole('button', { name: 'Nova igra' })).toBeDefined();
         expect(screen.getByText('Pirov rezultat')).toBeDefined();
         expect(screen.getAllByText('Dimenzije kapitala').length).toBeGreaterThanOrEqual(1);
@@ -348,7 +348,7 @@ describe('VerdictScreen route — endgame reachability', () => {
         expect(screen.getByText('Konačni poredak')).toBeDefined();
         expect(screen.getByText('1 naselje pod kontrolom')).toBeDefined();
         expect(screen.getByText('Kampanja je trajala 188 sedmica (3 godina, 32 sedmica)')).toBeDefined();
-        expect(screen.getByRole('button', { name: 'Pogledaj svoj rat' })).toBeDefined();
+        expect(screen.getByRole('button', { name: 'Otvori pregled kampanje' })).toBeDefined();
         expect(screen.getByRole('button', { name: 'Nova igra' })).toBeDefined();
         expect(document.body.textContent ?? '').not.toMatch(/\bOSID\b/i);
     });

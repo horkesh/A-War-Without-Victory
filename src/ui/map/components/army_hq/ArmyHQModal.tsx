@@ -30,6 +30,7 @@ import { turnToDateString } from '../../utils/formatters';
 import { getPlayerSafeCorpsName } from '../../utils/playerSafeText';
 import { formatReportedPersonnel, sumReportedPersonnel } from '../../utils/reportedMetrics';
 import { t } from '../../i18n';
+import { localizeOfficerProse } from '../../i18n/officerProse';
 import { WarSummaryContent } from './WarSummaryContent';
 import { RecordsContent } from './RecordsContent';
 import { RootErrorBoundary } from '../RootErrorBoundary';
@@ -134,15 +135,15 @@ function DecisionRoomHandoff({
 /** The commander's personnel note: prose on paper beneath the dark stat card. */
 function OfficerMiniBio({ officer }: { officer: NamedOfficerView }) {
     const rows: Array<[string, string | undefined]> = [
-        [t('armyHq.officer.style'), officer.command_style],
-        [t('armyHq.officer.known'), officer.known_for],
-        [t('armyHq.officer.command'), officer.political_alignment_note],
+        [t('armyHq.officer.style'), localizeOfficerProse(officer.command_style)],
+        [t('armyHq.officer.known'), localizeOfficerProse(officer.known_for)],
+        [t('armyHq.officer.command'), localizeOfficerProse(officer.political_alignment_note)],
         [t('armyHq.officer.note'), officer.sensitive_history_note],
     ];
     const present = rows.filter((row): row is [string, string] => Boolean(row[1]));
     return (
         <DossierPaper testId="army-hq-officer-note" className="mt-2 px-4 py-3 text-[15px] leading-relaxed">
-            <div className={DOSSIER_INK.body}>{officer.bio_short ?? t('armyHq.officer.servicePending')}</div>
+            <div className={DOSSIER_INK.body}>{localizeOfficerProse(officer.bio_short) ?? t('armyHq.officer.servicePending')}</div>
             {present.length > 0 && (
                 <div className={`mt-2 grid grid-cols-1 gap-1 border-t pt-2 ${DOSSIER_INK.rule}`}>
                     {present.map(([label, value]) => (
@@ -652,6 +653,7 @@ export function ArmyHQModal({
                                                 gameState={state}
                                                 playerFaction={faction}
                                                 onOpenArmyReserve={handleOpenArmyReserve}
+                                                eventCatalog={eventCatalog}
                                             />
                                         </RootErrorBoundary>
                                     </div>

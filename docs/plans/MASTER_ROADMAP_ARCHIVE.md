@@ -342,3 +342,16 @@ Kept verbatim from the roadmap.
    a regression. Any control pinning `sector_attack` near 44 was pinning a number the BUG produced.
 
 **Closed evidence:** stable sector-pair identity, edgeless-ghost exclusion and `occupies_on_victory` landed. The fixed-home probe exclusion was reverted (the tag covered 180/184 brigades); any future proposal requires an explicit tag and an enumerated predicted set before execution. Measurements, non-blocking follow-ups, the unmeasured orphan-rate proof and the post-1.0 enclave-targeting disposition are retained in the [closed probe scope](2026-08-26-probe-channel-scope.md).
+
+## Merged list moved 2026-11-14
+
+Superseded by the shorter 2026-11-14 merged list in the roadmap header. Kept verbatim: posture model option 2 (#580), truthful command and surface steps 2-5 (#568, #579, #570, #572, #585), sensitive copy (#584), displacement attribution (#587), replay totals (#586), BCS corps cases and the JNA relabel (#589), the Apr 1992 startup snapshot re-bake (#588), test tooling (#569, #582), and the DC and R6/R7 closeouts (#559, #575).
+
+## Combat-fatigue and R8 calibration updates moved 2026-11-14
+
+Superseded 2026-10-26 notes from the end of the roadmap, kept verbatim.
+
+
+The OSID combat fatigue single-owner source correction has focused 21/21 and 51/51 test evidence, nonincremental TypeScript success and independent bounded-scope GO. It has no direct controller-change assertion; current188, full-suite, package and native qualification remain open. Details: [implementation report](../40_reports/implemented/20261026_COMBAT_FATIGUE_SINGLE_OWNER.md) and [portable proof packet](../../logs/r8-native-calibration-parity-20261024/combat-fatigue-owner-20261026/PORTABLE_MANIFEST.v2.json).
+
+**R8 calibration phase update — 2026-10-26:** The owner authorized historical calibration on the corrected engine; existing score, zero-loss, anchor, health, provenance and preservation gates remain unchanged. The retained audits found no supported Circle timing/OOB or health-cap edit. HVO premature identities are established, but personnel duplication and a safe April representation are unresolved. The zero-drift morale invariant correction has focused GO (69/69 across six files; TypeScript 0), but does not clear health 13>3 or qualify runtime calibration. Current candidate remains 703/712 `STOP_NO_RETRY`, four formerly-correct losses; no new campaign ran. Next step is clean-source binding and independent prelaunch review of any candidate. [Report](../40_reports/implemented/20261026_CORRECTED_ENGINE_CALIBRATION_PACKET.md).

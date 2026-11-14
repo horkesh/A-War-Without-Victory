@@ -1,32 +1,15 @@
 import type { NamedOfficerView } from '../data/types';
+import { t } from '../i18n';
+import type { MessageKey } from '../i18n';
+
+// Every player-visible word in this file goes through i18n (`officerChar.*`), so the
+// officer card reads the same in EN and BCS. The EN values equal the old literals.
+const key = (name: string): MessageKey => `officerChar.${name}` as MessageKey;
+const unreported = (): string => t(key('unreported'));
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Rating descriptors (1-5 scale)
 // ═══════════════════════════════════════════════════════════════════════════
-
-const COMPETENCE_LABELS: Record<number, string> = {
-    1: 'Inept',
-    2: 'Mediocre',
-    3: 'Capable',
-    4: 'Skilled',
-    5: 'Exceptional',
-};
-
-const AGGRESSION_LABELS: Record<number, string> = {
-    1: 'Passive',
-    2: 'Cautious',
-    3: 'Balanced',
-    4: 'Bold',
-    5: 'Relentless',
-};
-
-const DEFENSE_LABELS: Record<number, string> = {
-    1: 'Exposed',
-    2: 'Porous',
-    3: 'Steady',
-    4: 'Resilient',
-    5: 'Ironclad',
-};
 
 function normalizedRating(value: number | null | undefined, max = 5): number | null {
     if (typeof value !== 'number' || !Number.isFinite(value)) return null;
@@ -40,47 +23,51 @@ function normalizedPipCount(value: number | null | undefined, max = 5): number |
 
 export function getCompetenceLabel(value: number | null | undefined): string {
     const rating = normalizedRating(value);
-    return rating == null ? 'Unreported' : COMPETENCE_LABELS[rating] ?? 'Unreported';
+    return rating == null ? unreported() : t(key(`competence.${rating}`));
 }
 export function getAggressionLabel(value: number | null | undefined): string {
     const rating = normalizedRating(value);
-    return rating == null ? 'Unreported' : AGGRESSION_LABELS[rating] ?? 'Unreported';
+    return rating == null ? unreported() : t(key(`aggression.${rating}`));
 }
 export function getDefenseLabel(value: number | null | undefined): string {
     const rating = normalizedRating(value);
-    return rating == null ? 'Unreported' : DEFENSE_LABELS[rating] ?? 'Unreported';
+    return rating == null ? unreported() : t(key(`defense.${rating}`));
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Origin labels
 // ═══════════════════════════════════════════════════════════════════════════
 
-const ORIGIN_DISPLAY: Record<string, { label: string; color: string }> = {
-    jna:       { label: 'JNA',       color: 'text-blue-400' },
-    hv:        { label: 'HV',        color: 'text-green-400' },
-    to:        { label: 'TO',        color: 'text-amber-400' },
-    militia:   { label: 'Militia',   color: 'text-orange-400' },
-    foreign:   { label: 'Foreign',   color: 'text-purple-400' },
-    political: { label: 'Political', color: 'text-red-400' },
-    military:  { label: 'Military',  color: 'text-teal-400' },
+const ORIGIN_COLOR: Record<string, string> = {
+    jna: 'text-blue-400',
+    hv: 'text-green-400',
+    to: 'text-amber-400',
+    militia: 'text-orange-400',
+    foreign: 'text-purple-400',
+    political: 'text-red-400',
+    military: 'text-teal-400',
 };
 
 export function getOriginDisplay(origin: string): { label: string; color: string } {
-    return ORIGIN_DISPLAY[origin] ?? { label: origin, color: 'text-text-secondary' };
+    const color = ORIGIN_COLOR[origin];
+    return color
+        ? { label: t(key(`origin.${origin}`)), color }
+        : { label: origin, color: 'text-text-secondary' };
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Rank formatting
 // ═══════════════════════════════════════════════════════════════════════════
 
-const RANK_DISPLAY: Record<string, string> = {
-    army_commander: 'Gen.',
-    corps_commander: 'Gen.',
-    deputy: 'Dep.',
+const RANK_DISPLAY_KEY: Record<string, string> = {
+    army_commander: 'rank.general',
+    corps_commander: 'rank.general',
+    deputy: 'rank.deputy',
 };
 
 export function formatRank(rank: string): string {
-    return RANK_DISPLAY[rank] ?? rank;
+    const rankKey = RANK_DISPLAY_KEY[rank];
+    return rankKey ? t(key(rankKey)) : rank;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -144,39 +131,43 @@ export function getRankInsigniaColor(faction: string): string {
 // ═══════════════════════════════════════════════════════════════════════════
 
 export function getArchetype(officer: NamedOfficerView): string {
+    return t(key(`archetype.${getArchetypeId(officer)}`));
+}
+
+function getArchetypeId(officer: NamedOfficerView): string {
     const c = officer.competence;
     const a = officer.aggressiveness;
     const d = officer.defensive_skill;
 
-    if (![c, a, d].every(Number.isFinite)) return 'Profile Unreported';
+    if (![c, a, d].every(Number.isFinite)) return 'unreported';
 
     // Exceptional all-rounders
-    if (c >= 5 && a >= 4 && d >= 4) return 'Master Strategist';
-    if (c >= 4 && a >= 4 && d >= 4) return 'Complete Commander';
+    if (c >= 5 && a >= 4 && d >= 4) return 'masterStrategist';
+    if (c >= 4 && a >= 4 && d >= 4) return 'completeCommander';
 
     // Dominant trait archetypes
-    if (a >= 5 && c >= 4) return 'Assault Commander';
-    if (a >= 5 && c <= 3) return 'Reckless Attacker';
-    if (d >= 5 && c >= 4) return 'Fortress Mind';
-    if (d >= 5 && a <= 2) return 'Entrenched Defender';
+    if (a >= 5 && c >= 4) return 'assaultCommander';
+    if (a >= 5 && c <= 3) return 'recklessAttacker';
+    if (d >= 5 && c >= 4) return 'fortressMind';
+    if (d >= 5 && a <= 2) return 'entrenchedDefender';
 
     // Two-trait combos
-    if (a >= 4 && d >= 4) return 'Versatile Fighter';
-    if (c >= 4 && a >= 4) return 'Aggressive Professional';
-    if (c >= 4 && d >= 4) return 'Methodical Tactician';
-    if (c >= 4 && a <= 2) return 'Cautious Professional';
+    if (a >= 4 && d >= 4) return 'versatileFighter';
+    if (c >= 4 && a >= 4) return 'aggressiveProfessional';
+    if (c >= 4 && d >= 4) return 'methodicalTactician';
+    if (c >= 4 && a <= 2) return 'cautiousProfessional';
 
     // Low-skill archetypes
-    if (c <= 2 && a >= 4) return 'Political Firebrand';
-    if (c <= 2 && a <= 2) return 'Paper Commander';
-    if (c <= 2) return 'Placeholder Officer';
+    if (c <= 2 && a >= 4) return 'politicalFirebrand';
+    if (c <= 2 && a <= 2) return 'paperCommander';
+    if (c <= 2) return 'placeholderOfficer';
 
     // Mid-range
-    if (a >= 4) return 'Aggressive Leader';
-    if (d >= 4) return 'Defensive Specialist';
-    if (c >= 4) return 'Competent Officer';
+    if (a >= 4) return 'aggressiveLeader';
+    if (d >= 4) return 'defensiveSpecialist';
+    if (c >= 4) return 'competentOfficer';
 
-    return 'Line Officer';
+    return 'lineOfficer';
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -194,7 +185,7 @@ export function getRatingColor(value: number | null | undefined): string {
 
 export function formatPips(value: number | null | undefined, max = 5): string {
     const filled = normalizedPipCount(value, max);
-    if (filled == null) return 'Unreported';
+    if (filled == null) return unreported();
     return '●'.repeat(filled) + '○'.repeat(max - filled) + ` ${filled}/${max}`;
 }
 
@@ -203,36 +194,28 @@ export function formatPips(value: number | null | undefined, max = 5): string {
 // ═══════════════════════════════════════════════════════════════════════════
 
 export function formatCombatRecord(battles: number, victories: number): string {
-    if (battles === 0) return 'No combat record';
+    if (battles === 0) return t(key('combat.none'));
     const winRate = Math.round((victories / battles) * 100);
-    return `${victories}W/${battles - victories}L (${winRate}%)`;
+    return t(key('combat.record'), { wins: victories, losses: battles - victories, rate: winRate });
 }
 
 export function formatTenure(turnsInCommand: number): string {
-    if (turnsInCommand === 0) return 'Newly assigned';
-    return `${turnsInCommand}w in command`;
+    if (turnsInCommand === 0) return t(key('tenure.new'));
+    return t(key('tenure.weeks'), { weeks: turnsInCommand });
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Political reliability display
 // ═══════════════════════════════════════════════════════════════════════════
 
-const RELIABILITY_LABELS: Record<number, string> = {
-    1: 'Defiant',
-    2: 'Unreliable',
-    3: 'Neutral',
-    4: 'Loyal',
-    5: 'Steadfast',
-};
-
 export function getReliabilityLabel(value: number | null | undefined): string {
     const rating = normalizedRating(value);
-    return rating == null ? 'Unreported' : RELIABILITY_LABELS[rating] ?? 'Unreported';
+    return rating == null ? unreported() : t(key(`reliability.${rating}`));
 }
 
 /** Formatted compliance modifier: e.g. '−0.20', '+0.10', '±0.00' */
 export function getComplianceModifierText(politicalReliability: number): string {
-    if (!Number.isFinite(politicalReliability)) return 'Unreported';
+    if (!Number.isFinite(politicalReliability)) return unreported();
     const mod = (politicalReliability - 3) * 0.10;
     if (Math.abs(mod) < 0.001) return '±0.00';
     return mod > 0 ? `+${mod.toFixed(2)}` : `−${Math.abs(mod).toFixed(2)}`;
@@ -243,7 +226,7 @@ export function getComplianceModifierText(politicalReliability: number): string 
  * e.g., +0.20, -0.25, 0.00
  */
 export function getComplianceModifierTextFromValue(modifier: number): string {
-    if (!Number.isFinite(modifier)) return 'Unreported';
+    if (!Number.isFinite(modifier)) return unreported();
     const sign = modifier >= 0 ? '+' : '';
     return `${sign}${modifier.toFixed(2)}`;
 }
@@ -260,12 +243,12 @@ export function getComplianceModifierColor(modifier: number): string {
 
 /** One-line personality summary from competence x aggressiveness quadrant. */
 export function getPersonalitySummary(comp: number, agg: number): string {
-    if (!Number.isFinite(comp) || !Number.isFinite(agg)) return 'Profile unreported';
-    if (comp >= 4 && agg >= 4) return 'Fast prep, accepts risk';
-    if (comp >= 4 && agg <= 2) return 'Thorough prep, demands intel';
-    if (comp <= 2 && agg >= 4) return 'Reckless, attacks blind';
-    if (comp <= 2 && agg <= 2) return 'Hesitant, may never launch';
-    if (agg >= 4) return 'Aggressive, short preparation';
-    if (comp >= 4) return 'Methodical, balanced preparation';
-    return 'Standard preparation cycle';
+    if (!Number.isFinite(comp) || !Number.isFinite(agg)) return t(key('personality.unreported'));
+    if (comp >= 4 && agg >= 4) return t(key('personality.fastPrep'));
+    if (comp >= 4 && agg <= 2) return t(key('personality.thoroughPrep'));
+    if (comp <= 2 && agg >= 4) return t(key('personality.reckless'));
+    if (comp <= 2 && agg <= 2) return t(key('personality.hesitant'));
+    if (agg >= 4) return t(key('personality.aggressive'));
+    if (comp >= 4) return t(key('personality.methodical'));
+    return t(key('personality.standard'));
 }

@@ -65,7 +65,7 @@ const {
 } = require('./strategic_posture_review_contract.cjs');
 const { stageConvoyDecisionOnState } = require('./convoy_ipc_contract.cjs');
 const { fileOfficerDecisionRecord } = require('./officer_decision_history.cjs');
-const { listSaveRecords, resolveSaveRecordPath } = require('./save_records.cjs');
+const { listSaveRecords, resolveSaveRecordPath, writeFileAtomically } = require('./save_records.cjs');
 const {
   projectPlayerVisibleReplaySequenceJson,
   projectPlayerVisibleStateJson,
@@ -2101,7 +2101,7 @@ function writeSaveFile(filename) {
   const savesDir = getSavesDir();
   fs.mkdirSync(savesDir, { recursive: true });
   const filePath = path.join(savesDir, filename);
-  fs.writeFileSync(filePath, currentCanonicalSaveJson, 'utf-8');
+  writeFileAtomically(filePath, currentCanonicalSaveJson);
   return filePath;
 }
 

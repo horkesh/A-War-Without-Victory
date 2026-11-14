@@ -21,29 +21,29 @@ describe('EventDecisionModal presidential dossier', () => {
   );
   const bcsExpectedCopy: Record<typeof firstHourEventIds[number], string[]> = {
     rbih_state_identity: [
-      'Sta je Bosna?',
-      'Predsjednistvo mora proglasiti viziju drzave.',
-      'Gradjanska multietnicka republika',
-      'Sarajevsko Predsjednistvo cuva gradjanski zahtjev',
-      'Kontekst presude Karadzicu',
-      'Majska platforma iz 1992. nalazi se pred Predsjednistvom.',
+      'Šta je Bosna?',
+      'Predsjedništvo mora proglasiti viziju države.',
+      'Građanska multietnička republika',
+      'Sarajevsko Predsjedništvo čuva građanski zahtjev',
+      'Kontekst presude Karadžiću',
+      'Majska platforma iz 1992. nalazi se pred Predsjedništvom.',
     ],
     rs_strategic_goals: [
-      'Skupstina govori',
-      'Narodna skupstina se sastala.',
-      'General Ratko Mladic',
-      'upozorenje generala Ratka Mladica',
-      'Usvojiti svih sest ciljeva',
-      'Skupstinski paket zadrzava historijski maksimalisticki kurs',
-      'Presude Karadzicu i Mladicu dokumentuju sest strateskih ciljeva',
+      'Skupština govori',
+      'Narodna skupština se sastala.',
+      'General Ratko Mladić',
+      'upozorenje generala Ratka Mladića',
+      'Usvojiti svih šest ciljeva',
+      'Skupštinski paket zadržava historijski maksimalistički kurs',
+      'Presude Karadžiću i Mladiću dokumentuju šest strateških ciljeva',
     ],
     hrhb_political_goal: [
-      'Sta je Herceg-Bosna?',
+      'Šta je Herceg-Bosna?',
       'Zagreb je na vezi.',
       'Hrvatska republika - slijediti Zagreb',
-      'Vodstvo Herceg-Bosne dobija uskladjenost s patronom',
-      'Presude Kordicu i Prlicu',
-      'Zagrebacka direktiva i institucije Herceg-Bosne vec oblikuju politiku HVO-a.',
+      'Vodstvo Herceg-Bosne dobija usklađenost s patronom',
+      'Presude Kordiću i Prliću',
+      'Zagrebačka direktiva i institucije Herceg-Bosne već oblikuju politiku HVO-a.',
     ],
   };
 
@@ -86,7 +86,7 @@ describe('EventDecisionModal presidential dossier', () => {
       expect(text).not.toMatch(/The May 1992 platform debate|Zagreb's directive and Herceg-Bosna institutions/);
       if (eventId === 'rbih_state_identity') {
         expect(text).toContain('Republika Bosna i Hercegovina moral +3');
-        expect(text).toContain('Zapis kampanje ažuriran: Gradjanska multietnicka republika');
+        expect(text).toContain('Zapis kampanje ažuriran: Građanska multietnička republika');
         expect(text).not.toContain('Republic of Bosnia and Herzegovina');
         expect(text).not.toContain('morale +3');
         expect(text).not.toContain('international standing');
@@ -151,9 +151,9 @@ describe('EventDecisionModal presidential dossier', () => {
       onRespond: () => undefined,
     }));
     const bcsText = bcsRender.container.textContent ?? '';
-    expect(bcsText).toContain('General Ratko Mladic');
-    expect(bcsText).toContain('upozorenje generala Ratka Mladica');
-    expect(bcsText).toContain('traziti radnje koje cine genocid');
+    expect(bcsText).toContain('General Ratko Mladić');
+    expect(bcsText).toContain('upozorenje generala Ratka Mladića');
+    expect(bcsText).toContain('tražiti radnje koje čine genocid');
     expect(bcsText).not.toMatch(/Komandant vojske|Upozorenje komandanta|Komandant je upozorio/i);
     bcsRender.unmount();
   });

@@ -18,6 +18,7 @@ import { GlassPanel } from './GlassPanel';
 import { OfficerProfile } from './OfficerProfile';
 import { formatTenure } from '../utils/officerCharacter';
 import { t, type MessageKey } from '../i18n';
+import { localizeOfficerProse } from '../i18n/officerProse';
 import { getPlayerSafeCorpsName } from '../utils/playerSafeText';
 
 export interface OfficerDossierPanelProps {
@@ -80,18 +81,18 @@ export function OfficerDossierPanel({ officer, onClose }: OfficerDossierPanelPro
                             {t('officerDossier.bio')}
                         </div>
                         {officer.bio_short && (
-                            <p className="text-xs text-text-primary leading-snug">{officer.bio_short}</p>
+                            <p className="text-xs text-text-primary leading-snug">{localizeOfficerProse(officer.bio_short)}</p>
                         )}
                         {officer.command_style && (
                             <div className="text-xs">
                                 <span className="text-text-secondary font-semibold">{t('officerDossier.commandStyleLabel')}: </span>
-                                <span className="text-text-primary">{officer.command_style}</span>
+                                <span className="text-text-primary">{localizeOfficerProse(officer.command_style)}</span>
                             </div>
                         )}
                         {officer.known_for && (
                             <div className="text-xs">
                                 <span className="text-text-secondary font-semibold">{t('officerDossier.knownForLabel')}: </span>
-                                <span className="text-text-primary">{officer.known_for}</span>
+                                <span className="text-text-primary">{localizeOfficerProse(officer.known_for)}</span>
                             </div>
                         )}
                     </div>
