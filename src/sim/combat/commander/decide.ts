@@ -258,9 +258,24 @@ function canReleaseReliefDonor(placement: ReliefDonorPlacement): boolean {
 }
 
 /**
- * Select one legally march-capable same-corps donor for each truly empty sector.
+ * Select one legally march-capable same-corps donor for each empty front sector.
  * This emits intent only; normal sector-march and column-movement phases perform
  * the physical move over subsequent turns.
+ *
+ * "Empty" means no front (assigned) brigade, whatever the sector's own reserve/rear
+ * lists say (SE7E). Sector construction runs earlier in the same turn and already
+ * promotes any own reserve/rear brigade that passes its local bar
+ * (`ensureMinimumSectorCoverage`, zero-assigned rescue), so a sector that is still
+ * frontless here owns a pool that construction could not commit — dug in, under
+ * another order, beyond the local relief radius. Before SE7E such a sector was left
+ * to construction alone and stayed empty indefinitely (ARBiH 1st Corps
+ * Visoko–Kiseljak, t98–t188 on main).
+ *
+ * Donor eligibility is unchanged. Ordering: the empty sector's own reserve/rear first
+ * (the standing OG's own second echelon, ADR-0006/ADR-0007), then placement tier,
+ * then friendly distance, then formation id (strictCompare). At most one donor per
+ * empty sector per pass, and a donor serves at most one sector (ADR-0007 bounded
+ * reserve commitment).
  */
 export function computeEmptySectorReliefReassignments(
     briefing: CommanderBriefing,
@@ -284,8 +299,6 @@ export function computeEmptySectorReliefReassignments(
         sector.edge_ids.length > 0
         && sector.unstaffed_front !== true
         && sector.assigned_brigade_ids.length === 0
-        && sector.reserve_brigade_ids.length === 0
-        && (sector.rear_brigade_ids?.length ?? 0) === 0
         && getSectorFrontOsids(sector).length > 0,
     );
     if (emptySectors.length === 0) return [];
@@ -303,6 +316,17 @@ export function computeEmptySectorReliefReassignments(
     for (const targetSector of emptySectors) {
         const targetOsids = new Set(getSectorFrontOsids(targetSector));
         if (hasPendingReliefForTargets(briefing, targetOsids)) continue;
+        const ownPool = new Set<FormationId>([
+            ...targetSector.reserve_brigade_ids,
+            ...(targetSector.rear_brigade_ids ?? []),
+        ]);
+        // An own reserve/rear brigade already standing on this front holds it in fact; only the
+        // buckets lag. Relief would march a donor onto a held position (or the brigade onto its
+        // own), so leave the sector to construction. A no-op for a sector with no own pool.
+        if (briefing.brigades.some((brigade) =>
+            ownPool.has(brigade.id)
+            && brigade.location_osid != null
+            && targetOsids.has(brigade.location_osid))) continue;
 
         const candidates = briefing.brigades
             .filter((brigade) => {
@@ -336,7 +360,8 @@ export function computeEmptySectorReliefReassignments(
             })
             .filter((candidate) => candidate.distance >= 0)
             .sort((left, right) =>
-                left.placement.tier - right.placement.tier
+                Number(!ownPool.has(left.brigade.id)) - Number(!ownPool.has(right.brigade.id))
+                || left.placement.tier - right.placement.tier
                 || left.distance - right.distance
                 || strictCompare(left.brigade.id, right.brigade.id),
             );
