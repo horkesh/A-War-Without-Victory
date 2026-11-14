@@ -22,6 +22,7 @@ import { loadOperationalSettlements } from '../data/DataLoader';
 import { buildControlGeoJSON } from '../map/builders/buildControlGeoJSON';
 import { buildFrontLinesGeoJSON } from '../map/builders/buildFrontLinesGeoJSON';
 import { Z } from '../../shared/zIndex';
+import { OsmAttribution } from './OsmAttribution';
 
 const MINIMAP_WIDTH = 250;
 const MINIMAP_HEIGHT = 180;
@@ -302,6 +303,9 @@ export const Minimap = React.memo(function Minimap({ active, onGraphicsControlle
       }}
     >
       <div ref={containerRef} style={{ width: '100%', height: '100%' }} />
+      {/* The minimap draws game-state GeoJSON, not osm.pmtiles; this repeats the war map's
+          OpenStreetMap credit on the second map surface. */}
+      <OsmAttribution placement="minimap" />
     </div>
   );
 });
