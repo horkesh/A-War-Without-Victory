@@ -50,6 +50,7 @@ import {
 import { isRbihHrhbMobilizing } from '../early_war/alliance_update.js';
 import { getActivePatronDirective } from './patron_directive_scope.js';
 import type { CampaignPlan } from './army_hq_gathering_types.js';
+import { hasLightStrikeGroup } from './commander/force_eval.js';
 import {
     averageCohesion,
     averagePersonnelFraction,
@@ -163,17 +164,29 @@ export function generateCorpsStanceOrders(
         }
         noteDriver('campaign_plan');
 
-        // --- N1297: Organizational readiness gate ---
-        // If the previous turn's commander assessment shows zero main_effort brigades,
-        // the corps has no offensive capacity (rifle-only, no artillery/tanks).
-        // Cap at 'defensive' — brigade AI can still repel attacks, but no new plans.
-        // Naturally models ARBiH early war (w0–w12 rifle-only) vs VRS (artillery day 1).
+        // --- N1297: Organizational readiness gate (RF-AI2 light strike group) ---
+        // Reads the previous turn's commander force assessment.
+        // - A motorized/mechanized main_effort brigade: no cap.
+        // - Otherwise, a light strike group (>= 3 fit, combat-effective brigades massed in
+        //   one zone, any equipment class; force_eval.hasLightStrikeGroup): cap at
+        //   'balanced'. The corps may plan a local main effort but takes no corps-wide
+        //   offensive posture. This is how infantry corps attacked (ARBiH 5th Corps,
+        //   Tigar 94 and the Oct-Nov 1994 breakout).
+        // - Neither: cap at 'defensive'. Brigade AI still repels attacks; no new plans.
+        // Before RF-AI2 only the main_effort test existed; it capped the 5th Corps all war
+        // and VRS corps whose brigades are classed mountain (measured: 188w main trace).
         // RS corridor override below may upgrade defensive → balanced for existential fronts.
+        // The faction-wide offensive biases below (RS early war, RBiH counteroffensive)
+        // need a main effort: a light strike group alone keeps the corps at 'balanced'.
+        let lightStrikeOnly = false;
         if (stance !== 'reorganize') {
             const prevForce = cmd.commander_state?.force_assessment;
-            if (prevForce && prevForce.tier_counts.main_effort === 0
-                && STANCE_RANK[stance] > STANCE_RANK['defensive']) {
-                stance = 'defensive';
+            if (prevForce && prevForce.tier_counts.main_effort === 0) {
+                lightStrikeOnly = hasLightStrikeGroup(prevForce);
+                const readinessCeiling: CorpsStance = lightStrikeOnly ? 'balanced' : 'defensive';
+                if (STANCE_RANK[stance] > STANCE_RANK[readinessCeiling]) {
+                    stance = readinessCeiling;
+                }
             }
         }
         noteDriver('readiness_low');
@@ -186,7 +199,7 @@ export function generateCorpsStanceOrders(
                 stance = 'balanced';
             }
             // E1: RS early-war aggression: prefer offensive in weeks 0–26 (PRIORITY_B handoff)
-            if (turn < RS_EARLY_WAR_END_WEEK && stance === 'balanced' && avgPers >= 0.6 && avgCoh >= 40) {
+            if (turn < RS_EARLY_WAR_END_WEEK && stance === 'balanced' && !lightStrikeOnly && avgPers >= 0.6 && avgCoh >= 40) {
                 stance = 'offensive';
             }
             // E1: Sarajevo siege corps: maintain pressure but never assault core
@@ -236,7 +249,7 @@ export function generateCorpsStanceOrders(
                 stance = 'balanced';
             }
             // E2: RBiH late-war counteroffensive eligibility (week 40+)
-            if (turn >= 40 && stance === 'balanced' && avgPers >= 0.6 && avgCoh >= 50) {
+            if (turn >= 40 && stance === 'balanced' && !lightStrikeOnly && avgPers >= 0.6 && avgCoh >= 50) {
                 // Check if faction controls enough territory for counteroffensive
                 const pc = state.political.political_controllers ?? {};
                 const pcKeys = Object.keys(pc);
