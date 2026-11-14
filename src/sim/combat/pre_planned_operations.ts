@@ -57,6 +57,7 @@ import { isFriendlyFaction } from '../early_war/alliance_update.js';
 import { isOperationObjectiveHostile } from './operation_objective_hostility.js';
 import { computeMultiAxisPlanningDuration } from './sector_offensive_axis_helpers.js';
 import { isEliteAuthoredForHistoricalOperation } from './historical_elite_reservations.js';
+import { isCorpsBoundByOct1995Ceasefire, isFactionBoundByOct1995Ceasefire } from './oct1995_ceasefire.js';
 import {
     emitPreplannedEligibilityRecord,
     isReasonCodeTopicEnabled,
@@ -2770,8 +2771,14 @@ export function injectPrePlannedOperations(
     const formations = state.military.formations ?? {};
     const turn = state.meta?.turn ?? 0;
 
+    // October 1995 general ceasefire (council fix 3): the operation channel is closed for a bound
+    // faction. Its definitions are skipped, not consumed, so they remain available if the war
+    // reopens after a declined Dayton.
+    const ceasefireBound = (def: PrePlannedOp): boolean => isFactionBoundByOct1995Ceasefire(state, def.faction);
+
     for (const def of ALL_PRE_PLANNED) {
         if (options?.faction && def.faction !== options.faction) continue;
+        if (ceasefireBound(def)) continue;
         prestageReservedPrePlannedElites(state, def, turn, adjacency);
     }
 
@@ -2780,6 +2787,7 @@ export function injectPrePlannedOperations(
     const allWarnings: OpInjectionWarning[] = [];
     for (const def of ALL_PRE_PLANNED) {
         if (options?.faction && def.faction !== options.faction) continue;
+        if (ceasefireBound(def)) continue;
         if (def.available_from != null && turn < def.available_from) continue;
         if (prePlannedOperationAlreadyResolved(state, def)) continue;
         if (allPrePlannedObjectivesOwnedByFaction(state, def)) {
@@ -2803,6 +2811,7 @@ export function injectPrePlannedOperations(
 
     for (const def of ALL_PRE_PLANNED) {
         if (options?.faction && def.faction !== options.faction) continue;
+        if (ceasefireBound(def)) continue;
         const cmd = corpsCommand[def.corps];
         const invocationKey = observe ? `direct_preplanned:${turn}:${def.corps}:${def.name}` : '';
         if (observe) emitPreplannedEligibilityRecord({
@@ -2992,6 +3001,11 @@ export function injectQueuedOperation(state: GameState, corpsId: string, adjacen
         if (observe) emitPreplannedEligibilityRecord({ kind: 'caller_terminal', caller: 'queued_injection', linkage: 'contiguous_unsequenced', invocation_key: invocationKey, turn, operation_name: observedOperationName, corps_id: corpsId, actual_exit: 'command_missing', build_reached: false, ordinary_return: false });
         return false;
     }
+    // October 1995 general ceasefire (council fix 3): the queue is held, not consumed, so the
+    // queued operation resumes if the war reopens after a declined Dayton.
+    if (isCorpsBoundByOct1995Ceasefire(state, corpsId)) {
+        return false;
+    }
     if (!isSlot0AvailableForQueue(cmd)) {
         if (observe) emitPreplannedEligibilityRecord({ kind: 'caller_terminal', caller: 'queued_injection', linkage: 'contiguous_unsequenced', invocation_key: invocationKey, turn, operation_name: observedOperationName, corps_id: corpsId, actual_exit: 'slot_unavailable', build_reached: false, ordinary_return: false });
         return false;
@@ -3166,6 +3180,9 @@ export function admitAuthoredPrePlannedReinforcements(state: GameState): number 
     let admitted = 0;
 
     for (const corpsId of Object.keys(commands).sort(strictCompare)) {
+        // October 1995 general ceasefire (council fix 3): no reinforcement or elite loan is
+        // sent to an offensive while the ceasefire binds the corps.
+        if (isCorpsBoundByOct1995Ceasefire(state, corpsId)) continue;
         const operations = [...(commands[corpsId]?.active_operations ?? [])]
             .sort((a, b) => strictCompare(a.name, b.name) || a.started_turn - b.started_turn);
         for (const operation of operations) {
