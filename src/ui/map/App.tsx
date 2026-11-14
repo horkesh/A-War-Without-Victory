@@ -38,8 +38,15 @@ import { SupplyPanel } from './components/SupplyPanel';
 const EconomyPanel = lazy(() =>
   import('./components/EconomyPanel').then(m => ({ default: m.EconomyPanel })),
 );
-import { HumanitarianLedgerPanel } from './components/HumanitarianLedgerPanel';
-import { EnclaveDashboard } from './components/EnclaveDashboard';
+// The Humanitarian Ledger and the Enclave dashboard open on demand; they load in their own
+// chunk so the entry chunk stays under the vite.config.ts chunk-size limit, which the
+// player-experience gate blocks on (council fix 4 grew the entry chunk past it, 2026-11-14).
+const HumanitarianLedgerPanel = lazy(() =>
+  import('./components/HumanitarianLedgerPanel').then(m => ({ default: m.HumanitarianLedgerPanel })),
+);
+const EnclaveDashboard = lazy(() =>
+  import('./components/EnclaveDashboard').then(m => ({ default: m.EnclaveDashboard })),
+);
 import { EventModal } from './components/EventModal';
 import { AiAdvisorPanel } from './components/AiAdvisorPanel';
 import { AiSettingsPanel } from './components/AiSettingsPanel';
@@ -64,7 +71,10 @@ import { DiplomacyPanel } from './components/DiplomacyPanel';
 import { MainMenu } from './components/MainMenu';
 import { PauseMenu } from './components/PauseMenu';
 import { SettingsScreen } from './components/SettingsScreen';
-import { CreditsScreen } from './components/CreditsScreen';
+// Opens on demand from the menu; its own chunk keeps the entry chunk under the limit.
+const CreditsScreen = lazy(() =>
+  import('./components/CreditsScreen').then(m => ({ default: m.CreditsScreen })),
+);
 import { MapModeLegend } from './components/MapModeLegend';
 import { PeaceStatusPanel } from './components/PeaceStatusPanel';
 import { PeaceWarTransitionOverlay } from './components/PeaceWarTransitionOverlay';
@@ -2059,11 +2069,13 @@ function App() {
       <CodexPanelWrapper eventCatalog={eventCatalogFull} requestedEventId={requestedCodexEventId} />
       <OperationBriefingModalWrapper />
       {loadedGameState && (
-        <EnclaveDashboard
-          state={loadedGameState}
-          open={enclaveDashboardOpen}
-          onClose={() => setEnclaveDashboardOpen(false)}
-        />
+        <Suspense fallback={null}>
+          <EnclaveDashboard
+            state={loadedGameState}
+            open={enclaveDashboardOpen}
+            onClose={() => setEnclaveDashboardOpen(false)}
+          />
+        </Suspense>
       )}
       {mapMode === 'supply' && loadedGameState && (
         <SupplyPanel state={loadedGameState} />
@@ -2074,11 +2086,13 @@ function App() {
         </Suspense>
       )}
       {loadedGameState && (
-        <HumanitarianLedgerPanel
-          state={loadedGameState}
-          open={humanitarianLedgerOpen}
-          onClose={() => setHumanitarianLedgerOpen(false)}
-        />
+        <Suspense fallback={null}>
+          <HumanitarianLedgerPanel
+            state={loadedGameState}
+            open={humanitarianLedgerOpen}
+            onClose={() => setHumanitarianLedgerOpen(false)}
+          />
+        </Suspense>
       )}
       {aiSettingsOpen && (
         <AiSettingsPanel onClose={() => setAiSettingsOpen(false)} />
@@ -2398,7 +2412,11 @@ function App() {
         />
       )}
       {settingsOpen && <SettingsScreen onClose={() => setSettingsOpen(false)} />}
-      {creditsOpen && <CreditsScreen onClose={() => setCreditsOpen(false)} />}
+      {creditsOpen && (
+        <Suspense fallback={null}>
+          <CreditsScreen onClose={() => setCreditsOpen(false)} />
+        </Suspense>
+      )}
       {/* v0.9.2 tutorial onboarding deck - auto-mounted at app root (task #77).
           Only on the in-game screen with a loaded save and no blocking
           presidential surface. The overlay's own `shouldShowOnboarding`
