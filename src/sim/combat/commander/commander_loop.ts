@@ -219,10 +219,10 @@ export function applyCommanderOutput(
     // 2. Mark this corps as AI-decided (so old formula bot skips it)
     corps.ai_decided = true;
 
-    // 3. Apply sector stances. A player-set OG stance is never overridden (the same rule
-    // evaluateSectorStances applies); it now survives sector rebuilds (sector_stance_carry.ts).
-    // Posture model option 2 gives the president no direct OG stance order, so no live
-    // path sets 'player' today: this keeps the rule true if one is added.
+    // 3. Apply sector stances. This is the only bot writer of OG stance (SE2, 2026-11-13).
+    // A player-set OG stance is never overridden. Posture model option 2 gives the president
+    // no direct OG stance order, so no live path sets 'player' today: this keeps the rule
+    // true if one is added.
     const sectorLookup = state.military.corps_front_sectors;
     if (sectorLookup) {
         for (const stanceUpdate of output.sector_stances) {

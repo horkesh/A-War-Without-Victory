@@ -38,7 +38,6 @@ import { clampHeldOgStances } from './stance_matters.js';
 import { evaluateOperationProgress } from './sector_offensive.js';
 import { generateOGActivationOrders, generateEmergencyDefensiveOperations } from './bot_corps_operations.js';
 import { attemptCorridorBreach } from './bot_corps_corridor.js';
-import { evaluateSectorStances } from './bot_corps_directives.js';
 import { generateArmyHQOverrides } from './army_hq_overrides.js';
 import {
     buildCorpsSubordinatesByCorps,
@@ -427,8 +426,10 @@ export function generateAllCorpsOrders(
     if (reverseMap) {
         graphAnalysis = analyzeFactionGraphCached(state, faction, adjacency, reverseMap);
     }
-    // 6b. Evaluate sector stances (Layer B: independent sector stances)
-    evaluateSectorStances(state, faction);
+    // 6b. OG (sector) stances are set by the commander loop below and nowhere else (SE2): the
+    // truce-line screening and own-operation elastic rules are commander inputs
+    // (briefing.sector_situations). Without spatial context no commander runs and OGs keep
+    // the 'defend' they were built with.
 
     if (spatial) {
         // v0.8 Commander Loop: per-corps PERCEIVE→DECIDE→EXECUTE pipeline
