@@ -121,7 +121,12 @@ Each run is the authoritative `npm run sim:scenario:run:188w` on a clean, commit
 - Not byte-identical to main after t98. Two seats counted battle-level differences, with different matching methods:
   - scenario-tester seat, on the attribution run (same hash): 10 battles with a different defender and 24 with different casualties or power ratio;
   - war-or-game seat, its own diff of run 4: 4 with a different defender, 28 with different casualties or power ratio (the first at t112, Lukavac), 6 shifted by a turn or swapped between t171 and t184.
-  - Both: **0 outcome changes**.
+  - Both: **0 battle-outcome changes and 0 control changes**.
+  - Brigade state does differ (historian seat; verified):
+    - 30 formations differ in personnel or location at t188;
+    - RS has 18 brigades destroyed against main's 16. The 3rd Petrovac falls from about 450 men to 0 at t187 at Ključ Donje Ratkovo. The 4th Ozren goes inactive at t174 in both runs, but in run 4 it does not recover to about 200 men.
+    - From about t150 the 146th Light, a dug-in reserve on main, takes front sub-segments in sectors 0 and 3.
+    - Historian: a shattered 2nd Krajina brigade in October 1995 fits the September 1995 rout (BB1 pp.419, 426). `formation_delta.json` reproduces main's pin, so it does not capture these differences.
 - Premise on run 4's saves:
   - frontless sector-turns that still have an own pool: 136 → 48;
   - validator missed-reinforcement turns: 122 → 45;
@@ -142,7 +147,7 @@ Main's w4 behaviour is kept unchanged. That is the existing T1 path letting a fu
   - On main the 182nd sits at Fojnica Živčići for 91 weeks while the Rajčići-Stuparići-Draževići line has no brigade.
   - With the rule, it holds Rajčići from t101 on a quiet line (no battle there in either run). Historian: plausible after the 23 February 1994 HVO-ARBiH ceasefire (BB2 pp.469-470). The 16th Division held Visoko-Breza-Vareš against the VRS Ilijaš/Ilidža brigades (BB1 pp.441-442).
   - The 182nd's real division (14th, Pazarić) is an order-of-battle identity point, not this rule.
-- **Idle mass (unchanged, registered SE7E-b).** The dug-in 164th, 147th and 185th stay behind the line in both runs.
+- **Idle mass (registered SE7E-b).** The dug-in 164th, 147th and 185th stay behind the line in both runs. The 146th's stuck order churn ends, and it takes front sub-segments from about t150 (§4).
 - **Removed in v3.** The run-2 butterfly effects: the Krupa gap to w11, the Herzegovina captures, the shuttle and the extra catastrophic probes.
 
 ## 7. Out of scope, registered (the lane does not grow)
