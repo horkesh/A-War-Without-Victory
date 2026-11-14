@@ -60,11 +60,10 @@ export const BILATERAL_HRHB_FLEE_ABROAD = 0.35;
 // The 1993 HVO expulsions of Bosniaks took place inside ground the HVO already held
 // (the Lašva valley, west Mostar, Stolac, Čapljina, Prozor; Prlić et al. TJ 2013, affirmed
 // on appeal 2017), so takeover displacement, which needs a control change, never saw them.
-// A faction whose recorded minority policy is "expel" (event flag `<faction>_minority_policy`,
-// set by the HRHB decision card `hrhb_minority_policy_1993`; bots take the historical
-// default) seeds, once, when the bilateral war is on, a timer for the other community in
-// every OSID it holds inside the municipalities where the record finds the policy applied
-// (POLICY_EXPULSION_SCOPE). Each timer fires one bounded wave and never drains further.
+// A bot-controlled faction whose historical policy was expulsion
+// (BOT_MINORITY_EXPULSION_POLICY: HRHB) seeds, once, when the open bilateral war has begun,
+// a timer for the other community in every OSID it holds inside the municipalities where
+// the record finds the policy applied (POLICY_EXPULSION_SCOPE). There is no player decision. Each timer fires one bounded wave and never drains further.
 // Control is never changed: an OSID the faction no longer holds is not seeded, and a
 // recapture before the wave clears the timer.
 export interface PolicyExpulsionScopeEntry {
@@ -108,13 +107,17 @@ export const POLICY_EXPULSION_SCOPE: Partial<Record<FactionId, Record<Municipali
 };
 /** Wave B starts this many turns after the policy is applied (≈ mid-April → July 1993). */
 export const POLICY_WAVE_B_DELAY_TURNS = 12;
-/** Event-flag value that records an expulsion policy. */
-export const MINORITY_POLICY_EXPEL = 'expel';
-const BILATERAL_POLICY_FACTIONS: readonly FactionId[] = ['HRHB', 'RBiH'];
-
-function minorityPolicyFlag(faction: FactionId): string {
-    return `${faction.toLowerCase()}_minority_policy`;
-}
+/**
+ * Historical minority policy of a BOT-controlled faction in the RBiH-HRHB war (§6 panel,
+ * 2026-11-14: bot-only; SENSITIVE_HISTORY_DESIGN_GATE.md §3 keeps paramilitary_policy as the
+ * only player-facing war-crime surface, and Ring 3 #5 lets bots act where the record
+ * documents it). HRHB: the Prlić Trial Chamber found a joint criminal enterprise from
+ * mid-January 1993 whose common purpose was domination by the Herceg-Bosna Croats through
+ * the ethnic cleansing of the Muslim population (affirmed on appeal, 2017). RBiH: no ARBiH
+ * joint criminal enterprise or expulsion policy was charged or found, so it has none.
+ * A human-controlled faction never expels: no player decision exists.
+ */
+export const BOT_MINORITY_EXPULSION_POLICY: Partial<Record<FactionId, true>> = { HRHB: true };
 
 /** Event flag recording the turn on which a faction's expulsion policy was applied (seeded). */
 export function minorityPolicyAppliedFlag(faction: FactionId): string {
@@ -130,9 +133,13 @@ function getPolicyExpulsionEntry(faction: FactionId, munId: MunicipalityId): Pol
     return POLICY_EXPULSION_SCOPE[faction]?.[munId];
 }
 
-/** True when the faction's recorded minority policy is "expel". */
+/**
+ * True when the faction follows an expulsion policy: it is bot-controlled (not the player's
+ * faction) and BOT_MINORITY_EXPULSION_POLICY records one for it.
+ */
 export function hasMinorityExpulsionPolicy(state: GameState, faction: FactionId): boolean {
-    return state.military.event_flags?.[minorityPolicyFlag(faction)] === MINORITY_POLICY_EXPEL;
+    if (state.meta.player_faction === faction) return false;
+    return BOT_MINORITY_EXPULSION_POLICY[faction] === true;
 }
 
 /** Krajina Bosniaks: ~55% ended abroad, largely via ICRC/UNHCR convoys to Croatia (Karlovac transit camp).
@@ -735,14 +742,17 @@ export function processDisplacementTakeover(
     }
 
     // 0b) RF-5B: policy-driven bilateral seed. Step 0 runs on the first war turn of 1992,
-    //     when RBiH and HRHB are allied, so it never seeds this pair. When the bilateral war
-    //     is on and a faction's recorded minority policy is "expel", seed (once per faction)
-    //     the other community in every OSID the faction holds inside its POLICY_EXPULSION_SCOPE
-    //     municipalities. Wave B timers start POLICY_WAVE_B_DELAY_TURNS later.
-    {
+    //     when RBiH and HRHB are allied, so it never seeds this pair. Once the open bilateral
+    //     war has begun (rbih_hrhb_state.war_started_turn) and while the pair is at war, a
+    //     bot-controlled faction with an expulsion policy seeds (once per faction) the other
+    //     community in every OSID it holds inside its POLICY_EXPULSION_SCOPE municipalities.
+    //     Wave B timers start POLICY_WAVE_B_DELAY_TURNS later.
+    const bilateralWarStarted = typeof state.political.rbih_hrhb_state?.war_started_turn === 'number';
+    if (bilateralWarStarted) {
         const pc = state.political.political_controllers ?? {};
-        for (const holder of BILATERAL_POLICY_FACTIONS) {
+        for (const holder of Object.keys(BOT_MINORITY_EXPULSION_POLICY).sort(strictCompare) as FactionId[]) {
             const other: FactionId = holder === 'HRHB' ? 'RBiH' : 'HRHB';
+            if (!isRbihHrhbPair(holder, other)) continue;
             if (!hasMinorityExpulsionPolicy(state, holder)) continue;
             if (!areFactionsAtWar(state, other, holder)) continue;
             const appliedFlag = minorityPolicyAppliedFlag(holder);

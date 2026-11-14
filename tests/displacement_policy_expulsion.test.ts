@@ -1,6 +1,7 @@
 // RF-5B: policy-driven bilateral displacement (RBiH-HRHB war).
-// A faction whose recorded minority policy is "expel" seeds, once, one bounded wave for
-// the other community in OSIDs it holds inside its POLICY_EXPULSION_SCOPE municipalities
+// A bot-controlled faction with a historical expulsion policy (HRHB) seeds, once, after the
+// open bilateral war begins, one bounded wave for the other community in OSIDs it holds
+// inside its POLICY_EXPULSION_SCOPE municipalities. A human-controlled faction never expels
 // (wave A after the standard delay, wave B POLICY_WAVE_B_DELAY_TURNS later). Control never
 // changes; the waves are booked to the holder and recorded as one authorized war crime.
 import fs from 'node:fs';
@@ -10,6 +11,7 @@ import { expect, test } from 'vitest';
 
 import type { SettlementRecord } from '../src/map/settlements.js';
 import {
+    BOT_MINORITY_EXPULSION_POLICY,
     POLICY_EXPULSION_SCOPE,
     POLICY_WAVE_B_DELAY_TURNS,
     minorityPolicyAppliedFlag,
@@ -72,6 +74,7 @@ function warState(turn: number): GameState {
         } as any,
         political: {
             war_alliance_rbih_hrhb: 0.05,
+            rbih_hrhb_state: { war_started_turn: 49 },
             political_controllers: {
                 'op:vitez:vitez': 'HRHB',
                 'op:mostar:zapad': 'HRHB',
@@ -115,23 +118,36 @@ test('scope table: HRHB only, no RBiH entry, fractions in (0, 1], waves A/B', ()
     }
 });
 
-test('no recorded policy: the bilateral war seeds no policy timers (main behaviour)', () => {
+test('a human-controlled HRHB never expels: no policy timers, policy never applied', () => {
     const state = warState(50);
+    state.meta.player_faction = 'HRHB';
+    for (let t = 50; t <= 70; t++) {
+        state.meta.turn = t;
+        run(state);
+    }
+    expect(hrhbEvents(state)).toEqual([]);
+    expect(policyTimers(state)).toEqual({});
+    expect(state.military.event_flags[minorityPolicyAppliedFlag('HRHB')]).toBeUndefined();
+});
+
+test('nothing is seeded before the open bilateral war begins (mobilization alone is not enough)', () => {
+    const state = warState(45);
+    (state.political as any).rbih_hrhb_state = { war_started_turn: null };
     run(state);
     expect(policyTimers(state)).toEqual({});
     expect(state.military.event_flags[minorityPolicyAppliedFlag('HRHB')]).toBeUndefined();
 });
 
-test('restrain policy seeds nothing', () => {
+test('a human-controlled RBiH changes nothing; RBiH-held OSIDs are never seeded (no RBiH policy)', () => {
+    expect(BOT_MINORITY_EXPULSION_POLICY.RBiH).toBeUndefined();
     const state = warState(50);
-    state.military.event_flags.hrhb_minority_policy = 'restrain';
+    state.meta.player_faction = 'RBiH';
     run(state);
-    expect(policyTimers(state)).toEqual({});
+    expect(Object.keys(policyTimers(state))).toEqual(['op:mostar:zapad|RBiH', 'op:vitez:vitez|RBiH']);
 });
 
-test('expel policy seeds held OSIDs in scope only; wave B starts later; control untouched', () => {
+test('bot HRHB seeds held OSIDs in scope only; wave B starts later; control untouched', () => {
     const state = warState(50);
-    state.military.event_flags.hrhb_minority_policy = 'expel';
     run(state);
     const timers = policyTimers(state);
     // Travnik (HRHB-held but out of scope) and RBiH-held OSIDs are never seeded.
@@ -145,7 +161,6 @@ test('expel policy seeds held OSIDs in scope only; wave B starts later; control 
 
 test('the policy is applied once: a later turn does not re-seed', () => {
     const state = warState(50);
-    state.military.event_flags.hrhb_minority_policy = 'expel';
     run(state);
     state.displacement.hostile_takeover_timers = {};
     state.meta.turn = 51;
@@ -156,7 +171,6 @@ test('the policy is applied once: a later turn does not re-seed', () => {
 test('no seeding while the pair is allied', () => {
     const state = warState(50);
     state.political.war_alliance_rbih_hrhb = 0.8;
-    state.military.event_flags.hrhb_minority_policy = 'expel';
     run(state);
     expect(policyTimers(state)).toEqual({});
     expect(state.military.event_flags[minorityPolicyAppliedFlag('HRHB')]).toBeUndefined();
@@ -164,7 +178,6 @@ test('no seeding while the pair is allied', () => {
 
 test('two bounded waves, booked to the holder, one war crime, no sustained drain', () => {
     const state = warState(50);
-    state.military.event_flags.hrhb_minority_policy = 'expel';
     run(state); // seed at t50
     for (let t = 51; t <= 53; t++) {
         state.meta.turn = t;
@@ -213,7 +226,6 @@ test('two bounded waves, booked to the holder, one war crime, no sustained drain
 
 test('recapture by the expelled side clears the policy timer before it fires', () => {
     const state = warState(50);
-    state.military.event_flags.hrhb_minority_policy = 'expel';
     run(state);
     state.political.political_controllers!['op:vitez:vitez'] = 'RBiH';
     state.political.political_controllers!['op:mostar:zapad'] = 'RBiH';
@@ -225,7 +237,6 @@ test('recapture by the expelled side clears the policy timer before it fires', (
 
 test('a policy wave against RBiH-aligned people counts declared Bosniaks only, not 1991 "others"', () => {
     const state = warState(50);
-    state.military.event_flags.hrhb_minority_policy = 'expel';
     const withOthers = new Map(osidSettlements);
     withOthers.set('op:vitez:vitez', {
         ...osidSettlements.get('op:vitez:vitez')!,
@@ -250,7 +261,6 @@ test('a policy wave against RBiH-aligned people counts declared Bosniaks only, n
 
 test('a third side taking a seeded OSID drops the policy timer: nothing booked to HRHB, the captor seeds its own timer', () => {
     const state = warState(50);
-    state.military.event_flags.hrhb_minority_policy = 'expel';
     run(state);
     expect(Object.keys(policyTimers(state))).toContain('op:vitez:vitez|RBiH');
     // RS takes Vitez before wave A.
@@ -269,7 +279,6 @@ test('a third side taking a seeded OSID drops the policy timer: nothing booked t
 
 test('a policy timer whose holder lost the OSID without a seeding flip is deleted, not fired', () => {
     const state = warState(50);
-    state.military.event_flags.hrhb_minority_policy = 'expel';
     run(state);
     state.political.political_controllers!['op:vitez:vitez'] = 'RS';
     state.meta.turn = 54;
@@ -280,7 +289,6 @@ test('a policy timer whose holder lost the OSID without a seeding flip is delete
 
 test('alliance restored before the wave clears policy timers; the policy is not re-applied', () => {
     const state = warState(50);
-    state.military.event_flags.hrhb_minority_policy = 'expel';
     run(state);
     state.political.war_alliance_rbih_hrhb = 0.8;
     state.meta.turn = 54;
@@ -294,7 +302,6 @@ test('alliance restored before the wave clears policy timers; the policy is not 
 
 test('a policy wave gives the expelling side no manpower: only the expelled community pool shrinks', () => {
     const state = warState(50);
-    state.military.event_flags.hrhb_minority_policy = 'expel';
     state.military.militia_pools = {
         'vitez:RBiH': { mun_id: 'vitez', faction: 'RBiH', available: 1000, committed: 0, exhausted: 0, updated_turn: 0 },
         'vitez:HRHB': { mun_id: 'vitez', faction: 'HRHB', available: 1000, committed: 0, exhausted: 0, updated_turn: 0 }
@@ -311,7 +318,6 @@ test('a policy wave gives the expelling side no manpower: only the expelled comm
 
 test('war crime is not flagged as recorded when the faction has no capital to record it on', () => {
     const state = warState(50);
-    state.military.event_flags.hrhb_minority_policy = 'expel';
     delete (state.military.negotiation!.capital as any).HRHB;
     for (let t = 50; t <= 54; t++) {
         state.meta.turn = t;
@@ -324,8 +330,7 @@ test('war crime is not flagged as recorded when the faction has no capital to re
 test('deterministic: two identical runs produce identical displacement state and logs', () => {
     const simulate = () => {
         const state = warState(50);
-        state.military.event_flags.hrhb_minority_policy = 'expel';
-        for (let t = 50; t <= 70; t++) {
+            for (let t = 50; t <= 70; t++) {
             state.meta.turn = t;
             run(state);
         }
