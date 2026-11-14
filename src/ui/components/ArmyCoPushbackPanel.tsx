@@ -40,6 +40,7 @@ import {
     ARMY_OVERRIDE_POLITICAL_CAPITAL_COST,
 } from '../../sim/combat/army_order_interpretation';
 import { turnToDateString } from '../map/utils/formatters';
+import { t, useLocale, type MessageKey } from '../map/i18n';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -219,6 +220,28 @@ interface ArmyObjection {
     officerId?: string;
 }
 
+const DIRECTIVE_LABEL_KEYS: Record<string, MessageKey> = {
+    HOLD_AT_ALL_COSTS: 'armyCoPushback.directive.HOLD_AT_ALL_COSTS',
+    PRESS_OFFENSIVE: 'armyCoPushback.directive.PRESS_OFFENSIVE',
+    MAINTAIN_CORRIDOR: 'armyCoPushback.directive.MAINTAIN_CORRIDOR',
+    PREPARE_RESERVE: 'armyCoPushback.directive.PREPARE_RESERVE',
+    HONOR_TRUCE: 'armyCoPushback.directive.HONOR_TRUCE',
+    BALANCE_FRONTS: 'armyCoPushback.directive.BALANCE_FRONTS',
+};
+
+/**
+ * The political directive is produced automatically by the bot-side producer
+ * (`political_directive_producer.ts`); no player action writes it, and in the
+ * shipping campaign it pins to one verb early in the war (realism audit F9).
+ * The header names it in plain words and the panel says who set it.
+ */
+function objectionHeader(o: ArmyObjection): string {
+    const key = DIRECTIVE_LABEL_KEYS[o.campaignRole];
+    return key
+        ? t('armyCoPushback.objection', { faction: o.faction, officer: o.officerName, directive: t(key) })
+        : t('armyCoPushback.objectionUnnamed', { faction: o.faction, officer: o.officerName });
+}
+
 function selectArmyObjections(props: ArmyCoPushbackPanelProps): ArmyObjection[] {
     const objections: ArmyObjection[] = [];
 
@@ -327,6 +350,7 @@ const SECTION_LABELS = {
 } as const;
 
 export function ArmyCoPushbackPanel(props: ArmyCoPushbackPanelProps): JSX.Element | null {
+    useLocale();
     const warnings = useMemo(() => selectMladicWarnings(props), [props]);
     const objections = useMemo(() => selectArmyObjections(props), [props]);
     const overrideRows = useMemo(() => selectOverrideHistory(props), [props]);
@@ -402,7 +426,10 @@ export function ArmyCoPushbackPanel(props: ArmyCoPushbackPanelProps): JSX.Elemen
                                 className="border border-amber-300 bg-white px-2 py-1"
                             >
                                 <div className="text-[15px] font-bold text-amber-900">
-                                    {o.faction} Main Staff ({o.officerName}): pushed back on directive — {o.campaignRole}.
+                                    {objectionHeader(o)}
+                                </div>
+                                <div className="mt-0.5 text-[14px] leading-snug text-amber-800">
+                                    {t('armyCoPushback.directiveSource')}
                                 </div>
                                 <div className="mt-0.5 line-clamp-3 text-[14px] leading-snug text-amber-800">
                                     {o.rationale}

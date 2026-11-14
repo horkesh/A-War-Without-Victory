@@ -298,7 +298,7 @@ When active, these corps pairs do not generate attack orders against each other'
 
 **Cold fronts:** `isColdFront()` in `frontline_attrition.ts` — RS↔HRHB fronts under corps-pair truce are exempt from frontline attrition (sniping, disease, desertion) and bombardment firepower. HRHB siege drain also skipped on cold fronts.
 
-**Player break:** Player may attack across the truce. First violation sets `truce_broken_turn[faction]`. Opponent bot gains `+0.25 aggression` for `6 turns` after truce break (`TRUCE_BREAK_SPIKE_TURNS`, `TRUCE_BREAK_AGGRESSION_SPIKE`).
+**Player break:** Player may attack across the truce. First violation sets `truce_broken_turn[faction]`. Designed: the opponent bot gains `+0.25 aggression` for `6 turns` after truce break (`TRUCE_BREAK_SPIKE_TURNS`, `TRUCE_BREAK_AGGRESSION_SPIKE`). Current build: not applied. `truce_broken_turn` is recorded in state, but `getTruceBreakAggressionBonus` has no caller that feeds bot or corps aggression. Wiring is deferred post-1.0 (realism audit F6, `docs/40_reports/proposals/20261114_PRE_1_0_REALISM_AUDIT.md`).
 
 **State:** `vienna_declaration_turn`, `vienna_accepted`, `vienna_herzegovina_broken_by`, `vienna_kiseljak_broken`, `truce_broken_turn`. Module: `src/sim/local_truces.ts`.
 

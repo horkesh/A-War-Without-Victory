@@ -140,7 +140,7 @@ function compileBattles(
     const result: TurnBattle[] = [];
     for (const [osid, group] of Array.from(byOsid.entries()).sort(([a], [b]) => strictCompare(a, b))) {
         const first = group[0];
-        const allAttackerIds = [...new Set(group.map((b) => b.attacker_brigade))];
+        const allAttackerIds = collectAttackerIds(group);
         const cas = casualtiesByOsid.get(osid) ?? { att: 0, def: 0 };
 
         result.push({
@@ -155,12 +155,38 @@ function compileBattles(
             attacker_casualties: cas.att,
             defender_casualties: cas.def,
             territory_flipped: flippedOsids.has(osid),
-            was_concentrated: group.length > 1,
+            was_concentrated: allAttackerIds.length > 1,
             ...(first.execution_friction ? { execution_friction: first.execution_friction } : {}),
             defender_contributions: first.defender_contributions,
         });
     }
     return result;
+}
+
+/**
+ * Every brigade that attacked one OSID this turn, lead first.
+ *
+ * The resolver writes one raw battle per target and lists the whole stack in
+ * `attacker_brigades`; `attacker_brigade` names only the lead. Reading the lead
+ * alone made every assault look like a single brigade (realism audit F10).
+ * Reports without `attacker_brigades` fall back to the lead.
+ * Order: the first raw battle's lead attacker, then the rest by strictCompare.
+ */
+export function collectAttackerIds(
+    group: ReadonlyArray<{ attacker_brigade: FormationId; attacker_brigades?: FormationId[] }>,
+): FormationId[] {
+    if (group.length === 0) return [];
+    const lead = group[0].attacker_brigade;
+    const others = new Set<FormationId>();
+    for (const b of group) {
+        const ids = b.attacker_brigades && b.attacker_brigades.length > 0
+            ? b.attacker_brigades
+            : [b.attacker_brigade];
+        for (const id of ids) {
+            if (id !== lead) others.add(id);
+        }
+    }
+    return [lead, ...Array.from(others).sort(strictCompare)];
 }
 
 // ---------------------------------------------------------------------------

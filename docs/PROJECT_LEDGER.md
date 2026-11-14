@@ -9,6 +9,45 @@
   Compacted 2026-09-10: 1723 sections moved out, 62 kept live.
 -->
 
+## 2026-11-14 — Realism audit non-calibration fixes: F10 battle records, F9 UI truth, F6 canon copy, errata
+
+Fixes the findings of the pre-1.0 realism audit (`docs/40_reports/proposals/20261114_PRE_1_0_REALISM_AUDIT.md`)
+that do not move calibration. Control and territory are byte-identical to main at 40 and 188 weeks.
+
+- **F10, battle records.** `compileTurnSummary` built `all_attacker_ids` from the lead attacker only. It now reads
+  the resolver's `attacker_brigades` (new `collectAttackerIds`: lead first, the rest by `strictCompare`, deduped),
+  and `was_concentrated` means two or more brigades. Same field, so old saves load unchanged and read as one
+  brigade. The AAR panel links every own attacker. A concentrated enemy assault stays one fogged contact and
+  shows "Concentrated assault" / "Koncentrisan napad" with no count (rule added to `PLAYER_VISIBLE_STATE.md`).
+  The `weekly_report.jsonl` projection still emits `attacker_brigades` only under the debug topic.
+- **F9, UI truth.** Verified dead in code and in the 188w final save (`front_pressure` and `front_segments`
+  empty; `equipment_state` read only by the dead front-pressure and doctrine steps). Removed the front tooltip
+  "Pressure" row and the Army HQ heavy-equipment pool %. Tactical doctrines and `political_directives_by_faction`
+  have no direct player surface. The directive verb does reach the Advance Turn pushback panel as a raw enum; it
+  is now a translated label with "The political staff sets this directive automatically. You did not issue it."
+- **F6, copy only.** Canon (Systems Manual, Engine Invariants, Rulebook, War Specification, context.md) and
+  engineering docs say event `aggression_modifier` effects and the truce-break +0.25 bonus are recorded but not
+  applied. Code comments on `getEventAggressionBonus` / `getTruceBreakAggressionBonus` match. Event effect copy
+  (EN/BCS) now says "recorded only". No mechanic wired.
+- **Errata.** Velika Kladuša retaken 17 Dec 1994 (BB2 p.535) in `20260523_RESEARCH_ARBIH_1994_OPS.md`; the 4th
+  Ozren Light Infantry Brigade held Vozuća (BB1 p.462, BB2 p.489) in `20260523_RESEARCH_VOZUCA_1995.md`.
+- **Baseline pins (record format only).** `final_save.json` and `run_summary.json` re-blessed in
+  `data/derived/scenario/baselines/manifest.json`; the other six pins, including `control_delta.json` and
+  `weekly_report.jsonl`, reproduce unchanged. A main 188w run hashed `final_save.json` to the old pin, and
+  branch vs main is identical outside `turn_summaries` (712 OSIDs, 278 control events, territory snapshots).
+  Retained battles with more than one attacker: 40w 48 of 169, 188w 154 of 524 (main: 0), up to 8 brigades.
+  After #604 (stance effects) re-blessed main's pins, the branch merged main and re-ran `UPDATE_BASELINES=1`:
+  against main's post-#604 manifest only `final_save.json` (`64425e76…`) and `run_summary.json` (`2a1f5879…`)
+  differ; the other six, including `control_delta.json`, match main.
+- Evidence: `tsc --noEmit` exit 0 (needs `--max-old-space-size=8192` here); affected tests 176/176;
+  `desktop:map:build` exit 0, entry chunk 2,980.84 kB. The tracked `latest_run_final_save.json` rewritten by the
+  40w run was reverted. Full `npm run test:vitest` (balanced shards): every shard green except 2 tests in
+  `event_modal_effect_labels.test.ts`, whose copy was being edited during the run; they pass at the final commit
+  together with the other files touched after the suite started (36/36). The `vitest_balanced` fixture FAIL lines
+  are the runner's deliberate failure controls.
+- Independent review findings fixed: stale heavy-pool tests and browser proof, lead-first order kept in the desktop
+  projection, aggression copy scoped to the standard army AI (the optional LLM commander prompt lists modifiers).
+
 ## 2026-11-14 — 1993 HVO-ARBiH event cards made truthful (Option A; copy only)
 
 Owner Option A from the HVO-ARBiH diagnosis (#598). No trigger, effect, flag or state change; 40w byte-identical in

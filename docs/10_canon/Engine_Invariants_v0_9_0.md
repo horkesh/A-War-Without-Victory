@@ -111,7 +111,7 @@ RS-HRHB fronts under the Graz Accords are exempt from:
 - Frontline attrition (passive personnel drain)
 - Bombardment firepower
 
-`isColdFront()` in `frontline_attrition.ts` determines cold front status. HRHB siege drain is also skipped on cold fronts. Player break of the accords applies +0.25 aggression to the opponent for 6 turns.
+`isColdFront()` in `frontline_attrition.ts` determines cold front status. HRHB siege drain is also skipped on cold fronts. Designed: a player break of the accords gives the opponent +0.25 aggression for 6 turns. Current build: not applied. The break turn is recorded in `truce_broken_turn`, but `getTruceBreakAggressionBonus` has no caller that feeds bot aggression; wiring is deferred post-1.0 (realism audit F6).
 
 ### 6.5 Unified Sector Defense
 
