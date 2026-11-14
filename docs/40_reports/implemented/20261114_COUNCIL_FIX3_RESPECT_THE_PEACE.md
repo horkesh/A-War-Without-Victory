@@ -12,6 +12,18 @@ Calibration is on hold (owner, 2026-11-14): checkpoint scores are recorded per c
 
 ## 2. Changes (one per measured run)
 
+**Final record, after rebasing onto main `f06d5aa` (#619 RF-AI2 and #631 PK1 merged):**
+
+| Change | What | 188w `final_state_hash` | Jan93 / Apr94 / Apr95 / Oct95 | Battles (all; t183-188) |
+|---|---|---|---|---|
+| Main (n6) | reproduced; equals the pinned `final_save` `7d4cf2cf…` | `7d4cf2cf698e3c41` | 712 / 705 / 706 / 698 | 518; 39 |
+| A alone (n7) | US halt retime + suppression | `9d5bb78ff4d58a26` | 712 / 705 / 706 / 698 (0 cell deltas) | 520; 41 |
+| A+B+C head (n8 = n9) | ceasefire with stand-down; H6 text | `ba67ebb347949f75` | 712 / 705 / 706 / 677 | 491; 12 |
+
+On the head, weekly reports t1-t183 are identical to main, and the first difference is at t184. Battles at t183-t188 run 6/5/1/0/0/0. The US halt never fires (it fires at t187 on main). Guards are intact, with Spreča taken at t185 by the stand-down. Strict health PASS (K:W 3.729); consistency 1. Oct95 loses 21 cells against main: Sanski Most 5, Jajce 4, Ključ 3, Mrkonjić Grad 3, Donji Vakuf 2, Drvar 2, Bosanski Petrovac 1, Bihać 1. All 21 changed hands on main between t184 and t188. The baselines are re-blessed at this head. The War-or-Game and determinism seats re-confirmed on the rebased runs.
+
+**Development record, on the pre-rebase main `4ff4a766` (the basis of the design choice):**
+
 | Change | What | 188w `final_state_hash` | Jan93 / Apr94 / Apr95 / Oct95 |
 |---|---|---|---|
 | Main (n0) | reproduced; matches the pinned manifest `final_save` SHA-256 `4ff4a766…` | `4ff4a7665c0a35b5` | 712 / 709 / 710 / 705 |
@@ -43,7 +55,7 @@ Calibration is on hold (owner, 2026-11-14): checkpoint scores are recorded per c
   - Planning: enter recovery at once (reason `ceasefire`).
   - Executing on the first ceasefire turn: each axis that had already engaged (attacked or captured) may take only its current objective, even one it had not yet attacked (`ceasefire_stand_down` caps; −1 for an axis that never engaged). The operation then stands down through the ordinary lifecycle.
   - A stand-down books no failed objective, no experience grade and no completion exhaustion. If the ordinary lifecycle ends the operation first (all objectives taken, or failure/stall caps), its ordinary recovery reason and bookings apply.
-  - In the head run, Farz's t185 assault on Brijesnica Donja and the HVO's t186 capture of Drvar are fresh assaults under this rule; neither cell was attacked at t183-t184. The narrower rule ("the cell already under assault") breaches the Farz guard while the simulated Farz runs late, so the guard is shaping this rule. Recorded in REAL_WAR_MASTER (War-or-Game seat).
+  - In the final head run, Farz's t185 assault on Brijesnica Donja is a fresh assault under this rule: the cell was not attacked at t183-t184. Before the rebase, the HVO's t186 capture of Drvar was a second case. The narrower rule ("the cell already under assault") breaches the Farz guard while the simulated Farz runs late, so the guard is shaping this rule. Recorded in REAL_WAR_MASTER (War-or-Game seat).
 - **Stances.** Corps stance and the combat-effective stance are held at Defensive. The army standing order cannot be General Offensive; it falls back to Balanced. The cap is also applied to the AI recommendation, so level-1 stance proposals never offer OFFENSIVE. A new stance-matter reason "ceasefire" (EN/BCS) replaces the Zagreb patron copy.
 - **Combat.** As under the COHA, every attack order of a bound faction, counter-attacks included, is cleared at generation and suppressed with `oct1995_ceasefire` receipts at resolution. The only exception is a stand-down order on its capped objective. Without this, the Defensive clamp would switch on the broadened sector counter-attack for every corps. Movement, redeployment and emergency strategic defence continue; frontline attrition is not suspended.
 - **Ending.** Refusing (`continue_offensive`) never sets the flag. A declined Dayton clears it (`reopenWarAfterDaytonDecline`), and queued operations resume.
@@ -74,7 +86,7 @@ The independent §4 copy review (SENSITIVE_HISTORY_DESIGN_GATE §4/§5) returned
 - UNSCR 787 is quoted precisely and added to `historical_source`.
 - The stance-reason copy, EN and BCS, passed unchanged.
 
-## 3. Measurements (Change B, n3 vs n1)
+## 3. Measurements on the pre-rebase main (Change B, n3 vs n1; see §2 for the final record)
 
 - **Battles.** All weeks: 509 → 471. t1-t183: byte-identical weekly reports (464 battles). t183-t188: 52 → 14 (t183 7 = 7; t184 11 → 5; t185 9 → 1; t186 11 → 1; t187 9 → 0; t188 5 → 0). The drop is the ceasefire itself after t183, not a battle-frequency lever.
 - **Oct95 cells.** 28 cells lost: Mrkonjić Grad 6, Ključ 5, Sanski Most 4, Jajce 4, Donji Vakuf 3, Bosanski Petrovac 2, and one each in Bihać, Bosanski Novi, Šipovo and Drvar. All 28 changed hands in n1 between t184 (16 Oct) and t188 (13 Nov), after the historical ceasefire. The 25 with a documented date fell historically between 12 Sep and 11 Oct 1995 (BB Vol. I pp.418-428: Petrovac 15 Sep, Ključ 17 Sep, Jajce and Donji Vakuf 13 Sep, Drvar 14 Sep, Mrkonjić Grad 10 Oct, Sanski Most 10 Oct). The simulated Sana, Mistral 2 and Donji Vakuf axes run 2-6 weeks behind history, and Southern Move one week. That lateness is calibration, which is held. Scenario-tester verdict: an honest consequence of simulation timing, not broken mechanics.
@@ -94,7 +106,7 @@ The independent §4 copy review (SENSITIVE_HISTORY_DESIGN_GATE §4/§5) returned
 
 ## 5. Open points
 
-- The stand-down has no turn limit; the ordinary failure caps bound it. In n3 the last stand-down battle is an HVO capture of Drvar at t186 (30 Oct), against BB's "another week" after 12 Oct. A turn cap would have to be chosen around the Farz guard (one turn breaches it, two turns drops Drvar), so it is left to game-designer and operations-expert.
+- The stand-down has no turn limit; the ordinary failure caps bound it. In the final head the last stand-down battle is Farz at t185 (23 Oct); before the rebase it was an HVO capture of Drvar at t186. BB has fighting for "another week" after 12 Oct. A turn cap would have to be chosen around the Farz guard (a one-turn cap breaches it), so it is left to game-designer and operations-expert.
 - `ceasefire_1995` ("the guns fall silent") fires at t181, before the demand. It gates the Dayton chain for both answers, so retiming it needs a design decision for the refusal branch.
 - `source_note` is rendered in the decision dossier and still narrates outcomes on several H6 cards. This belongs with council fix 4 (developer text and dossier copy).
 - RS fights no battles from t176 to t188 in every run, including main. The VRS counter-attacks of 20-22 Sep 1995 (BB Vol. I p.420) are absent. Pre-existing, not caused by this change.

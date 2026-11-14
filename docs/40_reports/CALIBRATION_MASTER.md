@@ -1,3 +1,18 @@
+**Council fix 3, respect the peace (B10, H4, H6) — 2026-11-14: 712 / 705 / 706 / 677 (recorded, not a bar; calibration held).**
+- **What changed.** (A) The US halt moves to t179-181 and is suppressed after a ceasefire. (B) Accepting Holbrooke's October 1995 ceasefire binds every party from the following turn:
+  - the operation channel closes on every path;
+  - planning offensives are called off, and executing ones take only the current objective of each engaged axis, then stand down;
+  - corps stances hold Defensive, and there is no army-wide offensive;
+  - attacks are suppressed as under the COHA.
+  (C) H6 cards are text only. Systems Manual §6.4 note; Engine Invariants "October 1995 ceasefire ownership"; report `docs/40_reports/implemented/20261114_COUNCIL_FIX3_RESPECT_THE_PEACE.md`.
+- **Measured one change per run** against main after #619/#631 (`7d4cf2cf698e3c41`, 712/705/706/698, reproduced, equal to its pin):
+  - A alone `9d5bb78ff4d58a26`: 712/705/706/698, 0 cell deltas. Battles 518 → 520 (+2 RBiH at t187-188), because the halt no longer fires.
+  - A+B+C (the head) `ba67ebb347949f75`, two identical runs: 712/705/706/677. Weekly reports t1-t183 are identical to main. Battles 518 → 491; t183-t188 39 → 12 (6 / 5 / 1, then none).
+  - Guards: enclave guard and Farz guard intact (Spreča taken at t185 by the stand-down). Strict health PASS (K:W 3.729). Consistency 1 (SD15, as on main).
+  - Pre-rebase, on main `4ff4a7665c0a35b5` (712/709/710/705): A `d140b5ff61671e7b`; B and C `2c9c5d5c6c7ad860` (712/709/710/677).
+- **Moved cells (Oct95, −21 vs main).** Sanski Most 5, Jajce 4, Ključ 3, Mrkonjić Grad 3, Donji Vakuf 2, Drvar 2, Bosanski Petrovac 1, Bihać 1. All 21 changed hands on main between t184 (16 Oct, when the ceasefire binds) and t188. Those municipalities fell historically between 13 Sep and 10 Oct 1995 (BB Vol. I pp.418-428). Cause: the late-1995 Sana, Mistral 2, Donji Vakuf and Southern Move axes run late. That is held calibration (tail-cell timing, op tempo) for the frozen-engine pass, not a regression of the ceasefire.
+- **Rejected alternative.** A hard cancel of executing offensives (`70aa5bb91e23cef9` on the pre-rebase main, Oct95 670) breached the Farz guard: Spreča/north Ozren is taken at t185 in the simulation.
+
 **Readiness gate light strike group + bot objective lockout, RF-AI2 (PR #619) — 2026-11-14: 712 / 705 / 706 / 698. Owner-accepted 2026-11-14 ("Yes, accept it") as an honest cost of fixing the corps gate. This is the new main reference.**
 - **Per-cell causes (vs 712/709/710/705):**
 
@@ -17,21 +32,6 @@
 - **Recorded, not certified (Pyrrhic gate integrator).** The head's matches at Krupa (Ripac casualty scale plus lockout timing), Ozren (VRS2), the Mistral 2 / Southern Move cells (t186-188 knife-edge; the op's recon probe at Prekaja stays unresolved t176-178, so it launches t179) and Vesela (adjacent_uncontested inertia) rest on known defects. None is a protected anchor or counts as fidelity evidence. Re-blessing records main's output; it does not certify these cells. Gate: GO with conditions (determinism GO; canon, historian and war-or-game GO with conditions), comment on #619.
 
 **Owner decision — 2026-11-14: calibration is held until the mechanics work is done.** The owner: "We might as well hold calibration until we are done with the other changes. No point in recalibrating later." From now until the condition-based engine freeze, checkpoint scores are measured and recorded for every change (one entry per change, as below) but are not a merge bar: no shortfall envelopes, no park-for-score rulings, no escalation of an honest loss to the owner, no chasing single cells. Pure calibration is held for ONE calibration pass on the frozen engine: data, constant or op tuning toward the painted checkpoints, tail-cell timing, op re-authoring for matches, and RF-4 officer dates as a lever. Unchanged: one change per measured 188-week run, determinism and the state hash, the strict health gate, the anchor, enclave and Farz guards and provenance gates, no structural cut in battles per week, baseline re-bless at the final head, the Pyrrhic gate for sim-moving merges, serial merges with a rebase and re-bless after each. A guard breach is still a stop: it signals broken mechanics, not a missed score. Roadmap Sequence and gates `RF-ENGINE-FREEZE` / `RF-CALIBRATION-RESIGNOFF` carry the same text. The current figures stay 712 / 709 / 710 / 705 until a merge changes them (RF-AI2 above changes them to 712 / 705 / 706 / 698 on merge).
-
-**Council fix 3, respect the peace (B10, H4, H6) — 2026-11-14: 712 / 709 / 710 / 677 (recorded, not a bar; calibration held).**
-- **What changed.** (A) The US halt moves to t179-181 and is suppressed after a ceasefire. (B) Accepting Holbrooke's October 1995 ceasefire binds every party from the following turn:
-  - the operation channel closes on every path;
-  - planning offensives are called off, and executing ones take only the current objective of each engaged axis, then stand down;
-  - stances hold Defensive;
-  - attacks are suppressed as under the COHA.
-  (C) H6 cards are text only. Systems Manual §6.4 note; Engine Invariants "October 1995 ceasefire ownership"; report `docs/40_reports/implemented/20261114_COUNCIL_FIX3_RESPECT_THE_PEACE.md`.
-- **Measured one change per run** against main `4ff4a7665c0a35b5` (712/709/710/705, reproduced):
-  - A `d140b5ff61671e7b`: 712/709/710/705, 0 cell deltas, battles +2 at t187-188.
-  - B `2c9c5d5c6c7ad860`: 712/709/710/677. t1-t183 byte-identical; battles t183-t188 52 → 14 (none after t186).
-  - C: same hash as B.
-  - Enclave and Farz guards intact; strict health PASS; consistency 1 (SD15, as on main).
-- **Moved cells (Oct95, −28).** Mrkonjić Grad 6, Ključ 5, Sanski Most 4, Jajce 4, Donji Vakuf 3, Bosanski Petrovac 2, and one each in Bihać, Bosanski Novi, Šipovo and Drvar. Every one fell in the simulation after 16 Oct, when the ceasefire binds. History dates 25 of them to 12 Sep-11 Oct 1995 (BB Vol. I pp.418-428). Cause: the late-1995 Sana, Mistral 2, Donji Vakuf and Southern Move axes run 1-6 weeks late. That is held calibration (tail-cell timing, op tempo) for the frozen-engine pass, not a regression of the ceasefire.
-- **Rejected alternative.** A hard cancel of executing offensives (`70aa5bb91e23cef9`, Oct95 670) breached the Farz guard: Spreča/north Ozren is taken at t185 in the simulation.
 
 **Legacy S-id consumer sweep, RF-F1 — 2026-11-14: 712 / 709 / 710 / 705 (unchanged; neutral in the historical-mode campaign).**
 - **What changed.** Sustainability and militia fatigue ran on legacy `S…` settlement edges against OSID control. On main 109 of 110 municipalities were surrounded and collapsed by t8 (104 already at t6) (each also degraded once per pool, 2-3 times a turn), every militia pool was "unsupplied", and negotiation momentum read 1.0 from t4. Both now use the OSID front and supply (`buildOsidDisplacementPressureInputs`). Sustainability evaluates each municipality once for one holder (a cut-off holder first, so Srebrenica and Žepa count); militia supply isolation counts only where the pool's faction holds ground. Systems Manual §24 System 1 note.
