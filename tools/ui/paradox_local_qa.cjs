@@ -38,6 +38,29 @@ const checkpointTurnsArg = process.argv.find((arg) => arg.startsWith('--checkpoi
 const lightCheckpointTour = args.has('--light-checkpoint-tour');
 const writeLiveEvents = args.has('--live-events');
 const strategicRun = args.has('--strategic');
+
+// --strategic-autonomy=<1|2>: the Command Autonomy level a --strategic run selects. The default is 2
+// (Delegated), the level a new campaign starts at, so strategic evidence plays the game a new player
+// gets. Level 1 (Assisted) stays available on request; before the PK1 fix (2026-11-14) it also froze
+// every bot corps commander, so R8 runs taken at level 1 before that fix understate the bot side.
+const STRATEGIC_AUTONOMY_LEVELS = [1, 2];
+const DEFAULT_STRATEGIC_AUTONOMY_LEVEL = 2;
+
+function parseStrategicAutonomyLevel(argv, strategic) {
+  const prefix = '--strategic-autonomy=';
+  const optionArgs = argv.filter((arg) => arg === '--strategic-autonomy' || arg.startsWith(prefix));
+  if (optionArgs.length === 0) return DEFAULT_STRATEGIC_AUTONOMY_LEVEL;
+  if (optionArgs.length !== 1) throw new Error('--strategic-autonomy must be provided exactly once');
+  if (!strategic) throw new Error('--strategic-autonomy requires --strategic');
+  const raw = optionArgs[0] === '--strategic-autonomy' ? '' : optionArgs[0].slice(prefix.length);
+  const level = /^\d$/.test(raw) ? Number(raw) : Number.NaN;
+  if (!STRATEGIC_AUTONOMY_LEVELS.includes(level)) {
+    throw new Error(`Unknown --strategic-autonomy level: ${raw || 'empty'} (expected ${STRATEGIC_AUTONOMY_LEVELS.join(' or ')})`);
+  }
+  return level;
+}
+
+const strategicAutonomyLevel = parseStrategicAutonomyLevel(process.argv, strategicRun);
 const autoRecruit = args.has('--auto-recruit');
 const requireRecruitment = args.has('--require-recruitment');
 const contextChurnCycles = Number(process.argv.find((arg) => arg.startsWith('--context-churn='))?.split('=')[1] ?? '0');
@@ -2549,18 +2572,18 @@ async function configureStrategicRun(frame) {
   if (!openedArmyHq) return { ok: false, error: 'army-hq-route-unavailable' };
   const openedPersonnel = await clickAndMeasure(frame, /^Personnel$|army-hq-tab-personnel/i, 'strategic personnel', { afterMs: 700 });
   const openedAutonomy = await clickTestId(frame, 'personnel-open-autonomy', 'strategic autonomy route', { afterMs: 700 });
-  const assistedAutonomyLevel = 1;
+  const targetAutonomyLevel = strategicAutonomyLevel;
   const autonomyBeforeSelection = openedAutonomy && !resumeSavePath
     ? await readState(frame).catch(() => null)
     : null;
   const autonomyExpectation = openedAutonomy && !resumeSavePath
-    ? predictStrategicAutonomySelection(autonomyBeforeSelection?.autonomyLevel, assistedAutonomyLevel)
+    ? predictStrategicAutonomySelection(autonomyBeforeSelection?.autonomyLevel, targetAutonomyLevel)
     : null;
-  const selectedAssisted = openedAutonomy
-    ? await clickTestId(frame, 'autonomy-level-1', 'strategic autonomy assisted', { afterMs: 900 })
+  const selectedAutonomy = openedAutonomy
+    ? await clickTestId(frame, `autonomy-level-${targetAutonomyLevel}`, `strategic autonomy level ${targetAutonomyLevel}`, { afterMs: 900 })
     : false;
-  const configuredState = selectedAssisted ? await readState(frame).catch(() => null) : null;
-  const autonomyProof = selectedAssisted && !resumeSavePath
+  const configuredState = selectedAutonomy ? await readState(frame).catch(() => null) : null;
+  const autonomyProof = selectedAutonomy && !resumeSavePath
     ? assertStrategicAutonomyState(
       'Strategic setup transition mismatch',
       configuredState,
@@ -2570,11 +2593,12 @@ async function configureStrategicRun(frame) {
     : null;
   await closeOpenSurface(frame);
   return {
-    ok: Boolean(openedPersonnel?.clicked && openedAutonomy && selectedAssisted),
+    ok: Boolean(openedPersonnel?.clicked && openedAutonomy && selectedAutonomy),
     openedArmyHq,
     openedPersonnel,
     openedAutonomy,
-    selectedAssisted,
+    targetAutonomyLevel,
+    selectedAutonomy,
     autonomyBeforeSelection,
     autonomyExpectation,
     configuredState,
@@ -6385,7 +6409,7 @@ async function playTurns(page, frame, faction, events, targetTurn) {
     if (handled.handled) {
       const afterHandle = await readState(frame).catch(() => null);
       if (strategicRun && !resumeSavePath && afterHandle?.turn === 1) {
-        assertStrategicAutonomyState('Strategic autonomy not applied after first turn', afterHandle, 1, null);
+        assertStrategicAutonomyState('Strategic autonomy not applied after first turn', afterHandle, strategicAutonomyLevel, null);
       }
       maxObservedTurn = Math.max(maxObservedTurn, afterHandle?.turn ?? maxObservedTurn);
       stagnantSteps = 0;
@@ -6419,7 +6443,7 @@ async function playTurns(page, frame, faction, events, targetTurn) {
     await sleep(2200);
     const after = await readState(frame).catch(() => null);
     if (strategicRun && !resumeSavePath && after?.turn === 1) {
-      assertStrategicAutonomyState('Strategic autonomy not applied after first turn', after, 1, null);
+      assertStrategicAutonomyState('Strategic autonomy not applied after first turn', after, strategicAutonomyLevel, null);
     }
     maxObservedTurn = Math.max(maxObservedTurn, after?.turn ?? maxObservedTurn);
     if ((after?.turn ?? lastTurn) > (before?.turn ?? lastTurn)) stagnantSteps = 0;
@@ -8210,8 +8234,8 @@ async function runFaction(faction, result) {
       expectedAmbientLifecycleAborts,
     );
     if (playtest) {
-      if (strategicRun && maxTurns > 0 && playtest.finalState?.autonomyLevel !== 1) {
-        throw new Error(`Strategic autonomy did not apply: expected level 1, observed ${playtest.finalState?.autonomyLevel}`);
+      if (strategicRun && maxTurns > 0 && playtest.finalState?.autonomyLevel !== strategicAutonomyLevel) {
+        throw new Error(`Strategic autonomy did not apply: expected level ${strategicAutonomyLevel}, observed ${playtest.finalState?.autonomyLevel}`);
       }
     }
     const cdpFinalization = await cdpCollectionLifecycle.finalize();

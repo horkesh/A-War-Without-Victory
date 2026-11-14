@@ -469,7 +469,7 @@ export function generateAllCorpsOrders(
                 osidPopulationMap,
                 terrainData,
             );
-            applyCommanderOutput(state, corps.id, output);
+            applyCommanderOutput(state, corps.id, output, faction);
         }
         if (isReasonCodeTopicEnabled('commander_creation')) {
             emitCommanderCreationRecord({

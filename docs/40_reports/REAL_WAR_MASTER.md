@@ -1,5 +1,13 @@
 # Real War Master
 
+## Open: the player's own army at autonomy level 1 (Assisted), after PK1 (2026-11-14)
+
+PK1 (PR horkesh/A-War-Without-Victory#631) made the level-1 approval hold and the level-1 local-occupation switch-off apply to the human player's corps only. Bot armies no longer freeze when the player chooses Assisted. The War-or-Game and Game Designer seats of the PK1 panel (`docs/40_reports/governance/20261114_PK1_LEVEL1_PLAYER_ONLY_PANEL.md`) recorded three open items on the player's own side at level 1. Level 1 is opt-in (new campaigns start at level 2), so none blocked PK1. Each needs its own ruling: either an approval identity for the task, or a ruling that it sits below the president's threshold.
+
+- **One-brigade local occupation is withheld from the player's corps, with no approval path** (`src/sim/combat/commander/emit.ts`, `isLevel1PlayerApprovalFaction` in `findLocalOccupationCandidateImpl`). Occupying an undefended hamlet was a corps or brigade decision in 1992-95, not a presidential one (War-or-Game, from memory). An Assisted player loses these mop-ups entirely.
+- **Plans built from authored operations are never offered to the player.** `extractTargetOsids` (`src/sim/combat/commander/plan.ts`) reads `target_osids` or `objectives` at the top level of the operation, but authored objectives sit on each axis. The plan gets empty `target_osids`, `proposal_generation.ts` skips plans with no targets, and the plan waits at `ready` silently. First recorded in `docs/40_reports/audits/20261105_live_jan1993/LEVEL1-RUN-ASSESSMENT.md` §1.
+- **Fallback probes and multi-brigade isolated-position reductions launch at level 1 without approval** (pushed in `emit.ts` on the fallback-probe/reduction path). The hold in `applyCommanderOutput` (`commander_loop.ts`) only acts when a plan advances to `executing` that turn. In any other turn `admitCommanderOperations` admits these operations unasked. So the Assisted description "operations wait for your approval" (`autonomy.level.assisted.desc`) over-claims. This predates PK1.
+
 ## Open items from the siege displacement lane (RF-3, 2026-11-14)
 
 Raised by the §6 panel and the Pyrrhic merge gate on PR horkesh/A-War-Without-Victory#600 (`SENSITIVE_HISTORY_DESIGN_GATE.md` §6 "Record (Siege displacement and flight abroad, 2026-11-14)"). Neither is a tuning target.

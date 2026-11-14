@@ -403,7 +403,9 @@ export async function startNewCampaign(
         // LEVEL 2, NOT LEVEL 1. Level 1 also restores engine drive, but its
         // `commander_loop` guard (commander_loop.ts, "block plan from advancing to
         // 'executing' unless player_op_response … approved") holds every
-        // commander-generated plan at 'ready' until a human answers it. Measured at
+        // commander-generated plan of the PLAYER's faction at 'ready' until a human
+        // answers it (bot factions are not held since PK1, 2026-11-14; Engine
+        // Invariants §14.10b). Measured (before PK1) at
         // t=30 as RS: autonomy 0 → active=3/planning=2/ready=0, autonomy 1 →
         // active=2/planning=0/ready=2 — two plans stalled, never admitted. With
         // ops-only attacks that starves the war in any run without a human in the

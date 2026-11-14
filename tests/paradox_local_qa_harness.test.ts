@@ -2977,11 +2977,46 @@ test('turn-zero strategic smoke does not claim staged autonomy should already be
 
     assert.match(
         harness,
-        /if \(strategicRun && maxTurns > 0 && playtest\.finalState\?\.autonomyLevel !== 1\)/,
+        /if \(strategicRun && maxTurns > 0 && playtest\.finalState\?\.autonomyLevel !== strategicAutonomyLevel\)/,
     );
 });
 
-test('strategic setup predicts the Assisted transition from validated pre-click state', () => {
+test('strategic runs select the shipped default level 2 unless level 1 is requested explicitly', () => {
+    const harness = readHarness();
+    const parseStrategicAutonomyLevel = loadFunction<(argv: string[], strategic: boolean) => number>(
+        harness,
+        'parseStrategicAutonomyLevel',
+        { STRATEGIC_AUTONOMY_LEVELS: [1, 2], DEFAULT_STRATEGIC_AUTONOMY_LEVEL: 2 },
+    );
+
+    assert.match(harness, /const DEFAULT_STRATEGIC_AUTONOMY_LEVEL = 2;/);
+    assert.match(harness, /const STRATEGIC_AUTONOMY_LEVELS = \[1, 2\];/);
+    assert.match(harness, /const strategicAutonomyLevel = parseStrategicAutonomyLevel\(process\.argv, strategicRun\);/);
+    assert.equal(parseStrategicAutonomyLevel(['--strategic'], true), 2);
+    assert.equal(parseStrategicAutonomyLevel([], false), 2);
+    assert.equal(parseStrategicAutonomyLevel(['--strategic', '--strategic-autonomy=1'], true), 1);
+    assert.equal(parseStrategicAutonomyLevel(['--strategic', '--strategic-autonomy=2'], true), 2);
+    for (const bad of ['--strategic-autonomy=0', '--strategic-autonomy=3', '--strategic-autonomy=', '--strategic-autonomy', '--strategic-autonomy=01', '--strategic-autonomy=one']) {
+        assert.throws(() => parseStrategicAutonomyLevel(['--strategic', bad], true), /--strategic-autonomy/);
+    }
+    assert.throws(
+        () => parseStrategicAutonomyLevel(['--strategic', '--strategic-autonomy=1', '--strategic-autonomy=2'], true),
+        /exactly once/,
+    );
+    assert.throws(() => parseStrategicAutonomyLevel(['--strategic-autonomy=1'], false), /requires --strategic/);
+
+    const configureStrategicRun = extractFunctionSource(harness, 'configureStrategicRun');
+    assert.match(configureStrategicRun, /const targetAutonomyLevel = strategicAutonomyLevel;/);
+    assert.doesNotMatch(configureStrategicRun, /'autonomy-level-1'/);
+    assert.doesNotMatch(harness, /assertStrategicAutonomyState\([^)]*, 1, null\)/);
+    const playTurns = extractFunctionSource(harness, 'playTurns');
+    assert.equal(
+        (playTurns.match(/assertStrategicAutonomyState\('Strategic autonomy not applied after first turn', \w+, strategicAutonomyLevel, null\)/g) ?? []).length,
+        2,
+    );
+});
+
+test('strategic setup predicts the selected autonomy transition from validated pre-click state', () => {
     const harness = readHarness();
     const predictStrategicAutonomySelection = loadFunction<(
         priorLevel: unknown,
@@ -2997,6 +3032,11 @@ test('strategic setup predicts the Assisted transition from validated pre-click 
     assert.deepEqual({ ...predictStrategicAutonomySelection(2, 1) }, { autonomyLevel: 1, autonomyLevelPending: null });
     assert.deepEqual({ ...predictStrategicAutonomySelection(1, 1) }, { autonomyLevel: 1, autonomyLevelPending: null });
     assert.deepEqual({ ...predictStrategicAutonomySelection(0, 1) }, { autonomyLevel: 0, autonomyLevelPending: 1 });
+    // Level 2 (the shipped default): a new campaign already starts there, so selecting it applies at
+    // once with nothing pending (electron-main `set-autonomy-level`, level === current).
+    assert.deepEqual({ ...predictStrategicAutonomySelection(2, 2) }, { autonomyLevel: 2, autonomyLevelPending: null });
+    assert.deepEqual({ ...predictStrategicAutonomySelection(3, 2) }, { autonomyLevel: 2, autonomyLevelPending: null });
+    assert.deepEqual({ ...predictStrategicAutonomySelection(1, 2) }, { autonomyLevel: 1, autonomyLevelPending: 2 });
     for (const invalidPrior of [undefined, null, Number.NaN, 1.5, -1, 4, '2']) {
         assert.throws(() => predictStrategicAutonomySelection(invalidPrior, 1), /prior autonomy level.*invalid/i);
     }
@@ -3013,7 +3053,7 @@ test('strategic setup predicts the Assisted transition from validated pre-click 
     const configureStrategicRun = extractFunctionSource(harness, 'configureStrategicRun');
     const priorRead = configureStrategicRun.indexOf('const autonomyBeforeSelection');
     const prediction = configureStrategicRun.indexOf('const autonomyExpectation');
-    const click = configureStrategicRun.indexOf("clickTestId(frame, 'autonomy-level-1'");
+    const click = configureStrategicRun.indexOf('clickTestId(frame, `autonomy-level-${targetAutonomyLevel}`');
     const observedRead = configureStrategicRun.indexOf('const configuredState');
     assert.ok(priorRead >= 0 && priorRead < prediction && prediction < click && click < observedRead);
     assert.match(configureStrategicRun, /assertStrategicAutonomyState/);
