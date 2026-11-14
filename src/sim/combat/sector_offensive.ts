@@ -104,7 +104,7 @@ import { seedDisplacementTimerOnFlip } from '../../state/displacement_takeover.j
 import type { PreparationEvent } from '../turn_pipeline_types.js';
 import { checkLoanedArrivals, areLoanedBrigadesReady, cleanupDissolvedLoans } from './operation_reinforcement.js';
 import { MAX_OP_LOAN_DISTANCE, LOAN_STAGING_BUFFER_TURNS } from './operation_reinforcement_constants.js';
-import { findBrigadeLiveOperationAnywhere, hasActiveOperation, removeOperation } from './corps_operation_helpers.js';
+import { findBrigadeLiveOperationAnywhere, hasActiveOperation, isCommanderBuiltOperation, removeOperation } from './corps_operation_helpers.js';
 import { MIN_ATTACK_PERSONNEL, MAX_BRIGADE_PERSONNEL } from '../../state/formation_constants.js';
 import { mayEliteJoinOperation } from './historical_elite_reservations.js';
 import { isVlasicCohaExceptionOperation } from './coha_operation_exception.js';
@@ -850,7 +850,7 @@ function issuePostOperationReturnMarches(state: GameState, op: CorpsOperation): 
  * After OBJECTIVE_FAILURE_THRESHOLD failures, the objective enters a cooldown period.
  * This prevents suicidal repeated assaults on hardened positions (Ripac pattern).
  */
-function recordFailedObjectives(cmd: CorpsCommandState, op: CorpsOperation, turn: number): void {
+export function recordFailedObjectives(cmd: CorpsCommandState, op: CorpsOperation, turn: number): void {
     if (op.recovery_reason === 'completed') return; // Success — no failure to record
     if (op.recovery_reason === 'probe_complete') return; // Probes gather intel — not a failure
     if (op.recovery_reason === 'political_blocked') return; // Truce/political block is not a failed assault
@@ -879,11 +879,20 @@ function recordFailedObjectives(cmd: CorpsCommandState, op: CorpsOperation, turn
 
     if (failedOsids.length === 0) return;
 
+    // RF-AI2 bot objective lockout: a bot commander-planned op (buildCommanderOperation)
+    // that ends because no axis could attack (zero_eligible_axis) or because it ran out
+    // of failures (max_failures) locks its objectives out at once, without waiting for
+    // a second failure. Measured: the woken ARBiH 5th Corps re-planned Ripac/Gornja
+    // Suvaja every ~5 turns, 7 of 13 ops ending zero_eligible_axis with 0 attacks.
+    // Authored, triggered, pre-planned and Army HQ ops keep their threshold behaviour.
+    const hardBotFailure = isCommanderBuiltOperation(op)
+        && (op.recovery_reason === 'zero_eligible_axis' || op.recovery_reason === 'max_failures');
+
     if (!cmd.failed_offensive_objectives) cmd.failed_offensive_objectives = {};
     for (const osid of failedOsids) {
         const entry = cmd.failed_offensive_objectives[osid] ?? { failure_count: 0, cooldown_until_turn: 0 };
         entry.failure_count += 1;
-        if (entry.failure_count >= OBJECTIVE_FAILURE_THRESHOLD) {
+        if (hardBotFailure || entry.failure_count >= OBJECTIVE_FAILURE_THRESHOLD) {
             entry.cooldown_until_turn = turn + OBJECTIVE_FAILURE_COOLDOWN_TURNS;
         }
         cmd.failed_offensive_objectives[osid] = entry;
