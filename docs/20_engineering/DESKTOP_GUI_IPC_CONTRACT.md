@@ -317,6 +317,14 @@ The `awwv` custom protocol is registered as standard+privileged with `supportFet
 - A late trusted ready signal normally reclaims React ownership. If legacy recovery is inside a campaign mutation, readiness is deferred until that mutation settles; failed mutation keeps recovery visible, while successful mutation consumes the latch. A fresh-campaign reset is sent before `awwv-shell:show-warroom` so stale intro state cannot leak into the new room.
 - The legacy recovery start payload is exactly `{ playerFaction, decisionMode: 'emergent', scenarioKey: 'apr_1992' }`. This fallback does not alter channel names or the canonical `start-new-campaign` contract.
 
+### External links and navigation (2026-11-14)
+
+App windows show app content only: `awwv://` documents, the loopback map or dev server (`127.0.0.1`, `localhost`), and `about:` and `blob:` documents of those origins. `electron-main.cjs` installs `installExternalLinkPolicy` on every new webContents (`app.on('web-contents-created')`; DevTools is skipped):
+
+- `setWindowOpenHandler` denies every popup. A `target="_blank"` link to an allow-listed https host (`EXTERNAL_LINK_HOSTS`, currently `openstreetmap.org` and `www.openstreetmap.org`) is handed to `shell.openExternal`, so it opens in the player's browser. No web page runs with the app's preload bridge.
+- `will-navigate` (main frame) and `will-frame-navigate` (sub-frames, such as the embedded React iframe) cancel any navigation that leaves app content. An allow-listed target opens in the browser instead.
+- To add an external link, add its host to `EXTERNAL_LINK_HOSTS`. `tests/desktop_external_link_policy.test.ts` fails when a renderer `<a href>` points at a host that is not allow-listed.
+
 ## Determinism Notes
 
 **Ordinary startup/event ownership (2026-10-25 candidate):** browser and Electron startup fill absent negotiation capital/patron containers and the absent whole strategic-dimension store before the selected faction's opening decision, using `initializeNegotiationState`. Existing values and partial stores remain intact; no derived tick, load migration or observer/headless initialization is added. After explicit RBiH turn-0 identity resolution, `resolvePlayerEventDecisionWithOpeningPolicy` queues the complete existing command-policy decision before first Advance. Both adapters use that atomic owner and the canonical resolver; persistence/broadcast still belongs to the desktop mutation transaction. Historical default remains `always_deny`, default policy remains `ask`, and consent is explicit. Catalog-authored legacy identity/policy responses retain their ordinary later-turn path without an early queue. Invalid, forged, duplicate or mixed-state rejection must leave the original state unchanged. See the controlling Electron-validation plan for current qualification status.

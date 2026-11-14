@@ -36,6 +36,13 @@ npx tsx tools/ai_play/run_president_rbih.ts
 
 Expected tail: `=== DETERMINISM: PASS — byte-identical ===`.
 
+The in-process tools (`president_playthrough.ts` and the scripts built on it, `territory_sweep.ts`,
+`parity_probe.ts`, `op_launch_diff.ts`, `desktop_calibration_compare.ts`) work from any launch
+folder. They import `repo_root_cwd.ts` first, which switches the process to the repo root, as the
+desktop app does, because parts of the sim still read data files relative to the cwd. Relative path
+arguments (`--out`, `--strategy`, ...) resolve against the folder you launched from. Keep that import
+first in any new in-process entry point.
+
 ## Wiring an LLM
 
 Replace the static `PRESIDENT_DECISIONS` map in `run_president_rbih.ts` with an

@@ -1,15 +1,17 @@
 // Step 4 render proof: drives the real dev map renderer and renders each records /
 // end-state surface at 2293x960 and 1280x720, screenshots it, and measures the
 // smallest computed font size of visible text inside the surface.
-// Usage: node step4_drive.mjs --url http://127.0.0.1:5199 --out F:/AWWV-coordination/surface_steps/step4
+// Usage: node tools/ui/records_surfaces_browser_proof.mjs --url http://127.0.0.1:5199 [--out <dir>]
+// --out defaults to $AWWV_COORDINATION_ROOT/surface_steps/step4 (see tools/lib/repo_paths.mjs).
 import { chromium } from 'playwright';
 import fs from 'node:fs';
 import path from 'node:path';
+import { coordinationRoot } from '../lib/repo_paths.mjs';
 
 const args = process.argv.slice(2);
 const opt = (n, f) => (args.includes(n) ? args[args.indexOf(n) + 1] : f);
 const origin = opt('--url', 'http://127.0.0.1:5199');
-const out = opt('--out', 'F:/AWWV-coordination/surface_steps/step4');
+const out = opt('--out', path.join(coordinationRoot(), 'surface_steps', 'step4'));
 const only = opt('--only', null);
 fs.mkdirSync(out, { recursive: true });
 
