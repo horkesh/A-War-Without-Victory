@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 import { createHash } from 'node:crypto';
 import * as nodeFs from 'node:fs';
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { closeSync, mkdtempSync, openSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { tmpdir } from 'node:os';
 import * as nodePath from 'node:path';
@@ -4718,6 +4718,44 @@ test('RS Drina selector picks the named visible control only while the decision 
     assert.equal(other.choice.basis, 'staff_recommendation');
     assert.equal(other.choice.requestedOverride, undefined);
     await assert.rejects(policy(surface()), /No ranked authored historical default/);
+});
+
+test('the result writer streams JSON byte-identically to JSON.stringify so a 188-turn run cannot exceed the string limit', () => {
+    const harness = readHarness();
+    const writeStream = loadFunction<(fd: number, value: unknown) => void>(harness, 'writeJsonStream', { fs: nodeFs });
+    const dir = mkdtempSync(join(tmpdir(), 'awwv-json-stream-'));
+    try {
+        const big = 'é"\\\n 😀'.repeat(200_000);
+        const values: unknown[] = [
+            {},
+            [],
+            { a: [], b: {}, c: [[], {}, [1, [2, [3]]]], d: null, e: 'x"y\\z\n', f: 1.5e300, g: -0, h: true },
+            { skipped: undefined, fn: () => 1, nested: { skipped: undefined, kept: 0 } },
+            [undefined, () => 1, null, NaN, Infinity, 'ok'],
+            { when: new Date(Date.UTC(2026, 10, 14, 12, 0, 0)), m: new Map([[1, 2]]), s: new Set([1]) },
+            { toJSON() { return { shaped: [1, 2] }; } },
+            { events: Array.from({ length: 3000 }, (_, index) => ({ index, label: `step-${index}`, diagnostics: { rows: [index, index + 1] } })) },
+            { huge: big, list: [big, 'tail'] },
+            'a bare string',
+            42,
+        ];
+        values.forEach((value, index) => {
+            const file = join(dir, `case-${index}.json`);
+            const fd = openSync(file, 'w');
+            try { writeStream(fd, value); } finally { closeSync(fd); }
+            assert.equal(readFileSync(file, 'utf8'), JSON.stringify(value, null, 2), `case ${index}`);
+        });
+        assert.throws(() => {
+            const circular: Record<string, unknown> = {};
+            circular.self = circular;
+            const file = join(dir, 'circular.json');
+            const fd = openSync(file, 'w');
+            try { writeStream(fd, circular); } finally { closeSync(fd); }
+        }, /circular/i);
+    } finally {
+        rmSync(dir, { recursive: true, force: true });
+    }
+    assert.match(extractFunctionSource(harness, 'writeJsonAtomic'), /writeJsonStream\(fd, value\)/);
 });
 
 test('--dayton-sign-verdict signs through review, captures the signing beat and Verdict, and ends the run cleanly', () => {

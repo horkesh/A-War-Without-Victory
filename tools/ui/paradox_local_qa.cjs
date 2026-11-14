@@ -1039,9 +1039,67 @@ function replaceFileSync(tmpPath, filePath) {
   }
 }
 
+// Streams `value` as JSON.stringify(value, null, 2) would, but a piece at a time. A full 188-turn
+// run's result object exceeds V8's maximum string length (about 512 MB), so a single stringify
+// crashed the harness after the campaign had finished (R8 dry run, RBiH). Leaves are written with
+// JSON.stringify itself, so escaping and number formatting are identical; only the containers
+// (objects, arrays) are walked here.
+function writeJsonStream(fd, value) {
+  let buffer = '';
+  const flush = () => {
+    if (buffer.length === 0) return;
+    fs.writeSync(fd, buffer);
+    buffer = '';
+  };
+  const emit = (text) => {
+    buffer += text;
+    if (buffer.length >= 1 << 20) flush();
+  };
+  const walk = (node, indent, depth) => {
+    if (depth > 400) throw new TypeError('Converting circular structure to JSON');
+    if (node !== null && typeof node === 'object' && typeof node.toJSON === 'function') node = node.toJSON();
+    if (node === null || typeof node !== 'object') {
+      const leaf = JSON.stringify(node);
+      emit(leaf === undefined ? 'null' : leaf);
+      return;
+    }
+    const inner = `${indent}  `;
+    if (Array.isArray(node)) {
+      if (node.length === 0) { emit('[]'); return; }
+      emit('[\n');
+      node.forEach((item, index) => {
+        emit(inner);
+        walk(item, inner, depth + 1);
+        emit(index < node.length - 1 ? ',\n' : '\n');
+      });
+      emit(`${indent}]`);
+      return;
+    }
+    const keys = Object.keys(node).filter((key) => {
+      const member = node[key];
+      return member !== undefined && typeof member !== 'function' && typeof member !== 'symbol';
+    });
+    if (keys.length === 0) { emit('{}'); return; }
+    emit('{\n');
+    keys.forEach((key, index) => {
+      emit(`${inner}${JSON.stringify(key)}: `);
+      walk(node[key], inner, depth + 1);
+      emit(index < keys.length - 1 ? ',\n' : '\n');
+    });
+    emit(`${indent}}`);
+  };
+  walk(value, '', 0);
+  flush();
+}
+
 function writeJsonAtomic(filePath, value) {
   const tmpPath = `${filePath}.tmp-${process.pid}`;
-  fs.writeFileSync(tmpPath, JSON.stringify(value, null, 2));
+  const fd = fs.openSync(tmpPath, 'w');
+  try {
+    writeJsonStream(fd, value);
+  } finally {
+    fs.closeSync(fd);
+  }
   replaceFileSync(tmpPath, filePath);
 }
 
