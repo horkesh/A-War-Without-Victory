@@ -1444,7 +1444,13 @@
   {
     "id": "csq_hvo_central_bosnia_offensive_1993",
     "title": "Ahmići and the Rupture",
-    "narrative": "On 16 April 1993 the HVO Viteska Brigade enters Ahmići at dawn. The village burns before the day is out; 116 civilians are killed in the operation. From that morning onward the alliance that had existed on paper for ten months is a written fiction and the war between HVO and ARBiH is a matter of specific coordinates. Mate Boban's Herceg-Bosna pursues the Banovina-border programme it had always intended; Zagreb's material support, which had been hedged under the joint-front arrangement, flows more openly. Viteska, Busovača, and the Nikola Subic-Zrinski brigades move against ARBiH positions in the Lašva and Neretva valleys. The arithmetic is simple: the HVO has the initiative for a season, and it will use it.",
+    "narrative": "On 16 April 1993 HVO forces attack the Bosniak houses of Ahmići at dawn. By evening the village is burning and more than 100 Bosniak civilians have been killed in the Ahmići massacre. The alliance with the ARBiH, already broken in practice, is finished. Orders go out from Mostar naming the Lašva valley towns, Gornji Vakuf, Prozor and Mostar as HVO objectives, and Zagreb's backing of the HVO continues. Whether the HVO brigades can carry out those orders depends on the state they are in.",
+    "localizations": {
+      "bcs": {
+        "title": "Ahmići i raskid",
+        "narrative": "Dana 16. aprila 1993. snage HVO-a u zoru napadaju bošnjačke kuće u Ahmićima. Do večeri selo gori, a u masakru u Ahmićima ubijeno je više od 100 bošnjačkih civila. Savez s ARBiH, već raskinut u praksi, okončan je. Iz Mostara izlaze naređenja koja kao ciljeve HVO-a navode gradove Lašvanske doline, Gornji Vakuf, Prozor i Mostar, a Zagreb nastavlja podržavati HVO. Mogu li brigade HVO-a izvršiti ta naređenja, zavisi od stanja u kojem se nalaze."
+      }
+    },
     "category": "military",
     "trigger": {
       "turn_min": 54,
@@ -1462,7 +1468,7 @@
     "responding_faction": "HRHB",
     "effect": {
       "kind": "narrative",
-      "text": "HVO begins the wider central-Bosnia offensive; the fractured alliance with ARBiH collapses."
+      "text": "Mostar orders a wider HVO offensive in central Bosnia; the alliance with the ARBiH is finished."
     },
     "effects": [
       {

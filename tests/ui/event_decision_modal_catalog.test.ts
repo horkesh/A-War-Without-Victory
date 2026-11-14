@@ -87,7 +87,7 @@ function describeEffect(effect: EventEffect): string | null {
       ].filter(Boolean).join(', ');
       return `${faction} equipment added: ${granted || 'support'}`;
     }
-    case 'aggression_modifier': return `${faction} operational aggression ${signedDelta(effect.delta)} for ${effect.duration_turns} weeks`;
+    case 'aggression_modifier': return `${faction} operational aggression ${signedDelta(effect.delta)} for ${effect.duration_turns} weeks (recorded only; the standard army AI ignores it in this build)`;
     case 'control_change': return `${faction} territorial control changes in ${effect.osids.length} area${effect.osids.length === 1 ? '' : 's'}`;
     case 'guerrilla_threat': return `${faction} rear-area threat for ${effect.duration_turns} weeks`;
     case 'recruitment_modifier': return `${faction} recruitment ${Math.round(effect.pool_multiplier * 100)}% for ${effect.duration_turns} weeks`;

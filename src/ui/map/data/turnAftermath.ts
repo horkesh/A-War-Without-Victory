@@ -7,6 +7,7 @@ import { turnToDateString } from '../utils/formatters';
 import { getOsidDisplayName } from '../utils/osidDisplayName';
 import { t, type MessageKey } from '../i18n';
 import { playerFactionMatch } from './playerFactionMatch';
+import { resolveEventDisplayTitle } from './eventDisplayCopy';
 
 export type TurnAftermathTone = 'gain' | 'loss' | 'mixed' | 'quiet';
 export type TurnAftermathCostSeverity = 'low' | 'moderate' | 'severe' | 'critical';
@@ -682,7 +683,7 @@ function buildStrategicSignals(
     signals.push({
       id: `event:${event.id}`,
       kind: 'event',
-      label: event.text,
+      label: resolveEventDisplayTitle(event.id, event.text),
       detail: t('turnAftermath.signal.detail.historicalEvent'),
       severity: 'notable',
     });

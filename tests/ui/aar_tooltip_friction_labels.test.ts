@@ -215,6 +215,48 @@ describe('AAR and tooltip friction labels', () => {
     expect(store.selectedOsid).toBe('op:tuzla:center');
   });
 
+  it('links every attacking brigade of a concentrated assault (realism audit F10)', () => {
+    const state = makeState();
+    (state.formations as any[]).push(
+      { id: 'bde_support_1', name: '3rd Tuzla Brigade', faction: 'RBiH', corps_id: 'arbih_2_corps' },
+      { id: 'bde_support_2', name: '4th Tuzla Brigade', faction: 'RBiH', corps_id: 'arbih_2_corps' },
+    );
+    useGameStore.setState({ loadedGameState: state, osidDisplayNames: { 'op:tuzla:center': 'Tuzla' } });
+
+    render(createElement(AARPanel, { isOpen: true, onClose: () => {}, embedded: true }));
+
+    const attackerIds = Array.from(document.querySelectorAll('[data-testid="aar-formation-link"][data-role="attacker"]'))
+      .map((el) => el.getAttribute('data-formation-id'));
+    expect(attackerIds).toEqual(['bde_attacker', 'bde_support_1', 'bde_support_2']);
+    expect(screen.getByRole('button', { name: '3rd Tuzla Brigade' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: '4th Tuzla Brigade' })).toBeTruthy();
+  });
+
+  it('labels a fogged concentrated enemy assault without a brigade count, in EN and BCS', () => {
+    const summary = makeSummary();
+    summary.battles[0] = {
+      ...summary.battles[0]!,
+      attacker_faction: 'RS',
+      defender_faction: 'RBiH',
+      primary_attacker_id: 'contact:RS:op:tuzla:center',
+      all_attacker_ids: ['contact:RS:op:tuzla:center'],
+      primary_defender_id: 'bde_attacker',
+      execution_friction: undefined,
+    };
+    const fogged = { ...makeState(), latestTurnSummary: summary, turnSummaries: [summary] } as LoadedGameState;
+    useGameStore.setState({ loadedGameState: fogged, osidDisplayNames: { 'op:tuzla:center': 'Tuzla' } });
+
+    const { container, unmount } = render(createElement(AARPanel, { isOpen: true, onClose: () => {}, embedded: true }));
+    expect(container.textContent).toContain('Concentrated assault');
+    expect(container.textContent).not.toContain('Concentration 1');
+    unmount();
+
+    setLocale('bcs');
+    const bcs = render(createElement(AARPanel, { isOpen: true, onClose: () => {}, embedded: true }));
+    expect(bcs.container.textContent).toContain('Koncentrisan napad');
+    expect(bcs.container.textContent).not.toContain('Koncentracija 1');
+  });
+
   it('renders battle tooltip friction and confidence bands without raw enum copy', () => {
     vi.useFakeTimers();
     useGameStore.setState({

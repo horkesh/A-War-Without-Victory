@@ -806,7 +806,9 @@ test('inventory documents conditional consequence rows as design counterfactuals
         claim.file === 'data/scenarios/events/consequences.json'
     ));
 
-    assert.strictEqual(claims.length, 549);
+    // 551: +2 for the BCS title and narrative of csq_hvo_central_bosnia_offensive_1993
+    // (1993 HVO-ARBiH truthful-cards lane, 2026-11-14).
+    assert.strictEqual(claims.length, 551);
     assert.strictEqual(claims.every((claim: { status: string }) => (
         claim.status === 'documented'
     )), true);

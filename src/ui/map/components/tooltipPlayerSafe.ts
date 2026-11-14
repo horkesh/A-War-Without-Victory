@@ -30,7 +30,6 @@ export interface PlayerSafeFrontTooltipModel {
   title: string;
   sectorName: string | null;
   sectorStatusLine: string | null;
-  pressureLine: string;
   densityValue: number | null;
   densityLabel: string | null;
   threatSummary: string | null;
@@ -201,25 +200,19 @@ export function buildPlayerSafeFormationTooltipModel(args: {
 export function buildPlayerSafeFrontTooltipModel(args: {
   edgeId: string;
   frontEdgesOsid: Array<Pick<FrontEdgeView, 'edge_id' | 'a' | 'b' | 'side_a' | 'side_b'>> | undefined;
-  frontPressureByEdge: Record<string, { value: number; max_abs: number; last_updated_turn?: number }> | undefined;
   formations: FormationView[] | undefined;
   fogOfWar: LoadedGameState['fogOfWar'] | undefined;
   corpsFrontSectors: CorpsFrontSectorView[] | undefined;
   playerFaction: string | null;
   locale?: Locale;
 }): PlayerSafeFrontTooltipModel {
+  // No front-pressure line: the legacy `front_pressure` substrate is never computed
+  // in the current build (its front edges are always empty), so any value shown
+  // would be a constant (realism audit F9).
   const edge = args.frontEdgesOsid?.find((entry) => entry.edge_id === args.edgeId);
   const locale = args.locale ?? 'en';
   const sideA = getPlayerSafeMilitaryFactionName(edge?.side_a, '?');
   const sideB = getPlayerSafeMilitaryFactionName(edge?.side_b, '?');
-  const pressure = args.frontPressureByEdge?.[args.edgeId];
-  const pressureValue = pressure?.value;
-  const pressureLine =
-    typeof pressureValue !== 'number' || !Number.isFinite(pressureValue)
-      ? t('tooltip.pressure.unreported', undefined, locale)
-      : pressureValue > 0 ? t('tooltip.pressure.advantage', { value: `+${pressureValue.toFixed(1)}`, side: sideA }, locale) :
-        pressureValue < 0 ? t('tooltip.pressure.advantage', { value: pressureValue.toFixed(1), side: sideB }, locale) :
-        t('tooltip.pressure.balanced', undefined, locale);
 
   const sector = args.corpsFrontSectors?.find((entry) => entry.edge_ids.includes(args.edgeId));
   const ownSector = sector?.faction === args.playerFaction ? sector : null;
@@ -263,7 +256,6 @@ export function buildPlayerSafeFrontTooltipModel(args: {
     title: t('tooltip.frontTitle', { sideA, sideB }, locale),
     sectorName: ownSector ? getPlayerFacingSectorName(ownSector.sector_id, [ownSector]) : null,
     sectorStatusLine: ownSector && !ownSectorHasCurrentLine ? t('tooltip.noFriendlyLine', undefined, locale) : null,
-    pressureLine,
     densityValue: ownSector && ownSectorHasCurrentLine && typeof ownSector.density === 'number' && Number.isFinite(ownSector.density) ? ownSector.density : null,
     densityLabel: ownSector && ownSectorHasCurrentLine && typeof ownSector.density === 'number' && Number.isFinite(ownSector.density) ? getDensityLabel(ownSector.density, locale) : null,
     threatSummary: ownSector

@@ -311,7 +311,44 @@
     "id": "gornji_vakuf_clashes_1993",
     "image": "event_central_bosnia_front.webp",
     "title": "HVO-ARBiH Fighting Erupts at Gornji Vakuf",
-    "narrative": "Heavy fighting breaks out between HVO and ARBiH forces in Gornji Vakuf as the HVO attempts to establish control over the town in line with the proposed Vance-Owen provincial boundaries. The clashes — involving tanks, artillery, and infantry — mark a significant escalation beyond the sporadic incidents of late 1992.",
+    "narrative": "The HVO has ordered the ARBiH units in Gornji Vakuf to place themselves under HVO command. The Vance-Owen map puts the town in a province that Herceg-Bosna claims as Croat, and Mostar treats that as settling who commands there. The ARBiH refuses, and local commanders on both sides wait for orders. In the historical record Mostar's ultimatum of 15 January 1993 ordered ARBiH units in the provinces it claimed, Gornji Vakuf among them, to submit to HVO command, and on 18 January the HVO attacked the town (ICTY, Prlić et al.).",
+    "localizations": {
+      "en": {
+        "title": "Ultimatum at Gornji Vakuf",
+        "notifications_to_other_factions": {
+          "escalate": {
+            "RBiH": {
+              "headline": "HVO enforces its Gornji Vakuf ultimatum",
+              "body": "Mostar backs its local command and orders the ultimatum enforced. Sarajevo staff read a sharper break in local cooperation."
+            },
+            "RS": {
+              "headline": "Mostar hardens its line at Gornji Vakuf",
+              "body": "Herceg-Bosna backs its ultimatum at Gornji Vakuf. Pale analysts see the Vance-Owen provincial map turning into a command dispute between the two former allies."
+            }
+          }
+        }
+      },
+      "bcs": {
+        "title": "Ultimatum u Gornjem Vakufu",
+        "narrative": "HVO je naredio jedinicama ARBiH u Gornjem Vakufu da se stave pod komandu HVO-a. Vance-Owenova mapa smješta grad u provinciju koju Herceg-Bosna smatra hrvatskom, a Mostar to tumači kao odgovor na pitanje ko tu komanduje. ARBiH odbija, a lokalni komandanti na obje strane čekaju naređenja. U historijskom zapisu ultimatum Mostara od 15. januara 1993. naložio je jedinicama ARBiH u provincijama na koje je polagao pravo, među njima i u Gornjem Vakufu, da se potčine komandi HVO-a, a 18. januara HVO je napao grad (MKSJ, Prlić i drugi).",
+        "staff_assessment": "Provođenje ultimatuma daje podršku lokalnoj komandi HVO-a i produbljuje raskol s ARBiH. Lokalno primirje zasad ublažava raskol, po cijenu morala HVO-a, a spor oko grada ostaje otvoren.",
+        "trigger_evidence": [
+          "Kohezija saveza pala je ispod praga saradnje.",
+          "Vance-Owenova mapa provincija učinila je komandne granice u srednjoj Bosni spornim.",
+          "Jedinice HVO-a i ARBiH stoje jedna naspram druge u općini Gornji Vakuf."
+        ],
+        "response_options": {
+          "escalate": {
+            "label": "Provesti ultimatum",
+            "description": "Narediti HVO-u u Gornjem Vakufu da nametne svoju komandu u gradu. Raskol s ARBiH se produbljuje."
+          },
+          "negotiate": {
+            "label": "Tražiti lokalno primirje",
+            "description": "Narediti lokalne pregovore s ARBiH. Raskol zasad slabi; spor oko grada ostaje otvoren."
+          }
+        }
+      }
+    },
     "category": "military",
     "family": "hrhb_central_bosnia_war",
     "source_tier": "icty_icj_un",
@@ -342,11 +379,11 @@
     "bot_response_logic": "historical",
     "historical_source": "ICTY Prlic et al. IT-04-74-T Trial Judgment Vol. 2 §§221-310 and Vol. 4 §§44-67; Prlic Appeals Judgment §§601-650; Blaskic IT-95-14-T §§161-220; Kordic IT-95-14/2-T §§560-650; Balkan Battlegrounds Vol. II pp. 448, 452; docs/40_reports/1993_EVENT_RESEARCH.md.",
     "source_note": "BB Vol. II frames Gornji Vakuf as an early 1993 HVO-ARBiH escalation around the Vance-Owen provincial map; the local response choice is a command-posture abstraction. Per Sensitive History Gate §1.5 #11 the escalate posture is operational-tempo only — specific atrocities (Dusa, Bistrica, Ždrimci) emerge from Ring 1 combat / paramilitary / displacement engines and Ring 2 essays, not from this row's effects.",
-    "staff_assessment": "Escalating reinforces the local HVO position but deepens the command split with ARBiH; a ceasefire contains the front at the cost of initiative and morale.",
+    "staff_assessment": "Enforcing the ultimatum backs the local HVO command and deepens the break with the ARBiH. A local ceasefire eases the break for now, at a cost to HVO morale, and leaves the dispute over the town open.",
     "trigger_evidence": [
       "Alliance cohesion has fallen below the cooperation threshold.",
       "The Vance-Owen provincial map has made central Bosnia command boundaries contested.",
-      "HVO and ARBiH units are already fighting around Gornji Vakuf."
+      "HVO and ARBiH units face each other inside Gornji Vakuf municipality."
     ],
     "historical_default_response_id": "escalate",
     "pressure": {
@@ -371,15 +408,15 @@
     "effects": [
       {
         "kind": "narrative",
-        "text": "HVO and ARBiH forces fight a pitched battle at Gornji Vakuf. The Vance-Owen provincial map becomes a pretext for Croat territorial grabs."
+        "text": "Mostar presses its claim to command in Gornji Vakuf, citing the Vance-Owen provincial map."
       }
     ],
     "response_options": [
       {
         "id": "escalate",
         "branch_tag": "hrhb_central_bosnia_war",
-        "label": "Respond with force",
-        "description": "Send reinforcements to Gornji Vakuf. Escalates the confrontation significantly.",
+        "label": "Enforce the ultimatum",
+        "description": "Order the HVO in Gornji Vakuf to impose its command on the town. The break with the ARBiH deepens.",
         "historical_marker": "historical_default",
         "aggression_affinity": 0.7,
         "risk_level": 0.7,
@@ -399,7 +436,7 @@
         "id": "negotiate",
         "branch_tag": "hrhb_central_bosnia_ceasefire",
         "label": "Seek a local ceasefire",
-        "description": "Attempt to contain the fighting. De-escalates but does not resolve underlying tensions.",
+        "description": "Order local talks with the ARBiH. The break eases for now; the dispute over the town stays open.",
         "aggression_affinity": -0.5,
         "risk_level": 0.4,
         "effects": [
@@ -429,11 +466,11 @@
       "negotiate": {
         "RBiH": {
           "headline": "HVO seeks a local Gornji Vakuf ceasefire",
-          "body": "Herceg-Bosna tries to contain the fighting around Gornji Vakuf. Sarajevo sees de-escalation on the local front, though the underlying territorial dispute remains unresolved."
+          "body": "Herceg-Bosna seeks local talks with the ARBiH over Gornji Vakuf. Sarajevo sees the dispute eased for now, though the territorial question remains open."
         },
         "RS": {
-          "headline": "Gornji Vakuf fighting is contained for now",
-          "body": "Herceg-Bosna moves toward a local ceasefire rather than a wider escalation. Pale reads the alliance strain as real, but not yet a full rupture."
+          "headline": "Gornji Vakuf dispute is contained for now",
+          "body": "Herceg-Bosna moves toward a local ceasefire rather than enforcing its ultimatum. Pale reads the alliance strain as real, but not yet a full rupture."
         }
       }
     }
@@ -495,7 +532,13 @@
     "id": "croat_bosniak_war_begins_1993",
     "image": "event_central_bosnia_front.webp",
     "title": "HVO-ARBiH Alliance Fractures",
-    "narrative": "After the October 1992 Prozor battle and January 1993 fighting at Gornji Vakuf and Busovača, the HVO-ARBiH alliance fractures amid local clashes and competing territorial claims. The wider central-Bosnia offensive follows in April. Later ICTY judgments attribute the Herceg-Bosna/HVO campaign and discrete ARBiH crimes to specific actors under different legal findings.",
+    "narrative": "The HVO-ARBiH alliance has broken down. Units that held a common line against the VRS now treat each other as enemies across central Bosnia and northern Herzegovina. In the historical record the break followed HVO attacks at Prozor in October 1992 and at Gornji Vakuf in January 1993, and open war came in April 1993. Later ICTY judgments attribute the Herceg-Bosna/HVO campaign and discrete ARBiH crimes to specific actors under different legal findings.",
+    "localizations": {
+      "bcs": {
+        "title": "Savez HVO-a i ARBiH se raspada",
+        "narrative": "Savez HVO-a i ARBiH se raspao. Jedinice koje su držale zajedničku liniju prema VRS-u sada se u srednjoj Bosni i sjevernoj Hercegovini odnose jedna prema drugoj kao neprijatelji. U historijskom zapisu raskol je uslijedio nakon napada HVO-a na Prozor u oktobru 1992. i na Gornji Vakuf u januaru 1993, a otvoreni rat počeo je u aprilu 1993. Kasnije presude MKSJ-a pripisuju kampanju Herceg-Bosne/HVO-a i pojedinačne zločine pripadnika ARBiH konkretnim akterima, na osnovu različitih pravnih utvrđenja."
+      }
+    },
     "category": "military",
     "source_tier": "icty_icj_un",
     "historical_source": "Balkan Battlegrounds Vol. I, ch. 39, pp. 219 and 225 (Croat-Bosniak fighting chronology); ICTY Prlic et al. Trial Judgment (IT-04-74-T), Herceg-Bosna/HVO joint-criminal-enterprise findings; ICTY Kordic and Cerkez Trial Judgment (IT-95-14/2-T), Lašva Valley attack findings; ICTY Hadzihasanovic and Kubura Trial Judgment (IT-01-47-T), superior-responsibility findings for discrete ARBiH crimes.",
@@ -545,7 +588,7 @@
       },
       {
         "kind": "narrative",
-        "text": "The HVO-ARBiH alliance fractures amid local clashes in central Bosnia."
+        "text": "The HVO-ARBiH alliance breaks down in central Bosnia."
       }
     ]
   },
@@ -714,7 +757,13 @@
     "id": "central_bosnia_fighting_1993",
     "image": "event_central_bosnia_front.webp",
     "title": "Central Bosnia Fronts Harden",
-    "narrative": "VRS, HVO, and ARBiH forces occupy overlapping fronts in central Bosnia as local HVO-ARBiH fighting and tensions continue. Travnik, Vitez, and Busovača face pressure from different directions before the wider April offensive. The conflict creates severe tactical strain and civilian suffering.",
+    "narrative": "Central Bosnia now has three armies on overlapping fronts. Around Vitez and Busovača a new line between the HVO and the ARBiH runs through mixed villages, while both armies still face the VRS on the old one. Civilians who find themselves on the far side of the new line are now living under the army of the other side.",
+    "localizations": {
+      "bcs": {
+        "title": "Frontovi u srednjoj Bosni se učvršćuju",
+        "narrative": "U srednjoj Bosni sada su tri vojske na frontovima koji se preklapaju. Oko Viteza i Busovače nova linija između HVO-a i ARBiH prolazi kroz miješana sela, dok obje vojske i dalje drže staru liniju prema VRS-u. Civili koji su se zatekli s druge strane nove linije sada žive pod vojskom druge strane."
+      }
+    },
     "source_note": "Existing event/essay/project sources ground the row's institutional and operational context. This note adds no casualty figures, causal claims, prohibited player choices, or alternate-outcome prevention framing.",
     "category": "military",
     "historical_source": "ICTY Hadzihasanovic Trial Judgment (IT-01-47-T); ICTY Kordic Trial Judgment (IT-95-14/2-T)",
@@ -730,7 +779,7 @@
     "once": true,
     "effect": {
       "kind": "narrative",
-      "text": "Central Bosnia's overlapping fronts harden as local HVO-ARBiH clashes continue."
+      "text": "A new HVO-ARBiH line runs through central Bosnia, beside the old front against the VRS."
     },
     "effects": [
       {
@@ -1254,7 +1303,51 @@
     "id": "hrhb_central_bosnia_defense_1993",
     "image": "event_central_bosnia_front.webp",
     "title": "Central Bosnia Pocket: HZ HB Records Its Defense Posture",
-    "narrative": "The ARBiH-HVO war that erupted from the Gornji Vakuf clashes (Jan 1993, H2) has now boiled over across central Bosnia. The HVO holds three encircled pockets — the Vitez/Busovača/Kiseljak triangle in the Lašva Valley, the Žepče exclave further north, and Mostar (west bank) — surrounded by ARBiH 3rd Corps formations whose strength dwarfs the local HVO Operative Zone Central Bosnia. The triangle is operationally indefensible long-term: only a tenuous Croatia-routed airbridge through Tudjman's Susak channel sustains ammunition, fuel, and officer rotation into the pocket. Tihofil Blaškić commands the Operative Zone from Kiseljak; Dario Kordić leads HVO political affairs in central Bosnia. Mate Boban must record HZ HB's posture: defend the pocket (the documented historical posture — hold the triangle and Žepče through the airbridge until a diplomatic resolution arrives); evacuate to Herzegovina (cede the Croat heartland, withdraw forces along the corridor); attempt a breakout offensive (high casualty cost, near-certain failure against 3rd Corps encirclement); or pursue early federation with RBiH (parallel to but distinct from the Feb 1994 Zagreb-ordered ceasefire — an April 1993 Croat-Bosniak federation overture against Tudjman's directive).",
+    "narrative": "The break with the ARBiH has cut the HVO in central Bosnia off from Herzegovina. It holds the Vitez-Busovača pocket in the Lašva valley, the Kiseljak pocket, and the Žepče exclave further north, each hemmed in by ARBiH units, chiefly of the 3rd Corps, that outnumber the local HVO Operative Zone Central Bosnia; Kiseljak and Žepče also border VRS lines. Little reaches the pockets from outside. Colonel Tihomir Blaškić commands the Operative Zone from Vitez; Dario Kordić, a vice-president of Herceg-Bosna, is the leading HZ HB political figure in central Bosnia. Mate Boban must record HZ HB's posture toward the pockets: hold them, withdraw to Herzegovina, order a breakout, or open early federation talks with Sarajevo.",
+    "localizations": {
+      "en": {
+        "notifications_to_other_factions": {
+          "defend_pocket": {
+            "RBiH": {
+              "headline": "HVO ordered to hold its central-Bosnia pockets",
+              "body": "Mostar orders Blaškić to hold the Vitez-Busovača and Kiseljak pockets and the Žepče exclave. Sarajevo staff expect the HVO to stay where it is."
+            },
+            "RS": {
+              "headline": "Herceg-Bosna orders its central-Bosnia pockets held",
+              "body": "Mostar orders the Operative Zone Central Bosnia to hold its pockets and presses Zagreb for supplies. Pale reads a long standoff between the HVO and the ARBiH."
+            }
+          }
+        }
+      },
+      "bcs": {
+        "title": "Džep u srednjoj Bosni: HZ HB bilježi svoj odbrambeni stav",
+        "narrative": "Raskol s ARBiH odsjekao je HVO u srednjoj Bosni od Hercegovine. HVO drži džep Vitez-Busovača u Lašvanskoj dolini, džep Kiseljak i eksklavu Žepče dalje na sjeveru, a svaki od njih okružuju jedinice ARBiH, uglavnom 3. korpusa, brojnije od lokalne Operativne zone Srednja Bosna HVO-a; Kiseljak i Žepče graniče i s linijama VRS-a. Izvana u džepove stiže malo. Pukovnik Tihomir Blaškić komanduje Operativnom zonom iz Viteza; Dario Kordić, potpredsjednik Herceg-Bosne, vodeća je politička figura HZ HB u srednjoj Bosni. Mate Boban mora zabilježiti stav HZ HB prema džepovima: držati ih, povući se u Hercegovinu, narediti proboj ili otvoriti rane pregovore o federaciji sa Sarajevom.",
+        "staff_assessment": "Držanje džepova bio je historijski stav od aprila 1993. do primirja u februaru 1994. i Washingtonskog sporazuma u martu 1994. Povlačenje znači odustajanje od zahtjeva Mostara za srednjom Bosnom i otvara raskol sa Zagrebom. Proboj se izvodi protiv odnosa snaga koji ide u korist 3. korpusa ARBiH i troši ljudstvo HVO-a. Rana federacija ublažava rat s ARBiH, ali kida odnose sa Zagrebom.",
+        "trigger_evidence": [
+          "HVO u srednjoj Bosni drži odvojene džepove oko Viteza i Busovače te oko Kiseljaka, kao i eksklavu Žepče, svaki odsječen od Hercegovine.",
+          "Jedinice 3. korpusa ARBiH okružuju džepove s odnosom snaga u korist ARBiH.",
+          "Snabdijevanje džepova zavisi od Zagreba i od onoga što se može prenijeti kroz neprijateljske linije."
+        ],
+        "response_options": {
+          "defend_pocket": {
+            "label": "Braniti džep",
+            "description": "Narediti Blaškiću da drži džepove Vitez-Busovača i Kiseljak te eksklavu Žepče onim što Operativna zona ima, i tražiti od Zagreba da snabdijevanje ne prestane. To je bio historijski stav do primirja u februaru 1994. i Washingtonskog sporazuma."
+          },
+          "evacuate_to_herzegovina": {
+            "label": "Povući se u Hercegovinu",
+            "description": "Narediti Operativnoj zoni da pripremi povlačenje prema Hercegovini. Tim naređenjem Mostar odustaje od svog zahtjeva na Lašvansku dolinu, Kiseljak i Žepče i na njihove hrvatske zajednice, a Zagreb se tome protivi."
+          },
+          "breakout_offensive": {
+            "label": "Pokrenuti proboj",
+            "description": "Narediti Operativnoj zoni pokušaj proboja kroz linije 3. korpusa ARBiH. Odnos snaga je izrazito nepovoljan. Naređenje iscrpljuje ljudstvo HVO-a i troši podršku Zagreba na operaciju s malo izgleda za uspjeh."
+          },
+          "federate_early": {
+            "label": "Rana federacija s RBiH",
+            "description": "Otvoriti pregovore o federaciji sa Sarajevom u proljeće 1993, gotovo godinu prije Washingtonskog sporazuma: primirje u cijeloj srednjoj Bosni i zajednička komanda protiv VRS-a. Zagreb se tome protivi i odnosi s pokroviteljem Mostara se kidaju, dok položaj Mostara za pregovaračkim stolom jača."
+          }
+        }
+      }
+    },
     "category": "military",
     "family": "hrhb_central_bosnia_response",
     "source_tier": "balkan_battlegrounds",
@@ -1297,14 +1390,14 @@
     },
     "effect": {
       "kind": "narrative",
-      "text": "Mostar records its posture toward the Central Bosnia pocket defense decision as the ARBiH-HVO war envelops the Lašva Valley triangle."
+      "text": "Mostar records its posture toward the central-Bosnia pockets."
     },
     "source_note": "The April-October 1993 Central Bosnia pocket defense is one of the war's defining operational decisions on the HRHB side. After the Gornji Vakuf clashes (Jan 1993, H2) escalated into the full ARBiH-HVO war through spring 1993, HVO Operative Zone Central Bosnia (Blaškić) held three encircled pockets: (i) the Vitez/Busovača/Kiseljak triangle in the Lašva Valley anchoring the historical Croat heartland of central Bosnia, (ii) the Žepče exclave to the north (HVO Operative Group Žepče), and (iii) Mostar west bank under HVO Mostar. ARBiH 3rd Corps (Hadžihasanović), with Alagić's Operational Group Bosanska Krajina, operated the encirclement; the HVO pocket's local strength was a fraction of the ARBiH force ratio. The pocket was operationally indefensible long-term in pure force-correlation terms, but held through October 1993-March 1994 via the Croatia-routed airbridge (Tudjman-Susak channel; Pleso-Posušje-Kiseljak resupply axis; HV officer rotation; ammunition and fuel sustainment). The Washington Agreement of 18 March 1994 resolved the pocket through diplomatic federation rather than military defeat. Sources: Balkan Battlegrounds Vol. II (CIA Office of Russian and European Analysis 2002) chs. on April 1993-March 1994 ARBiH-HVO war chronology, HVO Operative Zone Central Bosnia, Lašva Valley operations, Žepče exclave defense; ICTY Kordić & Čerkez IT-95-14/2-T Trial Judgment (26 February 2001) on HVO political leadership of central Bosnia (Kordić-Blaškić-Kraljević command coordination, Operative Zone Central Bosnia structure 1992-1994); ICTY Blaškić IT-95-14-T Trial Judgment (3 March 2000) on Operative Zone Central Bosnia operations through 1993-1994; ICTY Prlić et al. IT-04-74-T Trial Judgment (29 May 2013) Vol. 1 §§591-640 and Vol. 3 §§412-498 on the Susak-Tudjman correspondence ratifying the airbridge sustainment channel; ICTY Naletilić & Martinović IT-98-34-T Trial Judgment on the Mostar siege axis (separate from the central-Bosnia pocket but operationally adjacent); Tudjman Presidential Transcripts admitted at Prlić Vol. 3 on the directive to sustain the pocket via Croatia. §3.6 STRICT FORWARD-LOOKING GUARD (Lašva Valley sensitive-history canon-gate): the April-October 1993 central-Bosnia operations included the Ahmići massacre (16 April 1993 — ICTY Kupreškić et al. IT-95-16-T + Blaškić + Kordić & Čerkez), Stupni Do (23 October 1993 — ICTY Rajić IT-95-12 + Prlić Vol. 2), and other ICTY-litigated atrocities across the Lašva Valley and Vareš axis. THE H6 DECISION IS OPERATIONAL (defend triangle / evacuate / breakout / federate_early) NOT ATROCITY-COUPLED. Consequence chain prohibitions binding on ALL csq_hrhb_central_bosnia_* descendants: (a) defend_pocket MUST NOT be rewarded with cleansing/displacement/civilian-targeting/paramilitary-deployment effects; (b) Ahmići/Stupni Do/Vitez detention/Lašva Valley atrocity rows MUST NOT appear as downstream choices reachable from any H6 option; (c) NO consequence row may open paramilitary-deployment, civilian-targeting, forced-displacement, ethnic-targeting, hostage-taking, detention-camp-expansion, or any sensitive-act response option in any csq_hrhb_central_bosnia_* descendant. The sensitive Lašva Valley / Stupni Do history is canonical fact but stays canon-gated through the existing event surfaces (h5_croat_bosniak_war_atrocities family, h8_mostar_bridge family, hrhb_camp_exposure / hrhb_detention_camp_exposure family slugs already registered in RING3_SENSITIVE_FAMILIES per src/sim/events/event_families.ts). H6 is a pocket-DEFENSE operational decision (force-correlation, airbridge sustainment, breakout viability, federation timing) — NOT a Lašva Valley atrocity-coupled decision. Cost-floor topology reflects the operational stakes: defend_pocket (historical) carries POSITIVE airbridge-sustained operational morale (morale_change +2 + patron_confidence +5 + military_credibility +5 + internal_cohesion +3 — pocket held the Croat heartland through diplomatic resolution); evacuate_to_herzegovina (counterfactual) carries severe territorial-legitimacy collapse (alliance_change +0.10 de-escalation but territorial_legitimacy -30 loss of historical Croat central-Bosnia heartland + internal_cohesion -25 Vitez/Travnik Croat communities displaced + patron_confidence -15 Tudjman opposed pocket abandonment); breakout_offensive (counterfactual) carries high casualty cost and near-certain failure against ARBiH 3rd Corps encirclement (alliance_change -0.10 amplified rupture + military_credibility -15 historical record shows breakout would have failed + recruitment_modifier 0.85x × 6 turns); federate_early (counterfactual) — parallel to H4 (Zagreb-ordered ceasefire Feb 1994, `zagreb_orders_hrhb_ceasefire`) but at PACKET-EARLIER timing (April 1993 federation overture against Tudjman's directive) — carries paradoxical de-escalation gain at patron-channel rupture (alliance_change +0.15 strong Federation overture + patron_confidence -25 Tudjman opposed the early federation + negotiating_leverage +10). Note: federate_early effects DELIBERATELY DIFFER from H4 effects to capture the EARLIER counterfactual road-not-taken (April 1993 vs Feb 1994). Engine vocabulary substitutions per memory/engine_dimension_vocabulary.md: alliance_change captures the RBiH↔HRHB Federation alliance proxy; patron_confidence captures the Zagreb relationship; territorial_legitimacy captures the loss-of-Croat-heartland proxy on evacuate_to_herzegovina; recruitment_modifier captures the casualty-cost manpower constriction on breakout_offensive (subject to memory/recruitment_modifier_dead_channel.md caveat — narrative effect is independent of whether the modifier propagates to brigade pool). New event reuses existing HRHB_BRANCH_TAGS entries (`hrhb_central_bosnia_war` for defend_pocket; `hrhb_central_bosnia_ceasefire` for evacuate_to_herzegovina; `hrhb_strategic_ambiguity` for breakout_offensive; `hrhb_united_front` for federate_early) — no vocabulary additions; no new carrier flags. This packet extends the HRHB chain (H1) by one downstream event (was 10, now 11 in `enables_events_runtime`).",
-    "staff_assessment": "Defending the pocket is the documented Mostar posture across the April 1993-March 1994 window: Boban, Blaškić, Kordić, and the HZ HB Presidency aligned that holding the Lašva Valley triangle and Žepče exclave through the Tudjman-Susak airbridge channel was operationally sustainable until a diplomatic resolution arrived. Evacuation is the maximum-cost counterfactual on identity/territorial-legitimacy grounds — surrendering the historical Croat heartland of central Bosnia would collapse the HZ HB territorial claim and displace Vitez/Travnik Croat communities under ARBiH control. Breakout is the maximum-cost counterfactual on military grounds — the force ratio against ARBiH 3rd Corps made any breakout operationally near-certain to fail, with casualty losses that would dwarf the airbridge-sustained holding pattern. Federate_early is the road-not-taken counterfactual at the patron-channel cost — an April 1993 federation overture would have anticipated the Washington Agreement framework by eleven months but at the cost of a Tudjman patron-channel rupture (Zagreb opposed the early federation; the Croat-Bosniak war had to run its course before Tudjman's Susak channel could be diverted to compliance with the Granic-Silajdzic Washington track). The historical default reflects the operational reality: the pocket was sustainable via the airbridge until diplomatic resolution.",
+    "staff_assessment": "Holding the pockets was the historical posture from April 1993 until the ceasefire of February 1994 and the Washington Agreement of March 1994. Withdrawal gives up Mostar's claim to central Bosnia and opens a break with Zagreb. A breakout runs against a force ratio that favours the ARBiH 3rd Corps and costs HVO manpower. Early federation eases the war with the ARBiH but breaks relations with Zagreb.",
     "trigger_evidence": [
-      "The ARBiH-HVO war from spring 1993 has encircled HVO Operative Zone Central Bosnia in the Vitez/Busovaca/Kiseljak triangle plus the Žepče exclave.",
-      "ARBiH 3rd Corps (Hadžihasanović), with Alagić's Operational Group Bosanska Krajina, holds the encirclement with a force ratio favorable to ARBiH.",
-      "The Tudjman-Susak airbridge channel sustains the pocket via Croatia routing — operationally viable but politically conditional on Zagreb's continued patronage."
+      "The HVO in central Bosnia holds separate pockets around Vitez-Busovača and Kiseljak, plus the Žepče exclave, each cut off from Herzegovina.",
+      "ARBiH 3rd Corps units surround the pockets with a force ratio favorable to the ARBiH.",
+      "Supply into the pockets depends on Zagreb and on what can be brought in through hostile lines."
     ],
     "response_options": [
       {
@@ -1312,7 +1405,7 @@
         "branch_tag": "hrhb_central_bosnia_war",
         "historical_marker": "historical_default",
         "label": "Defend the pocket",
-        "description": "Hold the Vitez/Busovača/Kiseljak triangle and the Žepče exclave. Blaškić consolidates the Operative Zone defenses; the Tudjman-Susak airbridge sustains ammunition, fuel, and officer rotation through Croatia. The pocket is operationally viable until a diplomatic resolution arrives — the Croat heartland of central Bosnia is preserved on the ground.",
+        "description": "Order Blaškić to hold the Vitez-Busovača and Kiseljak pockets and the Žepče exclave with what the Operative Zone has, and press Zagreb to keep supplies coming. This was the historical posture until the February 1994 ceasefire and the Washington Agreement.",
         "effects": [
           {
             "kind": "morale_change",
@@ -1348,7 +1441,7 @@
         "branch_tag": "hrhb_central_bosnia_ceasefire",
         "historical_marker": "counterfactual",
         "label": "Evacuate to Herzegovina",
-        "description": "Withdraw HVO Operative Zone Central Bosnia along the corridor to Herzegovina. The Lašva Valley triangle and Žepče exclave are abandoned; Vitez, Busovača, Kiseljak, Travnik, and Žepče Croat communities are displaced under ARBiH control. The ARBiH-HVO war de-escalates dramatically — a Croat-Bosniak alliance reconstruction becomes structurally easier — but the historical Croat heartland of central Bosnia is surrendered. Tudjman is furious: pocket abandonment was politically forbidden in his directive.",
+        "description": "Order the Operative Zone to prepare a withdrawal toward Herzegovina. With this order Mostar gives up its claim to the Lašva valley, Kiseljak and Žepče and their Croat communities, and Zagreb opposes it.",
         "effects": [
           {
             "kind": "morale_change",
@@ -1388,7 +1481,7 @@
         "branch_tag": "hrhb_strategic_ambiguity",
         "historical_marker": "counterfactual",
         "label": "Mount a breakout offensive",
-        "description": "Launch HVO Operative Zone Central Bosnia in a coordinated breakout offensive against the ARBiH 3rd Corps encirclement. The force ratio is heavily unfavorable; the historical record across the April 1993-October 1993 window shows ARBiH 3rd Corps strength would have absorbed and crushed any breakout attempt before it could reach Operative Zone South-East Herzegovina relief axes. Heavy casualties drain the HVO manpower pool; the airbridge sustainment is squandered on a militarily near-impossible operation.",
+        "description": "Order the Operative Zone to attempt a breakout through the ARBiH 3rd Corps lines. The force ratio is heavily against it. The order drains HVO manpower and spends Zagreb's support on an operation unlikely to succeed.",
         "effects": [
           {
             "kind": "morale_change",
@@ -1429,7 +1522,7 @@
         "branch_tag": "hrhb_united_front",
         "historical_marker": "counterfactual",
         "label": "Federate early with RBiH",
-        "description": "Open an April 1993 federation overture with Sarajevo — eleven months ahead of the historical Washington Agreement (Mar 1994). HZ HB Presidency formally proposes federated HVO-ARBiH command coordination, ceasefire across central Bosnia, and joint anti-VRS prosecution. Tudjman is opposed: Zagreb's directive across spring 1993 was pocket-hold, not federation-early; the patron-channel ruptures. Negotiating leverage at the international table rises sharply — Mostar anticipates the Washington framework. This is the road-not-taken counterfactual distinct from H4 (zagreb_orders_hrhb_ceasefire, Feb 1994).",
+        "description": "Open federation talks with Sarajevo in the spring of 1993, nearly a year before the Washington Agreement: a ceasefire across central Bosnia and joint command against the VRS. Zagreb opposes it and relations with Mostar's patron break down, while Mostar's standing at the negotiating table rises.",
         "effects": [
           {
             "kind": "morale_change",
@@ -1473,32 +1566,32 @@
       },
       "evacuate_to_herzegovina": {
         "RBiH": {
-          "headline": "HVO withdraws from central-Bosnia heartland",
-          "body": "Mostar orders HVO Operative Zone Central Bosnia to withdraw along the corridor to Herzegovina. Sarajevo reads the dramatic de-escalation in central Bosnia but inherits responsibility for Vitez/Travnik Croat communities — the ARBiH-HVO war winds down at the cost of HZ HB's territorial claim."
+          "headline": "Mostar orders its central-Bosnia pockets to prepare withdrawal",
+          "body": "HZ HB orders the Operative Zone Central Bosnia to prepare a withdrawal toward Herzegovina. Sarajevo reads a step back from the Croat claim to central Bosnia."
         },
         "RS": {
-          "headline": "HVO abandons central-Bosnia pockets",
-          "body": "Herceg-Bosna withdraws HVO forces from central Bosnia to Herzegovina. Pale reads the territorial concession to ARBiH but notes the Tudjman patron-channel friction; the partition map is reshaped by Croat retreat."
+          "headline": "Herceg-Bosna prepares to give up its central-Bosnia pockets",
+          "body": "Mostar orders its central-Bosnia pockets to prepare a withdrawal. Pale notes the friction this opens with Zagreb."
         }
       },
       "breakout_offensive": {
         "RBiH": {
-          "headline": "HVO mounts central-Bosnia breakout attempt",
-          "body": "Mostar orders Blaškić to mount a coordinated breakout offensive from the Lašva Valley triangle. Sarajevo reads the desperate operational gamble; 3rd Corps formations are repositioned to absorb the breakout. Casualties mount on both sides."
+          "headline": "Mostar orders a breakout from the Lašva pocket",
+          "body": "HZ HB orders Blaškić to attempt a breakout from the Lašva valley. Sarajevo staff expect the attempt against the 3rd Corps lines."
         },
         "RS": {
-          "headline": "HVO launches doomed central-Bosnia breakout",
-          "body": "Herceg-Bosna mounts a breakout offensive against ARBiH 3rd Corps encirclement. Pale reads the force-ratio mismatch and the predictable casualty cost; the ARBiH-HVO war escalates while VRS holds its main axes."
+          "headline": "Herceg-Bosna orders a central-Bosnia breakout",
+          "body": "Mostar orders its central-Bosnia pockets to break out through the ARBiH lines. Pale reads the force ratio as heavily against the HVO."
         }
       },
       "federate_early": {
         "RBiH": {
           "headline": "Mostar proposes early federation with Sarajevo",
-          "body": "HZ HB Presidency opens an April 1993 federation overture — eleven months ahead of the Washington framework. Sarajevo reads the Croat-Bosniak war ending earlier than history records, but notes Zagreb's patron-channel rupture as the operational cost of the diplomatic gain."
+          "body": "The HZ HB Presidency opens a federation overture in the spring of 1993, nearly a year ahead of the Washington framework. Sarajevo weighs the offer and notes the rupture it opens with Zagreb."
         },
         "RS": {
-          "headline": "Herceg-Bosna federates early with Sarajevo",
-          "body": "Mostar opens federation talks with Sarajevo in spring 1993, eleven months ahead of the historical Washington track. Pale reads the Croat-Bosniak realignment against partition framing and notes the Tudjman patron-channel rupture as the leading indicator."
+          "headline": "Herceg-Bosna opens federation talks with Sarajevo",
+          "body": "Mostar opens federation talks with Sarajevo nearly a year ahead of the historical Washington track. Pale reads the Mostar-Sarajevo realignment as a threat to partition and notes the rupture with Zagreb."
         }
       }
     },
@@ -1613,7 +1706,13 @@
   {
     "id": "sovici_doljani_attack_1993",
     "title": "Sovići-Doljani Attack",
-    "narrative": "HVO forces attack the Bosniak villages of Sovići and Doljani near Jablanica, detaining approximately 400 Bosniak civilians and capturing 70-75 ARBiH soldiers. The attack occurs simultaneously with the Ahmići massacre in the Lašva Valley, revealing coordinated HVO operations across both central Bosnia and Herzegovina.",
+    "narrative": "On 17 April 1993, a day after the Ahmići massacre, HVO forces attack the Bosniak villages of Sovići and Doljani near Jablanica. About 400 Bosniak civilians are detained and 70 to 75 ARBiH soldiers are taken prisoner. Crimes committed in the attack and its aftermath were tried at the ICTY in the Naletilić and Martinović case.",
+    "localizations": {
+      "bcs": {
+        "title": "Napad na Soviće i Doljane",
+        "narrative": "Dana 17. aprila 1993, dan nakon masakra u Ahmićima, snage HVO-a napadaju bošnjačka sela Soviće i Doljane kod Jablanice. Oko 400 bošnjačkih civila je zatočeno, a 70 do 75 vojnika ARBiH zarobljeno. Za zločine počinjene u napadu i nakon njega sudilo se pred MKSJ-om u predmetu Naletilić i Martinović."
+      }
+    },
     "category": "military",
     "source_tier": "icty_icj_un",
     "source_note": "The Naletilic and Martinovic Trial Judgment supplies adjudicated findings concerning the attack, detention, and destruction record; Balkan Battlegrounds Vol. II p. 434 independently anchors the April 1993 operational chronology. The essay is original synthesis and does not infer responsibility beyond the cited findings.",
@@ -1643,7 +1742,7 @@
       },
       {
         "kind": "narrative",
-        "text": "Coordinated HVO operations strike from Jablanica to the Lašva Valley simultaneously. The scale reveals systematic planning behind what the HVO publicly frames as defensive action."
+        "text": "HVO forces attack Sovići and Doljani near Jablanica, a day after the Ahmići massacre."
       }
     ],
     "dimension_shifts": [
@@ -2080,7 +2179,13 @@
     "id": "vitez_kiseljak_pockets_1993",
     "image": "event_central_bosnia_front.webp",
     "title": "Vitez-Kiseljak Pockets Isolated",
-    "narrative": "As the Croat-Bosniak war intensifies, HVO garrisons in the Vitez-Busovača pocket and the Kiseljak enclave become increasingly cut off from resupply by HVO main forces in western Herzegovina. The pockets must survive on local resources and intermittent VRS cooperation, while the ARBiH weighs the cost of an assault against the benefits of encirclement.",
+    "narrative": "With the alliance broken, HVO garrisons in the Vitez-Busovača pocket and the Kiseljak enclave are cut off from resupply by HVO main forces in western Herzegovina. The pockets must survive on local resources and intermittent VRS cooperation, while the ARBiH weighs the cost of an assault against the benefits of encirclement.",
+    "localizations": {
+      "bcs": {
+        "title": "Džepovi Vitez i Kiseljak odsječeni",
+        "narrative": "Nakon raspada saveza garnizoni HVO-a u džepu Vitez-Busovača i u kiseljačkoj enklavi odsječeni su od snabdijevanja iz glavnine HVO-a u zapadnoj Hercegovini. Džepovi moraju opstati na lokalnim zalihama i povremenoj saradnji s VRS-om, dok ARBiH odmjerava cijenu napada naspram koristi od okruženja."
+      }
+    },
     "category": "military",
     "source_tier": "icty_icj_un",
     "source_note": "The listed adjudicative and institutional sources bound the chronology, actors, and findings described. The essay is original synthesis and does not extend individual liability, command responsibility, or institutional findings beyond the cited record.",
@@ -2106,7 +2211,7 @@
       },
       {
         "kind": "narrative",
-        "text": "HVO defenders in central Bosnia fight with the desperation of encirclement. Each convoy that fails to reach them deepens the crisis."
+        "text": "HVO garrisons in central Bosnia hold on inside their pockets. Supplies reach them only with difficulty."
       }
     ],
     "dimension_shifts": [
@@ -2314,7 +2419,16 @@
     "id": "east_mostar_siege_1993",
     "image": "event_siege_city_HRHB.webp",
     "title": "HVO Besieges East Mostar",
-    "narrative": "HVO forces impose a complete blockade on the eastern bank of Mostar, cutting off the Bosniak population from food, water, and medical supplies. Systematic shelling targets the densely populated old town. An estimated 55,000 Bosniaks are trapped in increasingly desperate conditions as the HVO seeks to drive them from the city entirely.",
+    "narrative": "Mostar is divided. The HVO holds the west bank and the city's administration, and the ARBiH holds the east bank. The 1992 alliance that drove the VRS out of the city is over, and the line between the former partners now runs through it. In the historical record the HVO attacked on 9 May 1993 and from June besieged the east bank until the spring of 1994. The ICTY found that the HVO shelled and sniped at civilians in East Mostar to spread terror among them, and that it obstructed humanitarian aid to the east bank (Prlić et al.).",
+    "localizations": {
+      "en": {
+        "title": "Mostar Divided"
+      },
+      "bcs": {
+        "title": "Podijeljeni Mostar",
+        "narrative": "Mostar je podijeljen. HVO drži zapadnu obalu i gradsku upravu, a ARBiH istočnu obalu. Savez iz 1992, koji je istjerao VRS iz grada, okončan je, a linija između bivših saveznika sada prolazi kroz grad. U historijskom zapisu HVO je napao 9. maja 1993, a od juna je opsjedao istočnu obalu sve do proljeća 1994. MKSJ je utvrdio da je HVO granatirao i snajperom gađao civile u istočnom Mostaru kako bi među njima širio teror, te da je ometao dostavu humanitarne pomoći na istočnu obalu (Prlić i drugi)."
+      }
+    },
     "category": "military",
     "historical_source": "ICTY Prlic et al. Trial Judgment (IT-04-74-T), East Mostar siege findings; ICTY Naletilic and Martinovic Trial Judgment (IT-98-34-T), Mostar findings",
     "source_tier": "icty_icj_un",
@@ -2351,7 +2465,7 @@
       },
       {
         "kind": "narrative",
-        "text": "East Mostar is besieged. 55,000 Bosniaks are trapped as HVO forces impose a total blockade on the eastern bank."
+        "text": "Mostar is divided between the HVO on the west bank and the ARBiH on the east."
       }
     ]
   },
@@ -2708,7 +2822,16 @@
     "id": "maglaj_enclave_blockade_1993",
     "image": "event_enclave_valley_town.webp",
     "title": "Maglaj Enclave Under Joint HVO-VRS Blockade",
-    "narrative": "Following the collapse of the ARBiH-HVO alliance, the HVO joins the VRS in imposing a complete blockade on the Bosniak-held pocket around Maglaj, trapping approximately 100,000 people. The town endures relentless bombardment and near-total isolation for nine months, surviving partly on US airdrop supplies. The joint siege exemplifies the impossible tactical situation the ARBiH now faces — encircled from two directions simultaneously.",
+    "narrative": "With the alliance broken, the HVO in Žepče no longer stands with the ARBiH around Maglaj. The VRS holds the approaches on one side and the HVO on the other, and supplies reach the Maglaj pocket with difficulty. In the historical record the VRS and the HVO blockaded Maglaj from the summer of 1993, and the town lived for months on the few convoys that got through and on airdrops.",
+    "localizations": {
+      "en": {
+        "title": "Maglaj Between the VRS and the HVO"
+      },
+      "bcs": {
+        "title": "Maglaj između VRS-a i HVO-a",
+        "narrative": "Nakon raspada saveza HVO u Žepču više ne stoji uz ARBiH oko Maglaja. VRS drži prilaze s jedne strane, a HVO s druge, a snabdijevanje teško stiže do maglajskog džepa. U historijskom zapisu VRS i HVO blokirali su Maglaj od ljeta 1993, a grad je mjesecima živio od rijetkih konvoja koji su prolazili i od pomoći bačene iz zraka."
+      }
+    },
     "category": "humanitarian",
     "source_tier": "icty_icj_un",
     "source_note": "The Prlic Trial Judgment supplies adjudicated Croat-Bosniak conflict context; Balkan Battlegrounds Vol. II pp. 450-451 independently anchors the Maglaj enclave's siege conditions and local military chronology. The essay is original synthesis and keeps operational description distinct from legal findings.",
@@ -2733,7 +2856,7 @@
       },
       {
         "kind": "narrative",
-        "text": "Maglaj's joint blockade is a new strategic reality: the ARBiH must now defend against coordinated Serb and Croat pressure in the same valley."
+        "text": "Around Maglaj the ARBiH now faces the VRS and the HVO in the same valley."
       }
     ],
     "dimension_shifts": [
@@ -4678,7 +4801,13 @@
     "id": "operation_neretva_93_1993",
     "image": "event_highland_offensive.webp",
     "title": "Operation Neretva '93",
-    "narrative": "On 14 September 1993, ARBiH forces mount a sizable offensive east of Prozor during the Neretva fighting. The advance continues south from Jablanica and Dreznica, with combat around Vrdi and a separate 17 September attack from East Mostar. The recorded gains remain limited and do not establish a decisive breakthrough.",
+    "narrative": "In mid-September 1993 the ARBiH opens an offensive east of Prozor, part of the Neretva fighting. In the historical record the offensive began on 14 September, pushed south from Jablanica and Drežnica toward Vrdi, and was followed on 17 September by an attack out of East Mostar. Its gains stayed limited, and there was no decisive breakthrough.",
+    "localizations": {
+      "bcs": {
+        "title": "Operacija Neretva '93",
+        "narrative": "Sredinom septembra 1993. ARBiH otvara ofanzivu istočno od Prozora, u sklopu borbi na Neretvi. U historijskom zapisu ofanziva je počela 14. septembra, nastavila se južno od Jablanice i Drežnice prema Vrdima, a 17. septembra uslijedio je napad iz istočnog Mostara. Dobici su ostali ograničeni i odlučujućeg proboja nije bilo."
+      }
+    },
     "category": "military",
     "source_tier": "icty_icj_un",
     "historical_source": "Balkan Battlegrounds Vol. II, pp. 434-435, September 1993 fighting east of Prozor and along the Neretva; ICTY Halilovic Trial Judgment (IT-01-48-T, 16 November 2005), Operation Neretva command record and Grabovica/Uzdol findings.",
@@ -4699,7 +4828,7 @@
     "once": true,
     "effect": {
       "kind": "narrative",
-      "text": "ARBiH forces open the September offensive east of Prozor and continue attacks along the Neretva toward Mostar."
+      "text": "ARBiH forces open the September offensive east of Prozor."
     }
   },
   {

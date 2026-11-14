@@ -124,7 +124,7 @@ DAYTON ENDGAME
 | Bot response | `event_flags{}` (FIX NEEDED) | Same as event system flags |
 | Officer system | `CorpsCommandState.stance` | Operation launch gate, bot corps directives, sector stance cascade |
 | Political bot | `event_constraints{}` | Operation blocks, doctrine overrides, scope restrictions |
-| Political bot | `event_aggression_modifiers[]` | Corps directive aggression scoring |
+| Political bot | `event_aggression_modifiers[]` | Designed: corps directive aggression scoring. Current build: no consumer; recorded in state only (realism audit F6, wiring deferred post-1.0) |
 | Operations | `political_controllers[osid]` | Territory, front lines, sectors — same cascade as paramilitaries |
 | Displacement | IVP components | `patron_pressure.ts`, exhaustion modifier, dimension base values |
 
@@ -156,7 +156,7 @@ Player Choice (event decision / paramilitary policy / corps stance / operation l
     ├─→ Political Bot Response (v0.8.0, opposing factions)
     │       │
     │       ├─→ event_constraints (operation blocks, doctrine overrides)
-    │       ├─→ event_aggression_modifiers (corps directive tuning)
+    │       ├─→ event_aggression_modifiers (designed for corps directive tuning; recorded but not applied in current build, audit F6)
     │       └─→ Alliance/diplomacy adjustments
     │
     ├─→ Officer Interpretation (v0.8.1, player faction)
@@ -213,6 +213,7 @@ Player Choice (event decision / paramilitary policy / corps stance / operation l
 **Status:** DESIGN GAP (found by Operations Expert)
 **Impact:** Multiple overlapping aggression modifiers from political bot can sum to -0.30+, functionally suppressing all offensives.
 **Fix:** `AGGRESSION_MODIFIER_FLOOR = -0.20`. Add per-corps operation blocks (currently faction-wide only).
+**Current build note (realism audit F6):** event aggression modifiers are recorded in `military.event_aggression_modifiers` but nothing feeds them into bot or corps aggression, so stacking has no live effect today. The floor becomes relevant once the post-1.0 wiring lands.
 **Milestone:** v0.8.0 (political bot implementation)
 
 ### GAP 7: Officer cycling avoids cowed penalty

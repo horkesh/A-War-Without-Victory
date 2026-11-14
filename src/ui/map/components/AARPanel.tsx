@@ -223,9 +223,15 @@ function BattleRow({
     const label = getOsidDisplayName(battle.osid, osidDisplayNames);
     const outcomeLabel = OUTCOME_LABEL_KEY[battle.outcome] ? t(OUTCOME_LABEL_KEY[battle.outcome]) : t('aar.outcome.recorded');
     const outcomeColor = OUTCOME_COLOR[battle.outcome] ?? 'text-[#c2b69c]';
-    const countLabel = battle.was_concentrated
-        ? t('aar.concentratedAttackShort', { count: battle.all_attacker_ids.length })
-        : null;
+    const attackerIds = Array.isArray(battle.all_attacker_ids) ? battle.all_attacker_ids : [];
+    // Enemy attackers reach the client as one fogged contact, so a concentrated
+    // enemy assault is labelled without a brigade count.
+    const countLabel = attackerIds.length > 1
+        ? t('aar.concentratedAttackShort', { count: attackerIds.length })
+        : battle.was_concentrated
+            ? t('aar.concentratedAttackUncounted')
+            : null;
+    const supportingAttackerIds = attackerIds.filter((id) => id !== battle.primary_attacker_id);
     const primaryAttackerLabel = getPlayerSafeBrigadeName(formationNameById.get(battle.primary_attacker_id));
     const primaryDefenderLabel = battle.primary_defender_id
         ? getPlayerSafeBrigadeName(formationNameById.get(battle.primary_defender_id))
@@ -288,6 +294,20 @@ function BattleRow({
                     >
                         {primaryAttackerLabel}
                     </button>
+                    {supportingAttackerIds.map((id) => (
+                        <button
+                            key={id}
+                            type="button"
+                            data-testid="aar-formation-link"
+                            data-role="attacker"
+                            data-formation-id={id}
+                            data-osid={battle.osid}
+                            className={AAR_LINK}
+                            onClick={() => onSelectFormation(id, battle.osid)}
+                        >
+                            {getPlayerSafeBrigadeName(formationNameById.get(id))}
+                        </button>
+                    ))}
                     {battle.primary_defender_id && (
                         <>
                             <span>{t('aar.vs')}</span>
