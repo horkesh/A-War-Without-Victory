@@ -32,7 +32,8 @@
  * Determinism: pure function of its numeric input. No RNG, no clock.
  */
 
-import { getActiveLocale, t } from '../i18n/index.js';
+import { t } from '../i18n/index.js';
+import { formatLocaleNumber } from '../utils/formatters.js';
 
 /** Cumulative-displacement milestone rungs (people displaced, ascending).
  *  A beat fires at the FIRST turn the running total crosses each rung. Chosen to
@@ -60,7 +61,7 @@ export const REFUGEE_SURGE_RATIO = 3;
 /** Format a people-count as a compact, somber figure (e.g. 1,500,000). */
 export function formatRefugeeCount(n: number): string {
     const safe = Number.isFinite(n) ? Math.max(0, Math.round(n)) : 0;
-    return safe.toLocaleString(getActiveLocale() === 'bcs' ? 'bs-BA' : 'en-US');
+    return formatLocaleNumber(safe);
 }
 
 /** Prose for a cumulative-milestone note. Faction-agnostic, non-gamified — the

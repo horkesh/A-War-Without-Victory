@@ -63,7 +63,7 @@
  *   pinned constant must be updated deliberately — not reflexively — because restoring the
  *   cohesion criterion is dissolution-INCREASING and moves territory.
  *
- *   node_modules/.bin/tsx tools/hooks/floor_vs_dissolution.ts
+ *   npx tsx tools/hooks/floor_vs_dissolution.ts
  *
  * Exit 1 if any faction/turn is unreachable, so it can gate a future change once fixed.
  */

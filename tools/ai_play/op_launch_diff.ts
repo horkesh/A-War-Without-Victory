@@ -20,7 +20,7 @@
  * them, so a difference here is a real behavioural difference, not an instrumentation artifact.
  *
  * Usage:
- *   node_modules/.bin/tsx tools/ai_play/op_launch_diff.ts [--turns N] [--faction RS]
+ *   npx tsx tools/ai_play/op_launch_diff.ts [--turns N] [--faction RS]
  */
 
 import { join } from 'node:path';

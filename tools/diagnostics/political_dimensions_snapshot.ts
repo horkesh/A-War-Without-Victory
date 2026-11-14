@@ -16,7 +16,7 @@
  * Date.now, no timestamps.
  *
  * CLI:
- *   node node_modules/tsx/dist/cli.mjs tools/diagnostics/political_dimensions_snapshot.ts [options]
+ *   npx tsx tools/diagnostics/political_dimensions_snapshot.ts [options]
  *
  * Options:
  *   --save <path>         Path to final_save.json (defaults to

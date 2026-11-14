@@ -172,8 +172,9 @@ describe('VerdictScreen Replay tab — live-play multi-frame manifest', () => {
         // The scrubber initialises at index 0 (frame 1). makeFrame(1,...) has
         // totalCasualties = 1 * 500 = 500.
         expect(html).toContain('500');
-        // The date of the first frame is also present.
-        expect(html).toContain('1992-04-06');
+        // The date of the first frame is also present, in the UI's date format (not raw ISO).
+        expect(html).toContain('6 Apr 1992');
+        expect(html).not.toContain('1992-04-06');
     });
 
     it('Replay tab is NOT visible when manifest is absent (live session not yet started)', () => {
