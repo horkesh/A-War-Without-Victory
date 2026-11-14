@@ -1,6 +1,6 @@
 # Third-Party Notices
 
-A War Without Victory is proprietary software of Pyrrhic Games (see `LICENSE`). It includes third-party
+A War Without Victory is licensed under the PolyForm Noncommercial License 1.0.0 (see `LICENSE.md`). It includes third-party
 software, fonts, map and elevation data, and recorded audio samples. Each keeps its own licence, and
 those terms govern that component. This file lists them.
 
@@ -148,7 +148,7 @@ Packages: 81.
 | MIT | 56 |
 | NOT DECLARED | 1 |
 
-Where a package offers a choice of licences (for example `MIT OR GPL-3.0-or-later`), Pyrrhic Games
+Where a package offers a choice of licences (for example `MIT OR GPL-3.0-or-later`), the project
 uses it under the first permissive option listed.
 
 <!-- npm-packages:start -->
