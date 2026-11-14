@@ -43,7 +43,7 @@
 **Notes on the runs.**
 - Runs 2-6 scored +2/+2/+3 because of two things. One was a coin-flip in a single planner choice: the 4th Corps launched a probe at t76 instead of forming Operacija Ponos, so the Prozor pair stayed HVO. The other was a reward for atrocity: the pass-through re-route moved about 23.5k of HRHB's own refugees out of the Lašva pocket into Livno, which added about 12k HRHB strategic reserve. Neither was a merge candidate.
 - After the re-route fix, the final run equals main.
-  - The Oct95 noise nets to 0: Kljevci lost at t186 in the Sana tail, Varošluk gained at t177-179.
+  - The Oct95 noise nets to 0: Kljevci lost at t186 in the Sana tail, Varošluk gained at t177-179. Varošluk is a match on an unsourced calibration-assumption axis (the 737th's inclusion in Donji Vakuf 95 is a planner knife-edge, t178 against main's t180), not a historical recovery; do not cite it as validation.
   - Battles per week −0.8%.
   - Strict health PASS, guards intact, consistency 1 (the same pre-existing gap as main).
   - Croats displaced by RBiH forces: 34,475 people.
@@ -57,7 +57,7 @@ Tools: `tools/diagnostics/hvo_arbih_war/hrhb_manpower_check.cjs`, `late_war_chec
   - t170 +0.02%, t180 +0.80%, t188 −0.15%. The t180 excess is entirely in the corps-less 1995 operational brigades and reverses by t184.
 - **End state (t188).** Strategic reserve 21,035 vs 24,104. Pool committed 136,109 vs 138,970. Total sheltered HRHB refugees 128,038 vs 128,143.
 - **HRHB recruitment displacement multiplier.** −4.9% at t170, −4.1% at t188.
-- **Livno supply population factor.** Equal at t170 (0.904). At t188 it is 1.00 vs 0.91: east Mostar's shared capacity holds Bosniak expellees, so Livno's 1992 Krajina Croats are not moved on. The same 22,830 arrive in both runs, and nothing downstream gains.
+- **Livno supply population factor.** Equal at t170 (0.904). At t188 it is 1.00 vs 0.91: east Mostar's shared capacity holds Bosniak expellees, so Livno's 1992 Krajina Croats are not moved on. The same 22,830 arrive in both runs, and nothing downstream gains. That holds only because Livno has no production facility: if one is added there, or local production gains another consumer, the B5 no-reward re-run must re-check it.
 - **Targeting and defence.** The ethnic inputs to brigade targeting and defence are the static 1991 census, so expulsions cannot change them.
 - **Restrain counterfactual.** It equals main.
 
