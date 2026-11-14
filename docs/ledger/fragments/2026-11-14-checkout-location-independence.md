@@ -40,7 +40,7 @@
 The owner chose the entry-point fix for the tools (option 2). New `tools/ai_play/repo_root_cwd.ts`, imported first, switches the process to the repo root, as `electron-main.cjs` does. It skips the `chdir` when already there, because `chdir` throws in vitest worker threads. It is used by `president_playthrough.ts` (and so by `run_president_rbih` and `run_rbih_best_outcome`), `territory_sweep`, `parity_probe`, `op_launch_diff` and `desktop_calibration_compare`. Their relative path arguments resolve against the launch folder via `fromLaunchDir()`.
 
 Proven:
-- `run_rbih_best_outcome` launched from a scratch folder with `--out rbih_rel` wrote there. Its first strategy's final state (war over at turn 40) is byte-identical to a repo-root run's, with no turn errors.
+- `run_rbih_best_outcome` launched from a scratch folder with `--out rbih_rel` wrote there. All four strategies completed with no turn errors (`maximal_activist` to turn 194, the others ending at turn 40). `all_results.json` and all four final states are byte-identical to a repo-root run's.
 - `territory_sweep` launched from a scratch folder, with a relative strategy and `--out`, ran 2 turns and exit 0.
 - `parity_probe --turns 2` gives identical hashes from a scratch folder, from the repo root, and on `origin/main`. The t1 calibration/harness divergence predates this PR.
 
