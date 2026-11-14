@@ -10,6 +10,7 @@ import { createElement } from 'react';
 import { render, screen, cleanup } from '@testing-library/react';
 import { readFileSync } from 'node:fs';
 import type { EventDisplayData } from '../../src/ui/map/components/EventModal';
+import { withoutComments } from '../helpers/sourceComments';
 
 const EVENT: EventDisplayData = {
     id: 'cessation_of_hostilities',
@@ -93,7 +94,7 @@ describe('EventModal layout', () => {
 });
 
 describe('Warroom status strip placement', () => {
-    const source = readFileSync('src/ui/map/components/warroom/WarroomStatusBar.tsx', 'utf8');
+    const source = withoutComments(readFileSync('src/ui/map/components/warroom/WarroomStatusBar.tsx', 'utf8'));
 
     it('is centred horizontally on the desk, not pinned to the right edge', () => {
         const strip = source.match(/data-tutorial-step="warroom-status-bar"\s+className="([^"]+)"/);
