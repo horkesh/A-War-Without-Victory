@@ -54,11 +54,15 @@ export const FLEE_ABROAD_FRACTION_RS = 0.30;
 export const FLEE_ABROAD_FRACTION_HRHB = 0.40;
 
 /**
- * Bosniaks: ~40% leave BiH, to Western Europe and Croatia (range 0.30-0.50; ICTY OTP 0.48).
- * Was 0.0 ("no external state to flee to"), which made Bosniaks the people least likely to
- * leave the country (realism audit F4).
+ * Bosniaks: share abroad at the moment of displacement. F4b (panel round 1, War-or-Game and
+ * Historian seats): the ICTY OTP 48% is where people were registered in 1997-98, after onward
+ * migration the model does not have (Srebrenica's 18% abroad can only be post-1995 movement),
+ * so the default is 0.20 (range 0.15-0.30; central Bosnia's expellees went to Zenica and Travnik).
+ * Regional overrides in displacement_takeover.ts: eastern Bosnia and the Sarajevo ring 0.08,
+ * Bijeljina/Posavina/Čapljina/Stolac exits 0.40, Krajina convoys 0.55. Was 0.0 ("no external
+ * state to flee to"), which made Bosniaks the people least likely to leave (realism audit F4).
  */
-export const FLEE_ABROAD_FRACTION_RBIH = 0.40;
+export const FLEE_ABROAD_FRACTION_RBIH = 0.20;
 
 // Sealed pockets: the siege path in displacement.ts books its departures with no flight abroad;
 // they go to own-side territory (F4, 2026-11-14). A simplification (Historian seat): it fits

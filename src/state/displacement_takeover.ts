@@ -67,9 +67,28 @@ const KRAJINA_BOSNIAK_CONVOY_MUN_IDS = new Set<MunicipalityId>([
 ]);
 const KRAJINA_BOSNIAK_FLEE_ABROAD = 0.55;
 
-// F4 (2026-11-14): the Bosniak border-municipality override (0.10) is deleted. Below the Bosniak
-// default it contradicted the record (Bijeljina 67% abroad; Herzegovina detainees released to third
-// countries); those municipalities now take the default.
+// F4b (panel round 1, War-or-Game and Historian seats; ICTY OTP 47-municipality report, Annex A6;
+// Krstić TJ; Krajišnik TJ). Bosniak share abroad at the moment of displacement, by origin:
+// - Eastern Bosnia and the Sarajevo ring: 0.08 (range 0.05-0.15). 1992 expellees went into
+//   Srebrenica, Cerska, Žepa, Goražde, Sarajevo and Tuzla; the real exits (deportation through
+//   Serbia, flight into Sandžak and Montenegro) were small. The OTP endpoints (Srebrenica 18%,
+//   Zvornik 45%) are onward movement after flight, which the model does not have.
+// - Bijeljina, Posavina, Čapljina and Stolac: 0.40. Semberija bordered Serbia; Posavina could
+//   cross the Sava to Croatia; HVO detainees were released to third countries via Croatia (Prlić TJ).
+// The former 0.10 border override is gone: below any realistic default it contradicted the record.
+const BOSNIAK_EAST_SARAJEVO_RING_MUN_IDS = new Set<MunicipalityId>([
+    'zvornik', 'bratunac', 'srebrenica', 'vlasenica', 'sekovici', 'han_pijesak', 'hanpijesak',
+    'rogatica', 'visegrad', 'foca', 'rudo', 'cajnice', 'gorazde', 'kalinovik', 'sokolac',
+    'pale', 'ilidza', 'hadzici', 'vogosca', 'ilijas', 'trnovo',
+    'novo_sarajevo', 'novi_grad_sarajevo', 'centar_sarajevo', 'stari_grad_sarajevo',
+    'olovo', 'kladanj',
+]);
+const BOSNIAK_EAST_SARAJEVO_RING_FLEE_ABROAD = 0.08;
+const BOSNIAK_EXIT_MUN_IDS = new Set<MunicipalityId>([
+    'bijeljina', 'brcko', 'bosanski_samac', 'odzak', 'derventa', 'modrica', 'bosanski_brod',
+    'capljina', 'stolac',
+]);
+const BOSNIAK_EXIT_FLEE_ABROAD = 0.40;
 
 // Enclave-overrun special case (historical high-lethality second displacement).
 export const ENCLAVE_OVERRUN_KILL_FRACTION = 0.35;
@@ -190,6 +209,8 @@ function getFleeAbroadFraction(sourceMun: MunicipalityId, fromFaction: FactionId
     if (toFaction && isRbihHrhbPair(fromFaction, toFaction) && fromFaction === 'HRHB') return BILATERAL_HRHB_FLEE_ABROAD;
     if (fromFaction === 'HRHB' && POSAVINA_MUN_IDS.has(sourceMun)) return POSAVINA_CROAT_FLEE_ABROAD;
     if (fromFaction === 'RBiH' && KRAJINA_BOSNIAK_CONVOY_MUN_IDS.has(sourceMun)) return KRAJINA_BOSNIAK_FLEE_ABROAD;
+    if (fromFaction === 'RBiH' && BOSNIAK_EXIT_MUN_IDS.has(sourceMun)) return BOSNIAK_EXIT_FLEE_ABROAD;
+    if (fromFaction === 'RBiH' && BOSNIAK_EAST_SARAJEVO_RING_MUN_IDS.has(sourceMun)) return BOSNIAK_EAST_SARAJEVO_RING_FLEE_ABROAD;
     return getFactionFleeAbroadFraction(fromFaction);
 }
 
