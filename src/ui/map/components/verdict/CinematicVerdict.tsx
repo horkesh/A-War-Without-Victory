@@ -28,7 +28,8 @@ const TONE_CLASSES: Record<VerdictSceneTone, string> = {
 const TONE_ACCENT: Record<VerdictSceneTone, string> = {
     somber: '#9a9080',
     pyrrhic: '#c4a35a',
-    catastrophic: '#c24040',
+    // 5.0:1 on the metric card (#11141b); the former #c24040 read 3.6:1 (R8 dry run, RBiH Verdict).
+    catastrophic: '#e05a5a',
     early_peace: '#6a9ec2',
 };
 

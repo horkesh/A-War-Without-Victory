@@ -15169,3 +15169,9 @@ From the stance-engine follow-up (#583) register `F:/AWWV-coordination/crash_rec
 - Found by the R8 packaged dry run (RBiH, turn 187, main `2076cc259`): after the harness declined Dayton through the conference flow, its readability gate flagged the "Round 1 / Round 2 / Round 3" marks at 11.5px (`.dayton-round-track li`, `.72rem`), under the 12px floor for essential text.
 - Fix: the six conference rules under `.75rem` (`live.css` x3, `boundary.css` x2, `signing.css` x1; `.7rem` to `.74rem`) are now `.75rem`. CSS only: no sim, state, copy or layout-structure change.
 - Test: `tests/dayton_conference_font_floor.test.ts` pins the smallest declared conference font size at 12px (positive assertion, no source-absence check). The seven existing Dayton UI test files still pass (59). Rendered evidence is the next packaged dry-run segment passing the readability gate at `dayton-decline-confirm`.
+
+## 2026-11-14 — Verdict metric contrast (R8 dry-run finding, product UI)
+
+- Found by the R8 sign-and-verdict segment (RBiH, signed Dayton, turn 188): the Verdict's Focus / Outcome / Cost Signal values draw in the scene tone accent on the metric card (`#11141b`), and the catastrophic accent `#c24040` read 3.6:1 at 19px, under the 4.5:1 floor (readability gate: "RBiH", "Survival", "Permanent condemnation").
+- Fix: `TONE_ACCENT.catastrophic` in `src/ui/map/components/verdict/CinematicVerdict.tsx` is now `#e05a5a` (5.0:1). The other three tone accents already cleared 4.5:1. Colour only; no copy, layout, sim or state change.
+- Test: `tests/ui/verdict_metric_contrast.test.ts` computes the contrast of every tone accent against the card colour read from the source and requires 4.5:1. `cinematic_verdict`, `endgame_snapshot_verdict_fidelity` and `records_surfaces_type_floor` still pass.
