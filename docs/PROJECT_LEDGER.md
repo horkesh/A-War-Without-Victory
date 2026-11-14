@@ -9,6 +9,35 @@
   Compacted 2026-09-10: 1723 sections moved out, 62 kept live.
 -->
 
+## 2026-11-14 — RF-AI2: the readiness gate counts a light strike group; bot objective lockout (draft PR #619)
+
+Calibration lane (register AI2). Measured on main with a new opt-in trace (`AWWV_CORPS_STANCE_TRACE=1`, inert): the N1297 readiness gate capped every corps without a motorized or mechanized `main_effort` brigade at `defensive`, so it never planned. The ARBiH 5th Corps was capped for all 188 turns, the General Staff 174/174, the 2nd Corps 91 and the 4th 74. VRS Herzegovina and East Bosnian were capped 188, 2nd Krajina 175, Drina 104 and SRK 92, although they hold 40-700 units of massed fire support; their brigades are classed mountain.
+
+Corps-army-commander, historian and war-or-game seats chose a light strike group over an artillery threshold. A corps with >= 3 fit, combat-effective brigades in one zone, of any equipment class, may reach `balanced` and plan a local main effort, never `offensive` from that term alone. Sources: 5th Corps infiltration assaults, BB1 p.393 and p.415, BB2 pp.527, 536. No tube counts exist for the 5th Corps, whose fire support is 4-9.
+
+By orchestrator-granted scope, the bot plan path now honours the failed-objective cooldown. A bot commander-planned op that ends `zero_eligible_axis` or `max_failures` locks its objectives out for 8 × failure-count turns. Authored, triggered, pre-planned and Army HQ ops are unchanged. Woken, the 5th Corps had re-planned Ripac every ~5 turns, and its re-assault at t172 bled the 505th just before Operation Sana.
+
+Runs (8-run budget, 6 used), all against main 712/709/710/705:
+
+| Run | Result | Notes |
+|---|---|---|
+| Gate removed | 707/706/704/690 | P-B guard breached |
+| D2 | 712/705/707/699 | Farz P-A breached: the 3rd Corps' own "Džihad" takes Donja Bočinja and Vitkovci at t167-173 |
+| D2 + flat lockout | 712/705/706/693 | guards intact |
+| D2 + escalating lockout | 712/705/706/698 | guards intact |
+| Final, on main after #617 | 712/705/706/698 (`7d4cf2cf698e3c41`) | — |
+
+Final run: strict health PASS, all guards intact, battles +2.2%. Consistency 2: main's sector-4 gap plus a VRS 1st Krajina sector-0 gap with legal donors, the same SE7E class.
+
+Cell losses:
+- VRS "Grom"/"Vihor" take Vesela and Prusac (t57-59).
+- 2nd Corps "Most" takes Lopare and Ugljevik cells (t82-85).
+- 7 western tail cells at Oct95: Mistral 2 and Southern Move start two turns later, so their last captures fall past t188.
+
+Gains: Jemanlići, Korenići, Varošluk.
+
+Historian and war-or-game on Ozren: an exposed VRS Ozren-defence weakness (VRS2), not AI2 overreach. The RS sector held 13.4k against 21.7k on main; rs_1st_armored left for Skender Vakuf. Status: pending the orchestrator's continue/park ruling.
+
 ## 2026-11-14 — RF-F1: sustainability and militia fatigue read the OSID front and supply
 
 Calibration lane (audit F1, P0). Measured on main first: 109 of 110 municipalities collapsed by t8 (104 already at t6) and negotiation momentum sat at 1.0 from t4. Two consumers fed negotiation pressure from legacy `S…` settlement edges against OSID control. Sustainability found no neighbour and nothing supplied, and degraded each municipality once per pool. Militia fatigue marked all 324 pools unsupplied. A wiring test on the real war steps fails 4 of 4 on main.
