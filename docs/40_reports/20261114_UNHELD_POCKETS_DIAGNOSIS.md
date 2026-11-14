@@ -4,6 +4,13 @@
 **Trigger:** owner playtest, RBiH, desktop app, 21 Nov 1994 (turn ~137): *"What are those surrounded
 OSIDs in western BiH? From what I can see, they are surrounded by RS and have no units holding them."*
 
+> **Follow-up, same day (§8): the screenshot is from R8 dry-run run m (packaged app, autonomy
+> level 1), not from the owner's own game.** Run m's save shows the islands survive because at
+> autonomy 1 every bot corps commander plan is held at "ready", waiting for a player approval that
+> can never come, so RS generated **zero** commander operations after week 20. The cells are
+> Arapuša, Jezero + Volari, Lupnica and Baljvine. **The R8 strategic harness runs at autonomy 1, so
+> R8 evidence is skewed by this defect.**
+
 ## 1. Short answer
 
 - **What they are.** Small RBiH and HVO islands from the April 1992 start map. They sit around Jajce,
@@ -150,7 +157,7 @@ purpose `reduce_isolated_position` (`commander/plan.ts:1680`). That path is narr
   at `commander_loop.ts:276-299`), and turns local occupation off for all factions (`emit.ts:777`).
   New live games default to level 2 (`desktop_sim.ts:412`). **If the owner plays at autonomy 1,
   the RS bot never generates these mop-up operations, which alone would explain the divergence.**
-  Logged as an out-of-scope finding (§8).
+  Logged as an out-of-scope finding (§9).
 - Authored chain behaviour (`corps_operation_helpers.ts:270-272`; `pre_planned_operations.ts:2127-2138, 3089-3108`):
   - The queue advances on *any* ending, so Donji Vakuf fires even if Jajce fails.
   - A resolved operation is never retried, so a Divičani objective that failed is never re-attempted.
@@ -180,7 +187,7 @@ every turn, and then nothing else ever looks at the pocket.
   (`corps_front_sectors.ts:3991-3993`). Watch for cached `sector_id`s on the operation.
 - RBiH–HRHB pockets have **no front at all** while the two are allied (`front_edges.ts:128-134`).
 - `createPocketContainmentSectors` (`sector_rearrangement.ts:213`) and `evaluateCorpsOffensiveLaunch`
-  (imported at `bot_corps_directives.ts:54`) are dead code. Both are logged in §8.
+  (imported at `bot_corps_directives.ts:54`) are dead code. Both are logged in §9.
 
 ## 4. Painted checkpoints: matched in headless, missed in the owner's game
 
@@ -308,9 +315,92 @@ instrumentation item (6) is non-calibration and can go to an N-lane now.
     "Enclave".
   - Owner: the UI lane that owns the map legend (not the event-modal lane).
 
-## 8. Out-of-scope findings (for the register)
+## 8. Follow-up: the screenshot is R8 dry-run run m, and autonomy 1 is the cause
 
-1. **Autonomy level 1 freezes bot commanders.** `commander_loop.ts:276-299` has no faction check,
+The owner clarified that the screenshot was taken while the R8 dry-run lane played the packaged
+app: RBiH run m, historical-choice policy, "strategic autonomy", auto-recruit, about turn 136.
+Evidence: `F:/AWWV-worktrees/_logs/r8-dryrun-20261114/run-m/evidence/rbih/final-autosave.json`
+(turn 188). The harness code is on `claude/r8-verdict-catastrophic-contrast`, at `ea7c2ce5a`.
+
+### 8.1 "Strategic autonomy" means autonomy level 1
+
+- `tools/ui/paradox_local_qa.cjs:2546-2580` (`configureStrategicRun`) opens Army HQ, then
+  Personnel, then Autonomy, and clicks `autonomy-level-1` (`assistedAutonomyLevel = 1`).
+- `:8213` then **asserts** that the final state is at level 1: "Strategic autonomy did not apply:
+  expected level 1".
+- The run-m final save confirms it: `meta.autonomy_level = 1`, `player_faction = RBiH`.
+
+### 8.2 Level 1 freezes the bot commanders of every faction (verified in code and in the save)
+
+- **Code.** `applyCommanderOutput` (`commander/commander_loop.ts:245, 276-299`) reads the global
+  `state.meta.autonomy_level` with **no faction check**. At level 1, any plan reaching `executing`
+  is held at `ready` unless `corps.player_op_response` approves it.
+- **The only writers of `player_op_response`** are the desktop player-approval handlers
+  (`electron-main.cjs:4188, 4234, 4305, 4391`; `whowrites player_op_response`). Nothing approves
+  a bot corps' plan, so bot plans wait forever.
+- **Local occupation is also off at level 1 for every faction** (`commander/emit.ts:777`,
+  `autonomy_not_level_1`).
+- **Save at turn 188:**
+  - 5 RS corps (including `vrs_1st_krajina` and `vrs_2nd_krajina`) and 1 HRHB corps carry
+    `status_reason = "plan held at ready: awaiting player approval at Level 1"`.
+  - `vrs_1st_krajina`'s plan has been held since turn 5.
+- **RS operations started after week 20:**
+
+| Run | RS operations started after week 20 |
+|---|---|
+| Headless main (`53ffe8e9545686ad`) | **19**: authored ones plus 13 bot-generated (Obruč t26, Sjever t29, Stjena t32, Topola t34, Munja, Odmazda, Redut, Oklop, Zavoj, Obala, Istok, Spona) and Zvezda 94 t93 |
+| R8 run m (autonomy 1) | **6**, all authored: Kijevo t24, Donji Vakuf t28 (partial), Cerska-Kamenica t40, Pracha River t52, and the two Lukavac 93 operations at t69. **None after t69. Zero bot-generated.** |
+
+Authored pre-planned operations go through the corps queue, not through commander plan approval,
+so they still fire. That is why the Jajce and Donji Vakuf cells fell on the headless schedule in
+run m (Divičani t24, Torlakovac t29, Donji Koričani t29).
+
+### 8.3 Why the islands survived in run m
+
+Control replayed from run m's `control_events` to turn 136, against headless at turn 136. Pockets of
+at most 6 cells that appear in run m only:
+
+| Pocket (run m, t136) | Controller | Ring | Cleared in headless by | Run m |
+|---|---|---|---|---|
+| bosanska_krupa:arapusa_2 | RBiH | RS only | bot op "Operacija Greben" (t18-20) | no control event in 188 turns; later absorbed into the 1995 Bihać pocket |
+| jajce:jezero_2 + sipovo:volari_2 | RBiH | RS only | bot ops Sjever t29 / Obruč t26 | never taken |
+| jajce:lupnica | HRHB | RS only | bot op Stjena t32 | never taken |
+| mrkonjic_grad:baljvine_2 | HRHB | RS only | bot op Topola t34 | never taken |
+
+**Every surviving island is a cell that headless clears with a bot-generated commander operation,
+and run m generated none.** The other candidate causes were checked and excluded:
+
+- **Ring gate:** all four rings are RS-only, so the third-party ring gate is not the blocker.
+- **Authored operations failing:** Jajce and Donji Vakuf ran.
+- **Spare brigade:** the adjacent-surplus gate never got a chance, because local occupation is
+  switched off at level 1 before any candidate is evaluated.
+
+This corrects the §2.1 identification, which was made from the screenshot alone:
+- the grey blobs are **Lupnica and Baljvine**, not Divičani or Gornje Krčevine;
+- the lower green blob is **Jezero and Volari**, not Torlakovac;
+- Arapuša is confirmed.
+
+### 8.4 Consequences
+
+- **R8 evidence is skewed. Urgent.** Every R8 "strategic" campaign runs at level 1. In those runs,
+  RS and HRHB fight only their authored operations: no bot offensives after the authored chain
+  ends, no mop-up, no Zvezda 94. Diaries, scores and Verdicts from those runs do not describe the
+  shipped game at level 2. This also explains why R8 maps differ from headless.
+- **Fix direction (not built).** The level-1 hold must apply only to corps of the **player**
+  faction:
+  - In `applyCommanderOutput`, gate on `faction === state.meta.player_faction`.
+  - In `emit.ts:777`, apply the local-occupation fail-closed only to player corps.
+- This is a correctness defect under RF entry test (a), and its premise is measured (this section).
+- It moves calibration only for runs at level 1. Headless leaves `player_faction` undefined and
+  runs at level 0, so the headless checkpoints should be unaffected; prove it with one 188w hash
+  comparison.
+- R8 qualifying should wait for it, or the harness should use level 2 until it lands.
+- **§6 (pocket reduction) still stands.** At levels 0 and 2 the post-week-20 path is the narrow
+  local-occupation gate described in §3.1, and the three Oct95 RS pockets are a level-0 defect.
+
+## 9. Out-of-scope findings (for the register)
+
+1. **Autonomy level 1 freezes bot commanders (CONFIRMED in R8 run m, §8; urgent for R8).** `commander_loop.ts:276-299` has no faction check,
    and `emit.ts:777` disables local occupation for all factions. A player autonomy setting changes
    bot behaviour. Correctness defect; candidate RF; needs a measured run at autonomy 1 versus 2.
 2. **Anomaly checks #8 and #19 skip `unstaffed_front`** (`anomaly_detector.ts:545, 1283`), so
