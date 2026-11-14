@@ -26,7 +26,7 @@
  */
 
 import { computeTreatyAutonomyIndex } from '../../../sim/negotiation/institutional_packages.js';
-import { DYSFUNCTION_WEIGHTS, PEACE_DYSFUNCTION_CAP_THRESHOLD } from '../../../sim/negotiation/peace_dysfunction.js';
+import { computeGridlockComponent, DYSFUNCTION_WEIGHTS, PEACE_DYSFUNCTION_CAP_THRESHOLD } from '../../../sim/negotiation/peace_dysfunction.js';
 
 export type InstitutionChoice = 'centralized' | 'decentralized';
 export type BrckoOutcome = 'federation' | 'rs' | 'arbitration';
@@ -116,6 +116,8 @@ export interface DysfunctionPreview {
     indexFloor: number;
     autonomyComponent: number;
     fragmentationComponent: number;
+    /** The engine's gridlock term for the draft's constitutional choices. */
+    gridlockComponent: number;
     brckoComponent: number;
     /** True when indexFloor >= OUTCOME_CAP_THRESHOLD: a clean win is already capped. */
     capsCleanWin: boolean;
@@ -133,16 +135,20 @@ export function computeDysfunctionPreview(
     split: Readonly<Record<string, number>>,
     brcko: BrckoOutcome,
     competencyAllocation?: Readonly<Record<string, string>>,
+    constitutionalChoices?: Readonly<Record<string, string>>,
 ): DysfunctionPreview {
     const autonomyIndex = computeAutonomyPreview(choices, competencyAllocation);
     const aComp = autonomyComponent(autonomyIndex);
     const fComp = fragmentationComponent(split);
+    const gComp = computeGridlockComponent(constitutionalChoices);
     const bComp = brckoComponent(brcko);
 
-    // Refugees + condemnation are unknown-at-table war-history terms → 0 in the floor.
+    // Refugees + condemnation are unknown-at-table war-history terms → 0 in the floor. The
+    // gridlock term is known at the table (the draft's constitution) and is the engine's own.
     const indexFloor = clamp0to100(
         aComp * DYSFUNCTION_WEIGHTS.autonomy +
         fComp * DYSFUNCTION_WEIGHTS.fragmentation +
+        gComp * DYSFUNCTION_WEIGHTS.gridlock +
         bComp * DYSFUNCTION_WEIGHTS.brcko,
     );
 
@@ -150,6 +156,7 @@ export function computeDysfunctionPreview(
         indexFloor: round1(indexFloor),
         autonomyComponent: round1(aComp),
         fragmentationComponent: round1(fComp),
+        gridlockComponent: round1(gComp),
         brckoComponent: round1(bComp),
         capsCleanWin: indexFloor >= OUTCOME_CAP_THRESHOLD,
     };

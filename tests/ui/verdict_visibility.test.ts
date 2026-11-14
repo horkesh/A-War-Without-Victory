@@ -84,7 +84,7 @@ describe('getOutcomeClassStyle', () => {
 describe('formatCondemnationFlag', () => {
     it('returns restrained wording for genocide_condemnation', () => {
         const result = formatCondemnationFlag('genocide_condemnation');
-        expect(result).toBe('Condemned for genocide - international tribunal proceedings inevitable');
+        expect(result).toBe('Its forces committed the Srebrenica genocide (found by the ICTY and the ICJ)');
     });
 
     it('returns restrained wording for civilian_atrocities', () => {

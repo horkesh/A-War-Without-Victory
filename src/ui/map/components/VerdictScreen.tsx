@@ -230,6 +230,9 @@ export interface EndgameMilestoneRow {
 /** Rupture milestones the Verdict never shows as timing rows. */
 const RUPTURE_MILESTONE_IDS: ReadonlySet<string> = new Set(['srebrenica_genocide_1995']);
 
+/** War-end milestones (and the duration fallback): dated by the comparison's end-of-war line. */
+const WAR_END_MILESTONE_IDS: ReadonlySet<string> = new Set(['dayton_accords', 'ceasefire_1995', 'war_duration']);
+
 function compareMilestones(a: MilestoneComparison, b: MilestoneComparison): number {
     const weekDelta = a.historical_week - b.historical_week;
     if (weekDelta !== 0) return weekDelta;
@@ -600,10 +603,12 @@ export function VerdictScreen({ onLoadSaveState, onLoadSaveError }: VerdictScree
     const settledShares = signedAgreement?.map.territoryPct ?? rawSettlement?.territory_pct;
     const opportunityNames = new Map((loadedGameState.operationOpportunityRecords ?? [])
         .map(record => [record.proposal_id, record.display_name] as const));
+    // War-end rows are left out: their early/late delta is the "N weeks shorter/longer" reading
+    // the §4 panel retired; the comparison's end-of-war line dates both endpoints instead.
     const milestoneRows = buildMilestoneComparisonRows(
         loadedGameState.costLedger,
         loadedGameState.historicalComparison,
-    );
+    ).filter(row => !WAR_END_MILESTONE_IDS.has(row.id));
     const hasReckoning = Boolean(loadedGameState?.costLedger && loadedGameState?.historicalComparison);
     const hasCodex = codexGhosts.length > 0;
     const hasRuptureReceipts = ruptureReceipts.length > 0;
@@ -1161,8 +1166,10 @@ export function FactionReport({
                             <div data-awwv-figure-kind="territory" data-awwv-figure-basis={t('verdict.basis.finalSplit')}>
                                 <span className="text-text-primary font-semibold">{t('verdict.finalSplit')} </span>
                                 {(['RBiH', 'RS', 'HRHB'] as const)
-                                    .filter(k => typeof daytonResult.final_territory_split?.[k] === 'number')
-                                    .map(k => `${formatVerdictSideName(k)} ${(daytonResult.final_territory_split![k] as number).toFixed(1)}%`)
+                                    .flatMap(k => {
+                                        const share = daytonResult.final_territory_split?.[k];
+                                        return typeof share === 'number' ? [`${formatVerdictSideName(k)} ${share.toFixed(1)}%`] : [];
+                                    })
                                     .join(', ')}
                                 <span className="block text-[14px] text-[#9c917b]">{t('verdict.basis.finalSplit')}</span>
                             </div>

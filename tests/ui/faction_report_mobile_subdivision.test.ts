@@ -28,7 +28,7 @@ import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { FactionReport } from '../../src/ui/map/components/VerdictScreen';
 import type { FactionVerdict } from '../../src/state/negotiation_types';
-import type { DaytonResult } from '../../src/state/negotiation_types';
+import type { DaytonAgreementRecord, DaytonResult } from '../../src/state/negotiation_types';
 
 function makeRichVerdict(): FactionVerdict {
     return {
@@ -77,24 +77,48 @@ function makeDayton(): DaytonResult {
     } as DaytonResult;
 }
 
-function renderReport(extra?: { dayton?: DaytonResult }): string {
+function renderReport(extra?: { dayton?: DaytonResult; verdict?: FactionVerdict; signedAgreement?: DaytonAgreementRecord }): string {
     return renderToStaticMarkup(createElement(FactionReport, {
-        verdict: makeRichVerdict(),
+        verdict: extra?.verdict ?? makeRichVerdict(),
         factionOsids: 413,
         totalOsids: 712,
         brigadeCount: 35,
         personnel: 85000,
         daytonResult: extra?.dayton,
+        signedAgreement: extra?.signedAgreement,
     }));
 }
 
 describe('FactionReport mobile subdivision (UI-5 / Batch 44)', () => {
-    it('preserves Pyrrhic Score, grade, outcome class, and grade description text', () => {
+    it('preserves Pyrrhic Score, grade and outcome class; the grade description lives in the grade trace', () => {
         const html = renderReport();
         expect(html).toContain('42.5');
         expect(html).toContain('>C<');
         expect(html).toContain('Failure');
-        expect(html).toContain('catastrophic moral cost');
+        // A verdict frozen before the grade trace shows no "How the verdict was set" block and
+        // no grade description (the description renders only inside that block).
+        expect(html).not.toContain('data-testid="faction-report-grade-trace"');
+        expect(html).not.toContain('catastrophic moral cost');
+
+        const traced = renderReport({
+            verdict: {
+                ...makeRichVerdict(),
+                grade_trace: {
+                    territory_basis: 'front', territory_graded_pct: 58, earned_grade: 'B',
+                    earned_description: 'Territorial gains but catastrophic moral cost', cost_step: 'war_cost_cap',
+                    cost_capped_grade: 'C', condemnation_capped_grade: 'C', settlement_capped_grade: 'C',
+                    base_outcome_class: 'pyrrhic_success', peace_dysfunction_index: null,
+                    settlement_peace_dysfunction_index: null, peace_dysfunction_band: 'none',
+                    outcome_class: 'pyrrhic_success',
+                },
+            },
+        });
+        const trace = traced.slice(traced.indexOf('data-testid="faction-report-grade-trace"'));
+        expect(trace).toContain('How the verdict was set');
+        expect(trace).toContain('Territory graded: 58.0%');
+        expect(trace).toContain('End position: grade B');
+        expect(trace).toContain('War cost: B → C');
+        expect(trace).toContain('catastrophic moral cost');
     });
 
     it('preserves all 6 capital dimension labels', () => {
@@ -107,26 +131,57 @@ describe('FactionReport mobile subdivision (UI-5 / Batch 44)', () => {
         expect(html).toContain('Negotiating Leverage');
     });
 
-    it('preserves all final-statistics labels', () => {
+    it('preserves all final-statistics labels, each figure with its basis', () => {
         const html = renderReport();
-        expect(html).toContain('Territory');
+        expect(html).toContain('Territory graded');
+        expect(html).toContain('Settlements held');
+        expect(html).toContain('413 of 712 (58.0%)');
+        expect(html).toContain('Area held');
         expect(html).toContain('Active Brigades');
         expect(html).toContain('Personnel');
-        expect(html).toContain('Casualties Inflicted');
-        expect(html).toContain('Casualties Taken');
-        expect(html).toContain('Civilians Protected');
+        expect(html).toContain('Combat losses inflicted');
+        expect(html).toContain('Combat losses suffered');
+        expect(html).toContain('Population in held municipalities');
         expect(html).toContain('Displaced or killed');
         expect(html).toContain('Refugees Received');
         expect(html).toContain('Operations Launched');
         expect(html).toContain('Operations Successful');
         expect(html).toContain('War Crimes Events');
+        // Every figure row states what it counts.
+        expect(html).toContain('data-awwv-figure-basis="Share of the country&#x27;s area held at the war&#x27;s end (front line); cells of an overrun safe area are not credited"');
+        expect(html).toContain('data-awwv-figure-basis="Killed, wounded and missing, summed over this side&#x27;s engagements; this campaign"');
+        expect(html).not.toMatch(/data-awwv-figure-basis=""/);
     });
 
-    it('preserves Dayton agreement fields when supplied', () => {
+    it('preserves Dayton agreement fields when supplied, with package names rather than ids', () => {
         const html = renderReport({ dayton: makeDayton() });
         expect(html).toContain('Dayton Agreement');
-        expect(html).toContain('51_49_split');
-        expect(html).toContain('greater_serbia');
+        expect(html).toContain('Packages Accepted:');
+        expect(html).toContain('51 49 Split');
+        expect(html).toContain('Packages left out of the treaty:');
+        expect(html).toContain('Greater Serbia');
+        expect(html).not.toContain('51_49_split');
+        expect(html).not.toContain('greater_serbia');
+        expect(html).toContain('data-awwv-dayton-institutions="legacy"');
+        expect(html).toContain('Republic of Bosnia and Herzegovina 51.0%, Republika Srpska 49.0%');
+    });
+
+    it('a signed treaty lists its institutions from the binder and no package lists', () => {
+        const dayton = makeDayton();
+        const signedAgreement = {
+            version: 1,
+            terms: { ...dayton, brcko_status: 'arbitration' },
+            map: { controllers: {}, wartimeControllers: {}, specialOsids: [], territoryPct: { RBiH: 51, RS: 49 } },
+            treaty: {
+                faction: 'RS', draft_share: { RBiH: 51, RS: 49 }, signed_share: { RBiH: 51, RS: 49 },
+                land_won: [], land_given: [], land_refused: [], powers_won: [], powers_refused: [],
+            },
+        } as unknown as DaytonAgreementRecord;
+        const html = renderReport({ dayton, signedAgreement });
+        expect(html).toContain('data-awwv-dayton-institutions="binder"');
+        expect(html).not.toContain('data-awwv-dayton-institutions="legacy"');
+        expect(html).not.toContain('Packages Accepted:');
+        expect(html).not.toContain('Packages left out of the treaty:');
     });
 
     it('emits stable data-testid markers for each top-level section', () => {

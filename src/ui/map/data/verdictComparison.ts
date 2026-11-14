@@ -17,7 +17,7 @@ import { t } from '../i18n';
 import { formatCount, turnToDateString } from '../utils/formatters.js';
 import { formatHistoricalDivergenceNote } from './historicalDivergenceNotes.js';
 
-const HISTORICAL_BASELINE = historicalBaselineJson as unknown as HistoricalBaseline;
+const HISTORICAL_BASELINE = historicalBaselineJson as HistoricalBaseline;
 
 export type ComparisonLineId = 'end_of_war' | 'military_dead' | 'civilian_dead' | 'territory' | 'srebrenica';
 

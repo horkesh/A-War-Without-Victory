@@ -165,6 +165,23 @@ function gridlockComponent(result: DaytonResult): number {
 }
 
 /**
+ * The gridlock sub-component for a draft's constitutional choices (absent keys take the same
+ * historical defaults the signed result does). Exported so the Dayton room's live floor reads
+ * the engine's own term (ending truth pass, 2026-11-14); pure.
+ */
+export function computeGridlockComponent(constitutionalChoices?: Readonly<Record<string, string>>): number {
+    const draft: DaytonResult = {
+        territorial_packages_accepted: [],
+        territorial_packages_rejected: [],
+        institutional_choices: {},
+        final_territory_split: {},
+        patron_overrides_applied: [],
+        constitutional_choices: { ...(constitutionalChoices ?? {}) },
+    };
+    return gridlockComponent(draft);
+}
+
+/**
  * Territorial fragmentation sub-component (0-100). Uses the normalized Shannon
  * evenness of the three-faction footprint: a single faction holding ~everything
  * is 0 (cohesive), a perfectly even three-way split is 100 (maximally fragmented).

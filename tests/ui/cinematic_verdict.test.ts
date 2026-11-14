@@ -101,41 +101,56 @@ describe('CinematicVerdict', () => {
         }));
 
         expect(html).toContain('data-awwv-cinematic-verdict');
-        expect(html).toContain('Pyrrhic success, measured against the bill');
-        expect(html).toContain('RBiH');
+        // Headline keyed on the focus side's final outcome class (verdictScene.ts), side named in full.
+        expect(html).toContain('The Republic of Bosnia and Herzegovina kept its gains at ruinous cost');
+        expect(html).toContain('Republic of Bosnia and Herzegovina');
         expect(html).toContain('Pyrrhic Success');
-        expect(html).toContain('Civilian displacement record');
-        expect(html).toContain('War lasted 12 weeks shorter');
+        // Banner tiles: Side / War-record grade / Outcome.
+        expect(html).toContain('>Side<');
+        expect(html).toContain('>War-record grade<');
+        expect(html).toContain('>Outcome<');
+        // The cost panel leads with the human-cost totals.
+        expect(html).toContain('War cost totals');
+        expect(html).toContain('46,500 military killed and 38,000 civilian killed');
+        // Comparison lines are rebuilt from the ledger (verdictComparison.ts), never the legacy notes.
+        expect(html).toContain('Military dead on all sides: 46,500 in this campaign. Historical war: 57,523 soldiers killed or missing');
+        expect(html).toContain('Civilian dead on all sides: 38,000 in this campaign. Historical war: 39,684 civilians killed or missing');
+        expect(html).not.toContain('War lasted');
+        expect(html).not.toContain('72%');
         expect(html).toContain('A War Without Victory - Verdict');
         expect(html).not.toContain('undefined');
     });
 
-    it.each([
-        ['record', 'Filed finding'],
-        ['grave', 'Grave finding'],
-        ['rupture', 'Permanent condemnation'],
-    ] as const)('renders the %s cost signal as player-facing copy', (severity, label) => {
+    it.each(['record', 'grave', 'rupture'] as const)(
+        'shows no Cost Signal tile and never a raw severity token for a %s finding',
+        (severity) => {
+            const html = renderToStaticMarkup(createElement(CinematicVerdict, {
+                verdict: makeVerdict(),
+                costLedger: makeCostLedger(severity),
+                focusFaction: 'RBiH',
+                dateLabel: '1995-10-01',
+                durationLabel: '188 weeks',
+            }));
+
+            // The banner's third tile is the Outcome; a finding's severity no longer heads it.
+            expect(html).not.toContain('Cost Signal');
+            expect(html).toContain('data-awwv-verdict-metric="grade"');
+            expect(html).toContain('data-awwv-verdict-metric="outcome"');
+            expect(html).toContain('War cost totals');
+            expect(html).not.toContain(`>${severity}<`);
+        },
+    );
+
+    it('renders the absent cost ledger as player-facing copy', () => {
         const html = renderToStaticMarkup(createElement(CinematicVerdict, {
             verdict: makeVerdict(),
-            costLedger: makeCostLedger(severity),
             focusFaction: 'RBiH',
             dateLabel: '1995-10-01',
             durationLabel: '188 weeks',
         }));
 
-        expect(html).toContain(label);
-        expect(html).not.toContain(`>${severity}<`);
-    });
-
-    it('renders the absent cost signal as player-facing copy', () => {
-        const html = renderToStaticMarkup(createElement(CinematicVerdict, {
-            verdict: makeVerdict(),
-            focusFaction: 'RBiH',
-            dateLabel: '1995-10-01',
-            durationLabel: '188 weeks',
-        }));
-
-        expect(html).toContain('No finding');
+        expect(html).toContain('No cost ledger packet available');
+        expect(html).not.toContain('Cost Signal');
         expect(html).not.toContain('>none<');
     });
 
@@ -151,9 +166,11 @@ describe('CinematicVerdict', () => {
             durationLabel: '',
         }));
 
-        expect(html).toContain('Fokus');
+        expect(html).toContain('Strana');
+        expect(html).toContain('Ocjena ratnog učinka');
         expect(html).toContain('Ishod');
-        expect(html).toContain('Signal cijene');
+        expect(html).not.toContain('Signal cijene');
+        expect(html).toContain('Republika Bosna i Hercegovina');
         expect(html).toContain('Podijeli sažetak');
         expect(html).toContain('Kopiraj');
         expect(html).toContain('Nije zabilježeno');
