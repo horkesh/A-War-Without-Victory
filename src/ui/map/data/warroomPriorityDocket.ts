@@ -50,15 +50,16 @@ function docketTone(status: PreAdvanceCommandReviewStatus): WarroomPriorityDocke
   return 'attention';
 }
 
-function formatSummary(metrics: PreAdvanceCommandReviewMetrics): string {
-  return t('warroom.docket.summary', {
-    advanceReviewCount: metrics.advanceReviewCount,
-    advanceItemLabel: t(metrics.advanceReviewCount === 1 ? 'warroom.docket.advanceItem.one' : 'warroom.docket.advanceItem.many'),
-    required: metrics.priorityCounts.required,
-    recommended: metrics.priorityCounts.recommended,
-    monitor: metrics.priorityCounts.monitor,
-    record: metrics.priorityCounts.record,
-    pendingReviews: metrics.pendingReviews,
+/**
+ * The panel header counts the listed rows by tier, so it can never disagree with the chip or the
+ * list (it used to print band totals over every card on the desk beside "1 advance item").
+ */
+function formatSummary(items: readonly WarroomPriorityDocketItem[]): string {
+  return t('review.docket.summary', {
+    count: items.length,
+    itemLabel: t(items.length === 1 ? 'warroom.docket.advanceItem.one' : 'warroom.docket.advanceItem.many'),
+    required: items.filter((item) => item.tier === 'required').length,
+    recommended: items.filter((item) => item.tier === 'recommended').length,
   });
 }
 
@@ -96,7 +97,7 @@ export function buildWarroomPriorityDocketView(input: WarroomPriorityDocketInput
     statusLabel: statusLabel(review.status, input.state != null),
     tone: docketTone(review.status),
     headline: review.headline,
-    summary: formatSummary(review.metrics),
+    summary: formatSummary(review.items),
     sourceHandoffSummary: formatSourceHandoffSummary(review.sourceHandoffs, review.metrics),
     canOpenBoard: review.canReviewPriorities,
     openBoardLabel: t('warroom.docket.openDecisionRoom'),

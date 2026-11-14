@@ -829,6 +829,7 @@ export const enMessages = {
     // review.* — honest review chip and the demoted weekly pushback (command-loop lane L1)
     'review.tier.required': 'Required ({count})',
     'review.tier.recommended': 'Recommended ({count})',
+    'review.docket.summary': '{count} {itemLabel}: {required} required, {recommended} recommended',
     'review.whyNow.required': 'Required: Advance stays blocked until you answer.',
     'review.whyNow.stance': 'Proceeds unless you act.',
     'review.whyNow.default': 'Worth a look before advancing.',

@@ -163,7 +163,8 @@ describe('buildWarroomPriorityDocketView', () => {
     expect(first.tone).toBe('attention');
     expect(first.headline).toBe('Recommended before advance');
     expect(first.blockingDecisionCount).toBe(0);
-    expect(first.summary).toBe('1 advance item / 0 required / 5 recommended / 1 monitor / 3 record / 1 pending');
+    // The header counts the listed rows by tier (not band totals over every card).
+    expect(first.summary).toBe('1 advance item: 0 required, 1 recommended');
     expect(first.items.map((item) => item.id)).toEqual([
       'opportunity:opp_docket',
     ]);
@@ -193,7 +194,7 @@ describe('buildWarroomPriorityDocketView', () => {
     expect(view.statusLabel).not.toBe(view.status);
     expect(view.tone).toBe('clear');
     expect(view.headline).toBe('Clear to advance');
-    expect(view.summary).toBe('0 advance items / 0 required / 4 recommended / 0 monitor / 0 record / 0 pending');
+    expect(view.summary).toBe('0 advance items: 0 required, 0 recommended');
     expect(view.items).toEqual([]);
     expect(view.sourceHandoffs).toEqual([]);
     expect(view.sourceHandoffSummary).toBe('0 source handoffs / 0 required / 4 recommended / 0 monitor / 0 record');
@@ -218,7 +219,7 @@ describe('buildWarroomPriorityDocketView', () => {
     // decisions still weigh on the pending-review count.
     expect(view.items).toHaveLength(1);
     expect(view.metrics.advanceReviewCount).toBe(1);
-    expect(view.summary).toBe('1 advance item / 2 required / 4 recommended / 0 monitor / 0 record / 2 pending');
+    expect(view.summary).toBe('1 advance item: 1 required, 0 recommended');
   });
 
   it('returns a safe unavailable state when no campaign is loaded', () => {
@@ -258,7 +259,7 @@ describe('buildWarroomPriorityDocketView', () => {
     const view = buildWarroomPriorityDocketView({ state, limit: 3 });
     setLocale('en');
 
-    expect(view.summary).toBe('1 stavka za napredovanje / 0 obavezno / 5 preporučeno / 1 praćenje / 3 zapis / 1 na čekanju');
+    expect(view.summary).toBe('1 stavka za napredovanje: 0 obavezno, 1 preporučeno');
     expect(view.sourceHandoffSummary).toBe('1 izvorni prijenos / 0 obavezno / 5 preporučeno / 1 praćenje / 3 zapis');
     expect(view.openBoardLabel).toBe('Otvori sobu odluka');
     expect(view.statusLabel).toBe('Pregled prije napredovanja');
