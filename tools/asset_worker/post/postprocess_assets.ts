@@ -5,6 +5,7 @@ import { loadManifest, writeManifest, AssetEntry, MANIFEST_PATH } from '../lib/m
 import { readPngMeta } from '../lib/png.js';
 import { hashFileSha256 } from '../lib/manifest.js';
 import { spawnSync } from 'node:child_process';
+import { resolveTsxCli } from '../../test/vitest_shared_config.mjs';
 
 const CONTEXT = 'phase a1.0 asset worker pipeline + mcp tools + deterministic postprocess';
 
@@ -80,7 +81,7 @@ function postprocessAsset(asset: AssetEntry, options: BatchOptions): string | nu
   if (options.alphaThreshold) args.push('--alphaThreshold', options.alphaThreshold);
   if (options.overwrite) args.push('--overwrite');
 
-  const result = spawnSync('tsx', args, { stdio: 'inherit' });
+  const result = spawnSync(process.execPath, [resolveTsxCli(process.cwd()), ...args], { stdio: 'inherit' });
   if (result.status !== 0) {
     throw new Error(`Postprocess failed for ${asset.asset_id}`);
   }

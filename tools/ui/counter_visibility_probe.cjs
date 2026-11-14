@@ -17,8 +17,16 @@
 const path = require('node:path');
 const fs = require('node:fs');
 const [repo, outDir, faction = 'RBiH', sizesArg = '2293x960'] = process.argv.slice(2);
-const { _electron: electron } = require(path.join(repo, 'node_modules', 'playwright'));
-const { PNG } = require(path.join(repo, 'node_modules', 'pngjs'));
+// A worktree without its own node_modules resolves packages through the nearest ancestor that has them.
+const resolvePackage = (pkg) => {
+  for (let dir = path.resolve(repo); ; dir = path.dirname(dir)) {
+    const candidate = path.join(dir, 'node_modules', pkg);
+    if (fs.existsSync(path.join(candidate, 'package.json'))) return candidate;
+    if (path.dirname(dir) === dir) return path.join(repo, 'node_modules', pkg);
+  }
+};
+const { _electron: electron } = require(resolvePackage('playwright'));
+const { PNG } = require(resolvePackage('pngjs'));
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 fs.mkdirSync(outDir, { recursive: true });
 const log = (...a) => { const line = a.join(' '); console.log(line); fs.appendFileSync(path.join(outDir, 'probe.log'), line + '\n'); };
