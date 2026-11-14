@@ -37,6 +37,14 @@ On Windows, the test process must resolve unqualified `bash` to Git Bash for MSY
 not the Windows/WSL launcher. Scope any PATH adjustment to the test child, not global settings.
 [BC08 evidence and limits](docs/40_reports/audits/20260907_BC08_CURRENT_ENGINE_HEALTH_VERIFICATION.md).
 
+## Licence
+
+Source-available under the [PolyForm Noncommercial License 1.0.0](LICENSE.md): you may read, study, modify and share A War Without Victory for noncommercial purposes, such as personal study, hobby projects, mods and research. Commercial use needs a separate licence from the owner. See [ADR-0008](docs/20_engineering/ADR/ADR-0008-licence.md).
+
+Third-party components keep their own licences: open-source libraries, fonts, recorded audio samples ([audio licences](docs/audio/LICENSES/)), and map data derived from OpenStreetMap (© OpenStreetMap contributors, [ODbL 1.0](https://opendatacommons.org/licenses/odbl/1-0/)).
+
+The game simulates the 1992-1995 war in Bosnia and Herzegovina and depicts real places, armed forces and events. It is not affiliated with, endorsed by or sponsored by any government, armed force, political party or organisation it depicts.
+
 ## Repo Notes
 
 - Root-level handoff and report artifacts may exist for historical context, but they are not architecture authority unless the docs above point back to them explicitly.

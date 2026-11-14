@@ -9,9 +9,9 @@
   Compacted 2026-09-10: 1723 sections moved out, 62 kept live.
 -->
 
-## 2026-11-14 — Proprietary LICENSE file
+## 2026-11-14 — Licence: PolyForm Noncommercial 1.0.0, as in Mandate
 
-Owner request. The repository had no licence file and no `license` field. A root `LICENSE` now states that the game (code, builds, data, maps, art, audio, text) is proprietary to Pyrrhic Games, all rights reserved. It grants a personal, non-commercial right to play copies from authorised channels; third-party components keep their own licences (OpenStreetMap-derived map data under ODbL 1.0 is named). It adds a no-affiliation note for the historical content and standard warranty and liability limits. `package.json` gets `"license": "SEE LICENSE IN LICENSE"`. No behaviour, data or packaging change. Bundling the licence into the installer and a full third-party notices file remain with the R9 licence/SBOM gate, as does register item LIC1 (the war map shows OSM-derived tiles without OSM attribution).
+Owner request: add a licence file, following the Mandate repository. The public repository had no licence. `LICENSE.md` is the official PolyForm Noncommercial 1.0.0 text, byte-identical to Mandate's, with "Required Notice: Copyright 2026 horkesh". It allows noncommercial study, modification, mods and sharing; commercial use needs a separate licence from the owner. `package.json` declares `PolyForm-Noncommercial-1.0.0`. The README has a Licence section naming third-party licences (OSM under ODbL 1.0) and a no-affiliation note for the historical content. Decision record: ADR-0008. No behaviour, data or packaging change. Bundling the licence into the installer and a full third-party notices file remain with the R9 licence/SBOM gate, as does register item LIC1 (the war map shows OSM-derived tiles without OSM attribution).
 
 ## 2026-11-14 — RF-3: the siege displacement path works; flight abroad set per region (PR #600)
 
