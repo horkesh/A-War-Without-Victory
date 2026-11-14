@@ -97,8 +97,9 @@ test('startNewCampaign disables headless auto-control for the selected player fa
         // any headless or LLM playthrough.
         //
         // Level 2 specifically, NOT Level 1: the `commander_loop` Level-1 guard
-        // holds every commander-generated plan at 'ready' pending a
-        // `player_op_response` that no headless run sends.
+        // holds every commander-generated plan of the player's faction at 'ready'
+        // pending a `player_op_response` that no headless run sends (bot factions
+        // are not held since PK1, 2026-11-14).
         assert.strictEqual(
             state.meta.autonomy_level,
             2,
