@@ -7197,11 +7197,24 @@ async function resumeThroughObservedMainMenu(page, faction, savePath, dependenci
     }))),
   }));
   try {
+    const openingSplashOwner = (record) => record.markers.openingSplash
+      && frameVisibleExactControlCount(record, 'Assume responsibility') === 1;
+    // The opening splash mounts after the window (slower on a loaded machine): re-capture for up
+    // to ~30s instead of judging the first instant, then fail exactly as before.
     let observation = remember(await capture(page, 'resume-opening-splash', null, observations, frameIds));
+    for (let attempt = 0; attempt < 60; attempt += 1) {
+      const splashCount = observation.pages
+        .flatMap((pageRecord) => pageRecord.frames)
+        .filter((frameRecord) => !frameRecord.detached && openingSplashOwner(frameRecord)).length;
+      if (splashCount >= 1) break;
+      await pause(500);
+      const next = await capture(page, 'resume-opening-splash', null, observations, frameIds);
+      if (!next) break;
+      observation = remember(next);
+    }
     let owner = chooseOwner(
       observation,
-      (record) => record.markers.openingSplash
-        && frameVisibleExactControlCount(record, 'Assume responsibility') === 1,
+      openingSplashOwner,
       'opening splash with one Assume responsibility control',
     );
     markOwner(observation, owner, observations);
