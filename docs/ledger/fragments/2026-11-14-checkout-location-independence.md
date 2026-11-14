@@ -2,7 +2,13 @@
 
 **Problem.** The owner is moving the local checkout from `F:\A-War-Without-Victory` (a USB drive) to `C:\Pyrrhic\A-War-Without-Victory`. Several live tools hard-coded `F:/A-War-Without-Victory`, `F:/AWWV-worktrees` or `F:/AWWV-coordination` and would read, write or fall back to the old drive after the move.
 
-**Change (tooling, tests and docs, plus one `src/` data-path fix that leaves turn results unchanged; no `data/`, scenario or calibration change).**
+**Change (tooling, tests and docs, plus `src/` data-path fixes that leave turn results unchanged; no `data/`, scenario or calibration change).**
+- `src/sim/osid_areas.ts`, `src/state/legitimacy.ts`, `turn_phases/war_phases.ts` (owner follow-up: the remaining cwd loaders on the war-phase path).
+  - `getOsidAreas()` now uses the bundled `osid_areas.json` module, as `sim/negotiation` and the map UI already do. Before, it read the file from `process.cwd()` and, on any error, silently returned an empty area map, so turn-summary territory and negotiation capital read zero.
+  - `update-legitimacy` passes `dataBaseDir` to `updateLegitimacyState`, which builds the population and 1990-controller paths from it.
+  - `process-lifecycle-events` passes it to `loadLifecycleEvents`, which falls back to no events on a read error.
+  - `phase3a-pressure-eligibility` passes `turnDataFilePath(...)` to `loadEnrichedContactGraph`.
+  - New `tests/turn_data_base_dir_wiring.test.ts` runs the real war-phase steps with the loaders mocked and checks the base dir each one receives. New `tests/osid_areas_bundled.test.ts` makes every `fs` read throw: the old loader returned 0 of 712 OSIDs, and the new one returns all of them. Both fail with the fix reversed.
 - `src/sim/combat/strategic_priorities.ts`, `strategic_reserve.ts`, `turn_phases/war_phases.ts` (owner follow-up): the strategic-reserve step now passes the turn's `TurnInput.dataBaseDir` through `reinforceFromStrategicReserves` → `getOsidPriority` → `loadStrategicPriorities`. Before, the loader always fell back to `process.cwd()`, so a run started outside the repo root failed with ENOENT on `data/source/strategic_priorities.json`. The scenario runner and desktop sim both set `dataBaseDir`, and the packaged app `chdir`s to the same folder (`electron-main.cjs`), so every existing entry point reads the same file as before. The parameters are optional, and callers without one keep the cwd fallback. New `tests/strategic_priorities_base_dir.test.ts` fails with the `src/` change reversed and passes with it.
 - New `tools/lib/repo_paths.mjs`: `REPO_ROOT` from `import.meta.url`; out-of-repo folders from `AWWV_COORDINATION_ROOT` / `AWWV_WORKTREES_ROOT`, defaulting to `AWWV-coordination` / `AWWV-worktrees` beside the main checkout. The main checkout is found through `git rev-parse --git-common-dir`, so a run from a linked worktree resolves the same folders.
 - `tools/ui/*_browser_proof.mjs` (8 render proofs): the `--out` default is `$AWWV_COORDINATION_ROOT/surface_steps/<step>`. The task named only `records_surfaces_browser_proof.mjs`; the other seven had the same hard-coded default and were added after the inventory was taken.
@@ -20,4 +26,10 @@
 
 **Checked.** `npx tsc --noEmit` exit 0. 18 vitest files (the 7 named tests plus 11 that read the touched docs or tools) passed, 202 tests. `npm run test:baselines` reports all scenarios match. Helper probed from a disposable linked worktree: it resolved the main checkout and its sibling coordination folder.
 
-**Not done.** The PowerShell and Playwright scripts were not run on Windows here. Other machine-specific paths that do not match the F: inventory pattern are listed in the PR as out of scope. After the strategic-priorities fix, a run from outside the repo root still depends on cwd in other loaders the turn pipeline reaches without a base dir. Two crash: `state/legitimacy.ts` `loadMunicipalityPopulation1991()` and `loadInitialMunicipalityControllers1990()`, which the /tmp playthrough now hits next. Two are silently wrong: `sim/osid_areas.ts` `getOsidAreas()` falls back to an empty area map, and `war_phases.ts` `process-lifecycle-events` `loadLifecycleEvents()` falls back to no events. One is behind the Phase 3A flag: `loadEnrichedContactGraph()`. They are left for the owner to decide; the silent ones would change results without an error.
+**Not done.** The PowerShell and Playwright scripts were not run on Windows here. Other machine-specific paths that do not match the F: inventory pattern are listed in the PR as out of scope. After these fixes, a run from outside the repo root still fails, now at `operational_settlements.geojson`. The sim broadly assumes it runs from the data root, and the remaining reads are a larger layer that needs its own lane:
+- the turn pipeline's `loadSettlementGraph()` fallbacks (`turn_pipeline_types.ts` `getOperationalSettlementGraph`, `turn_pipeline.ts`, six in `early_war_phases.ts`, `state/negotiation_capital.ts`)
+- an unconditional `fallback_geometries.json` read in `map/settlements.ts`
+- about ten default paths in `state/political_control_init.ts`
+- the scenario anomaly checks
+
+The desktop app (`chdir` to its data root) and the scenario runner (run from the repo root) are not affected.
