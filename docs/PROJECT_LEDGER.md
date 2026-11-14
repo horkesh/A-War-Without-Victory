@@ -9,6 +9,18 @@
   Compacted 2026-09-10: 1723 sections moved out, 62 kept live.
 -->
 
+## 2026-11-14 — RF-F1: sustainability and militia fatigue read the OSID front and supply
+
+Calibration lane (audit F1, P0). Measured on main first: 109 of 110 municipalities collapsed by t8 (104 already at t6) and negotiation momentum sat at 1.0 from t4. Two consumers fed negotiation pressure from legacy `S…` settlement edges against OSID control. Sustainability found no neighbour and nothing supplied, and degraded each municipality once per pool. Militia fatigue marked all 324 pools unsupplied. A wiring test on the real war steps fails 4 of 4 on main.
+
+Both now take the OSID inputs from `buildOsidDisplacementPressureInputs` (RF-3). Sustainability evaluates each municipality once for one holder: a faction whose OSIDs there are all cut off from supply if there is one (minority pockets such as Srebrenica and Žepa), otherwise the largest holder. A militia pool is supply-isolated only where its faction holds ground; pools in lost municipalities no longer count. The flagged pockets now follow the war: the 1992 Krajina pockets (Prijedor, Sanski Most, Ključ), the Jajce salient before its fall, the 1993 Lašva-Kiseljak-Žepče HVO pocket, and Goražde, Žepa and Srebrenica; the historian notes false t2 flags (Bosanski Brod, Derventa, RS Foča) and never-flagged Sarajevo, Bihać, Maglaj and East Mostar, from supply-source placement (F1f). Probe: `tools/diagnostics/f1_sustainability_probe.ts`.
+
+188w against main `53ffe8e9545686ad`: 712/709/710/705 unchanged. Battles per week, final control and formations are identical. Strict health PASS, guards intact, consistency 1 (the same pre-existing sector-4 gap as main, SD15). Collapsed at t188 falls from 109 to 27 and total pressure from 65,133 to 4,315. HRHB reaches its war-weariness bands one week later. The momentum formula still saturates (1.0 from about t19), so the ceasefire (t94) and Washington (t98) weeks are unchanged. Re-deriving it is a separate design item. Also registered: the RS peace-plan floor erosion (`pressure / 267`, fitted to the old numbers; emergent mode only), and the remaining legacy-edge consumers (inventory in `docs/40_reports/implemented/20261114_RF_F1_SID_SWEEP.md`).
+
+## 2026-11-14 — Proprietary LICENSE file
+
+Owner request. The repository had no licence file and no `license` field. A root `LICENSE` now states that the game (code, builds, data, maps, art, audio, text) is proprietary to Pyrrhic Games, all rights reserved. It grants a personal, non-commercial right to play copies from authorised channels; third-party components keep their own licences (OpenStreetMap-derived map data under ODbL 1.0 is named). It adds a no-affiliation note for the historical content and standard warranty and liability limits. `package.json` gets `"license": "SEE LICENSE IN LICENSE"`. No behaviour, data or packaging change. Bundling the licence into the installer and a full third-party notices file remain with the R9 licence/SBOM gate, as does register item LIC1 (the war map shows OSM-derived tiles without OSM attribution).
+
 ## 2026-11-14 — RF-3: the siege displacement path works; flight abroad set per region (PR #600)
 
 Calibration-moving and §6. The pressure path in `updateDisplacement` (siege, encirclement) never fired in a campaign: the war step handed it OSID settlements with legacy `S…` edges, so it saw 0 front edges. Its legacy supply search reached no settlement, and it processed each municipality once per pool. A failing test on the real `update-displacement` step proved this (5 of 7 checks).
@@ -15165,3 +15177,9 @@ From the stance-engine follow-up (#583) register `F:/AWWV-coordination/crash_rec
 - Found by the R8 packaged dry run (RBiH, turn 187, main `2076cc259`): after the harness declined Dayton through the conference flow, its readability gate flagged the "Round 1 / Round 2 / Round 3" marks at 11.5px (`.dayton-round-track li`, `.72rem`), under the 12px floor for essential text.
 - Fix: the six conference rules under `.75rem` (`live.css` x3, `boundary.css` x2, `signing.css` x1; `.7rem` to `.74rem`) are now `.75rem`. CSS only: no sim, state, copy or layout-structure change.
 - Test: `tests/dayton_conference_font_floor.test.ts` pins the smallest declared conference font size at 12px (positive assertion, no source-absence check). The seven existing Dayton UI test files still pass (59). Rendered evidence is the next packaged dry-run segment passing the readability gate at `dayton-decline-confirm`.
+
+## 2026-11-14 — Verdict metric contrast (R8 dry-run finding, product UI)
+
+- Found by the R8 sign-and-verdict segment (RBiH, signed Dayton, turn 188): the Verdict's Focus / Outcome / Cost Signal values draw in the scene tone accent on the metric card (`#11141b`), and the catastrophic accent `#c24040` read 3.6:1 at 19px, under the 4.5:1 floor (readability gate: "RBiH", "Survival", "Permanent condemnation").
+- Fix: `TONE_ACCENT.catastrophic` in `src/ui/map/components/verdict/CinematicVerdict.tsx` is now `#e05a5a` (5.0:1). The other three tone accents already cleared 4.5:1. Colour only; no copy, layout, sim or state change.
+- Test: `tests/ui/verdict_metric_contrast.test.ts` computes the contrast of every tone accent against the card colour read from the source and requires 4.5:1. `cinematic_verdict`, `endgame_snapshot_verdict_fidelity` and `records_surfaces_type_floor` still pass.
