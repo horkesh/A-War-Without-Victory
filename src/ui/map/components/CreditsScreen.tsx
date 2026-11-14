@@ -4,7 +4,7 @@
 import { type ReactNode } from 'react';
 import { Z } from '../../shared/zIndex';
 import { t, useLocale } from '../i18n';
-import { canOpenExternalLinks, OSM_COPYRIGHT_URL } from './OsmAttribution';
+import { OSM_COPYRIGHT_URL } from './OsmAttribution';
 
 interface CreditsScreenProps {
     onClose: () => void;
@@ -59,14 +59,10 @@ export function CreditsScreen({ onClose }: CreditsScreenProps) {
                     </p>
                     <p className="text-[#8a7a60] text-xs mt-1">
                         {t('credits.osmLicence')}{' '}
-                        {canOpenExternalLinks() ? (
-                            <a href={OSM_COPYRIGHT_URL} target="_blank" rel="noopener noreferrer"
-                               className="text-[#c4a35a] underline-offset-2 hover:underline focus-visible:underline">
-                                openstreetmap.org/copyright
-                            </a>
-                        ) : (
-                            <span className="text-[#c4a35a]">openstreetmap.org/copyright</span>
-                        )}
+                        <a href={OSM_COPYRIGHT_URL} target="_blank" rel="noopener noreferrer"
+                           className="text-[#c4a35a] underline-offset-2 hover:underline focus-visible:underline">
+                            openstreetmap.org/copyright
+                        </a>
                     </p>
                 </CreditSection>
 

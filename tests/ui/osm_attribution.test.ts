@@ -23,10 +23,10 @@ describe('OpenStreetMap attribution plate', () => {
     setLocale('en');
   });
 
-  it('links the war-map credit to the OSM copyright page in a browser', () => {
+  it('links the war-map credit to the OSM copyright page', () => {
     render(createElement(OsmAttribution, { placement: 'war-map' }));
 
-    const link = screen.getByRole('link', { name: 'OpenStreetMap copyright and licence (opens in a new tab)' });
+    const link = screen.getByRole('link', { name: 'OpenStreetMap copyright and licence (opens in your browser)' });
     expect(link.textContent).toBe('© OpenStreetMap contributors');
     expect(link.getAttribute('href')).toBe(OSM_COPYRIGHT_URL);
     expect(OSM_COPYRIGHT_URL).toBe('https://www.openstreetmap.org/copyright');
@@ -34,15 +34,16 @@ describe('OpenStreetMap attribution plate', () => {
     expect(link.getAttribute('rel')).toBe('noopener noreferrer');
   });
 
-  it('renders plain text without a link inside the Electron app', () => {
+  it('keeps the link inside the Electron app, where the main process sends it to the browser', () => {
     (window as DesktopWindow).awwv = {};
     render(createElement(OsmAttribution, { placement: 'war-map' }));
 
-    const plate = screen.getByTestId('osm-attribution-war-map');
-    expect(plate.textContent).toBe('© OpenStreetMap contributors');
-    expect(screen.queryByRole('link')).toBeNull();
-    // Plain text must not swallow map clicks.
-    expect(plate.style.pointerEvents).toBe('none');
+    const link = screen.getByRole('link', { name: 'OpenStreetMap copyright and licence (opens in your browser)' });
+    expect(link.getAttribute('href')).toBe(OSM_COPYRIGHT_URL);
+    expect(link.getAttribute('target')).toBe('_blank');
+    // The target must stay on electron-main.cjs's allow-list, or the click opens nothing.
+    const main = readFileSync(join(process.cwd(), 'src/desktop/electron-main.cjs'), 'utf8');
+    expect(main).toContain(`'${new URL(OSM_COPYRIGHT_URL).hostname}'`);
   });
 
   it('uses the BCS credit when BCS is selected', () => {
@@ -50,7 +51,7 @@ describe('OpenStreetMap attribution plate', () => {
     render(createElement(OsmAttribution, { placement: 'minimap' }));
 
     expect(screen.getByTestId('osm-attribution-minimap').textContent).toBe('© OpenStreetMap saradnici');
-    expect(screen.getByRole('link', { name: 'Autorska prava i licenca OpenStreetMapa (otvara se u novoj kartici)' })).toBeTruthy();
+    expect(screen.getByRole('link', { name: 'Autorska prava i licenca OpenStreetMapa (otvara se u pregledniku)' })).toBeTruthy();
   });
 
   it('keeps the credit at the 12px text floor on a dark plate with gold text and a green rule', () => {

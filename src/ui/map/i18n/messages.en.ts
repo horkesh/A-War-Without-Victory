@@ -3563,7 +3563,7 @@ export const enMessages = {
     'map.aria.tacticalMap': 'Tactical map of Bosnia and Herzegovina; pan with arrow keys, zoom with plus and minus, press Home to reset view',
     'map.status.preparing': 'Preparing operational map...',
     'map.attribution.osm': '© OpenStreetMap contributors',
-    'map.attribution.osmLinkLabel': 'OpenStreetMap copyright and licence (opens in a new tab)',
+    'map.attribution.osmLinkLabel': 'OpenStreetMap copyright and licence (opens in your browser)',
     'map.status.loadFailed': 'Operational map data could not be loaded.',
     'map.status.retry': 'Retry',
     'map.context.viewUnit': 'View Unit',

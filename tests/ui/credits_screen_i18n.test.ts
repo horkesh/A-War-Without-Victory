@@ -51,7 +51,7 @@ describe('CreditsScreen localization', () => {
         expect(link.getAttribute('href')).toBe('https://www.openstreetmap.org/copyright');
     });
 
-    it('credits OpenStreetMap in BCS and shows the copyright page as text in the desktop app', () => {
+    it('credits OpenStreetMap in BCS and links the copyright page in the desktop app too', () => {
         setLocale('bcs');
         (window as Window & { awwv?: unknown }).awwv = {};
         try {
@@ -60,8 +60,9 @@ describe('CreditsScreen localization', () => {
             expect(screen.getByText('Kartografski podaci')).toBeTruthy();
             expect(screen.getByTestId('credits-osm-attribution').textContent).toBe('© OpenStreetMap saradnici');
             expect(screen.getByText(/dostupni pod licencom Open Database License \(ODbL\) 1\.0/)).toBeTruthy();
-            expect(screen.getByText('openstreetmap.org/copyright')).toBeTruthy();
-            expect(screen.queryByRole('link', { name: 'openstreetmap.org/copyright' })).toBeNull();
+            const link = screen.getByRole('link', { name: 'openstreetmap.org/copyright' });
+            expect(link.getAttribute('href')).toBe('https://www.openstreetmap.org/copyright');
+            expect(link.getAttribute('target')).toBe('_blank');
         } finally {
             delete (window as Window & { awwv?: unknown }).awwv;
         }

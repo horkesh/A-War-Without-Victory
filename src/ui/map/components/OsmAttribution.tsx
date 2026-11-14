@@ -8,24 +8,18 @@
  * Style: dark NATO ops plate (near-black, ops-green hairline, gold text), 12px so it
  * stays at the campaign text floor.
  *
- * Links: the Electron app has no external-link route (the main process installs no
- * window-open handler, so a target="_blank" link would open the site in a new app
- * window with the app's preload). In the desktop app the credit is therefore plain
- * text; in a browser it links to the OpenStreetMap copyright page.
+ * Link: the credit links to the OpenStreetMap copyright page. In the desktop app the main
+ * process's external-link policy (electron-main.cjs, installExternalLinkPolicy) denies the
+ * popup and opens the allow-listed page in the player's browser instead of an app window.
  */
 import type { CSSProperties } from 'react';
 import { Z } from '../../shared/zIndex';
 import { t } from '../i18n';
 
+/** Allow-listed for the system browser by electron-main.cjs (EXTERNAL_LINK_HOSTS). */
 export const OSM_COPYRIGHT_URL = 'https://www.openstreetmap.org/copyright';
 
 export type OsmAttributionPlacement = 'war-map' | 'minimap';
-
-/** True outside the Electron shell, where the preload bridge (`window.awwv`) is absent. */
-export function canOpenExternalLinks(): boolean {
-  if (typeof window === 'undefined') return false;
-  return (window as Window & { awwv?: unknown }).awwv == null;
-}
 
 const PLATE_STYLE: CSSProperties = {
   position: 'absolute',
@@ -70,34 +64,24 @@ const LINK_STYLE: CSSProperties = {
 };
 
 export function OsmAttribution({ placement }: { placement: OsmAttributionPlacement }) {
-  const label = t('map.attribution.osm');
-  const linkable = canOpenExternalLinks();
   return (
     <div
       data-testid={`osm-attribution-${placement}`}
       // On the war map, unit counters treat the plate as a panel and clear it rather than
       // drawing under it. The minimap frame is already an occluder.
       data-awwv-counter-occluder={placement === 'war-map' ? 'true' : undefined}
-      style={{
-        ...PLATE_STYLE,
-        ...PLACEMENT_STYLE[placement],
-        pointerEvents: linkable ? 'auto' : 'none',
-      }}
+      style={{ ...PLATE_STYLE, ...PLACEMENT_STYLE[placement] }}
     >
-      {linkable ? (
-        <a
-          href={OSM_COPYRIGHT_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label={t('map.attribution.osmLinkLabel')}
-          className="hover:underline focus-visible:underline hover:text-[#d8b86c] focus-visible:text-[#d8b86c]"
-          style={LINK_STYLE}
-        >
-          {label}
-        </a>
-      ) : (
-        <span>{label}</span>
-      )}
+      <a
+        href={OSM_COPYRIGHT_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label={t('map.attribution.osmLinkLabel')}
+        className="hover:underline focus-visible:underline hover:text-[#d8b86c] focus-visible:text-[#d8b86c]"
+        style={LINK_STYLE}
+      >
+        {t('map.attribution.osm')}
+      </a>
     </div>
   );
 }

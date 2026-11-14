@@ -3429,7 +3429,7 @@ export const bcsMessages: Partial<Record<MessageKey, string>> = {
     'map.aria.tacticalMap': 'Taktička karta Bosne i Hercegovine; pomjerajte je strelicama, zumirajte plusom i minusom, pritisnite Home za reset pogleda',
     'map.status.preparing': 'Priprema operativne karte...',
     'map.attribution.osm': '© OpenStreetMap saradnici',
-    'map.attribution.osmLinkLabel': 'Autorska prava i licenca OpenStreetMapa (otvara se u novoj kartici)',
+    'map.attribution.osmLinkLabel': 'Autorska prava i licenca OpenStreetMapa (otvara se u pregledniku)',
     'map.status.loadFailed': 'Podaci operativne karte nisu učitani.',
     'map.status.retry': 'Pokušaj ponovo',
     'map.context.viewUnit': 'Pregled jedinice',
