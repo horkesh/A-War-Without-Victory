@@ -40,7 +40,32 @@
 | Canon Compliance | GO-WITH-CHANGES | GO |
 | War-or-Game | **BLOCK** on F4 (enclaves stopped filling) | GO |
 
-Verdicts in full: `F:/AWWV-coordination/siege_displacement/panel_r1_verdicts.md`.
+Seat verdicts in brief:
+- **Historian.** Round 1: attribution follows *Galić*, *D. Milošević* and UNCOE; 0.1% a week is bracketed by Krstić TJ ¶16 and Sarajevo after 1992; July 1995 was forcible transfer, not evacuation. Round 2: Krstić pinpoints corrected (¶11, ¶14, ¶16); the F4b regional shares approved; keep "Fled abroad".
+- **Scenario-tester / calibration.** Figures verified run by run. Asked for the P4 sentence, a statement of the RBiH recruitment lever, the premise worded "unchanged and still open", and no flight abroad when an enclave falls.
+- **Engine / systems.** Determinism confirmed. Asked for a per-side counter that restarts on a gap or a change of holder, the holder passed in, holder-only pool reduction, and tests for each.
+- **Red-team.** Round 1 BLOCK: a minority-of-municipality pocket never fired, and two holder computations could disagree. Both fixed in P6; GO in round 2, with SD11 recorded.
+- **Game Designer.** No perverse incentive. Canon had to move in the same change.
+- **Narrative Designer.** Final EN/BCS strings; dropped its "Displaced abroad" proposal in round 2.
+- **Canon Compliance.** Listed every canon passage to amend and the contents of the §6 row. Round 2: all passages true of the code.
+- **War-or-Game.** Round 1 BLOCK on F4: a flat 0.40 emptied the enclaves. F4b resolved it; GO in round 2.
+
+## Pyrrhic merge gate (2026-11-14)
+
+The gate had four independent seats: canon compliance, determinism auditor, historian and war-or-game. All four returned GO WITH CONDITIONS on head 44aa96ed5.
+
+Conditions:
+- re-measure on main after RF-2 (#604) and reproduce the hash, inside the owner-accepted envelope (total shortfall at most 10; Jan93, Apr94 and Apr95 at most -2 each; Oct95 at most -8; battles per week total drop at most 5% and RBiH at most 8%; consistency 0);
+- regenerate the PR's tables from the final run;
+- add to the §6 record that this panel's GO clears binding (3) of the 2026-11-13 record;
+- record the Goražde shortfall;
+- log ARBiH holding Prozor in `REAL_WAR_MASTER.md` (the HVO held Rama throughout, BB1 p.195, p.217);
+- state whether the final run passes the old corps-only Farz reading;
+- CI green.
+
+Standing question: main's matched cells were calibrated while the siege path never fired and Bosniak flight abroad was 0. War-or-game spot-checked Prozor (an operation choice) and Varosluk (launch timing of "Donji Vakuf 95"). No control writes, scripted captures or cuts in battle frequency were found. The Farz read-fix counts only Farz's own logged cross-corps participants, and real failures still fail.
+
+Battles per week (orchestrator ruling): the 5% line applies to the total. RBiH's -5.3% at F4b is accepted, because it is an emergent effect of the sourced manpower correction; no battle-generation code changed. The figures are re-checked at the final run.
 
 ## Measurement (188w)
 
