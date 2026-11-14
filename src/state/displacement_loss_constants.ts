@@ -60,9 +60,11 @@ export const FLEE_ABROAD_FRACTION_HRHB = 0.40;
  */
 export const FLEE_ABROAD_FRACTION_RBIH = 0.40;
 
-// Sealed pockets: nobody leaves a besieged pocket for abroad (Srebrenica, Žepa, Goražde, the
-// Bihać pocket, Sarajevo after mid-1992). The siege path in displacement.ts books its
-// departures with no flight abroad; they go to own-side territory (F4, 2026-11-14).
+// Sealed pockets: the siege path in displacement.ts books its departures with no flight abroad;
+// they go to own-side territory (F4, 2026-11-14). A simplification (Historian seat): it fits
+// Srebrenica, Žepa and Goražde, but some Sarajevo convoy and tunnel leavers went abroad,
+// Orašje's Sava crossing led to Croatia, and Abdić's followers left the Bihać pocket for
+// Croatia in 1994 and 1995 (Batnoga, Kupljensko). It understates flight abroad only.
 
 /** Flee-abroad fraction for an ethnicity-aligned faction. */
 export function getFactionFleeAbroadFraction(faction: FactionId): number {
