@@ -36,7 +36,7 @@ import type { GameState, EndgameSnapshot } from '../../state/game_state.js';
 import { computeFullVerdict } from '../negotiation/scoring.js';
 import { evaluateRuptureConsequences } from '../negotiation/rupture_consequences.js';
 import { buildCostLedger } from './cost_ledger.js';
-import { compareToHistorical } from './endgame_comparison.js';
+import { compareToHistorical, endingBasisForState } from './endgame_comparison.js';
 import { computePeaceDysfunctionBreakdown } from '../negotiation/peace_dysfunction.js';
 import historicalBaseline from '../../../data/reference/historical_baseline.json';
 
@@ -73,6 +73,7 @@ export function freezeEndgameSnapshot(state: GameState): void {
         ? tryDerive(() => compareToHistorical(
             costLedger as Parameters<typeof compareToHistorical>[0],
             historicalBaseline as Parameters<typeof compareToHistorical>[1],
+            endingBasisForState(state),
         ))
         : undefined;
 

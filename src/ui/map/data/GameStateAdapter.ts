@@ -63,7 +63,7 @@ import { computeFullVerdict } from '../../../sim/negotiation/scoring.js';
 import { DIMENSION_WEIGHTS } from '../../../sim/events/strategic_dimensions.js';
 import type { GameVerdict } from '../../../state/negotiation_types.js';
 import { buildCostLedger } from '../../../sim/endgame/cost_ledger.js';
-import { compareToHistorical } from '../../../sim/endgame/endgame_comparison.js';
+import { compareToHistorical, endingBasisForState } from '../../../sim/endgame/endgame_comparison.js';
 import type { DimensionShift, EventCategory, EventEffect } from '../../../sim/events/event_types.js';
 import historicalBaseline from '../../../../data/reference/historical_baseline.json';
 import { computeCorpsCommandStrainBreakdown, getCommandStrainLabel, projectStrainDecay, deriveRecoveryForecast, deriveRecoveryForecastToken, deriveCorpsSituationAssessment, deriveReadinessTrend } from './command_strain.js';
@@ -4884,7 +4884,11 @@ function deriveCostLedger(state: any): LoadedGameState['costLedger'] {
 function deriveHistoricalComparison(state: any): LoadedGameState['historicalComparison'] {
     return safeDerive('deriveHistoricalComparison', state, () => {
         const ledger = buildCostLedger(state as GameState);
-        return compareToHistorical(ledger, historicalBaseline as Parameters<typeof compareToHistorical>[1]);
+        return compareToHistorical(
+            ledger,
+            historicalBaseline as Parameters<typeof compareToHistorical>[1],
+            endingBasisForState(state as GameState),
+        );
     });
 }
 

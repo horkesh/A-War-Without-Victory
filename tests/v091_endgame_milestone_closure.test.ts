@@ -96,22 +96,37 @@ describe('v0.9.1 Dynamic Essay + Endgame Comparison milestone closure', () => {
     it('keeps one authoritative historical baseline artifact with all comparison categories', () => {
         const historical = baseline();
 
-        expect(historical.war_duration_weeks).toBe(182);
+        // Two like-for-like endpoints (R8 ending truth pass): Dayton initialled 21 Nov 1995
+        // (week 189) for a settled campaign; ceasefire in force 12 Oct 1995 (week 183) otherwise.
+        expect(historical.war_duration_weeks).toBe(189);
+        expect(historical.fighting_end_week).toBe(183);
         expect(historical.territory_final).toEqual({
             RS: 49,
             RBiH_HRHB_Federation: 51,
         });
-        expect(historical.total_killed).toBeGreaterThan(90000);
+        // No ceasefire-line share is carried until one is sourced (SHDG §6).
+        expect(historical.territory_ceasefire).toBeUndefined();
+        // RDC 2007: 97,207 killed or missing = 57,523 soldiers + 39,684 civilians.
+        expect(historical.total_killed).toBe(97207);
+        expect(historical.military_killed_total).toBe(57523);
+        expect(historical.civilian_killed).toBe(39684);
+        expect(historical.military_killed_total! + historical.civilian_killed).toBe(historical.total_killed);
+        // By army of service: a different RDC table that does not sum to the military total.
+        expect(historical.military_killed).toEqual({ RBiH: 30906, RS: 20775, HRHB: 5919 });
         expect(historical.total_displaced).toBeGreaterThan(2000000);
-        expect(historical.civilian_killed).toBeGreaterThan(30000);
-        expect(Object.keys(historical.military_killed).sort()).toEqual(['HRHB', 'RBiH', 'RS']);
         expect(historical.source_notes).toContain('RDC');
         expect(historical.source_notes).toContain('Dayton');
 
         const milestones = historical.milestones ?? [];
         expect(milestones.map((row) => row.id)).toEqual([
             'srebrenica_genocide_1995',
+            'ceasefire_1995',
             'dayton_accords',
+        ]);
+        expect(milestones.map((row) => [row.id, row.historical_week, row.kind, row.ending])).toEqual([
+            ['srebrenica_genocide_1995', 170, 'rupture', undefined],
+            ['ceasefire_1995', 183, 'war_end', 'no_settlement'],
+            ['dayton_accords', 189, 'war_end', 'settlement'],
         ]);
         for (const row of milestones) {
             expect(row.label.length).toBeGreaterThan(0);
@@ -122,19 +137,32 @@ describe('v0.9.1 Dynamic Essay + Endgame Comparison milestone closure', () => {
     });
 
     it('emits duration, territory, casualty, displacement, rupture, and milestone comparison truth from explicit inputs', () => {
+        // Default ending 'settlement': compared with the Dayton initialling (week 189).
         const comparison = compareToHistorical(ledger(), baseline());
 
-        expect(comparison.duration_delta_weeks).toBe(6);
+        expect(comparison.duration_delta_weeks).toBe(188 - 189);
+        expect(comparison.historical_reference_week).toBe(189);
         expect(comparison.territory_divergence.RS).toBe(3);
         expect(comparison.territory_divergence.RBiH_HRHB_Federation).toBe(-3);
-        expect(comparison.casualty_ratio).toBeGreaterThan(0);
+        expect(comparison.casualty_ratio).toBeCloseTo(46000 / 57523, 10);
+        expect(comparison.civilian_ratio).toBeCloseTo(33000 / 39684, 10);
         expect(comparison.displacement_ratio).toBeGreaterThan(0);
         expect(comparison.rupture_divergence).toEqual(['srebrenica_genocide_1995']);
-        expect(comparison.divergence_notes.length).toBeGreaterThanOrEqual(4);
-        expect(comparison.milestone_comparison?.map((row) => row.id)).toEqual([
-            'srebrenica_genocide_1995',
-            'dayton_accords',
-        ]);
+        expect(comparison.divergence_notes).toEqual(expect.arrayContaining([
+            'Military killed: 46,000 in this campaign; 57,523 in the historical war',
+            'Civilians killed: 33,000 in this campaign; 39,684 in the historical war',
+            'Srebrenica genocide occurred',
+        ]));
+        expect(comparison.divergence_notes.some((note) => note.startsWith('War lasted'))).toBe(false);
+        // Rupture rows are never timing rows; only the matching war-end milestone is compared.
+        expect(comparison.milestone_comparison?.map((row) => row.id)).toEqual(['dayton_accords']);
+
+        // A campaign ended without a settlement is compared with the ceasefire (week 183).
+        const unsettled = compareToHistorical(ledger(), baseline(), 'no_settlement');
+        expect(unsettled.duration_delta_weeks).toBe(188 - 183);
+        expect(unsettled.historical_reference_week).toBe(183);
+        expect(unsettled.territory_divergence).toEqual(comparison.territory_divergence);
+        expect(unsettled.milestone_comparison?.map((row) => row.id)).toEqual(['ceasefire_1995']);
     });
 
     it('renders dynamic sections without mutating canonical historical essay text', () => {
@@ -163,16 +191,17 @@ describe('v0.9.1 Dynamic Essay + Endgame Comparison milestone closure', () => {
                 casualty_ratio: 1,
                 displacement_ratio: 1,
                 rupture_divergence: [],
-                divergence_notes: ['War lasted 6 weeks longer than the historical 182 weeks'],
+                divergence_notes: ['Military killed: 46,000 in this campaign; 57,523 in the historical war'],
             },
         };
 
         const resolved = resolveCodexEssay(essay, context);
 
         expect(JSON.stringify(essay)).toBe(before);
+        // The producer's note renders through the localized comparison line (verdict.compare.militaryDead).
         expect(resolved.paragraphs.map((paragraph) => paragraph.text)).toEqual([
             'Canonical paragraph one.',
-            'War lasted 6 weeks longer than the historical 182 weeks',
+            'Military dead on all sides: 46,000 in this campaign. Historical war: 57,523 soldiers killed or missing (Research and Documentation Center, Sarajevo, 2007).',
             'Canonical paragraph two.',
         ]);
     });

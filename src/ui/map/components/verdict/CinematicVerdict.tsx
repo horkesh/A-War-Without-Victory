@@ -1,12 +1,11 @@
 import type { CostLedger } from '../../../../sim/endgame/cost_ledger.js';
 import type { ComparisonResult } from '../../../../sim/endgame/endgame_comparison.js';
 import type { GameVerdict } from '../../../../state/negotiation_types.js';
-import { buildVerdictScene, type VerdictSceneTone } from '../../data/verdictScene.js';
+import { buildVerdictScene, OUTCOME_CLASS_COLOR, type VerdictSceneTone } from '../../data/verdictScene.js';
 import { resolveVerdictBackground } from '../../data/verdictArt.js';
-import { formatHistoricalDivergenceNote } from '../../data/historicalDivergenceNotes.js';
+import { buildHistoricalComparisonLines } from '../../data/verdictComparison.js';
 import { buildVerdictShareSummary } from '../../data/verdictShareSummary.js';
 import { t, useLocale } from '../../i18n';
-import { formatFindingSeverity } from '../WarCostSummary';
 import { SURFACE_LABEL } from '../surface/Surface';
 
 export interface CinematicVerdictProps {
@@ -16,6 +15,8 @@ export interface CinematicVerdictProps {
     focusFaction?: string;
     dateLabel: string;
     durationLabel: string;
+    /** Shares under the signed settlement (all cells, overrun safe areas included). */
+    settledShares?: Readonly<Record<string, number>>;
 }
 
 const TONE_CLASSES: Record<VerdictSceneTone, string> = {
@@ -37,6 +38,11 @@ function metricText(value: string | undefined): string {
     return value && value.trim().length > 0 ? value : t('verdict.notRecorded');
 }
 
+/**
+ * The Verdict's banner (R8 ending truth pass, 2026-11-14): one headline that holds the
+ * war-record grade, the outcome and any cap (shown as a chip), the Srebrenica record named
+ * with its perpetrator, and the cost of the war with each figure's basis.
+ */
 export function CinematicVerdict({
     verdict,
     costLedger,
@@ -44,6 +50,7 @@ export function CinematicVerdict({
     focusFaction,
     dateLabel,
     durationLabel,
+    settledShares,
 }: CinematicVerdictProps) {
     useLocale();
     const scene = buildVerdictScene({
@@ -58,15 +65,15 @@ export function CinematicVerdict({
         historicalComparison,
         focusFaction,
     });
+    const comparisonLines = buildHistoricalComparisonLines({ verdict, costLedger, comparison: historicalComparison, settledShares })
+        .filter(line => line.id !== 'srebrenica');
     const accent = TONE_ACCENT[scene.tone];
+    const outcomeColor = scene.focusOutcomeClass ? OUTCOME_CLASS_COLOR[scene.focusOutcomeClass] : accent;
     // Graceful-fallback art: a tone-mapped documentary background renders behind
     // the gradient when its asset is present; absent → null and the gradient
     // alone shows (never a broken image). A scrim over the image preserves the
     // reserved text-band legibility built into each 1920×1080 plate.
     const backgroundUrl = resolveVerdictBackground(scene.tone);
-    const comparisonCallouts = (historicalComparison?.divergence_notes ?? [])
-        .filter(note => note.trim().length > 0)
-        .slice(0, 3);
 
     const copySummary = () => {
         void navigator.clipboard?.writeText(shareSummary);
@@ -78,10 +85,6 @@ export function CinematicVerdict({
             data-awwv-cinematic-verdict={scene.tone}
             data-awwv-verdict-bg={backgroundUrl ? 'image' : 'gradient'}
         >
-            {/* Tone-mapped documentary background (graceful fallback): renders
-                behind the content only when its asset resolves; otherwise the
-                gradient above stands alone. A scrim keeps the reserved text band
-                legible over the 1920×1080 plate. */}
             {backgroundUrl && (
                 <>
                     <div
@@ -100,41 +103,65 @@ export function CinematicVerdict({
                 className="absolute inset-x-0 top-0 h-px opacity-80"
                 style={{ background: `linear-gradient(90deg, transparent, ${accent}, transparent)` }}
             />
-            {/* Surface redesign, step 4 (2026-11-12): the scene is the verdict surface's
-                banner — 34px headline, 18px reading text, figure tiles; every string unchanged. */}
-            <div className="relative grid gap-x-10 gap-y-6 px-8 py-7 xl:grid-cols-[minmax(0,1.3fr)_minmax(0,0.7fr)]">
+            {/* Stacked below 2xl (UI/UX review A1): at 1280 px the cost column held four long
+                comparison lines in ~300 px and the tiles wrapped side names to three lines. */}
+            <div className="relative grid gap-x-10 gap-y-6 px-8 py-7 2xl:grid-cols-[minmax(0,1.3fr)_minmax(0,0.7fr)]">
                 <div className="flex min-w-0 flex-col gap-3">
                     <div className="font-mono text-[14px] font-semibold tracking-[0.08em] text-[#e2d6b8]">
                         {metricText(dateLabel)} / {metricText(durationLabel)} / {verdict.outcome_label}
                     </div>
-                    <h1 className="m-0 text-[34px] font-semibold leading-tight text-[#f6ecd2]">
+                    <h1 className="m-0 text-[34px] font-semibold leading-tight text-[#f6ecd2]" data-awwv-verdict-headline>
                         {scene.headline}
                     </h1>
-                    <p className="m-0 max-w-[62ch] text-[18px] leading-relaxed text-[#e2d6b8]">
-                        {scene.subheadline}
-                    </p>
-                    <div className="grid grid-cols-3 gap-3 pt-2">
-                        <VerdictMetric label={t('verdict.metric.focus')} value={scene.focusFaction ?? t('verdict.campaign')} accent={accent} />
-                        <VerdictMetric label={t('verdict.metric.outcome')} value={scene.focusOutcomeLabel} accent={accent} />
-                        <VerdictMetric label={t('verdict.metric.costSignal')} value={formatFindingSeverity(scene.costEmphasis.severity)} accent={accent} />
+                    {scene.subheadline && (
+                        <p className="m-0 max-w-[68ch] text-[18px] leading-relaxed text-[#e2d6b8]" data-awwv-verdict-subheadline>
+                            {scene.subheadline}
+                        </p>
+                    )}
+                    {/* The recorded genocide, named with its perpetrators, on its own line
+                        (never run on after a cap sentence; §4 panel 2026-11-14). */}
+                    {scene.stain && (
+                        <p className="m-0 max-w-[68ch] border-l-2 border-red-400/60 pl-3 text-[18px] leading-relaxed text-[#ecdcc4]"
+                           data-awwv-verdict-stain={scene.stain.relation}>
+                            {scene.stain.text}
+                        </p>
+                    )}
+                    <div className="grid grid-cols-1 gap-3 pt-2 sm:grid-cols-3">
+                        <VerdictMetric label={t('verdict.metric.side')} value={scene.focusSideName} color="#f1e6c8" />
+                        <VerdictMetric
+                            label={t('verdict.metric.grade')}
+                            value={scene.focusGrade ?? t('verdict.notRecorded')}
+                            color="#f1e6c8"
+                            testId="grade"
+                        />
+                        <VerdictMetric label={t('verdict.metric.outcome')} value={scene.focusOutcomeLabel} color={outcomeColor} testId="outcome" />
                     </div>
+                    {scene.cap && (
+                        <p className="m-0 inline-flex w-fit flex-wrap items-center gap-2 rounded border px-3 py-1.5 text-[16px] font-semibold"
+                           style={{ borderColor: OUTCOME_CLASS_COLOR[scene.cap.to], color: OUTCOME_CLASS_COLOR[scene.cap.to] }}
+                           data-awwv-verdict-cap={scene.cap.source}>
+                            {scene.cap.chip}
+                        </p>
+                    )}
                 </div>
 
-                <div className="flex min-w-0 flex-col gap-3 border-t border-[#3a4150] pt-5 xl:border-l xl:border-t-0 xl:pl-8 xl:pt-0">
+                <div className="flex min-w-0 flex-col gap-3 border-t border-[#3a4150] pt-5 2xl:border-l 2xl:border-t-0 2xl:pl-8 2xl:pt-0">
                     <div className="text-[18px] font-semibold text-[#f1e6c8]">
                         {scene.costEmphasis.title}
                     </div>
                     <p className="m-0 text-[16px] leading-relaxed text-[#ddd1b3]">
                         {scene.costEmphasis.text}
                     </p>
-                    {comparisonCallouts.length > 0 && (
-                        <div className="flex flex-col gap-2" data-awwv-cinematic-comparison={comparisonCallouts.length}>
-                            {comparisonCallouts.map(callout => (
-                                <div key={callout} className="border-l-2 pl-3 text-[16px] leading-relaxed text-[#ddd1b3]"
-                                     style={{ borderLeftColor: accent }}>
-                                    {formatHistoricalDivergenceNote(callout)}
+                    {comparisonLines.length > 0 && (
+                        <div className="flex flex-col gap-2" data-awwv-cinematic-comparison={comparisonLines.length}>
+                            {comparisonLines.map(line => (
+                                <div key={line.id} className="border-l-2 pl-3 text-[16px] leading-relaxed text-[#ddd1b3]"
+                                     style={{ borderLeftColor: accent }}
+                                     data-awwv-comparison-line={line.id}>
+                                    {line.text}
                                 </div>
                             ))}
+                            <div className="text-[14px] text-[#b9ad94]">{t('verdict.compare.sources')}</div>
                         </div>
                     )}
                     <div className="mt-1 flex flex-col gap-2 border-t border-[#3a4150] pt-3">
@@ -165,11 +192,12 @@ export function CinematicVerdict({
     );
 }
 
-function VerdictMetric({ label, value, accent }: { label: string; value: string; accent: string }) {
+function VerdictMetric({ label, value, color, testId }: { label: string; value: string; color: string; testId?: string }) {
     return (
-        <div className="flex min-w-0 flex-col gap-1 rounded-md border border-[#2a303c] bg-[#11141b] px-4 py-3">
+        <div className="flex min-w-0 flex-col gap-1 rounded-md border border-[#2a303c] bg-[#11141b] px-4 py-3"
+             data-awwv-verdict-metric={testId}>
             <div className="text-[15px] leading-snug text-[#b9ad94]">{label}</div>
-            <div className="break-words text-[19px] font-semibold leading-snug" style={{ color: accent }}>
+            <div className="break-words text-[19px] font-semibold leading-snug" style={{ color }}>
                 {value}
             </div>
         </div>

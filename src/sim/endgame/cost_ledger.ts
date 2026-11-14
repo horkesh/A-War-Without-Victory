@@ -277,16 +277,55 @@ export interface CostLedger {
     annotations?: CostLedgerAnnotation[];
 }
 
-const COST_LEDGER_SOURCES = Object.freeze({
-    sensitiveHistoryGate: 'Sensitive History Design Gate §4',
-    victoryScoring: 'Victory Conditions and Pyrrhic Scoring section 1',
-    rdc: 'RDC Sarajevo, Bosnian Book of the Dead (2007)',
-    unhcr: 'UNHCR (1996) displacement estimates',
-    srebrenica: 'ICTY Krstic IT-98-33-T; Karadzic IT-95-5/18-T; Mladic IT-09-92-T; ICJ Bosnia v. Serbia (2007)',
+/**
+ * Public sources only (R8 council C1; historian ruling 2026-11-14). A finding that counts the
+ * campaign's own record carries no source: no court or archive counted game events. Internal
+ * design documents never appear on a player-facing screen.
+ */
+export const COST_LEDGER_SOURCES = Object.freeze({
+    srebrenica: 'ICTY and IRMCT: Prosecutor v. Radislav Krstić, IT-98-33-T (2001) and IT-98-33-A (2004); '
+        + 'Prosecutor v. Radovan Karadžić, IT-95-5/18-T (2016), MICT-13-55-A (2019); '
+        + 'Prosecutor v. Ratko Mladić, IT-09-92-T (2017), MICT-13-56-A (2021); '
+        + 'ICJ, Bosnia and Herzegovina v. Serbia and Montenegro (2007)',
 });
+
+/**
+ * The Srebrenica genocide finding (historian ruling 2026-11-14, R8 council C3): names the
+ * perpetrators as forces and the victims, dates only the historical killings, and gives the
+ * court finding before the memorial list.
+ */
+export const SREBRENICA_FINDING_TEXT =
+    'The Srebrenica safe area fell in this campaign. Historically, after the safe area fell in July 1995, '
+    + 'Bosnian Serb forces killed between 7,000 and 8,000 Bosniak men and boys. The ICTY held these '
+    + 'killings to be genocide, as did the International Court of Justice. The Srebrenica-Potočari '
+    + 'Memorial lists 8,372 names.';
+
+/** Responsible parties named as forces, never as peoples (Sensitive History Design Gate §4). */
+const FORCES_NAME: Readonly<Record<string, string>> = {
+    RBiH: 'ARBiH forces',
+    RS: 'Bosnian Serb forces',
+    HRHB: 'HVO forces',
+};
+
+/** The authorizing command, as the ledger badges name it ("RS command", not a people). */
+const COMMAND_NAME: Readonly<Record<string, string>> = {
+    RBiH: 'RBiH command',
+    RS: 'RS command',
+    HRHB: 'Herzeg-Bosnia command',
+};
+
+/** Fixed side order for per-side cards (RBiH, RS, HRHB). */
+function sideOrder(faction: string): number {
+    const index = ['RBiH', 'RS', 'HRHB'].indexOf(faction);
+    return index === -1 ? 3 : index;
+}
 
 function formatInteger(value: number): string {
     return Math.trunc(Math.max(0, value)).toLocaleString('en-US');
+}
+
+function capitalizeFirst(value: string): string {
+    return value.charAt(0).toUpperCase() + value.slice(1);
 }
 
 function plural(value: number, singular: string, pluralForm = `${singular}s`): string {
@@ -351,12 +390,11 @@ function buildProsecutorialFindings(
         id: 'human_cost_record',
         category: 'human_cost',
         severity: totalCivilianKilled > 0 || totalMilitaryKilled > 0 ? 'grave' : 'record',
-        title: 'Human cost record',
+        title: 'Human cost of this campaign',
         text:
-            `The ledger records ${formatInteger(totalMilitaryKilled)} military killed and ` +
-            `${formatInteger(totalCivilianKilled)} civilian killed across ${entries.length} faction records. ` +
-            'These counts are accounting facts for the verdict surface, not a score.',
-        sources: [COST_LEDGER_SOURCES.rdc, COST_LEDGER_SOURCES.sensitiveHistoryGate],
+            `This campaign recorded ${formatInteger(totalMilitaryKilled)} military dead and ` +
+            `${formatInteger(totalCivilianKilled)} civilian dead on all sides.`,
+        sources: [],
     });
 
     if (earlyPeaceId) {
@@ -366,9 +404,9 @@ function buildProsecutorialFindings(
             severity: 'record',
             title: 'Early negotiated settlement',
             text:
-                `The ledger records acceptance of ${formatPeacePlanLabel(earlyPeaceId)} on ${formatCostLedgerTurnDate(state.meta?.turn ?? 0)}. ` +
-                'This is a termination fact, not proof that political or civilian costs vanished.',
-            sources: [COST_LEDGER_SOURCES.victoryScoring, COST_LEDGER_SOURCES.sensitiveHistoryGate],
+                `${capitalizeFirst(formatPeacePlanLabel(earlyPeaceId))} was accepted in the week of ${formatCostLedgerTurnDate(state.meta?.turn ?? 0)}. ` +
+                'The harm recorded up to that point remains in the ledger.',
+            sources: [],
         });
     }
 
@@ -377,11 +415,9 @@ function buildProsecutorialFindings(
             id: 'civilian_displacement_record',
             category: 'displacement',
             severity: 'grave',
-            title: 'Civilian displacement record',
-            text:
-                `The negotiation capital record attributes ${formatInteger(totalRefugeesCreated)} people displaced or killed ` +
-                'to the war path. The figure is reported as an integer civilian record, not as a percentage or efficiency measure.',
-            sources: [COST_LEDGER_SOURCES.unhcr, COST_LEDGER_SOURCES.sensitiveHistoryGate],
+            title: 'Displacement in this campaign',
+            text: `This campaign recorded ${formatInteger(totalRefugeesCreated)} people displaced or killed.`,
+            sources: [],
         });
     }
 
@@ -393,10 +429,11 @@ function buildProsecutorialFindings(
                 severity: 'rupture',
                 faction: rupture.perpetrator_faction,
                 title: 'Srebrenica genocide',
-                text:
-                    `The ledger records the Srebrenica genocide after ${rupture.description}. ` +
-                    'The historical reference is 8,000 killed; the finding remains a locked condemnation fact.',
-                sources: [COST_LEDGER_SOURCES.srebrenica, COST_LEDGER_SOURCES.sensitiveHistoryGate],
+                // R8 council C3; historian ruling 2026-11-14. Dates only the historical killings
+                // (the in-campaign fall has no upper bound, §1 Ring 1). Equals the i18n EN
+                // `warCost.finding.srebrenica.text` (pinned by tests/ui/ending_truth_pass.test.ts).
+                text: SREBRENICA_FINDING_TEXT,
+                sources: [COST_LEDGER_SOURCES.srebrenica],
             });
         } else {
             findings.push({
@@ -405,33 +442,29 @@ function buildProsecutorialFindings(
                 severity: 'rupture',
                 faction: rupture.perpetrator_faction,
                 title: rupture.id.replace(/_/g, ' '),
-                text:
-                    `The ledger records rupture ${rupture.id}: ${rupture.description}. ` +
-                    'The finding remains locked in the verdict packet.',
-                sources: [COST_LEDGER_SOURCES.sensitiveHistoryGate],
+                text: `${rupture.description}. This finding is permanent.`,
+                sources: [],
             });
         }
     }
 
+    // Fixed side order, never ranked by count (§4 panel 2026-11-14; Ring 3 #7).
     const warCrimeEntries = entries
         .filter((entry) => entry.war_crimes_events > 0)
-        .sort((a, b) => {
-            if (a.war_crimes_events !== b.war_crimes_events) return b.war_crimes_events - a.war_crimes_events;
-            return strictCompare(a.faction, b.faction);
-        });
+        .sort((a, b) => sideOrder(a.faction) - sideOrder(b.faction) || strictCompare(a.faction, b.faction));
     for (const entry of warCrimeEntries) {
         findings.push({
             id: `war_crimes_record_${entry.faction}`,
             category: 'war_crimes',
             severity: entry.condemnation_flags.length > 0 || entry.war_crimes_events >= 10 ? 'grave' : 'record',
             faction: entry.faction,
-            title: `${entry.faction} war-crimes record`,
+            title: `War-crimes record: ${FORCES_NAME[entry.faction] ?? entry.faction}`,
+            // Count only: the civilian and displacement figures are booked by control or siege,
+            // not culpability, so they are not attributed here (§4 panel, red-team A8).
             text:
-                `${entry.faction} capital records contain ${formatInteger(entry.war_crimes_events)} ` +
-                `${plural(entry.war_crimes_events, 'war-crime event')}, ${formatInteger(entry.civilian_casualties_caused)} ` +
-                'civilian casualties caused, and ' +
-                `${formatInteger(entry.refugees_created)} people displaced or killed. The ledger records these facts without mitigation or reward language.`,
-            sources: [COST_LEDGER_SOURCES.sensitiveHistoryGate],
+                `This campaign recorded ${formatInteger(entry.war_crimes_events)} ` +
+                `${plural(entry.war_crimes_events, 'war-crime event')} by ${FORCES_NAME[entry.faction] ?? entry.faction}.`,
+            sources: [],
         });
     }
 
@@ -443,8 +476,16 @@ function buildProsecutorialFindings(
             return strictCompare(a.event_id, b.event_id);
         });
 
+    // One finding per side (R8 council B5): each band crossing appends an annotation whose
+    // deployment count is the running total, so only the latest one per side is the record.
+    // Sorted by (faction, turn, event_id) above, so the last annotation per faction wins.
+    const latestParamilitaryByFaction = new Map<string, (typeof paramilitaryAnnotations)[number]>();
     for (const annotation of paramilitaryAnnotations) {
         const faction = annotation.faction ?? annotation.event_id.replace('cost_war_crimes_findings_', '');
+        latestParamilitaryByFaction.set(faction, annotation);
+    }
+
+    for (const [faction, annotation] of [...latestParamilitaryByFaction.entries()].sort(([a], [b]) => strictCompare(a, b))) {
         const band = annotation.tag.replace('paramilitary_war_crimes_', '');
         const deploymentCount = parseDeploymentCount(annotation.text);
         findings.push({
@@ -452,12 +493,12 @@ function buildProsecutorialFindings(
             category: 'war_crimes',
             severity: band === 'minor' ? 'record' : 'grave',
             faction,
-            title: `${faction} paramilitary war-crimes findings`,
+            title: `Paramilitary deployments: ${COMMAND_NAME[faction] ?? faction}`,
             text:
-                `${faction} records contain ${formatInteger(deploymentCount)} paramilitary ` +
-                `${plural(deploymentCount, 'deployment')} in the ${band} severity band. ` +
-                'The ledger records these deployments as war-crimes findings without mitigation or reward language.',
-            sources: [COST_LEDGER_SOURCES.sensitiveHistoryGate],
+                `This campaign recorded ${formatInteger(deploymentCount)} paramilitary ` +
+                `${plural(deploymentCount, 'deployment')} authorized by ${COMMAND_NAME[faction] ?? faction}. ` +
+                'Each is recorded as a war-crimes finding.',
+            sources: [],
         });
     }
 

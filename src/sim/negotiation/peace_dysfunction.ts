@@ -24,11 +24,15 @@
  * Determinism: pure read of already-frozen settlement + endgame state. No RNG, no
  * timestamps, sorted iteration via strictCompare, integer-rounded outputs.
  *
- * EMERGENT-GATED: the index is computed only when meta.decision_mode === 'emergent'.
- * In historical/unset mode it returns null and writes nothing — so historical
- * baselines (40w/52w/188w) stay byte-identical by construction. (Dayton fires
- * post-w188 and is never reached on the 40w/52w calibration path, so this is belt-
- * and-suspenders; it also keeps the gate identical to the atrocity term in scoring.ts.)
+ * EVERY DECISION MODE (R8 ending truth pass, 2026-11-14, game-designer ruling C): the index
+ * is computed for any signed Dayton. It was emergent-gated for baseline byte-identity only
+ * ("belt-and-suspenders"); the gate meant a historical-mode player was warned in the Dayton
+ * room that a dysfunctional peace caps the outcome and then saw a clean win on the Verdict
+ * (R8 council B3). The calibration baselines never reach a signed Dayton (the 188w run ends
+ * at turn 188 with game_over false), so their hashes do not move. The outcome cap reads each
+ * side's OWN reading (`ownFaction`): its condemnation term and its ratified_cleansing flag
+ * count only that side's rupture flags (§4 sensitive-copy panel, 2026-11-14), because the
+ * pooled reading graded the victims of a genocide down, even to failure at ≥80, for it.
  */
 
 import type { GameState } from '../../state/game_state.js';
@@ -52,7 +56,8 @@ const CANONICAL_FACTIONS = ['RBiH', 'RS', 'HRHB'] as const;
 // condemnation −0.01). Still sums to 1.00. Emergent-gated + post-w188 → the 40w/
 // 52w/188w historical baselines never reach this code, so the re-weight is
 // byte-identical on the calibration path by construction.
-const DYSFUNCTION_WEIGHTS = Object.freeze({
+/** Exported so the Dayton room's live preview reads the engine's weights, never a stale copy. */
+export const DYSFUNCTION_WEIGHTS = Object.freeze({
     autonomy: 0.26,
     fragmentation: 0.22,
     gridlock: 0.12,
@@ -229,9 +234,17 @@ function refugeesComponent(state: GameState, result: DaytonResult): number {
  * a FLOOR (max), never a discount: return/justice can only WORSEN the condemnation
  * reading, never buy down a locked rupture. Mirrors the existing condemnation cap.
  */
-function condemnationComponent(state: GameState, result: DaytonResult): { score: number; hasGenocide: boolean; any: boolean } {
+function condemnationComponent(
+    state: GameState,
+    result: DaytonResult,
+    ownFaction?: string,
+): { score: number; hasGenocide: boolean; any: boolean; flagged: boolean } {
+    // Settlement-wide reading pools every side's flags. A side's own reading (the index that
+    // caps that side's outcome) counts only the flags it holds itself; the ICTY
+    // non-cooperation floor below is a term of the settlement and applies either way.
     const all = new Set<string>();
-    for (const f of [...CANONICAL_FACTIONS].sort(strictCompare)) {
+    const factions = ownFaction ? [ownFaction] : [...CANONICAL_FACTIONS].sort(strictCompare);
+    for (const f of factions) {
         for (const flag of collectCondemnationFlags(state, f)) all.add(flag);
     }
     const rj = (result.return_justice ?? {}) as Record<string, string>;
@@ -241,22 +254,26 @@ function condemnationComponent(state: GameState, result: DaytonResult): { score:
         // No locked rupture: refusing ICTY cooperation still entrenches a justice
         // failure (floored), but there is no genocide/atrocity flag to ratify.
         const score = ictyRefused ? ICTY_NON_COOPERATION_CONDEMNATION_FLOOR : 0;
-        return { score, hasGenocide: false, any: ictyRefused };
+        return { score, hasGenocide: false, any: ictyRefused, flagged: false };
     }
     const hasGenocide = all.has('genocide_condemnation');
     let score = hasGenocide ? 100 : Math.min(100, 50 + (all.size - 1) * 15);
     if (ictyRefused) score = Math.max(score, ICTY_NON_COOPERATION_CONDEMNATION_FLOOR);
-    return { score, hasGenocide, any: true };
+    return { score, hasGenocide, any: true, flagged: true };
 }
 
 /**
  * Compute the full deterministic PeaceDysfunctionBreakdown for the frozen Dayton
- * settlement, or null if there is no Dayton result or the run is not emergent-mode.
+ * settlement, or null if there is no Dayton result. Every decision mode (see the header).
+ *
+ * `ownFaction` (§4 sensitive-copy panel, ending truth pass, 2026-11-14): the reading that
+ * caps that side's outcome. Its condemnation term counts only the side's own rupture flags
+ * (plus the ICTY non-cooperation floor, a settlement term), so another side's crime never
+ * caps a side's outcome: the victims' state is not capped for a genocide committed against
+ * its people, and preventing it is not an outcome lever for them (Ring 3 #10). Omitted: the
+ * settlement-wide reading (snapshot, Dayton result, the Dayton room).
  */
-export function computePeaceDysfunctionBreakdown(state: GameState): PeaceDysfunctionBreakdown | null {
-    // EMERGENT-GATED — keep historical baselines byte-identical.
-    if (state.meta?.decision_mode !== 'emergent') return null;
-
+export function computePeaceDysfunctionBreakdown(state: GameState, ownFaction?: string): PeaceDysfunctionBreakdown | null {
     const result = state.military?.negotiation?.dayton_result;
     if (!result) return null;
 
@@ -265,7 +282,7 @@ export function computePeaceDysfunctionBreakdown(state: GameState): PeaceDysfunc
     const gridlock = gridlockComponent(result);
     const brcko = brckoComponent(result);
     const refugees = refugeesComponent(state, result);
-    const condemnation = condemnationComponent(state, result);
+    const condemnation = condemnationComponent(state, result, ownFaction);
 
     const index = clamp0to100(
         autonomy * DYSFUNCTION_WEIGHTS.autonomy +
@@ -289,7 +306,10 @@ export function computePeaceDysfunctionBreakdown(state: GameState): PeaceDysfunc
     if (autonomy >= 60 || gridlock >= 60) flags.push(FLAG_GRIDLOCK_BY_DESIGN);
     if (brcko >= 100) flags.push(FLAG_BRCKO_UNRESOLVED);
     if (refugees >= 50) flags.push(FLAG_REFUGEES_NOT_RETURNED);
-    if (condemnation.any) flags.push(FLAG_RATIFIED_CLEANSING);
+    // A side's own reading flags ratified cleansing only for its own rupture flags (§4 panel,
+    // red-team B1, 2026-11-14: the ≥80 failure band must never fail a side for another side's
+    // crime, nor for a justice term of the settlement); the settlement-wide reading is unchanged.
+    if (ownFaction ? condemnation.flagged : condemnation.any) flags.push(FLAG_RATIFIED_CLEANSING);
     // DIMENSION 4 — supervised-peace dependency + the Sejdić–Finci fault.
     if (ohrAuthority === 'bonn_powers' || constCourt === 'international_judges') flags.push(FLAG_OHR_DEPENDENCY);
     if (constituentModel === 'three_peoples') flags.push(FLAG_SEJDIC_FINCI_FAULT);
@@ -344,6 +364,24 @@ export const PEACE_DYSFUNCTION_FAILURE_THRESHOLD = 80;
 
 /** Outcome classes considered "clean wins" that a dysfunctional peace must cap. */
 const CLEAN_WIN_CLASSES = new Set(['strategic_success', 'survival', 'negotiated_escape']);
+
+/** Which band of capOutcomeByPeaceDysfunction changed the outcome class ('none' when it did not). */
+export type PeaceDysfunctionBand = 'none' | 'soft' | 'hard' | 'failure';
+
+/**
+ * The band of capOutcomeByPeaceDysfunction that changed `outcomeClass`, for the Verdict's
+ * grade trace. Same thresholds and arguments; 'none' when the cap left the class as it was.
+ */
+export function peaceDysfunctionBand(
+    outcomeClass: string,
+    dysfunctionIndex: number | null | undefined,
+    flags?: readonly string[],
+): PeaceDysfunctionBand {
+    const capped = capOutcomeByPeaceDysfunction(outcomeClass, dysfunctionIndex, flags);
+    if (capped === outcomeClass || typeof dysfunctionIndex !== 'number') return 'none';
+    if (capped === 'failure') return 'failure';
+    return dysfunctionIndex >= PEACE_DYSFUNCTION_CAP_THRESHOLD ? 'hard' : 'soft';
+}
 
 /**
  * Cap an outcome class by the peace dysfunction index (graduated). Never improves

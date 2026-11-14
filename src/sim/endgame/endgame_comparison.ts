@@ -8,7 +8,8 @@
  */
 
 import type { CostLedger } from './cost_ledger.js';
-import type { HistoricalBaseline, HistoricalBaselineMilestone } from '../../state/negotiation_types.js';
+import type { GameState } from '../../state/game_state.js';
+import type { HistoricalBaseline, HistoricalBaselineMilestone, HistoricalEndingBasis } from '../../state/negotiation_types.js';
 import { strictCompare } from '../../state/validateGameState.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -39,8 +40,20 @@ export interface ComparisonResult {
     duration_delta_weeks: number;
     /** Faction or entity key -> delta from historical %. */
     territory_divergence: Record<string, number>;
-    /** Player total military killed / historical total killed. */
+    /**
+     * Player total military killed / historical military killed (RDC 2007, 57,523).
+     * Before the R8 ending truth pass this divided by all deaths (97,207); saves frozen
+     * then carry that older ratio.
+     */
     casualty_ratio: number;
+    /** Player total civilian killed / historical civilian killed (RDC 2007, 39,684). Additive. */
+    civilian_ratio?: number;
+    /** The historical figures the ratios read (additive; absent on older saves). */
+    historical_military_killed?: number;
+    historical_civilian_killed?: number;
+    /** The historical week the duration was compared with, and which endpoint it is (additive). */
+    historical_reference_week?: number;
+    historical_reference_basis?: HistoricalEndingBasis;
     /** Player total displaced (refugees_created sum) / historical displaced. */
     displacement_ratio: number;
     /** Rupture events that differ from history (IDs present in player run). */
@@ -67,15 +80,45 @@ function compareMilestones(a: HistoricalBaselineMilestone, b: HistoricalBaseline
     return strictCompare(a.id, b.id);
 }
 
+/**
+ * How a campaign ended, for like-for-like comparison: a recorded settlement (an accepted plan
+ * or a signed or imposed Dayton) or a Dayton result is 'settlement'; anything else is
+ * 'no_settlement'. Pure read of state.
+ */
+export function endingBasisForState(state: GameState): HistoricalEndingBasis {
+    const negotiation = state.military?.negotiation;
+    return negotiation?.settlement || negotiation?.dayton_result ? 'settlement' : 'no_settlement';
+}
+
+/** The historical week a campaign of this ending is compared with (189 initialling, 183 ceasefire). */
+export function historicalReferenceWeek(baseline: HistoricalBaseline, ending: HistoricalEndingBasis): number {
+    return ending === 'no_settlement'
+        ? baseline.fighting_end_week ?? baseline.war_duration_weeks
+        : baseline.war_duration_weeks;
+}
+
+/** Historical military killed, all sides, from the same source as the civilian line. */
+export function historicalMilitaryKilled(baseline: HistoricalBaseline): number {
+    if (typeof baseline.military_killed_total === 'number') return baseline.military_killed_total;
+    return Object.values(baseline.military_killed ?? {}).reduce((sum, value) => sum + value, 0);
+}
+
 function buildMilestoneComparison(
     costLedger: CostLedger,
     baseline: HistoricalBaseline,
+    ending: HistoricalEndingBasis,
 ): MilestoneComparison[] | undefined {
     const milestones = baseline.milestones ?? [];
     if (milestones.length === 0) return undefined;
 
     return milestones
         .filter(m => Number.isFinite(m.historical_week))
+        // No rupture as an early/late timing row (§4 sensitive-copy panel, 2026-11-14): only the
+        // historical killings are dated, in the record, never against an in-campaign fall
+        // (Sensitive History Design Gate §1 Ring 1, §4). The baseline keeps the record row.
+        .filter(m => m.kind !== 'rupture')
+        // Like for like: a war-end milestone is compared only with the ending it describes.
+        .filter(m => m.kind !== 'war_end' || m.ending === undefined || m.ending === ending)
         .slice()
         .sort(compareMilestones)
         .map((milestone): MilestoneComparison => {
@@ -109,6 +152,9 @@ function buildMilestoneComparison(
 /** Divergence note for a Srebrenica enclave overrun with no rupture recorded (the Chronicle localizes it). */
 export const SREBRENICA_OVERRUN_NOTE = 'Srebrenica enclave was overrun';
 
+/** First turn of the Srebrenica rupture window (Sensitive History Design Gate §1 Ring 1). */
+export const SREBRENICA_RUPTURE_FIRST_TURN = 160;
+
 /**
  * Compare player war against historical baseline. Pure, deterministic.
  * Both inputs are explicit, serializable values — no hidden state.
@@ -116,25 +162,26 @@ export const SREBRENICA_OVERRUN_NOTE = 'Srebrenica enclave was overrun';
 export function compareToHistorical(
     costLedger: CostLedger,
     baseline: HistoricalBaseline,
+    ending: HistoricalEndingBasis = 'settlement',
 ): ComparisonResult {
     const notes: string[] = [];
 
-    // Duration delta
-    const durationDelta = costLedger.war_duration_weeks - baseline.war_duration_weeks;
-    if (durationDelta > 0) {
-        notes.push(`War lasted ${durationDelta} weeks longer than the historical ${baseline.war_duration_weeks} weeks`);
-    } else if (durationDelta < 0) {
-        notes.push(`War lasted ${Math.abs(durationDelta)} weeks shorter than the historical ${baseline.war_duration_weeks} weeks`);
-    } else {
-        notes.push(`War lasted exactly the historical ${baseline.war_duration_weeks} weeks`);
-    }
+    // Duration delta, like for like (R8 council B8/H2): a settled campaign against the Dayton
+    // initialling (week 189), any other ending against the ceasefire in force (week 183).
+    // No "N weeks shorter/longer" note (§4 panel 2026-11-14: "shorter" beside an early peace
+    // invites a shorter-means-lesser reading); surfaces date the end of the war instead.
+    const referenceWeek = historicalReferenceWeek(baseline, ending);
+    const durationDelta = costLedger.war_duration_weeks - referenceWeek;
 
-    // Territory divergence — compare per-faction territory from cost ledger entries
-    // against historical baseline territory_final
+    // Territory divergence — compare per-faction territory from cost ledger entries against
+    // the Dayton shares, or the ceasefire line for a campaign ended without a settlement.
+    const territoryReference = ending === 'no_settlement' && baseline.territory_ceasefire
+        ? baseline.territory_ceasefire
+        : baseline.territory_final;
     const territoryDivergence: Record<string, number> = {};
-    const baselineKeys = Object.keys(baseline.territory_final).sort(strictCompare);
+    const baselineKeys = Object.keys(territoryReference).sort(strictCompare);
     for (const key of baselineKeys) {
-        const historicalPct = baseline.territory_final[key];
+        const historicalPct = territoryReference[key];
         // Find matching entry in cost ledger; for RS, compare directly;
         // for Federation, sum RBiH + HRHB territory
         if (key === 'RBiH_HRHB_Federation') {
@@ -157,12 +204,19 @@ export function compareToHistorical(
         }
     }
 
-    // Casualty ratio — player total military killed vs historical total killed
-    const casualtyRatio = baseline.total_killed > 0
-        ? costLedger.total_military_killed / baseline.total_killed
+    // Casualty ratios — military against military, civilian against civilian, one source (RDC
+    // 2007). The R8 council (B6/H3) found the military line divided by all deaths. The notes
+    // state both counts as integers, never as a percentage of history (Sensitive History Design
+    // Gate §4: no "X% as bad as history" comparisons).
+    const historicalMilitary = historicalMilitaryKilled(baseline);
+    const casualtyRatio = historicalMilitary > 0
+        ? costLedger.total_military_killed / historicalMilitary
         : 0;
-    const casualtyPct = Math.round(casualtyRatio * 100);
-    notes.push(`Total military casualties were ${casualtyPct}% of historical levels`);
+    const civilianRatio = baseline.civilian_killed > 0
+        ? costLedger.total_civilian_killed / baseline.civilian_killed
+        : 0;
+    notes.push(`Military killed: ${formatCount(costLedger.total_military_killed)} in this campaign; ${formatCount(historicalMilitary)} in the historical war`);
+    notes.push(`Civilians killed: ${formatCount(costLedger.total_civilian_killed)} in this campaign; ${formatCount(baseline.civilian_killed)} in the historical war`);
 
     // Displacement ratio — sum of refugees_created across all factions vs historical displaced
     let totalRefugees = 0;
@@ -188,7 +242,8 @@ export function compareToHistorical(
         notes.push('Srebrenica genocide occurred');
     } else if (srebrenicaLost) {
         notes.push(SREBRENICA_OVERRUN_NOTE);
-    } else {
+    } else if (costLedger.war_duration_weeks >= SREBRENICA_RUPTURE_FIRST_TURN) {
+        // Only a war that reached the rupture window can say the enclave "survived" (§4 panel).
         notes.push('Srebrenica enclave survived');
     }
     ruptureDivergence.sort(strictCompare);
@@ -202,9 +257,19 @@ export function compareToHistorical(
         duration_delta_weeks: durationDelta,
         territory_divergence: territoryDivergence,
         casualty_ratio: casualtyRatio,
+        civilian_ratio: civilianRatio,
+        historical_military_killed: historicalMilitary,
+        historical_civilian_killed: baseline.civilian_killed,
+        historical_reference_week: referenceWeek,
+        historical_reference_basis: ending,
         displacement_ratio: displacementRatio,
         rupture_divergence: ruptureDivergence,
         divergence_notes: notes,
-        milestone_comparison: buildMilestoneComparison(costLedger, baseline),
+        milestone_comparison: buildMilestoneComparison(costLedger, baseline, ending),
     };
+}
+
+/** Integer with thousands separators, fixed to en-US so the notes are byte-stable. */
+function formatCount(value: number): string {
+    return Math.trunc(Math.max(0, value)).toLocaleString('en-US');
 }

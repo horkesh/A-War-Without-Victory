@@ -19,7 +19,7 @@ import type { GameState, FactionId } from '../../state/game_state.js';
 import type { NegotiationBreakdown, OutcomeClass } from '../../state/negotiation_types.js';
 import type { FactionVerdict, GameVerdict, DimensionGrade } from '../../state/negotiation_types.js';
 import { collectCondemnationFlags } from './rupture_consequences.js';
-import { computePeaceDysfunctionBreakdown, computePeaceDysfunctionIndex, capOutcomeByPeaceDysfunction } from './peace_dysfunction.js';
+import { computePeaceDysfunctionBreakdown, computePeaceDysfunctionIndex, capOutcomeByPeaceDysfunction, peaceDysfunctionBand } from './peace_dysfunction.js';
 import { DIMENSION_WEIGHTS, computeNegotiatingCapital } from '../events/strategic_dimensions.js';
 import type { DimensionStore } from '../events/strategic_dimensions.js';
 import { strictCompare } from '../../state/validateGameState.js';
@@ -891,20 +891,24 @@ export function computeFactionVerdict(
     // as a clean settlement, regardless of territory. capOutcomeByPeaceDysfunction
     // pulls a clean-win class (strategic_success / survival / negotiated_escape)
     // down to hollow_victory when the index crosses the threshold; it never improves
-    // an outcome. Pure read of the frozen Dayton result. EMERGENT-GATED: the index
-    // is null in historical/unset mode (and for non-Dayton endings), so this is a
-    // no-op there and the historical baselines stay byte-identical. Mirrors the
-    // existing condemnation-flag cap inside classifyOutcome.
-    // Graduated cap (institutional-architecture expansion 2026-06-07): the
-    // breakdown's structural flags feed the ≥80 ratified_cleansing → failure band.
-    // computePeaceDysfunctionBreakdown is the SAME emergent-gated pure read; null
-    // in historical/unset mode and for non-Dayton endings, so this stays a no-op
-    // there and the historical baselines remain byte-identical.
+    // an outcome. Pure read of the frozen Dayton result; null for non-Dayton endings.
+    // Mirrors the existing condemnation-flag cap inside classifyOutcome.
+    // R8 ending truth pass (2026-11-14, game-designer ruling C): the cap applies in every
+    // decision mode, so the cap the Dayton room warns about is the cap the Verdict shows.
+    // §4 panel (2026-11-14, unanimous after three rounds): THIS side's reading caps its outcome —
+    // its condemnation term and its ratified_cleansing flag count only its own rupture flags
+    // (computePeaceDysfunctionBreakdown ownFaction), in every decision mode. Another side's
+    // crime never caps a side's outcome, so the victims' state is never graded down for a
+    // genocide committed against its people (and the desktop default is emergent mode, where
+    // the pooled flag used to fail RBiH at ≥80). The settlement-wide reading (snapshot,
+    // Dayton room) is recorded alongside.
     const dysfunctionBreakdown = computePeaceDysfunctionBreakdown(state);
+    const sideDysfunction = computePeaceDysfunctionBreakdown(state, faction);
+    const dysfunctionFlags = sideDysfunction?.flags;
     const outcomeClass = capOutcomeByPeaceDysfunction(
         baseOutcomeClass,
-        dysfunctionBreakdown?.index ?? null,
-        dysfunctionBreakdown?.flags,
+        sideDysfunction?.index ?? null,
+        dysfunctionFlags,
     );
 
     return {
@@ -916,6 +920,22 @@ export function computeFactionVerdict(
         dimension_grades: dimensionGrades,
         outcome_class: outcomeClass,
         condemnation_flags: condemnationFlags,
+        // R8 council fix 1: the steps above, recorded for the Verdict's score breakdown.
+        grade_trace: {
+            territory_basis: typeof settledTerritory === 'number' ? 'settled' : 'front',
+            territory_graded_pct: gradedCapital.territory_controlled_pct,
+            earned_grade: earned.grade,
+            earned_description: earned.description,
+            cost_step: scoringSimpleEnabled() ? 'human_cost_shift' : 'war_cost_cap',
+            cost_capped_grade: costCappedGrade,
+            condemnation_capped_grade: condemnationCappedGrade,
+            settlement_capped_grade: grade,
+            base_outcome_class: baseOutcomeClass,
+            peace_dysfunction_index: sideDysfunction?.index ?? null,
+            settlement_peace_dysfunction_index: dysfunctionBreakdown?.index ?? null,
+            peace_dysfunction_band: peaceDysfunctionBand(baseOutcomeClass, sideDysfunction?.index ?? null, dysfunctionFlags),
+            outcome_class: outcomeClass,
+        },
     };
 }
 

@@ -1,11 +1,14 @@
 /**
  * Comprehensive Dayton — Phase 1 keystone tests (peace_dysfunction_index).
  *
- * Covers: the formula sub-components, the outcome_class cap, emergent-gating,
- * back-compat (non-Dayton / non-emergent), and save/load round-trip of the
- * frozen field on the endgame snapshot.
+ * Covers: the formula sub-components, the outcome_class cap, every-decision-mode
+ * computation (R8 ending truth pass, 2026-11-14: no emergent gate), the per-side
+ * `ownFaction` reading, back-compat (non-Dayton), the 188w baseline never reaching a
+ * signed Dayton, and save/load round-trip of the frozen field on the endgame snapshot.
  */
 import { describe, it, expect } from 'vitest';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import type { GameState } from '../src/state/game_state.js';
 import type { DaytonResult } from '../src/state/negotiation_types.js';
 import {
@@ -100,15 +103,49 @@ describe('computeEntityAutonomyIndex', () => {
 // ── peace_dysfunction breakdown / index ───────────────────────────────────────
 
 describe('computePeaceDysfunctionBreakdown', () => {
-    it('returns null when not emergent mode (byte-identical guard)', () => {
-        const state = makeState({ decision_mode: 'historical', dayton: makeDaytonResult() });
-        expect(computePeaceDysfunctionBreakdown(state)).toBeNull();
-        expect(computePeaceDysfunctionIndex(state)).toBeNull();
+    it('is computed in historical mode, identically to emergent mode (no emergent gate)', () => {
+        const historical = makeState({ decision_mode: 'historical', dayton: makeDaytonResult() });
+        const emergent = makeState({ decision_mode: 'emergent', dayton: makeDaytonResult() });
+        const bd = computePeaceDysfunctionBreakdown(historical);
+        expect(bd).not.toBeNull();
+        expect(bd).toEqual(computePeaceDysfunctionBreakdown(emergent));
+        expect(computePeaceDysfunctionIndex(historical)).toBe(bd!.index);
     });
 
-    it('returns null when decision_mode unset', () => {
+    it('is computed when decision_mode is unset', () => {
         const state = makeState({ dayton: makeDaytonResult() });
-        expect(computePeaceDysfunctionBreakdown(state)).toBeNull();
+        expect(computePeaceDysfunctionBreakdown(state)).toEqual(
+            computePeaceDysfunctionBreakdown(makeState({ decision_mode: 'emergent', dayton: makeDaytonResult() })),
+        );
+    });
+
+    it('the committed 188w historical baseline never reaches a signed Dayton, so it computes nothing', () => {
+        // Byte-identity of the calibration baselines now rests on this, not on a mode gate:
+        // the 188-week run ends at turn 188 with game_over false and no dayton_result.
+        const save = JSON.parse(readFileSync(resolve(process.cwd(), 'data/derived/latest_run_final_save.json'), 'utf8')) as GameState;
+        expect(save.meta.turn).toBe(188);
+        expect(save.meta.game_over).toBe(false);
+        expect(save.military?.negotiation?.dayton_result).toBeUndefined();
+        expect(computePeaceDysfunctionBreakdown(save)).toBeNull();
+    });
+
+    it('a side\'s own reading counts only that side\'s rupture flags', () => {
+        const ruptures = [{ id: 'r1', recorded_turn: 170, perpetrator_faction: 'RS', description: 'x', condemnation_flag: 'genocide_condemnation' }];
+        const state = makeState({ decision_mode: 'historical', dayton: makeDaytonResult(), ruptures });
+
+        const pooled = computePeaceDysfunctionBreakdown(state)!;
+        const rs = computePeaceDysfunctionBreakdown(state, 'RS')!;
+        const rbih = computePeaceDysfunctionBreakdown(state, 'RBiH')!;
+
+        // Settlement-wide reading pools every side's flags; RS's own reading holds its own crime.
+        expect(pooled.condemnation_component).toBe(100);
+        expect(pooled.flags).toContain('ratified_cleansing');
+        expect(rs.condemnation_component).toBe(100);
+        expect(rs.flags).toContain('ratified_cleansing');
+        // Another side's crime never enters the victims' reading.
+        expect(rbih.condemnation_component).toBe(0);
+        expect(rbih.flags).not.toContain('ratified_cleansing');
+        expect(rbih.index).toBeLessThan(rs.index);
     });
 
     it('returns null when there is no Dayton result', () => {
@@ -223,12 +260,16 @@ describe('peace_dysfunction frozen on endgame snapshot', () => {
         expect(snap.peace_dysfunction!.index).toBe(snap.peace_dysfunction_index);
     });
 
-    it('does NOT freeze the index in historical mode (byte-identical guard)', () => {
+    it('freezes the index in historical mode too (every decision mode)', () => {
         const dayton = makeDaytonResult();
         const state = makeState({ decision_mode: 'historical', dayton, outcome: 'dayton' });
         freezeEndgameSnapshot(state);
-        const snap = (state.meta as { endgame_snapshot?: { peace_dysfunction_index?: number } }).endgame_snapshot!;
-        expect(snap.peace_dysfunction_index).toBeUndefined();
+        const snap = (state.meta as { endgame_snapshot?: { peace_dysfunction_index?: number; peace_dysfunction?: { index: number } } }).endgame_snapshot!;
+        expect(typeof snap.peace_dysfunction_index).toBe('number');
+        expect(snap.peace_dysfunction!.index).toBe(snap.peace_dysfunction_index);
+        expect(snap.peace_dysfunction_index).toBe(computePeaceDysfunctionBreakdown(
+            makeState({ decision_mode: 'emergent', dayton: makeDaytonResult(), outcome: 'dayton' }),
+        )!.index);
     });
 
     it('survives a JSON save/load round-trip', () => {

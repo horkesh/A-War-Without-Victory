@@ -26,24 +26,21 @@
  */
 
 import { computeTreatyAutonomyIndex } from '../../../sim/negotiation/institutional_packages.js';
+import { DYSFUNCTION_WEIGHTS, PEACE_DYSFUNCTION_CAP_THRESHOLD } from '../../../sim/negotiation/peace_dysfunction.js';
 
 export type InstitutionChoice = 'centralized' | 'decentralized';
 export type BrckoOutcome = 'federation' | 'rs' | 'arbitration';
 
-/** Dysfunction blend weights — mirror of peace_dysfunction.ts DYSFUNCTION_WEIGHTS. */
-const DYSFUNCTION_WEIGHTS = Object.freeze({
-    autonomy: 0.30,
-    fragmentation: 0.25,
-    brcko: 0.10,
-    refugees: 0.20,
-    condemnation: 0.15,
-});
-
 /** Autonomy below this is "functional" → 0 dysfunction (mirror of engine floor). */
 const AUTONOMY_FUNCTIONAL_FLOOR = 40;
 
-/** Dysfunction index at/above which a clean win collapses to hollow victory. */
-export const OUTCOME_CAP_THRESHOLD = 60;
+/**
+ * Dysfunction index at/above which a clean win collapses to hollow victory: the engine's own
+ * threshold. Since the R8 ending truth pass the cap applies in every decision mode, so the
+ * room's warning is the cap the Verdict applies. The weights are the engine's too (the
+ * mirror had kept the pre-gridlock weights, game-design seat 2026-11-14).
+ */
+export const OUTCOME_CAP_THRESHOLD = PEACE_DYSFUNCTION_CAP_THRESHOLD;
 
 const CANONICAL_FACTIONS = ['HRHB', 'RBiH', 'RS'] as const;
 
