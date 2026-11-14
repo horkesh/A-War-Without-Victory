@@ -134,6 +134,35 @@ describe('Level 1 holds only the human player\'s corps', () => {
         expect(state.military.corps_command?.[CORPS.RBiH]?.player_op_response).toBeUndefined();
     });
 
+    it('holds a player corps that exists only in corps_command when the caller passes its faction', () => {
+        const state = makeState(1, 'RBiH');
+        delete (state.military.formations as Record<string, unknown>)[CORPS.RBiH];
+        delete (state.military.formations as Record<string, unknown>)[CORPS.RS];
+        const id = CORPS.RBiH;
+        const output = {
+            directive: { type: 'hold', target_zone: null },
+            operations: [{
+                name: `op_${id}`, type: 'sector_attack', phase: 'planning', sector_id: `sector:${id}:0`,
+                objectives: ['op:test:objective'], participating_brigades: ['b1', 'b2'],
+                commander_officer_id: `officer_${id}`,
+            }],
+            sector_stances: [],
+            updated_state: { current_plan: { plan_id: `plan_${id}_t10`, status: 'executing' } },
+            reinforcement_requests: [], prepositioning_orders: [], plan_updates: [], garrison_locks: [],
+        } as any;
+        applyCommanderOutput(state, id, output, 'RBiH');
+        expect(launched(state, 'RBiH')).toEqual([]);
+        expect(planStatus(state, 'RBiH')).toBe('ready');
+
+        const rsId = CORPS.RS;
+        applyCommanderOutput(state, rsId, {
+            ...output,
+            operations: [{ ...output.operations[0], name: `op_${rsId}`, sector_id: `sector:${rsId}:0`, commander_officer_id: `officer_${rsId}` }],
+            updated_state: { current_plan: { plan_id: `plan_${rsId}_t10`, status: 'executing' } },
+        }, 'RS');
+        expect(launched(state, 'RS')).toEqual([`op_${rsId}`]);
+    });
+
     it('in a headless auto-control run nothing is held, even at Level 1', () => {
         const state = makeState(1, undefined, true);
         for (const faction of FACTIONS) applyExecutingPlan(state, faction);

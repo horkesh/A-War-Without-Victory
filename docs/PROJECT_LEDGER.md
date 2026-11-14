@@ -15186,11 +15186,12 @@ From the stance-engine follow-up (#583) register `F:/AWWV-coordination/crash_rec
 - **Fix.** New `isLevel1PlayerApprovalFaction(state, faction)` in `src/sim/bot/staff_control.ts`: true only at exactly Level 1, for the human player's faction, and never under headless auto-control. Both gates use it.
   - The player's corps keep the approval flow unchanged.
   - Bot corps plan, launch and run local occupation exactly as at Levels 0 and 2.
+  - `applyCommanderOutput` takes the caller's faction, so a player corps that exists only in `corps_command` cannot skip the hold (determinism review finding).
   - No state, schema or serialization change.
 - **Default level.** New desktop campaigns start at Level 2 (`desktop_sim.ts:412`). A real player hit the freeze only after choosing Level 1 ("Assisted") themselves. The R8 strategic runs hit it every time, so R8 evidence gathered before this fix understates the bot side.
 - **Calibration.** Zero drift: headless runs have no player faction and autonomy 0, and `npm run test:baselines` reports "Baseline regression: all scenarios match." `npx tsc --noEmit` exit 0.
 - **Tests.**
-  - New `tests/sim/autonomy/level1_player_only_gate.test.ts` (7 tests). Three of them were observed red on the old gate.
+  - New `tests/sim/autonomy/level1_player_only_gate.test.ts` (8 tests). Three of them were observed red on the old gate.
   - `operation_emit_overlap_guards` Level-1 cases now name the player faction and add bot-side positive cases.
   - `autonomy_phase_d` unchanged.
-  - 109 passed across the three files.
+  - 110 passed across the three files.

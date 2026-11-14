@@ -210,6 +210,9 @@ export function applyCommanderOutput(
     state: GameState,
     corpsId: FormationId,
     output: CommanderOutput,
+    /** The corps' faction as the caller knows it. Corps that exist only in `corps_command`
+     *  (no formation entry) still resolve, so a player corps can never skip the Level-1 hold. */
+    corpsFactionHint?: FactionId,
 ): void {
     const corps = state.military.corps_command?.[corpsId];
     if (!corps) return;
@@ -246,7 +249,7 @@ export function applyCommanderOutput(
     //    PLAYER FACTION ONLY (2026-11-14, R8 run m): the approval can only come from the human
     //    player, so holding a bot faction's plan froze every RS/HRHB commander for the whole war
     //    (zero bot-generated RS operations after week 20). Bot corps plan and launch as at Level 0/2.
-    const corpsFaction = state.military.formations?.[corpsId]?.faction;
+    const corpsFaction = corpsFactionHint ?? state.military.formations?.[corpsId]?.faction;
     const level1ApprovalApplies = isLevel1PlayerApprovalFaction(state, corpsFaction);
     const updatedPlan = output.updated_state.current_plan;
     const playerOpResp = corps.player_op_response;
