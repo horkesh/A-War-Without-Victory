@@ -16,6 +16,17 @@ export function selectStaffControlledFactions(state: GameState): FactionId[] {
 }
 
 /**
+ * True when a commander plan can be put to the President for Level-1 approval: it names at least
+ * one target OSID. `generateLevel1OpProposals` and the Level-1 guard in `applyCommanderOutput`
+ * share this one rule, so a plan the guard holds for an answer is always one that can be asked.
+ * (L3c, 2026-11-15: a pre-planned adoption built from a `queued_operations` name carries no targets,
+ * was never proposed, and was held at `ready` for the rest of the war.)
+ */
+export function isLevel1ProposablePlan(plan: { readonly target_osids?: readonly string[] } | null | undefined): boolean {
+    return plan != null && Array.isArray(plan.target_osids) && plan.target_osids.length > 0;
+}
+
+/**
  * True when Level-1 (Assisted) player approval governs this faction's corps commander: autonomy is
  * exactly 1 AND the faction is the human player's. Bot factions never wait for an approval no one can
  * give, so at Level 1 they plan and launch exactly as at any other level. Headless auto-control runs
