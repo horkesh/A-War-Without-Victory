@@ -95,6 +95,7 @@ import { getStalestSectorIntelConfidence, stableSectorKey } from '../sector_inte
 import { computePlanningDuration } from '../sector_offensive_axis_helpers.js';
 import { canFormationReachAssemblyInTime } from '../sector_offensive_launch_helpers.js';
 import { mayEliteJoinOperation } from '../historical_elite_reservations.js';
+import { isLevel1PlayerApprovalFaction } from '../../bot/staff_control.js';
 
 export function capOpportunityOperationParticipants(
     participantIds: readonly string[],
@@ -773,8 +774,10 @@ function findLocalOccupationCandidateImpl(
         return null;
     }
     // A standalone local opportunity has no proposal identity for the Level-1
-    // approval flow. Fail closed instead of admitting it around player authority.
-    if ((stateRef.meta?.autonomy_level ?? 0) === 1) {
+    // approval flow. Fail closed instead of admitting it around player authority —
+    // for the PLAYER's corps only. Bot corps have no approver, so they keep local
+    // occupation at Level 1 exactly as at Level 0/2 (2026-11-14, R8 run m).
+    if (isLevel1PlayerApprovalFaction(stateRef, briefing.faction)) {
         if (observation) observation.precondition_failure = 'autonomy_not_level_1';
         return null;
     }
