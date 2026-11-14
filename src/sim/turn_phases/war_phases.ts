@@ -4433,9 +4433,14 @@ export const warPhases: NamedPhase[] = [
                 }
             }
 
-            // Load settlement graph to get settlements map
+            // F1 (legacy S-id consumer sweep, 2026-11-14): settlements and supply both in the
+            // OSID id space. The legacy `settlementEdges` left every pool "unsupplied".
             const graph = await getOperationalSettlementGraph(context);
-            context.report.militia_fatigue = updateMilitiaFatigue(context.state, graph.settlements, edges, exhaustionDeltas);
+            const od = getOperationalData(context);
+            const osidSupply = od?.edges?.length
+                ? buildOsidDisplacementPressureInputs(context.state, od).suppliedByFaction
+                : undefined;
+            context.report.militia_fatigue = updateMilitiaFatigue(context.state, graph.settlements, edges, exhaustionDeltas, osidSupply);
         }
     },
     {
@@ -4464,9 +4469,13 @@ export const warPhases: NamedPhase[] = [
             const edges = context.input.settlementEdges;
             if (!edges) return;
 
-            // Load settlement graph to get settlements map
+            // F1 (legacy S-id consumer sweep, 2026-11-14): settlements, front and supply all
+            // in the OSID id space. The legacy `settlementEdges` marked 109/110 municipalities
+            // surrounded and collapsed by turn 8, pinning negotiation momentum at 1.0.
             const graph = await getOperationalSettlementGraph(context);
-            context.report.sustainability = updateSustainability(context.state, graph.settlements, edges);
+            const od = getOperationalData(context);
+            const osid = od?.edges?.length ? buildOsidDisplacementPressureInputs(context.state, od) : undefined;
+            context.report.sustainability = updateSustainability(context.state, graph.settlements, edges, osid);
         }
     },
     {
@@ -4474,7 +4483,14 @@ export const warPhases: NamedPhase[] = [
         run: (context) => {
             const edges = context.input.settlementEdges;
             if (!edges) return;
-            const derivedFrontEdges = computeFrontEdges(context.state, edges);
+            // F1: front edges in the OSID id space when operational data is present, so the
+            // step's ids match its other inputs. Breach candidates still read 0 here: they need
+            // `front_segments`/`front_pressure`, which the dormant legacy front substrate never
+            // populates in a campaign (F9/SD2, out of RF-F1 scope). Legacy edges otherwise.
+            const od = getOperationalData(context);
+            const derivedFrontEdges = od?.edges?.length
+                ? buildOsidDisplacementPressureInputs(context.state, od).frontEdges.slice()
+                : computeFrontEdges(context.state, edges);
             context.report.negotiation_pressure = updateNegotiationPressure(
                 context.state,
                 derivedFrontEdges,
