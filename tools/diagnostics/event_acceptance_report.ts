@@ -89,8 +89,10 @@ export const APPROVED_FIRST_AUTHORING_PACKET_CANDIDATES = [
 export const CONDITIONAL_AUTHORING_PACKET_CANDIDATES = [
 ] as const;
 
+// Emptied 2026-11-14 by EV1: us_halts_federation_advance_1995 was authored (default `comply`,
+// `historical` logic) with its 188w proof: final hash identical to main (53ffe8e9545686ad),
+// because the former `accept_first` already picked `comply`.
 export const DEFERRED_AUTHORING_PACKET_CANDIDATES = [
-    'us_halts_federation_advance_1995',
 ] as const;
 
 export const SENSITIVE_RING3_REFUSED_IDS = [

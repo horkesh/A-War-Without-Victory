@@ -14,8 +14,9 @@ import type { GameState } from '../src/state/game_state.js';
  *
  * 1. `staff_recommended_response_id` never reaches the bot. The six design counterfactuals and
  *    the NATO ultimatum got one; the headless pick must stay where the political scorer puts it.
- * 2. `us_halts_federation_advance_1995` got `historical_default_response_id: comply`; it was
- *    already `accept_first` -> comply, so the pick and its decision source are unchanged.
+ * 2. `us_halts_federation_advance_1995` got `historical_default_response_id: comply` and
+ *    `bot_response_logic: historical` (was `accept_first` -> options[0] = comply), so the pick
+ *    and its decision source (`bot_ai_default`) are unchanged.
  * 3. `drina_cleansing_decision_1992` stays unauthored (§6 panel). Headless resolves it by array
  *    position (`bot_v1` -> `systematic`): a positional artefact, not a historical claim. In
  *    emergent mode with Observer forcing an authored default, there is none, so it falls to the
@@ -69,7 +70,9 @@ describe('EV1: history-mode resolution of the nine events', () => {
         const state = await loadOpeningState();
         state.meta.decision_mode = 'historical';
         expect(def.historical_default_response_id).toBe('comply');
-        expect(def.bot_response_logic).toBe('accept_first');
+        // Was `accept_first` (options[0] = comply). With an authored default the acceptance
+        // report requires `historical` logic; both resolve to comply via bot_ai_default.
+        expect(def.bot_response_logic).toBe('historical');
         expect(def.response_options?.[0]?.id).toBe('comply');
         const selection = selectBotEventResponse(state, def, 'RBiH', false);
         expect(selection.chosen.id).toBe('comply');
