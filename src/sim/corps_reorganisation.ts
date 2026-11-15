@@ -51,7 +51,13 @@ import { recallEliteLoan } from './combat/army_reserve_system.js';
 import { removeFromActiveOperation } from './combat/brigade_dissolution.js';
 import { initializeCorpsCommand } from './combat/corps_command.js';
 import { removeOperation } from './combat/corps_operation_helpers.js';
-import { releaseOperationCommander, releaseTacticalCommander } from './combat/officer_system.js';
+import {
+    isPresidentialAppointee,
+    queueReplacementMatter,
+    releaseOperationCommander,
+    releaseTacticalCommander,
+} from './combat/officer_system.js';
+import { selectManualPlayerFaction } from './bot/staff_control.js';
 import { completeOperationLifecycle, enterOperationRecovery } from './combat/tactical_group_lifecycle.js';
 
 /** Default number of turns a committed brigade may finish its operation before a forced transfer. */
@@ -423,6 +429,27 @@ export function processCorpsReorganisationEvents(
         } else if (officer.assigned_operation) {
             continue; // finishes commanding the operation first
         } else if (!(officer.status === 'active' && officer.assigned_corps_id === target)) {
+            // The President's command choices win (Engine Invariants §15.1, Rulebook §5.9):
+            // an incumbent he appointed, accepted or kept is never displaced (the handover
+            // lapses), and a manually controlled player is asked, never overruled.
+            const incumbentId = Object.keys(officers).sort(strictCompare).find((oid) =>
+                oid !== e.officer_id && officers[oid]?.status === 'active' && officers[oid]?.assigned_corps_id === target) ?? null;
+            const targetFaction = state.military.formations?.[target]?.faction;
+            if (incumbentId && isPresidentialAppointee(state, target, incumbentId)) {
+                handover.lapsed = true;
+                receipts(state)[e.id] = turn;
+                report.completed_event_ids.push(e.id);
+                (report.handovers ??= []).push(handover);
+                changed = true;
+                continue;
+            }
+            if (targetFaction != null && targetFaction === selectManualPlayerFaction(state)) {
+                // A matter, deduplicated; no receipt until he has decided. Accepting seats
+                // the officer (receipt next turn); declining marks the incumbent kept (lapse).
+                // An empty command waits for the ordinary vacancy fill, then is put to him.
+                if (incumbentId && queueReplacementMatter(state, targetFaction, incumbentId, target, e.officer_id, turn)) changed = true;
+                continue;
+            }
             for (const oid of Object.keys(officers).sort(strictCompare)) {
                 const other = officers[oid];
                 if (oid === e.officer_id || !other) continue;

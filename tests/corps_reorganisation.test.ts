@@ -360,6 +360,55 @@ describe('commander_handover', () => {
         expect((state.military.named_officers as any).arbih_alagic.status).toBe('killed');
     });
 
+    // Canon seat C1 (Engine Invariants §15.1, Rulebook §5.9): the President's choices win.
+    function presidentState(meta: Record<string, unknown>) {
+        const state = makeState(99, [corps('arbih_3rd_corps'), corps('arbih_7th_corps')]);
+        Object.assign(state.meta, meta);
+        cmd(state, 'arbih_3rd_corps');
+        cmd(state, 'arbih_7th_corps');
+        state.military.named_officers = {
+            arbih_alagic: officer({ status: 'active', assigned_corps_id: 'arbih_3rd_corps' }),
+            generic_7th: officer({ status: 'active', assigned_corps_id: 'arbih_7th_corps' }),
+        } as any;
+        return state;
+    }
+
+    it('a manually controlled player is asked, never overruled: one deduplicated matter, no move, no receipt', () => {
+        const state = presidentState({ player_faction: 'RBiH', autonomy_level: 0 });
+        processCorpsReorganisationEvents(state, [HANDOVER]);
+        const o = state.military.named_officers as any;
+        expect(o.arbih_alagic).toMatchObject({ status: 'active', assigned_corps_id: 'arbih_3rd_corps' });
+        expect(o.generic_7th).toMatchObject({ status: 'active', assigned_corps_id: 'arbih_7th_corps' });
+        expect(state.military.formation_lifecycle_events_fired?.h).toBeUndefined();
+        expect(state.military.pending_officer_events).toEqual([expect.objectContaining({
+            type: 'replacement_suggested', corps_id: 'arbih_7th_corps', officer_id: 'arbih_alagic', current_commander_id: 'generic_7th',
+        })]);
+        state.meta.turn = 100;
+        processCorpsReorganisationEvents(state, [HANDOVER]);
+        expect(state.military.pending_officer_events).toHaveLength(1);
+        // He declines (keeps the incumbent): the handover lapses and is receipted.
+        state.military.officer_decision_history = [{ event_type: 'replacement_suggested', decision: 'acknowledged', corps_id: 'arbih_7th_corps', outgoing_officer_id: 'generic_7th', officer_id: 'arbih_alagic' }] as any;
+        const report = processCorpsReorganisationEvents(state, [HANDOVER])!;
+        expect(report.handovers?.[0]).toMatchObject({ lapsed: true });
+        expect(o.generic_7th.assigned_corps_id).toBe('arbih_7th_corps');
+        expect(state.military.formation_lifecycle_events_fired?.h).toBe(100);
+    });
+
+    it('a staff-controlled player and a bot follow the handover; a presidential appointee is never displaced', () => {
+        const staff = presidentState({ player_faction: 'RBiH', autonomy_level: 1 });
+        processCorpsReorganisationEvents(staff, [HANDOVER]);
+        expect((staff.military.named_officers as any).arbih_alagic.assigned_corps_id).toBe('arbih_7th_corps');
+
+        const appointed = presidentState({ player_faction: 'RBiH', autonomy_level: 2 });
+        (appointed.military.corps_command!.arbih_7th_corps as any).co_replacement_record = [{ replacement_officer_id: 'generic_7th' }];
+        const report = processCorpsReorganisationEvents(appointed, [HANDOVER])!;
+        const o = appointed.military.named_officers as any;
+        expect(report.handovers?.[0]).toMatchObject({ lapsed: true });
+        expect(o.generic_7th).toMatchObject({ status: 'active', assigned_corps_id: 'arbih_7th_corps' });
+        expect(o.arbih_alagic.assigned_corps_id).toBe('arbih_3rd_corps');
+        expect(appointed.military.pending_officer_events ?? []).toEqual([]);
+    });
+
     it('the shipped data seats Alagić in the 7th Corps on the formation week', async () => {
         const events = await loadCorpsReorganisationEvents(process.cwd());
         expect(events.find((e) => e.type === 'commander_handover')).toMatchObject({ corps_id: 'arbih_7th_corps', officer_id: 'arbih_alagic', trigger_turn: 99 });
