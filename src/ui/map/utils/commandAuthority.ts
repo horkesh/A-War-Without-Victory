@@ -103,6 +103,13 @@ export const STRATEGIC_POSTURE_REVIEW_COST = 10;
 export const BACK_CORPS_OPERATION_COST = 10;
 export const BACK_CAMPAIGN_COST = 20;
 
+/**
+ * Command loop L7: Insist over the army commander in a clash costs 15 Authority (Accept is free;
+ * Replace is the existing Replace-CO lever at REPLACE_CO_COST). MUST match
+ * army_clash_ipc.cjs ARMY_CLASH_INSIST_COST.
+ */
+export const ARMY_CLASH_INSIST_COST = 15;
+
 /** The Authority price of backing a pending proposal, from its proposed action (0 = free). */
 export function proposalBackingCost(proposedAction: string | null | undefined): number {
     if (typeof proposedAction !== 'string') return 0;

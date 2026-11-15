@@ -436,6 +436,8 @@ interface WindowAwwv {
     rejectProposal: (proposalId: string) => Promise<{ ok: boolean; error?: string }>;
     /** Posture model option 2: answer a corps/OG stance matter. */
     resolveStanceMatter: (payload: { matterId: string; answer: 'confirm' | 'countermand' | 'constrain'; constraint?: string }) => Promise<{ ok: boolean; error?: string }>;
+    /** Command loop L7: answer an army clash. */
+    resolveArmyClash: (payload: { clashId: string; answer: 'accept' | 'insist' | 'replace' }) => Promise<{ ok: boolean; error?: string; cost?: number }>;
     // Phase 2 slice 1 "Back the Officer": Level 3 Direct Intervention on an op proposal.
     forceLaunchProposal: (proposalId: string) => Promise<{ ok: boolean; error?: string }>;
     // Proactive presidential force-launch of a HELD-ready plan the officer never
@@ -859,6 +861,10 @@ export function useIPC() {
             resolveStanceMatter: awwv && typeof awwv.resolveStanceMatter === 'function'
                 ? (payload: { matterId: string; answer: 'confirm' | 'countermand' | 'constrain'; constraint?: string }) => awwv.resolveStanceMatter(payload)
                 : makeNoop<{ ok: boolean; error?: string }>(),
+
+            resolveArmyClash: awwv && typeof awwv.resolveArmyClash === 'function'
+                ? (payload: { clashId: string; answer: 'accept' | 'insist' | 'replace' }) => awwv.resolveArmyClash(payload)
+                : makeNoop<{ ok: boolean; error?: string; cost?: number }>(),
 
             forceLaunchProposal: awwv
                 ? (proposalId: string) => awwv.forceLaunchProposal(proposalId)

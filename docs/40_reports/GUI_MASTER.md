@@ -485,6 +485,18 @@ Army HQ, Codex, and other full-size overlays should obey the same density langua
 
 OSID, raw faction ids, and similar backend nouns are valid in engine code, canon, and tests. They are not valid in the live player shell when a human phrase like staging area, positions, or a political-side display name can carry the meaning. The product should sound like a command environment, not a debugger.
 
+## 2026-11-15 - Army clashes (command loop L7)
+
+- When an order the president just staged crosses the army plan and the army commander would comply only in part, a Command Surface card appears: "{army commander} objects to: {order}". Its summary says the order stands unless answered.
+- The lazily loaded `ArmyClashActions` shows:
+  - facts: your order, the army's version, the corps, his reason, how far he would go (the severity: modified, partial or refused; a modified clash's card reads as information, the others as a warning), the last clash;
+  - the corps commander's objection when it fired on the same order;
+  - three equal full-width answer rows, label left and price right, each with an aria label that includes the price: Accept (free for a withdrawn halt or request, which is refunded; 10 or 20 Authority when the army's version is an approval of a withheld plan or declined opportunity), Insist (15 Authority), Replace {corps commander} (25 Authority).
+- An answer the balance cannot pay for is disabled, and so is Replace when the corps has no commander. The current balance is shown.
+- An inbox row (type ARMY) and an advisory decision-surface family `army_clash` go with it.
+- Rows instead of three columns: at 1280 the three columns were about 110 px wide and "Replace {name}" overflowed. At 1280 the detail column scrolls to reach the third row, the shared detail-column issue L5 recorded.
+- Strings: `clash.*` (EN and BCS). Evidence: `tools/ui/army_clash_browser_proof.mjs`, ledger fragment `docs/ledger/fragments/2026-11-15-army-clashes.md`.
+
 ## 2026-11-15 - Authority that binds (command loop L6)
 
 - Backing an offensive now has a price on its directive: 10 Authority for a corps operation, 20 for a campaign or historical operation. Withhold and decline stay free.

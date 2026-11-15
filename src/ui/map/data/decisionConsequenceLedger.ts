@@ -68,7 +68,8 @@ export type DecisionConsequenceFamilyId =
   | 'paramilitary-authorization'
   | 'patron-relations'
   | 'officer-personnel'
-  | 'stance-matter';
+  | 'stance-matter'
+  | 'army-clash';
 
 export interface DecisionConsequenceLedgerSummary {
   total: number;
@@ -778,6 +779,24 @@ export function buildDecisionConsequenceLedger(
       outcome: t(outcomeKey),
       outcomeToken: { key: outcomeKey },
       detail: stanceMatterReceiptLine(receipt),
+      recordTarget: 'records',
+    });
+  }
+
+  // Command loop L7: every army clash leaves a Record line (answered, lapsed, noted or not put).
+  for (const receipt of state.armyClashHistory ?? []) {
+    const outcomeKey = `clash.outcome.${receipt.outcome}` as const;
+    records.push({
+      id: `army-clash:${receipt.id}:${receipt.outcome}:${receipt.resolvedTurn}`,
+      turn: receipt.resolvedTurn,
+      familyId: 'army-clash',
+      family: t('clash.family'),
+      title: t('clash.recordTitle', { officer: receipt.armyCommanderName ?? t('clash.armyCommanderFallback') }),
+      outcome: t(outcomeKey),
+      outcomeToken: { key: outcomeKey },
+      detail: receipt.cost > 0
+        ? t('clash.recordDetailCost', { corps: receipt.corpsName, cost: receipt.cost })
+        : t('clash.recordDetail', { corps: receipt.corpsName }),
       recordTarget: 'records',
     });
   }
