@@ -27,13 +27,13 @@ RF fidelity-pass change, owner-decided before 1.0 (roadmap BC14). Calibration is
 - Baselines re-blessed at the head. The structural fingerprint is unchanged (40w).
 
 **Standing question.** Phase B buys no new cell.
-- The Ozren/Teslić RS cells, Bočinja, Vozuća and Brijesnica Donja (through Apr95) and the Farz P-B pass depend on the remaining 3rd Corps stalling after the split (RF-3C-EXH, registered, paired with VRS2). On main the same cells rest on 7C5, so the footing is equal, not a regression.
+- At the post-split checkpoints (the Jan93 match is pre-split), the Ozren/Teslić RS cells, Bočinja, Vozuća and Brijesnica Donja (through Apr95) and the Farz P-B pass depend on the remaining 3rd Corps stalling after the split (RF-3C-EXH, registered, paired with VRS2). On main the same cells rest on 7C5, so the footing is equal, not a regression.
 - Jemanlići's Oct95 match rests on the t29 "Čelik" capture, as on main.
 - Paklarevo fell at t162 to Vlašić Ridge. The 7th Corps' model operation took shared credit; it did not win it.
 
 **Known limits (recorded, not fixed).**
 - Alagić still dies on the tenure clock (about t168), although he commanded the 7th Corps to the end of the war (BB1 n.686). The empty corps schedule (L4) protects survivors only once L8 dates it. The pool then seats Mesić from the 4th Corps.
-- An old save loaded past the week-99 window applies the reorganisation on its first loaded turn, with no transition cost and immediate operation withdrawal.
+- An old save loaded past the week-99 window applies the reorganisation on its first loaded turn, with no transition cost and immediate operation withdrawal. A save made before #591 also keeps Alagić's old officer data (home 3rd Corps, `available_until_turn` 120), because officer data is carried in the save, so he retires at week 120 there.
 - The roster's w80 3rd Corps handover is two weeks before the historical 1 November 1993 (week 82). Kept, so the run stays comparable with main.
 
-**Gate.** Historian, determinism, canon compliance and scenario-creator-runner-tester seats, plus a named integrator. Evidence `C:/Pyrrhic/AWWV-worktrees/_logs/cl-rf1-phase-b-20261115/`.
+**Gate.** Historian, determinism, canon compliance and scenario-creator-runner-tester seats, plus a named integrator: GO WITH CONDITIONS (process items only). FORAWWV §XIII.1 amendment: unanimous 4/4. Evidence `C:/Pyrrhic/AWWV-worktrees/_logs/cl-rf1-phase-b-20261115/`.
