@@ -57,14 +57,14 @@ export interface AttackResolutionOsidReport {
     flips_applied: number;
     casualty_attacker: number;
     casualty_defender: number;
-    combat_suppressed_reason?: 'coha_ceasefire';
+    combat_suppressed_reason?: 'coha_ceasefire' | 'oct1995_ceasefire';
     operation_lifecycle_paused_reason?: 'coha_ceasefire';
     orders_by_faction: Record<string, number>;
     orders_seen_by_brigade?: Record<FormationId, Osid>;
     suppressed_attack_orders?: Array<{
         brigade_id: FormationId;
         target_osid: Osid;
-        reason: 'coha_ceasefire';
+        reason: 'coha_ceasefire' | 'oct1995_ceasefire';
     }>;
     engaged_formation_ids: FormationId[];
     snap_events: AttackResolutionOsidSnapEvent[];

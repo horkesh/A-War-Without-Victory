@@ -1369,7 +1369,19 @@
     "image": "event_diplomatic_negotiation.webp",
     "source_tier": "agreement_text",
     "title": "Contact Group Plan Presented",
-    "narrative": "The Contact Group — the US, Russia, UK, France, and Germany — presents a take-it-or-leave-it peace plan offering the Federation 51% and Republika Srpska 49% of Bosnian territory. The Bosnian government and Croats accept under pressure, but the Bosnian Serb leadership rejects the plan, further isolating Pale even from its Belgrade patron.",
+    "localizations": {
+      "en": {
+        "notifications_to_other_factions": {
+          "accept": {
+            "HRHB": {
+              "headline": "RBiH accepts the Contact Group plan",
+              "body": "Sarajevo signals acceptance of the proposed territorial framework under international pressure. Mostar sees Federation diplomacy aligned for now, with the pressure shifting to Pale's answer."
+            }
+          }
+        }
+      }
+    },
+    "narrative": "This week the Contact Group (the United States, Russia, Britain, France and Germany) presents its peace plan in Geneva. The map gives the Federation 51 percent of Bosnia and Republika Srpska 49 percent, far less than Bosnian Serb forces now hold. The parties have two weeks to answer. Whether Sarajevo and Pale will accept is the open question.",
     "category": "diplomatic",
     "trigger": {
       "turn_min": 117,
