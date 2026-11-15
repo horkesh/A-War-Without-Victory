@@ -35,6 +35,10 @@
   - Each 10-point debit is refilled at once from the 15-point reserve (`applyCommandAuthorityRecovery`), so the meter never leaves the cap.
   - The prices work. Demand is still far below the proposal's assumed one backed operation every 2-3 weeks. Binding needs more priced asks to reach the president (2A Insist, L7) or a reserve and income decision, which the owner has kept unchanged. Reported to the orchestrator; nothing retuned here.
 
+## 2026-11-15 — Counterfactual events no longer claim a historical default; hidden citations corrected
+
+Display and event data text only; no sim, trigger, option, effect or calibration change. (1) A design-counterfactual event (`source_tier: design_counterfactual`) keeps its authored `historical_default` marker (bots read it) but its decision card says "Default option" / "This is the default option. You are free to choose any option. It is not documented history." instead of "Historical default" / "the historically attested choice"; the Records badge reads "Default" / "Other choice". EN and BCS, reviewed by the narrative-designer seat. Only `csq_patron_recovery_offer` has an authored default among the 149 counterfactual events today, and the test covers any that gain one. (2) The hidden `source_note` and `historical_source` of `rbih_late_war_offensive_1995`, `hrhb_1992_graz_cooperation_collapse`, `gornji_vakuf_clashes_1993` and `csq_patron_recovery_offer` carry the historian-corrected citations, so the data matches what players now see (#662); un-reverified ranges are marked. Two 188-week headless runs (clean tree vs this branch): final state hash identical (`e44c77f5b41052f8`), 14 of 15 artifacts byte-identical, `run_meta` differs only in the output directory suffix and the event-file input digests (#630 precedent). See `docs/40_reports/evidence/20261115_counterfactual_default_label/`.
+
 ## 2026-11-15 — The weekly dispatch names our lost formations (by name and corps)
 
 UI data layer only; no sim, state or calibration change. The "This week" dispatch promised losses by name, but `TurnAftermathView` carried only counts. The view now has `formations.ownDestroyedList` (id, name, corps) built from the week's `formation_destructions` for the player's faction, with the corps resolved from the order of battle; the dispatch cost line names up to three ("+N more" for the rest, count only when a record has no names). Enemy losses stay counts: the player-visible projection already carries only the player's own destructions, and the builder filters by faction too. New strings `dispatch.cost.formationsLostNamed.one/many`, `.formationsLostWithCorps`, `.formationsLostMore` (EN and BCS; the BCS corps placeholder declares its case).
@@ -294,6 +298,21 @@ Proof: `tests/desktop_player_visible_sustainability.test.ts` (own municipalities
 UI build only; no sim, state or calibration change. Main's full-suite player-experience gate failed on the Vite chunk-size warning (`tactical_map` 3,000.38 kB vs the 3000 kB limit) after #643 and #639 landed, each under the limit alone. `App.tsx` now lazy-imports the views that open on demand (Codex, Chronicle, Wrapped, Settings, Diplomacy, Peace plan, AI settings, AI advisor), each behind its own open flag and a `Suspense` boundary. Entry chunk 3,000.38 -> 2,863.53 kB (136.85 kB under the limit); `chunkSizeWarningLimit` and the gate are untouched. Same pattern as the earlier Recruitment, Autonomy, Economy and Credits splits.
 
 Proof: `tsc --noEmit` clean; 87 UI test files that reference App or these views pass (861 tests); rendered Codex and Chronicle open in the real desktop app. See `docs/40_reports/evidence/20261115_bundle_headroom/`.
+
+## 2026-11-15 — war-or-game retired from panels, gates and routing (owner directive)
+
+Owner directive, 2026-11-15, verbatim: "I want war-or-game removed from all seats. Too often he ignores history, is too cocky... I had to overrule him plenty of times." This extends the May 2026 removal from automatic review.
+
+**What changed (docs and skill text only; no `src/`, `data/`, hook or settings change):**
+- `docs/20_engineering/AGENT_WORKFLOW.md`: the broader bright-line panel now names Operations Expert in place of War-or-Game (still eight independent unanimous seats, implementer excluded).
+- `.claude/AGENT_TEAM_ROSTER.md`: the mandatory realism sign-off row is replaced by `scenario-creator-runner-tester` (calibration-run analysis and realism, with `historian` ruling on historical fact); a retirement note is added.
+- `docs/20_engineering/PYRRHIC_PROCESS_RULES.md`: the engine-touching sign-off names `scenario-creator-runner-tester`.
+- Skills `anomaly-triage`, `corps-army-commander` and `gap-finder` route to `scenario-creator-runner-tester` and `historian`; `.claude/skills/war-or-game/SKILL.md` carries a RETIRED header (explicit owner request only) and is not deleted.
+- `docs/40_reports/REAL_WAR_MASTER.md`: ownership moves to `historian` and `scenario-creator-runner-tester`; a realism finding must cite a source (BB or ICTY) or a measured run figure; the historian has the final word on historical fact. `docs/40_reports/README.md` and the roadmap RF row owners follow.
+
+**Not done in this change (canon, held for the owner's explicit go-ahead):** the required-seat wording in `docs/10_canon/SENSITIVE_HISTORY_DESIGN_GATE.md` (new-rupture sign-off lines and the realism evidence line), `docs/10_canon/VICTORY_AND_PYRRHIC_SCORING.md` (grade-anchor review row) and `docs/10_canon/Game_Bible_v0_9_0.md` (rupture review line) still name `/war-or-game`; a canon edit that changes who sits on a review gate was refused by the permission classifier here. Until they are amended, the bright-line panel in `AGENT_WORKFLOW.md` and those canon lines disagree, and the directive governs. Past §6 records and historical reports that name War-or-Game stay as written.
+
+**No Pyrrhic merge-gate composition is written in `CLAUDE_EXECUTION_STANDARD.md`, `.claude/commands/` or `.claude/agents/`; there was nothing to replace there.**
 
 ## 2026-11-14 — B11: an accepted proposal no longer comes back as an "unrequested operation"
 

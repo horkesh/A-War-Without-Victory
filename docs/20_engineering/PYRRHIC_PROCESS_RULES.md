@@ -33,7 +33,7 @@ Every phase MUST specify:
 |-------|----------|
 | **Implementer** | Which Pyrrhic role(s) write the code |
 | **Reviewer** | Which skill reviews (always `/simplify` minimum; `/code-review` for non-trivial) |
-| **Sign-off** | Who approves phase completion (Orchestrator minimum; add `/war-or-game` if engine-touching) |
+| **Sign-off** | Who approves phase completion (Orchestrator minimum; add `/scenario-creator-runner-tester` if engine-touching) |
 
 ### 2.3 Architectural Decision Flags
 `/architect` MUST flag decisions for documentation when a phase introduces:
@@ -67,7 +67,7 @@ Every phase MUST end with this 7-step block. No exceptions. No shortcuts.
 ```
 
 ### 2.5 Special Triggers
-- **Engine-touching phases** (IPC handlers, pipeline steps, state mutations): `/war-or-game` sign-off mandatory (napkin §Execution #2).
+- **Engine-touching phases** (IPC handlers, pipeline steps, state mutations): `/scenario-creator-runner-tester` sign-off mandatory (napkin §Execution #2; war-or-game retired from all seats by owner directive, 2026-11-15).
 - **New IPC channels**: `/architect` ADR + Systems Manual propagation.
 - **After final phase of a major feature**: `/create-report` → `docs/40_reports/`.
 - **Multi-session plans**: Write `working-on.md` at session end. Read and delete at next session start.
@@ -143,7 +143,7 @@ Before any plan is approved for execution, it MUST pass this checklist:
 - [ ] Post-phase discipline block is included (not abbreviated)
 - [ ] Relevant life lessons are listed
 - [ ] `/architect` flags are identified for phases with new state/IPC/components
-- [ ] Engine-touching phases have `/war-or-game` sign-off scheduled
+- [ ] Engine-touching phases have `/scenario-creator-runner-tester` sign-off scheduled
 - [ ] Scope creep rule is stated
 - [ ] `/create-report` is scheduled after the final phase (for major features)
 

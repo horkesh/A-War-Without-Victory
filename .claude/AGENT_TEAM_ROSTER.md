@@ -20,10 +20,12 @@ Consultation means reading the applicable skill and covering its domain duties w
 |---|---|
 | operations-expert | Any operation change, including preparation, objectives, brigades, staging, timing and corps command |
 | historian | Any historical claim about the Bosnian War; preserve BB1/BB2 and applicable source requirements |
-| war-or-game | Any calibration run; mandatory realism sign-off |
+| scenario-creator-runner-tester | Any calibration run: run analysis and realism review. The historian rules on historical fact. |
 | formation-expert | Any OOB, brigade or militia-pool change |
 | ui-ux-developer | Any new UI component, modal or panel; consult for UI/UX changes |
 | data-pipeline-engineer | Changes to tools that write derived data |
+
+`war-or-game` is retired from all panels, gates and routing (owner directive, 2026-11-15); it is consulted only on an explicit owner request. Calibration-run analysis and realism belong to `scenario-creator-runner-tester`, with `historian` for historical fact.
 
 Exact four-seat and eight-seat membership is retained in [the shared workflow's canon boundary](../docs/20_engineering/AGENT_WORKFLOW.md#canon-and-protected-boundaries). Apply [SENSITIVE_HISTORY_DESIGN_GATE.md](../docs/10_canon/SENSITIVE_HISTORY_DESIGN_GATE.md), [FORAWWV.md](../docs/10_canon/FORAWWV.md), and [canon-compliance-reviewer](skills/canon-compliance-reviewer/SKILL.md) for the operative canon requirements. Similar names do not make `canon-compliance-review` and `canon-compliance-reviewer` interchangeable seats.
 
