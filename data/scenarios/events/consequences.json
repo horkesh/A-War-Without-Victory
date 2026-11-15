@@ -2313,6 +2313,14 @@
     "image": "event_patron_relations_RS.webp",
     "source_tier": "design_counterfactual",
     "title": "Patron Recovery Offer",
+    "localizations": {
+      "en": {
+        "source_note": "Not a documented offer: a game construct that condenses Belgrade's pressure on the Pale leadership in 1994-95. Belgrade announced a blockade of the Bosnian Serbs on 4 August 1994 after the Bosnian Serb Assembly rejected the Contact Group plan (Balkan Battlegrounds, Vol. I, chronology, p. 23), and on 29 August 1995 the Bosnian Serb leaders agreed that a joint delegation led by Slobodan Milošević would negotiate for them (ICTY, Karadžić, IT-95-5/18-T, para. 424)."
+      },
+      "bcs": {
+        "source_note": "Nije dokumentirana ponuda, nego konstrukcija igre koja sažima pritisak Beograda na rukovodstvo u Palama 1994-95. Beograd je 4. augusta 1994. objavio blokadu bosanskih Srba nakon što je njihova Skupština odbila plan Kontakt grupe (Balkan Battlegrounds, tom I, hronologija, str. 23), a 29. augusta 1995. bosanskosrpski lideri pristali su da pregovore vodi zajednička delegacija na čelu sa Slobodanom Miloševićem (MKSJ, Karadžić, IT-95-5/18-T, par. 424)."
+      }
+    },
     "narrative": "The patron's emissary returns with terms: structural concessions in exchange for a managed recovery of the relationship. Acceptance buys back arms, briefings, and the soft cover of recognized backing. Refusal locks in the disavowal. Either way the choice is binding for the rest of the war.",
     "category": "diplomatic",
     "trigger": {

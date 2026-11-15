@@ -1436,6 +1436,9 @@
     "title": "The Final Offensive: Liberate or Negotiate?",
     "localizations": {
       "en": {
+        "source_note": "Balkan Battlegrounds, Vol. I, ch. 91-93 (pp. 379-391): Operation Sana, the ARBiH 5th Corps offensive from the Bihać area, September-October 1995. Holbrooke, To End a War (1998), chs. 8-11.",
+        "source_tier": "balkan_battlegrounds",
+        "historical_source": "Balkan Battlegrounds, Vol. I, ch. 91-93 (pp. 379-391): Operation Sana, the ARBiH 5th Corps offensive from the Bihać area, September-October 1995. Holbrooke, To End a War (1998), chs. 8-11.",
         "notifications_to_other_factions": {
           "launch_coordinated_offensives": {
             "HRHB": {
@@ -1474,6 +1477,9 @@
             }
           }
         }
+      },
+      "bcs": {
+        "source_note": "Balkan Battlegrounds, tom I, pogl. 91-93 (str. 379-391): operacija Sana, ofanziva 5. korpusa ARBiH iz bihaćkog područja, septembar-oktobar 1995. Holbrooke, To End a War (1998), pogl. 8-11."
       }
     },
     "narrative": "Operation Storm has ended the Krajina Serb republic in Croatia and broken the siege of the Bihać pocket. HV and HVO forces hold Bosansko Grahovo and Glamoč, on the western edge of the VRS front. NATO has warned of significant air strikes if Goražde or the other safe areas are attacked, and Washington has sent Richard Holbrooke to the region with a new peace initiative. Zagreb and Sarajevo are planning offensives in western Bosnia. The Presidency must choose its posture: launch coordinated offensives with the HV and HVO, pushing the 5th Corps deep on the Sana-Una axis to take as much ground as possible before talks fix the map; or hold the line, wait on diplomacy, or accept the present front as the basis of partition.",
