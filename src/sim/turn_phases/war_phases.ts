@@ -39,7 +39,7 @@ import { operationExecutedAttackCount } from '../combat/operation_attack_count.j
 import { buildAdjacencyMapCached } from '../../map/adjacency_map.js';
 import { computeFrontEdges, computeFrontEdgesOsid } from '../../map/front_edges.js';
 import { computeFrontRegions } from '../../map/front_regions.js';
-import { applyCommandAuthorityRecovery, computeCommandAuthorityRecovery } from '../../shared/commandAuthorityEconomy.js';
+import { applyCommandAuthorityRecovery, computeCommandAuthorityRecovery, toRecoveryBreakdownRecord } from '../../shared/commandAuthorityEconomy.js';
 import { loadTerrainScalars } from '../../map/terrain_scalars_node.js';
 import { backfillFormationLocationOsid, computeOsidPopulation } from '../../data/operational_data.js';
 import { loadSettlementEthnicityData } from '../../data/settlement_ethnicity.js';
@@ -3002,6 +3002,13 @@ export const warPhases: NamedPhase[] = [
                 unresolvedFriction,
             });
             applyCommandAuthorityRecovery(auth, recovery);
+            // Command loop L6: keep the week's income breakdown so the Desk and priced
+            // buttons can show next week's Authority and its sources. Live president only:
+            // a headless run can carry an authored player_faction, and its artifacts must
+            // stay byte-identical (proposal §3), so the field is never written there.
+            if (isLivePresident(context.state)) {
+                auth.last_recovery_breakdown = toRecoveryBreakdownRecord(recovery);
+            }
         }
     },
     {

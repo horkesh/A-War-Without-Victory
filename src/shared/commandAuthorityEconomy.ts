@@ -35,6 +35,32 @@ export interface CommandAuthorityRecoveryBreakdown {
     topSource: CommandAuthorityIncomeSource;
 }
 
+/**
+ * Command loop L6 (2026-11-14): the last weekly recovery, broken down by source, so the
+ * player can see where next week's Authority comes from. Persisted because the recovery
+ * inputs change later in the turn. Written only by the `recover-command-authority` step,
+ * only for a live president, never at seed time; headless runs never carry it.
+ */
+export interface CommandAuthorityRecoveryBreakdownRecord {
+    recovery: number;
+    base: number;
+    political_bonus: number;
+    quiet_front_dividend: number;
+    friction_penalty: number;
+    top_source: CommandAuthorityIncomeSource;
+}
+
+export function toRecoveryBreakdownRecord(breakdown: CommandAuthorityRecoveryBreakdown): CommandAuthorityRecoveryBreakdownRecord {
+    return {
+        recovery: breakdown.recovery,
+        base: breakdown.base,
+        political_bonus: breakdown.politicalBonus,
+        quiet_front_dividend: breakdown.quietFrontDividend,
+        friction_penalty: breakdown.frictionPenalty,
+        top_source: breakdown.topSource,
+    };
+}
+
 export interface CommandAuthorityAccount {
     current: number;
     max: number;
@@ -44,6 +70,7 @@ export interface CommandAuthorityAccount {
     lifetime_spent: number;
     last_recovery?: number;
     last_recovery_source?: CommandAuthorityIncomeSource;
+    last_recovery_breakdown?: CommandAuthorityRecoveryBreakdownRecord;
 }
 
 function finiteOr(value: number | undefined, fallback: number): number {
