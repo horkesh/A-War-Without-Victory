@@ -14,15 +14,17 @@ import { useMemo, useState } from 'react';
 import { useGameStore } from '../../store/gameStore';
 import {
   buildWarroomPriorityDocketView,
+  docketRowFallbackTarget,
   type WarroomPriorityDocketItem,
   type WarroomPriorityDocketTone,
 } from '../../data/warroomPriorityDocket';
 import type { PresidentialDecisionRoomNavigationTarget } from '../../data/presidentialDecisionRoom';
+import { formatReviewChipCount, type PreAdvanceReviewTier } from '../../data/preAdvanceCommandReview';
 import { derivePresidentialBlockers, type PresidentialBlocker } from '../../data/presidentialBlockers';
 import { isPresidentialCadenceHold } from '../../data/presidentialCadenceHold';
 import { deriveInboxItems } from '../../data/inboxItems';
 import { Z } from '../../../shared/zIndex';
-import { t } from '../../i18n';
+import { t, type MessageKey } from '../../i18n';
 import { useRecruitmentMatterInput } from '../../utils/useRecruitmentMatter';
 
 export interface WarroomStatusBarProps {
@@ -65,6 +67,19 @@ function categoryLabel(category: WarroomPriorityDocketItem['category']): string 
   return t('decisionRoom.category.memory');
 }
 
+const REVIEW_TIERS: readonly PreAdvanceReviewTier[] = ['required', 'recommended'];
+
+const TIER_HEADING_KEYS: Record<PreAdvanceReviewTier, MessageKey> = {
+  required: 'review.tier.required',
+  recommended: 'review.tier.recommended',
+};
+
+function tierPillClass(tier: PreAdvanceReviewTier): string {
+  return tier === 'required'
+    ? 'border-red-600/75 bg-red-950/60 text-red-200'
+    : 'border-amber-700/70 bg-amber-950/55 text-amber-300';
+}
+
 function PriorityDocketPanel({
   docket,
   canReviewPriorities,
@@ -97,40 +112,54 @@ function PriorityDocketPanel({
         </span>
       </div>
 
-      <div className="mt-2 space-y-1.5">
+      <div
+        data-testid="warroom-review-list"
+        className="mt-2 max-h-[min(55vh,26rem)] space-y-2 overflow-y-auto overscroll-contain pr-0.5"
+      >
         {docket.items.length === 0 ? (
           <div className="rounded border border-amber-900/45 bg-black/60 px-2 py-2 text-[12px] leading-snug text-amber-100">
             {t('decisionRoom.noBuriedItems')}
           </div>
-        ) : docket.items.map((item) => {
-          const disabled = item.navigationTarget.kind === 'none';
-          const disabledReason = t('warroom.priorityItemUnavailable', { reason: docket.statusLabel });
+        ) : REVIEW_TIERS.map((tier) => {
+          const tierItems = docket.items.filter((item) => item.tier === tier);
+          if (tierItems.length === 0) return null;
           return (
-            <button
-              key={item.id}
-              type="button"
-              onClick={() => onReviewItem(item)}
-              disabled={disabled}
-              title={disabled ? disabledReason : item.actionLabel}
-              aria-label={disabled ? disabledReason : undefined}
-              className="flex w-full min-w-0 items-start justify-between gap-2 rounded border border-amber-900/45 bg-black/40 px-2 py-1.5 text-left transition-colors hover:border-amber-600/55 hover:bg-amber-950/30 disabled:cursor-default disabled:opacity-55"
-            >
-              <span className="min-w-0">
-                <span className="flex min-w-0 flex-wrap items-center gap-1">
-                  <span className="rounded border border-amber-900/50 bg-amber-950/60 px-1 py-0.5 text-xs font-bold uppercase tracking-[0.06em] text-amber-300">
-                    {categoryLabel(item.category)}
-                  </span>
-                  <span className="rounded border border-neutral-700/60 bg-neutral-950/70 px-1 py-0.5 text-xs font-bold uppercase tracking-[0.06em] text-neutral-300">
-                    {severityLabel(item.severity)}
-                  </span>
+            <section key={tier} data-testid={`warroom-review-tier-${tier}`} aria-label={t(TIER_HEADING_KEYS[tier], { count: tierItems.length })}>
+              <div className="mb-1 flex items-center gap-1.5">
+                <span className={`rounded border px-1.5 py-0.5 text-xs font-bold uppercase tracking-[0.08em] ${tierPillClass(tier)}`}>
+                  {t(TIER_HEADING_KEYS[tier], { count: tierItems.length })}
                 </span>
-                <span className="mt-1 block truncate text-[12px] font-bold text-amber-50">{item.title}</span>
-                <span className="mt-0.5 block truncate text-xs uppercase tracking-[0.06em] text-amber-300">{item.sourceOwner}</span>
-              </span>
-              <span className="shrink-0 rounded border border-amber-700/55 px-1.5 py-0.5 text-xs font-bold uppercase tracking-[0.06em] text-amber-300">
-                {item.actionLabel}
-              </span>
-            </button>
+              </div>
+              <div className="space-y-1.5">
+                {tierItems.map((item) => (
+                  <button
+                    key={item.id}
+                    type="button"
+                    data-testid="warroom-review-row"
+                    data-review-tier={item.tier}
+                    onClick={() => onReviewItem(item)}
+                    title={item.actionLabel}
+                    className="flex w-full min-w-0 items-start justify-between gap-2 rounded border border-amber-900/45 bg-black/40 px-2 py-1.5 text-left transition-colors hover:border-amber-600/55 hover:bg-amber-950/30"
+                  >
+                    <span className="min-w-0">
+                      <span className="flex min-w-0 flex-wrap items-center gap-1">
+                        <span className="rounded border border-amber-900/50 bg-amber-950/60 px-1 py-0.5 text-xs font-bold uppercase tracking-[0.06em] text-amber-300">
+                          {categoryLabel(item.category)}
+                        </span>
+                        <span className="rounded border border-neutral-700/60 bg-neutral-950/70 px-1 py-0.5 text-xs font-bold uppercase tracking-[0.06em] text-neutral-300">
+                          {severityLabel(item.severity)}
+                        </span>
+                      </span>
+                      <span className="mt-1 block truncate text-[12px] font-bold text-amber-50">{item.title}</span>
+                      <span className="mt-0.5 block text-[12px] leading-snug text-amber-200">{item.whyNow}</span>
+                    </span>
+                    <span className="shrink-0 rounded border border-amber-700/55 px-1.5 py-0.5 text-xs font-bold uppercase tracking-[0.06em] text-amber-300">
+                      {item.actionLabel}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </section>
           );
         })}
       </div>
@@ -214,6 +243,8 @@ export function WarroomStatusBar({ onReviewPriorities, onReviewItem, onReviewTar
     loadedGameState,
     deriveInboxItems(loadedGameState, osidDisplayNames),
   );
+  // The chip carries a true count and disappears at zero: a chip that is always on says nothing.
+  const showReviewChip = advanceReviewCount > 0;
   const canReviewPriorities = docket.canOpenBoard && Boolean(onReviewPriorities);
   const singleBlocker = blockers.length === 1 ? blockers[0] : null;
   const canResolveSingleBlocker = singleBlocker != null && Boolean(onResolveBlocker);
@@ -231,6 +262,13 @@ export function WarroomStatusBar({ onReviewPriorities, onReviewItem, onReviewTar
 
   const handleReviewItem = (item: WarroomPriorityDocketItem) => {
     setPriorityDocketOpen(false);
+    // Every row is clickable. A row with no target of its own opens its card in the Decision Room
+    // instead of sitting disabled.
+    const fallback = docketRowFallbackTarget(item);
+    if (fallback) {
+      onReviewTarget?.(fallback);
+      return;
+    }
     onReviewItem?.(item);
   };
 
@@ -246,7 +284,7 @@ export function WarroomStatusBar({ onReviewPriorities, onReviewItem, onReviewTar
       data-testid="warroom-status-bar"
       style={{ backdropFilter: 'blur(4px)', zIndex: Z.PRIORITY_DOCKET }}
     >
-      {priorityDocketOpen && !canResolveSingleBlocker && (
+      {priorityDocketOpen && showReviewChip && !canResolveSingleBlocker && (
         <PriorityDocketPanel
           docket={docket}
           canReviewPriorities={canReviewPriorities}
@@ -299,9 +337,10 @@ export function WarroomStatusBar({ onReviewPriorities, onReviewItem, onReviewTar
           <span>{t('warroom.signatureRequired')}</span>
           <span className="h-1.5 w-1.5 rounded-full bg-red-300 animate-pulse" aria-hidden="true" />
         </button>
-      ) : (
+      ) : showReviewChip ? (
         <button
           type="button"
+          data-testid="warroom-review-chip"
           onClick={() => setPriorityDocketOpen((open) => !open)}
           disabled={!canReviewPriorities}
           title={reviewPrioritiesTitle}
@@ -311,16 +350,12 @@ export function WarroomStatusBar({ onReviewPriorities, onReviewItem, onReviewTar
           aria-expanded={priorityDocketOpen}
         >
           <span>{t('warroom.status.reviewBeforeAdvance')}</span>
-          <span data-review-count="before-advance" className="tabular-nums">{advanceReviewCount}</span>
-          {hasPendingReviews && (
-            <>
-              <span aria-hidden="true">·</span>
-              <span>{t('warroom.pendingCount', { count: pendingReviewCount })}</span>
-            </>
-          )}
+          <span data-review-count="before-advance" data-review-count-exact={advanceReviewCount} className="tabular-nums">
+            {formatReviewChipCount(advanceReviewCount)}
+          </span>
           {hasPendingReviews && <span className="h-1.5 w-1.5 rounded-full bg-amber-300 animate-pulse" aria-hidden="true" />}
         </button>
-      )}
+      ) : null}
     </div>
   );
 }

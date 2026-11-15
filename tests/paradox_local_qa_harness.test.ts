@@ -5175,3 +5175,15 @@ test('runFaction binds native proof after finalize and before publication with a
     assert.doesNotMatch(adapterSource, /receipt\.path/);
     assert.doesNotMatch(adapterSource, /catch/);
 });
+
+// Command loop L2h (2026-11-14): the harness clicked the aftermath close button before its
+// screenshot, so none of its screenshots could show the turn report (proposal §2 premise 1).
+test('campaign runner photographs the turn report before it closes it', () => {
+    const surfaceSource = extractFunctionSource(readHarness(), 'handleCurrentSurface');
+    const reportShot = surfaceSource.indexOf("'turn-aftermath-report'");
+    const closeClick = surfaceSource.indexOf("clickTestId(frame, 'turn-aftermath-close'");
+    assert.notEqual(reportShot, -1, 'the turn report must be snapshotted');
+    assert.notEqual(closeClick, -1, 'the turn report must still be closed by its stable test id');
+    assert.ok(reportShot < closeClick, 'the report screenshot must come before the close click');
+    assert.match(surfaceSource, /data-turn-aftermath-mode/);
+});

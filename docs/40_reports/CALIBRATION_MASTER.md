@@ -1,3 +1,19 @@
+**Council fix 3, respect the peace (B10, H4, H6) — 2026-11-14, re-measured 2026-11-15 on main `f7b5781e0`: 712 / 705 / 706 / 676 (recorded, not a bar; calibration held).**
+- **Re-measured after merging main `f7b5781e0`** (after #623, #625, #631, #642). Main `f5b477ededa198bd` 712/705/706/698. Head `0e61d03672be3762` 712/705/706/676; weekly reports identical to main through week index 183. Battles 526 → 499. Enclave and Farz guards intact, strict health PASS, consistency 0. The 22 lost Oct95 cells all changed hands on main at t185-t188; the extra one against the gated head (Pribrača, Donji Vakuf) comes from main's own tail. Baselines re-pinned. The figures below are from the gated head on main `f06d5aa`.
+- **What changed.** (A) The US halt moves to t179-181 and is suppressed after a ceasefire. (B) Accepting Holbrooke's October 1995 ceasefire binds every party from the following turn:
+  - the operation channel closes on every path;
+  - planning offensives are called off, and executing ones take only the current objective of each engaged axis, then stand down;
+  - corps stances hold Defensive, and there is no army-wide offensive;
+  - attacks are suppressed as under the COHA.
+  (C) H6 cards are text only. Systems Manual §6.4 note; Engine Invariants "October 1995 ceasefire ownership"; report `docs/40_reports/implemented/20261114_COUNCIL_FIX3_RESPECT_THE_PEACE.md`.
+- **Measured one change per run** against main after #619/#631 (`7d4cf2cf698e3c41`, 712/705/706/698, reproduced, equal to its pin):
+  - A alone `9d5bb78ff4d58a26`: 712/705/706/698, 0 cell deltas. Battles 518 → 520 (+2 RBiH at t187-188), because the halt no longer fires.
+  - A+B+C (the head) `ba67ebb347949f75`, two identical runs: 712/705/706/677. Weekly reports t1-t183 are identical to main. Battles 518 → 491; t183-t188 39 → 12 (6 / 5 / 1, then none).
+  - Guards: enclave guard and Farz guard intact (Spreča taken at t185 by the stand-down). Strict health PASS (K:W 3.729). Consistency 1 (SD15, as on main).
+  - Pre-rebase, on main `4ff4a7665c0a35b5` (712/709/710/705): A `d140b5ff61671e7b`; B and C `2c9c5d5c6c7ad860` (712/709/710/677).
+- **Moved cells (Oct95, −21 vs main).** Sanski Most 5, Jajce 4, Ključ 3, Mrkonjić Grad 3, Donji Vakuf 2, Drvar 2, Bosanski Petrovac 1, Bihać 1. All 21 changed hands on main between t184 (16 Oct, when the ceasefire binds) and t188. Those municipalities fell historically between 13 Sep and 10 Oct 1995 (BB Vol. I pp.418-428). Cause: the late-1995 Sana, Mistral 2, Donji Vakuf and Southern Move axes run late. That is held calibration (tail-cell timing, op tempo) for the frozen-engine pass, not a regression of the ceasefire.
+- **Rejected alternative.** A hard cancel of executing offensives (`70aa5bb91e23cef9` on the pre-rebase main, Oct95 670) breached the Farz guard: Spreča/north Ozren is taken at t185 in the simulation.
+
 **Empty front sector commits its own rear, SE7E (PR #625) — 2026-11-14: 712 / 705 / 706 / 698, equal to main after #619/#623; consistency 1 → 0 (recorded under the hold).**
 - **Final measurement** (rebased onto main `a92d99b`, after #619, #623 and #637; head `4baea29`; cloud 188w):
 

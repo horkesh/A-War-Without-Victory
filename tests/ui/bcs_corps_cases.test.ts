@@ -10,7 +10,7 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { cleanup, render, screen } from '@testing-library/react';
 import { createElement } from 'react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 import {
     BCS_CASES,
     BCS_CORPS_CASE_FORMS,
@@ -24,7 +24,10 @@ import { bcsMessages } from '../../src/ui/map/i18n/messages.bcs';
 import { formatCorpsDisplayName } from '../../src/ui/map/utils/formatters';
 import { getPlayerFacingCorpsName } from '../../src/ui/shared/playerFacingLabels';
 import { formatBackTheOfficerFraming } from '../../src/ui/map/components/army_hq/OperationOpportunityDossierPanel';
-import { TurnAftermathModal } from '../../src/ui/map/components/TurnAftermathModal';
+import { preloadTurnAftermathRecordFace, TurnAftermathModal } from '../../src/ui/map/components/TurnAftermathModal';
+
+// The aftermath's full record is its own chunk; load it once so record renders stay synchronous.
+beforeAll(async () => { await preloadTurnAftermathRecordFace(); });
 import type { BackTheOfficerView } from '../../src/ui/map/data/backTheOfficer';
 import type { TurnAftermathView } from '../../src/ui/map/data/turnAftermath';
 
@@ -256,7 +259,7 @@ describe('paths that bypassed the helper', () => {
         } as unknown as TurnAftermathView;
         setLocale('bcs');
         render(createElement(TurnAftermathModal, {
-            isOpen: true, view, onClose: vi.fn(), onOpenInbox: vi.fn(), onOpenSummary: vi.fn(),
+            isOpen: true, initialMode: 'record', view, onClose: vi.fn(), onOpenInbox: vi.fn(), onOpenSummary: vi.fn(),
             onOpenRecords: vi.fn(), onOpenChronicle: vi.fn(), onOpenCodex: vi.fn(),
         }));
         const row = screen.getByTestId('turn-aftermath-command-record-row');

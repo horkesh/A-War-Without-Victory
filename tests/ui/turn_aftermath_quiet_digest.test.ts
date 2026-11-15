@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { createElement } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { BottomStatusStrip } from '../../src/ui/map/components/BottomStatusStrip.js';
@@ -152,7 +152,9 @@ describe('turn aftermath quiet digest', () => {
     expect(classifyTurnAftermathWeight(withUnknown)).toBe('heavy');
   });
 
-  it('keeps quiet advances out of the modal ceremony and stores a digest line', async () => {
+  // Command loop L2 (2026-11-14): the dispatch opens after every Advance, a quiet week
+  // included; the strip line is the dispatch headline built from the week's data.
+  it('opens the dispatch on a quiet advance and keeps its headline for the strip', async () => {
     let currentState = makeLoadedState();
     const setTurnAftermath = vi.fn();
     const setTurnAftermathOpen = vi.fn();
@@ -175,14 +177,16 @@ describe('turn aftermath quiet digest', () => {
     });
 
     expect(setTurnAftermath).toHaveBeenCalledTimes(1);
-    expect(setTurnAftermathOpen).not.toHaveBeenCalledWith(true);
-    expect(setTurnAftermathDigest).toHaveBeenCalledWith(buildTurnAftermathDigest(makeAftermathView({
+    expect(setTurnAftermathOpen).toHaveBeenCalledWith(true);
+    const digest = buildTurnAftermathDigest(makeAftermathView({
       turn: 13,
       dateLabel: '6 Jul 1992',
-    })));
+    }));
+    expect(digest.headline).toBe('A quiet week on our fronts');
+    expect(setTurnAftermathDigest).toHaveBeenLastCalledWith(digest);
   });
 
-  it('keeps heavy advances on the full aftermath modal path', async () => {
+  it('opens the dispatch on a heavy advance with the week headline for the strip', async () => {
     let currentState = makeLoadedState();
     const setTurnAftermathOpen = vi.fn();
     const setTurnAftermathDigest = vi.fn();
@@ -209,10 +213,10 @@ describe('turn aftermath quiet digest', () => {
     });
 
     expect(setTurnAftermathOpen).toHaveBeenCalledWith(true);
-    expect(setTurnAftermathDigest).toHaveBeenCalledWith(null);
+    expect(setTurnAftermathDigest).toHaveBeenLastCalledWith({ headline: 'We took 1 settlement' });
   });
 
-  it('renders the digest in the bottom strip and opens the retained report on review', () => {
+  it("offers \"Reopen this week's dispatch\" in the strip once the dispatch is closed", () => {
     const view = makeAftermathView();
     useGameStore.setState({
       loadedGameState: makeLoadedState(),
@@ -223,10 +227,14 @@ describe('turn aftermath quiet digest', () => {
 
     render(createElement(BottomStatusStrip));
 
-    expect(screen.getByText('Quiet week filed. Full aftermath is available for review.')).toBeTruthy();
-    fireEvent.click(screen.getByRole('button', { name: 'Review aftermath report' }));
+    expect(screen.getByText('A quiet week on our fronts')).toBeTruthy();
+    expect(screen.queryByText(/Quiet week filed/)).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: "Reopen this week's dispatch" }));
     expect(useGameStore.getState().turnAftermathOpen).toBe(true);
+    // While the dispatch is open the strip line steps aside.
+    expect(screen.queryByTestId('status-strip-dispatch-reopen')).toBeNull();
 
+    act(() => { useGameStore.setState({ turnAftermathOpen: false }); });
     fireEvent.click(screen.getByRole('button', { name: 'Dismiss aftermath digest' }));
     expect(useGameStore.getState().turnAftermathDigest).toBeNull();
   });

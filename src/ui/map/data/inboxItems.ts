@@ -179,8 +179,15 @@ function isCommandInterpretationOfficerEvent(type: OfficerEvent['type']): boolea
         || type === 'order_pushback'
         || type === 'order_refused'
         || type === 'order_exceeded'
-        || type === 'army_directive_pushback'
         || type === 'army_co_proposes_op';
+}
+
+/**
+ * The weekly army reading of a political directive the President never gave. It is a Records
+ * line, not an inbox tile (command-loop proposal 2A, step A0).
+ */
+function isWeeklyDirectivePushback(type: OfficerEvent['type']): boolean {
+    return type === 'army_directive_pushback';
 }
 
 function officerEventDedupeKey(evt: OfficerEvent): string {
@@ -490,6 +497,7 @@ export function deriveInboxItems(
         const officerGroups = new Map<string, OfficerEvent[]>();
         for (const evt of officerEvents) {
             if (!playerFactionMatch(evt.faction, playerFaction)) continue;
+            if (isWeeklyDirectivePushback(evt.type)) continue;
             const key = officerEventDedupeKey(evt);
             const existing = officerGroups.get(key);
             if (existing) existing.push(evt);
