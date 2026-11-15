@@ -151,30 +151,30 @@ const REPLACE_CO_COST = 25;
 // authored visit_to_front_<faction> event. Priced LOWER than the override levers (10,
 // matching the stabilize-command-relationship action) because it is a leadership
 // gesture, not an officer override. MUST match src/ui/map/utils/commandAuthority.ts
-// (FRONT_VISIT_COST = 10) and the initiate-front-visit IPC handler. Cooldown/cap reuse
+// (FRONT_VISIT_COST = 20) and the initiate-front-visit IPC handler. Cooldown/cap reuse
 // the event's voluntary action cadence (a renewable cooldown since appendix D, 2026-11-15; see war_1993.json), not a CA-side timer.
-const FRONT_VISIT_COST = 10;
+const FRONT_VISIT_COST = 20;
 // ADDRESS-THE-NATION presidential leadership action cost (Presidential Command
 // Surface §10, deferred companion to front visit): the president addresses the
 // nation as a morale/leadership gesture, force-queuing the authored
 // address_to_nation_<faction> event. Priced like the front visit (10) — a
 // leadership gesture, not an officer override. MUST match
-// src/ui/map/utils/commandAuthority.ts (ADDRESS_NATION_COST = 10) and the
+// src/ui/map/utils/commandAuthority.ts (ADDRESS_NATION_COST = 20) and the
 // initiate-address-nation IPC handler. Cooldown/cap reuse the event's OWN
 // action cadence (a renewable cooldown since appendix D, 2026-11-15; see war_1993.json), not a CA-side timer.
-const ADDRESS_NATION_COST = 10;
+const ADDRESS_NATION_COST = 20;
 // DECORATE-A-UNIT presidential leadership action cost (Presidential Command
 // Surface §10, deferred companion to front visit): the president decorates a
 // REGULAR formation (bright line — never paramilitaries), force-queuing the
 // authored decorate_a_unit_<faction> event with per-unit branches. Priced like
 // the front visit (10). MUST match src/ui/map/utils/commandAuthority.ts
-// (DECORATE_UNIT_COST = 10) and the initiate-decorate-unit IPC handler.
+// (DECORATE_UNIT_COST = 20) and the initiate-decorate-unit IPC handler.
 // Cooldown/cap use the event's action cadence (a renewable cooldown since appendix D, 2026-11-15; see war_1993.json).
-const DECORATE_UNIT_COST = 10;
+const DECORATE_UNIT_COST = 20;
 // STRATEGIC-POSTURE-REVIEW is the fourth authored presidential leadership
 // gesture. It uses the same bounded political-attention price as the other
 // leadership gestures; its authored cadence carries the stronger 8-turn cycle.
-const STRATEGIC_POSTURE_REVIEW_COST = 10;
+const STRATEGIC_POSTURE_REVIEW_COST = 20;
 // Command loop L6 (owner decision 1, 2026-11-14): backing a general's offensive costs
 // Authority: 10 for a staff offensive at corps level (APPROVE_OP), 20 for a named campaign
 // (OPPORTUNITY) or an authored historical operation (HISTORICAL_OP). Withholding,

@@ -142,11 +142,11 @@ function makeState(opts: {
   };
 }
 
-describe('cost parity — leadership actions priced like the front visit (10)', () => {
+describe('cost parity — leadership actions priced like the front visit (20 since held step 1, 2026-11-15)', () => {
   it('ADDRESS_NATION_COST and DECORATE_UNIT_COST match FRONT_VISIT_COST', () => {
     expect(ADDRESS_NATION_COST).toBe(FRONT_VISIT_COST);
     expect(DECORATE_UNIT_COST).toBe(FRONT_VISIT_COST);
-    expect(ADDRESS_NATION_COST).toBe(10);
+    expect(ADDRESS_NATION_COST).toBe(20);
   });
 });
 
