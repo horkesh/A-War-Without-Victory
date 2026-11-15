@@ -108,6 +108,16 @@ export default defineConfig({
             input: {
                 main: resolve(__dirname, './index.html'),
                 'map-viewer': resolve(__dirname, './map_viewer_standalone.html')
+            },
+            output: {
+                // The two message catalogs are leaf modules (the BCS one imports a type only), so
+                // giving each its own chunk cannot create a chunk cycle. Without this they ride in
+                // the playerSafeText chunk, which sat within a kilobyte of the 900 kB limit and went
+                // over with the ending truth pass strings. Both still load eagerly, as before.
+                manualChunks(id: string) {
+                    const catalog = /[\\/]i18n[\\/]messages\.(en|bcs)\.ts$/.exec(id);
+                    return catalog ? `messages-${catalog[1]}` : undefined;
+                }
             }
         },
         copyPublicDir: false

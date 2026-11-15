@@ -220,8 +220,11 @@ describe('outcome class taxonomy — complete coverage', () => {
 describe('condemnation wording — restraint', () => {
     it('genocide_condemnation uses restrained institutional language', () => {
         const text = formatCondemnationFlag('genocide_condemnation');
+        // Names the forces, the event and the courts that found it (R8 ending truth pass).
+        expect(text).toBe('Its forces committed the Srebrenica genocide (found by the ICTY and the ICJ)');
         expect(text).toContain('genocide');
-        expect(text).toContain('tribunal');
+        expect(text).toContain('ICTY');
+        expect(text).toContain('ICJ');
         // Must NOT contain graphic or promotional language
         expect(text.toLowerCase()).not.toContain('massacre');
         expect(text.toLowerCase()).not.toContain('slaughter');

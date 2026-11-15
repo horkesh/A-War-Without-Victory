@@ -164,6 +164,7 @@ test('historical event policy accepts exact visible tooltip or same-modal dossie
         rbihParamilitaryPolicyOverride: null,
         rsDrinaPolicyOverride: null,
         eventPolicyOverrides: new Map(),
+        endgameRenderTour: false,
         selectHistoricalEventChoice,
         hasMeaningfulSourceContent,
     });
@@ -192,6 +193,7 @@ test('historical event policy rejects absent, empty, hidden, foreign, or ambiguo
         rbihParamilitaryPolicyOverride: null,
         rsDrinaPolicyOverride: null,
         eventPolicyOverrides: new Map(),
+        endgameRenderTour: false,
         selectHistoricalEventChoice,
         hasMeaningfulSourceContent,
     });
@@ -4556,6 +4558,7 @@ test('RBiH paramilitary override chooses only the existing visible counterfactua
             },
             rsDrinaPolicyOverride: null,
             eventPolicyOverrides: new Map(),
+            endgameRenderTour: false,
             selectHistoricalEventChoice,
             hasMeaningfulSourceContent: () => false,
         },
@@ -4687,6 +4690,7 @@ test('RS Drina selector picks the named visible control only while the decision 
             rbihParamilitaryPolicyOverride: null,
             rsDrinaPolicyOverride,
             eventPolicyOverrides: new Map(),
+            endgameRenderTour: false,
             selectHistoricalEventChoice,
             hasMeaningfulSourceContent: () => false,
         },
@@ -4843,6 +4847,7 @@ test('--event-policy parses strictly and answers an unranked design-counterfactu
             rbihParamilitaryPolicyOverride: null,
             rsDrinaPolicyOverride: null,
             eventPolicyOverrides,
+            endgameRenderTour: false,
             selectHistoricalEventChoice,
             hasMeaningfulSourceContent: () => false,
         },
@@ -4890,6 +4895,15 @@ test('--event-policy parses strictly and answers an unranked design-counterfactu
     await assert.rejects(policy(surface({ staff_recommended_response_id: 'press_offensive' })), /refuses/i);
     await assert.rejects(policy(surface({ historical_default_response_id: 'press_offensive' })), /refuses/i);
     await assert.rejects(policy(surface({}, [baseOptions[0]])), /missing or ambiguous/i);
+});
+
+test('readability gate treats a labelled focusable scroll region as keeping its text reachable', () => {
+    const harness = readHarness();
+    // The Verdict share summary is role=region, tabindex=0, aria-label: clipped text inside it can be scrolled to.
+    assert.match(harness, /closest\('\[role="region"\]\[tabindex="0"\]\[aria-label\]'\)/);
+    assert.match(harness, /accessibleFullText = accessibleText\.trim\(\)\.length >= text\.length \|\| insideFocusableScrollRegion/);
+    const verdict = readFileSync('src/ui/map/components/verdict/CinematicVerdict.tsx', 'utf8');
+    assert.match(verdict, /<pre\s+role="region"\s+tabIndex=\{0\}\s+aria-label=\{t\('verdict\.shareSummary'\)\}/);
 });
 
 test('readability gate includes tiny text, ancestor clipping, inaccessible truncation, contrast, and occlusion', () => {

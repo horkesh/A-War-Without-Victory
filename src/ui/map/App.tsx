@@ -48,12 +48,21 @@ const EnclaveDashboard = lazy(() =>
   import('./components/EnclaveDashboard').then(m => ({ default: m.EnclaveDashboard })),
 );
 import { EventModal } from './components/EventModal';
-import { AiAdvisorPanel } from './components/AiAdvisorPanel';
-import { AiSettingsPanel } from './components/AiSettingsPanel';
+const AiAdvisorPanel = lazy(() =>
+  import('./components/AiAdvisorPanel').then(m => ({ default: m.AiAdvisorPanel })),
+);
+const AiSettingsPanel = lazy(() =>
+  import('./components/AiSettingsPanel').then(m => ({ default: m.AiSettingsPanel })),
+);
 import { PresidentialInbox } from './components/PresidentialInbox';
 import type { EventDisplayData } from './components/EventModal';
 import { CommandBriefingLayer } from './components/CommandBriefingLayer';
-import { PeacePlanModal } from './components/PeacePlanModal';
+// Codex, Chronicle, Wrapped, Settings, Diplomacy, the Peace plan and the two AI panels all open
+// on demand, so each loads when first opened and stays out of the entry chunk (vite.config.ts
+// chunk-size limit; the player-experience gate blocks on it; main went red on it 2026-11-15).
+const PeacePlanModal = lazy(() =>
+  import('./components/PeacePlanModal').then(m => ({ default: m.PeacePlanModal })),
+);
 import { OnboardingOverlay, shouldShowOnboarding, type TutorialStateShape } from './components/onboarding/OnboardingOverlay';
 import { ParamilitaryReviewModal } from './components/ParamilitaryReviewModal';
 import { EventDecisionModal } from './components/EventDecisionModal';
@@ -67,10 +76,14 @@ import { CounterOfferModal } from './components/CounterOfferModal';
 const DaytonNegotiationModal = lazy(() =>
   import('./components/DaytonNegotiationModal').then(m => ({ default: m.DaytonNegotiationModal })),
 );
-import { DiplomacyPanel } from './components/DiplomacyPanel';
+const DiplomacyPanel = lazy(() =>
+  import('./components/DiplomacyPanel').then(m => ({ default: m.DiplomacyPanel })),
+);
 import { MainMenu } from './components/MainMenu';
 import { PauseMenu } from './components/PauseMenu';
-import { SettingsScreen } from './components/SettingsScreen';
+const SettingsScreen = lazy(() =>
+  import('./components/SettingsScreen').then(m => ({ default: m.SettingsScreen })),
+);
 // Opens on demand from the menu; its own chunk keeps the entry chunk under the limit.
 const CreditsScreen = lazy(() =>
   import('./components/CreditsScreen').then(m => ({ default: m.CreditsScreen })),
@@ -78,12 +91,24 @@ const CreditsScreen = lazy(() =>
 import { MapModeLegend } from './components/MapModeLegend';
 import { PeaceStatusPanel } from './components/PeaceStatusPanel';
 import { PeaceWarTransitionOverlay } from './components/PeaceWarTransitionOverlay';
-import { ChronicleOverlay } from './components/chronicle/ChronicleOverlay';
-import { WrappedOverlay } from './components/chronicle/WrappedOverlay';
-import { CodexPanel } from './components/CodexPanel';
+const ChronicleOverlay = lazy(() =>
+  import('./components/chronicle/ChronicleOverlay').then(m => ({ default: m.ChronicleOverlay })),
+);
+const WrappedOverlay = lazy(() =>
+  import('./components/chronicle/WrappedOverlay').then(m => ({ default: m.WrappedOverlay })),
+);
+const CodexPanel = lazy(() =>
+  import('./components/CodexPanel').then(m => ({ default: m.CodexPanel })),
+);
 import { LoadingSkeleton } from './components/LoadingSkeleton';
 import { LoadErrorToast } from './components/LoadErrorToast';
-import { VerdictScreen } from './components/VerdictScreen';
+// The Verdict and the ending code only it reads (scene, figures, decision ranking, findings,
+// comparison lines, cost ledger, signing beat) load on demand and stay out of the entry chunk
+// (vite.config.ts chunk-size limit). The screen still mounts unconditionally and returns null
+// until the war has ended; only its module is fetched late.
+const VerdictScreen = lazy(() =>
+  import('./components/VerdictScreen').then(m => ({ default: m.VerdictScreen })),
+);
 import { ReplayInspectionBanner } from './components/replay/ReplayInspectionBanner';
 import { AudioCueObserver } from './components/AudioCueObserver';
 import { AudioSurfaceBedController } from './components/AudioSurfaceBedController';
@@ -350,14 +375,38 @@ function CodexPanelWrapper({
   // absent the section gracefully degrades and the panel renders exactly
   // as before.
   const rawGameState = useGameStore((s) => s.loadedGameState?.rawGameState);
+  if (!codexOpen) return null;
   return (
-    <CodexPanel
-      isOpen={codexOpen}
-      onClose={() => setCodexOpen(false)}
-      requestedEventId={requestedEventId}
-      eventCatalog={eventCatalog}
-      state={rawGameState}
-    />
+    <Suspense fallback={null}>
+      <CodexPanel
+        isOpen={codexOpen}
+        onClose={() => setCodexOpen(false)}
+        requestedEventId={requestedEventId}
+        eventCatalog={eventCatalog}
+        state={rawGameState}
+      />
+    </Suspense>
+  );
+}
+
+/** Chronicle and Wrapped load on first open; each reads its own open flag. */
+function ChronicleOverlayHost() {
+  const open = useGameStore((s) => s.chronicleOpen);
+  if (!open) return null;
+  return (
+    <Suspense fallback={null}>
+      <ChronicleOverlay />
+    </Suspense>
+  );
+}
+
+function WrappedOverlayHost({ eventCatalog }: { eventCatalog?: ReadonlyMap<string, EventDefinition> }) {
+  const open = useGameStore((s) => s.wrappedOpen);
+  if (!open) return null;
+  return (
+    <Suspense fallback={null}>
+      <WrappedOverlay eventCatalog={eventCatalog} />
+    </Suspense>
   );
 }
 
@@ -2071,8 +2120,8 @@ function App() {
           }}
         />
       </RootErrorBoundary>
-      <ChronicleOverlay />
-      <WrappedOverlay eventCatalog={eventCatalogFull} />
+      <ChronicleOverlayHost />
+      <WrappedOverlayHost eventCatalog={eventCatalogFull} />
       <CodexPanelWrapper eventCatalog={eventCatalogFull} requestedEventId={requestedCodexEventId} />
       <OperationBriefingModalWrapper />
       {loadedGameState && (
@@ -2102,20 +2151,26 @@ function App() {
         </Suspense>
       )}
       {aiSettingsOpen && (
-        <AiSettingsPanel onClose={() => setAiSettingsOpen(false)} />
+        <Suspense fallback={null}>
+          <AiSettingsPanel onClose={() => setAiSettingsOpen(false)} />
+        </Suspense>
       )}
       {diplomacyOpen && loadedGameState?.diplomacyView && (
-        <DiplomacyPanel
-          view={loadedGameState.diplomacyView}
-          onClose={() => setDiplomacyOpen(false)}
-        />
+        <Suspense fallback={null}>
+          <DiplomacyPanel
+            view={loadedGameState.diplomacyView}
+            onClose={() => setDiplomacyOpen(false)}
+          />
+        </Suspense>
       )}
       {aiAdvisorOpen && (
-        <AiAdvisorPanel
-          response={aiAdvisorResponse}
-          loading={!aiAdvisorResponse}
-          onClose={() => { setAiAdvisorOpen(false); setAiAdvisorResponse(null); }}
-        />
+        <Suspense fallback={null}>
+          <AiAdvisorPanel
+            response={aiAdvisorResponse}
+            loading={!aiAdvisorResponse}
+            onClose={() => { setAiAdvisorOpen(false); setAiAdvisorResponse(null); }}
+          />
+        </Suspense>
       )}
       {loadedGameState?.phase === 'peace' && <PeaceStatusPanel />}
       {/* v0.4.1 Phase 5: Event modal (queue-based).
@@ -2140,10 +2195,12 @@ function App() {
           a pending plan does not auto-pop it over the boot Main Menu (same contract
           as the EventDecisionModal auto-launch above). Shows once past the menu. */}
       {appScreen !== 'mainMenu' && !turnAftermathOpen && showPeacePlanModal && pendingPeacePlan && (
-        <PeacePlanModal
-          plan={pendingPeacePlan}
-          onDismiss={() => setDismissedPeacePlanKey(getPeacePlanDismissalKey(pendingPeacePlan))}
-        />
+        <Suspense fallback={null}>
+          <PeacePlanModal
+            plan={pendingPeacePlan}
+            onDismiss={() => setDismissedPeacePlanKey(getPeacePlanDismissalKey(pendingPeacePlan))}
+          />
+        </Suspense>
       )}
       <ParamilitaryReviewModal
         isOpen={paramilitaryReviewOpen}
@@ -2272,7 +2329,9 @@ function App() {
         </Suspense>
       )}
       <PeaceWarTransitionOverlay />
-      <VerdictScreen onLoadSaveState={handleMainMenuLoadGame} onLoadSaveError={setLoadError} />
+      <Suspense fallback={null}>
+        <VerdictScreen onLoadSaveState={handleMainMenuLoadGame} onLoadSaveError={setLoadError} />
+      </Suspense>
       <ReplayInspectionBanner />
       {/* Warroom shell: advance-turn confirmation modal — triggered by wall_calendar_area hotspot */}
       <AdvanceTurnModal
@@ -2420,7 +2479,11 @@ function App() {
           onQuit={() => { if (typeof window !== 'undefined') window.close(); }}
         />
       )}
-      {settingsOpen && <SettingsScreen onClose={() => setSettingsOpen(false)} />}
+      {settingsOpen && (
+        <Suspense fallback={null}>
+          <SettingsScreen onClose={() => setSettingsOpen(false)} />
+        </Suspense>
+      )}
       {creditsOpen && (
         <Suspense fallback={null}>
           <CreditsScreen onClose={() => setCreditsOpen(false)} />
