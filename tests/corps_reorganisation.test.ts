@@ -409,6 +409,18 @@ describe('commander_handover', () => {
         expect(appointed.military.pending_officer_events ?? []).toEqual([]);
     });
 
+    it('never pulls the officer out of a command the President gave him, also after he delegates', () => {
+        const state = presidentState({ player_faction: 'RBiH', autonomy_level: 1 });
+        state.military.officer_decision_history = [{ decision: 'replacement_accepted', corps_id: 'arbih_3rd_corps', new_officer_id: 'arbih_alagic' }] as any;
+        const report = processCorpsReorganisationEvents(state, [HANDOVER])!;
+        const o = state.military.named_officers as any;
+        expect(report.handovers?.[0]).toMatchObject({ lapsed: true });
+        expect(o.arbih_alagic).toMatchObject({ status: 'active', assigned_corps_id: 'arbih_3rd_corps' });
+        expect(o.generic_7th).toMatchObject({ status: 'active', assigned_corps_id: 'arbih_7th_corps' });
+        expect(state.military.pending_officer_events ?? []).toEqual([]);
+        expect(state.military.formation_lifecycle_events_fired?.h).toBe(99);
+    });
+
     it('the shipped data seats Alagić in the 7th Corps on the formation week', async () => {
         const events = await loadCorpsReorganisationEvents(process.cwd());
         expect(events.find((e) => e.type === 'commander_handover')).toMatchObject({ corps_id: 'arbih_7th_corps', officer_id: 'arbih_alagic', trigger_turn: 99 });

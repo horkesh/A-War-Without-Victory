@@ -1,6 +1,7 @@
 /**
  * Corps reorganisation lifecycle events: dated brigade transfers between corps,
- * and corps retirement (hand-over to a successor, then switch-off).
+ * corps retirement (hand-over to a successor, then switch-off), and dated commander
+ * handovers (a named officer seated in a corps once).
  *
  * Data lives in `data/source/formation_lifecycle_events.json` under the
  * `corps_reorganisation` key (same file as the per-formation disband/merge/rename
@@ -21,7 +22,9 @@
  *   operation of its current corps (participant, attached, loaned) or out on an elite
  *   loan finishes that commitment first; after `max_defer_turns` (default 4) past the
  *   trigger it is released through the same path brigade dissolution uses. The target
- *   must exist as an active corps formation; until it does, the transfer waits.
+ *   must exist as an active corps formation; until it does, the transfer waits. An
+ *   optional `transition` cost (cohesion loss, disrupted_turns) is paid only by a brigade
+ *   that changes corps inside the window trigger_turn .. trigger_turn + max_defer_turns.
  *
  * corps_retire — from `trigger_turn` on, the corps is retired: its live operations
  *   are cancelled through the canonical clean-removal path (commanders released, TGs
@@ -33,14 +36,34 @@
  *   successor. A transfer whose target has been retired resolves through the
  *   successor chain.
  *
+ * commander_handover — fires ONCE, after the transfers of the same turn. From
+ *   `trigger_turn` on it seats `officer_id` as commander of `corps_id`. It waits while
+ *   the corps is inactive, the officer is not yet in play, or he commands a live
+ *   operation; it lapses (receipted, no effect) if he is killed or retired. The
+ *   President's command choices win (Engine Invariants §15.1, Rulebook §5.9): an
+ *   incumbent he appointed, accepted or kept is never displaced (the handover lapses),
+ *   and for a manually controlled player the step raises a deduplicated replacement
+ *   matter and writes no receipt until he has decided; it is never an automatic swap.
+ *   Otherwise the incumbent goes to reserve and the officer's old command is refilled
+ *   by ordinary succession later the same turn.
+ *
  * DETERMINISM: events sorted by (trigger_turn, id); formation ids and corps ids
  * iterated in strictCompare order; no RNG, no wall clock. When the data file has no
  * events (or none has triggered) the step performs ZERO mutation, so a run without
  * reorganisation data is byte-identical to one without this step.
  *
- * SAVE COMPATIBILITY: the only persisted write besides corps_id / status is the
- * existing optional `military.formation_lifecycle_events_fired` receipt map
- * (event id → first turn the event completed).
+ * SAVE COMPATIBILITY: no migration or schema bump; every write is to an existing field.
+ * Writes: formation corps_id / status; the transition cost on cohesion and
+ * disrupted_turns; for a handover, the named_officers fields status, assigned_corps_id,
+ * turns_in_command, acting_commander, effective_competence_penalty and
+ * penalty_turns_remaining, or a replacement_suggested entry in pending_officer_events;
+ * and the optional `military.formation_lifecycle_events_fired` receipt map (event id →
+ * first turn the event completed). Transfer and retire receipts are informational (the
+ * rules are standing). The handover receipt is load-bearing: the handover fires once,
+ * keyed by it. An old save loaded after a trigger turn applies the steps on its first
+ * loaded turn. Past the window it pays no transition cost, and committed brigades are
+ * pulled out of their live operations at once. This is a recorded limitation for
+ * pre-1.0 beta saves.
  */
 
 import { readFile } from 'node:fs/promises';
@@ -97,7 +120,8 @@ export interface CorpsRetireEventDef {
  * Fires once. Waits while the corps is inactive or the officer is not yet in play or is
  * commanding a live operation; lapses (receipted, no effect) if the officer is killed or retired.
  * The incumbent goes to reserve; the officer's previous command falls vacant and is filled by
- * ordinary officer succession later the same turn.
+ * ordinary officer succession later the same turn. A President-appointed, accepted or kept
+ * incumbent is never displaced, and a manual player is asked first (see the file header).
  */
 export interface CommanderHandoverEventDef {
     id: string;
@@ -435,7 +459,9 @@ export function processCorpsReorganisationEvents(
             const incumbentId = Object.keys(officers).sort(strictCompare).find((oid) =>
                 oid !== e.officer_id && officers[oid]?.status === 'active' && officers[oid]?.assigned_corps_id === target) ?? null;
             const targetFaction = state.military.formations?.[target]?.faction;
-            if (incumbentId && isPresidentialAppointee(state, target, incumbentId)) {
+            const leavesPresidentialPost = officer.status === 'active' && officer.assigned_corps_id != null
+                && isPresidentialAppointee(state, officer.assigned_corps_id, e.officer_id);
+            if (leavesPresidentialPost || (incumbentId && isPresidentialAppointee(state, target, incumbentId))) {
                 handover.lapsed = true;
                 receipts(state)[e.id] = turn;
                 report.completed_event_ids.push(e.id);

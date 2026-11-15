@@ -967,6 +967,12 @@ export const MISTRAL_1_95_OPPORTUNITY: OperationOpportunityDef = {
 // `op:jajce:grdovo` / `op:donji_vakuf:torlakovac_2` — i.e., the corps's front
 // physically reaches the Jajce zone by t≥178.
 //
+// Superseded by RF-1 Phase B (2026-11-15): the ARBiH 7th Corps is back in the OOB.
+// It forms at week 99 under Alagić and these brigades move to it from the 3rd Corps
+// (formation_lifecycle_events.json corps_reorganisation), so the op is now hosted on
+// `arbih_7th_corps`. The `arbih_3rd_corps:N` sector names in the dated Wave notes below
+// describe the sectors measured at the time, before the 7th Corps existed.
+//
 // Defender corps corrected from `vrs_2nd_krajina` (Drvar/Grahovo shoulder) to
 // `vrs_1st_krajina` (the corps that actually holds Jajce per live save:
 // sector:vrs_1st_krajina:7 contains all relevant Jajce/Donji Vakuf OSIDs).
@@ -974,11 +980,12 @@ export const MISTRAL_1_95_OPPORTUNITY: OperationOpportunityDef = {
 // Catalog rationale: painted Oct 1995 control shows 7 of 10 Jajce OSIDs
 // flipped Federation. With Mistral 2's Šipovo/Mrkonjić axis already running
 // hvo_tomislavgrad brigades, the Jajce push has no spare HVO Tomislavgrad
-// capacity. Re-hosting on arbih_3rd_corps:
+// capacity. Re-hosting on the ARBiH corps that holds these brigades (the 3rd Corps
+// in 2026-05; the 7th Corps since RF-1 Phase B):
 //   (a) puts the op on the corps whose front line is physically adjacent to
 //       the objective set,
 //   (b) uses ARBiH brigades that historically performed the operation
-//       (rolled-up 7th Corps brigades on the 3rd Corps roster),
+//       (the 7th Corps brigades),
 //   (c) leaves the Mistral 2 HVO/HV brigade pool undisturbed.
 //
 // Wave 14 axis split (2026-05-22): the single 11-OSID axis was failing at
@@ -1072,11 +1079,10 @@ const JAJCE_OBJECTIVES: readonly string[] = [
     ...JAJCE_RING_OBJECTIVES,
 ];
 
-// Brigade pool: ARBiH 3rd Corps brigades that home in the Bugojno / Travnik /
-// Donji Vakuf / Gornji Vakuf zone. These are the historical 7th Corps brigades
-// (rolled into 3rd Corps in our reduced-OOB scenario per user directive
-// 2026-05-19). Composition mirrors the Vlašić 95 (skender_vakuf axis) and
-// Donji Vakuf 95 pools and covers the shoulders feeding the live Grdovo
+// Brigade pool: ARBiH 7th Corps brigades that home in the Bugojno / Travnik /
+// Donji Vakuf / Gornji Vakuf zone. They serve in the 3rd Corps until the 7th
+// Corps forms at week 99 (RF-1 Phase B, 2026-11-15). Composition mirrors the
+// Vlašić 95 (skender_vakuf axis) and Donji Vakuf 95 pools and covers the shoulders feeding the live Grdovo
 // approach; it is not exact Jajce-town captor attribution.
 //   - arbih_770th_slavna_mountain  — home op:donji_vakuf:donji_vakuf_2
 //   - arbih_705th_slavna_mountain  — home op:bugojno:gracanica
