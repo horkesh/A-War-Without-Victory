@@ -428,8 +428,18 @@ function computeTerritoryTrend(assessments: CorpsAssessment[]): 'gaining' | 'sta
     return 'stable';
 }
 
-/** Derive supply status from general_supply_reserve. */
-function computeSupplyStatus(state: GameState, faction: FactionId): 'abundant' | 'adequate' | 'strained' | 'critical' {
+/**
+ * Derive supply status from general_supply_reserve.
+ *
+ * F7b (2026-11-15): with the supply-reserve model off (the shipping campaign) there is no reserve.
+ * A missing reserve used to read as 0, so every army was 'critical' every week: a gaining army could
+ * never take the general offensive and a losing one was always pushed to the general defensive.
+ * With reserves off supply is no constraint, so the status is the neutral 'adequate', matching
+ * combat's neutral default (combat_math.ts and frontline_attrition.ts read a missing level as 100).
+ * Exported for tests.
+ */
+export function computeSupplyStatus(state: GameState, faction: FactionId): 'abundant' | 'adequate' | 'strained' | 'critical' {
+    if (state.meta?.supply_reserves_enabled !== true) return 'adequate';
     const reserve = state.military.general_supply_reserve?.[faction] ?? 0;
     if (reserve >= SUPPLY_STATUS_THRESHOLDS.abundant) return 'abundant';
     if (reserve >= SUPPLY_STATUS_THRESHOLDS.adequate) return 'adequate';

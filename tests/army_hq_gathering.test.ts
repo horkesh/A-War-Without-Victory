@@ -280,16 +280,47 @@ describe('assessTheater', () => {
         expect(assessTheater(weakState, 'RS').territory_trend).toBe('losing');
     });
 
-    it('supply status derived from general_supply_reserve', () => {
-        const makeWithSupply = (reserve: number) => makeTheaterState({
-            formations: { bde_1: { faction: 'RS', corps_id: 'vrs_1st_krajina', personnel: 1000, status: 'active' } },
-            generalSupplyReserve: { RS: reserve },
-        });
+    it('supply status derived from general_supply_reserve (reserve model on)', () => {
+        const makeWithSupply = (reserve: number) => {
+            const state = makeTheaterState({
+                formations: { bde_1: { faction: 'RS', corps_id: 'vrs_1st_krajina', personnel: 1000, status: 'active' } },
+                generalSupplyReserve: { RS: reserve },
+            });
+            state.meta.supply_reserves_enabled = true;
+            return state;
+        };
 
         expect(assessTheater(makeWithSupply(80), 'RS').supply_status).toBe('abundant');
         expect(assessTheater(makeWithSupply(50), 'RS').supply_status).toBe('adequate');
         expect(assessTheater(makeWithSupply(30), 'RS').supply_status).toBe('strained');
         expect(assessTheater(makeWithSupply(10), 'RS').supply_status).toBe('critical');
+    });
+
+    // F7b (2026-11-15): with the reserve model off there is no reserve, so supply is neutral, not 'critical'.
+    it('supply status is neutral "adequate" when the reserve model is off, whatever the field holds', () => {
+        for (const reserve of [undefined, 0, 10, 80]) {
+            const state = makeTheaterState({
+                formations: { bde_1: { faction: 'RS', corps_id: 'vrs_1st_krajina', personnel: 1000, status: 'active' } },
+                generalSupplyReserve: reserve === undefined ? {} : { RS: reserve },
+            });
+            expect(assessTheater(state, 'RS').supply_status).toBe('adequate');
+        }
+    });
+
+    it('a gaining army can take the general offensive when the reserve model is off', () => {
+        const gaining = makeTheaterState({
+            turn: 40,
+            formations: {
+                bde_a1: { faction: 'RS', corps_id: 'vrs_1st_krajina', personnel: 1600, status: 'active' },
+                bde_b1: { faction: 'RS', corps_id: 'vrs_drina', personnel: 1500, status: 'active' },
+                bde_c1: { faction: 'RS', corps_id: 'vrs_sarajevo_romanija', personnel: 1800, status: 'active' },
+            },
+        });
+        const assessment = assessTheater(gaining, 'RS');
+        expect(assessment.territory_trend).toBe('gaining');
+        const plan = generateCampaignPlan(gaining, 'RS', assessment, 40, 'regular_cadence', false);
+        // Before F7b the missing reserve read as 'critical' and held this army at 'balanced'.
+        expect(plan.doctrine_override?.army_stance).toBe('general_offensive');
     });
 
     it('excluded corps still assessed with strength data', () => {
