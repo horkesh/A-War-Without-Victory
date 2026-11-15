@@ -75,6 +75,7 @@ import { isFriendlyFaction as isFriendlyFactionCtrl, isRbihHrhbCombatBlocked } f
 import { isBrigadeEligibleForOperationObjectives, isEnclaveBrigade, isOsidInSameEnclave } from './enclave_resilience.js';
 import { tickPreparation, hasUnresolvedProbe, autoResolveProbe, formTgsAtReadyTransition, formTgForAxis, settleLinkedPreparationProbeOnRecovery } from './operation_preparation.js';
 import {
+    emitCorpsExhaustionRecord,
     emitLinkedPreparationProbeRecord,
     emitSouthernMovePreparationPassRecord,
     isSouthernMovePreparationPassSelected,
@@ -1435,7 +1436,13 @@ export function advanceSectorOffensives(
         if (!cmd || cmd.corps_exhaustion <= 0) continue;
         // Faster recovery when idle (no active op), slower when operating
         const decayRate = cmd.active_operations.length > 0 ? EXHAUSTION_DECAY_ACTIVE : EXHAUSTION_DECAY_IDLE;
+        const exhBefore = cmd.corps_exhaustion;
         cmd.corps_exhaustion = Math.max(0, Math.round((cmd.corps_exhaustion - decayRate) * 10) / 10);
+        emitCorpsExhaustionRecord(() => ({
+            turn: state.meta?.turn ?? null, corps_id: cid,
+            source: cmd.active_operations.length > 0 ? 'decay_active' : 'decay_idle',
+            before: exhBefore, after: cmd.corps_exhaustion,
+        }));
     }
 
     // The Carter/COHA period suspends combat rather than consuming operation
@@ -1964,7 +1971,13 @@ export function advanceSectorOffensives(
                 const exhaustionCost = op.preparation_probe_link || op.recovery_reason === 'ceasefire'
                     ? 0
                     : op.type === 'feint' || op.type === 'probe' ? 5 : 15;
+                const exhBefore = cmd.corps_exhaustion ?? 0;
                 cmd.corps_exhaustion = Math.min(100, (cmd.corps_exhaustion ?? 0) + exhaustionCost);
+                emitCorpsExhaustionRecord(() => ({
+                    turn, corps_id: corpsId, faction, source: 'sector_op_completion',
+                    before: exhBefore, after: cmd.corps_exhaustion,
+                    op_name: op.name, op_type: op.type, recovery_reason: op.recovery_reason ?? null,
+                }));
                 // A ceasefire stand-down is a political order, not a failed assault: it books
                 // no objective failures (council fix 3; oct1995_ceasefire.ts).
                 if ((op.type === 'sector_attack' || op.type === 'probe') && op.recovery_reason !== 'ceasefire') {
@@ -3208,7 +3221,13 @@ export function evaluateOperationProgress(
                     completeOperationLifecycle(state, corps.id, op);
                     removeOperation(cmd, op);
                     // Add exhaustion from the operation
+                    const exhBefore = cmd.corps_exhaustion;
                     cmd.corps_exhaustion = Math.min(100, cmd.corps_exhaustion + 15);
+                    emitCorpsExhaustionRecord(() => ({
+                        turn, corps_id: corps.id, faction, source: 'named_op_completion',
+                        before: exhBefore, after: cmd.corps_exhaustion,
+                        op_name: op.name, op_type: op.type, recovery_reason: op.recovery_reason ?? null,
+                    }));
                 }
             }
         }
