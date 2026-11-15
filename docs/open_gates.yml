@@ -82,16 +82,35 @@ gates:
     opened: 2026-11-13
     blocks: [R8, R9]
     evidence_required: >
-      Every RF item merged, parked with an archive tag, or declined, each recorded in the
-      roadmap §4.1 register (BC17 is held for the calibration pass, not declined); one named
-      commit recorded as the frozen source in the roadmap; and the owner told that from that
-      commit a mechanics change needs an owner OK. The one calibration pass then runs on
-      the frozen engine under the unchanged gates (RF-CALIBRATION-RESIGNOFF closes it).
+      The six freeze conditions (orchestrator ruling 2026-11-15, Fable consult 2). (1) The
+      must list is merged: the slot 1 items (#677 RF-ROSTER, #680 the Brčko Tactical Group
+      relocation, the SE7E-h validator fix), RF-STRENGTH, RF-PM1 and RB1; the slot 4 items
+      (F7, SE9) are merged or dropped. (2) Every roadmap §4.1 RF row is disposed: BC14 merged,
+      BC15 with SE6 parked at its archive tag and SE10 post-1.0, BC16 merged, BC17 held for
+      the calibration pass, BC18 closed as decided, BC19 as listed in its row. (3) One
+      188-week run at the candidate commit, repeated once for determinism: strict health
+      PASS, enclave 9/9, Farz P1, P-A and P-B, consistency 0, baselines re-blessed; its
+      scores become the freeze figures. (4) Live = headless at that commit, 0 cells
+      differing for RBiH at autonomy 2 (all three factions are re-measured at
+      RF-CALIBRATION-RESIGNOFF). (5) The known-limits note
+      (docs/40_reports/governance/20261115_KNOWN_LIMITS_AT_THE_FREEZE.md) is merged. (6) One
+      named commit is recorded as the frozen source in the roadmap and the owner is told.
+      From that commit the freeze is a byte test: a change merges freely if the 188-week
+      headless final_state_hash is unchanged, and a change that moves the hash needs the
+      owner's OK. The one calibration pass then runs on the frozen engine under the
+      unchanged gates (RF-CALIBRATION-RESIGNOFF closes it).
     evidence_path: null
     source: docs/plans/MASTER_ROADMAP.md
     notes: >
-      R8 dry runs before the freeze are allowed and never count as qualifying. RF-5 (HVO-ARBiH
-      war, BC18) needs an owner decision before it can be merged or declined.
+      R8 dry runs before the freeze are allowed and never count as qualifying. The intake is
+      closed (2026-11-15): a new finding is pre-freeze work only if a live player can be
+      stuck, crash or hit an invariant failure; a §6 number or claim shown to the player is
+      wrong; a guard or determinism breaks; or live and headless differ. Everything else is
+      tagged post-1.0 with no measuring lane, and no new audit starts before the freeze.
+      BC18 (HVO-ARBiH war) was decided by the owner on 2026-11-14 (A now, B merged as #623,
+      C post-1.0) and needs nothing before the freeze. RF-3C-EXH with VRS2 is post-1.0 and
+      ships as a recorded known limit. data/derived/latest_run_final_save.json dates from
+      2026-09-01 and is stale; lanes read run folders instead.
 
   # ── RD — Dayton settlement and end map (closed, owner 2026-11-07) ───────────────────
 

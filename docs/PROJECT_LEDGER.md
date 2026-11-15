@@ -116,6 +116,28 @@ Proof: `tests/ui/turn_aftermath_named_losses.test.ts` (7), `tests/desktop_player
 
 UI data layer only; no sim, state or calibration change. `capturePreviousTurnSnapshot` looked up `political_controllers[munId]`, but that map is keyed by OSID, so `displacementOutTotals` was always `{}` (same bug class as the F1e collapse attribution in #651). It now takes the municipality's majority holder from its OSIDs via `deriveMunicipalityControllerByOsid`. On a 40-week save the totals go from `{}` to RS 537,020 / RBiH 162,211 / HRHB 23,223 (sum 722,454, equal to the total `displaced_out`). No screen reads the field today, so there is no rendered before/after; the proof is the real-save numbers and `tests/ui/warroom_state_displacement_out.test.ts` (majority holder, unheld and OSID-less municipalities left out, deterministic, no displacement state). See `docs/40_reports/evidence/20261115_displacement_out_key/`.
 
+## 2026-11-15 — A recalled elite never returns to a base its side has lost (t73 live-game freeze)
+
+- **Symptom.** A live RBiH game hit a post-turn invariant at turn 73 (found by the appendix C engaged-President run): `formation.location_not_friendly`, `hrhb_vitezovi_brigade_vitez` (HRHB) at `op:vitez:vitez_2`, controlled by RBiH.
+  - On the desktop an advance error puts the renderer back on the pre-turn state. The turn is deterministic, so every Advance fails and the player is stuck.
+- **Cause** (traced per phase with the movement diagnostic). In `tick-elite-loans`, `recallEliteLoan` (`src/sim/combat/army_reserve_system.ts`) moved the recalled elite to `base_osid ?? home_osid` without checking who held it.
+  - The Vitezovi's base, Vitez, had fallen to RBiH, so the recall put the brigade in enemy territory.
+  - `displace-enemy-territory` runs earlier in the turn, so nothing corrected it before the barrier.
+- **Fix.** The recall returns the elite to its base only if a friendly faction holds it, using the barrier's own test (controlled, and `isFriendlyFaction`). Otherwise the brigade stays where it stands. That position is held ground: the displacement step has already run, and a desktop recall happens between turns, after the barrier passed. `base_osid` is left as authored, so the elite goes home once the base is retaken. Every recall re-checks.
+- **Consulted.**
+  - `operations-expert` recommended also rebasing to the nearest friendly-connected OSID.
+  - `sector-expert` recommended staying where it stands and not rewriting `base_osid`: nothing in the sector code reads it, and a rewritten base would carry a pocket-specific position into later recalls.
+  - Both agreed on the recall-time check and on staying on held ground. The stale base shown in the UI is cosmetic and is recorded as a follow-up.
+- **Tests.**
+  - `tests/army_reserve_system.test.ts`: never returns to a lost base, the barrier is clean, the base is kept; returns again once the base is held; an uncontrolled base counts as not held.
+  - Two existing fixtures (`army_reserve_system`, `corps_reorganisation`) now give the base a controller.
+  - The full elite-related set (58 files) passes.
+- **Live repro.** Advancing the saved turn-72 state now completes turn 73 with no invariant issue, and the brigade stays at `op:travnik:puticevo_2` (HRHB).
+- **Headless: byte-identical** (evidence `C:/Pyrrhic/AWWV-worktrees/_logs/cl-elite-recall-20261115/`).
+  - 40-week run against main `a9f34f97`: 14/14 simulation artifacts identical, `final_state_hash` `c0ed7a71dad8af7d` on both. `run_meta.json` differs only in the output folder and the dirty flag.
+  - `npm run test:baselines` (188-week master): "all scenarios match".
+  - The canonical runs never recall an elite to a lost base. Not a measured change.
+
 ## 2026-11-15 — Ending polish: one source for the paramilitary record, source line, legibility, contrast, word breaks
 
 Five findings from the ending truth pass render check (PR #635), fixed together.
@@ -204,6 +226,23 @@ Event data text only (`localizations.<locale>.source_note`, EN and BCS); no sim,
 
 Gornji Vakuf is a bare judgment citation, so no section 6 record or narrative-designer seat was needed for this change. The existing event copy still says "ultimatum" (title, narrative, notifications, BCS options), which restates the Prosecution's label; the historian recommends a narrative-designer pass on that copy, filed as a follow-up and not changed here. See `docs/40_reports/evidence/20261115_event_source_notes/`.
 
+## 2026-11-15 — The freeze cut is written into the repo; known limits at the freeze (steward pass 18)
+
+Docs only; no `src/` or `data/` change, no hash change.
+
+- Orchestrator ruling of 2026-11-15 (Fable consult 2): the intake is closed by four criteria (a stuck, crashing or invariant-failing live player; a wrong §6 number or claim shown to the player; a broken guard or determinism; live and headless differing), and the freeze is a byte test (an unchanged 188-week headless `final_state_hash` merges freely; a moved hash needs the owner's OK). Written into `docs/open_gates.yml` (`RF-ENGINE-FREEZE`, six conditions), `docs/plans/MASTER_ROADMAP.md` (sequence line, BC14, BC15, BC18, BC19 rows) and `docs/plans/COMMAND_BOARD.md`.
+- BC18 is closed as decided on 2026-11-14: A merged (truthful 1993 cards), B merged as RF-5B (#623), C post-1.0.
+- New note `docs/40_reports/governance/20261115_KNOWN_LIMITS_AT_THE_FREEZE.md`: the ARBiH corps planning lockout (RF-3C-EXH with VRS2) deferred post-1.0 and ratified by three independent seats (historian, scenario-creator-runner-tester, game-designer; each AGREE WITH CONDITIONS), the political-directive saturation, the quadratic competence decay, and the calibration-pass rule for them.
+- Stale-text corrections (hash-neutral): A2, A3 and A4 army-chief reports (the stubbornness default and the masking by save migration 10); Game Bible §21 line "Replace a corps CO" (the RS revolt reads `political_reliability`) with a header Amended line. FORAWWV is not edited.
+
+## 2026-11-15 — Held step 1: presidential gestures cost 20 Authority (was 10)
+
+- **What.** Front visit, address to the nation, decoration and strategic posture review now cost 20 Authority each. The constants are `FRONT_VISIT_COST`, `ADDRESS_NATION_COST`, `DECORATE_UNIT_COST` and `STRATEGIC_POSTURE_REVIEW_COST`, in `src/desktop/autonomy_ipc_contract.cjs` and `src/ui/map/utils/commandAuthority.ts`.
+- **Why.** It is the first step of the ratified held tuning order (Fable consult 1; L7 #670), taken on its measured trigger. In the first three-President run, the engaged President never fell below 65.5 Authority. No new seat was needed; the ratification record names the step.
+- **Docs.** Systems Manual §6.4, proposal §5D (price row, gestures bullet, test spec with the new Stop-op, step note), ratification record.
+- **Player path only.** The prices are charged only in the desktop gesture handlers. Headless and bots never debit.
+- **Proof.** The PR has the 40-week headless artifact hashes against main, and the three-President rerun.
+
 ## 2026-11-15 — Citation sweep: swept Karadžić ranges no longer cited as support in hidden event notes
 
 Hidden event text only (provenance fields and consequence explanations the developer-text filter removes); no player-visible copy, trigger, option, effect or calibration change. The historian seat read Karadžić IT-95-5/18-T: §§4940-4982, §§4985-5020, §§4985-5067, §§5020-5067 and §§5025-5040 are Srebrenica passages (1993 convoys, the July 1995 fall) and do not mention Holbrooke or the Patriarch Paper. The supported passages are paras 422-437 (the US initiative, the 29 August 1995 Dobanovci agreement, the Dayton talks and the leadership's acceptance statement), 3614, 4297-4301, 4338-4340 and 4884. The hidden `rs_strategic_goals` explanations (war_1992.json), `holbrooke_us_belgrade_channel_1995` and `deliberate_force_rs_compliance_1995` `historical_source` and `dayton_talks_begin_1995` `source_note` (war_1995.json) now map each claim to those paragraphs or say "paragraph not verified" (the Holbrooke-Belgrade channel claims have no Karadžić passage; the "Assembly ratification vote" has none; Mladić IT-09-92-T §§4631-4685, §§4750-4795 and Milošević IT-02-54-T §§245-298 could not be checked); the non-existent "BB Vol. II Ch. 15" in `holbrooke_us_belgrade_channel_1995` points at BB Vol. I ch. 94 p. 391. Twelve strings a player can see (eleven `rs_strategic_goals` explanations and the Dayton talks card's source line) still cite the old ranges and are NOT changed here: annotating them would have shown audit notes to players, and several claims beside them are contradicted by the judgment, so they need the historian and narrative seats (next change). `tests/ui/event_karadzic_citation_ranges.test.ts` pins both rules and keeps the visible list as a shrinking allowlist. Two 188-week headless runs of the first version of this change: final state hash identical (`e44c77f5b41052f8`), 14 of 15 artifacts byte-identical, `run_meta` differs only in output-dir suffix, `git_commit` and input digests. The earlier statement that BB Vol. II "has no 1995 content" is corrected (annexes and addenda, including Annex 64 and Addenda 2-3). Exhaustive file list: `docs/40_reports/evidence/20261115_karadzic_citation_sweep/`.
@@ -230,6 +269,10 @@ Tests: new `osm_credit_visibility` (the plate matrix over every panel and rail s
 ## 2026-11-15 — Patriarch Paper dated 29 August 1995; counterfactual defaults out of "Your War vs History"
 
 Event/essay text and a display read-model only; no sim, trigger, option, effect or calibration change. (1) The Patriarch Paper (the Dobanovci agreement making Milošević head of a six-member joint negotiating delegation) is dated 29 August 1995, not 30 August (ICTY Karadžić IT-95-5/18-T para. 424; BB Vol. I p. 391): `rs_dayton_acceptance_1995` narrative, hidden notes and Codex essay (and index), `dayton_talks_begin_1995`, and the `rs_strategic_goals` option explanations; the name is kept. The event gets a visible source note, EN and BCS, citing the judgment paragraph, BB and Holbrooke as further reading. The historian could not retrieve Holbrooke's text, so no date, chapter or page is attributed to him. Hidden Karadžić paragraph ranges for the Dayton passages are corrected to paras 431-437 and the claims the judgment does not support (an RS Assembly vote, a December hardline alternative) are marked as design framing. (2) `distanceFromHistory` leaves out events with `source_tier: design_counterfactual`, so the "Your War vs History" block only measures against documented defaults (csq_patron_recovery_offer is the one counterfactual with an authored default today). Two 188-week headless runs: final state hash identical (`e44c77f5b41052f8`), 14 of 15 artifacts byte-identical, `run_meta` differs only in input digests, `git_commit` and `git_dirty`. See `docs/40_reports/evidence/20261115_patriarch_paper_distance/`.
+
+## 2026-11-15 — Citation audit batch 1 (ICTY Prlić et al. IT-04-74): hidden event notes now say what each cited paragraph range actually is
+
+Hidden event text only (28 strings in `war_1992.json`, `war_1992_hrhb_summer.json`, `war_1993.json`, `war_1994.json`, `war_1995.json`); no player-visible copy, trigger, option, effect or calibration change. The historian seat read all six trial volumes and the appeals judgment and checked the whole batch (164 mentions, 41 range groups): 2 groups supported, 9 in part, 28 wrong (68% of mentions); the ranges were templated across unrelated claims (Vol. 3 §§120-200 is Dretelj and Gabela, §§412-498 is Vareš, Vol. 1 §§591-640 is SIS and Finance, "Vol. 3 §§1700-2050" does not exist). Each hidden range now carries what the paragraphs are and where the claim is documented, or "paragraph not verified". Contradicted claims recorded: Athens was 2 May 1993 and Karadžić signed (Vol. 1 §474); the 20 September 1993 text was "reached", not "signed for HZ HB" (§485); 1995 events fall outside the indictment period. The hidden note saying the Appeals Chamber reversed the Tudjman, Šušak and Bobetko JCE finding (a claim about a conviction) is rewritten: the Appeals Chamber left the finding in place and held its details unnecessary (Appeals §§1521, 1751-1752, 1910-1911). 40 player-visible strings (51 mentions, mostly `hrhb_political_goal`) still carry unchecked ranges and are NOT changed here (HVO ground: historian, narrative and §6 seats); `rbih_state_identity` is pinned by a reviewed-contract hash and is fixed with its re-pin. `tests/ui/event_prlic_citation_ranges.test.ts` pins both rules and keeps the visible list as a shrinking allowlist. Evidence and exhaustive file list: `docs/40_reports/evidence/20261115_prlic_citation_audit/`.
 
 ## 2026-11-15 — Proposal dossiers: every offensive proposal carries an attributed dossier (command loop L5)
 
@@ -422,6 +465,46 @@ The corps' only activity while it waited was a one-brigade probe every two weeks
 5. The stranded artifact above.
 
 Evidence: `C:/Pyrrhic/AWWV-worktrees/_logs/rf-l3d-preplanned-20261115/`.
+
+## 2026-11-15 — RF-corridor-breach: the dead corridor-breach pass is retired (inert)
+
+Follow-up (c) to F1g: the corridor-breach pass had the same S-id/OSID mismatch.
+
+**Premise, measured on main's 188w.** Control was replayed per turn, and `detectCorridorBreachOpportunities` was run with today's inputs and with OSID-correct inputs (OSID edges; OSID → municipality via `operationalToCanonical`).
+- **Today:** 0 targets for every faction on every turn. `political_controllers` is OSID-keyed, and `sidToMun` maps `S…` ids.
+- **OSID-correct:**
+  - RS 0 and RBiH 0: their corridor lists hold 17-36 enemy cells, above the detector's 8-cell "strip" test.
+  - HRHB has targets on 174 of 188 turns. At t15 its "breach" was Livno Gubin, five Mostar cells including Mostar istok, and Stolac Hatelji: scattered, and several held by ALLIED ARBiH.
+
+**Ruling: retire (option c).** operations-expert and corps-army-commander were consulted separately before code, and both reached it.
+- Even with the keys fixed, `attemptCorridorBreach` builds a hollow `sector_attack` with `objectives: []`, which completes and goes to recovery with nothing attacked.
+- It took the first corps by id and its four strongest brigades, ignoring garrison, sector and queue-head guards.
+- It forced `cmd.stance = 'offensive'` over the faction rules. That would have flipped the Herzegovina HVO corps that rule E3 holds defensive into "breaching" allied ARBiH Mostar from mid-1992, with no alliance or Graz gate.
+- `corridor_municipalities` is defended territory, not a breach list.
+- Option (b), repairing it, would have built a second launcher beside the authored Corridor 92 and the commander loop.
+
+**Change.**
+- Deleted:
+  - `bot_corps_corridor.ts`;
+  - the step-4 call and re-exports in `bot_corps_ai.ts`;
+  - `CORRIDOR_BREACH_MAX_STRIP_WIDTH`;
+  - the `isCorridorBreachOp` donor branch (`bot_corps_operations.ts`);
+  - `corpsHoldForbidsNewOffensive`, whose only caller was the deleted pass;
+  - `tests/bot_corps_corridor.test.ts`.
+- Kept: `corridor_municipalities` (rule E3, posture) and clamp point 2, which still re-clamps after the bilateral-war reassignment.
+- Stale comments fixed: `stance_matters.ts`, `enclave_resilience.ts`, two tests.
+- Canon: Systems Manual (three mentions removed, plus a "do not revive" retirement note in §6), `AI_STRATEGY_SPECIFICATION.md`, `REPO_MAP.md`.
+
+**Tests.** New `tests/sim/corridor_breach_retired.test.ts`:
+- the module and its exports are gone;
+- a faction pass creates no "Corridor Breach" operation;
+- an HRHB Herzegovina corps beside allied ARBiH Mostar stays defensive through the whole `generateAllCorpsOrders`.
+
+**Proof.**
+- Headless 188w against main `c62d39975`: all 8 artifacts byte-identical (final_save `e44c77f5b41052f8`, weekly_report, control_delta, formation_delta, activity_summary, watched_operations, end_report, run_summary).
+- `tsc` 0; `test:baselines` all scenarios match; full `npm run test:vitest` exit 0. No re-bless.
+
+Evidence: `C:/Pyrrhic/AWWV-worktrees/_logs/rf-corridor-breach-20261115/`.
 
 ## 2026-11-15 — RF-1 Phase B: the ARBiH 7th Corps forms at week 99 (PR #591, measured)
 
