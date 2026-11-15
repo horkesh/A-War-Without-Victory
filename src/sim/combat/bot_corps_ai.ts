@@ -397,8 +397,14 @@ export function generateAllCorpsOrders(
     // 1. Evaluate existing operations
     evaluateOperationProgress(state, faction);
 
+    // OSID contact edges (`od.edges`, the graph preCombat spatial adjacency is built from).
+    // The corps threat ratio and the commander loop must read the same graph: brigade
+    // locations are OSIDs, so the canonical settlement (S-id) edges in `edges` gave every
+    // corps a threat of 0 (RF-F1g, 2026-11-15). Falls back to `edges` when no OSID graph is passed.
+    const effectiveOsidEdges = osidEdges ?? edges;
+
     // 2. Corps stance selection
-    generateCorpsStanceOrders(state, faction, edges, sidToMun, stanceTrace);
+    generateCorpsStanceOrders(state, faction, effectiveOsidEdges, sidToMun, stanceTrace);
     // Presidential stance holds (posture model option 2). Clamp point 1 of 3; inert without a hold.
     clampHeldCorpsStances(state, faction);
     reassignCorpsForBilateralWar(state, faction);
@@ -408,7 +414,7 @@ export function generateAllCorpsOrders(
     // from the entire corps pool without sector assignment, creating bloated non-sector ops.
 
     // 3b. Emergency defensive operations for high-threat defensive corps
-    generateEmergencyDefensiveOperations(state, faction, edges, sidToMun, preComputedAdjacency);
+    generateEmergencyDefensiveOperations(state, faction, effectiveOsidEdges, sidToMun, preComputedAdjacency);
 
     // 4. Attempt corridor breach
     attemptCorridorBreach(state, faction, edges, sidToMun);
@@ -419,8 +425,7 @@ export function generateAllCorpsOrders(
     generateOGActivationOrders(state, faction, edges);
 
     // 6. Generate corps directives (new: HoI-style command hierarchy)
-    // Use OSID edges for adjacency (not canonical SID edges)
-    const effectiveOsidEdges = osidEdges ?? edges;
+    // Use OSID edges for adjacency (not canonical SID edges): `effectiveOsidEdges` above.
     const adjacency = (preComputedAdjacency as Map<Osid, Osid[]>) ?? buildOsidAdjacency(effectiveOsidEdges);
     let graphAnalysis: FactionGraphAnalysis | null = null;
     if (reverseMap) {
