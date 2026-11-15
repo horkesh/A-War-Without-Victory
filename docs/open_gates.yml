@@ -61,7 +61,8 @@ gates:
       Oborci in October 1995, a timing loss; recorded under the hold; baselines re-blessed;
       consistency read 1 until SE7E-h was fixed in #685, validator only, and is 0 again;
       #677 RF-ROSTER left the scores unchanged and moved the headless final_state_hash from
-      19262a0b19df1567 to 518de17970af5914, officer state values only), after
+      19262a0b19df1567 to 518de17970af5914, officer state values only; that is the main hash
+      at #677, not the freeze hash), after
       709/709/708/682 at #647 (RF-L3d), 712/705/706/676 at #636 (the October 1995 ceasefire binds) and
       712/705/706/698 at #619
       (RF-AI2, owner accepted 2026-11-14). Earlier accepted moves: Apr 1995 711 after #583, Oct 1995
