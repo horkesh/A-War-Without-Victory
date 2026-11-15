@@ -5690,8 +5690,7 @@
       ]
     },
     "action_cadence": {
-      "max_fires": 8,
-      "cooldown_turns": 8,
+      "cooldown_turns": 26,
       "escalation": "escalating"
     },
     "effect": {
@@ -5952,8 +5951,7 @@
       ]
     },
     "action_cadence": {
-      "max_fires": 8,
-      "cooldown_turns": 8,
+      "cooldown_turns": 26,
       "escalation": "escalating"
     },
     "effect": {
@@ -6222,8 +6220,7 @@
       ]
     },
     "action_cadence": {
-      "max_fires": 8,
-      "cooldown_turns": 8,
+      "cooldown_turns": 26,
       "escalation": "escalating"
     },
     "effect": {
@@ -6484,8 +6481,7 @@
       ]
     },
     "action_cadence": {
-      "max_fires": 5,
-      "cooldown_turns": 10,
+      "cooldown_turns": 26,
       "escalation": "escalating"
     },
     "effect": {
@@ -6776,8 +6772,7 @@
       ]
     },
     "action_cadence": {
-      "max_fires": 5,
-      "cooldown_turns": 10,
+      "cooldown_turns": 26,
       "escalation": "escalating"
     },
     "effect": {
@@ -7053,8 +7048,7 @@
       ]
     },
     "action_cadence": {
-      "max_fires": 5,
-      "cooldown_turns": 10,
+      "cooldown_turns": 26,
       "escalation": "escalating"
     },
     "effect": {
@@ -7330,8 +7324,7 @@
       ]
     },
     "action_cadence": {
-      "max_fires": 5,
-      "cooldown_turns": 10,
+      "cooldown_turns": 52,
       "escalation": "static"
     },
     "effect": {
@@ -7555,8 +7548,7 @@
       ]
     },
     "action_cadence": {
-      "max_fires": 5,
-      "cooldown_turns": 10,
+      "cooldown_turns": 52,
       "escalation": "static"
     },
     "effect": {
@@ -7779,8 +7771,7 @@
       ]
     },
     "action_cadence": {
-      "max_fires": 5,
-      "cooldown_turns": 10,
+      "cooldown_turns": 52,
       "escalation": "static"
     },
     "effect": {
@@ -7989,8 +7980,7 @@
       ]
     },
     "action_cadence": {
-      "max_fires": 5,
-      "cooldown_turns": 10,
+      "cooldown_turns": 52,
       "escalation": "static"
     },
     "effect": {
@@ -8153,8 +8143,7 @@
       ]
     },
     "action_cadence": {
-      "max_fires": 5,
-      "cooldown_turns": 10,
+      "cooldown_turns": 52,
       "escalation": "static"
     },
     "effect": {
@@ -8317,8 +8306,7 @@
       ]
     },
     "action_cadence": {
-      "max_fires": 5,
-      "cooldown_turns": 10,
+      "cooldown_turns": 52,
       "escalation": "static"
     },
     "effect": {

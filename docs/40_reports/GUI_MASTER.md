@@ -485,6 +485,12 @@ Army HQ, Codex, and other full-size overlays should obey the same density langua
 
 OSID, raw faction ids, and similar backend nouns are valid in engine code, canon, and tests. They are not valid in the live player shell when a human phrase like staging area, positions, or a political-side display name can carry the meaning. The product should sound like a command environment, not a debugger.
 
+## 2026-11-15 - Renewable gestures (Fable consult 1 appendix D)
+
+- Front visit, address to the nation, decoration and strategic posture review no longer run out: each is limited by its cooldown alone (26, 52, 52 and 26 weeks).
+- The Army HQ front-visit section drops the "N visits remaining" line when there is no cap, and never shows "exhausted" for a renewable gesture. Its cooldown line ("On cooldown - available after …") is unchanged.
+- The contracts send `firesLeft: null` / `maxFires: null` for an uncapped gesture. Evidence: ledger fragment `docs/ledger/fragments/2026-11-15-renewable-gestures.md`.
+
 ## 2026-11-15 - Army clashes (command loop L7)
 
 - When an order the president just staged crosses the army plan and the army commander would comply only in part, a Command Surface card appears: "{army commander} objects to: {order}". Its summary says the order stands unless answered.

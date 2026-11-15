@@ -414,10 +414,10 @@ game-designer and canon-compliance seats).**
   optional spend is overruling: stop, request, elite, replace (25), force over a no-go (15), Insist in a
   clash (15, 2A), backing (10 or 20).
 - **The gestures are the routine spend.** Front visit, address to the nation, decoration and strategic
-  posture review (10 each) are to become renewable all war, on a cooldown instead of a lifetime cap
-  (front visit 26 weeks, address 52, decoration 52, posture review 26), keeping the war total about where
-  today's caps put it: a later data-only PR (Fable appendix D), player path only, to be measured
-  byte-identical for headless at its merge.
+  posture review (10 each) are renewable all war, on a cooldown instead of a lifetime cap (front visit
+  26 weeks, address 52, decoration 52, posture review 26), keeping the war total about where the old caps
+  put it. Landed in the appendix D PR (data plus loader, contracts and Desk; player path only; 40-week
+  headless artifacts byte-identical and `test:baselines` passing).
 - **The 25% target moves to the President it fits.** Test with three Presidents over 104 weeks at the
   default autonomy, counting a turn at cap only when `current` equals `max` and the reserve is full:
   A, hands-off (answers nothing, initiates nothing: a full meter is valid, shown as unspent capital);

@@ -9,7 +9,7 @@
  * `state.military.pending_event_decisions` so EventDecisionModal surfaces it.
  * The event's authored effects (morale / cohesion /
  * military_credibility / internal_cohesion shifts, all double-edged), voluntary action cadence
- * (max_fires 5 / cooldown 10t), and branches are reused. This contract ADDS the
+ * (a renewable cooldown since appendix D, 2026-11-15; see war_1993.json), and branches are reused. This contract ADDS the
  * deterministic per-unit branch expansion so the PLAYER picks WHICH regular
  * formation to honour (we never auto-pick the unit). The decision resolver scopes
  * morale/cohesion to that selected formation while retaining authored deltas.
@@ -148,8 +148,8 @@ function computeDecorateUnitAvailability(state, playerFaction, eventDef) {
 
   const out = {
     ...base,
-    firesLeft: Number.isFinite(firesLeft) ? firesLeft : maxFires,
-    maxFires: Number.isFinite(maxFires) ? maxFires : 0,
+    firesLeft: Number.isFinite(firesLeft) ? firesLeft : null, // null = renewable (no lifetime cap)
+    maxFires: Number.isFinite(maxFires) ? maxFires : null,
     cooldownUntil,
     onCooldown,
     eligibleFormations,
