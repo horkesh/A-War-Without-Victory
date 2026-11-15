@@ -1,17 +1,22 @@
 // Command loop L5 (2026-11-15): proposal dossier DETAIL, the facts under the header.
 //
 // Loaded only by the lazily imported ProposalDossierFacts, so none of this ships in the
-// map entry chunk (which sits at its 3,000 kB limit). The entry keeps the card title,
-// the one-sentence header and the map target (proposalDossier.ts, i18n `dossier.*`), the
-// same split as stanceMatterCopy.ts / stanceMatterDetail.ts.
+// map entry chunk. The entry keeps the card title, the one-sentence header and the map
+// target (proposalDossier.ts, i18n `dossier.*`), the same split as stanceMatterCopy.ts /
+// stanceMatterDetail.ts.
 //
 // Facts, in fixed order, each shown only when known: objective, forces (with donor corps
-// and a thin-front warning), odds, cost, what holding back means, and what Withhold and
-// Cancel actually do. The odds are a band, never a number, and always attributed:
-// "Odds: Karavelić judges them favourable." The band comes from the plan viability the
+// and a thin-front warning), readiness, what holding back means, and what Withhold and
+// Cancel actually do. Readiness is a band, never a number, and always attributed:
+// "Readiness: Karavelić reports the plan ready." The band comes from the plan viability the
 // corps staff report, bent by the proposing officer's file; where the army staff's unbent
 // reading differs, both voices appear. The inputs are the staff's own beliefs about their
 // own plan (OpProposalCardView.dossier_inputs), never fog-hidden enemy data.
+//
+// Readiness, not odds (#653 review): the viability score measures staging-area hold, its
+// posture and brigade availability, never the target's defenders or terrain, so it cannot
+// back combat odds or a casualty forecast. Odds and expected losses wait for a player-safe
+// combat assessment (force ratio against believed defenders), which does not exist yet.
 //
 // EN and BCS live here as two dictionaries with the same keys;
 // tests/ui/proposal_dossier.test.ts pins that both are complete.
@@ -20,7 +25,7 @@
 
 import { getActiveLocale } from '../i18n';
 import { getOsidDisplayName } from '../utils/osidDisplayName';
-import { getPlayerSafeOddsBand, type PlayerSafeOddsBand } from '../../../shared/playerSafeOperationBalance';
+import { getPlayerSafeReadinessBand, type PlayerSafeReadinessBand } from '../../../shared/playerSafeOperationBalance';
 import type { OpProposalCardView } from './backTheOfficer';
 
 export const PROPOSAL_DOSSIER_DETAIL_EN = {
@@ -30,23 +35,19 @@ export const PROPOSAL_DOSSIER_DETAIL_EN = {
   forcesDonors: 'Drawn partly from {donors}.',
   forcesThin: 'The corps front is already under heavy pressure.',
   judgeCorpsStaff: 'The {corps} staff',
-  odds: 'Odds: {judge} judges them {band}.',
-  oddsIntel: 'The judgement rests on {intel}.',
-  oddsStaff: 'Army staff read them as {band}.',
-  cost: 'Cost: {casualties} casualties expected.',
+  readiness: 'Readiness: {judge} reports the plan {band}.',
+  readinessIntel: 'The report rests on {intel}.',
+  readinessStaff: 'Army staff read it as {band}.',
   holdBack: 'If you hold back: answer before the next Advance. Unanswered, the proposal lapses and the plan is not launched.',
   withhold: 'Withhold: the corps drops this plan; its commander may plan again.',
   cancel: 'Cancel: close without answering; an unanswered proposal lapses at Advance.',
-  'band.favourable': 'favourable',
-  'band.even': 'even',
-  'band.hard': 'hard',
-  'band.long': 'long',
+  'band.ready': 'ready',
+  'band.mostly': 'mostly ready',
+  'band.strained': 'strained',
+  'band.unready': 'not ready',
   'intel.poor': 'poor intelligence',
   'intel.partial': 'partial intelligence',
   'intel.good': 'good intelligence',
-  'casualties.light': 'light',
-  'casualties.heavy': 'heavy',
-  'casualties.severe': 'severe',
 } as const;
 
 export type ProposalDossierDetailKey = keyof typeof PROPOSAL_DOSSIER_DETAIL_EN;
@@ -58,23 +59,19 @@ export const PROPOSAL_DOSSIER_DETAIL_BCS: Record<ProposalDossierDetailKey, strin
   forcesDonors: 'Dijelom iz sastava: {donors}.',
   forcesThin: 'Front korpusa je već pod jakim pritiskom.',
   judgeCorpsStaff: 'Štab ({corps})',
-  odds: 'Izgledi: {judge} ih ocjenjuje kao {band}.',
-  oddsIntel: 'Ocjena se oslanja na {intel}.',
-  oddsStaff: 'Štab armije ih ocjenjuje kao {band}.',
-  cost: 'Cijena: očekuju se {casualties} gubici.',
+  readiness: 'Spremnost: {judge} plan ocjenjuje kao {band}.',
+  readinessIntel: 'Ocjena se oslanja na {intel}.',
+  readinessStaff: 'Štab armije ga ocjenjuje kao {band}.',
   holdBack: 'Ako odgodite: odgovorite prije sljedećeg poteza. Bez odgovora prijedlog ističe i plan se ne pokreće.',
   withhold: 'Uskrati: korpus odustaje od ovog plana; njegov komandant može planirati ponovo.',
   cancel: 'Otkaži: zatvori bez odgovora; prijedlog bez odgovora ističe na sljedećem potezu.',
-  'band.favourable': 'povoljne',
-  'band.even': 'izjednačene',
-  'band.hard': 'teške',
-  'band.long': 'slabe',
+  'band.ready': 'spreman',
+  'band.mostly': 'uglavnom spreman',
+  'band.strained': 'napregnut',
+  'band.unready': 'nespreman',
   'intel.poor': 'slabe obavještajne podatke',
   'intel.partial': 'djelimične obavještajne podatke',
   'intel.good': 'dobre obavještajne podatke',
-  'casualties.light': 'laki',
-  'casualties.heavy': 'teški',
-  'casualties.severe': 'vrlo teški',
 };
 
 export function dossierDetailText(key: ProposalDossierDetailKey, params: Record<string, string | number> = {}): string {
@@ -85,22 +82,20 @@ export function dossierDetailText(key: ProposalDossierDetailKey, params: Record<
   return template.replace(/\{(\w+)\}/g, (match, name: string) => (name in params ? String(params[name]) : match));
 }
 
-export type ProposalCasualtyBand = 'light' | 'heavy' | 'severe';
 export type ProposalIntelQuality = 'poor' | 'partial' | 'good';
 
-export interface ProposalDossierOdds {
-  /** Who judges: the proposing officer, or the corps staff when he is unknown. */
+export interface ProposalDossierReadiness {
+  /** Who reports: the proposing officer, or the corps staff when he is unknown. */
   judge: string;
-  band: PlayerSafeOddsBand;
+  band: PlayerSafeReadinessBand;
   intel: ProposalIntelQuality | null;
   /** The army staff's unbent reading, only when it differs from the judge's. */
-  staffBand: PlayerSafeOddsBand | null;
+  staffBand: PlayerSafeReadinessBand | null;
 }
 
 export interface ProposalDossierFactsView {
   facts: string[];
-  odds: ProposalDossierOdds | null;
-  casualties: ProposalCasualtyBand | null;
+  readiness: ProposalDossierReadiness | null;
 }
 
 /** How far an officer's file bends his reading of the staff's viability figure. */
@@ -114,8 +109,8 @@ function clampUnit(value: number): number {
 }
 
 /**
- * The officer's own reading: aggressive officers read the same plan more hopefully,
- * competent ones a little more hopefully too (they trust their staff work).
+ * The officer's own reading: aggressive officers report the same plan as readier,
+ * competent ones a little readier too (they trust their staff work).
  */
 export function officerJudgement(
   viability: number,
@@ -134,14 +129,6 @@ export function intelQuality(confidence: number | null): ProposalIntelQuality | 
   if (confidence < 0.4) return 'poor';
   if (confidence < 0.7) return 'partial';
   return 'good';
-}
-
-/** Expected own losses, from the judged odds and how many brigades are committed. */
-export function casualtyBand(band: PlayerSafeOddsBand, brigadeCount: number): ProposalCasualtyBand {
-  if (band === 'long') return 'severe';
-  if (band === 'hard') return brigadeCount >= 4 ? 'severe' : 'heavy';
-  if (band === 'even') return brigadeCount >= 4 ? 'heavy' : 'light';
-  return 'light';
 }
 
 function listWithMore(items: readonly string[]): string {
@@ -182,26 +169,22 @@ export function buildProposalDossierFacts(
     facts.push(line);
   }
 
-  // 3. Odds, attributed; the staff's unbent reading too when it differs.
-  let odds: ProposalDossierOdds | null = null;
+  // 3. Readiness, attributed; the staff's unbent reading too when it differs.
+  let readiness: ProposalDossierReadiness | null = null;
   if (inputs?.viability !== null && inputs?.viability !== undefined) {
-    const staffBand = getPlayerSafeOddsBand(inputs.viability);
-    const band = getPlayerSafeOddsBand(officerJudgement(inputs.viability, officer ? inputs.commander_traits : null));
+    const staffBand = getPlayerSafeReadinessBand(inputs.viability);
+    const band = getPlayerSafeReadinessBand(officerJudgement(inputs.viability, officer ? inputs.commander_traits : null));
     const intel = intelQuality(inputs.intel_confidence);
     const judge = officer ?? dossierDetailText('judgeCorpsStaff', { corps: card.corps_name });
-    odds = { judge, band, intel, staffBand: staffBand !== band ? staffBand : null };
-    let line = dossierDetailText('odds', { judge, band: dossierDetailText(`band.${band}`) });
-    if (intel) line += ` ${dossierDetailText('oddsIntel', { intel: dossierDetailText(`intel.${intel}`) })}`;
+    readiness = { judge, band, intel, staffBand: staffBand !== band ? staffBand : null };
+    let line = dossierDetailText('readiness', { judge, band: dossierDetailText(`band.${band}`) });
+    if (intel) line += ` ${dossierDetailText('readinessIntel', { intel: dossierDetailText(`intel.${intel}`) })}`;
     facts.push(line);
-    if (odds.staffBand) facts.push(dossierDetailText('oddsStaff', { band: dossierDetailText(`band.${odds.staffBand}`) }));
+    if (readiness.staffBand) facts.push(dossierDetailText('readinessStaff', { band: dossierDetailText(`band.${readiness.staffBand}`) }));
   }
 
-  // 4. Cost. The Authority price joins this line with command loop L6.
-  const casualties = odds && forces.length > 0 ? casualtyBand(odds.band, forces.length) : null;
-  if (casualties) {
-    facts.push(dossierDetailText('cost', { casualties: dossierDetailText(`casualties.${casualties}`) }));
-  }
-
+  // 4. Odds and cost: no player-safe combat assessment exists for a ready plan, so no
+  //    odds or casualty forecast is shown. The Authority price joins with command loop L6.
   // 5. Stakes: no structured stakes exist for operation proposals yet, so none is shown.
 
   // 6. If you hold back, and what the refusal buttons do.
@@ -209,5 +192,5 @@ export function buildProposalDossierFacts(
   facts.push(dossierDetailText('withhold'));
   facts.push(dossierDetailText('cancel'));
 
-  return { facts, odds, casualties };
+  return { facts, readiness };
 }

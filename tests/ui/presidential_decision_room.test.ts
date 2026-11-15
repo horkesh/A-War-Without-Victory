@@ -1429,8 +1429,9 @@ describe('buildPresidentialDecisionRoomView', () => {
     const officer = 'Atif DudakoviÄ‡';
 
     // Command loop L5: a dossier, not thirteen "Label: value" lines. The officer's file
-    // (competence 4, aggressiveness 4) bends the staff's 0.6 viability up to favourable;
-    // the army staff's unbent reading (even) appears beside it. No percentages anywhere.
+    // (competence 4, aggressiveness 4) bends the staff's 0.6 readiness figure up to ready;
+    // the army staff's unbent reading (mostly ready) appears beside it. No percentages,
+    // no odds and no casualty forecast anywhere (#653 review: the figure is readiness).
     expect(card?.title).toBe('Relieve Jajce');
     expect(card?.explanation).toBe(`${officer} asks to commit 2 brigades to take Jajce.`);
     expect(card?.actionLabel).toBe('Review the plan');
@@ -1441,9 +1442,8 @@ describe('buildPresidentialDecisionRoomView', () => {
     expect(facts).toEqual([
       'Objective: take Jajce.',
       'Forces: 1st Corps with Alpha Brigade, Beta Brigade. The corps front is already under heavy pressure.',
-      `Odds: ${officer} judges them favourable. The judgement rests on good intelligence.`,
-      'Army staff read them as even.',
-      'Cost: light casualties expected.',
+      `Readiness: ${officer} reports the plan ready. The report rests on good intelligence.`,
+      'Army staff read it as mostly ready.',
       'If you hold back: answer before the next Advance. Unanswered, the proposal lapses and the plan is not launched.',
       'Withhold: the corps drops this plan; its commander may plan again.',
       'Cancel: close without answering; an unanswered proposal lapses at Advance.',
@@ -1519,8 +1519,8 @@ describe('buildPresidentialDecisionRoomView', () => {
       'op:bihac:orasac_2': 'Ora\u0161ac (Biha\u0107)',
     });
     expect(facts).toContain('Objective: take Ora\u0161ac (Biha\u0107).');
-    // No staff estimates on this card: no odds or cost line is invented.
-    expect(facts.some((line) => line.startsWith('Odds:') || line.startsWith('Cost:'))).toBe(false);
+    // No staff estimates on this card: no readiness line is invented.
+    expect(facts.some((line) => line.startsWith('Readiness:'))).toBe(false);
     expect(card?.fieldInspectionTarget).toMatchObject({ objectiveOsids: ['op:bihac:orasac_2'] });
     expect(`${card?.title} ${card?.explanation} ${card?.evidence.join(' ')}`)
       .not.toMatch(/zone:|op:|vrs_2nd_krajina|plan_vrs/);

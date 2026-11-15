@@ -1,20 +1,25 @@
 /**
- * Command loop L5 (2026-11-15): the four odds bands a proposal dossier may show. The
- * band is always attributed to whoever judged it ("Karavelić judges: favourable") and
+ * Command loop L5 (2026-11-15): the four readiness bands a proposal dossier may show. The
+ * band is always attributed to whoever reports it ("Karavelić reports the plan ready") and
  * never shown as a number: the command model rule is that the number is never the
  * decision, the source is (presidential command model design, line 32).
+ *
+ * This is plan READINESS, not combat odds. The staff figure behind it (the commander
+ * plan's viability score) measures staging-area hold, its posture and brigade
+ * availability; it never weighs the target's defenders or terrain (#653 review). Odds
+ * need a player-safe combat assessment, which does not exist yet.
  */
-export type PlayerSafeOddsBand = 'favourable' | 'even' | 'hard' | 'long';
+export type PlayerSafeReadinessBand = 'ready' | 'mostly' | 'strained' | 'unready';
 
 /**
- * Band a staff judgement in [0, 1] (the plan viability the corps staff report). The
- * thresholds are fixed so the same judgement always reads the same way.
+ * Band a staff readiness figure in [0, 1]. The thresholds are fixed so the same figure
+ * always reads the same way.
  */
-export function getPlayerSafeOddsBand(judgement: number): PlayerSafeOddsBand {
-  if (judgement >= 0.65) return 'favourable';
-  if (judgement >= 0.45) return 'even';
-  if (judgement >= 0.25) return 'hard';
-  return 'long';
+export function getPlayerSafeReadinessBand(judgement: number): PlayerSafeReadinessBand {
+  if (judgement >= 0.65) return 'ready';
+  if (judgement >= 0.45) return 'mostly';
+  if (judgement >= 0.25) return 'strained';
+  return 'unready';
 }
 
 export interface PlayerSafeOperationBalancePresentation {

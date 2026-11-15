@@ -489,8 +489,9 @@ OSID, raw faction ids, and similar backend nouns are valid in engine code, canon
 
 - Ordinary operation proposals in the Command Surface show a dossier (`src/ui/map/data/proposalDossier.ts`) in place of thirteen English "Label: value" lines.
   - A one-sentence header.
-  - Facts shown only when known: objective (Show on map via `field-operation-plan`), forces, attributed odds, casualty cost, holding back, and Withhold and Cancel explained.
-- Odds are four bands, never a number, always attributed to the proposing officer (bent by his file) with the army staff's unbent reading beside it when they differ. Inputs are the corps staff's own beliefs (`OpProposalCardView.dossier_inputs`).
+  - Facts shown only when known: objective (Show on map via `field-operation-plan`), forces, attributed plan readiness, holding back, and Withhold and Cancel explained. The facts load on demand (`ProposalDossierFacts`, `proposalDossierDetail.ts`).
+- Readiness is four bands, never a number, always attributed to the proposing officer (bent by his file) with the army staff's unbent reading beside it when they differ. Inputs are the corps staff's own beliefs (`OpProposalCardView.dossier_inputs`).
+- No odds and no casualty forecast: the plan's viability score never weighs the target's defenders (#653 review). Odds wait for a player-safe combat assessment.
 - Proposal cards drop the decorative detail art so the facts get the space. At 1280x720 the directive footer still pushes the facts below the fold; that shared footer layout is open.
 - Proposal: `docs/40_reports/proposals/20261114_COMMAND_LOOP_PROPOSAL.md` §5A. Evidence: ledger fragment `docs/ledger/fragments/2026-11-15-proposal-dossiers.md`.
 

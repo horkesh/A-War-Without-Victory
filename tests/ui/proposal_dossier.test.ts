@@ -5,21 +5,23 @@ import { buildOpProposalCards, type OpProposalCardView } from '../../src/ui/map/
 import { buildProposalDossier } from '../../src/ui/map/data/proposalDossier';
 import {
   buildProposalDossierFacts,
-  casualtyBand,
   intelQuality,
   officerJudgement,
   PROPOSAL_DOSSIER_DETAIL_BCS,
   PROPOSAL_DOSSIER_DETAIL_EN,
 } from '../../src/ui/map/data/proposalDossierDetail';
 import { withoutComments } from '../helpers/sourceComments';
-import { getPlayerSafeOddsBand } from '../../src/shared/playerSafeOperationBalance';
+import { getPlayerSafeReadinessBand } from '../../src/shared/playerSafeOperationBalance';
 import { setLocale } from '../../src/ui/map/i18n';
 
 /**
  * Command loop L5 (proposal §5A, 2026-11-15): every offensive proposal the president sees
- * carries a short dossier. Odds are an attributed band, never a number; facts with nothing
- * known are left out; the refusal buttons are explained; the inputs are the corps staff's
- * own beliefs about their own plan.
+ * carries a short dossier. Readiness is an attributed band, never a number; facts with
+ * nothing known are left out; the refusal buttons are explained; the inputs are the corps
+ * staff's own beliefs about their own plan.
+ *
+ * Readiness, not odds (#653 review): the plan's viability score never weighs the target's
+ * defenders, so the dossier shows no odds and no casualty forecast.
  */
 
 const nodeRequire = createRequire(import.meta.url);
@@ -60,13 +62,13 @@ function card(overrides: Partial<OpProposalCardView> = {}): OpProposalCardView {
 }
 
 describe('proposal dossier bands', () => {
-  it('bands a staff judgement in fixed steps', () => {
-    expect(getPlayerSafeOddsBand(0.9)).toBe('favourable');
-    expect(getPlayerSafeOddsBand(0.65)).toBe('favourable');
-    expect(getPlayerSafeOddsBand(0.64)).toBe('even');
-    expect(getPlayerSafeOddsBand(0.45)).toBe('even');
-    expect(getPlayerSafeOddsBand(0.3)).toBe('hard');
-    expect(getPlayerSafeOddsBand(0.1)).toBe('long');
+  it('bands a staff readiness figure in fixed steps', () => {
+    expect(getPlayerSafeReadinessBand(0.9)).toBe('ready');
+    expect(getPlayerSafeReadinessBand(0.65)).toBe('ready');
+    expect(getPlayerSafeReadinessBand(0.64)).toBe('mostly');
+    expect(getPlayerSafeReadinessBand(0.45)).toBe('mostly');
+    expect(getPlayerSafeReadinessBand(0.3)).toBe('strained');
+    expect(getPlayerSafeReadinessBand(0.1)).toBe('unready');
   });
 
   it('bends the reading by the officer\'s file, and not without one', () => {
@@ -77,17 +79,11 @@ describe('proposal dossier bands', () => {
     expect(officerJudgement(0.98, { competence: 5, aggressiveness: 5 })).toBe(1);
   });
 
-  it('names the intelligence quality and the casualty band', () => {
+  it('names the intelligence quality', () => {
     expect(intelQuality(null)).toBeNull();
     expect(intelQuality(0.2)).toBe('poor');
     expect(intelQuality(0.5)).toBe('partial');
     expect(intelQuality(0.9)).toBe('good');
-    expect(casualtyBand('favourable', 6)).toBe('light');
-    expect(casualtyBand('even', 2)).toBe('light');
-    expect(casualtyBand('even', 4)).toBe('heavy');
-    expect(casualtyBand('hard', 2)).toBe('heavy');
-    expect(casualtyBand('hard', 4)).toBe('severe');
-    expect(casualtyBand('long', 1)).toBe('severe');
   });
 });
 
@@ -100,44 +96,46 @@ describe('buildProposalDossier', () => {
   beforeEach(() => setLocale('en'));
   afterEach(() => setLocale('en'));
 
-  it('writes an attributed dossier with no numbers from the staff estimates', () => {
+  it('writes an attributed dossier with no numbers, no odds and no casualty forecast', () => {
     const dossier = full(card(), null);
     expect(dossier.header).toBe('Sead Delić asks to commit 5 brigades to take Vozuća (Zavidovići).');
     expect(dossier.facts).toEqual([
       'Objective: take Vozuća (Zavidovići), Stog, Krčevine and 1 more.',
       'Forces: 2nd Corps with 221st Brigade, 222nd Brigade, 223rd Brigade and 2 more.',
-      'Odds: Sead Delić judges them even. The judgement rests on poor intelligence.',
-      'Cost: heavy casualties expected.',
+      'Readiness: Sead Delić reports the plan mostly ready. The report rests on poor intelligence.',
       'If you hold back: answer before the next Advance. Unanswered, the proposal lapses and the plan is not launched.',
       'Withhold: the corps drops this plan; its commander may plan again.',
       'Cancel: close without answering; an unanswered proposal lapses at Advance.',
     ]);
-    expect(dossier.odds).toEqual({ judge: 'Sead Delić', band: 'even', intel: 'poor', staffBand: null });
-    expect(dossier.facts.join(' ')).not.toMatch(/\d+\s*%|\b0\.\d+\b|op:|arbih_|plan_1|Unreported/);
+    expect(dossier.readiness).toEqual({ judge: 'Sead Delić', band: 'mostly', intel: 'poor', staffBand: null });
+    const text = dossier.facts.join(' ');
+    expect(text).not.toMatch(/\d+\s*%|\b0\.\d+\b|op:|arbih_|plan_1|Unreported/);
+    // No combat odds or expected losses: nothing in the staff's figure supports them.
+    expect(text).not.toMatch(/\bodds\b|casualt|favourable|losses/i);
   });
 
   it('shows the army staff voice when the officer reads the plan differently', () => {
     const dossier = full(card({
-      // 0.55 staff viability reads even; this officer's file bends it to 0.69, favourable.
+      // 0.55 staff viability reads mostly ready; this officer's file bends it to 0.69, ready.
       dossier_inputs: { ...card().dossier_inputs!, viability: 0.55, commander_traits: { competence: 4, aggressiveness: 5 } },
     }), null);
-    expect(dossier.odds?.band).toBe('favourable');
-    expect(dossier.odds?.staffBand).toBe('even');
-    expect(dossier.facts).toContain('Army staff read them as even.');
+    expect(dossier.readiness?.band).toBe('ready');
+    expect(dossier.readiness?.staffBand).toBe('mostly');
+    expect(dossier.facts).toContain('Army staff read it as mostly ready.');
   });
 
   it('attributes to the corps staff when the officer is unknown or lost', () => {
     for (const commander of [null, { officer_id: 'x', name: 'Gone', lost: true }]) {
       const dossier = full(card({ commander: commander as OpProposalCardView['commander'] }), null);
-      expect(dossier.odds?.judge).toBe('The 2nd Corps staff');
+      expect(dossier.readiness?.judge).toBe('The 2nd Corps staff');
       expect(dossier.header.startsWith('2nd Corps asks')).toBe(true);
     }
   });
 
-  it('leaves out what is not known and never invents odds or cost', () => {
+  it('leaves out what is not known and never invents a readiness reading', () => {
     const dossier = full(card({ dossier_inputs: undefined, targets: ['Unreported'], forces: ['Unreported'] }), null);
     expect(dossier.header).toBe('Sead Delić asks for authority to launch Advance on Vozuća.');
-    expect(dossier.facts.some((line) => /^(Objective|Forces|Odds|Cost):/.test(line))).toBe(false);
+    expect(dossier.facts.some((line) => /^(Objective|Forces|Readiness):/.test(line))).toBe(false);
     expect(dossier.fieldTarget).toBeNull();
   });
 
@@ -166,7 +164,7 @@ describe('buildProposalDossier', () => {
     setLocale('bcs');
     const dossier = full(card(), null);
     expect(dossier.header).toBe('Sead Delić traži da angažuje brigade (5) kako bi zauzeo Vozuća (Zavidovići).');
-    expect(dossier.facts).toContain('Izgledi: Sead Delić ih ocjenjuje kao izjednačene. Ocjena se oslanja na slabe obavještajne podatke.');
+    expect(dossier.facts).toContain('Spremnost: Sead Delić plan ocjenjuje kao uglavnom spreman. Ocjena se oslanja na slabe obavještajne podatke.');
     expect(dossier.facts).toContain('Uskrati: korpus odustaje od ovog plana; njegov komandant može planirati ponovo.');
     expect(dossier.facts).toContain('Snage: 221st Brigade, 222nd Brigade, 223rd Brigade i još 2 (2nd Corps).');
   });
