@@ -615,7 +615,12 @@ export function generateChronicleEntries(
             for (const event of summary.events_fired) {
                 const id = event.id || '';
                 if (shouldSuppressTurnSummaryDecisionEvent(state, id, playerFaction, decisionEventIds)) continue;
-                const title = getPlayerSafeDisplayLabel(resolveEventDisplayTitle(id, event.text), 'Recorded event');
+                // The engine records the English title. A catalog row's localizations win
+                // (events outside the bundled war-year index); otherwise the bundled index.
+                const title = getPlayerSafeDisplayLabel(
+                    resolveEventDisplayTitle(id, event.text, { localizations: eventCatalog?.get(id)?.localizations }),
+                    'Recorded event',
+                );
 
                 if (isDiplomaticEvent(id)) {
                     entries.push({

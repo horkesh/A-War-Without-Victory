@@ -40,7 +40,7 @@ ARBiH organized into **7 corps** (formed gradually 1992-1993):
 4. **4th Corps** (Mostar) - Formed late, Herzegovina
 5. **5th Corps** (Bihać) - Isolated pocket, internal division (Abdić)
 6. **6th Corps** (Konjic) - June 1993 to 1994, then folded back into the 4th Corps (BB2 p.391, p.436); not modelled (its units sit under the 4th and 1st Corps)
-7. **7th Corps** (Travnik) - Central Bosnia, decided 26 Feb 1994 from the western half of the 3rd Corps
+7. **7th Corps** (Travnik) - Central Bosnia, decided 26 Feb 1994 from the western half of the 3rd Corps; modelled as `arbih_7th_corps` from week 99, 12 brigades; the Zenica 7th Muslim, 303rd and 314th stay in the 3rd Corps
 
 **Plus isolated enclaves:**
 - Srebrenica, Goražde, Žepa (Drina Valley) - Under siege, separate commands
@@ -229,6 +229,7 @@ ARBiH organized into **7 corps** (formed gradually 1992-1993):
 **HQ:** Travnik. **Commander:** Brig. Gen. Mehmed Alagić.
 **Formed:** decided 26 Feb 1994 (Presidency decision; Alagić appointed the same day); first operational report 7 Apr 1994. BB already credits the "newly established 7th Corps" with the 16 Mar 1994 Donji Vakuf attack (BB2 pp.465-466). Built from the 3rd Corps' OG Bosanska Krajina (Travnik) and OG Zapad (Bugojno).
 **Strength:** ~20,000-25,000 (1995)
+**Engine mapping (RF-1 Phase B, 2026-11-15):** modelled as `arbih_7th_corps` from week 99 (26 Feb 1994). Alagić is seated as its commander that week; he commanded the 3rd Corps from 1 Nov 1993 and the 7th Corps from 26 Feb 1994 (ICTY Case Information Sheet IT-01-47 p.4, citing the indictments; BB2 pp.468, 493). Twelve brigades move from the 3rd Corps that week: 17th, 705th, 706th, 707th, 708th, 712th, 717th, 725th, 727th, 733rd, 737th, 770th. The Zenica 7th Muslim, 303rd and 314th stay in the 3rd Corps. Source: `data/source/formation_lifecycle_events.json` (`corps_reorganisation`).
 
 **Area:** Central Bosnia (Travnik, Bugojno, Gornji and Donji Vakuf, Vitez, Busovača, Novi Travnik)
 
@@ -421,8 +422,8 @@ Corps-level support: **1st–7th Corps** each have Mixed Artillery Regiment, Arm
 
 ## Game alignment
 
-- The corps, brigades, and strength figures in this document are **narrative and research** only. The formation system in game state (`FormationState` in `src/state/game_state.ts`) is **not** yet populated from these OOBs.
-- All ARBiH forces map to game faction **`RBiH`**. When formation authoring is implemented, this document is the reference for ARBiH formations (1st–7th Corps, enclave commands, etc.). See `docs/knowledge/SCENARIO_GAME_MAPPING.md` for faction and control value mapping.
+- This document is the research reference. The game's formations (`FormationState` in `src/state/game_state.ts`) are built from the OOB data in `data/source/oob_corps.json` and `data/source/oob_brigades.json`, which follow it; dated corps changes are in `data/source/formation_lifecycle_events.json`. Strength figures here are narrative, not game values.
+- All ARBiH forces map to game faction **`RBiH`**. The game models the General Staff and the 1st, 2nd, 3rd, 4th, 5th and (from week 99) 7th Corps; the 6th Corps is folded into the 4th and 1st Corps, and the enclave forces sit under their parent corps. See `docs/knowledge/SCENARIO_GAME_MAPPING.md` for faction and control value mapping.
 
 ---
 
