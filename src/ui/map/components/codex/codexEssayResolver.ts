@@ -206,11 +206,21 @@ function hasRupture(context: CodexRenderContext, ruptureId: string): boolean {
 
 type MilestoneRow = NonNullable<ComparisonResult['milestone_comparison']>[number];
 
+/**
+ * Rupture milestones are never read as early/late timing rows (§4 sensitive-copy panel,
+ * ending truth pass, 2026-11-14; Sensitive History Design Gate §1 Ring 1). The comparison no
+ * longer writes them; saves frozen earlier still carry the row, so it is dropped here too,
+ * and the sections conditioned on it stay hidden (the enclave_defended ghost entry records
+ * the counterfactual, §5).
+ */
+const RUPTURE_MILESTONE_IDS: ReadonlySet<string> = new Set(['srebrenica_genocide_1995']);
+
 function milestoneRows(context: CodexRenderContext): MilestoneRow[] {
     const raw = context.historicalComparison?.milestone_comparison;
     return Array.isArray(raw)
         ? raw
             .filter((row): row is MilestoneRow => Boolean(row && typeof row.id === 'string'))
+            .filter((row) => !RUPTURE_MILESTONE_IDS.has(row.id))
             .slice()
             .sort((a, b) => {
                 if (a.historical_week !== b.historical_week) return a.historical_week - b.historical_week;
