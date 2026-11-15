@@ -167,8 +167,10 @@ describe('CA campaign integral target table', () => {
         expect(turnsToAfford).toBe(8);
     });
 
-    it('gesture cadence: a 10-CA gesture is affordable roughly monthly under neutral strained conditions', () => {
-        expect(Math.ceil(FRONT_VISIT_COST / neutralRecovery)).toBe(4);
+    // Held step 1 (2026-11-15, ratified Authority design, L7 #670): gestures cost 20, so under neutral
+    // strained recovery one is affordable about every seven weeks (it was monthly at 10).
+    it('gesture cadence: a 20-CA gesture is affordable about every seven weeks under neutral strained conditions', () => {
+        expect(Math.ceil(FRONT_VISIT_COST / neutralRecovery)).toBe(7);
     });
 
     it('healthy quiet cadence affords one override-class act every 3 turns', () => {

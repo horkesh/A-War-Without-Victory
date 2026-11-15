@@ -33,7 +33,9 @@ describe('CA-2 political-income recovery model', () => {
         expect(result.topSource).toBe('international_standing');
     });
 
-    it('neutral strained recovery keeps 10-CA gestures roughly monthly', () => {
+    // Held step 1 (2026-11-15, ratified Authority design, L7 #670): gestures cost 20; about every seven
+    // weeks under neutral strained recovery (it was monthly at 10).
+    it('neutral strained recovery affords a 20-CA gesture about every seven weeks', () => {
         const result = computeCommandAuthorityRecovery({
             dimensions: {
                 internationalStanding: 50,
@@ -44,7 +46,7 @@ describe('CA-2 political-income recovery model', () => {
             unresolvedFriction: 0,
         });
 
-        expect(turnsToAfford(FRONT_VISIT_COST, result.recovery)).toBe(4);
+        expect(turnsToAfford(FRONT_VISIT_COST, result.recovery)).toBe(7);
     });
 
     it('bounds the force-launch and friction spiral to an 8-turn post-crisis drought', () => {

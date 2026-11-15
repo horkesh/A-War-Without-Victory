@@ -31,3 +31,12 @@ The owner delegates design choices to the Pyrrhic team. The orchestrator convene
 **Non-blocking nit, applied:** the card's Accept price now comes from the same source as the IPC debit (the restaged review's `proposalBackingCost`).
 
 **Not touched:** FORAWWV and sensitive history. No §6 seat was needed.
+
+## Held step 1 (2026-11-15): taken on the measured trigger (B min 65.5)
+The ratified held tuning order fixed both the first step and its trigger: the engaged President never falls below 25. In the first three-President run (RBiH, 104 weeks, main plus appendix D, every act through the desktop's own contracts), B's balance never went below 65.5. So step 1, gestures 10 → 20, was taken without a new seat, as the design provides. The other results of that run:
+- A at cap 100%.
+- B at cap 9% (7/78).
+- C at cap 0%, refused for lack of Authority 4 and 9 times a year.
+- No clashes. That was a test-design gap: a Request-op cannot cross RBiH's plan. The test now adds a Stop-op on the main effort.
+
+Changed: the four gesture price constants (`autonomy_ipc_contract.cjs` and `commandAuthority.ts`), Systems Manual §6.4, proposal §5D. The next step, removing the 15-point reserve, is held until the rerun.
