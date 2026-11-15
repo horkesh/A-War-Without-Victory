@@ -41,6 +41,7 @@ import type {
     StanceHoldView, StanceMatterReceiptView, StanceMatterView,
     ArmyClashView, ArmyClashReceiptView,
 } from './types';
+import { proposalBackingCost } from '../utils/commandAuthority';
 import {
     getPlayerSafeCorpsName,
     getPlayerSafeDecisionTitle,
@@ -4912,6 +4913,10 @@ function deriveArmyClashViews(
                 orderRef,
                 orderName,
                 stagedCost: typeof c.staged_cost === 'number' ? c.staged_cost : 0,
+                // Same source as the IPC debit (army_clash_ipc.cjs): the restaged review's backing price.
+                acceptCost: clashAct === 'withhold_plan' || clashAct === 'decline_opportunity'
+                    ? proposalBackingCost(reviews.find((r) => r?.id === c.proposal_id)?.proposed_action)
+                    : 0,
                 corpsObjection: c.corps_objection === true,
                 previousClash: previous ? { turn: typeof previous.turn === 'number' ? previous.turn : 0, outcome: outcome(previous.outcome) } : null,
             };

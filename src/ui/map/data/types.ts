@@ -1105,6 +1105,8 @@ export interface ArmyClashView {
     /** Player-safe name of the operation or opportunity, when the order names one. */
     orderName: string | null;
     stagedCost: number;
+    /** What Accept costs: the backing price of the restaged plan (withhold/decline), else 0. */
+    acceptCost: number;
     corpsObjection: boolean;
     /** The previous clash this faction was shown, for "as on week N". */
     previousClash: { turn: number; outcome: ArmyClashReceiptView['outcome'] } | null;

@@ -339,9 +339,21 @@ describe('answers (desktop IPC)', () => {
         state.meta.pending_proposal_reviews = [{ id: 'PROP_W', turn: 40, faction: 'RBiH', domain: 'ops', description: 'Operation approval', proposed_action: 'APPROVE_OP:c_main:plan_7', accepted: false, resolved_turn: 40 }];
         (state.military.corps_command as any).c_main.player_op_response = { plan_id: 'plan_7', approved: false, turn: 40 };
         raiseArmyClash(state, 'RBiH', { act: 'withhold_plan', corpsId: 'c_main', orderRef: 'plan_7', proposalId: 'PROP_W' });
-        expect(ipc.recordArmyClashAnswer(state, { clashId: 'CLASH_40_RBiH', answer: 'accept' }).ok).toBe(true);
+        // Backing the plan after all pays the owner decision 1 price (10), as any approval does.
+        expect(ipc.recordArmyClashAnswer(state, { clashId: 'CLASH_40_RBiH', answer: 'accept' })).toEqual({ ok: true, cost: 10 });
         expect(state.meta.pending_proposal_reviews![0]!.accepted).toBe(true);
         expect((state.military.corps_command as any).c_main.player_op_response).toEqual({ plan_id: 'plan_7', approved: true, turn: 40 });
+        expect((state.military.command_authority as any).current).toBe(50);
+        expect(state.meta.army_clash_history?.at(-1)).toMatchObject({ outcome: 'accept', cost: 10 });
+    });
+
+    it('Accept of a withheld plan is refused when the backing price cannot be paid, changing nothing', () => {
+        const state = makeState({ authority: 6 });
+        state.meta.pending_proposal_reviews = [{ id: 'PROP_W', turn: 40, faction: 'RBiH', domain: 'ops', description: 'Operation approval', proposed_action: 'APPROVE_OP:c_main:plan_7', accepted: false, resolved_turn: 40 }];
+        raiseArmyClash(state, 'RBiH', { act: 'withhold_plan', corpsId: 'c_main', orderRef: 'plan_7', proposalId: 'PROP_W' });
+        const before = JSON.stringify(state);
+        expect(ipc.recordArmyClashAnswer(state, { clashId: 'CLASH_40_RBiH', answer: 'accept' })).toEqual({ ok: false, error: 'insufficient_command_authority (6/10)' });
+        expect(JSON.stringify(state)).toBe(before);
     });
 
     it('Insist: the order stands, 15 Authority, one override on the army commander only', () => {

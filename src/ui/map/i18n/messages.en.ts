@@ -6120,6 +6120,8 @@ export const enMessages = {
     'clash.cost.free': 'Free',
     'clash.cost.authority': '{cost} Authority',
     'clash.aria.accept': 'Accept the army\'s version. Free.',
+    'clash.aria.acceptPriced': 'Accept the army\'s version and approve the operation. Costs {cost} Authority.',
+    'clash.effect.acceptPriced': 'The operation is approved after all, at the usual backing price.',
     'clash.aria.insist': 'Insist on your order. Costs {cost} Authority.',
     'clash.aria.replace': 'Replace the corps commander. Costs {cost} Authority.',
     'clash.effect.accept': 'The army\'s version is staged instead. Anything you paid for the order is refunded.',

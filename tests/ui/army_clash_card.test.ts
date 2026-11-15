@@ -21,7 +21,7 @@ function clash(overrides: Partial<ArmyClashView> = {}): ArmyClashView {
     id: 'CLASH_40_RBiH', turn: 40, act: 'stop_op', corpsId: 'arbih_2nd_corps', corpsName: '2nd Corps',
     corpsCommanderName: 'Sead Delić', armyCommanderName: 'Rasim Delić', conflict: 'main_effort',
     compliance: 'partial', counterOrder: 'continue_operation', orderRef: 'Operation Vozuca',
-    orderName: 'Operation Vozuća', stagedCost: 25, corpsObjection: false, previousClash: null, ...overrides,
+    orderName: 'Operation Vozuća', stagedCost: 25, acceptCost: 0, corpsObjection: false, previousClash: null, ...overrides,
   };
 }
 
@@ -102,6 +102,18 @@ describe('army clash: Command Surface card', () => {
     expect(screen.getByTestId('army-clash-replace').textContent).toContain('Replace the corps commander');
   });
 
+  it('prices Accept at the backing cost when the army\'s version is an approval', async () => {
+    installIpc();
+    render(React.createElement(DirectiveCard, {
+      directive: DIRECTIVE,
+      gameState: makeState({ armyClashes: [clash({ act: 'withhold_plan', counterOrder: 'launch_plan', conflict: 'primary_corps', orderName: null, acceptCost: 10 })], commandAuthority: { current: 8, max: 100, spentThisTurn: 0, lifetimeSpent: 0 } as never }),
+    }));
+    const accept = await screen.findByTestId('army-clash-accept');
+    expect(accept.textContent).toContain('10 Authority');
+    expect(accept.getAttribute('aria-label')).toBe('Accept the army\'s version and approve the operation. Costs 10 Authority.');
+    expect(accept.hasAttribute('disabled')).toBe(true);
+  });
+
   it('shows both voices when the corps commander objected too', async () => {
     installIpc();
     render(React.createElement(DirectiveCard, { directive: DIRECTIVE, gameState: makeState({ armyClashes: [clash({ act: 'request_op', orderRef: 'op:doboj:doboj_1', orderName: null, corpsObjection: true, counterOrder: 'resubmit_next_week', conflict: 'economy_corps' })] }) }));
@@ -138,9 +150,14 @@ describe('army clash: inbox and adapter', () => {
       id: 'CLASH_0_RBiH', faction: 'RBiH', turn: 0, act: 'stop_op', corps_id: 'arbih_2nd_corps',
       army_officer_id: armyChief.id, conflict: 'main_effort', outcome: 'insist', resolved_turn: 0, cost: 15,
     }];
+    raw.meta.pending_proposal_reviews = [
+      ...(raw.meta.pending_proposal_reviews ?? []),
+      { id: 'P', turn, faction: 'RBiH', domain: 'ops', description: 'Operation approval', proposed_action: 'APPROVE_OP:arbih_2nd_corps:plan_1', accepted: false, resolved_turn: turn },
+    ];
     const loaded = parseGameState(raw);
     expect(loaded.armyClashes).toHaveLength(1);
-    expect(loaded.armyClashes![0]).toMatchObject({ act: 'withhold_plan', armyCommanderName: armyChief.name, counterOrder: 'launch_plan' });
+    // Accept's price comes from the restaged review, the same source as the IPC debit.
+    expect(loaded.armyClashes![0]).toMatchObject({ act: 'withhold_plan', armyCommanderName: armyChief.name, counterOrder: 'launch_plan', acceptCost: 10 });
     expect(loaded.armyClashes![0]!.corpsName).not.toMatch(/arbih_/);
     expect(loaded.armyClashHistory![0]).toMatchObject({ outcome: 'insist', cost: 15 });
     raw.meta.turn = turn + 1;

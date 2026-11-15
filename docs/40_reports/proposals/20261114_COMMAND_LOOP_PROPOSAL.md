@@ -127,7 +127,7 @@ objective, hold N weeks later, take the force from another corps, or resubmit ne
 
 | Answer | Effect | Cost |
 | --- | --- | --- |
-| Accept | The army's version is staged instead. Any Authority already staged for the order is refunded. Record: "You deferred to {CO} on week N." | 0; uses one of the year's clashes |
+| Accept | The army's version is staged instead. A withdrawn halt or request is refunded the Authority staged for it; a withheld plan or declined opportunity is backed at its usual price (10 or 20), refused when unaffordable. Record: "You deferred to {CO} on week N." | 0 for a halt or request; 10 or 20 for a withheld plan or declined opportunity; uses one of the year's clashes |
 | Insist | The order stands as given. One override goes on the army commander's tolerance record (`army_co_lifecycle.ts:470-476`). Record: "{CO} warned you on week N." Corps cowing counters are not touched. | 15 Authority |
 | Replace | The existing Replace-CO lever for the corps commander who would carry out the order, staged at answer time through `co_replacement.cjs` so it lands the same week. | 25 Authority (lever 5) |
 
@@ -414,16 +414,19 @@ game-designer and canon-compliance seats).**
   optional spend is overruling: stop, request, elite, replace (25), force over a no-go (15), Insist in a
   clash (15, 2A), backing (10 or 20).
 - **The gestures are the routine spend.** Front visit, address to the nation, decoration and strategic
-  posture review (10 each) become renewable all war, on a cooldown instead of a lifetime cap (front visit
-  26 weeks, address 52, decoration 52, posture review 26), keeping the war total about where today's caps
-  put it. A data-only change, player path only, measured byte-identical for headless.
+  posture review (10 each) are to become renewable all war, on a cooldown instead of a lifetime cap
+  (front visit 26 weeks, address 52, decoration 52, posture review 26), keeping the war total about where
+  today's caps put it: a later data-only PR (Fable appendix D), player path only, to be measured
+  byte-identical for headless at its merge.
 - **The 25% target moves to the President it fits.** Test with three Presidents over 104 weeks at the
   default autonomy, counting a turn at cap only when `current` equals `max` and the reserve is full:
   A, hands-off (answers nothing, initiates nothing: a full meter is valid, shown as unspent capital);
   B, engaged (every gesture when off cooldown and affordable, a Request-op every eighth week on the corps
   with the most enemy contact, Insist on every clash, backs what he is asked); C, meddler (as B, a
   Request-op every fourth week). Pass: B at cap in at most 25% of turns after week 26; B below 25 at
-  least once a year; C refused at least four times a year; B sees at least two clashes a year.
+  least once a year; C has an act turned down for lack of Authority at least four times a year; B sees
+  at least two clashes a year. Record each army chief's stubbornness: run on main as it stands and again
+  after the roster fix (Fable appendix B) lands; the clash line is judged on the second run.
 - **Held tuning order**, applied one step at a time and only if the test fails: gestures 10 → 20, then
   remove the 15-point reserve, then lower the base income. None is applied before the test.
 - Not part of this design: named operations drawing on Authority (a post-1.0 candidate), and the masked

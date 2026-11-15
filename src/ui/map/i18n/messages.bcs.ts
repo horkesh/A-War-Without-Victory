@@ -6182,6 +6182,8 @@ export const bcsMessages: Partial<Record<MessageKey, string>> = {
     'clash.cost.free': 'Besplatno',
     'clash.cost.authority': '{cost} autoriteta',
     'clash.aria.accept': 'Prihvati prijedlog armije. Besplatno.',
+    'clash.aria.acceptPriced': 'Prihvati prijedlog armije i odobri operaciju. Košta {cost} autoriteta.',
+    'clash.effect.acceptPriced': 'Operacija se ipak odobrava, po uobičajenoj cijeni podrške.',
     'clash.aria.insist': 'Insistiraj na svom naređenju. Košta {cost} autoriteta.',
     'clash.aria.replace': 'Smijeni komandanta korpusa. Košta {cost} autoriteta.',
     'clash.effect.accept': 'Umjesto vašeg naređenja priprema se prijedlog armije. Ono što ste platili za naređenje vraća vam se.',

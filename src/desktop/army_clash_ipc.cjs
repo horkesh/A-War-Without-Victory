@@ -7,8 +7,10 @@
  * only the clash fields, the staged order it concerns and (for Insist) the army commander's
  * override record. The war pipeline gains no step.
  *
- *   accept  : the army's version is staged instead and any Authority staged for the order is
- *             refunded. Free.
+ *   accept  : the army's version is staged instead, at that version's price: a withdrawn halt or
+ *             request refunds the Authority staged for it; a restaged withheld plan or declined
+ *             opportunity is an approval and pays the backing price (10 or 20), refused when
+ *             unaffordable.
  *   insist  : the order stands as given; one override goes on the army commander's tolerance
  *             record (`recent_overrides`, read by army_co_lifecycle). 15 Authority.
  *   replace : the existing Replace-CO lever for the corps commander who would carry out the
@@ -19,7 +21,7 @@
  */
 
 const { stageCoReplacement, REPLACE_CO_COST } = require('./co_replacement.cjs');
-const { debitCommandAuthority } = require('./autonomy_ipc_contract.cjs');
+const { debitCommandAuthority, proposalBackingCost } = require('./autonomy_ipc_contract.cjs');
 
 const ARMY_CLASH_INSIST_COST = 15;
 const ARMY_CLASH_HISTORY_CAP = 200;
@@ -62,6 +64,11 @@ function stageArmyVersion(state, clash) {
   }
   const review = reviews.find((row) => row && row.id === clash.proposal_id);
   if (!review) return 'proposal_not_found';
+  // The army's version of a withheld plan or a declined opportunity is an approval, so it pays the
+  // owner decision 1 backing price (10 or 20) like any other approval; refused when unaffordable
+  // (game-designer seat, L7 ratification: otherwise withhold + Accept would skip the price).
+  const backing = debitCommandAuthority(state, proposalBackingCost(review.proposed_action));
+  if (!backing.ok) return backing.error;
   if (clash.act === 'withhold_plan') {
     review.accepted = true;
     review.resolved_turn = turn;
@@ -112,8 +119,13 @@ function recordArmyClashAnswer(state, payload) {
 
   let cost = 0;
   if (answer === 'accept') {
+    const reviewBefore = (Array.isArray(meta.pending_proposal_reviews) ? meta.pending_proposal_reviews : [])
+      .find((row) => row && row.id === clash.proposal_id);
     const error = stageArmyVersion(state, clash);
     if (error) return { ok: false, error };
+    cost = clash.act === 'withhold_plan' || clash.act === 'decline_opportunity'
+      ? proposalBackingCost(reviewBefore && reviewBefore.proposed_action)
+      : 0;
   } else if (answer === 'insist') {
     const debit = debitCommandAuthority(state, ARMY_CLASH_INSIST_COST);
     if (!debit.ok) return { ok: false, error: debit.error };

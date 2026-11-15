@@ -6,7 +6,8 @@
  * Facts: the order as issued, the army's counter-order, the corps affected, his reason (and the
  * corps commander's own objection when it fired on the same order), and the previous clash.
  * Three equal buttons, each with its price and an aria label that includes it:
- *   Accept  (free)  the army's version is staged instead; anything paid for the order is refunded.
+ *   Accept          the army's version is staged instead: a withdrawn halt or request is refunded
+ *                   (free); a withheld plan or declined opportunity pays the backing price (10/20).
  *   Insist  (15)    the order stands; one override on the army commander's record.
  *   Replace (25)    the corps commander who would carry it out is replaced this week.
  * Advisory: unanswered at Advance, the order stands as given. Applied by `resolve-army-clash`.
@@ -49,10 +50,16 @@ export function ArmyClashActions({ clash, gameState, onAnswered }: ArmyClashActi
     ? t('clash.answer.replace', { commander: clash.corpsCommanderName })
     : t('clash.answer.replaceFallback');
 
+  // The army's version of a withheld plan or a declined opportunity is an approval and pays the
+  // backing price (owner decision 1); a withdrawn halt or request is refunded instead. The adapter
+  // takes the price from the restaged review, the same source as the IPC debit.
+  const acceptCost = clash.acceptCost;
   const answers: Array<{ answer: Answer; label: string; cost: number; aria: string; effect: string; disabled: boolean }> = [
     {
-      answer: 'accept', label: t('clash.answer.accept'), cost: 0,
-      aria: t('clash.aria.accept'), effect: t('clash.effect.accept'), disabled: false,
+      answer: 'accept', label: t('clash.answer.accept'), cost: acceptCost,
+      aria: acceptCost > 0 ? t('clash.aria.acceptPriced', { cost: acceptCost }) : t('clash.aria.accept'),
+      effect: acceptCost > 0 ? t('clash.effect.acceptPriced') : t('clash.effect.accept'),
+      disabled: !canAfford(acceptCost),
     },
     {
       answer: 'insist', label: t('clash.answer.insist'), cost: ARMY_CLASH_INSIST_COST,

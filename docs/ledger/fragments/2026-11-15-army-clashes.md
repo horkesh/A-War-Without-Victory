@@ -5,7 +5,7 @@
   - The army commander's A3 compliance with the act is short of full (modified, partial or refused), with the category kept as the clash's severity. Fable consult 1, appendix A, replaced the proposal's "partial or refused, never modified": the weekly noise that rule guarded against cannot reach A1.
   - The act concerns a corps operation or larger.
   - A crossing he fully complies with, or one with no army commander or an acting one, is a `noted` Record line.
-- **Answers.** Accept costs nothing: the army's version is staged and the order's Authority refunded. Insist costs 15 Authority, and one `override` goes on the army commander's `recent_overrides`. Replace is the existing Replace-CO lever for the corps commander, at 25. It never reaches the army commander (owner decision 4).
+- **Answers.** Accept stages the army's version at its own price: a withdrawn halt or request is refunded; a withheld plan or declined opportunity is backed at the owner decision 1 price (10 or 20), refused when unaffordable. Both ratification seats flagged that a free Accept would let withhold-then-Accept back an offensive for nothing. Insist costs 15 Authority, and one `override` goes on the army commander's `recent_overrides`. Replace is the existing Replace-CO lever for the corps commander, at 25. It never reaches the army commander (owner decision 4).
   - Unanswered at Advance, a clash lapses and the order stands.
   - Caps: one open, eight weeks apart, four per faction per calendar year. A clash over the caps becomes a `not_put` line.
 - **Code.**
