@@ -24,9 +24,9 @@ describe('presidential cadence catalog audit', () => {
       expect(event?.recurrence, id).toBeUndefined();
       const isPosture = id.startsWith('strategic_posture_review_');
       const isFrontVisit = id.startsWith('visit_to_front_');
+      // Renewable gestures (Fable consult 1 appendix D, 2026-11-15): cooldown only, no lifetime cap.
       expect(event?.action_cadence, id).toEqual({
-        max_fires: isPosture ? 8 : 5,
-        cooldown_turns: isPosture ? 8 : 10,
+        cooldown_turns: isPosture || isFrontVisit ? 26 : 52,
         escalation: isPosture || isFrontVisit ? 'escalating' : 'static',
       });
     }
