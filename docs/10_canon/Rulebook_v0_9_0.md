@@ -214,6 +214,8 @@ When an officer departs (historical departure date, casualty, capture, or retire
 
 **Dated corps schedule:** where the corps schedule names a commander for the date, he takes the corps first and replaces a stand-in when his tenure begins. A commander you appointed, accepted or kept is never rotated out, and in Full Control you are asked instead of the change being made for you. Historical deaths and reliefs happen on their dates; a relief is put to you in Full Control, a death is not. Commanders who survived the war in history are not killed by length of service. The schedule ships empty, so until its dates are filled in the pool ranking above applies.
 
+**Reorganisation appointments:** a corps reorganisation can name its commander, as when Mehmed Alagić takes the new ARBiH 7th Corps on 26 February 1994. The same rule holds. If you appointed, accepted or kept the commander already there, the appointment lapses and he stays. In Full Control the change is put to you as a replacement; it is made only if you accept it.
+
 **Faction-specific succession rules:**
 - **VRS:** Brain drain — officers leave at an increasing rate after week 40, reflecting the real degradation of the Serbian officer corps.
 - **ARBiH:** Pool regeneration — new officers emerge periodically with modest base competence but high improvement potential, reflecting the wartime professionalization of the Bosnian army. Early-war warlord friction reduces effectiveness.
