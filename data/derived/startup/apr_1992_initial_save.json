@@ -1126,11 +1126,6 @@
   "military": {
     "alliance_locks": [],
     "army_co_decision_traces": {},
-    "army_co_political_tolerance": {
-      "HRHB": 2,
-      "RBiH": 3,
-      "RS": 4
-    },
     "army_corps_directives_by_faction": {},
     "army_hq_last_op_turn": {},
     "army_hq_op_count_by_year": {},

@@ -520,21 +520,55 @@ export function relieveArmyCommander(
  * Faction-symmetric: iterates a sorted faction list; no per-faction branches.
  *
  * The roster owns `stubbornness` for every officer it lists (RF-ROSTER,
- * 2026-11-15): each call writes the roster value plus any recorded overstay
- * escalation (`kept_past_schedule_since_turn` before this turn, capped at
- * `stubbornness_cap`). Save migration 10 defaults every officer to 3, and the
- * old "only when undefined" rule therefore never let a roster value through;
- * an older save is corrected on its first call. No scenario authors
- * `stubbornness`; the roster is its only source. Officers the roster does not
- * list keep whatever they carry. Idempotent: a second call writes the same values.
+ * 2026-11-15): each call writes the roster value, plus the one-shot overstay
+ * escalation whenever an overstay is on record (`kept_past_schedule_since_turn`
+ * set; capped at `stubbornness_cap`). The value depends only on the roster and
+ * that marker, and the A4 step ends each turn with it, so a saved value reloads
+ * unchanged (migration 10 defaults only undefined values). Save migration 10
+ * defaults every officer to 3, and the old "only when undefined" rule therefore
+ * never let a roster value through; an older save is corrected on its first war
+ * turn. No scenario authors `stubbornness`; the roster is its only source.
+ * Officers the roster does not list keep whatever they carry. Idempotent: a
+ * second call writes the same values.
  */
 export function applyRosterToOfficers(
     state: GameState,
     roster: ArmyCoRoster,
 ): void {
+    if (!state.military.named_officer_data) return;
+    applyRosterStubbornness(state, roster);
+
+    // Per-faction political-leader tolerance — stored on a forward-compat slot
+    // on military state. A3 does not need to read this (its consumer is the
+    // future political-bot lane); we land it now so 188w validation has the
+    // value populated.
+    type LooseMilitary = GameState['military'] & {
+        army_co_political_tolerance?: Record<string, number>;
+    };
+    const mil = state.military as LooseMilitary;
+    if (!mil.army_co_political_tolerance) mil.army_co_political_tolerance = {};
+    const tolerances = roster.political_leader_tolerance ?? {};
+    const tolFactions = Object.keys(tolerances).sort();
+    for (const faction of tolFactions) {
+        const v = tolerances[faction];
+        if (typeof v === 'number') {
+            mil.army_co_political_tolerance[faction] = v;
+        }
+    }
+}
+
+/**
+ * RF-ROSTER: the stubbornness half of `applyRosterToOfficers` alone. Officer
+ * initialisation uses it so the startup save carries the roster values without
+ * adding any persisted key (the political-tolerance slot is first written by the
+ * war step, as before).
+ */
+export function applyRosterStubbornness(
+    state: GameState,
+    roster: ArmyCoRoster,
+): void {
     const officerData = state.military.named_officer_data;
     if (!officerData) return;
-    const turn = state.meta?.turn ?? 0;
     const officerStates = state.military.named_officers ?? {};
     const keepPast = roster.variation_rules?.keep_past_schedule;
     const escalation = keepPast?.stubbornness_escalation ?? A4_DEFAULT_STUBBORNNESS_ESCALATION;
@@ -553,31 +587,11 @@ export function applyRosterToOfficers(
         for (const entry of sched) {
             const officer = officerIndex.get(entry.officer_id);
             if (!officer) continue;
-            // Roster value, plus the one-shot escalation once an overstay is on
-            // record from an earlier turn (applyEmergentVariationRules adds it on
-            // the first overstay turn itself).
+            // Roster value, plus the one-shot escalation once an overstay is on record.
             const overstaySince = (officerStates[entry.officer_id] as { kept_past_schedule_since_turn?: number } | undefined)
                 ?.kept_past_schedule_since_turn;
-            const escalated = typeof overstaySince === 'number' && overstaySince < turn && escalation !== 0;
+            const escalated = typeof overstaySince === 'number' && escalation !== 0;
             officer.stubbornness = escalated ? Math.min(cap, entry.stubbornness + escalation) : entry.stubbornness;
-        }
-    }
-
-    // Per-faction political-leader tolerance — stored on a forward-compat slot
-    // on military state. A3 does not need to read this (its consumer is the
-    // future political-bot lane); we land it now so 188w validation has the
-    // value populated.
-    type LooseMilitary = GameState['military'] & {
-        army_co_political_tolerance?: Record<string, number>;
-    };
-    const mil = state.military as LooseMilitary;
-    if (!mil.army_co_political_tolerance) mil.army_co_political_tolerance = {};
-    const tolerances = roster.political_leader_tolerance ?? {};
-    const tolFactions = Object.keys(tolerances).sort();
-    for (const faction of tolFactions) {
-        const v = tolerances[faction];
-        if (typeof v === 'number') {
-            mil.army_co_political_tolerance[faction] = v;
         }
     }
 }
@@ -776,4 +790,8 @@ export function applyArmyCoRosterStep(
     applyRosterToOfficers(state, roster);
     evaluateScheduledTransitions(state, turn, roster);
     applyEmergentVariationRules(state, turn, roster);
+    // RF-ROSTER: re-apply after the transitions so the end-of-step stubbornness is a
+    // pure function of the roster and the overstay marker (also when the marker is
+    // first set late), which is exactly what a save reloads to.
+    applyRosterToOfficers(state, roster);
 }

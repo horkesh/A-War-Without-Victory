@@ -234,6 +234,29 @@ describe('A4 — political-leader tolerance', () => {
 // T4 — Scheduled transition: officer at tenure_end_default does NOT
 // double-fire relief (processOfficerSuccession remains canonical owner)
 // ===========================================================================
+describe('A4 — overstay escalation survives a save on the overstay turn (RF-ROSTER, determinism seat C1)', () => {
+    for (const turn of [61, 70]) {
+        it(`step at turn ${turn} (${turn === 61 ? 'first overstay turn' : 'marker first set late'}) → save → load gives the same stubbornness`, async () => {
+            const { applyMigrations } = await import('../src/state/save_migration.js');
+            const roster = loadArmyCoRoster();
+            const state = makeBaseState(turn);
+            state.military.named_officer_data = [makeOfficer({ id: 'arbih_halilovic', faction: 'RBiH', rank: 'army_commander', available_until_turn: 60, stubbornness: 3 })];
+            state.military.named_officers = { arbih_halilovic: makeOfficerState({ officer_id: 'arbih_halilovic', status: 'active' }) };
+            applyArmyCoRosterStep(state);
+            // Roster 4 + one-shot escalation 1, because the overstay is on record.
+            expect(state.military.named_officer_data![0].stubbornness).toBe(5);
+            const saved = JSON.stringify(state);
+            const loaded = JSON.parse(saved) as GameState;
+            applyMigrations(loaded);
+            expect(loaded.military.named_officer_data![0].stubbornness).toBe(5);
+            // A second step on the next turn keeps it (no double escalation).
+            loaded.meta.turn = turn + 1;
+            applyArmyCoRosterStep(loaded);
+            expect(loaded.military.named_officer_data![0].stubbornness).toBe(5);
+        });
+    }
+});
+
 describe('A4 — evaluateScheduledTransitions', () => {
     it('T4 — kept-past-schedule marker recorded but NO relief event emitted (canonical owner is processOfficerSuccession)', () => {
         const roster = loadArmyCoRoster();

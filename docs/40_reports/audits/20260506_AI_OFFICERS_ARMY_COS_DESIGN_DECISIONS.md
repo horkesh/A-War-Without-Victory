@@ -182,3 +182,29 @@ Unset constants flagged for **mini-panel** before A4 SHIP:
 - ARMY-GAP-1 audit: `docs/40_reports/audits/20260330_REPO_HEALTH_CONSOLIDATED.md`
 - Order Interpretation Phase 1 (shipped): `src/sim/combat/order_interpretation.ts` 949 LOC
 - KNOWLEDGE: parallel-lane git-index sweep risk + sibling-file-ownership collision (2026-05-06; honor pathspec form throughout this lane sequence)
+
+---
+
+## Addendum, 2026-11-15 (RF-ROSTER, PR #677): the stubbornness values go live; provenance and corrections
+
+**Live.** Until RF-ROSTER these values never applied: save migration 10 wrote 3 on every officer, and the roster step filled only empty values. They are now live from turn 0, written at officer init and every war turn (an older save is corrected on its first war turn). In the measured 188-week run no outcome moved. The historian seat's review is in `C:/Pyrrhic/AWWV-worktrees/_logs/cl-rf-roster-20261115/seat_historian.md`.
+
+**Provenance.** The values are **design-authored**. No source sets them. None is contradicted by the record:
+
+| Chief | Value | Record |
+|---|---|---|
+| Mladić | 5 | Supported by Balkan Battlegrounds: slow Igman withdrawal "despite … Karadzic's prodding" (BB2, Aug 1993); "Milosevic's man in Bosnia, not Karadzic" (BB1); Karadžić removed and reinstated him, 4–11 Aug 1995 (BB1 chronology). Limit: the Karadžić trial judgement (IT-95-5/18-T) holds that Karadžić controlled the VRS in fact throughout the conflict, so 5 means pushback and partial compliance, never action outside political control. |
+| Halilović | 4 | Supported: argued for force after Prozor (Oct 1992), was overruled by Izetbegović, then complied (BB1). |
+| Delić | 2 | Unsourced but plausible: the Presidency's appointee, who built a force that answered orders (BB1). |
+| Petković | 2 | Supported: appointed by Boban; his HQ was also an HV command post (Prlić et al. trial judgement IT-04-74-T, Vol 4 §651; BB1). |
+| Praljak | 3 | Unsourced; kept for a calibration reason, not a historical one. It sits oddly with his `political_reliability` 5. |
+| Roso | 2 | Supported: signed the 23 Feb 1994 Zagreb ceasefire with Delić (BB2). |
+| Petković-2 | 2 | Plausible; the same man, second tenure 26 Apr–5 Aug 1994 (Prlić TJ Vol 4 §652). |
+| Blaškić-2 | 3 | Unsourced value; identity and date are sourced (ICTY case sheet IT-95-14: commander from early August 1994). |
+
+**Corrections to the reasons given above.**
+- "Vukovar 1991" for Mladić: he led the JNA 9th (Knin) Corps, not the Vukovar operation (BB1).
+- "Srebrenica 1995" as Mladić's insubordination: the Karadžić judgement finds that Karadžić issued Directive 7 and shared the plan. It is not an example of defiance.
+- "Neretva '93" and a July 1993 sacking for Halilović: Delić replaced Halilović on 8 June 1993 (BB1 p.180). Neretva-93 came later, and the Halilović trial (IT-01-48-T) ended in acquittal.
+- §6 note for the autonomous-launch path: Krivaja-95 and Stupčanica-95 are not in the operation-opportunity catalog, so the path cannot propose them. Any future activation that frames a Srebrenica-area operation as "launched by Mladić, the President only failed to veto" goes to the §6 panel first.
+- Tenure starts in the roster run early against the record: Praljak 64 against week 67, Roso 80 against 83, Petković-2 100 against 107, Blaškić-2 120 against 121. Delić 61 is correct. These are registered for the calibration pass, one measured change at a time.
