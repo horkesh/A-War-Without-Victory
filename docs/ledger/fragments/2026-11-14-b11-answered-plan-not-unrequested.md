@@ -1,0 +1,15 @@
+## 2026-11-14 — B11: an accepted proposal no longer comes back as an "unrequested operation"
+
+**Problem (R8 dry-run Council, B11, m-611 → m-612).** After the President accepted a free staff proposal, the Decision Room offered the same plan as "Order an unrequested operation: … 25 Authority", and the receipt said "Command authority is spent now" while nothing had been spent.
+
+**Cause.** `accept-proposal` resolves the APPROVE_OP review and stages `corps_command[c].player_op_response`; the plan stays `ready` until Advance. The proactive force-launch projections (`buildForceableReadyPlans` in `backTheOfficer.ts`, `buildForceableReadyPlanData` in `autonomy_ipc_contract.cjs`) only excluded plans with a pending proposal, so the just-answered plan looked unrequested. The `proactive-force-launch-op` IPC accepted it too: clicking would charge 25 CA and re-tag an ordinary commit as a force-launch (Direct Intervention, which feeds command strain and lowers CA recovery). The engine-side `proposal_generation.ts` already excluded such plans. Separately, `DirectiveCard.markIssued` printed the same "authority is spent" receipt for cost-0 directives.
+
+**Change (UI projection and desktop guard only; no sim, state, save or calibration change).**
+- New `resolveProactiveForceLaunchRefusal` in `src/desktop/autonomy_ipc_contract.cjs`: `plan_has_pending_proposal` (an unresolved APPROVE_OP review from the player's faction), `plan_already_answered` (a staged `player_op_response` for the plan, which accept and withhold both stage and the commander loop consumes), or null. Used by `buildForceableReadyPlanData` and by the `proactive-force-launch-op` handler in `electron-main.cjs`.
+- `buildForceableReadyPlans` mirrors the rule from the raw state.
+- A review that auto-expired unanswered (`apply-autonomy-transition` marks it `accepted=false` and stages nothing) is deliberately NOT a refusal: its plan stays held at `ready`, is never re-proposed, and the proactive card is the only way to release it. An independent review caught an earlier draft that refused it.
+- `DirectiveCard` uses `directive.receipt.stagedNextTurnFree` (EN, BCS) when the directive costs 0.
+
+**Checked.** `tests/ui/b11_answered_plan_not_unrequested.test.ts` (18 cases: accepted, withheld, accepted but launch still blocked, staged force-launch, auto-expired review still offered, raw pending review, other plan, pending proposal, other faction); the projection cases failed on the old code. The receipt assertions in `tests/ui/decision_room_review_proposal.test.ts` (accept and withhold) failed on the old `DirectiveCard` and pass now. Every test that reads `electron-main.cjs`, `backTheOfficer` or `autonomy_ipc_contract`, plus the i18n parity suites: 57 files, 786 tests green. `npx tsc --noEmit` exit 0.
+
+**Not done.** Rendered check in the packaged app. The held-forever plan after an expired proposal (likely the Council's L8 "same two unrequested offers 1992-1995") is recorded in the command-loop proposal, `docs/40_reports/proposals/20261114_COMMAND_LOOP_PROPOSAL.md`, not fixed here.

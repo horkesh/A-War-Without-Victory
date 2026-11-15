@@ -461,7 +461,12 @@ function LeverDirectiveCard({ directive, gameState, onReceipt }: DirectiveCardPr
   };
 
   const markIssued = () => {
-    publishReceipt({ kind: 'success', message: t('directive.receipt.stagedNextTurn') });
+    // A cost-0 directive (accepting or withholding a staff proposal) spends no
+    // command authority, so its receipt must not say it did (B11 toast half).
+    publishReceipt({
+      kind: 'success',
+      message: t(cost > 0 ? 'directive.receipt.stagedNextTurn' : 'directive.receipt.stagedNextTurnFree'),
+    });
   };
 
   const markLeadershipDecisionOpened = () => {

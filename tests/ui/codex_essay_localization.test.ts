@@ -117,8 +117,8 @@ describe('Codex essay localization coverage', () => {
         // (commit 67eee60a). It still binds the same sourced operational facts:
         // the 5th Corps push from the pocket toward Grabez/Bosanska Krupa against
         // the VRS, and the Abdic/APWB split. Assert against the current canonized text.
-        expect(bihacEvent?.narrative).toContain('push from the pocket into Grabez and toward Bosanska Krupa against the VRS');
-        expect(bihacEvent?.narrative).toContain('Fikret Abdic / APWB split declared at Velika Kladuša on 27 September 1993');
+        expect(bihacEvent?.narrative).toContain('push from the pocket into Grabež and toward Bosanska Krupa against the VRS');
+        expect(bihacEvent?.narrative).toContain('Fikret Abdić / APWB split declared at Velika Kladuša on 27 September 1993');
         expect(sanaEvent?.narrative).toContain('Bosanski Petrovac fell on 15 September, Ključ two days later');
         expect(sanaEssay?.content).toContain('Bosanski Petrovac fell on 15 September, Ključ two days later');
 

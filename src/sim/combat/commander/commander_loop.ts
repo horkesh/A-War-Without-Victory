@@ -203,6 +203,21 @@ export function runCommanderForCorps(
 // ═══════════════════════════════════════════════════════════════════════════
 
 /**
+ * True when the Level-1 approval proposal for this exact plan was expired unanswered:
+ * `apply-autonomy-transition` stamps an unanswered review `accepted: false` with a
+ * `resolved_turn` but stages no `player_op_response` (an explicit accept or decline does).
+ * Callers check the staged response first, so this only sees silence.
+ */
+function planProposalExpiredUnanswered(state: GameState, corpsId: FormationId, planId: string): boolean {
+    const action = `APPROVE_OP:${corpsId}:${planId}`;
+    return (state.meta?.pending_proposal_reviews ?? []).some((review) => (
+        review.proposed_action === action
+        && review.accepted === false
+        && review.resolved_turn != null
+    ));
+}
+
+/**
  * Apply commander output to game state.
  * Writes CorpsDirective, operations, sector stances back to GameState.
  * Writes CorpsDirective, operations, and sector stances back to GameState.
@@ -303,6 +318,16 @@ export function applyCommanderOutput(
                 corps.commander_state = { ...output.updated_state, current_plan: null };
                 corps.status_reason = 'plan abandoned: player rejected op proposal at Level 1';
                 corps.player_op_response = undefined;
+                return;
+            } else if (!planApproved && planProposalExpiredUnanswered(state, corpsId, updatedPlan.plan_id)) {
+                // L3b (command-loop proposal §5C, Council L8): the President let this plan's
+                // proposal expire unanswered (apply-autonomy-transition stamps it declined but stages
+                // no response). Release the plan so the commander replans, instead of holding it at
+                // 'ready' forever with the force-launch card as its only way out. Silence lets his
+                // staff's reading stand. An explicit answer is still the staged player_op_response
+                // above (#633 B11 unchanged). Player faction only; headless never reaches this branch.
+                corps.commander_state = { ...output.updated_state, current_plan: null };
+                corps.status_reason = 'plan released: op proposal expired unanswered at Level 1';
                 return;
             } else if (!planApproved) {
                 // No player response yet — hold plan at 'ready', emit no new operations.

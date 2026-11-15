@@ -48,6 +48,8 @@ import { strictCompare } from '../../../state/validateGameState.js';
 import { getPlayerSafeDisplayLabel } from '../utils/playerSafeText.js';
 import { getActiveLocale, t, type Locale } from '../i18n/index.js';
 import { isCanonicalPlayerFaction, playerFactionMatch } from './playerFactionMatch.js';
+import { hasDeveloperText } from '../../shared/developerText.js';
+import { restoreBosnianProperNames } from '../../shared/bosnianPlaceNames.js';
 
 /** Realization status of a single predicted downstream event. */
 export type ConsequenceReceiptStatus = 'confirmed' | 'pending' | 'contradicted';
@@ -152,19 +154,36 @@ function resolveOptionLabel(
         : getPlayerSafeDisplayLabel(fallbackId, 'Recorded response');
 }
 
-function resolvePredictedLabel(
+/**
+ * Player-facing label for a predicted consequence. An authored English label written as an
+ * authoring note ("... is the canon-bound consequence surface") is skipped for the predicted
+ * event's title (council fix 4, C1). Exported for the developer-text guard test.
+ */
+export function resolvePredictedLabel(
     def: EventDefinition | undefined,
     fallbackId: string,
     authoredEnglishLabel: string | undefined,
     locale: Locale,
 ): string {
     if (locale === 'en') {
-        return authoredEnglishLabel?.trim() || resolveEventTitle(def, fallbackId, locale);
+        const authored = authoredEnglishLabel?.trim();
+        return restoreBosnianProperNames(authored && !hasDeveloperText(authored) ? authored : resolveEventTitle(def, fallbackId, locale));
     }
     const localizedTitle = def?.localizations?.[locale]?.title;
     return typeof localizedTitle === 'string' && localizedTitle.trim().length > 0
         ? localizedTitle
         : t('chronicle.card.consequence', undefined, locale);
+}
+
+/**
+ * Player-facing explanation for a predicted consequence: the authored English text, or nothing
+ * when it reads as an authoring note (internal ids, repo paths, worksheet or canon voice).
+ * English only, as before. Exported for the developer-text guard test.
+ */
+export function resolvePredictedExplanation(explanation: string | undefined, locale: Locale): string {
+    if (locale !== 'en') return '';
+    const text = explanation?.trim() ?? '';
+    return text && !hasDeveloperText(text) ? restoreBosnianProperNames(text) : '';
 }
 
 /** Player-facing label for a faction's coercive patron — sober, factual. */
@@ -341,7 +360,7 @@ export function buildConsequenceReceipts(
                     decisionTurn: dec.turn,
                     predictedEventId: predictedId,
                     predictedLabel,
-                    predictedExplanation: locale === 'en' ? fc.explanation ?? '' : '',
+                    predictedExplanation: resolvePredictedExplanation(fc.explanation, locale),
                     status: 'confirmed',
                     firedTurn: realized.fired_turn,
                     turnsElapsed: realized.turns_elapsed,

@@ -13,7 +13,7 @@ import { t } from '../../i18n';
 import { sidePickerFactionLabel } from '../../utils/sidePickerLabels.js';
 import { turnToDateString } from '../../utils/formatters.js';
 import { shouldNarrateTerritorySummary } from '../../data/territorySummaryGuard.js';
-import { resolveEventDisplayTitle as resolveDisplayCopyTitle } from '../../data/eventDisplayCopy.js';
+import { resolveEventDisplayTitle as resolveDisplayCopyTitle, resolveEventSourceLine } from '../../data/eventDisplayCopy.js';
 
 export interface WrappedSlide {
     id: string;
@@ -549,7 +549,7 @@ function pickFoundationalChoice(
             eventId: dec.event_id,
             optionId: option.id,
             optionLabel: resolveResponseDisplayLabel(def, option.id, 'Foundational response'),
-            sourceNote: def.source_note,
+            sourceNote: resolveEventSourceLine(def) ?? undefined,
         };
     }
     return null;

@@ -207,6 +207,9 @@ function detectDisplacement(
         for (const munId of Object.keys(timers).sort(sc)) {
             const timer = timers[munId];
             if (!timer) continue;
+            // RF-5B: a policy-expulsion timer is not a takeover (no control change, and wave B
+            // timers carry a future start turn); its displacement reaches the ledger when it fires.
+            if (timer.cause === 'policy_expulsion') continue;
             // Timer started this turn = new displacement event
             if (timer.started_turn === state.meta.turn) {
                 events.push({

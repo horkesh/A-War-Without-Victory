@@ -309,7 +309,7 @@
   {
     "id": "csq_bihac_pocket_collapses_1994",
     "title": "The Pocket Falls",
-    "narrative": "The 5th Corps has held against VRS, RSK, and Abdic's APWB for almost two years. The arithmetic of siege outlasts the arithmetic of defenders: no airdrops, no reinforcement road, no column of volunteers left to march in. The RBiH defensive perimeter breaks in sectors and does not close again. Refugees cross into Croatian territory by the tens of thousands. A Corps that had been a national symbol becomes a casualty list.",
+    "narrative": "The 5th Corps has held against VRS, RSK, and Abdić's APWB for almost two years. The arithmetic of siege outlasts the arithmetic of defenders: no airdrops, no reinforcement road, no column of volunteers left to march in. The RBiH defensive perimeter breaks in sectors and does not close again. Refugees cross into Croatian territory by the tens of thousands. A Corps that had been a national symbol becomes a casualty list.",
     "category": "military",
     "trigger": {
       "turn_min": 120,
@@ -516,14 +516,14 @@
     "sets_flags": {
       "camps_revealed_early": true
     },
-    "historical_source": "ICTY Stakic Trial Judgment (IT-97-24-T) and Kvocka et al. Trial Judgment (IT-98-30/1-T) on Omarska, Keraterm, and Trnopolje detention facilities; Tadic Trial Judgment (IT-94-1-T) on camp structure. Plan: docs/plans/2026-03-24-v090-consequence-system-plan.md Chain 5. WAVE-19 reader annotation.",
+    "historical_source": "ICTY Stakić Trial Judgment (IT-97-24-T) and Kvočka et al. Trial Judgment (IT-98-30/1-T) on Omarska, Keraterm, and Trnopolje detention facilities; Tadić Trial Judgment (IT-94-1-T) on camp structure. Plan: docs/plans/2026-03-24-v090-consequence-system-plan.md Chain 5. WAVE-19 reader annotation.",
     "source_tier": "design_counterfactual",
     "source_note": "This is a conditional simulation consequence, not a claim that the displayed outcome occurred historically. The historical_source field records the parent design chain and any contextual historical anchor; player-facing prose appears only when the authored state predicate fires."
   },
   {
     "id": "csq_early_war_crimes_tribunal_1993",
     "title": "ICTY Opens Its Doors Early",
-    "narrative": "The accumulating record of atrocities reaches a political threshold the Security Council cannot defer. The International Criminal Tribunal for the former Yugoslavia is stood up with expanded indictment authority; early subpoenas reach Pale and Belgrade. Serbian President Milosevic, calculating costs, orders a quiet pullback of logistical and personnel channels that had connected the VJ to the VRS. Karadzic and Mladic learn the shape of their defense through their lawyers, not through public argument.",
+    "narrative": "The accumulating record of atrocities reaches a political threshold the Security Council cannot defer. The International Criminal Tribunal for the former Yugoslavia is stood up with expanded indictment authority; early subpoenas reach Pale and Belgrade. Serbian President Milošević, calculating costs, orders a quiet pullback of logistical and personnel channels that had connected the VJ to the VRS. Karadžić and Mladić learn the shape of their defense through their lawyers, not through public argument.",
     "category": "diplomatic",
     "trigger": {
       "turn_min": 30,
@@ -588,7 +588,7 @@
     "id": "csq_accelerated_safe_areas_1993",
     "image": "event_un_presence.webp",
     "title": "Safe Areas With Teeth",
-    "narrative": "UNSCR 819, 824, and 836 arrive in the counterfactual with the mandate and the rules of engagement the historical resolutions lacked. Dutch and French detachments arrive at Srebrenica, Goražde, Žepa, and Bihać with artillery and close-air-support tasking, not only with logistic and observer roles. VRS corps commanders in Drinski and eastern axes receive written guidance that operations against those perimeters will be met with NATO response. The arithmetic of the enclaves changes: they cease to be siege objectives and begin to be diplomatic preconditions.",
+    "narrative": "UNSCR 819, 824, and 836 arrive in the counterfactual with the mandate and the rules of engagement the historical resolutions lacked. Dutch and French detachments arrive at Srebrenica, Goražde, Žepa, and Bihać with artillery and close-air-support tasking, not only with logistic and observer roles. VRS corps commanders on the Drina and eastern axes receive written guidance that operations against those perimeters will be met with NATO response. The arithmetic of the enclaves changes: they cease to be siege objectives and begin to be diplomatic preconditions.",
     "category": "diplomatic",
     "trigger": {
       "turn_min": 61,
@@ -643,7 +643,7 @@
     "sets_flags": {
       "safe_areas_have_defence_mandate": true
     },
-    "historical_source": "UNSCR 819 (16 April 1993) — Srebrenica safe area; UNSCR 824 (6 May 1993) — six safe areas; UNSCR 836 (4 June 1993) — defence mandate. ICTY Krstic Trial Judgment (IT-98-33-T) documented that the historical mandate fell short; this counterfactual models the enforced version. Plan: docs/plans/2026-03-24-v090-consequence-system-plan.md Chain 5. WAVE-19 reader annotation.",
+    "historical_source": "UNSCR 819 (16 April 1993) — Srebrenica safe area; UNSCR 824 (6 May 1993) — six safe areas; UNSCR 836 (4 June 1993) — defence mandate. ICTY Krstić Trial Judgment (IT-98-33-T) documented that the historical mandate fell short; this counterfactual models the enforced version. Plan: docs/plans/2026-03-24-v090-consequence-system-plan.md Chain 5. WAVE-19 reader annotation.",
     "source_tier": "design_counterfactual",
     "source_note": "This is a conditional simulation consequence, not a claim that the displayed outcome occurred historically. The historical_source field records the parent design chain and any contextual historical anchor; player-facing prose appears only when the authored state predicate fires."
   },
@@ -651,7 +651,7 @@
     "id": "csq_early_nato_threshold_1994",
     "image": "event_nato_air_power.webp",
     "title": "NATO Will Not Wait for Markale",
-    "narrative": "Cumulative ICTY evidence and the documented shelling of civilian infrastructure drag the NATO threshold forward by more than a year. Allied Force commanders receive strike authorisations that in the historical record waited until August 1995. The VRS loses the freedom of movement it had relied on through 1994; front-line commanders begin to plan their operations around coverage windows of the no-fly zone rather than around the enemy. The war's endgame window has closed on Republika Srpska earlier than Mladic's staff had projected.",
+    "narrative": "Cumulative ICTY evidence and the documented shelling of civilian infrastructure drag the NATO threshold forward by more than a year. Allied Force commanders receive strike authorisations that in the historical record waited until August 1995. The VRS loses the freedom of movement it had relied on through 1994; front-line commanders begin to plan their operations around coverage windows of the no-fly zone rather than around the enemy. The war's endgame window has closed on Republika Srpska earlier than Mladić's staff had projected.",
     "category": "military",
     "trigger": {
       "turn_min": 80,
@@ -764,7 +764,7 @@
     "sets_flags": {
       "drina_partisan_resistance_active": true
     },
-    "historical_source": "Counterfactual chain derived from the ICTY Krstic Trial Judgment (IT-98-33-T) discussion of how Drina-valley cleansing foreclosed Bosniak military presence behind VRS lines. Plan: docs/plans/2026-03-24-v090-consequence-system-plan.md Chain 1.",
+    "historical_source": "Counterfactual chain derived from the ICTY Krstić Trial Judgment (IT-98-33-T) discussion of how Drina-valley cleansing foreclosed Bosniak military presence behind VRS lines. Plan: docs/plans/2026-03-24-v090-consequence-system-plan.md Chain 1.",
     "source_tier": "design_counterfactual",
     "source_note": "This is a conditional simulation consequence, not a claim that the displayed outcome occurred historically. The historical_source field records the parent design chain and any contextual historical anchor; player-facing prose appears only when the authored state predicate fires."
   },
@@ -808,7 +808,7 @@
         "delta": -5
       }
     ],
-    "historical_source": "Derived from ICTY Milosevic Trial (IT-02-54) exhibits on VJ-VRS logistics coupling. Counterfactual: cost of the coupling rises when the rear is not secured. Plan: docs/plans/2026-03-24-v090-consequence-system-plan.md Chain 1.",
+    "historical_source": "Derived from ICTY Milošević Trial (IT-02-54) exhibits on VJ-VRS logistics coupling. Counterfactual: cost of the coupling rises when the rear is not secured. Plan: docs/plans/2026-03-24-v090-consequence-system-plan.md Chain 1.",
     "source_tier": "design_counterfactual",
     "source_note": "This is a conditional simulation consequence, not a claim that the displayed outcome occurred historically. The historical_source field records the parent design chain and any contextual historical anchor; player-facing prose appears only when the authored state predicate fires."
   },
@@ -816,7 +816,7 @@
     "id": "csq_drina_corps_pinned_1993",
     "image": "event_siege_city_RS.webp",
     "title": "Drina Corps on Interior Lines",
-    "narrative": "Drina Corps returns its quarterly readiness report with a line the VRS general staff has not seen before: more than half of the corps is committed to rear-security and anti-partisan tasks. The Podrinje Detachment is reformed and permanently redeployed from offensive tasks to interior lines. Whatever campaign Mladic's staff had projected for the eastern axis in 1993 becomes an operational impossibility; Drina Corps will hold what it has and not move from it.",
+    "narrative": "Drina Corps returns its quarterly readiness report with a line the VRS general staff has not seen before: more than half of the corps is committed to rear-security and anti-partisan tasks. The Podrinje Detachment is reformed and permanently redeployed from offensive tasks to interior lines. Whatever campaign Mladić's staff had projected for the eastern axis in 1993 becomes an operational impossibility; Drina Corps will hold what it has and not move from it.",
     "category": "military",
     "trigger": {
       "turn_min": 40,
@@ -948,7 +948,7 @@
     "sets_flags": {
       "srebrenica_stalemate": true
     },
-    "historical_source": "Counterfactual: the ICTY Krstic Trial (IT-98-33-T) documented the specific operational decision to reduce the enclave. This event models the world in which that decision is not taken. Per docs/10_canon/SENSITIVE_HISTORY_DESIGN_GATE.md §L60, the absence of the genocide rupture is itself the canon-legal upside; no additional standing bonus is awarded. Plan: docs/plans/2026-03-24-v090-consequence-system-plan.md Chain 3.",
+    "historical_source": "Counterfactual: the ICTY Krstić Trial (IT-98-33-T) documented the specific operational decision to reduce the enclave. This event models the world in which that decision is not taken. Per docs/10_canon/SENSITIVE_HISTORY_DESIGN_GATE.md §L60, the absence of the genocide rupture is itself the canon-legal upside; no additional standing bonus is awarded. Plan: docs/plans/2026-03-24-v090-consequence-system-plan.md Chain 3.",
     "source_tier": "design_counterfactual",
     "source_note": "This is a conditional simulation consequence, not a claim that the displayed outcome occurred historically. The historical_source field records the parent design chain and any contextual historical anchor; player-facing prose appears only when the authored state predicate fires."
   },
@@ -1177,7 +1177,7 @@
     "id": "csq_joint_operations_agreement_1992",
     "image": "event_washington_agreement.webp",
     "title": "Joint Operations, Formalized",
-    "narrative": "The agreement is signed at Mostar in late spring. HVO and ARBiH commands formalise what has been a working reality in parts of central Bosnia since winter: joint staff liaison at the operational level, combined defensive planning against the VRS, mutual supply arrangements through Split and Ploce. In Zagreb, Defence Minister Susak reads the English-language summary and sets it aside with a look his staff have learned to recognise. In Sarajevo and Mostar, the officers who will have to keep the agreement going read the Bosnian and Croatian summaries and believe at least some of it.",
+    "narrative": "The agreement is signed at Mostar in late spring. HVO and ARBiH commands formalise what has been a working reality in parts of central Bosnia since winter: joint staff liaison at the operational level, combined defensive planning against the VRS, mutual supply arrangements through Split and Ploce. In Zagreb, Defence Minister Šušak reads the English-language summary and sets it aside with a look his staff have learned to recognise. In Sarajevo and Mostar, the officers who will have to keep the agreement going read the Bosnian and Croatian summaries and believe at least some of it.",
     "category": "diplomatic",
     "trigger": {
       "turn_min": 6,
@@ -1219,7 +1219,7 @@
     "sets_flags": {
       "joint_operations_agreement_active": true
     },
-    "historical_source": "Counterfactual: the Split Agreement of July 1992 between Tudjman and Izetbegovic is treated in Burg & Shoup, 'The War in Bosnia-Herzegovina' (2000), as a moment when a sustained united-front path was diplomatically available. This event models the trajectory in which that path is taken. Plan: docs/plans/2026-03-24-v090-consequence-system-plan.md Chain 2.",
+    "historical_source": "Counterfactual: the Split Agreement of July 1992 between Tudjman and Izetbegović is treated in Burg & Shoup, 'The War in Bosnia-Herzegovina' (2000), as a moment when a sustained united-front path was diplomatically available. This event models the trajectory in which that path is taken. Plan: docs/plans/2026-03-24-v090-consequence-system-plan.md Chain 2.",
     "source_tier": "design_counterfactual",
     "source_note": "This is a conditional simulation consequence, not a claim that the displayed outcome occurred historically. The historical_source field records the parent design chain and any contextual historical anchor; player-facing prose appears only when the authored state predicate fires."
   },
@@ -1265,7 +1265,7 @@
         "delta": -15
       }
     ],
-    "historical_source": "Counterfactual: ICTY Prlic et al. Trial Judgment (IT-04-74-T) on Zagreb-HRHB resource flows. When the HRHB political direction does not match Zagreb's preferences, the documented supply coupling weakens. Plan: docs/plans/2026-03-24-v090-consequence-system-plan.md Chain 2.",
+    "historical_source": "Counterfactual: ICTY Prlić et al. Trial Judgment (IT-04-74-T) on Zagreb-HRHB resource flows. When the HRHB political direction does not match Zagreb's preferences, the documented supply coupling weakens. Plan: docs/plans/2026-03-24-v090-consequence-system-plan.md Chain 2.",
     "source_tier": "design_counterfactual",
     "source_note": "This is a conditional simulation consequence, not a claim that the displayed outcome occurred historically. The historical_source field records the parent design chain and any contextual historical anchor; player-facing prose appears only when the authored state predicate fires."
   },
@@ -1314,7 +1314,7 @@
         "delta": -5
       }
     ],
-    "historical_source": "Counterfactual: the real-world friction over central Bosnia administration documented in the ICTY Kordic Trial Judgment (IT-95-14/2-T) is, in the ahistorical united-front path, contained within alliance politics rather than spilling into open war. Plan: docs/plans/2026-03-24-v090-consequence-system-plan.md Chain 2.",
+    "historical_source": "Counterfactual: the real-world friction over central Bosnia administration documented in the ICTY Kordić Trial Judgment (IT-95-14/2-T) is, in the ahistorical united-front path, contained within alliance politics rather than spilling into open war. Plan: docs/plans/2026-03-24-v090-consequence-system-plan.md Chain 2.",
     "source_tier": "design_counterfactual",
     "source_note": "This is a conditional simulation consequence, not a claim that the displayed outcome occurred historically. The historical_source field records the parent design chain and any contextual historical anchor; player-facing prose appears only when the authored state predicate fires."
   },
@@ -1446,8 +1446,11 @@
     "title": "Ahmići and the Rupture",
     "narrative": "On 16 April 1993 HVO forces attack the Bosniak houses of Ahmići at dawn. By evening the village is burning and more than 100 Bosniak civilians have been killed in the Ahmići massacre. The alliance with the ARBiH, already broken in practice, is finished. Orders go out from Mostar naming the Lašva valley towns, Gornji Vakuf, Prozor and Mostar as HVO objectives, and Zagreb's backing of the HVO continues. Whether the HVO brigades can carry out those orders depends on the state they are in.",
     "localizations": {
+      "en": {
+        "title": "The Ahmići Massacre and the End of the Alliance"
+      },
       "bcs": {
-        "title": "Ahmići i raskid",
+        "title": "Masakr u Ahmićima i kraj saveza",
         "narrative": "Dana 16. aprila 1993. snage HVO-a u zoru napadaju bošnjačke kuće u Ahmićima. Do večeri selo gori, a u masakru u Ahmićima ubijeno je više od 100 bošnjačkih civila. Savez s ARBiH, već raskinut u praksi, okončan je. Iz Mostara izlaze naređenja koja kao ciljeve HVO-a navode gradove Lašvanske doline, Gornji Vakuf, Prozor i Mostar, a Zagreb nastavlja podržavati HVO. Mogu li brigade HVO-a izvršiti ta naređenja, zavisi od stanja u kojem se nalaze."
       }
     },
@@ -1546,7 +1549,7 @@
       "hvo_arbih_war_active": true,
       "ahmici_1993": true
     },
-    "historical_source": "ICTY Kordic Trial Judgment (IT-95-14/2-T) on the Ahmići massacre of 16 April 1993 and the Lašva Valley operations. ICTY Prlic et al. Trial Judgment (IT-04-74-T) on Zagreb-HRHB command coupling. Per war-or-game + corps-army-commander design consult 2026-04-23: the event must break the RBiH-HRHB alliance (floor below hostility threshold), bump HVO morale/cohesion to un-stick combat-readiness, and shift offensive priorities to central-Bosnia municipalities. Phase 2 (ARBiH counter-offensive, three-enclave defensive posture) emerges organically via normal ARBiH offensive doctrine once alliance is locked hostile. Issue #9.",
+    "historical_source": "ICTY Kordić Trial Judgment (IT-95-14/2-T) on the Ahmići massacre of 16 April 1993 and the Lašva Valley operations. ICTY Prlić et al. Trial Judgment (IT-04-74-T) on Zagreb-HRHB command coupling. Per war-or-game + corps-army-commander design consult 2026-04-23: the event must break the RBiH-HRHB alliance (floor below hostility threshold), bump HVO morale/cohesion to un-stick combat-readiness, and shift offensive priorities to central-Bosnia municipalities. Phase 2 (ARBiH counter-offensive, three-enclave defensive posture) emerges organically via normal ARBiH offensive doctrine once alliance is locked hostile. Issue #9.",
     "source_tier": "design_counterfactual",
     "source_note": "This is a conditional simulation consequence, not a claim that the displayed outcome occurred historically. The historical_source field records the parent design chain and any contextual historical anchor; player-facing prose appears only when the authored state predicate fires."
   },
@@ -1664,7 +1667,7 @@
     "id": "csq_enclave_held_alt_intervention",
     "image": "event_un_presence.webp",
     "title": "Safe Areas Still Standing",
-    "narrative": "By turn 145 the enclaves are not the museum exhibits the world expected to inspect after the fact. Resilience indices are running well above the floor. The columns have not marched out. The lists have not been compiled. The UN Safe Areas designation, which on the historical path became a euphemism for unfinished obligation, is still — for now — an enforced reality.",
+    "narrative": "By January 1995 the enclaves are not the museum exhibits the world expected to inspect after the fact. Resilience indices are running well above the floor. The columns have not marched out. The lists have not been compiled. The UN Safe Areas designation, which on the historical path became a euphemism for unfinished obligation, is still — for now — an enforced reality.",
     "category": "humanitarian",
     "trigger": {
       "turn_min": 145,
@@ -1698,7 +1701,7 @@
     "priority": 80,
     "effect": {
       "kind": "narrative",
-      "text": "Enclaves intact past t145; alt-intervention path annotated."
+      "text": "The enclaves are still intact in January 1995."
     },
     "effects": [
       {
@@ -1789,7 +1792,7 @@
     "priority": 80,
     "effect": {
       "kind": "narrative",
-      "text": "Peace accepted before t120 with non-baseline territory; leverage floor locked, ledger annotated."
+      "text": "Peace was accepted early, with the front where it stood; the late-war battles will add no leverage."
     },
     "effects": [
       {
@@ -2327,10 +2330,10 @@
     "requires_player_response": true,
     "bot_response_logic": "historical",
     "historical_default_response_id": "accept_recovery",
-    "source_note": "The existing patron-pressure source text frames this as the historical acceptance path under Milosevic pressure in 1995 after partial disavowal and renewed terms for recovery.",
+    "source_note": "The existing patron-pressure source text frames this as the historical acceptance path under Milošević pressure in 1995 after partial disavowal and renewed terms for recovery.",
     "staff_assessment": "Accepting restores some patron confidence but narrows Pale's autonomy; refusing preserves internal room for maneuver while locking in the partial disavowal.",
     "trigger_evidence": [
-      "The patron_partial_disavowal flag is already set before this offer can fire.",
+      "The patron has already partly disowned the leadership.",
       "The offer follows sustained patron pressure rather than a free-standing diplomatic opening.",
       "The default reflects acceptance under pressure, not certainty about later battlefield or negotiation outcomes."
     ],
@@ -2408,7 +2411,7 @@
         "risk_level": 0.7
       }
     ],
-    "historical_source": "LANE-NIGHTSHIFT-CONSEQUENCE-BREADTH (patron pressure B3). DECISION event with binary recovery/refuse path. Bot defaults to historical (which here is acceptance under Milosevic 1995 pressure)."
+    "historical_source": "LANE-NIGHTSHIFT-CONSEQUENCE-BREADTH (patron pressure B3). DECISION event with binary recovery/refuse path. Bot defaults to historical (which here is acceptance under Milošević 1995 pressure)."
   },
   {
     "id": "csq_patron_arms_review_imposed_RBiH",
@@ -4309,7 +4312,7 @@
     "responding_faction": "RBiH",
     "effect": {
       "kind": "narrative",
-      "text": "Sustained high war_exhaustion + low avg morale; recruitment quota attenuates, cohesion erodes."
+      "text": "War exhaustion stays high and morale low: fewer recruits come forward and units lose cohesion."
     },
     "effects": [
       {
@@ -4743,7 +4746,7 @@
     "responding_faction": "RS",
     "effect": {
       "kind": "narrative",
-      "text": "Sustained high war_exhaustion + low avg morale; recruitment quota attenuates, cohesion erodes."
+      "text": "War exhaustion stays high and morale low: fewer recruits come forward and units lose cohesion."
     },
     "effects": [
       {
@@ -5979,7 +5982,7 @@
     "responding_faction": "HRHB",
     "effect": {
       "kind": "narrative",
-      "text": "Sustained high war_exhaustion + low avg morale (HRHB variant); recruitment quota attenuates, cohesion erodes."
+      "text": "War exhaustion stays high and morale low: fewer recruits come forward and units lose cohesion."
     },
     "effects": [
       {
@@ -8807,7 +8810,7 @@
     "priority": 90,
     "effect": {
       "kind": "narrative",
-      "text": "Late-war audit: no faction crossed the winter supply-attrition threshold this season. Observer flag winter_held_through_turn recorded; no mechanical effect."
+      "text": "No side's winter supply broke down this season."
     },
     "sets_flags": {
       "winter_held_through_turn": true
@@ -8844,7 +8847,7 @@
     "priority": 90,
     "effect": {
       "kind": "narrative",
-      "text": "Post-window audit: the Posavina corridor remained severed and operation_corridor_1992 did not close its objective. Observer flag corridor_blocked_through_turn recorded; no mechanical effect."
+      "text": "The Posavina corridor is still cut; the corridor operation did not reach its objective."
     },
     "sets_flags": {
       "corridor_blocked_through_turn": true
@@ -8887,7 +8890,7 @@
     "priority": 90,
     "effect": {
       "kind": "narrative",
-      "text": "Late-war audit: no third-party arms channel or attenuation arrangement was logged for any faction. Observer flag arms_embargo_compliant_through_turn recorded; no mechanical effect."
+      "text": "No side has an outside arms channel on record."
     },
     "sets_flags": {
       "arms_embargo_compliant_through_turn": true
@@ -8926,7 +8929,7 @@
     "priority": 90,
     "effect": {
       "kind": "narrative",
-      "text": "Late-war audit: no faction logged a temporary political split this far into the war. Observer flag political_unity_held_through_turn recorded; no mechanical effect."
+      "text": "No side's leadership has split this far into the war."
     },
     "sets_flags": {
       "political_unity_held_through_turn": true

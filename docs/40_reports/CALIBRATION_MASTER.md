@@ -13,6 +13,45 @@
 - **Moved cells (Oct95, −21 vs main).** Sanski Most 5, Jajce 4, Ključ 3, Mrkonjić Grad 3, Donji Vakuf 2, Drvar 2, Bosanski Petrovac 1, Bihać 1. All 21 changed hands on main between t184 (16 Oct, when the ceasefire binds) and t188. Those municipalities fell historically between 13 Sep and 10 Oct 1995 (BB Vol. I pp.418-428). Cause: the late-1995 Sana, Mistral 2, Donji Vakuf and Southern Move axes run late. That is held calibration (tail-cell timing, op tempo) for the frozen-engine pass, not a regression of the ceasefire.
 - **Rejected alternative.** A hard cancel of executing offensives (`70aa5bb91e23cef9` on the pre-rebase main, Oct95 670) breached the Farz guard: Spreča/north Ozren is taken at t185 in the simulation.
 
+**Empty front sector commits its own rear, SE7E (PR #625) — 2026-11-14: 712 / 705 / 706 / 698, equal to main after #619/#623; consistency 1 → 0 (recorded under the hold).**
+- **Final measurement** (rebased onto main `a92d99b`, after #619, #623 and #637; head `4baea29`; cloud 188w):
+
+  | | Hash | Checkpoints | Cascade | Consistency | Battles |
+  |---|---|---|---:|---:|---:|
+  | main `a92d99b` | `ca6db798f436fedf` | 712/705/706/698 | 43 | 1 (sector 4) | 526 |
+  | SE7E | `f5b477ededa198bd` | 712/705/706/698 | 43 | **0** | 526 (0.00%, every faction) |
+
+  - `verify_checkpoints` exit 0 and guard intact on both; strict health PASS on both.
+  - 0 control cells differ at any checkpoint.
+  - The 182nd's call chain is the same as on the pre-#619 base: order t99, in transit t100, holds Rajčići t101-t188.
+  - The VRS 1st Krajina final-turn gap seen with #619 alone does not occur on this main.
+  - Baselines re-pinned at this head.
+- **Earlier measurement, on main before #619** (712/709/710/705): see below.
+- **What changed.** ARBiH 1st Corps sector 4 (Visoko-Kiseljak: Draževići, Rajčići, Stuparići) had no front brigade on t98-t188 on main (consistency 1, SD15).
+  - Its own pool could not be committed. The 147th, 185th and 146th were dug in (the 146th also caught in a bot march order the executor rejected every turn). The 182nd was free but 4 hops away.
+  - Construction's zero-assigned rescue reaches 3 hops and skips dug-in brigades. The bot sector march moves assigned and reserve brigades only.
+  - Commander T1 relief counted a sector as empty only with no reserve or rear at all.
+- **The rule** (`computeEmptySectorReliefReassignments`), strictly additive:
+  - sectors with no own pool are served first, exactly as before;
+  - then a frontless sector with no eligible own reserve commits its own eligible rear brigade if it is still free (nearest, then id);
+  - it never borrows another sector's brigade.
+  - Intent only (T2 reassignment march, T3 column movement); donor eligibility unchanged; at most one per sector per pass.
+  - `MOVEMENT_AUTHORITY.md` §3. Report `docs/40_reports/implemented/20261114_SE7E_EMPTY_SECTOR_PROMOTION.md`.
+- **Measured** against main `887310d` (`4ff4a7665c0a35b5`), cloud 188w:
+  - **Run 1, v1 (`567eb1f4a383e7f1`, 712/711/707/694): rejected.** It admitted every frontless sector with an own pool and allowed sibling donors. Guard breached.
+  - **Run 2, v2 (`ace4e553a491aecb`, 712/711/708/701): superseded.**
+    - Two tolerance breaches: Oct95 −4 and the cascade (gated at 49) 46.
+    - The only early change was at t4: frontless Ripac kept the 1st Drvar instead of Krupa getting it. The Pyrrhic gate's historian seat rated the resulting cell changes net less historical.
+  - **Run 4, v3 (`3253da2f9a6d2502`): final on that base.**
+    - 712/709/710/705; 0 control cells differ at any checkpoint; cascade 49/49.
+    - Consistency 0; strict health PASS; enclave, Farz and eastern-provenance guards intact.
+    - Battles per week 2.697 (0.00% in every faction).
+    - The only commander order that differs from main in the whole campaign is t99, 182nd → sector 4. The 182nd marches from Fojnica Živčići and holds Rajčići t101-t188.
+  - Its hash equals that of v2 resumed from main's w97 save (the attribution run).
+- **Defect dependency (standing question).** No matched cell depends on the Visoko-Kiseljak gap: fixing it changes no control cell.
+- **Residuals** (registered): main's existing T1 priority, which v3 keeps, still lets a fully empty sector take a frontless neighbour's rear (t4: the 1st Drvar to Krupa, the historically active April 1992 front), and a frontless sector whose whole own pool is dug in waits. SE7E-b, SE7E-c, SE7E-d and SE7E-f are registered in the report.
+- **Baselines:** on the pre-#619 base they were pinned to `3253da2f…`. They are now re-pinned at the rebased final head (`final_save.json` `f5b477ed…`; see above). The structural fingerprint check passes.
+
 **Readiness gate light strike group + bot objective lockout, RF-AI2 (PR #619) — 2026-11-14: 712 / 705 / 706 / 698. Owner-accepted 2026-11-14 ("Yes, accept it") as an honest cost of fixing the corps gate. This is the new main reference.**
 - **Per-cell causes (vs 712/709/710/705):**
 
@@ -32,6 +71,27 @@
 - **Recorded, not certified (Pyrrhic gate integrator).** The head's matches at Krupa (Ripac casualty scale plus lockout timing), Ozren (VRS2), the Mistral 2 / Southern Move cells (t186-188 knife-edge; the op's recon probe at Prekaja stays unresolved t176-178, so it launches t179) and Vesela (adjacent_uncontested inertia) rest on known defects. None is a protected anchor or counts as fidelity evidence. Re-blessing records main's output; it does not certify these cells. Gate: GO with conditions (determinism GO; canon, historian and war-or-game GO with conditions), comment on #619.
 
 **Owner decision — 2026-11-14: calibration is held until the mechanics work is done.** The owner: "We might as well hold calibration until we are done with the other changes. No point in recalibrating later." From now until the condition-based engine freeze, checkpoint scores are measured and recorded for every change (one entry per change, as below) but are not a merge bar: no shortfall envelopes, no park-for-score rulings, no escalation of an honest loss to the owner, no chasing single cells. Pure calibration is held for ONE calibration pass on the frozen engine: data, constant or op tuning toward the painted checkpoints, tail-cell timing, op re-authoring for matches, and RF-4 officer dates as a lever. Unchanged: one change per measured 188-week run, determinism and the state hash, the strict health gate, the anchor, enclave and Farz guards and provenance gates, no structural cut in battles per week, baseline re-bless at the final head, the Pyrrhic gate for sim-moving merges, serial merges with a rebase and re-bless after each. A guard breach is still a stop: it signals broken mechanics, not a missed score. Roadmap Sequence and gates `RF-ENGINE-FREEZE` / `RF-CALIBRATION-RESIGNOFF` carry the same text. The current figures stay 712 / 709 / 710 / 705 until a merge changes them (RF-AI2 above changes them to 712 / 705 / 706 / 698 on merge).
+
+**Policy-driven bilateral displacement, RF-5B (PR #623) — 2026-11-14: 712 / 705 / 706 / 698 (equal to main after #619; recorded, not a bar, under the calibration hold).**
+- **Final, on main after #619** (405c4a8e3, `7d4cf2cf698e3c41`, 712/705/706/698): merged head `ca6db798f436fedf` (two identical runs). Per-cell delta vs main: **none** at Jan93, Apr94, Apr95 or Oct95. Strict health PASS; enclave and Farz guards intact; consistency 1 (main 2); battles per week +1.5% (RBiH +3.5%, RS −1.6%, HRHB +2.1%). Bosniaks displaced by HRHB forces 27,827 people; Croats displaced by RBiH forces 34,348. No reward: HRHB personnel t80/t90/t100 −1.2/−1.2/−0.9%; reserve −11.8%; total HRHB stock at t188 −0.84% (`late_war_check.cjs` PASS). HRHB personnel +3.4% (t180) and +5.6% (t188) is the orphan pair of diagnosis finding #6 (F_HRHB_0003/0004, corps-less, 0 battles) spawning at t171/t176 in this run only; excluding it, −0.8%/−0.6%. Baselines re-pinned on this head.
+- **Earlier measurement (main 887310d5e):**
+- **What changed.** A bot-controlled HRHB applies its historical minority-expulsion policy once the open RBiH-HRHB war begins (`BOT_MINORITY_EXPULSION_POLICY`; Prlić et al. joint criminal enterprise; RBiH has none). Once, a `policy_expulsion` takeover timer is seeded in every HRHB-held OSID of the Historian-sourced `POLICY_EXPULSION_SCOPE`. Wave A (t54): Vitez, Busovača, Kiseljak, Žepče, Gornji Vakuf, Jablanica. Wave B (t66): Mostar, Stolac, Čapljina, Prozor, Ljubuški. Each OSID gets one wave of 30-75% of its declared Bosniaks, with no sustained drain and no pass-through re-route. Control is never changed. The first wave records one authorized war crime (§2a). A human HRHB never expels. §6 broader bright-line panel, eight seats, four rounds, unanimous GO (`SENSITIVE_HISTORY_DESIGN_GATE.md` §6 RF-5B record).
+- **Measured** against main after #617 (`4ff4a7665c0a35b5`, 712/709/710/705, reproduced). Head `5c378ee919295488`, reproduced: identical checkpoints. Oct95: Sanski Most `kljevci` lost (t186 Sana tail) and Travnik `varosluk` gained (t177-179); net 0, both noise. Varošluk is a match on an unsourced calibration-assumption axis (a Donji Vakuf 95 planner knife-edge), not a historical recovery. Strict health PASS; enclave and Farz guards intact; consistency 1, the same pre-existing ARBiH 1st Corps sector-4 gap as main. Battles per week −0.8% in total (RBiH −3.7%, RS +3.4%, HRHB 0).
+- **Displacement.** Bosniaks displaced by HRHB forces: 1,078 → **27,839 people** (the takeover `displaced` field), inside the Historian band 20,000-35,000. Croats displaced by RBiH forces: 34,582 → 34,475 people (band 25,000-50,000). The ledger sum is about 30% higher because of a pre-existing double count (register).
+- **No reward (bright line).** HRHB brigade personnel at t66/t80/t90/t100 is 0.00/−0.67/−0.59/−0.97% against main. Strategic reserve −12.7%, pool committed −2.1%, total sheltered HRHB refugees −105, recruitment displacement multiplier −4.1%. Checked by `tools/diagnostics/hvo_arbih_war/hrhb_manpower_check.cjs` and `late_war_check.cjs`. The restrain counterfactual equals main.
+- **Run budget.** 8 lane runs, sequential:
+  - run 1 (census-share rule) 712/711/710/702;
+  - run 2 (sourced table, two waves) 712/711/712/708;
+  - run 3 (declared Bosniaks only) 712/711/712/708, 28,009;
+  - run 4 = run 3 (holder fix);
+  - run 5 (restrain) = main;
+  - run 6 (bot-only) = run 3;
+  - run 7 (re-route skip, merged on main) 712/709/710/705;
+  - run 8 = run 7 reproduction.
+  Runs 2-6 recovered the Prozor pair through one 4th Corps probe-over-Ponos choice. The run-3 gain of +3 was an HRHB manpower reward from the pass-through re-route, now fixed, so it was never a merge candidate.
+- **Defect dependency (standing question).** No matched cell depends on the policy. The Prozor pair stays an open item (`REAL_WAR_MASTER.md`). Its match turns on one 4th Corps planner choice, because probes cannot capture.
+- **Known limits.** A human-HRHB live campaign (including Observer level 3) has no policy waves. Its displacement differs from the calibration line, and live = headless holds for the RBiH and RS players.
+- **Re-pinned on this source:** baseline manifest (apr1992_188w).
 
 **Legacy S-id consumer sweep, RF-F1 — 2026-11-14: 712 / 709 / 710 / 705 (unchanged; neutral in the historical-mode campaign).**
 - **What changed.** Sustainability and militia fatigue ran on legacy `S…` settlement edges against OSID control. On main 109 of 110 municipalities were surrounded and collapsed by t8 (104 already at t6) (each also degraded once per pool, 2-3 times a turn), every militia pool was "unsupplied", and negotiation momentum read 1.0 from t4. Both now use the OSID front and supply (`buildOsidDisplacementPressureInputs`). Sustainability evaluates each municipality once for one holder (a cut-off holder first, so Srebrenica and Žepa count); militia supply isolation counts only where the pool's faction holds ground. Systems Manual §24 System 1 note.
