@@ -67,7 +67,8 @@ export interface CorpsTransferEventDef {
     /**
      * One-off cost of the reorganisation itself, paid by each brigade as it changes corps
      * within the reorganisation window (trigger_turn .. trigger_turn + max_defer_turns).
-     * A brigade that appears later and is merely filed under the target corps pays nothing.
+     * A brigade that appears after the window (trigger_turn + max_defer_turns) and is merely
+     * filed under the target corps pays nothing; one that changes corps inside the window pays.
      * cohesion_cost: cohesion points lost (floored at 0).
      * disrupted_turns: sets formation.disrupted_turns to at least this value (the counter
      * ticks before combat, so N gives N-1 disrupted combat weeks).

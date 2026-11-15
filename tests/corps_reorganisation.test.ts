@@ -76,6 +76,33 @@ describe('corps reorganisation — inertness', () => {
     });
 });
 
+describe('corps_transfer — idempotence (determinism seat C2)', () => {
+    const WITH_COST: CorpsReorganisationEventDef = { ...TRANSFER, transition: { cohesion_cost: 4, disrupted_turns: 2 } };
+
+    it('a second call on the trigger week, and a call after a save round-trip, change nothing and charge the cost once', () => {
+        const state = makeState(99, [corps('arbih_3rd_corps'), corps('arbih_7th_corps'), brigade('b705', 'arbih_3rd_corps', { cohesion: 60 }), brigade('b706', 'arbih_3rd_corps', { cohesion: 60 })]);
+        cmd(state, 'arbih_3rd_corps');
+        cmd(state, 'arbih_7th_corps');
+        processCorpsReorganisationEvents(state, [WITH_COST]);
+        const afterFirst = JSON.stringify(state);
+        expect(state.military.formations.b705.cohesion).toBe(56);
+
+        processCorpsReorganisationEvents(state, [WITH_COST]);
+        expect(JSON.stringify(state)).toBe(afterFirst);
+
+        // Save round-trip (the saved state is plain JSON), then the same week and the next.
+        const loaded = JSON.parse(afterFirst) as GameState;
+        processCorpsReorganisationEvents(loaded, [WITH_COST]);
+        expect(JSON.stringify(loaded)).toBe(afterFirst);
+        loaded.meta.turn = 100;
+        processCorpsReorganisationEvents(loaded, [WITH_COST]);
+        expect(loaded.military.formations.b705.cohesion).toBe(56);
+        expect(loaded.military.formations.b706.cohesion).toBe(56);
+        expect(loaded.military.formations.b705.corps_id).toBe('arbih_7th_corps');
+        expect(loaded.military.formation_lifecycle_events_fired).toEqual({ arbih_7th_corps_formation: 99 });
+    });
+});
+
 describe('corps_transfer', () => {
     it('moves free brigades on the trigger week, writes a receipt and refreshes subordinate counts', () => {
         const state = makeState(99, [corps('arbih_3rd_corps'), corps('arbih_7th_corps'), brigade('b705', 'arbih_3rd_corps'), brigade('b706', 'arbih_3rd_corps'), brigade('b301', 'arbih_3rd_corps')]);
