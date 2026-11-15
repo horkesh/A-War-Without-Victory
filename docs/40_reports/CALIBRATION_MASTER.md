@@ -1,4 +1,5 @@
-**Council fix 3, respect the peace (B10, H4, H6) — 2026-11-14: 712 / 705 / 706 / 677 (recorded, not a bar; calibration held).**
+**Council fix 3, respect the peace (B10, H4, H6) — 2026-11-14, re-measured 2026-11-15 on main `f7b5781e0`: 712 / 705 / 706 / 676 (recorded, not a bar; calibration held).**
+- **Re-measured after merging main `f7b5781e0`** (after #623, #625, #631, #642). Main `f5b477ededa198bd` 712/705/706/698. Head `0e61d03672be3762` 712/705/706/676; weekly reports identical to main through week index 183. Battles 526 → 499. Enclave and Farz guards intact, strict health PASS, consistency 0. The 22 lost Oct95 cells all changed hands on main at t185-t188; the extra one against the gated head (Pribrača, Donji Vakuf) comes from main's own tail. Baselines re-pinned. The figures below are from the gated head on main `f06d5aa`.
 - **What changed.** (A) The US halt moves to t179-181 and is suppressed after a ceasefire. (B) Accepting Holbrooke's October 1995 ceasefire binds every party from the following turn:
   - the operation channel closes on every path;
   - planning offensives are called off, and executing ones take only the current objective of each engaged axis, then stand down;

@@ -19,6 +19,7 @@ Calibration is on hold (owner, 2026-11-14): checkpoint scores are recorded per c
 | Main (n6) | reproduced; equals the pinned `final_save` `7d4cf2cf…` | `7d4cf2cf698e3c41` | 712 / 705 / 706 / 698 | 518; 39 |
 | A alone (n7) | US halt retime + suppression | `9d5bb78ff4d58a26` | 712 / 705 / 706 / 698 (0 cell deltas) | 520; 41 |
 | A+B+C head (n8 = n9) | ceasefire with stand-down; H6 text | `ba67ebb347949f75` | 712 / 705 / 706 / 677 | 491; 12 |
+| head merged with main `f7b5781e0` (2026-11-15; main `f5b477ededa198bd` 712/705/706/698, battles 526; 42) | same; straight rebase | `0e61d03672be3762` | 712 / 705 / 706 / 676 | 499; 15 |
 
 On the head, weekly reports t1-t183 are identical to main, and the first difference is at t184. Battles at t183-t188 run 6/5/1/0/0/0. The US halt never fires (it fires at t187 on main). Guards are intact, with Spreča taken at t185 by the stand-down. Strict health PASS (K:W 3.729); consistency 1. Oct95 loses 21 cells against main: Sanski Most 5, Jajce 4, Ključ 3, Mrkonjić Grad 3, Donji Vakuf 2, Drvar 2, Bosanski Petrovac 1, Bihać 1. All 21 changed hands on main between t184 and t188. The baselines are re-blessed at this head. The War-or-Game and determinism seats re-confirmed on the rebased runs.
 
