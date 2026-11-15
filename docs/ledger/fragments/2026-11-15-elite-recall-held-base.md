@@ -15,4 +15,7 @@
   - Two existing fixtures (`army_reserve_system`, `corps_reorganisation`) now give the base a controller.
   - The full elite-related set (58 files) passes.
 - **Live repro.** Advancing the saved turn-72 state now completes turn 73 with no invariant issue, and the brigade stays at `op:travnik:puticevo_2` (HRHB).
-- **Headless.** The PR has the 40-week artifact comparison against main and `test:baselines`.
+- **Headless: byte-identical** (evidence `C:/Pyrrhic/AWWV-worktrees/_logs/cl-elite-recall-20261115/`).
+  - 40-week run against main `a9f34f97`: 14/14 simulation artifacts identical, `final_state_hash` `c0ed7a71dad8af7d` on both. `run_meta.json` differs only in the output folder and the dirty flag.
+  - `npm run test:baselines` (188-week master): "all scenarios match".
+  - The canonical runs never recall an elite to a lost base. Not a measured change.
