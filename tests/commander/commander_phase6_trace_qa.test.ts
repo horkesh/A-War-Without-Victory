@@ -16,7 +16,7 @@
  *    - determinism
  *    - formatTraceHeader returns single line
  * 3. Multi-turn causality integration — 2 tests
- *    - offensive_failure lesson suppresses stage_operation score (lesson_delta < 0)
+ *    - offensive_failure lesson suppresses launch_opportunity score (lesson_delta < 0)
  *    - offensive_failure lesson changes winner when score delta is decisive
  * 4. Trace structural invariant — 1 test
  *    - competition trace has ≥ 2 candidates when multiple intents are valid
@@ -356,11 +356,11 @@ describe('v0.8.1 Phase 6 — Decision Trace QA', () => {
         it('formatDecisionTrace with winner/blocked/loser labels contains correct labels', () => {
             const trace = {
                 turn: 7,
-                winning_intent_id: 'stage_operation_zone_a',
+                winning_intent_id: 'launch_opportunity_zone_a',
                 candidates: [
                     {
-                        intent_id: 'stage_operation_zone_a',
-                        type: 'stage_operation' as const,
+                        intent_id: 'launch_opportunity_zone_a',
+                        type: 'launch_opportunity' as const,
                         score: 0.8,
                         score_breakdown: { surplus: 0.8 } as Record<string, number>,
                         blocked_by: [],
@@ -420,11 +420,11 @@ describe('v0.8.1 Phase 6 — Decision Trace QA', () => {
         it('formatDecisionTrace is deterministic: same trace produces identical output on repeated calls', () => {
             const trace = {
                 turn: 12,
-                winning_intent_id: 'stage_operation_zone_x',
+                winning_intent_id: 'launch_opportunity_zone_x',
                 candidates: [
                     {
-                        intent_id: 'stage_operation_zone_x',
-                        type: 'stage_operation' as const,
+                        intent_id: 'launch_opportunity_zone_x',
+                        type: 'launch_opportunity' as const,
                         score: 0.75,
                         score_breakdown: { surplus: 0.5, supply: 0.25 } as Record<string, number>,
                         blocked_by: [],
@@ -475,7 +475,7 @@ describe('v0.8.1 Phase 6 — Decision Trace QA', () => {
 
     describe('Category 3: Multi-turn causality integration', () => {
 
-        it('offensive_failure lesson suppresses stage_operation score (lesson_delta < 0, lessons_applied populated)', () => {
+        it('offensive_failure lesson suppresses launch_opportunity score (lesson_delta < 0, lessons_applied populated)', () => {
             const turn = 5;
             const surplusPool = makeSurplusPool(MIN_BRIGADES_FOR_PLAN);
             const zones = [makeZone({ posture: 'balanced', surplus_brigades: surplusPool.map(e => e.brigade_id) })];
@@ -495,13 +495,13 @@ describe('v0.8.1 Phase 6 — Decision Trace QA', () => {
 
             const briefing = makeMinimalBriefing({
                 turn,
-                pre_planned_ops: [{ id: 'op_1' }],
+                pre_planned_ops: [],
                 previous_state: previousState,
             });
 
             const { trace } = selectWinningIntent(briefing, zones, forces, surplusPool, turn, previousState.lessons);
 
-            const stageOp = trace.candidates.find(c => c.type === 'stage_operation');
+            const stageOp = trace.candidates.find(c => c.type === 'launch_opportunity');
             expect(stageOp).toBeDefined();
 
             // lesson_delta must be negative (lesson suppressed the score)
@@ -512,7 +512,7 @@ describe('v0.8.1 Phase 6 — Decision Trace QA', () => {
             expect(trace.lessons_applied.length).toBeGreaterThan(0);
         });
 
-        it('offensive_failure lesson lowers stage_operation score compared to no-lesson baseline', () => {
+        it('offensive_failure lesson lowers launch_opportunity score compared to no-lesson baseline', () => {
             const turn = 5;
             const surplusPool = makeSurplusPool(MIN_BRIGADES_FOR_PLAN);
             const zones = [makeZone({ posture: 'balanced', surplus_brigades: surplusPool.map(e => e.brigade_id) })];
@@ -532,7 +532,7 @@ describe('v0.8.1 Phase 6 — Decision Trace QA', () => {
             // Run A: with lesson
             const briefingA = makeMinimalBriefing({
                 turn,
-                pre_planned_ops: [{ id: 'op_1' }],
+                pre_planned_ops: [],
                 previous_state: stateWithLesson,
             });
             const { trace: traceA } = selectWinningIntent(briefingA, zones, forces, surplusPool, turn, stateWithLesson.lessons);
@@ -540,15 +540,15 @@ describe('v0.8.1 Phase 6 — Decision Trace QA', () => {
             // Run B: without lesson
             const briefingB = makeMinimalBriefing({
                 turn,
-                pre_planned_ops: [{ id: 'op_1' }],
+                pre_planned_ops: [],
                 previous_state: stateNoLesson,
             });
             const { trace: traceB } = selectWinningIntent(briefingB, zones, forces, surplusPool, turn, stateNoLesson.lessons);
 
-            const stageOpA = traceA.candidates.find(c => c.type === 'stage_operation');
-            const stageOpB = traceB.candidates.find(c => c.type === 'stage_operation');
+            const stageOpA = traceA.candidates.find(c => c.type === 'launch_opportunity');
+            const stageOpB = traceB.candidates.find(c => c.type === 'launch_opportunity');
 
-            // Both must have produced stage_operation candidates for comparison
+            // Both must have produced launch_opportunity candidates for comparison
             expect(stageOpA).toBeDefined();
             expect(stageOpB).toBeDefined();
 
@@ -567,7 +567,7 @@ describe('v0.8.1 Phase 6 — Decision Trace QA', () => {
 
         it('competition trace has at least 2 candidates when multiple intents are valid', () => {
             const turn = 10;
-            // Large surplus pool: guarantees stage_operation and launch_opportunity are generated
+            // Large surplus pool: guarantees launch_opportunity and launch_opportunity are generated
             const surplusPool = makeSurplusPool(MIN_BRIGADES_FOR_PLAN + 2);
             const zones = [makeZone({
                 posture: 'projecting',
@@ -578,7 +578,7 @@ describe('v0.8.1 Phase 6 — Decision Trace QA', () => {
 
             const briefing = makeMinimalBriefing({
                 turn,
-                pre_planned_ops: [{ id: 'op_1' }],
+                pre_planned_ops: [],
                 corps_stance: 'balanced',
                 corps_exhaustion: 0,
         faction_war_exhaustion: 0,

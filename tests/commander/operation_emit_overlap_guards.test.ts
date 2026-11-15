@@ -1123,6 +1123,39 @@ describe('commander emission overlap guards', () => {
         expect(output.operations[0]?.participating_brigades.length).toBeGreaterThan(0);
     });
 
+    it('RF-L3d: a commander plan operation never takes a brigade the due queue head holds', () => {
+        // Operation Majevica (vrs_east_bosnian, no date: always due) rosters
+        // rs_1st_majevica_light_infantry. While it heads that corps' queue, no commander plan
+        // operation may take the brigade; the probe paths already apply the same rule.
+        const heldId = 'rs_1st_majevica_light_infantry';
+        const brigades = [makeBrigade(heldId, 'op:test:approach'), makeBrigade('b1', 'op:test:approach')];
+        const emitWith = (queued: boolean) => {
+            const base = makeBriefing([], brigades);
+            const sector = makeSector();
+            const briefing = {
+                ...base,
+                sectors: [{
+                    ...sector,
+                    assigned_brigade_ids: [heldId, 'b1'] as FormationId[],
+                    sub_segments: sector.sub_segments.map(s => ({ ...s, primary_brigade_ids: [heldId, 'b1'] })),
+                }],
+            } as CommanderBriefing;
+            if (queued) {
+                (briefing.state_ref!.military.corps_command as Record<string, unknown>).vrs_east_bosnian = {
+                    queued_operations: ['Operation Majevica'],
+                };
+            }
+            const allocation: AllocationResult = { ...makeAllocation(), surplus_pool: [makeEval(heldId), makeEval('b1')] };
+            return emitCommanderOutput(briefing, [], makeForces(), allocation, makePlanDecision(), makeDecisions(), makeThreats());
+        };
+
+        const control = emitWith(false);
+        expect(control.operations.flatMap(op => op.participating_brigades)).toContain(heldId);
+
+        const held = emitWith(true);
+        expect(held.operations.flatMap(op => op.participating_brigades)).not.toContain(heldId);
+    });
+
     it('emits a bilateral operation from plan-reserved brigades even when the new allocation garrison-locks them', () => {
         const briefing = { ...makeBriefing(), bilateral_offensive: true } as CommanderBriefing;
         const planDecision = makePlanDecision();
