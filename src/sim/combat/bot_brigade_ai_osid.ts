@@ -86,6 +86,7 @@ import type { OsidEthnicComposition } from './ethnic_defense.js';
 import { COUNTER_ATTACK_RETREAT_WINDOW } from './bot_constants.js';
 import { botOrdersPerfTime } from './_perf_profile_bot_orders.js';
 import { isReasonCodeTopicEnabled, sortedIds } from './reason_code_debug.js';
+import { emitDefenceTrace } from './defence_trace.js';
 
 /**
  * Resolve exceptional receiving-command authority for a surviving operation-evaluator attack.
@@ -826,6 +827,8 @@ function executeFactionDirectivesImpl(
     for (const [, arr] of sectorRecentRetreats) {
         arr.sort((a, b) => strictCompare(a.osid, b.osid));
     }
+    // Default-off `defence` receipts for settlements lost last turn. Observation only.
+    emitDefenceTrace(state, faction, brigades, adjacency, sectorAssignmentByBrigade, sectorRecentRetreats);
     const sectorCounterAttackCount = new Map<string, number>();
 
     const targetAdjacentCount = new Map<Osid, number>();

@@ -57,6 +57,7 @@ const ALL_TOPICS: ReasonCodeTopic[] = [
     'preplanned_eligibility',
     'sector_stance',
     'corps_plan',
+    'defence',
 ];
 
 function setFlag(value: string | undefined): void {

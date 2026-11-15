@@ -121,6 +121,9 @@ import { stableStringify } from '../../utils/stable_json.js';
  *                   healthy-brigade counts by the 3,000 cap and by designed strength.
  *                   The same topic writes one `[corps_exhaustion]` line at every
  *                   corps_exhaustion write: source, before, after, and the operation.
+ *  defence        — stdout-only receipts for every settlement a faction lost in combat:
+ *                   the owning sector, nearby own brigades with their counter-attack
+ *                   gates, the retreat trigger, and the nearest idle brigade.
  */
 export type ReasonCodeTopic =
     | 'battle_stack'
@@ -152,7 +155,8 @@ export type ReasonCodeTopic =
     | 'reconciliation_write'
     | 'preplanned_eligibility'
     | 'sector_stance'
-    | 'corps_plan';
+    | 'corps_plan'
+    | 'defence';
 
 const ALL_TOPICS: readonly ReasonCodeTopic[] = [
     'axis_reject',
@@ -185,6 +189,7 @@ const ALL_TOPICS: readonly ReasonCodeTopic[] = [
     'preplanned_eligibility',
     'sector_stance',
     'corps_plan',
+    'defence',
 ];
 
 /**
@@ -329,6 +334,17 @@ export function emitCorpsExhaustionRecord(build: () => Record<string, unknown>):
         console.log(`${CORPS_EXHAUSTION_PREFIX} ${stableStringify({ schema_version: 1, ...build() })}`);
     } catch {
         // Observation and stdout failures cannot affect exhaustion.
+    }
+}
+
+/** Default-off stdout receipts for lost settlements' defence context. Never writes GameState or reports. */
+export const DEFENCE_PREFIX = '[defence]';
+export function emitDefenceRecord(record: Record<string, unknown>): void {
+    if (!isReasonCodeTopicEnabled('defence')) return;
+    try {
+        console.log(`${DEFENCE_PREFIX} ${stableStringify({ schema_version: 1, ...record })}`);
+    } catch {
+        // Observation and stdout failures cannot affect defence.
     }
 }
 
