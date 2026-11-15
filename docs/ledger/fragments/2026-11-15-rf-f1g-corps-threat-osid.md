@@ -30,7 +30,7 @@ The player-facing reads (the stance-matter view's `sector_threat`, the Level-1 s
 - the emergency op fires once on the adjacent enemy OSID with OSID edges, and never with S-id edges, both directly and through the `generateAllCorpsOrders` call site (that test fails if the call site is reverted to `edges`);
 - the player recommendation step reads the OSID graph.
 
-`tsc` 0. The structural fingerprint check passes unchanged. `test:baselines` reports the two report artifacts above (`weekly_report.jsonl`, `end_report.md`) for `apr1992_188w`; re-bless pending the orchestrator's decision.
+`tsc` 0. The structural fingerprint check passes unchanged. `test:baselines` reported the two report artifacts above (`weekly_report.jsonl`, `end_report.md`) for `apr1992_188w`. With the orchestrator's approval the manifest was re-blessed at this head (those two hashes only), and two following compare runs both report all scenarios match. The full suite exits 0.
 
 **Registered (new lanes, not followed here):**
 1. Emergency defensive operations are dead behind the healthy-brigade gate, which measures strength against the 3,000 cap rather than designed strength.
