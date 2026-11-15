@@ -79,8 +79,10 @@ describe('DaytonNegotiationModal — Phase-4 player-agency surface', () => {
         // The default (all-decentralized + unraised Brčko) drives autonomy=100 and
         // Brčko=arbitration, so the floor caps the clean win out of the box.
         render(createElement(DaytonNegotiationModal, { dayton: PENDING }));
-        expect(screen.getByText('OUTCOME CAPPED — HOLLOW VICTORY')).toBeTruthy();
-        expect(screen.getByText(/never reads as a clean win/)).toBeTruthy();
+        // §4 panel copy (ending truth pass): the cap the room warns about is the cap the Verdict applies.
+        expect(screen.getByText('OUTCOME CAPPED: HOLLOW VICTORY')).toBeTruthy();
+        expect(screen.getByText(/no outcome stands as a clean result/)).toBeTruthy();
+        expect(screen.getByText(/Only this side's own condemnation counts toward its index/)).toBeTruthy();
     });
 
     it('probes positions and renders bot counter-offers from the read-only IPC', async () => {

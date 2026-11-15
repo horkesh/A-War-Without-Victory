@@ -100,7 +100,11 @@ export function DaytonConferenceRoom({ date, status, error, forced, ultimatum, p
                             {!panel && alert}
                         </header>
                         <DaytonRoomBackdrop labels={labels} onOpen={open} board={board} night={forced} />
-                        <nav className="dayton-live-nav dayton-live-actions" aria-label={t('dayton.conference.objects')}>
+                        {/* R8 council B2: an open panel covers most of the rail, which is inert behind it,
+                            so the rail hides instead of showing clipped labels ("Delegation fold"). It stays
+                            mounted so focus can return to the button that opened the panel. */}
+                        <nav className="dayton-live-nav dayton-live-actions" aria-label={t('dayton.conference.objects')}
+                            data-panel-open={panel !== null || undefined}>
                             {roomObjects.map(id => (
                                 <button type="button" key={id} className="dayton-live-button" onClick={event => open(id, event)}>
                                     {labels[id]}

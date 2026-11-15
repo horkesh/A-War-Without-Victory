@@ -163,7 +163,12 @@ describe('3. "survived" only while RBiH holds the enclave', () => {
         freezeEndgameSnapshot(s);
         expect(notes(s)).toContain('Srebrenica genocide occurred');
         expect(notes(s)).not.toContain(SREBRENICA_OVERRUN_NOTE);
-        expect(notes(variant({ turn: 120, holder: 'RBiH' }))).toContain('Srebrenica enclave survived');
+        // A held enclave "survived" only once the war reached the rupture window (turn 160,
+        // R8 ending truth pass §4 panel); a shorter war says nothing about it.
+        expect(notes(variant({ turn: 170, holder: 'RBiH' }))).toContain('Srebrenica enclave survived');
+        const short = notes(variant({ turn: 120, holder: 'RBiH' }));
+        expect(short).not.toContain('Srebrenica enclave survived');
+        expect(short).not.toContain(SREBRENICA_OVERRUN_NOTE);
     });
 
     it('the enclave_defended audit entry needs every capital in RBiH hands now', () => {

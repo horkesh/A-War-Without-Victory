@@ -4,10 +4,11 @@ import type { ComparisonResult } from '../../../sim/endgame/endgame_comparison.j
 import {
     buildVerdictScene,
     formatVerdictOutcomeClass,
+    formatVerdictSideName,
     getVerdictFactionOrder,
     type VerdictSceneInput,
 } from './verdictScene.js';
-import { formatHistoricalDivergenceNote } from './historicalDivergenceNotes.js';
+import { buildHistoricalComparisonLines } from './verdictComparison.js';
 import { t } from '../i18n';
 import { turnToDateString } from '../utils/formatters.js';
 
@@ -23,11 +24,18 @@ function formatOutcomeLine(input: VerdictShareSummaryInput): string {
 
     const factionVerdict = input.verdict.faction_verdicts[scene.focusFaction];
     return t('verdict.share.outcomeLine', {
-        faction: scene.focusFaction,
+        faction: scene.focusSideName,
         outcome: scene.focusOutcomeLabel,
         grade: factionVerdict.grade,
         score: factionVerdict.pyrrhic_score.toFixed(1),
     });
+}
+
+/** The headline, its subheadline, then the recorded genocide on its own line (§4 panel). */
+function formatHeadlineLines(input: VerdictShareSummaryInput): string[] {
+    if (!input.verdict) return [];
+    const scene = buildVerdictScene(input);
+    return [scene.headline, scene.subheadline, scene.stain?.text ?? ''].filter(line => line.trim().length > 0);
 }
 
 function formatWarEndLine(verdict: GameVerdict | undefined): string {
@@ -44,10 +52,11 @@ function formatCostLine(input: VerdictShareSummaryInput): string {
 
 function formatComparisonLine(input: VerdictShareSummaryInput): string {
     if (!input.historicalComparison) return t('verdict.share.comparisonMissing');
-    const callout = input.historicalComparison.divergence_notes
-        .map(formatHistoricalDivergenceNote)
-        .find(note => note.trim().length > 0)
-        ?? t('verdict.share.noDivergenceNotes');
+    const callout = buildHistoricalComparisonLines({
+        verdict: input.verdict,
+        costLedger: input.costLedger,
+        comparison: input.historicalComparison,
+    }).find(line => line.id === 'end_of_war')?.text ?? t('verdict.share.noDivergenceNotes');
     return t('verdict.share.comparisonLine', { callout });
 }
 
@@ -57,7 +66,7 @@ function formatFactionOutcomes(verdict: GameVerdict | undefined): string {
 
     const outcomes = factions.map((faction) => {
         const factionVerdict = verdict.faction_verdicts[faction];
-        return `${faction} ${formatVerdictOutcomeClass(factionVerdict.outcome_class)}`;
+        return `${formatVerdictSideName(faction)} ${formatVerdictOutcomeClass(factionVerdict.outcome_class)}`;
     });
     return t('verdict.share.factionOutcomesLine', { outcomes: outcomes.join('; ') });
 }
@@ -65,6 +74,7 @@ function formatFactionOutcomes(verdict: GameVerdict | undefined): string {
 export function buildVerdictShareSummary(input: VerdictShareSummaryInput): string {
     return [
         t('verdict.share.title'),
+        ...formatHeadlineLines(input),
         formatOutcomeLine(input),
         formatWarEndLine(input.verdict),
         formatCostLine(input),

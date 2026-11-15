@@ -1301,7 +1301,16 @@ function validateState(state, runLabel) {
     }
 
     log(`  Offensive signs: ${offensiveSignsCount}/${totalIntelRecords} records`);
-    if (currentTurn > 20 && totalIntelRecords > 0 && offensiveSignsCount === 0) {
+    // Under the October 1995 general ceasefire no party prepares an offensive, so zero offensive
+    // signs is the correct reading, not intel blindness (council fix 3; same predicate as
+    // src/sim/combat/oct1995_ceasefire.ts isOct1995CeasefireInForce: flag set and the turn later
+    // than the turn the Holbrooke demand fired).
+    const ceasefireFiredTurn = state.military?.event_last_fired_turn?.holbrooke_ceasefire_demand_oct95;
+    const oct1995CeasefireInForce = state.military?.event_flags?.ceasefire_oct1995_in_force === true
+        && (typeof ceasefireFiredTurn !== 'number' || currentTurn > ceasefireFiredTurn);
+    if (currentTurn > 20 && totalIntelRecords > 0 && offensiveSignsCount === 0 && oct1995CeasefireInForce) {
+        ok(`Intel system functional (turn ${currentTurn}); no offensive signs expected while the October 1995 ceasefire holds`);
+    } else if (currentTurn > 20 && totalIntelRecords > 0 && offensiveSignsCount === 0) {
         fail('After turn 20, 0 intel records show offensive_signs — intel system may be broken');
     } else if (currentTurn > 20 && totalIntelRecords === 0) {
         fail('After turn 20, 0 intel records exist — intel system may be broken');
