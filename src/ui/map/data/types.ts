@@ -1086,6 +1086,40 @@ export interface StanceMatterView {
     constraint: string | null;
 }
 
+/** Command loop L7: an army clash, projected player-safe (names, never raw ids). */
+export interface ArmyClashView {
+    id: string;
+    turn: number;
+    act: 'stop_op' | 'request_op' | 'withhold_plan' | 'decline_opportunity';
+    corpsId: string;
+    corpsName: string;
+    /** The corps commander Replace would remove; null when the corps has none. */
+    corpsCommanderName: string | null;
+    armyCommanderName: string | null;
+    conflict: 'main_effort' | 'plan_objective' | 'economy_corps' | 'primary_corps' | 'staff_recommended';
+    compliance: 'partial' | 'refused';
+    counterOrder: 'continue_operation' | 'resubmit_next_week' | 'launch_plan' | 'approve_opportunity';
+    /** Raw order reference: operation name, target settlement id, plan id or opportunity proposal id. */
+    orderRef: string;
+    /** Player-safe name of the operation or opportunity, when the order names one. */
+    orderName: string | null;
+    stagedCost: number;
+    corpsObjection: boolean;
+    /** The previous clash this faction was shown, for "as on week N". */
+    previousClash: { turn: number; outcome: ArmyClashReceiptView['outcome'] } | null;
+}
+
+export interface ArmyClashReceiptView {
+    id: string;
+    turn: number;
+    act: ArmyClashView['act'];
+    corpsName: string;
+    armyCommanderName: string | null;
+    outcome: 'accept' | 'insist' | 'replace' | 'lapsed' | 'noted' | 'not_put';
+    resolvedTurn: number;
+    cost: number;
+}
+
 export interface StanceMatterReceiptView {
     id: string;
     turn: number;
@@ -1799,6 +1833,10 @@ export interface LoadedGameState {
     stanceMatterHistory?: StanceMatterReceiptView[];
     /** Active and pending presidential stance holds (state.military.stance_matter_state.holds). */
     stanceHolds?: StanceHoldView[];
+    /** Command loop L7: this week's open army clash (state.meta.army_clashes, player faction only). */
+    armyClashes?: ArmyClashView[];
+    /** Army-clash receipts, newest first (state.meta.army_clash_history). */
+    armyClashHistory?: ArmyClashReceiptView[];
 
     /** Pending autonomy proposal reviews (Level 1 Assisted). Mapped from state.meta.pending_proposal_reviews. */
     pendingProposalReviews?: Array<{

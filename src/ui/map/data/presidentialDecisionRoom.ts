@@ -30,8 +30,10 @@ import {
   FORCE_LAUNCH_COST,
   PROACTIVE_FORCE_LAUNCH_COST,
   BACK_CAMPAIGN_COST,
+  ARMY_CLASH_INSIST_COST,
   proposalBackingCost,
 } from '../utils/commandAuthority';
+import { armyClashSummary, armyClashTitle } from './armyClashCopy';
 import { buildForceableReadyPlans } from './backTheOfficer';
 import { buildProposalDossier } from './proposalDossier';
 import { sidePickerFactionLabel } from '../utils/sidePickerLabels';
@@ -169,6 +171,7 @@ export interface PresidentialDecisionRoomDirective {
     | 'elite_deploy'
     | 'review_proposal'
     | 'stance_matter'
+    | 'army_clash'
     | 'front_visit'
     | 'address_nation'
     | 'decorate_unit'
@@ -1319,6 +1322,42 @@ function addStanceMatterCards(state: LoadedGameState, cards: CandidateCard[]): v
   }
 }
 
+/**
+ * Command loop L7: the army commander objects to an order the president staged this week.
+ * Advisory (unanswered at Advance, the order stands as given). The card's cost is the Insist
+ * price; the three answers and their prices render in the lazily loaded ArmyClashActions.
+ */
+function addArmyClashCards(
+  state: LoadedGameState,
+  cards: CandidateCard[],
+  osidNameMap: Record<string, string> | null,
+): void {
+  if (!state.player_faction) return;
+  for (const clash of state.armyClashes ?? []) {
+    cards.push({
+      id: `command:army-clash:${clash.id}`,
+      category: 'command',
+      severity: 'warning',
+      title: armyClashTitle(clash, osidNameMap),
+      explanation: armyClashSummary(clash),
+      sourceOwner: t('decisionRoom.card.command.sourceOwner'),
+      sourceLabel: t('clash.sourceLabel'),
+      actionLabel: t('clash.actionLabel'),
+      evidence: [],
+      navigationTarget: { kind: 'army-hq-corps-briefing', corpsId: clash.corpsId },
+      directive: {
+        lever: 'army_clash',
+        corpsId: clash.corpsId,
+        cost: ARMY_CLASH_INSIST_COST,
+        payload: { clashId: clash.id },
+      },
+      urgencySort: 6,
+      sourceSort: `command:army-clash:${clash.id}`,
+      deadlineTurn: clash.turn,
+    });
+  }
+}
+
 function addProposalReviewDirectiveCards(
   state: LoadedGameState,
   cards: CandidateCard[],
@@ -2452,6 +2491,7 @@ export function buildPresidentialDecisionRoomView(input: PresidentialDecisionRoo
   addStopOpDirectiveCards(state, candidates);
   addProposalReviewDirectiveCards(state, candidates, osidNameMap);
   addStanceMatterCards(state, candidates);
+  addArmyClashCards(state, candidates, osidNameMap);
   addForceLaunchDirectiveCards(state, candidates);
   addProactiveForceLaunchDirectiveCards(state, candidates);
   addHardTurnCards(state, osidNameMap, candidates);

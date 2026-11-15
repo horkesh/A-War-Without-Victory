@@ -4100,6 +4100,32 @@ export function validateGameStateShape(
                     }
                 }
             }
+            // Command loop L7: open army clashes and their receipts (optional, live president only).
+            const ARMY_CLASH_ACTS = new Set(['stop_op', 'request_op', 'withhold_plan', 'decline_opportunity']);
+            const ARMY_CLASH_OUTCOMES = new Set(['accept', 'insist', 'replace', 'lapsed', 'noted', 'not_put']);
+            for (const key of ['army_clashes', 'army_clash_history'] as const) {
+                if (key in m && (m as Record<string, unknown>)[key] !== undefined) {
+                    const rows = (m as Record<string, unknown>)[key];
+                    if (!Array.isArray(rows)) {
+                        errors.push(`meta.${key} must be an array when present`);
+                    } else {
+                        rows.forEach((row: unknown, i: number) => {
+                            const r = row as Record<string, unknown> | null;
+                            const shapeOk = !!r && typeof r === 'object' && typeof r.id === 'string'
+                                && typeof r.faction === 'string' && typeof r.corps_id === 'string'
+                                && typeof r.army_officer_id === 'string' && Number.isInteger(r.turn)
+                                && ARMY_CLASH_ACTS.has(String(r.act)) && typeof r.conflict === 'string';
+                            const kindOk = !!r && (key === 'army_clashes'
+                                ? (r.compliance === 'partial' || r.compliance === 'refused')
+                                    && typeof r.counter_order === 'string' && typeof r.order_ref === 'string'
+                                    && typeof r.staged_cost === 'number' && Number.isFinite(r.staged_cost) && r.staged_cost >= 0
+                                : ARMY_CLASH_OUTCOMES.has(String(r.outcome)) && Number.isInteger(r.resolved_turn)
+                                    && typeof r.cost === 'number' && Number.isFinite(r.cost) && r.cost >= 0);
+                            if (!shapeOk || !kindOk) errors.push(`meta.${key}[${i}] is malformed`);
+                        });
+                    }
+                }
+            }
             if ('proposal_decision_history' in m && m.proposal_decision_history !== undefined) {
                 validateProposalDecisionHistory(m.proposal_decision_history, errors);
             }
@@ -4891,6 +4917,23 @@ export function validateGameStateShape(
                             errors.push(`military.stance_matter_state.holds[${i}] is malformed`);
                         }
                     });
+                }
+            }
+        }
+
+        // army_clash_state (command loop L7): optional; three integer-valued records when present.
+        if ('army_clash_state' in mil && mil.army_clash_state !== undefined) {
+            const acs: unknown = mil.army_clash_state;
+            if (acs === null || typeof acs !== 'object' || Array.isArray(acs)) {
+                errors.push('military.army_clash_state must be an object when present');
+            } else {
+                const rec = acs as Record<string, unknown>;
+                for (const key of ['raised_by_faction_year', 'last_clash_turn_by_faction', 'last_clash_turn_by_officer']) {
+                    const v = rec[key];
+                    if (v === null || typeof v !== 'object' || Array.isArray(v)
+                        || Object.values(v as Record<string, unknown>).some((n) => !Number.isInteger(n))) {
+                        errors.push(`military.army_clash_state.${key} must be a record of integers`);
+                    }
                 }
             }
         }

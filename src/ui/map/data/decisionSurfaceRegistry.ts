@@ -28,6 +28,7 @@ export type DecisionResolverSurface =
   | 'operation_opportunity_dossier'
   | 'proposal_review_dossier'
   | 'stance_matter_dossier'
+  | 'army_clash_dossier'
   | 'counter_offer_modal'
   | 'intelligence_brief_modal'
   | 'situation_brief'
@@ -134,6 +135,13 @@ const SURFACE_COPY_KEYS: Record<DecisionSurfaceFamilyId, {
     sourceLabel: 'decisionSurface.stanceMatter.sourceLabel',
     fallbackTitle: 'decisionSurface.stanceMatter.fallbackTitle',
     fallbackSummary: 'decisionSurface.stanceMatter.fallbackSummary',
+  },
+  army_clash: {
+    playerLabel: 'decisionSurface.armyClash.playerLabel',
+    actionLabel: 'decisionSurface.armyClash.actionLabel',
+    sourceLabel: 'decisionSurface.armyClash.sourceLabel',
+    fallbackTitle: 'decisionSurface.armyClash.fallbackTitle',
+    fallbackSummary: 'decisionSurface.armyClash.fallbackSummary',
   },
   operation_opportunity: {
     playerLabel: 'decisionSurface.operationOpportunity.playerLabel',
@@ -362,6 +370,22 @@ export const DECISION_SURFACE_REGISTRY = {
     copySanitizer: (raw) => rawCopy(raw, 'Stance change', 'A commander has changed stance. It stands unless you answer.'),
     resolveAction: 'Confirm, countermand or constrain',
     consequenceRecord: 'Stance record',
+  }),
+  army_clash: manifestSurface({
+    familyId: 'army_clash',
+    inboxType: 'army_clash',
+    playerLabel: 'Army objection',
+    severity: 'advisory',
+    ownerShell: 'decision_room',
+    resolverSurface: 'army_clash_dossier',
+    opensAs: 'shell_panel',
+    gatePolicy: 'advisory',
+    inboxAction: 'decision_room',
+    actionLabel: 'Open Command Surface',
+    sourceLabel: 'Army commander',
+    copySanitizer: (raw) => rawCopy(raw, 'The army objects', 'The army commander objects to an order you gave. It stands unless you answer.'),
+    resolveAction: 'Accept, insist or replace',
+    consequenceRecord: 'Army clash record',
   }),
   operation_opportunity: manifestSurface({
     familyId: 'operation_opportunity',

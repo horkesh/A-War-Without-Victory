@@ -117,6 +117,14 @@ function projectMeta(meta, playerFaction) {
   projected.stance_matter_history = playerFaction
     ? rowsForFaction(meta?.stance_matter_history, playerFaction)
     : [];
+  // Command loop L7: the player's own army clash and its receipts. The volume bookkeeping
+  // (military.army_clash_state) stays in the main process.
+  projected.army_clashes = playerFaction
+    ? rowsForFaction(meta?.army_clashes, playerFaction)
+    : [];
+  projected.army_clash_history = playerFaction
+    ? rowsForFaction(meta?.army_clash_history, playerFaction)
+    : [];
   if (isRecord(meta?.autonomy_overrides) && playerFaction) {
     projected.autonomy_overrides = sortedRecordFromEntries(
       Object.entries(meta.autonomy_overrides)
