@@ -59,27 +59,7 @@ const mentions = (text: string): boolean => {
 };
 
 /** Player-visible strings that still carry a swept citation. Fix them with the seats, then remove the entry. */
-const KNOWN_VISIBLE_TO_FIX: ReadonlyArray<string> = [
-    'rs_assembly_rejects_voplan_1993:ro0.fc0', 'rs_strategic_goals:ro0.fc3', 'rs_strategic_goals:ro0.fc4', 'rs_strategic_goals:ro0.fc8', 'rs_strategic_goals:ro0.fc9',
-    'rs_strategic_goals:ro1.fc0', 'rs_strategic_goals:ro1.fc2', 'rs_strategic_goals:ro1.fc3', 'rs_strategic_goals:ro1.fc7', 'rs_strategic_goals:ro1.fc8',
-    'rs_strategic_goals:ro2.fc0', 'rs_strategic_goals:ro2.fc2', 'rs_strategic_goals:ro2.fc3', 'rs_strategic_goals:ro2.fc7', 'rs_strategic_goals:ro2.fc8',
-    'rbih_state_identity:ro0.fc6', 'rbih_state_identity:ro0.fc11', 'rbih_state_identity:ro1.fc5', 'rbih_state_identity:ro1.fc10',
-    'rbih_state_identity:ro2.fc5', 'rbih_state_identity:ro2.fc10',
-    'hrhb_political_goal:ro0.fc12', 'hrhb_political_goal:ro1.fc11', 'hrhb_political_goal:ro2.fc11',
-    'os_rbih_tactical_acceptance_1993:historical_source', 'hrhb_owen_stoltenberg_response_1993:historical_source',
-    'rs_owen_stoltenberg_response_1993:historical_source', 'rs_belgrade_pressure_response_1993:historical_source',
-    'rbih_reintegration_offers_1993:historical_source', 'rs_autonomy_path_decision_1993:historical_source',
-    'rs_washington_rejection_1994:historical_source', 'rs_contact_group_response_1994:historical_source',
-    'un_hostage_crisis_1995:historical_source',
-];
-
-/**
- * Events whose whole definition (hidden text included) is pinned by a reviewed-contract hash in
- * src/sim/events/opening_policy_transition.ts. Editing any string of `rbih_state_identity` breaks that
- * pin, and a UI lane makes no sim change, so its hidden notes keep the old cites until the contract
- * owner re-pins the hash. They are listed here so the hole is explicit and may only shrink.
- */
-const PINNED_BY_REVIEWED_CONTRACT: ReadonlyArray<string> = ['rbih_state_identity'];
+const KNOWN_VISIBLE_TO_FIX: ReadonlyArray<string> = [];
 
 describe('event notes no longer cite the Markale II, SDS and Srebrenica paragraphs, or a BB Vol. II chapter, as support', () => {
     it('is not vacuous: the corrections are recorded in the hidden data', () => {
@@ -87,17 +67,9 @@ describe('event notes no longer cite the Markale II, SDS and Srebrenica paragrap
         expect(hidden.length).toBeGreaterThanOrEqual(25);
     });
 
-    it('the pinned event is the only one left with an uncorrected hidden cite, and it is pinned by the reviewed contract', () => {
-        const source = withoutComments(readFileSync('src/sim/events/opening_policy_transition.ts', 'utf8'));
-        expect(source).toContain("const IDENTITY = 'rbih_state_identity'");
-        expect(source).toContain('REVIEWED_IDENTITY_FNV64');
-        const pinnedHidden = ENTRIES.filter((entry) => !entry.visible && PINNED_BY_REVIEWED_CONTRACT.includes(entry.id) && mentions(entry.text));
-        expect(pinnedHidden.length).toBeGreaterThan(0);
-    });
-
-    it('hidden text: every mention of a swept citation says it is the earlier, wrong cite', () => {
+    it('hidden text: every mention of a swept citation says it is the earlier, wrong cite (rbih_state_identity included, re-pinned with its review)', () => {
         const live: string[] = [];
-        for (const entry of ENTRIES.filter((row) => !row.visible && !PINNED_BY_REVIEWED_CONTRACT.includes(row.id))) {
+        for (const entry of ENTRIES.filter((row) => !row.visible)) {
             for (const match of entry.text.matchAll(SWEPT)) {
                 const at = match.index ?? 0;
                 const around = entry.text.slice(Math.max(0, at - 70), at + match[0].length + 60);

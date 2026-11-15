@@ -10,8 +10,11 @@ const POLICY = 'rbih_paramilitary_policy_1992';
 const OPTIONS = ['always_deny', 'ask', 'always_allow'] as const;
 // Re-pinned 2026-11-14 for the BCS diacritics restored in this event's `localizations.bcs` text
 // (was 69592 / a8b1bb427b526c07). Only BCS display strings changed; trigger, options, effects unchanged.
-const REVIEWED_IDENTITY_CANONICAL_LENGTH = 69579;
-const REVIEWED_IDENTITY_FNV64 = '6d447e72f84a687d';
+// Re-pinned 2026-11-15 after the citation audit (was 69579 / 6d447e72f84a687d). Reviewed by the historian, narrative and
+// canon-compliance seats as a whole event: 13 `explanation` strings changed (6 player-visible wording and citation fixes,
+// 7 hidden developer-note citations); trigger, options, effects, flags and dimension shifts are byte-identical.
+const REVIEWED_IDENTITY_CANONICAL_LENGTH = 70817;
+const REVIEWED_IDENTITY_FNV64 = 'a5cda75445f4eff3';
 const REVIEWED_POLICY_CANONICAL_LENGTH = 10911;
 const REVIEWED_POLICY_FNV64 = '4db9c9795b1abb6d';
 
@@ -73,6 +76,29 @@ function buildPending(def: EventDefinition, faction: FactionId, turn: number): P
             ? { notifications_to_other_factions: JSON.parse(JSON.stringify(def.notifications_to_other_factions)) }
             : {}),
     };
+}
+
+/**
+ * The structure of a pending decision with its player-facing wording removed.
+ *
+ * A pending decision copies the event's display text into the save when it fires, so a save written by an
+ * older build carries that build's wording. The reviewed-contract hash still pins the whole definition
+ * (wording included) at the catalog, but a saved decision is judged on what it can DO: event id, turn,
+ * faction, option ids, effects, flags, dimension shifts, defaults and consequence structure. Wording drift
+ * therefore cannot strand a save, while a forged or altered mechanic is still refused.
+ */
+function withoutDisplayText(decision: PendingEventDecision): unknown {
+    const copy = JSON.parse(JSON.stringify(decision)) as Record<string, unknown>;
+    for (const key of ['event_title', 'narrative', 'situation', 'staff_assessment', 'trigger_evidence', 'historical_source', 'source_note', 'source']) {
+        delete copy[key];
+    }
+    delete copy.notifications_to_other_factions;
+    for (const option of (copy.response_options ?? []) as Array<Record<string, unknown>>) {
+        delete option.label;
+        delete option.description;
+        for (const consequence of (option.future_consequences ?? []) as Array<Record<string, unknown>>) delete consequence.explanation;
+    }
+    return copy;
 }
 
 function requireCurrentDecision(state: GameState, eventId: string, responseId: string): PendingEventDecision {
@@ -191,7 +217,7 @@ function requireIdentityLane(
         || military.event_last_fired_turn[IDENTITY] !== fireTurn
         || military.event_readiness[IDENTITY] !== 0
         || (military.closed_event_ids ?? []).includes(IDENTITY)
-        || canonicalJson(decision) !== canonicalJson(buildPending(identity, 'RBiH', fireTurn))
+        || canonicalJson(withoutDisplayText(decision)) !== canonicalJson(withoutDisplayText(buildPending(identity, 'RBiH', fireTurn)))
         || military.fired_event_ids.includes(POLICY) || (military.closed_event_ids ?? []).includes(POLICY)
         || (military.enabled_event_ids ?? []).includes(POLICY)
         || (military.pending_event_decisions ?? []).some((d) => d.event_id === POLICY)
