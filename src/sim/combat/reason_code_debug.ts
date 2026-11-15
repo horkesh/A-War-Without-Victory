@@ -115,6 +115,10 @@ import { stableStringify } from '../../utils/stable_json.js';
  *                   stance with its reason, and the stance in effect when combat
  *                   resolves. Sectors are rebuilt after combat, so the turn-end
  *                   save shows neither.
+ *  army_doctrine  — stdout-only Army HQ doctrine receipts (F7b, 2026-11-15): one line
+ *                   per gathering with the assessment inputs (supply, manpower,
+ *                   territory trend) and the resulting army stance and aggression,
+ *                   plus whether the stance changed. The assessment is not saved.
  */
 export type ReasonCodeTopic =
     | 'battle_stack'
@@ -145,7 +149,8 @@ export type ReasonCodeTopic =
     | 'local_occupation_candidate'
     | 'reconciliation_write'
     | 'preplanned_eligibility'
-    | 'sector_stance';
+    | 'sector_stance'
+    | 'army_doctrine';
 
 const ALL_TOPICS: readonly ReasonCodeTopic[] = [
     'axis_reject',
@@ -177,6 +182,7 @@ const ALL_TOPICS: readonly ReasonCodeTopic[] = [
     'reconciliation_write',
     'preplanned_eligibility',
     'sector_stance',
+    'army_doctrine',
 ];
 
 /**
@@ -307,6 +313,17 @@ export function emitSectorStanceRecord(record: Record<string, unknown>): void {
         console.log(`${SECTOR_STANCE_PREFIX} ${stableStringify({ schema_version: 1, ...record })}`);
     } catch {
         // Observation and stdout failures cannot affect stance selection.
+    }
+}
+
+/** Default-off stdout receipts for Army HQ doctrine at each gathering. Never writes GameState or reports. */
+export const ARMY_DOCTRINE_PREFIX = '[army_doctrine]';
+export function emitArmyDoctrineRecord(record: Record<string, unknown>): void {
+    if (!isReasonCodeTopicEnabled('army_doctrine')) return;
+    try {
+        console.log(`${ARMY_DOCTRINE_PREFIX} ${stableStringify({ schema_version: 1, ...record })}`);
+    } catch {
+        // Observation and stdout failures cannot affect the campaign plan.
     }
 }
 

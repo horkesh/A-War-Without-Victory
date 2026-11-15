@@ -14,6 +14,7 @@ import {
     OPPORTUNITY_SCORE,
     MAX_GATHERING_OFFENSIVE_TARGETS, MAX_GATHERING_HOLD_TARGETS,
 } from './army_hq_gathering_constants.js';
+import { emitArmyDoctrineRecord, isReasonCodeTopicEnabled } from './reason_code_debug.js';
 
 // ── Emergency event IDs that trigger an immediate gathering ──────────────────
 const EMERGENCY_EVENT_IDS = new Set([
@@ -999,6 +1000,25 @@ export function evaluateArmyHQGathering(
     const emergency = reason !== 'regular_cadence';
     const assessment = assessTheater(state, faction);
     const plan = generateCampaignPlan(state, faction, assessment, currentTurn, reason, emergency);
+
+    // F7b observation (inert: stdout only, default off). The assessment is not saved, so this is the
+    // only place its inputs to the doctrine can be read. Detached scalar copies only.
+    if (isReasonCodeTopicEnabled('army_doctrine')) {
+        const previousStance = state.military.campaign_plans?.[faction]?.doctrine_override?.army_stance ?? null;
+        const stance = plan.doctrine_override?.army_stance ?? null;
+        emitArmyDoctrineRecord({
+            turn: currentTurn,
+            faction,
+            trigger: reason,
+            supply_status: assessment.supply_status,
+            manpower_status: assessment.manpower_status,
+            territory_trend: assessment.territory_trend,
+            army_stance: stance,
+            aggression_modifier: plan.doctrine_override?.aggression_modifier ?? null,
+            previous_stance: previousStance,
+            stance_changed: previousStance !== null && previousStance !== stance,
+        });
+    }
 
     // Write plan to state
     if (!state.military.campaign_plans) {

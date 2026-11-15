@@ -56,6 +56,8 @@ const ALL_TOPICS: ReasonCodeTopic[] = [
     'reconciliation_write',
     'preplanned_eligibility',
     'sector_stance',
+    // F7b (2026-11-15): Army HQ doctrine receipts.
+    'army_doctrine',
 ];
 
 function setFlag(value: string | undefined): void {
