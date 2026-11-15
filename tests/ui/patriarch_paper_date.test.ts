@@ -4,13 +4,16 @@
  * event text elsewhere said 30 August. NATO's Deliberate Force began on 30 August, which is
  * where the wrong date probably came from; that date stays correct for the air campaign.
  *
- * The name "Patriarch Paper" is kept: it is the name the diplomatic record uses. Holbrooke is named
- * as further reading only; the historian seat could not retrieve his text, so no date or chapter is
- * attributed to him in the visible note.
+ * The name "Patriarch Paper" stays in the event narrative as the game's label. Neither the ICTY
+ * judgment nor Balkan Battlegrounds uses it, so the visible source note, which cites them, does not
+ * attribute the name to them. Holbrooke is named as further reading only; the historian seat could
+ * not retrieve his text, so no date or chapter is attributed to him in the visible note.
  */
 
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
+
+import { withoutComments } from '../helpers/sourceComments';
 
 import type { EventDefinition } from '../../src/sim/events/event_types';
 import { resolveEventSourceLine } from '../../src/ui/map/data/eventDisplayCopy';
@@ -49,10 +52,12 @@ describe('the Patriarch Paper is dated 29 August 1995', () => {
     });
 
     it('the Codex essay and its index entry give 29 August', () => {
-        const essay = JSON.parse(readFileSync('data/scenarios/essays/rs_dayton_acceptance_1995.json', 'utf8')) as { content: string };
+        const essay = JSON.parse(
+            withoutComments(readFileSync('data/scenarios/essays/rs_dayton_acceptance_1995.json', 'utf8')),
+        ) as { content: string };
         expect(essay.content).toContain('granted on 29 August 1995');
         expect(essay.content).not.toContain('granted on 30 August');
-        const index = readFileSync('data/scenarios/essays/essay_index.json', 'utf8');
+        const index = withoutComments(readFileSync('data/scenarios/essays/essay_index.json', 'utf8'));
         expect(index).toContain('the Pale leadership had granted on 29 August 1995');
         expect(index).not.toContain('the Pale leadership had granted on 30 August 1995');
         // Deliberate Force did begin on 30 August; that line is untouched.
@@ -62,9 +67,18 @@ describe('the Patriarch Paper is dated 29 August 1995', () => {
     it('the visible source note cites the judgment paragraph, the date and the place, in EN and BCS', () => {
         const en = resolveEventSourceLine(acceptance, 'en') ?? '';
         const bcs = resolveEventSourceLine(acceptance, 'bcs') ?? '';
-        expect(en).toMatch(/Karadžić \(IT-95-5\/18-T\).*para\. 424.*Dobanovci.*29 August 1995.*Patriarch Paper/);
-        expect(bcs).toMatch(/Karadžić \(IT-95-5\/18-T\).*par\. 424.*Dobanovcima.*29\. augusta 1995.*Patrijarhov papir/);
+        expect(en).toMatch(/Karadžić \(IT-95-5\/18-T\).*para\. 424.*Dobanovci.*29 August 1995/);
+        expect(bcs).toMatch(/Karadžić \(IT-95-5\/18-T\).*par\. 424.*Dobanovcima.*29\. augusta 1995/);
+        expect(bcs).toContain('24. marta 2016.');
         expect(en).toContain('Balkan Battlegrounds, Vol. I, p. 391');
+    });
+
+    it('the visible note does not attribute the name "Patriarch Paper" to the judgment or Balkan Battlegrounds', () => {
+        // Historian check 2026-11-15: neither source uses the name (it is attested in Holbrooke, which
+        // could not be retrieved), so the note that cites them leaves it out; the narrative keeps it.
+        for (const locale of ['en', 'bcs'] as const) {
+            expect(resolveEventSourceLine(acceptance, locale) ?? '', locale).not.toMatch(/Patriarch|Patrijarh/i);
+        }
     });
 
     it('Holbrooke is further reading only: no date or chapter is attributed to him', () => {
