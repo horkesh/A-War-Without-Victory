@@ -10,6 +10,7 @@
 
 import type { FactionId, GameState, SettlementId } from '../../../state/game_state.js';
 import { strictCompare } from '../../../state/validateGameState.js';
+import { deriveMunicipalityControllerByOsid } from './war_data_extractor.js';
 
 /** Minimal snapshot of fields we need to diff between turns. */
 export interface PreviousTurnSnapshot {
@@ -107,11 +108,15 @@ export function capturePreviousTurnSnapshot(state: GameState): PreviousTurnSnaps
     const displacementOutTotals: Record<string, number> = {};
     // Displacement is per-municipality, not per-faction. Aggregate by controller.
     if (state.displacement.displacement_state) {
+        // `political_controllers` is keyed by OSID (`op:<municipality>:<name>`), never by municipality
+        // id, so the municipality's holder is the majority holder of its OSIDs (the same rule the
+        // sitrep uses). Looking the municipality id up directly always missed and the totals stayed {}.
+        const municipalityController = deriveMunicipalityControllerByOsid(state);
         for (const munId of Object.keys(state.displacement.displacement_state).sort(strictCompare)) {
             const ds = state.displacement.displacement_state[munId];
             if (!ds) continue;
             // Attribute displacement_out to the controller of the municipality
-            const controller = state.political.political_controllers?.[munId] ?? null;
+            const controller = municipalityController.get(munId) ?? null;
             if (controller) {
                 displacementOutTotals[controller] = (displacementOutTotals[controller] ?? 0) + ds.displaced_out;
             }
