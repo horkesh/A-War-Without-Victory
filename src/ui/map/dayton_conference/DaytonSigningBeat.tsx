@@ -11,6 +11,11 @@ import standardBlocking from './art/signing-blocking-4k.json';
 import wideBlocking from './art/signing-blocking-ultrawide.json';
 import standardPlate from './art/signing-table-4k.webp';
 import widePlate from './art/signing-table-ultrawide.webp';
+// live.css defines the .dayton-live-* layout, heading and button styles this beat uses. Only the
+// conference room imported it, so a finished game loaded from a save (the Verdict opens on this beat
+// without the conference ever loading) rendered it unstyled. It stays first so the cascade order is
+// the one the beat always had after the conference.
+import './live.css';
 import './room.css';
 import './boundary.css';
 import './signing.css';
@@ -147,6 +152,9 @@ export function DaytonSigningBeat({ agreement, fallbackDate, onContinue }: Dayto
                     {t(imposed ? 'dayton.signing.titleImposed' : 'dayton.signing.title')}
                 </h2>
                 <p className="dayton-signing-annexes">{t('dayton.signing.annexes')}</p>
+                {/* R8 council B9/H1: the plate dates the campaign's signing week only; the
+                    historical dates stand here as the record (historian ruling 2026-11-14). */}
+                <p className="dayton-signing-record" data-testid="dayton-signing-record">{t('dayton.signing.historicalRecord')}</p>
                 <TreatyLedger treaty={agreement.treaty} signed />
                 <div className="dayton-live-actions">
                     <button type="button" className="dayton-live-button" onClick={() => setMapOpen(true)}>

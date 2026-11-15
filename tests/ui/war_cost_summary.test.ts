@@ -125,8 +125,15 @@ describe('formatHistoricalDivergenceNote', () => {
             .toBe('Federacija je kontrolisala 54.0% teritorije naspram historijskih 51%.');
         expect(formatHistoricalDivergenceNote('RS controlled 47.5% territory vs historical 49%'))
             .toBe('RS je kontrolisao 47.5% teritorije naspram historijskih 49%.');
+        // A pre-truth-pass save's casualty note (military over all deaths, as a percentage of
+        // history) is shown without the percentage (Sensitive History Design Gate §4).
         expect(formatHistoricalDivergenceNote('Total military casualties were 72% of historical levels'))
-            .toBe('Ukupni vojni gubici bili su 72% historijskog nivoa.');
+            .toBe('Vojni poginuli upoređeni su s historijskim ratom u knjizi cijene.');
+        // The current producer's integer notes localize to the rebuilt comparison lines.
+        expect(formatHistoricalDivergenceNote('Military killed: 46,500 in this campaign; 57,523 in the historical war'))
+            .toBe('Vojni poginuli na svim stranama: 46,500 u ovoj kampanji. Historijski rat: 57,523 vojnika ubijenih ili nestalih (Istraživačko-dokumentacioni centar, Sarajevo, 2007).');
+        expect(formatHistoricalDivergenceNote('Civilians killed: 38,000 in this campaign; 39,684 in the historical war'))
+            .toContain('Civilni poginuli na svim stranama: 38,000 u ovoj kampanji. Historijski rat: 39,684 civila ubijenih ili nestalih');
     });
 });
 

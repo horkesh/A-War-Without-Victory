@@ -179,12 +179,16 @@ describe('endgame readability and foreground ownership', () => {
         expect(score.textContent).toContain('55.0');
         expect(score.className).toContain(FACTION_COLORS_SUBTLE.RBiH);
         expect(score.style.color).toBe('');
-        const rsTab = screen.getByText('VRS');
+        // The rail names the side ("Republika Srpska", not "VRS") in its subtle faction token.
+        const rsButton = container.querySelector('[data-awwv-faction-tab-outcome="RS"]')?.closest('button') as HTMLElement;
+        const rsTab = Array.from(rsButton.querySelectorAll('span'))
+            .find(span => span.textContent === 'Republika Srpska' && span.children.length === 0) as HTMLElement;
+        expect(rsTab).toBeDefined();
         expect(rsTab.className).toContain(FACTION_COLORS_SUBTLE.RS);
         expect(rsTab.style.color).toBe('');
-        const footer = screen.getByText(/least bad version of a tragedy/i);
-        expect(footer.className).not.toContain('text-secondary/60');
-        expect(footer.className).toContain('text-secondary');
+        expect(screen.queryByText('VRS')).toBeNull();
+        // The footer tagline is retired (§4 panel 2026-11-14): no low-contrast footer copy remains.
+        expect(screen.queryByText(/least bad version of a tragedy/i)).toBeNull();
 
         const tokens: Record<string, string> = {
             'faction-rs-subtle': '#e08080',
