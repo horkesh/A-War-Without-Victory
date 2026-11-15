@@ -547,7 +547,7 @@ describe('buildTurnAftermathView', () => {
       territoryFlipsFromBattles: 0,
     });
     expect(view?.humanitarian).toEqual({ displacedThisTurn: 0, hotspotLabel: undefined });
-    expect(view?.formations).toEqual({ spawned: 0, destroyed: 0, ownSpawned: 0, ownDestroyed: 0 });
+    expect(view?.formations).toEqual({ spawned: 0, destroyed: 0, ownSpawned: 0, ownDestroyed: 0, ownDestroyedList: [] });
     expect(view?.supply).toEqual({ ownSupplyDelta: 0, ownHeavyMunitionsDelta: 0 });
     expect(view?.cost).toEqual({
       friendlyMilitaryCasualties: 0,
