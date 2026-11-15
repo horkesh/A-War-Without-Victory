@@ -11,6 +11,11 @@ import standardBlocking from './art/signing-blocking-4k.json';
 import wideBlocking from './art/signing-blocking-ultrawide.json';
 import standardPlate from './art/signing-table-4k.webp';
 import widePlate from './art/signing-table-ultrawide.webp';
+// live.css defines the .dayton-live-* layout, heading and button styles this beat uses. Only the
+// conference room imported it, so a finished game loaded from a save (the Verdict opens on this beat
+// without the conference ever loading) rendered it unstyled. It stays first so the cascade order is
+// the one the beat always had after the conference.
+import './live.css';
 import './room.css';
 import './boundary.css';
 import './signing.css';
