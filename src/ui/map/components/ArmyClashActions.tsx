@@ -121,20 +121,22 @@ export function ArmyClashActions({ clash, gameState, onAnswered }: ArmyClashActi
             : t('clash.corpsObjectionFallback')}
         </p>
       )}
-      <div className="grid grid-cols-3 gap-2" role="group" aria-label={t('clash.actionLabel')}>
+      {/* Three equal full-width rows (label left, price right): equal weight, and long officer
+          names never overflow a narrow desk column. */}
+      <div className="flex flex-col gap-2" role="group" aria-label={t('clash.actionLabel')}>
         {answers.map((option) => (
           <button
             key={option.answer}
             type="button"
-            className={`${SURFACE_SECONDARY_BUTTON} flex flex-col items-center gap-0.5`}
+            className={`${SURFACE_SECONDARY_BUTTON} flex w-full items-center justify-between gap-3 text-left`}
             aria-label={option.aria}
             title={option.effect}
             data-testid={`army-clash-${option.answer}`}
             disabled={busy || !ipc.isAvailable || option.disabled}
             onClick={() => { void send(option.answer); }}
           >
-            <span>{option.label}</span>
-            <span className="text-[13px] text-[#cfc3a6]">
+            <span className="min-w-0 break-words">{option.label}</span>
+            <span className="shrink-0 text-[13px] text-[#cfc3a6]">
               {option.cost > 0 ? t('clash.cost.authority', { cost: option.cost }) : t('clash.cost.free')}
             </span>
           </button>
@@ -143,7 +145,6 @@ export function ArmyClashActions({ clash, gameState, onAnswered }: ArmyClashActi
       {typeof current === 'number' && (
         <p className="text-[14px] text-[#b9ad94]" data-testid="army-clash-balance">{t('clash.unaffordable', { current: Math.round(current * 100) / 100 })}</p>
       )}
-      <p className="text-[14px] text-[#b9ad94]" data-testid="army-clash-unanswered">{t('clash.unanswered')}</p>
       {!ipc.isAvailable && (
         <p className="text-[14px] text-[#b9ad94]">{t('clash.bridgeUnavailable')}</p>
       )}

@@ -27,7 +27,7 @@ export function armyClashTitle(clash: ArmyClashView, osidNameMap: Record<string,
   });
 }
 
-/** One line: the army's counter-order. */
+/** One line for the card and rail: what happens if he does not answer (the facts carry the rest). */
 export function armyClashSummary(clash: ArmyClashView): string {
-  return t(`clash.counter.${clash.counterOrder}`);
+  return t('clash.summary', { corps: clash.corpsName });
 }

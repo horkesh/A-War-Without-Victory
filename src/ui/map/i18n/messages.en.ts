@@ -6119,7 +6119,7 @@ export const enMessages = {
     'clash.effect.accept': 'The army\'s version is staged instead. Anything you paid for the order is refunded.',
     'clash.effect.insist': 'Your order stands. He will remember it.',
     'clash.effect.replace': 'Your order stands, and the corps gets a new commander this week.',
-    'clash.unanswered': 'Unanswered at Advance, your order stands as given.',
+    'clash.summary': 'Unanswered at Advance, your order to the {corps} stands as given.',
     'clash.done.accept': 'You deferred to {officer}.',
     'clash.done.insist': 'You insisted over {officer}.',
     'clash.done.replace': 'You replaced the commander of the {corps}.',

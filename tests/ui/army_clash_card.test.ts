@@ -55,7 +55,7 @@ describe('army clash: Command Surface card', () => {
     expect(card).toBeDefined();
     expect(card!.directive).toMatchObject({ lever: 'army_clash', cost: 15, payload: { clashId: 'CLASH_40_RBiH' } });
     expect(card!.title).toBe('Rasim Delić objects to: halt Operation Vozuća');
-    expect(card!.explanation).toBe('The army wants the operation to run on.');
+    expect(card!.explanation).toBe('Unanswered at Advance, your order to the 2nd Corps stands as given.');
     expect(card!.title).not.toMatch(/CLASH_|arbih_/);
     expect(view.advanceReadiness.blockedByExistingSystems).toBe(false);
   });
@@ -73,7 +73,7 @@ describe('army clash: Command Surface card', () => {
     const replace = screen.getByRole('button', { name: 'Replace the corps commander. Costs 25 Authority.' });
     expect(replace.textContent).toContain('Replace Sead Delić');
     expect(replace.textContent).toContain('25 Authority');
-    expect(screen.getByTestId('army-clash-unanswered').textContent).toBe('Unanswered at Advance, your order stands as given.');
+    expect(screen.getByTestId('army-clash-balance').textContent).toBe('You have 60 Authority.');
   });
 
   it('answers through resolve-army-clash', async () => {
