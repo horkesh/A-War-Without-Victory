@@ -463,6 +463,57 @@ export function stableSectorKey(sector: CorpsFrontSector): string {
 }
 
 /**
+ * RE-KEY SECTOR INTEL TO THIS TURN'S SECTORS (SE9, 2026-11-15).
+ *
+ * `partition-corps-front-sectors` re-mints every positional sector id early in the turn, but
+ * `deriveSectorIntel` re-keys `sector_intel` only at the END of the turn. Every read in between
+ * (the commander briefing, attack intel, the probe/launch confidence gate) looked up THIS turn's
+ * ids in LAST turn's map, so it read another sector's intel. Measured on main 16fc0a62f: 44% of
+ * reads in t2-26 found the sector's own intel filed under another id (17% in t182-188).
+ *
+ * This runs right after the partition and moves each record to its sector's new id on both sides,
+ * matching on the stable keys the records already carry (the same match `deriveSectorIntel` makes).
+ * Nothing else changes: no confidence, age or contact count is touched, and the stable keys stay,
+ * so the end-of-turn derivation produces the same map it would have. Only mid-turn readers see a
+ * difference: the right sector's intel instead of a stranger's.
+ * - A record whose enemy sector no longer exists cannot be placed and is dropped. The end-of-turn
+ *   derivation drops it too (its carry-forward finds no current sector for it).
+ * - Legacy records with no stable keys (pre-2026-08-26 saves) keep the old positional lookup.
+ */
+export function rekeySectorIntelToCurrentSectors(state: GameState): void {
+    const sectors = state.military.corps_front_sectors;
+    const prevIntel = state.military.sector_intel;
+    if (!sectors || !prevIntel) return;
+
+    const currentIdByStable = new Map<string, string>();
+    for (const sectorId of Object.keys(sectors).sort(strictCompare)) {
+        currentIdByStable.set(stableSectorKey(sectors[sectorId]!), sectorId);
+    }
+
+    const nextIntel: Record<string, SectorIntelRecord[]> = {};
+    const place = (sectorId: string, rec: SectorIntelRecord): void => {
+        (nextIntel[sectorId] ??= []).push(rec);
+    };
+    for (const key of Object.keys(prevIntel).sort(strictCompare)) {
+        for (const rec of prevIntel[key] ?? []) {
+            if (rec.own_stable_key === undefined || rec.enemy_stable_key === undefined) {
+                // Legacy record: positional, as before this change.
+                if (sectors[key]) place(key, rec);
+                continue;
+            }
+            const ownId = currentIdByStable.get(rec.own_stable_key);
+            const enemyId = currentIdByStable.get(rec.enemy_stable_key);
+            if (ownId === undefined || enemyId === undefined) continue;
+            place(ownId, enemyId === rec.enemy_sector_id ? rec : { ...rec, enemy_sector_id: enemyId });
+        }
+    }
+    for (const sectorId of Object.keys(nextIntel)) {
+        nextIntel[sectorId]!.sort((a, b) => strictCompare(a.enemy_sector_id, b.enemy_sector_id));
+    }
+    state.military.sector_intel = nextIntel;
+}
+
+/**
  * Previous-turn records for this sector, matched on stable identity with a positional fallback.
  *
  * The fallback is what keeps pre-2026-08-26 saves behaving exactly as before: their records carry
