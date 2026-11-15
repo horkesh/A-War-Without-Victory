@@ -427,6 +427,20 @@ describe('compareToHistorical', () => {
         expect(result.divergence_notes.some(n => /weeks (shorter|longer)/.test(n))).toBe(false);
     });
 
+    it('RB1: the displacement ratio counts people displaced (refugees_created minus the killed) against the historical displaced total, clamped at 0', () => {
+        const ledger = buildCostLedger(makeState({ turn: 150 }));
+        const baseline = makeBaseline();
+        const set = (faction: string, refugees: number, killed: number) => {
+            const entry = ledger.entries.find((e) => e.faction === faction);
+            if (entry) { entry.refugees_created = refugees; entry.civilian_casualties_caused = killed; }
+        };
+        set('RS', 1000, 100);
+        set('RBiH', 500, 50);
+        set('HRHB', 10, 40); // more killed than "displaced or killed": clamped to 0
+        const expected = ((1000 - 100) + (500 - 50) + 0) / baseline.total_displaced;
+        expect(compareToHistorical(ledger, baseline).displacement_ratio).toBeCloseTo(expected, 12);
+    });
+
     it('computes correct territory divergence', () => {
         const state = makeState({
             factionBreakdowns: {
