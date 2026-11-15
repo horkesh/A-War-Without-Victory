@@ -278,7 +278,8 @@ describe('pre-first-Advance RBiH paramilitary policy', () => {
     ['forged effects', (state: GameState) => { state.military.pending_event_decisions![0]!.response_options[2]!.effects = []; }],
     ['forged dimensions', (state: GameState) => { state.military.pending_event_decisions![0]!.response_options[2]!.dimension_shifts![0]!.delta = 25; }],
     ['forged notifications', (state: GameState) => { state.military.pending_event_decisions![0]!.notifications_to_other_factions = {}; }],
-    ['forged descriptive source', (state: GameState) => { state.military.pending_event_decisions![0]!.source_note = 'forged'; }],
+    ['forged narrative', (state: GameState) => { state.military.pending_event_decisions![0]!.narrative = 'forged'; }],
+    ['forged option description', (state: GameState) => { state.military.pending_event_decisions![0]!.response_options[2]!.description = 'forged'; }],
   ])('rejects policy response with %s and leaves input bytes unchanged', async (_label, arrange) => {
     const state = await pendingPolicyState();
     arrange(state);

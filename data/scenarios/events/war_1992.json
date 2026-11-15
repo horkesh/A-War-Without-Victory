@@ -1368,11 +1368,11 @@
               "rbih_state_identity"
             ],
             "material_effect_refs": [],
-            "explanation": "The civic platform reaches the April-May 1993 Srebrenica demilitarization decision: under UN Security Council Resolution 819 (16 April 1993) and the Sarajevo-airport agreement of 18 April 1993 (extended at Žepa on 8 May 1993), the Presidency must declare a compliance posture toward the UNPROFOR-supervised weapons handover inside the enclave. The civic line carries no special inclination to defy a UN-brokered humanitarian framework; the documented historical posture remains partial/nominal compliance per the UN Secretary-General's report on the fall of Srebrenica (UN A/54/549 of 15 November 1999, §§57-98) and the ICTY Krstić Trial Judgement (IT-98-33-T, 2 August 2001, §§16-28)."
+            "explanation": "The civic platform reaches the April-May 1993 Srebrenica demilitarization decision: under UN Security Council Resolution 819 (16 April 1993) and the Sarajevo-airport agreement of 18 April 1993 (extended at Žepa on 8 May 1993), the Presidency must declare a compliance posture toward the UNPROFOR-supervised weapons handover inside the enclave. The civic line carries no special inclination to defy a UN-brokered humanitarian framework; the documented historical posture remains partial/nominal compliance per the UN Secretary-General's report on the fall of Srebrenica (UN A/54/549 of 15 November 1999, paras 59-65 and 69) and the ICTY Krstić Trial Judgement (IT-98-33-T, 2 August 2001, paras 19-25)."
           },
           {
             "id": "civic_to_owen_stoltenberg_assembly_rejection",
-            "label": "Owen-Stoltenberg Assembly-rejection path (September 1993)",
+            "label": "Owen-Stoltenberg response decision (September 1993)",
             "timing": "future",
             "certainty": "conditional",
             "opens_events": [
@@ -1643,11 +1643,11 @@
               "rbih_state_identity"
             ],
             "material_effect_refs": [],
-            "explanation": "The Bosniak-national line still reaches the April-May 1993 Srebrenica demilitarization decision under UN Security Council Resolution 819 (16 April 1993) and the UN-brokered Sarajevo-airport agreement of 18 April 1993 (extended at Žepa 8 May 1993). On this branch the 28th Division's combat-effective small-arms retention reads as a stronger institutional posture than on the civic line, but the documented historical posture remains partial/nominal compliance with UNPROFOR weapons-handover terms per UN A/54/549 (15 November 1999, §§57-98) and the ICTY Krstić Trial Judgement (IT-98-33-T, 2 August 2001, §§16-28)."
+            "explanation": "The Bosniak-national line still reaches the April-May 1993 Srebrenica demilitarization decision under UN Security Council Resolution 819 (16 April 1993) and the UN-brokered Sarajevo-airport agreement of 18 April 1993 (extended at Žepa 8 May 1993). On this branch the 28th Division's combat-effective small-arms retention reads as a stronger institutional posture than on the civic line, but the documented historical posture remains partial/nominal compliance with UNPROFOR weapons-handover terms per UN A/54/549 (15 November 1999, paras 59-65 and 69) and the ICTY Krstić Trial Judgement (IT-98-33-T, 2 August 2001, paras 19-25)."
           },
           {
             "id": "bosniak_national_to_owen_stoltenberg_assembly_rejection",
-            "label": "Owen-Stoltenberg Assembly-rejection path (September 1993)",
+            "label": "Owen-Stoltenberg response decision (September 1993)",
             "timing": "future",
             "certainty": "conditional",
             "opens_events": [
@@ -1911,11 +1911,11 @@
               "rbih_state_identity"
             ],
             "material_effect_refs": [],
-            "explanation": "The pragmatic line carries an instrumentally consistent path into the April-May 1993 Srebrenica demilitarization decision: civic rhetoric outward supports the UN-brokered framework arising from UNSCR 819 (16 April 1993) and the Sarajevo-airport agreement of 18 April 1993 (extended at Žepa 8 May 1993), while institutional preservation inward aligns with the partial/nominal compliance posture documented in UN A/54/549 (15 November 1999, §§57-98) and the ICTY Krstić Trial Judgement (IT-98-33-T, 2 August 2001, §§16-28)."
+            "explanation": "The pragmatic line carries an instrumentally consistent path into the April-May 1993 Srebrenica demilitarization decision: civic rhetoric outward supports the UN-brokered framework arising from UNSCR 819 (16 April 1993) and the Sarajevo-airport agreement of 18 April 1993 (extended at Žepa 8 May 1993), while institutional preservation inward aligns with the partial/nominal compliance posture documented in UN A/54/549 (15 November 1999, paras 59-65 and 69) and the ICTY Krstić Trial Judgement (IT-98-33-T, 2 August 2001, paras 19-25)."
           },
           {
             "id": "pragmatic_to_owen_stoltenberg_assembly_rejection",
-            "label": "Owen-Stoltenberg Assembly-rejection path (September 1993)",
+            "label": "Owen-Stoltenberg response decision (September 1993)",
             "timing": "future",
             "certainty": "conditional",
             "opens_events": [
@@ -2138,7 +2138,7 @@
     "responding_faction": "RBiH",
     "bot_response_logic": "historical",
     "historical_default_response_id": "always_deny",
-    "source_note": "UN A/54/549 §35 and ICTY Hadzihasanovic/Kubura (IT-01-47) document ARBiH chain-of-command discipline relative to RS and HRHB paramilitary practice. The historical Sarajevo posture was integration of irregulars into the regular army with prosecution of those who refused — the Caco/Celo October 1993 disarming actions are the canonical operational expression of that posture. Sarajevo did not maintain a parallel paramilitary track.",
+    "source_note": "UN A/54/549 and ICTY Hadzihasanovic/Kubura (IT-01-47) document ARBiH chain-of-command discipline relative to RS and HRHB paramilitary practice. The historical Sarajevo posture was integration of irregulars into the regular army with prosecution of those who refused — the Caco/Celo October 1993 disarming actions are the canonical operational expression of that posture. Sarajevo did not maintain a parallel paramilitary track.",
     "staff_assessment": "Refusal mirrors the documented ARBiH integration policy and preserves international standing as legal-conduct evidence at The Hague accumulates. Per-deployment review introduces command friction and slower tempo. Standing authorization is ahistorical for the Presidency and exposes Sarajevo to ICTY-grade scrutiny on the RS/HRHB pattern.",
     "trigger_evidence": [
       "The Presidency state-identity platform has been recorded; the irregulars question follows.",
@@ -2337,8 +2337,8 @@
         }
       }
     },
-    "historical_source": "ICTY Hadzihasanovic and Kubura Trial Judgment (IT-01-47-T, 15 March 2006) — ARBiH 3rd Corps and 7th Muslim Brigade command-responsibility findings establishing the existence and reach of ARBiH chain of command. ICTY Oric Trial and Appeal Judgments (IT-03-68, 30 June 2006 / 3 July 2008) — Srebrenica enclave ARBiH commander; ultimate acquittal on command responsibility in the comparative discipline frame. ICTY Karadzic Trial Judgment (IT-95-5/18-T, 24 March 2016) — comparative narrative on Sarajevo state institutions and chain of command. ICTY Stakic (IT-97-24, 31 July 2003) and Brdjanin (IT-99-36, 1 September 2004) — RS comparator findings on paramilitary tolerance as policy. UN A/54/549 (Secretary-General's report on Srebrenica, 15 November 1999) §35 — Sarajevo posture and chain-of-command institutional context. UN S/1994/674 (Commission of Experts Final Report, 27 May 1994) Annex III.A — Special Forces comprehensive paramilitary inventory across all three factions.",
-    "source": "Paramilitary policy is the canon-bound player-authorized war-crime surface per Sensitive History Design Gate v0.9.0 §3. Option set bounded to always_allow / ask / always_deny — no expansion permitted. RBiH historical default = always_deny per documented ARBiH chain-of-command discipline (UN A/54/549 §35; Hadzihasanovic/Kubura IT-01-47). The always_allow counterfactual carries a steep international-standing floor per Gate §3 #5 (no atrocity-efficiency surface). war_crimes_events increments are produced by the existing paramilitary_sweep engine path on each capture, not by this decision event."
+    "historical_source": "ICTY Hadzihasanovic and Kubura Trial Judgment (IT-01-47-T, 15 March 2006) — ARBiH 3rd Corps and 7th Muslim Brigade command-responsibility findings establishing the existence and reach of ARBiH chain of command. ICTY Oric Trial and Appeal Judgments (IT-03-68, 30 June 2006 / 3 July 2008) — Srebrenica enclave ARBiH commander; ultimate acquittal on command responsibility in the comparative discipline frame. ICTY Karadzic Trial Judgment (IT-95-5/18-T, 24 March 2016) — comparative narrative on Sarajevo state institutions and chain of command. ICTY Stakic (IT-97-24, 31 July 2003) and Brdjanin (IT-99-36, 1 September 2004) — RS comparator findings on paramilitary tolerance as policy. UN A/54/549 (Secretary-General's report on Srebrenica, 15 November 1999) §35 (the earlier cite: UN A/54/549 ¶35 is the Srebrenica enclave before the safe-area resolutions, not the ARBiH chain of command; paragraph not verified for this claim) — Sarajevo posture and chain-of-command institutional context. UN S/1994/674 (Commission of Experts Final Report, 27 May 1994) Annex III.A — Special Forces comprehensive paramilitary inventory across all three factions.",
+    "source": "Paramilitary policy is the canon-bound player-authorized war-crime surface per Sensitive History Design Gate v0.9.0 §3. Option set bounded to always_allow / ask / always_deny — no expansion permitted. RBiH historical default = always_deny per documented ARBiH chain-of-command discipline (UN A/54/549 §35 (the earlier cite: UN A/54/549 ¶35 is the Srebrenica enclave before the safe-area resolutions, not the ARBiH chain of command; paragraph not verified for this claim); Hadzihasanovic/Kubura IT-01-47). The always_allow counterfactual carries a steep international-standing floor per Gate §3 #5 (no atrocity-efficiency surface). war_crimes_events increments are produced by the existing paramilitary_sweep engine path on each capture, not by this decision event."
   },
   {
     "id": "hrhb_political_goal",
