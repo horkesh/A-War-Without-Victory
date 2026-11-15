@@ -828,7 +828,7 @@ function executeFactionDirectivesImpl(
         arr.sort((a, b) => strictCompare(a.osid, b.osid));
     }
     // Default-off `defence` receipts for settlements lost last turn. Observation only.
-    emitDefenceTrace(state, faction, brigades, adjacency, sectorAssignmentByBrigade, sectorRecentRetreats);
+    emitDefenceTrace(state, faction, brigades, adjacency, sectorAssignmentByBrigade, sectorRecentRetreats, supplyStateByOsid);
     const sectorCounterAttackCount = new Map<string, number>();
 
     const targetAdjacentCount = new Map<Osid, number>();

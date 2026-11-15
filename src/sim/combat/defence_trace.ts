@@ -9,7 +9,11 @@
  *     cohesion, disruption, posture, operation, and which counter-attack gates it passes;
  *   - whether a counter-attack trigger exists (a brigade retreated from the lost OSID, or its sector
  *     has a recent retreat);
- *   - the nearest idle own brigade (no operation; reserve, rear or unassigned, or not on a front).
+ *   - the nearest idle own brigade (no operation; reserve, rear or unassigned, or not on a front);
+ *   - each brigade's supply state as the brigade pass reads it, and `brigade_encircled`.
+ * The defending sectors are those of the own brigades within 2 hops (the receipt is written after the
+ * loss, when sectors no longer list the lost OSID). One more record per faction-turn lists the
+ * faction's encircled brigades with cohesion and supply, so a pocket's drain is visible before any loss.
  * The receipts separate three causes of a thin defence: brigades in the wrong place, a reserve reaction
  * that does not fire, and brigades too weak to hold.
  *
@@ -21,7 +25,9 @@
 import type { CorpsFrontSector, FactionId, FormationState, GameState } from '../../state/game_state.js';
 import { MAX_BRIGADE_PERSONNEL } from '../../state/formation_constants.js';
 import { strictCompare } from '../../state/validateGameState.js';
+import type { SupplyStateByOsidReport } from '../../state/supply_state_derivation.js';
 import { COUNTER_ATTACK_MIN_COHESION, COUNTER_ATTACK_MIN_PERSONNEL } from './bot_constants.js';
+import { getBrigadeSupplyState } from './bot_brigade_supply_ethnic.js';
 import { emitDefenceRecord, isReasonCodeTopicEnabled } from './reason_code_debug.js';
 
 const MAX_HOPS = 3;
@@ -54,9 +60,15 @@ export function emitDefenceTrace(
     adjacency: ReadonlyMap<string, readonly string[]>,
     sectorRoleByBrigade: ReadonlyMap<string, SectorRole>,
     sectorRecentRetreats: ReadonlyMap<string, ReadonlyArray<{ osid: string; turn: number }>>,
+    supplyStateByOsid?: SupplyStateByOsidReport | null,
 ): void {
     if (!isReasonCodeTopicEnabled('defence')) return;
     const turn = state.meta?.turn ?? 0;
+    const encircledMap = state.military.brigade_encircled ?? {};
+    const encircled = [...brigades].filter(b => b.status === 'active' && encircledMap[b.id] === true)
+        .sort((a, b) => strictCompare(a.id, b.id))
+        .map(b => ({ id: b.id, cohesion: b.cohesion ?? null, personnel: b.personnel ?? 0, supply: getBrigadeSupplyState(b, supplyStateByOsid), loc: b.location_osid ?? null }));
+    if (encircled.length > 0) emitDefenceRecord({ turn, faction, kind: 'encircled_brigades', brigades: encircled });
     const lost = (state.political?.control_events ?? [])
         .filter(e => e.turn === turn - 1 && e.from === faction && e.mechanism === 'combat')
         .sort((a, b) => strictCompare(a.settlement_id, b.settlement_id));
@@ -87,6 +99,8 @@ export function emitDefenceTrace(
             personnel: b.personnel ?? 0, designed, cohesion: b.cohesion ?? null, disrupted_turns: disrupted,
             posture: (b as { posture?: string }).posture ?? null, operation: inOperation.get(b.id) ?? null,
             last_retreat_from: retreat ? `${retreat.osid}@${retreat.turn}` : null,
+            supply: getBrigadeSupplyState(b, supplyStateByOsid),
+            encircled: encircledMap[b.id] === true,
             ca_gate: {
                 stance_defensive: stance === 'defensive',
                 not_disrupted: disrupted === 0,
@@ -106,17 +120,19 @@ export function emitDefenceTrace(
             .sort((a, b) => a.hops - b.hops || strictCompare(a.id, b.id));
 
         const neighbours = new Set(adjacency.get(lostOsid) ?? []);
-        const owning = sectors.filter(s => s.sub_segments.some(ss => ss.friendly_osids.includes(lostOsid)));
-        const adjacentSectors = owning.length > 0 ? owning
-            : sectors.filter(s => s.sub_segments.some(ss => ss.friendly_osids.some(o => neighbours.has(o))));
+        const nearSectorIds = new Set(near.filter(r => r.hops <= 2 && r.sector).map(r => r.sector as string));
+        const defendingSectors = sectors.filter(s => nearSectorIds.has(s.sector_id)
+            || s.sub_segments.some(ss => ss.friendly_osids.some(o => neighbours.has(o))));
         const byId = new Map(own.map(b => [b.id, b]));
-        const sectorSummary = adjacentSectors.map(s => ({
-            sector: s.sector_id, corps: s.corps_id, owns_lost_osid: owning.includes(s),
+        const gateOk = (b: FormationState) => (b.personnel ?? 0) >= COUNTER_ATTACK_MIN_PERSONNEL && (b.cohesion ?? 0) >= COUNTER_ATTACK_MIN_COHESION;
+        const sectorSummary = defendingSectors.map(s => ({
+            sector: s.sector_id, corps: s.corps_id, corps_stance: corpsCommand[s.corps_id]?.stance ?? null,
+            fronts_lost_neighbourhood: s.sub_segments.some(ss => ss.friendly_osids.some(o => neighbours.has(o))),
             unstaffed_front: s.unstaffed_front ?? false,
             line: s.assigned_brigade_ids.map(id => byId.get(id)).filter((b): b is FormationState => !!b)
                 .map(b => ({ id: b.id, hops: dist.get(b.location_osid!) ?? null, personnel: b.personnel ?? 0, cohesion: b.cohesion ?? null })),
             reserve: s.reserve_brigade_ids.map(id => byId.get(id)).filter((b): b is FormationState => !!b)
-                .map(b => ({ id: b.id, hops: dist.get(b.location_osid!) ?? null, personnel: b.personnel ?? 0, cohesion: b.cohesion ?? null })),
+                .map(b => ({ id: b.id, hops: dist.get(b.location_osid!) ?? null, personnel: b.personnel ?? 0, cohesion: b.cohesion ?? null, gate_ok: gateOk(b), in_operation: inOperation.has(b.id) })),
             rear: (s.rear_brigade_ids ?? []).length,
             recent_retreats: (sectorRecentRetreats.get(s.sector_id) ?? []).map(r => `${r.osid}@${r.turn}`),
         }));

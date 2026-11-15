@@ -51,7 +51,9 @@ describe('defence receipts', () => {
         expect(lines).toHaveLength(1);
         const rec = JSON.parse(lines[0]!.slice(DEFENCE_PREFIX.length + 1));
         expect(rec).toMatchObject({ turn: 10, faction: 'RS', lost_osid: 'op:t:lost', to: 'RBiH', retreat_trigger: ['line1'] });
-        expect(rec.sectors[0]).toMatchObject({ sector: 'sector:vrs_c:0', owns_lost_osid: true });
+        expect(rec.sectors[0]).toMatchObject({ sector: 'sector:vrs_c:0', corps_stance: 'balanced' });
+        expect(rec.sectors[0].reserve[0]).toMatchObject({ id: 'res1', hops: 3, gate_ok: true });
+        expect(rec.near_brigades[0]).toMatchObject({ supply: 'adequate', encircled: false });
         expect(rec.near_brigades[0]).toMatchObject({ id: 'line1', hops: 1, role: 'line', corps_stance: 'balanced' });
         expect(rec.near_brigades[0].ca_gate).toMatchObject({ stance_defensive: false, cohesion_ok: false });
         expect(rec.nearest_idle).toMatchObject({ id: 'res1', hops: 3, role: 'reserve' });
