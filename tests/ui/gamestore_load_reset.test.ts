@@ -201,6 +201,53 @@ describe('gameStore.loadSave — post-load UI state reset', () => {
         expect(s.focusedDecisionConsequenceId).toBeNull();
     });
 
+    // Command loop L2 (2026-11-14): after Advance, the desktop main process pushes the new
+    // state again ~200 ms after advanceTurnAndSync opened the week's dispatch. In the live
+    // Electron app that second load wiped the report before anyone could see it.
+    it('keeps the week report when the same week is loaded again', async () => {
+        await useGameStore.getState().loadSave(makeMinimalSaveJson(5, 'RBiH'));
+        const report = { headline: 'We took 2 settlements' };
+        dirtyStoreState();
+        useGameStore.setState({ turnAftermathDigest: report });
+        const view = useGameStore.getState().turnAftermath;
+
+        await useGameStore.getState().loadSave(makeMinimalSaveJson(5, 'RBiH'));
+
+        const s = useGameStore.getState();
+        expect(s.turnAftermath).toBe(view);
+        expect(s.turnAftermathOpen).toBe(true);
+        expect(s.turnAftermathDigest).toBe(report);
+        // Everything else still resets.
+        expect(s.selectedOsid).toBeNull();
+        expect(s.stagedOrders).toEqual([]);
+    });
+
+    it('clears the week report when a different save arrives at the same turn and faction', async () => {
+        await useGameStore.getState().loadSave(makeMinimalSaveJson(5, 'RBiH'));
+        dirtyStoreState();
+        // Same turn, faction and label, but a different payload: another save, not a re-push.
+        const otherSave = JSON.parse(makeMinimalSaveJson(5, 'RBiH'));
+        otherSave.meta.seed = 'another-campaign';
+        await useGameStore.getState().loadSave(JSON.stringify(otherSave));
+        expect(useGameStore.getState().turnAftermath).toBeNull();
+        expect(useGameStore.getState().turnAftermathOpen).toBe(false);
+        expect(useGameStore.getState().turnAftermathDigest).toBeNull();
+    });
+
+    it('clears the week report when the load moves to another turn or faction', async () => {
+        await useGameStore.getState().loadSave(makeMinimalSaveJson(5, 'RBiH'));
+        dirtyStoreState();
+        await useGameStore.getState().loadSave(makeMinimalSaveJson(6, 'RBiH'));
+        expect(useGameStore.getState().turnAftermath).toBeNull();
+        expect(useGameStore.getState().turnAftermathOpen).toBe(false);
+
+        await useGameStore.getState().loadSave(makeMinimalSaveJson(6, 'RBiH'));
+        dirtyStoreState();
+        await useGameStore.getState().loadSave(makeMinimalSaveJson(6, 'HRHB'));
+        expect(useGameStore.getState().turnAftermath).toBeNull();
+        expect(useGameStore.getState().turnAftermathOpen).toBe(false);
+    });
+
     it('resets openingBriefDismissed after first loading a save', async () => {
         useGameStore.setState({ openingBriefDismissed: true });
         await useGameStore.getState().loadSave(makeMinimalSaveJson());

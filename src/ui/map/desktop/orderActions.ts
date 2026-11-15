@@ -1,6 +1,6 @@
 import type { IPC } from './useIPC';
 import type { LoadedGameState } from '../data/types';
-import { buildTurnAftermathDigest, buildTurnAftermathView, classifyTurnAftermathWeight, type TurnAftermathDigest, type TurnAftermathReportInput, type TurnAftermathView } from '../data/turnAftermath';
+import { buildTurnAftermathDigest, buildTurnAftermathView, type TurnAftermathDigest, type TurnAftermathReportInput, type TurnAftermathView } from '../data/turnAftermath';
 import type { LastTurnReport } from '../store/gameStore';
 import { playerFacingErrorCopy } from '../utils/errorCopy';
 
@@ -76,13 +76,12 @@ export async function advanceTurnAndSync({
             osidNameMap: getOsidNameMap?.() ?? null,
         });
         if (aftermath) {
+            // Command loop L2 (2026-11-14): the week's dispatch opens after every Advance,
+            // a quiet week included (two lines built from the week's own figures). The strip
+            // keeps the dispatch headline with a button that reopens it once it is closed.
             setTurnAftermath?.(aftermath);
-            if (classifyTurnAftermathWeight(aftermath) === 'heavy') {
-                setTurnAftermathDigest?.(null);
-                setTurnAftermathOpen?.(true);
-            } else {
-                setTurnAftermathDigest?.(buildTurnAftermathDigest(aftermath));
-            }
+            setTurnAftermathDigest?.(buildTurnAftermathDigest(aftermath));
+            setTurnAftermathOpen?.(true);
         }
     } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
