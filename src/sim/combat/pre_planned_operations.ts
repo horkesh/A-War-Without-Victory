@@ -3359,9 +3359,10 @@ export function getQueuedPrePlannedBrigadeIds(state: Pick<GameState, 'military'>
  * `available_from` is the bound, and missing timing defaults to due (0), matching
  * `getReservedPrePlannedBrigadeIds`.
  *
- * Probe selection needs this narrower reservation than the full-queue helper
- * above: protect the plan that can inject next without freezing formations
- * authored only for later campaigns.
+ * Commander probe, local-occupation and (since RF-L3d, 2026-11-15) plan selection
+ * need this narrower reservation than the full-queue helper above: protect the
+ * plan that can inject next without freezing formations authored only for later
+ * campaigns.
  */
 export function getHeadQueuedPrePlannedBrigadeIds(
     state: {
