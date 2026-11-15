@@ -90,6 +90,26 @@ export const ADDRESS_NATION_COST = 10;
 export const DECORATE_UNIT_COST = 10;
 /** Cost parity for the authored strategic-posture-review leadership gesture. */
 export const STRATEGIC_POSTURE_REVIEW_COST = 10;
+/**
+ * Command loop L6 (owner decision 1, 2026-11-14): backing a general's offensive costs
+ * Authority. Backing a staff offensive at corps level (an APPROVE_OP proposal) costs 10;
+ * backing a named campaign (an operation opportunity from the authored catalog) or an
+ * authored historical operation (HISTORICAL_OP) costs 20. Withholding or declining stays
+ * free, and income is unchanged. An ordinary approval never feeds the force-launch or
+ * friction penalty on income, and there is no refund on success. MUST match
+ * autonomy_ipc_contract.cjs (BACK_CORPS_OPERATION_COST = 10, BACK_CAMPAIGN_COST = 20) and
+ * the accept-proposal / resolve-operation-opportunity-decision handlers (electron-main.cjs).
+ */
+export const BACK_CORPS_OPERATION_COST = 10;
+export const BACK_CAMPAIGN_COST = 20;
+
+/** The Authority price of backing a pending proposal, from its proposed action (0 = free). */
+export function proposalBackingCost(proposedAction: string | null | undefined): number {
+    if (typeof proposedAction !== 'string') return 0;
+    if (proposedAction.startsWith('APPROVE_OP:')) return BACK_CORPS_OPERATION_COST;
+    if (proposedAction.startsWith('HISTORICAL_OP:') || proposedAction.startsWith('OPPORTUNITY:')) return BACK_CAMPAIGN_COST;
+    return 0;
+}
 export {
     COMMAND_AUTHORITY_BASE_RECOVERY_PER_TURN as COMMAND_AUTHORITY_RECOVERY_PER_TURN,
     COMMAND_AUTHORITY_RESERVE_MAX,

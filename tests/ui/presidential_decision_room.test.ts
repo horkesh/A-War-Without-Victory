@@ -1332,7 +1332,8 @@ describe('buildPresidentialDecisionRoomView', () => {
     expect(fallbackView.activeDossier).toBeNull();
   });
 
-  it('populates an authorize-op directive (cost 0) on an opportunity card with an enabled approve action', () => {
+  // Command loop L6 (owner decision 1): backing a named campaign costs 20 Authority.
+  it('populates an authorize-op directive (cost 20) on an opportunity card with an enabled approve action', () => {
     const state = makeState({
       operationOpportunityProposals: [
         makeOpportunity({
@@ -1356,7 +1357,7 @@ describe('buildPresidentialDecisionRoomView', () => {
 
     expect(authorizeCard?.directive).toEqual({
       lever: 'authorize_op',
-      cost: 0,
+      cost: 20,
       payload: { reviewId: 'review_alpha', proposalId: 'opp_authorize' },
     });
     expect(noActionCard).toMatchObject({
@@ -1648,7 +1649,7 @@ describe('buildPresidentialDecisionRoomView', () => {
     expect(view.activeDossier?.cardId).toBe('opportunity:opp_authorize');
     expect(view.activeDossier?.directive).toEqual({
       lever: 'authorize_op',
-      cost: 0,
+      cost: 20,
       payload: { reviewId: 'review_alpha', proposalId: 'opp_authorize' },
     });
   });

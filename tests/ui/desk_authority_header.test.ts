@@ -13,6 +13,8 @@ import {
   ELITE_DEPLOY_COST,
   REPLACE_CO_COST,
   FRONT_VISIT_COST,
+  BACK_CORPS_OPERATION_COST,
+  BACK_CAMPAIGN_COST,
 } from '../../src/ui/map/utils/commandAuthority.js';
 
 const ALL_COSTS = [
@@ -24,6 +26,9 @@ const ALL_COSTS = [
   ELITE_DEPLOY_COST,
   REPLACE_CO_COST,
   FRONT_VISIT_COST,
+  // Command loop L6: backing a general's offensive is priced (owner decision 1).
+  BACK_CORPS_OPERATION_COST,
+  BACK_CAMPAIGN_COST,
 ];
 const MIN_LEVER_COST = Math.min(...ALL_COSTS);
 
@@ -49,6 +54,22 @@ function renderHeaderState(state: LoadedGameState) {
 afterEach(() => cleanup());
 
 describe('DeskAuthorityHeader', () => {
+  // Command loop L6: regeneration made visible, with its sources (non-zero only).
+  it('shows next week\'s income and where it comes from', () => {
+    renderHeader({
+      current: 34, max: 100, reserve: 0, reserveMax: 15, spentThisTurn: 10, lifetimeSpent: 66,
+      lastRecovery: 4.5, lastRecoverySource: 'international_standing',
+      lastRecoveryBreakdown: { recovery: 4.5, base: 3.25, politicalBonus: 0.75, quietFrontDividend: 0, frictionPenalty: 0.5 },
+    });
+    expect(screen.getByTestId('desk-authority-next-week').textContent)
+      .toBe('Next week: +4.5 Authority (base 3.25, political standing +0.75, interventions −0.5)');
+  });
+
+  it('falls back to the last recovery when no breakdown is recorded', () => {
+    renderHeader({ current: 60, max: 100, spentThisTurn: 0, lifetimeSpent: 0, lastRecovery: 5.25 });
+    expect(screen.getByTestId('desk-authority-next-week').textContent).toBe('Next week: +5.25 Authority');
+  });
+
   it('renders the current CA balance from state.commandAuthority', () => {
     renderHeader({ current: 60, max: 100, reserve: 8, reserveMax: 15, spentThisTurn: 12, lifetimeSpent: 48, lastRecovery: 7, lastRecoverySource: 'patron_confidence' });
     expect(screen.getByTestId('desk-authority-ca-value').textContent).toContain('60');
