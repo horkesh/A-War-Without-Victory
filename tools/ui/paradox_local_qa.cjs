@@ -77,7 +77,11 @@ const saveLoadProof = args.has('--save-load-proof');
 const saveLoadOnly = args.has('--save-load-only');
 // --dayton-sign-verdict: when Dayton opens, SIGN the agreement (instead of declining), capture the
 // signing beat and the Verdict screen, then finish the run cleanly. Use from a late-campaign save.
-const daytonSignVerdict = args.has('--dayton-sign-verdict');
+// --endgame-render-tour adds the render-check tour (every Dayton room panel with its rail state and
+// focus return, the cap warning, signing-beat measurements, each side's Verdict, and an export of the
+// real post-sign state) to the same segment.
+const endgameRenderTour = args.has('--endgame-render-tour');
+const daytonSignVerdict = args.has('--dayton-sign-verdict') || endgameRenderTour;
 class DaytonVerdictCaptured extends Error {
   constructor(evidence) {
     super('Dayton signed and Verdict captured');
@@ -91,7 +95,17 @@ const daytonVerdictSegment = { evidence: null };
 function settleDaytonVerdictSegment(error, events) {
   if (!(error instanceof DaytonVerdictCaptured)) throw error;
   daytonVerdictSegment.evidence = error.evidence;
-  const failures = collectReadabilityFailures(events);
+  let failures = collectReadabilityFailures(events);
+  if (endgameRenderTour && error.evidence?.tour) {
+    // The render tour records, and does not fail on, findings that belong to earlier Dayton work:
+    // the signing plate's own captions (sized in cqw on the art, so under 12 px at 720p) and the
+    // Delegation folder's faction chips. Everything else, including every Verdict surface, still fails.
+    const isKnown = (row) => (row.label === 'dayton-signing-beat' && (row.kind === 'tiny-text' || row.kind === 'small-text'))
+      || (row.label === 'dayton-tour-panel-folder' && row.kind === 'low-contrast');
+    error.evidence.tour.knownFindings = failures.filter(isKnown)
+      .map((row) => ({ kind: row.kind, label: row.label, text: String(row.text ?? '').slice(0, 80), fontSize: row.fontSize ?? null, contrastRatio: row.contrastRatio ?? null }));
+    failures = failures.filter((row) => !isKnown(row));
+  }
   if (failures.length > 0) {
     writeJsonAtomic(readabilityDiagnosticsPath, failures);
     throw new Error(`Readability diagnostics detected: ${JSON.stringify(failures.slice(0, 40))}`);
@@ -313,7 +327,10 @@ async function policyEventResponseControl(surface) {
         }
       }
       if (sourceLocation === 'not_required') {
-        throw new Error(`Historical-choice source note unavailable: ${eventId}/${selected.id}`);
+        // The ending render tour is about the ending screens, not default provenance: it records
+        // that no source note was visible and goes on. Every other run still fails closed.
+        if (!endgameRenderTour) throw new Error(`Historical-choice source note unavailable: ${eventId}/${selected.id}`);
+        sourceLocation = 'none_visible_recorded_by_render_tour';
       }
     }
   }
@@ -1515,7 +1532,10 @@ async function textDiagnostics(surface) {
             || parent.closest('[aria-label], [title]')?.getAttribute('aria-label')
             || parent.closest('[aria-label], [title]')?.getAttribute('title')
             || '';
-          const accessibleFullText = accessibleText.trim().length >= text.length;
+          // A labelled, keyboard-focusable scroll region (role=region, tabindex=0, aria-label) keeps all
+          // of its text reachable by scrolling; text clipped inside one is not hidden from anyone.
+          const insideFocusableScrollRegion = Boolean(parent.closest('[role="region"][tabindex="0"][aria-label]'));
+          const accessibleFullText = accessibleText.trim().length >= text.length || insideFocusableScrollRegion;
           const foreground = parseColor(style.color);
           const background = solidBackground(parent, rangeRect);
           const ratio = foreground && background
@@ -3020,6 +3040,35 @@ async function snapshot(page, frame, faction, events, label, extra = {}) {
     });
   }
   return event;
+}
+
+// --window-size=WxH (the one size flag; command loop L2h) sets the game window's content size, and
+// --device-scale=N the device scale factor (default 1 whenever a size is requested), so a render check
+// is reproducible at 1280x720 or 1920x1080 on any display. Absent both options the window is left
+// exactly as the app opens it. The OS may clamp a size larger than the display.
+function parseRequestedViewport() {
+  const scaleRaw = process.argv.find((arg) => arg.startsWith('--device-scale='))?.slice('--device-scale='.length);
+  const size = requestedWindowSize;
+  const scale = scaleRaw !== undefined ? Number(scaleRaw) : (size ? 1 : null);
+  if (scale !== null && !(scale >= 0.5 && scale <= 4)) throw new Error(`--device-scale must be between 0.5 and 4, got: ${scaleRaw}`);
+  return { size, scale };
+}
+const requestedViewport = parseRequestedViewport();
+function requestedViewportArgs() {
+  return requestedViewport.scale === null ? [] : [`--force-device-scale-factor=${requestedViewport.scale}`];
+}
+async function applyRequestedViewport(app) {
+  if (!requestedViewport.size) return;
+  const { width, height } = requestedViewport.size;
+  await app.evaluate(({ BrowserWindow }, [w, h]) => {
+    for (const win of BrowserWindow.getAllWindows()) {
+      if (win.isFullScreen()) win.setFullScreen(false);
+      if (win.isMaximized()) win.unmaximize();
+      win.setContentSize(w, h);
+      win.center();
+    }
+  }, [width, height]);
+  await sleep(1500);
 }
 
 async function waitForGamePage(app) {
@@ -5191,6 +5240,91 @@ async function warroomRouteTour(page, frame, faction, events) {
 
 // Sign Dayton through the conference (arrival, Current draft, Review agreement, Sign agreement),
 // walk the signing beat and the Verdict, and return the evidence. Throws if any step is absent.
+async function readDaytonRailState(frame) {
+  return frame.evaluate(() => {
+    const nav = document.querySelector('nav.dayton-live-nav');
+    const rect = nav?.getBoundingClientRect();
+    return {
+      present: Boolean(nav),
+      panelOpenAttribute: nav?.hasAttribute('data-panel-open') ?? false,
+      visibility: nav ? getComputedStyle(nav).visibility : null,
+      rect: rect ? { x: Math.round(rect.x), y: Math.round(rect.y), w: Math.round(rect.width), h: Math.round(rect.height) } : null,
+      activeElementText: (document.activeElement?.textContent ?? '').trim().slice(0, 40),
+      openPanel: document.querySelector('[data-dayton-panel]')?.getAttribute('data-dayton-panel') ?? null,
+    };
+  });
+}
+
+// Every conference object, opened and closed both ways (Escape, and the panel's Back button), with
+// the rail's state and where focus lands, for the B2 check.
+async function daytonRoomPanelTour(page, frame, faction, events, pendingState) {
+  const result = { railWithNoPanel: await readDaytonRailState(frame), panels: [] };
+  const objects = [
+    { id: 'folder', name: 'Delegation folder', via: 'Escape' },
+    { id: 'draft', name: 'Current draft', via: 'Back' },
+    { id: 'map', name: 'Settlement map', via: 'Escape' },
+    { id: 'binder', name: 'Treaty binder', via: 'Back' },
+  ];
+  for (const object of objects) {
+    const nav = frame.getByRole('navigation', { name: 'Conference objects' });
+    await nav.getByRole('button', { name: object.name, exact: true }).first().click({ timeout: 10000 });
+    await sleep(1100);
+    const whileOpen = await readDaytonRailState(frame);
+    await snapshot(page, frame, faction, events, `dayton-tour-panel-${object.id}`, { object: object.name, whileOpen });
+    if (object.via === 'Escape') {
+      await page.keyboard.press('Escape');
+    } else {
+      await frame.locator('section[data-dayton-panel] header button').first().click({ timeout: 10000 });
+    }
+    await sleep(900);
+    const afterClose = await readDaytonRailState(frame);
+    await snapshot(page, frame, faction, events, `dayton-tour-closed-${object.id}`, { object: object.name, via: object.via, afterClose });
+    result.panels.push({
+      object: object.name,
+      closedWith: object.via,
+      railHiddenWhileOpen: whileOpen.visibility === 'hidden' && whileOpen.panelOpenAttribute === true,
+      railVisibleAfterClose: afterClose.visibility === 'visible' && afterClose.panelOpenAttribute === false,
+      focusAfterClose: afterClose.activeElementText,
+      focusReturnedToOpener: afterClose.activeElementText.startsWith(object.name),
+    });
+  }
+  return result;
+}
+
+async function readFactionBadgeContrast(frame) {
+  return frame.evaluate(() => {
+    const parse = (value) => {
+      const m = /rgba?\(([^)]+)\)/.exec(value);
+      if (!m) return null;
+      const [r, g, b, a = 1] = m[1].split(',').map((part) => Number(part.trim()));
+      return { r, g, b, a };
+    };
+    const lum = ({ r, g, b }) => {
+      const c = [r, g, b].map((v) => { const s = v / 255; return s <= 0.03928 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4; });
+      return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
+    };
+    const effectiveBackground = (node) => {
+      let layers = [];
+      for (let n = node; n; n = n.parentElement) {
+        const c = parse(getComputedStyle(n).backgroundColor);
+        if (c && c.a > 0) layers.push(c);
+        if (c && c.a >= 0.99) break;
+      }
+      let base = { r: 17, g: 20, b: 27 };
+      for (const layer of layers.reverse()) {
+        base = { r: layer.r * layer.a + base.r * (1 - layer.a), g: layer.g * layer.a + base.g * (1 - layer.a), b: layer.b * layer.a + base.b * (1 - layer.a) };
+      }
+      return base;
+    };
+    return Array.from(document.querySelectorAll('[data-awwv-faction-tab-outcome]')).map((node) => {
+      const fg = parse(getComputedStyle(node).color);
+      const bg = effectiveBackground(node);
+      const [hi, lo] = [lum(fg), lum(bg)].sort((a, b) => b - a);
+      return { side: node.getAttribute('data-awwv-faction-tab-outcome'), text: node.textContent.trim(), contrast: Math.round(((hi + 0.05) / (lo + 0.05)) * 100) / 100 };
+    });
+  });
+}
+
 async function signDaytonAndCaptureVerdict(page, frame, faction, events, pendingState) {
   const buttonVisible = (name) => frame.getByRole('button', { name, exact: true }).first()
     .isVisible().catch(() => false);
@@ -5200,12 +5334,16 @@ async function signDaytonAndCaptureVerdict(page, frame, faction, events, pending
     await clickExactVisibleButton(frame, 'Skip arrival', 'skip Dayton arrival', { afterMs: 1600 });
   }
   await snapshot(page, frame, faction, events, 'dayton-sign-conference-room', { before: pendingState });
+  const tour = endgameRenderTour ? { viewport: await frame.evaluate(() => ({ w: window.innerWidth, h: window.innerHeight, dpr: window.devicePixelRatio })) } : null;
+  if (tour) tour.daytonRoom = await daytonRoomPanelTour(page, frame, faction, events, pendingState);
+  const capWarningOf = async () => (await bodyText(frame).catch(() => '')).match(/OUTCOME CAPPED[^\n]*/i)?.[0] ?? null;
   const draftObject = frame.getByRole('navigation', { name: 'Conference objects' })
     .getByRole('button', { name: 'Current draft', exact: true }).first();
   await draftObject.waitFor({ state: 'visible', timeout: 15000 });
   await draftObject.click({ timeout: 10000 });
   await sleep(1200);
   await snapshot(page, frame, faction, events, 'dayton-sign-current-draft', { before: pendingState });
+  if (tour) tour.capWarningOnDraft = await capWarningOf();
   if (!await clickExactVisibleButton(frame, 'Review agreement', 'review Dayton agreement', { afterMs: 2000 })) {
     throw new Error('Dayton conference exposed no visible Review agreement action');
   }
@@ -5217,6 +5355,11 @@ async function signDaytonAndCaptureVerdict(page, frame, faction, events, pending
     await sleep(500);
   }
   await snapshot(page, frame, faction, events, 'dayton-sign-review-agreement', { before: pendingState });
+  if (tour) {
+    tour.finalReview = await readDaytonRailState(frame);
+    tour.capWarningOnReview = await capWarningOf();
+    tour.reviewPanelText = compactText(await frame.locator('section[data-dayton-panel="review"]').first().innerText().catch(() => ''), 1800);
+  }
   await sign.click({ timeout: 10000 });
   const beat = frame.getByTestId('dayton-signing-beat');
   await beat.waitFor({ state: 'visible', timeout: 90000 });
@@ -5224,6 +5367,27 @@ async function signDaytonAndCaptureVerdict(page, frame, faction, events, pending
   await snapshot(page, frame, faction, events, 'dayton-signing-beat', {
     signingText: compactText(await beat.innerText().catch(() => ''), 1200),
   });
+  if (tour) {
+    tour.signingBeat = await frame.evaluate(() => {
+      const q = (id) => document.querySelector(`[data-testid="${id}"]`);
+      const box = (node) => {
+        if (!node) return null;
+        const r = node.getBoundingClientRect();
+        return { x: Math.round(r.x), y: Math.round(r.y), w: Math.round(r.width), h: Math.round(r.height) };
+      };
+      const cont = box(q('dayton-signing-continue'));
+      const inside = (b) => Boolean(b) && b.x >= 0 && b.y >= 0 && b.x + b.w <= window.innerWidth && b.y + b.h <= window.innerHeight;
+      return {
+        plateDate: q('dayton-signing-date')?.innerText ?? null,
+        plateCost: q('dayton-signing-cost')?.innerText ?? null,
+        asideRecordLine: q('dayton-signing-record')?.innerText ?? null,
+        continueButton: cont,
+        continueFullyInViewport: inside(cont),
+        ledgerPresent: Boolean(document.querySelector('.dayton-signing-aside table, .dayton-signing-aside [data-testid*="ledger"], .dayton-signing-aside ul')),
+        viewport: { w: window.innerWidth, h: window.innerHeight },
+      };
+    });
+  }
   await frame.getByTestId('dayton-signing-continue').click({ timeout: 10000 });
   await sleep(2500);
   const verdictScore = frame.getByTestId('faction-report-score');
@@ -5232,6 +5396,18 @@ async function signDaytonAndCaptureVerdict(page, frame, faction, events, pending
     verdictVisible,
     verdictText: compactText(await bodyText(frame).catch(() => ''), 2400),
   });
+  const surfaceTextOf = () => frame.evaluate(() => document.querySelector('[data-awwv-endgame-surface="verdict"]')?.innerText ?? '');
+  if (tour) {
+    tour.verdictSide0 = { text: await surfaceTextOf(), badgeContrast: await readFactionBadgeContrast(frame) };
+    // The real post-sign state, for the browser-only renders (locale, narrow builds, scale factors).
+    const rawState = await frame.evaluate(async () => {
+      const value = await window.awwv.getCurrentGameState();
+      return typeof value === 'string' ? value : JSON.stringify(value);
+    });
+    fs.mkdirSync(path.join(evidenceDir, safeName(faction)), { recursive: true });
+    fs.writeFileSync(path.join(evidenceDir, safeName(faction), 'post-sign-state.json'), rawState);
+    tour.postSignStateBytes = Buffer.byteLength(rawState);
+  }
   // The Verdict is one long scrolling report: capture it a screen at a time, top to bottom.
   const verdictScrollShots = [];
   for (let step = 1; step <= 12; step += 1) {
@@ -5256,10 +5432,29 @@ async function signDaytonAndCaptureVerdict(page, frame, faction, events, pending
     await snapshot(page, frame, faction, events, `verdict-scroll-${step}`, { step, atBottom: scrolled.atBottom });
     if (scrolled.atBottom) break;
   }
-  await frame.evaluate(() => {
+  const scrollVerdictToTop = () => frame.evaluate(() => {
     const root = document.querySelector('[data-awwv-endgame-surface="verdict"]');
     root?.querySelectorAll('*').forEach((node) => { if (node instanceof HTMLElement && node.scrollTop > 0) node.scrollTop = 0; });
   }).catch(() => {});
+  await scrollVerdictToTop();
+  if (tour) {
+    // Each side in focus (the rail is the three sides), top of the report, with the text and the badge contrast.
+    tour.verdictBySide = [];
+    const rail = frame.locator('[data-awwv-verdict-faction-rail] button');
+    const sides = await rail.count().catch(() => 0);
+    for (let index = 0; index < sides; index += 1) {
+      const label = compactText(await rail.nth(index).innerText().catch(() => ''), 60);
+      await rail.nth(index).click({ timeout: 10000 });
+      await sleep(1300);
+      await scrollVerdictToTop();
+      await snapshot(page, frame, faction, events, `verdict-side-${index}`, { label });
+      tour.verdictBySide.push({ index, label, text: await surfaceTextOf(), badgeContrast: await readFactionBadgeContrast(frame) });
+    }
+    if (sides > 0) {
+      await rail.nth(0).click({ timeout: 10000 });
+      await sleep(900);
+    }
+  }
   const verdictTabs = [];
   const tabLocator = frame.getByRole('tab');
   const tabCount = await tabLocator.count().catch(() => 0);
@@ -5272,7 +5467,7 @@ async function signDaytonAndCaptureVerdict(page, frame, faction, events, pending
     verdictTabs.push(label);
     await snapshot(page, frame, faction, events, `verdict-tab-${index}`, { label });
   }
-  return { signed: true, verdictVisible, verdictTabs, verdictScrollShots, signedAtTurn: pendingState?.turn ?? null };
+  return { signed: true, verdictVisible, verdictTabs, verdictScrollShots, signedAtTurn: pendingState?.turn ?? null, ...(tour ? { tour } : {}) };
 }
 
 async function advanceModalProbe(page, frame, faction, events) {
@@ -8091,8 +8286,8 @@ async function runFaction(faction, result) {
     cwd: repo,
     ...(packagedExecutablePath ? { executablePath: packagedExecutablePath } : {}),
     args: packagedExecutablePath
-      ? [`--user-data-dir=${userDataDir}`, `--log-net-log=${netLogPath}`]
-      : ['.', `--user-data-dir=${userDataDir}`, `--log-net-log=${netLogPath}`],
+      ? [`--user-data-dir=${userDataDir}`, `--log-net-log=${netLogPath}`, ...requestedViewportArgs()]
+      : ['.', `--user-data-dir=${userDataDir}`, `--log-net-log=${netLogPath}`, ...requestedViewportArgs()],
     env: { ...process.env, ELECTRON_DISABLE_SECURITY_WARNINGS: 'true' },
     timeout: 90000,
   });
@@ -8128,17 +8323,8 @@ async function runFaction(faction, result) {
   try {
     const page = await waitForGamePage(app);
     attachDiagnostics(page);
+    await applyRequestedViewport(app);
     if (requestedWindowSize) {
-      // --window-size=WxH (command loop L2h, 2026-11-14): set the game window's content
-      // size, so report screenshots can be taken at the design floor (1280x720) or the
-      // wide desk size. The OS may clamp a size larger than the display.
-      await app.evaluate(({ BrowserWindow }, size) => {
-        for (const win of BrowserWindow.getAllWindows()) {
-          if (win.isDestroyed()) continue;
-          win.setContentSize(size.width, size.height);
-        }
-      }, requestedWindowSize);
-      await sleep(500);
       events.push({ type: 'harness_note', note: `window content size requested ${requestedWindowSize.width}x${requestedWindowSize.height}` });
     }
     await installTileFetchAbortObserverBeforeStartup(page);
@@ -8242,6 +8428,10 @@ async function runFaction(faction, result) {
     }
     if (saveLoadOnly) {
       await drainTransientSurfaces(page, frame, faction, events, 'save-load-only-pre-route', 40, { allowAdvanceModal: false });
+    } else if (endgameRenderTour) {
+      // The render tour starts from a late save and goes straight to the ending; the initial
+      // map-centre probe is not part of it (and is blocked by a status row at 1280x720).
+      await drainTransientSurfaces(page, frame, faction, events, 'render-tour-pre-route', 40, { allowAdvanceModal: false });
     } else if (!skipInitialTour) {
       await surfaceTour(page, frame, faction, events);
     } else {

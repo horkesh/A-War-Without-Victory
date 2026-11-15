@@ -87,14 +87,20 @@ describe('entity_autonomy_index surfaced on verdict (D2)', () => {
         expect(verdict.peace_dysfunction_index!).toBeGreaterThan(0);
     });
 
-    it('non-emergent Dayton: autonomy still surfaced, dysfunction undefined (byte-identical guard)', () => {
+    it('historical-mode Dayton: autonomy surfaced and dysfunction defined in every decision mode', () => {
         const state = makeState('historical');
         resolveDaytonNegotiation(state, { ...ALL_DECENTRALIZED });
         const verdict = computeFullVerdict(state);
         // entity_autonomy_index is a pure structural derivation, present regardless of mode.
         expect(verdict.entity_autonomy_index).toBe(100);
-        // peace_dysfunction is emergent-gated → undefined here.
-        expect(verdict.peace_dysfunction_index).toBeUndefined();
+        // R8 ending truth pass: peace_dysfunction is no longer emergent-gated, so the cap the
+        // Dayton room warns about is the cap the Verdict shows in historical mode too. The
+        // 188w calibration baseline ends at turn 188 with game_over false and never signs a
+        // Dayton, so its hashes are unaffected.
+        expect(typeof verdict.peace_dysfunction_index).toBe('number');
+        const emergent = makeState('emergent');
+        resolveDaytonNegotiation(emergent, { ...ALL_DECENTRALIZED });
+        expect(verdict.peace_dysfunction_index).toBe(computeFullVerdict(emergent).peace_dysfunction_index);
     });
 });
 

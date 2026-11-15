@@ -26,24 +26,21 @@
  */
 
 import { computeTreatyAutonomyIndex } from '../../../sim/negotiation/institutional_packages.js';
+import { computeGridlockComponent, DYSFUNCTION_WEIGHTS, PEACE_DYSFUNCTION_CAP_THRESHOLD } from '../../../sim/negotiation/peace_dysfunction.js';
 
 export type InstitutionChoice = 'centralized' | 'decentralized';
 export type BrckoOutcome = 'federation' | 'rs' | 'arbitration';
 
-/** Dysfunction blend weights — mirror of peace_dysfunction.ts DYSFUNCTION_WEIGHTS. */
-const DYSFUNCTION_WEIGHTS = Object.freeze({
-    autonomy: 0.30,
-    fragmentation: 0.25,
-    brcko: 0.10,
-    refugees: 0.20,
-    condemnation: 0.15,
-});
-
 /** Autonomy below this is "functional" → 0 dysfunction (mirror of engine floor). */
 const AUTONOMY_FUNCTIONAL_FLOOR = 40;
 
-/** Dysfunction index at/above which a clean win collapses to hollow victory. */
-export const OUTCOME_CAP_THRESHOLD = 60;
+/**
+ * Dysfunction index at/above which a clean win collapses to hollow victory: the engine's own
+ * threshold. Since the R8 ending truth pass the cap applies in every decision mode, so the
+ * room's warning is the cap the Verdict applies. The weights are the engine's too (the
+ * mirror had kept the pre-gridlock weights, game-design seat 2026-11-14).
+ */
+export const OUTCOME_CAP_THRESHOLD = PEACE_DYSFUNCTION_CAP_THRESHOLD;
 
 const CANONICAL_FACTIONS = ['HRHB', 'RBiH', 'RS'] as const;
 
@@ -119,6 +116,8 @@ export interface DysfunctionPreview {
     indexFloor: number;
     autonomyComponent: number;
     fragmentationComponent: number;
+    /** The engine's gridlock term for the draft's constitutional choices. */
+    gridlockComponent: number;
     brckoComponent: number;
     /** True when indexFloor >= OUTCOME_CAP_THRESHOLD: a clean win is already capped. */
     capsCleanWin: boolean;
@@ -136,16 +135,20 @@ export function computeDysfunctionPreview(
     split: Readonly<Record<string, number>>,
     brcko: BrckoOutcome,
     competencyAllocation?: Readonly<Record<string, string>>,
+    constitutionalChoices?: Readonly<Record<string, string>>,
 ): DysfunctionPreview {
     const autonomyIndex = computeAutonomyPreview(choices, competencyAllocation);
     const aComp = autonomyComponent(autonomyIndex);
     const fComp = fragmentationComponent(split);
+    const gComp = computeGridlockComponent(constitutionalChoices);
     const bComp = brckoComponent(brcko);
 
-    // Refugees + condemnation are unknown-at-table war-history terms → 0 in the floor.
+    // Refugees + condemnation are unknown-at-table war-history terms → 0 in the floor. The
+    // gridlock term is known at the table (the draft's constitution) and is the engine's own.
     const indexFloor = clamp0to100(
         aComp * DYSFUNCTION_WEIGHTS.autonomy +
         fComp * DYSFUNCTION_WEIGHTS.fragmentation +
+        gComp * DYSFUNCTION_WEIGHTS.gridlock +
         bComp * DYSFUNCTION_WEIGHTS.brcko,
     );
 
@@ -153,6 +156,7 @@ export function computeDysfunctionPreview(
         indexFloor: round1(indexFloor),
         autonomyComponent: round1(aComp),
         fragmentationComponent: round1(fComp),
+        gridlockComponent: round1(gComp),
         brckoComponent: round1(bComp),
         capsCleanWin: indexFloor >= OUTCOME_CAP_THRESHOLD,
     };

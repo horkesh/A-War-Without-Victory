@@ -149,6 +149,21 @@ function renderVS() {
     return render(createElement(VerdictScreen));
 }
 
+/** The faction rail button for a side (the rail names sides, so select by its outcome badge). */
+function railTab(container: HTMLElement, faction: string): HTMLElement {
+    const badge = container.querySelector(`[data-awwv-faction-tab-outcome="${faction}"]`);
+    const button = badge?.closest('button');
+    if (!button) throw new Error(`no rail tab for ${faction}`);
+    return button as HTMLElement;
+}
+
+/** The selected faction report's score hero (score, grade, outcome, condemnation). */
+function reportScore(container: HTMLElement) {
+    const hero = container.querySelector('[data-testid="faction-report-score"]');
+    if (!hero) throw new Error('no faction report score hero');
+    return within(hero as HTMLElement);
+}
+
 // ── INTERACTION PROOF: Tab switching ────────────────────────────────────────
 
 describe('VerdictScreen interaction — faction tab switching', () => {
@@ -161,35 +176,87 @@ describe('VerdictScreen interaction — faction tab switching', () => {
         setLocale('en');
     });
 
+    it('the faction rail names the sides, not their armies', () => {
+        const { container } = renderVS();
+        expect(railTab(container, 'RBiH').textContent).toContain('Republic of Bosnia and Herzegovina');
+        expect(railTab(container, 'RS').textContent).toContain('Republika Srpska');
+        expect(railTab(container, 'HRHB').textContent).toContain('Herzeg-Bosnia');
+        expect(screen.queryByText('ARBiH')).toBeNull();
+        expect(screen.queryByText('VRS')).toBeNull();
+        expect(screen.queryByText('HVO')).toBeNull();
+    });
+
     it('default selected faction is RBiH', () => {
-        renderVS();
-        expect(screen.getByText('Multi-ethnic state endures')).toBeDefined();
+        const { container } = renderVS();
+        expect(screen.getByText('The Republic of Bosnia and Herzegovina survived the war')).toBeDefined();
+        const report = reportScore(container);
+        expect(report.getByText('65.0')).toBeDefined();
+        expect(report.getByText('Survival')).toBeDefined();
     });
 
-    it('clicking VRS tab shows RS faction report', () => {
-        renderVS();
-        // Find and click the VRS tab button
-        const vrsTab = screen.getByText('VRS');
-        fireEvent.click(vrsTab);
-        // RS grade description should now be visible
-        expect(screen.getByText('Territorial gains tainted by condemnation')).toBeDefined();
+    it('renders the grade description only inside the grade-trace block', () => {
+        // A save frozen before the grade trace: no "How the verdict was set" block, no description.
+        const { container, unmount } = renderVS();
+        expect(container.querySelector('[data-testid="faction-report-grade-trace"]')).toBeNull();
+        expect(screen.queryByText('How the verdict was set')).toBeNull();
+        expect(screen.queryByText('Multi-ethnic state endures')).toBeNull();
+        unmount();
+
+        const base = endgame();
+        const rbih = base.gameVerdict!.faction_verdicts.RBiH!;
+        storeState = {
+            loadedGameState: {
+                ...base,
+                gameVerdict: {
+                    ...base.gameVerdict!,
+                    faction_verdicts: {
+                        ...base.gameVerdict!.faction_verdicts,
+                        RBiH: {
+                            ...rbih,
+                            grade_trace: {
+                                territory_basis: 'front', territory_graded_pct: 30, earned_grade: 'A',
+                                earned_description: 'Multi-ethnic state endures', cost_step: 'war_cost_cap',
+                                cost_capped_grade: 'A', condemnation_capped_grade: 'A', settlement_capped_grade: 'A',
+                                base_outcome_class: 'survival', peace_dysfunction_index: null,
+                                settlement_peace_dysfunction_index: null, peace_dysfunction_band: 'none',
+                                outcome_class: 'survival',
+                            },
+                        },
+                    },
+                } as GameVerdict,
+            },
+        };
+        const traced = renderVS();
+        const trace = traced.container.querySelector('[data-testid="faction-report-grade-trace"]') as HTMLElement;
+        expect(trace).not.toBeNull();
+        expect(within(trace).getByText('How the verdict was set')).toBeDefined();
+        expect(within(trace).getByText('Multi-ethnic state endures')).toBeDefined();
+        expect(screen.getAllByText('Multi-ethnic state endures')).toHaveLength(1);
     });
 
-    it('clicking VRS tab shows RS pyrrhic score', () => {
-        renderVS();
-        fireEvent.click(screen.getByText('VRS'));
+    it('clicking the Republika Srpska tab shows the RS faction report', () => {
+        const { container } = renderVS();
+        fireEvent.click(railTab(container, 'RS'));
+        expect(screen.getByText('Republika Srpska ended the war in failure: its forces committed the Srebrenica genocide')).toBeDefined();
+        const report = reportScore(container);
+        expect(report.getByText('42.0')).toBeDefined();
+        expect(report.getByText('Failure')).toBeDefined();
+    });
+
+    it('clicking the Republika Srpska tab shows the RS pyrrhic score', () => {
+        const { container } = renderVS();
+        fireEvent.click(railTab(container, 'RS'));
         // Score appears in both tab badge and report — use getAllByText
         const matches = screen.getAllByText('42.0');
-        expect(matches.length).toBeGreaterThanOrEqual(1);
+        expect(matches.length).toBeGreaterThanOrEqual(2);
     });
 
-    it('clicking VRS tab shows condemnation notice (genocide_condemnation)', () => {
-        renderVS();
-        fireEvent.click(screen.getByText('VRS'));
+    it('clicking the Republika Srpska tab shows condemnation notice (genocide_condemnation)', () => {
+        const { container } = renderVS();
+        fireEvent.click(railTab(container, 'RS'));
         expect(screen.getByText('International Condemnation')).toBeDefined();
-        // Verify restrained wording
-        const condemnation = screen.getByText(/genocide.*tribunal/i);
-        expect(condemnation).toBeDefined();
+        // Restrained, sourced wording naming the forces and the court findings.
+        expect(screen.getByText('Its forces committed the Srebrenica genocide (found by the ICTY and the ICJ)')).toBeDefined();
     });
 
     it('condemnation notice NOT visible on RBiH tab (no flags)', () => {
@@ -198,34 +265,43 @@ describe('VerdictScreen interaction — faction tab switching', () => {
         expect(screen.queryByText('International Condemnation')).toBeNull();
     });
 
-    it('clicking HVO tab shows HRHB faction report', () => {
-        renderVS();
-        fireEvent.click(screen.getByText('HVO'));
-        expect(screen.getByText('HRHB Federation compromise')).toBeDefined();
+    it('clicking the Herzeg-Bosnia tab shows the HRHB faction report', () => {
+        const { container } = renderVS();
+        fireEvent.click(railTab(container, 'HRHB'));
+        expect(screen.getByText('Herzeg-Bosnia left the war on negotiated terms')).toBeDefined();
+        const report = reportScore(container);
+        expect(report.getByText('55.0')).toBeDefined();
+        expect(report.getByText('Negotiated Escape')).toBeDefined();
     });
 
-    it('switching back to ARBiH restores original report', () => {
-        renderVS();
-        fireEvent.click(screen.getByText('VRS'));
-        expect(screen.getByText('Territorial gains tainted by condemnation')).toBeDefined();
-        fireEvent.click(screen.getByText('ARBiH'));
-        expect(screen.getByText('Multi-ethnic state endures')).toBeDefined();
+    it('switching back to the Republic restores original report', () => {
+        const { container } = renderVS();
+        fireEvent.click(railTab(container, 'RS'));
+        expect(reportScore(container).getByText('42.0')).toBeDefined();
+        fireEvent.click(railTab(container, 'RBiH'));
+        expect(screen.getByText('The Republic of Bosnia and Herzegovina survived the war')).toBeDefined();
+        expect(reportScore(container).getByText('65.0')).toBeDefined();
     });
 
     it('War Cost section remains stable across tab switches', () => {
-        renderVS();
+        const { container } = renderVS();
         expect(screen.getByText(/War Cost/)).toBeDefined();
-        fireEvent.click(screen.getByText('VRS'));
+        fireEvent.click(railTab(container, 'RS'));
         expect(screen.getByText(/War Cost/)).toBeDefined();
-        fireEvent.click(screen.getByText('HVO'));
+        fireEvent.click(railTab(container, 'HRHB'));
         expect(screen.getByText(/War Cost/)).toBeDefined();
     });
 
-    it('divergence notes remain stable across tab switches', () => {
-        renderVS();
-        expect(screen.getAllByText(/Srebrenica genocide occurred/).length).toBeGreaterThanOrEqual(1);
-        fireEvent.click(screen.getByText('VRS'));
-        expect(screen.getAllByText(/Srebrenica genocide occurred/).length).toBeGreaterThanOrEqual(1);
+    it('historical comparison lines remain stable across tab switches', () => {
+        const { container } = renderVS();
+        const srebrenicaLine = () => container.querySelector('[data-tutorial-step="cost-ledger"] [data-awwv-comparison-line="srebrenica"]');
+        const recordLine = 'The Srebrenica genocide, committed by Bosnian Serb forces against Bosniaks, is recorded in this campaign.';
+        expect(srebrenicaLine()?.textContent).toBe(recordLine);
+        fireEvent.click(railTab(container, 'RS'));
+        expect(srebrenicaLine()?.textContent).toBe(recordLine);
+        // The legacy producer notes are never printed raw.
+        expect(screen.queryByText(/War lasted/)).toBeNull();
+        expect(screen.queryByText('Srebrenica genocide occurred')).toBeNull();
     });
 
     it('mobile verdict section controls switch the lower report flow without changing faction scoring', () => {
@@ -238,7 +314,8 @@ describe('VerdictScreen interaction — faction tab switching', () => {
         expect(lowerFlow?.getAttribute('data-awwv-mobile-section-active')).toBe('reckoning');
         expect(container.querySelector('[data-awwv-mobile-section="report"]')).toBeDefined();
         expect(container.querySelector('[data-awwv-mobile-section="reckoning"]')).toBeDefined();
-        expect(screen.getByText('Multi-ethnic state endures')).toBeDefined();
+        expect(reportScore(container).getByText('65.0')).toBeDefined();
+        expect(reportScore(container).getByText('Survival')).toBeDefined();
         expect(screen.getByText(/War Cost/)).toBeDefined();
     });
 
@@ -252,11 +329,12 @@ describe('VerdictScreen interaction — faction tab switching', () => {
 
         expect(screen.getByRole('button', { name: 'Izvještaj' })).toBeDefined();
         expect(screen.getByRole('button', { name: 'Obračun' })).toBeDefined();
-        expect(screen.getByText('Najmanje loša verzija tragedije')).toBeDefined();
+        // The footer tagline is retired (§4 panel 2026-11-14).
+        expect(screen.queryByText('Najmanje loša verzija tragedije')).toBeNull();
         expect(screen.getByRole('button', { name: 'Otvori pregled kampanje' })).toBeDefined();
         expect(screen.getByRole('button', { name: 'Nova igra' })).toBeDefined();
         expect(screen.getByText('Pirov rezultat')).toBeDefined();
-        expect(screen.getAllByText('Dimenzije kapitala').length).toBeGreaterThanOrEqual(1);
+        expect(screen.getAllByText('Bodovi položaja (kontekst; ocjena se ne izračunava iz ovog zbira)').length).toBeGreaterThanOrEqual(1);
         expect(screen.queryByText('Military Credibility')).toBeNull();
         expect(screen.getByText('Vojni kredibilitet')).toBeDefined();
         expect(screen.getByText('Teritorijalni legitimitet')).toBeDefined();
@@ -265,38 +343,41 @@ describe('VerdictScreen interaction — faction tab switching', () => {
         expect(screen.getByText('Unutrašnja kohezija')).toBeDefined();
         expect(screen.getByText('Pregovaračka poluga')).toBeDefined();
         expect(screen.getAllByText('Završna statistika').length).toBeGreaterThanOrEqual(1);
-        expect(screen.getByText('Teritorija')).toBeDefined();
+        expect(screen.getByText('Ocijenjena teritorija')).toBeDefined();
         expect(screen.getByText('Ukupna cijena rata')).toBeDefined();
         expect(screen.getAllByText('Trajanje rata').length).toBeGreaterThanOrEqual(1);
-        expect(screen.getByText('Historijsko odstupanje')).toBeDefined();
+        // "Historical Divergence" is replaced by the rebuilt "Against the historical war" list.
+        expect(screen.queryByText('Historijsko odstupanje')).toBeNull();
+        expect(warCost.getByText('U poređenju s historijskim ratom')).toBeDefined();
         expect(warCost.queryByText('War lasted 6 weeks longer')).toBeNull();
         expect(warCost.queryByText('Srebrenica genocide occurred')).toBeNull();
-        expect(warCost.getByText('Rat je trajao 6 sedmica duže.')).toBeDefined();
-        expect(warCost.getByText('Genocid u Srebrenici se dogodio.')).toBeDefined();
-        expect(screen.getByText('Fokus')).toBeDefined();
+        expect(warCost.queryByText('Rat je trajao 6 sedmica duže.')).toBeNull();
+        expect(warCost.getByText('Genocid u Srebrenici, koji su snage bosanskih Srba počinile nad Bošnjacima, zabilježen je u ovoj kampanji.')).toBeDefined();
+        // Banner tiles: Side / War-record grade / Outcome; no Cost Signal tile.
+        expect(screen.getByText('Strana')).toBeDefined();
+        expect(screen.getAllByText('Ocjena ratnog učinka').length).toBeGreaterThanOrEqual(1);
         expect(screen.getByText('Ishod')).toBeDefined();
-        expect(screen.getByText('Signal cijene')).toBeDefined();
+        expect(screen.queryByText('Fokus')).toBeNull();
+        expect(screen.queryByText('Signal cijene')).toBeNull();
         expect(screen.getByText('Podijeli sažetak')).toBeDefined();
         expect(screen.getByRole('button', { name: 'Kopiraj' })).toBeDefined();
         expect(screen.queryByText('Survival')).toBeNull();
         expect(screen.getAllByText('Opstanak').length).toBeGreaterThanOrEqual(2);
         expect(screen.getAllByText('Daytonski sporazum').length).toBeGreaterThanOrEqual(1);
-        expect(screen.getByText('Poređenje prekretnica')).toBeDefined();
-        expect(screen.getByText('Historija')).toBeDefined();
-        expect(screen.getByText('Ova kampanja')).toBeDefined();
-        expect(screen.getByText('Razlika')).toBeDefined();
-        expect(screen.getByText('Status')).toBeDefined();
-        expect(screen.getAllByText('Trajanje rata').length).toBeGreaterThanOrEqual(2);
-        expect(screen.getByText('13 nov 1995')).toBeDefined();
-        expect(screen.getByText('6s kasno')).toBeDefined();
-        expect(screen.getByText('Kasno')).toBeDefined();
-        expect(screen.getByText('Kampanja je završila 6 sedmica kasnije od historijske reference.')).toBeDefined();
+        // The only milestone here is the war end; its early/late row is not shown (§4 panel:
+        // the end-of-war comparison line dates both endpoints instead).
+        expect(screen.queryByText('Poređenje prekretnica')).toBeNull();
+        expect(screen.getByText('U poređenju s historijskim ratom')).toBeDefined();
+        expect(screen.queryByText('6s kasno')).toBeNull();
+        expect(screen.queryByText('Kampanja je završila 6 sedmica kasnije od historijske reference.')).toBeNull();
+        // The end of the war is dated instead, in the BCS comparison line.
+        expect(screen.getAllByText(/13 nov 1995/).length).toBeGreaterThanOrEqual(1);
 
-        fireEvent.click(screen.getByText('VRS'));
+        fireEvent.click(railTab(container, 'RS'));
 
         expect(screen.getByText('Međunarodna osuda')).toBeDefined();
         expect(screen.queryByText(/Condemned for genocide/i)).toBeNull();
-        expect(screen.getByText('Osuđeno zbog genocida - međunarodni sudski postupci su neizbježni')).toBeDefined();
+        expect(screen.getByText('Njene snage počinile su genocid u Srebrenici (nalaz MKSJ-a i Međunarodnog suda pravde)')).toBeDefined();
     });
 });
 

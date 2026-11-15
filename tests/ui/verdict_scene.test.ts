@@ -104,17 +104,26 @@ describe('buildVerdictScene', () => {
         });
 
         expect(scene.tone).toBe('pyrrhic');
-        expect(scene.headline).toContain('Pyrrhic');
+        // The headline is keyed on the focus side's final outcome class and names the side.
+        expect(scene.headline).toBe('The Republic of Bosnia and Herzegovina kept its gains at ruinous cost');
         expect(scene.focusFaction).toBe('RBiH');
-        expect(scene.costEmphasis.title).toBe('Human cost record');
+        expect(scene.focusSideName).toBe('Republic of Bosnia and Herzegovina');
+        expect(scene.focusOutcomeLabel).toBe('Pyrrhic Success');
+        expect(scene.focusGrade).toBe('C');
+        expect(scene.cap).toBeUndefined();
+        expect(scene.stain).toBeUndefined();
+        expect(scene.subheadline).toBe('The cost ledger below records what the war took.');
+        // The cost panel leads with the human-cost totals; no finding outranks them.
+        expect(scene.costEmphasis.title).toBe('War cost totals');
+        expect(scene.costEmphasis.source).toBe('totals');
         expect(scene.comparisonCallouts).toEqual([
             'Srebrenica enclave survived',
             'War lasted 6 weeks longer than history',
         ]);
     });
 
-    it('selects a catastrophic scene when condemnation or collapse dominates', () => {
-        const scene = buildVerdictScene({
+    it('selects a catastrophic scene only for the side holding its own condemnation, or a collapse', () => {
+        const input = (focusFaction: string) => ({
             verdict: makeVerdict({
                 faction_verdicts: {
                     RBiH: verdictFor('RBiH', 'survival'),
@@ -126,6 +135,12 @@ describe('buildVerdictScene', () => {
                 },
             }),
             costLedger: makeCostLedger({
+                rupture_consequences: [{
+                    id: 'srebrenica_genocide_1995',
+                    recorded_turn: 170,
+                    perpetrator_faction: 'RS',
+                    description: 'Fall of Srebrenica',
+                }],
                 findings: [
                     {
                         id: 'rupture_srebrenica_genocide_1995',
@@ -149,13 +164,35 @@ describe('buildVerdictScene', () => {
             historicalComparison: makeComparison({
                 divergence_notes: ['War lasted exactly the historical 188 weeks'],
             }),
-            focusFaction: 'RBiH',
+            focusFaction,
         });
 
-        expect(scene.tone).toBe('catastrophic');
-        expect(scene.headline).toContain('condemnation');
-        expect(scene.costEmphasis.title).toBe('Srebrenica genocide');
-        expect(scene.costEmphasis.severity).toBe('rupture');
+        // The perpetrator side: catastrophic tone, its own record line.
+        const rs = buildVerdictScene(input('RS'));
+        expect(rs.tone).toBe('catastrophic');
+        expect(rs.headline).toBe('Republika Srpska collapsed');
+        expect(rs.stain?.relation).toBe('perpetrator');
+        expect(rs.stain?.text).toBe('The Srebrenica genocide, committed by Bosnian Serb forces against Bosniaks, is a permanent condemnation in this side\'s record.');
+        // The cost panel still leads with the totals; the rupture finding does not outrank them.
+        expect(rs.costEmphasis.title).toBe('War cost totals');
+        expect(rs.costEmphasis.severity).toBe('grave');
+
+        // The victims' state: never condemned and never catastrophic for another side's crime.
+        const rbih = buildVerdictScene(input('RBiH'));
+        expect(rbih.tone).toBe('somber');
+        expect(rbih.headline).toBe('The Republic of Bosnia and Herzegovina survived the war');
+        expect(rbih.headline).not.toMatch(/condemn/i);
+        expect(rbih.stain?.relation).toBe('victims_state');
+
+        // A collapse is catastrophic even without a condemnation flag; a third side is neither
+        // condemned nor framed as the victims.
+        const hrhbCollapse = buildVerdictScene({
+            ...input('HRHB'),
+            verdict: makeVerdict({ faction_verdicts: { HRHB: verdictFor('HRHB', 'collapse', { grade: 'F' }) } }),
+        });
+        expect(hrhbCollapse.tone).toBe('catastrophic');
+        expect(hrhbCollapse.headline).toBe('Herzeg-Bosnia collapsed');
+        expect(hrhbCollapse.stain?.relation).toBe('other');
     });
 
     it('selects an early-peace scene from a peace-plan verdict and duration finding', () => {
@@ -188,8 +225,13 @@ describe('buildVerdictScene', () => {
         });
 
         expect(scene.tone).toBe('early_peace');
-        expect(scene.headline).toBe('A war ended by a peace agreement');
-        expect(scene.costEmphasis.title).toBe('Early negotiated settlement');
+        // The headline stays the focus side's outcome; the early peace leads the subheadline.
+        expect(scene.headline).toBe('The Republic of Bosnia and Herzegovina survived the war');
+        expect(scene.subheadlineParts.slice(0, 2)).toEqual([
+            'A war ended by a peace agreement.',
+            'The agreement came before the historical end of the war. The harm recorded up to that point remains in the ledger.',
+        ]);
+        expect(scene.costEmphasis.title).toBe('War cost totals');
         expect(scene.comparisonCallouts[0]).toBe('Total military casualties were 20% of historical levels');
     });
 });
