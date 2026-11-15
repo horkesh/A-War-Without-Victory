@@ -2723,6 +2723,7 @@ describe('generateArmyReserveRequests', () => {
     });
 });
 
+// RF-1 Phase B: hosted on the 7th Corps from week 99 (the Vlasic host corps and every loaned_to_corps below).
 describe('COHA reserve admission invariant', () => {
     const VLASIC_OBJECTIVES = [
         'op:travnik:paklarevo',
@@ -2819,7 +2820,8 @@ describe('COHA reserve admission invariant', () => {
             personnel: 1200,
             morale: 70,
             cohesion: 60,
-            corps_id: 'arbih_3rd_corps',
+            // RF-1 Phase B: hosted on the 7th Corps from week 99
+            corps_id: 'arbih_7th_corps',
             location_osid: 'op:travnik:turbe_2',
             home_osid: 'op:travnik:turbe_2',
         } as FormationState;
@@ -2831,10 +2833,10 @@ describe('COHA reserve admission invariant', () => {
             corps_id: 'arbih_general_staff',
         });
         const formations: Record<string, FormationState> = {
-            arbih_3rd_corps: {
-                id: 'arbih_3rd_corps',
+            arbih_7th_corps: {
+                id: 'arbih_7th_corps',
                 faction: 'RBiH',
-                name: '3rd Corps',
+                name: '7th Corps',
                 created_turn: 0,
                 status: 'active',
                 kind: 'corps',
@@ -2849,9 +2851,9 @@ describe('COHA reserve admission invariant', () => {
 
         const state = makeState({
             formations,
-            corps_command: { arbih_3rd_corps: { active_operations: [vlasic] } },
+            corps_command: { arbih_7th_corps: { active_operations: [vlasic] } },
             corps_front_sectors: {
-                'sector:arbih_3rd_corps:0': makeSector('arbih_3rd_corps', 'RBiH', 'op:travnik:turbe_2', {
+                'sector:arbih_7th_corps:0': makeSector('arbih_7th_corps', 'RBiH', 'op:travnik:turbe_2', {
                     threat_ratio: 0.5,
                 }),
             },
@@ -2870,12 +2872,12 @@ describe('COHA reserve admission invariant', () => {
 
     it('auto-attaches authored Guards to an active Vlasic COHA exception without revoking it', () => {
         const { state, vlasic, guard } = makeVlasicReserveState(155);
-        expect(isVlasicCohaExceptionOperation(state, 'arbih_3rd_corps', vlasic)).toBe(true);
+        expect(isVlasicCohaExceptionOperation(state, 'arbih_7th_corps', vlasic)).toBe(true);
 
         expect(deployEliteLoan(
             state,
             'arbih_guards_brigade',
-            'arbih_3rd_corps',
+            'arbih_7th_corps',
             'offensive_support',
             1,
             155,
@@ -2883,10 +2885,10 @@ describe('COHA reserve admission invariant', () => {
 
         expect(vlasic.participating_brigades).toContain('arbih_guards_brigade');
         expect(vlasic.axes![0]!.assigned_brigades).toContain('arbih_guards_brigade');
-        expect(isVlasicCohaExceptionOperation(state, 'arbih_3rd_corps', vlasic)).toBe(true);
+        expect(isVlasicCohaExceptionOperation(state, 'arbih_7th_corps', vlasic)).toBe(true);
         expect(guard.elite_loan_state).toMatchObject({
             on_loan: true,
-            loaned_to_corps: 'arbih_3rd_corps',
+            loaned_to_corps: 'arbih_7th_corps',
             current_episode_id: 0,
             last_recall_turn: null,
         });
@@ -2897,21 +2899,21 @@ describe('COHA reserve admission invariant', () => {
         guard.elite_loan_state = {
             ...createEliteLoanState(),
             on_loan: true,
-            loaned_to_corps: 'arbih_3rd_corps',
+            loaned_to_corps: 'arbih_7th_corps',
             loan_start_turn: 150,
             loan_start_personnel: guard.personnel ?? null,
             current_episode_id: 0,
         };
-        expect(isVlasicCohaExceptionOperation(state, 'arbih_3rd_corps', vlasic)).toBe(true);
+        expect(isVlasicCohaExceptionOperation(state, 'arbih_7th_corps', vlasic)).toBe(true);
 
         generateArmyReserveRequests(state);
 
         expect(vlasic.participating_brigades).toContain('arbih_guards_brigade');
         expect(vlasic.axes![0]!.assigned_brigades).toContain('arbih_guards_brigade');
-        expect(isVlasicCohaExceptionOperation(state, 'arbih_3rd_corps', vlasic)).toBe(true);
+        expect(isVlasicCohaExceptionOperation(state, 'arbih_7th_corps', vlasic)).toBe(true);
         expect(guard.elite_loan_state).toMatchObject({
             on_loan: true,
-            loaned_to_corps: 'arbih_3rd_corps',
+            loaned_to_corps: 'arbih_7th_corps',
             current_episode_id: 0,
             last_recall_turn: null,
         });
@@ -2925,19 +2927,19 @@ describe('COHA reserve admission invariant', () => {
         unauthorized.elite_loan_state = {
             ...createEliteLoanState(),
             on_loan: true,
-            loaned_to_corps: 'arbih_3rd_corps',
+            loaned_to_corps: 'arbih_7th_corps',
             loan_start_turn: 150,
             loan_start_personnel: unauthorized.personnel ?? null,
             current_episode_id: 0,
         };
         state.military.formations!['arbih_327th_vitezka_mountain'] = unauthorized;
-        expect(isVlasicCohaExceptionOperation(state, 'arbih_3rd_corps', vlasic)).toBe(true);
+        expect(isVlasicCohaExceptionOperation(state, 'arbih_7th_corps', vlasic)).toBe(true);
 
         generateArmyReserveRequests(state);
 
         expect(vlasic.participating_brigades).not.toContain('arbih_327th_vitezka_mountain');
         expect(vlasic.axes![0]!.assigned_brigades).not.toContain('arbih_327th_vitezka_mountain');
-        expect(isVlasicCohaExceptionOperation(state, 'arbih_3rd_corps', vlasic)).toBe(true);
+        expect(isVlasicCohaExceptionOperation(state, 'arbih_7th_corps', vlasic)).toBe(true);
     });
 
     it('still admits an authored Vlasic reinforcement without revoking the exception', () => {
@@ -2946,12 +2948,12 @@ describe('COHA reserve admission invariant', () => {
             corps_id: 'arbih_general_staff',
         });
         state.military.formations!['arbih_712th_mountain'] = authored;
-        expect(isVlasicCohaExceptionOperation(state, 'arbih_3rd_corps', vlasic)).toBe(true);
+        expect(isVlasicCohaExceptionOperation(state, 'arbih_7th_corps', vlasic)).toBe(true);
 
         expect(deployEliteLoan(
             state,
             'arbih_712th_mountain',
-            'arbih_3rd_corps',
+            'arbih_7th_corps',
             'offensive_support',
             1,
             155,
@@ -2959,20 +2961,20 @@ describe('COHA reserve admission invariant', () => {
 
         expect(vlasic.participating_brigades).toContain('arbih_712th_mountain');
         expect(vlasic.axes![0]!.assigned_brigades).toContain('arbih_712th_mountain');
-        expect(isVlasicCohaExceptionOperation(state, 'arbih_3rd_corps', vlasic)).toBe(true);
+        expect(isVlasicCohaExceptionOperation(state, 'arbih_7th_corps', vlasic)).toBe(true);
         expect(authored.elite_loan_state!.on_loan).toBe(true);
     });
 
     it('auto-attaches Guards normally to an ordinary non-exception operation', () => {
         const { state, guard } = makeVlasicReserveState(153);
         const ordinary = makeOrdinaryOperation('Operation Ordinary', 'arbih_17th_vitezka_mountain');
-        state.military.corps_command!.arbih_3rd_corps.active_operations = [ordinary];
-        expect(isVlasicCohaExceptionOperation(state, 'arbih_3rd_corps', ordinary)).toBe(false);
+        state.military.corps_command!.arbih_7th_corps.active_operations = [ordinary];
+        expect(isVlasicCohaExceptionOperation(state, 'arbih_7th_corps', ordinary)).toBe(false);
 
         expect(deployEliteLoan(
             state,
             'arbih_guards_brigade',
-            'arbih_3rd_corps',
+            'arbih_7th_corps',
             'offensive_support',
             1,
             153,
@@ -2985,12 +2987,12 @@ describe('COHA reserve admission invariant', () => {
 
     it('leaves auto-join unchanged outside the receipt-155 COHA window', () => {
         const { state, vlasic, guard } = makeVlasicReserveState(156);
-        expect(isVlasicCohaExceptionOperation(state, 'arbih_3rd_corps', vlasic)).toBe(false);
+        expect(isVlasicCohaExceptionOperation(state, 'arbih_7th_corps', vlasic)).toBe(false);
 
         expect(deployEliteLoan(
             state,
             'arbih_guards_brigade',
-            'arbih_3rd_corps',
+            'arbih_7th_corps',
             'offensive_support',
             1,
             156,
@@ -3008,12 +3010,12 @@ describe('COHA reserve admission invariant', () => {
                 corps_id: 'arbih_general_staff',
             });
             state.military.formations!['arbih_327th_vitezka_mountain'] = unauthorized;
-            expect(isVlasicCohaExceptionOperation(state, 'arbih_3rd_corps', vlasic)).toBe(false);
+            expect(isVlasicCohaExceptionOperation(state, 'arbih_7th_corps', vlasic)).toBe(false);
 
             expect(deployEliteLoan(
                 state,
                 'arbih_327th_vitezka_mountain',
-                'arbih_3rd_corps',
+                'arbih_7th_corps',
                 'offensive_support',
                 1,
                 turn,
@@ -3022,10 +3024,10 @@ describe('COHA reserve admission invariant', () => {
             expect(vlasic.participating_brigades).toContain('arbih_327th_vitezka_mountain');
             expect(vlasic.axes![0]!.assigned_brigades).toContain('arbih_327th_vitezka_mountain');
             expect(unauthorized.elite_loan_state!.on_loan).toBe(true);
-            expect(isVlasicCohaExceptionOperation(state, 'arbih_3rd_corps', vlasic)).toBe(false);
+            expect(isVlasicCohaExceptionOperation(state, 'arbih_7th_corps', vlasic)).toBe(false);
 
             state.meta.turn = 155;
-            expect(isVlasicCohaExceptionOperation(state, 'arbih_3rd_corps', vlasic)).toBe(false);
+            expect(isVlasicCohaExceptionOperation(state, 'arbih_7th_corps', vlasic)).toBe(false);
         }
     });
 
@@ -3037,22 +3039,22 @@ describe('COHA reserve admission invariant', () => {
         unauthorized.elite_loan_state = {
             ...createEliteLoanState(),
             on_loan: true,
-            loaned_to_corps: 'arbih_3rd_corps',
+            loaned_to_corps: 'arbih_7th_corps',
             loan_start_turn: 150,
             loan_start_personnel: unauthorized.personnel ?? null,
             current_episode_id: 0,
         };
         state.military.formations!['arbih_327th_vitezka_mountain'] = unauthorized;
-        expect(isVlasicCohaExceptionOperation(state, 'arbih_3rd_corps', vlasic)).toBe(false);
+        expect(isVlasicCohaExceptionOperation(state, 'arbih_7th_corps', vlasic)).toBe(false);
 
         generateArmyReserveRequests(state);
 
         expect(vlasic.participating_brigades).toContain('arbih_327th_vitezka_mountain');
         expect(vlasic.axes![0]!.assigned_brigades).toContain('arbih_327th_vitezka_mountain');
-        expect(isVlasicCohaExceptionOperation(state, 'arbih_3rd_corps', vlasic)).toBe(false);
+        expect(isVlasicCohaExceptionOperation(state, 'arbih_7th_corps', vlasic)).toBe(false);
 
         state.meta.turn = 155;
-        expect(isVlasicCohaExceptionOperation(state, 'arbih_3rd_corps', vlasic)).toBe(false);
+        expect(isVlasicCohaExceptionOperation(state, 'arbih_7th_corps', vlasic)).toBe(false);
     });
 
     it('skips the incompatible Vlasic exception and selects a compatible alternative operation', () => {
@@ -3062,13 +3064,13 @@ describe('COHA reserve admission invariant', () => {
         });
         state.military.formations!['arbih_327th_vitezka_mountain'] = unauthorized;
         const alternative = makeOrdinaryOperation('Operation Zulu Support', 'arbih_705th_slavna_mountain');
-        state.military.corps_command!.arbih_3rd_corps.active_operations.push(alternative);
-        expect(isVlasicCohaExceptionOperation(state, 'arbih_3rd_corps', vlasic)).toBe(true);
+        state.military.corps_command!.arbih_7th_corps.active_operations.push(alternative);
+        expect(isVlasicCohaExceptionOperation(state, 'arbih_7th_corps', vlasic)).toBe(true);
 
         expect(deployEliteLoan(
             state,
             'arbih_327th_vitezka_mountain',
-            'arbih_3rd_corps',
+            'arbih_7th_corps',
             'offensive_support',
             1,
             155,
@@ -3078,7 +3080,7 @@ describe('COHA reserve admission invariant', () => {
         expect(vlasic.axes![0]!.assigned_brigades).not.toContain('arbih_327th_vitezka_mountain');
         expect(alternative.participating_brigades).toContain('arbih_327th_vitezka_mountain');
         expect(alternative.axes![0]!.assigned_brigades).toContain('arbih_327th_vitezka_mountain');
-        expect(isVlasicCohaExceptionOperation(state, 'arbih_3rd_corps', vlasic)).toBe(true);
+        expect(isVlasicCohaExceptionOperation(state, 'arbih_7th_corps', vlasic)).toBe(true);
         expect(unauthorized.elite_loan_state!.on_loan).toBe(true);
     });
 });

@@ -1,5 +1,7 @@
 # Wikipedia OOB Cross-Reference Master File
 
+> **Archived backup, not maintained.** Superseded by `WIKIPEDIA_OOB_CROSS_REFERENCE.md`, which is current (for example, the 7th Corps is modelled from week 99 since RF-1 Phase B, 2026-11-15).
+
 **Created:** 2026-03-02
 **Sources:** English, Bosnian, Serbian, Croatian Wikipedia + ICTY documents, kokosar.com, potkozarje.net, Military Wiki (Fandom), German Wikipedia
 **Purpose:** Cross-reference Wikipedia findings against existing Balkan Battlegrounds OOB data. Identify corrections, additions, and gaps.

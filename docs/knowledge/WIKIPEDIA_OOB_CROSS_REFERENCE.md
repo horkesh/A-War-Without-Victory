@@ -7,9 +7,9 @@
 
 ## Game Structure (per user directive)
 
-ARBiH simplified to 5 corps:
+ARBiH simplified to 5 corps (6 from week 99 since RF-1 Phase B, 2026-11-15):
 - 6th Corps (Konjic) → **merged into 4th Corps**
-- 7th Corps (Travnik) → **merged into 3rd Corps**
+- 7th Corps (Travnik) → **modelled from week 99 (26 Feb 1994)**; its 12 brigades serve in the 3rd Corps until then (RF-1 Phase B, 2026-11-15; before that it was merged into the 3rd Corps)
 - 28th Independent Division → **merged into 2nd Corps**
 - 81st Independent Division → **merged into 1st Corps**
 - Divisions are ignored as organizational level — brigades attributed directly to parent corps
@@ -25,7 +25,8 @@ ARBiH simplified to 5 corps:
 | General Staff | Kakanj | Direct command units |
 | 1st Corps | Sarajevo | Sarajevo + Goražde enclave (ex-81st Div) |
 | 2nd Corps | Tuzla | NE Bosnia + Srebrenica/Žepa enclaves (ex-28th Div) |
-| 3rd Corps | Zenica | Central Bosnia + Travnik/Bugojno area (absorbs 7th Corps) |
+| 3rd Corps | Zenica | Central Bosnia; also the Travnik/Bugojno area until week 99 |
+| 7th Corps | Travnik | Travnik/Bugojno area from week 99 (12 brigades from the 3rd Corps) |
 | 4th Corps | Jablanica | Herzegovina + Konjic/Jablanica (absorbs 6th Corps) |
 | 5th Corps | Bihać | Bihać pocket |
 
@@ -119,7 +120,7 @@ ARBiH simplified to 5 corps:
 | 284th East Bosnian Light | Srebrenica | Srebrenica | No | WP | **NEW** | |
 | 285th Light | Žepa | Žepa | No | WP | **NEW** | Žepa enclave |
 
-### 3rd Corps (Zenica) — includes ex-7th Corps (Travnik/Bugojno)
+### 3rd Corps (Zenica), with the 7th Corps (Travnik/Bugojno) rows it hands over at week 99
 
 | Brigade | Municipality | HQ | BB | WP | Status | Notes |
 |---------|-------------|-----|----|----|--------|-------|
@@ -138,7 +139,7 @@ ARBiH simplified to 5 corps:
 | 374th Slavna Light | Tešanj | Tešanj | Yes | Confirmed | OK | |
 | 375th Liberation | Tešanj | Tešanj | Yes | Confirmed | OK | |
 | 377th Vitezka Mountain | Tešanj | Jelah | Yes | Confirmed | OK | |
-| **Ex-7th Corps (Travnik/Bugojno area):** | | | | | | |
+| **7th Corps (Travnik/Bugojno area), in the 3rd Corps until week 99:** | | | | | | |
 | 17th Vitezka Krajina Mountain | Travnik | Travnik | Yes | Confirmed | OK | Slavna + Vitezka |
 | 705th Slavna Mountain | Bugojno | Rostovo | Yes | Confirmed | OK | Formed Dec 1, 1992 |
 | 706th Muslim Mountain | Travnik | Travnik | Yes | Confirmed | OK | Ex-306th |

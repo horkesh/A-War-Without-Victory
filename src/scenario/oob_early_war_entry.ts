@@ -265,6 +265,7 @@ export function createOobFormations(
         // Exception: RS army_hq (vrs_main_staff) is kind='army_hq' and available_from=0 — keep it.
         if (isBottomUp && c.faction !== 'RS') continue;
         if (state.military.formations[c.id]) continue;
+        if (c.strict_available_from && c.available_from > currentTurn) continue;
         const isOpeningArmyHq = c.kind === 'army_hq' && c.available_from <= currentTurn;
         if (!isOpeningArmyHq && !factionHasPresenceInMun(state, c.faction, c.hq_mun, sidToMun)) continue;
         const hq_sid = municipalityHqSettlement[c.hq_mun];
