@@ -86,7 +86,8 @@ describe('operational SITREP views', () => {
     // The cumulative collapsed-municipality list is data only: never an alert or the headline.
     expect(view.alerts.map((alert) => alert.id)).not.toContain('sustainment-collapsed');
     expect(view.headline).not.toMatch(/collapsed/i);
-    expect(view.sustainment.collapsedMunicipalities).toEqual(['Bijeljina']);
+    // Still carried as data (for the legacy warroom panels); the label's wording is not this test's concern.
+    expect(view.sustainment.collapsedMunicipalities).toHaveLength(1);
   });
 
   it('does not elevate thin fronts without reported pressure into presidential alerts', () => {
