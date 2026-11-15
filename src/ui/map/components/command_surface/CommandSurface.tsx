@@ -339,7 +339,9 @@ export function CommandSurface({ initialCategoryId = null, onClose, onNavigateTa
     if (target.kind !== 'none' && !selfTarget) review = { target, label };
   }
   const bannerArt = resolveCommandBannerArt(activeArea.id, playerFaction);
-  const detailArt = selectedCard?.directive
+  // Command loop L5 (2026-11-15): a proposal is read, not glanced at. Its dossier facts
+  // take the art's place, so they are visible above the directive footer at 1280x720.
+  const detailArt = selectedCard?.directive && selectedCard.directive.lever !== 'review_proposal'
     ? resolveDirectiveActArt(selectedCard.directive.lever, playerFaction)
     : null;
   const historicalNeeds = groups.find((entry) => entry.group === 'needs')?.cards.filter((card) => isHistoricalOperationAuthorizationCard(card)) ?? [];

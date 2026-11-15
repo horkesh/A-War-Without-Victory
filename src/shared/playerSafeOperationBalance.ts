@@ -1,3 +1,22 @@
+/**
+ * Command loop L5 (2026-11-15): the four odds bands a proposal dossier may show. The
+ * band is always attributed to whoever judged it ("Karavelić judges: favourable") and
+ * never shown as a number: the command model rule is that the number is never the
+ * decision, the source is (presidential command model design, line 32).
+ */
+export type PlayerSafeOddsBand = 'favourable' | 'even' | 'hard' | 'long';
+
+/**
+ * Band a staff judgement in [0, 1] (the plan viability the corps staff report). The
+ * thresholds are fixed so the same judgement always reads the same way.
+ */
+export function getPlayerSafeOddsBand(judgement: number): PlayerSafeOddsBand {
+  if (judgement >= 0.65) return 'favourable';
+  if (judgement >= 0.45) return 'even';
+  if (judgement >= 0.25) return 'hard';
+  return 'long';
+}
+
 export interface PlayerSafeOperationBalancePresentation {
   label: string;
   summary: string;

@@ -333,6 +333,36 @@ function percentage(value, suffix) {
     : 'Unreported';
 }
 
+function finiteUnit(value) {
+  return typeof value === 'number' && Number.isFinite(value) ? Math.max(0, Math.min(1, value)) : null;
+}
+
+/** Command loop L5: staff estimates for a proposal dossier (see buildOpProposalCardData). */
+function buildDossierInputs(plan, commanderState, military, commanderId) {
+  const stagingZone = safeStr(plan && plan.staging_zone);
+  const zoneConfidence = commanderState && commanderState.intel_picture && typeof commanderState.intel_picture.zone_confidence === 'object'
+    ? commanderState.intel_picture.zone_confidence
+    : {};
+  const pressureRaw = commanderState && commanderState.threat_assessment ? commanderState.threat_assessment.overall_pressure : null;
+  const officerRow = commanderId && Array.isArray(military && military.named_officer_data)
+    ? military.named_officer_data.find((row) => row && row.id === commanderId)
+    : null;
+  const traits = officerRow && Number.isFinite(officerRow.competence) && Number.isFinite(officerRow.aggressiveness)
+    ? { competence: officerRow.competence, aggressiveness: officerRow.aggressiveness }
+    : null;
+  return {
+    viability: finiteUnit(plan && plan.viability_score),
+    intel_confidence: finiteUnit(stagingZone ? zoneConfidence[stagingZone] : undefined),
+    concentration: finiteUnit(plan && plan.concentration_progress),
+    pressure: ['low', 'moderate', 'heavy', 'critical'].includes(pressureRaw) ? pressureRaw : null,
+    staging_osid: stagingZone ? zoneAnchorOsid(stagingZone) : null,
+    brigade_ids: plan && Array.isArray(plan.assigned_brigades)
+      ? plan.assigned_brigades.filter((id) => typeof id === 'string' && id.length > 0)
+      : [],
+    commander_traits: traits,
+  };
+}
+
 /**
  * Build the named-officer decision cards for pending 'ops' proposals from the
  * exact ready current_plan referenced by APPROVE_OP:<corps>:<plan>.
@@ -455,6 +485,10 @@ function buildOpProposalCardData(state, proposals) {
       force_ratio: 'Unreported',
       opportunity_cost: 'Unreported',
       summary,
+      // Command loop L5 (2026-11-15): the staff estimates behind a proposal dossier,
+      // mirroring backTheOfficer.ts OpProposalDossierInputs (staging and formation ids
+      // for map focus only; the corps staff's own beliefs, never enemy truth).
+      ...(ready ? { dossier_inputs: buildDossierInputs(plan, commanderState, military, commanderId) } : {}),
     });
   }
 

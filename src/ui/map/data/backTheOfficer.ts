@@ -639,6 +639,57 @@ export interface OpProposalCardView {
   force_ratio?: string;
   opportunity_cost?: string;
   summary?: string;
+  /**
+   * Command loop L5 (2026-11-15): the staff's own estimates the proposal dossier
+   * (`proposalDossier.ts`) turns into attributed bands. Everything here is what the
+   * president's corps staff already believe about their own plan (the corps
+   * commander's belief state and the officer's file), never fog-hidden enemy data.
+   * Ids are retained for map focus and name lookup only; never render them.
+   */
+  dossier_inputs?: OpProposalDossierInputs;
+}
+
+/** Staff estimates behind a proposal dossier. All optional: absent means "unknown". */
+export interface OpProposalDossierInputs {
+  /** Plan viability the corps staff report, in [0, 1]. */
+  viability: number | null;
+  /** The staff's confidence in their picture of the staging area, in [0, 1]. */
+  intel_confidence: number | null;
+  /** How far the assigned brigades have concentrated, in [0, 1]. */
+  concentration: number | null;
+  /** Pressure the corps front is already under. */
+  pressure: 'low' | 'moderate' | 'heavy' | 'critical' | null;
+  /** Staging settlement for map focus (an OSID; never rendered). */
+  staging_osid: string | null;
+  /** Assigned brigade ids for map focus (never rendered). */
+  brigade_ids: string[];
+  /** The proposing officer's file ratings (1-5), when the officer is known. */
+  commander_traits: { competence: number; aggressiveness: number } | null;
+}
+
+function finiteUnit(value: unknown): number | null {
+  return typeof value === 'number' && Number.isFinite(value) ? Math.max(0, Math.min(1, value)) : null;
+}
+
+function planPressureLevel(value: unknown): OpProposalDossierInputs['pressure'] {
+  return value === 'low' || value === 'moderate' || value === 'heavy' || value === 'critical' ? value : null;
+}
+
+function officerTraits(military: RawRecord | null, officerId: string | undefined): OpProposalDossierInputs['commander_traits'] {
+  if (!officerId) return null;
+  const rows = Array.isArray(military?.named_officer_data) ? military.named_officer_data : [];
+  for (const row of rows) {
+    const record = asRecord(row);
+    if (str(record?.id) !== officerId) continue;
+    const competence = record?.competence;
+    const aggressiveness = record?.aggressiveness;
+    if (typeof competence === 'number' && Number.isFinite(competence)
+      && typeof aggressiveness === 'number' && Number.isFinite(aggressiveness)) {
+      return { competence, aggressiveness };
+    }
+    return null;
+  }
+  return null;
 }
 
 /** Parse `APPROVE_OP:<corps>:<plan>` → { corpsId, planId }; null when malformed. */
@@ -849,6 +900,19 @@ export function buildOpProposalCards(
       force_ratio: forceRatio,
       opportunity_cost: opportunityCost,
       summary,
+      ...(ready
+        ? {
+          dossier_inputs: {
+            viability: finiteUnit(plan?.viability_score),
+            intel_confidence: finiteUnit(stagingZone ? zoneConfidence?.[stagingZone] : undefined),
+            concentration: finiteUnit(plan?.concentration_progress),
+            pressure: planPressureLevel(threat?.overall_pressure),
+            staging_osid: zoneAnchorOsid(stagingZone ?? ''),
+            brigade_ids: brigadeIds.filter((value): value is string => typeof value === 'string' && value.length > 0),
+            commander_traits: officerTraits(military, commanderIdByCorps.get(corpsId)),
+          },
+        }
+        : {}),
     });
   }
 
