@@ -1826,6 +1826,11 @@ export async function buildScenarioStartupState(
         }
         const officerData = validateOfficerData(officerRaw);
         initializeNamedOfficers(state, officerData);
+        // RF-ROSTER: army chiefs carry their roster stubbornness from turn 0, so the
+        // startup save and the first war turn agree (the war step re-applies it).
+        const { applyRosterStubbornness } = await import('../sim/combat/army_co_lifecycle.js');
+        const { CANONICAL_ARMY_CO_ROSTER } = await import('../sim/combat/army_co_roster_data.js');
+        applyRosterStubbornness(state, CANONICAL_ARMY_CO_ROSTER);
     }
 
     // ───────────────────────────────────────────────────────────────────────

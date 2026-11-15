@@ -39,6 +39,15 @@ import { resolvePeacePlan } from '../../src/sim/negotiation/peace_plans.js';
 import { getPeacePlanById } from '../../src/sim/negotiation/peace_plan_data.js';
 import { createRequire } from 'node:module';
 import { raiseArmyClash, sweepLapsedArmyClashes } from '../../src/sim/combat/army_clashes.js';
+import { applyPresidentPolicy, emptyPresidentTurnLog, type PresidentKind } from './president_policies.js';
+import { readFileSync } from 'node:fs';
+
+/** The gesture event rows as the desktop loads them (electron-main `loadFrontVisitEventDef`). */
+function loadGestureEventDefs(baseDir: string): Map<string, unknown> {
+    const parsed = JSON.parse(readFileSync(resolve(baseDir, 'data/scenarios/events/war_1993.json'), 'utf8'));
+    const rows: Array<{ id?: unknown }> = Array.isArray(parsed) ? parsed : (parsed.events ?? []);
+    return new Map(rows.filter((row) => typeof row?.id === 'string').map((row) => [row.id as string, row]));
+}
 
 /** The desktop IPC contract (CommonJS): the same price table and debit the accept-proposal handler uses. */
 /** The desktop army-clash answer (command loop L7), used only by `--clash-policy`. */
@@ -97,6 +106,8 @@ interface CliOptions {
      * answer the resulting army clash with this answer. Off by default.
      */
     clashPolicy?: 'insist' | 'accept';
+    /** Appendix C test President (proposal §5D): hands-off, engaged or meddler. Records Authority per turn. */
+    president?: PresidentKind;
     electronLogPath?: string;
     electronAutosavePath?: string;
 }
@@ -275,6 +286,13 @@ function parseArgs(argv: string[]): CliOptions {
     if (botParityParamilitaryDiagnostic && !(values.get('--out') ?? '').includes('attribution')) {
         throw new Error('--diagnostic-bot-parity-paramilitary requires an --out path containing "attribution" (diagnostic output must never sit with calibration evidence)');
     }
+    // An engaged or meddler President queues a gesture decision each time it pays for one. Under
+    // `--event-policy defer` nobody answers it, so the gesture stays pending, never comes off
+    // cooldown again, and the Authority measurement is wrong. Refuse that configuration.
+    const presidentArg = values.get('--president');
+    if ((presidentArg === 'engaged' || presidentArg === 'meddler') && (values.get('--event-policy') ?? 'defer') === 'defer') {
+        throw new Error(`--president ${presidentArg} needs an --event-policy that answers decisions (bot_equivalent, historical_default or staff_recommended), not defer`);
+    }
 
     return {
         turns,
@@ -313,6 +331,10 @@ function parseArgs(argv: string[]): CliOptions {
         ...(() => {
             const raw = parseEnum(values.get('--clash-policy') ?? 'off', ['off', 'insist', 'accept'] as const, '--clash-policy');
             return raw === 'off' ? {} : { clashPolicy: raw };
+        })(),
+        ...(() => {
+            const raw = parseEnum(values.get('--president') ?? 'off', ['off', 'hands_off', 'engaged', 'meddler'] as const, '--president');
+            return raw === 'off' ? {} : { president: raw };
         })(),
     };
 }
@@ -960,7 +982,16 @@ async function runComparison(baseDir: string, options: CliOptions) {
     const transcript: DecisionTranscriptRow[] = [];
     const turns: unknown[] = [];
 
+    // Appendix C: the President's own acts (gestures, Request-ops, Insist, backing), through the
+    // desktop's contracts, before the week's decisions are answered.
+    const presidentEventDefs = options.president ? loadGestureEventDefs(baseDir) : new Map<string, unknown>();
     for (let index = 0; index < options.turns; index += 1) {
+        const presidentLog = emptyPresidentTurnLog();
+        if (options.president) {
+            // An army clash left unanswered at Advance lapses (electron-main sweeps after advance).
+            sweepLapsedArmyClashes(playerState);
+            await applyPresidentPolicy(playerState, options.faction, options.president, index, presidentEventDefs, baseDir, presidentLog);
+        }
         applyPlayerPolicy(playerState, options, transcript);
         const headlessResult = await advanceTurn(headlessState, baseDir);
         // PAUSE BEFORE COMBAT: the player answers decisions fired this turn inside the turn,
@@ -998,9 +1029,21 @@ async function runComparison(baseDir: string, options: CliOptions) {
                 headless.control_counts,
             );
         }
-        if (options.priceBacking) {
+        if (options.priceBacking || options.president) {
             const auth = playerState.military?.command_authority;
-            row.player_command_authority = auth ? { current: auth.current, max: auth.max } : null;
+            row.player_command_authority = auth
+                ? {
+                    current: auth.current,
+                    max: auth.max,
+                    ...(options.president ? {
+                        reserve: auth.reserve ?? 0,
+                        reserve_max: auth.reserve_max ?? 0,
+                        income: auth.last_recovery ?? null,
+                        income_breakdown: auth.last_recovery_breakdown ?? null,
+                        president: presidentLog,
+                    } : {}),
+                }
+                : null;
         }
         if (options.traceCorps) {
             row.corps_trace = {
@@ -1066,6 +1109,7 @@ async function runComparison(baseDir: string, options: CliOptions) {
             historical_operations: options.historicalOperationPolicy,
             ...(options.priceBacking ? { price_backing: options.priceBacking } : {}),
             ...(options.clashPolicy ? { clash_policy: options.clashPolicy } : {}),
+            ...(options.president ? { president: options.president } : {}),
             paramilitary_requests: options.paramilitaryPolicy,
             paramilitary_resolution_timing: options.paramilitaryPolicy === 'standing_allow'
                 ? 'same_turn'

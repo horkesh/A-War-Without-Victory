@@ -291,7 +291,8 @@ export const DONATION_READINESS_FRACTION_HRHB = 0.25;
  *   - `full`    — offensive operations. Form a TG and pull donors per the full
  *                 Phase-1 model (up to MAX_DONORS_PER_TG, distance falloff, etc.).
  *                 Covers pre-planned / triggered / sector-offensive / Army-HQ ops.
- *   - `limited` — emergency defensive-reaction ops. Form a TG but cap the donor
+ *   - `limited` — defensive ops (strategic_defense, and legacy saves' emergency ops; their
+ *                 creator was retired 2026-11-15). Form a TG but cap the donor
  *                 pull (anchor + at most TG_LIMITED_POLICY_MAX_DONORS donors).
  *   - `none`    — probes / feints / reorganization. Low-commitment by design;
  *                 no TG is formed (legacy anchor-only behaviour).

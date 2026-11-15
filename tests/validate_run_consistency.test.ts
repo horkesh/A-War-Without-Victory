@@ -21,6 +21,7 @@ type AdjacentIssues = {
 type EmptyContestedIssues = {
     missed_reinforcement: Array<{ sector: string; length_edges: number; donor_candidates: DonorCandidate[] }>;
     unavoidable_empty: Array<{ sector: string; length_edges: number; donor_candidates: DonorCandidate[] }>;
+    relief_in_transit: Array<{ sector: string; length_edges: number; relieving_brigade_ids: string[] }>;
 };
 
 type SectorFloorIssues = {
@@ -1137,6 +1138,7 @@ describe('validate_run_consistency assignment completeness', () => {
         };
 
         expect(collectEmptyContestedSectorIssues(state)).toEqual({
+            relief_in_transit: [],
             missed_reinforcement: [],
             unavoidable_empty: [
                 expect.objectContaining({
@@ -1169,8 +1171,67 @@ describe('validate_run_consistency assignment completeness', () => {
         expect(result.lines.some((line) => line.includes('inside a partially covered sector'))).toBe(false);
     });
 
+    it('SE7E-h: an empty sector with a relief march already in transit to its front is not a missed reinforcement', () => {
+        const state: any = makeEmptyRecipientWithDonorState();
+        // donor_a has been ordered to the empty sector's front and is on the road (the engine
+        // issues no second relief while this one is in flight: hasPendingReliefForTargets).
+        state.military.brigade_movement_state = {
+            donor_a: { status: 'in_transit', destination_sids: ['op:test:recipient_front'], path: ['op:test:donor_front', 'op:test:recipient_front'], turns_remaining: 1 },
+        };
+        expect(collectEmptyContestedSectorIssues(state)).toEqual({
+            relief_in_transit: [{ sector: 'sector:vrs_drina:1', length_edges: 3, relieving_brigade_ids: ['donor_a'] }],
+            missed_reinforcement: [],
+            unavoidable_empty: [],
+        });
+        const result = validateState(state, 'synthetic');
+        expect(result.lines.some((line) => line.includes('empty with legal donor(s) available'))).toBe(false);
+        expect(result.lines.some((line) => line.includes('relief is in transit') && line.includes('donor_a'))).toBe(true);
+
+        // A movement order counts the same way; a march to some other OSID does not.
+        const ordered: any = makeEmptyRecipientWithDonorState();
+        ordered.military.brigade_movement_orders = { donor_b: { destination_sids: ['op:test:recipient_front'] } };
+        expect(collectEmptyContestedSectorIssues(ordered).relief_in_transit).toEqual([
+            { sector: 'sector:vrs_drina:1', length_edges: 3, relieving_brigade_ids: ['donor_b'] },
+        ]);
+        const elsewhere: any = makeEmptyRecipientWithDonorState();
+        elsewhere.military.brigade_movement_state = { donor_a: { status: 'in_transit', destination_sids: ['op:test:donor_front'] } };
+        expect(collectEmptyContestedSectorIssues(elsewhere).relief_in_transit).toEqual([]);
+        expect(collectEmptyContestedSectorIssues(elsewhere).missed_reinforcement).toHaveLength(1);
+    });
+
     it('fails hard on an empty contested sector when a legal same-corps donor exists', () => {
-        const state = {
+        const state = makeEmptyRecipientWithDonorState();
+        expect(collectEmptyContestedSectorIssues(state)).toEqual({
+            relief_in_transit: [],
+            missed_reinforcement: [
+                expect.objectContaining({
+                    sector: 'sector:vrs_drina:1',
+                    donor_candidates: [
+                        expect.objectContaining({
+                            brigade_id: 'donor_a',
+                            donor_sector_id: 'sector:vrs_drina:0',
+                            donor_role: 'front',
+                            distance: 1,
+                        }),
+                        expect.objectContaining({
+                            brigade_id: 'donor_b',
+                            donor_sector_id: 'sector:vrs_drina:0',
+                            donor_role: 'front',
+                            distance: 1,
+                        }),
+                    ],
+                }),
+            ],
+            unavoidable_empty: [],
+        });
+
+        const result = validateState(state, 'synthetic');
+        expect(result.failures).toBeGreaterThanOrEqual(1);
+        expect(result.lines.some((line) => line.includes('empty with legal donor(s) available'))).toBe(true);
+    });
+
+    function makeEmptyRecipientWithDonorState() {
+        return {
             meta: { turn: 40 },
             __contact_graph_edges: [
                 { a: 'op:test:donor_front', b: 'op:test:recipient_front' },
@@ -1253,34 +1314,7 @@ describe('validate_run_consistency assignment completeness', () => {
                 },
             },
         };
-
-        expect(collectEmptyContestedSectorIssues(state)).toEqual({
-            missed_reinforcement: [
-                expect.objectContaining({
-                    sector: 'sector:vrs_drina:1',
-                    donor_candidates: [
-                        expect.objectContaining({
-                            brigade_id: 'donor_a',
-                            donor_sector_id: 'sector:vrs_drina:0',
-                            donor_role: 'front',
-                            distance: 1,
-                        }),
-                        expect.objectContaining({
-                            brigade_id: 'donor_b',
-                            donor_sector_id: 'sector:vrs_drina:0',
-                            donor_role: 'front',
-                            distance: 1,
-                        }),
-                    ],
-                }),
-            ],
-            unavoidable_empty: [],
-        });
-
-        const result = validateState(state, 'synthetic');
-        expect(result.failures).toBeGreaterThanOrEqual(1);
-        expect(result.lines.some((line) => line.includes('empty with legal donor(s) available'))).toBe(true);
-    });
+    }
 
     it('fails hard on a wide gap in a partially covered sector', () => {
         const state = {
@@ -1406,6 +1440,7 @@ describe('validate_run_consistency assignment completeness', () => {
         };
 
         expect(collectEmptyContestedSectorIssues(state)).toEqual({
+            relief_in_transit: [],
             missed_reinforcement: [],
             unavoidable_empty: [],
         });
@@ -1474,6 +1509,7 @@ describe('validate_run_consistency assignment completeness', () => {
         };
 
         expect(collectEmptyContestedSectorIssues(state)).toEqual({
+            relief_in_transit: [],
             missed_reinforcement: [],
             unavoidable_empty: [],
         });

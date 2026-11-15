@@ -978,10 +978,30 @@ function hasCanonicalDefense(faction, osid, physicalByOsid, sectorCoverageFactio
     return sectorCoverageFactions.get(osid)?.has(faction) ?? false;
 }
 
+/**
+ * SE7E-h (2026-11-15): true when a relief is already on its way to one of these front
+ * OSIDs, the same test as the engine's `hasPendingReliefForTargets`
+ * (src/sim/combat/commander/decide.ts): a movement order or an in-flight movement whose
+ * destinations include a target OSID. The engine does not issue a second relief while one
+ * is in transit, so the validator must not count that sector as a missed reinforcement.
+ */
+function findPendingReliefForTargets(state, targetOsids) {
+    const military = state.military ?? {};
+    const hits = [];
+    for (const [brigadeId, order] of Object.entries(military.brigade_movement_orders ?? {}).sort((a, b) => String(a[0]).localeCompare(String(b[0])))) {
+        if ((order?.destination_sids ?? []).some((osid) => targetOsids.has(osid))) hits.push(brigadeId);
+    }
+    for (const [brigadeId, movement] of Object.entries(military.brigade_movement_state ?? {}).sort((a, b) => String(a[0]).localeCompare(String(b[0])))) {
+        if ((movement?.destination_sids ?? []).some((osid) => targetOsids.has(osid)) && !hits.includes(brigadeId)) hits.push(brigadeId);
+    }
+    return hits;
+}
+
 function collectEmptyContestedSectorIssues(state) {
     const sectors = state.military?.corps_front_sectors ?? {};
     const missedReinforcement = [];
     const unavoidableEmpty = [];
+    const reliefInTransit = [];
     for (const [sectorId, sector] of Object.entries(sectors).sort((a, b) => String(a[0]).localeCompare(String(b[0])))) {
         const lengthEdges = sector.length_edges ?? sector.edge_ids?.length ?? 0;
         if (lengthEdges <= 0) continue;
@@ -990,7 +1010,13 @@ function collectEmptyContestedSectorIssues(state) {
         const reserve = sector.reserve_brigade_ids?.length ?? 0;
         const rear = sector.rear_brigade_ids?.length ?? 0;
         if (assigned + reserve + rear === 0) {
-            const donorCandidates = collectLegalSectorDonorCandidates(state, sector, getSectorFrontOsids(sector));
+            const frontOsids = getSectorFrontOsids(sector);
+            const relievingBrigades = findPendingReliefForTargets(state, frontOsids);
+            if (relievingBrigades.length > 0) {
+                reliefInTransit.push({ sector: sectorId, length_edges: lengthEdges, relieving_brigade_ids: relievingBrigades });
+                continue;
+            }
+            const donorCandidates = collectLegalSectorDonorCandidates(state, sector, frontOsids);
             const issue = {
                 sector: sectorId,
                 length_edges: lengthEdges,
@@ -1006,6 +1032,7 @@ function collectEmptyContestedSectorIssues(state) {
     return {
         missed_reinforcement: missedReinforcement,
         unavoidable_empty: unavoidableEmpty,
+        relief_in_transit: reliefInTransit,
     };
 }
 
@@ -1435,6 +1462,9 @@ function validateState(state, runLabel) {
         for (const issue of emptyContested.unavoidable_empty) {
             log(`  ~ ${issue.sector} remains empty with no legal same-corps donor under current rules (${issue.length_edges} front edge(s))`);
         }
+    }
+    for (const issue of emptyContested.relief_in_transit) {
+        log(`  ~ ${issue.sector} is empty but relief is in transit to its front (${issue.relieving_brigade_ids.join(', ')}); the engine issues no second relief (SE7E-h)`);
     }
     log('');
 
