@@ -23,7 +23,7 @@ The topic is added to `tests/reason_code_debug.test.ts`.
 
 **Proof.**
 - `test:baselines`: all scenarios match (default off).
-- A 188w run with the topic ON against main `4064eafaa` (off): all 8 artifacts byte-identical, final_save `19262a0b19df1567`. 3,380 receipts.
+- A 188w run with the topic ON against main `4064eafaa` (off): all 8 artifacts byte-identical, final_save `19262a0b19df1567`. 3,380 plan receipts and 1,563 exhaustion receipts.
 - `tsc` 0.
 
 **First reading (main, ARBiH, t99-178).** The army-wide lockout is the EXHAUSTION gate, not the stance gate.
@@ -32,5 +32,7 @@ The topic is added to `tests/reason_code_debug.test.ts`.
 - The 5th and 7th Corps (mean exhaustion 6-7) planned 14 and 11 times.
 - The t188 reading "defensive stance, no new plans" is the October 1995 ceasefire clamp (driver `ceasefire` from t184), which masks the exhaustion gate.
 - Healthy brigades by the 3,000 cap average 0-6 per corps, against 10-32 by designed strength. That yardstick does not gate commander planning.
+
+**Exhaustion attribution (same run, `[corps_exhaustion]` receipts at all four writers).** In t99-178 the 1st-4th Corps' inflow is almost all commander probes (`probe_arbih_<corps>_t<turn>`, built by `buildProbeOperation`): 27, 24, 30 and 17 probe completions at +5 each. A probe is active on most turns, so decay runs at the active rate of 1 instead of the idle 3. The 1st Corps had 73 active-decay turns of 80, the 3rd 79 of 80. Probe inflow outruns the 1-a-turn decay, so the corps stays above the gate of 30 and the commander cannot plan. The 5th and 7th Corps' inflow is named operations (+15 each), with mostly idle decay between them. The in-execution replacement (`sector_offensive.ts:3171`) writes no exhaustion. Not traced: which of the two commander probe sites (`emit.ts` 2748, 3455) fires, and why probes are not held by the exhaustion gate.
 
 Evidence: `C:/Pyrrhic/AWWV-worktrees/_logs/rf-corps-plan-trace-20261115/`.
