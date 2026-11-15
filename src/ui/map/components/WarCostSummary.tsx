@@ -4,13 +4,35 @@
  * Does not re-derive upstream truth. Canonical owner for cost display.
  */
 
-import type { CostLedger } from '../../../sim/endgame/cost_ledger.js';
+import type { CostLedger, OpportunityCostLedgerEntry } from '../../../sim/endgame/cost_ledger.js';
 import type { ComparisonResult } from '../../../sim/endgame/endgame_comparison.js';
-import { formatHistoricalDivergenceNote } from '../data/historicalDivergenceNotes.js';
-import { getPlayerSafeMilitaryFactionName } from '../utils/playerSafeText';
+import type { GameVerdict } from '../../../state/negotiation_types.js';
+import { buildHistoricalComparisonLines } from '../data/verdictComparison.js';
+import { buildDisplayFindings } from '../data/verdictFindings.js';
+import { formatVerdictSideName } from '../data/verdictScene.js';
+import { getPlayerSafeMilitaryFactionName, getPlayerSafeOperationName } from '../utils/playerSafeText';
+import { formatCount } from '../utils/formatters.js';
 import { t, useLocale } from '../i18n';
-import { SURFACE_LABEL, SURFACE_LABEL_MUTED, SurfaceFigure, SurfacePanel, SurfaceStat } from './surface/Surface';
+import { SURFACE_LABEL, SURFACE_LABEL_MUTED, SurfaceFigure, SurfacePanel } from './surface/Surface';
+import { BasisStat } from './surface/BasisStat';
 export { formatHistoricalDivergenceNote } from '../data/historicalDivergenceNotes.js';
+
+/**
+ * Player-facing name of an operation decision (R8 council C8: "una 94", "pauk 94 95"): the
+ * executed operation's name, else the name the proposal was reviewed under (the opportunity
+ * records the adapter builds), else the id title-cased ("Una 94"), never the raw slug.
+ */
+export function formatOpportunityName(
+    entry: Pick<OpportunityCostLedgerEntry, 'executed_op_name' | 'opportunity_id' | 'proposal_id' | 'display_name'>,
+    reviewedNames?: ReadonlyMap<string, string>,
+): string {
+    if (entry.executed_op_name) return getPlayerSafeOperationName(entry.executed_op_name);
+    const reviewed = reviewedNames?.get(entry.proposal_id);
+    if (reviewed) return getPlayerSafeOperationName(reviewed);
+    const titled = (entry.display_name || entry.opportunity_id).replace(/_+/g, ' ').trim()
+        .replace(/\b\w/g, c => c.toUpperCase());
+    return titled ? getPlayerSafeOperationName(titled) : t('warCost.operationFallback');
+}
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Formatting helpers (exported for testing)
@@ -44,7 +66,12 @@ export function formatTerritoryDivergence(key: string, delta: number): string {
     });
 }
 
-function formatExitClass(exitClass: string | undefined): string {
+function formatExitClass(exitClass: string | undefined, gameOver = true): string {
+    if (!exitClass && gameOver) return t('warCost.exit.unresolvedAtEnd');
+    return formatExitClassLabel(exitClass);
+}
+
+function formatExitClassLabel(exitClass: string | undefined): string {
     const labels: Record<string, string> = {
         decisive_success: t('warCost.exit.decisiveSuccess'),
         partial_success: t('warCost.exit.partialSuccess'),
@@ -101,43 +128,77 @@ function formatFindingBadge(finding: { faction?: string; severity: string }): st
 export interface WarCostSummaryProps {
     costLedger: CostLedger;
     comparison: ComparisonResult;
+    /** The frozen verdict: its graded territory shares feed the territory comparison line. */
+    verdict?: GameVerdict;
+    /** proposal_id → name the proposal was reviewed under (adapter opportunity records). */
+    opportunityNames?: ReadonlyMap<string, string>;
+    /** Shares under the signed settlement, for the territory comparison line. */
+    settledShares?: Readonly<Record<string, number>>;
 }
 
-export function WarCostSummary({ costLedger, comparison }: WarCostSummaryProps) {
+/**
+ * R8 ending truth pass (2026-11-14): every casualty and displacement figure carries its basis,
+ * the historical comparison is rebuilt from structured data (like-for-like end of war, one
+ * source for military and civilian dead, integers only), findings are localized and deduped
+ * with public sources only, and operations show names, not ids.
+ */
+export function WarCostSummary({ costLedger, comparison, verdict, opportunityNames, settledShares }: WarCostSummaryProps) {
     useLocale();
     const opportunityLedger = costLedger.operation_opportunities;
+    const comparisonLines = buildHistoricalComparisonLines({ verdict, costLedger, comparison, settledShares });
+    const findings = buildDisplayFindings(costLedger);
+    const displacedOrKilled = costLedger.entries.reduce((sum, entry) => sum + Math.max(0, entry.refugees_created), 0);
 
-    // Surface redesign, step 4 (2026-11-12): surface section labels, stat rows and
-    // figure tiles; text 13 px and up. Figures and wording unchanged.
     return (
         <div data-tutorial-step="cost-ledger" className="flex flex-col gap-6">
             <h4 className={`m-0 ${SURFACE_LABEL}`}>
                 {t('warCost.title')}
             </h4>
 
-            {/* Key figures */}
-            <SurfacePanel className="grid grid-cols-2 gap-x-8">
-                <CostRow
+            {/* Key figures, each with its basis (R8 council B6). */}
+            <SurfacePanel className="grid grid-cols-1 gap-x-8 md:grid-cols-2" data-awwv-war-cost-figures>
+                <BasisStat
                     label={t('warCost.totalMilitaryKilled')}
-                    value={costLedger.total_military_killed.toLocaleString()}
+                    value={formatCount(costLedger.total_military_killed)}
+                    basis={t('verdict.basis.campaignAllSides')}
+                    kind="casualty"
                 />
-                <CostRow
+                <BasisStat
                     label={t('warCost.totalCivilianKilled')}
-                    value={costLedger.total_civilian_killed.toLocaleString()}
+                    value={formatCount(costLedger.total_civilian_killed)}
+                    basis={t('verdict.basis.campaignAllSides')}
+                    kind="casualty"
                 />
-                <CostRow
+                <BasisStat
+                    label={t('verdict.report.stat.refugeesCreated')}
+                    value={formatCount(displacedOrKilled)}
+                    basis={t('verdict.basis.displacedAllSides')}
+                    kind="displacement"
+                />
+                <BasisStat
                     label={t('warCost.warDuration')}
                     value={t('warCost.weeksValue', { weeks: costLedger.war_duration_weeks })}
-                />
-                <CostRow
-                    label={t('warCost.vsHistoricalDuration')}
-                    value={formatDurationDelta(comparison.duration_delta_weeks, costLedger.war_duration_weeks - comparison.duration_delta_weeks)}
-                />
-                <CostRow
-                    label={t('warCost.militaryCasualtiesVsHistory')}
-                    value={formatCasualtyRatio(comparison.casualty_ratio)}
+                    basis={t('verdict.basis.duration')}
+                    kind="record"
                 />
             </SurfacePanel>
+
+            {/* Against the historical war (R8 council B8, H2, H3). */}
+            {comparisonLines.length > 0 && (
+                <div className="flex flex-col gap-2" data-awwv-historical-comparison={comparisonLines.length}>
+                    <div className={SURFACE_LABEL_MUTED}>
+                        {t('verdict.compare.title')}
+                    </div>
+                    <ul className="m-0 flex list-none flex-col gap-1.5 p-0">
+                        {comparisonLines.map(line => (
+                            <li key={line.id} data-awwv-comparison-line={line.id} className="text-[16px] leading-relaxed text-[#ddd1b3]">
+                                {line.text}
+                            </li>
+                        ))}
+                    </ul>
+                    <p className="m-0 text-[15px] text-[#9c917b]">{t('verdict.compare.sources')}</p>
+                </div>
+            )}
 
             {/* Operation opportunity reckoning */}
             {opportunityLedger && opportunityLedger.total_decisions > 0 && (
@@ -166,11 +227,11 @@ export function WarCostSummary({ costLedger, comparison }: WarCostSummaryProps) 
                                 className="flex items-baseline justify-between gap-4 border-b border-[#262b35] py-2.5 text-[16px] text-[#c2b69c] last:border-b-0"
                             >
                                 <div className="flex min-w-0 flex-wrap items-baseline gap-x-3 gap-y-0.5">
-                                    <span className="font-semibold text-[#f1e6c8]">
-                                        {entry.display_name}
+                                    <span className="font-semibold text-[#f1e6c8]" data-awwv-opportunity-name>
+                                        {formatOpportunityName(entry, opportunityNames)}
                                     </span>
                                     <span className="text-[15px] text-[#b9ad94]">
-                                        {getPlayerSafeMilitaryFactionName(entry.faction)} / {formatOpportunityResponse(entry.response)}
+                                        {formatVerdictSideName(entry.faction)} / {formatOpportunityResponse(entry.response)}
                                     </span>
                                 </div>
                                 <div className="shrink-0 text-right tabular-nums">
@@ -189,16 +250,17 @@ export function WarCostSummary({ costLedger, comparison }: WarCostSummaryProps) 
                 </div>
             )}
 
-            {/* Prosecutorial findings */}
-            {costLedger.findings && costLedger.findings.length > 0 && (
+            {/* Findings: one per id, localized, public sources only (R8 council B5, C1, C3). */}
+            {findings.length > 0 && (
                 <div className="flex flex-col gap-3">
                     <div className={SURFACE_LABEL_MUTED}>
                         {t('warCost.prosecutorialFindings')}
                     </div>
                     <div className="flex flex-col gap-3">
-                        {costLedger.findings.map((finding) => (
+                        {findings.map((finding) => (
                             <div
                                 key={finding.id}
+                                data-awwv-finding={finding.id}
                                 className="flex flex-col gap-1.5 border-l-2 border-[#3a4150] pl-4 text-[16px] leading-relaxed text-[#ddd1b3]"
                             >
                                 <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
@@ -220,38 +282,6 @@ export function WarCostSummary({ costLedger, comparison }: WarCostSummaryProps) 
                     </div>
                 </div>
             )}
-
-            {/* Territory divergence */}
-            {Object.keys(comparison.territory_divergence).length > 0 && (
-                <div className="flex flex-col gap-2">
-                    <div className={SURFACE_LABEL_MUTED}>
-                        {t('warCost.territoryVsDayton')}
-                    </div>
-                    <ul className="m-0 flex list-none flex-col gap-1.5 p-0">
-                        {Object.entries(comparison.territory_divergence).map(([key, delta]) => (
-                            <li key={key} className="text-[16px] leading-relaxed text-[#ddd1b3]">
-                                {formatTerritoryDivergence(key, delta)}
-                            </li>
-                        ))}
-                    </ul>
-                </div>
-            )}
-
-            {/* Divergence notes */}
-            {comparison.divergence_notes.length > 0 && (
-                <div className="flex flex-col gap-2">
-                    <div className={SURFACE_LABEL_MUTED}>
-                        {t('warCost.historicalDivergence')}
-                    </div>
-                    <ul className="m-0 flex list-none flex-col gap-1.5 p-0">
-                        {comparison.divergence_notes.map((note, i) => (
-                            <li key={i} className="text-[16px] leading-relaxed text-[#ddd1b3]">
-                                {formatHistoricalDivergenceNote(note)}
-                            </li>
-                        ))}
-                    </ul>
-                </div>
-            )}
         </div>
     );
 }
@@ -260,10 +290,7 @@ export function WarCostSummary({ costLedger, comparison }: WarCostSummaryProps) 
 // Sub-component
 // ═══════════════════════════════════════════════════════════════════════════
 
-function CostRow({ label, value }: { label: string; value: string }) {
-    return <SurfaceStat label={label} value={value} />;
-}
-
 function OpportunityMetric({ label, value }: { label: string; value: string }) {
     return <SurfaceFigure label={label} value={value} tone="font-mono tabular-nums text-[#f1e6c8]" />;
 }
+

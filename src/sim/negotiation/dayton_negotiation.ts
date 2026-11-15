@@ -29,6 +29,7 @@ import {
 import { reconcileProposalPowers, reconcileResolvedPowers } from './power_overlap.js';
 import { buildDelegationFolder, declineStamp, warCostLine } from './delegation_folder.js';
 import { buildTreatyAgainstDraft } from './treaty_against_draft.js';
+import { OCT1995_CEASEFIRE_FLAG } from '../combat/oct1995_ceasefire.js';
 import { daytonRoundWillingness, effectiveDaytonOverride } from './dayton_rounds.js';
 import type { DelegationFolder } from '../../state/negotiation_types.js';
 import {
@@ -441,7 +442,8 @@ function recordDaytonDecline(state: GameState, faction: string): number {
 
 /**
  * Lift the autumn-1995 brakes that froze the front: the launch suppression and the
- * aggression cut written by us_halts_federation_advance_1995 (the Holbrooke halt).
+ * aggression cut written by us_halts_federation_advance_1995 (the Holbrooke halt), and the
+ * October 1995 general ceasefire recorded by accept_ceasefire.
  * Operations already executing continue regardless; with the suppression gone, planned
  * operations can launch again. Deterministic; touches only records tied to that event.
  */
@@ -462,6 +464,11 @@ export function reopenWarAfterDaytonDecline(state: GameState): void {
     }
     if (!military.event_flags) military.event_flags = {};
     military.event_flags.advance_halted = false;
+    // The October 1995 general ceasefire no longer holds once Dayton is declined: the operation
+    // channel reopens and corps stances are free again (council fix 3; oct1995_ceasefire.ts).
+    if (military.event_flags[OCT1995_CEASEFIRE_FLAG] === true) {
+        military.event_flags[OCT1995_CEASEFIRE_FLAG] = false;
+    }
 }
 
 /**
@@ -835,8 +842,8 @@ export function resolveDaytonNegotiation(
     // Comprehensive Dayton D3 (2026-06-07): compute the peace_dysfunction_index +
     // breakdown from the just-signed settlement and stamp it onto the result for
     // display / verdict. Pure read of the result we just assigned to state.
-    // Returns null in historical/unset mode (emergent-gated) and is then a no-op,
-    // keeping back-compat with pre-D3 outcomes. The same breakdown is independently
+    // Computed in every decision mode since the R8 ending truth pass (2026-11-14).
+    // The same breakdown is independently
     // frozen onto the endgame snapshot below (survives save/load round-trip).
     const dysfunction = computePeaceDysfunctionBreakdown(state);
     if (dysfunction) {

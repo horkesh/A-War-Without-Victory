@@ -142,6 +142,32 @@ also fails on ASCII-stripped names and pins the hidden pinned-event wording.
 Mistral 2 error is not corrected. Nor is the Codex Srebrenica `ghost_summary`, and the pinned-event
 explanation wording waits for a catalog-versioning lane. All are listed in the §6 record.
 
+## 2026-11-14 — Council fix 3: respect the October 1995 ceasefire, retime the US halt, present-tense cards (B10, H4, H6)
+
+Source: Player Experience Council diary, fix 3 (`docs/40_reports/playtests/20261114_r8_dry_rbih_council_diary.md`). Report: `docs/40_reports/implemented/20261114_COUNCIL_FIX3_RESPECT_THE_PEACE.md`. Calibration is held: scores are recorded per change, not a merge bar.
+
+- **Change A (H4, data).** `us_halts_federation_advance_1995` moves from t182-188 to t179-181 (mid/late September 1995). It is suppressed once the October ceasefire is accepted or `ceasefire_1995` has fired. 188w `d140b5ff61671e7b`: 712/709/710/705, 0 cell deltas. Battles 507 → 509: the halt no longer fires on the headless run, since RS holds more than 51% by area in the window.
+- **Change B (B10, engine).** `accept_ceasefire` records `ceasefire_oct1995_in_force`. From the turn after the demand card fired, the general ceasefire binds every party (COHA precedent). Owner: `src/sim/combat/oct1995_ceasefire.ts`; new war step `enforce-oct1995-ceasefire` after `evaluate-events`.
+  - **Operation channel closed.** All admission paths, the launch gate (no force-launch bypass), opportunity proposals and Level-1 offers.
+  - **Running offensives.** Planning offensives are called off. Executing ones take only the current objective of each engaged axis (even one not yet attacked), then stand down (`ceasefire_stand_down`, recovery `ceasefire`, no failure accounting).
+  - **Stances and combat.** Corps stances hold Defensive; the army standing order cannot be General Offensive (falls back to Balanced). Attack orders, counter-attacks included, are suppressed with receipts, as under the COHA.
+  - **Ending.** A declined Dayton lifts the ceasefire.
+  - **Measured (final, rebased on main `f06d5aa`, main `7d4cf2cf698e3c41` 712/705/706/698).**
+    - A alone `9d5bb78ff4d58a26`: 712/705/706/698, 0 cell deltas.
+    - Head `ba67ebb347949f75`, two identical runs: 712/705/706/677. t1-t183 identical to main. Battles 518 → 491; t183-t188 39 → 12, none after t185.
+    - Enclave and Farz guards intact. Strict health PASS. Consistency 1 (pre-existing SD15 gap).
+    - Pre-rebase on main `4ff4a766`: `2c9c5d5c6c7ad860`, 712/709/710/677.
+  - **Re-measured after merging main `f7b5781e0` (2026-11-15; after #623, #625, #631, #642).** Main `f5b477ededa198bd` 712/705/706/698, consistency 0. Head `0e61d03672be3762`: 712/705/706/**676**. Weekly reports are identical to main through week index 183; battles 526 → 499 (t183+ 42 → 15; per week from index 184: 6/1/0/0/0). Enclave guard 9/9, Farz P1 4/4 and P-A (Spreča t185, stand-down), eastern provenance clean, strict health PASS, consistency 0 (SD15 fixed on main by #625). The 22 lost Oct95 cells all changed hands on main at t185-t188 (Sanski Most 5, Jajce 4, Ključ 3, Mrkonjić Grad 3, Donji Vakuf 3, Drvar 2, Bosanski Petrovac 1, Bihać 1). The one more than at the gated head is Donji Vakuf Pribrača, which main's own changed tail takes at t186. Straight rebase: the gate verdict carries over. Baselines re-blessed (`final_save` `0e61d036…`; `test:baselines` all match).
+  - **Why 677.** All 21 lost cells (Sanski Most, Jajce, Ključ, Mrkonjić Grad, Donji Vakuf, Drvar, Petrovac, Bihać) changed hands on main after 16 Oct. Those towns fell historically between 13 Sep and 10 Oct 1995 (BB Vol. I pp.418-428). The simulated late-1995 offensives run late (calibration, held).
+  - **Rejected alternative.** A hard cancel of executing offensives (`70aa5bb91e23cef9` pre-rebase, 670) breached the Farz guard.
+- **Change C (H6, data text).** Seven cards rewritten in the present of their date: VOPP pressure, Vance-Owen, Owen-Stoltenberg Assembly, Contact Group, late-war offensive, US halt, Holbrooke demand. Persisted notification bodies are corrected via `localizations.en`. The 188w hash equals Change B's; text only for the simulation.
+- **Canon (same change).** Engine Invariants "October 1995 ceasefire ownership"; Systems Manual §6.4 implementation-note; Rulebook §15.7; PLAYER_TURN_GUIDE step row. Tool: `validate_run_consistency.cjs` treats zero offensive signs as expected while the ceasefire holds.
+- **Not done (registered).**
+  - The stand-down has no turn limit (Farz opens a fresh assault at t185).
+  - `ceasefire_1995` fires at t181, before the demand.
+  - `source_note` dossier text still narrates outcomes (council fix 4).
+  - RS fights no battles from t176 to t188, as on main.
+
 ## 2026-11-14 — Command loop L3 + L3b: no signature for defensive operations; an unanswered plan proposal releases the plan
 
 - **L3 (owner decision 2; proposal §5B).** Defensive-crisis (T3) opportunities of the player faction are decided by staff on the bot path at every autonomy level and never become a review card. Before this, the President was asked to sign defences ("Operation Breza 94 Defense"), and approving one did nothing mechanically. Code: `isDefensiveOpportunity` (a code-side lookup on the catalog tier, never persisted) and the two review functions in `operation_opportunities.ts` (`applyBotOpportunityDecisions`, `generateOpportunityProposalReviews`). Every other catalog entry is a corps operation or campaign, so in Full Control and Assisted he sees those only; Delegated is unchanged. Live president only: headless auto-control keeps its review-then-auto-resolve timing.
@@ -368,6 +394,31 @@ Follow-up to #602 (realism audit errata). Display copy only; no trigger, option,
 - Not changed: the event's premise (an autumn 1994 decision to "overrun" Velika Kladuša, which the 5th Corps had
   already taken in August) lives in the title, narrative, response options and persisted notification bodies.
   Rewriting it is a narrative and §6 decision, and the notification text sits in the hashed save.
+
+## 2026-11-14 — Weekly "This week" dispatch after Advance; the QA harness photographs the report before closing it (command loop L2 + L2h)
+
+**Why.** The R8 dry-run Player Experience Council found no weekly dispatch after Advance (L2): gains, losses and battles sat two clicks deep, and a quiet week showed fixed copy. The QA harness clicked the report's close button before every screenshot, so none of the dry run's screenshots could show it (`docs/40_reports/proposals/20261114_COMMAND_LOOP_PROPOSAL.md` §2 premise 1, §4 2B).
+
+**What changed (UI and tooling only; no engine, state or save change).**
+- `TurnAftermathModal` opens after every Advance on a compact "This week" dispatch: the date and one headline, chosen in a fixed order (territory, then formations, then decisions), then at most five lines: Ground (net settlements and up to three named gains or losses, each with "Show on map"), Fighting (our battles of all, our losses against theirs), Cost (displaced, formations lost, supply only once spending reaches 10), Your orders (operations launched over objection and their outcome, corps orders carried out or reinterpreted, warned consequences that arrived, an officer's resentment) and Needs you ("1 required · 2 recommended", opening the review list). Figures carry their basis (control record, battle reports, staff summary). A line with nothing to report is left out.
+- "Show on map" goes through App's field-inspection handoff (`inspectOnField` and `leaveWarroomForGame`), the same route as the command palette, so from the Warroom it opens the tactical map with the place selected (Codex review: a direct pan hit the inactive map). Verified in Electron.
+- The strip's reopen box keeps its natural width and shows the headline only at 2xl, so its buttons no longer run into Layers at 1280 px (measured in Electron: box right 1228, Layers left 1236).
+- A quiet week gets two lines built from the week's own figures (supply and munitions movement, formations raised). The fixed "Quiet week filed" copy is gone.
+- "Full record" shows the previous two-column report; "Back to the dispatch" returns. Every opening starts on the dispatch.
+- The bottom strip shows the dispatch headline and "Reopen this week's dispatch" once the report is closed.
+- The dispatch selector `buildTurnAftermathDispatch` (`turnAftermath.ts`) reads only the existing `TurnAftermathView` and the week's receipts; ordering ties use a strict string compare. New strings sit in a `dispatch.*` block in EN and BCS.
+- Monospace text removed from the report (judgment label, metric values).
+- The full record moved to `TurnAftermathRecordFace.tsx`, loaded on demand and prefetched when the report opens, so the entry bundle carries only the dispatch. Without the split the entry chunk was 3,005.01 kB, over the 3,000 kB warning the player-experience gate blocks on; with it, 2,989.58 kB (record chunk 17.51 kB).
+- **Found and fixed: the report never stayed open in the live app.** After Advance the desktop main process also pushes the new state, so the renderer loads the same week a second time about 220 ms after `advanceTurnAndSync` opened the report. `gameStore.loadSave`'s post-load reset cleared `turnAftermath`, `turnAftermathOpen` and the digest on every load, so the report closed before it could be seen (traced in Electron with a store hook: open from `advanceTurnAndSync`, close from the reset in `loadSave`). The reset now keeps the report only when the new payload is byte-identical to the last one loaded (a duplicate push); any other load, including a different save at the same turn and faction or a campaign replacement, still clears it (Codex review on #643: the state has no campaign id, and turn, faction and label match across saves). The live Electron trace confirms the post-Advance push is byte-identical, so the report stays open. This also explains why the R8 harness never photographed a report: there was nothing on screen to photograph. `tests/ui/gamestore_load_reset.test.ts` covers both cases.
+- `tools/ui/paradox_local_qa.cjs` (L2h) snapshots the report (`turn-aftermath-report`, with the dispatch's fit measurements) before clicking close, and gains `--window-size=WxH`.
+
+**Tests.** New `tests/ui/turn_aftermath_dispatch.test.ts` (builder order, caps, quiet week, determinism, BCS, modal faces, Show on map, review link, no monospace, record kept out of the entry). `turn_aftermath_quiet_digest.test.ts` updated for the new advance behaviour and strip line; record-content tests open the record face explicitly. `tests/paradox_local_qa_harness.test.ts` pins snapshot-before-close.
+
+**Evidence** (`C:/Pyrrhic/AWWV-worktrees/_logs/cl-l2-dispatch-20261114/`):
+- Real Electron route, Warroom Advance, real week (13 Apr 1992, RBiH): `electron_real_route_dispatch_busy_1280x720.png` and `electron_real_route_dispatch_busy_2294x960.png`. The dispatch stays open and fits without scrolling.
+- Browser build, quiet and busy weeks (fixtures, since the browser build cannot advance), EN and BCS, at 1280×720 and 2293×960: `dispatch_*.png`, `record_busy_*.png` and `dispatch_browser_report.json`. All eight dispatch renders show no body scroll, the panel inside the viewport, a 13 px minimum font and no monospace in the dispatch.
+
+**Not done.** Formations lost are counted, not named: the view carries counts only, and the proposal's "by name" needs a view field (recorded as a finding). The next dry run should confirm the dispatch on a packaged build.
 
 <!-- LEDGER FRAGMENTS:END -->
 ## 2026-11-14 — RF-F1: sustainability and militia fatigue read the OSID front and supply

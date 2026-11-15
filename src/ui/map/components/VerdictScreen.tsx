@@ -15,10 +15,17 @@
 import { lazy, Suspense, useState, useMemo, useRef } from 'react';
 import { useGameStore } from '../store/gameStore';
 import { useIPC } from '../desktop/useIPC';
-import type { FactionVerdict, DimensionGrade, GameVerdict } from '../../../state/negotiation_types.js';
+import type { FactionVerdict, DimensionGrade, GameVerdict, DaytonAgreementRecord } from '../../../state/negotiation_types.js';
 import { WarCostSummary } from './WarCostSummary';
 import { TreatyLedger } from '../dayton_conference/TreatyLedger';
 import { operativeOwners } from '../dayton_conference/annexes';
+import { institutionalRows } from '../dayton_conference/clauses';
+import { getTerritorialPackageById } from '../../../sim/negotiation/territorial_packages.js';
+import { DIMENSION_WEIGHTS } from '../../../sim/events/strategic_dimensions.js';
+import { buildFactionFigureRows, countFrontLineHoldings, type FrontLineHolding } from '../data/verdictFigures.js';
+import { buildDecisionReckoning, type DecisionReckoning, type DecisionReceipt, type FactionDimensionStore } from '../data/verdictDecisions.js';
+import { formatVerdictSideName, OUTCOME_CLASS_COLOR } from '../data/verdictScene.js';
+import { BasisStat } from './surface/BasisStat';
 
 // Dayton screens load on demand, out of the entry chunk (vite.config.ts chunk-size limit).
 const DaytonSettlementViewer = lazy(() => import('./DaytonSettlementViewer').then(m => ({ default: m.DaytonSettlementViewer })));
@@ -140,6 +147,8 @@ export function formatCondemnationFlag(flag: string): string {
     const labels: Record<string, MessageKey> = {
         genocide_condemnation: 'verdict.condemnation.genocide',
         civilian_atrocities: 'verdict.condemnation.civilianAtrocities',
+        // §2a: a general aggregate judgment over the side's own modeled harm, never a named event.
+        authorized_cleansing_condemnation: 'verdict.condemnation.authorizedCleansing',
     };
     const key = labels[flag];
     return key ? t(key) : t('verdict.condemnation.unreported');
@@ -218,6 +227,12 @@ export interface EndgameMilestoneRow {
     summary: string;
 }
 
+/** Rupture milestones the Verdict never shows as timing rows. */
+const RUPTURE_MILESTONE_IDS: ReadonlySet<string> = new Set(['srebrenica_genocide_1995']);
+
+/** War-end milestones (and the duration fallback): dated by the comparison's end-of-war line. */
+const WAR_END_MILESTONE_IDS: ReadonlySet<string> = new Set(['dayton_accords', 'ceasefire_1995', 'war_duration']);
+
 function compareMilestones(a: MilestoneComparison, b: MilestoneComparison): number {
     const weekDelta = a.historical_week - b.historical_week;
     if (weekDelta !== 0) return weekDelta;
@@ -279,7 +294,10 @@ export function buildMilestoneComparisonRows(
     costLedger: CostLedger | undefined,
     comparison: ComparisonResult | undefined,
 ): EndgameMilestoneRow[] {
-    const explicit = comparison?.milestone_comparison ?? [];
+    // No rupture as an early/late timing row (§4 panel, 2026-11-14; §1 Ring 1: the historical
+    // killings are dated only in the record, never against an in-campaign fall). Saves frozen
+    // before the comparison stopped writing the row still carry it.
+    const explicit = (comparison?.milestone_comparison ?? []).filter(m => !RUPTURE_MILESTONE_IDS.has(m.id));
     if (explicit.length > 0) {
         return explicit
             .filter(m => Number.isFinite(m.historical_week))
@@ -326,12 +344,6 @@ const FACTION_NAMES: Record<string, string> = {
     RBiH: 'Republic of Bosnia and Herzegovina',
     RS: 'Republika Srpska',
     HRHB: 'Herzeg-Bosnia',
-};
-
-const FACTION_SHORT: Record<string, string> = {
-    RBiH: 'ARBiH',
-    RS: 'VRS',
-    HRHB: 'HVO',
 };
 
 const GRADE_COLORS: Record<string, string> = {
@@ -522,15 +534,15 @@ export function VerdictScreen({ onLoadSaveState, onLoadSaveError }: VerdictScree
         );
     }
 
-    // Gather territory stats for the statistics section
+    // Settlements held at the end, counted on operational-settlement ids only. The control
+    // lookup also carries census-key aliases; counting every key double-counted settlements
+    // (R8 council B7: "39.3% (323 settlements)").
     const controllers = loadedGameState.controlBySettlement ?? {};
-    const factionOsids: Record<string, number> = {};
-    for (const controller of Object.values(controllers)) {
-        if (typeof controller === 'string') {
-            factionOsids[controller] = (factionOsids[controller] ?? 0) + 1;
-        }
-    }
-    const totalOsids = Object.keys(controllers).length || 1;
+    const frontLineHoldings = countFrontLineHoldings(controllers);
+    const factionOsids: Record<string, number> = Object.fromEntries(
+        Object.entries(frontLineHoldings).map(([faction, holding]) => [faction, holding.held]),
+    );
+    const totalOsids = frontLineHoldings.RBiH?.total || 1;
 
     // Formation counts
     const formations = loadedGameState.formations ?? [];
@@ -572,10 +584,31 @@ export function VerdictScreen({ onLoadSaveState, onLoadSaveError }: VerdictScree
         ? verdictSelection.faction
         : defaultFaction;
     const currentVerdict = verdict.faction_verdicts[selectedFaction];
+    // The decision receipts are the player's own; the block shows for the player's side only.
+    const rawMilitary = (loadedGameState.rawGameState as { military?: {
+        event_decision_log?: DecisionReceipt[];
+        negotiation?: { strategic_dimensions?: Record<string, FactionDimensionStore> };
+    } } | undefined)?.military;
+    const decisionReckoning = playerFaction && selectedFaction === playerFaction
+        ? buildDecisionReckoning(
+            rawMilitary?.event_decision_log,
+            selectedFaction,
+            rawMilitary?.negotiation?.strategic_dimensions?.[selectedFaction],
+        )
+        : undefined;
+    const settledWar = verdict.outcome_type !== 'termination';
+    // The signed map's shares (every cell), for the territory comparison line (§4 panel, red-team A7).
+    const rawSettlement = (loadedGameState.rawGameState as { military?: { negotiation?: { settlement?: { territory_pct?: Record<string, number> } } } } | undefined)
+        ?.military?.negotiation?.settlement;
+    const settledShares = signedAgreement?.map.territoryPct ?? rawSettlement?.territory_pct;
+    const opportunityNames = new Map((loadedGameState.operationOpportunityRecords ?? [])
+        .map(record => [record.proposal_id, record.display_name] as const));
+    // War-end rows are left out: their early/late delta is the "N weeks shorter/longer" reading
+    // the §4 panel retired; the comparison's end-of-war line dates both endpoints instead.
     const milestoneRows = buildMilestoneComparisonRows(
         loadedGameState.costLedger,
         loadedGameState.historicalComparison,
-    );
+    ).filter(row => !WAR_END_MILESTONE_IDS.has(row.id));
     const hasReckoning = Boolean(loadedGameState?.costLedger && loadedGameState?.historicalComparison);
     const hasCodex = codexGhosts.length > 0;
     const hasRuptureReceipts = ruptureReceipts.length > 0;
@@ -629,7 +662,7 @@ export function VerdictScreen({ onLoadSaveState, onLoadSaveError }: VerdictScree
                                     selected={active}
                                     onClick={() => setVerdictSelection({ verdict, faction: fid })}
                                     style={active ? { boxShadow: `inset 3px 0 0 ${FACTION_HEX[fid]}` } : undefined}
-                                    title={<span className={FACTION_COLORS_SUBTLE[fid] ?? ''}>{FACTION_SHORT[fid] ?? fid}</span>}
+                                    title={<span className={`${FACTION_COLORS_SUBTLE[fid] ?? ''} break-words text-[15px] md:text-[18px]`}>{formatVerdictSideName(fid)}</span>}
                                     status={v ? (
                                         <span className="flex flex-col items-start gap-1.5">
                                             <span className="flex items-baseline gap-2">
@@ -642,7 +675,8 @@ export function VerdictScreen({ onLoadSaveState, onLoadSaveError }: VerdictScree
                                                 </span>
                                             </span>
                                             <span
-                                                className={`inline-block rounded px-2 py-0.5 text-[14px] font-semibold ${getOutcomeClassStyle(v.outcome_class)}`}
+                                                className="inline-block rounded border px-2 py-0.5 text-[14px] font-semibold"
+                                                style={outcomeBadgeStyle(v.outcome_class)}
                                                 data-awwv-faction-tab-outcome={fid}
                                             >
                                                 {formatOutcomeClass(v.outcome_class)}
@@ -662,6 +696,7 @@ export function VerdictScreen({ onLoadSaveState, onLoadSaveError }: VerdictScree
                     costLedger={loadedGameState.costLedger}
                     historicalComparison={loadedGameState.historicalComparison}
                     focusFaction={selectedFaction}
+                    settledShares={settledShares}
                     dateLabel={date}
                     durationLabel={years > 0
                         ? `${formatFallbackYearCount(years)}, ${formatFallbackWeekCount(weeks)}`
@@ -725,6 +760,10 @@ export function VerdictScreen({ onLoadSaveState, onLoadSaveError }: VerdictScree
                             brigadeCount={factionBrigades[selectedFaction] ?? 0}
                             personnel={factionPersonnel[selectedFaction] ?? 0}
                             daytonResult={verdict.dayton_result}
+                            frontLine={frontLineHoldings[selectedFaction]}
+                            settled={settledWar}
+                            signedAgreement={signedAgreement}
+                            decisions={decisionReckoning}
                         />
                     ) : (
                         <SurfaceEmpty title={t('verdict.record.noFactionData')} />
@@ -766,6 +805,9 @@ export function VerdictScreen({ onLoadSaveState, onLoadSaveError }: VerdictScree
                         <WarCostSummary
                             costLedger={loadedGameState.costLedger!}
                             comparison={loadedGameState.historicalComparison!}
+                            verdict={verdict}
+                            opportunityNames={opportunityNames}
+                            settledShares={settledShares}
                         />
                         {milestoneRows.length > 0 && (
                             <EndgameMilestoneComparison rows={milestoneRows} />
@@ -845,10 +887,9 @@ export function VerdictScreen({ onLoadSaveState, onLoadSaveError }: VerdictScree
                 </div>
 
                 {/* Footer */}
-                <SurfaceModalFooter className="justify-between">
-                    <p className="m-0 min-w-0 flex-1 text-[16px] italic text-text-secondary">
-                        {t('verdict.footer.tagline')}
-                    </p>
+                {/* The footer tagline is gone (§4 panel, 2026-11-14): "the least bad version of a
+                    tragedy" is false for a catastrophic ending and reads as minimisation. */}
+                <SurfaceModalFooter className="justify-end">
                     <div className="flex flex-wrap justify-end gap-3">
                         <VerdictLoadSaveButton
                             ipc={ipc}
@@ -934,6 +975,10 @@ export function FactionReport({
     brigadeCount,
     personnel,
     daytonResult,
+    frontLine,
+    settled,
+    signedAgreement,
+    decisions,
 }: {
     verdict: FactionVerdict;
     factionOsids: number;
@@ -941,10 +986,25 @@ export function FactionReport({
     brigadeCount: number;
     personnel: number;
     daytonResult?: import('../../../state/negotiation_types.js').DaytonResult;
+    /** Settlements held at the war's end, on operational-settlement ids (R8 council B7). */
+    frontLine?: FrontLineHolding;
+    /** True when a signed settlement's map graded the territory. */
+    settled?: boolean;
+    /** The signed treaty: the institutions line reads its binder (R8 council B4). */
+    signedAgreement?: DaytonAgreementRecord;
+    /** The player's decisions that most raised and lowered the standing score (player's side only). */
+    decisions?: DecisionReckoning;
 }) {
     useLocale();
     const color = FACTION_HEX[verdict.faction] ?? '#888';
     const cap = verdict.capital_breakdown;
+    const figureRows = buildFactionFigureRows({
+        verdict,
+        frontLine: frontLine ?? { held: factionOsids, total: totalOsids },
+        settled: settled ?? verdict.grade_trace?.territory_basis === 'settled',
+        brigadeCount,
+        personnel,
+    });
 
     return (
         <div className="flex flex-col gap-7">
@@ -958,18 +1018,21 @@ export function FactionReport({
                 </div>
                 <div className="inline-flex items-center gap-2 rounded-full border px-4 py-1"
                      style={{ borderColor: GRADE_COLORS[verdict.grade] ?? '#9a9080' }}>
+                    <span className="text-[15px] text-[#b9ad94]">{t('verdict.metric.grade')}</span>
                     <span className="text-[22px] font-bold"
                           style={{ color: GRADE_COLORS[verdict.grade] ?? '#9a9080' }}>
                         {verdict.grade}
                     </span>
                 </div>
-                {/* Outcome Classification */}
+                {/* Outcome Classification — one colour per class on every surface (R8 council B1). */}
                 <div className="text-center">
-                    <span className={`inline-block rounded px-3 py-1.5 text-[15px] font-semibold ${getOutcomeClassStyle(verdict.outcome_class)}`}>
+                    <span className="inline-block rounded border px-3 py-1.5 text-[15px] font-semibold"
+                          style={outcomeBadgeStyle(verdict.outcome_class)}
+                          data-awwv-report-outcome={verdict.outcome_class}>
                         {formatOutcomeClass(verdict.outcome_class)}
                     </span>
                 </div>
-                {/* Condemnation Flags — shown only when present */}
+                {/* Condemnation Flags — shown only when present (only ever the side's own flags). */}
                 {verdict.condemnation_flags && verdict.condemnation_flags.length > 0 && (
                     <div className="w-full max-w-[44rem] rounded-md border border-red-400/40 bg-[#1a1316] px-5 py-4 text-left">
                         <h4 className="m-0 mb-2 text-[18px] font-semibold text-red-200">
@@ -982,19 +1045,12 @@ export function FactionReport({
                         ))}
                     </div>
                 )}
-                <div className="mx-auto max-w-[44rem] text-[17px] italic leading-relaxed text-[#ddd1b3]">
-                    {verdict.grade_description}
-                </div>
             </div>
 
-            {/* UI-5 Batch 44 mobile subdivision: subsections wrap in <details>
-                with `open` set + a `sm:hidden` summary so desktop renders dense
-                and unchanged while mobile gains a tap-to-collapse affordance.
-                Content stays in the DOM regardless of toggle state, so no
-                score/result text is ever hidden from automated tests or
-                accessibility tooling. */}
+            {/* How the verdict was set (R8 council fix 1; game-design seat: territory → anchor → caps). */}
+            <VerdictGradeTrace verdict={verdict} />
 
-            {/* 6-Dimension Breakdown */}
+            {/* Standing score: context, never the grade's input (game-design seat, §4 panel). */}
             <details
                 data-testid="faction-report-dimensions"
                 open
@@ -1002,23 +1058,25 @@ export function FactionReport({
             >
                 <summary className="sm:hidden mb-2 flex min-h-11 cursor-pointer list-none items-center justify-between rounded border border-[#3a4150] bg-[#1b2029] px-4 py-2">
                     <span className={SURFACE_LABEL}>
-                        {t('verdict.report.capitalDimensions')}
+                        {t('verdict.breakdown.standingTitle')}
                     </span>
                     <span className="text-[14px] text-[#b9ad94]">
                         {t('verdict.report.dimensionBars', { count: verdict.dimension_grades.length })}
                     </span>
                 </summary>
-                <div className={`mb-3 hidden sm:block ${SURFACE_LABEL}`}>
-                    {t('verdict.report.capitalDimensions')}
+                <div className={`mb-1 hidden sm:block ${SURFACE_LABEL}`}>
+                    {t('verdict.breakdown.standingTitle')}
                 </div>
-                <div className="space-y-2">
+                <p className="m-0 mb-3 text-[15px] text-[#9c917b]">{t('verdict.breakdown.standingNote')}</p>
+                <div className="space-y-2" data-awwv-standing-breakdown>
                     {verdict.dimension_grades.map((dg) => (
-                        <DimensionBar key={dg.dimension} dg={dg} factionColor={color} />
+                        <DimensionBar key={dg.dimension} dg={dg} factionColor={color}
+                            weight={DIMENSION_WEIGHTS[verdict.faction]?.[dg.dimension]} />
                     ))}
                 </div>
             </details>
 
-            {/* Statistics */}
+            {/* Final figures, each with its basis (R8 council B6/B7). */}
             <details
                 data-testid="faction-report-statistics"
                 open
@@ -1035,39 +1093,27 @@ export function FactionReport({
                 <div className={`mb-3 hidden sm:block ${SURFACE_LABEL}`}>
                     {t('verdict.report.finalStatistics')}
                 </div>
-                <div className="grid grid-cols-2 gap-x-8 rounded-md border border-[#2a303c] bg-[#161a22] px-5 py-2">
-                    <StatRow label={t('verdict.report.stat.territory')} value={`${((factionOsids / totalOsids) * 100).toFixed(1)}% (${factionOsids} settlements)`} />
-                    {cap && (
-                        <>
-                            <StatRow label={t('verdict.report.stat.territoryKm2')} value={`${Math.round(cap.territory_controlled_km2).toLocaleString()} km\u00b2`} />
-                            <StatRow label={t('verdict.report.stat.activeBrigades')} value={String(brigadeCount)} />
-                            <StatRow label={t('verdict.report.stat.personnel')} value={formatCount(personnel)} />
-                            <StatRow label={t('verdict.report.stat.casualtiesInflicted')} value={formatCount(cap.military_casualties_inflicted)} />
-                            <StatRow label={t('verdict.report.stat.casualtiesTaken')} value={formatCount(cap.military_casualties_taken)} />
-                            <StatRow label={t('verdict.report.stat.civiliansProtected')} value={formatCount(cap.civilians_under_protection)} />
-                            <StatRow label={t('verdict.report.stat.refugeesCreated')} value={formatCount(cap.refugees_created)} />
-                            <StatRow label={t('verdict.report.stat.refugeesReceived')} value={formatCount(cap.refugees_received)} />
-                            <StatRow label={t('verdict.report.stat.operationsLaunched')} value={String(cap.operations_launched)} />
-                            <StatRow label={t('verdict.report.stat.operationsSuccessful')} value={String(cap.operations_successful)} />
-                            {cap.enclaves_held.length > 0 && (
-                                <StatRow label={t('verdict.report.stat.enclavesHeld')} value={cap.enclaves_held.map(titleCase).join(', ')} />
-                            )}
-                            {cap.enclaves_lost.length > 0 && (
-                                <StatRow label={t('verdict.report.stat.enclavesLost')} value={cap.enclaves_lost.map(titleCase).join(', ')} />
-                            )}
-                            {cap.peace_plans_accepted.length > 0 && (
-                                <StatRow label={t('verdict.report.stat.plansAccepted')} value={cap.peace_plans_accepted.map(formatPeacePlanName).join(', ')} />
-                            )}
-                            {cap.peace_plans_rejected.length > 0 && (
-                                <StatRow label={t('verdict.report.stat.plansRejected')} value={cap.peace_plans_rejected.map(formatPeacePlanName).join(', ')} />
-                            )}
-                            {cap.war_crimes_events > 0 && (
-                                <StatRow label={t('verdict.report.stat.warCrimesEvents')} value={String(cap.war_crimes_events)} />
-                            )}
-                        </>
+                <div className="grid grid-cols-1 gap-x-8 rounded-md border border-[#2a303c] bg-[#161a22] px-5 py-2 md:grid-cols-2">
+                    {figureRows.map(row => (
+                        <BasisStat key={row.id} label={row.label} value={row.value} basis={row.basis} kind={row.kind} />
+                    ))}
+                    {cap && cap.enclaves_held.length > 0 && (
+                        <StatRow label={t('verdict.report.stat.enclavesHeld')} value={cap.enclaves_held.map(titleCase).join(', ')} />
+                    )}
+                    {cap && cap.enclaves_lost.length > 0 && (
+                        <StatRow label={t('verdict.report.stat.enclavesLost')} value={cap.enclaves_lost.map(titleCase).join(', ')} />
+                    )}
+                    {cap && cap.peace_plans_accepted.length > 0 && (
+                        <StatRow label={t('verdict.report.stat.plansAccepted')} value={cap.peace_plans_accepted.map(formatPeacePlanName).join(', ')} />
+                    )}
+                    {cap && cap.peace_plans_rejected.length > 0 && (
+                        <StatRow label={t('verdict.report.stat.plansRejected')} value={cap.peace_plans_rejected.map(formatPeacePlanName).join(', ')} />
                     )}
                 </div>
             </details>
+
+            {/* Decisions that moved the standing score (player's side only). */}
+            {decisions && <VerdictDecisionLists decisions={decisions} />}
 
             {/* Dayton Details (if applicable) */}
             {daytonResult && (
@@ -1088,20 +1134,28 @@ export function FactionReport({
                         {t('verdict.daytonAgreement')}
                     </div>
                     <div className="flex flex-col gap-2 text-[16px] leading-relaxed text-[#c2b69c]">
-                        {daytonResult.territorial_packages_accepted.length > 0 && (
+                        {/* A signed treaty is shown against the mediator's draft above (TreatyLedger);
+                            listing packages "rejected" here contradicted it (R8 council B4). Only
+                            saves without the signed record keep the package lists. */}
+                        {!signedAgreement && daytonResult.territorial_packages_accepted.length > 0 && (
                             <div>
                                 <span className="text-text-primary font-semibold">{t('verdict.packagesAccepted')} </span>
                                 {daytonResult.territorial_packages_accepted.map(formatDaytonPackageLabel).join(', ')}
                             </div>
                         )}
-                        {daytonResult.territorial_packages_rejected.length > 0 && (
+                        {!signedAgreement && daytonResult.territorial_packages_rejected.length > 0 && (
                             <div>
-                                <span className="text-text-primary font-semibold">{t('verdict.packagesRejected')} </span>
+                                <span className="text-text-primary font-semibold">{t('verdict.packagesNotTaken')} </span>
                                 {daytonResult.territorial_packages_rejected.map(formatDaytonPackageLabel).join(', ')}
                             </div>
                         )}
-                        {Object.keys(daytonResult.institutional_choices).length > 0 && (
-                            <div>
+                        {signedAgreement ? (
+                            <div data-awwv-dayton-institutions="binder">
+                                <span className="text-text-primary font-semibold">{t('verdict.institutions')} </span>
+                                {institutionalRows(signedAgreement.terms).map(row => `${row.label}: ${row.value}`).join('; ')}
+                            </div>
+                        ) : Object.keys(daytonResult.institutional_choices).length > 0 && (
+                            <div data-awwv-dayton-institutions="legacy">
                                 <span className="text-text-primary font-semibold">{t('verdict.institutions')} </span>
                                 {Object.entries(daytonResult.institutional_choices)
                                     .map(([k, v]) => `${formatDaytonInstitutionLabel(k)}: ${formatDaytonInstitutionValue(v)}`)
@@ -1109,11 +1163,15 @@ export function FactionReport({
                             </div>
                         )}
                         {daytonResult.final_territory_split && (
-                            <div>
+                            <div data-awwv-figure-kind="territory" data-awwv-figure-basis={t('verdict.basis.finalSplit')}>
                                 <span className="text-text-primary font-semibold">{t('verdict.finalSplit')} </span>
-                                {Object.entries(daytonResult.final_territory_split)
-                                    .map(([k, v]) => `${getPlayerSafeMilitaryFactionName(k, k)} ${(v as number).toFixed(1)}%`)
+                                {(['RBiH', 'RS', 'HRHB'] as const)
+                                    .flatMap(k => {
+                                        const share = daytonResult.final_territory_split?.[k];
+                                        return typeof share === 'number' ? [`${formatVerdictSideName(k)} ${share.toFixed(1)}%`] : [];
+                                    })
                                     .join(', ')}
+                                <span className="block text-[14px] text-[#9c917b]">{t('verdict.basis.finalSplit')}</span>
                             </div>
                         )}
                         {daytonResult.patron_overrides_applied.length > 0 && (
@@ -1125,6 +1183,96 @@ export function FactionReport({
                     </div>
                 </details>
             )}
+        </div>
+    );
+}
+
+/** Outcome badge style from the shared class colour (rail, report, banner agree). */
+export function outcomeBadgeStyle(oc: string | undefined): { color: string; borderColor: string; background: string } {
+    const color = OUTCOME_CLASS_COLOR[oc as keyof typeof OUTCOME_CLASS_COLOR] ?? '#b9ad94';
+    // The tint sits on an opaque dark base so the text keeps ≥5.4:1 on every rail row state
+    // (UI/UX review A2: on the selected row a bare 10% tint dropped Failure to 4.35:1).
+    return { color, borderColor: `${color}55`, background: `linear-gradient(${color}1a, ${color}1a) #11141b` };
+}
+
+function formatGradeTraceCostStep(step: 'war_cost_cap' | 'human_cost_shift'): string {
+    return t(step === 'human_cost_shift' ? 'verdict.breakdown.humanCost' : 'verdict.breakdown.warCost');
+}
+
+/**
+ * "How the verdict was set" (R8 council fix 1): territory basis → end-position grade → each
+ * step that changed something. Hidden for saves frozen before the grade trace existed.
+ */
+function VerdictGradeTrace({ verdict }: { verdict: FactionVerdict }) {
+    const trace = verdict.grade_trace;
+    if (!trace) return null;
+    const steps: string[] = [];
+    steps.push(t('verdict.breakdown.territory', {
+        pct: trace.territory_graded_pct.toFixed(1),
+        basis: t(trace.territory_basis === 'settled' ? 'verdict.basis.territorySettled' : 'verdict.basis.territoryFront'),
+    }));
+    steps.push(t('verdict.breakdown.endPosition', { grade: trace.earned_grade }));
+    if (trace.cost_capped_grade !== trace.earned_grade) {
+        steps.push(t('verdict.breakdown.step', { step: formatGradeTraceCostStep(trace.cost_step), from: trace.earned_grade, to: trace.cost_capped_grade }));
+    }
+    if (trace.condemnation_capped_grade !== trace.cost_capped_grade) {
+        steps.push(t('verdict.breakdown.step', { step: t('verdict.breakdown.condemnation'), from: trace.cost_capped_grade, to: trace.condemnation_capped_grade }));
+    }
+    if (trace.settlement_capped_grade !== trace.condemnation_capped_grade) {
+        steps.push(t('verdict.breakdown.step', { step: t('verdict.breakdown.settlementTerms'), from: trace.condemnation_capped_grade, to: trace.settlement_capped_grade }));
+    }
+    steps.push(t('verdict.breakdown.outcome', { outcome: formatOutcomeClass(trace.base_outcome_class), grade: trace.settlement_capped_grade }));
+    if (trace.peace_dysfunction_band !== 'none' && trace.peace_dysfunction_index !== null) {
+        steps.push(t('verdict.breakdown.dysfunction', {
+            index: Math.round(trace.peace_dysfunction_index),
+            from: formatOutcomeClass(trace.base_outcome_class),
+            to: formatOutcomeClass(trace.outcome_class),
+        }));
+    }
+    return (
+        <div className="flex flex-col gap-2" data-testid="faction-report-grade-trace">
+            <div className={SURFACE_LABEL}>{t('verdict.breakdown.title')}</div>
+            <ol className="m-0 flex list-decimal flex-col gap-1.5 rounded-md border border-[#2a303c] bg-[#161a22] py-3 pl-10 pr-5 text-[16px] leading-relaxed text-[#ddd1b3]">
+                {steps.map((step, index) => <li key={index}>{step}</li>)}
+            </ol>
+            <p className="m-0 text-[15px] italic text-[#b9ad94]">{verdict.grade_description}</p>
+        </div>
+    );
+}
+
+/** The decisions whose stated effects most raised and lowered the standing score. */
+function VerdictDecisionLists({ decisions }: { decisions: DecisionReckoning }) {
+    if (decisions.best.length === 0 && decisions.worst.length === 0) return null;
+    const row = (decision: DecisionReckoning['best'][number]) => (
+        <li key={`${decision.eventId}:${decision.responseId}`} className="flex items-baseline justify-between gap-4 border-b border-[#262b35] py-2 last:border-b-0"
+            data-awwv-decision={decision.eventId}>
+            <span className="flex min-w-0 flex-col">
+                <span className="font-semibold text-[#f1e6c8]">{decision.title}</span>
+                <span className="text-[15px] text-[#b9ad94]">
+                    {turnToDateString(decision.turn)} · {decision.responseLabel}
+                    {decision.count > 1 ? ` · ${t('verdict.decisions.repeated', { count: decision.count })}` : ''}
+                </span>
+            </span>
+            <span className="shrink-0 font-mono tabular-nums text-[#f1e6c8]">
+                {t('verdict.decisions.points', { points: `${decision.points > 0 ? '+' : ''}${decision.points.toFixed(1)}` })}
+            </span>
+        </li>
+    );
+    return (
+        <div className="flex flex-col gap-3" data-testid="faction-report-decisions">
+            {decisions.best.length > 0 && (
+                <div className="flex flex-col gap-1">
+                    <div className={SURFACE_LABEL}>{t('verdict.decisions.raisedTitle')}</div>
+                    <ul className="m-0 list-none rounded-md border border-[#2a303c] bg-[#161a22] px-5 py-1">{decisions.best.map(row)}</ul>
+                </div>
+            )}
+            {decisions.worst.length > 0 && (
+                <div className="flex flex-col gap-1">
+                    <div className={SURFACE_LABEL}>{t('verdict.decisions.loweredTitle')}</div>
+                    <ul className="m-0 list-none rounded-md border border-[#2a303c] bg-[#161a22] px-5 py-1">{decisions.worst.map(row)}</ul>
+                </div>
+            )}
+            <p className="m-0 text-[15px] text-[#9c917b]">{t('verdict.decisions.note')}</p>
         </div>
     );
 }
@@ -1152,7 +1300,9 @@ function formatDaytonPackageLabel(id: string): string {
         package_b: 'verdict.dayton.package.packageB',
     };
     const key = labels[id];
-    return key ? t(key) : id;
+    if (key) return t(key);
+    // Display names, never ids (R8 council B4: "brcko_district, central_bosnia, …").
+    return getTerritorialPackageById(id)?.name ?? getPlayerSafeDisplayLabel(id, t('verdict.dayton.packageFallback'));
 }
 
 function formatDaytonInstitutionLabel(key: string): string {
@@ -1180,14 +1330,24 @@ function formatDaytonPatronOverride(id: string): string {
     return key ? t(key) : id;
 }
 
-function DimensionBar({ dg, factionColor }: { dg: DimensionGrade; factionColor: string }) {
+function DimensionBar({ dg, factionColor, weight }: { dg: DimensionGrade; factionColor: string; weight?: number }) {
     const gradeColor = GRADE_COLORS[dg.grade] ?? '#9a9080';
     const barWidth = Math.max(2, Math.min(100, dg.score));
 
     return (
-        <div className="grid grid-cols-[minmax(12rem,15rem)_minmax(0,1fr)_2.75rem_2rem] items-center gap-4">
-            <div className="truncate text-[16px] text-[#c2b69c]">
-                {formatDimensionLabel(dg)}
+        <div className="grid grid-cols-[minmax(12rem,15rem)_minmax(0,1fr)_2.75rem_2rem] items-center gap-4"
+             data-awwv-dimension={dg.dimension}>
+            <div className="flex min-w-0 flex-col">
+                <span className="truncate text-[16px] text-[#c2b69c]">{formatDimensionLabel(dg)}</span>
+                {typeof weight === 'number' && (
+                    <span className="text-[14px] tabular-nums text-[#9c917b]" data-awwv-dimension-points>
+                        {t('verdict.breakdown.dimensionPoints', {
+                            weight: weight.toFixed(2),
+                            value: dg.score.toFixed(1),
+                            points: (weight * dg.score).toFixed(1),
+                        })}
+                    </span>
+                )}
             </div>
             <div className="h-2.5 overflow-hidden rounded-full bg-[#262b35]">
                 <div

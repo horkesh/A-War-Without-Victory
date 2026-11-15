@@ -59,6 +59,7 @@ import { BESIEGED_SURPLUS_HOP_LIMIT } from './allocate.js';
 import { CRITICAL_MORALE_THRESHOLD } from '../combat_math.js';
 import { MAX_EXHAUSTION_FOR_OPERATION } from '../bot_constants.js';
 import { corpsHoldForbidsNewPlans } from '../stance_matter_holds.js';
+import { isCorpsBoundByOct1995Ceasefire } from '../oct1995_ceasefire.js';
 import {
     isEliteAuthoredForHistoricalOperation,
     isEliteReservedForHistoricalOperation,
@@ -1057,6 +1058,17 @@ function advanceExistingPlan(
     // but on the NEXT advance they must be cleared rather than re-evaluated.
     if (plan.status === 'abandoned') {
         return { plan: null, action: 'none', reason: 'clearing abandoned plan' };
+    }
+
+    // October 1995 general ceasefire (council fix 3): a plan not yet handed to execution is
+    // abandoned, like the bilateral-ceasefire rule above, so no offensive becomes ready or is put
+    // to the president for authorization while the ceasefire holds. Inert without the ceasefire.
+    if (plan.status !== 'executing' && isCorpsBoundByOct1995Ceasefire(briefing.state_ref, briefing.corps_id)) {
+        return {
+            plan: { ...plan, status: 'abandoned' },
+            action: 'abandoned',
+            reason: 'the October 1995 ceasefire ended offensive authority',
+        };
     }
 
     // Check for abandon conditions first

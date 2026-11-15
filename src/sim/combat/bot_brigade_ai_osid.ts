@@ -66,6 +66,12 @@ import { getAllAxisBrigades, isMultiAxis } from './sector_offensive_axis_helpers
 import { buildOfficerCombatLookup, getCorpsStance } from './combat_math.js';
 import { findBrigadeOperation, findBrigadeOperationAnywhere, findBrigadeLiveOperationAnywhere } from './corps_operation_helpers.js';
 import { isVlasicCohaExceptionAttackOrder } from './coha_operation_exception.js';
+import {
+    isCorpsBoundByOct1995Ceasefire,
+    isFactionBoundByOct1995Ceasefire,
+    isOct1995CeasefireInForce,
+    isOct1995CeasefireStandDownAttackOrder,
+} from './oct1995_ceasefire.js';
 import { recordLinkedPreparationProbeOrderOpportunity } from './operation_preparation.js';
 export { getConvergingOperationBrigades } from './corps_operation_helpers.js';
 import { buildSectorDefenseByFactionAndOsid } from './corps_front_sectors.js';
@@ -1282,6 +1288,33 @@ export function generateAllBotOrdersOsid(
             const target = allAttackOrders[order.brigade_id as FormationId];
             if ((order.posture === 'attack' || order.posture === 'assault')
                 && !target) {
+                order.posture = 'hold';
+            }
+        }
+    }
+
+    // The October 1995 general ceasefire suspends combat the way the COHA does (Engine
+    // Invariants, COHA ceasefire ownership): no attack order, counter-attacks included, for a
+    // bound faction, while movement and redeployment output stays (council fix 3).
+    // The one carve-out is an offensive standing down: it may conclude the objective it was
+    // already fighting for when the ceasefire took effect (isOct1995CeasefireStandDownAttackOrder).
+    if (isOct1995CeasefireInForce(state)) {
+        for (const brigadeId of Object.keys(allAttackOrders).sort(strictCompare)) {
+            if (!isFactionBoundByOct1995Ceasefire(state, state.military.formations?.[brigadeId]?.faction)) continue;
+            const target = allAttackOrders[brigadeId as FormationId];
+            if (target && isOct1995CeasefireStandDownAttackOrder(state, brigadeId, target)) continue;
+            delete allAttackOrders[brigadeId as FormationId];
+        }
+        for (const corpsId of Object.keys(allEligibleAttackersByCorps).sort(strictCompare)) {
+            if (!isCorpsBoundByOct1995Ceasefire(state, corpsId)) continue;
+            const hasStandDownOrder = Object.entries(allAttackOrders).some(([brigadeId, target]) =>
+                state.military.formations?.[brigadeId]?.corps_id === corpsId
+                && isOct1995CeasefireStandDownAttackOrder(state, brigadeId, target));
+            if (!hasStandDownOrder) delete allEligibleAttackersByCorps[corpsId as FormationId];
+        }
+        for (const order of allPostureOrders) {
+            const target = allAttackOrders[order.brigade_id as FormationId];
+            if ((order.posture === 'attack' || order.posture === 'assault') && !target) {
                 order.posture = 'hold';
             }
         }

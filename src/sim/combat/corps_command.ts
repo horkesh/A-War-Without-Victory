@@ -17,6 +17,7 @@ import type {
 import { strictCompare } from '../../state/validateGameState.js';
 import { releaseOperationCommander } from './officer_system.js';
 import { capEffectiveStanceByHold } from './stance_matter_holds.js';
+import { capStanceForOct1995Ceasefire } from './oct1995_ceasefire.js';
 import { hasActiveOperation, findBrigadeOperation, removeOperation } from './corps_operation_helpers.js';
 import {
     completeOperationLifecycle,
@@ -182,8 +183,10 @@ export function getEffectiveCorpsStance(state: GameState, corpsId: FormationId):
     if (!corps) return 'balanced';
 
     // A presidential stance hold (posture model option 2) caps the result so an army
-    // general offensive cannot bypass it. Inert without a hold.
-    return capEffectiveStanceByHold(state, corpsId, uncappedEffectiveCorpsStance(state, corps.faction, corpsId));
+    // general offensive cannot bypass it. Inert without a hold. The October 1995 general
+    // ceasefire caps it the same way (council fix 3); inert unless the ceasefire flag is set.
+    const held = capEffectiveStanceByHold(state, corpsId, uncappedEffectiveCorpsStance(state, corps.faction, corpsId));
+    return capStanceForOct1995Ceasefire(state, corps.faction, held);
 }
 
 function uncappedEffectiveCorpsStance(state: GameState, faction: FactionId, corpsId: FormationId): CorpsStance {

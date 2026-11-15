@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { buildCostLedger } from '../src/sim/endgame/cost_ledger.js';
+import { buildCostLedger, COST_LEDGER_SOURCES, SREBRENICA_FINDING_TEXT } from '../src/sim/endgame/cost_ledger.js';
 import { compareToHistorical } from '../src/sim/endgame/endgame_comparison.js';
 import type { CostLedger } from '../src/sim/endgame/cost_ledger.js';
 import {
@@ -83,29 +83,43 @@ function makeState(overrides: {
 }
 
 function makeBaseline(overrides: Partial<HistoricalBaseline> = {}): HistoricalBaseline {
+    // Mirrors data/reference/historical_baseline.json after the R8 ending truth pass:
+    // Dayton initialled week 189 (settlement), ceasefire in force week 183 (no settlement),
+    // RDC 2007 military 57,523 + civilian 39,684 = 97,207.
     return {
-        war_duration_weeks: 182,
+        war_duration_weeks: 189,
+        fighting_end_week: 183,
         territory_final: { RS: 49, RBiH_HRHB_Federation: 51 },
         total_killed: 97207,
-        military_killed: { RBiH: 31270, RS: 21173, HRHB: 7788 },
-        civilian_killed: 38476,
+        military_killed_total: 57523,
+        military_killed: { RBiH: 30906, RS: 20775, HRHB: 5919 },
+        civilian_killed: 39684,
         total_displaced: 2200000,
         srebrenica_killed: 8372,
         milestones: [
             {
                 id: 'srebrenica_genocide_1995',
                 label: 'Srebrenica Genocide',
-                historical_week: 171,
+                historical_week: 170,
                 kind: 'rupture',
                 event_id: 'srebrenica_genocide_1995',
                 source_notes: 'ICTY Krstic judgment',
             },
             {
-                id: 'dayton_accords',
-                label: 'Dayton Accords',
-                historical_week: 182,
+                id: 'ceasefire_1995',
+                label: 'Country-wide ceasefire in force',
+                historical_week: 183,
                 kind: 'war_end',
-                source_notes: 'Dayton Agreement initialed November 1995',
+                ending: 'no_settlement',
+                source_notes: 'Ceasefire in force 12 Oct 1995',
+            },
+            {
+                id: 'dayton_accords',
+                label: 'Dayton Agreement initialled',
+                historical_week: 189,
+                kind: 'war_end',
+                ending: 'settlement',
+                source_notes: 'Dayton Agreement initialled 21 Nov 1995',
             },
         ],
         source_notes: 'RDC 2007',
@@ -246,19 +260,34 @@ describe('buildCostLedger', () => {
 
         const ledger = buildCostLedger(state);
 
+        // War-crimes cards follow the fixed side order (RBiH, RS, HRHB), never ranked by count.
         expect(ledger.findings.map((f) => f.id)).toEqual([
             'human_cost_record',
             'civilian_displacement_record',
             'rupture_srebrenica_genocide_1995',
-            'war_crimes_record_RS',
             'war_crimes_record_RBiH',
+            'war_crimes_record_RS',
             'war_crimes_record_HRHB',
         ]);
         const rupture = ledger.findings.find((f) => f.id === 'rupture_srebrenica_genocide_1995')!;
-        expect(rupture.text).toContain('Srebrenica genocide');
+        expect(rupture.title).toBe('Srebrenica genocide');
+        expect(rupture.text).toBe(SREBRENICA_FINDING_TEXT);
+        expect(rupture.text).toContain('genocide');
         expect(rupture.text).toContain('8,000');
+        expect(rupture.text).toContain('8,372');
+        expect(rupture.sources).toEqual([COST_LEDGER_SOURCES.srebrenica]);
         expect(rupture.sources.join(' ')).toContain('ICTY');
-        expect(rupture.sources.join(' ')).toContain('ICJ Bosnia v. Serbia');
+        expect(rupture.sources.join(' ')).toContain('ICJ, Bosnia and Herzegovina v. Serbia and Montenegro (2007)');
+        // Findings that count the campaign's own record carry no source (no court counted game events).
+        for (const finding of ledger.findings.filter((f) => f.id !== rupture.id)) {
+            expect(finding.sources).toEqual([]);
+        }
+        expect(ledger.findings.find((f) => f.id === 'human_cost_record')!.text).toBe(
+            'This campaign recorded 46,500 military dead and 38,000 civilian dead on all sides.',
+        );
+        expect(ledger.findings.find((f) => f.id === 'war_crimes_record_RS')!.text).toBe(
+            'This campaign recorded 35 war-crime events by Bosnian Serb forces.',
+        );
         for (const finding of ledger.findings) {
             expect(finding.text).not.toMatch(/\byou\b/i);
             expect(finding.text).not.toMatch(/less costly|more costly|achievement|badge/i);
@@ -371,24 +400,31 @@ describe('buildCostLedger', () => {
 // ═══════════════════════════════════════════════════════════════════════════
 
 describe('compareToHistorical', () => {
-    it('computes correct duration delta', () => {
+    it('computes correct duration delta against the Dayton initialling for a settled campaign', () => {
         const state = makeState({ turn: 200 });
         const ledger = buildCostLedger(state);
         const baseline = makeBaseline();
         const result = compareToHistorical(ledger, baseline);
 
-        expect(result.duration_delta_weeks).toBe(200 - 182);
-        expect(result.divergence_notes.some(n => n.includes('18 weeks longer'))).toBe(true);
+        // Default ending is 'settlement': reference week 189 (Dayton initialled).
+        expect(result.duration_delta_weeks).toBe(200 - 189);
+        expect(result.historical_reference_week).toBe(189);
+        expect(result.historical_reference_basis).toBe('settlement');
+        // No "War lasted N weeks longer/shorter" note any more (§4 panel 2026-11-14).
+        expect(result.divergence_notes.some(n => n.startsWith('War lasted'))).toBe(false);
     });
 
-    it('computes correct negative duration delta', () => {
+    it('computes correct negative duration delta against the ceasefire for a campaign without a settlement', () => {
         const state = makeState({ turn: 100 });
         const ledger = buildCostLedger(state);
         const baseline = makeBaseline();
-        const result = compareToHistorical(ledger, baseline);
+        const result = compareToHistorical(ledger, baseline, 'no_settlement');
 
-        expect(result.duration_delta_weeks).toBe(100 - 182);
-        expect(result.divergence_notes.some(n => n.includes('82 weeks shorter'))).toBe(true);
+        // 'no_settlement': reference week 183 (ceasefire in force, fighting_end_week).
+        expect(result.duration_delta_weeks).toBe(100 - 183);
+        expect(result.historical_reference_week).toBe(183);
+        expect(result.historical_reference_basis).toBe('no_settlement');
+        expect(result.divergence_notes.some(n => /weeks (shorter|longer)/.test(n))).toBe(false);
     });
 
     it('computes correct territory divergence', () => {
@@ -428,7 +464,7 @@ describe('compareToHistorical', () => {
         expect(result.divergence_notes.some(n => n.includes('Srebrenica genocide occurred'))).toBe(true);
     });
 
-    it('emits milestone comparison rows from the historical baseline', () => {
+    it('emits only the war-end milestone row matching the ending, never a rupture timing row', () => {
         const ruptures: RuptureConsequence[] = [
             {
                 id: 'srebrenica_genocide_1995',
@@ -440,60 +476,95 @@ describe('compareToHistorical', () => {
         ];
         const state = makeState({ turn: 188, ruptures });
         const ledger = buildCostLedger(state);
-        const result = compareToHistorical(ledger, makeBaseline());
 
-        expect(result.milestone_comparison?.map(row => row.id)).toEqual([
-            'srebrenica_genocide_1995',
-            'dayton_accords',
-        ]);
-        expect(result.milestone_comparison?.[0]).toMatchObject({
-            id: 'srebrenica_genocide_1995',
-            historical_week: 171,
-            player_week: 160,
-            delta_weeks: -11,
+        const settled = compareToHistorical(ledger, makeBaseline());
+        expect(settled.milestone_comparison?.map(row => row.id)).toEqual(['dayton_accords']);
+        expect(settled.milestone_comparison?.[0]).toMatchObject({
+            id: 'dayton_accords',
+            historical_week: 189,
+            player_week: 188,
+            delta_weeks: -1,
             status: 'early',
         });
-        expect(result.milestone_comparison?.[1]).toMatchObject({
-            id: 'dayton_accords',
-            historical_week: 182,
+
+        const unsettled = compareToHistorical(ledger, makeBaseline(), 'no_settlement');
+        expect(unsettled.milestone_comparison?.map(row => row.id)).toEqual(['ceasefire_1995']);
+        expect(unsettled.milestone_comparison?.[0]).toMatchObject({
+            id: 'ceasefire_1995',
+            historical_week: 183,
             player_week: 188,
-            delta_weeks: 6,
+            delta_weeks: 5,
             status: 'late',
         });
     });
 
-    it('marks rupture milestones absent when the player run avoided the rupture', () => {
-        const state = makeState({ turn: 182 });
+    it('never emits a rupture milestone row, whether or not the run recorded the rupture', () => {
+        const state = makeState({ turn: 189 });
         const ledger = buildCostLedger(state);
         const result = compareToHistorical(ledger, makeBaseline());
-        const srebrenica = result.milestone_comparison?.find(row => row.id === 'srebrenica_genocide_1995');
 
-        expect(srebrenica).toMatchObject({
-            player_week: null,
-            delta_weeks: null,
-            status: 'absent',
+        expect(result.milestone_comparison?.find(row => row.id === 'srebrenica_genocide_1995')).toBeUndefined();
+        expect(result.milestone_comparison?.map(row => row.id)).toEqual(['dayton_accords']);
+
+        const withRupture = compareToHistorical(buildCostLedger(makeState({
+            turn: 189,
+            ruptures: [{
+                id: 'srebrenica_genocide_1995',
+                recorded_turn: 165,
+                perpetrator_faction: 'RS',
+                description: 'Fall of Srebrenica',
+                condemnation_flag: 'genocide_condemnation',
+            }],
+        })), makeBaseline());
+        expect(withRupture.milestone_comparison?.map(row => row.id)).toEqual(['dayton_accords']);
+        // The rupture stays recorded in the divergence list and note, just not as a timing row.
+        expect(withRupture.rupture_divergence).toContain('srebrenica_genocide_1995');
+    });
+
+    it('generates the Srebrenica survived note only for a war that reached the rupture window (week 160)', () => {
+        const baseline = makeBaseline();
+
+        const longWar = compareToHistorical(buildCostLedger(makeState({ turn: 160 })), baseline);
+        expect(longWar.rupture_divergence).toHaveLength(0);
+        expect(longWar.divergence_notes).toContain('Srebrenica enclave survived');
+
+        const shortWar = compareToHistorical(buildCostLedger(makeState({ turn: 159 })), baseline);
+        expect(shortWar.rupture_divergence).toHaveLength(0);
+        expect(shortWar.divergence_notes.some(n => n.includes('Srebrenica enclave survived'))).toBe(false);
+    });
+
+    it('states military and civilian killed as counts against the matching historical figures', () => {
+        const cl = initializeCasualtyLedger(['RBiH', 'RS', 'HRHB']);
+        cl.RBiH!.killed = 20000;
+        cl.RS!.killed = 9000;
+        cl.HRHB!.killed = 1523;
+        const state = makeState({
+            turn: 189,
+            casualtyLedger: cl,
+            civilianCasualties: {
+                RBiH: { killed: 12000, fled_abroad: 0 },
+                RS: { killed: 3000, fled_abroad: 0 },
+                HRHB: { killed: 842, fled_abroad: 0 },
+            },
         });
-        expect(srebrenica?.summary).toContain('did not occur');
-    });
-
-    it('generates Srebrenica survived note when no rupture', () => {
-        const state = makeState();
         const ledger = buildCostLedger(state);
-        const baseline = makeBaseline();
-        const result = compareToHistorical(ledger, baseline);
-
-        expect(result.rupture_divergence).toHaveLength(0);
-        expect(result.divergence_notes.some(n => n.includes('Srebrenica enclave survived'))).toBe(true);
-    });
-
-    it('generates divergence note for duration', () => {
-        const state = makeState({ turn: 182 });
-        const ledger = buildCostLedger(state);
-        const baseline = makeBaseline();
-        const result = compareToHistorical(ledger, baseline);
+        const result = compareToHistorical(ledger, makeBaseline());
 
         expect(result.duration_delta_weeks).toBe(0);
-        expect(result.divergence_notes.some(n => n.includes('exactly the historical'))).toBe(true);
+        expect(result.divergence_notes.some(n => n.startsWith('War lasted'))).toBe(false);
+        // Military against military (57,523), civilian against civilian (39,684), RDC 2007.
+        expect(result.historical_military_killed).toBe(57523);
+        expect(result.historical_civilian_killed).toBe(39684);
+        expect(result.casualty_ratio).toBeCloseTo(ledger.total_military_killed / 57523, 10);
+        expect(result.civilian_ratio).toBeCloseTo(ledger.total_civilian_killed / 39684, 10);
+        expect(result.divergence_notes).toContain(
+            `Military killed: ${ledger.total_military_killed.toLocaleString('en-US')} in this campaign; 57,523 in the historical war`,
+        );
+        expect(result.divergence_notes).toContain(
+            `Civilians killed: ${ledger.total_civilian_killed.toLocaleString('en-US')} in this campaign; 39,684 in the historical war`,
+        );
+        // No percentage-of-history phrasing (Sensitive History Design Gate §4).
+        expect(result.divergence_notes.some(n => /% of historical/.test(n))).toBe(false);
     });
 
     it('comparison inputs are explicit and serializable (JSON round-trip)', () => {

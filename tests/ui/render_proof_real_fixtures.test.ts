@@ -150,7 +150,8 @@ describe('verdict render proof — realistic fixtures', () => {
     it('formatCondemnationFlag renders restrained genocide wording', () => {
         const text = formatCondemnationFlag('genocide_condemnation');
         expect(text).toContain('genocide');
-        expect(text).toContain('tribunal');
+        // Names the courts that found it (ICTY, ICJ) rather than a generic tribunal.
+        expect(text).toContain('found by the ICTY and the ICJ');
         // Verify wording is restrained — no graphic language
         expect(text).not.toContain('massacre');
         expect(text).not.toContain('killed');
