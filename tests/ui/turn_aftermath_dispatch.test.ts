@@ -239,19 +239,27 @@ describe('TurnAftermathModal dispatch face', () => {
     expect(body.querySelectorAll('li')).toHaveLength(1);
   });
 
-  it('shows a named place on the map and closes the report', () => {
-    const panToOsid = vi.fn();
-    useGameStore.setState({ panToOsid });
-    const props = renderModal(busyView());
+  it('hands a named place to the owner\'s field-inspection route', () => {
+    const onShowOnMap = vi.fn();
+    renderModal(busyView(), { onShowOnMap });
     const buttons = screen.getAllByTestId('turn-aftermath-dispatch-show-on-map');
     expect(buttons).toHaveLength(3);
     fireEvent.click(buttons[0]);
-    expect(panToOsid).toHaveBeenCalledWith('op:a');
-    expect(useGameStore.getState().selectedOsid).toBe('op:a');
-    expect(props.onClose).toHaveBeenCalledOnce();
+    expect(onShowOnMap).toHaveBeenCalledWith('op:a');
   });
 
-  it('hides "Show on map" when no map can pan', () => {
+  it('routes "Show on map" through the field-inspection handoff that activates the map', () => {
+    // Codex review on #643: from the Warroom a direct pan hits an inactive map. App must
+    // use the same handoff as the command palette, which leaves the Warroom first.
+    const app = withoutComments(readFileSync('src/ui/map/App.tsx', 'utf8'));
+    const start = app.indexOf('onShowOnMap={(osid) => {');
+    expect(start).toBeGreaterThan(0);
+    const handler = app.slice(start, app.indexOf('}}', start));
+    expect(handler).toContain("inspectOnField(useGameStore.getState(), { kind: 'field-settlement', osid })");
+    expect(handler).toContain('leaveWarroomForGame()');
+  });
+
+  it('hides "Show on map" when no owner route is given', () => {
     renderModal(busyView());
     expect(screen.getAllByTestId('turn-aftermath-dispatch-place')).toHaveLength(3);
     expect(screen.queryByTestId('turn-aftermath-dispatch-show-on-map')).toBeNull();

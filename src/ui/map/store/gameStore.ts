@@ -986,14 +986,15 @@ export const useGameStore = create<GameStore>((set, get) => ({
               previousOpeningBriefFaction === (state.player_faction ?? null);
             // Command loop L2 (2026-11-14): after Advance the desktop main process also
             // pushes the new state, so the same week is loaded a second time about 200 ms
-            // after advanceTurnAndSync opened the week's dispatch. That reload must not
-            // wipe the report it belongs to. A load that moves to another turn, faction
-            // or save still clears it.
+            // after advanceTurnAndSync opened the week's dispatch. That duplicate push must
+            // not wipe the report it belongs to. Only a byte-identical payload counts: the
+            // state carries no campaign id, and turn, faction and label match across
+            // different saves, so any other load (another save, a campaign replacement)
+            // still clears the report.
             const sameWeekReload = previousLoadedGameState != null
               && get().turnAftermath != null
-              && previousLoadedGameState.turn === state.turn
-              && (previousLoadedGameState.player_faction ?? null) === (state.player_faction ?? null)
-              && previousLoadedGameState.label === state.label;
+              && fingerprint != null
+              && fingerprint === get().lastLoadedStateFingerprint;
             set({
               loadedGameState: state,
               replayInspection: null,

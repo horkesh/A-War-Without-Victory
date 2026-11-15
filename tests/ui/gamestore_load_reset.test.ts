@@ -222,6 +222,18 @@ describe('gameStore.loadSave — post-load UI state reset', () => {
         expect(s.stagedOrders).toEqual([]);
     });
 
+    it('clears the week report when a different save arrives at the same turn and faction', async () => {
+        await useGameStore.getState().loadSave(makeMinimalSaveJson(5, 'RBiH'));
+        dirtyStoreState();
+        // Same turn, faction and label, but a different payload: another save, not a re-push.
+        const otherSave = JSON.parse(makeMinimalSaveJson(5, 'RBiH'));
+        otherSave.meta.seed = 'another-campaign';
+        await useGameStore.getState().loadSave(JSON.stringify(otherSave));
+        expect(useGameStore.getState().turnAftermath).toBeNull();
+        expect(useGameStore.getState().turnAftermathOpen).toBe(false);
+        expect(useGameStore.getState().turnAftermathDigest).toBeNull();
+    });
+
     it('clears the week report when the load moves to another turn or faction', async () => {
         await useGameStore.getState().loadSave(makeMinimalSaveJson(5, 'RBiH'));
         dirtyStoreState();

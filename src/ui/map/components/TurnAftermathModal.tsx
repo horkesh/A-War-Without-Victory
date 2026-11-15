@@ -13,7 +13,6 @@ import {
   type TurnAftermathTopAction,
   type TurnAftermathView,
 } from '../data/turnAftermath';
-import { useGameStore } from '../store/gameStore';
 import type { ConsequenceReceipt } from '../data/consequenceReceipts';
 import type { ForcedOpReceipt } from '../data/forcedOpReceipts';
 import type { OfficerResentmentReceipt } from '../data/officerResentmentReceipts';
@@ -109,6 +108,13 @@ interface TurnAftermathModalProps {
    * L2); the full two-column record is one click away.
    */
   initialMode?: TurnAftermathModalMode;
+  /**
+   * Show a named place from the dispatch on the tactical map. The owner (App) closes the
+   * report and routes through the field-inspection handoff, so the map is the active shell
+   * before it focuses; called from the Warroom, a hidden map would ignore a direct pan.
+   * Absent → no "Show on map" buttons.
+   */
+  onShowOnMap?: (osid: string) => void;
 }
 
 function toneClasses(tone: TurnAftermathView['tone']): string {
@@ -137,10 +143,9 @@ export function TurnAftermathModal({
   forcedOps,
   officerResentment,
   initialMode = 'dispatch',
+  onShowOnMap,
 }: TurnAftermathModalProps) {
   const [mode, setMode] = useState<TurnAftermathModalMode>(initialMode);
-  const panToOsid = useGameStore((s) => s.panToOsid);
-  const setSelectedOsid = useGameStore((s) => s.setSelectedOsid);
   // Every opening, and every new week, starts on the dispatch again; the record face is
   // fetched in the background so "Full record" opens at once.
   useEffect(() => {
@@ -154,13 +159,7 @@ export function TurnAftermathModal({
   const dispatch = mode === 'dispatch'
     ? buildTurnAftermathDispatch({ view, consequences, forcedOps, officerResentment })
     : null;
-  const showOnMap = panToOsid
-    ? (osid: string) => {
-      setSelectedOsid(osid);
-      panToOsid(osid);
-      onClose();
-    }
-    : null;
+  const showOnMap = onShowOnMap ?? null;
 
   const primaryAction = view.nextActions.topItems[0] ?? null;
   const primaryActionLabelKey: MessageKey = primaryAction?.severity === 'blocking'

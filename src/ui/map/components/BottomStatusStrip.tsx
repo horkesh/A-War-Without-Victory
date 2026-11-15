@@ -364,9 +364,11 @@ export function BottomStatusStrip({ eventCatalog }: BottomStatusStripProps = {})
       {turnAftermathDigest && !turnAftermathOpen && (
         <div
           data-testid="status-strip-dispatch-reopen"
-          className="hidden min-w-0 max-w-[38vw] items-center gap-2 border border-white/10 bg-panel-card/70 px-2 py-0.5 text-xs text-text-secondary shadow-sm lg:flex"
+          className="hidden max-w-[38vw] shrink-0 items-center gap-2 border border-white/10 bg-panel-card/70 px-2 py-0.5 text-xs text-text-secondary shadow-sm lg:flex"
         >
-          <span className="truncate">{turnAftermathDigest.headline}</span>
+          {/* The box keeps its natural width (the indicator zone gives way instead), so its
+              buttons never run into Layers; the headline shows only where there is room. */}
+          <span className="hidden min-w-0 truncate 2xl:block">{turnAftermathDigest.headline}</span>
           <button
             type="button"
             onClick={() => setTurnAftermathOpen(true)}
