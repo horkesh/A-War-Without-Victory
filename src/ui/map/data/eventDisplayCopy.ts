@@ -108,6 +108,16 @@ export function resolveEventDisplayNarrative(
 }
 
 /**
+ * True for an event the design wrote as a counterfactual: it is not a documented historical
+ * episode, so its default option is the staff's default, never "the historically attested choice".
+ * The `historical_default` marker stays as authored (bots read it); only what the player is told
+ * about it changes.
+ */
+export function isDesignCounterfactualEvent(def: Pick<EventDefinition, 'source_tier'> | undefined | null): boolean {
+    return def?.source_tier === 'design_counterfactual';
+}
+
+/**
  * Player-facing source line for an event dossier, or null when there is none to show.
  *
  * `source_note`, `historical_source` and `source` are authoring provenance as much as citation:

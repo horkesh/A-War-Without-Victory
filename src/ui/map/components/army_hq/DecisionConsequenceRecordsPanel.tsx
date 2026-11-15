@@ -17,6 +17,7 @@ import {
   decisionSourceRecordId,
   type ConsequenceReceipt,
 } from '../../data/consequenceReceipts';
+import { isDesignCounterfactualEvent } from '../../data/eventDisplayCopy';
 import { getConsequenceStillForRecord } from '../../data/presidentialDeskAssets';
 import { t, useLocale, type MessageKey } from '../../i18n';
 import { useGameStore } from '../../store/gameStore';
@@ -135,6 +136,9 @@ function DecisionHistoryRecordRow({
   const def = eventCatalog.get(decision.event_id);
   const family = def?.family ?? 'unknown';
   const diverged = isDivergenceFromHistorical(decision, eventCatalog);
+  // A design-counterfactual event has no historical record to follow or depart from: its badge
+  // speaks of the staff default instead.
+  const counterfactual = isDesignCounterfactualEvent(def);
   const sourceNote = diagMode ? (def?.source_note ?? def?.historical_source ?? null) : null;
   const sourceNoteExcerpt = sourceNote ? truncateSourceNote(sourceNote) : null;
   const decisionTitle = resolveDecisionTitle(decision, eventCatalog);
@@ -216,7 +220,9 @@ function DecisionHistoryRecordRow({
               : 'bg-panel-border/45 text-text-secondary'
           }`}
         >
-          {t(diverged ? 'decisionHistory.badge.diverged' : 'decisionHistory.badge.historical')}
+          {t(counterfactual
+            ? (diverged ? 'decisionHistory.badge.otherChoice' : 'decisionHistory.badge.staffDefault')
+            : (diverged ? 'decisionHistory.badge.diverged' : 'decisionHistory.badge.historical'))}
         </span>
       </button>
       {isExpanded && (
