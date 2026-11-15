@@ -49,8 +49,6 @@ export const PERSONNEL_HEALTHY_THRESHOLD = 0.7;
 /** Cohesion above which corps is considered healthy for offensive. */
 export const COHESION_HEALTHY_THRESHOLD = 50;
 
-/** Sector threat ratio for emergency defensive operations. */
-export const EMERGENCY_THREAT_THRESHOLD = 2.0;
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Named operation parameters (from bot_corps_ai.ts)
