@@ -2338,7 +2338,7 @@
     "requires_player_response": true,
     "bot_response_logic": "historical",
     "historical_default_response_id": "accept_recovery",
-    "source_note": "The existing patron-pressure source text frames this as the historical acceptance path under Milošević pressure in 1995 after partial disavowal and renewed terms for recovery.",
+    "source_note": "Design counterfactual, not a documented offer (historian check 2026-11-15: no recovery offer is attested in Balkan Battlegrounds or the Karadžić judgment, and Pale refused repeatedly). The event condenses Belgrade's 1994-95 pressure on the Pale leadership: the 4 August 1994 blockade announced after the Contact Group plan was rejected (BB Vol. I chronology, p. 23) and the 29 August 1995 Dobanovci agreement on a joint delegation led by Milošević (ICTY Karadžić IT-95-5/18-T para. 424). It can fire from turn 45 with no end turn, so the note describes 1994-95 events, not events of its firing date.",
     "staff_assessment": "Accepting restores some patron confidence but narrows Pale's autonomy; refusing preserves internal room for maneuver while locking in the partial disavowal.",
     "trigger_evidence": [
       "The patron has already partly disowned the leadership.",
@@ -2419,7 +2419,7 @@
         "risk_level": 0.7
       }
     ],
-    "historical_source": "LANE-NIGHTSHIFT-CONSEQUENCE-BREADTH (patron pressure B3). DECISION event with binary recovery/refuse path. Bot defaults to historical (which here is acceptance under Milošević 1995 pressure)."
+    "historical_source": "LANE-NIGHTSHIFT-CONSEQUENCE-BREADTH (patron pressure B3). DECISION event with binary recovery/refuse path. Bot defaults to the authored historical_default marker (accept_recovery); the marker is a design default, not an attested historical choice, and the player-facing label says so (2026-11-15). Context: BB Vol. I chronology p. 23 (4 August 1994 blockade); ICTY Karadžić IT-95-5/18-T para. 424 (29 August 1995 Dobanovci agreement)."
   },
   {
     "id": "csq_patron_arms_review_imposed_RBiH",
