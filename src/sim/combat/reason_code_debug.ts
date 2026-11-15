@@ -119,6 +119,8 @@ import { stableStringify } from '../../utils/stable_json.js';
  *                   stance and its formula driver, corps exhaustion, the commander's
  *                   plan action and reason (why no plan was made), force tiers, and
  *                   healthy-brigade counts by the 3,000 cap and by designed strength.
+ *                   The same topic writes one `[corps_exhaustion]` line at every
+ *                   corps_exhaustion write: source, before, after, and the operation.
  */
 export type ReasonCodeTopic =
     | 'battle_stack'
@@ -313,6 +315,20 @@ export function emitCorpsPlanRecord(record: Record<string, unknown>): void {
         console.log(`${CORPS_PLAN_PREFIX} ${stableStringify({ schema_version: 1, ...record })}`);
     } catch {
         // Observation and stdout failures cannot affect planning.
+    }
+}
+
+/**
+ * Default-off stdout receipts for every `corps_exhaustion` write (topic `corps_plan`). The payload is a
+ * thunk, built only when the topic is on. Never writes GameState or reports.
+ */
+export const CORPS_EXHAUSTION_PREFIX = '[corps_exhaustion]';
+export function emitCorpsExhaustionRecord(build: () => Record<string, unknown>): void {
+    if (!isReasonCodeTopicEnabled('corps_plan')) return;
+    try {
+        console.log(`${CORPS_EXHAUSTION_PREFIX} ${stableStringify({ schema_version: 1, ...build() })}`);
+    } catch {
+        // Observation and stdout failures cannot affect exhaustion.
     }
 }
 

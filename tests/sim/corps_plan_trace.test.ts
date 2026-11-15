@@ -5,7 +5,12 @@
 
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { generateAllCorpsOrders } from '../../src/sim/combat/bot_corps_ai.js';
-import { CORPS_PLAN_PREFIX, resetReasonCodeTopicCacheForTests } from '../../src/sim/combat/reason_code_debug.js';
+import {
+    CORPS_EXHAUSTION_PREFIX,
+    CORPS_PLAN_PREFIX,
+    emitCorpsExhaustionRecord,
+    resetReasonCodeTopicCacheForTests,
+} from '../../src/sim/combat/reason_code_debug.js';
 import type { FactionId, FormationState, GameState } from '../../src/state/game_state.js';
 
 const CORPS = 'arbih_trace_corps';
@@ -79,6 +84,25 @@ describe('corps_plan receipts', () => {
         expect(typeof rec.stance).toBe('string');
         expect(rec).toHaveProperty('stance_driver');
         expect(rec).toHaveProperty('plan_reason');
+    });
+
+    it('exhaustion receipts do not build their payload when off, and write one prefixed line when on', () => {
+        const lines: string[] = [];
+        const spy = vi.spyOn(console, 'log').mockImplementation((...args: unknown[]) => { lines.push(String(args[0])); });
+        try {
+            setFlag(undefined);
+            const build = vi.fn(() => ({ corps_id: CORPS, source: 'decay_idle', before: 10, after: 8 }));
+            emitCorpsExhaustionRecord(build);
+            expect(build).not.toHaveBeenCalled();
+            setFlag('corps_plan');
+            emitCorpsExhaustionRecord(build);
+            expect(build).toHaveBeenCalledTimes(1);
+        } finally {
+            spy.mockRestore();
+        }
+        expect(lines).toHaveLength(1);
+        expect(lines[0]!.startsWith(CORPS_EXHAUSTION_PREFIX)).toBe(true);
+        expect(JSON.parse(lines[0]!.slice(CORPS_EXHAUSTION_PREFIX.length + 1))).toMatchObject({ schema_version: 1, source: 'decay_idle', before: 10, after: 8 });
     });
 
     it('change no state: the pass leaves the same GameState with the topic on and off', () => {

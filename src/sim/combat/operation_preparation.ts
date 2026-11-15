@@ -97,6 +97,7 @@ import { engageTacticalGroup, formTacticalGroup } from './tactical_group_lifecyc
 // REASON-CODE INSTRUMENTATION (topic `tg_formation`): env-gated, absent by default.
 import {
     createSouthernMoveConfidenceLookupContext,
+    emitCorpsExhaustionRecord,
     emitLinkedPreparationProbeRecord,
     emitSouthernMoveConfidenceLookupRecord,
     emitMistralTgActivationRecord,
@@ -1756,7 +1757,12 @@ export function resolveActiveProbe(
     // Add exhaustion cost
     const cmd = state.military.corps_command?.[corpsId];
     if (cmd) {
+        const exhBefore = cmd.corps_exhaustion ?? 0;
         cmd.corps_exhaustion = Math.min(100, (cmd.corps_exhaustion ?? 0) + PROBE_EXHAUSTION_COST);
+        emitCorpsExhaustionRecord(() => ({
+            turn, corps_id: corpsId, faction, source: 'preparation_probe',
+            before: exhBefore, after: cmd.corps_exhaustion, op_name: op.name, op_type: op.type,
+        }));
     }
     emitSouthernMovePreparationRecord(op.name, faction, corpsId, turn, () => ({
         event: 'probe_return', entrypoint: 'real_probe', outcome: writeCount > 0 ? 'resolved_with_writes' : 'resolved_no_credit',
