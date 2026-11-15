@@ -62,20 +62,7 @@ const UNCHECKED_RANGES = /(Mladić IT-09-92-T §§(4631-4685|4750-4795)|Milošev
  * They need the historian and narrative seats (the claims beside some of them are contradicted by
  * the judgment), so they are not touched here. Remove an entry when its string is fixed.
  */
-const KNOWN_VISIBLE_TO_FIX: ReadonlyArray<string> = [
-    'dayton_talks_begin_1995:historical_source',
-    'rs_strategic_goals:ro0.fc10',
-    'rs_strategic_goals:ro0.fc11',
-    'rs_strategic_goals:ro0.fc13',
-    'rs_strategic_goals:ro1.fc0',
-    'rs_strategic_goals:ro1.fc9',
-    'rs_strategic_goals:ro1.fc10',
-    'rs_strategic_goals:ro1.fc12',
-    'rs_strategic_goals:ro2.fc0',
-    'rs_strategic_goals:ro2.fc9',
-    'rs_strategic_goals:ro2.fc10',
-    'rs_strategic_goals:ro2.fc12',
-];
+const KNOWN_VISIBLE_TO_FIX: ReadonlyArray<string> = [];
 
 const mentions = (text: string): boolean => {
     WRONG_KARADZIC_RANGES.lastIndex = 0;

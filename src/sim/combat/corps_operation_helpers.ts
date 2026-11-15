@@ -13,8 +13,8 @@
  * DOWNSTREAM: sector_offensive.ts (canonical lifecycle owner receives created ops)
  *
  * TRUTH INVARIANTS:
- * - Four canonical factories: buildCorpsOperation, buildCommanderOperation,
- *   buildEmergencyDefenseOperation, buildProbeOperation
+ * - Three canonical factories: buildCorpsOperation, buildCommanderOperation,
+ *   buildProbeOperation (buildEmergencyDefenseOperation retired 2026-11-15)
  * - All CorpsOperation creation must flow through one of these factories
  * - Deterministic: sorted via strictCompare; no Math.random(), no Date.now()
  * ═══════════════════════════════════════════════════════════════
@@ -463,31 +463,6 @@ export function buildCommanderOperation(
         // Set at emit time so power-attrition abort gate fires correctly for
         // commander-generated ops (operation_aar.ts skips the write when already set).
         initial_strength: initialStrength,
-    };
-}
-
-/** Factory for AI-generated emergency defensive operations (strategic_defense type). */
-export function buildEmergencyDefenseOperation(
-    corpsId: string,
-    turn: number,
-    participatingBrigades: string[],
-    targetSettlements: string[],
-    sectorId?: string,
-): CorpsOperation {
-    return {
-        name: `Emergency Defense (${corpsId})`,
-        type: 'strategic_defense',
-        phase: 'planning',
-        started_turn: turn,
-        phase_started_turn: turn,
-        participating_brigades: participatingBrigades,
-        sector_id: sectorId,
-        target_settlements: targetSettlements,
-        supply_readiness: 1.0,
-        momentum: 0,
-        failure_count: 0,
-        consecutive_failures_on_current: 0,
-        is_emergency: true,
     };
 }
 

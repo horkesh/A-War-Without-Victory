@@ -54,8 +54,6 @@ const ENTRIES: Entry[] = FILES.flatMap((file) =>
 const PRLIC_RANGE = /(?:Vol\. ?(?:[1-4]|IV|III|II|I)|Appeals(?: Judgment)?(?: \(29 Nov(?:ember)? 2017\))?) ?§§(\d+)-(\d+)/g;
 const SUPPORTED = new Set(['44-67']); // Vol. 4: the JCE's common criminal purpose
 const PRLIC_CONTEXT = /IT-04-74|Prli[cć]/;
-/** Reviewed-contract pin (src/sim/events/opening_policy_transition.ts): its hidden notes are fixed with the re-pin. */
-const PINNED_BY_REVIEWED_CONTRACT: ReadonlyArray<string> = ['rbih_state_identity'];
 
 /** [start, end) spans of every "(the earlier cite ...)" or "(the range ...)" correction, nested parentheses included. */
 function correctionSpans(text: string): Array<[number, number]> {
@@ -92,24 +90,7 @@ function unmarkedRanges(entry: Entry): string[] {
 const mentions = (entry: Entry): boolean => PRLIC_CONTEXT.test(entry.text) && [...entry.text.matchAll(PRLIC_RANGE)].some((m) => !SUPPORTED.has(`${m[1]}-${m[2]}`));
 
 /** Player-visible strings that still carry an unchecked Prlić range. Fix them with the seats, then remove the entry. */
-const KNOWN_VISIBLE_TO_FIX: ReadonlyArray<string> = [
-    'hrhb_camp_exposure_response_1993:historical_source', 'hrhb_central_bosnia_defense_1993:historical_source',
-    'hrhb_contact_group_response_1994:historical_source', 'hrhb_federation_army_integration_1994:historical_source',
-    'hrhb_federation_overture_1993:historical_source', 'hrhb_herceg_bosna_consolidation_1992:historical_source',
-    'hrhb_owen_stoltenberg_response_1993:historical_source', 'hrhb_territorial_scope_1993:historical_source',
-    'hrhb_vance_owen_acceptance_1993:historical_source', 'hrhb_washington_agreement_1994:historical_source',
-    'hv_hvo_cooperation_1995:historical_source', 'rbih_federation_army_integration_1994:historical_source',
-    'rbih_washington_agreement_1994:historical_source', 'zagreb_orders_hrhb_ceasefire:source_note',
-    'zagreb_restrains_boban_vopp:historical_source',
-    'hrhb_political_goal:ro0.fc2', 'hrhb_political_goal:ro0.fc3', 'hrhb_political_goal:ro0.fc4', 'hrhb_political_goal:ro0.fc6',
-    'hrhb_political_goal:ro0.fc9', 'hrhb_political_goal:ro0.fc10', 'hrhb_political_goal:ro0.fc11', 'hrhb_political_goal:ro0.fc12',
-    'hrhb_political_goal:ro0.fc13',
-    'hrhb_political_goal:ro1.fc1', 'hrhb_political_goal:ro1.fc2', 'hrhb_political_goal:ro1.fc8', 'hrhb_political_goal:ro1.fc9',
-    'hrhb_political_goal:ro1.fc10', 'hrhb_political_goal:ro1.fc11', 'hrhb_political_goal:ro1.fc12',
-    'hrhb_political_goal:ro2.fc1', 'hrhb_political_goal:ro2.fc2', 'hrhb_political_goal:ro2.fc3', 'hrhb_political_goal:ro2.fc5',
-    'hrhb_political_goal:ro2.fc8', 'hrhb_political_goal:ro2.fc9', 'hrhb_political_goal:ro2.fc10', 'hrhb_political_goal:ro2.fc11',
-    'hrhb_political_goal:ro2.fc12',
-];
+const KNOWN_VISIBLE_TO_FIX: ReadonlyArray<string> = [];
 
 describe('Prlić et al. paragraph ranges in the event data', () => {
     it('is not vacuous: the corrections are recorded in the hidden data', () => {
@@ -120,17 +101,10 @@ describe('Prlić et al. paragraph ranges in the event data', () => {
 
     it('hidden text: every Prlić range says what the paragraphs really are', () => {
         const live: string[] = [];
-        for (const entry of ENTRIES.filter((row) => !row.visible && PRLIC_CONTEXT.test(row.text) && !PINNED_BY_REVIEWED_CONTRACT.includes(row.id))) {
+        for (const entry of ENTRIES.filter((row) => !row.visible && PRLIC_CONTEXT.test(row.text))) {
             for (const range of unmarkedRanges(entry)) live.push(`${entry.id}:${entry.where} ${range}`);
         }
         expect(live).toEqual([]);
-    });
-
-    it('the pinned event is the only one left with an uncorrected hidden Prlić range', () => {
-        const source = withoutComments(readFileSync('src/sim/events/opening_policy_transition.ts', 'utf8'));
-        expect(source).toContain("const IDENTITY = 'rbih_state_identity'");
-        const pinned = ENTRIES.filter((entry) => !entry.visible && PINNED_BY_REVIEWED_CONTRACT.includes(entry.id) && PRLIC_CONTEXT.test(entry.text));
-        expect(pinned.length).toBeGreaterThan(0);
     });
 
     it('the Appeals Chamber is not said to have reversed the Tudjman, Šušak and Bobetko finding', () => {

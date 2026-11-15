@@ -13,7 +13,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { computeSectorThreat } from '../../src/sim/combat/bot_corps_helpers.js';
 import { generateCorpsStanceOrders, type CorpsStanceTrace } from '../../src/sim/combat/bot_corps_stance.js';
-import { generateEmergencyDefensiveOperations } from '../../src/sim/combat/bot_corps_operations.js';
 import { generateAllCorpsOrders } from '../../src/sim/combat/bot_corps_ai.js';
 import { warPhases } from '../../src/sim/turn_phases/war_phases.js';
 import type { FactionId, FormationState, GameState } from '../../src/state/game_state.js';
@@ -119,11 +118,10 @@ describe('RF-F1g: generateAllCorpsOrders passes the OSID edges to the threat', (
         expect(run(undefined)).toBe(0);
     });
 
-    it('the emergency call site also gets the OSID edges: the same threat drives it inside the bot pass', () => {
-        // generateAllCorpsOrders passes `effectiveOsidEdges` to generateEmergencyDefensiveOperations.
-        // With the OSID graph the formula sees threat 2.5 > 1.5, the corps goes defensive, and at
-        // threat >= 2.0 with two healthy brigades it opens one emergency op. With S-id edges it never does.
-        // (Reverting the emergency call site to `edges` fails this test.)
+    it('inside the bot pass the real threat makes the corps defensive, and no emergency op is created (retired)', () => {
+        // With the OSID graph the formula sees threat 2.5 > 1.5 and the corps goes defensive; with
+        // S-id edges it does not. The emergency defensive operation that used to follow at
+        // threat >= 2.0 was retired (RF-emergency-defense 2026-11-15): it must never appear.
         const run = (osidEdges: unknown[] | undefined) => {
             const state = makeState();
             const spy = vi.spyOn(console, 'log').mockImplementation(() => {});
@@ -135,36 +133,8 @@ describe('RF-F1g: generateAllCorpsOrders passes the OSID edges to the threat', (
             const cmd = state.military.corps_command![CORPS]!;
             return { stance: cmd.stance, emergency: cmd.active_operations.filter(op => op.is_emergency).length };
         };
-        const withGraph = run(OSID_EDGES);
-        const without = run(undefined);
-        expect(withGraph).toEqual({ stance: 'defensive', emergency: 1 });
-        expect(without.emergency).toBe(0);
-    });
-});
-
-describe('RF-F1g: emergency defensive operations can fire', () => {
-    it('a defensive corps under threat >= 2.0 gets exactly one emergency op on the adjacent enemy OSID', () => {
-        const state = makeState();
-        state.military.corps_command![CORPS]!.stance = 'defensive';
-        const spy = vi.spyOn(console, 'log').mockImplementation(() => {});
-        try {
-            generateEmergencyDefensiveOperations(state, 'RS', OSID_EDGES as never, new Map());
-            generateEmergencyDefensiveOperations(state, 'RS', OSID_EDGES as never, new Map());
-        } finally {
-            spy.mockRestore();
-        }
-        const ops = state.military.corps_command![CORPS]!.active_operations;
-        expect(ops.filter(op => op.is_emergency)).toHaveLength(1);
-        expect(ops[0]!.target_settlements).toEqual(['op:t:front']);
-        expect(ops[0]!.participating_brigades.length).toBeLessThanOrEqual(4);
-        expect(ops[0]!.participating_brigades).toEqual(expect.arrayContaining(['b1', 'b2']));
-    });
-
-    it('control: with S-id edges no emergency op is ever created (threat 0)', () => {
-        const state = makeState();
-        state.military.corps_command![CORPS]!.stance = 'defensive';
-        generateEmergencyDefensiveOperations(state, 'RS', S_EDGES as never, new Map());
-        expect(state.military.corps_command![CORPS]!.active_operations).toEqual([]);
+        expect(run(OSID_EDGES)).toEqual({ stance: 'defensive', emergency: 0 });
+        expect(run(undefined).stance).not.toBe('defensive');
     });
 });
 
