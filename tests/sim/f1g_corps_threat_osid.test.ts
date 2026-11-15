@@ -83,7 +83,7 @@ describe('RF-F1g: computeSectorThreat reads the OSID graph', () => {
 });
 
 describe('RF-F1g: the stance formula sees the threat', () => {
-    it('with OSID edges the formula stance is defensive, driven by threat_high', () => {
+    it('with OSID edges the formula reads the real threat (2.5, above the 1.5 defensive line)', () => {
         const state = makeState();
         const trace = new Map<string, CorpsStanceTrace>();
         generateCorpsStanceOrders(state, 'RS', OSID_EDGES as never, new Map(), trace);
@@ -117,6 +117,28 @@ describe('RF-F1g: generateAllCorpsOrders passes the OSID edges to the threat', (
         };
         expect(run(OSID_EDGES)).toBeCloseTo(2.5, 6);
         expect(run(undefined)).toBe(0);
+    });
+
+    it('the emergency call site also gets the OSID edges: the same threat drives it inside the bot pass', () => {
+        // generateAllCorpsOrders passes `effectiveOsidEdges` to generateEmergencyDefensiveOperations.
+        // With the OSID graph the formula sees threat 2.5 > 1.5, the corps goes defensive, and at
+        // threat >= 2.0 with two healthy brigades it opens one emergency op. With S-id edges it never does.
+        // (Reverting the emergency call site to `edges` fails this test.)
+        const run = (osidEdges: unknown[] | undefined) => {
+            const state = makeState();
+            const spy = vi.spyOn(console, 'log').mockImplementation(() => {});
+            try {
+                generateAllCorpsOrders(state, 'RS', S_EDGES as never, new Map(), null, osidEdges as never);
+            } finally {
+                spy.mockRestore();
+            }
+            const cmd = state.military.corps_command![CORPS]!;
+            return { stance: cmd.stance, emergency: cmd.active_operations.filter(op => op.is_emergency).length };
+        };
+        const withGraph = run(OSID_EDGES);
+        const without = run(undefined);
+        expect(withGraph).toEqual({ stance: 'defensive', emergency: 1 });
+        expect(without.emergency).toBe(0);
     });
 });
 
