@@ -40,6 +40,8 @@ export type EventCondition =
     // ─── Ring-1 divergence-event predicates (LANE-NIGHTSHIFT-ROUND2-DIVERGENCE-EVENT-SEEDS) ──
     /** True when state.political.paramilitary_mode equals the given value (defaults to 'rear_pocket' when undefined). Faction-agnostic. */
     | { type: 'paramilitary_mode_equals'; value: 'rear_pocket' | 'offensive' }
+    /** RF-PM1: true when the faction's paramilitary deployment count (state.paramilitary_deployment_count) is at most `max` (missing = 0). Per-faction. */
+    | { type: 'paramilitary_deployments_at_most'; faction: FactionId; max: number }
     /** Aggregates state.political.enclave_resilience entries via 'max' | 'min' | 'mean' and compares to threshold.
      *  Both bare-number and EnclaveResilienceEntry shapes are read; EnclaveResilienceEntry uses .resilience. */
     | { type: 'enclave_resilience_aggregate'; aggregate: 'max' | 'min' | 'mean'; comparator: 'above' | 'below'; threshold: number }
@@ -946,6 +948,13 @@ export function evaluateCondition(condition: EventCondition, state: GameState, e
             }
             const mode: 'rear_pocket' | 'offensive' = anyOffensive ? 'offensive' : 'rear_pocket';
             return mode === condition.value;
+        }
+        case 'paramilitary_deployments_at_most': {
+            // RF-PM1: how many paramilitary sweeps the faction has actually deployed
+            // (state.paramilitary_deployment_count, written by paramilitary_sweep.ts).
+            // A missing entry means none.
+            const deployed = state.paramilitary_deployment_count?.[condition.faction] ?? 0;
+            return deployed <= condition.max;
         }
         case 'enclave_resilience_aggregate': {
             const er = state.political?.enclave_resilience;

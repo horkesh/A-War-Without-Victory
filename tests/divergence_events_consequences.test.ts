@@ -126,6 +126,14 @@ describe('LANE-NIGHTSHIFT-ROUND2: divergence event seeds', () => {
             'pm_1': { id: 'pm_1', faction: 'RS', kind: 'brigade', status: 'active', name: 'pm', created_turn: 0, assignment: null, paramilitary_mode: 'offensive' } as any,
         };
         expect(evaluateCondition(cond, lapsed)).toBe(false);
+        // RF-PM1: the refusal is real only when RS has deployed no paramilitary sweep.
+        // One RS deployment blocks it; another faction's deployments do not.
+        const deployed = baseState(22) as any;
+        deployed.paramilitary_deployment_count = { RS: 1 };
+        expect(evaluateCondition(cond, deployed)).toBe(false);
+        const otherFaction = baseState(22) as any;
+        otherFaction.paramilitary_deployment_count = { HRHB: 3, RS: 0 };
+        expect(evaluateCondition(cond, otherFaction)).toBe(true);
         applyEventEffects(fires, effectsOf(def));
         // No mechanical effect on negotiation_capital.international_credibility key needed —
         // the negotiation_capital writer only mutates fields already present on the capital

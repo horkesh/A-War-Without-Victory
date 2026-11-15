@@ -1628,8 +1628,9 @@
             "value": "rear_pocket"
           },
           {
-            "type": "flag_not_set",
-            "flag": "paramilitary_offensive_authorized"
+            "type": "paramilitary_deployments_at_most",
+            "faction": "RS",
+            "max": 0
           }
         ]
       }
@@ -1638,7 +1639,7 @@
     "priority": 80,
     "effect": {
       "kind": "narrative",
-      "text": "No paramilitary authorization for 20+ turns; clean-record divergence."
+      "text": "No RS paramilitary deployment for 20+ turns; clean-record divergence."
     },
     "effects": [
       {
