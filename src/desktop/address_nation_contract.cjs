@@ -8,8 +8,8 @@
  * `address_to_nation_<faction>` event (data/scenarios/events/war_1993.json) into
  * `state.military.pending_event_decisions` so EventDecisionModal surfaces it.
  * ZERO new sim/event code — the event's authored effects (morale / cohesion /
- * patron_pressure / standing shifts, all double-edged), voluntary action cadence (max_fires 5 /
- * cooldown 10t), and branches are reused verbatim.
+ * patron_pressure / standing shifts, all double-edged), voluntary action cadence (renewable
+ * cooldown since appendix D, 2026-11-15), and branches are reused verbatim.
  *
  * Unlike the front visit, an address is FACTION-WIDE: there is NO reachability /
  * enclave gate (the president broadcasts from the capital; no front is travelled
@@ -85,8 +85,8 @@ function computeAddressNationAvailability(state, playerFaction, eventDef) {
 
   const out = {
     ...base,
-    firesLeft: Number.isFinite(firesLeft) ? firesLeft : maxFires,
-    maxFires: Number.isFinite(maxFires) ? maxFires : 0,
+    firesLeft: Number.isFinite(firesLeft) ? firesLeft : null, // null = renewable (no lifetime cap)
+    maxFires: Number.isFinite(maxFires) ? maxFires : null,
     cooldownUntil,
     onCooldown,
   };

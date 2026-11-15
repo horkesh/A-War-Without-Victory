@@ -726,7 +726,17 @@ export interface RecurrenceConfig {
  * while `evaluateEvents` continues to apply `once` to the row's natural
  * occurrence and never uses this field to manufacture another decision.
  */
-export type ActionCadenceConfig = RecurrenceConfig;
+export interface ActionCadenceConfig {
+    /**
+     * Lifetime cap on player-initiated fires. Optional: without it the action is renewable and
+     * limited by `cooldown_turns` alone (renewable gestures, Fable consult 1 appendix D).
+     */
+    max_fires?: number;
+    /** Minimum turns between player-initiated fires (positive when `max_fires` is absent). */
+    cooldown_turns: number;
+    /** How stakes change on each fire. */
+    escalation: 'static' | 'escalating' | 'deteriorating';
+}
 
 /** Check if trigger matches current state (deterministic). */
 export function triggerMatches(def: EventDefinition, state: GameState, currentTurn: number, edges?: EdgeRecord[]): boolean {

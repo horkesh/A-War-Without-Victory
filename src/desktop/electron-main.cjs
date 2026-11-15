@@ -3104,7 +3104,7 @@ app.whenReady().then(() => {
   // EventDecisionModal surfaces it. ZERO new sim/event code — the event's authored
   // effects/action cadence/branches are reused. Guards (in order):
   //   1. player faction must resolve to a visit_to_front_<faction> event
-  //   2. cooldown/cap use the event's action_cadence (max_fires 5 / cooldown 10t)
+  //   2. cooldown/cap use the event's action_cadence (a renewable cooldown since appendix D, 2026-11-15; see war_1993.json)
   //   3. ENCLAVE REACHABILITY GATE: front branches filtered to corridored targets;
   //      all-cut-off → 'all_cut_off' refusal
   //   4. CA guard + debit FRONT_VISIT_COST (10)
@@ -3151,7 +3151,7 @@ app.whenReady().then(() => {
       }
       state.military.pending_event_decisions.push(decision);
 
-      // Record the fire so the event's action_cadence (max_fires 5 / cooldown 10t)
+      // Record the fire so the event's action_cadence (a renewable cooldown since appendix D, 2026-11-15; see war_1993.json)
       // gates subsequent visits. resolveEventDecision (the modal-resolve path)
       // does NOT increment these — so we record at queue time here, mirroring the
       // calendar-fire bookkeeping in evaluate_events.ts:194-202. The act of
