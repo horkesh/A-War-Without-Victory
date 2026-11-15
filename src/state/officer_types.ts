@@ -105,10 +105,12 @@ export interface NamedOfficer {
     /**
      * A2 substrate (DDR Q3): willingness to launch operations the political
      * leader did NOT explicitly order. 1-5 scale (higher = more autonomous).
-     * ≥4 unlocks autonomous-launch path in A3. Canonical defaults from DDR:
-     * Mladić=5, Halilović=4, Praljak=3, Delić=2, Petković=2, Roso=2. Defaults
-     * applied at population time (A4); undefined here means "use canonical
-     * fallback" in A3.
+     * ≥4 unlocks autonomous-launch path in A3. Values come from
+     * data/scenarios/army_co_roster.json (Mladić=5, Halilović=4, Praljak=3,
+     * Delić=2, Petković=2, Roso=2; design-authored, see the DDR's RF-ROSTER
+     * addendum). The roster owns the field for the officers it lists
+     * (applyRosterStubbornness at officer init, applyRosterToOfficers every war turn);
+     * save migration 10 defaults any other officer to 3.
      *
      * Faction-symmetric mechanism: every army CO has a stubbornness value;
      * faction-asymmetric data only.
