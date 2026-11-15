@@ -315,6 +315,21 @@ describe('desktop player-visible state projection', () => {
     expect(projected.factions.map((faction: any) => faction.id)).toEqual(['RS']);
   });
 
+  it('keeps the player\'s own army decision traces and never the opponent\'s', () => {
+    const state = makeState() as any;
+    state.military.army_co_decision_traces = {
+      RS: [{ turn: 8, campaign_role: 'HOLD_AT_ALL_COSTS', rationale: 'executes HOLD_AT_ALL_COSTS as issued.', raw_directive_id: 'rs_directive_8' }],
+      RBiH: [{ turn: 8, campaign_role: 'PRESS_OFFENSIVE', rationale: 'secret rationale', raw_directive_id: 'rbih_directive_8' }],
+    };
+    const projected = loadProjector().projectPlayerVisibleState(state);
+
+    // A per-faction record, scoped to the player. It used to project as [] (the live app never
+    // received it), which left the Army HQ Records "staff reading of policy" line empty.
+    expect(Object.keys(projected.military.army_co_decision_traces)).toEqual(['RS']);
+    expect(projected.military.army_co_decision_traces.RS[0].campaign_role).toBe('HOLD_AT_ALL_COSTS');
+    expect(JSON.stringify(projected)).not.toContain('secret rationale');
+  });
+
   it('keeps the player informed about a pending autonomy transition', () => {
     const projected = loadProjector().projectPlayerVisibleState(makeState());
 

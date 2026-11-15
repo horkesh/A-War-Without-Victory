@@ -153,7 +153,11 @@ describe('derivePendingOfficerEvents', () => {
         expect(evt.override_action).toBeUndefined();
     });
 
-    it('maps army_directive_pushback as a command interpretation event', () => {
+    // Command-loop L1 (2A step A0): the weekly army_directive_pushback answers a directive the
+    // President never gave. For his own faction it is not a pending matter (it is one Army HQ
+    // Records line, read from the decision traces); order-level objections to his own orders still
+    // map and still count as command interpretation.
+    it('does not surface the weekly army_directive_pushback, and still maps an order-level pushback', () => {
         const raw = makeRawState({
             meta: { turn: 10, phase: 'war', player_faction: 'RBiH' },
             military: {
@@ -180,13 +184,23 @@ describe('derivePendingOfficerEvents', () => {
                         reason: 'Army command pushes back on the political directive.',
                         overridable: true,
                     },
+                    {
+                        event_id: 'order-pushback-1',
+                        type: 'order_pushback',
+                        faction: 'RBiH',
+                        turn: 10,
+                        officer_id: 'army_co',
+                        acknowledged: false,
+                        reason: 'Army command objects to the order as given.',
+                        overridable: false,
+                    },
                 ],
             },
         });
 
         const parsed = parseGameState(raw);
 
-        expect(parsed.pendingOfficerEvents?.[0]?.type).toBe('army_directive_pushback');
+        expect((parsed.pendingOfficerEvents ?? []).map((event) => event.type)).toEqual(['order_pushback']);
         expect(parsed.presidentialReviewQueue).toMatchObject({
             pendingCount: 1,
             criticalCount: 0,

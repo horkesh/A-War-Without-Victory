@@ -2292,8 +2292,10 @@ function App() {
               setSidePickerOpen(true);
               setSidePickerDismissed(false);
             }}
+            // Status dock: hidden on the Dayton signing and the Verdict, which render under
+            // `gameOver` (command-loop 2C). Only the dock is gated, not the shared blocking flag.
             statusDock={(
-              !presidentialBlockingSurfaceActive ? (
+              !presidentialBlockingSurfaceActive && !loadedGameState?.gameOver ? (
                 <WarroomStatusBar
                   onReviewPriorities={reviewPreAdvancePriorities}
                   onReviewItem={reviewPreAdvanceItem}
