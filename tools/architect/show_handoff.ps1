@@ -17,7 +17,7 @@ param(
 $ErrorActionPreference = "SilentlyContinue"
 
 $repoRoot = (git rev-parse --show-toplevel 2>$null)
-if (-not $repoRoot) { $repoRoot = "F:\A-War-Without-Victory" }
+if (-not $repoRoot) { $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..\..')).Path }
 
 $inboxDir = Join-Path $repoRoot "handoffs\inbox"
 

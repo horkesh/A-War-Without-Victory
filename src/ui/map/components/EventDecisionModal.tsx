@@ -26,6 +26,8 @@ import { Z } from '../../shared/zIndex';
 import { Modal } from '../../shared/Modal';
 import { DecisionModalImageHeader } from './DecisionModalImageHeader';
 import { resolveEventIllustration, section6StillAlt } from '../data/eventIllustrationArt';
+import { displayEventProse, resolveEventSourceLine } from '../data/eventDisplayCopy';
+import { restoreBosnianProperNames } from '../../shared/bosnianPlaceNames';
 import { getDecisionHeaderForEventCategory } from '../data/presidentialDeskAssets';
 import { isDisplayEventEffect } from '../utils/eventEffectDisplay';
 import { turnToDateString } from '../utils/formatters';
@@ -63,6 +65,23 @@ function eventLocalization(def: EventDefinition | undefined, locale: Locale) {
     return def?.localizations?.[locale];
 }
 
+/**
+ * The pending decision carries a copy of the catalog text taken when the event fired, inside
+ * the save. Display prefers the catalog's current wording (council fix 4 corrected developer
+ * text and names in place), so an older save shows the corrected copy too; the stored copy is
+ * the fallback and is never rewritten. `title` stays on the persisted copy (its display
+ * correction lives in `localizations.en.title`).
+ */
+function catalogText(
+    original: string | undefined,
+    def: EventDefinition | undefined,
+    field: 'title' | 'narrative' | 'situation' | 'staff_assessment' | 'historical_source' | 'source_note' | 'source',
+): string | undefined {
+    if (field === 'title') return original;
+    const current = def?.[field];
+    return typeof current === 'string' && current.trim().length > 0 ? current : original;
+}
+
 function localizedField(
     original: string | undefined,
     def: EventDefinition | undefined,
@@ -70,7 +89,7 @@ function localizedField(
     field: 'title' | 'narrative' | 'situation' | 'staff_assessment' | 'historical_source' | 'source_note' | 'source',
 ): string | undefined {
     const localized = eventLocalization(def, locale)?.[field];
-    return typeof localized === 'string' && localized.trim().length > 0 ? localized : original;
+    return typeof localized === 'string' && localized.trim().length > 0 ? localized : catalogText(original, def, field);
 }
 
 function localizedTriggerEvidence(
@@ -79,7 +98,8 @@ function localizedTriggerEvidence(
     locale: Locale,
 ): string[] | undefined {
     const localized = eventLocalization(def, locale)?.trigger_evidence;
-    return Array.isArray(localized) && localized.length > 0 ? localized : original;
+    if (Array.isArray(localized) && localized.length > 0) return localized;
+    return Array.isArray(def?.trigger_evidence) && def.trigger_evidence.length > 0 ? def.trigger_evidence : original;
 }
 
 function localizedResponseOptions(
@@ -88,14 +108,16 @@ function localizedResponseOptions(
     locale: Locale,
 ): EventResponseOption[] {
     const localizedOptions = eventLocalization(def, locale)?.response_options;
-    if (!localizedOptions) return options;
+    const catalogOptions = new Map((def?.response_options ?? []).map((option) => [option.id, option]));
     return options.map((option) => {
-        const localized = localizedOptions[option.id];
-        if (!localized) return option;
+        const current = catalogOptions.get(option.id);
+        const localized = localizedOptions?.[option.id];
+        const label = localized?.label?.trim() || current?.label?.trim() || option.label;
+        const description = localized?.description?.trim() || current?.description?.trim() || option.description;
         return {
             ...option,
-            label: localized.label?.trim() || option.label,
-            description: localized.description?.trim() || option.description,
+            label: displayEventProse(label),
+            description: description === undefined ? undefined : displayEventProse(description),
         };
     });
 }
@@ -109,11 +131,11 @@ function resolveLocalizedDecisionDossier(
     const localizedTitle = localizedField(decision.event_title, def, locale, 'title');
     return {
         ...decision,
-        event_title: getPlayerSafeDecisionTitle(localizedTitle ?? def?.title ?? decision.event_title),
-        narrative: localizedField(decision.narrative, def, locale, 'narrative'),
-        situation: localizedField(decision.situation, def, locale, 'situation'),
-        staff_assessment: localizedField(decision.staff_assessment, def, locale, 'staff_assessment'),
-        trigger_evidence: localizedTriggerEvidence(decision.trigger_evidence, def, locale),
+        event_title: getPlayerSafeDecisionTitle(restoreBosnianProperNames(localizedTitle ?? def?.title ?? decision.event_title)),
+        narrative: displayEventProse(localizedField(decision.narrative, def, locale, 'narrative')),
+        situation: displayEventProse(localizedField(decision.situation, def, locale, 'situation')),
+        staff_assessment: displayEventProse(localizedField(decision.staff_assessment, def, locale, 'staff_assessment')),
+        trigger_evidence: localizedTriggerEvidence(decision.trigger_evidence, def, locale)?.map((line) => displayEventProse(line)),
         historical_source: localizedField(decision.historical_source, def, locale, 'historical_source'),
         source_note: localizedField(decision.source_note, def, locale, 'source_note'),
         source: localizedField(decision.source, def, locale, 'source'),
@@ -240,8 +262,38 @@ function eventDecisionDimensionLabel(dimension: string | undefined): string {
     return key ? t(key) : humanizeToken(dimension);
 }
 
+/** Negotiating-capital components are a separate store from the strategic dimensions (C11). */
+function negotiationCapitalComponentLabel(component: string | undefined): string {
+    if (component === 'international_credibility') return t('eventDecision.capital.internationalCredibility');
+    return eventDecisionDimensionLabel(component).toLocaleLowerCase();
+}
+
+/**
+ * Effect-line nouns (council fix 4, C4/C11): what belongs to an army (morale, supply,
+ * cohesion, recruitment, combat effectiveness, offensives) names the army — ARBiH, VRS, HVO;
+ * what belongs to the state (standing, patron pressure, territory, alliance) names the state
+ * by its canonical short form — RBiH, RS, HRHB — instead of repeating the full state name.
+ */
+function eventDecisionArmyLabel(faction: string | undefined): string {
+    switch (faction) {
+        case 'RBiH': return t('desk.faction.military.rbih');
+        case 'RS': return t('desk.faction.military.rs');
+        case 'HRHB': return t('desk.faction.military.hrhb');
+        default: return eventDecisionFactionLabel(faction);
+    }
+}
+
+function eventDecisionStateShortLabel(faction: string | undefined): string {
+    return faction === 'RBiH' || faction === 'RS' || faction === 'HRHB' ? faction : eventDecisionFactionLabel(faction);
+}
+
 function signedDelta(delta: number): string {
     return `${delta > 0 ? '+' : ''}${delta}`;
+}
+
+/** Engine shares in [-1, 1] (alliance, offensive drive) read as whole points: 0.05 → 5. */
+function shareToPoints(value: number): number {
+    return Math.round(value * 100);
 }
 
 function humanizeRank(rank: string): string {
@@ -274,25 +326,28 @@ export function deriveAssessmentLabel(
 
 /** Render a human-readable summary of an effect. */
 function describeEffect(effect: EventEffect): string {
-    const faction = 'faction' in effect ? eventDecisionFactionLabel(effect.faction) : '';
+    const factionId = 'faction' in effect ? effect.faction : undefined;
+    // State-level effects name the state (RBiH); army-level effects name its army (ARBiH).
+    const faction = factionId ? eventDecisionStateShortLabel(factionId) : '';
+    const army = factionId ? eventDecisionArmyLabel(factionId) : '';
     switch (effect.kind) {
         case 'narrative': return effect.text;
-        case 'morale_change': return t('eventDecision.effect.moraleChange', { faction, delta: signedDelta(effect.delta) });
-        case 'supply_delta': return t('eventDecision.effect.supplyDelta', { faction, delta: signedDelta(effect.delta) });
-        case 'cohesion_change': return t('eventDecision.effect.cohesionChange', { faction, delta: signedDelta(effect.delta) });
+        case 'morale_change': return t('eventDecision.effect.moraleChange', { faction: army, delta: signedDelta(effect.delta) });
+        case 'supply_delta': return t('eventDecision.effect.supplyDelta', { faction: army, delta: signedDelta(effect.delta) });
+        case 'cohesion_change': return t('eventDecision.effect.cohesionChange', { faction: army, delta: signedDelta(effect.delta) });
         case 'humanitarian_impact': return t('eventDecision.effect.humanitarianImpact', {
             faction,
             delta: effect.war_crimes_delta ? ` (${signedDelta(effect.war_crimes_delta)})` : '',
         });
         case 'patron_pressure': return t('eventDecision.effect.patronPressure', { faction, delta: signedDelta(effect.delta) });
         case 'alliance_change': return t('eventDecision.effect.allianceChange', {
-            rbih: eventDecisionFactionLabel('RBiH'),
-            hrhb: eventDecisionFactionLabel('HRHB'),
-            delta: signedDelta(effect.delta),
+            rbih: eventDecisionStateShortLabel('RBiH'),
+            hrhb: eventDecisionStateShortLabel('HRHB'),
+            delta: signedDelta(shareToPoints(effect.delta)),
         });
         case 'negotiation_capital': return t('eventDecision.effect.negotiationCapital', {
             faction,
-            dimension: eventDecisionDimensionLabel(effect.dimension),
+            dimension: negotiationCapitalComponentLabel(effect.dimension),
             delta: signedDelta(effect.delta),
         });
         case 'equipment_grant': {
@@ -302,27 +357,29 @@ function describeEffect(effect: EventEffect): string {
                 effect.aa_systems ? t('eventDecision.equipment.aaSystems', { count: effect.aa_systems }) : '',
             ].filter(Boolean).join(', ');
             return t('eventDecision.effect.equipmentGrant', {
-                faction,
+                faction: army,
                 equipment: granted || t('eventDecision.equipment.support'),
             });
         }
-        case 'aggression_modifier': return t('eventDecision.effect.aggressionModifier', { faction, delta: signedDelta(effect.delta), turns: effect.duration_turns });
+        case 'aggression_modifier': return t('eventDecision.effect.aggressionModifier', { faction: army, delta: signedDelta(shareToPoints(effect.delta)), turns: effect.duration_turns });
         case 'control_change': return t('eventDecision.effect.controlChange', {
             faction,
             count: effect.osids.length,
             areaNoun: t(effect.osids.length === 1 ? 'eventDecision.area.one' : 'eventDecision.area.many'),
         });
         case 'guerrilla_threat': return t('eventDecision.effect.guerrillaThreat', { faction, turns: effect.duration_turns });
-        case 'recruitment_modifier': return t('eventDecision.effect.recruitmentModifier', { faction, percent: Math.round(effect.pool_multiplier * 100), turns: effect.duration_turns });
-        case 'equipment_quality_modifier': return t('eventDecision.effect.equipmentQualityModifier', { faction, percent: Math.round(effect.multiplier * 100), turns: effect.duration_turns });
-        case 'doctrine_constraint': return t('eventDecision.effect.doctrineConstraint', { faction, turns: effect.duration_turns });
-        case 'offensive_ops_suppression': return t('eventDecision.effect.offensiveOpsSuppression', { faction, turns: effect.duration_turns });
+        case 'recruitment_modifier': return t('eventDecision.effect.recruitmentModifier', { faction: army, percent: Math.round(effect.pool_multiplier * 100), turns: effect.duration_turns });
+        case 'equipment_quality_modifier': return t('eventDecision.effect.equipmentQualityModifier', { faction: army, percent: Math.round(effect.multiplier * 100), turns: effect.duration_turns });
+        case 'doctrine_constraint': return t('eventDecision.effect.doctrineConstraint', { faction: army, turns: effect.duration_turns });
+        case 'offensive_ops_suppression': return t('eventDecision.effect.offensiveOpsSuppression', { faction: army, turns: effect.duration_turns });
         case 'alliance_lock': return t('eventDecision.effect.allianceLock', {
+            rbih: eventDecisionStateShortLabel('RBiH'),
+            hrhb: eventDecisionStateShortLabel('HRHB'),
             mode: t(effect.mode === 'floor' ? 'eventDecision.lockMode.floor' : 'eventDecision.lockMode.ceiling'),
-            value: effect.value,
+            value: shareToPoints(effect.value),
             turns: effect.duration_turns,
         });
-        case 'bot_priority_shift': return t('eventDecision.effect.botPriorityShift', { faction, turns: effect.duration_turns });
+        case 'bot_priority_shift': return t('eventDecision.effect.botPriorityShift', { faction: army, turns: effect.duration_turns });
         case 'cost_ledger_annotation': return effect.text ?? t('eventDecision.effect.costLedgerAnnotation');
     }
     return t('eventDecision.effect.recorded');
@@ -330,7 +387,7 @@ function describeEffect(effect: EventEffect): string {
 
 function describeDimensionShift(shift: DimensionShift): string {
     return t('eventDecision.effect.dimensionShift', {
-        faction: eventDecisionFactionLabel(shift.faction),
+        faction: eventDecisionStateShortLabel(shift.faction),
         dimension: eventDecisionDimensionLabel(shift.dimension),
         delta: signedDelta(shift.delta),
     });
@@ -504,9 +561,13 @@ function DecisionContextSection({
     const family = eventDef?.family;
     const sourceTier = eventDef?.source_tier;
     const ancestors = state ? getCausalAncestors(decision.event_id, state) : [];
-    const rawDossier = localizedField(eventDef?.source_note, eventDef, locale, 'source_note')
-        ?? localizedField(eventDef?.historical_source, eventDef, locale, 'historical_source')
-        ?? null;
+    // Players see the first source line free of developer text (council fix 4, C1); the raw
+    // authoring provenance stays available in the diagnostic view.
+    const rawDossier = diagMode
+        ? localizedField(eventDef?.source_note, eventDef, locale, 'source_note')
+            ?? localizedField(eventDef?.historical_source, eventDef, locale, 'historical_source')
+            ?? null
+        : resolveEventSourceLine(eventDef, locale);
     const dossierExcerpt = rawDossier ? truncateSourceDossier(playerSafeDossierText(rawDossier, diagMode)) : null;
     // Resolve ancestry event_ids to catalog titles (humanized id as fallback)
     // so the dev diagnostic shows readable names rather than raw slugs.
@@ -572,14 +633,16 @@ export function EventDecisionModal({ decision, onRespond, eventCatalog, state, a
     const localizedDecision = resolveLocalizedDecisionDossier(decision, eventCatalog, locale);
     const factionColor = FACTION_TEXT_CLASS[localizedDecision.faction ?? ''] ?? 'text-accent-gold';
     const category = eventDecisionCategoryLabel(localizedDecision.category);
-    const sourceNote = localizedDecision.source_note ?? localizedDecision.historical_source ?? localizedDecision.source ?? null;
+    const diagMode = useGameStore((s) => s.diagMode);
+    const sourceNote = diagMode
+        ? localizedDecision.source_note ?? localizedDecision.historical_source ?? localizedDecision.source ?? null
+        : resolveEventSourceLine(eventCatalog?.get(decision.event_id), locale, localizedDecision);
     const hasHistoricalDefault = localizedDecision.response_options.some((option) => isHistoricalOption(option, localizedDecision));
 
     // Phase 2 slice 1 "Back the Officer": for operation/corps-scoped events
     // the assessment block speaks in a named officer's voice; otherwise it falls
     // back to the generic "Staff assessment". (See deriveAssessmentLabel.)
     const assessmentLabel = deriveAssessmentLabel(localizedDecision.category, advisor);
-    const diagMode = useGameStore((s) => s.diagMode);
     const decisionDate = turnToDateString(localizedDecision.turn_fired);
     const safeSourceNote = sourceNote ? playerSafeDossierText(sourceNote, diagMode) : null;
     // Art: the event's own documentary still when it authors one, otherwise the

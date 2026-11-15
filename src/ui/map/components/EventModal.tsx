@@ -20,12 +20,11 @@ import { isDisplayEventEffectKind } from '../utils/eventEffectDisplay';
 import {
     SurfaceCloseButton,
     SurfaceColumns,
-    SurfaceDetail,
     SurfaceHeader,
     SURFACE_CHIP,
     SURFACE_LABEL,
     SURFACE_MODAL_BACKDROP,
-    SURFACE_MODAL_PANEL_COMPACT,
+    SURFACE_MODAL_PANEL_NOTICE,
     SURFACE_PRIMARY_BUTTON,
 } from './surface/Surface';
 
@@ -131,9 +130,44 @@ export function EventModal({ event, queuePosition, queueTotal, onAcknowledge }: 
     // assistive technology. Any other still is decorative beside the narrative.
     const illustrationAlt = section6StillAlt(event.image);
 
-    // Surface redesign (owner, 2026-11-10): a short notice in the Command Surface's style —
-    // the still and the report on the left, what it changes and the single Acknowledged
-    // action on the right, in a footer that never scrolls away.
+    // Surface redesign (owner, 2026-11-10; rebalanced after the 2026-11-14 playtest): a short
+    // notice in the Command Surface's style. The still and its chips sit on the left (the still
+    // fills the column's height, so there is no dead space under it); the report comes first on
+    // the right, with what it changes below it. Without a still the same content stacks in one
+    // column. The single Acknowledged action stays in a footer that never scrolls away.
+    const metadataRow = (
+        <div
+            data-testid="event-modal-metadata-row"
+            className="flex flex-wrap items-center justify-between gap-3"
+        >
+            <div
+                data-testid="event-modal-faction-badges"
+                className="flex min-w-0 flex-1 flex-wrap items-center gap-2"
+            >
+                {factions.map(fid => (
+                    <span
+                        key={fid}
+                        className="rounded border px-3 py-1 text-[14px] font-semibold"
+                        style={{
+                            color: FACTION_COLORS[fid] ?? '#888',
+                            borderColor: `${FACTION_COLORS[fid] ?? '#888'}66`,
+                        }}
+                    >
+                        {getPlayerSafePoliticalFactionName(fid)}
+                    </span>
+                ))}
+            </div>
+            <div
+                data-testid="event-modal-category-stamp"
+                className={`${SURFACE_CHIP} flex shrink-0 items-center gap-2`}
+                style={{ borderColor: cat.color, color: cat.color }}
+            >
+                <Icon name={cat.icon} size={14} color={cat.color} />
+                {t(cat.labelKey)}
+            </div>
+        </div>
+    );
+
     return (
         <Modal
             isOpen={true}
@@ -141,7 +175,7 @@ export function EventModal({ event, queuePosition, queueTotal, onAcknowledge }: 
             zIndex={Z.GLASS_PANEL_EVENT_MODAL}
             ariaLabelledBy="event-modal-title"
             backdropClassName={SURFACE_MODAL_BACKDROP}
-            panelClassName={`relative animate-slideUp ${SURFACE_MODAL_PANEL_COMPACT}`}
+            panelClassName={`relative animate-slideUp ${SURFACE_MODAL_PANEL_NOTICE}`}
             testIdBackdrop="event-modal-backdrop"
             testIdPanel="event-modal-panel"
         >
@@ -155,64 +189,44 @@ export function EventModal({ event, queuePosition, queueTotal, onAcknowledge }: 
                 ) : undefined}
                 close={<SurfaceCloseButton onClick={onAcknowledge} aria-label={t('common.close')} />}
             />
-            <SurfaceColumns layout={mechanicalEffects.length > 0 ? 'content-detail' : 'single'}>
-                <div
-                    className="flex min-h-0 flex-col overflow-y-auto"
-                    data-testid="event-modal-scroll-region"
-                >
-                    {/* Documentary-realism illustration — rendered ONLY when the event
-                        authors an `image` and the asset resolves. */}
-                    {illustration && (
-                        <div className="relative w-full shrink-0" data-testid="event-modal-illustration">
+            <SurfaceColumns layout={illustration ? 'media-content' : 'single'}>
+                {/* Documentary-realism illustration — rendered ONLY when the event
+                    authors an `image` and the asset resolves. */}
+                {illustration && (
+                    <div
+                        className="flex min-h-0 flex-col border-r border-[#262b35] bg-[#0f1218]"
+                        data-testid="event-modal-media-column"
+                    >
+                        <div
+                            className="relative min-h-[11rem] flex-1 overflow-hidden"
+                            data-testid="event-modal-illustration"
+                        >
                             <img
                                 src={illustration}
                                 alt={illustrationAlt ?? ''}
                                 aria-hidden={illustrationAlt ? undefined : 'true'}
-                                className="block max-h-80 w-full object-cover"
-                                style={{ aspectRatio: '16 / 9' }}
+                                className="absolute inset-0 block h-full w-full object-cover"
                             />
                         </div>
-                    )}
-                    <div className="flex flex-col gap-4 px-8 py-6">
-                        <div
-                            data-testid="event-modal-metadata-row"
-                            className="flex flex-wrap items-center justify-between gap-3"
-                        >
-                            <div
-                                data-testid="event-modal-faction-badges"
-                                className="flex min-w-0 flex-1 flex-wrap items-center gap-2"
-                            >
-                                {factions.map(fid => (
-                                    <span
-                                        key={fid}
-                                        className="rounded border px-3 py-1 text-[14px] font-semibold"
-                                        style={{
-                                            color: FACTION_COLORS[fid] ?? '#888',
-                                            borderColor: `${FACTION_COLORS[fid] ?? '#888'}66`,
-                                        }}
-                                    >
-                                        {getPlayerSafePoliticalFactionName(fid)}
-                                    </span>
-                                ))}
-                            </div>
-                            <div
-                                data-testid="event-modal-category-stamp"
-                                className={`${SURFACE_CHIP} flex shrink-0 items-center gap-2`}
-                                style={{ borderColor: cat.color, color: cat.color }}
-                            >
-                                <Icon name={cat.icon} size={14} color={cat.color} />
-                                {t(cat.labelKey)}
-                            </div>
+                        <div className="shrink-0 border-t border-[#262b35] px-6 py-5">
+                            {metadataRow}
                         </div>
-                        <p className="m-0 text-[18px] leading-relaxed text-[#ddd1b3]">
-                            {event.narrative}
-                        </p>
                     </div>
-                </div>
+                )}
 
-                {mechanicalEffects.length > 0 && (
-                    <SurfaceDetail>
-                        <div className="min-h-0 flex-1 overflow-y-auto px-7 py-6">
+                <div
+                    className="flex min-h-0 flex-col gap-6 overflow-y-auto px-8 py-7"
+                    data-testid="event-modal-scroll-region"
+                >
+                    {!illustration && metadataRow}
+                    <p className="m-0 text-[18px] leading-relaxed text-[#ddd1b3]" data-testid="event-modal-narrative">
+                        {event.narrative}
+                    </p>
+                    {mechanicalEffects.length > 0 && (
+                        <section
+                            className="rounded-md border border-[#2a303c] bg-[#161a22] px-5 py-4"
+                            data-testid="event-modal-effects"
+                        >
                             <div className={`pb-3 ${SURFACE_LABEL}`}>
                                 {t('event.intelligenceAssessment')}
                             </div>
@@ -230,9 +244,9 @@ export function EventModal({ event, queuePosition, queueTotal, onAcknowledge }: 
                                     </li>
                                 ))}
                             </ul>
-                        </div>
-                    </SurfaceDetail>
-                )}
+                        </section>
+                    )}
+                </div>
             </SurfaceColumns>
             {/* Keep the only completion action visible while long dispatches scroll. */}
             <div

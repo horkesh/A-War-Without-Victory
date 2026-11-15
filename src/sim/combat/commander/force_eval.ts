@@ -160,6 +160,44 @@ export function evaluateBrigade(
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
+// Light strike group — offensive capacity without a motorized main effort (RF-AI2)
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Brigades a corps must mass in one zone to form an infantry assault grouping.
+ * Equal to the planner's MIN_BRIGADES_FOR_PLAN (plan.ts), so the readiness gate never
+ * admits a corps the planner would reject for size. Kept as its own constant so this
+ * pure scorer stays free of the planner's import graph; a test pins the two equal.
+ */
+export const LIGHT_STRIKE_GROUP_MIN_BRIGADES = 3;
+
+/**
+ * True when some zone of the assessment holds at least LIGHT_STRIKE_GROUP_MIN_BRIGADES
+ * brigades that are combat-effective, not disrupted, not on loan, and offensively fit
+ * (fitness_offense >= MAIN_EFFORT_FITNESS_THRESHOLD) regardless of equipment class.
+ *
+ * Models the infantry assault groupings light corps used for their main efforts
+ * (ARBiH 5th Corps, Tigar 94 and the Oct-Nov 1994 breakout). fitness_offense already
+ * carries personnel, cohesion, supply and fatigue, so exhaustion or starvation closes
+ * the capacity on its own. Counting per zone keeps brigades in separate pockets from
+ * adding up to one group. Pure; deterministic (sorted zone keys).
+ */
+export function hasLightStrikeGroup(force: Pick<ForceAssessment, 'by_zone'>): boolean {
+    for (const zoneKey of Object.keys(force.by_zone).sort(strictCompare)) {
+        if (zoneKey === '__unassigned__') continue;
+        let fit = 0;
+        for (const e of force.by_zone[zoneKey] ?? []) {
+            if (e.is_combat_effective && !e.is_disrupted && !e.is_on_loan
+                && e.fitness_offense >= MAIN_EFFORT_FITNESS_THRESHOLD) {
+                fit++;
+            }
+        }
+        if (fit >= LIGHT_STRIKE_GROUP_MIN_BRIGADES) return true;
+    }
+    return false;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
 // assignBrigadeToZone — match brigade to zone by location
 // ═══════════════════════════════════════════════════════════════════════════
 

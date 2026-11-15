@@ -38,6 +38,7 @@ import { assembleBeliefState } from './belief.js';
 import type { CorpsOperation } from '../../../state/game_state.js';
 import { botOrdersPerfTime } from '../_perf_profile_bot_orders.js';
 import { assignOperationCommander } from '../officer_system.js';
+import { isLevel1PlayerApprovalFaction } from '../../bot/staff_control.js';
 
 function operationsConflict(
     left: Pick<CorpsOperation, 'name' | 'sector_id' | 'objectives' | 'participating_brigades'>,
@@ -201,6 +202,21 @@ export function runCommanderForCorps(
 // ═══════════════════════════════════════════════════════════════════════════
 
 /**
+ * True when the Level-1 approval proposal for this exact plan was expired unanswered:
+ * `apply-autonomy-transition` stamps an unanswered review `accepted: false` with a
+ * `resolved_turn` but stages no `player_op_response` (an explicit accept or decline does).
+ * Callers check the staged response first, so this only sees silence.
+ */
+function planProposalExpiredUnanswered(state: GameState, corpsId: FormationId, planId: string): boolean {
+    const action = `APPROVE_OP:${corpsId}:${planId}`;
+    return (state.meta?.pending_proposal_reviews ?? []).some((review) => (
+        review.proposed_action === action
+        && review.accepted === false
+        && review.resolved_turn != null
+    ));
+}
+
+/**
  * Apply commander output to game state.
  * Writes CorpsDirective, operations, sector stances back to GameState.
  * Writes CorpsDirective, operations, and sector stances back to GameState.
@@ -209,6 +225,9 @@ export function applyCommanderOutput(
     state: GameState,
     corpsId: FormationId,
     output: CommanderOutput,
+    /** The corps' faction as the caller knows it. Corps that exist only in `corps_command`
+     *  (no formation entry) still resolve, so a player corps can never skip the Level-1 hold. */
+    corpsFactionHint?: FactionId,
 ): void {
     const corps = state.military.corps_command?.[corpsId];
     if (!corps) return;
@@ -242,7 +261,12 @@ export function applyCommanderOutput(
     //    If player rejected → abandon the plan (set to null in updated_state).
     //    If no response yet → hold the plan at 'ready' (do not emit the operation).
     //    Guard against headless/test states where meta may be absent.
-    const autonomyLevel = state.meta?.autonomy_level ?? 0;
+    //    PLAYER FACTION ONLY (2026-11-14, PK1, R8 run m): the approval can only come from the human
+    //    player, so holding a bot faction's plan held every non-player commander-generated plan for
+    //    as long as Level 1 was in force (run m: zero bot-generated RS operations after week 20).
+    //    Bot corps plan and launch as at Level 0/2. Engine Invariants §14.10b.
+    const corpsFaction = corpsFactionHint ?? state.military.formations?.[corpsId]?.faction;
+    const level1ApprovalApplies = isLevel1PlayerApprovalFaction(state, corpsFaction);
     const updatedPlan = output.updated_state.current_plan;
     const playerOpResp = corps.player_op_response;
     const activatedOperations: Array<typeof corps.active_operations[number]> = [];
@@ -273,7 +297,7 @@ export function applyCommanderOutput(
             }
         }
     };
-    if (autonomyLevel === 1) {
+    if (level1ApprovalApplies) {
         if (updatedPlan && updatedPlan.status === 'executing') {
             const planApproved =
                 playerOpResp !== undefined &&
@@ -289,6 +313,16 @@ export function applyCommanderOutput(
                 corps.commander_state = { ...output.updated_state, current_plan: null };
                 corps.status_reason = 'plan abandoned: player rejected op proposal at Level 1';
                 corps.player_op_response = undefined;
+                return;
+            } else if (!planApproved && planProposalExpiredUnanswered(state, corpsId, updatedPlan.plan_id)) {
+                // L3b (command-loop proposal §5C, Council L8): the President let this plan's
+                // proposal expire unanswered (apply-autonomy-transition stamps it declined but stages
+                // no response). Release the plan so the commander replans, instead of holding it at
+                // 'ready' forever with the force-launch card as its only way out. Silence lets his
+                // staff's reading stand. An explicit answer is still the staged player_op_response
+                // above (#633 B11 unchanged). Player faction only; headless never reaches this branch.
+                corps.commander_state = { ...output.updated_state, current_plan: null };
+                corps.status_reason = 'plan released: op proposal expired unanswered at Level 1';
                 return;
             } else if (!planApproved) {
                 // No player response yet — hold plan at 'ready', emit no new operations.

@@ -3603,7 +3603,7 @@ export const warPhases: NamedPhase[] = [
         run: async (context) => {
             if (context.state.meta.phase !== 'war') return;
             const { loadLifecycleEvents, processLifecycleEvents } = await import('../formation_lifecycle_events.js');
-            const events = await loadLifecycleEvents();
+            const events = await loadLifecycleEvents(context.input.dataBaseDir);
             processLifecycleEvents(context.state, events);
         }
     },
@@ -3805,7 +3805,7 @@ export const warPhases: NamedPhase[] = [
         name: 'strategic-reserve-reinforcement',
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
-            context.report.strategic_reserve_reinforcement = reinforceFromStrategicReserves(context.state);
+            context.report.strategic_reserve_reinforcement = reinforceFromStrategicReserves(context.state, context.input.dataBaseDir);
         }
     },
     {
@@ -4167,7 +4167,7 @@ export const warPhases: NamedPhase[] = [
         run: async (context) => {
             if (context.state.meta.phase !== 'war') return;
             const graph = await getOperationalSettlementGraph(context);
-            await updateLegitimacyState(context.state, graph);
+            await updateLegitimacyState(context.state, graph, context.input.dataBaseDir);
             context.report.legitimacy_update = { settlements: Object.keys(context.state.political.settlements ?? {}).length };
         }
     },
@@ -4304,7 +4304,9 @@ export const warPhases: NamedPhase[] = [
 
             try {
                 // Load enriched contact graph
-                const enrichedGraph = await loadEnrichedContactGraph();
+                const enrichedGraph = await loadEnrichedContactGraph(
+                    turnDataFilePath(context, 'data/derived/settlement_contact_graph_enriched.json')
+                );
 
                 // Build state accessors
                 const accessors = buildStateAccessors(context.state);

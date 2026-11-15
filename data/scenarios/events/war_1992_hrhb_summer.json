@@ -6,7 +6,7 @@
     "category": "political",
     "family": "hrhb_political_goal",
     "source_tier": "icty_icj_un",
-    "historical_source": "Balkan Battlegrounds Vol. I, PDF pp. 181, 193 and 195 / printed 144, 156 and 158 (verified against the source PDF); ICTY Prlic et al. Trial Judgment (IT-04-74-T), Vol. 1 §§490-525 [UNVERIFIED — no local copy]; ICTY Prlic et al. Appeals Judgment (IT-04-74-A), §§601-650 [UNVERIFIED — no local copy].",
+    "historical_source": "Balkan Battlegrounds Vol. I, PDF pp. 181, 193 and 195 / printed 144, 156 and 158 (verified against the source PDF); ICTY Prlić et al. Trial Judgment (IT-04-74-T), Vol. 1 §§490-525 [UNVERIFIED — no local copy]; ICTY Prlić et al. Appeals Judgment (IT-04-74-A), §§601-650 [UNVERIFIED — no local copy].",
     "emergence_class": "compound",
     "trigger": {
       "turn_min": 13,
@@ -30,7 +30,7 @@
     "responding_faction": "HRHB",
     "bot_response_logic": "historical",
     "historical_default_response_id": "formalize_institutions",
-    "source_note": "HZ HB first proclaimed November 1991 (Balkan Battlegrounds I, PDF p.181 / printed 144: 'the first overt steps toward Bosnian Croat political autonomy came in November 1991 with the formation of the Croatian Community of Herceg-Bosna'); statutory consolidation on 3 July 1992 declared the HVO the supreme defence body of HZ HB and established its executive (ICTY Prlic et al. IT-04-74 Trial Judgement Vol. 1 §§490-525 — UNVERIFIED, no local copy). Mate Boban rose to political dominance over HZ HB 'through the workings of Tudjman's visible hand' (BB1 PDF p.195 / printed 158). Mostar = seat; 1939 Banovina territorial template (Prlic Appeals §§601-650 — UNVERIFIED, no local copy). Operation Jackal (June 1992) relieved Mostar from the JNA under joint HV-HVO command (BB1 PDF p.193 / printed 156), so the anti-VRS alliance held through summer 1992. PAGE CONVENTION: BB1 references in this file give the PDF page with the printed folio alongside; the offset is PDF = printed + 37, read off docs/Balkan_BattlegroundsI.pdf directly. Each page above was confirmed to contain its quoted text. ADJUDICATION BOUNDARY: the Prlic Appeals Chamber REVERSED the Trial Chamber's finding that Tudjman, Susak and Bobetko were JCE members, holding that the Trial Chamber 'made no explicit findings concerning their participation in the JCE' (docs/50_research/icty_hrhb_political_goal.md:55). Nothing in this row asserts, or may be read to assert, an adjudicated finding of JCE membership against any of them; the row states institutional consolidation and Boban's political rise, which BB1 supports directly. Historical bot formalizes the institutions per the documented HZ HB statutory record.",
+    "source_note": "HZ HB first proclaimed November 1991 (Balkan Battlegrounds I, PDF p.181 / printed 144: 'the first overt steps toward Bosnian Croat political autonomy came in November 1991 with the formation of the Croatian Community of Herceg-Bosna'); statutory consolidation on 3 July 1992 declared the HVO the supreme defence body of HZ HB and established its executive (ICTY Prlić et al. IT-04-74 Trial Judgement Vol. 1 §§490-525 — UNVERIFIED, no local copy). Mate Boban rose to political dominance over HZ HB 'through the workings of Tudjman's visible hand' (BB1 PDF p.195 / printed 158). Mostar = seat; 1939 Banovina territorial template (Prlić Appeals §§601-650 — UNVERIFIED, no local copy). Operation Jackal (June 1992) relieved Mostar from the JNA under joint HV-HVO command (BB1 PDF p.193 / printed 156), so the anti-VRS alliance held through summer 1992. PAGE CONVENTION: BB1 references in this file give the PDF page with the printed folio alongside; the offset is PDF = printed + 37, read off docs/Balkan_BattlegroundsI.pdf directly. Each page above was confirmed to contain its quoted text. ADJUDICATION BOUNDARY: the Prlić Appeals Chamber REVERSED the Trial Chamber's finding that Tudjman, Šušak and Bobetko were JCE members, holding that the Trial Chamber 'made no explicit findings concerning their participation in the JCE' (docs/50_research/icty_hrhb_political_goal.md:55). Nothing in this row asserts, or may be read to assert, an adjudicated finding of JCE membership against any of them; the row states institutional consolidation and Boban's political rise, which BB1 supports directly. Historical bot formalizes the institutions per the documented HZ HB statutory record.",
     "staff_assessment": "Standing up Herceg-Bosna's institutions this summer matches the documented 3 July 1992 statutory record and raises the political ceiling for the Croat project, at the cost of harder questions later about parallel institutions inside Bosnia. A dual-track posture preserves more room with Sarajevo; a minimal entity keeps the joint front cleanest but forfeits the institutional fact-on-the-ground.",
     "trigger_evidence": [
       "The HZ HB statutory decision of 3 July 1992 is on the table; the HVO is to be named its supreme defence body.",
@@ -62,7 +62,7 @@
             "certainty": "guaranteed",
             "opens_flags": [ "hrhb_1992_institutionalization" ],
             "material_effect_refs": [ "cost_ledger_annotation.hzhb_institutions_formalized_1992" ],
-            "explanation": "Recording hrhb_1992_institutionalization=formalized marks the documented 3 July 1992 HZ HB statutory consolidation (BB1 PDF p.181 / printed 144 and PDF p.195 / printed 158; Prlic IT-04-74 Vol. 1 §§490-525 — UNVERIFIED). Calibration-inert: the historical default carries only an audit-only cost-ledger annotation and a read-model flag — no control, supply, morale, or alliance change on the historical path. The institutional fact informs the diplomatic-scope and Vance-Owen/Owen-Stoltenberg branches authored elsewhere (hrhb_territorial_scope_1993, hrhb_vance_owen_acceptance_1993) without opening or closing them here."
+            "explanation": "Recording hrhb_1992_institutionalization=formalized marks the documented 3 July 1992 HZ HB statutory consolidation (BB1 PDF p.181 / printed 144 and PDF p.195 / printed 158; Prlić IT-04-74 Vol. 1 §§490-525 — UNVERIFIED). Calibration-inert: the historical default carries only an audit-only cost-ledger annotation and a read-model flag — no control, supply, morale, or alliance change on the historical path. The institutional fact informs the diplomatic-scope and Vance-Owen/Owen-Stoltenberg branches authored elsewhere (hrhb_territorial_scope_1993, hrhb_vance_owen_acceptance_1993) without opening or closing them here."
           }
         ],
         "dimension_shifts": [
@@ -175,8 +175,8 @@
     "source_note": "Balkan Battlegrounds I, PDF p.195 / printed 158: 'Muslims and Croats first clashed over control over the Kaonik Barracks at Busovača, then at the Novi Travnik Bratstvo arms factory, and over the contents of the Ljuta Territorial Defense depot. In July the disputes escalated and confrontations spread to Vareš and Vitez.' These are LOCAL, arms-and-barracks frictions in July 1992 — NOT open war. Open Croat-Muslim war is a 1993 phenomenon (Gornji Vakuf Jan 1993, Ahmići Apr 1993); the major Prozor escalation is late October 1992 (BB1 PDF p.196 / printed 159) and is OUT of this Jul-Sep scope. Per docs/.../ARBIH_HVO_HOSTILITIES_TIMING.md the engine gates open RBiH-HRHB war to >= week 26 (Oct 1992); this event depicts tension only. Historical bot lets local consolidation stand.",
     "staff_assessment": "Letting the local consolidations stand matches the documented summer-1992 drift — the joint front degrades through dispute, not through a central decision to break — and raises the institutional ceiling for Herceg-Bosna, at the cost of the anti-VRS alliance fraying. Disciplining the commanders preserves the alliance floor but cedes the barracks and depots. Negotiating local arms-sharing is the hardest needle to thread.",
     "trigger_evidence": [
-      "Local clashes over the Kaonik barracks (Busovaca), the Novi Travnik 'Bratstvo' factory, and the Ljuta depot are documented for July 1992.",
-      "The frictions are spreading to Vares and Vitez, but the joint anti-VRS front still holds."
+      "Local clashes over the Kaonik barracks (Busovača), the Novi Travnik 'Bratstvo' factory, and the Ljuta depot are documented for July 1992.",
+      "The frictions are spreading to Vareš and Vitez, but the joint anti-VRS front still holds."
     ],
     "response_options": [
       {
@@ -286,7 +286,7 @@
     "id": "hrhb_zagreb_supply_channel_1992",
     "image": "event_supply_convoy_HRHB.webp",
     "title": "Zagreb's Two-Track Hand",
-    "narrative": "August-September 1992. The HVO does not arm itself. Croatian Army 'volunteers' have been organizing and equipping indigenous Bosnian Croat units since 1991, and regular HV and MUP troops deploy across the border under Zagreb's control. Defence Minister Susak runs the channel; Tudjman's hand is behind it. The guns, the fuel, the seconded officers — they flow from Zagreb, and with them flows Zagreb's agenda for the Bosnian Croats. Your commanders want more of it. But every crate deepens the dependence, and the more the HVO is Zagreb's instrument, the less it is your own. The files require a posture on the patron channel.",
+    "narrative": "August-September 1992. The HVO does not arm itself. Croatian Army 'volunteers' have been organizing and equipping indigenous Bosnian Croat units since 1991, and regular HV and MUP troops deploy across the border under Zagreb's control. Defence Minister Šušak runs the channel; Tudjman's hand is behind it. The guns, the fuel, the seconded officers — they flow from Zagreb, and with them flows Zagreb's agenda for the Bosnian Croats. Your commanders want more of it. But every crate deepens the dependence, and the more the HVO is Zagreb's instrument, the less it is your own. The files require a posture on the patron channel.",
     "category": "diplomatic",
     "family": "hrhb_political_goal",
     "source_tier": "icty_icj_un",
@@ -315,10 +315,10 @@
     "bot_response_logic": "historical",
     "historical_default_response_id": "deepen_patron_channel",
     "source_note": "Balkan Battlegrounds I, PDF p.181 / printed 144: Zagreb pursued 'a two-track plan to organize and arm indigenous Bosnian Croat military units — begun in 1991 by Croatian Army volunteers under Zagreb's control — while deploying regular Croatian Army (HV) and MUP troops to the republic.' The HVO is described as 'the Zagreb-controlled HVO' (same page). BB1 attributes the channel to Zagreb and to Croatian Army 'volunteers under Zagreb's control'; it does not name an individual minister, and no such attribution is made here. Historical bot deepens the patron channel — the documented summer-1992 posture.",
-    "staff_assessment": "Deepening the Zagreb channel is the documented posture: the guns, fuel, and seconded officers that keep the HVO in the field flow from Susak's logistics, and with them comes patron confidence and a clearer order of battle — at the cost of binding the HVO ever more tightly to Zagreb's agenda. Diversifying the supply base buys autonomy at a real material cost. Asserting full HVO autonomy is the cleanest break and the most expensive one.",
+    "staff_assessment": "Deepening the Zagreb channel is the documented posture: the guns, fuel, and seconded officers that keep the HVO in the field flow from Šušak's logistics, and with them comes patron confidence and a clearer order of battle — at the cost of binding the HVO ever more tightly to Zagreb's agenda. Diversifying the supply base buys autonomy at a real material cost. Asserting full HVO autonomy is the cleanest break and the most expensive one.",
     "trigger_evidence": [
       "Zagreb's two-track arming plan — Croatian Army volunteers plus regular HV/MUP deployments — is operative across summer 1992 (BB1 PDF p.181 / printed 144).",
-      "The HVO depends on Susak's logistics channel for arms, fuel, and seconded officers."
+      "The HVO depends on Šušak's logistics channel for arms, fuel, and seconded officers."
     ],
     "response_options": [
       {
@@ -326,7 +326,7 @@
         "branch_tag": "hrhb_zagreb_deepen_channel",
         "historical_marker": "historical_default",
         "label": "Deepen the Zagreb channel",
-        "description": "Take what Susak offers. More arms, more fuel, more seconded HV officers into the HVO order of battle. The HVO fights better-supplied and Zagreb's confidence in Herceg-Bosna grows — and the HVO becomes, more than ever, Zagreb's instrument in Bosnia.",
+        "description": "Take what Šušak offers. More arms, more fuel, more seconded HV officers into the HVO order of battle. The HVO fights better-supplied and Zagreb's confidence in Herceg-Bosna grows — and the HVO becomes, more than ever, Zagreb's instrument in Bosnia.",
         "sets_flags": {
           "hrhb_1992_patron_posture": "channel_deepened"
         },
@@ -362,7 +362,7 @@
         "branch_tag": "hrhb_zagreb_diversify_supply",
         "historical_marker": "counterfactual",
         "label": "Diversify the supply base",
-        "description": "Keep the Zagreb channel open, but build alternatives — local production, battlefield recovery, quiet arrangements with the ARBiH over shared depots. It costs you materiel now and irritates Susak, but it buys the HVO a measure of independence from Zagreb's agenda.",
+        "description": "Keep the Zagreb channel open, but build alternatives — local production, battlefield recovery, quiet arrangements with the ARBiH over shared depots. It costs you materiel now and irritates Šušak, but it buys the HVO a measure of independence from Zagreb's agenda.",
         "sets_flags": {
           "hrhb_1992_patron_posture": "supply_diversified"
         },
@@ -396,7 +396,7 @@
         "branch_tag": "hrhb_zagreb_assert_autonomy",
         "historical_marker": "counterfactual",
         "label": "Assert HVO autonomy from Zagreb",
-        "description": "Tell Susak the HVO answers to Mostar, not Zagreb. Refuse the seconded officers; insist on Bosnian Croat command of Bosnian Croat units. It is the cleanest assertion of independence — and the most expensive: Zagreb throttles the channel, and the HVO order of battle pays for it.",
+        "description": "Tell Šušak the HVO answers to Mostar, not Zagreb. Refuse the seconded officers; insist on Bosnian Croat command of Bosnian Croat units. It is the cleanest assertion of independence — and the most expensive: Zagreb throttles the channel, and the HVO order of battle pays for it.",
         "sets_flags": {
           "hrhb_1992_patron_posture": "autonomy_asserted"
         },

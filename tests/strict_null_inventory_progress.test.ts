@@ -810,7 +810,9 @@ describe('strict null inventory progress', () => {
             // headless runs (40w artifacts byte-identical). No new type escape. 564 -> 591.
             // RF-3 siege displacement (DA1, 2026-11-14): DisplacementState.unsupplied_pressure_turns,
             // the persisted siege counter (was a module cache). No new type escape. 591 -> 592.
-            optional_fields_game_state: 592,
+            // RF-5B policy displacement (2026-11-14): HostileTakeoverTimerState.cause, absent on every
+            // battle/flip-seeded timer. No new type escape. 592 -> 593.
+            optional_fields_game_state: 593,
         });
         // Reason-code instrumentation (item 3): +1, `OperationAxis.launch_blocker_detail`.
         // `classifyDomain` routes it to `sim` on the /Corps|Operation/ interface-name rule,
@@ -820,13 +822,14 @@ describe('strict null inventory progress', () => {
         // +26 state (StanceMatter, StanceMatterReceipt, PresidentialStanceHold optional fields;
         // StateMeta.stance_matters / stance_matter_history). 564 -> 591.
         // RF-3 (DA1): +1 state (DisplacementState.unsupplied_pressure_turns). 591 -> 592 / state 217 -> 218.
-        expect(current.optional_field_domains.total).toBe(592);
+        // RF-5B: +1 state (HostileTakeoverTimerState.cause). 592 -> 593 / state 218 -> 219.
+        expect(current.optional_field_domains.total).toBe(593);
         expect(current.optional_field_domains.domain_counts).toMatchObject({
             derived: 10,
             ipc: 0,
             scenario: 0,
             sim: 364,
-            state: 218,
+            state: 219,
             ui_adapter: 0,
             unknown: 0,
         });

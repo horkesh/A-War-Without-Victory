@@ -1058,7 +1058,10 @@ describe('commander emission overlap guards', () => {
             }));
         }],
         ['player autonomy', (harness) => {
+            // Level 1 holds the HUMAN PLAYER's corps only; a bot corps is not gated.
             harness.state.meta.autonomy_level = 1;
+            harness.state.meta.player_faction = FACTION;
+            harness.state.meta.headless_scenario_auto_control = false;
         }],
         ['friendly controller', (harness) => {
             harness.state.political.political_controllers![OMITTED_TARGET] = FACTION;
@@ -1902,9 +1905,41 @@ describe('commander emission overlap guards', () => {
         doesNotSelectBoundedTarget(guardedBrigadeBriefing({ elite_loan_state: { on_loan: true } as any }));
         doesNotSelectBoundedTarget(guardedBrigadeBriefing({ tags: ['enclave'] }));
 
+        // Level 1 fails closed for the HUMAN PLAYER's corps only.
         doesNotSelectBoundedTarget({
             ...briefing,
-            state_ref: { ...state, meta: { ...state.meta, autonomy_level: 1 } },
+            state_ref: {
+                ...state,
+                meta: { ...state.meta, autonomy_level: 1, player_faction: FACTION, headless_scenario_auto_control: false },
+            },
+        } as CommanderBriefing);
+        // A bot corps at Level 1 (the player is another faction, or there is no player) has no
+        // approver, so it keeps local occupation exactly as at Level 0 (R8 run m, 2026-11-14).
+        const selectsBoundedTarget = (candidateBriefing: CommanderBriefing) => {
+            const selected = emitCommanderOutput(
+                candidateBriefing,
+                [],
+                makeForces(),
+                allocation,
+                { ...makePlanDecision(), plan: null, action: 'none' },
+                makeDecisions(),
+                makeThreats(),
+            );
+            expect(selected.operations.some(
+                (candidate) => candidate.objectives?.includes('op:test:objective') === true,
+            )).toBe(true);
+        };
+        selectsBoundedTarget(briefing);
+        selectsBoundedTarget({
+            ...briefing,
+            state_ref: {
+                ...state,
+                meta: { ...state.meta, autonomy_level: 1, player_faction: 'RBiH', headless_scenario_auto_control: false },
+            },
+        } as CommanderBriefing);
+        selectsBoundedTarget({
+            ...briefing,
+            state_ref: { ...state, meta: { ...state.meta, autonomy_level: 1, player_faction: undefined } },
         } as CommanderBriefing);
 
         doesNotSelectBoundedTarget({
@@ -2617,9 +2652,13 @@ describe('commander emission overlap guards', () => {
     it('keeps a Level-1 approval pending when an unrelated live operation blocks emission', () => {
         const state = {
             schema_version: CURRENT_SCHEMA_VERSION,
-            meta: { turn: 10, phase: 'war', seed: 'approved-overlap', autonomy_level: 1 } as any,
+            meta: {
+                turn: 10, phase: 'war', seed: 'approved-overlap', autonomy_level: 1,
+                player_faction: FACTION, headless_scenario_auto_control: false,
+            } as any,
             factions: [{ id: FACTION }] as any,
             military: {
+                formations: { [CORPS_ID]: { id: CORPS_ID, faction: FACTION, kind: 'corps', status: 'active' } } as any,
                 corps_command: {
                     [CORPS_ID]: {
                         command_span: 5,
@@ -2686,9 +2725,13 @@ describe('commander emission overlap guards', () => {
     function runLevel1Launch(forceLaunched: boolean) {
         const state = {
             schema_version: CURRENT_SCHEMA_VERSION,
-            meta: { turn: 10, phase: 'war', seed: 'l1-launch', autonomy_level: 1 } as any,
+            meta: {
+                turn: 10, phase: 'war', seed: 'l1-launch', autonomy_level: 1,
+                player_faction: FACTION, headless_scenario_auto_control: false,
+            } as any,
             factions: [{ id: FACTION }] as any,
             military: {
+                formations: { [CORPS_ID]: { id: CORPS_ID, faction: FACTION, kind: 'corps', status: 'active' } } as any,
                 corps_command: {
                     [CORPS_ID]: {
                         command_span: 5,

@@ -1,3 +1,4 @@
+import { resolve } from 'node:path';
 import { getFactionDemographicFraction, loadMunicipalityPopulation1991 } from '../data/municipality_population.js';
 import type { LoadedSettlementGraph } from '../map/settlements.js';
 import type { FactionId, GameState, LegitimacyState, MunicipalityId, SettlementId } from './game_state.js';
@@ -50,15 +51,24 @@ function isCoerciveFlip(state: GameState, munId: MunicipalityId | null): boolean
     return score < 40;
 }
 
+/**
+ * `baseDir` is the turn's data root (`TurnInput.dataBaseDir`). Without it, both data files
+ * resolve against the process cwd, which only works when the process runs from that root.
+ */
 export async function updateLegitimacyState(
     state: GameState,
-    graph: LoadedSettlementGraph
+    graph: LoadedSettlementGraph,
+    baseDir?: string
 ): Promise<void> {
     if (!state.political.political_controllers) return;
     if (!state.political.settlements) state.political.settlements = {};
     const turn = state.meta.turn;
-    const populationData = await loadMunicipalityPopulation1991();
-    const prewarControllers = await loadInitialMunicipalityControllers1990();
+    const populationData = await loadMunicipalityPopulation1991(
+        baseDir ? resolve(baseDir, 'data/derived/municipality_population_1991.json') : undefined
+    );
+    const prewarControllers = await loadInitialMunicipalityControllers1990(
+        baseDir ? resolve(baseDir, 'data/source/municipalities_1990_initial_political_controllers.json') : undefined
+    );
 
     const sids = Object.keys(state.political.political_controllers).sort(strictCompare);
     for (const sid of sids) {

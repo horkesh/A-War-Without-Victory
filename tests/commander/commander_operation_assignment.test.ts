@@ -29,6 +29,7 @@ function operation(name = 'Operacija Bunar', patch: Partial<CorpsOperation> = {}
 
 function state(options: {
     autonomyLevel?: number;
+    playerFaction?: 'RS' | 'RBiH' | 'HRHB';
     activeOperations?: CorpsOperation[];
     officers?: Array<{ id: string; competence: number; aggressiveness: number; status?: 'reserve' | 'active'; assignedOperation?: string }>;
 } = {}): GameState {
@@ -110,7 +111,13 @@ function state(options: {
     };
     return {
         schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 25, phase: 'war', seed: 'commander-assignment', autonomy_level: options.autonomyLevel ?? 0 } as GameState['meta'],
+        meta: {
+            turn: 25,
+            phase: 'war',
+            seed: 'commander-assignment',
+            autonomy_level: options.autonomyLevel ?? 0,
+            ...(options.playerFaction ? { player_faction: options.playerFaction } : {}),
+        } as GameState['meta'],
         factions: [{ id: 'RS' }] as GameState['factions'],
         military,
         political: {
@@ -212,25 +219,37 @@ describe('commander operation commander assignment', () => {
         expect(game.military.named_officers!['home_4_4']!.status).toBe('reserve');
     });
 
-    it('does not allocate an officer while Level-1 approval is absent', () => {
-        const game = state({ autonomyLevel: 1 });
-        applyCommanderOutput(game, CORPS_ID, output(operation(), {
-            plan_id: 'p1',
-            objective_description: 'Test operation',
-            target_osids: ['op:test:target'],
-            required_brigades: 1,
-            assigned_brigades: ['b1'],
-            staging_zone: 'op:test:approach' as ZoneId,
-            status: 'executing',
-            created_turn: 25,
-            target_ready_turn: 25,
-            concentration_progress: 1,
-            viability_score: 1,
-            source: 'reactive',
-        }));
+    const executingPlan = (): NonNullable<CommanderState['current_plan']> => ({
+        plan_id: 'p1',
+        objective_description: 'Test operation',
+        target_osids: ['op:test:target'],
+        required_brigades: 1,
+        assigned_brigades: ['b1'],
+        staging_zone: 'op:test:approach' as ZoneId,
+        status: 'executing',
+        created_turn: 25,
+        target_ready_turn: 25,
+        concentration_progress: 1,
+        viability_score: 1,
+        source: 'reactive',
+    });
+
+    it('does not allocate an officer while Level-1 approval is absent for the player corps', () => {
+        // The Level-1 hold applies to the human player's corps only (PK1, 2026-11-14): RS is the player.
+        const game = state({ autonomyLevel: 1, playerFaction: 'RS' });
+        applyCommanderOutput(game, CORPS_ID, output(operation(), executingPlan()));
 
         expect(game.military.corps_command![CORPS_ID]!.active_operations).toHaveLength(0);
         expect(game.military.named_officers!['home_4_4']!.status).toBe('reserve');
+    });
+
+    it('admits a bot corps operation and allocates its officer at Level 1 without any approval', () => {
+        // Positive control: with RBiH as the player, this RS corps is a bot and never waits on approval.
+        const game = state({ autonomyLevel: 1, playerFaction: 'RBiH' });
+        applyCommanderOutput(game, CORPS_ID, output(operation(), executingPlan()));
+
+        expect(game.military.corps_command![CORPS_ID]!.active_operations).toHaveLength(1);
+        expect(game.military.named_officers!['home_4_4']!.status).toBe('active');
     });
 
     it('does not allocate a second officer on a same-identity retry', () => {

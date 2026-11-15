@@ -84,7 +84,7 @@ function PriorityDocketPanel({
       data-testid="warroom-priority-docket-panel"
       role="region"
       aria-label={t('warroom.priorityDocketAria')}
-      className="absolute bottom-full right-0 mb-2 w-[min(26rem,calc(100vw-2rem))] rounded border border-amber-900/70 bg-black/90 p-2 text-amber-100 shadow-2xl shadow-black/50"
+      className="absolute bottom-full left-1/2 mb-2 w-[min(26rem,calc(100vw-2rem))] -translate-x-1/2 rounded border border-amber-900/70 bg-black/90 p-2 text-amber-100 shadow-2xl shadow-black/50"
     >
       <div className="flex min-w-0 items-start justify-between gap-3 border-b border-amber-900/45 pb-2">
         <div className="min-w-0">
@@ -242,7 +242,8 @@ export function WarroomStatusBar({ onReviewPriorities, onReviewItem, onReviewTar
   return (
     <div
       data-tutorial-step="warroom-status-bar"
-      className="absolute bottom-[2%] right-[2%] flex max-w-[calc(100%-2rem)] flex-wrap items-center gap-2 rounded bg-black/90 px-3 py-1.5 font-mono text-xs text-amber-400 pointer-events-auto select-none"
+      className="absolute bottom-[2%] left-1/2 flex w-max max-w-[calc(100%-2rem)] -translate-x-1/2 flex-wrap items-center justify-center gap-2 rounded bg-black/90 px-3 py-1.5 font-mono text-xs text-amber-400 pointer-events-auto select-none"
+      data-testid="warroom-status-bar"
       style={{ backdropFilter: 'blur(4px)', zIndex: Z.PRIORITY_DOCKET }}
     >
       {priorityDocketOpen && !canResolveSingleBlocker && (

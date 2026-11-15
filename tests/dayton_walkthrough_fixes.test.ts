@@ -1,6 +1,6 @@
 /**
  * Fixes from the Dayton rounds walkthrough (2026-11-08,
- * F:/AWWV-worktrees/.dayton-design/rounds-walkthrough/FINDINGS.md).
+ * $AWWV_WORKTREES_ROOT/.dayton-design/rounds-walkthrough/FINDINGS.md, outside the repo).
  *  1. A deal moves only the parties' own ground across the inter-entity line, never a
  *     Federation partner's cells; a player never concedes its own protected ground
  *     (Brčko excepted); the contiguity pass never cuts a protected heartland.
