@@ -154,11 +154,23 @@ export function getCorpsSubordinates(
     return result;
 }
 
-/** Compute average personnel fraction for a set of brigades. */
+/**
+ * A brigade's strength against its own designed establishment (RF-STRENGTH 2026-11-15): personnel over
+ * `max_personnel` when that is above 0, else over MAX_BRIGADE_PERSONNEL, clamped at 1. Corps judgements
+ * of "healthy" and "average strength" use this, so a full 1,800-man light brigade reads 1.0, not 0.6
+ * against a mechanized ceiling. Absolute-strength measures (combat power, frontage, attack floors) stay
+ * on absolute numbers.
+ */
+export function designedStrengthFraction(b: Pick<FormationState, 'personnel' | 'max_personnel'>): number {
+    const designed = b.max_personnel !== undefined && b.max_personnel > 0 ? b.max_personnel : MAX_BRIGADE_PERSONNEL;
+    return Math.min(1, (b.personnel ?? 0) / designed);
+}
+
+/** Compute average designed-strength fraction for a set of brigades. */
 export function averagePersonnelFraction(brigades: FormationState[]): number {
     if (brigades.length === 0) return 0;
     let sum = 0;
-    for (const b of brigades) sum += (b.personnel ?? 0) / MAX_BRIGADE_PERSONNEL;
+    for (const b of brigades) sum += designedStrengthFraction(b);
     return sum / brigades.length;
 }
 
@@ -170,11 +182,11 @@ export function averageCohesion(brigades: FormationState[]): number {
     return sum / brigades.length;
 }
 
-/** Count how many brigades are "healthy" (personnel > 70%, cohesion > 50). */
+/** Count how many brigades are "healthy" (70% of designed strength, cohesion 50). */
 export function countHealthyBrigades(brigades: FormationState[]): number {
     let count = 0;
     for (const b of brigades) {
-        const persFrac = (b.personnel ?? 0) / MAX_BRIGADE_PERSONNEL;
+        const persFrac = designedStrengthFraction(b);
         const coh = b.cohesion ?? 60;
         if (persFrac >= PERSONNEL_HEALTHY_THRESHOLD && coh >= COHESION_HEALTHY_THRESHOLD) count++;
     }
