@@ -115,6 +115,10 @@ import { stableStringify } from '../../utils/stable_json.js';
  *                   stance with its reason, and the stance in effect when combat
  *                   resolves. Sectors are rebuilt after combat, so the turn-end
  *                   save shows neither.
+ *  corps_plan     — stdout-only per-corps plan receipts after the commander loop:
+ *                   stance and its formula driver, corps exhaustion, the commander's
+ *                   plan action and reason (why no plan was made), force tiers, and
+ *                   healthy-brigade counts by the 3,000 cap and by designed strength.
  */
 export type ReasonCodeTopic =
     | 'battle_stack'
@@ -145,7 +149,8 @@ export type ReasonCodeTopic =
     | 'local_occupation_candidate'
     | 'reconciliation_write'
     | 'preplanned_eligibility'
-    | 'sector_stance';
+    | 'sector_stance'
+    | 'corps_plan';
 
 const ALL_TOPICS: readonly ReasonCodeTopic[] = [
     'axis_reject',
@@ -177,6 +182,7 @@ const ALL_TOPICS: readonly ReasonCodeTopic[] = [
     'reconciliation_write',
     'preplanned_eligibility',
     'sector_stance',
+    'corps_plan',
 ];
 
 /**
@@ -296,6 +302,17 @@ export function emitPreplannedEligibilityRecord(record: Record<string, unknown>)
         console.log(`${PREPLANNED_ELIGIBILITY_PREFIX} ${stableStringify({ schema_version: 1, ...record })}`);
     } catch {
         // Observation and serialization failures are isolated from operation injection.
+    }
+}
+
+/** Default-off stdout receipts for per-corps plan decisions. Never writes GameState or reports. */
+export const CORPS_PLAN_PREFIX = '[corps_plan]';
+export function emitCorpsPlanRecord(record: Record<string, unknown>): void {
+    if (!isReasonCodeTopicEnabled('corps_plan')) return;
+    try {
+        console.log(`${CORPS_PLAN_PREFIX} ${stableStringify({ schema_version: 1, ...record })}`);
+    } catch {
+        // Observation and stdout failures cannot affect planning.
     }
 }
 

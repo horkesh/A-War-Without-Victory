@@ -46,6 +46,7 @@ import {
 } from './bot_corps_helpers.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { emitCommanderCreationRecord, isReasonCodeTopicEnabled } from './reason_code_debug.js';
+import { emitCorpsPlanTrace } from './corps_plan_trace.js';
 import { botOrdersPerfTime } from './_perf_profile_bot_orders.js';
 import { isRbihHrhbCombatEnabled } from '../early_war/alliance_update.js';
 import { MAX_EXHAUSTION_FOR_OPERATION } from './bot_constants.js';
@@ -396,8 +397,10 @@ export function generateAllCorpsOrders(
     // corps a threat of 0 (RF-F1g, 2026-11-15). Falls back to `edges` when no OSID graph is passed.
     const effectiveOsidEdges = osidEdges ?? edges;
 
-    // 2. Corps stance selection
-    generateCorpsStanceOrders(state, faction, effectiveOsidEdges, sidToMun, stanceTrace);
+    // 2. Corps stance selection. The default-off `corps_plan` receipts need the stance driver, so they
+    // collect the read-only stance trace when no caller did (filling it writes no state).
+    const planTraceStance = stanceTrace ?? (isReasonCodeTopicEnabled('corps_plan') ? new Map<string, CorpsStanceTrace>() : undefined);
+    generateCorpsStanceOrders(state, faction, effectiveOsidEdges, sidToMun, planTraceStance);
     // Presidential stance holds (posture model option 2). Clamp point 1 of 3; inert without a hold.
     clampHeldCorpsStances(state, faction);
     reassignCorpsForBilateralWar(state, faction);
@@ -500,6 +503,8 @@ export function generateAllCorpsOrders(
             status: 'skipped_no_spatial',
         });
     }
+    // Default-off per-corps plan receipts (why a corps made no plan). Observation only.
+    emitCorpsPlanTrace(state, faction, planTraceStance);
 
     // Clamp point 3 of 3 (the hold is the last writer), then OG holds after the commander
     // loop, which rewrites every OG stance. Both inert without a hold.
