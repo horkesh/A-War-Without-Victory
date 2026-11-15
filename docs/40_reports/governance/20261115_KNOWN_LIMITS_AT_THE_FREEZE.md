@@ -2,16 +2,16 @@
 
 **Date:** 2026-11-15
 **Authority:** orchestrator ruling of 2026-11-15 (Fable consult 2, the freeze cut; ORCHESTRATION §4b rules 8 to 10) and `RF-ENGINE-FREEZE` condition 5 in `docs/open_gates.yml`.
-**Status:** draft for the freeze. The cell lists are from the #591 record and the RF-3C-EXH register entry; the freeze commit re-checks them against the frozen run before this note is final.
+**Status:** draft for the freeze. The cell lists are from the #591 record and the register entry for the ARBiH plan lockout (formerly RF-3C-EXH); the freeze commit re-checks them against the frozen run before this note is final.
 
 Fitted defects ship with a record, not a fix. This note lists the engine defects that are deliberately left in at the freeze, the checkpoint cells and guards that match today because of them, and the rule the calibration pass follows because of them. A match on a listed cell is not evidence of fidelity.
 
-## 1. RF-3C-EXH with VRS2: the ARBiH corps stop planning (post-1.0)
+## 1. ARBiH plan lockout (army-wide) with VRS2: the ARBiH corps stop planning (post-1.0)
 
 **What the run shows (measured, RF-ROSTER 188-week run, 709/709/708/681).**
 - In 1994 (weeks 91 to 143) ARBiH corps 1 to 4 ran 83 probes and 3 real operations. At week 188 their exhaustion reads 89, 57, 97 and 67; every VRS corps reads 2 or below.
 - After the 7th Corps split at week 99 the 3rd Corps made 1 commander plan in weeks 99 to 178 (12 on main without the split) and 31 one-brigade probes with no sector attack.
-- The lockout is army-wide, not a 3rd Corps effect. On main the 1st, 2nd and 4th Corps also made no commander plans in weeks 99 to 178. The split changed only the 3rd Corps. The label "RF-3C-EXH" names where it was found, not its extent.
+- The lockout is army-wide, not a 3rd Corps effect. On main the 1st, 2nd and 4th Corps also made no commander plans in weeks 99 to 178. The split changed only the 3rd Corps. It was first registered as RF-3C-EXH because it was found in the 3rd Corps after the split; the seats and the orchestrator renamed it "ARBiH plan lockout (army-wide)" (2026-11-15).
 - At week 188 all four corps read "corps in defensive stance, no new plans", not an exhaustion refusal, so the cause has at least two candidates (the stance gate and the exhaustion gate). Run reports carry no per-corps exhaustion field, so the cause is untraced. It fails the RF entry test (premise measured), and any fix also needs VRS2: two earlier experiments (RF-1 step 7 and RF-AI2 D2) broke the Farz guard through Ozren when the 3rd Corps woke.
 
 **Cells that match because of it (checkpoint, from the #591 record).**
@@ -32,7 +32,7 @@ Fitted defects ship with a record, not a fix. This note lists the engine defects
 
 **The 1.1 brief.**
 - VRS2 is grounded in history: the VRS Ozren tactical group was "caught without the elite reserves" in September 1995 (BB1 p.386), and the 16th Krajina Brigade was pulled to Ozren only on 5 to 7 October (BB1 pp.388-389). Write it as a dated September 1995 reserve commitment.
-- The first step is a per-corps trace of exhaustion and last plan reason. A reporting-only trace that leaves the headless hash unchanged may be added before the freeze, so 1.1 starts traced.
+- The first step is a per-corps trace of `corps_exhaustion` and `last_plan_reason` for every corps. The orchestrator assigned it (2026-11-15) to the F1g lane as RF-STRENGTH's premise: an inert reporting trace that leaves the headless hash unchanged, landed before RF-STRENGTH, so 1.1 starts traced.
 - The 1.1 fix is expected to flip the Ozren, Teslić, Bočinja, Vozuća and Brijesnica Donja cells and the Farz P-B pass. That is an honest loss, not a regression.
 - The Bible says exhaustion drives negotiation and constraint for every actor, yet every VRS corps ends at 2 or below while the ARBiH corps sit at 57 to 97. That asymmetry is a design question for 1.1.
 
@@ -59,7 +59,7 @@ For every limit in this note, the calibration pass follows this rule:
 
 ## 5. Ratification of the deferral
 
-RF-3C-EXH with VRS2 is deferred to the post-1.0 engine pass by the orchestrator, on the recommendation of Fable consult 2. Three independent seats (fresh sessions, read-only, none of them the author of the memo or of this note) tested the reasoning on 2026-11-15. None said the deferral is wrong. Each corrected the memo's reasons, and those corrections are in section 1.
+The ARBiH plan lockout (army-wide) with VRS2 is deferred to the post-1.0 engine pass by the orchestrator, on the recommendation of Fable consult 2. Three independent seats (fresh sessions, read-only, none of them the author of the memo or of this note) tested the reasoning on 2026-11-15. None said the deferral is wrong. Each corrected the memo's reasons, and those corrections are in section 1.
 
 | Seat | Verdict | Reasons and conditions |
 |---|---|---|

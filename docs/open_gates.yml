@@ -85,7 +85,8 @@ gates:
       The six freeze conditions (orchestrator ruling 2026-11-15, Fable consult 2). (1) The
       must list is merged: the slot 1 items (#677 RF-ROSTER, #680 the Brčko Tactical Group
       relocation, the SE7E-h validator fix), RF-STRENGTH, RF-PM1 and RB1; the slot 4 items
-      (F7, SE9) are merged or dropped. (2) Every roadmap §4.1 RF row is disposed: BC14 merged,
+      (F7, SE9) are merged or dropped. The inert per-corps reporting trace (corps_exhaustion,
+      last_plan_reason; hash unchanged) lands before RF-STRENGTH. (2) Every roadmap §4.1 RF row is disposed: BC14 merged,
       BC15 with SE6 parked at its archive tag and SE10 post-1.0, BC16 merged, BC17 held for
       the calibration pass, BC18 closed as decided, BC19 as listed in its row. (3) One
       188-week run at the candidate commit, repeated once for determinism: strict health
@@ -108,8 +109,8 @@ gates:
       wrong; a guard or determinism breaks; or live and headless differ. Everything else is
       tagged post-1.0 with no measuring lane, and no new audit starts before the freeze.
       BC18 (HVO-ARBiH war) was decided by the owner on 2026-11-14 (A now, B merged as #623,
-      C post-1.0) and needs nothing before the freeze. RF-3C-EXH with VRS2 is post-1.0 and
-      ships as a recorded known limit. data/derived/latest_run_final_save.json dates from
+      C post-1.0) and needs nothing before the freeze. The ARBiH plan lockout (army-wide;
+      first filed as RF-3C-EXH) with VRS2 is post-1.0 and ships as a recorded known limit. data/derived/latest_run_final_save.json dates from
       2026-09-01 and is stale; lanes read run folders instead.
 
   # ── RD — Dayton settlement and end map (closed, owner 2026-11-07) ───────────────────
