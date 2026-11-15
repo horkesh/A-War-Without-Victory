@@ -1272,8 +1272,9 @@ function historicalOperationExplanation(
     : base;
 }
 
-// Command loop L5 (2026-11-15): an ordinary operation proposal is shown as a dossier
-// (proposalDossier.ts): a one-sentence header and attributed, localized facts. It
+// Command loop L5 (2026-11-15): an ordinary operation proposal is shown as a dossier: a
+// localized title and one-sentence header here (proposalDossier.ts), and attributed,
+// localized facts rendered lazily in the Command Surface (proposalDossierDetail.ts). It
 // replaces the thirteen English "Label: value" lines with their raw percentages.
 
 /**
@@ -1371,7 +1372,9 @@ function addProposalReviewDirectiveCards(
       evidence: historicalOp
         ? historicalOperationEvidence(state, historicalOp, historicalOperationReviewCount, osidNameMap)
         : dossier
-          ? dossier.facts
+          // The dossier facts render in the Command Surface from the lazily loaded
+          // ProposalDossierFacts (proposalDossierDetail.ts), outside the entry chunk.
+          ? []
           : [
           t('decisionRoom.card.reviewProposal.evidence.domain', { domain: domainLabel }),
           t('decisionRoom.card.reviewProposal.evidence.review'),

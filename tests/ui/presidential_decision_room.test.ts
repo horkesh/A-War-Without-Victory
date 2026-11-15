@@ -8,6 +8,7 @@ import type { LoadedGameState, OperationOpportunityProposalView, PlayerDecisionS
 import type { OperationalSitrepView } from '../../src/ui/shared/operational_sitrep_views.js';
 import type { TurnSummary } from '../../src/state/turn_summary.js';
 import { setLocale } from '../../src/ui/map/i18n/index.js';
+import { buildProposalDossierFacts } from '../../src/ui/map/data/proposalDossierDetail.js';
 import { turnToDateString } from '../../src/ui/map/utils/formatters.js';
 
 function makeSummary(overrides: Partial<TurnSummary> = {}): TurnSummary {
@@ -1433,7 +1434,11 @@ describe('buildPresidentialDecisionRoomView', () => {
     expect(card?.title).toBe('Relieve Jajce');
     expect(card?.explanation).toBe(`${officer} asks to commit 2 brigades to take Jajce.`);
     expect(card?.actionLabel).toBe('Review the plan');
-    expect(card?.evidence).toEqual([
+    // The facts render from the lazily loaded ProposalDossierFacts, outside the entry chunk;
+    // the card itself carries no "Label: value" evidence lines any more.
+    expect(card?.evidence).toEqual([]);
+    const { facts } = buildProposalDossierFacts(state.opProposalCards![0], null);
+    expect(facts).toEqual([
       'Objective: take Jajce.',
       'Forces: 1st Corps with Alpha Brigade, Beta Brigade. The corps front is already under heavy pressure.',
       `Odds: ${officer} judges them favourable. The judgement rests on good intelligence.`,
@@ -1451,7 +1456,7 @@ describe('buildPresidentialDecisionRoomView', () => {
       stagingOsids: ['op:jajce:jajce_staging'],
       formationIds: ['arbih_alpha', 'arbih_beta'],
     });
-    const shown = `${card?.title} ${card?.explanation} ${card?.evidence.join(' ')}`;
+    const shown = `${card?.title} ${card?.explanation} ${facts.join(' ')}`;
     expect(shown).not.toMatch(/arbih_1st_corps|plan_internal_30|op:jajce|zone:/);
     expect(shown).not.toMatch(/%|Unreported/);
   });
@@ -1509,9 +1514,13 @@ describe('buildPresidentialDecisionRoomView', () => {
     const card = view.cards.find((entry) => entry.id === 'command:review-proposal:PROP_2_ops_0');
 
     expect(card?.explanation).toBe('2nd Krajina Corps asks to commit one brigade to take Ora\u0161ac (Biha\u0107).');
-    expect(card?.evidence).toContain('Objective: take Ora\u0161ac (Biha\u0107).');
+    const { facts } = buildProposalDossierFacts(state.opProposalCards![0], {
+      'op:bihac:racic': 'Ra\u010dic (Biha\u0107)',
+      'op:bihac:orasac_2': 'Ora\u0161ac (Biha\u0107)',
+    });
+    expect(facts).toContain('Objective: take Ora\u0161ac (Biha\u0107).');
     // No staff estimates on this card: no odds or cost line is invented.
-    expect(card?.evidence.some((line) => line.startsWith('Odds:') || line.startsWith('Cost:'))).toBe(false);
+    expect(facts.some((line) => line.startsWith('Odds:') || line.startsWith('Cost:'))).toBe(false);
     expect(card?.fieldInspectionTarget).toMatchObject({ objectiveOsids: ['op:bihac:orasac_2'] });
     expect(`${card?.title} ${card?.explanation} ${card?.evidence.join(' ')}`)
       .not.toMatch(/zone:|op:|vrs_2nd_krajina|plan_vrs/);

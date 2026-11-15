@@ -1,12 +1,17 @@
+import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { buildOpProposalCards, type OpProposalCardView } from '../../src/ui/map/data/backTheOfficer';
+import { buildProposalDossier } from '../../src/ui/map/data/proposalDossier';
 import {
-  buildProposalDossier,
+  buildProposalDossierFacts,
   casualtyBand,
   intelQuality,
   officerJudgement,
-} from '../../src/ui/map/data/proposalDossier';
+  PROPOSAL_DOSSIER_DETAIL_BCS,
+  PROPOSAL_DOSSIER_DETAIL_EN,
+} from '../../src/ui/map/data/proposalDossierDetail';
+import { withoutComments } from '../helpers/sourceComments';
 import { getPlayerSafeOddsBand } from '../../src/shared/playerSafeOperationBalance';
 import { setLocale } from '../../src/ui/map/i18n';
 
@@ -86,12 +91,17 @@ describe('proposal dossier bands', () => {
   });
 });
 
+/** The entry-chunk dossier (title, header, map target) plus the lazily loaded facts. */
+function full(c: OpProposalCardView, names: Record<string, string> | null) {
+  return { ...buildProposalDossier(c, names), ...buildProposalDossierFacts(c, names) };
+}
+
 describe('buildProposalDossier', () => {
   beforeEach(() => setLocale('en'));
   afterEach(() => setLocale('en'));
 
   it('writes an attributed dossier with no numbers from the staff estimates', () => {
-    const dossier = buildProposalDossier(card(), null);
+    const dossier = full(card(), null);
     expect(dossier.header).toBe('Sead Delić asks to commit 5 brigades to take Vozuća (Zavidovići).');
     expect(dossier.facts).toEqual([
       'Objective: take Vozuća (Zavidovići), Stog, Krčevine and 1 more.',
@@ -107,7 +117,7 @@ describe('buildProposalDossier', () => {
   });
 
   it('shows the army staff voice when the officer reads the plan differently', () => {
-    const dossier = buildProposalDossier(card({
+    const dossier = full(card({
       // 0.55 staff viability reads even; this officer's file bends it to 0.69, favourable.
       dossier_inputs: { ...card().dossier_inputs!, viability: 0.55, commander_traits: { competence: 4, aggressiveness: 5 } },
     }), null);
@@ -118,21 +128,21 @@ describe('buildProposalDossier', () => {
 
   it('attributes to the corps staff when the officer is unknown or lost', () => {
     for (const commander of [null, { officer_id: 'x', name: 'Gone', lost: true }]) {
-      const dossier = buildProposalDossier(card({ commander: commander as OpProposalCardView['commander'] }), null);
+      const dossier = full(card({ commander: commander as OpProposalCardView['commander'] }), null);
       expect(dossier.odds?.judge).toBe('The 2nd Corps staff');
       expect(dossier.header.startsWith('2nd Corps asks')).toBe(true);
     }
   });
 
   it('leaves out what is not known and never invents odds or cost', () => {
-    const dossier = buildProposalDossier(card({ dossier_inputs: undefined, targets: ['Unreported'], forces: ['Unreported'] }), null);
+    const dossier = full(card({ dossier_inputs: undefined, targets: ['Unreported'], forces: ['Unreported'] }), null);
     expect(dossier.header).toBe('Sead Delić asks for authority to launch Advance on Vozuća.');
     expect(dossier.facts.some((line) => /^(Objective|Forces|Odds|Cost):/.test(line))).toBe(false);
     expect(dossier.fieldTarget).toBeNull();
   });
 
   it('notes a thin front and donor corps on the forces line', () => {
-    const dossier = buildProposalDossier(card({
+    const dossier = full(card({
       donors: [{ corps_id: 'c3', corps_name: '3rd Corps', brigade_ids: ['x'], personnel_lent: 400 }],
       dossier_inputs: { ...card().dossier_inputs!, pressure: 'critical' },
     }), null);
@@ -149,15 +159,28 @@ describe('buildProposalDossier', () => {
   });
 
   it('is deterministic', () => {
-    expect(buildProposalDossier(card(), null)).toEqual(buildProposalDossier(card(), null));
+    expect(full(card(), null)).toEqual(full(card(), null));
   });
 
   it('renders in BCS', () => {
     setLocale('bcs');
-    const dossier = buildProposalDossier(card(), null);
+    const dossier = full(card(), null);
     expect(dossier.header).toBe('Sead Delić traži da angažuje brigade (5) kako bi zauzeo Vozuća (Zavidovići).');
     expect(dossier.facts).toContain('Izgledi: Sead Delić ih ocjenjuje kao izjednačene. Ocjena se oslanja na slabe obavještajne podatke.');
     expect(dossier.facts).toContain('Uskrati: korpus odustaje od ovog plana; njegov komandant može planirati ponovo.');
+    expect(dossier.facts).toContain('Snage: 221st Brigade, 222nd Brigade, 223rd Brigade i još 2 (2nd Corps).');
+  });
+
+  it('keeps EN and BCS detail dictionaries complete and the facts out of the entry chunk', () => {
+    expect(Object.keys(PROPOSAL_DOSSIER_DETAIL_BCS).sort()).toEqual(Object.keys(PROPOSAL_DOSSIER_DETAIL_EN).sort());
+    for (const value of Object.values(PROPOSAL_DOSSIER_DETAIL_BCS)) expect(value.trim().length).toBeGreaterThan(0);
+    // Only the lazily loaded ProposalDossierFacts imports the detail module.
+    const room = withoutComments(readFileSync('src/ui/map/data/presidentialDecisionRoom.ts', 'utf8'));
+    const core = withoutComments(readFileSync('src/ui/map/data/proposalDossier.ts', 'utf8'));
+    const surface = withoutComments(readFileSync('src/ui/map/components/command_surface/CommandSurface.tsx', 'utf8'));
+    expect(room).not.toContain('proposalDossierDetail');
+    expect(core).not.toContain('proposalDossierDetail');
+    expect(surface).toContain("lazy(() => import('./ProposalDossierFacts'))");
   });
 });
 
