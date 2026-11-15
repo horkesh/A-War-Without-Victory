@@ -125,7 +125,7 @@ lanes:
   - lane: R7
     title: "Content, historical attribution, audio, accessibility, and opening experience"
     lane_open: false
-    status: "CLOSED — owner, 2026-11-08. Every R7 gate is closed: audio cue wiring, offline playback and human listening/sensitivity (all 17 interface cues accepted; ambient"
+    status: "CLOSED — owner, 2026-11-08. Every R7 gate is closed (all 17 interface cues accepted, ambient beds retired for 1.0); in-game audio checks pass to R8 packaged pla"
     plans:
       - path: docs/plans/2026-07-31-content-history-localization-audio-plan.md
         exists: true
@@ -185,7 +185,7 @@ lanes:
   - lane: DC
     title: "Dayton conference redesign"
     lane_open: false
-    status: "CLOSED 2026-11-12 — merged #560 (`4a67bd516`); Codex handoff CL-055 records every Next item done. Claude implemented, Codex supplied art (owner, 2026-11-08). Re"
+    status: "CLOSED 2026-11-12 — merged #560 (`4a67bd516`); Codex handoff CL-055 records every Next item done. Reworked the Dayton table (conference room, live bargaining, d"
     plans:
       - path: docs/plans/2026-11-08-dc-dayton-conference-plan.md
         exists: true
@@ -205,7 +205,7 @@ lanes:
   - lane: PS
     title: "Player surface and agency review, steps 1-6"
     lane_open: false
-    status: "CLOSED — owner, 2026-11-14 (steps 1-6 all merged). Step 1 [#568](https://github.com/horkesh/A-War-Without-Victory/pull/568), step 2 [#579](https://github.com/ho"
+    status: "CLOSED — owner, 2026-11-14 (steps 1-6 all merged: #568, #579, #570, #572, #585, posture model #580; redesign base #566). Owner chose posture option 2, 2026-11-1"
     plans:
       - path: docs/plans/2026-11-12-posture-model-option2-stance-matters.md
         exists: true

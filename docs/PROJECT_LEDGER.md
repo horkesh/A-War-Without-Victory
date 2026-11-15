@@ -90,6 +90,24 @@ The loaders below are not fixed and are a larger layer that needs its own lane:
 
 The desktop app (`chdir` to its data root) and the scenario runner (run from the repo root) are not affected.
 
+## 2026-11-14 — Command loop L1: an honest review chip, and the weekly army pushback demoted to one Records line
+
+UI only (command-loop proposal 2C and 2A step A0, `docs/40_reports/proposals/20261114_COMMAND_LOOP_PROPOSAL.md`). No sim, state, save or calibration change; the sim still emits `army_directive_pushback` and the headless artifacts are untouched.
+
+**Review chip (2C).**
+- `buildAdvanceReadiness` returns the full ordered list, required first, with no padding. The old `Math.max(4, ...)` floor meant the chip read 4 almost every week; `advanceReviewCount` is now the number of rows (a grouped card is one row), not card weights. Pending-review weight stays a separate figure in the chip's title and accessible name.
+- Each row carries a `tier` (`required` or `recommended`) and a one-line `whyNow` (required: "Advance stays blocked until you answer"; stance matters: "Proceeds unless you act"; others: the first sentence of the card's own explanation). Information items were already excluded and stay out.
+- The Warroom chip shows the true number, capped at "9+" (`formatReviewChipCount`), and is not rendered at zero. Its panel lists every item grouped by tier, scrolls, and every row is a live button (a row with no target of its own opens its card in the Decision Room via `docketRowFallbackTarget`). `warroomPriorityDocket` no longer cuts at four by default.
+- The status dock is hidden when `gameOver` is set (the Dayton signing and the Verdict render under it), on the dock only, not on the shared blocking flag.
+- No new chip on the map screen. The toolbar's Advance button carries the count in its title and accessible name ("Advance week. 3 items to review before advancing"), and `PresidentialToolbar` now passes the reviewed-aftermath turn it omitted.
+- Chip strings are in a new `review.*` block in EN and BCS.
+
+**Weekly pushback (2A step A0).** For the player's own faction the weekly `army_directive_pushback` is no longer a Decision Room card, an inbox tile, a chip item, an Army HQ matter or a review-queue count. It is filtered once where the player's pending officer events are built (`GameStateAdapter.derivePendingOfficerEvents`), and again in the view builders so a directly built state behaves the same (`presidentialDecisionRoom.ts`, `inboxItems.ts`). Order-level objections to the President's own orders (`order_pushback`, `order_refused`, `order_modified`, `order_exceeded`) and the army's own launch proposals are unchanged and still cards. The one Records line, "Staff reading of policy: {verb}, carried out as {role summary}.", is built from the player's latest interpretation trace and current corps roles (`buildStaffReadingLine`) and shown in the Army HQ Records archive summary. It is not a ledger record: a weekly record would crowd the desk's two-item consequence strip.
+
+**Outside the brief's file list, and why.** `GameStateAdapter.ts` (3 lines: without the filter at the data source, Army HQ's `OrderInterpretationPanel` and the pre-advance `ArmyCoPushbackPanel` would pile up one never-answered row per week) and `RecordsContent.tsx` (the render site of the Records line). Not changed: `OfficerMatterModal.tsx` (no longer reachable for this event type, its label case is harmless).
+
+**Tests.** New `review_chip_honest_count` (demotion, true count, tiers, Records line EN and BCS, cap formatter) and `review_chip_status_bar` (chip absent at zero, true number, "9+" with every row listed, tier heading, live rows, BCS). Updated for the new count semantics: `warroom_priority_docket` (a grouped convoy card is one row, two pending reviews) and `advance_turn_button_gated_feedback` (count 1 not 2, one visible number on the chip, no chip at zero or with no campaign side, dock hidden on `gameOver`). Rendered before/after screenshots at 1280x720 and the wide desk size are in the PR.
+
 ## 2026-11-14 — Council fix 4: developer text stripped from player copy; noun and diacritics pass
 
 R8 Player Experience Council fix 4 (items C1, C4, C5, C7, C11, C13, C14 in
