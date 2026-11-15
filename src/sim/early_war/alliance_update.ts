@@ -91,8 +91,8 @@ export function getAlliancePhase(value: number): AlliancePhase {
 }
 
 export function areRbihHrhbAllied(state: GameState): boolean {
-    const value = state.political.war_alliance_rbih_hrhb;
-    if (value === undefined || value === null) return true; // absent = allied
+    const value = state.political?.war_alliance_rbih_hrhb;
+    if (value === undefined || value === null) return true; // absent (or no political block) = allied
     return value > ALLIED_THRESHOLD;
 }
 

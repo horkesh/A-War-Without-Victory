@@ -38,8 +38,9 @@ import { sidePickerFactionLabel } from '../utils/sidePickerLabels';
 import { stanceMatterTitle } from './stanceMatterCopy';
 import type { RecruitmentMatter } from './recruitmentMatter';
 import { buildRecruitmentMatterCopy } from './recruitmentMatterCopy';
+import { armyClashTitle } from './armyClashCopy';
 
-export type InboxItemType = 'event_decision' | 'peace_plan' | 'dayton_negotiation' | 'convoy_decision' | 'paramilitary_request' | 'reserve_request' | 'officer_event' | 'operation_opportunity' | 'autonomy_proposal' | 'stance_matter' | 'intelligence_notification' | 'recruitment' | 'situation';
+export type InboxItemType = 'event_decision' | 'peace_plan' | 'dayton_negotiation' | 'convoy_decision' | 'paramilitary_request' | 'reserve_request' | 'officer_event' | 'operation_opportunity' | 'autonomy_proposal' | 'stance_matter' | 'army_clash' | 'intelligence_notification' | 'recruitment' | 'situation';
 export type InboxSeverity = 'blocking' | 'urgent' | 'normal' | 'info';
 
 export interface InboxItem {
@@ -398,6 +399,20 @@ export function deriveInboxItems(
             subtitle: stanceMatterTitle(matter),
             action: stanceMatterSurface.inboxAction,
             priority: 36,
+        });
+    }
+
+    // 3c. Command loop L7: this week's army clash (advisory; unanswered, the order stands).
+    const armyClashSurface = getDecisionSurface('army_clash');
+    for (const clash of state.armyClashes ?? []) {
+        items.push({
+            id: `command:army-clash:${clash.id}`,
+            type: 'army_clash',
+            severity: 'urgent',
+            title: t('inbox.item.armyClash.title'),
+            subtitle: armyClashTitle(clash, osidNameMap),
+            action: armyClashSurface.inboxAction,
+            priority: 30,
         });
     }
 
