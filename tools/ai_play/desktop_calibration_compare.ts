@@ -37,6 +37,13 @@ import { strictCompare } from '../../src/state/validateGameState.js';
 import { isHistoricalOperationAuthorizationReview } from '../../src/sim/combat/historical_operation_authorization.js';
 import { resolvePeacePlan } from '../../src/sim/negotiation/peace_plans.js';
 import { getPeacePlanById } from '../../src/sim/negotiation/peace_plan_data.js';
+import { createRequire } from 'node:module';
+
+/** The desktop IPC contract (CommonJS): the same price table and debit the accept-proposal handler uses. */
+const ipcContract = createRequire(import.meta.url)('../../src/desktop/autonomy_ipc_contract.cjs') as {
+    proposalBackingCost: (action: unknown) => number;
+    debitCommandAuthority: (state: unknown, cost: number) => { ok: boolean; error?: string };
+};
 
 /**
  * `bot_equivalent`: answer every player decision exactly as the bot would (the engine's own
@@ -71,13 +78,21 @@ interface CliOptions {
      * containing "attribution"; the output carries a top-level `diagnostic` label.
      */
     botParityParamilitaryDiagnostic?: boolean;
+    /**
+     * Command loop L6 measurement (Authority that binds). 'off' (default) leaves the run as it
+     * was. 'record' adds the player's Authority (`current`/`max`) to every turn row. 'on' also
+     * charges each accepted historical operation its backing price through the desktop IPC's own
+     * `debitCommandAuthority`, and defers it when the balance cannot cover the price, as the
+     * desktop refuses it.
+     */
+    priceBacking?: 'record' | 'on';
     electronLogPath?: string;
     electronAutosavePath?: string;
 }
 
 interface DecisionTranscriptRow {
     turn: number;
-    family: 'event' | 'historical_operation' | 'paramilitary_request' | 'peace_plan';
+    family: 'event' | 'historical_operation' | 'op_proposal' | 'paramilitary_request' | 'peace_plan';
     id: string;
     decision: string;
     value?: string;
@@ -280,6 +295,10 @@ function parseArgs(argv: string[]): CliOptions {
         ...(electronLogPath ? { electronLogPath } : {}),
         ...(electronAutosavePath ? { electronAutosavePath } : {}),
         ...(botParityParamilitaryDiagnostic ? { botParityParamilitaryDiagnostic } : {}),
+        ...(() => {
+            const raw = parseEnum(values.get('--price-backing') ?? 'off', ['off', 'record', 'on'] as const, '--price-backing');
+            return raw === 'off' ? {} : { priceBacking: raw };
+        })(),
     };
 }
 
@@ -368,6 +387,7 @@ function applyHistoricalOperationPolicy(
     faction: FactionId,
     policy: HistoricalOperationPolicy,
     transcript: DecisionTranscriptRow[],
+    priceBacking?: 'record' | 'on',
 ): void {
     const reviews = [...(state.meta.pending_proposal_reviews ?? [])]
         .filter((review) => review.faction === faction)
@@ -386,6 +406,20 @@ function applyHistoricalOperationPolicy(
             });
             continue;
         }
+        if (policy === 'accept' && priceBacking === 'on') {
+            // The desktop accept-proposal handler's own debit; a refusal leaves the review pending.
+            const backing = ipcContract.debitCommandAuthority(state, ipcContract.proposalBackingCost(review.proposed_action));
+            if (!backing.ok) {
+                transcript.push({
+                    turn: state.meta.turn,
+                    family: 'historical_operation',
+                    id: review.id,
+                    decision: 'defer_unaffordable',
+                    value: review.proposed_action,
+                });
+                continue;
+            }
+        }
         review.accepted = policy === 'accept';
         review.resolved_turn = state.meta.turn;
         transcript.push({
@@ -395,6 +429,33 @@ function applyHistoricalOperationPolicy(
             decision: policy,
             value: review.proposed_action,
         });
+    }
+}
+
+/**
+ * `--price-backing on` only: an eager president who backs every corps operation proposal
+ * (`APPROVE_OP:*`) he can afford, mirroring the desktop `accept-proposal` handler (the same debit,
+ * then `player_op_response` approved). An unaffordable proposal is left unanswered and lapses at
+ * Advance, as in the desktop. This bounds Authority spend from above for the L6 measurement.
+ */
+function applyEagerBackingPolicy(state: GameState, faction: FactionId, transcript: DecisionTranscriptRow[]): void {
+    const reviews = [...(state.meta.pending_proposal_reviews ?? [])]
+        .filter((review) => review.faction === faction)
+        .filter((review) => typeof review.proposed_action === 'string' && review.proposed_action.startsWith('APPROVE_OP:'))
+        .filter((review) => review.accepted == null && review.resolved_turn == null)
+        .sort((a, b) => strictCompare(a.id, b.id));
+    for (const review of reviews) {
+        const backing = ipcContract.debitCommandAuthority(state, ipcContract.proposalBackingCost(review.proposed_action));
+        if (!backing.ok) {
+            transcript.push({ turn: state.meta.turn, family: 'op_proposal', id: review.id, decision: 'defer_unaffordable', value: review.proposed_action });
+            continue;
+        }
+        review.accepted = true;
+        review.resolved_turn = state.meta.turn;
+        const [, corpsId, planId] = review.proposed_action.split(':');
+        const corps = state.military.corps_command?.[corpsId!] as Record<string, unknown> | undefined;
+        if (corps) corps.player_op_response = { plan_id: planId, approved: true, turn: state.meta.turn };
+        transcript.push({ turn: state.meta.turn, family: 'op_proposal', id: review.id, decision: 'accept', value: review.proposed_action });
     }
 }
 
@@ -460,7 +521,8 @@ function applyPlayerPolicy(
 ): void {
     applyEventPolicy(state, options.faction, options.eventPolicy, transcript);
     applyPeacePlanPolicy(state, options.faction, options.eventPolicy, transcript);
-    applyHistoricalOperationPolicy(state, options.faction, options.historicalOperationPolicy, transcript);
+    applyHistoricalOperationPolicy(state, options.faction, options.historicalOperationPolicy, transcript, options.priceBacking);
+    if (options.priceBacking === 'on') applyEagerBackingPolicy(state, options.faction, transcript);
     applyParamilitaryPolicy(state, options.faction, options.paramilitaryPolicy, transcript);
     // Last: resolving an event (e.g. the opening state-identity decision) can re-enable the
     // paramilitary policy event, which would reopen the pending window for this turn.
@@ -880,6 +942,10 @@ async function runComparison(baseDir: string, options: CliOptions) {
                 headless.control_counts,
             );
         }
+        if (options.priceBacking) {
+            const auth = playerState.military?.command_authority;
+            row.player_command_authority = auth ? { current: auth.current, max: auth.max } : null;
+        }
         if (options.traceCorps) {
             row.corps_trace = {
                 headless: corpsTrace(headlessState, options.traceCorps),
@@ -942,6 +1008,7 @@ async function runComparison(baseDir: string, options: CliOptions) {
             non_player_event_mode: playerState.meta.decision_mode,
             player_event_resolution_timing: 'between_turns',
             historical_operations: options.historicalOperationPolicy,
+            ...(options.priceBacking ? { price_backing: options.priceBacking } : {}),
             paramilitary_requests: options.paramilitaryPolicy,
             paramilitary_resolution_timing: options.paramilitaryPolicy === 'standing_allow'
                 ? 'same_turn'

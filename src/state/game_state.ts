@@ -3437,6 +3437,13 @@ export interface CommandAuthority {
     last_recovery?: number;
     /** Last recovery source classification; must stay inside the Section 6-approved CA source set. */
     last_recovery_source?: import('../shared/commandAuthorityEconomy.js').CommandAuthorityIncomeSource;
+    /**
+     * Command loop L6 (2026-11-14): the last weekly recovery broken down by source, so the
+     * Desk can show next week's income and where it comes from. Optional; written only by
+     * the `recover-command-authority` step for a live president (never at seed time, never
+     * in headless runs), so old saves and headless artifacts never carry it.
+     */
+    last_recovery_breakdown?: import('../shared/commandAuthorityEconomy.js').CommandAuthorityRecoveryBreakdownRecord;
 }
 
 /**

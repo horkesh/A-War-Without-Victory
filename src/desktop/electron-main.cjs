@@ -29,6 +29,9 @@ const {
   ADDRESS_NATION_COST,
   DECORATE_UNIT_COST,
   STRATEGIC_POSTURE_REVIEW_COST,
+  proposalBackingCost,
+  opportunityDecisionBackingCost,
+  debitCommandAuthority,
 } = require('./autonomy_ipc_contract.cjs');
 const { stageAuthoredOperation, stageCanonAttackOrder } = require('./author_op_staging.cjs');
 const { stageOpHalt } = require('./op_halt.cjs');
@@ -4243,6 +4246,12 @@ app.whenReady().then(() => {
     const proposal = proposals[idx];
     if (isResolvedProposalReviewRecord(proposal)) return { ok: false, error: 'already_resolved' };
 
+    // Command loop L6 (owner decision 1): backing an offensive costs Authority (10 for a
+    // corps operation, 20 for a campaign or historical operation). Refuse before any
+    // mutation when unaffordable. Stance and other proposals stay free.
+    const backing = debitCommandAuthority(state, proposalBackingCost(proposal.proposed_action));
+    if (!backing.ok) return { ok: false, error: backing.error };
+
     // Mark accepted
     proposal.accepted = true;
     proposal.resolved_turn = state.meta.turn;
@@ -4491,6 +4500,12 @@ app.whenReady().then(() => {
     const decisionAccess = resolveOpportunityDecisionPayload(proposals, payload, playerFaction);
     if (decisionAccess.index === -1) return { ok: false, error: decisionAccess.error };
     const proposal = proposals[decisionAccess.index];
+
+    // Command loop L6 (owner decision 1): approving, redirecting or under-resourcing a
+    // named campaign costs 20 Authority; delaying or declining stays free. Refuse before
+    // recording anything when unaffordable.
+    const backing = debitCommandAuthority(state, opportunityDecisionBackingCost(decisionAccess.decision));
+    if (!backing.ok) return { ok: false, error: backing.error };
 
     // Rich operation-opportunity responses are still consumed by the canonical
     // war-pipeline step. The desktop bridge records player intent only.
