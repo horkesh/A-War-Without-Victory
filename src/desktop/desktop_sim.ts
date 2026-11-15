@@ -95,6 +95,8 @@ export { resolvePeacePlan } from '../sim/negotiation/peace_plans.js';
 export { submitPlayerCounterOffer } from '../sim/negotiation/counter_offer_generator.js';
 export { declineDaytonNegotiation } from '../sim/negotiation/dayton_negotiation.js';
 export { parseDaytonProposal } from './dayton_proposal.js';
+// Command loop L7: army clashes are raised and swept only from desktop IPC (never the war pipeline).
+export { raiseArmyClash, sweepLapsedArmyClashes } from '../sim/combat/army_clashes.js';
 
 /** Table a draft for the next Dayton round (DC A2): every other delegation answers; the round is recorded. */
 export function tableDesktopDaytonRound(state: GameState, payload: unknown): TableDaytonRoundResult {

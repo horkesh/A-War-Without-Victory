@@ -2715,7 +2715,10 @@ export const warPhases: NamedPhase[] = [
             }
             // generateCorpsStanceOrders sets ai_recommended_stance on each corps cmd
             // and respects player_ordered_stance guard (will not overwrite cmd.stance).
-            generateCorpsStanceOrders(context.state, playerFaction, edges, sidToMun);
+            // The threat ratio reads the OSID contact graph, as in generate-bot-corps-orders
+            // (RF-F1g): brigade locations are OSIDs, so S-id edges gave a threat of 0.
+            const stanceThreatEdges = getOperationalData(context)?.edges ?? edges;
+            generateCorpsStanceOrders(context.state, playerFaction, stanceThreatEdges, sidToMun);
         },
     },
     {

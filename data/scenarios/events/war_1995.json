@@ -2536,7 +2536,7 @@
     "bot_response_logic": "historical",
     "historical_default_response_id": "accept",
     "historical_source": "General Framework Agreement for Peace in Bosnia and Herzegovina (Dayton, initialled 21 Nov 1995; signed Paris 14 Dec 1995; UN S/1995/999); UN S/RES/1031 (15 Dec 1995) — IFOR authorization; UN S/RES/1022 (22 Nov 1995) — sanctions suspension; UN S/RES/1035 (21 Dec 1995) — IPTF establishment; Krstić IT-98-33-T (2 Aug 2001) and IT-98-33-A (19 Apr 2004) — Srebrenica genocide findings establishing the strategic conditions entering Dayton; ICJ Bosnia and Herzegovina v. Serbia and Montenegro Judgment (26 Feb 2007) §§278-297 — Srebrenica genocide affirmation and Dayton entity-structure recognition; Karadžić IT-95-5/18-T (Trial Judgment, 24 Mar 2016) §§5020-5067 — RBiH delegation context and the Patriarch Paper joint-delegation authority; Holbrooke, To End a War (1998). RBiH delegation: President Alija Izetbegović, Foreign Minister Muhamed Šaćirbey, Prime Minister Haris Šilajdžić. Balkan Battlegrounds Vol. II close-out chapters on the late-1995 settlement environment.",
-    "source_note": "The Dayton General Framework Agreement was initialed at Wright-Patterson on 21 November 1995 by Presidents Izetbegović (RBiH), Milošević (FRY, for the Bosnian Serbs under the 30 August 1995 Patriarch Paper delegation), and Tuđman (Croatia), and signed in Paris on 14 December 1995; the eleven annexes establish the Federation/RS dual-entity structure inside a unitary BiH, the 51:49 Inter-Entity Boundary Line, IFOR deployment under UN S/RES/1031, and the High Representative civilian-implementation regime. The RBiH delegation accepted under post-Srebrenica strategic conditions (Krstić IT-98-33-T; ICJ Bosnia v. Serbia 2007) and the Contact Group 51:49 framework; Šilajdžić's documented post-Dayton resignation as Prime Minister (early 1996) reflects the internal current that would have driven a counterfactual hardline rejection per the Owen-Stoltenberg Assembly-rejection precedent (B4).",
+    "source_note": "The Dayton General Framework Agreement was initialed at Wright-Patterson on 21 November 1995 by Presidents Izetbegović (RBiH), Milošević (FRY, for the Bosnian Serbs under the 29 August 1995 Patriarch Paper delegation), and Tuđman (Croatia), and signed in Paris on 14 December 1995; the eleven annexes establish the Federation/RS dual-entity structure inside a unitary BiH, the 51:49 Inter-Entity Boundary Line, IFOR deployment under UN S/RES/1031, and the High Representative civilian-implementation regime. The RBiH delegation accepted under post-Srebrenica strategic conditions (Krstić IT-98-33-T; ICJ Bosnia v. Serbia 2007) and the Contact Group 51:49 framework; Šilajdžić's documented post-Dayton resignation as Prime Minister (early 1996) reflects the internal current that would have driven a counterfactual hardline rejection per the Owen-Stoltenberg Assembly-rejection precedent (B4).",
     "staff_assessment": "Acceptance ratifies the Federation/RS dual-entity arrangement and the 51:49 IEBL under duress, preserves RBiH legal continuity through Annex 4, and unlocks Annex 7 refugee-return commitments as partial compensation for the eastern-enclave losses; hardline repudiation walks the Paris signature on the grounds that the IEBL ratifies ethnic-cleansing-driven outcomes, foreclosing Annex 7 implementation, IFOR deployment, and U.S./Holbrooke-mediated stabilization.",
     "trigger_evidence": [
       "The October 1995 ceasefire event has fired.",
@@ -2906,8 +2906,16 @@
   {
     "id": "rs_dayton_acceptance_1995",
     "image": "event_political_session.webp",
-    "title": "Pale Ratifies the Patriarch Paper",
-    "narrative": "Milošević has initialed the General Framework Agreement at Wright-Patterson on 21 November 1995 under the Patriarch Paper joint-delegation authority granted by the Pale leadership on 30 August 1995. The text is on the table: Annex 1-A (IFOR, Zone of Separation, heavy-weapons cantonment), Annex 2 (the 51:49 Inter-Entity Boundary Line), Annex 4 (BiH Constitution — Federation/RS dual entities inside a unitary BiH), Annex 7 (refugee return), Annex 10 (the High Representative). Karadžić's objections are loud — Sarajevo unified under Federation control, eastern enclaves lost, the entity inside BiH rather than annexed to FRY. Mladić's reservations on the IFOR terms are recorded. The RS National Assembly must vote: ratify Milošević's signature, or repudiate the delegation and reject the framework.",
+    "title": "Pale Accepts the Dayton Agreement",
+    "localizations": {
+      "en": {
+        "source_note": "ICTY, Karadžić (IT-95-5/18-T), Trial Judgment, 24 March 2016, paras 424 and 431-437: at Dobanovci, near Belgrade, on 29 August 1995 the Bosnian Serb leaders agreed that a six-member joint delegation led by Slobodan Milošević would negotiate for the RS and the FRY (para. 424); Milošević, Tuđman and Izetbegović initialled the Dayton Agreement on 21 November 1995, with the RS delegation absent from the final plenary and the initialling (paras 435-436); members of the delegation and Karadžić then signed a statement that the RS leadership had accepted the agreement (para. 436). Balkan Battlegrounds, Vol. I, p. 391; see also Holbrooke, To End a War (1998)."
+      },
+      "bcs": {
+        "source_note": "MKSJ, Karadžić (IT-95-5/18-T), prvostepena presuda, 24. marta 2016., par. 424 i 431–437: u Dobanovcima kod Beograda 29. augusta 1995. bosanskosrpski lideri pristali su da ih u pregovorima zastupa zajednička šestočlana delegacija na čelu sa Slobodanom Miloševićem, u ime RS i SRJ (par. 424); Milošević, Tuđman i Izetbegović parafirali su Daytonski sporazum 21. novembra 1995., a delegacija RS nije prisustvovala završnoj plenarnoj sjednici ni parafiranju (par. 435–436); članovi delegacije i Karadžić potom su potpisali izjavu da je rukovodstvo RS prihvatilo sporazum (par. 436). Balkan Battlegrounds, tom I, str. 391; vidi i Holbrooke, To End a War (1998)."
+      }
+    },
+    "narrative": "Milošević, who heads the joint delegation the Bosnian Serb leaders agreed to at Dobanovci on 29 August 1995 (the Patriarch Paper), has initialled the General Framework Agreement at Wright-Patterson on 21 November 1995, together with Tuđman and Izetbegović. The RS delegation stayed away from the final plenary and the initialling. The text is on the table: Annex 1-A (IFOR, Zone of Separation, heavy-weapons cantonment), Annex 2 (the 51:49 Inter-Entity Boundary Line), Annex 4 (BiH Constitution — Federation/RS dual entities inside a single BiH), Annex 7 (refugee return), Annex 10 (the High Representative). The RS delegation's objections are recorded: Sarajevo, where 61% of the pre-war city goes to the Federation; the Posavina, Brčko and Goražde corridors; no access to the sea; and the military annex. The Pale leadership must now say whether it accepts the agreement or rejects it.",
     "category": "diplomatic",
     "family": "rs_dayton_response",
     "source_tier": "icty_icj_un",
@@ -2955,23 +2963,23 @@
     "responding_faction": "RS",
     "bot_response_logic": "historical",
     "historical_default_response_id": "accept",
-    "historical_source": "General Framework Agreement for Peace in Bosnia and Herzegovina (Dayton, initialled 21 Nov 1995; signed Paris 14 Dec 1995; UN S/1995/999); UN S/RES/1031 (15 Dec 1995) — IFOR authorization; UN S/RES/1022 (22 Nov 1995) — sanctions suspension contingent on Dayton implementation; UN S/RES/1035 (21 Dec 1995) — IPTF establishment; Karadžić IT-95-5/18-T (Trial Judgment, 24 Mar 2016) §§5020-5067 — RS National Assembly ratification of the Patriarch Paper signature, Karadžić's reservations on Sarajevo unification and eastern enclaves, December 1995 internal communications exploring the hardline alternative (§§5025-5040); Mladić IT-09-92-T (Trial Judgment, 22 Nov 2017) §§4750-4795 — VRS compliance with Annex 1-A despite military reservations; Milošević IT-02-54-T (Decision on Motion for Judgment of Acquittal, 16 Jun 2004) §§290-340 — Milošević's signing authority and Dayton commitments; ICJ Bosnia and Herzegovina v. Serbia and Montenegro Judgment (26 Feb 2007) — Dayton as legal terminus of the war and entity-structure recognition. Holbrooke, To End a War (1998).",
-    "source_note": "The Patriarch Paper of 30 August 1995 granted Milošević joint-delegation authority over the Bosnian Serb negotiating position. The Pale leadership's November-December 1995 ratification decision was a discrete political act — Karadžić publicly disagreed with Sarajevo unification and the eastern-enclave provisions but did not repudiate Milošević's authority (Karadžić IT-95-5/18-T §§5020-5067). The RS National Assembly voted to accept the framework in late November 1995 with noted reservations. The hardline counterfactual (Assembly rejection, repudiation of the Patriarch Paper, RS unilateral declaration of independence) was actively considered per Karadžić's December 1995 internal communications (§§5025-5040) and rejected.",
-    "staff_assessment": "Acceptance ratifies Milošević's signature under the Patriarch Paper authority, locks RS as a recognized entity inside BiH along the 51:49 line, secures sanctions relief under UN S/RES/1022, and orders VRS compliance with Annex 1-A; hardline repudiation ruptures the alliance lock with FRY definitively, invites NATO IFOR escalation to active enforcement, places the territorial gains at acute risk because the cessation-of-hostilities baseline is no longer guaranteed, and continues the war as an internationally-supervised low-intensity conflict with the RS as the spoiler party.",
+    "historical_source": "General Framework Agreement for Peace in Bosnia and Herzegovina (Dayton, initialled 21 Nov 1995; signed Paris 14 Dec 1995; UN S/1995/999); UN S/RES/1031 (15 Dec 1995) — IFOR authorization; UN S/RES/1022 (22 Nov 1995) — sanctions suspension contingent on Dayton implementation; UN S/RES/1035 (21 Dec 1995) — IPTF establishment; Karadžić IT-95-5/18-T (Trial Judgment, 24 Mar 2016) para. 424 (29 Aug 1995 Dobanovci agreement) and paras 431-437 (talks at Wright-Patterson; 21 Nov initialling by Tuđman, Milošević and Izetbegović; the RS delegation's absence from the final plenary and the initialling, and its objections; the signed statement that the RS leadership accepted the agreement; the London talks of 8-9 Dec; the Paris signing of 14 Dec); BB Vol. I p. 391. Paragraph not verified (historian check 2026-11-15, outside the material read): Mladić IT-09-92-T §§4750-4795 (VRS compliance with Annex 1-A) and Milošević IT-02-54-T Rule 98 bis decision §§290-340 (signing authority). The earlier text of this field cited Karadžić §§5020-5067 and §§5025-5040 (Srebrenica passages) for an RS National Assembly ratification and a December 1995 hardline alternative; the judgment records neither; ICJ Bosnia and Herzegovina v. Serbia and Montenegro Judgment (26 Feb 2007) — Dayton as legal terminus of the war and entity-structure recognition. Holbrooke, To End a War (1998).",
+    "source_note": "The Patriarch Paper is the game's label for the 29 August 1995 Dobanovci agreement that made Milošević head of a six-member joint delegation negotiating for the RS and the FRY (Karadžić IT-95-5/18-T para. 424; BB Vol. I p. 391; corrected 2026-11-15 from 30 August; neither source uses the name). Milošević, Tuđman and Izetbegović initialled the Dayton Agreement on 21 November 1995; the RS delegation stayed away from the final plenary and the initialling, and members of the delegation and Karadžić then signed a statement that the RS leadership had accepted it (paras 435-436; the judgment gives no date, its sources are of 28 November 1995, n. 1456). This event is a design frame around that documented outcome. The judgment records no Assembly vote and no independence declaration or other hardline alternative, so the Reject option is a plain counterfactual (historical_marker counterfactual). Historian check 2026-11-15; corrected from the earlier §§5020-5067 and §§5025-5040, which are Srebrenica passages.",
+    "staff_assessment": "Acceptance locks RS in as a recognized entity inside BiH along the 51:49 line, brings the suspension of FRY sanctions under UN S/RES/1022, and orders VRS compliance with Annex 1-A; rejection ruptures the alliance lock with FRY definitively, invites NATO IFOR escalation to active enforcement, places the territorial gains at acute risk because the cessation-of-hostilities baseline is no longer guaranteed, and continues the war as an internationally-supervised low-intensity conflict with the RS as the spoiler party.",
     "trigger_evidence": [
-      "Milošević has initialed the General Framework Agreement at Dayton on 21 November 1995 under the Patriarch Paper delegation authority.",
-      "The RS National Assembly must vote on ratification; Karadžić's reservations on Sarajevo and the eastern enclaves are recorded."
+      "Milošević, heading the joint delegation agreed on 29 August 1995, has initialled the General Framework Agreement at Wright-Patterson on 21 November 1995; the RS delegation did not attend the initialling.",
+      "The Pale leadership must say whether it accepts the agreement; the RS delegation's reservations on Sarajevo and the Posavina, Brčko and Goražde corridors are recorded."
     ],
     "effect": {
       "kind": "narrative",
-      "text": "The RS National Assembly records its posture on the Dayton General Framework Agreement."
+      "text": "The Pale leadership records its posture on the Dayton General Framework Agreement."
     },
     "response_options": [
       {
         "id": "accept",
         "branch_tag": "rs_dayton_accept",
-        "label": "Ratify the Patriarch Paper Signature",
-        "description": "The RS National Assembly accepts the General Framework Agreement under Milošević's signing authority. Order VRS compliance with Annex 1-A: heavy-weapons cantonment, Zone of Separation, IFOR deployment, freedom of movement. Accept the 51:49 Inter-Entity Boundary Line, the Federation/RS entity structure, the unitary BiH constitutional shell with the High Representative, and Sarajevo unification under Federation control. Sanctions relief flows; the war ends; RS as a recognized entity inside BiH secures the territorial gains compatible with the 51:49 line.",
+        "label": "Accept the Dayton Agreement",
+        "description": "The Pale leadership accepts the General Framework Agreement as Milošević initialled it, and signs the statement that the leadership of the RS has accepted it and will implement it. Order VRS compliance with Annex 1-A: heavy-weapons cantonment, Zone of Separation, IFOR deployment, freedom of movement. Accept the 51:49 Inter-Entity Boundary Line, the Federation/RS entity structure, the single BiH constitutional shell with the High Representative, and Sarajevo unification under Federation control. FRY sanctions are suspended; the war ends; RS as a recognized entity inside BiH secures the territorial gains compatible with the 51:49 line.",
         "historical_marker": "historical_default",
         "aggression_affinity": -0.6,
         "risk_level": 0.3,
@@ -3011,8 +3019,8 @@
       {
         "id": "hardline",
         "branch_tag": "rs_dayton_hardline",
-        "label": "Repudiate the Delegation — Declare Independence",
-        "description": "Repudiate Milošević's signature under the Patriarch Paper. The RS National Assembly rejects the General Framework Agreement; declare RS unilateral independence inside the recognized borders of BiH; refuse IFOR deployment and Zone of Separation compliance. Karadžić's December 1995 internal alternative (Karadžić IT-95-5/18-T §§5025-5040) becomes the operative line: hold the maximalist territorial claim and accept whatever international consequences follow.",
+        "label": "Reject the Dayton Agreement",
+        "description": "The Pale leadership rejects the General Framework Agreement Milošević initialled and refuses IFOR deployment and Zone of Separation compliance. Hold the maximalist territorial claim and accept whatever international consequences follow.",
         "historical_marker": "counterfactual",
         "aggression_affinity": 0.7,
         "risk_level": 0.9,
@@ -3058,22 +3066,22 @@
     "notifications_to_other_factions": {
       "accept": {
         "RBiH": {
-          "headline": "Pale ratifies the Patriarch Paper",
-          "body": "The RS National Assembly accepts Milošević's Dayton signature; Karadžić's reservations on Sarajevo and the eastern enclaves are recorded but not operationalized as repudiation. Sarajevo reads the ratification as the cessation-of-hostilities baseline holding under the 51:49 line."
+          "headline": "Pale accepts the Dayton Agreement",
+          "body": "The Pale leadership accepts the General Framework Agreement Milošević initialled; its delegation's reservations on Sarajevo and the corridors are recorded but not turned into rejection. Sarajevo reads the acceptance as the cessation-of-hostilities baseline holding under the 51:49 line."
         },
         "HRHB": {
-          "headline": "RS Assembly accepts Dayton framework",
-          "body": "Pale ratifies the General Framework Agreement under Milošević's signing authority. Mostar reads the acceptance as the war ending along the 51:49 Inter-Entity Boundary Line; HVO posture pivots to Federation military integration."
+          "headline": "RS leadership accepts the Dayton Agreement",
+          "body": "Pale accepts the General Framework Agreement Milošević initialled. Mostar reads the acceptance as the war ending along the 51:49 Inter-Entity Boundary Line; HVO posture pivots to Federation military integration."
         }
       },
       "hardline": {
         "RBiH": {
-          "headline": "Pale repudiates the Patriarch Paper",
-          "body": "The RS National Assembly rejects Dayton on Karadžić's December internal alternative; RS declares unilateral independence inside BiH borders. Sarajevo reads the move as the cessation-of-hostilities baseline collapsing; the war continues under IFOR enforcement posture."
+          "headline": "Pale rejects the Dayton Agreement",
+          "body": "The Pale leadership rejects the General Framework Agreement and refuses IFOR compliance. Sarajevo reads the move as the cessation-of-hostilities baseline collapsing; the war continues under IFOR enforcement posture."
         },
         "HRHB": {
           "headline": "RS rejects Dayton; war continues",
-          "body": "Pale repudiates Milošević's signature and declares RS independence. Mostar reads the move as the institutional Federation framework holding but the cessation-of-hostilities baseline gone; HV-HVO-ARBiH coalition posture remains warm."
+          "body": "Pale rejects the agreement Milošević initialled. Mostar reads the move as the institutional Federation framework holding but the cessation-of-hostilities baseline gone; HV-HVO-ARBiH coalition posture remains warm."
         }
       }
     }

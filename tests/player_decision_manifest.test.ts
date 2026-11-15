@@ -17,6 +17,7 @@ const EXPECTED_FAMILIES = [
     'autonomy_proposal',
     'operation_opportunity',
     'stance_matter',
+    'army_clash',
 ] as const;
 
 describe('player decision manifest', () => {
@@ -37,6 +38,7 @@ describe('player decision manifest', () => {
             { id: 'autonomy_proposal', source: 'meta.pending_proposal_reviews', destination: 'decision-room', receipt: 'meta.proposal_decision_history' },
             { id: 'operation_opportunity', source: 'meta.pending_proposal_reviews + military.operation_opportunities', destination: 'decision-room', receipt: 'military.operation_opportunity_resolutions' },
             { id: 'stance_matter', source: 'meta.stance_matters', destination: 'decision-room', receipt: 'meta.stance_matter_history' },
+            { id: 'army_clash', source: 'meta.army_clashes', destination: 'decision-room', receipt: 'meta.army_clash_history' },
         ]);
     });
 
@@ -48,6 +50,10 @@ describe('player decision manifest', () => {
                 stance_matters: [
                     { id: 'STANCE_10_arbih_2nd_corps', turn: 10, faction: 'RBiH', corps_id: 'arbih_2nd_corps' },
                     { id: 'STANCE_10_drina_corps', turn: 10, faction: 'RS', corps_id: 'drina_corps' },
+                ],
+                army_clashes: [
+                    { id: 'CLASH_12_RBiH', turn: 12, faction: 'RBiH', corps_id: 'arbih_2nd_corps' },
+                    { id: 'CLASH_12_RS', turn: 12, faction: 'RS', corps_id: 'drina_corps' },
                 ],
                 pending_proposal_reviews: [
                     {
@@ -172,12 +178,13 @@ describe('player decision manifest', () => {
             autonomy_proposal: 'advisory',
             operation_opportunity: 'advisory',
             stance_matter: 'advisory',
+            army_clash: 'advisory',
         });
 
-        expect(summary.totalCount).toBe(10);
+        expect(summary.totalCount).toBe(11);
         expect(summary.blockingCount).toBe(5);
         expect(summary.families.map((family) => family.id)).toEqual(EXPECTED_FAMILIES);
-        expect(summary.families.map((family) => family.count)).toEqual([1, 1, 1, 1, 1, 1, 1, 1, 1, 1]);
+        expect(summary.families.map((family) => family.count)).toEqual([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]);
         expect(listBlockingPlayerDecisions(state, 'RBiH').map((item) => item.familyId)).toEqual([
             'event_decision',
             'peace_plan',
@@ -339,6 +346,7 @@ describe('player decision manifest', () => {
             ['autonomy_proposal', 0, 0],
             ['operation_opportunity', 1, 0],
             ['stance_matter', 0, 0],
+            ['army_clash', 0, 0],
         ]);
         expect(listBlockingPlayerDecisions(state).map((item) => item.familyId)).toEqual([]);
     });

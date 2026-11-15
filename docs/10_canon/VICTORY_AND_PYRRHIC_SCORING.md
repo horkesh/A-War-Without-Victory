@@ -1,7 +1,8 @@
 # Victory Conditions and Pyrrhic Scoring — Canonical
 
 **Status:** CANON (v0.9.0 gate)
-**Last Updated:** 2026-11-14
+**Last Updated:** 2026-11-15
+**Amended:** 2026-11-15 (owner directive: war-or-game removed from all seats; owner approved this canon edit 2026-11-15, "Amend the canon docs"): the sign-off table row for grade anchor thresholds names `/scenario-creator-runner-tester` instead of `/war-or-game`. The 2026-11-07 sign-off record is history and stays as written. Nothing renumbered.
 **Amended:** 2026-11-14 (ending truth pass, R8 council fix 1): §2 table rows for `hollow_victory` and `failure` name the settlement cap; §2 "must not mean" gains the no-condemnation line for a settlement cap; §3.5a follow-up line updated; new §3.6 (peace-dysfunction cap, every decision mode, each side's own reading); §3.5 reference basis gains the week 189 / 183 endpoints; §3.5 A2 civilian-dead citation corrected to RDC 39,684 (the 5,000 constant is unchanged). Nothing renumbered.
 **Amended:** 2026-11-14 (RF-5B): §3.4 source (2) counts the first wave of a bot faction's minority-expulsion policy as an authorized war crime. Nothing renumbered.
 **Authority:** Canon hierarchy, Tier 2 (above Rulebook, below Engine Invariants)
@@ -364,7 +365,7 @@ Changes to this system require explicit review:
 
 | Change | Review required |
 |---|---|
-| Grade anchor thresholds | `/game-designer` + `/war-or-game` |
+| Grade anchor thresholds | `/game-designer` + `/scenario-creator-runner-tester` |
 | New outcome class | `/game-designer` + `/narrative-designer` review and Pyrrhic-panel sign-off; BLOCK, split verdict, or bright-line uncertainty escalates to the owner |
 | Dimension weights | `/game-designer` + `/historian` |
 | New condemnation flag | See `SENSITIVE_HISTORY_DESIGN_GATE.md` §6 |

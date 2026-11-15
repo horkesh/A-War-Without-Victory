@@ -181,4 +181,78 @@ describe('buildDistanceFromHistory', () => {
         assert.strictEqual(view.playerDiverged, 0);
         assert.deepStrictEqual(view.divergences, []);
     });
+
+    // A design counterfactual is a game construct, not a documented episode. Its authored default
+    // (bots read it) is not "what history did", so decisions on it are not part of the measure.
+    // csq_patron_recovery_offer is the one counterfactual with an authored default today.
+    test('a design-counterfactual default is not counted as history: matched or diverged', () => {
+        const refused = buildDistanceFromHistory(
+            fixtureInput([{ event_id: 'csq_patron_recovery_offer', response_id: 'refuse_recovery', turn: 60 }]),
+        );
+        assert.strictEqual(refused.totalDecided, 0);
+        assert.strictEqual(refused.diverged, 0);
+        assert.strictEqual(refused.matchedHistory, 0);
+        assert.deepStrictEqual(refused.divergences, []);
+
+        const accepted = buildDistanceFromHistory(
+            fixtureInput([{ event_id: 'csq_patron_recovery_offer', response_id: 'accept_recovery', turn: 60 }]),
+        );
+        assert.strictEqual(accepted.totalDecided, 0);
+        assert.strictEqual(accepted.matchedHistory, 0);
+    });
+
+    test('a counterfactual decision does not move the percentage of the documented decisions beside it', () => {
+        const withoutCounterfactual = buildDistanceFromHistory(
+            fixtureInput([
+                { event_id: 'vance_owen_plan_1993', response_id: 'reject', turn: 39 },
+                { event_id: 'karadzic_mladic_split_1995', response_id: 'back_down', turn: 180 },
+            ]),
+        );
+        const withCounterfactual = buildDistanceFromHistory(
+            fixtureInput([
+                { event_id: 'vance_owen_plan_1993', response_id: 'reject', turn: 39 },
+                { event_id: 'csq_patron_recovery_offer', response_id: 'refuse_recovery', turn: 60 },
+                { event_id: 'karadzic_mladic_split_1995', response_id: 'back_down', turn: 180 },
+            ]),
+        );
+        assert.deepStrictEqual(withCounterfactual, withoutCounterfactual);
+        assert.strictEqual(withCounterfactual.totalDecided, 2);
+    });
+
+    test('the catalog builder leaves design-counterfactual rows out and keeps documented ones', () => {
+        const map = __TEST_buildEventHistoryMapFromRows([
+            {
+                id: 'counterfactual_with_default',
+                source_tier: 'design_counterfactual',
+                historical_default_response_id: 'accept',
+                response_options: [{ id: 'accept', label: 'Accept' }],
+            },
+            {
+                id: 'documented_with_default',
+                source_tier: 'icty_icj_un',
+                historical_default_response_id: 'accept',
+                response_options: [{ id: 'accept', label: 'Accept' }],
+            },
+            {
+                id: 'untiered_with_default',
+                historical_default_response_id: 'accept',
+                response_options: [{ id: 'accept', label: 'Accept' }],
+            },
+        ]);
+        assert.strictEqual(map.has('counterfactual_with_default'), false);
+        assert.strictEqual(map.has('documented_with_default'), true);
+        assert.strictEqual(map.has('untiered_with_default'), true);
+    });
+
+    test('no design-counterfactual event is in the real catalog map', () => {
+        // The shipped catalog: every event with source_tier design_counterfactual is absent, so the
+        // measure only ever compares against documented defaults.
+        const view = buildDistanceFromHistory(
+            fixtureInput([
+                { event_id: 'csq_patron_recovery_offer', response_id: 'accept_recovery', turn: 60 },
+                { event_id: 'csq_separate_peace_overture', response_id: 'anything', turn: 61 },
+            ]),
+        );
+        assert.strictEqual(view.totalDecided, 0);
+    });
 });

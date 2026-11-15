@@ -44,6 +44,8 @@ describe('DirectiveCard act-layer lever → art map', () => {
       // stance_matter (confirm / countermand / constrain a commander's stance change) reuses
       // the same command-staff still until dedicated art lands.
       stance_matter: 'act_replace_commander',
+      // army_clash (command loop L7) reuses the command-staff still until dedicated art lands.
+      army_clash: 'act_replace_commander',
       front_visit: 'act_front_visit',
       // Leadership gestures (§10) carry their own per-faction command-card art,
       // resolved via the faction-aware override layer (act_address_nation_<faction>.webp

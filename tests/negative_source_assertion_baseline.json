@@ -44,6 +44,7 @@
     "tests/ui/advance_turn_button_gated_feedback.test.ts",
     "tests/ui/app_boot_main_menu.test.ts",
     "tests/ui/app_primary_command_quick_select_cleanup.test.ts",
+    "tests/ui/army_clash_card.test.ts",
     "tests/ui/army_hq_readiness_threat_copy.test.ts",
     "tests/ui/army_hq_role_clarity.test.ts",
     "tests/ui/army_hq_ultrawide_layout.test.ts",
