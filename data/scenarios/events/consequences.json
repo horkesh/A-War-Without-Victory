@@ -1549,14 +1549,14 @@
       "hvo_arbih_war_active": true,
       "ahmici_1993": true
     },
-    "historical_source": "ICTY Kordić Trial Judgment (IT-95-14/2-T) on the Ahmići massacre of 16 April 1993 and the Lašva Valley operations. ICTY Prlić et al. Trial Judgment (IT-04-74-T) on Zagreb-HRHB command coupling. Per war-or-game + corps-army-commander design consult 2026-04-23: the event must break the RBiH-HRHB alliance (floor below hostility threshold), bump HVO morale/cohesion to un-stick combat-readiness, and shift offensive priorities to central-Bosnia municipalities. Phase 2 (ARBiH counter-offensive, three-enclave defensive posture) emerges organically via normal ARBiH offensive doctrine once alliance is locked hostile. Issue #9.",
+    "historical_source": "ICTY Kordić Trial Judgment (IT-95-14/2-T) on the Ahmići massacre of 16 April 1993 and the Lašva Valley operations. ICTY Prlić et al. Trial Judgment (IT-04-74-T) on Zagreb-HRHB command coupling.",
     "source_tier": "design_counterfactual",
     "source_note": "This is a conditional simulation consequence, not a claim that the displayed outcome occurred historically. The historical_source field records the parent design chain and any contextual historical anchor; player-facing prose appears only when the authored state predicate fires."
   },
   {
     "id": "csq_alliance_holds_past_w35",
     "title": "An Alliance That Did Not Break",
-    "narrative": "The Mostar guns never opened up. The Ahmići road never burned. Past week thirty-five — the date the historians had circled — the RBiH-HRHB alliance is still functioning. The Washington table the Americans imagined is now a different table: not a cease-fire forced on belligerents, but a coordination of two fronts that never split. Cohesion in the joint sectors holds.",
+    "narrative": "No guns have opened up in Mostar, and the Ahmići road has not burned. Past week thirty-five, around the start of December 1992, the RBiH-HRHB alliance is still functioning. Historically, Croat-Muslim fighting flared at Novi Travnik in October 1992 and spread through Central Bosnia from January 1993; the Lašva Valley offensive began on 16 April 1993. The Washington table the Americans would later set becomes a different table: not a cease-fire forced on belligerents, but a coordination of two fronts that never split. Cohesion in the joint sectors holds.",
     "category": "diplomatic",
     "trigger": {
       "turn_min": 35,
@@ -1608,7 +1608,7 @@
       "washington_agreement_alt_path": true,
       "alliance_held_past_w35": true
     },
-    "historical_source": "Divergence Ring 1 (LANE-NIGHTSHIFT-ROUND2-DIVERGENCE-EVENT-SEEDS). Counter-historical: an unbroken RBiH-HRHB alliance past the historical April-1993 rupture window, anchored to alliance > 0.20 and absence of war flags. /narrative-designer + /historian sign-off.",
+    "historical_source": "Counterfactual: the alliance holds. Historically, HVO-ARBiH fighting began at Novi Travnik in October 1992 and at Gornji Vakuf and Busovača in January 1993, and the Lašva Valley attack came on 16 April 1993 (ICTY, Prosecutor v. Kordić and Čerkez, trial judgment, IT-95-14/2-T, 26 February 2001; ICTY, Prosecutor v. Prlić et al., trial judgment, IT-04-74-T, vol. 2, para. 336).",
     "source_tier": "design_counterfactual",
     "source_note": "This is a conditional simulation consequence, not a claim that the displayed outcome occurred historically. The historical_source field records the parent design chain and any contextual historical anchor; player-facing prose appears only when the authored state predicate fires."
   },
