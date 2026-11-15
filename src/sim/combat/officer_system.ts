@@ -27,6 +27,7 @@ import {
     officersRelievedFrom,
     officerSurvivedWar,
     scheduledTenure,
+    scheduledDeathBy,
     tenuresEndedBy,
     type CorpsCoRoster,
 } from './corps_co_roster.js';
@@ -693,6 +694,9 @@ export function processOfficerSuccession(
         if (data.rank === 'army_commander') continue;
         const os = officers[data.id];
         if (!os || os.status !== 'active' && os.status !== 'reserve') continue;
+        // A scheduled death on or before this turn wins over the availability departure:
+        // step 3b applies it (status, operation release, casualty). Inert with an empty schedule.
+        if (scheduledDeathBy(corpsRoster, data.id, turn)) continue;
         if (data.available_until_turn !== undefined && turn >= data.available_until_turn) {
             // Manual player faction: don't auto-retire, create a replacement_suggested event instead
             if (data.faction === manualPlayerFaction && os.status === 'active' && os.assigned_corps_id) {

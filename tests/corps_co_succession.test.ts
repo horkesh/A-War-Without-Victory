@@ -323,6 +323,16 @@ describe('panel conditions (populated schedule)', () => {
         expect(s.military.named_officers!.x).toMatchObject({ status: 'killed', assigned_operation: undefined });
     });
 
+    it('a scheduled death wins over an availability departure on the same turn (Codex P2)', () => {
+        const s = state(90, [officer('x', { home_corps_id: 'c1', available_until_turn: 90 })], {
+            x: os('x', { status: 'active', assigned_operation: 'Op' }),
+        }, ['c1']);
+        const report = processOfficerSuccession(s, new Set(), roster({ c1: { schedule: [tenure('x', 0, 90, 'killed')] } }));
+        expect(s.military.named_officers!.x).toMatchObject({ status: 'killed', assigned_operation: undefined });
+        expect(report.casualties).toContain('x');
+        expect(report.departures).not.toContain('x');
+    });
+
     it('an officer relieved in history but alive at the end of the war leaves the exposure clock', () => {
         const s = state(120, [officer('gal', { casualty_vulnerability: 0.1, home_corps_id: 'c1' })], {
             gal: os('gal', { status: 'active', assigned_corps_id: 'c1', turns_in_command: 100 }),

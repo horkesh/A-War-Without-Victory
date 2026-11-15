@@ -222,6 +222,21 @@ export function officersRelievedFrom(roster: CorpsCoRoster | null | undefined, c
  * idempotently (kill only a living officer; relieve only while he still holds that
  * corps), so a save loaded after the end turn still converges.
  */
+/**
+ * True when the schedule records this officer's death on or before `turn`. A scheduled
+ * death takes precedence over an availability departure on the same turn, so the
+ * departure pass leaves him for the scheduled-fate pass.
+ */
+export function scheduledDeathBy(roster: CorpsCoRoster | null | undefined, officerId: string, turn: number): boolean {
+    if (!roster) return false;
+    for (const corpsId of Object.keys(roster.rosters)) {
+        for (const t of roster.rosters[corpsId]!.schedule) {
+            if (t.officer_id === officerId && t.historical_fate === 'killed' && t.tenure_end !== null && t.tenure_end <= turn) return true;
+        }
+    }
+    return false;
+}
+
 export function tenuresEndedBy(roster: CorpsCoRoster | null | undefined, turn: number): Array<{ corps_id: string; tenure: CorpsCoTenure }> {
     if (!roster) return [];
     const out: Array<{ corps_id: string; tenure: CorpsCoTenure }> = [];
