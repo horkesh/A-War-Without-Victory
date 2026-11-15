@@ -13,6 +13,7 @@ import { setLocale } from '../../src/ui/map/i18n/index.js';
 import type { DaytonAgreementRecord } from '../../src/state/negotiation_types.js';
 import { DaytonSigningBeat } from '../../src/ui/map/dayton_conference/DaytonSigningBeat';
 import { readDaytonAgreement } from '../../src/ui/map/data/GameStateAdapter';
+import { turnToDateString } from '../../src/ui/map/utils/formatters';
 
 let storeState: Record<string, unknown> = { loadedGameState: null };
 vi.mock('../../src/ui/map/store/gameStore', () => ({
@@ -50,7 +51,15 @@ describe('DC A5 signing beat', () => {
         const onContinue = vi.fn();
         render(createElement(DaytonSigningBeat, { agreement, fallbackDate: 'unused', onContinue }));
         expect(screen.getByTestId('dayton-signing-plate').getAttribute('src')).toMatch(/signing-table-/);
-        expect(screen.getByTestId('dayton-signing-date').textContent).toMatch(/^Initialled at Wright-Patterson Air Force Base, Dayton, Ohio, /);
+        // The plate dates only the campaign's signing week; the historical dates stand beside it
+        // as a separate record line (R8 council B9/H1).
+        expect(screen.getByTestId('dayton-signing-date').textContent)
+            .toBe(`The parties initialled the agreement in the week of ${turnToDateString(188)}.`);
+        expect(screen.getByTestId('dayton-signing-date').textContent).not.toContain('Wright-Patterson');
+        expect(screen.getByTestId('dayton-signing-record').textContent).toBe(
+            'Historically, the General Framework Agreement for Peace in Bosnia and Herzegovina was initialled at '
+            + 'Wright-Patterson Air Force Base, near Dayton, Ohio, on 21 November 1995 and signed in Paris on 14 December 1995.',
+        );
         expect(screen.getByTestId('dayton-signing-cost').textContent)
             .toBe('188 weeks of war. 22,974 soldiers and 31,781 civilians killed on all sides, 1,202,697 civilians displaced.');
         // The General Framework Agreement's three parties are states; the FRY signs for RS under the August 1995 mandate.

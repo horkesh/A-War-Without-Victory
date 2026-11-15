@@ -1,11 +1,9 @@
 /** Early-war pipeline steps (militia emergence, JNA dissolution, pool population, etc.). Extracted from turn_pipeline.ts (R7). */
 
-import { buildAdjacencyMap } from '../../map/adjacency_map.js';
 import { computeFrontEdges } from '../../map/front_edges.js';
 import { loadSettlementGraph } from '../../map/settlements.js';
 import { buildSidToMunFromSettlements, buildOsidToMunFromReverseMap } from '../../scenario/oob_early_war_entry.js';
 import { updateCapabilityProfiles } from '../../state/capability_progression.js';
-import { applyDisplacementFromFlips } from '../../state/displacement.js';
 import { GameState, type FactionId } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { selectBotBrigadeOrderFactions } from './war_phases.js';
@@ -288,27 +286,6 @@ export const earlyWarPhases: NamedPhase[] = [
                 context.state,
                 context.state.meta.turn,
                 controlFlipReport,
-                context.input.municipalityPopulation1991
-            );
-        }
-    },
-    {
-        name: 'displacement-apply',
-        run: async (context) => {
-            const hooksReport = context.report.displacement_hooks;
-            const controlFlipReport = context.report.control_flip;
-            if (!hooksReport?.by_mun?.length || !controlFlipReport?.flips?.length) return;
-            const graph = context.input.settlementGraph ?? (await loadSettlementGraph());
-            const edges = context.input.settlementEdges ?? graph.edges;
-            if (!edges?.length) return;
-            const adjacencyMap = buildAdjacencyMap(edges);
-            context.report.displacement_apply = applyDisplacementFromFlips(
-                context.state,
-                context.state.meta.turn,
-                controlFlipReport.flips,
-                hooksReport.by_mun,
-                graph.settlements,
-                adjacencyMap,
                 context.input.municipalityPopulation1991
             );
         }

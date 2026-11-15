@@ -54,6 +54,11 @@ import type { SupplyStateByOsidReport } from '../../state/supply_state_derivatio
 import { strictCompare } from '../../state/validateGameState.js';
 import { isVlasicCohaExceptionAttackOrder } from './coha_operation_exception.js';
 import {
+    isFactionBoundByOct1995Ceasefire,
+    isOct1995CeasefireInForce,
+    isOct1995CeasefireStandDownAttackOrder,
+} from './oct1995_ceasefire.js';
+import {
     anyOperationHasPhaseGate,
     clearAttackOrderOwners,
     invalidateReceiptsOnControlChange,
@@ -443,6 +448,41 @@ export function resolveAttackOrdersOsid(
             : undefined;
         pruneAttackOrderOwners(state);
         if (Object.keys(permittedOrders).length === 0) { emitOwnershipPassEnd('coha_suppressed'); return report; }
+    }
+
+    // The October 1995 general ceasefire suppresses combat for every bound faction like the COHA
+    // above, with explicit receipts so causality diagnostics never infer a missing attempt
+    // (council fix 3; oct1995_ceasefire.ts). Inert unless the ceasefire flag is set.
+    if (isOct1995CeasefireInForce(state)) {
+        const orders = state.military.brigade_attack_orders ?? {};
+        const permittedOrders: Record<FormationId, Osid> = {};
+        let suppressedAny = false;
+        for (const brigadeId of Object.keys(orders).sort(strictCompare) as FormationId[]) {
+            const target = orders[brigadeId];
+            if (!target) continue;
+            const faction = state.military.formations?.[brigadeId]?.faction;
+            if (!isFactionBoundByOct1995Ceasefire(state, faction)
+                || isOct1995CeasefireStandDownAttackOrder(state, brigadeId, target)) {
+                permittedOrders[brigadeId] = target;
+                continue;
+            }
+            suppressedAny = true;
+            (report.orders_seen_by_brigade ??= {})[brigadeId] = target;
+            (report.suppressed_attack_orders ??= []).push({
+                brigade_id: brigadeId,
+                target_osid: target,
+                reason: 'oct1995_ceasefire',
+            });
+            if (faction) {
+                report.orders_by_faction[faction] = (report.orders_by_faction[faction] ?? 0) + 1;
+            }
+        }
+        if (suppressedAny) report.combat_suppressed_reason ??= 'oct1995_ceasefire';
+        state.military.brigade_attack_orders = Object.keys(permittedOrders).length > 0
+            ? permittedOrders
+            : undefined;
+        pruneAttackOrderOwners(state);
+        if (Object.keys(permittedOrders).length === 0) { emitOwnershipPassEnd('oct1995_ceasefire_suppressed'); return report; }
     }
 
     const terrainMultByOsid = buildTerrainMultByOsid(reverseMap, terrainData);

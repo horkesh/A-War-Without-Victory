@@ -14,7 +14,14 @@
 > `seedDisplacementTimerOnFlip()`: battle resolution, rear pocket consolidation,
 > paramilitary sweep, JNA phantom captures. Previously only battle resolution fired.
 > Routing overhaul: per-municipality Krajina routing, Drina split (Zvornik→Tuzla,
-> Bratunac/Vlasenica→Srebrenica), Krajina flee-abroad 35%, enclave reinforcement rate 0.005.
+> Bratunac/Vlasenica→Srebrenica), Krajina flee-abroad (35% then; 55% since 2026-11-14), enclave reinforcement rate 0.005.
+>
+> **Siege displacement lane (2026-11-14):** The continuous siege/encirclement path (§2.3) is now live
+> (it received legacy edges and never fired before), and flight abroad is set per people and region (§5).
+>
+> **RF-5B (2026-11-14):** A third trigger with no control change: the bot-only minority-expulsion policy
+> (§3.4). The HVO's 1993 expulsions of Bosniaks happened inside ground it already held, which the takeover
+> trigger could not see.
 
 ## 1. Overview
 
@@ -56,9 +63,9 @@ Displacement runs at three points in the **War turn pipeline** (canon: War_Speci
 
 **File:** `src/state/displacement_takeover.ts` → `processDisplacementTakeover()`
 
-Runs every turn after attack resolution. The **only active displacement trigger** as of 2026-03-01.
+Runs every turn after attack resolution. The primary displacement writer since 2026-03-01; it also owns the RF-5B policy seed (step 0b, §3.4). The siege path (§2.3) and paramilitary sweeps are the other live writers.
 
-**Three sub-steps per turn:**
+**Sub-steps per turn (step 0b, the RF-5B policy seed, runs between steps 0 and 1; see §3.4):**
 
 1. **Step 0 — War-start seeding:** On the first executed war turn (`currentTurn === warStartTurn + 1`), creates displacement timers for OSIDs in `political_controllers`. **Note:** `runTurn()` increments `state.meta.turn` BEFORE running phases, so `warStartTurn + 1` is the first actual execution turn (not `warStartTurn` itself). For each OSID, a timer is created for every minority faction at war with the controller — subject to **per-faction gating rules**:
 
@@ -95,26 +102,26 @@ Evaluates displacement deltas for front-active settlements based on conflict int
 
 **File:** `src/state/displacement.ts` → `updateDisplacement()`
 
-Runs every turn. Evaluates three continuous pressure conditions per municipality:
+Runs every turn. The war step (`update-displacement` in `war_phases.ts`) feeds it the OSID front (`computeFrontEdgesOsid`) and OSID supply (`computeSupplyReachabilityOsid`) through `buildOsidDisplacementPressureInputs`. One pass runs per municipality and side holding settlements there:
 
 | Condition | Threshold | Displacement Rate |
 |-----------|-----------|-------------------|
-| Unsupplied | 3 consecutive turns (`UNSUPPLIED_PRESSURE_TURNS`) | 5%/turn (`UNSUPPLIED_DISPLACEMENT_FRACTION`) |
-| Encircled | Immediate (no path to other friendly mun) | 10%/turn (`ENCIRCLEMENT_DISPLACEMENT_FRACTION`) |
-| Front breaches | 2 persistent turns (`BREACH_PERSISTENCE_TURNS`) | 3%/turn (`BREACH_DISPLACEMENT_FRACTION`) |
+| Siege | The side's settlements touch an at-war front and none is supplied for 3 consecutive turns (`UNSUPPLIED_PRESSURE_TURNS`) | 0.1% per week of the holder's own people (`UNSUPPLIED_DISPLACEMENT_FRACTION`) |
+| Encirclement | Under front pressure, and every held settlement lies outside the side's main territorial body, in a body holding at most 15% (`POCKET_MAX_SHARE`) of the side's settlements at turn 0 | 0.1% per week of the holder's own people (`ENCIRCLEMENT_DISPLACEMENT_FRACTION`) |
 
-- **Sustainability collapse multiplier:** When a municipality is collapsed, displacement rates are multiplied by `COLLAPSE_DISPLACEMENT_MULTIPLIER = 1.5`
-- Encirclement check: BFS from any settlement in municipality through friendly-controlled settlements; encircled if no path reaches a different friendly municipality
-- Supply check: at least one settlement in the municipality must be in `reachableSettlements` (supply graph)
-- Breach check: count front breaches affecting settlements in the municipality
+- When both fire the larger rate applies, never the sum.
+- Only the holder's people leave and only the holder's manpower pool loses people. Departures are booked to the pressing side (`resolvePressingFactions`, pro rata between two besiegers), with killed 0 and no flight abroad. Each departure is routed to municipalities the holder's side holds; people with nowhere to go stay.
+- The rate is sourced from Krstić TJ (UNHCR evacuations from Srebrenica, 1993), UNCOE S/1994/674/Add.2 Annex VI and the Tabeau and Galić demographic report (2002).
+- The old 5%, 10% and 3% rates, the front-breach trigger (it read `front_pressure`, which nothing wrote) and the 1.5 sustainability-collapse multiplier (sustainability marks 109 of 110 municipalities collapsed) are removed.
+- Siege deaths in place (shelling, sniping, starvation) are still not modelled.
 
 ---
 
 ## 3. Trigger Types
 
-### 3.1 Hostile Takeover (OSID-Based) — **ONLY ACTIVE TRIGGER**
+### 3.1 Hostile Takeover (OSID-Based) — **PRIMARY TRIGGER**
 
-The sole displacement trigger as of 2026-03-01. All displacement flows through this path. As of 2026-03-05, sustained displacement is active: initial wave = 70% of minority, sustained trickle = 3%/turn on remaining 30% until < 10 people remain.
+The primary displacement trigger since 2026-03-01: capture displacement flows through this path. The other live writers are the siege path (§3.3, live since 2026-11-14), paramilitary sweeps and the bot-only policy expulsion (§3.4, RF-5B). As of 2026-03-05, sustained displacement is active: initial wave = 70% of minority, sustained trickle = 3%/turn on remaining 30% until < 10 people remain.
 
 **Two trigger sources:**
 
@@ -158,15 +165,37 @@ As of 2026-03-01, `processMinorityFlight()` is **not called** in `turn_pipeline.
 
 Ongoing displacement from operational conditions — no direct battle required.
 
-Three independent triggers, each checked per municipality per turn:
+Two triggers, each checked per municipality and per side holding settlements there (full rules in §2.3):
 
-1. **Unsupply:** Municipality has no supplied settlements for `UNSUPPLIED_PRESSURE_TURNS = 3` consecutive turns → displace `UNSUPPLIED_DISPLACEMENT_FRACTION = 0.05` (5%) of remaining population per turn
-2. **Encirclement:** No friendly-controlled path to any other friendly municipality → displace `ENCIRCLEMENT_DISPLACEMENT_FRACTION = 0.10` (10%) per turn
-3. **Front breaches:** Municipality has breaches persisting for `BREACH_PERSISTENCE_TURNS = 2` turns → displace `BREACH_DISPLACEMENT_FRACTION = 0.03` (3%) per turn
+1. **Siege:** the side's settlements touch an at-war front and none is supplied for `UNSUPPLIED_PRESSURE_TURNS = 3` consecutive turns → 0.1% per week of the holder's own people (`UNSUPPLIED_DISPLACEMENT_FRACTION = 0.001`)
+2. **Encirclement:** under front pressure and every held settlement lies in a body outside the side's main territory that held at most `POCKET_MAX_SHARE = 0.15` of the side's settlements at turn 0 → 0.1% per week (`ENCIRCLEMENT_DISPLACEMENT_FRACTION = 0.001`)
 
-Pressure state tracking uses a module-level cache (`pressureStateCache`) that tracks consecutive unsupplied turns per municipality. Must be reset at simulation start via `resetDisplacementPressureCache()`.
+The larger of the two applies. Departures are booked to the pressing side with killed 0 and no flight abroad.
+
+The consecutive-turn counter is saved state: `DisplacementState.unsupplied_pressure_by_side` holds it per side, with the turn it was last counted. It replaces the old module-level cache (`pressureStateCache` and `resetDisplacementPressureCache()`), which is deleted, so the counter now survives save and load. `applyDisplacementFromFlips` and the `displacement-apply` step are also deleted; they were never reached.
 
 ---
+
+### 3.4 Policy Expulsion (RF-5B, bot-only)
+
+Owner: `processDisplacementTakeover` step 0b (`src/state/displacement_takeover.ts`). §6 broader bright-line panel record: `SENSITIVE_HISTORY_DESIGN_GATE.md` §6 (RF-5B).
+
+- **Who:** a faction listed in `BOT_MINORITY_EXPULSION_POLICY` (HRHB only) **while bot-controlled** (`state.meta.player_faction !== faction`). A human-controlled faction never expels; there is no player decision. RBiH has no entry: no ARBiH joint criminal enterprise or expulsion policy was charged or found (Hadžihasanović and Kubura; Halilović). The HRHB entry follows the Prlić et al. joint-criminal-enterprise finding (TJ 2013, affirmed 2017).
+- **When:** once per faction, on the first turn on which `rbih_hrhb_state.war_started_turn` is set and the pair is at war (in the 188w campaign: t50). The applied turn is recorded in event flag `hrhb_minority_policy_applied_turn`.
+- **Where:** every OSID the faction then holds inside a `POLICY_EXPULSION_SCOPE` municipality. A timer `${osid}|RBiH` with `cause: 'policy_expulsion'` is seeded; wave B timers start `POLICY_WAVE_B_DELAY_TURNS` (12) later.
+
+| Wave (matures) | Municipality: share of the OSID's declared Bosniaks displaced | Source (Historian seat) |
+|---|---|---|
+| A (seed + 4; t54, mid-April 1993) | Vitez 0.50, Busovača 0.40, Kiseljak 0.40, Žepče 0.30, Gornji Vakuf 0.40, Jablanica 0.75 | Kordić TJ ¶646, ¶511; BB2 p.444; Prlić TJ (Gornji Vakuf, Sovići/Doljani) |
+| B (seed + 16; t66, early July 1993) | Mostar 0.40, Stolac 0.75, Čapljina 0.75, Prozor 0.75, Ljubuški 0.50 | Prlić TJ v2 ¶¶814, 875, 922, 981, 1936, 277; Prlić TJ summary (Ljubuški) |
+| Out of scope | Kakanj, Travnik, Bugojno, Fojnica, Konjic, Novi Travnik, Vareš, Orašje, Livno, Tomislavgrad | HVO lost these towns or the record is Croat flight (BB1 p.217); Vareš overlaps the ARBiH capture; joint HVO-ARBiH front in Posavina; no expulsion finding |
+
+- **How much:** one wave per OSID of `floor(osidPop × bosniakShare × fraction)`, where `bosniakShare` counts **declared Bosniaks only** (the standing convention adds 1991 "others", largely Yugoslavs; the policy found by the court targeted the Muslim population). Pair kill share 3%; flight abroad per §5 (Bosniak 0.20; Čapljina and Stolac 0.40). Booked `caused_by` the holding faction. **No sustained drain** (Branch B skips policy timers). **No pass-through re-route**: the holder does not change, so people already sheltering in the municipality are not moved on (§10.6; panel Calibration C1: re-routing handed HRHB ~12k reserve manpower).
+- **Clears:** a recapture by the expelled side, a third side's capture (the holder no longer holds the OSID; a flip-seeded timer replaces a stale policy timer), or a restored alliance, before the wave.
+- **After the wave:** if a third side captures the OSID after the wave fired, the captor's timer (flip helper or battle capture) inherits the wave's `cumulative_displaced`; its initial wave takes its fraction of the community that remains (`floor(osidPop × hostileShare) − prior`) and its sustained drain stops at the same bound, so nobody is expelled twice (Codex review on #623). A recapture by the expelled side still deletes the timer, and a later capture starts from the census again; that reset is the standing behaviour for every timer (out-of-scope register).
+- **Bright line:** the first wave that displaces anyone records one authorized war crime for the faction (`recordWarCrime`, `src/state/war_crimes_record.ts`, sole writer of `war_crimes_events_emergent`), guarded by event flag `hrhb_minority_policy_war_crime_recorded`. §2a condemnation (emergent mode only).
+- **Changing it:** any change to the table, fractions, wave delay or target basis is its own measured change under the RF-5B §6 record; an RBiH entry needs a judicial finding and its own broader panel.
+- **Known limits:** men were historically detained (Heliodrom, Dretelj, Gabela) but are displaced with families here (camps stay unmodelled, Ring 3 #2); no incoming Croats fill vacated homes; Stari Vitez (held out) shares the Vitez town OSID; Žepče fires ~10 weeks early (fighting began late June 1993) and Mostar's first round ~8 weeks late (9 May); Busovača and Gornji Vakuf January 1993 episodes predate the war start; Prozor October 1992 (~5k, outside the JCE) and Vareš (October 1993) are not seeded; flight-abroad shares are not tiered per the Historian (Ljubuški 0.50, west Mostar 0.30, Central Bosnia 0.10); the April wave comes without an HVO attack behind it (the HVO offensive is owner Option C, post-1.0). Survivors are routed by the standing tables, never inside their own municipality and without regard to front lines: West Mostar, Stolac and Čapljina expellees reach Jablanica and Konjic rather than East Mostar and Blagaj; Kiseljak's reach Travnik across HVO-held ground; Ljubuški's reach Zenica rather than going abroad via Croatia. The 3% kill share is applied in Herzegovina, where deaths during removal were about 1%; it stands in for unmodelled detention-camp deaths (Dretelj, Heliodrom, Gabela). The Humanitarian Ledger and `refugees_created` count killed and abroad twice for takeover-path events, policy waves included, because the takeover writer's `displaced` already contains them (pre-existing on main; out-of-scope register). The ledger figure therefore overstates the people moved by about 30%; the run 7 people figure is 27,839. The rule keys on `player_faction`, not the autonomy level: a campaign with a human HRHB, including Observer level 3, has no policy waves, so it shows fewer 1993 HVO expulsions than history and drifts from the calibration line; no surface may present that as restraint or a better outcome. A `player_faction` change mid-campaign leaves timers already seeded in place. Livno's supply population factor rises at t188 (0.91 to 1.00, because its 1992 Krajina refugees are not moved on once east Mostar holds Bosniak expellees); this is inert only because Livno has no production facility, and the B5 no-reward re-run must re-check it if one is added or local production gains another consumer.
 
 ## 4. Routing System
 
@@ -290,17 +319,25 @@ When per-municipality routing is exhausted or no route is defined:
 | Constant | Value | Meaning |
 |----------|-------|---------|
 | `DISPLACEMENT_KILLED_FRACTION` | Per-faction (see below) | **OVERHAULED n905 (2026-03-18).** No longer uniform. RBiH displaced by RS = 4%, HRHB displaced by RS = 1%, RS displaced by non-RS = 1%, default = 2%. Was 0.04 uniform. See `getDisplacementKillFraction()` in `displacement_loss_constants.ts`. |
-| `FLEE_ABROAD_FRACTION_RS` | 0.30 | 30% of surviving displaced Serbs leave BiH |
-| `FLEE_ABROAD_FRACTION_HRHB` | 0.25 | 25% of surviving displaced Croats leave BiH |
-| `FLEE_ABROAD_FRACTION_RBIH` | 0.00 | Bosniaks have no external state to flee to |
+| `FLEE_ABROAD_FRACTION_RS` | 0.30 | 30% of surviving displaced Serbs leave BiH (range 0.25-0.40; ICTY OTP floor 0.23) |
+| `FLEE_ABROAD_FRACTION_HRHB` | 0.40 | 40% of surviving displaced Croats leave BiH (was 0.25; range 0.30-0.55) |
+| `FLEE_ABROAD_FRACTION_RBIH` | 0.20 | 20% of surviving displaced Bosniaks leave BiH (was 0.00; range 0.15-0.30) |
+
+Sources: ICTY OTP demographic report (Tabeau, Bijak et al., 2003, 47 municipalities, OSCE voters register 1997-98) and host-country figures at Dayton (about 1.2 million abroad: Germany about 320,000, FRY about 250,000, Croatia about 170,000). The OTP shares (Muslims 48%, Croats 78%, Serbs 23%) are registrations after onward migration, so the shares at the moment of displacement are lower in the east and the defaults sit below them.
 
 ### 5.2 Special Cases
 
 | Constant | Value | Location | Meaning |
 |----------|-------|----------|---------|
 | `POSAVINA_CROAT_FLEE_ABROAD` | 0.70 | `displacement_takeover.ts` | Posavina Croats: 70% flee to Croatia |
+| `KRAJINA_BOSNIAK_FLEE_ABROAD` | 0.55 | `displacement_takeover.ts` | Krajina Bosniak convoys (ICRC/UNHCR to Croatia): 55% (was 0.35) |
+| `BOSNIAK_EAST_SARAJEVO_RING_FLEE_ABROAD` | 0.08 | `displacement_takeover.ts` | Bosniaks from eastern Bosnia and the Sarajevo ring: 8% (expellees went into Srebrenica, Žepa, Goražde, Sarajevo, Tuzla) |
+| `BOSNIAK_EXIT_FLEE_ABROAD` | 0.40 | `displacement_takeover.ts` | Bosniaks from Bijeljina, Posavina, Čapljina, Stolac (exits toward Serbia and Croatia): 40% |
+| `BILATERAL_HRHB_FLEE_ABROAD` | 0.35 | `displacement_takeover.ts` | Croats displaced by RBiH: 35% |
+| Drina enclave falls | 0 | `displacement_takeover.ts` | Nobody goes abroad when Srebrenica, Goražde or Žepa falls; those forcibly transferred went to Kladanj and Tuzla (Krstić TJ) |
 | `ENCLAVE_OVERRUN_KILL_FRACTION` | 0.35 | `displacement_takeover.ts` | Srebrenica/Gorazde/Zepa overrun: 35% killed |
-| `LOST_POPULATION_FRACTION` | 0.20 | `displacement.ts` | Fallback when no 1991 census data: 20% lost |
+
+The former Bosniak border override (0.10) is deleted. Siege-path departures carry no flight abroad at all. No-census municipalities split by the national 1991 sums (`census_fallback_national`); the former `LOST_POPULATION_FRACTION` (0.20) was removed in SC2.
 
 ### 5.3 Loss Calculation Order
 
@@ -308,7 +345,7 @@ For each displacement event:
 1. Compute `displacementAmount` from trigger
 2. `killed = floor(displacementAmount × killFraction)` (per-faction rate via `getDisplacementKillFraction()`, or 35% for enclave overrun)
 3. `survivors = displacementAmount - killed`
-4. `fledAbroad = floor(survivors × fleeAbroadFraction)` (faction-specific, Posavina override)
+4. `fledAbroad = floor(survivors × fleeAbroadFraction)` (per people, with regional overrides in §5.2; 0 when a Drina enclave falls)
 5. `routedToCamp = survivors - fledAbroad` (enters camp state machine)
 6. Record `killed` and `fledAbroad` in `state.civilian_casualties`
 
@@ -372,6 +409,7 @@ interface HostileTakeoverTimerState {
     started_turn: number;       // turn timer began
     matured_turn?: number;      // set when initial displacement fires (undefined = still in countdown)
     cumulative_displaced?: number; // total persons displaced from this OSID (initial + sustained)
+    cause?: 'policy_expulsion';    // RF-5B: seeded by the minority-expulsion policy (§3.4); one wave, no Branch B
 }
 ```
 
@@ -382,6 +420,7 @@ interface HostileTakeoverTimerState {
 **Created by:**
 1. War-start seeding (Step 0): one timer per minority faction per OSID, at `warStartTurn + 1` (first executed war turn)
 2. Battle-driven flips (Step 1): one timer per flip, keyed by `${battle.osid}|${fromFaction}`
+3. Policy expulsion (Step 0b, RF-5B): once per bot faction with a policy, `cause: 'policy_expulsion'` (§3.4); deleted, never fired, when the holder loses the OSID
 
 - Only created when factions are at war (`areFactionsAtWar()`)
 - Existing timer for same key is not overwritten (first-come wins)
@@ -459,6 +498,7 @@ interface DisplacementState {
     last_updated_turn: number;
     displaced_out_by_osid?: Record<string, number>;   // OSID-level origin tracking
     displaced_in_by_osid?: Record<string, number>;    // OSID-level destination tracking
+    unsupplied_pressure_by_side?: Partial<Record<FactionId, { turns: number; last_turn: number }>>;  // siege counter per holding side, with the turn last counted
 }
 ```
 
@@ -527,12 +567,13 @@ When RBiH-HRHB are **allied** (alliance > 0.20):
 When an enclave municipality is overrun (from_faction = RBiH, to_faction != RBiH):
 - Kill fraction increases from 10% to **35%** (`ENCLAVE_OVERRUN_KILL_FRACTION`)
 - Models the historical high-lethality events (Srebrenica massacre)
+- Flight abroad: **0** (those forcibly transferred went to Kladanj and Tuzla)
 
 ### 10.2 Posavina Croats
 
 **Municipalities:** brcko, bosanski_samac, odzak, orasje, gradacac, derventa, modrica, bosanski_brod, bosanska_gradiska, doboj, bijeljina
 
-- Flee-abroad fraction: **70%** (vs standard 25% for Croats)
+- Flee-abroad fraction: **70%** (vs standard 40% for Croats)
 - Models the historical pattern where Posavina Croats overwhelmingly fled to Croatia
 
 ### 10.3 Sarajevo Siege

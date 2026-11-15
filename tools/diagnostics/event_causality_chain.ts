@@ -16,7 +16,7 @@
  * validator surface). No Math.random, no Date.now, no timestamps.
  *
  * CLI:
- *   node node_modules/tsx/dist/cli.mjs tools/diagnostics/event_causality_chain.ts [options]
+ *   npx tsx tools/diagnostics/event_causality_chain.ts [options]
  *
  * Options:
  *   --save <path>            Path to final_save.json (defaults to

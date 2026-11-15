@@ -1,10 +1,13 @@
 // @vitest-environment jsdom
 
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { createElement } from 'react';
 import { PresidentialToolbar } from '../../src/ui/map/components/PresidentialToolbar.js';
-import { TurnAftermathModal } from '../../src/ui/map/components/TurnAftermathModal.js';
+import { preloadTurnAftermathRecordFace, TurnAftermathModal } from '../../src/ui/map/components/TurnAftermathModal.js';
+
+// The full record is its own chunk; load it once so record renders stay synchronous.
+beforeAll(async () => { await preloadTurnAftermathRecordFace(); });
 import { useGameStore } from '../../src/ui/map/store/gameStore.js';
 import { openArmyHQDecisionConsequenceRecord, openArmyHQRecordsSubTab } from '../../src/ui/map/utils/shellNavigation.js';
 import { isShellHandoffCommand } from '../../src/ui/shared/shellHandoff.js';
@@ -124,7 +127,7 @@ describe('PresidentialToolbar RECORDS button', () => {
     it('routes Turn Aftermath record links to records and Chronicle callbacks without closing shell context first', () => {
         const calls: string[] = [];
         render(createElement(TurnAftermathModal, {
-            isOpen: true,
+            isOpen: true, initialMode: 'record',
             view: makeAftermathView(),
             onClose: () => calls.push('close'),
             onOpenInbox: () => calls.push('inbox'),

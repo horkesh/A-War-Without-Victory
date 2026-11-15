@@ -51,7 +51,7 @@
  * `EXCLUSION_REGISTER`, where it is checked against a walk of the real import graph from
  * `scenario_runner.ts`. Every concrete data read that graph reaches is either stamped here
  * or carries a justification there; the register is compared exhaustively, so it cannot
- * silently widen and it cannot go stale. As of that scan: **16 real run inputs are read and
+ * silently widen and it cannot go stale. As of that scan: **18 real run inputs are read and
  * NOT hashed**, plus the desktop-only startup snapshot which is excluded on purpose.
  *
  * ★ PARTIALLY CLOSED 2026-08-24, WIDENED LATER THE SAME DAY — read the distinction, because

@@ -70,6 +70,42 @@ describe('Farz objective gate', () => {
         }
     });
 
+    describe('cross-corps donors in the authored operation (RF-3 SD1, ruling 2026-11-14)', () => {
+        // The General Staff's 120th was lent to Farz and is in the AAR's participants.
+        const donorCorpsOf = (id: string) => (id === 'gs_brigade' ? 'arbih_general_staff' : input.corpsOf(id));
+        const donorEvent = { ...events[1], attacker_brigade: 'gs_brigade' };
+        const donorBattles = new Map(battles);
+        donorBattles.set(donorEvent.battle_id, { ...battles.get(donorEvent.battle_id)!, attacker_brigade: 'gs_brigade' });
+        const donorAar = { ...aar, participating_brigades: ['third_corps_brigade', 'gs_brigade'] };
+        const donorInput = { ...input, corpsOf: donorCorpsOf, events: [events[0], donorEvent],
+            battleById: donorBattles, aars: [donorAar] };
+
+        it('counts a capture by a participant from another command', () => {
+            const result = checkFarzObjectiveCaptures(donorInput);
+            expect(result.ok).toBe(true);
+            expect(result.rows[1]).toMatchObject({ via: 'farz', turn: donorEvent.turn, ok: true });
+        });
+
+        it('still rejects the same brigade when it was not a participant', () => {
+            expect(checkFarzObjectiveCaptures({ ...donorInput, aars: [aar] }).ok).toBe(false);
+        });
+
+        it('a Farz that really fails still fails with a donor participant', () => {
+            // The donor's objective never taken.
+            expect(checkFarzObjectiveCaptures({ ...donorInput, events: [events[0]] }).ok).toBe(false);
+            // Taken, then lost by the last turn.
+            expect(checkFarzObjectiveCaptures({ ...donorInput,
+                at188: { ...input.at188, [cells[1][1]]: 'RS' } }).ok).toBe(false);
+            // Taken by the donor in combat Farz did not own.
+            const otherOwner = new Map(donorBattles);
+            otherOwner.set(donorEvent.battle_id, { ...donorBattles.get(donorEvent.battle_id)!, operation_id: 'arbih_1st_corps:Operation Other:t161' });
+            expect(checkFarzObjectiveCaptures({ ...donorInput, battleById: otherOwner }).ok).toBe(false);
+            // Not in Farz's logged captures.
+            expect(checkFarzObjectiveCaptures({ ...donorInput,
+                aars: [{ ...donorAar, objectives_logged_captured: [cells[0][1]] }] }).ok).toBe(false);
+        });
+    });
+
     it('fails closed for a missing capture, missing AAR, or generic-name collision', () => {
         expect(checkFarzObjectiveCaptures({ ...input, events: events.slice(0, 1) }).ok).toBe(false);
         expect(checkFarzObjectiveCaptures({ ...input,

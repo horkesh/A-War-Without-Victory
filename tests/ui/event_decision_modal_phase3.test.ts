@@ -21,29 +21,29 @@ describe('EventDecisionModal presidential dossier', () => {
   );
   const bcsExpectedCopy: Record<typeof firstHourEventIds[number], string[]> = {
     rbih_state_identity: [
-      'Sta je Bosna?',
-      'Predsjednistvo mora proglasiti viziju drzave.',
-      'Gradjanska multietnicka republika',
-      'Sarajevsko Predsjednistvo cuva gradjanski zahtjev',
-      'Kontekst presude Karadzicu',
-      'Majska platforma iz 1992. nalazi se pred Predsjednistvom.',
+      'Šta je Bosna?',
+      'Predsjedništvo mora proglasiti viziju države.',
+      'Građanska multietnička republika',
+      'Sarajevsko Predsjedništvo čuva građanski zahtjev',
+      'Kontekst presude Karadžiću',
+      'Majska platforma iz 1992. nalazi se pred Predsjedništvom.',
     ],
     rs_strategic_goals: [
-      'Skupstina govori',
-      'Narodna skupstina se sastala.',
-      'General Ratko Mladic',
-      'upozorenje generala Ratka Mladica',
-      'Usvojiti svih sest ciljeva',
-      'Skupstinski paket zadrzava historijski maksimalisticki kurs',
-      'Presude Karadzicu i Mladicu dokumentuju sest strateskih ciljeva',
+      'Skupština govori',
+      'Narodna skupština se sastala.',
+      'General Ratko Mladić',
+      'upozorenje generala Ratka Mladića',
+      'Usvojiti svih šest ciljeva',
+      'Skupštinski paket zadržava historijski maksimalistički kurs',
+      'Presude Karadžiću i Mladiću dokumentuju šest strateških ciljeva',
     ],
     hrhb_political_goal: [
-      'Sta je Herceg-Bosna?',
+      'Šta je Herceg-Bosna?',
       'Zagreb je na vezi.',
       'Hrvatska republika - slijediti Zagreb',
-      'Vodstvo Herceg-Bosne dobija uskladjenost s patronom',
-      'Presude Kordicu i Prlicu',
-      'Zagrebacka direktiva i institucije Herceg-Bosne vec oblikuju politiku HVO-a.',
+      'Vodstvo Herceg-Bosne dobija usklađenost s patronom',
+      'Presude Kordiću i Prliću',
+      'Zagrebačka direktiva i institucije Herceg-Bosne već oblikuju politiku HVO-a.',
     ],
   };
 
@@ -82,11 +82,11 @@ describe('EventDecisionModal presidential dossier', () => {
       expect(text).not.toMatch(/What Is Bosnia|The Assembly Speaks|What Is Herceg-Bosna/);
       expect(text).not.toMatch(/Your Presidency must declare|The National Assembly has convened|Zagreb is on the line/);
       expect(text).not.toMatch(/Civic multi-ethnic republic|Adopt all six goals|Croat republic\s+[—-]\s+follow Zagreb/);
-      expect(text).not.toMatch(/Karadzic judgment context|ICTY Karadzic Trial Judgment|Kordic and Prlic judgments/);
+      expect(text).not.toMatch(/Karad[zž]i[cć] judgment context|ICTY Karad[zž]i[cć] Trial Judgment|Kordi[cć] and Prli[cć] judgments/);
       expect(text).not.toMatch(/The May 1992 platform debate|Zagreb's directive and Herceg-Bosna institutions/);
       if (eventId === 'rbih_state_identity') {
-        expect(text).toContain('Republika Bosna i Hercegovina moral +3');
-        expect(text).toContain('Zapis kampanje ažuriran: Gradjanska multietnicka republika');
+        expect(text).toContain('ARBiH moral +3');
+        expect(text).toContain('Zapis kampanje ažuriran: Građanska multietnička republika');
         expect(text).not.toContain('Republic of Bosnia and Herzegovina');
         expect(text).not.toContain('morale +3');
         expect(text).not.toContain('international standing');
@@ -128,7 +128,7 @@ describe('EventDecisionModal presidential dossier', () => {
 
   it('names General Ratko Mladic in the RS foundational decision without generic commander framing', () => {
     const eventDef = firstHourCatalog.get('rs_strategic_goals');
-    expect(eventDef?.narrative).toContain('General Ratko Mladic, commander of the VRS Main Staff');
+    expect(eventDef?.narrative).toContain('General Ratko Mladić, commander of the VRS Main Staff');
     expect(eventDef?.narrative).not.toMatch(/Your army commander/i);
     expect(JSON.stringify(eventDef?.response_options ?? [])).not.toMatch(/Your commander's warning|Your commander warned/i);
 
@@ -139,8 +139,8 @@ describe('EventDecisionModal presidential dossier', () => {
     }));
 
     const englishText = container.textContent ?? '';
-    expect(englishText).toContain('General Ratko Mladic, commander of the VRS Main Staff');
-    expect(englishText).toContain("General Mladic's warning");
+    expect(englishText).toContain('General Ratko Mladić, commander of the VRS Main Staff');
+    expect(englishText).toContain("General Mladić's warning");
     expect(englishText).not.toMatch(/Your army commander|Your commander's warning|Your commander warned/i);
     unmount();
 
@@ -151,9 +151,9 @@ describe('EventDecisionModal presidential dossier', () => {
       onRespond: () => undefined,
     }));
     const bcsText = bcsRender.container.textContent ?? '';
-    expect(bcsText).toContain('General Ratko Mladic');
-    expect(bcsText).toContain('upozorenje generala Ratka Mladica');
-    expect(bcsText).toContain('traziti radnje koje cine genocid');
+    expect(bcsText).toContain('General Ratko Mladić');
+    expect(bcsText).toContain('upozorenje generala Ratka Mladića');
+    expect(bcsText).toContain('tražiti radnje koje čine genocid');
     expect(bcsText).not.toMatch(/Komandant vojske|Upozorenje komandanta|Komandant je upozorio/i);
     bcsRender.unmount();
   });
@@ -250,9 +250,9 @@ describe('EventDecisionModal presidential dossier', () => {
     expect(screen.getByText('Historical default')).toBeTruthy();
     expect(screen.getByText(/historically attested choice/)).toBeTruthy();
     expect(screen.getByText('Keep the institutions aligned with the existing wartime project.')).toBeTruthy();
-    expect(screen.getByText('Herzeg-Bosna morale +4')).toBeTruthy();
-    expect(screen.getByText('Herzeg-Bosna patron pressure -2')).toBeTruthy();
-    expect(screen.getByText('Herzeg-Bosna Patron Confidence +6')).toBeTruthy();
+    expect(screen.getByText('HVO morale +4')).toBeTruthy();
+    expect(screen.getByText('HRHB patron pressure -2')).toBeTruthy();
+    expect(screen.getByText('HRHB Patron Confidence +6')).toBeTruthy();
     expect(screen.getByText('No immediate mechanical effects.')).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Choose response: Maintain the separate project' })).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Choose response: Seek a joint front' })).toBeTruthy();
@@ -319,7 +319,7 @@ describe('EventDecisionModal presidential dossier', () => {
       onRespond: () => undefined,
     }));
 
-    expect(screen.getByText('Republic of Bosnia and Herzegovina morale -1')).toBeTruthy();
+    expect(screen.getByText('ARBiH morale -1')).toBeTruthy();
     expect(container.textContent).not.toContain('recruitment');
     expect(container.textContent).not.toContain('combat effectiveness');
     expect(container.textContent).not.toContain('staff priorities');
@@ -343,7 +343,7 @@ describe('EventDecisionModal presidential dossier', () => {
       onRespond: () => undefined,
     }));
 
-    expect(screen.getByText(/Historical default source review required/i)).toBeTruthy();
+    expect(screen.getByText(/No response is marked as the historical choice/i)).toBeTruthy();
     expect(screen.queryByText('Recommended')).toBeNull();
     expect(screen.queryByText('Correct choice')).toBeNull();
   });
@@ -399,7 +399,7 @@ describe('EventDecisionModal presidential dossier', () => {
     }));
 
     expect(screen.getByText('Staff recommendation')).toBeTruthy();
-    expect(screen.getByText(/not a historical default and does not control bot calibration/i)).toBeTruthy();
+    expect(screen.getByText(/It is not the historical default; you may choose any option/i)).toBeTruthy();
     expect(screen.queryByText('Historical default')).toBeNull();
     expect(screen.queryByText(/historically attested choice/)).toBeNull();
   });

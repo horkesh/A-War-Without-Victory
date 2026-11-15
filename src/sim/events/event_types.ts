@@ -482,6 +482,8 @@ export interface EventDefinitionLocalization {
     source_note?: string;
     source?: string;
     response_options?: Record<string, EventResponseOptionLocalization>;
+    /** Display copy for the notifications sent after a response; overrides by response and recipient. */
+    notifications_to_other_factions?: EventNotificationTextByResponse;
 }
 
 export interface EventDefinition {
@@ -534,7 +536,14 @@ export interface EventDefinition {
     bot_response_logic?: 'accept_first' | 'reject_all' | 'capital_based' | 'capital_weighted' | 'historical' | 'personality_weighted' | 'strategic_weighted';
     /** Authored informational notifications shown to non-source factions after a response resolves. */
     notifications_to_other_factions?: EventNotificationTextByResponse;
-    /** Optional authored display localizations. Read-model/UI only; evaluators ignore it. */
+    /**
+     * Optional authored display localizations. Read-model/UI only; evaluators ignore it.
+     * `localizations.en` is the English display copy for strings the engine persists:
+     * `title` is copied into `turn_summaries[].events_fired` and notification text into
+     * `pending_event_notifications`, both inside the hashed save. Correcting such a string in
+     * place would move the save hash, so the corrected English lives here and the UI prefers
+     * it (see `src/ui/map/data/eventDisplayCopy.ts`).
+     */
     localizations?: Record<string, EventDefinitionLocalization>;
     // v0.6.0 metagame fields (all optional for backward compat)
     /** Pressure system config: readiness counter with increment/decay. */

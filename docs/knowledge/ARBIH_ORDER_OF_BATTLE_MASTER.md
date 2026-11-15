@@ -13,17 +13,17 @@
 
 **Military Command Evolution:**
 
-**Phase 1 (April-December 1992): Formation**
-- Chief of Staff: Sefer Halilović (April-June 1993)
-- Deputy Chief: Rasim Delić
+**Phase 1 (April 1992-8 June 1993): Formation**
+- Chief of the Supreme Command Staff: Sefer Halilović (to 8 June 1993)
+- Deputy: Rasim Delić
 - Status: Building from scratch, former TO and JNA Muslim officers
 
-**Phase 2 (June 1993-November 1993): Reorganization**
-- Commander: Sefer Halilović (short period)
-- Chief of General Staff: Rasim Delić
+**Phase 2 (8 June-November 1993): Reorganization**
+- Commander of the Main Staff: General Rasim Delić, appointed 8 June 1993
+- Halilović left the staff in November 1993 (that is the November date, not Delić's start)
 
 **Phase 3 (November 1993-1995): Mature Structure**
-- Commander of Main Staff: General Rasim Delić (November 1993-1995)
+- Commander of Main Staff: General Rasim Delić (8 June 1993-1995)
 - Chief of General Staff: Enver Hadžihasanović (later)
 
 **HQ:** Sarajevo (various locations due to siege)
@@ -209,7 +209,8 @@ ARBiH organized into **7 corps** (formed gradually 1992-1993):
 ## 6TH CORPS (KONJIC)
 
 **HQ:** Konjic
-**Strength:** Formed late 1992/early 1993, ~8,000-12,000 (1993-1994) → 12,000-15,000 (1995)
+**Existence:** formed early June 1993 (9 June, commander Salko Gušić); disbanded in 1994 (26 Feb 1994 per Wikipedia; BB2 p.436 fn. says only "1994"), its units returning to the 4th Corps. There was no 6th Corps in 1995.
+**Strength:** ~8,000-12,000 (1993-1994)
 
 **Area:** Central Herzegovina (Konjic, Jablanica)
 **Mission:** Defense of Sarajevo supply route (Mt. Igman)

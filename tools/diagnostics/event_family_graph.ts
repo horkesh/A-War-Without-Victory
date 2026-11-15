@@ -24,7 +24,7 @@
  * no Date.now, no timestamps. Pure function given catalog rows.
  *
  * CLI:
- *   node node_modules/tsx/dist/cli.mjs tools/diagnostics/event_family_graph.ts [options]
+ *   npx tsx tools/diagnostics/event_family_graph.ts [options]
  *
  * Options:
  *   --format <dot|tree|json>     Output format (default: tree).

@@ -18,11 +18,6 @@ import {
 // exercised. Any other EN key without a BCS translation is a parity gap.
 const INTENTIONAL_EN_ONLY = new Set<string>([
     'settings.experimentalFallbackProbe',
-    // R7 English readability keys await native BCS review and intentionally
-    // exercise the established English fallback in the meantime.
-    'attention.reviewCritical',
-    'attention.reserveCritical',
-    'warCost.findingSeverity.none',
 ]);
 
 describe('UI localization substrate', () => {

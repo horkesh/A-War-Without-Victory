@@ -9,42 +9,56 @@ import type { SettlementRecord } from '../map/settlements.js';
 import type { DisplacementState, FactionId, GameState, MilitiaPoolState, MunicipalityId } from './game_state.js';
 import { CANONICAL_FACTIONS } from './game_state.js';
 
-import { buildAdjacencyMapCached, type AdjacencyMap } from '../map/adjacency_map.js';
-import { computeFrontEdges } from '../map/front_edges.js';
+import { buildAdjacencyMapCached } from '../map/adjacency_map.js';
+import { computeFrontEdges, type FrontEdge } from '../map/front_edges.js';
 import { areRbihHrhbAllied, DEFAULT_RBIH_HRHB_WAR_EARLIEST_TURN } from '../sim/early_war/alliance_update.js';
 import type { EdgeRecord } from '../map/settlements.js';
 import { getReceivingCapacityFraction } from './displacement_routing_data.js';
-import { DISPLACEMENT_KILLED_FRACTION, getDisplacementKillFraction, getFactionFleeAbroadFraction } from './displacement_loss_constants.js';
 import { appendDisplacementEvent, UNKNOWN_CAUSER_BUCKET } from './displacement_event_log.js';
+import { getBilateralRoutingOrder } from './displacement_takeover.js';
 import { recordCivilianDisplacementCasualties } from './displacement_state_utils.js';
-import { computeFrontBreaches, type FrontBreach } from './front_breaches.js';
-import { LARGE_URBAN_MUN_IDS } from './large_urban_mun_data.js';
 import { strictCompare } from './validateGameState.js';
-import {
-    getFactionAlignedPopulationShare,
-    type MunicipalityPopulation1991Map
-} from './population_share.js';
+import type { MunicipalityPopulation1991Map } from './population_share.js';
 import { computeSupplyReachability } from './supply_reachability.js';
 
-// Displacement trigger constants
-const UNSUPPLIED_PRESSURE_TURNS = 3; // N consecutive turns without supply
-const UNSUPPLIED_DISPLACEMENT_FRACTION = 0.05; // 5% per turn after N turns
-const ENCIRCLEMENT_DISPLACEMENT_FRACTION = 0.10; // 10% per turn when encircled
-const BREACH_PERSISTENCE_TURNS = 2; // M turns of breaches
-const BREACH_DISPLACEMENT_FRACTION = 0.03; // 3% per turn when breaches persist
+// Pressure-path triggers (siege and encirclement). Dormant until the siege displacement
+// lane (DA1, 2026-11-13) fed them the campaign's own OSID front and supply.
+/** Consecutive turns under front pressure without supply before the siege trigger fires. */
+export const UNSUPPLIED_PRESSURE_TURNS = 3;
+/**
+ * Share of the holder's own people leaving per turn (week) once the siege trigger fires.
+ * DA1 P3 calibration (Historian seat, 2026-11-13): after the 1992 departures (which the
+ * takeover writer books), outflow from besieged pockets ran about 0.05-0.2% a week:
+ * Srebrenica's 8,000-9,000 UNHCR evacuees of spring 1993 (Krstić TJ ¶16) average about
+ * 0.1% a week over the siege; government-held Sarajevo about 0.05-0.1% a week after 1992
+ * (UNCOE S/1994/674/Add.2 Annex VI; Tabeau, Galić demographic report 2002). The dormant
+ * 5% (and 10% encircled) per week were 50-500 times higher than any source supports.
+ */
+export const UNSUPPLIED_DISPLACEMENT_FRACTION = 0.001;
+/**
+ * Same rate while encircled. Sources show encirclement traps people rather than draining
+ * them (Goražde, Srebrenica, Bihać and East Mostar all grew from refugee inflow), so the
+ * two triggers do not add: the rate is the larger of the two, never their sum.
+ */
+export const ENCIRCLEMENT_DISPLACEMENT_FRACTION = 0.001;
+/**
+ * DA1 P5: a cut-off body counts as an encircled POCKET only when it holds at most this
+ * share of its side's settlements. The besieged pockets of the war are small: Sarajevo,
+ * Goražde, Srebrenica, Žepa, the Bihać pocket (about 8% of RBiH-held settlements), and the
+ * HVO's Lašva valley, Kiseljak, Žepče and Orašje pockets in 1993-94. A front that splits
+ * a side's territory into two large regions is not a siege: during the 1993 Croat-Bosniak
+ * war the simulation cuts the Tuzla region (about 30% of RBiH-held settlements) off from
+ * central Bosnia, which historically stayed linked through Kladanj and Olovo.
+ */
+export const POCKET_MAX_SHARE = 0.15;
+// The breach trigger (3% per turn after persistent front breaches) was removed in DA1: it
+// read `front_pressure`, which no campaign writes (legacy edge keys), and capture-driven
+// displacement already has one writer, `displacement_takeover.ts`.
 
 // Displacement routing: receiving cap from getReceivingCapacityFraction (Sarajevo lower).
 // LOST_POPULATION_FRACTION (20% "lost", all booked as killed Bosniaks when no census) was
 // removed 2026-11-13 (SC2): the no-census case now splits by the national 1991 sums and
 // uses the same killed / fled-abroad rules as the census path.
-
-// Ethnicity-based loss: imported from displacement_loss_constants.ts (single source of truth)
-const FLEE_ABROAD_FRACTION_RS = 0.30; // Serbs: 30% of displaced leave BiH (Serbia to flee to)
-const FLEE_ABROAD_FRACTION_HRHB = 0.25; // Croats: 25% leave BiH (Croatia to flee to)
-const FLEE_ABROAD_FRACTION_RBIH = 0; // Bosniaks: no external state to flee to
-
-// Phase 22: Sustainability collapse displacement multiplier
-const COLLAPSE_DISPLACEMENT_MULTIPLIER = 1.5; // 50% increase when municipality is collapsed
 
 /**
  * Build municipality → controlling faction set from OSID-keyed political_controllers.
@@ -68,33 +82,198 @@ function buildMunControlFromOsids(state: GameState): Map<MunicipalityId, Set<Fac
 }
 
 /**
- * Check if a municipality has any OSIDs controlled by the given faction.
+ * What the pressure path reads about the front and supply, in the SAME id space as the
+ * `settlements` passed to `updateDisplacement` (OSIDs in a campaign).
+ *
+ * DA1 (2026-11-13): the war step used to hand OSID settlements together with legacy `S…`
+ * edges, so the path found 0 front edges every turn, its legacy supply BFS reached no
+ * settlement, and it never fired. The war step now builds these from the operational
+ * graph (`computeFrontEdgesOsid`, `computeSupplyReachabilityOsid`).
  */
-function isMunControlledByFaction(
-    munId: MunicipalityId,
-    factionId: FactionId,
-    munControl: Map<MunicipalityId, Set<FactionId>>
-): boolean {
-    return munControl.get(munId)?.has(factionId) ?? false;
+export interface DisplacementPressureInputs {
+    /** Current front edges (an edge present this turn is an active front). */
+    frontEdges: ReadonlyArray<FrontEdge>;
+    /** Per faction: the controlled settlement ids reachable from its supply sources. */
+    suppliedByFaction: ReadonlyMap<string, ReadonlySet<string>>;
 }
 
 /**
- * Check if a municipality has a path to another friendly municipality via OSID adjacency.
- * Uses OSID-keyed political_controllers for control checks.
+ * Inputs derived from `settlementEdges` alone, for callers without operational data (unit
+ * fixtures, legacy CLI harnesses). Only meaningful when the edges use the same ids as
+ * the controllers and settlements.
  */
-function isMunicipalityEncircledOsid(
-    munId: MunicipalityId,
-    factionId: FactionId,
-    munControl: Map<MunicipalityId, Set<FactionId>>
-): boolean {
-    // If faction doesn't control any OSID in this municipality, it's not "their" municipality to be encircled
-    if (!isMunControlledByFaction(munId, factionId, munControl)) return false;
-    // Check if any adjacent municipality is also controlled by this faction
-    for (const [otherMun, factions] of munControl) {
-        if (otherMun !== munId && factions.has(factionId)) return false;
+function pressureInputsFromEdges(state: GameState, settlementEdges: EdgeRecord[]): DisplacementPressureInputs {
+    const supply = computeSupplyReachability(state, buildAdjacencyMapCached(settlementEdges));
+    const supplied = new Map<string, ReadonlySet<string>>();
+    for (const f of supply.factions) supplied.set(f.faction_id, new Set(f.reachable_controlled));
+    return { frontEdges: computeFrontEdges(state, settlementEdges), suppliedByFaction: supplied };
+}
+
+function isCanonicalFaction(side: unknown): side is FactionId {
+    return typeof side === 'string' && (CANONICAL_FACTIONS as readonly string[]).includes(side);
+}
+
+function rbihHrhbAtWar(state: GameState): boolean {
+    const turn = state.meta?.turn ?? 0;
+    return turn >= (state.meta?.rbih_hrhb_war_earliest_turn ?? DEFAULT_RBIH_HRHB_WAR_EARLIEST_TURN) && !areRbihHrhbAllied(state);
+}
+
+/** Per faction: body index of each held settlement, the main body, own-settlement count per body. */
+interface TerritorialBodies {
+    bodyOf: Map<string, number>;
+    main: number;
+    size: number[];
+    total: number;
+}
+
+/**
+ * Per faction: which connected body of its territory each settlement it holds belongs to,
+ * and which body is its main one (the most settlements; ties go to the body found first
+ * in id order). Bodies connect through the faction's own settlements and, while RBiH and
+ * HRHB are not at war, through the ally's (as supply transit does).
+ *
+ * A municipality whose held settlements all lie outside the main body is encircled when
+ * it is also under front pressure: Sarajevo, Goražde, Srebrenica, Žepa and the Bihać
+ * pocket for RBiH; the Lašva valley pocket for HRHB once the Croat-Bosniak war starts.
+ * (The old test, "the faction holds no other municipality", could never fire.)
+ */
+function computeTerritorialBodies(
+    controllerOf: ReadonlyMap<string, FactionId>,
+    neighbours: ReadonlyMap<string, readonly string[]>,
+    atWarRbihHrhb: boolean
+): Map<FactionId, TerritorialBodies> {
+    const ids = [...controllerOf.keys()].sort(strictCompare);
+    const result = new Map<FactionId, TerritorialBodies>();
+    for (const faction of CANONICAL_FACTIONS) {
+        const passable = (side: FactionId | undefined): boolean => {
+            if (side === undefined) return false;
+            if (side === faction) return true;
+            const pair = (side === 'RBiH' && faction === 'HRHB') || (side === 'HRHB' && faction === 'RBiH');
+            return pair && !atWarRbihHrhb;
+        };
+        const bodyOf = new Map<string, number>();
+        const ownCount: number[] = [];
+        const visited = new Set<string>();
+        for (const start of ids) {
+            if (visited.has(start) || controllerOf.get(start) !== faction) continue;
+            const body = ownCount.length;
+            ownCount.push(0);
+            const queue = [start];
+            visited.add(start);
+            while (queue.length > 0) {
+                const cur = queue.shift()!;
+                if (controllerOf.get(cur) === faction) {
+                    bodyOf.set(cur, body);
+                    ownCount[body] += 1;
+                }
+                for (const nb of neighbours.get(cur) ?? []) {
+                    if (visited.has(nb) || !passable(controllerOf.get(nb))) continue;
+                    visited.add(nb);
+                    queue.push(nb);
+                }
+            }
+        }
+        let main = -1;
+        for (let b = 0; b < ownCount.length; b++) {
+            if (main < 0 || ownCount[b] > ownCount[main]) main = b;
+        }
+        const total = ownCount.reduce((s, n) => s + n, 0);
+        result.set(faction, { bodyOf, main, size: ownCount, total });
     }
-    // No other municipality controlled by this faction — truly isolated
-    return true;
+    return result;
+}
+
+/**
+ * The side holding a municipality: the one controlling most of its settlements. Ties go
+ * to the earlier side in canonical order. Null when nobody controls any of them.
+ */
+export function resolveMunicipalityHolder(heldInMun: ReadonlyMap<FactionId, number>): FactionId | null {
+    let holder: FactionId | null = null;
+    let best = 0;
+    for (const f of CANONICAL_FACTIONS) {
+        const c = heldInMun.get(f) ?? 0;
+        if (c > best) {
+            holder = f;
+            best = c;
+        }
+    }
+    return holder;
+}
+
+/**
+ * Get or initialize displacement state for a municipality.
+ */
+function getOrInitDisplacementState(
+    state: GameState,
+    munId: MunicipalityId,
+    originalPopulation: number
+): DisplacementState {
+    if (!state.displacement.displacement_state) {
+        state.displacement.displacement_state = {};
+    }
+
+    const existing = state.displacement.displacement_state[munId];
+    if (existing) {
+        return existing;
+    }
+
+    const newState: DisplacementState = {
+        mun_id: munId,
+        original_population: originalPopulation,
+        displaced_out: 0,
+        displaced_in: 0,
+        lost_population: 0,
+        last_updated_turn: state.meta.turn
+    };
+
+    state.displacement.displacement_state[munId] = newState;
+    return newState;
+}
+
+/**
+ * Route one people's displaced to municipalities their own side holds, with capacity.
+ * Order: the takeover writer's route for this origin, people and causer
+ * (`getBilateralRoutingOrder`), then the remaining held municipalities in id order.
+ * Whatever finds no capacity is returned unrouted (the caller books it as lost).
+ */
+function routeDisplacedPopulation(
+    fromMunId: MunicipalityId,
+    people: FactionId,
+    amount: number,
+    displacementState: Record<MunicipalityId, DisplacementState>,
+    munControl: Map<MunicipalityId, Set<FactionId>>,
+    causer: FactionId
+): DisplacementRoutingRecord[] {
+    const routing: DisplacementRoutingRecord[] = [];
+    let remaining = amount;
+
+    const friendly = new Set<MunicipalityId>();
+    for (const [targetMunId, factions] of munControl) {
+        if (targetMunId !== fromMunId && factions.has(people)) friendly.add(targetMunId);
+    }
+    const preferred = (causer === UNKNOWN_CAUSER_BUCKET
+        ? getBilateralRoutingOrder(fromMunId, people)
+        : getBilateralRoutingOrder(fromMunId, people, causer)
+    ).filter((m) => friendly.has(m));
+    const preferredSet = new Set(preferred);
+    const order = [...preferred, ...[...friendly].filter((m) => !preferredSet.has(m)).sort(strictCompare)];
+
+    for (const munId of order) {
+        if (remaining <= 0) break;
+        const targetState = displacementState[munId];
+        const targetOriginal = targetState?.original_population ?? 10000;
+        const current =
+            targetOriginal +
+            (targetState?.displaced_in ?? 0) -
+            (targetState?.displaced_out ?? 0) -
+            (targetState?.lost_population ?? 0);
+        const capacity = Math.floor(targetOriginal * getReceivingCapacityFraction(munId));
+        const routed = Math.min(remaining, Math.max(0, capacity - current));
+        if (routed <= 0) continue;
+        routing.push({ from_mun: fromMunId, to_mun: munId, amount: routed, reason: 'friendly_supplied' });
+        remaining -= routed;
+    }
+    return routing;
 }
 
 /**
@@ -133,246 +312,6 @@ export interface DisplacementStepReport {
 }
 
 /**
- * Track unsupplied pressure state per municipality.
- * This is a transient state that tracks consecutive unsupplied turns.
- */
-interface MunicipalityPressureState {
-    mun_id: MunicipalityId;
-    faction_id: FactionId;
-    unsupplied_consecutive_turns: number;
-    last_checked_turn: number;
-}
-
-/**
- * Module-level cache for tracking pressure state across turns.
- *
- * DETERMINISM NOTE: This cache persists across function calls within a single
- * process. For deterministic simulation, call resetDisplacementPressureCache()
- * at simulation start to ensure clean state.
- *
- * The cache tracks consecutive unsupplied turns per municipality per faction.
- * It is automatically updated during displacement computation and does not
- * need to be serialized - it reconstructs from turn-by-turn execution.
- */
-const pressureStateCache = new Map<string, MunicipalityPressureState>();
-
-/**
- * Reset the displacement pressure state cache.
- * Call this at simulation initialization to ensure deterministic behavior
- * across multiple simulation runs within the same process.
- */
-export function resetDisplacementPressureCache(): void {
-    pressureStateCache.clear();
-}
-
-/**
- * Get or initialize displacement state for a municipality.
- */
-function getOrInitDisplacementState(
-    state: GameState,
-    munId: MunicipalityId,
-    originalPopulation: number
-): DisplacementState {
-    if (!state.displacement.displacement_state) {
-        state.displacement.displacement_state = {};
-    }
-
-    const existing = state.displacement.displacement_state[munId];
-    if (existing) {
-        return existing;
-    }
-
-    const newState: DisplacementState = {
-        mun_id: munId,
-        original_population: originalPopulation,
-        displaced_out: 0,
-        displaced_in: 0,
-        lost_population: 0,
-        last_updated_turn: state.meta.turn
-    };
-
-    state.displacement.displacement_state[munId] = newState;
-    return newState;
-}
-
-/**
- * Check if a municipality is under pressure (has active front segments).
- */
-function isMunicipalityUnderPressure(
-    munId: MunicipalityId,
-    settlements: Map<string, SettlementRecord>,
-    state: GameState,
-    frontEdges: ReturnType<typeof computeFrontEdges>
-): boolean {
-    // Find all settlements in this municipality
-    const munSettlements: string[] = [];
-    for (const [sid, settlement] of settlements.entries()) {
-        if ((settlement.mun1990_id ?? settlement.mun_code) === munId) {
-            munSettlements.push(sid);
-        }
-    }
-
-    if (munSettlements.length === 0) return false;
-
-    // Check if any settlement in the municipality is part of an active front edge
-    const munSettlementSet = new Set(munSettlements);
-    for (const edge of frontEdges) {
-        const seg = state.military.front_segments[edge.edge_id];
-        const isActive = seg && typeof seg === 'object' && seg.active === true;
-        if (!isActive) continue;
-
-        if (munSettlementSet.has(edge.a) || munSettlementSet.has(edge.b)) {
-            return true;
-        }
-    }
-
-    return false;
-}
-
-/**
- * Check if a municipality is supplied for a faction.
- */
-function isMunicipalitySupplied(
-    factionId: FactionId,
-    munId: MunicipalityId,
-    settlements: Map<string, SettlementRecord>,
-    reachableSettlements: Set<string>
-): boolean {
-    // Find all settlements in this municipality
-    const munSettlements: string[] = [];
-    for (const [sid, settlement] of settlements.entries()) {
-        if ((settlement.mun1990_id ?? settlement.mun_code) === munId) {
-            munSettlements.push(sid);
-        }
-    }
-
-    // Sort deterministically
-    munSettlements.sort();
-
-    // Check if at least one settlement in the municipality is reachable
-    for (const sid of munSettlements) {
-        if (reachableSettlements.has(sid)) {
-            return true;
-        }
-    }
-
-    return false;
-}
-
-
-/**
- * Count breaches affecting a municipality.
- */
-function countBreachesAffectingMunicipality(
-    munId: MunicipalityId,
-    settlements: Map<string, SettlementRecord>,
-    breaches: FrontBreach[],
-    frontEdges: ReturnType<typeof computeFrontEdges>
-): number {
-    // Find all settlements in this municipality
-    const munSettlements: string[] = [];
-    for (const [sid, settlement] of settlements.entries()) {
-        if ((settlement.mun1990_id ?? settlement.mun_code) === munId) {
-            munSettlements.push(sid);
-        }
-    }
-
-    if (munSettlements.length === 0) return 0;
-
-    const munSettlementSet = new Set(munSettlements);
-
-    // Build edge_id to front edge map
-    const edgeMap = new Map<string, typeof frontEdges[0]>();
-    for (const edge of frontEdges) {
-        edgeMap.set(edge.edge_id, edge);
-    }
-
-    // Count breaches where the edge involves a settlement in this municipality
-    let count = 0;
-    for (const breach of breaches) {
-        const edge = edgeMap.get(breach.edge_id);
-        if (!edge) continue;
-
-        if (munSettlementSet.has(edge.a) || munSettlementSet.has(edge.b)) {
-            count += 1;
-        }
-    }
-
-    return count;
-}
-
-
-/**
- * Route displaced population to friendly municipalities.
- */
-function routeDisplacedPopulation(
-    fromMunId: MunicipalityId,
-    factionId: FactionId,
-    amount: number,
-    displacementState: Record<MunicipalityId, DisplacementState>,
-    munControl: Map<MunicipalityId, Set<FactionId>>
-): DisplacementRoutingRecord[] {
-    const routing: DisplacementRoutingRecord[] = [];
-    let remaining = amount;
-
-    // Find all friendly municipalities (controlled by this faction), sorted alphabetically for determinism
-    const candidateMuns: MunicipalityId[] = [];
-
-    for (const [targetMunId, factions] of munControl) {
-        if (targetMunId === fromMunId) continue;
-        if (!factions.has(factionId)) continue;
-        candidateMuns.push(targetMunId);
-    }
-
-    const urbanMunSet = new Set<MunicipalityId>(LARGE_URBAN_MUN_IDS as readonly MunicipalityId[]);
-
-    candidateMuns.sort(strictCompare);
-
-    const virtualDisplacedIn: Partial<Record<MunicipalityId, number>> = {};
-
-    function availableAt(targetMunId: MunicipalityId): number {
-        const targetState = displacementState[targetMunId];
-        const targetOriginal = targetState?.original_population ?? 10000;
-        const current =
-            targetOriginal +
-            (targetState?.displaced_in ?? 0) +
-            (virtualDisplacedIn[targetMunId] ?? 0) -
-            (targetState?.displaced_out ?? 0) -
-            (targetState?.lost_population ?? 0);
-        const capacity = Math.floor(targetOriginal * getReceivingCapacityFraction(targetMunId));
-        return Math.max(0, capacity - current);
-    }
-
-    function fillFromCandidates(candidates: MunicipalityId[]): void {
-        for (const munId of candidates) {
-            if (remaining <= 0) break;
-            const targetAvailable = availableAt(munId);
-            if (targetAvailable <= 0) continue;
-            const routed = Math.min(remaining, targetAvailable);
-            if (routed <= 0) continue;
-            virtualDisplacedIn[munId] = (virtualDisplacedIn[munId] ?? 0) + routed;
-            routing.push({
-                from_mun: fromMunId,
-                to_mun: munId,
-                amount: routed,
-                reason: 'friendly_supplied'
-            });
-            remaining -= routed;
-        }
-    }
-
-    fillFromCandidates(candidateMuns);
-    if (remaining > 0) {
-        fillFromCandidates(candidateMuns.filter((m) => urbanMunSet.has(m)));
-    }
-
-    return routing;
-}
-
-/** One-time displacement fraction for control flip when no 1991 census. */
-export const EARLY_WAR_DISPLACEMENT_FRACTION_NO_CENSUS = 0.15;
-
-/**
  * Push municipal displacement to displacement_event_log so UI can show exact per-OSID out/lost/in.
  * Distributes by population share (from settlement properties). byFaction = total displaced per faction; lostAmount = total lost (killed+fled); routed = total - lost.
  */
@@ -385,9 +324,11 @@ function pushDisplacementEventLogFromMun(
     routableByFaction: Record<FactionId, number>,
     causedBy: FactionId,
     killedByFaction: Record<FactionId, number>,
+    /** When set, spread only across these settlements (the holder's, for the pressure path). */
+    onlySids?: ReadonlySet<string>,
 ): void {
     const entries = Array.from(settlements.entries())
-        .filter(([, rec]) => (rec.mun1990_id ?? rec.mun_code) === munId)
+        .filter(([sid, rec]) => (rec.mun1990_id ?? rec.mun_code) === munId && (!onlySids || onlySids.has(sid)))
         .map(([sid, rec]) => {
             const pop = typeof (rec.properties as { population_total?: number } | undefined)?.population_total === 'number'
                 ? Math.max(0, (rec.properties as { population_total: number }).population_total)
@@ -450,210 +391,6 @@ function pushDisplacementEventLogFromMun(
             }, causerUnrecorded ? { causerUnrecorded: true } : undefined);
         }
     }
-}
-
-/** Minimal shape for control-flip displacement apply. */
-export interface EarlyWarDisplacementFlipInfo {
-    mun_id: MunicipalityId;
-    from_faction: FactionId | null;
-    to_faction: FactionId;
-}
-
-export interface PhaseIDisplacementHooksInfo {
-    by_mun: Array<{ mun_id: MunicipalityId; initiated_turn: number }>;
-}
-
-/**
- * Apply one-time displacement for muns that flipped and had displacement initiated this turn.
- * Mutates state.displacement.displacement_state; uses same routing and killed/fled-abroad rules when census provided.
- */
-export function applyDisplacementFromFlips(
-    state: GameState,
-    turn: number,
-    flips: EarlyWarDisplacementFlipInfo[],
-    hooksByMun: PhaseIDisplacementHooksInfo['by_mun'],
-    _settlements: Map<string, SettlementRecord>,
-    _adjacencyMap: AdjacencyMap,
-    population1991ByMun?: MunicipalityPopulation1991Map
-): DisplacementStepReport {
-    const defaultOriginalPopulation = 10000;
-    const records: DisplacementRecord[] = [];
-    const routingRecords: DisplacementRoutingRecord[] = [];
-    const flipByMun = new Map<MunicipalityId, EarlyWarDisplacementFlipInfo>();
-    for (const f of flips) {
-        flipByMun.set(f.mun_id, f);
-    }
-    const munsInitiatedThisTurn = hooksByMun.filter((m) => m.initiated_turn === turn).map((m) => m.mun_id);
-    munsInitiatedThisTurn.sort(strictCompare);
-    const mc = buildMunControlFromOsids(state);
-
-    for (const munId of munsInitiatedThisTurn) {
-        const flip = flipByMun.get(munId);
-        if (!flip || flip.from_faction === null) continue;
-
-        const fromFaction = flip.from_faction;
-        const dispState = getOrInitDisplacementState(
-            state,
-            munId,
-            state.displacement.displacement_state?.[munId]?.original_population ?? defaultOriginalPopulation
-        );
-        const remainingPopulation =
-            dispState.original_population - dispState.displaced_out - dispState.lost_population;
-        if (remainingPopulation <= 0) continue;
-
-        const share = getFactionAlignedPopulationShare(
-            munId,
-            fromFaction,
-            population1991ByMun,
-            EARLY_WAR_DISPLACEMENT_FRACTION_NO_CENSUS
-        );
-        const displacementAmount = Math.min(
-            Math.floor(dispState.original_population * share),
-            remainingPopulation
-        );
-        if (displacementAmount <= 0) continue;
-
-        // SC2/P3 (displacement attribution lane): the amount is sized from the LOSING side's
-        // own population share, so its victims are that people only. The former census split
-        // across all peoples booked part of it to the capturer's own people, and the no-census
-        // branch booked every lost person as a killed Bosniak.
-        const byFaction: { RBiH: number; RS: number; HRHB: number } = { RBiH: 0, RS: 0, HRHB: 0 };
-        if (fromFaction === 'RBiH' || fromFaction === 'RS' || fromFaction === 'HRHB') {
-            byFaction[fromFaction] = displacementAmount;
-        } else {
-            Object.assign(byFaction, splitDisplacedByEthnicity(munId, displacementAmount, population1991ByMun));
-        }
-        let lostAmount: number;
-        let routedAmount: number;
-        let routableByFaction: { RBiH: number; RS: number; HRHB: number } | undefined;
-
-        {
-            const toFaction = flip.to_faction;
-            const rRBiH = Math.floor(
-                byFaction.RBiH * (1 - getDisplacementKillFraction('RBiH', toFaction)) * (1 - getFactionFleeAbroadFraction('RBiH'))
-            );
-            const rRS = Math.floor(
-                byFaction.RS * (1 - getDisplacementKillFraction('RS', toFaction)) * (1 - getFactionFleeAbroadFraction('RS'))
-            );
-            const rHRHB = Math.floor(
-                byFaction.HRHB * (1 - getDisplacementKillFraction('HRHB', toFaction)) * (1 - getFactionFleeAbroadFraction('HRHB'))
-            );
-            routableByFaction = { RBiH: rRBiH, RS: rRS, HRHB: rHRHB };
-            routedAmount = rRBiH + rRS + rHRHB;
-            lostAmount = displacementAmount - routedAmount;
-
-            const killedByFac: Record<FactionId, number> = {
-                RBiH: Math.floor(byFaction.RBiH * getDisplacementKillFraction('RBiH', toFaction)),
-                RS: Math.floor(byFaction.RS * getDisplacementKillFraction('RS', toFaction)),
-                HRHB: Math.floor(byFaction.HRHB * getDisplacementKillFraction('HRHB', toFaction)),
-            };
-            const fledByFac: Record<FactionId, number> = {
-                RBiH: Math.floor(byFaction.RBiH * getFactionFleeAbroadFraction('RBiH')),
-                RS: Math.floor(byFaction.RS * getFactionFleeAbroadFraction('RS')),
-                HRHB: Math.floor(byFaction.HRHB * getFactionFleeAbroadFraction('HRHB')),
-            };
-
-            pushDisplacementEventLogFromMun(state, munId, _settlements, byFaction, turn, routableByFaction, toFaction, killedByFac);
-            for (const fid of CANONICAL_FACTIONS) {
-                if (killedByFac[fid] > 0 || fledByFac[fid] > 0) {
-                    recordCivilianDisplacementCasualties(state, fid, killedByFac[fid], fledByFac[fid]);
-                }
-            }
-        }
-
-        const beforeOut = dispState.displaced_out;
-        const beforeIn = dispState.displaced_in;
-        const beforeLost = dispState.lost_population;
-        // displaced_out = only actually-routed; lost_population = killed + fled + unrouted
-        dispState.lost_population += lostAmount;
-        dispState.last_updated_turn = turn;
-
-        if (routedAmount > 0) {
-            const displacementState = state.displacement.displacement_state;
-            if (!displacementState) {
-                throw new Error('Displacement state failed to initialize before routing');
-            }
-            const routing = routeDisplacedPopulation(
-                munId,
-                fromFaction,
-                routedAmount,
-                displacementState,
-                mc
-            );
-            const totalRoutable = routableByFaction
-                ? routableByFaction.RBiH + routableByFaction.RS + routableByFaction.HRHB
-                : routedAmount;
-            for (const route of routing) {
-                const destState = getOrInitDisplacementState(
-                    state,
-                    route.to_mun,
-                    displacementState[route.to_mun]?.original_population ?? defaultOriginalPopulation
-                );
-                destState.displaced_in += route.amount;
-                destState.last_updated_turn = turn;
-                if (population1991ByMun && routableByFaction && totalRoutable > 0) {
-                    if (!destState.displaced_in_by_faction) destState.displaced_in_by_faction = {};
-                    const df = destState.displaced_in_by_faction;
-                    const rRBiH = Math.floor((route.amount * routableByFaction.RBiH) / totalRoutable);
-                    const rRS = Math.floor((route.amount * routableByFaction.RS) / totalRoutable);
-                    const rHRHB = route.amount - rRBiH - rRS;
-                    if (rRBiH > 0) df['RBiH'] = (df['RBiH'] ?? 0) + rRBiH;
-                    if (rRS > 0) df['RS'] = (df['RS'] ?? 0) + rRS;
-                    if (rHRHB > 0) df['HRHB'] = (df['HRHB'] ?? 0) + rHRHB;
-                } else if (population1991ByMun) {
-                    const byFaction = splitDisplacedByEthnicity(route.from_mun, route.amount, population1991ByMun);
-                    if (!destState.displaced_in_by_faction) destState.displaced_in_by_faction = {};
-                    const df = destState.displaced_in_by_faction;
-                    if (byFaction.RBiH > 0) df['RBiH'] = (df['RBiH'] ?? 0) + byFaction.RBiH;
-                    if (byFaction.RS > 0) df['RS'] = (df['RS'] ?? 0) + byFaction.RS;
-                    if (byFaction.HRHB > 0) df['HRHB'] = (df['HRHB'] ?? 0) + byFaction.HRHB;
-                }
-                routingRecords.push(route);
-            }
-            const totalRouted = routing.reduce((sum, r) => sum + r.amount, 0);
-            dispState.displaced_out += totalRouted;
-            const unRouted = routedAmount - totalRouted;
-            if (unRouted > 0) {
-                dispState.lost_population += unRouted;
-            }
-        }
-
-        const militiaPools = state.military.militia_pools as Record<string, MilitiaPoolState> | undefined;
-        if (militiaPools && remainingPopulation > 0) {
-            const poolKey = `${munId}:${fromFaction}`;
-            const pool = militiaPools[poolKey];
-            if (pool && typeof pool === 'object') {
-                const reductionRatio = displacementAmount / Math.max(1, remainingPopulation);
-                const poolReduction = Math.floor(pool.available * reductionRatio);
-                if (poolReduction > 0) {
-                    pool.available = Math.max(0, pool.available - poolReduction);
-                    pool.updated_turn = turn;
-                }
-            }
-        }
-
-        records.push({
-            mun_id: munId,
-            faction_id: fromFaction,
-            original_population: dispState.original_population,
-            displaced_out_before: beforeOut,
-            displaced_out_after: dispState.displaced_out,
-            displaced_in_before: beforeIn,
-            displaced_in_after: dispState.displaced_in,
-            lost_population_before: beforeLost,
-            lost_population_after: dispState.lost_population,
-            displacement_this_turn: displacementAmount,
-            reason: ['phase_i_flip']
-        });
-    }
-
-    records.sort((a, b) => strictCompare(a.mun_id, b.mun_id));
-    routingRecords.sort((a, b) => {
-        const fromCmp = strictCompare(a.from_mun, b.from_mun);
-        if (fromCmp !== 0) return fromCmp;
-        return strictCompare(a.to_mun, b.to_mun);
-    });
-    return { by_municipality: records, routing: routingRecords };
 }
 
 /**
@@ -748,7 +485,13 @@ export function resolvePressingFactions(
     munId: MunicipalityId,
     poolFaction: FactionId,
     munSettlementIds: ReadonlySet<string>,
-    frontEdges: ReadonlyArray<{ a: string; b: string; side_a: string | null; side_b: string | null }>
+    frontEdges: ReadonlyArray<{ a: string; b: string; side_a: string | null; side_b: string | null }>,
+    /**
+     * DA1 P6 (panel round 1, Red-team and Engine seats): the caller's holder, used as is. The
+     * pressure path passes the side whose settlements it is processing, so the resolver can
+     * never disagree with it and book a pocket's people to their own defender.
+     */
+    holderOverride?: FactionId
 ): { holder: FactionId; causers: Array<{ faction: FactionId; weight: number }> } {
     const weights = (counts: Map<FactionId, number>): Array<{ faction: FactionId; weight: number }> =>
         CANONICAL_FACTIONS
@@ -767,12 +510,16 @@ export function resolvePressingFactions(
     }
     let holder: FactionId = poolFaction;
     let holderCount = heldInMun.get(poolFaction) ?? 0;
-    for (const f of CANONICAL_FACTIONS) {
-        const c = heldInMun.get(f) ?? 0;
-        if (c > holderCount) {
-            holder = f;
-            holderCount = c;
+    if (holderOverride === undefined) {
+        for (const f of CANONICAL_FACTIONS) {
+            const c = heldInMun.get(f) ?? 0;
+            if (c > holderCount) {
+                holder = f;
+                holderCount = c;
+            }
         }
+    } else {
+        holder = holderOverride;
     }
 
     const turn = state.meta?.turn ?? 0;
@@ -815,14 +562,6 @@ export function resolvePressingFactions(
 }
 
 /**
- * Kill fraction for a people displaced by `causer` (P1a). An unrecorded causer is not a
- * faction, so it takes the plain default rather than falling into a faction-specific rate.
- */
-function killFractionForCauser(displaced: FactionId, causer: FactionId): number {
-    return causer === UNKNOWN_CAUSER_BUCKET ? DISPLACEMENT_KILLED_FRACTION : getDisplacementKillFraction(displaced, causer);
-}
-
-/**
  * Split `amount` across causer weights: floor shares in the given order, remainder to
  * the last causer, so the parts always sum to `amount`. Deterministic.
  */
@@ -841,288 +580,242 @@ export function splitAmountByCauser(
 }
 
 /**
- * Update population displacement for all municipalities.
- * When population1991ByMun is provided, displaced_in at each destination is split by source mun's 1991 ethnicity (displaced_in_by_faction) so pool population can add to the correct faction's pool.
+ * Update population displacement from siege and encirclement (the pressure path).
+ *
+ * DA1 (siege displacement lane, 2026-11-13/14): one pass per (municipality, side holding
+ * settlements there). It used to run once per militia pool, and every pool displaced the
+ * whole municipality's population, so a municipality with three pools was processed three
+ * times. Triggers, read from `pressure` (same id space as `settlements`):
+ *   - siege: the side's settlements touch an at-war front and none of them is supplied,
+ *     for UNSUPPLIED_PRESSURE_TURNS consecutive turns (counter persisted per side in
+ *     DisplacementState.unsupplied_pressure_by_side with the turn last counted, so it
+ *     survives a save; it used to live in a module cache);
+ *   - encirclement: under front pressure and every held settlement lies in a body outside
+ *     the side's main territorial body holding at most POCKET_MAX_SHARE of its settlements
+ *     at turn 0 (`computeTerritorialBodies`).
+ * The side's own people leave at the sourced weekly rate, taken from the population of the
+ * settlements it controls; they are routed first (people with nowhere to go stay), booked
+ * to the pressing side (`resolvePressingFactions`, holder passed in), none killed and none
+ * abroad.
+ *
+ * Without `pressure`, inputs are derived from `settlementEdges` (fixtures and harnesses).
  */
 export function updateDisplacement(
     state: GameState,
     settlements: Map<string, SettlementRecord>,
     settlementEdges: EdgeRecord[],
-    population1991ByMun?: MunicipalityPopulation1991Map
+    population1991ByMun?: MunicipalityPopulation1991Map,
+    pressure?: DisplacementPressureInputs
 ): DisplacementStepReport {
     const currentTurn = state.meta.turn;
-    const militiaPools = state.military.militia_pools as Record<MunicipalityId, MilitiaPoolState> | undefined;
+    const militiaPools = state.military.militia_pools as Record<string, MilitiaPoolState> | undefined;
 
     if (!militiaPools || typeof militiaPools !== 'object') {
         return { by_municipality: [], routing: [] };
     }
 
-    // Compute derived state
-    const adjacencyMap = buildAdjacencyMapCached(settlementEdges);
-    const supplyReport = computeSupplyReachability(state, adjacencyMap);
-    const frontEdges = computeFrontEdges(state, settlementEdges);
-    const breaches = computeFrontBreaches(state, frontEdges);
+    const inputs = pressure ?? pressureInputsFromEdges(state, settlementEdges);
+    const frontEdges = inputs.frontEdges;
     const munControl = buildMunControlFromOsids(state);
+    const pc = state.political.political_controllers ?? {};
 
-    // Build reachable sets by faction
-    const reachableByFaction = new Map<FactionId, Set<string>>();
-    for (const f of supplyReport.factions) {
-        reachableByFaction.set(f.faction_id, new Set(f.reachable_controlled));
+    // Settlements by municipality (sorted), their controller and population.
+    const sidsByMun = new Map<MunicipalityId, string[]>();
+    const popOf = new Map<string, number>();
+    for (const [sid, rec] of settlements.entries()) {
+        const mun = (rec.mun1990_id ?? rec.mun_code) as MunicipalityId;
+        const list = sidsByMun.get(mun) ?? [];
+        list.push(sid);
+        sidsByMun.set(mun, list);
+        const p = (rec.properties as { population_total?: unknown } | undefined)?.population_total;
+        popOf.set(sid, typeof p === 'number' && Number.isFinite(p) ? Math.max(0, p) : 1);
     }
+    for (const list of sidsByMun.values()) list.sort(strictCompare);
 
-    // Track breach persistence (simplified: count breaches this turn)
-    const breachCountByMun = new Map<MunicipalityId, number>();
-    const poolKeysSorted = Object.keys(militiaPools).sort();
+    const controllerOf = new Map<string, FactionId>();
+    for (const sid of [...settlements.keys()].sort(strictCompare)) {
+        const side = pc[sid];
+        if (isCanonicalFaction(side)) controllerOf.set(sid, side);
+    }
+    const neighbourSets = new Map<string, Set<string>>();
+    for (const e of settlementEdges) {
+        if (e.a === e.b) continue;
+        if (!neighbourSets.has(e.a)) neighbourSets.set(e.a, new Set());
+        if (!neighbourSets.has(e.b)) neighbourSets.set(e.b, new Set());
+        neighbourSets.get(e.a)!.add(e.b);
+        neighbourSets.get(e.b)!.add(e.a);
+    }
+    const neighbours = new Map<string, string[]>();
+    for (const [k, v] of neighbourSets) neighbours.set(k, [...v].sort(strictCompare));
+    const bodies = computeTerritorialBodies(controllerOf, neighbours, rbihHrhbAtWar(state));
+
+    // Municipalities with at least one pool, once each, in id order.
+    const poolKeysSorted = Object.keys(militiaPools).sort(strictCompare);
+    const poolKeysByMun = new Map<MunicipalityId, string[]>();
     for (const key of poolKeysSorted) {
         const pool = militiaPools[key];
-        if (!pool || typeof pool !== 'object') continue;
-        const factionId = pool.faction;
-        if (!factionId || typeof factionId !== 'string') continue;
-        const munId = typeof pool.mun_id === 'string' ? pool.mun_id : key;
-
-        const count = countBreachesAffectingMunicipality(munId, settlements, breaches, frontEdges);
-        breachCountByMun.set(munId, count);
+        if (!pool || typeof pool !== 'object' || typeof pool.faction !== 'string') continue;
+        const munId = (typeof pool.mun_id === 'string' ? pool.mun_id : key) as MunicipalityId;
+        const list = poolKeysByMun.get(munId) ?? [];
+        list.push(key);
+        poolKeysByMun.set(munId, list);
     }
+    const munIds = [...poolKeysByMun.keys()].sort(strictCompare);
 
     const records: DisplacementRecord[] = [];
     const routingRecords: DisplacementRoutingRecord[] = [];
+    const defaultOriginalPopulation = 10000;
 
-    // Process each militia pool (key may be mun_id or "mun_id:faction")
-    for (const key of poolKeysSorted) {
-        const pool = militiaPools[key];
-        if (!pool || typeof pool !== 'object') continue;
+    // DA1 P6 (panel round 1, Red-team): the pocket share is measured against the side's
+    // settlement count at turn 0, so conquering most of a side cannot turn its pockets into
+    // "large regions" and switch the siege trigger off. Falls back to the current count.
+    const initialTotal = new Map<FactionId, number>();
+    for (const [osid, side] of Object.entries(state.political.initial_political_controllers ?? {})) {
+        if (settlements.has(osid) && isCanonicalFaction(side)) initialTotal.set(side, (initialTotal.get(side) ?? 0) + 1);
+    }
 
-        const factionId = pool.faction;
-        if (factionId === null || factionId === undefined) continue; // only process pools with faction
-        if (typeof factionId !== 'string') continue;
-
-        const munId = typeof pool.mun_id === 'string' ? pool.mun_id : key;
-
-        // Get or initialize displacement state
-        // Use a default original population if not set (can be initialized from census data later)
-        const defaultOriginalPopulation = 10000;
+    for (const munId of munIds) {
+        const munSids = sidsByMun.get(munId) ?? [];
+        if (munSids.length === 0) continue;
         const dispState = getOrInitDisplacementState(state, munId, defaultOriginalPopulation);
+        const munPop = munSids.reduce((s, sid) => s + (popOf.get(sid) ?? 0), 0);
+        const counters = dispState.unsupplied_pressure_by_side ?? {};
 
-        // Check conditions
-        const underPressure = isMunicipalityUnderPressure(munId, settlements, state, frontEdges);
-        const reachableSettlements = reachableByFaction.get(factionId) ?? new Set<string>();
-        const supplied = isMunicipalitySupplied(factionId, munId, settlements, reachableSettlements);
-        const encircled = isMunicipalityEncircledOsid(munId, factionId, munControl);
-        const breachCount = breachCountByMun.get(munId) ?? 0;
-
-        // Phase 22: Check if municipality is collapsed (sustainability collapse)
-        const sustState = state.displacement.sustainability_state?.[munId];
-        const isCollapsed = sustState?.collapsed ?? false;
-
-        // Calculate displacement amount
-        const remainingPopulation =
-            dispState.original_population - dispState.displaced_out - dispState.lost_population;
-        let displacementAmount = 0;
-        const reasons: string[] = [];
-
-        // Trigger 1: Sustained pressure without supply
-        if (underPressure && !supplied) {
-            // Track consecutive unsupplied turns
-            const cacheKey = `${munId}:${factionId}`;
-            const cached = pressureStateCache.get(cacheKey);
-            const consecutiveTurns =
-                cached && cached.last_checked_turn === currentTurn - 1
-                    ? cached.unsupplied_consecutive_turns + 1
-                    : 1;
-
-            pressureStateCache.set(cacheKey, {
-                mun_id: munId,
-                faction_id: factionId,
-                unsupplied_consecutive_turns: consecutiveTurns,
-                last_checked_turn: currentTurn
-            });
-
-            if (consecutiveTurns >= UNSUPPLIED_PRESSURE_TURNS) {
-                const fraction = UNSUPPLIED_DISPLACEMENT_FRACTION;
-                const amount = Math.floor(remainingPopulation * fraction);
-                displacementAmount += amount;
-                reasons.push(`unsupplied_pressure_${consecutiveTurns}_turns`);
+        // DA1 P6 (Red-team): one pass per side holding settlements here, so a pocket that is
+        // a minority of its municipality (Žepa is one of Rogatica's settlements) is still
+        // seen, and a besieger taking most of a municipality cannot silence the rest of it.
+        for (const side of CANONICAL_FACTIONS) {
+            const sideSids = munSids.filter((sid) => controllerOf.get(sid) === side);
+            if (sideSids.length === 0) {
+                delete counters[side];
+                continue;
             }
-        } else {
-            // Reset cache if supplied or not under pressure
-            const cacheKey = `${munId}:${factionId}`;
-            pressureStateCache.delete(cacheKey);
-        }
+            const sideSidSet = new Set(sideSids);
 
-        // Trigger 2: Encirclement
-        if (encircled) {
-            const fraction = ENCIRCLEMENT_DISPLACEMENT_FRACTION;
-            const amount = Math.floor(remainingPopulation * fraction);
-            displacementAmount += amount;
-            reasons.push('encircled');
-        }
-
-        // Trigger 3: Breach persistence
-        if (breachCount >= BREACH_PERSISTENCE_TURNS) {
-            const fraction = BREACH_DISPLACEMENT_FRACTION;
-            const amount = Math.floor(remainingPopulation * fraction);
-            displacementAmount += amount;
-            reasons.push(`breaches_${breachCount}`);
-        }
-
-        // Phase 22: Sustainability collapse amplifies displacement
-        if (isCollapsed) {
-            displacementAmount = Math.floor(displacementAmount * COLLAPSE_DISPLACEMENT_MULTIPLIER);
-            reasons.push('sustainability_collapsed');
-        }
-
-        // Cap displacement to remaining population
-        displacementAmount = Math.min(displacementAmount, remainingPopulation);
-
-        if (displacementAmount > 0) {
-            let lostAmount: number;
-            let routedAmount: number;
-            let routableByFaction: { RBiH: number; RS: number; HRHB: number } | undefined;
-
-            // SC1: the causer is the pressing side, not the pool's (holding) side. It also keys
-            // the kill fraction (P1a), whose documented meaning is "X displaced by Y".
-            const munSettlementIds = new Set<string>();
-            for (const [sid, rec] of settlements.entries()) {
-                if ((rec.mun1990_id ?? rec.mun_code) === munId) munSettlementIds.add(sid);
-            }
-            const causerShares = splitAmountByCauser(
-                displacementAmount,
-                resolvePressingFactions(state, munId, factionId, munSettlementIds, frontEdges).causers
+            const underPressure = frontEdges.some((e) =>
+                (sideSidSet.has(e.a) && e.side_a === side) || (sideSidSet.has(e.b) && e.side_b === side)
             );
+            const reachable = inputs.suppliedByFaction.get(side);
+            const supplied = sideSids.some((sid) => reachable?.has(sid) === true);
+            const body = bodies.get(side);
+            const denominator = initialTotal.get(side) ?? body?.total ?? 0;
+            const encircled = underPressure && body !== undefined && body.main >= 0 &&
+                sideSids.every((sid) => {
+                    const b = body.bodyOf.get(sid);
+                    return b !== undefined && b !== body.main && body.size[b] <= POCKET_MAX_SHARE * denominator;
+                });
 
-            lostAmount = 0;
-            routedAmount = 0;
-            routableByFaction = { RBiH: 0, RS: 0, HRHB: 0 };
-            for (const share of causerShares) {
-                if (share.amount <= 0) continue;
-                // P1a: the kill fraction is keyed on this share's causer. NOTE: when this path
-                // is revived, this rate becomes calibration-moving (own lane + panel); it is an
-                // expulsion rate, not a model of siege mortality.
-                const causerFid: FactionId = share.faction;
-                {
-                    // SC2: without a census entry the split uses the national sums (tagged),
-                    // never "all of it is Bosniak", and goes through the same killed / fled rules.
-                    const { split: byFaction, nationalFallback } =
-                        splitDisplacedByEthnicityWithSource(munId, share.amount, population1991ByMun);
-                    if (nationalFallback && !reasons.includes(CENSUS_FALLBACK_NATIONAL_REASON)) {
-                        reasons.push(CENSUS_FALLBACK_NATIONAL_REASON);
-                    }
-                    const rRBiH = Math.floor(
-                        byFaction.RBiH * (1 - killFractionForCauser('RBiH', causerFid)) * (1 - getFactionFleeAbroadFraction('RBiH'))
-                    );
-                    const rRS = Math.floor(
-                        byFaction.RS * (1 - killFractionForCauser('RS', causerFid)) * (1 - getFactionFleeAbroadFraction('RS'))
-                    );
-                    const rHRHB = Math.floor(
-                        byFaction.HRHB * (1 - killFractionForCauser('HRHB', causerFid)) * (1 - getFactionFleeAbroadFraction('HRHB'))
-                    );
-                    routableByFaction.RBiH += rRBiH;
-                    routableByFaction.RS += rRS;
-                    routableByFaction.HRHB += rHRHB;
-                    const shareRouted = rRBiH + rRS + rHRHB;
-                    const shareLost = share.amount - shareRouted;
-                    routedAmount += shareRouted;
-                    lostAmount += shareLost;
+            // Persisted per side, with the turn it was last counted: a change of holder or a
+            // skipped step starts the count again (Engine seat).
+            let unsuppliedTurns = 0;
+            if (underPressure && !supplied) {
+                const prev = counters[side];
+                unsuppliedTurns = prev && prev.last_turn === currentTurn - 1 ? prev.turns + 1 : 1;
+                counters[side] = { turns: unsuppliedTurns, last_turn: currentTurn };
+            } else {
+                delete counters[side];
+            }
 
-                    // Compute separate killed/fled breakdowns per faction
-                    const killedByFac: Record<FactionId, number> = {
-                        RBiH: Math.floor(byFaction.RBiH * killFractionForCauser('RBiH', causerFid)),
-                        RS: Math.floor(byFaction.RS * killFractionForCauser('RS', causerFid)),
-                        HRHB: Math.floor(byFaction.HRHB * killFractionForCauser('HRHB', causerFid)),
-                    };
-                    const fledByFac: Record<FactionId, number> = {
-                        RBiH: Math.floor(byFaction.RBiH * getFactionFleeAbroadFraction('RBiH')),
-                        RS: Math.floor(byFaction.RS * getFactionFleeAbroadFraction('RS')),
-                        HRHB: Math.floor(byFaction.HRHB * getFactionFleeAbroadFraction('HRHB')),
-                    };
+            const reasons: string[] = [];
+            let fraction = 0;
+            if (unsuppliedTurns >= UNSUPPLIED_PRESSURE_TURNS) {
+                fraction = Math.max(fraction, UNSUPPLIED_DISPLACEMENT_FRACTION);
+                reasons.push(`unsupplied_pressure_${unsuppliedTurns}_turns`);
+            }
+            if (encircled) {
+                fraction = Math.max(fraction, ENCIRCLEMENT_DISPLACEMENT_FRACTION);
+                reasons.push('encircled');
+            }
+            if (fraction <= 0) continue;
 
-                    pushDisplacementEventLogFromMun(state, munId, settlements, byFaction, currentTurn, { RBiH: rRBiH, RS: rRS, HRHB: rHRHB }, causerFid, killedByFac);
+            const remainingPopulation =
+                dispState.original_population - dispState.displaced_out - dispState.lost_population;
+            if (remainingPopulation <= 0) continue;
+            const sidePop = sideSids.reduce((s, sid) => s + (popOf.get(sid) ?? 0), 0);
+            const heldRemaining = munPop > 0 ? Math.floor((remainingPopulation * sidePop) / munPop) : remainingPopulation;
+            // DA1 P3: only the holder's own people leave under siege. Sources do not attribute a
+            // pocket's minority leaving (Serbs leaving government-held Sarajevo or Goražde) to
+            // the besieger; those 1992 departures are booked by the takeover writer.
+            // SC2: without a census entry the share uses the national sums (tagged).
+            const { split: heldByPeople, nationalFallback } =
+                splitDisplacedByEthnicityWithSource(munId, heldRemaining, population1991ByMun);
+            if (nationalFallback) reasons.push(CENSUS_FALLBACK_NATIONAL_REASON);
+            const heldPeople = side === 'RS' ? heldByPeople.RS : side === 'HRHB' ? heldByPeople.HRHB : heldByPeople.RBiH;
 
-                    // Record to civilian_casualties (was missing — only event log was written)
-                    for (const fid of CANONICAL_FACTIONS) {
-                        if (killedByFac[fid] > 0 || fledByFac[fid] > 0) {
-                            recordCivilianDisplacementCasualties(state, fid, killedByFac[fid], fledByFac[fid]);
-                        }
-                    }
+            // DA1 P4: the Phase 22 sustainability-collapse multiplier (x1.5) is not read here.
+            // `sustainability_state` runs on legacy settlement edges and marks 109 of 110
+            // municipalities collapsed every turn of a campaign; no source supports it.
+            const wanted = Math.min(Math.floor(heldPeople * fraction), heldPeople);
+            if (wanted <= 0) continue;
+
+            // SC1: the causer is the pressing side, never this holder (passed in, not re-derived:
+            // Red-team and Engine seats).
+            const causers = resolvePressingFactions(state, munId, side, new Set(munSids), frontEdges, side).causers;
+            let dominantCauser: FactionId = UNKNOWN_CAUSER_BUCKET;
+            let dominantWeight = 0;
+            for (const c of causers) {
+                if (c.weight > dominantWeight) {
+                    dominantCauser = c.faction;
+                    dominantWeight = c.weight;
                 }
             }
 
-            // Update displacement state
+            // Route first. DA1 P6 (panel round 1): people with nowhere to go stay in the pocket,
+            // so only the routed count leaves and is booked; nothing is added to lost_population.
+            // F4: nobody leaves a besieged pocket for abroad in this model. Srebrenica's 1993 UNHCR
+            // evacuations went to Tuzla (Krstić TJ); the July 1995 forcible transfer from Potočari to
+            // Kladanj is booked by the takeover writer, not this path. Known limits (understating
+            // flight abroad, never the killed): Sarajevo convoy and tunnel leavers often went abroad;
+            // Orašje's Sava crossing led to Croatia.
+            const displacementState = state.displacement.displacement_state;
+            const routing = routeDisplacedPopulation(munId, side, wanted, displacementState, munControl, dominantCauser);
+            const displacementAmount = routing.reduce((s, r) => s + r.amount, 0);
+            if (displacementAmount <= 0) continue;
+
             const beforeOut = dispState.displaced_out;
             const beforeIn = dispState.displaced_in;
             const beforeLost = dispState.lost_population;
-
-            // displaced_out = only actually-routed amount; lost_population = killed + fled + unrouted
-            dispState.lost_population += lostAmount;
+            for (const route of routing) {
+                const destState = getOrInitDisplacementState(
+                    state,
+                    route.to_mun,
+                    displacementState[route.to_mun]?.original_population ?? defaultOriginalPopulation
+                );
+                destState.displaced_in += route.amount;
+                if (!destState.displaced_in_by_faction) destState.displaced_in_by_faction = {};
+                destState.displaced_in_by_faction[side] = (destState.displaced_in_by_faction[side] ?? 0) + route.amount;
+                destState.last_updated_turn = currentTurn;
+                routingRecords.push(route);
+            }
+            dispState.displaced_out += displacementAmount;
             dispState.last_updated_turn = currentTurn;
 
-            // Reduce militia pool available proportionally (but not committed)
-            const reductionRatio = displacementAmount / Math.max(1, remainingPopulation);
-            const poolReduction = Math.floor(pool.available * reductionRatio);
-            if (poolReduction > 0) {
-                pool.available = Math.max(0, pool.available - poolReduction);
-                pool.updated_turn = currentTurn;
+            // Booked to the pressing side(s), pro rata; people leaving are not killed by leaving
+            // (DA1 P3: the expulsion kill rate does not apply; deaths in place from shelling,
+            // sniping and starvation are not modelled, register SD6).
+            const noKilled: Record<FactionId, number> = { RBiH: 0, RS: 0, HRHB: 0 };
+            for (const share of splitAmountByCauser(displacementAmount, causers)) {
+                if (share.amount <= 0) continue;
+                const byFaction: Record<FactionId, number> = { RBiH: 0, RS: 0, HRHB: 0 };
+                byFaction[side] = share.amount;
+                pushDisplacementEventLogFromMun(state, munId, settlements, byFaction, currentTurn, byFaction, share.faction, noKilled, sideSidSet);
             }
 
-            // Route displaced population
-            if (routedAmount > 0) {
-                const displacementState = state.displacement.displacement_state;
-                if (!displacementState) {
-                    throw new Error('Displacement state failed to initialize before routing');
-                }
-                const routing = routeDisplacedPopulation(
-                    munId,
-                    factionId,
-                    routedAmount,
-                    displacementState,
-                    munControl
-                );
-
-                const totalRoutable = routableByFaction
-                    ? routableByFaction.RBiH + routableByFaction.RS + routableByFaction.HRHB
-                    : routedAmount;
-
-                for (const route of routing) {
-                    const destState = getOrInitDisplacementState(
-                        state,
-                        route.to_mun,
-                        displacementState[route.to_mun]?.original_population ?? defaultOriginalPopulation
-                    );
-                    destState.displaced_in += route.amount;
-                    destState.last_updated_turn = currentTurn;
-
-                    if (population1991ByMun && routableByFaction && totalRoutable > 0) {
-                        if (!destState.displaced_in_by_faction) destState.displaced_in_by_faction = {};
-                        const df = destState.displaced_in_by_faction;
-                        const rRBiH = Math.floor((route.amount * routableByFaction.RBiH) / totalRoutable);
-                        const rRS = Math.floor((route.amount * routableByFaction.RS) / totalRoutable);
-                        const rHRHB = route.amount - rRBiH - rRS;
-                        if (rRBiH > 0) df['RBiH'] = (df['RBiH'] ?? 0) + rRBiH;
-                        if (rRS > 0) df['RS'] = (df['RS'] ?? 0) + rRS;
-                        if (rHRHB > 0) df['HRHB'] = (df['HRHB'] ?? 0) + rHRHB;
-                    } else if (population1991ByMun) {
-                        const byFaction = splitDisplacedByEthnicity(route.from_mun, route.amount, population1991ByMun);
-                        if (!destState.displaced_in_by_faction) destState.displaced_in_by_faction = {};
-                        const df = destState.displaced_in_by_faction;
-                        if (byFaction.RBiH > 0) df['RBiH'] = (df['RBiH'] ?? 0) + byFaction.RBiH;
-                        if (byFaction.RS > 0) df['RS'] = (df['RS'] ?? 0) + byFaction.RS;
-                        if (byFaction.HRHB > 0) df['HRHB'] = (df['HRHB'] ?? 0) + byFaction.HRHB;
-                    }
-
-                    routingRecords.push(route);
-                }
-
-                const totalRouted = routing.reduce((sum, r) => sum + r.amount, 0);
-                dispState.displaced_out += totalRouted;
-                const unRouted = routedAmount - totalRouted;
-                if (unRouted > 0) {
-                    dispState.lost_population += unRouted;
+            // Only this side's pool loses manpower: only its people left (Engine seat).
+            const reductionRatio = displacementAmount / Math.max(1, remainingPopulation);
+            for (const key of poolKeysByMun.get(munId) ?? []) {
+                const pool = militiaPools[key];
+                if (pool.faction !== side) continue;
+                const poolReduction = Math.floor(pool.available * reductionRatio);
+                if (poolReduction > 0) {
+                    pool.available = Math.max(0, pool.available - poolReduction);
+                    pool.updated_turn = currentTurn;
                 }
             }
 
             records.push({
                 mun_id: munId,
-                faction_id: factionId,
+                faction_id: side,
                 original_population: dispState.original_population,
                 displaced_out_before: beforeOut,
                 displaced_out_after: dispState.displaced_out,
@@ -1134,14 +827,18 @@ export function updateDisplacement(
                 reason: reasons
             });
         }
+
+        if (Object.keys(counters).length > 0) dispState.unsupplied_pressure_by_side = counters;
+        else delete dispState.unsupplied_pressure_by_side;
     }
 
-    // Sort records deterministically
-    records.sort((a, b) => strictCompare(a.mun_id, b.mun_id));
+    records.sort((a, b) => strictCompare(a.mun_id, b.mun_id) || strictCompare(String(a.faction_id), String(b.faction_id)));
     routingRecords.sort((a, b) => {
         const fromCmp = strictCompare(a.from_mun, b.from_mun);
         if (fromCmp !== 0) return fromCmp;
-        return strictCompare(a.to_mun, b.to_mun);
+        const toCmp = strictCompare(a.to_mun, b.to_mun);
+        if (toCmp !== 0) return toCmp;
+        return a.amount - b.amount;
     });
 
     // Enforce recruitment ceilings after all displacement updates

@@ -107,12 +107,11 @@ async function assertReport(report, faction, viewport) {
     if (faction === 'HRHB') assert((await item.innerText()).includes('No staff report'), 'Missing holdings became zero');
     else assert((await item.locator('dd').first().innerText()).includes(value), `Wrong ${key} holdings`);
   }
-  const poolText = await report.getByTestId('equipment-operational-pool').innerText();
+  // The abstract heavy-equipment pool row was removed (realism audit F9: no combat weight).
+  assert(await report.getByTestId('equipment-operational-pool').count() === 0, 'Dead heavy-equipment pool row is back');
   if (faction === 'RBiH') {
-    assert(poolText.includes('60%'), 'Abstract operational pool percentage wrong');
     assert(/partial/i.test(await report.getByTestId('equipment-holdings-artillery').innerText()), 'Partial artillery not labelled');
   }
-  if (faction === 'HRHB') assert(poolText.includes('No staff report'), 'Missing pool became known');
   return { text, bounds: await bounds(report, viewport) };
 }
 async function focusTrap(page, dialog) {

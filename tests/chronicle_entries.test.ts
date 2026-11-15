@@ -753,8 +753,26 @@ describe('generateChronicleEntries', () => {
         const ghostEntry = entries.find((e) => e.ghost);
 
         expect(ghostEntry).toBeDefined();
-        expect(ghostEntry?.title).toBe('Historical rupture absent');
-        expect(ghostEntry?.detail).toContain('Srebrenica enclave survived in your war');
+        expect(ghostEntry?.title).toBe('Srebrenica');
+        // §4 panel wording (council fix 4): third person, forces and victims named, court figure.
+        expect(ghostEntry?.detail).toContain('In this campaign, the Srebrenica enclave did not fall.');
+        expect(ghostEntry?.detail).toContain('Bosnian Serb forces');
+        expect(ghostEntry?.detail).toContain('found that these killings were genocide');
+        expect(ghostEntry?.detail).not.toMatch(/your war|catastrophe|rupture/i);
+    });
+
+    it('does not say the enclave "did not fall" when the final map shows Srebrenica in other hands', () => {
+        // The engine notes "survived" when RS took Srebrenica before the enclave formed.
+        const base = {
+            turn: 188,
+            gameOver: true,
+            historicalComparison: { divergence_notes: ['Srebrenica enclave survived'], rupture_divergence: [] },
+            turnSummaries: [makeTurnSummary(188)],
+        };
+        const heldByRs = generateChronicleEntries({ ...base, controlBySettlement: { 'op:srebrenica:srebrenica_2': 'RS' } } as any);
+        expect(heldByRs.find((e) => e.ghost)).toBeUndefined();
+        const heldByRbih = generateChronicleEntries({ ...base, controlBySettlement: { 'op:srebrenica:srebrenica_2': 'RBiH' } } as any);
+        expect(heldByRbih.find((e) => e.ghost)?.title).toBe('Srebrenica');
     });
 
     it('keeps a named commander on the single narrative for a completed operation', () => {

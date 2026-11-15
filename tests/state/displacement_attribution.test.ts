@@ -10,9 +10,8 @@ import { beforeEach, describe, expect, it } from 'vitest';
 
 import type { SettlementRecord } from '../../src/map/settlements.js';
 import {
-    resetDisplacementPressureCache,
-    applyDisplacementFromFlips,
     CENSUS_FALLBACK_NATIONAL_REASON,
+    ENCIRCLEMENT_DISPLACEMENT_FRACTION,
     NATIONAL_POPULATION_1991_SUMS,
     resolvePressingFactions,
     splitAmountByCauser,
@@ -110,9 +109,16 @@ describe('appendDisplacementEvent with an unrecorded causer', () => {
     });
 });
 
-/** An RBiH pocket that is the faction's only municipality (so "encircled" fires), ringed by RS. */
+/**
+ * An RBiH pocket ringed by RS, cut off from RBiH's main body (`home`, fifteen settlements),
+ * so "encircled" fires. (Before DA1 the test was "the faction holds no other
+ * municipality", which no campaign could meet.)
+ */
 function encircledPocketFixture() {
-    const controllers = { 'op:pocket:a': 'RBiH', 'op:pocket:b': 'RBiH', 'op:ring:c': 'RS', 'op:ring:d': 'RS' };
+    const controllers = {
+        'op:pocket:a': 'RBiH', 'op:pocket:b': 'RBiH', 'op:ring:c': 'RS', 'op:ring:d': 'RS',
+        'op:home:e': 'RBiH', 'op:home:f': 'RBiH', 'op:home:g': 'RBiH',
+    };
     const state = stateWith(controllers);
     (state.military as unknown as Record<string, unknown>).front_segments = {
         'op:pocket:a__op:ring:c': { edge_id: 'op:pocket:a__op:ring:c', active: true },
@@ -125,12 +131,17 @@ function encircledPocketFixture() {
     state.displacement.displacement_state = {
         pocket: { mun_id: 'pocket', original_population: 10000, displaced_out: 0, displaced_in: 0, lost_population: 0, last_updated_turn: 9 },
     };
+    const edges = [{ a: 'op:pocket:a', b: 'op:ring:c' }, { a: 'op:home:e', b: 'op:home:f' }, { a: 'op:home:f', b: 'op:home:g' }];
+    // Enough home settlements that the pocket is under POCKET_MAX_SHARE of RBiH's held settlements (P5).
+    for (let i = 1; i <= 12; i++) {
+        (controllers as Record<string, string>)[`op:home:x${i}`] = 'RBiH';
+        edges.push({ a: i === 1 ? 'op:home:g' : `op:home:x${i - 1}`, b: `op:home:x${i}` });
+    }
     const settlements = new Map<string, SettlementRecord>();
     for (const sid of Object.keys(controllers)) {
         const mun = sid.split(':')[1];
         settlements.set(sid, { sid, source_id: sid, mun_code: mun, mun, mun1990_id: mun, properties: { population_total: 100 } });
     }
-    const edges = [{ a: 'op:pocket:a', b: 'op:ring:c' }];
     const census: MunicipalityPopulation1991Map = {
         pocket: { total: 10000, bosniak: 6000, serb: 3000, croat: 1000, other: 0 },
         ring: { total: 10000, bosniak: 0, serb: 10000, croat: 0, other: 0 },
@@ -139,9 +150,8 @@ function encircledPocketFixture() {
 }
 
 describe('updateDisplacement pressure path (SC1 end to end)', () => {
-    beforeEach(() => resetDisplacementPressureCache());
 
-    it('books an encircled pocket\'s losses to the besieger, for every people in it', () => {
+    it('books an encircled pocket\'s departures to the besieger, its own people only, none killed', () => {
         const { state, settlements, edges, census } = encircledPocketFixture();
         updateDisplacement(state, settlements, edges, census);
         const agg = state.displacement.displacement_humanitarian_aggregates ?? {};
@@ -149,9 +159,11 @@ describe('updateDisplacement pressure path (SC1 end to end)', () => {
             Object.values(agg[c] ?? {}).some((s) => s.refugees_created > 0 || s.civilian_casualties_caused > 0)
         );
         expect(causers).toEqual(['RS']);
-        // P1a: Bosniaks displaced by RS use the RS-displacing-Bosniaks rate (4%).
-        // 10% of 10,000 encircled = 1,000 displaced; 60% Bosniak = 600; 4% killed = 24.
-        expect(state.displacement.civilian_casualties?.RBiH?.killed).toBe(24);
+        // DA1 P3: the holder's people only (6,000 Bosniaks of 10,000) leave at the sourced
+        // weekly rate; leaving a siege carries no expulsion kill rate.
+        expect(Object.keys(agg.RS ?? {})).toEqual(['RBiH']);
+        expect(agg.RS?.RBiH?.refugees_created).toBe(Math.floor(6000 * ENCIRCLEMENT_DISPLACEMENT_FRACTION));
+        expect(state.displacement.civilian_casualties?.RBiH?.killed ?? 0).toBe(0);
     });
 });
 
@@ -183,51 +195,28 @@ describe('no-census fallback (SC2)', () => {
         expect(missing).toEqual(['hanpijesak']);
     });
 
-    it('splits a pocket without a census entry by the national sums, tags it, and books no extra killed Bosniaks', () => {
-        resetDisplacementPressureCache();
+    it('sizes a pocket without a census entry by the national sums, tags it, and books no killed', () => {
         const { state, settlements, edges } = encircledPocketFixture();
         const report = updateDisplacement(state, settlements, edges, {} as MunicipalityPopulation1991Map);
         const rec = report.by_municipality.find((r) => r.mun_id === 'pocket');
         expect(rec?.reason).toContain(CENSUS_FALLBACK_NATIONAL_REASON);
-        // 1,000 displaced split nationally: Serbs floor(1000*1366013/4360093)=313,
-        // Croats floor(1000*760847/4360093)=174, Bosniaks+others 513. Caused by RS:
-        // killed Bosniaks 4% = 20, Serbs 2% = 6, Croats 1% = 1.
+        // Held population 10,000 split nationally: Serbs floor(10000*1366013/4360093)=3132,
+        // Croats floor(10000*760847/4360093)=1745, Bosniaks+others 5,123 (the holder's people).
         const cc = state.displacement.civilian_casualties ?? {};
-        expect(cc.RBiH?.killed).toBe(20);
-        expect(cc.RS?.killed).toBe(6);
-        expect(cc.HRHB?.killed).toBe(1);
-    });
-});
-
-describe('early-war flips path (SC2/P3)', () => {
-    it('books the loss to the losing side\'s people only, caused by the capturer', () => {
-        const state = stateWith({ 'op:town:a': 'RS', 'op:town:b': 'RS', 'op:home:c': 'RBiH' }, {}, 3);
-        state.displacement.displacement_state = {
-            town: { mun_id: 'town', original_population: 10000, displaced_out: 0, displaced_in: 0, lost_population: 0, last_updated_turn: 2 },
-        };
-        const settlements = new Map<string, SettlementRecord>();
-        for (const sid of ['op:town:a', 'op:town:b', 'op:home:c']) {
-            const mun = sid.split(':')[1];
-            settlements.set(sid, { sid, source_id: sid, mun_code: mun, mun, mun1990_id: mun, properties: { population_total: 100 } });
-        }
-        const census = { town: { total: 10000, bosniak: 5000, serb: 4000, croat: 1000, other: 0 } } as MunicipalityPopulation1991Map;
-        applyDisplacementFromFlips(
-            state, 3,
-            [{ mun_id: 'town', from_faction: 'RBiH', to_faction: 'RS' }],
-            [{ mun_id: 'town', initiated_turn: 3 }],
-            settlements, {}, census
-        );
-        const agg = state.displacement.displacement_humanitarian_aggregates ?? {};
-        expect(Object.keys(agg.RS ?? {})).toEqual(['RBiH']);
-        expect(state.displacement.civilian_casualties?.RS).toBeUndefined();
-        expect(state.displacement.civilian_casualties?.HRHB).toBeUndefined();
+        expect(cc.RBiH?.killed ?? 0).toBe(0);
+        expect(cc.RS?.killed ?? 0).toBe(0);
+        expect(cc.HRHB?.killed ?? 0).toBe(0);
+        expect(state.displacement.displacement_humanitarian_aggregates?.RS?.RBiH?.refugees_created)
+            .toBe(Math.floor(5123 * ENCIRCLEMENT_DISPLACEMENT_FRACTION));
     });
 });
 
 /** For each people: civilian_casualties[people].killed vs killed summed into the aggregates. */
 function killedBothWays(state: GameState): { casualties: Record<string, number>; aggregates: Record<string, number> } {
     const casualties: Record<string, number> = {};
-    for (const [p, v] of Object.entries(state.displacement.civilian_casualties ?? {})) casualties[p] = v.killed;
+    for (const [p, v] of Object.entries(state.displacement.civilian_casualties ?? {})) {
+        if (v.killed > 0) casualties[p] = v.killed; // a people with only fled-abroad has killed 0
+    }
     const aggregates: Record<string, number> = {};
     for (const byPeople of Object.values(state.displacement.displacement_humanitarian_aggregates ?? {})) {
         for (const [p, slot] of Object.entries(byPeople)) {
@@ -238,16 +227,16 @@ function killedBothWays(state: GameState): { casualties: Record<string, number>;
 }
 
 describe('the two ledger "Killed" figures agree by construction (SC3 invariant)', () => {
-    beforeEach(() => resetDisplacementPressureCache());
 
     it('pressure path, census split across three peoples with different flee-abroad rates', () => {
         const { state, settlements, edges, census } = encircledPocketFixture();
         updateDisplacement(state, settlements, edges, census);
         const { casualties, aggregates } = killedBothWays(state);
         expect(aggregates).toEqual(casualties);
-        // Refugees created per people equal that people's displaced total (600 / 300 / 100).
+        // Only the holder's people leave (DA1 P3): no Serb or Croat rows.
         const rs = state.displacement.displacement_humanitarian_aggregates?.RS ?? {};
-        expect([rs.RBiH?.refugees_created, rs.RS?.refugees_created, rs.HRHB?.refugees_created]).toEqual([600, 300, 100]);
+        expect([rs.RBiH?.refugees_created, rs.RS?.refugees_created, rs.HRHB?.refugees_created])
+            .toEqual([Math.floor(6000 * ENCIRCLEMENT_DISPLACEMENT_FRACTION), undefined, undefined]);
     });
 
     it('pressure path, national fallback and two causers', () => {

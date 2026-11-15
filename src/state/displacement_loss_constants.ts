@@ -40,18 +40,35 @@ export function getDisplacementKillFraction(displacedFaction: FactionId, control
     return DISPLACEMENT_KILLED_FRACTION;
 }
 
-/** Serbs: ~30% of displaced leave BiH (Serbia to flee to). */
+// Flight abroad (F4, RF-3 Historian seat 2026-11-14). Share of each people's displaced who
+// ended up abroad. ICTY OTP demographic report (Tabeau, Bijak et al., 2003, 47 municipalities,
+// OSCE voters register 1997-98, minimums after early returns): Muslims 48%, Croats 78%,
+// Serbs 23% (a floor; FRY excluded Serbs from Serb-held areas). Host-country build-up at
+// Dayton: ~1.2M abroad (Germany ~320k, ~60% Muslim; FRY ~250k, mostly Serb; Croatia ~170k).
+// Bosniaks were the largest group abroad, about 45-55% of all those abroad.
+
+/** Serbs: ~30% of displaced leave BiH (range 0.25-0.40; ICTY OTP floor 0.23). */
 export const FLEE_ABROAD_FRACTION_RS = 0.30;
 
-/** Croats: ~25% leave BiH (Croatia to flee to). */
-export const FLEE_ABROAD_FRACTION_HRHB = 0.25;
+/** Croats: ~40% leave BiH, mostly to Croatia (range 0.30-0.55; ICTY OTP 0.78 for Croats from Serb-held municipalities). */
+export const FLEE_ABROAD_FRACTION_HRHB = 0.40;
 
-/** Bosniaks: no external state to flee to. */
-export const FLEE_ABROAD_FRACTION_RBIH = 0.0;
+/**
+ * Bosniaks: share abroad at the moment of displacement. F4b (panel round 1, War-or-Game and
+ * Historian seats): the ICTY OTP 48% is where people were registered in 1997-98, after onward
+ * migration the model does not have (Srebrenica's 18% abroad can only be post-1995 movement),
+ * so the default is 0.20 (range 0.15-0.30; central Bosnia's expellees went to Zenica and Travnik).
+ * Regional overrides in displacement_takeover.ts: eastern Bosnia and the Sarajevo ring 0.08,
+ * Bijeljina/Posavina/Čapljina/Stolac exits 0.40, Krajina convoys 0.55. Was 0.0 ("no external
+ * state to flee to"), which made Bosniaks the people least likely to leave (realism audit F4).
+ */
+export const FLEE_ABROAD_FRACTION_RBIH = 0.20;
 
-// TODO Phase F step 26: when siege_ratio >= SIEGE_RATIO_FULL for a municipality,
-// override FLEE_ABROAD_FRACTION to 0 for all factions — no one can leave a fully surrounded enclave.
-// Requires passing siege state into displacement calculation (src/state/displacement.ts).
+// Sealed pockets: the siege path in displacement.ts books its departures with no flight abroad;
+// they go to own-side territory (F4, 2026-11-14). A simplification (Historian seat): it fits
+// Srebrenica, Žepa and Goražde, but some Sarajevo convoy and tunnel leavers went abroad,
+// Orašje's Sava crossing led to Croatia, and Abdić's followers left the Bihać pocket for
+// Croatia in 1994 and 1995 (Batnoga, Kupljensko). It understates flight abroad only.
 
 /** Flee-abroad fraction for an ethnicity-aligned faction. */
 export function getFactionFleeAbroadFraction(faction: FactionId): number {

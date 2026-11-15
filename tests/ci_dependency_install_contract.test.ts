@@ -9,6 +9,7 @@ const WORKFLOW_INSTALL_COUNTS = [
     ['desktop-release-guard.yml', 2],
     ['event-system-ci.yml', 1],
     ['full-suite-and-fingerprint.yml', 2],
+    ['ledger-fragment-guard.yml', 0],
     ['release.yml', 2],
 ] as const;
 

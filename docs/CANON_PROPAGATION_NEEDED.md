@@ -1,55 +1,31 @@
-# Canon Propagation Needed (2026-03-28 Session 2)
+# Canon Propagation Needed
 
-These mechanical changes need to be reflected in canon docs. Use `/propagate-to-canon` to apply.
+Mechanical changes that code made but canon did not yet describe. Apply with `/propagate-to-canon`.
 
-## 1. Supply filter change (Systems_Manual_v0_9_0.md §6.5)
-- **Old**: "Brigades at critical supply are forced to defend (no voluntary attacks). At strained supply, min_attack_outcome is upgraded to 'victory'"
-- **New**: Supply gate for operation pool: only `critical` excluded. `strained` brigades CAN participate in operations — 0.75× combat penalty models degraded effectiveness. The per-brigade strained gate (min_outcome upgrade to 'victory') still applies at brigade AI level.
-- **Where**: Line 154, supply gating section
+## The 2026-03-28 backlog: done (2026-11-13 written, 2026-11-14 panel-reviewed)
 
-## 2. Counter-attack broadening (Systems_Manual_v0_9_0.md §6.5)
-- **Old**: "Counter-attacks — brigades may retake a recently lost position (enabled by counterattack_window_turns > 0) without an active operation."
-- **New**: Sector-wide counter-attacks: when ANY brigade in a sector retreats within 2 turns, other healthy brigades (personnel≥600, cohesion≥30, not disrupted) on that sector's front can counter-attack adjacent enemy OSIDs within 2 hops. Max 2 per sector per turn.
-- **Where**: Line 213, counter-attack exception
+The fourteen items opened on 2026-03-28 were each checked against `src/` and `docs/10_canon/`. None was already in canon. All fourteen are written into `Systems_Manual_v0_9_0.md` with current code values, and a four-seat panel then checked every sentence against the code and corrected twelve defects in the first draft. The panel record is [20261114_CANON_PROPAGATION_PANEL.md](40_reports/20261114_CANON_PROPAGATION_PANEL.md); gate `REPO-CANON-PROPAGATION` is closed on it.
 
-## 3. Planning duration cap (Systems_Manual_v0_9_0.md §6.4)
-- **New**: MAX_PLANNING_DURATION=4. Planning duration capped regardless of objective count.
+| Old item | Where it landed | What the text now says, where it differs from the 2026-03-28 note |
+|---|---|---|
+| 1 Supply filter | §14.5 supply-gating note, supply multiplier bullets | Critical supply is excluded from a sector offensive's participant pool; strained is allowed at 0.75. The "victory-only" and pioneer rules no longer exist. Multiplier bullets now match the code (strained 0.75; critical 0.45 / 0.5). |
+| 2 Sector counter-attacks | §6.8 counter-attack exception | Written as an implementation extension, not canon: it is wider than Engine Invariants §6.3, runs for a defensive-stance corps only, and its numbers are tuning values. |
+| 3 Planning cap, 4 probe lifecycle, 6 exhaustion gate, 9 launch feasibility, 10 weakened-operation abort | §6.4 main paragraph | The cap and the exhaustion gate are scoped to the planners that apply them; the secondary-operation cooldown is defined but not wired; feasibility covers sector-offensive and triggered creation only. |
+| 5 Casualty ratio, 12 main/support, 13 co-located defenders | §7.4 "Power-ratio casualty scaling" | Attacker ratio^-0.33, defender ratio^0.33, clamp [0.6, 2.0]; shares rounded independently. |
+| 7 Phase 1.5 | §6.3 classification text | Same corps, same friendly component, within 30 hops; largest deficit wins, ties to the smaller sector id. |
+| 8 SpatialContext | §2 "Shared spatial snapshot" | Reconcile recomputes the post-combat snapshot; frozen shallowly. |
+| 11 Emergency retreat | §6.9 retreat chain, Engine Invariants §14.5 | The largest-component step is gone. The BFS examines one ring only (defect); a null result disperses the brigade, which conflicts with §6.2. |
+| 14 Friendly-only BFS | §6.3 "Friendly-only distance" | Depth cap 20. |
 
-## 4. Probe lifecycle (Systems_Manual_v0_9_0.md §6.4)
-- **New**: evaluateOperationProgress() skips probe AND feint (not just sector_attack). Probes don't trigger theater cooldown (don't set last_completed_operation).
-- **Where**: Line 150, "evaluateOperationProgress() skips sector_attack ops"
+Also corrected: launch minimum 2 brigades (not 3), enemy OSID minimum 1, supply readiness recorded not gating, `MAX_PARTICIPATING_BRIGADES` 20 (not 12), and §7.6's attack-threshold default `costly_victory`.
 
-## 5. Casualty ratio fix (Systems_Manual_v0_9_0.md §5 or combat section)
-- **New**: getPowerRatioCasualtyMult() bilateral scaling now fully applied. attCasMult multiplied into attacker casualty formula in both attack_resolution_osid.ts and combat_predictor.ts.
+## Still open
 
-## 6. Exhaustion gate (Systems_Manual_v0_9_0.md §6.4)
-- **New**: Corps with exhaustion > MAX_EXHAUSTION_FOR_OPERATION (30) cannot launch sector offensives. Probe threshold: 40.
-- SECONDARY_OP_COOLDOWN_TURNS: 8→5
-
-## 7. Territory reconciliation Phase 1.5 (Systems_Manual_v0_9_0.md §6.3 or sector section)
-- **New**: classifyBrigadesByTerritory has Phase 1.5 between front-line (Phase 1) and BFS pool (Phase 2). Matches pooled brigades by location_osid vs territory_osids.
-
-## 8. SpatialContext shared spatial layer (Systems_Manual_v0_9_0.md - new section needed)
-- **New**: `SpatialContext` interface computed at 2 pipeline points (pre-combat after supply-osid, post-combat after resolve-attack-orders). Contains adjacency, sharedBoundaryAdjacency, friendlyOsidsByFaction, componentsByFaction, frontEdgesOsid. All pipeline consumers read from cache instead of rebuilding. 22→1 buildOsidAdjacency calls per turn.
-- **File**: `src/sim/spatial_context.ts`
-
-## 9. Corps launch feasibility (Systems_Manual_v0_9_0.md §6.4 operations section)
-- **New**: `checkLaunchFeasibility` gates operation creation. Samples basePower ratio for each proposed objective. If no objective achievable at costly_victory (ratio >= 1.0), operation rejected.
-
-## 10. Ops reevaluation on brigade loss (Systems_Manual_v0_9_0.md §6.4 operations section)
-- **New**: `reevaluate-weakened-operations` pipeline step. After brigade mutations, checks each active op: 0 active brigades → abort, below type minimum (probe=1, sector_attack=2) → abort, personnel <50% of initial → abort. Recovery reason: `brigade_attrition` (1 turn).
-
-## 11. Emergency retreat reachability (Systems_Manual_v0_9_0.md §6.9 retreat section)
-- **Old**: findEmergencyRetreatOsid checks home_osid control only, BFS through raw adjacency.
-- **New**: Connected component reachability check before home_osid/fallback_osid/corps_HQ. Friendly-only BFS (no traversing enemy territory). 7-step fallback: home → fallback → BFS friendly → corps HQ → same component → largest component → any.
-
-## 12. Multi-brigade main/support (Systems_Manual_v0_9_0.md §6.4 operations section)
-- **New**: Operations assign main_brigade (highest basePower) and support_brigades per axis. Power-neutral model: SUPPORT_POWER_MULT=1.0 (concentration bonus already handles multi-unit synergy). MAIN_CASUALTY_MULT=1.40, SUPPORT_CASUALTY_MULT=0.55. Renormalized casualty distribution preserves total. BB1 p.182 sourced.
-
-## 13. Phantom defender fix (Systems_Manual_v0_9_0.md §5 combat section)
-- **Old**: Non-sector defense paths: only primary defender takes casualties.
-- **New**: Co-located defenders share casualties proportionally by personnel in all defense paths.
-
-## 14. bfsDistance friendly-only (Systems_Manual_v0_9_0.md §6.3 sector/assignment section)
-- **Old**: bfsDistance in sector_utils.ts uses raw adjacency (no faction filter).
-- **New**: Accepts friendlyOsids parameter. brigade_front_distribution and subsegment_assignment pass faction's friendly set.
+- **Engine Invariants §6.3 versus the sector-wide counter-attack.** Amend §6.3 under the Invariants gate or remove the extension; whether a presidential stance hold suppresses it is not established.
+- **Systems Manual §6.5 "Pioneer attacks" paragraph** describes a mechanic with no live code in `src/sim`. Needs a code-only check, then a rewrite or removal.
+- **Engine Invariants §14.5a (breakthrough retreat)** was not found in `src/sim` by two panel seats; unverified.
+- **Attack Resolution Formula Spec** still carries the old strained 0.7 / 0.8 and critical 0.4 multipliers.
+- **`context.md` (retreat chain, around line 119)** still has the old four-step chain.
+- **`docs/10_canon/PLAYER_TURN_GUIDE.md`** pipeline-step references carry stale line numbers (the spatial-context steps are at `war_phases.ts` 1547 and 3219; `reevaluate-weakened-operations` is at 2047).
+- **Code comments** (not canon): `bot_corps_directives.ts:205-209` says an 8-turn cooldown (it is 5); `attack_force_power.ts:124` says "reduced power" for support brigades (it is 1.0); `bot_brigade_targeting.ts:31` says 12 (it is 20); a `sector_offensive.ts` comment says 2 enemy OSIDs (the gate is 1).
+- **Code defects found by the panel** (each calibration-moving or its own lane; recorded in the panel record and the out-of-scope register): the emergency-retreat BFS frontier, dispersal of cut-off brigades, dead cooldown and probe-exhaustion constants, the exhaustion gate missing from sector-offensive, pre-planned and triggered creation.

@@ -1,13 +1,45 @@
 # Real War Master
 
-## Open FAIL: the HVO cleansing of Bosniaks barely registers in the humanitarian record (2026-11-13)
+## Open: the player's own army at autonomy level 1 (Assisted), after PK1 (2026-11-14)
+
+PK1 (PR horkesh/A-War-Without-Victory#631) made the level-1 approval hold and the level-1 local-occupation switch-off apply to the human player's corps only. Bot armies no longer freeze when the player chooses Assisted. The War-or-Game and Game Designer seats of the PK1 panel (`docs/40_reports/governance/20261114_PK1_LEVEL1_PLAYER_ONLY_PANEL.md`) recorded three open items on the player's own side at level 1. Level 1 is opt-in (new campaigns start at level 2), so none blocked PK1. Each needs its own ruling: either an approval identity for the task, or a ruling that it sits below the president's threshold.
+
+- **One-brigade local occupation is withheld from the player's corps, with no approval path** (`src/sim/combat/commander/emit.ts`, `isLevel1PlayerApprovalFaction` in `findLocalOccupationCandidateImpl`). Occupying an undefended hamlet was a corps or brigade decision in 1992-95, not a presidential one (War-or-Game, from memory). An Assisted player loses these mop-ups entirely.
+- **Plans built from authored operations are never offered to the player.** `extractTargetOsids` (`src/sim/combat/commander/plan.ts`) reads `target_osids` or `objectives` at the top level of the operation, but authored objectives sit on each axis. The plan gets empty `target_osids`, `proposal_generation.ts` skips plans with no targets, and the plan waits at `ready` silently. First recorded in `docs/40_reports/audits/20261105_live_jan1993/LEVEL1-RUN-ASSESSMENT.md` §1.
+- **Fallback probes and multi-brigade isolated-position reductions launch at level 1 without approval** (pushed in `emit.ts` on the fallback-probe/reduction path). The hold in `applyCommanderOutput` (`commander_loop.ts`) only acts when a plan advances to `executing` that turn. In any other turn `admitCommanderOperations` admits these operations unasked. So the Assisted description "operations wait for your approval" (`autonomy.level.assisted.desc`) over-claims. This predates PK1.
+
+## October 1995 ceasefire (council fix 3, 2026-11-14)
+
+Raised by the War-or-Game seat of the Pyrrhic merge gate on PR horkesh/A-War-Without-Victory#636. Runs after the rebase onto main `f06d5aa`: main `…_w188_n6` (`7d4cf2cf698e3c41`), head `…_w188_n8` (`ba67ebb347949f75`).
+
+- **FIXED: the war went on after Sarajevo accepted the October 1995 ceasefire.** On main there are 39 battles at t183-t188, and RS falls 343 → 316 OSIDs after acceptance and is still fighting at t188. On the head there are 12 battles (t183 6, t184 5, t185 1, then none), every corps is Defensive from t184, and RS goes 343 → 337.
+- **OPEN: the stand-down lets an axis start a fresh assault.** An axis that had made progress before the ceasefire may take its current objective even if it had not yet attacked it. Farz 95 assaults `op:lukavac:brijesnica_donja_2` at t185 with four brigades (casualties 872 attacker / 1,920 defender), with no attack on it at t183-t184. The historical window is about 12-20 October 1995 (BB Vol. I p.392, KB BB1_p0429). Tightening this to "objectives actually under attack", or to one turn, breaches the Farz guard until Farz tempo is recalibrated. The guard is shaping this rule; the record says so. (Before the rebase, an HVO capture of Drvar at t186 was a second case.)
+- **OPEN: HVO exhaustion rises faster under the ceasefire than without it** (+101 vs +73 over t185-t188 on the pre-rebase runs, head vs Change A only). Front pressure is not damped during the ceasefire.
+- **OPEN: the US halt is dormant in the baseline.** At t179-t181 RS still holds more than 51% by area, so the retimed card never fires headless. The date is right; the area gate is calibration-dependent.
+
+## Open items from the siege displacement lane (RF-3, 2026-11-14)
+
+Raised by the §6 panel and the Pyrrhic merge gate on PR horkesh/A-War-Without-Victory#600 (`SENSITIVE_HISTORY_DESIGN_GATE.md` §6 "Record (Siege displacement and flight abroad, 2026-11-14)"). Neither is a tuning target.
+
+- **ARBiH holds two Prozor villages (`op:prozor:lug_2`, `op:prozor:paros`) from 1993.** With the siege path live, the 4th Corps picks Prozor for "Operacija Ponos" (t77-81) and takes both after the HVO counterattack. The HVO held Rama throughout (BB1 p.195, p.217); the ARBiH pushed on the municipality's eastern edge in Neretva '93, so two border villages are plausible but unrecorded (War-or-Game seat). Open; owner-accepted as part of RF-3's checkpoint loss. Do not recover it with a lever.
+- **Goražde ends short of its record.** The pocket ends at about 45.1k against 60-65k historically (UN Special Rapporteur E/CN.4/1995/4); main ended at about 56k. The 0.08 flight-abroad share for eastern Bosnia restores most of the refugee inflow; the remainder sits with known limit SD9 (the siege base excludes refugees) and onward routing. Open.
+
+## PASS (RF-5B, 2026-11-14): the HVO's 1993 expulsions of Bosniaks are modelled in the engine
+
+Closed by RF-5B (PR horkesh/A-War-Without-Victory#623; `SENSITIVE_HISTORY_DESIGN_GATE.md` §6 "Record (RF-5B policy-driven bilateral displacement, 2026-11-14)"), in the engine, not the ledger. A bot-controlled HRHB applies its historical expulsion policy once the open RBiH-HRHB war begins: one bounded wave per held OSID in the Historian-sourced municipalities (Vitez, Busovača, Kiseljak, Žepče, Gornji Vakuf, Jablanica in mid-April 1993; Mostar, Stolac, Čapljina, Prozor, Ljubuški in early July 1993), with no control change.
+- Final head merged with main after #619 (188w hash `ca6db798f436fedf`, checkpoints 712/705/706/698 = main, no cell differing): **Bosniaks displaced by HRHB forces 27,827 people** (27,839 on the earlier main 887310d5e) (the takeover `displaced` field, killed and abroad included), inside the Historian band 20,000-35,000 (judicial floor ~15,000; centre 25,000-30,000; the Tabeau 40,266 figure was given no probative value, Prlić TJ v1 ¶355). Croats displaced by RBiH forces 34,348 people (working range 25,000-50,000). The whole-run ratio of the two figures is now about 0.81:1, against 1:32 before. It is not a measure of culpability: Croat departures are booked to the side controlling the area, and the HVO itself organised part of the Croat movement out of central Bosnia (Prlić TJ).
+- Compare people, not the ledger sum: the ledger adds killed and abroad to a `displaced` figure that already contains them (pre-existing double count, out-of-scope register), so it shows about 30% more.
+- This PASS covers the displacement record only. #37 (the HVO 1993 military offensive is absent; HRHB makes two attacks) stays OPEN P1 under owner Option C (post-1.0).
+- Known limits (men detained, no incoming Croats, routing by standing tables, Žepče early and Mostar late, the 3% Herzegovina kill share standing in for camp deaths, no waves when a human plays HRHB) are in `docs/20_engineering/DISPLACEMENT_MASTER.md` §3.4 and the §6 record.
+
+## Superseded FAIL (2026-11-13): the HVO cleansing of Bosniaks barely registered in the humanitarian record
 
 Raised by the War-or-Game seat of the displacement attribution panel (`SENSITIVE_HISTORY_DESIGN_GATE.md` §6). The Humanitarian Ledger now shows displaced-or-killed by the side controlling the area, so this gap is visible to the player.
 
 - Canonical 188w baseline (main `c1299da25`, `runs/apr1992_definitive_188w__6deb5845c150c196__w188_n0`), `displacement_humanitarian_aggregates`: Herzeg-Bosnia forces against Bosniaks 1,279 displaced or killed (31 killed); RBiH forces against Croats 43,267 (797 killed).
 - History runs the other way for 1993. ICTY Prlić et al. (IT-04-74-A, 2017) upheld a joint criminal enterprise to ethnically cleanse Muslims from Herceg-Bosna (Mostar, Stolac, Čapljina, Prozor, the Lašva Valley); Kordić (IT-95-14/2-A) and Blaškić (IT-95-14-A) cover the Lašva Valley.
 - Cause: the HVO-ARBiH war of 1993-94 is largely absent from the simulation (see the Option J/K reviews below), so the takeover writer has almost no HVO captures of Bosniak areas to book.
-- **Verdict: FAIL, open.** Fix it in the engine (the HVO-ARBiH war), never through the ledger or its labels.
+- **Verdict: FAIL, open.** Fix it in the engine (the HVO-ARBiH war), never through the ledger or its labels. *Closed 2026-11-14 by RF-5B, above.*
 
 ## Accounting-regime change: militia casualties are now recorded (2026-09-01)
 
@@ -2059,6 +2091,7 @@ target**. A cell can be pressured through its adjacency ring without ever being 
 | ~~**P1**~~ | ~~#46 SRK OOB + mandatory spawn~~ | ~~64/182 mandatory brigades silently failed to spawn~~ | **FIXED (n786)** |
 | ~~**P0**~~ | ~~#47 Recalibration after spawn fix~~ | ~~Overstacking fix (n790) + mobilization tuning (n797)~~ | **DONE (n797) — 13/13 anchors, troop balance calibrated** |
 | **P2** | #48 Overstacking redistribution — isMovementDestinationRisky was blocking all front redistribution | Brigades stacked 7-9 at one OSID while rest of sector front empty. Root cause: front OSIDs have 3+ enemy neighbors → flagged as "risky." Removed check for sector-internal redistribution. | **FIXED (n790)** |
+| ~~**P1**~~ | ~~#50 Frozen corps: a queued authored operation froze the corps' own initiative~~ | ~~The commander read `queued_operations` names as definitions and adopted a target-less plan that emitted nothing, so a corps with a queued operation (VRS 1st Krajina, SRK, 2nd Krajina, ARBiH 3rd Corps) made no opportunity plan while the queue waited and ran a one-brigade probe metronome instead (e.g. `rs_2nd_krajina_infantry` "decisively" beat militia at Prusac t42/44/46/48 without taking it). Main's jan1993 matches at Hotonj (SRK frozen until Kijevo, t24) and Jemanlići (3rd Corps frozen until t60) were bought by this defect. Measured on main `b51ab3e58`: battles 499 → 479, every lost battle a probe (240 → 220), planned-operation battles 259 = 259.~~ | **FIXED (RF-L3d, PR #647, 2026-11-15)**. The exposed follow-up is ahistorical opportunity-target selection (SRK "Spona" at Hotonj, 3rd Corps "Čelik" at Jemanlići), to be fixed in opportunity targeting, never by restoring the freeze. |
 | **P2** | #49 preserve_survival_corridors benchmark — RBiH w40 share 0.389 vs 0.329±0.05 | Only failing benchmark. RBiH territorial share slightly over threshold. May need benchmark threshold adjustment (was calibrated for 38-brigade ARBiH). | **OPEN — benchmark review** |
 
 ---

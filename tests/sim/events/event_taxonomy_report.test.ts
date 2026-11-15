@@ -454,6 +454,8 @@ describe('event taxonomy diagnostic report', () => {
             'carter_ceasefire_1994',
             'hv_hvo_cooperation_1995',
             'rbih_late_war_offensive_1995',
+            // EV1 2026-11-14: historian-authored default `comply`, full dossier.
+            'us_halts_federation_advance_1995',
             'holbrooke_ceasefire_demand_oct95',
             'dayton_talks_begin_1995',
             'hrhb_dayton_acceptance_1995',

@@ -1289,6 +1289,12 @@ export interface LoadedGameState {
             civilianCasualtiesCaused: number;
         }>>;
         refugeesByTurn: Array<{ turn: number; refugeesCreated: number }>;
+        /**
+         * True when the save carries `displacement_humanitarian_aggregates` at all (an empty
+         * record is a recorded zero). False means the measure is unavailable, so a total built
+         * from it must read "no staff report", not 0.
+         */
+        humanitarianAggregatesRecorded?: boolean;
     };
     /** Presidential command authority (Level 3 override resource). */
     commandAuthority?: {

@@ -40,7 +40,7 @@ import { useMemo } from 'react';
 import type { LoadedGameState } from '../data/types';
 import { t, useLocale, type MessageKey } from '../i18n';
 import { strictCompare } from '../../../state/validateGameState';
-import { turnToDateString } from '../utils/formatters';
+import { formatLocaleNumber, turnToDateString } from '../utils/formatters';
 import {
   SurfaceCloseButton,
   SurfaceColumns,
@@ -114,7 +114,7 @@ export function displacedOrKilledBySide(
 }
 
 function fmt(n: number): string {
-  return Math.round(n).toLocaleString();
+  return formatLocaleNumber(Math.round(n));
 }
 
 const TH = 'py-2 text-[15px] font-semibold text-[#b9ad94]';

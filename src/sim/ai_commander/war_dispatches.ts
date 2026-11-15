@@ -107,8 +107,8 @@ export function buildDispatchPrompt(input: DispatchPromptInput): AiPrompt {
     const userPrompt = `Generate a war dispatch for week ${input.turn} (${input.monthLabel} ${input.yearLabel}).
 
 GROUND SITUATION:
-- Total displaced persons: ${input.totalDisplaced.toLocaleString()}
-- Newly displaced this month: ${input.recentDisplaced.toLocaleString()}
+- Total displaced or killed (includes civilians killed and people who fled abroad): ${input.totalDisplaced.toLocaleString()}
+- Newly displaced or killed this month: ${input.recentDisplaced.toLocaleString()}
 - Sieged cities: ${input.siegedCities.join(', ') || 'none confirmed'}
 - Battles this period: ${input.recentBattleCount}
 - Territorial control:

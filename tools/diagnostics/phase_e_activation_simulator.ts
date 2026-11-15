@@ -38,7 +38,7 @@
  * Tier 2 hash compare reads same manifest the baseline-regression CLI reads.
  *
  * CLI:
- *   node node_modules/tsx/dist/cli.mjs tools/diagnostics/phase_e_activation_simulator.ts [options]
+ *   npx tsx tools/diagnostics/phase_e_activation_simulator.ts [options]
  *
  * Options:
  *   --save <path>          Path to final_save.json

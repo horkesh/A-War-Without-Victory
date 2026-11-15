@@ -842,6 +842,12 @@ export function evaluateEvents(
             // by array position. Exactly one event in the corpus is in that state
             // (drina_cleansing_decision_1992); the §6 packet in
             // docs/plans/2026-08-31-s6-ring3-half-migration-packet.md is what fixes it.
+            // CORRECTION (EV1 §6 panel, 2026-11-14): that positional pick is the HEADLESS path
+            // (decision_mode 'historical'). The desktop campaign defaults to 'emergent', where
+            // Observer finds no authored default for drina and selectBotEventResponse sends it to
+            // the political scorer instead (bot_political). Both stay until the packet lands; the
+            // panel kept drina deliberately unauthored, and neither pick is a historical claim.
+            // Pinned by tests/ev1_history_mode_resolution.test.ts.
             const observerAutoResolves = isPlayerRespondent && autonomyLevel >= 3;
             const mustShowPlayer = isPlayerRespondent && !observerAutoResolves;
             const answeredAhead = isPlayerRespondent && answeredAheadResponseId != null

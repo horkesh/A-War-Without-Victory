@@ -4,7 +4,14 @@
  * This is divergence evidence, not an equivalence claim: the player branch has
  * explicit decision gates that headless auto-control does not. The artifact
  * records the one shared startup snapshot plus every scripted player decision.
+ *
+ * Works from any launch folder: the process switches to the repo root (repo_root_cwd.ts), and
+ * relative --out / --final-save-dir / --electron-log / --electron-autosave resolve against the
+ * launch folder. Launched from the repo root, both readings are the same.
  */
+
+// Must stay the first import: switches the process to the repo root before the sim loads.
+import { REPO_ROOT, fromLaunchDir } from './repo_root_cwd.js';
 
 import { createHash } from 'node:crypto';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
@@ -228,8 +235,10 @@ function parseArgs(argv: string[]): CliOptions {
     const turns = Number(values.get('--turns') ?? '20');
     if (!Number.isInteger(turns) || turns < 0) throw new Error('--turns must be a non-negative integer');
 
-    const electronLogPath = values.get('--electron-log');
-    const electronAutosavePath = values.get('--electron-autosave');
+    const electronLogArg = values.get('--electron-log');
+    const electronAutosaveArg = values.get('--electron-autosave');
+    const electronLogPath = electronLogArg ? fromLaunchDir(electronLogArg) : undefined;
+    const electronAutosavePath = electronAutosaveArg ? fromLaunchDir(electronAutosaveArg) : undefined;
     if (Boolean(electronLogPath) !== Boolean(electronAutosavePath)) {
         throw new Error('--electron-log and --electron-autosave must be provided together');
     }
@@ -259,8 +268,8 @@ function parseArgs(argv: string[]): CliOptions {
             ['defer', 'accept', 'decline'] as const,
             '--historical-operation-policy',
         ),
-        ...(values.get('--out') ? { outPath: values.get('--out') } : {}),
-        ...(values.get('--final-save-dir') ? { finalSaveDir: values.get('--final-save-dir') } : {}),
+        ...(values.get('--out') ? { outPath: fromLaunchDir(values.get('--out') as string) } : {}),
+        ...(values.get('--final-save-dir') ? { finalSaveDir: fromLaunchDir(values.get('--final-save-dir') as string) } : {}),
         ...(values.get('--trace-corps')
             ? { traceCorps: (values.get('--trace-corps') ?? '').split(',').filter(Boolean).sort(strictCompare) }
             : {}),
@@ -1002,7 +1011,7 @@ async function runComparison(baseDir: string, options: CliOptions) {
 }
 
 async function main(): Promise<void> {
-    const baseDir = process.cwd();
+    const baseDir = REPO_ROOT;
     const options = parseArgs(process.argv.slice(2));
     const originalConsole = {
         debug: console.debug,

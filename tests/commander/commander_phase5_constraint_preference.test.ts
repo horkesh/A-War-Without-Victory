@@ -4,8 +4,8 @@
  * Covers:
  * 1. Critical supply reclassification — soft penalty (-0.50), not hard block
  * 2. Hard-block integrity — exhaustion/stance/surplus blocks unoverrideable by relationships
- * 3. player_trust effects — boosts stage_operation and launch_opportunity, not hold_line
- * 4. patron_alignment effects — boosts stage_operation when campaign role set
+ * 3. player_trust effects — boosts launch_opportunity and launch_opportunity, not hold_line
+ * 4. patron_alignment effects — boosts launch_opportunity when campaign role set
  * 5. sibling_corps_trust effects — boosts/dampens request_army_support
  * 6. managePlan() trace stubs — all 4 early-return paths emit decision_trace with relationships_applied: []
  * 7. Determinism — same inputs produce same winner, relationship ordering invariant
@@ -134,7 +134,7 @@ describe('v0.8.1 Phase 5 — Constraint Reclassification and Preference Scoring'
     // ─── Category 1: Critical supply reclassification ────────────────────────
 
     describe('Category 1: Critical supply reclassification', () => {
-        it('critical supply is a soft penalty, not a hard block: stage_operation has critical_supply_penalty in breakdown but blocked_by is empty', () => {
+        it('critical supply is a soft penalty, not a hard block: launch_opportunity has critical_supply_penalty in breakdown but blocked_by is empty', () => {
             const turn = 10;
             const surplusPool = makeSurplusPool(MIN_BRIGADES_FOR_PLAN);
             const zones = [makeZone({ posture: 'balanced', surplus_brigades: surplusPool.map(e => e.brigade_id) })];
@@ -147,13 +147,13 @@ describe('v0.8.1 Phase 5 — Constraint Reclassification and Preference Scoring'
 
             const briefing = makeMinimalBriefing({
                 turn,
-                pre_planned_ops: [{ id: 'op_1' }],
+                pre_planned_ops: [],
                 previous_state: previousState,
             });
 
             const { trace } = selectWinningIntent(briefing, zones, forces, surplusPool, turn);
 
-            const stageOp = trace.candidates.find(c => c.type === 'stage_operation');
+            const stageOp = trace.candidates.find(c => c.type === 'launch_opportunity');
             expect(stageOp).toBeDefined();
             // Penalty recorded in breakdown
             expect(stageOp!.score_breakdown['critical_supply_penalty']).toBe(-0.50);
@@ -186,7 +186,7 @@ describe('v0.8.1 Phase 5 — Constraint Reclassification and Preference Scoring'
             expect(launchOp!.blocked_by.length).toBe(0);
         });
 
-        it('critical supply with very high surplus ratio does not block stage_operation — it remains eligible', () => {
+        it('critical supply with very high surplus ratio does not block launch_opportunity — it remains eligible', () => {
             const turn = 10;
             // Many brigades to push surplus ratio high
             const surplusPool = makeSurplusPool(20);
@@ -199,13 +199,13 @@ describe('v0.8.1 Phase 5 — Constraint Reclassification and Preference Scoring'
 
             const briefing = makeMinimalBriefing({
                 turn,
-                pre_planned_ops: [{ id: 'op_1' }],
+                pre_planned_ops: [],
                 previous_state: previousState,
             });
 
             const { trace } = selectWinningIntent(briefing, zones, forces, surplusPool, turn);
 
-            const stageOp = trace.candidates.find(c => c.type === 'stage_operation');
+            const stageOp = trace.candidates.find(c => c.type === 'launch_opportunity');
             expect(stageOp).toBeDefined();
             // Must be eligible (not blocked)
             expect(stageOp!.blocked_by.length).toBe(0);
@@ -224,13 +224,13 @@ describe('v0.8.1 Phase 5 — Constraint Reclassification and Preference Scoring'
 
             const briefing = makeMinimalBriefing({
                 turn,
-                pre_planned_ops: [{ id: 'op_1' }],
+                pre_planned_ops: [],
                 previous_state: previousState,
             });
 
             const { trace } = selectWinningIntent(briefing, zones, forces, surplusPool, turn);
 
-            const stageOp = trace.candidates.find(c => c.type === 'stage_operation');
+            const stageOp = trace.candidates.find(c => c.type === 'launch_opportunity');
             expect(stageOp).toBeDefined();
             expect(stageOp!.score_breakdown['critical_supply_penalty']).toBeUndefined();
         });
@@ -239,7 +239,7 @@ describe('v0.8.1 Phase 5 — Constraint Reclassification and Preference Scoring'
     // ─── Category 2: Hard-block integrity ────────────────────────────────────
 
     describe('Category 2: Hard-block integrity', () => {
-        it('corps_exhaustion_exceeds_threshold blocks stage_operation even with player_trust=1.0 and patron_alignment=1.0', () => {
+        it('corps_exhaustion_exceeds_threshold blocks launch_opportunity even with player_trust=1.0 and patron_alignment=1.0', () => {
             const turn = 10;
             const surplusPool = makeSurplusPool(MIN_BRIGADES_FOR_PLAN);
             const zones = [makeZone({ posture: 'projecting', surplus_brigades: surplusPool.map(e => e.brigade_id) })];
@@ -253,7 +253,7 @@ describe('v0.8.1 Phase 5 — Constraint Reclassification and Preference Scoring'
 
             const briefing = makeMinimalBriefing({
                 turn,
-                pre_planned_ops: [{ id: 'op_1' }],
+                pre_planned_ops: [],
                 corps_exhaustion: MAX_EXHAUSTION_FOR_OPERATION + 10,
         faction_war_exhaustion: 0,
                 previous_state: previousState,
@@ -261,17 +261,17 @@ describe('v0.8.1 Phase 5 — Constraint Reclassification and Preference Scoring'
 
             const { trace } = selectWinningIntent(briefing, zones, forces, surplusPool, turn);
 
-            const stageOp = trace.candidates.find(c => c.type === 'stage_operation');
+            const stageOp = trace.candidates.find(c => c.type === 'launch_opportunity');
             expect(stageOp).toBeDefined();
             expect(stageOp!.blocked_by).toContain('corps_exhaustion_exceeds_threshold');
 
             // Winner must not be any offensive intent
             const winnerType = trace.candidates.find(c => c.intent_id === trace.winning_intent_id)?.type;
-            expect(winnerType).not.toBe('stage_operation');
+            expect(winnerType).not.toBe('launch_opportunity');
             expect(winnerType).not.toBe('launch_opportunity');
         });
 
-        it('corps_exhaustion_exceeds_threshold blocks stage_operation even with player_trust=0.0', () => {
+        it('corps_exhaustion_exceeds_threshold blocks launch_opportunity even with player_trust=0.0', () => {
             const turn = 10;
             const surplusPool = makeSurplusPool(MIN_BRIGADES_FOR_PLAN);
             const zones = [makeZone({ posture: 'projecting', surplus_brigades: surplusPool.map(e => e.brigade_id) })];
@@ -285,7 +285,7 @@ describe('v0.8.1 Phase 5 — Constraint Reclassification and Preference Scoring'
 
             const briefing = makeMinimalBriefing({
                 turn,
-                pre_planned_ops: [{ id: 'op_1' }],
+                pre_planned_ops: [],
                 corps_exhaustion: MAX_EXHAUSTION_FOR_OPERATION + 10,
         faction_war_exhaustion: 0,
                 previous_state: previousState,
@@ -293,7 +293,7 @@ describe('v0.8.1 Phase 5 — Constraint Reclassification and Preference Scoring'
 
             const { trace } = selectWinningIntent(briefing, zones, forces, surplusPool, turn);
 
-            const stageOp = trace.candidates.find(c => c.type === 'stage_operation');
+            const stageOp = trace.candidates.find(c => c.type === 'launch_opportunity');
             expect(stageOp).toBeDefined();
             expect(stageOp!.blocked_by).toContain('corps_exhaustion_exceeds_threshold');
         });
@@ -363,7 +363,7 @@ describe('v0.8.1 Phase 5 — Constraint Reclassification and Preference Scoring'
     // ─── Category 3: player_trust effects ────────────────────────────────────
 
     describe('Category 3: player_trust effects', () => {
-        it('high player_trust (1.0) boosts stage_operation: relationship_delta ≈ 0.06 and player_trust:stage_operation in relationships_applied', () => {
+        it('high player_trust (1.0) boosts launch_opportunity: relationship_delta ≈ 0.06 and player_trust:launch_opportunity in relationships_applied', () => {
             const turn = 10;
             const surplusPool = makeSurplusPool(MIN_BRIGADES_FOR_PLAN);
             const zones = [makeZone({ posture: 'balanced', surplus_brigades: surplusPool.map(e => e.brigade_id) })];
@@ -377,20 +377,20 @@ describe('v0.8.1 Phase 5 — Constraint Reclassification and Preference Scoring'
 
             const briefing = makeMinimalBriefing({
                 turn,
-                pre_planned_ops: [{ id: 'op_1' }],
+                pre_planned_ops: [],
                 previous_state: previousState,
             });
 
             const { trace } = selectWinningIntent(briefing, zones, forces, surplusPool, turn);
 
-            const stageOp = trace.candidates.find(c => c.type === 'stage_operation');
+            const stageOp = trace.candidates.find(c => c.type === 'launch_opportunity');
             expect(stageOp).toBeDefined();
             // player_trust=1.0 → (1.0-0.5)*0.12 = 0.06, capped at 0.06
             expect(stageOp!.score_breakdown['relationship_delta']).toBeCloseTo(0.06, 5);
-            expect(trace.relationships_applied).toContain('player_trust:stage_operation');
+            expect(trace.relationships_applied).toContain('player_trust:launch_opportunity');
         });
 
-        it('low player_trust (0.0) dampens stage_operation: relationship_delta ≈ -0.06', () => {
+        it('low player_trust (0.0) dampens launch_opportunity: relationship_delta ≈ -0.06', () => {
             const turn = 10;
             const surplusPool = makeSurplusPool(MIN_BRIGADES_FOR_PLAN);
             const zones = [makeZone({ posture: 'balanced', surplus_brigades: surplusPool.map(e => e.brigade_id) })];
@@ -404,13 +404,13 @@ describe('v0.8.1 Phase 5 — Constraint Reclassification and Preference Scoring'
 
             const briefing = makeMinimalBriefing({
                 turn,
-                pre_planned_ops: [{ id: 'op_1' }],
+                pre_planned_ops: [],
                 previous_state: previousState,
             });
 
             const { trace } = selectWinningIntent(briefing, zones, forces, surplusPool, turn);
 
-            const stageOp = trace.candidates.find(c => c.type === 'stage_operation');
+            const stageOp = trace.candidates.find(c => c.type === 'launch_opportunity');
             expect(stageOp).toBeDefined();
             // player_trust=0.0 → (0.0-0.5)*0.12 = -0.06, capped at -0.06
             expect(stageOp!.score_breakdown['relationship_delta']).toBeCloseTo(-0.06, 5);
@@ -467,63 +467,6 @@ describe('v0.8.1 Phase 5 — Constraint Reclassification and Preference Scoring'
     // ─── Category 4: patron_alignment effects ────────────────────────────────
 
     describe('Category 4: patron_alignment effects', () => {
-        it('high patron_alignment (1.0) with campaign_role=primary boosts stage_operation: patron_alignment:stage_operation in relationships_applied', () => {
-            const turn = 10;
-            const surplusPool = makeSurplusPool(MIN_BRIGADES_FOR_PLAN);
-            const zones = [makeZone({ posture: 'balanced', surplus_brigades: surplusPool.map(e => e.brigade_id) })];
-            const forces = makeForces(surplusPool, MIN_BRIGADES_FOR_PLAN);
-
-            // player_trust neutral to isolate patron_alignment effect
-            const previousState = makeStateWithRelationships({
-                player_trust: 0.5,
-                patron_alignment: 1.0,
-                sibling_corps_trust: {},
-            });
-
-            const briefing = makeMinimalBriefing({
-                turn,
-                pre_planned_ops: [{ id: 'op_1' }],
-                campaign_role: 'primary', // campaignAlignment = 1.0
-                previous_state: previousState,
-            });
-
-            const { trace } = selectWinningIntent(briefing, zones, forces, surplusPool, turn);
-
-            const stageOp = trace.candidates.find(c => c.type === 'stage_operation');
-            expect(stageOp).toBeDefined();
-            expect(trace.relationships_applied).toContain('patron_alignment:stage_operation');
-            expect(stageOp!.score_breakdown['relationship_delta']).toBeGreaterThan(0);
-        });
-
-        it('patron_alignment with campaign_role=null produces small non-zero delta for stage_operation', () => {
-            const turn = 10;
-            const surplusPool = makeSurplusPool(MIN_BRIGADES_FOR_PLAN);
-            const zones = [makeZone({ posture: 'balanced', surplus_brigades: surplusPool.map(e => e.brigade_id) })];
-            const forces = makeForces(surplusPool, MIN_BRIGADES_FOR_PLAN);
-
-            // player_trust neutral, patron_alignment high, no campaign_role → campaignAlignment = 0.5
-            const previousState = makeStateWithRelationships({
-                player_trust: 0.5,
-                patron_alignment: 1.0,
-                sibling_corps_trust: {},
-            });
-
-            const briefing = makeMinimalBriefing({
-                turn,
-                pre_planned_ops: [{ id: 'op_1' }],
-                campaign_role: null, // campaignAlignment = 0.5
-                previous_state: previousState,
-            });
-
-            const { trace } = selectWinningIntent(briefing, zones, forces, surplusPool, turn);
-
-            const stageOp = trace.candidates.find(c => c.type === 'stage_operation');
-            expect(stageOp).toBeDefined();
-            // (1.0 - 0.5) * 0.5 * 0.12 = 0.03 — non-zero, appears in relationship_delta
-            expect(trace.relationships_applied).toContain('patron_alignment:stage_operation');
-            expect(stageOp!.score_breakdown['relationship_delta']).toBeCloseTo(0.03, 5);
-        });
-
         it('patron_alignment does NOT affect launch_opportunity: no patron_alignment key in relationships_applied for launch_opportunity', () => {
             const turn = 10;
             const surplusPool = makeSurplusPool(MIN_BRIGADES_FOR_PLAN);
@@ -547,7 +490,7 @@ describe('v0.8.1 Phase 5 — Constraint Reclassification and Preference Scoring'
 
             const launchOp = trace.candidates.find(c => c.type === 'launch_opportunity');
             expect(launchOp).toBeDefined();
-            // patron_alignment only applies to stage_operation, not launch_opportunity
+            // patron_alignment only applies to launch_opportunity, not launch_opportunity
             const patronApplied = trace.relationships_applied.filter(r => r.startsWith('patron_alignment'));
             expect(patronApplied).not.toContain('patron_alignment:launch_opportunity');
             // And since player_trust is 0.5 (neutral), no relationship_delta at all on launch_opportunity
@@ -656,7 +599,7 @@ describe('v0.8.1 Phase 5 — Constraint Reclassification and Preference Scoring'
 
             const briefing = makeMinimalBriefing({
                 corps_stance: 'defensive',
-                pre_planned_ops: [{ id: 'op_1' }],
+                pre_planned_ops: [],
             });
 
             const result = managePlan(briefing, zones, forces, surplusPool, null, 10);
@@ -675,7 +618,7 @@ describe('v0.8.1 Phase 5 — Constraint Reclassification and Preference Scoring'
             const briefing = makeMinimalBriefing({
                 corps_exhaustion: MAX_EXHAUSTION_FOR_OPERATION + 1,
         faction_war_exhaustion: 0,
-                pre_planned_ops: [{ id: 'op_1' }],
+                pre_planned_ops: [],
             });
 
             const result = managePlan(briefing, zones, forces, surplusPool, null, 10);
@@ -693,7 +636,7 @@ describe('v0.8.1 Phase 5 — Constraint Reclassification and Preference Scoring'
 
             const briefing = makeMinimalBriefing({
                 campaign_role: 'economy',
-                pre_planned_ops: [{ id: 'op_1' }],
+                pre_planned_ops: [],
             });
 
             const result = managePlan(briefing, zones, forces, surplusPool, null, 10);
@@ -746,7 +689,7 @@ describe('v0.8.1 Phase 5 — Constraint Reclassification and Preference Scoring'
 
             const briefing = makeMinimalBriefing({
                 turn,
-                pre_planned_ops: [{ id: 'op_1' }],
+                pre_planned_ops: [],
                 campaign_role: 'secondary',
                 previous_state: previousState,
             });
@@ -804,7 +747,7 @@ describe('v0.8.1 Phase 5 — Constraint Reclassification and Preference Scoring'
 
             const briefing = makeMinimalBriefing({
                 turn,
-                pre_planned_ops: [{ id: 'op_1' }],
+                pre_planned_ops: [],
                 previous_state: null, // no relationships
             });
 

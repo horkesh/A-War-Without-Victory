@@ -63,7 +63,7 @@ import { computeFullVerdict } from '../../../sim/negotiation/scoring.js';
 import { DIMENSION_WEIGHTS } from '../../../sim/events/strategic_dimensions.js';
 import type { GameVerdict } from '../../../state/negotiation_types.js';
 import { buildCostLedger } from '../../../sim/endgame/cost_ledger.js';
-import { compareToHistorical } from '../../../sim/endgame/endgame_comparison.js';
+import { compareToHistorical, endingBasisForState } from '../../../sim/endgame/endgame_comparison.js';
 import type { DimensionShift, EventCategory, EventEffect } from '../../../sim/events/event_types.js';
 import historicalBaseline from '../../../../data/reference/historical_baseline.json';
 import { computeCorpsCommandStrainBreakdown, getCommandStrainLabel, projectStrainDecay, deriveRecoveryForecast, deriveRecoveryForecastToken, deriveCorpsSituationAssessment, deriveReadinessTrend } from './command_strain.js';
@@ -96,6 +96,7 @@ import war1993Events from '../../../../data/scenarios/events/war_1993.json';
 import war1994Events from '../../../../data/scenarios/events/war_1994.json';
 import war1995Events from '../../../../data/scenarios/events/war_1995.json';
 import war1992HrhbSummerEvents from '../../../../data/scenarios/events/war_1992_hrhb_summer.json';
+import { resolveEventDisplayTitle, resolveEventNotificationDisplay } from './eventDisplayCopy.js';
 
 export type StrategicObjectiveStatus = 'secure' | 'contested' | 'critical' | 'unreported';
 export type StrategicObjectiveTrend = 'improving' | 'steady' | 'worsening' | 'unreported';
@@ -2501,8 +2502,10 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
             displacementEventLogRaw.push({ turn: turnNum, origin_osid: originOsid || undefined, dest_osid: destOsid || undefined, origin_mun: originMun || undefined, ethnicity: ethnicity || undefined, displaced, killed, fled_abroad: fledAbroad, settled, caused_by: causedBy });
             if (originOsid) {
                 if (!displacementByOsid[originOsid]) displacementByOsid[originOsid] = { out: 0, lost: 0, in: 0 };
-                // displaced = total people removed (includes killed + fled as subsets)
-                // killed + fled_abroad are subsets of displaced, NOT additional
+                // displaced = the people routed to another place. killed and fled_abroad are
+                // ADDITIONAL to it, not subsets (the engine's refugees_created is
+                // displaced + killed + fled_abroad). `out` is therefore routed-only;
+                // `lost` is the killed and fled on top of it.
                 displacementByOsid[originOsid].out += displaced;
                 displacementByOsid[originOsid].lost += killed + fledAbroad;
             }
@@ -2510,7 +2513,9 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
                 if (!displacementByOsid[destOsid]) displacementByOsid[destOsid] = { out: 0, lost: 0, in: 0 };
                 displacementByOsid[destOsid].in += settled;
             }
-            // displaced = total removals (killed + fled are subsets, not additional)
+            // Routed people only: this per-OSID departed count excludes the killed and fled
+            // abroad. The war-wide displaced-or-killed total comes from the humanitarian
+            // aggregates instead (see warSummaryOverview.ts).
             const totalRemoved = displaced;
             if (totalRemoved > 0 && ethnicity) {
                 if (originOsid) {
@@ -2576,6 +2581,7 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
         }
         const humanitarianAggregates: Record<string, Record<string, { refugeesCreated: number; refugeesReceived: number; civilianCasualtiesCaused: number }>> = {};
         const rawHumAgg = state.displacement?.displacement_humanitarian_aggregates;
+        const humanitarianAggregatesRecorded = !!rawHumAgg && typeof rawHumAgg === 'object' && !Array.isArray(rawHumAgg);
         if (rawHumAgg && typeof rawHumAgg === 'object' && !Array.isArray(rawHumAgg)) {
             for (const [causer, victims] of Object.entries(rawHumAgg as Record<string, Record<string, Record<string, unknown>>>).sort((a, b) => a[0].localeCompare(b[0]))) {
                 if (!victims || typeof victims !== 'object') continue;
@@ -2604,9 +2610,10 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
         if (
             Object.keys(civilianCasualtiesByEthnicity).length > 0 ||
             Object.keys(humanitarianAggregates).length > 0 ||
-            refugeesByTurn.length > 0
+            refugeesByTurn.length > 0 ||
+            humanitarianAggregatesRecorded
         ) {
-            nationalDisplacement = { civilianCasualtiesByEthnicity, humanitarianAggregates, refugeesByTurn };
+            nationalDisplacement = { civilianCasualtiesByEthnicity, humanitarianAggregates, refugeesByTurn, humanitarianAggregatesRecorded };
         }
     }
 
@@ -3443,8 +3450,9 @@ function deriveHistoricalEvents(state: any): LoadedGameState['historicalEventsBy
             const staticScope = getStaticEventDisplayInfo(rawId)?.scope ?? null;
             const scope = mergeHistoricalEventScopes(collectHistoricalEventScope(e), staticScope);
             const fallback = t('settlementTimeline.historicalEvent.fallback');
-            const text = rawText && rawText !== rawId && !looksLikeRawPlayerFacingToken(rawText)
-                ? getPlayerSafeDisplayLabel(rawText, fallback)
+            const displayText = rawText ? resolveEventDisplayTitle(rawId, rawText) : rawText;
+            const text = displayText && displayText !== rawId && !looksLikeRawPlayerFacingToken(displayText)
+                ? getPlayerSafeDisplayLabel(displayText, fallback)
                 : fallback;
             result.push({
                 turn,
@@ -3691,6 +3699,11 @@ function derivePendingOfficerEvents(
     return events
         .filter((e: any) => !e.acknowledged)
         .filter((e: any) => playerFactionMatch(e.faction, playerFaction))
+        // The weekly `army_directive_pushback` answers a directive the President never gave. For his
+        // own faction it is a one-line Army HQ Records entry (read from the decision traces), never
+        // a pending matter: it feeds no card, tile, chip item or review-queue count (command-loop
+        // proposal 2A, step A0). The sim still emits it; enemy and headless rows are untouched.
+        .filter((e: any) => e.type !== 'army_directive_pushback')
         .map((e: any) => {
             const stats = getOfficerStats(e.officer_id);
             return {
@@ -3952,7 +3965,10 @@ function deriveFiredEvents(state: any, playerFaction: string | null): LoadedGame
         entries.push({
             id,
             turn,
-            title: getPlayerSafeDecisionTitle(staticInfo?.title ?? info?.text ?? getPlayerSafeDisplayLabel(id, 'Recorded decision')),
+            title: getPlayerSafeDecisionTitle(resolveEventDisplayTitle(
+                id,
+                staticInfo?.title ?? info?.text ?? getPlayerSafeDisplayLabel(id, 'Recorded decision'),
+            )),
             narrative: decision ? t('firedEvent.wrapper.narrative') : '',
             category: decision ? 'political' : 'military',
             effects: decision && response ? [{ kind: 'decision', description: t('firedEvent.wrapper.responseRecorded', { response }) }] : [],
@@ -4009,7 +4025,10 @@ function isPendingEventCategory(value: unknown): value is EventCategory {
 function sanitizePendingEventDecision(decision: RawPendingEventDecision): PendingEventDecisionView {
     return {
         event_id: String(decision.event_id ?? ''),
-        event_title: getPlayerSafeDecisionTitle(String(decision.event_title ?? '')),
+        event_title: getPlayerSafeDecisionTitle(resolveEventDisplayTitle(
+            String(decision.event_id ?? ''),
+            String(decision.event_title ?? ''),
+        )),
         ...(typeof decision.narrative === 'string' ? { narrative: decision.narrative } : {}),
         ...(typeof decision.situation === 'string' ? { situation: decision.situation } : {}),
         ...(typeof decision.staff_assessment === 'string' ? { staff_assessment: decision.staff_assessment } : {}),
@@ -4049,7 +4068,11 @@ function derivePendingEventNotifications(state: any): LoadedGameState['pendingEv
     const pending = state.military?.pending_event_notifications as
         LoadedGameState['pendingEventNotifications'];
     if (!pending || pending.length === 0) return undefined;
-    return pending;
+    // The persisted headline/body are engine copies; display corrected copy where authored.
+    return pending.map((notification) => ({
+        ...notification,
+        ...resolveEventNotificationDisplay(notification),
+    }));
 }
 
 function derivePresidentialReviewQueue({
@@ -4869,7 +4892,11 @@ function deriveCostLedger(state: any): LoadedGameState['costLedger'] {
 function deriveHistoricalComparison(state: any): LoadedGameState['historicalComparison'] {
     return safeDerive('deriveHistoricalComparison', state, () => {
         const ledger = buildCostLedger(state as GameState);
-        return compareToHistorical(ledger, historicalBaseline as Parameters<typeof compareToHistorical>[1]);
+        return compareToHistorical(
+            ledger,
+            historicalBaseline as Parameters<typeof compareToHistorical>[1],
+            endingBasisForState(state as GameState),
+        );
     });
 }
 

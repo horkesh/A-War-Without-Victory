@@ -558,6 +558,45 @@ export interface FactionVerdict {
     outcome_class: OutcomeClass;
     /** Condemnation flags that cap or taint the verdict regardless of score. */
     condemnation_flags: string[];
+    /**
+     * How the grade and the outcome class were reached, step by step (R8 council fix 1:
+     * the Verdict shows every cap that changed something). Records the existing steps of
+     * computeFactionVerdict and changes no value. Optional: absent on saves frozen before it.
+     */
+    grade_trace?: VerdictGradeTrace;
+}
+
+/** Steps from the earned grade to the final grade and outcome class (see FactionVerdict.grade_trace). */
+export interface VerdictGradeTrace {
+    /** Which map the end-position anchors read: the signed settlement's or the front line at the end. */
+    territory_basis: 'settled' | 'front';
+    /** The graded territory share (area, %); overrun safe-area cells are not credited. */
+    territory_graded_pct: number;
+    /** Grade from the faction's end-position anchors, before any cap. */
+    earned_grade: string;
+    /** The anchor that set the earned grade. */
+    earned_description: string;
+    /** The cost step in effect: the war-cost cap, or the signed human-cost shift (simple model). */
+    cost_step: 'war_cost_cap' | 'human_cost_shift';
+    /** After the cost step. */
+    cost_capped_grade: string;
+    /** After the atrocity-condemnation letter-grade cap. */
+    condemnation_capped_grade: string;
+    /** After the settlement-terms cap; equals FactionVerdict.grade. */
+    settlement_capped_grade: string;
+    /** Outcome class from the final grade and condemnation flags, before the peace-dysfunction cap. */
+    base_outcome_class: OutcomeClass;
+    /**
+     * Peace dysfunction index that capped this side's outcome: its condemnation term counts
+     * only the side's own flags. Null when no signed Dayton applies.
+     */
+    peace_dysfunction_index: number | null;
+    /** The settlement-wide index (every side's flags), as the Dayton room and snapshot show it. */
+    settlement_peace_dysfunction_index: number | null;
+    /** Which dysfunction band changed the class: none, soft (45), hard (60, hollow), failure (80, emergent only). */
+    peace_dysfunction_band: 'none' | 'soft' | 'hard' | 'failure';
+    /** Final outcome class; equals FactionVerdict.outcome_class. */
+    outcome_class: OutcomeClass;
 }
 
 /** Complete game verdict covering all factions and the overall outcome. */
@@ -599,13 +638,32 @@ export interface HistoricalBaselineMilestone {
     kind: 'war_end' | 'rupture';
     /** Required when kind is rupture. */
     event_id?: string;
+    /** war_end only: the campaign ending this endpoint is compared with (like for like). Absent = every ending. */
+    ending?: HistoricalEndingBasis;
     source_notes: string;
 }
 
+/**
+ * How a campaign ended, for like-for-like comparison with history (R8 council B8/H2):
+ * a signed settlement (Dayton or an accepted plan) is compared with the Dayton initialling
+ * (21 Nov 1995, week 189); any other ending with the week the fighting stopped (the
+ * country-wide ceasefire in force, 12 Oct 1995, week 183).
+ */
+export type HistoricalEndingBasis = 'settlement' | 'no_settlement';
+
 export interface HistoricalBaseline {
+    /** Historical end week for a campaign ended by a signed settlement (Dayton initialled, week 189). */
     war_duration_weeks: number;
+    /** Week the fighting stopped (ceasefire in force, week 183), for campaigns ended without a settlement. */
+    fighting_end_week?: number;
+    /** Dayton shares (Federation 51 / RS 49). */
     territory_final: Record<string, number>;
+    /** Ceasefire-line shares, for campaigns ended without a settlement. */
+    territory_ceasefire?: Record<string, number>;
     total_killed: number;
+    /** Military killed, all sides, from the same source as total_killed and civilian_killed (RDC 2007). */
+    military_killed_total?: number;
+    /** Military killed by army of service (a different RDC table; does not sum to military_killed_total). */
     military_killed: Record<string, number>;
     civilian_killed: number;
     total_displaced: number;

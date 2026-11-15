@@ -1,6 +1,8 @@
 import json,collections,math,sys
+from pathlib import Path
 S=sys.argv[1]
-R='F:/AWWV-worktrees/dayton-conference-prototype/'
+# Repo root from this file's location (tools/peace/iebl_cell_audit -> repo), not a fixed drive.
+R=Path(__file__).resolve().parents[3].as_posix()+'/'
 scope='bosanska_krupa bosanski_petrovac bosanski_samac doboj foca gorazde gracanica gradacac ilidza jajce kalesija kljuc kupres lopare mostar novo_sarajevo odzak orasje pale sanski_most skender_vakuf stari_grad_sarajevo stolac titov_drvar trebinje trnovo ugljevik zvornik srebrenica bratunac cajnice rogatica visegrad brcko'.split()
 areas=json.load(open(R+'data/derived/operational/osid_areas.json',encoding='utf-8'))['areas']
 ops=json.load(open(R+'data/derived/operational/operational_settlements.geojson',encoding='utf-8'))

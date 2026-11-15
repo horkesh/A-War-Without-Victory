@@ -485,6 +485,16 @@ Army HQ, Codex, and other full-size overlays should obey the same density langua
 
 OSID, raw faction ids, and similar backend nouns are valid in engine code, canon, and tests. They are not valid in the live player shell when a human phrase like staging area, positions, or a political-side display name can carry the meaning. The product should sound like a command environment, not a debugger.
 
+## 2026-11-15 - Proposal dossiers (command loop L5)
+
+- Ordinary operation proposals in the Command Surface show a dossier (`src/ui/map/data/proposalDossier.ts`) in place of thirteen English "Label: value" lines.
+  - A one-sentence header.
+  - Facts shown only when known: objective (Show on map via `field-operation-plan`), forces, attributed plan readiness, holding back, and Withhold and Cancel explained. The facts load on demand (`ProposalDossierFacts`, `proposalDossierDetail.ts`).
+- Readiness is four bands, never a number, always attributed to the proposing officer (bent by his file) with the army staff's unbent reading beside it when they differ. Inputs are the corps staff's own beliefs (`OpProposalCardView.dossier_inputs`).
+- No odds and no casualty forecast: the plan's viability score never weighs the target's defenders (#653 review). Odds wait for a player-safe combat assessment.
+- Proposal cards drop the decorative detail art so the facts get the space. At 1280x720 the directive footer still pushes the facts below the fold; that shared footer layout is open.
+- Proposal: `docs/40_reports/proposals/20261114_COMMAND_LOOP_PROPOSAL.md` §5A. Evidence: ledger fragment `docs/ledger/fragments/2026-11-15-proposal-dossiers.md`.
+
 ## 2026-04-02 - Tactical operations panel ownership cleanup
 
 - Tactical `OperationsPanel` is now map-facing only.
@@ -657,6 +667,14 @@ OSID, raw faction ids, and similar backend nouns are valid in engine code, canon
 - Warroom desk props for faction overview, command briefing, and report review now hand off into the embedded tactical shell instead of opening parallel Warroom-local staff packets.
 - Tactical-shell receipt is handled through `awwv-shell:handoff` plus the canonical Army HQ navigation helpers in `src/ui/map/utils/shellNavigation.ts`.
 - See `docs/40_reports/implemented/20260403_WARROOM_ARMYHQ_SHELL_HANDOFF.md`.
+
+## 2026-11-14 - Weekly "This week" dispatch (command loop L2)
+
+- Supersedes the quiet-week behaviour of WP-2 below. `TurnAftermathModal` now opens after every Advance on a compact dispatch: the date and one headline (territory, then formations, then decisions), then at most five lines (Ground with up to three named places and "Show on map", Fighting, Cost, Your orders, Needs you). A line with nothing to report is left out; a quiet week gets two lines built from the week's own figures. "Full record" shows the previous two-column report, which now loads as its own chunk (`TurnAftermathRecordFace.tsx`).
+- The bottom-strip digest is the dispatch headline with "Reopen this week's dispatch", shown once the report is closed.
+- `gameStore.loadSave` keeps the week's report when the same week is loaded again (the desktop main process re-pushes the state ~200 ms after Advance). Before this, that reload closed the report in the live app before it could be seen.
+- `tools/ui/paradox_local_qa.cjs` photographs the report before closing it and records the dispatch fit; `--window-size=WxH` sets the game window's content size.
+- Proposal: `docs/40_reports/proposals/20261114_COMMAND_LOOP_PROPOSAL.md` §4 2B. Evidence: ledger fragment `docs/ledger/fragments/2026-11-14-weekly-dispatch.md`.
 
 ## 2026-07-06 - WP-2 quiet-turn advance digest
 

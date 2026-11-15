@@ -598,7 +598,10 @@ describe('plan', () => {
         } as CommanderBriefing;
     }
 
-    it('creates plan from pre-planned ops when surplus available', () => {
+    it('RF-L3d: a queued pre-planned operation is never adopted as a commander plan', () => {
+        // The briefing carries corps_command.queued_operations: operation NAMES. The commander
+        // used to adopt the head as a nameless, target-less plan that emitted nothing. The
+        // pre-planned launcher owns authored operations; the queue raises no stage_operation intent.
         const zoneId = 'zone:test_corps:0' as ZoneId;
         const brigIds = ['b1', 'b2', 'b3', 'b4', 'b5'].map(id => id as FormationId);
         const zones = [makeZone({
@@ -616,16 +619,12 @@ describe('plan', () => {
         }));
         const forces = makeForces(evals, zones);
 
-        const briefing = makeMinimalBriefing({
-            pre_planned_ops: [{ name: 'Op Test', target_osids: ['op:enemy:e1'] }],
-        });
-
+        const briefing = makeMinimalBriefing({ pre_planned_ops: ['Operation Corridor'] });
         const result = managePlan(briefing, zones, forces, evals, null, 10);
 
-        expect(result.action).toBe('created');
-        expect(result.plan).not.toBeNull();
-        expect(result.plan!.source).toBe('pre_planned');
-        expect(result.plan!.status).toBe('concentrating');
+        expect(result.plan?.source).not.toBe('pre_planned');
+        expect(result.plan?.plan_id ?? '').not.toMatch(/pre_planned_op/);
+        expect(result.decision_trace?.candidates.map(c => c.type)).not.toContain('stage_operation');
     });
 
     it('returns no plan when surplus < MIN_BRIGADES_FOR_PLAN', () => {
@@ -1398,12 +1397,14 @@ describe('plan', () => {
         expect(result.plan?.assigned_brigades).toContain(reservedId);
     });
 
-    it('excludes the Mistral 1 roster from a generic pre-planned commander operation at t154', () => {
-        const turn = 154;
+    it('RF-L3d: brigades the due queue head holds never join a commander opportunity plan', () => {
+        // Prozor–Rama Line Counterattack (hvo_tomislavgrad, available from week 71) rosters
+        // hrhb_kralj_tomislav_brigade. While it heads the queue, the commander may not plan with it.
+        const turn = 80;
         const zoneId = 'zone:hvo_tomislavgrad:0' as ZoneId;
-        const reservedId = 'hvo_1st_guard_abb' as FormationId;
+        const headId = 'hrhb_kralj_tomislav_brigade' as FormationId;
         const lineIds = ['hrhb_line_a', 'hrhb_line_b', 'hrhb_line_c'].map(id => id as FormationId);
-        const brigadeIds = [reservedId, ...lineIds];
+        const brigadeIds = [headId, ...lineIds];
         const zones = [makeZone({
             zone_id: zoneId,
             corps_id: 'hvo_tomislavgrad' as FormationId,
@@ -1412,6 +1413,7 @@ describe('plan', () => {
             front_edge_count: 15,
             surplus_brigades: brigadeIds,
             assigned_brigades: brigadeIds,
+            enemy_adjacent_osids: ['op:glamoc:target'],
         })];
         const evals = brigadeIds.map((id, index) => makeEval({
             brigade_id: id,
@@ -1421,52 +1423,33 @@ describe('plan', () => {
             is_disrupted: false,
             tier: 'main_effort',
         }));
-        const briefing = makeMinimalBriefing({
+        const stateRef = (queued: string[] | undefined) => ({
+            meta: { turn },
+            military: {
+                formations: Object.fromEntries(brigadeIds.map(id => [id, {
+                    id, name: id, kind: 'brigade', status: 'active', faction: 'HRHB',
+                    corps_id: 'hvo_tomislavgrad', personnel: 1500,
+                }])),
+                corps_command: { hvo_tomislavgrad: queued ? { queued_operations: queued } : {} },
+            },
+        } as unknown as GameState);
+        const briefingFor = (queued: string[] | undefined) => makeMinimalBriefing({
             corps_id: 'hvo_tomislavgrad' as FormationId,
             faction: 'HRHB',
             turn,
-            pre_planned_ops: [{ name: 'Generic June Offensive', target_osids: ['op:glamoc:target'] }],
+            state_ref: stateRef(queued),
+            campaign_offensive_targets: ['op:glamoc:target'],
+            pre_planned_ops: queued ?? [],
         });
 
-        const result = managePlan(briefing, zones, makeForces(evals, zones), evals, null, turn);
+        // Control: with nothing queued, the fittest brigade is chosen.
+        const control = managePlan(briefingFor(undefined), zones, makeForces(evals, zones), evals, null, turn);
+        expect(control.plan?.assigned_brigades).toContain(headId);
 
-        expect(result.plan?.source).toBe('pre_planned');
-        expect(result.plan?.assigned_brigades).toEqual(lineIds);
-    });
-
-    it('lets a pre-planned Operation Mistral 1 claim a reserved participant at t160', () => {
-        const turn = 160;
-        const zoneId = 'zone:hvo_tomislavgrad:0' as ZoneId;
-        const reservedId = 'hvo_1st_guard_abb' as FormationId;
-        const brigadeIds = [reservedId, 'hrhb_line_a', 'hrhb_line_b'].map(id => id as FormationId);
-        const zones = [makeZone({
-            zone_id: zoneId,
-            corps_id: 'hvo_tomislavgrad' as FormationId,
-            faction: 'HRHB',
-            posture: 'projecting',
-            front_edge_count: 15,
-            surplus_brigades: brigadeIds,
-            assigned_brigades: brigadeIds,
-        })];
-        const evals = brigadeIds.map((id, index) => makeEval({
-            brigade_id: id,
-            current_zone: zoneId,
-            fitness_offense: index === 0 ? 1 : 0.5,
-            is_combat_effective: true,
-            is_disrupted: false,
-            tier: 'main_effort',
-        }));
-        const briefing = makeMinimalBriefing({
-            corps_id: 'hvo_tomislavgrad' as FormationId,
-            faction: 'HRHB',
-            turn,
-            pre_planned_ops: [{ name: 'Operation Mistral 1', target_osids: ['op:glamoc:target'] }],
-        });
-
-        const result = managePlan(briefing, zones, makeForces(evals, zones), evals, null, turn);
-
-        expect(result.plan?.source).toBe('pre_planned');
-        expect(result.plan?.assigned_brigades).toContain(reservedId);
+        const queued = managePlan(briefingFor(['Prozor–Rama Line Counterattack']), zones, makeForces(evals, zones), evals, null, turn);
+        expect(queued.plan).not.toBeNull();
+        expect(queued.plan?.source).toBe('opportunity');
+        expect(queued.plan?.assigned_brigades).not.toContain(headId);
     });
 
     it('does not require state_ref.military to apply generic reservation filtering', () => {

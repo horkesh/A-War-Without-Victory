@@ -187,7 +187,9 @@ export const PHASE0_TICKER_EVENTS: readonly TickerEvent[] = [
     { turn: 68, text: 'WORLD TRADE CENTER BOMBED IN NEW YORK — 6 KILLED', category: 'world' },
     { turn: 69, text: 'US BEGINS HUMANITARIAN AIRDROPS TO EASTERN BOSNIA', category: 'bih_international' },
     { turn: 70, text: 'CERSKA ENCLAVE IN EASTERN BOSNIA OVERRUN BY VRS', category: 'military' },
-    { turn: 71, text: 'FIGHTING BETWEEN HVO AND ARBIH ERUPTS IN GORNJI VAKUF', category: 'military' },
+    // 1993 HVO-ARBiH rows are receipt-gated: the headline appears only once the campaign has
+    // fired the matching event, and never claims an offensive or siege the map does not show.
+    { turn: 71, text: 'HVO ULTIMATUM TO ARBIH UNITS IN GORNJI VAKUF', category: 'military', requiresEventId: 'gornji_vakuf_clashes_1993' },
 
     // March 1993 (Turns 72-75)
     { turn: 72, text: 'SREBRENICA OFFENSIVE - VRS ADVANCES ON ENCLAVE', category: 'military', requiresEventId: 'srebrenica_demilitarization_1993' },
@@ -195,12 +197,12 @@ export const PHASE0_TICKER_EVENTS: readonly TickerEvent[] = [
     { turn: 73, text: 'BOSNIAN PRESIDENT IZETBEGOVIC SIGNS VANCE-OWEN PLAN', category: 'political', requiresEventId: 'vance_owen_plan_1993' },
     { turn: 74, text: 'GENERAL MORILLON ENTERS SREBRENICA - PROMISES PROTECTION', category: 'bih_international', requiresEventId: 'srebrenica_demilitarization_1993' },
     { turn: 74, text: 'DEPECHE MODE RELEASES SONGS OF FAITH AND DEVOTION — TOPS CHARTS', category: 'world' },
-    { turn: 75, text: 'BOSNIAN CROAT-BOSNIAK WAR INTENSIFIES IN CENTRAL BOSNIA', category: 'military' },
+    { turn: 75, text: 'HVO-ARBIH ALLIANCE BREAKS DOWN IN CENTRAL BOSNIA', category: 'military', requiresEventId: 'croat_bosniak_war_begins_1993' },
 
     // April 1993 (Turns 76-79)
     { turn: 76, text: 'NATO BEGINS ENFORCING NO-FLY ZONE — OPERATION DENY FLIGHT', category: 'bih_international' },
     { turn: 77, text: 'SREBRENICA DECLARED SAFE AREA BY UN - UNSCR 819', category: 'bih_international', requiresEventId: 'srebrenica_demilitarization_1993' },
-    { turn: 78, text: 'AHMICI MASSACRE — HVO KILLS BOSNIAK CIVILIANS IN CENTRAL BOSNIA', category: 'humanitarian' },
+    { turn: 78, text: 'AHMICI MASSACRE — HVO KILLS BOSNIAK CIVILIANS IN CENTRAL BOSNIA', category: 'humanitarian', requiresEventId: 'ahmici_massacre_1993' },
     { turn: 79, text: 'BOSNIAN SERB ASSEMBLY REJECTS VANCE-OWEN PLAN', category: 'political', requiresEventId: 'vance_owen_plan_1993' },
 
     // May 1993 (Turns 80-83)
@@ -208,12 +210,11 @@ export const PHASE0_TICKER_EVENTS: readonly TickerEvent[] = [
     { turn: 81, text: 'BOSNIAN SERB REFERENDUM REJECTS VANCE-OWEN PLAN', category: 'political', requiresEventId: 'vance_owen_plan_1993' },
     { turn: 82, text: 'JOINT ACTION PROGRAMME PROPOSED — LIFT AND STRIKE DEBATED', category: 'international' },
     { turn: 82, text: 'MARSEILLE WINS FIRST CHAMPIONS LEAGUE TITLE IN MUNICH', category: 'world' },
-    { turn: 83, text: 'MOSTAR BRIDGE SHELLED — OLD BRIDGE STILL STANDING', category: 'military' },
 
     // June 1993 (Turns 84-87)
     { turn: 84, text: 'OWEN-STOLTENBERG PLAN PROPOSED — UNION OF THREE REPUBLICS', category: 'international', requiresEventId: 'owen_stoltenberg_plan_1993' },
     { turn: 84, text: 'JURASSIC PARK OPENS IN CINEMAS — SHATTERS BOX OFFICE RECORDS', category: 'world' },
-    { turn: 85, text: 'FIGHTING IN MOSTAR — HVO BESIEGES EAST MOSTAR', category: 'military' },
+    { turn: 85, text: 'MOSTAR DIVIDED BETWEEN HVO AND ARBIH', category: 'military', requiresEventId: 'east_mostar_siege_1993' },
     { turn: 85, text: 'CHICAGO BULLS WIN THIRD STRAIGHT NBA TITLE — JORDAN THREE-PEAT', category: 'world' },
     { turn: 86, text: 'UNPROFOR MANDATE EXTENDED — SAFE AREA PROTECTION REMAINS WEAK', category: 'bih_international' },
     { turn: 87, text: 'CROATIAN COMMUNITY OF HERCEG-BOSNA DECLARES ITSELF A REPUBLIC', category: 'political' },
@@ -227,29 +228,26 @@ export const PHASE0_TICKER_EVENTS: readonly TickerEvent[] = [
 
     // August 1993 (Turns 92-95)
     { turn: 92, text: 'OWEN-STOLTENBERG PLAN REJECTED BY BOSNIAN PARLIAMENT', category: 'political', requiresEventId: 'owen_stoltenberg_plan_1993' },
-    { turn: 93, text: 'SIEGE OF EAST MOSTAR BY HVO CONTINUES — HUMANITARIAN CRISIS', category: 'humanitarian' },
     { turn: 94, text: 'MT IGMAN ROAD UNDER UN CONTROL — SOLE LINK TO SARAJEVO', category: 'bih_international' },
     { turn: 95, text: 'EU ACTION PLAN FOR BOSNIA PROPOSED', category: 'international' },
 
     // September 1993 (Turns 96-99)
-    { turn: 96, text: 'CROAT-BOSNIAK FIGHTING INTENSIFIES — CENTRAL BOSNIA A WAR ZONE', category: 'military' },
+    { turn: 96, text: 'HVO-ARBIH FIGHTING INTENSIFIES IN CENTRAL BOSNIA', category: 'military' },
     { turn: 96, text: 'NIRVANA RELEASES IN UTERO — GRUNGE DOMINATES AIRWAVES', category: 'world' },
     { turn: 97, text: 'NEGOTIATIONS AT GENEVA CONTINUE — EU-UN JOINT MEDIATION', category: 'international' },
-    { turn: 98, text: 'VITEZ AND TRAVNIK SEE HEAVY FIGHTING BETWEEN HVO AND ARBIH', category: 'military' },
     { turn: 99, text: 'UN SECURITY COUNCIL EXTENDS SANCTIONS ON SERBIA', category: 'international' },
 
     // October 1993 (Turns 100-103)
-    { turn: 100, text: 'STUPNI DO MASSACRE — HVO KILLS BOSNIAK CIVILIANS', category: 'humanitarian' },
+    { turn: 100, text: 'STUPNI DO MASSACRE — HVO KILLS BOSNIAK CIVILIANS', category: 'humanitarian', requiresEventId: 'stupni_do_massacre_1993' },
     { turn: 100, text: 'TORONTO BLUE JAYS WIN SECOND STRAIGHT WORLD SERIES', category: 'world' },
-    { turn: 101, text: 'VARDARSKI BRIDGE DESTRUCTION — FIGHTING IN MOSTAR', category: 'military' },
     { turn: 102, text: 'US SENATE VOTES TO LIFT ARMS EMBARGO ON BOSNIA', category: 'international' },
     { turn: 102, text: 'MICHAEL JORDAN ANNOUNCES RETIREMENT FROM BASKETBALL', category: 'world' },
     { turn: 103, text: 'EU ACTION PLAN NEGOTIATIONS STALL', category: 'international' },
 
     // November 1993 (Turns 104-107)
-    { turn: 104, text: 'STARI MOST (OLD BRIDGE) IN MOSTAR DESTROYED BY HVO SHELLING', category: 'humanitarian' },
+    { turn: 104, text: 'STARI MOST (OLD BRIDGE) IN MOSTAR DESTROYED BY HVO SHELLING', category: 'humanitarian', requiresEventId: 'mostar_bridge_destroyed_1993' },
     { turn: 105, text: 'INTERNATIONAL CRIMINAL TRIBUNAL FOR YUGOSLAVIA BEGINS WORK', category: 'international' },
-    { turn: 106, text: 'ARBIH OFFENSIVE IN CENTRAL BOSNIA — CAPTURES VARES', category: 'military' },
+    { turn: 106, text: 'ARBIH OFFENSIVE IN CENTRAL BOSNIA PRESSES TOWARD VARES', category: 'military' },
     { turn: 106, text: 'SCHINDLER\'S LIST PREMIERES — SPIELBERG FILM ON HOLOCAUST', category: 'world' },
     { turn: 107, text: 'EUROPEAN UNION FORMALLY ESTABLISHED — MAASTRICHT TREATY TAKES EFFECT', category: 'world' },
 

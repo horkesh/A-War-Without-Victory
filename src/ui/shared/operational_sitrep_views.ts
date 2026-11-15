@@ -200,9 +200,6 @@ function toHeadline(view: Omit<OperationalSitrepView, 'headline'>): string {
     if (view.readiness.encircledCount > 0) {
         return `${view.readiness.encircledCount} brigade${view.readiness.encircledCount === 1 ? '' : 's'} are encircled.`;
     }
-    if (view.sustainment.collapsedMunicipalities.length > 0) {
-        return 'Sustainment has collapsed in at least one controlled municipality.';
-    }
     if (view.sustainment.criticalCount > 0) {
         return `${view.sustainment.criticalCount} controlled municipality${view.sustainment.criticalCount === 1 ? '' : 'ies'} are at critical sustainability.`;
     }
@@ -226,9 +223,6 @@ function toHeadlineToken(view: Omit<OperationalSitrepView, 'headline'>): Operati
                 : 'operationalSitrep.headline.encircled.many',
             params: { count: view.readiness.encircledCount },
         };
-    }
-    if (view.sustainment.collapsedMunicipalities.length > 0) {
-        return { key: 'operationalSitrep.headline.sustainmentCollapsed' };
     }
     if (view.sustainment.criticalCount > 0) {
         return {
@@ -383,17 +377,9 @@ export function toOperationalSitrepView(snapshot: WarDataSnapshot): OperationalS
             textToken: { key: 'operationalSitrep.alert.collapseEligible' },
         });
     }
-    if (collapsedMunicipalities.length > 0) {
-        alerts.push({
-            id: 'sustainment-collapsed',
-            severity: 'warning',
-            text: `Collapsed sustainment: ${collapsedMunicipalities.join(', ')}.`,
-            textToken: {
-                key: 'operationalSitrep.alert.sustainmentCollapsed',
-                params: { locations: collapsedMunicipalities.join(', ') },
-            },
-        });
-    } else if (snapshot.ownSupply.criticalCount > 0) {
+    // The cumulative "permanently collapsed" municipality list is deliberately not a headline or
+    // an alert: it only grows, so it reads as a permanent emergency (owner playtest, F1e).
+    if (snapshot.ownSupply.criticalCount > 0) {
         const criticalCount = snapshot.ownSupply.criticalCount;
         alerts.push({
             id: 'sustainment-critical',

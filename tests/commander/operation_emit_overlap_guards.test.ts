@@ -1058,7 +1058,10 @@ describe('commander emission overlap guards', () => {
             }));
         }],
         ['player autonomy', (harness) => {
+            // Level 1 holds the HUMAN PLAYER's corps only; a bot corps is not gated.
             harness.state.meta.autonomy_level = 1;
+            harness.state.meta.player_faction = FACTION;
+            harness.state.meta.headless_scenario_auto_control = false;
         }],
         ['friendly controller', (harness) => {
             harness.state.political.political_controllers![OMITTED_TARGET] = FACTION;
@@ -1118,6 +1121,39 @@ describe('commander emission overlap guards', () => {
         expect(output.operations[0]?.type).toBe(expectedType);
         expect(output.operations[0]?.participating_brigades).not.toContain(reservedId);
         expect(output.operations[0]?.participating_brigades.length).toBeGreaterThan(0);
+    });
+
+    it('RF-L3d: a commander plan operation never takes a brigade the due queue head holds', () => {
+        // Operation Majevica (vrs_east_bosnian, no date: always due) rosters
+        // rs_1st_majevica_light_infantry. While it heads that corps' queue, no commander plan
+        // operation may take the brigade; the probe paths already apply the same rule.
+        const heldId = 'rs_1st_majevica_light_infantry';
+        const brigades = [makeBrigade(heldId, 'op:test:approach'), makeBrigade('b1', 'op:test:approach')];
+        const emitWith = (queued: boolean) => {
+            const base = makeBriefing([], brigades);
+            const sector = makeSector();
+            const briefing = {
+                ...base,
+                sectors: [{
+                    ...sector,
+                    assigned_brigade_ids: [heldId, 'b1'] as FormationId[],
+                    sub_segments: sector.sub_segments.map(s => ({ ...s, primary_brigade_ids: [heldId, 'b1'] })),
+                }],
+            } as CommanderBriefing;
+            if (queued) {
+                (briefing.state_ref!.military.corps_command as Record<string, unknown>).vrs_east_bosnian = {
+                    queued_operations: ['Operation Majevica'],
+                };
+            }
+            const allocation: AllocationResult = { ...makeAllocation(), surplus_pool: [makeEval(heldId), makeEval('b1')] };
+            return emitCommanderOutput(briefing, [], makeForces(), allocation, makePlanDecision(), makeDecisions(), makeThreats());
+        };
+
+        const control = emitWith(false);
+        expect(control.operations.flatMap(op => op.participating_brigades)).toContain(heldId);
+
+        const held = emitWith(true);
+        expect(held.operations.flatMap(op => op.participating_brigades)).not.toContain(heldId);
     });
 
     it('emits a bilateral operation from plan-reserved brigades even when the new allocation garrison-locks them', () => {
@@ -1902,9 +1938,41 @@ describe('commander emission overlap guards', () => {
         doesNotSelectBoundedTarget(guardedBrigadeBriefing({ elite_loan_state: { on_loan: true } as any }));
         doesNotSelectBoundedTarget(guardedBrigadeBriefing({ tags: ['enclave'] }));
 
+        // Level 1 fails closed for the HUMAN PLAYER's corps only.
         doesNotSelectBoundedTarget({
             ...briefing,
-            state_ref: { ...state, meta: { ...state.meta, autonomy_level: 1 } },
+            state_ref: {
+                ...state,
+                meta: { ...state.meta, autonomy_level: 1, player_faction: FACTION, headless_scenario_auto_control: false },
+            },
+        } as CommanderBriefing);
+        // A bot corps at Level 1 (the player is another faction, or there is no player) has no
+        // approver, so it keeps local occupation exactly as at Level 0 (R8 run m, 2026-11-14).
+        const selectsBoundedTarget = (candidateBriefing: CommanderBriefing) => {
+            const selected = emitCommanderOutput(
+                candidateBriefing,
+                [],
+                makeForces(),
+                allocation,
+                { ...makePlanDecision(), plan: null, action: 'none' },
+                makeDecisions(),
+                makeThreats(),
+            );
+            expect(selected.operations.some(
+                (candidate) => candidate.objectives?.includes('op:test:objective') === true,
+            )).toBe(true);
+        };
+        selectsBoundedTarget(briefing);
+        selectsBoundedTarget({
+            ...briefing,
+            state_ref: {
+                ...state,
+                meta: { ...state.meta, autonomy_level: 1, player_faction: 'RBiH', headless_scenario_auto_control: false },
+            },
+        } as CommanderBriefing);
+        selectsBoundedTarget({
+            ...briefing,
+            state_ref: { ...state, meta: { ...state.meta, autonomy_level: 1, player_faction: undefined } },
         } as CommanderBriefing);
 
         doesNotSelectBoundedTarget({
@@ -2617,9 +2685,13 @@ describe('commander emission overlap guards', () => {
     it('keeps a Level-1 approval pending when an unrelated live operation blocks emission', () => {
         const state = {
             schema_version: CURRENT_SCHEMA_VERSION,
-            meta: { turn: 10, phase: 'war', seed: 'approved-overlap', autonomy_level: 1 } as any,
+            meta: {
+                turn: 10, phase: 'war', seed: 'approved-overlap', autonomy_level: 1,
+                player_faction: FACTION, headless_scenario_auto_control: false,
+            } as any,
             factions: [{ id: FACTION }] as any,
             military: {
+                formations: { [CORPS_ID]: { id: CORPS_ID, faction: FACTION, kind: 'corps', status: 'active' } } as any,
                 corps_command: {
                     [CORPS_ID]: {
                         command_span: 5,
@@ -2686,9 +2758,13 @@ describe('commander emission overlap guards', () => {
     function runLevel1Launch(forceLaunched: boolean) {
         const state = {
             schema_version: CURRENT_SCHEMA_VERSION,
-            meta: { turn: 10, phase: 'war', seed: 'l1-launch', autonomy_level: 1 } as any,
+            meta: {
+                turn: 10, phase: 'war', seed: 'l1-launch', autonomy_level: 1,
+                player_faction: FACTION, headless_scenario_auto_control: false,
+            } as any,
             factions: [{ id: FACTION }] as any,
             military: {
+                formations: { [CORPS_ID]: { id: CORPS_ID, faction: FACTION, kind: 'corps', status: 'active' } } as any,
                 corps_command: {
                     [CORPS_ID]: {
                         command_span: 5,

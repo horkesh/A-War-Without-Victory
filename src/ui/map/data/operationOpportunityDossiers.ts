@@ -6,6 +6,7 @@ import type {
 } from './types';
 import { playerFactionMatch } from './playerFactionMatch';
 import { humanizeOsid } from '../utils/osidDisplayName';
+import { hasDeveloperText } from '../../shared/developerText';
 
 type RawRecord = Record<string, unknown>;
 type ForceTraitBand = OperationOpportunityProposalView['force_quality_traits'][number]['band'];
@@ -280,7 +281,12 @@ export function deriveOperationOpportunityProposals(
                 launch,
                 decision_outcome: receipt?.exit_class === 't3_authorized_no_offensive' ? 'defensive_commitment' as const
                     : launch ? 'launched' as const : receipt?.executed_op_name ? 'no_active_operation' as const : 'not_launched' as const,
-                decision_evidence: axes.filter(axis => typeof axis.reason === 'string' && axis.reason.trim())
+                // Engine axis reasons read as evaluator output ("not applicable", "5th Corps
+                // commander state present"); only plain-language reasons reach the President
+                // (council fix 4, C7). The reasons stay in the save untouched.
+                decision_evidence: axes.filter(axis => axis.mode !== 'not_applicable'
+                    && typeof axis.reason === 'string' && axis.reason.trim()
+                    && !hasDeveloperText(axis.reason))
                     .map(axis => axis.reason as string),
             } : {}),
             review_id: typeof review?.id === 'string' ? review.id : undefined,

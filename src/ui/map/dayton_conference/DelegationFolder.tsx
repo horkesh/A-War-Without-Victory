@@ -4,6 +4,12 @@ import { formatCount, turnToDateString } from '../utils/formatters';
 
 /** The map's faction palette (DaytonSettlementViewer), so the folder and the board agree. */
 const FACTION_COLORS: Record<string, string> = { RBiH: '#558463', HRHB: '#547ca7', RS: '#b35e53' };
+/**
+ * The same hues, 2-6% darker, for the segments that carry white share labels: the board palette
+ * gave 4.31:1 (RBiH) and 4.36:1 (HRHB) under white text, below the 4.5:1 floor. These measure
+ * 4.79, 4.67 and 4.68 (tests/ui/delegation_folder_contrast.test.ts pins the floor).
+ */
+export const SPLIT_BAR_COLORS: Record<string, string> = { RBiH: '#507c5d', HRHB: '#5177a0', RS: '#af5c51' };
 const FACTIONS = ['RBiH', 'RS', 'HRHB'] as const;
 const PLAN_KEYS: Record<string, string> = {
     vance_owen: 'dayton.folder.plan.vanceOwen',
@@ -38,7 +44,7 @@ function SplitBar({ split }: { split: FolderData['refused_plans'][number]['propo
         <div className="dayton-folder-split" role="img"
             aria-label={FACTIONS.map(f => `${faction(f)} ${split[f]}%`).join(', ')}>
             {FACTIONS.map(f => (
-                <span key={f} style={{ width: `${(100 * (split[f] ?? 0)) / total}%`, background: FACTION_COLORS[f] }}>
+                <span key={f} style={{ width: `${(100 * (split[f] ?? 0)) / total}%`, background: SPLIT_BAR_COLORS[f] }}>
                     {split[f] >= 12 ? `${f} ${split[f]}%` : ''}
                 </span>
             ))}

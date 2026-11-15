@@ -1,0 +1,24 @@
+name: Ledger Fragment Guard
+
+# A PR that changes src/ or data/ must add one ledger fragment,
+# docs/ledger/fragments/YYYY-MM-DD-<slug>.md. See docs/ledger/fragments/README.md and
+# tools/ledger_fragment_check.cjs. Label a PR `no-ledger` to skip the check.
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+
+jobs:
+  ledger-fragment:
+    if: ${{ !contains(github.event.pull_request.labels.*.name, 'no-ledger') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      - name: Check for a ledger fragment
+        run: node tools/ledger_fragment_check.cjs --base "origin/${{ github.base_ref }}"

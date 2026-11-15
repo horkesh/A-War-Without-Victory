@@ -498,6 +498,14 @@ export interface OfficerPersonality {
 // 14. CommanderBriefing — assembled each turn as input to commander loop
 // ---------------------------------------------------------------------------
 
+/** Standing facts about one OG (see CommanderBriefing.sector_situations). */
+export interface SectorSituation {
+    /** The OG faces only the truce partner on a cold (truce) front. */
+    readonly truce_line: boolean;
+    /** One of this corps' operations in planning or execution draws brigades from this OG. */
+    readonly own_operation_staging: boolean;
+}
+
 export interface CommanderBriefing {
     readonly corps_id: FormationId;
     readonly faction: FactionId;
@@ -523,6 +531,12 @@ export interface CommanderBriefing {
     readonly graph_analysis: FactionGraphAnalysis | null;
     readonly front_geometry: FrontGeometryAssessment | null;
     readonly intel_data: CommanderIntelData | null;
+    /**
+     * Standing facts about each of this corps' OGs that set a posture regardless of enemy
+     * activity, keyed by this turn's sector_id: a truce line (RS-HRHB under the Graz accords)
+     * and this corps' own operation staging or running from the OG. Absent in unit fixtures.
+     */
+    readonly sector_situations?: Readonly<Record<string, SectorSituation>>;
     /** From bot_strategy doctrine phase. */
     readonly doctrine_stance: string;
     /** Current corps stance. */

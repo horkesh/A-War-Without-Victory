@@ -101,11 +101,15 @@ function BattleTooltipContent({ osid, battles, osidDisplayNames }: {
         <span style={{ color: FACTION_COLORS[defenderFaction ?? ''] ?? '#aaa' }}>
           {getPlayerSafeMilitaryFactionName(defenderFaction)}
         </span>
-        {battle.was_concentrated && (
-          <span className="ml-1 text-text-muted">
+        {(battle.all_attacker_ids?.length ?? 0) > 1 ? (
+          <span className="ml-1 text-[13px] text-text-muted">
             ({t('tooltip.concentratedAttack', { count: battle.all_attacker_ids?.length ?? 0 })})
           </span>
-        )}
+        ) : battle.was_concentrated ? (
+          <span className="ml-1 text-[13px] text-text-muted">
+            ({t('tooltip.concentratedAttackUncounted')})
+          </span>
+        ) : null}
       </div>
       <div className="grid grid-cols-2 gap-x-3 text-xs tabular-nums">
         <div className="text-text-secondary">{t('tooltip.attackerLosses')}</div>
@@ -246,17 +250,15 @@ function densityColorClass(density: number): string {
   return 'text-amber-300';
 }
 
-/** §7.3 Front edge: factions, sector, density, threat, pressure, formations each side */
+/** §7.3 Front edge: factions, sector, density, threat, formations each side */
 function FrontTooltipContent({
   edgeId,
   frontEdgesOsid,
-  frontPressureByEdge,
   formations,
   corpsFrontSectors,
 }: {
   edgeId: string;
   frontEdgesOsid: { edge_id: string; a: string; b: string; side_a: string | null; side_b: string | null }[] | undefined;
-  frontPressureByEdge: Record<string, { value: number; max_abs: number }> | undefined;
   formations: FormationView[] | undefined;
   corpsFrontSectors?: CorpsFrontSectorView[];
 }) {
@@ -270,7 +272,6 @@ function FrontTooltipContent({
   const model = buildPlayerSafeFrontTooltipModel({
     edgeId: baseEdgeId,
     frontEdgesOsid,
-    frontPressureByEdge,
     formations,
     fogOfWar: useGameStore.getState().loadedGameState?.fogOfWar,
     corpsFrontSectors,
@@ -295,10 +296,6 @@ function FrontTooltipContent({
       <div className="text-xs text-text-secondary mb-1">
         <span>{t('tooltip.frontExtent')}</span>{' '}
         <span className="text-text-primary">{persistenceLine}</span>
-      </div>
-      <div className="text-xs text-text-secondary mb-1">
-        <span>{t('tooltip.pressure')}</span>{' '}
-        <span className="text-text-primary">{model.pressureLine}</span>
       </div>
       {model.sectorStatusLine && (
         <div className="text-xs text-amber-300 mb-1">
@@ -514,7 +511,6 @@ export const Tooltip = React.memo(function Tooltip() {
         <FrontTooltipContent
           edgeId={delayedTarget.id}
           frontEdgesOsid={loadedGameState?.frontEdgesOsid}
-          frontPressureByEdge={loadedGameState?.frontPressureByEdge}
           formations={loadedGameState?.formations}
           corpsFrontSectors={loadedGameState?.corpsFrontSectors}
         />

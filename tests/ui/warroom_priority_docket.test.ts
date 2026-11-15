@@ -163,7 +163,8 @@ describe('buildWarroomPriorityDocketView', () => {
     expect(first.tone).toBe('attention');
     expect(first.headline).toBe('Recommended before advance');
     expect(first.blockingDecisionCount).toBe(0);
-    expect(first.summary).toBe('1 advance item / 0 required / 5 recommended / 1 monitor / 3 record / 1 pending');
+    // The header counts the listed rows by tier (not band totals over every card).
+    expect(first.summary).toBe('1 advance item: 0 required, 1 recommended');
     expect(first.items.map((item) => item.id)).toEqual([
       'opportunity:opp_docket',
     ]);
@@ -176,7 +177,7 @@ describe('buildWarroomPriorityDocketView', () => {
     expect(first.sourceHandoffs.map((handoff) => handoff.id)).toEqual([
       'army-hq-briefing',
     ]);
-    expect(first.sourceHandoffSummary).toBe('1 source handoff / 0 required / 5 recommended / 1 monitor / 3 record');
+    expect(first.sourceHandoffSummary).toBe('1 source handoff');
     expect(first.openBoardLabel).toBe('Open Decision Room');
   });
 
@@ -193,14 +194,14 @@ describe('buildWarroomPriorityDocketView', () => {
     expect(view.statusLabel).not.toBe(view.status);
     expect(view.tone).toBe('clear');
     expect(view.headline).toBe('Clear to advance');
-    expect(view.summary).toBe('0 advance items / 0 required / 4 recommended / 0 monitor / 0 record / 0 pending');
+    expect(view.summary).toBe('0 advance items: 0 required, 0 recommended');
     expect(view.items).toEqual([]);
     expect(view.sourceHandoffs).toEqual([]);
-    expect(view.sourceHandoffSummary).toBe('0 source handoffs / 0 required / 4 recommended / 0 monitor / 0 record');
+    expect(view.sourceHandoffSummary).toBe('0 source handoffs');
     expect(view.canOpenBoard).toBe(true);
   });
 
-  it('uses weighted grouped-decision counts in the docket summary', () => {
+  it('counts a grouped decision card as one row, and its decisions as pending reviews', () => {
     const view = buildWarroomPriorityDocketView({
       state: makeState({
         latestTurnSummary: null,
@@ -214,8 +215,11 @@ describe('buildWarroomPriorityDocketView', () => {
 
     expect(view.metrics.pendingReviews).toBe(2);
     expect(view.metrics.priorityCounts.required).toBe(2);
-    expect(view.metrics.advanceReviewCount).toBe(2);
-    expect(view.summary).toBe('2 advance items / 2 required / 4 recommended / 0 monitor / 0 record / 2 pending');
+    // The chip's number is the rows the list shows (one grouped convoy card); the two convoy
+    // decisions still weigh on the pending-review count.
+    expect(view.items).toHaveLength(1);
+    expect(view.metrics.advanceReviewCount).toBe(1);
+    expect(view.summary).toBe('1 advance item: 1 required, 0 recommended');
   });
 
   it('returns a safe unavailable state when no campaign is loaded', () => {
@@ -228,7 +232,7 @@ describe('buildWarroomPriorityDocketView', () => {
     expect(view.headline).toBe('No state loaded');
     expect(view.items).toEqual([]);
     expect(view.sourceHandoffs).toEqual([]);
-    expect(view.sourceHandoffSummary).toBe('0 source handoffs / 0 required / 0 recommended / 0 monitor / 0 record');
+    expect(view.sourceHandoffSummary).toBe('0 source handoffs');
     expect(view.canOpenBoard).toBe(false);
   });
 
@@ -255,8 +259,8 @@ describe('buildWarroomPriorityDocketView', () => {
     const view = buildWarroomPriorityDocketView({ state, limit: 3 });
     setLocale('en');
 
-    expect(view.summary).toBe('1 stavka za napredovanje / 0 obavezno / 5 preporučeno / 1 praćenje / 3 zapis / 1 na čekanju');
-    expect(view.sourceHandoffSummary).toBe('1 izvorni prijenos / 0 obavezno / 5 preporučeno / 1 praćenje / 3 zapis');
+    expect(view.summary).toBe('1 stavka za napredovanje: 0 obavezno, 1 preporučeno');
+    expect(view.sourceHandoffSummary).toBe('1 izvorni prijenos');
     expect(view.openBoardLabel).toBe('Otvori sobu odluka');
     expect(view.statusLabel).toBe('Pregled prije napredovanja');
     expect(view.summary + view.sourceHandoffSummary + view.openBoardLabel).not.toContain('advance items');

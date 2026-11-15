@@ -13,10 +13,10 @@
  * See docs/40_reports/handovers/20260311_WARROOM_EXTERNAL_MASTER_HANDOVER.md §2.1, §6.4.
  *
  * Usage:
- *   node_modules/.bin/tsx tools/ui/warroom_resize_assets.ts [options] [files...]
- *   node_modules/.bin/tsx tools/ui/warroom_resize_assets.ts                    # all hq_rbih_*.png in assets
- *   node_modules/.bin/tsx tools/ui/warroom_resize_assets.ts --dry-run
- *   node_modules/.bin/tsx tools/ui/warroom_resize_assets.ts --no-display       # skip _display.png output
+ *   npx tsx tools/ui/warroom_resize_assets.ts [options] [files...]
+ *   npx tsx tools/ui/warroom_resize_assets.ts                    # all hq_rbih_*.png in assets
+ *   npx tsx tools/ui/warroom_resize_assets.ts --dry-run
+ *   npx tsx tools/ui/warroom_resize_assets.ts --no-display       # skip _display.png output
  */
 
 import { readdirSync, statSync, renameSync, unlinkSync } from 'node:fs';

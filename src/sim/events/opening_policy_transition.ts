@@ -8,8 +8,10 @@ import type { EventDefinition, EventEffect, PendingEventDecision } from './event
 const IDENTITY = 'rbih_state_identity';
 const POLICY = 'rbih_paramilitary_policy_1992';
 const OPTIONS = ['always_deny', 'ask', 'always_allow'] as const;
-const REVIEWED_IDENTITY_CANONICAL_LENGTH = 69592;
-const REVIEWED_IDENTITY_FNV64 = 'a8b1bb427b526c07';
+// Re-pinned 2026-11-14 for the BCS diacritics restored in this event's `localizations.bcs` text
+// (was 69592 / a8b1bb427b526c07). Only BCS display strings changed; trigger, options, effects unchanged.
+const REVIEWED_IDENTITY_CANONICAL_LENGTH = 69579;
+const REVIEWED_IDENTITY_FNV64 = '6d447e72f84a687d';
 const REVIEWED_POLICY_CANONICAL_LENGTH = 10911;
 const REVIEWED_POLICY_FNV64 = '4db9c9795b1abb6d';
 

@@ -104,11 +104,18 @@ import { seedDisplacementTimerOnFlip } from '../../state/displacement_takeover.j
 import type { PreparationEvent } from '../turn_pipeline_types.js';
 import { checkLoanedArrivals, areLoanedBrigadesReady, cleanupDissolvedLoans } from './operation_reinforcement.js';
 import { MAX_OP_LOAN_DISTANCE, LOAN_STAGING_BUFFER_TURNS } from './operation_reinforcement_constants.js';
-import { findBrigadeLiveOperationAnywhere, hasActiveOperation, removeOperation } from './corps_operation_helpers.js';
+import { findBrigadeLiveOperationAnywhere, hasActiveOperation, isCommanderBuiltOperation, removeOperation } from './corps_operation_helpers.js';
 import { MIN_ATTACK_PERSONNEL, MAX_BRIGADE_PERSONNEL } from '../../state/formation_constants.js';
 import { mayEliteJoinOperation } from './historical_elite_reservations.js';
 import { isVlasicCohaExceptionOperation } from './coha_operation_exception.js';
 import { isFactionOffensiveOpsSuppressed } from '../events/active_modifiers.js';
+import {
+    isCorpsBoundByOct1995Ceasefire,
+    isOct1995CeasefireInForce,
+    isOct1995CeasefireStandDownComplete,
+    isOffensiveOperationType,
+    recordOct1995CeasefireStandDown,
+} from './oct1995_ceasefire.js';
 import { isOperationObjectiveForeignControlled } from './operation_objective_hostility.js';
 import { effectiveOperationMinimum } from './operation_minimum_policy.js';
 import {
@@ -850,7 +857,7 @@ function issuePostOperationReturnMarches(state: GameState, op: CorpsOperation): 
  * After OBJECTIVE_FAILURE_THRESHOLD failures, the objective enters a cooldown period.
  * This prevents suicidal repeated assaults on hardened positions (Ripac pattern).
  */
-function recordFailedObjectives(cmd: CorpsCommandState, op: CorpsOperation, turn: number): void {
+export function recordFailedObjectives(cmd: CorpsCommandState, op: CorpsOperation, turn: number): void {
     if (op.recovery_reason === 'completed') return; // Success — no failure to record
     if (op.recovery_reason === 'probe_complete') return; // Probes gather intel — not a failure
     if (op.recovery_reason === 'political_blocked') return; // Truce/political block is not a failed assault
@@ -879,12 +886,36 @@ function recordFailedObjectives(cmd: CorpsCommandState, op: CorpsOperation, turn
 
     if (failedOsids.length === 0) return;
 
+    // RF-AI2 bot objective lockout: a bot commander-planned op (buildCommanderOperation)
+    // that ends because no axis could attack (zero_eligible_axis) or because it ran out
+    // of failures (max_failures) locks its objectives out at once, without waiting for
+    // a second failure. Measured: the woken ARBiH 5th Corps re-planned Ripac/Gornja
+    // Suvaja every ~5 turns, 7 of 13 ops ending zero_eligible_axis with 0 attacks.
+    // Authored, triggered, pre-planned and Army HQ ops keep their threshold behaviour.
+    const hardBotFailure = isCommanderBuiltOperation(op)
+        && (op.recovery_reason === 'zero_eligible_axis' || op.recovery_reason === 'max_failures');
+
     if (!cmd.failed_offensive_objectives) cmd.failed_offensive_objectives = {};
     for (const osid of failedOsids) {
         const entry = cmd.failed_offensive_objectives[osid] ?? { failure_count: 0, cooldown_until_turn: 0 };
         entry.failure_count += 1;
-        if (entry.failure_count >= OBJECTIVE_FAILURE_THRESHOLD) {
-            entry.cooldown_until_turn = turn + OBJECTIVE_FAILURE_COOLDOWN_TURNS;
+        if (hardBotFailure) {
+            // Each repeated hard failure on the same objective pushes the next bot try
+            // further out (8, 16, 24... turns). Run 4 measured the flat 8-turn window
+            // expiring on the very turn the 5th Corps re-assaulted Ripac (t164 -> t172),
+            // bleeding the 505th Brigade one turn before Operation Sana.
+            // failure_count is shared with every op kind and never decays, so earlier
+            // authored failures on the same objective lengthen this too.
+            entry.cooldown_until_turn = Math.max(
+                entry.cooldown_until_turn,
+                turn + OBJECTIVE_FAILURE_COOLDOWN_TURNS * entry.failure_count,
+            );
+        } else if (entry.failure_count >= OBJECTIVE_FAILURE_THRESHOLD) {
+            // Never shorten a longer lockout already in force (e.g. a bot hard-failure one).
+            entry.cooldown_until_turn = Math.max(
+                entry.cooldown_until_turn,
+                turn + OBJECTIVE_FAILURE_COOLDOWN_TURNS,
+            );
         }
         cmd.failed_offensive_objectives[osid] = entry;
     }
@@ -911,6 +942,42 @@ function beginRecovery(
         state.military.opsec_sectors = state.military.opsec_sectors.filter(s => s !== op.sector_id);
     }
     enterOperationRecovery(state, resolvedHostCorpsId, op, turn, reason);
+}
+
+/**
+ * Council fix 3 / B10: while the October 1995 general ceasefire holds, offensives (sector attack,
+ * feint, probe) are called off through the ordinary lifecycle path (`beginRecovery`, reason
+ * `ceasefire`); the normal recovery tick then finalizes and removes them.
+ *  - Planning: called off at once; it never launches.
+ *  - Executing: on the first ceasefire turn the stand-down caps are recorded
+ *    (oct1995_ceasefire.ts): each axis that had engaged may take only its current objective.
+ *    The operation is called off once every axis has moved past its cap or stopped; if the
+ *    ordinary lifecycle ends it first, its ordinary recovery reason applies.
+ * Emergency strategic-defence and reorganization operations are kept; operations already
+ * recovering are untouched, so the call is idempotent. Corps are visited in strictCompare order.
+ * Returns the called-off `corps:name:t<start>` ids.
+ */
+export function cancelOffensivesForOct1995Ceasefire(state: GameState, turn: number): string[] {
+    const cancelled: string[] = [];
+    const corpsCommand = state.military.corps_command;
+    if (!corpsCommand || !isOct1995CeasefireInForce(state)) return cancelled;
+    for (const corpsId of Object.keys(corpsCommand).sort(strictCompare)) {
+        const cmd = corpsCommand[corpsId];
+        if (!cmd || cmd.active_operations.length === 0) continue;
+        if (!isCorpsBoundByOct1995Ceasefire(state, corpsId)) continue;
+        for (const op of [...cmd.active_operations]) {
+            if (!isOffensiveOperationType(op.type)) continue;
+            if (op.phase === 'execution') {
+                recordOct1995CeasefireStandDown(op, turn);
+                if (!isOct1995CeasefireStandDownComplete(op)) continue;
+            } else if (op.phase !== 'planning') {
+                continue;
+            }
+            beginRecovery(op, turn, 'ceasefire', state, corpsId);
+            cancelled.push(`${corpsId}:${op.name}:t${op.started_turn}`);
+        }
+    }
+    return cancelled;
 }
 
 function findLiveLinkedPreparationProbe(
@@ -1126,6 +1193,7 @@ function getRecoveryDuration(op: CorpsOperation): number {
     switch (op.recovery_reason) {
         case 'no_logged_attempt':
         case 'manual_termination':
+        case 'ceasefire':
         case 'probe_complete':
         case 'brigade_attrition':
         case 'political_blocked':
@@ -1189,6 +1257,7 @@ function getMultiAxisRecoveryDuration(op: CorpsOperation): number {
     switch (op.recovery_reason) {
         case 'no_logged_attempt':
         case 'manual_termination':
+        case 'ceasefire':
         case 'probe_complete':
         case 'political_blocked':
         case 'planning_invalidated':
@@ -1755,6 +1824,13 @@ export function advanceSectorOffensives(
                     beginRecovery(op, turn, 'offensive_ops_suppressed', state);
                     continue;
                 }
+                // Council fix 3 / B10: the October 1995 general ceasefire closes the operation
+                // channel. Unlike the E-A5 cap above, a force launch does not bypass it: the
+                // war reopens only through a declined Dayton (reopenWarAfterDaytonDecline).
+                if (isCorpsBoundByOct1995Ceasefire(state, corpsId)) {
+                    beginRecovery(op, turn, 'ceasefire', state, corpsId);
+                    continue;
+                }
                 op.phase = 'execution';
                 op.phase_started_turn = turn;
                 op.recovery_reason = undefined;
@@ -1884,18 +1960,22 @@ export function advanceSectorOffensives(
                 ? getMultiAxisRecoveryDuration(op)
                 : getRecoveryDuration(op);
             if (elapsed >= recoveryDuration) {
-                const exhaustionCost = op.preparation_probe_link
+                // A ceasefire stand-down books no completion exhaustion (council fix 3).
+                const exhaustionCost = op.preparation_probe_link || op.recovery_reason === 'ceasefire'
                     ? 0
                     : op.type === 'feint' || op.type === 'probe' ? 5 : 15;
                 cmd.corps_exhaustion = Math.min(100, (cmd.corps_exhaustion ?? 0) + exhaustionCost);
-                if (op.type === 'sector_attack' || op.type === 'probe') {
+                // A ceasefire stand-down is a political order, not a failed assault: it books
+                // no objective failures (council fix 3; oct1995_ceasefire.ts).
+                if ((op.type === 'sector_attack' || op.type === 'probe') && op.recovery_reason !== 'ceasefire') {
                     recordFailedObjectives(cmd, op, turn);
                 }
                 if (op.type === 'sector_attack' || op.preparation_probe_link) {
                     const finalizedAAR = finalizeOperationAAR(state, corpsId, op);
                     if (op.type === 'sector_attack') linkOpportunityResolutionToAAR(state, finalizedAAR);
                     // Apply experience gain to operation commander based on AAR grade
-                    if (op.commander_officer_id && state.operation_history?.length) {
+                    // A ceasefire stand-down is not graded into the commander's experience.
+                    if (op.commander_officer_id && state.operation_history?.length && op.recovery_reason !== 'ceasefire') {
                         if (finalizedAAR.commander_officer_id === op.commander_officer_id) {
                             const outcome = gradeStarsToOutcome(finalizedAAR.grade.stars);
                             applyOperationExperience(state, op.commander_officer_id, outcome);
@@ -1907,7 +1987,7 @@ export function advanceSectorOffensives(
                         if (os) {
                             if (op.recovery_reason === 'completed') {
                                 os.consecutive_op_failures = 0; // Reset on success
-                            } else if (op.recovery_reason !== 'probe_complete') {
+                            } else if (op.recovery_reason !== 'probe_complete' && op.recovery_reason !== 'ceasefire') {
                                 os.consecutive_op_failures = (os.consecutive_op_failures ?? 0) + 1;
                                 checkDefeatism(state, op.commander_officer_id, os.consecutive_op_failures);
                             }

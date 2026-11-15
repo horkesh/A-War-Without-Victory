@@ -808,7 +808,13 @@ describe('strict null inventory progress', () => {
             // GameStateMeta.stance_matters / stance_matter_history and
             // MilitaryState.stance_matter_state. Written only for a live president; absent in
             // headless runs (40w artifacts byte-identical). No new type escape. 564 -> 591.
-            optional_fields_game_state: 591,
+            // RF-3 siege displacement (DA1, 2026-11-14): DisplacementState.unsupplied_pressure_turns,
+            // the persisted siege counter (was a module cache). No new type escape. 591 -> 592.
+            // RF-5B policy displacement (2026-11-14): HostileTakeoverTimerState.cause, absent on every
+            // battle/flip-seeded timer. No new type escape. 592 -> 593.
+            // Council fix 3 (2026-11-14): CorpsOperation.ceasefire_stand_down, recorded only on an
+            // offensive executing when the October 1995 ceasefire binds. No new type escape. 593 -> 594.
+            optional_fields_game_state: 594,
         });
         // Reason-code instrumentation (item 3): +1, `OperationAxis.launch_blocker_detail`.
         // `classifyDomain` routes it to `sim` on the /Corps|Operation/ interface-name rule,
@@ -817,13 +823,16 @@ describe('strict null inventory progress', () => {
         // Posture model option 2 (2026-11-12): +1 sim (MilitaryState.stance_matter_state),
         // +26 state (StanceMatter, StanceMatterReceipt, PresidentialStanceHold optional fields;
         // StateMeta.stance_matters / stance_matter_history). 564 -> 591.
-        expect(current.optional_field_domains.total).toBe(591);
+        // RF-3 (DA1): +1 state (DisplacementState.unsupplied_pressure_turns). 591 -> 592 / state 217 -> 218.
+        // RF-5B: +1 state (HostileTakeoverTimerState.cause). 592 -> 593 / state 218 -> 219.
+        // Council fix 3: +1 sim (CorpsOperation.ceasefire_stand_down). 593 -> 594 / sim 364 -> 365.
+        expect(current.optional_field_domains.total).toBe(594);
         expect(current.optional_field_domains.domain_counts).toMatchObject({
             derived: 10,
             ipc: 0,
             scenario: 0,
-            sim: 364,
-            state: 217,
+            sim: 365,
+            state: 219,
             ui_adapter: 0,
             unknown: 0,
         });

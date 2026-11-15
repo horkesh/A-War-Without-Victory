@@ -13,12 +13,13 @@ describe('own equipment reporting', () => {
   expect(result.holdings.artillery).toEqual({ total: 3, reportedCount: 1 });
   expect(result.holdings.aa_systems).toEqual({ total: null, reportedCount: 0 });
  });
- it('keeps the abstract operational pool separate and rejects inconsistent reports', () => {
-  const rows = [brigade({ tanks: 90 }, { operational_heavy: 3, total_heavy: 4 }), brigade({}, { operational_heavy: 0, total_heavy: 0 }), brigade({}, { operational_heavy: 8, total_heavy: 2 })];
+ it('does not report the abstract heavy pool, which has no combat weight (realism audit F9)', () => {
+  const rows = [brigade({ tanks: 90 }, { operational_heavy: 3, total_heavy: 4 }), brigade({}, { operational_heavy: 0, total_heavy: 0 })];
   const before = structuredClone(rows);
-  expect(summarizeOwnEquipment(rows, 'RS').pool).toEqual({ operational: 3, total: 4, reportedCount: 2, percent: 75 });
+  const summary = summarizeOwnEquipment(rows, 'RS');
+  expect(summary).not.toHaveProperty('pool');
+  expect(JSON.stringify(summary)).not.toMatch(/operational_heavy|total_heavy|percent/);
   expect(rows).toEqual(before);
-  expect(summarizeOwnEquipment([...rows].reverse(), 'RS')).toEqual(summarizeOwnEquipment(rows, 'RS'));
-  expect(summarizeOwnEquipment([brigade({}, { operational_heavy: 0, total_heavy: 0 })], 'RS').pool.percent).toBeNull();
+  expect(summarizeOwnEquipment([...rows].reverse(), 'RS')).toEqual(summary);
  });
 });

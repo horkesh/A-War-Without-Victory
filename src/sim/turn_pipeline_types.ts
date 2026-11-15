@@ -205,10 +205,11 @@ export interface TurnReport {
     authority_degradation?: AuthorityDegradationReport;
     war_control_strain?: ControlStrainReport;
     displacement_hooks?: DisplacementHooksReport;
-    displacement_apply?: DisplacementStepReport;
     war_jna_transition?: JNATransitionReport;
     alliance_update?: AllianceUpdateReport;
     ceasefire_check?: CeasefireCheckReport;
+    /** October 1995 general ceasefire enforcement (council fix 3). Present only on turns it changed something. */
+    oct1995_ceasefire?: { cancelled_operations: string[]; stances_lowered: string[] };
     washington_check?: WashingtonCheckReport;
     operation_storm_check?: OperationStormCheckReport;
     bilateral_flip_count?: number;

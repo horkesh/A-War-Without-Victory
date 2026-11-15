@@ -22,7 +22,7 @@ import { serializeGameState } from '../src/state/serializeGameState.js';
 
 const REAL_SAVE_PATH = join(process.cwd(), 'data', 'derived', 'latest_run_final_save.json');
 
-const SKIP_REASON = 'Real save file not found — run a scenario first (npm run sim:scenario:run:40w)';
+const SKIP_REASON = 'Real save file not found — run a scenario first (npm run sim:scenario:run:40w:map)';
 
 describe('real-save round-trip proof', () => {
 

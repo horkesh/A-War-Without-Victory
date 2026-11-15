@@ -442,7 +442,7 @@ describe('CodexPanel dynamic essay proof', () => {
         expect(screen.getByText(`${startVisibleEssayCount} eseja dostupno`)).toBeTruthy();
         expect(screen.getByText('Izaberite esej')).toBeTruthy();
         expect(screen.queryByText('Select an essay')).toBeNull();
-        expect(screen.getByText(/Historijski zapisi dostupni su od početka scenarija/)).toBeTruthy();
+        expect(screen.getByText(/Historijski zapisi dostupni su od početka kampanje/)).toBeTruthy();
     });
 
     it('hides not-yet-faced future dilemma titles during an active campaign', () => {

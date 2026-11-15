@@ -25,6 +25,7 @@ import { LARGE_URBAN_MUN_IDS } from './large_urban_mun_data.js';
 import { militiaPoolKey } from './militia_pool_key.js';
 import type { MunicipalityPopulation1991Map } from './population_share.js';
 import { strictCompare } from './validateGameState.js';
+import { recordWarCrime } from './war_crimes_record.js';
 
 const TAKEOVER_DISPLACEMENT_DELAY_TURNS = 4;
 const CAMP_REROUTE_DELAY_TURNS = 4;
@@ -55,12 +56,97 @@ const POSAVINA_CROAT_FLEE_ABROAD = 0.70;
 export const BILATERAL_KILL_FRACTION = 0.03;
 export const BILATERAL_HRHB_FLEE_ABROAD = 0.35;
 
+// ── RF-5B: policy-driven bilateral displacement (RBiH-HRHB war) ──────────────────────
+// The 1993 HVO expulsions of Bosniaks took place inside ground the HVO already held
+// (the Lašva valley, west Mostar, Stolac, Čapljina, Prozor; Prlić et al. TJ 2013, affirmed
+// on appeal 2017), so takeover displacement, which needs a control change, never saw them.
+// A bot-controlled faction whose historical policy was expulsion
+// (BOT_MINORITY_EXPULSION_POLICY: HRHB) seeds, once, when the open bilateral war has begun,
+// a timer for the other community in every OSID it holds inside the municipalities where
+// the record finds the policy applied (POLICY_EXPULSION_SCOPE). There is no player decision. Each timer fires one bounded wave and never drains further.
+// Control is never changed: an OSID the faction no longer holds is not seeded, and a
+// recapture before the wave clears the timer.
+export interface PolicyExpulsionScopeEntry {
+    /** Share of the other community in the OSID displaced by the single wave. */
+    fraction: number;
+    /** 'A' fires TAKEOVER_DISPLACEMENT_DELAY_TURNS after the policy is applied; 'B' POLICY_WAVE_B_DELAY_TURNS later. */
+    wave: 'A' | 'B';
+}
 /**
- * Border-adjacent municipalities where displaced Bosniaks flee abroad (Croatia, Germany, Austria, Sweden).
- * Historically, Bosniaks near international borders had realistic escape routes.
- * Interior populations (Sarajevo, Central Bosnia, Drina enclaves) displaced internally.
+ * Where a faction's expulsion policy reaches, by municipality, with the share removed.
+ * Historian seat, RF-5B (2026-11-14; side-session note rf5b_historian_sourcing.md):
+ * - Wave A (Central Bosnia, Jablanica; mid-April 1993): Vitez ("5,000 expelled" of 11,514
+ *   Muslims; Kordić TJ ¶646; Stari Vitez held out), Busovača (Kordić TJ ¶511), Kiseljak
+ *   (BB2 p.444), Žepče (BB2 p.444; low confidence), Gornji Vakuf (Prlić TJ), Jablanica
+ *   (Sovići/Doljani, the whole detained population moved 5 May; Prlić TJ).
+ * - Wave B (Herzegovina, July-August 1993, after the 30 June arrest order): Mostar (west;
+ *   chamber counts ~2,800-4,150; Prlić TJ v2 ¶¶814, 875, 922, 981), Stolac (Aladinići,
+ *   transfer to Blagaj; ¶1936), Čapljina, Prozor (≥2,500 moved 28 Aug; ¶277), Ljubuški
+ *   (arrests, departure abroad ordered via Croatia; Prlić TJ summary).
+ * - Not in scope: Kakanj, Travnik, Bugojno, Fojnica, Konjic, Novi Travnik (the HVO lost these
+ *   towns or was on the defensive; the record is Croat flight; BB1 p.217), Vareš (Oct-Nov,
+ *   overlaps the ARBiH capture), Orašje (HVO and ARBiH fought together in Posavina), Livno
+ *   and Tomislavgrad (no expulsion finding; low confidence).
+ * RBiH has no entry: no ARBiH joint criminal enterprise or expulsion policy was charged or
+ * found (Hadžihasanović and Kubura; Halilović).
  */
-/** Krajina Bosniaks: ~35% fled via organized ICRC/UNHCR convoys to Croatia (Karlovac transit camp).
+export const POLICY_EXPULSION_SCOPE: Partial<Record<FactionId, Record<MunicipalityId, PolicyExpulsionScopeEntry>>> = {
+    HRHB: {
+        vitez: { fraction: 0.50, wave: 'A' },
+        busovaca: { fraction: 0.40, wave: 'A' },
+        kiseljak: { fraction: 0.40, wave: 'A' },
+        zepce: { fraction: 0.30, wave: 'A' },
+        gornji_vakuf: { fraction: 0.40, wave: 'A' },
+        jablanica: { fraction: 0.75, wave: 'A' },
+        mostar: { fraction: 0.40, wave: 'B' },
+        stolac: { fraction: 0.75, wave: 'B' },
+        capljina: { fraction: 0.75, wave: 'B' },
+        prozor: { fraction: 0.75, wave: 'B' },
+        ljubuski: { fraction: 0.50, wave: 'B' },
+    },
+};
+/** Wave B starts this many turns after the policy is applied (≈ mid-April → July 1993). */
+export const POLICY_WAVE_B_DELAY_TURNS = 12;
+/**
+ * Historical minority policy of a BOT-controlled faction in the RBiH-HRHB war (§6 panel,
+ * 2026-11-14: bot-only; SENSITIVE_HISTORY_DESIGN_GATE.md §3 keeps paramilitary_policy as the
+ * only player-facing war-crime surface, and Ring 3 #5 lets bots act where the record
+ * documents it). HRHB: the Prlić Trial Chamber found a joint criminal enterprise from
+ * mid-January 1993 whose common purpose was domination by the Herceg-Bosna Croats through
+ * the ethnic cleansing of the Muslim population (affirmed on appeal, 2017). RBiH: no ARBiH
+ * joint criminal enterprise or expulsion policy was charged or found, so it has none.
+ * A human-controlled faction never expels: no player decision exists.
+ */
+export const BOT_MINORITY_EXPULSION_POLICY: Partial<Record<FactionId, true>> = { HRHB: true };
+/** Deterministic iteration order for the policy seed (strictCompare order of the pair). */
+const BILATERAL_POLICY_HOLDER_ORDER: readonly FactionId[] = ['HRHB', 'RBiH'];
+
+/** Event flag recording the turn on which a faction's expulsion policy was applied (seeded). */
+export function minorityPolicyAppliedFlag(faction: FactionId): string {
+    return `${faction.toLowerCase()}_minority_policy_applied_turn`;
+}
+
+/** Event flag set once the faction's first policy wave has been recorded as a war crime. */
+export function minorityPolicyWarCrimeFlag(faction: FactionId): string {
+    return `${faction.toLowerCase()}_minority_policy_war_crime_recorded`;
+}
+
+function getPolicyExpulsionEntry(faction: FactionId, munId: MunicipalityId): PolicyExpulsionScopeEntry | undefined {
+    return POLICY_EXPULSION_SCOPE[faction]?.[munId];
+}
+
+/**
+ * True when the faction follows an expulsion policy: it is bot-controlled (not the player's
+ * faction) and BOT_MINORITY_EXPULSION_POLICY records one for it.
+ */
+export function hasMinorityExpulsionPolicy(state: GameState, faction: FactionId): boolean {
+    if (state.meta.player_faction === faction) return false;
+    return BOT_MINORITY_EXPULSION_POLICY[faction] === true;
+}
+
+/** Krajina Bosniaks: ~55% ended abroad, largely via ICRC/UNHCR convoys to Croatia (Karlovac transit camp).
+ * F4 (2026-11-14): was 0.35; ICTY OTP 47-municipality figures leave ~56% abroad for Muslims outside
+ * the Drina valley (range 0.45-0.65). The Aug 1992 Vlašić convoys to Travnik stayed in the country.
  * This was the PRIMARY escape mechanism for Prijedor, Sanski Most, Bosanski Novi.
  * Convoys ran after international pressure forced camp closures (Aug 1992). */
 const KRAJINA_BOSNIAK_CONVOY_MUN_IDS = new Set<MunicipalityId>([
@@ -68,24 +154,30 @@ const KRAJINA_BOSNIAK_CONVOY_MUN_IDS = new Set<MunicipalityId>([
     'bosanska_dubica', 'bosanska_kostajnica', 'bosanska_gradiska',
     'banja_luka', 'celinac', 'laktasi', 'prnjavor',
 ]);
-const KRAJINA_BOSNIAK_FLEE_ABROAD = 0.35;
+const KRAJINA_BOSNIAK_FLEE_ABROAD = 0.55;
 
-const BOSNIAK_BORDER_ADJACENT_MUN_IDS = new Set<MunicipalityId>([
-    // Krajina — near Croatian border (non-convoy municipalities)
-    'kljuc', 'kotor_varos', 'skender_vakuf', 'mrkonjic_grad', 'sipovo',
-    'bosanski_petrovac', 'titov_drvar', 'bosansko_grahovo', 'glamoc',
-    'srbac',
-    // Posavina — near Croatia/Serbia border
-    'brcko', 'bosanski_samac', 'odzak', 'orasje',
-    'derventa', 'modrica', 'bosanski_brod', 'bijeljina',
-    'lopare', 'ugljevik',
-    // Herzegovina — near Croatian border
-    'mostar', 'capljina', 'stolac', 'jablanica', 'konjic',
-    'trebinje', 'bileca', 'nevesinje', 'ljubinje', 'gacko',
-    // Bihać pocket — near Croatian border
-    'bihac', 'cazin', 'velika_kladusa', 'bosanska_krupa',
+// F4b (panel round 1, War-or-Game and Historian seats; ICTY OTP 47-municipality report, Annex A6;
+// Krstić TJ; Krajišnik TJ). Bosniak share abroad at the moment of displacement, by origin:
+// - Eastern Bosnia and the Sarajevo ring: 0.08 (range 0.05-0.15). 1992 expellees went into
+//   Srebrenica, Cerska, Žepa, Goražde, Sarajevo and Tuzla; the real exits (deportation through
+//   Serbia, flight into Sandžak and Montenegro) were small. The OTP endpoints (Srebrenica 18%,
+//   Zvornik 45%) are onward movement after flight, which the model does not have.
+// - Bijeljina, Posavina, Čapljina and Stolac: 0.40. Semberija bordered Serbia; Posavina could
+//   cross the Sava to Croatia; HVO detainees were released to third countries via Croatia (Prlić TJ).
+// The former 0.10 border override is gone: below any realistic default it contradicted the record.
+const BOSNIAK_EAST_SARAJEVO_RING_MUN_IDS = new Set<MunicipalityId>([
+    'zvornik', 'bratunac', 'srebrenica', 'vlasenica', 'sekovici', 'han_pijesak', 'hanpijesak',
+    'rogatica', 'visegrad', 'foca', 'rudo', 'cajnice', 'gorazde', 'kalinovik', 'sokolac',
+    'pale', 'ilidza', 'hadzici', 'vogosca', 'ilijas', 'trnovo',
+    'novo_sarajevo', 'novi_grad_sarajevo', 'centar_sarajevo', 'stari_grad_sarajevo',
+    'olovo', 'kladanj',
 ]);
-const BOSNIAK_BORDER_FLEE_ABROAD = 0.10;
+const BOSNIAK_EAST_SARAJEVO_RING_FLEE_ABROAD = 0.08;
+const BOSNIAK_EXIT_MUN_IDS = new Set<MunicipalityId>([
+    'bijeljina', 'brcko', 'bosanski_samac', 'odzak', 'derventa', 'modrica', 'bosanski_brod',
+    'capljina', 'stolac',
+]);
+const BOSNIAK_EXIT_FLEE_ABROAD = 0.40;
 
 // Enclave-overrun special case (historical high-lethality second displacement).
 export const ENCLAVE_OVERRUN_KILL_FRACTION = 0.35;
@@ -144,14 +236,29 @@ export function seedDisplacementTimerOnFlip(
     for (const displaced of allFactions) {
         if (displaced === toFaction) continue;
         const timerKey = `${osid}|${displaced}`;
-        if (timerMap[timerKey]) continue;
+        // A stale RF-5B policy timer (the OSID changed hands) yields to the new holder's timer.
+        if (timerMap[timerKey] && timerMap[timerKey].cause !== 'policy_expulsion') continue;
         timerMap[timerKey] = {
             mun_id: munId,
             from_faction: displaced,
             to_faction: toFaction,
             started_turn: currentTurn,
+            ...carriedPolicyDisplacement(timerMap[timerKey]),
         };
     }
+}
+
+/**
+ * RF-5B: when a capture replaces a policy timer whose wave already fired, the new timer
+ * inherits the people that wave expelled, so its own waves draw on the community that
+ * remains, never on the 1991 census again (the same people cannot be expelled twice).
+ */
+function carriedPolicyDisplacement(
+    existing: HostileTakeoverTimerState | undefined
+): { cumulative_displaced?: number } {
+    if (existing?.cause !== 'policy_expulsion' || existing.matured_turn === undefined) return {};
+    const prior = existing.cumulative_displaced ?? 0;
+    return prior > 0 ? { cumulative_displaced: prior } : {};
 }
 
 export interface TakeoverBattleRecord {
@@ -199,10 +306,16 @@ function areFactionsAtWar(state: GameState, a: FactionId, b: FactionId): boolean
 }
 
 function getFleeAbroadFraction(sourceMun: MunicipalityId, fromFaction: FactionId, toFaction?: FactionId): number {
+    // F4 amendment (panel round 1, Calibration seat): people driven out when a Drina enclave
+    // falls go to own-side territory. Those forcibly transferred from Srebrenica and Žepa in
+    // July 1995 went to Kladanj and Tuzla (Krstić TJ); Bosniaks driven from Goražde's villages
+    // went into the pocket. Known limit: several hundred Žepa men crossed the Drina into Serbia.
+    if (toFaction && isEnclaveOverrun(sourceMun, fromFaction, toFaction)) return 0;
     if (toFaction && isRbihHrhbPair(fromFaction, toFaction) && fromFaction === 'HRHB') return BILATERAL_HRHB_FLEE_ABROAD;
     if (fromFaction === 'HRHB' && POSAVINA_MUN_IDS.has(sourceMun)) return POSAVINA_CROAT_FLEE_ABROAD;
     if (fromFaction === 'RBiH' && KRAJINA_BOSNIAK_CONVOY_MUN_IDS.has(sourceMun)) return KRAJINA_BOSNIAK_FLEE_ABROAD;
-    if (fromFaction === 'RBiH' && BOSNIAK_BORDER_ADJACENT_MUN_IDS.has(sourceMun)) return BOSNIAK_BORDER_FLEE_ABROAD;
+    if (fromFaction === 'RBiH' && BOSNIAK_EXIT_MUN_IDS.has(sourceMun)) return BOSNIAK_EXIT_FLEE_ABROAD;
+    if (fromFaction === 'RBiH' && BOSNIAK_EAST_SARAJEVO_RING_MUN_IDS.has(sourceMun)) return BOSNIAK_EAST_SARAJEVO_RING_FLEE_ABROAD;
     return getFactionFleeAbroadFraction(fromFaction);
 }
 
@@ -241,6 +354,35 @@ function getOsidCensusHostileShare(rec: SettlementRecord | undefined, fromFactio
     else return null;
     const share = factionPop / total;
     return Number.isFinite(share) ? Math.max(0, Math.min(1, share)) : null;
+}
+
+/**
+ * RF-5B: the community a recorded expulsion policy targets, as a share of the OSID's 1991
+ * population. The standing convention counts "others" (largely 1991 Yugoslavs) with
+ * Bosniaks; the policy the ICTY found targeted the Muslim population (Prlić TJ), so a
+ * policy wave against RBiH-aligned people counts declared Bosniaks only. In urban Mostar
+ * the convention would roughly double the wave. Falls back to the municipality share.
+ */
+function getPolicyTargetShare(
+    rec: SettlementRecord | undefined,
+    fromFaction: FactionId,
+    munId: MunicipalityId,
+    population1991ByMun?: MunicipalityPopulation1991Map
+): number {
+    if (fromFaction !== 'RBiH') {
+        return getOsidCensusHostileShare(rec, fromFaction)
+            ?? (() => {
+                const entry = population1991ByMun?.[munId];
+                const total = entry ? getPopulationTotal(entry) : 0;
+                return entry && total > 0 ? getFactionAlignedPopulation(entry, fromFaction) / total : 0;
+            })();
+    }
+    const total = getOsidCensusPopulation(rec);
+    const b = rec?.properties?.population_bosniaks;
+    if (total > 0 && typeof b === 'number' && Number.isFinite(b)) return Math.max(0, Math.min(1, b / total));
+    const entry = population1991ByMun?.[munId];
+    const munTotal = entry ? getPopulationTotal(entry) : 0;
+    return entry && munTotal > 0 ? Math.max(0, Math.min(1, entry.bosniak / munTotal)) : 0;
 }
 
 function getDynamicHostileShare(
@@ -320,7 +462,7 @@ function getRoutingOrder(sourceMun: MunicipalityId, faction: FactionId): Municip
     return orderedUnique([...primary, ...fallback, ...LARGE_URBAN_MUN_IDS]);
 }
 
-function getBilateralRoutingOrder(sourceMun: MunicipalityId, faction: FactionId, toFaction?: FactionId): MunicipalityId[] {
+export function getBilateralRoutingOrder(sourceMun: MunicipalityId, faction: FactionId, toFaction?: FactionId): MunicipalityId[] {
     if (!toFaction || !isRbihHrhbPair(faction, toFaction)) return getRoutingOrder(sourceMun, faction);
     const fallback = FALLBACK_ROUTES_BY_FACTION[faction] ?? [];
     if (faction === 'HRHB') return orderedUnique(['mostar', 'livno', ...fallback, ...LARGE_URBAN_MUN_IDS]);
@@ -615,6 +757,46 @@ export function processDisplacementTakeover(
         }
     }
 
+    // 0b) RF-5B: policy-driven bilateral seed. Step 0 runs on the first war turn of 1992,
+    //     when RBiH and HRHB are allied, so it never seeds this pair. Once the open bilateral
+    //     war has begun (rbih_hrhb_state.war_started_turn) and while the pair is at war, a
+    //     bot-controlled faction with an expulsion policy seeds (once per faction) the other
+    //     community in every OSID it holds inside its POLICY_EXPULSION_SCOPE municipalities.
+    //     Wave B timers start POLICY_WAVE_B_DELAY_TURNS later.
+    const bilateralWarStarted = typeof state.political.rbih_hrhb_state?.war_started_turn === 'number';
+    if (bilateralWarStarted) {
+        const pc = state.political.political_controllers ?? {};
+        for (const holder of BILATERAL_POLICY_HOLDER_ORDER) {
+            const other: FactionId = holder === 'HRHB' ? 'RBiH' : 'HRHB';
+            if (!isRbihHrhbPair(holder, other)) continue;
+            if (!hasMinorityExpulsionPolicy(state, holder)) continue;
+            if (!areFactionsAtWar(state, other, holder)) continue;
+            const appliedFlag = minorityPolicyAppliedFlag(holder);
+            if (typeof state.military.event_flags?.[appliedFlag] === 'number') continue;
+            for (const osid of Object.keys(pc).sort(strictCompare)) {
+                if (!osid.startsWith('op:')) continue;
+                if (pc[osid] !== holder) continue;
+                const munId = osid.split(':')[1] as MunicipalityId | undefined;
+                if (!munId) continue;
+                const scope = getPolicyExpulsionEntry(holder, munId);
+                if (!scope) continue;
+                const timerKey = `${osid}|${other}`;
+                if (timerMap[timerKey]) continue;
+                timerMap[timerKey] = {
+                    mun_id: munId,
+                    from_faction: other,
+                    to_faction: holder,
+                    started_turn: scope.wave === 'B' ? currentTurn + POLICY_WAVE_B_DELAY_TURNS : currentTurn,
+                    cause: 'policy_expulsion'
+                };
+                report.timers_started += 1;
+            }
+            if (!state.military.event_flags) state.military.event_flags = {};
+            state.military.event_flags[appliedFlag] = currentTurn;
+        }
+    }
+    const policyWaveFactions = new Set<FactionId>();
+
     // 1) Start takeover timers from flipped OSIDs (battle-driven).
     //    Seeds timers for ALL minority factions — not just the defender.
     //    Example: VRS captures HRHB OSID with Bosniak minority → seeds both HRHB and RBiH timers.
@@ -631,12 +813,14 @@ export function processDisplacementTakeover(
             if (fromFaction === toFaction) continue;
             if (!areFactionsAtWar(state, fromFaction, toFaction)) continue;
             const timerKey = `${osidKey}|${fromFaction}`;
-            if (timerMap[timerKey]) continue;
+            // A stale RF-5B policy timer (the OSID changed hands) yields to the captor's timer.
+            if (timerMap[timerKey] && timerMap[timerKey].cause !== 'policy_expulsion') continue;
             timerMap[timerKey] = {
                 mun_id: munId,
                 from_faction: fromFaction,
                 to_faction: toFaction,
-                started_turn: currentTurn
+                started_turn: currentTurn,
+                ...carriedPolicyDisplacement(timerMap[timerKey])
             };
             report.timers_started += 1;
         }
@@ -682,6 +866,12 @@ export function processDisplacementTakeover(
             delete timerMap[timerKey];
             continue;
         }
+        // RF-5B: a policy wave belongs to the faction whose policy it is. If that faction no
+        // longer holds the OSID (e.g. RS took it), the wave never fires and books nothing.
+        if (timer.cause === 'policy_expulsion' && currentController !== timer.to_faction) {
+            delete timerMap[timerKey];
+            continue;
+        }
 
         if (timer.matured_turn === undefined) {
             // ── Branch A: Initial maturation ──
@@ -716,13 +906,25 @@ export function processDisplacementTakeover(
             }
 
             const isFrontAdjMatured = allFrontAdjacent || frontOsids.has(osid);
-            const initFraction = getInitialDisplacementFraction(
-                timer.to_faction, timer.from_faction, munId, isFrontAdjMatured
-            ) ?? INITIAL_DISPLACEMENT_FRACTION;
-            const displacementAmount = Math.min(
-                Math.max(0, Math.floor(osidPop * hostileShare * initFraction)),
-                remainingPop
-            );
+            const isPolicyTimer = timer.cause === 'policy_expulsion';
+            if (isPolicyTimer) {
+                hostileShare = Math.min(
+                    getPolicyTargetShare(osidRec, timer.from_faction, munId, population1991ByMun),
+                    0.95
+                );
+            }
+            const initFraction = isPolicyTimer
+                ? (getPolicyExpulsionEntry(timer.to_faction, munId)?.fraction ?? 0)
+                : getInitialDisplacementFraction(
+                    timer.to_faction, timer.from_faction, munId, isFrontAdjMatured
+                ) ?? INITIAL_DISPLACEMENT_FRACTION;
+            // RF-5B: a capture that replaced a fired policy timer carries that wave's count; the
+            // initial wave then takes its fraction of the community that remains.
+            const priorDisplaced = timer.cumulative_displaced ?? 0;
+            const waveBase = priorDisplaced > 0
+                ? Math.floor(Math.max(0, Math.floor(osidPop * hostileShare) - priorDisplaced) * initFraction)
+                : Math.floor(osidPop * hostileShare * initFraction);
+            const displacementAmount = Math.min(Math.max(0, waveBase), remainingPop);
 
             if (displacementAmount > 0) {
                 const killFraction = getTakeoverKillFraction(munId, timer.from_faction, timer.to_faction);
@@ -771,6 +973,7 @@ export function processDisplacementTakeover(
                 report.source_municipalities.push(munId);
 
                 recordCivilianDisplacementCasualties(state, timer.from_faction, killed, fledAbroad);
+                if (isPolicyTimer) policyWaveFactions.add(timer.to_faction);
 
                 appendDisplacementEvent(state, {
                     turn: currentTurn,
@@ -789,7 +992,10 @@ export function processDisplacementTakeover(
             // Re-route displaced_in population without casualties (pass-through).
             // These people were already displaced once; second displacement incurs no
             // additional killed/fled_abroad and does not increment displaced_total.
-            if (dispState.displaced_in > 0) {
+            // RF-5B (§6 panel, Calibration seat C1): a policy wave changes no holder, so the
+            // people sheltering in the municipality (the holder's own refugees above all) are
+            // not moved on; re-routing them handed the expelling side extra manpower.
+            if (!isPolicyTimer && dispState.displaced_in > 0) {
                 const byFaction = dispState.displaced_in_by_faction ?? {};
                 const fKeys = Object.keys(byFaction).sort(strictCompare);
                 for (const fid of fKeys) {
@@ -811,9 +1017,11 @@ export function processDisplacementTakeover(
 
             // Mark timer as matured instead of deleting
             timer.matured_turn = currentTurn;
-            timer.cumulative_displaced = displacementAmount;  // Sustained pool accounts for initial fire
+            timer.cumulative_displaced = priorDisplaced + displacementAmount;  // Sustained pool accounts for initial fire
         } else {
             // ── Branch B: Sustained displacement ──
+            // RF-5B: a policy wave is one bounded expulsion; it never drains further.
+            if (timer.cause === 'policy_expulsion') continue;
             const munId = timer.mun_id;
             const dispState = getOrInitDisplacementState(
                 state,
@@ -916,6 +1124,19 @@ export function processDisplacementTakeover(
             report.routed_total += directRouted;
             report.source_municipalities.push(munId);
         }
+    }
+
+    // RF-5B bright line: an expulsion carried out under a recorded policy is an authorized
+    // war crime, recorded once per faction on the turn its first wave displaces anyone. This
+    // feeds the §2a `authorized_cleansing_condemnation` input exactly as a paramilitary
+    // sweep does.
+    for (const faction of [...policyWaveFactions].sort(strictCompare)) {
+        const flag = minorityPolicyWarCrimeFlag(faction);
+        if (state.military.event_flags?.[flag] === true) continue;
+        // The flag is set only when the record was actually written (capital present).
+        if (!recordWarCrime(state, faction)) continue;
+        if (!state.military.event_flags) state.military.event_flags = {};
+        state.military.event_flags[flag] = true;
     }
 
     // 3) Mature camp state into routed arrivals (urban-center order + capacity overflow).

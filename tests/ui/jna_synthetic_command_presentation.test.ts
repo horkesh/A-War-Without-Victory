@@ -190,7 +190,7 @@ describe('synthetic JNA command presentation', () => {
         expect(dossier.textContent).toContain('Temporary JNA/TO operation command');
         expect(dossier.textContent).toContain('No organic corps staff');
         expect(dossier.textContent).toContain('No permanent front OGs');
-        expect(dossier.textContent).toContain('Scenario-authored grouping of JNA/TO actions; not a documented operation title.');
+        expect(dossier.textContent).toContain('A grouping of JNA/TO actions made for the game; not the name of a documented operation.');
         expect(dossier.textContent).toContain('JNA Nevesinje Garrison');
         expect(dossier.textContent).toContain('JNA Bileca Garrison');
         expect(screen.queryByRole('button', { name: /Open Corps Orders/i })).toBeNull();

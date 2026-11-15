@@ -12,7 +12,6 @@ import {
     computeControlFlipProposals,
     type ControlFlipProposalFile
 } from '../state/control_flip_proposals.js';
-import { resetDisplacementPressureCache } from '../state/displacement.js';
 import { computeFrontBreaches } from '../state/front_breaches.js';
 import type { FormationState, GameState, MilitiaPoolState, MunicipalityId, PostureLevel } from '../state/game_state.js';
 import { deserializeState, serializeState } from '../state/serialize.js';
@@ -316,7 +315,6 @@ export async function runScenarioDeterministic(
     options: { turns: number; applyBreaches: boolean; applyNegotiation: boolean; script: ScenarioScriptFile; settlementEdges: EdgeRecord[] }
 ): Promise<{ finalState: GameState; summary: ScenarioSummaryFile }> {
     // Clear displacement pressure cache so multiple runs in the same process produce identical results.
-    resetDisplacementPressureCache();
     const adjacencyMap = buildAdjacencyMap(options.settlementEdges);
     let state: GameState = initialState;
     const turns: ScenarioTurnSummary[] = [];

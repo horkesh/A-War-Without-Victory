@@ -175,6 +175,8 @@ export interface GhostEntryStateView {
     };
     player_faction?: FactionId | null;
     paramilitary_policy?: GameState['paramilitary_policy'];
+    /** Running total of paramilitary deployments per faction (owner: paramilitary_sweep). */
+    paramilitary_deployment_count?: Partial<Record<FactionId, number>>;
     military?: {
         event_flags?: Record<string, GhostEntryFlagValue>;
         event_fire_counts?: Record<string, number | undefined>;
@@ -381,6 +383,24 @@ function warCrimesZeroOperand(
     };
 }
 
+/** No paramilitary deployment recorded for the faction. A missing count is none: the engine only
+ *  creates the record when it books a deployment (`paramilitary_sweep.ts`). */
+function paramilitaryDeploymentsZeroOperand(
+    state: GhostEntryStateView,
+    faction: FactionId,
+): ClaimPredicateOperand | null {
+    const raw = state.paramilitary_deployment_count?.[faction];
+    const observed = typeof raw === 'number' && Number.isFinite(raw) ? raw : 0;
+    if (observed !== 0) return null;
+    return {
+        owner_path: `state.paramilitary_deployment_count.${faction}`,
+        operator: 'equals',
+        expected_value: 0,
+        observed_value: observed,
+        expression: `paramilitary_deployment_count[${faction}]=0`,
+    };
+}
+
 function matchGhost(
     claimOperands: ClaimPredicateOperand[],
     missedOperands: ClaimPredicateOperand[],
@@ -516,10 +536,19 @@ function predForceQualityInversion(state: GhostEntryStateView, currentTurn: numb
 //   come from csq_paramilitary_authorization_refused. Distinct from
 //   cleansing_refused, which is gated on policy + war_crimes counter
 //   rather than the upstream divergence-event flag.
-function predParamilitaryStreakRefused(state: GhostEntryStateView, currentTurn: number): GhostPredicateMatch | null {
+//   R8 polish: the entry says authorisation was never begun, so it also reads the deployment
+//   count the Verdict's cost ledger reports ("N paramilitary deployments authorized"). Both
+//   now come from `paramilitary_deployment_count`; the flags alone stay set after a refusal
+//   even when the side authorised deployments later, which made the two contradict.
+function predParamilitaryStreakRefused(
+    state: GhostEntryStateView,
+    currentTurn: number,
+    faction: FactionId,
+): GhostPredicateMatch | null {
     const operands = requiredOperands(
         flagOperand(state, 'paramilitary_authorization_refused', true),
         flagOperand(state, 'clean_record', true),
+        paramilitaryDeploymentsZeroOperand(state, faction),
     );
     return operands ? matchGhost(operands, [operands[1]!], currentTurn, 80) : null;
 }

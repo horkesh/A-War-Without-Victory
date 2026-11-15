@@ -954,3 +954,39 @@ describe('predictor known own execution friction', () => {
         expect(prediction(0, undefined, true)).toEqual(prediction(0));
     });
 });
+
+describe('turn summary battle records (realism audit F10)', () => {
+    it('records both brigades of a two-brigade assault, lead first', () => {
+        const { state, edges } = makeScenario();
+        state.military.formations!.brig_rs_2 = makeFormation(
+            'brig_rs_2', 'RS', 'brigade', 'op:rs:staging', { corps_id: 'vrs_1st' },
+        );
+        state.military.corps_command!.vrs_1st!.active_operations[0]!.participating_brigades = ['brig_rs_1', 'brig_rs_2'];
+        state.military.brigade_attack_orders = {
+            brig_rs_2: 'op:rbih:target',
+            brig_rs_1: 'op:rbih:target',
+        } as any;
+
+        const report = resolveAttackOrdersOsid(state, edges, new Map<string, string[]>());
+        expect(report.battles).toHaveLength(1);
+        const lead = report.battles[0]!.attacker_brigade;
+
+        const summary = compileTurnSummary(state, makeSnapshot(5), { attack_resolution_osid: report } as TurnReport);
+
+        expect(summary.battles).toHaveLength(1);
+        const battle = summary.battles[0]!;
+        expect(battle.primary_attacker_id).toBe(lead);
+        expect(battle.all_attacker_ids[0]).toBe(lead);
+        expect([...battle.all_attacker_ids].sort()).toEqual(['brig_rs_1', 'brig_rs_2']);
+        expect(battle.was_concentrated).toBe(true);
+    });
+
+    it('keeps a one-brigade assault as a single attacker', () => {
+        const { state, edges } = makeScenario();
+        const report = resolveAttackOrdersOsid(state, edges, new Map<string, string[]>());
+        const summary = compileTurnSummary(state, makeSnapshot(5), { attack_resolution_osid: report } as TurnReport);
+
+        expect(summary.battles[0]!.all_attacker_ids).toEqual(['brig_rs_1']);
+        expect(summary.battles[0]!.was_concentrated).toBe(false);
+    });
+});

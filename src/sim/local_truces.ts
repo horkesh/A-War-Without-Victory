@@ -77,7 +77,11 @@ export const GRAZ_KISELJAK_HRHB_EXCLUSION = new Set([
  */
 const TRUCE_BREAK_SPIKE_TURNS = 6;
 
-/** Aggression modifier applied to the wronged faction after truce break. */
+/**
+ * Designed aggression modifier for the wronged faction after a truce break.
+ * Not currently applied: getTruceBreakAggressionBonus has no caller that feeds
+ * bot aggression (realism audit F6; wiring deferred post-1.0).
+ */
 const TRUCE_BREAK_AGGRESSION_SPIKE = 0.25;
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -255,6 +259,8 @@ export function shouldGrazBlockAttack(
  * Return extra aggression modifier for `faction` because the opponent broke the truce.
  * Returns TRUCE_BREAK_AGGRESSION_SPIKE for TRUCE_BREAK_SPIKE_TURNS turns after the break.
  * Returns 0 otherwise.
+ * Currently has no caller in src/ (only tests call it), so the bonus does not
+ * reach bot aggression (realism audit F6; wiring deferred post-1.0).
  */
 export function getTruceBreakAggressionBonus(faction: FactionId, state: GameState): number {
     if (!isGrazAccordsActive(state)) return 0;

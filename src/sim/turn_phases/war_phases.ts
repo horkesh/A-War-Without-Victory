@@ -49,7 +49,7 @@ import { computeDimensionBaseValues, applyDimensionShift } from '../events/strat
 import { relieveOfficer, recordPresidentialOverride } from '../combat/order_interpretation.js';
 import { applyReplaceCoConsequence, applyForceOpConsequence, applyStopOpConsequence } from '../combat/command_lever_consequences.js';
 import { clamp } from '../../utils/math.js';
-import { updateDisplacement } from '../../state/displacement.js';
+import { updateDisplacement, type DisplacementPressureInputs } from '../../state/displacement.js';
 import { processDisplacementTakeover } from '../../state/displacement_takeover.js';
 import { getDoctrineTempoMultiplier, updateDoctrineState } from '../../state/doctrine.js';
 import { updateEmbargoProfiles } from '../../state/embargo.js';
@@ -172,7 +172,12 @@ import {
 } from '../combat/commander_march_correction.js';
 import { evaluateHomeReturn } from '../combat/brigade_home_return.js';
 import { applyFrontlineAttrition } from '../combat/frontline_attrition.js';
-import { advanceSectorOffensives, updateSectorOffensiveResults, reevaluateWeakenedOperations } from '../combat/sector_offensive.js';
+import { advanceSectorOffensives, cancelOffensivesForOct1995Ceasefire, updateSectorOffensiveResults, reevaluateWeakenedOperations } from '../combat/sector_offensive.js';
+import {
+    clampCorpsStancesForOct1995Ceasefire,
+    isCorpsBoundByOct1995Ceasefire,
+    isOct1995CeasefireInForce,
+} from '../combat/oct1995_ceasefire.js';
 import { buildStaticOsidAdjacency } from '../combat/sector_offensive_launch_helpers.js';
 // LANE-2026-05-02: estimateForceRatio defender-modifier integration — terrain cache for advance-sector-offensives
 import { buildTerrainCache } from '../combat/combat_predictor.js';
@@ -332,6 +337,8 @@ function injectAuthoredOperations(state: GameState): void {
 
         const corpsFaction = formations[corpsId]?.faction;
         if (!corpsFaction) { reject('corps_not_found'); continue; }
+        // The October 1995 general ceasefire closes the operation channel (council fix 3).
+        if (isCorpsBoundByOct1995Ceasefire(state, corpsId)) { reject('ceasefire_in_force'); continue; }
 
         // 1. Pre-filter participants — membership + eligibility + double-commit guard.
         const corpsBrigadeIds = new Set(
@@ -945,6 +952,9 @@ function injectOpDirectives(state: GameState, adjacency?: Map<string, string[]>)
             cmd.op_directive_rejection = { target_osid: targetOsid, reason, turn };
         };
 
+        // The October 1995 general ceasefire closes the operation channel (council fix 3).
+        if (isCorpsBoundByOct1995Ceasefire(state, corpsId)) { reject('ceasefire_in_force'); continue; }
+
         const plan = planDirectiveOperation(state, cmd, corpsId, targetOsid, adjacency);
         if (!plan.ok) { reject(plan.reason); continue; }
 
@@ -1076,6 +1086,26 @@ function refreshHomeDistanceCache(context: TurnContext): void {
     );
 }
 
+/**
+ * DA1 (siege displacement lane, 2026-11-13): the displacement pressure path's front and
+ * supply, recomputed after combat from the operational graph so they match this turn's
+ * OSID control. Without operational data nothing presses (no front, nobody supplied is
+ * irrelevant because no municipality is under pressure).
+ */
+export function buildOsidDisplacementPressureInputs(
+    state: GameState,
+    od: ReturnType<typeof getOperationalData>
+): DisplacementPressureInputs {
+    if (!od?.opData?.operationalToCanonical || !od.opData.canonicalToOperational || !od.edges?.length) {
+        return { frontEdges: [], suppliedByFaction: new Map() };
+    }
+    const frontEdges = computeFrontEdgesOsid(state, od.edges, od.opData.operationalToCanonical);
+    const reach = computeSupplyReachabilityOsid(state, od.edges, od.opData.canonicalToOperational, od.opData.operationalToCanonical);
+    const suppliedByFaction = new Map<string, ReadonlySet<string>>();
+    for (const f of reach.factions) suppliedByFaction.set(f.faction_id, new Set(f.reachable_osids));
+    return { frontEdges, suppliedByFaction };
+}
+
 export const warPhases: NamedPhase[] = [
     {
         name: 'initialize',
@@ -1168,6 +1198,26 @@ export const warPhases: NamedPhase[] = [
             const grazText = checkAndFireGrazAccords(context.state);
             if (grazText) {
                 result.fired.push({ id: 'graz_accords', text: grazText });
+            }
+        }
+    },
+    {
+        // Council fix 3 / B10 (docs/40_reports/playtests/20261114_r8_dry_rbih_council_diary.md):
+        // while the October 1995 general ceasefire holds (accept_ceasefire set the flag; it binds
+        // from the turn after the demand card fired, for the president and a bot alike), call off
+        // every offensive still planning or executing and hold every corps at Defensive. Placed directly after
+        // evaluate-events so it acts before movement, operation planning and combat. Creation
+        // paths later in the turn are gated on the same predicate (oct1995_ceasefire.ts).
+        // DETERMINISM GATE: zero mutation unless the flag is true; never set before turn 183.
+        name: 'enforce-oct1995-ceasefire',
+        run: (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            if (!isOct1995CeasefireInForce(context.state)) return;
+            const turn = context.state.meta.turn;
+            const cancelled = cancelOffensivesForOct1995Ceasefire(context.state, turn);
+            const lowered = clampCorpsStancesForOct1995Ceasefire(context.state);
+            if (cancelled.length > 0 || lowered.length > 0) {
+                context.report.oct1995_ceasefire = { cancelled_operations: cancelled, stances_lowered: lowered };
             }
         }
     },
@@ -3583,7 +3633,7 @@ export const warPhases: NamedPhase[] = [
         run: async (context) => {
             if (context.state.meta.phase !== 'war') return;
             const { loadLifecycleEvents, processLifecycleEvents } = await import('../formation_lifecycle_events.js');
-            const events = await loadLifecycleEvents();
+            const events = await loadLifecycleEvents(context.input.dataBaseDir);
             processLifecycleEvents(context.state, events);
         }
     },
@@ -3785,7 +3835,7 @@ export const warPhases: NamedPhase[] = [
         name: 'strategic-reserve-reinforcement',
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
-            context.report.strategic_reserve_reinforcement = reinforceFromStrategicReserves(context.state);
+            context.report.strategic_reserve_reinforcement = reinforceFromStrategicReserves(context.state, context.input.dataBaseDir);
         }
     },
     {
@@ -4147,7 +4197,7 @@ export const warPhases: NamedPhase[] = [
         run: async (context) => {
             if (context.state.meta.phase !== 'war') return;
             const graph = await getOperationalSettlementGraph(context);
-            await updateLegitimacyState(context.state, graph);
+            await updateLegitimacyState(context.state, graph, context.input.dataBaseDir);
             context.report.legitimacy_update = { settlements: Object.keys(context.state.political.settlements ?? {}).length };
         }
     },
@@ -4284,7 +4334,9 @@ export const warPhases: NamedPhase[] = [
 
             try {
                 // Load enriched contact graph
-                const enrichedGraph = await loadEnrichedContactGraph();
+                const enrichedGraph = await loadEnrichedContactGraph(
+                    turnDataFilePath(context, 'data/derived/settlement_contact_graph_enriched.json')
+                );
 
                 // Build state accessors
                 const accessors = buildStateAccessors(context.state);
@@ -4413,9 +4465,14 @@ export const warPhases: NamedPhase[] = [
                 }
             }
 
-            // Load settlement graph to get settlements map
+            // F1 (legacy S-id consumer sweep, 2026-11-14): settlements and supply both in the
+            // OSID id space. The legacy `settlementEdges` left every pool "unsupplied".
             const graph = await getOperationalSettlementGraph(context);
-            context.report.militia_fatigue = updateMilitiaFatigue(context.state, graph.settlements, edges, exhaustionDeltas);
+            const od = getOperationalData(context);
+            const osidSupply = od?.edges?.length
+                ? buildOsidDisplacementPressureInputs(context.state, od).suppliedByFaction
+                : undefined;
+            context.report.militia_fatigue = updateMilitiaFatigue(context.state, graph.settlements, edges, exhaustionDeltas, osidSupply);
         }
     },
     {
@@ -4424,13 +4481,17 @@ export const warPhases: NamedPhase[] = [
             const edges = context.input.settlementEdges;
             if (!edges) return;
 
-            // Load settlement graph to get settlements map
+            // DA1 (siege displacement lane, 2026-11-13): settlements, edges, front and supply
+            // all in the OSID id space. The legacy `settlementEdges` gave 0 front edges here.
             const graph = await getOperationalSettlementGraph(context);
+            const od = getOperationalData(context);
+            const pressure = buildOsidDisplacementPressureInputs(context.state, od);
             context.report.displacement = updateDisplacement(
                 context.state,
                 graph.settlements,
-                edges,
-                context.input.municipalityPopulation1991
+                od?.edges?.length ? od.edges : graph.edges,
+                context.input.municipalityPopulation1991,
+                pressure
             );
         }
     },
@@ -4440,9 +4501,13 @@ export const warPhases: NamedPhase[] = [
             const edges = context.input.settlementEdges;
             if (!edges) return;
 
-            // Load settlement graph to get settlements map
+            // F1 (legacy S-id consumer sweep, 2026-11-14): settlements, front and supply all
+            // in the OSID id space. The legacy `settlementEdges` marked 109/110 municipalities
+            // surrounded and collapsed by turn 8, pinning negotiation momentum at 1.0.
             const graph = await getOperationalSettlementGraph(context);
-            context.report.sustainability = updateSustainability(context.state, graph.settlements, edges);
+            const od = getOperationalData(context);
+            const osid = od?.edges?.length ? buildOsidDisplacementPressureInputs(context.state, od) : undefined;
+            context.report.sustainability = updateSustainability(context.state, graph.settlements, edges, osid);
         }
     },
     {
@@ -4450,7 +4515,14 @@ export const warPhases: NamedPhase[] = [
         run: (context) => {
             const edges = context.input.settlementEdges;
             if (!edges) return;
-            const derivedFrontEdges = computeFrontEdges(context.state, edges);
+            // F1: front edges in the OSID id space when operational data is present, so the
+            // step's ids match its other inputs. Breach candidates still read 0 here: they need
+            // `front_segments`/`front_pressure`, which the dormant legacy front substrate never
+            // populates in a campaign (F9/SD2, out of RF-F1 scope). Legacy edges otherwise.
+            const od = getOperationalData(context);
+            const derivedFrontEdges = od?.edges?.length
+                ? buildOsidDisplacementPressureInputs(context.state, od).frontEdges.slice()
+                : computeFrontEdges(context.state, edges);
             context.report.negotiation_pressure = updateNegotiationPressure(
                 context.state,
                 derivedFrontEdges,

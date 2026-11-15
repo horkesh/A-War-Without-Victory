@@ -14,7 +14,7 @@
  * Then PROVE determinism: replay the recorded log against a FRESH campaign and
  * assert the final state hash is byte-identical.
  *
- * Run: node node_modules/tsx/dist/cli.mjs tools/ai_play/run_president_rbih.ts
+ * Run: npx tsx tools/ai_play/run_president_rbih.ts
  */
 
 import {

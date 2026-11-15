@@ -10,7 +10,7 @@ import {
 } from '../utils/operations';
 import { FACTION_COLORS } from '../utils/theme';
 import { getOsidDisplayName } from '../utils/osidDisplayName';
-import { turnToDateString, formatOperationType, toTitleCase } from '../utils/formatters';
+import { turnToDateString, formatOperationType, toTitleCase, formatLocaleNumber } from '../utils/formatters';
 import { OfficerProfile } from './OfficerProfile';
 import { filterPlayerFacingOperations } from '../../shared/playerVisibility';
 import {
@@ -108,14 +108,14 @@ function operationPhaseLabel(operation: OperationView): string {
     : getPlayerSafeOperationPhaseLabel(operation.phase);
 }
 
-function taskForceStrengthLabel(taskForce: OperationTaskForceInspectionView, numberLocale: string): string {
+function taskForceStrengthLabel(taskForce: OperationTaskForceInspectionView, bcs: boolean): string {
   const { reportedTotal, unreportedCount } = taskForce.personnel;
   if (unreportedCount === 0) {
-    return t('operationsPanel.taskForce.strengthReported', { personnel: reportedTotal.toLocaleString(numberLocale) });
+    return t('operationsPanel.taskForce.strengthReported', { personnel: formatLocaleNumber(reportedTotal, {}, bcs) });
   }
   if (reportedTotal > 0) {
     return t('operationsPanel.taskForce.strengthPartial', {
-      personnel: reportedTotal.toLocaleString(numberLocale),
+      personnel: formatLocaleNumber(reportedTotal, {}, bcs),
       count: unreportedCount,
     });
   }
@@ -124,7 +124,7 @@ function taskForceStrengthLabel(taskForce: OperationTaskForceInspectionView, num
 
 export function OperationsPanel() {
   const [locale] = useLocale();
-  const numberLocale = locale === 'bcs' ? 'bs-BA' : 'en-US';
+  const bcsNumbers = locale === 'bcs';
   const isOpen = useGameStore((s) => s.isOperationsPanelOpen);
   const setIsOpen = useGameStore((s) => s.setIsOperationsPanelOpen);
   const selectedOperationKey = useGameStore((s) => s.selectedOperationKey);
@@ -471,7 +471,7 @@ export function OperationsPanel() {
                       <div className="text-text-primary">
                         {t('operationsPanel.taskForce.participants', { count: selectedTaskForce.participants.length })}
                       </div>
-                      <div className="text-text-primary">{taskForceStrengthLabel(selectedTaskForce, numberLocale)}</div>
+                      <div className="text-text-primary">{taskForceStrengthLabel(selectedTaskForce, bcsNumbers)}</div>
                       <div className="text-text-primary">
                         {t('operationsPanel.taskForce.goals', { count: selectedTaskForce.goalCount })}
                       </div>
@@ -501,7 +501,7 @@ export function OperationsPanel() {
                           <span className="text-text-primary">{getPlayerSafeBrigadeName(participant.name)}</span>
                           <span className="shrink-0 tabular-nums text-text-secondary">
                             {typeof participant.personnel === 'number' && Number.isFinite(participant.personnel)
-                              ? t('operationsPanel.taskForce.participantPersonnel', { personnel: participant.personnel.toLocaleString(numberLocale) })
+                              ? t('operationsPanel.taskForce.participantPersonnel', { personnel: formatLocaleNumber(participant.personnel, {}, bcsNumbers) })
                               : t('operationsPanel.taskForce.participantPersonnelUnreported')}
                           </span>
                         </div>

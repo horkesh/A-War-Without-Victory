@@ -67,7 +67,7 @@ describe('onboarding spotlight targets', () => {
         expect(byId.get('03_brief')?.body).toContain('RECORDS opens the Army HQ records view');
         expect(byId.get('03_brief')?.body).toContain('CODEX keeps historical context close');
         expect(byId.get('05_decide')?.body).toBe(
-            "Before you advance the turn, the President's Desk surfaces every pending choice. Each row opens its resolver or the staff panel it came from -- open it, decide, return. Resolve what you can; defer what you must.",
+            "Before you advance the turn, the President's Desk lists every pending choice. Open each one, see what it needs from you, decide, and return to the desk. Resolve what you can; defer what you must.",
         );
     });
 

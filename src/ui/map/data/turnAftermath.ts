@@ -7,6 +7,8 @@ import { turnToDateString } from '../utils/formatters';
 import { getOsidDisplayName } from '../utils/osidDisplayName';
 import { t, type MessageKey } from '../i18n';
 import { playerFactionMatch } from './playerFactionMatch';
+import { resolveEventDisplayTitle } from './eventDisplayCopy';
+import { getPlayerSafeCorpsName, getPlayerSafeDisplayLabel } from '../utils/playerSafeText';
 
 export type TurnAftermathTone = 'gain' | 'loss' | 'mixed' | 'quiet';
 export type TurnAftermathCostSeverity = 'low' | 'moderate' | 'severe' | 'critical';
@@ -155,6 +157,13 @@ export interface TurnAftermathCampaignCostView {
   } | null;
 }
 
+export interface TurnAftermathLostFormation {
+  id: string;
+  name: string;
+  /** The corps it belonged to, when the order of battle still carries that link. */
+  corpsName: string | null;
+}
+
 export interface TurnAftermathView {
   turn: number;
   dateLabel: string;
@@ -185,6 +194,12 @@ export interface TurnAftermathView {
     destroyed: number;
     ownSpawned: number;
     ownDestroyed: number;
+    /**
+     * The player's own formations lost or destroyed this week, by name and corps. Own formations
+     * only: the player-visible projection never carries the opponent's destructions, so an enemy
+     * loss stays a count.
+     */
+    ownDestroyedList?: TurnAftermathLostFormation[];
   };
   supply: {
     ownSupplyDelta: number;
@@ -234,7 +249,7 @@ const TURN_AFTERMATH_TERRITORY_KEYS = ['friendlyNet', 'gains', 'losses', 'breakd
 const TURN_AFTERMATH_FLIP_KEYS = ['osid', 'label', 'direction', 'significance', 'from', 'to'] as const;
 const TURN_AFTERMATH_COMBAT_KEYS = ['battleCount', 'friendlyBattleCount', 'friendlyCasualties', 'opposingCasualties', 'territoryFlipsFromBattles'] as const;
 const TURN_AFTERMATH_HUMANITARIAN_KEYS = ['displacedThisTurn', 'hotspotLabel'] as const;
-const TURN_AFTERMATH_FORMATION_KEYS = ['spawned', 'destroyed', 'ownSpawned', 'ownDestroyed'] as const;
+const TURN_AFTERMATH_FORMATION_KEYS = ['spawned', 'destroyed', 'ownSpawned', 'ownDestroyed', 'ownDestroyedList'] as const;
 const TURN_AFTERMATH_SUPPLY_KEYS = ['ownSupplyDelta', 'ownHeavyMunitionsDelta'] as const;
 const TURN_AFTERMATH_COST_KEYS = [
   'friendlyMilitaryCasualties',
@@ -317,9 +332,250 @@ export function classifyTurnAftermathWeight(view: TurnAftermathView): TurnAfterm
   return 'quiet';
 }
 
-export function buildTurnAftermathDigest(_view: TurnAftermathView): TurnAftermathDigest {
+/**
+ * The bottom-strip line after the week's dispatch is closed: the dispatch headline,
+ * with a button that reopens it. Built from the week's real view, never fixed copy.
+ */
+export function buildTurnAftermathDigest(view: TurnAftermathView): TurnAftermathDigest {
   return {
-    headline: t('aftermath.digest.quiet'),
+    headline: buildTurnAftermathDispatch({ view }).headline,
+  };
+}
+
+// ── "This week" dispatch (command-loop proposal §4 2B) ──────────────────────────
+// The compact view the turn aftermath opens on after every Advance. At most six lines;
+// a line with nothing to report is left out, and a quiet week gets two lines. Every
+// figure comes from the existing TurnAftermathView and the week's receipts, so the
+// dispatch adds no engine or state reads of its own.
+
+export type TurnAftermathDispatchLineKind = 'ground' | 'fighting' | 'cost' | 'orders' | 'needs' | 'quiet';
+export type TurnAftermathDispatchHeadlineKind = 'territory' | 'formations' | 'decisions' | 'fighting' | 'quiet';
+
+export interface TurnAftermathDispatchPlace {
+  osid: string;
+  label: string;
+  direction: 'gain' | 'loss';
+}
+
+export interface TurnAftermathDispatchLine {
+  kind: TurnAftermathDispatchLineKind;
+  text: string;
+  /** Where the line's figures come from, shown beside them. */
+  basis?: string;
+  /** Up to three named gains or losses (ground line only). */
+  places?: TurnAftermathDispatchPlace[];
+  /** Decisions that need the president (needs line only). */
+  required?: number;
+  recommended?: number;
+}
+
+export interface TurnAftermathDispatch {
+  dateLabel: string;
+  headline: string;
+  headlineKind: TurnAftermathDispatchHeadlineKind;
+  quiet: boolean;
+  lines: TurnAftermathDispatchLine[];
+}
+
+export interface TurnAftermathDispatchInput {
+  view: TurnAftermathView;
+  consequences?: readonly { id: string }[];
+  forcedOps?: readonly { id: string; opName: string; outcome: string }[];
+  officerResentment?: readonly { id: string; officerName: string }[];
+}
+
+/** The dispatch never shows more than six lines, the headline included. */
+export const TURN_AFTERMATH_DISPATCH_MAX_LINES = 5;
+/** Supply appears in the cost line only once the week's spending crosses this. */
+const DISPATCH_SUPPLY_THRESHOLD = 10;
+const DISPATCH_MAX_PLACES = 3;
+
+function countKey(count: number, one: MessageKey, many: MessageKey): MessageKey {
+  return count === 1 ? one : many;
+}
+
+function signedCount(value: number): string {
+  return value > 0 ? `+${value}` : String(value);
+}
+
+function buildDispatchHeadline(view: TurnAftermathView): { kind: TurnAftermathDispatchHeadlineKind; text: string } {
+  // Fixed order: territory, then formations, then decisions (proposal §4 2B, line 1).
+  const net = view.territory.friendlyNet;
+  if (net > 0) {
+    return { kind: 'territory', text: t(countKey(net, 'dispatch.headline.gained.one', 'dispatch.headline.gained.many'), { count: net }) };
+  }
+  if (net < 0) {
+    const lost = Math.abs(net);
+    return { kind: 'territory', text: t(countKey(lost, 'dispatch.headline.lost.one', 'dispatch.headline.lost.many'), { count: lost }) };
+  }
+  if (view.territory.gains > 0 || view.territory.losses > 0) {
+    return { kind: 'territory', text: t('dispatch.headline.traded') };
+  }
+  const destroyed = Math.max(view.formations.ownDestroyed, view.cost.ownFormationsDestroyed);
+  if (destroyed > 0) {
+    return { kind: 'formations', text: t(countKey(destroyed, 'dispatch.headline.destroyed.one', 'dispatch.headline.destroyed.many'), { count: destroyed }) };
+  }
+  if (view.formations.ownSpawned > 0) {
+    const raised = view.formations.ownSpawned;
+    return { kind: 'formations', text: t(countKey(raised, 'dispatch.headline.raised.one', 'dispatch.headline.raised.many'), { count: raised }) };
+  }
+  if (view.nextActions.blockingCount > 0) {
+    const required = view.nextActions.blockingCount;
+    return { kind: 'decisions', text: t(countKey(required, 'dispatch.headline.required.one', 'dispatch.headline.required.many'), { count: required }) };
+  }
+  if (view.nextActions.actionableCount > 0) {
+    const waiting = view.nextActions.actionableCount;
+    return { kind: 'decisions', text: t(countKey(waiting, 'dispatch.headline.waiting.one', 'dispatch.headline.waiting.many'), { count: waiting }) };
+  }
+  if (view.combat.friendlyBattleCount > 0) {
+    return { kind: 'fighting', text: t('dispatch.headline.foughtNoChange') };
+  }
+  return { kind: 'quiet', text: t('dispatch.headline.quiet') };
+}
+
+function buildDispatchGround(view: TurnAftermathView): TurnAftermathDispatchLine | null {
+  const { friendlyNet, gains, losses, breakdownComplete, notable } = view.territory;
+  if (friendlyNet === 0 && gains === 0 && losses === 0) return null;
+  const places = notable
+    .filter((flip): flip is TurnAftermathFlipView & { direction: 'gain' | 'loss' } => flip.direction === 'gain' || flip.direction === 'loss')
+    .map((flip) => ({ osid: flip.osid, label: flip.label, direction: flip.direction }))
+    .sort((a, b) => (
+      (a.direction === b.direction ? 0 : a.direction === 'gain' ? -1 : 1)
+      || strictStringCompare(a.label, b.label)
+      || strictStringCompare(a.osid, b.osid)
+    ))
+    .slice(0, DISPATCH_MAX_PLACES);
+  const text = breakdownComplete
+    ? t('dispatch.ground.breakdown', { net: signedCount(friendlyNet), gained: gains, lost: losses })
+    : t('dispatch.ground.net', { net: signedCount(friendlyNet) });
+  return { kind: 'ground', text, basis: t('dispatch.basis.controlRecord'), places };
+}
+
+function buildDispatchFighting(view: TurnAftermathView): TurnAftermathDispatchLine | null {
+  const { battleCount, friendlyBattleCount, friendlyCasualties, opposingCasualties } = view.combat;
+  if (battleCount === 0 && friendlyBattleCount === 0) return null;
+  const battles = t('dispatch.fighting.battles', { ours: friendlyBattleCount, total: battleCount });
+  const text = friendlyBattleCount > 0
+    ? `${battles} · ${t('dispatch.fighting.losses', { ours: formatDispatchCount(friendlyCasualties), theirs: formatDispatchCount(opposingCasualties) })}`
+    : battles;
+  return { kind: 'fighting', text, basis: t('dispatch.basis.battleReports') };
+}
+
+function formatDispatchCount(value: number): string {
+  return Number.isFinite(value) ? String(Math.round(value)) : t('dispatch.unreported');
+}
+
+/** At most three names on the dispatch line, each with its corps; the rest are counted. */
+const DISPATCH_LOST_NAMES_SHOWN = 3;
+
+function formatLostFormationNames(named: readonly TurnAftermathLostFormation[], total: number): string {
+  const shown = named.slice(0, DISPATCH_LOST_NAMES_SHOWN).map((formation) => (
+    formation.corpsName
+      ? t('dispatch.cost.formationsLostWithCorps', { name: formation.name, corps: formation.corpsName })
+      : formation.name
+  ));
+  const unnamed = Math.max(0, total - shown.length);
+  if (unnamed > 0) shown.push(t('dispatch.cost.formationsLostMore', { count: unnamed }));
+  return shown.join(', ');
+}
+
+function buildDispatchCost(view: TurnAftermathView): TurnAftermathDispatchLine | null {
+  const parts: string[] = [];
+  const displaced = view.cost.displacedThisTurn;
+  if (displaced > 0) {
+    parts.push(view.humanitarian.hotspotLabel
+      ? t('dispatch.cost.displacedAt', { count: formatDispatchCount(displaced), place: view.humanitarian.hotspotLabel })
+      : t('dispatch.cost.displaced', { count: formatDispatchCount(displaced) }));
+  }
+  const lost = view.cost.ownFormationsDestroyed;
+  if (lost > 0) {
+    const named = view.formations.ownDestroyedList ?? [];
+    parts.push(named.length > 0
+      ? t(countKey(lost, 'dispatch.cost.formationsLostNamed.one', 'dispatch.cost.formationsLostNamed.many'), {
+        count: lost,
+        names: formatLostFormationNames(named, lost),
+      })
+      : t(countKey(lost, 'dispatch.cost.formationsLost.one', 'dispatch.cost.formationsLost.many'), { count: lost }));
+  }
+  const spent = view.cost.ownSupplySpent + view.cost.ownHeavyMunitionsSpent;
+  if (spent >= DISPATCH_SUPPLY_THRESHOLD) {
+    parts.push(t('dispatch.cost.supplySpent', { count: spent }));
+  }
+  if (parts.length === 0) return null;
+  return { kind: 'cost', text: parts.join(' · '), basis: t('dispatch.basis.weekSummary') };
+}
+
+function buildDispatchOrders(input: TurnAftermathDispatchInput): TurnAftermathDispatchLine | null {
+  const { view } = input;
+  const parts: string[] = [];
+  const forcedOps = [...(input.forcedOps ?? [])].sort((a, b) => strictStringCompare(a.id, b.id));
+  for (const op of forcedOps.slice(0, 2)) {
+    parts.push(t('dispatch.orders.forcedOp', {
+      op: op.opName,
+      outcome: t(`turnAftermath.opOutcome.${op.outcome}` as MessageKey),
+    }));
+  }
+  const rows = view.commandRecord?.rows ?? [];
+  const asIssued = rows.filter((row) => row.interpretation === 'as_issued').length;
+  const reinterpreted = rows.filter((row) => row.interpretation === 'reinterpreted').length;
+  if (asIssued > 0 || reinterpreted > 0) {
+    parts.push(t('dispatch.orders.corps', { asIssued, reinterpreted }));
+  }
+  const warned = input.consequences?.length ?? 0;
+  if (warned > 0) {
+    parts.push(t(countKey(warned, 'dispatch.orders.warned.one', 'dispatch.orders.warned.many'), { count: warned }));
+  }
+  const resentful = [...(input.officerResentment ?? [])].sort((a, b) => strictStringCompare(a.id, b.id));
+  if (resentful.length > 0) {
+    parts.push(t('dispatch.orders.resentment', { officer: resentful[0].officerName }));
+  }
+  if (parts.length === 0) return null;
+  return { kind: 'orders', text: parts.join(' · ') };
+}
+
+function buildDispatchNeeds(view: TurnAftermathView): TurnAftermathDispatchLine | null {
+  const required = view.nextActions.blockingCount;
+  const recommended = Math.max(0, view.nextActions.actionableCount - required);
+  if (required === 0 && recommended === 0) return null;
+  return {
+    kind: 'needs',
+    text: t('dispatch.needs.counts', { required, recommended }),
+    required,
+    recommended,
+  };
+}
+
+function buildDispatchQuietLine(view: TurnAftermathView): TurnAftermathDispatchLine {
+  const supply = view.supply.ownSupplyDelta;
+  const heavy = view.supply.ownHeavyMunitionsDelta;
+  const parts = [t('dispatch.quiet.held')];
+  parts.push(supply === 0 && heavy === 0
+    ? t('dispatch.quiet.supplyUnchanged')
+    : t('dispatch.quiet.supply', { supply: signedCount(supply), heavy: signedCount(heavy) }));
+  if (view.formations.ownSpawned > 0) {
+    parts.push(t(countKey(view.formations.ownSpawned, 'dispatch.quiet.raised.one', 'dispatch.quiet.raised.many'), { count: view.formations.ownSpawned }));
+  }
+  return { kind: 'quiet', text: parts.join(' ') };
+}
+
+export function buildTurnAftermathDispatch(input: TurnAftermathDispatchInput): TurnAftermathDispatch {
+  const { view } = input;
+  const headline = buildDispatchHeadline(view);
+  const lines = [
+    buildDispatchGround(view),
+    buildDispatchFighting(view),
+    buildDispatchCost(view),
+    buildDispatchOrders(input),
+    buildDispatchNeeds(view),
+  ].filter((line): line is TurnAftermathDispatchLine => line !== null)
+    .slice(0, TURN_AFTERMATH_DISPATCH_MAX_LINES);
+  const quiet = lines.length === 0;
+  return {
+    dateLabel: view.dateLabel,
+    headline: headline.text,
+    headlineKind: headline.kind,
+    quiet,
+    lines: quiet ? [buildDispatchQuietLine(view)] : lines,
   };
 }
 
@@ -682,7 +938,7 @@ function buildStrategicSignals(
     signals.push({
       id: `event:${event.id}`,
       kind: 'event',
-      label: event.text,
+      label: resolveEventDisplayTitle(event.id, event.text),
       detail: t('turnAftermath.signal.detail.historicalEvent'),
       severity: 'notable',
     });
@@ -892,6 +1148,32 @@ function emptyNextActions(): TurnAftermathView['nextActions'] {
   };
 }
 
+/**
+ * The week's own destroyed or disbanded formations by name, each with its corps when the order of
+ * battle still links it. Only the player's faction (the projection already drops the rest), sorted
+ * by id so the order is stable.
+ */
+function buildOwnDestroyedList(
+  summary: TurnSummary | null,
+  state: LoadedGameState,
+  playerFaction: string | null,
+): TurnAftermathLostFormation[] {
+  if (!summary || !playerFaction) return [];
+  const byId = new Map((state.formations ?? []).map((formation) => [formation.id, formation]));
+  return (summary.formation_destructions ?? [])
+    .filter((destruction) => destruction.faction === playerFaction)
+    .map((destruction): TurnAftermathLostFormation => {
+      const corpsId = byId.get(destruction.formation_id)?.corps_id;
+      const corps = corpsId ? byId.get(corpsId) : undefined;
+      return {
+        id: destruction.formation_id,
+        name: getPlayerSafeDisplayLabel(destruction.formation_name || destruction.formation_id, 'Formation'),
+        corpsName: corps ? getPlayerSafeCorpsName(corps.name, corps.id) : null,
+      };
+    })
+    .sort((a, b) => strictStringCompare(a.id, b.id));
+}
+
 export function buildTurnAftermathView(input: TurnAftermathBuildInput): TurnAftermathView | null {
   const nextState = input.nextState;
   if (!nextState) return null;
@@ -982,6 +1264,7 @@ export function buildTurnAftermathView(input: TurnAftermathBuildInput): TurnAfte
       destroyed: narratedSummary?.formation_destructions.length ?? 0,
       ownSpawned: (narratedSummary?.formation_spawns ?? []).filter((formation) => formation.faction === playerFaction).length,
       ownDestroyed: ownFormationsDestroyed,
+      ownDestroyedList: buildOwnDestroyedList(narratedSummary, nextState, playerFaction),
     },
     supply: {
       ownSupplyDelta: playerFaction ? (narratedSummary?.supply_deltas?.[playerFaction] ?? 0) : 0,

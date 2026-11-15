@@ -31,6 +31,14 @@ function parseOfficerSuccessionPolicy(argv) {
 
 const officerSuccessionPolicy = parseOfficerSuccessionPolicy(process.argv);
 const maxTurns = Number(process.argv.find((arg) => arg.startsWith('--turns='))?.split('=')[1] ?? '10');
+function parseWindowSize(argv) {
+  const raw = argv.find((arg) => arg.startsWith('--window-size='))?.slice('--window-size='.length);
+  if (raw === undefined) return null;
+  const match = /^(\d{3,5})x(\d{3,5})$/.exec(raw);
+  if (!match) throw new Error(`--window-size must be WIDTHxHEIGHT, got: ${raw}`);
+  return { width: Number(match[1]), height: Number(match[2]) };
+}
+const requestedWindowSize = parseWindowSize(process.argv);
 const runLabel = process.argv.find((arg) => arg.startsWith('--label='))?.split('=')[1] ?? 'run';
 const skipInitialTour = args.has('--skip-initial-tour');
 const skipCheckpointTour = args.has('--no-checkpoint-tour');
@@ -38,12 +46,64 @@ const checkpointTurnsArg = process.argv.find((arg) => arg.startsWith('--checkpoi
 const lightCheckpointTour = args.has('--light-checkpoint-tour');
 const writeLiveEvents = args.has('--live-events');
 const strategicRun = args.has('--strategic');
+
+// --strategic-autonomy=<1|2>: the Command Autonomy level a --strategic run selects. The default is 2
+// (Delegated), the level a new campaign starts at, so strategic evidence plays the game a new player
+// gets. Level 1 (Assisted) stays available on request; before the PK1 fix (2026-11-14) it also froze
+// every bot corps commander, so R8 runs taken at level 1 before that fix understate the bot side.
+const STRATEGIC_AUTONOMY_LEVELS = [1, 2];
+const DEFAULT_STRATEGIC_AUTONOMY_LEVEL = 2;
+
+function parseStrategicAutonomyLevel(argv, strategic) {
+  const prefix = '--strategic-autonomy=';
+  const optionArgs = argv.filter((arg) => arg === '--strategic-autonomy' || arg.startsWith(prefix));
+  if (optionArgs.length === 0) return DEFAULT_STRATEGIC_AUTONOMY_LEVEL;
+  if (optionArgs.length !== 1) throw new Error('--strategic-autonomy must be provided exactly once');
+  if (!strategic) throw new Error('--strategic-autonomy requires --strategic');
+  const raw = optionArgs[0] === '--strategic-autonomy' ? '' : optionArgs[0].slice(prefix.length);
+  const level = /^\d$/.test(raw) ? Number(raw) : Number.NaN;
+  if (!STRATEGIC_AUTONOMY_LEVELS.includes(level)) {
+    throw new Error(`Unknown --strategic-autonomy level: ${raw || 'empty'} (expected ${STRATEGIC_AUTONOMY_LEVELS.join(' or ')})`);
+  }
+  return level;
+}
+
+const strategicAutonomyLevel = parseStrategicAutonomyLevel(process.argv, strategicRun);
 const autoRecruit = args.has('--auto-recruit');
 const requireRecruitment = args.has('--require-recruitment');
 const contextChurnCycles = Number(process.argv.find((arg) => arg.startsWith('--context-churn='))?.split('=')[1] ?? '0');
 const finalCheckpointTour = args.has('--final-checkpoint-tour');
 const saveLoadProof = args.has('--save-load-proof');
 const saveLoadOnly = args.has('--save-load-only');
+// --dayton-sign-verdict: when Dayton opens, SIGN the agreement (instead of declining), capture the
+// signing beat and the Verdict screen, then finish the run cleanly. Use from a late-campaign save.
+// --endgame-render-tour adds the render-check tour (every Dayton room panel with its rail state and
+// focus return, the cap warning, signing-beat measurements, each side's Verdict, and an export of the
+// real post-sign state) to the same segment.
+const endgameRenderTour = args.has('--endgame-render-tour');
+const daytonSignVerdict = args.has('--dayton-sign-verdict') || endgameRenderTour;
+class DaytonVerdictCaptured extends Error {
+  constructor(evidence) {
+    super('Dayton signed and Verdict captured');
+    this.name = 'DaytonVerdictCaptured';
+    this.evidence = evidence;
+  }
+}
+const daytonVerdictSegment = { evidence: null };
+// Called from runFaction's playTurns(...).catch: the sentinel is a finished run (still subject to
+// the readability gate); any other error stays an error.
+function settleDaytonVerdictSegment(error, events) {
+  if (!(error instanceof DaytonVerdictCaptured)) throw error;
+  daytonVerdictSegment.evidence = error.evidence;
+  // No exemptions: the signing plate's captions and the delegation folder's chips were exempted
+  // while they were under 12 px and under 4.5:1; both are fixed, so every finding fails the run.
+  const failures = collectReadabilityFailures(events);
+  if (failures.length > 0) {
+    writeJsonAtomic(readabilityDiagnosticsPath, failures);
+    throw new Error(`Readability diagnostics detected: ${JSON.stringify(failures.slice(0, 40))}`);
+  }
+  return null;
+}
 const historicalChoice = args.has('--historical-choice');
 const archiveTurnAutosaves = args.has('--archive-turn-autosaves');
 const collectCdpNetworkV3 = args.has('--cdp-network-collection-v3');
@@ -125,6 +185,23 @@ function parseRsDrinaPolicyOverride(argv, historical, selectedFactions) {
   };
 }
 
+// --event-policy=<eventId>:<responseId> (repeatable): operator-named answers for decisions that
+// are authored with no historical default (see policyEventResponseControl). Historical-choice only.
+function parseEventPolicyOverrides(argv, historical) {
+  const prefix = '--event-policy=';
+  const entries = argv.filter((arg) => arg.startsWith(prefix)).map((arg) => arg.slice(prefix.length));
+  const map = new Map();
+  for (const entry of entries) {
+    const [eventId, responseId, ...rest] = entry.split(':');
+    if (!eventId || !responseId || rest.length > 0) throw new Error(`--event-policy must be <eventId>:<responseId>: ${entry}`);
+    if (map.has(eventId)) throw new Error(`--event-policy given twice for ${eventId}`);
+    map.set(eventId, responseId);
+  }
+  if (map.size > 0 && !historical) throw new Error('--event-policy requires --historical-choice');
+  return map;
+}
+const eventPolicyOverrides = parseEventPolicyOverrides(process.argv, historicalChoice);
+
 function hasMeaningfulSourceContent(value, prefix) {
   if (typeof value !== 'string') return false;
   const labelIndex = value.toLocaleLowerCase('en-US').lastIndexOf(prefix.toLocaleLowerCase('en-US'));
@@ -169,6 +246,25 @@ async function policyEventResponseControl(surface) {
       basis: 'player_selected_counterfactual',
       historicityClaim: 'none_counterfactual_player_choice',
       requestedOverride: { ...rsDrinaPolicyOverride },
+    };
+  } else if (eventPolicyOverrides.has(eventId)) {
+    // Operator-named answer for a recurring design-counterfactual decision that is authored
+    // WITHOUT a historical default or staff recommendation (strategic_posture_review_rbih/_rs).
+    // It claims no historicity, and refuses to act once the event gains an authored answer.
+    const requested = eventPolicyOverrides.get(eventId);
+    const options = decision.response_options ?? [];
+    if (decision.historical_default_response_id
+      || decision.staff_recommended_response_id
+      || options.some((option) => option.historical_marker === 'historical_default')) {
+      throw new Error(`--event-policy refuses ${eventId}: it now has an authored default or staff recommendation`);
+    }
+    const matchingOptions = options.filter((option) => option.id === requested);
+    if (matchingOptions.length !== 1) throw new Error(`--event-policy ${eventId}: option ${requested} is missing or ambiguous`);
+    selected = {
+      ...matchingOptions[0],
+      basis: 'player_selected_counterfactual',
+      historicityClaim: 'none_counterfactual_player_choice',
+      requestedOverride: { eventId, requested, version: 1, provenance: 'explicit_operator_event_policy' },
     };
   } else {
     selected = selectHistoricalEventChoice(decision);
@@ -222,9 +318,7 @@ async function policyEventResponseControl(surface) {
           sourceLocation = 'decision_context_dossier';
         }
       }
-      if (sourceLocation === 'not_required') {
-        throw new Error(`Historical-choice source note unavailable: ${eventId}/${selected.id}`);
-      }
+      if (sourceLocation === 'not_required') throw new Error(`Historical-choice source note unavailable: ${eventId}/${selected.id}`);
     }
   }
   return { loc, choice: { eventId, responseId: selected.id, responseLabel: selected.label, basis: selected.basis, source, sourceLocation, turn: raw.meta.turn, faction: raw.meta.player_faction, options: decision.response_options.map(option => ({ id: option.id, label: option.label })), playerInput: true, ...(selected.basis === 'player_selected_counterfactual' ? { historicityClaim: selected.historicityClaim, requestedOverride: selected.requestedOverride } : {}) } };
@@ -733,7 +827,20 @@ function projectCanonicalDecisionReceipts(state, playerFaction) {
 
 function readCanonicalDecisionReceiptsFromAutosave(autosavePath, playerFaction) {
   if (!fs.existsSync(autosavePath)) throw new Error(`Canonical autosave missing for decision receipt proof: ${autosavePath}`);
-  return projectCanonicalDecisionReceipts(JSON.parse(fs.readFileSync(autosavePath, 'utf8')), playerFaction);
+  // A saved-turn write can overlap this read (the app wrote the file in place before the atomic
+  // write fix). A torn read is a SyntaxError on a multi-MB file: re-read a few times, and rethrow
+  // the last error so a genuinely corrupt save still fails loudly.
+  let lastError = null;
+  for (let attempt = 0; attempt < 6; attempt += 1) {
+    try {
+      return projectCanonicalDecisionReceipts(JSON.parse(fs.readFileSync(autosavePath, 'utf8')), playerFaction);
+    } catch (error) {
+      if (!(error instanceof SyntaxError)) throw error;
+      lastError = error;
+      Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 500);
+    }
+  }
+  throw lastError;
 }
 
 function resolveDecisionReceiptAutosavePath(
@@ -749,14 +856,23 @@ function resolveDecisionReceiptAutosavePath(
 function buildPlayerBlockerInventory(raw, playerFaction, known) {
   const military = raw?.military ?? {};
   const proposals = Array.isArray(raw?.meta?.pending_proposal_reviews) ? raw.meta.pending_proposal_reviews : [];
+  const currentTurn = raw?.meta?.turn;
+  // An opportunity is covered while its review is still open, AND once the player's decision for
+  // THIS turn is recorded on the review: the desktop bridge records intent only and the war
+  // pipeline applies it at advance, so the opportunity itself stays eligible_pending_review until
+  // then (resolve-operation-opportunity-decision in electron-main.cjs). Counting that state as a
+  // blocker stopped the R8 dry run at turn 113 right after three visible approvals.
   const coveredOpportunityIds = new Set(proposals
     .filter((proposal) => proposal
       && (!playerFaction || proposal.faction === playerFaction)
-      && proposal.accepted == null
-      && proposal.opportunity_decision == null
-      && proposal.resolved_turn == null
       && typeof proposal.proposed_action === 'string'
-      && proposal.proposed_action.startsWith('OPPORTUNITY:'))
+      && proposal.proposed_action.startsWith('OPPORTUNITY:')
+      && ((proposal.accepted == null
+        && proposal.opportunity_decision == null
+        && proposal.resolved_turn == null)
+        || (proposal.opportunity_decision != null
+          && Number.isInteger(currentTurn)
+          && proposal.resolved_turn === currentTurn)))
     .map((proposal) => proposal.proposed_action.slice('OPPORTUNITY:'.length)));
   const reserves = (Array.isArray(military.pending_reserve_requests) ? military.pending_reserve_requests : [])
     .filter((request) => request && (!playerFaction || request.faction === playerFaction)).length;
@@ -958,9 +1074,67 @@ function replaceFileSync(tmpPath, filePath) {
   }
 }
 
+// Streams `value` as JSON.stringify(value, null, 2) would, but a piece at a time. A full 188-turn
+// run's result object exceeds V8's maximum string length (about 512 MB), so a single stringify
+// crashed the harness after the campaign had finished (R8 dry run, RBiH). Leaves are written with
+// JSON.stringify itself, so escaping and number formatting are identical; only the containers
+// (objects, arrays) are walked here.
+function writeJsonStream(fd, value) {
+  let buffer = '';
+  const flush = () => {
+    if (buffer.length === 0) return;
+    fs.writeSync(fd, buffer);
+    buffer = '';
+  };
+  const emit = (text) => {
+    buffer += text;
+    if (buffer.length >= 1 << 20) flush();
+  };
+  const walk = (node, indent, depth) => {
+    if (depth > 400) throw new TypeError('Converting circular structure to JSON');
+    if (node !== null && typeof node === 'object' && typeof node.toJSON === 'function') node = node.toJSON();
+    if (node === null || typeof node !== 'object') {
+      const leaf = JSON.stringify(node);
+      emit(leaf === undefined ? 'null' : leaf);
+      return;
+    }
+    const inner = `${indent}  `;
+    if (Array.isArray(node)) {
+      if (node.length === 0) { emit('[]'); return; }
+      emit('[\n');
+      node.forEach((item, index) => {
+        emit(inner);
+        walk(item, inner, depth + 1);
+        emit(index < node.length - 1 ? ',\n' : '\n');
+      });
+      emit(`${indent}]`);
+      return;
+    }
+    const keys = Object.keys(node).filter((key) => {
+      const member = node[key];
+      return member !== undefined && typeof member !== 'function' && typeof member !== 'symbol';
+    });
+    if (keys.length === 0) { emit('{}'); return; }
+    emit('{\n');
+    keys.forEach((key, index) => {
+      emit(`${inner}${JSON.stringify(key)}: `);
+      walk(node[key], inner, depth + 1);
+      emit(index < keys.length - 1 ? ',\n' : '\n');
+    });
+    emit(`${indent}}`);
+  };
+  walk(value, '', 0);
+  flush();
+}
+
 function writeJsonAtomic(filePath, value) {
   const tmpPath = `${filePath}.tmp-${process.pid}`;
-  fs.writeFileSync(tmpPath, JSON.stringify(value, null, 2));
+  const fd = fs.openSync(tmpPath, 'w');
+  try {
+    writeJsonStream(fd, value);
+  } finally {
+    fs.closeSync(fd);
+  }
   replaceFileSync(tmpPath, filePath);
 }
 
@@ -1246,6 +1420,9 @@ async function textDiagnostics(surface) {
     ) ?? null;
     const textOcclusion = (node, rect) => {
       if (outsideScrollableAncestor(node, rect)) return { occluded: false, occlusionHits: [] };
+      // Content in an inert layer (the Dayton room behind an open panel) is covered on purpose and
+      // is neither focusable nor read; an open panel over it is not an occlusion defect.
+      if (node.closest('[inert]')) return { occluded: false, occlusionHits: [] };
       const points = [
         [rect.left + rect.width / 2, rect.top + rect.height / 2],
         [rect.left + Math.min(3, rect.width / 2), rect.top + rect.height / 2],
@@ -1342,7 +1519,10 @@ async function textDiagnostics(surface) {
             || parent.closest('[aria-label], [title]')?.getAttribute('aria-label')
             || parent.closest('[aria-label], [title]')?.getAttribute('title')
             || '';
-          const accessibleFullText = accessibleText.trim().length >= text.length;
+          // A labelled, keyboard-focusable scroll region (role=region, tabindex=0, aria-label) keeps all
+          // of its text reachable by scrolling; text clipped inside one is not hidden from anyone.
+          const insideFocusableScrollRegion = Boolean(parent.closest('[role="region"][tabindex="0"][aria-label]'));
+          const accessibleFullText = accessibleText.trim().length >= text.length || insideFocusableScrollRegion;
           const foreground = parseColor(style.color);
           const background = solidBackground(parent, rangeRect);
           const ratio = foreground && background
@@ -2329,6 +2509,8 @@ function verifyArchivedEvidence(record, label) {
 }
 
 function finalizeEvidenceManifest(faction, initialEvidence, playtest) {
+  // The sign-and-verdict segment ends the campaign by design: no final autosave exists to seal.
+  if (playtest == null && daytonVerdictSegment.evidence) return null;
   const initial = verifyArchivedEvidence(initialEvidence?.initialAutosaveEvidence, `${faction} initial autosave`);
   const final = verifyArchivedEvidence(playtest?.finalAutosaveEvidence, `${faction} final autosave`);
   const manifest = {
@@ -2405,18 +2587,18 @@ async function configureStrategicRun(frame) {
   if (!openedArmyHq) return { ok: false, error: 'army-hq-route-unavailable' };
   const openedPersonnel = await clickAndMeasure(frame, /^Personnel$|army-hq-tab-personnel/i, 'strategic personnel', { afterMs: 700 });
   const openedAutonomy = await clickTestId(frame, 'personnel-open-autonomy', 'strategic autonomy route', { afterMs: 700 });
-  const assistedAutonomyLevel = 1;
+  const targetAutonomyLevel = strategicAutonomyLevel;
   const autonomyBeforeSelection = openedAutonomy && !resumeSavePath
     ? await readState(frame).catch(() => null)
     : null;
   const autonomyExpectation = openedAutonomy && !resumeSavePath
-    ? predictStrategicAutonomySelection(autonomyBeforeSelection?.autonomyLevel, assistedAutonomyLevel)
+    ? predictStrategicAutonomySelection(autonomyBeforeSelection?.autonomyLevel, targetAutonomyLevel)
     : null;
-  const selectedAssisted = openedAutonomy
-    ? await clickTestId(frame, 'autonomy-level-1', 'strategic autonomy assisted', { afterMs: 900 })
+  const selectedAutonomy = openedAutonomy
+    ? await clickTestId(frame, `autonomy-level-${targetAutonomyLevel}`, `strategic autonomy level ${targetAutonomyLevel}`, { afterMs: 900 })
     : false;
-  const configuredState = selectedAssisted ? await readState(frame).catch(() => null) : null;
-  const autonomyProof = selectedAssisted && !resumeSavePath
+  const configuredState = selectedAutonomy ? await readState(frame).catch(() => null) : null;
+  const autonomyProof = selectedAutonomy && !resumeSavePath
     ? assertStrategicAutonomyState(
       'Strategic setup transition mismatch',
       configuredState,
@@ -2426,11 +2608,12 @@ async function configureStrategicRun(frame) {
     : null;
   await closeOpenSurface(frame);
   return {
-    ok: Boolean(openedPersonnel?.clicked && openedAutonomy && selectedAssisted),
+    ok: Boolean(openedPersonnel?.clicked && openedAutonomy && selectedAutonomy),
     openedArmyHq,
     openedPersonnel,
     openedAutonomy,
-    selectedAssisted,
+    targetAutonomyLevel,
+    selectedAutonomy,
     autonomyBeforeSelection,
     autonomyExpectation,
     configuredState,
@@ -2846,6 +3029,35 @@ async function snapshot(page, frame, faction, events, label, extra = {}) {
   return event;
 }
 
+// --window-size=WxH (the one size flag; command loop L2h) sets the game window's content size, and
+// --device-scale=N the device scale factor (default 1 whenever a size is requested), so a render check
+// is reproducible at 1280x720 or 1920x1080 on any display. Absent both options the window is left
+// exactly as the app opens it. The OS may clamp a size larger than the display.
+function parseRequestedViewport() {
+  const scaleRaw = process.argv.find((arg) => arg.startsWith('--device-scale='))?.slice('--device-scale='.length);
+  const size = requestedWindowSize;
+  const scale = scaleRaw !== undefined ? Number(scaleRaw) : (size ? 1 : null);
+  if (scale !== null && !(scale >= 0.5 && scale <= 4)) throw new Error(`--device-scale must be between 0.5 and 4, got: ${scaleRaw}`);
+  return { size, scale };
+}
+const requestedViewport = parseRequestedViewport();
+function requestedViewportArgs() {
+  return requestedViewport.scale === null ? [] : [`--force-device-scale-factor=${requestedViewport.scale}`];
+}
+async function applyRequestedViewport(app) {
+  if (!requestedViewport.size) return;
+  const { width, height } = requestedViewport.size;
+  await app.evaluate(({ BrowserWindow }, [w, h]) => {
+    for (const win of BrowserWindow.getAllWindows()) {
+      if (win.isFullScreen()) win.setFullScreen(false);
+      if (win.isMaximized()) win.unmaximize();
+      win.setContentSize(w, h);
+      win.center();
+    }
+  }, [width, height]);
+  await sleep(1500);
+}
+
 async function waitForGamePage(app) {
   const deadline = Date.now() + 60000;
   while (Date.now() < deadline) {
@@ -2876,11 +3088,23 @@ async function findCampaignOpeningOwner(page) {
 
 async function waitForCampaignOpeningOwner(page, timeoutMs = 90000) {
   const deadline = Date.now() + timeoutMs;
+  // The shell's legacy #mm-new-campaign menu can be visible for a moment before the embedded
+  // React opening mounts (longer on a loaded machine). Treat legacy as the owner only when no
+  // React opening has appeared within the grace window, so the race cannot pick the wrong path.
+  const LEGACY_GRACE_MS = 20000;
+  let legacySeenAtMs = null;
+  let legacyOpening = null;
   while (Date.now() < deadline) {
     const opening = await findCampaignOpeningOwner(page);
-    if (opening) return opening;
+    if (opening?.kind === 'react') return opening;
+    if (opening) {
+      legacyOpening = opening;
+      legacySeenAtMs ??= Date.now();
+      if (Date.now() - legacySeenAtMs >= LEGACY_GRACE_MS) return legacyOpening;
+    }
     await sleep(250);
   }
+  if (legacyOpening) return legacyOpening;
   const observed = page.frames().map((candidate) => candidate.url()).filter(Boolean);
   throw new Error(`Timed out waiting for a visible campaign opening owner; observed ${JSON.stringify(observed)}`);
 }
@@ -2996,7 +3220,14 @@ async function startCampaign(page, faction, events) {
   for (let i = 0; i < 10; i += 1) {
     const acknowledge = frame.getByRole('button', { name: /^Acknowledge$/i }).first();
     if (await acknowledge.isVisible().catch(() => false)) {
-      await acknowledge.click({ timeout: 10000 });
+      // The intro art fades and animates; under load the actionability wait can outlast 10s.
+      // Wait longer, then fall back to the intro's own "press any key" dismissal.
+      try {
+        await acknowledge.click({ timeout: 30000 });
+      } catch (error) {
+        events.push({ type: 'harness_note', note: `Acknowledge click retried via keyboard: ${String(error.message).split('\n')[0]}` });
+        await frame.locator('body').press('Enter').catch(() => {});
+      }
       await sleep(1000);
       continue;
     }
@@ -4348,7 +4579,43 @@ async function pollFrameEvaluation(frame, evaluator, arg, timeoutMs = 5000, inte
   throw new Error(`Frame DOM condition timed out after ${timeoutMs}ms; last result: ${JSON.stringify(lastResult)}`);
 }
 
+// The command OOB is a four-tab rail (Army default, owner review 2026-11-11), so the Situation
+// content and the Army corps cards are never mounted together. Read each tab's own geometry and
+// merge: corps cards come from the Army pass, Situation content/prose from the Situation pass,
+// and the horizontal-overflow figures keep the worse of the two. The sidebar is left on Army.
+async function selectOobTab(frame, testId) {
+  const toggle = frame.locator(`[data-testid="${testId}"]`).first();
+  if (await toggle.count() === 0) return false;
+  await toggle.click({ timeout: 5000 });
+  await sleep(250);
+  return true;
+}
+
 async function readMapChromeGeometry(frame) {
+  const armySelected = await selectOobTab(frame, 'oob-section-army-toggle');
+  const armyPass = await readMapChromeGeometryOnce(frame);
+  if (!armySelected || !armyPass.oob.present) return armyPass;
+  const situationSelected = await selectOobTab(frame, 'oob-section-situation-toggle');
+  if (!situationSelected) return armyPass;
+  const situationPass = await readMapChromeGeometryOnce(frame);
+  await selectOobTab(frame, 'oob-section-army-toggle');
+  if (!situationPass.oob.present) return armyPass;
+  return {
+    ...armyPass,
+    oob: {
+      ...armyPass.oob,
+      scrollWidth: Math.max(armyPass.oob.scrollWidth, situationPass.oob.scrollWidth),
+      overflowingDescendants: [
+        ...armyPass.oob.overflowingDescendants,
+        ...situationPass.oob.overflowingDescendants,
+      ].slice(0, 24),
+      situationContent: situationPass.oob.situationContent,
+      situationProse: situationPass.oob.situationProse,
+    },
+  };
+}
+
+async function readMapChromeGeometryOnce(frame) {
   return frame.evaluate(() => {
     const rectOf = (node) => {
       if (!(node instanceof HTMLElement)) return null;
@@ -4958,6 +5225,238 @@ async function warroomRouteTour(page, frame, faction, events) {
   return results;
 }
 
+// Sign Dayton through the conference (arrival, Current draft, Review agreement, Sign agreement),
+// walk the signing beat and the Verdict, and return the evidence. Throws if any step is absent.
+async function readDaytonRailState(frame) {
+  return frame.evaluate(() => {
+    const nav = document.querySelector('nav.dayton-live-nav');
+    const rect = nav?.getBoundingClientRect();
+    return {
+      present: Boolean(nav),
+      panelOpenAttribute: nav?.hasAttribute('data-panel-open') ?? false,
+      visibility: nav ? getComputedStyle(nav).visibility : null,
+      rect: rect ? { x: Math.round(rect.x), y: Math.round(rect.y), w: Math.round(rect.width), h: Math.round(rect.height) } : null,
+      activeElementText: (document.activeElement?.textContent ?? '').trim().slice(0, 40),
+      openPanel: document.querySelector('[data-dayton-panel]')?.getAttribute('data-dayton-panel') ?? null,
+    };
+  });
+}
+
+// Every conference object, opened and closed both ways (Escape, and the panel's Back button), with
+// the rail's state and where focus lands, for the B2 check.
+async function daytonRoomPanelTour(page, frame, faction, events, pendingState) {
+  const result = { railWithNoPanel: await readDaytonRailState(frame), panels: [] };
+  const objects = [
+    { id: 'folder', name: 'Delegation folder', via: 'Escape' },
+    { id: 'draft', name: 'Current draft', via: 'Back' },
+    { id: 'map', name: 'Settlement map', via: 'Escape' },
+    { id: 'binder', name: 'Treaty binder', via: 'Back' },
+  ];
+  for (const object of objects) {
+    const nav = frame.getByRole('navigation', { name: 'Conference objects' });
+    await nav.getByRole('button', { name: object.name, exact: true }).first().click({ timeout: 10000 });
+    await sleep(1100);
+    const whileOpen = await readDaytonRailState(frame);
+    await snapshot(page, frame, faction, events, `dayton-tour-panel-${object.id}`, { object: object.name, whileOpen });
+    if (object.via === 'Escape') {
+      await page.keyboard.press('Escape');
+    } else {
+      await frame.locator('section[data-dayton-panel] header button').first().click({ timeout: 10000 });
+    }
+    await sleep(900);
+    const afterClose = await readDaytonRailState(frame);
+    await snapshot(page, frame, faction, events, `dayton-tour-closed-${object.id}`, { object: object.name, via: object.via, afterClose });
+    result.panels.push({
+      object: object.name,
+      closedWith: object.via,
+      railHiddenWhileOpen: whileOpen.visibility === 'hidden' && whileOpen.panelOpenAttribute === true,
+      railVisibleAfterClose: afterClose.visibility === 'visible' && afterClose.panelOpenAttribute === false,
+      focusAfterClose: afterClose.activeElementText,
+      focusReturnedToOpener: afterClose.activeElementText.startsWith(object.name),
+    });
+  }
+  return result;
+}
+
+async function readFactionBadgeContrast(frame) {
+  return frame.evaluate(() => {
+    const parse = (value) => {
+      const m = /rgba?\(([^)]+)\)/.exec(value);
+      if (!m) return null;
+      const [r, g, b, a = 1] = m[1].split(',').map((part) => Number(part.trim()));
+      return { r, g, b, a };
+    };
+    const lum = ({ r, g, b }) => {
+      const c = [r, g, b].map((v) => { const s = v / 255; return s <= 0.03928 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4; });
+      return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
+    };
+    const effectiveBackground = (node) => {
+      let layers = [];
+      for (let n = node; n; n = n.parentElement) {
+        const c = parse(getComputedStyle(n).backgroundColor);
+        if (c && c.a > 0) layers.push(c);
+        if (c && c.a >= 0.99) break;
+      }
+      let base = { r: 17, g: 20, b: 27 };
+      for (const layer of layers.reverse()) {
+        base = { r: layer.r * layer.a + base.r * (1 - layer.a), g: layer.g * layer.a + base.g * (1 - layer.a), b: layer.b * layer.a + base.b * (1 - layer.a) };
+      }
+      return base;
+    };
+    return Array.from(document.querySelectorAll('[data-awwv-faction-tab-outcome]')).map((node) => {
+      const fg = parse(getComputedStyle(node).color);
+      const bg = effectiveBackground(node);
+      const [hi, lo] = [lum(fg), lum(bg)].sort((a, b) => b - a);
+      return { side: node.getAttribute('data-awwv-faction-tab-outcome'), text: node.textContent.trim(), contrast: Math.round(((hi + 0.05) / (lo + 0.05)) * 100) / 100 };
+    });
+  });
+}
+
+async function signDaytonAndCaptureVerdict(page, frame, faction, events, pendingState) {
+  const buttonVisible = (name) => frame.getByRole('button', { name, exact: true }).first()
+    .isVisible().catch(() => false);
+  if (await buttonVisible('Enter conference room')) {
+    await clickExactVisibleButton(frame, 'Enter conference room', 'enter Dayton conference room', { afterMs: 1600 });
+  } else if (await buttonVisible('Skip arrival')) {
+    await clickExactVisibleButton(frame, 'Skip arrival', 'skip Dayton arrival', { afterMs: 1600 });
+  }
+  await snapshot(page, frame, faction, events, 'dayton-sign-conference-room', { before: pendingState });
+  const tour = endgameRenderTour ? { viewport: await frame.evaluate(() => ({ w: window.innerWidth, h: window.innerHeight, dpr: window.devicePixelRatio })) } : null;
+  if (tour) tour.daytonRoom = await daytonRoomPanelTour(page, frame, faction, events, pendingState);
+  const capWarningOf = async () => (await bodyText(frame).catch(() => '')).match(/OUTCOME CAPPED[^\n]*/i)?.[0] ?? null;
+  const draftObject = frame.getByRole('navigation', { name: 'Conference objects' })
+    .getByRole('button', { name: 'Current draft', exact: true }).first();
+  await draftObject.waitFor({ state: 'visible', timeout: 15000 });
+  await draftObject.click({ timeout: 10000 });
+  await sleep(1200);
+  await snapshot(page, frame, faction, events, 'dayton-sign-current-draft', { before: pendingState });
+  if (tour) tour.capWarningOnDraft = await capWarningOf();
+  if (!await clickExactVisibleButton(frame, 'Review agreement', 'review Dayton agreement', { afterMs: 2000 })) {
+    throw new Error('Dayton conference exposed no visible Review agreement action');
+  }
+  const sign = frame.getByRole('button', { name: 'Sign agreement', exact: true }).first();
+  await sign.waitFor({ state: 'visible', timeout: 60000 });
+  const enableDeadline = Date.now() + 90000;
+  while (!await sign.isEnabled().catch(() => false)) {
+    if (Date.now() > enableDeadline) throw new Error('Dayton Sign agreement stayed disabled after Review agreement');
+    await sleep(500);
+  }
+  await snapshot(page, frame, faction, events, 'dayton-sign-review-agreement', { before: pendingState });
+  if (tour) {
+    tour.finalReview = await readDaytonRailState(frame);
+    tour.capWarningOnReview = await capWarningOf();
+    tour.reviewPanelText = compactText(await frame.locator('section[data-dayton-panel="review"]').first().innerText().catch(() => ''), 1800);
+  }
+  await sign.click({ timeout: 10000 });
+  const beat = frame.getByTestId('dayton-signing-beat');
+  await beat.waitFor({ state: 'visible', timeout: 90000 });
+  await sleep(1500);
+  await snapshot(page, frame, faction, events, 'dayton-signing-beat', {
+    signingText: compactText(await beat.innerText().catch(() => ''), 1200),
+  });
+  if (tour) {
+    tour.signingBeat = await frame.evaluate(() => {
+      const q = (id) => document.querySelector(`[data-testid="${id}"]`);
+      const box = (node) => {
+        if (!node) return null;
+        const r = node.getBoundingClientRect();
+        return { x: Math.round(r.x), y: Math.round(r.y), w: Math.round(r.width), h: Math.round(r.height) };
+      };
+      const cont = box(q('dayton-signing-continue'));
+      const inside = (b) => Boolean(b) && b.x >= 0 && b.y >= 0 && b.x + b.w <= window.innerWidth && b.y + b.h <= window.innerHeight;
+      return {
+        plateDate: q('dayton-signing-date')?.innerText ?? null,
+        plateCost: q('dayton-signing-cost')?.innerText ?? null,
+        asideRecordLine: q('dayton-signing-record')?.innerText ?? null,
+        continueButton: cont,
+        continueFullyInViewport: inside(cont),
+        ledgerPresent: Boolean(document.querySelector('.dayton-signing-aside table, .dayton-signing-aside [data-testid*="ledger"], .dayton-signing-aside ul')),
+        viewport: { w: window.innerWidth, h: window.innerHeight },
+      };
+    });
+  }
+  await frame.getByTestId('dayton-signing-continue').click({ timeout: 10000 });
+  await sleep(2500);
+  const verdictScore = frame.getByTestId('faction-report-score');
+  const verdictVisible = await verdictScore.waitFor({ state: 'visible', timeout: 30000 }).then(() => true).catch(() => false);
+  await snapshot(page, frame, faction, events, 'verdict-first-screen', {
+    verdictVisible,
+    verdictText: compactText(await bodyText(frame).catch(() => ''), 2400),
+  });
+  const surfaceTextOf = () => frame.evaluate(() => document.querySelector('[data-awwv-endgame-surface="verdict"]')?.innerText ?? '');
+  if (tour) {
+    tour.verdictSide0 = { text: await surfaceTextOf(), badgeContrast: await readFactionBadgeContrast(frame) };
+    // The real post-sign state, for the browser-only renders (locale, narrow builds, scale factors).
+    const rawState = await frame.evaluate(async () => {
+      const value = await window.awwv.getCurrentGameState();
+      return typeof value === 'string' ? value : JSON.stringify(value);
+    });
+    fs.mkdirSync(path.join(evidenceDir, safeName(faction)), { recursive: true });
+    fs.writeFileSync(path.join(evidenceDir, safeName(faction), 'post-sign-state.json'), rawState);
+    tour.postSignStateBytes = Buffer.byteLength(rawState);
+  }
+  // The Verdict is one long scrolling report: capture it a screen at a time, top to bottom.
+  const verdictScrollShots = [];
+  for (let step = 1; step <= 12; step += 1) {
+    const scrolled = await frame.evaluate(() => {
+      const root = document.querySelector('[data-awwv-endgame-surface="verdict"]');
+      if (!root) return { found: false };
+      const candidates = Array.from(root.querySelectorAll('*')).filter((node) => {
+        if (!(node instanceof HTMLElement)) return false;
+        const overflowY = getComputedStyle(node).overflowY;
+        return (overflowY === 'auto' || overflowY === 'scroll') && node.scrollHeight > node.clientHeight + 40;
+      });
+      candidates.sort((a, b) => (b.clientHeight * b.clientWidth) - (a.clientHeight * a.clientWidth));
+      const pane = candidates[0];
+      if (!pane) return { found: false };
+      const before = pane.scrollTop;
+      pane.scrollTop = before + Math.round(pane.clientHeight * 0.85);
+      return { found: true, moved: pane.scrollTop > before, atBottom: pane.scrollTop + pane.clientHeight >= pane.scrollHeight - 4 };
+    }).catch(() => ({ found: false }));
+    if (!scrolled.found || !scrolled.moved) break;
+    await sleep(700);
+    verdictScrollShots.push(`verdict-scroll-${step}`);
+    await snapshot(page, frame, faction, events, `verdict-scroll-${step}`, { step, atBottom: scrolled.atBottom });
+    if (scrolled.atBottom) break;
+  }
+  const scrollVerdictToTop = () => frame.evaluate(() => {
+    const root = document.querySelector('[data-awwv-endgame-surface="verdict"]');
+    root?.querySelectorAll('*').forEach((node) => { if (node instanceof HTMLElement && node.scrollTop > 0) node.scrollTop = 0; });
+  }).catch(() => {});
+  await scrollVerdictToTop();
+  if (tour) {
+    // Each side in focus (the rail is the three sides), top of the report, with the text and the badge contrast.
+    tour.verdictBySide = [];
+    const rail = frame.locator('[data-awwv-verdict-faction-rail] button');
+    const sides = await rail.count().catch(() => 0);
+    for (let index = 0; index < sides; index += 1) {
+      const label = compactText(await rail.nth(index).innerText().catch(() => ''), 60);
+      await rail.nth(index).click({ timeout: 10000 });
+      await sleep(1300);
+      await scrollVerdictToTop();
+      await snapshot(page, frame, faction, events, `verdict-side-${index}`, { label });
+      tour.verdictBySide.push({ index, label, text: await surfaceTextOf(), badgeContrast: await readFactionBadgeContrast(frame) });
+    }
+    if (sides > 0) {
+      await rail.nth(0).click({ timeout: 10000 });
+      await sleep(900);
+    }
+  }
+  const verdictTabs = [];
+  const tabLocator = frame.getByRole('tab');
+  const tabCount = await tabLocator.count().catch(() => 0);
+  for (let index = 0; index < tabCount; index += 1) {
+    const tab = tabLocator.nth(index);
+    if (!await tab.isVisible().catch(() => false)) continue;
+    const label = compactText(await tab.innerText().catch(() => ''), 60);
+    await tab.click({ timeout: 10000 }).catch(() => {});
+    await sleep(900);
+    verdictTabs.push(label);
+    await snapshot(page, frame, faction, events, `verdict-tab-${index}`, { label });
+  }
+  return { signed: true, verdictVisible, verdictTabs, verdictScrollShots, signedAtTurn: pendingState?.turn ?? null, ...(tour ? { tour } : {}) };
+}
+
 async function advanceModalProbe(page, frame, faction, events) {
   const clicked = await clickMatch(frame, /Advance|warroom-toolbar-advance|toolbar-route-advance/i, 'advance probe', { afterMs: 900 });
   if (!clicked) throw new Error('Required advance probe route failed');
@@ -5098,6 +5597,32 @@ async function handleCurrentSurface(page, frame, faction, events, options = {}) 
   const pendingEventId = pendingState?.pendingEventDecisionIds?.[0] ?? null;
   const aftermathClose = frame.locator('[data-testid="turn-aftermath-close"]').first();
   if (await aftermathClose.isVisible().catch(() => false)) {
+    // Command loop L2h (2026-11-14): photograph the week's report BEFORE closing it.
+    // The harness used to click close first, so none of its screenshots showed the
+    // turn report (proposal §2 premise 1). The report opens on the "This week" dispatch.
+    const aftermathMode = await frame.locator('[data-turn-aftermath-mode]').first()
+      .getAttribute('data-turn-aftermath-mode').catch(() => null);
+    // Fit evidence for the dispatch: it must show whole at 1280x720 without scrolling.
+    const dispatchFit = await frame.evaluate(() => {
+      const body = document.querySelector('[data-testid="turn-aftermath-dispatch"]');
+      if (!body) return null;
+      const panel = body.closest('[role="dialog"]') ?? body.parentElement;
+      const rect = panel ? panel.getBoundingClientRect() : body.getBoundingClientRect();
+      return {
+        viewport: { width: window.innerWidth, height: window.innerHeight },
+        quiet: body.getAttribute('data-dispatch-quiet') === 'true',
+        lines: Array.from(body.querySelectorAll('li')).map((li) => li.getAttribute('data-testid')),
+        headline: document.querySelector('[data-testid="turn-aftermath-dispatch-headline"]')?.textContent ?? null,
+        bodyScrolls: body.scrollHeight > body.clientHeight + 1,
+        panelInsideViewport: rect.top >= 0 && rect.left >= 0 && rect.bottom <= window.innerHeight && rect.right <= window.innerWidth,
+        panelRect: { top: Math.round(rect.top), left: Math.round(rect.left), width: Math.round(rect.width), height: Math.round(rect.height) },
+      };
+    }).catch(() => null);
+    await snapshot(page, frame, faction, events, 'turn-aftermath-report', {
+      handledAction: 'view-aftermath-report',
+      aftermathMode,
+      dispatchFit,
+    });
     const clicked = await clickTestId(frame, 'turn-aftermath-close', 'close aftermath report', { afterMs: 1000 });
     await snapshot(page, frame, faction, events, 'handled-turn-aftermath', { handledAction: 'close-aftermath-report', clicked });
     return { handled: clicked, action: 'close-aftermath-report' };
@@ -5150,13 +5675,50 @@ async function handleCurrentSurface(page, frame, faction, events, options = {}) 
     return { handled: true, action: responseLabel === 'Reject Plan' ? 'peace-plan-reject' : 'peace-plan-accept' };
   }
   if ((pendingState?.pendingDayton ?? 0) > 0) {
-    if (!await frame.getByRole('button', { name: 'Decline Talks', exact: true }).first().isVisible().catch(() => false)) {
+    // The Dayton conference (DC lane) opens on an arrival screen, then the conference room, whose
+    // refusal is a two-step "Decline Settlement" / "Confirm Decline". The pre-conference
+    // "Decline Talks" button is kept as a fallback for the legacy modal.
+    const buttonVisible = (name) => frame.getByRole('button', { name, exact: true }).first()
+      .isVisible().catch(() => false);
+    const daytonSurfaceVisible = async () => (await buttonVisible('Decline Talks'))
+      || (await buttonVisible('Decline Settlement'))
+      || (await buttonVisible('Confirm Decline'))
+      || (await buttonVisible('Enter conference room'))
+      || (await buttonVisible('Skip arrival'));
+    if (!await daytonSurfaceVisible()) {
       await clearOpenSurfaces(frame);
       await openDeskInboxItem(frame, 'dayton_negotiation');
     }
     await snapshot(page, frame, faction, events, 'dayton-before-response', { before: pendingState });
-    const clicked = await clickExactVisibleButton(frame, 'Decline Talks', 'decline Dayton talks', { afterMs: 1600 });
-    if (!clicked) throw new Error('Pending Dayton negotiation exposed no visible Decline Talks escape action');
+    if (daytonSignVerdict) {
+      throw new DaytonVerdictCaptured(await signDaytonAndCaptureVerdict(page, frame, faction, events, pendingState));
+    }
+    let clicked = false;
+    if (await buttonVisible('Enter conference room')) {
+      await clickExactVisibleButton(frame, 'Enter conference room', 'enter Dayton conference room', { afterMs: 1600 });
+      await snapshot(page, frame, faction, events, 'dayton-conference-room', { before: pendingState });
+    } else if (await buttonVisible('Skip arrival')) {
+      await clickExactVisibleButton(frame, 'Skip arrival', 'skip Dayton arrival', { afterMs: 1600 });
+    }
+    // In the conference room the refusal lives with the draft the player is shaping: open the
+    // "Current draft" object from the room's own nav (the backdrop repeats the label as a hotspot).
+    if (!await buttonVisible('Decline Talks') && !await buttonVisible('Decline Settlement')) {
+      const draftObject = frame.getByRole('navigation', { name: 'Conference objects' })
+        .getByRole('button', { name: 'Current draft', exact: true }).first();
+      if (await draftObject.isVisible().catch(() => false)) {
+        await draftObject.click({ timeout: 10000 });
+        await sleep(1200);
+        await snapshot(page, frame, faction, events, 'dayton-current-draft', { before: pendingState });
+      }
+    }
+    if (await buttonVisible('Decline Talks')) {
+      clicked = await clickExactVisibleButton(frame, 'Decline Talks', 'decline Dayton talks', { afterMs: 1600 });
+    } else if (await buttonVisible('Decline Settlement')) {
+      const first = await clickExactVisibleButton(frame, 'Decline Settlement', 'decline Dayton settlement', { afterMs: 900 });
+      await snapshot(page, frame, faction, events, 'dayton-decline-confirm', { first });
+      clicked = first && await clickExactVisibleButton(frame, 'Confirm Decline', 'confirm Dayton decline', { afterMs: 1800 });
+    }
+    if (!clicked) throw new Error('Pending Dayton negotiation exposed no visible Decline Settlement / Decline Talks escape action');
     const after = await readState(frame);
     const cleared = (after?.pendingDayton ?? Number.POSITIVE_INFINITY) < pendingState.pendingDayton;
     await snapshot(page, frame, faction, events, 'dayton-after-response', { clicked, cleared, after });
@@ -6063,7 +6625,7 @@ async function playTurns(page, frame, faction, events, targetTurn) {
     if (handled.handled) {
       const afterHandle = await readState(frame).catch(() => null);
       if (strategicRun && !resumeSavePath && afterHandle?.turn === 1) {
-        assertStrategicAutonomyState('Strategic autonomy not applied after first turn', afterHandle, 1, null);
+        assertStrategicAutonomyState('Strategic autonomy not applied after first turn', afterHandle, strategicAutonomyLevel, null);
       }
       maxObservedTurn = Math.max(maxObservedTurn, afterHandle?.turn ?? maxObservedTurn);
       stagnantSteps = 0;
@@ -6097,7 +6659,7 @@ async function playTurns(page, frame, faction, events, targetTurn) {
     await sleep(2200);
     const after = await readState(frame).catch(() => null);
     if (strategicRun && !resumeSavePath && after?.turn === 1) {
-      assertStrategicAutonomyState('Strategic autonomy not applied after first turn', after, 1, null);
+      assertStrategicAutonomyState('Strategic autonomy not applied after first turn', after, strategicAutonomyLevel, null);
     }
     maxObservedTurn = Math.max(maxObservedTurn, after?.turn ?? maxObservedTurn);
     if ((after?.turn ?? lastTurn) > (before?.turn ?? lastTurn)) stagnantSteps = 0;
@@ -7084,11 +7646,24 @@ async function resumeThroughObservedMainMenu(page, faction, savePath, dependenci
     }))),
   }));
   try {
+    const openingSplashOwner = (record) => record.markers.openingSplash
+      && frameVisibleExactControlCount(record, 'Assume responsibility') === 1;
+    // The opening splash mounts after the window (slower on a loaded machine): re-capture for up
+    // to ~30s instead of judging the first instant, then fail exactly as before.
     let observation = remember(await capture(page, 'resume-opening-splash', null, observations, frameIds));
+    for (let attempt = 0; attempt < 60; attempt += 1) {
+      const splashCount = observation.pages
+        .flatMap((pageRecord) => pageRecord.frames)
+        .filter((frameRecord) => !frameRecord.detached && openingSplashOwner(frameRecord)).length;
+      if (splashCount >= 1) break;
+      await pause(500);
+      const next = await capture(page, 'resume-opening-splash', null, observations, frameIds);
+      if (!next) break;
+      observation = remember(next);
+    }
     let owner = chooseOwner(
       observation,
-      (record) => record.markers.openingSplash
-        && frameVisibleExactControlCount(record, 'Assume responsibility') === 1,
+      openingSplashOwner,
       'opening splash with one Assume responsibility control',
     );
     markOwner(observation, owner, observations);
@@ -7698,8 +8273,8 @@ async function runFaction(faction, result) {
     cwd: repo,
     ...(packagedExecutablePath ? { executablePath: packagedExecutablePath } : {}),
     args: packagedExecutablePath
-      ? [`--user-data-dir=${userDataDir}`, `--log-net-log=${netLogPath}`]
-      : ['.', `--user-data-dir=${userDataDir}`, `--log-net-log=${netLogPath}`],
+      ? [`--user-data-dir=${userDataDir}`, `--log-net-log=${netLogPath}`, ...requestedViewportArgs()]
+      : ['.', `--user-data-dir=${userDataDir}`, `--log-net-log=${netLogPath}`, ...requestedViewportArgs()],
     env: { ...process.env, ELECTRON_DISABLE_SECURITY_WARNINGS: 'true' },
     timeout: 90000,
   });
@@ -7735,6 +8310,10 @@ async function runFaction(faction, result) {
   try {
     const page = await waitForGamePage(app);
     attachDiagnostics(page);
+    await applyRequestedViewport(app);
+    if (requestedWindowSize) {
+      events.push({ type: 'harness_note', note: `window content size requested ${requestedWindowSize.width}x${requestedWindowSize.height}` });
+    }
     await installTileFetchAbortObserverBeforeStartup(page);
     await installAmbientLifecycleObserverBeforeStartup(page);
     const resolvedGameplay = await resolveGameplayFrameAndStartCdpCollection({
@@ -7836,6 +8415,10 @@ async function runFaction(faction, result) {
     }
     if (saveLoadOnly) {
       await drainTransientSurfaces(page, frame, faction, events, 'save-load-only-pre-route', 40, { allowAdvanceModal: false });
+    } else if (endgameRenderTour) {
+      // The render tour starts from a late save and goes straight to the ending; the initial
+      // map-centre probe is not part of it (and is blocked by a status row at 1280x720).
+      await drainTransientSurfaces(page, frame, faction, events, 'render-tour-pre-route', 40, { allowAdvanceModal: false });
     } else if (!skipInitialTour) {
       await surfaceTour(page, frame, faction, events);
     } else {
@@ -7860,8 +8443,9 @@ async function runFaction(faction, result) {
         throw new Error(`Command Authority lever exercise failed: ${JSON.stringify(strategicCommandAuthority)}`);
       }
     }
-    playtest = await playTurns(page, frame, faction, events, maxTurns);
-    if (saveLoadProof) {
+    playtest = await playTurns(page, frame, faction, events, maxTurns)
+      .catch((error) => settleDaytonVerdictSegment(error, events));
+    if (saveLoadProof && playtest) {
       playtest.saveLoadProof = await exerciseFinalSaveLoad(page, frame, faction, events, userDataDir, maxTurns);
     }
     const rawNetworkFailures = structuredClone(networkFailures);
@@ -7873,8 +8457,10 @@ async function runFaction(faction, result) {
       ambientLifecycleSignals,
       expectedAmbientLifecycleAborts,
     );
-    if (strategicRun && maxTurns > 0 && playtest.finalState?.autonomyLevel !== 1) {
-      throw new Error(`Strategic autonomy did not apply: expected level 1, observed ${playtest.finalState?.autonomyLevel}`);
+    if (playtest) {
+      if (strategicRun && maxTurns > 0 && playtest.finalState?.autonomyLevel !== strategicAutonomyLevel) {
+        throw new Error(`Strategic autonomy did not apply: expected level ${strategicAutonomyLevel}, observed ${playtest.finalState?.autonomyLevel}`);
+      }
     }
     const cdpFinalization = await cdpCollectionLifecycle.finalize();
     cdpNetworkCollection = cdpFinalization.receipt;
@@ -7914,6 +8500,7 @@ async function runFaction(faction, result) {
       evidenceManifest,
       events,
       playtest,
+      ...(daytonVerdictSegment.evidence ? { daytonVerdictEvidence: daytonVerdictSegment.evidence } : {}),
       eventChoiceTranscript,
       officerSuccessionChoiceTranscript,
       campaignModeSelectionEvidence,
@@ -8012,7 +8599,9 @@ let result = null;
       faction: entry.faction,
       eventCount: entry.events.length,
       screenshots: entry.events.length,
-      finalState: entry.playtest.finalState,
+      // The Dayton sign-and-verdict segment ends the campaign, so it has no playtest final state.
+      finalState: entry.playtest?.finalState ?? null,
+      ...(entry.daytonVerdictEvidence ? { daytonVerdictEvidence: entry.daytonVerdictEvidence } : {}),
       consoleMessages: entry.consoleMessages.length,
     })),
   }, null, 2));

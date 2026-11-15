@@ -36,7 +36,7 @@ And the two defensive crises:
 | # | Defensive op | Faction | Dates | Area | Result |
 |---|---|---|---|---|---|
 | D1 | VRS *Štit-94* (Shield) — the Bihać crisis | ARBiH 5th C vs VRS Composite Tactical Groups | 4 Nov 1994 – Feb 1995 | Bihać pocket | ~150 km² recovered by VRS; pocket survives |
-| D2 | OG *Pauk* (Spider) + APWB return | ARBiH 5th C vs RSK/VJ/APZB/RDB | Nov 1994 – Aug 1995 | NW Bihać pocket | Abdić reinstalled Kladuša Dec 1994; APWB returns |
+| D2 | OG *Pauk* (Spider) + APWB return | ARBiH 5th C vs RSK/VJ/APZB/RDB | Nov 1994 – Aug 1995 | NW Bihać pocket | Abdić reinstalled Kladuša 17 Dec 1994 (BB2 p.535); APWB returns |
 
 Plus the early 1995 VRS offensive activity in central Bosnia and the ARBiH 1st Corps spring–summer 1995 Sarajevo theatre actions (Trnovo / Treskavica) that overlap with the larger calendar but precede *Sana 95*.
 
@@ -121,7 +121,7 @@ This is the bizarre command structure that pinned the 5th Corps for the next nin
 
 **Total committed against the pocket Nov 1994 – Aug 1995:** Sekulić's claim of 6,638 SVK soldiers in December 1994 alone (BB2 p.560 fn 30), plus VJ/RDB/SDG/APWB ~3,000, plus VRS 2KK ~12,000 — call it 20,000+ engaged at peak. The November–December 1994 phase was opened with the SA-2 surface-to-air missiles fired in ground-to-ground mode from the 155th Air Defense Rocket Brigade.
 
-**APWB resurrection.** Pauk's primary tactical purpose, beyond destroying the 5th Corps, was to reinstall **Fikret Abdić** in Velika Kladuša. Abdić had fled in August 1994; the *Pauk* offensive in late November captured Velika Kladuša and on 18 November APWB forces claimed 365 5th Corps prisoners (BB2 p.560 fn 35), of whom 100 reportedly "joined APWB units" (under duress, per BB2 footnote phrasing).
+**APWB resurrection.** Pauk's primary tactical purpose, beyond destroying the 5th Corps, was to reinstall **Fikret Abdić** in Velika Kladuša. Abdić had fled in August 1994. The *Pauk* offensive pressed on Velika Kladuša from November; on 18 November APWB forces claimed 365 5th Corps prisoners in the fighting there (BB2 p.560 fn 35), of whom 100 reportedly "joined APWB units" (under duress, per BB2 footnote phrasing). The 5th Corps held the town into December. SVK and APWB units took the Plazikur hill and Trnovi positions on 14/15 December, the ARBiH pulled out to positions about five kilometres southeast on the Cazin road, and Velika Kladuša fell on 17 December 1994 (BB2 p.535, printed page; repo extract `data/derived/knowledge_base/balkan_battlegrounds/pages/BB2_p0554.json`). Erratum: an earlier version of this report dated the retaking 18-22 November 1994.
 
 **Outcome of phase two (November 1994 – August 1995):**
 - Bihać city not taken. The 5th Corps held the southern half of the Grabež plateau and the city itself.
@@ -301,7 +301,7 @@ A condensed timeline of the intra-Bosniak conflict that drained the 5th Corps fo
 | 25 Oct – 3 Nov 1994 | ARBiH *Grmeč-94* | See §1 |
 | 4 Nov – Nov-end 1994 | VRS *Štit-94* phase one | See §1 |
 | **Nov 1994** | **OG *Pauk* assembled** | RDB/VJ/SDG/APWB+SVK joint force; Novaković commands |
-| **18–22 Nov 1994** | **APWB retakes Velika Kladuša** with *Pauk* support; Abdić reinstalled | NW pocket lost again to APZB |
+| **17 Dec 1994** | **APWB retakes Velika Kladuša** with *Pauk* support; Abdić reinstalled (BB2 p.535) | NW pocket lost again to APZB |
 | Dec 1994 – Apr 1995 | *Pauk* offensive grinds; SA-2 missiles ground-launched at Bihać; pocket pressed but not breached | 5th Corps holds southern half; loses NW |
 | **Apr–Jul 1995** | **5th Corps spring offensive against APWB** — re-takes Velika Kladuša | Abdić again loses ground |
 | **4–7 Aug 1995** | **Croatian Operation Storm destroys SVK**, dissolves *Pauk*'s logistical backbone | APWB collapses |

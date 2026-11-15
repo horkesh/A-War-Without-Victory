@@ -245,9 +245,12 @@ const threats: ThreatAssessment = {
     overall_pressure: 'low',
 };
 
-function emit(targetOsids: string[]) {
+function emit(
+    targetOsids: string[],
+    failed: CommanderBriefing['failed_offensive_objectives'] = {},
+) {
     return emitCommanderOutput(
-        makeBriefing(),
+        { ...makeBriefing(), failed_offensive_objectives: failed },
         [],
         makeForces(),
         makeAllocation(),
@@ -273,5 +276,25 @@ describe('commander operation objective scope', () => {
         expect(output.operations).toHaveLength(1);
         expect(output.operations[0]!.sector_id).toBe(`sector:${CORPS_ID}:0`);
         expect(output.operations[0]!.objectives).toEqual([PRIMARY_OBJECTIVE]);
+    });
+
+    // RF-AI2 bot objective lockout: the bot plan path honours the failed-objective cooldown.
+    it('drops a plan objective that is on the corps failed-objective cooldown', () => {
+        const output = emit([PRIMARY_OBJECTIVE, PRIMARY_OBJECTIVE_2], {
+            [PRIMARY_OBJECTIVE]: { failure_count: 1, cooldown_until_turn: 18 },
+            [PRIMARY_OBJECTIVE_2]: { failure_count: 1, cooldown_until_turn: 10 }, // expires this turn
+        });
+
+        expect(output.operations).toHaveLength(1);
+        expect(output.operations[0]!.objectives).toEqual([PRIMARY_OBJECTIVE_2]);
+    });
+
+    it('creates no operation when every plan objective is on cooldown', () => {
+        const output = emit([PRIMARY_OBJECTIVE, PRIMARY_OBJECTIVE_2], {
+            [PRIMARY_OBJECTIVE]: { failure_count: 2, cooldown_until_turn: 18 },
+            [PRIMARY_OBJECTIVE_2]: { failure_count: 1, cooldown_until_turn: 11 },
+        });
+
+        expect(output.operations).toHaveLength(0);
     });
 });

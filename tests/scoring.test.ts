@@ -324,6 +324,26 @@ describe('computeFullVerdict', () => {
         expect(verdict.dayton_result).toBeDefined();
     });
 
+    it('labels every termination outcome the engine writes, never a raw id', () => {
+        // The strings checkWarTermination actually produces, not shortened forms.
+        const labelFor = (outcome: string) => {
+            const state = makeStateWithCapital({
+                RBiH: { territory_controlled_pct: 30 },
+                RS: { territory_controlled_pct: 52 },
+                HRHB: { territory_controlled_pct: 18 },
+            });
+            state.meta.outcome = outcome;
+            return computeFullVerdict(state).outcome_label;
+        };
+        expect(labelFor('timeout_stalemate')).toBe('Exhaustion Stalemate');
+        expect(labelFor('faction_collapse:RS:winner:RBiH')).toBe('Faction Collapse');
+        expect(labelFor('faction_collapse:HRHB,RS:winner:RBiH')).toBe('Faction Collapse');
+        expect(labelFor('mutual_collapse')).toBe('Mutual Collapse');
+        for (const outcome of ['faction_collapse:RS:winner:RBiH', 'mutual_collapse', 'timeout_stalemate']) {
+            expect(labelFor(outcome)).not.toMatch(/[:_]/);
+        }
+    });
+
     it('handles state without negotiation data gracefully', () => {
         const state = makeState();
         const verdict = computeFullVerdict(state);

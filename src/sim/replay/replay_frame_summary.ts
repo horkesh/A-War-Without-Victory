@@ -19,7 +19,12 @@ export interface ReplayControlSummary {
 export interface ReplayFrameSummary {
     turn: number | null;
     date: string | null;
-    activeFormations: number;
+    /**
+     * Active formations, all sides. Hidden information during play (the count
+     * includes the other sides' formations), so the renderer's copy of the
+     * manifest carries `null` until the war ends; see `playerVisibleReplayManifestJson`.
+     */
+    activeFormations: number | null;
     /**
      * Military casualties so far, all sides: killed + wounded + missing/captured
      * from `military.casualty_ledger`, the ledger the Verdict cost ledger and the
@@ -54,9 +59,50 @@ function readTurn(frame: ReplayFrameLike): number | null {
     return null;
 }
 
-function readDate(frame: ReplayFrameLike): string | null {
+// Days since 1970-01-01 for a proleptic Gregorian civil date, and its inverse
+// (Howard Hinnant's algorithms). Integer arithmetic only: no Date object, no clock.
+function daysFromCivil(year: number, month: number, day: number): number {
+    const y = month <= 2 ? year - 1 : year;
+    const era = Math.floor(y / 400);
+    const yearOfEra = y - era * 400;
+    const dayOfYear = Math.floor((153 * (month + (month > 2 ? -3 : 9)) + 2) / 5) + day - 1;
+    const dayOfEra = yearOfEra * 365 + Math.floor(yearOfEra / 4) - Math.floor(yearOfEra / 100) + dayOfYear;
+    return era * 146097 + dayOfEra - 719468;
+}
+
+function civilFromDays(days: number): [number, number, number] {
+    const z = days + 719468;
+    const era = Math.floor(z / 146097);
+    const dayOfEra = z - era * 146097;
+    const yearOfEra = Math.floor(
+        (dayOfEra - Math.floor(dayOfEra / 1460) + Math.floor(dayOfEra / 36524) - Math.floor(dayOfEra / 146096)) / 365,
+    );
+    const dayOfYear = dayOfEra - (365 * yearOfEra + Math.floor(yearOfEra / 4) - Math.floor(yearOfEra / 100));
+    const monthIndex = Math.floor((5 * dayOfYear + 2) / 153);
+    const day = dayOfYear - Math.floor((153 * monthIndex + 2) / 5) + 1;
+    const month = monthIndex < 10 ? monthIndex + 3 : monthIndex - 9;
+    return [yearOfEra + era * 400 + (month <= 2 ? 1 : 0), month, day];
+}
+
+/** Campaign calendar: turn 0 is 6 April 1992 and every turn is one week (the UI's `turnToDateString`). */
+const CAMPAIGN_EPOCH_DAYS = daysFromCivil(1992, 4, 6);
+
+/** The ISO date (YYYY-MM-DD) that opens a turn: a pure function of the turn number. */
+export function turnToIsoDate(turn: number): string {
+    const [year, month, day] = civilFromDays(CAMPAIGN_EPOCH_DAYS + Math.trunc(turn) * 7);
+    const pad = (value: number, width: number): string => String(value).padStart(width, '0');
+    return `${pad(year, 4)}-${pad(month, 2)}-${pad(day, 2)}`;
+}
+
+/**
+ * The frame's own `metadata.date` when it has one, else the date its turn opens.
+ * Headless runner frames carry no metadata, so the manifest used to hold `null`
+ * for every one of them.
+ */
+function readDate(frame: ReplayFrameLike, turn: number | null): string | null {
     const date = frame.metadata?.date;
-    return typeof date === 'string' && date.length > 0 ? date : null;
+    if (typeof date === 'string' && date.length > 0) return date;
+    return turn !== null && Number.isFinite(turn) && turn >= 0 ? turnToIsoDate(turn) : null;
 }
 
 function nonNegativeCount(value: unknown): number {
@@ -151,9 +197,10 @@ export function buildReplayFrameSummary(frame: GameState | null | undefined): Re
     }
 
     const replayFrame = frame as ReplayFrameLike;
+    const turn = readTurn(replayFrame);
     return {
-        turn: readTurn(replayFrame),
-        date: readDate(replayFrame),
+        turn,
+        date: readDate(replayFrame, turn),
         activeFormations: readActiveFormations(replayFrame),
         totalCasualties: readTotalCasualties(replayFrame),
         totalDisplacedOrKilled: readTotalDisplacedOrKilled(replayFrame),

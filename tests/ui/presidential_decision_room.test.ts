@@ -8,6 +8,7 @@ import type { LoadedGameState, OperationOpportunityProposalView, PlayerDecisionS
 import type { OperationalSitrepView } from '../../src/ui/shared/operational_sitrep_views.js';
 import type { TurnSummary } from '../../src/state/turn_summary.js';
 import { setLocale } from '../../src/ui/map/i18n/index.js';
+import { buildProposalDossierFacts } from '../../src/ui/map/data/proposalDossierDetail.js';
 import { turnToDateString } from '../../src/ui/map/utils/formatters.js';
 
 function makeSummary(overrides: Partial<TurnSummary> = {}): TurnSummary {
@@ -1411,31 +1412,53 @@ describe('buildPresidentialDecisionRoomView', () => {
         override_available: false,
         override_ca_cost: 15,
         framing: 'Atif DudakoviÄ‡ requests authorization to relieve Jajce.',
+        dossier_inputs: {
+          viability: 0.6,
+          intel_confidence: 0.72,
+          concentration: 1,
+          pressure: 'heavy',
+          staging_osid: 'op:jajce:jajce_staging',
+          brigade_ids: ['arbih_alpha', 'arbih_beta'],
+          commander_traits: { competence: 4, aggressiveness: 4 },
+        },
       }],
     });
 
     const view = buildPresidentialDecisionRoomView({ state });
     const card = view.cards.find((entry) => entry.id === 'command:review-proposal:PROP_30_ops_0');
+    const officer = 'Atif DudakoviÄ‡';
 
+    // Command loop L5: a dossier, not thirteen "Label: value" lines. The officer's file
+    // (competence 4, aggressiveness 4) bends the staff's 0.6 readiness figure up to ready;
+    // the army staff's unbent reading (mostly ready) appears beside it. No percentages,
+    // no odds and no casualty forecast anywhere (#653 review: the figure is readiness).
     expect(card?.title).toBe('Relieve Jajce');
-    expect(card?.explanation).toContain('1st Corps requests authorization');
-    expect(card?.evidence).toEqual([
-      'Command: 1st Corps',
-      'Commander: Corps Commander Atif DudakoviÄ‡',
-      'Objective: Relieve Jajce',
-      'Targets: Jajce',
-      'Forces: Alpha Brigade, Beta Brigade',
-      'Concentration/readiness: 100% concentrated; ready',
-      'Intelligence: 72% confidence',
-      'Supply: 80% continuity confidence',
-      'Risk: High pressure; 65% plan viability',
-      'Recommendation: Concentration complete; authorize launch.',
-      'Deadline: Before the next turn advances',
-      'Force ratio: Unreported',
-      'Opportunity cost: Unreported',
+    expect(card?.explanation).toBe(`${officer} asks to commit 2 brigades to take Jajce.`);
+    expect(card?.actionLabel).toBe('Review the plan');
+    // The facts render from the lazily loaded ProposalDossierFacts, outside the entry chunk;
+    // the card itself carries no "Label: value" evidence lines any more.
+    expect(card?.evidence).toEqual([]);
+    const { facts } = buildProposalDossierFacts(state.opProposalCards![0], null);
+    expect(facts).toEqual([
+      'Objective: take Jajce.',
+      'Forces: 1st Corps with Alpha Brigade, Beta Brigade. The corps front is already under heavy pressure.',
+      `Readiness: ${officer} reports the plan ready. The report rests on good intelligence.`,
+      'Army staff read it as mostly ready.',
+      'If you hold back: answer before the next Advance. Unanswered, the proposal lapses and the plan is not launched.',
+      'Withhold: the corps drops this plan; its commander may plan again.',
+      'Cancel: close without answering; an unanswered proposal lapses at Advance.',
     ]);
-    expect(`${card?.title} ${card?.explanation} ${card?.evidence.join(' ')}`)
-      .not.toMatch(/arbih_1st_corps|plan_internal_30|op:jajce|zone:/);
+    expect(card?.fieldInspectionTarget).toEqual({
+      kind: 'field-operation-plan',
+      proposalId: 'PROP_30_ops_0',
+      corpsId: 'arbih_1st_corps',
+      objectiveOsids: [],
+      stagingOsids: ['op:jajce:jajce_staging'],
+      formationIds: ['arbih_alpha', 'arbih_beta'],
+    });
+    const shown = `${card?.title} ${card?.explanation} ${facts.join(' ')}`;
+    expect(shown).not.toMatch(/arbih_1st_corps|plan_internal_30|op:jajce|zone:/);
+    expect(shown).not.toMatch(/%|Unreported/);
   });
 
   it('uses map settlement names for generated ordinary proposal objectives and targets', () => {
@@ -1490,8 +1513,15 @@ describe('buildPresidentialDecisionRoomView', () => {
     });
     const card = view.cards.find((entry) => entry.id === 'command:review-proposal:PROP_2_ops_0');
 
-    expect(card?.evidence).toContain('Objective: Advance from Ra\u010dic (Biha\u0107)');
-    expect(card?.evidence).toContain('Targets: Ora\u0161ac (Biha\u0107)');
+    expect(card?.explanation).toBe('2nd Krajina Corps asks to commit one brigade to take Ora\u0161ac (Biha\u0107).');
+    const { facts } = buildProposalDossierFacts(state.opProposalCards![0], {
+      'op:bihac:racic': 'Ra\u010dic (Biha\u0107)',
+      'op:bihac:orasac_2': 'Ora\u0161ac (Biha\u0107)',
+    });
+    expect(facts).toContain('Objective: take Ora\u0161ac (Biha\u0107).');
+    // No staff estimates on this card: no readiness line is invented.
+    expect(facts.some((line) => line.startsWith('Readiness:'))).toBe(false);
+    expect(card?.fieldInspectionTarget).toMatchObject({ objectiveOsids: ['op:bihac:orasac_2'] });
     expect(`${card?.title} ${card?.explanation} ${card?.evidence.join(' ')}`)
       .not.toMatch(/zone:|op:|vrs_2nd_krajina|plan_vrs/);
   });

@@ -53,7 +53,8 @@ describe('R7 English readability Phase 1', () => {
   });
 
   it('states cumulative counts and staff-facing units without exposing internal identifiers', () => {
-    expect(enMessages['situation.sustainmentCollapsed']).toBe(', {count} permanently collapsed municipalities (cumulative)');
+    // The "permanently collapsed municipalities" list is not shown to the player (F1e).
+    expect((enMessages as Record<string, string>)['situation.sustainmentCollapsed']).toBeUndefined();
     expect(enMessages['warSummary.label.netOsids']).toBe('Net operational areas (settlements)');
     expect(enMessages['warSummary.label.netOsids']).not.toMatch(/\bOSID\b/i);
     expect(enMessages['corpsFront.standardBrigadeBaseline']).toBe('Combat power reference: 1.0 equals one standard brigade');

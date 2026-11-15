@@ -113,11 +113,9 @@ function eventToTicker(event: TurnEvent, playerFaction: FactionId): string | nul
         }
 
         case 'sustainability_collapse': {
-            if (isOwn) {
-                const mun = formatMunicipality(event.municipality);
-                return truncate(`SUPPLY CRISIS \u2014 ${mun} UNDER PRESSURE`);
-            }
-            return truncate('ENEMY LOGISTICS DISRUPTED');
+            // Not a ticker item: collapses are cumulative and permanent, so they would
+            // scroll as a standing emergency (owner playtest, F1e).
+            return null;
         }
 
         case 'exhaustion_milestone': {

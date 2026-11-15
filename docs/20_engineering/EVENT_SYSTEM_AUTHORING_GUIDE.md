@@ -271,6 +271,8 @@ offensive_ops_suppression, patron_pressure, recruitment_modifier, supply_delta
 
 Note that `recruitment_modifier` is a LIVE EffectKind (see `memory/recruitment_modifier_dead_channel.md` for the corrected investigation — the channel works; small multipliers on small pools round to zero deterministically). Magnitudes: `0.80x`-`1.20x` is subtle; `0.50x` or `1.50x` is stark.
 
+`aggression_modifier` is recorded but not applied in the current build. `applyEventEffects` pushes it onto `military.event_aggression_modifiers`, and the optional LLM AI commander prompt lists active entries as text, but no reader feeds it into deterministic bot or corps aggression (`getEventAggressionBonus` has no caller). Do not write event copy that promises a behavioural change from this effect alone. Wiring is deferred post-1.0 (realism audit F6, `docs/40_reports/proposals/20261114_PRE_1_0_REALISM_AUDIT.md`).
+
 ### 5.3 Worksheet-to-engine substitution map
 
 Historian worksheets often use natural-language dimension names. Substitutions:

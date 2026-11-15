@@ -639,6 +639,57 @@ export interface OpProposalCardView {
   force_ratio?: string;
   opportunity_cost?: string;
   summary?: string;
+  /**
+   * Command loop L5 (2026-11-15): the staff's own estimates the proposal dossier
+   * (`proposalDossier.ts`) turns into attributed bands. Everything here is what the
+   * president's corps staff already believe about their own plan (the corps
+   * commander's belief state and the officer's file), never fog-hidden enemy data.
+   * Ids are retained for map focus and name lookup only; never render them.
+   */
+  dossier_inputs?: OpProposalDossierInputs;
+}
+
+/** Staff estimates behind a proposal dossier. All optional: absent means "unknown". */
+export interface OpProposalDossierInputs {
+  /** Plan viability the corps staff report, in [0, 1]. */
+  viability: number | null;
+  /** The staff's confidence in their picture of the staging area, in [0, 1]. */
+  intel_confidence: number | null;
+  /** How far the assigned brigades have concentrated, in [0, 1]. */
+  concentration: number | null;
+  /** Pressure the corps front is already under. */
+  pressure: 'low' | 'moderate' | 'heavy' | 'critical' | null;
+  /** Staging settlement for map focus (an OSID; never rendered). */
+  staging_osid: string | null;
+  /** Assigned brigade ids for map focus (never rendered). */
+  brigade_ids: string[];
+  /** The proposing officer's file ratings (1-5), when the officer is known. */
+  commander_traits: { competence: number; aggressiveness: number } | null;
+}
+
+function finiteUnit(value: unknown): number | null {
+  return typeof value === 'number' && Number.isFinite(value) ? Math.max(0, Math.min(1, value)) : null;
+}
+
+function planPressureLevel(value: unknown): OpProposalDossierInputs['pressure'] {
+  return value === 'low' || value === 'moderate' || value === 'heavy' || value === 'critical' ? value : null;
+}
+
+function officerTraits(military: RawRecord | null, officerId: string | undefined): OpProposalDossierInputs['commander_traits'] {
+  if (!officerId) return null;
+  const rows = Array.isArray(military?.named_officer_data) ? military.named_officer_data : [];
+  for (const row of rows) {
+    const record = asRecord(row);
+    if (str(record?.id) !== officerId) continue;
+    const competence = record?.competence;
+    const aggressiveness = record?.aggressiveness;
+    if (typeof competence === 'number' && Number.isFinite(competence)
+      && typeof aggressiveness === 'number' && Number.isFinite(aggressiveness)) {
+      return { competence, aggressiveness };
+    }
+    return null;
+  }
+  return null;
 }
 
 /** Parse `APPROVE_OP:<corps>:<plan>` → { corpsId, planId }; null when malformed. */
@@ -849,6 +900,19 @@ export function buildOpProposalCards(
       force_ratio: forceRatio,
       opportunity_cost: opportunityCost,
       summary,
+      ...(ready
+        ? {
+          dossier_inputs: {
+            viability: finiteUnit(plan?.viability_score),
+            intel_confidence: finiteUnit(stagingZone ? zoneConfidence?.[stagingZone] : undefined),
+            concentration: finiteUnit(plan?.concentration_progress),
+            pressure: planPressureLevel(threat?.overall_pressure),
+            staging_osid: zoneAnchorOsid(stagingZone ?? ''),
+            brigade_ids: brigadeIds.filter((value): value is string => typeof value === 'string' && value.length > 0),
+            commander_traits: officerTraits(military, commanderIdByCorps.get(corpsId)),
+          },
+        }
+        : {}),
     });
   }
 
@@ -931,8 +995,10 @@ export interface ForceableReadyProposalRow {
  *
  * Reads raw GameState (military.corps_command[*].commander_state.current_plan)
  * and the pending proposals so a plan that already has an APPROVE_OP proposal is
- * excluded (that one goes through the existing commit / override path instead).
- * Returns [] when no corps holds a ready plan. Sorted by corps id then plan id.
+ * excluded (that one goes through the existing commit / override path instead),
+ * and excludes a plan with a staged presidential answer (player_op_response for
+ * that plan; B11). Returns [] when no corps holds a ready plan. Sorted by corps id
+ * then plan id.
  */
 export function buildForceableReadyPlans(
   rawState: unknown,
@@ -995,6 +1061,22 @@ export function buildForceableReadyPlans(
     proposedPlanKeys.add(`${parts[1]}:${parts.slice(2).join(':')}`);
   }
 
+  // Parity with resolveProactiveForceLaunchRefusal (autonomy_ipc_contract.cjs): an
+  // UNRESOLVED APPROVE_OP review from the player's faction on the raw state also
+  // routes the plan to the proposal path, even if the caller passed no proposals.
+  const rawReviews = Array.isArray(meta?.pending_proposal_reviews) ? meta.pending_proposal_reviews : [];
+  for (const raw of rawReviews) {
+    const review = asRecord(raw);
+    if (!review) continue;
+    if (playerFaction && str(review.faction) !== playerFaction) continue;
+    if (review.accepted != null || review.resolved_turn != null || review.opportunity_decision != null) continue;
+    const action = str(review.proposed_action);
+    if (!action) continue;
+    const parts = action.split(':');
+    if (parts[0] !== 'APPROVE_OP' || !parts[1] || !parts[2]) continue;
+    proposedPlanKeys.add(`${parts[1]}:${parts.slice(2).join(':')}`);
+  }
+
   const views: ForceableReadyPlanView[] = [];
   for (const corpsId of Object.keys(corpsCommand).sort(strictCompare)) {
     const cc = asRecord(corpsCommand[corpsId]);
@@ -1010,6 +1092,15 @@ export function buildForceableReadyPlans(
     if (!planId) continue;
     // Skip plans the officer already surfaced as a proposal (existing path owns those).
     if (proposedPlanKeys.has(`${corpsId}:${planId}`)) continue;
+    // B11 (R8 dry-run Council, 2026-11-14): skip plans with a staged presidential
+    // answer. accept/withhold resolves the review (so it leaves the pending list) and
+    // stages player_op_response, which stays until the commander loop consumes it,
+    // while the plan stays 'ready'; such a plan is not "unrequested". A review that
+    // auto-expired unanswered stages nothing, so its held plan stays listed (this card
+    // is the only way to release it). Mirrors resolveProactiveForceLaunchRefusal in
+    // src/desktop/autonomy_ipc_contract.cjs, which the IPC enforces.
+    const staged = asRecord(cc.player_op_response);
+    if (staged && str(staged.plan_id) === planId) continue;
 
     const commander = resolveCommander(commanderIdByCorps.get(corpsId), rosterById);
     views.push({

@@ -101,6 +101,7 @@ import { FEDERATION_WESTERN_BOSNIA_OPPORTUNITIES } from './operation_opportunity
 import { DAYTON_CONTINUATION_OPPORTUNITIES } from './operation_opportunity_catalog_dayton_continuation.js';
 import { enterOperationRecovery } from './tactical_group_lifecycle.js';
 import { effectiveOperationMinimum } from './operation_minimum_policy.js';
+import { isFactionBoundByOct1995Ceasefire } from './oct1995_ceasefire.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Public types
@@ -902,6 +903,9 @@ export function evaluateOperationOpportunities(
         // where Sana was approved at t175, then re-proposed every turn
         // because the prior `live` filter only looked at pending/delayed.
         if (seenOpportunityIds.has(def.opportunity_id)) continue;
+        // October 1995 general ceasefire (council fix 3): the staff does not raise a new
+        // offensive for a bound faction. The entry is not enqueued, so it is not consumed.
+        if (isFactionBoundByOct1995Ceasefire(state, def.faction)) continue;
 
         const proposalId = buildProposalId(def.opportunity_id, turn);
         const expiresTurn = defaultExpiryTurn(turn);
@@ -1348,6 +1352,11 @@ export function preflightOpportunityAdmission(
 ): OpportunityAdmissionPreflight {
     const required = effectiveOperationMinimum('sector_attack');
     if (!state.military.corps_command?.[def.primary_corps]) {
+        return insufficientAdmission(0, required);
+    }
+    // October 1995 general ceasefire (council fix 3): refuse admission. A refusal leaves the
+    // proposal pending, so an approval given before the ceasefire is not consumed.
+    if (isFactionBoundByOct1995Ceasefire(state, def.faction)) {
         return insufficientAdmission(0, required);
     }
 
@@ -1917,6 +1926,31 @@ export function defaultBotDecisionForOpportunity(
 export const OPPORTUNITY_PROPOSAL_ACTION_PREFIX = 'OPPORTUNITY:';
 
 /**
+ * Defensive opportunities are never put to the President (owner decision 2, 2026-11-14;
+ * command-loop proposal §5B; Engine Invariants §14.10b). The classification is a code-side
+ * lookup on the catalog tier, never a field copied into persisted opportunity state: T3 is the
+ * defensive-crisis subtype (approve commits reserves and spawns no operation). Every T1/T4
+ * catalog entry is a corps operation or campaign, so no catalog entry is a small local attack.
+ */
+export function isDefensiveOpportunity(def: OperationOpportunityDef): boolean {
+    return def.tier === 'T3';
+}
+
+/**
+ * A live president is present: player faction set and not headless auto-control. The defensive
+ * rule applies only then, so headless runs keep their review-then-auto-resolve timing and stay
+ * byte-identical (same gate as `isLivePresident` in stance_matters.ts, inlined to avoid an import cycle).
+ */
+function hasLivePresident(state: GameState): boolean {
+    return Boolean(state.meta?.player_faction) && state.meta?.headless_scenario_auto_control !== true;
+}
+
+/** True when this player-faction opportunity is decided by staff instead of the President's review queue. */
+function isStaffDecidedPlayerOpportunity(state: GameState, def: OperationOpportunityDef): boolean {
+    return hasLivePresident(state) && isDefensiveOpportunity(def);
+}
+
+/**
  * Apply default bot decisions for any pending opportunity whose
  * `approver_faction` is NOT a human-controlled player (levels 0/1). Runs synchronously after the
  * evaluator so bot opportunities are resolved on the same turn they become
@@ -1938,10 +1972,16 @@ export function applyBotOpportunityDecisions(
     const targets: Array<{ proposalId: string; def: OperationOpportunityDef; proposal: OperationOpportunityState }> = [];
     for (const p of proposals) {
         if (p.status !== 'eligible_pending_review') continue;
-        if (playerFaction !== null && p.approver_faction === playerFaction
-            && (state.meta.autonomy_level ?? 0) < 2) continue;
+        // October 1995 general ceasefire (council fix 3): no bot approval while it binds; a
+        // pending proposal waits and expires on its own clock.
+        if (isFactionBoundByOct1995Ceasefire(state, p.approver_faction)) continue;
         const def = catalog.find(d => d.opportunity_id === p.opportunity_id);
         if (!def) continue;
+        // Below level 2 the President reviews his faction's opportunities, except defensive
+        // ones, which his staff decides at every level (§14.10b).
+        if (playerFaction !== null && p.approver_faction === playerFaction
+            && (state.meta.autonomy_level ?? 0) < 2
+            && !isStaffDecidedPlayerOpportunity(state, def)) continue;
         targets.push({ proposalId: p.proposal_id, def, proposal: p });
     }
     // Sort deterministically so bot decisions are stable across replays.
@@ -1976,6 +2016,8 @@ export function generateOpportunityProposalReviews(
     catalog: readonly OperationOpportunityDef[] = OPERATION_OPPORTUNITY_CATALOG,
 ): PendingProposalReview[] {
     if ((state.meta.autonomy_level ?? 0) >= 2) return [];
+    // October 1995 general ceasefire (council fix 3): the staff puts no offensive to the president.
+    if (isFactionBoundByOct1995Ceasefire(state, playerFaction)) return [];
     const proposals = state.military.operation_opportunities;
     if (!proposals || proposals.length === 0) return [];
 
@@ -1993,6 +2035,8 @@ export function generateOpportunityProposalReviews(
         if (existingActions.has(`${OPPORTUNITY_PROPOSAL_ACTION_PREFIX}${p.proposal_id}`)) continue;
         const def = catalog.find(d => d.opportunity_id === p.opportunity_id);
         if (!def) continue;
+        // Defensive opportunities are never put to the President (§14.10b).
+        if (isStaffDecidedPlayerOpportunity(state, def)) continue;
         const recommendation = def.staff_recommendation;
         const desc = `${def.name} — staff recommendation: ${recommendation}`;
         out.push({

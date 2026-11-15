@@ -39,6 +39,18 @@ function makeLoadedGameState(): LoadedGameState {
       HRHB: { killed: 120, wounded: 190, missing_captured: 0 },
     },
     displacementByMun: {},
+    nationalDisplacement: {
+      civilianCasualtiesByEthnicity: {},
+      refugeesByTurn: [],
+      // refugeesCreated is displaced + killed + fled abroad. It is larger than the routed-only
+      // departedByOsid counts below for RBiH (4000 routed, 4500 with the killed and fled).
+      humanitarianAggregates: {
+        RS: { RBiH: { refugeesCreated: 3000, refugeesReceived: 0, civilianCasualtiesCaused: 400 } },
+        HRHB: { RBiH: { refugeesCreated: 1500, refugeesReceived: 0, civilianCasualtiesCaused: 100 } },
+        RBiH: { RS: { refugeesCreated: 12000, refugeesReceived: 0, civilianCasualtiesCaused: 900 } },
+        _unknown: { HRHB: { refugeesCreated: 1000, refugeesReceived: 0, civilianCasualtiesCaused: 0 } },
+      },
+    },
     departedByOsid: {
       'op:sarajevo:centar': { RBiH: 4000, RS: 5000 },
       'op:bijeljina:center': { RS: 7000, HRHB: 1000 },
@@ -70,9 +82,13 @@ describe('ui army hq war summary visibility', () => {
     expect(model.personnelByFaction.RBiH).toBe(1200);
     expect(model.personnelByFaction.RS).toBe(2400);
     expect(model.personnelByFaction.HRHB).toBe(1800);
-    expect(model.displacedByFaction.RBiH).toBe(4000);
-    expect(model.displacedByFaction.RS).toBe(12000);
-    expect(model.displacedByFaction.HRHB).toBe(1000);
+    // One definition: displaced OR KILLED (the engine's refugees_created), the same figure the
+    // Humanitarian Ledger, the replay and the Verdict show, not the routed-only departedByOsid.
+    expect(model.displacedOrKilledByFaction.RBiH).toBe(4500);
+    expect(model.displacedOrKilledByFaction.RS).toBe(12000);
+    expect(model.displacedOrKilledByFaction.HRHB).toBe(1000);
+    expect(model.totalDisplacedOrKilled).toBe(17500);
+    expect(model.totalDisplacedOrKilledReported).toBe(true);
     expect(model.areaPct.RBiH).toBeGreaterThanOrEqual(0);
     expect(model.areaPct.RS).toBeGreaterThanOrEqual(0);
     expect(model.areaPct.HRHB).toBeGreaterThanOrEqual(0);

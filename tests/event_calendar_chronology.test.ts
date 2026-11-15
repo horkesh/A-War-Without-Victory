@@ -177,7 +177,7 @@ describe('event calendar chronology', () => {
 
         expect(anchors.carter_ceasefire_1994.citation).toContain('Carter shuttle 18-20 Dec 1994');
         expect(anchors.carter_ceasefire_1994.citation).toContain('temporary truce 23/24 Dec 1994');
-        expect(carter.trigger_evidence?.join(' ')).toContain('18-20 December shuttle window');
+        expect(carter.trigger_evidence?.join(' ')).toContain('18-20 December 1994');
         expect(carter.trigger_evidence?.join(' ')).toContain('23/24 December');
         expect(carter.trigger_evidence?.join(' ')).not.toContain('agreement week');
         expect(anchors.coha_ceasefire_begins_1995.citation).toContain('1 Jan 1995');

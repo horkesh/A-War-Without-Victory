@@ -38,15 +38,31 @@ import { SupplyPanel } from './components/SupplyPanel';
 const EconomyPanel = lazy(() =>
   import('./components/EconomyPanel').then(m => ({ default: m.EconomyPanel })),
 );
-import { HumanitarianLedgerPanel } from './components/HumanitarianLedgerPanel';
-import { EnclaveDashboard } from './components/EnclaveDashboard';
+// The Humanitarian Ledger and the Enclave dashboard open on demand; they load in their own
+// chunk so the entry chunk stays under the vite.config.ts chunk-size limit, which the
+// player-experience gate blocks on (council fix 4 grew the entry chunk past it, 2026-11-14).
+const HumanitarianLedgerPanel = lazy(() =>
+  import('./components/HumanitarianLedgerPanel').then(m => ({ default: m.HumanitarianLedgerPanel })),
+);
+const EnclaveDashboard = lazy(() =>
+  import('./components/EnclaveDashboard').then(m => ({ default: m.EnclaveDashboard })),
+);
 import { EventModal } from './components/EventModal';
-import { AiAdvisorPanel } from './components/AiAdvisorPanel';
-import { AiSettingsPanel } from './components/AiSettingsPanel';
+const AiAdvisorPanel = lazy(() =>
+  import('./components/AiAdvisorPanel').then(m => ({ default: m.AiAdvisorPanel })),
+);
+const AiSettingsPanel = lazy(() =>
+  import('./components/AiSettingsPanel').then(m => ({ default: m.AiSettingsPanel })),
+);
 import { PresidentialInbox } from './components/PresidentialInbox';
 import type { EventDisplayData } from './components/EventModal';
 import { CommandBriefingLayer } from './components/CommandBriefingLayer';
-import { PeacePlanModal } from './components/PeacePlanModal';
+// Codex, Chronicle, Wrapped, Settings, Diplomacy, the Peace plan and the two AI panels all open
+// on demand, so each loads when first opened and stays out of the entry chunk (vite.config.ts
+// chunk-size limit; the player-experience gate blocks on it; main went red on it 2026-11-15).
+const PeacePlanModal = lazy(() =>
+  import('./components/PeacePlanModal').then(m => ({ default: m.PeacePlanModal })),
+);
 import { OnboardingOverlay, shouldShowOnboarding, type TutorialStateShape } from './components/onboarding/OnboardingOverlay';
 import { ParamilitaryReviewModal } from './components/ParamilitaryReviewModal';
 import { EventDecisionModal } from './components/EventDecisionModal';
@@ -60,20 +76,39 @@ import { CounterOfferModal } from './components/CounterOfferModal';
 const DaytonNegotiationModal = lazy(() =>
   import('./components/DaytonNegotiationModal').then(m => ({ default: m.DaytonNegotiationModal })),
 );
-import { DiplomacyPanel } from './components/DiplomacyPanel';
+const DiplomacyPanel = lazy(() =>
+  import('./components/DiplomacyPanel').then(m => ({ default: m.DiplomacyPanel })),
+);
 import { MainMenu } from './components/MainMenu';
 import { PauseMenu } from './components/PauseMenu';
-import { SettingsScreen } from './components/SettingsScreen';
-import { CreditsScreen } from './components/CreditsScreen';
+const SettingsScreen = lazy(() =>
+  import('./components/SettingsScreen').then(m => ({ default: m.SettingsScreen })),
+);
+// Opens on demand from the menu; its own chunk keeps the entry chunk under the limit.
+const CreditsScreen = lazy(() =>
+  import('./components/CreditsScreen').then(m => ({ default: m.CreditsScreen })),
+);
 import { MapModeLegend } from './components/MapModeLegend';
 import { PeaceStatusPanel } from './components/PeaceStatusPanel';
 import { PeaceWarTransitionOverlay } from './components/PeaceWarTransitionOverlay';
-import { ChronicleOverlay } from './components/chronicle/ChronicleOverlay';
-import { WrappedOverlay } from './components/chronicle/WrappedOverlay';
-import { CodexPanel } from './components/CodexPanel';
+const ChronicleOverlay = lazy(() =>
+  import('./components/chronicle/ChronicleOverlay').then(m => ({ default: m.ChronicleOverlay })),
+);
+const WrappedOverlay = lazy(() =>
+  import('./components/chronicle/WrappedOverlay').then(m => ({ default: m.WrappedOverlay })),
+);
+const CodexPanel = lazy(() =>
+  import('./components/CodexPanel').then(m => ({ default: m.CodexPanel })),
+);
 import { LoadingSkeleton } from './components/LoadingSkeleton';
 import { LoadErrorToast } from './components/LoadErrorToast';
-import { VerdictScreen } from './components/VerdictScreen';
+// The Verdict and the ending code only it reads (scene, figures, decision ranking, findings,
+// comparison lines, cost ledger, signing beat) load on demand and stay out of the entry chunk
+// (vite.config.ts chunk-size limit). The screen still mounts unconditionally and returns null
+// until the war has ended; only its module is fetched late.
+const VerdictScreen = lazy(() =>
+  import('./components/VerdictScreen').then(m => ({ default: m.VerdictScreen })),
+);
 import { ReplayInspectionBanner } from './components/replay/ReplayInspectionBanner';
 import { AudioCueObserver } from './components/AudioCueObserver';
 import { AudioSurfaceBedController } from './components/AudioSurfaceBedController';
@@ -92,6 +127,7 @@ import { useGameStore, isDevMode } from './store/gameStore';
 import { loadLatestRunSaveAsText, loadEventDefinitions, loadEventDefinitionsFull } from './data/DataLoader';
 import type { EventDefinition } from '../../sim/events/event_types';
 import { buildConsequenceReceipts, receiptsRealizedOnTurn } from './data/consequenceReceipts';
+import { resolveEventDisplayNarrative, resolveEventDisplayTitle } from './data/eventDisplayCopy';
 import { buildForcedOpReceipts, forcedOpReceiptsRealizedOnTurn } from './data/forcedOpReceipts';
 import {
   buildOfficerResentmentReceipts,
@@ -181,10 +217,22 @@ function formatEventDuration(turns: number | undefined): string {
     : '';
 }
 
+/** Engine shares in [-1, 1] (alliance, offensive drive) read as whole points: 0.05 → 5. */
+function formatSignedEventShare(share: number | undefined): string {
+  return typeof share === 'number' && Number.isFinite(share) ? formatSignedEventDelta(Math.round(share * 100)) : '';
+}
+
 export function formatAcknowledgementEventEffect(effect: AcknowledgementEventEffect): string {
   if (effect.text) return effect.text;
+  // Council fix 4 (C4/C11): army attributes name the army (ARBiH, VRS, HVO); state attributes
+  // (patron pressure, negotiating position, territory, humanitarian record) name the state by
+  // its canonical short form (RBiH, RS, HRHB).
   const faction = effect.faction ? getPlayerSafeMilitaryFactionName(effect.faction) : null;
   const factionPrefix = faction ? `${faction} ` : '';
+  const stateFaction = effect.faction === 'RBiH' || effect.faction === 'RS' || effect.faction === 'HRHB'
+    ? effect.faction
+    : faction;
+  const statePrefix = stateFaction ? `${stateFaction} ` : '';
   const delta = formatSignedEventDelta(effect.delta);
   const duration = formatEventDuration(effect.duration_turns);
 
@@ -196,25 +244,25 @@ export function formatAcknowledgementEventEffect(effect: AcknowledgementEventEff
     case 'cohesion_change':
       return t('eventModal.effect.cohesionChange', { faction: factionPrefix, delta });
     case 'humanitarian_impact':
-      return t('eventModal.effect.humanitarianImpact', { faction: factionPrefix, delta: formatSignedEventDelta(effect.war_crimes_delta) });
+      return t('eventModal.effect.humanitarianImpact', { faction: statePrefix, delta: formatSignedEventDelta(effect.war_crimes_delta) });
     case 'patron_pressure':
-      return t('eventModal.effect.patronPressure', { faction: factionPrefix, delta });
+      return t('eventModal.effect.patronPressure', { faction: statePrefix, delta });
     case 'alliance_change':
-      return t('eventModal.effect.allianceChange', { delta });
+      return t('eventModal.effect.allianceChange', { delta: formatSignedEventShare(effect.delta) });
     case 'negotiation_capital':
-      return t('eventModal.effect.negotiationCapital', { faction: factionPrefix, delta });
+      return t('eventModal.effect.negotiationCapital', { faction: statePrefix, delta });
     case 'equipment_grant':
       return t('eventModal.effect.equipmentGrant', { faction: factionPrefix });
     case 'aggression_modifier':
-      return t('eventModal.effect.aggressionModifier', { faction: factionPrefix, delta, duration });
+      return t('eventModal.effect.aggressionModifier', { faction: factionPrefix, delta: formatSignedEventShare(effect.delta), duration });
     case 'control_change': {
       const count = effect.osids?.length ?? 0;
       return count > 0
-        ? t(count === 1 ? 'eventModal.effect.controlChange.one' : 'eventModal.effect.controlChange.many', { faction: factionPrefix, count })
-        : t('eventModal.effect.controlChange.recorded', { faction: factionPrefix });
+        ? t(count === 1 ? 'eventModal.effect.controlChange.one' : 'eventModal.effect.controlChange.many', { faction: statePrefix, count })
+        : t('eventModal.effect.controlChange.recorded', { faction: statePrefix });
     }
     case 'guerrilla_threat':
-      return t('eventModal.effect.guerrillaThreat', { faction: factionPrefix, duration });
+      return t('eventModal.effect.guerrillaThreat', { faction: statePrefix, duration });
     case 'offensive_ops_suppression':
       return t('eventModal.effect.offensiveSuppression', { faction: factionPrefix, duration });
     case 'alliance_lock':
@@ -327,14 +375,38 @@ function CodexPanelWrapper({
   // absent the section gracefully degrades and the panel renders exactly
   // as before.
   const rawGameState = useGameStore((s) => s.loadedGameState?.rawGameState);
+  if (!codexOpen) return null;
   return (
-    <CodexPanel
-      isOpen={codexOpen}
-      onClose={() => setCodexOpen(false)}
-      requestedEventId={requestedEventId}
-      eventCatalog={eventCatalog}
-      state={rawGameState}
-    />
+    <Suspense fallback={null}>
+      <CodexPanel
+        isOpen={codexOpen}
+        onClose={() => setCodexOpen(false)}
+        requestedEventId={requestedEventId}
+        eventCatalog={eventCatalog}
+        state={rawGameState}
+      />
+    </Suspense>
+  );
+}
+
+/** Chronicle and Wrapped load on first open; each reads its own open flag. */
+function ChronicleOverlayHost() {
+  const open = useGameStore((s) => s.chronicleOpen);
+  if (!open) return null;
+  return (
+    <Suspense fallback={null}>
+      <ChronicleOverlay />
+    </Suspense>
+  );
+}
+
+function WrappedOverlayHost({ eventCatalog }: { eventCatalog?: ReadonlyMap<string, EventDefinition> }) {
+  const open = useGameStore((s) => s.wrappedOpen);
+  if (!open) return null;
+  return (
+    <Suspense fallback={null}>
+      <WrappedOverlay eventCatalog={eventCatalog} />
+    </Suspense>
   );
 }
 
@@ -893,8 +965,9 @@ function App() {
         const def = defs.get(e.id);
         return {
           id: e.id,
-          title: def?.title ?? e.title,
-          narrative: def?.narrative ?? e.narrative ?? '',
+          // def.title is the persisted catalog title; display the authored correction/locale copy.
+          title: resolveEventDisplayTitle(e.id, def?.title ?? e.title),
+          narrative: resolveEventDisplayNarrative(e.id, def?.narrative ?? e.narrative ?? ''),
           category: def?.category ?? e.category ?? 'military',
           effects: def?.effects?.map(eff => ({
             kind: eff.kind,
@@ -2027,6 +2100,13 @@ function App() {
           setTurnAftermathOpen(false);
           handlePresidentialInboxAction(item.action, item.id);
         }}
+        onShowOnMap={(osid) => {
+          // Command loop L2: the same field-inspection handoff as the command palette,
+          // so the tactical map is the active shell before it focuses the place.
+          clearTacticalInspectionOverlays();
+          inspectOnField(useGameStore.getState(), { kind: 'field-settlement', osid });
+          leaveWarroomForGame();
+        }}
       />
       <RootErrorBoundary zone="army hq">
         <ArmyHQModal
@@ -2040,16 +2120,18 @@ function App() {
           }}
         />
       </RootErrorBoundary>
-      <ChronicleOverlay />
-      <WrappedOverlay eventCatalog={eventCatalogFull} />
+      <ChronicleOverlayHost />
+      <WrappedOverlayHost eventCatalog={eventCatalogFull} />
       <CodexPanelWrapper eventCatalog={eventCatalogFull} requestedEventId={requestedCodexEventId} />
       <OperationBriefingModalWrapper />
       {loadedGameState && (
-        <EnclaveDashboard
-          state={loadedGameState}
-          open={enclaveDashboardOpen}
-          onClose={() => setEnclaveDashboardOpen(false)}
-        />
+        <Suspense fallback={null}>
+          <EnclaveDashboard
+            state={loadedGameState}
+            open={enclaveDashboardOpen}
+            onClose={() => setEnclaveDashboardOpen(false)}
+          />
+        </Suspense>
       )}
       {mapMode === 'supply' && loadedGameState && (
         <SupplyPanel state={loadedGameState} />
@@ -2060,27 +2142,35 @@ function App() {
         </Suspense>
       )}
       {loadedGameState && (
-        <HumanitarianLedgerPanel
-          state={loadedGameState}
-          open={humanitarianLedgerOpen}
-          onClose={() => setHumanitarianLedgerOpen(false)}
-        />
+        <Suspense fallback={null}>
+          <HumanitarianLedgerPanel
+            state={loadedGameState}
+            open={humanitarianLedgerOpen}
+            onClose={() => setHumanitarianLedgerOpen(false)}
+          />
+        </Suspense>
       )}
       {aiSettingsOpen && (
-        <AiSettingsPanel onClose={() => setAiSettingsOpen(false)} />
+        <Suspense fallback={null}>
+          <AiSettingsPanel onClose={() => setAiSettingsOpen(false)} />
+        </Suspense>
       )}
       {diplomacyOpen && loadedGameState?.diplomacyView && (
-        <DiplomacyPanel
-          view={loadedGameState.diplomacyView}
-          onClose={() => setDiplomacyOpen(false)}
-        />
+        <Suspense fallback={null}>
+          <DiplomacyPanel
+            view={loadedGameState.diplomacyView}
+            onClose={() => setDiplomacyOpen(false)}
+          />
+        </Suspense>
       )}
       {aiAdvisorOpen && (
-        <AiAdvisorPanel
-          response={aiAdvisorResponse}
-          loading={!aiAdvisorResponse}
-          onClose={() => { setAiAdvisorOpen(false); setAiAdvisorResponse(null); }}
-        />
+        <Suspense fallback={null}>
+          <AiAdvisorPanel
+            response={aiAdvisorResponse}
+            loading={!aiAdvisorResponse}
+            onClose={() => { setAiAdvisorOpen(false); setAiAdvisorResponse(null); }}
+          />
+        </Suspense>
       )}
       {loadedGameState?.phase === 'peace' && <PeaceStatusPanel />}
       {/* v0.4.1 Phase 5: Event modal (queue-based).
@@ -2105,10 +2195,12 @@ function App() {
           a pending plan does not auto-pop it over the boot Main Menu (same contract
           as the EventDecisionModal auto-launch above). Shows once past the menu. */}
       {appScreen !== 'mainMenu' && !turnAftermathOpen && showPeacePlanModal && pendingPeacePlan && (
-        <PeacePlanModal
-          plan={pendingPeacePlan}
-          onDismiss={() => setDismissedPeacePlanKey(getPeacePlanDismissalKey(pendingPeacePlan))}
-        />
+        <Suspense fallback={null}>
+          <PeacePlanModal
+            plan={pendingPeacePlan}
+            onDismiss={() => setDismissedPeacePlanKey(getPeacePlanDismissalKey(pendingPeacePlan))}
+          />
+        </Suspense>
       )}
       <ParamilitaryReviewModal
         isOpen={paramilitaryReviewOpen}
@@ -2237,7 +2329,9 @@ function App() {
         </Suspense>
       )}
       <PeaceWarTransitionOverlay />
-      <VerdictScreen onLoadSaveState={handleMainMenuLoadGame} onLoadSaveError={setLoadError} />
+      <Suspense fallback={null}>
+        <VerdictScreen onLoadSaveState={handleMainMenuLoadGame} onLoadSaveError={setLoadError} />
+      </Suspense>
       <ReplayInspectionBanner />
       {/* Warroom shell: advance-turn confirmation modal — triggered by wall_calendar_area hotspot */}
       <AdvanceTurnModal
@@ -2264,8 +2358,10 @@ function App() {
               setSidePickerOpen(true);
               setSidePickerDismissed(false);
             }}
+            // Status dock: hidden on the Dayton signing and the Verdict, which render under
+            // `gameOver` (command-loop 2C). Only the dock is gated, not the shared blocking flag.
             statusDock={(
-              !presidentialBlockingSurfaceActive ? (
+              !presidentialBlockingSurfaceActive && !loadedGameState?.gameOver ? (
                 <WarroomStatusBar
                   onReviewPriorities={reviewPreAdvancePriorities}
                   onReviewItem={reviewPreAdvanceItem}
@@ -2383,8 +2479,16 @@ function App() {
           onQuit={() => { if (typeof window !== 'undefined') window.close(); }}
         />
       )}
-      {settingsOpen && <SettingsScreen onClose={() => setSettingsOpen(false)} />}
-      {creditsOpen && <CreditsScreen onClose={() => setCreditsOpen(false)} />}
+      {settingsOpen && (
+        <Suspense fallback={null}>
+          <SettingsScreen onClose={() => setSettingsOpen(false)} />
+        </Suspense>
+      )}
+      {creditsOpen && (
+        <Suspense fallback={null}>
+          <CreditsScreen onClose={() => setCreditsOpen(false)} />
+        </Suspense>
+      )}
       {/* v0.9.2 tutorial onboarding deck - auto-mounted at app root (task #77).
           Only on the in-game screen with a loaded save and no blocking
           presidential surface. The overlay's own `shouldShowOnboarding`

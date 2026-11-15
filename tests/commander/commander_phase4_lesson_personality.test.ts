@@ -151,7 +151,7 @@ describe('v0.8.1 Phase 4 — Lesson Memory and Personality Weighting', () => {
 
             const briefing = makeMinimalBriefing({
                 turn: activeTurn,
-                pre_planned_ops: [{ id: 'op_1' }],
+                pre_planned_ops: [],
             });
 
             // lesson is active — selectWinningIntent will see it
@@ -160,7 +160,7 @@ describe('v0.8.1 Phase 4 — Lesson Memory and Personality Weighting', () => {
             expect(trace.lessons_applied).toContain('lesson_active');
         });
 
-        it('offensive_failure lesson produces negative lesson_delta in score_breakdown for stage_operation', () => {
+        it('offensive_failure lesson produces negative lesson_delta in score_breakdown for launch_opportunity', () => {
             const turn = 10;
             const lesson = makeLesson({
                 lesson_id: 'lesson_failure_breakdown',
@@ -175,12 +175,12 @@ describe('v0.8.1 Phase 4 — Lesson Memory and Personality Weighting', () => {
 
             const briefing = makeMinimalBriefing({
                 turn,
-                pre_planned_ops: [{ id: 'op_1' }],
+                pre_planned_ops: [],
             });
 
             const { trace } = selectWinningIntent(briefing, zones, forces, surplusPool, turn, [lesson]);
 
-            const stageOp = trace.candidates.find(c => c.type === 'stage_operation');
+            const stageOp = trace.candidates.find(c => c.type === 'launch_opportunity');
             expect(stageOp).toBeDefined();
             expect(stageOp!.score_breakdown['lesson_delta']).toBeDefined();
             expect(stageOp!.score_breakdown['lesson_delta']).toBeLessThan(0);
@@ -205,7 +205,7 @@ describe('v0.8.1 Phase 4 — Lesson Memory and Personality Weighting', () => {
 
             const briefing = makeMinimalBriefing({
                 turn,
-                pre_planned_ops: [{ id: 'op_1' }],
+                pre_planned_ops: [],
             });
 
             const { trace } = selectWinningIntent(briefing, zones, forces, surplusPool, turn, [expiredLesson]);
@@ -228,7 +228,7 @@ describe('v0.8.1 Phase 4 — Lesson Memory and Personality Weighting', () => {
 
             const briefing = makeMinimalBriefing({
                 turn,
-                pre_planned_ops: [{ id: 'op_1' }],
+                pre_planned_ops: [],
             });
 
             const { trace } = selectWinningIntent(briefing, zones, forces, surplusPool, turn, [activeLesson]);
@@ -251,7 +251,7 @@ describe('v0.8.1 Phase 4 — Lesson Memory and Personality Weighting', () => {
 
             const briefing = makeMinimalBriefing({
                 turn,
-                pre_planned_ops: [{ id: 'op_1' }],
+                pre_planned_ops: [],
             });
 
             const { trace } = selectWinningIntent(briefing, zones, forces, surplusPool, turn, [permanentLesson]);
@@ -274,7 +274,7 @@ describe('v0.8.1 Phase 4 — Lesson Memory and Personality Weighting', () => {
 
             const briefing = makeMinimalBriefing({
                 turn,
-                pre_planned_ops: [{ id: 'op_1' }],
+                pre_planned_ops: [],
             });
 
             const { trace } = selectWinningIntent(briefing, zones, forces, surplusPool, turn, [alreadyExpired]);
@@ -286,7 +286,7 @@ describe('v0.8.1 Phase 4 — Lesson Memory and Personality Weighting', () => {
     // ─── Personality weighting ───────────────────────────────────────────────
 
     describe('Personality weighting', () => {
-        it('high aggression (0.9) produces higher stage_operation score than neutral (0.5), all else equal', () => {
+        it('high aggression (0.9) produces higher launch_opportunity score than neutral (0.5), all else equal', () => {
             const turn = 10;
             const surplusPool = makeSurplusPool(MIN_BRIGADES_FOR_PLAN);
             const zones = [makeZone({ posture: 'balanced', surplus_brigades: surplusPool.map(e => e.brigade_id) })];
@@ -294,20 +294,20 @@ describe('v0.8.1 Phase 4 — Lesson Memory and Personality Weighting', () => {
 
             const briefingAggressive = makeMinimalBriefing({
                 turn,
-                pre_planned_ops: [{ id: 'op_1' }],
+                pre_planned_ops: [],
                 officer_personality: aggressivePersonality,
             });
             const briefingNeutral = makeMinimalBriefing({
                 turn,
-                pre_planned_ops: [{ id: 'op_1' }],
+                pre_planned_ops: [],
                 officer_personality: neutralPersonality,
             });
 
             const { trace: traceAggressive } = selectWinningIntent(briefingAggressive, zones, forces, surplusPool, turn);
             const { trace: traceNeutral } = selectWinningIntent(briefingNeutral, zones, forces, surplusPool, turn);
 
-            const stageAggressive = traceAggressive.candidates.find(c => c.type === 'stage_operation');
-            const stageNeutral = traceNeutral.candidates.find(c => c.type === 'stage_operation');
+            const stageAggressive = traceAggressive.candidates.find(c => c.type === 'launch_opportunity');
+            const stageNeutral = traceNeutral.candidates.find(c => c.type === 'launch_opportunity');
 
             expect(stageAggressive).toBeDefined();
             expect(stageNeutral).toBeDefined();
@@ -340,7 +340,7 @@ describe('v0.8.1 Phase 4 — Lesson Memory and Personality Weighting', () => {
             expect(holdCautious!.score).toBeGreaterThan(holdNeutral!.score);
         });
 
-        it('personality_delta appears in score_breakdown for stage_operation when aggression != 0.5', () => {
+        it('personality_delta appears in score_breakdown for launch_opportunity when aggression != 0.5', () => {
             const turn = 10;
             const surplusPool = makeSurplusPool(MIN_BRIGADES_FOR_PLAN);
             const zones = [makeZone({ posture: 'balanced', surplus_brigades: surplusPool.map(e => e.brigade_id) })];
@@ -348,13 +348,13 @@ describe('v0.8.1 Phase 4 — Lesson Memory and Personality Weighting', () => {
 
             const briefing = makeMinimalBriefing({
                 turn,
-                pre_planned_ops: [{ id: 'op_1' }],
+                pre_planned_ops: [],
                 officer_personality: aggressivePersonality,
             });
 
             const { trace } = selectWinningIntent(briefing, zones, forces, surplusPool, turn);
 
-            const stageOp = trace.candidates.find(c => c.type === 'stage_operation');
+            const stageOp = trace.candidates.find(c => c.type === 'launch_opportunity');
             expect(stageOp).toBeDefined();
             expect(stageOp!.score_breakdown['personality_delta']).toBeDefined();
             expect(stageOp!.score_breakdown['personality_delta']).toBeGreaterThan(0);
@@ -379,7 +379,7 @@ describe('v0.8.1 Phase 4 — Lesson Memory and Personality Weighting', () => {
             expect(holdLine!.score_breakdown['personality_delta']).toBeGreaterThan(0);
         });
 
-        it('high aggression does NOT override hard-block: corps_exhaustion_exceeds_threshold still blocks stage_operation', () => {
+        it('high aggression does NOT override hard-block: corps_exhaustion_exceeds_threshold still blocks launch_opportunity', () => {
             const turn = 10;
             const surplusPool = makeSurplusPool(MIN_BRIGADES_FOR_PLAN);
             const zones = [makeZone({ posture: 'projecting', surplus_brigades: surplusPool.map(e => e.brigade_id) })];
@@ -387,7 +387,7 @@ describe('v0.8.1 Phase 4 — Lesson Memory and Personality Weighting', () => {
 
             const briefing = makeMinimalBriefing({
                 turn,
-                pre_planned_ops: [{ id: 'op_1' }],
+                pre_planned_ops: [],
                 officer_personality: aggressivePersonality,
                 corps_exhaustion: MAX_EXHAUSTION_FOR_OPERATION + 10, // hard block
         faction_war_exhaustion: 0,
@@ -395,12 +395,12 @@ describe('v0.8.1 Phase 4 — Lesson Memory and Personality Weighting', () => {
 
             const { trace } = selectWinningIntent(briefing, zones, forces, surplusPool, turn);
 
-            const stageOp = trace.candidates.find(c => c.type === 'stage_operation');
-            // stage_operation must be blocked regardless of aggression
+            const stageOp = trace.candidates.find(c => c.type === 'launch_opportunity');
+            // launch_opportunity must be blocked regardless of aggression
             expect(stageOp).toBeDefined();
             expect(stageOp!.blocked_by).toContain('corps_exhaustion_exceeds_threshold');
             // winner must NOT be an offensive intent
-            expect(trace.winning_intent_id).not.toContain('stage_operation');
+            expect(trace.winning_intent_id).not.toContain('launch_opportunity');
             expect(trace.winning_intent_id).not.toContain('launch_opportunity');
         });
 
@@ -422,35 +422,6 @@ describe('v0.8.1 Phase 4 — Lesson Memory and Personality Weighting', () => {
     // ─── Lesson influence on candidate scoring ───────────────────────────────
 
     describe('Lesson influence', () => {
-        it('offensive_failure lesson reduces stage_operation score below un-lessoned baseline', () => {
-            const turn = 10;
-            const surplusPool = makeSurplusPool(MIN_BRIGADES_FOR_PLAN);
-            const zones = [makeZone({ posture: 'balanced', surplus_brigades: surplusPool.map(e => e.brigade_id) })];
-            const forces = makeForces(surplusPool, MIN_BRIGADES_FOR_PLAN);
-
-            const briefing = makeMinimalBriefing({
-                turn,
-                pre_planned_ops: [{ id: 'op_1' }],
-            });
-
-            const failureLesson = makeLesson({
-                lesson_id: 'lesson_reduce_offensive',
-                category: 'offensive_failure',
-                weight: -0.20,
-                expires_turn: turn + 5,
-            });
-
-            const { trace: traceNoLesson } = selectWinningIntent(briefing, zones, forces, surplusPool, turn);
-            const { trace: traceWithLesson } = selectWinningIntent(briefing, zones, forces, surplusPool, turn, [failureLesson]);
-
-            const stageNoLesson = traceNoLesson.candidates.find(c => c.type === 'stage_operation');
-            const stageWithLesson = traceWithLesson.candidates.find(c => c.type === 'stage_operation');
-
-            expect(stageNoLesson).toBeDefined();
-            expect(stageWithLesson).toBeDefined();
-            expect(stageWithLesson!.score).toBeLessThan(stageNoLesson!.score);
-        });
-
         it('offensive_failure lesson reduces launch_opportunity score below un-lessoned baseline', () => {
             const turn = 10;
             const surplusPool = makeSurplusPool(MIN_BRIGADES_FOR_PLAN);
@@ -477,7 +448,7 @@ describe('v0.8.1 Phase 4 — Lesson Memory and Personality Weighting', () => {
             expect(launchWithLesson!.score).toBeLessThan(launchNoLesson!.score);
         });
 
-        it('success_pattern lesson increases stage_operation score above un-lessoned baseline', () => {
+        it('success_pattern lesson increases launch_opportunity score above un-lessoned baseline', () => {
             const turn = 10;
             const surplusPool = makeSurplusPool(MIN_BRIGADES_FOR_PLAN);
             const zones = [makeZone({ posture: 'balanced', surplus_brigades: surplusPool.map(e => e.brigade_id) })];
@@ -485,7 +456,7 @@ describe('v0.8.1 Phase 4 — Lesson Memory and Personality Weighting', () => {
 
             const briefing = makeMinimalBriefing({
                 turn,
-                pre_planned_ops: [{ id: 'op_1' }],
+                pre_planned_ops: [],
             });
 
             const successLesson = makeLesson({
@@ -498,8 +469,8 @@ describe('v0.8.1 Phase 4 — Lesson Memory and Personality Weighting', () => {
             const { trace: traceNoLesson } = selectWinningIntent(briefing, zones, forces, surplusPool, turn);
             const { trace: traceWithLesson } = selectWinningIntent(briefing, zones, forces, surplusPool, turn, [successLesson]);
 
-            const stageNoLesson = traceNoLesson.candidates.find(c => c.type === 'stage_operation');
-            const stageWithLesson = traceWithLesson.candidates.find(c => c.type === 'stage_operation');
+            const stageNoLesson = traceNoLesson.candidates.find(c => c.type === 'launch_opportunity');
+            const stageWithLesson = traceWithLesson.candidates.find(c => c.type === 'launch_opportunity');
 
             expect(stageNoLesson).toBeDefined();
             expect(stageWithLesson).toBeDefined();
@@ -567,7 +538,7 @@ describe('v0.8.1 Phase 4 — Lesson Memory and Personality Weighting', () => {
         });
 
         it('zone-specific lesson does NOT affect corps-level candidates (launch_opportunity has no target_zone)', () => {
-            // Implementation note: candidateDefs for launch_opportunity / stage_operation have no target_zone
+            // Implementation note: candidateDefs for launch_opportunity / launch_opportunity have no target_zone
             // (they are corps-level, not zone-targeted). The relevance check is:
             //   !lesson.zone_id || lesson.zone_id === (targetZone ?? null)
             // When targetZone is undefined, targetZone ?? null = null, so a zone-specific lesson
@@ -621,7 +592,7 @@ describe('v0.8.1 Phase 4 — Lesson Memory and Personality Weighting', () => {
 
             const briefing = makeMinimalBriefing({
                 turn,
-                pre_planned_ops: [{ id: 'op_1' }],
+                pre_planned_ops: [],
                 officer_personality: aggressivePersonality,
             });
 
@@ -713,13 +684,13 @@ describe('v0.8.1 Phase 4 — Lesson Memory and Personality Weighting', () => {
 
             const briefing = makeMinimalBriefing({
                 turn,
-                pre_planned_ops: [{ id: 'op_1' }],
+                pre_planned_ops: [],
                 officer_personality: neutralPersonality,
             });
 
             const { trace } = selectWinningIntent(briefing, zones, forces, surplusPool, turn, []);
 
-            const stageOp = trace.candidates.find(c => c.type === 'stage_operation');
+            const stageOp = trace.candidates.find(c => c.type === 'launch_opportunity');
             expect(stageOp).toBeDefined();
             expect(stageOp!.score_breakdown['lesson_delta']).toBeUndefined();
         });

@@ -268,6 +268,6 @@ describe('generateWarDispatch displacement window', () => {
 
         await generateWarDispatch(state, client as any);
 
-        expect(capturedPrompt).toMatch(/Newly displaced this month: 700\b/);
+        expect(capturedPrompt).toMatch(/Newly displaced or killed this month: 700\b/);
     });
 });

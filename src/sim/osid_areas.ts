@@ -1,21 +1,21 @@
-import { readFileSync } from 'fs';
-import { resolve } from 'path';
+// OSID areas (km²) for territory share / km² figures.
+//
+// Bundled as a JSON module, the same way sim/negotiation (peace_settlement, enclave_credit,
+// front_packages, package_area_resolver) and the map UI already load this file. It used to be read
+// from `process.cwd()` at runtime, and on any read error it silently fell back to an empty area
+// map, so a run started outside the repo root reported zero territory without an error.
+import osidAreasJson from '../../data/derived/operational/osid_areas.json';
 
 export interface OsidAreaData {
     total: number;
     areas: Record<string, number>;
 }
 
-let osidAreaCache: OsidAreaData | null = null;
+const OSID_AREAS: OsidAreaData = {
+    total: osidAreasJson.total_area_km2,
+    areas: osidAreasJson.areas as Record<string, number>,
+};
 
 export function getOsidAreas(): OsidAreaData {
-    if (osidAreaCache) return osidAreaCache;
-    try {
-        const filePath = resolve(process.cwd(), 'data/derived/operational/osid_areas.json');
-        const raw = JSON.parse(readFileSync(filePath, 'utf8')) as { total_area_km2: number; areas: Record<string, number> };
-        osidAreaCache = { total: raw.total_area_km2, areas: raw.areas };
-    } catch {
-        osidAreaCache = { total: 51337, areas: {} };
-    }
-    return osidAreaCache;
+    return OSID_AREAS;
 }

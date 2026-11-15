@@ -63,7 +63,7 @@ Reuse unaffected evidence. Passing another check never retires an unmet acceptan
 
 Diagnose the first unexpected failure across all visible categories. Correct the smallest established cause and verify it with the cheapest meaningful check before broadening. Escalate only after a consolidated unresolved diagnosis or when authority must change.
 
-Update `docs/PROJECT_LEDGER.md` for behavioral/output/scenario or adopted process changes when required by repository policy. Put reusable technical knowledge in the existing knowledge ledger or napkin topic; do not create parallel task journals such as `tasks/todo.md` or `tasks/lessons.md`.
+Record behavioral/output/scenario or adopted process changes in the ledger when required by repository policy: add one fragment file, `docs/ledger/fragments/YYYY-MM-DD-<slug>.md`, first line `## YYYY-MM-DD — <title>`, instead of editing the top of `docs/PROJECT_LEDGER.md` (parallel PRs conflicted there). The integration steward compiles fragments into the ledger with `node tools/ledger_compile.cjs`; a PR that changes `src/` or `data/` must add a fragment (CI: Ledger Fragment Guard; label `no-ledger` to skip). See `docs/ledger/fragments/README.md`. Put reusable technical knowledge in the existing knowledge ledger or napkin topic; do not create parallel task journals such as `tasks/todo.md` or `tasks/lessons.md`.
 
 Before claiming completion, inspect the final diff, verify every applicable requirement with fresh evidence, report exits/counts/evidence paths, and obtain independent review where required. Keep previous failures and residual gates visible.
 

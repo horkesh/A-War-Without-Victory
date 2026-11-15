@@ -83,6 +83,7 @@ import { buildMajorCityLabelGeoJSON } from './builders/buildMajorCityLabelGeoJSO
 import { StackExpansionOverlay } from '../components/StackExpansionOverlay';
 import { RadialMenu } from '../components/RadialMenu';
 import type { RadialMenuItem } from '../components/RadialMenu';
+import { OsmAttribution, useOsmCreditPlates } from '../components/OsmAttribution';
 import { rewritePmtilesUrls } from './rewritePmtilesUrls';
 import { ensurePmtilesProtocol } from './pmtilesProtocol';
 import { collectEmphasizedFormationIds, collectHighlightedFormationIds } from './highlightSelection';
@@ -1115,6 +1116,7 @@ export function MapContainer({
   // In live mode, front line visibility follows sectorsVisible (fronts ARE sectors).
   const effectiveFrontsVisible = devMode ? frontsVisible : sectorsVisible;
   const fogVisible = useGameStore((s) => s.fogVisible);
+  const osmCreditPlates = useOsmCreditPlates();
   const battlesVisible = useGameStore((s) => s.battlesVisible);
   const municipalityBordersVisible = useGameStore((s) => s.municipalityBordersVisible);
   const selectedCorpsFrontSectorId = useGameStore((s) => s.selectedCorpsFrontSectorId);
@@ -4721,6 +4723,11 @@ export function MapContainer({
       className="absolute inset-0 outline-none"
     >
       <div ref={containerRef} className="absolute inset-0" style={{ filter: 'sepia(0.08) saturate(0.95)' }} />
+
+      {/* ODbL attribution for the OpenStreetMap-derived base map (osm.pmtiles). Drawn only while
+          nothing covers it: an open entity rail takes this column, and the minimap plate carries
+          the credit then (see osmCreditPlates). */}
+      {osmCreditPlates.warMap && <OsmAttribution placement="war-map" />}
 
       {mapLoadError ? (
         <div

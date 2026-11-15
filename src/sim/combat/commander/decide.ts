@@ -48,6 +48,7 @@ import type {
     ZoneAssessment,
     ZoneBelief,
     ZoneId,
+    SectorSituation,
 } from './commander_state.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -57,7 +58,6 @@ import type {
 /** Turns of quiet before a sector is eligible for thinning to 'screening'. */
 const QUIET_TURNS_FOR_SCREENING = 5;
 // Sectors with threat_ratio at or above this threshold must not drop below 'defend'.
-// Matches the evaluateSectorStances threshold in bot_corps_directives.ts.
 const SCREENING_MAX_THREAT_RATIO = 1.5;
 
 /** Casualty threshold to classify sector activity as 'skirmish'. */
@@ -96,14 +96,16 @@ const OFFENSIVE_SIGNS_CONFIDENCE_BOOST = 0.15;
 
 /**
  * A recommended OG stance. `trigger` says what drove it: 'contact' (ground lost or fighting
- * in the sector this turn) applies at once; 'intel' (enemy intent, a quiet front) waits for
- * the posture's minimum dwell (emit.ts OG_STANCE_MIN_DWELL_TURNS). Absent counts as 'intel'.
+ * in the sector this turn) and 'situation' (a truce line, or the corps' own operation staging
+ * from the OG — facts the commander knows, not readings of the enemy) apply at once; 'intel'
+ * (enemy intent, a quiet front) waits for the posture's minimum dwell
+ * (emit.ts OG_STANCE_MIN_DWELL_TURNS). Absent counts as 'intel'.
  */
 export interface StanceRecommendation {
     sector_id: string;
     new_stance: SectorStance;
     reason: string;
-    trigger?: 'contact' | 'intel';
+    trigger?: 'contact' | 'intel' | 'situation';
 }
 
 export interface DecisionResult {
@@ -159,7 +161,7 @@ export function makeDecisions(
     // 3. Reactive stance changes
     const stanceChanges = computeStanceChanges(
         zones, threats, intelPicture, activityEntries, previousState, personality, briefing.sectors,
-        beliefState ?? null,
+        beliefState ?? null, briefing.sector_situations,
     );
 
     // 4. Reserve shifting
@@ -256,9 +258,39 @@ function canReleaseReliefDonor(placement: ReliefDonorPlacement): boolean {
 }
 
 /**
- * Select one legally march-capable same-corps donor for each truly empty sector.
+ * Select one legally march-capable same-corps donor for each empty front sector.
  * This emits intent only; normal sector-march and column-movement phases perform
  * the physical move over subsequent turns.
+ *
+ * A sector with no reserve or rear of its own is relieved from any legal same-corps
+ * donor (rear, then reserve, then surplus line; then distance; then id).
+ *
+ * SE7E is strictly additive: it never changes a relief the rule above issues. Sectors with
+ * no own pool are served first (in the sorted order below), so they keep first call on
+ * every donor, including another frontless sector's rear brigade. Then a frontless sector
+ * (no assigned brigade) that still lists its own pool is served:
+ * - An eligible own RESERVE belongs to the reserve sector march (`evaluateSectorMarch`:
+ *   a reserve of a sector with no line holder marches to that front), so the sector is
+ *   left to it.
+ * - Otherwise the sector commits its own eligible REAR brigade that is still free
+ *   (nearest, then id). No
+ *   other path moves a rear brigade forward: sector construction promotes only an own
+ *   brigade within its local radius that is not dug in or under an order
+ *   (`ensureMinimumSectorCoverage`, zero-assigned rescue), and the bot sector march
+ *   indexes assigned and reserve brigades only. Before SE7E such a sector was ignored
+ *   here because it was not "truly empty", and it could stay frontless indefinitely
+ *   (ARBiH 1st Corps Visoko–Kiseljak, t98–t188 on main).
+ * - It never borrows another sector's brigade while it still has its own pool.
+ * - It is skipped when one of its own reserve/rear brigades already stands on its front
+ *   (the front is held; only the buckets lag).
+ *
+ * Donor eligibility is unchanged (dug in, under an order, moving, operation-bound,
+ * disrupted and loaned brigades are excluded). At most one donor per empty sector per
+ * pass, and a donor serves at most one sector (Engine Invariant 14.9: one deterministic
+ * reassignment intent per empty, reachable same-corps sector).
+ *
+ * Residuals (known): a frontless sector whose own rear was taken by a sector with no own
+ * pool, or whose whole own pool is dug in, waits for a later pass.
  */
 export function computeEmptySectorReliefReassignments(
     briefing: CommanderBriefing,
@@ -278,14 +310,19 @@ export function computeEmptySectorReliefReassignments(
             if (left.length_edges !== right.length_edges) return right.length_edges - left.length_edges;
             return strictCompare(left.sector_id, right.sector_id);
         });
-    const emptySectors = corpsSectors.filter((sector) =>
+    const frontlessSectors = corpsSectors.filter((sector) =>
         sector.edge_ids.length > 0
         && sector.unstaffed_front !== true
         && sector.assigned_brigade_ids.length === 0
-        && sector.reserve_brigade_ids.length === 0
-        && (sector.rear_brigade_ids?.length ?? 0) === 0
         && getSectorFrontOsids(sector).length > 0,
     );
+    const listsOwnPool = (sector: CorpsFrontSector): boolean =>
+        sector.reserve_brigade_ids.length + (sector.rear_brigade_ids?.length ?? 0) > 0;
+    // SE7E additive order: sectors with no own pool first (each subset keeps the sorted order).
+    const emptySectors = [
+        ...frontlessSectors.filter((sector) => !listsOwnPool(sector)),
+        ...frontlessSectors.filter(listsOwnPool),
+    ];
     if (emptySectors.length === 0) return [];
 
     const operationParticipants = buildActiveOperationParticipantSet(briefing);
@@ -301,8 +338,17 @@ export function computeEmptySectorReliefReassignments(
     for (const targetSector of emptySectors) {
         const targetOsids = new Set(getSectorFrontOsids(targetSector));
         if (hasPendingReliefForTargets(briefing, targetOsids)) continue;
+        const ownReserve = new Set<FormationId>(targetSector.reserve_brigade_ids);
+        const ownRear = new Set<FormationId>(targetSector.rear_brigade_ids ?? []);
+        const hasOwnPool = ownReserve.size + ownRear.size > 0;
+        // An own reserve/rear brigade already standing on this front holds it in fact; only the
+        // buckets lag. Leave the sector to construction. A no-op for a sector with no own pool.
+        if (briefing.brigades.some((brigade) =>
+            (ownReserve.has(brigade.id) || ownRear.has(brigade.id))
+            && brigade.location_osid != null
+            && targetOsids.has(brigade.location_osid))) continue;
 
-        const candidates = briefing.brigades
+        const eligible = briefing.brigades
             .filter((brigade) => {
                 if (brigade.faction !== briefing.faction || brigade.corps_id !== briefing.corps_id) return false;
                 if (!isSectorRosterEligibleFormation(brigade) || !brigade.location_osid) return false;
@@ -332,12 +378,20 @@ export function computeEmptySectorReliefReassignments(
                 }
                 return { brigade, placement: placements.get(brigade.id)!, distance };
             })
-            .filter((candidate) => candidate.distance >= 0)
-            .sort((left, right) =>
-                left.placement.tier - right.placement.tier
-                || left.distance - right.distance
-                || strictCompare(left.brigade.id, right.brigade.id),
-            );
+            .filter((candidate) => candidate.distance >= 0);
+
+        let candidates = eligible;
+        if (hasOwnPool) {
+            // SE7E (see the function comment): the reserve sector march owns an eligible own
+            // reserve; otherwise only the sector's own rear is committed.
+            if (eligible.some((candidate) => ownReserve.has(candidate.brigade.id))) continue;
+            candidates = eligible.filter((candidate) => ownRear.has(candidate.brigade.id));
+        }
+        candidates.sort((left, right) =>
+            left.placement.tier - right.placement.tier
+            || left.distance - right.distance
+            || strictCompare(left.brigade.id, right.brigade.id),
+        );
 
         const selected = candidates[0];
         if (!selected) continue;
@@ -578,6 +632,7 @@ function computeStanceChanges(
     personality: OfficerPersonality,
     sectors: readonly CorpsFrontSector[],
     beliefState: CommanderBeliefState | null,
+    sectorSituations?: Readonly<Record<string, SectorSituation>>,
 ): StanceRecommendation[] {
     const changes: StanceRecommendation[] = [];
 
@@ -654,10 +709,22 @@ function computeStanceChanges(
         let newStance: SectorStance | null = null;
         let reason = '';
 
+        const situation = sectorSituations?.[sectorId];
+        let standing = false;
         if (activity.activity === 'overrun') {
             // Territory lost — fortify regardless of personality
             newStance = 'fortify';
             reason = 'territory overrun — maximum defensive posture';
+        } else if (situation?.truce_line) {
+            // A truce line: no shooting, a thin observation screen (Graz RS-HRHB truce).
+            newStance = 'screening';
+            reason = 'truce line — screening';
+            standing = true;
+        } else if (situation?.own_operation_staging) {
+            // Our own operation stages or runs from this OG: keep its reserves mobile.
+            newStance = 'elastic';
+            reason = 'own operation staging — elastic defence keeps reserves free';
+            standing = true;
         } else if (enemyMassing) {
             // Enemy concentration detected
             if (personality.aggression > 0.6) {
@@ -700,7 +767,10 @@ function computeStanceChanges(
             const contact = activity.activity === 'overrun'
                 || activity.activity === 'contested'
                 || activity.activity === 'active';
-            changes.push({ sector_id: sectorId, new_stance: newStance, reason, trigger: contact ? 'contact' : 'intel' });
+            changes.push({
+                sector_id: sectorId, new_stance: newStance, reason,
+                trigger: standing ? 'situation' : contact ? 'contact' : 'intel',
+            });
         }
     }
 

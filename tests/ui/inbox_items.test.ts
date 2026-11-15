@@ -289,7 +289,7 @@ describe('deriveInboxItems — event decisions', () => {
 
         const eventItem = deriveInboxItems(state, null, firstHourCatalog).find(i => i.type === 'event_decision');
 
-        expect(eventItem?.title).toBe('Sta je Bosna?');
+        expect(eventItem?.title).toBe('Šta je Bosna?');
         expect(eventItem?.title).not.toBe('What Is Bosnia?');
     });
 

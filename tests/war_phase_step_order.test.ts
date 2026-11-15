@@ -163,7 +163,9 @@ describe('war-phase step ordering', () => {
     });
 
     it('step count is stable', () => {
-        // Current count: 125 steps. Update this if steps are intentionally added/removed.
+        // The authoritative count is the assertion at the end of this test (196 at time of writing);
+        // the "+1 from ..." history below is a partial log, not a running total. Update the assertion
+        // and add a line here if steps are intentionally added/removed.
         // +1 from check-victory-conditions (war termination, 2026-03-15).
         // +1 from compute-negotiation-capital (negotiation system, 2026-03-15).
         // +1 from evaluate-peace-plans (peace plan events, 2026-03-15).
@@ -296,6 +298,8 @@ describe('war-phase step ordering', () => {
         //        CorpsCommandState.player_ordered_stance; touches only corps that carry it.
         // +1 from apply-corps-reorganisation (2026-11-13, 7th Corps Phase A): dated brigade
         //        transfers / corps retirement after activate-corps; inert without events.
-        expect(stepNames.length).toBe(196);
+        // +1 from enforce-oct1995-ceasefire (2026-11-14, council fix 3): directly after
+        //        evaluate-events; inert unless the October 1995 ceasefire was accepted.
+        expect(stepNames.length).toBe(197);
     });
 });

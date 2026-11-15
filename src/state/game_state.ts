@@ -700,7 +700,16 @@ export interface CorpsOperation {
      *  reason — it reached this union only by being propagated from the removed
      *  opening-attack donation gate. Retained so pre-repair saves and run artifacts still
      *  load and read back correctly. */
-    recovery_reason?: 'completed' | 'max_failures' | 'orphaned_sector' | 'no_logged_attempt' | 'manual_termination' | 'probe_complete' | 'brigade_attrition' | 'political_blocked' | 'planning_invalidated' | 'no_launch_readiness' | 'defender_power_too_high' | 'participants_below_attack_floor' | 'participants_below_assembly_floor' | 'no_approach_osid' | 'zero_eligible_axis' | 'insufficient_donation' | 'offensive_ops_suppressed' | 'tg_cohesion_exhausted' | 'tg_max_lifecycle';
+    recovery_reason?: 'completed' | 'max_failures' | 'orphaned_sector' | 'no_logged_attempt' | 'manual_termination' | 'probe_complete' | 'brigade_attrition' | 'political_blocked' | 'planning_invalidated' | 'no_launch_readiness' | 'defender_power_too_high' | 'participants_below_attack_floor' | 'participants_below_assembly_floor' | 'no_approach_osid' | 'zero_eligible_axis' | 'insufficient_donation' | 'offensive_ops_suppressed' | 'ceasefire' | 'tg_cohesion_exhausted' | 'tg_max_lifecycle';
+    /**
+     * Council fix 3 (src/sim/combat/oct1995_ceasefire.ts): recorded once, on the first turn the
+     * October 1995 general ceasefire binds, on an offensive that was executing. Each axis (key
+     * `axis_id`, or `__op__` for a single-axis operation) may conclude only the objective it was
+     * already fighting for: its cap is that objective's index, or -1 when it had not yet attacked.
+     * Once every axis has moved past its cap or stopped executing, the operation stands down
+     * (recovery reason `ceasefire`). Optional; absent on every operation outside the ceasefire.
+     */
+    ceasefire_stand_down?: { from_turn: number; objective_cap_by_axis: Record<string, number> };
     /**
      * REASON-CODE INSTRUMENTATION, topic `tg_formation` — ENGINE-HEALTH B3 (2026-09-19).
      * Legacy single-axis counterpart of `OperationAxis.tg_formation_decline`. Absent on a
@@ -1804,6 +1813,13 @@ export interface DisplacementState {
     displaced_out_by_osid?: Record<string, number>;
     /** OSID-level tracking: destination OSID → count settled in. */
     displaced_in_by_osid?: Record<string, number>;
+    /**
+     * Pressure path (siege trigger), per side holding settlements here: consecutive turns its
+     * settlements were under front pressure with none supplied, and the turn last counted (a
+     * gap restarts the count). A side is absent when the condition does not hold; the field is
+     * absent when no side qualifies. Persisted so a save round trip keeps the count (DA1).
+     */
+    unsupplied_pressure_by_side?: Partial<Record<FactionId, { turns: number; last_turn: number }>>;
 }
 
 /** Per-event displacement record for tracking and reporting. Sorted by (turn, origin_mun). */
@@ -1847,8 +1863,19 @@ export interface HostileTakeoverTimerState {
     started_turn: number;
     /** Set when initial displacement fires. Undefined = still in 4-turn countdown. */
     matured_turn?: number;
-    /** Cumulative persons displaced from this OSID (initial + all sustained rounds). */
+    /**
+     * Cumulative persons displaced from this OSID (initial + all sustained rounds). Set before
+     * maturation only when a capture replaces a fired RF-5B policy timer: it then carries the
+     * people that wave already expelled, and the new initial wave draws on those who remain.
+     */
     cumulative_displaced?: number;
+    /**
+     * RF-5B: why the timer exists when no control change seeded it. 'policy_expulsion' =
+     * seeded once by a faction's recorded minority policy ("expel") at the RBiH-HRHB war
+     * start (`displacement_takeover.ts` step 0b); it fires one bounded wave and never
+     * drains further. Absent = battle/flip-seeded (legacy behaviour).
+     */
+    cause?: 'policy_expulsion';
 }
 
 /**
@@ -2035,6 +2062,7 @@ export type StanceMatterReason =
     | 'army_directive'
     | 'alliance_front'
     | 'patron_ceiling'
+    | 'ceasefire'
     | 'enemy_massing'
     | 'situation_eased'
     | 'other';
@@ -3683,9 +3711,9 @@ displacement_recent_by_turn: Record<number, number>;
  *
  * Outer key: origin/dest OSID.
  * Value:
- *   - out: cumulative `displaced` from this OSID (total removals; killed + fled
- *     are subsets, NOT additional — matches the event-log adapter semantics).
- *   - lost: cumulative `killed + fled_abroad` from this OSID (subset of out).
+ *   - out: cumulative `displaced` from this OSID (people routed elsewhere only;
+ *     killed + fled are ADDITIONAL to it, as in `refugees_created`).
+ *   - lost: cumulative `killed + fled_abroad` from this OSID (on top of out).
  *   - in: cumulative `settled` arrivals to this OSID.
  *   - by_ethnicity: optional cumulative `displaced` from this OSID keyed by the
  *     departing ethnicity-aligned faction (drives the per-OSID "fled here"

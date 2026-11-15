@@ -1,6 +1,7 @@
 import { existsSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
+import { resolveTsxCli } from '../../test/vitest_shared_config.mjs';
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { CallToolRequestSchema, ListToolsRequestSchema } from '@modelcontextprotocol/sdk/types.js';
@@ -170,14 +171,16 @@ function postprocessPng(args: PostprocessArgs): void {
   if (args.alphaThreshold !== undefined) commandArgs.push('--alphaThreshold', `${args.alphaThreshold}`);
   if (args.overwrite) commandArgs.push('--overwrite');
 
-  const result = spawnSync('tsx', commandArgs, { stdio: 'inherit' });
+  const result = spawnSync(process.execPath, [resolveTsxCli(process.cwd()), ...commandArgs], { stdio: 'inherit' });
   if (result.status !== 0) {
     throw new Error('Postprocess failed.');
   }
 }
 
 function validateAssets(): void {
-  const result = spawnSync('tsx', ['tools/asset_worker/validate/validate_assets.ts'], { stdio: 'inherit' });
+  const result = spawnSync(process.execPath, [resolveTsxCli(process.cwd()), 'tools/asset_worker/validate/validate_assets.ts'], {
+    stdio: 'inherit'
+  });
   if (result.status !== 0) {
     throw new Error('Asset validation failed.');
   }

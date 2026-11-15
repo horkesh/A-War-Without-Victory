@@ -52,7 +52,9 @@ import type {
     CommanderIntelData,
     EnemyEquipmentSummary,
     OfficerPersonality,
+    SectorSituation,
 } from './commander_state.js';
+import { isSectorColdFront } from '../sector_utils.js';
 
 import { getCorpsSubordinates, type CorpsSubordinatesByCorps } from '../bot_corps_helpers.js';
 import { getCorpsCommander } from '../officer_system.js';
@@ -259,6 +261,38 @@ function getActiveOperations(
     const cmd = state.military.corps_command?.[corpsId];
     if (!cmd) return [];
     return cmd.active_operations ?? [];
+}
+
+/**
+ * Standing facts per OG of this corps (SE2, 2026-11-13). They used to be read by the corps
+ * AI's evaluateSectorStances, whose stance write the commander loop then overwrote every war
+ * turn; the commander is now the single writer and takes them as inputs.
+ *  - truce_line: isSectorColdFront (RS-HRHB Graz truce, exemptions included).
+ *  - own_operation_staging: an operation of this corps in planning or execution draws a
+ *    participant from the OG (assigned or reserve). Matched on brigades, not the operation's
+ *    sector_id, because sectors are renumbered every turn.
+ */
+function buildSectorSituations(
+    state: GameState,
+    corpsId: FormationId,
+    sectors: readonly CorpsFrontSector[],
+    activeOperations: readonly CorpsOperation[],
+): Record<string, SectorSituation> {
+    const busy = new Set<string>();
+    for (const op of activeOperations) {
+        if (op.phase !== 'planning' && op.phase !== 'execution') continue;
+        for (const bid of op.participating_brigades ?? []) busy.add(bid);
+    }
+    const out: Record<string, SectorSituation> = {};
+    for (const sector of [...sectors].sort((a, b) => strictCompare(a.sector_id, b.sector_id))) {
+        if (sector.corps_id !== corpsId) continue;
+        out[sector.sector_id] = {
+            // A state without political data (partial fixtures) has no truce to read.
+            truce_line: state.political != null && isSectorColdFront(state, sector),
+            own_operation_staging: [...sector.assigned_brigade_ids, ...sector.reserve_brigade_ids].some(bid => busy.has(bid)),
+        };
+    }
+    return out;
 }
 
 function getCorpsExhaustion(
@@ -840,6 +874,7 @@ export function buildBriefing(
         graph_analysis: graphAnalysis,
         front_geometry: frontGeometry,
         intel_data: intelData,
+        sector_situations: buildSectorSituations(state, corpsId, sectors, activeOperations),
         doctrine_stance: doctrineStance,
         corps_stance: corpsStance,
         corps_exhaustion: corpsExhaustion,

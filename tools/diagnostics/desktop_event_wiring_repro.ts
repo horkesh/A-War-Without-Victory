@@ -6,7 +6,7 @@
  * "6 goals") decision queues to military.pending_event_decisions — the codex-like
  * decisions that were missing before event definitions were threaded into advanceTurn.
  *
- * Run: node node_modules/tsx/dist/cli.mjs tools/diagnostics/desktop_event_wiring_repro.ts
+ * Run: npx tsx tools/diagnostics/desktop_event_wiring_repro.ts
  */
 
 import { startNewCampaign, advanceTurn } from '../../src/desktop/desktop_sim.js';

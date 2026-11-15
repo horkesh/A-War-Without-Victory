@@ -52,6 +52,8 @@ Current public intel-friction labels are staff abstractions:
 - `defender_opsec`
 - `ambush_risk`
 
+Battle records (`turn_summaries[].battles`) list every attacking brigade since the realism-audit F10 fix. The player receives the full own-brigade list when their side attacked. When the enemy attacked, the client gets one fogged contact id and the `was_concentrated` flag; the flag is a staff abstraction ("concentrated assault") and carries no enemy brigade count or identity.
+
 These labels may explain battle/AAR outcomes at a coarse level. `ambush_risk` is a staff abstraction over bounded casualty friction, including Batch 17 confidence-gap scaling; it does not reveal the exact confidence value, defender deployment, or ambush location. Exact confidence values, hidden defender positions, and raw enemy strength remain debug-only unless a later canon-reviewed surface explicitly promotes them.
 
 ### `debug-only`

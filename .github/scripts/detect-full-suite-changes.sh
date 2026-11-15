@@ -24,6 +24,7 @@ PREFIXES=(
   "data/scenarios/"
   "data/calibration/"
   "data/derived/"
+  "data/source/"
   "data/ui/"
   "assets/"
   "scripts/"

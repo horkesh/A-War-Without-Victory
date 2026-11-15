@@ -49,7 +49,9 @@ import {
 } from './bot_constants.js';
 import { isRbihHrhbMobilizing } from '../early_war/alliance_update.js';
 import { getActivePatronDirective } from './patron_directive_scope.js';
+import { capStanceForOct1995Ceasefire, isFactionBoundByOct1995Ceasefire } from './oct1995_ceasefire.js';
 import type { CampaignPlan } from './army_hq_gathering_types.js';
+import { hasLightStrikeGroup } from './commander/force_eval.js';
 import {
     averageCohesion,
     averagePersonnelFraction,
@@ -83,7 +85,7 @@ export interface CorpsStanceTrace {
     driver:
         | 'reorganize_critical' | 'threat_high' | 'opportunity'
         | 'doctrine' | 'campaign_plan' | 'readiness_low' | 'faction_rule'
-        | 'patron_ceiling' | 'army_directive' | 'alliance_front';
+        | 'patron_ceiling' | 'army_directive' | 'alliance_front' | 'ceasefire';
     avg_cohesion: number;
     avg_strength: number;
     sector_threat: number;
@@ -163,17 +165,29 @@ export function generateCorpsStanceOrders(
         }
         noteDriver('campaign_plan');
 
-        // --- N1297: Organizational readiness gate ---
-        // If the previous turn's commander assessment shows zero main_effort brigades,
-        // the corps has no offensive capacity (rifle-only, no artillery/tanks).
-        // Cap at 'defensive' — brigade AI can still repel attacks, but no new plans.
-        // Naturally models ARBiH early war (w0–w12 rifle-only) vs VRS (artillery day 1).
+        // --- N1297: Organizational readiness gate (RF-AI2 light strike group) ---
+        // Reads the previous turn's commander force assessment.
+        // - A motorized/mechanized main_effort brigade: no cap.
+        // - Otherwise, a light strike group (>= 3 fit, combat-effective brigades massed in
+        //   one zone, any equipment class; force_eval.hasLightStrikeGroup): cap at
+        //   'balanced'. The corps may plan a local main effort but takes no corps-wide
+        //   offensive posture. This is how infantry corps attacked (ARBiH 5th Corps,
+        //   Tigar 94 and the Oct-Nov 1994 breakout).
+        // - Neither: cap at 'defensive'. Brigade AI still repels attacks; no new plans.
+        // Before RF-AI2 only the main_effort test existed; it capped the 5th Corps all war
+        // and VRS corps whose brigades are classed mountain (measured: 188w main trace).
         // RS corridor override below may upgrade defensive → balanced for existential fronts.
+        // The faction-wide offensive biases below (RS early war, RBiH counteroffensive)
+        // need a main effort: a light strike group alone keeps the corps at 'balanced'.
+        let lightStrikeOnly = false;
         if (stance !== 'reorganize') {
             const prevForce = cmd.commander_state?.force_assessment;
-            if (prevForce && prevForce.tier_counts.main_effort === 0
-                && STANCE_RANK[stance] > STANCE_RANK['defensive']) {
-                stance = 'defensive';
+            if (prevForce && prevForce.tier_counts.main_effort === 0) {
+                lightStrikeOnly = hasLightStrikeGroup(prevForce);
+                const readinessCeiling: CorpsStance = lightStrikeOnly ? 'balanced' : 'defensive';
+                if (STANCE_RANK[stance] > STANCE_RANK[readinessCeiling]) {
+                    stance = readinessCeiling;
+                }
             }
         }
         noteDriver('readiness_low');
@@ -186,7 +200,7 @@ export function generateCorpsStanceOrders(
                 stance = 'balanced';
             }
             // E1: RS early-war aggression: prefer offensive in weeks 0–26 (PRIORITY_B handoff)
-            if (turn < RS_EARLY_WAR_END_WEEK && stance === 'balanced' && avgPers >= 0.6 && avgCoh >= 40) {
+            if (turn < RS_EARLY_WAR_END_WEEK && stance === 'balanced' && !lightStrikeOnly && avgPers >= 0.6 && avgCoh >= 40) {
                 stance = 'offensive';
             }
             // E1: Sarajevo siege corps: maintain pressure but never assault core
@@ -236,7 +250,7 @@ export function generateCorpsStanceOrders(
                 stance = 'balanced';
             }
             // E2: RBiH late-war counteroffensive eligibility (week 40+)
-            if (turn >= 40 && stance === 'balanced' && avgPers >= 0.6 && avgCoh >= 50) {
+            if (turn >= 40 && stance === 'balanced' && !lightStrikeOnly && avgPers >= 0.6 && avgCoh >= 50) {
                 // Check if faction controls enough territory for counteroffensive
                 const pc = state.political.political_controllers ?? {};
                 const pcKeys = Object.keys(pc);
@@ -359,6 +373,11 @@ export function generateCorpsStanceOrders(
         }
         noteDriver('alliance_front');
 
+        // October 1995 general ceasefire (council fix 3): every bound corps holds at Defensive
+        // or below, including AI/army directives above. Inert unless the ceasefire flag is set.
+        stance = capStanceForOct1995Ceasefire(state, faction, stance);
+        noteDriver('ceasefire');
+
         // Read-only trace for the stance-matter path (posture model option 2). No state write.
         if (trace) {
             trace.set(corps.id, {
@@ -414,6 +433,12 @@ export function setArmyStandingOrder(
         if (allianceValue >= 0.2) {
             stance = 'balanced'; // Not at war — no army-wide offensive
         }
+    }
+
+    // October 1995 general ceasefire (council fix 3): no army-wide offensive while it binds the
+    // faction, which also keeps coordinateMultiCorpsOffensive from pre-setting corps to offensive.
+    if (stance === 'general_offensive' && isFactionBoundByOct1995Ceasefire(state, faction)) {
+        stance = 'balanced';
     }
 
     if (!state.military.army_stance) state.military.army_stance = {};

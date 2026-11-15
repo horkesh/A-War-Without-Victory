@@ -1,15 +1,15 @@
 {
   "schema_version": 2,
-  "fingerprint": "bc629e89a585dfde",
+  "fingerprint": "3b1ddd64fb4f1600",
   "fields": {
     "schema_version": 2,
     "scenario_id": "apr1992_definitive_188w",
     "weeks": 40,
     "final_turn": 40,
     "control_counts": {
-      "HRHB": 86,
+      "HRHB": 87,
       "RBiH": 251,
-      "RS": 375
+      "RS": 374
     },
     "control_flips": [
       {
@@ -235,6 +235,12 @@
         "to": "RS"
       },
       {
+        "settlement_id": "op:donji_vakuf:jemanlici",
+        "municipality_id": "donji_vakuf",
+        "from": "RS",
+        "to": "RBiH"
+      },
+      {
         "settlement_id": "op:donji_vakuf:korenici",
         "municipality_id": "donji_vakuf",
         "from": "RBiH",
@@ -412,12 +418,6 @@
         "settlement_id": "op:jajce:kruscica",
         "municipality_id": "jajce",
         "from": "RBiH",
-        "to": "RS"
-      },
-      {
-        "settlement_id": "op:jajce:lupnica",
-        "municipality_id": "jajce",
-        "from": "HRHB",
         "to": "RS"
       },
       {
@@ -747,6 +747,12 @@
       {
         "settlement_id": "op:vlasenica:vlasenica_2",
         "municipality_id": "vlasenica",
+        "from": "RBiH",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:vogosca:hotonj",
+        "municipality_id": "vogosca",
         "from": "RBiH",
         "to": "RS"
       },

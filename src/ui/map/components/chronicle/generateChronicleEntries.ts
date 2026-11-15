@@ -53,13 +53,17 @@ import { buildGeneralsDigestChronicleEntries } from './generalsDigestChronicle.j
 import { projectOperationLifecycle } from '../../data/operationLifecycleProjection.js';
 import type { LoadedGameState } from '../../data/types.js';
 import { shouldNarrateTerritorySummary } from '../../data/territorySummaryGuard.js';
-import { getActiveLocale, t, type MessageKey } from '../../i18n/index.js';
+import { t, type MessageKey } from '../../i18n/index.js';
 import type { EventDefinition } from '../../../../sim/events/event_types.js';
 import type { GameState } from '../../../../state/game_state.js';
 import { turnToDateString } from '../../utils/formatters.js';
 import { playerFactionMatch } from '../../data/playerFactionMatch.js';
+import { resolveEventDisplayTitle } from '../../data/eventDisplayCopy.js';
 import { getOsidDisplayName } from '../../utils/osidDisplayName.js';
 import { SREBRENICA_OVERRUN_NOTE } from '../../../../sim/endgame/endgame_comparison.js';
+
+/** The Srebrenica town settlement the rupture evaluator reads (rupture_consequences.ts). */
+const SREBRENICA_OSID = 'op:srebrenica:srebrenica_2';
 
 import {
     getPlayerSafeDisplacementGroupLabel,
@@ -264,7 +268,13 @@ function buildEndgameComparisonEntries(state: any): ChronicleEntry[] {
     // and the "never arrived" ghost appears only when the enclave really survived.
     const overrun = rawNotes.includes(SREBRENICA_OVERRUN_NOTE);
     const nonGhostNotes = rawNotes.filter((note) => note !== 'Srebrenica enclave survived' && note !== SREBRENICA_OVERRUN_NOTE);
-    const ghostSrebrenica = !ruptureDivergence.has('srebrenica_genocide_1995') && !overrun;
+    // §4 panel (council fix 4, 2026-11-14): the card says "the Srebrenica enclave did not fall",
+    // so it is shown only while that is true. The engine also notes "survived" when RS took the
+    // town before the enclave formed (nothing in enclaves_lost); a final control map that shows
+    // Srebrenica in other hands suppresses the card. With no control map it behaves as before.
+    const srebrenicaHolder = (state.controlBySettlement as Record<string, string | null> | undefined)?.[SREBRENICA_OSID];
+    const srebrenicaHeldByOthers = srebrenicaHolder !== undefined && srebrenicaHolder !== 'RBiH';
+    const ghostSrebrenica = !ruptureDivergence.has('srebrenica_genocide_1995') && !overrun && !srebrenicaHeldByOthers;
     const visibleComparisons = nonGhostNotes.length + (ghostSrebrenica || overrun ? 1 : 0);
 
     entries.push({
@@ -605,11 +615,12 @@ export function generateChronicleEntries(
             for (const event of summary.events_fired) {
                 const id = event.id || '';
                 if (shouldSuppressTurnSummaryDecisionEvent(state, id, playerFaction, decisionEventIds)) continue;
-                // The engine records the English title; an event authored with a localized
-                // title (localizations.<locale>.title) shows it in that locale.
-                const locale = getActiveLocale();
-                const localizedTitle = locale === 'en' ? undefined : eventCatalog?.get(id)?.localizations?.[locale]?.title;
-                const title = getPlayerSafeDisplayLabel(localizedTitle ?? event.text, 'Recorded event');
+                // The engine records the English title. A catalog row's localizations win
+                // (events outside the bundled war-year index); otherwise the bundled index.
+                const title = getPlayerSafeDisplayLabel(
+                    resolveEventDisplayTitle(id, event.text, { localizations: eventCatalog?.get(id)?.localizations }),
+                    'Recorded event',
+                );
 
                 if (isDiplomaticEvent(id)) {
                     entries.push({

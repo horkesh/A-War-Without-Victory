@@ -32,11 +32,65 @@
 #   npm run gates                           prints the currently-open rows
 
 version: 1
-updated: 2026-11-08
+updated: 2026-11-14
 
-lanes: [R1, R2, R3, R4, R5, R6, R7, R8, R9, RC, RD, DC, RE, REPO]
+lanes: [R1, R2, R3, R4, R5, R6, R7, R8, R9, RC, RD, DC, RE, RF, REPO]
 
 gates:
+  # ── RF — pre-freeze fidelity pass (BC14-BC19 in MASTER_ROADMAP §4.1; orchestrator 2026-11-13) ──
+
+  - id: RF-CALIBRATION-RESIGNOFF
+    lane: RF
+    title: Calibration re-signed after the one calibration pass that follows the engine freeze
+    status: open
+    kind: acceptance
+    opened: 2026-11-13
+    blocks: [R8, R9]
+    evidence_required: >
+      A calibration-master entry for the final RF source showing the four checkpoints
+      re-scored against the current painted files with tools/verify_checkpoints.cjs and no
+      checkpoint below main's figures at the freeze (709/709/708/682 after #647) (a cell loss only by a recorded orchestrator
+      ruling); guards intact (Farz, enclave); 0 consistency failures; strict engine-health
+      gate PASS on the 188-week run; baseline manifest and fingerprint re-pinned with the
+      reason; and live = headless re-measured, 0 cells differing for RBiH, RS and HRHB as
+      player.
+    evidence_path: null
+    source: docs/plans/MASTER_ROADMAP.md
+    notes: >
+      Main stands at 709/709/708/682 after #647 (RF-L3d, recorded under the hold; baselines
+      re-blessed), after 712/705/706/676 at #636 (the October 1995 ceasefire binds) and
+      712/705/706/698 at #619
+      (RF-AI2, owner accepted 2026-11-14). Earlier accepted moves: Apr 1995 711 after #583, Oct 1995
+      708 (Korenici and Jemanlici, a known historical miss) after #604, and 712/709/710/705 after
+      #600 (siege displacement). #617 (RF-F1) left all four checkpoints unchanged.
+      Owner decision 2026-11-14: calibration is held until the mechanics work is done. During
+      the RF pass the checkpoint scores are recorded per change in CALIBRATION_MASTER but are
+      not a merge bar; pure calibration (data, constant or op tuning toward the checkpoints,
+      tail timing, RF-4 officer dates as a lever) is held. Guards, health, determinism,
+      anchors and one change per measured run are unchanged, and a guard breach still stops a
+      merge. This gate closes after the ONE calibration pass that runs on the frozen engine.
+      Each RF item (BC14-BC19) is measured on top of the one before it. Live = headless was not re-measured for the
+      stance bundle (SE8 in the out-of-scope register).
+
+  - id: RF-ENGINE-FREEZE
+    lane: RF
+    title: Engine freeze before qualifying R8 campaigns
+    status: open
+    kind: acceptance
+    opened: 2026-11-13
+    blocks: [R8, R9]
+    evidence_required: >
+      Every RF item merged, parked with an archive tag, or declined, each recorded in the
+      roadmap §4.1 register (BC17 is held for the calibration pass, not declined); one named
+      commit recorded as the frozen source in the roadmap; and the owner told that from that
+      commit a mechanics change needs an owner OK. The one calibration pass then runs on
+      the frozen engine under the unchanged gates (RF-CALIBRATION-RESIGNOFF closes it).
+    evidence_path: null
+    source: docs/plans/MASTER_ROADMAP.md
+    notes: >
+      R8 dry runs before the freeze are allowed and never count as qualifying. RF-5 (HVO-ARBiH
+      war, BC18) needs an owner decision before it can be merged or declined.
+
   # ── RD — Dayton settlement and end map (closed, owner 2026-11-07) ───────────────────
 
   - id: RD-PACKAGE-KEYWORD-MATCH
@@ -211,7 +265,8 @@ gates:
   - id: DC-CONFERENCE-REDESIGN
     lane: DC
     title: Dayton conference redesign lands on the RD end-map contract
-    status: open
+    status: closed
+    closed: 2026-11-12
     kind: acceptance
     opened: 2026-11-07
     blocks: [R8]
@@ -220,9 +275,13 @@ gates:
       through applyPeaceSettlement; the player-agency items in the RD handoff (held enclave,
       protected ground, the decliner's eight weeks) decided with their panels; 188w pins
       intact or owner re-pinned.
-    evidence_path: null
+    evidence_path: docs/plans/2026-11-08-dc-dayton-conference-plan.md
     source: handoffs/20261107_dayton_end_map_to_conference.md
     notes: >
+      Closed with the DC lane: merged as #560 (4a67bd516) on 2026-11-12; the roadmap register
+      records every DC item done (Codex handoff CL-055) and 188w pins intact. Corrected here
+      by the integration steward; the roadmap row was already closed.
+      Earlier note: >
       Codex owns the plan (Dragon: F:/AWWV-worktrees/.dayton-design/DAYTON_CONFERENCE_IMPLEMENTATION_PLAN.md).
       Codex should split this into the plan's own gates when the plan lands in the repo.
 
@@ -512,19 +571,29 @@ gates:
   - id: REPO-CANON-PROPAGATION
     lane: REPO
     title: Stale canon propagation backlog
-    status: open
+    status: closed
+    closed: 2026-11-14
     kind: propagation
     opened: 2026-03-28
     blocks: []
     evidence_required: >
       Each of the ten recorded mechanical changes either propagated into the Systems Manual
       under Pyrrhic-panel sign-off, or explicitly retired as superseded.
-    evidence_path: null
+    evidence_path: docs/40_reports/20261114_CANON_PROPAGATION_PANEL.md
     source: docs/CANON_PROPAGATION_NEEDED.md
     notes: >
-      Open since 2026-03-28 and untouched since. Canon edits require panel sign-off, so this
-      cannot be discharged as routine doc maintenance. Recorded here so it stops being
-      invisible; it does not gate 1.0.
+      Closed 2026-11-14 on the panel record. All fourteen recorded changes were checked
+      against current code and written into the Systems Manual (#599), which closed this gate
+      on 2026-11-13 without the panel (Codex P1; the reopening commit missed the merge). A
+      four-seat panel (canon-compliance as lead and integrator, systems-programmer,
+      game-designer, determinism-auditor) then found twelve defects in that text in round 1;
+      all were corrected, and Engine Invariants §14.5 was brought in line with the code.
+      Round 2: determinism GO; the other three seats GO-WITH-CONDITIONS with every text
+      condition applied. Round 3: the lead seat cleared its last condition, so the panel is
+      unanimous GO on the propagation. Still open as a separate decision, not part of this gate:
+      reconcile Engine Invariants §6.3 with the sector-wide counter-attack (amend §6.3, or
+      remove the defensive-stance path in bot_brigade_eval_attack.ts); the Manual labels it
+      "not canon" until then.
 
   - id: REPO-ROADMAP-CONCISENESS
     lane: REPO
