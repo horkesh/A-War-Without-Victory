@@ -96,12 +96,6 @@ export function clampHeldCorpsStances(state: GameState, faction: FactionId): voi
     }
 }
 
-/** True when an active corps hold keeps this corps below offensive (no new offensive such as a corridor breach). */
-export function corpsHoldForbidsNewOffensive(state: GameState, corpsId: string, turn: number): boolean {
-    const hold = activeCorpsHold(state, corpsId, turn);
-    if (!hold || !isCorpsStance(hold.stance)) return false;
-    return HOLD_STANCE_RANK[hold.stance] < HOLD_STANCE_RANK.offensive;
-}
 
 /**
  * True when an active corps hold keeps this corps at Defensive or below, where a commander

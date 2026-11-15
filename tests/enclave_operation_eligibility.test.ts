@@ -69,7 +69,7 @@ describe('enclave operation eligibility — one rule, every creation site', () =
     });
 
     it('declines to answer rather than guessing when there are no objectives', () => {
-        // Corridor-breach ops pass []. A silent `false` would exclude every enclave brigade
+        // An op built with [] (the retired corridor-breach ops were). A silent `false` would exclude every enclave brigade
         // from them; an op with no objectives captures nothing, so there is no §6 exposure.
         expect(isBrigadeEligibleForOperationObjectives(enclaveBde(srebrenicaCell), [])).toBe(true);
     });

@@ -112,9 +112,9 @@ export function generateOGActivationOrders(
                     .filter((b): b is FormationState => b != null && b.status === 'active')
             );
 
-            // Corridor breach and HRHB: lower threshold (2 donors)
-            const isCorridorBreachOp = op.name.startsWith('Corridor Breach');
-            const minDonors = (faction === 'HRHB' || isCorridorBreachOp) ? 2 : 3;
+            // HRHB: lower threshold (2 donors). (The corridor-breach exception was removed with
+            // that pass, RF-corridor-breach 2026-11-15: no operation of that name is created.)
+            const minDonors = faction === 'HRHB' ? 2 : 3;
             const maxDonors = 4;
 
             for (const brigade of participantsSorted) {

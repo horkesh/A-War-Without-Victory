@@ -98,7 +98,7 @@ describe('S1: a presidential hold survives the real bot pass (commander loop inc
         const cmd = state.military.corps_command![CORPS]!;
         expect(['defensive', 'reorganize']).toContain(cmd.stance);
         expect(state.military.corps_front_sectors![SECTOR]!.sector_stance).toBe('fortify');
-        // No new offensive launched under the hold (corridor guard + defensive stance).
+        // No new offensive launched under the hold (defensive stance; the corridor-breach pass is retired).
         expect(cmd.active_operations.some((op) => op.started_turn === 5 && (op.name ?? '').startsWith('Corridor Breach'))).toBe(false);
     });
 
