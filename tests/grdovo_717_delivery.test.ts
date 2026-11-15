@@ -22,7 +22,8 @@ import {
 } from '../src/sim/combat/operation_preparation.js';
 import type { CorpsOperation, FormationId, FormationState, GameState } from '../src/state/game_state.js';
 
-const CORPS = 'arbih_3rd_corps' as FormationId;
+// RF-1 Phase B: hosted on the 7th Corps from week 99 (Jajce, Donji Vakuf and all four brigades).
+const CORPS = 'arbih_7th_corps' as FormationId;
 const ID_705 = 'arbih_705th_slavna_mountain' as FormationId;
 const ID_707 = 'arbih_707th_slavna_mountain' as FormationId;
 const ID_717 = 'arbih_717th_slavna_mountain' as FormationId;
@@ -108,8 +109,8 @@ function brigade(
 }
 
 function stateAt(turn: 180 | 182 | 183 | 184): GameState {
-    const nearSector = turn < 183 ? 'sector:arbih_3rd_corps:5' : 'sector:arbih_3rd_corps:0';
-    const sector717 = turn < 183 ? 'sector:arbih_3rd_corps:6' : nearSector;
+    const nearSector = turn < 183 ? 'sector:arbih_7th_corps:5' : 'sector:arbih_7th_corps:0';
+    const sector717 = turn < 183 ? 'sector:arbih_7th_corps:6' : nearSector;
     const role717 = turn === 184 ? 'rear' : 'front';
     const donjiVakufOperation = {
         name: 'Operation Donji Vakuf',
@@ -140,7 +141,7 @@ function stateAt(turn: 180 | 182 | 183 | 184): GameState {
             formations: {
                 [CORPS]: {
                     id: CORPS,
-                    name: 'ARBiH 3rd Corps',
+                    name: 'ARBiH 7th Corps',
                     kind: 'corps',
                     faction: 'RBiH',
                     status: 'active',
@@ -356,8 +357,8 @@ describe('589 — production 717th Grdovo delivery', () => {
         'finds the real Grdovo approach and a timely Prusac route in assignment case %i',
         (turn) => {
             const state = stateAt(turn);
-            const nearSector = turn < 183 ? 'sector:arbih_3rd_corps:5' : 'sector:arbih_3rd_corps:0';
-            const sector717 = turn < 183 ? 'sector:arbih_3rd_corps:6' : nearSector;
+            const nearSector = turn < 183 ? 'sector:arbih_7th_corps:5' : 'sector:arbih_7th_corps:0';
+            const sector717 = turn < 183 ? 'sector:arbih_7th_corps:6' : nearSector;
             const role717 = turn === 184 ? 'rear' : 'front';
             const formation717 = state.military.formations![ID_717]!;
             expect(formation717.assignment).toEqual({

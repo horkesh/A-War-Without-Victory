@@ -156,17 +156,18 @@ function makeVlasicState(turn = 155): GameState {
     delete state.military.formations!.b1;
     brigade.id = 'arbih_17th_vitezka_mountain';
     brigade.name = '17th Vitezka';
-    brigade.corps_id = 'arbih_3rd_corps';
+    // RF-1 Phase B: hosted on the 7th Corps from week 99
+    brigade.corps_id = 'arbih_7th_corps';
     brigade.location_osid = 'op:travnik:turbe_2';
     state.military.formations![brigade.id] = brigade;
     const corps = state.military.formations!.corps_1!;
     delete state.military.formations!.corps_1;
-    corps.id = 'arbih_3rd_corps';
+    corps.id = 'arbih_7th_corps';
     state.military.formations![corps.id] = corps;
     const command = state.military.corps_command!.corps_1!;
     delete state.military.corps_command!.corps_1;
     command.active_operations = [operation];
-    state.military.corps_command!.arbih_3rd_corps = command;
+    state.military.corps_command!.arbih_7th_corps = command;
     state.military.brigade_attack_orders = {
         [brigade.id]: 'op:travnik:paklarevo',
     };
@@ -179,8 +180,8 @@ function makeVlasicState(turn = 155): GameState {
 describe('COHA operation pause', () => {
     it('allows only the authored Vlašić operation identity in the March window', () => {
         const state = makeVlasicState();
-        const op = state.military.corps_command!.arbih_3rd_corps!.active_operations[0]!;
-        expect(isVlasicCohaExceptionOperation(state, 'arbih_3rd_corps', op)).toBe(true);
+        const op = state.military.corps_command!.arbih_7th_corps!.active_operations[0]!;
+        expect(isVlasicCohaExceptionOperation(state, 'arbih_7th_corps', op)).toBe(true);
         expect(isVlasicCohaExceptionAttackOrder(
             state,
             'arbih_17th_vitezka_mountain' as any,
@@ -192,18 +193,18 @@ describe('COHA operation pause', () => {
             'op:travnik:varosluk',
         )).toBe(false);
         const wrongOperationStaging = makeVlasicState();
-        const wrongOp = wrongOperationStaging.military.corps_command!.arbih_3rd_corps!.active_operations[0]!;
+        const wrongOp = wrongOperationStaging.military.corps_command!.arbih_7th_corps!.active_operations[0]!;
         wrongOp.staging_osid = 'op:travnik:turbe_2';
         expect(isVlasicCohaExceptionOperation(
             wrongOperationStaging,
-            'arbih_3rd_corps',
+            'arbih_7th_corps',
             wrongOp,
         )).toBe(false);
     });
 
     it('advances the approved Vlašić operation while leaving its phase clock unshifted', () => {
         const state = makeVlasicState(155);
-        const operation = state.military.corps_command!.arbih_3rd_corps!.active_operations[0]!;
+        const operation = state.military.corps_command!.arbih_7th_corps!.active_operations[0]!;
         advanceSectorOffensives(state);
         expect(operation.phase_started_turn).toBe(154);
         expect(operation.phase).toBe('execution');
@@ -243,20 +244,20 @@ describe('COHA operation pause', () => {
             'arbih_303rd_vitezka_mountain',
         ]) {
             const state = makeVlasicState(155);
-            const op = state.military.corps_command!.arbih_3rd_corps!.active_operations[0]!;
+            const op = state.military.corps_command!.arbih_7th_corps!.active_operations[0]!;
             op.participating_brigades = [brigadeId] as any;
             op.axes![0]!.assigned_brigades = [brigadeId] as any;
-            expect(isVlasicCohaExceptionOperation(state, 'arbih_3rd_corps', op)).toBe(true);
+            expect(isVlasicCohaExceptionOperation(state, 'arbih_7th_corps', op)).toBe(true);
         }
 
         const full = makeVlasicState(155);
-        const fullOp = full.military.corps_command!.arbih_3rd_corps!.active_operations[0]!;
+        const fullOp = full.military.corps_command!.arbih_7th_corps!.active_operations[0]!;
         fullOp.participating_brigades = [...authored] as any;
         fullOp.axes![0]!.assigned_brigades = [...authored] as any;
-        expect(isVlasicCohaExceptionOperation(full, 'arbih_3rd_corps', fullOp)).toBe(true);
+        expect(isVlasicCohaExceptionOperation(full, 'arbih_7th_corps', fullOp)).toBe(true);
 
         const unauthorized = makeVlasicState(155);
-        const unauthorizedOp = unauthorized.military.corps_command!.arbih_3rd_corps!.active_operations[0]!;
+        const unauthorizedOp = unauthorized.military.corps_command!.arbih_7th_corps!.active_operations[0]!;
         const template = unauthorized.military.formations!['arbih_17th_vitezka_mountain']!;
         unauthorized.military.formations!['arbih_327th_vitezka_mountain'] = {
             ...template,
@@ -267,10 +268,10 @@ describe('COHA operation pause', () => {
             ...authored,
             'arbih_327th_vitezka_mountain',
         ] as any;
-        expect(isVlasicCohaExceptionOperation(unauthorized, 'arbih_3rd_corps', unauthorizedOp)).toBe(false);
+        expect(isVlasicCohaExceptionOperation(unauthorized, 'arbih_7th_corps', unauthorizedOp)).toBe(false);
 
         const unauthorized330 = makeVlasicState(155);
-        const unauthorized330Op = unauthorized330.military.corps_command!.arbih_3rd_corps!.active_operations[0]!;
+        const unauthorized330Op = unauthorized330.military.corps_command!.arbih_7th_corps!.active_operations[0]!;
         const template330 = unauthorized330.military.formations!['arbih_17th_vitezka_mountain']!;
         unauthorized330.military.formations!['arbih_330th_liberation'] = {
             ...template330,
@@ -280,14 +281,14 @@ describe('COHA operation pause', () => {
             ...authored,
             'arbih_330th_liberation',
         ] as any;
-        expect(isVlasicCohaExceptionOperation(unauthorized330, 'arbih_3rd_corps', unauthorized330Op)).toBe(false);
+        expect(isVlasicCohaExceptionOperation(unauthorized330, 'arbih_7th_corps', unauthorized330Op)).toBe(false);
     });
 
     it('pauses the lifecycle and consumes the Vlasic order at receipts 153 and 154', () => {
         for (const turn of [153, 154]) {
             const lifecycleState = makeVlasicState(turn);
-            const lifecycleOperation = lifecycleState.military.corps_command!.arbih_3rd_corps!.active_operations[0]!;
-            expect(isVlasicCohaExceptionOperation(lifecycleState, 'arbih_3rd_corps', lifecycleOperation)).toBe(false);
+            const lifecycleOperation = lifecycleState.military.corps_command!.arbih_7th_corps!.active_operations[0]!;
+            expect(isVlasicCohaExceptionOperation(lifecycleState, 'arbih_7th_corps', lifecycleOperation)).toBe(false);
 
             advanceSectorOffensives(lifecycleState);
 
@@ -317,8 +318,8 @@ describe('COHA operation pause', () => {
         expect(turnToCompletedWeekRange(155)).toBe('20-26 Mar 1995');
         expect(isVlasicCohaWindow(155)).toBe(true);
         const state = makeVlasicState(155);
-        const operation = state.military.corps_command!.arbih_3rd_corps!.active_operations[0]!;
-        expect(isVlasicCohaExceptionOperation(state, 'arbih_3rd_corps', operation)).toBe(true);
+        const operation = state.military.corps_command!.arbih_7th_corps!.active_operations[0]!;
+        expect(isVlasicCohaExceptionOperation(state, 'arbih_7th_corps', operation)).toBe(true);
         advanceSectorOffensives(state);
         expect(operation.phase_started_turn).toBe(154);
 
@@ -339,15 +340,16 @@ describe('COHA operation pause', () => {
         expect(report.suppressed_attack_orders ?? []).toEqual([]);
         expect(report.orders_processed).toBe(1);
         expect(report.battles[0]?.operation_name).toBe('Operation Vlasic Ridge');
-        expect(report.battles[0]?.operation_id).toContain('arbih_3rd_corps:Operation Vlasic Ridge');
+        // RF-1 Phase B: hosted on the 7th Corps from week 99
+        expect(report.battles[0]?.operation_id).toContain('arbih_7th_corps:Operation Vlasic Ridge');
     });
 
     it('pauses the lifecycle and consumes the Vlasic order again at receipt 156', () => {
         expect(turnToCompletedWeekRange(156)).toBe('27 Mar-2 Apr 1995');
         expect(isVlasicCohaWindow(156)).toBe(false);
         const lifecycleState = makeVlasicState(156);
-        const lifecycleOperation = lifecycleState.military.corps_command!.arbih_3rd_corps!.active_operations[0]!;
-        expect(isVlasicCohaExceptionOperation(lifecycleState, 'arbih_3rd_corps', lifecycleOperation)).toBe(false);
+        const lifecycleOperation = lifecycleState.military.corps_command!.arbih_7th_corps!.active_operations[0]!;
+        expect(isVlasicCohaExceptionOperation(lifecycleState, 'arbih_7th_corps', lifecycleOperation)).toBe(false);
 
         advanceSectorOffensives(lifecycleState);
 
@@ -374,24 +376,24 @@ describe('COHA operation pause', () => {
 
     it('keeps identity, corps, roster, current-objective, and ambiguous-ownership negatives closed', () => {
         const base = makeVlasicState(155);
-        const op = base.military.corps_command!.arbih_3rd_corps!.active_operations[0]!;
+        const op = base.military.corps_command!.arbih_7th_corps!.active_operations[0]!;
         expect(isVlasicCohaExceptionOperation(base, 'arbih_other_corps', op)).toBe(false);
 
         const wrongIdentity = makeVlasicState(155);
-        const wrongOp = wrongIdentity.military.corps_command!.arbih_3rd_corps!.active_operations[0]!;
+        const wrongOp = wrongIdentity.military.corps_command!.arbih_7th_corps!.active_operations[0]!;
         wrongOp.name = 'Operation Ordinary';
-        expect(isVlasicCohaExceptionOperation(wrongIdentity, 'arbih_3rd_corps', wrongOp)).toBe(false);
+        expect(isVlasicCohaExceptionOperation(wrongIdentity, 'arbih_7th_corps', wrongOp)).toBe(false);
 
         const wrongRoster = makeVlasicState(155);
-        const wrongRosterOp = wrongRoster.military.corps_command!.arbih_3rd_corps!.active_operations[0]!;
+        const wrongRosterOp = wrongRoster.military.corps_command!.arbih_7th_corps!.active_operations[0]!;
         wrongRosterOp.participating_brigades = [
             ...wrongRosterOp.participating_brigades,
             'arbih_unrelated_brigade',
         ] as any;
-        expect(isVlasicCohaExceptionOperation(wrongRoster, 'arbih_3rd_corps', wrongRosterOp)).toBe(false);
+        expect(isVlasicCohaExceptionOperation(wrongRoster, 'arbih_7th_corps', wrongRosterOp)).toBe(false);
 
         const objectiveState = makeVlasicState(155);
-        const objectiveOp = objectiveState.military.corps_command!.arbih_3rd_corps!.active_operations[0]!;
+        const objectiveOp = objectiveState.military.corps_command!.arbih_7th_corps!.active_operations[0]!;
         objectiveOp.axes![0]!.current_objective_index = 1;
         expect(isVlasicCohaExceptionAttackOrder(
             objectiveState,
@@ -401,9 +403,9 @@ describe('COHA operation pause', () => {
 
         const ambiguous = makeVlasicState(155);
         const duplicate = JSON.parse(JSON.stringify(
-            ambiguous.military.corps_command!.arbih_3rd_corps!.active_operations[0],
+            ambiguous.military.corps_command!.arbih_7th_corps!.active_operations[0],
         )) as CorpsOperation;
-        ambiguous.military.corps_command!.arbih_3rd_corps!.active_operations.push(duplicate);
+        ambiguous.military.corps_command!.arbih_7th_corps!.active_operations.push(duplicate);
         expect(isVlasicCohaExceptionAttackOrder(
             ambiguous,
             'arbih_17th_vitezka_mountain' as any,
@@ -436,7 +438,8 @@ describe('COHA operation pause', () => {
         expect(report.suppressed_attack_orders ?? []).toEqual([]);
         expect(report.orders_processed).toBe(1);
         expect(report.battles[0]?.operation_name).toBe('Operation Vlasic Ridge');
-        expect(report.battles[0]?.operation_id).toContain('arbih_3rd_corps:Operation Vlasic Ridge');
+        // RF-1 Phase B: hosted on the 7th Corps from week 99
+        expect(report.battles[0]?.operation_id).toContain('arbih_7th_corps:Operation Vlasic Ridge');
     });
 
     it('emits the COHA pause receipt with zero orders and does not invalidate an unrelated operation', () => {
@@ -467,8 +470,8 @@ describe('COHA operation pause', () => {
 
     it('keeps the exception closed outside the window and for unrelated operations', () => {
         const outside = makeVlasicState(156);
-        const outsideOp = outside.military.corps_command!.arbih_3rd_corps!.active_operations[0]!;
-        expect(isVlasicCohaExceptionOperation(outside, 'arbih_3rd_corps', outsideOp)).toBe(false);
+        const outsideOp = outside.military.corps_command!.arbih_7th_corps!.active_operations[0]!;
+        expect(isVlasicCohaExceptionOperation(outside, 'arbih_7th_corps', outsideOp)).toBe(false);
         const unrelated = makeState();
         expect(isVlasicCohaExceptionAttackOrder(
             unrelated,
@@ -479,7 +482,7 @@ describe('COHA operation pause', () => {
 
     it('keeps a mixed Vlašić battle and unrelated suppression out of Vlašić diagnostics', () => {
         const state = makeVlasicState();
-        const operation = state.military.corps_command!.arbih_3rd_corps!.active_operations[0]!;
+        const operation = state.military.corps_command!.arbih_7th_corps!.active_operations[0]!;
         state.military.brigade_attack_orders = {
             arbih_17th_vitezka_mountain: 'op:travnik:paklarevo',
             unrelated_brigade: 'op:unrelated:objective',
