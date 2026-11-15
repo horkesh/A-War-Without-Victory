@@ -20,7 +20,11 @@
 - The inputs are the corps staff's own beliefs about their own plan. `OpProposalCardView.dossier_inputs` carries viability, intel confidence, concentration, front pressure, staging and brigade ids for map focus, and the officer's competence and aggressiveness; no fog-hidden enemy data. `buildOpProposalCardData` in `autonomy_ipc_contract.cjs` mirrors the same inputs in one property block. `src/shared/playerSafeOperationBalance.ts` gains the four-band mapping.
 - Show on map uses the existing `field-operation-plan` target, until now set only for historical operations.
 - Card actions read "Review the plan". Generated plans get a localized title ("Advance from Banovići" / "Napredovanje, polazište: Banovići").
-- Strings sit in a `dossier.*` block in EN and BCS.
+- **Entry-chunk split.** With main merged, the dossier pushed the map entry chunk to 3,002 kB, over the 3,000 kB warning the player-experience gate blocks on. The split now follows `stanceMatterCopy` / `stanceMatterDetail`:
+  - The entry keeps the title, the header and the map target (`proposalDossier.ts`, five `dossier.*` strings in EN and BCS).
+  - The facts, the odds logic and their EN/BCS copy live in `proposalDossierDetail.ts`, loaded only by the lazy `ProposalDossierFacts` that the Command Surface renders in the detail body.
+  - Result on main `b51ab3e58` plus this branch: entry 2,998.52 kB (main alone 2,996.30 kB); facts chunk 5.1 kB.
+  - The margin under 3,000 kB is about 1.5 kB, which matters for L6 next.
 - `CommandSurface.tsx` drops the decorative art for proposal cards, so the dossier facts get that space. This is outside the lane's file list.
 - Stakes (who reacts) are left out: no structured stakes exist for operation proposals yet. The Authority price joins the cost line with L6.
 
