@@ -392,7 +392,7 @@ are free, and the priced levers are rare by design. Cutting income would not cre
 | Insist over the army in a clash (2A) | 15 |
 | Withhold or decline | 0, recorded |
 | Defensive operations | never asked (5B) |
-| Existing levers (request, stop, elite, replace 25; force over a shown no-go 15; gestures 10) | unchanged |
+| Existing levers (request, stop, elite, replace 25; force over a shown no-go 15; gestures 10, 20 since held step 1 on 2026-11-15) | unchanged, except gestures |
 
 - An ordinary approval never feeds the force-launch or friction penalty on income.
 - No refund on success: territorial gain is a banned income source under the Section 6 audit.
@@ -414,7 +414,7 @@ game-designer and canon-compliance seats).**
   optional spend is overruling: stop, request, elite, replace (25), force over a no-go (15), Insist in a
   clash (15, 2A), backing (10 or 20).
 - **The gestures are the routine spend.** Front visit, address to the nation, decoration and strategic
-  posture review (10 each) are renewable all war, on a cooldown instead of a lifetime cap (front visit
+  posture review (20 each since held step 1; 10 before) are renewable all war, on a cooldown instead of a lifetime cap (front visit
   26 weeks, address 52, decoration 52, posture review 26), keeping the war total about where the old caps
   put it. Landed in the appendix D PR (data plus loader, contracts and Desk; player path only; 40-week
   headless artifacts byte-identical and `test:baselines` passing).
@@ -422,13 +422,18 @@ game-designer and canon-compliance seats).**
   default autonomy, counting a turn at cap only when `current` equals `max` and the reserve is full:
   A, hands-off (answers nothing, initiates nothing: a full meter is valid, shown as unspent capital);
   B, engaged (every gesture when off cooldown and affordable, a Request-op every eighth week on the corps
-  with the most enemy contact, Insist on every clash, backs what he is asked); C, meddler (as B, a
-  Request-op every fourth week). Pass: B at cap in at most 25% of turns after week 26; B below 25 at
+  with the most enemy contact, a Stop-op on the main-effort operation of the army's plan every twelfth
+  week, Insist on every clash, backs what he is asked); C, meddler (as B, a Request-op every fourth week
+  and a Stop-op every sixth). *(Stop-op added 2026-11-15: in the first run no Request-op could cross
+  RBiH's plan, which holds no field corps back, so the clash line was untestable.)* Pass: B at cap in at most 25% of turns after week 26; B below 25 at
   least once a year; C has an act turned down for lack of Authority at least four times a year; B sees
   at least two clashes a year. Record each army chief's stubbornness: run on main as it stands and again
   after the roster fix (Fable appendix B) lands; the clash line is judged on the second run.
 - **Held tuning order**, applied one step at a time and only if the test fails: gestures 10 → 20, then
   remove the 15-point reserve, then lower the base income. None is applied before the test.
+  **Step 1 taken 2026-11-15 on the measured trigger.** First run (RBiH, 104 weeks, main plus appendix D):
+  A at cap 100%; B at cap 9% but never below 65.5; C at cap 0%, refused 4 and 9 times a year; no clashes
+  (the test-design gap above). Gestures now cost 20.
 - Not part of this design: named operations drawing on Authority (a post-1.0 candidate), and the masked
   army-roster stubbornness (a separate measured RF fix, Fable appendix B).
 

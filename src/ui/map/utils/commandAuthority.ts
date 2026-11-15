@@ -62,11 +62,11 @@ export const REPLACE_CO_COST = 25;
  * gesture, force-queuing the authored `visit_to_front_<faction>` event. Priced
  * LOWER than the override levers (10, matching the stabilize-command-relationship
  * action) because it is a leadership gesture, not an officer override. MUST match
- * autonomy_ipc_contract.cjs (FRONT_VISIT_COST = 10) and the initiate-front-visit
+ * autonomy_ipc_contract.cjs (FRONT_VISIT_COST = 20) and the initiate-front-visit
  * IPC handler (electron-main.cjs). Cooldown/cap use the event's voluntary action cadence
  * (max_fires 5 / cooldown 10t), not a CA-side timer.
  */
-export const FRONT_VISIT_COST = 10;
+export const FRONT_VISIT_COST = 20;
 /**
  * Cost of the ADDRESS-THE-NATION presidential leadership action (Presidential
  * Command Surface design §10, deferred companion to the shipped front visit):
@@ -74,9 +74,9 @@ export const FRONT_VISIT_COST = 10;
  * `address_to_nation_<faction>` event. Priced like the front visit (10) — a
  * leadership gesture, not an officer override. Unlike the front visit it is
  * faction-wide (no reachability gate). MUST match autonomy_ipc_contract.cjs
- * (ADDRESS_NATION_COST = 10) and the initiate-address-nation IPC handler.
+ * (ADDRESS_NATION_COST = 20) and the initiate-address-nation IPC handler.
  */
-export const ADDRESS_NATION_COST = 10;
+export const ADDRESS_NATION_COST = 20;
 /**
  * Cost of the DECORATE-A-UNIT presidential leadership action (Presidential
  * Command Surface design §10, deferred companion to the shipped front visit):
@@ -84,12 +84,12 @@ export const ADDRESS_NATION_COST = 10;
  * or atrocity-associated units), force-queuing the authored
  * `decorate_a_unit_<faction>` event with one branch per eligible regular unit so
  * the player picks WHICH to honour. Priced like the front visit (10). MUST match
- * autonomy_ipc_contract.cjs (DECORATE_UNIT_COST = 10) and the
+ * autonomy_ipc_contract.cjs (DECORATE_UNIT_COST = 20) and the
  * initiate-decorate-unit IPC handler.
  */
-export const DECORATE_UNIT_COST = 10;
+export const DECORATE_UNIT_COST = 20;
 /** Cost parity for the authored strategic-posture-review leadership gesture. */
-export const STRATEGIC_POSTURE_REVIEW_COST = 10;
+export const STRATEGIC_POSTURE_REVIEW_COST = 20;
 /**
  * Command loop L6 (owner decision 1, 2026-11-14): backing a general's offensive costs
  * Authority. Backing a staff offensive at corps level (an APPROVE_OP proposal) costs 10;
