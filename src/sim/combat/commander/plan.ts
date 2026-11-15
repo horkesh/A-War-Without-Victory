@@ -58,6 +58,7 @@ import type {
 import { BESIEGED_SURPLUS_HOP_LIMIT } from './allocate.js';
 import { CRITICAL_MORALE_THRESHOLD } from '../combat_math.js';
 import { MAX_EXHAUSTION_FOR_OPERATION } from '../bot_constants.js';
+import { getHeadQueuedPrePlannedBrigadeIds } from '../pre_planned_operations.js';
 import { corpsHoldForbidsNewPlans } from '../stance_matter_holds.js';
 import {
     isEliteAuthoredForHistoricalOperation,
@@ -389,13 +390,13 @@ export function selectWinningIntent(
             generate: zones.some(z => z.deficit > 0) || isHeavyOrCriticalPressure,
         },
 
-        // stage_operation — pre-planned ops + sufficient surplus
-        {
-            type: 'stage_operation',
-            generate:
-                briefing.pre_planned_ops.length > 0 &&
-                surplusPool.length >= MIN_BRIGADES_FOR_PLAN,
-        },
+        // stage_operation — never generated (RF-L3d, 2026-11-15). Authored pre-planned
+        // operations are launched only by the pre-planned launcher (inject-queued-operations),
+        // with their own authorization, timing and rosters. The commander used to adopt the
+        // queued NAME as a target-less plan that emitted nothing; a waiting queue must not make
+        // the corps more offensive on its own initiative either. The member stays in
+        // CommanderIntentType for saved traces.
+        { type: 'stage_operation', generate: false },
 
         // launch_opportunity — enough surplus AND a projecting/balanced zone
         {
@@ -966,8 +967,18 @@ export function managePlan(
     // intent into a canonical opportunity plan before generic intent competition;
     // all normal force, reachability, fatigue, exhaustion, and operation-slot
     // gates above and inside tryCreateFromOpportunity still apply.
+    // Brigades the due queue head holds for its authored operation are not the commander's to
+    // plan with (RF-L3d): the launcher would otherwise lose them to an opportunity operation and
+    // can drop below its participant floor. Same rule the probe paths already apply (emit.ts).
+    const queueHeadHeld = briefing.state_ref
+        ? getHeadQueuedPrePlannedBrigadeIds(briefing.state_ref)
+        : new Set<FormationId>();
+    const planPool = queueHeadHeld.size > 0
+        ? surplusPool.filter(ev => !queueHeadHeld.has(ev.brigade_id as FormationId))
+        : surplusPool;
+
     if (briefing.bilateral_offensive && briefing.campaign_offensive_targets.length > 0) {
-        const bilateralDecision = tryCreateFromOpportunity(briefing, zones, forces, surplusPool, turn);
+        const bilateralDecision = tryCreateFromOpportunity(briefing, zones, forces, planPool, turn);
         if (bilateralDecision) {
             const gated = applyForceQualitySoftGates(bilateralDecision, briefing);
             const stagedPlan = gated.plan?.concentration_progress === 1
@@ -986,25 +997,16 @@ export function managePlan(
     // The existing stance/exhaustion/fatigue/role guards above already enforce the same
     // hard-block conditions, so any `stage_operation` or `launch_opportunity` winner
     // here is already known-eligible for offensive planning.
-    const { winner, trace } = selectWinningIntent(briefing, zones, forces, surplusPool, turn, briefing.previous_state?.lessons);
+    const { winner, trace } = selectWinningIntent(briefing, zones, forces, planPool, turn, briefing.previous_state?.lessons);
 
-    // Route based on winning intent type.
-    // When competition selects an offensive intent, preserve original priority ordering:
-    // pre-planned ops take precedence over opportunity even when launch_opportunity scored higher.
+    // Route based on winning intent type. Pre-planned operations are not adopted here
+    // (RF-L3d): their launcher owns them, and the queued entries are names, not definitions.
     const offensiveWinner =
         winner?.type === 'stage_operation' || winner?.type === 'launch_opportunity';
 
     if (offensiveWinner) {
-        // Priority 1: pre-planned operations (always attempted first when eligible)
-        const prePlannedDecision = tryCreateFromPrePlanned(briefing, zones, surplusPool, forces.tier_counts.main_effort, turn);
-        if (prePlannedDecision) {
-            const gated = applyForceQualitySoftGates(prePlannedDecision, briefing);
-            const augmentedTrace = augmentTraceWithForceQuality(trace, gated.plan?.force_quality_traits);
-            return { ...gated, decision_trace: augmentedTrace };
-        }
-
-        // Priority 2: opportunity (weak/undefended enemy zone adjacent to surplus)
-        const opportunityDecision = tryCreateFromOpportunity(briefing, zones, forces, surplusPool, turn);
+        // Opportunity (weak/undefended enemy zone adjacent to surplus)
+        const opportunityDecision = tryCreateFromOpportunity(briefing, zones, forces, planPool, turn);
         if (opportunityDecision) {
             const gated = applyForceQualitySoftGates(opportunityDecision, briefing);
             const augmentedTrace = augmentTraceWithForceQuality(trace, gated.plan?.force_quality_traits);
@@ -1240,86 +1242,6 @@ function advanceExistingPlan(
         plan: advancedPlan,
         action: 'advanced',
         reason: `concentrating: ${(concentrationProgress * 100).toFixed(0)}% (turn ${turn} / target ${plan.target_ready_turn})`,
-    };
-}
-
-// ═══════════════════════════════════════════════════════════════════════════
-// tryCreateFromPrePlanned — adopt pre-planned operations
-// ═══════════════════════════════════════════════════════════════════════════
-
-function tryCreateFromPrePlanned(
-    briefing: CommanderBriefing,
-    zones: ZoneAssessment[],
-    surplusPool: BrigadeEvaluation[],
-    mainEffortCap: number,
-    turn: number,
-): PlanDecision | null {
-    if (!briefing.pre_planned_ops || briefing.pre_planned_ops.length === 0) return null;
-
-    // Take the first pre-planned op (queue order is priority order)
-    const opDef = briefing.pre_planned_ops[0] as Record<string, unknown>;
-    if (!opDef) return null;
-
-    const opName = (opDef['name'] as string) ?? 'pre_planned_op';
-
-    // Find the best staging zone: zone with most surplus, preferring projecting posture
-    const stagingZone = findBestStagingZone(briefing, zones, surplusPool);
-    if (!stagingZone) return null;
-
-    // Determine required brigades: scale to main_effort capacity (n1298).
-    // mainEffortCap = tier_counts.main_effort: only brigades capable of offensive ops.
-    // A corps with 2 main_effort brigades out of 10 total deploys 3 (floor), not all 10.
-    const mainEffortLimit = mainEffortCap > 0 ? mainEffortCap : surplusPool.length;
-    const baseRequiredBrigades = Math.max(MIN_BRIGADES_FOR_PLAN, Math.min(mainEffortLimit, surplusPool.length));
-    const requiredBrigades = baseRequiredBrigades + getEnemyEquipmentBrigadeBump(briefing);
-    if (requiredBrigades > surplusPool.length) {
-        return null;
-    }
-
-    // Estimate concentration time: 1 turn per 2 brigades that need to move
-    const brigadesAlreadyAtStaging = countBrigadesInZone(
-        surplusPool.map(e => e.brigade_id),
-        surplusPool,
-        stagingZone.zone_id,
-    );
-    const brigadesToMove = Math.max(0, requiredBrigades - brigadesAlreadyAtStaging);
-    const concentrationTurns = Math.ceil(brigadesToMove / PLAN_CONCENTRATION_RATE);
-
-    // Check besieged corps rule
-    if (isBesiegedCorps(zones) && !isLocalTarget(opDef, stagingZone)) {
-        return null; // Cannot plan distant offensives from besieged position
-    }
-
-    // Assign brigades from surplus pool (sorted by offensive fitness)
-    const assignedBrigades = selectBrigadesForPlan(surplusPool, requiredBrigades, turn, opName);
-
-    // Pre-planned ops are designed to execute AFTER concentration, not from current positions.
-    // Reachability is enforced in emit.ts (buildAxesFromDef) at execution time when brigades
-    // are already near staging. Applying it here at plan-creation time incorrectly rejects
-    // valid pre-planned ops whose brigades will march toward staging over the next few turns.
-    const targetOsids = extractTargetOsids(opDef);
-
-    const plan: CommanderPlan = {
-        plan_id: `plan_${briefing.corps_id}_t${turn}_${opName.replace(/\s+/g, '_').toLowerCase()}`,
-        objective_description: opName,
-        target_osids: targetOsids,
-        required_brigades: requiredBrigades,
-        assigned_brigades: assignedBrigades,
-        staging_zone: stagingZone.zone_id,
-        status: 'concentrating',
-        created_turn: turn,
-        target_ready_turn: turn + concentrationTurns,
-        concentration_progress: requiredBrigades > 0
-            ? Math.min(1.0, brigadesAlreadyAtStaging / requiredBrigades)
-            : 0,
-        viability_score: 1.0,
-        source: 'pre_planned',
-    };
-
-    return {
-        plan,
-        action: 'created',
-        reason: `adopted pre-planned op: ${opName}`,
     };
 }
 
@@ -2079,49 +2001,6 @@ function selectBrigadesForPlan(
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// Helper: find best staging zone
-// ═══════════════════════════════════════════════════════════════════════════
-
-function findBestStagingZone(
-    briefing: CommanderBriefing,
-    zones: readonly ZoneAssessment[],
-    surplusPool: readonly BrigadeEvaluation[],
-): ZoneAssessment | null {
-    // Prefer projecting > balanced > defending. Never stage from besieged.
-    const posturePriority: Record<string, number> = {
-        projecting: 0,
-        balanced: 1,
-        defending: 2,
-        besieged: 99,
-    };
-
-    const campaignTargetSet = getPriorityTargetSet(briefing);
-    const wantsCampaignPush = briefing.campaign_role === 'primary' || briefing.campaign_role === 'secondary';
-
-    const candidates = zones
-        .filter(z => z.posture !== 'besieged' && z.front_edge_count > 0)
-        .sort((a, b) => {
-            if (wantsCampaignPush && campaignTargetSet.size > 0) {
-                const aMatches = a.enemy_adjacent_osids.some(osid => campaignTargetSet.has(osid)) ? 1 : 0;
-                const bMatches = b.enemy_adjacent_osids.some(osid => campaignTargetSet.has(osid)) ? 1 : 0;
-                const matchDiff = bMatches - aMatches;
-                if (matchDiff !== 0) return matchDiff;
-            }
-            // 1. Posture priority
-            const posA = posturePriority[a.posture] ?? 99;
-            const posB = posturePriority[b.posture] ?? 99;
-            if (posA !== posB) return posA - posB;
-            // 2. Most surplus brigades
-            const surpDiff = b.surplus_brigades.length - a.surplus_brigades.length;
-            if (surpDiff !== 0) return surpDiff;
-            // 3. Deterministic tiebreaker
-            return strictCompare(a.zone_id, b.zone_id);
-        });
-
-    return candidates.length > 0 ? candidates[0]! : null;
-}
-
-// ═══════════════════════════════════════════════════════════════════════════
 // Helper: check if corps is besieged (all zones besieged, or main body isolated)
 // ═══════════════════════════════════════════════════════════════════════════
 
@@ -2134,39 +2013,6 @@ function isBesiegedCorps(zones: readonly ZoneAssessment[]): boolean {
     // cannot plan distant offensives regardless of fringe zone posture.
     const mainBody = zones.find(z => z.is_main_body);
     return mainBody != null && mainBody.corridor_width <= 1;
-}
-
-// ═══════════════════════════════════════════════════════════════════════════
-// Helper: check if op target is local to staging zone (within hop limit)
-// ═══════════════════════════════════════════════════════════════════════════
-
-function isLocalTarget(opDef: Record<string, unknown>, stagingZone: ZoneAssessment): boolean {
-    // For pre-planned ops, check if target OSIDs overlap with or are adjacent to staging zone
-    const targetOsids = extractTargetOsids(opDef);
-    if (targetOsids.length === 0) return true; // No specific targets = local by default
-    // If any target OSID is in the staging zone's OSIDs, it's local
-    const zoneOsidSet = new Set(stagingZone.osids);
-    return targetOsids.some(osid => zoneOsidSet.has(osid));
-}
-
-// ═══════════════════════════════════════════════════════════════════════════
-// Helper: extract target OSIDs from an op definition
-// ═══════════════════════════════════════════════════════════════════════════
-
-function extractTargetOsids(opDef: Record<string, unknown>): string[] {
-    // Pre-planned ops may have target_osids, objectives, or similar fields
-    const targets = opDef['target_osids'] as string[] | undefined;
-    if (Array.isArray(targets)) return [...targets].sort(strictCompare);
-
-    const objectives = opDef['objectives'] as Array<{ osid?: string }> | undefined;
-    if (Array.isArray(objectives)) {
-        return objectives
-            .map(o => o.osid)
-            .filter((osid): osid is string => typeof osid === 'string')
-            .sort(strictCompare);
-    }
-
-    return [];
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

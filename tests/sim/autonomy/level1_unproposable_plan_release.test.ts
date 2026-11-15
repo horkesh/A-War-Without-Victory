@@ -1,7 +1,7 @@
 /**
  * L3c (2026-11-15): a Level-1 plan that can never be put to the President is released, not held.
  *
- * WHY. `tryCreateFromPrePlanned` reads `briefing.pre_planned_ops[0]` as an operation definition, but
+ * WHY. `tryCreateFromPrePlanned` (removed in RF-L3d) read `briefing.pre_planned_ops[0]` as an operation definition, but
  * the briefing passes `corps_command.queued_operations`, which is a list of operation NAMES. The
  * adopted plan therefore has no name (`..._pre_planned_op`) and no `target_osids`. In live Assisted
  * play `arbih_1st_corps` held `plan_arbih_1st_corps_t15_pre_planned_op` at `ready` from turn 15 to the

@@ -2402,8 +2402,16 @@ function buildOperationsImpl(
             markCommanderCreationExit(obs, 'active_slot_full');
             return ops;
         }
+        // Brigades the due queue head holds for its authored operation never join a commander
+        // plan's operation (RF-L3d): the same rule as the probe paths below, so the launcher
+        // keeps its roster. Assigned brigades of a bilateral plan are filtered too.
+        const queueHeadHeld = briefing.state_ref
+            ? getHeadQueuedPrePlannedBrigadeIds(briefing.state_ref)
+            : new Set<FormationId>();
         const surplusSet = new Set(
-            allocation.surplus_pool.map(ev => ev.brigade_id),
+            allocation.surplus_pool
+                .map(ev => ev.brigade_id)
+                .filter(brigadeId => !queueHeadHeld.has(brigadeId as FormationId)),
         );
         if (activePlan.bilateral_offensive) {
             // The plan reserved these brigades on creation. A subsequent front
@@ -2412,7 +2420,7 @@ function buildOperationsImpl(
             // between READY and emission. Combat readiness and reachability remain
             // enforced below for every reserved participant.
             for (const brigadeId of activePlan.assigned_brigades) {
-                if (mayJoinPlanOperation(brigadeId)) surplusSet.add(brigadeId);
+                if (mayJoinPlanOperation(brigadeId) && !queueHeadHeld.has(brigadeId)) surplusSet.add(brigadeId);
             }
         }
 

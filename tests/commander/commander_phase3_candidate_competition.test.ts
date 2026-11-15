@@ -103,17 +103,20 @@ describe('v0.8.1 Phase 3 — Candidate Generation', () => {
         expect(trace.candidates.some(c => c.type === 'hold_line')).toBe(true);
     });
 
-    it('stage_operation is generated when pre_planned_ops is non-empty and surplus >= MIN_BRIGADES_FOR_PLAN', () => {
+    it('RF-L3d: stage_operation is never generated, even when a pre-planned operation is queued', () => {
+        // Authored pre-planned operations belong to the pre-planned launcher; a waiting queue
+        // gives the commander no offensive intent of its own.
         const surplusPool = makeSurplusPool(MIN_BRIGADES_FOR_PLAN);
         const briefing = makeMinimalBriefing({
-            pre_planned_ops: [{ id: 'op_1' }],
+            pre_planned_ops: ['Operation Corridor'],
         });
         const zones = [makeZone({ posture: 'balanced' })];
         const forces = makeForces(surplusPool, MIN_BRIGADES_FOR_PLAN);
 
         const { trace } = selectWinningIntent(briefing, zones, forces, surplusPool, 10);
 
-        expect(trace.candidates.some(c => c.type === 'stage_operation')).toBe(true);
+        expect(trace.candidates.some(c => c.type === 'stage_operation')).toBe(false);
+        expect(trace.candidates.some(c => c.type === 'launch_opportunity')).toBe(true);
     });
 
     it('stage_operation is NOT generated when pre_planned_ops is empty', () => {
@@ -207,24 +210,6 @@ describe('v0.8.1 Phase 3 — Candidate Generation', () => {
 // ═══════════════════════════════════════════════════════════════════════════
 
 describe('v0.8.1 Phase 3 — Hard-Block Rules', () => {
-    it('exhaustion-blocked corps produce stage_operation with non-empty blocked_by', () => {
-        const surplusPool = makeSurplusPool(MIN_BRIGADES_FOR_PLAN);
-        const briefing = makeMinimalBriefing({
-            corps_exhaustion: MAX_EXHAUSTION_FOR_OPERATION + 5,
-        faction_war_exhaustion: 0,
-            pre_planned_ops: [{ id: 'op_1' }],
-        });
-        const zones = [makeZone({ posture: 'balanced', surplus_brigades: surplusPool.map(e => e.brigade_id) })];
-        const forces = makeForces(surplusPool, surplusPool.length);
-
-        const { trace } = selectWinningIntent(briefing, zones, forces, surplusPool, 10);
-
-        const stageOp = trace.candidates.find(c => c.type === 'stage_operation');
-        expect(stageOp).toBeDefined();
-        expect(stageOp!.blocked_by.length).toBeGreaterThan(0);
-        expect(stageOp!.blocked_by).toContain('corps_exhaustion_exceeds_threshold');
-    });
-
     it('exhaustion-blocked corps produce launch_opportunity with non-empty blocked_by', () => {
         const surplusPool = makeSurplusPool(MIN_BRIGADES_FOR_PLAN);
         const briefing = makeMinimalBriefing({
@@ -278,10 +263,10 @@ describe('v0.8.1 Phase 3 — Hard-Block Rules', () => {
         const blockedCandidates = trace.candidates.filter(c => c.blocked_by.length > 0);
         expect(blockedCandidates.length).toBeGreaterThan(0);
 
-        // Specifically the blocked offensive intents appear
-        const stageOp = trace.candidates.find(c => c.type === 'stage_operation');
-        expect(stageOp).toBeDefined();
-        expect(stageOp!.blocked_by.length).toBeGreaterThan(0);
+        // Specifically the blocked offensive intent appears
+        const launchOp = trace.candidates.find(c => c.type === 'launch_opportunity');
+        expect(launchOp).toBeDefined();
+        expect(launchOp!.blocked_by.length).toBeGreaterThan(0);
     });
 
     it('critical_supply_belief applies soft penalty (not hard block) when supply_continuity_confidence < 0.2 (Phase 5)', () => {
@@ -485,27 +470,6 @@ describe('v0.8.1 Phase 3 — Score Breakdown', () => {
         expect(keys).toContain('supply_inverse');
     });
 
-    it('stage_operation score_breakdown contains expected factor keys', () => {
-        const surplusPool = makeSurplusPool(MIN_BRIGADES_FOR_PLAN);
-        const briefing = makeMinimalBriefing({
-            pre_planned_ops: [{ id: 'op_1' }],
-        });
-        const zones = [makeZone({ posture: 'balanced', surplus_brigades: surplusPool.map(e => e.brigade_id) })];
-        const forces = makeForces(surplusPool, surplusPool.length);
-
-        const { trace } = selectWinningIntent(briefing, zones, forces, surplusPool, 10);
-
-        const stageOp = trace.candidates.find(c => c.type === 'stage_operation');
-        if (stageOp) {
-            const keys = Object.keys(stageOp.score_breakdown);
-            expect(keys).toContain('supply_readiness');
-            expect(keys).toContain('surplus_ratio');
-            expect(keys).toContain('threat_inverse');
-            expect(keys).toContain('exhaustion_penalty');
-            expect(keys).toContain('fatigue_readiness');
-            expect(keys).toContain('campaign_alignment');
-        }
-    });
 
     it('launch_opportunity score_breakdown contains expected factor keys', () => {
         const surplusPool = makeSurplusPool(MIN_BRIGADES_FOR_PLAN);

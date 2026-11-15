@@ -3354,7 +3354,8 @@ export function getHeadQueuedPrePlannedBrigadeIds(
 ): Set<FormationId> {
     const currentTurn = state.meta?.turn ?? 0;
     const reserved = new Set<FormationId>();
-    const corpsCommand = state.military.corps_command ?? {};
+    // Partial state snapshots (unit briefings) may carry no military block: nothing is held.
+    const corpsCommand = state.military?.corps_command ?? {};
     for (const corpsId of Object.keys(corpsCommand).sort(strictCompare)) {
         const operationName = corpsCommand[corpsId]?.queued_operations?.[0];
         if (!operationName) continue;
