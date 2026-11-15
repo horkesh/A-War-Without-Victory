@@ -14,6 +14,7 @@
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { createRequire } from 'node:module';
+import { withoutComments } from '../helpers/sourceComments.js';
 import { describe, expect, it } from 'vitest';
 import type { FactionId, GameState } from '../../src/state/game_state.js';
 import {
@@ -467,7 +468,7 @@ describe('save, validation, manifest, projection, firewall', () => {
                 const path = join(dir, entry);
                 if (statSync(path).isDirectory()) { walk(path); continue; }
                 if (!/\.(ts|cjs|js)$/.test(entry)) continue;
-                if (/army_clash|armyClash/.test(readFileSync(path, 'utf8'))) offenders.push(path);
+                if (/army_clash|armyClash/.test(withoutComments(readFileSync(path, 'utf8')))) offenders.push(path);
             }
         };
         for (const root of roots) walk(root);

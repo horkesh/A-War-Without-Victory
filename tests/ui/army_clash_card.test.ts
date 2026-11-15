@@ -10,6 +10,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { DirectiveCard } from '../../src/ui/map/components/army_hq/DirectiveCard';
 import { buildPresidentialDecisionRoomView, type PresidentialDecisionRoomDirective } from '../../src/ui/map/data/presidentialDecisionRoom';
 import { deriveInboxItems } from '../../src/ui/map/data/inboxItems';
+import { buildDecisionConsequenceLedger } from '../../src/ui/map/data/decisionConsequenceLedger';
 import { parseGameState } from '../../src/ui/map/data/GameStateAdapter';
 import { setLocale } from '../../src/ui/map/i18n';
 import type { ArmyClashView, LoadedGameState } from '../../src/ui/map/data/types';
@@ -162,6 +163,20 @@ describe('army clash: inbox and adapter', () => {
     expect(loaded.armyClashHistory![0]).toMatchObject({ outcome: 'insist', cost: 15 });
     raw.meta.turn = turn + 1;
     expect(parseGameState(raw).armyClashes).toBeUndefined();
+  });
+
+  it('files every clash receipt as a Record line', () => {
+    const ledger = buildDecisionConsequenceLedger(makeState({
+      armyClashHistory: [
+        { id: 'CLASH_40_RBiH', turn: 40, act: 'stop_op', corpsName: '2nd Corps', armyCommanderName: 'Rasim Delić', outcome: 'insist', resolvedTurn: 40, cost: 15 },
+        { id: 'CLASH_30_RBiH', turn: 30, act: 'request_op', corpsName: '7th Corps', armyCommanderName: 'Rasim Delić', outcome: 'noted', resolvedTurn: 30, cost: 0 },
+      ],
+    }));
+    const rows = ledger.filter((r) => r.familyId === 'army-clash');
+    expect(rows.map((r) => [r.title, r.outcome, r.detail])).toEqual(expect.arrayContaining([
+      ['Army objection: Rasim Delić', 'you insisted', '2nd Corps · 15 Authority'],
+      ['Army objection: Rasim Delić', 'the army noted its objection', '7th Corps'],
+    ]));
   });
 
   it('an old save carries no clash views', () => {
