@@ -232,11 +232,14 @@ function compileDisplacement(state: GameState, turn: number): Pick<TurnSummary, 
     const byMun: Record<string, number> = {};
 
     for (const e of events) {
-        displacement_total += e.displaced;
+        // RB1: people displaced = routed (`displaced`) + fled abroad, each once. The killed
+        // are not displaced; they are reported as civilian casualties.
+        const displacedPeople = Math.max(0, e.displaced ?? 0) + Math.max(0, e.fled_abroad ?? 0);
+        displacement_total += displacedPeople;
         if (e.ethnicity) {
-            displacement_by_ethnicity[e.ethnicity] = (displacement_by_ethnicity[e.ethnicity] ?? 0) + e.displaced;
+            displacement_by_ethnicity[e.ethnicity] = (displacement_by_ethnicity[e.ethnicity] ?? 0) + displacedPeople;
         }
-        byMun[e.origin_mun] = (byMun[e.origin_mun] ?? 0) + e.displaced;
+        byMun[e.origin_mun] = (byMun[e.origin_mun] ?? 0) + displacedPeople;
     }
 
     // Municipality with highest displacement
