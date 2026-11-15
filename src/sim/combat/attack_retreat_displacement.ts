@@ -332,6 +332,12 @@ export function findEmergencyRetreatOsid(
     // 3. BFS from current location through friendly territory only.
     //    Keeps enclave brigades inside their pocket instead of teleporting to corps HQ.
     //    BB2 p.479: beaten units fell back concentrically toward Goražde town.
+    //    In effect this is ONE hop, by design: it never expands through enemy territory, and the
+    //    first friendly neighbour it meets is returned at once, so `next` could only ever hold
+    //    friendly cells, which would already have returned. It finds an adjacent friendly cell or
+    //    nothing. Friendly ground further away in the same connected component is steps 4-5's job;
+    //    another component is never reached (the cut-off rule below). (Reviewed 2026-11-15; left
+    //    unchanged on purpose.)
     if (adjacency && origin) {
         const visited = new Set<string>([origin]);
         let frontier = [origin as Osid];

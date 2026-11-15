@@ -107,13 +107,6 @@ export const MAIN_CASUALTY_MULT = 1.40;
 export const SUPPORT_CASUALTY_MULT = 0.55;
 
 // ═══════════════════════════════════════════════════════════════════════════
-// Corridor breach parameters (from bot_corps_ai.ts)
-// ═══════════════════════════════════════════════════════════════════════════
-
-/** Corridor breach: max enemy settlements in a narrow strip to attempt breach. */
-export const CORRIDOR_BREACH_MAX_STRIP_WIDTH = 8;
-
-// ═══════════════════════════════════════════════════════════════════════════
 // Sector counter-attack parameters
 // ═══════════════════════════════════════════════════════════════════════════
 

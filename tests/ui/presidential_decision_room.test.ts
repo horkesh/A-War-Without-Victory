@@ -2014,14 +2014,14 @@ describe('buildPresidentialDecisionRoomView', () => {
     expect(evidence).not.toMatch(/Severity:|Donor command:|Source position:|Weakened position:/);
   });
 
-  it('always emits a single front-visit directive card (cost 10, availability gated in the component)', () => {
+  it('always emits a single front-visit directive card (cost 20 since held step 1, availability gated in the component)', () => {
     const view = buildPresidentialDecisionRoomView({ state: makeState() });
     const card = view.cards.find((c) => c.id === 'command:front-visit');
 
     expect(card?.category).toBe('command');
     expect(card?.directive).toEqual({
       lever: 'front_visit',
-      cost: 10,
+      cost: 20,
       payload: {},
     });
     // The front-visit directive targets no corps (it targets a front).
@@ -2034,7 +2034,7 @@ describe('buildPresidentialDecisionRoomView', () => {
     expect(cards).toHaveLength(1);
     expect(cards[0]?.directive).toEqual({
       lever: 'strategic_posture_review',
-      cost: 10,
+      cost: 20,
       payload: {},
     });
   });

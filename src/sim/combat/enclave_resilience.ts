@@ -90,8 +90,8 @@ export function isBrigadeEligibleForOperationObjectives(
     const loc = brigade.location_osid;
     if (!loc) return true;
     // No declared objectives => this predicate CANNOT assess the question it was asked, and a
-    // silent `false` here would exclude every enclave brigade from e.g. corridor-breach ops,
-    // which pass `[]`. An operation with no objectives captures nothing, so there is no §6
+    // silent `false` here would exclude every enclave brigade from any op built with `[]`
+    // (the retired corridor-breach ops did). An operation with no objectives captures nothing, so there is no §6
     // exposure in answering true. Declining to answer is honest; guessing false is not.
     if (objectives.length === 0) return true;
     // Enclave brigade: eligible only if at least one objective lies in its own enclave.

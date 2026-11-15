@@ -52,8 +52,9 @@
  * configured here.
  */
 
-import type { FormationId, GameState } from '../../state/game_state.js';
+import type { FactionId, FormationId, GameState } from '../../state/game_state.js';
 import { invalidateBrigadeJourney } from './brigade_journey_lifecycle.js';
+import { isFriendlyFaction } from '../early_war/alliance_update.js';
 
 /** Turn the Tactical Group relocates to Brčko (a few turns ahead of the
  *  observed wk58-59 crisis, giving it time to be "in position"). */
@@ -87,7 +88,15 @@ export function applyBrckoTacticalGroupRelocation(state: GameState): void {
             ? BRCKO_OSID
             : (turn === RETURN_TURN && formation.home_osid ? formation.home_osid : undefined);
         if (!targetOsid || targetOsid === formation.location_osid) continue;
+        // Only onto ground its side holds (the post-turn barrier's own test). A Brčko or a home that
+        // has fallen is not a place to attach to or return to; the formation then stays where it is.
+        if (!isHeldByFriendlyFaction(state, targetOsid, formation.faction)) continue;
         invalidateBrigadeJourney(state, fid);
         formation.location_osid = targetOsid;
     }
+}
+
+function isHeldByFriendlyFaction(state: GameState, osid: string, faction: FactionId): boolean {
+    const controller = state.political?.political_controllers?.[osid] ?? null;
+    return controller !== null && isFriendlyFaction(controller, faction, state);
 }

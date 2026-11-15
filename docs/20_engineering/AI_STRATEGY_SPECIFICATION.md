@@ -106,7 +106,7 @@ At most **one brigade per faction per turn** may be assigned to attack a given s
 War-phase bot decisions are organized in three layers, run in pipeline order:
 
 1. **Army standing orders** — historical army-level directives set `state.army_stance` per faction (e.g. RS Territorial Seizure 0–12, RBiH Survival Defense 0–12, HRHB Lasva Offensive 12–26 when at war with RBiH). Data: `FACTION_STANDING_ORDERS` in `bot_strategy.ts`.
-2. **Corps AI** — stance selection, named operations, OG activation, corridor breach. Sets corps stance and active operations before brigade AI runs.
+2. **Corps AI** — stance selection, named operations, OG activation. (The corridor-breach pass was retired 2026-11-15; see Systems Manual §6.) Sets corps stance and active operations before brigade AI runs.
 3. **Brigade AI** — posture, target scoring, attack orders, casualty-aversion. Reads corps stance via `getParentCorpsStance()`; offensive corps lowers attack threshold, defensive/reorganize forces defend.
 
 Shared helpers used by corps AI, brigade AI, and AoR rebalancing:
@@ -123,7 +123,7 @@ Pipeline steps: `generate-bot-corps-orders` (before) → `generate-bot-brigade-o
 - `src/sim/bot/bot_manager.ts`
 - `src/sim/consolidation_scoring.ts`
 - `src/sim/combat/war_adjacency.ts` (shared adjacency and faction brigades)
-- `src/sim/combat/bot_corps_ai.ts` (corps stance, operations, OGs, corridor breach, standing orders)
+- `src/sim/combat/bot_corps_ai.ts` (corps stance, operations, OGs, standing orders)
 - `src/sim/combat/bot_brigade_ai_osid.ts` (posture, target scoring, attack orders)
 - `src/sim/combat/bot_strategy.ts` (war-phase faction profiles, doctrine phases, standing orders)
 - `src/sim/combat/combat_estimate.ts` (read-only attack cost for casualty-aversion)

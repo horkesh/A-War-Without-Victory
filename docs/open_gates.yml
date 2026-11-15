@@ -49,7 +49,7 @@ gates:
     evidence_required: >
       A calibration-master entry for the final RF source showing the four checkpoints
       re-scored against the current painted files with tools/verify_checkpoints.cjs and no
-      checkpoint below main's figures at the freeze (709/709/708/682 after #647) (a cell loss only by a recorded orchestrator
+      checkpoint below main's figures at the freeze (709/709/708/681 after #591) (a cell loss only by a recorded orchestrator
       ruling); guards intact (Farz, enclave); 0 consistency failures; strict engine-health
       gate PASS on the 188-week run; baseline manifest and fingerprint re-pinned with the
       reason; and live = headless re-measured, 0 cells differing for RBiH, RS and HRHB as
@@ -57,8 +57,10 @@ gates:
     evidence_path: null
     source: docs/plans/MASTER_ROADMAP.md
     notes: >
-      Main stands at 709/709/708/682 after #647 (RF-L3d, recorded under the hold; baselines
-      re-blessed), after 712/705/706/676 at #636 (the October 1995 ceasefire binds) and
+      Main stands at 709/709/708/681 after #591 (RF-1 Phase B, the 7th Corps; the lost cell is
+      Oborci in October 1995, a timing loss; recorded under the hold; baselines re-blessed;
+      consistency reads 1 until SE7E-h is fixed, so the 0-failures bar needs that item), after
+      709/709/708/682 at #647 (RF-L3d), 712/705/706/676 at #636 (the October 1995 ceasefire binds) and
       712/705/706/698 at #619
       (RF-AI2, owner accepted 2026-11-14). Earlier accepted moves: Apr 1995 711 after #583, Oct 1995
       708 (Korenici and Jemanlici, a known historical miss) after #604, and 712/709/710/705 after
