@@ -256,6 +256,25 @@ Hidden event text only (provenance fields and consequence explanations the devel
 - **Tests.** `tests/sim/autonomy/level1_unproposable_plan_release.test.ts` (shared rule; never proposed; player released; a plan with targets still held; bot and headless unchanged). Level-1 fixtures in `level1_player_only_gate` and `level1_expired_proposal_release` now carry targets, since they stand for proposable plans.
 - **Inertness.** See the PR: equal 40-week headless artifact hashes against main and a live strip-and-compare. Evidence under `C:/Pyrrhic/AWWV-worktrees/_logs/cl-l3c-empty-target-20261115/`.
 
+## 2026-11-15 — Brčko Tactical Group relocates only onto held ground; emergency-retreat step 3 documented
+
+Same failure class as the t73 elite-recall freeze (#675): a write to `location_osid` that does not check who holds the target. Both items are latent: neither runs in a default game.
+
+- **Brčko Tactical Group** (`src/sim/combat/brcko_tactical_group.ts`, behind `AWWV_BRCKO_TACTICAL_GROUP`, default OFF).
+  - At turn 56 it moved `rs_5th_kozara_light_infantry` to `op:brcko:brcko`, and at turn 70 back to `home_osid`, without checking control.
+  - With the flag on, in a game where Brčko or the home cell had fallen, that teleported the brigade into enemy territory. The move runs before combat and before `displace-enemy-territory`, so the barrier would not fire. Displacement would then treat the brigade as overrun in a cell it never fought for: a wrong outcome, not a freeze.
+  - Fix: each move now goes only onto a cell its side holds, using the barrier's own test (controlled, and `isFriendlyFaction`). Otherwise the brigade stays where it is and its journey is untouched. No forced control.
+- **`findEmergencyRetreatOsid` step 3** (`src/sim/combat/attack_retreat_displacement.ts`). The BFS never fills `next`, so it is one hop. This is not a bug.
+  - It never expands through enemy territory, and the first friendly neighbour returns at once, so `next` could only ever hold friendly cells, and those would already have returned.
+  - Farther friendly ground in the same component is handled by steps 4-5, and the cut-off rule forbids crossing to another component.
+  - Comment only, no code change. The `friendlyPathToAny` consolidation goes to the sector lane later.
+- **Tests.** `tests/brcko_tactical_group_journey_lifecycle.test.ts`:
+  - the fixture now gives RS both cells;
+  - new cases: does not attach to a lost Brčko (the journey is kept); does not return to a lost or uncontrolled home (it stays at Brčko);
+  - the flag-off no-op case is unchanged;
+  - `tests/emergency_retreat_reachability.test.ts` passes.
+- **Headless: byte-identical.** With the flag off the module returns before the guard. `npm run test:baselines` (188-week master): "all scenarios match" (log `C:/Pyrrhic/AWWV-worktrees/_logs/latent-guards-20261115/baselines.log`). Not a measured change.
+
 ## 2026-11-15 — OSM credit: each plate is drawn only where nothing covers it, and one is always drawn
 
 UI only; no sim, state, save or calibration change. Licence-relevant (ODbL 1.0 attribution must stay visible).
@@ -506,6 +525,43 @@ Follow-up (c) to F1g: the corridor-breach pass had the same S-id/OSID mismatch.
 
 Evidence: `C:/Pyrrhic/AWWV-worktrees/_logs/rf-corridor-breach-20261115/`.
 
+## 2026-11-15 — RF-emergency-defense: the emergency defensive operation is retired (inert)
+
+Follow-up (a) to F1g. With the threat ratio fixed, the emergency defensive operation could in principle fire at threat 2.0 or more.
+
+**Premise, measured on main's 188w.** 166 corps-turns were defensive at threat >= 2.0. None had the two brigades at 70% of the 3,000 cap with cohesion 50 that the creator required, so it never fired.
+
+**Ruling: retire (a2).** operations-expert and corps-army-commander were consulted separately before code, and both reached it.
+- The operation was hollow: no axes, objectives or staging point. No tactical group formed, it made no attacks and wrote no control.
+- It froze the corps' four strongest brigades for about seven turns, which cut them off from sector reassignment, the march back to the front and the reserve hold.
+- It gave x1.05 defence in planning, then x0.9 defence and x0.6 attack in recovery, and added +15 corps exhaustion.
+- It blocked the commander loop (`major_operation_already_active`) and survived the October 1995 ceasefire.
+- Its targets were `nCtrl !== faction`, so HVO Northwest Bosnia (70 of the 166 candidate turns) would have listed ALLIED ARBiH ground. This is the corridor-breach flaw (#672) again.
+- A threatened corps was worse defended with it than without. The defensive stance (x1.2 defence) is the reaction.
+- A real emergency defence (committing reserves, a local counterattack) is a post-1.0 design item.
+
+**Change.**
+- Deleted:
+  - `generateEmergencyDefensiveOperations` (`bot_corps_operations.ts`) and its step-3b call and re-export in `bot_corps_ai.ts`;
+  - `buildEmergencyDefenseOperation` (`corps_operation_helpers.ts`);
+  - `EMERGENCY_THREAT_THRESHOLD` (`bot_constants.ts`);
+  - their tests in `concurrent_operations.test.ts` and `corps_operation_helpers.test.ts`.
+- Kept for saves: `CorpsOperation.is_emergency` and the `limited` branch of `classifyOpDonorPolicy`. Also kept: `computeSectorThreat`, which the stance formula and player recommendations read.
+- Comments: `oct1995_ceasefire.ts`, `game_state.ts`, `tactical_group_config.ts`, the council-fix-3 test.
+- Canon: Systems Manual (the F1g note, the exhaustion-40 mention and the October-1995 bullet, plus a "do not revive" retirement note in §6); Engine Invariants (October 1995 ceasefire line).
+
+**Tests.**
+- New `tests/sim/emergency_defense_retired.test.ts`:
+  - the creator, factory and threshold are gone;
+  - a legacy save's `is_emergency` strategic-defence op walks planning, execution and recovery, then is removed.
+- `tests/sim/f1g_corps_threat_osid.test.ts`: a corps at threat 2.5 goes defensive and gets no emergency op.
+
+**Proof.**
+- Headless 188w against main `16fc0a62f`: all 8 artifacts byte-identical (final_save `19262a0b19df1567`, weekly_report, control_delta, formation_delta, activity_summary, watched_operations, end_report, run_summary).
+- `tsc` 0; `test:baselines` all scenarios match; full `npm run test:vitest` exit 0. No re-bless.
+
+Evidence: `C:/Pyrrhic/AWWV-worktrees/_logs/rf-emergency-defense-20261115/`.
+
 ## 2026-11-15 — RF-1 Phase B: the ARBiH 7th Corps forms at week 99 (PR #591, measured)
 
 RF fidelity-pass change, owner-decided before 1.0 (roadmap BC14). Calibration is held, so the scores are recorded and are not a merge bar. Phase A (#590) shipped the reorganisation events, the 3xx names and cleanup, all inert.
@@ -546,17 +602,46 @@ RF fidelity-pass change, owner-decided before 1.0 (roadmap BC14). Calibration is
 
 **Gate.** Historian, determinism, canon compliance and scenario-creator-runner-tester seats, plus a named integrator: GO WITH CONDITIONS (process items only). FORAWWV §XIII.1 amendment: unanimous 4/4. Evidence `C:/Pyrrhic/AWWV-worktrees/_logs/cl-rf1-phase-b-20261115/`.
 
+## 2026-11-15 — SE7E-h: the run validator counts a relief already in transit (validator only)
+
+RESIGNOFF blocker from the freeze plan (Fable consult 2). Found in RF-1 Phase B (#591): the Prusac sector.
+
+**Defect.** `tools/validate_run_consistency.cjs` failed an empty contested sector "with legal donor(s) available" even when the engine had already ordered a relief into it and the brigade was on the road. The engine's empty-sector relief (`computeEmptySectorReliefReassignments`, `hasPendingReliefForTargets` in `src/sim/combat/commander/decide.ts`) issues no second relief while one is in transit. The validator ignored the march and reported a missed reinforcement.
+
+Observed case: on main after #591, `sector:arbih_7th_corps:3` (Prusac) is empty at t188 while the 770th Slavna is in transit to `prusac_2`, with 3 turns left. That was main's consistency 1.
+
+**Change.** Before the donor check, the validator now applies the engine's own test: a movement order or an in-flight movement whose destinations include one of the sector's friendly front OSIDs. A match is reported as `relief_in_transit`, a logged note naming the relieving brigades, and is not a failure. Nothing else changes: no relief in flight still fails with legal donors, and a march to another OSID does not count.
+
+**Evidence.**
+- Main's 188w run (4d876050e, `..._w188_n6`) and the RF-1 final run both go from 1 failure to PASS. The Prusac line now reads "relief is in transit … (arbih_770th_slavna_mountain)".
+- The validator isn't part of the simulation, so the sim and baselines are byte-identical.
+- Tests: `tests/validate_run_consistency.test.ts` gains the in-transit, movement-order and wrong-destination cases; the empty-sector expectations carry the new `relief_in_transit` field. 24/24 pass; `tsc` 0.
+
 ## 2026-11-15 — Player-visible projection carries the player's own municipal sustainability
 
 UI/projection only; no sim, state or calibration change. `src/desktop/player_visible_state.cjs` did not project `displacement.sustainability_state`, so the live sitrep, the Situation tab and the War Summary always read "0 critical, 0 strained" (found while proving F1e, which could only be tested, not rendered). The projection now carries the entries of the municipalities the player holds (majority of OSIDs, the rule `deriveMunicipalityControllerByOsid` uses for the sitrep count); the opponents' municipal supply condition stays out, like `war_supply_condition`. No player faction projects an empty map.
 
 Proof: `tests/desktop_player_visible_sustainability.test.ts` (own municipalities only, per faction, no leak of the others, same holder rule as the sitrep, detached and deterministic, tolerates a save without the field); `desktop_player_visible_state` unchanged and green; `tsc` clean; map build with no chunk warning. Rendered before/after in the real desktop app: "Sustainment: 0 critical, 0 strained" -> "4 critical, 4 strained", matching the raw save. See `docs/40_reports/evidence/20261115_sustainment_projection/`.
 
+## 2026-11-15 — Three test Presidents in the desktop harness (appendix C tooling)
+
+- **What.** `tools/ai_play/desktop_calibration_compare.ts --president hands_off|engaged|meddler` drives the player branch with one of the three test Presidents of proposal §5D. The policies are in `tools/ai_play/president_policies.ts`.
+  - **hands_off** initiates nothing and pays for nothing.
+  - **engaged** makes each gesture as soon as it is off cooldown and affordable. It sends a Request-op every 8 weeks and a Stop-op on the plan's main-effort operation every 12 weeks. It insists on every army clash and backs every proposal.
+  - **meddler** does the same with a Request-op every 4 weeks and a Stop-op every 6. A Stop-op that falls due carries over until the main-effort corps has an operation.
+- **How.** Every act goes through the desktop's own contracts: availability, the Authority debit, then the staged order or queued decision. A clash left unanswered at Advance lapses, as in electron-main.
+  - Each turn row records Authority `current`/`max`, the reserve, the income and its breakdown, and the President's acts and refusals.
+- **Scope.** Tooling only. Without `--president` the harness output is unchanged. No sim, data or canon change.
+
 ## 2026-11-15 — Entry-chunk headroom: Codex, Chronicle, Wrapped, Settings, Diplomacy, Peace plan, AI panels load on demand
 
 UI build only; no sim, state or calibration change. Main's full-suite player-experience gate failed on the Vite chunk-size warning (`tactical_map` 3,000.38 kB vs the 3000 kB limit) after #643 and #639 landed, each under the limit alone. `App.tsx` now lazy-imports the views that open on demand (Codex, Chronicle, Wrapped, Settings, Diplomacy, Peace plan, AI settings, AI advisor), each behind its own open flag and a `Suspense` boundary. Entry chunk 3,000.38 -> 2,863.53 kB (136.85 kB under the limit); `chunkSizeWarningLimit` and the gate are untouched. Same pattern as the earlier Recruitment, Autonomy, Economy and Credits splits.
 
 Proof: `tsc --noEmit` clean; 87 UI test files that reference App or these views pass (861 tests); rendered Codex and Chronicle open in the real desktop app. See `docs/40_reports/evidence/20261115_bundle_headroom/`.
+
+## 2026-11-15 — Player-visible truth fixes after the citation audit; rbih_state_identity re-pinned; identity card tolerant of wording drift
+
+Player-visible event text only, plus the reviewed-contract pin for `rbih_state_identity`; no trigger, option, effect, flag, dimension shift or calibration change. 32 visible strings now carry the paragraph or page the historian read in the judgments and no longer make claims the judgments contradict (a 3 August 1994 Bijeljina session; Owen-Stoltenberg keeping Sarajevo divided; 377 peacekeepers and 30+ facilities, the judgment has about 347; "Holbrooke bypasses Pale"; an RS Assembly ratification vote on Dayton; Belgrade restraining Pale in 1993; Markale II paragraphs cited for the 1994 embargo); the Dayton essay says "more than 70 percent ... in November 1994" (Karadžić para 3294); two older leaks of developer text on main are fixed (`csq_alliance_holds_past_w35` gave week 35 as April 1993, it is early December 1992; `embargo_croatia_transit_1992` carried an audit stamp). 47 sensitive or HVO strings are range-stripped only (unverified paragraph ranges dropped, source name and claim wording kept): their content corrections follow in the §6 change with the §6 seats. Reviewed by the historian, narrative and canon-compliance seats; the canon seat approved the whole-event re-pin of `rbih_state_identity` in `src/sim/events/opening_policy_transition.ts` (length 69579 to 70817, FNV-1a 64 `6d447e72f84a687d` to `a5cda75445f4eff3`; 13 `explanation` strings changed, nothing structural) and found that option 1's Contact Group line claimed an identity-conditioned international-standing penalty the engine does not have (reworded). The re-pin exposed a save-compatibility hole, reproduced and fixed: a pending decision copies its display text into the save, and the reviewed-lane check compared the whole saved decision, so any wording change stranded an unanswered identity card ("stale, forged, or already completed"); the check now compares the decision's structure with the wording removed on both sides (`withoutDisplayText`), forged or completed decisions are still refused (`tests/identity_pending_text_drift.test.ts`). New permanent guard `tests/ui/player_visible_event_text_clean.test.ts`: no audit or developer vocabulary in any player-visible event string. 188-week headless run identical to a clean `origin/main` run (hash `19262a0b19df1567`, 14 of 15 artifacts byte-identical, `run_meta.json` digests differ). Evidence and exhaustive file list: `docs/40_reports/evidence/20261115_visible_truth_fixes/`.
 
 ## 2026-11-15 — war-or-game retired from panels, gates and routing (owner directive)
 
