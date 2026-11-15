@@ -22,7 +22,7 @@ import { loadOperationalSettlements } from '../data/DataLoader';
 import { buildControlGeoJSON } from '../map/builders/buildControlGeoJSON';
 import { buildFrontLinesGeoJSON } from '../map/builders/buildFrontLinesGeoJSON';
 import { Z } from '../../shared/zIndex';
-import { OsmAttribution } from './OsmAttribution';
+import { OsmAttribution, useOsmCreditPlates } from './OsmAttribution';
 
 const MINIMAP_WIDTH = 250;
 const MINIMAP_HEIGHT = 180;
@@ -133,6 +133,7 @@ export const Minimap = React.memo(function Minimap({ active, onGraphicsControlle
   const activeRef = useRef(active);
   activeRef.current = active;
   const minimapVisible = useGameStore((s) => s.minimapVisible);
+  const creditPlates = useOsmCreditPlates();
   const mapViewport = useGameStore((s) => s.mapViewport);
   const loadedGameState = useGameStore((s) => s.loadedGameState);
   const loadedStateFingerprint = useGameStore((s) => s.lastLoadedStateFingerprint);
@@ -305,7 +306,9 @@ export const Minimap = React.memo(function Minimap({ active, onGraphicsControlle
       <div ref={containerRef} style={{ width: '100%', height: '100%' }} />
       {/* The minimap draws game-state GeoJSON, not osm.pmtiles; this repeats the war map's
           OpenStreetMap credit on the second map surface. */}
-      <OsmAttribution placement="minimap" />
+      {/* Drawn only while nothing covers it (the presidential inbox and the Operations panel sit
+          over this corner); the war-map plate carries the credit then. */}
+      {creditPlates.minimap && <OsmAttribution placement="minimap" />}
     </div>
   );
 });

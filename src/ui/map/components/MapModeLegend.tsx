@@ -1,6 +1,11 @@
 import { useGameStore } from '../store/gameStore';
 import { t, type MessageKey } from '../i18n';
-import { COUNTER_PRINT } from '../map/mapPaperPalette';
+import { COUNTER_PRINT, MAP_PAPER_PALETTE, PAPER_HALO_RGB, rgbaString } from '../map/mapPaperPalette';
+
+/** The paper the map is printed on, so tinted swatches read as they do on the map. */
+const PAPER_SWATCH = rgbaString(PAPER_HALO_RGB, 1);
+/** Dashed enclave outline ink, as MapContainer paints it for the player's own side. */
+const ENCLAVE_OUTLINE_SWATCH = 'rgba(40, 120, 55, 0.9)';
 
 interface LegendStop {
   color: string;
@@ -100,6 +105,45 @@ export function MapModeLegend() {
             <span>{t('map.legend.counters.status')}</span>
             <span>{t('map.legend.counters.selected')}</span>
             <span>{t('map.legend.counters.stackSize')}</span>
+          </div>
+        </div>
+        <div
+          data-testid="map-ground-legend"
+          className="mt-2 flex flex-col gap-1.5 border-t border-panel-border pt-2 text-xs text-text-primary"
+        >
+          <div className="flex items-center gap-2" data-testid="map-legend-enemy-contact">
+            <span
+              className="relative flex h-5 w-8 shrink-0 items-center justify-center rounded-sm border-2 text-sm font-bold leading-none"
+              style={{ backgroundColor: 'var(--cb-faction-rs)', borderColor: 'rgba(18, 14, 10, 0.72)', color: COUNTER_PRINT.symbol }}
+              aria-hidden="true"
+            >
+              ?
+            </span>
+            <span>{t('map.legend.counters.enemyContact')}</span>
+          </div>
+          <div className="flex items-center gap-2" data-testid="map-legend-scouted">
+            <span
+              className="h-4 w-8 shrink-0 rounded-sm border border-white/30"
+              style={{ backgroundColor: PAPER_SWATCH, backgroundImage: `linear-gradient(${MAP_PAPER_PALETTE.controlRS}, ${MAP_PAPER_PALETTE.controlRS})` }}
+              aria-hidden="true"
+            />
+            <span>{t('map.legend.ground.scouted')}</span>
+          </div>
+          <div className="flex items-center gap-2" data-testid="map-legend-fogged">
+            <span
+              className="h-4 w-8 shrink-0 rounded-sm border border-white/30"
+              style={{ backgroundColor: PAPER_SWATCH, backgroundImage: `linear-gradient(${MAP_PAPER_PALETTE.fog}, ${MAP_PAPER_PALETTE.fog})` }}
+              aria-hidden="true"
+            />
+            <span>{t('map.legend.ground.fogged')}</span>
+          </div>
+          <div className="flex items-center gap-2" data-testid="map-legend-enclave">
+            <span
+              className="h-4 w-8 shrink-0 rounded-sm border-2 border-dashed"
+              style={{ borderColor: ENCLAVE_OUTLINE_SWATCH }}
+              aria-hidden="true"
+            />
+            <span>{t('map.legend.ground.enclave')}</span>
           </div>
         </div>
       </div>

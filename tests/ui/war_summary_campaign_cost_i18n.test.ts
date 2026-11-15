@@ -227,7 +227,8 @@ describe('War Summary campaign cost localization', () => {
         expect((document.body.textContent?.match(/12k/g) ?? [])).toHaveLength(2);
         expect(document.body.textContent).not.toContain('12,000 killed');
         const sitrep = screen.getByText('Situation Report').parentElement?.textContent ?? '';
-        expect(sitrep).toContain('0 critical / 1 strained, 2 permanently collapsed municipalities (cumulative)');
+        expect(sitrep).toContain('0 critical / 1 strained');
+        expect(sitrep).not.toMatch(/collapsed/i);
     });
 
     it('renders missing casualty and displacement sources as unreported in the overview', () => {

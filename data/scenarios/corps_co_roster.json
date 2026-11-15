@@ -1,0 +1,5 @@
+{
+  "schema_version": 1,
+  "description": "Dated, sourced corps commander schedule (command-loop proposal §5E, owner decision 3). Keyed by corps id; each tenure: officer_id, tenure_start, tenure_end (exclusive, null = to the end), historical_fate (survived | killed | relieved), source (ICTY first, then Balkan Battlegrounds). Ships EMPTY: the mechanism is inert until the post-freeze calibration pass (lane L8, BC17) adds the dates.",
+  "rosters": {}
+}

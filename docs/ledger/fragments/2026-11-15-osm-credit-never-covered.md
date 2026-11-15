@@ -1,0 +1,9 @@
+## 2026-11-15 — OSM credit: each plate is drawn only where nothing covers it, and one is always drawn
+
+UI only; no sim, state, save or calibration change. Licence-relevant (ODbL 1.0 attribution must stay visible).
+
+The QA harness (lane L2) found that presidential-inbox cards cover the minimap's "© OpenStreetMap contributors" credit once the inbox fills (week 3-5 in the R8 runs), and its readability check stops the run on a covered text node. Probed in the real app: on the map screen the war-map plate (bottom-left, legend column) is visible and the minimap plate (bottom-right) sits under the inbox cards; with an entity rail open the war-map plate is the covered one. Both plates were always mounted, so one was always an occluded text node.
+
+`osmCreditPlates()` (and the `useOsmCreditPlates()` hook, `OsmAttribution.tsx`) now says which credit can be seen from the same rail state the app uses (`derivePanelRailState`, `shouldRenderTacticalDetailRails`, the Operations panel flag), and `MapContainer` and `Minimap` mount their plate only then: the war-map plate while no entity rail is open (inbox open, Operations open, nothing selected), the minimap plate while an entity rail is open (unit, corps, sector, settlement, reserve, ORBAT), both when no rail is open. A left rail needs the detail rails visible (which closes the Operations panel) and replaces the inbox, so the two covers never coincide: one plate is always drawn. Nothing moved or shrank; the credit text, link and styling are unchanged.
+
+Tests: new `osm_credit_visibility` (the plate matrix over every panel and rail state, "at least one is drawn" over all reachable states, the store hook swapping with selection, and where each plate is mounted). Rendered before/after in the real desktop app at 1280x720 and 1920x1080 (topmost-element probe at each plate's corners, inbox open and unit selected) are in the PR.

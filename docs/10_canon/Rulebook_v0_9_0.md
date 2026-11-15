@@ -196,7 +196,7 @@ Historical corps and army-level commanders are represented as **named officers**
 
 **Corps assignment and penalties:** Each officer has a preferred corps (`home_corps_id`) and optionally compatible corps. Assignment to the home corps incurs no penalty. Assignment to a compatible corps imposes -1 effective competence for 8 turns. Assignment to an incompatible corps imposes -2 effective competence for 12 turns. Acting commanders (temporary assignments without a named officer) operate at 92% effectiveness.
 
-**Officer casualties:** Officers face per-battle casualty risk based on their `casualty_vulnerability` rating (0.0-1.0). Officers can be killed, captured, or wounded. Officer loss triggers immediate succession.
+**Officer casualties:** A corps commander's risk grows with time in command while his corps is fighting, scaled by his `casualty_vulnerability` rating (0.0-1.0); once it reaches the threshold he falls, at most one per corps per week. A commander the corps schedule records as having survived the war carries no such risk. Officer loss triggers immediate succession.
 
 **Competence improvement:** Officers marked `can_improve` gain competence through combat experience at their `improvement_rate` per battle, reflecting the wartime learning curve — especially important for ARBiH officers who started with minimal training.
 
@@ -211,6 +211,8 @@ When an officer departs (historical departure date, casualty, capture, or retire
 **Player faction:** The player receives a notification event (`replacement_suggested`) identifying the departing officer and recommending a historical successor. The player may accept the recommendation, choose a different officer from the available pool, or leave the position temporarily vacant (acting commander at reduced effectiveness). The `available_until_turn` field on an officer creates a suggestion event — the officer does not automatically retire, giving the player time to plan the transition.
 
 **Bot factions:** Automatic succession using historical successor lookup. The system finds the next officer with the same `home_corps_id`, available at the current turn, prioritized by pool tier (starter > tier_a > tier_b > tier_c).
+
+**Dated corps schedule:** where the corps schedule names a commander for the date, he takes the corps first and replaces a stand-in when his tenure begins. A commander you appointed, accepted or kept is never rotated out, and in Full Control you are asked instead of the change being made for you. Historical deaths and reliefs happen on their dates; a relief is put to you in Full Control, a death is not. Commanders who survived the war in history are not killed by length of service. The schedule ships empty, so until its dates are filled in the pool ranking above applies.
 
 **Faction-specific succession rules:**
 - **VRS:** Brain drain — officers leave at an increasing rate after week 40, reflecting the real degradation of the Serbian officer corps.
