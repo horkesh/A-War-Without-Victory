@@ -37,7 +37,7 @@ describe('the Patriarch Paper is dated 29 August 1995', () => {
     const acceptance = EVENTS.find((def) => def.id === 'rs_dayton_acceptance_1995')!;
 
     it('the Dayton acceptance event narrative gives 29 August', () => {
-        expect(acceptance.narrative).toContain('granted by the Pale leadership on 29 August 1995');
+        expect(acceptance.narrative).toContain('agreed to at Dobanovci on 29 August 1995 (the Patriarch Paper)');
         expect(acceptance.narrative).not.toContain('30 August');
     });
 
@@ -67,8 +67,8 @@ describe('the Patriarch Paper is dated 29 August 1995', () => {
     it('the visible source note cites the judgment paragraph, the date and the place, in EN and BCS', () => {
         const en = resolveEventSourceLine(acceptance, 'en') ?? '';
         const bcs = resolveEventSourceLine(acceptance, 'bcs') ?? '';
-        expect(en).toMatch(/Karadžić \(IT-95-5\/18-T\).*para\. 424.*Dobanovci.*29 August 1995/);
-        expect(bcs).toMatch(/Karadžić \(IT-95-5\/18-T\).*par\. 424.*Dobanovcima.*29\. augusta 1995/);
+        expect(en).toMatch(/Karadžić \(IT-95-5\/18-T\).*paras 424.*Dobanovci.*29 August 1995.*\(para\. 424\)/);
+        expect(bcs).toMatch(/Karadžić \(IT-95-5\/18-T\).*par\. 424.*Dobanovcima.*29\. augusta 1995.*\(par\. 424\)/);
         expect(bcs).toContain('24. marta 2016.');
         expect(en).toContain('Balkan Battlegrounds, Vol. I, p. 391');
     });
@@ -92,7 +92,8 @@ describe('the Patriarch Paper is dated 29 August 1995', () => {
 
     it('the hidden provenance no longer cites the Srebrenica paragraphs for the Dayton passages', () => {
         const note = acceptance.source_note ?? '';
-        expect(note).toContain('paras 431-437');
+        expect(note).toContain('para. 424');
+        expect(note).toContain('paras 435-436');
         expect(note).toContain('29 August 1995');
         expect(note).not.toMatch(/Karadžić IT-95-5\/18-T §§5020-5067\)\./);
     });
