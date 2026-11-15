@@ -662,7 +662,10 @@ export function VerdictScreen({ onLoadSaveState, onLoadSaveError }: VerdictScree
                                     selected={active}
                                     onClick={() => setVerdictSelection({ verdict, faction: fid })}
                                     style={active ? { boxShadow: `inset 3px 0 0 ${FACTION_HEX[fid]}` } : undefined}
-                                    title={<span className={`${FACTION_COLORS_SUBTLE[fid] ?? ''} break-words text-[15px] md:text-[18px]`}>{formatVerdictSideName(fid)}</span>}
+                                    // Three tiles share a 375px row: without the item's own gap and wider padding
+                                    // each name has ~70px, and "Hercegovina" broke mid-word ("Hercego/vina").
+                                    className="max-sm:gap-0 max-sm:px-2"
+                                    title={<span className={`${FACTION_COLORS_SUBTLE[fid] ?? ''} break-words text-[14px] sm:text-[15px] md:text-[18px]`}>{formatVerdictSideName(fid)}</span>}
                                     status={v ? (
                                         <span className="flex flex-col items-start gap-1.5">
                                             <span className="flex items-baseline gap-2">

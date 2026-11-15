@@ -95,17 +95,9 @@ const daytonVerdictSegment = { evidence: null };
 function settleDaytonVerdictSegment(error, events) {
   if (!(error instanceof DaytonVerdictCaptured)) throw error;
   daytonVerdictSegment.evidence = error.evidence;
-  let failures = collectReadabilityFailures(events);
-  if (endgameRenderTour && error.evidence?.tour) {
-    // The render tour records, and does not fail on, findings that belong to earlier Dayton work:
-    // the signing plate's own captions (sized in cqw on the art, so under 12 px at 720p) and the
-    // Delegation folder's faction chips. Everything else, including every Verdict surface, still fails.
-    const isKnown = (row) => (row.label === 'dayton-signing-beat' && (row.kind === 'tiny-text' || row.kind === 'small-text'))
-      || (row.label === 'dayton-tour-panel-folder' && row.kind === 'low-contrast');
-    error.evidence.tour.knownFindings = failures.filter(isKnown)
-      .map((row) => ({ kind: row.kind, label: row.label, text: String(row.text ?? '').slice(0, 80), fontSize: row.fontSize ?? null, contrastRatio: row.contrastRatio ?? null }));
-    failures = failures.filter((row) => !isKnown(row));
-  }
+  // No exemptions: the signing plate's captions and the delegation folder's chips were exempted
+  // while they were under 12 px and under 4.5:1; both are fixed, so every finding fails the run.
+  const failures = collectReadabilityFailures(events);
   if (failures.length > 0) {
     writeJsonAtomic(readabilityDiagnosticsPath, failures);
     throw new Error(`Readability diagnostics detected: ${JSON.stringify(failures.slice(0, 40))}`);
@@ -326,12 +318,7 @@ async function policyEventResponseControl(surface) {
           sourceLocation = 'decision_context_dossier';
         }
       }
-      if (sourceLocation === 'not_required') {
-        // The ending render tour is about the ending screens, not default provenance: it records
-        // that no source note was visible and goes on. Every other run still fails closed.
-        if (!endgameRenderTour) throw new Error(`Historical-choice source note unavailable: ${eventId}/${selected.id}`);
-        sourceLocation = 'none_visible_recorded_by_render_tour';
-      }
+      if (sourceLocation === 'not_required') throw new Error(`Historical-choice source note unavailable: ${eventId}/${selected.id}`);
     }
   }
   return { loc, choice: { eventId, responseId: selected.id, responseLabel: selected.label, basis: selected.basis, source, sourceLocation, turn: raw.meta.turn, faction: raw.meta.player_faction, options: decision.response_options.map(option => ({ id: option.id, label: option.label })), playerInput: true, ...(selected.basis === 'player_selected_counterfactual' ? { historicityClaim: selected.historicityClaim, requestedOverride: selected.requestedOverride } : {}) } };

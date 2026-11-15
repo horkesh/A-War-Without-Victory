@@ -4822,6 +4822,9 @@ test('--dayton-sign-verdict signs through review, captures the signing beat and 
     const settle = extractFunctionSource(harness, 'settleDaytonVerdictSegment');
     assert.match(settle, /error instanceof DaytonVerdictCaptured/);
     assert.match(settle, /collectReadabilityFailures\(events\)/);
+    // No finding is exempted or partitioned out of the gate (the R8 polish removed the last two).
+    assert.doesNotMatch(settle, /knownFindings|isKnown/);
+    assert.doesNotMatch(harness, /none_visible_recorded_by_render_tour/);
 });
 
 test('--event-policy parses strictly and answers an unranked design-counterfactual decision only', async () => {

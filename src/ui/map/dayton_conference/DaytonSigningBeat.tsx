@@ -101,6 +101,23 @@ export function DaytonSigningBeat({ agreement, fallbackDate, onContinue }: Dayto
     const date = signing ? turnToDateString(signing.turn) : fallbackDate;
     const imposed = agreement.terms.imposed;
     const war = signing?.war;
+    const dateText = t('dayton.signing.date', { date });
+    const costText = war
+        ? t('dayton.signing.cost', {
+            weeks: formatCount(war.weeks),
+            military: formatCount(war.dead.military),
+            civilian: formatCount(war.dead.civilian),
+            displaced: formatCount(war.displaced),
+        })
+        : t('dayton.signing.costUnavailable');
+    // The same date, cost and signature notes as plain text in the panel. In a narrow window the
+    // plate is a few hundred pixels wide and its lettering cannot reach a readable size, so the
+    // plate's lines are hidden there (signing.css) and these stand in; wider, these are hidden.
+    // Either way each fact is in the accessibility tree once (display:none leaves it).
+    const notes = SIGNATORIES.flatMap(({ state, party }) => {
+        const note = blockNote(state, party, imposed?.on_faction);
+        return note ? [{ id: state, text: t(note) }] : [];
+    });
 
     return (
         <div className="dayton-live dayton-signing" data-testid="dayton-signing-beat" onKeyDown={event => {
@@ -118,17 +135,10 @@ export function DaytonSigningBeat({ agreement, fallbackDate, onContinue }: Dayto
                         <BoardLine controllers={agreement.map.controllers} fit />
                     </button>
                     <p className="dayton-signing-line dayton-signing-date" style={box(blocking, 'date')} data-testid="dayton-signing-date">
-                        {t('dayton.signing.date', { date })}
+                        {dateText}
                     </p>
                     <p className="dayton-signing-line dayton-signing-cost" style={box(blocking, 'cost')} data-testid="dayton-signing-cost">
-                        {war
-                            ? t('dayton.signing.cost', {
-                                weeks: formatCount(war.weeks),
-                                military: formatCount(war.dead.military),
-                                civilian: formatCount(war.dead.civilian),
-                                displaced: formatCount(war.displaced),
-                            })
-                            : t('dayton.signing.costUnavailable')}
+                        {costText}
                     </p>
                     {SIGNATORIES.map(({ id, state, party }) => {
                         const coerced = imposed?.on_faction === party;
@@ -152,6 +162,11 @@ export function DaytonSigningBeat({ agreement, fallbackDate, onContinue }: Dayto
                     {t(imposed ? 'dayton.signing.titleImposed' : 'dayton.signing.title')}
                 </h2>
                 <p className="dayton-signing-annexes">{t('dayton.signing.annexes')}</p>
+                <ul className="dayton-signing-facts" data-testid="dayton-signing-facts">
+                    <li>{dateText}</li>
+                    <li>{costText}</li>
+                    {notes.map(note => <li key={note.id}>{note.text}</li>)}
+                </ul>
                 {/* R8 council B9/H1: the plate dates the campaign's signing week only; the
                     historical dates stand here as the record (historian ruling 2026-11-14). */}
                 <p className="dayton-signing-record" data-testid="dayton-signing-record">{t('dayton.signing.historicalRecord')}</p>
