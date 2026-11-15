@@ -31,8 +31,8 @@ function computeActionCadenceAvailability(state, eventId, eventDef) {
     .some((decision) => decision?.event_id === eventId);
   const out = {
     ...base,
-    firesLeft: Number.isFinite(firesLeft) ? firesLeft : maxFires,
-    maxFires: Number.isFinite(maxFires) ? maxFires : 0,
+    firesLeft: Number.isFinite(firesLeft) ? firesLeft : null, // null = renewable (no lifetime cap)
+    maxFires: Number.isFinite(maxFires) ? maxFires : null,
     cooldownUntil,
     onCooldown,
     nextFireNumber: fireCount + 1,

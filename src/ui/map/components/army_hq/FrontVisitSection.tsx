@@ -31,8 +31,9 @@ import { t } from '../../i18n';
 interface FrontVisitAvailability {
     available: boolean;
     reason: string | null;
-    firesLeft: number;
-    maxFires: number;
+    /** Visits left under a lifetime cap; null when the visit is renewable (cooldown only). */
+    firesLeft: number | null;
+    maxFires: number | null;
     cooldownUntil: number | null;
     onCooldown: boolean;
     reachableBranchIds: string[];
@@ -76,8 +77,9 @@ export function FrontVisitSection() {
         setAvail({
             available: !!r.available,
             reason: r.reason ?? null,
-            firesLeft: r.firesLeft ?? 0,
-            maxFires: r.maxFires ?? 0,
+            // Renewable gestures (appendix D): the contract sends null when there is no lifetime cap.
+            firesLeft: typeof r.firesLeft === 'number' ? r.firesLeft : null,
+            maxFires: typeof r.maxFires === 'number' ? r.maxFires : null,
             cooldownUntil: r.cooldownUntil ?? null,
             onCooldown: !!r.onCooldown,
             reachableBranchIds: r.reachableBranchIds ?? [],
@@ -128,7 +130,7 @@ export function FrontVisitSection() {
 
                 {/* Availability readout */}
                 <div className={`flex flex-col gap-0.5 text-[13px] ${DOSSIER_INK.muted}`}>
-                    {avail.firesLeft > 0 ? (
+                    {avail.firesLeft === null ? null : avail.firesLeft > 0 ? (
                         <span>{t('frontVisit.firesLeft', { count: avail.firesLeft })}</span>
                     ) : (
                         <span className="text-red-800">{t('frontVisit.firesExhausted')}</span>
@@ -138,7 +140,7 @@ export function FrontVisitSection() {
                             {t('frontVisit.cooldown', { date: turnToDateString(avail.cooldownUntil) })}
                         </span>
                     )}
-                    {avail.reachableBranchIds.length === 0 && avail.firesLeft > 0 && !avail.onCooldown && (
+                    {avail.reachableBranchIds.length === 0 && avail.firesLeft !== 0 && !avail.onCooldown && (
                         <span className="text-red-800">{t('frontVisit.allCutOff')}</span>
                     )}
                     {avail.reachableBranchIds.length > 0 && (

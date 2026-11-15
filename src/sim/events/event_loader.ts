@@ -385,11 +385,17 @@ function validateActionCadence(value: unknown, filename: string, rowIndex: numbe
     if (!isObject(value)) {
         failRow(filename, rowIndex, 'action_cadence must be a non-null object when present');
     }
-    if (!Number.isInteger(value.max_fires) || (value.max_fires as number) <= 0) {
-        failRow(filename, rowIndex, 'action_cadence.max_fires must be a positive integer');
+    // Renewable gestures (Fable consult 1 appendix D, 2026-11-15): max_fires is optional. Without
+    // it the action is limited by its cooldown alone, which must then be positive.
+    const hasMaxFires = value.max_fires !== undefined;
+    if (hasMaxFires && (!Number.isInteger(value.max_fires) || (value.max_fires as number) <= 0)) {
+        failRow(filename, rowIndex, 'action_cadence.max_fires must be a positive integer when present');
     }
     if (!Number.isInteger(value.cooldown_turns) || (value.cooldown_turns as number) < 0) {
         failRow(filename, rowIndex, 'action_cadence.cooldown_turns must be a non-negative integer');
+    }
+    if (!hasMaxFires && !((value.cooldown_turns as number) > 0)) {
+        failRow(filename, rowIndex, 'action_cadence without max_fires needs a positive cooldown_turns');
     }
     if (!['static', 'escalating', 'deteriorating'].includes(String(value.escalation))) {
         failRow(filename, rowIndex, 'action_cadence.escalation must be one of static, escalating, deteriorating');

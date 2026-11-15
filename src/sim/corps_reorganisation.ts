@@ -1,6 +1,7 @@
 /**
  * Corps reorganisation lifecycle events: dated brigade transfers between corps,
- * and corps retirement (hand-over to a successor, then switch-off).
+ * corps retirement (hand-over to a successor, then switch-off), and dated commander
+ * handovers (a named officer seated in a corps once).
  *
  * Data lives in `data/source/formation_lifecycle_events.json` under the
  * `corps_reorganisation` key (same file as the per-formation disband/merge/rename
@@ -21,7 +22,9 @@
  *   operation of its current corps (participant, attached, loaned) or out on an elite
  *   loan finishes that commitment first; after `max_defer_turns` (default 4) past the
  *   trigger it is released through the same path brigade dissolution uses. The target
- *   must exist as an active corps formation; until it does, the transfer waits.
+ *   must exist as an active corps formation; until it does, the transfer waits. An
+ *   optional `transition` cost (cohesion loss, disrupted_turns) is paid only by a brigade
+ *   that changes corps inside the window trigger_turn .. trigger_turn + max_defer_turns.
  *
  * corps_retire — from `trigger_turn` on, the corps is retired: its live operations
  *   are cancelled through the canonical clean-removal path (commanders released, TGs
@@ -33,14 +36,34 @@
  *   successor. A transfer whose target has been retired resolves through the
  *   successor chain.
  *
+ * commander_handover — fires ONCE, after the transfers of the same turn. From
+ *   `trigger_turn` on it seats `officer_id` as commander of `corps_id`. It waits while
+ *   the corps is inactive, the officer is not yet in play, or he commands a live
+ *   operation; it lapses (receipted, no effect) if he is killed or retired. The
+ *   President's command choices win (Engine Invariants §15.1, Rulebook §5.9): an
+ *   incumbent he appointed, accepted or kept is never displaced (the handover lapses),
+ *   and for a manually controlled player the step raises a deduplicated replacement
+ *   matter and writes no receipt until he has decided; it is never an automatic swap.
+ *   Otherwise the incumbent goes to reserve and the officer's old command is refilled
+ *   by ordinary succession later the same turn.
+ *
  * DETERMINISM: events sorted by (trigger_turn, id); formation ids and corps ids
  * iterated in strictCompare order; no RNG, no wall clock. When the data file has no
  * events (or none has triggered) the step performs ZERO mutation, so a run without
  * reorganisation data is byte-identical to one without this step.
  *
- * SAVE COMPATIBILITY: the only persisted write besides corps_id / status is the
- * existing optional `military.formation_lifecycle_events_fired` receipt map
- * (event id → first turn the event completed).
+ * SAVE COMPATIBILITY: no migration or schema bump; every write is to an existing field.
+ * Writes: formation corps_id / status; the transition cost on cohesion and
+ * disrupted_turns; for a handover, the named_officers fields status, assigned_corps_id,
+ * turns_in_command, acting_commander, effective_competence_penalty and
+ * penalty_turns_remaining, or a replacement_suggested entry in pending_officer_events;
+ * and the optional `military.formation_lifecycle_events_fired` receipt map (event id →
+ * first turn the event completed). Transfer and retire receipts are informational (the
+ * rules are standing). The handover receipt is load-bearing: the handover fires once,
+ * keyed by it. An old save loaded after a trigger turn applies the steps on its first
+ * loaded turn. Past the window it pays no transition cost, and committed brigades are
+ * pulled out of their live operations at once. This is a recorded limitation for
+ * pre-1.0 beta saves.
  */
 
 import { readFile } from 'node:fs/promises';
@@ -51,7 +74,13 @@ import { recallEliteLoan } from './combat/army_reserve_system.js';
 import { removeFromActiveOperation } from './combat/brigade_dissolution.js';
 import { initializeCorpsCommand } from './combat/corps_command.js';
 import { removeOperation } from './combat/corps_operation_helpers.js';
-import { releaseOperationCommander, releaseTacticalCommander } from './combat/officer_system.js';
+import {
+    isPresidentialAppointee,
+    queueReplacementMatter,
+    releaseOperationCommander,
+    releaseTacticalCommander,
+} from './combat/officer_system.js';
+import { selectManualPlayerFaction } from './bot/staff_control.js';
 import { completeOperationLifecycle, enterOperationRecovery } from './combat/tactical_group_lifecycle.js';
 
 /** Default number of turns a committed brigade may finish its operation before a forced transfer. */
@@ -64,6 +93,16 @@ export interface CorpsTransferEventDef {
     target_corps_id: string;
     formation_ids: string[];
     max_defer_turns?: number;
+    /**
+     * One-off cost of the reorganisation itself, paid by each brigade as it changes corps
+     * within the reorganisation window (trigger_turn .. trigger_turn + max_defer_turns).
+     * A brigade that appears after the window (trigger_turn + max_defer_turns) and is merely
+     * filed under the target corps pays nothing; one that changes corps inside the window pays.
+     * cohesion_cost: cohesion points lost (floored at 0).
+     * disrupted_turns: sets formation.disrupted_turns to at least this value (the counter
+     * ticks before combat, so N gives N-1 disrupted combat weeks).
+     */
+    transition?: { cohesion_cost?: number; disrupted_turns?: number };
     reason: string;
 }
 
@@ -76,12 +115,30 @@ export interface CorpsRetireEventDef {
     reason: string;
 }
 
-export type CorpsReorganisationEventDef = CorpsTransferEventDef | CorpsRetireEventDef;
+/**
+ * Dated appointment of a named officer to command a corps (e.g. Alagić to the new 7th Corps).
+ * Fires once. Waits while the corps is inactive or the officer is not yet in play or is
+ * commanding a live operation; lapses (receipted, no effect) if the officer is killed or retired.
+ * The incumbent goes to reserve; the officer's previous command falls vacant and is filled by
+ * ordinary officer succession later the same turn. A President-appointed, accepted or kept
+ * incumbent is never displaced, and a manual player is asked first (see the file header).
+ */
+export interface CommanderHandoverEventDef {
+    id: string;
+    type: 'commander_handover';
+    trigger_turn: number;
+    corps_id: string;
+    officer_id: string;
+    reason: string;
+}
+
+export type CorpsReorganisationEventDef = CorpsTransferEventDef | CorpsRetireEventDef | CommanderHandoverEventDef;
 
 export interface CorpsReorganisationReport {
     transferred: Array<{ event_id: string; formation_id: string; from_corps_id: string | null; to_corps_id: string; forced: boolean }>;
     deferred: Array<{ event_id: string; formation_id: string }>;
     retired: Array<{ event_id: string; corps_id: string; successor_corps_id: string; cancelled_operations: string[]; dropped_queued_operations: string[] }>;
+    handovers?: Array<{ event_id: string; corps_id: string; officer_id: string; previous_corps_id: string | null; replaced_officer_id: string | null; lapsed: boolean }>;
     completed_event_ids: string[];
 }
 
@@ -135,6 +192,19 @@ export function validateCorpsReorganisationEvents(raw: unknown): CorpsReorganisa
             if (e.max_defer_turns != null && (typeof e.max_defer_turns !== 'number' || !Number.isInteger(e.max_defer_turns) || e.max_defer_turns < 0)) {
                 throw new CorpsReorganisationDataError(`${id}: max_defer_turns must be a non-negative integer`);
             }
+            let transition: CorpsTransferEventDef['transition'];
+            if (e.transition != null) {
+                const t = e.transition as Record<string, unknown>;
+                const nonNeg = (v: unknown) => v == null || (typeof v === 'number' && Number.isFinite(v) && v >= 0);
+                if (typeof t !== 'object' || !nonNeg(t.cohesion_cost) || !nonNeg(t.disrupted_turns)
+                    || (t.disrupted_turns != null && !Number.isInteger(t.disrupted_turns))) {
+                    throw new CorpsReorganisationDataError(`${id}: transition costs must be non-negative numbers (disrupted_turns an integer)`);
+                }
+                transition = {
+                    ...(t.cohesion_cost != null ? { cohesion_cost: t.cohesion_cost as number } : {}),
+                    ...(t.disrupted_turns != null ? { disrupted_turns: t.disrupted_turns as number } : {}),
+                };
+            }
             out.push({
                 id,
                 type: 'corps_transfer',
@@ -142,6 +212,7 @@ export function validateCorpsReorganisationEvents(raw: unknown): CorpsReorganisa
                 target_corps_id: e.target_corps_id,
                 formation_ids: [...new Set(e.formation_ids as string[])].sort(strictCompare),
                 ...(e.max_defer_turns != null ? { max_defer_turns: e.max_defer_turns as number } : {}),
+                ...(transition ? { transition } : {}),
                 reason,
             });
         } else if (e.type === 'corps_retire') {
@@ -158,6 +229,10 @@ export function validateCorpsReorganisationEvents(raw: unknown): CorpsReorganisa
                 successor_corps_id: e.successor_corps_id,
                 reason,
             });
+        } else if (e.type === 'commander_handover') {
+            if (typeof e.corps_id !== 'string' || !e.corps_id) throw new CorpsReorganisationDataError(`${id}: corps_id required`);
+            if (typeof e.officer_id !== 'string' || !e.officer_id) throw new CorpsReorganisationDataError(`${id}: officer_id required`);
+            out.push({ id, type: 'commander_handover', trigger_turn: e.trigger_turn, corps_id: e.corps_id, officer_id: e.officer_id, reason });
         } else {
             throw new CorpsReorganisationDataError(`${id}: unknown type ${String(e.type)}`);
         }
@@ -343,6 +418,11 @@ export function processCorpsReorganisationEvents(
             releaseFromCorpsOperations(state, fid as FormationId, from);
         }
         f.corps_id = target as FormationId;
+        if (e.transition && turn - e.trigger_turn <= maxDefer) {
+            const { cohesion_cost, disrupted_turns } = e.transition;
+            if (cohesion_cost && typeof f.cohesion === 'number') f.cohesion = Math.max(0, f.cohesion - cohesion_cost);
+            if (disrupted_turns) f.disrupted_turns = Math.max(f.disrupted_turns ?? 0, disrupted_turns);
+        }
         report.transferred.push({ event_id: e.id, formation_id: fid, from_corps_id: from, to_corps_id: target, forced: committed });
         changed = true;
     }
@@ -355,6 +435,67 @@ export function processCorpsReorganisationEvents(
         // nothing left to do. Receipts are informational; the rule itself stays standing.
         receipts(state)[e.id] = turn;
         report.completed_event_ids.push(e.id);
+        changed = true;
+    }
+
+    // 3. Commander handovers (once each), after transfers so the corps already holds its brigades.
+    for (const e of sorted) {
+        if (e.type !== 'commander_handover' || e.trigger_turn > turn) continue;
+        if (state.military.formation_lifecycle_events_fired?.[e.id] != null) continue;
+        const target = resolveLiveCorpsId(e.corps_id, retired);
+        if (!isActiveCorps(state, target)) continue;
+        const officers = state.military.named_officers;
+        const officer = officers?.[e.officer_id];
+        if (!officers || !officer) continue; // not yet in play
+        const handover = { event_id: e.id, corps_id: target, officer_id: e.officer_id, previous_corps_id: officer.assigned_corps_id ?? null, replaced_officer_id: null as string | null, lapsed: false };
+        if (officer.status === 'killed' || officer.status === 'retired') {
+            handover.lapsed = true;
+        } else if (officer.assigned_operation) {
+            continue; // finishes commanding the operation first
+        } else if (!(officer.status === 'active' && officer.assigned_corps_id === target)) {
+            // The President's command choices win (Engine Invariants §15.1, Rulebook §5.9):
+            // an incumbent he appointed, accepted or kept is never displaced (the handover
+            // lapses), and a manually controlled player is asked, never overruled.
+            const incumbentId = Object.keys(officers).sort(strictCompare).find((oid) =>
+                oid !== e.officer_id && officers[oid]?.status === 'active' && officers[oid]?.assigned_corps_id === target) ?? null;
+            const targetFaction = state.military.formations?.[target]?.faction;
+            const leavesPresidentialPost = officer.status === 'active' && officer.assigned_corps_id != null
+                && isPresidentialAppointee(state, officer.assigned_corps_id, e.officer_id);
+            if (leavesPresidentialPost || (incumbentId && isPresidentialAppointee(state, target, incumbentId))) {
+                handover.lapsed = true;
+                receipts(state)[e.id] = turn;
+                report.completed_event_ids.push(e.id);
+                (report.handovers ??= []).push(handover);
+                changed = true;
+                continue;
+            }
+            if (targetFaction != null && targetFaction === selectManualPlayerFaction(state)) {
+                // A matter, deduplicated; no receipt until he has decided. Accepting seats
+                // the officer (receipt next turn); declining marks the incumbent kept (lapse).
+                // An empty command waits for the ordinary vacancy fill, then is put to him.
+                if (incumbentId && queueReplacementMatter(state, targetFaction, incumbentId, target, e.officer_id, turn)) changed = true;
+                continue;
+            }
+            for (const oid of Object.keys(officers).sort(strictCompare)) {
+                const other = officers[oid];
+                if (oid === e.officer_id || !other) continue;
+                if (other.status === 'active' && other.assigned_corps_id === target) {
+                    other.status = 'reserve';
+                    other.assigned_corps_id = null;
+                    other.acting_commander = false;
+                    handover.replaced_officer_id = oid;
+                }
+            }
+            officer.status = 'active';
+            officer.assigned_corps_id = target;
+            officer.turns_in_command = 0;
+            officer.acting_commander = false;
+            officer.effective_competence_penalty = 0;
+            officer.penalty_turns_remaining = 0;
+        }
+        receipts(state)[e.id] = turn;
+        report.completed_event_ids.push(e.id);
+        (report.handovers ??= []).push(handover);
         changed = true;
     }
 
