@@ -315,6 +315,9 @@
     "localizations": {
       "en": {
         "title": "Ultimatum at Gornji Vakuf",
+        "source_note": "ICTY, Prlić et al. (IT-04-74), Trial Judgment, 29 May 2013, Vol. 2, paras 336-355 (Gornji Vakuf Municipality, January 1993).",
+        "source_tier": "icty_icj_un",
+        "historical_source": "ICTY, Prlić et al. (IT-04-74), Trial Judgment, 29 May 2013, Vol. 2, paras 336-355 (Gornji Vakuf Municipality, January 1993).",
         "notifications_to_other_factions": {
           "escalate": {
             "RBiH": {
@@ -330,6 +333,9 @@
       },
       "bcs": {
         "title": "Ultimatum u Gornjem Vakufu",
+        "source_note": "MKSJ, Prlić i drugi (IT-04-74), prvostepena presuda, 29. maj 2013, tom 2, par. 336-355 (općina Gornji Vakuf, januar 1993.).",
+        "source_tier": "icty_icj_un",
+        "historical_source": "MKSJ, Prlić i drugi (IT-04-74), prvostepena presuda, 29. maj 2013, tom 2, par. 336-355 (općina Gornji Vakuf, januar 1993.).",
         "narrative": "HVO je naredio jedinicama ARBiH u Gornjem Vakufu da se stave pod komandu HVO-a. Vance-Owenova mapa smješta grad u provinciju koju Herceg-Bosna smatra hrvatskom, a Mostar to tumači kao odgovor na pitanje ko tu komanduje. ARBiH odbija, a lokalni komandanti na obje strane čekaju naređenja. U historijskom zapisu ultimatum Mostara od 15. januara 1993. naložio je jedinicama ARBiH u provincijama na koje je polagao pravo, među njima i u Gornjem Vakufu, da se potčine komandi HVO-a, a 18. januara HVO je napao grad (MKSJ, Prlić i drugi).",
         "staff_assessment": "Provođenje ultimatuma daje podršku lokalnoj komandi HVO-a i produbljuje raskol s ARBiH. Lokalno primirje zasad ublažava raskol, po cijenu morala HVO-a, a spor oko grada ostaje otvoren.",
         "trigger_evidence": [
