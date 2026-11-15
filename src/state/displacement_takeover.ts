@@ -982,7 +982,11 @@ export function processDisplacementTakeover(
                     dest_mun: munId,
                     ethnicity: timer.from_faction,
                     caused_by: timer.to_faction,
-                    displaced: displacementAmount,
+                    // RB1: `displaced` is the routed share only. Killed and fled-abroad are
+                    // their own fields, and every reader (appendDisplacementEvent's
+                    // refugees_created, the Humanitarian Ledger, war dispatches) sums all three.
+                    // Logging the whole wave here counted the killed and fled-abroad twice.
+                    displaced: routedToCamp,
                     killed,
                     fled_abroad: fledAbroad,
                     settled: 0,
@@ -1110,7 +1114,8 @@ export function processDisplacementTakeover(
                 dest_mun: munId,
                 ethnicity: timer.from_faction,
                 caused_by: timer.to_faction,
-                displaced: sustainedAmount,
+                // RB1: the routed share only (see the policy-timer event above).
+                displaced: directRouted,
                 killed,
                 fled_abroad: fledAbroad,
                 settled: 0,

@@ -103,6 +103,11 @@ function hrhbEvents(state: GameState) {
     return (state.displacement.displacement_event_log ?? []).filter((e) => e.caused_by === 'HRHB');
 }
 
+/** RB1: an event's `displaced` is the routed share; the whole wave is routed + killed + fled abroad. */
+function waveOf(e: { displaced: number; killed?: number; fled_abroad?: number }): number {
+    return e.displaced + (e.killed ?? 0) + (e.fled_abroad ?? 0);
+}
+
 test('scope table: HRHB only, no RBiH entry, fractions in (0, 1], waves A/B', () => {
     expect(POLICY_EXPULSION_SCOPE.RBiH).toBeUndefined();
     const hrhb = POLICY_EXPULSION_SCOPE.HRHB ?? {};
@@ -192,8 +197,8 @@ test('two bounded waves, booked to the holder, one war crime, no sustained drain
     expect(hrhbEvents(state)[0]).toMatchObject({
         origin_osid: 'op:vitez:vitez',
         ethnicity: 'RBiH',
-        displaced: Math.floor(1000 * 0.4 * vitezFraction)
     });
+    expect(waveOf(hrhbEvents(state)[0])).toBe(Math.floor(1000 * 0.4 * vitezFraction));
     expect(state.military.negotiation!.capital.HRHB.war_crimes_events_emergent).toBe(1);
     expect(state.military.negotiation!.capital.HRHB.war_crimes_events).toBe(1);
     expect(state.military.negotiation!.capital.RBiH.war_crimes_events_emergent).toBe(0);
@@ -212,8 +217,8 @@ test('two bounded waves, booked to the holder, one war crime, no sustained drain
     expect(events).toHaveLength(2);
     expect(events[1]).toMatchObject({
         origin_osid: 'op:mostar:zapad',
-        displaced: Math.floor(2000 * 0.3 * mostarFraction)
     });
+    expect(waveOf(events[1])).toBe(Math.floor(2000 * 0.3 * mostarFraction));
     // The war crime is recorded once per faction, not once per wave.
     expect(state.military.negotiation!.capital.HRHB.war_crimes_events_emergent).toBe(1);
 
@@ -255,8 +260,8 @@ test('a policy wave against RBiH-aligned people counts declared Bosniaks only, n
     const vitezFraction = POLICY_EXPULSION_SCOPE.HRHB!.vitez.fraction;
     expect(hrhbEvents(state)[0]).toMatchObject({
         origin_osid: 'op:vitez:vitez',
-        displaced: Math.floor(1000 * 0.3 * vitezFraction)
     });
+    expect(waveOf(hrhbEvents(state)[0])).toBe(Math.floor(1000 * 0.3 * vitezFraction));
 });
 
 test('a third side taking a seeded OSID drops the policy timer: nothing booked to HRHB, the captor seeds its own timer', () => {
@@ -286,7 +291,7 @@ for (const path of ['flip helper', 'battle capture'] as const) {
             run(state);
         }
         const policyWave = Math.floor(400 * POLICY_EXPULSION_SCOPE.HRHB!.vitez.fraction);
-        expect(hrhbEvents(state).map((e) => e.displaced)).toEqual([policyWave]);
+        expect(hrhbEvents(state).map(waveOf)).toEqual([policyWave]);
 
         state.meta.turn = 55;
         state.political.political_controllers!['op:vitez:vitez'] = 'RS';
@@ -312,11 +317,11 @@ for (const path of ['flip helper', 'battle capture'] as const) {
         }
         const bosniaksOut = (state.displacement.displacement_event_log ?? [])
             .filter((e) => e.origin_osid === 'op:vitez:vitez' && e.ethnicity === 'RBiH')
-            .reduce((s, e) => s + e.displaced, 0);
+            .reduce((s, e) => s + waveOf(e), 0);
         const rsWave = (state.displacement.displacement_event_log ?? [])
             .filter((e) => e.origin_osid === 'op:vitez:vitez' && e.caused_by === 'RS' && e.ethnicity === 'RBiH');
         expect(rsWave.length).toBeGreaterThan(0);
-        expect(rsWave[0].displaced).toBeLessThanOrEqual(400 - policyWave);
+        expect(waveOf(rsWave[0])).toBeLessThanOrEqual(400 - policyWave);
         expect(bosniaksOut).toBeLessThanOrEqual(400);
     });
 }

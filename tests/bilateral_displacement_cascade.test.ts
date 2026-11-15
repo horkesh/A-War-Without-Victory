@@ -87,7 +87,15 @@ describe('bilateral displacement cascade', () => {
 
         expect(report.displaced_total).toBeGreaterThan(0);
         expect(bosniakEvent).toBeTruthy();
-        expect(bosniakEvent!.killed).toBe(Math.floor(bosniakEvent!.displaced * BILATERAL_KILL_FRACTION));
+        // RB1: an event's `displaced` is the routed share; the wave is displaced + killed + fled abroad.
+        const wave = bosniakEvent!.displaced + bosniakEvent!.killed + bosniakEvent!.fled_abroad;
+        expect(bosniakEvent!.killed).toBe(Math.floor(wave * BILATERAL_KILL_FRACTION));
+        // RB1 regression: refugees_created books each person of the wave once (it was the wave
+        // plus killed plus fled abroad, about 30% high).
+        const hrhbWaves = (state.displacement.displacement_event_log ?? [])
+            .filter((e) => e.caused_by === 'HRHB' && e.ethnicity === 'RBiH')
+            .reduce((s, e) => s + e.displaced + e.killed + e.fled_abroad, 0);
+        expect(state.displacement.displacement_humanitarian_aggregates?.HRHB?.RBiH?.refugees_created).toBe(hrhbWaves);
     });
 
     test('Croat displacement from RBiH bilateral takeover uses HRHB flee-abroad share and routes to HRHB Herzegovina', () => {
@@ -108,7 +116,8 @@ describe('bilateral displacement cascade', () => {
         const mature = processDisplacementTakeover(state, settlements, undefined, pop1991, settlements);
         const croatEvent = state.displacement.displacement_event_log?.find(e => e.origin_mun === 'busovaca' && e.ethnicity === 'HRHB');
         expect(croatEvent).toBeTruthy();
-        const expectedFled = Math.floor((croatEvent!.displaced - croatEvent!.killed) * BILATERAL_HRHB_FLEE_ABROAD);
+        // RB1: survivors of the wave = routed (`displaced`) + fled abroad.
+        const expectedFled = Math.floor((croatEvent!.displaced + croatEvent!.fled_abroad) * BILATERAL_HRHB_FLEE_ABROAD);
         expect(croatEvent!.fled_abroad).toBe(expectedFled);
 
         state.meta.turn = 58;
