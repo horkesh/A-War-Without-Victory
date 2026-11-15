@@ -7,9 +7,15 @@ const ID = 'rs_5th_kozara_light_infantry';
 const HOME = 'op:test:home';
 const BRCKO = 'op:brcko:brcko';
 
-function makeState(turn: number, locationOsid = HOME): GameState {
+/** By default RS holds both Brčko and the home cell, so the relocation has friendly ground. */
+function makeState(
+    turn: number,
+    locationOsid = HOME,
+    controllers: Record<string, string | null> = { [HOME]: 'RS', [BRCKO]: 'RS' },
+): GameState {
     return {
         meta: { turn, phase: 'war' },
+        political: { political_controllers: controllers },
         military: {
             formations: {
                 [ID]: {
@@ -82,6 +88,28 @@ describe('Brcko tactical-group journey lifecycle', () => {
         expect(state.military.formations?.[ID]?.location_osid).toBe(HOME);
         expect(state.military.brigade_movement_state?.[ID]).toEqual(before);
         expect(state.military.brigade_movement_orders?.[ID]).toBeDefined();
+    });
+
+    it('does not attach to a Brcko its side has lost, and keeps the journey', () => {
+        process.env.AWWV_BRCKO_TACTICAL_GROUP = '1';
+        const state = makeState(56, HOME, { [HOME]: 'RS', [BRCKO]: 'RBiH' });
+        const before = structuredClone(state.military.brigade_movement_state?.[ID]);
+
+        applyBrckoTacticalGroupRelocation(state);
+
+        expect(state.military.formations?.[ID]?.location_osid).toBe(HOME);
+        expect(state.military.brigade_movement_state?.[ID]).toEqual(before);
+    });
+
+    it('does not return to a home its side has lost (or that nobody controls); it stays at Brcko', () => {
+        process.env.AWWV_BRCKO_TACTICAL_GROUP = '1';
+        const lost = makeState(70, BRCKO, { [HOME]: 'RBiH', [BRCKO]: 'RS' });
+        applyBrckoTacticalGroupRelocation(lost);
+        expect(lost.military.formations?.[ID]?.location_osid).toBe(BRCKO);
+
+        const uncontrolled = makeState(70, BRCKO, { [HOME]: null, [BRCKO]: 'RS' });
+        applyBrckoTacticalGroupRelocation(uncontrolled);
+        expect(uncontrolled.military.formations?.[ID]?.location_osid).toBe(BRCKO);
     });
 
     it('is a complete no-op when the flag is disabled', () => {
