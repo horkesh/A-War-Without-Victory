@@ -37,7 +37,7 @@ import { setArmyStandingOrder, coordinateMultiCorpsOffensive, generateCorpsStanc
 import { clampHeldCorpsStances } from './stance_matter_holds.js';
 import { clampHeldOgStances } from './stance_matters.js';
 import { evaluateOperationProgress } from './sector_offensive.js';
-import { generateOGActivationOrders, generateEmergencyDefensiveOperations } from './bot_corps_operations.js';
+import { generateOGActivationOrders } from './bot_corps_operations.js';
 import { generateArmyHQOverrides } from './army_hq_overrides.js';
 import {
     buildCorpsSubordinatesByCorps,
@@ -86,7 +86,6 @@ export { evaluateOperationProgress } from './sector_offensive.js';
 // From bot_corps_operations (creation/activation entry points only)
 export {
     generateOGActivationOrders,
-    generateEmergencyDefensiveOperations,
 } from './bot_corps_operations.js';
 
 // From bot_corps_directives
@@ -354,7 +353,7 @@ export function reassignCorpsForBilateralWar(state: GameState, faction: FactionI
  * 1. Evaluate progress of existing operations (advance/abort)
  * 2. Set corps stances
  * 3. Launch new named operations
- * 3b. Emergency defensive operations (high-threat corps without active ops)
+ * 3b. (retired: emergency defensive operations, RF-emergency-defense 2026-11-15)
  * 4. (retired: corridor breach, RF-corridor-breach 2026-11-15)
  * 5. Generate OG activation orders
  * 6. Generate corps directives for brigade AI
@@ -406,8 +405,13 @@ export function generateAllCorpsOrders(
     // The old catalog-based generateCorpsOperationOrders is disabled — it pulled brigades
     // from the entire corps pool without sector assignment, creating bloated non-sector ops.
 
-    // 3b. Emergency defensive operations for high-threat defensive corps
-    generateEmergencyDefensiveOperations(state, faction, effectiveOsidEdges, sidToMun, preComputedAdjacency);
+    // 3b. (Retired 2026-11-15, RF-emergency-defense.) Emergency defensive operations never
+    // fired (no threatened corps had two brigades at 70% of the 3,000 cap). Woken, the operation
+    // had no axes, objectives or staging point: no tactical group, no attacks, no control. It
+    // froze the corps' four strongest brigades for about seven turns (planning x1.05 defence,
+    // recovery x0.9 defence and x0.6 attack, +15 exhaustion), blocked the commander loop and
+    // took adjacent ALLIED ground as targets. A threatened corps was worse defended with it.
+    // A real emergency defence (reserves, counterattack) is a post-1.0 design item.
 
     // 4. (Retired 2026-11-15, RF-corridor-breach.) The corridor-breach pass read OSID-keyed
     // control through an S-id sidToMun, so it never found a target; fixed, it would have built

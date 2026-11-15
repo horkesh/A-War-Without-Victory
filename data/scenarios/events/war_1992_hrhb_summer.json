@@ -6,7 +6,7 @@
     "category": "political",
     "family": "hrhb_political_goal",
     "source_tier": "icty_icj_un",
-    "historical_source": "Balkan Battlegrounds Vol. I, PDF pp. 181, 193 and 195 / printed 144, 156 and 158 (verified against the source PDF); ICTY Prlić et al. Trial Judgment (IT-04-74-T), Vol. 1 §§490-525 [UNVERIFIED — no local copy]; ICTY Prlić et al. Appeals Judgment (IT-04-74-A), §§601-650 [UNVERIFIED — no local copy].",
+    "historical_source": "Balkan Battlegrounds Vol. I, PDF pp. 181, 193 and 195 / printed 144, 156 and 158 (verified against the source PDF); ICTY Prlić et al. Trial Judgment (IT-04-74-T); ICTY Prlić et al. Appeals Judgment (IT-04-74-A).",
     "emergence_class": "compound",
     "trigger": {
       "turn_min": 13,

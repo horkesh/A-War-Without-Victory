@@ -779,7 +779,8 @@ export interface CorpsOperation {
     /** Previous turn's objective control snapshot for diff (OSID→faction). */
     _prev_objective_state?: Record<string, string | null>;
 
-    /** True when this is an emergency defensive operation (bypasses slot limit, max 1). */
+    /** Legacy: true on an emergency defensive operation. Its creator was retired (RF-emergency-defense
+     *  2026-11-15); kept so older saves load. Such an op gets the `limited` donor policy. */
     is_emergency?: boolean;
 
     // --- Synchronized operation fields (Army HQ Gathering v0.4.7) ---

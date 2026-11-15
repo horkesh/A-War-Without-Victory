@@ -118,7 +118,7 @@ describe('B10: running offensives are called off', () => {
         const arbih = state.military.corps_command!.arbih_2nd_corps.active_operations;
         expect(arbih.find((o) => o.name === 'Uragan 95')).toMatchObject({ phase: 'recovery', recovery_reason: 'ceasefire', phase_started_turn: 183 });
         expect(arbih.find((o) => o.name === 'Probe Ozren')).toMatchObject({ phase: 'recovery', recovery_reason: 'ceasefire' });
-        // Defensive reactions stay: the emergency strategic-defence operation is untouched.
+        // Defensive reactions stay: a strategic-defence operation (here a legacy emergency one) is untouched.
         expect(arbih.find((o) => o.name === 'Emergency Defense')).toMatchObject({ phase: 'planning' });
         expect(state.military.corps_command!.vrs_1st_krajina.active_operations[0]).toMatchObject({ phase: 'recovery', recovery_reason: 'ceasefire' });
         // An operation already recovering keeps its own reason and clock.
