@@ -14,6 +14,7 @@ import { initializeFormationDefaults } from './formation_defaults.js';
 import type { FactionId, GameState } from './game_state.js';
 import { reconcileLoadedArmyHqOperationLifecycle } from './operation_lifecycle_reconciliation.js';
 import { canonicalizePoliticalSideId } from './identity.js';
+import armyCoRosterJson from '../../data/scenarios/army_co_roster.json';
 
 interface SaveMigration {
     /** Schema version this migration brings the state TO. */
@@ -286,6 +287,7 @@ export function applyMigrations(state: GameState): number {
     }
 
     if (state.military) reconcileLoadedArmyHqOperationLifecycle(state);
+    if (state.military) reconcileLoadedArmyChiefStubbornness(state);
 
     return pending.length;
 }
@@ -853,3 +855,40 @@ registerMigration({
         ensureRecord(military, 'corps_front_sectors');
     },
 });
+
+/**
+ * RF-ROSTER (2026-11-15) load-time reconciliation, run on every load after the
+ * versioned migrations (no schema bump): army-chief `stubbornness` takes the army
+ * roster value (data/scenarios/army_co_roster.json) instead of the migration-10
+ * default of 3, plus any recorded overstay escalation (kept_past_schedule_since_turn
+ * before the save turn, capped). Officers the roster does not list are untouched.
+ * Idempotent. The war step applies the same rule every turn (applyRosterToOfficers);
+ * this only makes a loaded older save correct before its first war turn.
+ */
+function reconcileLoadedArmyChiefStubbornness(state: GameState): void {
+    {
+        const military = asRecord(state.military);
+        if (!military || !Array.isArray(military.named_officer_data)) return;
+        const roster = armyCoRosterJson as {
+            rosters?: Record<string, { schedule?: Array<{ officer_id: string; stubbornness: number }> }>;
+            variation_rules?: { keep_past_schedule?: { stubbornness_escalation?: number; stubbornness_cap?: number } };
+        };
+        const escalation = roster.variation_rules?.keep_past_schedule?.stubbornness_escalation ?? 1;
+        const cap = roster.variation_rules?.keep_past_schedule?.stubbornness_cap ?? 5;
+        const rosterValue = new Map<string, number>();
+        for (const faction of Object.keys(roster.rosters ?? {}).sort(strictCompare)) {
+            for (const entry of roster.rosters![faction]!.schedule ?? []) rosterValue.set(entry.officer_id, entry.stubbornness);
+        }
+        const meta = asRecord(state.meta);
+        const turn = typeof meta?.turn === 'number' ? meta.turn : 0;
+        const officerStates = asRecord(military.named_officers) ?? {};
+        for (const officer of military.named_officer_data) {
+            if (!officer || typeof officer !== 'object' || Array.isArray(officer)) continue;
+            const value = rosterValue.get(officer.id);
+            if (value === undefined) continue;
+            const since = asRecord(officerStates[officer.id])?.kept_past_schedule_since_turn;
+            const escalated = typeof since === 'number' && since < turn && escalation !== 0;
+            officer.stubbornness = escalated ? Math.min(cap, value + escalation) : value;
+        }
+    }
+}

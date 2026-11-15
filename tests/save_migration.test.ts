@@ -22,6 +22,31 @@ describe('save_migration', () => {
         expect(existing.military.corps_front_sectors).toEqual({ sector_a: { sector_id: 'sector_a' } });
     });
 
+    it('RF-ROSTER load-time reconciliation: an older save takes the roster stubbornness for army chiefs, keeps a recorded overstay escalation, and leaves other officers alone', () => {
+        const officer = (id: string) => ({ id, rank: 'army_commander', stubbornness: 3, override_tolerance: 3 });
+        const state = {
+            schema_version: 38,
+            meta: { turn: 70 },
+            military: {
+                named_officer_data: [
+                    officer('vrs_mladic'), officer('arbih_halilovic'), officer('arbih_delic'),
+                    officer('hvo_petkovic'), officer('hvo_praljak'), officer('hvo_roso'),
+                    { id: 'arbih_mahmuljin', rank: 'corps_commander', stubbornness: 3 },
+                ],
+                named_officers: { hvo_petkovic: { officer_id: 'hvo_petkovic', kept_past_schedule_since_turn: 60 } },
+            },
+        } as any;
+        applyMigrations(state);
+        const byId = Object.fromEntries(state.military.named_officer_data.map((o: any) => [o.id, o.stubbornness]));
+        expect(byId).toEqual({
+            vrs_mladic: 5, arbih_halilovic: 4, arbih_delic: 2, hvo_petkovic: 3, hvo_praljak: 3, hvo_roso: 2,
+            arbih_mahmuljin: 3,
+        });
+        expect(state.schema_version).toBe(getLatestSchemaVersion());
+        // Re-applying is a no-op (already at the latest version).
+        expect(applyMigrations(state)).toBe(0);
+    });
+
     it('applies pending migrations to old saves', () => {
         const state = {
             schema_version: 0,
