@@ -1,0 +1,18 @@
+## 2026-11-15 — A recalled elite never returns to a base its side has lost (t73 live-game freeze)
+
+- **Symptom.** A live RBiH game hit a post-turn invariant at turn 73 (found by the appendix C engaged-President run): `formation.location_not_friendly`, `hrhb_vitezovi_brigade_vitez` (HRHB) at `op:vitez:vitez_2`, controlled by RBiH.
+  - On the desktop an advance error puts the renderer back on the pre-turn state. The turn is deterministic, so every Advance fails and the player is stuck.
+- **Cause** (traced per phase with the movement diagnostic). In `tick-elite-loans`, `recallEliteLoan` (`src/sim/combat/army_reserve_system.ts`) moved the recalled elite to `base_osid ?? home_osid` without checking who held it.
+  - The Vitezovi's base, Vitez, had fallen to RBiH, so the recall put the brigade in enemy territory.
+  - `displace-enemy-territory` runs earlier in the turn, so nothing corrected it before the barrier.
+- **Fix.** The recall returns the elite to its base only if a friendly faction holds it, using the barrier's own test (controlled, and `isFriendlyFaction`). Otherwise the brigade stays where it stands. That position is held ground: the displacement step has already run, and a desktop recall happens between turns, after the barrier passed. `base_osid` is left as authored, so the elite goes home once the base is retaken. Every recall re-checks.
+- **Consulted.**
+  - `operations-expert` recommended also rebasing to the nearest friendly-connected OSID.
+  - `sector-expert` recommended staying where it stands and not rewriting `base_osid`: nothing in the sector code reads it, and a rewritten base would carry a pocket-specific position into later recalls.
+  - Both agreed on the recall-time check and on staying on held ground. The stale base shown in the UI is cosmetic and is recorded as a follow-up.
+- **Tests.**
+  - `tests/army_reserve_system.test.ts`: never returns to a lost base, the barrier is clean, the base is kept; returns again once the base is held; an uncontrolled base counts as not held.
+  - Two existing fixtures (`army_reserve_system`, `corps_reorganisation`) now give the base a controller.
+  - The full elite-related set (58 files) passes.
+- **Live repro.** Advancing the saved turn-72 state now completes turn 73 with no invariant issue, and the brigade stays at `op:travnik:puticevo_2` (HRHB).
+- **Headless.** The PR has the 40-week artifact comparison against main and `test:baselines`.
