@@ -258,7 +258,7 @@ const EXCLUSION_REGISTER: readonly Exclusion[] = [
     {
         path: 'data/scenarios/army_co_roster.json',
         kind: 'deferred_stamp',
-        reason: 'Read by army_co_roster_data.ts. This is the R7 Phase 2 elite_commander class — competence and aggressiveness values that are demonstrably NOT run-inert.',
+        reason: 'Read by army_co_roster_data.ts. Since RF-ROSTER (2026-11-15) it sets the army chiefs\' live stubbornness at officer init and every war turn. This is the R7 Phase 2 elite_commander class — values that are demonstrably NOT run-inert (a roster edit moves final_state_hash while the input digest does not).',
     },
     {
         path: 'data/scenarios/corps_co_roster.json',
