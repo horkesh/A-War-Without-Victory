@@ -8,6 +8,7 @@ import { getOsidDisplayName } from '../utils/osidDisplayName';
 import { t, type MessageKey } from '../i18n';
 import { playerFactionMatch } from './playerFactionMatch';
 import { resolveEventDisplayTitle } from './eventDisplayCopy';
+import { getPlayerSafeCorpsName, getPlayerSafeDisplayLabel } from '../utils/playerSafeText';
 
 export type TurnAftermathTone = 'gain' | 'loss' | 'mixed' | 'quiet';
 export type TurnAftermathCostSeverity = 'low' | 'moderate' | 'severe' | 'critical';
@@ -156,6 +157,13 @@ export interface TurnAftermathCampaignCostView {
   } | null;
 }
 
+export interface TurnAftermathLostFormation {
+  id: string;
+  name: string;
+  /** The corps it belonged to, when the order of battle still carries that link. */
+  corpsName: string | null;
+}
+
 export interface TurnAftermathView {
   turn: number;
   dateLabel: string;
@@ -186,6 +194,12 @@ export interface TurnAftermathView {
     destroyed: number;
     ownSpawned: number;
     ownDestroyed: number;
+    /**
+     * The player's own formations lost or destroyed this week, by name and corps. Own formations
+     * only: the player-visible projection never carries the opponent's destructions, so an enemy
+     * loss stays a count.
+     */
+    ownDestroyedList?: TurnAftermathLostFormation[];
   };
   supply: {
     ownSupplyDelta: number;
@@ -235,7 +249,7 @@ const TURN_AFTERMATH_TERRITORY_KEYS = ['friendlyNet', 'gains', 'losses', 'breakd
 const TURN_AFTERMATH_FLIP_KEYS = ['osid', 'label', 'direction', 'significance', 'from', 'to'] as const;
 const TURN_AFTERMATH_COMBAT_KEYS = ['battleCount', 'friendlyBattleCount', 'friendlyCasualties', 'opposingCasualties', 'territoryFlipsFromBattles'] as const;
 const TURN_AFTERMATH_HUMANITARIAN_KEYS = ['displacedThisTurn', 'hotspotLabel'] as const;
-const TURN_AFTERMATH_FORMATION_KEYS = ['spawned', 'destroyed', 'ownSpawned', 'ownDestroyed'] as const;
+const TURN_AFTERMATH_FORMATION_KEYS = ['spawned', 'destroyed', 'ownSpawned', 'ownDestroyed', 'ownDestroyedList'] as const;
 const TURN_AFTERMATH_SUPPLY_KEYS = ['ownSupplyDelta', 'ownHeavyMunitionsDelta'] as const;
 const TURN_AFTERMATH_COST_KEYS = [
   'friendlyMilitaryCasualties',
@@ -451,6 +465,20 @@ function formatDispatchCount(value: number): string {
   return Number.isFinite(value) ? String(Math.round(value)) : t('dispatch.unreported');
 }
 
+/** At most three names on the dispatch line, each with its corps; the rest are counted. */
+const DISPATCH_LOST_NAMES_SHOWN = 3;
+
+function formatLostFormationNames(named: readonly TurnAftermathLostFormation[], total: number): string {
+  const shown = named.slice(0, DISPATCH_LOST_NAMES_SHOWN).map((formation) => (
+    formation.corpsName
+      ? t('dispatch.cost.formationsLostWithCorps', { name: formation.name, corps: formation.corpsName })
+      : formation.name
+  ));
+  const unnamed = Math.max(0, total - shown.length);
+  if (unnamed > 0) shown.push(t('dispatch.cost.formationsLostMore', { count: unnamed }));
+  return shown.join(', ');
+}
+
 function buildDispatchCost(view: TurnAftermathView): TurnAftermathDispatchLine | null {
   const parts: string[] = [];
   const displaced = view.cost.displacedThisTurn;
@@ -461,7 +489,13 @@ function buildDispatchCost(view: TurnAftermathView): TurnAftermathDispatchLine |
   }
   const lost = view.cost.ownFormationsDestroyed;
   if (lost > 0) {
-    parts.push(t(countKey(lost, 'dispatch.cost.formationsLost.one', 'dispatch.cost.formationsLost.many'), { count: lost }));
+    const named = view.formations.ownDestroyedList ?? [];
+    parts.push(named.length > 0
+      ? t(countKey(lost, 'dispatch.cost.formationsLostNamed.one', 'dispatch.cost.formationsLostNamed.many'), {
+        count: lost,
+        names: formatLostFormationNames(named, lost),
+      })
+      : t(countKey(lost, 'dispatch.cost.formationsLost.one', 'dispatch.cost.formationsLost.many'), { count: lost }));
   }
   const spent = view.cost.ownSupplySpent + view.cost.ownHeavyMunitionsSpent;
   if (spent >= DISPATCH_SUPPLY_THRESHOLD) {
@@ -1114,6 +1148,32 @@ function emptyNextActions(): TurnAftermathView['nextActions'] {
   };
 }
 
+/**
+ * The week's own destroyed or disbanded formations by name, each with its corps when the order of
+ * battle still links it. Only the player's faction (the projection already drops the rest), sorted
+ * by id so the order is stable.
+ */
+function buildOwnDestroyedList(
+  summary: TurnSummary | null,
+  state: LoadedGameState,
+  playerFaction: string | null,
+): TurnAftermathLostFormation[] {
+  if (!summary || !playerFaction) return [];
+  const byId = new Map((state.formations ?? []).map((formation) => [formation.id, formation]));
+  return (summary.formation_destructions ?? [])
+    .filter((destruction) => destruction.faction === playerFaction)
+    .map((destruction): TurnAftermathLostFormation => {
+      const corpsId = byId.get(destruction.formation_id)?.corps_id;
+      const corps = corpsId ? byId.get(corpsId) : undefined;
+      return {
+        id: destruction.formation_id,
+        name: getPlayerSafeDisplayLabel(destruction.formation_name || destruction.formation_id, 'Formation'),
+        corpsName: corps ? getPlayerSafeCorpsName(corps.name, corps.id) : null,
+      };
+    })
+    .sort((a, b) => strictStringCompare(a.id, b.id));
+}
+
 export function buildTurnAftermathView(input: TurnAftermathBuildInput): TurnAftermathView | null {
   const nextState = input.nextState;
   if (!nextState) return null;
@@ -1204,6 +1264,7 @@ export function buildTurnAftermathView(input: TurnAftermathBuildInput): TurnAfte
       destroyed: narratedSummary?.formation_destructions.length ?? 0,
       ownSpawned: (narratedSummary?.formation_spawns ?? []).filter((formation) => formation.faction === playerFaction).length,
       ownDestroyed: ownFormationsDestroyed,
+      ownDestroyedList: buildOwnDestroyedList(narratedSummary, nextState, playerFaction),
     },
     supply: {
       ownSupplyDelta: playerFaction ? (narratedSummary?.supply_deltas?.[playerFaction] ?? 0) : 0,
