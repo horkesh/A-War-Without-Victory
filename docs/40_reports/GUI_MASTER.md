@@ -658,6 +658,14 @@ OSID, raw faction ids, and similar backend nouns are valid in engine code, canon
 - Tactical-shell receipt is handled through `awwv-shell:handoff` plus the canonical Army HQ navigation helpers in `src/ui/map/utils/shellNavigation.ts`.
 - See `docs/40_reports/implemented/20260403_WARROOM_ARMYHQ_SHELL_HANDOFF.md`.
 
+## 2026-11-14 - Weekly "This week" dispatch (command loop L2)
+
+- Supersedes the quiet-week behaviour of WP-2 below. `TurnAftermathModal` now opens after every Advance on a compact dispatch: the date and one headline (territory, then formations, then decisions), then at most five lines (Ground with up to three named places and "Show on map", Fighting, Cost, Your orders, Needs you). A line with nothing to report is left out; a quiet week gets two lines built from the week's own figures. "Full record" shows the previous two-column report, which now loads as its own chunk (`TurnAftermathRecordFace.tsx`).
+- The bottom-strip digest is the dispatch headline with "Reopen this week's dispatch", shown once the report is closed.
+- `gameStore.loadSave` keeps the week's report when the same week is loaded again (the desktop main process re-pushes the state ~200 ms after Advance). Before this, that reload closed the report in the live app before it could be seen.
+- `tools/ui/paradox_local_qa.cjs` photographs the report before closing it and records the dispatch fit; `--window-size=WxH` sets the game window's content size.
+- Proposal: `docs/40_reports/proposals/20261114_COMMAND_LOOP_PROPOSAL.md` §4 2B. Evidence: ledger fragment `docs/ledger/fragments/2026-11-14-weekly-dispatch.md`.
+
 ## 2026-07-06 - WP-2 quiet-turn advance digest
 
 - Quiet turns now advance through the existing one-click path and file a retained Turn Aftermath report without opening the full aftermath modal. The bottom status strip shows a one-line digest with Review and Dismiss actions; Review reopens the retained report on demand.

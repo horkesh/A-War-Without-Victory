@@ -11,7 +11,11 @@ import { TurnAftermathRecordsPanel } from './TurnAftermathRecordsPanel';
 import { DecisionConsequenceRecordsPanel } from './DecisionConsequenceRecordsPanel';
 import { TerritoryOverTimeChart } from '../TerritoryOverTimeChart';
 import { t, type MessageKey } from '../../i18n';
-import { buildDecisionConsequenceLedger, buildDecisionConsequenceLedgerSummary } from '../../data/decisionConsequenceLedger';
+import {
+    buildDecisionConsequenceLedger,
+    buildDecisionConsequenceLedgerSummary,
+    buildStaffReadingLine,
+} from '../../data/decisionConsequenceLedger';
 import { buildTurnAftermathRecordViews } from '../../data/turnAftermath';
 import { shouldNarrateTerritorySummary } from '../../data/territorySummaryGuard';
 import { openCodex } from '../../utils/shellNavigation';
@@ -45,6 +49,8 @@ export function RecordsContent({ eventCatalog }: RecordsContentProps = {}) {
     const state = useGameStore((s) => s.loadedGameState);
     const osidNameMap = useGameStore((s) => s.osidDisplayNames);
     const operationLifecycle = useMemo(() => projectOperationLifecycle(state), [state]);
+    // The weekly army reading of policy is one line here, not a card, tile or chip item.
+    const staffReading = useMemo(() => buildStaffReadingLine(state), [state]);
 
     const archiveCounts = useMemo(() => {
         const aftermathCount = buildTurnAftermathRecordViews({ state, osidNameMap, limit: Number.MAX_SAFE_INTEGER }).length;
@@ -108,6 +114,15 @@ export function RecordsContent({ eventCatalog }: RecordsContentProps = {}) {
                         <div className="mt-1 text-[14px] font-bold tabular-nums text-text-primary">{archiveCounts.opportunities}</div>
                     </div>
                 </div>
+                {staffReading && (
+                    <div
+                        className="mt-3 border-l-2 border-[#c9a75c]/60 px-2 py-1 text-[13px] leading-snug text-text-secondary"
+                        data-testid="records-staff-reading"
+                        data-staff-reading-turn={staffReading.turn}
+                    >
+                        <span className="font-bold text-text-primary">{staffReading.label}:</span> {staffReading.text}
+                    </div>
+                )}
             </section>
 
             <section

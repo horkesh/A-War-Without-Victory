@@ -18,8 +18,8 @@ Follow-up to the 2026-11-14 ending truth pass (PR #635), after merging origin/ma
   imported. Loading a finished save opens the Verdict on the beat without the room, so it rendered with
   browser-default buttons and headings. The beat now imports `live.css` first; test in
   `tests/ui/dayton_signing_beat_styles.test.ts`.
-- **Tooling.** `tools/ui/paradox_local_qa.cjs` gains `--endgame-render-tour`, `--viewport WxH` and
-  `--device-scale`, and its readability gate treats a labelled, focusable scroll region as keeping its
+- **Tooling.** `tools/ui/paradox_local_qa.cjs` gains `--endgame-render-tour` and `--device-scale`, and
+  its `--window-size=WxH` (from main) now also leaves full-screen and maximised states; its readability gate treats a labelled, focusable scroll region as keeping its
   text reachable (the Verdict share summary). `tools/ui/ending_truth_browser_proof.mjs` renders real
   engine endings at 1280×720, 768×1024 and 375×812 in EN and BCS against the vite dev server.
 - **Render evidence.** Packaged app: RBiH A-grade ending at 1280×720, 1920×1080, 1280×720 at 125% and

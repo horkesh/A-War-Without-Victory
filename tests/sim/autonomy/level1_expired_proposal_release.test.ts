@@ -66,7 +66,7 @@ function applyExecutingPlan(state: GameState, id: string): void {
             commander_officer_id: `officer_${id}`,
         }],
         sector_stances: [],
-        updated_state: { current_plan: { plan_id: PLAN(id), status: 'executing' } },
+        updated_state: { current_plan: { plan_id: PLAN(id), status: 'executing', target_osids: ['op:test:objective'] } },
         reinforcement_requests: [], prepositioning_orders: [], plan_updates: [], garrison_locks: [],
     } as any);
 }

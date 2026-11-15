@@ -386,6 +386,7 @@ function reasonFromTrace(trace: CorpsStanceTrace | undefined, finalStance: Corps
         case 'patron_ceiling': return 'patron_ceiling';
         case 'army_directive': return 'army_directive';
         case 'alliance_front': return 'alliance_front';
+        case 'ceasefire': return 'ceasefire';
         default: return 'other';
     }
 }

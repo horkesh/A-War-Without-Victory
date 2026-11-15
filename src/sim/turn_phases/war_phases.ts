@@ -172,7 +172,12 @@ import {
 } from '../combat/commander_march_correction.js';
 import { evaluateHomeReturn } from '../combat/brigade_home_return.js';
 import { applyFrontlineAttrition } from '../combat/frontline_attrition.js';
-import { advanceSectorOffensives, updateSectorOffensiveResults, reevaluateWeakenedOperations } from '../combat/sector_offensive.js';
+import { advanceSectorOffensives, cancelOffensivesForOct1995Ceasefire, updateSectorOffensiveResults, reevaluateWeakenedOperations } from '../combat/sector_offensive.js';
+import {
+    clampCorpsStancesForOct1995Ceasefire,
+    isCorpsBoundByOct1995Ceasefire,
+    isOct1995CeasefireInForce,
+} from '../combat/oct1995_ceasefire.js';
 import { buildStaticOsidAdjacency } from '../combat/sector_offensive_launch_helpers.js';
 // LANE-2026-05-02: estimateForceRatio defender-modifier integration — terrain cache for advance-sector-offensives
 import { buildTerrainCache } from '../combat/combat_predictor.js';
@@ -332,6 +337,8 @@ function injectAuthoredOperations(state: GameState): void {
 
         const corpsFaction = formations[corpsId]?.faction;
         if (!corpsFaction) { reject('corps_not_found'); continue; }
+        // The October 1995 general ceasefire closes the operation channel (council fix 3).
+        if (isCorpsBoundByOct1995Ceasefire(state, corpsId)) { reject('ceasefire_in_force'); continue; }
 
         // 1. Pre-filter participants — membership + eligibility + double-commit guard.
         const corpsBrigadeIds = new Set(
@@ -945,6 +952,9 @@ function injectOpDirectives(state: GameState, adjacency?: Map<string, string[]>)
             cmd.op_directive_rejection = { target_osid: targetOsid, reason, turn };
         };
 
+        // The October 1995 general ceasefire closes the operation channel (council fix 3).
+        if (isCorpsBoundByOct1995Ceasefire(state, corpsId)) { reject('ceasefire_in_force'); continue; }
+
         const plan = planDirectiveOperation(state, cmd, corpsId, targetOsid, adjacency);
         if (!plan.ok) { reject(plan.reason); continue; }
 
@@ -1188,6 +1198,26 @@ export const warPhases: NamedPhase[] = [
             const grazText = checkAndFireGrazAccords(context.state);
             if (grazText) {
                 result.fired.push({ id: 'graz_accords', text: grazText });
+            }
+        }
+    },
+    {
+        // Council fix 3 / B10 (docs/40_reports/playtests/20261114_r8_dry_rbih_council_diary.md):
+        // while the October 1995 general ceasefire holds (accept_ceasefire set the flag; it binds
+        // from the turn after the demand card fired, for the president and a bot alike), call off
+        // every offensive still planning or executing and hold every corps at Defensive. Placed directly after
+        // evaluate-events so it acts before movement, operation planning and combat. Creation
+        // paths later in the turn are gated on the same predicate (oct1995_ceasefire.ts).
+        // DETERMINISM GATE: zero mutation unless the flag is true; never set before turn 183.
+        name: 'enforce-oct1995-ceasefire',
+        run: (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            if (!isOct1995CeasefireInForce(context.state)) return;
+            const turn = context.state.meta.turn;
+            const cancelled = cancelOffensivesForOct1995Ceasefire(context.state, turn);
+            const lowered = clampCorpsStancesForOct1995Ceasefire(context.state);
+            if (cancelled.length > 0 || lowered.length > 0) {
+                context.report.oct1995_ceasefire = { cancelled_operations: cancelled, stances_lowered: lowered };
             }
         }
     },
