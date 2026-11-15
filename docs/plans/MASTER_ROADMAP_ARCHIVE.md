@@ -371,3 +371,27 @@ BC17 row detail, verbatim: It waits for a calibration slot (at most three calibr
 BC15 row detail, verbatim: SE6 (stance-based entrenchment rates) is parked at `archive/claude/stance-effects-se6`: it lets the VRS hold Konjic, which history refutes. It resumes after SE10 ("trenches travel": reactive contributors fight with their own entrenchment, `attack_resolution_osid.ts`). Also open: SE9 (sector intel read by the previous turn's sector id), SE11 (`posture_observed` is corps-wide), live = headless re-check for the stance bundle (SE8).
 
 BC16 row detail, verbatim: #600 revives the siege and encirclement path on the OSID front at a sourced 0.1% a week, and sets Bosniak flight abroad at displacement (F4b). §6 panel unanimous GO; record in SENSITIVE_HISTORY_DESIGN_GATE §6 and `docs/40_reports/implemented/20261114_SIEGE_DISPLACEMENT_PANEL.md`. Open follow-ups: SD15 (reserves are never promoted into an empty front sector; it surfaces one consistency failure in ARBiH 1st Corps sector 4), SD10 (no onward migration), SD13 (Goražde ends near 44.7k against 60-65k), and DA3.
+
+## Merged list and current-state narrative moved 2026-11-14 (steward pass 8)
+
+Superseded by the roadmap header after #619. Kept verbatim.
+
+Current-state paragraph before #619: Main stands at **712/709/710/705** out of 712 (January 1993, April 1994, April 1995, October 1995) on headless 188 turns, strict health PASS. The owner signed off 712/711/712/710 under `live-equivalent-desktop-v1` on 2026-11-06. Three accepted moves since: #583 (stance engine, April 1995 to 711), #604 (stance effects, October 1995 to 708, Korenići and Jemanlići a known historical miss) and #600 (RF-3 siege displacement, 712/709/710/705, an honest loss the owner accepted on 2026-11-14). #617 (RF-F1) then left every checkpoint unchanged and re-blessed the baselines. Brka and Ilijaš Krivajevići stay open by owner direction and are not calibration levers.
+
+Merged list before this pass: the R8 dry-run harness fixes and record (#622), RF-F1 sustainability and militia fatigue on the OSID front (#617), the unheld-pockets diagnosis and PK1 finding (#616, #620), Verdict contrast (#615), the proprietary LICENSE (#612), RF-3 siege displacement (#600), stance effects SE4, SE2, SE7 (#604; SE6 held at `archive/claude/stance-effects-se6`).
+
+R8 row sentence before this pass: **R8 qualifying HOLDS for the PK1 fix (#624) and EV1; all earlier R8 strategic runs ran at autonomy 1**, which froze the enemy bot commanders, so their enemy-behaviour evidence is skewed (end-of-campaign, save and Verdict evidence stays valid). #624 was closed unmerged; the fix returned as #631.
+
+BC19 row detail, verbatim: F1 is closed: #617 reads the OSID front and supply, checkpoints unchanged, collapsed municipalities 109 → 27. F2 (ARBiH 1994 offensives lose 15-30:1, against the shelved lane-3 hold) and F7 (`supply_below` fires on a reserve that does not exist) stay open for triage.
+
+R8 row sentence before this pass: Live-equivalent player/bot map parity held at 712/711/712/710 on 2026-11-07 (0 cells differ per player faction at 188 turns); main was then 712/709/710/705 and live = headless is re-proved at the freeze.
+
+Further roadmap text trimmed in pass 8, verbatim: R8 first dry run detail: tour, byte-exact save/load at turn 188, strict runtime 0/0/0/0 and Dayton sign-and-Verdict passed. Packaged 24-turn shakedowns and 188-turn diaries for RBiH, RS and HRHB have not run on the frozen source. Sequence paragraph: R8 dry runs before the freeze are allowed; they never count as qualifying. RF-F1b: negotiation momentum still saturates at about week 19, so the Washington and ceasefire gates stay always-true; after SE7E, needs historian and game-designer, moves negotiation weeks.
+
+## Merged list moved 2026-11-15 (steward pass 10)
+
+Merged list before this pass, verbatim: **Merged since 2026-11-12:** RF-AI2 (#619); the PK1 Level-1 fix with its canon amendment, R8 strategic runs at level 2 (#631); EV1 required-event answers (#621); the command-loop proposal (#632), B11 (#633) and Council fix 4 (#634); the Council diary (#629); path portability (#628); the licence (#612) and OSM attribution with the third-party notices (#618); the Velika Kladuša date (#630); the desk status strip (#614). Earlier items (#622, #617, #616, #620, #615, #600, #604 with SE6 held at `archive/claude/stance-effects-se6`) are in the archive.
+
+Licence note: #612 merged its first, proprietary commit before the PolyForm switch was pushed; #641 re-landed the switch (PolyForm Noncommercial 1.0.0, LICENSE.md identical to Mandate's, package.json SPDX id, README, ADR-0008, notices header and generator template).
+
+Wording trimmed from the roadmap header in pass 10, verbatim: SE7E, an empty front sector commits its own rear brigade, calibration-neutral, consistency 1 → 0 (#625); command-loop L3 and L3b, defensive operations need no signature and an unanswered plan proposal releases the plan (#642); the PolyForm Noncommercial licence (#641, re-landing the switch #612 missed). BC19 row: RF-5B (#623, HVO 1993 expulsions, bot-only) is merged and main is unchanged.

@@ -4618,6 +4618,10 @@ export function validateGameStateShape(
                     ) {
                         errors.push(`displacement.hostile_takeover_timers.${munId}.started_turn must be a non-negative integer`);
                     }
+                    // RF-5B: optional cause marker; only 'policy_expulsion' is defined.
+                    if (rec.cause !== undefined && rec.cause !== 'policy_expulsion') {
+                        errors.push(`displacement.hostile_takeover_timers.${munId}.cause must be 'policy_expulsion' when present`);
+                    }
                 }
             } else {
                 errors.push('displacement.hostile_takeover_timers must be an object (Record<string, HostileTakeoverTimerState>) when present');
