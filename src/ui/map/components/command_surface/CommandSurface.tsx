@@ -17,7 +17,7 @@
  * Canonical owner: src/ui/map/components/command_surface/CommandSurface.tsx
  */
 
-import { useEffect, useMemo, useRef, useState, useSyncExternalStore, type KeyboardEvent as ReactKeyboardEvent } from 'react';
+import { Suspense, lazy, useEffect, useMemo, useRef, useState, useSyncExternalStore, type KeyboardEvent as ReactKeyboardEvent } from 'react';
 import {
   consumeRequestedDecisionRoomLens,
   getDecisionRoomLensRequestSnapshot,
@@ -46,6 +46,9 @@ import { turnToDateString } from '../../utils/formatters';
 import { t, type MessageKey } from '../../i18n';
 import { DirectiveCard, type DirectiveReceipt } from '../army_hq/DirectiveCard';
 import type { FieldOperationPlanTarget } from '../../utils/fieldInspectionTarget';
+// Command loop L5: the facts under an operation proposal's dossier load on demand, so
+// their copy and the odds logic stay out of the map entry chunk.
+const ProposalDossierFacts = lazy(() => import('./ProposalDossierFacts'));
 import {
   SurfaceBanner,
   SurfaceCloseButton,
@@ -339,7 +342,14 @@ export function CommandSurface({ initialCategoryId = null, onClose, onNavigateTa
     if (target.kind !== 'none' && !selfTarget) review = { target, label };
   }
   const bannerArt = resolveCommandBannerArt(activeArea.id, playerFaction);
-  const detailArt = selectedCard?.directive
+  // Command loop L5 (2026-11-15): the ordinary operation proposal behind the selected card,
+  // when there is one; its dossier facts render from the lazy ProposalDossierFacts.
+  const dossierProposal = dossier
+    ? state?.opProposalCards?.find((card) => `command:review-proposal:${card.proposal_id}` === dossier.cardId) ?? null
+    : null;
+  // A proposal is read, not glanced at. Its dossier facts take the art's place, so more of
+  // them are visible above the directive footer.
+  const detailArt = selectedCard?.directive && selectedCard.directive.lever !== 'review_proposal'
     ? resolveDirectiveActArt(selectedCard.directive.lever, playerFaction)
     : null;
   const historicalNeeds = groups.find((entry) => entry.group === 'needs')?.cards.filter((card) => isHistoricalOperationAuthorizationCard(card)) ?? [];
@@ -480,7 +490,13 @@ export function CommandSurface({ initialCategoryId = null, onClose, onNavigateTa
                 explanation={dossier.explanation}
                 facts={dossier.evidence}
                 factsLabel={t('commandSurface.whatToKnow')}
-              />
+              >
+                {dossierProposal && (
+                  <Suspense fallback={null}>
+                    <ProposalDossierFacts card={dossierProposal} osidNameMap={osidNameMap} />
+                  </Suspense>
+                )}
+              </SurfaceDetailBody>
               <SurfaceDetailFooter>
                 {dossier.directive && state && (
                   <DirectiveCard directive={dossier.directive} gameState={state} onReceipt={setReceipt} />

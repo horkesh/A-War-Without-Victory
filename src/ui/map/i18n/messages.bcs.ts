@@ -1922,6 +1922,12 @@ export const bcsMessages: Partial<Record<MessageKey, string>> = {
     'autonomy.proposal.overrideInsufficient': 'Treba {cost} KA (imaš {current})',
     'autonomy.proposal.fieldCommander': 'Vaš terenski komandant',
     'autonomy.proposal.forceRatio': '{ratio}:1',
+    // Command loop L5 (2026-11-15): dosijei prijedloga (proposalDossier.ts).
+    'dossier.action.review': 'Pregledaj plan',
+    'dossier.title.advanceFrom': 'Napredovanje, polazište: {place}',
+    'dossier.header.one': '{asker} traži da angažuje jednu brigadu kako bi zauzeo {target}.',
+    'dossier.header.many': '{asker} traži da angažuje brigade ({count}) kako bi zauzeo {target}.',
+    'dossier.header.plain': '{asker} traži ovlaštenje da pokrene {operation}.',
     'autonomy.proposal.assessment.launch': 'Preporuka: napad',
     'autonomy.proposal.assessment.postpone': 'Preporuka: odgodi',
     'autonomy.proposal.assessment.abort': 'Preporuka: obustavi',

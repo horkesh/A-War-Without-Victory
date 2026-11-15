@@ -31,6 +31,7 @@ import {
   PROACTIVE_FORCE_LAUNCH_COST,
 } from '../utils/commandAuthority';
 import { buildForceableReadyPlans } from './backTheOfficer';
+import { buildProposalDossier } from './proposalDossier';
 import { sidePickerFactionLabel } from '../utils/sidePickerLabels';
 import { getPlayerSafeCorpsName, getPlayerSafeEnclaveName, getPlayerSafeRecordDetail } from '../utils/playerSafeText';
 import { countFiledChronicleDecisionRecords } from './filedRecordTruth';
@@ -1271,38 +1272,10 @@ function historicalOperationExplanation(
     : base;
 }
 
-function ordinaryOperationProposalEvidence(
-  proposal: NonNullable<LoadedGameState['opProposalCards']>[number],
-  osidNameMap: Record<string, string> | null,
-): string[] {
-  const unreported = t('corpsFront.unreported');
-  const commander = proposal.commander
-    ? `${proposal.commander.rank
-      ? proposal.commander.rank.split(/[_\s]+/).filter(Boolean).map((part) => `${part.charAt(0).toUpperCase()}${part.slice(1)}`).join(' ')
-      : ''} ${proposal.commander.name}`.trim()
-    : 'Unreported';
-  const objective = proposal.objective_origin_osid
-    ? `Advance from ${getOsidDisplayName(proposal.objective_origin_osid, osidNameMap)}`
-    : proposal.objective ?? unreported;
-  const targets = proposal.target_osids && proposal.target_osids.length > 0
-    ? proposal.target_osids.map((osid) => getOsidDisplayName(osid, osidNameMap))
-    : proposal.targets ?? [];
-  return [
-    `Command: ${proposal.corps_name}`,
-    `Commander: ${commander}`,
-    `Objective: ${objective}`,
-    `Targets: ${targets.join(', ') || unreported}`,
-    `Forces: ${proposal.forces?.join(', ') || unreported}`,
-    `Concentration/readiness: ${proposal.concentration_readiness ?? unreported}`,
-    `Intelligence: ${proposal.intel_assessment ?? unreported}`,
-    `Supply: ${proposal.supply_assessment ?? unreported}`,
-    `Risk: ${proposal.risk_assessment ?? unreported}`,
-    `Recommendation: ${proposal.recommendation ?? unreported}`,
-    `Deadline: ${proposal.decision_deadline ?? unreported}`,
-    `Force ratio: ${proposal.force_ratio ?? unreported}`,
-    `Opportunity cost: ${proposal.opportunity_cost ?? unreported}`,
-  ];
-}
+// Command loop L5 (2026-11-15): an ordinary operation proposal is shown as a dossier: a
+// localized title and one-sentence header here (proposalDossier.ts), and attributed,
+// localized facts rendered lazily in the Command Surface (proposalDossierDetail.ts). It
+// replaces the thirteen English "Label: value" lines with their raw percentages.
 
 /**
  * Posture model option 2: one Command Surface matter per open corps/OG stance matter.
@@ -1370,6 +1343,7 @@ function addProposalReviewDirectiveCards(
     const ordinaryOperation = !historicalOp && review.domain === 'ops'
       ? state.opProposalCards?.find((proposal) => proposal.proposal_id === review.id)
       : undefined;
+    const dossier = ordinaryOperation ? buildProposalDossier(ordinaryOperation, osidNameMap) : null;
     const domainLabel = proposalDomainLabel(review.domain);
     cards.push({
       id: `command:review-proposal:${review.id}`,
@@ -1377,12 +1351,12 @@ function addProposalReviewDirectiveCards(
       severity: historicalOp ? 'blocking' : 'warning',
       title: historicalOp
         ? historicalOp.operationName
-        : ordinaryOperation?.op_name ?? t('decisionRoom.card.reviewProposal.title', {
+        : dossier?.title ?? t('decisionRoom.card.reviewProposal.title', {
           domain: domainLabel,
         }),
       explanation: historicalOp
         ? historicalOperationExplanation(state, historicalOp, osidNameMap)
-        : ordinaryOperation?.summary ?? getPlayerSafeRecordDetail(
+        : dossier?.header ?? getPlayerSafeRecordDetail(
           review.description,
           t('decisionRoom.card.reviewProposal.evidence.review'),
         ),
@@ -1392,11 +1366,15 @@ function addProposalReviewDirectiveCards(
         : t('decisionRoom.card.reviewProposal.sourceLabel'),
       actionLabel: historicalOp
         ? t('decisionRoom.action.authorizeBeforeAdvance')
-        : t('decisionRoom.action.personnel'),
+        : dossier
+          ? t('dossier.action.review')
+          : t('decisionRoom.action.personnel'),
       evidence: historicalOp
         ? historicalOperationEvidence(state, historicalOp, historicalOperationReviewCount, osidNameMap)
-        : ordinaryOperation
-          ? ordinaryOperationProposalEvidence(ordinaryOperation, osidNameMap)
+        : dossier
+          // The dossier facts render in the Command Surface from the lazily loaded
+          // ProposalDossierFacts (proposalDossierDetail.ts), outside the entry chunk.
+          ? []
           : [
           t('decisionRoom.card.reviewProposal.evidence.domain', { domain: domainLabel }),
           t('decisionRoom.card.reviewProposal.evidence.review'),
@@ -1420,13 +1398,15 @@ function addProposalReviewDirectiveCards(
             formationIds: historicalDetails.formationIds,
           },
         }
-        : {}),
+        : dossier?.fieldTarget
+          ? { fieldInspectionTarget: dossier.fieldTarget }
+          : {}),
       directive: {
         lever: 'review_proposal',
         cost: 0,
         payload: { proposalId: review.id },
       },
-      ...(historicalOp ? { preserveActionLabel: true } : {}),
+      ...(historicalOp || dossier ? { preserveActionLabel: true } : {}),
       urgencySort: historicalOp ? 0 : 8,
       sourceSort: `command:review-proposal:${review.id}`,
     });

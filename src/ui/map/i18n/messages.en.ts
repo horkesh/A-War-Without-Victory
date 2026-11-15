@@ -1955,6 +1955,12 @@ export const enMessages = {
     'autonomy.proposal.overrideInsufficient': 'Need {cost} CA (have {current})',
     'autonomy.proposal.fieldCommander': 'Your field commander',
     'autonomy.proposal.forceRatio': '{ratio}:1',
+    // Command loop L5 (2026-11-15): proposal dossiers (proposalDossier.ts).
+    'dossier.action.review': 'Review the plan',
+    'dossier.title.advanceFrom': 'Advance from {place}',
+    'dossier.header.one': '{asker} asks to commit one brigade to take {target}.',
+    'dossier.header.many': '{asker} asks to commit {count} brigades to take {target}.',
+    'dossier.header.plain': '{asker} asks for authority to launch {operation}.',
     'autonomy.proposal.assessment.launch': 'Recommends: launch',
     'autonomy.proposal.assessment.postpone': 'Recommends: postpone',
     'autonomy.proposal.assessment.abort': 'Recommends: abort',
