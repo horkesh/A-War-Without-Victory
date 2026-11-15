@@ -5,7 +5,8 @@
   - Measured on main `16fc0a62f`: one of them fires, `csq_supply_corridor_chronic_strain_RS` at t180, in headless 188w and live alike. Its effects are RS cohesion −4, RS recruitment ×0.92 for 20 turns, RS internal cohesion −3, and a Cost Ledger line.
   - It claims a supply shortage the game does not model.
 - **Fix.** `supply_below` and `supply_above` are false unless `meta.supply_reserves_enabled` is true and the faction has a reserve.
-  - The gate is the meta flag, as in combat (`attack_resource_aftermath.ts`). It is not the field's presence, because a feint writes `general_supply_reserve` even with reserves off (`sector_offensive.ts`).
+  - The gate is the meta flag, as in combat (`attack_resource_aftermath.ts`), not the field's presence.
+  - **Folded in (orchestrator, 2026-11-15):** a finished feint wrote `general_supply_reserve[faction]` (−0.5, creating the field at 0) even with reserves off (`sector_offensive.ts`). Nothing acted on it, but the turn summary showed a false −0.5 supply change. The write is now gated on `meta.supply_reserves_enabled`. Every behavioural reader is already gated, so this does not affect F7's attribution.
 - **Tests.**
   - `tests/condition_evaluator.test.ts`, three new cases: reserves off makes both conditions false; a feint-written 0 reserve with reserves off does not count; a faction with no entry is not "below".
   - The twelve event-wave, condition and pressure fixtures that model a reserve now turn the reserve model on.
