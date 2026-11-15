@@ -95,7 +95,7 @@
     "sets_flags": {
       "operation_flash_occurred": true
     },
-    "historical_source": "ICTY Gotovina et al. (IT-06-90-T). UNSCR 981. BB Vol. II, Ch. 13."
+    "historical_source": "ICTY Gotovina et al. (IT-06-90-T). UNSCR 981. BB Vol. I ch. 76, pp. 296-298 and BB Vol. II Addendum 3, pp. 11-13 (the earlier \"BB Vol. II, Ch. 13\" does not exist)."
   },
   {
     "id": "coha_expires_1995",
@@ -853,7 +853,7 @@
     "sets_flags": {
       "rrf_deployed": true
     },
-    "historical_source": "UNSCR 998 (1995). ICTY Karadžić Judgment (IT-95-5/18-T). BB Vol. II, Ch. 14."
+    "historical_source": "UNSCR 998 (1995). ICTY Karadžić Judgment (IT-95-5/18-T). BB Vol. II Annex 64, pp. 563-569 (Chart 1, p. 569) and BB Vol. I pp. 326, 357, 360, 378 (the earlier \"BB Vol. II, Ch. 14\" does not exist; the Igman deployment page is not verified)."
   },
   {
     "id": "operation_summer_95",
@@ -908,7 +908,7 @@
     "sets_flags": {
       "grahovo_glamoc_captured": true
     },
-    "historical_source": "ICTY Gotovina et al. (IT-06-90-T). BB Vol. II, Ch. 14."
+    "historical_source": "ICTY Gotovina et al. (IT-06-90-T). BB Vol. I pp. 364-366, 369-370, 374 (Ljeto 95; the earlier \"BB Vol. II, Ch. 14\" does not exist)."
   },
   {
     "id": "operation_storm_1995",
@@ -1218,7 +1218,7 @@
       "kind": "narrative",
       "text": "The HZ HB Presidency must take a command-coordination posture toward HV Guards Brigades operating openly inside Bosnia-Herzegovina."
     },
-    "source_note": "On 4 August 1995 — the opening day of Operation Storm — HV Guards Brigades crossed the international border to operate openly inside Bosnia-Herzegovina alongside HVO units in the Livno-Glamoč-Bosansko Grahovo sector and again during Operation Mistral 2 (Šipovo, Mrkonjić Grad, Jajce, 8-13 September 1995). The historical action of the HZ HB Presidency was to accept HV command coordination per the Šušak-Tudjman-Boban-successor channel documented in admitted Tudjman Presidential Transcripts and BB Vol. II Ch. 15. §3.6 forward-looking guard (Wave 2 Canon): any future csq_hrhb_hv_* event authored to consume hv_hvo_cooperation_1995 outcomes MUST NOT carry response options that re-author cleansing, forced-displacement, hostage-taking, civilian-targeting, or any sensitive-act response option. The Operation Storm aftermath is ICTY-litigated (Gotovina/Markac/Cermak IT-06-90-T appeals reversal on JCE) and consequence rows must stay within legitimate military coordination lanes; the Krajina civilian column events and post-Storm Knin/Krajina property crimes remain canon-gated and OUT-OF-SCOPE.",
+    "source_note": "On 4 August 1995 — the opening day of Operation Storm — HV Guards Brigades crossed the international border to operate openly inside Bosnia-Herzegovina alongside HVO units in the Livno-Glamoč-Bosansko Grahovo sector and again during Operation Mistral 2 (Šipovo, Mrkonjić Grad, Jajce, 8-13 September 1995). The historical action of the HZ HB Presidency was to accept HV command coordination per the Šušak-Tudjman-Boban-successor channel documented in admitted Tudjman Presidential Transcripts and BB Vol. I ch. 89, pp. 367-376 and ch. 91, pp. 379-383 (the earlier \"BB Vol. II Ch. 15\" does not exist; the Šušak-Tudjman-Boban-successor channel is not verified). §3.6 forward-looking guard (Wave 2 Canon): any future csq_hrhb_hv_* event authored to consume hv_hvo_cooperation_1995 outcomes MUST NOT carry response options that re-author cleansing, forced-displacement, hostage-taking, civilian-targeting, or any sensitive-act response option. The Operation Storm aftermath is ICTY-litigated (Gotovina/Markac/Cermak IT-06-90-T appeals reversal on JCE) and consequence rows must stay within legitimate military coordination lanes; the Krajina civilian column events and post-Storm Knin/Krajina property crimes remain canon-gated and OUT-OF-SCOPE.",
     "staff_assessment": "Accepting HV command coordination secures Zagreb's operational and logistical backbone (Guards Brigades, captured SVK depot stocks, ammunition, fuel) for the September push and maximizes HR HB's Dayton negotiating leverage; running independently or coordinating only with ARBiH carries patron-axis cost.",
     "trigger_evidence": [
       "HV Guards Brigades are already in Livno-Glamoč-Bosansko Grahovo sector as of 4 August 1995.",
@@ -2071,7 +2071,7 @@
     "sets_flags": {
       "jajce_recaptured": true
     },
-    "historical_source": "ICTY Gotovina et al. (IT-06-90-T). BB Vol. II, Ch. 15."
+    "historical_source": "ICTY Gotovina et al. (IT-06-90-T). BB Vol. I ch. 91 (Maestral), pp. 379-381 and ch. 92-93, pp. 384-391 (the earlier \"BB Vol. II, Ch. 15\" does not exist)."
   },
   {
     "id": "operation_sana_1995",
@@ -2135,7 +2135,7 @@
     "sets_flags": {
       "operation_sana_occurred": true
     },
-    "historical_source": "ICTY Karadžić Judgment (IT-95-5/18-T). BB Vol. II Ch. 15; BB Vol. II pp. 536-538 for 5th Corps/Bihać source trail."
+    "historical_source": "ICTY Karadžić Judgment (IT-95-5/18-T). BB Vol. I ch. 91, pp. 379-383 and ch. 92, pp. 384-389 (the earlier \"BB Vol. II Ch. 15\" does not exist, and \"BB Vol. II pp. 536-538\" is inside Annex 61, Bihać October-December 1994, the wrong year for Sana) for 5th Corps/Bihać source trail."
   },
   {
     "id": "us_halts_federation_advance_1995",
@@ -2312,7 +2312,7 @@
     "sets_flags": {
       "advance_halted": true
     },
-    "historical_source": "Holbrooke, 'To End a War' (1998), on the 17 September 1995 meeting with Tuđman (Sanski Most, Prijedor and Bosanski Novi, but not Banja Luka; 'over two hundred thousand additional refugees'). Peter Galbraith, 'How Holbrooke Saved Banja Luka', Foreign Policy ('Remembering Richard Holbrooke'), 14 December 2010. BB Vol. II, Ch. 15. US State Dept. chronology. DECISIVE for the current authoring (2026-08-12): BB Vol. I p.462 endnote 823 — US pressure came in September after 'Maestral', and 'Nevertheless, Zagreb went ahead and ordered Juzni Potez in October'; BB Vol. I p.462 endnote 821 — Izetbegović bowed reluctantly while setting conditions to buy the ARBiH more days, Delić begging him to let the fighting continue; BB Vol. I p.427 — Juzni Potez opened 8 Oct, Mrkonjić Grad fell 10 Oct. This is why the comply response suppresses RBiH only and NOT HRHB."
+    "historical_source": "Holbrooke, 'To End a War' (1998), on the 17 September 1995 meeting with Tuđman (Sanski Most, Prijedor and Bosanski Novi, but not Banja Luka; 'over two hundred thousand additional refugees'). Peter Galbraith, 'How Holbrooke Saved Banja Luka', Foreign Policy ('Remembering Richard Holbrooke'), 14 December 2010. BB Vol. I ch. 92-93, pp. 384-390 and ch. 94, pp. 391-392 (the earlier \"BB Vol. II, Ch. 15\" does not exist). US State Dept. chronology. DECISIVE for the current authoring (2026-08-12): BB Vol. I p.462 endnote 823 — US pressure came in September after 'Maestral', and 'Nevertheless, Zagreb went ahead and ordered Juzni Potez in October'; BB Vol. I p.462 endnote 821 — Izetbegović bowed reluctantly while setting conditions to buy the ARBiH more days, Delić begging him to let the fighting continue; BB Vol. I p.427 — Juzni Potez opened 8 Oct, Mrkonjić Grad fell 10 Oct. This is why the comply response suppresses RBiH only and NOT HRHB."
   },
   {
     "id": "ceasefire_1995",

@@ -1552,7 +1552,7 @@
       "kind": "narrative",
       "text": "The Pale Assembly records its posture toward the Contact Group 51:49 territorial framework."
     },
-    "source_note": "The Pale Assembly's 3 August 1994 rejection of the Contact Group 51/49 plan is the documented historical posture (Karadžić IT-95-5/18-T §§4263-4310). The X4 packet uses the X1 London Conference cross-faction pattern (Packet 6): one event per faction, each triggered by `contact_group_plan_1994` and gated on the responding faction's foundational flag. §3.6 forward-looking guard: any future `csq_rs_contact_group_*` row consuming this row's outcomes MUST NOT re-author cleansing, forced-displacement, hostage-taking, civilian-targeting, paramilitary deployment, or any sensitive-act response option. The Contact Group response is a diplomatic/patron-axis posture decision; downstream rupture cascades (Belgrade embargo, Patriarch Paper delegation, Deliberate Force, hostage crisis) remain canon-gated through their existing event surfaces. Engine vocabulary substitutions per memory/engine_dimension_vocabulary.md: patron-pressure spike captured via `patron_pressure` dimension shift; cohesion damage via `internal_cohesion`; recruitment-pool penalty via `recruitment_modifier` multiplier with duration.",
+    "source_note": "The Pale Assembly's 3 August 1994 rejection of the Contact Group 51/49 plan is the documented historical posture (Karadžić IT-95-5/18-T paras 399 and 401: the judgment records the rejection on 21 July 1994 and the 27 August referendum, with no 3 August session and no Bijeljina; the earlier cite §§4263-4310 is Markale II). The X4 packet uses the X1 London Conference cross-faction pattern (Packet 6): one event per faction, each triggered by `contact_group_plan_1994` and gated on the responding faction's foundational flag. §3.6 forward-looking guard: any future `csq_rs_contact_group_*` row consuming this row's outcomes MUST NOT re-author cleansing, forced-displacement, hostage-taking, civilian-targeting, paramilitary deployment, or any sensitive-act response option. The Contact Group response is a diplomatic/patron-axis posture decision; downstream rupture cascades (Belgrade embargo, Patriarch Paper delegation, Deliberate Force, hostage crisis) remain canon-gated through their existing event surfaces. Engine vocabulary substitutions per memory/engine_dimension_vocabulary.md: patron-pressure spike captured via `patron_pressure` dimension shift; cohesion damage via `internal_cohesion`; recruitment-pool penalty via `recruitment_modifier` multiplier with duration.",
     "staff_assessment": "Rejection mirrors the documented Pale Assembly posture and preserves the platform claims, but invites Belgrade's embargo and patron rupture. Acceptance breaks the Six Goals platform internally and incurs cohesion collapse; negotiation forestalls the rupture without yielding the territorial frame.",
     "trigger_evidence": [
       "The Contact Group has presented the 51:49 map to all three factions.",
@@ -3240,7 +3240,7 @@
     "sets_flags": {
       "kupres_recaptured": true
     },
-    "historical_source": "BB Vol. II, Ch. 11. ICTY Prlić et al. (IT-04-74-T). Croatian operational records."
+    "historical_source": "BB Vol. II Annex 58, pp. 507-511 and BB Vol. I ch. 62, pp. 242-243 (the earlier \"BB Vol. II, Ch. 11\" does not exist). ICTY Prlić et al. (IT-04-74-T). Croatian operational records."
   },
   {
     "id": "bihac_crisis_1994",
@@ -3436,6 +3436,6 @@
     "sets_flags": {
       "carter_ceasefire_active": true
     },
-    "historical_source": "Carter Center archives. BB Vol. II, Ch. 12. ICTY Karadžić Judgment."
+    "historical_source": "Carter Center archives. BB Vol. II Annex 61, pp. 534-535 and BB Vol. I p. 250 (the earlier \"BB Vol. II, Ch. 12\" does not exist; the BB Vol. I chronology page is not verified). ICTY Karadžić Judgment."
   }
 ]
