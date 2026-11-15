@@ -963,8 +963,12 @@ export function computeFullVerdict(state: GameState): GameVerdict {
         outcomeLabel = outcome.replace('victory_', '') + ' Prevails';
     } else if (outcome === 'timeout_stalemate') {
         outcomeLabel = 'Exhaustion Stalemate';
-    } else if (outcome === 'faction_collapse') {
+    } else if (outcome === 'faction_collapse' || outcome?.startsWith('faction_collapse:')) {
+        // checkWarTermination writes `faction_collapse:<collapsed>:winner:<side>`; the exact match
+        // alone let every real collapse ending fall through to the raw id on the Verdict header.
         outcomeLabel = 'Faction Collapse';
+    } else if (outcome === 'mutual_collapse') {
+        outcomeLabel = 'Mutual Collapse';
     } else if (outcome) {
         outcomeLabel = outcome.replace(/_/g, ' ');
     }
