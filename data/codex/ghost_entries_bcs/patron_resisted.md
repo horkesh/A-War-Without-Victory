@@ -1,9 +1,11 @@
-# Pritisak pokrovitelja je odbijen
+# Pokrovitelj koji je odbijen
 
-Ring 2 - narativna opservacija. Ghost entry.
+**Ring 2 — narativna opservacija. Put kojim se nije išlo. Ghost zapis.**
 
-Ovaj bosanski sidecar lokalizira Codex ghost zapis "Pritisak pokrovitelja je odbijen". Zapis se prikazuje samo kao historijska sjenka: kampanja je dosla do vidljive razlike, ali stvarni historijski dogadjaj i dalje ostaje kanonski zapis onoga sto se desilo izvan simulacije. Tekst ne mijenja mehaniku, ne dodaje novu odluku i ne pretvara civilnu patnju u bodovanje.
+Strane koje su se borile u Bosni nisu se borile same. Savezna Republika Jugoslavija pod Slobodanom Miloševićem snabdijevala je i plaćala Vojsku Republike Srpske, i to preko 30. kadrovskog centra Generalštaba u Beogradu. Republika Hrvatska pod Franjom Tuđmanom snabdijevala je Hrvatsko vijeće obrane i politički ga usmjeravala. Taj odnos nije bio savjetodavan. Pretresno vijeće je u predmetu *Tužilac protiv Perišića* (IT-04-81-T) iznijelo nalaze o osiguravanju ljudstva, municije i logističke podrške od Vojske Jugoslavije prema VRS-u putem 30. kadrovskog centra (Perišić je oslobođen u žalbenom postupku 2013.). U predmetu *Tužilac protiv Prlića i drugih* (IT-04-74-T) razmatran je politički i vojni odnos između Zagreba i Herceg-Bosne, te su doneseni nalazi o učešću hrvatske države u Herceg-Bosni.
 
-U citanju ovog zapisa igrac treba razlikovati tri stvari: stvarni historijski tok rata u Bosni i Hercegovini, dokaz koji je simulacija zabiljezila u ovoj kampanji, i ogranicenje da Codex smije opisati samo narativni kontekst. Ako se spominju enklave, pregovori, paravojne formacije, koridori, oprema, zima ili raseljavanje, to je opis posljedica i dokaza, a ne poziv da se zlocin ili katastrofa tretiraju kao alat za optimizaciju.
+Pritisci vršeni kroz te kanale pokrovitelja — za teritorijalno pripajanje, za određene operacije, za političko usklađivanje s vanjskom diplomatijom pokrovitelja — nisu uvijek bili istovjetni ratnim ciljevima bosanskog rukovodstva nad kojim su se vršili. Historijski zapis sadrži trenutke u kojima su ti pritisci bili apsorbirani, preusmjereni, a ponekad i odbijeni.
 
-Izvorni engleski ghost zapis ostaje u susjednom direktoriju kao kanonski referentni tekst; ovaj sidecar daje Bosnian BCS prikaz za lokalizirani Codex paket.
+U ovoj kampanji rukovodstvo strane koju igrač vodi odbilo je pritisak pokrovitelja u najmanje tri zabilježena navrata. Brojač odbijanja pritiska iznosi tri ili više. Diplomatski registar tih odbijanja zabilježen je u političkoj evidenciji.
+
+Ovaj zapis ne tvrdi da je otpor prema pokrovitelju spriječio zločin, promijenio ishod rata ili dao povoljan ishod. Bilježi da je opcija odbijanja u ovoj kampanji iskorištena.

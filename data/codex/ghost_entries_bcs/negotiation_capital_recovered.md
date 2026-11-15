@@ -1,9 +1,11 @@
-# Pregovaracki kapital se oporavio
+# Pregovarački kapital: oporavak zabilježen u ovom toku igre
 
-Ring 2 - narativna opservacija. Ghost entry.
+**Ring 2 — narativna opservacija. Napomena o odstupanju. Ghost zapis. Analitička procjena načelnika štaba (CoS).**
 
-Ovaj bosanski sidecar lokalizira Codex ghost zapis "Pregovaracki kapital se oporavio". Zapis se prikazuje samo kao historijska sjenka: kampanja je dosla do vidljive razlike, ali stvarni historijski dogadjaj i dalje ostaje kanonski zapis onoga sto se desilo izvan simulacije. Tekst ne mijenja mehaniku, ne dodaje novu odluku i ne pretvara civilnu patnju u bodovanje.
+U kanonskoj osnovnoj liniji igre putanja pregovaračkog kapitala jednosmjerno je pražnjenje za sva tri glavna politička i vojna rukovodstva. Navodna kršenja prekida vatre, dokumentirana pripisivanja zločina, javna denunciranja posredničkih tijela i kumulativni trošak operativnih događaja koji su se upisivali na štetu međunarodnog ugleda — svaki je doprinosio postojanom nagrizanju političkog prostora raspoloživog na uzastopnim pregovaračkim stolovima. *Balkan Battlegrounds* II obuhvata faze Vance–Owen, Owen–Stoltenberg, Kontakt grupa i Holbrooke. Pretresna vijeća u predmetima *Tužilac protiv Karadžića* (IT-95-5/18-T) i *Tužilac protiv Prlića i drugih* (IT-04-74-T) donijela su nalaze o tome kako su se politička rukovodstva odnosila prema mirovnim planovima tog razdoblja. U toj osnovnoj liniji pregovarački kapital, jednom potrošen, ne vraća se održivo.
 
-U citanju ovog zapisa igrac treba razlikovati tri stvari: stvarni historijski tok rata u Bosni i Hercegovini, dokaz koji je simulacija zabiljezila u ovoj kampanji, i ogranicenje da Codex smije opisati samo narativni kontekst. Ako se spominju enklave, pregovori, paravojne formacije, koridori, oprema, zima ili raseljavanje, to je opis posljedica i dokaza, a ne poziv da se zlocin ili katastrofa tretiraju kao alat za optimizaciju.
+U ovoj kampanji, na putanji strane koju igrač vodi, očitanje pregovaračkog kapitala u revizijskom potezu odstupilo je naviše od putanje kanonske osnovne linije, a revizijsko očitanje bilježi oporavljeni kapital naspram historijskog dna.
 
-Izvorni engleski ghost zapis ostaje u susjednom direktoriju kao kanonski referentni tekst; ovaj sidecar daje Bosnian BCS prikaz za lokalizirani Codex paket.
+Mehanizam je zabilježen u tabelama ovog toka igre o pregovaračkom kapitalu, kršenjima prekida vatre i međunarodnom ugledu. Posljedični učinak vidljiv je u kasnijem držanju koje strana koju igrač vodi može zauzeti u aktivnoj posredničkoj fazi naspram očitanja kapitala suprotnih strana.
+
+Ovaj zapis ne tvrdi da je oporavak proizveo bilo koji konkretan mirovni ishod, da je istisnuo kanonski okvir mirovnog rješenja iz daytonskog razdoblja niti da je izmijenio historijski zapis. Nalazi Tribunala i kanonski politički Codex ostaju mjerodavni. Ovdje je zabilježeno usko: u ovom toku igre, na posebnoj evidenciji kapitala strane koju igrač vodi, putanja je kroz revizijsko razdoblje skrenula naviše, a revizijsko očitanje bilježi odstupanje od kanonske osnovne linije.

@@ -1,9 +1,11 @@
-# Puna uskladjenost s embargom na oruzje
+# Embargo koji nije zaobiđen
 
-Ring 2 - narativna opservacija. Ghost entry.
+**Ring 2 — narativna opservacija. Put kojim se nije išlo. Ghost zapis.**
 
-Ovaj bosanski sidecar lokalizira Codex ghost zapis "Puna uskladjenost s embargom na oruzje". Zapis se prikazuje samo kao historijska sjenka: kampanja je dosla do vidljive razlike, ali stvarni historijski dogadjaj i dalje ostaje kanonski zapis onoga sto se desilo izvan simulacije. Tekst ne mijenja mehaniku, ne dodaje novu odluku i ne pretvara civilnu patnju u bodovanje.
+Rezolucija 713 Vijeća sigurnosti UN-a, usvojena 25. septembra 1991, uvela je embargo na oružje na teritoriju bivše Jugoslavije. U operativnoj praksi rezolucija nije jednako djelovala. Historijski zapis sadrži dokumentirani mehanizam hrvatskog kanala za dotur oružja kojim je materijal prolazio do Republike Bosne i Hercegovine i Hrvatskog vijeća obrane; dokumentirani tok opskrbe od strane pokrovitelja, Savezne Republike Jugoslavije, prema Vojsci Republike Srpske putem logističke i kadrovske potpore, uključujući 30. kadrovski centar, razmatrane u predmetu *Tužilac protiv Perišića* (IT-04-81-T; osuđujuća presuda preinačena u žalbenom postupku, IT-04-81-A); te kanale naoružavanja trećih strana — uključujući iranski kanal — koji su djelovali uz formalni režim embarga do 1994. i u 1995. godinu. Zapis Tribunala i *Balkan Battlegrounds* II dokumentiraju taj obrazac.
 
-U citanju ovog zapisa igrac treba razlikovati tri stvari: stvarni historijski tok rata u Bosni i Hercegovini, dokaz koji je simulacija zabiljezila u ovoj kampanji, i ogranicenje da Codex smije opisati samo narativni kontekst. Ako se spominju enklave, pregovori, paravojne formacije, koridori, oprema, zima ili raseljavanje, to je opis posljedica i dokaza, a ne poziv da se zlocin ili katastrofa tretiraju kao alat za optimizaciju.
+U ovoj kampanji, na putanji strane koju igrač vodi, nijedan kanal naoružavanja trećih strana nije registriran kao aktivan u evidencijama toka igre, niti se potom aktivirao ijedan događaj slabljenja kanala (što bi bilo nizvodna posljedica prethodnog aktiviranja kanala).
 
-Izvorni engleski ghost zapis ostaje u susjednom direktoriju kao kanonski referentni tekst; ovaj sidecar daje Bosnian BCS prikaz za lokalizirani Codex paket.
+Historijski obrazac embarga i kanala ostaje u kanonskom Codexu. Pitanja koja je on tada otvorio u međunarodnoj raspravi — je li embargo bio pravičan u svom operativnom učinku s obzirom na asimetričnu raspodjelu arsenala Jugoslavenske narodne armije, je li njegovo provođenje bilo jednako za sve strane, jesu li kanali promijenili tok ili trajanje rata — ovim zapisom se ne presuđuju. Ovaj zapis ne istiskuje zapis Tribunala o mehanizmu opskrbe od strane pokrovitelja.
+
+Ovdje je zabilježeno samo ovo: u ovom toku igre, na putanji kvaliteta opreme strane koju igrač vodi, kanal trećih strana nije se aktivirao. Cijena je zabilježena u vlastitim evidencijama toka igre.

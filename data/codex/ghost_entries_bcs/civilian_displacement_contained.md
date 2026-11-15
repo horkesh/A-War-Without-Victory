@@ -1,9 +1,11 @@
-# Civilno raseljavanje je ograniceno
+# Civilno raseljavanje: val koji nije dostigao vrhunac
 
-Ring 2 - narativna opservacija. Ghost entry.
+**Ring 2 — narativna opservacija. Put kojim se nije išlo. Ghost zapis.**
 
-Ovaj bosanski sidecar lokalizira Codex ghost zapis "Civilno raseljavanje je ograniceno". Zapis se prikazuje samo kao historijska sjenka: kampanja je dosla do vidljive razlike, ali stvarni historijski dogadjaj i dalje ostaje kanonski zapis onoga sto se desilo izvan simulacije. Tekst ne mijenja mehaniku, ne dodaje novu odluku i ne pretvara civilnu patnju u bodovanje.
+Bosanski rat izazvao je najveće civilno raseljavanje u Evropi od Drugog svjetskog rata. UNHCR je do 1995. registrirao oko 2,2 miliona raseljenih osoba, podijeljenih na interno raseljene osobe unutar Bosne i Hercegovine i izbjeglice u inostranstvu. *Balkan Battlegrounds* I i II dokumentiraju valove raseljavanja: raseljavanje u proljeće–ljeto 1992. iz općina na koje je polagala pravo Republika Srpska, raseljavanje u srednjoj Bosni 1992–1993. između bošnjačkog i hrvatskog stanovništva, raseljavanja iz enklava u dolini Drine koja su kulminirala događajima iz jula 1995, te raseljavanje hrvatskih Srba iz Krajine u Hrvatskoj tokom operacije Oluja u augustu 1995, izvan Bosne i Hercegovine. Pretresna vijeća u predmetu *Tužilac protiv Krajišnika* (IT-00-39-T) i povezanim predmetima koji se tiču općine Prijedor razmatrala su prisilno raseljavanje u okviru šire kampanje progona.
 
-U citanju ovog zapisa igrac treba razlikovati tri stvari: stvarni historijski tok rata u Bosni i Hercegovini, dokaz koji je simulacija zabiljezila u ovoj kampanji, i ogranicenje da Codex smije opisati samo narativni kontekst. Ako se spominju enklave, pregovori, paravojne formacije, koridori, oprema, zima ili raseljavanje, to je opis posljedica i dokaza, a ne poziv da se zlocin ili katastrofa tretiraju kao alat za optimizaciju.
+U ovoj kampanji, na putanji strane koju igrač vodi, revizijski brojač civilnog raseljavanja zabilježio je do revizijskog poteza putanju ispod očitanja kanonske osnovne linije. Val koji kanonska osnovna linija bilježi nije dostigao vrhunac do revizijskog poteza.
 
-Izvorni engleski ghost zapis ostaje u susjednom direktoriju kao kanonski referentni tekst; ovaj sidecar daje Bosnian BCS prikaz za lokalizirani Codex paket.
+Historijski zapis o valovima raseljavanja ostaje u kanonskom Codexu. UNHCR-ovi registrirani ukupni brojevi, nalazi Pretresnih vijeća o kampanjama prisilnog raseljavanja u općinama iz optužnice protiv Karadžića i općinama iz optužnice protiv Prlića, te okvir prava na povratak iz Aneksa 7 nakon Daytona ostaju mjerodavni.
+
+Ovdje je zabilježeno samo ovo: u ovom toku igre, na područjima pod kontrolom strane koju igrač vodi i unutar revizijskog razdoblja, putanja brojača raseljavanja odstupila je od kanonske osnovne linije ispod revizijskog praga. Mehanizam je zabilježen u evidencijama stanovništva, kontrole i događaja toka igre; ovaj zapis tvrdi odstupanje i ništa više.

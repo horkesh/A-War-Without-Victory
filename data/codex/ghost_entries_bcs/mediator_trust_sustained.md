@@ -1,9 +1,11 @@
-# Povjerenje posrednika je sacuvano
+# Povjerenje posrednika: kanal koji nije spaljen
 
-Ring 2 - narativna opservacija. Ghost entry.
+**Ring 2 — narativna opservacija. Put kojim se nije išlo. Ghost zapis.**
 
-Ovaj bosanski sidecar lokalizira Codex ghost zapis "Povjerenje posrednika je sacuvano". Zapis se prikazuje samo kao historijska sjenka: kampanja je dosla do vidljive razlike, ali stvarni historijski dogadjaj i dalje ostaje kanonski zapis onoga sto se desilo izvan simulacije. Tekst ne mijenja mehaniku, ne dodaje novu odluku i ne pretvara civilnu patnju u bodovanje.
+Međunarodna posrednička arhitektura tokom rata prolazila je kroz prepoznatljive faze. *Balkan Battlegrounds* II opisuje institucionalni slijed: Konferencija Evropske zajednice o Jugoslaviji pod lordom Carringtonom, Međunarodna konferencija o bivšoj Jugoslaviji pod Cyrusom Vanceom i Davidom Owenom, okvir Owen–Stoltenberg, plan Kontakt grupe iz jula 1994. i Holbrookeove misije posredovanja koje su proizvele Opći okvirni sporazum iz Daytona od 14. decembra 1995. Svaku fazu uvjetovalo je povjerenje koje su strane ukazivale posredničkim institucijama i pojedincima koji su nosili zaduženja. Historijski zapis sadrži dokumentirana povlačenja povjerenja u nekoliko faza — odbijanja prijema posrednika, javna denunciranja imenovanih pregovarača, izjave da imenovana tijela nisu nepristrasna — te posljedice koje su ta povlačenja imala na to šta se moglo dogovoriti i kada.
 
-U citanju ovog zapisa igrac treba razlikovati tri stvari: stvarni historijski tok rata u Bosni i Hercegovini, dokaz koji je simulacija zabiljezila u ovoj kampanji, i ogranicenje da Codex smije opisati samo narativni kontekst. Ako se spominju enklave, pregovori, paravojne formacije, koridori, oprema, zima ili raseljavanje, to je opis posljedica i dokaza, a ne poziv da se zlocin ili katastrofa tretiraju kao alat za optimizaciju.
+U ovoj kampanji, na putanji strane koju igrač vodi, brojač niza povjerenja u posrednika napredovao je kroz zabilježeni raspon poteza a da se u evidenciji strane koju igrač vodi nije registrirao nijedan događaj denunciranja posrednika. Do revizijskog poteza kanal povjerenja prema posredničkom tijelu aktivne faze ostao je, prema očitanju diplomatske evidencije ovog toka igre, otvoren.
 
-Izvorni engleski ghost zapis ostaje u susjednom direktoriju kao kanonski referentni tekst; ovaj sidecar daje Bosnian BCS prikaz za lokalizirani Codex paket.
+Historijska denunciranja ostaju u zapisu. Stav Skupštine na Palama prema Vance–Owenovom planu i stav sarajevskog rukovodstva prema okviru Owen–Stoltenberg — to je zabilježeno u kanonskom političkom Codexu. Ovaj zapis ih ne dovodi u pitanje.
+
+Ovdje je zabilježeno operativno: kanal povjerenja, mnogo puta kroz mnogo poteza upitan hoće li biti odbačen, u tom razdoblju nije odbačen. Je li kanal održan uvjerenjem, taktičkim proračunom ili izostankom povoda za provokaciju, ovdje se ne presuđuje; brojač niza je napredovao, a revizijsko očitanje bilježi tu činjenicu.

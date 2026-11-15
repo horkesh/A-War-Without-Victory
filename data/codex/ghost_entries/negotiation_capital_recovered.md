@@ -1,5 +1,5 @@
 ---
-historical_source: Balkan Battlegrounds Vol. II chs. 31 and 51; ICTY Karadžić (IT-95-5/18-T) and Prlić et al. (IT-04-74-T) Trial Judgments; canonical negotiation-capital ledger.
+historical_source: Balkan Battlegrounds Vol. II; ICTY Karadžić (IT-95-5/18-T) and Prlić et al. (IT-04-74-T) Trial Judgments; canonical negotiation-capital ledger.
 source_tier: design_counterfactual
 source_note: The sources anchor the historical negotiation context. Recovery is a live-run ledger divergence and does not displace the canonical peace-process record.
 ---
@@ -8,9 +8,9 @@ source_note: The sources anchor the historical negotiation context. Recovery is 
 
 **Ring 2 — narrative observation. Divergence note. Ghost entry. CoS analytical assessment.**
 
-The negotiation-capital trajectory across the war was, in the canonical record, a one-way drain for all three principal political-military leaderships. Alleged ceasefire violations, documented atrocity attributions, public denunciations of mediating bodies, and the cumulative cost of operational events that registered against international standing each contributed to a steady erosion of the political room available at successive negotiating tables. *Balkan Battlegrounds* II Chapters 31 and 51 document the pattern across the Vance–Owen, Owen–Stoltenberg, Contact Group, and Holbrooke phases. The Trial Chambers addressed the negotiation-context findings in *Prosecutor v. Karadžić* (IT-95-5/18-T), *Prosecutor v. Prlić et al.* (IT-04-74-T), and the related cases that examined how political authority engaged with the mediation process during the periods covered by the indictments. None of the three principal leaderships recovered negotiation capital in a sustained way once it was spent; the late-war floor was reached through accumulation, not through reversal.
+In the game's canonical baseline, the negotiation-capital trajectory is a one-way drain for all three principal political-military leaderships. Alleged ceasefire violations, documented atrocity attributions, public denunciations of mediating bodies, and the cumulative cost of operational events that registered against international standing each contributed to a steady erosion of the political room available at successive negotiating tables. *Balkan Battlegrounds* II covers the Vance–Owen, Owen–Stoltenberg, Contact Group, and Holbrooke phases. The Trial Chambers in *Prosecutor v. Karadžić* (IT-95-5/18-T) and *Prosecutor v. Prlić et al.* (IT-04-74-T) made findings on how the political leaderships engaged with the peace plans of the period. In that baseline, negotiation capital once spent is not recovered in a sustained way.
 
-In this campaign, on the player faction's track, the negotiation-capital reading at the audit turn diverged upward from the canonical-baseline trajectory. The combined drivers — the absence of a registered ceasefire-violation event in the audit window, the absence of a documented international-condemnation event in the audit window, and the maintenance of mediator-trust channels described in the run's diplomatic ledger — produced a recovery rather than a continued drain, and the audit reading registers the recovered capital against the historical floor.
+In this campaign, on the player faction's track, the negotiation-capital reading at the audit turn diverged upward from the canonical-baseline trajectory, and the audit reading registers the recovered capital against the historical floor.
 
 The mechanism is recorded in the run's negotiation-capital, ceasefire-violation, and international-standing tables. The downstream effect is visible in the late-run posture the player faction can adopt at the active mediation phase against opposing-side capital readings.
 

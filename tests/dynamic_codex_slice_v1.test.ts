@@ -227,6 +227,19 @@ describe('LANE-NIGHTSHIFT-DYNAMIC-CODEX-SLICE — T3: ghost-entry conditionality
             negotiation_capital: { RBiH: makeBreakdown(0) },
         });
         expect(buildGhostEntries(passes, 120).find((g) => g.ghost_id === 'cleansing_refused')).toBeDefined();
+
+        // R8 polish: a recorded deployment (the count the cost ledger prints) withdraws the entry,
+        // even under always_deny with a zero war-crimes counter; another side's count does not.
+        const withDeployments = {
+            ...passes,
+            paramilitary_deployment_count: { RBiH: 2 },
+        } as unknown as GameState;
+        expect(buildGhostEntries(withDeployments, 120).find((g) => g.ghost_id === 'cleansing_refused')).toBeUndefined();
+        const otherSide = {
+            ...passes,
+            paramilitary_deployment_count: { RS: 29 },
+        } as unknown as GameState;
+        expect(buildGhostEntries(otherSide, 120).find((g) => g.ghost_id === 'cleansing_refused')).toBeDefined();
     });
 
     it('early_peace_accepted is mutually exclusive with dayton_signed_1995', () => {

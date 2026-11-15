@@ -1,9 +1,11 @@
-# Reforma doktrine je dovrsena
+# Reforma doktrine bez otklona: reforma koja se primila
 
-Ring 2 - narativna opservacija. Ghost entry.
+**Ring 2 — narativna opservacija. Put kojim se nije išlo. Ghost zapis.**
 
-Ovaj bosanski sidecar lokalizira Codex ghost zapis "Reforma doktrine je dovrsena". Zapis se prikazuje samo kao historijska sjenka: kampanja je dosla do vidljive razlike, ali stvarni historijski dogadjaj i dalje ostaje kanonski zapis onoga sto se desilo izvan simulacije. Tekst ne mijenja mehaniku, ne dodaje novu odluku i ne pretvara civilnu patnju u bodovanje.
+Vojne snage koje su vodile rat u Bosni i Hercegovini bile su institucije u pokretu. Armija Republike Bosne i Hercegovine nastala je iz osnove Teritorijalne odbrane, rascjepkanog prvog talasa sastavljenog od policije i dobrovoljaca te postepenog upijanja regionalnih formacija u korpusnu strukturu koja na početku rata nije postojala. Hrvatsko vijeće obrane, Vojska Republike Srpske i njihovi pokušaji reforme uz podršku pokrovitelja tekli su usporednim kolosijecima. *Balkan Battlegrounds* II dokumentira kasnoratni tok reforme i modernizacije na strani ARBiH; kanonski Codex pokriva odgovarajuće impulse na putanjama drugih strana.
 
-U citanju ovog zapisa igrac treba razlikovati tri stvari: stvarni historijski tok rata u Bosni i Hercegovini, dokaz koji je simulacija zabiljezila u ovoj kampanji, i ogranicenje da Codex smije opisati samo narativni kontekst. Ako se spominju enklave, pregovori, paravojne formacije, koridori, oprema, zima ili raseljavanje, to je opis posljedica i dokaza, a ne poziv da se zlocin ili katastrofa tretiraju kao alat za optimizaciju.
+Codex modelira reformu kao neujednačenu: pokretanju reforme može slijediti otklon — institucionalna erozija koja nastaje kada rotacija kadra prestiže konsolidaciju, kada se priručnici pišu brže nego što se čitaju, i kada se ratna iscrpljenost iznad revizijskog praga združi s moralom ispod revizijskog praga i razgradi uslove koje je reforma zahtijevala. Odgovarajuće napomene u evidenciji troškova u kanonskom Codexu opisuju modelirani mehanizam.
 
-Izvorni engleski ghost zapis ostaje u susjednom direktoriju kao kanonski referentni tekst; ovaj sidecar daje Bosnian BCS prikaz za lokalizirani Codex paket.
+U ovoj kampanji, na putanji strane koju igrač vodi, obrazac reforme je aktiviran, modernizacijski impuls koji ovisi o prethodnoj reformi je aktiviran, a uslov otklona nije aktiviran.
+
+Mehanizam je zabilježen u evidencijama kohezije, iscrpljenosti i morala. Ovaj zapis ne tvrdi da je reforma polučila bilo kakav određeni operativni ishod, spriječila bilo koji konkretni zločin ili izmijenila opći strateški oblik rata. Bilježi da je slijed reforme bez otklona u ovom toku igre aktiviran na posebnoj putanji strane koju igrač vodi.

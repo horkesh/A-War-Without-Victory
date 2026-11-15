@@ -44,7 +44,11 @@ export function parseGhostEntryProse(
     .replace(/[\*_`]/g, '')
     .trim();
 
-  return markdown
+  // A leading YAML front-matter block (`---` ... `---`: historical_source, source_tier,
+  // source_note) is authoring metadata, never player text. Ten EN bodies carry one; without
+  // this it rendered as a visible paragraph of raw keys.
+  const body = markdown.replace(/^﻿?---\r?\n[\s\S]*?\r?\n---[ \t]*(?:\r?\n|$)/, '');
+  return body
     .split(/\r?\n\s*\r?\n/)
     .map((rawBlock): GhostProseBlock | null => {
       const block = rawBlock.trim();
@@ -56,7 +60,9 @@ export function parseGhostEntryProse(
       // Four reclassified EN context bodies carry a legacy classification strapline.
       // It is metadata, not factual prose, and must not mislabel a context row
       // as a path-not-taken record.
-      if (classification !== 'path_not_taken' && /path[-\s]?not[-\s]?taken/i.test(parsed.text)) {
+      // The BCS sidecars carry the same strapline ("Put kojim se nije išlo").
+      if (classification !== 'path_not_taken'
+        && /path[-\s]?not[-\s]?taken|put kojim se nije (?:i[šs]lo|krenulo)/i.test(parsed.text)) {
         return null;
       }
       return parsed.text.length > 0 ? parsed : null;

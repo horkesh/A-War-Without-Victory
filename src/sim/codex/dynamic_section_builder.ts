@@ -459,6 +459,10 @@ function predAllianceHeld(state: GhostEntryStateView, currentTurn: number): Ghos
 //   negotiation breakdown (`state.political.negotiation.capital[faction]`),
 //   which is the canonical accumulator written by paramilitary_sweep and
 //   per-turn negotiation-capital recalculation.
+//   R8 polish (2026-11-15): also requires zero recorded paramilitary deployments for the
+//   faction (`paramilitary_deployment_count`, the counter the Verdict cost ledger prints),
+//   the same gate as paramilitary_streak_refused, so the entry can never sit beside an
+//   "N deployments authorized" finding if its §6 gate is ever lifted.
 function predCleansingRefused(
     state: GhostEntryStateView,
     currentTurn: number,
@@ -467,6 +471,7 @@ function predCleansingRefused(
     const operands = requiredOperands(
         policyOperand(state, 'always_deny'),
         warCrimesZeroOperand(state, faction),
+        paramilitaryDeploymentsZeroOperand(state, faction),
     );
     return operands ? matchGhost(operands, [operands[1]!], currentTurn, 100) : null;
 }

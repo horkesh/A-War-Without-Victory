@@ -1,9 +1,11 @@
-# Politicko jedinstvo je odrzano
+# Klub koji nije pukao
 
-Ring 2 - narativna opservacija. Ghost entry.
+**Ring 2 — narativna opservacija. Put kojim se nije išlo. Ghost zapis.**
 
-Ovaj bosanski sidecar lokalizira Codex ghost zapis "Politicko jedinstvo je odrzano". Zapis se prikazuje samo kao historijska sjenka: kampanja je dosla do vidljive razlike, ali stvarni historijski dogadjaj i dalje ostaje kanonski zapis onoga sto se desilo izvan simulacije. Tekst ne mijenja mehaniku, ne dodaje novu odluku i ne pretvara civilnu patnju u bodovanje.
+Svako od tri glavna politička i vojna rukovodstva u ratu djelovalo je pod dokumentiranim unutrašnjim pritiskom. Ratno Predsjedništvo u Sarajevu obuhvatalo je suprotstavljene frakcije oko pitanja stava o opstanku, upravljanja savezništvima i prihvatljivih mirovnih uslova. Osovina Pale–Banja Luka nosila je trajnu napetost između političkog rukovodstva i Glavnog štaba, te između palanskog i banjalučkog (krajiškog) rukovodstva entiteta. Mostarsko rukovodstvo Hrvatske zajednice Herceg-Bosne djelovalo je pod unakrsnim pritiskom iz Zagreba i lokalne političke dinamike u središnjoj Bosni i samoj Hercegovini. Obrazac dokumentiran u *Balkan Battlegrounds* II, nalazi Pretresnog vijeća u predmetima *Tužilac protiv Karadžića* (IT-95-5/18-T) i *Tužilac protiv Prlića i drugih* (IT-04-74-T), te savremena štampa pokazuju ponavljana neslaganja unutar svakog rukovodstva.
 
-U citanju ovog zapisa igrac treba razlikovati tri stvari: stvarni historijski tok rata u Bosni i Hercegovini, dokaz koji je simulacija zabiljezila u ovoj kampanji, i ogranicenje da Codex smije opisati samo narativni kontekst. Ako se spominju enklave, pregovori, paravojne formacije, koridori, oprema, zima ili raseljavanje, to je opis posljedica i dokaza, a ne poziv da se zlocin ili katastrofa tretiraju kao alat za optimizaciju.
+U ovoj kampanji, na putanji strane koju igrač vodi, zajednički uslov koji pokreće privremeni politički raskol — istovremeno prelaženje praga napetosti u savezništvu, praga revizije kumulativnih gubitaka i praga revizije međunarodnog ugleda — nije bio ispunjen u zabilježenom rasponu poteza. Oznaka privremenog političkog raskola nije se do revizijskog poteza upisala u evidenciju strane koju igrač vodi. Kabinet je izdržao; klub je, makar nevoljko, izdržao.
 
-Izvorni engleski ghost zapis ostaje u susjednom direktoriju kao kanonski referentni tekst; ovaj sidecar daje Bosnian BCS prikaz za lokalizirani Codex paket.
+Historijski zapis o dokumentiranim raskolima — sporovima u Skupštini na Palama, frakcijskim pregrupisavanjima u sarajevskom Predsjedništvu, neslaganjima u rukovodstvu Herceg-Bosne — ostaje u kanonskom Codexu. Ti raskoli su se dogodili. Ovaj zapis ih ne potiskuje.
+
+Ovdje je zabilježeno samo ovo: prema pragovima revizije i u rasponu poteza u kojem bi se historijski obrazac obično aktivirao, na posebnoj putanji strane koju igrač vodi zajednički uslov nije bio ispunjen, a trošak kohezije i vjerodostojnosti koji opisuje napomena u evidenciji troškova nije naplaćen.

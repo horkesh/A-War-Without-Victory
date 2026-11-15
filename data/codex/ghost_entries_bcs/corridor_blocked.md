@@ -1,9 +1,11 @@
-# Koridor je blokiran
+# Posavski koridor koji nije otvoren
 
-Ring 2 - narativna opservacija. Ghost entry.
+**Ring 2 — narativna opservacija. Put kojim se nije išlo. Ghost zapis.**
 
-Ovaj bosanski sidecar lokalizira Codex ghost zapis "Koridor je blokiran". Zapis se prikazuje samo kao historijska sjenka: kampanja je dosla do vidljive razlike, ali stvarni historijski dogadjaj i dalje ostaje kanonski zapis onoga sto se desilo izvan simulacije. Tekst ne mijenja mehaniku, ne dodaje novu odluku i ne pretvara civilnu patnju u bodovanje.
+U historijskom ratu operacija Koridor započela je 24. juna 1992. i do sredine jula povezala Bosansku krajinu s istočnom Republikom Srpskom i teritorijom Savezne Republike Jugoslavije preko tla pod srpskom kontrolom, iako je pojas kod Brčkog ostao uzak, mjestimično oko tri kilometra širok krajem 1992. *Balkan Battlegrounds* I (str. 177–182) dokumentiraju operativni tok i njegove posljedice. Koridor je postao glavna opskrbna arterija koja je zapadni dio Republike Srpske održavala do kraja rata, a sjeverna linija fronta kod Brčkog postala je dugotrajna iscrpljujuća kriza za sve snage koje su osporavale savsku osovinu. Uspostava koridora zabilježena je kao događaj strateškog nivoa u kanonskom vojnom Codexu.
 
-U citanju ovog zapisa igrac treba razlikovati tri stvari: stvarni historijski tok rata u Bosni i Hercegovini, dokaz koji je simulacija zabiljezila u ovoj kampanji, i ogranicenje da Codex smije opisati samo narativni kontekst. Ako se spominju enklave, pregovori, paravojne formacije, koridori, oprema, zima ili raseljavanje, to je opis posljedica i dokaza, a ne poziv da se zlocin ili katastrofa tretiraju kao alat za optimizaciju.
+U ovoj kampanji proboj koridora nije se dogodio u historijskom operativnom razdoblju. Odgovarajući događaj u vremenskoj liniji scenarija nije bio aktiviran do revizijskog poteza. Oznaka osiguranog koridora ostala je nepostavljena.
 
-Izvorni engleski ghost zapis ostaje u susjednom direktoriju kao kanonski referentni tekst; ovaj sidecar daje Bosnian BCS prikaz za lokalizirani Codex paket.
+Šta je to značilo za zapadni dio Republike Srpske, za front na savskoj osovini i za tempo opskrbe snaga koje su djelovale s jedne i druge strane osporavanog pojasa zabilježeno je u teritorijalnim, opskrbnim evidencijama i evidencijama gubitaka ovog toka igre i kroz njih se prenosi. Ovaj zapis tvrdi operativno odstupanje i ništa dalje.
+
+Historijski zapis o koridoru — njegova strateška vrijednost, cijena njegove uspostave, cijena njegovog osporavanja, geografska logika zbog koje je bio i nezamjenjiv i ranjiv — ostaje u kanonskom Codexu. Ovaj tok igre odstupa od tog zapisa u trenutku aktiviranja uslova, a ne u kanonskoj ocjeni onoga što je koridor bio.

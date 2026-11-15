@@ -1,9 +1,11 @@
-# Zima je izdrzana
+# Zimsko snabdijevanje: raspodjela koja je izdržala
 
-Ring 2 - narativna opservacija. Ghost entry.
+**Ring 2 — narativna opservacija. Put kojim se nije išlo. Ghost zapis.**
 
-Ovaj bosanski sidecar lokalizira Codex ghost zapis "Zima je izdrzana". Zapis se prikazuje samo kao historijska sjenka: kampanja je dosla do vidljive razlike, ali stvarni historijski dogadjaj i dalje ostaje kanonski zapis onoga sto se desilo izvan simulacije. Tekst ne mijenja mehaniku, ne dodaje novu odluku i ne pretvara civilnu patnju u bodovanje.
+Zime 1992–93. i 1993–94. izazvale su dokumentirano opterećenje snabdijevanja širom Bosne i Hercegovine. Raspodijeljena logistika improvizirala je pred nestašicom goriva i zatvaranjem planinskih puteva. *Balkan Battlegrounds* II dokumentira taj obrazac u središnjoj Bosni, u obruču opsade Sarajeva i u istočnim enklavama: improvizaciju i operativni tempo prilagođen vremenskim prilikama.
 
-U citanju ovog zapisa igrac treba razlikovati tri stvari: stvarni historijski tok rata u Bosni i Hercegovini, dokaz koji je simulacija zabiljezila u ovoj kampanji, i ogranicenje da Codex smije opisati samo narativni kontekst. Ako se spominju enklave, pregovori, paravojne formacije, koridori, oprema, zima ili raseljavanje, to je opis posljedica i dokaza, a ne poziv da se zlocin ili katastrofa tretiraju kao alat za optimizaciju.
+U ovoj kampanji uslov sezonskog gubitka zaliha provjeravan je kroz raspon poteza u kojem bi ga hladno vrijeme obično aktiviralo, ali zajednički uslov — zalihe ispod praga revizije, ratna iscrpljenost iznad praga revizije i moral ispod praga revizije — nije bio istovremeno ispunjen za stranu koju igrač vodi. Oznaka zimskog gubitka zaliha nije se do zabilježenog revizijskog poteza upisala u evidenciju strane koju igrač vodi.
 
-Izvorni engleski ghost zapis ostaje u susjednom direktoriju kao kanonski referentni tekst; ovaj sidecar daje Bosnian BCS prikaz za lokalizirani Codex paket.
+Mehanizam koji je proizveo to odstupanje zabilježen je u evidencijama zaliha, iscrpljenosti i morala kampanje. Nije riječ o tome da je hladno vrijeme bilo toplije niti da je racioniranje bilo lakše.
+
+Ovaj zapis ne tvrdi da je zaliha bilo u izobilju, da su vojnici bili na toplom niti da je rat bio manje težak zato što se vodio kroz te zime. Bilježi da se revizijski uslov koji bi se prema historijskim obrascima obično aktivirao u ovoj kampanji nije aktivirao, te da se troškovi kohezije i zaliha dokumentirani u kanonskom Codexu nisu upisali u evidenciju strane koju igrač vodi u ovom revizijskom potezu.
