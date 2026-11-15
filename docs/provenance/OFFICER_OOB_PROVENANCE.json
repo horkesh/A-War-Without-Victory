@@ -3019,6 +3019,18 @@
       "citation": "Volume I, Appendix H, Skeleton Bosnian Army Order of Battle, October 1995, PDF pp. 506-515.",
       "notes": "Exact formation identity; the game separately constrains the April 1992 availability model."
     },
+    "corps:arbih_7th_corps": {
+      "source": "Balkan Battlegrounds: A Military History of the Yugoslav Conflict, 1990-1995, Volume I",
+      "source_url": "https://books.google.ba/books?id=it1IAQAAIAAJ&printsec=frontcover",
+      "source_tier": "scholarly",
+      "confidence": "exact",
+      "identity_relation": null,
+      "court_record_citation": null,
+      "conflict_note": null,
+      "disposition": "supported",
+      "citation": "Volume I, Appendix H, Skeleton Bosnian Army Order of Battle, October 1995, PDF pp. 506-515; formation at Travnik on 26 February 1994 under Mehmed Alagic, Volume II pp. 468, 493.",
+      "notes": "Exact formation identity; the game creates the corps at week 99 (26 February 1994) from the western half of the 3rd Corps."
+    },
     "corps:arbih_general_staff": {
       "source": "Balkan Battlegrounds: A Military History of the Yugoslav Conflict, 1990-1995, Volume I",
       "source_url": "https://books.google.ba/books?id=it1IAQAAIAAJ&printsec=frontcover",

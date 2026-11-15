@@ -7,8 +7,8 @@
  * (data/scenarios/events/war_1993.json) into
  * `state.military.pending_event_decisions` so EventDecisionModal surfaces it.
  * ZERO new sim/event code — the event's authored effects (morale +5 / cohesion
- * +3 / patron_pressure -3 / standing shifts), voluntary action cadence (max_fires 5 /
- * cooldown 10t), and branches are reused verbatim.
+ * +3 / patron_pressure -3 / standing shifts), voluntary action cadence (renewable
+ * cooldown since appendix D, 2026-11-15), and branches are reused verbatim.
  *
  * ⚠ ENCLAVE REACHABILITY GATE (owner constraint, 2026-06-01):
  * The president CANNOT visit a CUT-OFF enclave (Srebrenica / Žepa / Goražde,
@@ -171,8 +171,8 @@ function computeFrontVisitAvailability(state, playerFaction, eventDef) {
 
   const out = {
     ...base,
-    firesLeft: Number.isFinite(firesLeft) ? firesLeft : maxFires,
-    maxFires: Number.isFinite(maxFires) ? maxFires : 0,
+    firesLeft: Number.isFinite(firesLeft) ? firesLeft : null, // null = renewable (no lifetime cap)
+    maxFires: Number.isFinite(maxFires) ? maxFires : null,
     cooldownUntil,
     onCooldown,
     reachableBranchIds,

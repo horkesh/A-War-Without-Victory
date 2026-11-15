@@ -227,12 +227,13 @@ describe('officer/OOB provenance inventory', () => {
         // Central Bosnia rather than the post-fall Tomislavgrad assignment.
         // Officers 68 -> 90, elite commanders 3 -> 5, brigades 244 -> 247,
         // omitted candidates 40 -> 14.
-        expect(report.summary.total_records).toBe(361);
+        // RF-1 Phase B adds corps:arbih_7th_corps (BB1 App. H; BB2 pp.468, 493): corps 19 -> 20, total 361 -> 362.
+        expect(report.summary.total_records).toBe(362);
         expect(report.records.filter((record) => record.record_kind === 'officer')).toHaveLength(90);
-        expect(report.records.filter((record) => record.record_kind === 'corps')).toHaveLength(19);
+        expect(report.records.filter((record) => record.record_kind === 'corps')).toHaveLength(20);
         expect(report.records.filter((record) => record.record_kind === 'brigade')).toHaveLength(247);
         expect(report.records.filter((record) => record.record_kind === 'elite_commander')).toHaveLength(5);
-        expect(report.summary.manifest_records).toBe(361);
+        expect(report.summary.manifest_records).toBe(362);
         expect(report.summary.omitted_candidate_records).toBe(14);
         expect(violationCodes(report)).not.toContain('missing_provenance');
 
@@ -284,7 +285,7 @@ describe('officer/OOB provenance inventory', () => {
         const report = loadOfficerOobProvenanceReport(process.cwd());
         const corpsRecords = report.records.filter((record) => record.record_kind === 'corps');
 
-        expect(corpsRecords).toHaveLength(19);
+        expect(corpsRecords).toHaveLength(20);
         expect(corpsRecords.map((record) => record.record_key)).toEqual(
             [...corpsRecords.map((record) => record.record_key)].sort(),
         );

@@ -19,6 +19,7 @@ import {
     PERSONNEL_HEALTHY_THRESHOLD,
 } from './bot_constants.js';
 import { buildOsidAdjacency } from './osid_adjacency.js';
+import { isFriendlyFaction } from '../early_war/alliance_update.js';
 
 /** Assess supply health of a corps by checking supply state of subordinate brigades. */
 export function assessCorpsSupplyHealth(
@@ -239,6 +240,9 @@ export function computeSectorThreat(
             if (corpsOsids.has(f.location_osid)) {
                 ourPersonnel += f.personnel ?? 0;
             }
+        } else if (isFriendlyFaction(f.faction, faction, state)) {
+            // Allied brigades (RBiH-HRHB while allied) are no threat (RF-F1g). Neither counted.
+            continue;
         } else {
             if (threatZone.has(f.location_osid)) {
                 enemyPersonnel += f.personnel ?? 0;

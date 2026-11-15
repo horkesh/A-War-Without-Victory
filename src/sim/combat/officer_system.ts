@@ -136,6 +136,43 @@ export function officerReplacementMatterKey(
     return `replacement:${outgoingOfficerId}:${corpsId}:${proposedSuccessorId}`;
 }
 
+/**
+ * Put a corps-command change to the President as a `replacement_suggested` matter,
+ * deduplicated against pending and resolved matters. Returns true when a new matter was
+ * queued. Shared by the §5E schedule paths and the corps-reorganisation handover.
+ */
+export function queueReplacementMatter(
+    state: GameState,
+    faction: FactionId,
+    outgoingOfficerId: string,
+    corpsId: string,
+    proposedSuccessorId: string,
+    turn: number,
+): boolean {
+    const pendingEvents = (state.military.pending_officer_events ??= []);
+    const matterKey = officerReplacementMatterKey(outgoingOfficerId, corpsId, proposedSuccessorId);
+    const alreadyPending = pendingEvents.some(event => replacementMatterMatches(event, matterKey, outgoingOfficerId, corpsId, proposedSuccessorId));
+    const alreadyResolved = (state.military.officer_decision_history ?? []).some(record => replacementMatterMatches(
+        record as typeof record & { matter_key?: string },
+        matterKey,
+        outgoingOfficerId,
+        corpsId,
+        proposedSuccessorId,
+    ));
+    if (alreadyPending || alreadyResolved) return false;
+    pendingEvents.push({
+        event_id: matterKey,
+        type: 'replacement_suggested',
+        faction,
+        turn,
+        officer_id: proposedSuccessorId,
+        current_commander_id: outgoingOfficerId,
+        corps_id: corpsId,
+        acknowledged: false,
+    });
+    return true;
+}
+
 function replacementMatterMatches(
     value: {
         type?: string;
@@ -664,26 +701,7 @@ export function processOfficerSuccession(
     function suggestScheduledReplacement(outgoing: NamedOfficer, corpsId: string, proposed?: NamedOfficer | null): void {
         const successor = proposed ?? findHistoricalSuccessor(outgoing, officerData!, officers!, turn, corpsRoster, corpsId);
         if (!successor) return;
-        const matterKey = officerReplacementMatterKey(outgoing.id, corpsId, successor.id);
-        const alreadyPending = pendingEvents.some(event => replacementMatterMatches(event, matterKey, outgoing.id, corpsId, successor.id));
-        const alreadyResolved = (state.military.officer_decision_history ?? []).some(record => replacementMatterMatches(
-            record as typeof record & { matter_key?: string },
-            matterKey,
-            outgoing.id,
-            corpsId,
-            successor.id,
-        ));
-        if (alreadyPending || alreadyResolved) return;
-        pendingEvents.push({
-            event_id: matterKey,
-            type: 'replacement_suggested',
-            faction: outgoing.faction,
-            turn,
-            officer_id: successor.id,
-            current_commander_id: outgoing.id,
-            corps_id: corpsId,
-            acknowledged: false,
-        });
+        queueReplacementMatter(state, outgoing.faction, outgoing.id, corpsId, successor.id, turn);
     }
 
     // 1. Historical departures
@@ -1067,7 +1085,7 @@ export function processOfficerSuccession(
  * by him when he declined one (both filed in `officer_decision_history`). The choice
  * survives a later switch to staff control.
  */
-function isPresidentialAppointee(state: GameState, corpsId: string, officerId: string): boolean {
+export function isPresidentialAppointee(state: GameState, corpsId: string, officerId: string): boolean {
     const records = state.military.corps_command?.[corpsId]?.co_replacement_record;
     if (Array.isArray(records) && records.some(r => r.replacement_officer_id === officerId)) return true;
     const history = state.military.officer_decision_history;

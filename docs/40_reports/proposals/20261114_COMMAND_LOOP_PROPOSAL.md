@@ -106,10 +106,17 @@ before commit (`docs/plans/2026-06-01-presidential-command-model-design.md:28`).
 | Decline an opportunity | staff recommended approval and every required check is green |
 
 A clash fires only when all three hold: (a) one of the conflicts above; (b) the army commander's
-compliance with that act scores partial or refused, using the existing compliance formula against the
-verb the act implies (request op: press offensive; stop op or withhold: hold), and never "modified",
-which is today's weekly noise; (c) the act concerns a corps operation or larger. Otherwise the army's
-objection becomes one silent Record line.
+compliance with that act is short of full (modified, partial or refused), using the existing compliance
+formula against the verb the act implies (request op: press offensive; stop op, withhold or decline:
+hold), with the category kept on the clash as its severity; (c) the act concerns a corps operation or
+larger. Otherwise (full compliance, or no or an acting army commander) the army's objection becomes one
+silent Record line.
+
+*(Amended 2026-11-15, Fable consult 1 appendix A, ratified in L7 (#670). Rule (b) first read "partial or
+refused … and never 'modified', which is today's weekly noise". That noise was the weekly bot directive;
+it cannot reach A1, which needs a real presidential act that crosses the plan at corps scale, with one
+open clash, four a year and eight weeks apart. Under the old rule, with stubbornness masked to 3, only
+Praljak could ever clash, and with the roster values RBiH would have no clash after June 1993.)*
 
 Stance matters are excluded: option 2 already prices an overrule (Main Staff delay, eight-week
 Confirm-only window, patron shift), and the panel ruled that stance overrules must not stack with other
@@ -120,7 +127,7 @@ objective, hold N weeks later, take the force from another corps, or resubmit ne
 
 | Answer | Effect | Cost |
 | --- | --- | --- |
-| Accept | The army's version is staged instead. Any Authority already staged for the order is refunded. Record: "You deferred to {CO} on week N." | 0; uses one of the year's clashes |
+| Accept | The army's version is staged instead. A withdrawn halt or request is refunded the Authority staged for it; a withheld plan or declined opportunity is backed at its usual price (10 or 20), refused when unaffordable. Record: "You deferred to {CO} on week N." | 0 for a halt or request; 10 or 20 for a withheld plan or declined opportunity; uses one of the year's clashes |
 | Insist | The order stands as given. One override goes on the army commander's tolerance record (`army_co_lifecycle.ts:470-476`). Record: "{CO} warned you on week N." Corps cowing counters are not touched. | 15 Authority |
 | Replace | The existing Replace-CO lever for the corps commander who would carry out the order, staged at answer time through `co_replacement.cjs` so it lands the same week. | 25 Authority (lever 5) |
 
@@ -391,14 +398,39 @@ are free, and the priced levers are rare by design. Cutting income would not cre
 - No refund on success: territorial gain is a banned income source under the Section 6 audit.
 - Visible regeneration: every priced button reads "Back · 10 · you have 34 · +4 next week", and the Desk
   header shows next week's income with its sources.
-- Target: about one backed corps operation every two to three weeks, or one campaign a month. At autonomy
-  1 the game designer's estimate is that Authority first drops below 50 by mid-1993 and stays under 60
-  through most of 1994-95. Acceptance: Authority sits at its cap in no more than 25% of turns after week
-  26 in a measured diary, using the diary template's "turns at cap" line.
+- ~~Target: about one backed corps operation every two to three weeks, or one campaign a month. …
+  Acceptance: Authority sits at its cap in no more than 25% of turns after week 26 in a measured diary.~~
+  *(Superseded 2026-11-15, see "Ratified design" below. Measured in L6 (#661) and L7 (#670): a President
+  who only says yes stays at the cap in 100% of turns, because the engine offers RBiH a backed operation
+  about every seven weeks, not every two to three.)*
 - At the default autonomy 2 only authored historical operations ask for a signature (Rulebook line 13),
   so demand there rests on stop, request, elite, replace and Insist. A restrained President who keeps
   Authority high is making a valid choice; the Record shows it as unspent political capital. No
   artificial sinks.
+
+**Ratified design (2026-11-15, Fable consult 1 and its follow-up; ratified in L7 #670 by independent
+game-designer and canon-compliance seats).**
+- **Authority is the price of overruling the army.** Prices and income stay as they are. The large,
+  optional spend is overruling: stop, request, elite, replace (25), force over a no-go (15), Insist in a
+  clash (15, 2A), backing (10 or 20).
+- **The gestures are the routine spend.** Front visit, address to the nation, decoration and strategic
+  posture review (10 each) are renewable all war, on a cooldown instead of a lifetime cap (front visit
+  26 weeks, address 52, decoration 52, posture review 26), keeping the war total about where the old caps
+  put it. Landed in the appendix D PR (data plus loader, contracts and Desk; player path only; 40-week
+  headless artifacts byte-identical and `test:baselines` passing).
+- **The 25% target moves to the President it fits.** Test with three Presidents over 104 weeks at the
+  default autonomy, counting a turn at cap only when `current` equals `max` and the reserve is full:
+  A, hands-off (answers nothing, initiates nothing: a full meter is valid, shown as unspent capital);
+  B, engaged (every gesture when off cooldown and affordable, a Request-op every eighth week on the corps
+  with the most enemy contact, Insist on every clash, backs what he is asked); C, meddler (as B, a
+  Request-op every fourth week). Pass: B at cap in at most 25% of turns after week 26; B below 25 at
+  least once a year; C has an act turned down for lack of Authority at least four times a year; B sees
+  at least two clashes a year. Record each army chief's stubbornness: run on main as it stands and again
+  after the roster fix (Fable appendix B) lands; the clash line is judged on the second run.
+- **Held tuning order**, applied one step at a time and only if the test fails: gestures 10 → 20, then
+  remove the 15-point reserve, then lower the base income. None is applied before the test.
+- Not part of this design: named operations drawing on Authority (a post-1.0 candidate), and the masked
+  army-roster stubbornness (a separate measured RF fix, Fable appendix B).
 
 **Engine and state impact.** Prices: the cost constants in `src/ui/map/utils/commandAuthority.ts` and
 `autonomy_ipc_contract.cjs` (with the existing parity guard), a debit in the `accept-proposal` handler
@@ -532,7 +564,9 @@ hashes and a live strip-and-compare, as for stance matters. L4 and L8: full suit
 run, anchors and provenance, one change per run.
 
 **Done when.** The next dry-run diary shows no weekly pushback, a dispatch every week, a chip that
-clears, and Authority at its cap in no more than a quarter of turns after week 26.
+clears, and the engaged President of the 5D three-President test at the cap in no more than a quarter of
+turns after week 26 (amended 2026-11-15; first read "Authority at its cap in no more than a quarter of
+turns after week 26" for every President).
 
 ## 7. Decisions for the owner
 
