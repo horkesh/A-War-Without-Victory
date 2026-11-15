@@ -633,6 +633,77 @@ function officerDetailToken(record: OfficerDecisionRecordView): DecisionConseque
   };
 }
 
+// ── Staff reading of policy (command-loop 2A, step A0) ────────────────────────────────────────
+// The army reads a political directive every week, for a President who never gave one. For his
+// own faction that reading is one line in Army HQ Records, replaced each week. It is deliberately
+// not a ledger record: a weekly record would crowd out the decisions the ledger exists to keep.
+
+const STAFF_READING_AUTONOMOUS_TRACE_ROLE = 'AUTONOMOUS_LAUNCH_PROPOSAL';
+
+const STAFF_READING_VERB_KEYS: Record<string, MessageKey> = {
+  HOLD_AT_ALL_COSTS: 'review.record.verb.holdAtAllCosts',
+  PRESS_OFFENSIVE: 'review.record.verb.pressOffensive',
+  MAINTAIN_CORRIDOR: 'review.record.verb.maintainCorridor',
+  PREPARE_RESERVE: 'review.record.verb.prepareReserve',
+  HONOR_TRUCE: 'review.record.verb.honorTruce',
+  BALANCE_FRONTS: 'review.record.verb.balanceFronts',
+};
+
+const STAFF_READING_ROLE_ORDER = ['primary', 'secondary', 'economy', 'contain'] as const;
+
+const STAFF_READING_ROLE_KEYS: Record<(typeof STAFF_READING_ROLE_ORDER)[number], MessageKey> = {
+  primary: 'review.record.role.primary',
+  secondary: 'review.record.role.secondary',
+  economy: 'review.record.role.economy',
+  contain: 'review.record.role.contain',
+};
+
+export interface StaffReadingLine {
+  /** The week the army read the directive. */
+  turn: number;
+  /** "Staff reading of policy". */
+  label: string;
+  /** "{verb}, carried out as {role summary}." */
+  text: string;
+}
+
+/**
+ * The latest staff reading of policy for the player's own faction, or null when the army has not
+ * read one (no directive was interpreted, or this is not a live player's state).
+ */
+export function buildStaffReadingLine(state: LoadedGameState | null | undefined): StaffReadingLine | null {
+  const playerFaction = state ? playerFactionFromState(state) : null;
+  if (!state || !playerFaction) return null;
+  const traces = (state.armyCoDecisionTraces?.[playerFaction] ?? [])
+    .filter((trace) => trace.campaign_role !== STAFF_READING_AUTONOMOUS_TRACE_ROLE);
+  const latest = traces.reduce<typeof traces[number] | null>(
+    (best, trace) => (best === null || trace.turn >= best.turn ? trace : best),
+    null,
+  );
+  if (!latest) return null;
+
+  const verbKey = STAFF_READING_VERB_KEYS[latest.campaign_role];
+  const verb = verbKey
+    ? t(verbKey)
+    : humanizeToken(latest.campaign_role).toLowerCase() || t('review.record.verb.unreported');
+
+  const counts = new Map<string, number>();
+  for (const directive of state.armyCorpsDirectives ?? []) {
+    counts.set(directive.role, (counts.get(directive.role) ?? 0) + 1);
+  }
+  const roleParts = STAFF_READING_ROLE_ORDER
+    .filter((role) => (counts.get(role) ?? 0) > 0)
+    .map((role) => t(STAFF_READING_ROLE_KEYS[role], { count: counts.get(role) ?? 0 }));
+
+  return {
+    turn: latest.turn,
+    label: t('review.record.label'),
+    text: roleParts.length > 0
+      ? t('review.record.text', { verb, roles: roleParts.join(t('review.record.listSeparator')) })
+      : t('review.record.textNoRoles', { verb }),
+  };
+}
+
 function compareRecords(a: DecisionConsequenceRecord, b: DecisionConsequenceRecord): number {
   if (a.turn !== b.turn) return b.turn - a.turn;
   return strictCompare(a.id, b.id);

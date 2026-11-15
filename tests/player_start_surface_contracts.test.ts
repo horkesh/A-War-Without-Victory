@@ -10,6 +10,8 @@ import { resolveEventDecision } from '../src/sim/events/resolve_decision';
 import { EventDecisionModal } from '../src/ui/map/components/EventDecisionModal';
 import type { DimensionShift, EventDefinition, EventEffect, PendingEventDecision } from '../src/sim/events/event_types';
 import { isDisplayEventEffect } from '../src/ui/map/utils/eventEffectDisplay';
+import { displayEventProse, resolveEventSourceLine } from '../src/ui/map/data/eventDisplayCopy';
+import { restoreBosnianProperNames } from '../src/ui/shared/bosnianPlaceNames';
 import war1992Events from '../data/scenarios/events/war_1992.json';
 
 // Every card is on the desk at campaign birth. atBirth: the event is also FIRED (and the answer
@@ -61,23 +63,29 @@ function signedDelta(delta: number): string {
   return `${delta > 0 ? '+' : ''}${delta}`;
 }
 
+// Council fix 4 (C4/C11): state attributes use the canonical short state name (RBiH, RS, HRHB);
+// army attributes use the army (ARBiH, VRS, HVO); engine shares read as whole points.
 function factionLabel(faction: string | undefined): string {
-  return ({ RBiH: 'Republic of Bosnia and Herzegovina', RS: 'Republika Srpska', HRHB: 'Herzeg-Bosna' } as Record<string, string>)[faction ?? ''] ?? faction ?? '';
+  return faction ?? '';
+}
+
+function armyLabel(faction: string | undefined): string {
+  return ({ RBiH: 'ARBiH', RS: 'VRS', HRHB: 'HVO' } as Record<string, string>)[faction ?? ''] ?? faction ?? '';
 }
 
 function dimensionLabel(dimension: string): string {
   return ({
     military_credibility: 'Military Credibility', territorial_legitimacy: 'Territorial Legitimacy',
-    international_standing: "Int'l Standing", patron_confidence: 'Patron Confidence',
+    international_standing: 'International Standing', patron_confidence: 'Patron Confidence',
     internal_cohesion: 'Internal Cohesion', negotiating_leverage: 'Negotiating Leverage',
   } as Record<string, string>)[dimension] ?? dimension;
 }
 
 function displayedEffectRow(effect: EventEffect): string | null {
   if (!isDisplayEventEffect(effect) || effect.kind === 'narrative') return null;
-  if (effect.kind === 'morale_change') return `${factionLabel(effect.faction)} morale ${signedDelta(effect.delta)}`;
-  if (effect.kind === 'alliance_change') return `${factionLabel('RBiH')} / ${factionLabel('HRHB')} alliance ${signedDelta(effect.delta)}`;
-  if (effect.kind === 'aggression_modifier') return `${factionLabel(effect.faction)} operational aggression ${signedDelta(effect.delta)} for ${effect.duration_turns} weeks (recorded only; the standard army AI ignores it in this build)`;
+  if (effect.kind === 'morale_change') return `${armyLabel(effect.faction)} morale ${signedDelta(effect.delta)}`;
+  if (effect.kind === 'alliance_change') return `RBiH–HRHB alliance ${signedDelta(Math.round(effect.delta * 100))}`;
+  if (effect.kind === 'aggression_modifier') return `${armyLabel(effect.faction)} offensive drive ${signedDelta(Math.round(effect.delta * 100))}% for ${effect.duration_turns} weeks (noted in the record; it does not change army planning)`;
   throw new Error(`Unhandled display-safe foundational effect: ${effect.kind}`);
 }
 
@@ -108,9 +116,9 @@ describe('player start surface contracts', () => {
         onRespond: () => undefined,
       }));
 
-      expect(container.textContent).toContain(eventDef!.title);
+      expect(container.textContent).toContain(restoreBosnianProperNames(eventDef!.title ?? ''));
       for (const option of eventDef!.response_options ?? []) {
-        expect(container.textContent).toContain(option.label);
+        expect(container.textContent).toContain(displayEventProse(option.label));
         for (const effect of option.effects ?? []) {
           const row = displayedEffectRow(effect);
           if (row) expect(container.textContent, `${flow.eventId}:${option.id}:${effect.kind}`).toContain(row);
@@ -140,11 +148,11 @@ describe('player start surface contracts', () => {
 
     const dialog = screen.getByRole('dialog');
     expect(dialog.getAttribute('aria-modal')).toBe('true');
-    expect(container.textContent).toContain(policy.source_note);
+    expect(container.textContent).toContain(resolveEventSourceLine(policy, 'en')!);
     expect(pendingDecisionFromEvent(policy).historical_source).toBe(policy.historical_source);
     for (const option of policy.response_options ?? []) {
-      expect(container.textContent).toContain(option.label);
-      expect(container.textContent).toContain(option.description);
+      expect(container.textContent).toContain(displayEventProse(option.label));
+      expect(container.textContent).toContain(displayEventProse(option.description ?? ''));
       for (const effect of option.effects ?? []) {
         const row = displayedEffectRow(effect);
         if (row) expect(container.textContent, `${policy.id}:${option.id}:${effect.kind}`).toContain(row);

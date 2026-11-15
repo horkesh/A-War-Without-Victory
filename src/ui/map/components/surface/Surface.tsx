@@ -72,6 +72,12 @@ export const SURFACE_MODAL_PANEL_MEDIUM =
 /** A short notice: grows with its content up to the cap; columns still scroll on their own. */
 export const SURFACE_MODAL_PANEL_COMPACT =
   'flex max-h-[min(46rem,calc(var(--interface-viewport-height,100vh)-6rem))] w-[min(64rem,calc(var(--interface-viewport-width,100vw)-3rem))] flex-col overflow-hidden rounded-lg border border-accent-gold/35 bg-[#11141b] text-text-primary shadow-[0_30px_90px_rgba(0,0,0,0.65)] outline-none';
+/**
+ * A dispatch notice (event modal): one still beside the report. Wider than the compact panel so
+ * the report and what it changes read without scrolling at 1366x768 and 1920x1080.
+ */
+export const SURFACE_MODAL_PANEL_NOTICE =
+  'flex max-h-[min(46rem,calc(var(--interface-viewport-height,100vh)-6rem))] w-[min(72rem,calc(var(--interface-viewport-width,100vw)-3rem))] flex-col overflow-hidden rounded-lg border border-accent-gold/35 bg-[#11141b] text-text-primary shadow-[0_30px_90px_rgba(0,0,0,0.65)] outline-none';
 
 /** Column templates. Widths follow the interface viewport so ultrawide gets room and 1280 still fits. */
 const RAIL_WIDTH = 'clamp(17rem,calc(var(--interface-viewport-width,100vw)*0.19),21rem)';
@@ -86,6 +92,8 @@ export const SURFACE_COLUMN_LAYOUTS = {
   'content-detail': `grid-cols-[minmax(0,1fr)_clamp(21rem,calc(var(--interface-viewport-width,100vw)*0.31),35rem)]`,
   /** content | wide detail (reading-heavy right column). */
   'content-wide-detail': `grid-cols-[minmax(0,1fr)_clamp(24rem,calc(var(--interface-viewport-width,100vw)*0.4),46rem)]`,
+  /** still + chips | report (the event notice). */
+  'media-content': `grid-cols-[clamp(18rem,calc(var(--interface-viewport-width,100vw)*0.22),26rem)_minmax(0,1fr)]`,
   /** one column. */
   single: 'grid-cols-1',
 } as const;

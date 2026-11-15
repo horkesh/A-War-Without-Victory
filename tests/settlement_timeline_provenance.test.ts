@@ -65,7 +65,7 @@ describe('Settlement Timeline Provenance — Turn-0 Control Truth', () => {
         expect(events[0].type).toBe('control_flip');
         expect(events[0].faction).toBe('RS');
         expect(events[0].title).toContain('VRS');
-        expect(events[0].title).toContain('scenario start');
+        expect(events[0].title).toContain('when the campaign began');
         expect(events[0].detail).toBe('initial control');
     });
 
@@ -84,7 +84,7 @@ describe('Settlement Timeline Provenance — Turn-0 Control Truth', () => {
 
         const controlFlips = events.filter(e => e.type === 'control_flip');
         expect(controlFlips).toHaveLength(1);
-        expect(controlFlips[0].title).toBe('Controlled by ARBiH at scenario start');
+        expect(controlFlips[0].title).toBe('Controlled by ARBiH when the campaign began');
         expect(controlFlips[0].title).not.toContain('took control');
         expect(controlFlips[0].detail).toBe('initial control');
     });
@@ -100,7 +100,7 @@ describe('Settlement Timeline Provenance — Turn-0 Control Truth', () => {
         const controlFlips = events.filter(e => e.type === 'control_flip');
         expect(controlFlips).toHaveLength(1);
         expect(controlFlips[0].turn).toBe(1);
-        expect(controlFlips[0].title).toBe('Controlled by VRS at scenario start');
+        expect(controlFlips[0].title).toBe('Controlled by VRS when the campaign began');
         expect(controlFlips[0].title).not.toContain('took control');
         expect(controlFlips[0].detail).toBe('initial control');
     });
@@ -137,7 +137,7 @@ describe('Settlement Timeline Provenance — Turn-0 Control Truth', () => {
 
         const controlFlips = events.filter(e => e.type === 'control_flip');
         expect(controlFlips).toHaveLength(1);
-        expect(controlFlips[0].title).toBe('Controlled by ARBiH at scenario start');
+        expect(controlFlips[0].title).toBe('Controlled by ARBiH when the campaign began');
         expect(controlFlips[0].detail).toBe('initial control');
     });
 
@@ -227,7 +227,7 @@ describe('Settlement Timeline Provenance — Turn-0 Control Truth', () => {
         expect(controlFlips).toHaveLength(1);
         expect(controlFlips[0].turn).toBe(0);
         expect(controlFlips[0].title).toContain('VRS');
-        expect(controlFlips[0].title).toContain('scenario start');
+        expect(controlFlips[0].title).toContain('when the campaign began');
 
         // Displacement still recorded
         const disp = events.filter(e => e.type === 'displacement');

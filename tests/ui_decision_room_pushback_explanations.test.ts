@@ -170,6 +170,30 @@ describe('PresidentialDecisionRoom pushback explanations card', () => {
     });
 
     it('emits a pushback card from an army CO decision trace with PARTIAL / REFUSED rationale', () => {
+        // A trace that is not the weekly reading of a political directive (here the army's own
+        // launch proposal) still raises the card.
+        const state = makeState({
+            armyCoDecisionTraces: {
+                RBiH: [
+                    {
+                        turn: 30,
+                        campaign_role: 'AUTONOMOUS_LAUNCH_PROPOSAL',
+                        rationale: 'General Delić pushes back and proposes an operation of his own — the corps asks for an override.',
+                    },
+                ],
+            },
+        } as Partial<LooseLGS>);
+        const view = buildPresidentialDecisionRoomView({ state });
+        const card = view.cards.find((c) => c.id === 'pushback:player-army-co');
+        expect(card).toBeDefined();
+        const joined = [card!.explanation, ...card!.evidence].join(' ');
+        expect(/AUTONOMOUS|proposes|push/i.test(joined)).toBe(true);
+    });
+
+    // Command-loop L1 (2A step A0): the weekly reading of a political directive the President never
+    // gave is one Army HQ Records line, not a Decision Room card (the visibility projection itself
+    // is unchanged; the card builder no longer reads it).
+    it('does not raise a card from the weekly directive trace or its pushback event', () => {
         const state = makeState({
             armyCoDecisionTraces: {
                 RBiH: [
@@ -180,12 +204,26 @@ describe('PresidentialDecisionRoom pushback explanations card', () => {
                     },
                 ],
             },
+            pendingOfficerEvents: [
+                {
+                    event_id: 'army:RBiH:directive:30',
+                    type: 'army_directive_pushback',
+                    faction: 'RBiH',
+                    turn: 30,
+                    officer_id: 'rbih_army_co',
+                    officer_name: 'General Delić',
+                    officer_competence: 5,
+                    officer_aggressiveness: 4,
+                    officer_defensive_skill: 4,
+                    acknowledged: false,
+                    reason: 'General Delić pushes back on the political directive.',
+                    overridable: true,
+                },
+            ],
         } as Partial<LooseLGS>);
         const view = buildPresidentialDecisionRoomView({ state });
-        const card = view.cards.find((c) => c.id === 'pushback:player-army-co');
-        expect(card).toBeDefined();
-        const joined = [card!.explanation, ...card!.evidence].join(' ');
-        expect(/PRESS_OFFENSIVE|deviate|push/i.test(joined)).toBe(true);
+        expect(view.cards.find((c) => c.id === 'pushback:player-army-co')).toBeUndefined();
+        expect(view.advanceReadiness.items).toEqual([]);
     });
 
     it('does not leak enemy pushback signals into the player Decision Room card', () => {

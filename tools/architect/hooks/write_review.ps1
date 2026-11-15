@@ -15,7 +15,7 @@ $ErrorActionPreference = "SilentlyContinue"
 
 # Resolve repo root
 $repoRoot = (git -C $ResultDir rev-parse --show-toplevel 2>$null)
-if (-not $repoRoot) { $repoRoot = "F:\A-War-Without-Victory" }
+if (-not $repoRoot) { $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..\..\..')).Path }
 
 $metaFile     = Join-Path $ResultDir "meta.json"
 $responseFile = Join-Path $ResultDir "response.md"

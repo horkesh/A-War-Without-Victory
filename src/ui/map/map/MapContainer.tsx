@@ -83,6 +83,7 @@ import { buildMajorCityLabelGeoJSON } from './builders/buildMajorCityLabelGeoJSO
 import { StackExpansionOverlay } from '../components/StackExpansionOverlay';
 import { RadialMenu } from '../components/RadialMenu';
 import type { RadialMenuItem } from '../components/RadialMenu';
+import { OsmAttribution } from '../components/OsmAttribution';
 import { rewritePmtilesUrls } from './rewritePmtilesUrls';
 import { ensurePmtilesProtocol } from './pmtilesProtocol';
 import { collectEmphasizedFormationIds, collectHighlightedFormationIds } from './highlightSelection';
@@ -4721,6 +4722,9 @@ export function MapContainer({
       className="absolute inset-0 outline-none"
     >
       <div ref={containerRef} className="absolute inset-0" style={{ filter: 'sepia(0.08) saturate(0.95)' }} />
+
+      {/* ODbL attribution for the OpenStreetMap-derived base map (osm.pmtiles). */}
+      <OsmAttribution placement="war-map" />
 
       {mapLoadError ? (
         <div

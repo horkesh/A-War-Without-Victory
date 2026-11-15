@@ -95,6 +95,7 @@ import { getStalestSectorIntelConfidence, stableSectorKey } from '../sector_inte
 import { computePlanningDuration } from '../sector_offensive_axis_helpers.js';
 import { canFormationReachAssemblyInTime } from '../sector_offensive_launch_helpers.js';
 import { mayEliteJoinOperation } from '../historical_elite_reservations.js';
+import { isLevel1PlayerApprovalFaction } from '../../bot/staff_control.js';
 
 export function capOpportunityOperationParticipants(
     participantIds: readonly string[],
@@ -773,8 +774,10 @@ function findLocalOccupationCandidateImpl(
         return null;
     }
     // A standalone local opportunity has no proposal identity for the Level-1
-    // approval flow. Fail closed instead of admitting it around player authority.
-    if ((stateRef.meta?.autonomy_level ?? 0) === 1) {
+    // approval flow. Fail closed instead of admitting it around player authority —
+    // for the PLAYER's corps only. Bot corps have no approver, so they keep local
+    // occupation at Level 1 exactly as at Level 0/2 (2026-11-14, R8 run m).
+    if (isLevel1PlayerApprovalFaction(stateRef, briefing.faction)) {
         if (observation) observation.precondition_failure = 'autonomy_not_level_1';
         return null;
     }
@@ -2663,9 +2666,15 @@ function buildOperationsImpl(
                 // Filter: drop any objective OSID not reachable from this corps's front segments.
                 // Only apply when the corps has at least one reachable enemy OSID (i.e., the set
                 // is non-empty), to avoid incorrectly zeroing objectives for a corps with no sectors.
-                return reachableEnemyOsids.size > 0
+                const reachable = reachableEnemyOsids.size > 0
                     ? rawObjectives.filter(osid => reachableEnemyOsids.has(osid))
                     : rawObjectives;
+                // RF-AI2 bot objective lockout: honour the corps' failed-objective cooldown
+                // (sector_offensive.ts recordFailedObjectives). The local-occupation and probe
+                // paths already read it; this bot plan path did not, so a corps re-planned the
+                // objective that had just failed.
+                return reachable.filter(osid =>
+                    (briefing.failed_offensive_objectives?.[osid]?.cooldown_until_turn ?? 0) <= briefing.turn);
             },
         );
 

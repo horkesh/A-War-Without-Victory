@@ -679,7 +679,10 @@ function projectMilitary(state, playerFaction, opportunityOwnership) {
     .map(cloneJson);
   projected.operation_opportunity_diagnostics = rowsForFaction(military.operation_opportunity_diagnostics, playerFaction);
   projected.operation_opportunity_traces = rowsForFaction(military.operation_opportunity_traces, playerFaction);
-  projected.army_co_decision_traces = rowsForFaction(military.army_co_decision_traces, playerFaction);
+  // A per-faction record ({ RBiH: [...] }), not a list of rows: rowsForFaction() turned it into []
+  // so the live app never received the player's own interpretation traces (the Army HQ Records
+  // "staff reading of policy" line and the turn record's directive rows read them).
+  projected.army_co_decision_traces = scopeFactionValue(military.army_co_decision_traces, playerFaction);
   projected.pending_event_decisions = rowsForFaction(military.pending_event_decisions, playerFaction);
   projected.pending_event_notifications = (Array.isArray(military.pending_event_notifications)
     ? military.pending_event_notifications

@@ -37,8 +37,20 @@ On Windows, the test process must resolve unqualified `bash` to Git Bash for MSY
 not the Windows/WSL launcher. Scope any PATH adjustment to the test child, not global settings.
 [BC08 evidence and limits](docs/40_reports/audits/20260907_BC08_CURRENT_ENGINE_HEALTH_VERIFICATION.md).
 
+## Licence
+
+Source-available under the [PolyForm Noncommercial License 1.0.0](LICENSE.md): you may read, study, modify and share A War Without Victory for noncommercial purposes, such as personal study, hobby projects, mods and research. Commercial use needs a separate licence from the owner. See [ADR-0008](docs/20_engineering/ADR/ADR-0008-licence.md).
+
+Third-party components keep their own licences: open-source libraries, fonts, recorded audio samples ([audio licences](docs/audio/LICENSES/)), and map data derived from OpenStreetMap (© OpenStreetMap contributors, [ODbL 1.0](https://opendatacommons.org/licenses/odbl/1-0/)).
+
+The game simulates the 1992-1995 war in Bosnia and Herzegovina and depicts real places, armed forces and events. It is not affiliated with, endorsed by or sponsored by any government, armed force, political party or organisation it depicts.
+
 ## Repo Notes
 
 - Root-level handoff and report artifacts may exist for historical context, but they are not architecture authority unless the docs above point back to them explicitly.
 - Archived root session artifacts now live under [`docs/70_archive/root_session_artifacts/`](docs/70_archive/root_session_artifacts/).
 - Test discovery is now convention-based rather than manually allowlisted. New Vitest files are picked up automatically, and files that declare `@vitest-environment jsdom` or use the `.browser.test.ts` suffix run under jsdom.
+- The checkout may live anywhere (the owner's copy moved from `F:\A-War-Without-Victory` to `C:\Pyrrhic\A-War-Without-Victory`). Live tools derive the repo root at runtime (`git rev-parse --show-toplevel`, `import.meta.url`, `$PSScriptRoot`, `Path(__file__)`); do not add drive-letter paths. Folders outside the repo sit beside the main checkout and can be moved with environment variables (resolved by [`tools/lib/repo_paths.mjs`](tools/lib/repo_paths.mjs), also from linked worktrees):
+  - `AWWV_WORKTREES_ROOT` — disposable linked worktrees; default `<main checkout>/../AWWV-worktrees`. Today this is the convention used in runbooks (e.g. `tools/opencode_implementer/README.md`); `worktreesRoot()` in the helper is there for tools that need it.
+  - `AWWV_COORDINATION_ROOT` — shared coordination evidence such as `tools/ui/*_browser_proof.mjs` output (`surface_steps/...`); default `<main checkout>/../AWWV-coordination`.
+  - Absolute `F:` paths in `logs/`, `docs/40_reports/`, `docs/plans/`, `data/derived/` and provenance notes are records of past runs and stay as written.

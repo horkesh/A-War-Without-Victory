@@ -49,7 +49,7 @@ gates:
     evidence_required: >
       A calibration-master entry for the final RF source showing the four checkpoints
       re-scored against the current painted files with tools/verify_checkpoints.cjs and no
-      checkpoint below main's 712/709/710/705 (a cell loss only by a recorded orchestrator
+      checkpoint below main's figures at the freeze (712/705/706/698 after #619) (a cell loss only by a recorded orchestrator
       ruling); guards intact (Farz, enclave); 0 consistency failures; strict engine-health
       gate PASS on the 188-week run; baseline manifest and fingerprint re-pinned with the
       reason; and live = headless re-measured, 0 cells differing for RBiH, RS and HRHB as
@@ -57,10 +57,10 @@ gates:
     evidence_path: null
     source: docs/plans/MASTER_ROADMAP.md
     notes: >
-      Main stands at 712/709/710/705: Apr 1995 711 accepted after #583, Oct 1995 708 (Korenici
-      and Jemanlici, a known historical miss) after #604, and 712/709/710/705 after #600
-      (siege displacement, accepted by the owner 2026-11-14). #617 (RF-F1) left all four
-      checkpoints unchanged and re-blessed the baseline manifest.
+      Main stands at 712/705/706/698 after #619 (RF-AI2, an honest loss the owner accepted
+      2026-11-14; baselines re-blessed). Earlier accepted moves: Apr 1995 711 after #583, Oct 1995
+      708 (Korenici and Jemanlici, a known historical miss) after #604, and 712/709/710/705 after
+      #600 (siege displacement). #617 (RF-F1) left all four checkpoints unchanged.
       Owner decision 2026-11-14: calibration is held until the mechanics work is done. During
       the RF pass the checkpoint scores are recorded per change in CALIBRATION_MASTER but are
       not a merge bar; pure calibration (data, constant or op tuning toward the checkpoints,

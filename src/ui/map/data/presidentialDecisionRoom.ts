@@ -403,12 +403,47 @@ function requiredReviewEventDecisions(state: LoadedGameState) {
 
 type ReviewOfficerEvent = NonNullable<LoadedGameState['pendingOfficerEvents']>[number];
 
+/**
+ * The weekly `army_directive_pushback` is the army's reading of a political directive the
+ * President never gave (the sim produces it for his own staff every week). It is not a decision
+ * for him: it is recorded in Army HQ Records as one line, and is never a card, an inbox tile or a
+ * review-chip item (command-loop proposal 2A, step A0). Order-level objections to his own orders
+ * (`order_pushback`, `order_refused`, ...) stay cards.
+ */
+function isWeeklyDirectivePushbackEvent(event: Pick<ReviewOfficerEvent, 'type'>): boolean {
+  return event.type === 'army_directive_pushback';
+}
+
+/** Interpretation-trace role the army writes for its own autonomous launch proposals. */
+const AUTONOMOUS_LAUNCH_TRACE_ROLE = 'AUTONOMOUS_LAUNCH_PROPOSAL';
+
+/**
+ * The state as the pushback card should read it: the weekly directive pushback events and the
+ * decision traces they come with (every trace except the army's own launch proposals) removed.
+ */
+function withoutWeeklyDirectivePushback(state: LoadedGameState): LoadedGameState {
+  const events = state.pendingOfficerEvents;
+  const traces = state.armyCoDecisionTraces;
+  const hasWeeklyEvent = Array.isArray(events) && events.some(isWeeklyDirectivePushbackEvent);
+  const hasWeeklyTrace = traces != null && Object.values(traces).some((rows) =>
+    Array.isArray(rows) && rows.some((row) => row.campaign_role !== AUTONOMOUS_LAUNCH_TRACE_ROLE));
+  if (!hasWeeklyEvent && !hasWeeklyTrace) return state;
+  const keptTraces: NonNullable<LoadedGameState['armyCoDecisionTraces']> = {};
+  for (const faction of Object.keys(traces ?? {}).sort(strictCompare)) {
+    keptTraces[faction] = (traces?.[faction] ?? []).filter((row) => row.campaign_role === AUTONOMOUS_LAUNCH_TRACE_ROLE);
+  }
+  return {
+    ...state,
+    ...(events ? { pendingOfficerEvents: events.filter((event) => !isWeeklyDirectivePushbackEvent(event)) } : {}),
+    ...(traces ? { armyCoDecisionTraces: keptTraces } : {}),
+  };
+}
+
 function isCommandReviewOfficerEvent(event: ReviewOfficerEvent): boolean {
   return event.type === 'order_modified'
     || event.type === 'order_pushback'
     || event.type === 'order_refused'
     || event.type === 'order_exceeded'
-    || event.type === 'army_directive_pushback'
     || event.type === 'army_co_proposes_op';
 }
 
@@ -740,6 +775,14 @@ function addCounterOfferCards(state: LoadedGameState, cards: CandidateCard[]): v
   }
 }
 
+/** The commander's launch assessment as words, never the raw engine value ("launch"). */
+function commanderAssessmentText(assessment: string): string {
+  if (assessment === 'launch') return t('operationHistory.assessment.launch');
+  if (assessment === 'postpone') return t('operationHistory.assessment.postpone');
+  if (assessment === 'abort') return t('operationHistory.assessment.abort');
+  return t('operationHistory.assessment.unavailable');
+}
+
 function addOpportunityCards(state: LoadedGameState, cards: CandidateCard[]): void {
   const playerFaction = state.player_faction ?? null;
   const opportunities = [...(state.operationOpportunityProposals ?? [])]
@@ -769,7 +812,7 @@ function addOpportunityCards(state: LoadedGameState, cards: CandidateCard[]): vo
           : t('opportunity.noLiveLaunch');
       const evidence = [
         launch?.commander_name,
-        launch?.assessment ? t('opportunity.commanderAssessment', { assessment: launch.assessment }) : null,
+        launch?.assessment ? t('opportunity.commanderAssessment', { assessment: commanderAssessmentText(launch.assessment) }) : null,
         ...(opportunity.decision_evidence ?? []),
         !directive && launch ? t('opportunity.stopNotAvailable') : null,
       ].filter((entry): entry is string => Boolean(entry));
@@ -871,7 +914,7 @@ function addSupplyVisibilityCard(state: LoadedGameState, cards: CandidateCard[])
 }
 
 function addArmyCoPushbackCard(state: LoadedGameState, cards: CandidateCard[]): void {
-  const view = buildPlayerArmyCoPushbackVisibility(state);
+  const view = buildPlayerArmyCoPushbackVisibility(withoutWeeklyDirectivePushback(state));
   if (!view || !view.hasSignal) return;
   const commandEvents = reviewOfficerEvents(state, isCommandReviewOfficerEvent);
 
@@ -2100,24 +2143,10 @@ function buildAdvanceReadiness(
   );
   const blockers = eligible.filter(isHardAdvanceBlockingCard);
   const recommendations = eligible.filter((card) => !isHardAdvanceBlockingCard(card));
-  const items: PresidentialDecisionRoomCard[] = [...blockers];
-  const usedIds = new Set<string>(blockers.map((card) => card.id));
-  const usedCategories = new Set<PresidentialDecisionRoomCategory>();
-  const targetCount = Math.max(4, blockers.length);
-  for (const card of blockers) usedCategories.add(card.category);
-  for (const card of recommendations) {
-    if (items.length >= targetCount) break;
-    if (usedCategories.has(card.category)) continue;
-    items.push(card);
-    usedIds.add(card.id);
-    usedCategories.add(card.category);
-  }
-  for (const card of recommendations) {
-    if (items.length >= targetCount) break;
-    if (usedIds.has(card.id)) continue;
-    items.push(card);
-    usedIds.add(card.id);
-  }
+  // The full ordered list, required first and then recommended, each in card order. It is never
+  // padded or cut: the review chip's number is the length of this list (command-loop 2C). A short
+  // featured list for a crowded surface is derived from it by the surface, not here.
+  const items: PresidentialDecisionRoomCard[] = [...blockers, ...recommendations];
 
   const hasBlockingReadinessItem = blockers.length > 0;
   const blockedByExistingSystems = hasBlockingReadinessItem;
@@ -2466,7 +2495,7 @@ export function buildPresidentialDecisionRoomView(input: PresidentialDecisionRoo
       pendingReviews: weightedCardCount(livePendingReviewCards),
       opportunities: (state.operationOpportunityProposals ?? []).filter((opportunity) => isReviewableOperationOpportunity(opportunity) || Boolean(opportunity.decision_outcome)).length,
       hardTurns: cards.filter((card) => card.category === 'turn').length,
-      advanceReviewCount: weightedCardCount(advanceReadiness.items),
+      advanceReviewCount: advanceReadiness.items.length,
     },
   };
 }

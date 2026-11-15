@@ -13,6 +13,7 @@
 import type { FactionId, GameState, PendingProposalReview } from '../../state/game_state.js';
 import type { CommanderState } from '../combat/commander/commander_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
+import { isLevel1ProposablePlan } from '../bot/staff_control.js';
 import { getFactionCorps } from '../combat/bot_corps_helpers.js';
 import { formatPlayerFacingZoneLabel } from '../../utils/player_facing_zone_label.js';
 
@@ -208,7 +209,7 @@ export function generateLevel1OpProposals(
         const plan = cs.current_plan ?? null;
         const planIsReady = plan !== null && plan.status === 'ready';
         if (!planIsReady) continue;
-        if (!Array.isArray(plan.target_osids) || plan.target_osids.length === 0) continue;
+        if (!isLevel1ProposablePlan(plan)) continue;
 
         // A response remains authoritative until the matching commander loop
         // consumes it. Its originating turn does not change the plan identity.

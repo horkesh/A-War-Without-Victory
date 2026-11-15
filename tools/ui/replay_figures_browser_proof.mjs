@@ -9,15 +9,17 @@
 // Screenshots and a JSON report (figure text, smallest visible font in the replay section,
 // horizontal overflow) go to --out.
 // Usage: node tools/ui/replay_figures_browser_proof.mjs --url http://127.0.0.1:3002 \
-//          --manifest runs/<run>/replay_save_manifest.json --out F:/AWWV-coordination/surface_steps/replay_figures
+//          --manifest runs/<run>/replay_save_manifest.json [--out <dir>]
+// --out defaults to $AWWV_COORDINATION_ROOT/surface_steps/replay_figures (see tools/lib/repo_paths.mjs).
 import { chromium } from 'playwright';
 import fs from 'node:fs';
 import path from 'node:path';
+import { coordinationRoot } from '../lib/repo_paths.mjs';
 
 const args = process.argv.slice(2);
 const opt = (n, f) => (args.includes(n) ? args[args.indexOf(n) + 1] : f);
 const origin = opt('--url', 'http://127.0.0.1:3002');
-const out = opt('--out', 'F:/AWWV-coordination/surface_steps/replay_figures');
+const out = opt('--out', path.join(coordinationRoot(), 'surface_steps', 'replay_figures'));
 const manifestPath = opt('--manifest', null);
 if (!manifestPath) throw new Error('--manifest <replay_save_manifest.json> is required');
 const realManifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
