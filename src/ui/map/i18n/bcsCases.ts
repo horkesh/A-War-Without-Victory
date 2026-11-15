@@ -73,6 +73,7 @@ export const BCS_CORPS_CASE_FORMS: Readonly<Record<string, BcsCaseForms>> = {
     arbih_3rd_corps: ordinalKorpus('3.'),
     arbih_4th_corps: ordinalKorpus('4.'),
     arbih_5th_corps: ordinalKorpus('5.'),
+    arbih_7th_corps: ordinalKorpus('7.'),
     vrs_main_staff: mainStaff('štab', 'VRS'),
     // The JNA's 13th (Bileća) and 2nd (Titograd) Corps of Strugar's 4th Military
     // District in Herzegovina, April-May 1992 (BB1 printed p.154). Feminine i-stem.

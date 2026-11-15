@@ -967,6 +967,12 @@ export const MISTRAL_1_95_OPPORTUNITY: OperationOpportunityDef = {
 // `op:jajce:grdovo` / `op:donji_vakuf:torlakovac_2` — i.e., the corps's front
 // physically reaches the Jajce zone by t≥178.
 //
+// Superseded by RF-1 Phase B (2026-11-15): the ARBiH 7th Corps is back in the OOB.
+// It forms at week 99 under Alagić and these brigades move to it from the 3rd Corps
+// (formation_lifecycle_events.json corps_reorganisation), so the op is now hosted on
+// `arbih_7th_corps`. The `arbih_3rd_corps:N` sector names in the dated Wave notes below
+// describe the sectors measured at the time, before the 7th Corps existed.
+//
 // Defender corps corrected from `vrs_2nd_krajina` (Drvar/Grahovo shoulder) to
 // `vrs_1st_krajina` (the corps that actually holds Jajce per live save:
 // sector:vrs_1st_krajina:7 contains all relevant Jajce/Donji Vakuf OSIDs).
@@ -974,11 +980,12 @@ export const MISTRAL_1_95_OPPORTUNITY: OperationOpportunityDef = {
 // Catalog rationale: painted Oct 1995 control shows 7 of 10 Jajce OSIDs
 // flipped Federation. With Mistral 2's Šipovo/Mrkonjić axis already running
 // hvo_tomislavgrad brigades, the Jajce push has no spare HVO Tomislavgrad
-// capacity. Re-hosting on arbih_3rd_corps:
+// capacity. Re-hosting on the ARBiH corps that holds these brigades (the 3rd Corps
+// in 2026-05; the 7th Corps since RF-1 Phase B):
 //   (a) puts the op on the corps whose front line is physically adjacent to
 //       the objective set,
 //   (b) uses ARBiH brigades that historically performed the operation
-//       (rolled-up 7th Corps brigades on the 3rd Corps roster),
+//       (the 7th Corps brigades),
 //   (c) leaves the Mistral 2 HVO/HV brigade pool undisturbed.
 //
 // Wave 14 axis split (2026-05-22): the single 11-OSID axis was failing at
@@ -993,7 +1000,7 @@ export const MISTRAL_1_95_OPPORTUNITY: OperationOpportunityDef = {
 // docs/40_reports/proposals/20260522_WAVE_14_JAJCE_AXIS_SPLIT.md.
 // ═══════════════════════════════════════════════════════════════════════════
 
-const JAJCE_PRIMARY_CORPS = 'arbih_3rd_corps';
+const JAJCE_PRIMARY_CORPS = 'arbih_7th_corps';
 const JAJCE_DEFENDER_WEAKNESS_FLOOR = 0.25;
 const JAJCE_READINESS_FLOOR = 0.32;
 const JAJCE_AXIS_COORDINATION_FLOOR = 0.30;
@@ -1072,11 +1079,10 @@ const JAJCE_OBJECTIVES: readonly string[] = [
     ...JAJCE_RING_OBJECTIVES,
 ];
 
-// Brigade pool: ARBiH 3rd Corps brigades that home in the Bugojno / Travnik /
-// Donji Vakuf / Gornji Vakuf zone. These are the historical 7th Corps brigades
-// (rolled into 3rd Corps in our reduced-OOB scenario per user directive
-// 2026-05-19). Composition mirrors the Vlašić 95 (skender_vakuf axis) and
-// Donji Vakuf 95 pools and covers the shoulders feeding the live Grdovo
+// Brigade pool: ARBiH 7th Corps brigades that home in the Bugojno / Travnik /
+// Donji Vakuf / Gornji Vakuf zone. They serve in the 3rd Corps until the 7th
+// Corps forms at week 99 (RF-1 Phase B, 2026-11-15). Composition mirrors the
+// Vlašić 95 (skender_vakuf axis) and Donji Vakuf 95 pools and covers the shoulders feeding the live Grdovo
 // approach; it is not exact Jajce-town captor attribution.
 //   - arbih_770th_slavna_mountain  — home op:donji_vakuf:donji_vakuf_2
 //   - arbih_705th_slavna_mountain  — home op:bugojno:gracanica
@@ -1143,13 +1149,13 @@ const politicalAuthorizationJajce: AxisPredicate = () => ({
 
 const corpsReadinessJajce: AxisPredicate = (state) => {
     if (!state.military.corps_command?.[JAJCE_PRIMARY_CORPS]) {
-        return { green: false, reason: 'ARBiH 3rd Corps command not present for Jajce recovery' };
+        return { green: false, reason: 'ARBiH 7th Corps command not present for Jajce recovery' };
     }
     const traits = computeCorpsOperationReadiness(state, JAJCE_PRIMARY_CORPS as FormationId);
     if (traits.operation_readiness < JAJCE_READINESS_FLOOR) {
-        return { green: false, reason: 'ARBiH 3rd Corps readiness below Jajce recovery floor' };
+        return { green: false, reason: 'ARBiH 7th Corps readiness below Jajce recovery floor' };
     }
-    return { green: true, reason: 'ARBiH 3rd Corps readiness sufficient for Jajce recovery' };
+    return { green: true, reason: 'ARBiH 7th Corps readiness sufficient for Jajce recovery' };
 };
 
 const logisticsJajce: AxisPredicate = (state) => {
@@ -1180,9 +1186,9 @@ const weatherSeasonJajce: AxisPredicate = (_state, turn) => {
 const commanderConfidenceJajce: AxisPredicate = (state) => {
     const commanderState = state.military.corps_command?.[JAJCE_PRIMARY_CORPS]?.commander_state;
     if (!commanderState) {
-        return { green: false, reason: 'ARBiH 3rd Corps commander state unavailable for Jajce recovery' };
+        return { green: false, reason: 'ARBiH 7th Corps commander state unavailable for Jajce recovery' };
     }
-    return { green: true, reason: 'ARBiH 3rd Corps commander state present for Jajce recovery' };
+    return { green: true, reason: 'ARBiH 7th Corps commander state present for Jajce recovery' };
 };
 
 const enemyWeaknessJajce: AxisPredicate = (state, turn) => {
@@ -1223,13 +1229,13 @@ const allianceContextJajce: AxisPredicate = (state) => {
 
 const forceQualityJajce: AxisPredicate = (state) => {
     if (!state.military.corps_command?.[JAJCE_PRIMARY_CORPS]) {
-        return { green: false, reason: 'ARBiH 3rd Corps command not present for Jajce recovery' };
+        return { green: false, reason: 'ARBiH 7th Corps command not present for Jajce recovery' };
     }
     const traits = computeCorpsOperationReadiness(state, JAJCE_PRIMARY_CORPS as FormationId);
     if (traits.axis_coordination < JAJCE_AXIS_COORDINATION_FLOOR) {
-        return { green: false, reason: 'ARBiH 3rd Corps axis coordination below Jajce recovery threshold' };
+        return { green: false, reason: 'ARBiH 7th Corps axis coordination below Jajce recovery threshold' };
     }
-    return { green: true, reason: 'ARBiH 3rd Corps axis coordination supports Jajce recovery' };
+    return { green: true, reason: 'ARBiH 7th Corps axis coordination supports Jajce recovery' };
 };
 
 export const JAJCE_95_OPPORTUNITY: OperationOpportunityDef = {

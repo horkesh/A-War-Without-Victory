@@ -664,6 +664,8 @@ function localOccupationGroupInputs(): EmitInputs {
 
 function varoslukSkippedGroupInputs(): EmitInputs {
     const inputs = localOccupationInputs({
+        // RF-1 Phase B: hosted on the 7th Corps from week 99 (the Varošluk shadow is a 7th Corps diagnostic).
+        corpsId: 'arbih_7th_corps' as FormationId,
         listed: false,
         brigadeCount: 3,
         targetOsid: 'op:travnik:varosluk',
@@ -795,7 +797,8 @@ describe('local_occupation_candidate observer (real commander builder)', () => {
     });
 
     it.each([
-        ['same sector', { sector_id: 'sector:arbih_3rd_corps:0', objectives: ['op:test:other'], participating_brigades: ['other'] }, {
+        // RF-1 Phase B: hosted on the 7th Corps from week 99 (same sector = the Varošluk fixture's 7th Corps sector)
+        ['same sector', { sector_id: 'sector:arbih_7th_corps:0', objectives: ['op:test:other'], participating_brigades: ['other'] }, {
             same_sector: true, shared_objective: null, shared_participant: null, first_matched_clause: 'same_sector',
         }],
         ['shared objective', { sector_id: 'sector:other:0', objectives: ['op:travnik:varosluk'], participating_brigades: ['other'] }, {
@@ -889,6 +892,8 @@ describe('local_occupation_candidate observer (real commander builder)', () => {
 
     it('reports rejected-only when the skipped group has no qualifying roster', () => {
         const inputs = localOccupationInputs({
+            // RF-1 Phase B: hosted on the 7th Corps from week 99
+            corpsId: 'arbih_7th_corps' as FormationId,
             listed: false,
             brigadeCount: 1,
             targetOsid: 'op:travnik:varosluk',
@@ -914,7 +919,8 @@ describe('local_occupation_candidate observer (real commander builder)', () => {
             const inputs = varoslukSkippedGroupInputs();
             (inputs.briefing as { active_operations: unknown }).active_operations = [{
                 name: 'Existing', type: 'sector_attack', phase: 'recovery', started_turn: 100,
-                sector_id: 'sector:arbih_3rd_corps:0', objectives: ['op:test:other'],
+                // RF-1 Phase B: hosted on the 7th Corps from week 99
+                sector_id: 'sector:arbih_7th_corps:0', objectives: ['op:test:other'],
                 participating_brigades: ['other'],
             }];
             return inputs;

@@ -20,6 +20,7 @@ import { processOsidColumnMovement } from '../src/sim/combat/osid_column_movemen
 import { buildAttackOrderOwner } from '../src/sim/combat/operation_phase_gate.js';
 import { canFormationReachAssemblyInTime } from '../src/sim/combat/sector_offensive_launch_helpers.js';
 import { initializeCasualtyLedger } from '../src/state/casualty_ledger.js';
+import { loadCorpsReorganisationEvents, processCorpsReorganisationEvents } from '../src/sim/corps_reorganisation.js';
 import {
     BEHAR_I_94_OPPORTUNITY,
     CENTRAL_BOSNIA_VLASIC_OPPORTUNITIES,
@@ -59,18 +60,29 @@ const PAKLAREVO_UNRELATED_PLAN = [
     'arbih_725th_mountain',
 ];
 
-const VLASIC_BRIGADES = [
+// RF-1 Phase B: the Vlašić ridge is hosted on the 7th Corps from week 99. Its main
+// ridge axis carries the 7th Corps brigades (plus the General Staff Guards loan); the
+// Zenica brigades stay in the 3rd Corps and support the ridge on their own axis.
+const VLASIC_HOST_CORPS = 'arbih_7th_corps';
+const VLASIC_SUPPORT_CORPS = 'arbih_3rd_corps';
+const VLASIC_RIDGE_AXIS_BRIGADES = [
     'arbih_17th_vitezka_mountain',
     'arbih_706th_muslim_mountain',
     'arbih_727th_slavna',
     'arbih_712th_mountain',
     'arbih_737th_muslim_light',
     'arbih_705th_slavna_mountain',
-    'arbih_7th_vitezka_muslim_liberation',
     'arbih_guards_brigade',
-    'arbih_314th_slavna_liberation',
     'arbih_717th_slavna_mountain',
+];
+const VLASIC_ZENICA_SUPPORT_BRIGADES = [
+    'arbih_7th_vitezka_muslim_liberation',
+    'arbih_314th_slavna_liberation',
     'arbih_303rd_vitezka_mountain',
+];
+const VLASIC_BRIGADES = [
+    ...VLASIC_RIDGE_AXIS_BRIGADES,
+    ...VLASIC_ZENICA_SUPPORT_BRIGADES,
 ];
 
 const DONJI_VAKUF_STAGING_ANCHORS = [
@@ -331,7 +343,7 @@ function buildVlasicState(opts: {
             // Guards loan, where only nine participants are expected.
             status: id === 'arbih_706th_muslim_mountain' ? 'inactive' : 'active',
             faction: 'RBiH',
-            corps_id: 'arbih_3rd_corps',
+            corps_id: VLASIC_ZENICA_SUPPORT_BRIGADES.includes(id) ? VLASIC_SUPPORT_CORPS : VLASIC_HOST_CORPS,
             personnel: reserve ? 1800 : 1400,
             strength: reserve ? 1800 : 1400,
             officer_quality: opts.axisCoordinationLow ? 0.25 : 0.75,
@@ -369,7 +381,17 @@ function buildVlasicState(opts: {
             front_posture_regions: {},
             front_pressure: {},
             militia_pools: {},
-            corps_command: { arbih_3rd_corps: cmd },
+            corps_command: {
+                [VLASIC_HOST_CORPS]: cmd,
+                [VLASIC_SUPPORT_CORPS]: {
+                    ...cmd,
+                    command_span: 3,
+                    subordinate_count: 3,
+                    active_ogs: [],
+                    active_operations: [],
+                    commander_state: { current_plan: null, decision_trace: null, operation_history: [] } as unknown as CorpsCommandState['commander_state'],
+                },
+            },
             faction_officer_maturity: { RBiH: opts.axisCoordinationLow ? 1.5 : 3.5 },
         },
         political: {
@@ -419,8 +441,9 @@ function buildDonjiVakufState(opts: {
             kind: 'brigade',
             status: 'active',
             faction: 'RBiH',
-            corps_id: 'arbih_3rd_corps',
-            own_corps_cmd: 'arbih_3rd_corps',
+            // RF-1 Phase B: hosted on the 7th Corps from week 99
+            corps_id: 'arbih_7th_corps',
+            own_corps_cmd: 'arbih_7th_corps',
             personnel: 1350,
             strength: 1350,
             officer_quality: opts.axisCoordinationLow ? 0.25 : 0.72,
@@ -460,7 +483,7 @@ function buildDonjiVakufState(opts: {
             front_posture_regions: {},
             front_pressure: {},
             militia_pools: {},
-            corps_command: { arbih_3rd_corps: cmd },
+            corps_command: { arbih_7th_corps: cmd },
             faction_officer_maturity: { RBiH: opts.axisCoordinationLow ? 1.5 : 3.5 },
             event_last_fired_turn: (opts.stormRuptured ?? true) ? { operation_storm_1995: 172 } : {},
         },
@@ -473,13 +496,23 @@ function buildDonjiVakufState(opts: {
     } as unknown as GameState;
 }
 
-function buildDonjiVakufSourceOobState(turn: number): GameState {
+async function buildDonjiVakufSourceOobState(turn: number): Promise<GameState> {
     const state = buildDonjiVakufState({ turn });
+    // RF-1 Phase B: the source OOB still files these brigades under the 3rd Corps; the
+    // production week-99 corps_reorganisation event moves them to the 7th Corps. Start
+    // from the source owner and apply the real event, so the operation is spawned against
+    // the brigade owner the live game actually has at this turn.
     for (const id of DONJI_VAKUF_BRIGADES) {
         const formation = state.military.formations[id] as { corps_id?: string; own_corps_cmd?: string };
         formation.corps_id = 'arbih_3rd_corps';
         formation.own_corps_cmd = 'arbih_3rd_corps';
     }
+    (state.military.formations as Record<string, unknown>)['arbih_7th_corps'] = {
+        id: 'arbih_7th_corps', name: 'ARBiH 7th Corps', kind: 'corps', status: 'active', faction: 'RBiH',
+    };
+    const report = processCorpsReorganisationEvents(state, await loadCorpsReorganisationEvents(process.cwd()));
+    expect(report?.transferred.map((t) => t.formation_id).filter((id) => DONJI_VAKUF_BRIGADES.includes(id)).sort())
+        .toEqual([...DONJI_VAKUF_BRIGADES].sort());
     return state;
 }
 
@@ -525,8 +558,9 @@ function buildPaklarevoState(opts: {
         kind: 'brigade',
         status: 'active',
         faction: 'RBiH',
-        corps_id: 'arbih_3rd_corps',
-        own_corps_cmd: 'arbih_3rd_corps',
+        // RF-1 Phase B: hosted on the 7th Corps from week 99
+        corps_id: 'arbih_7th_corps',
+        own_corps_cmd: 'arbih_7th_corps',
         personnel: 1800,
         strength: 1800,
         officer_quality: opts.lowReadiness ? 0.2 : 0.75,
@@ -546,8 +580,8 @@ function buildPaklarevoState(opts: {
         },
     });
     const formations: Record<string, unknown> = {
-        'arbih_3rd_corps': {
-            id: 'arbih_3rd_corps', name: 'ARBiH 3rd Corps', kind: 'corps',
+        'arbih_7th_corps': {
+            id: 'arbih_7th_corps', name: 'ARBiH 7th Corps', kind: 'corps',
             status: 'active', faction: 'RBiH',
         },
         'arbih_712th_mountain': formation('arbih_712th_mountain', 'op:travnik:turbe_2', 62),
@@ -578,12 +612,12 @@ function buildPaklarevoState(opts: {
             front_posture_regions: {},
             front_pressure: {},
             militia_pools: {},
-            corps_command: { arbih_3rd_corps: cmd },
+            corps_command: { arbih_7th_corps: cmd },
             faction_officer_maturity: { RBiH: opts.lowReadiness ? 1.2 : 3.5 },
             corps_front_sectors: {
-                'sector:arbih_3rd_corps:paklarevo': {
-                    sector_id: 'sector:arbih_3rd_corps:paklarevo',
-                    corps_id: 'arbih_3rd_corps',
+                'sector:arbih_7th_corps:paklarevo': {
+                    sector_id: 'sector:arbih_7th_corps:paklarevo',
+                    corps_id: 'arbih_7th_corps',
                     assigned_brigade_ids: [...PAKLAREVO_TRIO],
                     reserve_brigade_ids: [...PAKLAREVO_UNRELATED_PLAN],
                     sub_segments: [],
@@ -1022,13 +1056,15 @@ describe('Central Bosnia / Vlasic operation opportunity catalog', () => {
         expect(VLASIC_RIDGE_95_OPPORTUNITY.family).toBe('central_bosnia_vlasic');
         expect(VLASIC_RIDGE_95_OPPORTUNITY.tier).toBe('T1');
         expect(VLASIC_RIDGE_95_OPPORTUNITY.faction).toBe('RBiH');
-        expect(VLASIC_RIDGE_95_OPPORTUNITY.primary_corps).toBe('arbih_3rd_corps');
+        // RF-1 Phase B: hosted on the 7th Corps from week 99
+        expect(VLASIC_RIDGE_95_OPPORTUNITY.primary_corps).toBe('arbih_7th_corps');
         expect(VLASIC_RIDGE_95_OPPORTUNITY.variants?.map(v => v.variant_id).sort())
             .toEqual(['ridge_probe']);
         expect(DONJI_VAKUF_95_OPPORTUNITY.family).toBe('central_bosnia_vlasic');
         expect(DONJI_VAKUF_95_OPPORTUNITY.tier).toBe('T1');
         expect(DONJI_VAKUF_95_OPPORTUNITY.faction).toBe('RBiH');
-        expect(DONJI_VAKUF_95_OPPORTUNITY.primary_corps).toBe('arbih_3rd_corps');
+        // RF-1 Phase B: hosted on the 7th Corps from week 99
+        expect(DONJI_VAKUF_95_OPPORTUNITY.primary_corps).toBe('arbih_7th_corps');
     });
 
     it('uses only exact repository OOB IDs for the Paklarevo local trio', () => {
@@ -1051,7 +1087,8 @@ describe('Central Bosnia / Vlasic operation opportunity catalog', () => {
         expect(def.tier).toBe('T1');
         expect(def.family).toBe('central_bosnia_vlasic');
         expect(def.faction).toBe('RBiH');
-        expect(def.primary_corps).toBe('arbih_3rd_corps');
+        // RF-1 Phase B: hosted on the 7th Corps from week 99
+        expect(def.primary_corps).toBe('arbih_7th_corps');
         expect(def.historical_exit_class).toBe('did_not_launch');
         expect(def.citations).toEqual([]);
         expect(def.variants).toBeUndefined();
@@ -1062,7 +1099,7 @@ describe('Central Bosnia / Vlasic operation opportunity catalog', () => {
         expect(def.axes[0]!.objectives).toEqual(['op:travnik:paklarevo']);
         expect(def.axes[0]!.staging_osid).toBe('op:travnik:turbe_2');
         const state = buildPaklarevoState();
-        const cmd = state.military.corps_command!.arbih_3rd_corps;
+        const cmd = state.military.corps_command!.arbih_7th_corps;
         const planBefore = structuredClone((cmd.commander_state as any).current_plan);
         const controllersBefore = structuredClone(state.political.political_controllers);
         const locationsBefore = Object.fromEntries(PAKLAREVO_TRIO.map((id) => [
@@ -1118,7 +1155,7 @@ describe('Central Bosnia / Vlasic operation opportunity catalog', () => {
             'arbih_770th_slavna_mountain',
         ];
         const state = buildPaklarevoState();
-        const cmd = state.military.corps_command!.arbih_3rd_corps;
+        const cmd = state.military.corps_command!.arbih_7th_corps;
         const planBefore = structuredClone((cmd.commander_state as any).current_plan);
         const controllersBefore = structuredClone(state.political.political_controllers);
         const locationsBefore = Object.fromEntries(expectedTrio.map((id) => [
@@ -1178,7 +1215,7 @@ describe('Central Bosnia / Vlasic operation opportunity catalog', () => {
             expect(isOpportunityEligible(def, evaluateAxes(state, turn, def))).toBe(false);
             runOpportunityEvaluationStep(state, turn);
             expect(state.military.operation_opportunities ?? []).toEqual([]);
-            expect(state.military.corps_command!.arbih_3rd_corps.active_operations).toEqual([]);
+            expect(state.military.corps_command!.arbih_7th_corps.active_operations).toEqual([]);
             expect(state.military.brigade_movement_orders).toEqual(undefined);
             expect(PAKLAREVO_TRIO.map((id) => state.military.formations![id]!.location_osid))
                 .toEqual(['op:travnik:turbe_2', 'op:travnik:ovcarevo', 'op:travnik:gluha_bukovica']);
@@ -1216,7 +1253,7 @@ describe('Central Bosnia / Vlasic operation opportunity catalog', () => {
         } as any;
         cases.push(moving);
         const committed = buildPaklarevoState();
-        committed.military.corps_command!.arbih_3rd_corps.active_operations.push({
+        committed.military.corps_command!.arbih_7th_corps.active_operations.push({
             name: 'Unrelated Live Ownership',
             type: 'sector_attack',
             phase: 'execution',
@@ -1257,8 +1294,22 @@ describe('Central Bosnia / Vlasic operation opportunity catalog', () => {
     });
 
     it('authors the exact eleven-ID main Vlašić roster in priority order after the original six', () => {
+        // RF-1 Phase B: hosted on the 7th Corps from week 99. The former single 11-ID axis is
+        // split: the 7th Corps ridge axis keeps the original six, the Guards and the 717th; the
+        // three Zenica brigades stay in the 3rd Corps on a support axis (same objectives/staging).
+        expect(VLASIC_RIDGE_95_OPPORTUNITY.axes).toHaveLength(2);
         const ridgeAxis = VLASIC_RIDGE_95_OPPORTUNITY.axes[0];
-        expect(ridgeAxis.brigades).toEqual(VLASIC_BRIGADES);
+        const supportAxis = VLASIC_RIDGE_95_OPPORTUNITY.axes[1];
+        expect(ridgeAxis.axis_id).toBe('vlasic_travnik_ridge');
+        expect(ridgeAxis.corps).toBe(VLASIC_HOST_CORPS);
+        expect(ridgeAxis.brigades).toEqual(VLASIC_RIDGE_AXIS_BRIGADES);
+        expect(supportAxis.axis_id).toBe('vlasic_zenica_support');
+        expect(supportAxis.corps).toBe(VLASIC_SUPPORT_CORPS);
+        expect(supportAxis.brigades).toEqual(VLASIC_ZENICA_SUPPORT_BRIGADES);
+        expect(supportAxis.objectives).toEqual(ridgeAxis.objectives);
+        expect(supportAxis.staging_osid).toBe(ridgeAxis.staging_osid);
+        const authored = [...ridgeAxis.brigades, ...supportAxis.brigades];
+        expect(authored).toEqual(VLASIC_BRIGADES);
         expect(ridgeAxis.brigades.slice(0, 6)).toEqual([
             'arbih_17th_vitezka_mountain',
             'arbih_706th_muslim_mountain',
@@ -1267,9 +1318,9 @@ describe('Central Bosnia / Vlasic operation opportunity catalog', () => {
             'arbih_737th_muslim_light',
             'arbih_705th_slavna_mountain',
         ]);
-        expect(new Set(ridgeAxis.brigades).size).toBe(11);
+        expect(new Set(authored).size).toBe(11);
         expect(ridgeAxis.brigades).toContain('arbih_717th_slavna_mountain');
-        expect(ridgeAxis.brigades).toContain('arbih_303rd_vitezka_mountain');
+        expect(supportAxis.brigades).toContain('arbih_303rd_vitezka_mountain');
 
         const probeAxis = VLASIC_RIDGE_95_OPPORTUNITY.variants
             ?.find(v => v.variant_id === 'ridge_probe')?.axes[0];
@@ -1329,7 +1380,7 @@ describe('Central Bosnia / Vlasic operation opportunity catalog', () => {
             'approve',
         );
         expect(approved?.status).toBe('approved');
-        const op = state.military.corps_command!.arbih_3rd_corps.active_operations[0]!;
+        const op = state.military.corps_command!.arbih_7th_corps.active_operations[0]!;
         expect(op.participating_brigades).toContain('arbih_314th_slavna_liberation');
         expect(op.participating_brigades).toContain('arbih_7th_vitezka_muslim_liberation');
         expect(op.participating_brigades).toContain('arbih_guards_brigade');
@@ -1341,8 +1392,11 @@ describe('Central Bosnia / Vlasic operation opportunity catalog', () => {
 
     it('refuses 314 when it is already committed to a live non-probe operation', () => {
         const state = buildVlasicState({ turn: 155 });
-        const cmd = state.military.corps_command!.arbih_3rd_corps;
-        cmd.active_operations.push({
+        // RF-1 Phase B: hosted on the 7th Corps from week 99; the 314th's live commitment
+        // sits in its own (3rd) Corps, the Vlasic operation in the 7th.
+        const cmd = state.military.corps_command!.arbih_7th_corps;
+        const supportCmd = state.military.corps_command!.arbih_3rd_corps;
+        supportCmd.active_operations.push({
             name: '314 Live Commitment',
             type: 'sector_attack',
             phase: 'execution',
@@ -1524,7 +1578,7 @@ describe('Central Bosnia / Vlasic operation opportunity catalog', () => {
         const proposalId = buildProposalId('vlasic_ridge_95', 156);
         const declined = applyOpportunityDecision(declineState, 156, proposalId, 'decline');
         expect(declined?.status).toBe('declined');
-        expect(declineState.military.corps_command!.arbih_3rd_corps.active_operations).toHaveLength(0);
+        expect(declineState.military.corps_command!.arbih_7th_corps.active_operations).toHaveLength(0);
         expect(declineState.military.operation_opportunity_resolutions)
             .toEqual([{ proposal_id: proposalId, opportunity_id: 'vlasic_ridge_95', response: 'decline', response_turn: 156 }]);
 
@@ -1532,7 +1586,7 @@ describe('Central Bosnia / Vlasic operation opportunity catalog', () => {
         runOpportunityEvaluationStep(approveState, 156);
         const approved = applyOpportunityDecision(approveState, 156, proposalId, 'approve');
         expect(approved?.status).toBe('approved');
-        expect(approveState.military.corps_command!.arbih_3rd_corps.active_operations[0].name)
+        expect(approveState.military.corps_command!.arbih_7th_corps.active_operations[0].name)
             .toBe('Operation Vlasic Ridge');
 
         const redirectState = buildVlasicState({ turn: 156 });
@@ -1547,7 +1601,7 @@ describe('Central Bosnia / Vlasic operation opportunity catalog', () => {
         );
         expect(redirected?.status).toBe('redirected');
         expect(redirected?.redirect_variant_id).toBe('ridge_probe');
-        expect(redirectState.military.corps_command!.arbih_3rd_corps.active_operations[0].axes)
+        expect(redirectState.military.corps_command!.arbih_7th_corps.active_operations[0].axes)
             .toHaveLength(1);
     });
 
@@ -1593,7 +1647,7 @@ describe('Central Bosnia / Vlasic operation opportunity catalog', () => {
         )).toBe(false);
 
         const blocked = buildDonjiVakufState({ turn: 178 });
-        delete blocked.military.corps_command!.arbih_3rd_corps;
+        delete blocked.military.corps_command!.arbih_7th_corps;
         expect(dateWindow(blocked, 178)).toMatchObject({ green: true });
         expect(isOpportunityEligible(
             DONJI_VAKUF_95_OPPORTUNITY,
@@ -1645,9 +1699,9 @@ describe('Central Bosnia / Vlasic operation opportunity catalog', () => {
         const approved = applyOpportunityDecision(state, 178, proposalId, 'approve');
 
         expect(approved?.status).toBe('approved');
-        expect(state.military.corps_command!.arbih_3rd_corps.active_operations[0].name)
+        expect(state.military.corps_command!.arbih_7th_corps.active_operations[0].name)
             .toBe('Operation Donji Vakuf 95');
-        expect(state.military.corps_command!.arbih_3rd_corps.active_operations[0].axes![0].objectives)
+        expect(state.military.corps_command!.arbih_7th_corps.active_operations[0].axes![0].objectives)
             .toEqual(DONJI_VAKUF_OBJECTIVES);
         // Calibration 2026-11-06: Korenici and Jemanlici are a 707th handoff gated on the town.
         expect(DONJI_VAKUF_95_OPPORTUNITY.axes.find((axis) => axis.axis_id === 'donji_vakuf_east_707th')).toMatchObject({
@@ -1662,15 +1716,15 @@ describe('Central Bosnia / Vlasic operation opportunity catalog', () => {
         });
     });
 
-    it('spawns Donji Vakuf 95 against the source-OOB 3rd Corps brigade owner', () => {
-        const state = buildDonjiVakufSourceOobState(178);
+    it('spawns Donji Vakuf 95 against the source-OOB 3rd Corps brigade owner after the week-99 7th Corps transfer', async () => {
+        const state = await buildDonjiVakufSourceOobState(178);
         runOpportunityEvaluationStep(state, 178);
         const proposalId = buildProposalId('donji_vakuf_95', 178);
 
         const approved = applyOpportunityDecision(state, 178, proposalId, 'approve');
 
         expect(approved?.status).toBe('approved');
-        const op = state.military.corps_command!.arbih_3rd_corps.active_operations[0];
+        const op = state.military.corps_command!.arbih_7th_corps.active_operations[0];
         expect(op.name).toBe('Operation Donji Vakuf 95');
         expect(op.participating_brigades).toEqual([...DONJI_VAKUF_BRIGADES].sort());
     });
@@ -1681,9 +1735,10 @@ describe('Central Bosnia / Vlasic operation opportunity catalog', () => {
         const proposalId = buildProposalId('vlasic_ridge_95', 156);
         applyOpportunityDecision(state, 156, proposalId, 'approve');
         const aar: OperationAAR = {
-            operation_id: 'arbih_3rd_corps:vlasic:t156',
+            // RF-1 Phase B: hosted on the 7th Corps from week 99
+            operation_id: 'arbih_7th_corps:vlasic:t156',
             operation_name: 'Operation Vlasic Ridge',
-            corps_id: 'arbih_3rd_corps',
+            corps_id: 'arbih_7th_corps',
             faction: 'RBiH',
             type: 'sector_attack',
             started_turn: 156,
@@ -1712,7 +1767,8 @@ describe('Central Bosnia / Vlasic operation opportunity catalog', () => {
         expect(linkOpportunityResolutionToAAR(state, aar)).toBe(true);
         expect(state.military.operation_opportunity_resolutions?.[0].exit_class).toBe('partial_success');
         expect(state.military.operation_opportunity_resolutions?.[0].executed_op_aar_id)
-            .toBe('arbih_3rd_corps:vlasic:t156');
+            // RF-1 Phase B: hosted on the 7th Corps from week 99
+            .toBe('arbih_7th_corps:vlasic:t156');
     });
 
     it('spawns a t152 Vlašić operation with planning_duration 2 for t154 execution', () => {
@@ -1731,9 +1787,9 @@ describe('Central Bosnia / Vlasic operation opportunity catalog', () => {
 
         // The lifecycle owner derives the acting faction from the corps formation;
         // buildVlasicState only sets the six brigades, so add the RBiH corps.
-        (state.military.formations as Record<string, unknown>)['arbih_3rd_corps'] = {
-            id: 'arbih_3rd_corps',
-            name: '3rd Corps',
+        (state.military.formations as Record<string, unknown>)['arbih_7th_corps'] = {
+            id: 'arbih_7th_corps',
+            name: '7th Corps',
             kind: 'corps',
             status: 'active',
             faction: 'RBiH',
@@ -1748,7 +1804,7 @@ describe('Central Bosnia / Vlasic operation opportunity catalog', () => {
         const approved = applyOpportunityDecision(state, 152, proposalId, 'approve');
 
         expect(approved?.status).toBe('approved');
-        const op = state.military.corps_command!.arbih_3rd_corps.active_operations[0];
+        const op = state.military.corps_command!.arbih_7th_corps.active_operations[0];
         expect(op).toBeDefined();
         // The operation inherits the catalog's shortened planning window...
         expect(op.planning_duration).toBe(2);
@@ -2100,7 +2156,7 @@ describe('Vlašić advance preparation window 146..149', () => {
             runOpportunityEvaluationStep(state, 146);
             expect((state.military.operation_opportunities ?? [])
                 .find(p => p.opportunity_id === 'vlasic_ridge_95')).toBeUndefined();
-            expect(state.military.corps_command!.arbih_3rd_corps.active_operations).toHaveLength(0);
+            expect(state.military.corps_command!.arbih_7th_corps.active_operations).toHaveLength(0);
         }
     });
 });

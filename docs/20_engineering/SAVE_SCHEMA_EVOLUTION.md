@@ -23,6 +23,21 @@ introduced by the withdrawal.
 id. The receipt is informational: both events are standing rules re-evaluated every turn, so a
 missing receipt in an old save changes nothing. No migration or schema bump.
 
+**2026-11-15 writer (RF-1 Phase B):** the same step gains `commander_handover` and a
+`corps_transfer` `transition` cost. It writes only existing fields, so there is no migration or
+schema bump. The new writes are formation `cohesion` and `disrupted_turns` (the transition cost);
+the `named_officers` fields `status`, `assigned_corps_id`, `turns_in_command`,
+`acting_commander`, `effective_competence_penalty` and `penalty_turns_remaining` (the
+handover); and, for a manually controlled player, a `replacement_suggested` entry in
+`pending_officer_events`. Unlike the transfer receipt, the handover receipt is load-bearing: the
+handover fires once, keyed by its receipt, so an old save without it runs the handover on its
+first loaded turn. A save from before week 99 needs nothing. An old save loaded after week 99
+applies the week-99 steps on its first loaded turn: the 7th Corps is created, the 12 brigades
+move, and Alagić is seated unless the guards stop it. Past the window
+(`trigger_turn + max_defer_turns`) the brigades pay no transition cost, and any still committed
+to a live 3rd Corps operation are pulled out of it at once. This is a recorded limitation for
+pre-1.0 beta saves.
+
 
 Use this procedure for every `GameState` shape change that can appear in a saved game.
 
