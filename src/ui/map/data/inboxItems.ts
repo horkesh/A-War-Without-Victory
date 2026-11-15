@@ -410,7 +410,7 @@ export function deriveInboxItems(
             type: 'army_clash',
             severity: 'urgent',
             title: t('inbox.item.armyClash.title'),
-            subtitle: armyClashTitle(clash),
+            subtitle: armyClashTitle(clash, osidNameMap),
             action: armyClashSurface.inboxAction,
             priority: 30,
         });
