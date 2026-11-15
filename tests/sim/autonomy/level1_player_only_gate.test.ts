@@ -82,7 +82,7 @@ function applyExecutingPlan(state: GameState, faction: FactionId): void {
         }],
         sector_stances: [],
         updated_state: {
-            current_plan: { plan_id: `plan_${id}_t10`, status: 'executing' },
+            current_plan: { plan_id: `plan_${id}_t10`, status: 'executing', target_osids: ['op:test:objective'] },
         },
         reinforcement_requests: [],
         prepositioning_orders: [],
@@ -149,7 +149,7 @@ describe('Level 1 holds only the human player\'s corps', () => {
                 commander_officer_id: `officer_${id}`,
             }],
             sector_stances: [],
-            updated_state: { current_plan: { plan_id: `plan_${id}_t10`, status: 'executing' } },
+            updated_state: { current_plan: { plan_id: `plan_${id}_t10`, status: 'executing', target_osids: ['op:test:objective'] } },
             reinforcement_requests: [], prepositioning_orders: [], plan_updates: [], garrison_locks: [],
         } as any;
         applyCommanderOutput(state, id, output, 'RBiH');
@@ -160,7 +160,7 @@ describe('Level 1 holds only the human player\'s corps', () => {
         applyCommanderOutput(state, rsId, {
             ...output,
             operations: [{ ...output.operations[0], name: `op_${rsId}`, sector_id: `sector:${rsId}:0`, commander_officer_id: `officer_${rsId}` }],
-            updated_state: { current_plan: { plan_id: `plan_${rsId}_t10`, status: 'executing' } },
+            updated_state: { current_plan: { plan_id: `plan_${rsId}_t10`, status: 'executing', target_osids: ['op:test:objective'] } },
         }, 'RS');
         expect(launched(state, 'RS')).toEqual([`op_${rsId}`]);
     });

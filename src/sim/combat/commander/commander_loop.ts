@@ -38,7 +38,7 @@ import { assembleBeliefState } from './belief.js';
 import type { CorpsOperation } from '../../../state/game_state.js';
 import { botOrdersPerfTime } from '../_perf_profile_bot_orders.js';
 import { assignOperationCommander } from '../officer_system.js';
-import { isLevel1PlayerApprovalFaction } from '../../bot/staff_control.js';
+import { isLevel1PlayerApprovalFaction, isLevel1ProposablePlan } from '../../bot/staff_control.js';
 
 function operationsConflict(
     left: Pick<CorpsOperation, 'name' | 'sector_id' | 'objectives' | 'participating_brigades'>,
@@ -313,6 +313,15 @@ export function applyCommanderOutput(
                 corps.commander_state = { ...output.updated_state, current_plan: null };
                 corps.status_reason = 'plan abandoned: player rejected op proposal at Level 1';
                 corps.player_op_response = undefined;
+                return;
+            } else if (!planApproved && !isLevel1ProposablePlan(updatedPlan)) {
+                // L3c: a plan with no target cannot be put to the President (generateLevel1OpProposals
+                // skips it) and, being a non-opportunity plan without targets, would emit no operation
+                // even if approved. Holding it waits for an answer that can never be asked, so it was
+                // held at 'ready' for the rest of the war and blocked every new plan. Release it, as a
+                // bot corps' identical plan is cleared after its no-op launch. Player faction only.
+                corps.commander_state = { ...output.updated_state, current_plan: null };
+                corps.status_reason = 'plan released: no objective to put to the president at Level 1';
                 return;
             } else if (!planApproved && planProposalExpiredUnanswered(state, corpsId, updatedPlan.plan_id)) {
                 // L3b (command-loop proposal §5C, Council L8): the President let this plan's
