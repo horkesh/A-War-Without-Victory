@@ -13,7 +13,7 @@
  *   - corps stances are held at Defensive or below, and no army-wide offensive is ordered;
  *   - combat is suspended as under the COHA: brigade attack orders, counter-attacks included,
  *     are cleared at generation and suppressed with receipts at resolution. Movement stays, and
- *     emergency strategic-defence operations (which issue no attack orders) are kept.
+ *     strategic-defence operations (which issue no attack orders) are kept.
  *
  * SCOPE: general, by the canon precedent of the COHA (Engine Invariants "COHA ceasefire
  * ownership"; Systems Manual COHA implementation-note): a cessation-of-hostilities agreement
