@@ -9,7 +9,10 @@
   - The `useIPC` types now allow null.
   - Stale "max_fires 5 / cooldown 10t" comments are updated.
 - **Engine.** `evaluate_events.ts` never reads `action_cadence`; only the desktop contracts do. The bot faction's own firing of these events (at week 84) uses `once` and `event_fire_counts`, which are unchanged.
-- **Tests.** `tests/renewable_gestures.test.ts`: the data pin, never exhausted, cooldown still applies, a capped cadence still runs out, and front visit reports null rather than 0. The existing gesture and event tests pass unchanged.
-- **Proof.** Results in the PR, evidence under `C:/Pyrrhic/AWWV-worktrees/_logs/cl-appd-gestures-20261115/`:
-  - a 40-week headless run against main, every artifact compared by hash;
-  - `npm run test:baselines`: the 188-week master, 8 artifacts against the committed baselines.
+- **Tests.**
+  - `tests/renewable_gestures.test.ts`: the data pin, never exhausted, cooldown still applies, a capped cadence still runs out, and front visit reports null rather than 0.
+  - `tests/ui/front_visit_renewable.test.ts`: the Desk shows the cooldown and never "exhausted" for a renewable visit, and still shows it for a capped one.
+  - The existing gesture and event tests pass unchanged.
+- **Proof** (evidence under `C:/Pyrrhic/AWWV-worktrees/_logs/cl-appd-gestures-20261115/final/`):
+  - 40-week headless run against main `3912a7ec`: 14/14 simulation artifacts byte-identical, `final_state_hash` `c5d49a21a9db379f` on both. `run_meta.json` differs only in provenance (output folder, the changed event file's input digest, commit).
+  - `npm run test:baselines`: the 188-week master, 8 artifacts against the committed baselines. "Baseline regression: all scenarios match." This covers the bots' own week-84 firing of these events.
