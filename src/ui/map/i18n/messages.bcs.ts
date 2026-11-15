@@ -6124,8 +6124,8 @@ export const bcsMessages: Partial<Record<MessageKey, string>> = {
     // Command loop L6 (2026-11-14): naplaćena podrška i vidljiva obnova vlasti.
     'authority.lever.backCorpsOperation': 'Podrži operaciju korpusa',
     'authority.lever.backCampaign': 'Podrži kampanju ili historijsku operaciju',
-    'authority.nextWeek': 'Sljedeće sedmice: +{income} vlasti',
-    'authority.nextWeekWithSources': 'Sljedeće sedmice: +{income} vlasti ({sources})',
+    'authority.nextWeek': 'Sljedeće sedmice: +{income} autoriteta',
+    'authority.nextWeekWithSources': 'Sljedeće sedmice: +{income} autoriteta ({sources})',
     'authority.source.base': 'osnova {value}',
     'authority.source.political': 'politički ugled {value}',
     'authority.source.quietFront': 'miran front {value}',
