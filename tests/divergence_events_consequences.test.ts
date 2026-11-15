@@ -22,6 +22,7 @@ import { applyEventEffects } from '../src/sim/events/apply_effects.js';
 import { buildCostLedger } from '../src/sim/endgame/cost_ledger.js';
 import type { EventDefinition, EventCondition, EventEffect } from '../src/sim/events/event_types.js';
 import type { GameState } from '../src/state/game_state.js';
+import { OFFENSIVE_PARA_FADE_WEEK, PARAMILITARY_FADE_WEEK } from '../src/state/formation_constants.js';
 
 const ALL_EVENTS: EventDefinition[] = loadEventDefinitions(0);
 function getEvent(id: string): EventDefinition {
@@ -134,6 +135,19 @@ describe('LANE-NIGHTSHIFT-ROUND2: divergence event seeds', () => {
         const otherFaction = baseState(22) as any;
         otherFaction.paramilitary_deployment_count = { HRHB: 3, RS: 0 };
         expect(evaluateCondition(cond, otherFaction)).toBe(true);
+        // An RS President who chose "always allow" gave the order, even if no target came up.
+        const authorized = baseState(22) as any;
+        authorized.military.event_flags = { ...(authorized.military.event_flags ?? {}), rs_paramilitary_authorized: true };
+        expect(evaluateCondition(cond, authorized)).toBe(false);
+        // RS war crimes on record (e.g. the Drina cleansing) rule the refusal out.
+        const crimes = baseState(22) as any;
+        crimes.military.negotiation.capital.RS = { ...(crimes.military.negotiation.capital.RS ?? {}), war_crimes_events: 1 };
+        expect(evaluateCondition(cond, crimes)).toBe(false);
+        // Guard: the refusal is judged only after both fade weeks, so no deployment can still
+        // follow a "refused" reward (refuse-then-deploy).
+        expect(def.trigger.turn_min!).toBeGreaterThan(Math.max(PARAMILITARY_FADE_WEEK, OFFENSIVE_PARA_FADE_WEEK));
+        // The narrative claims only what the predicate measures.
+        expect(def.narrative).not.toMatch(/clean record|without massacres/i);
         applyEventEffects(fires, effectsOf(def));
         // No mechanical effect on negotiation_capital.international_credibility key needed —
         // the negotiation_capital writer only mutates fields already present on the capital

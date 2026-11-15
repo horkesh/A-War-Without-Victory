@@ -1615,7 +1615,7 @@
   {
     "id": "csq_paramilitary_authorization_refused",
     "title": "The Sweep That Was Never Ordered",
-    "narrative": "Twenty turns and counting. The political files do not contain the order. The paramilitary detachments that, on other timelines, would have been turned loose on the rear-area municipalities are still confined to peripheral roles. The international monitors cite a clean record. It is the rarest commodity in this war: a ledger without massacres.",
+    "narrative": "Twenty turns and counting. The political files do not contain the order. The paramilitary detachments that, on other timelines, would have been turned loose on the rear-area municipalities are still confined to peripheral roles. International monitors note that no sweep has been ordered. In this war that is rare, though it is not a ledger without deaths.",
     "category": "humanitarian",
     "trigger": {
       "turn_min": 21,
@@ -1631,6 +1631,18 @@
             "type": "paramilitary_deployments_at_most",
             "faction": "RS",
             "max": 0
+          },
+          {
+            "type": "flag_not_set",
+            "flag": "rs_paramilitary_authorized"
+          },
+          {
+            "type": "not",
+            "condition": {
+              "type": "war_crimes_above",
+              "faction": "RS",
+              "threshold": 1
+            }
           }
         ]
       }
