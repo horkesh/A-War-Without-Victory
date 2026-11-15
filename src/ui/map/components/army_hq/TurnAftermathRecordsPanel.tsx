@@ -95,6 +95,7 @@ const ACTION_TYPE_LABEL_KEYS = {
     officer_event: 'records.actionType.officer_event',
     autonomy_proposal: 'records.actionType.autonomy_proposal',
     stance_matter: 'records.actionType.stance_matter',
+    army_clash: 'records.actionType.army_clash',
     operation_opportunity: 'records.actionType.operation_opportunity',
     counter_offer: 'records.actionType.counter_offer',
     intelligence_notification: 'records.actionType.intelligence_notification',

@@ -39,7 +39,9 @@ import type {
     MilitiaPoolView, MobilizationSummaryView, MovementOrderSettlementView, NamedOfficerStateView, NamedOfficerView,
     OperationView, RepositionOrderView, RecruitmentView,
     StanceHoldView, StanceMatterReceiptView, StanceMatterView,
+    ArmyClashView, ArmyClashReceiptView,
 } from './types';
+import { proposalBackingCost } from '../utils/commandAuthority';
 import {
     getPlayerSafeCorpsName,
     getPlayerSafeDecisionTitle,
@@ -3162,6 +3164,7 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
         settlementMap: deriveSettlementMap(state),
         pendingProposalReviews,
         ...deriveStanceMatterViews(state, playerFaction, corpsFrontSectors),
+        ...deriveArmyClashViews(state, playerFaction),
         strategicDimensions: deriveStrategicDimensions(state),
         negotiatingCapital: deriveNegotiatingCapital(state),
         eventFlags: state.military?.event_flags ?? undefined,
@@ -4843,6 +4846,102 @@ function deriveStanceMatterViews(
         ...(matters.length > 0 ? { stanceMatters: matters } : {}),
         ...(history.length > 0 ? { stanceMatterHistory: history } : {}),
         ...(holds.length > 0 ? { stanceHolds: holds } : {}),
+    };
+}
+
+/**
+ * Command loop L7: project the player's open army clash (this week's only; an older one has
+ * lapsed) and the clash receipts into player-safe views. Read-only; deterministic order.
+ */
+function deriveArmyClashViews(
+    state: any,
+    playerFaction: string | null | undefined,
+): Pick<LoadedGameState, 'armyClashes' | 'armyClashHistory'> {
+    const formationsRecord = (state.military?.formations ?? {}) as Record<string, { name?: unknown }>;
+    const officerData: any[] = Array.isArray(state.military?.named_officer_data) ? state.military.named_officer_data : [];
+    const officerStates: Record<string, any> = state.military?.named_officers ?? {};
+    const corpsName = (corpsId: string): string => {
+        const name = formationsRecord[corpsId]?.name;
+        return getPlayerSafeCorpsName(typeof name === 'string' ? name : null, corpsId);
+    };
+    const officerName = (id: unknown): string | null => {
+        if (typeof id !== 'string' || !id) return null;
+        const data = officerData.find((o) => o?.id === id);
+        return data && typeof data.name === 'string' ? getPlayerSafeOfficerName(data.name, '') || null : null;
+    };
+    const corpsCommanderName = (corpsId: string): string | null => {
+        const id = Object.keys(officerStates).sort()
+            .find((key) => officerStates[key]?.status === 'active' && officerStates[key]?.assigned_corps_id === corpsId
+                && officerData.find((o) => o?.id === key)?.rank === 'corps_commander');
+        return id ? officerName(id) : null;
+    };
+    const mine = (row: any): boolean => row && typeof row === 'object' && playerFactionMatch(row.faction, playerFaction);
+    const turn = typeof state.meta?.turn === 'number' ? state.meta.turn : null;
+    const ACTS = ['stop_op', 'request_op', 'withhold_plan', 'decline_opportunity'] as const;
+    const OUTCOMES = ['accept', 'insist', 'replace', 'lapsed', 'noted', 'not_put'] as const;
+    const act = (value: unknown): ArmyClashView['act'] => (ACTS as readonly string[]).includes(String(value))
+        ? value as ArmyClashView['act'] : 'stop_op';
+    const outcome = (value: unknown): ArmyClashReceiptView['outcome'] => (OUTCOMES as readonly string[]).includes(String(value))
+        ? value as ArmyClashReceiptView['outcome'] : 'noted';
+    const historyRows: any[] = (Array.isArray(state.meta?.army_clash_history) ? state.meta.army_clash_history : []).filter(mine);
+    const reviews: any[] = Array.isArray(state.meta?.pending_proposal_reviews) ? state.meta.pending_proposal_reviews : [];
+
+    const clashes = (Array.isArray(state.meta?.army_clashes) ? state.meta.army_clashes : [])
+        .filter(mine)
+        .filter((c: any) => turn === null || c.turn === turn)
+        .map((c: any): ArmyClashView => {
+            const clashAct = act(c.act);
+            const corpsId = String(c.corps_id ?? '');
+            const orderRef = String(c.order_ref ?? '');
+            const previous = typeof c.previous_clash_id === 'string'
+                ? historyRows.find((r) => r.id === c.previous_clash_id) : null;
+            let orderName: string | null = null;
+            if (clashAct === 'stop_op') orderName = getPlayerSafeOperationName(orderRef, corpsId);
+            if (clashAct === 'decline_opportunity') {
+                const review = reviews.find((r) => r?.id === c.proposal_id);
+                const name = typeof review?.description === 'string' ? review.description.split(' — ')[0]!.trim() : '';
+                orderName = name ? getPlayerSafeOperationName(name, corpsId) : null;
+            }
+            return {
+                id: String(c.id ?? ''),
+                turn: typeof c.turn === 'number' ? c.turn : 0,
+                act: clashAct,
+                corpsId,
+                corpsName: corpsName(corpsId),
+                corpsCommanderName: corpsCommanderName(corpsId),
+                armyCommanderName: officerName(c.army_officer_id),
+                conflict: c.conflict,
+                compliance: c.compliance === 'refused' || c.compliance === 'partial' ? c.compliance : 'modified',
+                counterOrder: c.counter_order,
+                orderRef,
+                orderName,
+                stagedCost: typeof c.staged_cost === 'number' ? c.staged_cost : 0,
+                // Same source as the IPC debit (army_clash_ipc.cjs): the restaged review's backing price.
+                acceptCost: clashAct === 'withhold_plan' || clashAct === 'decline_opportunity'
+                    ? proposalBackingCost(reviews.find((r) => r?.id === c.proposal_id)?.proposed_action)
+                    : 0,
+                corpsObjection: c.corps_objection === true,
+                previousClash: previous ? { turn: typeof previous.turn === 'number' ? previous.turn : 0, outcome: outcome(previous.outcome) } : null,
+            };
+        })
+        .sort((a: ArmyClashView, b: ArmyClashView) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
+
+    const history = historyRows
+        .map((r: any): ArmyClashReceiptView => ({
+            id: String(r.id ?? ''),
+            turn: typeof r.turn === 'number' ? r.turn : 0,
+            act: act(r.act),
+            corpsName: corpsName(String(r.corps_id ?? '')),
+            armyCommanderName: officerName(r.army_officer_id),
+            outcome: outcome(r.outcome),
+            resolvedTurn: typeof r.resolved_turn === 'number' ? r.resolved_turn : 0,
+            cost: typeof r.cost === 'number' ? r.cost : 0,
+        }))
+        .reverse();
+
+    return {
+        ...(clashes.length > 0 ? { armyClashes: clashes } : {}),
+        ...(history.length > 0 ? { armyClashHistory: history } : {}),
     };
 }
 

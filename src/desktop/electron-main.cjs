@@ -36,6 +36,7 @@ const {
 const { stageAuthoredOperation, stageCanonAttackOrder } = require('./author_op_staging.cjs');
 const { stageOpHalt } = require('./op_halt.cjs');
 const { recordStanceMatterAnswer } = require('./stance_matter_ipc.cjs');
+const { recordArmyClashAnswer } = require('./army_clash_ipc.cjs');
 const { stageOpDirective } = require('./op_directive_staging.cjs');
 const { stageCoReplacement } = require('./co_replacement.cjs');
 const { createSerialMutex } = require('./ipc_mutex.cjs');
@@ -305,6 +306,17 @@ function getDesktopSim() {
     throw new Error('Desktop sim not built. Run: npm run desktop:sim:build');
   }
   return require(bundlePath);
+}
+
+/**
+ * Command loop L7: after a presidential act is staged, ask the sim whether it crosses the army's
+ * plan. Raises at most one open clash, or files a silent Record line, or does nothing. Live
+ * president only (checked in the sim); never called by headless runs.
+ */
+function raiseArmyClashAfterAct(sim, state, input) {
+  const faction = state && state.meta ? state.meta.player_faction : null;
+  if (!faction || typeof sim.raiseArmyClash !== 'function') return null;
+  return sim.raiseArmyClash(state, faction, input);
 }
 
 function getActivePlayerFaction() {
@@ -2587,6 +2599,8 @@ app.whenReady().then(() => {
         if (currentGameStateJson) sendGameStateToRenderer(currentGameStateJson);
         return { ok: false, error: result.error };
       }
+      // Command loop L7: an army clash left unanswered at Advance lapses (the order stood as given).
+      if (typeof sim.sweepLapsedArmyClashes === 'function') sim.sweepLapsedArmyClashes(result.state);
       writeCanonicalCurrentState(sim, result.state, _event.sender);
       if (result.report) sendTurnReportToRenderer(result.report);
       // TIER1-REPLAY-LIVE: accumulate sparse replay summary for the live-play
@@ -2813,6 +2827,12 @@ app.whenReady().then(() => {
       const state = readCanonicalCurrentState(sim);
       const result = stageOpHalt(state, payload);
       if (!result.ok) return result;
+      const stagedHalt = state.military?.corps_command?.[payload.corpsId]?.pending_op_halt;
+      if (stagedHalt) {
+        raiseArmyClashAfterAct(sim, state, {
+          act: 'stop_op', corpsId: payload.corpsId, orderRef: stagedHalt.op_name, stagedCost: stagedHalt.ca_cost,
+        });
+      }
       // Codex P2 (#104): refresh the CLICKING renderer too. Excluding _event.sender
       // left the renderer that issued the halt showing stale command-authority — the
       // CA debit + pending_op_halt never reached it, so it would let the player click
@@ -2860,6 +2880,13 @@ app.whenReady().then(() => {
       }
       const result = stageOpDirective(state, payload, { unbuildableReason });
       if (!result.ok) return result;
+      const stagedDirective = state.military?.corps_command?.[payload.corpsId]?.pending_op_directive;
+      if (stagedDirective) {
+        raiseArmyClashAfterAct(sim, state, {
+          act: 'request_op', corpsId: payload.corpsId, orderRef: stagedDirective.target_osid,
+          stagedCost: stagedDirective.ca_cost, corpsObjection: stagedDirective.forced_over_objection === true,
+        });
+      }
       // Refresh ALL windows incl. the clicking renderer (see Codex P2 above) so the
       // sender re-renders the debited CA and the now-staged directive immediately.
       writeCanonicalCurrentState(sim, state);
@@ -4233,6 +4260,18 @@ app.whenReady().then(() => {
     return { ok: true };
   });
 
+  // Command loop L7: the president answers an army clash (Accept / Insist / Replace). The answer
+  // applies at once in the planning window (army_clash_ipc.cjs); the war pipeline gains no step.
+  ipcMain.handle('resolve-army-clash', async (event, payload) => {
+    if (!currentGameStateJson) return { ok: false, error: 'no_state' };
+    const sim = getDesktopSim();
+    const state = readCanonicalCurrentState(sim);
+    const swept = typeof sim.sweepLapsedArmyClashes === 'function' ? sim.sweepLapsedArmyClashes(state) : 0;
+    const result = recordArmyClashAnswer(state, payload);
+    if (result.ok || swept > 0) writeCanonicalCurrentState(sim, state, event.sender);
+    return result.ok ? { ok: true, cost: result.cost } : result;
+  });
+
   // v0.8.4 Phase C: Proposal accept/reject handlers
   ipcMain.handle('accept-proposal', async (event, proposalId) => {
     if (!currentGameStateJson) return { ok: false, error: 'no_state' };
@@ -4319,10 +4358,14 @@ app.whenReady().then(() => {
       if (cc) {
         cc.player_op_response = { plan_id: planId, approved: false, turn: state.meta.turn };
       }
+      raiseArmyClashAfterAct(sim, state, { act: 'withhold_plan', corpsId, orderRef: planId, proposalId: proposal.id });
     } else if (proposal.proposed_action.startsWith('OPPORTUNITY:')) {
       // LANE B Phase 2: Player declines an opportunity.
       // accepted=false above; the war-pipeline step on the next turn routes
       // it through applyOpportunityDecision('decline'). No state mutation here.
+      raiseArmyClashAfterAct(sim, state, {
+        act: 'decline_opportunity', orderRef: proposal.proposed_action.slice('OPPORTUNITY:'.length), proposalId: proposal.id,
+      });
     }
 
     writeCanonicalCurrentState(sim, state, event.sender);
@@ -4512,6 +4555,12 @@ app.whenReady().then(() => {
     proposal.opportunity_decision = decisionAccess.decision;
     proposal.opportunity_decision_options = decisionAccess.options;
     proposal.resolved_turn = state.meta.turn;
+    if (decisionAccess.decision === 'decline' && typeof proposal.proposed_action === 'string'
+      && proposal.proposed_action.startsWith('OPPORTUNITY:')) {
+      raiseArmyClashAfterAct(sim, state, {
+        act: 'decline_opportunity', orderRef: proposal.proposed_action.slice('OPPORTUNITY:'.length), proposalId: proposal.id,
+      });
+    }
 
     writeCanonicalCurrentState(sim, state, event.sender);
     return { ok: true };

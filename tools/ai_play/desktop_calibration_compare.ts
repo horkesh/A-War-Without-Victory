@@ -38,8 +38,14 @@ import { isHistoricalOperationAuthorizationReview } from '../../src/sim/combat/h
 import { resolvePeacePlan } from '../../src/sim/negotiation/peace_plans.js';
 import { getPeacePlanById } from '../../src/sim/negotiation/peace_plan_data.js';
 import { createRequire } from 'node:module';
+import { raiseArmyClash, sweepLapsedArmyClashes } from '../../src/sim/combat/army_clashes.js';
 
 /** The desktop IPC contract (CommonJS): the same price table and debit the accept-proposal handler uses. */
+/** The desktop army-clash answer (command loop L7), used only by `--clash-policy`. */
+const clashIpc = createRequire(import.meta.url)('../../src/desktop/army_clash_ipc.cjs') as {
+    recordArmyClashAnswer: (state: unknown, payload: Record<string, unknown>) => { ok: boolean; error?: string };
+};
+
 const ipcContract = createRequire(import.meta.url)('../../src/desktop/autonomy_ipc_contract.cjs') as {
     proposalBackingCost: (action: unknown) => number;
     debitCommandAuthority: (state: unknown, cost: number) => { ok: boolean; error?: string };
@@ -86,13 +92,18 @@ interface CliOptions {
      * desktop refuses it.
      */
     priceBacking?: 'record' | 'on';
+    /**
+     * Command loop L7 measurement (with `--price-backing on`): withhold every primary-corps plan and
+     * answer the resulting army clash with this answer. Off by default.
+     */
+    clashPolicy?: 'insist' | 'accept';
     electronLogPath?: string;
     electronAutosavePath?: string;
 }
 
 interface DecisionTranscriptRow {
     turn: number;
-    family: 'event' | 'historical_operation' | 'op_proposal' | 'paramilitary_request' | 'peace_plan';
+    family: 'event' | 'historical_operation' | 'op_proposal' | 'army_clash' | 'paramilitary_request' | 'peace_plan';
     id: string;
     decision: string;
     value?: string;
@@ -299,6 +310,10 @@ function parseArgs(argv: string[]): CliOptions {
             const raw = parseEnum(values.get('--price-backing') ?? 'off', ['off', 'record', 'on'] as const, '--price-backing');
             return raw === 'off' ? {} : { priceBacking: raw };
         })(),
+        ...(() => {
+            const raw = parseEnum(values.get('--clash-policy') ?? 'off', ['off', 'insist', 'accept'] as const, '--clash-policy');
+            return raw === 'off' ? {} : { clashPolicy: raw };
+        })(),
     };
 }
 
@@ -438,13 +453,21 @@ function applyHistoricalOperationPolicy(
  * then `player_op_response` approved). An unaffordable proposal is left unanswered and lapses at
  * Advance, as in the desktop. This bounds Authority spend from above for the L6 measurement.
  */
-function applyEagerBackingPolicy(state: GameState, faction: FactionId, transcript: DecisionTranscriptRow[]): void {
+function applyEagerBackingPolicy(
+    state: GameState,
+    faction: FactionId,
+    transcript: DecisionTranscriptRow[],
+    clashPolicy?: 'insist' | 'accept',
+): void {
+    // Command loop L7: an unanswered clash lapses at Advance (electron-main sweeps after advanceTurn).
+    if (clashPolicy) sweepLapsedArmyClashes(state);
     const reviews = [...(state.meta.pending_proposal_reviews ?? [])]
         .filter((review) => review.faction === faction)
         .filter((review) => typeof review.proposed_action === 'string' && review.proposed_action.startsWith('APPROVE_OP:'))
         .filter((review) => review.accepted == null && review.resolved_turn == null)
         .sort((a, b) => strictCompare(a.id, b.id));
     for (const review of reviews) {
+        if (clashPolicy && withholdsAgainstArmyPlan(state, faction, review, transcript, clashPolicy)) continue;
         const backing = ipcContract.debitCommandAuthority(state, ipcContract.proposalBackingCost(review.proposed_action));
         if (!backing.ok) {
             transcript.push({ turn: state.meta.turn, family: 'op_proposal', id: review.id, decision: 'defer_unaffordable', value: review.proposed_action });
@@ -457,6 +480,39 @@ function applyEagerBackingPolicy(state: GameState, faction: FactionId, transcrip
         if (corps) corps.player_op_response = { plan_id: planId, approved: true, turn: state.meta.turn };
         transcript.push({ turn: state.meta.turn, family: 'op_proposal', id: review.id, decision: 'accept', value: review.proposed_action });
     }
+}
+
+/**
+ * `--clash-policy insist|accept` (with `--price-backing on`), L7 measurement only: the president
+ * withholds every plan of a corps the army's campaign plan calls primary, mirroring the desktop
+ * `reject-proposal` handler, then raises the army clash exactly as it does and answers it with the
+ * desktop's own `recordArmyClashAnswer`. Returns true when the proposal was withheld.
+ */
+function withholdsAgainstArmyPlan(
+    state: GameState,
+    faction: FactionId,
+    review: NonNullable<GameState['meta']['pending_proposal_reviews']>[number],
+    transcript: DecisionTranscriptRow[],
+    clashPolicy: 'insist' | 'accept',
+): boolean {
+    const [, corpsId, planId] = review.proposed_action.split(':');
+    const plan = state.military.campaign_plans?.[faction];
+    const primary = plan && plan.valid_until_turn >= state.meta.turn
+        && plan.front_priorities.some((fp) => fp.corps_id === corpsId && fp.role === 'primary');
+    if (!primary) return false;
+    review.accepted = false;
+    review.resolved_turn = state.meta.turn;
+    const corps = state.military.corps_command?.[corpsId!] as Record<string, unknown> | undefined;
+    if (corps) corps.player_op_response = { plan_id: planId, approved: false, turn: state.meta.turn };
+    transcript.push({ turn: state.meta.turn, family: 'op_proposal', id: review.id, decision: 'withhold', value: review.proposed_action });
+    const raised = raiseArmyClash(state, faction, { act: 'withhold_plan', corpsId: corpsId!, orderRef: planId!, proposalId: review.id });
+    if (raised.outcome === 'raised') {
+        const answer = clashIpc.recordArmyClashAnswer(state, { clashId: raised.clashId, answer: clashPolicy });
+        transcript.push({ turn: state.meta.turn, family: 'army_clash', id: raised.clashId, decision: answer.ok ? clashPolicy : `refused:${answer.error}` });
+    } else if (raised.outcome !== 'none') {
+        transcript.push({ turn: state.meta.turn, family: 'army_clash', id: raised.receiptId, decision: raised.outcome });
+    }
+    return true;
 }
 
 function applyParamilitaryPolicy(
@@ -522,7 +578,7 @@ function applyPlayerPolicy(
     applyEventPolicy(state, options.faction, options.eventPolicy, transcript);
     applyPeacePlanPolicy(state, options.faction, options.eventPolicy, transcript);
     applyHistoricalOperationPolicy(state, options.faction, options.historicalOperationPolicy, transcript, options.priceBacking);
-    if (options.priceBacking === 'on') applyEagerBackingPolicy(state, options.faction, transcript);
+    if (options.priceBacking === 'on') applyEagerBackingPolicy(state, options.faction, transcript, options.clashPolicy);
     applyParamilitaryPolicy(state, options.faction, options.paramilitaryPolicy, transcript);
     // Last: resolving an event (e.g. the opening state-identity decision) can re-enable the
     // paramilitary policy event, which would reopen the pending window for this turn.
@@ -1009,6 +1065,7 @@ async function runComparison(baseDir: string, options: CliOptions) {
             player_event_resolution_timing: 'between_turns',
             historical_operations: options.historicalOperationPolicy,
             ...(options.priceBacking ? { price_backing: options.priceBacking } : {}),
+            ...(options.clashPolicy ? { clash_policy: options.clashPolicy } : {}),
             paramilitary_requests: options.paramilitaryPolicy,
             paramilitary_resolution_timing: options.paramilitaryPolicy === 'standing_allow'
                 ? 'same_turn'

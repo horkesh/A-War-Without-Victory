@@ -42,6 +42,8 @@ import { getPlayerSafeCorpsName, getPlayerSafeOfficerName } from '../../utils/pl
 import { getOsidDisplayName } from '../../utils/osidDisplayName';
 // Lazy: the stance-matter answer and its detail copy stay out of the map entry chunk.
 const StanceMatterActions = lazy(() => import('../StanceMatterActions'));
+// Lazy (command loop L7): the army-clash facts and answers stay out of the map entry chunk.
+const ArmyClashActions = lazy(() => import('../ArmyClashActions'));
 import { buildObjectiveTargetOptions } from '../../utils/objectiveTargetOptions';
 import { t, type MessageKey } from '../../i18n';
 import { formatAuthorityAmount, nextWeekIncome } from '../../utils/authorityIncome';
@@ -78,6 +80,7 @@ function leverLabel(lever: PresidentialDecisionRoomDirective['lever']): string {
     case 'elite_deploy': return t('directive.lever.elite_deploy');
     case 'review_proposal': return t('directive.lever.review_proposal');
     case 'stance_matter': return t('directive.lever.stance_matter');
+    case 'army_clash': return t('directive.lever.army_clash');
     case 'front_visit': return t('directive.lever.front_visit');
     case 'address_nation': return t('directive.lever.address_nation');
     case 'decorate_unit': return t('directive.lever.decorate_unit');
@@ -174,6 +177,21 @@ export function DirectiveCard(props: DirectiveCardProps) {
         <StanceMatterActions
           matter={matter}
           showDetail
+          onAnswered={(message) => props.onReceipt?.({ kind: 'success', message })}
+        />
+      </Suspense>
+    );
+  }
+  // Command loop L7: an army clash has three answers (Accept / Insist / Replace), each priced.
+  if (props.directive.lever === 'army_clash') {
+    const clashId = typeof props.directive.payload.clashId === 'string' ? props.directive.payload.clashId : '';
+    const clash = props.gameState.armyClashes?.find((c) => c.id === clashId);
+    if (!clash) return null;
+    return (
+      <Suspense fallback={null}>
+        <ArmyClashActions
+          clash={clash}
+          gameState={props.gameState}
           onAnswered={(message) => props.onReceipt?.({ kind: 'success', message })}
         />
       </Suspense>
