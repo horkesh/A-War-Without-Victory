@@ -1,6 +1,7 @@
 # A War Without Victory -- Game Bible v0.9.0
 
-**Last Updated:** 2026-05-05
+**Last Updated:** 2026-11-15
+**Amended:** 2026-11-15 (owner directive: war-or-game removed from all seats; owner approved this canon edit 2026-11-15, "Amend the canon docs"): adding a rupture now needs `/historian` + `/scenario-creator-runner-tester` + `/game-designer` review instead of `/war-or-game`. Nothing renumbered.
 
 One game turn equals one week.
 
@@ -326,7 +327,7 @@ A historical event becomes eligible for rupture status only if it meets all four
 3. **Specific trigger condition:** discrete, deterministic game-state condition (control of a specific OSID, presence of a flag, turn range), NOT a cumulative threshold and NOT a calendar-window heuristic.
 4. **Non-reversible:** once recorded, the event is a fact of the world for the run.
 
-Adding a rupture is a capital-R Decision requiring `/historian` + `/war-or-game` + `/game-designer` review and Pyrrhic-panel sign-off; BLOCK, split verdict, or bright-line uncertainty escalates to the owner. The default is: do not add one.
+Adding a rupture is a capital-R Decision requiring `/historian` + `/scenario-creator-runner-tester` + `/game-designer` review and Pyrrhic-panel sign-off; BLOCK, split verdict, or bright-line uncertainty escalates to the owner. The default is: do not add one.
 
 ### 22.3 Counterfactual silence is canon
 
