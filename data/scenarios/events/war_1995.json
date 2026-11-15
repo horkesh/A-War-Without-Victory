@@ -2138,6 +2138,14 @@
     "narrative": "Washington calls. Republika Srpska now holds no more than about half the country, close to or below the 49 percent the Contact Group map gave it in July 1994, and the VRS is under pressure in western Bosnia. Holbrooke wants the offensive stopped short of Banja Luka. Washington fears that the city's fall to Federation or Croatian forces would put hundreds of thousands more refugees on the roads and upset the balance the peace talks depend on. Sarajevo must decide whether to halt where the front stands and keep American backing, or push on and risk losing it. Zagreb faces the same pressure.",
     "category": "diplomatic",
     "source_tier": "balkan_battlegrounds",
+    "localizations": {
+      "en": {
+        "source_note": "Balkan Battlegrounds, Vol. I, p. 462 and endnote 823 (US pressure in September 1995; Zagreb ordered Južni Potez in October) and Vol. II, Ch. 15. Holbrooke, To End a War (1998)."
+      },
+      "bcs": {
+        "source_note": "Balkan Battlegrounds, tom I, str. 462 i bilješka 823 (američki pritisak u septembru 1995; Zagreb je u oktobru naredio Južni potez) i tom II, pogl. 15. Holbrooke, To End a War (1998)."
+      }
+    },
     "source_note": "Editorial provenance: originally machine-drafted, then hand-corrected against Balkan Battlegrounds Vol. I. The correction reverses the compliance direction (Zagreb proceeded with Južni Potez despite US pressure; Sarajevo complied reluctantly while stalling), qualifies the claim that Banja Luka was there for the taking, and replaces the mid-October freeze with the 12 October ceasefire and the fighting that continued to 20 October. The post-Dayton return of Mrkonjić Grad and Šipovo to Republika Srpska is not narrated by Balkan Battlegrounds and is deliberately omitted rather than sourced elsewhere.",
     "trigger": {
       "turn_min": 179,
