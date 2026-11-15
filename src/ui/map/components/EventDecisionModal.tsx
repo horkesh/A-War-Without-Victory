@@ -26,7 +26,7 @@ import { Z } from '../../shared/zIndex';
 import { Modal } from '../../shared/Modal';
 import { DecisionModalImageHeader } from './DecisionModalImageHeader';
 import { resolveEventIllustration, section6StillAlt } from '../data/eventIllustrationArt';
-import { displayEventProse, resolveEventSourceLine } from '../data/eventDisplayCopy';
+import { displayEventProse, isDesignCounterfactualEvent, resolveEventSourceLine } from '../data/eventDisplayCopy';
 import { restoreBosnianProperNames } from '../../shared/bosnianPlaceNames';
 import { getDecisionHeaderForEventCategory } from '../data/presidentialDeskAssets';
 import { isDisplayEventEffect } from '../utils/eventEffectDisplay';
@@ -467,17 +467,26 @@ function ResponseButton({
     decision,
     sourceNote,
     showDiagnostics,
+    counterfactual,
     onChoose,
 }: {
     option: EventResponseOption;
     decision: EventDecisionDossier;
     sourceNote: string | null;
     showDiagnostics: boolean;
+    /** The event is a design counterfactual: its default is the staff's, not a historical choice. */
+    counterfactual: boolean;
     onChoose: () => void;
 }) {
     const historical = isHistoricalOption(option, decision);
     const staffRecommended = !historical && isStaffRecommendedOption(option, decision);
-    const historicalDescription = `${t('eventDecision.historicalDefaultDescription')}${sourceNote ? ` ${t('eventDecision.sourceInline', { source: sourceNote.replace(/[.。]+$/u, '') })}` : ''}`;
+    // A design-counterfactual event keeps its `historical_default` marker (bots read it), but the
+    // player is never told that choice is historically attested.
+    const defaultChipKey: MessageKey = counterfactual ? 'eventDecision.staffDefault' : 'eventDecision.historicalDefault';
+    const defaultDescriptionKey: MessageKey = counterfactual
+        ? 'eventDecision.staffDefaultDescription'
+        : 'eventDecision.historicalDefaultDescription';
+    const historicalDescription = `${t(defaultDescriptionKey)}${sourceNote ? ` ${t('eventDecision.sourceInline', { source: sourceNote.replace(/[.。]+$/u, '') })}` : ''}`;
     const chooseLabel = t('eventDecision.chooseResponseAria', { response: option.label });
     // Surface redesign (2026-11-10): each response is a matter card — the choice itself
     // is the big button; why it is marked, what it says and what follows read below it.
@@ -500,7 +509,7 @@ function ResponseButton({
                             className={`${SURFACE_CHIP} border-accent-gold/60 text-accent-gold`}
                             title={historicalDescription}
                         >
-                            {t('eventDecision.historicalDefault')}
+                            {t(defaultChipKey)}
                         </span>
                     )}
                     {staffRecommended && (
@@ -785,6 +794,7 @@ export function EventDecisionModal({ decision, onRespond, eventCatalog, state, a
                                     decision={localizedDecision}
                                     sourceNote={safeSourceNote}
                                     showDiagnostics={diagMode}
+                                    counterfactual={isDesignCounterfactualEvent(eventCatalog?.get(decision.event_id))}
                                     onChoose={() => onRespond(localizedDecision.event_id, option.id)}
                                 />
                             ))}

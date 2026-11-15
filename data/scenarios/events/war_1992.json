@@ -3348,6 +3348,14 @@
   {
     "id": "hrhb_1992_graz_cooperation_collapse",
     "title": "Graz and the Frictions of Cooperation",
+    "localizations": {
+      "en": {
+        "source_note": "ICTY, Prlić et al. (IT-04-74), Trial Judgment, 29 May 2013, Vol. 1, para. 439: the meeting of Mate Boban and Radovan Karadžić in Graz on 6 May 1992, which produced a joint statement but no signed agreement. ICTY, Kordić and Čerkez (IT-95-14/2), Trial Judgment, 26 February 2001: the HVO takeover of municipal authority in central Bosnia in 1992."
+      },
+      "bcs": {
+        "source_note": "MKSJ, Prlić i drugi (IT-04-74), prvostepena presuda, 29. maj 2013, tom 1, par. 439: sastanak Mate Bobana i Radovana Karadžića u Grazu 6. maja 1992., koji je završio zajedničkom izjavom, ali bez potpisanog sporazuma. MKSJ, Kordić i Čerkez (IT-95-14/2), prvostepena presuda, 26. februar 2001: preuzimanje vlasti u općinama srednje Bosne od strane HVO-a 1992."
+      }
+    },
     "narrative": "Karadžić and Boban have met in Graz. The 6 May 1992 joint statement records a Croat-Serb understanding on the territorial organization of Bosnia-Herzegovina — partition lines that leave only residual central-Bosnia ground for Sarajevo. The HVO 4th Brigade still holds the Mostar line against the JNA/VRS; in Prozor, Novi Travnik, and Vitez, local HVO commanders begin asserting HZ HB jurisdiction over checkpoints, factories, and municipal command. Zagreb's transcripts read Graz as compatible with the HZ HB project, but with diplomatic risk. The political files require a posture: accept the local frictions as the visible cost of separate trajectories, or have the Presidency intervene at command level to suppress them and preserve the joint anti-VRS framework.",
     "category": "political",
     "family": "hrhb_political_goal",
@@ -3388,7 +3396,7 @@
     "responding_faction": "HRHB",
     "bot_response_logic": "historical",
     "historical_default_response_id": "local_friction_emerges",
-    "source_note": "Graz meeting documented in Prlić IT-04-74 (Vol. 1 §§490-525) and admitted Tudjman transcripts. The OR-trigger on hrhb_political_goal ensures all three H1 branches reach H1a; historical bot picks local_friction_emerges per documented cooperation decline through Prozor / Novi Travnik / Vitez summer 1992.",
+    "source_note": "Graz meeting documented in Prlić IT-04-74 (Vol. 1, para. 439: the 6 May 1992 meeting and its joint statement, no signed agreement; corrected 2026-11-15 from \"§§490-525\") and admitted Tudjman transcripts. The OR-trigger on hrhb_political_goal ensures all three H1 branches reach H1a; historical bot picks local_friction_emerges per the cooperation decline in central Bosnia in 1992 (the HVO takeover of municipal authority is in ICTY Kordić and Čerkez; the Prozor / Novi Travnik / Vitez frictions are design framing, not findings of the Prlić judgment as cited here, historian check 2026-11-15).",
     "staff_assessment": "Accepting the Graz baseline matches the documented HZ HB Presidency posture and raises the institutional ceiling for the HZ HB project, at the cost of the joint anti-VRS front degrading through dispute. Presidency intervention to suppress local frictions preserves the alliance floor but pulls Zagreb's logistical leverage against the HVO order of battle.",
     "trigger_evidence": [
       "The Graz joint statement of 6 May 1992 has been recorded; HZ HB territorial framework is on the table.",
@@ -3559,7 +3567,7 @@
         }
       }
     },
-    "historical_source": "ICTY Prlić et al. IT-04-74-T Trial Judgment (29 May 2013) Vol. 1 §§490-525 (Graz meeting 6 May 1992 between Karadžić and Boban; joint statement on territorial organization of BiH), Vol. 2 §§110-220 (Prozor offensive October 1992; Novi Travnik June-October 1992; Vitez summer-autumn 1992 frictions), §§220-260 (HV-HVO logistics dependency: Zagreb officer secondments, fuel, ammunition leverage); Prlić Appeals Judgment (29 Nov 2017) §§601-650. ICTY Kordić IT-95-14/2-T Trial Judgment (26 Feb 2001) §§485-610 (Graz and Lašva valley 1992). ICTY Blaškić IT-95-14-T Trial Judgment (3 March 2000) §§99-160 (Operative Zone Central Bosnia institutional history 1992). Tudjman Presidential Transcripts admitted at Prlić Vol. 1 §§357-389 and §§510-525 (Zagreb's calibration of the Graz framework)."
+    "historical_source": "Historian check 2026-11-15: only Vol. 1 para. 439 and the Kordić and Čerkez citation below were verified; the other paragraph ranges in this field were not re-verified, and the earlier \"Vol. 1 §§490-525\" and \"Vol. 2 §§110-220\" did not match the judgment. ICTY Prlić et al. IT-04-74-T Trial Judgment (29 May 2013) Vol. 1 para. 439 (Graz meeting 6 May 1992 between Karadžić and Boban; joint statement, no signed agreement), Vol. 2 (Prozor attack of 23-24 October 1992 only; Novi Travnik and Vitez frictions are not findings of this judgment), §§220-260 (HV-HVO logistics dependency: Zagreb officer secondments, fuel, ammunition leverage); Prlić Appeals Judgment (29 Nov 2017) §§601-650. ICTY Kordić IT-95-14/2-T Trial Judgment (26 Feb 2001) §§485-610 (Graz and Lašva valley 1992). ICTY Blaškić IT-95-14-T Trial Judgment (3 March 2000) §§99-160 (Operative Zone Central Bosnia institutional history 1992). Tudjman Presidential Transcripts admitted at Prlić Vol. 1 §§357-389 and §§510-525 (Zagreb's calibration of the Graz framework)."
   },
   {
     "id": "battle_of_the_barracks_sarajevo",

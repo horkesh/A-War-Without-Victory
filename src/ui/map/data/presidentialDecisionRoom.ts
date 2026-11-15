@@ -29,6 +29,8 @@ import {
   REQUEST_OP_COST,
   FORCE_LAUNCH_COST,
   PROACTIVE_FORCE_LAUNCH_COST,
+  BACK_CAMPAIGN_COST,
+  proposalBackingCost,
 } from '../utils/commandAuthority';
 import { buildForceableReadyPlans } from './backTheOfficer';
 import { buildProposalDossier } from './proposalDossier';
@@ -853,13 +855,14 @@ function addOpportunityCards(state: LoadedGameState, cards: CandidateCard[]): vo
     ].filter((entry): entry is string => Boolean(entry));
 
     // AUTHORIZE-OP directive: when the officer's proposal carries an enabled
-    // `approve` action, the card can ISSUE acceptance inline (acceptProposal).
-    // Cost 0 — agreeing with the officer's own recommendation is free.
+    // `approve` action, the card can ISSUE acceptance inline (approve decision).
+    // Command loop L6 (owner decision 1): backing a named campaign costs
+    // BACK_CAMPAIGN_COST (20) Authority; declining stays free.
     const canApprove = opportunity.available_actions.some(
       (action) => action.id === 'approve' && action.enabled,
     );
     const directive: PresidentialDecisionRoomDirective | undefined = canApprove && opportunity.review_id
-      ? { lever: 'authorize_op', cost: 0, payload: { reviewId: opportunity.review_id, proposalId: opportunity.proposal_id } }
+      ? { lever: 'authorize_op', cost: BACK_CAMPAIGN_COST, payload: { reviewId: opportunity.review_id, proposalId: opportunity.proposal_id } }
       : undefined;
 
     cards.push({
@@ -1403,7 +1406,9 @@ function addProposalReviewDirectiveCards(
           : {}),
       directive: {
         lever: 'review_proposal',
-        cost: 0,
+        // Command loop L6 (owner decision 1): backing an offensive costs Authority
+        // (10 corps operation, 20 historical operation); other proposals stay free.
+        cost: proposalBackingCost(review.proposed_action),
         payload: { proposalId: review.id },
       },
       ...(historicalOp || dossier ? { preserveActionLabel: true } : {}),

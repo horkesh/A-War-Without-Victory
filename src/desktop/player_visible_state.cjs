@@ -753,8 +753,48 @@ function projectPolitical(political, playerFaction) {
   return projected;
 }
 
-function projectDisplacement(displacement) {
-  return copyKeys(displacement, [
+/**
+ * Municipality holder by majority of its OSIDs (`op:<municipality>:<name>` keys of
+ * `political_controllers`; ties go to the lower faction id). Mirrors
+ * `deriveMunicipalityControllerByOsid` in `war_data_extractor.ts`, which the sitrep uses to pick
+ * the player's own municipalities; a test pins the two together.
+ */
+function municipalityHoldersByOsid(controllers) {
+  const counts = new Map();
+  for (const osid of Object.keys(controllers).sort(strictCompare)) {
+    const holder = controllers[osid];
+    if (holder === null || holder === undefined) continue;
+    const parts = osid.split(':');
+    if (parts[0] !== 'op' || parts.length < 3 || !parts[1]) continue;
+    const perFaction = counts.get(parts[1]) ?? new Map();
+    perFaction.set(holder, (perFaction.get(holder) ?? 0) + 1);
+    counts.set(parts[1], perFaction);
+  }
+  const holders = new Map();
+  for (const [munId, perFaction] of counts) {
+    const ranking = [...perFaction.entries()].sort((a, b) => (a[1] !== b[1] ? b[1] - a[1] : strictCompare(a[0], b[0])));
+    holders.set(munId, ranking[0] ? ranking[0][0] : null);
+  }
+  return holders;
+}
+
+/**
+ * Municipal sustainability (supply strain, collapse) is the player's own condition: only the
+ * municipalities the player holds are projected, never the opponents' (the same scope as
+ * `war_supply_condition`). Control itself is public, so the holder is read from the raw controllers.
+ */
+function projectSustainabilityState(sustainability, controllers, playerFaction) {
+  if (!playerFaction || !isRecord(sustainability) || !isRecord(controllers)) return {};
+  const holders = municipalityHoldersByOsid(controllers);
+  return sortedRecordFromEntries(
+    Object.entries(sustainability)
+      .filter(([munId, row]) => isRecord(row) && holders.get(munId) === playerFaction)
+      .map(([munId, row]) => [munId, cloneJson(row)]),
+  );
+}
+
+function projectDisplacement(displacement, controllers, playerFaction) {
+  const projected = copyKeys(displacement, [
     'civilian_casualties',
     'displacement_event_log',
     'displacement_flows_by_osid',
@@ -762,6 +802,12 @@ function projectDisplacement(displacement) {
     'displacement_recent_by_turn',
     'displacement_state',
   ]);
+  projected.sustainability_state = projectSustainabilityState(
+    isRecord(displacement) ? displacement.sustainability_state : undefined,
+    controllers,
+    playerFaction,
+  );
+  return projected;
 }
 
 function projectSupplyState(value, playerFaction) {
@@ -861,7 +907,11 @@ function projectPlayerVisibleState(state, fallbackFaction, opportunityOwnership)
     factions: projectFactions(state.factions, playerFaction),
     military: projectedMilitary,
     political: projectedPolitical,
-    displacement: projectDisplacement(state.displacement),
+    displacement: projectDisplacement(
+      state.displacement,
+      isRecord(state.political) ? state.political.political_controllers : undefined,
+      playerFaction,
+    ),
     operation_history: playerFaction ? projectOperationHistory(state.operation_history, playerFaction) : [],
     pending_paramilitary_requests: playerFaction ? rowsForFaction(state.pending_paramilitary_requests, playerFaction) : [],
     paramilitary_decision_history: playerFaction ? rowsForFaction(state.paramilitary_decision_history, playerFaction) : [],

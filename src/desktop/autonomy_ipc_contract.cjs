@@ -175,6 +175,44 @@ const DECORATE_UNIT_COST = 10;
 // gesture. It uses the same bounded political-attention price as the other
 // leadership gestures; its authored cadence carries the stronger 8-turn cycle.
 const STRATEGIC_POSTURE_REVIEW_COST = 10;
+// Command loop L6 (owner decision 1, 2026-11-14): backing a general's offensive costs
+// Authority: 10 for a staff offensive at corps level (APPROVE_OP), 20 for a named campaign
+// (OPPORTUNITY) or an authored historical operation (HISTORICAL_OP). Withholding,
+// declining and delaying stay free; income is unchanged. MUST match
+// src/ui/map/utils/commandAuthority.ts (BACK_CORPS_OPERATION_COST, BACK_CAMPAIGN_COST,
+// proposalBackingCost). Human-only: these handlers run only for the desktop player.
+const BACK_CORPS_OPERATION_COST = 10;
+const BACK_CAMPAIGN_COST = 20;
+const OPPORTUNITY_BACKING_DECISIONS = new Set(['approve', 'redirect', 'under_resource']);
+
+function proposalBackingCost(proposedAction) {
+  if (typeof proposedAction !== 'string') return 0;
+  if (proposedAction.startsWith('APPROVE_OP:')) return BACK_CORPS_OPERATION_COST;
+  if (proposedAction.startsWith('HISTORICAL_OP:') || proposedAction.startsWith(OPPORTUNITY_PREFIX)) return BACK_CAMPAIGN_COST;
+  return 0;
+}
+
+function opportunityDecisionBackingCost(decision) {
+  return OPPORTUNITY_BACKING_DECISIONS.has(decision) ? BACK_CAMPAIGN_COST : 0;
+}
+
+/**
+ * Debit `cost` from the player's Command Authority, refusing (no mutation) when the
+ * balance cannot cover it. A state without a command_authority account (legacy saves)
+ * is not charged, exactly like the existing force-launch guard.
+ */
+function debitCommandAuthority(state, cost) {
+  if (!(cost > 0)) return { ok: true };
+  const auth = state && state.military ? state.military.command_authority : null;
+  if (!auth) return { ok: true };
+  if (!(auth.current >= cost)) {
+    return { ok: false, error: `insufficient_command_authority (${auth.current}/${cost})` };
+  }
+  auth.current -= cost;
+  auth.spent_this_turn = (auth.spent_this_turn || 0) + cost;
+  auth.lifetime_spent = (auth.lifetime_spent || 0) + cost;
+  return { ok: true };
+}
 const APPROVE_OP_PREFIX = 'APPROVE_OP:';
 
 function parseApproveOpAction(action) {
@@ -622,4 +660,9 @@ module.exports = {
   ADDRESS_NATION_COST,
   DECORATE_UNIT_COST,
   STRATEGIC_POSTURE_REVIEW_COST,
+  BACK_CORPS_OPERATION_COST,
+  BACK_CAMPAIGN_COST,
+  proposalBackingCost,
+  opportunityDecisionBackingCost,
+  debitCommandAuthority,
 };

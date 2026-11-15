@@ -44,6 +44,7 @@ import { getOsidDisplayName } from '../../utils/osidDisplayName';
 const StanceMatterActions = lazy(() => import('../StanceMatterActions'));
 import { buildObjectiveTargetOptions } from '../../utils/objectiveTargetOptions';
 import { t, type MessageKey } from '../../i18n';
+import { formatAuthorityAmount, nextWeekIncome } from '../../utils/authorityIncome';
 import { strictCompare } from '../../../../state/validateGameState.js';
 import {
   buildCommandFrictionStakes,
@@ -215,6 +216,19 @@ function LeverDirectiveCard({ directive, gameState, onReceipt }: DirectiveCardPr
   const cost = directive.cost;
   const authCurrent = gameState.commandAuthority?.current ?? 100;
   const canAfford = authCurrent >= cost;
+  // Command loop L6: every priced button shows what the president has and what next
+  // week brings ("You have 34 · +4 next week"), so the price reads against the balance.
+  const weeklyIncome = nextWeekIncome(gameState.commandAuthority);
+  const priceLine = cost > 0 && gameState.commandAuthority ? (
+    <div
+      data-testid="directive-price-line"
+      className={`mt-1 text-right text-[14px] tabular-nums ${canAfford ? 'text-[#b9ad94]' : 'text-red-300'}`}
+    >
+      {weeklyIncome
+        ? t('authority.priceLine', { current: formatAuthorityAmount(authCurrent), income: formatAuthorityAmount(weeklyIncome.amount) })
+        : t('authority.priceLineNoIncome', { current: formatAuthorityAmount(authCurrent) })}
+    </div>
+  ) : null;
   const needsObjection = directive.lever === 'request_op';
   const isFrontVisit = directive.lever === 'front_visit';
   const isAddressNation = directive.lever === 'address_nation';
@@ -393,6 +407,7 @@ function LeverDirectiveCard({ directive, gameState, onReceipt }: DirectiveCardPr
               {cost === 0 ? t('directive.costFree') : t('directive.costAuthority', { cost })}
             </span>
           </div>
+          {priceLine}
           <div
             role="status"
             aria-label={t('directive.bridgeUnavailable.aria')}
@@ -554,7 +569,9 @@ function LeverDirectiveCard({ directive, gameState, onReceipt }: DirectiveCardPr
 
       // REVIEW-PROPOSAL — accept a general's autonomy Level-1 proposal. Routes through
       // the SAME acceptProposal IPC the AutonomyPanel used; the withhold action is a
-      // separate button wired to handleWithhold (rejectProposal). Cost 0.
+      // separate button wired to handleWithhold (rejectProposal). Backing an offensive
+      // costs Authority (command loop L6: 10 corps operation, 20 historical operation;
+      // the IPC handler debits it); withholding stays free.
       if (directive.lever === 'review_proposal') {
         const proposalId = typeof directive.payload.proposalId === 'string' ? directive.payload.proposalId : '';
         if (!proposalId) { setLoadError('Directive is missing its proposal context.'); return; }
@@ -684,6 +701,7 @@ function LeverDirectiveCard({ directive, gameState, onReceipt }: DirectiveCardPr
           {cost === 0 ? t('directive.costFree') : t('directive.costAuthority', { cost })}
         </span>
       </div>
+      {priceLine}
 
       {reservePresentation && (
         <div

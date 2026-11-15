@@ -315,6 +315,9 @@
     "localizations": {
       "en": {
         "title": "Ultimatum at Gornji Vakuf",
+        "source_note": "ICTY, Prlić et al. (IT-04-74), Trial Judgment, 29 May 2013, Vol. 2, paras 336-355 (Gornji Vakuf Municipality, January 1993).",
+        "source_tier": "icty_icj_un",
+        "historical_source": "ICTY, Prlić et al. (IT-04-74), Trial Judgment, 29 May 2013, Vol. 2, paras 336-355 (Gornji Vakuf Municipality, January 1993).",
         "notifications_to_other_factions": {
           "escalate": {
             "RBiH": {
@@ -330,6 +333,9 @@
       },
       "bcs": {
         "title": "Ultimatum u Gornjem Vakufu",
+        "source_note": "MKSJ, Prlić i drugi (IT-04-74), prvostepena presuda, 29. maj 2013, tom 2, par. 336-355 (općina Gornji Vakuf, januar 1993.).",
+        "source_tier": "icty_icj_un",
+        "historical_source": "MKSJ, Prlić i drugi (IT-04-74), prvostepena presuda, 29. maj 2013, tom 2, par. 336-355 (općina Gornji Vakuf, januar 1993.).",
         "narrative": "HVO je naredio jedinicama ARBiH u Gornjem Vakufu da se stave pod komandu HVO-a. Vance-Owenova mapa smješta grad u provinciju koju Herceg-Bosna smatra hrvatskom, a Mostar to tumači kao odgovor na pitanje ko tu komanduje. ARBiH odbija, a lokalni komandanti na obje strane čekaju naređenja. U historijskom zapisu ultimatum Mostara od 15. januara 1993. naložio je jedinicama ARBiH u provincijama na koje je polagao pravo, među njima i u Gornjem Vakufu, da se potčine komandi HVO-a, a 18. januara HVO je napao grad (MKSJ, Prlić i drugi).",
         "staff_assessment": "Provođenje ultimatuma daje podršku lokalnoj komandi HVO-a i produbljuje raskol s ARBiH. Lokalno primirje zasad ublažava raskol, po cijenu morala HVO-a, a spor oko grada ostaje otvoren.",
         "trigger_evidence": [
@@ -377,8 +383,8 @@
     "requires_player_response": true,
     "responding_faction": "HRHB",
     "bot_response_logic": "historical",
-    "historical_source": "ICTY Prlić et al. IT-04-74-T Trial Judgment Vol. 2 §§221-310 and Vol. 4 §§44-67; Prlić Appeals Judgment §§601-650; Blaškić IT-95-14-T §§161-220; Kordić IT-95-14/2-T §§560-650; Balkan Battlegrounds Vol. II pp. 448, 452; docs/40_reports/1993_EVENT_RESEARCH.md.",
-    "source_note": "BB Vol. II frames Gornji Vakuf as an early 1993 HVO-ARBiH escalation around the Vance-Owen provincial map; the local response choice is a command-posture abstraction. Per Sensitive History Gate §1.5 #11 the escalate posture is operational-tempo only — specific atrocities (Dusa, Bistrica, Ždrimci) emerge from Ring 1 combat / paramilitary / displacement engines and Ring 2 essays, not from this row's effects.",
+    "historical_source": "ICTY Prlić et al. IT-04-74-T Trial Judgment (29 May 2013) Vol. 2 paras 336-355 (Gornji Vakuf Municipality, January 1993; corrected 2026-11-15 from \"§§221-310\", which did not match). Historian check 2026-11-15: whether the Prlić Appeals Judgment changed these findings was not checked; the other ranges listed here before (Vol. 4 §§44-67, Appeals §§601-650, Blaškić §§161-220, Kordić §§560-650) were not re-verified and are dropped; Balkan Battlegrounds Vol. II pp. 448 and 452 are the Bugojno and Konjic-Jablanica annexes, which mention Gornji Vakuf only in passing and do not support the dated claims, so they are dropped. docs/40_reports/1993_EVENT_RESEARCH.md.",
+    "source_note": "The Prlić Trial Judgment (Vol. 2 paras 336-355) records HVO-ARBiH fighting at Gornji Vakuf in January 1993 around the Vance-Owen provincial map (BB Vol. II mentions the town only in passing; historian check 2026-11-15); the local response choice is a command-posture abstraction. Per Sensitive History Gate §1.5 #11 the escalate posture is operational-tempo only — specific atrocities (Dusa, Bistrica, Ždrimci) emerge from Ring 1 combat / paramilitary / displacement engines and Ring 2 essays, not from this row's effects.",
     "staff_assessment": "Enforcing the ultimatum backs the local HVO command and deepens the break with the ARBiH. A local ceasefire eases the break for now, at a cost to HVO morale, and leaves the dispute over the town open.",
     "trigger_evidence": [
       "Alliance cohesion has fallen below the cooperation threshold.",

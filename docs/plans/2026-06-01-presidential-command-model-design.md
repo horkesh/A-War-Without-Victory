@@ -46,6 +46,7 @@ The popular recollection that "Karadžić ordered Mladić to stop at Bihać" is 
 
 ## 6. Open tuning (set during build, owner-adjustable)
 - Command-authority cost per lever (request / stop / elite-deploy / replace-CO) and `patron_confidence` deltas. Engineer proposes values; owner adjusts.
+  - **Owner-set 2026-11-14 (decision 1, command loop L6):** authorizing an op is no longer free. Backing a corps operation costs 10 and backing a named campaign or an authored historical operation costs 20; withholding or declining stays free and income is unchanged. Rulebook line 13, Systems Manual §6.4, `docs/40_reports/proposals/20261114_COMMAND_LOOP_PROPOSAL.md` §5D.
 - Whether **elite deployment** is a binary release gate or has tiers.
 
 ## 7. Build order

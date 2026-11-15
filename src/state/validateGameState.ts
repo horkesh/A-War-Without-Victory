@@ -3071,6 +3071,25 @@ function validateCommandAuthority(value: unknown, errors: string[]): void {
     ) {
         errors.push('military.command_authority.last_recovery_source must be a Section 6-approved command authority income source when present');
     }
+    // Command loop L6: the optional weekly income breakdown (live president only).
+    if (value.last_recovery_breakdown !== undefined) {
+        const breakdown = value.last_recovery_breakdown;
+        if (!isRecord(breakdown)) {
+            errors.push('military.command_authority.last_recovery_breakdown must be an object when present');
+        } else {
+            for (const key of ['recovery', 'base', 'quiet_front_dividend', 'friction_penalty'] as const) {
+                if (!isFiniteNonNegativeNumber(breakdown[key])) {
+                    errors.push(`military.command_authority.last_recovery_breakdown.${key} must be a finite non-negative number`);
+                }
+            }
+            if (typeof breakdown.political_bonus !== 'number' || !Number.isFinite(breakdown.political_bonus)) {
+                errors.push('military.command_authority.last_recovery_breakdown.political_bonus must be a finite number');
+            }
+            if (!COMMAND_AUTHORITY_ALLOWED_INCOME_SOURCES.includes(breakdown.top_source as never)) {
+                errors.push('military.command_authority.last_recovery_breakdown.top_source must be a Section 6-approved command authority income source');
+            }
+        }
+    }
     if (isFiniteNonNegativeNumber(current) && isFiniteNonNegativeNumber(max) && current > max) {
         errors.push('military.command_authority.current must be less than or equal to military.command_authority.max');
     }
