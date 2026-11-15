@@ -39,6 +39,7 @@ interface MakeStateOptions {
     event_fire_counts?: Record<string, number>;
     paramilitary_policy?: 'always_allow' | 'always_deny' | 'ask';
     player_faction?: FactionId;
+    paramilitary_deployment_count?: Partial<Record<FactionId, number>>;
 }
 
 function makeState(options: MakeStateOptions = {}): GameState {
@@ -53,6 +54,9 @@ function makeState(options: MakeStateOptions = {}): GameState {
     };
     const baseState = {
         paramilitary_policy: options.paramilitary_policy ?? 'ask',
+        ...(options.paramilitary_deployment_count
+            ? { paramilitary_deployment_count: options.paramilitary_deployment_count }
+            : {}),
         meta: { player_faction: options.player_faction ?? ('RBiH' as FactionId) },
         military,
         political: {},
@@ -85,6 +89,20 @@ describe('LANE-NIGHTSHIFT-CODEX-CONTENT-EXPANSION — W1: paramilitary_streak_re
     it('does not fire when clean_record is missing', () => {
         const s = makeState({ event_flags: { paramilitary_authorization_refused: true } });
         expect(findGhost(buildGhostEntries(s, 100), 'paramilitary_streak_refused')).toBeUndefined();
+    });
+
+    it('does not claim a sustained refusal once the side has authorised a deployment', () => {
+        // R8 polish: the Verdict's cost ledger reads this same count ("4 paramilitary deployments
+        // authorized by RBiH command"); the card must not say authorisation was never begun.
+        const flags = { paramilitary_authorization_refused: true, clean_record: true };
+        const authorised = makeState({ event_flags: flags, paramilitary_deployment_count: { RBiH: 4 } as Record<FactionId, number> });
+        expect(findGhost(buildGhostEntries(authorised, 100), 'paramilitary_streak_refused')).toBeUndefined();
+        // Another side's deployments are not this side's record.
+        const otherSide = makeState({ event_flags: flags, paramilitary_deployment_count: { RS: 30 } as Record<FactionId, number> });
+        expect(findGhost(buildGhostEntries(otherSide, 100), 'paramilitary_streak_refused')).toBeDefined();
+        const zero = makeState({ event_flags: flags, paramilitary_deployment_count: { RBiH: 0 } as Record<FactionId, number> });
+        const got = findGhost(buildGhostEntries(zero, 100), 'paramilitary_streak_refused');
+        expect(got?.conditional_on).toContain('paramilitary_deployment_count[RBiH]=0');
     });
 
     it('fires when both flags set AND turn >= 80', () => {

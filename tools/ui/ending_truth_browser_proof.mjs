@@ -24,6 +24,8 @@ const raws = Object.fromEntries(Object.entries(files).filter(([, p]) => p).map((
 const CASES = [
   { id: 'real-en-1280x720', state: 'real', locale: 'en', width: 1280, height: 720, dsf: 1, focus: [0, 1, 2], beat: true },
   { id: 'real-bcs-1280x720', state: 'real', locale: 'bcs', width: 1280, height: 720, dsf: 1, focus: [0], beat: true },
+  { id: 'real-en-1920x1080', state: 'real', locale: 'en', width: 1920, height: 1080, dsf: 1, focus: [0], beat: true },
+  { id: 'real-bcs-1920x1080', state: 'real', locale: 'bcs', width: 1920, height: 1080, dsf: 1, focus: [0], beat: true },
   { id: 'real-en-768x1024', state: 'real', locale: 'en', width: 768, height: 1024, dsf: 1, focus: [0, 1], beat: true },
   { id: 'real-en-375x812', state: 'real', locale: 'en', width: 375, height: 812, dsf: 1, focus: [0, 1], beat: true },
   { id: 'real-bcs-375x812', state: 'real', locale: 'bcs', width: 375, height: 812, dsf: 1, focus: [0], beat: true },

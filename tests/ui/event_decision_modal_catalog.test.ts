@@ -208,6 +208,9 @@ describe('production modal-ready event catalog rendering', () => {
           response_options: event.response_options ?? [],
         },
         onRespond: () => undefined,
+        // As in the app (App.tsx passes `eventCatalogFull`): the event's own definition carries its
+        // `localizations`, where a player-facing source line may live.
+        eventCatalog: new Map([[event.id, event]]),
       }));
 
       expect(screen.getByRole('dialog', { name: restoreBosnianProperNames(eventTitle(event)) }), row.id).toBeTruthy();
