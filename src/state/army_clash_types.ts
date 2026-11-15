@@ -4,7 +4,8 @@
  * A clash is raised only by something the president actually did, at the moment he stages it
  * (stop an operation, request one, withhold a Level-1 plan, decline an opportunity), when the
  * order crosses the army's current campaign plan AND the army commander's compliance with that
- * order scores partial or refused. The president answers Accept (the army's version is staged
+ * order is anything short of full (modified, partial or refused; the category is kept as the
+ * clash's severity). The president answers Accept (the army's version is staged
  * instead; free), Insist (the order stands; 15 Authority; an override on the army commander's
  * tolerance record) or Replace (the corps commander who would carry it out is replaced through the
  * existing lever; 25 Authority). Replace never reaches the army commander in 1.0.
@@ -45,6 +46,9 @@ export type ArmyClashCounterOrder =
 
 export type ArmyClashAnswer = 'accept' | 'insist' | 'replace';
 
+/** Compliance short of full, mildest first: he would change it, carry out part of it, or refuse it. */
+export type ArmyClashSeverity = 'modified' | 'partial' | 'refused';
+
 /**
  * Receipt outcome. `lapsed`: unanswered by Advance, so the order stood as given and no override
  * was recorded. `noted`: the order crossed the plan but the army commander complies, so only a
@@ -64,7 +68,11 @@ export interface ArmyClash {
     /** The army commander who objects. */
     army_officer_id: string;
     conflict: ArmyClashConflict;
-    compliance: 'partial' | 'refused';
+    /**
+     * The army commander's A3 compliance with the act, kept as the clash's severity: anything
+     * short of `full` raises a clash (Fable consult 1, appendix A, 2026-11-15).
+     */
+    compliance: ArmyClashSeverity;
     counter_order: ArmyClashCounterOrder;
     /** The staged order: operation name (stop), target settlement (request), plan id (withhold), opportunity proposal id (decline). */
     order_ref: string;

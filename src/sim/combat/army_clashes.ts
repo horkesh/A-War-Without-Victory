@@ -6,9 +6,13 @@
  *   (a) the act crosses the faction's current CampaignPlan (`detectPlanConflict`);
  *   (b) the army commander's compliance with that act, scored by the existing A3 formula against
  *       the verb it implies (request op: press offensive; stop, withhold, decline: hold), is
- *       partial or refused, never "modified";
+ *       anything short of `full`; the category (modified, partial, refused) is kept as the clash's
+ *       severity. (Changed from "partial or refused, never modified" by Fable consult 1, appendix A,
+ *       2026-11-15: the weekly bot-directive noise that rule guarded against cannot reach A1, which
+ *       needs a real presidential act at corps scale and is capped at one open, four a year.)
  *   (c) the act concerns a corps operation or larger (all four acts do).
- * If (a) holds but (b) does not, the objection is one silent Record line (`noted`). Volume: at most
+ * If (a) holds but (b) does not (full compliance, no army commander, or an acting one), the
+ * objection is one silent Record line (`noted`). Volume: at most
  * one open clash per faction, at most 4 per faction per calendar year, at least 8 weeks between
  * clashes; anything over the caps is a `not_put` Record line. Frequency differences between
  * factions come from officer data, never from faction branches.
@@ -228,7 +232,7 @@ export function raiseArmyClash(state: GameState, faction: FactionId, input: Army
         army_officer_id: compliance?.officerId ?? '', conflict, resolved_turn: turn, cost: 0,
     };
 
-    if (!compliance || (compliance.category !== 'partial' && compliance.category !== 'refused')) {
+    if (!compliance || compliance.category === 'full') {
         const id = uniqueId(state, `CLASH_${turn}_${faction}`);
         appendArmyClashReceipt(state, { id, ...receiptBase, outcome: 'noted' });
         return { outcome: 'noted', receiptId: id };

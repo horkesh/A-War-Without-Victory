@@ -489,7 +489,7 @@ OSID, raw faction ids, and similar backend nouns are valid in engine code, canon
 
 - When an order the president just staged crosses the army plan and the army commander would comply only in part, a Command Surface card appears: "{army commander} objects to: {order}". Its summary says the order stands unless answered.
 - The lazily loaded `ArmyClashActions` shows:
-  - facts: your order, the army's version, the corps, his reason, the last clash;
+  - facts: your order, the army's version, the corps, his reason, how far he would go (the severity: modified, partial or refused; a modified clash's card reads as information, the others as a warning), the last clash;
   - the corps commander's objection when it fired on the same order;
   - three equal full-width answer rows, label left and price right, each with an aria label that includes the price: Accept (free), Insist (15 Authority), Replace {corps commander} (25 Authority).
 - An answer the balance cannot pay for is disabled, and so is Replace when the corps has no commander. The current balance is shown.

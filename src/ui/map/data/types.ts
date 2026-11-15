@@ -1097,7 +1097,8 @@ export interface ArmyClashView {
     corpsCommanderName: string | null;
     armyCommanderName: string | null;
     conflict: 'main_effort' | 'plan_objective' | 'economy_corps' | 'primary_corps' | 'staff_recommended';
-    compliance: 'partial' | 'refused';
+    /** Severity: how far short of full compliance the army commander falls. */
+    compliance: 'modified' | 'partial' | 'refused';
     counterOrder: 'continue_operation' | 'resubmit_next_week' | 'launch_plan' | 'approve_opportunity';
     /** Raw order reference: operation name, target settlement id, plan id or opportunity proposal id. */
     orderRef: string;

@@ -58,6 +58,10 @@ describe('army clash: Command Surface card', () => {
     expect(card!.explanation).toBe('Unanswered at Advance, your order to the 2nd Corps stands as given.');
     expect(card!.title).not.toMatch(/CLASH_|arbih_/);
     expect(view.advanceReadiness.blockedByExistingSystems).toBe(false);
+    expect(card!.severity).toBe('warning');
+    const mild = buildPresidentialDecisionRoomView({ state: makeState({ armyClashes: [clash({ compliance: 'modified' })] }) })
+      .cards.find((c) => c.id === 'command:army-clash:CLASH_40_RBiH');
+    expect(mild!.severity).toBe('info');
   });
 
   it('shows the order, the army\'s version, the corps, his reason and three priced answers', async () => {
@@ -67,6 +71,7 @@ describe('army clash: Command Surface card', () => {
     expect(screen.getByTestId('army-clash-counter').textContent).toBe('The army wants the operation to run on.');
     expect(screen.getByTestId('army-clash-corps').textContent).toBe('2nd Corps');
     expect(screen.getByTestId('army-clash-reason').textContent).toBe('It is the main effort of the army\'s campaign plan.');
+    expect(screen.getByTestId('army-clash-severity').textContent).toBe('He would carry out only part of it.');
     expect(screen.getByTestId('army-clash-previous').textContent).toContain('you insisted');
     expect(screen.getByRole('button', { name: 'Accept the army\'s version. Free.' }).textContent).toContain('Free');
     expect(screen.getByRole('button', { name: 'Insist on your order. Costs 15 Authority.' }).textContent).toContain('15 Authority');

@@ -4907,7 +4907,7 @@ function deriveArmyClashViews(
                 corpsCommanderName: corpsCommanderName(corpsId),
                 armyCommanderName: officerName(c.army_officer_id),
                 conflict: c.conflict,
-                compliance: c.compliance === 'refused' ? 'refused' : 'partial',
+                compliance: c.compliance === 'refused' || c.compliance === 'partial' ? c.compliance : 'modified',
                 counterOrder: c.counter_order,
                 orderRef,
                 orderName,

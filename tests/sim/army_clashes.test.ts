@@ -1,8 +1,9 @@
 /**
  * Command loop L7: army clashes (proposal 2A step A1; owner decision 4, 2026-11-14).
  *
- * Covers: plan-conflict detection per act, the compliance gate (partial/refused only; "modified"
- * is a silent Record line), the live-president gate (headless and other factions never), volume
+ * Covers: plan-conflict detection per act, the compliance gate (anything short of full raises a
+ * clash, the category kept as severity; full compliance is a silent Record line; the appendix A
+ * chief table), the live-president gate (headless and other factions never), volume
  * caps (one open, 8 weeks apart, 4 a calendar year, all `not_put`), lapse at Advance, the three
  * answers through the desktop IPC module (Accept restages and refunds, Insist debits 15 and records
  * one override on the army commander, Replace stages the corps commander's replacement for 25 and
@@ -189,6 +190,28 @@ describe('detectPlanConflict', () => {
 });
 
 describe('compliance gate and live-president gate', () => {
+    // Fable consult 1, appendix A: the army chiefs by act, under today's masked stubbornness (all 3)
+    // and the army_co_roster.json values. "clash" = compliance short of full.
+    const CHIEFS: Array<[string, number, number, number]> = [
+        // name, competence, aggressiveness, roster stubbornness
+        ['Mladić', 4, 5, 5], ['Halilović', 3, 4, 4], ['Delić', 4, 3, 2], ['Roso', 5, 3, 2], ['Praljak', 2, 5, 3],
+    ];
+    const EXPECTED: Record<string, { masked: [boolean, boolean]; roster: [boolean, boolean] }> = {
+        // [request op (press offensive), stop op (hold)]
+        Mladić: { masked: [false, true], roster: [true, true] },
+        Halilović: { masked: [true, true], roster: [true, true] },
+        Delić: { masked: [true, true], roster: [true, true] },
+        Roso: { masked: [true, true], roster: [false, false] },
+        Praljak: { masked: [true, true], roster: [true, true] },
+    };
+    it.each(CHIEFS)('%s clashes per the appendix A table (masked and roster stubbornness)', (name, competence, aggressiveness, roster) => {
+        for (const [key, stubbornness] of [['masked', 3], ['roster', roster]] as const) {
+            const clashes = (['request_op', 'stop_op'] as const).map((act) =>
+                armyComplianceForAct(makeState({ competence, aggressiveness, stubbornness }), 'RBiH', act)?.category !== 'full');
+            expect(clashes, `${name} ${key}`).toEqual(EXPECTED[name]![key]);
+        }
+    });
+
     it('uses the A3 formula against the verb the act implies; acting commanders always comply', () => {
         expect(armyComplianceForAct(makeState({ competence: 2 }), 'RBiH', 'stop_op')?.category).toBe('partial');
         expect(armyComplianceForAct(makeState({ competence: 3 }), 'RBiH', 'stop_op')?.category).toBe('modified');
@@ -212,8 +235,15 @@ describe('compliance gate and live-president gate', () => {
         });
     });
 
-    it('a complying ("modified") chief files a silent Record line, no card', () => {
+    it('anything short of full compliance raises a clash, with the category as its severity', () => {
         const state = makeState({ competence: 3 });
+        expect(stageHalt(state, 'Operation Doboj').outcome).toBe('raised');
+        expect(state.meta.army_clashes![0]!.compliance).toBe('modified');
+    });
+
+    it('a fully complying chief files a silent Record line, no card', () => {
+        // (5 + 5 - 2) / 10 = 0.80: full.
+        const state = makeState({ competence: 5, stubbornness: 2, aggressiveness: 3 });
         expect(stageHalt(state, 'Operation Doboj').outcome).toBe('noted');
         expect(state.meta.army_clashes).toBeUndefined();
         expect(state.meta.army_clash_history?.[0]?.outcome).toBe('noted');
@@ -363,7 +393,7 @@ describe('save, validation, manifest, projection, firewall', () => {
         stageHalt(state, 'Operation Doboj');
         raiseArmyClash(state, 'RBiH', { act: 'withhold_plan', corpsId: 'c_main', orderRef: 'p', proposalId: 'P' });
         expect(clashErrors(state)).toEqual([]);
-        (state.meta.army_clashes![0] as any).compliance = 'modified';
+        (state.meta.army_clashes![0] as any).compliance = 'full';
         (state.meta.army_clash_history![0] as any).outcome = 'surrender';
         (state.military.army_clash_state as any).last_clash_turn_by_faction = { RBiH: 'soon' };
         expect(clashErrors(state)).toEqual([

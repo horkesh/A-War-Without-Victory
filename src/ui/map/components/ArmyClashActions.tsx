@@ -92,6 +92,7 @@ export function ArmyClashActions({ clash, gameState, onAnswered }: ArmyClashActi
     { label: t('clash.fact.counter'), value: t(`clash.counter.${clash.counterOrder}`), testId: 'army-clash-counter' },
     { label: t('clash.fact.corps'), value: clash.corpsName, testId: 'army-clash-corps' },
     { label: t('clash.fact.reason'), value: t(`clash.reason.${clash.conflict}`), testId: 'army-clash-reason' },
+    { label: t('clash.fact.severity'), value: t(`clash.severity.${clash.compliance}`), testId: 'army-clash-severity' },
   ];
   if (clash.previousClash) {
     facts.push({

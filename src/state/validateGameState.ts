@@ -4116,7 +4116,7 @@ export function validateGameStateShape(
                                 && typeof r.army_officer_id === 'string' && Number.isInteger(r.turn)
                                 && ARMY_CLASH_ACTS.has(String(r.act)) && typeof r.conflict === 'string';
                             const kindOk = !!r && (key === 'army_clashes'
-                                ? (r.compliance === 'partial' || r.compliance === 'refused')
+                                ? (r.compliance === 'modified' || r.compliance === 'partial' || r.compliance === 'refused')
                                     && typeof r.counter_order === 'string' && typeof r.order_ref === 'string'
                                     && typeof r.staged_cost === 'number' && Number.isFinite(r.staged_cost) && r.staged_cost >= 0
                                 : ARMY_CLASH_OUTCOMES.has(String(r.outcome)) && Number.isInteger(r.resolved_turn)

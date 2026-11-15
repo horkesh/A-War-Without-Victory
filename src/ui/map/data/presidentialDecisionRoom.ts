@@ -1337,7 +1337,8 @@ function addArmyClashCards(
     cards.push({
       id: `command:army-clash:${clash.id}`,
       category: 'command',
-      severity: 'warning',
+      // Severity follows how far short of full compliance he falls (Fable consult 1, appendix A).
+      severity: clash.compliance === 'modified' ? 'info' : 'warning',
       title: armyClashTitle(clash, osidNameMap),
       explanation: armyClashSummary(clash),
       sourceOwner: t('decisionRoom.card.command.sourceOwner'),
