@@ -197,7 +197,7 @@ import {
 } from '../combat/triggered_operations.js';
 import { computeMilitiaGarrisons } from '../combat/militia_garrison.js';
 import { activateOGs, updateOGLifecycle } from '../combat/operational_groups.js';
-import { deriveSectorIntel, stableSectorKey } from '../combat/sector_intel.js';
+import { deriveSectorIntel, rekeySectorIntelToCurrentSectors, stableSectorKey } from '../combat/sector_intel.js';
 import { resolveAttackOrders } from '../combat/resolve_attack_orders.js';
 import { resolveAttackOrdersOsid, displaceFormationsInEnemyTerritory } from '../combat/attack_resolution_osid.js';
 import { applyBrigadeMovementOrders } from '../combat/brigade_movement_orders.js';
@@ -1733,6 +1733,15 @@ export const warPhases: NamedPhase[] = [
             context.state.military.corps_front_sectors = buildCorpsFrontSectors(
                 context.state, od.edges, od.opData.operationalToCanonical, od.centroids, spatial?.preCombat
             );
+        }
+    },
+    {
+        // SE9: the partition just re-minted every sector id. Move last turn's intel to the new ids
+        // (by stable key) so this turn's readers get their own sector's intel, not a stranger's.
+        name: 'rekey-sector-intel',
+        run: (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            rekeySectorIntelToCurrentSectors(context.state);
         }
     },
     // Note: brigade_front_assignment survives only as a compatibility fallback.
