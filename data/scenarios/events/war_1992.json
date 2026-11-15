@@ -2138,7 +2138,7 @@
     "responding_faction": "RBiH",
     "bot_response_logic": "historical",
     "historical_default_response_id": "always_deny",
-    "source_note": "UN A/54/549 §35 (the earlier cite: UN A/54/549 is the Secretary-General's report on the fall of Srebrenica; ¶17 (ARBiH), ¶35 (the Srebrenica enclave) and ¶102 (the arms embargo) are not about Herzegovina detention, which is Prlić Vol. 2 §§1378-1662 and Naletilić ¶¶428-437) and ICTY Hadzihasanovic/Kubura (IT-01-47) document ARBiH chain-of-command discipline relative to RS and HRHB paramilitary practice. The historical Sarajevo posture was integration of irregulars into the regular army with prosecution of those who refused — the Caco/Celo October 1993 disarming actions are the canonical operational expression of that posture. Sarajevo did not maintain a parallel paramilitary track.",
+    "source_note": "UN A/54/549 §35 and ICTY Hadzihasanovic/Kubura (IT-01-47) document ARBiH chain-of-command discipline relative to RS and HRHB paramilitary practice. The historical Sarajevo posture was integration of irregulars into the regular army with prosecution of those who refused — the Caco/Celo October 1993 disarming actions are the canonical operational expression of that posture. Sarajevo did not maintain a parallel paramilitary track.",
     "staff_assessment": "Refusal mirrors the documented ARBiH integration policy and preserves international standing as legal-conduct evidence at The Hague accumulates. Per-deployment review introduces command friction and slower tempo. Standing authorization is ahistorical for the Presidency and exposes Sarajevo to ICTY-grade scrutiny on the RS/HRHB pattern.",
     "trigger_evidence": [
       "The Presidency state-identity platform has been recorded; the irregulars question follows.",
@@ -2337,8 +2337,8 @@
         }
       }
     },
-    "historical_source": "ICTY Hadzihasanovic and Kubura Trial Judgment (IT-01-47-T, 15 March 2006) — ARBiH 3rd Corps and 7th Muslim Brigade command-responsibility findings establishing the existence and reach of ARBiH chain of command. ICTY Oric Trial and Appeal Judgments (IT-03-68, 30 June 2006 / 3 July 2008) — Srebrenica enclave ARBiH commander; ultimate acquittal on command responsibility in the comparative discipline frame. ICTY Karadzic Trial Judgment (IT-95-5/18-T, 24 March 2016) — comparative narrative on Sarajevo state institutions and chain of command. ICTY Stakic (IT-97-24, 31 July 2003) and Brdjanin (IT-99-36, 1 September 2004) — RS comparator findings on paramilitary tolerance as policy. UN A/54/549 (Secretary-General's report on Srebrenica, 15 November 1999) §35 (the earlier cite: UN A/54/549 is the Secretary-General's report on the fall of Srebrenica; ¶17 (ARBiH), ¶35 (the Srebrenica enclave) and ¶102 (the arms embargo) are not about Herzegovina detention, which is Prlić Vol. 2 §§1378-1662 and Naletilić ¶¶428-437) — Sarajevo posture and chain-of-command institutional context. UN S/1994/674 (Commission of Experts Final Report, 27 May 1994) Annex III.A — Special Forces comprehensive paramilitary inventory across all three factions.",
-    "source": "Paramilitary policy is the canon-bound player-authorized war-crime surface per Sensitive History Design Gate v0.9.0 §3. Option set bounded to always_allow / ask / always_deny — no expansion permitted. RBiH historical default = always_deny per documented ARBiH chain-of-command discipline (UN A/54/549 §35 (the earlier cite: UN A/54/549 is the Secretary-General's report on the fall of Srebrenica; ¶17 (ARBiH), ¶35 (the Srebrenica enclave) and ¶102 (the arms embargo) are not about Herzegovina detention, which is Prlić Vol. 2 §§1378-1662 and Naletilić ¶¶428-437); Hadzihasanovic/Kubura IT-01-47). The always_allow counterfactual carries a steep international-standing floor per Gate §3 #5 (no atrocity-efficiency surface). war_crimes_events increments are produced by the existing paramilitary_sweep engine path on each capture, not by this decision event."
+    "historical_source": "ICTY Hadzihasanovic and Kubura Trial Judgment (IT-01-47-T, 15 March 2006) — ARBiH 3rd Corps and 7th Muslim Brigade command-responsibility findings establishing the existence and reach of ARBiH chain of command. ICTY Oric Trial and Appeal Judgments (IT-03-68, 30 June 2006 / 3 July 2008) — Srebrenica enclave ARBiH commander; ultimate acquittal on command responsibility in the comparative discipline frame. ICTY Karadzic Trial Judgment (IT-95-5/18-T, 24 March 2016) — comparative narrative on Sarajevo state institutions and chain of command. ICTY Stakic (IT-97-24, 31 July 2003) and Brdjanin (IT-99-36, 1 September 2004) — RS comparator findings on paramilitary tolerance as policy. UN A/54/549 (Secretary-General's report on Srebrenica, 15 November 1999) §35 — Sarajevo posture and chain-of-command institutional context. UN S/1994/674 (Commission of Experts Final Report, 27 May 1994) Annex III.A — Special Forces comprehensive paramilitary inventory across all three factions.",
+    "source": "Paramilitary policy is the canon-bound player-authorized war-crime surface per Sensitive History Design Gate v0.9.0 §3. Option set bounded to always_allow / ask / always_deny — no expansion permitted. RBiH historical default = always_deny per documented ARBiH chain-of-command discipline (UN A/54/549 §35; Hadzihasanovic/Kubura IT-01-47). The always_allow counterfactual carries a steep international-standing floor per Gate §3 #5 (no atrocity-efficiency surface). war_crimes_events increments are produced by the existing paramilitary_sweep engine path on each capture, not by this decision event."
   },
   {
     "id": "hrhb_political_goal",
@@ -4693,7 +4693,7 @@
     "sets_flags": {
       "omarska_camp_documented": true
     },
-    "historical_source": "ICTY Tadić IT-94-1-T §§154-237; ICTY Stakić IT-97-24-T §§88-168; ICTY Kvočka et al. IT-98-30/1-T (Omarska command responsibility); ICTY Karadžić IT-95-5/18-T (scheduled detention facilities); ITN broadcast 6 August 1992; BB Vol. I pp. 198-229.",
+    "historical_source": "ICTY Tadić IT-94-1-T §§154-237; ICTY Stakić IT-97-24-T; ICTY Kvočka et al. IT-98-30/1-T (Omarska command responsibility); ICTY Karadžić IT-95-5/18-T (scheduled detention facilities); ITN broadcast 6 August 1992; BB Vol. I pp. 198-229.",
     "effect": {
       "kind": "narrative",
       "text": "The historical record of the Omarska detention facility is documented in the Codex."
@@ -4773,7 +4773,7 @@
     "sets_flags": {
       "trnopolje_camp_documented": true
     },
-    "historical_source": "ICTY Tadić IT-94-1-T (Trnopolje findings); ICTY Stakić IT-97-24-T §§88-168; ICTY Kvočka et al. IT-98-30/1-T; ICTY Karadžić IT-95-5/18-T (scheduled detention facilities); ITN broadcast 6 August 1992; BB Vol. I pp. 198-229.",
+    "historical_source": "ICTY Tadić IT-94-1-T (Trnopolje findings); ICTY Stakić IT-97-24-T; ICTY Kvočka et al. IT-98-30/1-T; ICTY Karadžić IT-95-5/18-T (scheduled detention facilities); ITN broadcast 6 August 1992; BB Vol. I pp. 198-229.",
     "effect": {
       "kind": "narrative",
       "text": "The historical record of the Trnopolje detention facility is documented in the Codex."
@@ -4813,7 +4813,7 @@
     "sets_flags": {
       "prijedor_takeover_documented": true
     },
-    "historical_source": "ICTY Stakić IT-97-24-T §§88-168 (Prijedor takeover and ARK command); ICTY Tadić IT-94-1-T (Prijedor 1992 context); ICTY Brđanin IT-99-36-T §§540-558 (Autonomous Region of Krajina); ICTY Karadžić IT-95-5/18-T (Prijedor scheduled municipality); BB Vol. I, Bosanska Krajina spring 1992.",
+    "historical_source": "ICTY Stakić IT-97-24-T (Prijedor takeover and ARK command); ICTY Tadić IT-94-1-T (Prijedor 1992 context); ICTY Brđanin IT-99-36-T (Autonomous Region of Krajina); ICTY Karadžić IT-95-5/18-T (Prijedor scheduled municipality); BB Vol. I, Bosanska Krajina spring 1992.",
     "effect": {
       "kind": "narrative",
       "text": "The historical record of the Prijedor takeover is documented in the Codex."
@@ -5017,7 +5017,7 @@
         }
       }
     },
-    "historical_source": "ITN broadcast 6 August 1992 (Penny Marshall, Ed Vulliamy, Ian Williams — Trnopolje/Omarska footage); ICTY Tadić IT-94-1-T §§154-237; ICTY Stakić IT-97-24-T §§88-168, §§220-300; ICTY Karadžić IT-95-5/18-T §§3289-3340, §§3473-3475; ICTY Brdanin IT-99-36-T §§540-558; ICTY Kvočka IT-98-30/1-T; UN Mazowiecki E/CN.4/1992/S-1/9 (28 Aug 1992); UNSCR 771; UNSCR 780; BB Vol. I pp. 198-229."
+    "historical_source": "ITN broadcast 6 August 1992 (Penny Marshall, Ed Vulliamy, Ian Williams — Trnopolje/Omarska footage); ICTY Tadić IT-94-1-T §§154-237; ICTY Stakić IT-97-24-T; ICTY Karadžić IT-95-5/18-T; ICTY Brdanin IT-99-36-T; ICTY Kvočka IT-98-30/1-T; UN Mazowiecki E/CN.4/1992/S-1/9 (28 Aug 1992); UNSCR 771; UNSCR 780; BB Vol. I pp. 198-229."
   },
   {
     "id": "gorazde_pocket_consolidation_1992",
