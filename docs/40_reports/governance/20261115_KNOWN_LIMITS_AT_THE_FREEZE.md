@@ -12,7 +12,15 @@ Fitted defects ship with a record, not a fix. This note lists the engine defects
 - In 1994 (weeks 91 to 143) ARBiH corps 1 to 4 ran 83 probes and 3 real operations. At week 188 their exhaustion reads 89, 57, 97 and 67; every VRS corps reads 2 or below.
 - After the 7th Corps split at week 99 the 3rd Corps made 1 commander plan in weeks 99 to 178 (12 on main without the split) and 31 one-brigade probes with no sector attack.
 - The lockout is army-wide, not a 3rd Corps effect. On main the 1st, 2nd and 4th Corps also made no commander plans in weeks 99 to 178. The split changed only the 3rd Corps. It was first registered as RF-3C-EXH because it was found in the 3rd Corps after the split; the seats and the orchestrator renamed it "ARBiH plan lockout (army-wide)" (2026-11-15).
-- At week 188 all four corps read "corps in defensive stance, no new plans", not an exhaustion refusal, so the cause has at least two candidates (the stance gate and the exhaustion gate). Run reports carry no per-corps exhaustion field, so the cause is untraced. It fails the RF entry test (premise measured), and any fix also needs VRS2: two earlier experiments (RF-1 step 7 and RF-AI2 D2) broke the Farz guard through Ozren when the 3rd Corps woke.
+- At week 188 all four corps read "corps in defensive stance, no new plans", not an exhaustion refusal. Before the trace, the cause had two candidates (the stance gate and the exhaustion gate) because run reports carried no per-corps exhaustion field. The inert per-corps trace (PR #686) has now measured the mechanism (below). The fix is multi-run and any fix also needs VRS2: two earlier experiments (RF-1 step 7 and RF-AI2 D2) broke the Farz guard through Ozren when the 3rd Corps woke.
+
+**The mechanism (traced, PR #686, inert).**
+- The exhaustion that the 1st to 4th Corps carry comes almost entirely from their own commander probes: `buildProbeOperation` adds +5 exhaustion each, and each corps ran 17 to 30 probes over weeks 99 to 178.
+- A probe is active on most turns, so exhaustion decays at the active rate of 1 a turn instead of the idle rate of 3. Inflow outruns decay and exhaustion stays above the planning gate of 30.
+- Probes are exempt from that gate, so the loop sustains itself: exhaustion blocks real plans, and the probes that remain keep exhaustion up.
+- The 5th and 7th Corps run named operations (+15 each) with idle decay in between, so they come back under the gate and keep planning.
+- RF-STRENGTH's replacement churn writes no exhaustion, so it does not touch this loop.
+- Candidate fixes, all for 1.1 and none now: probes respect the gate; probes cost less exhaustion; decay treats a probe turn as idle. Any of them wakes the 1st to 4th Corps, so each must pair with VRS2 on Ozren, because the Farz breach is the risk that keeps this post-1.0.
 
 **Cells that match because of it (checkpoint, from the #591 record).**
 - October 1995 (t188), all RS-held matches: `doboj:boljanic_2`, `doboj:bukovica_velika_2`, `doboj:makljenovac`, `gracanica:petrovo_2`, `teslic:blatnica_2`, `teslic:kamenica_2`, `teslic:vitkovci`. A freed 3rd Corps took Boljanić at t162 and Petrovo at t163.
@@ -28,11 +36,11 @@ Fitted defects ship with a record, not a fix. This note lists the engine defects
 - A literate player would notice a 3rd Corps that makes one plan in 80 weeks.
 - The sim has no 1994 Teslić or Vozuća offensive and no spring 1995 Ozren attack. Those, and the 3rd Corps offensive record of 1994 and spring 1995, are 1.1 history targets.
 
-**The owner's probe-channel ruling does not protect this.** The ruling of 2026-08-26 (`docs/plans/2026-08-26-probe-channel-scope.md`) records "it was blindness" (owner ruling 2) and accepts a tempo rise that comes from repairing a defect; its N1 item is report-only. The complaint it names ("38 times in a row") has the same shape as the 31 back-to-back probes. The deferral rests on the untraced cause and the VRS2 dependency, not on that ruling. The owner is told this, and is asked to assent, not told the ruling covers the case.
+**The owner's probe-channel ruling does not protect this.** The ruling of 2026-08-26 (`docs/plans/2026-08-26-probe-channel-scope.md`) records "it was blindness" (owner ruling 2) and accepts a tempo rise that comes from repairing a defect; its N1 item is report-only. The complaint it names ("38 times in a row") has the same shape as the 31 back-to-back probes. The deferral rests on the traced mechanism needing a multi-run fix that pairs with VRS2, not on that ruling. The owner is told this, and is asked to assent, not told the ruling covers the case.
 
 **The 1.1 brief.**
 - VRS2 is grounded in history: the VRS Ozren tactical group was "caught without the elite reserves" in September 1995 (BB1 p.386), and the 16th Krajina Brigade was pulled to Ozren only on 5 to 7 October (BB1 pp.388-389). Write it as a dated September 1995 reserve commitment.
-- The first step is a per-corps trace of `corps_exhaustion` and `last_plan_reason` for every corps. The orchestrator assigned it (2026-11-15) to the F1g lane as RF-STRENGTH's premise: an inert reporting trace that leaves the headless hash unchanged, landed before RF-STRENGTH, so 1.1 starts traced.
+- The first step, a per-corps trace of `corps_exhaustion` and `last_plan_reason` for every corps, is done as an inert reporting trace (PR #686, headless hash unchanged, landed before RF-STRENGTH). It traced the mechanism in section 1, so 1.1 starts from the three candidate fixes there, each paired with VRS2 and each its own measured run.
 - The 1.1 fix is expected to flip the Ozren, Teslić, Bočinja, Vozuća and Brijesnica Donja cells and the Farz P-B pass. That is an honest loss, not a regression.
 - The Bible says exhaustion drives negotiation and constraint for every actor, yet every VRS corps ends at 2 or below while the ARBiH corps sit at 57 to 97. That asymmetry is a design question for 1.1.
 
@@ -55,7 +63,7 @@ For every limit in this note, the calibration pass follows this rule:
 3. A change that moves any listed cell in either direction, by any pathway, is an engine change and goes to the 1.1 pass with its own panel. A lever that strengthens the VRS on Ozren would hide the defect further, and counts.
 4. Nothing is tuned that depends on the limit persisting: the 3rd Corps and other ARBiH corps exhaustion constants, the probe fallback, the stance gate for the ARBiH corps, the directive producer threshold and its Wave 6 coupling, the competence decay rate.
 5. Farz P1, P-A and P-B are not tuned.
-6. The route back in for section 1 is the per-corps trace; what follows from it is the orchestrator's and the owner's decision.
+6. The route back in for section 1 is the traced mechanism and its three candidate fixes; which one runs, and when, is the orchestrator's and the owner's decision.
 
 ## 5. Ratification of the deferral
 
@@ -63,8 +71,8 @@ The ARBiH plan lockout (army-wide) with VRS2 is deferred to the post-1.0 engine 
 
 | Seat | Verdict | Reasons and conditions |
 |---|---|---|
-| `historian` | AGREE WITH CONDITIONS | The memo's claim that the 3rd Corps "took hills, not cells" fails against BB2 pp.479-488 and BB1 pp.385-388. The deferral stands on the untraced cause and VRS2 (a dated September 1995 reserve commitment), not on history or on the owner's ruling. No matched cell is cited as fidelity evidence. The 3rd Corps offensive record goes to the 1.1 targets. |
-| `scenario-creator-runner-tester` | AGREE WITH CONDITIONS | Reproduced the 1994 counts (83 probes, 3 operations) and the week-188 exhaustion; the lockout is army-wide and mostly not an effect of the split; the cause has two candidates and per-turn evidence does not exist; the owner's ruling does not forbid a fix. Supplied the exact cell list and a stronger rule (section 4). Add an inert per-corps trace before the freeze. |
+| `historian` | AGREE WITH CONDITIONS | The memo's claim that the 3rd Corps "took hills, not cells" fails against BB2 pp.479-488 and BB1 pp.385-388. The deferral stands on the VRS2 dependency (a dated September 1995 reserve commitment) and, since the trace, on a traced mechanism whose fix is multi-run, not on history or on the owner's ruling. At the time of the seat read, the cause was still untraced. No matched cell is cited as fidelity evidence. The 3rd Corps offensive record goes to the 1.1 targets. |
+| `scenario-creator-runner-tester` | AGREE WITH CONDITIONS | Reproduced the 1994 counts (83 probes, 3 operations) and the week-188 exhaustion; the lockout is army-wide and mostly not an effect of the split; the cause has two candidates and per-turn evidence does not exist; the owner's ruling does not forbid a fix. Supplied the exact cell list and a stronger rule (section 4). Add an inert per-corps trace before the freeze (done, PR #686). |
 | `game-designer` | AGREE WITH CONDITIONS | A passive central front is partly the intended texture, but the lockout is a self-reinforcing probe and exhaustion loop, a defect and not a design stance. The memo stretches the owner's ruling, so the owner is asked to assent. The note must say the cells are held by a defect, the 1.1 fix is expected to flip them, and the rule is reworded as in section 4. |
 
 The owner is told after the merge. The orchestrator is told before it that no seat called the deferral wrong, and that the memo's stated reasons on the 3rd Corps history and on the probe ruling were corrected by two seats each.

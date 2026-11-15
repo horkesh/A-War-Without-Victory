@@ -110,8 +110,11 @@ gates:
       tagged post-1.0 with no measuring lane, and no new audit starts before the freeze.
       BC18 (HVO-ARBiH war) was decided by the owner on 2026-11-14 (A now, B merged as #623,
       C post-1.0) and needs nothing before the freeze. The ARBiH plan lockout (army-wide;
-      first filed as RF-3C-EXH) with VRS2 is post-1.0 and ships as a recorded known limit. data/derived/latest_run_final_save.json dates from
-      2026-09-01 and is stale; lanes read run folders instead.
+      first filed as RF-3C-EXH) with VRS2 is post-1.0 and ships as a recorded known limit;
+      the trace (#686) traced it to the corps' own probes keeping exhaustion above the
+      planning gate, and the fix is multi-run and pairs with VRS2.
+      data/derived/latest_run_final_save.json dates from 2026-09-01 and is stale; lanes
+      read run folders instead.
 
   # ── RD — Dayton settlement and end map (closed, owner 2026-11-07) ───────────────────
 
