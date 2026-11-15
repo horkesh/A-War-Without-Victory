@@ -814,7 +814,9 @@ describe('strict null inventory progress', () => {
             // battle/flip-seeded timer. No new type escape. 592 -> 593.
             // Council fix 3 (2026-11-14): CorpsOperation.ceasefire_stand_down, recorded only on an
             // offensive executing when the October 1995 ceasefire binds. No new type escape. 593 -> 594.
-            optional_fields_game_state: 594,
+            // Command loop L6 (2026-11-15): command_authority.last_recovery_breakdown, written only by
+            // the live recovery step. No new type escape. 594 -> 595.
+            optional_fields_game_state: 595,
         });
         // Reason-code instrumentation (item 3): +1, `OperationAxis.launch_blocker_detail`.
         // `classifyDomain` routes it to `sim` on the /Corps|Operation/ interface-name rule,
@@ -826,13 +828,14 @@ describe('strict null inventory progress', () => {
         // RF-3 (DA1): +1 state (DisplacementState.unsupplied_pressure_turns). 591 -> 592 / state 217 -> 218.
         // RF-5B: +1 state (HostileTakeoverTimerState.cause). 592 -> 593 / state 218 -> 219.
         // Council fix 3: +1 sim (CorpsOperation.ceasefire_stand_down). 593 -> 594 / sim 364 -> 365.
-        expect(current.optional_field_domains.total).toBe(594);
+        // Command loop L6: +1 state (command_authority.last_recovery_breakdown). 594 -> 595 / state 219 -> 220.
+        expect(current.optional_field_domains.total).toBe(595);
         expect(current.optional_field_domains.domain_counts).toMatchObject({
             derived: 10,
             ipc: 0,
             scenario: 0,
             sim: 365,
-            state: 219,
+            state: 220,
             ui_adapter: 0,
             unknown: 0,
         });
