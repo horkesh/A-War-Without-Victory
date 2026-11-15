@@ -98,14 +98,14 @@ import {
     PERSONNEL_HEALTHY_THRESHOLD,
 } from './bot_constants.js';
 import { getActiveDoctrinePhase } from './bot_strategy.js';
-import { getFactionCorps, getCorpsSubordinates, sortByPersonnelDesc } from './bot_corps_helpers.js';
+import { designedStrengthFraction, getFactionCorps, getCorpsSubordinates, sortByPersonnelDesc } from './bot_corps_helpers.js';
 import type { PredictedOutcome } from './combat_predictor.js';
 import { seedDisplacementTimerOnFlip } from '../../state/displacement_takeover.js';
 import type { PreparationEvent } from '../turn_pipeline_types.js';
 import { checkLoanedArrivals, areLoanedBrigadesReady, cleanupDissolvedLoans } from './operation_reinforcement.js';
 import { MAX_OP_LOAN_DISTANCE, LOAN_STAGING_BUFFER_TURNS } from './operation_reinforcement_constants.js';
 import { findBrigadeLiveOperationAnywhere, hasActiveOperation, isCommanderBuiltOperation, removeOperation } from './corps_operation_helpers.js';
-import { MIN_ATTACK_PERSONNEL, MAX_BRIGADE_PERSONNEL } from '../../state/formation_constants.js';
+import { MIN_ATTACK_PERSONNEL } from '../../state/formation_constants.js';
 import { mayEliteJoinOperation } from './historical_elite_reservations.js';
 import { isVlasicCohaExceptionOperation } from './coha_operation_exception.js';
 import { isFactionOffensiveOpsSuppressed } from '../events/active_modifiers.js';
@@ -3355,9 +3355,10 @@ export function evaluateOperationProgress(
                 for (const brigId of op.participating_brigades) {
                     const brig = formations[brigId];
                     if (!brig || brig.status !== 'active') continue;
-                    const startPersonnel = MAX_BRIGADE_PERSONNEL; // approximate
-                    const currentPersonnel = brig.personnel ?? 0;
-                    const lossRate = 1 - (currentPersonnel / startPersonnel);
+                    // Below the healthy line against its own designed strength (RF-STRENGTH 2026-11-15;
+                    // was the 3,000 cap, which read every full ARBiH/VRS brigade as heavily damaged).
+                    // Strength at op start is not recorded per brigade.
+                    const lossRate = 1 - designedStrengthFraction(brig);
                     if (lossRate > BRIGADE_LOSS_THRESHOLD) {
                         // Try to find a replacement from the same corps
                         const subordinates = getCorpsSubordinates(state, corps.id);
@@ -3366,7 +3367,7 @@ export function evaluateOperationProgress(
                             !updatedParticipants.includes(s.id) &&
                             findBrigadeLiveOperationAnywhere(state, s.id) === null &&
                             mayEliteJoinOperation(s.id, turn, op.name) &&
-                            (s.personnel ?? 0) / MAX_BRIGADE_PERSONNEL >= PERSONNEL_HEALTHY_THRESHOLD &&
+                            designedStrengthFraction(s) >= PERSONNEL_HEALTHY_THRESHOLD &&
                             (s.cohesion ?? 60) >= COHESION_HEALTHY_THRESHOLD
                         );
                         if (replacement) {
