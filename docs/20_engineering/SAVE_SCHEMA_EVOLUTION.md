@@ -38,6 +38,18 @@ move, and Alagić is seated unless the guards stop it. Past the window
 to a live 3rd Corps operation are pulled out of it at once. This is a recorded limitation for
 pre-1.0 beta saves.
 
+**2026-11-15 writer (RF-ROSTER), no migration or schema bump:** the A4 war step
+(`applyArmyCoRosterStep`) now owns `named_officer_data[].stubbornness` for every officer listed
+in `data/scenarios/army_co_roster.json`: roster value, plus the one-shot overstay escalation when
+`kept_past_schedule_since_turn` is set (capped). It writes this at officer initialisation and at
+the start and end of the step each war turn. Migration 10 still defaults only undefined values,
+so a saved value reloads unchanged. An older save, where migration 10 had written 3 on every
+officer, keeps 3 until its first war turn after load, when the step corrects it. That one turn is
+a recorded limitation for pre-1.0 beta saves. Other officers are untouched; values stay in the
+validator range [1, 5]. Sensitive under the rule above, because it changes bot behaviour (army
+compliance and corps-directive roles; in the measured 188w run no outcome moved). Sign-off: the
+RF-ROSTER Pyrrhic gate (PR #677).
+
 
 Use this procedure for every `GameState` shape change that can appear in a saved game.
 
