@@ -109,6 +109,8 @@ export function buildPlayerArmyCoPushbackVisibility(
 
     let refusedCount = 0;
     let pushbackCount = 0;
+    /** Objections to the President's own orders (order_pushback), as opposed to the army's weekly reading of a directive. */
+    let orderPushbackCount = 0;
     let modifiedCount = 0;
     let autonomousProposalCount = 0;
 
@@ -122,6 +124,7 @@ export function buildPlayerArmyCoPushbackVisibility(
             if (ev.reason && primaryReason === null) primaryReason = ev.reason;
         } else if (ev.type === 'order_pushback' || ev.type === 'army_directive_pushback') {
             pushbackCount++;
+            if (ev.type === 'order_pushback') orderPushbackCount++;
             if (ev.reason && primaryReason === null) primaryReason = ev.reason;
         } else if (ev.type === 'order_modified' || ev.type === 'order_exceeded') {
             modifiedCount++;
@@ -212,18 +215,32 @@ export function buildPlayerArmyCoPushbackVisibility(
         modifiedCount === 0 &&
         traceObjectionCount === 0;
 
+    // An order the corps commander refused (order_refused) or objected to (order_pushback,
+    // order_modified, order_exceeded) is a corps order, not a political directive: the headline
+    // and fallback rationale name the order. The directive wording stays for the army's own
+    // reading of a directive (army_directive_pushback, decision traces).
+    const orderLevel = refusedCount > 0 || orderPushbackCount > 0 || modifiedCount > 0;
+
     const headline =
         proposalOnly
             ? t('decisionRoom.card.pushback.headline.proposal')
         : severity === 'blocking'
-            ? t('decisionRoom.card.pushback.headline.refused')
+            ? t(refusedCount > 0
+                ? 'decisionRoom.card.pushback.headline.orderRefused'
+                : 'decisionRoom.card.pushback.headline.refused')
+        : orderLevel
+            ? t('decisionRoom.card.pushback.headline.orderObjection')
             : t('decisionRoom.card.pushback.headline.pushback');
 
     const rationale = primaryReason ?? lastTraceRationale ?? (
         proposalOnly
             ? t('decisionRoom.card.pushback.rationale.proposal')
         : severity === 'blocking'
-            ? t('decisionRoom.card.pushback.rationale.refused')
+            ? t(refusedCount > 0
+                ? 'decisionRoom.card.pushback.rationale.orderRefused'
+                : 'decisionRoom.card.pushback.rationale.refused')
+        : orderLevel
+            ? t('decisionRoom.card.pushback.rationale.orderObjection')
             : t('decisionRoom.card.pushback.rationale.pushback')
     );
 
