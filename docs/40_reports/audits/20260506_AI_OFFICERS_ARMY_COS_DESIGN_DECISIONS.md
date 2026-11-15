@@ -206,5 +206,6 @@ Unset constants flagged for **mini-panel** before A4 SHIP:
 - "Vukovar 1991" for Mladić: he led the JNA 9th (Knin) Corps, not the Vukovar operation (BB1).
 - "Srebrenica 1995" as Mladić's insubordination: the Karadžić judgement finds that Karadžić issued Directive 7 and shared the plan. It is not an example of defiance.
 - "Neretva '93" and a July 1993 sacking for Halilović: Delić replaced Halilović on 8 June 1993 (BB1 p.180). Neretva-93 came later, and the Halilović trial (IT-01-48-T) ended in acquittal.
+- The cross-cutting principle above ("Halilović overrode by Izetbegović") is garbled. The record is the reverse: Izetbegović overruled Halilović after Prozor (Oct 1992), and Halilović then complied (BB1).
 - §6 note for the autonomous-launch path: Krivaja-95 and Stupčanica-95 are not in the operation-opportunity catalog, so the path cannot propose them. Any future activation that frames a Srebrenica-area operation as "launched by Mladić, the President only failed to veto" goes to the §6 panel first.
 - Tenure starts in the roster run early against the record: Praljak 64 against week 67, Roso 80 against 83, Petković-2 100 against 107, Blaškić-2 120 against 121. Delić 61 is correct. These are registered for the calibration pass, one measured change at a time.
