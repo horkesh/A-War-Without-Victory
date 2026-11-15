@@ -13,10 +13,16 @@ const OPTIONS = ['always_deny', 'ask', 'always_allow'] as const;
 // Re-pinned 2026-11-15 after the citation audit (was 69579 / 6d447e72f84a687d). Reviewed by the historian, narrative and
 // canon-compliance seats as a whole event: 13 `explanation` strings changed (6 player-visible wording and citation fixes,
 // 7 hidden developer-note citations); trigger, options, effects, flags and dimension shifts are byte-identical.
-const REVIEWED_IDENTITY_CANONICAL_LENGTH = 70817;
-const REVIEWED_IDENTITY_FNV64 = 'a5cda75445f4eff3';
-const REVIEWED_POLICY_CANONICAL_LENGTH = 10911;
-const REVIEWED_POLICY_FNV64 = '4db9c9795b1abb6d';
+// Re-pinned again 2026-11-15 (was 70817 / a5cda75445f4eff3): three imprecise A/54/549 and Krstić paragraph cites in visible
+// explanations and the Owen-Stoltenberg consequence label ("response decision", the event it opens is a player Accept or Resist
+// decision); string-only, reviewed with the policy event below.
+const REVIEWED_IDENTITY_CANONICAL_LENGTH = 70844;
+const REVIEWED_IDENTITY_FNV64 = 'acbebbba72173a81';
+// Re-pinned 2026-11-15 (was 10911 / 4db9c9795b1abb6d): three hidden provenance notes cited UN A/54/549 §35 (the Srebrenica enclave
+// before the safe areas) for the ARBiH chain of command; the two hidden notes now record the correction and the visible source
+// line drops the paragraph. Strings only; options, effects, flags and dimension shifts are byte-identical.
+const REVIEWED_POLICY_CANONICAL_LENGTH = 11239;
+const REVIEWED_POLICY_FNV64 = '3aa51be73b2cdda0';
 
 export type EventDefinitionCatalog = readonly EventDefinition[] | ReadonlyMap<string, EventDefinition>;
 
@@ -96,8 +102,23 @@ function withoutDisplayText(decision: PendingEventDecision): unknown {
     for (const option of (copy.response_options ?? []) as Array<Record<string, unknown>>) {
         delete option.label;
         delete option.description;
-        for (const consequence of (option.future_consequences ?? []) as Array<Record<string, unknown>>) delete consequence.explanation;
+        for (const consequence of (option.future_consequences ?? []) as Array<Record<string, unknown>>) {
+            delete consequence.label;
+            delete consequence.explanation;
+        }
     }
+    return copy;
+}
+
+/**
+ * The paramilitary-policy decision keeps a stricter comparison than the identity card (its narrative, notifications and option text
+ * must still match the reviewed catalog), but the three developer provenance notes it copies into a save (`historical_source`,
+ * `source_note`, `source`) are never shown to a player and are corrected when an audit finds a wrong cite, so they must not strand a
+ * save written before the correction either.
+ */
+function withoutProvenanceText(decision: PendingEventDecision): unknown {
+    const copy = JSON.parse(JSON.stringify(decision)) as Record<string, unknown>;
+    for (const key of ['historical_source', 'source_note', 'source']) delete copy[key];
     return copy;
 }
 
@@ -191,7 +212,7 @@ function requirePolicyResponseState(
         throw new Error('Pending RBiH policy response is not eligible in the current state');
     }
     requireCanonicalIdentityReceipt(state, catalog, openingLane, fireTurn);
-    if (canonicalJson(decision) !== canonicalJson(buildPending(def, 'RBiH', fireTurn))) {
+    if (canonicalJson(withoutProvenanceText(decision)) !== canonicalJson(withoutProvenanceText(buildPending(def, 'RBiH', fireTurn)))) {
         throw new Error('Pending RBiH policy payload differs from the reviewed catalog');
     }
 }
