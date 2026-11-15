@@ -117,8 +117,10 @@ describe('rs_dayton_acceptance_1995 says what happened', () => {
         const entry = index.essays.find((row) => row.event_id === 'rs_dayton_acceptance_1995')!;
         for (const row of [essay, entry]) {
             expect(row.title).toBe('Pale Accepts the Dayton Agreement');
-            expect(row.content).not.toMatch(/ratif|held the pen|over its head|Belgrade-led delegation|70 percent/i);
+            expect(row.content).not.toMatch(/ratif|held the pen|over its head|Belgrade-led delegation|70 percent at its peak|roughly two-thirds/i);
             expect(row.content).toContain('Milošević, not Karadžić, initialled the agreement');
+            // The territory figure is the one the Karadžić judgment records (para 3294: Perišić, November 1994, more than 70 percent).
+            expect(row.content).toContain('more than 70 percent of the country that Yugoslav officials said the Bosnian Serbs held in November 1994');
         }
         expect(JSON.stringify(index)).not.toContain('Pale Ratifies the Dayton Framework');
     });
