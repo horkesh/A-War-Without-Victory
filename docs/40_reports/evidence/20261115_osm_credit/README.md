@@ -8,9 +8,9 @@ Real Electron app (`desktop:release:check` build), RBiH save with the presidenti
 | Map, inbox open, 1280x720 | minimap | covered by the inbox ("Read later" button) | not drawn |
 | Map, inbox open, 1920x1080 | war-map | topmost is the plate itself | topmost is the plate itself |
 | Map, inbox open, 1920x1080 | minimap | covered by an inbox card | not drawn |
-| Map, corps rail open, 1280x720 | war-map | (covered by the rail) | not drawn |
-| Map, corps rail open, 1280x720 | minimap | visible | visible |
-| Map, unit rail open, 1920x1080 | minimap | visible | visible |
+| Map, corps rail open, 1280x720 | war-map | not probed | not drawn (the rail covers its column) |
+| Map, corps rail open, 1280x720 | minimap | not probed | drawn, topmost at all three points |
+| Map, unit rail open, 1920x1080 | minimap | not probed | drawn, topmost at all three points |
 
 After: in every map state exactly the plates that can be seen are drawn, and the one drawn is topmost at all three probe points. Screenshots: `before_*_map.webp` (inbox open), `after_*_map_inbox.webp` (war-map credit), `after_*_map_unit_selected.webp` (minimap credit).
 
