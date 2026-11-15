@@ -2,6 +2,7 @@
 
 **Status:** CANON (v0.9.0 gate — moral and design)
 **Last Updated:** 2026-11-15
+**Amended:** 2026-11-15 (owner directive: war-or-game removed from all seats; owner approved this canon edit 2026-11-15, "Amend the canon docs"): the "Adding a new rupture" sign-off seats, the §6 "New rupture added" row and the "Evidence required for each sign-off" realism line name `/scenario-creator-runner-tester` instead of `/war-or-game`; realism findings cite a source or a measured run figure, and the historian has the final word on historical fact. Earlier §6 records are history and stay as written. Nothing renumbered.
 **Amended:** 2026-11-15 (ending polish): §6 gains the record for the Sustained Refusal ghost entry (`paramilitary_streak_refused`): its predicate now also reads the deployment count the cost ledger prints, its prose claims only that no deployment was authorised, and its BCS text is a full translation. Nothing renumbered.
 **Amended:** 2026-11-14 (ending truth pass, R8 council fix 1): §6 gains the ending truth pass record (Verdict and Dayton signing copy, each side's own peace-dysfunction reading, retired rupture timing row and footer tagline). Nothing renumbered.
 **Amended:** 2026-11-14 (RF-5B policy-driven bilateral displacement): §1 Ring 1 displacement and war-crimes-counter bullets gain the bot-only minority-expulsion policy; §2a(ii)(a) gains its first wave as an authorized act; §3 states the policy is not a player surface; §6 gains the RF-5B record; §9 gains src/state/war_crimes_record.ts. Nothing renumbered.
@@ -115,7 +116,7 @@ A new rupture requires:
 2. A concrete trigger condition that fits into `evaluateRuptureConsequences()` as a pure predicate on `GameState`.
 3. Grade-anchor impact analysis — how does the new condemnation flag interact with existing faction grades?
 4. Cost Ledger wording draft for the rupture description.
-5. Pyrrhic §6-panel sign-off: `/historian` + scenario-tester/calibration + Engine/systems + Red-team (Historian/war-or-game/game-designer seats), unanimous GO = signature.
+5. Pyrrhic §6-panel sign-off: `/historian` + scenario-tester/calibration + Engine/systems + Red-team (Historian/scenario-creator-runner-tester/game-designer seats), unanimous GO = signature.
 6. A BLOCK or split panel verdict surfaces to the owner.
 
 Adding a rupture is a capital-R Decision. The default is: do not add one.
@@ -223,7 +224,7 @@ Changes that touch sensitive history require explicit multi-party review. No exc
 
 | Change type | Required sign-off |
 |---|---|
-| New rupture added | Pyrrhic §6-panel: Historian + scenario-tester/calibration + Engine/systems + Red-team (incl. `/historian` + `/war-or-game` + `/game-designer`), unanimous GO = signature; BLOCK or split surfaces to the owner |
+| New rupture added | Pyrrhic §6-panel: Historian + scenario-tester/calibration + Engine/systems + Red-team (incl. `/historian` + `/scenario-creator-runner-tester` + `/game-designer`), unanimous GO = signature; BLOCK or split surfaces to the owner |
 | Change to rupture trigger or description | `/historian` + `/game-designer` |
 | New atrocity event | `/historian` + `/narrative-designer` |
 | Change to atrocity event content | `/historian` + `/narrative-designer` |
@@ -248,7 +249,7 @@ Changes that touch sensitive history require explicit multi-party review. No exc
 ### Evidence required for each sign-off
 
 - `/historian` reviews must cite ICTY, Court of BiH, ICJ, or published academic-historical sources. Court of BiH judgments are canonical alongside ICTY judgments; indictments and non-final judgments may be cited only as what they are. BB (Balkan Battlegrounds) is acceptable; Wikipedia is not.
-- `/war-or-game` reviews must test the change against "would a real Bosnian War observer find this absurd" — reference REAL_WAR_MASTER.md.
+- Realism reviews (`/historian` with `/scenario-creator-runner-tester`) must test the change against "would a real Bosnian War observer find this absurd", citing a source (Balkan Battlegrounds, ICTY/ICJ) or a measured run figure for every finding; the historian has the final word on historical fact — reference REAL_WAR_MASTER.md.
 - `/game-designer` reviews must verify the change does not create a Ring 3 refused surface by accident.
 - `/narrative-designer` reviews must verify §4 wording constraints are met.
 

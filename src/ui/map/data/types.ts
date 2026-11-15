@@ -1306,6 +1306,14 @@ export interface LoadedGameState {
         lifetimeSpent: number;
         lastRecovery?: number;
         lastRecoverySource?: string;
+        /** Command loop L6: the last weekly income by source (live campaigns only). */
+        lastRecoveryBreakdown?: {
+            recovery: number;
+            base: number;
+            politicalBonus: number;
+            quietFrontDividend: number;
+            frictionPenalty: number;
+        };
     };
     fogOfWar?: FogOfWarView;
     /** Sector intelligence records for the player faction — per friendly sector, what we know about enemy sectors. */

@@ -485,6 +485,13 @@ Army HQ, Codex, and other full-size overlays should obey the same density langua
 
 OSID, raw faction ids, and similar backend nouns are valid in engine code, canon, and tests. They are not valid in the live player shell when a human phrase like staging area, positions, or a political-side display name can carry the meaning. The product should sound like a command environment, not a debugger.
 
+## 2026-11-15 - Authority that binds (command loop L6)
+
+- Backing an offensive now has a price on its directive: 10 Authority for a corps operation, 20 for a campaign or historical operation. Withhold and decline stay free.
+- Every priced directive shows a price line under its cost chip (`directive-price-line`): "You have 34 · +4.5 next week".
+- The Desk's Authority column adds the two backing prices to the lever ladder and a "Next week: +4.5 Authority (base 3.25, political standing +0.75, interventions −0.5)" line (`desk-authority-next-week`). Only non-zero sources are listed. Without a recorded breakdown it falls back to last week's income.
+- Strings: `authority.*` (EN and BCS). Helper: `src/ui/map/utils/authorityIncome.ts`. Evidence: ledger fragment `docs/ledger/fragments/2026-11-15-authority-prices.md`.
+
 ## 2026-11-15 - Proposal dossiers (command loop L5)
 
 - Ordinary operation proposals in the Command Surface show a dossier (`src/ui/map/data/proposalDossier.ts`) in place of thirteen English "Label: value" lines.

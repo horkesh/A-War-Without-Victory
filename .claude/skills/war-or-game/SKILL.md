@@ -5,6 +5,8 @@ description: Realism auditor. Investigates sim outputs, AARs, battle logs, and c
 
 # War or Game
 
+> **RETIRED from all panels, gates and routing (owner, 2026-11-15); explicit owner request only.** The owner's directive: "I want war-or-game removed from all seats. Too often he ignores history, is too cocky... I had to overrule him plenty of times." Calibration-run analysis and realism belong to `scenario-creator-runner-tester`, with `historian` ruling on historical fact; Operations Expert holds the former bright-line panel seat. Do not invoke this skill from another skill, a panel or a gate. This file is kept for history and for an explicit owner request.
+
 ## Live sources (read these at task start — do not hardcode floor/lane state)
 - `docs/40_reports/REAL_WAR_MASTER.md` — your master realism doc (READ first, WRITE findings).
 - `docs/40_reports/CALIBRATION_MASTER.md` — authoritative current calibration floor (count/hash/anchors). Never quote a floor from memory.

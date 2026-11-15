@@ -3104,6 +3104,17 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
             lastRecoverySource: typeof state.military.command_authority.last_recovery_source === 'string'
                 ? state.military.command_authority.last_recovery_source
                 : undefined,
+            ...(state.military.command_authority.last_recovery_breakdown
+                ? {
+                    lastRecoveryBreakdown: {
+                        recovery: finiteNumber(state.military.command_authority.last_recovery_breakdown.recovery),
+                        base: finiteNumber(state.military.command_authority.last_recovery_breakdown.base),
+                        politicalBonus: finiteNumber(state.military.command_authority.last_recovery_breakdown.political_bonus),
+                        quietFrontDividend: finiteNumber(state.military.command_authority.last_recovery_breakdown.quiet_front_dividend),
+                        frictionPenalty: finiteNumber(state.military.command_authority.last_recovery_breakdown.friction_penalty),
+                    },
+                }
+                : {}),
         } : undefined,
         commandBriefing,
         operationalSitrep,

@@ -34,7 +34,10 @@ import {
   ELITE_DEPLOY_COST,
   REPLACE_CO_COST,
   FRONT_VISIT_COST,
+  BACK_CORPS_OPERATION_COST,
+  BACK_CAMPAIGN_COST,
 } from '../../utils/commandAuthority';
+import { formatAuthorityAmount, nextWeekIncome } from '../../utils/authorityIncome';
 
 interface LeverCost {
   /** i18n key for the lever label. */
@@ -48,7 +51,10 @@ interface LeverCost {
  * reads as a price ladder. Costs come from utils/commandAuthority.ts constants.
  */
 const LEVER_COSTS: LeverCost[] = [
+  // Command loop L6 (owner decision 1): backing a general's offensive is priced.
+  { labelKey: 'authority.lever.backCorpsOperation', cost: BACK_CORPS_OPERATION_COST },
   { labelKey: 'deskAuthority.lever.frontVisit', cost: FRONT_VISIT_COST },
+  { labelKey: 'authority.lever.backCampaign', cost: BACK_CAMPAIGN_COST },
   { labelKey: 'deskAuthority.lever.forceLaunch', cost: FORCE_LAUNCH_COST },
   { labelKey: 'deskAuthority.lever.authorOp', cost: AUTHOR_OP_COST },
   { labelKey: 'deskAuthority.lever.requestOp', cost: REQUEST_OP_COST },
@@ -95,6 +101,7 @@ export function DeskAuthorityHeader({ state }: DeskAuthorityHeaderProps) {
   const lowAuthority = current < MIN_LEVER_COST;
   const atCapacity = max > 0 && current >= max;
   const nearCapacityQuiet = isPresidentialCadenceHold(state, deriveInboxItems(state, null));
+  const income = nextWeekIncome(ca);
 
   const gaugeColor = pct >= 60 ? 'bg-emerald-400/70' : pct >= 30 ? 'bg-amber-400/70' : 'bg-[#e07a6a]';
   const valueColor = pct >= 60 ? 'text-emerald-300' : pct >= 30 ? 'text-amber-300' : 'text-red-300';
@@ -131,6 +138,14 @@ export function DeskAuthorityHeader({ state }: DeskAuthorityHeaderProps) {
           <li data-testid="desk-authority-income-source">
             {t('deskAuthority.incomeSource', { source: t(sourceLabelKey(ca.lastRecoverySource)) })}
           </li>
+          {income && (
+            // Command loop L6: regeneration made visible, with where it comes from.
+            <li data-testid="desk-authority-next-week">
+              {income.sources.length > 0
+                ? t('authority.nextWeekWithSources', { income: formatAuthorityAmount(income.amount), sources: income.sources.join(', ') })
+                : t('authority.nextWeek', { income: formatAuthorityAmount(income.amount) })}
+            </li>
+          )}
           {directiveCadence != null && (
             <li data-testid="desk-authority-cadence">
               {t('deskAuthority.cadence', { turns: directiveCadence })}
