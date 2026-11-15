@@ -47,7 +47,8 @@ Fix (`src/sim/events/opening_policy_transition.ts`): the decision is judged on i
 
 - 188-week headless run on this branch against a clean `origin/main` run (same commit, `4d876050e`): final state hash `19262a0b19df1567` in both; 14 of 15 artifacts byte-identical; `run_meta.json` differs in digests only. (Main's hash moved from `e44c77f5b41052f8` in earlier checks because other changes merged; it is the same on both sides here.)
 - A 7-week run of the identity decision shows no event text in any artifact (canon seat); the 188-week artifacts do not include these strings.
-- `tsc` clean; the 145-file event/essay/codex set plus the new tests green.
+- `tsc` clean; the 148-file event/essay/codex set plus the new tests green (2292 tests).
+- What a player sees, before and after (`shown_text_before_after.md`): produced with the same `resolveEventSourceLine` and developer-text filter the app calls: 54 source lines (en and bcs) and 55 visible consequence explanations changed. No app screenshot: these are text-only changes to lines rendered by unchanged components, and reaching each in the running app needs a forced event per line.
 
 ## Found, not changed
 
