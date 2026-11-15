@@ -1,5 +1,7 @@
 # Real War Master
 
+**Ownership (changed 2026-11-15, owner directive):** this master is owned by `historian` and `scenario-creator-runner-tester`. The War-or-Game seat that owned it before is retired from all panels, gates and routing. Two rules apply to every entry from now on: (1) a realism finding must cite a source (Balkan Battlegrounds or ICTY) or a measured run figure; an opinion about what a commander "would" do is not a finding. (2) The historian has the final word on historical fact. Entries written before this date that name War-or-Game stay as written; they are history, and the sourcing rule applies to them when they are next relied on.
+
 ## Open: the player's own army at autonomy level 1 (Assisted), after PK1 (2026-11-14)
 
 PK1 (PR horkesh/A-War-Without-Victory#631) made the level-1 approval hold and the level-1 local-occupation switch-off apply to the human player's corps only. Bot armies no longer freeze when the player chooses Assisted. The War-or-Game and Game Designer seats of the PK1 panel (`docs/40_reports/governance/20261114_PK1_LEVEL1_PLAYER_ONLY_PANEL.md`) recorded three open items on the player's own side at level 1. Level 1 is opt-in (new campaigns start at level 2), so none blocked PK1. Each needs its own ruling: either an approval identity for the task, or a ruling that it sits below the president's threshold.
