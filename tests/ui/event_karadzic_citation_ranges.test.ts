@@ -87,13 +87,13 @@ describe('event notes no longer cite the Srebrenica paragraphs as support', () =
         expect(live).toEqual([]);
     });
 
-    it('hidden text: every Mladić and Milošević range the historian could not check is marked "paragraph not verified"', () => {
+    it('hidden text: every Mladić and Milošević range is marked "paragraph not verified" or corrected ("the earlier cite", batch 2)', () => {
         const unmarked: string[] = [];
         for (const entry of ENTRIES.filter((row) => !row.visible)) {
             for (const match of entry.text.matchAll(UNCHECKED_RANGES)) {
                 const at = match.index ?? 0;
                 const around = entry.text.slice(Math.max(0, at - 160), at + match[0].length + 200);
-                if (!/not verified/.test(around)) unmarked.push(`${entry.id}:${entry.where} ${match[0]}`);
+                if (!/not verified|the earlier cite/.test(around)) unmarked.push(`${entry.id}:${entry.where} ${match[0]}`);
             }
         }
         expect(unmarked).toEqual([]);
