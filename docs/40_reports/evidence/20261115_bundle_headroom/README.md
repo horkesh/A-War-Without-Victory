@@ -23,3 +23,7 @@ The limit and the gate are unchanged.
 - `chronicle_1280x720_open.webp`: President's Desk, Chronicle nav -> the War Chronicle opens.
 
 Settings, Diplomacy, the Peace plan and the two AI panels are covered by their existing component tests (87 UI test files, 861 tests, all passing).
+
+## After merging main (#635 landed)
+
+`tactical_map-*.js` is 2,743.03 kB (257 kB under the limit; no chunk-size warning). 103 UI test files that reference App or these views pass (1090 tests); `tsc --noEmit` clean.
