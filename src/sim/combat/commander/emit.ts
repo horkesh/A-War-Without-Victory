@@ -90,7 +90,8 @@ import { COMMITMENT_RATIO_UNBOUNDED_PERSISTED } from './zone_detection.js';
 import type { DecisionResult, StanceRecommendation } from './decide.js';
 import { augmentOffensiveTargetsWithShifts } from './bot_priority_shift_augmentation.js';
 import { botOrdersPerfTime } from '../_perf_profile_bot_orders.js';
-import { shouldLaunchProbeInstead, type ProbeLaunchDecisionTrace } from '../bot_corps_directives.js';
+import { shouldLaunchProbeInstead, PROBE_EXHAUSTION_MARGIN, type ProbeLaunchDecisionTrace } from '../bot_corps_directives.js';
+import { MAX_EXHAUSTION_FOR_OPERATION as FABLE_MAX_EXH } from '../bot_constants.js';
 import { getStalestSectorIntelConfidence, stableSectorKey } from '../sector_intel.js';
 import { computePlanningDuration } from '../sector_offensive_axis_helpers.js';
 import { canFormationReachAssemblyInTime } from '../sector_offensive_launch_helpers.js';
@@ -2888,7 +2889,10 @@ function buildOperationsImpl(
 
     // If no plan but surplus and high-initiative commander: occupy a verified
     // local pocket, or retain the cooldown-governed generic probe fallback.
-    if (canConsiderLocalOpportunity && (localOccupationCandidate != null || !probeOnCooldown)) {
+    // FABLE EXPERIMENT (throwaway): the dormant probe gate, threshold 30 + 10.
+    const fableProbeGateBlocks = process.env.AWWV_FABLE_VARIANT === 'gate40'
+        && briefing.corps_exhaustion > FABLE_MAX_EXH + PROBE_EXHAUSTION_MARGIN;
+    if (!fableProbeGateBlocks && canConsiderLocalOpportunity && (localOccupationCandidate != null || !probeOnCooldown)) {
         if (obs) obs.fallback_considered = true;
 
         // A verified local occupation pair takes precedence. If there is none,
