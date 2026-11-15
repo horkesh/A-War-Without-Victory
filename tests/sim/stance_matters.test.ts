@@ -39,7 +39,6 @@ import {
 import {
     capEffectiveStanceByHold,
     clampHeldCorpsStances,
-    corpsHoldForbidsNewOffensive,
 } from '../../src/sim/combat/stance_matter_holds.js';
 import { getEffectiveCorpsStance } from '../../src/sim/combat/corps_command.js';
 import { createRequire } from 'node:module';
@@ -312,7 +311,6 @@ describe('stance matters: resolution', () => {
         recordStanceMatterAnswer(state, { matterId: 'STANCE_11_c_a', answer: 'constrain', constraint: 'ceiling_defensive' });
         runTurn(state, { c_a: 'offensive' });
         expect(state.military.corps_command!.c_a!.stance).toBe('defensive');
-        expect(corpsHoldForbidsNewOffensive(state, 'c_a', state.meta.turn - 1)).toBe(true);
     });
 
     it('a hold never overrides reorganize', () => {

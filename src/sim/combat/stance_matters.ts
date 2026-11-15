@@ -371,8 +371,9 @@ export function clearCorpsHoldsForPresidentialOperation(state: GameState, corpsI
 function reasonFromTrace(trace: CorpsStanceTrace | undefined, finalStance: CorpsStance): StanceMatterReason {
     if (!trace) return 'other';
     if (trace.stance !== finalStance) {
-        // A later writer in the pass changed it: corridor breach (offensive) or
-        // bilateral-war reassignment.
+        // A later writer in the pass changed it. Since the corridor-breach pass was retired
+        // (RF-corridor-breach 2026-11-15) that is only the bilateral-war reassignment, which
+        // sets balanced; the offensive branch is kept for any future late writer.
         return finalStance === 'offensive' ? 'opportunity' : 'alliance_front';
     }
     switch (trace.driver) {
