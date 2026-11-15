@@ -286,6 +286,13 @@ function parseArgs(argv: string[]): CliOptions {
     if (botParityParamilitaryDiagnostic && !(values.get('--out') ?? '').includes('attribution')) {
         throw new Error('--diagnostic-bot-parity-paramilitary requires an --out path containing "attribution" (diagnostic output must never sit with calibration evidence)');
     }
+    // An engaged or meddler President queues a gesture decision each time it pays for one. Under
+    // `--event-policy defer` nobody answers it, so the gesture stays pending, never comes off
+    // cooldown again, and the Authority measurement is wrong. Refuse that configuration.
+    const presidentArg = values.get('--president');
+    if ((presidentArg === 'engaged' || presidentArg === 'meddler') && (values.get('--event-policy') ?? 'defer') === 'defer') {
+        throw new Error(`--president ${presidentArg} needs an --event-policy that answers decisions (bot_equivalent, historical_default or staff_recommended), not defer`);
+    }
 
     return {
         turns,

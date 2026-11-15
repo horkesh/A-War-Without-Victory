@@ -216,19 +216,28 @@ function applyStopOp(state: GameState, faction: FactionId, log: PresidentTurnLog
  */
 let stopOpDue = false;
 
-/** Back every corps operation he is asked to back, mirroring the desktop accept-proposal handler. */
+/**
+ * Back every corps operation and campaign opportunity he is asked to back, mirroring the desktop
+ * accept-proposal handler: debit `proposalBackingCost` (10 for APPROVE_OP, 20 for OPPORTUNITY),
+ * then mark the review accepted. For an opportunity that is all the handler does; the war
+ * pipeline's `apply-resolved-opportunity-decisions` step reads the accepted flag next turn.
+ * Historical operations stay with `--historical-operation-policy`.
+ */
 function backProposals(state: GameState, faction: FactionId, log: PresidentTurnLog): void {
     const reviews = [...(state.meta.pending_proposal_reviews ?? [])]
-        .filter((r) => r.faction === faction && typeof r.proposed_action === 'string' && r.proposed_action.startsWith('APPROVE_OP:'))
+        .filter((r) => r.faction === faction && typeof r.proposed_action === 'string'
+            && (r.proposed_action.startsWith('APPROVE_OP:') || r.proposed_action.startsWith('OPPORTUNITY:')))
         .filter((r) => r.accepted == null && r.resolved_turn == null)
         .sort((a, b) => strictCompare(a.id, b.id));
     for (const review of reviews) {
         if (!debit(state, ipcContract.proposalBackingCost(review.proposed_action))) { log.refusals.push('back:insufficient_ca'); continue; }
         review.accepted = true;
         review.resolved_turn = state.meta.turn;
-        const [, corpsId, planId] = review.proposed_action.split(':');
-        const corps = state.military.corps_command?.[corpsId!] as Record<string, unknown> | undefined;
-        if (corps) corps.player_op_response = { plan_id: planId, approved: true, turn: state.meta.turn };
+        if (review.proposed_action.startsWith('APPROVE_OP:')) {
+            const [, corpsId, planId] = review.proposed_action.split(':');
+            const corps = state.military.corps_command?.[corpsId!] as Record<string, unknown> | undefined;
+            if (corps) corps.player_op_response = { plan_id: planId, approved: true, turn: state.meta.turn };
+        }
         log.backed.push(review.id);
     }
 }

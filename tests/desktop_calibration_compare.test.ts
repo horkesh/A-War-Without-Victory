@@ -268,6 +268,16 @@ describe('desktop calibration comparison provenance', () => {
     expect(result.stderr).toContain('requires an --out path containing "attribution"');
   });
 
+  it('refuses an engaged or meddler President whose gesture decisions nobody answers (event policy defer)', () => {
+    for (const president of ['engaged', 'meddler']) {
+      const result = runComparison(['--turns', '0', '--faction', 'RBiH', '--president', president]);
+      expect(result.status).not.toBe(0);
+      expect(result.stderr).toContain(`--president ${president} needs an --event-policy that answers decisions`);
+    }
+    const handsOff = runComparison(['--turns', '0', '--faction', 'RBiH', '--president', 'hands_off']);
+    expect(handsOff.status, handsOff.stderr).toBe(0);
+  });
+
   it('labels bot-parity paramilitary output as diagnostic and never as calibration', () => {
     const outPath = join(fixtureDir, 'bot-parity-attribution.json');
     const result = runComparison([
