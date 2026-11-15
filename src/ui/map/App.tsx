@@ -102,7 +102,13 @@ const CodexPanel = lazy(() =>
 );
 import { LoadingSkeleton } from './components/LoadingSkeleton';
 import { LoadErrorToast } from './components/LoadErrorToast';
-import { VerdictScreen } from './components/VerdictScreen';
+// The Verdict and the ending code only it reads (scene, figures, decision ranking, findings,
+// comparison lines, cost ledger, signing beat) load on demand and stay out of the entry chunk
+// (vite.config.ts chunk-size limit). The screen still mounts unconditionally and returns null
+// until the war has ended; only its module is fetched late.
+const VerdictScreen = lazy(() =>
+  import('./components/VerdictScreen').then(m => ({ default: m.VerdictScreen })),
+);
 import { ReplayInspectionBanner } from './components/replay/ReplayInspectionBanner';
 import { AudioCueObserver } from './components/AudioCueObserver';
 import { AudioSurfaceBedController } from './components/AudioSurfaceBedController';
@@ -2323,7 +2329,9 @@ function App() {
         </Suspense>
       )}
       <PeaceWarTransitionOverlay />
-      <VerdictScreen onLoadSaveState={handleMainMenuLoadGame} onLoadSaveError={setLoadError} />
+      <Suspense fallback={null}>
+        <VerdictScreen onLoadSaveState={handleMainMenuLoadGame} onLoadSaveError={setLoadError} />
+      </Suspense>
       <ReplayInspectionBanner />
       {/* Warroom shell: advance-turn confirmation modal — triggered by wall_calendar_area hotspot */}
       <AdvanceTurnModal

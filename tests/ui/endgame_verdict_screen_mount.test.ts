@@ -192,24 +192,34 @@ describe('VerdictScreen mount — verdict content', () => {
         };
         const html = render();
         expect(html).toContain('data-awwv-verdict-focus="RS"');
-        expect(html).toContain('Territorial gains tainted by condemnation');
+        // The banner headline follows the focus side's own outcome and condemnation flags.
+        expect(html).toContain('Republika Srpska ended the war in failure: its forces committed the Srebrenica genocide');
         expect(html).toContain(turnToDateString(40));
         expect(html).not.toContain('UNKNOWN');
     });
     it('all faction tabs with outcome badges', () => {
         const h = render();
-        expect(h).toContain('ARBiH'); expect(h).toContain('VRS'); expect(h).toContain('HVO');
+        // The rail names the sides, not their armies.
+        expect(h).toContain('Republic of Bosnia and Herzegovina'); expect(h).toContain('Republika Srpska'); expect(h).toContain('Herzeg-Bosnia');
+        expect(h).not.toMatch(/>(ARBiH|VRS|HVO)</);
         expect(h).toContain('Survival'); expect(h).toContain('Failure'); expect(h).toContain('Negotiated Escape');
     });
     it('RBiH pyrrhic score', () => { expect(render()).toContain('65.0'); });
-    it('RBiH grade description', () => { expect(render()).toContain('Multi-ethnic state endures'); });
+    it('RBiH headline; the grade description shows only inside a grade trace', () => {
+        const h = render();
+        expect(h).toContain('The Republic of Bosnia and Herzegovina survived the war');
+        // No grade_trace on this verdict, so no "How the verdict was set" block and no description.
+        expect(h).not.toContain('How the verdict was set');
+        expect(h).not.toContain('Multi-ethnic state endures');
+    });
     it('dimension bars', () => {
         const h = render();
         expect(h).toContain('Military Credibility'); expect(h).toContain('International Standing');
     });
     it('footer', () => {
         const h = render();
-        expect(h).toContain('least bad version'); expect(h).toContain('Open campaign recap'); expect(h).toContain('New Game');
+        // The footer tagline is retired (§4 panel 2026-11-14); the actions remain.
+        expect(h).not.toContain('least bad version'); expect(h).toContain('Open campaign recap'); expect(h).toContain('New Game');
     });
 
     it('renders mixed ghost classifications under a neutral Campaign Codex heading', () => {
@@ -299,10 +309,14 @@ describe('VerdictScreen mount — cost ledger', () => {
         const h = render();
         expect(h).toContain('War Cost'); expect(h).toContain('Historical Comparison');
     });
-    it('divergence notes in order', () => {
+    it('rebuilt comparison lines in order; legacy notes never printed raw', () => {
         const h = render();
-        expect(h).toContain('6 weeks longer'); expect(h).toContain('Srebrenica genocide occurred');
-        expect(h.indexOf('6 weeks longer')).toBeLessThan(h.indexOf('Srebrenica genocide occurred'));
+        const warCost = h.slice(h.indexOf('data-tutorial-step="cost-ledger"'));
+        expect(h).not.toContain('6 weeks longer'); expect(h).not.toContain('Srebrenica genocide occurred');
+        const order = ['end_of_war', 'military_dead', 'civilian_dead', 'srebrenica']
+            .map(id => warCost.indexOf(`data-awwv-comparison-line="${id}"`));
+        expect(order.every(index => index >= 0)).toBe(true);
+        expect([...order].sort((a, b) => a - b)).toEqual(order);
     });
     it('renders milestone comparison rows', () => {
         const h = render();
@@ -663,8 +677,7 @@ describe('FactionReport — direct component mount proof', () => {
             personnel: 85000,
         });
         expect(html).toContain('International Condemnation');
-        expect(html).toContain('genocide');
-        expect(html).toContain('tribunal');
+        expect(html).toContain('Its forces committed the Srebrenica genocide (found by the ICTY and the ICJ)');
     });
 
     it('does NOT render condemnation notice when no flags present', () => {
@@ -704,15 +717,27 @@ describe('FactionReport — direct component mount proof', () => {
         expect(html).toContain('Internal Cohesion');
     });
 
-    it('renders grade description text', () => {
+    it('renders grade description text inside the grade trace only', () => {
+        const props = { factionOsids: 413, totalOsids: 712, brigadeCount: 35, personnel: 85000 };
+        // Without a grade trace (a save frozen before it) the description is not shown.
+        expect(renderComponentMP(FactionReport, { ...props, verdict: makeRsVerdictMP() }))
+            .not.toContain('catastrophic moral cost');
         const html = renderComponentMP(FactionReport, {
-            verdict: makeRsVerdictMP(),
-            factionOsids: 413,
-            totalOsids: 712,
-            brigadeCount: 35,
-            personnel: 85000,
+            ...props,
+            verdict: makeRsVerdictMP({
+                grade_trace: {
+                    territory_basis: 'front', territory_graded_pct: 58, earned_grade: 'B',
+                    earned_description: 'Territorial gains but catastrophic moral cost', cost_step: 'war_cost_cap',
+                    cost_capped_grade: 'B', condemnation_capped_grade: 'C', settlement_capped_grade: 'C',
+                    base_outcome_class: 'failure', peace_dysfunction_index: null,
+                    settlement_peace_dysfunction_index: null, peace_dysfunction_band: 'none',
+                    outcome_class: 'failure',
+                },
+            }),
         });
-        expect(html).toContain('catastrophic moral cost');
+        const trace = html.slice(html.indexOf('data-testid="faction-report-grade-trace"'));
+        expect(trace).toContain('Condemnation: B → C');
+        expect(trace).toContain('catastrophic moral cost');
     });
 
     it('renders war crimes count in statistics', () => {
@@ -788,50 +813,58 @@ describe('WarCostSummary — direct component mount proof', () => {
         expect(html).toContain('170 weeks');
     });
 
-    it('renders duration comparison with historical', () => {
+    it('compares the end of the war by date, with no duration delta or casualty index', () => {
         const html = renderComponentMP(WarCostSummary, {
             costLedger: makeCostLedgerMP(),
             comparison: makeComparisonMP(),
         });
-        expect(html).toContain('shorter');
+        expect(html).toContain('This campaign ended in the week of 10 Jul 1995. Historically, the country-wide ceasefire came into force on 12 October 1995.');
+        expect(html).not.toContain('shorter');
+        expect(html).not.toContain('vs Historical Duration');
+        expect(html).not.toContain('Military Casualties vs History');
     });
 
-    it('renders territory divergence section', () => {
+    it('states territory as a comparison line, with no "Territory vs Dayton" section', () => {
         const html = renderComponentMP(WarCostSummary, {
             costLedger: makeCostLedgerMP(),
             comparison: makeComparisonMP(),
         });
-        expect(html).toContain('Territory vs Dayton');
+        expect(html).toContain('data-awwv-comparison-line="territory"');
+        expect(html).toContain('Republic of Bosnia and Herzegovina and Herzeg-Bosnia together 42.0%, Republika Srpska 58.0% at this campaign&#x27;s end (front line, share of the country&#x27;s area).');
+        expect(html).not.toContain('Territory vs Dayton');
     });
 
-    it('renders divergence notes in order', () => {
+    it('renders the rebuilt comparison lines in order, never the raw producer notes', () => {
         const html = renderComponentMP(WarCostSummary, {
             costLedger: makeCostLedgerMP(),
             comparison: makeComparisonMP(),
         });
-        const notes = makeComparisonMP().divergence_notes;
-        for (const note of notes) {
-            expect(html).toContain(note);
+        for (const note of makeComparisonMP().divergence_notes) {
+            expect(html).not.toContain(note);
         }
-        const idx1 = html.indexOf(notes[0]);
-        const idx3 = html.indexOf(notes[2]);
-        expect(idx1).toBeLessThan(idx3);
+        const order = ['end_of_war', 'military_dead', 'civilian_dead', 'territory', 'srebrenica']
+            .map(id => html.indexOf(`data-awwv-comparison-line="${id}"`));
+        expect(order.every(index => index >= 0)).toBe(true);
+        expect([...order].sort((a, b) => a - b)).toEqual(order);
     });
 
-    it('renders Srebrenica divergence note', () => {
+    it('renders the Srebrenica record line naming the perpetrators and victims', () => {
         const html = renderComponentMP(WarCostSummary, {
             costLedger: makeCostLedgerMP(),
             comparison: makeComparisonMP(),
         });
-        expect(html).toContain('Srebrenica genocide occurred');
+        expect(html).toContain('The Srebrenica genocide, committed by Bosnian Serb forces against Bosniaks, is recorded in this campaign.');
+        expect(html).not.toContain('Srebrenica genocide occurred');
     });
 
-    it('renders Historical Divergence section heading', () => {
+    it('renders the "Against the historical war" heading and its sources, not "Historical Divergence"', () => {
         const html = renderComponentMP(WarCostSummary, {
             costLedger: makeCostLedgerMP(),
             comparison: makeComparisonMP(),
         });
-        expect(html).toContain('Historical Divergence');
+        expect(html).toContain('Against the historical war');
+        expect(html).toContain('Historical figures: Research and Documentation Center, Sarajevo (June 2007 release)');
+        expect(html).not.toContain('Historical Divergence');
     });
 
     it('renders operation opportunity reckoning when present', () => {
@@ -852,7 +885,11 @@ describe('WarCostSummary — direct component mount proof', () => {
         });
         expect(html).toContain('Prosecutorial Findings');
         expect(html).toContain('Srebrenica genocide');
-        expect(html).toContain('ICTY Krstic IT-98-33-T');
+        // An older ledger's Srebrenica finding shows the panel-signed text and public sources.
+        expect(html).toContain('The ICTY held these killings to be genocide, as did the International Court of Justice.');
+        expect(html).toContain('Prosecutor v. Radislav Krstić, IT-98-33-T (2001)');
+        expect(html).toContain('ICJ, Bosnia and Herzegovina v. Serbia and Montenegro (2007)');
+        expect(html).not.toContain('The ledger records the Srebrenica genocide');
         expect(html).not.toMatch(/less costly|more costly|of historical levels/i);
     });
 });
