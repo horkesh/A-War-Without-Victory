@@ -25,3 +25,7 @@ Fixed in: the Dayton acceptance event (`rs_dayton_acceptance_1995`) narrative an
 ## Headless artifacts
 
 Two 188-week headless runs (clean tree at the #662 tip versus this branch): final state hash `e44c77f5b41052f8` in both; 14 of 15 artifacts byte-identical; `run_meta.json` differs only in the input digests of the edited event/essay files, `git_commit` and `git_dirty`. Raw numbers only.
+
+## Follow-up after the CI hygiene check and a second historian pass
+
+The visible source note no longer says "The agreement is known as the Patriarch Paper": neither the judgment nor Balkan Battlegrounds uses that name (it is attested in Holbrooke, which could not be retrieved), so the note that cites them leaves it out and the event narrative keeps it as the game label. The note now says the joint delegation negotiates "for the RS and the FRY" (para. 424), and the BCS date reads "24. marta 2016.". The new test also strips comments before its negative assertions, as `negative_source_assertion_hygiene` requires.
