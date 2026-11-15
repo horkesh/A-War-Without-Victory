@@ -38,8 +38,9 @@ import war1993 from '../../../../data/scenarios/events/war_1993.json';
 import war1994 from '../../../../data/scenarios/events/war_1994.json';
 import war1995 from '../../../../data/scenarios/events/war_1995.json';
 // Codex P2 (#95): consequences.json is part of the runtime EVENT_FILES catalog and its
-// rows are recorded in event_decision_log by id (e.g. csq_patron_recovery_offer carries a
-// historical_default_response_id). Without it, those decisions were skipped → undercount.
+// rows are recorded in event_decision_log by id. Its design-counterfactual rows (for example
+// csq_patron_recovery_offer, which carries an authored default) are skipped by source_tier below:
+// that default is a design default, not a historical answer.
 import consequences from '../../../../data/scenarios/events/consequences.json';
 
 /** One resolved decision that differs from the historical default. */
@@ -91,9 +92,17 @@ export interface DistanceFromHistoryView {
 interface RawEventRowForHistory {
     id?: unknown;
     title?: unknown;
+    source_tier?: unknown;
     historical_default_response_id?: unknown;
     response_options?: Array<{ id?: unknown; label?: unknown }>;
 }
+
+/**
+ * A design-counterfactual event is a game construct, not a documented episode, so its authored
+ * default (which bots read) is not "what history did". It is left out of the measure: there is
+ * nothing historical to diverge from. Display only; the marker and the engine are untouched.
+ */
+const DESIGN_COUNTERFACTUAL_TIER = 'design_counterfactual';
 
 /** Per-event historical-default + title metadata resolved from the catalog. */
 export interface EventHistoryMeta {
@@ -111,13 +120,15 @@ const RECORDED_DECISION_TITLE = 'Recorded decision';
  * events that carry a `historical_default_response_id`. Pure, computed once at
  * module load from the build-time-bundled event JSON. Defensive against
  * malformed rows. Events without a historical default are intentionally absent
- * (a decision for such an event has nothing to diverge from and is skipped).
+ * (a decision for such an event has nothing to diverge from and is skipped), and so are
+ * design-counterfactual events: their authored default is a design default, not history.
  */
 export function __TEST_buildEventHistoryMapFromRows(rows: readonly RawEventRowForHistory[]): ReadonlyMap<string, EventHistoryMeta> {
     const out = new Map<string, EventHistoryMeta>();
     for (const rawRow of rows) {
         const eventId = typeof rawRow?.id === 'string' ? rawRow.id : undefined;
         if (!eventId) continue;
+        if (rawRow.source_tier === DESIGN_COUNTERFACTUAL_TIER) continue;
         const historicalDefault =
             typeof rawRow.historical_default_response_id === 'string'
                 ? rawRow.historical_default_response_id.trim()
