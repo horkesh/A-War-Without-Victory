@@ -519,9 +519,14 @@ export function relieveArmyCommander(
  *
  * Faction-symmetric: iterates a sorted faction list; no per-faction branches.
  *
- * Idempotent: when stubbornness is already set on an officer (e.g. from a
- * pre-A4 scenario JSON or a manual override), the roster value DOES NOT
- * overwrite. This preserves per-scenario authorial intent.
+ * The roster owns `stubbornness` for every officer it lists (RF-ROSTER,
+ * 2026-11-15): each call writes the roster value plus any recorded overstay
+ * escalation (`kept_past_schedule_since_turn` before this turn, capped at
+ * `stubbornness_cap`). Save migration 10 defaults every officer to 3, and the
+ * old "only when undefined" rule therefore never let a roster value through;
+ * an older save is corrected on its first call. No scenario authors
+ * `stubbornness`; the roster is its only source. Officers the roster does not
+ * list keep whatever they carry. Idempotent: a second call writes the same values.
  */
 export function applyRosterToOfficers(
     state: GameState,
@@ -529,6 +534,11 @@ export function applyRosterToOfficers(
 ): void {
     const officerData = state.military.named_officer_data;
     if (!officerData) return;
+    const turn = state.meta?.turn ?? 0;
+    const officerStates = state.military.named_officers ?? {};
+    const keepPast = roster.variation_rules?.keep_past_schedule;
+    const escalation = keepPast?.stubbornness_escalation ?? A4_DEFAULT_STUBBORNNESS_ESCALATION;
+    const cap = keepPast?.stubbornness_cap ?? A4_DEFAULT_STUBBORNNESS_CAP;
 
     // Build an index by officer_id for O(1) lookup. Sorted iteration on the
     // schedule list ensures determinism regardless of caller insertion order.
@@ -543,10 +553,13 @@ export function applyRosterToOfficers(
         for (const entry of sched) {
             const officer = officerIndex.get(entry.officer_id);
             if (!officer) continue;
-            // Idempotent: only set when undefined
-            if (typeof officer.stubbornness !== 'number') {
-                officer.stubbornness = entry.stubbornness;
-            }
+            // Roster value, plus the one-shot escalation once an overstay is on
+            // record from an earlier turn (applyEmergentVariationRules adds it on
+            // the first overstay turn itself).
+            const overstaySince = (officerStates[entry.officer_id] as { kept_past_schedule_since_turn?: number } | undefined)
+                ?.kept_past_schedule_since_turn;
+            const escalated = typeof overstaySince === 'number' && overstaySince < turn && escalation !== 0;
+            officer.stubbornness = escalated ? Math.min(cap, entry.stubbornness + escalation) : entry.stubbornness;
         }
     }
 

@@ -182,13 +182,34 @@ describe('A4 — applyRosterToOfficers', () => {
         expect(byId.hvo_roso.stubbornness).toBe(2);
     });
 
-    it('T2b — applyRosterToOfficers is idempotent (does not overwrite a populated stubbornness)', () => {
+    it('T2b — the roster owns stubbornness: it replaces the migration-10 default and a second call changes nothing (RF-ROSTER)', () => {
         const roster = loadArmyCoRoster();
         const state = makeBaseState();
-        // Pre-set stubbornness=1 on Mladić; A4 should NOT overwrite to 5.
-        state.military.named_officer_data = [makeOfficer({ id: 'vrs_mladic', faction: 'RS', stubbornness: 1 })];
+        // Save migration 10 writes 3 on every officer; the old "only when undefined"
+        // rule left Mladić at 3. The roster value (5) must win.
+        state.military.named_officer_data = [makeOfficer({ id: 'vrs_mladic', faction: 'RS', stubbornness: 3 })];
         applyRosterToOfficers(state, roster!);
-        expect(state.military.named_officer_data![0].stubbornness).toBe(1);
+        expect(state.military.named_officer_data![0].stubbornness).toBe(5);
+        const once = JSON.stringify(state);
+        applyRosterToOfficers(state, roster!);
+        expect(JSON.stringify(state)).toBe(once);
+    });
+
+    it('T2c — an older save (every chief at 3) migrates to the roster values, keeping a recorded overstay escalation (RF-ROSTER)', () => {
+        const roster = loadArmyCoRoster();
+        const state = makeBaseState(70);
+        const ids: Array<[string, FactionId]> = [
+            ['vrs_mladic', 'RS'], ['arbih_halilovic', 'RBiH'], ['arbih_delic', 'RBiH'],
+            ['hvo_petkovic', 'HRHB'], ['hvo_praljak', 'HRHB'], ['hvo_roso', 'HRHB'],
+        ];
+        state.military.named_officer_data = ids.map(([id, faction]) => makeOfficer({ id, faction, stubbornness: 3 }));
+        state.military.named_officers = Object.fromEntries(ids.map(([id]) => [id, makeOfficerState({ officer_id: id })]));
+        // Petković was kept past schedule from turn 60 (escalation already applied once).
+        (state.military.named_officers!.hvo_petkovic as NamedOfficerState & { kept_past_schedule_since_turn?: number }).kept_past_schedule_since_turn = 60;
+        const loaded = JSON.parse(JSON.stringify(state)) as GameState; // save round-trip
+        applyRosterToOfficers(loaded, roster!);
+        const byId = Object.fromEntries(loaded.military.named_officer_data!.map((o) => [o.id, o.stubbornness]));
+        expect(byId).toEqual({ vrs_mladic: 5, arbih_halilovic: 4, arbih_delic: 2, hvo_petkovic: 3, hvo_praljak: 3, hvo_roso: 2 });
     });
 });
 

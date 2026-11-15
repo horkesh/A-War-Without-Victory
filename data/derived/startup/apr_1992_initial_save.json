@@ -1126,6 +1126,11 @@
   "military": {
     "alliance_locks": [],
     "army_co_decision_traces": {},
+    "army_co_political_tolerance": {
+      "HRHB": 2,
+      "RBiH": 3,
+      "RS": 4
+    },
     "army_corps_directives_by_faction": {},
     "army_hq_last_op_turn": {},
     "army_hq_op_count_by_year": {},
@@ -31212,7 +31217,7 @@
         "political_reliability": 2,
         "pool_tier": "starter",
         "rank": "army_commander",
-        "stubbornness": 3,
+        "stubbornness": 5,
         "war_crimes_record": {
           "charges": "Genocide, crimes against humanity, violations of laws of war",
           "court": "ICTY",
@@ -31977,7 +31982,7 @@
         "political_reliability": 2,
         "pool_tier": "starter",
         "rank": "army_commander",
-        "stubbornness": 3,
+        "stubbornness": 4,
         "war_crimes_record": {
           "charges": "Violations of laws of war (command responsibility for Grabovica and Uzdol massacres)",
           "court": "ICTY",
@@ -32002,7 +32007,7 @@
         "political_reliability": 5,
         "pool_tier": "starter",
         "rank": "army_commander",
-        "stubbornness": 3,
+        "stubbornness": 2,
         "war_crimes_record": {
           "charges": "Violations of laws of war (cruel treatment by mujahedin fighters)",
           "court": "ICTY",
@@ -32781,7 +32786,7 @@
         "political_reliability": 4,
         "pool_tier": "starter",
         "rank": "army_commander",
-        "stubbornness": 3,
+        "stubbornness": 2,
         "war_crimes_record": {
           "charges": "Crimes against humanity (persecution, murder, deportation), violations of laws of war",
           "court": "ICTY",
@@ -32835,7 +32840,7 @@
         "political_reliability": 4,
         "pool_tier": "starter",
         "rank": "army_commander",
-        "stubbornness": 3
+        "stubbornness": 2
       },
       {
         "aggressiveness": 3,
@@ -32855,7 +32860,7 @@
         "political_reliability": 4,
         "pool_tier": "starter",
         "rank": "army_commander",
-        "stubbornness": 3,
+        "stubbornness": 2,
         "war_crimes_record": {
           "charges": "Crimes against humanity (persecution, murder, deportation), violations of laws of war",
           "court": "ICTY",
