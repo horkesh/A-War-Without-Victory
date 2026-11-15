@@ -20,6 +20,13 @@ describe('war-phase step ordering', () => {
         // Sectors must be partitioned before corps directives are generated
         assertBefore('partition-corps-front-sectors', 'generate-bot-corps-orders');
 
+        // SE9: sector intel is re-keyed to this turn's sector ids right after the partition,
+        // before any reader (the corps commanders, attack resolution) and before the end-of-turn derive.
+        assertBefore('partition-corps-front-sectors', 'rekey-sector-intel');
+        assertBefore('rekey-sector-intel', 'generate-bot-corps-orders');
+        assertBefore('rekey-sector-intel', 'resolve-attack-orders');
+        assertBefore('rekey-sector-intel', 'derive-sector-intel');
+
         // Corps directives must exist before brigade AI evaluates them
         assertBefore('generate-bot-corps-orders', 'generate-bot-brigade-orders');
 
@@ -300,6 +307,8 @@ describe('war-phase step ordering', () => {
         //        transfers / corps retirement after activate-corps; inert without events.
         // +1 from enforce-oct1995-ceasefire (2026-11-14, council fix 3): directly after
         //        evaluate-events; inert unless the October 1995 ceasefire was accepted.
-        expect(stepNames.length).toBe(197);
+        // +1 from rekey-sector-intel (2026-11-15, SE9): directly after the partition; moves last
+        //        turn's sector intel to this turn's sector ids by stable key.
+        expect(stepNames.length).toBe(198);
     });
 });
