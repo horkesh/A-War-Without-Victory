@@ -10,9 +10,14 @@ Five findings from the ending truth pass render check (PR #635), fixed together.
   side authorised deployments later. The ghost's gate now also requires a deployment count of zero for
   the player faction (`paramilitaryDeploymentsZeroOperand` in `dynamic_section_builder.ts`; a missing
   count is none). Both surfaces now read `paramilitary_deployment_count`; the state decided it: the side
-  that authorised 4 deployments did not refuse continuously. The change only narrows when the card
-  appears: no new claim, no §6 surface, no text change to the entry. Test in
-  `tests/codex_ghost_entries_wave_2.test.ts`.
+  that authorised 4 deployments did not refuse continuously. The change only narrows what the card claims
+  and when it appears: no new claim, no new surface. A three-seat panel (historian, narrative designer,
+  canon compliance; implementer excluded) found the entry's prose also asserted things nothing checks (a
+  deny order, a zero war-crimes counter, requests asked many times, a faction-blind clean-record flag), so
+  paragraphs 2 and 4 now say only that no paramilitary deployment was authorised by this command, the
+  titles no longer assert refusals, the unverified "on appeal" clause is gone, and the BCS sidecar, which
+  was boilerplate, is a full translation. Record: `SENSITIVE_HISTORY_DESIGN_GATE.md` §6 (Ending polish,
+  2026-11-15). Test in `tests/codex_ghost_entries_wave_2.test.ts`.
 - **Source note for `us_halts_federation_advance_1995`.** Its `source_note` and `historical_source` carry
   authoring provenance, which the player-copy filter hides, so the historical default showed no source.
   The event now carries `localizations.en.source_note` and `localizations.bcs.source_note` (Balkan
@@ -37,4 +42,7 @@ Five findings from the ending truth pass render check (PR #635), fixed together.
 - **Not done.** Four events have a historical default with no visible source line:
   `csq_patron_recovery_offer`, `gornji_vakuf_clashes_1993`, `hrhb_1992_graz_cooperation_collapse` and
   `rbih_late_war_offensive_1995` (their citations are developer text). Listed in the guard test; the event
-  lane writes their player-facing source notes.
+  lane writes their player-facing source notes. The other ghost-entry BCS sidecars in
+  `data/codex/ghost_entries_bcs/` are the same boilerplate this PR replaced for one entry (Narrative
+  Designer finding, not fixed here); `cleansing_refused` also does not read the deployment count and is
+  withheld from players, so it needs that gate before it is ever unlocked (Historian finding).
