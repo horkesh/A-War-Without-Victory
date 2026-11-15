@@ -80,6 +80,7 @@ import { getPrimaryOperation } from './corps_operation_helpers.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import { removeFromActiveOperation } from './brigade_dissolution.js';
 import { invalidateBrigadeJourney } from './brigade_journey_lifecycle.js';
+import { isFriendlyFaction } from '../early_war/alliance_update.js';
 import { ENCLAVE_DEFINITIONS, osidBelongsToEnclave } from './enclave_resilience.js';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -1212,11 +1213,24 @@ export function recallEliteLoan(
     ls.last_recall_turn = turn;
     ls.current_episode_id = null;
     invalidateBrigadeJourney(state, brigadeId);
-    // Explicit reserve contract: when loan ends, elite returns to base (not home).
+    // Explicit reserve contract: when loan ends, elite returns to base (not home), but only to a
+    // base its side still holds. A base that has fallen is not a place to return to: moving there
+    // would stand the brigade inside enemy territory, which the post-turn barrier rejects
+    // (formation.location_not_friendly; a live RBiH game froze at turn 73 when RBiH held Vitez and
+    // the Vitezovi were recalled to it). The brigade then stays where it stands, which is held
+    // ground: displace-enemy-territory has already run this turn, and a desktop recall happens
+    // between turns, after the barrier passed. `base_osid` is left as authored, so the elite goes
+    // home once the base is retaken; each recall re-checks.
     const returnBase = f.base_osid ?? f.home_osid;
-    if (returnBase) {
+    if (returnBase && isHeldByFriendlyFaction(state, returnBase, f.faction)) {
         f.location_osid = returnBase;
     }
+}
+
+/** The barrier's own test (assert_formation_territory.ts): controlled, and by a friendly faction. */
+function isHeldByFriendlyFaction(state: GameState, osid: string, faction: FactionId): boolean {
+    const controller = state.political?.political_controllers?.[osid] ?? null;
+    return controller !== null && isFriendlyFaction(controller, faction, state);
 }
 
 /**

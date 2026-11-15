@@ -1,6 +1,8 @@
 /**
- * Bot AI for corps-level decisions: stance selection, named operations,
- * operational group activation, and corridor breach detection.
+ * Bot AI for corps-level decisions: stance selection, named operations and
+ * operational group activation. (The corridor-breach pass was retired 2026-11-15,
+ * RF-corridor-breach: corridor fights are authored operations, and the commander
+ * loop plans opportunities.)
  *
  * Sits above bot_brigade_ai_osid.ts in the decision hierarchy.
  * Corps stance flows down to modulate brigade posture decisions.
@@ -10,7 +12,6 @@
  *   - bot_corps_helpers.ts    (shared utilities)
  *   - bot_corps_stance.ts     (stance selection, army standing orders)
  *   - bot_corps_operations.ts (named ops, OG activation, emergency defense)
- *   - bot_corps_corridor.ts   (corridor breach detection)
  *   - bot_corps_directives.ts (directive generation)
  *
  * Deterministic: sorted iteration via strictCompare, no Math.random().
@@ -37,7 +38,6 @@ import { clampHeldCorpsStances } from './stance_matter_holds.js';
 import { clampHeldOgStances } from './stance_matters.js';
 import { evaluateOperationProgress } from './sector_offensive.js';
 import { generateOGActivationOrders, generateEmergencyDefensiveOperations } from './bot_corps_operations.js';
-import { attemptCorridorBreach } from './bot_corps_corridor.js';
 import { generateArmyHQOverrides } from './army_hq_overrides.js';
 import {
     buildCorpsSubordinatesByCorps,
@@ -88,13 +88,6 @@ export {
     generateOGActivationOrders,
     generateEmergencyDefensiveOperations,
 } from './bot_corps_operations.js';
-
-// From bot_corps_corridor
-export {
-    type CorridorTarget,
-    detectCorridorBreachOpportunities,
-    attemptCorridorBreach,
-} from './bot_corps_corridor.js';
 
 // From bot_corps_directives
 export {
@@ -362,7 +355,7 @@ export function reassignCorpsForBilateralWar(state: GameState, faction: FactionI
  * 2. Set corps stances
  * 3. Launch new named operations
  * 3b. Emergency defensive operations (high-threat corps without active ops)
- * 4. Attempt corridor breach if opportunity exists
+ * 4. (retired: corridor breach, RF-corridor-breach 2026-11-15)
  * 5. Generate OG activation orders
  * 6. Generate corps directives for brigade AI
  */
@@ -416,9 +409,13 @@ export function generateAllCorpsOrders(
     // 3b. Emergency defensive operations for high-threat defensive corps
     generateEmergencyDefensiveOperations(state, faction, effectiveOsidEdges, sidToMun, preComputedAdjacency);
 
-    // 4. Attempt corridor breach
-    attemptCorridorBreach(state, faction, edges, sidToMun);
-    // Clamp point 2 of 3: before evaluateSectorStances reads cmd.stance for the OG ceiling.
+    // 4. (Retired 2026-11-15, RF-corridor-breach.) The corridor-breach pass read OSID-keyed
+    // control through an S-id sidToMun, so it never found a target; fixed, it would have built
+    // a hollow operation with no objectives, taken a corps' four strongest brigades and forced
+    // the corps offensive, including HRHB Herzegovina corps against ALLIED ARBiH Mostar.
+    // Corridor fights are authored operations; the commander loop plans opportunities.
+    // Clamp point 2 of 3: reassignCorpsForBilateralWar above may have rewritten a held corps'
+    // stance; re-clamp before the OG ceiling reads cmd.stance.
     clampHeldCorpsStances(state, faction);
 
     // 5. OG activation

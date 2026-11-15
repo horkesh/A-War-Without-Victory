@@ -37,6 +37,7 @@ import type { OperationalToCanonicalReverseMap } from '../src/data/operational_d
 import type { TerrainScalars, TerrainScalarsData } from '../src/map/terrain_scalars.js';
 import type { Osid } from '../src/sim/combat/osid_adjacency.js';
 import { warPhases } from '../src/sim/turn_phases/war_phases.js';
+import { assertFormationsInFriendlyTerritory } from '../src/sim/combat/assert_formation_territory.js';
 
 // ── Fixtures ──────────────────────────────────────────────────────────────────
 
@@ -1075,6 +1076,8 @@ describe('recallEliteLoan', () => {
             base_osid: 'op:unrelated:hold',
         });
         const state = makeState({ formations: { arbih_guards: brigade, arbih_unrelated: other }, turn: 12 });
+        // The recall returns the brigade only to a base its side holds.
+        state.political.political_controllers = { [base]: 'RBiH', [current]: 'RBiH' } as any;
         const loanOrder: BrigadeMovementOrder = { destination_sids: [base as any], stance: 'column' };
         const unrelatedOrder: BrigadeMovementOrder = { destination_sids: ['op:unrelated:dest' as any], stance: 'combat' };
         state.military.brigade_movement_orders = {
@@ -1099,6 +1102,42 @@ describe('recallEliteLoan', () => {
         expect(state.military.brigade_movement_state?.arbih_unrelated).toBeDefined();
         expect(state.military.brigade_movement_orders?.arbih_guards).toEqual(loanOrder);
         expect(state.military.brigade_movement_orders?.arbih_unrelated).toEqual(unrelatedOrder);
+    });
+
+    // t73 live-game freeze (2026-11-15): the Vitezovi were recalled to Vitez after RBiH took it, and
+    // the post-turn barrier rejected an HRHB brigade standing in RBiH territory.
+    it('never returns an elite to a base its side no longer holds; it stays on held ground', () => {
+        const base = 'op:vitez:vitez_2';
+        const current = 'op:travnik:puticevo_2';
+        const brigade = makeElite('hrhb_vitezovi', 'HRHB', current, { base_osid: base, home_osid: base });
+        brigade.elite_loan_state = { ...createEliteLoanState(), on_loan: true, loaned_to_corps: 'hvo_central_bosnia' as any };
+        const state = makeState({ formations: { hrhb_vitezovi: brigade }, turn: 73 });
+        state.political.political_controllers = { [base]: 'RBiH', [current]: 'HRHB' } as any;
+        (state.political as any).war_alliance_rbih_hrhb = -0.5; // 1993: the Croat-Bosniak war
+
+        recallEliteLoan(state, 'hrhb_vitezovi', 'need_expired', 73);
+
+        expect(brigade.location_osid).toBe(current);
+        expect(brigade.base_osid).toBe(base);
+        expect(brigade.elite_loan_state?.on_loan).toBe(false);
+        expect(assertFormationsInFriendlyTerritory(state)).toEqual([]);
+    });
+
+    it('returns to the base again once its side holds it, and treats an uncontrolled base as not held', () => {
+        const base = 'op:vitez:vitez_2';
+        const current = 'op:travnik:puticevo_2';
+        const brigade = makeElite('hrhb_vitezovi', 'HRHB', current, { base_osid: base, home_osid: base });
+        brigade.elite_loan_state = { ...createEliteLoanState(), on_loan: true, loaned_to_corps: 'hvo_central_bosnia' as any };
+        const state = makeState({ formations: { hrhb_vitezovi: brigade }, turn: 80 });
+        state.political.political_controllers = { [current]: 'HRHB' } as any;
+        (state.political as any).war_alliance_rbih_hrhb = -0.5;
+        recallEliteLoan(state, 'hrhb_vitezovi', 'need_expired', 80);
+        expect(brigade.location_osid).toBe(current);
+
+        brigade.elite_loan_state = { ...createEliteLoanState(), on_loan: true, loaned_to_corps: 'hvo_central_bosnia' as any };
+        state.political.political_controllers = { [base]: 'HRHB', [current]: 'HRHB' } as any;
+        recallEliteLoan(state, 'hrhb_vitezovi', 'need_expired', 81);
+        expect(brigade.location_osid).toBe(base);
     });
 
     it('invalidates an active loan journey even when recall returns to the current cell', () => {

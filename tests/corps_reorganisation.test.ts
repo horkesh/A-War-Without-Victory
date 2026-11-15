@@ -297,6 +297,8 @@ describe('corps_transfer of a brigade out on an elite loan', () => {
         state.military.elite_brigade_tracker = {
             b705: { episodes: [{ loan_start_turn: 90, personnel_start: 1500, casualties_taken: 0, battles_fought: 2, osids_captured: 1 }], total_casualties_taken: 0, total_battles: 0, total_osids_captured: 0 },
         } as any;
+        // The recall returns the brigade only to a base its side holds.
+        state.political = { ...(state.political ?? {}), political_controllers: { 'op:bugojno:base': 'RBiH', 'op:tuzla:front': 'RBiH' } } as any;
 
         const report = processCorpsReorganisationEvents(state, [TRANSFER])!;
         const f = state.military.formations.b705;
