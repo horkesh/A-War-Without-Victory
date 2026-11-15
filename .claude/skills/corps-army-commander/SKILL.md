@@ -71,7 +71,7 @@ Every turn, every corps CO asks:
 
 ## Consults
 
-- **War-or-Game** for realism: "Would a real VRS/ARBiH/HVO commander do this?"
+- **Scenario Creator / Runner / Tester** (with the **Historian** for historical fact) for realism: "Would a real VRS/ARBiH/HVO commander do this?"
 - **Operations Expert** for ops interaction: "How does this affect pre-planned ops? What about mid-operation zone transitions?"
 - **Historian** for historical precedent: "Did 1st Corps actually operate as two independent commands?"
 - **SpatialContext** (code, not expert) for all geographic computation

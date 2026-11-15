@@ -51,11 +51,11 @@ Route each anomaly to its owning expert using this table:
 | `combat_ineffective_concentration` | formation-expert | Reinforcement/mobilization |
 | `morale_collapse_cluster` | formation-expert | Morale/cohesion systems |
 | `zero_personnel_active` | formation-expert | Dissolution/lifecycle |
-| `battle_tempo_floor` | war-or-game | Overall sim health |
-| `outcome_distribution_skew` | war-or-game | Combat balance |
-| `casualty_ratio_check` | war-or-game | Combat model |
-| `osid_seesawing` | war-or-game | Front stability |
-| `corps_out_of_area` | war-or-game | Realism |
+| `battle_tempo_floor` | scenario-creator-runner-tester | Overall sim health |
+| `outcome_distribution_skew` | scenario-creator-runner-tester | Combat balance |
+| `casualty_ratio_check` | scenario-creator-runner-tester | Combat model |
+| `osid_seesawing` | scenario-creator-runner-tester | Front stability |
+| `corps_out_of_area` | scenario-creator-runner-tester (historian for the historical fact) | Realism |
 
 ### Phase 3: Dispatch Expert Investigations (PARALLEL)
 
@@ -108,8 +108,8 @@ After all expert investigations return, dispatch a **review panel** of 3 agents 
    - Pipeline ordering (will the fix invalidate derived data?)
    - Scope creep (is the fix minimal and surgical?)
 
-2. **War-or-Game** — reviews findings for:
-   - Historical plausibility (is the "expected behavior" actually realistic?)
+2. **Scenario Creator / Runner / Tester**, with **Historian** for historical fact — reviews findings for:
+   - Historical plausibility (is the "expected behavior" actually realistic?). A realism finding must cite a source (BB/ICTY) or a measured run figure; the Historian has the final word on historical fact.
    - Combat balance (will fixes shift the war in unrealistic ways?)
    - Known historical patterns that explain the anomaly
 
