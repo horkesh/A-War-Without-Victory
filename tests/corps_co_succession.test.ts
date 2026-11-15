@@ -330,7 +330,7 @@ describe('panel conditions (populated schedule)', () => {
         const report = processOfficerSuccession(s, new Set(), roster({ c1: { schedule: [tenure('x', 0, 90, 'killed')] } }));
         expect(s.military.named_officers!.x).toMatchObject({ status: 'killed', assigned_operation: undefined });
         expect(report.casualties).toContain('x');
-        expect(report.departures).not.toContain('x');
+        expect(report.departures.includes('x')).toBe(false);
     });
 
     it('an officer relieved in history but alive at the end of the war leaves the exposure clock', () => {
