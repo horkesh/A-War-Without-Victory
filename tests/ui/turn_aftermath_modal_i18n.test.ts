@@ -1,10 +1,13 @@
 // @vitest-environment jsdom
 
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { createElement } from 'react';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
-import { TurnAftermathModal } from '../../src/ui/map/components/TurnAftermathModal.js';
+import { preloadTurnAftermathRecordFace, TurnAftermathModal } from '../../src/ui/map/components/TurnAftermathModal.js';
+
+// The full record is its own chunk; load it once so record renders stay synchronous.
+beforeAll(async () => { await preloadTurnAftermathRecordFace(); });
 import { setLocale } from '../../src/ui/map/i18n/index.js';
 import type { TurnAftermathView } from '../../src/ui/map/data/turnAftermath.js';
 import type { ForcedOpReceipt } from '../../src/ui/map/data/forcedOpReceipts.js';
@@ -84,7 +87,7 @@ describe('TurnAftermathModal localization', () => {
         view.cost.friendlyMilitaryCasualties = 1_234_567;
         setLocale('bcs');
         render(createElement(TurnAftermathModal, {
-            isOpen: true, view, onClose: vi.fn(), onOpenInbox: vi.fn(),
+            isOpen: true, initialMode: 'record', view, onClose: vi.fn(), onOpenInbox: vi.fn(),
             onOpenSummary: vi.fn(), onOpenRecords: vi.fn(), onOpenChronicle: vi.fn(), onOpenCodex: vi.fn(),
         }));
         expect(screen.queryByText('NaN')).toBeNull();
@@ -105,7 +108,7 @@ describe('TurnAftermathModal localization', () => {
         view.cost = { ...view.cost, friendlyMilitaryCasualties: 1_234 };
 
         render(createElement(TurnAftermathModal, {
-            isOpen: true,
+            isOpen: true, initialMode: 'record',
             view,
             onClose: vi.fn(),
             onOpenInbox: vi.fn(),
@@ -123,7 +126,7 @@ describe('TurnAftermathModal localization', () => {
         const onClose = vi.fn();
 
         render(createElement(TurnAftermathModal, {
-            isOpen: true,
+            isOpen: true, initialMode: 'record',
             view: makeView(),
             onClose,
             onOpenInbox: vi.fn(),
@@ -166,7 +169,7 @@ describe('TurnAftermathModal localization', () => {
         };
 
         const { container } = render(createElement(TurnAftermathModal, {
-            isOpen: true,
+            isOpen: true, initialMode: 'record',
             view,
             onClose: vi.fn(),
             onOpenInbox: vi.fn(),
@@ -194,7 +197,7 @@ describe('TurnAftermathModal localization', () => {
         };
 
         render(createElement(TurnAftermathModal, {
-            isOpen: true,
+            isOpen: true, initialMode: 'record',
             view,
             onClose: vi.fn(),
             onOpenInbox: vi.fn(),
@@ -226,7 +229,7 @@ describe('TurnAftermathModal localization', () => {
         const onReviewAction = vi.fn();
 
         render(createElement(TurnAftermathModal, {
-            isOpen: true,
+            isOpen: true, initialMode: 'record',
             view,
             onReviewAction,
             onClose: vi.fn(),
@@ -271,7 +274,7 @@ describe('TurnAftermathModal localization', () => {
         const onOpenInbox = vi.fn();
 
         render(createElement(TurnAftermathModal, {
-            isOpen: true,
+            isOpen: true, initialMode: 'record',
             view,
             onReviewAction,
             onClose: vi.fn(),
@@ -318,7 +321,7 @@ describe('TurnAftermathModal localization', () => {
         const onOpenCodex = vi.fn();
 
         render(createElement(TurnAftermathModal, {
-            isOpen: true,
+            isOpen: true, initialMode: 'record',
             view,
             onClose: vi.fn(),
             onOpenInbox: vi.fn(),
@@ -355,7 +358,7 @@ describe('TurnAftermathModal localization', () => {
         };
 
         const { container } = render(createElement(TurnAftermathModal, {
-            isOpen: true,
+            isOpen: true, initialMode: 'record',
             view,
             onClose: vi.fn(),
             onOpenInbox: vi.fn(),
@@ -390,7 +393,7 @@ describe('TurnAftermathModal localization', () => {
         }];
 
         const { container } = render(createElement(TurnAftermathModal, {
-            isOpen: true,
+            isOpen: true, initialMode: 'record',
             view: makeView(),
             forcedOps,
             onClose: vi.fn(),
@@ -447,7 +450,7 @@ describe('TurnAftermathModal localization', () => {
         }];
 
         const { container } = render(createElement(TurnAftermathModal, {
-            isOpen: true,
+            isOpen: true, initialMode: 'record',
             view: makeView(),
             consequences,
             officerResentment,
@@ -474,7 +477,7 @@ describe('TurnAftermathModal localization', () => {
         };
 
         const { container } = render(createElement(TurnAftermathModal, {
-            isOpen: true,
+            isOpen: true, initialMode: 'record',
             view,
             onClose: vi.fn(),
             onOpenInbox: vi.fn(),
@@ -501,7 +504,7 @@ describe('TurnAftermathModal localization', () => {
         }];
 
         const { container } = render(createElement(TurnAftermathModal, {
-            isOpen: true,
+            isOpen: true, initialMode: 'record',
             view,
             onClose: vi.fn(),
             onOpenInbox: vi.fn(),
@@ -529,7 +532,7 @@ describe('TurnAftermathModal localization', () => {
         const onOpenCodex = vi.fn();
 
         render(createElement(TurnAftermathModal, {
-            isOpen: true,
+            isOpen: true, initialMode: 'record',
             view,
             onClose: vi.fn(),
             onOpenInbox: vi.fn(),
@@ -545,7 +548,8 @@ describe('TurnAftermathModal localization', () => {
     });
 
     it('keeps command-desk action summaries fully readable', () => {
-        const source = readFileSync('src/ui/map/components/TurnAftermathModal.tsx', 'utf8');
+        // The command desk lives in the full-record face since command loop L2 (2026-11-14).
+        const source = readFileSync('src/ui/map/components/TurnAftermathRecordFace.tsx', 'utf8');
 
         expect(source).not.toContain('line-clamp-2 text-xs leading-4 opacity-80');
         expect(source).toContain('break-words text-[15px] leading-snug opacity-85');

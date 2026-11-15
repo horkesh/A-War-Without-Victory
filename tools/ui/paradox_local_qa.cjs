@@ -31,6 +31,14 @@ function parseOfficerSuccessionPolicy(argv) {
 
 const officerSuccessionPolicy = parseOfficerSuccessionPolicy(process.argv);
 const maxTurns = Number(process.argv.find((arg) => arg.startsWith('--turns='))?.split('=')[1] ?? '10');
+function parseWindowSize(argv) {
+  const raw = argv.find((arg) => arg.startsWith('--window-size='))?.slice('--window-size='.length);
+  if (raw === undefined) return null;
+  const match = /^(\d{3,5})x(\d{3,5})$/.exec(raw);
+  if (!match) throw new Error(`--window-size must be WIDTHxHEIGHT, got: ${raw}`);
+  return { width: Number(match[1]), height: Number(match[2]) };
+}
+const requestedWindowSize = parseWindowSize(process.argv);
 const runLabel = process.argv.find((arg) => arg.startsWith('--label='))?.split('=')[1] ?? 'run';
 const skipInitialTour = args.has('--skip-initial-tour');
 const skipCheckpointTour = args.has('--no-checkpoint-tour');
@@ -5407,6 +5415,32 @@ async function handleCurrentSurface(page, frame, faction, events, options = {}) 
   const pendingEventId = pendingState?.pendingEventDecisionIds?.[0] ?? null;
   const aftermathClose = frame.locator('[data-testid="turn-aftermath-close"]').first();
   if (await aftermathClose.isVisible().catch(() => false)) {
+    // Command loop L2h (2026-11-14): photograph the week's report BEFORE closing it.
+    // The harness used to click close first, so none of its screenshots showed the
+    // turn report (proposal §2 premise 1). The report opens on the "This week" dispatch.
+    const aftermathMode = await frame.locator('[data-turn-aftermath-mode]').first()
+      .getAttribute('data-turn-aftermath-mode').catch(() => null);
+    // Fit evidence for the dispatch: it must show whole at 1280x720 without scrolling.
+    const dispatchFit = await frame.evaluate(() => {
+      const body = document.querySelector('[data-testid="turn-aftermath-dispatch"]');
+      if (!body) return null;
+      const panel = body.closest('[role="dialog"]') ?? body.parentElement;
+      const rect = panel ? panel.getBoundingClientRect() : body.getBoundingClientRect();
+      return {
+        viewport: { width: window.innerWidth, height: window.innerHeight },
+        quiet: body.getAttribute('data-dispatch-quiet') === 'true',
+        lines: Array.from(body.querySelectorAll('li')).map((li) => li.getAttribute('data-testid')),
+        headline: document.querySelector('[data-testid="turn-aftermath-dispatch-headline"]')?.textContent ?? null,
+        bodyScrolls: body.scrollHeight > body.clientHeight + 1,
+        panelInsideViewport: rect.top >= 0 && rect.left >= 0 && rect.bottom <= window.innerHeight && rect.right <= window.innerWidth,
+        panelRect: { top: Math.round(rect.top), left: Math.round(rect.left), width: Math.round(rect.width), height: Math.round(rect.height) },
+      };
+    }).catch(() => null);
+    await snapshot(page, frame, faction, events, 'turn-aftermath-report', {
+      handledAction: 'view-aftermath-report',
+      aftermathMode,
+      dispatchFit,
+    });
     const clicked = await clickTestId(frame, 'turn-aftermath-close', 'close aftermath report', { afterMs: 1000 });
     await snapshot(page, frame, faction, events, 'handled-turn-aftermath', { handledAction: 'close-aftermath-report', clicked });
     return { handled: clicked, action: 'close-aftermath-report' };
@@ -8094,6 +8128,19 @@ async function runFaction(faction, result) {
   try {
     const page = await waitForGamePage(app);
     attachDiagnostics(page);
+    if (requestedWindowSize) {
+      // --window-size=WxH (command loop L2h, 2026-11-14): set the game window's content
+      // size, so report screenshots can be taken at the design floor (1280x720) or the
+      // wide desk size. The OS may clamp a size larger than the display.
+      await app.evaluate(({ BrowserWindow }, size) => {
+        for (const win of BrowserWindow.getAllWindows()) {
+          if (win.isDestroyed()) continue;
+          win.setContentSize(size.width, size.height);
+        }
+      }, requestedWindowSize);
+      await sleep(500);
+      events.push({ type: 'harness_note', note: `window content size requested ${requestedWindowSize.width}x${requestedWindowSize.height}` });
+    }
     await installTileFetchAbortObserverBeforeStartup(page);
     await installAmbientLifecycleObserverBeforeStartup(page);
     const resolvedGameplay = await resolveGameplayFrameAndStartCdpCollection({

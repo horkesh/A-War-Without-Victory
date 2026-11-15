@@ -984,6 +984,17 @@ export const useGameStore = create<GameStore>((set, get) => ({
               get().openingBriefDismissed &&
               previousOpeningBriefFaction != null &&
               previousOpeningBriefFaction === (state.player_faction ?? null);
+            // Command loop L2 (2026-11-14): after Advance the desktop main process also
+            // pushes the new state, so the same week is loaded a second time about 200 ms
+            // after advanceTurnAndSync opened the week's dispatch. That duplicate push must
+            // not wipe the report it belongs to. Only a byte-identical payload counts: the
+            // state carries no campaign id, and turn, faction and label match across
+            // different saves, so any other load (another save, a campaign replacement)
+            // still clears the report.
+            const sameWeekReload = previousLoadedGameState != null
+              && get().turnAftermath != null
+              && fingerprint != null
+              && fingerprint === get().lastLoadedStateFingerprint;
             set({
               loadedGameState: state,
               replayInspection: null,
@@ -1038,10 +1049,13 @@ export const useGameStore = create<GameStore>((set, get) => ({
               ghostLinePoint: null,
               // Flash highlight from stale ORBAT-map sync
               flashOsid: null,
-              // Turn aftermath belongs to the previous save/turn payload.
-              turnAftermath: null,
-              turnAftermathOpen: false,
-              turnAftermathDigest: null,
+              // Turn aftermath belongs to the previous save/turn payload, unless this
+              // load is the same week arriving again (see sameWeekReload above).
+              ...(sameWeekReload ? {} : {
+                turnAftermath: null,
+                turnAftermathOpen: false,
+                turnAftermathDigest: null,
+              }),
               focusedAftermathTurn: null,
               focusedOperationHistoryId: null,
               // #244: a stale focused-decision id from the previous save makes

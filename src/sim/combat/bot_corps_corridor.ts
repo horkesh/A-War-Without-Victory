@@ -24,6 +24,7 @@ import {
 import { buildAdjacencyFromEdges } from './war_adjacency.js';
 import { assignOperationCommander } from './officer_system.js';
 import { corpsHoldForbidsNewOffensive } from './stance_matter_holds.js';
+import { isCorpsBoundByOct1995Ceasefire } from './oct1995_ceasefire.js';
 import {
     countHealthyBrigades,
     getCorpsSubordinates,
@@ -138,6 +139,8 @@ export function attemptCorridorBreach(
             // A presidential stance hold below offensive forbids a new breach (posture
             // model option 2). Inert without a hold.
             if (corpsHoldForbidsNewOffensive(state, corps.id, turn)) continue;
+            // The October 1995 general ceasefire closes the operation channel (council fix 3).
+            if (isCorpsBoundByOct1995Ceasefire(state, corps.id)) continue;
             if (cmd.corps_exhaustion > MAX_EXHAUSTION_FOR_OPERATION) continue;
 
             const subordinates = getCorpsSubordinates(state, corps.id);

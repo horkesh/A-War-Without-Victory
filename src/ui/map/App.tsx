@@ -2051,6 +2051,13 @@ function App() {
           setTurnAftermathOpen(false);
           handlePresidentialInboxAction(item.action, item.id);
         }}
+        onShowOnMap={(osid) => {
+          // Command loop L2: the same field-inspection handoff as the command palette,
+          // so the tactical map is the active shell before it focuses the place.
+          clearTacticalInspectionOverlays();
+          inspectOnField(useGameStore.getState(), { kind: 'field-settlement', osid });
+          leaveWarroomForGame();
+        }}
       />
       <RootErrorBoundary zone="army hq">
         <ArmyHQModal
@@ -2292,8 +2299,10 @@ function App() {
               setSidePickerOpen(true);
               setSidePickerDismissed(false);
             }}
+            // Status dock: hidden on the Dayton signing and the Verdict, which render under
+            // `gameOver` (command-loop 2C). Only the dock is gated, not the shared blocking flag.
             statusDock={(
-              !presidentialBlockingSurfaceActive ? (
+              !presidentialBlockingSurfaceActive && !loadedGameState?.gameOver ? (
                 <WarroomStatusBar
                   onReviewPriorities={reviewPreAdvancePriorities}
                   onReviewItem={reviewPreAdvanceItem}

@@ -387,3 +387,134 @@ BC19 row detail, verbatim: F1 is closed: #617 reads the OSID front and supply, c
 R8 row sentence before this pass: Live-equivalent player/bot map parity held at 712/711/712/710 on 2026-11-07 (0 cells differ per player faction at 188 turns); main was then 712/709/710/705 and live = headless is re-proved at the freeze.
 
 Further roadmap text trimmed in pass 8, verbatim: R8 first dry run detail: tour, byte-exact save/load at turn 188, strict runtime 0/0/0/0 and Dayton sign-and-Verdict passed. Packaged 24-turn shakedowns and 188-turn diaries for RBiH, RS and HRHB have not run on the frozen source. Sequence paragraph: R8 dry runs before the freeze are allowed; they never count as qualifying. RF-F1b: negotiation momentum still saturates at about week 19, so the Washington and ceasefire gates stay always-true; after SE7E, needs historian and game-designer, moves negotiation weeks.
+
+## Merged list moved 2026-11-15 (steward pass 10)
+
+Merged list before this pass, verbatim: **Merged since 2026-11-12:** RF-AI2 (#619); the PK1 Level-1 fix with its canon amendment, R8 strategic runs at level 2 (#631); EV1 required-event answers (#621); the command-loop proposal (#632), B11 (#633) and Council fix 4 (#634); the Council diary (#629); path portability (#628); the licence (#612) and OSM attribution with the third-party notices (#618); the Velika Kladuša date (#630); the desk status strip (#614). Earlier items (#622, #617, #616, #620, #615, #600, #604 with SE6 held at `archive/claude/stance-effects-se6`) are in the archive.
+
+Licence note: #612 merged its first, proprietary commit before the PolyForm switch was pushed; #641 re-landed the switch (PolyForm Noncommercial 1.0.0, LICENSE.md identical to Mandate's, package.json SPDX id, README, ADR-0008, notices header and generator template).
+
+Wording trimmed from the roadmap header in pass 10, verbatim: SE7E, an empty front sector commits its own rear brigade, calibration-neutral, consistency 1 → 0 (#625); command-loop L3 and L3b, defensive operations need no signature and an unanswered plan proposal releases the plan (#642); the PolyForm Noncommercial licence (#641, re-landing the switch #612 missed). BC19 row: RF-5B (#623, HVO 1993 expulsions, bot-only) is merged and main is unchanged.
+
+## Roadmap sections moved 2026-11-15 (steward pass 12 archive pass)
+
+Settled history moved out of the roadmap to keep it far below its 60,000-byte cap. Text is verbatim; heading levels inside each block are demoted to level 4. The roadmap keeps a pointer or a one-line row for each block.
+
+### Roadmap section 4.2, Repository audit integration (2026-09-07)
+
+#### 4.2 Repository audit integration (2026-09-07)
+
+BC09 and cleanup Tasks 1–8 are GO; script handoff is ready. No new workstream:
+
+| Owner / packet | Slot and overlap |
+|---|---|
+| R8 [deletion cleanup](2026-09-07-bounded-deletion-cleanup-plan.md) | Tasks 1–8 GO; health repair verified. A 13-worktree recheck found no executable RE consumer; final R8 acceptance is open. |
+| R8 [runtime integrity](2026-09-07-r8-runtime-input-ai-integrity-plan.md) | BC09 integrated/reviewed GO; campaigns deferred. BC07 RETAIN disposition verified; BC10 planned. No regeneration. |
+| R9 [build preparation](2026-09-07-r9-build-validation-preparation-plan.md) | P1–3 complete/review GO. |
+
+R4/R5/R7/RE stay closed. Package/lockfile edits are serial.
+Keep live viewers/recovery, main-process composition and existing IPC contracts; no code-generation task.
+BC04 conditions and retired P1 repeats remain unchanged. Existing gates apply; reuse evidence only
+on matching contracts/inputs. No baseline refresh, remote configuration change or publication is implied.
+
+### Roadmap section 6.4, local source anchors and official corroboration
+
+Local source anchors:
+
+- [Early-war territorial progression](../../data/derived/knowledge_base/balkan_battlegrounds/extractions/EARLY_WAR_TERRITORIAL_PROGRESSION_APR_JAN1993.md)
+- [Balkan Battlegrounds Volume II page 453 extraction](../../data/derived/knowledge_base/balkan_battlegrounds/pages/BB2_p0453.json)
+- [Balkan Battlegrounds Volume II page 454 extraction](../../data/derived/knowledge_base/balkan_battlegrounds/pages/BB2_p0454.json)
+
+Official corroboration:
+
+- [IRMCT: Sarajevo](https://www.irmct.org/en/mip/features/sarajevo)
+- [ICTY/IRMCT: Prosecutor v. Sefer Halilović judgment summary](https://r.irmct.org/en/press/judgement-case-prosecutor-v-sefer-halilovic)
+- [ICTY/IRMCT: Krstić appeal judgment summary](https://aomenduchangnvrenshuqian.irmct.org/en/press/appeals-chamber-judgement-case-prosecutor-v-radislav-krstic)
+- [United Nations A/54/549: The fall of Srebrenica](https://documents.un.org/api/symbol/access?l=en&s=A%2F54%2F549&t=pdf)
+
+### Roadmap section 6.5, standards and licensing references
+
+Standards and licensing references:
+
+- [W3C language-tag overview](https://www.w3.org/International/articles/language-tags/Overview.en)
+- [Unicode CLDR Bosnian summary](https://unicode.org/cldr/charts/49/summary/bs.html)
+- [Microsoft pseudolocalization method](https://learn.microsoft.com/en-us/globalization/methodology/pseudolocalization)
+- [W3C WCAG](https://www.w3.org/WAI/standards-guidelines/wcag/)
+- [Creative Commons CC0](https://creativecommons.org/public-domain/)
+- [Creative Commons attribution/TASL guidance](https://creativecommons.org/reusing-cc-licensed-content/)
+- [Freesound licensing FAQ](https://freesound.org/help/faq/)
+
+### Roadmap section 6.6, primary references
+
+Primary references:
+
+- [Electron performance guide](https://www.electronjs.org/docs/latest/tutorial/performance)
+- [Electron security guide](https://www.electronjs.org/docs/latest/tutorial/security)
+- [MapLibre GL JS documentation](https://maplibre.org/maplibre-gl-js/docs)
+- [Microsoft SmartScreen and Artifact Signing](https://learn.microsoft.com/en-us/windows/apps/package-and-deploy/smartscreen-reputation)
+- [Microsoft SignTool](https://learn.microsoft.com/en-us/windows/win32/seccrypto/signtool)
+- [Apple notarization](https://developer.apple.com/documentation/security/notarizing-macos-software-before-distribution)
+- [SteamPipe](https://partner.steamgames.com/doc/sdk/uploading)
+
+### Roadmap section 7, Experiment Outcome Matrix
+
+#### 7. Experiment Outcome Matrix
+
+| Experiment | Adopt when | Retire when | Always preserve |
+|---|---|---|---|
+| Political `intl_only` | Historical direction, faction separation, engine health, determinism, and control/casualty bounds all pass the R6 thresholds | Any hard criterion fails or the effect is materially redundant | Recorded seed/config/baseline and a concise result report |
+| Political `cohesion_only` | Same criteria, evaluated only after the first branch is dispositioned | Same failure rule | Same evidence |
+| Intel ambush | Adds readable uncertainty and historically plausible cost without hidden-truth leakage or destabilizing calibration | Fails comprehension, determinism, or historical/calibration bounds | Focused test/report and clean revert |
+| Fall-1995 E-A6 | E-B1 evidence leaves the exact named residual and E-A6 corrects it without breaking other bounds | E-B1 closes the residual or E-A6 causes collateral drift | E-B1 remains; E-A6 row closes as not needed |
+| Performance optimization | Profiled bottleneck improves materially and byte/state/render truth is unchanged | Noise, regression, stale truth, or complexity exceeds benefit | Characterization and before/after measurements |
+| Sourced cadence initiative | Source, existing lever, deterministic eligibility, optionality, and cadence value all pass | No source-backed lever exists | Explicit positive-hold interval |
+
+No experiment remains “partial” after evaluation.
+
+### Roadmap section 10, post-1.0 and non-blocking backlog rows, full text
+
+| 2026-09-08 | Six address/decoration escalation stages; retain static 1.0 behavior. | [BC06 disposition](2026-07-31-full-campaign-electron-validation-plan.md#bc06-final-design-disposition-and-bc09-authorization--2026-09-08) | **DEFERRED POST-1.0**, owner-delegated scope exception; not full canon compliance. Packaged gate remains. |
+| 2026-08-15 | Collapse D-topology: add an explicitly reviewed neighbour-loss/cascade mechanism only if post-1.0 thesis-depth work requires territorial propagation beyond the retained local selection/shape model. Must reopen ordinary Section 6 review and fresh 188-week re-floor; do not reopen struck breadth tuning. | [RC panel synthesis](../40_reports/20260813_RC_COLLAPSE_PANEL_RECONCILER_SYNTHESIS.md#option-d--address-the-model-three-variants-priced-very-differently) | **RESERVED POST-1.0**; narrow RC lanes 1-3 are complete and this does not gate R7, R8, R9, or 1.0 |
+| 2026-08-15 | Multilingual localization: canonicalize `bs`/`bs-BA`, migrate legacy `bcs`, add deterministic pseudolocalization, complete Bosnian strings, obtain native linguistic/in-product review, and run locale-specific packaged visual proof. Existing translations/compatibility remain; English is the sole required 1.0 language. | [R7 plan Phase 3](2026-07-31-content-history-localization-audio-plan.md#phase-3----deferred-post-10----bosnian-locale-contract-and-localizability) | **DEFERRED POST-1.0 by owner decision**; does not gate R7, R8, R9, or the 1.0 release |
+| 2026-08-05 | Faction-wide current equipment totals visibility (Warroom Faction Overview MILITARY quadrant + Army HQ corps-list rollup) | [Design note](2026-08-05-faction-equipment-totals-visibility-design.md) | Proposed — not implemented; does not gate any R1–R9 lane |
+| 2026-08-05 | Local Support presidential lever reads as a mandatory free weekly click rather than a real decision — Game Designer's Pyrrhic panel review confirms the underlying mechanic (single expiring weekly slot, no CA cost) is intentional two-tier lever design, not a bug, but there's currently never a reason not to fire it. Candidate (not approved): 4-week commitment lock-in instead of a per-turn overwrite. | `docs/40_reports/20260805_RS_PLAYTHROUGH_PYRRHIC_PANEL_SYNTHESIS.md` | Proposed — not implemented; canon-silent per Game Designer's own review; does not gate any R1–R9 lane |
+| 2026-08-06 | Rename player-facing "sector" → "Operational Group" (OG) and auto-name EVERY OG with a real historical name (attested OG/TG/OZ verbatim where known — the existing `ATTESTED_OG_NAMES`/`resolveAttestedOgName` in `GameStateAdapter.ts`; geographic `"{dominant_mun} OG"` fallback for the rest). DISPLAY-LAYER ONLY per ADR-0006 (engine `sector_id` unchanged, no sector-removal refactor). Zero calibration/engine risk; deterministic; §6-safe (attested names historian-sourced, place-name fallback). | [Design](2026-08-06-sectors-to-og-naming-design.md) | SCOPED (owner-requested 2026-08-06, tackle eventually) — not implemented; schedulable any time, no lane dependency |
+| 2026-09-05 | **Casualty-formatter consolidation.** Four competing formatters render the same casualty numbers on the same screens: `fmtK` (`formatters.ts:125-128`), `formatPersonnel` (`formatters.ts:120-122`), `localizedInteger`, and raw `String(...)`. Two components additionally **inline-duplicate** `formatPersonnel`'s exact `>=1000 ? toFixed(1)+'k'` logic without importing it (`BrigadeRow.tsx:153`, `SettlementDetailContent.tsx:921`). The R7 amendment fixes the four surfaces the audit caught (missing M-scale branch, mixed styles on one screen, a raw unseparated third style) but deliberately does **not** sweep the repo. | [R7 amendment §9.4](2026-09-05-r7-presentation-and-english-readability-amendment-plan.md) · [panel record §3](../40_reports/working/20260905_SHOWCASE_AUDIT_PANEL_SPECIALIST_REPORTS.md) | Proposed — a `code-simplifier` pass, not a lane; does not gate any R1–R9 lane |
+| 2026-09-05 | **Full turns→weeks sweep.** A turn is a week and the player is never shown "turns", but ~20 keys beyond the three the audit named still say so. **The list is recorded here so it is not re-grepped:** `opsPlanning.commander.optionAria`, `commanderSelect.personalityPrep`, `turnAftermath.campaignCost.briefing.*`, `deskAuthority.cadence`, `eventDecision.effect.*` (×7), `eventModal.effect.duration`, `commandStrain.recovery.resolving.*`, `commandBriefing.item.enclave.detail`. The R7 amendment changes only `messages.en.ts:2166,1892,1894` plus `officerCharacter.ts:211-215`'s month branch. | [R7 amendment §9.4](2026-09-05-r7-presentation-and-english-readability-amendment-plan.md) · [panel record §4](../40_reports/working/20260905_SHOWCASE_AUDIT_PANEL_SPECIALIST_REPORTS.md) | Proposed — string-only, zero engine risk; does not gate any R1–R9 lane |
+| 2026-09-05 | **Per-candidate decorate-a-unit content (audit finding 8e).** Three real, distinct formations offer byte-identical body copy and byte-identical effect rows because one authored response template per faction (`data/scenarios/events/war_1993.json:8172-8194`) is cloned verbatim over every eligible candidate by `src/desktop/decorate_unit_contract.cjs` — whose own comment confirms this is deliberate ("authored effects come straight from the authored event, no fabricated"). Neither a duplicate-render bug nor two coincidentally-identical entities: **a content-authoring gap**. Needs per-candidate variation authored, not a code fix. | [panel record §5](../40_reports/working/20260905_SHOWCASE_AUDIT_PANEL_SPECIALIST_REPORTS.md) | Proposed — routes to Narrative Designer / Game Designer; belongs to neither the R7 amendment nor R8's bug register |
+| 2026-09-05 | **HRHB warroom wall-map plate regeneration (audit finding 27).** The HRHB corkboard is mostly empty with a tiny outline confined to one corner, where the RS plate fills the frame. All three plates composite through the **same** `WarroomScenePlate` with no faction-conditional sizing, cropping, or filter — the difference is entirely in the generated `.webp` content, so **no code fix exists**. The owner generates all images externally. | [panel record §1, §5](../40_reports/working/20260905_SHOWCASE_AUDIT_PANEL_SPECIALIST_REPORTS.md) | **CLOSED 2026-11-06** — superseded by WR01: the sheet is sized from the measured cork box per faction (`corkBox()`), so the HRHB map no longer floats small; the HRHB cork is simply a smaller board. Phase F packet D4. |
+| 2026-09-05 | **Dead export cleanup: `PRESIDENTIAL_DESK_BACKGROUND`.** `grep -rn` returns exactly one hit repo-wide — its own declaration at `src/ui/map/data/presidentialDeskAssets.ts:28`. Zero importers in `src/`, zero in `tools/`. Removing it also retires its unused `hq_presidential_desk_1992.webp` import. Found incidentally while tracing audit finding 24. | [panel record §1, §5](../40_reports/working/20260905_SHOWCASE_AUDIT_PANEL_SPECIALIST_REPORTS.md) | Proposed — trivial, but it is cleanup and therefore not 1.0 scope; does not gate any R1–R9 lane |
+| 2026-09-06 | **Event-catalog consolidation: ratchet FIRST, then the debt, then drought authoring.** One row, not three, because all three touch the same six files and doing them separately costs three re-floor runs instead of one. **(a) The orphan-flag ratchet is the load-bearing half and is byte-neutral.** MEASURED: 234 flags written by the catalog, 134 read by triggers, **32 read but never written by catalog or engine, gating 70 events**. The decisive fact is that this **regenerates**: [`2026-03-23-event-flag-wiring-plan.md`](2026-03-23-event-flag-wiring-plan.md) closed 2026-03-25 stating *"Zero orphan flags remain"* — and `consequences.json` **did not exist until 2026-04-22**, so all 32 arrived afterwards with the Wave 4-18 authoring, which was itself signed off as *"condition-kind utilization healthy"* while counting the very reads that had no writers. Wiring the 32 without the check means Wave 19 recreates them. Fix: a whole-catalog pass at load — every flag an event reads must resolve to a writer (another event's `sets_flags`, or an explicit engine allowlist); allowlist the current 32 as recorded debt so the build stays green, and **fail on anything new**. The loader already fail-closes row-by-row via `failRow` and `EVENT_FILES` loads all six files together, so the cross-file pass has an obvious home. Cannot move a calibration number — it passes or breaks the build. **(b) The debt itself, in three tiers**: 7 flags whose meaning is unambiguous and whose state already exists; ~10 where the number exists but the *definition* does not (what is `cumulative_casualties_x100` a percentage OF? what makes an offensive "major"?); ~6 authored against mechanics that were never built at all (no grain corridor, no corridor-hostility concept, no corps reorganisation) — **likely deleted rather than built**. **NOT a pacing fix: only 2 of the 70 blocked events carry `response_options`**, so the whole layer adds two player decisions in 188 weeks. Re-floor class — ~69 consequence events with real supply/morale/patron effects firing for the first time. **(c) Drought authoring** — the sourced-candidate coverage ledger for w139-188, acceptance being zero open AUTHORABLE rows with the resulting cadence an *output*, never a per-week quota (`MASTER_ROADMAP.md:217` forbids *"'invent a decision' to fill a quiet historical interval"*; §6.1 ranks a truthful quiet week above a fabricated choice). | [Observations](../40_reports/audits/20260906_ORPHAN_EVENT_FLAGS_OBSERVATIONS.md) · [Investigation](../40_reports/20260905_EVENT_FIRING_SATURATION_AND_DEAD_CATALOG.md) · [P3 sweep](../40_reports/audits/20260906_FACTION_CONTROLS_MUNICIPALITY_THRESHOLD_SWEEP.md) | Proposed — **(a) is schedulable any time** (byte-neutral, no lane dependency); (b) and (c) sit **after D2** and need their own controlled 188w. Does not gate R7, R8, R9 or 1.0. Dayton-ending, chronology and the one-turn-window lint are **already routed to R8's pre-seeded register** and are NOT part of this row |
+| 2026-11-08 | Army HQ on paper, further slices (`CommanderSection`, `CommandRelationshipSection`, dossier excerpts); slices 1–2 shipped in R7. | [Visual polish follow-ups](2026-11-06-visual-polish-follow-ups-plan.md) | Post-1.0 |
+
+### Roadmap section 13, Orchestrator Closeout Contract
+
+#### 13. Orchestrator Closeout Contract
+
+For each workstream, the orchestrator records:
+
+```text
+Workstream:
+Plan:
+Base and final commit:
+Tasks completed:
+Focused verification:
+Long-run/package evidence:
+Behavior/baseline disposition:
+Historical/source review:
+Bug findings:
+Friction findings:
+Ledger/canon/docs propagation:
+Remaining dependency:
+Next workstream:
+```
+
+At program close, append one final ledger entry, link the R8 diaries and R9 manifest, mark R1–R9 and RE complete here and on the command board, and run the full verification set. Do not publish implicitly.
+
+### Roadmap register and row wording shortened in the same pass, verbatim
+
+- PS row status: **CLOSED — owner, 2026-11-14 (steps 1-6 all merged).** Step 1 [#568](https://github.com/horkesh/A-War-Without-Victory/pull/568), step 2 [#579](https://github.com/horkesh/A-War-Without-Victory/pull/579), step 3 [#570](https://github.com/horkesh/A-War-Without-Victory/pull/570), step 4 [#572](https://github.com/horkesh/A-War-Without-Victory/pull/572), step 5 [#585](https://github.com/horkesh/A-War-Without-Victory/pull/585), step 6 posture model [#580](https://github.com/horkesh/A-War-Without-Victory/pull/580), with the redesign base [#566](https://github.com/horkesh/A-War-Without-Victory/pull/566). Sequence in `docs/40_reports/proposals/20261111_PLAYER_SURFACE_AND_AGENCY_REVIEW.md` §4; owner chose posture option 2, 2026-11-12. Gates no R8/R9 item.
+- DC row status, dropped sentences: Claude implemented, Codex supplied art (owner, 2026-11-08). First items under the player-agency principle: an enclave held at signature, protected ground as expensive rather than impossible, the decliner's eight weeks (plan amendment A6).
+- R7 row status, dropped wording: Every R7 gate is closed: audio cue wiring, offline playback and human listening/sensitivity (all 17 interface cues accepted; ambient beds retired for 1.0), WR01 and the baseline pins. In-game audio checks pass to R8 packaged play; remaining Army HQ paper slices are post-1.0 backlog.
+- R8 row, dropped wording: Dry runs find product and harness faults early, for example the RS-07 aborts fixed in [#571](https://github.com/horkesh/A-War-Without-Victory/pull/571). The first RBiH dry run (#622): tour, save/load, strict runtime and Dayton sign-and-Verdict passed.
+- BC01 dropped sentence: Verified L0/L1 review, L2 auto-apply/no queue, L3 observer across three factions. BC02 dropped sentence: Electron save load rebuilds only transient ratings before player projection; canonical bytes and privacy remain intact. BC03 dropped wording: Working negotiation preserved; no headless change; owner deferred post-horizon acceptance/tickers. BC08 dropped sentence: Current simulation suites pass; one environmental full-suite failure classified, not erased.

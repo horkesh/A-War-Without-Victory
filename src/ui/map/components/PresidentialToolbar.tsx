@@ -164,16 +164,31 @@ export function PresidentialToolbar({
     // Visual-only; no new state; deterministic count-threshold derivation.
     const preAdvanceSeverityTone = derivePreAdvanceSeverityTone(loadedGameState?.presidentialReviewQueue);
     const recruitmentInput = useRecruitmentMatterInput();
+    const turnAftermath = useGameStore((s) => s.turnAftermath);
     const preAdvanceReview = useMemo(
-        () => buildPreAdvanceCommandReviewView({ state: loadedGameState, osidNameMap: osidDisplayNames, ...recruitmentInput }),
-        [loadedGameState, osidDisplayNames, recruitmentInput],
+        () => buildPreAdvanceCommandReviewView({
+            state: loadedGameState,
+            osidNameMap: osidDisplayNames,
+            // The aftermath the player has just reviewed no longer counts against Advance.
+            reviewedAftermathTurn: turnAftermath?.turn ?? null,
+            ...recruitmentInput,
+        }),
+        [loadedGameState, osidDisplayNames, turnAftermath?.turn, recruitmentInput],
     );
     const advanceBlocked = preAdvanceReview.status === 'blocked';
+    // The map screen has no review chip (the toolbar has a fixed width budget); the count rides on
+    // the Advance button's title and accessible name instead.
+    const reviewItemCount = preAdvanceReview.metrics.advanceReviewCount;
+    const reviewCountLabel = reviewItemCount > 0
+        ? t(reviewItemCount === 1 ? 'review.advance.itemsToReview.one' : 'review.advance.itemsToReview.many', { count: reviewItemCount })
+        : null;
     const advanceGateTitle = advanceBlocked
         ? formatPreAdvanceGateBlockTitle(preAdvanceReview)
         : !ipc.isAvailable
             ? t('toolbar.advance.requiresDesktop')
-            : t('toolbar.advance.title');
+            : reviewCountLabel
+                ? `${t('toolbar.advance.title')}. ${reviewCountLabel}`
+                : t('toolbar.advance.title');
     const shellRouteDisabled = modalLocked || !loadedGameState;
 
     const handleAdvanceTurn = useCallback(async () => {
@@ -535,7 +550,7 @@ export function PresidentialToolbar({
                         onClick={handleAdvanceTurn}
                         disabled={modalLocked || advancing || !loadedGameState || (!advanceBlocked && !ipc.isAvailable)}
                         title={advanceGateTitle}
-                        aria-label={advanceBlocked ? advanceGateTitle : undefined}
+                        aria-label={advanceBlocked || (reviewCountLabel && ipc.isAvailable) ? advanceGateTitle : undefined}
                         className={`shrink-0 whitespace-nowrap px-4 py-1.5 text-[13px] font-mono font-bold uppercase tracking-[0.15em] border rounded transition-all disabled:opacity-30 disabled:cursor-not-allowed active:scale-95 ${
                             advanceBlocked
                                 ? 'bg-red-500/10 text-red-300 border-red-500/45 hover:bg-red-500/20 hover:border-red-400/60'

@@ -20,8 +20,23 @@ import {
 
 export type PreAdvanceCommandReviewStatus = 'blocked' | 'review' | 'clear' | 'unavailable';
 
+/** The two tiers the review chip counts. Information items are never counted (dispatch and Record). */
+export type PreAdvanceReviewTier = 'required' | 'recommended';
+
+/** The chip shows a true count up to this number, then "9+". */
+export const REVIEW_CHIP_DISPLAY_CAP = 9;
+
+export function formatReviewChipCount(count: number): string {
+  const safe = Number.isFinite(count) ? Math.max(0, Math.floor(count)) : 0;
+  return safe > REVIEW_CHIP_DISPLAY_CAP ? `${REVIEW_CHIP_DISPLAY_CAP}+` : String(safe);
+}
+
 export interface PreAdvanceCommandReviewItem {
   id: string;
+  /** Required items block Advance; recommended items are counted and advisory. */
+  tier: PreAdvanceReviewTier;
+  /** One line saying why this is on the list now, and for required items what happens if ignored. */
+  whyNow: string;
   severity: PresidentialDecisionRoomSeverity;
   priorityBand: PresidentialPriorityBand;
   priorityModel: PresidentialPriorityReadModel;
@@ -58,9 +73,38 @@ export interface PreAdvanceCommandReviewInput
   reviewedAftermathTurn?: number | null;
 }
 
+const WHY_NOW_MAX_LENGTH = 110;
+
+function firstSentence(text: string): string {
+  const trimmed = text.replace(/\s+/g, ' ').trim();
+  if (!trimmed) return '';
+  const end = trimmed.search(/[.!?](\s|$)/);
+  const sentence = end >= 0 ? trimmed.slice(0, end + 1) : trimmed;
+  return sentence.length <= WHY_NOW_MAX_LENGTH
+    ? sentence
+    : `${sentence.slice(0, WHY_NOW_MAX_LENGTH - 1).trimEnd()}…`;
+}
+
+function isStanceMatterCard(card: PresidentialDecisionRoomCard): boolean {
+  return card.id.startsWith('command:stance-matter:') || card.directive?.lever === 'stance_matter';
+}
+
+function reviewTierFor(card: PresidentialDecisionRoomCard): PreAdvanceReviewTier {
+  return card.priorityBand === 'required' ? 'required' : 'recommended';
+}
+
+function whyNowFor(card: PresidentialDecisionRoomCard, tier: PreAdvanceReviewTier): string {
+  if (tier === 'required') return t('review.whyNow.required');
+  if (isStanceMatterCard(card)) return t('review.whyNow.stance');
+  return firstSentence(card.explanation) || t('review.whyNow.default');
+}
+
 function mapReadinessItem(card: PresidentialDecisionRoomCard): PreAdvanceCommandReviewItem {
+  const tier = reviewTierFor(card);
   return {
     id: card.id,
+    tier,
+    whyNow: whyNowFor(card, tier),
     severity: card.severity,
     priorityBand: card.priorityBand,
     priorityModel: card.priorityModel,
@@ -153,10 +197,9 @@ export function buildPreAdvanceCommandReviewView(input: PreAdvanceCommandReviewI
         };
       })(),
       hardTurns: Math.max(0, decisionRoom.metrics.hardTurns - reviewedAftermathCards.length),
-      advanceReviewCount: readinessCards.reduce(
-        (sum, card) => sum + (card.countWeight ?? 1),
-        0,
-      ),
+      // A true count: one per listed row. A grouped card is one row, whatever it groups
+      // (the chip's number must match the rows the list shows).
+      advanceReviewCount: readinessCards.length,
     },
   };
 }
