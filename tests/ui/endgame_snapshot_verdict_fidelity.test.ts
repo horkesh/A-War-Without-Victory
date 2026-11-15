@@ -259,19 +259,25 @@ describe('VerdictScreen renders the frozen snapshot faithfully (D2 verdict UI)',
 
     it('renders all three faction tabs with the snapshot grades and Failure outcome badges', () => {
         const h = renderVerdictScreen();
-        expect(h).toContain('ARBiH');
-        expect(h).toContain('VRS');
-        expect(h).toContain('HVO');
+        // The rail names the sides (R8 ending truth pass), not their armies.
+        expect(h).toContain('Republic of Bosnia and Herzegovina');
+        expect(h).toContain('Republika Srpska');
+        expect(h).toContain('Herzeg-Bosnia');
+        expect(h).not.toMatch(/>(ARBiH|VRS|HVO)</);
         // Three Failure badges (one per faction tab) come straight from the snapshot.
         const failureTabBadges = h.match(/data-awwv-faction-tab-outcome="[^"]+"[^>]*>Failure</g) ?? [];
         expect(failureTabBadges).toHaveLength(3);
     });
 
-    it('renders the selected faction (RBiH) pyrrhic score + grade description from the snapshot', () => {
+    it('renders the selected faction (RBiH) pyrrhic score from the snapshot; no grade trace, no description', () => {
         const h = renderVerdictScreen();
         expect(h).toContain('48.2');                 // RBiH pyrrhic_score
         expect(h).toContain('Pyrrhic Score');
-        expect(h).toContain('multi-ethnic state survives');
+        // The grade description renders only inside "How the verdict was set", which needs the
+        // grade trace; a snapshot frozen before the trace shows neither (R8 ending truth pass).
+        expect(h).not.toContain('data-testid="faction-report-grade-trace"');
+        expect(h).not.toContain('How the verdict was set');
+        expect(h).not.toContain('multi-ethnic state survives');
     });
 
     it('renders the 6-dimension capital-spend breakdown for the selected faction', () => {
@@ -287,9 +293,13 @@ describe('VerdictScreen renders the frozen snapshot faithfully (D2 verdict UI)',
     it('surfaces the genocide condemnation record from the snapshot — atrocity is recorded, never hidden', () => {
         const h = renderVerdictScreen();
         // The prosecutorial Srebrenica finding (from cost_ledger.findings) renders
-        // in War Cost — proof the §6 record reaches the screen from the snapshot.
+        // in War Cost — proof the §6 record reaches the screen from the snapshot. An older
+        // snapshot's finding is shown with the panel-signed text and public sources.
+        expect(h).toContain('data-awwv-finding="rupture_srebrenica_genocide_1995"');
         expect(h).toContain('Srebrenica genocide');
-        expect(h).toContain('ICTY Krstic IT-98-33-T');
+        expect(h).toContain('The ICTY held these killings to be genocide, as did the International Court of Justice.');
+        expect(h).toContain('Prosecutor v. Radislav Krstić, IT-98-33-T (2001)');
+        expect(h).toContain('ICJ, Bosnia and Herzegovina v. Serbia and Montenegro (2007)');
     });
 
     it('renders the war-cost figures (military + civilian killed, duration) from the snapshot cost ledger', () => {
@@ -301,11 +311,17 @@ describe('VerdictScreen renders the frozen snapshot faithfully (D2 verdict UI)',
         expect(h).toContain('188 weeks');
     });
 
-    it('renders the historical divergence notes from the snapshot comparison, in order', () => {
+    it('renders the rebuilt historical comparison lines, in order, never the legacy notes', () => {
         const h = renderVerdictScreen();
-        expect(h).toContain('6 weeks longer');
-        expect(h).toContain('Srebrenica genocide occurred');
-        expect(h.indexOf('6 weeks longer')).toBeLessThan(h.indexOf('Srebrenica genocide occurred'));
+        const warCost = h.slice(h.indexOf('data-tutorial-step="cost-ledger"'));
+        // The snapshot's notes are not printed raw; the lines are rebuilt from the ledger.
+        expect(h).not.toContain('6 weeks longer');
+        expect(h).not.toContain('Srebrenica genocide occurred');
+        const order = ['end_of_war', 'military_dead', 'civilian_dead', 'srebrenica'].map(id => warCost.indexOf(`data-awwv-comparison-line="${id}"`));
+        expect(order.every(index => index >= 0)).toBe(true);
+        expect([...order].sort((a, b) => a - b)).toEqual(order);
+        expect(warCost).toContain('This campaign: the parties initialled the agreement in the week of 13 Nov 1995. Historically, the Dayton Agreement was initialled on 21 November 1995.');
+        expect(warCost).toContain('The Srebrenica genocide, committed by Bosnian Serb forces against Bosniaks, is recorded in this campaign.');
     });
 });
 
@@ -329,8 +345,8 @@ describe('RS faction-detail condemnation surface (snapshot → FactionReport)', 
             personnel: 80000,
         }));
         expect(h).toContain('International Condemnation');
-        expect(h).toContain('genocide');           // from verdict.condemnation.genocide label
-        expect(h).toContain('tribunal');
+        // from the verdict.condemnation.genocide label
+        expect(h).toContain('Its forces committed the Srebrenica genocide (found by the ICTY and the ICJ)');
         // RS grade + outcome from the snapshot, on the detail card.
         expect(h).toContain('41.0');               // RS pyrrhic_score
         expect(h).toContain('Failure');
