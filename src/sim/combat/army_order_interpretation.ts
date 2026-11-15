@@ -602,8 +602,11 @@ function alignmentForVerb(verb: PoliticalDirectiveVerb, data: NamedOfficer): -1 
  *
  * Inputs are pure functions of officer data + directive; same inputs → same
  * output (determinism).
+ *
+ * Exported for army clashes (command loop L7), which score the army commander's compliance with
+ * a presidential act against the verb it implies; pure, no trace or event.
  */
-function computeArmyComplianceScore(
+export function computeArmyComplianceScore(
     data: NamedOfficer,
     verb: PoliticalDirectiveVerb,
 ): number {
@@ -621,7 +624,7 @@ function computeArmyComplianceScore(
 /**
  * Map score → compliance category (mirrors corps Phase 1 thresholds).
  */
-function categoryForScore(score: number): ArmyComplianceCategory {
+export function categoryForScore(score: number): ArmyComplianceCategory {
     if (score >= FULL_COMPLIANCE_THRESHOLD) return 'full';
     if (score >= MODIFIED_COMPLIANCE_THRESHOLD) return 'modified';
     if (score >= PARTIAL_COMPLIANCE_THRESHOLD) return 'partial';

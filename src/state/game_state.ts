@@ -2309,6 +2309,10 @@ export interface StateMeta {
     stance_matters?: StanceMatter[];
     /** Durable receipts of stance matters (bounded, sorted by resolved_turn then id). */
     stance_matter_history?: StanceMatterReceipt[];
+    /** Open army clash for the president (command loop L7; live only, at most one per faction). */
+    army_clashes?: import('./army_clash_types.js').ArmyClash[];
+    /** Durable army-clash receipts (bounded at 200, sorted by resolved_turn then id). */
+    army_clash_history?: import('./army_clash_types.js').ArmyClashReceipt[];
     /**
      * LANE-NIGHTSHIFT-N3 (D#2, 2026-05-03): frozen endgame snapshot.
      *
@@ -2974,6 +2978,8 @@ logistics_priority?: Record<FactionId, Record<string, number>>;
 sector_stance_orders?: SectorStanceOrder[];
 /** Stance-matter bookkeeping and presidential stance holds (live president at autonomy 2 only). @persistence optional-persisted */
 stance_matter_state?: StanceMatterState;
+/** Army-clash volume bookkeeping (command loop L7; live president only). @persistence optional-persisted */
+army_clash_state?: import('./army_clash_types.js').ArmyClashState;
 /** Militia strength [0, 100] per municipality per faction; Peace-phase §4.2. */
 war_militia_strength?: Record<MunicipalityId, Record<FactionId, number>>;
 /** JNA withdrawal and asset transfer; Peace-phase §4.6. Does not start war. */

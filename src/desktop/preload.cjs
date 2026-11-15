@@ -146,6 +146,8 @@ contextBridge.exposeInMainWorld('awwv', {
   rejectProposal: (proposalId) => ipcRenderer.invoke('reject-proposal', proposalId),
   // Posture model option 2: answer a corps/OG stance matter (confirm | countermand | constrain).
   resolveStanceMatter: (payload) => ipcRenderer.invoke('resolve-stance-matter', payload),
+  // Command loop L7: answer an army clash (accept | insist | replace).
+  resolveArmyClash: (payload) => ipcRenderer.invoke('resolve-army-clash', payload),
   // Phase 2 slice 1 "Back the Officer": Level 3 Direct Intervention on an op proposal.
   forceLaunchProposal: (proposalId) => ipcRenderer.invoke('force-launch-proposal', proposalId),
   // "Override without proposal": proactively force-launch a corps plan the officer

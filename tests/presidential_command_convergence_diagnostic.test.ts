@@ -27,14 +27,15 @@ describe('presidential command convergence diagnostic', () => {
     const report = buildCurrentReport();
 
     expect(report.summary).toEqual({
-      familyCount: 10,
-      reachableActionFamilyCount: 10,
-      durableReceiptFamilyCount: 10,
+      familyCount: 11,
+      reachableActionFamilyCount: 11,
+      durableReceiptFamilyCount: 11,
       conditionalReceiptFamilyCount: 0,
       unresolvedFindingCount: 0,
-      sourceVerifiedFamilyCount: 10,
+      sourceVerifiedFamilyCount: 11,
     });
     expect(report.rows.map((row) => row.familyId)).toEqual([
+      'army_clash',
       'autonomy_proposal',
       'convoy_decision',
       'dayton_negotiation',

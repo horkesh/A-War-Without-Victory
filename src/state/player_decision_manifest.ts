@@ -10,7 +10,8 @@ export type PlayerDecisionFamilyId =
     | 'officer_event'
     | 'autonomy_proposal'
     | 'operation_opportunity'
-    | 'stance_matter';
+    | 'stance_matter'
+    | 'army_clash';
 
 export type PlayerDecisionGatePolicy = 'hard_block' | 'modal_required' | 'advisory';
 export type PlayerDecisionRecommendedDestination = 'inbox' | 'decision-room' | 'army-hq';
@@ -160,6 +161,18 @@ export const PLAYER_DECISION_FAMILIES: readonly PlayerDecisionFamilyDefinition[]
         recommendedDestination: 'decision-room',
         receiptPath: 'meta.stance_matter_history',
     },
+    {
+        // Command loop L7: the army commander objects to an order the president just staged.
+        // ADVISORY: unanswered at Advance, the order stands as given (the clash lapses).
+        id: 'army_clash',
+        statePath: 'meta.army_clashes',
+        inboxType: 'army_clash',
+        ownerSurface: 'decision_room',
+        resolver: 'resolve-army-clash',
+        gatePolicy: 'advisory',
+        recommendedDestination: 'decision-room',
+        receiptPath: 'meta.army_clash_history',
+    },
 ] as const;
 
 function isRecord(value: unknown): value is RawRecord {
@@ -248,7 +261,23 @@ function labelForFamily(familyId: PlayerDecisionFamilyId): string {
         case 'autonomy_proposal': return 'Autonomy proposal';
         case 'operation_opportunity': return 'Operation opportunity';
         case 'stance_matter': return 'Stance matter';
+        case 'army_clash': return 'Army clash';
     }
+}
+
+function armyClashInstances(state: GameStateLike, playerFaction: string | null): PlayerDecisionInstance[] {
+    const family = requiredFamily('army_clash');
+    const turn = getMeta(state).turn;
+    return arrayFrom(getMeta(state).army_clashes)
+        .filter((item) => matchesPlayerFaction(item, playerFaction))
+        // Only this week's clash is answerable; an older one has lapsed.
+        .filter((item) => typeof turn !== 'number' || item.turn === turn)
+        .map((item, index) => instance(
+            family,
+            stringFrom(item.id) ?? `army_clash:${index}`,
+            false,
+            stringFrom(item.faction),
+        ));
 }
 
 function stanceMatterInstances(state: GameStateLike, playerFaction: string | null): PlayerDecisionInstance[] {
@@ -408,6 +437,7 @@ function collectInstances(state: GameStateLike, playerFaction: string | null): P
             ...operationOpportunityFallbackInstances(state, playerFaction, countedReviewProposalIds),
         ],
         stanceMatterInstances(state, playerFaction),
+        armyClashInstances(state, playerFaction),
     ];
 }
 

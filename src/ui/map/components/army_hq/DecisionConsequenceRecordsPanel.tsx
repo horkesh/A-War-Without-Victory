@@ -37,6 +37,7 @@ const FAMILY_LABEL_KEYS: Record<DecisionConsequenceRecord['familyId'], MessageKe
   'patron-relations': 'decisionConsequences.family.patronRelations',
   'officer-personnel': 'decisionConsequences.family.officerPersonnel',
   'stance-matter': 'decisionConsequences.family.stanceMatter',
+  'army-clash': 'clash.family',
 };
 
 function routeLabel(record: DecisionConsequenceRecord): string {

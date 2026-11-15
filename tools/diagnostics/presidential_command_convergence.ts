@@ -206,6 +206,14 @@ export const PRESIDENTIAL_DECISION_OWNERSHIP: readonly PresidentialDecisionOwner
     receiptDurability: 'durable',
     receiptDisposition: 'Every stance matter, answered or not, and every change not put to the president remains in the bounded stance-matter history.',
   },
+  {
+    familyId: 'army_clash',
+    producer: 'src/sim/combat/army_clashes.ts -> meta.army_clashes (raised from desktop IPC after a staged presidential act)',
+    blockerPredicate: 'advisory; unanswered at Advance, the order stands as given',
+    receiptOwner: 'meta.army_clash_history',
+    receiptDurability: 'durable',
+    receiptDisposition: 'Every clash, answered or lapsed, and every objection noted or not put, remains in the bounded army-clash history.',
+  },
 ] as const;
 
 /**
@@ -461,6 +469,40 @@ export const PRESIDENTIAL_DECISION_SOURCE_PROOFS: readonly PresidentialDecisionS
       label: 'decision-consequence ledger',
       path: 'src/ui/map/data/decisionConsequenceLedger.ts',
       anchors: ["familyId: 'stance-matter'"],
+    }],
+  },
+  {
+    familyId: 'army_clash',
+    producer: [{
+      path: 'src/sim/combat/army_clashes.ts',
+      anchors: ['export function raiseArmyClash(', 'state.meta.army_clashes = [...(state.meta.army_clashes ?? []), clash]'],
+    }],
+    action: [
+      { path: 'src/ui/map/App.tsx', anchors: ["if (action === 'decision_room')"] },
+      {
+        path: 'src/ui/map/data/presidentialDecisionRoom.ts',
+        anchors: ['function addArmyClashCards('],
+      },
+    ],
+    receipt: [
+      {
+        path: 'src/desktop/army_clash_ipc.cjs',
+        anchors: ['function recordArmyClashAnswer(', 'meta.army_clash_history = history.slice('],
+      },
+      {
+        path: 'src/sim/combat/army_clashes.ts',
+        anchors: ['export function sweepLapsedArmyClashes(', 'export function appendArmyClashReceipt('],
+      },
+      {
+        path: 'src/desktop/player_visible_state.cjs',
+        anchors: ['projected.army_clash_history = playerFaction'],
+      },
+    ],
+    consumers: [{
+      channel: 'records',
+      label: 'decision-consequence ledger',
+      path: 'src/ui/map/data/decisionConsequenceLedger.ts',
+      anchors: ["familyId: 'army-clash'"],
     }],
   },
 ] as const;
