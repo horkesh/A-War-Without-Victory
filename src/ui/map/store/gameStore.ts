@@ -984,6 +984,16 @@ export const useGameStore = create<GameStore>((set, get) => ({
               get().openingBriefDismissed &&
               previousOpeningBriefFaction != null &&
               previousOpeningBriefFaction === (state.player_faction ?? null);
+            // Command loop L2 (2026-11-14): after Advance the desktop main process also
+            // pushes the new state, so the same week is loaded a second time about 200 ms
+            // after advanceTurnAndSync opened the week's dispatch. That reload must not
+            // wipe the report it belongs to. A load that moves to another turn, faction
+            // or save still clears it.
+            const sameWeekReload = previousLoadedGameState != null
+              && get().turnAftermath != null
+              && previousLoadedGameState.turn === state.turn
+              && (previousLoadedGameState.player_faction ?? null) === (state.player_faction ?? null)
+              && previousLoadedGameState.label === state.label;
             set({
               loadedGameState: state,
               replayInspection: null,
@@ -1038,10 +1048,13 @@ export const useGameStore = create<GameStore>((set, get) => ({
               ghostLinePoint: null,
               // Flash highlight from stale ORBAT-map sync
               flashOsid: null,
-              // Turn aftermath belongs to the previous save/turn payload.
-              turnAftermath: null,
-              turnAftermathOpen: false,
-              turnAftermathDigest: null,
+              // Turn aftermath belongs to the previous save/turn payload, unless this
+              // load is the same week arriving again (see sameWeekReload above).
+              ...(sameWeekReload ? {} : {
+                turnAftermath: null,
+                turnAftermathOpen: false,
+                turnAftermathDigest: null,
+              }),
               focusedAftermathTurn: null,
               focusedOperationHistoryId: null,
               // #244: a stale focused-decision id from the previous save makes

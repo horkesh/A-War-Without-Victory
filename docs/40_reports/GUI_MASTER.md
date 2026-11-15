@@ -662,6 +662,7 @@ OSID, raw faction ids, and similar backend nouns are valid in engine code, canon
 
 - Supersedes the quiet-week behaviour of WP-2 below. `TurnAftermathModal` now opens after every Advance on a compact dispatch: the date and one headline (territory, then formations, then decisions), then at most five lines (Ground with up to three named places and "Show on map", Fighting, Cost, Your orders, Needs you). A line with nothing to report is left out; a quiet week gets two lines built from the week's own figures. "Full record" shows the previous two-column report, which now loads as its own chunk (`TurnAftermathRecordFace.tsx`).
 - The bottom-strip digest is the dispatch headline with "Reopen this week's dispatch", shown once the report is closed.
+- `gameStore.loadSave` keeps the week's report when the same week is loaded again (the desktop main process re-pushes the state ~200 ms after Advance). Before this, that reload closed the report in the live app before it could be seen.
 - `tools/ui/paradox_local_qa.cjs` photographs the report before closing it and records the dispatch fit; `--window-size=WxH` sets the game window's content size.
 - Proposal: `docs/40_reports/proposals/20261114_COMMAND_LOOP_PROPOSAL.md` §4 2B. Evidence: ledger fragment `docs/ledger/fragments/2026-11-14-weekly-dispatch.md`.
 

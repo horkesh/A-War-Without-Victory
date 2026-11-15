@@ -15,6 +15,7 @@ import {
 } from '../../src/ui/map/data/turnAftermath.js';
 import { setLocale } from '../../src/ui/map/i18n/index.js';
 import { useGameStore } from '../../src/ui/map/store/gameStore.js';
+import { withoutComments } from '../helpers/sourceComments';
 
 /**
  * Command loop L2 (proposal §4 2B, 2026-11-14): the turn aftermath opens on a compact
@@ -277,12 +278,12 @@ describe('TurnAftermathModal dispatch face', () => {
 
   it('keeps monospace out of the report text', () => {
     for (const file of ['src/ui/map/components/TurnAftermathModal.tsx', 'src/ui/map/components/TurnAftermathRecordFace.tsx']) {
-      expect(readFileSync(file, 'utf8')).not.toContain('font-mono');
+      expect(withoutComments(readFileSync(file, 'utf8'))).not.toContain('font-mono');
     }
   });
 
   it('keeps the full record out of the entry bundle', () => {
-    const modal = readFileSync('src/ui/map/components/TurnAftermathModal.tsx', 'utf8');
+    const modal = withoutComments(readFileSync('src/ui/map/components/TurnAftermathModal.tsx', 'utf8'));
     expect(modal).toContain("import('./TurnAftermathRecordFace')");
     expect(modal).not.toMatch(/^import \{[^}]*\} from '\.\/TurnAftermathRecordFace'/m);
   });
