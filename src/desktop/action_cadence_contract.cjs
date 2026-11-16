@@ -1,5 +1,15 @@
 'use strict';
 
+/**
+ * G1 (2026-11-16): the first turn an authored event may fire, from its own `trigger.turn_min`.
+ * Returns that turn while `currentTurn` is still before it, otherwise null. The engine's bot path
+ * honours turn_min when it evaluates the event; every player-initiated gesture must too.
+ */
+function eventNotYetAvailableUntil(currentTurn, eventDef) {
+  const turnMin = eventDef?.trigger?.turn_min;
+  return Number.isInteger(turnMin) && currentTurn < turnMin ? turnMin : null;
+}
+
 /** Shared deterministic gate for player-initiated authored event actions. */
 function computeActionCadenceAvailability(state, eventId, eventDef) {
   const currentTurn = state?.meta?.turn ?? 0;
@@ -38,6 +48,11 @@ function computeActionCadenceAvailability(state, eventId, eventDef) {
     nextFireNumber: fireCount + 1,
   };
   if (alreadyPending) return { ...out, reason: 'already_pending' };
+  // G1 (2026-11-16): the event's own trigger.turn_min holds for the human President too. The bot
+  // path fires these authored events only from turn_min (84); the desktop path used to queue them
+  // from turn 0.
+  const notYetUntil = eventNotYetAvailableUntil(currentTurn, eventDef);
+  if (notYetUntil != null) return { ...out, reason: 'not_yet_available', availableFromTurn: notYetUntil };
   if (firesLeft <= 0) return { ...out, reason: 'exhausted' };
   if (onCooldown) return { ...out, reason: 'on_cooldown' };
   return { ...out, available: true };
@@ -55,4 +70,4 @@ function responseOptionsForFire(responseOptions, nextFireNumber) {
   });
 }
 
-module.exports = { computeActionCadenceAvailability, responseOptionsForFire };
+module.exports = { computeActionCadenceAvailability, eventNotYetAvailableUntil, responseOptionsForFire };
