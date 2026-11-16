@@ -29,10 +29,18 @@ describe('presidential command convergence diagnostic', () => {
     expect(report.summary).toEqual({
       familyCount: 11,
       reachableActionFamilyCount: 11,
-      durableReceiptFamilyCount: 11,
+      // F1i (2026-11-16): convoy_decision is retired from 1.0 (surfaces inert), so 10 durable + 1 retired.
+      durableReceiptFamilyCount: 10,
       conditionalReceiptFamilyCount: 0,
+      retiredFamilyCount: 1,
       unresolvedFindingCount: 0,
       sourceVerifiedFamilyCount: 11,
+    });
+    expect(report.rows.find((row) => row.familyId === 'convoy_decision')).toMatchObject({
+      receiptDurability: 'retired',
+      sourceEvidence: expect.objectContaining({
+        producer: ['src/state/supply_reserves.ts#humanitarian convoys are not in 1.0'],
+      }),
     });
     expect(report.rows.map((row) => row.familyId)).toEqual([
       'army_clash',

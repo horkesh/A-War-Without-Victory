@@ -186,7 +186,6 @@ The following table lists every `name:` literal from early_war_phases.ts, war_ph
 | War - Aftermath | `update-enclave-integrity` | No | war_phases.ts:2446 |
 | War - Aftermath | `update-sarajevo-exception` | No | war_phases.ts:2469 |
 | War - Aftermath | `update-patron-ivp` | Indirect | war_phases.ts:2482 |
-| War - Aftermath | `evaluate-humanitarian-convoys` | No | war_phases.ts:2510 |
 | War - Aftermath | `update-legitimacy` | No | war_phases.ts:2524 |
 | War - Aftermath | `apply-formation-commitment` | No | war_phases.ts:2533 |
 | War - Aftermath | `update-doctrine-eligibility` | No | war_phases.ts:2552 |

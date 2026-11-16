@@ -1,0 +1,36 @@
+## 2026-11-16 — C8 F1i: `political.enclaves` reads OSID supply; its unsound readers retired (§6 panel, unanimous; control-identical)
+
+- **Defect** (same class as #617, from the RF-F1 SID sweep):
+  - `update-enclave-integrity` passed the legacy settlement edges and the legacy `supply_state` into `updateEnclaveIntegrity`. Political control is keyed by OSID, so no controlled OSID was ever "critical" and `political.enclaves` was `[]` every turn.
+- **Root fix:** read `supply_state_by_osid` and the operational graph edges.
+- **What the revived readers did** (main 7bfe7fa6d vs root fix only, one historical 188w; evidence in the session notes):
+  - Control stayed byte-identical and the enclave guard stayed intact.
+  - **IVP:** the detector's pressure stacked on the hand-curated `enclave_resilience` fallback (a double count). The term saturated at 1.0 on all 188 turns. `drina_blockade` fired at t1 instead of t8, sanctions at t17 instead of t30, and RS patron commitment fell from 0.41 to 0.28.
+  - **Capital:** the penalty fell on the besieged party. RBiH went from 120 to 59 at t10 and HRHB from 99 to 17 at t60, driven by about 30 one-OSID mixed-control "enclaves" on t1 and by the 1993 Lašva pockets.
+  - **Convoys and the tunnel activator:** inert.
+  - The detector marks Srebrenica, Žepa and Goražde "collapsed" (integrity floor) long before history does.
+- **§6 panel** (historian, scenario-creator-runner-tester, engine/systems, red-team, canon-compliance): unanimous GO on package A' in round 2. Option C (a filtered detector) was vetoed.
+  - Keep the root fix.
+  - IVP reads `enclave_resilience` only.
+  - Retire the capital enclave penalty (its zero ledger row stays, so ledger ids are unchanged).
+  - Retire humanitarian convoys. They are dead in every reachable path: they run only with `supply_reserves_enabled`, which is true only in sep1991 and jan1993, which no player can start, and even there they read legacy SID edges and never route.
+  - Retire the enclave-derived Sarajevo tunnel activation; the `sarajevo_tunnel_operational` flag stays.
+  - Nothing reads `political.enclaves` any more.
+- **Convoy UI:** kept mounted but inert. `tests/f1i_convoy_surfaces_inert.test.ts` pins that no source creates a pending convoy. The convergence diagnostic gains a `retired` disposition for `convoy_decision`. The UI removal is queued as a Part-4 inert retirement.
+- **Canon** (same change):
+  - Rulebook l.515/545: convoys "not modelled in 1.0".
+  - Systems Manual: the supply-agency note, the state list, System 5 (OSID detection; `collapsed` means "integrity floor reached", not fallen; §6 review for any reader; known defects) and System 7 (no enclave term in capital).
+  - PLAYER_TURN_GUIDE: the convoy step row is removed.
+  - context.md.
+  - No FORAWWV record or broader bright-line panel (canon seat).
+- **Measured** (fresh main 7588468dd = `83b8e8cd36023899` vs A' = `2afce5e4fb86b3ce`):
+  - The only difference in the final save is `political.enclaves`.
+  - control_delta, formation_delta, activity_summary, operation_aars and weekly_report are byte-identical, so IVP, capital, patron, consequences and the negotiation ledger equal main on every turn.
+  - Guards equal main.
+  - sep1991 1-week start runs (its only difference from main is the run path). jan1993 fails on main too (J1, missing control file).
+- **Registered, not fixed:**
+  - Enclave identity is keyed by `settlement_ids[0]` (history resets when that OSID falls).
+  - `supplyScore` is fixed at 0.
+  - EI §12.2 gap: `enclave_resilience` pressure is linear and falls as a siege goes on.
+  - On main, `drina_blockade` fires at t8 (history: August 1994) and sanctions drop by t70.
+  - The IVP ×0.7 Sarajevo modifier reads only the tunnel flag, never the tunnel event.

@@ -23,7 +23,9 @@ import {
 } from '../../src/ui/map/data/decisionSurfaceRegistry.js';
 import { strictCompare } from '../../src/state/validateGameState.js';
 
-export type ReceiptDurability = 'durable' | 'conditional';
+// 'retired' (F1i, 2026-11-16): a family whose producer is retired from 1.0. Its surfaces stay
+// mounted but inert; its proof anchors the retirement record instead of a live producer/receipt.
+export type ReceiptDurability = 'durable' | 'conditional' | 'retired';
 
 export interface PresidentialDecisionOwnership {
   familyId: PlayerDecisionFamilyId;
@@ -108,6 +110,7 @@ export interface PresidentialCommandConvergenceReport {
     reachableActionFamilyCount: number;
     durableReceiptFamilyCount: number;
     conditionalReceiptFamilyCount: number;
+    retiredFamilyCount: number;
     unresolvedFindingCount: number;
     sourceVerifiedFamilyCount: number;
   };
@@ -160,11 +163,11 @@ export const PRESIDENTIAL_DECISION_OWNERSHIP: readonly PresidentialDecisionOwner
   },
   {
     familyId: 'convoy_decision',
-    producer: 'src/state/supply_reserves.ts -> military.pending_convoy_decisions',
+    producer: 'retired (F1i 2026-11-16): nothing creates military.pending_convoy_decisions',
     blockerPredicate: 'decision is undefined',
     receiptOwner: 'military.convoy_decision_history',
-    receiptDurability: 'durable',
-    receiptDisposition: 'Resolved convoy instruction remains in the humanitarian access history.',
+    receiptDurability: 'retired',
+    receiptDisposition: 'Humanitarian convoys are not modelled in 1.0; the surfaces are inert and an old save keeps its convoy history.',
   },
   {
     familyId: 'reserve_request',
@@ -302,14 +305,15 @@ export const PRESIDENTIAL_DECISION_SOURCE_PROOFS: readonly PresidentialDecisionS
   },
   {
     familyId: 'convoy_decision',
+    // F1i: the retirement record stands in for the retired producer and receipt writers.
     producer: [{
       path: 'src/state/supply_reserves.ts',
-      anchors: ['state.military.pending_convoy_decisions = pending.sort((a, b) => strictCompare(a.id, b.id));'],
+      anchors: ['humanitarian convoys are not in 1.0'],
     }],
     action: [{ path: 'src/ui/map/App.tsx', anchors: ["if (action === 'convoy_decision_modal')"] }],
     receipt: [{
       path: 'src/state/supply_reserves.ts',
-      anchors: ['state.military.convoy_decision_history = history.sort((a, b) =>'],
+      anchors: ['pending_convoy_decisions / convoy_decision_history stay so old saves load'],
     }],
     consumers: [{
       channel: 'chronicle',
@@ -643,7 +647,7 @@ export function buildPresidentialCommandConvergenceReport(
       });
     }
 
-    if (ownership && ownership.receiptDurability !== 'durable') {
+    if (ownership && ownership.receiptDurability !== 'durable' && ownership.receiptDurability !== 'retired') {
       findings.push({
         code: 'missing_durable_receipt',
         familyId: family.id,
@@ -706,6 +710,7 @@ export function buildPresidentialCommandConvergenceReport(
         && receiptSourceVerifiedFamilyIds.has(row.familyId)
       )).length,
       conditionalReceiptFamilyCount: rows.filter((row) => row.receiptDurability === 'conditional').length,
+      retiredFamilyCount: rows.filter((row) => row.receiptDurability === 'retired').length,
       unresolvedFindingCount: findings.length,
       sourceVerifiedFamilyCount: rows.filter((row) => row.sourceProofStatus === 'verified').length,
     },
