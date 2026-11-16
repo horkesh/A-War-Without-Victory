@@ -507,6 +507,30 @@ describe('Bot response logic', () => {
         expect(state.meta.game_over).not.toBe(true);
     });
 
+    it('ground moves the RS answer: RS on little AREA accepts Vance-Owen however many settlements it holds', () => {
+        // The played half of B0. RS holds the SMALLEST 65% of settlements: by count a
+        // 22pp gap over the 43% offer (the old measure hard-rejected on the 18pp floor),
+        // by area well under the offer. A player who takes ground from RS moves this answer.
+        const { areas, total } = getOsidAreas();
+        const bySize = Object.keys(areas).sort((a, b) => (areas[a]! - areas[b]!) || strictCompare(a, b));
+        const rsCount = Math.ceil(bySize.length * 0.65);
+        const controllers: Record<string, string> = {};
+        bySize.forEach((osid, i) => { controllers[osid] = i < rsCount ? 'RS' : (i % 2 === 0 ? 'RBiH' : 'HRHB'); });
+        const rsArea = bySize.slice(0, rsCount).reduce((s, o) => s + areas[o]!, 0) / total * 100;
+        expect(rsCount / bySize.length * 100 - 43).toBeGreaterThan(18);
+        expect(rsArea).toBeLessThan(43);
+
+        const state = makeState({
+            turn: 50,
+            war_start_turn: 10,
+            decision_mode: 'emergent',
+            controllers,
+            negotiation: makeNegotiationState({ override_authority: { RS: 10, HRHB: 10, RBiH: 10 } }),
+        });
+        evaluatePeacePlans(state);
+        expect(state.military.negotiation?.pending_peace_plan?.bot_responses.RS).toBe('accepted');
+    });
+
     it('bot accepts when plan offers more than current territory', () => {
         const neg = makeNegotiationState({
             override_authority: { RS: 10, HRHB: 10 },
