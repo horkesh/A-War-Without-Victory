@@ -184,6 +184,7 @@ describe('RB9 takeover timer inheritance', () => {
         };
         const refugeesBefore = bosniakRefugees();
         const originOutBefore = state.displacement.displacement_state!.vitez!.displaced_out;
+        const osidOutBefore = state.displacement.displacement_flows_by_osid?.[OSID]?.out ?? 0;
         state.meta.turn = 60 + RETURN_HOLD_WEEKS;
         processDisplacementTakeover(state, settlements, undefined, pop1991, settlements);
         const after = timers()[KEY];
@@ -196,6 +197,11 @@ describe('RB9 takeover timer inheritance', () => {
         expect(refugeesBefore - bosniakRefugees()).toBe(returned);
         // Engine seat E2: the origin gets exactly those people back.
         expect(originOutBefore - state.displacement.displacement_state!.vitez!.displaced_out).toBe(returned);
+        // Red-team R2 / engine N1: the return is logged, and the OSID's departed tally falls by the same number.
+        const returnEvents = (state.displacement.displacement_event_log ?? []).filter((e) => (e.returned ?? 0) > 0);
+        expect(returnEvents.reduce((s, e) => s + (e.returned ?? 0), 0)).toBe(returned);
+        expect(returnEvents.every((e) => e.displaced === 0 && e.killed === 0 && e.fled_abroad === 0)).toBe(true);
+        expect(osidOutBefore - (state.displacement.displacement_flows_by_osid?.[OSID]?.out ?? 0)).toBe(returned);
         expect(outBefore).toBeGreaterThan(0);
         // refugees_created is untouched: the first expulsion happened.
         const created = state.displacement.displacement_humanitarian_aggregates?.HRHB?.RBiH?.refugees_created;
