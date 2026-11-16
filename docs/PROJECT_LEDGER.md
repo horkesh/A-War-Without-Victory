@@ -15,6 +15,31 @@
 
 The renewable RBiH presidential address (first turn 84, then about 136 and 188; turn 0 is April 1992) said "a people in the fourth year of siege", which is wrong at turns 84 (second year) and 136 (third). It now reads "a people who have lived under siege this long". One narrative sentence in `war_1993.json`; narrative and historian seats keep it; the event has no Bosnian localization. Headless 188-week artifacts unchanged. Evidence: `docs/40_reports/evidence/20261116_address_year_copy/`.
 
+## 2026-11-16 — The Ahmići consequence fires only after the 1993 war has begun and the alliance is broken (trigger only; content and wording unchanged; byte-identical)
+
+- **Why.** `csq_hvo_central_bosnia_offensive_1993` ("The Ahmići Massacre and the End of the Alliance") fired at t54-56 on `hrhb_political_goal == croat_republic` alone, whatever the RBiH-HRHB alliance. It sets alliance −1 with a 0.0 ceiling for 60 turns, and its mutex with `csq_alliance_holds_past_w35` only works within one turn. The rupture was therefore scripted from a week-3 flag. Its own text says the alliance was "already broken in practice", and the sibling `ahmici_massacre_1993` already requires the 1993 war.
+- **Measured** (instrumented diagnostic 188w; historical and hands-off emergent the same). The alliance is held at 0.40 from t10 to t40 (`ALLIANCE_FLOOR_BEFORE_WAR`). It is 0.377 at t41 after Gornji Vakuf (HRHB `escalate`), then held at 0.10 from t42 to t47 by the 12-turn floor of `csq_alliance_holds_past_w35`, then 0.076 at t48 and 0.052 at t49. The war starts at **t49** (`croat_bosniak_war_begins_1993`, `war_started_turn` 49). At t54 the alliance is −0.57. So this consequence never started the war in a left-alone game.
+- **Rulings** (historian + game designer).
+  - Gate the consequence like `ahmici_massacre_1993`: `requires_events: [croat_bosniak_war_begins_1993]` and `alliance_below 0.2`. 0.2 is `ALLIED_THRESHOLD`, matching the card's "already broken in practice"; 0.3 is still a fragile alliance.
+  - Keep the turn window, the `croat_republic` flag and the mutex (now logically exclusive). Content and wording are unchanged.
+  - Historian: the 1993 offensive was not mainly a reaction to Sarajevo. Prlić IT-04-74-T found a JCE for a Croat entity with Zagreb's participation (the 15 January 1993 ultimatum on Vance-Owen provinces 3, 8 and 10; Gornji Vakuf attacked 18 January; Vol. 2 paras 336-355). Kordić IT-95-14/2: Lašva was planned. Sarajevo's real concessions did not avert it.
+- **Proof** (main `71ffa0cb8`; logs `C:/Pyrrhic/AWWV-worktrees/_logs/b5-scorer-20261116/ah_*`, `ally_*_DIAGNOSTIC.jsonl`).
+  - Historical 188w byte-identical: `03159b9ee1e5877f` (main's pin).
+  - Hands-off emergent identical to main: `dde641b2c74838f0`.
+  - `tests/consequence_chains.test.ts`: two new cases (does not fire while the alliance holds; does not fire before the 1993 war). The firing cases now set the war and a broken alliance. Consequence, event, card and codex slices: 15 files, 280 tests pass. tsc clean.
+- **§6 panel** (Historian, scenario-tester, Engine/systems, Red-team): **unanimous GO-with-conditions**. Canon COMPLIANT WITH AMENDMENT, applied in the same change: a `SENSITIVE_HISTORY_DESIGN_GATE.md` record row and an amended-date line. Determinism PASS.
+  - The change follows Ring 3 #11: the card no longer states a dated massacre in a game whose modelled war did not produce the conflict.
+  - P2, the open Ahmići effects question, stays open with the owner and is now conditional on the war.
+  - Registered findings (not fixed here):
+    - the `ahmici_massacre_1993` card window ends at t70, so a war that starts t71-80 shows neither card nor consequence;
+    - `federation_never_fractured` is never set, so the Ahmići alliance-held note and its ghost entry can never show;
+    - that note's BCS text is a stock line, not a translation;
+    - in the historical run the alliance reads 0.15 at t68 although the consequence's 60-turn ceiling of 0.0 should still hold, so something overrides the ceiling.
+- **Not enough on its own.** Every alliance-breaker after t40 is answered by HRHB, so an RBiH President still has no lever. The orchestrator ruled on 2026-11-16 to build the RBiH lever (capitulation on the substance: ARBiH units under HVO command in provinces 3, 8 and 10, then the union of three republics, at its real price) as a content PR after A2b, with historian, narrative, game-designer and §6 seats.
+- **Calibration-pass list (registered, not changed here).**
+  - `csq_alliance_holds_past_w35` fires at t35 in every run, because the 0.40 floor makes `alliance_above 0.2` trivially true. Its 0.1 floor lock is doing history work, delaying the war to t49. Retiming it moves the hash.
+  - Five consequences check `rbih_hrhb_war_active`, which nothing sets: a dead guard.
+
 ## 2026-11-16 — B0: bot peace-plan responses measure territory by area, the unit of the plan split
 
 Batch B, item B0 (freeze cut, Fable consult 2 revision 2; must-fix before emergent ships).
@@ -695,6 +720,34 @@ Docs only; no `src/` or `data/` change, no hash change.
 
 - #732: `operation_summer_95` and `federation_ground_offensive_1995` now need the Washington agreement event or the alliance above 0.2, so a President who kept the alliance gets Croatian help and kept-alliance games reach the 1995 ceasefire and Holbrooke chain. Data only; byte-identical in historical and hands-off emergent mode; main stays 03159b9ee1e5877f. Fable consult 5's pre-freeze Croatian-help gate is done.
 - #735 (the B5 political gate: a player's political departure opens the divergence gate for the bots whose history it rules out; §6 decisions carved out) has a unanimous §6 round-2 GO and is ready, behind #744 (the Ahmići trigger, A) and #737 (A2, the Washington Federation by consent). The Ahmići bright-line panel (P2) and the alliance-lock conflict panel are both sitting.
+
+## 2026-11-16 — Pass 48: #745 (threat_ratio as a pressure index) and package P2 step 3 recorded; the wording defect left on main
+
+Docs only; no `src/` or `data/` change, no hash change.
+
+- #745: `threat_ratio` is described as a sector pressure index, not a force ratio (description only; comments plus the Systems Manual; hash unchanged, the pin stays 03159b9ee1e5877f). Registered as an ACCEPT-AS-FINAL candidate for the next Part 5 sitting (game-designer and historian): about 20 readers have thresholds tuned to its scale; rescaling is calibration-sized; documented honestly as a pressure index. Measured on a package P2 run (t99 to t178): RS staffed sectors median 48, maximum 5,346; 87% of RS sector-turns above 2.0.
+- The merged wording of #745 still says the index "falls with own cohesion" in the `game_state.ts` field comment and the Systems Manual, although the orchestrator reported the Codex direction fix as applied. The steward read the code (`brigadePower` multiplies cohesion; the index is enemy personnel divided by defensive power): falling own cohesion raises the index, so the wording is inverted and Codex comment r4588239176 stays open on main. The fix is a code comment plus a canon sentence; not made here.
+- Package P2 step 3 (candidate 4 of 8, run 80aaf7ae31900002): a retake-only counter-attack in any stance; 6 battles outside an operation, all on just-lost cells, 3 won; scores recorded 704 / 700 / 700 / 663 on the step-0 base.
+- Harness evidence in #742 (open): a sustained multi-corps Request-op lever moves the war about 2.8 percentage points off history (the old ceiling was 0.75).
+
+## 2026-11-16 — `threat_ratio` is named for what it is: a sector pressure index, not a force ratio (description only)
+
+Orchestrator ruling (package "1994-95 attack and defence", step 2b premise check).
+
+**What it is.** `CorpsFrontSector.threat_ratio` is the enemy personnel facing the whole sector, divided by `defensive_power`. `defensive_power` is own weighted personnel *per front edge*. So the value grows with sector length and falls as own cohesion falls. It is 9999 when enemies face a sector that has no defensive power.
+
+Measured on a P2 step-2 run, t99-178:
+- RS staffed sectors: median 48, max 5,346.
+- 87% of RS sector-turns are above 2.0.
+
+**Disposition: accepted as final, scale unchanged.**
+- About 20 readers have thresholds tuned to this scale. Examples: 250 in `decide.ts` and `corps_front_sectors.ts`, `DEFENSIVE_CRITICAL_THREAT`, and the `brigade_assignment` passes.
+- Rescaling would be a calibration-sized change.
+- Only the descriptions change: the `game_state.ts` field comment, the write site in `brigade_assignment.ts`, and the Systems Manual sector paragraph.
+- A system that needs a real force ratio divides enemy personnel by own effective personnel. Package P2 step 2b does this for the army-reserve gap check.
+- Registered for the Part 5 sitting via the steward.
+
+No behaviour change: comments and canon text only, so the simulation hash is unchanged.
 
 ## 2026-11-15 — Command loop L7: army clashes (proposal 2A step A1; owner decision 4)
 
