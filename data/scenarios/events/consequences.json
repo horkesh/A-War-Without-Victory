@@ -1459,10 +1459,22 @@
       "turn_min": 54,
       "turn_max": 56,
       "phase": "war",
+      "requires_events": [
+        "croat_bosniak_war_begins_1993"
+      ],
       "condition": {
-        "type": "flag_equals",
-        "flag": "hrhb_political_goal",
-        "value": "croat_republic"
+        "type": "and",
+        "conditions": [
+          {
+            "type": "flag_equals",
+            "flag": "hrhb_political_goal",
+            "value": "croat_republic"
+          },
+          {
+            "type": "alliance_below",
+            "value": 0.2
+          }
+        ]
       }
     },
     "once": true,
