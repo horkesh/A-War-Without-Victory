@@ -1,5 +1,15 @@
 # Save Schema Evolution
 
+## v39 — political-directive chain retired (2026-11-16, freeze cut B3 + B2)
+
+`CURRENT_SCHEMA_VERSION` 38 → 39. The turn pipeline no longer writes `political_directives_by_faction` or `army_corps_directives_by_faction`, and nothing reads them in a game. Migration v39 (`src/state/save_migration.ts`):
+- deletes `military.political_directives_by_faction`;
+- resets `military.army_corps_directives_by_faction` to `{}` (the field stays required since v10);
+- drains every unacknowledged `army_directive_pushback` from `pending_officer_events` (no handler existed);
+- keeps only `AUTONOMOUS_LAUNCH_PROPOSAL` rows in `army_co_decision_traces`.
+
+The migration is forward-only, deterministic (sorted keys) and idempotent. No field is added. Fresh scenario states build at v39 with the slots already empty. The startup snapshot is rebuilt at v39. Test: `tests/b3_directive_chain_retired.test.ts`.
+
 ## Optional subordinate preparation-probe fields (October 2026 — no schema version change)
 
 `CorpsOperation.preparation_probe_delivery` and `CorpsOperation.preparation_probe_link` are optional persisted fields. The capability accepts only `'subordinate'`; the link records the exact parent instance, request turn/target, source axes, execution/order receipts, and restoration state. They are authored only for Southern Move and its live subordinate child. Legacy and non-opted operations omit both keys, so no migration, version bump, required-field row, or fixture is added. `validateGameStateShape` rejects unknown capability values and malformed link ownership when present.
