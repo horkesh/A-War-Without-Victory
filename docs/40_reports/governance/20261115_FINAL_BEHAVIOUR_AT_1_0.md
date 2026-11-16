@@ -26,7 +26,7 @@ Two fresh read-only seats sat in parallel and independently, each checking the c
 - **Left alone:** yes. Bots launch dated operations on schedule.
 - **Played:** yes. The President can stop a live operation (stop-op, 25 command authority and a patron penalty), request one (25) or author one (25), and may force an operation over a commander's shown objection at a patron-confidence price. A player faction's historical operations are born authorized, opt-out (`historical_operation_authorization.ts`).
 - **Canon line to add:** "Authored and triggered operations are scripted history and are not exhaustion-gated; discretionary commander plans are gated; exhaustion is booked as a cost; the player's counter is stop-op."
-- **Conditions.** The line says the gate covers only discretionary plans, not "all operations". Before the line says "any live operation", a halt order must be shown to be accepted while an operation is still in planning (neither seat read `findLiveOp`); the L7 lane is assigned to check it (orchestrator, 2026-11-15).
+- **Conditions.** The line says the gate covers only discretionary plans, not "all operations". Before the line says "any live operation", a halt order must be shown to be accepted while an operation is still in planning (neither seat read `findLiveOp`); the L7 lane was assigned to check it (orchestrator, 2026-11-15). Done in #705 (2026-11-16, byte-identical): the check found that Stop-op was offered only for an operation in execution and that a halt did not hold, because the player-faction injection re-queued a halted authored operation the next week. Both are fixed: Stop-op is offered in planning or execution at the same price, and a halt resolves an authored operation. CODE3's grounds now hold from planning onward, and a paid halt no longer comes back. Canon amended in the same change (Engine Invariants §14.10b, Systems Manual §6.5, Game Bible line 298); the exhaustion-gate canon line above is still to be added.
 - **Seats:** game-designer RATIFY WITH CONDITIONS; historian RATIFY WITH CONDITIONS.
 
 ### RB5. No expulsion-policy waves for a human HRHB President
@@ -131,7 +131,7 @@ Each of these was on the memo's first accept list and moved to fix or retire. Th
 ## 6. Open conditions (work owed by this record)
 
 0. A hands-off emergent 188-week run at the frozen commit passes the history guards and the historian accepts its divergences (freeze condition 7); the left-alone answers of section 1 are re-checked against it.
-1. A canon line for CODE3 (discretionary plans only; exhaustion is a cost; stop-op is the player's counter), after the L7 lane checks that stop-op works on an operation in planning.
+1. A canon line for CODE3 (discretionary plans only; exhaustion is a cost; stop-op is the player's counter). The precondition is met (#705: stop-op works in planning and a halt holds); the line itself is not yet in canon.
 2. RB5: the reason text of section 1 in canon; the withholding at autonomy 1 to 3 is a Part 3 fix item whose design the §6 panel decides (sensitive: no lane touches it before that ruling); a Part 3 copy fix, with the narrative and historian seats, so no Verdict, ending or ledger copy presents the missing waves as the player's restraint.
 3. PK5: C7 fixed; the retry duty for the 1994 ARBiH fights met by the package or by Part 6.
 4. SD6 and SD8: keep the three disclosure strings; no UI shows a siege civilian-death number as simulation output; the `scoring.ts:172` note stays open.

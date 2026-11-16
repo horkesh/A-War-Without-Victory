@@ -19,6 +19,31 @@ The renewable RBiH presidential address (first turn 84, then about 136 and 188; 
 
 The historian read the cited location of every BB reference (109 groups, 279 mentions): 109 mentions cite the right printed page, 36 are right only at the knowledge-base extraction or PDF number (the printed page shown is wrong), 12 hold in part, 108 (39%) are about something else, 14 are accurate "does not exist" notes. 80 of the wrong ones cite Vol. II "chapters" (BB Vol. II has addenda and annexes only); 27 are pages from the wrong year or place (Vol. II pp. 358-366, 312-321, 287-314, 406-417, 459-462, 471-475, 506-520, 28-31, 9-32; Vol. I pp. 198-229); the printed-page rule is Vol. I = PDF - 37 and Vol. II = PDF - 19. 95 hidden notes record the correction; extraction numbers become printed pages everywhere (Vol. I p. 187 to p. 151, p. 462 to p. 425, pp. 416-420 to pp. 379-383, Vol. II pp. 536-538 to pp. 517-519 and others); 52 player-visible strings (events and Codex essays) drop wrong pages and non-existent chapters, leaving the source name, or show the verified printed page; the Vol. II pp. 28-31 Vance-Owen claim now cites Vol. I p. 8. One more visible audit-vocabulary leak on main ("the H4 audit") is fixed and added to the permanent leak test, and the historian's earlier PR-B rewrite that cited an extraction number (Vol. I pp. 418-421) now cites pp. 381-384. New test `tests/ui/event_bb_citations.test.ts`; `rbih_state_identity` (pinned) keeps 3 visible Vol. II pp. 406-417 cites until its next re-pin. Evidence and exhaustive file list: `docs/40_reports/evidence/20261115_bb_citation_audit/`.
 
+## 2026-11-16 — CODE3: the President can stop an operation while it is still being planned, and a halt holds (byte-identical)
+
+- **Why.** The 1.0 final-behaviour record accepts CODE3 (scripted and event-raised operations have no exhaustion gate) because the President's Stop-op is the counter. Two things broke that claim.
+  - **Offer.** The Decision Room card and the opportunity dossier offered Stop-op only for an operation in execution (`presidentialDecisionRoom.ts`). The engine and IPC already halted a planning op through the same clean path (`apply-op-halts`, `op_halt.cjs`).
+  - **Halt did not hold** (found by the game-designer seat, proven by a failing test). The player-faction pre-planned injection runs every week and re-queues any authored operation that is neither active, queued nor resolved. A halt removes the op and writes no AAR, so the halted authored operation was injected again the next week. This affected halts in either phase: the President paid 25 Authority and the operation came back.
+- **Fix.**
+  - The Stop-op card and the dossier's Stop-op are offered for an operation in planning or execution. Not in recovery, and not when the save did not report the phase (the adapter defaults that to planning). One shared helper, `stopOpDirective`.
+  - The price stays 25 Authority, with the same army objection, clash and patron consequence (game-designer seat: no discount).
+  - Planning ops get their own copy (EN, BCS) and sort after executing ones.
+  - `prePlannedOperationAlreadyResolved` (`pre_planned_operations.ts`) counts a halt in the corps' `halted_op_record` as the operation's resolution. One authored operation is one attempt. Triggered operations were already guarded by `fired_event_ids`.
+- **Copy (ui-ux seat).**
+  - The dossier line now reads "This operation can be halted only while it is being prepared or carried out." (BCS "Obustava operacije moguća je samo dok se ova operacija priprema ili izvodi.").
+  - The BCS planning line is gender-free.
+  - The army-objection line reads "The army wants the operation to go ahead." / "Armija želi da se operacija provede.", which suits a planning op.
+- **Canon (canon-compliance seat: COMPLIANT WITH AMENDMENT).** Amended in the same change:
+  - Engine Invariants §14.10b: Stop-op is offered when the bound operation is in planning or execution.
+  - Systems Manual §6.5: the same, plus "a halt, in either phase, resolves an authored operation: it is not queued again".
+  - Game Bible :298: "halt a live operation (in planning or execution)".
+  - No FORAWWV change.
+- **Proof.**
+  - **Byte-identical.** One 188-week run on main after #696 gives `70f4dc05bf375bc7`, equal to main. `halted_op_record` and the Stop-op offer are player-only.
+  - **Tests.** New `tests/stop_op_halt_no_requeue.test.ts`: a halted pre-planned operation, in planning and in execution, is removed and not re-queued or re-injected the next week. It failed before the fix. An un-halted one still queues.
+  - Decision Room tests: a planning op gets the card at the same price and payload with planning copy; recovery, unreported-phase and enemy ops do not.
+  - 33 related files pass (634 tests). tsc is clean.
+
 ## 2026-11-16 — CODE4: equal-power defenders rank by formation id (freeze Batch C5; byte-identical)
 
 - **Defect.** `rankDefendersByPower` (`src/sim/combat/combat_math.ts`) and its predictor mirror (`rankDefendersByPowerWithEntries`, `combat_predictor.ts`) sorted defenders by power only.
@@ -48,6 +73,34 @@ The historian read the cited location of every BB reference (109 groups, 279 men
   - Re-pinned `data/derived/scenario/baselines/manifest.json`. The 40-week structural fingerprint is unchanged (`3b1ddd64fb4f1600`).
 - **Tests.** `tests/army_hq_gathering.test.ts` now asserts the assessment's and the doctrine's retired fields are gone and that the corps ceilings still apply. 296 tests in the affected files pass, and tsc is clean.
 
+## 2026-11-16 — Package "1994-95 attack and defence": the appendix C harness can run the played test (tooling, inert)
+
+The package's second pass test is "played": an engaged RBiH President who concentrates on one axis can win ground at a visible cost, including with a Request-op on an exhausted corps. The scenario tester found that #682's harness could not run that test. Its Request-op picked a held-back corps or the busiest front and the first buildable target, never one axis or an exhausted corps, and recorded no exhaustion or outcome.
+
+**Change (tools only, opt-in):**
+- `tools/ai_play/president_policies.ts`:
+  - `requestCandidates` is exported and takes `requestAxis` (one corps, targets in named municipalities) and `preferExhausted` (a corps above `MAX_EXHAUSTION_FOR_OPERATION` first);
+  - with either option, each staged Request-op leaves a `request_details` record.
+- `tools/ai_play/desktop_calibration_compare.ts`:
+  - new flags `--request-axis` and `--request-prefer-exhausted`;
+  - with either, the output adds `president_requests` (each order joined to its after-action report in `state.operation_history`) and `requested_corps_exhaustion` per turn.
+- The README documents the flags.
+- **Found:** an engaged President with `--event-policy bot_equivalent` stops on `strategic_posture_review_rbih` (no response `accept_ceasefire_terms`). That is a pre-existing harness defect, documented and not fixed here.
+
+**Inert.**
+- No `src/` change, so the 188-week hash cannot move.
+- A 10-turn engaged run without the new flags gives the same output as main, except the tool's own entry in `entrypoint_source_sha256`.
+
+**Tests.** New `tests/president_policies_request_axis.test.ts`:
+- the default order is unchanged;
+- preferExhausted puts the exhausted corps first;
+- the axis keeps only its corps and municipalities;
+- an empty axis gives no candidate.
+
+`tests/desktop_calibration_compare.test.ts` passes.
+
+**Smoke run (12 turns, axis 3rd Corps on Maglaj/Zavidovići/Žepče).** A Request-op at t7 on Donja Bočinja was forced over the commander's objection and cost 25 Authority. The join shows it ended `failure / defender_power_too_high`, with 0 attacks.
+
 ## 2026-11-16 — Package "1994-95 attack and defence", P0: the multi-corps offensive pre-set is retired (inert)
 
 Fable consult 2, Revision 2 (P0): retire RF-STRENGTH's dead write and its never-run replacement, proving the hash unchanged.
@@ -70,6 +123,10 @@ Fable consult 2, Revision 2 (P0): retire RF-STRENGTH's dead write and its never-
 - New `tests/sim/coordination_preset_retired.test.ts`.
 
 Evidence: `C:/Pyrrhic/AWWV-worktrees/_logs/pkg-1994-95-step0/` (p0_*).
+
+## 2026-11-16 — RB6: 13 bot operation-pool names replaced in place (Džihad and twelve real or loaded names)
+
+`src/sim/combat/operation_names.ts`: "Operacija Džihad" (never an ARBiH operation; the ICTY ties the word to the foreign El Mujahed Detachment and Serb propaganda used it to brand all Muslims) became Prevoj; the real operation names Sabur, Oluja, Bljesak, Udar (twice), Proboj and Vihor (twice) and the loaded names Hajka, Gazija, Grad and Odmazda became Temelj, Snijeg, Bujica, Nasip and Mlaz, Zalet, Granit and Mećava, Ždral, Vedrina, Magla and Smreka, each in its original slot (pool lengths 38 / 39 / 35 unchanged, selection deterministic). Historian and narrative seats chose the replacements; each was checked against the pools, the reserved list, the authored catalogues, BB Vol. I and II and the ICTY texts. New test `tests/operation_names_no_real_operations.test.ts`. Data-only (names move the state hash only for runs that draw those slots): measured pass in the PR. Evidence and rename map: `docs/40_reports/evidence/20261116_rb6_operation_names/`.
 
 ## 2026-11-16 — Pass 20: BC06 gestures accepted as final, RC dropped, BC18 C as an add-on candidate, #689-#692 recorded
 
@@ -109,6 +166,16 @@ Docs only; no `src/` or `data/` change, no hash change.
 
 - B3 (political-directive producer, Wave 6 coupling, RS corps-role overlay): the Batch B lane found the overlay is a hard plan gate, not a 0.02 weight (`plan.ts:173-176`): it locks all ARBiH corps to the economy role and lifts every RS and HRHB corps. Ruled B3-b (no produced directive for any faction, the human's staff included) with B2-b (stop producing `army_directive_pushback`, drain the old events on load). B3 lands after package P2 and before P3. Work list rows B2 and B3 and the final-behaviour record (section 6, item 6) updated.
 - `jan1993_to_dayton` cannot start on main: `data/source/municipalities_1990_initial_political_controllers_jan1993.json` has never existed in git history. Read-only check: it is not reachable by a player (the desktop New Game and IPC accept only `apr_1992`; no scenario picker renders; `SCENARIO_REGISTRY` has no consumer in `src/` besides tests). Registered in the work list (Part 4, J1) and ruled RETIRE by the orchestrator (inert, proves the hash unchanged, owner the first lane that frees up, may land after the freeze and before 1.0); a January 1993 start could return later as an add-on campaign (content with its own painted control), not as engine work.
+
+## 2026-11-16 — Pass 25: #703, #705, #706 recorded; N6 retire becomes fix; C7 ruled the bounded skip
+
+Docs only; no `src/` or `data/` change, no hash change.
+
+- #705, CODE3: Stop-op reaches operations in planning and a halt holds (a halted authored operation used to be re-queued the next week). Byte-identical. Engine Invariants §14.10b, Systems Manual §6.5 and Game Bible line 298 amended. In the final-behaviour record the CODE3 grounds hold from planning onward; the canon line about the exhaustion gate stays owed. Work list row C9.
+- #703, RB6: 13 bot operation-pool names that were real or loaded operations replaced in place (Džihad to Prevoj and 12 more). The names live in state, so the headless `final_state_hash` moved to 1391f69248072728, with zero differences after mapping the names back; recorded as the main hash at #703, not the freeze hash. #705 was measured byte-identical against the pre-#703 main (70f4dc05bf375bc7) and has not been re-measured on top of #703.
+- #706: the one-axis, exhausted-corps Request-op in the played-test harness (tooling, opt-in, inert).
+- Dispositions: N6 moves from retire to FIX (stable-key concentration zones, #709 open; player-visible in the command-strain text); C7 PK5 is ruled the bounded skip (a plain skip would have deleted Srebrenica-Cerska and Pracha River).
+- Open at this pass: #697, #700, #701, #708, #709.
 
 ## 2026-11-15 — Command loop L7: army clashes (proposal 2A step A1; owner decision 4)
 
