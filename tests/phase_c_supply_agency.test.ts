@@ -1,11 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import type { EdgeRecord } from '../src/map/settlements.js';
-import {
-    applyHumanitarianConvoyDecisions,
-    applySmugglingAllocation,
-    evaluateHumanitarianConvoys,
-    maybeActivateSarajevoTunnel
-} from '../src/state/supply_reserves.js';
+import * as supplyReserves from '../src/state/supply_reserves.js';
+import { applySmugglingAllocation } from '../src/state/supply_reserves.js';
 import {
     applyIvpConsequences,
     ensureInternationalVisibilityPressure,
@@ -154,27 +149,14 @@ describe('Phase C supply agency', () => {
         expect(ivp.composite_ivp).toBeGreaterThan(0);
     });
 
-    it('generates deterministic convoy decisions and applies divert effects', () => {
-        const state = makeState();
-        const edges: EdgeRecord[] = [
-            { a: 'enclave_1', b: 'route_rs' } as EdgeRecord,
-            { a: 'enclave_2', b: 'route_rs' } as EdgeRecord,
-        ];
-
-        const convoys = evaluateHumanitarianConvoys(state, edges);
-        expect(convoys).toHaveLength(1);
-        expect(convoys[0]?.route_faction).toBe('RS');
-
-        state.military.pending_convoy_decisions = [{ ...convoys[0], decision: 'divert' }];
-        applyHumanitarianConvoyDecisions(state);
-
-        expect(state.military.general_supply_reserve?.RS).toBeCloseTo(40 + (convoys[0]?.supply_amount ?? 0) * 0.5);
-        expect(state.military.general_supply_reserve?.RBiH).toBeCloseTo(20 + (convoys[0]?.supply_amount ?? 0) * 0.5);
-        expect(state.military.pending_convoy_decisions).toEqual([]);
-        expect(state.factions.find((f) => f.id === 'RS')?.patron_state?.diplomatic_isolation ?? 0).toBeGreaterThan(0);
+    it('F1i: humanitarian convoys and the enclave-derived tunnel activation are retired (not in 1.0)', () => {
+        const mod = supplyReserves as Record<string, unknown>;
+        expect(mod.evaluateHumanitarianConvoys).toBeUndefined();
+        expect(mod.applyHumanitarianConvoyDecisions).toBeUndefined();
+        expect(mod.maybeActivateSarajevoTunnel).toBeUndefined();
     });
 
-    it('applies smuggling allocation to ammo and food tracks and unlocks Sarajevo tunnel', () => {
+    it('applies smuggling allocation to ammo and food tracks', () => {
         const state = makeState({
   military: {
     smuggling_allocation: {
@@ -187,10 +169,10 @@ describe('Phase C supply agency', () => {
         state.political.international_visibility_pressure!.enclave_humanitarian_pressure = 0.5;
 
         applySmugglingAllocation(state);
-        maybeActivateSarajevoTunnel(state);
 
         expect(state.military.heavy_munitions_reserve?.RBiH).toBeGreaterThan(5);
         expect(state.political.international_visibility_pressure?.enclave_humanitarian_pressure).toBeLessThan(0.5);
-        expect(state.military.sarajevo_tunnel_operational).toBe(true);
+        // F1i: smuggling no longer opens the tunnel; it is event truth (sarajevo_lifeline.ts).
+        expect(state.military.sarajevo_tunnel_operational).toBeUndefined();
     });
 });

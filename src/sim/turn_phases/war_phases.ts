@@ -212,11 +212,8 @@ import { applyBrigadeMovementOrders } from '../combat/brigade_movement_orders.js
 import { processOsidColumnMovement, type OsidColumnMovementReport } from '../combat/osid_column_movement.js';
 import { updateSupplyPressure } from '../combat/supply_pressure.js';
 import {
-    applyHumanitarianConvoyDecisions,
     applySmugglingAllocation,
     applyUnAirdrops,
-    evaluateHumanitarianConvoys,
-    maybeActivateSarajevoTunnel,
     updateSiegeTurnCounters,
     updateSupplyReserves
 } from '../../state/supply_reserves.js';
@@ -4151,7 +4148,8 @@ export const warPhases: NamedPhase[] = [
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
             const sarajevo = updateSarajevoState(context.state, context.report.supply_resolution?.supply_state_by_osid);
-            maybeActivateSarajevoTunnel(context.state);
+            // F1i (2026-11-16): the enclave-derived tunnel activation is retired (it could never
+            // fire); the tunnel is event truth in sarajevo_lifeline.ts.
             context.report.sarajevo_exception = {
                 siege_status: sarajevo.siege_status,
                 siege_intensity: sarajevo.siege_intensity,
@@ -4164,14 +4162,12 @@ export const warPhases: NamedPhase[] = [
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
             ensureInternationalVisibilityPressure(context.state);
-            // #23 phase 2: bridge enclave_resilience map into IVP rollup. The
-            // primary supply-critical-component detection produces zero entries
-            // despite historically-correct sieges (n10 empirical); the fallback
-            // reads the hand-curated enclave_resilience map so siege humanitarian
-            // pressure surfaces in IVP and constraint_severity can clear W4 (>0.55).
-            const primaryPressure = context.report.enclave_integrity?.humanitarian_pressure_total ?? 0;
-            const fallbackPressure = computeEnclaveResilienceFallbackPressure(context.state);
-            const enclavePressure = primaryPressure + fallbackPressure;
+            // F1i (2026-11-16, §6 panel, unanimous): IVP's enclave humanitarian term has ONE
+            // source, the hand-curated enclave_resilience map (SENSITIVE_HISTORY_DESIGN_GATE's
+            // enclave authority). The generic supply-critical detector (political.enclaves) is
+            // not added: once its read was fixed it double-counted the same sieges, saturated the
+            // term at 1.0 every turn and billed turn-1 mixed-control noise pockets.
+            const enclavePressure = computeEnclaveResilienceFallbackPressure(context.state);
             const ivp = updateInternationalVisibilityPressure(
                 context.state,
                 context.state.political.sarajevo_state,
@@ -4187,20 +4183,8 @@ export const warPhases: NamedPhase[] = [
             (context.report as TurnReport & { patron_ivp_active_consequences?: string[] }).patron_ivp_active_consequences = consequences;
         }
     },
-    {
-        name: 'evaluate-humanitarian-convoys',
-        run: (context) => {
-            if (context.state.meta.phase !== 'war') return;
-            const edges = context.input.settlementEdges;
-            if (!edges?.length) return;
-            const created = evaluateHumanitarianConvoys(context.state, edges);
-            applyHumanitarianConvoyDecisions(context.state);
-            (context.report as TurnReport & { humanitarian_convoys?: { created: number; pending: number } }).humanitarian_convoys = {
-                created: created.length,
-                pending: context.state.military.pending_convoy_decisions?.length ?? 0,
-            };
-        }
-    },
+    // F1i (2026-11-16): 'evaluate-humanitarian-convoys' is retired; humanitarian convoys are not in
+    // 1.0 (see supply_reserves.ts). The step never found a route on any reachable path.
     {
         name: 'update-legitimacy',
         run: async (context) => {
