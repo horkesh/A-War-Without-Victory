@@ -18,14 +18,15 @@ export interface FrontPriority {
     hold_targets?: string[];
 }
 
-/** Adaptive doctrine override replacing calendar-driven phases */
+/**
+ * Doctrine override from the Army HQ gathering: per-corps stance ceilings.
+ *
+ * F7b retirement (2026-11-16): `army_stance` and `aggression_modifier` are no longer produced; no
+ * code read them. Saves written before carry them, and the validator accepts them as legacy fields.
+ */
 export interface DoctrineOverride {
-    /** Army-wide stance */
-    army_stance: 'general_defensive' | 'balanced' | 'general_offensive' | 'total_mobilization';
     /** Per-corps stance ceilings */
     corps_stance_ceilings?: Record<string, 'offensive' | 'balanced' | 'defensive' | 'reorganize'>;
-    /** Aggression modifier applied to all corps */
-    aggression_modifier: number;
 }
 
 /** A participant in a synchronized multi-corps operation */
@@ -103,9 +104,6 @@ export interface CorpsAssessment {
 /** Theater-wide assessment produced before plan generation */
 export interface TheaterAssessment {
     corps_assessments: CorpsAssessment[];
-    territory_trend: 'gaining' | 'stable' | 'losing';
-    supply_status: 'abundant' | 'adequate' | 'strained' | 'critical';
-    manpower_status: 'healthy' | 'adequate' | 'strained' | 'critical';
     weakest_enemy_front: string | null;
     strongest_threat: string | null;
 }
