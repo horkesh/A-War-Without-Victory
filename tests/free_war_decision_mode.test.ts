@@ -184,6 +184,15 @@ test('emergent decisions are deterministic: same state → same choice twice', (
     assert.strictEqual(chosenResponseId(a), SIGNAL_DRIVEN_ID);
 });
 
+test('B5 fix 4: emergent decisions are deterministic with the gate closed too', () => {
+    const a = rsBotState('emergent', false);
+    const b = rsBotState('emergent', false);
+    evaluateEvents(a, rng, 10, [rsDecisionEvent()]);
+    evaluateEvents(b, rng, 10, [rsDecisionEvent()]);
+    assert.strictEqual(chosenResponseId(a), chosenResponseId(b));
+    assert.strictEqual(chosenResponseId(a), HISTORICAL_DEFAULT_ID);
+});
+
 test('Phase 0.5: a `historical`-logic event DIVERGES in emergent (routed to the political scorer, not the v1 railroad)', () => {
     const state = rsBotState('emergent');
     evaluateEvents(state, rng, 10, [rsHistoricalLogicEvent()]);
