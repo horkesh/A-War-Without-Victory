@@ -148,6 +148,7 @@ describe('LANE-NIGHTSHIFT-ROUND2: divergence event seeds', () => {
         expect(def.trigger.turn_min!).toBeGreaterThan(Math.max(PARAMILITARY_FADE_WEEK, OFFENSIVE_PARA_FADE_WEEK));
         // The narrative claims only what the predicate measures.
         expect(def.narrative).not.toMatch(/clean record|without massacres/i);
+        expect(JSON.stringify(def.effect)).not.toMatch(/clean[- ]record/i);
         applyEventEffects(fires, effectsOf(def));
         // No mechanical effect on negotiation_capital.international_credibility key needed —
         // the negotiation_capital writer only mutates fields already present on the capital
