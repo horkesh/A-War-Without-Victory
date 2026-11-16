@@ -888,6 +888,16 @@ Docs only; no `src/` or `data/` change, no hash change.
 - Four §6 residuals go to the §6 atrocity lane for a pre-freeze disposition (fix, retire, or accept with a reason): the 15,000 civilian-harm threshold unreachable for a human RBiH or HRHB President; refugee-only expulsion ungated; the C cap lets D and F gain at the margin; a save edit of decision_mode.
 - #740 has GO after its lane merges main (one conflict in SENSITIVE_HISTORY_DESIGN_GATE.md) and re-proves the hash; byte-identical, merges on green.
 
+## 2026-11-16 — Pass 58: S1 owner change and S2 (the in-sim peace phase), the three-President re-measure closed, the BCS gap, W5 answered
+
+Docs only; no `src/` or `data/` change, no hash change.
+
+- S1 `sep1991_to_dayton`: the owner is now the batch-b-lane (not L7; L7 keeps J1). One PR: the runner's peace-start block and the peace-to-war read, the scenario and registry entry, and `meta.peace_war_start_control_path` retired with a schema v40 migration. It is hash-moving (the key leaves every save) and waits for GO after #729. The determinism finding closes as "retired with the peace phase, not made repo-relative".
+- S2, a new pre-freeze Part 4 item (batch-b-lane, right after S1): the in-sim peace phase (`runOneTurn`'s peace branch, the referendum and declaration logic, the `peace_scheduled_*` meta, the UI `phase === 'peace'` branches in 12 files); the canon check comes first, and a FORAWWV or phase-specification edit needs its panel.
+- The three-President re-measure after G1 (Appendix C, RBiH, 104 weeks): the held tuning order is NOT triggered (hands-off at cap 100%; engaged at cap 13%, minimum 6.5, was 65.5 before G1; meddler at cap 0%, minimum 3.25). Closed. #761: a harness fix (bot_equivalent picks only among the offered options; tooling, hash-neutral), merged.
+- The BCS gap measured by the UI lane: 172 of 186 fired events have no BCS title or narrative, and 70 of 75 decisions; the whole catalogue is 288 of 302 (about 1,500 or more strings). The effects[] PR goes ahead with a list-driven allowlist test; full BCS for event content is an owner scope question (pending); GAME_STATE_RATING_MASTER grades localisation against the 1.0 English-only contract.
+- W5 answered: the Ahmići war_crimes_delta +3 is live in the engine (it goes to the shared war_crimes_events counter only, never to war_crimes_events_emergent, so it does not trip §2a; only the notice drops it); W5 is now a display question for the full §6 copy panel; the §6 lane also checks whether readers of the shared counter treat scripted historical atrocities as the player's own.
+
 ## 2026-11-16 — t76 Belgrade event: Pale's historical posture in autumn 1993 is staying in step with Belgrade, not defiance
 
 A factual truth fix found by the second Batch B lane's historian and assigned to this lane. It is not tuning, so it proceeds under the calibration HOLD with the scores recorded.
