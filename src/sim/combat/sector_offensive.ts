@@ -1761,8 +1761,13 @@ export function advanceSectorOffensives(
 
             if (op.type === 'feint' && elapsed >= FEINT_PLANNING_TURNS) {
                 applyCohesionDelta(state, allBrigades, -5);
-                if (!state.military.general_supply_reserve) state.military.general_supply_reserve = {};
-                state.military.general_supply_reserve[faction] = Math.max(0, (state.military.general_supply_reserve[faction] ?? 0) - 0.5);
+                // The feint's supply cost exists only where the reserve model runs (F7, 2026-11-15).
+                // With reserves off this wrote a phantom 0 reserve that nothing acted on but the turn
+                // summary showed as a -0.5 supply change.
+                if (state.meta.supply_reserves_enabled) {
+                    if (!state.military.general_supply_reserve) state.military.general_supply_reserve = {};
+                    state.military.general_supply_reserve[faction] = Math.max(0, (state.military.general_supply_reserve[faction] ?? 0) - 0.5);
+                }
                 beginRecovery(op, turn, 'manual_termination', state);
                 continue;
             }

@@ -58,7 +58,7 @@ function baseState(turn: number, opts: {
 } = {}): GameState {
     return {
         schema_version: 1,
-        meta: { turn, phase: 'war', scenario_id: 'test', player_faction: 'RBiH', seed: 'wave18' } as GameState['meta'],
+        meta: { supply_reserves_enabled: true, turn, phase: 'war', scenario_id: 'test', player_faction: 'RBiH', seed: 'wave18' } as GameState['meta'],
         factions: [
             { id: 'RBiH', profile: {} as any, areasOfResponsibility: [], supply_sources: [] },
             { id: 'RS', profile: {} as any, areasOfResponsibility: [], supply_sources: [] },

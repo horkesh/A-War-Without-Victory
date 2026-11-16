@@ -87,7 +87,7 @@ function baseState(turn: number, overrides: BaseStateOverrides = {}): GameState 
     const hrhbSupply = overrides.hrhbSupply ?? 40;
     return {
         schema_version: 1,
-        meta: { turn, phase: 'war', scenario_id: 'test', player_faction: 'RBiH', seed: 'div17' } as GameState['meta'],
+        meta: { supply_reserves_enabled: true, turn, phase: 'war', scenario_id: 'test', player_faction: 'RBiH', seed: 'div17' } as GameState['meta'],
         factions: [
             { id: 'RBiH', profile: {} as any, areasOfResponsibility: [], supply_sources: [] },
             { id: 'RS', profile: {} as any, areasOfResponsibility: [], supply_sources: [] },
