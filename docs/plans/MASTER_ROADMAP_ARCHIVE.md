@@ -548,3 +548,8 @@ the re-pin of `rbih_state_identity` and `rbih_paramilitary_policy_1992` (#689, s
 Merged list moved 2026-11-16 (steward pass 36), verbatim from the same paragraph:
 
 F7, false supply-reserve events no longer fire where the reserve model is off (#690, control-identical; the headless `final_state_hash` moved to 799e43a7ee2f4764, state only, the main hash at #690); F7b, the Army HQ plan's unread army stance and aggression modifier and the three theater statuses that fed them retired, with the reserves-off supply bug (#696, control-identical: 0 cells differ at w39, w104, w156 and w188, all 251 control events identical, scores unchanged; the headless `final_state_hash` is now 70f4dc05bf375bc7, state only, the six retired fields, the main hash at #696; save-compatibility test included); package P0, `coordinateMultiCorpsOffensive` retired (#694, all 8 artifacts byte-identical, so the headless `final_state_hash` stays 799e43a7ee2f4764; it also removes an override of a President's accepted stance, a player-path fix);
+
+
+Merged list moved 2026-11-16 (steward pass 41), verbatim from the same paragraph:
+
+B1, army-commander competence decays linearly as documented (#701, inert in headless); the PK5 bounded queue skip (#721, byte-identical); the `address_to_nation_rbih` closing line made year-neutral (#698, string only);
