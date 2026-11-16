@@ -677,10 +677,14 @@ export function evaluateScheduledTransitions(
  * Apply emergent variation rules per DDR Q5 to officers held past schedule.
  * Faction-symmetric: same code path for every officer.
  *
+ * CALL ONCE PER TURN. The competence rule applies one turn's decay per call and
+ * has no same-turn guard; the only pipeline caller is `applyArmyCoRosterStep`
+ * (war step `evaluate-army-co-transitions`). Competence is serialized in
+ * `named_officer_data`, so a reload resumes the decay without re-applying it.
+ *
  * Rules applied each turn the officer is held past `tenure_end_default`:
- *   • Competence decays by `competence_decay_per_12w / 12` per turn (linearized
- *     to per-turn so the rule is well-defined for any turn delta). Floored at
- *     1.0 to preserve combat-formula bounds.
+ *   • Competence decays by `competence_decay_per_12w / 12` per turn, linearly
+ *     (B1). Floored at 1.0 to preserve combat-formula bounds.
  *   • Stubbornness escalates by +1 once at the moment the officer first
  *     overstays (capped at `stubbornness_cap`).
  *   • Cooldown halving is signaled by mutating the officer's
