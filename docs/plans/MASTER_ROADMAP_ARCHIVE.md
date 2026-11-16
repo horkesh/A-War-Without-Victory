@@ -553,3 +553,13 @@ F7, false supply-reserve events no longer fire where the reserve model is off (#
 Merged list moved 2026-11-16 (steward pass 41), verbatim from the same paragraph:
 
 B1, army-commander competence decays linearly as documented (#701, inert in headless); the PK5 bounded queue skip (#721, byte-identical); the `address_to_nation_rbih` closing line made year-neutral (#698, string only);
+
+
+Merged list moved 2026-11-16 (steward pass 43), verbatim from the same paragraph:
+
+the freeze cut and work list (#681) and the emergent-mode ruling (#692); the one-axis exhausted-corps Request-op in the played-test harness (#706, tooling); B4, the army commander's autonomous launch retired (#700, inert);
+
+
+Merged list moved 2026-11-16 (steward pass 45), verbatim from the same paragraph:
+
+RF-PM1, the paramilitary-refusal consequence fires only on a real refusal (#708, §6 panel, control-identical);  B0, the bot peace-plan floors measure territory by area (#697; inert in historical mode);  B5 scorer fixes 1 to 3, territory trend, exhaustion scale and the neutral patron term (#726, historical byte-identical, emergent hash-identical);

@@ -5,10 +5,9 @@
  * (941bd68e + 168d65c2)
  * Predecessors: A1 18136710 • A2 ba6955bf • A3 c8ff93d8 • A4 93c75b1d • B1 44053a32
  *
- * B2 ships canonical political-leader Ring 2 DATA + scenario-init wire-up
- * that populates B1's substrate slots. Once both are populated, B1's
- * `producePoliticalDirective` transitions from always-null to actively
- * emitting verbs consumed by A3 and observable at 188w via A3+A4 telemetry.
+ * B2 ships canonical political-leader Ring 2 DATA + scenario-init wire-up.
+ * The B1 producer that read it was retired 2026-11-16 (freeze cut B3); the
+ * substrate is still loaded into state and these tests cover the loader only.
  */
 
 import { describe, expect, it, beforeEach, afterEach } from 'vitest';
@@ -16,7 +15,6 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 import type { GameState, FactionId } from '../src/state/game_state.js';
-import type { PoliticalDirective } from '../src/sim/combat/army_order_interpretation.js';
 import type {
     PoliticalLeaderProfile,
     PoliticalLeaderState,
@@ -28,10 +26,6 @@ import {
     isValidLeaderProfile,
     _resetPoliticalLeaderDataCache,
 } from '../src/sim/political/political_leader_data_loader.js';
-import {
-    producePoliticalDirective,
-    applyPoliticalDirectiveProducer,
-} from '../src/sim/political/political_directive_producer.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -139,48 +133,6 @@ describe('B2 — populates political_leaders', () => {
 });
 
 // ===========================================================================
-// T4 — B1 producer fires (returns non-null) when B2 data is loaded
-// ===========================================================================
-describe('B2 — B1 producer becomes active', () => {
-    it('T4 — producePoliticalDirective returns non-null after B2 init for all factions', () => {
-        const state = makeBaseState();
-        applyPoliticalLeaderDataInit(state, CANONICAL_JSON_PATH);
-        const factions: FactionId[] = ['HRHB', 'RBiH', 'RS'];
-        for (const faction of factions) {
-            const directive = producePoliticalDirective(state, faction);
-            expect(directive).not.toBeNull();
-            expect(directive!.verb).toBeDefined();
-            expect(directive!.directive_id).toContain(faction);
-        }
-    });
-
-    it('T4b — Karadžić (RS, hawkishness 4.2) emits PRESS_OFFENSIVE by default', () => {
-        const state = makeBaseState();
-        applyPoliticalLeaderDataInit(state, CANONICAL_JSON_PATH);
-        // Default state: no exhaustion, no IVP, alliance positive — hawkish
-        // path dominates.
-        (state.political as unknown as { war_alliance_rbih_hrhb: number })
-            .war_alliance_rbih_hrhb = 1;
-        const d = producePoliticalDirective(state, 'RS');
-        expect(d).not.toBeNull();
-        expect(d!.verb).toBe('PRESS_OFFENSIVE');
-    });
-});
-
-// ===========================================================================
-// T5 — B1 producer returns null when B-LANE disabled, even with B2 data
-// ===========================================================================
-describe('B2 — B-lane disable flag dominates', () => {
-    it('T5 — B_LANE_POLITICAL_DIRECTIVE_PRODUCER_DISABLED=true forces null even with B2 substrate', () => {
-        const state = makeBaseState();
-        applyPoliticalLeaderDataInit(state, CANONICAL_JSON_PATH);
-        process.env.B_LANE_POLITICAL_DIRECTIVE_PRODUCER_DISABLED = 'true';
-        const d = producePoliticalDirective(state, 'RS');
-        expect(d).toBeNull();
-    });
-});
-
-// ===========================================================================
 // T6 — Determinism: re-run produces byte-identical state
 // ===========================================================================
 describe('B2 — determinism', () => {
@@ -245,57 +197,8 @@ describe('B2 — backward-compat (missing data)', () => {
         applyPoliticalLeaderDataInit(state, resolve('data/scenarios/_does_not_exist_.json'));
         const after = JSON.stringify(state.military);
         expect(after).toBe(before);
-        // B1 producer must still return null with empty substrate.
-        expect(producePoliticalDirective(state, 'RS')).toBeNull();
     });
 
-    it('T8b — pre-B2 save (no political_leader_data) survives applyPoliticalDirectiveProducer', () => {
-        const state = makeBaseState();
-        // Simulate pre-B2 save: NO political_leader_data, NO political_leaders.
-        expect(() => applyPoliticalDirectiveProducer(state)).not.toThrow();
-        const mil = state.military as GameState['military'] & {
-            political_directives_by_faction?: Record<string, PoliticalDirective>;
-        };
-        expect(mil.political_directives_by_faction).toBeUndefined();
-    });
-});
-
-// ===========================================================================
-// T9 — A3 receives non-null directive when B2 + B1 + (faction !== player) all GO
-// ===========================================================================
-describe('B2 — A3 sees the directive', () => {
-    it('T9 — applyPoliticalDirectiveProducer writes directives_by_faction for non-player factions', () => {
-        const state = makeBaseState();
-        applyPoliticalLeaderDataInit(state, CANONICAL_JSON_PATH);
-        applyPoliticalDirectiveProducer(state);
-        const mil = state.military as GameState['military'] & {
-            political_directives_by_faction?: Record<string, PoliticalDirective>;
-        };
-        expect(mil.political_directives_by_faction).toBeDefined();
-        // All three canonical factions emit (no player_faction set in test).
-        expect(Object.keys(mil.political_directives_by_faction!).sort()).toEqual(
-            ['HRHB', 'RBiH', 'RS'],
-        );
-        // Each directive carries the canonical verb shape.
-        for (const faction of ['HRHB', 'RBiH', 'RS'] as const) {
-            expect(mil.political_directives_by_faction![faction].verb).toBeDefined();
-        }
-    });
-
-    it('T9b — player_faction directive is NOT written (player issues via UI)', () => {
-        const state = makeBaseState();
-        applyPoliticalLeaderDataInit(state, CANONICAL_JSON_PATH);
-        (state.meta as unknown as { player_faction: FactionId }).player_faction = 'RBiH';
-        applyPoliticalDirectiveProducer(state);
-        const mil = state.military as GameState['military'] & {
-            political_directives_by_faction?: Record<string, PoliticalDirective>;
-        };
-        expect(mil.political_directives_by_faction).toBeDefined();
-        expect(Object.keys(mil.political_directives_by_faction!).sort()).toEqual(
-            ['HRHB', 'RS'],
-        );
-        expect(mil.political_directives_by_faction!.RBiH).toBeUndefined();
-    });
 });
 
 // ===========================================================================
@@ -309,9 +212,6 @@ describe('B2 — env-flag short-circuit', () => {
         applyPoliticalLeaderDataInit(state, CANONICAL_JSON_PATH);
         const after = JSON.stringify(state.military);
         expect(after).toBe(before);
-        // B1 producer therefore returns null — preserves byte-stability vs.
-        // pre-B2 baseline hash 575aca8c8adfdae2.
-        expect(producePoliticalDirective(state, 'RS')).toBeNull();
     });
 });
 

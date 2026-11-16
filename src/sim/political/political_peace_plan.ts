@@ -31,7 +31,7 @@
 import type { FactionId } from '../../state/game_state.js';
 import type { PeacePlanDefinition } from '../../state/negotiation_types.js';
 import type { PoliticalAssessment, PoliticalPersonality } from './political_personality.js';
-import { scorePoliticalOption } from './political_event_decision.js';
+import { scorePoliticalOption, divergesFromHistory } from './political_event_decision.js';
 import { WASHINGTON_AGREEMENT_WEEK } from '../early_war/washington_agreement.js';
 import type { EventResponseOption } from '../events/event_types.js';
 
@@ -90,6 +90,8 @@ export function computePoliticalPeacePlanResponse(
     assessment: PoliticalAssessment,
     personality: PoliticalPersonality,
     warWeek: number = 0,
+    historicalResponse?: 'accepted' | 'rejected',
+    warOffHistory: boolean = false,
 ): 'accepted' | 'rejected' {
     // RBiH Owen-Stoltenberg tactical acceptance branch.
     // When RBiH is in a weak position (situation_score < 50) and evaluates O-S, it accepts for
@@ -223,6 +225,19 @@ export function computePoliticalPeacePlanResponse(
 
     const acceptScore = scorePoliticalOption(acceptOption, faction, assessment, personality);
     const rejectScore = scorePoliticalOption(rejectOption, faction, assessment, personality);
+
+    // B5 fix 4: with the plan's historical response as the reference, the scored step keeps
+    // history unless the war's map has left history's band AND the other answer wins by more
+    // than the faction's divergence_threshold. (The hard branches above stay first: they
+    // already respond to territory, patron authority and the calendar.)
+    if (historicalResponse != null) {
+        const historicalScore = historicalResponse === 'accepted' ? acceptScore : rejectScore;
+        const otherScore = historicalResponse === 'accepted' ? rejectScore : acceptScore;
+        if (divergesFromHistory(otherScore, historicalScore, personality, warOffHistory)) {
+            return historicalResponse === 'accepted' ? 'rejected' : 'accepted';
+        }
+        return historicalResponse;
+    }
 
     // Higher score wins. Tie-break: 'accept' < 'reject' lexicographically → accept wins ties.
     if (rejectScore > acceptScore) {
