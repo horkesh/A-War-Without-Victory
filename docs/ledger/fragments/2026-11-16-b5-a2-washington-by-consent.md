@@ -5,7 +5,7 @@
   - `rbih_washington_agreement_1994` had no war prerequisite, while HRHB's required `croat_bosniak_war_begins_1993`. In a never-broken game the RBiH card fired saying acceptance "ends the two-front Croat-Bosniak war".
 - **Rulings** (game designer + historian).
   - Accept Path C, with two amendments: never lower an alliance already above the 0.80 lock; start no ceasefire.
-  - Historian: a Federation in early 1994 without the war is coherent only as the formalising of an existing alliance. The real treaty was "a temporary convergence of three self-interests… essentially imposed from outside", driven by the war (BB2 pp.450-451; sequence BB1 p.54). So Path C carries the Federation benefits and none of the war-ending effects.
+  - Historian: a Federation in early 1994 without the war is coherent only as the formalising of an existing alliance. The real treaty was "a temporary convergence of three self-interests… essentially imposed from outside", driven by the war (BB2 p.451; sequence BB1 p.54). So Path C carries the Federation benefits and none of the war-ending effects.
 - **Change.**
   - `src/sim/early_war/washington_agreement.ts`: `evaluateWashingtonByConsent`, Path C in `checkAndApplyWashington` (`trigger_path: 'consent'`), and `applyWashingtonEffects(state, byConsent)`. `WASHINGTON_AGREEMENT_WEEK` (102) moves here as its one owner; `political_peace_plan.ts` imports it.
   - `ceasefire_active` readers audited: control flips (allied ⇒ skip), the corps-AI release (the `washington_signed` branch comes first), minority erosion, bot early war and the commander plan (all also read `washington_signed`). None needs the ceasefire flag for a benefit.
@@ -21,6 +21,13 @@
   - Hands-off emergent identical to main: `cbdfdb200b1f7069`.
   - Path C cannot fire left alone: the bilateral war starts around t49.
   - Tests: new `tests/washington_by_consent.test.ts` (signs at week 102 when never broken; no ceasefire and no cut to a 0.95 alliance; not before week 102, not after a war, not at the threshold; both cards require the war; the predicate). `tests/event_timeline_integrity.test.ts` updated. Washington, ceasefire and event slices: 128 files, 2245 tests pass. tsc clean.
+- **Gate** (historian, game designer, scenario tester, canon, determinism): all GO; determinism PASS. Canon wording applied: Path C fires on the first turn from week 102 onward.
+  - The `ceasefire_active` audit is completed by the game designer: `simple_general_bot.ts:31-42`, `alliance_update.ts:183-184` and `:290`, `bilateral_ceasefire.ts:141` and the warroom ceasefire modal. None loses a benefit, because the alliance stays allied at 0.80 or above and per-turn updates are locked.
+  - Residuals, recorded for A2b:
+    - Path C can fire later than week 102 (even in 1995) if an alliance that never broke recovers above 0.2 then. Path A has no week gate.
+    - Path C pays the engine benefits, not the cards' own gains (RBiH supply, credibility, morale, cohesion).
+    - Path C ignores `hrhb_political_goal`. A2b must give the HRHB President a decision (accept or reluctant) before the lock.
+    - Historian for the A2b copy: Croat buy-in was patron-imposed through Tuđman. Write a Zagreb-sanctioned formalisation, not free consent, and avoid "under heavy American pressure".
 - **Follow-ups.**
   - **A2b (content):** consent-variant Washington cards for RBiH and HRHB (no "ends the war" text; no war-recovery bonus) with essays. The warroom copy that assumes a war (DeclarationEventModal "ending the war between former allies", the headline "intended to end hostilities", AAR) needs a war/consent variant. These need narrative and historian seats.
   - **Played proof:** blocked until the Ahmići consequence gate lands, because today no RBiH President can keep the alliance.
