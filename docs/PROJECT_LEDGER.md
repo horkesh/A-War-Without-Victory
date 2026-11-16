@@ -423,12 +423,6 @@ Docs only; no `src/` or `data/` change, no hash change.
 - Owner, 2026-11-16, "Keep them RBiH": Biljesevo, Olovci and the Glamoč village (Goražde) stay RBiH in the January 1993 reference map, since no source says how or when they changed hands. In D1 stage 2 all five former artefact-sweep cells get ordinary 1992 operations, with unsourced dates marked unverified in the data. The open item is closed.
 - #718, RB1 (A2): a takeover wave counts each person once (`refugees_created` at w188 1,971,236 to 1,485,614; the Verdict displacement ratio 0.896 to 0.657); §6 panel unanimous, control-identical; final-state hash df791f73c26ed642 (the PR's measurement on main 01572f50dfea2378, baselines re-blessed in the PR), recorded as the main hash at #718.
 
-## 2026-11-16 — Pass 36: #701 (B1) recorded; where the citation package's §6 record row lives
-
-Docs only; no `src/` or `data/` change, no hash change.
-
-- #701, B1: an overstaying army commander's competence now decays linearly as documented (it was quadratic: 12 turns cost 0.325 instead of 0.05). Inert in headless (no army commander overstays in the historical or emergent 188-week runs); the PR measured 70f4dc05bf375bc7 against its base d10892602. Not re-measured on top of #718; main is expected to stay df791f73c26ed642. #721 (PK5) is added to the roadmap merged list.
-- Pointer, per the orchestrator: the citation-audit content package's §6 record row is in `docs/10_canon/SENSITIVE_HISTORY_DESIGN_GATE.md` ("Record (Citation-audit content package, 2026-11-16)", added by #718 beside the RB1 row). It records unanimous §6 verdicts for 47 strings (11 rewrites, 34 changes, 2 unchanged); the verdicts file is `_logs/s6_content_package_citation_audit_20261115_verdicts.md` in the worktrees folder; the UI lane applies them. Work list Part 7.
 ## 2026-11-16 — Pass 35: #721 (PK5 queue head) recorded; Part 5 corrected; C8 ruled; #709 needs a re-pin
 
 Docs only; no `src/` or `data/` change, no hash change.
@@ -436,6 +430,20 @@ Docs only; no `src/` or `data/` change, no hash change.
 - #721, C7 (PK5): a short queue head steps aside only for a dated, admissible operation with its own roster (a bounded skip; nothing is ever removed from a queue; undated chain members never jump the queue, with a regression test). Byte-identical on its base in historical and hands-off emergent mode (no skip fires). Systems Manual §6 paragraph added by the PR. Part 5 corrected: only the PK5 no-retry half (authored operations do not retry) stays accepted as final; the queue-head block is fixed by #721.
 - C8 (F1i, `political.enclaves` always empty because the integrity step reads the legacy `supply_state` and edges): ruled by the orchestrator: a §6 panel (historian, scenario tester, engine/systems, red-team, unanimous, plus canon); root fix first, then each revived reader measured alone and kept or retired (the IVP humanitarian term, which may double-count `enclave_resilience`; the negotiation enclave penalty; convoys; the Sarajevo tunnel flag).
 - #709 (N6) needs another re-pin after #718; it is with the L7 lane. Open: #701, #710, and the P2 steps.
+
+## 2026-11-16 — Pass 36: #701 (B1) recorded; where the citation package's §6 record row lives
+
+Docs only; no `src/` or `data/` change, no hash change.
+
+- #701, B1: an overstaying army commander's competence now decays linearly as documented (it was quadratic: 12 turns cost 0.325 instead of 0.05). Inert in headless (no army commander overstays in the historical or emergent 188-week runs); the PR measured 70f4dc05bf375bc7 against its base d10892602. Not re-measured on top of #718; main is expected to stay df791f73c26ed642. #721 (PK5) is added to the roadmap merged list.
+- Pointer, per the orchestrator: the citation-audit content package's §6 record row is in `docs/10_canon/SENSITIVE_HISTORY_DESIGN_GATE.md` ("Record (Citation-audit content package, 2026-11-16)", added by #718 beside the RB1 row). It records unanimous §6 verdicts for 47 strings (11 rewrites, 34 changes, 2 unchanged); the verdicts file is `_logs/s6_content_package_citation_audit_20261115_verdicts.md` in the worktrees folder; the UI lane applies them. Work list Part 7.
+
+## 2026-11-16 — Pass 37: calendar railroads and the Chronicle title registered; #721 and #701 confirmed
+
+Docs only; no `src/` or `data/` change, no hash change.
+
+- Registered in the work list Part 3: RR1, the dated per-faction settings in `data/scenarios/timelines/apr1992.json` (RS reinforcement multiplier 1.0 to 0.85 at week 52, 0.65 at week 78, 0.45 at week 104; RBiH "Controlled Counteroffensive" +0.15 aggression from week 80) are calendar railroads that weaken the VRS on schedule in a diverged game; fix (tie to causes) or a written reason before the freeze, routed to the chapters integration and the package (F2 and RS replacement at P3). A UI truth fix: the Chronicle shows an HRHB player "Washington Pivot" from week 26, 17 months early, because chapters are titled from standing-order names.
+- Confirmed (orchestrator): #721's "Baseline pins" check passed on the merge ref that included #718, so its inert claim holds on top of #718; #701 (B1) is inert; main stays df791f73c26ed642.
 
 ## 2026-11-15 — Command loop L7: army clashes (proposal 2A step A1; owner decision 4)
 
