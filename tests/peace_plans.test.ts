@@ -1,5 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import { evaluatePeacePlans, resolvePeacePlan } from '../src/sim/negotiation/peace_plans.js';
+import { evaluatePeacePlans, getFactionTerritoryAreaPct, resolvePeacePlan } from '../src/sim/negotiation/peace_plans.js';
+import { getOsidAreas } from '../src/sim/osid_areas.js';
+import { strictCompare } from '../src/state/validateGameState.js';
 import { PEACE_PLANS, getPeacePlanById } from '../src/sim/negotiation/peace_plan_data.js';
 import { createEmptyCapital, createDefaultPatronRelationship } from '../src/state/negotiation_types.js';
 import type { NegotiationState } from '../src/state/negotiation_types.js';
@@ -474,6 +476,36 @@ describe('Bot response logic', () => {
     // (Group 2: RS territory floor; Group 4: Territory signal) on states built for it.
     // Re-pointing this integration test at Vance-Owen made it assert scorer output from
     // a synthetic minimal state, which is not what it was written to check.
+
+    it('RS measures its holding by AREA, the unit of the plan split (B0: no week-40 Vance-Owen peace)', () => {
+        // RS takes the largest settlements until it holds 40% of them. By count that is
+        // under Vance-Owen's 43% offer; by area it is far above 43% + the 18pp floor.
+        // The settlement-count measure accepted here and ended the war in January 1993.
+        const { areas, total } = getOsidAreas();
+        const bySize = Object.keys(areas).sort((a, b) => (areas[b]! - areas[a]!) || strictCompare(a, b));
+        const rsCount = Math.floor(bySize.length * 0.4);
+        const controllers: Record<string, string> = {};
+        bySize.forEach((osid, i) => { controllers[osid] = i < rsCount ? 'RS' : (i % 2 === 0 ? 'RBiH' : 'HRHB'); });
+        const rsArea = bySize.slice(0, rsCount).reduce((s, o) => s + areas[o]!, 0) / total * 100;
+        expect(rsCount / bySize.length * 100).toBeLessThan(43);
+        expect(rsArea).toBeGreaterThan(43 + 18);
+        expect(getFactionTerritoryAreaPct({ political: { political_controllers: controllers } } as unknown as GameState, 'RS'))
+            .toBeCloseTo(rsArea, 6);
+
+        const state = makeState({
+            turn: 50,
+            war_start_turn: 10,
+            decision_mode: 'emergent',
+            no_player: true,
+            controllers,
+            negotiation: makeNegotiationState({ override_authority: { RS: 10, HRHB: 10, RBiH: 10 } }),
+        });
+        evaluatePeacePlans(state);
+
+        const history = state.military.negotiation?.peace_plan_history ?? [];
+        expect(history.find(h => h.plan_id === 'vance_owen')?.responses.RS).toBe('rejected');
+        expect(state.meta.game_over).not.toBe(true);
+    });
 
     it('bot accepts when plan offers more than current territory', () => {
         const neg = makeNegotiationState({
