@@ -390,7 +390,13 @@ registerBriefingCollector('command', (state, faction) => {
     const items: BriefingItem[] = [];
     const pending = state.military?.pending_officer_events;
     if (Array.isArray(pending)) {
-        const factionEvents = (pending as PendingOfficerEvent[]).filter(e => e.faction === faction && !e.acknowledged);
+        // B2 (freeze cut): `army_directive_pushback` has no handler and no UI can
+        // acknowledge it (the adapter drops it), so counting it here told the player
+        // "N order interpretations pending" forever with nothing to review. Excluded,
+        // matching the adapter.
+        const factionEvents = (pending as PendingOfficerEvent[]).filter(
+            e => e.faction === faction && !e.acknowledged && e.type !== 'army_directive_pushback',
+        );
 
         // Phase 3 interpretation events (order deviations)
         const INTERP_TYPES = new Set<OfficerEventType>([
@@ -398,7 +404,6 @@ registerBriefingCollector('command', (state, faction) => {
             'order_pushback',
             'order_refused',
             'order_exceeded',
-            'army_directive_pushback',
             'army_co_proposes_op',
         ]);
         const interpEvents = factionEvents.filter(e => INTERP_TYPES.has(e.type));

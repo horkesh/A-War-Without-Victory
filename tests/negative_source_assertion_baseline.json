@@ -8,7 +8,6 @@
   ],
   "files": [
     "tests/adapter_field_completeness.test.ts",
-    "tests/b1_political_directive_producer.test.ts",
     "tests/b2_political_leader_data.test.ts",
     "tests/branch_hygiene_safety.test.ts",
     "tests/build_calibration_map_html.test.ts",

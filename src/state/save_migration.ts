@@ -853,3 +853,38 @@ registerMigration({
         ensureRecord(military, 'corps_front_sectors');
     },
 });
+
+registerMigration({
+    version: 39,
+    description: 'Freeze cut B3 + B2: the political-directive chain is retired. Empties the stale '
+        + 'political_directives_by_faction (removed) and army_corps_directives_by_faction (emptied; '
+        + 'the field stays) slots, which nothing ever cleared, so a mid-war save cannot keep '
+        + 'running the old corps-role overlay. Drains every unacknowledged army_directive_pushback '
+        + 'officer event: they had no handler, no UI could acknowledge them, and the sim briefing '
+        + 'counted them as pending forever. Other officer events are untouched. Drops the army '
+        + 'staff\'s directive-reading traces from army_co_decision_traces (the pushback panel '
+        + 'shows each faction\'s LAST trace with no age limit, so an old save would show a '
+        + 'stale objection forever); AUTONOMOUS_LAUNCH_PROPOSAL traces are kept. Sensitive: no.',
+    migrate: (state) => {
+        const mil = asRecord(state.military);
+        if (!mil) return;
+        delete mil.political_directives_by_faction;
+        mil.army_corps_directives_by_faction = {};
+        const traces = asRecord(mil.army_co_decision_traces);
+        if (traces) {
+            for (const faction of sortedKeys(traces)) {
+                const rows = traces[faction];
+                if (!Array.isArray(rows)) continue;
+                const kept = rows.filter((row: unknown) => asRecord(row)?.campaign_role === 'AUTONOMOUS_LAUNCH_PROPOSAL');
+                if (kept.length > 0) traces[faction] = kept;
+                else delete traces[faction];
+            }
+        }
+        if (Array.isArray(mil.pending_officer_events)) {
+            mil.pending_officer_events = mil.pending_officer_events.filter((event: unknown) => {
+                const e = asRecord(event);
+                return !(e && e.type === 'army_directive_pushback' && e.acknowledged !== true);
+            });
+        }
+    },
+});

@@ -8,18 +8,10 @@ import {turnDataFilePath} from '../turn_pipeline_types.js';
 
 import { evaluateArmyHQGathering } from '../combat/army_hq_gathering.js';
 import {
-    applyArmyDirectiveInterpretation,
-    A3_PIPELINE_STEP_NAME,
-} from '../combat/army_order_interpretation.js';
-import {
     applyArmyCoRosterStep,
     A4_PIPELINE_STEP_NAME,
 } from '../combat/army_co_lifecycle.js';
 import { CANONICAL_ARMY_CO_ROSTER } from '../combat/army_co_roster_data.js';
-import {
-    applyPoliticalDirectiveProducer,
-    B1_PIPELINE_STEP_NAME,
-} from '../political/political_directive_producer.js';
 import {
     applyBotOpportunityDecisions,
     applyResolvedOpportunityDecisions,
@@ -2539,34 +2531,18 @@ export const warPhases: NamedPhase[] = [
             }
         },
     },
-    {
-        // B1 (LANE-NIGHTSHIFT-B1-POLITICAL-DIRECTIVE-PRODUCER-INFRA):
-        // Bot-side producer for the soft-state political directive that A3
-        // (`apply-army-directive-interpretation`) reads from
-        // `state.military.political_directives_by_faction[faction]`. Without
-        // a producer, A3's `readPoliticalDirective` short-circuits every turn
-        // and `interpretArmyDirective` is never invoked. B1 wires the
-        // infrastructure; B2 will populate `political_leader_data` so the
-        // producer transitions from always-null to actively emitting verbs.
-        //
-        // Position: AFTER `evaluate-army-hq-gathering` (the producer reads
-        // CampaignPlan to derive `target_corps_id`) and BEFORE
-        // `evaluate-army-co-transitions` (A4) / `apply-army-directive-interpretation`
-        // (A3, the consumer of what we write).
-        //
-        // SUBSTRATE-DRIVEN: short-circuits when
-        // B_LANE_POLITICAL_DIRECTIVE_PRODUCER_DISABLED env flag is set OR
-        // `state.military.political_leader_data` / `political_leaders` are
-        // unpopulated. 40w byte-stable until B2 ships scenario data.
-        //
-        // DDR: docs/40_reports/audits/20260506_B_LANE_POLITICAL_DIRECTIVE_PRODUCER_DDR.md
-        // (941bd68e + 168d65c2). A3: c8ff93d8. A4: 93c75b1d.
-        name: B1_PIPELINE_STEP_NAME,
-        run: (context) => {
-            if (context.state.meta.phase !== 'war') return;
-            applyPoliticalDirectiveProducer(context.state);
-        },
-    },
+    // RETIRED 2026-11-16 (freeze cut B3): the political-directive chain.
+    // Two steps ran here and after A4: `produce-political-directive` (B1) and
+    // `apply-army-directive-interpretation` (A3). The producer's verb locked once
+    // exhaustion passed 500 (the same output for ~182 weeks), and the army's
+    // translation of it became a HARD campaign_role gate on fresh commander plans
+    // (plan.ts): it pinned every ARBiH corps to `economy` and lifted every RS and
+    // HRHB corps above its CampaignPlan role. Corps now take their role from the
+    // CampaignPlan alone (commander/briefing.ts collectCampaignIntent). The
+    // player's own order tool (`inject-op-directive`) never used this chain.
+    // Save migration v39 empties the stale slots and drains the undrainable
+    // `army_directive_pushback` events (B2). Do not revive without a design
+    // ruling and a measured run.
     {
         // A4 (LANE-NIGHTSHIFT-A4-ARMY-CO-ROSTER-PERSONALITIES):
         // Populate canonical historical roster onto NamedOfficer.stubbornness
@@ -2593,30 +2569,9 @@ export const warPhases: NamedPhase[] = [
             applyArmyCoRosterStep(context.state, CANONICAL_ARMY_CO_ROSTER);
         },
     },
-    {
-        // A3 (LANE-NIGHTSHIFT-A3-ARMY-LEVEL-ORDER-INTERPRETATION):
-        // Translate POLITICAL directives → per-corps directives via the army CO's
-        // advisory interpretation; emit `army_directive_pushback` PendingOfficerEvent
-        // on non-FULL compliance. (The Mladić-class autonomous-launch proposal
-        // that also ran here is retired, freeze cut B4.)
-        //
-        // Position: AFTER `evaluate-army-co-transitions` (A4 populates stubbornness
-        // / tolerance from the canonical roster) and BEFORE `generate-bot-corps-orders`
-        // (downstream consumer of corps directives).
-        //
-        // SUBSTRATE-DRIVEN: pre-A4-roster-data this step short-circuits when no
-        // political directive is present in state.military.political_directives_by_faction
-        // and when stubbornness fields are unpopulated. 40w byte-stable until A4
-        // populates the canonical roster.
-        //
-        // DDR: docs/40_reports/audits/20260506_AI_OFFICERS_ARMY_COS_DESIGN_DECISIONS.md
-        // (eee308e0). A1: 18136710. A2: ba6955bf.
-        name: A3_PIPELINE_STEP_NAME,
-        run: (context) => {
-            if (context.state.meta.phase !== 'war') return;
-            applyArmyDirectiveInterpretation(context.state);
-        },
-    },
+    // (The A3 step `apply-army-directive-interpretation` stood here; retired with
+    // the political-directive chain above, freeze cut B3. Its autonomous-launch
+    // proposal was retired earlier, freeze cut B4.)
     {
         name: 'generate-bot-corps-orders',
         run: async (context) => {

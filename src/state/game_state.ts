@@ -39,7 +39,7 @@ import type { ArmyLabel } from './identity.js';
 import type { RecruitmentResourceState } from './recruitment_types.js';
 import type { CommanderState } from '../sim/combat/commander/commander_state.js';
 
-export const CURRENT_SCHEMA_VERSION = 38 as const;
+export const CURRENT_SCHEMA_VERSION = 39 as const;
 
 // --- ID types (canonical) ---
 export type FactionId = string;
@@ -3152,20 +3152,19 @@ army_co_decision_traces: Record<string, Array<{
 }>>;
 /**
  * C1 substrate (LANE-NIGHTSHIFT-C1-CORPS-DIRECTIVE-CONSUMER-WIRE):
- * Per-faction × per-corps directive map persisted by A3's
- * `applyArmyDirectiveInterpretation` and read by `assembleCampaignIntent`
- * (commander/briefing.ts) so the political → army → corps chain is observable.
+ * Per-faction × per-corps directive map once persisted by A3's
+ * `applyArmyDirectiveInterpretation` and read by the C1 briefing overlay
+ * (both retired, freeze cut B3; see below).
  *
  * DDR-cited per `docs/40_reports/audits/20260506_C_LANE_BOT_CORPS_ORDERS_CONSUMER_DDR.md`
- * (57cec91c). A3's existing return-value contract is preserved; this slot is
- * a parallel persisted view consumed by the briefing-overlay path.
+ * (57cec91c).
  *
- * Writer: A3 pipeline step (`apply-army-directive-interpretation`).
- * Reader: briefing.ts → `assembleCampaignIntent` overlays
- * `frontPriority.role` → `briefing.campaign_role`. Faction-symmetric mechanism;
- * faction-asymmetric data lands via B2 leader profiles → B1 producer → A3
- * verb-translation. Required as of save schema v10; legacy saves migrate this
- * top-level record to `{}`. Nested directive metadata remains optional.
+ * RETIRED CHAIN (freeze cut B3, 2026-11-16): no turn-pipeline step writes this
+ * slot and the briefing no longer reads it; save migration v39 empties it. The
+ * field stays (required since schema v10) for save compatibility and for the
+ * library/tooling paths in army_order_interpretation.ts. Former writer: the A3
+ * step `apply-army-directive-interpretation`; former reader: the C1 overlay in
+ * briefing.ts. Nested directive metadata remains optional.
  *
  * Env flag `C_LANE_CORPS_DIRECTIVE_CONSUMER_DISABLED=true` short-circuits
  * BOTH the persist path (A3) and the read path (briefing) for byte-stable A/B.
