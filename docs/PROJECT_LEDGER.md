@@ -737,6 +737,47 @@ Docs only; no `src/` or `data/` change, no hash change.
 - #744: `csq_hvo_central_bosnia_offensive_1993` (the Ahmići consequence) now fires only after the 1993 war has begun and the alliance is below 0.2, mirroring `ahmici_massacre_1993`; content and wording unchanged; §6 unanimous; canon amended (a SHDG amended-date line and a §6 record row); byte-identical in both modes (historical 03159b9ee1e5877f, the main pin; hands-off emergent dde641b2c74838f0 = main); honours Ring 3 item 11. Work list Ahmići and alliance paragraph (item A).
 - Registered from #744: (1) the `ahmici_massacre_1993` card window ends at t70; (2) `federation_never_fractured` is never set (a dead alliance-held note); (3) that note's BCS is a stock line (1 to 3 go to the B and C content PR); (4) the alliance-lock floor-over-ceiling, traced, with its fix held behind package P2.
 
+## 2026-11-16 — Pass 51: #748 (the t76 Belgrade historical default) recorded; a determinism finding registered
+
+Docs only; no `src/` or `data/` change, no hash change.
+
+- #748: `rs_belgrade_pressure_response_1993`'s historical default is now `accept_belgrade_directive` (Pale stayed in step with Belgrade in autumn 1993; BB1 pp.11-13, Karadžić 377-383 and 3286-3287), with native BCS copy and smaller costs; historian ruling, calibration HOLD, scores recorded: historical 709 / 709 / 708 / 682, guard intact, emergent 710 / 707 / 707 / 670 (guard intact, Farz 4 of 4). Hash-moving: the main pin is final_save 8c9fbf1d30e8a976, "main hash at #748".
+- New determinism finding (must-fix, batch-b-lane): `meta.peace_war_start_control_path` stores an absolute filesystem path in GameState, so the final hash of any scenario that sets it (sep1991_to_dayton) depends on the checkout location; it matters for the freeze byte test.
+- Chapters block: the army-stance override retirement is proven hash-neutral in seven scenarios; the PR is coming.
+
+## 2026-11-16 — t76 Belgrade event: Pale's historical posture in autumn 1993 is staying in step with Belgrade, not defiance
+
+A factual truth fix found by the second Batch B lane's historian and assigned to this lane. It is not tuning, so it proceeds under the calibration HOLD with the scores recorded.
+
+**Defect.** `rs_belgrade_pressure_response_1993` (war_1993.json, weeks 76-79, the Invincible window of September-October 1993) made `defy_belgrade_directive` the historical default. Its text claimed that Pale "repeatedly defied" Belgrade, that Belgrade pressed it to "ease the Drina tempo" and show "flexibility on Sarajevo division", and that a Patriarch Pavle / Russian channel existed. The event's own source note cited Karadžić paras 3286-3287 as showing Belgrade *supporting* Pale in 1993.
+
+**Historian ruling (default = `accept_belgrade_directive`).**
+- 28 Aug 1993: the Bosnian Serb Assembly accepted the Geneva accord without conditions (BB Vol. I p. 11).
+- 20 Sep: the Invincible package, with Milošević at the table: 49%, Sarajevo undivided under the UN for two years (BB I pp. 12-13; Karadžić paras 377-383, 381).
+- Belgrade backed Pale (paras 3286-3287).
+- Igman and Bjelašnica were vacated under UN/NATO pressure (BB I pp. 185-186).
+- After Sarajevo's conditional vote on 29 Sep, Pale withdrew its concessions on 2 Oct (BB I p. 13).
+- Open defiance belongs to May 1993 and July-August 1994.
+- The sibling event `rs_owen_stoltenberg_response_1993` already has acceptance as the RS default.
+
+**Change.**
+- `historical_default_response_id` → `accept_belgrade_directive`, now option 0 (the event acceptance contract requires this). Markers swapped.
+- Option costs (historian): accept +10 patron / +5 standing / −2 cohesion / +5 leverage; partial −5/−5/+3/+3; broker −5 standing / +2 cohesion / +8 leverage; defy −15/−10/+5/−10, morale +2. The 6-turn recruitment ×0.9 is dropped: Pale's cohesion did not break.
+- Narrative, staff assessment, trigger evidence, the four option labels and descriptions, the other-faction notifications, effect text and source note were rewritten by the narrative seat on the historian's facts. The text no longer mentions Pavle, Russian envoys or Sarajevo fire (§6 note).
+- Essay (file and `essay_index.json`): new EN and native BCS text. Sources are now Karadžić plus BB (Krajišnik cannot carry 1993 claims). The accept variant is the historical "note"; the other three are divergences.
+
+**Measured (main fde8acc98, B3 in).**
+- Historical 188w: final_save `8c9fbf1d30e8a976`. Scores 709/709/708/**682** (Oct 1995 +1 against 681).
+  - Guard intact: enclaves hold and fall on schedule, Farz/Uragan 4/4 with receipts, late 2nd Corps captures warranted, HRHB cascade 31. Health PASS, 0 consistency failures.
+  - Final-cell delta against main: 5 cells. Three in Donji Vakuf go RS→RBiH (babin_potok_2, korenici, oborci_2); jajce:grdovo and travnik:gornje_krcevine go RBiH→RS.
+  - RS ends with patron confidence 69.5 (46.5 before), negotiating leverage 52.9 (34.4) and internal cohesion 9 (16).
+- Emergent 188w: the scorer already picked accept. Final map unchanged, 710/707/707/670, with the same three package-P2 breaches.
+- Option order does not affect either hash (re-run after the reorder gave identical hashes).
+- Tests: the event-system suite (16 files, 388 tests) and essay tests (130) pass; tsc 0.
+- Baselines manifest re-blessed to the new historical state.
+
+Evidence: `C:/Pyrrhic/AWWV-worktrees/_logs/batch-b-20261116/` (t76_*).
+
 ## 2026-11-16 — threat_ratio direction corrected (comment and canon wording only; Codex r4588239176)
 
 Comment and canon wording only; no behaviour change, no hash change.
