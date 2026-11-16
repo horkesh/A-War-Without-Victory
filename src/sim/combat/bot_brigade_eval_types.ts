@@ -86,6 +86,12 @@ export interface BrigadeEvaluationContext {
     sectorRecentRetreats: Map<string, Array<{ osid: string; turn: number }>>;
     /** Mutable counter: how many sector-level counter-attacks have been issued per sector this turn. */
     sectorCounterAttackCount: Map<string, number>;
+    /**
+     * Cells this faction lost in combat in the last COUNTER_ATTACK_RETREAT_WINDOW turns and does not
+     * hold now (militia-held losses included). The only legal counter-attack targets (package P2
+     * step 3, retake-only). Absent: no counter-attack target.
+     */
+    recentLostCells?: ReadonlySet<string>;
 
     /** Cached sector membership for this brigade, built once per faction-order pass. */
     sectorAssignment?: {
