@@ -35,6 +35,26 @@ Batch B, item B0 (freeze cut, Fable consult 2 revision 2; must-fix before emerge
 
 Evidence: `C:/Pyrrhic/AWWV-worktrees/_logs/batch-b-20261116/` (b0_*).
 
+## 2026-11-16 — B4: the army commander's autonomous launch is retired (inert)
+
+Batch B, item B4 (freeze cut, Fable consult 2 revision 2, RF-ROSTER "path a"): retire.
+
+**Premise, measured.** `proposeAutonomousArmyLaunch` (the Mladić-class proposal, DDR Q3) needs a stubborn army commander past a 12-turn cooldown AND an eligible operation-opportunity catalog entry. On main's 188w it never found an eligible entry, so it never proposed. The final saves of the historical and hands-off emergent 188w carry no `last_autonomous_launch_turn`, no `cooldown_halved_applied`, no `kept_past_schedule_since_turn` and no `army_co_proposes_op` event. Turning the path on would start an untested mechanic before a permanent freeze and would need a §6 ruling first.
+
+**Change.**
+- Deleted `proposeAutonomousArmyLaunch`, its `AutonomousLaunchProposal` type and its call in the A3 step (`army_order_interpretation.ts`), with the now-unused catalog imports.
+- Deleted the overstay rule that halved the launch cooldown by rewriting `last_autonomous_launch_turn` (`army_co_lifecycle.ts`), its `cooldown_halving` / `cooldown_halved_to_turns` roster keys (`data/scenarios/army_co_roster.json`, `ArmyCoVariationRules`) and `A4_DEFAULT_COOLDOWN_HALVED_TO_TURNS`.
+- Kept for saves: the `army_co_proposes_op` event type and its validator, `NamedOfficerState.last_autonomous_launch_turn`, and the UI readers that tolerate a legacy event. `STUBBORNNESS_AUTONOMOUS_THRESHOLD` and `AUTONOMOUS_LAUNCH_COOLDOWN_TURNS` stay, because the army pushback panel reads them; they are documented as retired.
+- Comments in `war_phases.ts` and the A3/A4 headers carry a "do not revive without a §6 ruling" note.
+
+**Tests.** `a3_army_order_interpretation.test.ts` T5-T7 now guard the retirement: the export is gone; a stubborn commander proposes nothing in the A3 step; the source has no call. `a4_army_co_roster_personalities.test.ts` T6b: an overstay leaves `last_autonomous_launch_turn` untouched and the roster has no halving key. The A3, A4, A5 pushback and phase-4 UI slices pass (5 files, 72 tests); `tsc` 0.
+
+**Proof.** Historical 188w against main `05cf3de0f`: final_save `799e43a7ee2f4764` (= baselines manifest). final_save, initial_save, weekly_report, control_delta, formation_delta, activity_summary, run_summary, end_report, watched_operations, operation_aars, the brigade and displacement logs and the replay manifest are all byte-identical to a main run. `run_meta.json` differs only in provenance (git commit and input digests). No re-bless.
+
+**Follow-up (UI, not engine):** the pushback panel's "Autonomous-launch warning" section can now be shown only for a legacy save. It is a candidate for removal by the UI lane.
+
+Evidence: `C:/Pyrrhic/AWWV-worktrees/_logs/batch-b-20261116/` (b4_*).
+
 ## 2026-11-16 — Citation audit batch 3: Balkan Battlegrounds page and chapter references in event and essay data
 
 The historian read the cited location of every BB reference (109 groups, 279 mentions): 109 mentions cite the right printed page, 36 are right only at the knowledge-base extraction or PDF number (the printed page shown is wrong), 12 hold in part, 108 (39%) are about something else, 14 are accurate "does not exist" notes. 80 of the wrong ones cite Vol. II "chapters" (BB Vol. II has addenda and annexes only); 27 are pages from the wrong year or place (Vol. II pp. 358-366, 312-321, 287-314, 406-417, 459-462, 471-475, 506-520, 28-31, 9-32; Vol. I pp. 198-229); the printed-page rule is Vol. I = PDF - 37 and Vol. II = PDF - 19. 95 hidden notes record the correction; extraction numbers become printed pages everywhere (Vol. I p. 187 to p. 151, p. 462 to p. 425, pp. 416-420 to pp. 379-383, Vol. II pp. 536-538 to pp. 517-519 and others); 52 player-visible strings (events and Codex essays) drop wrong pages and non-existent chapters, leaving the source name, or show the verified printed page; the Vol. II pp. 28-31 Vance-Owen claim now cites Vol. I p. 8. One more visible audit-vocabulary leak on main ("the H4 audit") is fixed and added to the permanent leak test, and the historian's earlier PR-B rewrite that cited an extraction number (Vol. I pp. 418-421) now cites pp. 381-384. New test `tests/ui/event_bb_citations.test.ts`; `rbih_state_identity` (pinned) keeps 3 visible Vol. II pp. 406-417 cites until its next re-pin. Evidence and exhaustive file list: `docs/40_reports/evidence/20261115_bb_citation_audit/`.
@@ -301,6 +321,14 @@ Docs only; no `src/` or `data/` change, no hash change.
 Docs only; no `src/` or `data/` change, no hash change.
 
 - Orchestrator ruling, 2026-11-16: AI1 (the force-ratio term in target ranking) is REPLACED by Fable consult 4's "objectives from the weakest sector first" and "one launch estimate"; the force-ratio consideration moves to the Army HQ target choice and the estimator. RF-L3d follow-ups 1, 3 and 4 are pending P3 ratification: the package seats rule each as covered by consult 4's steps, still needed as its own step, or retired, with a one-line reason. Work list P3 row, roadmap BC19 row, board 7c and the final-behaviour record updated.
+
+## 2026-11-16 — Pass 33: #700 (B4) recorded; the owner's ruling on D1 (two stages); RB9 with rule (a) measured
+
+Docs only; no `src/` or `data/` change, no hash change.
+
+- #700, B4: the army commander's autonomous launch is retired. Inert; every simulation artifact byte-identical; main stays 01572f50dfea2378. UI follow-up: the pushback panel's "Autonomous-launch warning" shows only for a legacy save.
+- Owner ruling on D1, 2026-11-16, "Yes, approve both", on the orchestrator's two-stage plan. Stage 1, now: honest copy and canon ("authorized" only where the faction's policy allowed or ordered the sweep; no "ethnic cleansing" for a one-sweep trigger; delegation texts disclose staff acting before the policy decision), a staff-sweep receipt, then PR 1 (mode gating). Stage 2, after package P2 and before the freeze: retire the five artefact RBiH sweeps and take Bukvik (about September 1992) and Obadi (if kept) by ordinary 1992 operations (the joint HVO 108th Brčko operation). The historian found all 5 RBiH sweeps an engine artefact. Open with the owner: Biljesevo, Olovci and the Glamoč village in the January 1993 paint.
+- RB9 with rule (a), measured: scores 709 / 708 / 707 / 672; returns drain host refugee and militia pools, so the 1995 western captures (Petrovac, Drvar, Jajce, Ključ and others) do not happen; guards hold. Accepted as modelled history under the calibration HOLD (an honest loss), conditional on the historian's check of the returns magnitude (about 130,000); the lost cells join the calibration-pass list (HV-in-Bosnia modelling).
 
 ## 2026-11-15 — Command loop L7: army clashes (proposal 2A step A1; owner decision 4)
 
