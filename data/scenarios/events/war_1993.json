@@ -4577,7 +4577,7 @@
     "id": "rs_belgrade_pressure_response_1993",
     "image": "event_patron_relations_RS.webp",
     "title": "Belgrade Calls: Pale Records Its Posture",
-    "narrative": "Milošević's envoys arrive at Pale through the FRY-RS channel. The directive is unambiguous: ease the Drina-corridor tempo, signal flexibility on Sarajevo division, and accept the corridor-narrowing implied by the Owen-Stoltenberg track and the diplomatic envelope Belgrade is brokering. The pressure is diplomatic, not material — no embargo, no border closure, no supply rupture. But Belgrade is exhausted by sanctions and the patron channel matters for ammunition reliability and political cover at the Security Council. Karadžić, Krajišnik, and Mladić disagree on the response. The Pale Assembly must record its posture: defy the directive on principle, accept the directive and adjust operations, partially comply by signaling some flexibility without breaking the platform, or attempt to broker a compromise that preserves Pale's leverage.",
+    "narrative": "On 20 September 1993, aboard the British carrier HMS Invincible, Owen and Stoltenberg put a package to the parties with Milošević at the table. It gave 49 percent of Bosnia to the Serb republic. Sarajevo would stay undivided, under UN administration for two years. Pale had already said yes once. On 28 August the Bosnian Serb Assembly accepted the Geneva accord without conditions. In the same month the VRS left Igman and Bjelašnica after the UN and NATO threatened air strikes. Belgrade stood behind Pale. The Bosnian Assembly had yet to vote. Pale must now record its posture toward Belgrade.",
     "category": "diplomatic",
     "family": "rs_belgrade_pressure_response",
     "source_tier": "balkan_battlegrounds",
@@ -4612,7 +4612,7 @@
     "requires_player_response": true,
     "responding_faction": "RS",
     "bot_response_logic": "historical",
-    "historical_default_response_id": "defy_belgrade_directive",
+    "historical_default_response_id": "accept_belgrade_directive",
     "pressure": {
       "base_rate": 3,
       "threshold": 3,
@@ -4620,22 +4620,63 @@
     },
     "effect": {
       "kind": "narrative",
-      "text": "Pale records its posture toward Belgrade's soft diplomatic pressure on the Owen-Stoltenberg / pre-embargo channel."
+      "text": "Pale records its posture toward Belgrade on the HMS Invincible package."
     },
-    "source_note": "Belgrade-Pale soft diplomatic pressure was an intermittent thread across the war's mid-period (1993-1995). Milošević applied diplomatic — not material — pressure on the Pale leadership (Karadžić, Krajišnik, Mladić) to accept successive peace plans (VOPP, Owen-Stoltenberg, Contact Group); Pale repeatedly defied these overtures short of the formal August 1994 FRY embargo. The autumn 1993 Owen-Stoltenberg-adjacent window is the densest documented soft-pressure phase: Belgrade brokered the Invincible package signature track but Pale's tempo on the Drina-corridor and Sarajevo-axis operations diverged from the diplomatic envelope, producing the patron-channel friction Karadžić IT-95-5/18-T paras 3283-3295 document on the Pale side (the earlier cite \"Vol. III §§4263-4310\" is Markale II of 28 August 1995; the judgment shows Belgrade supporting rather than restraining Pale in 1993, paras 3286-3287). Sources: ICTY Krajišnik IT-00-39-T Trial Judgment (27 September 2006) §§1006-1040 (the earlier cite: Krajišnik §§1006-1040 is his knowledge of 1992 events (information flows, travel, reports of expulsions and detention) and the judgment ends at 30 December 1992, so it cannot carry a 1993-94 claim; Owen-Stoltenberg is Karadžić ¶¶377-383 and the Belgrade-Pale rift and Drina blockade ¶¶3289-3297) (Pale leadership response to Belgrade pressure on diplomatic envelope, 1993-1994); ICTY Karadžić IT-95-5/18-T Trial Judgment (24 March 2016) paras 3283-3295 (the earlier cite \"Vol. III §§4263-4310\" is Markale II of 28 August 1995; FRY-RS channel friction across the autumn 1993 - August 1994 corridor); ICTY Milošević IT-02-54-T (FRY-RS channel context; Belgrade's diplomatic envelope and patron-pressure modulation); Richard Holbrooke, To End a War (Random House 1998) chs. 4-5 (Belgrade-Pale split as defining political-military thread of the war's mid-period; soft diplomatic pressure phase distinct from the August 1994 embargo); David Owen, Balkan Odyssey (Harcourt 1995) ch. 7 (Belgrade-brokered Invincible package; Pale acquiescence pattern); Balkan Battlegrounds Vol. II Ch. 11 (the earlier cite: BB Vol. II has annexes and addenda, not chapters, and the claim has no BB anchor; Balkan Battlegrounds Vol. II Ch. 11 is not a BB location) (FRY-RS channel modulation through the autumn 1993 Owen-Stoltenberg window and across the 1993-1994 Contact Group prelude). This row is DISTINCT from R8 (`belgrade_embargo_rs_1994`, war_1994.json turn 121-122): R7 covers the SOFT diplomatic-pressure phase (1993 — no material embargo, no border closure, no supply rupture); R8 covers the HARD material embargo response (4 August 1994 onward — FRY border closure, supply rupture, UNSCR 943 of 23 September 1994 endorsement). Cost-floor topology reflects the soft/hard distinction: R7 lever pulls patron-confidence + international-standing + internal-cohesion via political signalling; R8 lever pulls supply_delta, patron_pressure, recruitment_modifier via material rupture. §3.6 forward-looking guard: any future `csq_rs_belgrade_pressure_*` row consuming this row's outcomes MUST NOT re-author cleansing, forced-displacement, hostage-taking, civilian-targeting, paramilitary deployment, or any sensitive-act response option. This is a CONSTITUTIONAL-POLITICAL crisis lane (Belgrade-Pale patron-channel friction; Karadžić-Milošević split politics) — NOT operational ethnic-targeting. The Drina-corridor cleansing, Sarajevo-siege fires, Srebrenica enclave operations, and any associated atrocity surfaces remain canon-gated through their existing event surfaces (rs_drina_campaign, rs_camp_exposure_response, un_safe_area_enforcement, un_hostage_crisis_1995 family slugs). Engine vocabulary substitutions per memory/engine_dimension_vocabulary.md: counterfactual accept costs Pale hawks (internal_cohesion -20) + boosts patron_confidence (+20) and international_standing (+10); historical defy keeps internal cohesion intact and burns negotiating leverage; partial compliance and broker-compromise occupy the middle band with proportional shifts. New event reuses existing RS_BRANCH_TAGS entries (`rs_belgrade_pale_resist`, `rs_belgrade_pale_acknowledge`, `rs_belgrade_negotiate`) — no vocabulary additions; no new carrier flags.",
-    "staff_assessment": "Defying Belgrade's directive is the documented Pale posture across the soft-pressure 1993-1995 window: Karadžić, Krajišnik, and Mladić agreed the platform mattered more than the patron channel until the August 1994 embargo forced re-evaluation. Acceptance is the maximum-cost counterfactual — Belgrade is satisfied (Belgrade's confidence +20) and the West signals approval (international standing +10), but Pale hawks rebel and internal cohesion collapses by 20, with a six-week recruitment penalty. Partial compliance and brokered compromise occupy the middle band: smaller patron gains, proportional internal-cohesion costs. The Russian channel and the Patriarchate soften the cost of a brokered compromise (negotiating leverage +10).",
+    "source_note": "CORRECTED 2026-11-16 (historian seat, Batch B t76): in the September-October 1993 window Pale went along with Belgrade, it did not defy it. The Bosnian Serb Assembly accepted the Geneva accord without conditions on 28 August 1993 (Balkan Battlegrounds Vol. I p. 11). On 20 September Milošević sat in on the HMS Invincible package: 49 percent to the Serb republic, Sarajevo undivided under UN administration for two years (BB Vol. I pp. 12-13; ICTY Karadžić IT-95-5/18-T paras 377-383, 381). The judgment shows Belgrade supporting rather than restraining Pale in 1993 (paras 3286-3287). The VRS left Igman and Bjelašnica in August 1993 under UN and NATO pressure (BB Vol. I pp. 185-186; BB does not name Belgrade as the source). After the Bosnian Assembly made its acceptance conditional on 29 September, Pale withdrew its concessions on 2 October, a day after the Croat Assembly (BB Vol. I p. 13). The internal strain that September was the Banja Luka mutiny over war profiteering, settled on 16 September. Open defiance of Belgrade belongs to May 1993 (Vance-Owen; BB Vol. I pp. 182-183) and July-August 1994 (Contact Group; Karadžić paras 396-401, 3289-3295). The earlier framing of this row (Pale defying Belgrade in autumn 1993; easing the Drina tempo; flexibility on dividing Sarajevo; a corridor narrowing; a Patriarch Pavle / Russian channel) has no source and is withdrawn. This row is DISTINCT from R8 (`belgrade_embargo_rs_1994`, war_1994.json turns 121-122): R7 is the 1993 political posture with no material pressure; R8 is the material embargo from 4 August 1994. §3.6 forward-looking guard: any future `csq_rs_belgrade_pressure_*` row consuming this row's outcomes MUST NOT author cleansing, forced displacement, hostage-taking, civilian targeting, siege fire, paramilitary deployment or any other sensitive act as a response option. This is a constitutional-political lane, not operational ethnic targeting. Costs (historian seat): staying in step with Belgrade is cheap in cohesion and earns patron confidence; defiance is the costly counterfactual. No recruitment modifier: Pale's cohesion did not break that autumn.",
+    "staff_assessment": "Staying in step with Belgrade is the documented line. Belgrade backed Pale that autumn and did not hold it back. The strain inside the Serb republic that September came from Banja Luka, where a mutiny over war profiteering was settled on 16 September. It was not a revolt against Belgrade. When the Bosnian Assembly attached conditions on 29 September, Pale withdrew its concessions on 2 October, a day after the Croat Assembly did the same. The open break with Belgrade came later, over the Contact Group map in the summer of 1994.",
     "trigger_evidence": [
-      "FRY envoys have arrived at Pale through the documented Belgrade-RS channel.",
-      "The Owen-Stoltenberg diplomatic envelope and the corridor-narrowing implications are in active play.",
-      "The Pale leadership (Karadžić, Krajišnik, Mladić) disagrees on the response posture and must record a decision."
+      "On 28 August 1993 the Bosnian Serb Assembly accepted the Geneva accord without conditions.",
+      "On 20 September, aboard HMS Invincible, Milošević sat in on a package that gave 49 percent of Bosnia to the Serb republic and put Sarajevo under UN administration for two years.",
+      "Belgrade is backing Pale's acceptance, and the Bosnian Assembly has not yet voted on the package."
     ],
     "response_options": [
       {
+        "id": "accept_belgrade_directive",
+        "branch_tag": "rs_belgrade_pale_acknowledge",
+        "historical_marker": "historical_default",
+        "label": "Stay in step with Belgrade",
+        "description": "Hold to the package Milošević backed. If Sarajevo attaches conditions, withdraw the concessions offered to it. Belgrade's confidence rises, and Pale stands on record as the party that said yes.",
+        "effects": [
+          {
+            "kind": "morale_change",
+            "faction": "RS",
+            "delta": 0
+          }
+        ],
+        "sets_flags": {
+          "rs_belgrade_pressure_response": "accept"
+        },
+        "dimension_shifts": [
+          {
+            "faction": "RS",
+            "dimension": "patron_confidence",
+            "delta": 10
+          },
+          {
+            "faction": "RS",
+            "dimension": "international_standing",
+            "delta": 5
+          },
+          {
+            "faction": "RS",
+            "dimension": "internal_cohesion",
+            "delta": -2
+          },
+          {
+            "faction": "RS",
+            "dimension": "negotiating_leverage",
+            "delta": 5
+          }
+        ],
+        "aggression_affinity": -0.3,
+        "risk_level": 0.6
+      },
+      {
         "id": "defy_belgrade_directive",
         "branch_tag": "rs_belgrade_pale_resist",
-        "historical_marker": "historical_default",
-        "label": "Defy Belgrade's directive",
-        "description": "Reject the FRY envoys' demand. The platform matters more than the patron channel; the corridor tempo, Drina-valley axis, and Sarajevo-division operations continue without adjustment. Karadžić, Krajišnik, and Mladić align on rejection. The patron-confidence cost is real but recoverable short of the August 1994 embargo.",
+        "historical_marker": "counterfactual",
+        "label": "Break with Belgrade",
+        "description": "Break with the package Belgrade backed and let the Assembly decide alone. The failure of the plan is laid at Pale's door, and Belgrade's support is put at risk.",
         "effects": [
           {
             "kind": "morale_change",
@@ -4650,6 +4691,11 @@
           {
             "faction": "RS",
             "dimension": "patron_confidence",
+            "delta": -15
+          },
+          {
+            "faction": "RS",
+            "dimension": "international_standing",
             "delta": -10
           },
           {
@@ -4660,60 +4706,18 @@
           {
             "faction": "RS",
             "dimension": "negotiating_leverage",
-            "delta": -5
+            "delta": -10
           }
         ],
         "aggression_affinity": 0.3,
         "risk_level": 0.5
       },
       {
-        "id": "accept_belgrade_directive",
-        "branch_tag": "rs_belgrade_pale_acknowledge",
-        "historical_marker": "counterfactual",
-        "label": "Accept Belgrade's directive",
-        "description": "Honor Milošević's request. Ease the Drina-corridor tempo, signal flexibility on Sarajevo, and align the Pale posture with the FRY diplomatic envelope. Belgrade is satisfied; international standing rises. But Pale hawks rebel: Mladić and the Assembly hardliners challenge the leadership, internal cohesion collapses, and recruitment suffers for six turns as the platform faction questions the political track.",
-        "effects": [
-          {
-            "kind": "morale_change",
-            "faction": "RS",
-            "delta": -2
-          },
-          {
-            "kind": "recruitment_modifier",
-            "faction": "RS",
-            "pool_multiplier": 0.9,
-            "duration_turns": 6
-          }
-        ],
-        "sets_flags": {
-          "rs_belgrade_pressure_response": "accept"
-        },
-        "dimension_shifts": [
-          {
-            "faction": "RS",
-            "dimension": "patron_confidence",
-            "delta": 20
-          },
-          {
-            "faction": "RS",
-            "dimension": "international_standing",
-            "delta": 10
-          },
-          {
-            "faction": "RS",
-            "dimension": "internal_cohesion",
-            "delta": -20
-          }
-        ],
-        "aggression_affinity": -0.3,
-        "risk_level": 0.6
-      },
-      {
         "id": "partial_compliance",
         "branch_tag": "rs_belgrade_negotiate",
         "historical_marker": "counterfactual",
-        "label": "Partial compliance",
-        "description": "Signal some flexibility to Belgrade without breaking the platform. Slow the corridor tempo on selected axes, keep the Sarajevo-axis fires unchanged, and offer the diplomatic envelope a narrower acceptance window. Belgrade is partly mollified; Pale hawks grumble but do not rebel. The patron channel holds at reduced confidence.",
+        "label": "Endorse in public, delay the vote",
+        "description": "Endorse the package in public but hold back the Assembly's vote, and press for map changes of Pale's own. Belgrade is irritated. The hardliners are pleased.",
         "effects": [
           {
             "kind": "morale_change",
@@ -4728,17 +4732,22 @@
           {
             "faction": "RS",
             "dimension": "patron_confidence",
-            "delta": 5
+            "delta": -5
           },
           {
             "faction": "RS",
             "dimension": "international_standing",
-            "delta": 5
+            "delta": -5
           },
           {
             "faction": "RS",
             "dimension": "internal_cohesion",
-            "delta": -10
+            "delta": 3
+          },
+          {
+            "faction": "RS",
+            "dimension": "negotiating_leverage",
+            "delta": 3
           }
         ],
         "aggression_affinity": -0.1,
@@ -4748,13 +4757,13 @@
         "id": "broker_compromise",
         "branch_tag": "rs_belgrade_negotiate",
         "historical_marker": "counterfactual",
-        "label": "Broker a compromise",
-        "description": "Open back-channels through Patriarch Pavle and the Russian envoys. Offer Belgrade a face-saving formula that preserves the Six Strategic Goals platform while signalling diplomatic engagement on the Owen-Stoltenberg envelope. The patron channel strengthens and negotiating leverage rises; internal cohesion takes a small hit from the optical compromise.",
+        "label": "Ask Belgrade to reopen the map",
+        "description": "Ask Milošević to reopen the map in Pale's favor before any new vote. If it works, Pale's leverage rises. Belgrade's patience wears thinner.",
         "effects": [
           {
             "kind": "morale_change",
             "faction": "RS",
-            "delta": 1
+            "delta": 0
           }
         ],
         "sets_flags": {
@@ -4763,18 +4772,18 @@
         "dimension_shifts": [
           {
             "faction": "RS",
-            "dimension": "patron_confidence",
-            "delta": 10
-          },
-          {
-            "faction": "RS",
-            "dimension": "negotiating_leverage",
-            "delta": 10
+            "dimension": "international_standing",
+            "delta": -5
           },
           {
             "faction": "RS",
             "dimension": "internal_cohesion",
-            "delta": -5
+            "delta": 2
+          },
+          {
+            "faction": "RS",
+            "dimension": "negotiating_leverage",
+            "delta": 8
           }
         ],
         "aggression_affinity": -0.1,
@@ -4782,44 +4791,44 @@
       }
     ],
     "notifications_to_other_factions": {
-      "defy_belgrade_directive": {
-        "RBiH": {
-          "headline": "Pale defies Belgrade on diplomatic envelope",
-          "body": "RS rejects FRY pressure to ease the corridor tempo and align with the Owen-Stoltenberg envelope. Sarajevo reads the patron-channel friction but no material rupture — Pale's platform holds even as Belgrade's diplomatic envelope narrows."
-        },
-        "HRHB": {
-          "headline": "Karadzic rejects Milosevic's envoys",
-          "body": "Pale defies Belgrade's soft diplomatic pressure on the corridor and Sarajevo axes. Mostar reads the FRY-RS friction as a leading indicator but no embargo; the patron channel holds at reduced confidence."
-        }
-      },
       "accept_belgrade_directive": {
         "RBiH": {
-          "headline": "Pale aligns with Belgrade's envelope",
-          "body": "RS accepts FRY pressure to ease the corridor tempo and align with the diplomatic envelope. Sarajevo reads the Belgrade-Pale alignment as a leading indicator — but Pale's internal cohesion suffers and recruitment tightens for six turns."
+          "headline": "Pale holds to the Invincible package",
+          "body": "Pale stays in step with Belgrade behind the package. Its concessions depend on Sarajevo accepting the terms as offered."
         },
         "HRHB": {
-          "headline": "Karadzic honors Milosevic's directive",
-          "body": "Pale aligns with Belgrade's diplomatic envelope on the Owen-Stoltenberg envelope and the Sarajevo axis. Mostar reads the FRY-RS rapprochement but notes Pale's internal cohesion damage from the platform-faction backlash."
+          "headline": "Pale and Belgrade keep one line",
+          "body": "Pale backs the package Milošević sat in on. Mostar expects Pale to drop its concessions if Sarajevo attaches conditions."
         }
       },
       "partial_compliance": {
         "RBiH": {
-          "headline": "Pale signals partial flexibility to Belgrade",
-          "body": "RS narrows tempo on selected corridor axes while keeping Sarajevo-axis fires unchanged. Sarajevo reads the Pale-Belgrade signal as partial flexibility — Pale hawks grumble but the platform holds."
+          "headline": "Pale endorses the package but delays its vote",
+          "body": "Pale backs the package in public while holding back the Assembly's vote and pressing for map changes of its own. Belgrade is reported to be irritated."
         },
         "HRHB": {
-          "headline": "Karadzic offers Milosevic a narrower window",
-          "body": "Pale signals partial compliance with Belgrade's directive on the corridor envelope. Mostar reads the FRY-RS friction as moderated but unresolved; the patron channel holds at reduced confidence."
+          "headline": "Pale stalls on the Assembly vote",
+          "body": "Pale endorses the package but will not put it to a vote. Mostar sees friction between Pale and Belgrade, short of a break."
         }
       },
       "broker_compromise": {
         "RBiH": {
-          "headline": "Pale opens Pavle channel to Belgrade",
-          "body": "RS opens back-channels through Patriarch Pavle and the Russian envoys to offer Belgrade a face-saving formula. Sarajevo reads the optical compromise but the corridor and Sarajevo claims persist on the platform."
+          "headline": "Pale asks Belgrade to reopen the map",
+          "body": "Pale wants the map redrawn in its favor before any new vote. Sarajevo reads it as a bid for more ground with Belgrade's help."
         },
         "HRHB": {
-          "headline": "Karadzic seeks face-saving formula with Belgrade",
-          "body": "Pale routes a compromise proposal through Patriarch Pavle and the Russian envoys. Mostar reads the patron-channel strengthening and the negotiating-leverage rise; the platform itself remains intact."
+          "headline": "Pale presses Milošević on the map",
+          "body": "Pale asks Belgrade to reopen the map before the Assembly votes again. Mostar is watching whether Milošević takes the request to the mediators."
+        }
+      },
+      "defy_belgrade_directive": {
+        "RBiH": {
+          "headline": "Pale breaks with Belgrade's package",
+          "body": "Pale walks away from the package Milošević backed, and its Assembly will decide alone. The failure of the plan now falls on Pale."
+        },
+        "HRHB": {
+          "headline": "Pale goes its own way",
+          "body": "Pale breaks with Belgrade over the package. Mostar sees an open rift between Pale and Belgrade, and the plan stalls on the Serb side."
         }
       }
     },
