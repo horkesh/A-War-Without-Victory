@@ -10,7 +10,7 @@ import {
     GATHERING_CADENCE_RS, GATHERING_CADENCE_HRHB, getGatheringCadenceRBiH,
     EMERGENCY_COOLDOWN, PLAN_VALIDITY_BUFFER,
     SYNC_WINDOW_DEFAULT, SYNC_MIN_BRIGADES,
-    STRENGTH_THRESHOLDS, SUPPLY_STATUS_THRESHOLDS, MANPOWER_STATUS_THRESHOLDS,
+    STRENGTH_THRESHOLDS,
     OPPORTUNITY_SCORE,
     MAX_GATHERING_OFFENSIVE_TARGETS, MAX_GATHERING_HOLD_TARGETS,
 } from './army_hq_gathering_constants.js';
@@ -190,7 +190,7 @@ const DEFAULT_OFFICER_COMPETENCE = 2.0;
 
 /**
  * Produces a theater-wide assessment for a faction — corps-by-corps evaluation,
- * territory trend, supply/manpower status, and threat identification.
+ * and threat identification.
  * Used as input for campaign plan generation.
  */
 export function assessTheater(state: GameState, faction: FactionId): TheaterAssessment {
@@ -205,23 +205,11 @@ export function assessTheater(state: GameState, faction: FactionId): TheaterAsse
     // Deterministic sort by corps_id
     corpsAssessments.sort((a, b) => a.corps_id < b.corps_id ? -1 : a.corps_id > b.corps_id ? 1 : 0);
 
-    // 3. Territory trend (derived from strength_class distribution)
-    const territoryTrend = computeTerritoryTrend(corpsAssessments);
-
-    // 4. Supply status
-    const supplyStatus = computeSupplyStatus(state, faction);
-
-    // 5. Manpower status
-    const manpowerStatus = computeManpowerStatus(state, faction);
-
-    // 6. Weakest enemy front + strongest threat (from sector intel)
+    // 3. Weakest enemy front + strongest threat (from sector intel)
     const { weakestEnemyFront, strongestThreat } = identifyEnemyFronts(state, faction);
 
     return {
         corps_assessments: corpsAssessments,
-        territory_trend: territoryTrend,
-        supply_status: supplyStatus,
-        manpower_status: manpowerStatus,
         weakest_enemy_front: weakestEnemyFront,
         strongest_threat: strongestThreat,
     };
@@ -410,51 +398,10 @@ export function computeRecentTerritoryChange(
     return delta;
 }
 
-/** Derive territory trend from corps strength distribution. */
-function computeTerritoryTrend(assessments: CorpsAssessment[]): 'gaining' | 'stable' | 'losing' {
-    if (assessments.length === 0) return 'stable';
-
-    let weak = 0;
-    let strong = 0;
-    for (const a of assessments) {
-        if (a.strength_class === 'thin' || a.strength_class === 'critical') weak++;
-        if (a.strength_class === 'fortress' || a.strength_class === 'strong') strong++;
-    }
-
-    const majority = assessments.length / 2;
-    if (weak > majority) return 'losing';
-    if (strong > majority) return 'gaining';
-    return 'stable';
-}
-
-/** Derive supply status from general_supply_reserve. */
-function computeSupplyStatus(state: GameState, faction: FactionId): 'abundant' | 'adequate' | 'strained' | 'critical' {
-    const reserve = state.military.general_supply_reserve?.[faction] ?? 0;
-    if (reserve >= SUPPLY_STATUS_THRESHOLDS.abundant) return 'abundant';
-    if (reserve >= SUPPLY_STATUS_THRESHOLDS.adequate) return 'adequate';
-    if (reserve >= SUPPLY_STATUS_THRESHOLDS.strained) return 'strained';
-    return 'critical';
-}
-
-/** Derive manpower status from average brigade personnel. */
-function computeManpowerStatus(state: GameState, faction: FactionId): 'healthy' | 'adequate' | 'strained' | 'critical' {
-    let totalPersonnel = 0;
-    let count = 0;
-    for (const fmn of Object.values(state.military.formations)) {
-        if (fmn.faction !== faction) continue;
-        if (fmn.status !== 'active') continue;
-        const kind = fmn.kind ?? 'brigade';
-        if (kind !== 'brigade') continue;
-        totalPersonnel += fmn.personnel ?? 1000;
-        count++;
-    }
-
-    const avg = count > 0 ? totalPersonnel / count : 0;
-    if (avg >= MANPOWER_STATUS_THRESHOLDS.healthy) return 'healthy';
-    if (avg >= MANPOWER_STATUS_THRESHOLDS.adequate) return 'adequate';
-    if (avg >= MANPOWER_STATUS_THRESHOLDS.strained) return 'strained';
-    return 'critical';
-}
+// F7b retirement (2026-11-16): the theater-level territory trend, supply status and manpower
+// status are gone. Their only consumer was the plan's army stance and aggression modifier, which
+// nothing read (measured: removing them leaves control and every other field identical). The
+// supply status also read a missing reserve as 'critical' with the reserve model off.
 
 /** Identify weakest enemy front (best opportunity) and strongest threat from sector intel. */
 function identifyEnemyFronts(
@@ -556,7 +503,7 @@ export function generateCampaignPlan(
     emergency: boolean,
 ): CampaignPlan {
     const priorities = generateFrontPriorities(state, faction, assessment, currentTurn);
-    const doctrine = generateDoctrineOverride(faction, assessment, currentTurn, priorities);
+    const doctrine = generateDoctrineOverride(priorities);
 
     const syncOps = generateSynchronizedOperations(assessment, priorities, currentTurn);
 
@@ -787,52 +734,15 @@ function applyFactionPersonality(
     }
 }
 
-/** Generate doctrine override from theater assessment and front priorities. */
-function generateDoctrineOverride(
-    faction: FactionId,
-    assessment: TheaterAssessment,
-    currentTurn: number,
-    priorities: FrontPriority[],
-): DoctrineOverride {
-    let armyStance: DoctrineOverride['army_stance'] = 'balanced';
-    let aggression = 0.0;
-
-    // Compute average exhaustion
-    const corpsAssessments = assessment.corps_assessments;
-    const totalExhaustion = corpsAssessments.reduce((sum, c) => sum + c.exhaustion, 0);
-    const avgExhaustion = corpsAssessments.length > 0 ? totalExhaustion / corpsAssessments.length : 0;
-
-    // Territory + supply + manpower → army stance
-    if (assessment.territory_trend === 'losing' &&
-        (assessment.manpower_status === 'critical' || assessment.supply_status === 'critical')) {
-        armyStance = 'general_defensive';
-        aggression = -0.15;
-    } else if (assessment.territory_trend === 'gaining' && assessment.supply_status !== 'critical') {
-        armyStance = 'general_offensive';
-        aggression = 0.10;
-    } else if (avgExhaustion > 40) {
-        armyStance = 'balanced';
-        aggression = -0.05;
-    }
-
-    // Faction adjustments
-    if (faction === 'RS' && currentTurn < 26) {
-        if (armyStance !== 'general_offensive') {
-            aggression += 0.05;
-        }
-        if (armyStance === 'balanced') {
-            armyStance = 'general_offensive';
-        }
-    } else if (faction === 'RBiH' && currentTurn < 40) {
-        armyStance = 'general_defensive';
-        if (aggression > -0.15) aggression = -0.15;
-    } else if (faction === 'HRHB') {
-        if (armyStance === 'general_offensive') {
-            armyStance = 'balanced';
-            aggression = Math.min(aggression, 0.0);
-        }
-    }
-
+/**
+ * Generate the doctrine override from front priorities: per-corps stance ceilings, which
+ * bot_corps_stance and the commander briefing read.
+ *
+ * F7b retirement (2026-11-16): the army-wide stance and aggression modifier this used to compute
+ * had no reader anywhere (sim, UI, briefing or save consumers), so they are no longer produced.
+ * Saves written before this still carry them; the validator accepts them as legacy fields.
+ */
+function generateDoctrineOverride(priorities: FrontPriority[]): DoctrineOverride {
     // Corps stance ceilings from front priorities
     const corpsStanceCeilings: Record<string, 'offensive' | 'balanced' | 'defensive' | 'reorganize'> = {};
     for (const p of priorities) {
@@ -844,9 +754,7 @@ function generateDoctrineOverride(
     }
 
     return {
-        army_stance: armyStance,
         corps_stance_ceilings: Object.keys(corpsStanceCeilings).length > 0 ? corpsStanceCeilings : undefined,
-        aggression_modifier: aggression,
     };
 }
 

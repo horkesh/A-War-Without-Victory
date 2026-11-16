@@ -84,6 +84,7 @@ Any one of the following triggers REVERT + VERDICT-REPORT-ONLY shape (mirrors MO
 - Stubbornness/tolerance/variation-rule values: all DDR values CONFIRMED unchanged.
 - Roster `tenure_end_default`: REFINED — optional in JSON; loader resolves at runtime from OOB canon source. Avoids dual-canon conflict.
 - §6 surface flag: **EXPLICIT** — A4 enables A3's Mladić-bot autonomous-launch path to FIRE (stubbornness=5 populated → cooldown gate satisfiable). Per A3 closeout `c8ff93d8`, the autonomous-launch path is parity-with-existing — does NOT introduce a new §6 surface (Stupčanica SHAPE B sign-off chain `b03333af`; Krivaja Phase 1 at `bc44ddec`). Flag carried into 188w validation.
+  - **Correction (2026-11-15, RF-ROSTER gate):** the roster values never reached the officers when this was written. Save migration 10 wrote 3 on every officer whose stubbornness was undefined, and the roster was applied only to an unset field, so every army chief carried 3. The wiring fix is RF-ROSTER (#677). Even with the roster live, the autonomous-launch gate (stubbornness >= 4) finds no eligible catalog opportunity today (one RS entry; the RBiH entries are late-war), so the path stays inert, and the §6 DDR framing is held for the panel before any activation.
 
 ---
 
@@ -164,7 +165,7 @@ T6 — keep-past-schedule stubbornness escalation: stubbornness +1 capped at 5.
 T7 — early-relief: political_capital cost = 4.
 T8 — faction-symmetric mechanism (static-grep guard, no `if (faction === 'X')` branches in source).
 T9 — determinism: re-run produces byte-identical roster + state.
-T10 — backward-compat: pre-A4 saves load with default-undefined → no behavior change.
+T10 — backward-compat: pre-A4 saves load with default-undefined → no behavior change. *(Correction 2026-11-15: save migration 10 turns an undefined stubbornness into 3 on every load, so a pre-A4 save carried 3, not undefined; RF-ROSTER (#677) reconciles the roster-owned value at load.)*
 T11 — pipeline ordering: `evaluate-army-co-transitions` runs BEFORE `evaluate-army-hq-gathering`'s consumer (`apply-army-directive-interpretation`) AND after `evaluate-army-hq-gathering`.
 
 ### Verification snapshot (CHECKPOINT)

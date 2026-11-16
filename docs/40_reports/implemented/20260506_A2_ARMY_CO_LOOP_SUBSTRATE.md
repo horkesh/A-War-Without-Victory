@@ -135,7 +135,7 @@ Substrate-only / no behavior change → expected **BYTE-STABLE** to predecessor 
 ## Next-lane handoff
 
 A3 may now:
-- Read `state.military.named_officer_data[*].stubbornness` (default 2 if undefined).
+- Read `state.military.named_officer_data[*].stubbornness` (default 2 if undefined). *(Correction 2026-11-15: the effective default was 3, not 2. Save migration 10 writes 3 on every officer whose stubbornness is undefined, on every load; RF-ROSTER (#677) makes the roster the owner of the field for the army chiefs.)*
 - Read `state.military.named_officer_data[*].override_tolerance` (default 3 if undefined for political leaders).
 - Read/write `state.military.named_officers[id].last_autonomous_launch_turn` for cooldown enforcement.
 - Append/prune `state.military.named_officers[id].recent_overrides` for the 12-turn rolling window.

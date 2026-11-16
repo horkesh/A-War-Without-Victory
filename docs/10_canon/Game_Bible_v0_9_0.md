@@ -2,6 +2,7 @@
 
 **Last Updated:** 2026-11-15
 **Amended:** 2026-11-15 (owner directive: war-or-game removed from all seats; owner approved this canon edit 2026-11-15, "Amend the canon docs"): adding a rupture now needs `/historian` + `/scenario-creator-runner-tester` + `/game-designer` review instead of `/war-or-game`. Nothing renumbered.
+**Amended:** 2026-11-15 (RF-ROSTER gate, wording only, no mechanic change): §21 "Replace a corps CO" now says the RS officer-corps revolt reads the relieved officer's `political_reliability` against the faction's patron-dependence weight, as `command_lever_consequences.ts` does, not roster stubbornness. Nothing renumbered.
 
 One game turn equals one week.
 
@@ -294,9 +295,9 @@ Canonical clarification of the player's command role, consistent with §3 and §
 
 1. **Authorize op** — approve an operation a commander proposes. **SHIPPED** (back-the-officer / proposal approval).
 2. **Request op** — direct a commander toward a strategic objective, even against his military judgment. **SHIPPED 2026-06-01 (#106)** — president names a target OSID; engine auto-builds the op (single-hop staging v1).
-3. **Stop op** — halt a live operation to bank political capital. **SHIPPED 2026-06-01 (#103/#104).**
+3. **Stop op** — halt a live operation (in planning or execution) to bank political capital. **SHIPPED 2026-06-01 (#103/#104).**
 4. **Authorize elite deployment** — release elite/special units to a front or operation. **SHIPPED 2026-06-01 (#105).**
-5. **Replace a corps CO** — sack/install a commander, at a cost. **SHIPPED 2026-06-01 (#107)** — observable internal_cohesion −4 cost + RS-revolt via roster stubbornness.
+5. **Replace a corps CO** — sack/install a commander, at a cost. **SHIPPED 2026-06-01 (#107)** — observable internal_cohesion −4 cost + RS-revolt when the faction's patron-dependence weight times the relieved officer's `political_reliability` passes the threshold (`command_lever_consequences.ts`).
 
 Refusing a patron demand is **not a sixth lever** — it is a response option within the event system (§21.1) resolving through `patron_confidence` (§21.2). Faction asymmetry (RS officer-revolt/blockade risk, RBiH firmest civilian control, HRHB patron-gated) emerges from data, not faction branches. Authoritative design: `docs/plans/2026-06-01-presidential-command-model-design.md`. *(Additive note; does not supersede §3 or §21. All five levers SHIPPED 2026-06-01, player-only → historical/headless byte-identical. Still forthcoming as depth (not levers): the force-op disposition-tinted pushback card, and patron-event consolidation + supply dead-channel fix.)*
 

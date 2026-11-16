@@ -82,7 +82,7 @@ describe('sensitive-history player-choice content boundary', () => {
         const consequence = requireEvent(events, 'drina_valley_ethnic_cleansing_1992');
         expect(decision.trigger).toMatchObject({ turn_min: 8, turn_max: 30, phase: 'war' });
         expect(decision.narrative).toContain('Reports from the field');
-        expect(decision.historical_source).toContain('BB Vol. I Ch. 8-9');
+        expect(decision.historical_source).toContain('Balkan Battlegrounds Vol. I (Drina Valley campaign'); // Vol. I ch. 8-9 is Croatia 1991 and was dropped
         expect(decision.source_tier).toBe('icty_icj_un');
         expect(decision.source_note).toContain('Sensitive History Design Gate');
         expect(directChoiceFields(decision).some(isDirectRefusedSensitiveChoice)).toBe(false);

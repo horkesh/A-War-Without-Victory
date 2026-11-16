@@ -26,7 +26,7 @@ const AUDIT_VOCABULARY = new RegExp([
     'historian check', 'historian audit', 'historian sign-off', '\\bhistorians? (?:had|have) ', 'sign-off',
     'paragraph not verified', 'not verified for this claim', 'corrected 2026-', 'the earlier cite', 'earlier text of this field',
     'design inference', 'LANE-[A-Z]', '/narrative-designer', '/historian', 'Divergence Ring', '\\b20\\d\\d-\\d\\d-\\d\\d\\b',
-    'UNVERIFIED', 'no local copy',
+    'UNVERIFIED', 'no local copy', '\\bH\\d+ audit\\b', 'the H\\d+ audit',
 ].join('|'), 'i');
 
 type Surface = { id: string; where: string; text: string };

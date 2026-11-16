@@ -86,3 +86,21 @@ node --import tsx tools/ai_play/desktop_calibration_compare.ts --turns 0 --facti
 ```
 
 Nonzero horizons require the approved phase/source-bound run brief after consistency review. Evidence_only output is never automatic baseline adoption or qualification.
+
+### Played test: a one-axis President (package "1994-95 attack and defence")
+
+With `--president engaged|meddler`, two opt-in flags make the President's Request-ops usable as the package's played test. Without them, the President and the output are unchanged.
+
+- `--request-axis <corps>:<mun>[,<mun>...]`: every Request-op goes to that corps, against targets in the named municipalities only. If no axis target is buildable, it records `request_op:no_buildable_axis_target`.
+- `--request-prefer-exhausted on`: among candidate corps, one whose corps exhaustion is above the planning gate (`MAX_EXHAUSTION_FOR_OPERATION`) is ordered first.
+
+With either flag set, the output adds:
+- `player_policy.president_options`;
+- per turn, `requested_corps_exhaustion`;
+- `president_requests`: each order with its turn, corps, target, exhaustion at the order, objection, Authority cost and clash, joined to its result. The result is the after-action report from `state.operation_history` (outcome, attacks, killed on each side, objectives captured), a still-running phase, or the `op_directive_rejection`.
+
+```bash
+node --import tsx tools/ai_play/desktop_calibration_compare.ts --faction RBiH --turns 120 --president engaged --event-policy staff_recommended --request-axis arbih_3rd_corps:maglaj,zavidovici --request-prefer-exhausted on
+```
+
+`--event-policy bot_equivalent` with an engaged President currently stops with `No response option "accept_ceasefire_terms" for event "strategic_posture_review_rbih"`. Use `staff_recommended` or `historical_default` until that is fixed.
