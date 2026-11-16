@@ -35,6 +35,25 @@ Batch B, item B0 (freeze cut, Fable consult 2 revision 2; must-fix before emerge
 
 Evidence: `C:/Pyrrhic/AWWV-worktrees/_logs/batch-b-20261116/` (b0_*).
 
+## 2026-11-16 — B1: an overstaying army commander's competence decays linearly, as documented
+
+Batch B, item B1 (freeze cut, Fable consult 2 revision 2): fix the code to the documented rate.
+
+**Defect.** `applyEmergentVariationRules` (`src/sim/combat/army_co_lifecycle.ts`) is documented as "competence decays by `competence_decay_per_12w / 12` per turn". It runs once per turn, but each turn it added `decayPerTurn × overstayTurns` to the already-decayed competence. After n overstay turns the officer had lost `decayPerTurn × n(n+1)/2`. With the roster's −0.05 per 12 weeks, 12 turns cost −0.325 instead of −0.05, and 52 turns cost −5.5, which clamps at the floor of 1.
+
+**Change.** Each overstay turn applies `decayPerTurn` once to the stored competence (clamped to [1, 5]). No new state field.
+
+**Tests.** `a4_army_co_roster_personalities.test.ts`:
+- T5 now runs the rule once per turn, as the pipeline does, and expects −0.05 after 12 turns. The old single-call test could not see the quadratic.
+- New T5b: 24 turns cost exactly twice 12.
+- 20 tests pass.
+
+**Proof: inert in headless.** The rule only touches army commanders kept past their tenure (`kept_past_schedule_since_turn`). No officer reaches that state in the historical or the hands-off emergent 188w.
+- Historical 188w against main `d10892602`: final_save `70f4dc05bf375bc7`, equal to the baselines manifest (after #696). No re-bless.
+- A played game can reach the rule only where an army commander outlasts his tenure.
+
+Evidence: `C:/Pyrrhic/AWWV-worktrees/_logs/batch-b-20261116/` (b1_*).
+
 ## 2026-11-16 — B4: the army commander's autonomous launch is retired (inert)
 
 Batch B, item B4 (freeze cut, Fable consult 2 revision 2, RF-ROSTER "path a"): retire.
@@ -54,6 +73,22 @@ Batch B, item B4 (freeze cut, Fable consult 2 revision 2, RF-ROSTER "path a"): r
 **Follow-up (UI, not engine):** the pushback panel's "Autonomous-launch warning" section can now be shown only for a legacy save. It is a candidate for removal by the UI lane.
 
 Evidence: `C:/Pyrrhic/AWWV-worktrees/_logs/batch-b-20261116/` (b4_*).
+
+## 2026-11-16 — B5 scorer fixes 1-3: the emergent political scorer reads territory trend, exhaustion and the patron term in the state's own units (historical byte-identical, emergent hash-identical)
+
+- **Why.** The Batch B emergent triage (B5) found three unit and order defects in the political scorer that emergent bots, peace-plan responses and political-logic events use. Each made the scorer less tied to game state than its comments say. None decided a pick on its own.
+  - **Territory trend was always "stable".** `turn_summaries` is newest-first and keeps every turn, so `slice(-3)` read the war's first three summaries for the whole war, oldest-first, with the sign reversed. `territory_snapshot` is an area fraction (0..1), and the ±1.0 threshold was meant in percentage points.
+  - **Exhaustion was under-read about 6×.** `war_exhaustion / 600` kept `exhaustion_level` at or below ~16 all war (188w end state: HRHB ~8100, RBiH ~8700, RS ~9800, against the 10000 cap). A war-weary faction never read as exhausted, and the RBiH survival term (situation_score < 50) could not fire.
+  - **The patron term treated a neutral option as aggressive.** `aggression_affinity` 0 took the −0.5 branch.
+- **Fix.** `src/sim/political/political_personality.ts` and `political_event_decision.ts`.
+  - The trend compares the newest and the third-newest snapshot that carry the faction, in percentage points, against ±1 pp (`TERRITORY_TREND_WINDOW`, `TERRITORY_TREND_THRESHOLD_PP`).
+  - `exhaustion_level` uses the shared `recoveredExhaustionLevel` (`state/war_weariness_bands.ts`), the same 0..100 read as the war-weariness bands, the phase-3c gate and the UI.
+  - The patron term is +0.5 for a defensive option, −0.5 for an aggressive one and 0 for a neutral one.
+- **Proof.**
+  - **Historical 188w byte-identical** to a main run (`df206642c`, B0/B1/B4 merged): final hash `df791f73c26ed642`, the baselines manifest value. Every artifact matches except `run_meta.json`. Checkpoints 709/709/708/681, guard intact. (Also byte-identical on the earlier main `e3a0c2b6a`: `01572f50dfea2378`.)
+  - **Hands-off emergent 188w hash-identical** with and without the fixes: `b5507e7b9b6463a2` (710/707/707/670). Its guard breaches (Farz 0/4 receipts, Seher t164, Petrovo t179) are the same on main and belong to package P2. The fixes are live (the trend now reads gaining or losing on 6-10% of turns per faction; mid-war exhaustion reads 60-95 instead of 10-16), but no pick crosses: the 15 emergent picks that differ from history win by authored-option margins of 0.10-4.42, and the state terms move a score by at most ~1.3.
+  - Tests: new `tests/sim/political/scorer_unit_fixes_b5.test.ts` (9); `tests/cohesion_divisor_rescale.test.ts` updated to the new scale. The political, events and peace-plan slices pass (21 files, 298 tests). tsc is clean.
+- Logs: `C:/Pyrrhic/AWWV-worktrees/_logs/b5-scorer-20261116/`.
 
 ## 2026-11-16 — Citation audit batch 3: Balkan Battlegrounds page and chapter references in event and essay data
 
@@ -112,6 +147,30 @@ The historian read the cited location of every BB reference (109 groups, 279 men
   - Guards: verify_checkpoints "guard intact" (enclave 9/9, Farz, cascade 31, eastern provenance CLEAN), and engine_health_gate --strict PASS (consistency 0).
   - Re-pinned `data/derived/scenario/baselines/manifest.json`. The 40-week structural fingerprint is unchanged (`3b1ddd64fb4f1600`).
 - **Tests.** `tests/army_hq_gathering.test.ts` now asserts the assessment's and the doctrine's retired fields are gone and that the corps ceilings still apply. 296 tests in the affected files pass, and tsc is clean.
+
+## 2026-11-16 — N6: enemy-concentration zones survive sector renumbering (control-identical)
+
+- **Defect** (same class as SE9, found in the SE9 attribution).
+  - `assessSituation` (`commander/assess.ts`) built `enemy_concentration_zones` from the previous turn's `intel_picture.concentration_detected`, keyed by last turn's positional sector ids. It matched those ids against this turn's sectors, which the partition re-minted, so the zones pointed at whichever sector now carried that number.
+  - The zones reach the player: the command-strain text "Enemy concentration detected — defensive readiness elevated" (`command_strain.ts:1083/:1361`, via `GameStateAdapter.ts:1659`) appears or disappears on them.
+  - No sim decision reads them.
+- **Ruling (orchestrator):** fix, not retire, because the value is player-visible.
+- **Fix.**
+  - The intel picture also records massing by `stableSectorKey` (`concentration_detected_by_stable_key`, built in `decide.ts`).
+  - The assessment maps last turn's concentrations onto this turn's sectors by stable key, through a new pure `concentrationZonesFromPreviousIntel`.
+  - A picture saved before N6 has no stable map and keeps the positional lookup.
+  - The new field is optional, so older saves load.
+- **Measured** (one 188-week run on main `76e5fcabd`, whose hash is `70f4dc05bf375bc7`; re-measured after merging main `713c7a213` = `1391f69248072728`: N6 `9499e1f9a4d2e628`, still 0 cells, 251 identical control_events, re-pinned; re-measured again after merging main `9a3ab8894` = `01572f50dfea2378`: N6 `adb056607d260858`, 0 cells at all four checkpoints, 251 identical control_events, control/formation/activity/AAR files byte-identical, re-pinned; and after merging main `df206642c` = `df791f73c26ed642` (fresh run, equal to main's pin): N6 `83b8e8cd36023899`, 0 cells, 251 identical control_events, deltas and AARs byte-identical, re-pinned).
+  - Final hash `bb22e1f77c941211`.
+  - **0 cells differ** at w39, w104, w156 and w188, and all 251 control_events are identical.
+  - The state diff is the new `intel_picture` field plus corrected `threat_assessment.enemy_concentration_zones`. Example at w188: VRS 1st Krajina Corps no longer lists `zone:vrs_1st_krajina:op:donji_vakuf:korenici`, a zone the positional map borrowed from a renumbered sector.
+  - Guards: verify_checkpoints "guard intact", engine_health_gate --strict PASS.
+  - The baselines manifest is re-pinned.
+- **Tests.** New `tests/commander_concentration_zones_stable_key.test.ts`:
+  - a renumbered sector keeps its concentration;
+  - a legacy picture uses the positional lookup;
+  - the player's strain text shows the concentration warning when the massing was real, where the positional map lost it.
+  - All 30 commander test files pass (544 tests). tsc is clean.
 
 ## 2026-11-16 — PK5 (C7): a short queue head steps aside only for a dated, admissible op with its own roster (byte-identical)
 
@@ -411,6 +470,36 @@ Docs only; no `src/` or `data/` change, no hash change.
 - #721, C7 (PK5): a short queue head steps aside only for a dated, admissible operation with its own roster (a bounded skip; nothing is ever removed from a queue; undated chain members never jump the queue, with a regression test). Byte-identical on its base in historical and hands-off emergent mode (no skip fires). Systems Manual §6 paragraph added by the PR. Part 5 corrected: only the PK5 no-retry half (authored operations do not retry) stays accepted as final; the queue-head block is fixed by #721.
 - C8 (F1i, `political.enclaves` always empty because the integrity step reads the legacy `supply_state` and edges): ruled by the orchestrator: a §6 panel (historian, scenario tester, engine/systems, red-team, unanimous, plus canon); root fix first, then each revived reader measured alone and kept or retired (the IVP humanitarian term, which may double-count `enclave_resilience`; the negotiation enclave penalty; convoys; the Sarajevo tunnel flag).
 - #709 (N6) needs another re-pin after #718; it is with the L7 lane. Open: #701, #710, and the P2 steps.
+
+## 2026-11-16 — Pass 36: #701 (B1) recorded; where the citation package's §6 record row lives
+
+Docs only; no `src/` or `data/` change, no hash change.
+
+- #701, B1: an overstaying army commander's competence now decays linearly as documented (it was quadratic: 12 turns cost 0.325 instead of 0.05). Inert in headless (no army commander overstays in the historical or emergent 188-week runs); the PR measured 70f4dc05bf375bc7 against its base d10892602. Not re-measured on top of #718; main is expected to stay df791f73c26ed642. #721 (PK5) is added to the roadmap merged list.
+- Pointer, per the orchestrator: the citation-audit content package's §6 record row is in `docs/10_canon/SENSITIVE_HISTORY_DESIGN_GATE.md` ("Record (Citation-audit content package, 2026-11-16)", added by #718 beside the RB1 row). It records unanimous §6 verdicts for 47 strings (11 rewrites, 34 changes, 2 unchanged); the verdicts file is `_logs/s6_content_package_citation_audit_20261115_verdicts.md` in the worktrees folder; the UI lane applies them. Work list Part 7.
+
+## 2026-11-16 — Pass 37: calendar railroads and the Chronicle title registered; #721 and #701 confirmed
+
+Docs only; no `src/` or `data/` change, no hash change.
+
+- Registered in the work list Part 3: RR1, the dated per-faction settings in `data/scenarios/timelines/apr1992.json` (RS reinforcement multiplier 1.0 to 0.85 at week 52, 0.65 at week 78, 0.45 at week 104; RBiH "Controlled Counteroffensive" +0.15 aggression from week 80) are calendar railroads that weaken the VRS on schedule in a diverged game; fix (tie to causes) or a written reason before the freeze, routed to the chapters integration and the package (F2 and RS replacement at P3). A UI truth fix: the Chronicle shows an HRHB player "Washington Pivot" from week 26, 17 months early, because chapters are titled from standing-order names.
+- Confirmed (orchestrator): #721's "Baseline pins" check passed on the merge ref that included #718, so its inert claim holds on top of #718; #701 (B1) is inert; main stays df791f73c26ed642.
+
+## 2026-11-16 — Pass 38: the Codex review backlog sweep (standing duty), finding G1, #701 measured
+
+Docs only; no `src/` or `data/` change, no hash change.
+
+- New standing steward duty (owner, 2026-11-16, via the orchestrator): inventory every comment by the Codex review bot (`chatgpt-codex-connector[bot]`) on open PRs and on PRs merged in the last 7 days, classify, route the open ones to the orchestrator, and track to closure in `C:/Pyrrhic/AWWV-coordination/codex_review_comments.md`. First sweep: the last 70 PRs (#657 to #726): 65 with no findings, 1 (#690) a completed review without findings data, 4 with findings (#706, #693, #682, #670; 6 inline comments): 3 fixed in their merge commits (#682 twice, #670), 3 open (two harness comments on #706, one on #693).
+- The #693 comment is a real finding with a record consequence: `computeAddressNationAvailability` never checks the event's `turn_min`, so a human President can address the nation from turn 0 (four uses) while a bot fires it from turn 84. Registered as work list G1; the BC06 record's reason is corrected to say "about three uses for a bot". The Rulebook's wording of the recurring address (about three uses) is not edited without an instruction.
+- #701 (B1): main stays df791f73c26ed642, measured (the Batch B lane re-proved it on main 0d62cdcf0, which includes #718).
+
+## 2026-11-16 — Pass 39: RR1 moved from Part 3 to the package (P3); #709 (N6) recorded
+
+Docs only; no `src/` or `data/` change, no hash change.
+
+- Orchestrator correction: RR1 (the dated per-faction settings in `data/scenarios/timelines/apr1992.json`: the RS reinforcement multiplier and the RBiH "Controlled Counteroffensive" aggression) moves the hash if it is changed, so it cannot sit in Part 3 (after the freeze, hash unchanged). It is now in the work list P3 row beside F2 and RS replacement, disposition pending the chapters integration (fix by tying them to causes, or a written reason, before the freeze). The Chronicle "Washington Pivot" truth fix stays in Part 3 (UI only).
+- #709, N6: enemy-concentration zones survive the per-turn sector renumbering (a stable-key map; older saves keep the positional lookup). Control-identical (0 cells differ, 251 control events identical); the state moved only by the new `intel_picture` field and the corrected zones; baselines re-pinned in the PR. The main hash after #709 is not recorded until confirmed.
+- #726, B5 scorer fixes 1 to 3 (territory trend, exhaustion scale, neutral patron term): historical byte-identical (df791f73c26ed642, the manifest at that base), emergent hash-identical with and without the fixes (b5507e7b9b6463a2; 710 / 707 / 707 / 670); the fixes decide no pick; the emergent guard breaches belong to package P2. Work list B5-1, B5-2, B5-4.
 
 ## 2026-11-15 — Command loop L7: army clashes (proposal 2A step A1; owner decision 4)
 

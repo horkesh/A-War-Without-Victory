@@ -53,11 +53,13 @@ export function scorePoliticalOption(
         * ((assessment.blended_score / 100) - 0.5)
         * 1.5;
 
-    // patronScore: high patron pressure + sensitive faction → prefer lower-aggression options
+    // patronScore: high patron pressure + sensitive faction → prefer lower-aggression options.
+    // A neutral option (aggression_affinity 0) is neither rewarded nor penalised.
+    const affinity = option.aggression_affinity ?? 0;
     const patronScore =
         (assessment.patron_pressure / 100)
         * personality.patron_sensitivity
-        * ((option.aggression_affinity ?? 0) < 0 ? 0.5 : -0.5);
+        * (affinity < 0 ? 0.5 : affinity > 0 ? -0.5 : 0);
 
     // survivalScore: survival-internationalist factions (RBiH) favor defiant options when weak,
     // because international legitimacy substitutes for military strength.

@@ -268,8 +268,14 @@ export interface IntelPicture {
     readonly zone_confidence: Readonly<Record<string, number>>;
     /** sector_id -> detected offensive signs. */
     readonly offensive_signs: Readonly<Record<string, number>>;
-    /** sector_id -> enemy massing. */
+    /** sector_id -> enemy massing (this turn's positional ids). */
     readonly concentration_detected: Readonly<Record<string, boolean>>;
+    /**
+     * N6 (2026-11-16): the same massing, keyed by `stableSectorKey`. Sector ids are re-minted every
+     * turn, so next turn's assessment reads this one to map last turn's concentrations onto its own
+     * sectors (the positional map pointed at the wrong sectors). Optional: absent on older saves.
+     */
+    readonly concentration_detected_by_stable_key?: Readonly<Record<string, boolean>>;
     readonly last_updated_turn: number;
 }
 
