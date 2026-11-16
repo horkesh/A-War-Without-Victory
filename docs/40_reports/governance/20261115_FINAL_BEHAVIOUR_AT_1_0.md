@@ -1,7 +1,7 @@
 # Final behaviour at 1.0
 
 **Date:** 2026-11-15
-**Authority:** owner rulings of 2026-11-15 (no engine change after 1.0; a finished game reproduces history if left alone and lets the player create ahistorical outcomes); orchestrator ruling on Fable consult 2, revision 2 (`fable_consults/2_freeze_cut.md`, "Appendix A, revised"); `RF-ENGINE-FREEZE` condition 5 in `docs/open_gates.yml`.
+**Authority:** owner rulings of 2026-11-15 (no engine change after 1.0; a finished game reproduces history if left alone and lets the player create ahistorical outcomes) and of 2026-11-16 (the improvising mode ships in 1.0 and stays the default); orchestrator ruling on Fable consult 2, revision 2 (`fable_consults/2_freeze_cut.md`, "Appendix A, revised"); `RF-ENGINE-FREEZE` condition 5 in `docs/open_gates.yml`.
 **Status:** record for the freeze. Section 1 is ratified. Sections 3 to 5 list what is not accepted and what the sitting found; the freeze commit re-checks the cell lists against the frozen run before this record is final.
 
 ## The test every accepted item passes
@@ -13,6 +13,8 @@ Each item accepted as final has two answers.
 - **Played:** does a player keep real agency over it?
 
 An item that removes player agency is not accepted as final. Accept-as-final is narrow: it is right for a finished game, and cost is never the reason. Dead paths, saturating formulas and code that contradicts its documentation are fixed or retired.
+
+**The tests apply to the emergent game.** Owner, 2026-11-16: "Of course the improvising mode ships in 1.0. That is the game. Replaying historical moves and what happened is just, well, history. Game is something else." Emergent mode ships and stays the default. So the "left alone" answer of every accepted item is owed on a hands-off emergent 188-week run, not only on historical-mode calibration; historical-mode calibration stays the engine health check. The left-alone answers in section 1 were given on code reading and historical-mode behaviour; they are re-checked against the emergent run before this record is final (freeze condition 7).
 
 ## 1. Accepted as final (game-designer and historian, one sitting, 2026-11-15)
 
@@ -81,6 +83,8 @@ The lockout was first filed as RF-3C-EXH. An earlier sitting (historian, scenari
 
 **Calibration-pass rule for the cells above.** No calibration lever is selected, justified or scored by a listed cell, and a match on a listed cell is not credited as fidelity. Farz P1, P-A and P-B are not tuned. After the package lands the list is re-derived and the freeze figures are read against it.
 
+**Emergent mode today (probe of 2026-11-16, main `278e4eb55`; evidence in `_logs/emergent-probe-20261115/REPORT.md`).** Left alone, emergent mode ends at week 40 with `negotiated_peace:vance_owen` and breaches the history guard (Srebrenica and Žepa never fall, Farz 0/4, the western-Bosnia HRHB cascade 4 against 31); checkpoint scores are 710 / 667 / 657 / 568, the last three against a map frozen in January 1993. The cause is a peace-plan floor that compares RS's share by settlement count (52.7%) with the plan's area-based 43%: the gap of 9.7 points is under the 17.3 floor, so the scoring engine decides and accepts, while by area RS holds 63.4% and would reject. The Contact Group floor has the same mismatch (not measured). The floor fix is a must-fix engine item and Batch B's first item (B0); the other emergent divergences are then triaged (E1): engine defects before the freeze, option weights in the calibration pass. Freeze condition 7 requires a hands-off emergent 188-week run that passes the history guards, with the historian accepting its divergences.
+
 ## 3. Items not accepted, with the Revision 2 answer
 
 Each of these was on the memo's first accept list and moved to fix or retire. The seats' views are added where they bear on the work.
@@ -113,6 +117,7 @@ Each of these was on the memo's first accept list and moved to fix or retire. Th
 
 ## 6. Open conditions (work owed by this record)
 
+0. A hands-off emergent 188-week run at the frozen commit passes the history guards and the historian accepts its divergences (freeze condition 7); the left-alone answers of section 1 are re-checked against it.
 1. A canon line for CODE3 (discretionary plans only; exhaustion is a cost; stop-op is the player's counter), after the L7 lane checks that stop-op works on an operation in planning.
 2. RB5: the reason text of section 1 in canon; the withholding at autonomy 1 to 3 is a Part 3 fix item whose design the §6 panel decides (sensitive: no lane touches it before that ruling); a Part 3 copy fix, with the narrative and historian seats, so no Verdict, ending or ledger copy presents the missing waves as the player's restraint.
 3. PK5: C7 fixed; the retry duty for the 1994 ARBiH fights met by the package or by Part 6.
@@ -131,7 +136,11 @@ Each of these was on the memo's first accept list and moved to fix or retire. Th
 7. F1h: the Systems Manual §15 text is corrected now; the code retirement stays in Part 4.
 8. The RC (D-topology) and BC06 (six escalation stages) roadmap rows are classified by the rule "pre-freeze, add-on candidate, or dropped"; there is no "post-1.0 engine" category. Proposed classification, for the orchestrator to rule: both dropped, with the static gesture behaviour and the absence of the neighbour cascade final. Neither blocks 1.0 and neither can ship later without changing 1.0's engine behaviour.
 
-## 8. Hash-neutral notes
+## 8. Owner ruling of 2026-11-16 (via the orchestrator)
+
+Emergent mode ships in 1.0 and stays the default. Consequences written in: the two tests apply to the emergent game; freeze condition 4 (live = headless) is re-run in emergent mode at the frozen commit, because the first measurement carried `decision_mode` historical on both sides; new freeze condition 7; the peace-plan floor fix is batch B's first item and the emergent triage is its own row (E1) in the work list.
+
+## 9. Hash-neutral notes
 
 - Roster tenure starts (H-C4: Praljak 64 to 67, Roso 80 to 83, Petković-2 100 to 107, Blaškić-2 120 to 121) go to the calibration pass.
 - The autonomous-launch path is inert and is retired (B4).
