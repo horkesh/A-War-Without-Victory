@@ -15,6 +15,26 @@
 
 The renewable RBiH presidential address (first turn 84, then about 136 and 188; turn 0 is April 1992) said "a people in the fourth year of siege", which is wrong at turns 84 (second year) and 136 (third). It now reads "a people who have lived under siege this long". One narrative sentence in `war_1993.json`; narrative and historian seats keep it; the event has no Bosnian localization. Headless 188-week artifacts unchanged. Evidence: `docs/40_reports/evidence/20261116_address_year_copy/`.
 
+## 2026-11-16 — B0: bot peace-plan responses measure territory by area, the unit of the plan split
+
+Batch B, item B0 (freeze cut, Fable consult 2 revision 2; must-fix before emergent ships).
+
+**Defect.** In emergent mode, `computeBotResponse` (`src/sim/negotiation/peace_plans.ts`) compared a faction's share of SETTLEMENTS (`getFactionTerritoryPct`, a count over `political_controllers`) with the plan's `proposed_split`, which is an AREA share (`peace_plan_data.ts`: "area-weighted as the game measures"). At week 40 of a hands-off emergent run RS held 52.7% of settlements but 63.4% of the area. The RS Vance-Owen floor read a 9.7pp gap instead of 20.4pp, the scorer accepted, and the war ended in January 1993 (`negotiated_peace:vance_owen`). The Contact Group floor, the Owen-Stoltenberg and Dayton floors, and the territory-gain bias every faction's accept option carries all read the same wrong measure. The floor constants were written for area ("Sim gap ~22pp (RS ~65%, VOPP proposes ~43%)").
+
+**Change.**
+- `getFactionTerritoryPct` → exported `getFactionTerritoryAreaPct`: km² held over the country total (`getOsidAreas`), the measure negotiation capital (`compute_capital.ts`) and the settlement map (`settlementTerritoryPct`) already use.
+- `political_peace_plan.ts`: the call-site contract now states the area measure.
+- Swept every other negotiation and political floor for the same mismatch: none. `computePoliticalPeacePlanResponse` has one caller. Dayton's package negotiation uses `settlement.territory_pct` and `area_pct` (both area). The delegation folder's held/total counts are labelled as settlements.
+
+**Tests.** `tests/peace_plans.test.ts`: RS takes the largest settlements until it holds 40% of them (under VOPP's 43% by count, above 43% + 18pp by area). The test asserts that the helper returns the area share and that RS rejects Vance-Owen without ending the war. The peace-plan and political slices pass (10 files, 199 tests).
+
+**Proof.**
+- Historical 188w: final_save `799e43a7ee2f4764`, equal to the baselines manifest (main after #690). 709/709/708/681, guard intact, engine health PASS, 0 consistency failures. Historical mode never calls the scorer, so this is byte-identical by construction and by measurement.
+- Hands-off emergent 188w (uncommitted scenario copy, `decision_mode: emergent`): the war runs to week 188 (no game over). VOPP t40 RS rejected; O-S t70 RBiH rejected; CG t118 RS rejected, all as in history. Scores 710/707/707/670 (before the fix: 710/667/657/568, ended at t40). Srebrenica and Žepa fall on schedule and every hold holds. Engine health PASS, 0 consistency failures, HRHB western cascade 29 (historical 31).
+- The emergent guard still reads BREACHED: Farz receipts 0/4, unwarranted late 2nd Corps captures Seher t164 and Petrovo t179. These are the same breaches the probe's peace-pinned diagnostic showed; they come from emergent political decisions after t40 and go to the B5 triage. The historical guard is intact.
+
+Evidence: `C:/Pyrrhic/AWWV-worktrees/_logs/batch-b-20261116/` (b0_*).
+
 ## 2026-11-16 — Citation audit batch 3: Balkan Battlegrounds page and chapter references in event and essay data
 
 The historian read the cited location of every BB reference (109 groups, 279 mentions): 109 mentions cite the right printed page, 36 are right only at the knowledge-base extraction or PDF number (the printed page shown is wrong), 12 hold in part, 108 (39%) are about something else, 14 are accurate "does not exist" notes. 80 of the wrong ones cite Vol. II "chapters" (BB Vol. II has addenda and annexes only); 27 are pages from the wrong year or place (Vol. II pp. 358-366, 312-321, 287-314, 406-417, 459-462, 471-475, 506-520, 28-31, 9-32; Vol. I pp. 198-229); the printed-page rule is Vol. I = PDF - 37 and Vol. II = PDF - 19. 95 hidden notes record the correction; extraction numbers become printed pages everywhere (Vol. I p. 187 to p. 151, p. 462 to p. 425, pp. 416-420 to pp. 379-383, Vol. II pp. 536-538 to pp. 517-519 and others); 52 player-visible strings (events and Codex essays) drop wrong pages and non-existent chapters, leaving the source name, or show the verified printed page; the Vol. II pp. 28-31 Vance-Owen claim now cites Vol. I p. 8. One more visible audit-vocabulary leak on main ("the H4 audit") is fixed and added to the permanent leak test, and the historian's earlier PR-B rewrite that cited an extraction number (Vol. I pp. 418-421) now cites pp. 381-384. New test `tests/ui/event_bb_citations.test.ts`; `rbih_state_identity` (pinned) keeps 3 visible Vol. II pp. 406-417 cites until its next re-pin. Evidence and exhaustive file list: `docs/40_reports/evidence/20261115_bb_citation_audit/`.
@@ -253,6 +273,13 @@ Docs only; no `src/` or `data/` change, no hash change.
 - RB9 ruled (a): a bounded return rule (a dormant record clears after 12 or more weeks held by the group's own or a non-hostile side, the pool decremented) lands back-to-back with RB9 before the freeze; §6 unanimous, with a red-team anti-gaming check.
 - P2 measured: step 1 (candidate 1 of 8) held objectives 100% to 71%, VRS operations reaching battle 0 of 8 to 3 of 9, VRS sub-30 brigades 61 to 24; Farz P-A fails on a missing Army HQ marker (traced) and P-B is a new fail (2nd Corps at Brčko and Gradačac, t161 to t162); not merged. Step 2 (candidate 2 of 8): the army-reserve repair works mechanically but the pool is only two VRS elites; no priority above the threat cap; the 9999 threat sentinel is a fix (step 2b); the reserve-elite OOB audit goes to the calibration pass.
 - Hash: main with #703 and #708 is 01572f50dfea2378, the main hash at the re-pin (#713, merged on main; three measurements agree: the re-pin run on main 07b553fbe, CI on #708's merge ref, and the Batch B lane's inert B4 run). The orchestrator had asked for it to be recorded as provisional until a "merged" message; #713 is verifiably merged (git log), so it is recorded as confirmed.
+
+## 2026-11-16 — Pass 29: #697 (B0) recorded; option C for D1 measured and not supported
+
+Docs only; no `src/` or `data/` change, no hash change.
+
+- #697, B0: the bot peace-plan floors (RS and Contact Group, Owen-Stoltenberg, Dayton and the territory-gain bias) now measure territory by area. Inert in historical mode (the scorer is not called there), so main stays at 01572f50dfea2378. A hands-off emergent game now runs to t188 instead of ending at Vance-Owen at t40; peace-plan answers match history; emergent scores 710 / 707 / 707 / 670 (emergent hash 357b158daf80d1e3, a measurement); the guard is still breached in emergent mode and goes to the B5 triage.
+- D1, option C: C and C' measured and not supported (they remove 1 of 5 RBiH sweeps, because 4 happen at t1 to t2 before the policy event; both perturb the war and break a guard and parity). Per the owner's condition it returns to the owner after the historian's per-sweep ruling and an option-A measurement. PR 1 (mode gating) stays held.
 
 ## 2026-11-15 — Command loop L7: army clashes (proposal 2A step A1; owner decision 4)
 
