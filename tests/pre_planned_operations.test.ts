@@ -2517,70 +2517,108 @@ describe('pre-planned operations', () => {
         const skipWarnings = (state: ReturnType<typeof makeMinimalState>) =>
             (state.military.op_injection_warnings ?? []).filter((w) => w.check === 'queue_head_skipped');
 
-        it('steps past a short head when the op behind it is admissible now, and keeps the head queued', () => {
+        it('steps past a short head for a dated op behind it with its own roster, and keeps the head queued', () => {
             const state = makeMinimalState();
-            state.meta.turn = 18;
+            state.meta.turn = 85;
+            const command = state.military.corps_command!.arbih_3rd_corps!;
+            command.active_operations = [];
+            command.queued_operations = ['Central Bosnia Counteroffensive', 'Vareš November Offensive'];
+            const head = brigadesOf('Central Bosnia Counteroffensive');
+            const behind = brigadesOf('Vareš November Offensive');
+            assert.equal([...head].filter((id) => behind.has(id)).length, 0, 'fixture: the two ops share no brigade');
+            weaken(state, head);
+
+            const injected = injectQueuedOperation(state, 'arbih_3rd_corps');
+
+            assert.equal(injected, true);
+            assert.equal(command.active_operations[0]?.name, 'Vareš November Offensive');
+            assert.deepEqual(command.queued_operations, ['Central Bosnia Counteroffensive']);
+            const skips = skipWarnings(state);
+            assert.equal(skips.length, 1);
+            assert.equal(skips[0]!.op_name, 'Central Bosnia Counteroffensive');
+            assert.match(skips[0]!.detail, /viable participant/);
+            assert.match(skips[0]!.detail, /Vareš November Offensive/);
+        });
+
+        it('never lets an undated chain member jump the 1KK queue (n1145 regression)', () => {
+            const state = makeMinimalState();
+            state.meta.turn = 10;
             const command = state.military.corps_command!.vrs_1st_krajina!;
             command.active_operations = [];
-            command.queued_operations = ['Operation Corridor', 'Operation Jajce', 'Operation Bosanski Novi'];
-            const corridor = brigadesOf('Operation Corridor');
-            const jajce = brigadesOf('Operation Jajce');
-            assert.equal([...corridor].filter((id) => jajce.has(id)).length, 0, 'fixture: the two ops share no brigade');
-            weaken(state, corridor);
+            command.queued_operations = ['Operation Corridor', 'Operation Jajce', 'Operation Donji Vakuf', 'Operation Bosanski Novi'];
+            weaken(state, brigadesOf('Operation Corridor'));
 
             const injected = injectQueuedOperation(state, 'vrs_1st_krajina');
 
-            assert.equal(injected, true);
-            assert.equal(command.active_operations[0]?.name, 'Operation Jajce');
-            assert.deepEqual(command.queued_operations, ['Operation Corridor', 'Operation Bosanski Novi']);
-            const skips = skipWarnings(state);
-            assert.equal(skips.length, 1);
-            assert.equal(skips[0]!.op_name, 'Operation Corridor');
-            assert.match(skips[0]!.detail, /viable participant/);
-            assert.match(skips[0]!.detail, /Operation Jajce/);
+            assert.equal(injected, false);
+            assert.equal(command.active_operations.length, 0);
+            assert.deepEqual(command.queued_operations, ['Operation Corridor', 'Operation Jajce', 'Operation Donji Vakuf', 'Operation Bosanski Novi']);
+            assert.equal(skipWarnings(state).length, 0);
+        });
+
+        it('does not promote a dated op that draws on the short head\'s roster', () => {
+            const state = makeMinimalState();
+            state.meta.turn = 70;
+            const command = state.military.corps_command!.vrs_sarajevo_romanija!;
+            command.active_operations = [];
+            command.queued_operations = ['Operation Kijevo', 'Operation Lukavac 93'];
+            const kijevo = brigadesOf('Operation Kijevo');
+            const lukavac = brigadesOf('Operation Lukavac 93');
+            const shared = [...kijevo].filter((id) => lukavac.has(id));
+            assert.ok(shared.length > 0, 'fixture: the two ops share a brigade');
+            // Kijevo short: all but one of its brigades understrength. Lukavac keeps enough of its own.
+            weaken(state, new Set([...kijevo].slice(1)));
+
+            const injected = injectQueuedOperation(state, 'vrs_sarajevo_romanija');
+
+            assert.equal(injected, false);
+            assert.equal(command.active_operations.length, 0);
+            assert.deepEqual(command.queued_operations, ['Operation Kijevo', 'Operation Lukavac 93']);
+            assert.equal(skipWarnings(state).length, 0);
         });
 
         it('does not skip when nothing behind the short head is admissible', () => {
             const state = makeMinimalState();
             state.meta.turn = 18;
-            const command = state.military.corps_command!.vrs_1st_krajina!;
+            state.meta.turn = 85;
+            const command = state.military.corps_command!.arbih_3rd_corps!;
             command.active_operations = [];
-            command.queued_operations = ['Operation Corridor', 'Operation Jajce'];
-            weaken(state, brigadesOf('Operation Corridor'));
-            weaken(state, brigadesOf('Operation Jajce'));
+            command.queued_operations = ['Central Bosnia Counteroffensive', 'Vareš November Offensive'];
+            weaken(state, brigadesOf('Central Bosnia Counteroffensive'));
+            weaken(state, brigadesOf('Vareš November Offensive'));
 
-            const injected = injectQueuedOperation(state, 'vrs_1st_krajina');
+            const injected = injectQueuedOperation(state, 'arbih_3rd_corps');
 
             assert.equal(injected, false);
-            assert.deepEqual(command.queued_operations, ['Operation Corridor', 'Operation Jajce']);
+            assert.deepEqual(command.queued_operations, ['Central Bosnia Counteroffensive', 'Vareš November Offensive']);
             assert.equal(command.active_operations.length, 0);
             assert.equal(skipWarnings(state).length, 0);
         });
 
         it('does not skip to an op the player has not authorized', () => {
             const state = makeMinimalState();
-            state.meta.turn = 18;
-            state.meta.player_faction = 'RS';
+            state.meta.turn = 85;
+            state.meta.player_faction = 'RBiH';
             state.meta.pending_proposal_reviews = [{
-                id: 'PROP_17_historical_op_preplanned_vrs_1st_krajina_operation_jajce',
-                turn: 17,
-                faction: 'RS',
+                id: 'PROP_84_historical_op_preplanned_arbih_3rd_corps_vares_november_offensive',
+                turn: 84,
+                faction: 'RBiH',
                 domain: 'ops',
-                description: 'Operation Jajce - awaiting authorization.',
-                proposed_action: 'HISTORICAL_OP:preplanned:vrs_1st_krajina:Operation Jajce',
+                description: 'Vareš November Offensive - declined.',
+                proposed_action: 'HISTORICAL_OP:preplanned:arbih_3rd_corps:Vareš November Offensive',
                 current_value: 'awaiting_authorization',
                 proposed_value: 'authorize',
                 accepted: false,
-                resolved_turn: 17,
+                resolved_turn: 84,
             } as any];
-            const command = state.military.corps_command!.vrs_1st_krajina!;
+            const command = state.military.corps_command!.arbih_3rd_corps!;
             command.active_operations = [];
-            command.queued_operations = ['Operation Corridor', 'Operation Jajce'];
-            weaken(state, brigadesOf('Operation Corridor'));
+            command.queued_operations = ['Central Bosnia Counteroffensive', 'Vareš November Offensive'];
+            weaken(state, brigadesOf('Central Bosnia Counteroffensive'));
 
-            injectQueuedOperation(state, 'vrs_1st_krajina');
+            injectQueuedOperation(state, 'arbih_3rd_corps');
 
-            assert.equal(command.active_operations.filter((op) => op.name === 'Operation Jajce').length, 0);
+            assert.equal(command.active_operations.filter((op) => op.name === 'Vareš November Offensive').length, 0);
             assert.equal(skipWarnings(state).length, 0);
         });
     });

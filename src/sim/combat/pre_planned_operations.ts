@@ -2999,13 +2999,26 @@ function isQueuedOperationAdmissibleNow(
     cmd: CorpsCommandState,
     corpsId: string,
     opName: string,
+    headRoster: ReadonlySet<FormationId>,
     adjacency?: Map<Osid, Osid[]>,
 ): boolean {
     const turn = state.meta?.turn ?? 0;
     const def = ALL_PRE_PLANNED.find(d => d.name === opName && d.corps === corpsId);
     if (!def) return false;
+    // Only an op with its OWN date may go ahead of the head. An undated op is a chain member whose
+    // place in the order is the plan (the 1KK Corridor -> Jajce -> Donji Vakuf chain: n1145 moved
+    // Donji Vakuf up, it stalled 23 turns, blocked Corridor and cascaded).
+    if (def.available_from == null || turn < def.available_from) return false;
     if (prePlannedOperationAlreadyResolved(state, def)) return false;
-    if (def.available_from != null && turn < def.available_from) return false;
+    // The promoted op must not draw on the roster the head is waiting for, or it wears that roster
+    // down and the head may never recover.
+    const formations = state.military.formations ?? {};
+    for (const axis of def.axes) {
+        for (const authored of axis.brigades) {
+            const fid = resolveOperationFormation(formations, authored).formation_id ?? authored;
+            if (headRoster.has(fid)) return false;
+        }
+    }
     if (hasNonCapturingObjectiveOverlap(def, cmd)) return false;
     const effectiveDef = omitObjectivesClaimedByActiveOperations(def, cmd);
     if (effectiveDef.axes.length === 0) return false;
@@ -3013,8 +3026,10 @@ function isQueuedOperationAdmissibleNow(
         const action = historicalOperationAuthorizationAction({
             kind: 'preplanned', faction: effectiveDef.faction, corpsId, operationName: effectiveDef.name,
         });
+        // Same selection as the real gate's existingReview: lowest id first.
         const review = (state.meta.pending_proposal_reviews ?? [])
-            .find((r) => r.proposed_action === action && r.faction === effectiveDef.faction);
+            .filter((r) => r.proposed_action === action && r.faction === effectiveDef.faction)
+            .sort((a, b) => strictCompare(a.id, b.id))[0];
         if (review && review.accepted !== true) return false;
     }
     const allObjectives = effectiveDef.axes.flatMap(a => a.objectives);
@@ -3030,37 +3045,51 @@ function isQueuedOperationAdmissibleNow(
 
 /**
  * PK5 (2026-11-16) bounded queue skip. A queue head that is short this turn (no axis builds, or
- * too few viable participants) used to hold the whole corps queue. Step past it ONLY when an op
- * behind it is admissible right now: that op moves to the front, the short head keeps its place
- * directly behind it (it is not dropped and is retried when the slot frees), and the skip is
- * recorded naming the head, the reason and the promoted op. `PrePlannedOp` has no window end, so
- * the "head past its own window" case does not arise. Returns true when a promotion was made.
+ * too few viable participants) used to hold the whole corps queue. Step past it ONLY for the first
+ * op behind it that is admissible right now, carries its own `available_from`, and shares no
+ * brigade with the head. That op moves to the front and is injected by one retry (which may not
+ * skip again); the short head keeps its place directly behind it and is retried when the slot
+ * frees. Atomic: the skip is recorded (naming the head, the reason and the promoted op) only when
+ * the retry launches; if it does not, the queue order is restored and nothing is recorded.
+ * `PrePlannedOp` has no window end, so the "head past its own window" case does not arise.
+ * Returns true when the promoted op launched.
  */
-function promoteAdmissibleQueuedOperation(
+function tryQueueHeadSkip(
     state: GameState,
     cmd: CorpsCommandState,
     corpsId: string,
-    headName: string,
+    headDef: PrePlannedOp,
     reason: string,
     adjacency?: Map<Osid, Osid[]>,
 ): boolean {
-    const queue = cmd.queued_operations ?? [];
-    if (queue[0] !== headName || queue.length < 2) return false;
-    for (let i = 1; i < queue.length; i++) {
-        const candidate = queue[i]!;
-        if (!isQueuedOperationAdmissibleNow(state, cmd, corpsId, candidate, adjacency)) continue;
-        queue.splice(i, 1);
-        queue.unshift(candidate);
-        collectOpInjectionWarnings(state, [{
-            op_name: headName,
-            check: 'queue_head_skipped',
-            detail: `Queued operation skipped this turn (${reason}); "${candidate}" behind it was admissible and goes first`,
-            severity: 'warning',
-            turn: state.meta?.turn ?? 0,
-        }]);
-        return true;
+    const queue = cmd.queued_operations;
+    if (!queue || queue[0] !== headDef.name || queue.length < 2) return false;
+    const formations = state.military.formations ?? {};
+    const headRoster = new Set<FormationId>();
+    for (const axis of headDef.axes) {
+        for (const authored of axis.brigades) {
+            headRoster.add(resolveOperationFormation(formations, authored).formation_id ?? authored);
+        }
     }
-    return false;
+    const index = queue.findIndex((name, i) =>
+        i > 0 && isQueuedOperationAdmissibleNow(state, cmd, corpsId, name, headRoster, adjacency));
+    if (index < 0) return false;
+    const candidate = queue[index]!;
+    const originalOrder = [...queue];
+    queue.splice(index, 1);
+    queue.unshift(candidate);
+    if (!injectQueuedOperation(state, corpsId, adjacency, false)) {
+        cmd.queued_operations = originalOrder;
+        return false;
+    }
+    collectOpInjectionWarnings(state, [{
+        op_name: headDef.name,
+        check: 'queue_head_skipped',
+        detail: `Queued operation skipped this turn (${reason}); "${candidate}" behind it was admissible and went first`,
+        severity: 'warning',
+        turn: state.meta?.turn ?? 0,
+    }]);
+    return true;
 }
 
 // PERMITTED CREATION ENTRY POINT — pre-planned and player-queued operations only.
@@ -3196,10 +3225,7 @@ export function injectQueuedOperation(
     } : undefined);
     if (!result) {
         if (observe) emitPreplannedEligibilityRecord({ kind: 'caller_terminal', caller: 'queued_injection', linkage: 'contiguous_unsequenced', invocation_key: invocationKey, turn, operation_name: opName, corps_id: corpsId, actual_exit: 'build_returned_null', build_reached: true, build_returned: false, ordinary_return: false });
-        if (allowHeadSkip && promoteAdmissibleQueuedOperation(state, cmd, corpsId, opName, 'no axis could be built', adjacency)) {
-            return injectQueuedOperation(state, corpsId, adjacency, false);
-        }
-        return false;
+        return allowHeadSkip && tryQueueHeadSkip(state, cmd, corpsId, def, 'no axis could be built', adjacency);
     }
     const minimumViableParticipants = effectiveDef.minimum_viable_participants ?? MIN_OPERATION_PARTICIPANTS;
     if (result.viableParticipating < minimumViableParticipants) {
@@ -3211,13 +3237,10 @@ export function injectQueuedOperation(
             turn,
         }]);
         if (observe) emitPreplannedEligibilityRecord({ kind: 'caller_terminal', caller: 'queued_injection', linkage: 'contiguous_unsequenced', invocation_key: invocationKey, turn, operation_name: opName, corps_id: corpsId, actual_exit: 'viable_floor', build_reached: true, build_returned: true, admitted: false, viable_participating: result.viableParticipating, ordinary_return: false });
-        if (allowHeadSkip && promoteAdmissibleQueuedOperation(
-            state, cmd, corpsId, opName,
+        return allowHeadSkip && tryQueueHeadSkip(
+            state, cmd, corpsId, def,
             `${result.viableParticipating} viable participant(s), ${minimumViableParticipants} required`, adjacency,
-        )) {
-            return injectQueuedOperation(state, corpsId, adjacency, false);
-        }
-        return false;
+        );
     }
 
     deployPrePlannedEliteLoans(state, result.eliteLoans, effectiveDef, turn, adjacency);
