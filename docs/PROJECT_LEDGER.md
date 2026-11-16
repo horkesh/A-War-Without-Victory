@@ -730,6 +730,14 @@ Docs only; no `src/` or `data/` change, no hash change.
 - Package P2 step 3 (candidate 4 of 8, run 80aaf7ae31900002): a retake-only counter-attack in any stance; 6 battles outside an operation, all on just-lost cells, 3 won; scores recorded 704 / 700 / 700 / 663 on the step-0 base.
 - Harness evidence in #742 (open): a sustained multi-corps Request-op lever moves the war about 2.8 percentage points off history (the old ceiling was 0.75).
 
+## 2026-11-16 — threat_ratio direction corrected (comment and canon wording only; Codex r4588239176)
+
+Comment and canon wording only; no behaviour change, no hash change.
+
+- #745 described the sector pressure index `threat_ratio` as falling with own cohesion. It rises: `brigadePower` multiplies personnel by cohesion (`local_front_defense.ts:43-48`), `defensive_power` is own cohesion-weighted personnel per front edge, and `recomputeSectorPowerAndThreat` divides enemy personnel by it (`brigade_assignment.ts:2561`), so lower own cohesion or fewer own men raises the index, as does a longer sector. Codex flagged the inversion on #745 (comment r4588239176); #745 merged before the fix reached it.
+- Corrected, on the orchestrator's explicit instruction of 2026-11-16: the `CorpsFrontSector.threat_ratio` field comment in `src/state/game_state.ts` (comment only) and the Systems Manual Corps Sectors paragraph, with a one-line Amended note.
+- Proof: the `src/` diff is comment lines only; no executable line changes, so the 188-week hash is unchanged (the pin stays 03159b9ee1e5877f).
+
 ## 2026-11-16 — `threat_ratio` is named for what it is: a sector pressure index, not a force ratio (description only)
 
 Orchestrator ruling (package "1994-95 attack and defence", step 2b premise check).
