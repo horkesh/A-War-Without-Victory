@@ -93,7 +93,7 @@ gates:
       in the BC19 row; the slot 1 items #677, #680 and the SE7E-h fix are merged. Part 2: the
       1994-95 attack and defence package P0 to P6 (the #686 trace and the dead-site
       retirements, the defence trace, the defence repairs, planner odds, RF-STRENGTH's live
-      change, the ARBiH plan lockout probe gate, RF-PK), with Farz P1, P-A, P-B and the
+      change, the ARBiH plan lockout (probes stop at 30), RF-PK), with Farz P1, P-A, P-B and the
       enclave guard passing at every merge. Shipping the passive ARBiH as final behaviour is
       not an option. (2) Every roadmap §4.1 RF row is disposed: BC14 merged, BC15 with SE6 and
       SE10 decided by the defence repairs, BC16
@@ -108,11 +108,12 @@ gates:
       (docs/40_reports/governance/20261115_FINAL_BEHAVIOUR_AT_1_0.md) is merged. (6) One
       named commit is recorded as the frozen source in the roadmap and the owner is told. (7) A hands-off
       emergent 188-week run at the frozen commit passes the history guards (Farz, enclave,
-      the western-Bosnia cascade) and the historian accepts its divergences. Today it ends at
-      week 40, when RS accepts Vance-Owen, because the peace-plan floor compares a
+      the western-Bosnia cascade) and the historian accepts its divergences. It used to end at
+      week 40, when RS accepted Vance-Owen, because the peace-plan floor compared a
       settlement-count share with an area share; that floor fix (RS and Contact Group) is
-      batch B's first item, and the other emergent divergences are then triaged: engine
-      defects before the freeze, option weights in the calibration pass.
+      merged (#697, by area), a hands-off emergent game now runs to t188, and the other
+      emergent divergences are triaged: engine defects before the freeze, option weights in
+      the calibration pass.
       From that commit the freeze is a byte test: a change merges freely if the 188-week
       headless final_state_hash is unchanged, and a change that moves the hash needs the
       owner's OK. The one calibration pass then runs on the frozen engine under the
@@ -135,10 +136,17 @@ gates:
       owner on 2026-11-14 (A now, B merged as #623, C post-1.0 by the owner's decision) and
       needs nothing before the freeze. The ARBiH plan lockout (army-wide; first filed as
       RF-3C-EXH) is traced (#686: the corps' own probes keep exhaustion above the planning
-      gate; the designed probe gate of 40 was never wired) and is fixed inside the 1994-95
+      gate; the designed probe gate of 40 was never wired, and Fable consult 4 withdrew it: probes stop at 30) and is fixed inside the 1994-95
       package, paired with a defence change. The 188-week final_state_hash on main was
-      518de17970af5914 after #677, 799e43a7ee2f4764 after #690 and is 70f4dc05bf375bc7 after
-      #696 (each a state-only move); each is the main hash at that merge, not the freeze hash.
+      518de17970af5914 after #677, 799e43a7ee2f4764 after #690, 70f4dc05bf375bc7 after #696
+      and #703 claims 1391f69248072728 (a state-only move that renames labels; claimed, not
+      re-measured alone); main with #703 and #708 is 01572f50dfea2378, the main hash at the re-pin (#713, merged;
+      three independent measurements agree: the re-pin run on main 07b553fbe, CI on #708's
+      merge ref, and the Batch B lane's inert B4 run); each earlier value is the main hash at
+      that merge, not the freeze hash. #703 had merged with the advisory baseline-pins check
+      red and did not re-pin the manifest, so main's pins were stale until #713; the re-pin
+      also re-confirms #705's byte-identity on top of #703 (orchestrator). #708 (RF-PM1) measured 9e17d22f520f94e6 on the pre-#703
+      base 76e5fcabd (control, activity, formation and operation files byte-identical to main).
       data/derived/latest_run_final_save.json dates from 2026-09-01 and is stale; lanes
       read run folders instead.
 

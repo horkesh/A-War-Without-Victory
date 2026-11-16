@@ -94,23 +94,29 @@ describe('LANE-NIGHTSHIFT-CODEX-CONTENT-EXPANSION — W1: paramilitary_streak_re
     it('does not claim a sustained refusal once the side has authorised a deployment', () => {
         // R8 polish: the Verdict's cost ledger reads this same count ("4 paramilitary deployments
         // authorized by RBiH command"); the card must not say authorisation was never begun.
+        // RF-PM1: the entry is RS-only (its flags come from an RS-only consequence).
         const flags = { paramilitary_authorization_refused: true, clean_record: true };
-        const authorised = makeState({ event_flags: flags, paramilitary_deployment_count: { RBiH: 4 } as Record<FactionId, number> });
+        const RS = 'RS' as FactionId;
+        const authorised = makeState({ event_flags: flags, player_faction: RS, paramilitary_deployment_count: { RS: 4 } as Record<FactionId, number> });
         expect(findGhost(buildGhostEntries(authorised, 100), 'paramilitary_streak_refused')).toBeUndefined();
         // Another side's deployments are not this side's record.
-        const otherSide = makeState({ event_flags: flags, paramilitary_deployment_count: { RS: 30 } as Record<FactionId, number> });
+        const otherSide = makeState({ event_flags: flags, player_faction: RS, paramilitary_deployment_count: { RBiH: 30 } as Record<FactionId, number> });
         expect(findGhost(buildGhostEntries(otherSide, 100), 'paramilitary_streak_refused')).toBeDefined();
-        const zero = makeState({ event_flags: flags, paramilitary_deployment_count: { RBiH: 0 } as Record<FactionId, number> });
+        const zero = makeState({ event_flags: flags, player_faction: RS, paramilitary_deployment_count: { RS: 0 } as Record<FactionId, number> });
         const got = findGhost(buildGhostEntries(zero, 100), 'paramilitary_streak_refused');
-        expect(got?.conditional_on).toContain('paramilitary_deployment_count[RBiH]=0');
+        expect(got?.conditional_on).toContain('paramilitary_deployment_count[RS]=0');
+        // An RBiH President never sees it, whatever the flags.
+        const rbih = makeState({ event_flags: flags, paramilitary_deployment_count: { RBiH: 0 } as Record<FactionId, number> });
+        expect(findGhost(buildGhostEntries(rbih, 100), 'paramilitary_streak_refused')).toBeUndefined();
     });
 
-    it('fires when both flags set AND turn >= 80', () => {
+    it('fires when both flags set AND turn >= 80 (RS President)', () => {
         const s = makeState({
             event_flags: {
                 paramilitary_authorization_refused: true,
                 clean_record: true,
             },
+            player_faction: 'RS' as FactionId,
         });
         const got = findGhost(buildGhostEntries(s, 80), 'paramilitary_streak_refused');
         expect(got).toBeDefined();
@@ -443,8 +449,13 @@ describe('LANE-NIGHTSHIFT-CODEX-CONTENT-EXPANSION — W9: Wave 2 predicates rema
         const idsRS = buildGhostEntries(stateForFaction('RS' as FactionId), 200).map((g) => g.ghost_id);
         const idsHRHB = buildGhostEntries(stateForFaction('HRHB' as FactionId), 200).map((g) => g.ghost_id);
 
-        expect(idsRS).toEqual(idsRBiH);
+        // RF-PM1: paramilitary_streak_refused is RS-only (its flags come from an RS-only
+        // consequence); every other Wave 2 predicate stays faction-agnostic.
+        const without = (ids: string[]) => ids.filter((id) => id !== 'paramilitary_streak_refused');
+        expect(without(idsRS)).toEqual(idsRBiH);
         expect(idsHRHB).toEqual(idsRBiH);
+        expect(idsRS).toContain('paramilitary_streak_refused');
+        expect(idsRBiH).not.toContain('paramilitary_streak_refused');
 
         // All Wave 2 ids must be present.
         const wave2 = [
@@ -458,7 +469,7 @@ describe('LANE-NIGHTSHIFT-CODEX-CONTENT-EXPANSION — W9: Wave 2 predicates rema
             'negotiation_capital_exhausted',
         ];
         for (const id of wave2) {
-            expect(idsRBiH).toContain(id);
+            expect(idsRS).toContain(id);
         }
     });
 });
