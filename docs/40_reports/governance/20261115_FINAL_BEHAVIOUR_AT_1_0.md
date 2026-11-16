@@ -161,6 +161,8 @@ Owner ruling of 2026-11-16 on disclosure (b) (via the orchestrator): asked wheth
 
 Owner history input of 2026-11-16 (via the orchestrator, verbatim): "Historically, ARBiH undertook offensives from 1994 that had low chance of winning, but Delić imposed the strategy. Goal was to weaken VRS everywhere. ARBiH had a lot more men, and Delić was willing to spend them to go on strategic offensive." The package's P3 must therefore produce an emergent General Staff attrition doctrine (low-odds launches, accepted losses, the VRS attrited) that the President can accept or refuse, and the package pass line is 20 to 40% of a historically sized launch count (about 24 operations in t99 to t178). Fable consult 4 designs it. This bears on section 2 (the ARBiH plan lockout): the passive army is not history, and a low success rate by design is.
 
+Owner history input of 2026-11-16 (via the orchestrator, verbatim): "Historically, ARBiH undertook offensives from 1994 that had low chance of winning, but Delić imposed the strategy. Goal was to weaken VRS everywhere. ARBiH had a lot more men, and Delić was willing to spend them to go on strategic offensive." The package's P3 must therefore produce an emergent General Staff attrition doctrine (low-odds launches, accepted losses, the VRS attrited) that the President can accept or refuse, and the package pass line is 20 to 40% of a historically sized launch count (about 24 operations in t99 to t178). Fable consult 4 designs it. This bears on section 2 (the ARBiH plan lockout): the passive army is not history, and a low success rate by design is.
+
 ## 9. Hash-neutral notes
 
 - Roster tenure starts (H-C4: Praljak 64 to 67, Roso 80 to 83, Petković-2 100 to 107, Blaškić-2 120 to 121) go to the calibration pass.
