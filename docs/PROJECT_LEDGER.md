@@ -730,6 +730,13 @@ Docs only; no `src/` or `data/` change, no hash change.
 - Package P2 step 3 (candidate 4 of 8, run 80aaf7ae31900002): a retake-only counter-attack in any stance; 6 battles outside an operation, all on just-lost cells, 3 won; scores recorded 704 / 700 / 700 / 663 on the step-0 base.
 - Harness evidence in #742 (open): a sustained multi-corps Request-op lever moves the war about 2.8 percentage points off history (the old ceiling was 0.75).
 
+## 2026-11-16 — Pass 50: #744 (the Ahmići consequence trigger) recorded; four findings registered
+
+Docs only; no `src/` or `data/` change, no hash change.
+
+- #744: `csq_hvo_central_bosnia_offensive_1993` (the Ahmići consequence) now fires only after the 1993 war has begun and the alliance is below 0.2, mirroring `ahmici_massacre_1993`; content and wording unchanged; §6 unanimous; canon amended (a SHDG amended-date line and a §6 record row); byte-identical in both modes (historical 03159b9ee1e5877f, the main pin; hands-off emergent dde641b2c74838f0 = main); honours Ring 3 item 11. Work list Ahmići and alliance paragraph (item A).
+- Registered from #744: (1) the `ahmici_massacre_1993` card window ends at t70; (2) `federation_never_fractured` is never set (a dead alliance-held note); (3) that note's BCS is a stock line (1 to 3 go to the B and C content PR); (4) the alliance-lock floor-over-ceiling, traced, with its fix held behind package P2.
+
 ## 2026-11-16 — threat_ratio direction corrected (comment and canon wording only; Codex r4588239176)
 
 Comment and canon wording only; no behaviour change, no hash change.
