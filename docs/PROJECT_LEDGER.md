@@ -15,6 +15,46 @@
 
 The renewable RBiH presidential address (first turn 84, then about 136 and 188; turn 0 is April 1992) said "a people in the fourth year of siege", which is wrong at turns 84 (second year) and 136 (third). It now reads "a people who have lived under siege this long". One narrative sentence in `war_1993.json`; narrative and historian seats keep it; the event has no Bosnian localization. Headless 188-week artifacts unchanged. Evidence: `docs/40_reports/evidence/20261116_address_year_copy/`.
 
+## 2026-11-16 — B0: bot peace-plan responses measure territory by area, the unit of the plan split
+
+Batch B, item B0 (freeze cut, Fable consult 2 revision 2; must-fix before emergent ships).
+
+**Defect.** In emergent mode, `computeBotResponse` (`src/sim/negotiation/peace_plans.ts`) compared a faction's share of SETTLEMENTS (`getFactionTerritoryPct`, a count over `political_controllers`) with the plan's `proposed_split`, which is an AREA share (`peace_plan_data.ts`: "area-weighted as the game measures"). At week 40 of a hands-off emergent run RS held 52.7% of settlements but 63.4% of the area. The RS Vance-Owen floor read a 9.7pp gap instead of 20.4pp, the scorer accepted, and the war ended in January 1993 (`negotiated_peace:vance_owen`). The Contact Group floor, the Owen-Stoltenberg and Dayton floors, and the territory-gain bias every faction's accept option carries all read the same wrong measure. The floor constants were written for area ("Sim gap ~22pp (RS ~65%, VOPP proposes ~43%)").
+
+**Change.**
+- `getFactionTerritoryPct` → exported `getFactionTerritoryAreaPct`: km² held over the country total (`getOsidAreas`), the measure negotiation capital (`compute_capital.ts`) and the settlement map (`settlementTerritoryPct`) already use.
+- `political_peace_plan.ts`: the call-site contract now states the area measure.
+- Swept every other negotiation and political floor for the same mismatch: none. `computePoliticalPeacePlanResponse` has one caller. Dayton's package negotiation uses `settlement.territory_pct` and `area_pct` (both area). The delegation folder's held/total counts are labelled as settlements.
+
+**Tests.** `tests/peace_plans.test.ts`: RS takes the largest settlements until it holds 40% of them (under VOPP's 43% by count, above 43% + 18pp by area). The test asserts that the helper returns the area share and that RS rejects Vance-Owen without ending the war. The peace-plan and political slices pass (10 files, 199 tests).
+
+**Proof.**
+- Historical 188w: final_save `799e43a7ee2f4764`, equal to the baselines manifest (main after #690). 709/709/708/681, guard intact, engine health PASS, 0 consistency failures. Historical mode never calls the scorer, so this is byte-identical by construction and by measurement.
+- Hands-off emergent 188w (uncommitted scenario copy, `decision_mode: emergent`): the war runs to week 188 (no game over). VOPP t40 RS rejected; O-S t70 RBiH rejected; CG t118 RS rejected, all as in history. Scores 710/707/707/670 (before the fix: 710/667/657/568, ended at t40). Srebrenica and Žepa fall on schedule and every hold holds. Engine health PASS, 0 consistency failures, HRHB western cascade 29 (historical 31).
+- The emergent guard still reads BREACHED: Farz receipts 0/4, unwarranted late 2nd Corps captures Seher t164 and Petrovo t179. These are the same breaches the probe's peace-pinned diagnostic showed; they come from emergent political decisions after t40 and go to the B5 triage. The historical guard is intact.
+
+Evidence: `C:/Pyrrhic/AWWV-worktrees/_logs/batch-b-20261116/` (b0_*).
+
+## 2026-11-16 — B4: the army commander's autonomous launch is retired (inert)
+
+Batch B, item B4 (freeze cut, Fable consult 2 revision 2, RF-ROSTER "path a"): retire.
+
+**Premise, measured.** `proposeAutonomousArmyLaunch` (the Mladić-class proposal, DDR Q3) needs a stubborn army commander past a 12-turn cooldown AND an eligible operation-opportunity catalog entry. On main's 188w it never found an eligible entry, so it never proposed. The final saves of the historical and hands-off emergent 188w carry no `last_autonomous_launch_turn`, no `cooldown_halved_applied`, no `kept_past_schedule_since_turn` and no `army_co_proposes_op` event. Turning the path on would start an untested mechanic before a permanent freeze and would need a §6 ruling first.
+
+**Change.**
+- Deleted `proposeAutonomousArmyLaunch`, its `AutonomousLaunchProposal` type and its call in the A3 step (`army_order_interpretation.ts`), with the now-unused catalog imports.
+- Deleted the overstay rule that halved the launch cooldown by rewriting `last_autonomous_launch_turn` (`army_co_lifecycle.ts`), its `cooldown_halving` / `cooldown_halved_to_turns` roster keys (`data/scenarios/army_co_roster.json`, `ArmyCoVariationRules`) and `A4_DEFAULT_COOLDOWN_HALVED_TO_TURNS`.
+- Kept for saves: the `army_co_proposes_op` event type and its validator, `NamedOfficerState.last_autonomous_launch_turn`, and the UI readers that tolerate a legacy event. `STUBBORNNESS_AUTONOMOUS_THRESHOLD` and `AUTONOMOUS_LAUNCH_COOLDOWN_TURNS` stay, because the army pushback panel reads them; they are documented as retired.
+- Comments in `war_phases.ts` and the A3/A4 headers carry a "do not revive without a §6 ruling" note.
+
+**Tests.** `a3_army_order_interpretation.test.ts` T5-T7 now guard the retirement: the export is gone; a stubborn commander proposes nothing in the A3 step; the source has no call. `a4_army_co_roster_personalities.test.ts` T6b: an overstay leaves `last_autonomous_launch_turn` untouched and the roster has no halving key. The A3, A4, A5 pushback and phase-4 UI slices pass (5 files, 72 tests); `tsc` 0.
+
+**Proof.** Historical 188w against main `05cf3de0f`: final_save `799e43a7ee2f4764` (= baselines manifest). final_save, initial_save, weekly_report, control_delta, formation_delta, activity_summary, run_summary, end_report, watched_operations, operation_aars, the brigade and displacement logs and the replay manifest are all byte-identical to a main run. `run_meta.json` differs only in provenance (git commit and input digests). No re-bless.
+
+**Follow-up (UI, not engine):** the pushback panel's "Autonomous-launch warning" section can now be shown only for a legacy save. It is a candidate for removal by the UI lane.
+
+Evidence: `C:/Pyrrhic/AWWV-worktrees/_logs/batch-b-20261116/` (b4_*).
+
 ## 2026-11-16 — Citation audit batch 3: Balkan Battlegrounds page and chapter references in event and essay data
 
 The historian read the cited location of every BB reference (109 groups, 279 mentions): 109 mentions cite the right printed page, 36 are right only at the knowledge-base extraction or PDF number (the printed page shown is wrong), 12 hold in part, 108 (39%) are about something else, 14 are accurate "does not exist" notes. 80 of the wrong ones cite Vol. II "chapters" (BB Vol. II has addenda and annexes only); 27 are pages from the wrong year or place (Vol. II pp. 358-366, 312-321, 287-314, 406-417, 459-462, 471-475, 506-520, 28-31, 9-32; Vol. I pp. 198-229); the printed-page rule is Vol. I = PDF - 37 and Vol. II = PDF - 19. 95 hidden notes record the correction; extraction numbers become printed pages everywhere (Vol. I p. 187 to p. 151, p. 462 to p. 425, pp. 416-420 to pp. 379-383, Vol. II pp. 536-538 to pp. 517-519 and others); 52 player-visible strings (events and Codex essays) drop wrong pages and non-existent chapters, leaving the source name, or show the verified printed page; the Vol. II pp. 28-31 Vance-Owen claim now cites Vol. I p. 8. One more visible audit-vocabulary leak on main ("the H4 audit") is fixed and added to the permanent leak test, and the historian's earlier PR-B rewrite that cited an extraction number (Vol. I pp. 418-421) now cites pp. 381-384. New test `tests/ui/event_bb_citations.test.ts`; `rbih_state_identity` (pinned) keeps 3 visible Vol. II pp. 406-417 cites until its next re-pin. Evidence and exhaustive file list: `docs/40_reports/evidence/20261115_bb_citation_audit/`.
@@ -73,6 +113,32 @@ The historian read the cited location of every BB reference (109 groups, 279 men
   - Re-pinned `data/derived/scenario/baselines/manifest.json`. The 40-week structural fingerprint is unchanged (`3b1ddd64fb4f1600`).
 - **Tests.** `tests/army_hq_gathering.test.ts` now asserts the assessment's and the doctrine's retired fields are gone and that the corps ceilings still apply. 296 tests in the affected files pass, and tsc is clean.
 
+## 2026-11-16 — PK5 (C7): a short queue head steps aside only for a dated, admissible op with its own roster (byte-identical)
+
+- **Ruling (orchestrator):** C7 option (a), the bounded skip. Skip and record a short head only when an op behind it is admissible now. The skip record names the op and the reason.
+- **Premise (main):** one `viable_floor` block (Srebrenica–Cerska, t4, admitted t5) and one stall (Pracha River, `build_returned_null` t41–57, admitted t58) that delayed nothing behind it.
+- **Change** (`pre_planned_operations.ts`):
+  - When `injectQueuedOperation`'s head returns at `build_returned_null` or `viable_floor`, `tryQueueHeadSkip` scans the ops behind it with a read-only dry run of the launch gates (`isQueuedOperationAdmissibleNow`).
+  - A candidate qualifies only if it has its own `available_from` (now or earlier) and shares no brigade with the head (operations-expert: undated chain members such as 1KK Jajce and Donji Vakuf must never jump; n1145).
+  - The first qualifier moves to the front and launches through one retry, which may not skip again. The head stays directly behind it.
+  - The step is atomic. The `op_injection_warnings` row `queue_head_skipped` (head, reason, promoted op) is written only on launch; otherwise the queue order is restored.
+  - Nothing is removed from a queue. `PrePlannedOp` has no window end.
+  - `OpInjectionCheck` and the validator list gain `queue_head_skipped`. This is additive, so older saves load. The parked `AuthorizePhase.tsx` maps it to the generic copy for type completeness.
+- **Measured** on main `e3a0c2b6a`:
+  - Historical 188w: main and PK5 are both `01572f50dfea2378`.
+  - Hands-off emergent 188w (`decision_mode: emergent`): both `a6669043cb8f4b58`.
+  - No skip fires in either run.
+  - Guards intact (709/709/708/681). `engine_health_gate --strict` PASS.
+  - Re-measured after the seat changes (see the PR).
+- **Tests** (`tests/pre_planned_operations.test.ts`, "PK5 bounded queue skip"):
+  - a dated, disjoint op is promoted and the head is kept;
+  - no skip when nothing behind is admissible;
+  - the 1KK chain never inverts at t10;
+  - a dated op sharing the head's roster is not promoted;
+  - a declined player authorization blocks the promotion.
+- **Seats:** operations-expert APPROVE-WITH-CHANGES (dated-only, disjoint roster, atomic retry, 1KK regression test; all applied). Canon-compliance APPROVE-WITH-CHANGES (two wording fixes and the review selector matching `existingReview`; applied). No panel needed.
+- **Canon:** Systems Manual §6, "A short queue head steps aside only for an admissible operation".
+
 ## 2026-11-16 — Package "1994-95 attack and defence": the appendix C harness can run the played test (tooling, inert)
 
 The package's second pass test is "played": an engaged RBiH President who concentrates on one axis can win ground at a visible cost, including with a Request-op on an exhausted corps. The scenario tester found that #682's harness could not run that test. Its Request-op picked a held-back corps or the busiest front and the first buildable target, never one axis or an exhausted corps, and recorded no exhaustion or outcome.
@@ -123,6 +189,47 @@ Fable consult 2, Revision 2 (P0): retire RF-STRENGTH's dead write and its never-
 - New `tests/sim/coordination_preset_retired.test.ts`.
 
 Evidence: `C:/Pyrrhic/AWWV-worktrees/_logs/pkg-1994-95-step0/` (p0_*).
+
+## 2026-11-16 — RB1: a takeover wave counts each person once (§6 panel, measured)
+
+RF fidelity-pass fix. Calibration is held: scores are recorded and are not a merge bar.
+
+**Defect.** The policy-timer and sustained takeover events logged the whole wave as `displaced` and also logged `killed` and `fled_abroad`. Everything that summed them counted the killed and the fled twice. On main, `refugees_created` read 1,971,236 at w188; counting each person once gives 1,485,614.
+
+**Contract.** An event's `displaced` is the routed share only, and the wave is `displaced + killed + fled_abroad` (JSDoc on `DisplacementEvent.displaced`).
+
+**Readers.** Each of these reads `refugees_created` or the event log, and each now takes the meaning it needs:
+- `refugees_created` (humanitarian aggregates): each person once. It feeds treaty scoring, the Humanitarian Ledger, war dispatches and the refugee-flow milestones.
+- Atrocity visibility (`patron_pressure.ts`): people harmed this turn = routed + killed + fled (red-team C-RB1).
+- Turn summary (`compile_turn_summary.ts`): `displacement_total` = routed + fled; the new `displacement_killed` keeps the killed in the turn record. It is projected to the player and shown in the AAR as "Killed" / "Ubijeni" (red-team C-RB2).
+- Endgame displacement ratio (`endgame_comparison.ts`): `refugees_created − civilian_casualties_caused`, clamped at 0, so it is counted like its historical baseline of people displaced (engine C1, scenario-tester C3).
+
+**Measured** (188w, final run on main e1d1a24e3, after the #713 re-pin, against a main run at the same commit `01572f50dfea2378`; final_state_hash `df791f73c26ed642`; control, formation, operation-AAR and activity files byte-identical to main):
+- Checkpoints 709/709/708/681, per-cell delta zero, guards intact, strict health PASS (consistency 0).
+- `refugees_created` per causer → victim: RS→RBiH 1,062,156 → 822,669; RS→HRHB 337,388 → 221,404; RBiH→RS 362,043 → 281,732; RBiH→HRHB 45,157 → 33,789; HRHB→RS 127,960 → 98,011; HRHB→RBiH 36,532 → 28,009.
+- The reader fixes move only off-map values: at w188, atrocity visibility 0.02355 → 0.03354, composite IVP 0.5497 → 0.5517; patron commitment in the 4th decimal; some negotiation-ledger entries; terminal exhaustion slightly.
+
+**Historian sanity check (recorded, not a target).**
+- Displaced + fled is 1,444,732, which is 66% of the UNHCR ~2.2M in `data/reference/historical_baseline.json`.
+- Main's 88% came from the double count.
+- The model figure is a flow summed over events, and the UNHCR figure is a war-end stock, so a faithful flow should come out at or above the record. The gap is known.
+- The real gap is fled abroad: 448k against about 1.2M (register RB1-R2).
+
+**Recorded limitation (determinism seat B2).** A save played across the upgrade keeps cumulative stores that mix both contracts:
+- `refugees_created`;
+- `displacement_recent_by_turn` (it ages out);
+- `displacement_flows_by_osid`;
+- the turn summaries.
+
+The per-turn event log is cleared each turn and does not mix. The overstatement cannot be recovered exactly, and the schema stays 38. No migration.
+
+**Gate.** §6 panel:
+- seats: historian, scenario-creator-runner-tester, engine/systems, red-team; determinism alongside;
+- implementer excluded; named integrator;
+- unanimous APPROVE with conditions;
+- §6 record row in `SENSITIVE_HISTORY_DESIGN_GATE.md`.
+
+Evidence: `C:/Pyrrhic/AWWV-worktrees/_logs/cl-rb1-20261115/` and the seat and integrator files in `_logs/cl-rf-pm1-20261115/`. Register items RB1-R1 to RB1-R3; none is tagged post-1.0.
 
 ## 2026-11-16 — RB6: 13 bot operation-pool names replaced in place (Džihad and twelve real or loaded names)
 
@@ -253,6 +360,57 @@ Docs only; no `src/` or `data/` change, no hash change.
 - RB9 ruled (a): a bounded return rule (a dormant record clears after 12 or more weeks held by the group's own or a non-hostile side, the pool decremented) lands back-to-back with RB9 before the freeze; §6 unanimous, with a red-team anti-gaming check.
 - P2 measured: step 1 (candidate 1 of 8) held objectives 100% to 71%, VRS operations reaching battle 0 of 8 to 3 of 9, VRS sub-30 brigades 61 to 24; Farz P-A fails on a missing Army HQ marker (traced) and P-B is a new fail (2nd Corps at Brčko and Gradačac, t161 to t162); not merged. Step 2 (candidate 2 of 8): the army-reserve repair works mechanically but the pool is only two VRS elites; no priority above the threat cap; the 9999 threat sentinel is a fix (step 2b); the reserve-elite OOB audit goes to the calibration pass.
 - Hash: main with #703 and #708 is 01572f50dfea2378, the main hash at the re-pin (#713, merged on main; three measurements agree: the re-pin run on main 07b553fbe, CI on #708's merge ref, and the Batch B lane's inert B4 run). The orchestrator had asked for it to be recorded as provisional until a "merged" message; #713 is verifiably merged (git log), so it is recorded as confirmed.
+
+## 2026-11-16 — Pass 29: #697 (B0) recorded; option C for D1 measured and not supported
+
+Docs only; no `src/` or `data/` change, no hash change.
+
+- #697, B0: the bot peace-plan floors (RS and Contact Group, Owen-Stoltenberg, Dayton and the territory-gain bias) now measure territory by area. Inert in historical mode (the scorer is not called there), so main stays at 01572f50dfea2378. A hands-off emergent game now runs to t188 instead of ending at Vance-Owen at t40; peace-plan answers match history; emergent scores 710 / 707 / 707 / 670 (emergent hash 357b158daf80d1e3, a measurement); the guard is still breached in emergent mode and goes to the B5 triage.
+- D1, option C: C and C' measured and not supported (they remove 1 of 5 RBiH sweeps, because 4 happen at t1 to t2 before the policy event; both perturb the war and break a guard and parity). Per the owner's condition it returns to the owner after the historian's per-sweep ruling and an option-A measurement. PR 1 (mode gating) stays held.
+
+## 2026-11-16 — Pass 30: the emergent guard breaches are routed to package P2, not the B5 triage
+
+Docs only; no `src/` or `data/` change, no hash change.
+
+- Orchestrator correction to pass 29: the emergent guard breaches left after B0 (Farz receipts 0 of 4, the 2nd Corps taking Seher at t164 and Petrovo at t179) are the thin-defence defect showing in emergent mode. They are routed to the package's P2 (re-measure in emergent after P2), not to the B5 triage, which covers political divergences only. Work list B0 row and the final-behaviour record corrected.
+
+## 2026-11-16 — Pass 31: Fable consult 4 accepted (P3 order, P5 corrected, the army stance put to the President, F2 moves up)
+
+Docs only; no `src/` or `data/` change, no hash change.
+
+- Consult 4 on the owner's history input of 2026-11-16: no new doctrine, trigger or threshold. "Controlled Counteroffensive" already sets the general offensive from week 80; three locks (the 1st Corps re-abandoning its plan after Washington, the 2nd Corps held over the exhaustion threshold by its own probes, the 3rd Corps held by "campaign role contain", B3) and the objectives rule (Army HQ picks the highest-threat sector) keep launches at 8 against history's 24.
+- P3 order: B3, clear the abandoned plan, probes stop at the plan threshold of 30, weakest-sector objectives, one launch estimate (VRS operations reach battle), N2, the local-occupation scope, exhaustion in combat. P5 is corrected: Fable withdrew "the probe gate at 40"; `PROBE_EXHAUSTION_MARGIN` is retired.
+- New player-path item (Part 3): the army-wide stance is put to the President (silence is consent; a refusal holds it at balanced for the hold period).
+- F2 moves up: the offensives fail as in history but do not attrit the VRS (brigade strength 129,000 to 141,000; failed operations 600 to 1,700 killed against 45 to 305); the pass line adds "the VRS is visibly attrited into 1995". Fable's run 2 (on the P2 step-1 base only): 20 launches, 11 failed, 46% held, Farz P-B passes.
+
+## 2026-11-16 — Pass 32: AI1 replaced by consult 4; RF-L3d follow-ups 1, 3 and 4 pending P3 ratification
+
+Docs only; no `src/` or `data/` change, no hash change.
+
+- Orchestrator ruling, 2026-11-16: AI1 (the force-ratio term in target ranking) is REPLACED by Fable consult 4's "objectives from the weakest sector first" and "one launch estimate"; the force-ratio consideration moves to the Army HQ target choice and the estimator. RF-L3d follow-ups 1, 3 and 4 are pending P3 ratification: the package seats rule each as covered by consult 4's steps, still needed as its own step, or retired, with a one-line reason. Work list P3 row, roadmap BC19 row, board 7c and the final-behaviour record updated.
+
+## 2026-11-16 — Pass 33: #700 (B4) recorded; the owner's ruling on D1 (two stages); RB9 with rule (a) measured
+
+Docs only; no `src/` or `data/` change, no hash change.
+
+- #700, B4: the army commander's autonomous launch is retired. Inert; every simulation artifact byte-identical; main stays 01572f50dfea2378. UI follow-up: the pushback panel's "Autonomous-launch warning" shows only for a legacy save.
+- Owner ruling on D1, 2026-11-16, "Yes, approve both", on the orchestrator's two-stage plan. Stage 1, now: honest copy and canon ("authorized" only where the faction's policy allowed or ordered the sweep; no "ethnic cleansing" for a one-sweep trigger; delegation texts disclose staff acting before the policy decision), a staff-sweep receipt, then PR 1 (mode gating). Stage 2, after package P2 and before the freeze: retire the five artefact RBiH sweeps and take Bukvik (about September 1992) and Obadi (if kept) by ordinary 1992 operations (the joint HVO 108th Brčko operation). The historian found all 5 RBiH sweeps an engine artefact. Open with the owner: Biljesevo, Olovci and the Glamoč village in the January 1993 paint.
+- RB9 with rule (a), measured: scores 709 / 708 / 707 / 672; returns drain host refugee and militia pools, so the 1995 western captures (Petrovac, Drvar, Jajce, Ključ and others) do not happen; guards hold. Accepted as modelled history under the calibration HOLD (an honest loss), conditional on the historian's check of the returns magnitude (about 130,000); the lost cells join the calibration-pass list (HV-in-Bosnia modelling).
+
+## 2026-11-16 — Pass 34: the D1 open item closed by the owner; #718 (RB1) recorded
+
+Docs only; no `src/` or `data/` change, no hash change.
+
+- Owner, 2026-11-16, "Keep them RBiH": Biljesevo, Olovci and the Glamoč village (Goražde) stay RBiH in the January 1993 reference map, since no source says how or when they changed hands. In D1 stage 2 all five former artefact-sweep cells get ordinary 1992 operations, with unsourced dates marked unverified in the data. The open item is closed.
+- #718, RB1 (A2): a takeover wave counts each person once (`refugees_created` at w188 1,971,236 to 1,485,614; the Verdict displacement ratio 0.896 to 0.657); §6 panel unanimous, control-identical; final-state hash df791f73c26ed642 (the PR's measurement on main 01572f50dfea2378, baselines re-blessed in the PR), recorded as the main hash at #718.
+
+## 2026-11-16 — Pass 35: #721 (PK5 queue head) recorded; Part 5 corrected; C8 ruled; #709 needs a re-pin
+
+Docs only; no `src/` or `data/` change, no hash change.
+
+- #721, C7 (PK5): a short queue head steps aside only for a dated, admissible operation with its own roster (a bounded skip; nothing is ever removed from a queue; undated chain members never jump the queue, with a regression test). Byte-identical on its base in historical and hands-off emergent mode (no skip fires). Systems Manual §6 paragraph added by the PR. Part 5 corrected: only the PK5 no-retry half (authored operations do not retry) stays accepted as final; the queue-head block is fixed by #721.
+- C8 (F1i, `political.enclaves` always empty because the integrity step reads the legacy `supply_state` and edges): ruled by the orchestrator: a §6 panel (historian, scenario tester, engine/systems, red-team, unanimous, plus canon); root fix first, then each revived reader measured alone and kept or retired (the IVP humanitarian term, which may double-count `enclave_resilience`; the negotiation enclave penalty; convoys; the Sarajevo tunnel flag).
+- #709 (N6) needs another re-pin after #718; it is with the L7 lane. Open: #701, #710, and the P2 steps.
 
 ## 2026-11-15 — Command loop L7: army clashes (proposal 2A step A1; owner decision 4)
 

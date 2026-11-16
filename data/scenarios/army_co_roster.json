@@ -97,9 +97,7 @@
     "keep_past_schedule": {
       "competence_decay_per_12w": -0.05,
       "stubbornness_escalation": 1,
-      "stubbornness_cap": 5,
-      "cooldown_halving": true,
-      "cooldown_halved_to_turns": 6
+      "stubbornness_cap": 5
     },
     "early_relief": {
       "political_capital_cost": 4,
