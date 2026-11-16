@@ -40,6 +40,8 @@ Batch B, items B3 and B2 (freeze cut, Fable consult 2 revision 2). Scope ruled B
 - Hands-off emergent 188w with B0's source applied (uncommitted): control_delta byte-identical to the B0-only emergent run; 710/707/707/670; the same three emergent breaches (Farz 0/4, Seher t164, Petrovo t179), which belong to package P2.
 - The baselines manifest needs a re-bless for the new state hash (`bb2ca04839f11d8b` on 76e5fcabd) at merge time, on top of whatever main it lands on.
 
+**Canon debt (recorded, canon-seat condition).** FORAWWV.md describes the retired chain as validated substrate: lines 276-301 (§X.1 PoliticalDirective verbs, the B1 producer output, the C1 persisted slot and its overlay), 409 (the A1-A5 / B1+B2 / C1+C2 validated list) and 421 (C1 as the Ring 1 example). FORAWWV edits need the unanimous Pyrrhic panel and a same-change canon record, so the amendment is a separate panel change, not part of this one. The Systems Manual, Rulebook and Game Bible have no text that requires the chain. `SAVE_SCHEMA_EVOLUTION.md` has a v39 entry, and the code comments in `game_state.ts`, `ArmyCoPushbackPanel.tsx`, `political_leader_data_loader.ts` and `army_co_lifecycle.ts` now say the chain is retired.
+
 **Follow-ups (register).**
 - `political_leader_data` / `political_leaders` are still loaded into state at scenario start, but nothing reads them now (state-only; retiring them changes every save).
 - The claude_plays_vrs directive bridge and three-commander harness now drive a chain the game no longer reads.

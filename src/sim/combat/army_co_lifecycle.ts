@@ -775,7 +775,8 @@ export function applyEmergentVariationRules(
 /**
  * Single pipeline-step entry. Caller (war_phases.ts) gates by phase==='war'
  * and orders this step AFTER `evaluate-army-hq-gathering` and BEFORE
- * `apply-army-directive-interpretation`.
+ * `generate-bot-corps-orders` (the A3 step that used to sit between them is
+ * retired, freeze cut B3).
  *
  * The roster is injected so this module remains browser-safe. Node-only A/B
  * tooling supplies the `disabled` argument through army_co_roster_loader.ts.
