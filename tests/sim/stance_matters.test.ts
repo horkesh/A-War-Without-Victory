@@ -191,13 +191,13 @@ describe('stance matters: generation', () => {
         expect(state.meta.stance_matters).toBeUndefined();
     });
 
-    it('an army-wide stance governs combat, so the change is recorded not_put (army_stance)', () => {
+    it('an army-wide stance no longer hides a corps stance change: it is put to the President (Batch B)', () => {
         const state = makeState();
         runTurn(state, {});
         state.military.army_stance = { RBiH: 'general_offensive' } as never;
         runTurn(state, { c_a: 'offensive' });
-        expect(state.meta.stance_matters).toBeUndefined();
-        expect(state.meta.stance_matter_history?.[0]).toMatchObject({ outcome: 'not_put', not_put_reason: 'army_stance' });
+        expect(state.meta.stance_matters?.map((m) => m.corps_id)).toEqual(['c_a']);
+        expect(state.meta.stance_matter_history?.some((r) => r.not_put_reason === 'army_stance') ?? false).toBe(false);
     });
 
     it('caps at three matters a turn and records the rest as not_put (cap)', () => {
