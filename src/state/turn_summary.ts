@@ -119,8 +119,14 @@ export interface TurnSummary {
     notable_flips: NotableFlip[];
 
     // --- Displacement ---
+    /** People displaced this turn: routed inside BiH plus fled abroad, each person once (RB1). */
     displacement_total: number;
     displacement_by_ethnicity: Partial<Record<FactionId, number>>;
+    /**
+     * People killed in this turn's displacement events (RB1, red-team C-RB2). They are not displaced, so they are not in
+     * `displacement_total`, and they must not vanish from the turn record. Absent on summaries written before RB1.
+     */
+    displacement_killed?: number;
     /** Municipality ID with highest displacement volume this turn. */
     displacement_hotspot?: string;
 

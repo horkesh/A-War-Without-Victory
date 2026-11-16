@@ -224,18 +224,23 @@ function compileTerritory(
 // Section: Displacement
 // ---------------------------------------------------------------------------
 
-function compileDisplacement(state: GameState, turn: number): Pick<TurnSummary, 'displacement_total' | 'displacement_by_ethnicity' | 'displacement_hotspot'> {
+function compileDisplacement(
+    state: GameState,
+    turn: number,
+): Pick<TurnSummary, 'displacement_total' | 'displacement_by_ethnicity' | 'displacement_hotspot' | 'displacement_killed'> {
     const events = (state.displacement.displacement_event_log ?? []).filter((e) => e.turn === turn);
 
     let displacement_total = 0;
+    let displacement_killed = 0;
     const displacement_by_ethnicity: Partial<Record<FactionId, number>> = {};
     const byMun: Record<string, number> = {};
 
     for (const e of events) {
         // RB1: people displaced = routed (`displaced`) + fled abroad, each once. The killed
-        // are not displaced; they are reported as civilian casualties.
+        // are not displaced; they are counted separately in `displacement_killed`.
         const displacedPeople = Math.max(0, e.displaced ?? 0) + Math.max(0, e.fled_abroad ?? 0);
         displacement_total += displacedPeople;
+        displacement_killed += Math.max(0, e.killed ?? 0);
         if (e.ethnicity) {
             displacement_by_ethnicity[e.ethnicity] = (displacement_by_ethnicity[e.ethnicity] ?? 0) + displacedPeople;
         }
@@ -252,7 +257,7 @@ function compileDisplacement(state: GameState, turn: number): Pick<TurnSummary, 
         }
     }
 
-    return { displacement_total, displacement_by_ethnicity, displacement_hotspot };
+    return { displacement_total, displacement_by_ethnicity, displacement_hotspot, displacement_killed };
 }
 
 // ---------------------------------------------------------------------------

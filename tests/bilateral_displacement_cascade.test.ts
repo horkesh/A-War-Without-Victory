@@ -98,6 +98,33 @@ describe('bilateral displacement cascade', () => {
         expect(state.displacement.displacement_humanitarian_aggregates?.HRHB?.RBiH?.refugees_created).toBe(hrhbWaves);
     });
 
+    test('RB1 (red-team C-RB4): a sustained wave books each person once in its event and in refugees_created', () => {
+        const state = makeState();
+        state.political.political_controllers = { 'op:vitez:center': 'HRHB', S_ZE: 'RBiH' };
+        state.displacement.displacement_state = {
+            vitez: { mun_id: 'vitez', original_population: 1000, displaced_out: 0, displaced_in: 0, lost_population: 0, last_updated_turn: 0 },
+        };
+        processDisplacementTakeover(state, settlements, {
+            battles: [{ settlement_flipped: true, location: 'S_VI', osid: 'op:vitez:center', attacker_faction: 'HRHB', defender_faction: 'RBiH' }],
+        }, pop1991, settlements);
+        state.meta.turn = 54;
+        processDisplacementTakeover(state, settlements, undefined, pop1991, settlements);
+
+        state.meta.turn = 55;
+        const sustained = processDisplacementTakeover(state, settlements, undefined, pop1991, settlements);
+        expect(sustained.sustained_fires).toBeGreaterThan(0);
+        const turnEvents = (state.displacement.displacement_event_log ?? []).filter((e) => e.turn === 55 && e.origin_mun === 'vitez');
+        expect(turnEvents.length).toBe(sustained.sustained_fires);
+        // The event's `displaced` is the routed share; routed + killed + fled abroad is the sustained amount, each person once.
+        const turnWave = turnEvents.reduce((s, e) => s + e.displaced + e.killed + e.fled_abroad, 0);
+        expect(turnWave).toBe(sustained.sustained_displaced_total);
+        expect(turnEvents.reduce((s, e) => s + e.displaced, 0)).toBe(sustained.routed_total);
+        const allWaves = (state.displacement.displacement_event_log ?? [])
+            .filter((e) => e.caused_by === 'HRHB' && e.ethnicity === 'RBiH')
+            .reduce((s, e) => s + e.displaced + e.killed + e.fled_abroad, 0);
+        expect(state.displacement.displacement_humanitarian_aggregates?.HRHB?.RBiH?.refugees_created).toBe(allWaves);
+    });
+
     test('Croat displacement from RBiH bilateral takeover uses HRHB flee-abroad share and routes to HRHB Herzegovina', () => {
         const state = makeState();
         state.political.political_controllers = { 'op:busovaca:center': 'RBiH', 'op:mostar:center': 'HRHB' };

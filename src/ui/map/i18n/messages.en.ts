@@ -1835,6 +1835,7 @@ export const enMessages = {
     'aar.supply': 'Supply',
     'aar.munitions': 'Munitions',
     'aar.totalDisplaced': 'Total displaced',
+    'aar.displacementKilled': 'Killed',
     'aar.hotspot': 'Hotspot',
     'aar.quietTurn': 'Quiet week',
     'aar.noSignificantEvents': 'No significant events recorded this week.',

@@ -1802,6 +1802,7 @@ export const bcsMessages: Partial<Record<MessageKey, string>> = {
     'aar.supply': 'Zalihe',
     'aar.munitions': 'Municija',
     'aar.totalDisplaced': 'Ukupno raseljeni',
+    'aar.displacementKilled': 'Ubijeni',
     'aar.hotspot': 'Žarište',
     'aar.quietTurn': 'Miran potez',
     'aar.noSignificantEvents': 'Nema značajnih događaja zabilježenih ovaj potez.',
