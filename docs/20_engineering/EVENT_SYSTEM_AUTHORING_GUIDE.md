@@ -84,6 +84,8 @@ Required fields on a new event row:
 - `response_options[]` — typically 3 options. Each must carry an `id`, a `label`, optional `dimension_shifts[]`, optional `effects[]`, optional `future_consequences[]`, optional `enables_events_runtime[]`, optional `closes_events_runtime[]`.
 - `source_note` — prose paragraph. Sensitive-adjacent rows MUST include the §3.6 forward-looking guard text (see §3 below).
 
+`effect` and `effects[]`: the engine applies the row's required `effect` AND every `effects[]` entry. Put each mechanic in exactly one of them. Never copy `effect` into `effects[0]`; the loader rejects it (§4, `validateNoRepeatedEffect`). Before §6 E1 (2026-11-16), 27 rows did this and applied the effect twice.
+
 ### 2.3 Foundational extension (when adding a downstream)
 
 If the new event hangs off a foundational decision:
@@ -209,6 +211,7 @@ Reference: `hrhb_camp_exposure_response_1993` Packet 42.
 |---|---|
 | `validateDimensionShiftVocabulary` | `dimension_shifts[].dimension` not in canonical 6 DimensionIds (see §5) |
 | `validateEffectKindVocabulary` | `effects[].kind` not in `KNOWN_EVENT_EFFECT_KIND_SET` (see §5) |
+| `validateNoRepeatedEffect` | A row's or response option's `effect` repeated inside its `effects[]` (key-sorted content), which would apply twice (§6 E1, 2026-11-16) |
 | `validateRing3EnablingRejection` | Any `enables_events_runtime[]` targeting a Ring 3 family |
 | `validateRuptureForeclosurePolicy` | Any `closes_events_runtime[]` referencing `srebrenica_falls_1995` or `srebrenica_genocide_1995` without an allowlist entry |
 | Camp-exposure freeze | Catalog row in `concentration_camps_revealed_1992` or camp-exposure family with non-canonical option ids |
