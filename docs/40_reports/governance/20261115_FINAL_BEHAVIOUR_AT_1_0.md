@@ -18,7 +18,7 @@ An item that removes player agency is not accepted as final. Accept-as-final is 
 
 ## 1. Accepted as final (game-designer and historian, one sitting, 2026-11-15)
 
-Two fresh read-only seats sat in parallel and independently, each checking the code and canon in the repository. Both returned RATIFY WITH CONDITIONS on all four items. Three of the four reasons in the memo were wrong or too wide and are corrected below. The conditions are open work, listed in section 6.
+Two fresh read-only seats sat in parallel and independently, each checking the code and canon in the repository. Both returned RATIFY WITH CONDITIONS on all four items. Three of the four reasons in the memo were wrong or too wide and are corrected below. A fifth item, BC06 (the six static gesture rows), was added at a second sitting on 2026-11-16 and follows the four. The conditions are open work, listed in section 6.
 
 ### CODE3. Authored and triggered operations are not exhaustion-gated
 
@@ -55,6 +55,18 @@ Two fresh read-only seats sat in parallel and independently, each checking the c
 - **Player text, grepped by the game-designer seat.** Three strings already disclose the gap, in English and BCS: `humanitarianLedger.note.scope`, `verdict.compare.civilianDead`, `verdict.basis.campaignAllSides` (`messages.en.ts:6445, 6761, 6802`). No player-visible text claims siege deaths or military-age departures in `src/` or `data`. The Verdict is unaffected (`civilian_casualties_full` is deliberately 5,000 against about 39,684 real dead).
 - **Conditions.** Keep those three strings in English and BCS. No UI shows a Sarajevo or siege civilian-death number as simulation output. No player-facing text equates the displaced count with casualties or says nobody died. The `scoring.ts:172` premise (15,000 compared against about 3,500 to 5,500 Sarajevo dead) rests on a quantity the engine does not model and stays an open note. SD8's military-age exit bar for Sarajevo is not verified against a source.
 - **Seats:** game-designer RATIFY WITH CONDITIONS; historian RATIFY WITH CONDITIONS.
+
+### BC06. The six address and decoration gesture rows stay static
+
+Rows: `address_to_nation_{rbih,rs,hrhb}` and `decorate_a_unit_{rbih,rs,hrhb}` (`data/scenarios/events/war_1993.json`). Sitting of 2026-11-16 (game-designer and historian, independent, read-only), on the orchestrator's referral of the BC06 roadmap row. Both returned ACCEPT WITH CONDITIONS; neither wants the escalation stages, so nothing becomes pre-freeze authoring.
+
+- **What ships.** Each row has `action_cadence {cooldown_turns: 52, escalation: "static"}` and no `max_fires`. The five-use limit of the 2026-09-08 disposition is gone: #673 removed the cap and the desktop contracts report `firesLeft: null`; #678 set the price to 20 Authority. The engine never reads `action_cadence`; only the desktop contracts do. The trigger turn is 84 and the cooldown 52, so a war allows about three uses (turns 84, 136, 188). Addresses offer 3 to 4 options (defiance, endurance, appeal or reassurance, silence) with different costs; decorations offer steadfast, broad citation or decline, per unit, to regular formations only. The other six gestures (front visits and strategic posture reviews) do escalate, each with an authored fire-gated option; those carry the real recurrence.
+- **Reason for the record.** The six rows are renewable on a 52-turn cooldown. The calendar allows about three uses, each a different choice among costed options, so a repeat use is a new decision in a new phase of the war, not a worse copy of the first. The record shows no historical escalation in the effect of addresses or unit honours: honours were permanent unit titles, not a rising scale ("Vitezka" and "Slavna", BB1 appendix H endnote, KB page BB1_p0516). Stages would need invented numbers and would add no agency.
+- **Left alone:** yes. A bot or hands-off run fires each once from turn 84 and gains +2 to +6 morale, which does not rewrite the war; an unplayed human President fires nothing.
+- **Played:** yes. Options, a 20-Authority price, a cooldown, a per-unit target and a decline option are the player's agency.
+- **Not verified (historian seat):** "Zlatni ljiljan" and other decorations are not in the BB1 and BB2 pages searched; Karadžić's and Tuđman's addresses, HVO decorations and any ICTY paragraph on gestures are not verified.
+- **Conditions.** (1) Rulebook "Recurring decisions" paragraph reworded: done in this change. (2) The stale five-use rationale is marked superseded in the 2026-09-08 disposition: done in this change. (3) The `address_to_nation_rbih` narrative opens "a people in the fourth year of siege" but first fires at turn 84, about the second year of the war if the campaign starts in April 1992 (not confirmed by the historian seat): fix or soften it (a data text check, not made here). (4) Keep the decoration copy that restricts it to regular formations and the essays' warning that an honour attaches to a unit's whole record; no player text may imply that a decoration or address grows stronger with use.
+- **Seats:** game-designer ACCEPT WITH CONDITIONS; historian ACCEPT WITH CONDITIONS.
 
 ## 2. The ARBiH plan lockout (army-wide): fixed in the package, not accepted
 
@@ -112,6 +124,7 @@ Each of these was on the memo's first accept list and moved to fix or retire. Th
 ## 5. Process record
 
 - First sitting, 2026-11-15 (historian, scenario-creator-runner-tester, game-designer, read-only, none the author of the memo): ratified deferring the lockout; corrected the memo's claim that the 3rd Corps "took hills, not cells", the claim that the owner's probe ruling covered the case, and the scope (army-wide, not the 3rd Corps). Superseded by the owner's ruling; the corrections are in section 2.
+- Third sitting, 2026-11-16 (game-designer, historian, independent, read-only): BC06, accepted as final with conditions (above). The orchestrator referred it because gestures became renewable in #673, so the "use 4 to 5" escalation no longer means anything.
 - Second sitting, 2026-11-15 (game-designer, historian, one sitting, read-only, independent): the four items in section 1, each with both owner tests. The memo's RB5 reason, its PK5 scope and its "directive layer is the player's tool" were corrected; the memo's accept of quadratic decay was rejected. The §6 seats rule RB2 and the RB items at their own sitting.
 - The orchestrator is told before the merge of every correction above.
 
@@ -124,6 +137,7 @@ Each of these was on the memo's first accept list and moved to fix or retire. Th
 4. SD6 and SD8: keep the three disclosure strings; no UI shows a siege civilian-death number as simulation output; the `scoring.ts:172` note stays open.
 5. Systems Manual §15 is reworded for F1h (done in this change). The stale "post-1.0 design item" lines (the #683 fragment is history and is not edited; the Systems Manual §6 note) are deleted when P2 delivers the capability.
 6. The directive-producer retirement (B3) covers the human's staff at autonomy 1 and above; B2 checks whether the human sees the pushback events.
+7. BC06: the `address_to_nation_rbih` narrative ("a people in the fourth year of siege") checked against its first firing at turn 84; a data text fix or softening, owned by the UI or copy lane.
 
 ## 7. Rulings on the second sitting (orchestrator, 2026-11-15)
 
@@ -134,7 +148,7 @@ Each of these was on the memo's first accept list and moved to fix or retire. Th
 5. Emergency defence: capability from P2, the old operation stays retired.
 6. F3: a defect, fixed in P2 and P3.
 7. F1h: the Systems Manual §15 text is corrected now; the code retirement stays in Part 4.
-8. The RC (D-topology) and BC06 (six escalation stages) roadmap rows are classified by the rule "pre-freeze, add-on candidate, or dropped"; there is no "post-1.0 engine" category. Proposed classification, for the orchestrator to rule: both dropped, with the static gesture behaviour and the absence of the neighbour cascade final. Neither blocks 1.0 and neither can ship later without changing 1.0's engine behaviour.
+8. The RC (D-topology) and BC06 (six escalation stages) roadmap rows are classified by the rule "pre-freeze, add-on candidate, or dropped"; there is no "post-1.0 engine" category. Ruled 2026-11-16: RC D-topology is dropped (it gates nothing and would reopen §6 and a re-floor); BC06 went to a sitting and is accepted as final (above); BC18 C is a post-1.0 add-on candidate (opt-in content that must not change 1.0's base-game engine behaviour).
 
 ## 8. Owner ruling of 2026-11-16 (via the orchestrator)
 
