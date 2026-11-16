@@ -2505,6 +2505,86 @@ describe('pre-planned operations', () => {
         );
     });
 
+    describe('PK5 bounded queue skip', () => {
+        const brigadesOf = (name: string) =>
+            new Set(_ALL_PRE_PLANNED.find((def) => def.name === name)!.axes.flatMap((axis) => axis.brigades));
+        const weaken = (state: ReturnType<typeof makeMinimalState>, ids: Set<string>) => {
+            for (const id of ids) {
+                const formation = state.military.formations[id];
+                if (formation) formation.personnel = 300;
+            }
+        };
+        const skipWarnings = (state: ReturnType<typeof makeMinimalState>) =>
+            (state.military.op_injection_warnings ?? []).filter((w) => w.check === 'queue_head_skipped');
+
+        it('steps past a short head when the op behind it is admissible now, and keeps the head queued', () => {
+            const state = makeMinimalState();
+            state.meta.turn = 18;
+            const command = state.military.corps_command!.vrs_1st_krajina!;
+            command.active_operations = [];
+            command.queued_operations = ['Operation Corridor', 'Operation Jajce', 'Operation Bosanski Novi'];
+            const corridor = brigadesOf('Operation Corridor');
+            const jajce = brigadesOf('Operation Jajce');
+            assert.equal([...corridor].filter((id) => jajce.has(id)).length, 0, 'fixture: the two ops share no brigade');
+            weaken(state, corridor);
+
+            const injected = injectQueuedOperation(state, 'vrs_1st_krajina');
+
+            assert.equal(injected, true);
+            assert.equal(command.active_operations[0]?.name, 'Operation Jajce');
+            assert.deepEqual(command.queued_operations, ['Operation Corridor', 'Operation Bosanski Novi']);
+            const skips = skipWarnings(state);
+            assert.equal(skips.length, 1);
+            assert.equal(skips[0]!.op_name, 'Operation Corridor');
+            assert.match(skips[0]!.detail, /viable participant/);
+            assert.match(skips[0]!.detail, /Operation Jajce/);
+        });
+
+        it('does not skip when nothing behind the short head is admissible', () => {
+            const state = makeMinimalState();
+            state.meta.turn = 18;
+            const command = state.military.corps_command!.vrs_1st_krajina!;
+            command.active_operations = [];
+            command.queued_operations = ['Operation Corridor', 'Operation Jajce'];
+            weaken(state, brigadesOf('Operation Corridor'));
+            weaken(state, brigadesOf('Operation Jajce'));
+
+            const injected = injectQueuedOperation(state, 'vrs_1st_krajina');
+
+            assert.equal(injected, false);
+            assert.deepEqual(command.queued_operations, ['Operation Corridor', 'Operation Jajce']);
+            assert.equal(command.active_operations.length, 0);
+            assert.equal(skipWarnings(state).length, 0);
+        });
+
+        it('does not skip to an op the player has not authorized', () => {
+            const state = makeMinimalState();
+            state.meta.turn = 18;
+            state.meta.player_faction = 'RS';
+            state.meta.pending_proposal_reviews = [{
+                id: 'PROP_17_historical_op_preplanned_vrs_1st_krajina_operation_jajce',
+                turn: 17,
+                faction: 'RS',
+                domain: 'ops',
+                description: 'Operation Jajce - awaiting authorization.',
+                proposed_action: 'HISTORICAL_OP:preplanned:vrs_1st_krajina:Operation Jajce',
+                current_value: 'awaiting_authorization',
+                proposed_value: 'authorize',
+                accepted: false,
+                resolved_turn: 17,
+            } as any];
+            const command = state.military.corps_command!.vrs_1st_krajina!;
+            command.active_operations = [];
+            command.queued_operations = ['Operation Corridor', 'Operation Jajce'];
+            weaken(state, brigadesOf('Operation Corridor'));
+
+            injectQueuedOperation(state, 'vrs_1st_krajina');
+
+            assert.equal(command.active_operations.filter((op) => op.name === 'Operation Jajce').length, 0);
+            assert.equal(skipWarnings(state).length, 0);
+        });
+    });
+
     it('injects Operation Corridor after Operation Prijedor leaves slot 0 and preserves the remaining 1KK queue', () => {
         const state = makeMinimalState();
         state.meta.turn = 10;

@@ -2988,13 +2988,94 @@ export function injectPrePlannedOperations(
     }
 }
 
+/**
+ * PK5 (2026-11-16): would `opName` inject for `corpsId` this turn? READ-ONLY dry run of the
+ * injectQueuedOperation gates (no authorization review is created, no warning is written, no
+ * brigade is claimed). An authorization the player has not accepted counts as not admissible;
+ * an op the player has never been asked about is admissible because the review is born accepted.
+ */
+function isQueuedOperationAdmissibleNow(
+    state: GameState,
+    cmd: CorpsCommandState,
+    corpsId: string,
+    opName: string,
+    adjacency?: Map<Osid, Osid[]>,
+): boolean {
+    const turn = state.meta?.turn ?? 0;
+    const def = ALL_PRE_PLANNED.find(d => d.name === opName && d.corps === corpsId);
+    if (!def) return false;
+    if (prePlannedOperationAlreadyResolved(state, def)) return false;
+    if (def.available_from != null && turn < def.available_from) return false;
+    if (hasNonCapturingObjectiveOverlap(def, cmd)) return false;
+    const effectiveDef = omitObjectivesClaimedByActiveOperations(def, cmd);
+    if (effectiveDef.axes.length === 0) return false;
+    if (state.meta?.player_faction === effectiveDef.faction) {
+        const action = historicalOperationAuthorizationAction({
+            kind: 'preplanned', faction: effectiveDef.faction, corpsId, operationName: effectiveDef.name,
+        });
+        const review = (state.meta.pending_proposal_reviews ?? [])
+            .find((r) => r.proposed_action === action && r.faction === effectiveDef.faction);
+        if (review && review.accepted !== true) return false;
+    }
+    const allObjectives = effectiveDef.axes.flatMap(a => a.objectives);
+    if (allObjectives.length > 0 && allObjectives.every(osid =>
+        getPoliticalControllerOSID(state, osid, undefined) === effectiveDef.faction)) {
+        return false;
+    }
+    if (hasBlockingOpInjectionWarnings(validateOpAtInjection(effectiveDef, state, undefined, cmd))) return false;
+    const result = buildAxesFromDef(effectiveDef, state, adjacency);
+    if (!result) return false;
+    return result.viableParticipating >= (effectiveDef.minimum_viable_participants ?? MIN_OPERATION_PARTICIPANTS);
+}
+
+/**
+ * PK5 (2026-11-16) bounded queue skip. A queue head that is short this turn (no axis builds, or
+ * too few viable participants) used to hold the whole corps queue. Step past it ONLY when an op
+ * behind it is admissible right now: that op moves to the front, the short head keeps its place
+ * directly behind it (it is not dropped and is retried when the slot frees), and the skip is
+ * recorded naming the head, the reason and the promoted op. `PrePlannedOp` has no window end, so
+ * the "head past its own window" case does not arise. Returns true when a promotion was made.
+ */
+function promoteAdmissibleQueuedOperation(
+    state: GameState,
+    cmd: CorpsCommandState,
+    corpsId: string,
+    headName: string,
+    reason: string,
+    adjacency?: Map<Osid, Osid[]>,
+): boolean {
+    const queue = cmd.queued_operations ?? [];
+    if (queue[0] !== headName || queue.length < 2) return false;
+    for (let i = 1; i < queue.length; i++) {
+        const candidate = queue[i]!;
+        if (!isQueuedOperationAdmissibleNow(state, cmd, corpsId, candidate, adjacency)) continue;
+        queue.splice(i, 1);
+        queue.unshift(candidate);
+        collectOpInjectionWarnings(state, [{
+            op_name: headName,
+            check: 'queue_head_skipped',
+            detail: `Queued operation skipped this turn (${reason}); "${candidate}" behind it was admissible and goes first`,
+            severity: 'warning',
+            turn: state.meta?.turn ?? 0,
+        }]);
+        return true;
+    }
+    return false;
+}
+
 // PERMITTED CREATION ENTRY POINT — pre-planned and player-queued operations only.
 // All CorpsOperation objects must be built via buildCorpsOperation() in corps_operation_helpers.ts.
 /**
  * Inject a queued operation by name for a corps.
  * Called when a corps completes an operation and has queued_operations.
  */
-export function injectQueuedOperation(state: GameState, corpsId: string, adjacency?: Map<Osid, Osid[]>): boolean {
+export function injectQueuedOperation(
+    state: GameState,
+    corpsId: string,
+    adjacency?: Map<Osid, Osid[]>,
+    /** Internal: the one retry after a PK5 head skip may not skip again. */
+    allowHeadSkip = true,
+): boolean {
     const observe = isReasonCodeTopicEnabled('preplanned_eligibility');
     const cmd = state.military.corps_command?.[corpsId];
     const observedOperationName = observe ? cmd?.queued_operations?.[0] ?? null : null;
@@ -3115,6 +3196,9 @@ export function injectQueuedOperation(state: GameState, corpsId: string, adjacen
     } : undefined);
     if (!result) {
         if (observe) emitPreplannedEligibilityRecord({ kind: 'caller_terminal', caller: 'queued_injection', linkage: 'contiguous_unsequenced', invocation_key: invocationKey, turn, operation_name: opName, corps_id: corpsId, actual_exit: 'build_returned_null', build_reached: true, build_returned: false, ordinary_return: false });
+        if (allowHeadSkip && promoteAdmissibleQueuedOperation(state, cmd, corpsId, opName, 'no axis could be built', adjacency)) {
+            return injectQueuedOperation(state, corpsId, adjacency, false);
+        }
         return false;
     }
     const minimumViableParticipants = effectiveDef.minimum_viable_participants ?? MIN_OPERATION_PARTICIPANTS;
@@ -3127,6 +3211,12 @@ export function injectQueuedOperation(state: GameState, corpsId: string, adjacen
             turn,
         }]);
         if (observe) emitPreplannedEligibilityRecord({ kind: 'caller_terminal', caller: 'queued_injection', linkage: 'contiguous_unsequenced', invocation_key: invocationKey, turn, operation_name: opName, corps_id: corpsId, actual_exit: 'viable_floor', build_reached: true, build_returned: true, admitted: false, viable_participating: result.viableParticipating, ordinary_return: false });
+        if (allowHeadSkip && promoteAdmissibleQueuedOperation(
+            state, cmd, corpsId, opName,
+            `${result.viableParticipating} viable participant(s), ${minimumViableParticipants} required`, adjacency,
+        )) {
+            return injectQueuedOperation(state, corpsId, adjacency, false);
+        }
         return false;
     }
 
