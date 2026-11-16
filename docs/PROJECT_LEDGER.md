@@ -341,6 +341,33 @@ Canon record for the FORAWWV amendment that follows PR #710 (B3 + B2). #710's ca
 
 Evidence: `C:/Pyrrhic/AWWV-worktrees/_logs/batch-b-20261116/forawwv_b3_panel_packet.md`, `forawwv_b3_amendment_final.md`.
 
+## 2026-11-16 — G1: the President's leadership gestures honour their event's turn_min (headless hash unchanged)
+
+- **Defect** (Codex finding on #693, verified by the steward):
+  - There are four renewable leadership gestures: address to the nation, visit to the front, decorate a unit, and the strategic posture review.
+  - Each is an authored event in `war_1993.json` with `trigger.turn_min: 84`.
+  - The bot path fires them only from week 84. The desktop availability contracts never checked `turn_min`, so a human President could use them from week 0.
+  - The address could therefore be used four times (0/52/104/156) where canon's "about three uses in a war" gives 84/136/188.
+- **Fix:**
+  - New shared `eventNotYetAvailableUntil` (`src/desktop/action_cadence_contract.cjs`), applied in all four contracts, so the electron-main initiate handlers inherit it.
+  - It runs after the "already pending" check, so an old save's pending gesture still reads as pending.
+  - New reason `not_yet_available`, with `availableFromTurn`.
+  - Player copy names the opening date: "Not possible this early in the war. Available from {date}." (BCS "Nije moguće ovako rano u ratu. Dostupno od {date}."). It appears on the directive card and the front-visit section, through `utils/gestureCopy.ts`.
+- **Canon** (same change):
+  - Systems Manual l.193: renewable from the event's own `trigger.turn_min`.
+  - Rulebook "Recurring decisions": all four open at week 84 for the President as for bots.
+  - Rulebook amendment record updated.
+- **Seats:**
+  - game-designer: APPROVE-WITH-CHANGES. Parity is correct and week 84 fits the authored text; the requested date copy is applied.
+  - canon-compliance: APPROVE-WITH-CHANGES. The requested canon wording and the pending-first order are applied.
+- **Measured:** headless 188w = `03159b9ee1e5877f`, equal to main's pin (desktop and UI only; headless never loads these contracts).
+- **Tests:** `tests/g1_gesture_turn_min.test.ts`.
+  - Every faction and gesture is "not yet" at t0 and t83 and open at t84.
+  - The copy names the date with no week number.
+  - A pending gesture still reads "already pending".
+  - 26 gesture test files and 22 i18n test files pass. tsc is clean.
+- **Flag for the orchestrator** (canon seat): the three-President Authority test (SM l.193, "at cap ≤25% of turns after week 26") was measured with the gestures open from week 0. Re-measure it before the held tuning order moves on.
+
 ## 2026-11-16 — N6: enemy-concentration zones survive sector renumbering (control-identical)
 
 - **Defect** (same class as SE9, found in the SE9 attribution).
@@ -785,6 +812,8 @@ Docs only; no `src/` or `data/` change, no hash change.
 
 - #737, A2a "Washington: Federation by consent" (Path C): a never-broken alliance reaches the Federation at the Washington week through `applyWashingtonEffects` (alliance max(current, 0.80); no ceasefire activation, since there is no war); the card has war and consent variants keyed on `war_started_turn`; byte-identical (the war starts at about t49 when left alone), so the main pin stays 8c9fbf1d30e8a976. Path C is not yet reachable from either side until A2b (choices that hold the alliance against drift, and Path A' for a mended alliance) and the B and C capitulation lever land.
 - Queued in the same lane, one at a time, each re-pinning on main after #748: #753 (the Ahmići massacre card carries only costs; Mostar's April 1993 orders carry the HVO readiness; an 8-seat bright-line panel; guard intact) and #754 (one shared RBiH-HRHB at-war predicate, five readers, control-identical); then #735 (the political gate).
+- #756, G1 (the Codex finding on #693): the four renewable leadership gestures (the address to the nation, the visit to the front, decorate a unit, the strategic posture review) now honour the event's own `trigger.turn_min` (week 84) for a human President as for bots, so the human has about three uses (84, 136, 188) as the canon says; new reason `not_yet_available`; the copy names the opening date; canon: Systems Manual line 193 and the Rulebook "Recurring decisions". Headless hash unchanged (desktop and UI only). Flag: the three-President Authority test was measured with the gestures open from week 0 and must be re-measured before the held tuning order. Codex r4581281567 on #693 is fixed.
+- #752 (the threat_ratio direction fix) merged: Codex r4588239176 on #745 is fixed.
 
 ## 2026-11-16 — t76 Belgrade event: Pale's historical posture in autumn 1993 is staying in step with Belgrade, not defiance
 
