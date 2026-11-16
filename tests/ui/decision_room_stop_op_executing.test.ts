@@ -135,10 +135,13 @@ describe('Decision Room stop-op reachability for executing operations', () => {
     });
   });
 
-  it('does not emit stop_op for non-executing or enemy-faction ops', () => {
+  // CODE3 (2026-11-16): planning ops are stoppable too (authored and triggered ops have no
+  // exhaustion gate; the President's Stop-op is their counter and must reach them before launch).
+  it('emits stop_op for planning and executing ops, not for recovery, unreported-phase or enemy ops', () => {
     const state = makeState({
       operations: [
         makeOp({ name: 'op_planning', phase: 'planning' }),
+        makeOp({ name: 'op_unreported', phase: 'planning', phase_unreported: true }),
         makeOp({ name: 'op_recovery', phase: 'recovery' }),
         makeOp({
           corps_id: 'vrs_1st_corps', corps_name: '1st Krajina Corps', faction: 'RS',
@@ -151,8 +154,27 @@ describe('Decision Room stop-op reachability for executing operations', () => {
     const view = buildPresidentialDecisionRoomView({ state });
     const stopOpCards = view.cards.filter((c) => c.id.startsWith('command:stop-op:'));
 
-    expect(stopOpCards.map((c) => c.id)).toEqual(['command:stop-op:arbih_3rd_corps:op_live']);
+    expect(stopOpCards.map((c) => c.id)).toEqual([
+      'command:stop-op:arbih_3rd_corps:op_live',
+      'command:stop-op:arbih_3rd_corps:op_planning',
+    ]);
     expect(view.cards.find((c) => c.id === 'command:stop-op:vrs_1st_corps:op_enemy')).toBeUndefined();
+  });
+
+  it('a planning op gets the same Stop-op price and payload, with planning copy', () => {
+    const state = makeState({ operations: [makeOp({ name: 'op_prep', display_name: 'Operation Prep', phase: 'planning' })] });
+    const view = buildPresidentialDecisionRoomView({ state });
+    const card = view.cards.find((c) => c.id === 'command:stop-op:arbih_3rd_corps:op_prep');
+
+    expect(card?.directive).toEqual({
+      lever: 'stop_op',
+      corpsId: 'arbih_3rd_corps',
+      cost: 25,
+      payload: { corpsId: 'arbih_3rd_corps', opName: 'op_prep' },
+    });
+    expect(card?.explanation).toBe('Order 3rd Corps to call off Operation Prep before it starts — the brigades preparing it go back to their posts.');
+    expect(card?.evidence).toContain('Operation still being prepared');
+    expect(card?.evidence).not.toContain('Operation currently under way');
   });
 
   it('orders multiple executing-op stop_op cards deterministically', () => {
