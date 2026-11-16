@@ -28,6 +28,7 @@
  */
 
 import { strictCompare } from '../../../state/validateGameState.js';
+import { stableSectorKey } from '../sector_intel.js';
 import { botOrdersPerfTime } from '../_perf_profile_bot_orders.js';
 import type {
     CommanderBriefing,
@@ -52,6 +53,49 @@ const MEDIUM_THREAT_COMMITMENT = 6;
 
 /** Commitment ratio above which a zone is low threat (stretched). */
 const LOW_THREAT_COMMITMENT = 4;
+
+/**
+ * Zones of this turn's sectors where last turn's intel picture detected enemy massing.
+ *
+ * N6 (2026-11-16): sector ids are re-minted every turn by the partition, so the previous picture's
+ * positional `concentration_detected` keys point at whichever sector now carries that number. The
+ * picture now also records massing by `stableSectorKey`, and this matches on it. A picture saved
+ * before N6 (no stable map) keeps the positional lookup. Deterministic: sectors and osids in
+ * strictCompare order. Exported for tests.
+ */
+export function concentrationZonesFromPreviousIntel(
+    prevIntel: NonNullable<CommanderState['intel_picture']> | null,
+    corpsSectors: readonly CommanderBriefing['sectors'][number][],
+    zones: readonly ZoneAssessment[],
+): ZoneId[] {
+    if (!prevIntel) return [];
+    const osidToZone = new Map<string, ZoneId>();
+    for (const zone of zones) {
+        for (const osid of zone.osids) osidToZone.set(osid, zone.zone_id);
+    }
+    const byStable = prevIntel.concentration_detected_by_stable_key;
+    const detectedSectors = byStable
+        ? [...corpsSectors]
+            .filter((s) => byStable[stableSectorKey(s)] === true)
+            .sort((a, b) => strictCompare(a.sector_id, b.sector_id))
+        : Object.entries(prevIntel.concentration_detected)
+            .sort((a, b) => strictCompare(a[0], b[0]))
+            .filter(([, detected]) => detected)
+            .map(([sectorId]) => corpsSectors.find((s) => s.sector_id === sectorId))
+            .filter((s): s is NonNullable<typeof s> => s != null);
+    const out: ZoneId[] = [];
+    const seen = new Set<ZoneId>();
+    for (const sector of detectedSectors) {
+        for (const osid of [...sector.territory_osids].sort(strictCompare)) {
+            const zoneId = osidToZone.get(osid);
+            if (zoneId && !seen.has(zoneId)) {
+                seen.add(zoneId);
+                out.push(zoneId);
+            }
+        }
+    }
+    return out;
+}
 
 // ═══════════════════════════════════════════════════════════════════════════
 // assessSituation — main ASSESS orchestrator
@@ -105,39 +149,14 @@ export function assessSituation(
         () => evaluateCorpsForces(briefing.brigades, zones, briefing.supply_by_osid),
     );
 
-    // 4. Build concentration zone list from previous intel picture
-    // concentration_detected is keyed by sector_id; map via osid overlap to zone_id.
+    // 4. Build concentration zone list from previous intel picture, mapped via osid overlap to zone_id.
+    // N6 (2026-11-16): last turn's sector ids were re-minted by this turn's partition, so matching
+    // them positionally against this turn's sectors pointed at the wrong sectors (the zones also
+    // reach the player's command-strain text). Match on stable sector keys; older saved pictures
+    // without the stable map keep the positional lookup.
     const concentrationZoneIds: ZoneId[] = botOrdersPerfTime(
         'commander.runCommanderForCorps.decide.assessSituation.concentrationZones',
-        () => {
-            const concentrationZoneIds: ZoneId[] = [];
-            const prevIntel = briefing.previous_state?.intel_picture ?? null;
-            if (prevIntel) {
-                // Build osid → zone_id reverse map
-                const osidToZone = new Map<string, ZoneId>();
-                for (const zone of zones) {
-                    for (const osid of zone.osids) {
-                        osidToZone.set(osid, zone.zone_id);
-                    }
-                }
-                const seenZones = new Set<ZoneId>();
-                for (const [sectorId, detected] of Object.entries(prevIntel.concentration_detected).sort(
-                    (a, b) => strictCompare(a[0], b[0]),
-                )) {
-                    if (!detected) continue;
-                    const sector = corpsSectors.find(s => s.sector_id === sectorId);
-                    if (!sector) continue;
-                    for (const osid of [...sector.territory_osids].sort(strictCompare)) {
-                        const zoneId = osidToZone.get(osid);
-                        if (zoneId && !seenZones.has(zoneId)) {
-                            seenZones.add(zoneId);
-                            concentrationZoneIds.push(zoneId);
-                        }
-                    }
-                }
-            }
-            return concentrationZoneIds;
-        },
+        () => concentrationZonesFromPreviousIntel(briefing.previous_state?.intel_picture ?? null, corpsSectors, zones),
     );
 
     // 5. Assess threats
