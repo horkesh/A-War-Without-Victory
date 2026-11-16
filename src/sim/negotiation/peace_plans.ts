@@ -19,7 +19,8 @@ import { freezeEndgameSnapshot } from '../endgame/endgame_snapshot.js';
 import { resolveEventDecisionCore } from '../events/resolve_decision_core.js';
 import { applyPeaceSettlement, isSettlementPlan } from './peace_settlement.js';
 import { warDeadTotals } from './war_dead.js';
-import { getOsidAreas } from '../osid_areas.js';
+import { getFactionTerritoryAreaPct } from '../osid_areas.js';
+import { isWarOutsideHistoricalBand } from '../political/historical_territory_band.js';
 
 const CANONICAL_FACTIONS: FactionId[] = ['RBiH', 'RS', 'HRHB'];
 const DAYTON_PLAN_ID = 'dayton';
@@ -82,29 +83,15 @@ function ensureNegotiationState(state: GameState): NegotiationState {
 // ═══════════════════════════════════════════════════════════════════════════
 
 /**
- * Faction's current share of Bosnia and Herzegovina by AREA, 0..100.
+ * Faction's current share of Bosnia and Herzegovina by AREA, 0..100 (owned by osid_areas.ts).
  *
  * Every plan's `proposed_split` is an area share (peace_plan_data.ts), so the
  * bot response must compare like with like. This used to be a settlement-count
  * ratio: at week 40 of a hands-off emergent run RS held 52.7% of settlements
  * but 63.4% of the area, so the RS Vance-Owen floor (gap vs 43%) read 9.7pp
  * instead of 20.4pp and RS accepted the plan, ending the war in January 1993.
- * Same measure as negotiation capital (`compute_capital.ts`) and the
- * settlement map (`settlementTerritoryPct`): km² held over the country total.
  */
-export function getFactionTerritoryAreaPct(state: GameState, faction: FactionId): number {
-    const controllers = state.political?.political_controllers;
-    if (!controllers) return 0;
-
-    const { areas, total } = getOsidAreas();
-    if (!(total > 0)) return 0;
-
-    let factionKm2 = 0;
-    for (const osid of Object.keys(controllers).sort(strictCompare)) {
-        if (controllers[osid] === faction) factionKm2 += areas[osid] ?? 0;
-    }
-    return (factionKm2 / total) * 100;
-}
+export { getFactionTerritoryAreaPct };
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Bot response logic
@@ -145,6 +132,8 @@ function computeBotResponse(
         assessment,
         personality,
         warWeek,
+        plan.historical_responses[faction],
+        isWarOutsideHistoricalBand(state),
     );
 }
 
