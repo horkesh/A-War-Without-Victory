@@ -20,6 +20,7 @@ Every engine finding gets one of three answers, with a one-line reason when it i
 | A7 | SD11 | A pocket that is its side's largest body cannot be encircled; a wrong exemption. After A6. |
 | A8 | SD12 | Novo Sarajevo receives 0 arrivals, a routing-order quirk. After A7. |
 | A9 | SD13 and SD10 | Goražde population, and "abroad" at 0.45 million against 1.2 million: re-measure after A8, then the §6 seats choose between modelling onward migration and labelling the figure as first flight only. |
+| A10 | RB8 root | The refuge definition (§6): the root of the corps-less HRHB brigades at Putićevo. Batch A; the corps-adoption guard goes to the L7 lane after it (C3). |
 
 **Batch B, officers and politics (the Batch B lane, in this order).**
 
@@ -35,11 +36,11 @@ Every engine finding gets one of three answers, with a one-line reason when it i
 
 | # | Item | Answer |
 |---|---|---|
-| C1 | F7 `supply_below` fires on a reserve that does not exist | Fix; a false event reaches the player; built. |
-| C2 | SE9 sector intel re-key | Fix; about half of early-war mid-turn reads use the wrong sector; built. |
-| C3 | RB8 corps-less HRHB brigades | Fix: two at Putićevo with 3,000 and 1,672 men at week 188; trace first (RF-5B binding B6). |
+| C1 | F7 `supply_below` fires on a reserve that does not exist | Fix; a false event reaches the player; built. Merged (#690, control-identical). |
+| C2 | SE9 sector intel re-key | Fix; about half of early-war mid-turn reads use the wrong sector; built. Waits for the package's P2. |
+| C3 | RB8 corps-less HRHB brigades | Fix: two at Putićevo with 3,000 and 1,672 men at week 188; trace first (RF-5B binding B6). The root (the refuge definition) is A10; the corps-adoption guard follows it in the L7 lane. |
 | C4 | RB6 "Operacija Džihad" | Fix: still drawn in every run; historian check first. |
-| C5 | CODE4 `rankDefendersByPower` tie-break | Fix: determinism; inert if there are no ties. |
+| C5 | CODE4 `rankDefendersByPower` tie-break | Fix: determinism; inert if there are no ties. Merged (#691, byte-identical). |
 | C6 | Identity card applied at week 0 live and week 3 headless | Fix: live and headless should match to the soldier. |
 | C7 | PK5 queue head below its floor blocks the corps chain | Fix: skip it and record it. |
 | C8 | F1i `political.enclaves` always empty | Fix the root read (same class as #617), then keep or retire each revived reader on what the run shows. |
@@ -72,7 +73,7 @@ F1h's dead connectivity term (the 0.5 stays as a named constant); SD2's dormant 
 
 ## Part 5. Accept as final
 
-Game-designer and historian in one sitting; each item passes two owner tests, left alone and played. CODE3, RB5 for an active human HRHB President, PK5 and SD6 with SD8. Reasons and ratifying seats: [final-behaviour record](../40_reports/governance/20261115_FINAL_BEHAVIOUR_AT_1_0.md).
+Game-designer and historian in one sitting; each item passes two owner tests, left alone and played. CODE3, RB5 for an active human HRHB President, PK5, SD6 with SD8, and the six static gesture rows of BC06 (sitting of 2026-11-16). Reasons and ratifying seats: [final-behaviour record](../40_reports/governance/20261115_FINAL_BEHAVIOUR_AT_1_0.md).
 
 ## Part 6. Calibration pass (data and constants, after the freeze)
 
