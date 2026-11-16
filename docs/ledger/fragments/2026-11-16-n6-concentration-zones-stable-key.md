@@ -1,0 +1,23 @@
+## 2026-11-16 — N6: enemy-concentration zones survive sector renumbering (control-identical)
+
+- **Defect** (same class as SE9, found in the SE9 attribution).
+  - `assessSituation` (`commander/assess.ts`) built `enemy_concentration_zones` from the previous turn's `intel_picture.concentration_detected`, keyed by last turn's positional sector ids. It matched those ids against this turn's sectors, which the partition re-minted, so the zones pointed at whichever sector now carried that number.
+  - The zones reach the player: the command-strain text "Enemy concentration detected — defensive readiness elevated" (`command_strain.ts:1083/:1361`, via `GameStateAdapter.ts:1659`) appears or disappears on them.
+  - No sim decision reads them.
+- **Ruling (orchestrator):** fix, not retire, because the value is player-visible.
+- **Fix.**
+  - The intel picture also records massing by `stableSectorKey` (`concentration_detected_by_stable_key`, built in `decide.ts`).
+  - The assessment maps last turn's concentrations onto this turn's sectors by stable key, through a new pure `concentrationZonesFromPreviousIntel`.
+  - A picture saved before N6 has no stable map and keeps the positional lookup.
+  - The new field is optional, so older saves load.
+- **Measured** (one 188-week run on main `76e5fcabd`, whose hash is `70f4dc05bf375bc7`; re-measured after merging main `713c7a213` = `1391f69248072728`: N6 `9499e1f9a4d2e628`, still 0 cells, 251 identical control_events, re-pinned; re-measured again after merging main `9a3ab8894` = `01572f50dfea2378`: N6 `adb056607d260858`, 0 cells at all four checkpoints, 251 identical control_events, control/formation/activity/AAR files byte-identical, re-pinned; and after merging main `df206642c` = `df791f73c26ed642` (fresh run, equal to main's pin): N6 `83b8e8cd36023899`, 0 cells, 251 identical control_events, deltas and AARs byte-identical, re-pinned).
+  - Final hash `bb22e1f77c941211`.
+  - **0 cells differ** at w39, w104, w156 and w188, and all 251 control_events are identical.
+  - The state diff is the new `intel_picture` field plus corrected `threat_assessment.enemy_concentration_zones`. Example at w188: VRS 1st Krajina Corps no longer lists `zone:vrs_1st_krajina:op:donji_vakuf:korenici`, a zone the positional map borrowed from a renumbered sector.
+  - Guards: verify_checkpoints "guard intact", engine_health_gate --strict PASS.
+  - The baselines manifest is re-pinned.
+- **Tests.** New `tests/commander_concentration_zones_stable_key.test.ts`:
+  - a renumbered sector keeps its concentration;
+  - a legacy picture uses the positional lookup;
+  - the player's strain text shows the concentration warning when the massing was real, where the positional map lost it.
+  - All 30 commander test files pass (544 tests). tsc is clean.
