@@ -31,7 +31,6 @@ import type {
     GameState,
     SettlementId
 } from '../../state/game_state.js';
-import { strictCompare } from '../../state/validateGameState.js';
 import {
     FACTION_STRATEGIES,
     getActiveDoctrinePhase,
@@ -56,7 +55,6 @@ import {
     averageCohesion,
     averagePersonnelFraction,
     computeSectorThreat,
-    countHealthyBrigades,
     getCorpsHomeMun,
     getCorpsSubordinates,
     getFactionCorps,
@@ -435,8 +433,7 @@ export function setArmyStandingOrder(
         }
     }
 
-    // October 1995 general ceasefire (council fix 3): no army-wide offensive while it binds the
-    // faction, which also keeps coordinateMultiCorpsOffensive from pre-setting corps to offensive.
+    // October 1995 general ceasefire (council fix 3): no army-wide offensive while it binds the faction.
     if (stance === 'general_offensive' && isFactionBoundByOct1995Ceasefire(state, faction)) {
         stance = 'balanced';
     }
@@ -445,54 +442,7 @@ export function setArmyStandingOrder(
     state.military.army_stance[faction] = stance;
 }
 
-/**
- * During general_offensive standing orders, identify the 2 most capable corps
- * and set them to offensive stance, concentrating combat power instead of
- * spreading it evenly across all corps.
- *
- * Prevents dilution where every corps independently chooses balanced and no
- * concentrated offensive develops.
- *
- * Must run AFTER setArmyStandingOrder and BEFORE generateCorpsStanceOrders
- * so that per-corps stance logic can override with local conditions.
- */
-export function coordinateMultiCorpsOffensive(
-    state: GameState,
-    faction: FactionId,
-    edges: EdgeRecord[]
-): void {
-    const armyStance = state.military.army_stance?.[faction];
-    if (armyStance !== 'general_offensive') return;
-
-    const corpsCommand = state.military.corps_command;
-    if (!corpsCommand) return;
-
-    const corpsList = getFactionCorps(state, faction);
-    if (corpsList.length < 3) return; // No coordination needed for 1-2 corps
-
-    // Score each corps by offensive potential
-    const scored = corpsList.map(corps => {
-        const cmd = corpsCommand[corps.id];
-        if (!cmd) return { corpsId: corps.id, score: -999 };
-        const subs = getCorpsSubordinates(state, corps.id);
-        const healthy = countHealthyBrigades(subs);
-        const exhaustionPenalty = cmd.corps_exhaustion / 10;
-        const avgPers = averagePersonnelFraction(subs);
-        return {
-            corpsId: corps.id,
-            score: healthy * 10 + avgPers * 5 - exhaustionPenalty
-        };
-    }).sort((a, b) => {
-        if (b.score !== a.score) return b.score - a.score;
-        return strictCompare(a.corpsId, b.corpsId);
-    });
-
-    // Top 2 corps get pre-set to offensive — per-corps logic can still override
-    for (let i = 0; i < scored.length && i < 2; i++) {
-        const cmd = corpsCommand[scored[i].corpsId];
-        if (!cmd) continue;
-        if (scored[i].score > 0 && cmd.stance !== 'reorganize') {
-            cmd.stance = 'offensive';
-        }
-    }
-}
+// coordinateMultiCorpsOffensive was retired 2026-11-16 (package "1994-95 attack and defence", P0):
+// its top-2 "offensive" pre-set ran before generateCorpsStanceOrders, which rewrites every corps
+// stance, so it only ever survived for a corps with a player stance order, where it overrode the
+// President's accepted stance for the turn. Headless it changed nothing.
