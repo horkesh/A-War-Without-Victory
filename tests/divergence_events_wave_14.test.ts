@@ -220,7 +220,7 @@ describe('LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-14: 6 Ring-1 divergence events'
     });
 
     // ── 5. csq_back_channel_communication_RS ────────────────────────────────
-    it('csq_back_channel_communication_RS: predicate + leverage +5 + alliance floor', () => {
+    it('csq_back_channel_communication_RS: predicate + leverage +5, no alliance floor (B5 2026-11-16)', () => {
         const def = getEvent('csq_back_channel_communication_RS');
         const cond = def.trigger.condition!;
         // patron_pressure_above(RS)>=15, dimension_above(patron_confidence)>=50
@@ -242,6 +242,7 @@ describe('LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-14: 6 Ring-1 divergence events'
         expect(cap.negotiating_leverage).toBe(55); // 50 + 5
         const ledger = buildCostLedger(fires);
         expect(ledger.annotations?.find(a => a.tag === 'back_channel_communication_RS')).toBeTruthy();
+        expect(fires.military.alliance_locks ?? []).toEqual([]);
     });
 
     // ── 6. csq_paramilitary_refusal_streak_RBiH ─────────────────────────────

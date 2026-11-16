@@ -216,7 +216,9 @@ describe('LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-5: 7 Ring-1 divergence events',
     });
 
     // ── 4. csq_back_channel_communication ─────────────────────────────────
-    it('csq_back_channel_communication: predicate + soft alliance floor lock + leverage uplift', () => {
+    // B5 (2026-11-16, historian): the back-channel no longer pushes an alliance floor. No patron
+    // back-channel produced Bosniak-Croat cooperation; in 1993 the floor lifted an open war.
+    it('csq_back_channel_communication: predicate + leverage uplift, no alliance floor', () => {
         const def = getEvent('csq_back_channel_communication');
         const cond = def.trigger.condition!;
         const fires = baseState(65);
@@ -233,7 +235,7 @@ describe('LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-5: 7 Ring-1 divergence events',
         expect(evaluateCondition(cond, lapsed)).toBe(false);
 
         applyEventEffects(fires, effectsOf(def));
-        expect(fires.military.alliance_locks?.some(l => l.mode === 'floor' && l.value === 0.15)).toBe(true);
+        expect(fires.military.alliance_locks ?? []).toEqual([]);
         // negotiation_capital writes to capital[faction][dimension] when the dimension key is present.
         const cap = (fires.military.negotiation as any).capital.RBiH;
         // negotiating_leverage was not pre-seeded on capital; writer guards `if (dimension in cap)` so a missing key is a no-op.

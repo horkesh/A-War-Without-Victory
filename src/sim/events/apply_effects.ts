@@ -6,7 +6,7 @@
 import type { GameState, FactionId, FormationId, ControlEvent } from '../../state/game_state.js';
 import type { EventEffect } from './event_types.js';
 import type { EventConstraints } from './event_constraints.js';
-import { getActiveAllianceBounds } from './active_modifiers.js';
+import { getActiveAllianceBounds, recordAllianceLockConflict } from './active_modifiers.js';
 import { recordBattleCasualties } from '../../state/casualty_ledger.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { invalidateBrigadeJourney } from '../combat/brigade_journey_lifecycle.js';
@@ -417,11 +417,10 @@ function applyPatronPressure(state: GameState, faction: FactionId, delta: number
  *  alliance_locks (floor/ceiling). Active locks override any incoming delta
  *  that would push the value past them.
  *
- *  Clamp order is ceiling-then-floor so that floor wins when locks contradict
- *  (e.g. Washington Agreement floor=0.80 simultaneously active with a stale
- *  recovery-event ceiling=0.55). Floor is the stronger semantic guarantee —
- *  a minimum that must hold — so a contradictory ceiling cannot pull the
- *  value below it. */
+ *  Contradicting locks are resolved in `getActiveAllianceBounds` (B5 2026-11-16):
+ *  before Washington the ceiling governs (a cooperation floor cannot lift an open
+ *  war), after Washington the floor governs (e.g. the Washington floor 0.80 over a
+ *  stale recovery-event ceiling 0.55). Only the governing bound comes back. */
 function applyAllianceChange(state: GameState, delta: number): void {
     // P2-B: war_alliance_rbih_hrhb is a persisted FLOAT and the lock-bound
     // comparisons below are false for NaN, so a non-finite delta would persist.
@@ -434,6 +433,7 @@ function applyAllianceChange(state: GameState, delta: number): void {
     let next = clamp(current + delta, -1, 1);
     const currentTurn = state.meta.turn ?? 0;
     const bounds = getActiveAllianceBounds(state, currentTurn);
+    if (bounds.conflict) recordAllianceLockConflict(state, bounds.conflict);
     if (bounds.ceiling != null && next > bounds.ceiling) next = bounds.ceiling;
     if (bounds.floor != null && next < bounds.floor) next = bounds.floor;
     state.political.war_alliance_rbih_hrhb = next;

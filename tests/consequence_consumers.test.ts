@@ -88,12 +88,12 @@ describe('applyAllianceChange with alliance_lock floor', () => {
         expect(state.political.war_alliance_rbih_hrhb).toBeCloseTo(0.1);
     });
 
-    it('floor wins when contradictory floor and ceiling locks both active', () => {
+    it('after Washington, the floor governs when a floor and a ceiling contradict', () => {
         // Washington Agreement scenario: floor=0.80 + stale recovery
-        // ceiling=0.55 simultaneously active. A positive delta would push
-        // value into 1.0; ceiling pulls it to 0.55; floor must lift back
-        // to 0.80. Floor is the stronger semantic guarantee.
+        // ceiling=0.55 simultaneously active. Once washington_signed is set,
+        // no ceiling can pull the Federation below its floor (B5 2026-11-16).
         const state = makeState();
+        (state.political as any).rbih_hrhb_state = { washington_signed: true };
         state.political.war_alliance_rbih_hrhb = 0.8;
         applyEventEffects(state, [
             { kind: 'alliance_lock', mode: 'floor', value: 0.8, duration_turns: 60 },
@@ -101,6 +101,34 @@ describe('applyAllianceChange with alliance_lock floor', () => {
         ]);
         applyEventEffects(state, [{ kind: 'alliance_change', delta: 0.8 }]);
         expect(state.political.war_alliance_rbih_hrhb).toBeCloseTo(0.8);
+    });
+
+    it('before Washington, the ceiling governs: a cooperation floor cannot lift an open war', () => {
+        // The 1993 case: the Ahmići ceiling 0.0 and a back-channel floor 0.15.
+        const state = makeState();
+        state.political.war_alliance_rbih_hrhb = -1;
+        applyEventEffects(state, [
+            { kind: 'alliance_lock', mode: 'ceiling', value: 0, duration_turns: 60 },
+            { kind: 'alliance_lock', mode: 'floor', value: 0.15, duration_turns: 25 },
+        ]);
+        applyEventEffects(state, [{ kind: 'alliance_change', delta: 0.05 }]);
+        expect(state.political.war_alliance_rbih_hrhb).toBeCloseTo(-0.95);
+        // One receipt per distinct conflict, deduplicated.
+        applyEventEffects(state, [{ kind: 'alliance_change', delta: 0.05 }]);
+        const rows = (state.military.event_effect_anomalies ?? []).filter((r) => r.effect_kind === 'alliance_lock_conflict');
+        expect(rows).toHaveLength(1);
+        expect(rows[0]!.value_repr).toBe('floor=0.15;ceiling=0;governs=ceiling');
+    });
+
+    it('writes no receipt when the locks do not contradict', () => {
+        const state = makeState();
+        applyEventEffects(state, [
+            { kind: 'alliance_lock', mode: 'floor', value: 0.2, duration_turns: 20 },
+            { kind: 'alliance_lock', mode: 'ceiling', value: 0.2, duration_turns: 20 },
+        ]);
+        applyEventEffects(state, [{ kind: 'alliance_change', delta: -0.3 }]);
+        expect(state.political.war_alliance_rbih_hrhb).toBeCloseTo(0.2);
+        expect(state.military.event_effect_anomalies ?? []).toEqual([]);
     });
 });
 

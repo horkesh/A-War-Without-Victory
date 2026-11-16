@@ -4008,15 +4008,9 @@
         "delta": 5
       },
       {
-        "kind": "alliance_lock",
-        "mode": "floor",
-        "value": 0.15,
-        "duration_turns": 25
-      },
-      {
         "kind": "cost_ledger_annotation",
         "tag": "back_channel_communication",
-        "text": "Back-channel communication established under patron_pressure>15 and patron_confidence>50. Negotiating leverage +5 and soft alliance floor 0.15 for 25 turns; reflects deconflicting cooperation rather than partnership revival."
+        "text": "A back-channel line to the patron capital was established; negotiating leverage +5. It did not restore Bosniak–Croat cooperation."
       }
     ],
     "dimension_shifts": [
@@ -6633,15 +6627,9 @@
         "delta": 5
       },
       {
-        "kind": "alliance_lock",
-        "mode": "floor",
-        "value": 0.15,
-        "duration_turns": 25
-      },
-      {
         "kind": "cost_ledger_annotation",
         "tag": "back_channel_communication_HRHB",
-        "text": "Back-channel communication established (HRHB variant) under patron_pressure>15 and patron_confidence>50. Negotiating leverage +5 and soft alliance floor 0.15 for 25 turns; reflects deconflicting cooperation rather than partnership revival. AUDIT-ONLY annotation; no rupture wiring."
+        "text": "A back-channel line to the patron capital was established (HRHB); negotiating leverage +5. It did not restore Bosniak–Croat cooperation."
       }
     ],
     "dimension_shifts": [
@@ -7068,15 +7056,9 @@
         "delta": 5
       },
       {
-        "kind": "alliance_lock",
-        "mode": "floor",
-        "value": 0.15,
-        "duration_turns": 25
-      },
-      {
         "kind": "cost_ledger_annotation",
         "tag": "back_channel_communication_RS",
-        "text": "Back-channel communication established (RS variant) under patron_pressure>15 and patron_confidence>50. Negotiating leverage +5 and soft alliance floor 0.15 for 25 turns; reflects deconflicting cooperation rather than partnership revival. AUDIT-ONLY annotation; no rupture wiring."
+        "text": "A back-channel line to the patron capital was established (RS); negotiating leverage +5."
       }
     ],
     "dimension_shifts": [

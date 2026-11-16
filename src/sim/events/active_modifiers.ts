@@ -98,13 +98,35 @@ export function getCascadePenaltyForOsid(
     return lowest;
 }
 
-/** Tightest floor and loosest ceiling across active alliance locks. Undefined
- *  when no lock of that mode is active. Multiple locks of the same mode take
- *  the most restrictive value (highest floor, lowest ceiling). */
+/** A floor above a ceiling: the two active locks contradict. */
+export interface AllianceLockConflict {
+    floor: number;
+    ceiling: number;
+    governs: 'floor' | 'ceiling';
+}
+
+/** Active alliance bounds after conflict resolution. */
+export interface AllianceBounds {
+    floor?: number;
+    ceiling?: number;
+    conflict?: AllianceLockConflict;
+}
+
+/** Highest active floor and lowest active ceiling across active alliance locks.
+ *  Undefined when no lock of that mode is active. Multiple locks of the same mode
+ *  take the most restrictive value (highest floor, lowest ceiling).
+ *
+ *  Contradiction rule (B5, 2026-11-16; Systems Manual §6.6a): when the floor is
+ *  above the ceiling, BEFORE the Washington Agreement the ceiling governs (no
+ *  cooperation floor can lift an open war above the war threshold); once
+ *  `washington_signed` is set the floor governs (no ceiling can pull the
+ *  Federation below its floor; the value is held at the floor, as before B5).
+ *  The conflict is described in the result. Equal floor and ceiling is not a conflict. Recomputed
+ *  from the saved locks on every read; order-independent (min/max). */
 export function getActiveAllianceBounds(
     state: GameState,
     currentTurn: number
-): { floor?: number; ceiling?: number } {
+): AllianceBounds {
     const locks = state.military.alliance_locks;
     if (!locks || locks.length === 0) return {};
     let floor: number | undefined;
@@ -117,7 +139,24 @@ export function getActiveAllianceBounds(
             ceiling = ceiling === undefined ? lock.value : Math.min(ceiling, lock.value);
         }
     }
+    if (floor !== undefined && ceiling !== undefined && floor > ceiling) {
+        const governs = state.political?.rbih_hrhb_state?.washington_signed === true ? 'floor' : 'ceiling';
+        const conflict: AllianceLockConflict = { floor, ceiling, governs };
+        // Floor governs: the value is held at the floor, exactly the pre-B5 ceiling-then-floor
+        // result (byte-identical where it was already the floor's case). Ceiling governs: the
+        // floor is set aside and the ceiling alone caps the value.
+        return governs === 'ceiling' ? { ceiling, conflict } : { floor, ceiling: floor, conflict };
+    }
     return { floor, ceiling };
+}
+
+/** Receipt for a lock contradiction: one `event_effect_anomalies` row per distinct
+ *  conflict (deduplicated by kind and value). Observability only; no sim reader. */
+export function recordAllianceLockConflict(state: GameState, conflict: AllianceLockConflict): void {
+    const valueRepr = `floor=${conflict.floor};ceiling=${conflict.ceiling};governs=${conflict.governs}`;
+    const log = (state.military.event_effect_anomalies ??= []);
+    if (log.some((row) => row.effect_kind === 'alliance_lock_conflict' && row.value_repr === valueRepr)) return;
+    log.push({ turn: state.meta.turn ?? 0, effect_kind: 'alliance_lock_conflict', faction: null, value_repr: valueRepr });
 }
 
 /** Merged add/remove sets across active bot_priority_shifts for the given
