@@ -839,6 +839,7 @@ function projectTurnSummaries(summaries, context, allowedEventIds) {
       'displacement_total',
       'displacement_by_ethnicity',
       'displacement_hotspot',
+      'displacement_killed',
       'supply_transitions',
       'territory_snapshot',
     ]);

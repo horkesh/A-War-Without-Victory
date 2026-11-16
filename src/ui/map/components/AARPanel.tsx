@@ -558,13 +558,20 @@ export function AARPanel({ isOpen, onClose, embedded }: AARPanelProps) {
                             )}
 
                             {/* Displacement */}
-                            {summary.displacement_total > 0 && (
+                            {(summary.displacement_total > 0 || (summary.displacement_killed ?? 0) > 0) && (
                                 <Section title={t('aar.section.displacement')} defaultOpen={false}>
                                     <div className="space-y-0.5 text-[15px]">
                                         <div className="flex justify-between">
                                             <span className="text-[#c2b69c]">{t('aar.totalDisplaced')}</span>
                                             <span className="tabular-nums text-[#f1e6c8]">{summary.displacement_total.toLocaleString()}</span>
                                         </div>
+                                        {/* RB1 (red-team C-RB2): the killed are not displaced, but they stay in the turn record. */}
+                                        {(summary.displacement_killed ?? 0) > 0 && (
+                                            <div className="flex justify-between">
+                                                <span className="text-[#c2b69c]">{t('aar.displacementKilled')}</span>
+                                                <span className="tabular-nums text-[#f1e6c8]">{(summary.displacement_killed ?? 0).toLocaleString()}</span>
+                                            </div>
+                                        )}
                                         {summary.displacement_hotspot && (
                                             <div className="flex justify-between">
                                                 <span className="text-[#c2b69c]">{t('aar.hotspot')}</span>
@@ -602,6 +609,7 @@ export function AARPanel({ isOpen, onClose, embedded }: AARPanelProps) {
                             {summary.battles.length === 0 &&
                              (!narrateTerritory || Object.keys(summary.territory_net).length === 0) &&
                              summary.displacement_total === 0 &&
+                             (summary.displacement_killed ?? 0) === 0 &&
                              summary.notable_events.length === 0 &&
                              summary.decoration_awards.length === 0 &&
                              summary.arc_transitions.length === 0 && (

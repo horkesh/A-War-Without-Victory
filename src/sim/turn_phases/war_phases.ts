@@ -2573,7 +2573,8 @@ export const warPhases: NamedPhase[] = [
         },
     },
     // (The A3 step `apply-army-directive-interpretation` stood here; retired with
-    // the political-directive chain above, freeze cut B3.)
+    // the political-directive chain above, freeze cut B3. Its autonomous-launch
+    // proposal was retired earlier, freeze cut B4.)
     {
         name: 'generate-bot-corps-orders',
         run: async (context) => {

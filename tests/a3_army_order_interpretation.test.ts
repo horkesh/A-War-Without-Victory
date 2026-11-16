@@ -7,8 +7,8 @@
  * Tests cover the two A3 predicates:
  *   • interpretArmyDirective — political-directive → corps-directive translation,
  *     pushback events on non-FULL compliance.
- *   • proposeAutonomousArmyLaunch — Mladić-class autonomous proposal with
- *     stubbornness ≥ 4 + 12-turn cooldown.
+ *   • proposeAutonomousArmyLaunch — retired (freeze cut B4); T5-T7 guard the
+ *     retirement.
  *
  * Plus pipeline integration + determinism + static-grep guards.
  */
@@ -25,7 +25,6 @@ import type {
 } from '../src/state/officer_types.js';
 import {
     interpretArmyDirective,
-    proposeAutonomousArmyLaunch,
     applyArmyDirectiveInterpretation,
     A3_PIPELINE_STEP_NAME,
     MAX_DIRECTIVE_DEVIATION,
@@ -246,54 +245,30 @@ describe('A3 — interpretArmyDirective', () => {
 // ===========================================================================
 // T5–T7 — Autonomous launch path
 // ===========================================================================
-describe('A3 — proposeAutonomousArmyLaunch', () => {
-    it('T5 — stubbornness ≥ threshold + cooldown elapsed → opportunity proposal fires when an eligible catalog entry exists', () => {
-        // Build state with army CO faction matching at least one catalog entry.
-        // Catalog currently has fifth_corps RBiH entries; we test the proposal
-        // path by checking that at most one event is emitted, with the correct
-        // type. If no catalog entry is currently eligible (axes red), proposal
-        // does NOT fire — that is correct behavior. We assert the contract:
-        //   "stubbornness gate passes + cooldown elapsed → predicate runs to
-        //   completion without throwing".
+describe('A3 — autonomous launch retired (freeze cut B4)', () => {
+    it('T5 — the proposal predicate is gone from the module', async () => {
+        const mod = await import('../src/sim/combat/army_order_interpretation.js');
+        expect('proposeAutonomousArmyLaunch' in mod).toBe(false);
+    });
+
+    it('T6 — a stubborn army CO past any cooldown proposes nothing in the A3 step', () => {
         const state = makeStateWithArmyCO('RBiH', {
             id: 'fixture_army_rbih',
-            stubbornness: STUBBORNNESS_AUTONOMOUS_THRESHOLD + 1, // 5
+            stubbornness: STUBBORNNESS_AUTONOMOUS_THRESHOLD + 1,
             aggressiveness: 5,
             competence: 4,
         });
-        const result = proposeAutonomousArmyLaunch(state, 'RBiH');
-        // Either fired (because a catalog entry is eligible) or not (axes red).
-        // Both outcomes are valid — the contract is "predicate evaluated".
-        if (result.proposed) {
-            expect(result.opportunity_id).toBeTruthy();
-            expect(result.event).toBeDefined();
-            expect(result.event!.type).toBe('army_co_proposes_op');
-            expect(result.event!.overridable).toBe(true);
-        } else {
-            expect(result.event).toBeUndefined();
-            expect(result.opportunity_id).toBeNull();
-        }
+        applyArmyDirectiveInterpretation(state);
+        const events = state.military.pending_officer_events ?? [];
+        expect(events.some((e) => e.type === 'army_co_proposes_op')).toBe(false);
     });
 
-    it('T6 — cooldown: stubbornness ≥ threshold but last_autonomous_launch_turn within cooldown → NO proposal', () => {
-        const state = makeStateWithArmyCO(
-            'RBiH',
-            { id: 'fixture_army_rbih', stubbornness: 5, aggressiveness: 5, competence: 4 },
-            { last_autonomous_launch_turn: 5 },
-            10, // turn 10 - last turn 5 = 5 < 12-turn cooldown
-        );
-        const result = proposeAutonomousArmyLaunch(state, 'RBiH');
-        expect(result.proposed).toBe(false);
-        expect(result.event).toBeUndefined();
-    });
-
-    it('T7 — stubbornness < threshold → no autonomous proposal even when cooldown is clear', () => {
-        const state = makeStateWithArmyCO(
-            'RBiH',
-            { id: 'fixture_army_rbih', stubbornness: 3, aggressiveness: 5, competence: 4 },
-        );
-        const result = proposeAutonomousArmyLaunch(state, 'RBiH');
-        expect(result.proposed).toBe(false);
+    it('T7 — the pipeline source no longer calls the retired predicate', () => {
+        const src = stripComments(readFileSync(
+            resolve(process.cwd(), 'src/sim/combat/army_order_interpretation.ts'),
+            'utf-8',
+        ));
+        expect(src).not.toMatch(/proposeAutonomousArmyLaunch|army_co_proposes_op/);
     });
 });
 

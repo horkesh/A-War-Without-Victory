@@ -13,14 +13,9 @@
  *        per-corps directive map; emits an `army_directive_pushback` PendingOfficerEvent
  *        when compliance score is below FULL_COMPLIANCE_THRESHOLD (DDR Q2 advisory shape).
  *
- *   2. proposeAutonomousArmyLaunch(state, faction)
- *      — when the army CO has stubbornness ≥ STUBBORNNESS_AUTONOMOUS_THRESHOLD AND
- *        the autonomous-launch cooldown has elapsed AND an opportunity-catalog entry
- *        matches the army CO's faction + readiness gates, emits an
- *        `army_co_proposes_op` PendingOfficerEvent (1-turn warning per DDR Q3).
- *        Caller (pipeline step in war_phases.ts) fires the proposal one turn
- *        before any preparation entry, giving the political leader a deterministic
- *        override window.
+ *   2. (retired 2026-11-16, freeze cut B4) proposeAutonomousArmyLaunch, the
+ *      Mladić-class autonomous-launch proposal (DDR Q3). It never found an
+ *      eligible opportunity; see the retirement note at its former place below.
  *
  * What A3 does NOT do:
  *   • Mutate corps stance directly (corps Phase 1 path remains canonical for that).
@@ -50,8 +45,6 @@ import type {
     OrderSnapshot,
 } from '../../state/officer_types.js';
 import { getArmyCommander } from './officer_system.js';
-import { OPERATION_OPPORTUNITY_CATALOG, evaluateAxes, isOpportunityEligible, buildProposalId } from './operation_opportunities.js';
-import type { OperationOpportunityDef } from './operation_opportunities.js';
 
 type NodeFsSync = {
     existsSync(path: string): boolean;
@@ -91,16 +84,15 @@ function getNodeBuiltinModule<T>(id: string): T {
 export const MAX_DIRECTIVE_DEVIATION = 1;
 
 /**
- * Stubbornness threshold for autonomous launch (DDR Q3, locked in panel-defaults
- * table). Officers with stubbornness ≥ this value MAY autonomously propose
- * opportunity-catalog operations the political leader did NOT explicitly order.
+ * Stubbornness threshold of the retired autonomous launch (DDR Q3; B4). No sim
+ * code reads it now; the army pushback panel still reads it to label a legacy
+ * `army_co_proposes_op` event an old save may carry.
  */
 export const STUBBORNNESS_AUTONOMOUS_THRESHOLD = 4;
 
 /**
- * Autonomous-launch cooldown window in turns (DDR Q3, locked). Maximum one
- * autonomous proposal per army CO per N-turn rolling window. Enforced via
- * NamedOfficerState.last_autonomous_launch_turn (A2 substrate).
+ * Cooldown window of the retired autonomous launch (DDR Q3; B4). No sim code
+ * reads it now; the army pushback panel's legacy-warning label still does.
  */
 export const AUTONOMOUS_LAUNCH_COOLDOWN_TURNS = 12;
 
@@ -516,17 +508,6 @@ export interface ArmyDirectiveInterpretation {
     compliance_score: number;
 }
 
-export interface AutonomousLaunchProposal {
-    /** True when the proposal fired this turn. */
-    proposed: boolean;
-    /** Catalog opportunity_id, or null when no proposal fired. */
-    opportunity_id: string | null;
-    /** PendingOfficerEvent — pushed onto state.military.pending_officer_events when proposed. */
-    event?: PendingOfficerEvent;
-    /** Player-safe reason when proposed (or empty when not). */
-    reason: string;
-}
-
 // ═══════════════════════════════════════════════════════════════════════════
 // Internal helpers
 // ═══════════════════════════════════════════════════════════════════════════
@@ -914,113 +895,12 @@ export function interpretArmyDirective(
     };
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// Public predicate 2: proposeAutonomousArmyLaunch
-// ═══════════════════════════════════════════════════════════════════════════
-
-/**
- * Mladić-class autonomous-launch proposal (DDR Q3).
- *
- * When ALL of:
- *   • the army CO has stubbornness ≥ STUBBORNNESS_AUTONOMOUS_THRESHOLD
- *   • last_autonomous_launch_turn is undefined OR
- *     state.meta.turn − last_autonomous_launch_turn ≥ AUTONOMOUS_LAUNCH_COOLDOWN_TURNS
- *   • at least one OperationOpportunityDef in the catalog matches the army CO's
- *     faction AND is currently eligible (all required axes green)
- * then the army CO emits an `army_co_proposes_op` PendingOfficerEvent with a
- * 1-turn override window (the political leader / player can relieve or override
- * before the op enters preparation).
- *
- * The actual operation creation entry happens NEXT TURN if the proposal is not
- * overridden. A3 only emits the proposal; A5 / IPC handler consumes it.
- *
- * NOTE: A3 does NOT mutate last_autonomous_launch_turn here — that mutation
- * occurs at the moment the un-overridden proposal converts into a real op
- * (downstream lane). Emitting a proposal is not yet a launch.
- */
-export function proposeAutonomousArmyLaunch(
-    state: GameState,
-    faction: FactionId,
-): AutonomousLaunchProposal {
-    const commander = getArmyCommander(faction, state);
-    const empty: AutonomousLaunchProposal = { proposed: false, opportunity_id: null, reason: '' };
-
-    if (!commander) return empty;
-
-    const { data, state: officerState } = commander;
-
-    // Acting commanders never autonomously launch.
-    if (officerState.acting_commander) return empty;
-
-    const stubbornness = typeof data.stubbornness === 'number' ? data.stubbornness : 0;
-    if (stubbornness < STUBBORNNESS_AUTONOMOUS_THRESHOLD) return empty;
-
-    // Cooldown enforcement
-    const lastLaunch = officerState.last_autonomous_launch_turn;
-    if (typeof lastLaunch === 'number') {
-        const elapsed = state.meta.turn - lastLaunch;
-        if (elapsed < AUTONOMOUS_LAUNCH_COOLDOWN_TURNS) return empty;
-    }
-
-    // Find the first eligible catalog entry for this faction (deterministic
-    // order: catalog is sorted by opportunity_id).
-    const candidates: OperationOpportunityDef[] = OPERATION_OPPORTUNITY_CATALOG
-        .filter(def => def.faction === faction)
-        .slice()
-        .sort((a, b) => strictCompare(a.opportunity_id, b.opportunity_id));
-
-    let chosen: OperationOpportunityDef | null = null;
-    for (const def of candidates) {
-        const axes = evaluateAxes(state, state.meta.turn, def);
-        if (isOpportunityEligible(def, axes)) {
-            chosen = def;
-            break;
-        }
-    }
-    if (!chosen) return empty;
-
-    const reason =
-        `${data.name} has decided to launch ${chosen.name} on his own authority. ` +
-        `The political leader has one turn to override or relieve before preparation begins.`;
-
-    const proposalId = buildProposalId(chosen.opportunity_id, state.meta.turn);
-
-    const interpreted: OrderSnapshot = {
-        order_type: 'army_co_proposed_op',
-        corps_id: chosen.primary_corps,
-        operation_name: chosen.name,
-        opportunity_id: chosen.opportunity_id,
-    };
-
-    const event: PendingOfficerEvent = {
-        event_id: `army:${faction}:autonomous_launch:${proposalId}:${state.meta.turn}`,
-        type: 'army_co_proposes_op',
-        faction,
-        turn: state.meta.turn,
-        officer_id: data.id,
-        corps_id: chosen.primary_corps,
-        acknowledged: false,
-        interpreted_order: interpreted,
-        reason,
-        overridable: true,
-        override_action: 'override-army-autonomous-launch',
-    };
-    pushOfficerEvent(state, event);
-
-    appendDecisionTrace(state, faction, {
-        turn: state.meta.turn,
-        campaign_role: 'AUTONOMOUS_LAUNCH_PROPOSAL',
-        rationale: reason,
-        raw_directive_id: chosen.opportunity_id,
-    });
-
-    return {
-        proposed: true,
-        opportunity_id: chosen.opportunity_id,
-        event,
-        reason,
-    };
-}
+// Public predicate 2 (proposeAutonomousArmyLaunch, the Mladić-class
+// autonomous-launch proposal of DDR Q3) was RETIRED 2026-11-16 (freeze cut B4).
+// Measured on main's 188w it never found an eligible catalog opportunity, so it
+// never proposed; turning it on would need a §6 ruling before a permanent freeze.
+// Kept for saves: the `army_co_proposes_op` event type, `last_autonomous_launch_turn`
+// and the readers that tolerate them. Do not revive without that ruling.
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Pipeline entry — invoked from war_phases.ts (A3 step)
@@ -1204,11 +1084,7 @@ export function applyArmyDirectiveInterpretation(state: GameState): void {
             // (frozen at 5084071d); C2 owns recordC2ApplicationsForFaction.
             recordC2ApplicationsForFaction(state, faction, interpretation, directive);
         }
-        // Autonomous-launch evaluation is independent of the political directive
-        // (it is the army CO's volitional act). Always evaluate; the function
-        // short-circuits when stubbornness / cooldown gate fails, so pre-A4
-        // populated rosters yield zero behavior change.
-        proposeAutonomousArmyLaunch(state, faction);
+        // The autonomous-launch evaluation that ran here is retired (B4).
     }
 
     // C2 — flush the per-turn telemetry buffer to the side-channel JSONL.
