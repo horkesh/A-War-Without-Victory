@@ -528,3 +528,18 @@ command-loop L6, Authority prices (#661; its at-cap target was not met, so it is
 Moved verbatim from the same paragraph, second part:
 
 command-loop L7 army clashes (#670: Accept, Insist at 15 Authority, or Replace for a corps commander; a clash fires on any compliance short of full; Accept on a withheld plan charges the backing price; ratified by game-designer and canon-compliance, record `docs/40_reports/governance/20261115_AUTHORITY_DESIGN_RATIFICATION.md`) and renewable presidential gestures, a cooldown and no lifetime cap (#673); RF-F1g, the corps threat ratio reads the OSID contact graph (#667); the Patriarch Paper dated 29 August 1995 and counterfactual events out of distanceFromHistory (#665, #663); `rs_dayton_acceptance_1995` retitled "Pale Accepts the Dayton Agreement" (#669); citation sweeps 1 and 2 on hidden event text (#671, #674); war-or-game removed from every seat, gate and routing by owner directive, governance in #666 and the canon seat wording in #668;
+
+
+Merged list moved 2026-11-16 (steward pass 25), verbatim from the same paragraph:
+
+the emergency defensive operation retired (#683, byte-identical); player-visible truth fixes after the citation audit, `rbih_state_identity` re-pinned and the identity card tolerant of wording drift (#684, hash unchanged); citation audit batch 2 (#687); three test Presidents in the desktop harness (#682, tooling); the presidential gestures cost 20 Authority, a held step (#678); the Prlić hidden-text citation fixes, batch 1 (#676); the corridor-breach pass retired, byte-identical (#672); a recalled elite never returns to a base its side has lost, the t73 live-game freeze (#675);
+
+
+Merged list moved 2026-11-16 (steward pass 26), verbatim from the same paragraph:
+
+RF-ROSTER, army-chief stubbornness comes from the roster (#677; 709/709/708/681, outcome-identical; the headless `final_state_hash` moved from 19262a0b19df1567 to 518de17970af5914 on officer state values only; 518de17970af5914 is the main hash at #677, not the freeze hash); the Brčko Tactical Group relocates only onto held ground (#680, latent behind its flag, byte-identical); the SE7E-h run validator counts a relief already in transit (#685, validator only, consistency back to 0);
+
+
+Merged list moved 2026-11-16 (steward pass 28), verbatim from the same paragraph:
+
+the re-pin of `rbih_state_identity` and `rbih_paramilitary_policy_1992` (#689, string-only, three seats; the pinned-contract allowlist is empty); the CODE4 tie-break (#691, byte-identical); the corps_plan and corps_exhaustion receipts (#686, default off, byte-identical: they showed the ARBiH plan lockout is the exhaustion gate fed by the corps' own probes);
