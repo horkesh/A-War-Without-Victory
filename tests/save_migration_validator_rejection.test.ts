@@ -1695,6 +1695,32 @@ describe('save migration validator hardening', () => {
 
     // F7b retirement (2026-11-16): Army HQ plans no longer write doctrine_override.army_stance or
     // aggression_modifier. A save made before still carries them and must keep loading, fields intact.
+    // N6 (2026-11-16): commander intel pictures now also carry concentration_detected_by_stable_key.
+    // A save made before has a picture without it; it must load, and its concentrations then go
+    // through the positional fallback (see tests/commander_concentration_zones_stable_key.test.ts).
+    it('loads a save whose commander intel picture predates the stable concentration map', () => {
+        const state = currentVersionState();
+        const legacyPicture = {
+            zone_confidence: { 'zone:arbih_4th_corps:op:konjic:bijela_2': 0.4 },
+            offensive_signs: { 'sector:arbih_4th_corps:3': 1 },
+            concentration_detected: { 'sector:arbih_4th_corps:3': true },
+            last_updated_turn: 76,
+        };
+        (state.military as Record<string, unknown>).corps_command = {
+            ...(state.military.corps_command ?? {}),
+            arbih_4th_corps: {
+                ...((state.military.corps_command ?? {}).arbih_4th_corps ?? {}),
+                commander_state: { intel_picture: legacyPicture },
+            },
+        };
+
+        const loaded = deserializeState(JSON.stringify(state));
+        const picture = (loaded.military.corps_command as Record<string, { commander_state?: { intel_picture?: Record<string, unknown> } }>)
+            .arbih_4th_corps?.commander_state?.intel_picture;
+        expect(picture?.concentration_detected).toEqual({ 'sector:arbih_4th_corps:3': true });
+        expect(picture).not.toHaveProperty('concentration_detected_by_stable_key');
+    });
+
     it('loads a save whose campaign plan still carries the retired doctrine fields', () => {
         const state = currentVersionState();
         (state.military as unknown as Record<string, unknown>).campaign_plans = {
