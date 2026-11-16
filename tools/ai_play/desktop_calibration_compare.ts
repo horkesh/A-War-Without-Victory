@@ -300,6 +300,11 @@ function parseArgs(argv: string[]): CliOptions {
     if ((presidentArg === 'engaged' || presidentArg === 'meddler') && (values.get('--event-policy') ?? 'defer') === 'defer') {
         throw new Error(`--president ${presidentArg} needs an --event-policy that answers decisions (bot_equivalent, historical_default or staff_recommended), not defer`);
     }
+    for (const pair of (values.get('--event-override') ?? '').split(',').filter(Boolean)) {
+        const [eventId, responseId] = pair.split('=');
+        if (!eventId || !responseId) throw new Error(`--event-override expects <event_id>=<response_id>[,...], got "${pair}"`);
+        eventResponseOverrides.set(eventId, responseId);
+    }
 
     return {
         turns,
@@ -387,6 +392,13 @@ function applyBotParityParamilitaryDiagnostic(state: GameState, faction: Faction
     state.paramilitary_policy = 'always_allow';
 }
 
+/**
+ * Opt-in `--event-override <event_id>=<response_id>[,...]`: the President answers these events
+ * with the named response whatever the event policy (e.g. a played political departure). Empty
+ * by default, so runs without the flag are unchanged.
+ */
+const eventResponseOverrides = new Map<string, string>();
+
 /** Event catalog for `bot_equivalent` (loaded once per run, from the same files the desktop loads). */
 let botEquivalentCatalog: Map<string, EventDefinition> | null = null;
 
@@ -412,7 +424,10 @@ function applyEventPolicy(
             .sort((a, b) => strictCompare(a.event_id, b.event_id));
 
     for (const decision of pending) {
-        const responseId = policy === 'historical_default'
+        const overrideId = eventResponseOverrides.get(decision.event_id);
+        const responseId = overrideId != null && decision.response_options.some((o) => o.id === overrideId)
+            ? overrideId
+            : policy === 'historical_default'
             ? decision.historical_default_response_id ?? decision.response_options[0]?.id
             : policy === 'staff_recommended'
                 ? decision.staff_recommended_response_id ?? decision.historical_default_response_id
