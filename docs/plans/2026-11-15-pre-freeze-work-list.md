@@ -37,6 +37,7 @@ Every engine finding gets one of three answers, with a one-line reason when it i
 | # | Item | Answer |
 |---|---|---|
 | C1 | F7 `supply_below` fires on a reserve that does not exist | Fix; a false event reaches the player; built. Merged (#690, control-identical). |
+| C1b | F7b the Army HQ plan's unread army stance and aggression modifier | Retire (nothing reads them; the fix would be new behaviour before the freeze). Merged (#696, control-identical; the theater statuses that fed them and the reserves-off supply bug go with them; the headless hash moved to 70f4dc05bf375bc7 on the six retired state fields only). |
 | C2 | SE9 sector intel re-key | Fix; about half of early-war mid-turn reads use the wrong sector; built. Waits for the package's P2. |
 | C3 | RB8 corps-less HRHB brigades | Fix: two at Putićevo with 3,000 and 1,672 men at week 188; trace first (RF-5B binding B6). The root (the refuge definition) is A10; the corps-adoption guard follows it in the L7 lane. |
 | C4 | RB6 "Operacija Džihad" | Fix: still drawn in every run; historian check first. |
