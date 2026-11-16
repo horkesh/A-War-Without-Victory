@@ -437,10 +437,10 @@ describe('★ input-surface scan: every data read on the headless path is stampe
             // Templated by refKey, so stamping it means first resolving which snapshots a
             // given run actually loads. This is the one entry here that is a real gap.
             'src/scenario/scenario_runner.ts (1)',
+            // (army_order_interpretation.ts's `data/derived/_debug` C2 telemetry WRITE left
+            // the headless path when the A3 step was retired, freeze cut B3.)
             // WRITE, not a read: `join(cwd, 'data', 'derived', '_debug')` is a debug OUTPUT
             // directory. An output cannot confound a comparison, so it is not an input.
-            'src/sim/combat/army_order_interpretation.ts (1)',
-            // WRITE, not a read: the same `data/derived/_debug` output directory.
             'src/sim/combat/corps_front_sectors.ts (1)',
         ]);
         // Non-vacuity: the detector must actually match something, or the pin above is an

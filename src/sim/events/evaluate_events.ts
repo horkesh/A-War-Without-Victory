@@ -17,7 +17,8 @@ import { applyAIDefaultResponse, hasAuthoredAIDefaultResponse, selectAIDefaultRe
 import { emitEventNotifications } from './emit_notifications.js';
 import { applyDimensionShift, type DimensionStore } from './strategic_dimensions.js';
 import { getPoliticalPersonality, computePoliticalAssessment } from '../political/political_personality.js';
-import { pickPoliticalResponse } from '../political/political_event_decision.js';
+import { pickPoliticalResponse, pickPoliticalResponseWithHistory } from '../political/political_event_decision.js';
+import { isWarOutsideHistoricalBand } from '../political/historical_territory_band.js';
 import { compareCausalityEntries, strictCompare } from '../../state/validateGameState.js';
 import { findAnswerAheadOfFiring, isAnswerAheadOfFiringDecision } from './answer_ahead_of_firing.js';
 
@@ -466,6 +467,26 @@ export function selectBotEventResponse(
     ) {
         const personality = getPoliticalPersonality(respondingFaction);
         const assessment = computePoliticalAssessment(state, respondingFaction, personality);
+        // B5 fix 4: with an authored historical response, an emergent bot keeps to it while the
+        // war's map is historical, and improvises only past its divergence_threshold once the map
+        // has left history's band. (Historical mode returned the authored default above.)
+        // Only an AUTHORED default is a reference: an event left unauthored on purpose (e.g. the
+        // §6 Drina decision, whose headless pick is positional, not a historical claim) stays scored.
+        const historicalReferenceId =
+            emergent && hasAuthoredAIDefaultResponse(def) ? selectAIDefaultResponse(def).id : undefined;
+        if (historicalReferenceId != null) {
+            return {
+                chosen: pickPoliticalResponseWithHistory(
+                    options,
+                    respondingFaction,
+                    assessment,
+                    personality,
+                    historicalReferenceId,
+                    isWarOutsideHistoricalBand(state),
+                ),
+                decisionSource: 'bot_political',
+            };
+        }
         return {
             chosen: pickPoliticalResponse(options, respondingFaction, assessment, personality),
             decisionSource: 'bot_political',

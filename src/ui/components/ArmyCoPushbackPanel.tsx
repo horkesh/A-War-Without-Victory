@@ -230,10 +230,11 @@ const DIRECTIVE_LABEL_KEYS: Record<string, MessageKey> = {
 };
 
 /**
- * The political directive is produced automatically by the bot-side producer
- * (`political_directive_producer.ts`); no player action writes it, and in the
- * shipping campaign it pins to one verb early in the war (realism audit F9).
- * The header names it in plain words and the panel says who set it.
+ * The political directive came from the bot-side producer, retired with the
+ * political-directive chain (freeze cut B3, 2026-11-16). New games carry no
+ * directive and no directive objection; this label path remains only for a
+ * pre-v39 save's legacy trace (the v39 migration drops those). Removal of this
+ * dead copy belongs to the UI lane.
  */
 function objectionHeader(o: ArmyObjection): string {
     const key = DIRECTIVE_LABEL_KEYS[o.campaignRole];
