@@ -149,6 +149,10 @@ describe('LANE-NIGHTSHIFT-ROUND2: divergence event seeds', () => {
         // The narrative claims only what the predicate measures.
         expect(def.narrative).not.toMatch(/clean record|without massacres/i);
         expect(JSON.stringify(def.effect)).not.toMatch(/clean[- ]record/i);
+        // Zero sweeps is not zero killings (narrative and historian seats).
+        expect(def.narrative).toMatch(/not a record without killing/);
+        expect(def.narrative).not.toMatch(/monitors|rare/i);
+        expect(JSON.stringify(def.effect)).toMatch(/does not mean RS forces killed no one/);
         applyEventEffects(fires, effectsOf(def));
         // No mechanical effect on negotiation_capital.international_credibility key needed —
         // the negotiation_capital writer only mutates fields already present on the capital

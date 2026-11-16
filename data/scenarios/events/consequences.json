@@ -1615,7 +1615,7 @@
   {
     "id": "csq_paramilitary_authorization_refused",
     "title": "The Sweep That Was Never Ordered",
-    "narrative": "Twenty turns and counting. The political files do not contain the order. The paramilitary detachments that, on other timelines, would have been turned loose on the rear-area municipalities are still confined to peripheral roles. International monitors note that no sweep has been ordered. In this war that is rare, though it is not a ledger without deaths.",
+    "narrative": "Twenty turns have passed. The political files do not contain the order. The paramilitary detachments remain in peripheral roles and have not been sent into the rear-area municipalities. That is not a record without killing. RS forces are still at war, and where they take a town, its people are still killed or driven from their homes.",
     "category": "humanitarian",
     "trigger": {
       "turn_min": 21,
@@ -1651,7 +1651,7 @@
     "priority": 80,
     "effect": {
       "kind": "narrative",
-      "text": "No RS paramilitary deployment for 20+ turns; the refusal is recorded."
+      "text": "No RS paramilitary sweep authorized in 20+ turns. This does not mean RS forces killed no one."
     },
     "effects": [
       {

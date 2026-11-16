@@ -14,7 +14,7 @@ RF fidelity-pass fix. Calibration is held: scores are recorded and are not a mer
   - RS deployments at most 0;
   - `rs_paramilitary_authorized` not set;
   - RS war crimes not above 1.
-- Narrative (historian's text) and effect text no longer claim a clean record: "In this war that is rare, though it is not a ledger without deaths."
+- The narrative and effect text no longer claim a clean record. The historian wrote the narrative, the narrative-designer seat amended it, and the historian fact-checked the result. It ends: "That is not a record without killing. RS forces are still at war, and where they take a town, its people are still killed or driven from their homes." The effect text reads: "This does not mean RS forces killed no one."
 - Ghost 7 (`predParamilitaryStreakRefused`) is RS-only.
 - `rbih_paramilitary_policy_1992`: the `always_deny` preview no longer promises the RS-only consequence, and the `ask` explanation drops its internal id (engine C-1, red-team C-PM2). The RS `ask` explanation is reworded the same way.
 - That event is under the reviewed-contract pin, so the pin is re-pinned to 11091 / `57f0d7f927df002c`. A pending decision saved before RF-PM1 carries the two old preview values; exactly those are upgraded before comparison (`PRE_RF_PM1_POLICY_PREVIEW`), and any other drift is still refused.
