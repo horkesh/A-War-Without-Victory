@@ -20,6 +20,7 @@
 import type { GameState, FactionId } from '../../state/game_state.js';
 import type { DimensionId } from '../events/event_types.js';
 import { clamp } from '../../utils/math.js';
+import { recoveredExhaustionLevel } from '../../state/war_weariness_bands.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Types
@@ -250,8 +251,6 @@ export function computeSituationWeight(
 // computePoliticalAssessment
 // ═══════════════════════════════════════════════════════════════════════════
 
-/** war_exhaustion that reads as exhaustion_level 100 (full-war ceiling after the 100× rescale). */
-export const WAR_EXHAUSTION_SCORER_CEILING = 10000;
 /** Number of most-recent territory snapshots the trend compares (newest vs oldest of the window). */
 export const TERRITORY_TREND_WINDOW = 3;
 /** Area change, in percentage points across the window, that counts as gaining or losing. */
@@ -308,16 +307,12 @@ export function computePoliticalAssessment(
     const patron_pressure = clamp(rawOverrideAuthority, 0, 100);
 
     // ── Exhaustion ──────────────────────────────────────────────────────────
-    // war_exhaustion is unbounded monotonic (Engine Invariants §8). After the 2026-05-22 100× rescale
-    // (commit 59511672) it runs ~0-10000 over a full war (188w historical end state: HRHB ~8100,
-    // RBiH ~8700, RS ~9800). Normalise against that ceiling so exhaustion_level spans 0-100.
-    // The earlier /600 divisor kept exhaustion_level at or below ~16 all war, so a war-weary faction
-    // never read as exhausted and the survival term (situation_score < 50) could not fire.
-    const exhaustion_level = clamp(
-        ((state.political?.war_exhaustion?.[faction] ?? 0) / WAR_EXHAUSTION_SCORER_CEILING) * 100,
-        0,
-        100,
-    );
+    // war_exhaustion approaches its 10000 cap asymptotically (Engine Invariants §8.6; combat/exhaustion.ts).
+    // A full 188w war ends near it (historical end state: HRHB ~8100, RBiH ~8700, RS ~9800).
+    // Read it on the shared 0..100 scale (recoveredExhaustionLevel, the same read as the war-weariness
+    // bands). The earlier /600 divisor kept exhaustion_level at or below ~16 all war, so a war-weary
+    // faction never read as exhausted and the survival term (situation_score < 50) could not fire.
+    const exhaustion_level = recoveredExhaustionLevel(state.political?.war_exhaustion?.[faction] ?? 0);
 
     // ── Situation score ─────────────────────────────────────────────────────
     // Composite of military strength, low patron pressure, and low exhaustion.
