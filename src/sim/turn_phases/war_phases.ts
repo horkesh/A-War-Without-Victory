@@ -2600,8 +2600,8 @@ export const warPhases: NamedPhase[] = [
         // A3 (LANE-NIGHTSHIFT-A3-ARMY-LEVEL-ORDER-INTERPRETATION):
         // Translate POLITICAL directives → per-corps directives via the army CO's
         // advisory interpretation; emit `army_directive_pushback` PendingOfficerEvent
-        // on non-FULL compliance, plus `army_co_proposes_op` for Mladić-class
-        // autonomous launches (stubbornness ≥ 4 + 12-turn cooldown).
+        // on non-FULL compliance. (The Mladić-class autonomous-launch proposal
+        // that also ran here is retired, freeze cut B4.)
         //
         // Position: AFTER `evaluate-army-co-transitions` (A4 populates stubbornness
         // / tolerance from the canonical roster) and BEFORE `generate-bot-corps-orders`
