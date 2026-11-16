@@ -875,10 +875,28 @@ export function generateArmyReserveRequests(
             }
         }
 
-        // 2. Defensive gap — any sector with threat_ratio > 2.0 and ≤ 1 brigade
-        if (sector && sector.threat_ratio > 2.0 && sector.assigned_brigade_ids.length <= 1) {
-            const rawPriority = Math.min(85, 50 + (sector.threat_ratio - 2.0) * 10);
-            if (rawPriority > bestRawPriority) {
+        // 2. Defensive gap (package P2 step 2, 2026-11-16; was: the corps' FIRST sector only, with
+        // threat > 2.0 AND at most 1 brigade). Every sector of the corps is read. A sector is a gap
+        // when its threat ratio is above 2.0, when it fronts a cell this faction lost in combat in the
+        // last 2 turns, or when it is an unstaffed front. The breached sector ranks first, then the
+        // unstaffed one, then the most threatened. A gap outranks offensive support: defence first.
+        const lostCells = (state.political?.control_events ?? [])
+            .filter((e) => e.mechanism === 'combat' && e.from === corpsFaction && e.to !== corpsFaction && e.turn >= turn - 2)
+            .map((e) => e.settlement_id);
+        let gapSector: CorpsFrontSector | undefined;
+        let gapScore = -Infinity;
+        for (const candidate of Object.keys(corpsSectors).sort(strictCompare).map((k) => corpsSectors[k]!).filter((s) => s.corps_id === corpsId)) {
+            const front = new Set(sectorFrontOsids(candidate));
+            const breached = lostCells.some((cell) => (adjacency.get(cell as Osid) ?? []).some((n) => front.has(n)));
+            const unstaffed = candidate.unstaffed_front === true;
+            if (!(candidate.threat_ratio > 2.0 || breached || unstaffed)) continue;
+            const score = (breached ? 2e6 : 0) + (unstaffed ? 1e6 : 0) + Math.min(candidate.threat_ratio, 1e5);
+            if (score > gapScore) { gapScore = score; gapSector = candidate; }
+        }
+        if (gapSector) {
+            const sector = gapSector;
+            const rawPriority = Math.max(bestRawPriority, Math.min(85, 50 + Math.max(0, Math.min(sector.threat_ratio, 1e3) - 2.0) * 10));
+            {
                 bestReason = 'defensive_gap';
                 bestProvenanceDriver = 'sector_threat';
                 bestRawPriority = rawPriority;
