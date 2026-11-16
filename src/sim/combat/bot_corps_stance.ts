@@ -46,7 +46,7 @@ import {
     THREAT_DEFENSIVE_THRESHOLD,
     THREAT_OFFENSIVE_THRESHOLD,
 } from './bot_constants.js';
-import { isRbihHrhbMobilizing } from '../early_war/alliance_update.js';
+import { isRbihHrhbAtWar, isRbihHrhbMobilizing } from '../early_war/alliance_update.js';
 import { getActivePatronDirective } from './patron_directive_scope.js';
 import { capStanceForOct1995Ceasefire, isFactionBoundByOct1995Ceasefire } from './oct1995_ceasefire.js';
 import type { CampaignPlan } from './army_hq_gathering_types.js';
@@ -262,8 +262,7 @@ export function generateCorpsStanceOrders(
             // E2: RBiH bilateral war awareness
             const rhsRBiH = state.political.rbih_hrhb_state;
             if (rhsRBiH && !rhsRBiH.washington_signed) {
-                const allianceVal = state.political.war_alliance_rbih_hrhb ?? 1.0;
-                if (allianceVal < 0.0) {
+                if (isRbihHrhbAtWar(state)) { // shared at-war predicate (alliance <= 0; B5 2026-11-16)
                     // Open war with HRHB: ARBiH carries the offensive in central Bosnia.
                     const CENTRAL_BOSNIA_MUNS = new Set(['travnik', 'bugojno', 'vitez', 'novi_travnik', 'busovaca', 'kiseljak', 'zenica']);
                     if (corpsHomeMun && CENTRAL_BOSNIA_MUNS.has(corpsHomeMun)) {
@@ -289,7 +288,7 @@ export function generateCorpsStanceOrders(
             const rhs = state.political.rbih_hrhb_state;
             if (rhs && !rhs.washington_signed) {
                 const allianceValue = state.political.war_alliance_rbih_hrhb ?? 1.0;
-                if (allianceValue < 0.0) {
+                if (isRbihHrhbAtWar(state)) { // shared at-war predicate (B5 2026-11-16)
                     // Open war: HVO holds its central Bosnia enclaves while ARBiH attacks.
                     if (!HERZEGOVINA_MUNS.has(corpsHomeMun ?? '')) {
                         if (stance !== 'reorganize') stance = 'defensive';
