@@ -1,0 +1,25 @@
+## 2026-11-16 — PK5 (C7): a short queue head steps aside only for a dated, admissible op with its own roster (byte-identical)
+
+- **Ruling (orchestrator):** C7 option (a), the bounded skip. Skip and record a short head only when an op behind it is admissible now. The skip record names the op and the reason.
+- **Premise (main):** one `viable_floor` block (Srebrenica–Cerska, t4, admitted t5) and one stall (Pracha River, `build_returned_null` t41–57, admitted t58) that delayed nothing behind it.
+- **Change** (`pre_planned_operations.ts`):
+  - When `injectQueuedOperation`'s head returns at `build_returned_null` or `viable_floor`, `tryQueueHeadSkip` scans the ops behind it with a read-only dry run of the launch gates (`isQueuedOperationAdmissibleNow`).
+  - A candidate qualifies only if it has its own `available_from` (now or earlier) and shares no brigade with the head (operations-expert: undated chain members such as 1KK Jajce and Donji Vakuf must never jump; n1145).
+  - The first qualifier moves to the front and launches through one retry, which may not skip again. The head stays directly behind it.
+  - The step is atomic. The `op_injection_warnings` row `queue_head_skipped` (head, reason, promoted op) is written only on launch; otherwise the queue order is restored.
+  - Nothing is removed from a queue. `PrePlannedOp` has no window end.
+  - `OpInjectionCheck` and the validator list gain `queue_head_skipped`. This is additive, so older saves load. The parked `AuthorizePhase.tsx` maps it to the generic copy for type completeness.
+- **Measured** on main `e3a0c2b6a`:
+  - Historical 188w: main and PK5 are both `01572f50dfea2378`.
+  - Hands-off emergent 188w (`decision_mode: emergent`): both `a6669043cb8f4b58`.
+  - No skip fires in either run.
+  - Guards intact (709/709/708/681). `engine_health_gate --strict` PASS.
+  - Re-measured after the seat changes (see the PR).
+- **Tests** (`tests/pre_planned_operations.test.ts`, "PK5 bounded queue skip"):
+  - a dated, disjoint op is promoted and the head is kept;
+  - no skip when nothing behind is admissible;
+  - the 1KK chain never inverts at t10;
+  - a dated op sharing the head's roster is not promoted;
+  - a declined player authorization blocks the promotion.
+- **Seats:** operations-expert APPROVE-WITH-CHANGES (dated-only, disjoint roster, atomic retry, 1KK regression test; all applied). Canon-compliance APPROVE-WITH-CHANGES (two wording fixes and the review selector matching `existingReview`; applied). No panel needed.
+- **Canon:** Systems Manual §6, "A short queue head steps aside only for an admissible operation".

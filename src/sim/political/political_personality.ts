@@ -20,6 +20,7 @@
 import type { GameState, FactionId } from '../../state/game_state.js';
 import type { DimensionId } from '../events/event_types.js';
 import { clamp } from '../../utils/math.js';
+import { recoveredExhaustionLevel } from '../../state/war_weariness_bands.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Types
@@ -250,6 +251,11 @@ export function computeSituationWeight(
 // computePoliticalAssessment
 // ═══════════════════════════════════════════════════════════════════════════
 
+/** Number of most-recent territory snapshots the trend compares (newest vs oldest of the window). */
+export const TERRITORY_TREND_WINDOW = 3;
+/** Area change, in percentage points across the window, that counts as gaining or losing. */
+export const TERRITORY_TREND_THRESHOLD_PP = 1.0;
+
 /**
  * Derives a PoliticalAssessment from current GameState for the given faction
  * and personality. Read-only — no writes to GameState.
@@ -301,15 +307,12 @@ export function computePoliticalAssessment(
     const patron_pressure = clamp(rawOverrideAuthority, 0, 100);
 
     // ── Exhaustion ──────────────────────────────────────────────────────────
-    // war_exhaustion is unbounded monotonic (Engine Invariants §8). After the 2026-05-22 100× rescale
-    // (commit 59511672) it runs ~0-10000+ (turn-40 ~4750-7940). Normalize to a 0-100 scale for
-    // situation_score: divide by 600 (was /6 in the 0-100 era) so the term tracks the rescaled ceiling.
-    // A plain 0-100 clamp pinned ALL factions to 100 after ~w5, contributing zero political differential.
-    const exhaustion_level = clamp(
-        (state.political?.war_exhaustion?.[faction] ?? 0) / 600,
-        0,
-        100,
-    );
+    // war_exhaustion approaches its 10000 cap asymptotically (Engine Invariants §8.6; combat/exhaustion.ts).
+    // A full 188w war ends near it (historical end state: HRHB ~8100, RBiH ~8700, RS ~9800).
+    // Read it on the shared 0..100 scale (recoveredExhaustionLevel, the same read as the war-weariness
+    // bands). The earlier /600 divisor kept exhaustion_level at or below ~16 all war, so a war-weary
+    // faction never read as exhausted and the survival term (situation_score < 50) could not fire.
+    const exhaustion_level = recoveredExhaustionLevel(state.political?.war_exhaustion?.[faction] ?? 0);
 
     // ── Situation score ─────────────────────────────────────────────────────
     // Composite of military strength, low patron pressure, and low exhaustion.
@@ -349,29 +352,28 @@ export function computePoliticalAssessment(
     );
 
     // ── Territory trend ─────────────────────────────────────────────────────
-    // Derived from the last 3 turn_summaries' territory_snapshot for this faction.
+    // Derived from the three most recent turn_summaries that carry a territory_snapshot for this
+    // faction. turn_summaries is stored most-recent-first (war_phase_briefing_steps prepends) and
+    // territory_snapshot is an area FRACTION (0..1, compile_turn_summary), so the change is converted
+    // to percentage points before it meets the ±1 pp threshold.
     let territory_trend: 'gaining' | 'stable' | 'losing' = 'stable';
     const summaries = state.turn_summaries;
-    if (Array.isArray(summaries) && summaries.length >= 2) {
-        const last3 = summaries.slice(-3);
-        // Use territory_snapshot if available; fall back to territory_controlled_pct from capital.
-        const getPct = (idx: number): number | undefined => {
-            const s = last3[idx];
-            if (!s) return undefined;
-            const snap = s.territory_snapshot?.[faction];
-            if (snap != null) return snap;
-            return undefined;
-        };
-        const earliest = getPct(0);
-        const latest = getPct(last3.length - 1);
-        if (earliest != null && latest != null) {
-            const delta = latest - earliest;
-            if (delta > 1.0) {
+    if (Array.isArray(summaries)) {
+        const recentSnaps: number[] = [];
+        for (const s of summaries) {
+            const snap = s?.territory_snapshot?.[faction];
+            if (snap == null) continue;
+            recentSnaps.push(snap);
+            if (recentSnaps.length === TERRITORY_TREND_WINDOW) break;
+        }
+        if (recentSnaps.length >= 2) {
+            const latest = recentSnaps[0];
+            const earliest = recentSnaps[recentSnaps.length - 1];
+            const deltaPp = (latest - earliest) * 100;
+            if (deltaPp > TERRITORY_TREND_THRESHOLD_PP) {
                 territory_trend = 'gaining';
-            } else if (delta < -1.0) {
+            } else if (deltaPp < -TERRITORY_TREND_THRESHOLD_PP) {
                 territory_trend = 'losing';
-            } else {
-                territory_trend = 'stable';
             }
         }
     }
