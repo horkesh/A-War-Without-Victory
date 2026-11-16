@@ -809,7 +809,9 @@ test('inventory documents conditional consequence rows as design counterfactuals
     // 551: +2 for the BCS title and narrative of csq_hvo_central_bosnia_offensive_1993
     // (1993 HVO-ARBiH truthful-cards lane, 2026-11-14).
     // 552: +1 for its English display title (localizations.en.title; council fix 4 §4 panel, 2026-11-14).
-    assert.strictEqual(claims.length, 552);
+    // 558: +6 for csq_hvo_april_1993_offensive_orders ("Mostar's Orders for Central Bosnia", EN and
+    // BCS title and narrative, effect text; P2 bright-line panel, 2026-11-16).
+    assert.strictEqual(claims.length, 558);
     assert.strictEqual(claims.every((claim: { status: string }) => (
         claim.status === 'documented'
     )), true);

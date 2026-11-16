@@ -568,3 +568,13 @@ RF-PM1, the paramilitary-refusal consequence fires only on a real refusal (#708,
 Merged list moved 2026-11-16 (steward pass 47), verbatim from the same paragraph:
 
 N6, enemy-concentration zones survive sector renumbering (#709, control-identical; main hash at #709 83b8e8cd36023899, #726 inert);
+
+
+Merged list moved 2026-11-16 (steward pass 51), verbatim from the same paragraph:
+
+RB1, a takeover wave counts each person once (#718, §6 panel, control-identical; the headless `final_state_hash` is now df791f73c26ed642, off-map values only, the main hash at #718);
+
+
+Merged list moved 2026-11-16 (steward pass 52), verbatim from the same paragraph:
+
+B2 and B3, the political-directive chain retired for every faction and 538 stale pushback events drained (#710, save migration v39, control-identical; main pin `03159b9ee1e5877f`, the main hash at #710; FORAWWV §X and §XIV amended in #734, unanimous panel);
