@@ -1502,6 +1502,11 @@
         "faction": "HRHB",
         "dimension": "international_standing",
         "delta": -15
+      },
+      {
+        "faction": "RBiH",
+        "dimension": "international_standing",
+        "delta": 10
       }
     ],
     "sets_flags": {
