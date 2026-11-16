@@ -145,7 +145,7 @@ gates:
       merge ref, and the Batch B lane's inert B4 run); each earlier value is the main hash at
       that merge, not the freeze hash. #703 had merged with the advisory baseline-pins check
       red and did not re-pin the manifest, so main's pins were stale until #713; the re-pin
-      also re-confirms #705's byte-identity on top of #703 (orchestrator). #700 (B4) is inert and #697 (B0) is inert in historical mode, so main stayed 01572f50dfea2378 until #718 (RB1, off-map state values only), whose PR measured df791f73c26ed642 against that base and re-blessed the baselines. #708 (RF-PM1) measured 9e17d22f520f94e6 on the pre-#703
+      also re-confirms #705's byte-identity on top of #703 (orchestrator). #700 (B4) is inert and #697 (B0) is inert in historical mode, so main stayed 01572f50dfea2378 until #718 (RB1, off-map state values only), whose PR measured df791f73c26ed642 against that base and re-blessed the baselines. #709 (N6, control-identical) moved only the new intel_picture field and the corrected concentration zones: the manifest pin (final_save.json hash prefix) is 83b8e8cd36023899 after #709, and #726 (B5 scorer fixes) is byte-identical in historical mode. #708 (RF-PM1) measured 9e17d22f520f94e6 on the pre-#703
       base 76e5fcabd (control, activity, formation and operation files byte-identical to main).
       data/derived/latest_run_final_save.json dates from 2026-09-01 and is stale; lanes
       read run folders instead.
