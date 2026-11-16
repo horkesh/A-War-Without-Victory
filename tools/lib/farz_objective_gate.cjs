@@ -98,4 +98,4 @@ function checkFarzObjectiveCaptures({ cells, at188, events, battleById, aars, co
     ok: !!aar && aar.started_turn >= windowStart && rows.every((row) => row.ok) };
 }
 
-module.exports = { checkFarzObjectiveCaptures };
+module.exports = { checkFarzObjectiveCaptures, registeredFarzAarIds };
