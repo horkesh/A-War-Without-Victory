@@ -55,10 +55,37 @@ export function resolveTacticalGroupIdsForOperation(
         const group = groups[id];
         const matches = group.army_hq_op_id != null
             ? group.army_hq_op_id === op.army_hq_op_id
-            : group.corps_id === hostCorpsId && group.op_id === op.name;
+            : group.op_id === op.name
+                && (group.corps_id === hostCorpsId || isCrossCorpsAnchoredGroupOf(state, group, hostCorpsId, op.name));
         if (matches) result.push(id);
     }
     return result;
+}
+
+/**
+ * A TG takes its ANCHOR's corps (`formTacticalGroup`), so an operation whose anchor brigade
+ * belongs to another corps (e.g. a 7th Corps operation anchored by a 3rd Corps brigade) hosts a
+ * TG with `corps_id !== hostCorpsId`. Matching only on the host corps left such a TG unmatched
+ * for its whole life: never engaged, never dissolved when the operation ended, holding a faction
+ * and corps TG slot and its donors' lent personnel until the end of the war (zombie-TG fix,
+ * 2026-11-16: Operation Vlasic Ridge's TG stayed `forming` from t162 to t188).
+ *
+ * The group belongs to this operation when it carries the operation's name, its anchor is of the
+ * host corps' faction, and the anchor's own corps hosts no live operation of that name. The last
+ * condition keeps a same-name operation in another corps from claiming that corps' own TG.
+ */
+function isCrossCorpsAnchoredGroupOf(
+    state: GameState,
+    group: TacticalGroup,
+    hostCorpsId: FormationId,
+    opName: string,
+): boolean {
+    const formations = state.military.formations ?? {};
+    const hostFaction = formations[hostCorpsId]?.faction;
+    if (hostFaction == null) return false;
+    if (formations[group.anchor_brigade_id]?.faction !== hostFaction) return false;
+    const anchorCorpsOperations = state.military.corps_command?.[group.corps_id]?.active_operations ?? [];
+    return !anchorCorpsOperations.some((operation) => operation.name === opName);
 }
 
 function findMatchingLiveCorpsOperation(
