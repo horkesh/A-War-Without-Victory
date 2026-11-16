@@ -265,6 +265,37 @@ export function clampSectorStanceToCorpsStance(stance: SectorStance, corpsStance
 }
 
 /**
+ * N5 (2026-11-16): the primary defender of a sector-coverage battle — the brigade that carries the
+ * defender-only aftermath (cohesion, morale, officer loss, fatigue, last-stand and surrender gates,
+ * flip penalties, the AAR name). It used to be the nominally strongest positive contributor, so a
+ * strong brigade five hops away (weight 0.6^5) took every hit while the brigade actually in contact
+ * took none. Now: a brigade in the cell (hop 0) if any, the one with the largest weight among them;
+ * otherwise the largest weighted contributor. Ties go to fewer hops, then id (strictCompare).
+ * Only positive weights qualify. Returns undefined when no brigade contributes.
+ */
+export function selectWeightedPrimaryDefender<T extends { id: string }>(
+    brigades: readonly T[],
+    weightById: ReadonlyMap<string, number>,
+    hopsById: ReadonlyMap<string, number>,
+): T | undefined {
+    const contributors = brigades.filter((b) => (weightById.get(b.id) ?? 0) > 0);
+    const inCell = contributors.filter((b) => hopsById.get(b.id) === 0);
+    const pool = inCell.length > 0 ? inCell : contributors;
+    let best: T | undefined;
+    for (const b of pool) {
+        if (!best) { best = b; continue; }
+        const wb = weightById.get(b.id) ?? 0;
+        const wBest = weightById.get(best.id) ?? 0;
+        if (wb !== wBest) { if (wb > wBest) best = b; continue; }
+        const hb = hopsById.get(b.id) ?? Number.POSITIVE_INFINITY;
+        const hBest = hopsById.get(best.id) ?? Number.POSITIVE_INFINITY;
+        if (hb !== hBest) { if (hb < hBest) best = b; continue; }
+        if (strictCompare(b.id, best.id) < 0) best = b;
+    }
+    return best;
+}
+
+/**
  * Compute the reactive distance weight for a given number of BFS hops.
  * Returns 0 for unreachable or beyond max hops.
  */
