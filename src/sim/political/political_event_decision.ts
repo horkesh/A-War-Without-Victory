@@ -53,11 +53,13 @@ export function scorePoliticalOption(
         * ((assessment.blended_score / 100) - 0.5)
         * 1.5;
 
-    // patronScore: high patron pressure + sensitive faction → prefer lower-aggression options
+    // patronScore: high patron pressure + sensitive faction → prefer lower-aggression options.
+    // A neutral option (aggression_affinity 0) is neither rewarded nor penalised.
+    const affinity = option.aggression_affinity ?? 0;
     const patronScore =
         (assessment.patron_pressure / 100)
         * personality.patron_sensitivity
-        * ((option.aggression_affinity ?? 0) < 0 ? 0.5 : -0.5);
+        * (affinity < 0 ? 0.5 : affinity > 0 ? -0.5 : 0);
 
     // survivalScore: survival-internationalist factions (RBiH) favor defiant options when weak,
     // because international legitimacy substitutes for military strength.
@@ -117,4 +119,44 @@ export function pickPoliticalResponse(
     }
 
     return bestOption;
+}
+
+/**
+ * The divergence rule (B5 fix 4; `divergence_threshold` in political_personality.ts).
+ *
+ * An emergent bot keeps to the historical choice unless BOTH hold:
+ *  - `warOffHistory`: the war's map has left history's territory band
+ *    (historical_territory_band.ts `isWarOutsideHistoricalBand`);
+ *  - the alternative beats the historical choice by MORE than the faction's
+ *    `divergence_threshold` (a tie or a smaller margin keeps history).
+ */
+export function divergesFromHistory(
+    bestScore: number,
+    historicalScore: number,
+    personality: PoliticalPersonality,
+    warOffHistory: boolean,
+): boolean {
+    if (!warOffHistory) return false;
+    return bestScore - historicalScore > personality.divergence_threshold;
+}
+
+/**
+ * pickPoliticalResponse with an authored historical response as the reference.
+ * Returns the historical option unless `divergesFromHistory` lets the best-scoring one through.
+ * Without a matching historical option it is plain pickPoliticalResponse.
+ */
+export function pickPoliticalResponseWithHistory(
+    options: EventResponseOption[],
+    respondingFaction: FactionId,
+    assessment: PoliticalAssessment,
+    personality: PoliticalPersonality,
+    historicalOptionId: string | undefined,
+    warOffHistory: boolean,
+): EventResponseOption {
+    const best = pickPoliticalResponse(options, respondingFaction, assessment, personality);
+    const historical = historicalOptionId != null ? options.find((o) => o.id === historicalOptionId) : undefined;
+    if (!historical || best.id === historical.id) return best;
+    const bestScore = scorePoliticalOption(best, respondingFaction, assessment, personality);
+    const historicalScore = scorePoliticalOption(historical, respondingFaction, assessment, personality);
+    return divergesFromHistory(bestScore, historicalScore, personality, warOffHistory) ? best : historical;
 }

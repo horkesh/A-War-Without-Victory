@@ -1,5 +1,5 @@
 /**
- * SCHEMA FREEZE GUARD (currently v38) (ADR-0005 §Determinism Impact + §Schema).
+ * SCHEMA FREEZE GUARD (currently v39) (ADR-0005 §Determinism Impact + §Schema).
  *
  * The Tactical Group schema moved v19→v34 once during the event-system merge
  * (the v19 slot was reclaimed by displacement civilian-casualty). ADR-0005
@@ -22,20 +22,20 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import type { TgParticipationRecord } from '../src/state/brigade_history.js';
 
-describe('C3 schema freeze guard (v38)', () => {
-    it('CURRENT_SCHEMA_VERSION is pinned at 38', () => {
+describe('C3 schema freeze guard (v39)', () => {
+    it('CURRENT_SCHEMA_VERSION is pinned at 39', () => {
         // If this fails, a renumber happened. Confirm the bump is intentional
         // (new migration step appended), then update this guard + the
         // save_migration v34 one-way contract comment together.
-        expect(CURRENT_SCHEMA_VERSION).toBe(38);
+        expect(CURRENT_SCHEMA_VERSION).toBe(39);
     });
 
-    it('the latest registered migration version equals CURRENT_SCHEMA_VERSION (38)', () => {
+    it('the latest registered migration version equals CURRENT_SCHEMA_VERSION (39)', () => {
         // Guards against a migration being appended at a number > 35 without
         // bumping CURRENT_SCHEMA_VERSION (or vice-versa) — the classic
         // collide-renumber footgun ADR-0005 §Determinism Impact warns about.
         expect(getLatestSchemaVersion()).toBe(CURRENT_SCHEMA_VERSION);
-        expect(getLatestSchemaVersion()).toBe(38);
+        expect(getLatestSchemaVersion()).toBe(39);
     });
 
     it('v34 ships the four TG/Army-HQ Records as the only non-undefined scaffold (omitEmpty shape)', () => {
@@ -140,7 +140,7 @@ describe('C3 schema freeze guard (v38)', () => {
         expect(hydrated.schema_version).toBe(CURRENT_SCHEMA_VERSION);
     });
 
-    it('C3 freeze: canonical startup save (schema 38) keeps the frozen persisted key-sets', () => {
+    it('C3 freeze: canonical startup save (schema 39) keeps the frozen persisted key-sets', () => {
         // C3 schema-freeze sentinel. A new PERSISTED field added to the initial
         // GameState (military/political/displacement) without a deliberate schema
         // bump + migration changes these key-sets and trips a RED test — the

@@ -14,12 +14,17 @@
  * Historian gate applied 2026-04-05:
  * - RBiH war_crimes_tolerance = 0.10 (hard floor, never changes regardless of situation_score)
  * - HRHB war_crimes_tolerance = 0.55 (raised from 0.4 per Prlic/Kordic ICTY findings)
- * - RS patron_confidence weight = 0.20 (accurate for 1992; decays to vulnerability post-1993)
+ * - RS patron_confidence weight = 0.20, static all war. (B5 fix 5, 2026-11-16, historian + game-designer:
+ *   an earlier note that it "decays post-1993" was inaccurate. Pale's regard for Belgrade rose and fell
+ *   with each plan — defiant on Vance-Owen May 1993, compliant Aug-Oct 1993, defiant on the Contact
+ *   Group plan and the Aug 1994 blockade, deferring again by Aug 1995 — and that split is modelled as
+ *   state: the patron dimension, override_authority and the Belgrade events, not this weight.)
  */
 
 import type { GameState, FactionId } from '../../state/game_state.js';
 import type { DimensionId } from '../events/event_types.js';
 import { clamp } from '../../utils/math.js';
+import { recoveredExhaustionLevel } from '../../state/war_weariness_bands.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Types
@@ -48,8 +53,14 @@ export interface PoliticalPersonality {
     /** Sensitivity to patron override_authority signals. [0, 1]. */
     patron_sensitivity: number;
     /**
-     * Points above the historical option score required for the bot to deviate.
-     * Lower = more erratic / reactive. Higher = more cautious.
+     * Score margin (scorePoliticalOption units) by which an option must beat the event's
+     * authored historical response before an emergent bot takes it, and then only once the
+     * war's map has left history's territory band (historical_territory_band.ts). A tie or a
+     * smaller margin keeps history. Lower = more reactive. Read by `divergesFromHistory`
+     * (political_event_decision.ts). B5 fix 4, 2026-11-16: the authored 12/18/8 were on a
+     * different scale from the built scorer (largest margin in a run ≈4.4; state terms ≤≈1.3),
+     * so they are rescaled ÷6, with RS raised to RBiH's value on the historian's ruling that
+     * Pale's institutional commitments were at least as firm as Sarajevo's.
      */
     divergence_threshold: number;
     /**
@@ -108,7 +119,7 @@ export interface PoliticalAssessment {
  * Historian gate 2026-04-05:
  * - RS: Karadzic — Expansionist-Nationalist. Four JCEs, Directive 7.
  *   war_crimes_tolerance = 0.70 (ICTY-verified). patron_confidence 0.20
- *   (secondary in 1992, decays to liability post-1993).
+ *   (static; the Pale-Belgrade split is state, see the header).
  * - RBiH: Izetbegovic — Survival-Internationalist. No leadership-directed JCE.
  *   war_crimes_tolerance = 0.10 (hard floor).
  * - HRHB: Boban — Opportunist-Patron-Dependent. Reactive to Zagreb.
@@ -138,7 +149,8 @@ export const POLITICAL_PERSONALITIES: Record<FactionId, PoliticalPersonality> = 
         },
         risk_tolerance: 0.65,
         patron_sensitivity: 0.45,
-        divergence_threshold: 12,
+        // Assembly platform, referendums, peace-plan rejections: firm commitments (BB1 pp.44, 59, 61).
+        divergence_threshold: 3.0,
         situation_weight_curve: {
             early: 0.7,
             late: 0.4,
@@ -161,7 +173,7 @@ export const POLITICAL_PERSONALITIES: Record<FactionId, PoliticalPersonality> = 
         },
         risk_tolerance: 0.35,
         patron_sensitivity: 0.60,
-        divergence_threshold: 18,
+        divergence_threshold: 3.0,
         situation_weight_curve: {
             early: 0.7,
             late: 0.4,
@@ -184,7 +196,8 @@ export const POLITICAL_PERSONALITIES: Record<FactionId, PoliticalPersonality> = 
         },
         risk_tolerance: 0.50,
         patron_sensitivity: 0.80,
-        divergence_threshold: 8,
+        // Followed Zagreb's turns (Feb-Mar 1994): the most reactive leadership.
+        divergence_threshold: 1.33,
         situation_weight_curve: {
             early: 0.7,
             late: 0.4,
@@ -250,6 +263,11 @@ export function computeSituationWeight(
 // computePoliticalAssessment
 // ═══════════════════════════════════════════════════════════════════════════
 
+/** Number of most-recent territory snapshots the trend compares (newest vs oldest of the window). */
+export const TERRITORY_TREND_WINDOW = 3;
+/** Area change, in percentage points across the window, that counts as gaining or losing. */
+export const TERRITORY_TREND_THRESHOLD_PP = 1.0;
+
 /**
  * Derives a PoliticalAssessment from current GameState for the given faction
  * and personality. Read-only — no writes to GameState.
@@ -301,15 +319,12 @@ export function computePoliticalAssessment(
     const patron_pressure = clamp(rawOverrideAuthority, 0, 100);
 
     // ── Exhaustion ──────────────────────────────────────────────────────────
-    // war_exhaustion is unbounded monotonic (Engine Invariants §8). After the 2026-05-22 100× rescale
-    // (commit 59511672) it runs ~0-10000+ (turn-40 ~4750-7940). Normalize to a 0-100 scale for
-    // situation_score: divide by 600 (was /6 in the 0-100 era) so the term tracks the rescaled ceiling.
-    // A plain 0-100 clamp pinned ALL factions to 100 after ~w5, contributing zero political differential.
-    const exhaustion_level = clamp(
-        (state.political?.war_exhaustion?.[faction] ?? 0) / 600,
-        0,
-        100,
-    );
+    // war_exhaustion approaches its 10000 cap asymptotically (Engine Invariants §8.6; combat/exhaustion.ts).
+    // A full 188w war ends near it (historical end state: HRHB ~8100, RBiH ~8700, RS ~9800).
+    // Read it on the shared 0..100 scale (recoveredExhaustionLevel, the same read as the war-weariness
+    // bands). The earlier /600 divisor kept exhaustion_level at or below ~16 all war, so a war-weary
+    // faction never read as exhausted and the survival term (situation_score < 50) could not fire.
+    const exhaustion_level = recoveredExhaustionLevel(state.political?.war_exhaustion?.[faction] ?? 0);
 
     // ── Situation score ─────────────────────────────────────────────────────
     // Composite of military strength, low patron pressure, and low exhaustion.
@@ -349,29 +364,28 @@ export function computePoliticalAssessment(
     );
 
     // ── Territory trend ─────────────────────────────────────────────────────
-    // Derived from the last 3 turn_summaries' territory_snapshot for this faction.
+    // Derived from the three most recent turn_summaries that carry a territory_snapshot for this
+    // faction. turn_summaries is stored most-recent-first (war_phase_briefing_steps prepends) and
+    // territory_snapshot is an area FRACTION (0..1, compile_turn_summary), so the change is converted
+    // to percentage points before it meets the ±1 pp threshold.
     let territory_trend: 'gaining' | 'stable' | 'losing' = 'stable';
     const summaries = state.turn_summaries;
-    if (Array.isArray(summaries) && summaries.length >= 2) {
-        const last3 = summaries.slice(-3);
-        // Use territory_snapshot if available; fall back to territory_controlled_pct from capital.
-        const getPct = (idx: number): number | undefined => {
-            const s = last3[idx];
-            if (!s) return undefined;
-            const snap = s.territory_snapshot?.[faction];
-            if (snap != null) return snap;
-            return undefined;
-        };
-        const earliest = getPct(0);
-        const latest = getPct(last3.length - 1);
-        if (earliest != null && latest != null) {
-            const delta = latest - earliest;
-            if (delta > 1.0) {
+    if (Array.isArray(summaries)) {
+        const recentSnaps: number[] = [];
+        for (const s of summaries) {
+            const snap = s?.territory_snapshot?.[faction];
+            if (snap == null) continue;
+            recentSnaps.push(snap);
+            if (recentSnaps.length === TERRITORY_TREND_WINDOW) break;
+        }
+        if (recentSnaps.length >= 2) {
+            const latest = recentSnaps[0];
+            const earliest = recentSnaps[recentSnaps.length - 1];
+            const deltaPp = (latest - earliest) * 100;
+            if (deltaPp > TERRITORY_TREND_THRESHOLD_PP) {
                 territory_trend = 'gaining';
-            } else if (delta < -1.0) {
+            } else if (deltaPp < -TERRITORY_TREND_THRESHOLD_PP) {
                 territory_trend = 'losing';
-            } else {
-                territory_trend = 'stable';
             }
         }
     }

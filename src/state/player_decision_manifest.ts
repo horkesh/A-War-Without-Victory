@@ -360,6 +360,8 @@ function officerEventInstances(state: GameStateLike, playerFaction: string | nul
     return arrayFrom(getMilitary(state).pending_officer_events)
         .filter((item) => matchesPlayerFaction(item, playerFaction))
         .filter((item) => item.acknowledged !== true)
+        // B2: no handler or UI can act on `army_directive_pushback` (the adapter drops it).
+        .filter((item) => item.type !== 'army_directive_pushback')
         .map((item, index) => instance(
             family,
             stringFrom(item.event_id) ?? `officer:${index}`,

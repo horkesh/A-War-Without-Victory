@@ -852,9 +852,29 @@ describe('Issue #9 — csq_hvo_central_bosnia_offensive_1993', () => {
         expect(state.military.fired_event_ids).not.toContain('csq_hvo_central_bosnia_offensive_1993');
     });
 
-    it('fires w54-w56 under croat_republic and lands all five effect kinds', () => {
+    // B5 Ahmići gate (2026-11-16): the consequence fires only once the 1993 Croat-Bosniak war has
+    // begun and the alliance is below ALLIED_THRESHOLD (0.2), as ahmici_massacre_1993 already
+    // requires. A President who kept the alliance is no longer railroaded into it by a week-3 flag.
+    it('does NOT fire while the alliance holds (no 1993 war, alliance above 0.2)', () => {
         const state = makeChain1State(54, { flags: { hrhb_political_goal: 'croat_republic' } });
-        state.political.war_alliance_rbih_hrhb = 1.0;
+        state.political.war_alliance_rbih_hrhb = 0.4;
+        evaluateEvents(state, rng, 54, CSQ_EVENTS);
+        expect(state.military.fired_event_ids).not.toContain('csq_hvo_central_bosnia_offensive_1993');
+    });
+
+    it('does NOT fire before the 1993 war event, even with a broken alliance', () => {
+        const state = makeChain1State(54, { flags: { hrhb_political_goal: 'croat_republic' } });
+        state.political.war_alliance_rbih_hrhb = -0.5;
+        evaluateEvents(state, rng, 54, CSQ_EVENTS);
+        expect(state.military.fired_event_ids).not.toContain('csq_hvo_central_bosnia_offensive_1993');
+    });
+
+    it('fires w54-w56 under croat_republic and lands all five effect kinds', () => {
+        const state = makeChain1State(54, {
+            flags: { hrhb_political_goal: 'croat_republic' },
+            firedEvents: ['croat_bosniak_war_begins_1993'],
+        });
+        state.political.war_alliance_rbih_hrhb = -0.5;
         evaluateEvents(state, rng, 54, CSQ_EVENTS);
         expect(state.military.fired_event_ids).toContain('csq_hvo_central_bosnia_offensive_1993');
         expect(state.military.fired_event_ids).not.toContain('csq_alliance_holds_past_w35');
@@ -887,8 +907,11 @@ describe('Issue #9 — csq_hvo_central_bosnia_offensive_1993', () => {
     });
 
     it('keeps the rupture combat-enabled after the same-turn alliance update', () => {
-        const state = makeChain1State(54, { flags: { hrhb_political_goal: 'croat_republic' } });
-        state.political.war_alliance_rbih_hrhb = 1.0;
+        const state = makeChain1State(54, {
+            flags: { hrhb_political_goal: 'croat_republic' },
+            firedEvents: ['croat_bosniak_war_begins_1993'],
+        });
+        state.political.war_alliance_rbih_hrhb = 0.1;
         evaluateEvents(state, rng, 54, CSQ_EVENTS);
         const report = updateAllianceValue(state);
 

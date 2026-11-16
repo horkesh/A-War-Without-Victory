@@ -428,6 +428,7 @@ function updateIntelPicture(
     // Build offensive_signs and concentration_detected from sector intel records
     const offensiveSigns: Record<string, number> = {};
     const concentrationDetected: Record<string, boolean> = {};
+    const concentrationDetectedByStableKey: Record<string, boolean> = {};
 
     const sectorIds = Object.keys(sectorIntel).sort(strictCompare);
     for (const sectorId of sectorIds) {
@@ -449,6 +450,9 @@ function updateIntelPicture(
         }
         if (hasConcentration) {
             concentrationDetected[sectorId] = true;
+            // N6: also by stable key, so next turn's assessment can find this sector after renumbering.
+            const sector = briefing.sectors.find((s) => s.sector_id === sectorId);
+            if (sector) concentrationDetectedByStableKey[stableSectorKey(sector)] = true;
         }
     }
 
@@ -496,6 +500,7 @@ function updateIntelPicture(
         zone_confidence: zoneConfidence,
         offensive_signs: offensiveSigns,
         concentration_detected: concentrationDetected,
+        concentration_detected_by_stable_key: concentrationDetectedByStableKey,
         last_updated_turn: turn,
     };
 }
