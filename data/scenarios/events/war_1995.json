@@ -368,7 +368,7 @@
     "sets_flags": {
       "un_hostage_crisis_occurred": true
     },
-    "historical_source": "ICTY Karadžić Trial Judgment (IT-95-5/18-T, 24 March 2016) Count 11 (Taking of Hostages). ICTY Karadžić Appeal Judgment (IT-95-5/18-A, 20 March 2019). ICTY Mladić Trial Judgment (IT-09-92-T, 22 November 2017) Count 6. UN Security Council Resolution 998 (16 June 1995). UN Secretary-General Report S/1995/444 (30 May 1995). UN General Assembly A/54/549 (Srebrenica fall report context). BB Vol. II pp. 312-321 (operational chronology, 25 May - 18 June 1995)."
+    "historical_source": "ICTY Karadžić Trial Judgment (IT-95-5/18-T, 24 March 2016) Count 11 (Taking of Hostages). ICTY Karadžić Appeal Judgment (IT-95-5/18-A, 20 March 2019). ICTY Mladić Trial Judgment (IT-09-92-T, 22 November 2017) Count 6. UN Security Council Resolution 998 (16 June 1995). UN Secretary-General Report S/1995/444 (30 May 1995). UN General Assembly A/54/549 (Srebrenica fall report context). Balkan Battlegrounds Vol. II (operational chronology, 25 May - 18 June 1995)."
   },
   {
     "id": "srebrenica_falls_1995",
@@ -709,7 +709,7 @@
     "category": "military",
     "historical_source": "NATO operational records, August-September 1995; Balkan Battlegrounds, Vol. I, pp. 386-395",
     "source_tier": "balkan_battlegrounds",
-    "source_note": "NATO operational records establish the alliance operation's authorized chronology and targets; Balkan Battlegrounds Vol. I pp. 386-395 independently situates the air campaign alongside the September 1995 ground offensives. The essay is original synthesis and does not infer a single-cause path to negotiations.",
+    "source_note": "NATO operational records establish the alliance operation's authorized chronology and targets; Balkan Battlegrounds Vol. I pp. 377-380 and 394-395 independently situates the air campaign alongside the September 1995 ground offensives. The essay is original synthesis and does not infer a single-cause path to negotiations.",
     "trigger": {
       "turn_min": 178,
       "turn_max": 195,
@@ -1165,9 +1165,9 @@
         "text": "The 5th Corps enters the Sana campaign with captured heavy equipment and HV artillery support strengthening its offensive position."
       }
     ],
-    "historical_source": "Balkan Battlegrounds Vol. I pp.417-419, especially p.419 on Operation Sana, recently captured Serb armor and field guns, and HV artillery support.",
+    "historical_source": "Balkan Battlegrounds Vol. I pp.380-382, especially p.382 on Operation Sana, recently captured Serb armor and field guns, and HV artillery support.",
     "source_tier": "balkan_battlegrounds",
-    "source_note": "BB1 pp.417-419 support the 5th Corps' Sana mission and its use of recently captured Serb armor and field guns with HV artillery support. This event's equipment-quality effect abstracts that improved operational position; earlier claims about exact calibers, vehicle types, depot provenance, and an overnight end to ammunition rationing were removed as unsupported by the cited repo source."
+    "source_note": "Balkan Battlegrounds Vol. I, pp. 380-382 support the 5th Corps' Sana mission and its use of recently captured Serb armor and field guns with HV artillery support. This event's equipment-quality effect abstracts that improved operational position; the event does not claim exact calibers, vehicle types, depot provenance, or an overnight end to ammunition rationing."
   },
   {
     "id": "hv_hvo_cooperation_1995",
@@ -2312,7 +2312,7 @@
     "sets_flags": {
       "advance_halted": true
     },
-    "historical_source": "Holbrooke, 'To End a War' (1998), on the 17 September 1995 meeting with Tuđman (Sanski Most, Prijedor and Bosanski Novi, but not Banja Luka; 'over two hundred thousand additional refugees'). Peter Galbraith, 'How Holbrooke Saved Banja Luka', Foreign Policy ('Remembering Richard Holbrooke'), 14 December 2010. BB Vol. I ch. 92-93, pp. 384-390 and ch. 94, pp. 391-392 (the earlier \"BB Vol. II, Ch. 15\" does not exist). US State Dept. chronology. DECISIVE for the current authoring (2026-08-12): BB Vol. I p.462 endnote 823 — US pressure came in September after 'Maestral', and 'Nevertheless, Zagreb went ahead and ordered Juzni Potez in October'; BB Vol. I p.462 endnote 821 — Izetbegović bowed reluctantly while setting conditions to buy the ARBiH more days, Delić begging him to let the fighting continue; BB Vol. I p.427 — Juzni Potez opened 8 Oct, Mrkonjić Grad fell 10 Oct. This is why the comply response suppresses RBiH only and NOT HRHB."
+    "historical_source": "Holbrooke, 'To End a War' (1998), on the 17 September 1995 meeting with Tuđman (Sanski Most, Prijedor and Bosanski Novi, but not Banja Luka; 'over two hundred thousand additional refugees'). Peter Galbraith, 'How Holbrooke Saved Banja Luka', Foreign Policy ('Remembering Richard Holbrooke'), 14 December 2010. BB Vol. I ch. 92-93, pp. 384-390 and ch. 94, pp. 391-392 (the earlier \"BB Vol. II, Ch. 15\" does not exist). US State Dept. chronology. DECISIVE for the current authoring (2026-08-12): BB Vol. I p.425 endnote 823 — US pressure came in September after 'Maestral', and 'Nevertheless, Zagreb went ahead and ordered Juzni Potez in October'; BB Vol. I p.425 endnote 821 — Izetbegović bowed reluctantly while setting conditions to buy the ARBiH more days, Delić begging him to let the fighting continue; BB Vol. I p.390 — Juzni Potez opened 8 Oct, Mrkonjić Grad fell 10 Oct. This is why the comply response suppresses RBiH only and NOT HRHB."
   },
   {
     "id": "ceasefire_1995",

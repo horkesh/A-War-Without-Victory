@@ -1,7 +1,7 @@
 # Final behaviour at 1.0
 
 **Date:** 2026-11-15
-**Authority:** owner rulings of 2026-11-15 (no engine change after 1.0; a finished game reproduces history if left alone and lets the player create ahistorical outcomes); orchestrator ruling on Fable consult 2, revision 2 (`fable_consults/2_freeze_cut.md`, "Appendix A, revised"); `RF-ENGINE-FREEZE` condition 5 in `docs/open_gates.yml`.
+**Authority:** owner rulings of 2026-11-15 (no engine change after 1.0; a finished game reproduces history if left alone and lets the player create ahistorical outcomes) and of 2026-11-16 (the improvising mode ships in 1.0 and stays the default); orchestrator ruling on Fable consult 2, revision 2 (`fable_consults/2_freeze_cut.md`, "Appendix A, revised"); `RF-ENGINE-FREEZE` condition 5 in `docs/open_gates.yml`.
 **Status:** record for the freeze. Section 1 is ratified. Sections 3 to 5 list what is not accepted and what the sitting found; the freeze commit re-checks the cell lists against the frozen run before this record is final.
 
 ## The test every accepted item passes
@@ -14,9 +14,11 @@ Each item accepted as final has two answers.
 
 An item that removes player agency is not accepted as final. Accept-as-final is narrow: it is right for a finished game, and cost is never the reason. Dead paths, saturating formulas and code that contradicts its documentation are fixed or retired.
 
+**The tests apply to the emergent game.** Owner, 2026-11-16: "Of course the improvising mode ships in 1.0. That is the game. Replaying historical moves and what happened is just, well, history. Game is something else." Emergent mode ships and stays the default. So the "left alone" answer of every accepted item is owed on a hands-off emergent 188-week run, not only on historical-mode calibration; historical-mode calibration stays the engine health check. The left-alone answers in section 1 were given on code reading and historical-mode behaviour; they are re-checked against the emergent run before this record is final (freeze condition 7).
+
 ## 1. Accepted as final (game-designer and historian, one sitting, 2026-11-15)
 
-Two fresh read-only seats sat in parallel and independently, each checking the code and canon in the repository. Both returned RATIFY WITH CONDITIONS on all four items. Three of the four reasons in the memo were wrong or too wide and are corrected below. The conditions are open work, listed in section 6.
+Two fresh read-only seats sat in parallel and independently, each checking the code and canon in the repository. Both returned RATIFY WITH CONDITIONS on all four items. Three of the four reasons in the memo were wrong or too wide and are corrected below. A fifth item, BC06 (the six static gesture rows), was added at a second sitting on 2026-11-16 and follows the four. The conditions are open work, listed in section 6.
 
 ### CODE3. Authored and triggered operations are not exhaustion-gated
 
@@ -54,6 +56,18 @@ Two fresh read-only seats sat in parallel and independently, each checking the c
 - **Conditions.** Keep those three strings in English and BCS. No UI shows a Sarajevo or siege civilian-death number as simulation output. No player-facing text equates the displaced count with casualties or says nobody died. The `scoring.ts:172` premise (15,000 compared against about 3,500 to 5,500 Sarajevo dead) rests on a quantity the engine does not model and stays an open note. SD8's military-age exit bar for Sarajevo is not verified against a source.
 - **Seats:** game-designer RATIFY WITH CONDITIONS; historian RATIFY WITH CONDITIONS.
 
+### BC06. The six address and decoration gesture rows stay static
+
+Rows: `address_to_nation_{rbih,rs,hrhb}` and `decorate_a_unit_{rbih,rs,hrhb}` (`data/scenarios/events/war_1993.json`). Sitting of 2026-11-16 (game-designer and historian, independent, read-only), on the orchestrator's referral of the BC06 roadmap row. Both returned ACCEPT WITH CONDITIONS; neither wants the escalation stages, so nothing becomes pre-freeze authoring.
+
+- **What ships.** Each row has `action_cadence {cooldown_turns: 52, escalation: "static"}` and no `max_fires`. The five-use limit of the 2026-09-08 disposition is gone: #673 removed the cap and the desktop contracts report `firesLeft: null`; #678 set the price to 20 Authority. The engine never reads `action_cadence`; only the desktop contracts do. The trigger turn is 84 and the cooldown 52, so a war allows about three uses (turns 84, 136, 188). Addresses offer 3 to 4 options (defiance, endurance, appeal or reassurance, silence) with different costs; decorations offer steadfast, broad citation or decline, per unit, to regular formations only. The other six gestures (front visits and strategic posture reviews) do escalate, each with an authored fire-gated option; those carry the real recurrence.
+- **Reason for the record.** The six rows are renewable on a 52-turn cooldown. The calendar allows about three uses, each a different choice among costed options, so a repeat use is a new decision in a new phase of the war, not a worse copy of the first. The record shows no historical escalation in the effect of addresses or unit honours: honours were permanent unit titles, not a rising scale ("Vitezka" and "Slavna", BB1 appendix H endnote, KB page BB1_p0516). Stages would need invented numbers and would add no agency.
+- **Left alone:** yes. A bot or hands-off run fires each once from turn 84 and gains +2 to +6 morale, which does not rewrite the war; an unplayed human President fires nothing.
+- **Played:** yes. Options, a 20-Authority price, a cooldown, a per-unit target and a decline option are the player's agency.
+- **Not verified (historian seat):** "Zlatni ljiljan" and other decorations are not in the BB1 and BB2 pages searched; Karadžić's and Tuđman's addresses, HVO decorations and any ICTY paragraph on gestures are not verified.
+- **Conditions.** (1) Rulebook "Recurring decisions" paragraph reworded: done in this change. (2) The stale five-use rationale is marked superseded in the 2026-09-08 disposition: done in this change. (3) The `address_to_nation_rbih` narrative opens "a people in the fourth year of siege" but first fires at turn 84, about the second year of the war if the campaign starts in April 1992 (not confirmed by the historian seat): done in #698: the closing line is now year-neutral ("a people who have lived under siege this long"), string only, hash unchanged. (4) Keep the decoration copy that restricts it to regular formations and the essays' warning that an honour attaches to a unit's whole record; no player text may imply that a decoration or address grows stronger with use.
+- **Seats:** game-designer ACCEPT WITH CONDITIONS; historian ACCEPT WITH CONDITIONS.
+
 ## 2. The ARBiH plan lockout (army-wide): fixed in the package, not accepted
 
 The lockout was first filed as RF-3C-EXH. An earlier sitting (historian, scenario-creator-runner-tester, game-designer, 2026-11-15) ratified deferring it, each AGREE WITH CONDITIONS; the owner's ruling that no engine change follows 1.0 supersedes that deferral. Its findings stand and are kept here.
@@ -81,6 +95,8 @@ The lockout was first filed as RF-3C-EXH. An earlier sitting (historian, scenari
 
 **Calibration-pass rule for the cells above.** No calibration lever is selected, justified or scored by a listed cell, and a match on a listed cell is not credited as fidelity. Farz P1, P-A and P-B are not tuned. After the package lands the list is re-derived and the freeze figures are read against it.
 
+**Emergent mode today (probe of 2026-11-16, main `278e4eb55`; evidence in `_logs/emergent-probe-20261115/REPORT.md`).** Left alone, emergent mode ends at week 40 with `negotiated_peace:vance_owen` and breaches the history guard (Srebrenica and Žepa never fall, Farz 0/4, the western-Bosnia HRHB cascade 4 against 31); checkpoint scores are 710 / 667 / 657 / 568, the last three against a map frozen in January 1993. The cause is a peace-plan floor that compares RS's share by settlement count (52.7%) with the plan's area-based 43%: the gap of 9.7 points is under the 17.3 floor, so the scoring engine decides and accepts, while by area RS holds 63.4% and would reject. The Contact Group floor has the same mismatch (not measured). The floor fix is a must-fix engine item and Batch B's first item (B0); the other emergent divergences are then triaged (E1): engine defects before the freeze, option weights in the calibration pass. Freeze condition 7 requires a hands-off emergent 188-week run that passes the history guards, with the historian accepting its divergences.
+
 ## 3. Items not accepted, with the Revision 2 answer
 
 Each of these was on the memo's first accept list and moved to fix or retire. The seats' views are added where they bear on the work.
@@ -96,7 +112,7 @@ Each of these was on the memo's first accept list and moved to fix or retire. Th
 | RB2 unlogged re-route | Fix (A4) | The §6 seats rule the design at their sitting. |
 | F2 casualty scale of failed operations | Fix in P3 if it remains | Historian: the verifiable successful-attack exchange is about 3:1 (Goražde, BB2 pp.480-481); 10:1 to 20:1 for failed ARBiH operations is not supported. |
 | F3 VRS "last stand", VRS wins nothing after week 99 | A defect, fixed in the package (P2 and P3): operations like Zvezda 94 and the Kulen Vakuf counter-offensive of November 1994 must become possible (orchestrator, 2026-11-15) | Historian: not acceptable. Zvezda 94 took ground (BB2 pp.479-480) and the VRS and SVK retook Kulen Vakuf on 3 to 4 November 1994 (BB2 p.549). |
-| A real emergency defence (reserve commitment, a local counterattack) | Capability: package P2 (Fable consult 3 is designing it); the old operation: retired as code (#683). The capability is not accepted as absent (orchestrator, 2026-11-15) | The seats split. Game-designer: the absence is acceptable, because reactive sector defence, Army HQ reserve loans and Active Defense counterattacks exist (Rulebook §5.10, §6.3). Historian: armies did commit reserves and counterattack, so the absence is not historical, and the June 1994 Vozuća gains were lost to a VRS counterattack using corps reserves (BB1 p.422, BB2 p.506); the orchestrator ruled that the historian is right on the fact. The "post-1.0 design item" wording in the retirement fragment of #683 and in the Systems Manual §6 note is stale and is deleted when the ruling is made. |
+| A real emergency defence (reserve commitment, a local counterattack) | Capability: package P2, which is the posture-rule repair, the army-reserve repair (the existing reserve system reads every sector and judges a gap by threat) and a retake-only, stance-free counter-attack (Fable consult 3 and its addendum, accepted 2026-11-16: no new reserve mechanic); the old operation: retired as code (#683). The capability is not accepted as absent (orchestrator, 2026-11-15) | The seats split. Game-designer: the absence is acceptable, because reactive sector defence, Army HQ reserve loans and Active Defense counterattacks exist (Rulebook §5.10, §6.3). Historian: armies did commit reserves and counterattack, so the absence is not historical, and the June 1994 Vozuća gains were lost to a VRS counterattack using corps reserves (BB1 p.422, BB2 p.506); the orchestrator ruled that the historian is right on the fact. The "post-1.0 design item" wording in the retirement fragment of #683 and in the Systems Manual §6 note is stale and is deleted when the ruling is made. |
 
 ## 4. Historical gaps a finished game cannot ship with (historian seat)
 
@@ -108,17 +124,21 @@ Each of these was on the memo's first accept list and moved to fix or retire. Th
 ## 5. Process record
 
 - First sitting, 2026-11-15 (historian, scenario-creator-runner-tester, game-designer, read-only, none the author of the memo): ratified deferring the lockout; corrected the memo's claim that the 3rd Corps "took hills, not cells", the claim that the owner's probe ruling covered the case, and the scope (army-wide, not the 3rd Corps). Superseded by the owner's ruling; the corrections are in section 2.
+- Third sitting, 2026-11-16 (game-designer, historian, independent, read-only): BC06, accepted as final with conditions (above). The orchestrator referred it because gestures became renewable in #673, so the "use 4 to 5" escalation no longer means anything.
 - Second sitting, 2026-11-15 (game-designer, historian, one sitting, read-only, independent): the four items in section 1, each with both owner tests. The memo's RB5 reason, its PK5 scope and its "directive layer is the player's tool" were corrected; the memo's accept of quadratic decay was rejected. The §6 seats rule RB2 and the RB items at their own sitting.
 - The orchestrator is told before the merge of every correction above.
 
 ## 6. Open conditions (work owed by this record)
 
+0. A hands-off emergent 188-week run at the frozen commit passes the history guards and the historian accepts its divergences (freeze condition 7); the left-alone answers of section 1 are re-checked against it.
 1. A canon line for CODE3 (discretionary plans only; exhaustion is a cost; stop-op is the player's counter), after the L7 lane checks that stop-op works on an operation in planning.
 2. RB5: the reason text of section 1 in canon; the withholding at autonomy 1 to 3 is a Part 3 fix item whose design the §6 panel decides (sensitive: no lane touches it before that ruling); a Part 3 copy fix, with the narrative and historian seats, so no Verdict, ending or ledger copy presents the missing waves as the player's restraint.
 3. PK5: C7 fixed; the retry duty for the 1994 ARBiH fights met by the package or by Part 6.
 4. SD6 and SD8: keep the three disclosure strings; no UI shows a siege civilian-death number as simulation output; the `scoring.ts:172` note stays open.
 5. Systems Manual §15 is reworded for F1h (done in this change). The stale "post-1.0 design item" lines (the #683 fragment is history and is not edited; the Systems Manual §6 note) are deleted when P2 delivers the capability.
 6. The directive-producer retirement (B3) covers the human's staff at autonomy 1 and above; B2 checks whether the human sees the pushback events.
+7. BC06: the `address_to_nation_rbih` narrative ("a people in the fourth year of siege") was wrong at its first firing at turn 84; done in #698 (a year-neutral closing line).
+8. EH-3 Path C respawn of collapsed-stranded brigades (`reconstituteBrigades`): open, filed as "post-1.0" and now needing fix, retire or accept-as-final with a reason before the freeze (orchestrator, 2026-11-16); owner the package lane (work list P2-R); `stranded_status='collapsed'` is never cleared.
 
 ## 7. Rulings on the second sitting (orchestrator, 2026-11-15)
 
@@ -126,12 +146,16 @@ Each of these was on the memo's first accept list and moved to fix or retire. Th
 2. PK5: the no-retry half only; C7 stays a fix; the 1994 retry duty goes to the package.
 3. CODE3: the canon line as above; the L7 lane checks stop-op in planning.
 4. SD6 and SD8: accepted; the three disclosure strings stay.
-5. Emergency defence: capability from P2, the old operation stays retired.
+5. Emergency defence: capability from P2 (the posture-rule repair, the army-reserve repair and the retake-only counter-attack, Fable consult 3 and addendum; no new mechanic), the old operation stays retired.
 6. F3: a defect, fixed in P2 and P3.
 7. F1h: the Systems Manual §15 text is corrected now; the code retirement stays in Part 4.
-8. The RC (D-topology) and BC06 (six escalation stages) roadmap rows are classified by the rule "pre-freeze, add-on candidate, or dropped"; there is no "post-1.0 engine" category. Proposed classification, for the orchestrator to rule: both dropped, with the static gesture behaviour and the absence of the neighbour cascade final. Neither blocks 1.0 and neither can ship later without changing 1.0's engine behaviour.
+8. The RC (D-topology) and BC06 (six escalation stages) roadmap rows are classified by the rule "pre-freeze, add-on candidate, or dropped"; there is no "post-1.0 engine" category. Ruled 2026-11-16: RC D-topology is dropped (it gates nothing and would reopen §6 and a re-floor); BC06 went to a sitting and is accepted as final (above); BC18 C is a post-1.0 add-on candidate (opt-in content that must not change 1.0's base-game engine behaviour).
 
-## 8. Hash-neutral notes
+## 8. Owner ruling of 2026-11-16 (via the orchestrator)
+
+Emergent mode ships in 1.0 and stays the default. Consequences written in: the two tests apply to the emergent game; freeze condition 4 (live = headless) is re-run in emergent mode at the frozen commit, because the first measurement carried `decision_mode` historical on both sides; new freeze condition 7; the peace-plan floor fix is batch B's first item and the emergent triage is its own row (E1) in the work list.
+
+## 9. Hash-neutral notes
 
 - Roster tenure starts (H-C4: Praljak 64 to 67, Roso 80 to 83, Petković-2 100 to 107, Blaškić-2 120 to 121) go to the calibration pass.
 - The autonomous-launch path is inert and is retired (B4).

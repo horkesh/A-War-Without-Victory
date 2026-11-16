@@ -85,8 +85,9 @@ gates:
     opened: 2026-11-13
     blocks: [R8, R9]
     evidence_required: >
-      The six freeze conditions (orchestrator rulings 2026-11-15: Fable consult 2 and its
-      revision after the owner's "no engine change after 1.0"). (1) Appendix A parts 1 and 2
+      The seven freeze conditions (orchestrator rulings 2026-11-15: Fable consult 2 and its
+      revision after the owner's "no engine change after 1.0"; 2026-11-16: emergent mode
+      ships). (1) Appendix A parts 1 and 2
       of fable_consults/2_freeze_cut.md (revision 2) are merged. Part 1: batch A (the §6
       displacement fixes), batch B (officers and politics) and batch C (singles), as listed
       in the BC19 row; the slot 1 items #677, #680 and the SE7E-h fix are merged. Part 2: the
@@ -100,11 +101,18 @@ gates:
       its row. (3) One 188-week run at the candidate commit, repeated once for determinism:
       strict health PASS, enclave 9/9, Farz P1, P-A and P-B, consistency 0, baselines
       re-blessed; its scores become the freeze figures. (4) Live = headless at that commit,
-      0 cells differing for RBiH at autonomy 2 (all three factions are re-measured at
-      RF-CALIBRATION-RESIGNOFF); the condition was met before the freeze and is re-run at the
-      frozen commit. (5) The final-behaviour record
+      0 cells differing for RBiH at autonomy 2, in historical mode and in emergent mode (the
+      first measurement was historical on both sides; all three factions are re-measured at
+      RF-CALIBRATION-RESIGNOFF); the historical-mode result was met before the freeze, and
+      both are re-run at the frozen commit. (5) The final-behaviour record
       (docs/40_reports/governance/20261115_FINAL_BEHAVIOUR_AT_1_0.md) is merged. (6) One
-      named commit is recorded as the frozen source in the roadmap and the owner is told.
+      named commit is recorded as the frozen source in the roadmap and the owner is told. (7) A hands-off
+      emergent 188-week run at the frozen commit passes the history guards (Farz, enclave,
+      the western-Bosnia cascade) and the historian accepts its divergences. Today it ends at
+      week 40, when RS accepts Vance-Owen, because the peace-plan floor compares a
+      settlement-count share with an area share; that floor fix (RS and Contact Group) is
+      batch B's first item, and the other emergent divergences are then triaged: engine
+      defects before the freeze, option weights in the calibration pass.
       From that commit the freeze is a byte test: a change merges freely if the 188-week
       headless final_state_hash is unchanged, and a change that moves the hash needs the
       owner's OK. The one calibration pass then runs on the frozen engine under the
@@ -113,6 +121,8 @@ gates:
     source: docs/plans/MASTER_ROADMAP.md
     notes: >
       R8 dry runs before the freeze are allowed and never count as qualifying. Owner ruling
+      2026-11-16: the improvising (emergent) mode ships in 1.0 and stays the default;
+      historical-mode calibration remains the engine health check. Owner ruling
       2026-11-15: no engine change follows 1.0, and everything after it is an add-on. There
       is no "post-1.0" bucket for engine items: each finding is fixed, retired or accepted
       as final, with a one-line reason when it is filed. Only a change that moves the
@@ -126,8 +136,9 @@ gates:
       needs nothing before the freeze. The ARBiH plan lockout (army-wide; first filed as
       RF-3C-EXH) is traced (#686: the corps' own probes keep exhaustion above the planning
       gate; the designed probe gate of 40 was never wired) and is fixed inside the 1994-95
-      package, paired with a defence change. The 188-week final_state_hash on main after
-      #677 is 518de17970af5914; it is the main hash at #677, not the freeze hash.
+      package, paired with a defence change. The 188-week final_state_hash on main was
+      518de17970af5914 after #677, 799e43a7ee2f4764 after #690 and is 70f4dc05bf375bc7 after
+      #696 (each a state-only move); each is the main hash at that merge, not the freeze hash.
       data/derived/latest_run_final_save.json dates from 2026-09-01 and is stale; lanes
       read run folders instead.
 
