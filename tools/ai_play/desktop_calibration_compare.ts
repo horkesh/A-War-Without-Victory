@@ -393,7 +393,13 @@ let botEquivalentCatalog: Map<string, EventDefinition> | null = null;
 function botEquivalentResponseId(state: GameState, decision: PendingEventDecision): string | undefined {
     const def = botEquivalentCatalog?.get(decision.event_id);
     if (!def || !def.response_options || def.response_options.length === 0) return undefined;
-    return selectBotEventResponse(state, def, decision.faction, false).chosen.id;
+    // Choose among the options this decision actually OFFERS. A player-initiated gesture is queued
+    // with options filtered by fire number and reach (responseOptionsForFire); the full catalog can
+    // hold an option the decision does not carry, which resolveEventDecision rejects.
+    const offered = new Set((decision.response_options ?? []).map((option) => option.id));
+    const narrowed = { ...def, response_options: def.response_options.filter((option) => offered.has(option.id)) };
+    if (narrowed.response_options.length === 0) return undefined;
+    return selectBotEventResponse(state, narrowed, decision.faction, false).chosen.id;
 }
 
 function applyEventPolicy(
