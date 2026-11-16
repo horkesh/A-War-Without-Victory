@@ -1693,6 +1693,34 @@ describe('save migration validator hardening', () => {
         });
     });
 
+    // F7b retirement (2026-11-16): Army HQ plans no longer write doctrine_override.army_stance or
+    // aggression_modifier. A save made before still carries them and must keep loading, fields intact.
+    it('loads a save whose campaign plan still carries the retired doctrine fields', () => {
+        const state = currentVersionState();
+        (state.military as unknown as Record<string, unknown>).campaign_plans = {
+            RS: {
+                issued_turn: 8,
+                valid_until_turn: 18,
+                emergency: false,
+                trigger_reason: 'regular_cadence',
+                front_priorities: [{ corps_id: 'vrs_1st_krajina', role: 'primary', suggested_stance: 'offensive' }],
+                doctrine_override: {
+                    army_stance: 'balanced',
+                    aggression_modifier: -0.05,
+                    corps_stance_ceilings: { vrs_1st_krajina: 'balanced' },
+                },
+                synchronized_operations: [],
+                force_transfers: [],
+                excluded_corps: [],
+            },
+        };
+
+        const loaded = deserializeState(JSON.stringify(state));
+        const doctrine = (loaded.military.campaign_plans?.RS?.doctrine_override ?? {}) as Record<string, unknown>;
+        expect(doctrine.corps_stance_ceilings).toEqual({ vrs_1st_krajina: 'balanced' });
+        expect(doctrine.army_stance).toBe('balanced');
+    });
+
     it('rejects current-version saves with malformed army stance records', () => {
         const state = currentVersionState();
         state.military.army_stance = {
