@@ -811,7 +811,7 @@ function addOpportunityCards(state: LoadedGameState, cards: CandidateCard[]): vo
         op.corps_id === launch.corps_id && op.name === launch.op_name
         && op.started_turn === launch.started_turn && op.faction === playerFaction) : [];
       const directive = matches.length === 1 && playerFaction
-        ? executingStopOpDirective(matches[0], playerFaction) : undefined;
+        ? stopOpDirective(matches[0], playerFaction) : undefined;
       const explanation = opportunity.decision_outcome === 'defensive_commitment'
         ? t('opportunity.defensiveCommitment')
         : launch ? t('opportunity.launchedReceipt', { operation: launch.op_name })
@@ -1164,19 +1164,32 @@ function addBriefingCards(state: LoadedGameState, cards: CandidateCard[]): void 
 
 /**
  * STOP-OP directives (War-Direction lever): one `command`-category card per PLAYER-faction
- * EXECUTING operation, keyed off the live operation list (`state.operations`, already
- * player-faction filtered by the adapter). This is the canonical, reachable home of the
+ * operation that can still be stopped, keyed off the live operation list (`state.operations`,
+ * already player-faction filtered by the adapter). This is the canonical, reachable home of the
  * stop-op lever — it replaces the briefing-derived path, which never fired because the
  * sim briefing target carries no per-operation (corpsId, opName) pair and `toTargetView`
  * collapses operation targets (see `addBriefingCards`). `op.name` is the RAW engine name
  * the IPC (`stageOpHaltOrder`) expects; `op.display_name` is the player-safe caption.
  *
+ * CODE3 (2026-11-16): an operation in PLANNING can be stopped as well as one in EXECUTION —
+ * scripted and event-raised operations carry no exhaustion gate, and the President's Stop-op is
+ * their counter, so it must reach them before they launch. The engine already halts a planning
+ * op through the same clean path (`apply-op-halts`); only this offer was execution-only. Same
+ * price and the same army objection either way. An op in RECOVERY is finished and is not
+ * offered; nor is one whose phase the save did not report (the adapter defaults it to planning).
+ *
  * Deterministic: operations are iterated in a stable strictCompare order (corps id then
  * raw op name). No nondeterministic or time-based sources.
  */
+function isStoppableOperation(op: OperationView, playerFaction: string): boolean {
+  if (op.faction !== playerFaction) return false;
+  if (op.phase === 'execution') return true;
+  return op.phase === 'planning' && op.phase_unreported !== true;
+}
+
 /** Shared live Stop-op authority for the Decision Room and exact-bound opportunity dossier. */
-export function executingStopOpDirective(op: OperationView, playerFaction: string): PresidentialDecisionRoomDirective | undefined {
-  if (op.faction !== playerFaction || op.phase !== 'execution') return undefined;
+export function stopOpDirective(op: OperationView, playerFaction: string): PresidentialDecisionRoomDirective | undefined {
+  if (!isStoppableOperation(op, playerFaction)) return undefined;
   return { lever: 'stop_op', corpsId: op.corps_id, cost: STOP_OP_COST,
     payload: { corpsId: op.corps_id, opName: op.name } };
 }
@@ -1186,21 +1199,22 @@ function addStopOpDirectiveCards(state: LoadedGameState, cards: CandidateCard[])
   const playerFaction = state.player_faction ?? null;
   if (!playerFaction) return;
 
-  const executing = [...(state.operations ?? [])]
-    .filter((op) => op.faction === playerFaction && op.phase === 'execution')
+  const stoppable = [...(state.operations ?? [])]
+    .filter((op) => isStoppableOperation(op, playerFaction))
     .sort((a, b) => {
       const corpsDelta = strictCompare(a.corps_id, b.corps_id);
       if (corpsDelta !== 0) return corpsDelta;
       return strictCompare(a.name, b.name);
     });
 
-  for (const op of executing) {
+  for (const op of stoppable) {
+    const planning = op.phase === 'planning';
     cards.push({
       id: `command:stop-op:${op.corps_id}:${op.name}`,
       category: 'command',
       severity: 'warning',
       title: t('decisionRoom.card.stopOp.title', { opName: op.display_name }),
-      explanation: t('decisionRoom.card.stopOp.explanation', {
+      explanation: t(planning ? 'decisionRoom.card.stopOp.explanationPlanning' : 'decisionRoom.card.stopOp.explanation', {
         opName: op.display_name,
         corps: op.corps_name,
       }),
@@ -1209,10 +1223,10 @@ function addStopOpDirectiveCards(state: LoadedGameState, cards: CandidateCard[])
       actionLabel: t('decisionRoom.action.inspectCorps'),
       evidence: [
         t('decisionRoom.card.stopOp.evidence.corps', { corps: op.corps_name }),
-        t('decisionRoom.card.stopOp.evidence.executing'),
+        t(planning ? 'decisionRoom.card.stopOp.evidence.planning' : 'decisionRoom.card.stopOp.evidence.executing'),
       ],
       navigationTarget: { kind: 'army-hq-corps-briefing', corpsId: op.corps_id },
-      directive: executingStopOpDirective(op, playerFaction),
+      directive: stopOpDirective(op, playerFaction),
       urgencySort: 7,
       sourceSort: `command:stop-op:${op.corps_id}:${op.name}`,
     });

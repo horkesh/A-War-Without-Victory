@@ -107,7 +107,8 @@ describe('BC01 live Decision Room exact launch directive', () => {
     expect(card).toBeDefined();
     expect(view.metrics.pendingReviews).toBe(0);
     expect(view.advanceReadiness.blockedByExistingSystems).toBe(false);
-    if (kind === 'exact') expect(card?.directive).toMatchObject({ lever: 'stop_op', payload: { corpsId: 'corps', opName: 'Exact' } });
+    // CODE3 (2026-11-16): a launch still in preparation (planning) can be stopped too.
+    if (kind === 'exact' || kind === 'preparation') expect(card?.directive).toMatchObject({ lever: 'stop_op', payload: { corpsId: 'corps', opName: 'Exact' } });
     else expect(card?.directive).toBeUndefined();
     if (kind === 'defensive') expect(card?.explanation).toContain('no offensive operation');
   });
