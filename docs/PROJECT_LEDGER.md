@@ -24,6 +24,26 @@ The historian read the cited location of every BB reference (109 groups, 279 men
 - **Proof.** One 188-week run on main `278e4eb55` gives final state hash `518de17970af5914`, the same as main. The canonical run has no tie that the old order resolved differently, so there is no re-pin.
 - **Tests.** New `tests/rank_defenders_tiebreak.test.ts`: tied twins rank by id in either input order, with the same total; a stronger defender still ranks first whatever its id. The first case fails on the old code. `operation_preparation_force_ratio` and `bot_orders_perf_profile` pass. tsc is clean.
 
+## 2026-11-16 — F7b: the Army HQ plan's army stance and aggression modifier retired (freeze Batch C1b; control-identical)
+
+- **Finding** (from the F7 build; measured on main 2026-11-16).
+  - `computeSupplyStatus` (`army_hq_gathering.ts`) read a missing supply reserve as `critical` when reserves are off, so every army planned under "critical" supply.
+  - A fix measured on main changed only `campaign_plans.{RBiH,RS}.doctrine_override.{army_stance,aggression_modifier}`. Control and every other field stayed identical, and no general_offensive or strategic_defense op appeared, before or after.
+  - Those two stored values have no reader anywhere: not in sim, UI, desktop, briefing or the Desk. The only consumer of `doctrine_override` reads `corps_stance_ceilings`. The UI's army stance is the separate `military.army_stance`, and the Chronicle's doctrine comes from the authored war timeline.
+- **Ruling (orchestrator, clean-engine rule):** retire, not fix. A stored value nobody reads is removed. Wiring it would be new behaviour before the freeze.
+- **Retired.**
+  - `DoctrineOverride.army_stance` and `aggression_modifier`.
+  - Their only inputs, the theater `territory_trend`, `supply_status` and `manpower_status`, with `computeTerritoryTrend`, `computeSupplyStatus` (and its reserves-off bug), `computeManpowerStatus`, and the two threshold constants.
+  - `generateDoctrineOverride` now builds only `corps_stance_ceilings`, which is kept.
+- **Save compatibility.** The validator accepts `army_stance` and `aggression_modifier` as optional legacy fields, checked only when present.
+  - New test in `tests/save_migration_validator_rejection.test.ts`: a save carrying them loads, with the fields intact.
+- **Measured** (one 188-week run against main `b1a79a844` = `799e43a7ee2f4764`).
+  - Final hash `70f4dc05bf375bc7`.
+  - **0 cells differ** at w39, w104, w156 and w188, and all 251 control_events are identical. The whole final-state diff is the 6 retired fields (3 plans × 2).
+  - Guards: verify_checkpoints "guard intact" (enclave 9/9, Farz, cascade 31, eastern provenance CLEAN), and engine_health_gate --strict PASS (consistency 0).
+  - Re-pinned `data/derived/scenario/baselines/manifest.json`. The 40-week structural fingerprint is unchanged (`3b1ddd64fb4f1600`).
+- **Tests.** `tests/army_hq_gathering.test.ts` now asserts the assessment's and the doctrine's retired fields are gone and that the corps ceilings still apply. 296 tests in the affected files pass, and tsc is clean.
+
 ## 2026-11-16 — Package "1994-95 attack and defence", P0: the multi-corps offensive pre-set is retired (inert)
 
 Fable consult 2, Revision 2 (P0): retire RF-STRENGTH's dead write and its never-run replacement, proving the hash unchanged.
@@ -62,7 +82,7 @@ Docs only; no `src/` or `data/` change, no hash change.
 
 - Package P2 (the defence repair) now follows Fable consult 3, accepted by the orchestrator on 2026-11-16: no new mechanic. Bots order `dig_in` only at cohesion 40 or more and `defend` below it, so sub-40 brigades slide to their floor and stay (47 to 61 of 83 VRS brigades below 30). After an inert step 0 (four receipts) the repair is four measured steps in order: the complete posture rule (`dig_in` at any cohesion at every static front `defend` site; dug-in brigades are relief donors and the consistency validator must exit 0; an overshoot narrows the rule's scope first, then one paired RS drift-curve data change), the army-reserve repair (the existing reserve system reads every sector and judges a gap by threat, not by a brigade count), a retake-only stance-free counter-attack, and stance coherence. The consult's addendum (same day) struck SD15, a dated VRS2 and any garrison rule, and moved the no-plan local-occupation branch and "VRS operations reach battle" (AI1, launch odds) to P3. The "new mechanic" branch is closed. Written into `docs/plans/2026-11-15-pre-freeze-work-list.md`, the roadmap BC19 row, the board row 7c and the final-behaviour record (emergency-defence row, process record item 5).
 - New work-list items: P2-L, the Lašva fix (the t1 stranding of the HVO Central Bosnia brigades, `op:novi_travnik:rat_2` missing from `hvo_central_bosnia`; the drain is probably the stranded "holding" loss; `stranded_status='collapsed'` is never cleared); P2-R, the EH-3 Path C respawn of collapsed-stranded brigades, open, filed as "post-1.0" and now needing fix, retire or accept-as-final before the freeze, owner the package lane (record section 6, item 8).
-- Merged and recorded: #694 (package P0: `coordinateMultiCorpsOffensive` retired, byte-identical, the headless `final_state_hash` stays 799e43a7ee2f4764; a player-path fix as well) and #695 (citation audit batch 3).
+- Merged and recorded: #694 (package P0: `coordinateMultiCorpsOffensive` retired, byte-identical, the headless `final_state_hash` stays 799e43a7ee2f4764; a player-path fix as well), #695 (citation audit batch 3) and #696 (F7b: the Army HQ plan's unread `army_stance` and `aggression_modifier` and the three theater statuses retired, with the reserves-off supply bug; control-identical, 0 cells differ; the headless `final_state_hash` is now 70f4dc05bf375bc7, state only, from 799e43a7ee2f4764; scores unchanged at 709/709/708/681).
 
 ## 2026-11-15 — Command loop L7: army clashes (proposal 2A step A1; owner decision 4)
 
