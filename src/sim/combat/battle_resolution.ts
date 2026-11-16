@@ -329,13 +329,8 @@ function getCorpsStance(state: GameState, formation: FormationState): CorpsStanc
     const corps = state.military.corps_command[formation.corps_id];
     if (!corps) return null;
 
-    // Check army stance override
-    const faction = formation.faction;
-    const armyStance = state.military.army_stance?.[faction];
-    if (armyStance === 'general_defensive') return 'defensive';
-    if (armyStance === 'general_offensive') return 'offensive';
-    if (armyStance === 'total_mobilization') return 'reorganize';
-
+    // No army-stance override (Batch B, Fable consult 5 ruling 3): the corps acts on its
+    // own stance. The override also bypassed presidential holds on this SID-fallback path.
     return corps.stance ?? 'balanced';
 }
 
