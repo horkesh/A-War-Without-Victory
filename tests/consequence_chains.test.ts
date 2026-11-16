@@ -1056,4 +1056,23 @@ describe('Ahmići windows and the H6 exclusions', () => {
         expect(fires('evacuate')).toBe(false);
         expect(fires('federate_early')).toBe(false);
     });
+
+    it('a late war (recorded after t54) still books the Ahmići war crimes; only the t54 consequence is withheld', () => {
+        // Red-team condition (§6 panel): narrowing the consequence window must not let a later war
+        // escape the record. ahmici_massacre_1993 keeps its t54-t70 window and its war_crimes_delta 3.
+        const card = ALL_EVENTS.find(e => e.id === 'ahmici_massacre_1993')!;
+        const consequence = ALL_EVENTS.find(e => e.id === AHMICI)!;
+        const s = makeChain1State(68, {
+            flags: { hvo_arbih_tensions_rising: true, hrhb_political_goal: 'croat_republic' },
+            firedEvents: [WAR],
+        });
+        s.military.event_fire_counts = { [WAR]: 1 };
+        s.political.war_alliance_rbih_hrhb = -0.5;
+        (s.political.political_controllers as Record<string, string>)['op:vitez:vitez_2'] = 'HRHB';
+        evaluateEvents(s, rng, 68, [card, consequence]);
+        const fired = s.military.fired_event_ids ?? [];
+        expect(fired).toContain('ahmici_massacre_1993');
+        expect(fired).not.toContain(AHMICI);
+        expect((s.military.negotiation as any).capital.HRHB.war_crimes_events).toBe(3);
+    });
 });
