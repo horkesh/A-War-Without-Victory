@@ -65,6 +65,8 @@ import { getSeasonalModifiers } from './seasonal_effects.js';
 import { getAllAxisBrigades, isMultiAxis } from './sector_offensive_axis_helpers.js';
 import { buildOfficerCombatLookup, getCorpsStance } from './combat_math.js';
 import { findBrigadeOperation, findBrigadeOperationAnywhere, findBrigadeLiveOperationAnywhere } from './corps_operation_helpers.js';
+import { canAdoptPosture } from './brigade_posture.js';
+import { isBrigadeAssignedToFront } from './front_assignment.js';
 import { isVlasicCohaExceptionAttackOrder } from './coha_operation_exception.js';
 import {
     isCorpsBoundByOct1995Ceasefire,
@@ -1464,6 +1466,34 @@ export function generateAllBotOrdersOsid(
         const corpsId = brig?.corps_id;
         if (!corpsId) continue;
         allEligibleAttackersByCorps[corpsId] = (allEligibleAttackersByCorps[corpsId] ?? 0) + 1;
+    }
+
+    // Package "1994-95 attack and defence", P2 step 1 (2026-11-16): a static front brigade digs in
+    // at any cohesion. Every evaluator's `defend` for a front brigade that is neither moving nor
+    // attacking becomes `dig_in` here, at the one point where the pass's orders are final. `defend`
+    // drains cohesion (-1/turn) and `dig_in` recovers it (+0.5) and defends at least as well, so a
+    // static `defend` held worn brigades on their cohesion floor (consult 3). Kept as `defend`:
+    // brigades with an attack or movement order this pass or an existing move, sector reserves
+    // (step 2 owns them), brigades off the front, brigades in an operation's execution phase,
+    // disrupted brigades, and any brigade that may not adopt `dig_in` (e.g. forming). The post-repulse
+    // `defend` is a combat write, not a bot order, and is untouched.
+    const staticDigInRoles = buildSectorAssignmentByBrigade(state);
+    for (const order of allPostureOrders) {
+        if (order.posture !== 'defend') continue;
+        const bid = order.brigade_id;
+        if (allAttackOrders[bid] != null) continue;
+        if (allMovementOrders[bid] != null || allColumnMarchOrders[bid] != null) continue;
+        if (state.military.brigade_movement_orders?.[bid]) continue;
+        const movementState = state.military.brigade_movement_state?.[bid];
+        if (movementState && movementState.status !== 'deployed') continue;
+        const formation = state.military.formations?.[bid];
+        if (!formation || formation.status !== 'active' || (formation.kind ?? 'brigade') !== 'brigade') continue;
+        if (((formation as { disrupted_turns?: number }).disrupted_turns ?? 0) > 0 || (formation as { disrupted?: boolean }).disrupted === true) continue;
+        if (!canAdoptPosture(formation, 'dig_in')) continue;
+        if (staticDigInRoles.get(bid)?.isReserve === true) continue;
+        if (!isBrigadeAssignedToFront(state, bid)) continue;
+        if (findBrigadeLiveOperationAnywhere(state, bid)?.op?.phase === 'execution') continue;
+        order.posture = 'dig_in';
     }
 
     if (!state.military.brigade_posture_orders) state.military.brigade_posture_orders = [];

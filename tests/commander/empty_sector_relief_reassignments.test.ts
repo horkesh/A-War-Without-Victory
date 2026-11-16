@@ -117,10 +117,10 @@ describe('empty-sector relief reassignment', () => {
         expect(computeEmptySectorReliefReassignments(briefing)).toEqual([]);
     });
 
-    it('does not override a dug-in donor', () => {
+    it('takes a dug-in donor when it is the only legal one (package P2 step 1: moving forfeits dig-in)', () => {
         const briefing = makeBriefing({ donorPosture: 'dig_in' });
 
-        expect(computeEmptySectorReliefReassignments(briefing)).toEqual([]);
+        expect(computeEmptySectorReliefReassignments(briefing).map((r) => r.brigade_id)).toEqual(['relief_brigade']);
     });
 
     it('does not issue competing intent for a donor already in transit', () => {
@@ -153,13 +153,13 @@ describe('empty-sector relief reassignment', () => {
             .toBe('op:test:rear');
     });
 
-    it('does not issue intent for a donor with a pending dig-in posture order', () => {
+    it('takes a donor with a pending dig-in order when it is the only legal one, as intent only', () => {
         const briefing = makeBriefing();
         briefing.state_ref.military.brigade_posture_orders = [
             { brigade_id: 'relief_brigade', posture: 'dig_in' },
         ];
 
-        expect(computeEmptySectorReliefReassignments(briefing)).toEqual([]);
+        expect(computeEmptySectorReliefReassignments(briefing).map((r) => r.brigade_id)).toEqual(['relief_brigade']);
         expect(briefing.state_ref.military.formations.relief_brigade.location_osid)
             .toBe('op:test:rear');
     });
@@ -322,13 +322,13 @@ describe('empty-sector relief reassignment', () => {
             expect(computeEmptySectorReliefReassignments(briefing)).toEqual([]);
         });
 
-        it('does not borrow a sibling brigade while its own pool is only dug in', () => {
+        it('commits its own dug-in rear rather than borrowing a sibling (dug-in donors are legal)', () => {
             const briefing = makeBriefing();
             const own = addOwn(briefing, 'own_dug_in_rear', 'op:test:c', 'rear', 'dig_in');
             const ownBefore = structuredClone(own);
 
-            expect(computeEmptySectorReliefReassignments(briefing)).toEqual([]);
-            expect(own).toEqual(ownBefore); // dug-in exclusion unchanged
+            expect(computeEmptySectorReliefReassignments(briefing)).toEqual([relief('own_dug_in_rear')]);
+            expect(own).toEqual(ownBefore); // intent only: no location or posture write
         });
 
         it('breaks a tie between equal own rear brigades by formation id', () => {
