@@ -1,0 +1,15 @@
+## 2026-11-16 — One shared RBiH-HRHB "at war" predicate (control-identical; re-pinned)
+
+- **Why** (red-team finding on the lock-conflict panel; the orchestrator folded it in and ruled that it is measured separately). Readers of the RBiH-HRHB alliance disagreed exactly at 0.0:
+  - `isRbihHrhbAtWar` and minority erosion use ≤ 0;
+  - `bot_corps_stance` (RBiH and HRHB branches), `bot_corps_ai`'s bilateral diversion and `bot_early_war` used < 0;
+  - `bot/bot_strategy`'s RBiH appeasement penalty used > 0.
+  So for a turn with the alliance at exactly 0.0 (t93 in the baseline) some systems saw war and others did not.
+- **Change.** The five divergent readers call `isRbihHrhbAtWar` (alliance ≤ `HOSTILE_THRESHOLD`): `src/sim/combat/bot_corps_stance.ts` (two branches), `src/sim/combat/bot_corps_ai.ts`, `src/sim/early_war/bot_early_war.ts`, `src/sim/bot/bot_strategy.ts`.
+- **Proof** (on main `69c566349`; logs `C:/Pyrrhic/AWWV-worktrees/_logs/b5-scorer-20261116/aw_*`).
+  - Historical 188w: hash `044a3f85f003e7c7`. Checkpoints 709/709/708/681, guard intact.
+  - Control-identical to main: `control_delta`, activity, formations, operation AARs and the end report are all byte-identical. Only state changes: `final_save` and `weekly_report`, for the one turn at exactly 0.0.
+  - Emergent `f98539c388ffb459`: 709/709/708/680, intact.
+  - Baselines re-pinned; a second run matches.
+  - The 43 test files that touch these readers pass (716 tests). tsc clean.
+- The lock-conflict fix (the back-channel floor and the contradiction rule) is **held** on `claude/b5-alliance-lock-conflict` until package P2 and the RF-ROSTER precedence fix make the Farz chain robust. Measured alone it breaks the guard through Farz (an "all objectives already owned" skip at t179).
