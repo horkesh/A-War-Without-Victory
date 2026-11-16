@@ -1374,8 +1374,11 @@ export function resolveAttackOrdersOsid(
             applyOfficerCasualtyLoss(a, Math.round(finalAttackerCas * frac), a.personnel ?? 0);
         }
         for (const entry of defenderAftermathEntries) {
-            const preCasualtyPersonnel = (entry.formation.personnel ?? 0) + entry.casualties;
-            applyOfficerCasualtyLoss(entry.formation, entry.casualties, preCasualtyPersonnel);
+            // N5 follow-up 1 (2026-11-16): officer loss reads the brigade's OWN casualties. In a
+            // sector-coverage battle the whole sector's casualties were charged to the primary.
+            const ownCasualties = defenderCasualtyShares?.get(entry.formation.id) ?? entry.casualties;
+            const preCasualtyPersonnel = (entry.formation.personnel ?? 0) + ownCasualties;
+            applyOfficerCasualtyLoss(entry.formation, ownCasualties, preCasualtyPersonnel);
         }
 
         // Probes are recon-by-force and never capture territory. Capture
