@@ -21,6 +21,16 @@
  * prefers a corps the current campaign plan holds on economy or containment; otherwise the corps
  * with the most enemy contact. The objective is that corps' first buildable enemy settlement on its
  * front (checked with the same `queryDirectiveObjection` the desktop uses before staging).
+ *
+ * Played-test options (package "1994-95 attack and defence", 2026-11-16), all opt-in; without them the
+ * President behaves exactly as above:
+ *   requestAxis      : concentrate every Request-op on one corps and on targets in the named
+ *                      municipalities (one axis). No buildable axis target records a refusal.
+ *   preferExhausted  : among candidate corps, prefer one whose corps exhaustion is above the planning
+ *                      gate (MAX_EXHAUSTION_FOR_OPERATION), so an exhausted corps is ordered forward.
+ * With either option set, each staged Request-op also leaves a `request_details` record (corps
+ * exhaustion at the order, objection, cost, clash) that the compare tool joins to the operation's
+ * after-action report.
  */
 
 import { createRequire } from 'node:module';
@@ -28,6 +38,7 @@ import type { FactionId, GameState } from '../../src/state/game_state.js';
 import { strictCompare } from '../../src/state/validateGameState.js';
 import { raiseArmyClash } from '../../src/sim/combat/army_clashes.js';
 import { queryDirectiveObjection } from '../../src/desktop/desktop_sim.js';
+import { MAX_EXHAUSTION_FOR_OPERATION } from '../../src/sim/combat/bot_constants.js';
 
 const requireCjs = createRequire(import.meta.url);
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -42,6 +53,26 @@ const clashIpc = requireCjs('../../src/desktop/army_clash_ipc.cjs');
 
 export type PresidentKind = 'hands_off' | 'engaged' | 'meddler';
 
+/** Opt-in played-test options. Absent: the President behaves exactly as before. */
+export interface PresidentPolicyOptions {
+    requestAxis?: { corpsId: string; municipalities: string[] };
+    preferExhausted?: boolean;
+}
+
+/** One staged Request-op, recorded only when a played-test option is set. */
+export interface PresidentRequestDetail {
+    turn: number;
+    corps_id: string;
+    target_osid: string;
+    /** The operation the inject-op-directive step builds from this order. */
+    operation_name: string;
+    corps_exhaustion_at_order: number;
+    above_planning_gate: boolean;
+    forced_over_objection: boolean;
+    ca_cost: number;
+    clash: string | null;
+}
+
 export interface PresidentTurnLog {
     gestures: string[];
     requests: string[];
@@ -50,6 +81,8 @@ export interface PresidentTurnLog {
     backed: string[];
     /** Acts he wanted but could not take, each `<kind>:<reason>`. */
     refusals: string[];
+    /** Present only when a played-test option is set. */
+    request_details?: PresidentRequestDetail[];
 }
 
 export function emptyPresidentTurnLog(): PresidentTurnLog {
@@ -119,8 +152,12 @@ function applyGestures(state: GameState, faction: FactionId, defs: Map<string, a
     }
 }
 
-/** The corps he orders forward: one the plan holds back if any (crosses the plan), else the busiest front. */
-function requestCandidates(state: GameState, faction: FactionId): Array<{ corpsId: string; targets: string[] }> {
+/**
+ * The corps he orders forward: one the plan holds back if any (crosses the plan), else the busiest front.
+ * With `requestAxis`, only that corps and only targets in the axis municipalities. With
+ * `preferExhausted`, a corps above the planning gate sorts first.
+ */
+export function requestCandidates(state: GameState, faction: FactionId, opts?: PresidentPolicyOptions): Array<{ corpsId: string; targets: string[] }> {
     const enemyByCorps = new Map<string, Set<string>>();
     for (const sector of Object.values(state.military.corps_front_sectors ?? {}) as any[]) {
         if (!sector?.corps_id || sector.faction !== faction) continue;
@@ -131,15 +168,21 @@ function requestCandidates(state: GameState, faction: FactionId): Array<{ corpsI
     const plan = state.military.campaign_plans?.[faction];
     const heldBack = new Set((plan && plan.valid_until_turn >= state.meta.turn ? plan.front_priorities : [])
         .filter((fp) => fp.role === 'economy' || fp.role === 'contain').map((fp) => fp.corps_id));
+    const exhausted = (corpsId: string) => (state.military.corps_command?.[corpsId]?.corps_exhaustion ?? 0) > MAX_EXHAUSTION_FOR_OPERATION;
+    const axis = opts?.requestAxis;
+    const inAxis = (osid: string) => !axis || axis.municipalities.some((m) => osid.startsWith(`op:${m}:`));
     return [...enemyByCorps.entries()]
+        .filter(([corpsId]) => !axis || corpsId === axis.corpsId)
+        .map(([corpsId, targets]) => [corpsId, new Set([...targets].filter(inAxis))] as const)
         .filter(([, targets]) => targets.size > 0)
-        .sort((a, b) => Number(heldBack.has(b[0])) - Number(heldBack.has(a[0])) || b[1].size - a[1].size || strictCompare(a[0], b[0]))
+        .sort((a, b) => (opts?.preferExhausted ? Number(exhausted(b[0])) - Number(exhausted(a[0])) : 0)
+            || Number(heldBack.has(b[0])) - Number(heldBack.has(a[0])) || b[1].size - a[1].size || strictCompare(a[0], b[0]))
         .map(([corpsId, targets]) => ({ corpsId, targets: [...targets].sort(strictCompare) }));
 }
 
-async function applyRequestOp(state: GameState, faction: FactionId, baseDir: string, log: PresidentTurnLog): Promise<void> {
+async function applyRequestOp(state: GameState, faction: FactionId, baseDir: string, log: PresidentTurnLog, opts?: PresidentPolicyOptions): Promise<void> {
     if (current(state) < opDirective.REQUEST_OP_COST) { log.refusals.push('request_op:insufficient_ca'); return; }
-    for (const candidate of requestCandidates(state, faction).slice(0, 3)) {
+    for (const candidate of requestCandidates(state, faction, opts).slice(0, 3)) {
         if (state.military.corps_command?.[candidate.corpsId]?.pending_op_directive) continue;
         for (const targetOsid of candidate.targets.slice(0, 5)) {
             const objection = await queryDirectiveObjection(state, { corpsId: candidate.corpsId, targetOsid }, baseDir);
@@ -153,17 +196,29 @@ async function applyRequestOp(state: GameState, faction: FactionId, baseDir: str
                 act: 'request_op', corpsId: candidate.corpsId, orderRef: targetOsid,
                 stagedCost: pending?.ca_cost ?? opDirective.REQUEST_OP_COST, corpsObjection: pending?.forced_over_objection === true,
             });
+            let clash: string | null = null;
             if (raised.outcome === 'raised') {
                 const answer = clashIpc.recordArmyClashAnswer(state, { clashId: raised.clashId, answer: 'insist' });
-                if (answer.ok) log.clashes.push(`insist:${raised.clashId}`);
+                if (answer.ok) { log.clashes.push(`insist:${raised.clashId}`); clash = `insist:${raised.clashId}`; }
                 else log.refusals.push(`insist:${answer.error}`);
             } else if (raised.outcome !== 'none') {
                 log.clashes.push(`${raised.outcome}:${raised.receiptId}`);
+                clash = `${raised.outcome}:${raised.receiptId}`;
+            }
+            if (opts && (opts.requestAxis || opts.preferExhausted)) {
+                const exhaustion = state.military.corps_command?.[candidate.corpsId]?.corps_exhaustion ?? 0;
+                (log.request_details ??= []).push({
+                    turn: state.meta.turn, corps_id: candidate.corpsId, target_osid: targetOsid,
+                    operation_name: `Presidential Directive — ${targetOsid}`,
+                    corps_exhaustion_at_order: exhaustion, above_planning_gate: exhaustion > MAX_EXHAUSTION_FOR_OPERATION,
+                    forced_over_objection: pending?.forced_over_objection === true,
+                    ca_cost: pending?.ca_cost ?? opDirective.REQUEST_OP_COST, clash,
+                });
             }
             return;
         }
     }
-    log.refusals.push('request_op:no_buildable_target');
+    log.refusals.push(opts?.requestAxis ? 'request_op:no_buildable_axis_target' : 'request_op:no_buildable_target');
 }
 
 /**
@@ -255,11 +310,12 @@ export async function applyPresidentPolicy(
     eventDefs: Map<string, any>,
     baseDir: string,
     log: PresidentTurnLog,
+    opts?: PresidentPolicyOptions,
 ): Promise<void> {
     if (kind === 'hands_off') return;
     applyGestures(state, faction, eventDefs, log);
     const requestEvery = kind === 'meddler' ? 4 : 8;
-    if (turnIndex % requestEvery === requestEvery - 1) await applyRequestOp(state, faction, baseDir, log);
+    if (turnIndex % requestEvery === requestEvery - 1) await applyRequestOp(state, faction, baseDir, log, opts);
     const stopEvery = kind === 'meddler' ? 6 : 12;
     if (turnIndex % stopEvery === stopEvery - 1) stopOpDue = true;
     if (stopOpDue && applyStopOp(state, faction, log) !== 'no_operation') stopOpDue = false;

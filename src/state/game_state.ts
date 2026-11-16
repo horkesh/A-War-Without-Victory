@@ -1847,8 +1847,16 @@ export interface DisplacementEvent {
     ethnicity: FactionId;
     /** Faction controlling the origin OSID at time of displacement (the causer). */
     caused_by?: FactionId;
+    /**
+     * Routed share only: people moved to another municipality inside BiH. The whole wave is
+     * `displaced + killed + fled_abroad`, each person once (RB1). Before RB1 the killed and fled abroad
+     * were also counted inside `displaced`; a save played across the upgrade keeps cumulative stores
+     * (refugees_created, flows, turn summaries) that mix both contracts (recorded limitation, no migration).
+     */
     displaced: number;
+    /** People killed in this wave (not displaced). */
     killed: number;
+    /** People who left BiH in this wave. */
     fled_abroad: number;
     settled: number;
 }

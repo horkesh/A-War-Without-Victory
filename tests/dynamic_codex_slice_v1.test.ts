@@ -652,7 +652,8 @@ describe('R4 Phase 4 - dynamic claims name their truth owner', () => {
             { ghostId: 'force_quality_inversion', state: makeState({ event_flags: { vrs_quality_inverted: true } }), turn: 60 },
             {
                 ghostId: 'paramilitary_streak_refused',
-                state: makeState({ event_flags: { paramilitary_authorization_refused: true, clean_record: true } }),
+                // RF-PM1: RS-only entry.
+                state: makeState({ event_flags: { paramilitary_authorization_refused: true, clean_record: true }, player_faction: 'RS' as FactionId }),
                 turn: 80,
             },
             { ghostId: 'winter_held', state: makeState({ event_flags: { winter_held_through_turn: true } }), turn: 80 },

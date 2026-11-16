@@ -96,7 +96,7 @@ const RS_NAMES: string[] = [
     'Operacija Hrast',          // Oak
     'Operacija Kamen',          // Stone
     'Operacija Oklop',          // Armor
-    'Operacija Vihor',          // Whirlwind
+    'Operacija Granit',         // Granite
     'Operacija Soko',           // Falcon
     'Operacija Ponor',          // Abyss
     'Operacija Grab',           // Hornbeam (tree)
@@ -108,9 +108,9 @@ const RS_NAMES: string[] = [
     'Operacija Munja',          // Lightning
     'Operacija Topola',         // Poplar
     'Operacija Javor',          // Maple
-    'Operacija Odmazda',        // Retribution
+    'Operacija Smreka',         // Spruce
     'Operacija Zaslon',         // Screen/Shield
-    'Operacija Udar',           // Strike
+    'Operacija Nasip',          // Embankment
     'Operacija Tvrđava',       // Fortress
     'Operacija Bunar',          // Well
     'Operacija Redut',          // Redoubt
@@ -143,20 +143,20 @@ const RBiH_NAMES: string[] = [
     // 5th Corps opportunity catalog (operation_opportunity_catalog_5th_corps.ts).
     // Same name-collision class as Krivaja / Stup\u010Danica above.
     // --- Emergent: aspirational + nature + Islamic ---
-    'Operacija Sabur',          // Patience (Islamic virtue)
+    'Operacija Temelj',         // Foundation
     'Operacija Nada',           // Hope
     'Operacija Osvit',          // First light / Daybreak
-    'Operacija Hajka',          // Hunt / Chase
+    'Operacija Ždral',          // Crane (bird)
     'Operacija Pravda',         // Justice
-    'Operacija Oluja',          // Storm
+    'Operacija Snijeg',         // Snow
     'Operacija Kiša',           // Rain
     'Operacija Sjena',          // Shadow
     'Operacija Šahin',         // Peregrine falcon (Islamic/Turkish)
     'Operacija Ćuprija',      // Bridge (Turkish/Bosnian)
-    'Operacija Džihad',        // Struggle (spiritual, not holy war)
-    'Operacija Gazija',         // Veteran warrior (Turkish/Bosnian)
+    'Operacija Prevoj',        // Mountain pass
+    'Operacija Vedrina',        // Clear weather
     'Operacija Ihlas',          // Sincerity (Islamic term)
-    'Operacija Grad',           // Hail (weather)
+    'Operacija Magla',          // Fog
     'Operacija Lavina',         // Avalanche
     'Operacija Kopljem',        // By the Spear
     'Operacija Ponos',          // Pride
@@ -191,12 +191,12 @@ const HRHB_NAMES: string[] = [
     // Same name-collision class as Krivaja / Stup\u010Danica / Sana above.
     // --- Emergent: Croatian weather/force/action ---
     'Operacija Jugo',            // Sirocco wind (Adriatic)
-    'Operacija Bljesak',         // Flash
+    'Operacija Bujica',          // Torrent
     'Operacija Guja',            // Viper
-    'Operacija Vihor',           // Whirlwind
+    'Operacija Mećava',          // Blizzard
     'Operacija Grmljavina',      // Thunderstorm
     'Operacija Strijela',        // Arrow
-    'Operacija Udar',            // Strike
+    'Operacija Mlaz',            // Jet / stream
     'Operacija Nakovanj',        // Anvil
     'Operacija Čekić',          // Hammer
     'Operacija Kobac',           // Sparrowhawk
@@ -209,7 +209,7 @@ const HRHB_NAMES: string[] = [
     'Operacija Grom',            // Thunder
     'Operacija Plima',           // Tide
     'Operacija Oseka',           // Ebb tide
-    'Operacija Proboj',          // Breakthrough
+    'Operacija Zalet',           // Run-up / momentum
     'Operacija Karike',          // Links (chain)
     'Operacija Tmina',           // Darkness
     'Operacija Žalac',          // Sting

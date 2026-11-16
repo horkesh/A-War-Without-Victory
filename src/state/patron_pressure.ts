@@ -113,10 +113,16 @@ export function sortIvpConsequenceIds(ids: readonly string[]): string[] {
 }
 
 function getCurrentTurnAtrocityVisibility(state: GameState): number {
-    const displacedThisTurn = (state.displacement.displacement_event_log ?? [])
+    // RB1: everyone a displacement event harmed — routed (`displaced`), killed and fled
+    // abroad, each counted once. `displaced` alone is the routed share; reading only it made
+    // killing more people lower visibility once the takeover writer logged routed-only.
+    const harmedThisTurn = (state.displacement.displacement_event_log ?? [])
         .filter((event) => event.turn === state.meta.turn)
-        .reduce((sum, event) => sum + Math.max(0, event.displaced ?? 0), 0);
-    return clamp01(displacedThisTurn / 100000);
+        .reduce((sum, event) => sum
+            + Math.max(0, event.displaced ?? 0)
+            + Math.max(0, event.killed ?? 0)
+            + Math.max(0, event.fled_abroad ?? 0), 0);
+    return clamp01(harmedThisTurn / 100000);
 }
 
 function hasConsequence(active: string[] | undefined, id: string): boolean {

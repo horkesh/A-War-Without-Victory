@@ -15,9 +15,54 @@
 
 The renewable RBiH presidential address (first turn 84, then about 136 and 188; turn 0 is April 1992) said "a people in the fourth year of siege", which is wrong at turns 84 (second year) and 136 (third). It now reads "a people who have lived under siege this long". One narrative sentence in `war_1993.json`; narrative and historian seats keep it; the event has no Bosnian localization. Headless 188-week artifacts unchanged. Evidence: `docs/40_reports/evidence/20261116_address_year_copy/`.
 
+## 2026-11-16 — B0: bot peace-plan responses measure territory by area, the unit of the plan split
+
+Batch B, item B0 (freeze cut, Fable consult 2 revision 2; must-fix before emergent ships).
+
+**Defect.** In emergent mode, `computeBotResponse` (`src/sim/negotiation/peace_plans.ts`) compared a faction's share of SETTLEMENTS (`getFactionTerritoryPct`, a count over `political_controllers`) with the plan's `proposed_split`, which is an AREA share (`peace_plan_data.ts`: "area-weighted as the game measures"). At week 40 of a hands-off emergent run RS held 52.7% of settlements but 63.4% of the area. The RS Vance-Owen floor read a 9.7pp gap instead of 20.4pp, the scorer accepted, and the war ended in January 1993 (`negotiated_peace:vance_owen`). The Contact Group floor, the Owen-Stoltenberg and Dayton floors, and the territory-gain bias every faction's accept option carries all read the same wrong measure. The floor constants were written for area ("Sim gap ~22pp (RS ~65%, VOPP proposes ~43%)").
+
+**Change.**
+- `getFactionTerritoryPct` → exported `getFactionTerritoryAreaPct`: km² held over the country total (`getOsidAreas`), the measure negotiation capital (`compute_capital.ts`) and the settlement map (`settlementTerritoryPct`) already use.
+- `political_peace_plan.ts`: the call-site contract now states the area measure.
+- Swept every other negotiation and political floor for the same mismatch: none. `computePoliticalPeacePlanResponse` has one caller. Dayton's package negotiation uses `settlement.territory_pct` and `area_pct` (both area). The delegation folder's held/total counts are labelled as settlements.
+
+**Tests.** `tests/peace_plans.test.ts`: RS takes the largest settlements until it holds 40% of them (under VOPP's 43% by count, above 43% + 18pp by area). The test asserts that the helper returns the area share and that RS rejects Vance-Owen without ending the war. The peace-plan and political slices pass (10 files, 199 tests).
+
+**Proof.**
+- Historical 188w: final_save `799e43a7ee2f4764`, equal to the baselines manifest (main after #690). 709/709/708/681, guard intact, engine health PASS, 0 consistency failures. Historical mode never calls the scorer, so this is byte-identical by construction and by measurement.
+- Hands-off emergent 188w (uncommitted scenario copy, `decision_mode: emergent`): the war runs to week 188 (no game over). VOPP t40 RS rejected; O-S t70 RBiH rejected; CG t118 RS rejected, all as in history. Scores 710/707/707/670 (before the fix: 710/667/657/568, ended at t40). Srebrenica and Žepa fall on schedule and every hold holds. Engine health PASS, 0 consistency failures, HRHB western cascade 29 (historical 31).
+- The emergent guard still reads BREACHED: Farz receipts 0/4, unwarranted late 2nd Corps captures Seher t164 and Petrovo t179. These are the same breaches the probe's peace-pinned diagnostic showed; they come from emergent political decisions after t40 and go to the B5 triage. The historical guard is intact.
+
+Evidence: `C:/Pyrrhic/AWWV-worktrees/_logs/batch-b-20261116/` (b0_*).
+
 ## 2026-11-16 — Citation audit batch 3: Balkan Battlegrounds page and chapter references in event and essay data
 
 The historian read the cited location of every BB reference (109 groups, 279 mentions): 109 mentions cite the right printed page, 36 are right only at the knowledge-base extraction or PDF number (the printed page shown is wrong), 12 hold in part, 108 (39%) are about something else, 14 are accurate "does not exist" notes. 80 of the wrong ones cite Vol. II "chapters" (BB Vol. II has addenda and annexes only); 27 are pages from the wrong year or place (Vol. II pp. 358-366, 312-321, 287-314, 406-417, 459-462, 471-475, 506-520, 28-31, 9-32; Vol. I pp. 198-229); the printed-page rule is Vol. I = PDF - 37 and Vol. II = PDF - 19. 95 hidden notes record the correction; extraction numbers become printed pages everywhere (Vol. I p. 187 to p. 151, p. 462 to p. 425, pp. 416-420 to pp. 379-383, Vol. II pp. 536-538 to pp. 517-519 and others); 52 player-visible strings (events and Codex essays) drop wrong pages and non-existent chapters, leaving the source name, or show the verified printed page; the Vol. II pp. 28-31 Vance-Owen claim now cites Vol. I p. 8. One more visible audit-vocabulary leak on main ("the H4 audit") is fixed and added to the permanent leak test, and the historian's earlier PR-B rewrite that cited an extraction number (Vol. I pp. 418-421) now cites pp. 381-384. New test `tests/ui/event_bb_citations.test.ts`; `rbih_state_identity` (pinned) keeps 3 visible Vol. II pp. 406-417 cites until its next re-pin. Evidence and exhaustive file list: `docs/40_reports/evidence/20261115_bb_citation_audit/`.
+
+## 2026-11-16 — CODE3: the President can stop an operation while it is still being planned, and a halt holds (byte-identical)
+
+- **Why.** The 1.0 final-behaviour record accepts CODE3 (scripted and event-raised operations have no exhaustion gate) because the President's Stop-op is the counter. Two things broke that claim.
+  - **Offer.** The Decision Room card and the opportunity dossier offered Stop-op only for an operation in execution (`presidentialDecisionRoom.ts`). The engine and IPC already halted a planning op through the same clean path (`apply-op-halts`, `op_halt.cjs`).
+  - **Halt did not hold** (found by the game-designer seat, proven by a failing test). The player-faction pre-planned injection runs every week and re-queues any authored operation that is neither active, queued nor resolved. A halt removes the op and writes no AAR, so the halted authored operation was injected again the next week. This affected halts in either phase: the President paid 25 Authority and the operation came back.
+- **Fix.**
+  - The Stop-op card and the dossier's Stop-op are offered for an operation in planning or execution. Not in recovery, and not when the save did not report the phase (the adapter defaults that to planning). One shared helper, `stopOpDirective`.
+  - The price stays 25 Authority, with the same army objection, clash and patron consequence (game-designer seat: no discount).
+  - Planning ops get their own copy (EN, BCS) and sort after executing ones.
+  - `prePlannedOperationAlreadyResolved` (`pre_planned_operations.ts`) counts a halt in the corps' `halted_op_record` as the operation's resolution. One authored operation is one attempt. Triggered operations were already guarded by `fired_event_ids`.
+- **Copy (ui-ux seat).**
+  - The dossier line now reads "This operation can be halted only while it is being prepared or carried out." (BCS "Obustava operacije moguća je samo dok se ova operacija priprema ili izvodi.").
+  - The BCS planning line is gender-free.
+  - The army-objection line reads "The army wants the operation to go ahead." / "Armija želi da se operacija provede.", which suits a planning op.
+- **Canon (canon-compliance seat: COMPLIANT WITH AMENDMENT).** Amended in the same change:
+  - Engine Invariants §14.10b: Stop-op is offered when the bound operation is in planning or execution.
+  - Systems Manual §6.5: the same, plus "a halt, in either phase, resolves an authored operation: it is not queued again".
+  - Game Bible :298: "halt a live operation (in planning or execution)".
+  - No FORAWWV change.
+- **Proof.**
+  - **Byte-identical.** One 188-week run on main after #696 gives `70f4dc05bf375bc7`, equal to main. `halted_op_record` and the Stop-op offer are player-only.
+  - **Tests.** New `tests/stop_op_halt_no_requeue.test.ts`: a halted pre-planned operation, in planning and in execution, is removed and not re-queued or re-injected the next week. It failed before the fix. An un-halted one still queues.
+  - Decision Room tests: a planning op gets the card at the same price and payload with planning copy; recovery, unreported-phase and enemy ops do not.
+  - 33 related files pass (634 tests). tsc is clean.
 
 ## 2026-11-16 — CODE4: equal-power defenders rank by formation id (freeze Batch C5; byte-identical)
 
@@ -48,6 +93,34 @@ The historian read the cited location of every BB reference (109 groups, 279 men
   - Re-pinned `data/derived/scenario/baselines/manifest.json`. The 40-week structural fingerprint is unchanged (`3b1ddd64fb4f1600`).
 - **Tests.** `tests/army_hq_gathering.test.ts` now asserts the assessment's and the doctrine's retired fields are gone and that the corps ceilings still apply. 296 tests in the affected files pass, and tsc is clean.
 
+## 2026-11-16 — Package "1994-95 attack and defence": the appendix C harness can run the played test (tooling, inert)
+
+The package's second pass test is "played": an engaged RBiH President who concentrates on one axis can win ground at a visible cost, including with a Request-op on an exhausted corps. The scenario tester found that #682's harness could not run that test. Its Request-op picked a held-back corps or the busiest front and the first buildable target, never one axis or an exhausted corps, and recorded no exhaustion or outcome.
+
+**Change (tools only, opt-in):**
+- `tools/ai_play/president_policies.ts`:
+  - `requestCandidates` is exported and takes `requestAxis` (one corps, targets in named municipalities) and `preferExhausted` (a corps above `MAX_EXHAUSTION_FOR_OPERATION` first);
+  - with either option, each staged Request-op leaves a `request_details` record.
+- `tools/ai_play/desktop_calibration_compare.ts`:
+  - new flags `--request-axis` and `--request-prefer-exhausted`;
+  - with either, the output adds `president_requests` (each order joined to its after-action report in `state.operation_history`) and `requested_corps_exhaustion` per turn.
+- The README documents the flags.
+- **Found:** an engaged President with `--event-policy bot_equivalent` stops on `strategic_posture_review_rbih` (no response `accept_ceasefire_terms`). That is a pre-existing harness defect, documented and not fixed here.
+
+**Inert.**
+- No `src/` change, so the 188-week hash cannot move.
+- A 10-turn engaged run without the new flags gives the same output as main, except the tool's own entry in `entrypoint_source_sha256`.
+
+**Tests.** New `tests/president_policies_request_axis.test.ts`:
+- the default order is unchanged;
+- preferExhausted puts the exhausted corps first;
+- the axis keeps only its corps and municipalities;
+- an empty axis gives no candidate.
+
+`tests/desktop_calibration_compare.test.ts` passes.
+
+**Smoke run (12 turns, axis 3rd Corps on Maglaj/Zavidovići/Žepče).** A Request-op at t7 on Donja Bočinja was forced over the commander's objection and cost 25 Authority. The join shows it ended `failure / defender_power_too_high`, with 0 attacks.
+
 ## 2026-11-16 — Package "1994-95 attack and defence", P0: the multi-corps offensive pre-set is retired (inert)
 
 Fable consult 2, Revision 2 (P0): retire RF-STRENGTH's dead write and its never-run replacement, proving the hash unchanged.
@@ -70,6 +143,60 @@ Fable consult 2, Revision 2 (P0): retire RF-STRENGTH's dead write and its never-
 - New `tests/sim/coordination_preset_retired.test.ts`.
 
 Evidence: `C:/Pyrrhic/AWWV-worktrees/_logs/pkg-1994-95-step0/` (p0_*).
+
+## 2026-11-16 — RB6: 13 bot operation-pool names replaced in place (Džihad and twelve real or loaded names)
+
+`src/sim/combat/operation_names.ts`: "Operacija Džihad" (never an ARBiH operation; the ICTY ties the word to the foreign El Mujahed Detachment and Serb propaganda used it to brand all Muslims) became Prevoj; the real operation names Sabur, Oluja, Bljesak, Udar (twice), Proboj and Vihor (twice) and the loaded names Hajka, Gazija, Grad and Odmazda became Temelj, Snijeg, Bujica, Nasip and Mlaz, Zalet, Granit and Mećava, Ždral, Vedrina, Magla and Smreka, each in its original slot (pool lengths 38 / 39 / 35 unchanged, selection deterministic). Historian and narrative seats chose the replacements; each was checked against the pools, the reserved list, the authored catalogues, BB Vol. I and II and the ICTY texts. New test `tests/operation_names_no_real_operations.test.ts`. Data-only (names move the state hash only for runs that draw those slots): measured pass in the PR. Evidence and rename map: `docs/40_reports/evidence/20261116_rb6_operation_names/`.
+
+## 2026-11-16 — Baselines: pins re-blessed after #703 merged with the advisory pins check failing
+
+Pins only. No code, data or behaviour changes.
+
+- #703 (RB6: bot operation-pool names replaced in place) changed the 188w artifacts, but the baseline manifest was not re-pinned. It merged with the advisory "Baseline pins" check failing, so every later PR compared against stale pins. #708 inherited the same advisory failure through its merge ref.
+- This change re-blesses `data/derived/scenario/baselines/manifest.json` to what main 07b553fbe (after #708) actually produces:
+  - end_report.md, final_save.json, run_summary.json and weekly_report.jsonl change;
+  - the other four pins are unchanged;
+  - final_state_hash `01572f50dfea2378`, the same value CI computed on #708's merge ref.
+- 40w structural fingerprint: `3b1ddd64fb4f1600`, unchanged (check passes, no update).
+- Proof: a second run matches the new pins ("Baseline regression: all scenarios match").
+- Checkpoints 709/709/708/681, guards intact, strict health PASS.
+
+## 2026-11-16 — RF-PM1: the paramilitary-refusal consequence fires only on a real refusal (§6 panel, measured)
+
+RF fidelity-pass fix. Calibration is held: scores are recorded and are not a merge bar.
+
+**Defect.** `csq_paramilitary_authorization_refused` tested only `paramilitary_mode_equals rear_pocket`, which is the default mode. On main it fired at t21 with RS holding 28 deployments and `rs_paramilitary_authorized` set. It:
+- set `clean_record` and `paramilitary_authorization_refused`;
+- paid RS +12 international standing and +12 international credibility (the credibility is a no-op, because the `negotiation_capital` key it writes is absent);
+- unlocked Codex ghost 7 for every faction.
+
+**Change.**
+- New condition `paramilitary_deployments_at_most {faction, max}` reads `paramilitary_deployment_count`.
+- The trigger now requires all of:
+  - rear_pocket mode;
+  - RS deployments at most 0;
+  - `rs_paramilitary_authorized` not set;
+  - RS war crimes not above 1.
+- The narrative and effect text no longer claim a clean record. The historian wrote the narrative, the narrative-designer seat amended it, and the historian fact-checked the result. It ends: "That is not a record without killing. RS forces are still at war, and where they take a town, its people are still killed or driven from their homes." The effect text reads: "This does not mean RS forces killed no one."
+- Ghost 7 (`predParamilitaryStreakRefused`) is RS-only.
+- `rbih_paramilitary_policy_1992`: the `always_deny` preview no longer promises the RS-only consequence, and the `ask` explanation drops its internal id (engine C-1, red-team C-PM2). The RS `ask` explanation is reworded the same way.
+- That event is under the reviewed-contract pin, so the pin is re-pinned to 11091 / `57f0d7f927df002c`. A pending decision saved before RF-PM1 carries the two old preview values; exactly those are upgraded before comparison (`PRE_RF_PM1_POLICY_PREVIEW`), and any other drift is still refused.
+- Without the re-pin every RBiH policy response threw, and a player was stuck at the opening decision. The headless runs could not see it; the integrator and the lane found it in `pre_first_advance_paramilitary_policy` and `identity_pending_text_drift`.
+
+**Measured** (188w, final run on main 76e5fcabd, against a main run at the same commit, 70f4dc05bf375bc7):
+- final_state_hash `9e17d22f520f94e6`. Control, activity, formation and operation-AAR files are byte-identical to main. Checkpoints 709/709/708/681, per-cell delta zero, guards intact, strict health PASS (consistency 0).
+- Diagnostic vs main 4cd7ba559: main fires at t21; the branch never fires; control-identical.
+- What goes away: the false flags, ghost 7 for RBiH and HRHB players, and the +12 RS standing (it had decayed to nothing by w188).
+
+**Recorded limitation (determinism seat P2).** A save played on the old code past t21 has already fired this once-only consequence. It keeps both flags and the +12 standing. Ghost 7 no longer shows it, because it now requires RS deployments = 0. There is no migration, because reversing deltas already paid would be a fabricated state write. `data/derived/latest_run_final_save.json` is such a save; it is regenerated with the normal artifact refresh, never by hand.
+
+**Gate.** §6 panel:
+- seats: historian, scenario-creator-runner-tester, engine/systems, red-team; determinism alongside;
+- implementer excluded; named integrator;
+- unanimous APPROVE with conditions, all met in this change;
+- §6 record row in `SENSITIVE_HISTORY_DESIGN_GATE.md`.
+
+Evidence: `C:/Pyrrhic/AWWV-worktrees/_logs/cl-rf-pm1-20261115/`. Register items PM1-R1 to PM1-R7 are in the out-of-scope register; none is tagged post-1.0.
 
 ## 2026-11-16 — Pass 20: BC06 gestures accepted as final, RC dropped, BC18 C as an add-on candidate, #689-#692 recorded
 
@@ -102,6 +229,78 @@ Docs only; no `src/` or `data/` change, no hash change.
 
 - The L7 lane's SE9 attribution is done; the orchestrator's dispositions are in `docs/plans/2026-11-15-pre-freeze-work-list.md`: N1 Konjic September Offensive force balance (calibration pass, authored operation data); N2 probe-repeat (trace, then a must-fix if confirmed, sequenced with P3 and P5); N3 Kreševo HVO pocket and N4 ARBiH coverage at Prusac and Vesela (re-measure after P2, then fix or calibration pass); N5 sector aggregation, a Konjic defender at Ljubinje (trace, then a must-fix if engine); N6 unread concentration zones (retire, Part 4).
 - "Probes never occupy on a decisive win" is a Part 5 candidate for the next game-designer and historian sitting, with the probe-casualty question (F2). The owner reference questions Ljuta (all), Golubići October 1995 and Sitnik October 1995 join the Part 6 painted-reference batch. SE9 stays parked behind P2.
+
+## 2026-11-16 — Pass 24: the B3 finding, B2-b, and jan1993_to_dayton registered
+
+Docs only; no `src/` or `data/` change, no hash change.
+
+- B3 (political-directive producer, Wave 6 coupling, RS corps-role overlay): the Batch B lane found the overlay is a hard plan gate, not a 0.02 weight (`plan.ts:173-176`): it locks all ARBiH corps to the economy role and lifts every RS and HRHB corps. Ruled B3-b (no produced directive for any faction, the human's staff included) with B2-b (stop producing `army_directive_pushback`, drain the old events on load). B3 lands after package P2 and before P3. Work list rows B2 and B3 and the final-behaviour record (section 6, item 6) updated.
+- `jan1993_to_dayton` cannot start on main: `data/source/municipalities_1990_initial_political_controllers_jan1993.json` has never existed in git history. Read-only check: it is not reachable by a player (the desktop New Game and IPC accept only `apr_1992`; no scenario picker renders; `SCENARIO_REGISTRY` has no consumer in `src/` besides tests). Registered in the work list (Part 4, J1) and ruled RETIRE by the orchestrator (inert, proves the hash unchanged, owner the first lane that frees up, may land after the freeze and before 1.0); a January 1993 start could return later as an add-on campaign (content with its own painted control), not as engine work.
+
+## 2026-11-16 — Pass 25: #703, #705, #706 recorded; N6 retire becomes fix; C7 ruled the bounded skip
+
+Docs only; no `src/` or `data/` change, no hash change.
+
+- #705, CODE3: Stop-op reaches operations in planning and a halt holds (a halted authored operation used to be re-queued the next week). Byte-identical. Engine Invariants §14.10b, Systems Manual §6.5 and Game Bible line 298 amended. In the final-behaviour record the CODE3 grounds hold from planning onward; the canon line about the exhaustion gate stays owed. Work list row C9.
+- #703, RB6: 13 bot operation-pool names that were real or loaded operations replaced in place (Džihad to Prevoj and 12 more). The names live in state, so the headless `final_state_hash` moved to 1391f69248072728, with zero differences after mapping the names back; recorded as the main hash at #703, not the freeze hash. #705 was measured byte-identical against the pre-#703 main (70f4dc05bf375bc7) and has not been re-measured on top of #703.
+- #706: the one-axis, exhausted-corps Request-op in the played-test harness (tooling, opt-in, inert).
+- Dispositions: N6 moves from retire to FIX (stable-key concentration zones, #709 open; player-visible in the command-strain text); C7 PK5 is ruled the bounded skip (a plain skip would have deleted Srebrenica-Cerska and Pracha River).
+- Open at this pass: #697, #700, #701, #708, #709.
+
+## 2026-11-16 — Pass 26: owner ruling on disclosure (b) (D1), the B5 scorer items, #708 recorded
+
+Docs only; no `src/` or `data/` change, no hash change.
+
+- Owner ruling, 2026-11-16, via the orchestrator: "Yes, go with that" to the §6 panel's fix making bot factions respect their own standing paramilitary policy if the historian and measurement support it. Disclosure (b) is confirmed: a default RBiH President (autonomy 2, `always_deny`) is condemned for 4 to 5 staff sweeps, already on main in emergent mode, because bots auto-approve regardless of policy and the 11-05 directive makes staff copy bots. Option C makes `always_deny` bind everyone. Recorded as must-fix D1 (a false §6 claim), the approval conditional on the historian and the measurement, no automatic fallback; the UI lane runs it and its PR 1 (mode gating) is held until it lands.
+- Batch B's B5 (the emergent-pick scorer) items registered in the work list: defects 1, 2 and 4 are fixes; defect 3 (`divergence_threshold` unread) is a wire-or-retire ruling (the orchestrator leans wire); defect 6 (RS patron decay) is a ruling; defect 5 (option effects ignored) is a Part 5 candidate; `war_crimes_tolerance` unread goes to §6; the 15 divergent emergent picks are option data for the calibration pass (t2, t11 and t17 under §6); follow-ups: retire the `political_leaders` state, the `claude_plays_vrs` harness, dead pushback copy (UI lane).
+- #708 (RF-PM1, §6 panel unanimous APPROVE with conditions, control-identical) recorded in work list row A1 and the roadmap merged list; #703's historian notes are pointed at in row C4. The hash of main after #703 and #708 together is not yet recorded (#708 measured 9e17d22f520f94e6 on the pre-#703 base).
+- Open at this pass: Batch B's queue #697, #700, #701, #710, and #709.
+
+## 2026-11-16 — Pass 27: the CODE3 canon line, and the hash and stale-pins record for #703
+
+Canon wording (no behaviour change) and docs; no `src/` or `data/` change, no hash change. FORAWWV is not edited.
+
+- Canon, on the orchestrator's explicit instruction of 2026-11-16: "Scripted (authored and triggered) operations are not exhaustion-gated; discretionary plans are; exhaustion is a cost; Stop-op is the player's counter, from planning onward (CODE3, 2026-11-16)." Added to Engine Invariants §14.10b (paragraph on authored historical operations, with an Amended note) and Systems Manual §6.5, next to the sentences #705 amended. It records shipped behaviour: the exhaustion gate (`MAX_EXHAUSTION_FOR_OPERATION`) covers discretionary commander plans only.
+- Canon record: the Part 5 sitting of 2026-11-15 (game-designer and historian, each RATIFY WITH CONDITIONS, CODE3 accepted as final); the condition that a halt be accepted in planning was met by #705. Record: `docs/40_reports/governance/20261115_FINAL_BEHAVIOUR_AT_1_0.md`, section 1 and section 6 item 1 (now done).
+- #703's hash is recorded as its claimed hash, 1391f69248072728 (label-only), not as a measured main hash: #703 merged with the advisory baseline-pins check red and did not re-pin the manifest, so main's pins are stale. The RF-ROSTER lane's standalone re-pin PR follows #708; its measured hash becomes the main hash at the re-pin, and its run also confirms #705's byte-identity on top of #703. The #708 hash is recorded only after that lands.
+
+## 2026-11-16 — Pass 28: the owner's history input on ARBiH attrition, N5 and RB9 rulings, P2 steps 1 and 2 measured, the provisional combined hash
+
+Docs only; no `src/` or `data/` change, no hash change.
+
+- Owner history input, 2026-11-16 (verbatim): "Historically, ARBiH undertook offensives from 1994 that had low chance of winning, but Delić imposed the strategy. Goal was to weaken VRS everywhere. ARBiH had a lot more men, and Delić was willing to spend them to go on strategic offensive." Consequence: package P3 must produce an emergent General Staff attrition doctrine (low-odds launches, accepted losses, the VRS attrited) that the President can accept or refuse; the pass line becomes 20 to 40% of a historically sized launch count (about 24 operations in t99 to t178). Fable consult 4 is open on its design. Work list P3 row, final-behaviour record section 8.
+- N5 (the L7 lane's seat rulings): the reactive reach of 5 hops is design; casualties and side-effects landing on a primary picked by nominal power is a must-fix defect, sequenced after P2 step 1; the 198 against 285 gap is design; the flat hop cutoff, the nominal-average cap and `rs_2nd_herzegovina`'s home go to the calibration pass.
+- RB9 ruled (a): a bounded return rule (a dormant record clears after 12 or more weeks held by the group's own or a non-hostile side, the pool decremented) lands back-to-back with RB9 before the freeze; §6 unanimous, with a red-team anti-gaming check.
+- P2 measured: step 1 (candidate 1 of 8) held objectives 100% to 71%, VRS operations reaching battle 0 of 8 to 3 of 9, VRS sub-30 brigades 61 to 24; Farz P-A fails on a missing Army HQ marker (traced) and P-B is a new fail (2nd Corps at Brčko and Gradačac, t161 to t162); not merged. Step 2 (candidate 2 of 8): the army-reserve repair works mechanically but the pool is only two VRS elites; no priority above the threat cap; the 9999 threat sentinel is a fix (step 2b); the reserve-elite OOB audit goes to the calibration pass.
+- Hash: main with #703 and #708 is 01572f50dfea2378, the main hash at the re-pin (#713, merged on main; three measurements agree: the re-pin run on main 07b553fbe, CI on #708's merge ref, and the Batch B lane's inert B4 run). The orchestrator had asked for it to be recorded as provisional until a "merged" message; #713 is verifiably merged (git log), so it is recorded as confirmed.
+
+## 2026-11-16 — Pass 29: #697 (B0) recorded; option C for D1 measured and not supported
+
+Docs only; no `src/` or `data/` change, no hash change.
+
+- #697, B0: the bot peace-plan floors (RS and Contact Group, Owen-Stoltenberg, Dayton and the territory-gain bias) now measure territory by area. Inert in historical mode (the scorer is not called there), so main stays at 01572f50dfea2378. A hands-off emergent game now runs to t188 instead of ending at Vance-Owen at t40; peace-plan answers match history; emergent scores 710 / 707 / 707 / 670 (emergent hash 357b158daf80d1e3, a measurement); the guard is still breached in emergent mode and goes to the B5 triage.
+- D1, option C: C and C' measured and not supported (they remove 1 of 5 RBiH sweeps, because 4 happen at t1 to t2 before the policy event; both perturb the war and break a guard and parity). Per the owner's condition it returns to the owner after the historian's per-sweep ruling and an option-A measurement. PR 1 (mode gating) stays held.
+
+## 2026-11-16 — Pass 30: the emergent guard breaches are routed to package P2, not the B5 triage
+
+Docs only; no `src/` or `data/` change, no hash change.
+
+- Orchestrator correction to pass 29: the emergent guard breaches left after B0 (Farz receipts 0 of 4, the 2nd Corps taking Seher at t164 and Petrovo at t179) are the thin-defence defect showing in emergent mode. They are routed to the package's P2 (re-measure in emergent after P2), not to the B5 triage, which covers political divergences only. Work list B0 row and the final-behaviour record corrected.
+
+## 2026-11-16 — Pass 31: Fable consult 4 accepted (P3 order, P5 corrected, the army stance put to the President, F2 moves up)
+
+Docs only; no `src/` or `data/` change, no hash change.
+
+- Consult 4 on the owner's history input of 2026-11-16: no new doctrine, trigger or threshold. "Controlled Counteroffensive" already sets the general offensive from week 80; three locks (the 1st Corps re-abandoning its plan after Washington, the 2nd Corps held over the exhaustion threshold by its own probes, the 3rd Corps held by "campaign role contain", B3) and the objectives rule (Army HQ picks the highest-threat sector) keep launches at 8 against history's 24.
+- P3 order: B3, clear the abandoned plan, probes stop at the plan threshold of 30, weakest-sector objectives, one launch estimate (VRS operations reach battle), N2, the local-occupation scope, exhaustion in combat. P5 is corrected: Fable withdrew "the probe gate at 40"; `PROBE_EXHAUSTION_MARGIN` is retired.
+- New player-path item (Part 3): the army-wide stance is put to the President (silence is consent; a refusal holds it at balanced for the hold period).
+- F2 moves up: the offensives fail as in history but do not attrit the VRS (brigade strength 129,000 to 141,000; failed operations 600 to 1,700 killed against 45 to 305); the pass line adds "the VRS is visibly attrited into 1995". Fable's run 2 (on the P2 step-1 base only): 20 launches, 11 failed, 46% held, Farz P-B passes.
+
+## 2026-11-16 — Pass 32: AI1 replaced by consult 4; RF-L3d follow-ups 1, 3 and 4 pending P3 ratification
+
+Docs only; no `src/` or `data/` change, no hash change.
+
+- Orchestrator ruling, 2026-11-16: AI1 (the force-ratio term in target ranking) is REPLACED by Fable consult 4's "objectives from the weakest sector first" and "one launch estimate"; the force-ratio consideration moves to the Army HQ target choice and the estimator. RF-L3d follow-ups 1, 3 and 4 are pending P3 ratification: the package seats rule each as covered by consult 4's steps, still needed as its own step, or retired, with a one-line reason. Work list P3 row, roadmap BC19 row, board 7c and the final-behaviour record updated.
 
 ## 2026-11-15 — Command loop L7: army clashes (proposal 2A step A1; owner decision 4)
 

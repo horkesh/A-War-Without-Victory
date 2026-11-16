@@ -18,7 +18,8 @@
  *   2. evaluateScheduledTransitions(state, turn, roster) — record
  *      `kept_past_schedule_since_turn` markers for variation rules.
  *   3. applyEmergentVariationRules(state, turn, roster) — competence decay,
- *      stubbornness escalation, cooldown halving. Faction-symmetric mechanism.
+ *      stubbornness escalation. Faction-symmetric mechanism. (Cooldown
+ *      halving retired with the autonomous launch, freeze cut B4.)
  *   4. processArmyCommanderLifecycle(state, engagedCorpsIds, roster) —
  *      deterministic death, political relief, and authored succession.
  *   5. applyArmyCoRosterStep(state, roster) — browser-safe pipeline entry.
@@ -47,8 +48,8 @@
  *   Ring 1 mechanism (faction-symmetric); Ring 2 data (faction-asymmetric values
  *   in roster JSON). No FORAWWV / paint anchor / political_controllers / OOB
  *   / rupture-wiring touch. §6 surface flag (per A3 closeout c8ff93d8): A4
- *   enables A3's autonomous-launch path to FIRE; parity-with-existing — does
- *   NOT introduce a new §6 surface.
+ *   once enabled A3's autonomous-launch path; that path is retired (B4), so
+ *   A4 carries no §6 surface.
  */
 
 import type { GameState, FactionId } from '../../state/game_state.js';
@@ -89,8 +90,8 @@ export interface ArmyCoVariationRules {
         competence_decay_per_12w: number;
         stubbornness_escalation: number;
         stubbornness_cap: number;
-        cooldown_halving: boolean;
-        cooldown_halved_to_turns: number;
+        // cooldown_halving / cooldown_halved_to_turns retired with the
+        // autonomous launch they shortened (freeze cut B4).
     };
     early_relief: {
         political_capital_cost: number;
@@ -115,7 +116,6 @@ export const A4_PIPELINE_STEP_NAME = 'evaluate-army-co-transitions';
 export const A4_DEFAULT_COMPETENCE_DECAY_PER_12W = -0.05;
 export const A4_DEFAULT_STUBBORNNESS_ESCALATION = 1;
 export const A4_DEFAULT_STUBBORNNESS_CAP = 5;
-export const A4_DEFAULT_COOLDOWN_HALVED_TO_TURNS = 6;
 export const A4_DEFAULT_EARLY_RELIEF_PC_COST = 4;
 export const A4_DEFAULT_PREDECESSOR_MORALE_PENALTY = -0.5;
 
@@ -687,13 +687,8 @@ export function evaluateScheduledTransitions(
  *     (B1). Floored at 1.0 to preserve combat-formula bounds.
  *   • Stubbornness escalates by +1 once at the moment the officer first
  *     overstays (capped at `stubbornness_cap`).
- *   • Cooldown halving is signaled by mutating the officer's
- *     `last_autonomous_launch_turn` so that A3's existing cooldown gate
- *     (12 turns) computes the halved duration without modifying A3 source.
- *     We subtract `(AUTONOMOUS_LAUNCH_COOLDOWN_TURNS - cooldown_halved_to_turns)`
- *     from the stored value when first overstaying, which makes the next launch
- *     eligible after `cooldown_halved_to_turns` turns instead of the full
- *     12-turn window.
+ * (A third rule, halving the autonomous-launch cooldown by rewriting
+ * `last_autonomous_launch_turn`, was retired with that launch: freeze cut B4.)
  */
 export function applyEmergentVariationRules(
     state: GameState,
@@ -710,8 +705,6 @@ export function applyEmergentVariationRules(
     const decayPer12w = rules.competence_decay_per_12w ?? A4_DEFAULT_COMPETENCE_DECAY_PER_12W;
     const stubbornnessEscalation = rules.stubbornness_escalation ?? A4_DEFAULT_STUBBORNNESS_ESCALATION;
     const stubbornnessCap = rules.stubbornness_cap ?? A4_DEFAULT_STUBBORNNESS_CAP;
-    const cooldownHalvingEnabled = rules.cooldown_halving === true;
-    const cooldownHalvedTo = rules.cooldown_halved_to_turns ?? A4_DEFAULT_COOLDOWN_HALVED_TO_TURNS;
 
     const officerIndex = new Map<string, NamedOfficer>();
     for (const o of officerData) officerIndex.set(o.id, o);
@@ -724,7 +717,6 @@ export function applyEmergentVariationRules(
         if (os.status !== 'active') continue;
         type LooseOS = NamedOfficerState & {
             kept_past_schedule_since_turn?: number;
-            cooldown_halved_applied?: boolean;
         };
         const losse = os as LooseOS;
         const overstayStart = losse.kept_past_schedule_since_turn;
@@ -748,27 +740,6 @@ export function applyEmergentVariationRules(
         if (stubbornnessEscalation !== 0 && overstayTurns === 1) {
             const cur = typeof officer.stubbornness === 'number' ? officer.stubbornness : 3;
             officer.stubbornness = Math.min(stubbornnessCap, cur + stubbornnessEscalation);
-        }
-
-        // Cooldown halving — one-shot at first overstay. Mutates A2 substrate
-        // field consumed by A3's existing read API (no A3 source modification).
-        if (cooldownHalvingEnabled && overstayTurns === 1 && !losse.cooldown_halved_applied) {
-            // A3's AUTONOMOUS_LAUNCH_COOLDOWN_TURNS = 12. Halving means the
-            // next launch is eligible after `cooldown_halved_to_turns` turns
-            // (default 6). Mutate stored last_autonomous_launch_turn so the
-            // gate (turn - last >= 12) effectively requires only 6.
-            const last = losse.last_autonomous_launch_turn;
-            const A3_FULL_COOLDOWN = 12;
-            const shift = A3_FULL_COOLDOWN - cooldownHalvedTo;
-            if (typeof last === 'number') {
-                losse.last_autonomous_launch_turn = last - shift;
-            } else {
-                // Officer hasn't launched yet; set a synthetic prior so the
-                // first overstay still permits an early launch after the
-                // halved window.
-                losse.last_autonomous_launch_turn = turn - cooldownHalvedTo;
-            }
-            losse.cooldown_halved_applied = true;
         }
     }
 }
