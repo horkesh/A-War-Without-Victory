@@ -175,7 +175,8 @@ function rankDefendersByPowerWithEntries(
         })),
     );
     return predictorPerfTime(profilePrefix, '.rankDefendersByPower.sortAndTotal', () => {
-        const sorted = [...scored].sort((a, b) => b.power - a.power);
+        // CODE4: same id tie-break as combat_math.ts rankDefendersByPower.
+        const sorted = [...scored].sort((a, b) => (b.power - a.power) || strictCompare(a.formation.id, b.formation.id));
         const totalPower = sorted[0]!.power + sorted.slice(1).reduce(
             (sum, entry) => sum + entry.power * STACKING_DEFENDER_SUPPORT,
             0,

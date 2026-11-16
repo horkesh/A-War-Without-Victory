@@ -1945,7 +1945,10 @@ export function rankDefendersByPower(
                 );
             return { f: d, p: breakdown.power, breakdown };
         })
-        .sort((a, b) => b.p - a.p);
+        // CODE4 (2026-11-16): equal power breaks by formation id, so the primary (who takes the
+        // casualties) and the stacking order never depend on the caller's list order.
+        // The predictor mirrors this (combat_predictor.ts rankDefendersByPowerWithEntries).
+        .sort((a, b) => (b.p - a.p) || strictCompare(a.f.id, b.f.id));
     const primary = sorted[0];
     if (primary === undefined) {
         throw new Error('rankDefendersByPower requires at least one defender');
