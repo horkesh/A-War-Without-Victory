@@ -113,7 +113,11 @@ gates:
       settlement-count share with an area share; that floor fix (RS and Contact Group) is
       merged (#697, by area), a hands-off emergent game now runs to t188, and the other
       emergent divergences are triaged: engine defects before the freeze, option weights in
-      the calibration pass.
+      the calibration pass. Condition 7 is MET on main at f98c074d9 (#727, 2026-11-16): a
+      hands-off emergent 188-week run passes every guard (Farz 4 of 4 receipts, P-B pass,
+      enclaves on schedule), scores 709 / 709 / 708 / 680, and all 15 divergent emergent picks
+      revert to history; the Drina "restrained" pick (t11) is recorded as a section 6
+      artefact. It is re-run at the frozen commit.
       From that commit the freeze is a byte test: a change merges freely if the 188-week
       headless final_state_hash is unchanged, and a change that moves the hash needs the
       owner's OK. The one calibration pass then runs on the frozen engine under the
