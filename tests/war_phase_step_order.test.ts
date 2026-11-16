@@ -300,6 +300,10 @@ describe('war-phase step ordering', () => {
         //        transfers / corps retirement after activate-corps; inert without events.
         // +1 from enforce-oct1995-ceasefire (2026-11-14, council fix 3): directly after
         //        evaluate-events; inert unless the October 1995 ceasefire was accepted.
-        expect(stepNames.length).toBe(197);
+        // -2 from retiring produce-political-directive and apply-army-directive-interpretation
+        //        (2026-11-16, freeze cut B3: the political-directive chain).
+        expect(stepNames.length).toBe(195);
+        expect(stepNames).not.toContain('produce-political-directive');
+        expect(stepNames).not.toContain('apply-army-directive-interpretation');
     });
 });

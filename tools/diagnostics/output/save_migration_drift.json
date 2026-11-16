@@ -1,7 +1,7 @@
 {
   "generated_by": "tools/diagnostics/save_migration_drift_audit.cjs",
-  "latest_schema_version": 38,
-  "registered_migration_count": 38,
+  "latest_schema_version": 39,
+  "registered_migration_count": 39,
   "strict_required_field_count": 79,
   "anonymous_default_count": 0,
   "fields": [],
@@ -157,6 +157,10 @@
     {
       "version": 38,
       "description": "Persist durable militia casualty accounting: per-pool casualty rows on each "
+    },
+    {
+      "version": 39,
+      "description": "Freeze cut B3 + B2: the political-directive chain is retired. Empties the stale "
     }
   ],
   "required_fields": [
