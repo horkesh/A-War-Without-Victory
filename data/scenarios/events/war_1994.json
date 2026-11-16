@@ -41,8 +41,8 @@
     "priority": 50,
     "auto_resolve_turns": 2,
     "historical_default_response_id": "acknowledge_pressure",
-    "historical_source": "Washington Agreement, 1 March 1994; ICTY Prlić et al. IT-04-74-T Trial Judgment (29 May 2013) Vol. 1 §§357-422 (the earlier cite: Vol. 1 §§357-422 is expert and evidence-assessment sections and the 1990-91 background, not the Washington track or the collapse of the Croat-Bosniak war; Washington is Vol. 1 §§487-490; paragraph not verified for this claim) and §§556-590 (HZ HB Presidency-Zagreb axis directing the February 1994 ceasefire posture and the Washington Agreement framework preconditions); Vol. 2 §§600-680 (the earlier cite: Vol. 2 §§600-680 is the end of Jablanica and the start of Mostar, not the Washington preconditions or a 1995 HV-HVO command (1995 is outside the indictment period); Washington is Vol. 1 §§487-490; paragraph not verified for this claim) (Tudjman-Boban coordination through the Granic-Silajdžić diplomatic channel preceding the 23 February 1994 ceasefire); Granić, Vanjski poslovi (2005) — Granić-Šilajdžić channel record; Tudjman Presidential Transcripts admitted at Prlić (February 1994 set); US State Department Christopher/Redman shuttle records, February 1994; Balkan Battlegrounds Vol. II pp. 506-520.",
-    "source_note": "The February 1994 Zagreb ceasefire order follows the Washington track: with Croatia's EU trajectory and credible US sanctions on the table, Tudjman directs Boban via the Granic-Silajdžić channel to stand down HVO operations against ARBiH (Prlić; Balkan Battlegrounds Vol. II pp. 506-520). Acknowledge-pressure is the documented historical posture — Boban accepted the directive, opening the Washington Agreement signature window (1 March 1994). Resist-patron is a structurally plausible counterfactual grounded in the analogous patron-resistance precedent at R6 (RS Assembly rejection of VOPP, 5-6 May 1993).",
+    "historical_source": "Washington Agreement, 1 March 1994; ICTY Prlić et al. IT-04-74-T Trial Judgment (29 May 2013) Vol. 1 §§357-422 (the earlier cite: Vol. 1 §§357-422 is expert and evidence-assessment sections and the 1990-91 background, not the Washington track or the collapse of the Croat-Bosniak war; Washington is Vol. 1 §§487-490; paragraph not verified for this claim) and §§556-590 (HZ HB Presidency-Zagreb axis directing the February 1994 ceasefire posture and the Washington Agreement framework preconditions); Vol. 2 §§600-680 (the earlier cite: Vol. 2 §§600-680 is the end of Jablanica and the start of Mostar, not the Washington preconditions or a 1995 HV-HVO command (1995 is outside the indictment period); Washington is Vol. 1 §§487-490; paragraph not verified for this claim) (Tudjman-Boban coordination through the Granic-Silajdžić diplomatic channel preceding the 23 February 1994 ceasefire); Granić, Vanjski poslovi (2005) — Granić-Šilajdžić channel record; Tudjman Presidential Transcripts admitted at Prlić (February 1994 set); US State Department Christopher/Redman shuttle records, February 1994; Balkan Battlegrounds Vol. II pp. 506-520 (the earlier cite: Balkan Battlegrounds Vol. II pp. 506-520 does not carry this claim; Vol II Annex 47 pp.449-453 (Granic named p.450).).",
+    "source_note": "The February 1994 Zagreb ceasefire order follows the Washington track: with Croatia's EU trajectory and credible US sanctions on the table, Tudjman directs Boban via the Granic-Silajdžić channel to stand down HVO operations against ARBiH (Prlić; Balkan Battlegrounds Vol. II). Acknowledge-pressure is the documented historical posture — Boban accepted the directive, opening the Washington Agreement signature window (1 March 1994). Resist-patron is a structurally plausible counterfactual grounded in the analogous patron-resistance precedent at R6 (RS Assembly rejection of VOPP, 5-6 May 1993).",
     "effect": {
       "kind": "narrative",
       "text": "Tuđman orders Boban to stand down HVO operations against ARBiH under the Washington Agreement framework."
@@ -1423,7 +1423,7 @@
     "responding_faction": "RBiH",
     "bot_response_logic": "historical",
     "historical_default_response_id": "accept",
-    "historical_source": "Balkan Battlegrounds Vol. I p.22; Contact Group proposal, July 1994; ICTY Karadžić Trial Judgment (IT-95-5/18-T).",
+    "historical_source": "Balkan Battlegrounds Vol. I pp. 21-23; Contact Group proposal, July 1994; ICTY Karadžić Trial Judgment (IT-95-5/18-T).",
     "source_note": "The Contact Group plan created the 51/49 formula and was accepted by Sarajevo under pressure, but it was not implemented after RS rejection.",
     "staff_assessment": "Acceptance preserves international credibility and keeps Federation diplomacy aligned, but it means accepting an unsatisfying territorial formula rather than a delivered peace.",
     "trigger_evidence": [
@@ -1930,7 +1930,7 @@
         }
       }
     },
-    "historical_source": "Contact Group proposal, July 1994 (US/UK/France/Germany/Russia 51:49 framework). Richard Holbrooke, To End a War (Random House, 1998), Ch. 5 (Contact Group framework, Christopher and Galbraith shuttle diplomacy). Warren Christopher, In the Stream of History (Stanford University Press, 1998) Ch. 7 (US-RBiH shuttle records). UNSCR 942 (23 September 1994) — Contact Group plan and SC welcome of Federation acceptance. Balkan Battlegrounds Vol. II Ch. 12 (Sarajevo Presidency acceptance posture under US pressure)."
+    "historical_source": "Contact Group proposal, July 1994 (US/UK/France/Germany/Russia 51:49 framework). Richard Holbrooke, To End a War (Random House, 1998), Ch. 5 (Contact Group framework, Christopher and Galbraith shuttle diplomacy). Warren Christopher, In the Stream of History (Stanford University Press, 1998) Ch. 7 (US-RBiH shuttle records). UNSCR 942 (23 September 1994) — Contact Group plan and SC welcome of Federation acceptance. Balkan Battlegrounds Vol. II (Sarajevo Presidency acceptance posture under US pressure)."
   },
   {
     "id": "hrhb_contact_group_response_1994",
@@ -2852,7 +2852,7 @@
         }
       }
     },
-    "historical_source": "ICTY Karadžić Trial Judgment (IT-95-5/18-T, 24 March 2016) paras. 4263-4310 — Belgrade-Pale distancing and Pale's accommodation calculus. UN Security Council Resolutions 943 (23 September 1994), 970 (12 January 1995), and 988 (21 April 1995) — FRY-sanctions suspension framework recognising Belgrade's compliance with the embargo against RS. Balkan Battlegrounds Vol. II pp. 287-314 — Belgrade embargo chronology and VRS operational supply impact."
+    "historical_source": "ICTY Karadžić Trial Judgment (IT-95-5/18-T, 24 March 2016) paras. 4263-4310 — Belgrade-Pale distancing and Pale's accommodation calculus. UN Security Council Resolutions 943 (23 September 1994), 970 (12 January 1995), and 988 (21 April 1995) — FRY-sanctions suspension framework recognising Belgrade's compliance with the embargo against RS. Balkan Battlegrounds Vol. II pp. 287-314 (the earlier cite: Balkan Battlegrounds Vol. II pp. 287-314 does not carry this claim; Belgrade blockade: Vol I p.23; embargo-lift debate: Vol II pp.557-559.) — Belgrade embargo chronology and VRS operational supply impact."
   },
   {
     "id": "anti_sniping_agreement_1994",
@@ -2944,7 +2944,7 @@
     "responding_faction": "RBiH",
     "bot_response_logic": "historical",
     "historical_default_response_id": "press_offensive",
-    "source_note": "B6 worksheet 2026-05-27 + v1.3 packet §3.6 forward-looking guard: B6 is Ring-2 operational/posture (no atrocity authorization surface). Any future `csq_rbih_bihac_*` row consuming `bihac_5th_corps_1994_response` outcomes MUST NOT re-author atrocity authorization, cleansing, hostage-taking, or any sensitive-act response option. Cost floors on `consolidate_defend` and `accept_ceasefire_terms` per Game Designer Wave 1 review on packet v1.1 edit 13 prevent counterfactual dominance of the historical `press_offensive` line. BB Vol. II pp. 406-417 region (Bihać 1994 chronology, 5th Corps offensive, October high-water mark, November-December counter-attack), UNSCR 958 of 19 November 1994 (NATO close-air-support authority extended to Bihać safe area), NATO 21 November 1994 Udbina airfield close-air-support action.",
+    "source_note": "B6 worksheet 2026-05-27 + v1.3 packet §3.6 forward-looking guard: B6 is Ring-2 operational/posture (no atrocity authorization surface). Any future `csq_rbih_bihac_*` row consuming `bihac_5th_corps_1994_response` outcomes MUST NOT re-author atrocity authorization, cleansing, hostage-taking, or any sensitive-act response option. Cost floors on `consolidate_defend` and `accept_ceasefire_terms` per Game Designer Wave 1 review on packet v1.1 edit 13 prevent counterfactual dominance of the historical `press_offensive` line. BB Vol. II pp. 406-417 (the earlier cite: BB Vol. II pp. 406-417 does not carry this claim; Bihac 1994: Vol II Annex 59-61 (pp.513-542); Vol I p.27, ch.63.) region (Bihać 1994 chronology, 5th Corps offensive, October high-water mark, November-December counter-attack), UNSCR 958 of 19 November 1994 (NATO close-air-support authority extended to Bihać safe area), NATO 21 November 1994 Udbina airfield close-air-support action.",
     "staff_assessment": "Pressing the offensive mirrors the documented Dudaković posture and the historical 5th Corps capture of APWB-held Velika Kladuša on 21 August 1994, which Abdić retook on 17 December 1994; the strategic value lies in eliminating the APWB rear threat and catalyzing the international engagement decision tree leading to Operation Storm 1995 and Mistral/Sana 1995. Consolidating the defense reduces immediate casualties but permits APWB persistence and weakens 5th Corps political-recruit posture into 1995. Seeking negotiation signals conditional military pressure to APWB and RS. Accepting ceasefire terms functionally recognizes the APWB split, sharply degrades 5th Corps capability for 1995 operations, and pays a federation-level cohesion cost.",
     "trigger_evidence": [
       "The 5th Corps offensive plan from Dudaković is before the Presidency.",
@@ -3185,7 +3185,7 @@
         "delta": 0
       }
     ],
-    "historical_source": "BB Vol. II pp. 406-417 region (Bihać 1994 chronology; 5th Corps autumn offensive; October high-water mark at Grabež; November-December VRS/RSK/APWB counter-attack). Balkan Battlegrounds Vol. II p.516 (5th Corps overran Velika Kladuša on 21 August 1994) and p.535 (Velika Kladuša fell back to Abdić on 17 December 1994). UN Security Council Resolution 958 (19 November 1994) extending NATO close-air-support authority to the Bihać safe area. NATO operation records for the 21 November 1994 Udbina airfield close-air-support action. ICTY Karadžić Trial Judgment (IT-95-5/18-T, 24 March 2016) references the Bihać 1994 crisis as part of the VRS-RS strategic chronology. Balkan Battlegrounds Vol. II Abdić / APWB declaration of 27 September 1993 and APWB military operations through 1994-1995."
+    "historical_source": "Balkan Battlegrounds Vol. II region (Bihać 1994 chronology; 5th Corps autumn offensive; October high-water mark at Grabež; November-December VRS/RSK/APWB counter-attack). Balkan Battlegrounds Vol. II p.516 (5th Corps overran Velika Kladuša on 21 August 1994) and p.535 (Velika Kladuša fell back to Abdić on 17 December 1994). UN Security Council Resolution 958 (19 November 1994) extending NATO close-air-support authority to the Bihać safe area. NATO operation records for the 21 November 1994 Udbina airfield close-air-support action. ICTY Karadžić Trial Judgment (IT-95-5/18-T, 24 March 2016) references the Bihać 1994 crisis as part of the VRS-RS strategic chronology. Balkan Battlegrounds Vol. II Abdić / APWB declaration of 27 September 1993 and APWB military operations through 1994-1995."
   },
   {
     "id": "operation_cincar_1994",
@@ -3310,10 +3310,10 @@
       "embargo_lifted": true
     },
     "historian_audit_row": "H4",
-    "source": "BB1 p.63; docs/40_reports/audits/20260517_HISTORIAN_OPEN_QUESTIONS_RESEARCH.md H4",
-    "historical_source": "BB1 p.63; 2026-05-17 Historian audit H4.",
+    "source": "BB1 p.27; docs/40_reports/audits/20260517_HISTORIAN_OPEN_QUESTIONS_RESEARCH.md H4",
+    "historical_source": "BB1 p.27; 2026-05-17 Historian audit H4.",
     "source_tier": "balkan_battlegrounds",
-    "source_note": "BB1 p.63 and the H4 audit support the nonbinding General Assembly action and the shift in enforcement posture. The event keeps the legal distinction explicit: the Security Council embargo remained in force even as outside support channels widened."
+    "source_note": "Balkan Battlegrounds Vol. I, p. 27 supports the nonbinding General Assembly action and the shift in enforcement posture. The event keeps the legal distinction explicit: the Security Council embargo remained in force even as outside support channels widened."
   },
   {
     "id": "carter_ceasefire_1994",
@@ -3332,7 +3332,7 @@
     "responding_faction": "RBiH",
     "bot_response_logic": "historical",
     "historical_default_response_id": "respect",
-    "source_note": "Carter Center archives, Balkan Battlegrounds Vol. II Ch. 12, and the ICTY Karadžić Judgment ground the winter COHA.",
+    "source_note": "Carter Center archives, Balkan Battlegrounds Vol. II, and the ICTY Karadžić Judgment ground the winter COHA.",
     "staff_assessment": "Sarajevo can preserve diplomatic credibility by honoring the Carter pause, while using the lower tempo to rebuild under scrutiny.",
     "trigger_evidence": [
       "Jimmy Carter is shuttling between Sarajevo and Pale, 18-20 December 1994; the temporary truce he is seeking would start on 23/24 December.",
@@ -3436,6 +3436,6 @@
     "sets_flags": {
       "carter_ceasefire_active": true
     },
-    "historical_source": "Carter Center archives. BB Vol. II Annex 61, pp. 534-535 and BB Vol. I p. 250 (the earlier \"BB Vol. II, Ch. 12\" does not exist; the BB Vol. I chronology page is not verified). ICTY Karadžić Judgment."
+    "historical_source": "Carter Center archives. BB Vol. II Annex 61, pp. 534-535 and BB Vol. I pp. 28-29 (the earlier \"BB Vol. II, Ch. 12\" does not exist; the BB Vol. I chronology page is not verified). ICTY Karadžić Judgment."
   }
 ]
