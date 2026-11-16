@@ -15,7 +15,7 @@ Batch A, §6 displacement (A3). Calibration is held: scores are recorded and gua
   - The killed and the fled abroad never return. `refugees_created` is untouched. A shorter hold returns nobody.
 - War-room readers skip dormant timers; the validator accepts the new optional fields. The `displaced_out` comment and the sim_smoke invariant are updated (only `lost_population` is monotonic). DISPLACEMENT_MASTER §timers is updated.
 
-**Measured** (188w, final run on main 1a3a6c1c2 against a main run at the same commit `83b8e8cd36023899`; branch `f0717546116324d0`):
+**Measured** (188w, final run on main fdaa8629b against a main run at the same commit `03159b9ee1e5877f`; branch `11af5fd2f0cdd97e`):
 - RB9 alone was control-identical, refugees_created −1.19%. With the return rule, about 80k return by w188 (Serbs ~58k, Bosniaks ~20k, Croats ~5k).
 - Historical checkpoints 709/707/706/674 against main 709/709/708/681 (the same as the v2 diagnostic). Guards hold; strict health PASS.
 - Lost: Pobuđe, Teslić Vitkovci, Jajce Barevo, Drvar ×2, Kalinovik Sela, Mostar Vranjevići, Nevesinje ×2. Gained: Donji Vakuf ×2.
