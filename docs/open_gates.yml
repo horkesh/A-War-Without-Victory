@@ -108,11 +108,12 @@ gates:
       (docs/40_reports/governance/20261115_FINAL_BEHAVIOUR_AT_1_0.md) is merged. (6) One
       named commit is recorded as the frozen source in the roadmap and the owner is told. (7) A hands-off
       emergent 188-week run at the frozen commit passes the history guards (Farz, enclave,
-      the western-Bosnia cascade) and the historian accepts its divergences. Today it ends at
-      week 40, when RS accepts Vance-Owen, because the peace-plan floor compares a
+      the western-Bosnia cascade) and the historian accepts its divergences. It used to end at
+      week 40, when RS accepted Vance-Owen, because the peace-plan floor compared a
       settlement-count share with an area share; that floor fix (RS and Contact Group) is
-      batch B's first item, and the other emergent divergences are then triaged: engine
-      defects before the freeze, option weights in the calibration pass.
+      merged (#697, by area), a hands-off emergent game now runs to t188, and the other
+      emergent divergences are triaged: engine defects before the freeze, option weights in
+      the calibration pass.
       From that commit the freeze is a byte test: a change merges freely if the 188-week
       headless final_state_hash is unchanged, and a change that moves the hash needs the
       owner's OK. The one calibration pass then runs on the frozen engine under the
