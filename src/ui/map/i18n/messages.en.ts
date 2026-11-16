@@ -6199,6 +6199,8 @@ export const enMessages = {
     'directive.gesture.cannotAct': 'Cannot act',
     'directive.gesture.alreadyPending': 'Answer the decision this has already put on your desk first.',
     'directive.gesture.exhausted': 'This can no longer be done in this war.',
+    'directive.gesture.notYet': 'Not possible this early in the war. Available from {date}.',
+    'directive.gesture.notYetUndated': 'Not possible this early in the war.',
     'directive.gesture.failed': 'Failed to issue the leadership action.',
     'directive.targetPicker.aria': 'Known objective settlement',
     'directive.targetPicker.placeholder': 'Choose a known objective...',

@@ -15,6 +15,31 @@
 
 The renewable RBiH presidential address (first turn 84, then about 136 and 188; turn 0 is April 1992) said "a people in the fourth year of siege", which is wrong at turns 84 (second year) and 136 (third). It now reads "a people who have lived under siege this long". One narrative sentence in `war_1993.json`; narrative and historian seats keep it; the event has no Bosnian localization. Headless 188-week artifacts unchanged. Evidence: `docs/40_reports/evidence/20261116_address_year_copy/`.
 
+## 2026-11-16 — The Ahmići consequence fires only after the 1993 war has begun and the alliance is broken (trigger only; content and wording unchanged; byte-identical)
+
+- **Why.** `csq_hvo_central_bosnia_offensive_1993` ("The Ahmići Massacre and the End of the Alliance") fired at t54-56 on `hrhb_political_goal == croat_republic` alone, whatever the RBiH-HRHB alliance. It sets alliance −1 with a 0.0 ceiling for 60 turns, and its mutex with `csq_alliance_holds_past_w35` only works within one turn. The rupture was therefore scripted from a week-3 flag. Its own text says the alliance was "already broken in practice", and the sibling `ahmici_massacre_1993` already requires the 1993 war.
+- **Measured** (instrumented diagnostic 188w; historical and hands-off emergent the same). The alliance is held at 0.40 from t10 to t40 (`ALLIANCE_FLOOR_BEFORE_WAR`). It is 0.377 at t41 after Gornji Vakuf (HRHB `escalate`), then held at 0.10 from t42 to t47 by the 12-turn floor of `csq_alliance_holds_past_w35`, then 0.076 at t48 and 0.052 at t49. The war starts at **t49** (`croat_bosniak_war_begins_1993`, `war_started_turn` 49). At t54 the alliance is −0.57. So this consequence never started the war in a left-alone game.
+- **Rulings** (historian + game designer).
+  - Gate the consequence like `ahmici_massacre_1993`: `requires_events: [croat_bosniak_war_begins_1993]` and `alliance_below 0.2`. 0.2 is `ALLIED_THRESHOLD`, matching the card's "already broken in practice"; 0.3 is still a fragile alliance.
+  - Keep the turn window, the `croat_republic` flag and the mutex (now logically exclusive). Content and wording are unchanged.
+  - Historian: the 1993 offensive was not mainly a reaction to Sarajevo. Prlić IT-04-74-T found a JCE for a Croat entity with Zagreb's participation (the 15 January 1993 ultimatum on Vance-Owen provinces 3, 8 and 10; Gornji Vakuf attacked 18 January; Vol. 2 paras 336-355). Kordić IT-95-14/2: Lašva was planned. Sarajevo's real concessions did not avert it.
+- **Proof** (main `71ffa0cb8`; logs `C:/Pyrrhic/AWWV-worktrees/_logs/b5-scorer-20261116/ah_*`, `ally_*_DIAGNOSTIC.jsonl`).
+  - Historical 188w byte-identical: `03159b9ee1e5877f` (main's pin).
+  - Hands-off emergent identical to main: `dde641b2c74838f0`.
+  - `tests/consequence_chains.test.ts`: two new cases (does not fire while the alliance holds; does not fire before the 1993 war). The firing cases now set the war and a broken alliance. Consequence, event, card and codex slices: 15 files, 280 tests pass. tsc clean.
+- **§6 panel** (Historian, scenario-tester, Engine/systems, Red-team): **unanimous GO-with-conditions**. Canon COMPLIANT WITH AMENDMENT, applied in the same change: a `SENSITIVE_HISTORY_DESIGN_GATE.md` record row and an amended-date line. Determinism PASS.
+  - The change follows Ring 3 #11: the card no longer states a dated massacre in a game whose modelled war did not produce the conflict.
+  - P2, the open Ahmići effects question, stays open with the owner and is now conditional on the war.
+  - Registered findings (not fixed here):
+    - the `ahmici_massacre_1993` card window ends at t70, so a war that starts t71-80 shows neither card nor consequence;
+    - `federation_never_fractured` is never set, so the Ahmići alliance-held note and its ghost entry can never show;
+    - that note's BCS text is a stock line, not a translation;
+    - in the historical run the alliance reads 0.15 at t68 although the consequence's 60-turn ceiling of 0.0 should still hold, so something overrides the ceiling.
+- **Not enough on its own.** Every alliance-breaker after t40 is answered by HRHB, so an RBiH President still has no lever. The orchestrator ruled on 2026-11-16 to build the RBiH lever (capitulation on the substance: ARBiH units under HVO command in provinces 3, 8 and 10, then the union of three republics, at its real price) as a content PR after A2b, with historian, narrative, game-designer and §6 seats.
+- **Calibration-pass list (registered, not changed here).**
+  - `csq_alliance_holds_past_w35` fires at t35 in every run, because the 0.40 floor makes `alliance_above 0.2` trivially true. Its 0.1 floor lock is doing history work, delaying the war to t49. Retiming it moves the hash.
+  - Five consequences check `rbih_hrhb_war_active`, which nothing sets: a dead guard.
+
 ## 2026-11-16 — B0: bot peace-plan responses measure territory by area, the unit of the plan split
 
 Batch B, item B0 (freeze cut, Fable consult 2 revision 2; must-fix before emergent ships).
@@ -54,6 +79,61 @@ Batch B, item B1 (freeze cut, Fable consult 2 revision 2): fix the code to the d
 
 Evidence: `C:/Pyrrhic/AWWV-worktrees/_logs/batch-b-20261116/` (b1_*).
 
+## 2026-11-16 — B3 + B2: the political-directive chain is retired; its undrainable officer events are drained
+
+Batch B, items B3 and B2 (freeze cut, Fable consult 2 revision 2). Scope ruled B3-b + B2-b by game-designer and corps-army-commander, confirmed by the orchestrator.
+
+**What the chain was.**
+- `produce-political-directive` (B1) wrote a verb per faction. The verb locked once war exhaustion passed 500, and exhaustion never falls, so it said the same thing for ~182 weeks.
+- `apply-army-directive-interpretation` (A3) translated that verb into per-corps roles (`army_corps_directives_by_faction`).
+- The commander briefing's C1 overlay let those roles REPLACE the CampaignPlan role. That made the overlay a hard `campaign_role` gate on fresh commander plans (`plan.ts`), not the "~0.02 weight" the freeze cut assumed. On main's final save it pinned every ARBiH corps to `economy` and lifted every RS and HRHB corps above its plan role.
+- A3 also pushed one `army_directive_pushback` officer event per faction per turn: 538 over 188 weeks, none ever acknowledged.
+  - `override-army-directive` has no handler.
+  - The UI adapter drops the type.
+  - But the sim briefing counted them, so a player at autonomy 1+ saw "N order interpretations pending" grow every week, and "Review" opened an empty list.
+- The player's own order tool (`stage-op-directive-order` → `inject-op-directive`) is a separate path and was never part of this chain.
+
+**Change.**
+- Removed both pipeline steps (`war_phases.ts`; step count 197 → 195) and deleted `political_directive_producer.ts` and its test.
+- `commander/briefing.ts`: the overlay reader and its "Wave 6" economy exception are gone. A corps role now comes from the CampaignPlan alone (`army_hq_gathering` front priorities). The plan.ts hard block, the 0.05 alignment weight and the patron term now read the plan's own roles.
+- `army_order_interpretation.ts` keeps its library functions for the claude_plays_vrs harness tools and `army_clashes.ts` (compliance score). `applyArmyDirectiveInterpretation` is marked as no longer in the pipeline.
+- B2: `collect_briefing.ts` and `player_decision_manifest.ts` exclude `army_directive_pushback`, matching the adapter.
+- Save migration v39 (CURRENT_SCHEMA_VERSION 38 → 39):
+  - deletes `political_directives_by_faction`;
+  - empties `army_corps_directives_by_faction` (the field stays);
+  - drains unacknowledged `army_directive_pushback` events;
+  - drops the staff's directive-reading traces (the pushback panel shows each faction's last trace with no age limit), keeping AUTONOMOUS_LAUNCH_PROPOSAL traces.
+  - Other officer events are untouched.
+- Startup snapshot rebuilt at schema 39; drift report regenerated.
+
+**Tests.**
+- New `tests/b3_directive_chain_retired.test.ts`: the v39 migration (slots, drain, traces, idempotence) and the briefing count (pushback not counted; a real `order_pushback` still is).
+- Updated: step order, A3 T12, A4 T11, C1 T2/T3/T4b/T10, the schema pins (freeze guard, versioned steps, drift audit) and the B2 leader-data test (producer parts removed).
+- The player's tool: `op_directive_injection`, `op_directive_staging` and `command_lever_consequences` pass.
+- 16 files, 413 tests, plus the earlier 30-file slice; `tsc` 0.
+
+**Proof (main 76e5fcabd).**
+- Historical 188w, two runs: final_save `bb2ca04839f11d8b` both times (deterministic).
+  - Compared with main's run, these are byte-identical: control_delta, weekly_report, formation_delta, activity_summary, operation_aars, watched_operations, destroyed_brigades, the brigade and displacement logs, end_report and replay manifest. CONTROL-IDENTICAL.
+  - 709/709/708/681, guard intact, engine health PASS, 0 consistency failures.
+  - The final save differs only in `pending_officer_events` (538 → 0), `army_co_decision_traces`, the two directive slots and `schema_version`. It is about 550 KB smaller.
+  - Commander state is byte-identical, so the gate never changed a corps decision in a measured run.
+- Hands-off emergent 188w with B0's source applied (uncommitted): control_delta byte-identical to the B0-only emergent run; 710/707/707/670; the same three emergent breaches (Farz 0/4, Seher t164, Petrovo t179), which belong to package P2.
+- **Re-measured on the landing main** (after #697 B0, #700 B4, #713 re-pin and #718 RB1; main pin `df791f73c26ed642`):
+  - historical and emergent 188w against main-equivalent runs: control_delta, weekly_report, formation_delta, activity_summary, operation_aars, watched_operations, destroyed_brigades and end_report all byte-identical;
+  - 709/709/708/681, guard intact.
+  - Baselines manifest RE-BLESSED (`UPDATE_BASELINES=1 npm run test:baselines`) to final_save `0a31449959639988`. The state moves only through schema v39 and the drained slots. An independent rerun reproduces it and `npm run test:baselines` passes.
+- Scenario-tester smoke (apr1993/1994/1995 starts, sep1991_to_dayton, apr1992 188w, on main e3a0c2b6a): control artifacts byte-identical to a main-equivalent reference in all five.
+
+**Canon debt (recorded, canon-seat condition).** FORAWWV.md describes the retired chain as validated substrate: lines 276-301 (§X.1 PoliticalDirective verbs, the B1 producer output, the C1 persisted slot and its overlay), 409 (the A1-A5 / B1+B2 / C1+C2 validated list) and 421 (C1 as the Ring 1 example). FORAWWV edits need the unanimous Pyrrhic panel and a same-change canon record, so the amendment is a separate panel change, not part of this one. The Systems Manual, Rulebook and Game Bible have no text that requires the chain. `SAVE_SCHEMA_EVOLUTION.md` has a v39 entry, and the code comments in `game_state.ts`, `ArmyCoPushbackPanel.tsx`, `political_leader_data_loader.ts` and `army_co_lifecycle.ts` now say the chain is retired.
+
+**Follow-ups (register).**
+- `political_leader_data` / `political_leaders` are still loaded into state at scenario start, but nothing reads them now (state-only; retiring them changes every save).
+- The claude_plays_vrs directive bridge and three-commander harness now drive a chain the game no longer reads.
+- The pushback panel's directive-objection source and its copy are now dead for new games (UI lane).
+
+Evidence: `C:/Pyrrhic/AWWV-worktrees/_logs/batch-b-20261116/` (b3_*).
+
 ## 2026-11-16 — B4: the army commander's autonomous launch is retired (inert)
 
 Batch B, item B4 (freeze cut, Fable consult 2 revision 2, RF-ROSTER "path a"): retire.
@@ -73,6 +153,98 @@ Batch B, item B4 (freeze cut, Fable consult 2 revision 2, RF-ROSTER "path a"): r
 **Follow-up (UI, not engine):** the pushback panel's "Autonomous-launch warning" section can now be shown only for a legacy save. It is a candidate for removal by the UI lane.
 
 Evidence: `C:/Pyrrhic/AWWV-worktrees/_logs/batch-b-20261116/` (b4_*).
+
+## 2026-11-16 — 1995 Croatian involvement keys on the Federation, not on the 1993 war (data; historical byte-identical)
+
+- **Why** (Fable consult 5, ruling 4; confirmed in data). `operation_summer_95` and `federation_ground_offensive_1995` required `hrhb_washington_agreement_1994`, which requires `croat_bosniak_war_begins_1993`. So an RBiH President who **kept** the alliance with HRHB got no Croatian help in 1995, less than one who broke the alliance and mended it. Emergent ("improvising") mode is the default, so this was a must-fix before the freeze, not acceptable as final.
+- **Rulings.**
+  - Game designer: gate both on the Federation existing, through the existing condition vocabulary. One branch is the Washington event firing, which is exactly the old prerequisite on the historical path. The other is the alliance above `ALLIED_THRESHOLD` (0.20).
+  - Historian: Croatian intervention in 1995 is plausible for a Federation that never fought the 1993 war. The Split Agreement (22 Jul 1995) answered Bihać, and Zagreb's own aim was the RSK (BB1 pp.74, 401; BB2 p.470). Zagreb's Herceg-Bosna aims remain, which is why help keys on the alliance state rather than being assumed.
+- **Change** (`data/scenarios/events/war_1995.json`):
+  - `operation_summer_95` drops `requires_events: [hrhb_washington_agreement_1994]`.
+  - `federation_ground_offensive_1995` keeps `requires_events: [nato_deliberate_force_1995]`.
+  - Both gain `condition: or(event_fire_count hrhb_washington_agreement_1994 ≥ 1, alliance_above 0.2)`.
+  - Tests: `tests/event_timeline_integrity.test.ts` pins both triggers, with the threshold read from `ALLIED_THRESHOLD`. New `tests/sim/events/federation_1995_alliance_gate.test.ts` covers the historical path, a kept alliance, and a broken alliance with no Washington.
+- **Re-confirmed on main `71ffa0cb8`** (#727 and #710 merged; `pa2_*` logs).
+  - Historical byte-identical to main's pin: `03159b9ee1e5877f`.
+  - Hands-off emergent identical to main: `dde641b2c74838f0`.
+- **Proof** (first measured on main `4866a4279`; logs `C:/Pyrrhic/AWWV-worktrees/_logs/b5-scorer-20261116/pa_*`).
+  - Historical 188w is byte-identical to main, `83b8e8cd36023899`. Every artifact matches except `run_meta.json`.
+  - Hands-off emergent is hash-identical to main's emergent, `cbdfdb200b1f7069`.
+  - Events, timeline and pipeline slices: 14 files, 182 tests pass. tsc is clean.
+- **Routed separately (same class, not changed here).**
+  - The engine-side benefits of a signed Washington (`croatian_support` 0.90, HV coordination, the joint bonus) are unreachable without a prior war.
+  - `rbih_washington_agreement_1994` has no war prerequisite while HRHB's does.
+
+## 2026-11-16 — A2: Washington "Federation by consent" (a never-broken alliance gets the Federation); both Washington cards key on the engine's war record (historical byte-identical)
+
+- **Why.** Same defect class as the 1995 alliance gate (#732): a President who never broke the RBiH-HRHB alliance was treated worse than one who broke it and mended it.
+  - Every Washington benefit hangs off `rbih_hrhb_state.washington_signed`: `croatian_support` 0.90, equipment and embargo relief, HV `COORDINATED_STRIKE`, the 1.15 joint bonus, the Storm and Federation catalogs, and corps release. Path A (ceasefire plus diplomatic preconditions) and Path B (patron override) both need a prior war.
+  - `rbih_washington_agreement_1994` had no war prerequisite, while HRHB's required `croat_bosniak_war_begins_1993`. In a never-broken game the RBiH card fired saying acceptance "ends the two-front Croat-Bosniak war".
+- **Rulings** (game designer + historian).
+  - Accept Path C, with two amendments: never lower an alliance already above the 0.80 lock; start no ceasefire.
+  - Historian: a Federation in early 1994 without the war is coherent only as the formalising of an existing alliance. The real treaty was "a temporary convergence of three self-interests… essentially imposed from outside", driven by the war (BB2 p.451; sequence BB1 p.54). So Path C carries the Federation benefits and none of the war-ending effects.
+- **Change.**
+  - `src/sim/early_war/washington_agreement.ts`: `evaluateWashingtonByConsent`, Path C in `checkAndApplyWashington` (`trigger_path: 'consent'`), and `applyWashingtonEffects(state, byConsent)`. `WASHINGTON_AGREEMENT_WEEK` (102) moves here as its one owner; `political_peace_plan.ts` imports it.
+  - `ceasefire_active` readers audited: control flips (allied ⇒ skip), the corps-AI release (the `washington_signed` branch comes first), minority erosion, bot early war and the commander plan (all also read `washington_signed`). None needs the ceasefire flag for a benefit.
+  - New event condition `rbih_hrhb_war_started` (vocabulary and evaluator).
+  - `data/scenarios/events/war_1994.json`: both Washington cards require `rbih_hrhb_war_started: true` (HRHB drops `requires_events: [croat_bosniak_war_begins_1993]`; RBiH gains the prerequisite).
+  - Systems Manual: an implementation note on the three Washington paths.
+- **The orphan flags.** `washington_agreement_alt_path` (`csq_alliance_holds_past_w35`) and `federation_formed_early` (`csq_federation_early_1994`) are not read by Path C, by design. Path C keys on the engine's war record, the same fact the cards read. Those consequences fire on flags and a turn window, and `alliance_holds_past_w35` can fire at t35 and still be followed by the war (its mutex is same-turn only). Reading them would let a flag and the engine disagree. Path C is what now pays out the world they describe.
+- **Re-confirmed on main `71ffa0cb8`** (`a2b_*` logs).
+  - Historical byte-identical to main's pin: `03159b9ee1e5877f`.
+  - Hands-off emergent identical to main: `dde641b2c74838f0`.
+- **Proof** (first measured on main `4866a4279`; logs `C:/Pyrrhic/AWWV-worktrees/_logs/b5-scorer-20261116/a2_*`).
+  - Historical 188w byte-identical: `83b8e8cd36023899`.
+  - Hands-off emergent identical to main: `cbdfdb200b1f7069`.
+  - Path C cannot fire left alone: the bilateral war starts around t49.
+  - Tests: new `tests/washington_by_consent.test.ts` (signs at week 102 when never broken; no ceasefire and no cut to a 0.95 alliance; not before week 102, not after a war, not at the threshold; both cards require the war; the predicate). `tests/event_timeline_integrity.test.ts` updated. Washington, ceasefire and event slices: 128 files, 2245 tests pass. tsc clean.
+- **Gate** (historian, game designer, scenario tester, canon, determinism): all GO; determinism PASS. Canon wording applied: Path C fires on the first turn from week 102 onward.
+  - The `ceasefire_active` audit is completed by the game designer: `simple_general_bot.ts:31-42`, `alliance_update.ts:183-184` and `:290`, `bilateral_ceasefire.ts:141` and the warroom ceasefire modal. None loses a benefit, because the alliance stays allied at 0.80 or above and per-turn updates are locked.
+  - Residuals, recorded for A2b:
+    - Path C can fire later than week 102 (even in 1995) if an alliance that never broke recovers above 0.2 then. Path A has no week gate.
+    - Path C pays the engine benefits, not the cards' own gains (RBiH supply, credibility, morale, cohesion).
+    - Path C ignores `hrhb_political_goal`. A2b must give the HRHB President a decision (accept or reluctant) before the lock.
+    - Historian for the A2b copy: Croat buy-in was patron-imposed through Tuđman. Write a Zagreb-sanctioned formalisation, not free consent, and avoid "under heavy American pressure".
+- **Follow-ups.**
+  - **A2b (content):** consent-variant Washington cards for RBiH and HRHB (no "ends the war" text; no war-recovery bonus) with essays. The warroom copy that assumes a war (DeclarationEventModal "ending the war between former allies", the headline "intended to end hostilities", AAR) needs a war/consent variant. These need narrative and historian seats.
+  - **Played proof:** blocked until the Ahmići consequence gate lands, because today no RBiH President can keep the alliance.
+
+## 2026-11-16 — B5 fix 4: emergent bots keep history while the war is historical (`divergence_threshold` wired with a territory gate); fix 5: RS patron-weight note corrected (historical byte-identical; hands-off emergent now passes the guard)
+
+- **Why.** Owner rule: "A finished game will reproduce history accurately if left alone, BUT also allow the player to create ahistorical outcomes." In a hands-off emergent 188w (B0 and fixes 1-3 in), 15 bot political picks left the record, 9 of them FALSE history, because the authored option data outweighs every state term. The guard breached (Farz 0/4 receipts, Seher t164, Petrovo t179). `divergence_threshold` was declared for exactly this and never read; its original design (`docs/plans/2026-03-24-v080-political-leader-bot-plan.md` §3) also had a territory-divergence condition that was never built.
+- **Rulings** (panel; integrator: the B5 scorer lane).
+  - Game designer: WIRE, threshold AND territory gate, bot factions in emergent only. Historical mode, the player's own picks and Observer unchanged. Events with no authored default stay scored. Peace plans gate only the final scored step.
+  - Historian: order RS ≥ RBiH > HRHB (Pale's Assembly, referendum and peace-plan decisions were firm: BB1 pp.44, 59, 61). Fix 5: the RS weight "decays post-1993" note is inaccurate, so keep the static 0.20.
+  - Integrator: thresholds ÷6 from the authored values, with RS raised to RBiH's: RS 3.0, RBiH 3.0, HRHB 1.33.
+- **Change.**
+  - New `src/sim/political/historical_territory_band.ts`: each faction's area share at the April 1992 start and the painted checkpoints Jan93/Apr94/Apr95/Oct95. The gate opens when a faction is more than 3 pp outside the [min, max] its share spans between the checkpoints either side of the week. Recomputed at each decision; no state.
+  - `political_event_decision.ts`: `divergesFromHistory` and `pickPoliticalResponseWithHistory`. History is kept unless the gate is open AND best − historical > threshold.
+  - `evaluate_events.ts` `selectBotEventResponse`: in emergent mode, events with an authored default (`historical_default_response_id` or `accept_first`) use the rule. Unauthored events stay scored, including Drina (a §6 case; its headless pick is positional, not a historical claim).
+  - `political_peace_plan.ts` and `negotiation/peace_plans.ts`: the scored accept/reject step uses `plan.historical_responses` as the reference. The hard branches run first, unchanged.
+  - `getFactionTerritoryAreaPct` moved to `src/sim/osid_areas.ts`, re-exported by `peace_plans.ts`.
+  - `political_personality.ts`: the thresholds and their doc; the RS patron note corrected.
+  - Canon: Systems Manual §7.10.7 gains the rule, in the same change. It also records the dependency: the band is the painted references, so a later paint correction shifts the gate. The band test fails until the table is re-baked, and a hands-off emergent run must then be re-measured.
+- **Re-confirmed on main `4866a4279`** (#726 and N6 #709 merged; `m3_*` logs).
+  - Historical 188w is byte-identical to main, `83b8e8cd36023899` (the manifest pin). Every artifact matches except `run_meta.json`.
+  - Hands-off emergent: `25176ce62fdcca94`, 709/709/708/680, guard intact. Against historical, only Drina and the three flavour timings differ.
+  - Main's own emergent is `cbdfdb200b1f7069`, 710/707/707/670: 18 picks differ and the guard is breached (Farz 0/4, Seher t164, Petrovo t179).
+- **Proof** (first measured on main `df206642c` + #726; logs `C:/Pyrrhic/AWWV-worktrees/_logs/b5-scorer-20261116/`).
+  - **Historical 188w byte-identical**: `df791f73c26ed642`, 709/709/708/681, guard intact.
+  - **Hands-off emergent 188w**: `6ebcd2c2d3d03372`, 709/709/708/680, **guard intact**. Farz 4/4 receipts (t180-185, 2nd Corps), P-B pass, eastern provenance clean, Srebrenica and Žepa fall on schedule, HRHB cascade 30. The previous emergent run on main was 710/707/707/670 and breached.
+  - Decisions versus historical: all 15 earlier divergences revert. Peace plans match history. What remains: t11 Drina fires again (t1 is all_six now) but the scorer picks `restrained` against history's `systematic`, which goes to the §6 seats as a finding. Three flavour events move a few weeks (t90/91 visits and address).
+  - Measured gate margin: the largest excursion outside the band in a hands-off run is 0.42 pp (historical) and 0.24 pp (emergent), against the 3 pp gate.
+  - Tests: new `tests/sim/political/historical_territory_band.test.ts` (painted rows recomputed from the reference files, band, gate, rule, peace-plan step). Political, events and peace-plan slices: 24 files, 315 tests pass. tsc clean.
+  - **The played half, gate forced open** (a diagnostic run with an uncommitted patch, `f4_emer_gate_forced_DIAGNOSTIC.log`, hash `574af024580b6fd4`). Bots improvise exactly where an option beats history by more than the threshold: t76 RS `accept_belgrade_directive`, t82 RBiH `conditional_autonomy_proposal`, t89 HRHB `sue_for_peace_hrhb`. No §6 decision moves. 709/709/708/682, guard intact.
+  - **Played harness runs** (`tools/ai_play/desktop_calibration_compare.ts`, emergent through `staff_recommended`): an RBiH engaged one-axis Request-op President, an RBiH meddler, and RS and HRHB Presidents declining historical operations. None moved the map more than 0.75 pp outside the band, so the gate never opened and no bot left history. The harness's player levers cannot yet drive the war off history's map. That is recorded as a finding; the forced-gate run shows the mechanism.
+- **§6 panel** (Historian, scenario-tester/calibration, Engine/systems, Red-team): **unanimous GO-with-conditions**. Recorded in `SENSITIVE_HISTORY_DESIGN_GATE.md` (row "B5 fix 4") and `docs/plans/2026-08-31-s6-ring3-half-migration-packet.md`. Left alone, the rule restores t2 (paramilitary), t17 (camps), t54 (Srebrenica demilitarisation) and t79 (HRHB camps) to the record. Drina fires again, stays unauthored, and its emergent `restrained` pick is a recorded artefact. The pre-R8 record-register line extends to Drina's notification texts.
+- **Engine conditions applied.**
+  - The band is keyed on the war week (turn − `war_start_turn`), byte-identical for the April 1992 start.
+  - With no control map the gate stays closed.
+  - A mid-war start (`jan1993_to_dayton`: turn 0 is calendar week 39) would read the band 39 weeks early, because GameState has no scenario start week. This is **accepted as final** for 1.0: emergent mode is reached only through the desktop New Game, which is fixed to April 1992.
+- **Gate seats.** Canon COMPLIANT with amendments, applied (§7.10.7 wording; the §6 record rows). Determinism PASS. Game-designer GO.
+- **Emergent scenario copy:** not committed. Recreate it as `data/scenarios/apr1992_definitive_188w.json` with `scenario_id` `apr1992_definitive_188w_emergent` and `"decision_mode": "emergent"`.
+- **Data finding (not changed here).** Historian: at t76 (Sept 1993) Pale went along with Belgrade (BB1 pp.47-48), so the authored default `defy_belgrade_directive` of `rs_belgrade_pressure_response_1993` is itself wrong. It is routed to the events/calibration owner.
 
 ## 2026-11-16 — B5 scorer fixes 1-3: the emergent political scorer reads territory trend, exhaustion and the patron term in the state's own units (historical byte-identical, emergent hash-identical)
 
@@ -148,6 +320,54 @@ The historian read the cited location of every BB reference (109 groups, 279 men
   - Re-pinned `data/derived/scenario/baselines/manifest.json`. The 40-week structural fingerprint is unchanged (`3b1ddd64fb4f1600`).
 - **Tests.** `tests/army_hq_gathering.test.ts` now asserts the assessment's and the doctrine's retired fields are gone and that the corps ceilings still apply. 296 tests in the affected files pass, and tsc is clean.
 
+## 2026-11-16 — FORAWWV §X and §XIV amended: the political-directive chain is retired (B3)
+
+Canon record for the FORAWWV amendment that follows PR #710 (B3 + B2). #710's canon seat recorded the debt: FORAWWV 276-301, 409 and 421 described the B1 producer, the A3 step and the C1 overlay as live, validated substrate.
+
+**Panel (unanimous).** Five seats, each APPROVE WITH WORDING CHANGES, all applied: historian, canon-compliance, game-designer, corps-army-commander, scenario-creator-runner-tester. The named integrator checked every change and found no contradiction: GO. war-or-game is not seated (owner rule).
+
+**Amendment.**
+- **§X header:** a dated "Amended" paragraph. It says the chain is retired, gives the measured result (control-identical in the five smoke scenarios plus historical and emergent 188w; commander state byte-identical in the historical run), and gives the corps-role source (the Army HQ CampaignPlan plus the existing bilateral-front diversion). It says civil-military direction now runs through the player's staged orders, the A4 officer roster and `army_clashes` compliance, with no standing political verb modelled.
+- **§X.1:** the six-verb set is library and tooling only; no game step writes it, except in tooling runs.
+- **§X.2:** each slot now reads as retired or save-only, as follows.
+  - `political_directives_by_faction` is not written in a game (the harness may write it); v39 deletes it.
+  - `army_corps_directives_by_faction` stays a required field. It is not written or read for decisions; the adapter still reads it, validation checks it, and v39 empties it.
+  - Corps decisions: the `plan.ts` gates read the CampaignPlan role, null without a valid plan, or primary/contain under the bilateral-front diversion.
+- **§XIV line 409:** B1+B2 and C1+C2 noted as retired; the invariant is unchanged.
+- **§XIV.3:** the Ring 1 example now names the retired C1 persistence as historical.
+- **Path correction (integrator note):** the old §X.2 said `state.political.political_leader_data`. The code (`political_leader_data_loader.ts`, `political_leader_types.ts`) holds it at `state.military.political_leader_data`. The new text uses the code's path.
+
+**Scope.** Canon text only; no code or data. The Systems Manual, Engine Invariants and Rulebook needed no change (canon seat).
+
+Evidence: `C:/Pyrrhic/AWWV-worktrees/_logs/batch-b-20261116/forawwv_b3_panel_packet.md`, `forawwv_b3_amendment_final.md`.
+
+## 2026-11-16 — G1: the President's leadership gestures honour their event's turn_min (headless hash unchanged)
+
+- **Defect** (Codex finding on #693, verified by the steward):
+  - There are four renewable leadership gestures: address to the nation, visit to the front, decorate a unit, and the strategic posture review.
+  - Each is an authored event in `war_1993.json` with `trigger.turn_min: 84`.
+  - The bot path fires them only from week 84. The desktop availability contracts never checked `turn_min`, so a human President could use them from week 0.
+  - The address could therefore be used four times (0/52/104/156) where canon's "about three uses in a war" gives 84/136/188.
+- **Fix:**
+  - New shared `eventNotYetAvailableUntil` (`src/desktop/action_cadence_contract.cjs`), applied in all four contracts, so the electron-main initiate handlers inherit it.
+  - It runs after the "already pending" check, so an old save's pending gesture still reads as pending.
+  - New reason `not_yet_available`, with `availableFromTurn`.
+  - Player copy names the opening date: "Not possible this early in the war. Available from {date}." (BCS "Nije moguće ovako rano u ratu. Dostupno od {date}."). It appears on the directive card and the front-visit section, through `utils/gestureCopy.ts`.
+- **Canon** (same change):
+  - Systems Manual l.193: renewable from the event's own `trigger.turn_min`.
+  - Rulebook "Recurring decisions": all four open at week 84 for the President as for bots.
+  - Rulebook amendment record updated.
+- **Seats:**
+  - game-designer: APPROVE-WITH-CHANGES. Parity is correct and week 84 fits the authored text; the requested date copy is applied.
+  - canon-compliance: APPROVE-WITH-CHANGES. The requested canon wording and the pending-first order are applied.
+- **Measured:** headless 188w = `03159b9ee1e5877f`, equal to main's pin (desktop and UI only; headless never loads these contracts).
+- **Tests:** `tests/g1_gesture_turn_min.test.ts`.
+  - Every faction and gesture is "not yet" at t0 and t83 and open at t84.
+  - The copy names the date with no week number.
+  - A pending gesture still reads "already pending".
+  - 26 gesture test files and 22 i18n test files pass. tsc is clean.
+- **Flag for the orchestrator** (canon seat): the three-President Authority test (SM l.193, "at cap ≤25% of turns after week 26") was measured with the gestures open from week 0. Re-measure it before the held tuning order moves on.
+
 ## 2026-11-16 — N6: enemy-concentration zones survive sector renumbering (control-identical)
 
 - **Defect** (same class as SE9, found in the SE9 attribution).
@@ -171,6 +391,42 @@ The historian read the cited location of every BB reference (109 groups, 279 men
   - a legacy picture uses the positional lookup;
   - the player's strain text shows the concentration warning when the massing was real, where the positional map lost it.
   - All 30 commander test files pass (544 tests). tsc is clean.
+
+## 2026-11-16 — P2: the Ahmići massacre card carries only costs; Mostar's April 1993 orders carry the HVO's readiness (historical guard intact; scores unchanged)
+
+- **Why.** P2 was open since Council fix 4 (2026-11-14): `csq_hvo_central_bosnia_offensive_1993` recorded the Ahmići massacre and, on the same turn, gave the HVO morale +15, cohesion +10, aggression +0.25 for 14 weeks, military credibility +10 and patron confidence +10, listed as plus figures. Its dimension shifts netted HRHB **+1.75** on its own Pyrrhic score (VICTORY_AND_PYRRHIC_SCORING §3.1). That breaches "atrocity is never rewarded" (SENSITIVE_HISTORY_DESIGN_GATE Ring 3 #4; Scoring §6 non-goals 1 and 3). The orchestrator ruled it a pre-freeze must-fix.
+- **Panel.** Broader bright-line panel, eight independent seats (historian, scenario-tester, engine/systems, red-team, game designer, narrative designer, canon compliance, operations), no war-or-game. Two rounds, **unanimous GO** on option (c) as measured (B2-minus).
+- **Change** (`data/scenarios/events/consequences.json`).
+  - **Massacre card** keeps: alliance −1, ceiling 0.0 for 60 turns, flags `hvo_arbih_war_active` and `ahmici_1993`, HRHB international standing −15. Its narrative (EN/BCS) loses the orders sentences, and its effect text names the massacre.
+  - **Dropped:** aggression +0.25 (no reader; realism audit F6), HRHB military credibility +10 and patron confidence +10, RBiH military credibility −5, and RBiH international standing +10 (Ring 3 #4: an atrocity never improves a graded dimension for any side).
+  - **New non-atrocity consequence `csq_hvo_april_1993_offensive_orders`** ("Mostar's Orders for Central Bosnia" / "Naređenja Mostara za srednju Bosnu"; narrative-seat EN/BCS text). It fires at t53, the April ultimatum with its 15 April deadline (Prlić IT-04-74-T; Blaškić IT-95-14-T; Kordić IT-95-14/2-T).
+    - Gate: requires `croat_bosniak_war_begins_1993`, `hrhb_political_goal = croat_republic`, alliance below 0.2, and H6 (`hrhb_central_bosnia_defense`) not `evacuate` or `federate_early`. No mutex.
+    - Effects: the central-Bosnia objective shift (15 turns, expiring at t68 as before), HRHB morale +15, cohesion +10, and `hvo_arbih_war_active`. It models readiness before the offensive, not success: the 3rd Corps took Travnik in June and Bugojno in July 1993.
+- **Measured** (historical 188w, `tools/verify_checkpoints.cjs`; main 709/709/708/681; logs `C:/Pyrrhic/AWWV-worktrees/_logs/b5-scorer-20261116/p2*`).
+
+  | Variant | Scores | Guard |
+  |---|---|---|
+  | A: no readiness lift anywhere | 709/708/707/672 | BREACHED: Farz 0/4; unwarranted Petrovo t168, Makljenovac t183 |
+  | A′: A + RBiH +10 | same as A | breached |
+  | B: cohesion +10 on the orders card | 709/709/707/675 | breached |
+  | B2: morale + cohesion on the orders card, RBiH +10 kept | 709/709/708/681 | intact |
+  | **B2-minus (shipped)** | **709/709/708/681** | **intact**: cascade 31, Farz receipts on base's turns; hash `c88796667041051a`. Emergent 709/709/708/680, intact (`990b39cc1df19c0d`) |
+
+  **Re-confirmed on main `861de7ad9`** (after #748, whose t76 rewrite moved the pins to `8c9fbf1d30e8a976` and scores 709/709/708/682): P2 historical `0b86d3d742fcbf1c`, 709/709/708/682, guard intact (cascade 31). Emergent `84595a73932f3ac4`, 709/709/708/682, intact. Re-pinned on this head (`p2g_*` logs); a second run matches.
+
+  The operations seat explains why the lift is load-bearing: without it the 1993 HVO is weaker, 2nd Corps allocation shifts in 1995, and unwarranted captures appear. It is the existing magnitude moved one turn earlier, not a new lever.
+- **Tests** (`tests/consequence_chains.test.ts`).
+  - The Issue #9 block is rewritten, recording why the 2026-04-23 rationale no longer holds.
+  - An allowlist guard: the massacre card's effects may only be alliance_change, alliance_lock or narrative, and its dimension shifts must all be negative.
+  - The orders card fires at t53 with the shift, morale and cohesion, is not fired under H6 evacuate or federate, and is independent of the massacre (no shared turn, mutex or cross-reference).
+  - `tests/codex_sensitive_claim_inventory.test.ts`: consequence claims 552 → 558.
+- **Canon.** `SENSITIVE_HISTORY_DESIGN_GATE.md` gains an amended-date line and the P2 record row; the Council fix 4 and B5 Ahmići gate rows gain closure notes. No Systems Manual change (no new effect kind). P2 is closed; the owner is informed.
+- **Registered (findings, not fixed here).**
+  - The massacre trigger lacks the H6 evacuate/federate_early exclusions (a separate §6 change).
+  - The orders window is t53 only, so a war that starts later gets the massacre's costs and never the orders.
+  - Check whether `effect.text` shows untranslated in BCS mode (an existing pattern).
+  - The 1995 Farz chain is a knife-edge on 1993 HVO morale.
+- **P2b** (other atrocity cards that buff the perpetrator, all factions): the complete inventory is being built for the same panel.
 
 ## 2026-11-16 — PK5 (C7): a short queue head steps aside only for a dated, admissible op with its own roster (byte-identical)
 
@@ -526,6 +782,201 @@ Docs only (plus a knowledge-doc correction); no `src/` or `data/` change, no has
 - P2 step 2b (candidate 3 of 8, run cccc2d37901f7624): the army reserve reads a real local ratio; Farz P-A passes on the step-0 base; the ARBiH holds 59% of objectives (was 71%); RS loans still go to the Drina corps through a standing commander "critical" request (95) that outranks the capped gap requests (85): that priority question goes to the package seats as step 2c.
 - Calibration-pass OOB list (Part 6): the historian's VRS reserve-elite draft (C:/Pyrrhic/AWWV-worktrees/_logs/pkg-runB/VRS_RESERVE_ELITES_DRAFT.md): 24 formations, 7 in the OOB, 2 flagged elite; the 1st Krajina package; the Herzegovina Combined Brigade; the MUP brigade; the 1st Guards date and location fixes; with its §6 condition on naming Srebrenica-linked units.
 - `docs/knowledge/VRS_ORDER_OF_BATTLE_MASTER.md`: the East Bosnian Corps "Guards Brigade (Bijeljina-based elite formation)" is corrected to the 1st Bijeljina Light Infantry Brigade "Panthers" ("Serbian Guard-Panthers"), which the same document already lists in its roster: no unit of that name appears in Balkan Battlegrounds' VRS charts (BB1 pp.459-464, BB2 pp.277-285) and the historian reads it as the Panthers (draft section D1). A docs correction, not a data change.
+
+## 2026-11-16 — Pass 43: #710 (B2 and B3) recorded; main pin 03159b9ee1e5877f
+
+Docs only; no `src/` or `data/` change, no hash change.
+
+- #710, B3 + B2: the produced political-directive chain (producer, A3 role translation, C1 briefing overlay and its Wave 6 exception) is retired for every faction, including the player's staff at autonomy 1 and above; `army_directive_pushback` is no longer produced and the 538 stale events are drained (save migration v39, schema 38 to 39; the briefing and the decision manifest no longer count them). The player's own directive tool is a separate path and untouched. Control-identical in the measured runs (commander state byte-identical); main's pin is final_save 03159b9ee1e5877f (schema v39), the main hash at #710. Merged with the full suite, engine-health-188w and Baseline pins green. It is also P3 step 1 of Fable consult 4's order.
+- Next from that lane: #734 (the FORAWWV §X and §XIV amendment, with a unanimous panel) and the t76 Belgrade historical-default fix.
+
+## 2026-11-16 — Pass 44: #734 (FORAWWV §X and §XIV, the canon record for #710) recorded; Codex sweep 4
+
+Docs only; no `src/` or `data/` change, no hash change. The steward did not edit FORAWWV.
+
+- #734, the canon record for #710: FORAWWV §X and §XIV now describe the political-directive chain as retired (§X.1 the six verbs are library and tooling only; §X.2 the slots are save-only or tooling-only; §XIV the invariant unchanged). Unanimous panel: historian, canon-compliance, game-designer, corps-army-commander, scenario-creator-runner-tester, each APPROVE WITH WORDING CHANGES, all applied; the named integrator GO. Merged 2026-11-16. Work list B3 row, roadmap merged list.
+- Codex sweep 4 (the 10 newest PRs): no new findings; #729 (routed to the F1g lane) is still the only open inline comment on an open PR.
+
+## 2026-11-16 — Pass 45: #727 (B5 fix 4) recorded; the F1i follow-ups registered; #739 noted
+
+Docs only; no `src/` or `data/` change, no hash change.
+
+- #727, B5 fix 4 and 5: `divergence_threshold` is wired with a historical-territory gate (a bot keeps an event's authored response unless some faction is more than 3 percentage points outside history's band and the alternative wins by more than the faction's threshold); the RS patron-weight note is corrected (weight stays 0.20). §6 unanimous; Systems Manual §7.10.7 gains the rule. Historical 188w byte-identical (the pin stays 03159b9ee1e5877f); a hands-off emergent run measured 6ebcd2c2d3d03372, 709 / 709 / 708 / 680 with the guard intact (a measurement on an earlier base). The t11 Drina pick (restrained) is a finding for the §6 seats. Work list B5-3.
+- Registered from #739 (package A', the L7 lane): F1i-1 to F1i-5 (the `settlement_ids[0]` identity reset in enclave detection; `supplyScore` hard-wired to 0; the Engine Invariants §12.2 gap, enclave_resilience pressure linear and falling as a siege goes on; main's `drina_blockade` at t8 and sanctions dropping by t70; the IVP x0.7 modifier reading only the tunnel flag), each an engine item needing fix, retire or accept-as-final before the freeze. #739 (C8) is hash-moving and waits for the orchestrator's go, pending a swap to retiring the convoy UI family properly.
+
+## 2026-11-16 — Pass 46: freeze condition 7 met at f98c074d9; the Ahmići and alliance rulings
+
+Docs only; no `src/` or `data/` change, no hash change.
+
+- Freeze condition 7 (a hands-off emergent 188-week run passes the history guards) is MET on main at f98c074d9 (#727), by the orchestrator's ruling: Farz 4 of 4 receipts, P-B pass, enclaves on schedule, scores 709 / 709 / 708 / 680, all 15 divergent picks reverted, and Drina's "restrained" pick recorded as a §6 artefact. It is re-run at the frozen commit. Recorded in `RF-ENGINE-FREEZE`, the final-behaviour record and the roadmap.
+- Ahmići and the alliance (orchestrator rulings): A, the trigger gated on war plus the alliance below 0.2 (§6), in progress; B and C, a costly capitulation lever for an RBiH President (ARBiH under HVO command in provinces 3, 8 and 10, then the union of three republics, with the costs visible including civilians under HVO administration), after A2b, may land after the freeze; D, the retiming of `csq_alliance_holds` and the dead `rbih_hrhb_war_active` guard, on the calibration list.
+
+## 2026-11-16 — Pass 47: #732 (1995 Croatian help keyed on the Federation) recorded; #735, #744 and #737 noted
+
+Docs only; no `src/` or `data/` change, no hash change.
+
+- #732: `operation_summer_95` and `federation_ground_offensive_1995` now need the Washington agreement event or the alliance above 0.2, so a President who kept the alliance gets Croatian help and kept-alliance games reach the 1995 ceasefire and Holbrooke chain. Data only; byte-identical in historical and hands-off emergent mode; main stays 03159b9ee1e5877f. Fable consult 5's pre-freeze Croatian-help gate is done.
+- #735 (the B5 political gate: a player's political departure opens the divergence gate for the bots whose history it rules out; §6 decisions carved out) has a unanimous §6 round-2 GO and is ready, behind #744 (the Ahmići trigger, A) and #737 (A2, the Washington Federation by consent). The Ahmići bright-line panel (P2) and the alliance-lock conflict panel are both sitting.
+
+## 2026-11-16 — Pass 48: #745 (threat_ratio as a pressure index) and package P2 step 3 recorded; the wording defect left on main
+
+Docs only; no `src/` or `data/` change, no hash change.
+
+- #745: `threat_ratio` is described as a sector pressure index, not a force ratio (description only; comments plus the Systems Manual; hash unchanged, the pin stays 03159b9ee1e5877f). Registered as an ACCEPT-AS-FINAL candidate for the next Part 5 sitting (game-designer and historian): about 20 readers have thresholds tuned to its scale; rescaling is calibration-sized; documented honestly as a pressure index. Measured on a package P2 run (t99 to t178): RS staffed sectors median 48, maximum 5,346; 87% of RS sector-turns above 2.0.
+- The merged wording of #745 still says the index "falls with own cohesion" in the `game_state.ts` field comment and the Systems Manual, although the orchestrator reported the Codex direction fix as applied. The steward read the code (`brigadePower` multiplies cohesion; the index is enemy personnel divided by defensive power): falling own cohesion raises the index, so the wording is inverted and Codex comment r4588239176 stays open on main. The fix is a code comment plus a canon sentence; not made here.
+- Package P2 step 3 (candidate 4 of 8, run 80aaf7ae31900002): a retake-only counter-attack in any stance; 6 battles outside an operation, all on just-lost cells, 3 won; scores recorded 704 / 700 / 700 / 663 on the step-0 base.
+- Harness evidence in #742 (open): a sustained multi-corps Request-op lever moves the war about 2.8 percentage points off history (the old ceiling was 0.75).
+
+## 2026-11-16 — Pass 50: #744 (the Ahmići consequence trigger) recorded; four findings registered
+
+Docs only; no `src/` or `data/` change, no hash change.
+
+- #744: `csq_hvo_central_bosnia_offensive_1993` (the Ahmići consequence) now fires only after the 1993 war has begun and the alliance is below 0.2, mirroring `ahmici_massacre_1993`; content and wording unchanged; §6 unanimous; canon amended (a SHDG amended-date line and a §6 record row); byte-identical in both modes (historical 03159b9ee1e5877f, the main pin; hands-off emergent dde641b2c74838f0 = main); honours Ring 3 item 11. Work list Ahmići and alliance paragraph (item A).
+- Registered from #744: (1) the `ahmici_massacre_1993` card window ends at t70; (2) `federation_never_fractured` is never set (a dead alliance-held note); (3) that note's BCS is a stock line (1 to 3 go to the B and C content PR); (4) the alliance-lock floor-over-ceiling, traced, with its fix held behind package P2.
+
+## 2026-11-16 — Pass 51: #748 (the t76 Belgrade historical default) recorded; a determinism finding registered
+
+Docs only; no `src/` or `data/` change, no hash change.
+
+- #748: `rs_belgrade_pressure_response_1993`'s historical default is now `accept_belgrade_directive` (Pale stayed in step with Belgrade in autumn 1993; BB1 pp.11-13, Karadžić 377-383 and 3286-3287), with native BCS copy and smaller costs; historian ruling, calibration HOLD, scores recorded: historical 709 / 709 / 708 / 682, guard intact, emergent 710 / 707 / 707 / 670 (guard intact, Farz 4 of 4). Hash-moving: the main pin is final_save 8c9fbf1d30e8a976, "main hash at #748".
+- New determinism finding (must-fix, batch-b-lane): `meta.peace_war_start_control_path` stores an absolute filesystem path in GameState, so the final hash of any scenario that sets it (sep1991_to_dayton) depends on the checkout location; it matters for the freeze byte test.
+- Chapters block: the army-stance override retirement is proven hash-neutral in seven scenarios; the PR is coming.
+
+## 2026-11-16 — Pass 52: #737 (A2a, the Washington Federation by consent) recorded; the alliance lane's queue
+
+Docs only; no `src/` or `data/` change, no hash change.
+
+- #737, A2a "Washington: Federation by consent" (Path C): a never-broken alliance reaches the Federation at the Washington week through `applyWashingtonEffects` (alliance max(current, 0.80); no ceasefire activation, since there is no war); the card has war and consent variants keyed on `war_started_turn`; byte-identical (the war starts at about t49 when left alone), so the main pin stays 8c9fbf1d30e8a976. Path C is not yet reachable from either side until A2b (choices that hold the alliance against drift, and Path A' for a mended alliance) and the B and C capitulation lever land.
+- Queued in the same lane, one at a time, each re-pinning on main after #748: #753 (the Ahmići massacre card carries only costs; Mostar's April 1993 orders carry the HVO readiness; an 8-seat bright-line panel; guard intact) and #754 (one shared RBiH-HRHB at-war predicate, five readers, control-identical); then #735 (the political gate).
+- #756, G1 (the Codex finding on #693): the four renewable leadership gestures (the address to the nation, the visit to the front, decorate a unit, the strategic posture review) now honour the event's own `trigger.turn_min` (week 84) for a human President as for bots, so the human has about three uses (84, 136, 188) as the canon says; new reason `not_yet_available`; the copy names the opening date; canon: Systems Manual line 193 and the Rulebook "Recurring decisions". Headless hash unchanged (desktop and UI only). Flag: the three-President Authority test was measured with the gestures open from week 0 and must be re-measured before the held tuning order. Codex r4581281567 on #693 is fixed.
+- #752 (the threat_ratio direction fix) merged: Codex r4588239176 on #745 is fixed.
+
+## 2026-11-16 — Pass 53: the final chapter titles; the B5-10 emergent figure corrected
+
+Docs only; no `src/` or `data/` change, no hash change.
+
+- Owner ruling, 2026-11-16 (chapters_design/TITLES_FINAL.md): the final chapter titles replace the earlier set in the work list's Chapters block: I The Lines Are Drawn / Linije su povučene; II Who Is the Enemy? / Ko je neprijatelj? (subtitle "War Within the War / Rat unutar rata" when the ARBiH-HVO war actually happens; the owner corrected the BCS from "Rat u ratu"); III War of Attrition / Rat iscrpljivanja; IV Who Breaks First? / Ko će prvi popustiti?. Guards: III names what each army can still do, never the enemy's dead; IV is never linked to Srebrenica or Žepa. Implementation is post-freeze presentation under the §6 copy panel. (The earlier titles also appear in the consult 5 ledger fragment of pass 41, which is merged and not edited.)
+- Correction to B5-10 (#748), also superseding the figure in the pass 51 fragment: the emergent check is 709 / 709 / 708 / 682, guard intact, Farz 4 of 4, cascade 31, measured by the batch-b-lane on #748's head ee8cd125a, which includes #727; the 710 / 707 / 707 / 670 figure came from a base before #727 and is withdrawn.
+
+## 2026-11-16 — Pass 54: #753 (the Ahmići effects, B2-minus) recorded; the three-President re-measure routed
+
+Docs only; no `src/` or `data/` change, no hash change.
+
+- #753, P2 of the sensitive-history gate (Council fix 4): the Ahmići massacre card now carries only costs (alliance -1, ceiling 0.0 over 60, flags, HRHB international standing -15); a new non-atrocity card `csq_hvo_april_1993_offensive_orders` (t53) carries the objective shift and the HVO readiness; the broader bright-line panel (8 seats, 2 rounds) was a unanimous GO on the merits. Guard intact (the no-lift variant breached the Farz guard); hash-moving: main pin 0b86d3d742fcbf1c, the main hash at #753 (read from the manifest on main).
+- The three-President Authority re-measure flagged by #756 is routed to the L7 lane (it owns the Appendix C harness), after #739; it must be done before the held tuning order.
+
+## 2026-11-16 — Pass 55: Fable consult 6 (the supply reserves) accepted; sep1991_to_dayton retired
+
+Docs only; no `src/` or `data/` change, no hash change.
+
+- Fable consult 6 accepted: RETIRE the supply-reserve economy (the reserves, patron aid and embargo caps on reserves, expenditure, facility damage, smuggling routes, airdrops into reserves, `getHeavyMunitionsMult` and the JNA +40 bonus, the supply-aware bot branches, the siege morale drain with Engine Invariants §6.10 and Systems Manual §6.10, SupplyPanel and EconomyPanel). Reason: it saturates (each faction's reserve reaches its cap within 12 weeks; RBiH's caps of 45 general and 15 heavy sit below the model's adequate line of 50, so the ARBiH is permanently strained; siege drain is capped at 2.5 from week 4); a flag-on run costs about 33 cells with every guard passing (702 / 699 / 699 / 674 against 709 / 709 / 708 / 681). Part 4 (the April 1992 hash is unchanged), owner the L7 lane; its held smuggling-route fix is superseded. Pre-freeze: measure siege counters and siege bombardment attrition alone first (keep and switch on, or retire), §6 seats and the historian. KEEP the embargo gate on offensive eligibility. Enclave resilience (Phase C) already runs and is not part of this.
+- `sep1991_to_dayton` is retired (owner reminder: the September 1991 start was retired as playable content in the 2026-03 campaign structure decision; April 1992 is the only campaign), beside J1, owner the L7 lane, bundled with the supply-reserve retirement, with any peace-phase code reachable only from it; lanes stop using it as a proof scenario. The `meta.peace_war_start_control_path` determinism finding may become "retire with the peace phase"; the batch-b-lane is checking which.
+
+## 2026-11-16 — Pass 56: the Washington-card correction (W1) and the §6 effect findings (W2 to W5) registered; the merge hold
+
+Docs only; no `src/` or `data/` change, no hash change.
+
+- Merge hold (orchestrator): every hash-moving PR waits until #729 lands. Docs passes are fine. #759 merged; the main pin after #753 is 0b86d3d742fcbf1c (confirmed by the orchestrator against the manifest).
+- W1, correction to the B5 Washington finding: a cooperative HRHB President does reach Washington (Path A signs at t112; the probe stopped at t110). The real defect: both Washington cards fire and are accepted at t102 saying "signed" while `washington_signed` stays false until t112. Ruling: Path A' amended (quiet front 4 or more, Zagreb's restraint, both cards, alliance above 0.20); the cards must never announce a signing the engine has not made. Queue: #754, #735, A', the A2b driver probe, the A2b mechanism. Owner: batch-b-politics.
+- W2 (§6 E1): 27 events carry `effect` deep-equal to `effects[0]` (applied twice by the engine, shown once by the UI): delete the duplicates and add a loader rule that throws. W3 (§6 E2): the whole `negotiation_capital` effect kind is dead (51 effects: international_credibility x40, negotiating_leverage x10, military_credibility x1; none is a NegotiationBreakdown key, yet EventDecisionModal shows them as costs): the E2 panel rules on all 51 before the freeze. W4 (UI): narrative effect text reaches the BCS UI in raw English: one resolver with catalog keys, native BCS and a test that fails on a missing BCS (UI lane, after #740 and #751). W5: the Ahmići war_crimes_delta +3 sits in the singular effect and is never displayed (the §6 lane checks whether the engine applies it; showing it goes to the full §6 copy panel).
+
+## 2026-11-16 — Pass 57: rulings from the #740 READY notice
+
+Docs only; no `src/` or `data/` change, no hash change.
+
+- Policy cards (orchestrator ruling): at Assisted autonomy or above, "Refuse" pays +5 standing while staff sweeps still count. This folds into D1 stage 2: after stage 2 the policy binds the staff at every autonomy level, and the acceptance test shows zero staff sweeps counted at Assisted and Delegated under always_deny. Owner: the UI lane, after P2.
+- Four §6 residuals go to the §6 atrocity lane for a pre-freeze disposition (fix, retire, or accept with a reason): the 15,000 civilian-harm threshold unreachable for a human RBiH or HRHB President; refugee-only expulsion ungated; the C cap lets D and F gain at the margin; a save edit of decision_mode.
+- #740 has GO after its lane merges main (one conflict in SENSITIVE_HISTORY_DESIGN_GATE.md) and re-proves the hash; byte-identical, merges on green.
+
+## 2026-11-16 — Pass 58: S1 owner change and S2 (the in-sim peace phase), the three-President re-measure closed, the BCS gap, W5 answered
+
+Docs only; no `src/` or `data/` change, no hash change.
+
+- S1 `sep1991_to_dayton`: the owner is now the batch-b-lane (not L7; L7 keeps J1). One PR: the runner's peace-start block and the peace-to-war read, the scenario and registry entry, and `meta.peace_war_start_control_path` retired with a schema v40 migration. It is hash-moving (the key leaves every save) and waits for GO after #729. The determinism finding closes as "retired with the peace phase, not made repo-relative".
+- S2, a new pre-freeze Part 4 item (batch-b-lane, right after S1): the in-sim peace phase (`runOneTurn`'s peace branch, the referendum and declaration logic, the `peace_scheduled_*` meta, the UI `phase === 'peace'` branches in 12 files); the canon check comes first, and a FORAWWV or phase-specification edit needs its panel.
+- The three-President re-measure after G1 (Appendix C, RBiH, 104 weeks): the held tuning order is NOT triggered (hands-off at cap 100%; engaged at cap 13%, minimum 6.5, was 65.5 before G1; meddler at cap 0%, minimum 3.25). Closed. #761: a harness fix (bot_equivalent picks only among the offered options; tooling, hash-neutral), merged.
+- The BCS gap measured by the UI lane: 172 of 186 fired events have no BCS title or narrative, and 70 of 75 decisions; the whole catalogue is 288 of 302 (about 1,500 or more strings). The effects[] PR goes ahead with a list-driven allowlist test; full BCS for event content is an owner scope question (pending); GAME_STATE_RATING_MASTER grades localisation against the 1.0 English-only contract.
+- W5 answered: the Ahmići war_crimes_delta +3 is live in the engine (it goes to the shared war_crimes_events counter only, never to war_crimes_events_emergent, so it does not trip §2a; only the notice drops it); W5 is now a display question for the full §6 copy panel; the §6 lane also checks whether readers of the shared counter treat scripted historical atrocities as the player's own.
+
+## 2026-11-16 — t76 Belgrade event: Pale's historical posture in autumn 1993 is staying in step with Belgrade, not defiance
+
+A factual truth fix found by the second Batch B lane's historian and assigned to this lane. It is not tuning, so it proceeds under the calibration HOLD with the scores recorded.
+
+**Defect.** `rs_belgrade_pressure_response_1993` (war_1993.json, weeks 76-79, the Invincible window of September-October 1993) made `defy_belgrade_directive` the historical default. Its text claimed that Pale "repeatedly defied" Belgrade, that Belgrade pressed it to "ease the Drina tempo" and show "flexibility on Sarajevo division", and that a Patriarch Pavle / Russian channel existed. The event's own source note cited Karadžić paras 3286-3287 as showing Belgrade *supporting* Pale in 1993.
+
+**Historian ruling (default = `accept_belgrade_directive`).**
+- 28 Aug 1993: the Bosnian Serb Assembly accepted the Geneva accord without conditions (BB Vol. I p. 11).
+- 20 Sep: the Invincible package, with Milošević at the table: 49%, Sarajevo undivided under the UN for two years (BB I pp. 12-13; Karadžić paras 377-383, 381).
+- Belgrade backed Pale (paras 3286-3287).
+- Igman and Bjelašnica were vacated under UN/NATO pressure (BB I pp. 185-186).
+- After Sarajevo's conditional vote on 29 Sep, Pale withdrew its concessions on 2 Oct (BB I p. 13).
+- Open defiance belongs to May 1993 and July-August 1994.
+- The sibling event `rs_owen_stoltenberg_response_1993` already has acceptance as the RS default.
+
+**Change.**
+- `historical_default_response_id` → `accept_belgrade_directive`, now option 0 (the event acceptance contract requires this). Markers swapped.
+- Option costs (historian): accept +10 patron / +5 standing / −2 cohesion / +5 leverage; partial −5/−5/+3/+3; broker −5 standing / +2 cohesion / +8 leverage; defy −15/−10/+5/−10, morale +2. The 6-turn recruitment ×0.9 is dropped: Pale's cohesion did not break.
+- Narrative, staff assessment, trigger evidence, the four option labels and descriptions, the other-faction notifications, effect text and source note were rewritten by the narrative seat on the historian's facts. The text no longer mentions Pavle, Russian envoys or Sarajevo fire (§6 note).
+- Essay (file and `essay_index.json`): new EN and native BCS text. Sources are now Karadžić plus BB (Krajišnik cannot carry 1993 claims). The accept variant is the historical "note"; the other three are divergences.
+
+**Measured (main fde8acc98, B3 in).**
+- Historical 188w: final_save `8c9fbf1d30e8a976`. Scores 709/709/708/**682** (Oct 1995 +1 against 681).
+  - Guard intact: enclaves hold and fall on schedule, Farz/Uragan 4/4 with receipts, late 2nd Corps captures warranted, HRHB cascade 31. Health PASS, 0 consistency failures.
+  - Final-cell delta against main: 5 cells. Three in Donji Vakuf go RS→RBiH (babin_potok_2, korenici, oborci_2); jajce:grdovo and travnik:gornje_krcevine go RBiH→RS.
+  - RS ends with patron confidence 69.5 (46.5 before), negotiating leverage 52.9 (34.4) and internal cohesion 9 (16).
+- Emergent 188w: the scorer already picked accept. Final map unchanged, 710/707/707/670, with the same three package-P2 breaches.
+- Option order does not affect either hash (re-run after the reorder gave identical hashes).
+- Tests: the event-system suite (16 files, 388 tests) and essay tests (130) pass; tsc 0.
+- Baselines manifest re-blessed to the new historical state.
+
+Evidence: `C:/Pyrrhic/AWWV-worktrees/_logs/batch-b-20261116/` (t76_*).
+
+## 2026-11-16 — threat_ratio direction corrected (comment and canon wording only; Codex r4588239176)
+
+Comment and canon wording only; no behaviour change, no hash change.
+
+- #745 described the sector pressure index `threat_ratio` as falling with own cohesion. It rises: `brigadePower` multiplies personnel by cohesion (`local_front_defense.ts:43-48`), `defensive_power` is own cohesion-weighted personnel per front edge, and `recomputeSectorPowerAndThreat` divides enemy personnel by it (`brigade_assignment.ts:2561`), so lower own cohesion or fewer own men raises the index, as does a longer sector. Codex flagged the inversion on #745 (comment r4588239176); #745 merged before the fix reached it.
+- Corrected, on the orchestrator's explicit instruction of 2026-11-16: the `CorpsFrontSector.threat_ratio` field comment in `src/state/game_state.ts` (comment only) and the Systems Manual Corps Sectors paragraph, with a one-line Amended note.
+- Proof: the `src/` diff is comment lines only; no executable line changes, so the 188-week hash is unchanged (the pin stays 03159b9ee1e5877f).
+
+## 2026-11-16 — `threat_ratio` is named for what it is: a sector pressure index, not a force ratio (description only)
+
+Orchestrator ruling (package "1994-95 attack and defence", step 2b premise check).
+
+**What it is.** `CorpsFrontSector.threat_ratio` is the enemy personnel facing the whole sector, divided by `defensive_power`. `defensive_power` is own weighted personnel *per front edge*. So the value grows with sector length and falls as own cohesion falls. It is 9999 when enemies face a sector that has no defensive power.
+
+Measured on a P2 step-2 run, t99-178:
+- RS staffed sectors: median 48, max 5,346.
+- 87% of RS sector-turns are above 2.0.
+
+**Disposition: accepted as final, scale unchanged.**
+- About 20 readers have thresholds tuned to this scale. Examples: 250 in `decide.ts` and `corps_front_sectors.ts`, `DEFENSIVE_CRITICAL_THREAT`, and the `brigade_assignment` passes.
+- Rescaling would be a calibration-sized change.
+- Only the descriptions change: the `game_state.ts` field comment, the write site in `brigade_assignment.ts`, and the Systems Manual sector paragraph.
+- A system that needs a real force ratio divides enemy personnel by own effective personnel. Package P2 step 2b does this for the army-reserve gap check.
+- Registered for the Part 5 sitting via the steward.
+
+No behaviour change: comments and canon text only, so the simulation hash is unchanged.
+
+## 2026-11-16 — Three-President Authority re-measure after G1, plus a harness fix (tooling only)
+
+- **Harness fix** (`tools/ai_play/desktop_calibration_compare.ts`).
+  - The `bot_equivalent` event policy chose from the event's full catalog of options, not from the options the queued decision offers.
+  - A player-initiated gesture is queued with its options filtered by fire number and reach (`responseOptionsForFire`).
+  - After G1 (#756) the engaged and meddler Presidents' first front visit falls at week 86. The harness then chose `visit_press_rbih`, which that decision does not carry, and `resolveEventDecision` threw.
+  - The policy now narrows to the offered options. This does not change any choice that was already offered (selection is a deterministic pick over the options), so hands-off is unaffected.
+- **Re-measure** (appendix C: RBiH, 104 weeks, main `b524f3bfe` with #756; `--autonomy-level production --event-policy bot_equivalent --paramilitary-policy deny --historical-operation-policy accept`):
+  - **A, hands-off:** at cap 100% (78/78 turns after week 26), minimum 100.
+  - **B, engaged:**
+    - at cap 13% (10/78), minimum 6.5 at week 86 (after its first gestures at weeks 86, 90 and 94);
+    - 30 refusals for lack of Authority (21 in 1993, 9 in 1994);
+    - 11 requests, 6 stops, 3 clashes.
+  - **C, meddler:**
+    - at cap 0%, minimum 3.25 at week 64;
+    - 43 refusals (32 in 1993, 11 in 1994);
+    - 18 requests, 1 stop.
+- **Held tuning order:** NOT triggered. The trigger to tighten further (remove the 15-point reserve, then the income) was "the engaged President never falls below 25". B now falls to 6.5, and B's at-cap share of 13% is inside the ≤25% target. The earlier run, with gestures open from week 0 and priced at 10, had B at a minimum of 65.5.
+- **Logs:** `C:/Pyrrhic/AWWV-worktrees/_logs/three-president-20261116/`.
 
 ## 2026-11-15 — Command loop L7: army clashes (proposal 2A step A1; owner decision 4)
 

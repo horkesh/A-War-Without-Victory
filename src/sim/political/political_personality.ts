@@ -14,7 +14,11 @@
  * Historian gate applied 2026-04-05:
  * - RBiH war_crimes_tolerance = 0.10 (hard floor, never changes regardless of situation_score)
  * - HRHB war_crimes_tolerance = 0.55 (raised from 0.4 per Prlic/Kordic ICTY findings)
- * - RS patron_confidence weight = 0.20 (accurate for 1992; decays to vulnerability post-1993)
+ * - RS patron_confidence weight = 0.20, static all war. (B5 fix 5, 2026-11-16, historian + game-designer:
+ *   an earlier note that it "decays post-1993" was inaccurate. Pale's regard for Belgrade rose and fell
+ *   with each plan — defiant on Vance-Owen May 1993, compliant Aug-Oct 1993, defiant on the Contact
+ *   Group plan and the Aug 1994 blockade, deferring again by Aug 1995 — and that split is modelled as
+ *   state: the patron dimension, override_authority and the Belgrade events, not this weight.)
  */
 
 import type { GameState, FactionId } from '../../state/game_state.js';
@@ -49,8 +53,14 @@ export interface PoliticalPersonality {
     /** Sensitivity to patron override_authority signals. [0, 1]. */
     patron_sensitivity: number;
     /**
-     * Points above the historical option score required for the bot to deviate.
-     * Lower = more erratic / reactive. Higher = more cautious.
+     * Score margin (scorePoliticalOption units) by which an option must beat the event's
+     * authored historical response before an emergent bot takes it, and then only once the
+     * war's map has left history's territory band (historical_territory_band.ts). A tie or a
+     * smaller margin keeps history. Lower = more reactive. Read by `divergesFromHistory`
+     * (political_event_decision.ts). B5 fix 4, 2026-11-16: the authored 12/18/8 were on a
+     * different scale from the built scorer (largest margin in a run ≈4.4; state terms ≤≈1.3),
+     * so they are rescaled ÷6, with RS raised to RBiH's value on the historian's ruling that
+     * Pale's institutional commitments were at least as firm as Sarajevo's.
      */
     divergence_threshold: number;
     /**
@@ -109,7 +119,7 @@ export interface PoliticalAssessment {
  * Historian gate 2026-04-05:
  * - RS: Karadzic — Expansionist-Nationalist. Four JCEs, Directive 7.
  *   war_crimes_tolerance = 0.70 (ICTY-verified). patron_confidence 0.20
- *   (secondary in 1992, decays to liability post-1993).
+ *   (static; the Pale-Belgrade split is state, see the header).
  * - RBiH: Izetbegovic — Survival-Internationalist. No leadership-directed JCE.
  *   war_crimes_tolerance = 0.10 (hard floor).
  * - HRHB: Boban — Opportunist-Patron-Dependent. Reactive to Zagreb.
@@ -139,7 +149,8 @@ export const POLITICAL_PERSONALITIES: Record<FactionId, PoliticalPersonality> = 
         },
         risk_tolerance: 0.65,
         patron_sensitivity: 0.45,
-        divergence_threshold: 12,
+        // Assembly platform, referendums, peace-plan rejections: firm commitments (BB1 pp.44, 59, 61).
+        divergence_threshold: 3.0,
         situation_weight_curve: {
             early: 0.7,
             late: 0.4,
@@ -162,7 +173,7 @@ export const POLITICAL_PERSONALITIES: Record<FactionId, PoliticalPersonality> = 
         },
         risk_tolerance: 0.35,
         patron_sensitivity: 0.60,
-        divergence_threshold: 18,
+        divergence_threshold: 3.0,
         situation_weight_curve: {
             early: 0.7,
             late: 0.4,
@@ -185,7 +196,8 @@ export const POLITICAL_PERSONALITIES: Record<FactionId, PoliticalPersonality> = 
         },
         risk_tolerance: 0.50,
         patron_sensitivity: 0.80,
-        divergence_threshold: 8,
+        // Followed Zagreb's turns (Feb-Mar 1994): the most reactive leadership.
+        divergence_threshold: 1.33,
         situation_weight_curve: {
             early: 0.7,
             late: 0.4,

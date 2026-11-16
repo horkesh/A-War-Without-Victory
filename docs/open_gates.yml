@@ -113,7 +113,11 @@ gates:
       settlement-count share with an area share; that floor fix (RS and Contact Group) is
       merged (#697, by area), a hands-off emergent game now runs to t188, and the other
       emergent divergences are triaged: engine defects before the freeze, option weights in
-      the calibration pass.
+      the calibration pass. Condition 7 is MET on main at f98c074d9 (#727, 2026-11-16): a
+      hands-off emergent 188-week run passes every guard (Farz 4 of 4 receipts, P-B pass,
+      enclaves on schedule), scores 709 / 709 / 708 / 680, and all 15 divergent emergent picks
+      revert to history; the Drina "restrained" pick (t11) is recorded as a section 6
+      artefact. It is re-run at the frozen commit.
       From that commit the freeze is a byte test: a change merges freely if the 188-week
       headless final_state_hash is unchanged, and a change that moves the hash needs the
       owner's OK. The one calibration pass then runs on the frozen engine under the
@@ -145,7 +149,7 @@ gates:
       merge ref, and the Batch B lane's inert B4 run); each earlier value is the main hash at
       that merge, not the freeze hash. #703 had merged with the advisory baseline-pins check
       red and did not re-pin the manifest, so main's pins were stale until #713; the re-pin
-      also re-confirms #705's byte-identity on top of #703 (orchestrator). #700 (B4) is inert and #697 (B0) is inert in historical mode, so main stayed 01572f50dfea2378 until #718 (RB1, off-map state values only), whose PR measured df791f73c26ed642 against that base and re-blessed the baselines. #709 (N6, control-identical) moved only the new intel_picture field and the corrected concentration zones: the manifest pin (final_save.json hash prefix) is 83b8e8cd36023899, the main hash at #709 (N6), and #726 (B5 scorer fixes) is byte-identical in historical mode. #708 (RF-PM1) measured 9e17d22f520f94e6 on the pre-#703
+      also re-confirms #705's byte-identity on top of #703 (orchestrator). #700 (B4) is inert and #697 (B0) is inert in historical mode, so main stayed 01572f50dfea2378 until #718 (RB1, off-map state values only), whose PR measured df791f73c26ed642 against that base and re-blessed the baselines. #709 (N6, control-identical) moved only the new intel_picture field and the corrected concentration zones: the manifest pin (final_save.json hash prefix) is 83b8e8cd36023899, the main hash at #709 (N6), and #726 (B5 scorer fixes) is byte-identical in historical mode. #710 (B2 and B3: the political-directive chain retired, 538 stale events drained, save migration v39) is control-identical and moved the state: the manifest pin is 03159b9ee1e5877f, the main hash at #710 (schema v39). #748 (the t76 Belgrade historical default; historical 709 / 709 / 708 / 682) moved the state: the manifest pin is 8c9fbf1d30e8a976, the main hash at #748. Open determinism finding: `meta.peace_war_start_control_path` stores an absolute filesystem path, so the hash of a scenario that sets it (sep1991_to_dayton) depends on the checkout location (batch-b-lane, must-fix before the freeze byte test). #708 (RF-PM1) measured 9e17d22f520f94e6 on the pre-#703
       base 76e5fcabd (control, activity, formation and operation files byte-identical to main).
       data/derived/latest_run_final_save.json dates from 2026-09-01 and is stale; lanes
       read run folders instead.
