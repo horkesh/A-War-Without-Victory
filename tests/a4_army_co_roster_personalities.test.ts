@@ -11,7 +11,7 @@
  *   • evaluateScheduledTransitions (informational marker;
  *     processOfficerSuccession remains canonical relief owner)
  *   • applyEmergentVariationRules (competence decay, stubbornness
- *     escalation, cooldown halving)
+ *     escalation; cooldown halving retired with the autonomous launch, B4)
  *   • Pipeline integration (war_phases ordering)
  *   • Determinism + backward-compat + faction-symmetric mechanism
  */
@@ -33,7 +33,6 @@ import {
     A4_DEFAULT_COMPETENCE_DECAY_PER_12W,
     A4_DEFAULT_STUBBORNNESS_ESCALATION,
     A4_DEFAULT_STUBBORNNESS_CAP,
-    A4_DEFAULT_COOLDOWN_HALVED_TO_TURNS,
     A4_DEFAULT_EARLY_RELIEF_PC_COST,
     type ArmyCoRoster,
 } from '../src/sim/combat/army_co_lifecycle.js';
@@ -147,8 +146,6 @@ describe('A4 — loadArmyCoRoster', () => {
         expect(roster!.variation_rules.keep_past_schedule.competence_decay_per_12w).toBe(A4_DEFAULT_COMPETENCE_DECAY_PER_12W);
         expect(roster!.variation_rules.keep_past_schedule.stubbornness_escalation).toBe(A4_DEFAULT_STUBBORNNESS_ESCALATION);
         expect(roster!.variation_rules.keep_past_schedule.stubbornness_cap).toBe(A4_DEFAULT_STUBBORNNESS_CAP);
-        expect(roster!.variation_rules.keep_past_schedule.cooldown_halving).toBe(true);
-        expect(roster!.variation_rules.keep_past_schedule.cooldown_halved_to_turns).toBe(A4_DEFAULT_COOLDOWN_HALVED_TO_TURNS);
         expect(roster!.variation_rules.early_relief.political_capital_cost).toBe(A4_DEFAULT_EARLY_RELIEF_PC_COST);
     });
 });
@@ -283,12 +280,15 @@ describe('A4 — evaluateScheduledTransitions', () => {
 
 // ===========================================================================
 // T5 — Keep-past-schedule degradation: officer held 12 turns past schedule
-// → competence decreases by ~0.05 (cumulative: -0.05 / 12 per turn × 12 turns)
+// → competence decreases by 0.05 (linear: -0.05 / 12 per turn × 12 turns).
+// B1 (freeze cut): the rule runs once per turn, as in the pipeline. The old code
+// lost decayPerTurn × n(n+1)/2 after n turns (quadratic); the old single-call test
+// could not see it.
 // ===========================================================================
 describe('A4 — applyEmergentVariationRules', () => {
-    it('T5 — held 12 turns past schedule → competence decay -0.05 (cumulative)', () => {
+    function heldPastSchedule() {
         const roster = loadArmyCoRoster();
-        const state = makeBaseState(72); // 12 turns past tenure_end=60
+        const state = makeBaseState(61);
         state.military.named_officer_data = [
             makeOfficer({
                 id: 'arbih_halilovic',
@@ -302,13 +302,25 @@ describe('A4 — applyEmergentVariationRules', () => {
         state.military.named_officers = {
             arbih_halilovic: makeOfficerState({ officer_id: 'arbih_halilovic', status: 'active' }),
         };
-        // Step 1: mark as overstaying (turn 72 > 60).
-        evaluateScheduledTransitions(state, 72, roster!);
-        // Step 2: apply emergent rules.
-        applyEmergentVariationRules(state, 72, roster!);
-        const officer = state.military.named_officer_data!.find(o => o.id === 'arbih_halilovic')!;
-        // Overstay duration = 72 - 61 + 1 = 12 turns. Decay = (-0.05/12) * 12 = -0.05.
-        expect(officer.competence).toBeCloseTo(3 - 0.05, 5);
+        const competenceAfter = (lastTurn: number): number => {
+            for (let t = 61; t <= lastTurn; t++) {
+                evaluateScheduledTransitions(state, t, roster!);
+                applyEmergentVariationRules(state, t, roster!);
+            }
+            return state.military.named_officer_data!.find(o => o.id === 'arbih_halilovic')!.competence;
+        };
+        return { competenceAfter };
+    }
+
+    it('T5 — held 12 turns past schedule (one call per turn) → competence decay -0.05, linear', () => {
+        // Overstay turns 61..72 = 12. Decay = (-0.05/12) × 12 = -0.05 (quadratic gave -0.325).
+        expect(heldPastSchedule().competenceAfter(72)).toBeCloseTo(3 - 0.05, 9);
+    });
+
+    it('T5b — the per-turn loss is constant: 24 turns cost exactly twice 12', () => {
+        const loss12 = 3 - heldPastSchedule().competenceAfter(72);
+        const loss24 = 3 - heldPastSchedule().competenceAfter(84);
+        expect(loss24).toBeCloseTo(2 * loss12, 9);
     });
 });
 
@@ -356,7 +368,7 @@ describe('A4 — stubbornness escalation', () => {
         expect(mladic.stubbornness).toBe(5);
     });
 
-    it('T6b — cooldown halving sets last_autonomous_launch_turn to enable launch after 6 turns', () => {
+    it('T6b (B4) — an overstay no longer rewrites last_autonomous_launch_turn: cooldown halving is retired', () => {
         const roster = loadArmyCoRoster();
         const state = makeBaseState(61);
         state.military.named_officer_data = [
@@ -368,9 +380,6 @@ describe('A4 — stubbornness escalation', () => {
                 available_until_turn: 60,
             }),
         ];
-        // Officer launched at turn 50; full 12-turn cooldown would block until turn 62.
-        // After cooldown halving, the stored last should be shifted by 6 → 44, so the
-        // gate at turn 62 still passes (62 - 44 >= 12).
         type LooseOS = NamedOfficerState & {
             last_autonomous_launch_turn?: number;
             cooldown_halved_applied?: boolean;
@@ -381,9 +390,9 @@ describe('A4 — stubbornness escalation', () => {
         evaluateScheduledTransitions(state, 61, roster!);
         applyEmergentVariationRules(state, 61, roster!);
         const os = state.military.named_officers!.arbih_halilovic as LooseOS;
-        expect(os.cooldown_halved_applied).toBe(true);
-        // 50 - (12 - 6) = 44 → gap of 17 at turn 61, which would have been 11 without the shift.
-        expect(os.last_autonomous_launch_turn).toBe(44);
+        expect(os.cooldown_halved_applied).toBeUndefined();
+        expect(os.last_autonomous_launch_turn).toBe(50);
+        expect('cooldown_halving' in roster!.variation_rules.keep_past_schedule).toBe(false);
     });
 });
 

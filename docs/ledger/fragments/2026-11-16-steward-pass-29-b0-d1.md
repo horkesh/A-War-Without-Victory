@@ -1,0 +1,6 @@
+## 2026-11-16 — Pass 29: #697 (B0) recorded; option C for D1 measured and not supported
+
+Docs only; no `src/` or `data/` change, no hash change.
+
+- #697, B0: the bot peace-plan floors (RS and Contact Group, Owen-Stoltenberg, Dayton and the territory-gain bias) now measure territory by area. Inert in historical mode (the scorer is not called there), so main stays at 01572f50dfea2378. A hands-off emergent game now runs to t188 instead of ending at Vance-Owen at t40; peace-plan answers match history; emergent scores 710 / 707 / 707 / 670 (emergent hash 357b158daf80d1e3, a measurement); the guard is still breached in emergent mode and goes to the B5 triage.
+- D1, option C: C and C' measured and not supported (they remove 1 of 5 RBiH sweeps, because 4 happen at t1 to t2 before the policy event; both perturb the war and break a guard and parity). Per the owner's condition it returns to the owner after the historian's per-sweep ruling and an option-A measurement. PR 1 (mode gating) stays held.
