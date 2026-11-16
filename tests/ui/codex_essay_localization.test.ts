@@ -112,7 +112,7 @@ describe('Codex essay localization coverage', () => {
         const sanaEvent = war1995Events.find((event) => event.id === 'operation_sana_1995');
 
         expect(bihacEssay?.sources).toContain('Balkan Battlegrounds II, pp. 517-519'); // printed pages (Annex 59 charts); 536-538 was the PDF page
-        expect(bihacEvent?.historical_source).toContain('Balkan Battlegrounds Vol. II region (Bihać 1994 chronology'); // pp. 406-417 are 1993 annexes and were dropped
+        expect(bihacEvent?.historical_source).toContain('Balkan Battlegrounds Vol. II (Bihać 1994 chronology'); // pp. 406-417 are 1993 annexes and were dropped
         // Narrative re-authored into the Phase B+D decision-modal framing
         // (commit 67eee60a). It still binds the same sourced operational facts:
         // the 5th Corps push from the pocket toward Grabez/Bosanska Krupa against
