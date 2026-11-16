@@ -27,6 +27,7 @@ import { useGameStore } from '../../store/gameStore';
 import { turnToDateString } from '../../utils/formatters';
 import { FRONT_VISIT_COST } from '../../utils/commandAuthority';
 import { t } from '../../i18n';
+import { gestureNotYetText } from '../../utils/gestureCopy';
 
 interface FrontVisitAvailability {
     available: boolean;
@@ -36,6 +37,7 @@ interface FrontVisitAvailability {
     maxFires: number | null;
     cooldownUntil: number | null;
     onCooldown: boolean;
+    availableFromTurn: number | null;
     reachableBranchIds: string[];
     unreachableBranchIds: string[];
 }
@@ -82,6 +84,7 @@ export function FrontVisitSection() {
             maxFires: typeof r.maxFires === 'number' ? r.maxFires : null,
             cooldownUntil: r.cooldownUntil ?? null,
             onCooldown: !!r.onCooldown,
+            availableFromTurn: typeof r.availableFromTurn === 'number' ? r.availableFromTurn : null,
             reachableBranchIds: r.reachableBranchIds ?? [],
             unreachableBranchIds: r.unreachableBranchIds ?? [],
         });
@@ -130,6 +133,11 @@ export function FrontVisitSection() {
 
                 {/* Availability readout */}
                 <div className={`flex flex-col gap-0.5 text-[13px] ${DOSSIER_INK.muted}`}>
+                    {/* G1: before the event's own turn_min the visit is not possible yet; the
+                        cap/cooldown/reach readouts below would misread the empty availability. */}
+                    {avail.reason === 'not_yet_available' ? (
+                        <span className="text-amber-900">{gestureNotYetText(avail.availableFromTurn)}</span>
+                    ) : (<>
                     {avail.firesLeft === null ? null : avail.firesLeft > 0 ? (
                         <span>{t('frontVisit.firesLeft', { count: avail.firesLeft })}</span>
                     ) : (
@@ -153,6 +161,7 @@ export function FrontVisitSection() {
                             {t('frontVisit.someCutOff', { fronts: unreachableLabels })}
                         </span>
                     )}
+                    </>)}
                 </div>
 
                 {/* Action button */}

@@ -6255,6 +6255,8 @@ export const bcsMessages: Partial<Record<MessageKey, string>> = {
     'directive.gesture.cannotAct': 'Nije moguće djelovati',
     'directive.gesture.alreadyPending': 'Prvo odgovorite na odluku koju je ovo već stavilo na vaš sto.',
     'directive.gesture.exhausted': 'Ovo se u ovom ratu više ne može učiniti.',
+    'directive.gesture.notYet': 'Nije moguće ovako rano u ratu. Dostupno od {date}.',
+    'directive.gesture.notYetUndated': 'Nije moguće ovako rano u ratu.',
     'directive.gesture.failed': 'Izdavanje predsjedničke akcije nije uspjelo.',
     'directive.targetInput.placeholder': 'Ciljno naselje (npr. Bihać)',
     'directive.targetInput.aria': 'Ciljno naselje',
