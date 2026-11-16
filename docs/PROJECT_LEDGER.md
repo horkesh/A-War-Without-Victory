@@ -281,6 +281,12 @@ Docs only; no `src/` or `data/` change, no hash change.
 - #697, B0: the bot peace-plan floors (RS and Contact Group, Owen-Stoltenberg, Dayton and the territory-gain bias) now measure territory by area. Inert in historical mode (the scorer is not called there), so main stays at 01572f50dfea2378. A hands-off emergent game now runs to t188 instead of ending at Vance-Owen at t40; peace-plan answers match history; emergent scores 710 / 707 / 707 / 670 (emergent hash 357b158daf80d1e3, a measurement); the guard is still breached in emergent mode and goes to the B5 triage.
 - D1, option C: C and C' measured and not supported (they remove 1 of 5 RBiH sweeps, because 4 happen at t1 to t2 before the policy event; both perturb the war and break a guard and parity). Per the owner's condition it returns to the owner after the historian's per-sweep ruling and an option-A measurement. PR 1 (mode gating) stays held.
 
+## 2026-11-16 — Pass 30: the emergent guard breaches are routed to package P2, not the B5 triage
+
+Docs only; no `src/` or `data/` change, no hash change.
+
+- Orchestrator correction to pass 29: the emergent guard breaches left after B0 (Farz receipts 0 of 4, the 2nd Corps taking Seher at t164 and Petrovo at t179) are the thin-defence defect showing in emergent mode. They are routed to the package's P2 (re-measure in emergent after P2), not to the B5 triage, which covers political divergences only. Work list B0 row and the final-behaviour record corrected.
+
 ## 2026-11-15 — Command loop L7: army clashes (proposal 2A step A1; owner decision 4)
 
 - **What.** A clash is raised only by something the president did, when he stages it: stop an operation, request one, withhold a Level-1 plan, or decline a recommended opportunity. All three must hold:
