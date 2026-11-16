@@ -91,7 +91,6 @@ describe('RB9 takeover timer inheritance', () => {
         // RBiH retakes the OSID: the timer is retired as dormant, not deleted.
         state.meta.turn = 60;
         capture(state, 'RBiH', 'HRHB');
-        processDisplacementTakeover(state, settlements, undefined, pop1991, settlements);
         const dormant = (state.displacement.hostile_takeover_timers as Record<string, HostileTakeoverTimerState>)[KEY]!;
         expect(dormant.dormant_since_turn).toBeDefined();
         expect(dormant.cumulative_displaced).toBe(firstWave);
@@ -132,13 +131,11 @@ describe('RB9 takeover timer inheritance', () => {
         // Retaken (dormant), taken again (inherits, not yet fired), retaken inside the delay.
         state.meta.turn = 60;
         capture(state, 'RBiH', 'HRHB');
-        processDisplacementTakeover(state, settlements, undefined, pop1991, settlements);
         state.meta.turn = 62;
         capture(state, 'HRHB', 'RBiH');
         expect(timers()[KEY]!.cumulative_displaced).toBe(firstWave);
         state.meta.turn = 63;
         capture(state, 'RBiH', 'HRHB');
-        processDisplacementTakeover(state, settlements, undefined, pop1991, settlements);
         expect(timers()[KEY]!.dormant_since_turn).toBeDefined();
         expect(timers()[KEY]!.cumulative_displaced).toBe(firstWave);
 
@@ -166,7 +163,6 @@ describe('RB9 takeover timer inheritance', () => {
 
         state.meta.turn = 60;
         capture(state, 'RBiH', 'HRHB');
-        processDisplacementTakeover(state, settlements, undefined, pop1991, settlements);
         expect(timers()[KEY]!.dormant_since_turn).toBe(60);
         // Held by RBiH: the second pass at t60 starts the hold; the return comes RETURN_HOLD_WEEKS later.
         expect(timers()[KEY]!.return_hold_since_turn).toBe(60);
@@ -222,7 +218,6 @@ describe('RB9 takeover timer inheritance', () => {
         const firstWave = timers()[KEY]!.cumulative_displaced!;
         state.meta.turn = 60;
         capture(state, 'RBiH', 'HRHB');
-        processDisplacementTakeover(state, settlements, undefined, pop1991, settlements);
         for (let t = 61; t < 60 + RETURN_HOLD_WEEKS - 1; t++) {
             state.meta.turn = t;
             processDisplacementTakeover(state, settlements, undefined, pop1991, settlements);
@@ -268,7 +263,6 @@ describe('RB9 takeover timer inheritance', () => {
         const poolAfterExpulsion = pool();
         state.meta.turn = 60;
         capture(state, 'RBiH', 'HRHB');
-        processDisplacementTakeover(state, settlements, undefined, pop1991, settlements);
         for (let t = 61; t <= 60 + RETURN_HOLD_WEEKS; t++) {
             state.meta.turn = t;
             processDisplacementTakeover(state, settlements, undefined, pop1991, settlements);
@@ -283,7 +277,6 @@ describe('RB9 takeover timer inheritance', () => {
         capture(state, 'HRHB', 'RBiH');
         state.meta.turn = 51;
         capture(state, 'RBiH', 'HRHB');
-        processDisplacementTakeover(state, settlements, undefined, pop1991, settlements);
         expect((state.displacement.hostile_takeover_timers as Record<string, unknown>)[KEY]).toBeUndefined();
     });
 });

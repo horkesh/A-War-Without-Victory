@@ -424,13 +424,20 @@ function isReplaceableTimer(existing: HostileTakeoverTimerState | undefined): bo
  * dormant record that never fires; a timer with no count displaced nobody and is deleted, as before.
  */
 function retireTimer(
+    state: GameState,
     timerMap: Record<string, HostileTakeoverTimerState>,
     timerKey: string,
     currentTurn: number,
+    controller: FactionId | null | undefined,
 ): void {
     const timer = timerMap[timerKey];
     if (timer && (timer.cumulative_displaced ?? 0) > 0) {
         timer.dormant_since_turn = currentTurn;
+        // Codex P2: the return clock starts on the turn the safe holder takes over, not on the
+        // next weekly pass (a recapture at t60 returns people at t72, after 12 weeks, not t73).
+        if (isSafeHolderForGroup(state, timer.from_faction, timer.to_faction, controller)) {
+            timer.return_hold_since_turn = currentTurn;
+        }
         return;
     }
     delete timerMap[timerKey];
@@ -1047,18 +1054,18 @@ export function processDisplacementTakeover(
         // Recapture check: if displaced faction regained control, retire the timer (RB9: a fired
         // timer stays as a dormant record of who was expelled; an unfired one is deleted).
         if (currentController === timer.from_faction) {
-            retireTimer(timerMap, timerKey, currentTurn);
+            retireTimer(state, timerMap, timerKey, currentTurn, currentController);
             continue;
         }
         // Alliance check: if factions no longer at war, retire the timer
         if (currentController && !areFactionsAtWar(state, timer.from_faction, currentController)) {
-            retireTimer(timerMap, timerKey, currentTurn);
+            retireTimer(state, timerMap, timerKey, currentTurn, currentController);
             continue;
         }
         // RF-5B: a policy wave belongs to the faction whose policy it is. If that faction no
         // longer holds the OSID (e.g. RS took it), the wave never fires and books nothing.
         if (timer.cause === 'policy_expulsion' && currentController !== timer.to_faction) {
-            retireTimer(timerMap, timerKey, currentTurn);
+            retireTimer(state, timerMap, timerKey, currentTurn, currentController);
             continue;
         }
 
@@ -1251,7 +1258,7 @@ export function processDisplacementTakeover(
             const remainingMinority = Math.max(0, initialMinority - cumulativeDisplaced);
 
             if (remainingMinority < SUSTAINED_MIN_REMAINING) {
-                retireTimer(timerMap, timerKey, currentTurn);
+                retireTimer(state, timerMap, timerKey, currentTurn, currentController);
                 continue;
             }
 
