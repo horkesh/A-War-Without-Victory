@@ -2557,10 +2557,18 @@ describe('generateArmyReserveRequests', () => {
             home_osid: 'op:mun:o3',
         } as unknown as FormationState;
 
-        const state = makeState({
+        // Package P2 step 2b: the gap check reads a real local force ratio (hostile men on the
+        // sector's enemy-side cells ÷ own effective men assigned), not threat_ratio. 3,120 RS
+        // facing 1,200 RBiH is 2.6.
+        const enemy = {
+            ...frontline, id: 'rs_facing_bde', faction: 'RS', name: 'Facing Brigade',
+            personnel: 3120, corps_id: 'vrs_east_bosnian', location_osid: 'op:mun:o4', home_osid: 'op:mun:o4',
+        } as unknown as FormationState;
+        const makeThinFrontState = (withEnemy: boolean) => makeState({
             formations: {
                 arbih_guards: elite,
                 arbih_1st_corps_bde_1: frontline,
+                ...(withEnemy ? { rs_facing_bde: enemy } : {}),
             },
             corps_command: {
                 arbih_1st_corps: {
@@ -2573,12 +2581,20 @@ describe('generateArmyReserveRequests', () => {
                     corps_id: 'arbih_1st_corps',
                     threat_ratio: 2.6,
                     assigned_brigade_ids: ['arbih_1st_corps_bde_1'],
+                    sub_segments: [{ sub_segment_id: 'sec_a:0', friendly_osids: ['op:mun:o3'], enemy_osids: ['op:mun:o4'] }],
                 },
             },
             player_faction: 'RBiH',
             turn: 10,
         });
 
+        // The sector pressure index alone (threat_ratio 2.6, no hostile men facing) is not a gap.
+        const noEnemy = makeThinFrontState(false);
+        makeChainFriendlyToCorps(noEnemy, 'RBiH');
+        generateArmyReserveRequests(noEnemy, adj);
+        expect(noEnemy.military.pending_reserve_requests ?? []).toHaveLength(0);
+
+        const state = makeThinFrontState(true);
         makeChainFriendlyToCorps(state, 'RBiH');
         generateArmyReserveRequests(state, adj);
 

@@ -75,6 +75,8 @@ import {
 } from './historical_elite_reservations.js';
 import { isVlasicCohaExceptionOperation } from './coha_operation_exception.js';
 import { strictCompare } from '../../state/validateGameState.js';
+import { effectivePersonnel } from './tactical_group_personnel.js';
+import { isSectorRosterEligibleFormation } from './sector_roster_eligibility.js';
 import { selectStaffControlledFactions } from '../bot/staff_control.js';
 import { getPrimaryOperation } from './corps_operation_helpers.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
@@ -331,6 +333,49 @@ function sortedCorpsSectors(state: GameState, corpsId: string): CorpsFrontSector
     return Object.values(state.military.corps_front_sectors ?? {})
         .filter((sector) => sector.corps_id === corpsId)
         .sort((a, b) => strictCompare(a.sector_id, b.sector_id));
+}
+
+/**
+ * Local force ratio of a sector for the army-reserve gap check (package P2 step 2b, 2026-11-16):
+ * hostile personnel standing on the sector's enemy-side cells ÷ the effective personnel of the
+ * brigades assigned to the sector. `CorpsFrontSector.threat_ratio` is a sector pressure index,
+ * not a force ratio (whole-sector enemy men over own weighted men PER EDGE), so it grows with
+ * sector length: 82% of RS sector-turns read above 5.5 and every RS corps requested at the
+ * priority cap. The ratified gap rule ("threat above 2", breach first) needs a real ratio.
+ * An unstaffed sector returns Infinity when enemies face it (it is also flagged unstaffed).
+ */
+function sectorLocalForceRatio(
+    state: GameState,
+    sector: CorpsFrontSector,
+    faction: FactionId,
+    hostileByOsid: Map<string, number>,
+): number {
+    const enemyOsids = new Set<string>();
+    for (const subSegment of sector.sub_segments ?? []) {
+        for (const osid of subSegment.enemy_osids ?? []) enemyOsids.add(osid);
+    }
+    let enemy = 0;
+    for (const osid of enemyOsids) enemy += hostileByOsid.get(osid) ?? 0;
+    let own = 0;
+    for (const id of sector.assigned_brigade_ids) {
+        const f = state.military.formations?.[id];
+        if (f && f.status === 'active' && f.faction === faction) own += effectivePersonnel(f);
+    }
+    if (own > 0) return enemy / own;
+    return enemy > 0 ? Infinity : 0;
+}
+
+/** Hostile (not this faction, not an ally) roster-eligible personnel by location OSID. */
+function hostilePersonnelByOsid(state: GameState, faction: FactionId): Map<string, number> {
+    const byOsid = new Map<string, number>();
+    const formations = state.military.formations ?? {};
+    for (const id of Object.keys(formations).sort(strictCompare)) {
+        const f = formations[id]!;
+        if (!f.location_osid || f.faction === faction || isFriendlyFaction(f.faction, faction, state)) continue;
+        if (!isSectorRosterEligibleFormation(f)) continue;
+        byOsid.set(f.location_osid, (byOsid.get(f.location_osid) ?? 0) + effectivePersonnel(f));
+    }
+    return byOsid;
 }
 
 function sectorFrontOsids(sector: CorpsFrontSector): string[] {
@@ -885,22 +930,26 @@ export function generateArmyReserveRequests(
             .map((e) => e.settlement_id);
         let gapSector: CorpsFrontSector | undefined;
         let gapScore = -Infinity;
+        let gapRatio = 0;
+        const hostileByOsid = hostilePersonnelByOsid(state, corpsFaction);
         for (const candidate of Object.keys(corpsSectors).sort(strictCompare).map((k) => corpsSectors[k]!).filter((s) => s.corps_id === corpsId)) {
             const front = new Set(sectorFrontOsids(candidate));
             const breached = lostCells.some((cell) => (adjacency.get(cell as Osid) ?? []).some((n) => front.has(n)));
             const unstaffed = candidate.unstaffed_front === true;
-            if (!(candidate.threat_ratio > 2.0 || breached || unstaffed)) continue;
-            const score = (breached ? 2e6 : 0) + (unstaffed ? 1e6 : 0) + Math.min(candidate.threat_ratio, 1e5);
-            if (score > gapScore) { gapScore = score; gapSector = candidate; }
+            // Step 2b: a real local force ratio, not the sector pressure index (threat_ratio).
+            const ratio = sectorLocalForceRatio(state, candidate, corpsFaction, hostileByOsid);
+            if (!(ratio > 2.0 || breached || unstaffed)) continue;
+            const score = (breached ? 2e6 : 0) + (unstaffed ? 1e6 : 0) + Math.min(ratio, 1e5);
+            if (score > gapScore) { gapScore = score; gapSector = candidate; gapRatio = ratio; }
         }
         if (gapSector) {
             const sector = gapSector;
-            const rawPriority = Math.max(bestRawPriority, Math.min(85, 50 + Math.max(0, Math.min(sector.threat_ratio, 1e3) - 2.0) * 10));
+            const rawPriority = Math.max(bestRawPriority, Math.min(85, 50 + Math.max(0, Math.min(gapRatio, 1e3) - 2.0) * 10));
             {
                 bestReason = 'defensive_gap';
                 bestProvenanceDriver = 'sector_threat';
                 bestRawPriority = rawPriority;
-                bestDescription = `Sector threat ratio ${sector.threat_ratio.toFixed(1)} with only ${sector.assigned_brigade_ids.length} brigade(s) — line is thin`;
+                bestDescription = `Sector force ratio ${Number.isFinite(gapRatio) ? gapRatio.toFixed(1) : 'unopposed'} with only ${sector.assigned_brigade_ids.length} brigade(s) — line is thin`;
                 bestSectorThreatRatio = sector.threat_ratio;
                 bestSectorAssignedBrigadeCount = sector.assigned_brigade_ids.length;
                 bestOperationName = undefined;
