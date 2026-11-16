@@ -8,7 +8,8 @@
 - **Change.** The five divergent readers call `isRbihHrhbAtWar` (alliance ≤ `HOSTILE_THRESHOLD`): `src/sim/combat/bot_corps_stance.ts` (two branches), `src/sim/combat/bot_corps_ai.ts`, `src/sim/early_war/bot_early_war.ts`, `src/sim/bot/bot_strategy.ts`.
 - **Proof** (on main `69c566349`; logs `C:/Pyrrhic/AWWV-worktrees/_logs/b5-scorer-20261116/aw_*`).
   - Historical 188w: hash `044a3f85f003e7c7`. Checkpoints 709/709/708/681, guard intact.
-  - Control-identical to main: `control_delta`, activity, formations, operation AARs and the end report are all byte-identical. Only state changes: `final_save` and `weekly_report`, for the one turn at exactly 0.0.
+  - Control-identical to main: `control_delta`, activity, formations, operation AARs and the end report are all byte-identical.
+  - State does change, from the one turn at exactly 0.0 (t93) onward: HRHB cohesion is 1-2 lower from t93 to t188 (`brigade_temporal_log`), and `weekly_report` differs at t136-140 (Kupres power ratios). No control cell changes.
   - Emergent `f98539c388ffb459`: 709/709/708/680, intact.
   - Baselines re-pinned; a second run matches.
   - The 43 test files that touch these readers pass (716 tests). tsc clean.
