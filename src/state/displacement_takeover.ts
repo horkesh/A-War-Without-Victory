@@ -1197,11 +1197,17 @@ export function processDisplacementTakeover(
                 for (const fid of fKeys) {
                     let rem = Math.max(0, Math.floor(byFaction[fid] ?? 0));
                     if (rem <= 0) continue;
+                    // RB2: only a group at war with the captor flees onward. The captor's own people
+                    // (and a group not at war with it) stay where they sheltered; moving them was an
+                    // unlogged move of the captor's own population.
+                    if (!areFactionsAtWar(state, fid as FactionId, timer.to_faction)) continue;
+                    // RB2: the onward flight is logged (a settled-only event per destination, no
+                    // expulsion fields), so the move is visible and refugees_created is untouched.
                     const result = routeDisplacedCohort(
                         state, munId, fid, rem,
                         friendlyMunsByFaction[fid],
                         settlements, routedByPoolKey, report,
-                        { causedByFaction: timer.to_faction }
+                        { causedByFaction: timer.to_faction, eventReason: 'sheltered_reroute' }
                     );
                     byFaction[fid] = result.remaining;
                 }
