@@ -25,6 +25,7 @@ Every engine finding gets one of three answers, with a one-line reason when it i
 
 | # | Item | Answer |
 |---|---|---|
+| B0 | Peace-plan floor (RS and Contact Group) compares a settlement-count share with an area share | Fix (must), the lane's first item. In emergent mode the RS floor reads 52.7% by settlement count against the plan's area-based 43%; the 9.7-point gap is under the 17.3 floor, so the scoring engine decides and RS accepts Vance-Owen at week 40 and the war ends. By area RS holds 63.4%, a 20.4-point gap, and rejects. The Contact Group floor has the same mismatch (not measured). Evidence: `_logs/emergent-probe-20261115/REPORT.md`. |
 | B4 | Autonomous-launch gate | Retire (inert): it never finds an opportunity, and turning it on would need a §6 ruling first. |
 | B1 | Competence decay is quadratic | Fix to the documented linear rate. |
 | B2 | 538 pending officer events never acknowledged | Fix: a queue that is never drained (moves state). |
@@ -42,6 +43,8 @@ Every engine finding gets one of three answers, with a one-line reason when it i
 | C6 | Identity card applied at week 0 live and week 3 headless | Fix: live and headless should match to the soldier. |
 | C7 | PK5 queue head below its floor blocks the corps chain | Fix: skip it and record it. |
 | C8 | F1i `political.enclaves` always empty | Fix the root read (same class as #617), then keep or retire each revived reader on what the run shows. |
+
+**Emergent triage (E1; owner, 2026-11-16: the improvising mode ships in 1.0 and stays the default).** After B0, a hands-off emergent 188-week run at the candidate commit. Engine defects found in its divergences are fixed before the freeze; option weights go to the calibration pass; the historian accepts the divergences that remain. Today's top divergences (probe of 2026-11-16, main `278e4eb55`): t1 RS strategic goals all_six becomes aggressive and the Drina cleansing decision never fires; t2 RS paramilitary policy allow becomes deny; t17 camps revealed, RS obstruct becomes cooperate; t38 RBiH under Vance-Owen pressure acknowledge becomes resist the patron; and, once the war runs past week 40, t89 HRHB sues for peace, t106 RBiH resists the US after Washington, t99 and t118 RS conditional engagement and amendments, t54 Srebrenica complies fully and t121 HRHB refuses army integration. Emergent scores today are 710 / 667 / 657 / 568 with the guard breached (Srebrenica and Žepa never fall, Farz 0/4, the western-Bosnia cascade 4 against 31), against the historical 709 / 709 / 708 / 681; the last three are scored against a map frozen in January 1993. Historical mode keeps its role as the engine health check.
 
 ## Part 2. The 1994-95 attack and defence package (F1g lane, in order)
 
@@ -72,6 +75,8 @@ F1h's dead connectivity term (the 0.5 stays as a named constant); SD2's dormant 
 Game-designer and historian in one sitting; each item passes two owner tests, left alone and played. CODE3, RB5 for an active human HRHB President, PK5 and SD6 with SD8. Reasons and ratifying seats: [final-behaviour record](../40_reports/governance/20261115_FINAL_BEHAVIOUR_AT_1_0.md).
 
 ## Part 6. Calibration pass (data and constants, after the freeze)
+
+Emergent-mode option weights (from E1).
 
 L8 with RF-4, the Donji Vakuf 95 timing (with RF-L3d follow-up 2), the Mistral 2 and Southern Move assembly slip, the painted-reference questions (Prusac January 1993, Konjic Ljuta, Goražde, Maglaj-Jablanica); RF-F1b's constant (check before the freeze that a constant alone makes the W3 and C5 gates bind; if it cannot, it is a Part 1 fix); the roster tenure starts for Praljak, Roso, Petković-2 and Blaškić-2 (H-C4); F1f supply sources; SD14; the F1c and F1d constants in emergent mode (hide emergent mode if a player cannot choose it); SD5 (one read-only check before the freeze to rule out an engine cause); and, once the package lands, the 1994-95 offensives the historian listed (Teslić, Vozuća in June and November 1994, Ozren in spring 1995) as authored operations.
 
