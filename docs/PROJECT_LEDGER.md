@@ -164,6 +164,47 @@ Fable consult 2, Revision 2 (P0): retire RF-STRENGTH's dead write and its never-
 
 Evidence: `C:/Pyrrhic/AWWV-worktrees/_logs/pkg-1994-95-step0/` (p0_*).
 
+## 2026-11-16 — RB1: a takeover wave counts each person once (§6 panel, measured)
+
+RF fidelity-pass fix. Calibration is held: scores are recorded and are not a merge bar.
+
+**Defect.** The policy-timer and sustained takeover events logged the whole wave as `displaced` and also logged `killed` and `fled_abroad`. Everything that summed them counted the killed and the fled twice. On main, `refugees_created` read 1,971,236 at w188; counting each person once gives 1,485,614.
+
+**Contract.** An event's `displaced` is the routed share only, and the wave is `displaced + killed + fled_abroad` (JSDoc on `DisplacementEvent.displaced`).
+
+**Readers.** Each of these reads `refugees_created` or the event log, and each now takes the meaning it needs:
+- `refugees_created` (humanitarian aggregates): each person once. It feeds treaty scoring, the Humanitarian Ledger, war dispatches and the refugee-flow milestones.
+- Atrocity visibility (`patron_pressure.ts`): people harmed this turn = routed + killed + fled (red-team C-RB1).
+- Turn summary (`compile_turn_summary.ts`): `displacement_total` = routed + fled; the new `displacement_killed` keeps the killed in the turn record. It is projected to the player and shown in the AAR as "Killed" / "Ubijeni" (red-team C-RB2).
+- Endgame displacement ratio (`endgame_comparison.ts`): `refugees_created − civilian_casualties_caused`, clamped at 0, so it is counted like its historical baseline of people displaced (engine C1, scenario-tester C3).
+
+**Measured** (188w, final run on main e1d1a24e3, after the #713 re-pin, against a main run at the same commit `01572f50dfea2378`; final_state_hash `df791f73c26ed642`; control, formation, operation-AAR and activity files byte-identical to main):
+- Checkpoints 709/709/708/681, per-cell delta zero, guards intact, strict health PASS (consistency 0).
+- `refugees_created` per causer → victim: RS→RBiH 1,062,156 → 822,669; RS→HRHB 337,388 → 221,404; RBiH→RS 362,043 → 281,732; RBiH→HRHB 45,157 → 33,789; HRHB→RS 127,960 → 98,011; HRHB→RBiH 36,532 → 28,009.
+- The reader fixes move only off-map values: at w188, atrocity visibility 0.02355 → 0.03354, composite IVP 0.5497 → 0.5517; patron commitment in the 4th decimal; some negotiation-ledger entries; terminal exhaustion slightly.
+
+**Historian sanity check (recorded, not a target).**
+- Displaced + fled is 1,444,732, which is 66% of the UNHCR ~2.2M in `data/reference/historical_baseline.json`.
+- Main's 88% came from the double count.
+- The model figure is a flow summed over events, and the UNHCR figure is a war-end stock, so a faithful flow should come out at or above the record. The gap is known.
+- The real gap is fled abroad: 448k against about 1.2M (register RB1-R2).
+
+**Recorded limitation (determinism seat B2).** A save played across the upgrade keeps cumulative stores that mix both contracts:
+- `refugees_created`;
+- `displacement_recent_by_turn` (it ages out);
+- `displacement_flows_by_osid`;
+- the turn summaries.
+
+The per-turn event log is cleared each turn and does not mix. The overstatement cannot be recovered exactly, and the schema stays 38. No migration.
+
+**Gate.** §6 panel:
+- seats: historian, scenario-creator-runner-tester, engine/systems, red-team; determinism alongside;
+- implementer excluded; named integrator;
+- unanimous APPROVE with conditions;
+- §6 record row in `SENSITIVE_HISTORY_DESIGN_GATE.md`.
+
+Evidence: `C:/Pyrrhic/AWWV-worktrees/_logs/cl-rb1-20261115/` and the seat and integrator files in `_logs/cl-rf-pm1-20261115/`. Register items RB1-R1 to RB1-R3; none is tagged post-1.0.
+
 ## 2026-11-16 — RB6: 13 bot operation-pool names replaced in place (Džihad and twelve real or loaded names)
 
 `src/sim/combat/operation_names.ts`: "Operacija Džihad" (never an ARBiH operation; the ICTY ties the word to the foreign El Mujahed Detachment and Serb propaganda used it to brand all Muslims) became Prevoj; the real operation names Sabur, Oluja, Bljesak, Udar (twice), Proboj and Vihor (twice) and the loaded names Hajka, Gazija, Grad and Odmazda became Temelj, Snijeg, Bujica, Nasip and Mlaz, Zalet, Granit and Mećava, Ždral, Vedrina, Magla and Smreka, each in its original slot (pool lengths 38 / 39 / 35 unchanged, selection deterministic). Historian and narrative seats chose the replacements; each was checked against the pools, the reserved list, the authored catalogues, BB Vol. I and II and the ICTY texts. New test `tests/operation_names_no_real_operations.test.ts`. Data-only (names move the state hash only for runs that draw those slots): measured pass in the PR. Evidence and rename map: `docs/40_reports/evidence/20261116_rb6_operation_names/`.
@@ -329,6 +370,13 @@ Docs only; no `src/` or `data/` change, no hash change.
 - #700, B4: the army commander's autonomous launch is retired. Inert; every simulation artifact byte-identical; main stays 01572f50dfea2378. UI follow-up: the pushback panel's "Autonomous-launch warning" shows only for a legacy save.
 - Owner ruling on D1, 2026-11-16, "Yes, approve both", on the orchestrator's two-stage plan. Stage 1, now: honest copy and canon ("authorized" only where the faction's policy allowed or ordered the sweep; no "ethnic cleansing" for a one-sweep trigger; delegation texts disclose staff acting before the policy decision), a staff-sweep receipt, then PR 1 (mode gating). Stage 2, after package P2 and before the freeze: retire the five artefact RBiH sweeps and take Bukvik (about September 1992) and Obadi (if kept) by ordinary 1992 operations (the joint HVO 108th Brčko operation). The historian found all 5 RBiH sweeps an engine artefact. Open with the owner: Biljesevo, Olovci and the Glamoč village in the January 1993 paint.
 - RB9 with rule (a), measured: scores 709 / 708 / 707 / 672; returns drain host refugee and militia pools, so the 1995 western captures (Petrovac, Drvar, Jajce, Ključ and others) do not happen; guards hold. Accepted as modelled history under the calibration HOLD (an honest loss), conditional on the historian's check of the returns magnitude (about 130,000); the lost cells join the calibration-pass list (HV-in-Bosnia modelling).
+
+## 2026-11-16 — Pass 34: the D1 open item closed by the owner; #718 (RB1) recorded
+
+Docs only; no `src/` or `data/` change, no hash change.
+
+- Owner, 2026-11-16, "Keep them RBiH": Biljesevo, Olovci and the Glamoč village (Goražde) stay RBiH in the January 1993 reference map, since no source says how or when they changed hands. In D1 stage 2 all five former artefact-sweep cells get ordinary 1992 operations, with unsourced dates marked unverified in the data. The open item is closed.
+- #718, RB1 (A2): a takeover wave counts each person once (`refugees_created` at w188 1,971,236 to 1,485,614; the Verdict displacement ratio 0.896 to 0.657); §6 panel unanimous, control-identical; final-state hash df791f73c26ed642 (the PR's measurement on main 01572f50dfea2378, baselines re-blessed in the PR), recorded as the main hash at #718.
 
 ## 2026-11-15 — Command loop L7: army clashes (proposal 2A step A1; owner decision 4)
 
