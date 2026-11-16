@@ -105,6 +105,7 @@ const OP_INJECTION_CHECKS = [
     'op_empty',
     'objective_overlap',
     'participants_below_attack_floor',
+    'queue_head_skipped',
 ] as const;
 const OP_INJECTION_SEVERITIES = ['error', 'warning'] as const;
 const WATCHED_OPERATION_CATALOG_STATUSES = ['present', 'missing', 'not_applicable'] as const;
@@ -3304,7 +3305,7 @@ function validateOpInjectionWarnings(value: unknown, errors: string[]): void {
         }
         if (!isNonEmptyString(entry.op_name)) errors.push(`${path}.op_name must be a non-empty string`);
         if ('axis_id' in entry && entry.axis_id !== undefined && typeof entry.axis_id !== 'string') errors.push(`${path}.axis_id must be a string when present`);
-        if (!isOpInjectionCheck(entry.check)) errors.push(`${path}.check must be one of: staging_adjacency, chain_gap, brigade_missing, brigade_ineligible, all_objectives_owned, axis_empty, op_empty, objective_overlap, participants_below_attack_floor`);
+        if (!isOpInjectionCheck(entry.check)) errors.push(`${path}.check must be one of: staging_adjacency, chain_gap, brigade_missing, brigade_ineligible, all_objectives_owned, axis_empty, op_empty, objective_overlap, participants_below_attack_floor, queue_head_skipped`);
         if (!isNonEmptyString(entry.detail)) errors.push(`${path}.detail must be a non-empty string`);
         if (!isOpInjectionSeverity(entry.severity)) errors.push(`${path}.severity must be one of: error, warning`);
         if (!isNonNegativeInteger(entry.turn)) errors.push(`${path}.turn must be a non-negative integer`);
