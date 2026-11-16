@@ -98,6 +98,7 @@ import { engageTacticalGroup, formTacticalGroup } from './tactical_group_lifecyc
 import {
     createSouthernMoveConfidenceLookupContext,
     emitCorpsExhaustionRecord,
+    emitDefenceRecord,
     emitLinkedPreparationProbeRecord,
     emitSouthernMoveConfidenceLookupRecord,
     emitMistralTgActivationRecord,
@@ -1462,6 +1463,27 @@ export function tickPreparation(
     const forceRatio = estimateForceRatio(state, op, competence, confidence, supplyByOsid, terrainMultByOsid);
     const requiredConfidence = getRequiredConfidence(competence, aggressiveness);
     const requiredForceRatio = getRequiredForceRatio(competence, aggressiveness);
+    // Default-off `defence` receipt: the chosen objective's launch odds against the best enemy cell
+    // on the corps' own front for the same force (estimateForceRatio is pure). Observation only.
+    if (isReasonCodeTopicEnabled('defence')) {
+        const frontEnemy = new Set<string>();
+        for (const sector of Object.values(state.military.corps_front_sectors ?? {})) {
+            if (sector.corps_id !== corpsId) continue;
+            for (const sub of sector.sub_segments ?? []) for (const e of (sub as { enemy_osids?: string[] }).enemy_osids ?? []) frontEnemy.add(e);
+        }
+        let best: { target: string; ratio: number } | null = null;
+        for (const target of [...frontEnemy].sort(strictCompare)) {
+            const ratio = estimateForceRatio(state, { ...op, objectives: [target], axes: undefined } as typeof op, competence, confidence, supplyByOsid, terrainMultByOsid);
+            if (best === null || ratio > best.ratio) best = { target, ratio };
+        }
+        emitDefenceRecord({
+            kind: 'launch_odds', turn: state.meta?.turn ?? null, faction, corps_id: corpsId, operation: op.name, op_type: op.type,
+            sub_phase: op.preparation_sub_phase ?? null, participants: op.participating_brigades.length,
+            chosen_objectives: [...(op.objectives ?? (op.axes ?? []).flatMap((a) => a.objectives))].slice(0, 6),
+            chosen_ratio: forceRatio, required_ratio: requiredForceRatio, front_candidates: frontEnemy.size,
+            best_ratio: best?.ratio ?? null, best_target: best?.target ?? null,
+        });
+    }
     let currentConfidenceReached: number | undefined;
 
     const result: PreparationTickResult = {

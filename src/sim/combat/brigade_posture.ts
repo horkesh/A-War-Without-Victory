@@ -11,6 +11,7 @@
  * Legacy postures 'probe' and 'consolidation' are migrated to 'hold' on load.
  */
 
+import { emitDefenceRecord, isReasonCodeTopicEnabled } from './reason_code_debug.js';
 import type {
     BrigadePosture,
     BrigadePostureOrder,
@@ -242,13 +243,23 @@ export function applyPostureOrders(state: GameState): PostureReport {
 export function applyPostureCosts(state: GameState): void {
     const formations = state.military.formations ?? {};
     const ids = Object.keys(formations).sort(strictCompare);
+    // Default-off `defence` receipt: brigades by faction, front, posture and cohesion band. Observation only.
+    const tally = isReasonCodeTopicEnabled('defence') ? new Map<string, Record<string, number>>() : null;
+    const band = (c: number) => (c < 20 ? '<20' : c < 30 ? '20-29' : c < 40 ? '30-39' : c < 60 ? '40-59' : '60+');
 
     for (const id of ids) {
         const brigade = formations[id];
         if (!brigade) continue;
         if (brigade.status !== 'active') continue;
         if ((brigade.kind ?? 'brigade') !== 'brigade') continue;
-        if (!isBrigadeAssignedToFront(state, id as FormationId)) continue;
+        const onFront = isBrigadeAssignedToFront(state, id as FormationId);
+        if (tally) {
+            const key = `${onFront ? 'front' : 'off_front'}|${onFront ? normalizePosture(brigade.posture) : '-'}|${band(brigade.cohesion ?? 60)}`;
+            const t = tally.get(brigade.faction) ?? {};
+            t[key] = (t[key] ?? 0) + 1;
+            tally.set(brigade.faction, t);
+        }
+        if (!onFront) continue;
 
         const posture: BrigadePosture = normalizePosture(brigade.posture);
         // Migrate in-place so auto-downgrade and progress tracking use the canonical posture
@@ -286,6 +297,12 @@ export function applyPostureCosts(state: GameState): void {
         // Exception: defend_at_all_costs never auto-downgrades (existential orders)
         if (posture !== 'defend_at_all_costs' && cohesion < POSTURE_MIN_COHESION[posture]) {
             brigade.posture = 'hold';
+        }
+    }
+    if (tally) {
+        for (const faction of [...tally.keys()].sort(strictCompare)) {
+            const counts = tally.get(faction)!;
+            emitDefenceRecord({ kind: 'posture_tally', turn: state.meta?.turn ?? null, faction, counts: Object.fromEntries(Object.keys(counts).sort(strictCompare).map((k) => [k, counts[k]])) });
         }
     }
 }

@@ -969,7 +969,22 @@ export function generateArmyReserveRequests(
         const availableElites = getAvailableElites(state, corpsFaction, turn)
             .filter((brigadeId) => !isEliteReservedForHistoricalOperation(brigadeId, turn))
             .filter((brigadeId) => standingHoldOverride || !standingHoldBrigadeIds.has(brigadeId));
-        if (availableElites.length === 0) continue;
+        // Default-off `defence` receipt: the request's fate, and the elite pool's state. Observation only.
+        const traceReserve = isReasonCodeTopicEnabled('defence');
+        if (traceReserve) {
+            const pool = Object.keys(formations).sort(strictCompare)
+                .filter((id) => formations[id]?.faction === corpsFaction && formations[id]?.elite_loan_state !== undefined)
+                .map((id) => {
+                    const f = formations[id]!;
+                    return { id, cohesion: f.cohesion ?? null, personnel: f.personnel ?? 0, posture: (f as { posture?: string }).posture ?? null,
+                        on_loan: f.elite_loan_state?.on_loan === true, loaned_to: f.elite_loan_state?.loaned_to_corps ?? null, available: availableElites.includes(id) };
+                });
+            emitDefenceRecord({ kind: 'reserve_pool', turn, faction: corpsFaction, corps_id: corpsId, reason: bestReason, pool });
+        }
+        if (availableElites.length === 0) {
+            if (traceReserve) emitDefenceRecord({ kind: 'reserve_outcome', turn, faction: corpsFaction, corps_id: corpsId, reason: bestReason, outcome: 'no_available_elite' });
+            continue;
+        }
 
         const candidates: CandidateEdge[] = [];
         for (const bid of availableElites) {
@@ -994,6 +1009,10 @@ export function generateArmyReserveRequests(
             return strictCompare(a.brigadeId, b.brigadeId);
         });
         const nearestCandidate = candidates[0];
+        if (traceReserve) {
+            emitDefenceRecord({ kind: 'reserve_outcome', turn, faction: corpsFaction, corps_id: corpsId, reason: bestReason,
+                outcome: nearestCandidate ? 'matchable' : 'no_reachable_elite', candidates: candidates.map((c) => `${c.brigadeId}@${c.hops}`) });
+        }
         if (!nearestCandidate) continue;
 
         const priority = computeDeployPriority(bestRawPriority, nearestCandidate.hops);

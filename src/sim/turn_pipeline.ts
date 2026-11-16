@@ -7,6 +7,7 @@
  * Types, context helpers, and caches live in turn_pipeline_types.ts.
  */
 
+import { cohesionTraceBrigadeIds, emitDefenceRecord } from './combat/reason_code_debug.js';
 import { computeFrontEdges } from '../map/front_edges.js';
 import { registerImmutableSettlementEdges } from '../map/adjacency_map.js';
 import { EdgeRecord, loadSettlementGraph } from '../map/settlements.js';
@@ -264,7 +265,20 @@ export async function runNamedPhase(context: TurnContext, step: NamedPhase, phas
         if (poolFlowBoundary) poolFlowObserver?.afterPhase(context.state, poolFlowBoundary, 'skipped', skipReason);
         return;
     }
+    const cohesionIds = cohesionTraceBrigadeIds();
+    const cohesionBefore = cohesionIds.length > 0
+        ? cohesionIds.map((id) => context.state.military?.formations?.[id]?.cohesion ?? null)
+        : null;
     await step.run(context);
+    if (cohesionBefore) {
+        // Default-off `defence` receipt: which step moved a listed brigade's cohesion. Observation only.
+        cohesionIds.forEach((id, i) => {
+            const after = context.state.military?.formations?.[id]?.cohesion ?? null;
+            if (after !== cohesionBefore[i]) {
+                emitDefenceRecord({ kind: 'cohesion_step', turn: context.state.meta?.turn ?? null, step: step.name, brigade_id: id, before: cohesionBefore[i], after });
+            }
+        });
+    }
     movementObserver?.afterPhase(context.state, movementBoundary, 'executed', null);
     personnelObserver?.afterPhase(context.state, personnelBoundary, 'executed', null);
     if (poolFlowBoundary) poolFlowObserver?.afterPhase(context.state, poolFlowBoundary, 'executed', null);

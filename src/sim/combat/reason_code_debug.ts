@@ -337,6 +337,21 @@ export function emitCorpsExhaustionRecord(build: () => Record<string, unknown>):
     }
 }
 
+/**
+ * Brigades whose cohesion the `defence` topic snapshots around every pipeline step
+ * (AWWV_DEBUG_COHESION_BRIGADES=id,id). Empty unless the topic is on and the list is set.
+ */
+let cachedCohesionTraceIds: readonly string[] | undefined;
+export function cohesionTraceBrigadeIds(): readonly string[] {
+    if (cachedCohesionTraceIds === undefined) {
+        const raw = typeof process === 'undefined' ? undefined : process.env.AWWV_DEBUG_COHESION_BRIGADES;
+        cachedCohesionTraceIds = isReasonCodeTopicEnabled('defence') && typeof raw === 'string'
+            ? raw.split(',').map((s) => s.trim()).filter(Boolean).sort(strictCompare)
+            : [];
+    }
+    return cachedCohesionTraceIds;
+}
+
 /** Default-off stdout receipts for lost settlements' defence context. Never writes GameState or reports. */
 export const DEFENCE_PREFIX = '[defence]';
 export function emitDefenceRecord(record: Record<string, unknown>): void {
