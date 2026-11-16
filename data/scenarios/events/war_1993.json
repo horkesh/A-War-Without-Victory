@@ -273,11 +273,6 @@
     "once": true,
     "effects": [
       {
-        "kind": "morale_change",
-        "faction": "RBiH",
-        "delta": 3
-      },
-      {
         "kind": "aggression_modifier",
         "faction": "RS",
         "delta": 0.1,
@@ -497,11 +492,6 @@
     "effects": [
       {
         "kind": "morale_change",
-        "faction": "RBiH",
-        "delta": -3
-      },
-      {
-        "kind": "morale_change",
         "faction": "RS",
         "delta": 2
       },
@@ -613,11 +603,6 @@
     "once": true,
     "effects": [
       {
-        "kind": "morale_change",
-        "faction": "RBiH",
-        "delta": 2
-      },
-      {
         "kind": "patron_pressure",
         "faction": "RS",
         "delta": 3
@@ -665,11 +650,6 @@
     },
     "once": true,
     "effects": [
-      {
-        "kind": "morale_change",
-        "faction": "RS",
-        "delta": 5
-      },
       {
         "kind": "morale_change",
         "faction": "RBiH",
@@ -725,11 +705,6 @@
     },
     "once": true,
     "effects": [
-      {
-        "kind": "patron_pressure",
-        "faction": "RS",
-        "delta": 5
-      },
       {
         "kind": "patron_pressure",
         "faction": "HRHB",
@@ -922,11 +897,6 @@
     },
     "once": true,
     "effects": [
-      {
-        "kind": "morale_change",
-        "faction": "RBiH",
-        "delta": 3
-      },
       {
         "kind": "patron_pressure",
         "faction": "RS",
@@ -1272,11 +1242,6 @@
     "once": true,
     "effects": [
       {
-        "kind": "patron_pressure",
-        "faction": "RS",
-        "delta": 5
-      },
-      {
         "kind": "morale_change",
         "faction": "RBiH",
         "delta": 2
@@ -1619,11 +1584,6 @@
     "once": true,
     "effects": [
       {
-        "kind": "supply_delta",
-        "faction": "HRHB",
-        "delta": 5
-      },
-      {
         "kind": "morale_change",
         "faction": "HRHB",
         "delta": 3
@@ -1749,11 +1709,6 @@
     "once": true,
     "effects": [
       {
-        "kind": "humanitarian_impact",
-        "faction": "HRHB",
-        "war_crimes_delta": 1
-      },
-      {
         "kind": "morale_change",
         "faction": "HRHB",
         "delta": 2
@@ -1799,11 +1754,6 @@
     "once": true,
     "effects": [
       {
-        "kind": "humanitarian_impact",
-        "faction": "RBiH",
-        "war_crimes_delta": 1
-      },
-      {
         "kind": "morale_change",
         "faction": "HRHB",
         "delta": -3
@@ -1848,11 +1798,6 @@
     "once": true,
     "effects": [
       {
-        "kind": "morale_change",
-        "faction": "RBiH",
-        "delta": 3
-      },
-      {
         "kind": "patron_pressure",
         "faction": "RS",
         "delta": 5
@@ -1891,11 +1836,6 @@
     },
     "once": true,
     "effects": [
-      {
-        "kind": "supply_delta",
-        "faction": "RS",
-        "delta": -10
-      },
       {
         "kind": "patron_pressure",
         "faction": "RS",
@@ -2222,11 +2162,6 @@
     "once": true,
     "effects": [
       {
-        "kind": "morale_change",
-        "faction": "HRHB",
-        "delta": -3
-      },
-      {
         "kind": "supply_delta",
         "faction": "HRHB",
         "delta": -3
@@ -2540,11 +2475,6 @@
     "effects": [
       {
         "kind": "patron_pressure",
-        "faction": "RS",
-        "delta": 5
-      },
-      {
-        "kind": "patron_pressure",
         "faction": "HRHB",
         "delta": 3
       },
@@ -2653,11 +2583,6 @@
     "once": true,
     "effects": [
       {
-        "kind": "patron_pressure",
-        "faction": "RS",
-        "delta": 5
-      },
-      {
         "kind": "morale_change",
         "faction": "RBiH",
         "delta": 2
@@ -2707,11 +2632,6 @@
     "effects": [
       {
         "kind": "supply_delta",
-        "faction": "RS",
-        "delta": -3
-      },
-      {
-        "kind": "supply_delta",
         "faction": "RBiH",
         "delta": -2
       },
@@ -2750,11 +2670,6 @@
     },
     "once": true,
     "effects": [
-      {
-        "kind": "humanitarian_impact",
-        "faction": "HRHB",
-        "war_crimes_delta": 3
-      },
       {
         "kind": "patron_pressure",
         "faction": "HRHB",
@@ -2806,11 +2721,6 @@
     },
     "once": true,
     "effects": [
-      {
-        "kind": "supply_delta",
-        "faction": "RBiH",
-        "delta": 10
-      },
       {
         "kind": "morale_change",
         "faction": "RBiH",
@@ -2867,11 +2777,6 @@
     },
     "once": true,
     "effects": [
-      {
-        "kind": "morale_change",
-        "faction": "RBiH",
-        "delta": -3
-      },
       {
         "kind": "alliance_change",
         "delta": -0.05
@@ -3198,11 +3103,6 @@
     "effects": [
       {
         "kind": "morale_change",
-        "faction": "RBiH",
-        "delta": 3
-      },
-      {
-        "kind": "morale_change",
         "faction": "HRHB",
         "delta": -3
       },
@@ -3364,11 +3264,6 @@
     "priority": 50,
     "once": true,
     "effects": [
-      {
-        "kind": "patron_pressure",
-        "faction": "RS",
-        "delta": 10
-      },
       {
         "kind": "morale_change",
         "faction": "RBiH",
@@ -4903,11 +4798,6 @@
     "once": true,
     "effects": [
       {
-        "kind": "humanitarian_impact",
-        "faction": "RBiH",
-        "war_crimes_delta": 2
-      },
-      {
         "kind": "morale_change",
         "faction": "HRHB",
         "delta": -3
@@ -5214,11 +5104,6 @@
     "once": true,
     "effects": [
       {
-        "kind": "morale_change",
-        "faction": "RBiH",
-        "delta": 3
-      },
-      {
         "kind": "patron_pressure",
         "faction": "RBiH",
         "delta": 5
@@ -5264,11 +5149,6 @@
     },
     "once": true,
     "effects": [
-      {
-        "kind": "morale_change",
-        "faction": "RBiH",
-        "delta": -3
-      },
       {
         "kind": "morale_change",
         "faction": "RS",
@@ -5325,11 +5205,6 @@
     },
     "once": true,
     "effects": [
-      {
-        "kind": "humanitarian_impact",
-        "faction": "HRHB",
-        "war_crimes_delta": 2
-      },
       {
         "kind": "patron_pressure",
         "faction": "HRHB",

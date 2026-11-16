@@ -4641,12 +4641,6 @@
       "kind": "narrative",
       "text": "A limited Croatia transit channel eases, but does not solve, the ARBiH supply crisis."
     },
-    "effects": [
-      {
-        "kind": "narrative",
-        "text": "A limited Croatia transit channel eases, but does not solve, the ARBiH supply crisis."
-      }
-    ],
     "sets_flags": {
       "embargo_croatia_transit": true
     },
