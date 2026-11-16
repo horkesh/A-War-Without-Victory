@@ -246,9 +246,13 @@ describe('Event timeline historical integrity', () => {
         expect(cohaExpires.sets_flags?.coha_expired).toBe(true);
     });
 
-    it('Washington Agreement requires Croat-Bosniak war', () => {
-        const wa = allEvents.find((e: any) => e.id === 'hrhb_washington_agreement_1994');
-        expect(wa.trigger.requires_events).toContain('croat_bosniak_war_begins_1993');
+    // B5 A2 (2026-11-16): both Washington cards require the Croat-Bosniak war through the
+    // engine's own record of it (rbih_hrhb_state.war_started_turn), not the 1993 event id, so a
+    // war that starts by another route still counts and the card and the engine cannot disagree.
+    it.each(['hrhb_washington_agreement_1994', 'rbih_washington_agreement_1994'])('%s requires the Croat-Bosniak war', (id) => {
+        const wa = allEvents.find((e: any) => e.id === id);
+        expect(wa.trigger.condition.type).toBe('and');
+        expect(wa.trigger.condition.conditions).toContainEqual({ type: 'rbih_hrhb_war_started', value: true });
     });
 
     it('NATO ultimatum and Sarajevo exclusion zone retain their bounded chronology and effects', () => {

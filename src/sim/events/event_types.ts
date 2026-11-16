@@ -15,6 +15,8 @@ export type EventCondition =
     | { type: 'territory_control'; municipality?: string; osid?: string; faction: string; threshold?: number }
     | { type: 'alliance_below'; value: number }
     | { type: 'alliance_above'; value: number }
+    /** B5 A2: true when the RBiH-HRHB war has started (`rbih_hrhb_state.war_started_turn` set), the engine's own record of it. */
+    | { type: 'rbih_hrhb_war_started'; value: boolean }
     | { type: 'faction_controls_municipality'; faction: string; municipality: string; threshold?: number }
     | { type: 'siege_active'; osid_or_municipality: string }
     | { type: 'operation_completed'; operation_name_pattern: string; min_attacks?: number }
@@ -785,6 +787,8 @@ export function evaluateCondition(condition: EventCondition, state: GameState, e
             return (state.political?.war_alliance_rbih_hrhb ?? 1.0) < condition.value;
         case 'alliance_above':
             return (state.political?.war_alliance_rbih_hrhb ?? 1.0) > condition.value;
+        case 'rbih_hrhb_war_started':
+            return (state.political?.rbih_hrhb_state?.war_started_turn != null) === condition.value;
         case 'faction_controls_municipality': {
             const pc2 = state.political?.political_controllers ?? {};
             const threshold2 = condition.threshold ?? 0.5;
