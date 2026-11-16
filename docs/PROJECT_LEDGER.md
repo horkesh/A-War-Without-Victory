@@ -660,6 +660,13 @@ Docs only; no `src/` or `data/` change, no hash change.
 - #727, B5 fix 4 and 5: `divergence_threshold` is wired with a historical-territory gate (a bot keeps an event's authored response unless some faction is more than 3 percentage points outside history's band and the alternative wins by more than the faction's threshold); the RS patron-weight note is corrected (weight stays 0.20). §6 unanimous; Systems Manual §7.10.7 gains the rule. Historical 188w byte-identical (the pin stays 03159b9ee1e5877f); a hands-off emergent run measured 6ebcd2c2d3d03372, 709 / 709 / 708 / 680 with the guard intact (a measurement on an earlier base). The t11 Drina pick (restrained) is a finding for the §6 seats. Work list B5-3.
 - Registered from #739 (package A', the L7 lane): F1i-1 to F1i-5 (the `settlement_ids[0]` identity reset in enclave detection; `supplyScore` hard-wired to 0; the Engine Invariants §12.2 gap, enclave_resilience pressure linear and falling as a siege goes on; main's `drina_blockade` at t8 and sanctions dropping by t70; the IVP x0.7 modifier reading only the tunnel flag), each an engine item needing fix, retire or accept-as-final before the freeze. #739 (C8) is hash-moving and waits for the orchestrator's go, pending a swap to retiring the convoy UI family properly.
 
+## 2026-11-16 — Pass 46: freeze condition 7 met at f98c074d9; the Ahmići and alliance rulings
+
+Docs only; no `src/` or `data/` change, no hash change.
+
+- Freeze condition 7 (a hands-off emergent 188-week run passes the history guards) is MET on main at f98c074d9 (#727), by the orchestrator's ruling: Farz 4 of 4 receipts, P-B pass, enclaves on schedule, scores 709 / 709 / 708 / 680, all 15 divergent picks reverted, and Drina's "restrained" pick recorded as a §6 artefact. It is re-run at the frozen commit. Recorded in `RF-ENGINE-FREEZE`, the final-behaviour record and the roadmap.
+- Ahmići and the alliance (orchestrator rulings): A, the trigger gated on war plus the alliance below 0.2 (§6), in progress; B and C, a costly capitulation lever for an RBiH President (ARBiH under HVO command in provinces 3, 8 and 10, then the union of three republics, with the costs visible including civilians under HVO administration), after A2b, may land after the freeze; D, the retiming of `csq_alliance_holds` and the dead `rbih_hrhb_war_active` guard, on the calibration list.
+
 ## 2026-11-15 — Command loop L7: army clashes (proposal 2A step A1; owner decision 4)
 
 - **What.** A clash is raised only by something the president did, when he stages it: stop an operation, request one, withhold a Level-1 plan, or decline a recommended opportunity. All three must hold:
