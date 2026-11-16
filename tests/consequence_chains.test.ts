@@ -983,3 +983,77 @@ describe('Issue #9 (cont.) — rupture stays combat-enabled', () => {
         expect(ids.has('csq_hvo_central_bosnia_offensive_1993')).toBe(true);
     });
 });
+
+// ─── Ahmići windows and H6 (§6 panel, 2026-11-16) ─────────────────────────────
+// The massacre card fires only at t54 (Ahmići week), never after H6 evacuate/federate_early;
+// Mostar's orders reach a war recorded the same week (same_turn_requires_events). Neither
+// trigger reads the other (the cross-reference was rejected).
+describe('Ahmići windows and the H6 exclusions', () => {
+    const ORDERS = 'csq_hvo_april_1993_offensive_orders';
+    const AHMICI = 'csq_hvo_central_bosnia_offensive_1993';
+    const WAR = 'croat_bosniak_war_begins_1993';
+    const registry = ALL_EVENTS.filter(e => e.id === ORDERS || e.id === AHMICI || e.id === WAR);
+
+    /** Runs turns 53..56 from a state where the war was recorded at `warTurn` (or fires at 53). */
+    function play(warTurn: number, h6?: string): { orders?: number; ahmici?: number } {
+        const flags: Record<string, string> = { hrhb_political_goal: 'croat_republic' };
+        if (h6) flags.hrhb_central_bosnia_defense = h6;
+        const preFired = warTurn < 53;
+        const state = makeChain1State(53, { flags, firedEvents: preFired ? [WAR] : [] });
+        state.military.event_fire_counts = preFired ? { [WAR]: 1 } : {};
+        // The war event is pressure-gated; seed readiness so it fires on its recorded turn.
+        state.military.event_readiness = { [WAR]: 10 };
+        // A war recorded at 53 fires in the primary pass (alliance below 0.1); a later war is not yet due.
+        state.political.war_alliance_rbih_hrhb = warTurn <= 53 ? 0.05 : 0.15;
+        if (preFired) state.political.war_alliance_rbih_hrhb = -0.5;
+        const firedAt: { orders?: number; ahmici?: number } = {};
+        for (let turn = 53; turn <= 56; turn++) {
+            state.meta.turn = turn;
+            if (turn === warTurn && warTurn > 53) state.political.war_alliance_rbih_hrhb = 0.05;
+            evaluateEvents(state, rng, turn, registry);
+            const ids = state.military.fired_event_ids ?? [];
+            if (firedAt.orders == null && ids.includes(ORDERS)) firedAt.orders = turn;
+            if (firedAt.ahmici == null && ids.includes(AHMICI)) firedAt.ahmici = turn;
+        }
+        return firedAt;
+    }
+
+    it('a war recorded before t53: orders at t53, massacre at t54', () => {
+        for (const h6 of [undefined, 'defend', 'breakout']) {
+            expect(play(49, h6), String(h6)).toEqual({ orders: 53, ahmici: 54 });
+        }
+    });
+
+    it('a war recorded at t53: the orders reach it the same week, massacre at t54', () => {
+        expect(play(53)).toEqual({ orders: 53, ahmici: 54 });
+    });
+
+    it('a war recorded at t54 or later gets neither card (no dated massacre from another war)', () => {
+        for (const w of [54, 55]) expect(play(w), String(w)).toEqual({});
+    });
+
+    it('H6 evacuate or federate_early withholds both cards', () => {
+        for (const h6 of ['evacuate', 'federate_early']) expect(play(49, h6), h6).toEqual({});
+    });
+
+    it('ahmici_massacre_1993 is withheld after H6 evacuate or federate_early, kept otherwise', () => {
+        const card = ALL_EVENTS.find(e => e.id === 'ahmici_massacre_1993')!;
+        const base = (h6?: string) => {
+            const s = makeChain1State(60, {
+                flags: { hvo_arbih_tensions_rising: true, ...(h6 ? { hrhb_central_bosnia_defense: h6 } : {}) },
+                firedEvents: [WAR],
+            });
+            (s.political.political_controllers as Record<string, string>)['op:vitez:vitez_2'] = 'HRHB';
+            return s;
+        };
+        const fires = (h6?: string) => {
+            const s = base(h6);
+            evaluateEvents(s, rng, 60, [card]);
+            return (s.military.fired_event_ids ?? []).includes(card.id);
+        };
+        expect(fires()).toBe(true);
+        expect(fires('breakout')).toBe(true);
+        expect(fires('evacuate')).toBe(false);
+        expect(fires('federate_early')).toBe(false);
+    });
+});
