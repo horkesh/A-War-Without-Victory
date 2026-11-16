@@ -35,6 +35,25 @@ Batch B, item B0 (freeze cut, Fable consult 2 revision 2; must-fix before emerge
 
 Evidence: `C:/Pyrrhic/AWWV-worktrees/_logs/batch-b-20261116/` (b0_*).
 
+## 2026-11-16 — B1: an overstaying army commander's competence decays linearly, as documented
+
+Batch B, item B1 (freeze cut, Fable consult 2 revision 2): fix the code to the documented rate.
+
+**Defect.** `applyEmergentVariationRules` (`src/sim/combat/army_co_lifecycle.ts`) is documented as "competence decays by `competence_decay_per_12w / 12` per turn". It runs once per turn, but each turn it added `decayPerTurn × overstayTurns` to the already-decayed competence. After n overstay turns the officer had lost `decayPerTurn × n(n+1)/2`. With the roster's −0.05 per 12 weeks, 12 turns cost −0.325 instead of −0.05, and 52 turns cost −5.5, which clamps at the floor of 1.
+
+**Change.** Each overstay turn applies `decayPerTurn` once to the stored competence (clamped to [1, 5]). No new state field.
+
+**Tests.** `a4_army_co_roster_personalities.test.ts`:
+- T5 now runs the rule once per turn, as the pipeline does, and expects −0.05 after 12 turns. The old single-call test could not see the quadratic.
+- New T5b: 24 turns cost exactly twice 12.
+- 20 tests pass.
+
+**Proof: inert in headless.** The rule only touches army commanders kept past their tenure (`kept_past_schedule_since_turn`). No officer reaches that state in the historical or the hands-off emergent 188w.
+- Historical 188w against main `d10892602`: final_save `70f4dc05bf375bc7`, equal to the baselines manifest (after #696). No re-bless.
+- A played game can reach the rule only where an army commander outlasts his tenure.
+
+Evidence: `C:/Pyrrhic/AWWV-worktrees/_logs/batch-b-20261116/` (b1_*).
+
 ## 2026-11-16 — B4: the army commander's autonomous launch is retired (inert)
 
 Batch B, item B4 (freeze cut, Fable consult 2 revision 2, RF-ROSTER "path a"): retire.
@@ -112,6 +131,32 @@ The historian read the cited location of every BB reference (109 groups, 279 men
   - Guards: verify_checkpoints "guard intact" (enclave 9/9, Farz, cascade 31, eastern provenance CLEAN), and engine_health_gate --strict PASS (consistency 0).
   - Re-pinned `data/derived/scenario/baselines/manifest.json`. The 40-week structural fingerprint is unchanged (`3b1ddd64fb4f1600`).
 - **Tests.** `tests/army_hq_gathering.test.ts` now asserts the assessment's and the doctrine's retired fields are gone and that the corps ceilings still apply. 296 tests in the affected files pass, and tsc is clean.
+
+## 2026-11-16 — PK5 (C7): a short queue head steps aside only for a dated, admissible op with its own roster (byte-identical)
+
+- **Ruling (orchestrator):** C7 option (a), the bounded skip. Skip and record a short head only when an op behind it is admissible now. The skip record names the op and the reason.
+- **Premise (main):** one `viable_floor` block (Srebrenica–Cerska, t4, admitted t5) and one stall (Pracha River, `build_returned_null` t41–57, admitted t58) that delayed nothing behind it.
+- **Change** (`pre_planned_operations.ts`):
+  - When `injectQueuedOperation`'s head returns at `build_returned_null` or `viable_floor`, `tryQueueHeadSkip` scans the ops behind it with a read-only dry run of the launch gates (`isQueuedOperationAdmissibleNow`).
+  - A candidate qualifies only if it has its own `available_from` (now or earlier) and shares no brigade with the head (operations-expert: undated chain members such as 1KK Jajce and Donji Vakuf must never jump; n1145).
+  - The first qualifier moves to the front and launches through one retry, which may not skip again. The head stays directly behind it.
+  - The step is atomic. The `op_injection_warnings` row `queue_head_skipped` (head, reason, promoted op) is written only on launch; otherwise the queue order is restored.
+  - Nothing is removed from a queue. `PrePlannedOp` has no window end.
+  - `OpInjectionCheck` and the validator list gain `queue_head_skipped`. This is additive, so older saves load. The parked `AuthorizePhase.tsx` maps it to the generic copy for type completeness.
+- **Measured** on main `e3a0c2b6a`:
+  - Historical 188w: main and PK5 are both `01572f50dfea2378`.
+  - Hands-off emergent 188w (`decision_mode: emergent`): both `a6669043cb8f4b58`.
+  - No skip fires in either run.
+  - Guards intact (709/709/708/681). `engine_health_gate --strict` PASS.
+  - Re-measured after the seat changes (see the PR).
+- **Tests** (`tests/pre_planned_operations.test.ts`, "PK5 bounded queue skip"):
+  - a dated, disjoint op is promoted and the head is kept;
+  - no skip when nothing behind is admissible;
+  - the 1KK chain never inverts at t10;
+  - a dated op sharing the head's roster is not promoted;
+  - a declined player authorization blocks the promotion.
+- **Seats:** operations-expert APPROVE-WITH-CHANGES (dated-only, disjoint roster, atomic retry, 1KK regression test; all applied). Canon-compliance APPROVE-WITH-CHANGES (two wording fixes and the review selector matching `existingReview`; applied). No panel needed.
+- **Canon:** Systems Manual §6, "A short queue head steps aside only for an admissible operation".
 
 ## 2026-11-16 — Package "1994-95 attack and defence": the appendix C harness can run the played test (tooling, inert)
 
@@ -377,6 +422,13 @@ Docs only; no `src/` or `data/` change, no hash change.
 
 - Owner, 2026-11-16, "Keep them RBiH": Biljesevo, Olovci and the Glamoč village (Goražde) stay RBiH in the January 1993 reference map, since no source says how or when they changed hands. In D1 stage 2 all five former artefact-sweep cells get ordinary 1992 operations, with unsourced dates marked unverified in the data. The open item is closed.
 - #718, RB1 (A2): a takeover wave counts each person once (`refugees_created` at w188 1,971,236 to 1,485,614; the Verdict displacement ratio 0.896 to 0.657); §6 panel unanimous, control-identical; final-state hash df791f73c26ed642 (the PR's measurement on main 01572f50dfea2378, baselines re-blessed in the PR), recorded as the main hash at #718.
+
+## 2026-11-16 — Pass 36: #701 (B1) recorded; where the citation package's §6 record row lives
+
+Docs only; no `src/` or `data/` change, no hash change.
+
+- #701, B1: an overstaying army commander's competence now decays linearly as documented (it was quadratic: 12 turns cost 0.325 instead of 0.05). Inert in headless (no army commander overstays in the historical or emergent 188-week runs); the PR measured 70f4dc05bf375bc7 against its base d10892602. Not re-measured on top of #718; main is expected to stay df791f73c26ed642. #721 (PK5) is added to the roadmap merged list.
+- Pointer, per the orchestrator: the citation-audit content package's §6 record row is in `docs/10_canon/SENSITIVE_HISTORY_DESIGN_GATE.md` ("Record (Citation-audit content package, 2026-11-16)", added by #718 beside the RB1 row). It records unanimous §6 verdicts for 47 strings (11 rewrites, 34 changes, 2 unchanged); the verdicts file is `_logs/s6_content_package_citation_audit_20261115_verdicts.md` in the worktrees folder; the UI lane applies them. Work list Part 7.
 
 ## 2026-11-15 — Command loop L7: army clashes (proposal 2A step A1; owner decision 4)
 
