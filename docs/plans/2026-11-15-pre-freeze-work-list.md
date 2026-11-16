@@ -1,0 +1,85 @@
+# Pre-freeze work list (BC19 detail)
+
+**Status:** active. Authority: [MASTER_ROADMAP.md](MASTER_ROADMAP.md) BC19 row and gate `RF-ENGINE-FREEZE` in [open_gates.yml](../open_gates.yml); the roadmap wins if they differ.
+**Source:** orchestrator rulings of 2026-11-15 on Fable consult 2, revision 2 (`fable_consults/2_freeze_cut.md` in the coordination folder, "Appendix A, revised"), after the owner's rulings: no engine change follows 1.0, and a finished game reproduces history if left alone while the player can still create ahistorical outcomes.
+
+Every engine finding gets one of three answers, with a one-line reason when it is filed: fix, retire, or accept as final. Accept-as-final is narrow: it is right for a finished game, cost is never the reason, and dead paths, saturating formulas and code that contradicts its documentation are fixed or retired. Only a change that moves the 188-week headless `final_state_hash` must precede the freeze; inert retirements and player-path fixes may follow it, before 1.0, each proving the hash unchanged. The intake is closed: only four doors earn a lane before the freeze (a live player can be stuck, crash or hit an invariant failure; a §6 number or claim shown to the player is wrong; a guard or determinism breaks; live and headless differ), and no new audit starts.
+
+## Part 1. Small fixes before the freeze
+
+**Batch A, §6 displacement (RF-ROSTER lane; moves state, not control; the §6 seats sit once for the design and each change has its own run).**
+
+| # | Item | Why |
+|---|---|---|
+| A1 | RF-PM1 | The paramilitary "refused" event fires at week 21 while the save holds `rs_paramilitary_authorized = true`; false record and +12 credibility. |
+| A2 | RB1 | The takeover double count: the player-visible §6 figure runs 30% high and feeds negotiation and the Verdict. |
+| A3 | RB9 | The takeover timer reset counts people twice; extend #623's inheritance to every timer (1.7% or less). After A2. |
+| A4 | RB2 | An unlogged re-route of sheltered refugees moves the captor's own people with no event. After A3. |
+| A5 | SD7 | Siege routing into another besieged pocket, with no supply or connectivity check on the destination. After A4. |
+| A6 | SD9 | A one-settlement pocket rounds to 0 people a week; carry the remainder (Žepa loses nobody today). After A5. |
+| A7 | SD11 | A pocket that is its side's largest body cannot be encircled; a wrong exemption. After A6. |
+| A8 | SD12 | Novo Sarajevo receives 0 arrivals, a routing-order quirk. After A7. |
+| A9 | SD13 and SD10 | Goražde population, and "abroad" at 0.45 million against 1.2 million: re-measure after A8, then the §6 seats choose between modelling onward migration and labelling the figure as first flight only. |
+
+**Batch B, officers and politics (the Batch B lane, in this order).**
+
+| # | Item | Answer |
+|---|---|---|
+| B0 | Peace-plan floor (RS and Contact Group) compares a settlement-count share with an area share | Fix (must), the lane's first item. In emergent mode the RS floor reads 52.7% by settlement count against the plan's area-based 43%; the 9.7-point gap is under the 17.3 floor, so the scoring engine decides and RS accepts Vance-Owen at week 40 and the war ends. By area RS holds 63.4%, a 20.4-point gap, and rejects. The Contact Group floor has the same mismatch (not measured). Evidence: `_logs/emergent-probe-20261115/REPORT.md`. |
+| B4 | Autonomous-launch gate | Retire (inert): it never finds an opportunity, and turning it on would need a §6 ruling first. |
+| B1 | Competence decay is quadratic | Fix to the documented linear rate. |
+| B2 | 538 pending officer events never acknowledged | Fix: a queue that is never drained (moves state). |
+| B3 | Political-directive producer saturation, Wave 6 coupling, RS corps-role overlay | Retire for bot factions: the producer says the same thing for 182 weeks and the roles weigh about 0.02. The directive layer stays as the player's tool. |
+
+**Batch C, singles (L7 lane, each its own run; C4 and C6 go to the UI lane).**
+
+| # | Item | Answer |
+|---|---|---|
+| C1 | F7 `supply_below` fires on a reserve that does not exist | Fix; a false event reaches the player; built. |
+| C2 | SE9 sector intel re-key | Fix; about half of early-war mid-turn reads use the wrong sector; built. |
+| C3 | RB8 corps-less HRHB brigades | Fix: two at Putićevo with 3,000 and 1,672 men at week 188; trace first (RF-5B binding B6). |
+| C4 | RB6 "Operacija Džihad" | Fix: still drawn in every run; historian check first. |
+| C5 | CODE4 `rankDefendersByPower` tie-break | Fix: determinism; inert if there are no ties. |
+| C6 | Identity card applied at week 0 live and week 3 headless | Fix: live and headless should match to the soldier. |
+| C7 | PK5 queue head below its floor blocks the corps chain | Fix: skip it and record it. |
+| C8 | F1i `political.enclaves` always empty | Fix the root read (same class as #617), then keep or retire each revived reader on what the run shows. |
+
+**Emergent triage (E1; owner, 2026-11-16: the improvising mode ships in 1.0 and stays the default).** After B0, a hands-off emergent 188-week run at the candidate commit. Engine defects found in its divergences are fixed before the freeze; option weights go to the calibration pass; the historian accepts the divergences that remain. Today's top divergences (probe of 2026-11-16, main `278e4eb55`): t1 RS strategic goals all_six becomes aggressive and the Drina cleansing decision never fires; t2 RS paramilitary policy allow becomes deny; t17 camps revealed, RS obstruct becomes cooperate; t38 RBiH under Vance-Owen pressure acknowledge becomes resist the patron; and, once the war runs past week 40, t89 HRHB sues for peace, t106 RBiH resists the US after Washington, t99 and t118 RS conditional engagement and amendments, t54 Srebrenica complies fully and t121 HRHB refuses army integration. Emergent scores today are 710 / 667 / 657 / 568 with the guard breached (Srebrenica and Žepa never fall, Farz 0/4, the western-Bosnia cascade 4 against 31), against the historical 709 / 709 / 708 / 681; the last three are scored against a map frozen in January 1993. Historical mode keeps its role as the engine health check.
+
+## Part 2. The 1994-95 attack and defence package (F1g lane, in order)
+
+On main, two defects keep the ARBiH 1st to 4th Corps passive (the plan lockout and the fixed 3,000 yardstick), and nothing tests the defenders: when either is fixed, a woken corps wins 16 of 17 operations, many against barely defended cells, and the Farz guard breaks. The package repairs the defence first, then lets the ARBiH act at its designed strength.
+
+| # | Step | Answer |
+|---|---|---|
+| P0 | The #686 trace; RF-STRENGTH's dead write and never-run replacement | Merge; retire (inert). |
+| P1 | Defence trace with receipts, two inert runs | For every captured cell: the attackers and the defenders actually in it, where the defender's own brigades were and why not in the fight, whether a reserve counter-attack was considered and why it did not fire, why a corps attacks far outside its area, and what stopped the six failed VRS operations. |
+| P2 | Defence repairs the trace picks | VRS2 dated redeploy, the HVO pocket garrison, SD15, SE10 then SE6; a real emergency defence (reserve commitment and counter-attack, designed in Fable consult 3; the retired operation stays retired as code); F3, a defect: operations like Zvezda 94 and the Kulen Vakuf counter-offensive of November 1994 must become possible. |
+| P3 | Planner odds | An AI1 force-ratio term with RF-L3d follow-ups 1, 3 and 4; then F2 (the casualty scale of failed operations) re-measured and fixed if it remains. |
+| P4 | RF-STRENGTH's live change | The stance matrix reads designed strength; the fixed 3,000 yardstick calls 10 of 125 ARBiH brigades healthy against 117 by designed strength. |
+| P5 | ARBiH plan lockout | Wire the probe gate (`PROBE_EXHAUSTION_MARGIN`, designed at 40, never called) into the no-plan probe branch. If the woken corps then retry by themselves, that also covers the 1994 retry duty of PK5 (Vozuća and Ozren, Zuc and Trebević, Donji Vakuf, Bihać); otherwise Part 6 authors them. |
+| P6 | RF-PK empty pockets | Re-measure; fix only if they remain. |
+
+Bar: the Farz P1, P-A, P-B and enclave guards pass at every merge, and the historian accepts the share of 1st to 4th Corps operations that succeed. Scores are recorded and are not a bar. After 8 runs past the trace the seats read the receipts and re-plan. Shipping the passive army as final behaviour is not on the list. Ratification: operations-expert, corps-army-commander, sector-expert, historian and scenario-creator-runner-tester, then an orchestrator ruling.
+
+## Part 3. Fix before 1.0 (the freeze may come first; each proves the hash unchanged)
+
+The enclave-fall handler (§6 panel); L4-2, L4-1 and L4-6; RB5, the withholding of the expulsion policy at autonomy 1 to 3 (sensitive: the §6 panel decides the design, and no lane touches it before that ruling), with a copy fix so Verdict and ending text never presents the missing waves as restraint (narrative and historian seats); SE11, the warroom `political_controllers` key and the B14 re-check; DEC1 (Engine Invariants §6.3), CODE5 (§14.5a text) and the canon lines for Part 5.
+
+## Part 4. Retire (inert; each proves the hash unchanged)
+
+F1h's dead connectivity term (the 0.5 stays as a named constant); SD2's dormant front readers; F1j's dead friction term; F1k's `corridor_severed` condition; PK4 dead code; the other two CODE2 constants; the feint reserve write; DA3's dormant pressure path (the §6 seats agree to the removal first); any F1i reader that C8's run shows unsound.
+
+## Part 5. Accept as final
+
+Game-designer and historian in one sitting; each item passes two owner tests, left alone and played. CODE3, RB5 for an active human HRHB President, PK5 and SD6 with SD8. Reasons and ratifying seats: [final-behaviour record](../40_reports/governance/20261115_FINAL_BEHAVIOUR_AT_1_0.md).
+
+## Part 6. Calibration pass (data and constants, after the freeze)
+
+Emergent-mode option weights (from E1).
+
+L8 with RF-4, the Donji Vakuf 95 timing (with RF-L3d follow-up 2), the Mistral 2 and Southern Move assembly slip, the painted-reference questions (Prusac January 1993, Konjic Ljuta, Goražde, Maglaj-Jablanica); RF-F1b's constant (check before the freeze that a constant alone makes the W3 and C5 gates bind; if it cannot, it is a Part 1 fix); the roster tenure starts for Praljak, Roso, Petković-2 and Blaškić-2 (H-C4); F1f supply sources; SD14; the F1c and F1d constants in emergent mode (hide emergent mode if a player cannot choose it); SD5 (one read-only check before the freeze to rule out an engine cause); and, once the package lands, the 1994-95 offensives the historian listed (Teslić, Vozuća in June and November 1994, Ozren in spring 1995) as authored operations.
+
+## Part 7. Before publication
+
+The paused §6 copy lane, and the citation audit to the end with its guard.
