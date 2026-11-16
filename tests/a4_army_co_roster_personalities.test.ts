@@ -17,6 +17,7 @@
  */
 
 import { describe, expect, it, beforeEach } from 'vitest';
+import { withoutComments } from './helpers/sourceComments.js';
 import { readFileSync, existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 
@@ -528,7 +529,7 @@ describe('A4 — pipeline integration', () => {
         expect(idxArmyHQ).toBeGreaterThan(0);
         expect(idxA4Step).toBeGreaterThan(idxArmyHQ);
         expect(idxBotOrders).toBeGreaterThan(idxA4Step);
-        expect(src).not.toContain('name: A3_PIPELINE_STEP_NAME');
+        expect(withoutComments(src)).not.toContain('name: A3_PIPELINE_STEP_NAME');
     });
 });
 
