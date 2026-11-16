@@ -12,6 +12,7 @@ import { processDisplacementTakeover, RETURN_HOLD_WEEKS } from '../src/state/dis
 import { CURRENT_SCHEMA_VERSION, type GameState, type HostileTakeoverTimerState } from '../src/state/game_state.js';
 import type { MunicipalityPopulation1991Map } from '../src/state/population_share.js';
 import { validateGameStateShape } from '../src/state/validateGameState.js';
+import { militiaPoolKey } from '../src/state/militia_pool_key.js';
 
 function makeState(): GameState {
     const profile = { authority: 0, legitimacy: 0, control: 0, logistics: 0, exhaustion: 0 };
@@ -182,6 +183,7 @@ describe('RB9 takeover timer inheritance', () => {
             return inCamps + elsewhere;
         };
         const refugeesBefore = bosniakRefugees();
+        const originOutBefore = state.displacement.displacement_state!.vitez!.displaced_out;
         state.meta.turn = 60 + RETURN_HOLD_WEEKS;
         processDisplacementTakeover(state, settlements, undefined, pop1991, settlements);
         const after = timers()[KEY];
@@ -192,6 +194,8 @@ describe('RB9 takeover timer inheritance', () => {
         expect(after?.cumulative_displaced ?? 0).toBeGreaterThanOrEqual(firstWave - routed);
         // Each person is still counted once: exactly that many leave the Bosniak refugee population.
         expect(refugeesBefore - bosniakRefugees()).toBe(returned);
+        // Engine seat E2: the origin gets exactly those people back.
+        expect(originOutBefore - state.displacement.displacement_state!.vitez!.displaced_out).toBe(returned);
         expect(outBefore).toBeGreaterThan(0);
         // refugees_created is untouched: the first expulsion happened.
         const created = state.displacement.displacement_humanitarian_aggregates?.HRHB?.RBiH?.refugees_created;
@@ -222,6 +226,50 @@ describe('RB9 takeover timer inheritance', () => {
         capture(state, 'HRHB', 'RBiH');
         expect(timers()[KEY]!.cumulative_displaced).toBe(firstWave);
         expect(timers()[KEY]!.return_hold_since_turn).toBeUndefined();
+    });
+
+    test('return rule: nobody returns to the side that expelled them, even after it makes peace (historian round 2, red-team R1)', () => {
+        const state = makeState();
+        const timers = () => state.displacement.hostile_takeover_timers as Record<string, HostileTakeoverTimerState>;
+        (state.political as any).rbih_hrhb_state = { war_started_turn: 40 };
+        capture(state, 'HRHB', 'RBiH');
+        state.meta.turn = 54;
+        processDisplacementTakeover(state, settlements, undefined, pop1991, settlements);
+        const firstWave = timers()[KEY]!.cumulative_displaced!;
+        // Washington: the sides make peace while HRHB still holds the OSID. The record goes dormant.
+        (state.political as any).war_alliance_rbih_hrhb = 0.6;
+        state.meta.turn = 99;
+        processDisplacementTakeover(state, settlements, undefined, pop1991, settlements);
+        expect(timers()[KEY]!.dormant_since_turn).toBe(99);
+        for (let t = 100; t <= 99 + 2 * RETURN_HOLD_WEEKS; t++) {
+            state.meta.turn = t;
+            processDisplacementTakeover(state, settlements, undefined, pop1991, settlements);
+        }
+        expect(timers()[KEY]!.cumulative_displaced).toBe(firstWave);
+        expect(timers()[KEY]!.return_hold_since_turn).toBeUndefined();
+    });
+
+    test('return rule: the returnees share of the home militia pool cut goes back to the home pool (engine E3)', () => {
+        const state = makeState();
+        const timers = () => state.displacement.hostile_takeover_timers as Record<string, HostileTakeoverTimerState>;
+        state.military.militia_pools = { [militiaPoolKey('vitez', 'RBiH')]: { mun_id: 'vitez', faction: 'RBiH', available: 600, committed: 0, exhausted: 0, updated_turn: 0 } } as any;
+        capture(state, 'HRHB', 'RBiH');
+        state.meta.turn = 54;
+        processDisplacementTakeover(state, settlements, undefined, pop1991, settlements);
+        const pool = () => (state.military.militia_pools as any)[militiaPoolKey('vitez', 'RBiH')].available as number;
+        const cut = timers()[KEY]!.cumulative_pool_cut!;
+        expect(cut).toBeGreaterThan(0);
+        const poolAfterExpulsion = pool();
+        state.meta.turn = 60;
+        capture(state, 'RBiH', 'HRHB');
+        processDisplacementTakeover(state, settlements, undefined, pop1991, settlements);
+        for (let t = 61; t <= 60 + RETURN_HOLD_WEEKS; t++) {
+            state.meta.turn = t;
+            processDisplacementTakeover(state, settlements, undefined, pop1991, settlements);
+        }
+        const restored = pool() - poolAfterExpulsion;
+        expect(restored).toBeGreaterThan(0);
+        expect(restored).toBeLessThan(cut); // the dead and the fled abroad stay cut
     });
 
     test('a timer recaptured before its wave fired displaced nobody and is deleted, as before', () => {

@@ -1804,7 +1804,7 @@ export interface FormationSpawnDirective {
 export interface DisplacementState {
     mun_id: MunicipalityId;
     original_population: number; // immutable baseline from census or existing data
-    displaced_out: number; // cumulative, irreversible (people who left this municipality)
+    displaced_out: number; // cumulative people who left this municipality; reduced only when routed survivors return (RB9 return rule)
     displaced_in: number; // cumulative (people who arrived from other municipalities)
     /** When set, displaced_in is split by recruiting faction (Bosniak→RBiH, Serb→RS, Croat→HRHB) so pool population can add to the correct faction's pool at this mun. */
     displaced_in_by_faction?: Partial<Record<FactionId, number>>;
@@ -1859,6 +1859,12 @@ export interface DisplacementEvent {
     /** People who left BiH in this wave. */
     fled_abroad: number;
     settled: number;
+    /**
+     * RB9 return rule: routed survivors of an earlier expulsion who came home to `origin_osid` this
+     * turn (no expulsion; `displaced`, `killed` and `fled_abroad` are 0, and `refugees_created` is not
+     * touched). Absent on every other event.
+     */
+    returned?: number;
 }
 
 /**
@@ -1892,6 +1898,12 @@ export interface HostileTakeoverTimerState {
      * come back. Carried with `cumulative_displaced` on inheritance.
      */
     cumulative_routed?: number;
+    /**
+     * RB9 return rule: militia the expulsion removed from the group's home pool at this municipality
+     * (the source-pool cut). When survivors return, their share of it goes back to the home pool, so
+     * manpower is not lost twice (engine seat E3). Carried on inheritance.
+     */
+    cumulative_pool_cut?: number;
     /**
      * RB9 return rule: the turn since which a dormant record's OSID has been held by the expelled
      * group's own side or a side not at war with it. Cleared when a hostile side holds it again.
