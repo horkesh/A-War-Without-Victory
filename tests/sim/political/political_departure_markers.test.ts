@@ -62,8 +62,9 @@ describe('marker table is pinned to the event data', () => {
         expect(byId.get(CROAT_BOSNIAK_WAR_EVENT_ID)?.trigger.turn_max).toBe(CROAT_BOSNIAK_WAR_LAST_TURN);
     });
 
-    it('every §6 carve-out id is a real event', () => {
+    it('every §6 carve-out id and every reviewed allow-list id is a real event', () => {
         for (const id of POLITICAL_GATE_EXCLUDED_EVENT_IDS) expect(byId.has(id), id).toBe(true);
+        for (const id of POLITICAL_GATE_REVIEWED_ALLOWED_EVENT_IDS) expect(byId.has(id), id).toBe(true);
     });
 });
 

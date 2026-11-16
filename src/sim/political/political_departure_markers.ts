@@ -82,7 +82,8 @@ const CROAT_BOSNIAK_WAR_OPENS: readonly FactionId[] = ['RBiH', 'HRHB'];
 
 /**
  * §6 carve-out: decisions the political opening never applies to (game-designer + historian,
- * 2026-11-16; to be ratified by the §6 seats). Camp-exposure family rows are excluded as well.
+ * 2026-11-16; ratified by the §6 seats, unanimous, after two rounds on PR #735). Camp-exposure
+ * family rows, HVO detention-camp rows and every Ring-3 sensitive family are excluded as well.
  */
 export const POLITICAL_GATE_EXCLUDED_EVENT_IDS: ReadonlySet<string> = new Set([
     'rs_paramilitary_policy_1992',

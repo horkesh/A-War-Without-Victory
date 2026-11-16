@@ -29,6 +29,13 @@
   - The state marker reads `rbih_hrhb_state.war_started_turn` (engine seat).
   - Canon: a §6 record row and the §7.10.7 wording.
   - Engine note, recorded: the harness `bot_equivalent` policy logs its answers as `'player'`, so in a harness run with the band open the player-side run can open markers the headless run never does. This is harness-only; a desktop player's rows are their own picks.
+- **§6 panel, round 2: unanimous GO.** Canon COMPLIANT WITH AMENDMENT, applied.
+  - The historian read all ten allow-listed events' options and ruled that none depicts or enables an atrocity.
+  - The allow-list ids are now pinned to real events by the test.
+  - The §6 record row names the ten ids and the round-2 outcome.
+  - The stale "to be ratified" comment is fixed.
+  - The round-1 re-measure's emergent run (`pb2_emer`) failed on a missing untracked scenario copy, so the emergent evidence is `pb3_emer` = `m4_main_emer`.
+  - Advisories, not blocking: "clearance operations" in `abdic_apwb_declared_1993` would read better as "operations"; a scenario that starts after t80 without seeding `war_started_turn` would open the state marker on load (not a regression).
 - **Re-confirmed on main `71ffa0cb8`** (#727 and #710 merged; `pb3_*` logs).
   - Historical 188w is byte-identical to main's pin, `03159b9ee1e5877f`.
   - Hands-off emergent is identical to main's emergent, `dde641b2c74838f0`.
