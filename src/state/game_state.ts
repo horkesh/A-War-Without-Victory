@@ -2883,7 +2883,15 @@ export interface CorpsFrontSector {
     unstaffed_front?: boolean;
     /** Density: assigned_brigades / length_edges. */
     density: number;
-    /** Threat ratio: enemy power adjacent to sector / defensive power. */
+    /**
+     * Sector pressure index (NOT a force ratio, despite the name): enemy personnel on the
+     * sector's enemy-side cells, summed over the whole sector, divided by `defensive_power`,
+     * which is own weighted personnel PER FRONT EDGE. It therefore grows with sector length and
+     * falls as own cohesion falls; 9999 when enemies face a sector with no defensive power.
+     * Typical staffed values run from 1 to several hundred. About 20 readers have thresholds
+     * tuned to this scale, so it is kept as is (accepted as final, 2026-11-16). For a real local
+     * force ratio, divide enemy personnel by own effective personnel instead.
+     */
     threat_ratio: number;
     /** Computed defensive power (same formula as LocalFront). */
     defensive_power: number;
