@@ -20,8 +20,8 @@ RF fidelity-pass fix. Calibration is held: scores are recorded and are not a mer
 - That event is under the reviewed-contract pin, so the pin is re-pinned to 11091 / `57f0d7f927df002c`. A pending decision saved before RF-PM1 carries the two old preview values; exactly those are upgraded before comparison (`PRE_RF_PM1_POLICY_PREVIEW`), and any other drift is still refused.
 - Without the re-pin every RBiH policy response threw, and a player was stuck at the opening decision. The headless runs could not see it; the integrator and the lane found it in `pre_first_advance_paramilitary_policy` and `identity_pending_text_drift`.
 
-**Measured** (188w, final run on main f5a7990af):
-- final_state_hash `03921ba4a0863b80`. Checkpoints 709/709/708/681, per-cell delta zero, guards intact, strict health PASS (consistency 0).
+**Measured** (188w, final run on main 76e5fcabd, against a main run at the same commit, 70f4dc05bf375bc7):
+- final_state_hash `9e17d22f520f94e6`. Control, activity, formation and operation-AAR files are byte-identical to main. Checkpoints 709/709/708/681, per-cell delta zero, guards intact, strict health PASS (consistency 0).
 - Diagnostic vs main 4cd7ba559: main fires at t21; the branch never fires; control-identical.
 - What goes away: the false flags, ghost 7 for RBiH and HRHB players, and the +12 RS standing (it had decayed to nothing by w188).
 
