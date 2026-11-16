@@ -9,7 +9,7 @@
   - `exhaustion_level` uses the shared `recoveredExhaustionLevel` (`state/war_weariness_bands.ts`), the same 0..100 read as the war-weariness bands, the phase-3c gate and the UI.
   - The patron term is +0.5 for a defensive option, −0.5 for an aggressive one and 0 for a neutral one.
 - **Proof.**
-  - **Historical 188w byte-identical** to a current-main run (`e3a0c2b6a`): final hash `01572f50dfea2378`. Every artifact matches except `run_meta.json`.
-  - **Hands-off emergent 188w (with B0 #697 applied) hash-identical** with and without the fixes: `23be8062d084418b`. The fixes are live (the trend now reads gaining or losing on 6-10% of turns per faction; mid-war exhaustion reads 60-95 instead of 10-16), but no pick crosses: the authored dimension shifts outweigh the state terms.
-  - Tests: new `tests/sim/political/scorer_unit_fixes_b5.test.ts` (9); `tests/cohesion_divisor_rescale.test.ts` updated to the new scale. The political and events slices pass (20 files, 261 tests). tsc is clean.
+  - **Historical 188w byte-identical** to a main run (`df206642c`, B0/B1/B4 merged): final hash `df791f73c26ed642`, the baselines manifest value. Every artifact matches except `run_meta.json`. Checkpoints 709/709/708/681, guard intact. (Also byte-identical on the earlier main `e3a0c2b6a`: `01572f50dfea2378`.)
+  - **Hands-off emergent 188w hash-identical** with and without the fixes: `b5507e7b9b6463a2` (710/707/707/670). Its guard breaches (Farz 0/4 receipts, Seher t164, Petrovo t179) are the same on main and belong to package P2. The fixes are live (the trend now reads gaining or losing on 6-10% of turns per faction; mid-war exhaustion reads 60-95 instead of 10-16), but no pick crosses: the 15 emergent picks that differ from history win by authored-option margins of 0.10-4.42, and the state terms move a score by at most ~1.3.
+  - Tests: new `tests/sim/political/scorer_unit_fixes_b5.test.ts` (9); `tests/cohesion_divisor_rescale.test.ts` updated to the new scale. The political, events and peace-plan slices pass (21 files, 298 tests). tsc is clean.
 - Logs: `C:/Pyrrhic/AWWV-worktrees/_logs/b5-scorer-20261116/`.
