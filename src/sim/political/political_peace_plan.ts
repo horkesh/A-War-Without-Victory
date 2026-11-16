@@ -72,7 +72,9 @@ const HRHB_CG_ALIGNMENT_THRESHOLD = 60; // lowered from 80: post-Washington, pat
  * Call site contract: caller (peace_plans.ts computeBotResponse) passes:
  *   - plan: the PeacePlanDefinition
  *   - faction: the responding bot faction
- *   - currentTerritoryPct: faction's current OSID-count territory percentage (caller computes via getFactionTerritoryPct)
+ *   - currentTerritoryPct: faction's current AREA share of BiH, 0..100 (caller computes via
+ *     getFactionTerritoryAreaPct). It must be the same measure as plan.proposed_split, which is
+ *     an area share; a settlement-count share understates RS by ~10pp in 1993.
  *   - patronOverrideAuthority: the faction's patron override_authority from NegotiationState
  *   - assessment: computed by computePoliticalAssessment
  *   - personality: from getPoliticalPersonality
