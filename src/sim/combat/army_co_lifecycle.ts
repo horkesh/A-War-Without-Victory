@@ -731,12 +731,13 @@ export function applyEmergentVariationRules(
         // Overstay duration in turns (>= 1 when present).
         const overstayTurns = Math.max(0, turn - overstayStart + 1);
 
-        // Competence decay — linearized: decay_per_12w / 12 per turn.
+        // Competence decay — linear: decay_per_12w / 12 per overstay turn, applied
+        // once per turn to the stored competence. (B1, freeze cut: this used to add
+        // `decayPerTurn * overstayTurns` EVERY turn to the already-decayed value, so
+        // after n turns the officer had lost decayPerTurn * n(n+1)/2: quadratic.)
         const decayPerTurn = decayPer12w / 12;
-        const totalDecay = decayPerTurn * overstayTurns;
-        if (totalDecay !== 0) {
-            const newCompetence = Math.max(1, Math.min(5, officer.competence + totalDecay));
-            officer.competence = newCompetence;
+        if (overstayTurns >= 1 && decayPerTurn !== 0) {
+            officer.competence = Math.max(1, Math.min(5, officer.competence + decayPerTurn));
         }
 
         // Stubbornness escalation — one-shot at first overstay.

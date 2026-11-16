@@ -283,12 +283,15 @@ describe('A4 — evaluateScheduledTransitions', () => {
 
 // ===========================================================================
 // T5 — Keep-past-schedule degradation: officer held 12 turns past schedule
-// → competence decreases by ~0.05 (cumulative: -0.05 / 12 per turn × 12 turns)
+// → competence decreases by 0.05 (linear: -0.05 / 12 per turn × 12 turns).
+// B1 (freeze cut): the rule runs once per turn, as in the pipeline. The old code
+// lost decayPerTurn × n(n+1)/2 after n turns (quadratic); the old single-call test
+// could not see it.
 // ===========================================================================
 describe('A4 — applyEmergentVariationRules', () => {
-    it('T5 — held 12 turns past schedule → competence decay -0.05 (cumulative)', () => {
+    function heldPastSchedule() {
         const roster = loadArmyCoRoster();
-        const state = makeBaseState(72); // 12 turns past tenure_end=60
+        const state = makeBaseState(61);
         state.military.named_officer_data = [
             makeOfficer({
                 id: 'arbih_halilovic',
@@ -302,13 +305,25 @@ describe('A4 — applyEmergentVariationRules', () => {
         state.military.named_officers = {
             arbih_halilovic: makeOfficerState({ officer_id: 'arbih_halilovic', status: 'active' }),
         };
-        // Step 1: mark as overstaying (turn 72 > 60).
-        evaluateScheduledTransitions(state, 72, roster!);
-        // Step 2: apply emergent rules.
-        applyEmergentVariationRules(state, 72, roster!);
-        const officer = state.military.named_officer_data!.find(o => o.id === 'arbih_halilovic')!;
-        // Overstay duration = 72 - 61 + 1 = 12 turns. Decay = (-0.05/12) * 12 = -0.05.
-        expect(officer.competence).toBeCloseTo(3 - 0.05, 5);
+        const competenceAfter = (lastTurn: number): number => {
+            for (let t = 61; t <= lastTurn; t++) {
+                evaluateScheduledTransitions(state, t, roster!);
+                applyEmergentVariationRules(state, t, roster!);
+            }
+            return state.military.named_officer_data!.find(o => o.id === 'arbih_halilovic')!.competence;
+        };
+        return { competenceAfter };
+    }
+
+    it('T5 — held 12 turns past schedule (one call per turn) → competence decay -0.05, linear', () => {
+        // Overstay turns 61..72 = 12. Decay = (-0.05/12) × 12 = -0.05 (quadratic gave -0.325).
+        expect(heldPastSchedule().competenceAfter(72)).toBeCloseTo(3 - 0.05, 9);
+    });
+
+    it('T5b — the per-turn loss is constant: 24 turns cost exactly twice 12', () => {
+        const loss12 = 3 - heldPastSchedule().competenceAfter(72);
+        const loss24 = 3 - heldPastSchedule().competenceAfter(84);
+        expect(loss24).toBeCloseTo(2 * loss12, 9);
     });
 });
 
