@@ -23,4 +23,13 @@
     - t89 HRHB `sue_for_peace_hrhb` (history: `press_croat_objectives`).
     These are the opened factions' picks whose margins (4.42, 3.84) beat their thresholds (3.0, 1.33). No §6 decision moves. The control run matches history.
   - Tests: new `tests/sim/political/political_departure_markers.test.ts` pins the table to the event data, the state-marker turn to the event window, left alone closed, the faction scope, softer variants, and the §6 carve-out. Political, events and peace-plan slices: 23 files, 321 tests pass. tsc clean.
-- **§6:** with the carve-out no §6 decision can move on the political opening. The §6 seats ratify the carve-out.
+- **§6 panel, round 1.** Historian and Red-team voted NO-GO because the carve-out list was incomplete: a choice marker is cheaper than moving the map, so rejecting Vance-Owen at t39 would have opened RS for the 1995 hostage and siege-gun decisions. Applied:
+  - Carved out as well: `un_hostage_crisis_1995`, `deliberate_force_rs_compliance_1995`, `rbih_nato_ultimatum_compliance_1994`, `rs_strategic_goals`, and every Ring-3 sensitive family.
+  - A completeness test makes every gate-reachable event flagged by the §4 classifier either carved out or on `POLITICAL_GATE_REVIEWED_ALLOWED_EVENT_IDS` (ten peace-plan answers and political or posture decisions, each with a reason).
+  - The state marker reads `rbih_hrhb_state.war_started_turn` (engine seat).
+  - Canon: a §6 record row and the §7.10.7 wording.
+  - Engine note, recorded: the harness `bot_equivalent` policy logs its answers as `'player'`, so in a harness run with the band open the player-side run can open markers the headless run never does. This is harness-only; a desktop player's rows are their own picks.
+- **Re-confirmed on main `71ffa0cb8`** (#727 and #710 merged; `pb3_*` logs).
+  - Historical 188w is byte-identical to main's pin, `03159b9ee1e5877f`.
+  - Hands-off emergent is identical to main's emergent, `dde641b2c74838f0`.
+  - The played pair still differs in exactly the three decisions.
