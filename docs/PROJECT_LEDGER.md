@@ -128,6 +128,19 @@ Evidence: `C:/Pyrrhic/AWWV-worktrees/_logs/pkg-1994-95-step0/` (p0_*).
 
 `src/sim/combat/operation_names.ts`: "Operacija Džihad" (never an ARBiH operation; the ICTY ties the word to the foreign El Mujahed Detachment and Serb propaganda used it to brand all Muslims) became Prevoj; the real operation names Sabur, Oluja, Bljesak, Udar (twice), Proboj and Vihor (twice) and the loaded names Hajka, Gazija, Grad and Odmazda became Temelj, Snijeg, Bujica, Nasip and Mlaz, Zalet, Granit and Mećava, Ždral, Vedrina, Magla and Smreka, each in its original slot (pool lengths 38 / 39 / 35 unchanged, selection deterministic). Historian and narrative seats chose the replacements; each was checked against the pools, the reserved list, the authored catalogues, BB Vol. I and II and the ICTY texts. New test `tests/operation_names_no_real_operations.test.ts`. Data-only (names move the state hash only for runs that draw those slots): measured pass in the PR. Evidence and rename map: `docs/40_reports/evidence/20261116_rb6_operation_names/`.
 
+## 2026-11-16 — Baselines: pins re-blessed after #703 merged with the advisory pins check failing
+
+Pins only. No code, data or behaviour changes.
+
+- #703 (RB6: bot operation-pool names replaced in place) changed the 188w artifacts, but the baseline manifest was not re-pinned. It merged with the advisory "Baseline pins" check failing, so every later PR compared against stale pins. #708 inherited the same advisory failure through its merge ref.
+- This change re-blesses `data/derived/scenario/baselines/manifest.json` to what main 07b553fbe (after #708) actually produces:
+  - end_report.md, final_save.json, run_summary.json and weekly_report.jsonl change;
+  - the other four pins are unchanged;
+  - final_state_hash `01572f50dfea2378`, the same value CI computed on #708's merge ref.
+- 40w structural fingerprint: `3b1ddd64fb4f1600`, unchanged (check passes, no update).
+- Proof: a second run matches the new pins ("Baseline regression: all scenarios match").
+- Checkpoints 709/709/708/681, guards intact, strict health PASS.
+
 ## 2026-11-16 — RF-PM1: the paramilitary-refusal consequence fires only on a real refusal (§6 panel, measured)
 
 RF fidelity-pass fix. Calibration is held: scores are recorded and are not a merge bar.
@@ -222,6 +235,24 @@ Docs only; no `src/` or `data/` change, no hash change.
 - Batch B's B5 (the emergent-pick scorer) items registered in the work list: defects 1, 2 and 4 are fixes; defect 3 (`divergence_threshold` unread) is a wire-or-retire ruling (the orchestrator leans wire); defect 6 (RS patron decay) is a ruling; defect 5 (option effects ignored) is a Part 5 candidate; `war_crimes_tolerance` unread goes to §6; the 15 divergent emergent picks are option data for the calibration pass (t2, t11 and t17 under §6); follow-ups: retire the `political_leaders` state, the `claude_plays_vrs` harness, dead pushback copy (UI lane).
 - #708 (RF-PM1, §6 panel unanimous APPROVE with conditions, control-identical) recorded in work list row A1 and the roadmap merged list; #703's historian notes are pointed at in row C4. The hash of main after #703 and #708 together is not yet recorded (#708 measured 9e17d22f520f94e6 on the pre-#703 base).
 - Open at this pass: Batch B's queue #697, #700, #701, #710, and #709.
+
+## 2026-11-16 — Pass 27: the CODE3 canon line, and the hash and stale-pins record for #703
+
+Canon wording (no behaviour change) and docs; no `src/` or `data/` change, no hash change. FORAWWV is not edited.
+
+- Canon, on the orchestrator's explicit instruction of 2026-11-16: "Scripted (authored and triggered) operations are not exhaustion-gated; discretionary plans are; exhaustion is a cost; Stop-op is the player's counter, from planning onward (CODE3, 2026-11-16)." Added to Engine Invariants §14.10b (paragraph on authored historical operations, with an Amended note) and Systems Manual §6.5, next to the sentences #705 amended. It records shipped behaviour: the exhaustion gate (`MAX_EXHAUSTION_FOR_OPERATION`) covers discretionary commander plans only.
+- Canon record: the Part 5 sitting of 2026-11-15 (game-designer and historian, each RATIFY WITH CONDITIONS, CODE3 accepted as final); the condition that a halt be accepted in planning was met by #705. Record: `docs/40_reports/governance/20261115_FINAL_BEHAVIOUR_AT_1_0.md`, section 1 and section 6 item 1 (now done).
+- #703's hash is recorded as its claimed hash, 1391f69248072728 (label-only), not as a measured main hash: #703 merged with the advisory baseline-pins check red and did not re-pin the manifest, so main's pins are stale. The RF-ROSTER lane's standalone re-pin PR follows #708; its measured hash becomes the main hash at the re-pin, and its run also confirms #705's byte-identity on top of #703. The #708 hash is recorded only after that lands.
+
+## 2026-11-16 — Pass 28: the owner's history input on ARBiH attrition, N5 and RB9 rulings, P2 steps 1 and 2 measured, the provisional combined hash
+
+Docs only; no `src/` or `data/` change, no hash change.
+
+- Owner history input, 2026-11-16 (verbatim): "Historically, ARBiH undertook offensives from 1994 that had low chance of winning, but Delić imposed the strategy. Goal was to weaken VRS everywhere. ARBiH had a lot more men, and Delić was willing to spend them to go on strategic offensive." Consequence: package P3 must produce an emergent General Staff attrition doctrine (low-odds launches, accepted losses, the VRS attrited) that the President can accept or refuse; the pass line becomes 20 to 40% of a historically sized launch count (about 24 operations in t99 to t178). Fable consult 4 is open on its design. Work list P3 row, final-behaviour record section 8.
+- N5 (the L7 lane's seat rulings): the reactive reach of 5 hops is design; casualties and side-effects landing on a primary picked by nominal power is a must-fix defect, sequenced after P2 step 1; the 198 against 285 gap is design; the flat hop cutoff, the nominal-average cap and `rs_2nd_herzegovina`'s home go to the calibration pass.
+- RB9 ruled (a): a bounded return rule (a dormant record clears after 12 or more weeks held by the group's own or a non-hostile side, the pool decremented) lands back-to-back with RB9 before the freeze; §6 unanimous, with a red-team anti-gaming check.
+- P2 measured: step 1 (candidate 1 of 8) held objectives 100% to 71%, VRS operations reaching battle 0 of 8 to 3 of 9, VRS sub-30 brigades 61 to 24; Farz P-A fails on a missing Army HQ marker (traced) and P-B is a new fail (2nd Corps at Brčko and Gradačac, t161 to t162); not merged. Step 2 (candidate 2 of 8): the army-reserve repair works mechanically but the pool is only two VRS elites; no priority above the threat cap; the 9999 threat sentinel is a fix (step 2b); the reserve-elite OOB audit goes to the calibration pass.
+- Hash: main with #703 and #708 is 01572f50dfea2378, the main hash at the re-pin (#713, merged on main; three measurements agree: the re-pin run on main 07b553fbe, CI on #708's merge ref, and the Batch B lane's inert B4 run). The orchestrator had asked for it to be recorded as provisional until a "merged" message; #713 is verifiably merged (git log), so it is recorded as confirmed.
 
 ## 2026-11-15 — Command loop L7: army clashes (proposal 2A step A1; owner decision 4)
 
