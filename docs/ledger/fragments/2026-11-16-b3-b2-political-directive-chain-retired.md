@@ -38,7 +38,11 @@ Batch B, items B3 and B2 (freeze cut, Fable consult 2 revision 2). Scope ruled B
   - The final save differs only in `pending_officer_events` (538 → 0), `army_co_decision_traces`, the two directive slots and `schema_version`. It is about 550 KB smaller.
   - Commander state is byte-identical, so the gate never changed a corps decision in a measured run.
 - Hands-off emergent 188w with B0's source applied (uncommitted): control_delta byte-identical to the B0-only emergent run; 710/707/707/670; the same three emergent breaches (Farz 0/4, Seher t164, Petrovo t179), which belong to package P2.
-- The baselines manifest needs a re-bless for the new state hash (`bb2ca04839f11d8b` on 76e5fcabd) at merge time, on top of whatever main it lands on.
+- **Re-measured on the landing main** (after #697 B0, #700 B4, #713 re-pin and #718 RB1; main pin `df791f73c26ed642`):
+  - historical and emergent 188w against main-equivalent runs: control_delta, weekly_report, formation_delta, activity_summary, operation_aars, watched_operations, destroyed_brigades and end_report all byte-identical;
+  - 709/709/708/681, guard intact.
+  - Baselines manifest RE-BLESSED (`UPDATE_BASELINES=1 npm run test:baselines`) to final_save `0a31449959639988`. The state moves only through schema v39 and the drained slots. An independent rerun reproduces it and `npm run test:baselines` passes.
+- Scenario-tester smoke (apr1993/1994/1995 starts, sep1991_to_dayton, apr1992 188w, on main e3a0c2b6a): control artifacts byte-identical to a main-equivalent reference in all five.
 
 **Canon debt (recorded, canon-seat condition).** FORAWWV.md describes the retired chain as validated substrate: lines 276-301 (§X.1 PoliticalDirective verbs, the B1 producer output, the C1 persisted slot and its overlay), 409 (the A1-A5 / B1+B2 / C1+C2 validated list) and 421 (C1 as the Ring 1 example). FORAWWV edits need the unanimous Pyrrhic panel and a same-change canon record, so the amendment is a separate panel change, not part of this one. The Systems Manual, Rulebook and Game Bible have no text that requires the chain. `SAVE_SCHEMA_EVOLUTION.md` has a v39 entry, and the code comments in `game_state.ts`, `ArmyCoPushbackPanel.tsx`, `political_leader_data_loader.ts` and `army_co_lifecycle.ts` now say the chain is retired.
 
