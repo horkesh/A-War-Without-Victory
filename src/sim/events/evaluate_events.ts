@@ -470,14 +470,18 @@ export function selectBotEventResponse(
         // B5 fix 4: with an authored historical response, an emergent bot keeps to it while the
         // war's map is historical, and improvises only past its divergence_threshold once the map
         // has left history's band. (Historical mode returned the authored default above.)
-        if (emergent && hasAuthoredAIDefaultResponse(def)) {
+        // Only an AUTHORED default is a reference: an event left unauthored on purpose (e.g. the
+        // §6 Drina decision, whose headless pick is positional, not a historical claim) stays scored.
+        const historicalReferenceId =
+            emergent && hasAuthoredAIDefaultResponse(def) ? selectAIDefaultResponse(def).id : undefined;
+        if (historicalReferenceId != null) {
             return {
                 chosen: pickPoliticalResponseWithHistory(
                     options,
                     respondingFaction,
                     assessment,
                     personality,
-                    selectAIDefaultResponse(def).id,
+                    historicalReferenceId,
                     isWarOutsideHistoricalBand(state),
                 ),
                 decisionSource: 'bot_political',
