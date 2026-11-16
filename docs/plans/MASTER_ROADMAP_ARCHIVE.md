@@ -563,3 +563,8 @@ the freeze cut and work list (#681) and the emergent-mode ruling (#692); the one
 Merged list moved 2026-11-16 (steward pass 45), verbatim from the same paragraph:
 
 RF-PM1, the paramilitary-refusal consequence fires only on a real refusal (#708, §6 panel, control-identical);  B0, the bot peace-plan floors measure territory by area (#697; inert in historical mode);  B5 scorer fixes 1 to 3, territory trend, exhaustion scale and the neutral patron term (#726, historical byte-identical, emergent hash-identical);
+
+
+Merged list moved 2026-11-16 (steward pass 47), verbatim from the same paragraph:
+
+N6, enemy-concentration zones survive sector renumbering (#709, control-identical; main hash at #709 83b8e8cd36023899, #726 inert);
