@@ -501,7 +501,7 @@ export function DecisionConsequenceRecordsPanel({ eventCatalog }: DecisionConseq
               <div className="min-w-0 flex-1">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <div className="truncate text-[13px] font-bold text-text-primary">{title}</div>
+                    <div className={`${record.familyId === 'paramilitary-sweep' ? 'break-words' : 'truncate'} text-[13px] font-bold text-text-primary`}>{title}</div>
                     <div className="mt-1 text-[13px] uppercase tracking-[0.14em] text-text-muted">
                       {`${familyLabel(record)} / ${turnToDateString(record.turn)}`}
                     </div>

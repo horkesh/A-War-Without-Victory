@@ -1031,9 +1031,11 @@ export function buildDecisionConsequenceLedgerSummary(
     }
   }
 
-  const latest = records[0] ?? null;
+  // Sweep receipts are listed in Records but are not filed decisions: they stay out of the total and the "latest decision".
+  const decisions = records.filter((record) => record.familyId !== 'paramilitary-sweep');
+  const latest = decisions[0] ?? null;
   return {
-    total: records.length,
+    total: decisions.length,
     recordsRouteCount,
     chronicleRouteCount,
     latestTurn: latest?.turn ?? null,

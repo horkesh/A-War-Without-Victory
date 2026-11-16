@@ -646,7 +646,10 @@ describe('decision consequence trail', () => {
     expect(countFiledDecisionRecords(state)).toBe(0);
     expect(countFiledSweepReceipts(state)).toBe(1);
     expect(hasFiledRecord(state)).toBe(true);
-    expect(buildDecisionConsequenceLedgerSummary(buildDecisionConsequenceLedger(state, 10)).recordsRouteCount).toBe(0);
+    const summary = buildDecisionConsequenceLedgerSummary(buildDecisionConsequenceLedger(state, 10));
+    expect(summary.recordsRouteCount).toBe(0);
+    expect(summary.total).toBe(0);
+    expect(summary.latestTitle).toBeNull();
   });
 
   it('excludes paramilitary authorization decisions outside the loaded player faction', () => {
