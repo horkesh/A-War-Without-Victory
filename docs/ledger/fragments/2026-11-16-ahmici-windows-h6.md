@@ -20,4 +20,7 @@
 - **Binding.** No surface may present a withheld Ahmići card as restraint or a better outcome.
 - **Registered (not fixed here).**
   - The H6 `evacuate`/`federate_early` answers set only the flag; nothing in `src/` acts on them.
-  - The event modal's effects list shows `narrative` text and effect labels in English in every locale (every card; UI/BCS lane).
+    - Not acceptable as final (orchestrator, ruling-5 class).
+    - Routed to the batch-b lane's ruling-5 sweep; the panel reconvenes for H6.
+  - In BCS the event modal shows `effects[]` narrative entries in raw English and omits `ahmici_massacre_1993`'s war crimes +3. UI lane.
+  - Its dead international-credibility −25, shown as a figure, goes to the atrocity-accounting lane (E2).
