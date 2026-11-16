@@ -136,7 +136,7 @@ Each of these was on the memo's first accept list and moved to fix or retire. Th
 3. PK5: C7 fixed; the retry duty for the 1994 ARBiH fights met by the package or by Part 6.
 4. SD6 and SD8: keep the three disclosure strings; no UI shows a siege civilian-death number as simulation output; the `scoring.ts:172` note stays open.
 5. Systems Manual §15 is reworded for F1h (done in this change). The stale "post-1.0 design item" lines (the #683 fragment is history and is not edited; the Systems Manual §6 note) are deleted when P2 delivers the capability.
-6. The directive-producer retirement (B3) covers the human's staff at autonomy 1 and above; B2 checks whether the human sees the pushback events.
+6. The directive-producer retirement (B3) covers the human's staff at autonomy 1 and above (ruled B3-b, 2026-11-16: no produced directive for any faction; the overlay is a hard plan gate, not a 0.02 weight); B2-b stops the pushback events and drains the old ones (the sim briefing counts unacknowledged ones for the player as "order interpretations pending"). B3 lands after package P2 and before P3.
 7. BC06: the `address_to_nation_rbih` narrative ("a people in the fourth year of siege") was wrong at its first firing at turn 84; done in #698 (a year-neutral closing line).
 8. EH-3 Path C respawn of collapsed-stranded brigades (`reconstituteBrigades`): open, filed as "post-1.0" and now needing fix, retire or accept-as-final with a reason before the freeze (orchestrator, 2026-11-16); owner the package lane (work list P2-R); `stranded_status='collapsed'` is never cleared.
 
