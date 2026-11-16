@@ -1,0 +1,22 @@
+## 2026-11-16 — Washington Path A': the signed cards on a quiet front sign the agreement (byte-identical left alone)
+
+- **Why.** In a played game where the HRHB President mended the alliance (probe `a2_probe2_hrhb_united`, on main), both Washington cards fired and were accepted at t102. The HRHB card's alliance +0.8 lifted the alliance to 0.82. But `washington_signed` stayed false until t112: Path A waits for an engine ceasefire (`bilateral_ceasefire` C1 needs 45 weeks of war, so 63 + 45 = t108) and then four more weeks (W2). For ten weeks the cards said "signed" while the engine withheld the Federation.
+- **Panel** (game designer and historian, 2026-11-16).
+  - Path A' fires once when all of these hold:
+    - Washington is not yet signed;
+    - a war was fought;
+    - turn ≥ 102;
+    - the front is quiet (`stalemate_turns` ≥ 4, or a held ceasefire ≥ 4 weeks);
+    - HRHB acknowledged `zagreb_orders_hrhb_ceasefire` (Zagreb's restraint);
+    - both Washington cards were signed (accept or reluctant);
+    - the alliance is > 0.20.
+  - Effects are Path A's, ceasefire included.
+  - N = 4 matches W2. The historical ceasefire, framework and signing came 1-3.5 weeks apart.
+- **Change.**
+  - `src/sim/early_war/washington_agreement.ts`: `evaluateWashingtonQuietFront` and `WASH_QUIET_FRONT_TURNS`; `trigger_path: 'quiet_front'`. Answers are read from `event_decision_log`, last answer wins (every bot, auto and player route writes it); no new state.
+  - `tools/scenario_runner/run_baseline_regression.ts`: `assertHistoricalWashingtonBeforeQuietFrontWindow`. The historical 188w run must sign before t102, or both the compare and the re-pin fail loudly.
+  - Canon: Systems Manual, Washington implementation note.
+- **Measured** (logs `C:/Pyrrhic/AWWV-worktrees/_logs/b5-scorer-20261116/qf_*`).
+  - Historical 188w `0b86d3d742fcbf1c`, emergent `84595a73932f3ac4`: byte-identical to main. Both sign through Path A at t98.
+  - Played probe (HRHB President: united_front, formal_alliance_persists, Gornji Vakuf negotiate; staff_recommended; 130 turns): Washington signs at **t102** through Path A' (ceasefire from t102; alliance 0.90 at t130). On main the same game signed at t112.
+- **Tests.** `tests/washington_quiet_front.test.ts` (9): fires with Path A effects; a held ceasefire counts; reluctant counts; closed before t102, without a war, below 0.20, on a fighting front, without Zagreb's restraint (resist or no answer), or with one card unsigned; never twice; the historical guard passes at t98 and throws at t102 or when unsigned.
