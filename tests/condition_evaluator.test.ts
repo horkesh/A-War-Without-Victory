@@ -4,7 +4,7 @@ import type { GameState } from '../src/state/game_state.js';
 
 function minState(): GameState {
     return {
-        meta: { turn: 20, phase: 'war', scenario_start_date: '1992-04-06' },
+        meta: { supply_reserves_enabled: true, turn: 20, phase: 'war', scenario_start_date: '1992-04-06' },
         political: {
             political_controllers: {},
             war_alliance_rbih_hrhb: 0.5,
@@ -39,6 +39,30 @@ describe('evaluateCondition — new v0.6.0 condition types', () => {
     it('supply_above: true when above threshold', () => {
         const state = minState();
         expect(evaluateCondition({ type: 'supply_above', faction: 'RS', threshold: 40 }, state)).toBe(true);
+    });
+
+    // F7 (2026-11-15): with the reserve model off there is no reserve, so neither condition holds.
+    it('supply_below and supply_above are false when the reserve model is off (shipping campaign)', () => {
+        const state = minState();
+        delete (state.meta as { supply_reserves_enabled?: boolean }).supply_reserves_enabled;
+        delete (state.military as { general_supply_reserve?: unknown }).general_supply_reserve;
+        for (const faction of ['RBiH', 'RS', 'HRHB'] as const) {
+            expect(evaluateCondition({ type: 'supply_below', faction, threshold: 30 }, state)).toBe(false);
+            expect(evaluateCondition({ type: 'supply_above', faction, threshold: 0 }, state)).toBe(false);
+        }
+    });
+
+    it('a reserve written while the model is off (a feint drain) does not make supply_below true', () => {
+        const state = minState();
+        delete (state.meta as { supply_reserves_enabled?: boolean }).supply_reserves_enabled;
+        (state.military as { general_supply_reserve?: Record<string, number> }).general_supply_reserve = { RS: 0 };
+        expect(evaluateCondition({ type: 'supply_below', faction: 'RS', threshold: 30 }, state)).toBe(false);
+    });
+
+    it('a faction with no reserve entry is not "below" even when the model is on', () => {
+        const state = minState();
+        (state.military as { general_supply_reserve?: Record<string, number> }).general_supply_reserve = { RBiH: 30 };
+        expect(evaluateCondition({ type: 'supply_below', faction: 'RS', threshold: 30 }, state)).toBe(false);
     });
 
     it('flag_equals: matches set flag', () => {

@@ -7,7 +7,7 @@ import type { EventDefinition } from '../src/sim/events/event_types.js';
 
 function minState(): GameState {
     return {
-        meta: { turn: 10, phase: 'war' },
+        meta: { supply_reserves_enabled: true, turn: 10, phase: 'war' },
         political: { political_controllers: {}, war_alliance_rbih_hrhb: 0.5 },
         military: {
             formations: {},

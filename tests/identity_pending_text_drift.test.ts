@@ -44,7 +44,10 @@ function withOldDisplayText(state: GameState): GameState {
     for (const option of pending.response_options) {
         option.label = `${option.label} (older)`;
         option.description = `${option.description} Older.`;
-        for (const consequence of option.future_consequences ?? []) consequence.explanation = `Older explanation for ${consequence.explanation.slice(0, 20)}.`;
+        for (const consequence of option.future_consequences ?? []) {
+            consequence.label = `${consequence.label} (older)`;
+            consequence.explanation = `Older explanation for ${consequence.explanation.slice(0, 20)}.`;
+        }
     }
     return old;
 }
@@ -81,5 +84,34 @@ describe('rbih_state_identity pending decision across display-text drift', () =>
     it('still refuses a decision that was already answered', async () => {
         const answered = resolveDesktopEventDecision(withOldDisplayText(await openingState()), 'rbih_state_identity', 'civic', process.cwd());
         expect(() => resolveDesktopEventDecision(answered, 'rbih_state_identity', 'civic', process.cwd())).toThrow();
+    });
+});
+
+describe('rbih_paramilitary_policy_1992 pending decision across provenance-note drift', () => {
+    async function pendingPolicy(): Promise<GameState> {
+        return resolveDesktopEventDecision(await openingState(), 'rbih_state_identity', 'civic', process.cwd());
+    }
+
+    it('answers a policy decision saved with older developer provenance notes', async () => {
+        const current = await pendingPolicy();
+        const old = clone(current);
+        const pending = (old.military.pending_event_decisions ?? []).find((d) => d.event_id === 'rbih_paramilitary_policy_1992')!;
+        pending.historical_source = 'Older historical source.';
+        pending.source_note = 'Older source note.';
+        pending.source = 'Older source.';
+        const resolved = resolveDesktopEventDecision(old, 'rbih_paramilitary_policy_1992', 'ask', process.cwd());
+        expect(resolved.military.event_decision_log?.at(-1)).toMatchObject({ event_id: 'rbih_paramilitary_policy_1992', response_id: 'ask' });
+    });
+
+    it('still refuses a policy decision whose player-facing text or options were altered', async () => {
+        for (const forge of [
+            (p: any) => { p.narrative = 'forged'; },
+            (p: any) => { p.response_options[0].label = 'forged'; },
+            (p: any) => { p.notifications_to_other_factions = {}; },
+        ]) {
+            const forged = clone(await pendingPolicy());
+            forge((forged.military.pending_event_decisions ?? []).find((d) => d.event_id === 'rbih_paramilitary_policy_1992'));
+            expect(() => resolveDesktopEventDecision(forged, 'rbih_paramilitary_policy_1992', 'ask', process.cwd())).toThrow();
+        }
     });
 });
