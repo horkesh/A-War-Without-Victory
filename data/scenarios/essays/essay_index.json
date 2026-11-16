@@ -4673,39 +4673,39 @@
       "id": "essay_rs_belgrade_pressure_response_1993",
       "tier": 2,
       "event_id": "rs_belgrade_pressure_response_1993",
-      "title": "Belgrade Calls Pale: The Limits of the Patron’s Leverage",
+      "title": "In Step with Belgrade: Pale and the Invincible Package",
       "year": 1993,
       "category": "diplomatic",
       "sources": [
-        "ICTY Krajišnik Trial Judgment (IT-00-39-T)",
-        "ICTY Karadžić Trial Judgment (IT-95-5/18-T)"
+        "ICTY Karadžić Trial Judgment (IT-95-5/18-T), paras 377-383, 3286-3287, 396-401, 3289-3295",
+        "Balkan Battlegrounds Vol. I, pp. 11-13, 182-186"
       ],
       "source_tier": "icty_icj_un",
       "source_note": "The listed adjudicative and institutional sources bound the chronology, actors, and findings described. The essay is original synthesis and does not extend individual liability, command responsibility, or institutional findings beyond the cited record.",
       "generated": true,
-      "content": "Throughout the war’s middle period, the relationship between Belgrade and Pale was a study in the limits of patronage. Slobodan Milošević, exhausted by the international sanctions that the Bosnian war had brought down on the Federal Republic of Yugoslavia, applied recurring diplomatic pressure on the Bosnian Serb leadership to accept the successive peace plans — Vance-Owen, Owen-Stoltenberg, and later the Contact Group map. The pressure in the autumn of 1993 was diplomatic, not material: no embargo, no border closure, no rupture of the supply line. It was the pressure of a patron asking, not yet compelling.\n\nThe directive that reached Pale through the FRY-RS channel was specific: ease the tempo on the Drina corridor, signal flexibility on the division of Sarajevo, and accept the corridor-narrowing implied by the Owen-Stoltenberg track. Belgrade was brokering a diplomatic envelope and wanted Pale to fit inside it. But Karadžić, Krajišnik, and Mladić did not speak with one voice on the response, and the Bosnian Serb assembly guarded its autonomy jealously.\n\nThe documented historical posture was defiance. Pale repeatedly declined Belgrade’s overtures short of the formal August 1994 embargo that Milošević eventually imposed when soft pressure failed. The ICTY Krajišnik and Karadžić proceedings record the friction this produced: a patron channel that mattered for ammunition reliability and political cover at the Security Council, set against a Pale leadership convinced that the battlefield position justified holding firm against Belgrade’s diplomatic preferences.\n\nThe alternatives were real but unchosen. Pale could have accepted Belgrade’s directive, aligning its operational tempo with the diplomatic envelope. It could have offered partial compliance, easing some pressure while holding the Drina axis. It could have brokered a compromise, trading a gesture of flexibility for continued patron support. Each would have preserved the Belgrade channel at a different cost to the strategic platform; the historical leadership judged the platform worth the friction.\n\nThe autumn 1993 episode is the densest documented phase of Belgrade-Pale soft pressure, and it illustrates a structural truth about the Bosnian Serb war effort: the patron’s leverage was real but not unlimited. Belgrade could supply, shield, and lean — but it could not, short of an embargo, dictate. Pale’s defiance in 1993 was a wager that the patron would keep supplying even while being defied. For nearly a year, that wager held.",
+      "content": "In the late summer of 1993 the Bosnian Serb leadership was saying yes. On 28 August the Bosnian Serb Assembly accepted the Geneva accord without conditions. In the same month the VRS pulled back from Igman and Bjelašnica, the mountains above Sarajevo, after the UN and NATO threatened air strikes. On 20 September, aboard the British carrier HMS Invincible, Owen and Stoltenberg put a package to the parties, and Milošević sat at the table. The package gave 49 percent of Bosnia to the Serb republic. Sarajevo would stay undivided, under UN administration for two years.\n\nBelgrade's part that autumn was support. The Karadžić trial judgment shows Milošević backing the Pale leadership in this period, and it does not show him holding Pale back. The strain on the Bosnian Serb leadership that September came from inside. In Banja Luka a mutiny broke out over war profiteering. The mutineers wanted action against the profiteers. The mutiny was settled on 16 September. It was not a revolt against Belgrade.\n\nThe package then stalled in the assemblies. On 29 September the Bosnian Assembly accepted it only with conditions. On 1 October the Croat Assembly withdrew the concessions it had offered the Muslims. On 2 October the Bosnian Serb Assembly did the same. Through those weeks Pale and Belgrade moved together. Staying in step with Belgrade was the documented line of autumn 1993.\n\nOpen defiance of Belgrade belongs to other seasons. In May 1993 Pale turned down the Vance-Owen plan, which Milošević had pressed it to accept. In July and August 1994 Pale rejected the Contact Group map, and the rift with Belgrade came into the open. The autumn of 1993 lay between those two breaks. For a few weeks Belgrade and the Bosnian Serb leadership held one line. The package stalled all the same, and the war went into its second winter.",
       "dynamic_sections": [
-        {
-          "id": "wave2_rs_belgrade_defy",
-          "insert_after_paragraph": 3,
-          "condition": "RESPONSE:rs_belgrade_pressure_response_1993:defy_belgrade_directive",
-          "variant": "note",
-          "content": "In this campaign, Pale defied Belgrade’s directive — the documented historical posture, in which the leadership held its operational tempo against Milošević’s soft diplomatic pressure short of the formal August 1994 embargo (ICTY Krajišnik Trial Judgment, IT-00-39-T).",
-          "localizations": {
-            "bcs": {
-              "content": "U ovoj kampanji Pale je prkosio direktivi iz Beograda — dokumentovani historijski stav, u kojem je vodstvo zadrzalo svoj operativni tempo nasuprot mekom diplomatskom pritisku Milosevica, sve do formalnog embarga iz augusta 1994. (ICTY Krajišnik Trial Judgment, IT-00-39-T)."
-            }
-          }
-        },
         {
           "id": "wave2_rs_belgrade_accept",
           "insert_after_paragraph": 3,
           "condition": "RESPONSE:rs_belgrade_pressure_response_1993:accept_belgrade_directive",
-          "variant": "divergence",
-          "content": "In this campaign, Pale accepted Belgrade’s directive — a counterfactual divergence from the documented defiance, aligning its operational tempo on the Drina and Sarajevo axes with the diplomatic envelope Milošević was brokering.",
+          "variant": "note",
+          "content": "In this campaign, Pale stayed in step with Belgrade behind the Invincible package, as it did in the autumn of 1993.",
           "localizations": {
             "bcs": {
-              "content": "U ovoj kampanji Pale je prihvatio direktivu iz Beograda — protucinjenicno odstupanje od dokumentovanog prkosa, uskladjujuci svoj operativni tempo na drinskoj i sarajevskoj osi sa diplomatskim okvirom koji je Milošević posredovao."
+              "content": "U ovoj kampanji Pale su ostale u korak s Beogradom iza paketa s broda Invincible, kao i u jesen 1993."
+            }
+          }
+        },
+        {
+          "id": "wave2_rs_belgrade_defy",
+          "insert_after_paragraph": 3,
+          "condition": "RESPONSE:rs_belgrade_pressure_response_1993:defy_belgrade_directive",
+          "variant": "divergence",
+          "content": "In this campaign, Pale broke with the package Belgrade backed and let its Assembly decide alone, a departure from the documented line of staying in step with Belgrade.",
+          "localizations": {
+            "bcs": {
+              "content": "U ovoj kampanji Pale su raskinule s paketom koji je Beograd podržavao i odluku prepustile samoj skupštini, čime su odstupile od dokumentovane linije usklađenosti s Beogradom."
             }
           }
         },
@@ -4714,10 +4714,10 @@
           "insert_after_paragraph": 3,
           "condition": "RESPONSE:rs_belgrade_pressure_response_1993:partial_compliance",
           "variant": "divergence",
-          "content": "In this campaign, Pale offered Belgrade partial compliance — a counterfactual divergence from the documented defiance, easing some pressure while holding the Drina-valley axis the strategic platform prized.",
+          "content": "In this campaign, Pale endorsed the package in public but held back the Assembly's vote, a departure from the documented line of staying in step with Belgrade.",
           "localizations": {
             "bcs": {
-              "content": "U ovoj kampanji Pale je ponudio Beogradu djelimicnu saradnju — protucinjenicno odstupanje od dokumentovanog prkosa, popustajuci dio pritiska uz zadrzavanje drinske osi koju je strateska platforma cijenila."
+              "content": "U ovoj kampanji Pale su paket javno podržale, ali su skupštinsko glasanje zadržale, čime su odstupile od dokumentovane linije usklađenosti s Beogradom."
             }
           }
         },
@@ -4726,19 +4726,19 @@
           "insert_after_paragraph": 3,
           "condition": "RESPONSE:rs_belgrade_pressure_response_1993:broker_compromise",
           "variant": "divergence",
-          "content": "In this campaign, Pale brokered a compromise with Belgrade — a counterfactual divergence from the documented defiance, trading a gesture of diplomatic flexibility for continued patron support and Security Council cover.",
+          "content": "In this campaign, Pale asked Milošević to reopen the map before any new vote, a departure from the documented line of staying in step with Belgrade.",
           "localizations": {
             "bcs": {
-              "content": "U ovoj kampanji Pale je ispregovarao kompromis sa Beogradom — protucinjenicno odstupanje od dokumentovanog prkosa, mijenjajuci gest diplomatske fleksibilnosti za nastavak podrske patrona i zastite u Vijecu sigurnosti."
+              "content": "U ovoj kampanji Pale su tražile od Miloševića da prije novog glasanja ponovo otvori pitanje mape, čime su odstupile od dokumentovane linije usklađenosti s Beogradom."
             }
           }
         }
       ],
       "localizations": {
         "bcs": {
-          "title": "Beograd zove Pale: granice poluge patrona",
+          "title": "U korak s Beogradom: Pale i paket s broda Invincible",
           "category": "diplomatsko",
-          "content": "Ovaj Codex zapis obradjuje temu \"Beograd zove Pale: granice poluge patrona\" kao diplomatsko pitanje rata u Bosni i Hercegovini 1993. Bosanska lokalizacija sazimava isti historijski okvir koji nosi izvorni esej: uzroke, glavne aktere, neposredni tok dogadjaja i posljedice za komandovanje, diplomatiju, civile i ratnu legitimnost. Fokus ostaje na razumijevanju historije i odgovornosti, ne na pretvaranju patnje u igracku nagradu.\n\nU igrinom toku ovaj zapis pomaze igracu da poveze otkljucani dogadjaj s vecim ratnim lukom. Ako se kampanja razvije drugacije od historijskog slijeda, Codex i dalje cuva razliku izmedju onoga sto se dogodilo u stvarnosti i onoga sto je nastalo u simulaciji. Izvorni aparat navodi: ICTY Krajišnik Trial Judgment (IT-00-39-T); ICTY Karadžić Trial Judgment (IT-95-5/18-T)."
+          "content": "Krajem ljeta 1993. rukovodstvo bosanskih Srba pristajalo je na ponuđeno. Skupština bosanskih Srba je 28. augusta bezuslovno prihvatila ženevski sporazum. Istog mjeseca VRS se povukla s Igmana i Bjelašnice, planina iznad Sarajeva, nakon što su UN i NATO zaprijetili zračnim udarima. Owen i Stoltenberg su 20. septembra na britanskom nosaču aviona HMS Invincible iznijeli paket pred strane, a za stolom je sjedio i Milošević. Po tom paketu srpskoj republici pripadalo je 49 posto Bosne i Hercegovine. Sarajevo je trebalo ostati nepodijeljeno, dvije godine pod upravom UN-a.\n\nBeograd je te jeseni stajao uz Pale. Prema presudi Haškog tribunala Karadžiću, Milošević je u tom periodu podržavao rukovodstvo na Palama i nije ga obuzdavao. Napetost u vrhu bosanskih Srba tog septembra došla je iznutra. U Banjoj Luci izbila je pobuna zbog ratnog profiterstva. Pobunjenici su tražili obračun s profiterima. Pobuna je okončana 16. septembra. Nije bila uperena protiv Beograda.\n\nPaket je potom zapeo u skupštinama. Skupština Republike Bosne i Hercegovine prihvatila ga je 29. septembra samo uz uslove. Skupština Herceg-Bosne je 1. oktobra povukla ustupke koje je ponudila bošnjačkoj strani. Skupština bosanskih Srba učinila je isto 2. oktobra. Tih sedmica Pale i Beograd išli su zajedno. Usklađenost s Beogradom bila je dokumentovana linija jeseni 1993.\n\nOtvoreni prkos Beogradu pripada drugim razdobljima. U maju 1993. Pale su odbile Vance-Owenov plan, iako je Milošević tražio da ga prihvate. U julu i augustu 1994. odbile su mapu Kontakt grupe, i raskol s Beogradom izašao je na vidjelo. Jesen 1993. smjestila se između ta dva loma. Nekoliko sedmica Beograd i rukovodstvo bosanskih Srba držali su se iste linije. Paket je ipak zapeo, a rat je ušao u svoju drugu zimu."
         }
       }
     },
