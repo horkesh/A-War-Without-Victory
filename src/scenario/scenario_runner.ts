@@ -7,7 +7,14 @@
 import { createHash } from 'node:crypto';
 import { createWriteStream, writeSync } from 'node:fs';
 import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
-import { join } from 'node:path';
+import { isAbsolute, join, relative, resolve, sep } from 'node:path';
+
+/** A path stored in GameState must not depend on the checkout location: repo-relative, '/'-separated. */
+export function toRepoRelativePath(absolutePath: string, baseDir: string): string {
+    const rel = relative(baseDir, absolutePath);
+    if (rel === '' || isAbsolute(rel)) return absolutePath.split(sep).join('/');
+    return rel.split(sep).join('/');
+}
 
 import { computeFrontEdges, computeFrontEdgesOsid } from '../map/front_edges.js';
 import type { LoadedSettlementGraph } from '../map/settlements.js';
@@ -1862,8 +1869,12 @@ export async function buildScenarioStartupState(
         const referendumHeldAtStart = scenario.peace_referendum_held_at_start ?? true;
         const refTurn = scenario.peace_referendum_turn ?? 0;
         const warTurn = scenario.peace_war_start_turn ?? refTurn + 4;
+        // Stored in GameState REPO-RELATIVE (forward slashes), never absolute: an absolute
+        // path made the final state hash depend on where the repo is checked out. The read
+        // site resolves it against baseDir; an older save's absolute path still resolves to
+        // itself (path.resolve keeps an absolute second argument).
         const warStartControlPath = scenario.peace_war_start_control
-            ? resolveInitControlPath(scenario.peace_war_start_control, baseDir)
+            ? toRepoRelativePath(resolveInitControlPath(scenario.peace_war_start_control, baseDir), baseDir)
             : undefined;
         state.meta.phase = 'peace';
         state.meta.turn = 0;
@@ -2982,7 +2993,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                     await applyMunicipalityControllersFromMun1990Only(
                         state,
                         graph,
-                        state.meta.peace_war_start_control_path
+                        resolve(baseDir, state.meta.peace_war_start_control_path)
                     );
                 }
                 turnReport = {
