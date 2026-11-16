@@ -129,6 +129,28 @@ Batch B, item B4 (freeze cut, Fable consult 2 revision 2, RF-ROSTER "path a"): r
 
 Evidence: `C:/Pyrrhic/AWWV-worktrees/_logs/batch-b-20261116/` (b4_*).
 
+## 2026-11-16 — 1995 Croatian involvement keys on the Federation, not on the 1993 war (data; historical byte-identical)
+
+- **Why** (Fable consult 5, ruling 4; confirmed in data). `operation_summer_95` and `federation_ground_offensive_1995` required `hrhb_washington_agreement_1994`, which requires `croat_bosniak_war_begins_1993`. So an RBiH President who **kept** the alliance with HRHB got no Croatian help in 1995, less than one who broke the alliance and mended it. Emergent ("improvising") mode is the default, so this was a must-fix before the freeze, not acceptable as final.
+- **Rulings.**
+  - Game designer: gate both on the Federation existing, through the existing condition vocabulary. One branch is the Washington event firing, which is exactly the old prerequisite on the historical path. The other is the alliance above `ALLIED_THRESHOLD` (0.20).
+  - Historian: Croatian intervention in 1995 is plausible for a Federation that never fought the 1993 war. The Split Agreement (22 Jul 1995) answered Bihać, and Zagreb's own aim was the RSK (BB1 pp.74, 401; BB2 p.470). Zagreb's Herceg-Bosna aims remain, which is why help keys on the alliance state rather than being assumed.
+- **Change** (`data/scenarios/events/war_1995.json`):
+  - `operation_summer_95` drops `requires_events: [hrhb_washington_agreement_1994]`.
+  - `federation_ground_offensive_1995` keeps `requires_events: [nato_deliberate_force_1995]`.
+  - Both gain `condition: or(event_fire_count hrhb_washington_agreement_1994 ≥ 1, alliance_above 0.2)`.
+  - Tests: `tests/event_timeline_integrity.test.ts` pins both triggers, with the threshold read from `ALLIED_THRESHOLD`. New `tests/sim/events/federation_1995_alliance_gate.test.ts` covers the historical path, a kept alliance, and a broken alliance with no Washington.
+- **Re-confirmed on main `71ffa0cb8`** (#727 and #710 merged; `pa2_*` logs).
+  - Historical byte-identical to main's pin: `03159b9ee1e5877f`.
+  - Hands-off emergent identical to main: `dde641b2c74838f0`.
+- **Proof** (first measured on main `4866a4279`; logs `C:/Pyrrhic/AWWV-worktrees/_logs/b5-scorer-20261116/pa_*`).
+  - Historical 188w is byte-identical to main, `83b8e8cd36023899`. Every artifact matches except `run_meta.json`.
+  - Hands-off emergent is hash-identical to main's emergent, `cbdfdb200b1f7069`.
+  - Events, timeline and pipeline slices: 14 files, 182 tests pass. tsc is clean.
+- **Routed separately (same class, not changed here).**
+  - The engine-side benefits of a signed Washington (`croatian_support` 0.90, HV coordination, the joint bonus) are unreachable without a prior war.
+  - `rbih_washington_agreement_1994` has no war prerequisite while HRHB's does.
+
 ## 2026-11-16 — B5 fix 4: emergent bots keep history while the war is historical (`divergence_threshold` wired with a territory gate); fix 5: RS patron-weight note corrected (historical byte-identical; hands-off emergent now passes the guard)
 
 - **Why.** Owner rule: "A finished game will reproduce history accurately if left alone, BUT also allow the player to create ahistorical outcomes." In a hands-off emergent 188w (B0 and fixes 1-3 in), 15 bot political picks left the record, 9 of them FALSE history, because the authored option data outweighs every state term. The guard breached (Farz 0/4 receipts, Seher t164, Petrovo t179). `divergence_threshold` was declared for exactly this and never read; its original design (`docs/plans/2026-03-24-v080-political-leader-bot-plan.md` §3) also had a territory-divergence condition that was never built.
@@ -666,6 +688,13 @@ Docs only; no `src/` or `data/` change, no hash change.
 
 - Freeze condition 7 (a hands-off emergent 188-week run passes the history guards) is MET on main at f98c074d9 (#727), by the orchestrator's ruling: Farz 4 of 4 receipts, P-B pass, enclaves on schedule, scores 709 / 709 / 708 / 680, all 15 divergent picks reverted, and Drina's "restrained" pick recorded as a §6 artefact. It is re-run at the frozen commit. Recorded in `RF-ENGINE-FREEZE`, the final-behaviour record and the roadmap.
 - Ahmići and the alliance (orchestrator rulings): A, the trigger gated on war plus the alliance below 0.2 (§6), in progress; B and C, a costly capitulation lever for an RBiH President (ARBiH under HVO command in provinces 3, 8 and 10, then the union of three republics, with the costs visible including civilians under HVO administration), after A2b, may land after the freeze; D, the retiming of `csq_alliance_holds` and the dead `rbih_hrhb_war_active` guard, on the calibration list.
+
+## 2026-11-16 — Pass 47: #732 (1995 Croatian help keyed on the Federation) recorded; #735, #744 and #737 noted
+
+Docs only; no `src/` or `data/` change, no hash change.
+
+- #732: `operation_summer_95` and `federation_ground_offensive_1995` now need the Washington agreement event or the alliance above 0.2, so a President who kept the alliance gets Croatian help and kept-alliance games reach the 1995 ceasefire and Holbrooke chain. Data only; byte-identical in historical and hands-off emergent mode; main stays 03159b9ee1e5877f. Fable consult 5's pre-freeze Croatian-help gate is done.
+- #735 (the B5 political gate: a player's political departure opens the divergence gate for the bots whose history it rules out; §6 decisions carved out) has a unanimous §6 round-2 GO and is ready, behind #744 (the Ahmići trigger, A) and #737 (A2, the Washington Federation by consent). The Ahmići bright-line panel (P2) and the alliance-lock conflict panel are both sitting.
 
 ## 2026-11-15 — Command loop L7: army clashes (proposal 2A step A1; owner decision 4)
 
