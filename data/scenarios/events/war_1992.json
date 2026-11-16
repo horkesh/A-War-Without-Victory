@@ -970,7 +970,7 @@
     "bot_response_logic": "historical",
     "historical_default_response_id": "always_allow",
     "source_note": "ICTY Karadžić, Stakić, Brđanin, Tadić, Krajišnik, and Šešelj findings document the political leadership's tolerance of paramilitary methods. UN reports record the pattern contemporaneously. The historical RS posture was de-facto tolerance.",
-    "staff_assessment": "Standing authorization mirrors documented RS leadership posture. Per-deployment review introduces command friction; refusal forecloses paramilitary operations entirely and shifts the rear-area burden onto regular formations.",
+    "staff_assessment": "Standing authorization mirrors documented RS leadership posture. Per-deployment review introduces command friction; refusal forecloses paramilitary operations on the orders you give yourself and shifts the rear-area burden onto regular formations. A standing order governs only the deployments you decide yourself: with your staff in charge (Assisted command or above), rear-area sweeps are decided without it, and each one counts against your side.",
     "trigger_evidence": [
       "The Six Strategic Goals platform has been recorded; rear-area operations follow.",
       "Crisis Staffs in Banja Luka and Prijedor are already coordinating with volunteer formations."
@@ -2139,7 +2139,7 @@
     "bot_response_logic": "historical",
     "historical_default_response_id": "always_deny",
     "source_note": "UN A/54/549 and ICTY Hadzihasanovic/Kubura (IT-01-47) document ARBiH chain-of-command discipline relative to RS and HRHB paramilitary practice. The historical Sarajevo posture was integration of irregulars into the regular army with prosecution of those who refused — the Caco/Celo October 1993 disarming actions are the canonical operational expression of that posture. Sarajevo did not maintain a parallel paramilitary track.",
-    "staff_assessment": "Refusal mirrors the documented ARBiH integration policy and preserves international standing as legal-conduct evidence at The Hague accumulates. Per-deployment review introduces command friction and slower tempo. Standing authorization is ahistorical for the Presidency and exposes Sarajevo to ICTY-grade scrutiny on the RS/HRHB pattern.",
+    "staff_assessment": "Refusal mirrors the documented ARBiH integration policy and preserves international standing as legal-conduct evidence at The Hague accumulates. Per-deployment review introduces command friction and slower tempo. Standing authorization is ahistorical for the Presidency and exposes Sarajevo to ICTY-grade scrutiny on the RS/HRHB pattern. A standing order governs only the deployments you decide yourself: with your staff in charge (Assisted command or above), rear-area sweeps are decided without it, and each one counts against your side.",
     "trigger_evidence": [
       "The Presidency state-identity platform has been recorded; the irregulars question follows.",
       "ARBiH command has flagged the Patriotic League, Green Berets, and Sarajevo-area independent brigades pending political direction."

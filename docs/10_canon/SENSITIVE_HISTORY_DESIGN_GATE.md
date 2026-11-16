@@ -2,7 +2,7 @@
 
 **Status:** CANON (v0.9.0 gate — moral and design)
 **Last Updated:** 2026-11-16
-**Amended:** 2026-11-16 (bright-line mode gating, §6 panel): §2a(i) is rewritten from "emergent-only" to "emergent mode, and the faction the player commands"; §3 notes the consequence is the same in either decision mode; §6 gains the record. Nothing renumbered.
+**Amended:** 2026-11-16 (bright-line mode gating, §6 panel): §2a(i) is rewritten from "emergent-only" to "emergent mode, and the faction the player commands"; §3 notes the consequence is the same in either decision mode, that the standing policy governs only sweeps decided in person (Full Control) and that staff-run sweeps are the faction's acts, with the staff-sweep receipt; the Verdict and Dayton flag copy no longer says "authorized" or "ethnic cleansing" (§2a(0)); §6 gains the record. Nothing renumbered.
 **Amended:** 2026-11-15 (owner directive: war-or-game removed from all seats; owner approved this canon edit 2026-11-15, "Amend the canon docs"): the "Adding a new rupture" sign-off seats, the §6 "New rupture added" row and the "Evidence required for each sign-off" realism line name `/scenario-creator-runner-tester` instead of `/war-or-game`; realism findings cite a source or a measured run figure, and the historian has the final word on historical fact. Earlier §6 records are history and stay as written. Nothing renumbered.
 **Amended:** 2026-11-15 (ending polish): §6 gains the record for the Sustained Refusal ghost entry (`paramilitary_streak_refused`): its predicate now also reads the deployment count the cost ledger prints, its prose claims only that no deployment was authorised, and its BCS text is a full translation. Nothing renumbered.
 **Amended:** 2026-11-14 (ending truth pass, R8 council fix 1): §6 gains the ending truth pass record (Verdict and Dayton signing copy, each side's own peace-dysfunction reading, retired rupture timing row and footer tagline). Nothing renumbered.
@@ -138,12 +138,12 @@ Adopted 2026-08-10 (Pyrrhic §6 panel: calibration/canon-§6/historian/red-team,
 
 ## 3. Player-Authorized War Crime Surface (Ring 1 — explicit)
 
-The `paramilitary_policy` field on `GameState` (`'always_allow' | 'always_deny' | 'ask'`) is the **only** player-facing surface that authorizes war crimes. This is deliberate. The minority-expulsion policy (RF-5B; §1 Ring 1, `BOT_MINORITY_EXPULSION_POLICY`) is not a player-facing surface. It applies only to a bot-controlled HRHB, following the historical record (Ring 3 #5), and a human HRHB is never offered it. Its record of an authorized war crime runs through §2a(ii)(a) as a bot-authorized act.
+The `paramilitary_policy` field on `GameState` (`'always_allow' | 'always_deny' | 'ask'`) is the **only** player-facing surface for authorizing paramilitary sweeps, and it governs only the sweeps the player decides in person (Full Control, autonomy level 0). At autonomy level 1 or higher the player's staff decides rear-area sweeps on its own authority and the standing policy is not consulted (owner calibration directive, 2026-11-05: live play reproduces the calibrated headless result); those sweeps are the faction's acts and count against it (§2a(i)). The player is told so on the surfaces they use: the autonomy descriptions, the policy modal, the opening policy decision and a Records receipt for each such sweep. This is deliberate. The minority-expulsion policy (RF-5B; §1 Ring 1, `BOT_MINORITY_EXPULSION_POLICY`) is not a player-facing surface. It applies only to a bot-controlled HRHB, following the historical record (Ring 3 #5), and a human HRHB is never offered it. Its record of an authorized war crime runs through §2a(ii)(a) as a bot-authorized act.
 
 **What it means:**
 - `always_allow` — the player is endorsing every paramilitary capture's civilian cost. The game does not hide or sugar-coat this. Every approved sweep records civilian casualties and increments `war_crimes_events`. The consequence is the same in either decision mode (§2a(i)): a human's own approved sweep reaches the §2a flag in historical mode too. At autonomy level 1 or higher the player's staff runs rear-pocket sweeps as bot staff do and the standing policy is not consulted (owner calibration directive, 2026-11-05), so those sweeps are booked to the faction all the same.
-- `always_deny` — paramilitaries do not spawn for the player faction. Bot factions continue to use them historically.
-- `ask` — the player sees each pending request with civilian casualty projection and decides one at a time. This is the default.
+- `always_deny` — at Full Control, paramilitaries do not spawn for the player faction. At autonomy level 1 or higher the staff still runs rear-area sweeps and this setting does not stop them (measured 2026-11-16, 188 turns, a human RBiH at `always_deny`: 4 sweeps at autonomy 1 and 2, none at autonomy 0). Bot factions continue to use them historically.
+- `ask` — at Full Control, the player sees each pending request with civilian casualty projection and decides one at a time. This is the default setting. At autonomy level 1 or higher no request is shown.
 
 **What it must never become:**
 - A "level of brutality" slider with five or ten positions
@@ -151,7 +151,7 @@ The `paramilitary_policy` field on `GameState` (`'always_allow' | 'always_deny' 
 - An optimization surface where the player chooses *which* populations to target
 - A risk/reward tooltip that frames atrocity as a trade ("50% chance of +5% territory, -3% international standing")
 
-**UI rule:** The `ask` mode presents each decision with: the target population, projected civilian casualties, war-crime-event increment, international standing impact, and historical-citation context. It does not round numbers to make the decision look small. It does not phrase the decision as a military necessity.
+**UI rule:** The `ask` mode presents each decision with: the target population, projected civilian casualties, war-crime-event increment, international standing impact, and historical-citation context. It does not round numbers to make the decision look small. It does not phrase the decision as a military necessity. **Staff-sweep receipt:** each sweep carried out without a request to the player is recorded for the player in Records (where, when, that no request came and why, and that it counts against the player's side), in plain words that never call it "authorized"; it is derived read-only from the paramilitary formation the sweep created and is not a decision.
 
 ---
 

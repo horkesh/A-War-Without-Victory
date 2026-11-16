@@ -24,6 +24,7 @@ import {
     getPlayerSafeMilitaryFactionName,
 } from '../utils/playerSafeText.js';
 import { t, type MessageKey } from '../i18n/index.js';
+import { humanizeOsid } from '../utils/osidDisplayName.js';
 import { playerFactionMatch } from './playerFactionMatch.js';
 import { stanceMatterReceiptLine } from './stanceMatterCopy.js';
 
@@ -924,6 +925,28 @@ export function buildDecisionConsequenceLedger(
       outcomeToken: paramilitaryOutcomeToken(paramilitary),
       detail: paramilitaryDetail(paramilitary),
       detailToken: paramilitaryDetailToken(paramilitary),
+      recordTarget: 'records',
+    });
+  }
+
+  // A sweep carried out for the player's side with no request ever reaching the player (the staff decides rear-area sweeps at
+  // Assisted command or above; a standing order to allow sends them without a request at Full Control). It still counts against the
+  // side, so the player is told where and why instead of meeting the count at Dayton.
+  for (const sweep of state.paramilitaryStaffSweeps ?? []) {
+    if (playerFaction && !playerFactionMatch(sweep.faction, playerFaction)) continue;
+    const place = humanizeOsid(sweep.target_osid);
+    const faction = getPlayerSafeMilitaryFactionName(sweep.faction, sweep.faction);
+    records.push({
+      id: `paramilitary-staff:${sweep.id}`,
+      turn: sweep.turn,
+      familyId: 'paramilitary-authorization',
+      family: 'Paramilitary authorization',
+      title: 'Paramilitary sweep carried out without a request to you',
+      titleToken: { key: 'decisionConsequences.title.paramilitary.staffSweep' },
+      outcome: 'Carried out',
+      outcomeToken: { key: 'decisionConsequences.outcome.staffSweep' },
+      detail: `A paramilitary sweep was sent into ${place} for ${faction}. No request came to you: at Assisted command or above your staff decides rear-area sweeps on its own authority, and at Full Control a standing order to allow does the same. It counts against your side.`,
+      detailToken: { key: 'decisionConsequences.detail.paramilitary.staffSweep', params: { place, faction } },
       recordTarget: 'records',
     });
   }

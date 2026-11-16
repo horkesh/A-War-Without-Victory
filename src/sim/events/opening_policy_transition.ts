@@ -24,8 +24,18 @@ const REVIEWED_IDENTITY_FNV64 = 'acbebbba72173a81';
 // Re-pinned 2026-11-16 for RF-PM1 (was 11239 / 3aa51be73b2cdda0), conditions of the RF-PM1 §6 panel (engine and red-team seats):
 // `always_deny` no longer previews the RS-only `csq_paramilitary_authorization_refused` (opens_events emptied) and the `ask`
 // explanation no longer names that internal id. Options, effects, flags and dimension shifts are byte-identical.
-const REVIEWED_POLICY_CANONICAL_LENGTH = 11091;
-const REVIEWED_POLICY_FNV64 = '57f0d7f927df002c';
+// Re-pinned 2026-11-16 for the staff-sweep disclosure (was 11091 / 57f0d7f927df002c): the staff assessment gains one sentence saying a
+// standing order governs only the deployments the player decides, that a staff in charge (Assisted command or above) decides rear-area
+// sweeps without it, and that each such sweep counts against the player's side. String only; options, effects, flags and dimension
+// shifts are byte-identical. A decision saved with the previous text is upgraded (`PRE_STAFF_SWEEP_STAFF_ASSESSMENT`).
+const REVIEWED_POLICY_CANONICAL_LENGTH = 11293;
+const REVIEWED_POLICY_FNV64 = '4d2ae0ae1ec957b5';
+
+/** The staff assessment a pending policy decision carried before the staff-sweep disclosure, and the reviewed one that replaces it. */
+const PRE_STAFF_SWEEP_STAFF_ASSESSMENT = {
+    from: 'Refusal mirrors the documented ARBiH integration policy and preserves international standing as legal-conduct evidence at The Hague accumulates. Per-deployment review introduces command friction and slower tempo. Standing authorization is ahistorical for the Presidency and exposes Sarajevo to ICTY-grade scrutiny on the RS/HRHB pattern.',
+    to: 'Refusal mirrors the documented ARBiH integration policy and preserves international standing as legal-conduct evidence at The Hague accumulates. Per-deployment review introduces command friction and slower tempo. Standing authorization is ahistorical for the Presidency and exposes Sarajevo to ICTY-grade scrutiny on the RS/HRHB pattern. A standing order governs only the deployments you decide yourself: with your staff in charge (Assisted command or above), rear-area sweeps are decided without it, and each one counts against your side.',
+} as const;
 
 /**
  * The two preview values RF-PM1 corrected, as a decision saved before the change carries them. Exactly these old values are
@@ -139,6 +149,7 @@ function withoutDisplayText(decision: PendingEventDecision): unknown {
 function withoutProvenanceText(decision: PendingEventDecision): unknown {
     const copy = JSON.parse(JSON.stringify(decision)) as Record<string, unknown>;
     for (const key of ['historical_source', 'source_note', 'source']) delete copy[key];
+    if (copy.staff_assessment === PRE_STAFF_SWEEP_STAFF_ASSESSMENT.from) copy.staff_assessment = PRE_STAFF_SWEEP_STAFF_ASSESSMENT.to;
     for (const rule of PRE_RF_PM1_POLICY_PREVIEW) {
         const option = ((copy.response_options ?? []) as Array<Record<string, unknown>>).find((entry) => entry.id === rule.option);
         for (const consequence of (option?.future_consequences ?? []) as Array<Record<string, unknown>>) {

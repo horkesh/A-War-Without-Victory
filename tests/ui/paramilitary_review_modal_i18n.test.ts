@@ -91,7 +91,7 @@ describe('Paramilitary review modal — i18n Car 3 (EN keys)', () => {
         expect(en['paramilitaryReview.allowPacket']).toBe('Allow packet');
         expect(en['paramilitaryReview.alwaysDeny']).toBe('Always deny');
         expect(en['paramilitaryReview.alwaysAllow']).toBe('Always allow');
-        expect(en['paramilitaryReview.policyHint']).toBe('Use a standing order if you want future paramilitary packets resolved the same way.');
+        expect(en['paramilitaryReview.policyHint']).toBe('Use a standing order if you want future paramilitary packets resolved the same way. It applies only at Full Control; at any higher level your staff decides rear-area sweeps without it.');
         expect(en['paramilitaryReview.close']).toBe('Close');
         expect(en['paramilitaryReview.submit']).toBe('Submit Decisions');
         expect(en['paramilitaryReview.submitting']).toBe('Submitting...');

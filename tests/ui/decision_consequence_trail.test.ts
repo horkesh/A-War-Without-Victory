@@ -615,6 +615,26 @@ describe('decision consequence trail', () => {
     expect(`${ledger[0]?.family} ${ledger[0]?.title} ${ledger[0]?.outcome} ${ledger[0]?.detail}`).not.toMatch(/_/);
   });
 
+  it('tells the player when a paramilitary sweep ran without a request: where, when and why, in plain words', () => {
+    const ledger = buildDecisionConsequenceLedger(makeState({
+      player_faction: 'RBiH',
+      rawGameState: { meta: { player_faction: 'RBiH' } } as any,
+      paramilitaryStaffSweeps: [
+        { id: 'para_rbih_t2_0', turn: 2, target_osid: 'op:kakanj:biljesevo', faction: 'RBiH' },
+        { id: 'para_rs_t2_0', turn: 2, target_osid: 'op:srebrenica:obadi', faction: 'RS' },
+      ],
+    } as Partial<LoadedGameState>), 10);
+
+    expect(ledger.map((record) => record.id)).toEqual(['paramilitary-staff:para_rbih_t2_0']);
+    const record = ledger[0]!;
+    expect(record).toMatchObject({ turn: 2, family: 'Paramilitary authorization', title: 'Paramilitary sweep carried out without a request to you', outcome: 'Carried out' });
+    expect(record.detail).toContain('A paramilitary sweep was sent into');
+    expect(record.detail).toContain('your staff decides rear-area sweeps on its own authority');
+    expect(record.detail).toContain('It counts against your side.');
+    expect(record.detail).not.toMatch(/authorized|ethnic cleansing|_|op:/i);
+    expect(record.detailToken?.key).toBe('decisionConsequences.detail.paramilitary.staffSweep');
+  });
+
   it('excludes paramilitary authorization decisions outside the loaded player faction', () => {
     const ledger = buildDecisionConsequenceLedger(makeState({
       player_faction: 'RS',
