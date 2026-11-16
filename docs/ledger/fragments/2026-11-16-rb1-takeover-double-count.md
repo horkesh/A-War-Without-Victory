@@ -12,7 +12,7 @@ RF fidelity-pass fix. Calibration is held: scores are recorded and are not a mer
 - Turn summary (`compile_turn_summary.ts`): `displacement_total` = routed + fled; the new `displacement_killed` keeps the killed in the turn record. It is projected to the player and shown in the AAR as "Killed" / "Ubijeni" (red-team C-RB2).
 - Endgame displacement ratio (`endgame_comparison.ts`): `refugees_created − civilian_casualties_caused`, clamped at 0, so it is counted like its historical baseline of people displaced (engine C1, scenario-tester C3).
 
-**Measured** (188w, final run on main f5a7990af, final_state_hash `73345df85957100c`):
+**Measured** (188w, final run on main e1d1a24e3, after the #713 re-pin, against a main run at the same commit `01572f50dfea2378`; final_state_hash `df791f73c26ed642`; control, formation, operation-AAR and activity files byte-identical to main):
 - Checkpoints 709/709/708/681, per-cell delta zero, guards intact, strict health PASS (consistency 0).
 - `refugees_created` per causer → victim: RS→RBiH 1,062,156 → 822,669; RS→HRHB 337,388 → 221,404; RBiH→RS 362,043 → 281,732; RBiH→HRHB 45,157 → 33,789; HRHB→RS 127,960 → 98,011; HRHB→RBiH 36,532 → 28,009.
 - The reader fixes move only off-map values: at w188, atrocity visibility 0.02355 → 0.03354, composite IVP 0.5497 → 0.5517; patron commitment in the 4th decimal; some negotiation-ledger entries; terminal exhaustion slightly.
