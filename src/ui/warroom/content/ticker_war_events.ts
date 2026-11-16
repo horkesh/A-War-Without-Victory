@@ -132,7 +132,10 @@ function eventToTicker(event: TurnEvent, playerFaction: FactionId): string | nul
         }
 
         case 'washington_signed': {
-            return truncate('FEDERATION FORMED: ARBIH-HVO WAR ENDS');
+            // Path C (Federation by consent) forms the Federation with no war fought.
+            return truncate(details.warFought === false
+                ? 'FEDERATION FORMED: ARBIH-HVO ALLIANCE PUT ON A FORMAL FOOTING'
+                : 'FEDERATION FORMED: ARBIH-HVO WAR ENDS');
         }
 
         case 'encirclement': {

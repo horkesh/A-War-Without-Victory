@@ -76,6 +76,18 @@ const EVENT_DISPLAYS: Record<string, (event: Phase0Event, playerFaction: Faction
         color: '#00e878',
         bgOverlay: 'rgba(0, 232, 120, 0.08)',
     }),
+    // Path C (Federation by consent, B5 A2): the alliance never broke, so no war ended (narrative seat).
+    washington_consent: (_event, _pf) => ({
+        title: 'FEDERATION FORMED',
+        subtitle: 'The ARBiH-HVO alliance becomes a federation',
+        body: 'The alliance between the ARBiH and the HVO becomes the Federation of Bosnia and Herzegovina. '
+            + 'The two armies have stayed allied through the war so far and now move toward joint command under a common political framework. '
+            + 'That joint command still has to be built in practice. '
+            + 'In the historical record, the alliance broke down into war in 1993. A ceasefire signed in Zagreb on 23 February 1994 took effect on 25 February. '
+            + 'The framework agreement followed in Washington on 1 March, and the Federation accords on 18 March.',
+        color: '#00e878',
+        bgOverlay: 'rgba(0, 232, 120, 0.08)',
+    }),
     exhaustion_critical: (_event, _pf) => ({
         title: 'FORCES REACHING BREAKING POINT',
         subtitle: 'Exhaustion exceeds critical threshold',
@@ -277,9 +289,9 @@ export function findWarMilestoneEvent(
 
     const rhs = state.political.rbih_hrhb_state;
 
-    // Washington agreement just signed
+    // Federation formed (washington_signed flip). Path C forms it with no war fought.
     if (rhs?.washington_signed && !previousSnapshot.washingtonSigned) {
-        return 'washington_agreement';
+        return rhs.war_started_turn == null ? 'washington_consent' : 'washington_agreement';
     }
 
     // Ceasefire just started

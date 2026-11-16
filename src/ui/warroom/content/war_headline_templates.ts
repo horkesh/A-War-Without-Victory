@@ -82,7 +82,20 @@ function headlineForCeasefire(_event: TurnEvent, _pf: FactionId): WarHeadline {
     };
 }
 
-function headlineForWashington(_event: TurnEvent, _pf: FactionId): WarHeadline {
+function headlineForWashington(event: TurnEvent, _pf: FactionId): WarHeadline {
+    if ((event.details as Record<string, unknown> | undefined)?.warFought === false) {
+        // Path C (Federation by consent): no war was fought (narrative seat, 2026-11-17).
+        return {
+            headline: 'FEDERATION FORMED',
+            subhead: 'The ARBiH-HVO alliance becomes a federation',
+            body: `The alliance between the ARBiH and the HVO becomes the Federation of Bosnia and Herzegovina. `
+                + `The two armies have stayed allied through the war so far and now move toward joint command under a common political framework. `
+                + `That joint command still has to be built in practice. `
+                + `In the historical record, the alliance broke down into war in 1993. A ceasefire signed in Zagreb on 23 February 1994 took effect on 25 February. `
+                + `The framework agreement followed in Washington on 1 March, and the Federation accords on 18 March.`,
+            photoCaption: 'HVO and ARBiH officers meet in Central Bosnia',
+        };
+    }
     return {
         // Fires on the engine's washington_signed flip: state, not a dated signing (panel 2026-11-17).
         headline: 'FEDERATION FORMED',

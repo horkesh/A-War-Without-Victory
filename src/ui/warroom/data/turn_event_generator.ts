@@ -419,7 +419,9 @@ function detectCeasefireWashington(
             faction: pf,
             visibility: 1,
             priority: 0,
-            details: {},
+            // Paths A, B and A' follow an RBiH-HRHB war; Path C (by consent) forms the Federation
+            // with no war, so the war-room copy must not say a war ended.
+            details: { warFought: rhs.war_started_turn != null },
         });
     }
 }

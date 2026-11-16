@@ -27,7 +27,13 @@
   - **HRHB `effects` narrative (EN).** It no longer claims the war ended or that supply pipelines opened; the card has no such supply effect.
   - **RBiH `future_consequences`.** These no longer promise the 1995 offensives. "Within days" is now tied to the 1 March signing.
   - **War-room strings** (declaration modal, headline, ticker, Diplomacy tracker label). They fire on the engine's flip, so they announce the state, "FEDERATION FORMED / The Croat-Bosniak war is over", with no dated signing. A left-alone run flips at week 98, before the historical ceasefire.
-    - The war-room surfaces are EN-only constants with no locale path. The panel's BCS war-room text is in `washington_framework_copy_integrated.json` (shared notes) for the UI lane.
+    - **State-chosen** (orchestrator, 2026-11-17). Four paths flip `washington_signed`: A, B and A' follow a war; Path C (#737) forms the Federation with no war fought.
+      - The turn event carries `warFought` (`war_started_turn` set).
+      - With a war, the milestone modal uses `washington_agreement`; with no war, `washington_consent`. The headline and ticker choose the same way.
+      - Path C text (narrative seat): "FEDERATION FORMED / The ARBiH-HVO alliance becomes a federation". It says nothing about a war ending; the historical breakdown into war is stated in the record register.
+      - The Path C headline photo caption ("HVO and ARBiH officers meet in Central Bosnia") is integrator wording.
+      - Test: `tests/ui/warroom_federation_formed_copy.test.ts`.
+    - The war-room surfaces are EN-only constants with no locale path; this goes on the BCS gap list (W4 allowlist). The panel's BCS war-room text is in `washington_framework_copy_integrated.json` (shared notes) for the UI lane.
   - **Fixes the seats found in the old copy:**
     - HRHB "preserved autonomy" and "supply pipelines open" had no mechanic behind them;
     - RBiH reluctant costs more cohesion (−10) than accept (−5);
