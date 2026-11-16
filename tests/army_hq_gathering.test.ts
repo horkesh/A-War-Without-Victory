@@ -258,38 +258,15 @@ describe('assessTheater', () => {
         expect(krajina.exhaustion).toBe(65);
     });
 
-    it('territory trend: gaining when mostly strong, losing when mostly thin', () => {
-        // All strong → gaining
-        const strongState = makeTheaterState({
-            formations: {
-                bde_a1: { faction: 'RS', corps_id: 'vrs_1st_krajina', personnel: 1600, status: 'active' },
-                bde_b1: { faction: 'RS', corps_id: 'vrs_drina', personnel: 1500, status: 'active' },
-                bde_c1: { faction: 'RS', corps_id: 'vrs_sarajevo_romanija', personnel: 1800, status: 'active' },
-            },
-        });
-        expect(assessTheater(strongState, 'RS').territory_trend).toBe('gaining');
-
-        // All thin → losing
-        const weakState = makeTheaterState({
-            formations: {
-                bde_a2: { faction: 'RS', corps_id: 'vrs_1st_krajina', personnel: 250, status: 'active' },
-                bde_b2: { faction: 'RS', corps_id: 'vrs_drina', personnel: 280, status: 'active' },
-                bde_c2: { faction: 'RS', corps_id: 'vrs_sarajevo_romanija', personnel: 200, status: 'active' },
-            },
-        });
-        expect(assessTheater(weakState, 'RS').territory_trend).toBe('losing');
-    });
-
-    it('supply status derived from general_supply_reserve', () => {
-        const makeWithSupply = (reserve: number) => makeTheaterState({
+    // F7b retirement (2026-11-16): the theater-level territory trend, supply status and manpower
+    // status fed only the retired army stance, so the assessment no longer computes them.
+    it('carries no retired theater-level status fields', () => {
+        const state = makeTheaterState({
             formations: { bde_1: { faction: 'RS', corps_id: 'vrs_1st_krajina', personnel: 1000, status: 'active' } },
-            generalSupplyReserve: { RS: reserve },
+            generalSupplyReserve: { RS: 10 },
         });
-
-        expect(assessTheater(makeWithSupply(80), 'RS').supply_status).toBe('abundant');
-        expect(assessTheater(makeWithSupply(50), 'RS').supply_status).toBe('adequate');
-        expect(assessTheater(makeWithSupply(30), 'RS').supply_status).toBe('strained');
-        expect(assessTheater(makeWithSupply(10), 'RS').supply_status).toBe('critical');
+        const assessment = assessTheater(state, 'RS') as unknown as Record<string, unknown>;
+        expect(Object.keys(assessment).sort()).toEqual(['corps_assessments', 'strongest_threat', 'weakest_enemy_front']);
     });
 
     it('excluded corps still assessed with strength data', () => {
@@ -414,9 +391,6 @@ function makeCorpsAssessment(overrides: Partial<CorpsAssessment> & { corps_id: s
 /** Helper to build a TheaterAssessment for plan generation tests. */
 function makeAssessment(overrides: Partial<TheaterAssessment> & { corps_assessments: CorpsAssessment[] }): TheaterAssessment {
     return {
-        territory_trend: 'stable',
-        supply_status: 'adequate',
-        manpower_status: 'adequate',
         weakest_enemy_front: null,
         strongest_threat: null,
         ...overrides,
@@ -439,21 +413,22 @@ describe('generateCampaignPlan', () => {
         expect(primaryCorps.length).toBeGreaterThanOrEqual(1);
     });
 
-    it('VRS late war with high exhaustion: shifts to general_defensive', () => {
+    // F7b retirement (2026-11-16): the doctrine override carries only the per-corps ceilings.
+    it('doctrine override carries only corps stance ceilings (army stance and aggression retired)', () => {
         const assessment = makeAssessment({
             corps_assessments: [
                 makeCorpsAssessment({ corps_id: 'vrs_1st_krajina', exhaustion: 55, strength_class: 'thin', available_brigades: 3 }),
                 makeCorpsAssessment({ corps_id: 'vrs_drina', exhaustion: 60, strength_class: 'thin', available_brigades: 2 }),
                 makeCorpsAssessment({ corps_id: 'vrs_sarajevo_romanija', exhaustion: 50, strength_class: 'thin', available_brigades: 2 }),
             ],
-            territory_trend: 'losing',
-            manpower_status: 'critical',
         });
         const state = makeMinimalState({ turn: 60 });
         const plan = generateCampaignPlan(state, 'RS', assessment, 60, 'regular_cadence', false);
 
-        expect(plan.doctrine_override!.army_stance).toBe('general_defensive');
-        expect(plan.doctrine_override!.aggression_modifier).toBeLessThan(0);
+        const doctrine = plan.doctrine_override as unknown as Record<string, unknown>;
+        expect(doctrine).not.toHaveProperty('army_stance');
+        expect(doctrine).not.toHaveProperty('aggression_modifier');
+        expect(Object.keys(doctrine)).toEqual(['corps_stance_ceilings']);
     });
 
     it('ARBiH early war: no primary corps', () => {
@@ -534,23 +509,18 @@ describe('generateCampaignPlan', () => {
         expect(krajina.role).toBe('primary');
     });
 
-    it('all corps exhausted: doctrine forces balanced, negative aggression', () => {
+    it('economy and contain roles still set corps stance ceilings', () => {
         const assessment = makeAssessment({
             corps_assessments: [
-                makeCorpsAssessment({ corps_id: 'vrs_1st_krajina', exhaustion: 55, available_brigades: 4 }),
-                makeCorpsAssessment({ corps_id: 'vrs_drina', exhaustion: 50, available_brigades: 3 }),
-                makeCorpsAssessment({ corps_id: 'vrs_sarajevo_romanija', exhaustion: 45, available_brigades: 3 }),
+                makeCorpsAssessment({ corps_id: 'arbih_general_staff', attendance: 'excluded', available_brigades: 3 }),
+                makeCorpsAssessment({ corps_id: 'arbih_2nd_corps', available_brigades: 6, strength_class: 'strong' }),
             ],
-            territory_trend: 'stable',
-            supply_status: 'adequate',
-            manpower_status: 'adequate',
         });
-        // Turn > 52 so VRS early war override doesn't apply
-        const state = makeMinimalState({ turn: 60 });
-        const plan = generateCampaignPlan(state, 'RS', assessment, 60, 'regular_cadence', false);
+        const state = makeMinimalState({ turn: 50 });
+        const plan = generateCampaignPlan(state, 'RBiH', assessment, 50, 'regular_cadence', false);
 
-        expect(plan.doctrine_override!.army_stance).toBe('balanced');
-        expect(plan.doctrine_override!.aggression_modifier).toBeLessThan(0);
+        // The excluded corps gets the contain role, and contain caps the corps at defensive.
+        expect(plan.doctrine_override?.corps_stance_ceilings?.arbih_general_staff).toBe('defensive');
     });
 
     it('critical commander reinforcement pressure keeps a corps out of economy role', () => {
@@ -951,8 +921,6 @@ describe('corps directive integration', () => {
                 { corps_id: 'vrs_1st_krajina', role: 'primary', suggested_stance: 'offensive' },
             ],
             doctrine_override: {
-                army_stance: 'balanced',
-                aggression_modifier: 0,
                 corps_stance_ceilings: { vrs_1st_krajina: 'balanced' },
             },
         });
@@ -1080,8 +1048,6 @@ describe('serialization and validation', () => {
                 { corps_id: 'vrs_drina', role: 'secondary', suggested_stance: 'balanced' },
             ],
             doctrine_override: {
-                army_stance: 'balanced',
-                aggression_modifier: -0.05,
                 corps_stance_ceilings: { vrs_1st_krajina: 'offensive', vrs_drina: 'balanced' },
             },
             synchronized_operations: [
@@ -1113,7 +1079,6 @@ describe('serialization and validation', () => {
         expect(parsed.front_priorities[0]!.corps_id).toBe('vrs_1st_krajina');
         expect(parsed.front_priorities[0]!.offensive_targets).toEqual(['op:brcko:brcko_1']);
         expect(parsed.doctrine_override).toBeDefined();
-        expect(parsed.doctrine_override!.army_stance).toBe('balanced');
         expect(parsed.doctrine_override!.corps_stance_ceilings!['vrs_drina']).toBe('balanced');
         expect(parsed.synchronized_operations).toHaveLength(1);
         expect(parsed.synchronized_operations[0]!.participants).toHaveLength(2);
@@ -1148,7 +1113,9 @@ describe('serialization and validation', () => {
         }
     });
 
-    it('validateGameState accepts nested campaign plan details produced by Army HQ gathering', () => {
+    // Save compatibility (F7b retirement, 2026-11-16): a plan saved before the retirement still carries
+    // army_stance and aggression_modifier; it must keep loading.
+    it('validateGameState accepts nested campaign plan details, including the retired legacy doctrine fields', () => {
         const state = makeMinimalState({ turn: 10 });
         (state.military as unknown as Record<string, unknown>).campaign_plans = {
             RS: {
@@ -1284,8 +1251,8 @@ describe('serialization and validation', () => {
                 'military.campaign_plans.RS.front_priorities[0].offensive_targets must be a string array',
                 'military.campaign_plans.RS.front_priorities[0].hold_targets must be a string array',
                 'military.campaign_plans.RS.front_priorities[1] must be an object',
-                'military.campaign_plans.RS.doctrine_override.army_stance must be a valid army stance',
-                'military.campaign_plans.RS.doctrine_override.aggression_modifier must be a finite number',
+                'military.campaign_plans.RS.doctrine_override.army_stance must be a valid army stance when present',
+                'military.campaign_plans.RS.doctrine_override.aggression_modifier must be a finite number when present',
                 'military.campaign_plans.RS.doctrine_override.corps_stance_ceilings.vrs_1st_krajina must be a valid front priority stance',
                 'military.campaign_plans.RS.synchronized_operations[0].name must be a non-empty string',
                 'military.campaign_plans.RS.synchronized_operations[0].launch_window_end must be greater than or equal to launch_window_start',

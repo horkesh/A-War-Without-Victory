@@ -1,6 +1,7 @@
 # A War Without Victory -- Rulebook v0.9.0
 
 **Last Updated:** 2026-05-05
+**Amended:** 2026-11-16 (BC06 sitting of the game-designer and historian seats, orchestrator ruling; wording only, no mechanic change): the "Recurring decisions" paragraph in the event-system section now says which events escalate and that the address to the nation and the decoration of a unit are renewable but static. Nothing renumbered.
 
 One game turn equals one week.
 
@@ -575,7 +576,7 @@ The event system presents the player with political and strategic decisions thro
 - **Scope restrictions:** offensive targets limited to specific municipalities
 - **Doctrine overrides:** forced defensive/offensive posture
 
-**Recurring decisions** — some events fire multiple times with escalating stakes. Options narrow as the player defers.
+**Recurring decisions** — some events fire again after a cooldown. Where an event escalates (front visits and strategic posture reviews), a later fire unlocks an additional option. The address to the nation and the decoration of a unit are renewable but static: each use offers the same choices, priced at 20 Authority with a 52-turn cooldown, and the calendar allows about three uses in a war.
 
 **Maximum 4 events per turn.** Candidates are sorted by priority, trigger week, then event id. Events sharing a `mutex_group` cannot co-fire in the same turn; only the first candidate in canonical order remains eligible. Events delayed only by the four-event cap are persisted as an overflow queue and rechecked on later turns before they can fire.
 

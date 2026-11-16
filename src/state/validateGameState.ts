@@ -2234,11 +2234,13 @@ function validateCampaignPlanDoctrineOverride(value: unknown, path: string, erro
         errors.push(`${path} must be an object`);
         return;
     }
-    if (!isCampaignPlanArmyStance(value.army_stance)) {
-        errors.push(`${path}.army_stance must be a valid army stance`);
+    // F7b retirement (2026-11-16): army_stance and aggression_modifier are no longer written. Saves
+    // made before still carry them; they stay valid, and are checked only when present.
+    if ('army_stance' in value && value.army_stance !== undefined && !isCampaignPlanArmyStance(value.army_stance)) {
+        errors.push(`${path}.army_stance must be a valid army stance when present`);
     }
-    if (!isFiniteNumber(value.aggression_modifier)) {
-        errors.push(`${path}.aggression_modifier must be a finite number`);
+    if ('aggression_modifier' in value && value.aggression_modifier !== undefined && !isFiniteNumber(value.aggression_modifier)) {
+        errors.push(`${path}.aggression_modifier must be a finite number when present`);
     }
     if ('corps_stance_ceilings' in value && value.corps_stance_ceilings !== undefined) {
         if (!isRecord(value.corps_stance_ceilings)) {

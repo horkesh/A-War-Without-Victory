@@ -76,7 +76,7 @@ New step `apply-army-directive-interpretation` registered in `src/sim/turn_phase
 The step short-circuits when:
 - `state.meta.phase !== 'war'`
 - No `political_directives_by_faction[faction]` entry is present (substrate-driven; A4 wires the slot)
-- Army CO stubbornness gate fails (defaults to undefined → 0 < threshold)
+- Army CO stubbornness gate fails (defaults to undefined → 0 < threshold) *(Correction 2026-11-15: stubbornness was never undefined at runtime; save migration 10 wrote 3 on every officer, so this gate saw 3 until RF-ROSTER (#677) wired the roster values.)*
 
 ## Files touched (exclusive ownership)
 
@@ -93,7 +93,7 @@ Files NOT touched: `src/sim/combat/order_interpretation.ts` (corps Phase 1 terri
 - `npx vitest run tests/a3_army_order_interpretation.test.ts` — **14/14 GREEN**
 - `npx vitest run tests/a3_army_order_interpretation.test.ts tests/order_interpretation*.test.ts tests/officer_*.test.ts tests/a1_*.test.ts tests/a2_*.test.ts` — **148/148 GREEN**
 - `npx tsc --noEmit -p tsconfig.json` — **CLEAN**
-- 40w smoke (parent runs): expected BYTE-STABLE pre-A4-roster-data per DDR substrate-driven design (no political directive slot is populated yet; stubbornness defaults are undefined; both predicates short-circuit silently).
+- 40w smoke (parent runs): expected BYTE-STABLE pre-A4-roster-data per DDR substrate-driven design (no political directive slot is populated yet; stubbornness defaults are undefined; both predicates short-circuit silently). *(Correction 2026-11-15: the stubbornness defaults were 3, written by save migration 10, not undefined; the byte-stability claim concerned the missing directive slot, not the stubbornness gate.)*
 
 ## Sensitive-history compliance
 

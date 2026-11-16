@@ -69,7 +69,7 @@ describe('army clash: Command Surface card', () => {
     installIpc();
     render(React.createElement(DirectiveCard, { directive: DIRECTIVE, gameState: makeState({ armyClashes: [clash({ previousClash: { turn: 20, outcome: 'insist' } })] }) }));
     expect((await screen.findByTestId('army-clash-order')).textContent).toBe('Halt Operation Vozuća');
-    expect(screen.getByTestId('army-clash-counter').textContent).toBe('The army wants the operation to run on.');
+    expect(screen.getByTestId('army-clash-counter').textContent).toBe('The army wants the operation to go ahead.');
     expect(screen.getByTestId('army-clash-corps').textContent).toBe('2nd Corps');
     expect(screen.getByTestId('army-clash-reason').textContent).toBe('It is the main effort of the army\'s campaign plan.');
     expect(screen.getByTestId('army-clash-severity').textContent).toBe('He would carry out only part of it.');
@@ -126,7 +126,7 @@ describe('army clash: Command Surface card', () => {
     setLocale('bcs');
     render(React.createElement(DirectiveCard, { directive: DIRECTIVE, gameState: makeState({ armyClashes: [clash()] }) }));
     expect((await screen.findByTestId('army-clash-insist')).textContent).toContain('Insistiraj');
-    expect(screen.getByTestId('army-clash-counter').textContent).toBe('Armija želi da se operacija nastavi.');
+    expect(screen.getByTestId('army-clash-counter').textContent).toBe('Armija želi da se operacija provede.');
   });
 });
 

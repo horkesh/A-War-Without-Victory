@@ -33,7 +33,7 @@ import { buildOsidAdjacency, type Osid } from './osid_adjacency.js';
 import { analyzeFactionGraphCached, type FactionGraphAnalysis } from './osid_graph_analysis.js';
 
 // ── Submodule imports for orchestrator ──────────────────────────────────
-import { setArmyStandingOrder, coordinateMultiCorpsOffensive, generateCorpsStanceOrders, type CorpsStanceTrace } from './bot_corps_stance.js';
+import { setArmyStandingOrder, generateCorpsStanceOrders, type CorpsStanceTrace } from './bot_corps_stance.js';
 import { clampHeldCorpsStances } from './stance_matter_holds.js';
 import { clampHeldOgStances } from './stance_matters.js';
 import { evaluateOperationProgress } from './sector_offensive.js';
@@ -78,7 +78,6 @@ export {
 export {
     generateCorpsStanceOrders,
     setArmyStandingOrder,
-    coordinateMultiCorpsOffensive,
 } from './bot_corps_stance.js';
 
 // From sector_offensive (canonical lifecycle owner)
@@ -350,7 +349,7 @@ export function reassignCorpsForBilateralWar(state: GameState, faction: FactionI
  *
  * Order:
  * 0. Set army stance from historical standing orders
- * 0b. Multi-corps coordination (concentrate force for general_offensive)
+ * 0b. (retired: multi-corps offensive pre-set, package P0 2026-11-16)
  * 1. Evaluate progress of existing operations (advance/abort)
  * 2. Set corps stances
  * 3. Launch new named operations
@@ -384,8 +383,9 @@ export function generateAllCorpsOrders(
     // 0a. Set army stance from standing orders
     setArmyStandingOrder(state, faction);
 
-    // 0b. Multi-corps coordination: concentrate offensive force
-    coordinateMultiCorpsOffensive(state, faction, edges);
+    // 0b. (retired 2026-11-16: the multi-corps "offensive" pre-set. Step 2 rewrites every corps
+    // stance, so it only survived for a corps with a player stance order, where it overrode the
+    // President's accepted stance. Headless it changed nothing.)
 
     // 1. Evaluate existing operations
     evaluateOperationProgress(state, faction);
