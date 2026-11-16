@@ -1,0 +1,35 @@
+## 2026-11-16 — B5 fix 4: emergent bots keep history while the war is historical (`divergence_threshold` wired with a territory gate); fix 5: RS patron-weight note corrected (historical byte-identical; hands-off emergent now passes the guard)
+
+- **Why.** Owner rule: "A finished game will reproduce history accurately if left alone, BUT also allow the player to create ahistorical outcomes." In a hands-off emergent 188w (B0 and fixes 1-3 in), 15 bot political picks left the record, 9 of them FALSE history, because the authored option data outweighs every state term. The guard breached (Farz 0/4 receipts, Seher t164, Petrovo t179). `divergence_threshold` was declared for exactly this and never read; its original design (`docs/plans/2026-03-24-v080-political-leader-bot-plan.md` §3) also had a territory-divergence condition that was never built.
+- **Rulings** (panel; integrator: the B5 scorer lane).
+  - Game designer: WIRE, threshold AND territory gate, bot factions in emergent only. Historical mode, the player's own picks and Observer unchanged. Events with no authored default stay scored. Peace plans gate only the final scored step.
+  - Historian: order RS ≥ RBiH > HRHB (Pale's Assembly, referendum and peace-plan decisions were firm: BB1 pp.44, 59, 61). Fix 5: the RS weight "decays post-1993" note is inaccurate, so keep the static 0.20.
+  - Integrator: thresholds ÷6 from the authored values, with RS raised to RBiH's: RS 3.0, RBiH 3.0, HRHB 1.33.
+- **Change.**
+  - New `src/sim/political/historical_territory_band.ts`: each faction's area share at the April 1992 start and the painted checkpoints Jan93/Apr94/Apr95/Oct95. The gate opens when a faction is more than 3 pp outside the [min, max] its share spans between the checkpoints either side of the week. Recomputed at each decision; no state.
+  - `political_event_decision.ts`: `divergesFromHistory` and `pickPoliticalResponseWithHistory`. History is kept unless the gate is open AND best − historical > threshold.
+  - `evaluate_events.ts` `selectBotEventResponse`: in emergent mode, events with an authored default (`historical_default_response_id` or `accept_first`) use the rule. Unauthored events stay scored, including Drina (a §6 case; its headless pick is positional, not a historical claim).
+  - `political_peace_plan.ts` and `negotiation/peace_plans.ts`: the scored accept/reject step uses `plan.historical_responses` as the reference. The hard branches run first, unchanged.
+  - `getFactionTerritoryAreaPct` moved to `src/sim/osid_areas.ts`, re-exported by `peace_plans.ts`.
+  - `political_personality.ts`: the thresholds and their doc; the RS patron note corrected.
+  - Canon: Systems Manual §7.10.7 gains the rule, in the same change. It also records the dependency: the band is the painted references, so a later paint correction shifts the gate. The band test fails until the table is re-baked, and a hands-off emergent run must then be re-measured.
+- **Re-confirmed on main `4866a4279`** (#726 and N6 #709 merged; `m3_*` logs).
+  - Historical 188w is byte-identical to main, `83b8e8cd36023899` (the manifest pin). Every artifact matches except `run_meta.json`.
+  - Hands-off emergent: `25176ce62fdcca94`, 709/709/708/680, guard intact. Against historical, only Drina and the three flavour timings differ.
+  - Main's own emergent is `cbdfdb200b1f7069`, 710/707/707/670: 18 picks differ and the guard is breached (Farz 0/4, Seher t164, Petrovo t179).
+- **Proof** (first measured on main `df206642c` + #726; logs `C:/Pyrrhic/AWWV-worktrees/_logs/b5-scorer-20261116/`).
+  - **Historical 188w byte-identical**: `df791f73c26ed642`, 709/709/708/681, guard intact.
+  - **Hands-off emergent 188w**: `6ebcd2c2d3d03372`, 709/709/708/680, **guard intact**. Farz 4/4 receipts (t180-185, 2nd Corps), P-B pass, eastern provenance clean, Srebrenica and Žepa fall on schedule, HRHB cascade 30. The previous emergent run on main was 710/707/707/670 and breached.
+  - Decisions versus historical: all 15 earlier divergences revert. Peace plans match history. What remains: t11 Drina fires again (t1 is all_six now) but the scorer picks `restrained` against history's `systematic`, which goes to the §6 seats as a finding. Three flavour events move a few weeks (t90/91 visits and address).
+  - Measured gate margin: the largest excursion outside the band in a hands-off run is 0.42 pp (historical) and 0.24 pp (emergent), against the 3 pp gate.
+  - Tests: new `tests/sim/political/historical_territory_band.test.ts` (painted rows recomputed from the reference files, band, gate, rule, peace-plan step). Political, events and peace-plan slices: 24 files, 315 tests pass. tsc clean.
+  - **The played half, gate forced open** (a diagnostic run with an uncommitted patch, `f4_emer_gate_forced_DIAGNOSTIC.log`, hash `574af024580b6fd4`). Bots improvise exactly where an option beats history by more than the threshold: t76 RS `accept_belgrade_directive`, t82 RBiH `conditional_autonomy_proposal`, t89 HRHB `sue_for_peace_hrhb`. No §6 decision moves. 709/709/708/682, guard intact.
+  - **Played harness runs** (`tools/ai_play/desktop_calibration_compare.ts`, emergent through `staff_recommended`): an RBiH engaged one-axis Request-op President, an RBiH meddler, and RS and HRHB Presidents declining historical operations. None moved the map more than 0.75 pp outside the band, so the gate never opened and no bot left history. The harness's player levers cannot yet drive the war off history's map. That is recorded as a finding; the forced-gate run shows the mechanism.
+- **§6 panel** (Historian, scenario-tester/calibration, Engine/systems, Red-team): **unanimous GO-with-conditions**. Recorded in `SENSITIVE_HISTORY_DESIGN_GATE.md` (row "B5 fix 4") and `docs/plans/2026-08-31-s6-ring3-half-migration-packet.md`. Left alone, the rule restores t2 (paramilitary), t17 (camps), t54 (Srebrenica demilitarisation) and t79 (HRHB camps) to the record. Drina fires again, stays unauthored, and its emergent `restrained` pick is a recorded artefact. The pre-R8 record-register line extends to Drina's notification texts.
+- **Engine conditions applied.**
+  - The band is keyed on the war week (turn − `war_start_turn`), byte-identical for the April 1992 start.
+  - With no control map the gate stays closed.
+  - A mid-war start (`jan1993_to_dayton`: turn 0 is calendar week 39) would read the band 39 weeks early, because GameState has no scenario start week. This is **accepted as final** for 1.0: emergent mode is reached only through the desktop New Game, which is fixed to April 1992.
+- **Gate seats.** Canon COMPLIANT with amendments, applied (§7.10.7 wording; the §6 record rows). Determinism PASS. Game-designer GO.
+- **Emergent scenario copy:** not committed. Recreate it as `data/scenarios/apr1992_definitive_188w.json` with `scenario_id` `apr1992_definitive_188w_emergent` and `"decision_mode": "emergent"`.
+- **Data finding (not changed here).** Historian: at t76 (Sept 1993) Pale went along with Belgrade (BB1 pp.47-48), so the authored default `defy_belgrade_directive` of `rs_belgrade_pressure_response_1993` is itself wrong. It is routed to the events/calibration owner.
