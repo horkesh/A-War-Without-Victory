@@ -538,3 +538,8 @@ the emergency defensive operation retired (#683, byte-identical); player-visible
 Merged list moved 2026-11-16 (steward pass 26), verbatim from the same paragraph:
 
 RF-ROSTER, army-chief stubbornness comes from the roster (#677; 709/709/708/681, outcome-identical; the headless `final_state_hash` moved from 19262a0b19df1567 to 518de17970af5914 on officer state values only; 518de17970af5914 is the main hash at #677, not the freeze hash); the Brčko Tactical Group relocates only onto held ground (#680, latent behind its flag, byte-identical); the SE7E-h run validator counts a relief already in transit (#685, validator only, consistency back to 0);
+
+
+Merged list moved 2026-11-16 (steward pass 28), verbatim from the same paragraph:
+
+the re-pin of `rbih_state_identity` and `rbih_paramilitary_policy_1992` (#689, string-only, three seats; the pinned-contract allowlist is empty); the CODE4 tie-break (#691, byte-identical); the corps_plan and corps_exhaustion receipts (#686, default off, byte-identical: they showed the ARBiH plan lockout is the exhaustion gate fed by the corps' own probes);
