@@ -98,6 +98,45 @@ Each file carries a header Amended line. Earlier §6 records and the 2026-11-07 
 
 Hidden event text only (28 strings in `war_1992.json`, `war_1993.json`, `war_1994.json`, `war_1995.json`); no player-visible copy, trigger, option, effect or calibration change. The historian seat read Karadžić IT-95-5/18-T: §§4263-4310 (also cited as "Vol. III") are the Markale II evidence of 28 August 1995, §§3471-3475 are SDS ideology and impunity, §§3526-3530 open the Sarajevo section, and §§5810-5876 open with Srebrenica (Count 11 on UN personnel is §§5852-5993); BB Vol. II is annexes and addenda, so "BB Vol. II Ch. 11-16" does not exist. Each hidden mention now names the paragraph or BB Vol. I page that supports the claim (Contact Group paras 396-401, Owen-Stoltenberg paras 377-383, Vance-Owen paras 359-375, Belgrade-Pale paras 3283-3295, Count 11 paras 5852-5993; BB Vol. II Annexes 58, 61, 64, Addendum 3; BB Vol. I ch. 62, 76, 89-94) or says "paragraph not verified". Claims the judgment contradicts (a 3 August 1994 Bijeljina session, Owen-Stoltenberg flexibility on Sarajevo, 377 UN peacekeepers and 30+ facilities, Belgrade restraining Pale in 1993) sit in player-visible strings and are left for the historian and narrative seats; 33 such strings are pinned in `tests/ui/event_citation_sweep2.test.ts` as a list that may only shrink. `rbih_state_identity` is not touched: a reviewed-contract hash in `src/sim/events/opening_policy_transition.ts` pins its whole definition, hidden text included, so its four hidden cites wait for the contract owner. 188-week headless run: final state hash `e44c77f5b41052f8` and 14 of 15 artifacts identical, `run_meta.json` differs in digests only. Exhaustive file list: `docs/40_reports/evidence/20261115_citation_sweep2/`.
 
+## 2026-11-15 — corps_plan receipts: why a corps made no plan (default off)
+
+The deferral seats found that on main all four ARBiH corps make no commander plan in t99-178 and read "defensive stance, no new plans" at t188. Whether the stance gate or the exhaustion gate causes it was untraced. This adds the trace that RF-STRENGTH uses as its premise.
+
+**Change.** A new reason-code topic, `AWWV_DEBUG_REASON_CODES=corps_plan`. After the commander loop it writes one `[corps_plan]` stdout line per corps per bot pass, holding:
+- the corps stance and the formula layer that set it (`stance_driver`, from the read-only stance trace);
+- `corps_exhaustion`;
+- the commander's `last_plan_action` and `last_plan_reason`, and the current plan status;
+- the active operations;
+- the force tiers the readiness layer reads (`tier_counts`);
+- the brigade count, healthy by the fixed 3,000 cap (`countHealthyBrigades`), and healthy by each brigade's designed `max_personnel`.
+
+Files: `src/sim/combat/corps_plan_trace.ts`, the topic in `reason_code_debug.ts`, and one gated call in `bot_corps_ai.ts`.
+
+**Inert.** Nothing is written to GameState or to any report, and no decision reads the trace. With the topic off it returns before reading anything.
+
+**Tests.** `tests/sim/corps_plan_trace.test.ts`:
+- silent when off;
+- one record per corps when on, with healthy 0 by the cap and 2 by design for two full 1,800-designed brigades;
+- the same GameState with the topic on and off.
+
+The topic is added to `tests/reason_code_debug.test.ts`.
+
+**Proof.**
+- `test:baselines`: all scenarios match (default off).
+- A 188w run with the topic ON against main `4064eafaa` (off): all 8 artifacts byte-identical, final_save `19262a0b19df1567`. 3,380 plan receipts and 1,563 exhaustion receipts.
+- `tsc` 0.
+
+**First reading (main, ARBiH, t99-178).** The army-wide lockout is the EXHAUSTION gate, not the stance gate.
+- The 1st, 2nd, 3rd and 4th Corps sit at offensive or balanced stance (doctrine, faction rule), but their corps exhaustion averages 95, 80, 71 and 55 against the gate of 30 (`MAX_EXHAUSTION_FOR_OPERATION`).
+- 316 of their 320 corps-turns read "corps exhaustion N above operation threshold 30". The 3rd Corps made one plan, which was abandoned.
+- The 5th and 7th Corps (mean exhaustion 6-7) planned 14 and 11 times.
+- The t188 reading "defensive stance, no new plans" is the October 1995 ceasefire clamp (driver `ceasefire` from t184), which masks the exhaustion gate.
+- Healthy brigades by the 3,000 cap average 0-6 per corps, against 10-32 by designed strength. That yardstick does not gate commander planning.
+
+**Exhaustion attribution (same run, `[corps_exhaustion]` receipts at all four writers).** In t99-178 the 1st-4th Corps' inflow is almost all commander probes (`probe_arbih_<corps>_t<turn>`, built by `buildProbeOperation`): 27, 24, 30 and 17 probe completions at +5 each. A probe is active on most turns, so decay runs at the active rate of 1 instead of the idle 3. The 1st Corps had 73 active-decay turns of 80, the 3rd 79 of 80. Probe inflow outruns the 1-a-turn decay, so the corps stays above the gate of 30 and the commander cannot plan. The 5th and 7th Corps' inflow is named operations (+15 each), with mostly idle decay between them. The in-execution replacement (`sector_offensive.ts:3171`) writes no exhaustion. Not traced: which of the two commander probe sites (`emit.ts` 2748, 3455) fires, and why probes are not held by the exhaustion gate.
+
+Evidence: `C:/Pyrrhic/AWWV-worktrees/_logs/rf-corps-plan-trace-20261115/`.
+
 ## 2026-11-15 — Counterfactual events no longer claim a historical default; hidden citations corrected
 
 Display and event data text only; no sim, trigger, option, effect or calibration change. (1) A design-counterfactual event (`source_tier: design_counterfactual`) keeps its authored `historical_default` marker (bots read it) but its decision card says "Default option" / "This is the default option. You are free to choose any option. It is not documented history." instead of "Historical default" / "the historically attested choice"; the Records badge reads "Default" / "Other choice". EN and BCS, reviewed by the narrative-designer seat. Only `csq_patron_recovery_offer` has an authored default among the 149 counterfactual events today, and the test covers any that gain one. (2) The hidden `source_note` and `historical_source` of `rbih_late_war_offensive_1995`, `hrhb_1992_graz_cooperation_collapse`, `gornji_vakuf_clashes_1993` and `csq_patron_recovery_offer` carry the historian-corrected citations, so the data matches what players now see (#662); un-reverified ranges are marked. Two 188-week headless runs (clean tree vs this branch): final state hash identical (`e44c77f5b41052f8`), 14 of 15 artifacts byte-identical, `run_meta` differs only in the output directory suffix and the event-file input digests (#630 precedent). See `docs/40_reports/evidence/20261115_counterfactual_default_label/`.
@@ -226,6 +265,16 @@ Event data text only (`localizations.<locale>.source_note`, EN and BCS); no sim,
 
 Gornji Vakuf is a bare judgment citation, so no section 6 record or narrative-designer seat was needed for this change. The existing event copy still says "ultimatum" (title, narrative, notifications, BCS options), which restates the Prosecution's label; the historian recommends a narrative-designer pass on that copy, filed as a follow-up and not changed here. See `docs/40_reports/evidence/20261115_event_source_notes/`.
 
+## 2026-11-15 — The freeze cut is written into the repo; the final-behaviour record for 1.0 (steward pass 18)
+
+Docs only; no `src/` or `data/` change, no hash change.
+
+- Orchestrator rulings of 2026-11-15 (Fable consult 2, then its revision after the owner's "I don't want engine changes after 1.0"). There is no post-1.0 engine bucket: every engine finding is fixed before the freeze, retired, or accepted as final with a written reason. Only a change that moves the 188-week headless hash must precede the freeze; inert retirements and player-path fixes may follow it, before 1.0, each proving the hash unchanged. The intake is closed by four criteria (a stuck, crashing or invariant-failing live player; a wrong §6 number or claim shown to the player; a broken guard or determinism; live and headless differing), and every new finding gets fix, retire or accept-as-final with a one-line reason when it is filed. The freeze is a byte test: an unchanged 188-week headless `final_state_hash` merges freely, and a moved hash needs the owner's OK. Written into `docs/open_gates.yml` (`RF-ENGINE-FREEZE`, six conditions), `docs/plans/MASTER_ROADMAP.md` (sequence line, BC14, BC15, BC19 rows) and `docs/plans/COMMAND_BOARD.md`.
+- Freeze condition 1 is "appendix A parts 1 and 2 merged, or the fallback ruled" (eight small fixes and the 1994-95 attack and defence package; the fallback is the owner's decision, taken only if the package budget is spent). Condition 5 is "the final-behaviour record merged". Condition 4 (live = headless) is met and is re-run at the frozen commit.
+- BC18 is closed as decided on 2026-11-14: A merged, B merged as RF-5B (#623), C post-1.0 by the owner's decision.
+- New record `docs/40_reports/governance/20261115_FINAL_BEHAVIOUR_AT_1_0.md`: each item accepted as final with its reason and the ratifying seats (game-designer and historian, one sitting), the items still owed a ruling (the owner's fallback, RB2 at the §6 sitting), the traced mechanism of the ARBiH plan lockout (the corps' own probes keep exhaustion above the planning gate; its fix is inside the package), and the calibration-pass rule for the matched cells that depend on it.
+- Stale-text corrections (hash-neutral): A2, A3 and A4 army-chief reports (the stubbornness default and the masking by save migration 10); Game Bible §21 line "Replace a corps CO" (the RS revolt reads `political_reliability`) with a header Amended line. FORAWWV is not edited.
+
 ## 2026-11-15 — Held step 1: presidential gestures cost 20 Authority (was 10)
 
 - **What.** Front visit, address to the nation, decoration and strategic posture review now cost 20 Authority each. The constants are `FRONT_VISIT_COST`, `ADDRESS_NATION_COST`, `DECORATE_UNIT_COST` and `STRATEGIC_POSTURE_REVIEW_COST`, in `src/desktop/autonomy_ipc_contract.cjs` and `src/ui/map/utils/commandAuthority.ts`.
@@ -233,6 +282,10 @@ Gornji Vakuf is a bare judgment citation, so no section 6 record or narrative-de
 - **Docs.** Systems Manual §6.4, proposal §5D (price row, gestures bullet, test spec with the new Stop-op, step note), ratification record.
 - **Player path only.** The prices are charged only in the desktop gesture handlers. Headless and bots never debit.
 - **Proof.** The PR has the 40-week headless artifact hashes against main, and the three-President rerun.
+
+## 2026-11-15 — Citation audit batch 2: the other ICTY, ICJ and UN paragraph ranges in the event data
+
+The historian read every judgment for the whole batch (181 mentions): 71 were already known wrong, 18 are not citations, and of 92 newly checked 9 hold, 35 hold in part and 48 (52%) are about something else (Mladić §§5169-5215 is sentencing, not hostage-taking, which is Count 11 with about 347 held, not 377; Krajišnik §§1006-1040 is 1992 and cannot carry a 1993-94 claim; Milošević IT-02-54-T has only a Rule 98bis Decision; the Mladić dismissal was rescinded on 27 August 1995, ¶3138, not 11 August). 27 hidden notes now say what each range is and give the correct cite; 6 visible source lines lose unverified ranges, `karadzic_mladic_split_1995` gets the right paragraphs and date, and `srebrenica_demilitarization_1993` cites the paragraphs that carry the claim (A/54/549 paras 59-65 and 69; Krstić paras 19-25). Events pinned by a reviewed-contract hash (`rbih_state_identity`, `rbih_paramilitary_policy_1992`) are not touched; their remaining imprecise or wrong cites wait for their next seat-reviewed re-pin. New test `tests/ui/event_icty_other_citation_ranges.test.ts`. Evidence and exhaustive file list: `docs/40_reports/evidence/20261115_icty_other_citation_audit/`.
 
 ## 2026-11-15 — Citation sweep: swept Karadžić ranges no longer cited as support in hidden event notes
 
