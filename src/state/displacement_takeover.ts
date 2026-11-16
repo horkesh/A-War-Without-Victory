@@ -257,13 +257,97 @@ export function seedDisplacementTimerOnFlip(
  */
 function carriedDisplacement(
     existing: HostileTakeoverTimerState | undefined
-): { cumulative_displaced?: number } {
+): { cumulative_displaced?: number; cumulative_routed?: number } {
     if (!existing) return {};
     if (existing.cause !== 'policy_expulsion' && existing.dormant_since_turn === undefined) return {};
     // The count is carried whether or not this timer fired: a re-seeded timer that inherited a count
     // and was replaced again inside its delay still holds those people (red-team C1).
     const prior = existing.cumulative_displaced ?? 0;
-    return prior > 0 ? { cumulative_displaced: prior } : {};
+    if (prior <= 0) return {};
+    const routed = Math.min(prior, Math.max(0, existing.cumulative_routed ?? 0));
+    return routed > 0 ? { cumulative_displaced: prior, cumulative_routed: routed } : { cumulative_displaced: prior };
+}
+
+/**
+ * RB9 return rule (historian seat, orchestrator ruling 2026-11-16): weeks a dormant record's OSID
+ * must be held by the expelled group's own side, or a side not at war with it, before the routed
+ * survivors come back. The historian seat picks and justifies the figure.
+ */
+export const RETURN_HOLD_WEEKS = 12;
+
+function isSafeHolderForGroup(state: GameState, group: FactionId, controller: FactionId | null | undefined): boolean {
+    if (!controller) return false;
+    return controller === group || !areFactionsAtWar(state, group, controller);
+}
+
+/**
+ * RB9 return rule. A dormant record whose OSID has been held safely for RETURN_HOLD_WEEKS brings its
+ * routed survivors home: the same number leave that group's refugee population (the origin camp
+ * first, then `displaced_in` elsewhere in municipality order), so each person is still counted once.
+ * The killed and the fled abroad never return and stay on the record; people no longer found in
+ * any refugee population are not invented. `refugees_created` is untouched: the expulsion happened.
+ * Faction-blind, no named places. A record with nothing left on it is deleted.
+ */
+function applyBoundedReturn(
+    state: GameState,
+    timerMap: Record<string, HostileTakeoverTimerState>,
+    timerKey: string,
+    timer: HostileTakeoverTimerState,
+    controller: FactionId | null | undefined,
+    currentTurn: number,
+): void {
+    if (!isSafeHolderForGroup(state, timer.from_faction, controller)) {
+        delete timer.return_hold_since_turn;
+        return;
+    }
+    if (timer.return_hold_since_turn === undefined) {
+        timer.return_hold_since_turn = currentTurn;
+        return;
+    }
+    if (currentTurn - timer.return_hold_since_turn < RETURN_HOLD_WEEKS) return;
+
+    const group = timer.from_faction;
+    let wanted = Math.min(Math.max(0, timer.cumulative_routed ?? 0), Math.max(0, timer.cumulative_displaced ?? 0));
+    let returned = 0;
+    const camps = (state.displacement.displacement_camp_state ?? {}) as Record<MunicipalityId, DisplacementCampState>;
+    const camp = camps[timer.mun_id];
+    if (wanted > 0 && camp) {
+        const take = Math.min(wanted, Math.max(0, camp.by_faction[group] ?? 0), Math.max(0, camp.population));
+        if (take > 0) {
+            camp.by_faction[group] = (camp.by_faction[group] ?? 0) - take;
+            camp.population -= take;
+            wanted -= take;
+            returned += take;
+        }
+    }
+    const dispStates = state.displacement.displacement_state ?? {};
+    for (const munId of Object.keys(dispStates).sort(strictCompare)) {
+        if (wanted <= 0) break;
+        if (munId === timer.mun_id) continue;
+        const d = dispStates[munId];
+        const byFaction = d?.displaced_in_by_faction;
+        if (!d || !byFaction) continue;
+        const take = Math.min(wanted, Math.max(0, Math.floor(byFaction[group] ?? 0)), Math.max(0, d.displaced_in));
+        if (take <= 0) continue;
+        byFaction[group] = (byFaction[group] ?? 0) - take;
+        d.displaced_in -= take;
+        d.last_updated_turn = currentTurn;
+        wanted -= take;
+        returned += take;
+    }
+    if (returned > 0) {
+        const origin = dispStates[timer.mun_id];
+        if (origin) {
+            origin.displaced_out = Math.max(0, origin.displaced_out - returned);
+            origin.last_updated_turn = currentTurn;
+        }
+    }
+    // The routed survivors have come home, or are no longer in any refugee population; either way
+    // nobody routed remains to return. What is left on the record is the killed and the fled abroad.
+    timer.cumulative_displaced = Math.max(0, (timer.cumulative_displaced ?? 0) - returned);
+    timer.cumulative_routed = 0;
+    delete timer.return_hold_since_turn;
+    if (timer.cumulative_displaced <= 0) delete timerMap[timerKey];
 }
 
 /** A timer a new capture may replace: a policy timer (RF-5B) or a dormant one (RB9). */
@@ -888,12 +972,17 @@ export function processDisplacementTakeover(
         const pipeIdx = timerKey.indexOf('|');
         const osid = pipeIdx >= 0 ? timerKey.substring(0, pipeIdx) : timerKey;
 
-        // RB9: a dormant timer only remembers who was already expelled; it never fires.
-        if (timer.dormant_since_turn !== undefined) continue;
+        const currentController = state.political.political_controllers?.[osid];
+
+        // RB9: a dormant timer only remembers who was already expelled; it never fires. Under a safe
+        // holder for RETURN_HOLD_WEEKS its routed survivors come home (bounded return rule).
+        if (timer.dormant_since_turn !== undefined) {
+            applyBoundedReturn(state, timerMap, timerKey, timer, currentController, currentTurn);
+            continue;
+        }
 
         // Recapture check: if displaced faction regained control, retire the timer (RB9: a fired
         // timer stays as a dormant record of who was expelled; an unfired one is deleted).
-        const currentController = state.political.political_controllers?.[osid];
         if (currentController === timer.from_faction) {
             retireTimer(timerMap, timerKey, currentTurn);
             continue;
@@ -970,6 +1059,8 @@ export function processDisplacementTakeover(
                 const fledAbroad = Math.floor(survivors * getFleeAbroadFraction(munId, timer.from_faction, timer.to_faction));
                 const routedToCamp = Math.max(0, survivors - fledAbroad);
                 const lost = killed + fledAbroad;
+                // RB9 return rule: only the routed survivors can come back (not the killed or the fled abroad).
+                timer.cumulative_routed = (timer.cumulative_routed ?? 0) + routedToCamp;
 
                 const beforePop = remainingPop;
                 dispState.displaced_out += routedToCamp;
@@ -1112,6 +1203,8 @@ export function processDisplacementTakeover(
             const fledAbroad = Math.floor(survivors * getFleeAbroadFraction(munId, timer.from_faction, timer.to_faction));
             const directRouted = Math.max(0, survivors - fledAbroad);
             const lost = killed + fledAbroad;
+            // RB9 return rule: only the routed survivors can come back.
+            timer.cumulative_routed = (timer.cumulative_routed ?? 0) + directRouted;
 
             const beforePop = remainingPop;
             dispState.displaced_out += directRouted;

@@ -1887,6 +1887,17 @@ export interface HostileTakeoverTimerState {
      */
     dormant_since_turn?: number;
     /**
+     * RB9 return rule: the survivors of this timer's waves who were routed inside BiH (camp or
+     * another municipality), as opposed to the killed and the fled abroad. Only these people can
+     * come back. Carried with `cumulative_displaced` on inheritance.
+     */
+    cumulative_routed?: number;
+    /**
+     * RB9 return rule: the turn since which a dormant record's OSID has been held by the expelled
+     * group's own side or a side not at war with it. Cleared when a hostile side holds it again.
+     */
+    return_hold_since_turn?: number;
+    /**
      * RF-5B: why the timer exists when no control change seeded it. 'policy_expulsion' =
      * seeded once by a faction's recorded minority policy ("expel") at the RBiH-HRHB war
      * start (`displacement_takeover.ts` step 0b); it fires one bounded wave and never

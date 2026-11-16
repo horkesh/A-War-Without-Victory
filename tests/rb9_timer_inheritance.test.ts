@@ -8,7 +8,7 @@
  */
 import { describe, expect, test } from 'vitest';
 import type { SettlementRecord } from '../src/map/settlements.js';
-import { processDisplacementTakeover } from '../src/state/displacement_takeover.js';
+import { processDisplacementTakeover, RETURN_HOLD_WEEKS } from '../src/state/displacement_takeover.js';
 import { CURRENT_SCHEMA_VERSION, type GameState, type HostileTakeoverTimerState } from '../src/state/game_state.js';
 import type { MunicipalityPopulation1991Map } from '../src/state/population_share.js';
 import { validateGameStateShape } from '../src/state/validateGameState.js';
@@ -148,6 +148,80 @@ describe('RB9 takeover timer inheritance', () => {
         state.meta.turn = 74;
         processDisplacementTakeover(state, settlements, undefined, pop1991, settlements);
         expect(firstWave + wavesFrom(state, 74)).toBeLessThanOrEqual(900);
+    });
+
+    test('return rule: after RETURN_HOLD_WEEKS under its own side the routed survivors come home; the dead and the fled stay on the record', () => {
+        const state = makeState();
+        const timers = () => state.displacement.hostile_takeover_timers as Record<string, HostileTakeoverTimerState>;
+        capture(state, 'HRHB', 'RBiH');
+        state.meta.turn = 54;
+        processDisplacementTakeover(state, settlements, undefined, pop1991, settlements);
+        const fired = timers()[KEY]!;
+        const firstWave = fired.cumulative_displaced!;
+        const routed = fired.cumulative_routed!;
+        expect(routed).toBeGreaterThan(0);
+        expect(routed).toBeLessThan(firstWave); // some were killed or fled abroad
+        const outBefore = state.displacement.displacement_state!.vitez!.displaced_out;
+
+        state.meta.turn = 60;
+        capture(state, 'RBiH', 'HRHB');
+        processDisplacementTakeover(state, settlements, undefined, pop1991, settlements);
+        expect(timers()[KEY]!.dormant_since_turn).toBe(60);
+        // Held by RBiH: the second pass at t60 starts the hold; the return comes RETURN_HOLD_WEEKS later.
+        expect(timers()[KEY]!.return_hold_since_turn).toBe(60);
+        for (let t = 61; t < 60 + RETURN_HOLD_WEEKS; t++) {
+            state.meta.turn = t;
+            processDisplacementTakeover(state, settlements, undefined, pop1991, settlements);
+            expect(timers()[KEY]!.cumulative_displaced).toBe(firstWave);
+        }
+        const bosniakRefugees = (): number => {
+            const camps = Object.values(state.displacement.displacement_camp_state ?? {}) as Array<{ by_faction: Record<string, number> }>;
+            const inCamps = camps.reduce((s, c) => s + (c.by_faction.RBiH ?? 0), 0);
+            const elsewhere = Object.values(state.displacement.displacement_state ?? {})
+                .reduce((s, d: any) => s + (d.displaced_in_by_faction?.RBiH ?? 0), 0);
+            return inCamps + elsewhere;
+        };
+        const refugeesBefore = bosniakRefugees();
+        state.meta.turn = 60 + RETURN_HOLD_WEEKS;
+        processDisplacementTakeover(state, settlements, undefined, pop1991, settlements);
+        const after = timers()[KEY];
+        const returned = firstWave - (after?.cumulative_displaced ?? 0);
+        expect(returned).toBeGreaterThan(0);
+        expect(returned).toBeLessThanOrEqual(routed);
+        // The dead and the fled abroad never come back.
+        expect(after?.cumulative_displaced ?? 0).toBeGreaterThanOrEqual(firstWave - routed);
+        // Each person is still counted once: exactly that many leave the Bosniak refugee population.
+        expect(refugeesBefore - bosniakRefugees()).toBe(returned);
+        expect(outBefore).toBeGreaterThan(0);
+        // refugees_created is untouched: the first expulsion happened.
+        const created = state.displacement.displacement_humanitarian_aggregates?.HRHB?.RBiH?.refugees_created;
+        expect(created).toBe(firstWave);
+
+        // A later capture draws on the returned community again (a real second expulsion).
+        state.meta.turn = 90;
+        capture(state, 'HRHB', 'RBiH');
+        expect(timers()[KEY]!.cumulative_displaced ?? 0).toBe(after?.cumulative_displaced ?? 0);
+    });
+
+    test('return rule cannot be laundered: a hold shorter than RETURN_HOLD_WEEKS returns nobody', () => {
+        const state = makeState();
+        const timers = () => state.displacement.hostile_takeover_timers as Record<string, HostileTakeoverTimerState>;
+        capture(state, 'HRHB', 'RBiH');
+        state.meta.turn = 54;
+        processDisplacementTakeover(state, settlements, undefined, pop1991, settlements);
+        const firstWave = timers()[KEY]!.cumulative_displaced!;
+        state.meta.turn = 60;
+        capture(state, 'RBiH', 'HRHB');
+        processDisplacementTakeover(state, settlements, undefined, pop1991, settlements);
+        for (let t = 61; t < 60 + RETURN_HOLD_WEEKS - 1; t++) {
+            state.meta.turn = t;
+            processDisplacementTakeover(state, settlements, undefined, pop1991, settlements);
+        }
+        // HRHB takes it back one week short: no return, and the new timer inherits the full count.
+        state.meta.turn = 60 + RETURN_HOLD_WEEKS - 1;
+        capture(state, 'HRHB', 'RBiH');
+        expect(timers()[KEY]!.cumulative_displaced).toBe(firstWave);
+        expect(timers()[KEY]!.return_hold_since_turn).toBeUndefined();
     });
 
     test('a timer recaptured before its wave fired displaced nobody and is deleted, as before', () => {
