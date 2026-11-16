@@ -47,6 +47,7 @@ import {
     derivePrimarySectorForBrigades,
     hasActiveOperation,
     hasAvailableSlot,
+    hasAvailableSlotIgnoringRecovery,
 } from './corps_operation_helpers.js';
 import { ensureHistoricalOperationAuthorizationReview } from './historical_operation_authorization.js';
 import { evaluateLaunchFeasibility, type LaunchFeasibilityResult } from './sector_offensive_launch_helpers.js';
@@ -1516,19 +1517,17 @@ export function injectArmyHqOperations(state: GameState): string[] {
         // Phase C frequency gate: 52-turn cooldown + once-per-year-bucket ceiling.
         if (!armyHqFrequencyGateOpen(state, def.faction, turn)) continue;
 
-        // Primary corps must have a free concurrent operation slot. Like the ordinary
-        // triggered path, an unrelated probe in another slot does not suppress the op.
-        const primaryCmd = cc[def.primary_corps];
-        if (!primaryCmd || !hasAvailableSlot(primaryCmd, activeCorpsBrigadeCount(state, def.primary_corps))) {
+        // Authored-op precedence S1: the objective checks come before the slot check, so the trace
+        // records the true blocker (an op whose objectives were already taken is not "blocked by
+        // the corps").
+        // Stale offer with no enemy objectives left?
+        if (!opStillHasEnemyObjectives(state, def)) {
             recordWatchedOperationTrace(state, def, turn, {
                 launch_status: 'not_launched',
-                blocker_code: 'active_primary_corps',
+                blocker_code: 'already_owned_objectives',
             });
             continue;
         }
-
-        // Stale offer with no enemy objectives left?
-        if (!opStillHasEnemyObjectives(state, def)) continue;
 
         // Resolve live axes (objectives still enemy-held).
         const liveAxes = def.axes
@@ -1540,8 +1539,27 @@ export function injectArmyHqOperations(state: GameState): string[] {
                 }),
             }))
             .filter((axis) => axis.objectives.length > 0);
-        if (liveAxes.length === 0) continue;
+        if (liveAxes.length === 0) {
+            recordWatchedOperationTrace(state, def, turn, {
+                launch_status: 'not_launched',
+                blocker_code: 'already_owned_objectives',
+            });
+            continue;
+        }
         const effectiveDef = { ...def, axes: liveAxes };
+
+        // Primary corps must have a free concurrent operation slot. Like the ordinary
+        // triggered path, an unrelated probe in another slot does not suppress the op.
+        // S1: an op already in recovery does not hold the slot, the same rule the commander
+        // loop uses when it starts generic operations.
+        const primaryCmd = cc[def.primary_corps];
+        if (!primaryCmd || !hasAvailableSlotIgnoringRecovery(primaryCmd, activeCorpsBrigadeCount(state, def.primary_corps))) {
+            recordWatchedOperationTrace(state, def, turn, {
+                launch_status: 'not_launched',
+                blocker_code: 'active_primary_corps',
+            });
+            continue;
+        }
 
         // Validate before building (mirror regular path's blocking checks).
         const validatable: ValidatableOpDef = {

@@ -324,7 +324,7 @@ describe('checkTriggeredOperations', () => {
         assert.ok(injected.includes('Operation Farz 95'));
     });
 
-    it('blocks Army HQ Farz when a probe consumes the corps only slot and records why', () => {
+    it('authored-op precedence S1: an op already in recovery does not hold the corps only slot', () => {
         const state = prepareFarzState(178);
         setArbihThirdCorpsActiveBrigades(state, 23); // 23 active brigades -> 1 slot
         state.military.corps_command!['arbih_3rd_corps']!.active_operations = [{
@@ -336,10 +336,49 @@ describe('checkTriggeredOperations', () => {
 
         const injected = injectArmyHqOperations(state);
 
+        // The commander loop does not count a recovering op when it starts generic operations;
+        // the Army HQ path now counts slots the same way, so the authored op is not locked out.
+        assert.ok(injected.includes('Operation Farz 95'));
+    });
+
+    it('blocks Army HQ Farz when a probe still executing consumes the corps only slot and records why', () => {
+        const state = prepareFarzState(178);
+        setArbihThirdCorpsActiveBrigades(state, 23); // 23 active brigades -> 1 slot
+        state.military.corps_command!['arbih_3rd_corps']!.active_operations = [{
+            name: 'Test Probe',
+            type: 'probe',
+            phase: 'execution',
+            participating_brigades: [],
+        } as any];
+
+        const injected = injectArmyHqOperations(state);
+
         assert.ok(!injected.includes('Operation Farz 95'));
         assert.equal(
             state.military.watched_operations?.find((row: any) => row.operation_name === 'Operation Farz 95')?.blocker_code,
             'active_primary_corps',
+        );
+    });
+
+    it('authored-op precedence S1: an Army HQ op whose objectives are already held records already_owned_objectives, not a slot block', () => {
+        const state = prepareFarzState(178);
+        setArbihThirdCorpsActiveBrigades(state, 23);
+        state.military.corps_command!['arbih_3rd_corps']!.active_operations = [{
+            name: 'Test Probe',
+            type: 'probe',
+            phase: 'execution',
+            participating_brigades: [],
+        } as any];
+        for (const osid of ['op:zavidovici:vozuca_2', 'op:maglaj:gornja_bocinja', 'op:maglaj:donja_bocinja_2', 'op:lukavac:brijesnica_donja_2']) {
+            (state.political.political_controllers as Record<string, string>)[osid] = 'RBiH';
+        }
+
+        const injected = injectArmyHqOperations(state);
+
+        assert.ok(!injected.includes('Operation Farz 95'));
+        assert.equal(
+            state.military.watched_operations?.find((row: any) => row.operation_name === 'Operation Farz 95')?.blocker_code,
+            'already_owned_objectives',
         );
     });
 
