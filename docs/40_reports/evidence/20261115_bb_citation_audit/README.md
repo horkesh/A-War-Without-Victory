@@ -35,6 +35,6 @@ Flags from the historian: BB p. 291 describes the 4 August 1995 Mladić move as 
 
 188-week headless run against a clean `origin/main` run at the same commit: see the PR description. `tsc` clean; 150 related test files (2311 tests) green.
 
-## Files changed
+## Files changed (exhaustive)
 
-Events: `war_1992.json`, `war_1993.json`, `war_1994.json`, `war_1995.json`, `consequences.json` (the 68 "BB II Ch. N" mentions). Essays: `essay_index.json` and 10 essay files (`bihac_5th_corps_offensive_1994`, `contact_group_plan_1994`, `maglaj_enclave_blockade_1993`, `nato_deliberate_force_1995`, `operation_lukavac_93`, `operation_sana_1995`, `rs_assembly_rejects_voplan_1993`, `us_halts_federation_advance_1995`, and the source fields of the others listed in the diff). Tests: `ui/event_bb_citations.test.ts` (new), `ui/player_visible_event_text_clean.test.ts`, `sensitive_history_player_choice_content.test.ts`, `ui/codex_essay_localization.test.ts`. Docs: this README and `docs/ledger/fragments/2026-11-16-bb-citation-audit.md`.
+Events: `war_1992.json`, `war_1993.json`, `war_1994.json`, `war_1995.json`, `consequences.json` (the 68 "BB II Ch. N" mentions). Essays: `essay_index.json`, `bihac_5th_corps_offensive_1994.json`, `contact_group_plan_1994.json`, `maglaj_enclave_blockade_1993.json`, `nato_deliberate_force_1995.json`, `operation_lukavac_93.json`, `operation_sana_1995.json`, `rs_assembly_rejects_voplan_1993.json`, `us_halts_federation_advance_1995.json`. Tests: `ui/event_bb_citations.test.ts` (new), `ui/player_visible_event_text_clean.test.ts`, `sensitive_history_player_choice_content.test.ts`, `ui/codex_essay_localization.test.ts`. Docs: this README and `docs/ledger/fragments/2026-11-16-bb-citation-audit.md`.
