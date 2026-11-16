@@ -19,4 +19,19 @@
 - **Measured** (logs `C:/Pyrrhic/AWWV-worktrees/_logs/b5-scorer-20261116/qf_*`).
   - Historical 188w `0b86d3d742fcbf1c`, emergent `84595a73932f3ac4`: byte-identical to main. Both sign through Path A at t98.
   - Played probe (HRHB President: united_front, formal_alliance_persists, Gornji Vakuf negotiate; staff_recommended; 130 turns): Washington signs at **t102** through Path A' (ceasefire from t102; alliance 0.90 at t130). On main the same game signed at t112.
+- **Copy: the cards become the framework step** (orchestrator condition 1, 2026-11-17).
+  - The panel: the narrative designer drafted the copy and gave a round-2 GO with amendments; the historian gave GO with amendments (BB Vol. I p.18, Vol. II pp.450-451). Both seats' amendments were integrated.
+  - **Cards.** Both Washington cards now present the framework step ("Washington Framework Agreed" / "Sarajevo and the Washington Framework"), through display-time `localizations` in EN and BCS.
+    - Their present tense says only what holds in both orders: the engine formed the Federation first (left alone: t98, then the cards at t102) or later (played).
+    - Dates go in the record register: the Zagreb ceasefire on 23 Feb (in force 25 Feb), the framework on 1 Mar, the Federation accords on 18 Mar.
+  - **HRHB `effects` narrative (EN).** It no longer claims the war ended or that supply pipelines opened; the card has no such supply effect.
+  - **RBiH `future_consequences`.** These no longer promise the 1995 offensives. "Within days" is now tied to the 1 March signing.
+  - **War-room strings** (declaration modal, headline, ticker, Diplomacy tracker label). They fire on the engine's flip, so they announce the state, "FEDERATION FORMED / The Croat-Bosniak war is over", with no dated signing. A left-alone run flips at week 98, before the historical ceasefire.
+    - The war-room surfaces are EN-only constants with no locale path. The panel's BCS war-room text is in `washington_framework_copy_integrated.json` (shared notes) for the UI lane.
+  - **Fixes the seats found in the old copy:**
+    - HRHB "preserved autonomy" and "supply pipelines open" had no mechanic behind them;
+    - RBiH reluctant costs more cohesion (−10) than accept (−5);
+    - the entity name is HR HB, not HZ HB;
+    - the unsourced hardliner attribution is removed.
+  - **Measured:** byte-identical (historical `0b86d3d742fcbf1c`, emergent `84595a73932f3ac4`).
 - **Tests.** `tests/washington_quiet_front.test.ts` (9): fires with Path A effects; a held ceasefire counts; reluctant counts; closed before t102, without a war, below 0.20, on a fighting front, without Zagreb's restraint (resist or no answer), or with one card unsigned; never twice; the historical guard passes at t98 and throws at t102 or when unsigned.

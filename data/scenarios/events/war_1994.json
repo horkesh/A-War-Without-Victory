@@ -814,6 +814,92 @@
     "image": "event_washington_agreement.webp",
     "title": "Washington Agreement Signed",
     "narrative": "Under heavy American pressure, Bosniak and Bosnian Croat leaders sign the Washington Agreement, ending the Croat-Bosniak war and establishing the Federation of Bosnia and Herzegovina. The agreement changes the military balance by creating a Federation framework against the VRS, though trust, command integration, and supply coordination remain uneven.",
+    "localizations": {
+      "en": {
+        "title": "Washington Framework Agreed",
+        "narrative": "American pressure, carried to Mostar through Tuđman, has produced a framework agreed in Washington between the Bosniak and Bosnian Croat leaderships. It provides for a Federation of Bosnia and Herzegovina joining Bosniak-held and Croat-held territory, and for a loose confederal link with Croatia. The HR HB leadership must now decide how far to commit to it. Trust and joint command between the two armies will stay uneven whatever is decided. In the historical record, the ARBiH and the HVO agreed a ceasefire in Zagreb on 23 February 1994. The framework agreement was signed in Washington on 1 March, and the Federation accords on 18 March.",
+        "staff_assessment": "Both answers commit Mostar to the framework. The card's effects apply either way: HVO cohesion and morale recover, ARBiH morale and cohesion rise a little, and relations with Sarajevo improve. Full commitment also gives Sarajevo more international credibility and more supply. Signing with reservations gives Sarajevo a smaller gain in credibility and no added supply. Expect slow trust-building and uneven joint command on either path.",
+        "trigger_evidence": [
+          "Fighting between the HVO and the ARBiH broke out earlier in this campaign.",
+          "The HR HB leadership has set its political line for the war.",
+          "The calendar has reached the Washington framework milestone."
+        ],
+        "response_options": {
+          "accept": {
+            "label": "Commit fully to the Federation",
+            "description": "Sign the framework without reservation. Mostar's full commitment gives Sarajevo more international credibility and more supply for the war against the VRS."
+          },
+          "reluctant": {
+            "label": "Sign with reservations",
+            "description": "Sign the framework but keep distance from Sarajevo on the record. Sarajevo gains less international credibility and no added supply."
+          }
+        },
+        "notifications_to_other_factions": {
+          "accept": {
+            "RS": {
+              "headline": "Mostar commits fully to the Washington framework",
+              "body": "The HR HB leadership signs the Washington framework without reservation. Pale expects closer Croat-Bosniak coordination and better supply for the ARBiH against the VRS."
+            },
+            "RBiH": {
+              "headline": "Mostar commits to the Federation framework",
+              "body": "The HR HB leadership signs the Washington framework without reservation. Sarajevo reads it as a clear commitment, and its international credibility and supply improve."
+            }
+          },
+          "reluctant": {
+            "RS": {
+              "headline": "Mostar signs the framework with reservations",
+              "body": "The HR HB leadership signs the Washington framework but keeps its distance from its former Bosniak adversaries. Pale still faces a Federation framework, with integration looking slower and more brittle."
+            },
+            "RBiH": {
+              "headline": "Mostar signs the framework warily",
+              "body": "The HR HB leadership signs the Washington framework but signals continued caution toward Sarajevo. The framework holds. Trust and joint operations will take time."
+            }
+          }
+        }
+      },
+      "bcs": {
+        "title": "Dogovoren okvir iz Washingtona",
+        "narrative": "Američki pritisak, koji je Tuđman prenio na Mostar, doveo je do okvira koji su bošnjačko i bosanskohrvatsko rukovodstvo dogovorili u Washingtonu. Okvir predviđa Federaciju Bosne i Hercegovine koja spaja teritorije pod bošnjačkom i hrvatskom kontrolom, te labavu konfederalnu vezu s Hrvatskom. Rukovodstvo HR HB sada mora odlučiti koliko će se čvrsto vezati za njega. Povjerenje i zajednička komanda između dviju vojski ostat će neujednačeni, kakva god odluka bila. Prema historijskim izvorima, Armija RBiH i HVO dogovorili su primirje u Zagrebu 23. februara 1994. Okvirni sporazum potpisan je u Washingtonu 1. marta, a sporazumi o Federaciji 18. marta.",
+        "staff_assessment": "Oba odgovora obavezuju Mostar na okvir. Učinci kartice vrijede u oba slučaja: kohezija i moral HVO-a se oporavljaju, moral i kohezija Armije RBiH malo rastu, a odnosi sa Sarajevom se poboljšavaju. Puno opredjeljenje Sarajevu donosi i veći međunarodni kredibilitet i više snabdijevanja. Potpis s rezervama Sarajevu donosi manji rast kredibiliteta, bez dodatnog snabdijevanja. Na oba puta treba očekivati sporo građenje povjerenja i neujednačenu zajedničku komandu.",
+        "trigger_evidence": [
+          "Borbe između HVO-a i Armije RBiH izbile su ranije u ovoj kampanji.",
+          "Rukovodstvo HR HB odredilo je svoju političku liniju za rat.",
+          "Kalendar je dostigao prekretnicu okvira iz Washingtona."
+        ],
+        "response_options": {
+          "accept": {
+            "label": "Puno opredjeljenje za Federaciju",
+            "description": "Potpisati okvir bez rezervi. Puno opredjeljenje Mostara Sarajevu donosi veći međunarodni kredibilitet i više snabdijevanja za rat protiv VRS-a."
+          },
+          "reluctant": {
+            "label": "Potpis s rezervama",
+            "description": "Potpisati okvir, ali javno zadržati distancu prema Sarajevu. Sarajevo dobija manji međunarodni kredibilitet i nikakvo dodatno snabdijevanje."
+          }
+        },
+        "notifications_to_other_factions": {
+          "accept": {
+            "RS": {
+              "headline": "Mostar se bez rezervi opredjeljuje za okvir iz Washingtona",
+              "body": "Rukovodstvo HR HB potpisuje okvir iz Washingtona bez rezervi. Pale očekuju tješnju hrvatsko-bošnjačku koordinaciju i bolje snabdijevanje Armije RBiH protiv VRS-a."
+            },
+            "RBiH": {
+              "headline": "Mostar se obavezuje na okvir Federacije",
+              "body": "Rukovodstvo HR HB potpisuje okvir iz Washingtona bez rezervi. Sarajevo to čita kao jasnu obavezu, a njegov međunarodni kredibilitet i snabdijevanje rastu."
+            }
+          },
+          "reluctant": {
+            "RS": {
+              "headline": "Mostar potpisuje okvir s rezervama",
+              "body": "Rukovodstvo HR HB potpisuje okvir iz Washingtona, ali drži distancu prema dojučerašnjim bošnjačkim protivnicima. Pale se i dalje suočavaju s okvirom Federacije, ali integracija izgleda sporija i krhkija."
+            },
+            "RBiH": {
+              "headline": "Mostar oprezno potpisuje okvir",
+              "body": "Rukovodstvo HR HB potpisuje okvir iz Washingtona, ali najavljuje nastavak opreza prema Sarajevu. Okvir opstaje. Za povjerenje i zajedničke operacije trebat će vremena."
+            }
+          }
+        }
+      }
+    },
     "category": "diplomatic",
     "family": "hrhb_washington_response",
     "source_tier": "icty_icj_un",
@@ -892,7 +978,7 @@
       },
       {
         "kind": "narrative",
-        "text": "The Washington Agreement ends the Croat-Bosniak war. The Federation of Bosnia and Herzegovina is established. HVO units rebuild cohesion under Federation military integration; HRHB-RBiH supply pipelines open."
+        "text": "Mostar takes up the Washington framework. HVO units regain cohesion as the leadership turns to Federation military integration, and relations with Sarajevo improve."
       }
     ],
     "response_options": [
@@ -964,6 +1050,92 @@
     "image": "event_washington_agreement.webp",
     "title": "Washington Agreement — Sarajevo's Acceptance",
     "narrative": "Under cumulative US shuttle diplomacy (Christopher, Galbraith, Redman) and the post-Markale NATO ultimatum, the Sarajevo Presidency receives the Washington framework. Izetbegović and Prime Minister Silajdžić delegate to Washington; the 1 March 1994 framework agreement and the 18 March 1994 constitutional agreement establish the Federation of Bosnia and Herzegovina, with a parallel Preliminary Agreement on Confederation with Croatia witnessed by Tudjman. Acceptance ends the two-front Croat-Bosniak war and reopens Croatian supply lines, but Assembly hardliners and the Silajdžić-track skepticism record the acceptance as instrumental rather than ideological.",
+    "localizations": {
+      "en": {
+        "title": "Sarajevo and the Washington Framework",
+        "narrative": "After weeks of American diplomacy, the Bosniak and Bosnian Croat leaderships have agreed a framework in Washington. It provides for a Federation of Bosnia and Herzegovina and a preliminary confederation with Croatia. The Presidency must decide its posture toward it. Izetbegović and Silajdžić weigh the framework against the cost of continuing a two-front war. The framework costs Sarajevo some sovereignty, but its leaders must be seen to agree if they are to keep international support. Either answer signs the framework. The choice is how openly the Presidency commits. In the historical record, the ARBiH and the HVO agreed a ceasefire in Zagreb on 23 February 1994. The framework agreement was signed in Washington on 1 March. The Federation accords and the Preliminary Agreement on Confederation with Croatia were signed there on 18 March.",
+        "staff_assessment": "Both answers sign the framework. Full commitment improves relations with the HVO, raises supply and morale, and strengthens Sarajevo's international standing and negotiating position, at a small cost in internal cohesion since the framework gives ground on sovereignty. Signing with reservations brings smaller gains in relations with the HVO, morale, international standing and negotiating position, and no added supply. Reservations on the record expose a split in the leadership, so internal cohesion falls further than under full commitment. Expect uneven joint command with the HVO on either path.",
+        "trigger_evidence": [
+          "Fighting between the ARBiH and the HVO broke out earlier in this campaign.",
+          "The Presidency has declared the state identity it defends.",
+          "The calendar has reached the Washington framework milestone."
+        ],
+        "response_options": {
+          "accept": {
+            "label": "Commit fully to the Federation framework",
+            "description": "Sign the framework and its confederal provisions with Croatia without reservation. Relations with the HVO improve and supply to the ARBiH rises. Sarajevo gains international standing and negotiating position. Giving ground on sovereignty costs a little internal cohesion."
+          },
+          "reluctant": {
+            "label": "Sign with reservations",
+            "description": "Sign the framework with the Presidency's doubts on the record. Relations with the HVO, morale and international standing improve less, and supply does not rise. An open split costs more internal cohesion than full commitment."
+          }
+        },
+        "notifications_to_other_factions": {
+          "accept": {
+            "RS": {
+              "headline": "Sarajevo commits fully to the Washington framework",
+              "body": "The RBiH Presidency signs the Washington framework without reservation. Pale expects closer Croat-Bosniak coordination, stronger international standing for Sarajevo and better supply for the ARBiH."
+            },
+            "HRHB": {
+              "headline": "Sarajevo commits to the Federation framework",
+              "body": "The RBiH Presidency signs the Washington framework without reservation. Mostar reads it as a clear commitment that makes joint action against the VRS easier to sustain."
+            }
+          },
+          "reluctant": {
+            "RS": {
+              "headline": "Sarajevo signs the framework with reservations",
+              "body": "The RBiH Presidency signs the Washington framework with its doubts on the record. Pale still faces a Federation framework and sees strain inside the Bosniak leadership."
+            },
+            "HRHB": {
+              "headline": "Sarajevo signs the framework warily",
+              "body": "The RBiH Presidency signs the Washington framework but signals continued caution toward Mostar. The framework holds. Trust and joint operations will take time."
+            }
+          }
+        }
+      },
+      "bcs": {
+        "title": "Sarajevo i okvir iz Washingtona",
+        "narrative": "Nakon sedmica američkog posredovanja, bošnjačko i bosanskohrvatsko rukovodstvo dogovorili su okvir u Washingtonu. On predviđa Federaciju Bosne i Hercegovine i preliminarnu konfederaciju s Hrvatskom. Predsjedništvo mora odlučiti kakav će stav zauzeti prema njemu. Izetbegović i Silajdžić odmjeravaju okvir naspram cijene nastavka rata na dva fronta. Okvirom Sarajevo gubi dio suvereniteta, ali njegovo rukovodstvo mora pokazati spremnost na dogovor ako želi zadržati međunarodnu podršku. Oba odgovora znače potpis okvira. Pitanje je koliko se otvoreno Predsjedništvo obavezuje. Prema historijskim izvorima, Armija RBiH i HVO dogovorili su primirje u Zagrebu 23. februara 1994. Okvirni sporazum potpisan je u Washingtonu 1. marta. Sporazumi o Federaciji i Preliminarni sporazum o konfederaciji s Hrvatskom potpisani su ondje 18. marta.",
+        "staff_assessment": "Oba odgovora znače potpis okvira. Puno opredjeljenje poboljšava odnose s HVO-om, povećava snabdijevanje i moral, te jača međunarodni ugled i pregovaračku poziciju Sarajeva, uz manji gubitak unutrašnje kohezije zbog ustupaka u pitanju suvereniteta. Potpis s rezervama donosi manje pomake u odnosima s HVO-om, moralu, međunarodnom ugledu i pregovaračkoj poziciji, bez dodatnog snabdijevanja. Javno iznesene rezerve otkrivaju raskol u rukovodstvu, pa unutrašnja kohezija pada više nego uz puno opredjeljenje. Na oba puta treba očekivati neujednačenu zajedničku komandu s HVO-om.",
+        "trigger_evidence": [
+          "Borbe između Armije RBiH i HVO-a izbile su ranije u ovoj kampanji.",
+          "Predsjedništvo je proglasilo državni identitet koji brani.",
+          "Kalendar je dostigao prekretnicu okvira iz Washingtona."
+        ],
+        "response_options": {
+          "accept": {
+            "label": "Puno opredjeljenje za okvir Federacije",
+            "description": "Potpisati okvir i njegove konfederalne odredbe s Hrvatskom bez rezervi. Odnosi s HVO-om se poboljšavaju, a snabdijevanje Armije RBiH raste. Sarajevo jača međunarodni ugled i pregovaračku poziciju. Ustupci u pitanju suvereniteta malo smanjuju unutrašnju koheziju."
+          },
+          "reluctant": {
+            "label": "Potpis s rezervama",
+            "description": "Potpisati okvir, uz javno iznesene sumnje Predsjedništva. Odnosi s HVO-om, moral i međunarodni ugled poboljšavaju se manje, a snabdijevanje ne raste. Otvoreni raskol košta više unutrašnje kohezije nego puno opredjeljenje."
+          }
+        },
+        "notifications_to_other_factions": {
+          "accept": {
+            "RS": {
+              "headline": "Sarajevo se bez rezervi opredjeljuje za okvir iz Washingtona",
+              "body": "Predsjedništvo RBiH potpisuje okvir iz Washingtona bez rezervi. Pale očekuju tješnju hrvatsko-bošnjačku koordinaciju, jači međunarodni položaj Sarajeva i bolje snabdijevanje Armije RBiH."
+            },
+            "HRHB": {
+              "headline": "Sarajevo se obavezuje na okvir Federacije",
+              "body": "Predsjedništvo RBiH potpisuje okvir iz Washingtona bez rezervi. Mostar to čita kao jasnu obavezu koja olakšava zajedničko djelovanje protiv VRS-a."
+            }
+          },
+          "reluctant": {
+            "RS": {
+              "headline": "Sarajevo potpisuje okvir s rezervama",
+              "body": "Predsjedništvo RBiH potpisuje okvir iz Washingtona uz javno iznesene sumnje. Pale se i dalje suočavaju s okvirom Federacije i vide napetost unutar bošnjačkog rukovodstva."
+            },
+            "HRHB": {
+              "headline": "Sarajevo oprezno potpisuje okvir",
+              "body": "Predsjedništvo RBiH potpisuje okvir iz Washingtona, ali najavljuje nastavak opreza prema Mostaru. Okvir opstaje. Za povjerenje i zajedničke operacije trebat će vremena."
+            }
+          }
+        }
+      }
+    },
     "category": "diplomatic",
     "family": "rbih_washington_response",
     "source_tier": "icty_icj_un",
@@ -1093,7 +1265,7 @@
               "negotiation_capital.RBiH.international_credibility",
               "supply_delta.RBiH"
             ],
-            "explanation": "Sarajevo's signature on the Washington framework opens the federation military integration track and positions ARBiH for the 1995 joint offensives (Storm, Mistral, Sana) alongside HVO and HV forces. Croatian supply lines reopen; UNPROFOR cease-fire monitoring takes effect across Mostar, Vitez, Gornji Vakuf, Prozor, Konjic, and Jablanica within days (BB Vol. II p. 451)."
+            "explanation": "Sarajevo's signature on the framework opens the Federation military integration track with the HVO. Relations with the HVO improve and supply to the ARBiH rises. In the historical record, UNPROFOR took on ceasefire monitoring in Mostar, Vitez, Gornji Vakuf, Prozor, Konjic and Jablanica within days of the 1 March signing (BB Vol. II p. 451)."
           }
         ]
       },
@@ -1157,7 +1329,7 @@
               "morale_change.RBiH",
               "negotiation_capital.RBiH.international_credibility"
             ],
-            "explanation": "Same direction as accept (per BB Vol. II p. 451 — both options are forms of acceptance), but at a different posture. Silajdžić-track skepticism dampens commitment; the federation military integration track still opens but with friction. Counterfactual gradient capturing the same-direction-different-posture register documented in BB Vol. II p. 451."
+            "explanation": "Both answers accept the framework. In the historical record, each party signed for its own reasons (BB Vol. II p. 451). With reservations on the record, the Federation military integration track still opens, with more friction."
           }
         ]
       }

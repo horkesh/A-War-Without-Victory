@@ -65,9 +65,14 @@ const EVENT_DISPLAYS: Record<string, (event: Phase0Event, playerFaction: Faction
         bgOverlay: 'rgba(0, 232, 120, 0.08)',
     }),
     washington_agreement: (_event, _pf) => ({
-        title: 'WASHINGTON AGREEMENT SIGNED',
-        subtitle: 'Federation of Bosnia and Herzegovina established',
-        body: 'The Washington Agreement creates a Bosniak-Croat federation, ending the war between former allies and uniting them against the VRS.',
+        // Fires on the engine's washington_signed flip (week 98 left alone, later when played): state, not
+        // a dated signing (historian + narrative seats, 2026-11-17; BB Vol. I p.18, Vol. II pp.450-451).
+        title: 'FEDERATION FORMED',
+        subtitle: 'The Croat-Bosniak war is over',
+        body: 'The ARBiH and the HVO have stopped fighting each other, and the Federation of Bosnia and Herzegovina is established. '
+            + 'Joint command and trust between the two armies remain to be built. '
+            + 'In the historical record, the two army commanders signed a ceasefire in Zagreb on 23 February 1994, in force from 25 February. '
+            + 'The framework agreement followed in Washington on 1 March, and the Federation accords on 18 March.',
         color: '#00e878',
         bgOverlay: 'rgba(0, 232, 120, 0.08)',
     }),

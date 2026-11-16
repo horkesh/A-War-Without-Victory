@@ -132,7 +132,7 @@ function eventToTicker(event: TurnEvent, playerFaction: FactionId): string | nul
         }
 
         case 'washington_signed': {
-            return truncate('WASHINGTON AGREEMENT SIGNED \u2014 NEW ERA OF COOPERATION');
+            return truncate('FEDERATION FORMED: ARBIH-HVO WAR ENDS');
         }
 
         case 'encirclement': {
