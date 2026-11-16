@@ -24,8 +24,14 @@
  *
  * Played-test options (package "1994-95 attack and defence", 2026-11-16), all opt-in; without them the
  * President behaves exactly as above:
- *   requestAxis      : concentrate every Request-op on one corps and on targets in the named
- *                      municipalities (one axis). No buildable axis target records a refusal.
+ *   requestAxis      : concentrate every Request-op on the named corps (one or several) and on
+ *                      targets in the named municipalities (one axis). With several corps, each
+ *                      request week stages one Request-op per corps (each paid in Authority), so
+ *                      several corps converge on the axis. No buildable axis target records a refusal.
+ *   requestEvery     : the Request-op cadence in weeks (default 8 engaged / 4 meddler); 1 orders
+ *                      every week, a sustained push.
+ *   requestOnly      : spend Command Authority on Request-ops only (no gestures, Stop-ops or
+ *                      backing), as a President set on one push would. Every order is still paid.
  *   preferExhausted  : among candidate corps, prefer one whose corps exhaustion is above the planning
  *                      gate (MAX_EXHAUSTION_FOR_OPERATION), so an exhausted corps is ordered forward.
  * With either option set, each staged Request-op also leaves a `request_details` record (corps
@@ -55,8 +61,12 @@ export type PresidentKind = 'hands_off' | 'engaged' | 'meddler';
 
 /** Opt-in played-test options. Absent: the President behaves exactly as before. */
 export interface PresidentPolicyOptions {
-    requestAxis?: { corpsId: string; municipalities: string[] };
+    requestAxis?: { corpsIds: string[]; municipalities: string[] };
     preferExhausted?: boolean;
+    /** Request-op cadence in weeks (1 = every week). Absent: 8 engaged, 4 meddler. */
+    requestEvery?: number;
+    /** Spend Authority on Request-ops only: no gestures, Stop-ops or backing. */
+    requestOnly?: boolean;
 }
 
 /** One staged Request-op, recorded only when a played-test option is set. */
@@ -66,6 +76,12 @@ export interface PresidentRequestDetail {
     target_osid: string;
     /** The operation the inject-op-directive step builds from this order. */
     operation_name: string;
+    /**
+     * Bound after the week resolves (compare tool): the start turn of the operation this order
+     * created, or the rejection recorded for this order's own attempt. Unbound: neither was seen.
+     */
+    injected_started_turn?: number;
+    rejection?: { reason: string; turn: number };
     corps_exhaustion_at_order: number;
     above_planning_gate: boolean;
     forced_over_objection: boolean;
@@ -172,7 +188,7 @@ export function requestCandidates(state: GameState, faction: FactionId, opts?: P
     const axis = opts?.requestAxis;
     const inAxis = (osid: string) => !axis || axis.municipalities.some((m) => osid.startsWith(`op:${m}:`));
     return [...enemyByCorps.entries()]
-        .filter(([corpsId]) => !axis || corpsId === axis.corpsId)
+        .filter(([corpsId]) => !axis || axis.corpsIds.includes(corpsId))
         .map(([corpsId, targets]) => [corpsId, new Set([...targets].filter(inAxis))] as const)
         .filter(([, targets]) => targets.size > 0)
         .sort((a, b) => (opts?.preferExhausted ? Number(exhausted(b[0])) - Number(exhausted(a[0])) : 0)
@@ -181,6 +197,18 @@ export function requestCandidates(state: GameState, faction: FactionId, opts?: P
 }
 
 async function applyRequestOp(state: GameState, faction: FactionId, baseDir: string, log: PresidentTurnLog, opts?: PresidentPolicyOptions): Promise<void> {
+    // Several axis corps: one Request-op per corps per request week (each paid and checked alone).
+    const axis = opts?.requestAxis;
+    if (axis && axis.corpsIds.length > 1) {
+        for (const corpsId of [...axis.corpsIds].sort(strictCompare)) {
+            await applyOneRequestOp(state, faction, baseDir, log, { ...opts, requestAxis: { ...axis, corpsIds: [corpsId] } });
+        }
+        return;
+    }
+    await applyOneRequestOp(state, faction, baseDir, log, opts);
+}
+
+async function applyOneRequestOp(state: GameState, faction: FactionId, baseDir: string, log: PresidentTurnLog, opts?: PresidentPolicyOptions): Promise<void> {
     if (current(state) < opDirective.REQUEST_OP_COST) { log.refusals.push('request_op:insufficient_ca'); return; }
     for (const candidate of requestCandidates(state, faction, opts).slice(0, 3)) {
         if (state.military.corps_command?.[candidate.corpsId]?.pending_op_directive) continue;
@@ -205,7 +233,7 @@ async function applyRequestOp(state: GameState, faction: FactionId, baseDir: str
                 log.clashes.push(`${raised.outcome}:${raised.receiptId}`);
                 clash = `${raised.outcome}:${raised.receiptId}`;
             }
-            if (opts && (opts.requestAxis || opts.preferExhausted)) {
+            if (opts && (opts.requestAxis || opts.preferExhausted || opts.requestEvery != null || opts.requestOnly)) {
                 const exhaustion = state.military.corps_command?.[candidate.corpsId]?.corps_exhaustion ?? 0;
                 (log.request_details ??= []).push({
                     turn: state.meta.turn, corps_id: candidate.corpsId, target_osid: targetOsid,
@@ -313,11 +341,76 @@ export async function applyPresidentPolicy(
     opts?: PresidentPolicyOptions,
 ): Promise<void> {
     if (kind === 'hands_off') return;
+    const requestEvery = opts?.requestEvery ?? (kind === 'meddler' ? 4 : 8);
+    if (opts?.requestOnly) {
+        if (turnIndex % requestEvery === requestEvery - 1) await applyRequestOp(state, faction, baseDir, log, opts);
+        return;
+    }
     applyGestures(state, faction, eventDefs, log);
-    const requestEvery = kind === 'meddler' ? 4 : 8;
     if (turnIndex % requestEvery === requestEvery - 1) await applyRequestOp(state, faction, baseDir, log, opts);
     const stopEvery = kind === 'meddler' ? 6 : 12;
     if (turnIndex % stopEvery === stopEvery - 1) stopOpDue = true;
     if (stopOpDue && applyStopOp(state, faction, log) !== 'no_operation') stopOpDue = false;
     backProposals(state, faction, log);
+}
+
+/**
+ * Played test: each staged Request-op joined to what became of it. The inject-op-directive step names
+ * the operation `Presidential Directive — <target>`; a finished one has an after-action report in
+ * `state.operation_history`, a running one is still in the corps' active operations, and a refused
+ * one leaves `op_directive_rejection`. The compare tool binds each order after the week that consumed it.
+ */
+export function bindPresidentRequestAttempts(requests: PresidentRequestDetail[], state: GameState, weekStartTurn: number): void {
+    // Codex review on #706: the corps' op_directive_rejection holds only the LATEST rejection and a
+    // later order can reuse the same operation name, so each outcome is bound to its own attempt
+    // right after the week that consumed it resolves. A rejection counts only when it names this
+    // order's target and was written this week; an operation only when it carries this order's
+    // name and corps and started this week.
+    const weekEndTurn = state.meta.turn;
+    const inWeek = (turn: number | undefined): boolean => turn != null && turn >= weekStartTurn && turn <= weekEndTurn;
+    const history = (state.operation_history ?? []) as Array<Record<string, any>>;
+    for (const request of requests) {
+        if (request.injected_started_turn != null || request.rejection) continue;
+        const command = state.military.corps_command?.[request.corps_id];
+        const rejection = command?.op_directive_rejection;
+        if (rejection && rejection.target_osid === request.target_osid && inWeek(rejection.turn)) {
+            request.rejection = { reason: rejection.reason, turn: rejection.turn };
+            continue;
+        }
+        const live = (command?.active_operations ?? []).find((op) => op.name === request.operation_name && inWeek(op.started_turn));
+        const closed = history.find((a) => a.operation_name === request.operation_name && a.corps_id === request.corps_id && inWeek(a.started_turn));
+        const started = live?.started_turn ?? closed?.started_turn;
+        if (started != null) request.injected_started_turn = started;
+    }
+}
+
+/**
+ * Each staged Request-op joined to what became of ITS OWN attempt (bound by
+ * `bindPresidentRequestAttempts`): the after-action report or live operation with this order's
+ * name, corps and start turn, or the rejection recorded for this order. Objectives are the AAR's
+ * canonical `objectives_captured` (it carries engagement receipts and replayed losses).
+ */
+export function joinPresidentRequests(requests: PresidentRequestDetail[], state: GameState) {
+    const history = (state.operation_history ?? []) as Array<Record<string, any>>;
+    return requests.map((request) => {
+        if (request.rejection) {
+            return { ...request, result: { status: 'rejected', reason: request.rejection.reason, turn: request.rejection.turn } };
+        }
+        const started = request.injected_started_turn;
+        if (started == null) return { ...request, result: { status: 'not_found' } };
+        const aar = history.find((a) => a.operation_name === request.operation_name && a.corps_id === request.corps_id && a.started_turn === started);
+        if (aar) {
+            return { ...request, result: {
+                status: 'completed', outcome: aar.outcome ?? null, recovery_reason: aar.recovery_reason ?? null,
+                started_turn: aar.started_turn ?? null, ended_turn: aar.ended_turn ?? null, total_attacks: aar.total_attacks ?? null,
+                killed_suffered: aar.casualties_suffered?.killed ?? null, killed_inflicted: aar.casualties_inflicted?.killed ?? null,
+                objectives_captured: [...(aar.objectives_captured ?? [])].sort(strictCompare),
+            } };
+        }
+        const running = (state.military.corps_command?.[request.corps_id]?.active_operations ?? [])
+            .find((op) => op.name === request.operation_name && op.started_turn === started);
+        return { ...request, result: running
+            ? { status: 'running', phase: running.phase, started_turn: started }
+            : { status: 'not_found', started_turn: started } };
+    });
 }

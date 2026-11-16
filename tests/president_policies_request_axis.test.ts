@@ -5,7 +5,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { requestCandidates } from '../tools/ai_play/president_policies.js';
+import { bindPresidentRequestAttempts, joinPresidentRequests, requestCandidates, type PresidentRequestDetail } from '../tools/ai_play/president_policies.js';
 import type { GameState } from '../src/state/game_state.js';
 
 function makeState(): GameState {
@@ -38,11 +38,70 @@ describe('President Request-op candidates', () => {
     });
 
     it('requestAxis keeps only the named corps and only targets in the axis municipalities', () => {
-        expect(requestCandidates(makeState(), 'RBiH', { requestAxis: { corpsId: 'arbih_3rd_corps', municipalities: ['maglaj'] } }))
+        expect(requestCandidates(makeState(), 'RBiH', { requestAxis: { corpsIds: ['arbih_3rd_corps'], municipalities: ['maglaj'] } }))
             .toEqual([{ corpsId: 'arbih_3rd_corps', targets: ['op:maglaj:donja_bocinja_2'] }]);
     });
 
     it('an axis with no matching target yields no candidate', () => {
-        expect(requestCandidates(makeState(), 'RBiH', { requestAxis: { corpsId: 'arbih_3rd_corps', municipalities: ['tuzla'] } })).toEqual([]);
+        expect(requestCandidates(makeState(), 'RBiH', { requestAxis: { corpsIds: ['arbih_3rd_corps'], municipalities: ['tuzla'] } })).toEqual([]);
+    });
+});
+
+describe('President Request-op: several corps on one axis', () => {
+    it('keeps every named corps, each with only its axis targets', () => {
+        expect(requestCandidates(makeState(), 'RBiH', {
+            requestAxis: { corpsIds: ['arbih_2nd_corps', 'arbih_3rd_corps'], municipalities: ['doboj', 'maglaj'] },
+        })).toEqual([
+            { corpsId: 'arbih_2nd_corps', targets: ['op:doboj:x'] },
+            { corpsId: 'arbih_3rd_corps', targets: ['op:maglaj:donja_bocinja_2'] },
+        ]);
+    });
+});
+
+describe('Request-op outcomes bound to their own attempt (Codex review on #706)', () => {
+    const target = 'op:maglaj:donja_bocinja_2';
+    const name = `Presidential Directive — ${target}`;
+    const order = (turn: number): PresidentRequestDetail => ({
+        turn, corps_id: 'arbih_3rd_corps', target_osid: target, operation_name: name,
+        corps_exhaustion_at_order: 10, above_planning_gate: false, forced_over_objection: false, ca_cost: 25, clash: null,
+    });
+    const stateAt = (turn: number, extra: Record<string, unknown>) => ({
+        meta: { turn },
+        military: { corps_command: { arbih_3rd_corps: { active_operations: [], ...extra } } },
+        operation_history: [],
+    }) as unknown as GameState;
+
+    it('a rejected order stays rejected when a later order on the same target completes', () => {
+        const first = order(10);
+        const second = order(20);
+        // Week 10: the first order is refused.
+        bindPresidentRequestAttempts([first], stateAt(11, { op_directive_rejection: { target_osid: target, reason: 'no_available_slot', turn: 10 } }), 10);
+        // Week 20: the second order is injected (the stale rejection field is gone).
+        bindPresidentRequestAttempts([second], stateAt(21, { active_operations: [{ name, started_turn: 20, phase: 'planning' }] }), 20);
+        const final = stateAt(40, {});
+        (final as any).operation_history = [{
+            operation_name: name, corps_id: 'arbih_3rd_corps', started_turn: 20, ended_turn: 30, outcome: 'success',
+            objectives_captured: [target, 'op:maglaj:replayed_loss'], objectives_logged_captured: [target],
+        }];
+        const [a, b] = joinPresidentRequests([first, second], final);
+        expect(a.result).toEqual({ status: 'rejected', reason: 'no_available_slot', turn: 10 });
+        expect(b.result).toMatchObject({ status: 'completed', started_turn: 20, outcome: 'success' });
+        // The canonical AAR field, not the logged-capture subset.
+        expect((b.result as any).objectives_captured).toEqual([target, 'op:maglaj:replayed_loss']);
+    });
+
+    it('an earlier rejection of the same target does not bind to a later order', () => {
+        const later = order(20);
+        bindPresidentRequestAttempts([later], stateAt(21, { op_directive_rejection: { target_osid: target, reason: 'no_available_slot', turn: 10 } }), 20);
+        expect(later.rejection).toBeUndefined();
+        expect(joinPresidentRequests([later], stateAt(40, {}))[0]!.result).toEqual({ status: 'not_found' });
+    });
+
+    it('an order is not credited with a same-name operation started in another week', () => {
+        const early = order(10);
+        bindPresidentRequestAttempts([early], stateAt(11, {}), 10);
+        const final = stateAt(40, {});
+        (final as any).operation_history = [{ operation_name: name, corps_id: 'arbih_3rd_corps', started_turn: 20, outcome: 'success', objectives_captured: [target] }];
+        expect(joinPresidentRequests([early], final)[0]!.result).toEqual({ status: 'not_found' });
     });
 });
