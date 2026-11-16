@@ -822,26 +822,32 @@
       "turn_min": 102,
       "turn_max": 102,
       "phase": "war",
-      "requires_events": [
-        "croat_bosniak_war_begins_1993"
-      ],
       "condition": {
-        "type": "or",
+        "type": "and",
         "conditions": [
           {
-            "type": "flag_equals",
-            "flag": "hrhb_political_goal",
-            "value": "croat_republic"
+            "type": "rbih_hrhb_war_started",
+            "value": true
           },
           {
-            "type": "flag_equals",
-            "flag": "hrhb_political_goal",
-            "value": "united_front"
-          },
-          {
-            "type": "flag_equals",
-            "flag": "hrhb_political_goal",
-            "value": "strategic_ambiguity"
+            "type": "or",
+            "conditions": [
+              {
+                "type": "flag_equals",
+                "flag": "hrhb_political_goal",
+                "value": "croat_republic"
+              },
+              {
+                "type": "flag_equals",
+                "flag": "hrhb_political_goal",
+                "value": "united_front"
+              },
+              {
+                "type": "flag_equals",
+                "flag": "hrhb_political_goal",
+                "value": "strategic_ambiguity"
+              }
+            ]
           }
         ]
       }
@@ -967,22 +973,31 @@
       "turn_max": 105,
       "phase": "war",
       "condition": {
-        "type": "or",
+        "type": "and",
         "conditions": [
           {
-            "type": "flag_equals",
-            "flag": "rbih_state_identity",
-            "value": "civic"
+            "type": "rbih_hrhb_war_started",
+            "value": true
           },
           {
-            "type": "flag_equals",
-            "flag": "rbih_state_identity",
-            "value": "bosniak_national"
-          },
-          {
-            "type": "flag_equals",
-            "flag": "rbih_state_identity",
-            "value": "pragmatic"
+            "type": "or",
+            "conditions": [
+              {
+                "type": "flag_equals",
+                "flag": "rbih_state_identity",
+                "value": "civic"
+              },
+              {
+                "type": "flag_equals",
+                "flag": "rbih_state_identity",
+                "value": "bosniak_national"
+              },
+              {
+                "type": "flag_equals",
+                "flag": "rbih_state_identity",
+                "value": "pragmatic"
+              }
+            ]
           }
         ]
       }
