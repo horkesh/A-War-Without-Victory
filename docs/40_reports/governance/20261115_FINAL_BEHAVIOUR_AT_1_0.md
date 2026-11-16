@@ -132,7 +132,7 @@ Each of these was on the memo's first accept list and moved to fix or retire. Th
 
 ## 6. Open conditions (work owed by this record)
 
-0. A hands-off emergent 188-week run at the frozen commit passes the history guards and the historian accepts its divergences (freeze condition 7); the left-alone answers of section 1 are re-checked against it.
+0. A hands-off emergent 188-week run at the frozen commit passes the history guards and the historian accepts its divergences (freeze condition 7); the left-alone answers of section 1 are re-checked against it. MET on main at f98c074d9 (#727, 2026-11-16): a hands-off emergent 188-week run passes every guard (Farz 4 of 4 receipts, P-B pass, enclaves on schedule), scores 709 / 709 / 708 / 680, and all 15 divergent emergent picks revert to history; Drina's "restrained" pick (t11) is recorded as a §6 artefact. To be re-run at the frozen commit.
 1. A canon line for CODE3 (discretionary plans only; exhaustion is a cost; stop-op is the player's counter): DONE 2026-11-16 (Engine Invariants §14.10b, Systems Manual §6.5), after the precondition was met by #705 (stop-op works in planning and a halt holds).
 2. RB5: the reason text of section 1 in canon; the withholding at autonomy 1 to 3 is a Part 3 fix item whose design the §6 panel decides (sensitive: no lane touches it before that ruling); a Part 3 copy fix, with the narrative and historian seats, so no Verdict, ending or ledger copy presents the missing waves as the player's restraint.
 3. PK5: C7 fixed (#721); the retry duty for the 1994 ARBiH fights met by the package or by Part 6.
