@@ -46,6 +46,8 @@ const ELIGIBILITY_MESSAGE_KEYS: Record<AuthorableOpWarningView['code'], MessageK
     op_empty: 'opsPlanning.authorize.eligibility.finding.operationEmpty',
     objective_overlap: 'opsPlanning.authorize.eligibility.finding.objectiveOverlap',
     participants_below_attack_floor: 'opsPlanning.authorize.eligibility.finding.participantsBelowFloor',
+    // PK5: written only for queued pre-planned ops, never for an authored plan; generic copy for type completeness.
+    queue_head_skipped: 'opsPlanning.authorize.eligibility.finding.generic',
 };
 
 function playerSafeEligibilityMessage(warning: AuthorableOpWarningView): string {
