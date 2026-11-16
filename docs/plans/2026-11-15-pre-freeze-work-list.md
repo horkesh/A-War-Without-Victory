@@ -51,17 +51,17 @@ On main, two defects keep the ARBiH 1st to 4th Corps passive (the plan lockout a
 |---|---|---|
 | P0 | The #686 trace; RF-STRENGTH's dead write and never-run replacement | Merge; retire (inert). |
 | P1 | Defence trace with receipts, two inert runs | For every captured cell: the attackers and the defenders actually in it, where the defender's own brigades were and why not in the fight, whether a reserve counter-attack was considered and why it did not fire, why a corps attacks far outside its area, and what stopped the six failed VRS operations. |
-| P2 | Defence repairs the trace picks | VRS2 dated redeploy, the HVO pocket garrison, SD15, SE10 then SE6; F3 fixed or retired. |
+| P2 | Defence repairs the trace picks | VRS2 dated redeploy, the HVO pocket garrison, SD15, SE10 then SE6; a real emergency defence (reserve commitment and counter-attack, designed in Fable consult 3; the retired operation stays retired as code); F3, a defect: operations like Zvezda 94 and the Kulen Vakuf counter-offensive of November 1994 must become possible. |
 | P3 | Planner odds | An AI1 force-ratio term with RF-L3d follow-ups 1, 3 and 4; then F2 (the casualty scale of failed operations) re-measured and fixed if it remains. |
 | P4 | RF-STRENGTH's live change | The stance matrix reads designed strength; the fixed 3,000 yardstick calls 10 of 125 ARBiH brigades healthy against 117 by designed strength. |
-| P5 | ARBiH plan lockout | Wire the probe gate (`PROBE_EXHAUSTION_MARGIN`, designed at 40, never called) into the no-plan probe branch. |
+| P5 | ARBiH plan lockout | Wire the probe gate (`PROBE_EXHAUSTION_MARGIN`, designed at 40, never called) into the no-plan probe branch. If the woken corps then retry by themselves, that also covers the 1994 retry duty of PK5 (Vozuća and Ozren, Zuc and Trebević, Donji Vakuf, Bihać); otherwise Part 6 authors them. |
 | P6 | RF-PK empty pockets | Re-measure; fix only if they remain. |
 
 Bar: the Farz P1, P-A, P-B and enclave guards pass at every merge, and the historian accepts the share of 1st to 4th Corps operations that succeed. Scores are recorded and are not a bar. After 8 runs past the trace the seats read the receipts and re-plan. Shipping the passive army as final behaviour is not on the list. Ratification: operations-expert, corps-army-commander, sector-expert, historian and scenario-creator-runner-tester, then an orchestrator ruling.
 
 ## Part 3. Fix before 1.0 (the freeze may come first; each proves the hash unchanged)
 
-The enclave-fall handler (§6 panel); L4-2, L4-1 and L4-6; RB5 at Observer level (an observer decides nothing, so the bot policy should run); SE11, the warroom `political_controllers` key and the B14 re-check; DEC1 (Engine Invariants §6.3), CODE5 (§14.5a text) and the canon lines for Part 5.
+The enclave-fall handler (§6 panel); L4-2, L4-1 and L4-6; RB5, the withholding of the expulsion policy at autonomy 1 to 3 (sensitive: the §6 panel decides the design, and no lane touches it before that ruling), with a copy fix so Verdict and ending text never presents the missing waves as restraint (narrative and historian seats); SE11, the warroom `political_controllers` key and the B14 re-check; DEC1 (Engine Invariants §6.3), CODE5 (§14.5a text) and the canon lines for Part 5.
 
 ## Part 4. Retire (inert; each proves the hash unchanged)
 

@@ -996,7 +996,7 @@ Local production and war economy (defense industry) contribute to sustainment an
 
 Municipalities may possess limited local production capacity contributing to sustainment.
 
-Production is constrained by authority, population, exhaustion, and connectivity.
+Production is constrained by authority, population, exhaustion, and a connectivity factor. In the current engine the connectivity factor is always 0.5: the reachable-settlement input it reads is empty, so every municipality's production capacity is halved, whatever its supply state. That half rate is the calibrated rate (F1h); replacing the dead connectivity term with a named constant is queued and changes no output. Local production does not respond to a municipality's supply connection.
 
 Local production mitigates but never replaces external supply. Capacity degrades irreversibly under prolonged stress.
 

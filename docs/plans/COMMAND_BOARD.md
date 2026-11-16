@@ -16,7 +16,7 @@ The owner activated full roadmap execution on 2026-07-31. Local implementation, 
 |---:|---|---|---|---|
 | 1-5 | R1-R5 | **COMPLETE — CLOSED** (R1 2026-08-01, R2 2026-08-03, R3, R4 2026-08-06, R5 2026-08-05) | None. | [R1](2026-07-31-seamless-command-room-map-transition-plan.md) · [R2](2026-07-31-rs-104week-friction-remediation-plan.md) · [R3](2026-07-31-operational-tactical-group-closeout-implementation-plan.md) · [R4](2026-07-31-command-event-codex-convergence-plan.md) · [R5](2026-07-31-engine-quality-performance-stability-plan.md) |
 | 6 | R6 | **CLOSED — owner, 2026-11-08** | None. Signed off 2026-11-06 at 712/711/712/710, live = headless. Main is now 709/709/708/681 (see RF). | [Calibration authority](../40_reports/CALIBRATION_MASTER.md) |
-| 6.5 | RC | **PRE-1.0 NARROW SCOPE COMPLETE — CLOSED 2026-08-15** | None. D-topology is reserved post-1.0. | [Collapse build spec](../40_reports/proposals/20260609_COLLAPSE_PIPELINE_BUILD_SPEC.md) |
+| 6.5 | RC | **PRE-1.0 NARROW SCOPE COMPLETE — CLOSED 2026-08-15** | None. D-topology (the neighbour-loss cascade) is not in 1.0; proposed: dropped, orchestrator to rule. | [Collapse build spec](../40_reports/proposals/20260609_COLLAPSE_PIPELINE_BUILD_SPEC.md) |
 | 7 | R7 | **CLOSED — owner, 2026-11-08** | None. All 17 interface cues accepted, ambient beds retired for 1.0. | [Content/history/audio](2026-07-31-content-history-localization-audio-plan.md) |
 | 7.5 | RE | **CLOSED — owner, 2026-09-01** | None. RE gates nothing; engine-health defects are still fixed before tuning. | [Closed RE contract](2026-08-26-engine-integrity-plan.md) |
 | 7a | DC | **CLOSED 2026-11-12 — merged #560** | None. | [Handoff](../../handoffs/20261107_dayton_end_map_to_conference.md) |

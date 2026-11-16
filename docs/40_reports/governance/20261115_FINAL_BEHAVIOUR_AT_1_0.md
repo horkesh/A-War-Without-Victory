@@ -24,17 +24,17 @@ Two fresh read-only seats sat in parallel and independently, each checking the c
 - **Left alone:** yes. Bots launch dated operations on schedule.
 - **Played:** yes. The President can stop a live operation (stop-op, 25 command authority and a patron penalty), request one (25) or author one (25), and may force an operation over a commander's shown objection at a patron-confidence price. A player faction's historical operations are born authorized, opt-out (`historical_operation_authorization.ts`).
 - **Canon line to add:** "Authored and triggered operations are scripted history and are not exhaustion-gated; discretionary commander plans are gated; exhaustion is booked as a cost; the player's counter is stop-op."
-- **Conditions.** The line says the gate covers only discretionary plans, not "all operations". Before the line says "any live operation", someone checks that a halt order is accepted while an operation is still in planning (neither seat read `findLiveOp`).
+- **Conditions.** The line says the gate covers only discretionary plans, not "all operations". Before the line says "any live operation", a halt order must be shown to be accepted while an operation is still in planning (neither seat read `findLiveOp`); the L7 lane is assigned to check it (orchestrator, 2026-11-15).
 - **Seats:** game-designer RATIFY WITH CONDITIONS; historian RATIFY WITH CONDITIONS.
 
 ### RB5. No expulsion-policy waves for a human HRHB President
 
-- **The memo's reason was wrong.** "The player authors that policy" is false: no player lever or card exists in 1.0 (`SENSITIVE_HISTORY_DESIGN_GATE.md:140`, `displacement_takeover.ts:143`; the RB3 card is later). The real reason is the §6 bright-line ruling of 2026-11-14, that a player is never made a perpetrator by default.
-- **Reason for the record.** A human HRHB government does not run the 1993-94 expulsion waves, by a §6 panel decision. No player card exists in 1.0. A human HRHB war is cleaner than history by design.
+- **The memo's reason was wrong.** "The player authors that policy" is false: no player lever or card exists in 1.0 (`SENSITIVE_HISTORY_DESIGN_GATE.md:140`, `displacement_takeover.ts:143`; the RB3 card is later). The real reason is the §6 ruling of 2026-11-14: by the bright line that atrocity is never player-ordered, there is no player lever.
+- **Reason for the record (orchestrator ruling, 2026-11-15).** The §6 ruling of 2026-11-14: there is no player lever for the 1993-94 expulsion waves, by the bright line that atrocity is never player-ordered. A human HRHB government therefore does not run them, and no player card exists in 1.0.
 - **Left alone:** a hands-off human HRHB President gets no waves, so history is absent by omission. This is accepted for a player-controlled HRHB only, and only because of the §6 ruling.
 - **Played:** the player can restrain, and an ahistorical outcome is always available, but the historical policy cannot be chosen. The owner's principle asks for the first; the second is withheld on purpose.
-- **Extent.** `hasMinorityExpulsionPolicy` returns false whenever `player_faction === faction`, at any autonomy, so staff-controlled and Observer levels (autonomy 1 to 3) also get no waves. Both seats want autonomy 1 and above to run the bot policy; that extends Part 3's Observer-level fix and is a fix, not an acceptance.
-- **Conditions.** The reason text above replaces the memo's. No Verdict, ending or ledger copy may present the missing waves as the player's restraint, or imply the minority was treated gently (not checked: whether the displacement comparison against history does this). The Observer and staff-controlled cases are the separate fix.
+- **Not accepted: the withholding at autonomy 1 to 3.** `hasMinorityExpulsionPolicy` returns false whenever `player_faction === faction`, at any autonomy, so staff-controlled and Observer levels also get no waves. The historian seat wants autonomy 1 and above to run the bot policy; the game-designer seat treats the Observer level as a separate fix. The orchestrator ruled (2026-11-15) that this is a Part 3 fix item whose design the §6 panel decides. It is sensitive, so no lane touches it before that ruling.
+- **Conditions.** The reason text above replaces the memo's. Verdict, ending and ledger copy must not present the missing waves as the player's restraint, or imply the minority was treated gently (not checked: whether the displacement comparison against history does this); that is a Part 3 copy fix, with the narrative and historian seats.
 - **Seats:** game-designer RATIFY WITH CONDITIONS; historian RATIFY WITH CONDITIONS.
 
 ### PK5, the no-retry half. Authored operations do not retry
@@ -42,7 +42,7 @@ Two fresh read-only seats sat in parallel and independently, each checking the c
 - **Reason for the record.** An authored operation is one historical set-piece and the scenario does not re-run it when it fails. Retries belong to the corps' discretionary planner, and to the player, who can re-author or request the same target (25 each).
 - **Left alone:** yes for the set-pieces, and Zvezda 94 already holds its own pause and resumption (28 March to 10 April, then 15 to 20 April; BB2 p.479). History did repeat attempts within weeks at Vozuća and Ozren (June and July 1994, August 1994, September 1995; BB1 pp.422-423, BB2 pp.506-508), at Zuc and Trebević (BB1 p.190, BB2 p.428), at Donji Vakuf from October 1994 (BB2 p.486) and at Bihać (BB2 pp.546-549). A single attempt is wrong for the 1994-95 Vozuća, Teslić, Ozren and Donji Vakuf fights, which are ARBiH and are not authored today.
 - **Played:** yes.
-- **Conditions.** Accept only the no-retry half. The other half of PK5, a queue head below its floor blocking the corps chain, is a defect and is fixed as C7. The retry duty for the 1994 ARBiH fights is met by the package (the planner, P5) or by authoring the 1994 Teslić and Vozuća attempts in the calibration pass (Part 6).
+- **Conditions.** Accept only the no-retry half. The other half of PK5, a queue head below its floor blocking the corps chain, is a defect and is fixed as C7. The retry duty for the 1994 ARBiH fights (Vozuća and Ozren, Zuc and Trebević, Donji Vakuf, Bihać) goes to the package (orchestrator, 2026-11-15): P5 if the woken corps retry by themselves, otherwise the authored offensives of Part 6.
 - **Seats:** game-designer RATIFY WITH CONDITIONS (narrowed); historian RATIFY WITH CONDITIONS.
 
 ### SD6 and SD8. Siege deaths in place and military-age departures are not modelled
@@ -77,7 +77,7 @@ The lockout was first filed as RF-3C-EXH. An earlier sitting (historian, scenari
 
 **The owner's probe-channel ruling** (`docs/plans/2026-08-26-probe-channel-scope.md`, "it was blindness", ruling 2) accepts a tempo rise that comes from repairing a defect; its N1 item is report-only. It does not forbid the fix.
 
-**The fallback is gone.** Revision 2 does not list shipping the passive ARBiH as final behaviour, and both seats object to it: a President who gets no proposal from four of six corps for about 80 weeks has lost his central verb, which fails the played test, and holding Ozren and Vozuća by inaction is not history (the 1st to 4th Corps' 1994 record is Teslić, Husar, Vozuća and Donji Vakuf). Only the owner could put it back.
+**The fallback is gone.** Revision 2 does not list shipping the passive ARBiH as final behaviour, and neither seat would ship it: the game-designer seat finds that a President who gets no proposal from four of six corps for about 80 weeks has lost his central verb, which fails the played test, and the historian seat finds that holding Ozren and Vozuća by inaction is not history (the 1st to 4th Corps' 1994 record is Teslić, Husar, Vozuća and Donji Vakuf). Only the owner could put it back.
 
 **Calibration-pass rule for the cells above.** No calibration lever is selected, justified or scored by a listed cell, and a match on a listed cell is not credited as fidelity. Farz P1, P-A and P-B are not tuned. After the package lands the list is re-derived and the freeze figures are read against it.
 
@@ -87,7 +87,7 @@ Each of these was on the memo's first accept list and moved to fix or retire. Th
 
 | Item | Answer | Seat views |
 |---|---|---|
-| F1h recruitment at half rate | Retire the dead connectivity term; keep 0.5 as a named constant | The term is a flat `connectivity \|\| 0.5` (`supply_state_derivation.ts:376-388`); Systems Manual §15 ("constrained by connectivity") overstates and is reworded (game-designer). |
+| F1h recruitment at half rate | Retire the dead connectivity term; keep 0.5 as a named constant | The term is a flat `connectivity \|\| 0.5` (`supply_state_derivation.ts:376-388`); Systems Manual §15 ("constrained by connectivity") overstated it and is reworded in this change to say the factor is always 0.5 (game-designer). |
 | Political-directive producer saturation, Wave 6 coupling, RS corps-role overlay | Retire for bot factions (B3); the directive layer stays as the player's tool | The producer skips only an autonomy-0 player: at autonomy 1 and above the human's own staff gets the same saturated directive, and no player directive UI exists (game-designer). The retirement must cover the human's staff, and the documents must say so. |
 | Quadratic competence decay | Fix to the documented linear rate (B1) | Both seats object to accepting it: the effective rate is 6.5 times the documented rate at 12 weeks and an overstayer reaches the floor in about 40 weeks. |
 | AI1 target ranking; RF-L3d follow-ups 1, 3, 4 | Fix (P3) | Both a 56:1 walkover and attacks below 0.6:1 are launched today. |
@@ -95,8 +95,8 @@ Each of these was on the memo's first accept list and moved to fix or retire. Th
 | Live = headless differ by one soldier | Fix (C6, the identity card applied at week 0 live and week 3 headless) | |
 | RB2 unlogged re-route | Fix (A4) | The §6 seats rule the design at their sitting. |
 | F2 casualty scale of failed operations | Fix in P3 if it remains | Historian: the verifiable successful-attack exchange is about 3:1 (Goražde, BB2 pp.480-481); 10:1 to 20:1 for failed ARBiH operations is not supported. |
-| F3 VRS "last stand", VRS wins nothing after week 99 | Fix or retire at P2 | Historian: not acceptable. Zvezda 94 took ground (BB2 pp.479-480) and the VRS and SVK retook Kulen Vakuf on 3 to 4 November 1994 (BB2 p.549). |
-| A real emergency defence (reserve commitment, a local counterattack) | Disposition pending the ruling at P2 | The seats split. Game-designer: the absence is acceptable, because reactive sector defence, Army HQ reserve loans and Active Defense counterattacks exist (Rulebook §5.10, §6.3). Historian: armies did commit reserves and counterattack, so the absence is not historical, and the June 1994 Vozuća gains were lost to a VRS counterattack using corps reserves (BB1 p.422, BB2 p.506). The "post-1.0 design item" wording in the retirement fragment of #683 and in the Systems Manual §6 note is stale and is deleted when the ruling is made. |
+| F3 VRS "last stand", VRS wins nothing after week 99 | A defect, fixed in the package (P2 and P3): operations like Zvezda 94 and the Kulen Vakuf counter-offensive of November 1994 must become possible (orchestrator, 2026-11-15) | Historian: not acceptable. Zvezda 94 took ground (BB2 pp.479-480) and the VRS and SVK retook Kulen Vakuf on 3 to 4 November 1994 (BB2 p.549). |
+| A real emergency defence (reserve commitment, a local counterattack) | Capability: package P2 (Fable consult 3 is designing it); the old operation: retired as code (#683). The capability is not accepted as absent (orchestrator, 2026-11-15) | The seats split. Game-designer: the absence is acceptable, because reactive sector defence, Army HQ reserve loans and Active Defense counterattacks exist (Rulebook §5.10, §6.3). Historian: armies did commit reserves and counterattack, so the absence is not historical, and the June 1994 Vozuća gains were lost to a VRS counterattack using corps reserves (BB1 p.422, BB2 p.506); the orchestrator ruled that the historian is right on the fact. The "post-1.0 design item" wording in the retirement fragment of #683 and in the Systems Manual §6 note is stale and is deleted when the ruling is made. |
 
 ## 4. Historical gaps a finished game cannot ship with (historian seat)
 
@@ -113,14 +113,25 @@ Each of these was on the memo's first accept list and moved to fix or retire. Th
 
 ## 6. Open conditions (work owed by this record)
 
-1. A canon line for CODE3 (discretionary plans only; exhaustion is a cost; stop-op is the player's counter), after a check that stop-op works on an operation in planning.
-2. RB5: the reason text of section 1 in canon; autonomy 1 and above run the bot policy; no Verdict, ending or ledger copy presents the missing waves as the player's restraint.
+1. A canon line for CODE3 (discretionary plans only; exhaustion is a cost; stop-op is the player's counter), after the L7 lane checks that stop-op works on an operation in planning.
+2. RB5: the reason text of section 1 in canon; the withholding at autonomy 1 to 3 is a Part 3 fix item whose design the §6 panel decides (sensitive: no lane touches it before that ruling); a Part 3 copy fix, with the narrative and historian seats, so no Verdict, ending or ledger copy presents the missing waves as the player's restraint.
 3. PK5: C7 fixed; the retry duty for the 1994 ARBiH fights met by the package or by Part 6.
 4. SD6 and SD8: keep the three disclosure strings; no UI shows a siege civilian-death number as simulation output; the `scoring.ts:172` note stays open.
-5. Systems Manual §15 reworded for F1h; the stale "post-1.0 design item" lines deleted once the emergency-defence ruling is made.
+5. Systems Manual §15 is reworded for F1h (done in this change). The stale "post-1.0 design item" lines (the #683 fragment is history and is not edited; the Systems Manual §6 note) are deleted when P2 delivers the capability.
 6. The directive-producer retirement (B3) covers the human's staff at autonomy 1 and above; B2 checks whether the human sees the pushback events.
 
-## 7. Hash-neutral notes
+## 7. Rulings on the second sitting (orchestrator, 2026-11-15)
+
+1. RB5: the §6 ruling of 2026-11-14 is the reason; the withholding at autonomy 1 to 3 and the copy fix are Part 3 items (above).
+2. PK5: the no-retry half only; C7 stays a fix; the 1994 retry duty goes to the package.
+3. CODE3: the canon line as above; the L7 lane checks stop-op in planning.
+4. SD6 and SD8: accepted; the three disclosure strings stay.
+5. Emergency defence: capability from P2, the old operation stays retired.
+6. F3: a defect, fixed in P2 and P3.
+7. F1h: the Systems Manual §15 text is corrected now; the code retirement stays in Part 4.
+8. The RC (D-topology) and BC06 (six escalation stages) roadmap rows are classified by the rule "pre-freeze, add-on candidate, or dropped"; there is no "post-1.0 engine" category. Proposed classification, for the orchestrator to rule: both dropped, with the static gesture behaviour and the absence of the neighbour cascade final. Neither blocks 1.0 and neither can ship later without changing 1.0's engine behaviour.
+
+## 8. Hash-neutral notes
 
 - Roster tenure starts (H-C4: Praljak 64 to 67, Roso 80 to 83, Petković-2 100 to 107, Blaškić-2 120 to 121) go to the calibration pass.
 - The autonomous-launch path is inert and is retired (B4).
