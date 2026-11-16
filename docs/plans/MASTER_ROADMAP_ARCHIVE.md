@@ -543,3 +543,8 @@ RF-ROSTER, army-chief stubbornness comes from the roster (#677; 709/709/708/681,
 Merged list moved 2026-11-16 (steward pass 28), verbatim from the same paragraph:
 
 the re-pin of `rbih_state_identity` and `rbih_paramilitary_policy_1992` (#689, string-only, three seats; the pinned-contract allowlist is empty); the CODE4 tie-break (#691, byte-identical); the corps_plan and corps_exhaustion receipts (#686, default off, byte-identical: they showed the ARBiH plan lockout is the exhaustion gate fed by the corps' own probes);
+
+
+Merged list moved 2026-11-16 (steward pass 36), verbatim from the same paragraph:
+
+F7, false supply-reserve events no longer fire where the reserve model is off (#690, control-identical; the headless `final_state_hash` moved to 799e43a7ee2f4764, state only, the main hash at #690); F7b, the Army HQ plan's unread army stance and aggression modifier and the three theater statuses that fed them retired, with the reserves-off supply bug (#696, control-identical: 0 cells differ at w39, w104, w156 and w188, all 251 control events identical, scores unchanged; the headless `final_state_hash` is now 70f4dc05bf375bc7, state only, the six retired fields, the main hash at #696; save-compatibility test included); package P0, `coordinateMultiCorpsOffensive` retired (#694, all 8 artifacts byte-identical, so the headless `final_state_hash` stays 799e43a7ee2f4764; it also removes an override of a President's accepted stance, a player-path fix);
