@@ -1227,7 +1227,8 @@ function addStopOpDirectiveCards(state: LoadedGameState, cards: CandidateCard[])
       ],
       navigationTarget: { kind: 'army-hq-corps-briefing', corpsId: op.corps_id },
       directive: stopOpDirective(op, playerFaction),
-      urgencySort: 7,
+      // An operation under way is the time-critical halt; one still being prepared lists after it.
+      urgencySort: planning ? 8 : 7,
       sourceSort: `command:stop-op:${op.corps_id}:${op.name}`,
     });
   }

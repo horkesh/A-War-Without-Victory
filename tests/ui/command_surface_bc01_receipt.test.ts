@@ -86,7 +86,7 @@ describe('BC01 mounted Decision Room receipt', () => {
     expect(screen.getAllByText('BC01 actual launch').length).toBeGreaterThan(0);
     expect(screen.getAllByText(/Reserve assembled/).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/Commander Example/).length).toBeGreaterThan(0);
-    expect(screen.getAllByText(/Stop op is available only/).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/can be halted only while it is being prepared or carried out/).length).toBeGreaterThan(0);
   });
 });
 
