@@ -258,8 +258,10 @@ export function seedDisplacementTimerOnFlip(
 function carriedDisplacement(
     existing: HostileTakeoverTimerState | undefined
 ): { cumulative_displaced?: number } {
-    if (!existing || existing.matured_turn === undefined) return {};
+    if (!existing) return {};
     if (existing.cause !== 'policy_expulsion' && existing.dormant_since_turn === undefined) return {};
+    // The count is carried whether or not this timer fired: a re-seeded timer that inherited a count
+    // and was replaced again inside its delay still holds those people (red-team C1).
     const prior = existing.cumulative_displaced ?? 0;
     return prior > 0 ? { cumulative_displaced: prior } : {};
 }
@@ -270,9 +272,9 @@ function isReplaceableTimer(existing: HostileTakeoverTimerState | undefined): bo
 }
 
 /**
- * RB9: retire a timer instead of forgetting it. A timer whose wave fired keeps its
- * `cumulative_displaced` as a dormant record (it never fires again); one that never fired
- * displaced nobody and is deleted, as before.
+ * RB9: retire a timer instead of forgetting it. A timer that holds a count of people already
+ * expelled (its own fired wave, or a count it inherited and has not yet fired on) keeps it as a
+ * dormant record that never fires; a timer with no count displaced nobody and is deleted, as before.
  */
 function retireTimer(
     timerMap: Record<string, HostileTakeoverTimerState>,
@@ -280,7 +282,7 @@ function retireTimer(
     currentTurn: number,
 ): void {
     const timer = timerMap[timerKey];
-    if (timer && timer.matured_turn !== undefined && (timer.cumulative_displaced ?? 0) > 0) {
+    if (timer && (timer.cumulative_displaced ?? 0) > 0) {
         timer.dormant_since_turn = currentTurn;
         return;
     }

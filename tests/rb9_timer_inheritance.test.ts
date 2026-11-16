@@ -119,6 +119,37 @@ describe('RB9 takeover timer inheritance', () => {
         expect(secondWave).toBeLessThan(firstWave);
     });
 
+    test('red-team C1: a re-seeded timer retaken inside its delay keeps the inherited count', () => {
+        const state = makeState();
+        capture(state, 'HRHB', 'RBiH');
+        state.meta.turn = 54;
+        processDisplacementTakeover(state, settlements, undefined, pop1991, settlements);
+        const firstWave = wavesFrom(state, 54);
+        expect(firstWave).toBeGreaterThan(0);
+        const timers = () => state.displacement.hostile_takeover_timers as Record<string, HostileTakeoverTimerState>;
+
+        // Retaken (dormant), taken again (inherits, not yet fired), retaken inside the delay.
+        state.meta.turn = 60;
+        capture(state, 'RBiH', 'HRHB');
+        processDisplacementTakeover(state, settlements, undefined, pop1991, settlements);
+        state.meta.turn = 62;
+        capture(state, 'HRHB', 'RBiH');
+        expect(timers()[KEY]!.cumulative_displaced).toBe(firstWave);
+        state.meta.turn = 63;
+        capture(state, 'RBiH', 'HRHB');
+        processDisplacementTakeover(state, settlements, undefined, pop1991, settlements);
+        expect(timers()[KEY]!.dormant_since_turn).toBeDefined();
+        expect(timers()[KEY]!.cumulative_displaced).toBe(firstWave);
+
+        // The next capture still inherits the people expelled in the first wave.
+        state.meta.turn = 70;
+        capture(state, 'HRHB', 'RBiH');
+        expect(timers()[KEY]!.cumulative_displaced).toBe(firstWave);
+        state.meta.turn = 74;
+        processDisplacementTakeover(state, settlements, undefined, pop1991, settlements);
+        expect(firstWave + wavesFrom(state, 74)).toBeLessThanOrEqual(900);
+    });
+
     test('a timer recaptured before its wave fired displaced nobody and is deleted, as before', () => {
         const state = makeState();
         capture(state, 'HRHB', 'RBiH');
