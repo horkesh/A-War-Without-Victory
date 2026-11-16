@@ -203,6 +203,27 @@ The historian read the cited location of every BB reference (109 groups, 279 men
   - Re-pinned `data/derived/scenario/baselines/manifest.json`. The 40-week structural fingerprint is unchanged (`3b1ddd64fb4f1600`).
 - **Tests.** `tests/army_hq_gathering.test.ts` now asserts the assessment's and the doctrine's retired fields are gone and that the corps ceilings still apply. 296 tests in the affected files pass, and tsc is clean.
 
+## 2026-11-16 — FORAWWV §X and §XIV amended: the political-directive chain is retired (B3)
+
+Canon record for the FORAWWV amendment that follows PR #710 (B3 + B2). #710's canon seat recorded the debt: FORAWWV 276-301, 409 and 421 described the B1 producer, the A3 step and the C1 overlay as live, validated substrate.
+
+**Panel (unanimous).** Five seats, each APPROVE WITH WORDING CHANGES, all applied: historian, canon-compliance, game-designer, corps-army-commander, scenario-creator-runner-tester. The named integrator checked every change and found no contradiction: GO. war-or-game is not seated (owner rule).
+
+**Amendment.**
+- **§X header:** a dated "Amended" paragraph. It says the chain is retired, gives the measured result (control-identical in the five smoke scenarios plus historical and emergent 188w; commander state byte-identical in the historical run), and gives the corps-role source (the Army HQ CampaignPlan plus the existing bilateral-front diversion). It says civil-military direction now runs through the player's staged orders, the A4 officer roster and `army_clashes` compliance, with no standing political verb modelled.
+- **§X.1:** the six-verb set is library and tooling only; no game step writes it, except in tooling runs.
+- **§X.2:** each slot now reads as retired or save-only, as follows.
+  - `political_directives_by_faction` is not written in a game (the harness may write it); v39 deletes it.
+  - `army_corps_directives_by_faction` stays a required field. It is not written or read for decisions; the adapter still reads it, validation checks it, and v39 empties it.
+  - Corps decisions: the `plan.ts` gates read the CampaignPlan role, null without a valid plan, or primary/contain under the bilateral-front diversion.
+- **§XIV line 409:** B1+B2 and C1+C2 noted as retired; the invariant is unchanged.
+- **§XIV.3:** the Ring 1 example now names the retired C1 persistence as historical.
+- **Path correction (integrator note):** the old §X.2 said `state.political.political_leader_data`. The code (`political_leader_data_loader.ts`, `political_leader_types.ts`) holds it at `state.military.political_leader_data`. The new text uses the code's path.
+
+**Scope.** Canon text only; no code or data. The Systems Manual, Engine Invariants and Rulebook needed no change (canon seat).
+
+Evidence: `C:/Pyrrhic/AWWV-worktrees/_logs/batch-b-20261116/forawwv_b3_panel_packet.md`, `forawwv_b3_amendment_final.md`.
+
 ## 2026-11-16 — N6: enemy-concentration zones survive sector renumbering (control-identical)
 
 - **Defect** (same class as SE9, found in the SE9 attribution).
@@ -588,6 +609,13 @@ Docs only; no `src/` or `data/` change, no hash change.
 
 - #710, B3 + B2: the produced political-directive chain (producer, A3 role translation, C1 briefing overlay and its Wave 6 exception) is retired for every faction, including the player's staff at autonomy 1 and above; `army_directive_pushback` is no longer produced and the 538 stale events are drained (save migration v39, schema 38 to 39; the briefing and the decision manifest no longer count them). The player's own directive tool is a separate path and untouched. Control-identical in the measured runs (commander state byte-identical); main's pin is final_save 03159b9ee1e5877f (schema v39), the main hash at #710. Merged with the full suite, engine-health-188w and Baseline pins green. It is also P3 step 1 of Fable consult 4's order.
 - Next from that lane: #734 (the FORAWWV §X and §XIV amendment, with a unanimous panel) and the t76 Belgrade historical-default fix.
+
+## 2026-11-16 — Pass 44: #734 (FORAWWV §X and §XIV, the canon record for #710) recorded; Codex sweep 4
+
+Docs only; no `src/` or `data/` change, no hash change. The steward did not edit FORAWWV.
+
+- #734, the canon record for #710: FORAWWV §X and §XIV now describe the political-directive chain as retired (§X.1 the six verbs are library and tooling only; §X.2 the slots are save-only or tooling-only; §XIV the invariant unchanged). Unanimous panel: historian, canon-compliance, game-designer, corps-army-commander, scenario-creator-runner-tester, each APPROVE WITH WORDING CHANGES, all applied; the named integrator GO. Merged 2026-11-16. Work list B3 row, roadmap merged list.
+- Codex sweep 4 (the 10 newest PRs): no new findings; #729 (routed to the F1g lane) is still the only open inline comment on an open PR.
 
 ## 2026-11-15 — Command loop L7: army clashes (proposal 2A step A1; owner decision 4)
 
