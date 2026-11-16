@@ -80,7 +80,7 @@ import { buildSectorDefenseByFactionAndOsid } from './corps_front_sectors.js';
 
 import { evaluateGarrisonAndDetachments, evaluateReserve, evaluateHold } from './bot_brigade_eval_hold.js';
 import { evaluateSectorMarch, evaluateReturnToCorps, evaluatePocketEvacuation, evaluateFrontCoverage } from './bot_brigade_eval_front.js';
-import { evaluateHomeDefense, evaluateSupplyGate, evaluateSectorAttack, evaluateReorganize, evaluateDefensive, evaluateOffensive, recordAxisOrderGenerationDetail } from './bot_brigade_eval_attack.js';
+import { evaluateHomeDefense, evaluateSupplyGate, evaluateSectorAttack, evaluateReorganize, evaluateDefensive, evaluateRetakeCounterAttack, evaluateOffensive, recordAxisOrderGenerationDetail } from './bot_brigade_eval_attack.js';
 import { evaluateInteriorMovement } from './bot_brigade_eval_movement.js';
 import type { BrigadeEvaluationContext, SectorMarchObservation } from './bot_brigade_eval_types.js';
 
@@ -316,6 +316,7 @@ export type BotDispatcherHandler =
     | 'sector_attack'
     | 'hold'
     | 'reorganize'
+    | 'retake'
     | 'defensive'
     | 'offensive'
     | 'front_coverage'
@@ -832,6 +833,15 @@ function executeFactionDirectivesImpl(
     // Default-off `defence` receipts for settlements lost last turn. Observation only.
     emitDefenceTrace(state, faction, brigades, adjacency, sectorAssignmentByBrigade, sectorRecentRetreats, supplyStateByOsid);
     const sectorCounterAttackCount = new Map<string, number>();
+    // Package P2 step 3 (2026-11-16): the retake-only counter-attack reads the cells this faction
+    // lost in combat within the retreat window and has not taken back, militia-held losses included.
+    const recentLostCells = new Set<string>();
+    for (const event of state.political?.control_events ?? []) {
+        if (event.mechanism !== 'combat' || event.from !== faction) continue;
+        if (event.turn < currentTurn - COUNTER_ATTACK_RETREAT_WINDOW) continue;
+        if ((state.political.political_controllers ?? {})[event.settlement_id] === faction) continue;
+        recentLostCells.add(event.settlement_id);
+    }
 
     const targetAdjacentCount = new Map<Osid, number>();
     for (const b of brigades) {
@@ -925,6 +935,7 @@ function executeFactionDirectivesImpl(
             isHoldBrigade: false,
             sectorRecentRetreats,
             sectorCounterAttackCount,
+            recentLostCells,
             sectorAssignment,
             assignedSectorFrontOsids,
             corpsBrigadeCountsByOsid,
@@ -1013,6 +1024,7 @@ function executeFactionDirectivesImpl(
             if (runEvaluator('sector_attack', 'bot_orders.executeFactionDirectives.eval.sectorAttack', () => evaluateSectorAttack(ctx))) return true;
             if (runEvaluator('hold', 'bot_orders.executeFactionDirectives.eval.hold', () => evaluateHold(ctx))) return true;
             if (runEvaluator('reorganize', 'bot_orders.executeFactionDirectives.eval.reorganize', () => evaluateReorganize(ctx))) return true;
+            if (runEvaluator('retake', 'bot_orders.executeFactionDirectives.eval.retake', () => evaluateRetakeCounterAttack(ctx))) return true;
             if (runEvaluator('defensive', 'bot_orders.executeFactionDirectives.eval.defensive', () => evaluateDefensive(ctx))) return true;
             if (runEvaluator('offensive', 'bot_orders.executeFactionDirectives.eval.offensive', () => evaluateOffensive(ctx))) return true;
             if (runEvaluator('front_coverage', 'bot_orders.executeFactionDirectives.eval.frontCoverage', () => evaluateFrontCoverage(ctx))) return true;

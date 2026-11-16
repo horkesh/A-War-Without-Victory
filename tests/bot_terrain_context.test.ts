@@ -91,7 +91,7 @@ it('nonempty brigade counterattack execution forwards winter slope across its ad
  const reverseMap=new Map([[target,['S']]]),edges=[{a:source,b:target},{a:target,b:rear}];
  const A=makeAttackFormation({id:'A',faction:'RS',corps_id:'C',location_osid:source,cohesion:70,morale:70});
  (A as any).last_retreat_from={osid:target,turn:3};
- const state={meta:{turn:4,phase:'war',scenario_start_date:{year:1992,month:0,day:1}},factions:[{id:'RS'},{id:'RBiH'}],political:{political_controllers:{[source]:'RS',[target]:'RBiH',[rear]:'RBiH'}},military:{formations:{A,D:makeAttackFormation({id:'D',faction:'RBiH',location_osid:target,morale:0})},corps_command:{C:{stance:'defensive',active_operations:[]}}},displacement:{}} as unknown as GameState;
+ const state={meta:{turn:4,phase:'war',scenario_start_date:{year:1992,month:0,day:1}},factions:[{id:'RS'},{id:'RBiH'}],political:{political_controllers:{[source]:'RS',[target]:'RBiH',[rear]:'RBiH'},control_events:[{turn:3,settlement_id:target,from:'RS',to:'RBiH',mechanism:'combat'}]},military:{formations:{A,D:makeAttackFormation({id:'D',faction:'RBiH',location_osid:target,morale:0})},corps_command:{C:{stance:'defensive',active_operations:[]}}},displacement:{}} as unknown as GameState;
  const real=predictor.predictAllAdjacentTargets;
  let stripSlope=false;
  const spy=vi.spyOn(predictor,'predictAllAdjacentTargets').mockImplementation((...args)=>{
