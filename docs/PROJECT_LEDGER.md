@@ -74,6 +74,22 @@ Batch B, item B4 (freeze cut, Fable consult 2 revision 2, RF-ROSTER "path a"): r
 
 Evidence: `C:/Pyrrhic/AWWV-worktrees/_logs/batch-b-20261116/` (b4_*).
 
+## 2026-11-16 — B5 scorer fixes 1-3: the emergent political scorer reads territory trend, exhaustion and the patron term in the state's own units (historical byte-identical, emergent hash-identical)
+
+- **Why.** The Batch B emergent triage (B5) found three unit and order defects in the political scorer that emergent bots, peace-plan responses and political-logic events use. Each made the scorer less tied to game state than its comments say. None decided a pick on its own.
+  - **Territory trend was always "stable".** `turn_summaries` is newest-first and keeps every turn, so `slice(-3)` read the war's first three summaries for the whole war, oldest-first, with the sign reversed. `territory_snapshot` is an area fraction (0..1), and the ±1.0 threshold was meant in percentage points.
+  - **Exhaustion was under-read about 6×.** `war_exhaustion / 600` kept `exhaustion_level` at or below ~16 all war (188w end state: HRHB ~8100, RBiH ~8700, RS ~9800, against the 10000 cap). A war-weary faction never read as exhausted, and the RBiH survival term (situation_score < 50) could not fire.
+  - **The patron term treated a neutral option as aggressive.** `aggression_affinity` 0 took the −0.5 branch.
+- **Fix.** `src/sim/political/political_personality.ts` and `political_event_decision.ts`.
+  - The trend compares the newest and the third-newest snapshot that carry the faction, in percentage points, against ±1 pp (`TERRITORY_TREND_WINDOW`, `TERRITORY_TREND_THRESHOLD_PP`).
+  - `exhaustion_level` uses the shared `recoveredExhaustionLevel` (`state/war_weariness_bands.ts`), the same 0..100 read as the war-weariness bands, the phase-3c gate and the UI.
+  - The patron term is +0.5 for a defensive option, −0.5 for an aggressive one and 0 for a neutral one.
+- **Proof.**
+  - **Historical 188w byte-identical** to a main run (`df206642c`, B0/B1/B4 merged): final hash `df791f73c26ed642`, the baselines manifest value. Every artifact matches except `run_meta.json`. Checkpoints 709/709/708/681, guard intact. (Also byte-identical on the earlier main `e3a0c2b6a`: `01572f50dfea2378`.)
+  - **Hands-off emergent 188w hash-identical** with and without the fixes: `b5507e7b9b6463a2` (710/707/707/670). Its guard breaches (Farz 0/4 receipts, Seher t164, Petrovo t179) are the same on main and belong to package P2. The fixes are live (the trend now reads gaining or losing on 6-10% of turns per faction; mid-war exhaustion reads 60-95 instead of 10-16), but no pick crosses: the 15 emergent picks that differ from history win by authored-option margins of 0.10-4.42, and the state terms move a score by at most ~1.3.
+  - Tests: new `tests/sim/political/scorer_unit_fixes_b5.test.ts` (9); `tests/cohesion_divisor_rescale.test.ts` updated to the new scale. The political, events and peace-plan slices pass (21 files, 298 tests). tsc is clean.
+- Logs: `C:/Pyrrhic/AWWV-worktrees/_logs/b5-scorer-20261116/`.
+
 ## 2026-11-16 — Citation audit batch 3: Balkan Battlegrounds page and chapter references in event and essay data
 
 The historian read the cited location of every BB reference (109 groups, 279 mentions): 109 mentions cite the right printed page, 36 are right only at the knowledge-base extraction or PDF number (the printed page shown is wrong), 12 hold in part, 108 (39%) are about something else, 14 are accurate "does not exist" notes. 80 of the wrong ones cite Vol. II "chapters" (BB Vol. II has addenda and annexes only); 27 are pages from the wrong year or place (Vol. II pp. 358-366, 312-321, 287-314, 406-417, 459-462, 471-475, 506-520, 28-31, 9-32; Vol. I pp. 198-229); the printed-page rule is Vol. I = PDF - 37 and Vol. II = PDF - 19. 95 hidden notes record the correction; extraction numbers become printed pages everywhere (Vol. I p. 187 to p. 151, p. 462 to p. 425, pp. 416-420 to pp. 379-383, Vol. II pp. 536-538 to pp. 517-519 and others); 52 player-visible strings (events and Codex essays) drop wrong pages and non-existent chapters, leaving the source name, or show the verified printed page; the Vol. II pp. 28-31 Vance-Owen claim now cites Vol. I p. 8. One more visible audit-vocabulary leak on main ("the H4 audit") is fixed and added to the permanent leak test, and the historian's earlier PR-B rewrite that cited an extraction number (Vol. I pp. 418-421) now cites pp. 381-384. New test `tests/ui/event_bb_citations.test.ts`; `rbih_state_identity` (pinned) keeps 3 visible Vol. II pp. 406-417 cites until its next re-pin. Evidence and exhaustive file list: `docs/40_reports/evidence/20261115_bb_citation_audit/`.
@@ -131,6 +147,30 @@ The historian read the cited location of every BB reference (109 groups, 279 men
   - Guards: verify_checkpoints "guard intact" (enclave 9/9, Farz, cascade 31, eastern provenance CLEAN), and engine_health_gate --strict PASS (consistency 0).
   - Re-pinned `data/derived/scenario/baselines/manifest.json`. The 40-week structural fingerprint is unchanged (`3b1ddd64fb4f1600`).
 - **Tests.** `tests/army_hq_gathering.test.ts` now asserts the assessment's and the doctrine's retired fields are gone and that the corps ceilings still apply. 296 tests in the affected files pass, and tsc is clean.
+
+## 2026-11-16 — N6: enemy-concentration zones survive sector renumbering (control-identical)
+
+- **Defect** (same class as SE9, found in the SE9 attribution).
+  - `assessSituation` (`commander/assess.ts`) built `enemy_concentration_zones` from the previous turn's `intel_picture.concentration_detected`, keyed by last turn's positional sector ids. It matched those ids against this turn's sectors, which the partition re-minted, so the zones pointed at whichever sector now carried that number.
+  - The zones reach the player: the command-strain text "Enemy concentration detected — defensive readiness elevated" (`command_strain.ts:1083/:1361`, via `GameStateAdapter.ts:1659`) appears or disappears on them.
+  - No sim decision reads them.
+- **Ruling (orchestrator):** fix, not retire, because the value is player-visible.
+- **Fix.**
+  - The intel picture also records massing by `stableSectorKey` (`concentration_detected_by_stable_key`, built in `decide.ts`).
+  - The assessment maps last turn's concentrations onto this turn's sectors by stable key, through a new pure `concentrationZonesFromPreviousIntel`.
+  - A picture saved before N6 has no stable map and keeps the positional lookup.
+  - The new field is optional, so older saves load.
+- **Measured** (one 188-week run on main `76e5fcabd`, whose hash is `70f4dc05bf375bc7`; re-measured after merging main `713c7a213` = `1391f69248072728`: N6 `9499e1f9a4d2e628`, still 0 cells, 251 identical control_events, re-pinned; re-measured again after merging main `9a3ab8894` = `01572f50dfea2378`: N6 `adb056607d260858`, 0 cells at all four checkpoints, 251 identical control_events, control/formation/activity/AAR files byte-identical, re-pinned; and after merging main `df206642c` = `df791f73c26ed642` (fresh run, equal to main's pin): N6 `83b8e8cd36023899`, 0 cells, 251 identical control_events, deltas and AARs byte-identical, re-pinned).
+  - Final hash `bb22e1f77c941211`.
+  - **0 cells differ** at w39, w104, w156 and w188, and all 251 control_events are identical.
+  - The state diff is the new `intel_picture` field plus corrected `threat_assessment.enemy_concentration_zones`. Example at w188: VRS 1st Krajina Corps no longer lists `zone:vrs_1st_krajina:op:donji_vakuf:korenici`, a zone the positional map borrowed from a renumbered sector.
+  - Guards: verify_checkpoints "guard intact", engine_health_gate --strict PASS.
+  - The baselines manifest is re-pinned.
+- **Tests.** New `tests/commander_concentration_zones_stable_key.test.ts`:
+  - a renumbered sector keeps its concentration;
+  - a legacy picture uses the positional lookup;
+  - the player's strain text shows the concentration warning when the massing was real, where the positional map lost it.
+  - All 30 commander test files pass (544 tests). tsc is clean.
 
 ## 2026-11-16 — PK5 (C7): a short queue head steps aside only for a dated, admissible op with its own roster (byte-identical)
 
@@ -452,6 +492,24 @@ Docs only; no `src/` or `data/` change, no hash change.
 - New standing steward duty (owner, 2026-11-16, via the orchestrator): inventory every comment by the Codex review bot (`chatgpt-codex-connector[bot]`) on open PRs and on PRs merged in the last 7 days, classify, route the open ones to the orchestrator, and track to closure in `C:/Pyrrhic/AWWV-coordination/codex_review_comments.md`. First sweep: the last 70 PRs (#657 to #726): 65 with no findings, 1 (#690) a completed review without findings data, 4 with findings (#706, #693, #682, #670; 6 inline comments): 3 fixed in their merge commits (#682 twice, #670), 3 open (two harness comments on #706, one on #693).
 - The #693 comment is a real finding with a record consequence: `computeAddressNationAvailability` never checks the event's `turn_min`, so a human President can address the nation from turn 0 (four uses) while a bot fires it from turn 84. Registered as work list G1; the BC06 record's reason is corrected to say "about three uses for a bot". The Rulebook's wording of the recurring address (about three uses) is not edited without an instruction.
 - #701 (B1): main stays df791f73c26ed642, measured (the Batch B lane re-proved it on main 0d62cdcf0, which includes #718).
+
+## 2026-11-16 — Pass 39: RR1 moved from Part 3 to the package (P3); #709 (N6) recorded
+
+Docs only; no `src/` or `data/` change, no hash change.
+
+- Orchestrator correction: RR1 (the dated per-faction settings in `data/scenarios/timelines/apr1992.json`: the RS reinforcement multiplier and the RBiH "Controlled Counteroffensive" aggression) moves the hash if it is changed, so it cannot sit in Part 3 (after the freeze, hash unchanged). It is now in the work list P3 row beside F2 and RS replacement, disposition pending the chapters integration (fix by tying them to causes, or a written reason, before the freeze). The Chronicle "Washington Pivot" truth fix stays in Part 3 (UI only).
+- #709, N6: enemy-concentration zones survive the per-turn sector renumbering (a stable-key map; older saves keep the positional lookup). Control-identical (0 cells differ, 251 control events identical); the state moved only by the new `intel_picture` field and the corrected zones; baselines re-pinned in the PR. The main hash after #709 is not recorded until confirmed.
+- #726, B5 scorer fixes 1 to 3 (territory trend, exhaustion scale, neutral patron term): historical byte-identical (df791f73c26ed642, the manifest at that base), emergent hash-identical with and without the fixes (b5507e7b9b6463a2; 710 / 707 / 707 / 670); the fixes decide no pick; the emergent guard breaches belong to package P2. Work list B5-1, B5-2, B5-4.
+
+## 2026-11-16 — Pass 40: the pin after #709 and #726, G1 ruled FIX, #727 and the harness gap, Codex routing
+
+Docs only; no `src/` or `data/` change, no hash change.
+
+- The main pin after #709 (N6) and #726 (B5 scorer fixes 1 to 3) is 83b8e8cd36023899 (the manifest's final_save.json hash prefix, read from main); #726 is byte-identical in historical mode.
+- G1 (the address to the nation ignores `turn_min` 84 for a human President): ruled FIX by the orchestrator, routed to the L7 lane (player path, hash unchanged headless); the Rulebook's "about three uses" stays; an FYI for the next game-designer and historian sitting.
+- #727 (B5 fix 4 and 5: `divergence_threshold` wired with a territory gate, RS patron note; open): unanimous §6 GO with conditions; a hands-off emergent game passes every guard with it; a follow-up is ordered so the gate also opens on political divergence.
+- Harness gap: no harness lever moves the map 3 percentage points, so the package's played test needs a stronger lever (F1g lane). The two Codex findings on #706 are routed to the F1g lane and must be fixed before the played test relies on the harness.
+- Codex tracker: no GitHub replies are posted (orchestrator ruling); the tracker file is the record. All 70 summary comments swept carry no finding text in their body (none holds a priority badge); #690's completed review has no findings data.
 
 ## 2026-11-15 — Command loop L7: army clashes (proposal 2A step A1; owner decision 4)
 
