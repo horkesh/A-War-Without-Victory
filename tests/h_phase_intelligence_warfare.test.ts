@@ -173,6 +173,61 @@ describe('H phase intelligence warfare', () => {
         expect(op?.phase).toBe('execution');
     });
 
+    // F7 (2026-11-15): a feint's 0.5 supply cost exists only where the reserve model runs.
+    it.each([
+        { reserves: false, expected: undefined },
+        { reserves: true, expected: 9.5 },
+    ])('a finished feint drains the supply reserve only with reserves on (reserves=$reserves)', ({ reserves, expected }) => {
+        const state = {
+  schema_version: CURRENT_SCHEMA_VERSION,
+  meta: { turn: 10, seed: 'feint-supply', phase: 'war', ...(reserves ? { supply_reserves_enabled: true } : {}) } as any,
+  factions: [
+                { id: 'RS', profile: { authority: 10, legitimacy: 10, control: 10, logistics: 10, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] },
+            ],
+  military: {
+    formations: {
+                rs_corps: { id: 'rs_corps', faction: 'RS', name: 'Corps', created_turn: 1, status: 'active', assignment: null, kind: 'corps', personnel: 50, cohesion: 80, hq_sid: 'S1', tags: [] },
+                b1: makeBrigade('b1', 'RS', 'rs_corps', 'op:test:staging'),
+            },
+    corps_front_sectors: {
+                rs_sector: makeSector('rs_sector', 'rs_corps', 'RS', ['e1'], ['op:test:staging'], ['op:test:objective']),
+            },
+    ...(reserves ? { general_supply_reserve: { RS: 10, RBiH: 10, HRHB: 10 }, heavy_munitions_reserve: { RS: 10, RBiH: 0, HRHB: 0 } } : {}),
+    corps_command: {
+                rs_corps: {
+                    command_span: 5,
+                    subordinate_count: 1,
+                    og_slots: 1,
+                    active_ogs: [],
+                    corps_exhaustion: 0,
+                    stance: 'offensive',
+                    active_operations: [{
+                        name: 'Maskirovka',
+                        type: 'feint',
+                        phase: 'planning',
+                        started_turn: 8,
+                        phase_started_turn: 8,
+                        participating_brigades: ['b1'],
+                        objectives: ['op:test:objective'],
+                        current_objective_index: 0,
+                        staging_osid: 'op:test:staging',
+                        sector_id: 'rs_sector',
+                    }],
+                },
+            }
+  } as any,
+  political: {
+    political_controllers: { 'op:test:objective': 'RBiH' }
+  } as any,
+} as unknown as GameState;
+
+        advanceSectorOffensives(state, null);
+
+        const op = state.military.corps_command?.rs_corps?.active_operations[0];
+        expect(op?.phase).toBe('recovery'); // the feint ran its course
+        expect(state.military.general_supply_reserve?.RS).toBe(expected);
+    });
+
     it('opsec halves positive cohesion drift for formations in the marked sector', () => {
         const state = {
   schema_version: CURRENT_SCHEMA_VERSION,

@@ -128,13 +128,11 @@ describe('ICTY, ICJ and UN paragraph ranges outside Karadžić and Prlić in the
         // Stakić §§88-168 stays only on the Keraterm line (the Keraterm findings, ¶¶160-166, sit inside it); the other camp and Prijedor lines lost it.
         const VERIFIED = [/Tadi[cć][^§]{0,40}§§154-(?:237|202)/, /Mladi[cć][^§]{0,60}§§4762-4778/, /A\/54\/549[^§]{0,20}§§270-280/, /Krsti[cć][^§]{0,60}§§16-28/, /Staki[cć][^§]{0,40}§§88-168/];
         const CASE_RANGE = /(?:Mladi[cć]|Krajišnik|Kordi[cć]|Bla[sš]ki[cć]|Staki[cć]|Milo[sš]evi[cć]|Br[dđ]anin|Tadi[cć]|Naletili[cć]|A\/54\/549|ICJ)[^§]{0,80}§§\s?\d+-\d+/g;
-        // Known, may only shrink: three `rbih_state_identity` explanations still show UN A/54/549 §§57-98 (historian: partly; the paragraphs
-        // that carry the claim are 59-65 and 69) and Krstić §§16-28 (19-25). That event is pinned by a reviewed-contract hash, so they are
-        // corrected with its next re-pin together with the F3 option label, not by a data-only change.
-        const KNOWN_IN_PINNED_EVENT = ['rbih_state_identity:ro0.fc5', 'rbih_state_identity:ro1.fc4', 'rbih_state_identity:ro2.fc4'];
+        // The three `rbih_state_identity` explanations that showed UN A/54/549 §§57-98 and Krstić §§16-28 now cite paras 59-65 and 69 and
+        // 19-25 (corrected with that event's seat-reviewed re-pin), so the allowlist is empty.
         const shown = ENTRIES.filter((entry) => entry.visible
             && [...entry.text.matchAll(CASE_RANGE)].some((m) => !VERIFIED.some((re) => re.test(m[0]))))
             .map((entry) => `${entry.id}:${entry.where}`);
-        expect(shown.sort()).toEqual([...KNOWN_IN_PINNED_EVENT].sort());
+        expect(shown).toEqual([]);
     });
 });

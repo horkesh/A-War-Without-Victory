@@ -755,6 +755,13 @@ export function triggerMatches(def: EventDefinition, state: GameState, currentTu
     return true;
 }
 
+/** A faction's general supply reserve when the reserve model runs, else null (no reserve exists). */
+function readEnabledSupplyReserve(state: GameState, faction: FactionId): number | null {
+    if (state.meta?.supply_reserves_enabled !== true) return null;
+    const supply = state.military.general_supply_reserve?.[faction];
+    return typeof supply === 'number' ? supply : null;
+}
+
 /** Evaluate a state-based condition against current game state. */
 export function evaluateCondition(condition: EventCondition, state: GameState, edges?: EdgeRecord[]): boolean {
     switch (condition.type) {
@@ -857,13 +864,19 @@ export function evaluateCondition(condition: EventCondition, state: GameState, e
             return condition.conditions.some(c => evaluateCondition(c, state, edges));
         case 'not':
             return !evaluateCondition(condition.condition, state, edges);
+        // Supply-reserve conditions describe the reserve model, so they hold only where it runs
+        // (F7, 2026-11-15). With reserves off (the shipping campaign) there is no reserve to be low
+        // or high: both are false. Reading a missing reserve as 0 made every supply_below true and
+        // fired csq_supply_corridor_chronic_strain_RS at t180. The gate is the meta flag, as in
+        // combat (attack_resource_aftermath.ts), not the field's presence: a feint writes the field
+        // even with reserves off (sector_offensive.ts).
         case 'supply_below': {
-            const supply = state.military.general_supply_reserve?.[condition.faction] ?? 0;
-            return supply < condition.threshold;
+            const supply = readEnabledSupplyReserve(state, condition.faction);
+            return supply !== null && supply < condition.threshold;
         }
         case 'supply_above': {
-            const supply = state.military.general_supply_reserve?.[condition.faction] ?? 0;
-            return supply >= condition.threshold;
+            const supply = readEnabledSupplyReserve(state, condition.faction);
+            return supply !== null && supply >= condition.threshold;
         }
         case 'territory_percentage': {
             const pc = state.political?.political_controllers ?? {};
