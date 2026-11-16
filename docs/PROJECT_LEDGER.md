@@ -113,6 +113,32 @@ The historian read the cited location of every BB reference (109 groups, 279 men
   - Re-pinned `data/derived/scenario/baselines/manifest.json`. The 40-week structural fingerprint is unchanged (`3b1ddd64fb4f1600`).
 - **Tests.** `tests/army_hq_gathering.test.ts` now asserts the assessment's and the doctrine's retired fields are gone and that the corps ceilings still apply. 296 tests in the affected files pass, and tsc is clean.
 
+## 2026-11-16 — PK5 (C7): a short queue head steps aside only for a dated, admissible op with its own roster (byte-identical)
+
+- **Ruling (orchestrator):** C7 option (a), the bounded skip. Skip and record a short head only when an op behind it is admissible now. The skip record names the op and the reason.
+- **Premise (main):** one `viable_floor` block (Srebrenica–Cerska, t4, admitted t5) and one stall (Pracha River, `build_returned_null` t41–57, admitted t58) that delayed nothing behind it.
+- **Change** (`pre_planned_operations.ts`):
+  - When `injectQueuedOperation`'s head returns at `build_returned_null` or `viable_floor`, `tryQueueHeadSkip` scans the ops behind it with a read-only dry run of the launch gates (`isQueuedOperationAdmissibleNow`).
+  - A candidate qualifies only if it has its own `available_from` (now or earlier) and shares no brigade with the head (operations-expert: undated chain members such as 1KK Jajce and Donji Vakuf must never jump; n1145).
+  - The first qualifier moves to the front and launches through one retry, which may not skip again. The head stays directly behind it.
+  - The step is atomic. The `op_injection_warnings` row `queue_head_skipped` (head, reason, promoted op) is written only on launch; otherwise the queue order is restored.
+  - Nothing is removed from a queue. `PrePlannedOp` has no window end.
+  - `OpInjectionCheck` and the validator list gain `queue_head_skipped`. This is additive, so older saves load. The parked `AuthorizePhase.tsx` maps it to the generic copy for type completeness.
+- **Measured** on main `e3a0c2b6a`:
+  - Historical 188w: main and PK5 are both `01572f50dfea2378`.
+  - Hands-off emergent 188w (`decision_mode: emergent`): both `a6669043cb8f4b58`.
+  - No skip fires in either run.
+  - Guards intact (709/709/708/681). `engine_health_gate --strict` PASS.
+  - Re-measured after the seat changes (see the PR).
+- **Tests** (`tests/pre_planned_operations.test.ts`, "PK5 bounded queue skip"):
+  - a dated, disjoint op is promoted and the head is kept;
+  - no skip when nothing behind is admissible;
+  - the 1KK chain never inverts at t10;
+  - a dated op sharing the head's roster is not promoted;
+  - a declined player authorization blocks the promotion.
+- **Seats:** operations-expert APPROVE-WITH-CHANGES (dated-only, disjoint roster, atomic retry, 1KK regression test; all applied). Canon-compliance APPROVE-WITH-CHANGES (two wording fixes and the review selector matching `existingReview`; applied). No panel needed.
+- **Canon:** Systems Manual §6, "A short queue head steps aside only for an admissible operation".
+
 ## 2026-11-16 — Package "1994-95 attack and defence": the appendix C harness can run the played test (tooling, inert)
 
 The package's second pass test is "played": an engaged RBiH President who concentrates on one axis can win ground at a visible cost, including with a Request-op on an exhausted corps. The scenario tester found that #682's harness could not run that test. Its Request-op picked a held-back corps or the busiest front and the first buildable target, never one axis or an exhausted corps, and recorded no exhaustion or outcome.
@@ -377,6 +403,14 @@ Docs only; no `src/` or `data/` change, no hash change.
 
 - Owner, 2026-11-16, "Keep them RBiH": Biljesevo, Olovci and the Glamoč village (Goražde) stay RBiH in the January 1993 reference map, since no source says how or when they changed hands. In D1 stage 2 all five former artefact-sweep cells get ordinary 1992 operations, with unsourced dates marked unverified in the data. The open item is closed.
 - #718, RB1 (A2): a takeover wave counts each person once (`refugees_created` at w188 1,971,236 to 1,485,614; the Verdict displacement ratio 0.896 to 0.657); §6 panel unanimous, control-identical; final-state hash df791f73c26ed642 (the PR's measurement on main 01572f50dfea2378, baselines re-blessed in the PR), recorded as the main hash at #718.
+
+## 2026-11-16 — Pass 35: #721 (PK5 queue head) recorded; Part 5 corrected; C8 ruled; #709 needs a re-pin
+
+Docs only; no `src/` or `data/` change, no hash change.
+
+- #721, C7 (PK5): a short queue head steps aside only for a dated, admissible operation with its own roster (a bounded skip; nothing is ever removed from a queue; undated chain members never jump the queue, with a regression test). Byte-identical on its base in historical and hands-off emergent mode (no skip fires). Systems Manual §6 paragraph added by the PR. Part 5 corrected: only the PK5 no-retry half (authored operations do not retry) stays accepted as final; the queue-head block is fixed by #721.
+- C8 (F1i, `political.enclaves` always empty because the integrity step reads the legacy `supply_state` and edges): ruled by the orchestrator: a §6 panel (historian, scenario tester, engine/systems, red-team, unanimous, plus canon); root fix first, then each revived reader measured alone and kept or retired (the IVP humanitarian term, which may double-count `enclave_resilience`; the negotiation enclave penalty; convoys; the Sarajevo tunnel flag).
+- #709 (N6) needs another re-pin after #718; it is with the L7 lane. Open: #701, #710, and the P2 steps.
 
 ## 2026-11-15 — Command loop L7: army clashes (proposal 2A step A1; owner decision 4)
 
