@@ -74,6 +74,22 @@ Batch B, item B4 (freeze cut, Fable consult 2 revision 2, RF-ROSTER "path a"): r
 
 Evidence: `C:/Pyrrhic/AWWV-worktrees/_logs/batch-b-20261116/` (b4_*).
 
+## 2026-11-16 — B5 scorer fixes 1-3: the emergent political scorer reads territory trend, exhaustion and the patron term in the state's own units (historical byte-identical, emergent hash-identical)
+
+- **Why.** The Batch B emergent triage (B5) found three unit and order defects in the political scorer that emergent bots, peace-plan responses and political-logic events use. Each made the scorer less tied to game state than its comments say. None decided a pick on its own.
+  - **Territory trend was always "stable".** `turn_summaries` is newest-first and keeps every turn, so `slice(-3)` read the war's first three summaries for the whole war, oldest-first, with the sign reversed. `territory_snapshot` is an area fraction (0..1), and the ±1.0 threshold was meant in percentage points.
+  - **Exhaustion was under-read about 6×.** `war_exhaustion / 600` kept `exhaustion_level` at or below ~16 all war (188w end state: HRHB ~8100, RBiH ~8700, RS ~9800, against the 10000 cap). A war-weary faction never read as exhausted, and the RBiH survival term (situation_score < 50) could not fire.
+  - **The patron term treated a neutral option as aggressive.** `aggression_affinity` 0 took the −0.5 branch.
+- **Fix.** `src/sim/political/political_personality.ts` and `political_event_decision.ts`.
+  - The trend compares the newest and the third-newest snapshot that carry the faction, in percentage points, against ±1 pp (`TERRITORY_TREND_WINDOW`, `TERRITORY_TREND_THRESHOLD_PP`).
+  - `exhaustion_level` uses the shared `recoveredExhaustionLevel` (`state/war_weariness_bands.ts`), the same 0..100 read as the war-weariness bands, the phase-3c gate and the UI.
+  - The patron term is +0.5 for a defensive option, −0.5 for an aggressive one and 0 for a neutral one.
+- **Proof.**
+  - **Historical 188w byte-identical** to a main run (`df206642c`, B0/B1/B4 merged): final hash `df791f73c26ed642`, the baselines manifest value. Every artifact matches except `run_meta.json`. Checkpoints 709/709/708/681, guard intact. (Also byte-identical on the earlier main `e3a0c2b6a`: `01572f50dfea2378`.)
+  - **Hands-off emergent 188w hash-identical** with and without the fixes: `b5507e7b9b6463a2` (710/707/707/670). Its guard breaches (Farz 0/4 receipts, Seher t164, Petrovo t179) are the same on main and belong to package P2. The fixes are live (the trend now reads gaining or losing on 6-10% of turns per faction; mid-war exhaustion reads 60-95 instead of 10-16), but no pick crosses: the 15 emergent picks that differ from history win by authored-option margins of 0.10-4.42, and the state terms move a score by at most ~1.3.
+  - Tests: new `tests/sim/political/scorer_unit_fixes_b5.test.ts` (9); `tests/cohesion_divisor_rescale.test.ts` updated to the new scale. The political, events and peace-plan slices pass (21 files, 298 tests). tsc is clean.
+- Logs: `C:/Pyrrhic/AWWV-worktrees/_logs/b5-scorer-20261116/`.
+
 ## 2026-11-16 — Citation audit batch 3: Balkan Battlegrounds page and chapter references in event and essay data
 
 The historian read the cited location of every BB reference (109 groups, 279 mentions): 109 mentions cite the right printed page, 36 are right only at the knowledge-base extraction or PDF number (the printed page shown is wrong), 12 hold in part, 108 (39%) are about something else, 14 are accurate "does not exist" notes. 80 of the wrong ones cite Vol. II "chapters" (BB Vol. II has addenda and annexes only); 27 are pages from the wrong year or place (Vol. II pp. 358-366, 312-321, 287-314, 406-417, 459-462, 471-475, 506-520, 28-31, 9-32; Vol. I pp. 198-229); the printed-page rule is Vol. I = PDF - 37 and Vol. II = PDF - 19. 95 hidden notes record the correction; extraction numbers become printed pages everywhere (Vol. I p. 187 to p. 151, p. 462 to p. 425, pp. 416-420 to pp. 379-383, Vol. II pp. 536-538 to pp. 517-519 and others); 52 player-visible strings (events and Codex essays) drop wrong pages and non-existent chapters, leaving the source name, or show the verified printed page; the Vol. II pp. 28-31 Vance-Owen claim now cites Vol. I p. 8. One more visible audit-vocabulary leak on main ("the H4 audit") is fixed and added to the permanent leak test, and the historian's earlier PR-B rewrite that cited an extraction number (Vol. I pp. 418-421) now cites pp. 381-384. New test `tests/ui/event_bb_citations.test.ts`; `rbih_state_identity` (pinned) keeps 3 visible Vol. II pp. 406-417 cites until its next re-pin. Evidence and exhaustive file list: `docs/40_reports/evidence/20261115_bb_citation_audit/`.
@@ -483,6 +499,7 @@ Docs only; no `src/` or `data/` change, no hash change.
 
 - Orchestrator correction: RR1 (the dated per-faction settings in `data/scenarios/timelines/apr1992.json`: the RS reinforcement multiplier and the RBiH "Controlled Counteroffensive" aggression) moves the hash if it is changed, so it cannot sit in Part 3 (after the freeze, hash unchanged). It is now in the work list P3 row beside F2 and RS replacement, disposition pending the chapters integration (fix by tying them to causes, or a written reason, before the freeze). The Chronicle "Washington Pivot" truth fix stays in Part 3 (UI only).
 - #709, N6: enemy-concentration zones survive the per-turn sector renumbering (a stable-key map; older saves keep the positional lookup). Control-identical (0 cells differ, 251 control events identical); the state moved only by the new `intel_picture` field and the corrected zones; baselines re-pinned in the PR. The main hash after #709 is not recorded until confirmed.
+- #726, B5 scorer fixes 1 to 3 (territory trend, exhaustion scale, neutral patron term): historical byte-identical (df791f73c26ed642, the manifest at that base), emergent hash-identical with and without the fixes (b5507e7b9b6463a2; 710 / 707 / 707 / 670); the fixes decide no pick; the emergent guard breaches belong to package P2. Work list B5-1, B5-2, B5-4.
 
 ## 2026-11-15 — Command loop L7: army clashes (proposal 2A step A1; owner decision 4)
 

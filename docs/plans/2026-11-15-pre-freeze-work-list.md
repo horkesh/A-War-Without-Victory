@@ -42,10 +42,10 @@ Every engine finding gets one of three answers, with a one-line reason when it i
 
 | # | Item | Disposition |
 |---|---|---|
-| B5-1 | Scorer defect 1: territory trend | FIX, a Batch B follow-up. |
-| B5-2 | Scorer defect 2: exhaustion scale | FIX, a Batch B follow-up. |
+| B5-1 | Scorer defect 1: territory trend | FIX, a Batch B follow-up. Merged (#726): `turn_summaries` is newest-first, so `slice(-3)` read the war's first three summaries for the whole war with the sign reversed, and the threshold was in the wrong units; the trend is now the newest against the third-newest snapshot carrying the faction, in percentage points, with a threshold of 1. |
+| B5-2 | Scorer defect 2: exhaustion scale | FIX, a Batch B follow-up. Merged (#726): `war_exhaustion / 600` kept `exhaustion_level` at about 16 or less all war, so the RBiH survival term could not fire; it now uses the shared `recoveredExhaustionLevel` (the war-weariness bands' 0 to 100 read). |
 | B5-3 | Scorer defect 3: `divergence_threshold` is unread | The game-designer and historian rule: wire or retire. The orchestrator leans wire, because it encodes the owner's left-alone principle. |
-| B5-4 | Scorer defect 4: patron affinity is 0 | FIX, a Batch B follow-up. |
+| B5-4 | Scorer defect 4: patron affinity is 0 | FIX, a Batch B follow-up. Merged (#726): a neutral option (`aggression_affinity` 0) took the aggressive branch of the patron term; it now gets 0. #726 is historical byte-identical (`df791f73c26ed642`, the manifest) and emergent hash-identical with and without the fixes (`b5507e7b9b6463a2`, scores 710 / 707 / 707 / 670, a measurement); the fixes are live but decide no pick (the 15 divergent picks win by authored-option margins of 0.10 to 4.42 while the state terms move a score by about 1.3 at most); the emergent guard breaches (Farz 0 of 4, Seher t164, Petrovo t179) are identical on main and belong to package P2. |
 | B5-5 | Scorer defect 5: the scorer ignores option effects | A Part 5 candidate. |
 | B5-6 | Scorer defect 6: RS patron decay | A ruling is needed (game-designer and historian). |
 | B5-7 | `war_crimes_tolerance` is unread | §6 panel. |

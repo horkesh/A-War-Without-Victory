@@ -10,7 +10,8 @@
  * and pinning every faction's exhaustion_level at 100 — destroying the
  * faction-asymmetric signal the Phase E cohesion gate depends on.
  *
- * These tests pin the completed sweep (`/300` and `/600`): post-rescale
+ * These tests pin the completed sweep (`/300`, and the situation score's
+ * normalisation to the 10000 full-war ceiling since B5, 2026-11-16): post-rescale
  * exhaustion must leave cohesion bases off the 0 floor AND faction-differentiated,
  * and must leave the situation-score exhaustion term differentiated rather than
  * pinned at the 100 ceiling.
@@ -83,14 +84,15 @@ describe('cohesion-divisor rescale — political_personality situation score', (
 
     it('does NOT pin exhaustion_level at the 100 ceiling under post-rescale exhaustion', () => {
         const a = assess(POST_RESCALE_EXHAUSTION, 'RBiH');
-        // 6000 / 600 = 10, well below the 100 clamp ceiling (old /6 gave 1000 → 100).
+        // B5 (2026-11-16): normalised against the ~10000 full-war ceiling, so 6000 → 60
+        // (old /6 gave 1000 → 100; the interim /600 gave 10, so no faction ever read as exhausted).
         expect(a.exhaustion_level).toBeLessThan(100);
-        expect(a.exhaustion_level).toBeCloseTo(10, 5);
+        expect(a.exhaustion_level).toBeCloseTo(60, 5);
     });
 
     it('keeps situation_score sensitive to exhaustion differences post-rescale', () => {
         const low = assess(POST_RESCALE_EXHAUSTION, 'RBiH');
-        const high = assess(POST_RESCALE_EXHAUSTION * 2, 'RBiH');
+        const high = assess(POST_RESCALE_EXHAUSTION * 1.5, 'RBiH');
         // Higher exhaustion → lower situation score. Under the old /6 divisor both
         // saturated to exhaustion_level 100 and produced an identical situation score.
         expect(high.situation_score).toBeLessThan(low.situation_score);
