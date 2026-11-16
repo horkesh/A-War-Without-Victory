@@ -12,7 +12,6 @@ import type { PeacePlanDefinition, PeacePlanResponse, NegotiationState } from '.
 import { createEmptyCapital, createDefaultPatronRelationship } from '../../state/negotiation_types.js';
 import { PEACE_PLANS, getPeacePlanById } from './peace_plan_data.js';
 import { PEACE_PLAN_REJECTION_SUPPORT_COST } from './patron_pressure.js';
-import { strictCompare } from '../../state/validateGameState.js';
 import { getPoliticalPersonality, computePoliticalAssessment } from '../political/political_personality.js';
 import { computePoliticalPeacePlanResponse } from '../political/political_peace_plan.js';
 import { freezeEndgameSnapshot } from '../endgame/endgame_snapshot.js';

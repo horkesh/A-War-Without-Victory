@@ -15,6 +15,7 @@ import {
     DIVERGENCE_GATE_MARGIN_PP,
     historicalShareBand,
     historicalBandOvershootPp,
+    isWarOutsideHistoricalBand,
 } from '../../../src/sim/political/historical_territory_band.js';
 import {
     divergesFromHistory,
@@ -26,7 +27,7 @@ import {
     type PoliticalAssessment,
 } from '../../../src/sim/political/political_personality.js';
 import type { EventResponseOption } from '../../../src/sim/events/event_types.js';
-import type { FactionId } from '../../../src/state/game_state.js';
+import type { FactionId, GameState } from '../../../src/state/game_state.js';
 import type { PeacePlanDefinition } from '../../../src/state/negotiation_types.js';
 
 const ROOT = resolve(__dirname, '../../..');
@@ -79,6 +80,20 @@ describe('historical band and gate', () => {
 
     it('opens only past the 3 pp margin', () => {
         expect(DIVERGENCE_GATE_MARGIN_PP).toBe(3);
+    });
+
+    it('stays closed with no control map (never fails open)', () => {
+        expect(isWarOutsideHistoricalBand({ meta: { turn: 60, war_start_turn: 0 }, political: {} } as unknown as GameState)).toBe(false);
+    });
+
+    it('opens when the map is far off history (pre-war start: read at war week 0)', () => {
+        // A tiny map where RS holds everything: far outside every band. turn 30 with
+        // war_start_turn 30 is war week 0 (a sep1991-style start).
+        const state = {
+            meta: { turn: 30, war_start_turn: 30 },
+            political: { political_controllers: { 'op:x:y': 'RS' } },
+        } as unknown as GameState;
+        expect(isWarOutsideHistoricalBand(state)).toBe(true);
     });
 });
 

@@ -76,8 +76,19 @@ export function historicalBandOvershootPp(turn: number, shareOf: (faction: Facti
     return worst;
 }
 
-/** True when the war's map has left history's band by more than DIVERGENCE_GATE_MARGIN_PP. */
+/**
+ * True when the war's map has left history's band by more than DIVERGENCE_GATE_MARGIN_PP.
+ *
+ * The band is keyed on the war week (turn − war_start_turn, as peace_plans' getWarWeek), so a
+ * pre-war start (sep1991_to_dayton) reads the April 1992 band when its war begins. A scenario that
+ * starts mid-war (jan1993_to_dayton: turn 0 is calendar week 39 and war_start_turn is 0) would read
+ * the band 39 weeks early; GameState carries no scenario start week, so this gate is calibrated for
+ * the April 1992 start only. Accepted as final for 1.0: emergent mode is reached only through the
+ * desktop New Game, which is fixed to April 1992, and the later starts are historical-mode scenarios.
+ * With no control map at all the gate stays closed (history is kept), never open.
+ */
 export function isWarOutsideHistoricalBand(state: GameState): boolean {
-    const turn = state.meta?.turn ?? 0;
-    return historicalBandOvershootPp(turn, (f) => getFactionTerritoryAreaPct(state, f)) > DIVERGENCE_GATE_MARGIN_PP;
+    if (!state.political?.political_controllers) return false;
+    const warWeek = Math.max(0, (state.meta?.turn ?? 0) - (state.meta?.war_start_turn ?? 0));
+    return historicalBandOvershootPp(warWeek, (f) => getFactionTerritoryAreaPct(state, f)) > DIVERGENCE_GATE_MARGIN_PP;
 }
