@@ -12,5 +12,6 @@
   - State does change, from the one turn at exactly 0.0 (t93) onward: HRHB cohesion is 1-2 lower from t93 to t188 (`brigade_temporal_log`), and `weekly_report` differs at t136-140 (Kupres power ratios). No control cell changes.
   - Emergent `f98539c388ffb459`: 709/709/708/680, intact.
   - Baselines re-pinned; a second run matches.
+  - **Re-measured on main after #753 and #758** (main pins historical `0b86d3d742fcbf1c`, emergent `84595a73932f3ac4`, 709/709/708/682; logs `aw2_*`): historical `743bc115ea3a41fe`, emergent `b098c193e64d5d88`, both 709/709/708/682 (equal to main), guard intact (cascade 31). Re-pinned on this head; a second run matches.
   - The 43 test files that touch these readers pass (716 tests). tsc clean.
 - The lock-conflict fix (the back-channel floor and the contradiction rule) is **held** on `claude/b5-alliance-lock-conflict` until package P2 and the RF-ROSTER precedence fix make the Farz chain robust. Measured alone it breaks the guard through Farz (an "all objectives already owned" skip at t179).
