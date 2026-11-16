@@ -5,7 +5,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { bindPresidentRequestAttempts, joinPresidentRequests, requestCandidates, type PresidentRequestDetail } from '../tools/ai_play/president_policies.js';
+import { axisCorpsOrder, bindPresidentRequestAttempts, joinPresidentRequests, requestCandidates, type PresidentRequestDetail } from '../tools/ai_play/president_policies.js';
 import type { GameState } from '../src/state/game_state.js';
 
 function makeState(): GameState {
@@ -48,6 +48,12 @@ describe('President Request-op candidates', () => {
 });
 
 describe('President Request-op: several corps on one axis', () => {
+    it('serves an exhausted corps first with preferExhausted, else in corps id order (Codex review on #742)', () => {
+        const ids = ['arbih_2nd_corps', 'arbih_3rd_corps'];
+        expect(axisCorpsOrder(makeState(), ids, true)).toEqual(['arbih_3rd_corps', 'arbih_2nd_corps']);
+        expect(axisCorpsOrder(makeState(), ids, false)).toEqual(['arbih_2nd_corps', 'arbih_3rd_corps']);
+    });
+
     it('keeps every named corps, each with only its axis targets', () => {
         expect(requestCandidates(makeState(), 'RBiH', {
             requestAxis: { corpsIds: ['arbih_2nd_corps', 'arbih_3rd_corps'], municipalities: ['doboj', 'maglaj'] },

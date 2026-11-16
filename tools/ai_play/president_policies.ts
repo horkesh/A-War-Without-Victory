@@ -196,11 +196,23 @@ export function requestCandidates(state: GameState, faction: FactionId, opts?: P
         .map(([corpsId, targets]) => ({ corpsId, targets: [...targets].sort(strictCompare) }));
 }
 
+/**
+ * The order several axis corps are served in a request week. With `preferExhausted`, corps above
+ * the planning gate come first (Codex review on #742: in plain id order an exhausted 3rd Corps lost
+ * its Authority to a buildable 2nd Corps request); then corps id.
+ */
+export function axisCorpsOrder(state: GameState, corpsIds: readonly string[], preferExhausted: boolean): string[] {
+    const exhausted = (corpsId: string): number =>
+        (state.military.corps_command?.[corpsId]?.corps_exhaustion ?? 0) > MAX_EXHAUSTION_FOR_OPERATION ? 1 : 0;
+    return [...corpsIds].sort((a, b) => (preferExhausted ? exhausted(b) - exhausted(a) : 0) || strictCompare(a, b));
+}
+
 async function applyRequestOp(state: GameState, faction: FactionId, baseDir: string, log: PresidentTurnLog, opts?: PresidentPolicyOptions): Promise<void> {
-    // Several axis corps: one Request-op per corps per request week (each paid and checked alone).
+    // Several axis corps: one Request-op per corps per request week (each paid and checked alone),
+    // in axisCorpsOrder so --request-prefer-exhausted reaches the exhausted corps first.
     const axis = opts?.requestAxis;
     if (axis && axis.corpsIds.length > 1) {
-        for (const corpsId of [...axis.corpsIds].sort(strictCompare)) {
+        for (const corpsId of axisCorpsOrder(state, axis.corpsIds, opts?.preferExhausted === true)) {
             await applyOneRequestOp(state, faction, baseDir, log, { ...opts, requestAxis: { ...axis, corpsIds: [corpsId] } });
         }
         return;
