@@ -236,29 +236,55 @@ export function seedDisplacementTimerOnFlip(
     for (const displaced of allFactions) {
         if (displaced === toFaction) continue;
         const timerKey = `${osid}|${displaced}`;
-        // A stale RF-5B policy timer (the OSID changed hands) yields to the new holder's timer.
-        if (timerMap[timerKey] && timerMap[timerKey].cause !== 'policy_expulsion') continue;
+        // A stale RF-5B policy timer (the OSID changed hands) or a dormant one (RB9) yields to
+        // the new holder's timer, which inherits the people already expelled.
+        if (!isReplaceableTimer(timerMap[timerKey])) continue;
         timerMap[timerKey] = {
             mun_id: munId,
             from_faction: displaced,
             to_faction: toFaction,
             started_turn: currentTurn,
-            ...carriedPolicyDisplacement(timerMap[timerKey]),
+            ...carriedDisplacement(timerMap[timerKey]),
         };
     }
 }
 
 /**
- * RF-5B: when a capture replaces a policy timer whose wave already fired, the new timer
- * inherits the people that wave expelled, so its own waves draw on the community that
- * remains, never on the 1991 census again (the same people cannot be expelled twice).
+ * RF-5B, extended to every timer by RB9: when a capture replaces a timer whose wave already
+ * fired (a policy timer, or a dormant one), the new timer inherits the people already expelled,
+ * so its own waves draw on the community that remains, never on the 1991 census again (the
+ * same people cannot be expelled twice).
  */
-function carriedPolicyDisplacement(
+function carriedDisplacement(
     existing: HostileTakeoverTimerState | undefined
 ): { cumulative_displaced?: number } {
-    if (existing?.cause !== 'policy_expulsion' || existing.matured_turn === undefined) return {};
+    if (!existing || existing.matured_turn === undefined) return {};
+    if (existing.cause !== 'policy_expulsion' && existing.dormant_since_turn === undefined) return {};
     const prior = existing.cumulative_displaced ?? 0;
     return prior > 0 ? { cumulative_displaced: prior } : {};
+}
+
+/** A timer a new capture may replace: a policy timer (RF-5B) or a dormant one (RB9). */
+function isReplaceableTimer(existing: HostileTakeoverTimerState | undefined): boolean {
+    return !existing || existing.cause === 'policy_expulsion' || existing.dormant_since_turn !== undefined;
+}
+
+/**
+ * RB9: retire a timer instead of forgetting it. A timer whose wave fired keeps its
+ * `cumulative_displaced` as a dormant record (it never fires again); one that never fired
+ * displaced nobody and is deleted, as before.
+ */
+function retireTimer(
+    timerMap: Record<string, HostileTakeoverTimerState>,
+    timerKey: string,
+    currentTurn: number,
+): void {
+    const timer = timerMap[timerKey];
+    if (timer && timer.matured_turn !== undefined && (timer.cumulative_displaced ?? 0) > 0) {
+        timer.dormant_since_turn = currentTurn;
+        return;
+    }
+    delete timerMap[timerKey];
 }
 
 export interface TakeoverBattleRecord {
@@ -781,13 +807,17 @@ export function processDisplacementTakeover(
                 const scope = getPolicyExpulsionEntry(holder, munId);
                 if (!scope) continue;
                 const timerKey = `${osid}|${other}`;
-                if (timerMap[timerKey]) continue;
+                // RB9: a dormant timer (people already expelled here) yields, and the policy
+                // wave draws only on those who remain.
+                const existingTimer = timerMap[timerKey];
+                if (existingTimer && existingTimer.dormant_since_turn === undefined) continue;
                 timerMap[timerKey] = {
                     mun_id: munId,
                     from_faction: other,
                     to_faction: holder,
                     started_turn: scope.wave === 'B' ? currentTurn + POLICY_WAVE_B_DELAY_TURNS : currentTurn,
-                    cause: 'policy_expulsion'
+                    cause: 'policy_expulsion',
+                    ...carriedDisplacement(existingTimer),
                 };
                 report.timers_started += 1;
             }
@@ -813,14 +843,15 @@ export function processDisplacementTakeover(
             if (fromFaction === toFaction) continue;
             if (!areFactionsAtWar(state, fromFaction, toFaction)) continue;
             const timerKey = `${osidKey}|${fromFaction}`;
-            // A stale RF-5B policy timer (the OSID changed hands) yields to the captor's timer.
-            if (timerMap[timerKey] && timerMap[timerKey].cause !== 'policy_expulsion') continue;
+            // A stale RF-5B policy timer (the OSID changed hands) or a dormant one (RB9) yields
+            // to the captor's timer, which inherits the people already expelled.
+            if (!isReplaceableTimer(timerMap[timerKey])) continue;
             timerMap[timerKey] = {
                 mun_id: munId,
                 from_faction: fromFaction,
                 to_faction: toFaction,
                 started_turn: currentTurn,
-                ...carriedPolicyDisplacement(timerMap[timerKey])
+                ...carriedDisplacement(timerMap[timerKey])
             };
             report.timers_started += 1;
         }
@@ -855,21 +886,25 @@ export function processDisplacementTakeover(
         const pipeIdx = timerKey.indexOf('|');
         const osid = pipeIdx >= 0 ? timerKey.substring(0, pipeIdx) : timerKey;
 
-        // Recapture check: if displaced faction regained control, delete timer
+        // RB9: a dormant timer only remembers who was already expelled; it never fires.
+        if (timer.dormant_since_turn !== undefined) continue;
+
+        // Recapture check: if displaced faction regained control, retire the timer (RB9: a fired
+        // timer stays as a dormant record of who was expelled; an unfired one is deleted).
         const currentController = state.political.political_controllers?.[osid];
         if (currentController === timer.from_faction) {
-            delete timerMap[timerKey];
+            retireTimer(timerMap, timerKey, currentTurn);
             continue;
         }
-        // Alliance check: if factions no longer at war, delete timer
+        // Alliance check: if factions no longer at war, retire the timer
         if (currentController && !areFactionsAtWar(state, timer.from_faction, currentController)) {
-            delete timerMap[timerKey];
+            retireTimer(timerMap, timerKey, currentTurn);
             continue;
         }
         // RF-5B: a policy wave belongs to the faction whose policy it is. If that faction no
         // longer holds the OSID (e.g. RS took it), the wave never fires and books nothing.
         if (timer.cause === 'policy_expulsion' && currentController !== timer.to_faction) {
-            delete timerMap[timerKey];
+            retireTimer(timerMap, timerKey, currentTurn);
             continue;
         }
 
@@ -1059,7 +1094,7 @@ export function processDisplacementTakeover(
             const remainingMinority = Math.max(0, initialMinority - cumulativeDisplaced);
 
             if (remainingMinority < SUSTAINED_MIN_REMAINING) {
-                delete timerMap[timerKey];
+                retireTimer(timerMap, timerKey, currentTurn);
                 continue;
             }
 

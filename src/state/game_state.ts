@@ -1874,10 +1874,18 @@ export interface HostileTakeoverTimerState {
     matured_turn?: number;
     /**
      * Cumulative persons displaced from this OSID (initial + all sustained rounds). Set before
-     * maturation only when a capture replaces a fired RF-5B policy timer: it then carries the
-     * people that wave already expelled, and the new initial wave draws on those who remain.
+     * maturation only when a capture replaces a timer whose wave already fired (an RF-5B policy
+     * timer, or a dormant timer, RB9): it then carries the people already expelled, and the new
+     * initial wave draws on those who remain, never on the 1991 census again.
      */
     cumulative_displaced?: number;
+    /**
+     * RB9: set when a timer whose wave already fired would have been deleted (the expelled side
+     * retook the OSID, the sides made peace, a policy holder lost it, or the community ran out).
+     * A dormant timer never fires; it only remembers `cumulative_displaced`, so a later capture of
+     * the same OSID inherits it instead of counting the same people from the census a second time.
+     */
+    dormant_since_turn?: number;
     /**
      * RF-5B: why the timer exists when no control change seeded it. 'policy_expulsion' =
      * seeded once by a faction's recorded minority policy ("expel") at the RBiH-HRHB war
