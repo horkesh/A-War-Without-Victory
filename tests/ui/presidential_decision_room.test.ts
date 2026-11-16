@@ -1626,10 +1626,15 @@ describe('buildPresidentialDecisionRoomView', () => {
       cost: 25,
       payload: { corpsId: 'arbih_3rd_corps', opName: 'operation_breakthrough' },
     });
-    // A non-executing (planning) operation carries no stop-op directive.
+    // CODE3 (2026-11-16): a planning operation can be stopped too, at the same price.
     expect(
-      view.cards.find((card) => card.id === 'command:stop-op:arbih_2nd_corps:operation_staging'),
-    ).toBeUndefined();
+      view.cards.find((card) => card.id === 'command:stop-op:arbih_2nd_corps:operation_staging')?.directive,
+    ).toEqual({
+      lever: 'stop_op',
+      corpsId: 'arbih_2nd_corps',
+      cost: 25,
+      payload: { corpsId: 'arbih_2nd_corps', opName: 'operation_staging' },
+    });
   });
 
   it('propagates a directive through buildActiveDossier for the selected card', () => {

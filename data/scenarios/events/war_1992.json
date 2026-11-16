@@ -1051,7 +1051,7 @@
             "material_effect_refs": [
               "recruitment_modifier.RS"
             ],
-            "explanation": "Per-decision review routes each proposed sweep through a modal with full casualty projection. The csq_paramilitary_authorization_refused counterfactual remains reachable if approvals are never granted."
+            "explanation": "Per-decision review routes each proposed sweep through a modal with full casualty projection. If no sweep is ever approved, the refusal can still be recorded."
           }
         ],
         "dimension_shifts": [
@@ -2162,9 +2162,7 @@
             "label": "Paramilitary refusal posture recorded",
             "timing": "future",
             "certainty": "conditional",
-            "opens_events": [
-              "csq_paramilitary_authorization_refused"
-            ],
+            "opens_events": [],
             "opens_flags": [
               "rbih_paramilitary_policy",
               "rbih_paramilitary_refused"
@@ -2220,7 +2218,7 @@
             "material_effect_refs": [
               "recruitment_modifier.RBiH"
             ],
-            "explanation": "Per-decision review routes each proposed deployment through a modal with full casualty projection. The csq_paramilitary_authorization_refused counterfactual remains reachable if approvals are never granted; the international-standing penalty remains modest until a deployment is actually approved."
+            "explanation": "Per-decision review routes each proposed deployment through a modal with full casualty projection. The international-standing penalty remains modest until a deployment is actually approved."
           }
         ],
         "dimension_shifts": [
