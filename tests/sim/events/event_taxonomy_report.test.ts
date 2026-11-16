@@ -194,7 +194,7 @@ describe('event taxonomy diagnostic report', () => {
             'zagreb_orders_hrhb_ceasefire',
             'zagreb_restrains_boban_vopp',
             'csq_international_disillusionment_1993',
-            'csq_paramilitary_authorization_refused',
+            // RF-PM1: the RBiH "always deny" preview no longer opens the RS-paying consequence.
             'gornji_vakuf_clashes_1993',
         ]);
         // Phase E/F foreclosure authoring: the three faction-root historical-default

@@ -2132,6 +2132,15 @@ function prePlannedOperationAlreadyResolved(state: GameState, def: PrePlannedOp)
     )) {
         return true;
     }
+    // CODE3 (2026-11-16): a President's Stop-op resolves the authored operation. The halt removes
+    // the op and writes no AAR, so without this the per-week player injection re-queued it the
+    // next turn and the paid halt did not hold. One authored operation is one attempt. Halts are
+    // player-only (halted_op_record is never written in headless runs), so headless is unchanged.
+    if ((state.military.corps_command?.[def.corps]?.halted_op_record ?? []).some((record) =>
+        record.op_name === def.name
+    )) {
+        return true;
+    }
     return (state.military.preplanned_operations_satisfied_by_start ?? []).some((entry) =>
         entry.corps_id === def.corps
         && entry.operation_name === def.name

@@ -52,6 +52,7 @@ export const KNOWN_EVENT_CONDITION_TYPES = [
     'operation_attacked',
     'operation_completed',
     'or',
+    'paramilitary_deployments_at_most',
     'paramilitary_mode_equals',
     'patron_pressure_above',
     'siege_active',

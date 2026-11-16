@@ -295,7 +295,7 @@ Canonical clarification of the player's command role, consistent with §3 and §
 
 1. **Authorize op** — approve an operation a commander proposes. **SHIPPED** (back-the-officer / proposal approval).
 2. **Request op** — direct a commander toward a strategic objective, even against his military judgment. **SHIPPED 2026-06-01 (#106)** — president names a target OSID; engine auto-builds the op (single-hop staging v1).
-3. **Stop op** — halt a live operation to bank political capital. **SHIPPED 2026-06-01 (#103/#104).**
+3. **Stop op** — halt a live operation (in planning or execution) to bank political capital. **SHIPPED 2026-06-01 (#103/#104).**
 4. **Authorize elite deployment** — release elite/special units to a front or operation. **SHIPPED 2026-06-01 (#105).**
 5. **Replace a corps CO** — sack/install a commander, at a cost. **SHIPPED 2026-06-01 (#107)** — observable internal_cohesion −4 cost + RS-revolt when the faction's patron-dependence weight times the relieved officer's `political_reliability` passes the threshold (`command_lever_consequences.ts`).
 

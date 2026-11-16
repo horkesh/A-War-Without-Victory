@@ -39,7 +39,7 @@ import { resolvePeacePlan } from '../../src/sim/negotiation/peace_plans.js';
 import { getPeacePlanById } from '../../src/sim/negotiation/peace_plan_data.js';
 import { createRequire } from 'node:module';
 import { raiseArmyClash, sweepLapsedArmyClashes } from '../../src/sim/combat/army_clashes.js';
-import { applyPresidentPolicy, emptyPresidentTurnLog, type PresidentKind } from './president_policies.js';
+import { applyPresidentPolicy, emptyPresidentTurnLog, type PresidentKind, type PresidentPolicyOptions, type PresidentRequestDetail } from './president_policies.js';
 import { readFileSync } from 'node:fs';
 
 /** The gesture event rows as the desktop loads them (electron-main `loadFrontVisitEventDef`). */
@@ -108,6 +108,13 @@ interface CliOptions {
     clashPolicy?: 'insist' | 'accept';
     /** Appendix C test President (proposal §5D): hands-off, engaged or meddler. Records Authority per turn. */
     president?: PresidentKind;
+    /**
+     * Played-test options for the President (package "1994-95 attack and defence"), opt-in:
+     * `--request-axis <corps>:<mun>[,<mun>...]` and `--request-prefer-exhausted on`. With either,
+     * the output adds `president_requests` (each order joined to its after-action report) and the
+     * requested corps' exhaustion per turn. Without them the output is unchanged.
+     */
+    presidentOptions?: PresidentPolicyOptions;
     electronLogPath?: string;
     electronAutosavePath?: string;
 }
@@ -335,6 +342,22 @@ function parseArgs(argv: string[]): CliOptions {
         ...(() => {
             const raw = parseEnum(values.get('--president') ?? 'off', ['off', 'hands_off', 'engaged', 'meddler'] as const, '--president');
             return raw === 'off' ? {} : { president: raw };
+        })(),
+        ...(() => {
+            const axisRaw = values.get('--request-axis');
+            const exhaustedRaw = parseEnum(values.get('--request-prefer-exhausted') ?? 'off', ['off', 'on'] as const, '--request-prefer-exhausted');
+            if (!axisRaw && exhaustedRaw === 'off') return {};
+            if ((axisRaw || exhaustedRaw === 'on') && !presidentArg) {
+                throw new Error('--request-axis / --request-prefer-exhausted need --president engaged or meddler');
+            }
+            let requestAxis: PresidentPolicyOptions['requestAxis'];
+            if (axisRaw) {
+                const [corpsId, munList] = axisRaw.split(':');
+                const municipalities = (munList ?? '').split(',').map((m) => m.trim()).filter(Boolean).sort(strictCompare);
+                if (!corpsId || municipalities.length === 0) throw new Error(`--request-axis expects <corps>:<mun>[,<mun>...], got ${axisRaw}`);
+                requestAxis = { corpsId, municipalities };
+            }
+            return { presidentOptions: { ...(requestAxis ? { requestAxis } : {}), ...(exhaustedRaw === 'on' ? { preferExhausted: true } : {}) } };
         })(),
     };
 }
@@ -914,6 +937,35 @@ function reportSummary(state: GameState, report: unknown, playerFaction: Faction
 }
 
 /** Diagnostic snapshot of each traced corps' queue and live operations, in deterministic order. */
+/**
+ * Played test: each staged Request-op joined to what became of it. The inject-op-directive step
+ * names the operation `Presidential Directive — <target>`; a finished one has an after-action report
+ * in `state.operation_history`, a running one is still in the corps' active operations, and a refused one
+ * leaves `op_directive_rejection`.
+ */
+function joinPresidentRequests(requests: PresidentRequestDetail[], state: GameState) {
+    const history = (state.operation_history ?? []) as Array<Record<string, any>>;
+    return requests.map((request) => {
+        const aar = history.find((a) => a.operation_name === request.operation_name && (a.started_turn ?? 0) >= request.turn);
+        const command = state.military.corps_command?.[request.corps_id];
+        const running = (command?.active_operations ?? []).find((op) => op.name === request.operation_name);
+        const rejection = command?.op_directive_rejection;
+        const result = aar
+            ? {
+                status: 'completed', outcome: aar.outcome ?? null, recovery_reason: aar.recovery_reason ?? null,
+                started_turn: aar.started_turn ?? null, ended_turn: aar.ended_turn ?? null, total_attacks: aar.total_attacks ?? null,
+                killed_suffered: aar.casualties_suffered?.killed ?? null, killed_inflicted: aar.casualties_inflicted?.killed ?? null,
+                objectives_captured: [...(aar.objectives_logged_captured ?? [])].sort(strictCompare),
+            }
+            : running
+                ? { status: 'running', phase: running.phase }
+                : rejection && rejection.target_osid === request.target_osid
+                    ? { status: 'rejected', reason: rejection.reason, turn: rejection.turn }
+                    : { status: 'not_found' };
+        return { ...request, result };
+    });
+}
+
 function corpsTrace(state: GameState, corpsIds: string[]) {
     return Object.fromEntries(corpsIds.map((corpsId) => {
         const command = state.military.corps_command?.[corpsId];
@@ -985,12 +1037,14 @@ async function runComparison(baseDir: string, options: CliOptions) {
     // Appendix C: the President's own acts (gestures, Request-ops, Insist, backing), through the
     // desktop's contracts, before the week's decisions are answered.
     const presidentEventDefs = options.president ? loadGestureEventDefs(baseDir) : new Map<string, unknown>();
+    const presidentRequests: PresidentRequestDetail[] = [];
     for (let index = 0; index < options.turns; index += 1) {
         const presidentLog = emptyPresidentTurnLog();
         if (options.president) {
             // An army clash left unanswered at Advance lapses (electron-main sweeps after advance).
             sweepLapsedArmyClashes(playerState);
-            await applyPresidentPolicy(playerState, options.faction, options.president, index, presidentEventDefs, baseDir, presidentLog);
+            await applyPresidentPolicy(playerState, options.faction, options.president, index, presidentEventDefs, baseDir, presidentLog, options.presidentOptions);
+            if (presidentLog.request_details) presidentRequests.push(...presidentLog.request_details);
         }
         applyPlayerPolicy(playerState, options, transcript);
         const headlessResult = await advanceTurn(headlessState, baseDir);
@@ -1044,6 +1098,11 @@ async function runComparison(baseDir: string, options: CliOptions) {
                     } : {}),
                 }
                 : null;
+        }
+        if (options.presidentOptions) {
+            const requested = [...new Set(presidentRequests.map((r) => r.corps_id))].sort(strictCompare);
+            row.requested_corps_exhaustion = Object.fromEntries(requested.map((corpsId) =>
+                [corpsId, playerState.military.corps_command?.[corpsId]?.corps_exhaustion ?? null]));
         }
         if (options.traceCorps) {
             row.corps_trace = {
@@ -1110,6 +1169,7 @@ async function runComparison(baseDir: string, options: CliOptions) {
             ...(options.priceBacking ? { price_backing: options.priceBacking } : {}),
             ...(options.clashPolicy ? { clash_policy: options.clashPolicy } : {}),
             ...(options.president ? { president: options.president } : {}),
+            ...(options.presidentOptions ? { president_options: options.presidentOptions } : {}),
             paramilitary_requests: options.paramilitaryPolicy,
             paramilitary_resolution_timing: options.paramilitaryPolicy === 'standing_allow'
                 ? 'same_turn'
@@ -1136,6 +1196,7 @@ async function runComparison(baseDir: string, options: CliOptions) {
                 final: { control_counts: controlCounts(playerState), state_sha256: stateHash(playerState) },
             },
         },
+        ...(options.presidentOptions ? { president_requests: joinPresidentRequests(presidentRequests, playerState) } : {}),
         turns,
     };
     if (!electronReplay) return baseOutput;
