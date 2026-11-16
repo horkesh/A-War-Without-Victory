@@ -235,7 +235,6 @@ function hasPendingPoliticalObjectiveDecision(
     return Boolean(state.pendingPeacePlan)
         || Boolean(state.pendingDayton)
         || (state.pendingCounterOffers ?? []).some((offer) => !offer.targetFaction || offer.targetFaction === faction)
-        || (state.pendingConvoyDecisions ?? []).some((convoy) => convoy.route_faction === faction && convoy.decision == null)
         || (state.pendingParamilitaryRequests ?? []).some((request) => request.faction === faction && request.decision == null);
 }
 
@@ -2045,31 +2044,6 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
             .filter((value: unknown): value is string => typeof value === 'string' && value.length > 0)
             .sort(strictCompare)
         : undefined;
-    const pendingConvoyDecisions = Array.isArray(state.military.pending_convoy_decisions)
-        ? (state.military.pending_convoy_decisions as Array<Record<string, unknown>>)
-            .map((convoy) => {
-                const id = typeof convoy.id === 'string' ? convoy.id : '';
-                const targetEnclave = typeof convoy.target_enclave === 'string' ? convoy.target_enclave : '';
-                const routeFaction = convoy.route_faction === 'RS' || convoy.route_faction === 'RBiH' || convoy.route_faction === 'HRHB'
-                    ? convoy.route_faction
-                    : null;
-                if (!id || !targetEnclave || !routeFaction) return null;
-                const decision = convoy.decision === 'allow' || convoy.decision === 'block' || convoy.decision === 'divert'
-                    ? convoy.decision
-                    : undefined;
-                return {
-                    id,
-                    target_enclave: targetEnclave,
-                    route_faction: routeFaction as 'RS' | 'RBiH' | 'HRHB',
-                    supply_amount: finiteNumber(convoy.supply_amount),
-                    ...(decision ? { decision: decision as 'allow' | 'block' | 'divert' } : {}),
-                };
-            })
-            .filter((value): value is NonNullable<typeof value> => value !== null)
-            .filter((convoy) => !playerFaction || convoy.route_faction === playerFaction)
-            .sort((a, b) => a.id.localeCompare(b.id))
-        : undefined;
-
     const municipalitySupportOrders = state.military.municipality_support_orders && typeof state.military.municipality_support_orders === 'object'
         ? Object.fromEntries(
             Object.entries(state.military.municipality_support_orders as Record<string, Record<string, unknown>>)
@@ -2961,7 +2935,6 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
     const corpsCommanderActions = derivePlayerCorpsCommanderActions(state, playerFaction);
     const reserveRequestHistory = deriveReserveRequestHistory(state, playerFaction);
     const peacePlanHistory = derivePeacePlanHistory(state, playerFaction);
-    const convoyDecisionHistory = deriveConvoyDecisionHistory(state, playerFaction);
     const paramilitaryDecisionHistory = deriveParamilitaryDecisionHistory(state, playerFaction);
     const officerDecisionHistory = deriveOfficerDecisionHistory(state, playerFaction);
     const armyReserveQueue = deriveArmyReserveQueue({
@@ -3043,7 +3016,7 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
         directiveOutcomeReceipts: directiveOutcomeReceiptsRealizedOnTurn(buildDirectiveOutcomeReceipts(state as GameState), turn),
         runtimeFeatureFlags: options?.runtimeFeatureFlags,
         armyStance, armyCoDecisionTraces, armyCorpsDirectives, corpsCommanderActions,
-        casualtyLedger: scopeToPlayerFaction(casualtyLedger, playerFaction), civilianCasualties, internationalVisibilityPressure, ivpConsequencesActive, pendingConvoyDecisions, municipalitySupportOrders,
+        casualtyLedger: scopeToPlayerFaction(casualtyLedger, playerFaction), civilianCasualties, internationalVisibilityPressure, ivpConsequencesActive, municipalitySupportOrders,
         sarajevoTunnelOperational: Boolean(state.military.sarajevo_tunnel_operational), sarajevoLifeline: deriveSarajevoLifelineView(state), warPhaseSupplyPressure: scopeToPlayerFaction(warPhaseSupplyPressure, playerFaction), warPhaseSupplyCondition: scopeToPlayerFaction(warPhaseSupplyCondition, playerFaction), warPhaseExhaustion: scopeToPlayerFaction(warPhaseExhaustion, playerFaction),
         player_faction: playerFaction ?? undefined,
         rbih_hrhb_war_earliest_turn: rbih_hrhb_war_earliest_turn ?? null,
@@ -3139,7 +3112,6 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
         pendingReserveRequests,
         reserveRequestHistory,
         peacePlanHistory,
-        convoyDecisionHistory,
         paramilitaryDecisionHistory,
         officerDecisionHistory,
         pendingParamilitaryRequests,
@@ -4557,10 +4529,6 @@ function derivePeacePlanHistory(
     return records.length > 0 ? records : undefined;
 }
 
-function asConvoyDecision(value: unknown): 'allow' | 'block' | 'divert' | null {
-    return value === 'allow' || value === 'block' || value === 'divert' ? value : null;
-}
-
 function asParamilitaryDecision(value: unknown): 'allow' | 'deny' | 'regular' | null {
     return value === 'allow' || value === 'deny' || value === 'regular' ? value : null;
 }
@@ -4569,39 +4537,6 @@ function asOfficerDecision(value: unknown): 'acknowledged' | 'override_confirmed
     return value === 'acknowledged' || value === 'override_confirmed' || value === 'replacement_accepted'
         ? value
         : null;
-}
-
-function deriveConvoyDecisionHistory(
-    state: any,
-    playerFaction: string | null | undefined,
-): LoadedGameState['convoyDecisionHistory'] {
-    const history = state.military?.convoy_decision_history;
-    if (!Array.isArray(history) || history.length === 0) return undefined;
-    const records: NonNullable<LoadedGameState['convoyDecisionHistory']> = [];
-
-    for (const raw of [...history].sort((a, b) => {
-        const turnA = Number.isFinite(a?.turn) ? Number(a.turn) : 0;
-        const turnB = Number.isFinite(b?.turn) ? Number(b.turn) : 0;
-        if (turnA !== turnB) return turnB - turnA;
-        return strictCompare(String(a?.id ?? ''), String(b?.id ?? ''));
-    })) {
-        const decision = asConvoyDecision(raw?.decision);
-        if (!raw || typeof raw.id !== 'string' || !decision) continue;
-        const routeFaction = String(raw.route_faction ?? '');
-        if (!playerFactionMatch(routeFaction, playerFaction)) continue;
-        records.push({
-            id: raw.id,
-            turn: Number.isFinite(raw.turn) ? Number(raw.turn) : 0,
-            target_enclave: String(raw.target_enclave ?? ''),
-            route_faction: routeFaction,
-            target_faction: String(raw.target_faction ?? ''),
-            supply_amount: finiteNumber(raw.supply_amount),
-            decision,
-            decided_by: raw.decided_by === 'player' ? 'player' : 'bot',
-        });
-    }
-
-    return records.length > 0 ? records : undefined;
 }
 
 function deriveParamilitaryDecisionHistory(

@@ -15,7 +15,7 @@ vi.mock('../../src/ui/map/store/gameStore', () => ({
 }));
 
 vi.mock('../../src/ui/map/desktop/useIPC', () => ({
-    useIPC: () => ({ stageConvoyDecision: vi.fn() }),
+    useIPC: () => ({}),
 }));
 
 // @ts-expect-error TS1378: Vitest supports top-level await in ESM tests.

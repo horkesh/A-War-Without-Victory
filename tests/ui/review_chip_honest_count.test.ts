@@ -231,11 +231,11 @@ describe('the review chip is a true count', () => {
 
   it('says what happens by default for a required item', () => {
     const state = makeState({
-      pendingConvoyDecisions: [{
-        id: 'convoy_a',
-        target_enclave: 'Gorazde',
-        route_faction: 'RBiH',
-        supply_amount: 20,
+      pendingParamilitaryRequests: [{
+        faction: 'RBiH',
+        strength: 120,
+        target_osid: 'S100',
+        estimated_civilian_risk: 10,
       }],
     } as Partial<LoadedGameState>);
     const review = buildPreAdvanceCommandReviewView({ state });

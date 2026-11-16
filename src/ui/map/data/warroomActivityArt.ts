@@ -1,8 +1,8 @@
 /**
  * warroomActivityArt — shared art resolver for the warroom activity strips that
- * surface the two patron/humanitarian "activity" lanes in the Situation tab:
- *   - the Humanitarian Convoy lane  (convoy)
+ * surface the patron "activity" lane in the Situation tab:
  *   - the Diplomacy & Patron lane   (patron)
+ * (The Humanitarian Convoy lane was retired with the convoy decision family, F1i 2026-11-16.)
  *
  * Mirrors the `eventIllustrationArt` / `tutorialDeckArt` / `verdictArt` resolver
  * idiom EXACTLY (eager `import.meta.glob` + faction-tagged basename suffix
@@ -11,17 +11,16 @@
  * NOT sepia; see docs/plans/2026-05-24-gui-ai-asset-brief.md +
  * docs/30_planning/design/VISUAL_ASSET_STRATEGY.md).
  *
- * The two activity stills are faction-defining (the art-prompt-pack §4.4 convoy
- * and §4.12 patron "Category-4" stills, split per faction —
+ * The activity still is faction-defining (the art-prompt-pack §4.12 patron
+ * "Category-4" still, split per faction —
  * docs/40_reports/proposals/20260609_ART_PROMPT_PACK_NON_SECTION6.md), so each
  * resolves a per-faction basename out of the already-shipped event-illustration
  * directory:
- *   convoy → event_supply_convoy_<faction>.webp
  *   patron → event_patron_relations_<faction>.webp
  * (faction ∈ RBiH | RS | HRHB).
  *
  * Art resolution: an eager `import.meta.glob` over `assets/event_illustrations/*.webp`
- * resolves the mapped basename to a hashed dist URL. The six faction-tagged stills
+ * resolves the mapped basename to a hashed dist URL. The three faction-tagged stills
  * already ship in that directory; when an asset is absent (e.g. a future faction or
  * a base that strips the art) the resolver returns `null` and the caller keeps its
  * existing text-only activity card — never a broken image, never a crash.
@@ -33,8 +32,8 @@
  * Canonical owner: src/ui/map/data/warroomActivityArt.ts
  */
 
-/** The two patron/humanitarian activity lanes that carry a documentary still. */
-export type WarroomActivityKind = 'convoy' | 'patron';
+/** The activity lane that carries a documentary still. */
+export type WarroomActivityKind = 'patron';
 
 /** Canonical player factions whose activity stills ship today. */
 export type WarroomActivityFaction = 'RBiH' | 'RS' | 'HRHB';
@@ -42,7 +41,7 @@ export type WarroomActivityFaction = 'RBiH' | 'RS' | 'HRHB';
 // Eager + ?url so the bundler hashes the committed activity stills into dist and
 // we get a plain URL string keyed by the glob path. This is the SAME directory
 // glob the EventModal's `eventIllustrationArt` uses; we share the asset folder so
-// the convoy/patron stills are never duplicated. If the directory is stripped on a
+// the patron stills are never duplicated. If the directory is stripped on a
 // given base, the glob resolves to `{}` and every activity renders text-only.
 const WARROOM_ACTIVITY_ART = import.meta.glob('../assets/event_illustrations/*.webp', {
   eager: true,
@@ -55,7 +54,6 @@ const WARROOM_ACTIVITY_ART = import.meta.glob('../assets/event_illustrations/*.w
  * appended at resolve time. Owner-editable: re-point a lane by editing the stem.
  */
 export const WARROOM_ACTIVITY_TO_BASENAME_STEM: Readonly<Record<WarroomActivityKind, string>> = {
-  convoy: 'event_supply_convoy',
   patron: 'event_patron_relations',
 };
 
@@ -83,7 +81,7 @@ export function resolveWarroomActivityArtFrom(
   kind: WarroomActivityKind | null | undefined,
   faction: string | null | undefined,
 ): string | null {
-  if (kind !== 'convoy' && kind !== 'patron') return null;
+  if (kind !== 'patron') return null;
   if (!isWarroomActivityFaction(faction)) return null;
   const stem = WARROOM_ACTIVITY_TO_BASENAME_STEM[kind];
   if (!stem) return null;

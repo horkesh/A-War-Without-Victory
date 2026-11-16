@@ -543,52 +543,6 @@ describe('decision consequence trail', () => {
     expect(`${ledger[0]?.family} ${ledger[0]?.title} ${ledger[0]?.outcome} ${ledger[0]?.detail}`).not.toMatch(/_/);
   });
 
-  it('includes resolved humanitarian convoy decisions from persisted history', () => {
-    const ledger = buildDecisionConsequenceLedger(makeState({
-      convoyDecisionHistory: [
-        {
-          id: 'convoy:64:srebrenica:RS',
-          turn: 64,
-          target_enclave: 'Srebrenica enclave',
-          route_faction: 'RS',
-          target_faction: 'RBiH',
-          supply_amount: 0.5,
-          decision: 'allow',
-          decided_by: 'player',
-        },
-      ],
-    } as Partial<LoadedGameState>));
-
-    expect(ledger[0]).toMatchObject({
-      id: 'convoy:convoy:64:srebrenica:RS',
-      family: 'Humanitarian convoy',
-      turn: 64,
-      title: 'Convoy allowed',
-      outcome: 'Allowed',
-      detail: 'Convoy to Srebrenica enclave allowed through VRS lines; aid delivered to ARBiH.',
-    });
-    expect(`${ledger[0]?.family} ${ledger[0]?.title} ${ledger[0]?.outcome} ${ledger[0]?.detail}`).not.toMatch(/_/);
-  });
-
-  it('excludes bot convoy decisions from player consequence receipts', () => {
-    const ledger = buildDecisionConsequenceLedger(makeState({
-      convoyDecisionHistory: [
-        {
-          id: 'convoy:64:srebrenica:RS',
-          turn: 64,
-          target_enclave: 'Srebrenica enclave',
-          route_faction: 'RS',
-          target_faction: 'RBiH',
-          supply_amount: 0.5,
-          decision: 'allow',
-          decided_by: 'bot',
-        },
-      ],
-    } as Partial<LoadedGameState>));
-
-    expect(ledger.find((record) => record.familyId === 'humanitarian-convoy')).toBeUndefined();
-  });
-
   it('includes resolved paramilitary authorization decisions from persisted history', () => {
     const ledger = buildDecisionConsequenceLedger(makeState({
       paramilitaryDecisionHistory: [

@@ -261,7 +261,6 @@ interface WindowAwwv {
     stageOperationDecision: (payload: { corpsId: string; operationName: string; decision: 'launch' | 'postpone' | 'abort' | 'probe' }) => Promise<{ ok: boolean; error?: string }>;
     stageAirdropAllocation: (allocations: Record<string, number>) => Promise<{ ok: boolean; error?: string }>;
     respondToEventDecision: (eventId: string, responseId: string) => Promise<{ ok: boolean; error?: string }>;
-    stageConvoyDecision: (convoyId: string, decision: 'allow' | 'block' | 'divert') => Promise<{ ok: boolean; error?: string }>;
     stageOpsecToggle: (sectorId: string, active: boolean) => Promise<{ ok: boolean; error?: string }>;
     stageMunicipalitySupportOrder: (payload: { faction: 'RS' | 'RBiH' | 'HRHB'; munId: string; type: 'weapons_shipment' | 'staff_priority' | 'croatian_support_package' }) => Promise<{ ok: boolean; error?: string }>;
     clearOrders: (brigadeId: string) => Promise<{ ok: boolean; error?: string }>;
@@ -600,10 +599,6 @@ export function useIPC() {
             respondToEventDecision: awwv
                 ? (eventId: string, responseId: string) => awwv.respondToEventDecision(eventId, responseId)
                 : (_eventId: string, _responseId: string) => NOOP_RESULT as Promise<{ ok: boolean; error?: string }>,
-
-            stageConvoyDecision: awwv
-                ? (convoyId: string, decision: 'allow' | 'block' | 'divert') => awwv.stageConvoyDecision(convoyId, decision)
-                : (_convoyId: string, _decision: 'allow' | 'block' | 'divert') => NOOP_RESULT as Promise<{ ok: boolean; error?: string }>,
 
             stageOpsecToggle: awwv
                 ? (sectorId: string, active: boolean) => awwv.stageOpsecToggle(sectorId, active)

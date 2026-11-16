@@ -782,19 +782,6 @@ function projectCanonicalDecisionReceipts(state, playerFaction) {
         }))
         .filter((receipt) => typeof receipt.requestId === 'string' && receipt.requestId.length > 0),
     ),
-    convoyDecisionReceipts: sortReceipts(
-      (Array.isArray(military.convoy_decision_history) ? military.convoy_decision_history : [])
-        .filter((receipt) => receipt && (!playerFaction || receipt.route_faction === playerFaction))
-        .map((receipt) => ({
-          id: receipt.id ?? null,
-          turn: receipt.turn ?? null,
-          routeFaction: receipt.route_faction ?? null,
-          targetFaction: receipt.target_faction ?? null,
-          decision: receipt.decision ?? null,
-          decidedBy: receipt.decided_by ?? null,
-        }))
-        .filter((receipt) => typeof receipt.id === 'string' && receipt.id.length > 0),
-    ),
     officerDecisionReceipts: sortReceipts(
       (Array.isArray(military.officer_decision_history) ? military.officer_decision_history : [])
         .filter((receipt) => receipt && (!playerFaction || receipt.faction === playerFaction))
@@ -876,10 +863,6 @@ function buildPlayerBlockerInventory(raw, playerFaction, known) {
     .map((proposal) => proposal.proposed_action.slice('OPPORTUNITY:'.length)));
   const reserves = (Array.isArray(military.pending_reserve_requests) ? military.pending_reserve_requests : [])
     .filter((request) => request && (!playerFaction || request.faction === playerFaction)).length;
-  const convoys = (Array.isArray(military.pending_convoy_decisions) ? military.pending_convoy_decisions : [])
-    .filter((decision) => decision
-      && (!playerFaction || decision.route_faction === playerFaction)
-      && decision.decision == null).length;
   const officerEvents = (Array.isArray(military.pending_officer_events) ? military.pending_officer_events : [])
     .filter((event) => event
       && (!playerFaction || event.faction === playerFaction)
@@ -897,7 +880,6 @@ function buildPlayerBlockerInventory(raw, playerFaction, known) {
     proposals: Number(known?.proposals ?? 0),
     paramilitary: Number(known?.paramilitary ?? 0),
     reserves,
-    convoys,
     officerEvents,
     peacePlan: negotiation.pending_peace_plan ? 1 : 0,
     counterOffers,
@@ -1963,7 +1945,6 @@ async function readState(frame) {
   const {
     peacePlanDecisionReceipts,
     reserveDecisionReceipts,
-    convoyDecisionReceipts,
     officerDecisionReceipts,
     paramilitaryDecisionReceipts,
   } = readCanonicalDecisionReceiptsFromAutosave(decisionReceiptAutosavePath, playerFaction);
@@ -2134,7 +2115,6 @@ async function readState(frame) {
       .sort(([left], [right]) => strictAsciiCompare(left, right))),
     peacePlanDecisionReceipts,
     reserveDecisionReceipts,
-    convoyDecisionReceipts,
     officerDecisionReceipts,
     paramilitaryDecisionReceipts,
     pendingProposalCount: unresolvedPlayerProposals.length,
@@ -2159,12 +2139,6 @@ async function readState(frame) {
     pendingReserveRequestIds: (Array.isArray(raw.military?.pending_reserve_requests) ? raw.military.pending_reserve_requests : [])
       .filter((request) => request && (!playerFaction || request.faction === playerFaction))
       .map((request) => request.request_id ?? null)
-      .filter(Boolean)
-      .sort(strictAsciiCompare),
-    convoyDecisions: blockerInventory.convoys,
-    pendingConvoyDecisionIds: (Array.isArray(raw.military?.pending_convoy_decisions) ? raw.military.pending_convoy_decisions : [])
-      .filter((decision) => decision && (!playerFaction || decision.route_faction === playerFaction) && decision.decision == null)
-      .map((decision) => decision.id)
       .filter(Boolean)
       .sort(strictAsciiCompare),
     pendingOfficerEvents: blockerInventory.officerEvents,
@@ -6042,34 +6016,6 @@ async function handleCurrentSurface(page, frame, faction, events, options = {}) 
       after,
     });
     return { handled: true, action: `reserve-issue:${requestId}` };
-  }
-  if ((pendingState?.convoyDecisions ?? 0) > 0) {
-    const convoyId = pendingState.pendingConvoyDecisionIds?.[0] ?? null;
-    if (!convoyId) throw new Error('Pending convoy decision has no exact identity');
-    const opened = await openDeskInboxItem(frame, 'convoy_decision', `convoy:${convoyId}`);
-    if (!opened) throw new Error(`Pending convoy decision did not open from the Presidential Desk: ${convoyId}`);
-    await snapshot(page, frame, faction, events, 'convoy-before-response', { convoyId, before: pendingState });
-    const clicked = await clickExactVisibleButton(frame, 'Allow Convoy', `allow convoy ${convoyId}`, { afterMs: 1200 });
-    if (!clicked) throw new Error(`Pending convoy decision exposed no exact Allow Convoy action: ${convoyId}`);
-    const after = await readState(frame);
-    const cleared = !(after?.pendingConvoyDecisionIds ?? []).includes(convoyId);
-    const convoyReceipt = assertNewExactDecisionReceipt(
-      'convoy',
-      'id',
-      convoyId,
-      pendingState?.convoyDecisionReceipts ?? [],
-      after?.convoyDecisionReceipts ?? [],
-      { routeFaction: faction, decision: 'allow', decidedBy: 'player' },
-    );
-    await snapshot(page, frame, faction, events, 'convoy-after-response', {
-      convoyId,
-      clicked,
-      cleared,
-      convoyReceipt,
-      after,
-    });
-    if (!cleared) throw new Error(`Pending convoy decision remained after visible response: ${convoyId}`);
-    return { handled: true, action: `convoy-allow:${convoyId}` };
   }
   if ((pendingState?.pendingOfficerEvents ?? 0) > 0) {
     const officerMatter = pendingState.pendingOfficerMatterItems?.[0] ?? null;
