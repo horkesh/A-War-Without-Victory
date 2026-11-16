@@ -2,8 +2,8 @@
  * Posture model option 2: stance matters (plan docs/plans/2026-11-12-posture-model-option2-stance-matters.md,
  * panel docs/40_reports/governance/20261112_POSTURE_MODEL_OPTION2_PANEL.md, Engine Invariants §14.10c).
  *
- * Covers: gate, generation from persisted baselines, president-caused exclusion, army-stance
- * exclusion, cap + cooldown + not_put receipts, deadline lapse = stood (no effect), confirm,
+ * Covers: gate, generation from persisted baselines, president-caused exclusion, no army-stance
+ * exclusion (retired, Batch B), cap + cooldown + not_put receipts, deadline lapse = stood (no effect), confirm,
  * countermand / constrain holds (4 turns from effective-from), reorganize never overridden,
  * patron re-cap + shift, RS Main Staff delay vs RBiH none, overrule window (Confirm only,
  * keyed to the corps, survives a level round trip), no cowing from stance overrules, hold is
@@ -13,7 +13,8 @@
  */
 
 import { readdirSync, readFileSync, statSync } from 'node:fs';
-import { join } from 'node:path';
+import { join, resolve } from 'node:path';
+import { withoutComments } from '../helpers/sourceComments.js';
 import { describe, expect, it } from 'vitest';
 import type {
     CorpsCommandState,
@@ -329,6 +330,19 @@ describe('stance matters: resolution', () => {
         state.meta.turn -= 1;
         expect(getEffectiveCorpsStance(state, 'c_a')).toBe('balanced');
         expect(capEffectiveStanceByHold(makeState(), 'c_a', 'offensive')).toBe('offensive');
+    });
+
+    it('an army general offensive cannot bypass a presidential hold at defensive (Batch B: no army override)', () => {
+        const state = stateWithMatter();
+        state.military.army_stance = { RBiH: 'general_offensive' } as never;
+        recordStanceMatterAnswer(state, { matterId: 'STANCE_11_c_a', answer: 'constrain', constraint: 'ceiling_defensive' });
+        runTurn(state, { c_a: 'offensive' });
+        state.meta.turn -= 1;
+        expect(state.military.corps_command!.c_a!.stance).toBe('defensive');
+        expect(getEffectiveCorpsStance(state, 'c_a')).toBe('defensive');
+        // The SID-fallback battle path reads the corps stance only; it has no army override to bypass the hold.
+        const battleSrc = withoutComments(readFileSync(resolve(process.cwd(), 'src/sim/combat/battle_resolution.ts'), 'utf8'));
+        expect(battleSrc).not.toMatch(/army_stance/);
     });
 
     it('rejects a malformed or out-of-option constraint at the IPC', () => {
