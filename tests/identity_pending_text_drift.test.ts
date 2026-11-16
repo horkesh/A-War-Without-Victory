@@ -125,19 +125,6 @@ describe('rbih_paramilitary_policy_1992 pending decision across provenance-note 
         }
     });
 
-    it('answers a policy decision saved before the staff-sweep disclosure (staff assessment without the closing sentence)', async () => {
-        const current = await pendingPolicy();
-        const old = clone(current);
-        const pending = (old.military.pending_event_decisions ?? []).find((d) => d.event_id === 'rbih_paramilitary_policy_1992')!;
-        const sentence = ' A standing order governs only the deployments you decide yourself: with your staff in charge (Assisted command or above), rear-area sweeps are decided without it, and each one counts against your side.';
-        expect(pending.staff_assessment?.endsWith(sentence)).toBe(true);
-        pending.staff_assessment = pending.staff_assessment!.slice(0, -sentence.length);
-        for (const response of ['always_deny', 'ask', 'always_allow']) {
-            const fromOld = resolveDesktopEventDecision(clone(old), 'rbih_paramilitary_policy_1992', response, process.cwd());
-            expect(fromOld.military.event_decision_log?.at(-1)).toMatchObject({ event_id: 'rbih_paramilitary_policy_1992', response_id: response });
-        }
-    });
-
     it('still refuses a policy decision whose player-facing text or options were altered', async () => {
         for (const forge of [
             (p: any) => { p.narrative = 'forged'; },

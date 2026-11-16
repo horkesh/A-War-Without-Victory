@@ -24,7 +24,15 @@ import {
     getPlayerSafeMilitaryFactionName,
 } from '../utils/playerSafeText.js';
 import { t, type MessageKey } from '../i18n/index.js';
-import { humanizeOsid } from '../utils/osidDisplayName.js';
+import { municipalityDisplayName } from '../../shared/bosnianPlaceNames.js';
+
+/** The 1991 municipality named by an OSID ("op:<municipality>:<settlement>"), in census spelling. */
+function sweepMunicipalityName(osid: string): string {
+  const municipality = typeof osid === 'string' ? osid.split(':')[1] : undefined;
+  if (!municipality) return 'rear';
+  return municipalityDisplayName(municipality)
+    ?? municipality.split('_').map((word) => (word ? word.charAt(0).toUpperCase() + word.slice(1) : '')).join(' ');
+}
 import { playerFactionMatch } from './playerFactionMatch.js';
 import { stanceMatterReceiptLine } from './stanceMatterCopy.js';
 
@@ -67,6 +75,7 @@ export type DecisionConsequenceFamilyId =
   | 'dayton-settlement'
   | 'humanitarian-convoy'
   | 'paramilitary-authorization'
+  | 'paramilitary-sweep'
   | 'patron-relations'
   | 'officer-personnel'
   | 'stance-matter'
@@ -934,18 +943,19 @@ export function buildDecisionConsequenceLedger(
   // side, so the player is told where and why instead of meeting the count at Dayton.
   for (const sweep of state.paramilitaryStaffSweeps ?? []) {
     if (playerFaction && !playerFactionMatch(sweep.faction, playerFaction)) continue;
-    const place = humanizeOsid(sweep.target_osid);
+    // Municipality scale only: the record speaks at that scale, and a settlement name would assert village-level history.
+    const place = sweepMunicipalityName(sweep.target_osid);
     const faction = getPlayerSafeMilitaryFactionName(sweep.faction, sweep.faction);
     records.push({
       id: `paramilitary-staff:${sweep.id}`,
       turn: sweep.turn,
-      familyId: 'paramilitary-authorization',
-      family: 'Paramilitary authorization',
+      familyId: 'paramilitary-sweep',
+      family: 'Paramilitary sweep',
       title: 'Paramilitary sweep carried out without a request to you',
       titleToken: { key: 'decisionConsequences.title.paramilitary.staffSweep' },
       outcome: 'Carried out',
       outcomeToken: { key: 'decisionConsequences.outcome.staffSweep' },
-      detail: `A paramilitary sweep was sent into ${place} for ${faction}. No request came to you: at Assisted command or above your staff decides rear-area sweeps on its own authority, and at Full Control a standing order to allow does the same. It counts against your side.`,
+      detail: `In this campaign a paramilitary sweep was sent into the ${place} area for ${faction}. No request came to you: at Assisted, Delegated or Observer your staff decides rear-area sweeps without asking, and at Full Control your standing order of Always allow sends them without one. It counts against your side. This is an event of the simulated war, not a statement about what happened in that place.`,
       detailToken: { key: 'decisionConsequences.detail.paramilitary.staffSweep', params: { place, faction } },
       recordTarget: 'records',
     });
@@ -1015,7 +1025,8 @@ export function buildDecisionConsequenceLedgerSummary(
     familySet.add(record.family);
     if (record.recordTarget === 'chronicle') {
       chronicleRouteCount += 1;
-    } else {
+    } else if (record.familyId !== 'paramilitary-sweep') {
+      // A sweep carried out without a request is a receipt, not a filed decision of the President.
       recordsRouteCount += 1;
     }
   }

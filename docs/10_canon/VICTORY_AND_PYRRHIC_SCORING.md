@@ -129,7 +129,7 @@ Grades A+/A/B/C/D/F are assigned by faction-specific anchors (the anchor tables 
 
 | RBiH anchor | Condition |
 |---|---|
-| A+ | >33% territory AND no enclaves lost AND zero war crimes authorized in play (`war_crimes_events_emergent`; owner 2026-11-10: scripted historical records no longer block it) |
+| A+ | >33% territory AND no enclaves lost AND zero war crimes recorded in play (`war_crimes_events_emergent`; owner 2026-11-10: scripted historical records no longer block it) |
 | A | ≥30% territory AND ≤1 enclave lost AND Sarajevo held |
 | B | ≥25% territory AND Sarajevo held |
 | C | ≥18% territory AND ≤3 enclaves lost |
@@ -180,7 +180,7 @@ Six per-dimension letter grades (A+/A/B/C/D/F) threshold-gated on raw dimension 
 
 Condemnation flags come from **two sources**:
 1. Recorded discrete **ruptures** (`rupture_consequences[]` → `collectCondemnationFlags()`), each tied to a specific event supported by an authoritative legal finding under `SENSITIVE_HISTORY_DESIGN_GATE.md` §2 (ICTY, a final Court of BiH judgment of equivalent subject-matter weight, or an ICJ/UN finding), permanent once recorded. Currently one: `genocide_condemnation`, fired by the Srebrenica rupture (`src/sim/negotiation/rupture_consequences.ts`).
-2. A verdict-time, **non-rupture** `authorized_cleansing_condemnation` flag, applied in emergent mode and to the faction the player commands in any mode (`SENSITIVE_HISTORY_DESIGN_GATE.md §2a(i)`), computed from terminal modeled-atrocity state per `SENSITIVE_HISTORY_DESIGN_GATE.md §2a` — a general aggregate severity judgment (a union of ≥1 authorized war crime (a paramilitary sweep, or the first wave of a bot faction's minority-expulsion policy; `SENSITIVE_HISTORY_DESIGN_GATE.md` §2a(ii)(a)) OR catastrophic civilian harm booked to the side that took or held control of the area or conducted the paramilitary action; siege departures are booked to the besieger with none killed, and siege deaths are not modelled; corrected 2026-11-13 per the §6 displacement attribution record), NOT an accusation of any specific historical incident.
+2. A verdict-time, **non-rupture** `authorized_cleansing_condemnation` flag, applied in emergent mode and to the faction the player commands in any mode (`SENSITIVE_HISTORY_DESIGN_GATE.md §2a(i)`), computed from terminal modeled-atrocity state per `SENSITIVE_HISTORY_DESIGN_GATE.md §2a` — a general aggregate severity judgment (a union of ≥1 recorded war crime (a paramilitary sweep the faction carried out, whether the player approved it, its staff ran it, or a bot faction ran it; or the first wave of a bot faction's minority-expulsion policy; `SENSITIVE_HISTORY_DESIGN_GATE.md` §2a(ii)(a)) OR catastrophic civilian harm booked to the side that took or held control of the area or conducted the paramilitary action; siege departures are booked to the besieger with none killed, and siege deaths are not modelled; corrected 2026-11-13 per the §6 displacement attribution record), NOT an accusation of any specific historical incident.
 
 Both feed `FactionVerdict.condemnation_flags[]` and `classifyOutcome`. **Only source (1) may be cited with an ICTY or Court of BiH finding, or a named historical event, in any narrative surface.** Below-C atrocity decisiveness for non-genocide cases is delivered by the §2a flag (→ `hollow_victory`), NOT the cost cap (which bottoms at C per §3.5); the additive `ATROCITY_COST_GAIN` term is retained (it still forces the C-cap for otherwise-cheap wars, invariant A1).
 

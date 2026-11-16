@@ -18,7 +18,14 @@ export function countFiledTurnRecords(state: LoadedGameState | null | undefined)
 
 export function countFiledDecisionRecords(state: LoadedGameState | null | undefined): number {
   return buildDecisionConsequenceLedger(state, Number.MAX_SAFE_INTEGER)
-    .filter((record) => record.recordTarget !== 'chronicle')
+    .filter((record) => record.recordTarget !== 'chronicle' && record.familyId !== 'paramilitary-sweep')
+    .length;
+}
+
+/** Sweeps carried out without a request: receipts that are listed in Records but are not decisions the President filed. */
+export function countFiledSweepReceipts(state: LoadedGameState | null | undefined): number {
+  return buildDecisionConsequenceLedger(state, Number.MAX_SAFE_INTEGER)
+    .filter((record) => record.familyId === 'paramilitary-sweep')
     .length;
 }
 
@@ -33,6 +40,7 @@ export function hasFiledRecord(state: LoadedGameState | null | undefined): boole
   if (countFiledTurnRecords(state) > 0) return true;
   if (countFiledDecisionRecords(state) > 0) return true;
   if (countFiledChronicleDecisionRecords(state) > 0) return true;
+  if (countFiledSweepReceipts(state) > 0) return true;
   if (filterPlayerFacingOperationHistory(state).length > 0) return true;
   return false;
 }

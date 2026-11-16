@@ -6,6 +6,7 @@ import {
   resolveDecisionConsequenceCopy,
 } from '../../src/ui/map/data/decisionConsequenceLedger.js';
 import type { LoadedGameState } from '../../src/ui/map/data/types.js';
+import { countFiledDecisionRecords, countFiledSweepReceipts, hasFiledRecord } from '../../src/ui/map/data/filedRecordTruth.js';
 
 function makeState(overrides: Partial<LoadedGameState> = {}): LoadedGameState {
   return {
@@ -627,12 +628,25 @@ describe('decision consequence trail', () => {
 
     expect(ledger.map((record) => record.id)).toEqual(['paramilitary-staff:para_rbih_t2_0']);
     const record = ledger[0]!;
-    expect(record).toMatchObject({ turn: 2, family: 'Paramilitary authorization', title: 'Paramilitary sweep carried out without a request to you', outcome: 'Carried out' });
-    expect(record.detail).toContain('A paramilitary sweep was sent into');
-    expect(record.detail).toContain('your staff decides rear-area sweeps on its own authority');
+    expect(record).toMatchObject({ turn: 2, familyId: 'paramilitary-sweep', family: 'Paramilitary sweep', title: 'Paramilitary sweep carried out without a request to you', outcome: 'Carried out' });
+    // Municipality scale, never the settlement: the record does not support a village-level claim, and the text says so.
+    expect(record.detail).toContain('into the Kakanj area for');
+    expect(record.detail).not.toMatch(/Bilješevo|Biljesevo/);
+    expect(record.detail).toContain('your staff decides rear-area sweeps without asking');
     expect(record.detail).toContain('It counts against your side.');
+    expect(record.detail).toContain('an event of the simulated war, not a statement about what happened in that place');
     expect(record.detail).not.toMatch(/authorized|ethnic cleansing|_|op:/i);
     expect(record.detailToken?.key).toBe('decisionConsequences.detail.paramilitary.staffSweep');
+    // A receipt is not a filed decision: it is listed in Records but never counted as one.
+    const state = makeState({
+      player_faction: 'RBiH',
+      rawGameState: { meta: { player_faction: 'RBiH' } } as any,
+      paramilitaryStaffSweeps: [{ id: 'para_rbih_t2_0', turn: 2, target_osid: 'op:kakanj:biljesevo', faction: 'RBiH' }],
+    } as Partial<LoadedGameState>);
+    expect(countFiledDecisionRecords(state)).toBe(0);
+    expect(countFiledSweepReceipts(state)).toBe(1);
+    expect(hasFiledRecord(state)).toBe(true);
+    expect(buildDecisionConsequenceLedgerSummary(buildDecisionConsequenceLedger(state, 10)).recordsRouteCount).toBe(0);
   });
 
   it('excludes paramilitary authorization decisions outside the loaded player faction', () => {

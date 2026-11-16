@@ -27,6 +27,7 @@ const FAMILY_LABEL_KEYS: Record<DecisionConsequenceRecord['familyId'], MessageKe
   'dayton-settlement': 'decisionConsequences.family.daytonSettlement',
   'humanitarian-convoy': 'decisionConsequences.family.humanitarianConvoy',
   'paramilitary-authorization': 'decisionConsequences.family.paramilitaryAuthorization',
+  'paramilitary-sweep': 'decisionConsequences.family.paramilitarySweep',
   'patron-relations': 'decisionConsequences.family.patronRelations',
   'officer-personnel': 'decisionConsequences.family.officerPersonnel',
   'stance-matter': 'decisionConsequences.family.stanceMatter',
