@@ -37,6 +37,9 @@ export interface HistoricalTerritoryCheckpoint {
  * (apr1992_definitive_188w initial_save); 39/104/156/188 are the painted references
  * jan1993/apr1994/apr1995/oct1995 (the calibration checkpoints). Guarded by
  * tests/sim/political/historical_territory_band.test.ts, which recomputes the painted rows.
+ * DEPENDENCY: a paint correction to those references changes history's band and so the gate;
+ * the test then fails until this table is re-baked, and a hands-off emergent run must be
+ * re-measured with the new table.
  */
 export const HISTORICAL_TERRITORY_CHECKPOINTS: readonly HistoricalTerritoryCheckpoint[] = [
     { turn: 0, id: 'start', share: { RS: 52.692, RBiH: 32.264, HRHB: 15.044 } },

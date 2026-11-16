@@ -12,7 +12,7 @@
   - `political_peace_plan.ts` and `negotiation/peace_plans.ts`: the scored accept/reject step uses `plan.historical_responses` as the reference. The hard branches run first, unchanged.
   - `getFactionTerritoryAreaPct` moved to `src/sim/osid_areas.ts`, re-exported by `peace_plans.ts`.
   - `political_personality.ts`: the thresholds and their doc; the RS patron note corrected.
-  - Canon: Systems Manual §7.10.7 gains the rule, in the same change.
+  - Canon: Systems Manual §7.10.7 gains the rule, in the same change. It also records the dependency: the band is the painted references, so a later paint correction shifts the gate. The band test fails until the table is re-baked, and a hands-off emergent run must then be re-measured.
 - **Proof** (main `df206642c` + #726; logs `C:/Pyrrhic/AWWV-worktrees/_logs/b5-scorer-20261116/`).
   - **Historical 188w byte-identical**: `df791f73c26ed642`, 709/709/708/681, guard intact.
   - **Hands-off emergent 188w**: `6ebcd2c2d3d03372`, 709/709/708/680, **guard intact**. Farz 4/4 receipts (t180-185, 2nd Corps), P-B pass, eastern provenance clean, Srebrenica and Žepa fall on schedule, HRHB cascade 30. The previous emergent run on main was 710/707/707/670 and breached.
