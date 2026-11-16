@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
+import { ALLIED_THRESHOLD } from '../src/sim/early_war/alliance_update.js';
 
 function loadEvents(filename: string) {
     const raw = readFileSync(resolve(__dirname, '..', 'data', 'scenarios', 'events', filename), 'utf-8');
@@ -245,9 +246,13 @@ describe('Event timeline historical integrity', () => {
         expect(cohaExpires.sets_flags?.coha_expired).toBe(true);
     });
 
-    it('Washington Agreement requires Croat-Bosniak war', () => {
-        const wa = allEvents.find((e: any) => e.id === 'hrhb_washington_agreement_1994');
-        expect(wa.trigger.requires_events).toContain('croat_bosniak_war_begins_1993');
+    // B5 A2 (2026-11-16): both Washington cards require the Croat-Bosniak war through the
+    // engine's own record of it (rbih_hrhb_state.war_started_turn), not the 1993 event id, so a
+    // war that starts by another route still counts and the card and the engine cannot disagree.
+    it.each(['hrhb_washington_agreement_1994', 'rbih_washington_agreement_1994'])('%s requires the Croat-Bosniak war', (id) => {
+        const wa = allEvents.find((e: any) => e.id === id);
+        expect(wa.trigger.condition.type).toBe('and');
+        expect(wa.trigger.condition.conditions).toContainEqual({ type: 'rbih_hrhb_war_started', value: true });
     });
 
     it('NATO ultimatum and Sarajevo exclusion zone retain their bounded chronology and effects', () => {
@@ -280,10 +285,28 @@ describe('Event timeline historical integrity', () => {
         ]);
     });
 
-    it('Federation ground offensive requires both Washington and Deliberate Force', () => {
+    // B5 1995 alliance gate (2026-11-16): Croatian involvement in 1995 keys on the Federation
+    // actually existing — Washington signed, OR an RBiH-HRHB alliance kept above ALLIED_THRESHOLD —
+    // not on the 1993 war that Washington ended. Left alone the Washington branch is true exactly
+    // where the old requires_events was.
+    const ALLIANCE_OR_WASHINGTON = {
+        type: 'or',
+        conditions: [
+            { type: 'event_fire_count', event_id: 'hrhb_washington_agreement_1994', min_count: 1 },
+            { type: 'alliance_above', value: ALLIED_THRESHOLD },
+        ],
+    };
+
+    it('Federation ground offensive requires Deliberate Force and a Federation (Washington or a kept alliance)', () => {
         const fgo = allEvents.find((e: any) => e.id === 'federation_ground_offensive_1995');
-        expect(fgo.trigger.requires_events).toContain('hrhb_washington_agreement_1994');
-        expect(fgo.trigger.requires_events).toContain('nato_deliberate_force_1995');
+        expect(fgo.trigger.requires_events).toEqual(['nato_deliberate_force_1995']);
+        expect(fgo.trigger.condition).toEqual(ALLIANCE_OR_WASHINGTON);
+    });
+
+    it('Operation Summer 95 requires a Federation (Washington or a kept alliance), not the 1993 war', () => {
+        const summer = allEvents.find((e: any) => e.id === 'operation_summer_95');
+        expect(summer.trigger.requires_events).toBeUndefined();
+        expect(summer.trigger.condition).toEqual(ALLIANCE_OR_WASHINGTON);
     });
 
     it('Holbrooke ceasefire demand requires the Federation ground offensive', () => {
