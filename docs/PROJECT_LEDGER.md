@@ -103,6 +103,13 @@ Docs only; no `src/` or `data/` change, no hash change.
 - The L7 lane's SE9 attribution is done; the orchestrator's dispositions are in `docs/plans/2026-11-15-pre-freeze-work-list.md`: N1 Konjic September Offensive force balance (calibration pass, authored operation data); N2 probe-repeat (trace, then a must-fix if confirmed, sequenced with P3 and P5); N3 Kreševo HVO pocket and N4 ARBiH coverage at Prusac and Vesela (re-measure after P2, then fix or calibration pass); N5 sector aggregation, a Konjic defender at Ljubinje (trace, then a must-fix if engine); N6 unread concentration zones (retire, Part 4).
 - "Probes never occupy on a decisive win" is a Part 5 candidate for the next game-designer and historian sitting, with the probe-casualty question (F2). The owner reference questions Ljuta (all), Golubići October 1995 and Sitnik October 1995 join the Part 6 painted-reference batch. SE9 stays parked behind P2.
 
+## 2026-11-16 — Pass 24: the B3 finding, B2-b, and jan1993_to_dayton registered
+
+Docs only; no `src/` or `data/` change, no hash change.
+
+- B3 (political-directive producer, Wave 6 coupling, RS corps-role overlay): the Batch B lane found the overlay is a hard plan gate, not a 0.02 weight (`plan.ts:173-176`): it locks all ARBiH corps to the economy role and lifts every RS and HRHB corps. Ruled B3-b (no produced directive for any faction, the human's staff included) with B2-b (stop producing `army_directive_pushback`, drain the old events on load). B3 lands after package P2 and before P3. Work list rows B2 and B3 and the final-behaviour record (section 6, item 6) updated.
+- `jan1993_to_dayton` cannot start on main: `data/source/municipalities_1990_initial_political_controllers_jan1993.json` has never existed in git history. Read-only check: it is not reachable by a player (the desktop New Game and IPC accept only `apr_1992`; no scenario picker renders; `SCENARIO_REGISTRY` has no consumer in `src/` besides tests). Registered in the work list (Part 4, J1) with a proposal to retire it; the orchestrator rules.
+
 ## 2026-11-15 — Command loop L7: army clashes (proposal 2A step A1; owner decision 4)
 
 - **What.** A clash is raised only by something the president did, when he stages it: stop an operation, request one, withhold a Level-1 plan, or decline a recommended opportunity. All three must hold:
