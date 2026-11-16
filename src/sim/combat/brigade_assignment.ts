@@ -2556,6 +2556,8 @@ export function recomputeSectorPowerAndThreat(
         for (const osid of enemyOsids) {
             enemyPower += enemyPersonnelByOsid.get(osid) ?? 0;
         }
+        // Sector pressure index, not a force ratio: whole-sector enemy personnel over own
+        // defensive power per edge (see CorpsFrontSector.threat_ratio). Scale accepted as final.
         s.threat_ratio = s.defensive_power > 0
             ? enemyPower / s.defensive_power
             : (enemyPower > 0 ? 9999 : 0);
