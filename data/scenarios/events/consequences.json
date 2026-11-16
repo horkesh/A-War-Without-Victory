@@ -1603,7 +1603,7 @@
     "sets_flags": {
       "hvo_arbih_war_active": true
     },
-    "historical_source": "ICTY Prlić et al. Trial Judgment (IT-04-74-T): the 15 January 1993 HZ HB ultimatum on Vance-Owen provinces 3, 8 and 10 and the April 1993 orders; ICTY Kordić Trial Judgment (IT-95-14/2-T) on the Lašva Valley operations; Balkan Battlegrounds II pp. 417-421.",
+    "historical_source": "ICTY Prlić et al. Trial Judgment (IT-04-74-T): the HZ HB ultimatums on Vance-Owen provinces 3, 8 and 10 (15 January 1993, and April 1993 with a 15 April deadline) and the April 1993 orders; ICTY Blaškić Trial Judgment (IT-95-14-T) on the 15-16 April attack orders to the Central Bosnia Operative Zone; ICTY Kordić Trial Judgment (IT-95-14/2-T) on the Lašva Valley operations; Balkan Battlegrounds II pp. 417-421.",
     "source_tier": "design_counterfactual",
     "source_note": "This is a conditional simulation consequence, not a claim that the displayed outcome occurred historically. The historical_source field records the parent design chain and any contextual historical anchor; player-facing prose appears only when the authored state predicate fires."
   },

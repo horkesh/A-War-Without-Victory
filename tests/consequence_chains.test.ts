@@ -900,9 +900,10 @@ describe('Issue #9 — csq_hvo_central_bosnia_offensive_1993', () => {
 
     it('the massacre card gives no faction a positive delta (atrocity is never rewarded)', () => {
         const def = CSQ_EVENTS.find(e => e.id === 'csq_hvo_central_bosnia_offensive_1993')!;
-        const positiveKinds = new Set(['morale_change', 'cohesion_change', 'aggression_modifier', 'bot_priority_shift', 'supply_delta', 'recruitment_modifier']);
+        // Allowlist (engine seat, P2 round 2): only the rupture itself and narrative may appear.
+        const allowedKinds = new Set(['alliance_change', 'alliance_lock', 'narrative']);
         for (const effect of def.effects ?? []) {
-            expect(positiveKinds.has(effect.kind), effect.kind).toBe(false);
+            expect(allowedKinds.has(effect.kind), effect.kind).toBe(true);
         }
         for (const shift of def.dimension_shifts ?? []) {
             expect(shift.delta, `${shift.faction}.${shift.dimension}`).toBeLessThan(0);
@@ -930,6 +931,12 @@ describe('P2 — csq_hvo_april_1993_offensive_orders (Mostar\'s orders, no atroc
             expect.arrayContaining(['vitez', 'busovaca', 'novi_travnik', 'gornji_vakuf', 'prozor', 'kiseljak', 'travnik', 'kakanj', 'fojnica', 'mostar']),
         );
         expect(shift?.expires_turn).toBe(68); // 53 + 15, the same expiry as before
+        // The readiness lift of Mostar's April orders (B2-minus, P2 round 2).
+        const orders = CSQ_EVENTS.find(e => e.id === ORDERS)!;
+        expect(orders.effects).toEqual(expect.arrayContaining([
+            expect.objectContaining({ kind: 'morale_change', faction: 'HRHB', delta: 15 }),
+            expect.objectContaining({ kind: 'cohesion_change', faction: 'HRHB', delta: 10 }),
+        ]));
     });
 
     it('does not fire when the HVO leadership chose to evacuate or federate (H6)', () => {
@@ -955,7 +962,8 @@ describe('P2 — csq_hvo_april_1993_offensive_orders (Mostar\'s orders, no atroc
     });
 });
 
-describe('Issue #9 (cont.) — rupture stays combat-enabled', () => {    it('keeps the rupture combat-enabled after the same-turn alliance update', () => {
+describe('Issue #9 (cont.) — rupture stays combat-enabled', () => {
+    it('keeps the rupture combat-enabled after the same-turn alliance update', () => {
         const state = makeChain1State(54, {
             flags: { hrhb_political_goal: 'croat_republic' },
             firedEvents: ['croat_bosniak_war_begins_1993'],
