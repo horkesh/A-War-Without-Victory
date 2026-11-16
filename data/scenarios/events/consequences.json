@@ -1593,6 +1593,16 @@
           "mostar"
         ],
         "duration_turns": 15
+      },
+      {
+        "kind": "cohesion_change",
+        "faction": "HRHB",
+        "delta": 10
+      },
+      {
+        "kind": "morale_change",
+        "faction": "HRHB",
+        "delta": 15
       }
     ],
     "sets_flags": {
