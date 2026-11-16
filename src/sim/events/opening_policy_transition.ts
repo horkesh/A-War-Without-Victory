@@ -21,8 +21,27 @@ const REVIEWED_IDENTITY_FNV64 = 'acbebbba72173a81';
 // Re-pinned 2026-11-15 (was 10911 / 4db9c9795b1abb6d): three hidden provenance notes cited UN A/54/549 §35 (the Srebrenica enclave
 // before the safe areas) for the ARBiH chain of command; the two hidden notes now record the correction and the visible source
 // line drops the paragraph. Strings only; options, effects, flags and dimension shifts are byte-identical.
-const REVIEWED_POLICY_CANONICAL_LENGTH = 11239;
-const REVIEWED_POLICY_FNV64 = '3aa51be73b2cdda0';
+// Re-pinned 2026-11-16 for RF-PM1 (was 11239 / 3aa51be73b2cdda0), conditions of the RF-PM1 §6 panel (engine and red-team seats):
+// `always_deny` no longer previews the RS-only `csq_paramilitary_authorization_refused` (opens_events emptied) and the `ask`
+// explanation no longer names that internal id. Options, effects, flags and dimension shifts are byte-identical.
+const REVIEWED_POLICY_CANONICAL_LENGTH = 11091;
+const REVIEWED_POLICY_FNV64 = '57f0d7f927df002c';
+
+/**
+ * The two preview values RF-PM1 corrected, as a decision saved before the change carries them. Exactly these old values are
+ * upgraded to the reviewed ones before the save is compared with the catalog, so such a save can still be answered; any other
+ * drift (including any other opens_events or explanation) is still refused. `opens_events` is preview and receipt metadata and
+ * gates no firing (`enables_events_runtime` does).
+ */
+const PRE_RF_PM1_POLICY_PREVIEW: ReadonlyArray<{ option: string; field: 'opens_events' | 'explanation'; from: unknown; to: unknown }> = [
+    { option: 'always_deny', field: 'opens_events', from: ['csq_paramilitary_authorization_refused'], to: [] },
+    {
+        option: 'ask',
+        field: 'explanation',
+        from: 'Per-decision review routes each proposed deployment through a modal with full casualty projection. The csq_paramilitary_authorization_refused counterfactual remains reachable if approvals are never granted; the international-standing penalty remains modest until a deployment is actually approved.',
+        to: 'Per-decision review routes each proposed deployment through a modal with full casualty projection. The international-standing penalty remains modest until a deployment is actually approved.',
+    },
+];
 
 export type EventDefinitionCatalog = readonly EventDefinition[] | ReadonlyMap<string, EventDefinition>;
 
@@ -114,11 +133,18 @@ function withoutDisplayText(decision: PendingEventDecision): unknown {
  * The paramilitary-policy decision keeps a stricter comparison than the identity card (its narrative, notifications and option text
  * must still match the reviewed catalog), but the three developer provenance notes it copies into a save (`historical_source`,
  * `source_note`, `source`) are never shown to a player and are corrected when an audit finds a wrong cite, so they must not strand a
- * save written before the correction either.
+ * save written before the correction either. The two exact pre-RF-PM1 preview values (`PRE_RF_PM1_POLICY_PREVIEW`) are upgraded for
+ * the same reason.
  */
 function withoutProvenanceText(decision: PendingEventDecision): unknown {
     const copy = JSON.parse(JSON.stringify(decision)) as Record<string, unknown>;
     for (const key of ['historical_source', 'source_note', 'source']) delete copy[key];
+    for (const rule of PRE_RF_PM1_POLICY_PREVIEW) {
+        const option = ((copy.response_options ?? []) as Array<Record<string, unknown>>).find((entry) => entry.id === rule.option);
+        for (const consequence of (option?.future_consequences ?? []) as Array<Record<string, unknown>>) {
+            if (canonicalJson(consequence[rule.field]) === canonicalJson(rule.from)) consequence[rule.field] = JSON.parse(JSON.stringify(rule.to));
+        }
+    }
     return copy;
 }
 

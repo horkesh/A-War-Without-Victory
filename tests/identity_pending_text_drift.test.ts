@@ -103,11 +103,35 @@ describe('rbih_paramilitary_policy_1992 pending decision across provenance-note 
         expect(resolved.military.event_decision_log?.at(-1)).toMatchObject({ event_id: 'rbih_paramilitary_policy_1992', response_id: 'ask' });
     });
 
+    function option(p: any, id: string): any {
+        return p.response_options.find((o: any) => o.id === id);
+    }
+
+    it('answers a policy decision saved before RF-PM1 with the old preview (always_deny opens the refusal; ask names its id)', async () => {
+        const current = await pendingPolicy();
+        const old = clone(current);
+        const pending = (old.military.pending_event_decisions ?? []).find((d) => d.event_id === 'rbih_paramilitary_policy_1992')!;
+        const deny = option(pending, 'always_deny').future_consequences[0];
+        expect(deny.opens_events).toEqual([]);
+        deny.opens_events = ['csq_paramilitary_authorization_refused'];
+        const ask = option(pending, 'ask').future_consequences.find((fc: any) => /international-standing penalty/.test(fc.explanation));
+        ask.explanation = 'Per-decision review routes each proposed deployment through a modal with full casualty projection. The csq_paramilitary_authorization_refused counterfactual remains reachable if approvals are never granted; the international-standing penalty remains modest until a deployment is actually approved.';
+        for (const response of ['always_deny', 'ask']) {
+            const fromOld = resolveDesktopEventDecision(clone(old), 'rbih_paramilitary_policy_1992', response, process.cwd());
+            const fromCurrent = resolveDesktopEventDecision(clone(current), 'rbih_paramilitary_policy_1992', response, process.cwd());
+            expect(fromOld.military.event_decision_log?.at(-1)).toMatchObject({ event_id: 'rbih_paramilitary_policy_1992', response_id: response });
+            expect(fromOld.military.event_flags).toEqual(fromCurrent.military.event_flags);
+            expect(fromOld.military.negotiation?.strategic_dimensions).toEqual(fromCurrent.military.negotiation?.strategic_dimensions);
+        }
+    });
+
     it('still refuses a policy decision whose player-facing text or options were altered', async () => {
         for (const forge of [
             (p: any) => { p.narrative = 'forged'; },
             (p: any) => { p.response_options[0].label = 'forged'; },
             (p: any) => { p.notifications_to_other_factions = {}; },
+            (p: any) => { option(p, 'always_deny').future_consequences[0].opens_events = ['csq_some_other_event']; },
+            (p: any) => { option(p, 'ask').future_consequences[0].explanation = 'forged'; },
         ]) {
             const forged = clone(await pendingPolicy());
             forge((forged.military.pending_event_decisions ?? []).find((d) => d.event_id === 'rbih_paramilitary_policy_1992'));
