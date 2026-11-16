@@ -38,7 +38,7 @@ Every engine finding gets one of three answers, with a one-line reason when it i
 |---|---|---|
 | C1 | F7 `supply_below` fires on a reserve that does not exist | Fix; a false event reaches the player; built. Merged (#690, control-identical). |
 | C1b | F7b the Army HQ plan's unread army stance and aggression modifier | Retire (nothing reads them; the fix would be new behaviour before the freeze). Merged (#696, control-identical; the theater statuses that fed them and the reserves-off supply bug go with them; the headless hash moved to 70f4dc05bf375bc7 on the six retired state fields only). |
-| C2 | SE9 sector intel re-key | Fix; about half of early-war mid-turn reads use the wrong sector; built. Waits for the package's P2. |
+| C2 | SE9 sector intel re-key | Fix; about half of early-war mid-turn reads use the wrong sector; built. Waits for the package's P2; attribution done (N1 to N6 above). |
 | C3 | RB8 corps-less HRHB brigades | Fix: two at Putićevo with 3,000 and 1,672 men at week 188; trace first (RF-5B binding B6). The root (the refuge definition) is A10; the corps-adoption guard follows it in the L7 lane. |
 | C4 | RB6 "Operacija Džihad" | Fix: still drawn in every run; historian check first. |
 | C5 | CODE4 `rankDefendersByPower` tie-break | Fix: determinism; inert if there are no ties. Merged (#691, byte-identical). |
@@ -66,23 +66,35 @@ On main, two defects keep the ARBiH 1st to 4th Corps passive (the plan lockout a
 
 Bar: the Farz P1, P-A, P-B and enclave guards pass at every merge, and the historian accepts the share of 1st to 4th Corps operations that succeed (the historian's 20 to 40% band) and that VRS operations reach a battle and win some. One hands-off emergent 188-week run joins the pass tests after the package: the band, VRS operations reaching battle, the enclaves, and Ozren falling in the 1995 window to any operation (none of Fable's runs is emergent, and no P2 item reads decision mode, so the repairs should carry over, unverified). Scores are recorded and are not a bar. After 8 runs past the trace the seats read the receipts and re-plan. Shipping the passive army as final behaviour is not on the list. Ratification: operations-expert, corps-army-commander, sector-expert, historian and scenario-creator-runner-tester, then an orchestrator ruling.
 
+**SE9 attribution dispositions (L7 lane, 2026-11-16; data in the L7 shared notes `se9_attribution_raw`, `se9_konjic_defender_trace`, `se9_historian_rulings_20261116`).** The attribution of the matches and misses that SE9 moves, each with the historian's ruling, and the orchestrator's disposition for each new defect. SE9 stays parked behind P2.
+
+| # | Finding | Disposition |
+|---|---|---|
+| N1 | Konjic September Offensive force balance (Bijela, Glavatičevo; the September 1994 offensive must succeed, BB2 pp.495-496; main's result is partly bought by probe attrition) | Calibration pass: authored operation data. |
+| N2 | Probe-repeat (probes repeating against the same cell) | Trace, then a must-fix if confirmed; sequenced with package P3 and P5. |
+| N3 | Kreševo HVO pocket (the HVO held to Washington, BB2 pp.425-426) and N4 ARBiH coverage at Prusac and Vesela (ARBiH-held, ICTY S&Z TJ ¶242, BB2 p.466) | Re-measure after package P2, then fix (engine) or calibration pass (data). |
+| N5 | Sector aggregation: a Konjic defender counted at Ljubinje | Trace, then a must-fix if it is an engine defect. |
+| N6 | Unread concentration zones (`assess.ts:114-128`) | Retire (inert; Part 4). |
+
+Historian rulings on the other cells: Bočinja minor, main's timing is more historical; Jezero right (Maestral, BB1 p.381); Jemanlići right (BB1 p.382); Ljuta a doubtful paint; Golubići a doubtful paint with SE9 plausible; Sitnik a knock-on, the 1995 date unverified. The Ljuta, Golubići (October 1995) and Sitnik (October 1995) reference questions go to the owner in the calibration pass, batched with the painted-reference questions (Part 6). "Probes never occupy on a decisive win" is a Part 5 candidate for the next game-designer and historian sitting, with the probe-casualty question (F2) attached.
+
 ## Part 3. Fix before 1.0 (the freeze may come first; each proves the hash unchanged)
 
 The enclave-fall handler (§6 panel); L4-2, L4-1 and L4-6; RB5, the withholding of the expulsion policy at autonomy 1 to 3 (sensitive: the §6 panel decides the design, and no lane touches it before that ruling), with a copy fix so Verdict and ending text never presents the missing waves as restraint (narrative and historian seats); SE11, the warroom `political_controllers` key and the B14 re-check; DEC1 (Engine Invariants §6.3), CODE5 (§14.5a text) and the canon lines for Part 5.
 
 ## Part 4. Retire (inert; each proves the hash unchanged)
 
-F1h's dead connectivity term (the 0.5 stays as a named constant); SD2's dormant front readers; F1j's dead friction term; F1k's `corridor_severed` condition; PK4 dead code; the other two CODE2 constants; the feint reserve write; DA3's dormant pressure path (the §6 seats agree to the removal first); any F1i reader that C8's run shows unsound.
+N6, the unread concentration zones (`assess.ts:114-128`); F1h's dead connectivity term (the 0.5 stays as a named constant); SD2's dormant front readers; F1j's dead friction term; F1k's `corridor_severed` condition; PK4 dead code; the other two CODE2 constants; the feint reserve write; DA3's dormant pressure path (the §6 seats agree to the removal first); any F1i reader that C8's run shows unsound.
 
 ## Part 5. Accept as final
 
-Game-designer and historian in one sitting; each item passes two owner tests, left alone and played. CODE3, RB5 for an active human HRHB President, PK5, SD6 with SD8, and the six static gesture rows of BC06 (sitting of 2026-11-16). Reasons and ratifying seats: [final-behaviour record](../40_reports/governance/20261115_FINAL_BEHAVIOUR_AT_1_0.md).
+Game-designer and historian in one sitting; each item passes two owner tests, left alone and played. CODE3, RB5 for an active human HRHB President, PK5, SD6 with SD8, and the six static gesture rows of BC06 (sitting of 2026-11-16). Next sitting, candidate: "probes never occupy on a decisive win", with the probe-casualty question (F2) attached. Reasons and ratifying seats: [final-behaviour record](../40_reports/governance/20261115_FINAL_BEHAVIOUR_AT_1_0.md).
 
 ## Part 6. Calibration pass (data and constants, after the freeze)
 
 Emergent-mode option weights (from E1).
 
-L8 with RF-4, the Donji Vakuf 95 timing (with RF-L3d follow-up 2), the Mistral 2 and Southern Move assembly slip, the painted-reference questions (Prusac January 1993, Konjic Ljuta, Goražde, Maglaj-Jablanica); RF-F1b's constant (check before the freeze that a constant alone makes the W3 and C5 gates bind; if it cannot, it is a Part 1 fix); the roster tenure starts for Praljak, Roso, Petković-2 and Blaškić-2 (H-C4); F1f supply sources; SD14; the F1c and F1d constants in emergent mode (hide emergent mode if a player cannot choose it); SD5 (one read-only check before the freeze to rule out an engine cause); and, once the package lands, the 1994-95 offensives the historian listed (Teslić, Vozuća in June and November 1994, Ozren in spring 1995) as authored operations.
+L8 with RF-4, the Donji Vakuf 95 timing (with RF-L3d follow-up 2), the Mistral 2 and Southern Move assembly slip, the painted-reference questions (Prusac January 1993, Konjic Ljuta, Goražde, Maglaj-Jablanica) with the owner reference questions Ljuta (all), Golubići October 1995 and Sitnik October 1995; N1, the Konjic September Offensive force balance (authored operation data, BB2 pp.495-496), and N3 and N4 if the re-measure after P2 leaves them as data; RF-F1b's constant (check before the freeze that a constant alone makes the W3 and C5 gates bind; if it cannot, it is a Part 1 fix); the roster tenure starts for Praljak, Roso, Petković-2 and Blaškić-2 (H-C4); F1f supply sources; SD14; the F1c and F1d constants in emergent mode (hide emergent mode if a player cannot choose it); SD5 (one read-only check before the freeze to rule out an engine cause); and, once the package lands, the 1994-95 offensives the historian listed (Teslić, Vozuća in June and November 1994, Ozren in spring 1995) as authored operations.
 
 ## Part 7. Before publication
 

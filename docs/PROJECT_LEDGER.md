@@ -96,6 +96,13 @@ Docs only; no `src/` or `data/` change, no hash change.
 - #698: the `address_to_nation_rbih` closing line is year-neutral ("a people who have lived under siege this long"), so the BC06 copy condition of the final-behaviour record is met. String only; the headless hash stays 799e43a7ee2f4764 at that commit.
 - Still open on GitHub at this pass: #697 (B0, the peace-plan floor) and #700 (B4, the autonomous launch retired).
 
+## 2026-11-16 — Pass 22b: SE9 attribution dispositions N1 to N6 on the work list
+
+Docs only; no `src/` or `data/` change, no hash change.
+
+- The L7 lane's SE9 attribution is done; the orchestrator's dispositions are in `docs/plans/2026-11-15-pre-freeze-work-list.md`: N1 Konjic September Offensive force balance (calibration pass, authored operation data); N2 probe-repeat (trace, then a must-fix if confirmed, sequenced with P3 and P5); N3 Kreševo HVO pocket and N4 ARBiH coverage at Prusac and Vesela (re-measure after P2, then fix or calibration pass); N5 sector aggregation, a Konjic defender at Ljubinje (trace, then a must-fix if engine); N6 unread concentration zones (retire, Part 4).
+- "Probes never occupy on a decisive win" is a Part 5 candidate for the next game-designer and historian sitting, with the probe-casualty question (F2). The owner reference questions Ljuta (all), Golubići October 1995 and Sitnik October 1995 join the Part 6 painted-reference batch. SE9 stays parked behind P2.
+
 ## 2026-11-15 — Command loop L7: army clashes (proposal 2A step A1; owner decision 4)
 
 - **What.** A clash is raised only by something the president did, when he stages it: stop an operation, request one, withhold a Level-1 plan, or decline a recommended opportunity. All three must hold:
