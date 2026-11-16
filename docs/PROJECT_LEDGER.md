@@ -54,6 +54,61 @@ Batch B, item B1 (freeze cut, Fable consult 2 revision 2): fix the code to the d
 
 Evidence: `C:/Pyrrhic/AWWV-worktrees/_logs/batch-b-20261116/` (b1_*).
 
+## 2026-11-16 — B3 + B2: the political-directive chain is retired; its undrainable officer events are drained
+
+Batch B, items B3 and B2 (freeze cut, Fable consult 2 revision 2). Scope ruled B3-b + B2-b by game-designer and corps-army-commander, confirmed by the orchestrator.
+
+**What the chain was.**
+- `produce-political-directive` (B1) wrote a verb per faction. The verb locked once war exhaustion passed 500, and exhaustion never falls, so it said the same thing for ~182 weeks.
+- `apply-army-directive-interpretation` (A3) translated that verb into per-corps roles (`army_corps_directives_by_faction`).
+- The commander briefing's C1 overlay let those roles REPLACE the CampaignPlan role. That made the overlay a hard `campaign_role` gate on fresh commander plans (`plan.ts`), not the "~0.02 weight" the freeze cut assumed. On main's final save it pinned every ARBiH corps to `economy` and lifted every RS and HRHB corps above its plan role.
+- A3 also pushed one `army_directive_pushback` officer event per faction per turn: 538 over 188 weeks, none ever acknowledged.
+  - `override-army-directive` has no handler.
+  - The UI adapter drops the type.
+  - But the sim briefing counted them, so a player at autonomy 1+ saw "N order interpretations pending" grow every week, and "Review" opened an empty list.
+- The player's own order tool (`stage-op-directive-order` → `inject-op-directive`) is a separate path and was never part of this chain.
+
+**Change.**
+- Removed both pipeline steps (`war_phases.ts`; step count 197 → 195) and deleted `political_directive_producer.ts` and its test.
+- `commander/briefing.ts`: the overlay reader and its "Wave 6" economy exception are gone. A corps role now comes from the CampaignPlan alone (`army_hq_gathering` front priorities). The plan.ts hard block, the 0.05 alignment weight and the patron term now read the plan's own roles.
+- `army_order_interpretation.ts` keeps its library functions for the claude_plays_vrs harness tools and `army_clashes.ts` (compliance score). `applyArmyDirectiveInterpretation` is marked as no longer in the pipeline.
+- B2: `collect_briefing.ts` and `player_decision_manifest.ts` exclude `army_directive_pushback`, matching the adapter.
+- Save migration v39 (CURRENT_SCHEMA_VERSION 38 → 39):
+  - deletes `political_directives_by_faction`;
+  - empties `army_corps_directives_by_faction` (the field stays);
+  - drains unacknowledged `army_directive_pushback` events;
+  - drops the staff's directive-reading traces (the pushback panel shows each faction's last trace with no age limit), keeping AUTONOMOUS_LAUNCH_PROPOSAL traces.
+  - Other officer events are untouched.
+- Startup snapshot rebuilt at schema 39; drift report regenerated.
+
+**Tests.**
+- New `tests/b3_directive_chain_retired.test.ts`: the v39 migration (slots, drain, traces, idempotence) and the briefing count (pushback not counted; a real `order_pushback` still is).
+- Updated: step order, A3 T12, A4 T11, C1 T2/T3/T4b/T10, the schema pins (freeze guard, versioned steps, drift audit) and the B2 leader-data test (producer parts removed).
+- The player's tool: `op_directive_injection`, `op_directive_staging` and `command_lever_consequences` pass.
+- 16 files, 413 tests, plus the earlier 30-file slice; `tsc` 0.
+
+**Proof (main 76e5fcabd).**
+- Historical 188w, two runs: final_save `bb2ca04839f11d8b` both times (deterministic).
+  - Compared with main's run, these are byte-identical: control_delta, weekly_report, formation_delta, activity_summary, operation_aars, watched_operations, destroyed_brigades, the brigade and displacement logs, end_report and replay manifest. CONTROL-IDENTICAL.
+  - 709/709/708/681, guard intact, engine health PASS, 0 consistency failures.
+  - The final save differs only in `pending_officer_events` (538 → 0), `army_co_decision_traces`, the two directive slots and `schema_version`. It is about 550 KB smaller.
+  - Commander state is byte-identical, so the gate never changed a corps decision in a measured run.
+- Hands-off emergent 188w with B0's source applied (uncommitted): control_delta byte-identical to the B0-only emergent run; 710/707/707/670; the same three emergent breaches (Farz 0/4, Seher t164, Petrovo t179), which belong to package P2.
+- **Re-measured on the landing main** (after #697 B0, #700 B4, #713 re-pin and #718 RB1; main pin `df791f73c26ed642`):
+  - historical and emergent 188w against main-equivalent runs: control_delta, weekly_report, formation_delta, activity_summary, operation_aars, watched_operations, destroyed_brigades and end_report all byte-identical;
+  - 709/709/708/681, guard intact.
+  - Baselines manifest RE-BLESSED (`UPDATE_BASELINES=1 npm run test:baselines`) to final_save `0a31449959639988`. The state moves only through schema v39 and the drained slots. An independent rerun reproduces it and `npm run test:baselines` passes.
+- Scenario-tester smoke (apr1993/1994/1995 starts, sep1991_to_dayton, apr1992 188w, on main e3a0c2b6a): control artifacts byte-identical to a main-equivalent reference in all five.
+
+**Canon debt (recorded, canon-seat condition).** FORAWWV.md describes the retired chain as validated substrate: lines 276-301 (§X.1 PoliticalDirective verbs, the B1 producer output, the C1 persisted slot and its overlay), 409 (the A1-A5 / B1+B2 / C1+C2 validated list) and 421 (C1 as the Ring 1 example). FORAWWV edits need the unanimous Pyrrhic panel and a same-change canon record, so the amendment is a separate panel change, not part of this one. The Systems Manual, Rulebook and Game Bible have no text that requires the chain. `SAVE_SCHEMA_EVOLUTION.md` has a v39 entry, and the code comments in `game_state.ts`, `ArmyCoPushbackPanel.tsx`, `political_leader_data_loader.ts` and `army_co_lifecycle.ts` now say the chain is retired.
+
+**Follow-ups (register).**
+- `political_leader_data` / `political_leaders` are still loaded into state at scenario start, but nothing reads them now (state-only; retiring them changes every save).
+- The claude_plays_vrs directive bridge and three-commander harness now drive a chain the game no longer reads.
+- The pushback panel's directive-objection source and its copy are now dead for new games (UI lane).
+
+Evidence: `C:/Pyrrhic/AWWV-worktrees/_logs/batch-b-20261116/` (b3_*).
+
 ## 2026-11-16 — B4: the army commander's autonomous launch is retired (inert)
 
 Batch B, item B4 (freeze cut, Fable consult 2 revision 2, RF-ROSTER "path a"): retire.
@@ -526,6 +581,13 @@ Docs only (plus a knowledge-doc correction); no `src/` or `data/` change, no has
 - P2 step 2b (candidate 3 of 8, run cccc2d37901f7624): the army reserve reads a real local ratio; Farz P-A passes on the step-0 base; the ARBiH holds 59% of objectives (was 71%); RS loans still go to the Drina corps through a standing commander "critical" request (95) that outranks the capped gap requests (85): that priority question goes to the package seats as step 2c.
 - Calibration-pass OOB list (Part 6): the historian's VRS reserve-elite draft (C:/Pyrrhic/AWWV-worktrees/_logs/pkg-runB/VRS_RESERVE_ELITES_DRAFT.md): 24 formations, 7 in the OOB, 2 flagged elite; the 1st Krajina package; the Herzegovina Combined Brigade; the MUP brigade; the 1st Guards date and location fixes; with its §6 condition on naming Srebrenica-linked units.
 - `docs/knowledge/VRS_ORDER_OF_BATTLE_MASTER.md`: the East Bosnian Corps "Guards Brigade (Bijeljina-based elite formation)" is corrected to the 1st Bijeljina Light Infantry Brigade "Panthers" ("Serbian Guard-Panthers"), which the same document already lists in its roster: no unit of that name appears in Balkan Battlegrounds' VRS charts (BB1 pp.459-464, BB2 pp.277-285) and the historian reads it as the Panthers (draft section D1). A docs correction, not a data change.
+
+## 2026-11-16 — Pass 43: #710 (B2 and B3) recorded; main pin 03159b9ee1e5877f
+
+Docs only; no `src/` or `data/` change, no hash change.
+
+- #710, B3 + B2: the produced political-directive chain (producer, A3 role translation, C1 briefing overlay and its Wave 6 exception) is retired for every faction, including the player's staff at autonomy 1 and above; `army_directive_pushback` is no longer produced and the 538 stale events are drained (save migration v39, schema 38 to 39; the briefing and the decision manifest no longer count them). The player's own directive tool is a separate path and untouched. Control-identical in the measured runs (commander state byte-identical); main's pin is final_save 03159b9ee1e5877f (schema v39), the main hash at #710. Merged with the full suite, engine-health-188w and Baseline pins green. It is also P3 step 1 of Fable consult 4's order.
+- Next from that lane: #734 (the FORAWWV §X and §XIV amendment, with a unanimous panel) and the t76 Belgrade historical-default fix.
 
 ## 2026-11-15 — Command loop L7: army clashes (proposal 2A step A1; owner decision 4)
 
