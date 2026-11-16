@@ -1165,9 +1165,9 @@
         "text": "The 5th Corps enters the Sana campaign with captured heavy equipment and HV artillery support strengthening its offensive position."
       }
     ],
-    "historical_source": "Balkan Battlegrounds Vol. I pp.380-382, especially p.419 on Operation Sana, recently captured Serb armor and field guns, and HV artillery support.",
+    "historical_source": "Balkan Battlegrounds Vol. I pp.380-382, especially p.382 on Operation Sana, recently captured Serb armor and field guns, and HV artillery support.",
     "source_tier": "balkan_battlegrounds",
-    "source_note": "BB1 pp.380-382 support the 5th Corps' Sana mission and its use of recently captured Serb armor and field guns with HV artillery support. This event's equipment-quality effect abstracts that improved operational position; earlier claims about exact calibers, vehicle types, depot provenance, and an overnight end to ammunition rationing were removed as unsupported by the cited repo source."
+    "source_note": "Balkan Battlegrounds Vol. I, pp. 380-382 support the 5th Corps' Sana mission and its use of recently captured Serb armor and field guns with HV artillery support. This event's equipment-quality effect abstracts that improved operational position; the event does not claim exact calibers, vehicle types, depot provenance, or an overnight end to ammunition rationing."
   },
   {
     "id": "hv_hvo_cooperation_1995",
