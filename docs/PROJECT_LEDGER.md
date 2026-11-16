@@ -880,6 +880,14 @@ Docs only; no `src/` or `data/` change, no hash change.
 - W1, correction to the B5 Washington finding: a cooperative HRHB President does reach Washington (Path A signs at t112; the probe stopped at t110). The real defect: both Washington cards fire and are accepted at t102 saying "signed" while `washington_signed` stays false until t112. Ruling: Path A' amended (quiet front 4 or more, Zagreb's restraint, both cards, alliance above 0.20); the cards must never announce a signing the engine has not made. Queue: #754, #735, A', the A2b driver probe, the A2b mechanism. Owner: batch-b-politics.
 - W2 (§6 E1): 27 events carry `effect` deep-equal to `effects[0]` (applied twice by the engine, shown once by the UI): delete the duplicates and add a loader rule that throws. W3 (§6 E2): the whole `negotiation_capital` effect kind is dead (51 effects: international_credibility x40, negotiating_leverage x10, military_credibility x1; none is a NegotiationBreakdown key, yet EventDecisionModal shows them as costs): the E2 panel rules on all 51 before the freeze. W4 (UI): narrative effect text reaches the BCS UI in raw English: one resolver with catalog keys, native BCS and a test that fails on a missing BCS (UI lane, after #740 and #751). W5: the Ahmići war_crimes_delta +3 sits in the singular effect and is never displayed (the §6 lane checks whether the engine applies it; showing it goes to the full §6 copy panel).
 
+## 2026-11-16 — Pass 57: rulings from the #740 READY notice
+
+Docs only; no `src/` or `data/` change, no hash change.
+
+- Policy cards (orchestrator ruling): at Assisted autonomy or above, "Refuse" pays +5 standing while staff sweeps still count. This folds into D1 stage 2: after stage 2 the policy binds the staff at every autonomy level, and the acceptance test shows zero staff sweeps counted at Assisted and Delegated under always_deny. Owner: the UI lane, after P2.
+- Four §6 residuals go to the §6 atrocity lane for a pre-freeze disposition (fix, retire, or accept with a reason): the 15,000 civilian-harm threshold unreachable for a human RBiH or HRHB President; refugee-only expulsion ungated; the C cap lets D and F gain at the margin; a save edit of decision_mode.
+- #740 has GO after its lane merges main (one conflict in SENSITIVE_HISTORY_DESIGN_GATE.md) and re-proves the hash; byte-identical, merges on green.
+
 ## 2026-11-16 — t76 Belgrade event: Pale's historical posture in autumn 1993 is staying in step with Belgrade, not defiance
 
 A factual truth fix found by the second Batch B lane's historian and assigned to this lane. It is not tuning, so it proceeds under the calibration HOLD with the scores recorded.
@@ -939,6 +947,26 @@ Measured on a P2 step-2 run, t99-178:
 - Registered for the Part 5 sitting via the steward.
 
 No behaviour change: comments and canon text only, so the simulation hash is unchanged.
+
+## 2026-11-16 — Three-President Authority re-measure after G1, plus a harness fix (tooling only)
+
+- **Harness fix** (`tools/ai_play/desktop_calibration_compare.ts`).
+  - The `bot_equivalent` event policy chose from the event's full catalog of options, not from the options the queued decision offers.
+  - A player-initiated gesture is queued with its options filtered by fire number and reach (`responseOptionsForFire`).
+  - After G1 (#756) the engaged and meddler Presidents' first front visit falls at week 86. The harness then chose `visit_press_rbih`, which that decision does not carry, and `resolveEventDecision` threw.
+  - The policy now narrows to the offered options. This does not change any choice that was already offered (selection is a deterministic pick over the options), so hands-off is unaffected.
+- **Re-measure** (appendix C: RBiH, 104 weeks, main `b524f3bfe` with #756; `--autonomy-level production --event-policy bot_equivalent --paramilitary-policy deny --historical-operation-policy accept`):
+  - **A, hands-off:** at cap 100% (78/78 turns after week 26), minimum 100.
+  - **B, engaged:**
+    - at cap 13% (10/78), minimum 6.5 at week 86 (after its first gestures at weeks 86, 90 and 94);
+    - 30 refusals for lack of Authority (21 in 1993, 9 in 1994);
+    - 11 requests, 6 stops, 3 clashes.
+  - **C, meddler:**
+    - at cap 0%, minimum 3.25 at week 64;
+    - 43 refusals (32 in 1993, 11 in 1994);
+    - 18 requests, 1 stop.
+- **Held tuning order:** NOT triggered. The trigger to tighten further (remove the 15-point reserve, then the income) was "the engaged President never falls below 25". B now falls to 6.5, and B's at-cap share of 13% is inside the ≤25% target. The earlier run, with gestures open from week 0 and priced at 10, had B at a minimum of 65.5.
+- **Logs:** `C:/Pyrrhic/AWWV-worktrees/_logs/three-president-20261116/`.
 
 ## 2026-11-15 — Command loop L7: army clashes (proposal 2A step A1; owner decision 4)
 
