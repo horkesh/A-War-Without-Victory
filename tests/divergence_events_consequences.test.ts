@@ -22,6 +22,7 @@ import { applyEventEffects } from '../src/sim/events/apply_effects.js';
 import { buildCostLedger } from '../src/sim/endgame/cost_ledger.js';
 import type { EventDefinition, EventCondition, EventEffect } from '../src/sim/events/event_types.js';
 import type { GameState } from '../src/state/game_state.js';
+import { OFFENSIVE_PARA_FADE_WEEK, PARAMILITARY_FADE_WEEK } from '../src/state/formation_constants.js';
 
 const ALL_EVENTS: EventDefinition[] = loadEventDefinitions(0);
 function getEvent(id: string): EventDefinition {
@@ -126,6 +127,32 @@ describe('LANE-NIGHTSHIFT-ROUND2: divergence event seeds', () => {
             'pm_1': { id: 'pm_1', faction: 'RS', kind: 'brigade', status: 'active', name: 'pm', created_turn: 0, assignment: null, paramilitary_mode: 'offensive' } as any,
         };
         expect(evaluateCondition(cond, lapsed)).toBe(false);
+        // RF-PM1: the refusal is real only when RS has deployed no paramilitary sweep.
+        // One RS deployment blocks it; another faction's deployments do not.
+        const deployed = baseState(22) as any;
+        deployed.paramilitary_deployment_count = { RS: 1 };
+        expect(evaluateCondition(cond, deployed)).toBe(false);
+        const otherFaction = baseState(22) as any;
+        otherFaction.paramilitary_deployment_count = { HRHB: 3, RS: 0 };
+        expect(evaluateCondition(cond, otherFaction)).toBe(true);
+        // An RS President who chose "always allow" gave the order, even if no target came up.
+        const authorized = baseState(22) as any;
+        authorized.military.event_flags = { ...(authorized.military.event_flags ?? {}), rs_paramilitary_authorized: true };
+        expect(evaluateCondition(cond, authorized)).toBe(false);
+        // RS war crimes on record (e.g. the Drina cleansing) rule the refusal out.
+        const crimes = baseState(22) as any;
+        crimes.military.negotiation.capital.RS = { ...(crimes.military.negotiation.capital.RS ?? {}), war_crimes_events: 1 };
+        expect(evaluateCondition(cond, crimes)).toBe(false);
+        // Guard: the refusal is judged only after both fade weeks, so no deployment can still
+        // follow a "refused" reward (refuse-then-deploy).
+        expect(def.trigger.turn_min!).toBeGreaterThan(Math.max(PARAMILITARY_FADE_WEEK, OFFENSIVE_PARA_FADE_WEEK));
+        // The narrative claims only what the predicate measures.
+        expect(def.narrative).not.toMatch(/clean record|without massacres/i);
+        expect(JSON.stringify(def.effect)).not.toMatch(/clean[- ]record/i);
+        // Zero sweeps is not zero killings (narrative and historian seats).
+        expect(def.narrative).toMatch(/not a record without killing/);
+        expect(def.narrative).not.toMatch(/monitors|rare/i);
+        expect(JSON.stringify(def.effect)).toMatch(/does not mean RS forces killed no one/);
         applyEventEffects(fires, effectsOf(def));
         // No mechanical effect on negotiation_capital.international_credibility key needed —
         // the negotiation_capital writer only mutates fields already present on the capital

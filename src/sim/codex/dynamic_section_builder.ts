@@ -545,6 +545,9 @@ function predParamilitaryStreakRefused(
     currentTurn: number,
     faction: FactionId,
 ): GhostPredicateMatch | null {
+    // RF-PM1: the refusal flags are set by an RS-only consequence (they are global, not
+    // per faction), so the entry applies only to the RS President.
+    if (faction !== 'RS') return null;
     const operands = requiredOperands(
         flagOperand(state, 'paramilitary_authorization_refused', true),
         flagOperand(state, 'clean_record', true),

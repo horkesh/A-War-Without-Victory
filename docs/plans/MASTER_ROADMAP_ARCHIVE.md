@@ -528,3 +528,8 @@ command-loop L6, Authority prices (#661; its at-cap target was not met, so it is
 Moved verbatim from the same paragraph, second part:
 
 command-loop L7 army clashes (#670: Accept, Insist at 15 Authority, or Replace for a corps commander; a clash fires on any compliance short of full; Accept on a withheld plan charges the backing price; ratified by game-designer and canon-compliance, record `docs/40_reports/governance/20261115_AUTHORITY_DESIGN_RATIFICATION.md`) and renewable presidential gestures, a cooldown and no lifetime cap (#673); RF-F1g, the corps threat ratio reads the OSID contact graph (#667); the Patriarch Paper dated 29 August 1995 and counterfactual events out of distanceFromHistory (#665, #663); `rs_dayton_acceptance_1995` retitled "Pale Accepts the Dayton Agreement" (#669); citation sweeps 1 and 2 on hidden event text (#671, #674); war-or-game removed from every seat, gate and routing by owner directive, governance in #666 and the canon seat wording in #668;
+
+
+Merged list moved 2026-11-16 (steward pass 25), verbatim from the same paragraph:
+
+the emergency defensive operation retired (#683, byte-identical); player-visible truth fixes after the citation audit, `rbih_state_identity` re-pinned and the identity card tolerant of wording drift (#684, hash unchanged); citation audit batch 2 (#687); three test Presidents in the desktop harness (#682, tooling); the presidential gestures cost 20 Authority, a held step (#678); the Prlić hidden-text citation fixes, batch 1 (#676); the corridor-breach pass retired, byte-identical (#672); a recalled elite never returns to a base its side has lost, the t73 live-game freeze (#675);
