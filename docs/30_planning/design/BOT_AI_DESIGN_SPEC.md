@@ -83,7 +83,7 @@ Each layer runs in pipeline order. Higher layers constrain lower layers. Corps s
 
 Periodic deliberative meetings producing a `CampaignPlan` with multi-turn scope. Runs every 8–14 turns (faction-specific) plus emergency sessions. Outputs:
 - **Front priorities** (primary/secondary/economy/contain) — drives corps stance baselines and target selection
-- **Doctrine override** — adaptive army stance + aggression, replaces calendar-driven `FACTION_DOCTRINE_PHASES` after first gathering
+- **Doctrine override** — corps stance ceilings only. *(Amended 2026-11-16: the earlier design, an adaptive army stance and aggression modifier that replaced the calendar-driven `FACTION_DOCTRINE_PHASES` after the first gathering, was retired in F7b (#696; those two stored values had no reader). The army-level standing order is still written each turn as the General Staff's proposal and display value, but since #757 it no longer overrides any corps stance and no longer hides corps stance matters from the President; each corps keeps its own stance, capped only by presidential holds and the October 1995 ceasefire. See Systems Manual §6.4.)*
 - **Synchronized operations** — multi-corps launch windows with `waiting_for_sync` preparation state
 
 Layer G sets the strategic context that constrains all lower layers. When no gathering has fired (turn 0 to first gathering), Layer 0 defaults apply.
