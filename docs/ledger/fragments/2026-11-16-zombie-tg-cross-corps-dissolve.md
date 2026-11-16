@@ -22,7 +22,7 @@ RF fidelity-pass must-fix (orchestrator ruling, package "1994-95 attack and defe
 
 389/389 pass across the TG and Army HQ files; tsc 0.
 
-**Measured** (188w on main 69c566349: main reproduced its pin `03159b9ee1e5877f`; fix `27637190e868d811`, twin 8/8 identical. Re-merged onto main 5372de3e7 (pin `8c9fbf1d30e8a976`): fix `ebf895487dce785b`, reproduced by the baseline update run, checkpoints 709/709/708/682, every guard PASS, validator PASS, no TG left at t188):
+**Measured** (188w on main 69c566349: main reproduced its pin `03159b9ee1e5877f`; fix `27637190e868d811`, twin 8/8 identical. Re-merged as main moved; final merge onto main with pin `0b86d3d742fcbf1c`: fix `3b4685bc356210d5`, reproduced by the baseline update run, checkpoints 709/709/708/682, every guard PASS, validator PASS, no TG left at t188):
 - Unchanged against main:
   - combat control events (204/204);
   - final control;
@@ -33,7 +33,7 @@ RF fidelity-pass must-fix (orchestrator ruling, package "1994-95 attack and defe
 - **What changes.** Both zombies dissolve when their operations end, so 0 TGs are left at t188 (main: 2). The 705th's 540 men are returned.
   - From t180 Farz 95's TG draws its donors from the 3rd Corps only: the freed 705th is nearer, and donors are ordered by distance.
   - So a few late battles change power ratio slightly.
-- Baseline pins re-pinned (`final_save.json` `8c9fbf1d…` → `ebf89548…`).
+- Baseline pins re-pinned (`final_save.json` `0b86d3d7…` → `3b4685bc…`).
 
 **Recorded, not fixed here.** The orphan-TG per-turn sweep is accepted as a pre-freeze must-fix, as its own change. It will cover:
 - old saves that already hold a zombie;
