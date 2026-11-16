@@ -11,7 +11,7 @@ Every engine finding gets one of three answers, with a one-line reason when it i
 
 | # | Item | Why |
 |---|---|---|
-| A1 | RF-PM1 | The paramilitary "refused" event fires at week 21 while the save holds `rs_paramilitary_authorized = true`; false record and +12 credibility. |
+| A1 | RF-PM1 | The paramilitary "refused" event fires at week 21 while the save holds `rs_paramilitary_authorized = true`; false record and +12 credibility. Merged (#708, §6 panel unanimous APPROVE with conditions, control-identical): the event now needs rear_pocket mode, RS deployments at most 0, no `rs_paramilitary_authorized` and RS war crimes not above 1; the narrative no longer claims a clean record ("zero sweeps is not zero killings"); ghost 7 is RS-only; the `rbih_paramilitary_policy_1992` contract pin was re-pinned (11091 / `57f0d7f927df002c`) with an upgrade for a pending decision saved on the old preview. Limitation: a save played past t21 on the old code keeps the flags and the +12. The PM1-R1 to R7 register items are in the PR. |
 | A2 | RB1 | The takeover double count: the player-visible §6 figure runs 30% high and feeds negotiation and the Verdict. |
 | A3 | RB9 | The takeover timer reset counts people twice; extend #623's inheritance to every timer (1.7% or less). After A2. |
 | A4 | RB2 | An unlogged re-route of sheltered refugees moves the captor's own people with no event. After A3. |
@@ -32,6 +32,26 @@ Every engine finding gets one of three answers, with a one-line reason when it i
 | B2 | 538 pending officer events never acknowledged | Fix: a queue that is never drained (moves state). Ruled B2-b (orchestrator, 2026-11-16): stop producing `army_directive_pushback` entirely and drain the old ones on load or migration (save-compatible). Today the events are 538 in a 188-week run (RBiH 188, RS 188, HRHB 162), `override-army-directive` has no handler, no UI card shows them, but the sim briefing counts every unacknowledged player-faction one as "N order interpretations pending" in the player's command briefing (at autonomy 1 and above that count grows by one a turn and can never clear). |
 | B3 | Political-directive producer saturation, Wave 6 coupling, RS corps-role overlay | Retire the producer for every faction (B3-b, orchestrator ruling 2026-11-16, confirmed by the Batch B lane): it says the same thing for 182 weeks, and a human's staff at autonomy 1 and above gets the same constant verb, so it carries no varying information. The finding that changes the first reading: the overlay is a hard plan gate, not a 0.02 weight. It locks all ARBiH corps to the economy role and lifts every RS and HRHB corps (`plan.ts:173-176` is a hard block; the 0.05 weight and the patron term at `:327-336`, `:488` and `:635` are the soft part). So B3 moves plans and is a measured change. Order: B3 lands after package P2 and before P3. The player's own directive tool is a different path (`stage-op-directive-order` into `inject-op-directive`) and keeps working; the adapter's display of the political-directive slot shows nothing, or the slot is removed from the UI. Pairs with B2-b above. |
 
+**§6 disclosure (b): bots must respect a standing paramilitary policy (D1; owner ruling 2026-11-16 via the orchestrator).** The owner, asked whether the §6 panel's fix may make bot factions respect their own standing paramilitary policy if the historian and measurement support it: "Yes, go with that." The finding (disclosure (b), confirmed): a default RBiH President (autonomy 2, `always_deny`) is condemned for 4 to 5 staff sweeps, already on main in emergent mode. The cause: bots auto-approve regardless of policy, and the 11-05 directive makes the President's staff copy the bots. Option C keeps staff equal to bot and live equal to headless, and makes `always_deny` bind everyone.
+
+| # | Item | Answer |
+|---|---|---|
+| D1 | A standing `always_deny` binds every faction, staff and bot alike (option C) | Must-fix: a false §6 claim reaches the player (the President is condemned for sweeps the policy forbids). The owner's approval is CONDITIONAL on the historian and on the measurement; there is no automatic fallback if either does not support it. Sensitive history: the §6 panel decides the design. The UI lane runs it; its PR 1 (mode gating) is held until D1 lands. |
+
+**B5, the emergent-pick scorer (Batch B lane follow-ups, 2026-11-16).** The scorer that picks options for bot factions in emergent mode has defects, and 15 of its picks diverge from the historical ones (the list is in `_logs/batch-b-20261116/b5_decision_diff.txt`).
+
+| # | Item | Disposition |
+|---|---|---|
+| B5-1 | Scorer defect 1: territory trend | FIX, a Batch B follow-up. |
+| B5-2 | Scorer defect 2: exhaustion scale | FIX, a Batch B follow-up. |
+| B5-3 | Scorer defect 3: `divergence_threshold` is unread | The game-designer and historian rule: wire or retire. The orchestrator leans wire, because it encodes the owner's left-alone principle. |
+| B5-4 | Scorer defect 4: patron affinity is 0 | FIX, a Batch B follow-up. |
+| B5-5 | Scorer defect 5: the scorer ignores option effects | A Part 5 candidate. |
+| B5-6 | Scorer defect 6: RS patron decay | A ruling is needed (game-designer and historian). |
+| B5-7 | `war_crimes_tolerance` is unread | §6 panel. |
+| B5-8 | The 15 divergent emergent picks | Option data in the calibration pass (Part 6); t2, t11 and t17 (RS paramilitary policy, the Drina cleansing decision, the camps revealed) go to the §6 panel. |
+| B5-9 | Follow-ups | Retire the `political_leaders` state; the `claude_plays_vrs` harness; dead pushback copy (UI lane). |
+
 **Batch C, singles (L7 lane, each its own run; C4 and C6 go to the UI lane).**
 
 | # | Item | Answer |
@@ -40,7 +60,7 @@ Every engine finding gets one of three answers, with a one-line reason when it i
 | C1b | F7b the Army HQ plan's unread army stance and aggression modifier | Retire (nothing reads them; the fix would be new behaviour before the freeze). Merged (#696, control-identical; the theater statuses that fed them and the reserves-off supply bug go with them; the headless hash moved to 70f4dc05bf375bc7 on the six retired state fields only). |
 | C2 | SE9 sector intel re-key | Fix; about half of early-war mid-turn reads use the wrong sector; built. Waits for the package's P2; attribution done (N1 to N6 above). |
 | C3 | RB8 corps-less HRHB brigades | Fix: two at Putićevo with 3,000 and 1,672 men at week 188; trace first (RF-5B binding B6). The root (the refuge definition) is A10; the corps-adoption guard follows it in the L7 lane. |
-| C4 | RB6 "Operacija Džihad" | Fix: still drawn in every run; historian check first. Merged (#703, owner-approved): 13 bot operation-pool slots that held a real operation name or a loaded one are replaced in place (Džihad to Prevoj and 12 more); pool lengths and the deterministic selection are unchanged, the names live in state so the hash moved to 1391f69248072728 with zero differences after mapping the names back. Four names (Kopljem, Zavet, Ihlas, Bor) stay for the owner's call. |
+| C4 | RB6 "Operacija Džihad" | Fix: still drawn in every run; historian check first. Merged (#703, owner-approved): 13 bot operation-pool slots that held a real operation name or a loaded one are replaced in place (Džihad to Prevoj and 12 more); pool lengths and the deterministic selection are unchanged, the names live in state so the hash moved to 1391f69248072728 with zero differences after mapping the names back. Four names (Kopljem, Zavet, Ihlas, Bor) stay for the owner's call. The historian's notes are in `docs/40_reports/evidence/20261116_rb6_operation_names/` (`historian_note_dzihad.md`: no ARBiH operation was ever named Džihad, zero hits in BB Vol. I and II and the ICTY judgments read). |
 | C5 | CODE4 `rankDefendersByPower` tie-break | Fix: determinism; inert if there are no ties. Merged (#691, byte-identical). |
 | C6 | Identity card applied at week 0 live and week 3 headless | Fix: live and headless should match to the soldier. |
 | C7 | PK5 queue head below its floor blocks the corps chain | Fix: ruled (a), the bounded skip (orchestrator, 2026-11-16); a plain skip would have deleted Srebrenica-Cerska and Pracha River. |
@@ -89,11 +109,11 @@ J1, `jan1993_to_dayton` (ruled RETIRE by the orchestrator, 2026-11-16; inert, pr
 
 ## Part 5. Accept as final
 
-Game-designer and historian in one sitting; each item passes two owner tests, left alone and played. CODE3, RB5 for an active human HRHB President, PK5, SD6 with SD8, and the six static gesture rows of BC06 (sitting of 2026-11-16). Next sitting, candidate: "probes never occupy on a decisive win", with the probe-casualty question (F2) attached. Reasons and ratifying seats: [final-behaviour record](../40_reports/governance/20261115_FINAL_BEHAVIOUR_AT_1_0.md).
+Game-designer and historian in one sitting; each item passes two owner tests, left alone and played. CODE3, RB5 for an active human HRHB President, PK5, SD6 with SD8, and the six static gesture rows of BC06 (sitting of 2026-11-16). Next sitting, candidates: "probes never occupy on a decisive win", with the probe-casualty question (F2) attached; and B5-5, the emergent-pick scorer ignoring option effects. Reasons and ratifying seats: [final-behaviour record](../40_reports/governance/20261115_FINAL_BEHAVIOUR_AT_1_0.md).
 
 ## Part 6. Calibration pass (data and constants, after the freeze)
 
-Emergent-mode option weights (from E1).
+Emergent-mode option weights (from E1), including the 15 divergent emergent picks (B5-8; t2, t11 and t17 under the §6 panel).
 
 L8 with RF-4, the Donji Vakuf 95 timing (with RF-L3d follow-up 2), the Mistral 2 and Southern Move assembly slip, the painted-reference questions (Prusac January 1993, Konjic Ljuta, Goražde, Maglaj-Jablanica) with the owner reference questions Ljuta (all), Golubići October 1995 and Sitnik October 1995; N1, the Konjic September Offensive force balance (authored operation data, BB2 pp.495-496), and N3 and N4 if the re-measure after P2 leaves them as data; RF-F1b's constant (check before the freeze that a constant alone makes the W3 and C5 gates bind; if it cannot, it is a Part 1 fix); the roster tenure starts for Praljak, Roso, Petković-2 and Blaškić-2 (H-C4); F1f supply sources; SD14; the F1c and F1d constants in emergent mode (hide emergent mode if a player cannot choose it); SD5 (one read-only check before the freeze to rule out an engine cause); and, once the package lands, the 1994-95 offensives the historian listed (Teslić, Vozuća in June and November 1994, Ozren in spring 1995) as authored operations.
 

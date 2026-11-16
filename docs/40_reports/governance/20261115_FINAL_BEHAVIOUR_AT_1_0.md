@@ -155,6 +155,8 @@ Each of these was on the memo's first accept list and moved to fix or retire. Th
 
 Emergent mode ships in 1.0 and stays the default. Consequences written in: the two tests apply to the emergent game; freeze condition 4 (live = headless) is re-run in emergent mode at the frozen commit, because the first measurement carried `decision_mode` historical on both sides; new freeze condition 7; the peace-plan floor fix is batch B's first item and the emergent triage is its own row (E1) in the work list.
 
+Owner ruling of 2026-11-16 on disclosure (b) (via the orchestrator): asked whether the §6 panel's fix may make bot factions respect their own standing paramilitary policy if the historian and measurement support it, the owner said "Yes, go with that." A default RBiH President (autonomy 2, `always_deny`) is condemned for 4 to 5 staff sweeps, already on main in emergent mode, because bots auto-approve regardless of policy and the 11-05 directive makes staff copy bots. Option C (staff equal to bot, live equal to headless, `always_deny` binds everyone) is recorded as a must-fix (a false §6 claim reaches the player), work list D1. The approval is conditional on the historian and the measurement, with no automatic fallback; the UI lane runs it and its PR 1 (mode gating) is held until D1 lands.
+
 ## 9. Hash-neutral notes
 
 - Roster tenure starts (H-C4: Praljak 64 to 67, Roso 80 to 83, Petković-2 100 to 107, Blaškić-2 120 to 121) go to the calibration pass.
