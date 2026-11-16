@@ -17,6 +17,7 @@
  */
 
 import { describe, expect, it, beforeEach } from 'vitest';
+import { withoutComments } from './helpers/sourceComments.js';
 import { readFileSync, existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 
@@ -517,25 +518,18 @@ describe('A4 — backward-compat', () => {
 // apply-army-directive-interpretation AND AFTER evaluate-army-hq-gathering.
 // ===========================================================================
 describe('A4 — pipeline integration', () => {
-    it('T11 — pipeline step name + ordering vs A1/A3', () => {
+    it('T11 — pipeline step name + ordering vs A1 and generate-bot-corps-orders (A3 retired, B3)', () => {
         expect(A4_PIPELINE_STEP_NAME).toBe('evaluate-army-co-transitions');
         const path = resolve('src/sim/turn_phases/war_phases.ts');
         expect(existsSync(path)).toBe(true);
         const src = readFileSync(path, 'utf8');
-        const idxArmyHQ = src.indexOf('evaluate-army-hq-gathering');
-        const idxA4 = src.indexOf('A4_PIPELINE_STEP_NAME');
-        const idxA3 = src.indexOf('A3_PIPELINE_STEP_NAME');
-        expect(idxArmyHQ).toBeGreaterThan(0);
-        expect(idxA4).toBeGreaterThan(0);
-        expect(idxA3).toBeGreaterThan(0);
-        // A4 step name appears AFTER evaluate-army-hq-gathering AND BEFORE
-        // A3 step (A3 step name appears later in the file as a `name:` value).
-        // We rely on textual ordering of the constant references in the steps
-        // array, which mirrors the runtime ordering.
+        const idxArmyHQ = src.indexOf("name: 'evaluate-army-hq-gathering'");
         const idxA4Step = src.indexOf('name: A4_PIPELINE_STEP_NAME');
-        const idxA3Step = src.indexOf('name: A3_PIPELINE_STEP_NAME');
+        const idxBotOrders = src.indexOf("name: 'generate-bot-corps-orders'");
+        expect(idxArmyHQ).toBeGreaterThan(0);
         expect(idxA4Step).toBeGreaterThan(idxArmyHQ);
-        expect(idxA4Step).toBeLessThan(idxA3Step);
+        expect(idxBotOrders).toBeGreaterThan(idxA4Step);
+        expect(withoutComments(src)).not.toContain('name: A3_PIPELINE_STEP_NAME');
     });
 });
 

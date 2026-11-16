@@ -204,7 +204,7 @@ describe('C1 — A3 persists corps_directives[] into army_corps_directives_by_fa
 // T2 — Briefing reads persisted slot and overlays role onto campaign_role.
 // ===========================================================================
 describe('C1 — briefing assembleCampaignIntent reads persisted overlay', () => {
-    it('T2 — overlay REPLACES CampaignPlan role when present', async () => {
+    it('T2 (B3) — the overlay no longer replaces the CampaignPlan role: the briefing does not read the slot', async () => {
         // We test the collectCampaignIntent path indirectly via buildBriefing.
         // The simplest seam: prove the overlay slot drives role even when
         // CampaignPlan says something else.
@@ -238,14 +238,13 @@ describe('C1 — briefing assembleCampaignIntent reads persisted overlay', () =>
             },
         };
 
-        // We invoke the internal collectCampaignIntent indirectly: build a
-        // minimal briefing path is heavy; instead grep the source to assert
-        // the read is wired (T2b covers full overlay precedence at the unit
-        // level by direct invocation through buildBriefing-equivalent path).
+        // B3 (freeze cut): the overlay read is RETIRED. The briefing no longer
+        // reads the slot at all, so a stale slot (old save) cannot replace the
+        // CampaignPlan role.
         const path = resolve('src/sim/combat/commander/briefing.ts');
         const stripped = stripComments(readFileSync(path, 'utf8'));
-        expect(stripped).toMatch(/army_corps_directives_by_faction/);
-        expect(stripped).toMatch(/readArmyCorpsDirectiveOverlay/);
+        expect(stripped).not.toMatch(/army_corps_directives_by_faction/);
+        expect(stripped).not.toMatch(/readArmyCorpsDirectiveOverlay/);
 
         // And the produced state object's slot for RS contains role 'contain'.
         const slot = (state.military as LooseMilitary).army_corps_directives_by_faction;
@@ -265,10 +264,10 @@ describe('C1 — backward-compat fallback to CampaignPlan when overlay absent', 
     it('T3 — no overlay slot → briefing.ts source still reads campaign_plans (A1 path preserved)', () => {
         const path = resolve('src/sim/combat/commander/briefing.ts');
         const stripped = stripComments(readFileSync(path, 'utf8'));
-        // A1 CampaignPlan path must survive in source.
+        // A1 CampaignPlan path must survive in source, and it alone sets the role (B3).
         expect(stripped).toMatch(/campaign_plans\?\.\[faction\]/);
-        // And C1 overlay must be optional (?? fallback).
-        expect(stripped).toMatch(/overlay\?\.role\s*\?\?\s*frontPriority\?\.role/);
+        expect(stripped).toMatch(/const role: CommanderBriefing\['campaign_role'\] = frontPriority\?\.role \?\? null/);
+        expect(stripped).not.toMatch(/overlay\?\.role/);
     });
 });
 
@@ -288,10 +287,10 @@ describe('C1 — env flag short-circuits persist + read', () => {
         expect(readSlot(state)).toBeUndefined();
     });
 
-    it('T4b — env flag is honored on the read path (briefing.ts source)', () => {
+    it('T4b (B3) — the read path is retired, so briefing.ts needs no read-side flag', () => {
         const path = resolve('src/sim/combat/commander/briefing.ts');
         const stripped = stripComments(readFileSync(path, 'utf8'));
-        expect(stripped).toMatch(/C_LANE_CORPS_DIRECTIVE_CONSUMER_DISABLED/);
+        expect(stripped).not.toMatch(/C_LANE_CORPS_DIRECTIVE_CONSUMER_DISABLED/);
     });
 
     it('T4c — env flag is honored on the persist path (army_order_interpretation.ts source)', () => {
@@ -483,16 +482,14 @@ describe('C1 — determinism guard (static-grep)', () => {
 // T10 — Pipeline ordering verification (no new pipeline step per DDR Q4).
 // ===========================================================================
 describe('C1 — pipeline ordering (no new step)', () => {
-    it('T10 — apply-army-directive-interpretation step exists and persistCorpsDirectives runs inside it', () => {
+    it('T10 (B3) — the A3 step that ran persistCorpsDirectives is retired; no replacement step exists', () => {
         const path = resolve('src/sim/turn_phases/war_phases.ts');
         const src = readFileSync(path, 'utf8');
-        // A3 step name still owns the slot.
-        expect(src).toMatch(/A3_PIPELINE_STEP_NAME/);
+        const stripped = stripComments(src);
+        expect(stripped).not.toMatch(/A3_PIPELINE_STEP_NAME/);
         expect(A3_PIPELINE_STEP_NAME).toBe('apply-army-directive-interpretation');
 
-        // No NEW C1 pipeline step name was introduced (DDR Q4 explicitly
-        // forbids it). The grep below would catch any rogue step.
-        const stripped = stripComments(src);
+        // No NEW C1 pipeline step name was introduced either.
         expect(stripped).not.toMatch(/['"]apply-army-directive-to-state['"]/);
         expect(stripped).not.toMatch(/['"]consume-army-directive['"]/);
         expect(stripped).not.toMatch(/['"]C1_PIPELINE_STEP_NAME['"]/);

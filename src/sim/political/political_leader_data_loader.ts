@@ -16,10 +16,9 @@
  * B2 ships canonical political-leader Ring 2 DATA + the scenario-init
  * loader/wire-up that populates B1's substrate slots
  * (`state.military.political_leader_data` and `state.military.political_leaders`).
- * Once both are populated, B1's `producePoliticalDirective` transitions from
- * always-null to actively emitting `PoliticalDirectiveVerb`s consumed by
- * A3 (`apply-army-directive-interpretation`), enabling A4 personality
- * differentiation observable at 188w.
+ * B1's producer and the A3 step that consumed it were RETIRED 2026-11-16
+ * (freeze cut B3); nothing reads these slots now. They are still loaded so
+ * saves stay unchanged until a separate state-retirement change (registered).
  *
  * Faction-symmetric mechanism (Ring 1)
  * ────────────────────────────────────
