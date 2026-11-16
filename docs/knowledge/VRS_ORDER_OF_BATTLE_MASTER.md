@@ -206,7 +206,7 @@ The VRS organized into **6 corps** based on former JNA corps structures:
 ### Major Units:
 
 **Guard/Elite Units:**
-- Guards Brigade (Bijeljina-based elite formation)
+- 1st Bijeljina Light Infantry Brigade "Panthers" ("Serbian Guard-Panthers"), Bijeljina-based elite formation (listed here earlier as an unnamed "Guards Brigade"; corrected 2026-11-16: no unit of that name appears in Balkan Battlegrounds' VRS charts, BB1 pp.459-464 and BB2 pp.277-285, and the "Guards" label is most likely the Panthers' "Serbian Guard" name; the same unit is listed in the East Bosnian Corps roster below. Source: the historian's draft `VRS_RESERVE_ELITES_DRAFT.md`, section D1 and its note on this master, a docs correction, not a data change.)
 
 **Infantry Brigades:**
 - 17th Light Infantry Brigade

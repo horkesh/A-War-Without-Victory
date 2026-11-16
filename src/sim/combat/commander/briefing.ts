@@ -520,52 +520,11 @@ function collectAdjacentCorpsSummaries(
     return [...summaries.values()].sort((a, b) => strictCompare(a.corps_id, b.corps_id));
 }
 
-/**
- * C1 (LANE-NIGHTSHIFT-C1-CORPS-DIRECTIVE-CONSUMER-WIRE) — read the
- * A3-translated per-corps directive from
- * `state.military.army_corps_directives_by_faction[faction][corpsId]`.
- *
- * Returns null when the env flag is set OR the slot is absent (pre-C1
- * saves, A3 short-circuit, no political directive emitted this turn). When
- * a directive is present, the OVERLAY in `collectCampaignIntent` REPLACES
- * the CampaignPlan-derived role with the A3-translated role — this is the
- * single chokepoint that makes the political → army → corps chain
- * observable. Mirrors A3's persist short-circuit for byte-stable A/B.
- *
- * DDR: docs/40_reports/audits/20260506_C_LANE_BOT_CORPS_ORDERS_CONSUMER_DDR.md
- * (57cec91c).
- */
-function readArmyCorpsDirectiveOverlay(
-    state: GameState,
-    faction: FactionId,
-    corpsId: FormationId,
-): {
-    role: 'primary' | 'secondary' | 'economy' | 'contain';
-    deviated: boolean;
-    deviation_reason?: 'aggressive_preference' | 'cautious_preference' | 'compliance_score_low';
-} | null {
-    if (process.env.C_LANE_CORPS_DIRECTIVE_CONSUMER_DISABLED === 'true') return null;
-    type LooseMilitary = GameState['military'] & {
-        army_corps_directives_by_faction?: Record<string, Record<string, {
-            corps_id: string;
-            role: 'primary' | 'secondary' | 'economy' | 'contain';
-            deviated: boolean;
-            deviation_reason?: 'aggressive_preference' | 'cautious_preference' | 'compliance_score_low';
-        }>>;
-    };
-    const mil = state.military as LooseMilitary;
-    const slot = mil.army_corps_directives_by_faction?.[faction]?.[corpsId];
-    if (!slot) return null;
-    // Q2 (LANE-NIGHTSHIFT-Q2-COMPLIANCE-DEVIATION-REASON): forward
-    // `deviation_reason` to the briefing overlay so the commander loop
-    // (and downstream API prompt construction) can act on the reason
-    // instead of seeing an opaque `compliance: deviated` flag.
-    return {
-        role: slot.role,
-        deviated: slot.deviated === true,
-        ...(slot.deviation_reason !== undefined ? { deviation_reason: slot.deviation_reason } : {}),
-    };
-}
+// The C1 overlay reader (`readArmyCorpsDirectiveOverlay`) that let the army's
+// translation of the political directive REPLACE the CampaignPlan role is
+// retired with the political-directive chain (freeze cut B3; see the note in
+// war_phases.ts). It acted as a hard campaign_role gate driven by a verb that
+// never changed after exhaustion 500.
 
 function collectCampaignIntent(
     state: GameState,
@@ -590,17 +549,9 @@ function collectCampaignIntent(
     const plan: CampaignPlan | null | undefined = state.military.campaign_plans?.[faction];
     const turn = state.meta?.turn ?? 0;
 
-    // C1 overlay precedence: A3-translated role wins over CampaignPlan role
-    // when present. When the slot is absent (env-flag short-circuit, no
-    // directive emitted, pre-C1 save), fall back to A1's CampaignPlan path.
-    const overlay = readArmyCorpsDirectiveOverlay(state, faction, corpsId);
-
-    // Q2 reason surfaces only when the overlay records a deviation. (If the
-    // overlay is null, fall back returns null reason; the deterministic
-    // briefing path is unchanged for non-overlay states.)
-    const deviationReason = overlay?.deviated === true && overlay.deviation_reason
-        ? overlay.deviation_reason
-        : null;
+    // Q2 deviation reasons came only from the retired C1 overlay (B3); the
+    // briefing field stays for its readers and is always null now.
+    const deviationReason = null;
 
     // Open Croat-Bosniak war is deliberately asymmetric. The diverted ARBiH
     // corps receives the opposing bilateral-front OSIDs as campaign objectives;
@@ -623,9 +574,8 @@ function collectCampaignIntent(
     }
 
     if (!plan || plan.valid_until_turn < turn) {
-        // No CampaignPlan — overlay still wins for `role` if present.
         return {
-            role: overlay?.role ?? null,
+            role: null,
             offensiveTargets: [],
             holdTargets: [],
             stanceCeiling: null,
@@ -642,23 +592,9 @@ function collectCampaignIntent(
         if (syncParticipant) break;
     }
 
-    // C1 OVERLAY: if A3 persisted a directive for this corps, it REPLACES
-    // the CampaignPlan-derived role; else fall back to frontPriority.role.
-    //
-    // Wave 6 exception: an 'economy' overlay (degenerate political default
-    // when the faction's verb is PREPARE_RESERVE / BALANCE_FRONTS) does NOT
-    // override a CampaignPlan that explicitly assigned offensive targets to
-    // this corps. The plan represents authored campaign intent and outranks
-    // a derived political role. Faction-symmetric in code but practically
-    // asymmetric: HRHB campaign plans carry offensive_targets for hvo
-    // corps; RS plans without explicit offensive_targets remain constrained.
-    let role: CommanderBriefing['campaign_role'] =
-        overlay?.role ?? frontPriority?.role ?? null;
-    if (overlay?.role === 'economy'
-        && frontPriority?.role != null
-        && (frontPriority.offensive_targets?.length ?? 0) > 0) {
-        role = frontPriority.role;
-    }
+    // The corps role is the CampaignPlan's (army_hq_gathering front priority).
+    // The C1 overlay and its "Wave 6" economy exception are retired (B3).
+    const role: CommanderBriefing['campaign_role'] = frontPriority?.role ?? null;
 
     return {
         role,
