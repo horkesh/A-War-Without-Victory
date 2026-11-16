@@ -21,7 +21,7 @@
  */
 
 import type { FactionId, GameState } from '../../state/game_state.js';
-import { isCampExposureFamily } from '../events/event_families.js';
+import { isCampExposureFamily, isRing3SensitiveFamily } from '../events/event_families.js';
 
 export interface PoliticalDepartureMarker {
     /** Event whose player response is read. */
@@ -92,6 +92,31 @@ export const POLITICAL_GATE_EXCLUDED_EVENT_IDS: ReadonlySet<string> = new Set([
     'srebrenica_demilitarization_1993',
     'hrhb_camp_exposure_response_1993',
     'drina_cleansing_decision_1992',
+    // §6 seats on #735 (2026-11-16): adjudicated crimes in the same class.
+    'un_hostage_crisis_1995', // UN peacekeepers as human shields (Karadžić IT-95-5/18-T; Mladić IT-09-92-T)
+    'deliberate_force_rs_compliance_1995', // the Sarajevo siege guns (Galić IT-98-29)
+    'rbih_nato_ultimatum_compliance_1994', // the Sarajevo heavy-weapons exclusion zone
+    'rs_strategic_goals', // Strategic Goal 1, the separation of peoples (not reachable in time; safeguard)
+]);
+
+/**
+ * Events reviewed by the §6 seats as reachable by the gate and flagged sensitive by the §4
+ * classifier (`isSensitiveDecisionEvent`), whose options depict no atrocity, so the political
+ * opening may apply. A completeness test requires every flagged event to be carved out or here.
+ */
+export const POLITICAL_GATE_REVIEWED_ALLOWED_EVENT_IDS: ReadonlySet<string> = new Set([
+    // Peace-plan and negotiation answers: options are accept/reject; the sensitive words are context.
+    'london_conference_1992', // accept_principles / reject
+    'owen_stoltenberg_plan_1993', // accept / reject ("enclave" in context)
+    'os_rbih_tactical_acceptance_1993', // reject_via_assembly / accept_for_optics
+    'rbih_contact_group_response_1994', // accept / reject / accept with reservations
+    'dayton_talks_begin_1995', // accept / hardline
+    'rs_dayton_acceptance_1995', // accept / hardline
+    'rbih_washington_agreement_1994', // accept / reluctant
+    // Political or posture decisions whose options depict no atrocity.
+    'abdic_apwb_declared_1993', // suppress / tolerate / federation offer / autonomy for Bihać APWB
+    'strategic_posture_review_hrhb', // press objectives / coordinate / consolidate / sue for peace
+    'rbih_late_war_offensive_1995', // offensives / consolidation / wait / accept partition
 ]);
 
 /** True when the political opening may apply to this event (it is not §6-carved-out). */
@@ -99,16 +124,19 @@ export function isPoliticalGateEligible(eventId: string, family?: string): boole
     if (POLITICAL_GATE_EXCLUDED_EVENT_IDS.has(eventId)) return false;
     if (eventId.startsWith('hvo_detention_camps_')) return false;
     if (isCampExposureFamily(family)) return false;
+    if (isRing3SensitiveFamily(family) || isRing3SensitiveFamily(eventId)) return false;
     return true;
 }
 
 /** True when a political departure has ruled out `faction`'s history. */
 export function isPoliticsOffHistoryFor(state: GameState, faction: FactionId): boolean {
     const turn = state.meta?.turn ?? 0;
+    // The engine's own record of the war (rbih_hrhb_state.war_started_turn), not the event
+    // receipt: a war that starts by another route still counts (engine seat, #735).
     if (
         CROAT_BOSNIAK_WAR_OPENS.includes(faction)
         && turn > CROAT_BOSNIAK_WAR_LAST_TURN
-        && !(state.military?.fired_event_ids ?? []).includes(CROAT_BOSNIAK_WAR_EVENT_ID)
+        && state.political?.rbih_hrhb_state?.war_started_turn == null
     ) {
         return true;
     }

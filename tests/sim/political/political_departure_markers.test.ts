@@ -11,12 +11,15 @@ import { describe, it, expect } from 'vitest';
 import {
     POLITICAL_DEPARTURE_MARKERS,
     POLITICAL_GATE_EXCLUDED_EVENT_IDS,
+    POLITICAL_GATE_REVIEWED_ALLOWED_EVENT_IDS,
     CROAT_BOSNIAK_WAR_EVENT_ID,
     CROAT_BOSNIAK_WAR_LAST_TURN,
     isPoliticalGateEligible,
     isPoliticsOffHistoryFor,
 } from '../../../src/sim/political/political_departure_markers.js';
 import type { GameState } from '../../../src/state/game_state.js';
+import type { EventDefinition } from '../../../src/sim/events/event_types.js';
+import { isSensitiveDecisionEvent } from '../../../src/ui/map/data/verdictDecisions.js';
 
 const EVENTS_DIR = resolve(__dirname, '../../../data/scenarios/events');
 const allEvents: Array<{ id: string; responding_faction?: string; historical_default_response_id?: string; response_options?: Array<{ id: string }>; trigger: { turn_max?: number } }> =
@@ -32,6 +35,7 @@ type Row = { event_id: string; response_id: string; decision_source: string; fac
 function state(opts: { turn: number; rows?: Row[]; warFired?: boolean }): GameState {
     return {
         meta: { turn: opts.turn },
+        political: { rbih_hrhb_state: { war_started_turn: opts.warFired === false ? null : 49 } },
         military: {
             event_decision_log: opts.rows ?? [],
             fired_event_ids: opts.warFired === false ? [] : [CROAT_BOSNIAK_WAR_EVENT_ID],
@@ -96,6 +100,20 @@ describe('isPoliticsOffHistoryFor', () => {
 });
 
 describe('§6 carve-out', () => {
+    it('is complete: every gate-reachable event the §4 classifier flags is carved out or explicitly reviewed', () => {
+        const unreviewed: string[] = [];
+        for (const def of allEvents as unknown as EventDefinition[]) {
+            const reachable = typeof def.responding_faction === 'string'
+                && typeof def.historical_default_response_id === 'string'
+                && (def.response_options?.length ?? 0) > 1;
+            if (!reachable || !isSensitiveDecisionEvent(def)) continue;
+            if (!isPoliticalGateEligible(def.id, def.family)) continue;
+            if (POLITICAL_GATE_REVIEWED_ALLOWED_EVENT_IDS.has(def.id)) continue;
+            unreviewed.push(def.id);
+        }
+        expect(unreviewed).toEqual([]);
+    });
+
     it('never applies the political opening to §6 decisions', () => {
         for (const id of POLITICAL_GATE_EXCLUDED_EVENT_IDS) expect(isPoliticalGateEligible(id)).toBe(false);
         expect(isPoliticalGateEligible('hvo_detention_camps_1993')).toBe(false);
