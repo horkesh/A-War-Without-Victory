@@ -7281,7 +7281,7 @@
     "image": "event_wartime_broadcast.webp",
     "source_tier": "design_counterfactual",
     "title": "Address the Nation",
-    "narrative": "Your chief of staff lays a draft speech on the desk. RTV BiH can carry your voice into every cellar and shelter still holding a working radio. An address can steady a frightened, exhausted population and signal resolve abroad — but every word is a promise the war may not let you keep. Defiance hardens the lines and raises expectations that later curdle into disillusion; a sober call for endurance spends political credit; an appeal to the world invites the patron's irritation at being lectured. What does the president say to a people in the fourth year of siege?",
+    "narrative": "Your chief of staff lays a draft speech on the desk. RTV BiH can carry your voice into every cellar and shelter still holding a working radio. An address can steady a frightened, exhausted population and signal resolve abroad — but every word is a promise the war may not let you keep. Defiance hardens the lines and raises expectations that later curdle into disillusion; a sober call for endurance spends political credit; an appeal to the world invites the patron's irritation at being lectured. What does the president say to a people who have lived under siege this long?",
     "category": "command",
     "trigger": {
       "turn_min": 84,
