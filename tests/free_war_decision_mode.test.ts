@@ -84,7 +84,14 @@ function rsHistoricalLogicEvent(): EventDefinition {
  * player-respondent → it flows through the bot auto-respond branch (the
  * de-railroad chokepoint).
  */
-function rsBotState(decisionMode?: 'historical' | 'emergent'): GameState {
+/**
+ * `offHistoryMap`: B5 fix 4 (2026-11-16) keeps an emergent bot on an event's authored
+ * historical response while the war's map is inside history's territory band. A control map
+ * where RS holds a single small settlement is far outside every band, so the gate is open and
+ * the scorer's pick goes through when it beats history by more than RS's threshold (here
+ * 16 × 0.30 = 4.8 > 3.0). Without a control map the gate stays closed.
+ */
+function rsBotState(decisionMode?: 'historical' | 'emergent', offHistoryMap = true): GameState {
     return {
         schema_version: CURRENT_SCHEMA_VERSION,
         meta: {
@@ -92,10 +99,11 @@ function rsBotState(decisionMode?: 'historical' | 'emergent'): GameState {
             seed: 'free-war-test-seed',
             phase: 'war',
             player_faction: 'RBiH',
+            war_start_turn: 0,
             ...(decisionMode ? { decision_mode: decisionMode } : {}),
         },
         military: { formations: {}, fired_event_ids: [] },
-        political: {},
+        political: offHistoryMap ? { political_controllers: { 'op:brcko:brcko': 'RS' } } : {},
         factions: [],
         displacement: {},
     } as unknown as GameState;
@@ -122,6 +130,13 @@ test('emergent mode bypasses the railroad → bot picks the signal-driven (non-h
         'emergent bot should pick the political-scorer-favored option, not the historical default',
     );
     assert.strictEqual(decisionSource(state), 'bot_political', 'emergent strategic_weighted → political scorer');
+});
+
+test('B5 fix 4: emergent keeps the historical default while the war is historical (gate closed)', () => {
+    const state = rsBotState('emergent', false);
+    evaluateEvents(state, rng, 10, [rsDecisionEvent()]);
+    assert.strictEqual(chosenResponseId(state), HISTORICAL_DEFAULT_ID, 'left alone, emergent keeps history');
+    assert.strictEqual(decisionSource(state), 'bot_political', 'still scored by the political engine');
 });
 
 test('historical mode keeps the railroad → bot picks the historical default', () => {
