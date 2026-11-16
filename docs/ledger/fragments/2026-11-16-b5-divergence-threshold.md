@@ -13,7 +13,11 @@
   - `getFactionTerritoryAreaPct` moved to `src/sim/osid_areas.ts`, re-exported by `peace_plans.ts`.
   - `political_personality.ts`: the thresholds and their doc; the RS patron note corrected.
   - Canon: Systems Manual §7.10.7 gains the rule, in the same change. It also records the dependency: the band is the painted references, so a later paint correction shifts the gate. The band test fails until the table is re-baked, and a hands-off emergent run must then be re-measured.
-- **Proof** (main `df206642c` + #726; logs `C:/Pyrrhic/AWWV-worktrees/_logs/b5-scorer-20261116/`).
+- **Re-confirmed on main `4866a4279`** (#726 and N6 #709 merged; `m3_*` logs).
+  - Historical 188w is byte-identical to main, `83b8e8cd36023899` (the manifest pin). Every artifact matches except `run_meta.json`.
+  - Hands-off emergent: `25176ce62fdcca94`, 709/709/708/680, guard intact. Against historical, only Drina and the three flavour timings differ.
+  - Main's own emergent is `cbdfdb200b1f7069`, 710/707/707/670: 18 picks differ and the guard is breached (Farz 0/4, Seher t164, Petrovo t179).
+- **Proof** (first measured on main `df206642c` + #726; logs `C:/Pyrrhic/AWWV-worktrees/_logs/b5-scorer-20261116/`).
   - **Historical 188w byte-identical**: `df791f73c26ed642`, 709/709/708/681, guard intact.
   - **Hands-off emergent 188w**: `6ebcd2c2d3d03372`, 709/709/708/680, **guard intact**. Farz 4/4 receipts (t180-185, 2nd Corps), P-B pass, eastern provenance clean, Srebrenica and Žepa fall on schedule, HRHB cascade 30. The previous emergent run on main was 710/707/707/670 and breached.
   - Decisions versus historical: all 15 earlier divergences revert. Peace plans match history. What remains: t11 Drina fires again (t1 is all_six now) but the scorer picks `restrained` against history's `systematic`, which goes to the §6 seats as a finding. Three flavour events move a few weeks (t90/91 visits and address).
