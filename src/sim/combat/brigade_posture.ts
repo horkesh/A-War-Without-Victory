@@ -259,7 +259,15 @@ export function applyPostureCosts(state: GameState): void {
             t[key] = (t[key] ?? 0) + 1;
             tally.set(brigade.faction, t);
         }
-        if (!onFront) continue;
+        if (!onFront) {
+            // P2 step 2 (2026-11-16): an unassigned army-reserve brigade in `hold` rests off the front
+            // too (only the army reserve; every other off-front brigade still gets no posture effect).
+            if (brigade.elite_loan_state && brigade.elite_loan_state.on_loan !== true && normalizePosture(brigade.posture) === 'hold') {
+                const rested = Math.min(DEFEND_COHESION_CAP, (brigade.cohesion ?? 60) + POSTURE_COHESION_COST.hold);
+                if (rested > (brigade.cohesion ?? 60)) brigade.cohesion = Math.round(rested * 10) / 10;
+            }
+            continue;
+        }
 
         const posture: BrigadePosture = normalizePosture(brigade.posture);
         // Migrate in-place so auto-downgrade and progress tracking use the canonical posture

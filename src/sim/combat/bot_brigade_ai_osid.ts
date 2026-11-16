@@ -1480,6 +1480,20 @@ export function generateAllBotOrdersOsid(
     // (step 2 owns them), brigades off the front, brigades in an operation's execution phase,
     // disrupted brigades, and any brigade that may not adopt `dig_in` (e.g. forming). The post-repulse
     // `defend` is a combat write, not a bot order, and is untouched.
+    // P2 step 2 (2026-11-16): an unassigned army-reserve brigade (an elite not on loan and in no
+    // operation, with no move this pass) stands in `hold`, the existing rest posture, instead of the
+    // draining `defend` (step 0b: both VRS elites sat at cohesion 20 in defend in 157/157 samples).
+    for (const order of allPostureOrders) {
+        if (order.posture !== 'defend' && order.posture !== 'dig_in') continue;
+        const bid = order.brigade_id;
+        const formation = state.military.formations?.[bid];
+        if (!formation?.elite_loan_state || formation.elite_loan_state.on_loan === true) continue;
+        if (allAttackOrders[bid] != null || allMovementOrders[bid] != null || allColumnMarchOrders[bid] != null) continue;
+        if (state.military.brigade_movement_orders?.[bid]) continue;
+        if (findBrigadeLiveOperationAnywhere(state, bid) != null) continue;
+        if (!canAdoptPosture(formation, 'hold')) continue;
+        order.posture = 'hold';
+    }
     const staticDigInRoles = buildSectorAssignmentByBrigade(state);
     for (const order of allPostureOrders) {
         if (order.posture !== 'defend') continue;
