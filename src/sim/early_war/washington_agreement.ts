@@ -31,7 +31,7 @@
 import type { GameState } from '../../state/game_state.js';
 import { parseMilitiaPoolKey } from '../../state/militia_pool_key.js';
 import { strictCompare } from '../../state/validateGameState.js';
-import { DEFAULT_MIXED_MUNICIPALITIES } from './alliance_update.js';
+import { ALLIED_THRESHOLD, DEFAULT_MIXED_MUNICIPALITIES } from './alliance_update.js';
 
 // ── Tunable Washington precondition thresholds ──
 
@@ -93,8 +93,8 @@ export interface WashingtonPreconditionResult {
 export interface WashingtonCheckReport {
     preconditions: WashingtonPreconditionResult;
     patron_override?: WashingtonPatronOverrideResult;
-    /** Which trigger path fired: 'diplomatic' (Path A), 'patron_override' (Path B), or null. */
-    trigger_path?: 'diplomatic' | 'patron_override' | null;
+    /** Which trigger path fired: 'diplomatic' (Path A), 'patron_override' (Path B), 'consent' (Path C), or null. */
+    trigger_path?: 'diplomatic' | 'patron_override' | 'consent' | null;
     fired: boolean;
     already_signed: boolean;
 }
@@ -248,10 +248,38 @@ export function evaluateWashingtonPatronOverride(state: GameState): WashingtonPa
     };
 }
 
+// ── Path C: Federation by consent (B5 A2, 2026-11-16) ──
+
+/**
+ * Week of the Washington framework (1 March 1994; the Washington event cards' turn_min).
+ * Single owner: political_peace_plan.ts reads it for the HRHB Contact Group / Dayton alignment.
+ */
+export const WASHINGTON_AGREEMENT_WEEK = 102;
+
+/**
+ * Path C — Federation by consent. A President who never broke the RBiH-HRHB alliance must not be
+ * treated worse than one who broke it and mended it (Paths A and B both need a prior war). Fires
+ * once when ALL hold: not yet signed; the bilateral war never started (`war_started_turn` null,
+ * the engine's record of it); the alliance is above ALLIED_THRESHOLD (0.20, the isAllied rule);
+ * and the calendar has reached the Washington week. Game designer + historian 2026-11-16:
+ * coherent only as the formalising of an existing alliance (BB2 pp.450-451; BB1 p.54), so it
+ * carries the Federation benefits but none of the war-ending effects (no ceasefire to start, no
+ * cut to an alliance already above the lock). Never fires left alone: the war starts ~t49-57.
+ */
+export function evaluateWashingtonByConsent(state: GameState): boolean {
+    const rhs = state.political.rbih_hrhb_state;
+    if (!rhs || rhs.washington_signed) return false;
+    if (rhs.war_started_turn != null) return false;
+    if (!((state.political.war_alliance_rbih_hrhb ?? 0) > ALLIED_THRESHOLD)) return false;
+    return state.meta.turn >= WASHINGTON_AGREEMENT_WEEK;
+}
+
 /**
  * Apply post-Washington effects to HRHB capabilities, embargo, and alliance.
+ * `byConsent` (Path C): the alliance is raised to the lock value but never cut below its current
+ * value, and no bilateral ceasefire is started (there is no war to end).
  */
-function applyWashingtonEffects(state: GameState): void {
+function applyWashingtonEffects(state: GameState, byConsent = false): void {
     const rhs = state.political.rbih_hrhb_state!;
 
     // Lock alliance.
@@ -268,7 +296,9 @@ function applyWashingtonEffects(state: GameState): void {
     //
     // The peace-phase per-turn alliance_update.ts:260 already respects washington_signed
     // and exits early; this commit closes the symmetric gap on the event-effect path.
-    state.political.war_alliance_rbih_hrhb = WASH_ALLIANCE_LOCK_VALUE;
+    state.political.war_alliance_rbih_hrhb = byConsent
+        ? Math.max(state.political.war_alliance_rbih_hrhb ?? 0, WASH_ALLIANCE_LOCK_VALUE)
+        : WASH_ALLIANCE_LOCK_VALUE;
     if (!state.military.alliance_locks) {
         state.military.alliance_locks = [];
     }
@@ -304,8 +334,8 @@ function applyWashingtonEffects(state: GameState): void {
     rhs.washington_signed = true;
     rhs.washington_turn = state.meta.turn;
 
-    // Activate bilateral ceasefire (if not already active)
-    if (!rhs.ceasefire_active) {
+    // Activate bilateral ceasefire (if not already active). Not for Path C: no war was fought.
+    if (!byConsent && !rhs.ceasefire_active) {
         rhs.ceasefire_active = true;
         rhs.ceasefire_since_turn = state.meta.turn;
     }
@@ -388,6 +418,12 @@ export function checkAndApplyWashington(state: GameState): WashingtonCheckReport
     if (patronOverride.all_met) {
         applyWashingtonEffects(state);
         return { preconditions, patron_override: patronOverride, trigger_path: 'patron_override', fired: true, already_signed: false };
+    }
+
+    // Path C: Federation by consent (the alliance never broke)
+    if (evaluateWashingtonByConsent(state)) {
+        applyWashingtonEffects(state, true);
+        return { preconditions, patron_override: patronOverride, trigger_path: 'consent', fired: true, already_signed: false };
     }
 
     return { preconditions, patron_override: patronOverride, trigger_path: null, fired: false, already_signed: false };

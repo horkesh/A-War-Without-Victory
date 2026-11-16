@@ -32,6 +32,7 @@ import type { FactionId } from '../../state/game_state.js';
 import type { PeacePlanDefinition } from '../../state/negotiation_types.js';
 import type { PoliticalAssessment, PoliticalPersonality } from './political_personality.js';
 import { scorePoliticalOption, divergesFromHistory } from './political_event_decision.js';
+import { WASHINGTON_AGREEMENT_WEEK } from '../early_war/washington_agreement.js';
 import type { EventResponseOption } from '../events/event_types.js';
 
 // RS TERRITORY FLOOR — CANONICAL CONSTRAINTS
@@ -63,7 +64,7 @@ const RS_PATRON_OVERRIDE_IMMUNE = new Set(['vance_owen', 'contact_group']);
 // Washington Agreement (March 1994, ~w102) created institutional alignment pressure on HRHB
 // to accept the Contact Group plan alongside RBiH. Zagreb fully aligned with CG acceptance.
 // Source: ICTY Prlic et al. IT-04-74-T Vol. 3 paras. 480-520; Washington Agreement (1 March 1994)
-const WASHINGTON_AGREEMENT_WEEK = 102;
+// WASHINGTON_AGREEMENT_WEEK (102) is owned by early_war/washington_agreement.ts.
 const HRHB_CG_ALIGNMENT_THRESHOLD = 60; // lowered from 80: post-Washington, patron confidence ≥ 60 → override
 
 /**
