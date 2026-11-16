@@ -128,6 +128,19 @@ Evidence: `C:/Pyrrhic/AWWV-worktrees/_logs/pkg-1994-95-step0/` (p0_*).
 
 `src/sim/combat/operation_names.ts`: "Operacija Džihad" (never an ARBiH operation; the ICTY ties the word to the foreign El Mujahed Detachment and Serb propaganda used it to brand all Muslims) became Prevoj; the real operation names Sabur, Oluja, Bljesak, Udar (twice), Proboj and Vihor (twice) and the loaded names Hajka, Gazija, Grad and Odmazda became Temelj, Snijeg, Bujica, Nasip and Mlaz, Zalet, Granit and Mećava, Ždral, Vedrina, Magla and Smreka, each in its original slot (pool lengths 38 / 39 / 35 unchanged, selection deterministic). Historian and narrative seats chose the replacements; each was checked against the pools, the reserved list, the authored catalogues, BB Vol. I and II and the ICTY texts. New test `tests/operation_names_no_real_operations.test.ts`. Data-only (names move the state hash only for runs that draw those slots): measured pass in the PR. Evidence and rename map: `docs/40_reports/evidence/20261116_rb6_operation_names/`.
 
+## 2026-11-16 — Baselines: pins re-blessed after #703 merged with the advisory pins check failing
+
+Pins only. No code, data or behaviour changes.
+
+- #703 (RB6: bot operation-pool names replaced in place) changed the 188w artifacts, but the baseline manifest was not re-pinned. It merged with the advisory "Baseline pins" check failing, so every later PR compared against stale pins. #708 inherited the same advisory failure through its merge ref.
+- This change re-blesses `data/derived/scenario/baselines/manifest.json` to what main 07b553fbe (after #708) actually produces:
+  - end_report.md, final_save.json, run_summary.json and weekly_report.jsonl change;
+  - the other four pins are unchanged;
+  - final_state_hash `01572f50dfea2378`, the same value CI computed on #708's merge ref.
+- 40w structural fingerprint: `3b1ddd64fb4f1600`, unchanged (check passes, no update).
+- Proof: a second run matches the new pins ("Baseline regression: all scenarios match").
+- Checkpoints 709/709/708/681, guards intact, strict health PASS.
+
 ## 2026-11-16 — RF-PM1: the paramilitary-refusal consequence fires only on a real refusal (§6 panel, measured)
 
 RF fidelity-pass fix. Calibration is held: scores are recorded and are not a merge bar.
@@ -239,7 +252,7 @@ Docs only; no `src/` or `data/` change, no hash change.
 - N5 (the L7 lane's seat rulings): the reactive reach of 5 hops is design; casualties and side-effects landing on a primary picked by nominal power is a must-fix defect, sequenced after P2 step 1; the 198 against 285 gap is design; the flat hop cutoff, the nominal-average cap and `rs_2nd_herzegovina`'s home go to the calibration pass.
 - RB9 ruled (a): a bounded return rule (a dormant record clears after 12 or more weeks held by the group's own or a non-hostile side, the pool decremented) lands back-to-back with RB9 before the freeze; §6 unanimous, with a red-team anti-gaming check.
 - P2 measured: step 1 (candidate 1 of 8) held objectives 100% to 71%, VRS operations reaching battle 0 of 8 to 3 of 9, VRS sub-30 brigades 61 to 24; Farz P-A fails on a missing Army HQ marker (traced) and P-B is a new fail (2nd Corps at Brčko and Gradačac, t161 to t162); not merged. Step 2 (candidate 2 of 8): the army-reserve repair works mechanically but the pool is only two VRS elites; no priority above the threat cap; the 9999 threat sentinel is a fix (step 2b); the reserve-elite OOB audit goes to the calibration pass.
-- Hash: main with #703 and #708 measured 01572f50dfea2378, recorded as provisional (the Batch B lane's measurement, inert B4, on main 07b553fbe); the re-pin PR #713 reports three agreeing measurements and confirms it when merged.
+- Hash: main with #703 and #708 is 01572f50dfea2378, the main hash at the re-pin (#713, merged on main; three measurements agree: the re-pin run on main 07b553fbe, CI on #708's merge ref, and the Batch B lane's inert B4 run). The orchestrator had asked for it to be recorded as provisional until a "merged" message; #713 is verifiably merged (git log), so it is recorded as confirmed.
 
 ## 2026-11-15 — Command loop L7: army clashes (proposal 2A step A1; owner decision 4)
 

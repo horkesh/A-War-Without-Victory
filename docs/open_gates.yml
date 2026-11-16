@@ -139,13 +139,12 @@ gates:
       package, paired with a defence change. The 188-week final_state_hash on main was
       518de17970af5914 after #677, 799e43a7ee2f4764 after #690, 70f4dc05bf375bc7 after #696
       and #703 claims 1391f69248072728 (a state-only move that renames labels; claimed, not
-      re-measured alone); main with #703 and #708 measured 01572f50dfea2378 (provisional, the
-      Batch B lane's measurement for B4, inert, on main 07b553fbe; the re-pin PR #713 reports
-      three measurements that agree and confirms it when merged); each earlier value is the main hash at that merge, not the freeze
-      hash. #703 merged with the advisory baseline-pins check red and did not re-pin the
-      manifest, so main's pins are stale; a standalone re-pin PR (RF-ROSTER lane) follows #708,
-      and its measured hash becomes the main hash at the re-pin; it also re-confirms #705's
-      byte-identity on top of #703. #708 (RF-PM1) measured 9e17d22f520f94e6 on the pre-#703
+      re-measured alone); main with #703 and #708 is 01572f50dfea2378, the main hash at the re-pin (#713, merged;
+      three independent measurements agree: the re-pin run on main 07b553fbe, CI on #708's
+      merge ref, and the Batch B lane's inert B4 run); each earlier value is the main hash at
+      that merge, not the freeze hash. #703 had merged with the advisory baseline-pins check
+      red and did not re-pin the manifest, so main's pins were stale until #713; the re-pin
+      also re-confirms #705's byte-identity on top of #703 (orchestrator). #708 (RF-PM1) measured 9e17d22f520f94e6 on the pre-#703
       base 76e5fcabd (control, activity, formation and operation files byte-identical to main).
       data/derived/latest_run_final_save.json dates from 2026-09-01 and is stale; lanes
       read run folders instead.
