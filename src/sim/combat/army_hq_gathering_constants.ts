@@ -56,12 +56,6 @@ export const PRIORITY_RESERVE: Record<string, number> = {
 /** Strength classification thresholds (average brigade personnel) */
 export const STRENGTH_THRESHOLDS = { fortress: 1500, strong: 1000, adequate: 600, thin: 300 };
 
-/** Supply status thresholds (general_supply_reserve value) */
-export const SUPPLY_STATUS_THRESHOLDS = { abundant: 75, adequate: 50, strained: 25 };
-
-/** Manpower status thresholds (average brigade personnel) */
-export const MANPOWER_STATUS_THRESHOLDS = { healthy: 1500, adequate: 1000, strained: 600 };
-
 /** Max offensive targets per corps in gathering plan (strategic, not tactical) */
 export const MAX_GATHERING_OFFENSIVE_TARGETS = 10;
 
