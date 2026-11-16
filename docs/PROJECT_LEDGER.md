@@ -132,6 +132,30 @@ The historian read the cited location of every BB reference (109 groups, 279 men
   - Re-pinned `data/derived/scenario/baselines/manifest.json`. The 40-week structural fingerprint is unchanged (`3b1ddd64fb4f1600`).
 - **Tests.** `tests/army_hq_gathering.test.ts` now asserts the assessment's and the doctrine's retired fields are gone and that the corps ceilings still apply. 296 tests in the affected files pass, and tsc is clean.
 
+## 2026-11-16 — N6: enemy-concentration zones survive sector renumbering (control-identical)
+
+- **Defect** (same class as SE9, found in the SE9 attribution).
+  - `assessSituation` (`commander/assess.ts`) built `enemy_concentration_zones` from the previous turn's `intel_picture.concentration_detected`, keyed by last turn's positional sector ids. It matched those ids against this turn's sectors, which the partition re-minted, so the zones pointed at whichever sector now carried that number.
+  - The zones reach the player: the command-strain text "Enemy concentration detected — defensive readiness elevated" (`command_strain.ts:1083/:1361`, via `GameStateAdapter.ts:1659`) appears or disappears on them.
+  - No sim decision reads them.
+- **Ruling (orchestrator):** fix, not retire, because the value is player-visible.
+- **Fix.**
+  - The intel picture also records massing by `stableSectorKey` (`concentration_detected_by_stable_key`, built in `decide.ts`).
+  - The assessment maps last turn's concentrations onto this turn's sectors by stable key, through a new pure `concentrationZonesFromPreviousIntel`.
+  - A picture saved before N6 has no stable map and keeps the positional lookup.
+  - The new field is optional, so older saves load.
+- **Measured** (one 188-week run on main `76e5fcabd`, whose hash is `70f4dc05bf375bc7`; re-measured after merging main `713c7a213` = `1391f69248072728`: N6 `9499e1f9a4d2e628`, still 0 cells, 251 identical control_events, re-pinned; re-measured again after merging main `9a3ab8894` = `01572f50dfea2378`: N6 `adb056607d260858`, 0 cells at all four checkpoints, 251 identical control_events, control/formation/activity/AAR files byte-identical, re-pinned; and after merging main `df206642c` = `df791f73c26ed642` (fresh run, equal to main's pin): N6 `83b8e8cd36023899`, 0 cells, 251 identical control_events, deltas and AARs byte-identical, re-pinned).
+  - Final hash `bb22e1f77c941211`.
+  - **0 cells differ** at w39, w104, w156 and w188, and all 251 control_events are identical.
+  - The state diff is the new `intel_picture` field plus corrected `threat_assessment.enemy_concentration_zones`. Example at w188: VRS 1st Krajina Corps no longer lists `zone:vrs_1st_krajina:op:donji_vakuf:korenici`, a zone the positional map borrowed from a renumbered sector.
+  - Guards: verify_checkpoints "guard intact", engine_health_gate --strict PASS.
+  - The baselines manifest is re-pinned.
+- **Tests.** New `tests/commander_concentration_zones_stable_key.test.ts`:
+  - a renumbered sector keeps its concentration;
+  - a legacy picture uses the positional lookup;
+  - the player's strain text shows the concentration warning when the massing was real, where the positional map lost it.
+  - All 30 commander test files pass (544 tests). tsc is clean.
+
 ## 2026-11-16 — PK5 (C7): a short queue head steps aside only for a dated, admissible op with its own roster (byte-identical)
 
 - **Ruling (orchestrator):** C7 option (a), the bounded skip. Skip and record a short head only when an op behind it is admissible now. The skip record names the op and the reason.
@@ -452,6 +476,13 @@ Docs only; no `src/` or `data/` change, no hash change.
 - New standing steward duty (owner, 2026-11-16, via the orchestrator): inventory every comment by the Codex review bot (`chatgpt-codex-connector[bot]`) on open PRs and on PRs merged in the last 7 days, classify, route the open ones to the orchestrator, and track to closure in `C:/Pyrrhic/AWWV-coordination/codex_review_comments.md`. First sweep: the last 70 PRs (#657 to #726): 65 with no findings, 1 (#690) a completed review without findings data, 4 with findings (#706, #693, #682, #670; 6 inline comments): 3 fixed in their merge commits (#682 twice, #670), 3 open (two harness comments on #706, one on #693).
 - The #693 comment is a real finding with a record consequence: `computeAddressNationAvailability` never checks the event's `turn_min`, so a human President can address the nation from turn 0 (four uses) while a bot fires it from turn 84. Registered as work list G1; the BC06 record's reason is corrected to say "about three uses for a bot". The Rulebook's wording of the recurring address (about three uses) is not edited without an instruction.
 - #701 (B1): main stays df791f73c26ed642, measured (the Batch B lane re-proved it on main 0d62cdcf0, which includes #718).
+
+## 2026-11-16 — Pass 39: RR1 moved from Part 3 to the package (P3); #709 (N6) recorded
+
+Docs only; no `src/` or `data/` change, no hash change.
+
+- Orchestrator correction: RR1 (the dated per-faction settings in `data/scenarios/timelines/apr1992.json`: the RS reinforcement multiplier and the RBiH "Controlled Counteroffensive" aggression) moves the hash if it is changed, so it cannot sit in Part 3 (after the freeze, hash unchanged). It is now in the work list P3 row beside F2 and RS replacement, disposition pending the chapters integration (fix by tying them to causes, or a written reason, before the freeze). The Chronicle "Washington Pivot" truth fix stays in Part 3 (UI only).
+- #709, N6: enemy-concentration zones survive the per-turn sector renumbering (a stable-key map; older saves keep the positional lookup). Control-identical (0 cells differ, 251 control events identical); the state moved only by the new `intel_picture` field and the corrected zones; baselines re-pinned in the PR. The main hash after #709 is not recorded until confirmed.
 
 ## 2026-11-15 — Command loop L7: army clashes (proposal 2A step A1; owner decision 4)
 
