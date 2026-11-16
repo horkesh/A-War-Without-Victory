@@ -76,6 +76,7 @@ import {
     DEFENDER_CASUALTY_ENGAGEMENT_CAP,
     bfsDistanceFriendly,
     getReactiveDistanceWeight,
+    selectWeightedPrimaryDefender,
     HOME_DEFENSE_REACTIVE_BONUS,
     SECTOR_STANCE_REACTIVE_BONUS,
 } from './combat_math.js';
@@ -372,7 +373,7 @@ export function predictCombatOutcome(
             const pc = state.political?.political_controllers ?? {};
 
             // Per-brigade distance-weighted contribution
-            const { physicalPower, effectiveReserves, contributingBrigadeCount, eligibleBrigadeIds } = predictorPerfTime(
+            const { physicalPower, effectiveReserves, contributingBrigadeCount, eligibleBrigadeIds, weightById, hopsById } = predictorPerfTime(
                 profilePrefix,
                 '.sectorDefensePower',
                 () => {
@@ -380,6 +381,8 @@ export function predictCombatOutcome(
                     let effectiveReserves = 0;
                     let contributingBrigadeCount = 0;
                     const eligibleBrigadeIds = new Set<string>();
+                    const weightById = new Map<string, number>();
+                    const hopsById = new Map<string, number>();
                     for (const b of sectorBrigades) {
                         const locOsid = (b as { location_osid?: string }).location_osid ?? '';
                         const bPower = powerByFormationId.get(b.id) ?? computeDefenderPower(
@@ -395,6 +398,8 @@ export function predictCombatOutcome(
                         const homeBonus = (homeMun && homeMun === targetMun) ? HOME_DEFENSE_REACTIVE_BONUS : 1.0;
                         if (locOsid === targetOsid) {
                             physicalPower += bPower;
+                            weightById.set(b.id, bPower * homeBonus);
+                            hopsById.set(b.id, 0);
                             if (bPower * homeBonus > 0) {
                                 contributingBrigadeCount += 1;
                                 eligibleBrigadeIds.add(b.id);
@@ -404,24 +409,24 @@ export function predictCombatOutcome(
                             const distWeight = getReactiveDistanceWeight(hops);
                             const contribution = bPower * distWeight * homeBonus;
                             effectiveReserves += contribution;
+                            weightById.set(b.id, contribution);
+                            hopsById.set(b.id, hops);
                             if (contribution > 0) {
                                 contributingBrigadeCount += 1;
                                 eligibleBrigadeIds.add(b.id);
                             }
                         }
                     }
-                    return { physicalPower, effectiveReserves, contributingBrigadeCount, eligibleBrigadeIds };
+                    return { physicalPower, effectiveReserves, contributingBrigadeCount, eligibleBrigadeIds, weightById, hopsById };
                 }
             );
             sectorEligibleBrigadeIds = eligibleBrigadeIds;
             defenderHasReachableBrigade = contributingBrigadeCount > 0;
-            // Existing nominal scored powers and stable sort order pick the
-            // eligible primary. Membership is filtered only after distance/home
-            // contributions, so aggregate power/caps/floors stay unchanged.
+            // N5 (2026-11-16): same primary as resolution — the in-cell brigade with the
+            // largest weight, else the largest weighted contributor (ties: fewer hops, id).
+            // Aggregate power/caps/floors stay on the nominal roster.
             const eligiblePrimary = contributingBrigadeCount > 0
-                ? [...sectorBrigades]
-                    .filter((b) => eligibleBrigadeIds.has(b.id))
-                    .sort((a, b) => (powerByFormationId.get(b.id) ?? 0) - (powerByFormationId.get(a.id) ?? 0))[0]
+                ? selectWeightedPrimaryDefender(sectorBrigades, weightById, hopsById)
                 : undefined;
 
             // Apply sector stance reactive bonus (Layer B)
