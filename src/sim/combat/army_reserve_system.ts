@@ -75,6 +75,7 @@ import {
 } from './historical_elite_reservations.js';
 import { isVlasicCohaExceptionOperation } from './coha_operation_exception.js';
 import { strictCompare } from '../../state/validateGameState.js';
+import { emitDefenceRecord, isReasonCodeTopicEnabled } from './reason_code_debug.js';
 import { selectStaffControlledFactions } from '../bot/staff_control.js';
 import { getPrimaryOperation } from './corps_operation_helpers.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
@@ -824,7 +825,11 @@ export function generateArmyReserveRequests(
         if (!corpsFaction) continue;
 
         // Skip if already has a loaned elite
-        if (corpsWithLoanedElite.has(corpsId)) continue;
+        if (corpsWithLoanedElite.has(corpsId)) {
+            // Default-off `defence` receipt (package 1994-95, pre-P2): the corps was not evaluated.
+            if (isReasonCodeTopicEnabled('defence')) emitDefenceRecord({ kind: 'reserve_gap_check', turn: state.meta?.turn ?? null, faction: corpsFaction, corps_id: corpsId, skipped: 'has_loaned_elite' });
+            continue;
+        }
 
         const cmd = corpsCommand[corpsId];
         const sector = Object.keys(corpsSectors).sort(strictCompare).map(k => corpsSectors[k]).find(s => s.corps_id === corpsId);
@@ -944,6 +949,18 @@ export function generateArmyReserveRequests(
             }
         }
 
+        // Default-off `defence` receipt (package 1994-95, pre-P2): what the request check read. Observation only.
+        if (isReasonCodeTopicEnabled('defence')) {
+            const allSectors = Object.keys(corpsSectors).sort(strictCompare).map(k => corpsSectors[k]!).filter(s => s.corps_id === corpsId);
+            emitDefenceRecord({
+                kind: 'reserve_gap_check', turn: state.meta?.turn ?? null, faction: corpsFaction, corps_id: corpsId,
+                evaluated_sector: sector ? { id: sector.sector_id, threat_ratio: sector.threat_ratio, assigned: sector.assigned_brigade_ids.length } : null,
+                all_sectors: allSectors.map(s => ({ id: s.sector_id, threat_ratio: s.threat_ratio, assigned: s.assigned_brigade_ids.length, reserve: s.reserve_brigade_ids.length })),
+                op_phase: op ? `${op.type}:${op.phase}` : null,
+                commander_need: commanderNeed ? JSON.parse(JSON.stringify(commanderNeed)) : null,
+                chosen_reason: bestReason ?? null, raw_priority: bestRawPriority,
+            });
+        }
         if (!bestReason || !bestProvenanceDriver) continue;
 
         // Collect every feasible elite edge. Assignment happens after all corps

@@ -101,6 +101,7 @@ export function emitDefenceTrace(
             last_retreat_from: retreat ? `${retreat.osid}@${retreat.turn}` : null,
             supply: getBrigadeSupplyState(b, supplyStateByOsid),
             encircled: encircledMap[b.id] === true,
+            entrenchment_turns: (b as { entrenchment_turns?: number }).entrenchment_turns ?? 0,
             ca_gate: {
                 stance_defensive: stance === 'defensive',
                 not_disrupted: disrupted === 0,
