@@ -86,7 +86,7 @@ describe('BC01 mounted Decision Room receipt', () => {
     expect(screen.getAllByText('BC01 actual launch').length).toBeGreaterThan(0);
     expect(screen.getAllByText(/Reserve assembled/).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/Commander Example/).length).toBeGreaterThan(0);
-    expect(screen.getAllByText(/Stop op is available only/).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/can be halted only while it is being prepared or carried out/).length).toBeGreaterThan(0);
   });
 });
 
@@ -107,7 +107,8 @@ describe('BC01 live Decision Room exact launch directive', () => {
     expect(card).toBeDefined();
     expect(view.metrics.pendingReviews).toBe(0);
     expect(view.advanceReadiness.blockedByExistingSystems).toBe(false);
-    if (kind === 'exact') expect(card?.directive).toMatchObject({ lever: 'stop_op', payload: { corpsId: 'corps', opName: 'Exact' } });
+    // CODE3 (2026-11-16): a launch still in preparation (planning) can be stopped too.
+    if (kind === 'exact' || kind === 'preparation') expect(card?.directive).toMatchObject({ lever: 'stop_op', payload: { corpsId: 'corps', opName: 'Exact' } });
     else expect(card?.directive).toBeUndefined();
     if (kind === 'defensive') expect(card?.explanation).toContain('no offensive operation');
   });
