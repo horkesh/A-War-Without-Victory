@@ -54,6 +54,61 @@ Batch B, item B1 (freeze cut, Fable consult 2 revision 2): fix the code to the d
 
 Evidence: `C:/Pyrrhic/AWWV-worktrees/_logs/batch-b-20261116/` (b1_*).
 
+## 2026-11-16 — B3 + B2: the political-directive chain is retired; its undrainable officer events are drained
+
+Batch B, items B3 and B2 (freeze cut, Fable consult 2 revision 2). Scope ruled B3-b + B2-b by game-designer and corps-army-commander, confirmed by the orchestrator.
+
+**What the chain was.**
+- `produce-political-directive` (B1) wrote a verb per faction. The verb locked once war exhaustion passed 500, and exhaustion never falls, so it said the same thing for ~182 weeks.
+- `apply-army-directive-interpretation` (A3) translated that verb into per-corps roles (`army_corps_directives_by_faction`).
+- The commander briefing's C1 overlay let those roles REPLACE the CampaignPlan role. That made the overlay a hard `campaign_role` gate on fresh commander plans (`plan.ts`), not the "~0.02 weight" the freeze cut assumed. On main's final save it pinned every ARBiH corps to `economy` and lifted every RS and HRHB corps above its plan role.
+- A3 also pushed one `army_directive_pushback` officer event per faction per turn: 538 over 188 weeks, none ever acknowledged.
+  - `override-army-directive` has no handler.
+  - The UI adapter drops the type.
+  - But the sim briefing counted them, so a player at autonomy 1+ saw "N order interpretations pending" grow every week, and "Review" opened an empty list.
+- The player's own order tool (`stage-op-directive-order` → `inject-op-directive`) is a separate path and was never part of this chain.
+
+**Change.**
+- Removed both pipeline steps (`war_phases.ts`; step count 197 → 195) and deleted `political_directive_producer.ts` and its test.
+- `commander/briefing.ts`: the overlay reader and its "Wave 6" economy exception are gone. A corps role now comes from the CampaignPlan alone (`army_hq_gathering` front priorities). The plan.ts hard block, the 0.05 alignment weight and the patron term now read the plan's own roles.
+- `army_order_interpretation.ts` keeps its library functions for the claude_plays_vrs harness tools and `army_clashes.ts` (compliance score). `applyArmyDirectiveInterpretation` is marked as no longer in the pipeline.
+- B2: `collect_briefing.ts` and `player_decision_manifest.ts` exclude `army_directive_pushback`, matching the adapter.
+- Save migration v39 (CURRENT_SCHEMA_VERSION 38 → 39):
+  - deletes `political_directives_by_faction`;
+  - empties `army_corps_directives_by_faction` (the field stays);
+  - drains unacknowledged `army_directive_pushback` events;
+  - drops the staff's directive-reading traces (the pushback panel shows each faction's last trace with no age limit), keeping AUTONOMOUS_LAUNCH_PROPOSAL traces.
+  - Other officer events are untouched.
+- Startup snapshot rebuilt at schema 39; drift report regenerated.
+
+**Tests.**
+- New `tests/b3_directive_chain_retired.test.ts`: the v39 migration (slots, drain, traces, idempotence) and the briefing count (pushback not counted; a real `order_pushback` still is).
+- Updated: step order, A3 T12, A4 T11, C1 T2/T3/T4b/T10, the schema pins (freeze guard, versioned steps, drift audit) and the B2 leader-data test (producer parts removed).
+- The player's tool: `op_directive_injection`, `op_directive_staging` and `command_lever_consequences` pass.
+- 16 files, 413 tests, plus the earlier 30-file slice; `tsc` 0.
+
+**Proof (main 76e5fcabd).**
+- Historical 188w, two runs: final_save `bb2ca04839f11d8b` both times (deterministic).
+  - Compared with main's run, these are byte-identical: control_delta, weekly_report, formation_delta, activity_summary, operation_aars, watched_operations, destroyed_brigades, the brigade and displacement logs, end_report and replay manifest. CONTROL-IDENTICAL.
+  - 709/709/708/681, guard intact, engine health PASS, 0 consistency failures.
+  - The final save differs only in `pending_officer_events` (538 → 0), `army_co_decision_traces`, the two directive slots and `schema_version`. It is about 550 KB smaller.
+  - Commander state is byte-identical, so the gate never changed a corps decision in a measured run.
+- Hands-off emergent 188w with B0's source applied (uncommitted): control_delta byte-identical to the B0-only emergent run; 710/707/707/670; the same three emergent breaches (Farz 0/4, Seher t164, Petrovo t179), which belong to package P2.
+- **Re-measured on the landing main** (after #697 B0, #700 B4, #713 re-pin and #718 RB1; main pin `df791f73c26ed642`):
+  - historical and emergent 188w against main-equivalent runs: control_delta, weekly_report, formation_delta, activity_summary, operation_aars, watched_operations, destroyed_brigades and end_report all byte-identical;
+  - 709/709/708/681, guard intact.
+  - Baselines manifest RE-BLESSED (`UPDATE_BASELINES=1 npm run test:baselines`) to final_save `0a31449959639988`. The state moves only through schema v39 and the drained slots. An independent rerun reproduces it and `npm run test:baselines` passes.
+- Scenario-tester smoke (apr1993/1994/1995 starts, sep1991_to_dayton, apr1992 188w, on main e3a0c2b6a): control artifacts byte-identical to a main-equivalent reference in all five.
+
+**Canon debt (recorded, canon-seat condition).** FORAWWV.md describes the retired chain as validated substrate: lines 276-301 (§X.1 PoliticalDirective verbs, the B1 producer output, the C1 persisted slot and its overlay), 409 (the A1-A5 / B1+B2 / C1+C2 validated list) and 421 (C1 as the Ring 1 example). FORAWWV edits need the unanimous Pyrrhic panel and a same-change canon record, so the amendment is a separate panel change, not part of this one. The Systems Manual, Rulebook and Game Bible have no text that requires the chain. `SAVE_SCHEMA_EVOLUTION.md` has a v39 entry, and the code comments in `game_state.ts`, `ArmyCoPushbackPanel.tsx`, `political_leader_data_loader.ts` and `army_co_lifecycle.ts` now say the chain is retired.
+
+**Follow-ups (register).**
+- `political_leader_data` / `political_leaders` are still loaded into state at scenario start, but nothing reads them now (state-only; retiring them changes every save).
+- The claude_plays_vrs directive bridge and three-commander harness now drive a chain the game no longer reads.
+- The pushback panel's directive-objection source and its copy are now dead for new games (UI lane).
+
+Evidence: `C:/Pyrrhic/AWWV-worktrees/_logs/batch-b-20261116/` (b3_*).
+
 ## 2026-11-16 — B4: the army commander's autonomous launch is retired (inert)
 
 Batch B, item B4 (freeze cut, Fable consult 2 revision 2, RF-ROSTER "path a"): retire.
@@ -147,6 +202,27 @@ The historian read the cited location of every BB reference (109 groups, 279 men
   - Guards: verify_checkpoints "guard intact" (enclave 9/9, Farz, cascade 31, eastern provenance CLEAN), and engine_health_gate --strict PASS (consistency 0).
   - Re-pinned `data/derived/scenario/baselines/manifest.json`. The 40-week structural fingerprint is unchanged (`3b1ddd64fb4f1600`).
 - **Tests.** `tests/army_hq_gathering.test.ts` now asserts the assessment's and the doctrine's retired fields are gone and that the corps ceilings still apply. 296 tests in the affected files pass, and tsc is clean.
+
+## 2026-11-16 — FORAWWV §X and §XIV amended: the political-directive chain is retired (B3)
+
+Canon record for the FORAWWV amendment that follows PR #710 (B3 + B2). #710's canon seat recorded the debt: FORAWWV 276-301, 409 and 421 described the B1 producer, the A3 step and the C1 overlay as live, validated substrate.
+
+**Panel (unanimous).** Five seats, each APPROVE WITH WORDING CHANGES, all applied: historian, canon-compliance, game-designer, corps-army-commander, scenario-creator-runner-tester. The named integrator checked every change and found no contradiction: GO. war-or-game is not seated (owner rule).
+
+**Amendment.**
+- **§X header:** a dated "Amended" paragraph. It says the chain is retired, gives the measured result (control-identical in the five smoke scenarios plus historical and emergent 188w; commander state byte-identical in the historical run), and gives the corps-role source (the Army HQ CampaignPlan plus the existing bilateral-front diversion). It says civil-military direction now runs through the player's staged orders, the A4 officer roster and `army_clashes` compliance, with no standing political verb modelled.
+- **§X.1:** the six-verb set is library and tooling only; no game step writes it, except in tooling runs.
+- **§X.2:** each slot now reads as retired or save-only, as follows.
+  - `political_directives_by_faction` is not written in a game (the harness may write it); v39 deletes it.
+  - `army_corps_directives_by_faction` stays a required field. It is not written or read for decisions; the adapter still reads it, validation checks it, and v39 empties it.
+  - Corps decisions: the `plan.ts` gates read the CampaignPlan role, null without a valid plan, or primary/contain under the bilateral-front diversion.
+- **§XIV line 409:** B1+B2 and C1+C2 noted as retired; the invariant is unchanged.
+- **§XIV.3:** the Ring 1 example now names the retired C1 persistence as historical.
+- **Path correction (integrator note):** the old §X.2 said `state.political.political_leader_data`. The code (`political_leader_data_loader.ts`, `political_leader_types.ts`) holds it at `state.military.political_leader_data`. The new text uses the code's path.
+
+**Scope.** Canon text only; no code or data. The Systems Manual, Engine Invariants and Rulebook needed no change (canon seat).
+
+Evidence: `C:/Pyrrhic/AWWV-worktrees/_logs/batch-b-20261116/forawwv_b3_panel_packet.md`, `forawwv_b3_amendment_final.md`.
 
 ## 2026-11-16 — N6: enemy-concentration zones survive sector renumbering (control-identical)
 
@@ -500,6 +576,46 @@ Docs only; no `src/` or `data/` change, no hash change.
 - Orchestrator correction: RR1 (the dated per-faction settings in `data/scenarios/timelines/apr1992.json`: the RS reinforcement multiplier and the RBiH "Controlled Counteroffensive" aggression) moves the hash if it is changed, so it cannot sit in Part 3 (after the freeze, hash unchanged). It is now in the work list P3 row beside F2 and RS replacement, disposition pending the chapters integration (fix by tying them to causes, or a written reason, before the freeze). The Chronicle "Washington Pivot" truth fix stays in Part 3 (UI only).
 - #709, N6: enemy-concentration zones survive the per-turn sector renumbering (a stable-key map; older saves keep the positional lookup). Control-identical (0 cells differ, 251 control events identical); the state moved only by the new `intel_picture` field and the corrected zones; baselines re-pinned in the PR. The main hash after #709 is not recorded until confirmed.
 - #726, B5 scorer fixes 1 to 3 (territory trend, exhaustion scale, neutral patron term): historical byte-identical (df791f73c26ed642, the manifest at that base), emergent hash-identical with and without the fixes (b5507e7b9b6463a2; 710 / 707 / 707 / 670); the fixes decide no pick; the emergent guard breaches belong to package P2. Work list B5-1, B5-2, B5-4.
+
+## 2026-11-16 — Pass 40: the pin after #709 and #726, G1 ruled FIX, #727 and the harness gap, Codex routing
+
+Docs only; no `src/` or `data/` change, no hash change.
+
+- The main pin after #709 (N6) and #726 (B5 scorer fixes 1 to 3) is 83b8e8cd36023899 (the manifest's final_save.json hash prefix, read from main); #726 is byte-identical in historical mode.
+- G1 (the address to the nation ignores `turn_min` 84 for a human President): ruled FIX by the orchestrator, routed to the L7 lane (player path, hash unchanged headless); the Rulebook's "about three uses" stays; an FYI for the next game-designer and historian sitting.
+- #727 (B5 fix 4 and 5: `divergence_threshold` wired with a territory gate, RS patron note; open): unanimous §6 GO with conditions; a hands-off emergent game passes every guard with it; a follow-up is ordered so the gate also opens on political divergence.
+- Harness gap: no harness lever moves the map 3 percentage points, so the package's played test needs a stronger lever (F1g lane). The two Codex findings on #706 are routed to the F1g lane and must be fixed before the played test relies on the harness.
+- Codex tracker: no GitHub replies are posted (orchestrator ruling); the tracker file is the record. All 70 summary comments swept carry no finding text in their body (none holds a priority badge); #690's completed review has no findings data.
+
+## 2026-11-16 — Pass 41: Fable consult 5 (the chapters) accepted; the dated-settings dispositions; #729 routed
+
+Docs only; no `src/` or `data/` change, no hash change.
+
+- Fable consult 5 accepted (owner's page https://claude.ai/artifact/MEJkBykexA7cVwNQmVVzC5): four chapters (weeks 0, 54, 102, 154) as a presentation and decision frame with no chapter setting in the simulation; neutral titles with a per-side question and a state-chosen subtitle; a chapter closes with a record, not a grade. Measured: the Chapter III offensive decision is inert today (accept, balanced and defensive give identical runs, 0aa080fe82213516, because the army stance never reaches the battle or the planner); pass line: refusing leaves the VRS measurably stronger and the ARBiH less bled, otherwise it does not ship as a decision. Correction to consult 4: the army-level matter would have been decoration; the army-stance override is retired and the hidden corps stance matters fixed (Batch B).
+- Pre-freeze routed: package P3 with F2 and RS replacement (F1g lane); Batch B (retire the army-stance override, fix `stance_matters.ts:448-454`, one host for the offensive decision, the dated-settings audit list) and the Croatian-help gate on alliance state (a second Batch B lane); the accept-against-refuse played measurement after P3. Post-freeze: the chapter screens, the Chronicle "Phases" rename, Codex essays, copy under the §6 panel with the canon timeline extended past January 1993 first. The dated-settings dispositions from the memo's section 4 are in the work list.
+- Main hash at #709 (N6): 83b8e8cd36023899; #726 is inert. The #729 Codex finding (the TG name collision across corps) is routed to the F1g lane, which owns #729, to be fixed before merge.
+
+## 2026-11-16 — Pass 42: P2 step 2b measured; the VRS reserve-elite OOB list; the Guards Brigade docs correction
+
+Docs only (plus a knowledge-doc correction); no `src/` or `data/` change, no hash change.
+
+- P2 step 2b (candidate 3 of 8, run cccc2d37901f7624): the army reserve reads a real local ratio; Farz P-A passes on the step-0 base; the ARBiH holds 59% of objectives (was 71%); RS loans still go to the Drina corps through a standing commander "critical" request (95) that outranks the capped gap requests (85): that priority question goes to the package seats as step 2c.
+- Calibration-pass OOB list (Part 6): the historian's VRS reserve-elite draft (C:/Pyrrhic/AWWV-worktrees/_logs/pkg-runB/VRS_RESERVE_ELITES_DRAFT.md): 24 formations, 7 in the OOB, 2 flagged elite; the 1st Krajina package; the Herzegovina Combined Brigade; the MUP brigade; the 1st Guards date and location fixes; with its §6 condition on naming Srebrenica-linked units.
+- `docs/knowledge/VRS_ORDER_OF_BATTLE_MASTER.md`: the East Bosnian Corps "Guards Brigade (Bijeljina-based elite formation)" is corrected to the 1st Bijeljina Light Infantry Brigade "Panthers" ("Serbian Guard-Panthers"), which the same document already lists in its roster: no unit of that name appears in Balkan Battlegrounds' VRS charts (BB1 pp.459-464, BB2 pp.277-285) and the historian reads it as the Panthers (draft section D1). A docs correction, not a data change.
+
+## 2026-11-16 — Pass 43: #710 (B2 and B3) recorded; main pin 03159b9ee1e5877f
+
+Docs only; no `src/` or `data/` change, no hash change.
+
+- #710, B3 + B2: the produced political-directive chain (producer, A3 role translation, C1 briefing overlay and its Wave 6 exception) is retired for every faction, including the player's staff at autonomy 1 and above; `army_directive_pushback` is no longer produced and the 538 stale events are drained (save migration v39, schema 38 to 39; the briefing and the decision manifest no longer count them). The player's own directive tool is a separate path and untouched. Control-identical in the measured runs (commander state byte-identical); main's pin is final_save 03159b9ee1e5877f (schema v39), the main hash at #710. Merged with the full suite, engine-health-188w and Baseline pins green. It is also P3 step 1 of Fable consult 4's order.
+- Next from that lane: #734 (the FORAWWV §X and §XIV amendment, with a unanimous panel) and the t76 Belgrade historical-default fix.
+
+## 2026-11-16 — Pass 44: #734 (FORAWWV §X and §XIV, the canon record for #710) recorded; Codex sweep 4
+
+Docs only; no `src/` or `data/` change, no hash change. The steward did not edit FORAWWV.
+
+- #734, the canon record for #710: FORAWWV §X and §XIV now describe the political-directive chain as retired (§X.1 the six verbs are library and tooling only; §X.2 the slots are save-only or tooling-only; §XIV the invariant unchanged). Unanimous panel: historian, canon-compliance, game-designer, corps-army-commander, scenario-creator-runner-tester, each APPROVE WITH WORDING CHANGES, all applied; the named integrator GO. Merged 2026-11-16. Work list B3 row, roadmap merged list.
+- Codex sweep 4 (the 10 newest PRs): no new findings; #729 (routed to the F1g lane) is still the only open inline comment on an open PR.
 
 ## 2026-11-15 — Command loop L7: army clashes (proposal 2A step A1; owner decision 4)
 

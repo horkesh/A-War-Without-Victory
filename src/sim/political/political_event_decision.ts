@@ -120,3 +120,43 @@ export function pickPoliticalResponse(
 
     return bestOption;
 }
+
+/**
+ * The divergence rule (B5 fix 4; `divergence_threshold` in political_personality.ts).
+ *
+ * An emergent bot keeps to the historical choice unless BOTH hold:
+ *  - `warOffHistory`: the war's map has left history's territory band
+ *    (historical_territory_band.ts `isWarOutsideHistoricalBand`);
+ *  - the alternative beats the historical choice by MORE than the faction's
+ *    `divergence_threshold` (a tie or a smaller margin keeps history).
+ */
+export function divergesFromHistory(
+    bestScore: number,
+    historicalScore: number,
+    personality: PoliticalPersonality,
+    warOffHistory: boolean,
+): boolean {
+    if (!warOffHistory) return false;
+    return bestScore - historicalScore > personality.divergence_threshold;
+}
+
+/**
+ * pickPoliticalResponse with an authored historical response as the reference.
+ * Returns the historical option unless `divergesFromHistory` lets the best-scoring one through.
+ * Without a matching historical option it is plain pickPoliticalResponse.
+ */
+export function pickPoliticalResponseWithHistory(
+    options: EventResponseOption[],
+    respondingFaction: FactionId,
+    assessment: PoliticalAssessment,
+    personality: PoliticalPersonality,
+    historicalOptionId: string | undefined,
+    warOffHistory: boolean,
+): EventResponseOption {
+    const best = pickPoliticalResponse(options, respondingFaction, assessment, personality);
+    const historical = historicalOptionId != null ? options.find((o) => o.id === historicalOptionId) : undefined;
+    if (!historical || best.id === historical.id) return best;
+    const bestScore = scorePoliticalOption(best, respondingFaction, assessment, personality);
+    const historicalScore = scorePoliticalOption(historical, respondingFaction, assessment, personality);
+    return divergesFromHistory(bestScore, historicalScore, personality, warOffHistory) ? best : historical;
+}

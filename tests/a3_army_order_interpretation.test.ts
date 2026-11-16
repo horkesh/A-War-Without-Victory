@@ -370,30 +370,15 @@ describe('A3 — decision traces', () => {
 // T12 — Pipeline integration: step exists at correct position in war_phases.ts.
 // ===========================================================================
 describe('A3 — pipeline integration', () => {
-    it('T12 — apply-army-directive-interpretation step exists in war_phases.ts AFTER evaluate-army-hq-gathering and BEFORE generate-bot-corps-orders', () => {
-        const src = readFileSync(
+    it('T12 (B3) — the A3 step is retired: war_phases.ts no longer wires apply-army-directive-interpretation', () => {
+        const src = stripComments(readFileSync(
             resolve(process.cwd(), 'src/sim/turn_phases/war_phases.ts'),
             'utf-8',
-        );
-
-        // 1. Constant value is the canonical step name.
+        ));
         expect(A3_PIPELINE_STEP_NAME).toBe('apply-army-directive-interpretation');
-
-        // 2. The constant is imported (or the literal string is referenced) in
-        //    war_phases.ts. We accept either symbol or literal so the source
-        //    file is free to import the name from its canonical owner.
-        const usesSymbol = src.includes('A3_PIPELINE_STEP_NAME');
-        const usesLiteral = src.includes(A3_PIPELINE_STEP_NAME);
-        expect(usesSymbol || usesLiteral).toBe(true);
-
-        // 3. Ordering: evaluate-army-hq-gathering < A3 step usage < generate-bot-corps-orders
-        const idxGather = src.indexOf("name: 'evaluate-army-hq-gathering'");
-        const a3Marker = usesSymbol ? 'name: A3_PIPELINE_STEP_NAME' : `name: '${A3_PIPELINE_STEP_NAME}'`;
-        const idxA3 = src.indexOf(a3Marker);
-        const idxBotOrders = src.indexOf("name: 'generate-bot-corps-orders'");
-        expect(idxGather).toBeGreaterThan(0);
-        expect(idxA3).toBeGreaterThan(idxGather);
-        expect(idxBotOrders).toBeGreaterThan(idxA3);
+        expect(src).not.toContain('A3_PIPELINE_STEP_NAME');
+        expect(src).not.toContain('applyArmyDirectiveInterpretation');
+        expect(src).not.toContain(`'${A3_PIPELINE_STEP_NAME}'`);
     });
 
     it('T12b — applyArmyDirectiveInterpretation is callable and tolerates an empty state with no faction directives', () => {

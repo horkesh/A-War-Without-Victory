@@ -1033,6 +1033,11 @@ function recordC2ApplicationsForFaction(
 }
 
 /**
+ * NOT IN THE TURN PIPELINE since 2026-11-16 (freeze cut B3): the political-
+ * directive chain is retired and nothing writes `political_directives_by_faction`
+ * in a game. Kept as a library for the claude_plays_vrs harness tools and tests;
+ * `army_clashes.ts` uses only `computeArmyComplianceScore` / `categoryForScore`.
+ *
  * Single pipeline-step entry: for each (non-player) faction, run the A3
  * predicates and emit traces / events. Faction-symmetric: no per-faction
  * branches.
