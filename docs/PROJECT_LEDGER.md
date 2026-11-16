@@ -296,6 +296,12 @@ Docs only; no `src/` or `data/` change, no hash change.
 - New player-path item (Part 3): the army-wide stance is put to the President (silence is consent; a refusal holds it at balanced for the hold period).
 - F2 moves up: the offensives fail as in history but do not attrit the VRS (brigade strength 129,000 to 141,000; failed operations 600 to 1,700 killed against 45 to 305); the pass line adds "the VRS is visibly attrited into 1995". Fable's run 2 (on the P2 step-1 base only): 20 launches, 11 failed, 46% held, Farz P-B passes.
 
+## 2026-11-16 — Pass 32: AI1 replaced by consult 4; RF-L3d follow-ups 1, 3 and 4 pending P3 ratification
+
+Docs only; no `src/` or `data/` change, no hash change.
+
+- Orchestrator ruling, 2026-11-16: AI1 (the force-ratio term in target ranking) is REPLACED by Fable consult 4's "objectives from the weakest sector first" and "one launch estimate"; the force-ratio consideration moves to the Army HQ target choice and the estimator. RF-L3d follow-ups 1, 3 and 4 are pending P3 ratification: the package seats rule each as covered by consult 4's steps, still needed as its own step, or retired, with a one-line reason. Work list P3 row, roadmap BC19 row, board 7c and the final-behaviour record updated.
+
 ## 2026-11-15 — Command loop L7: army clashes (proposal 2A step A1; owner decision 4)
 
 - **What.** A clash is raised only by something the president did, when he stages it: stop an operation, request one, withhold a Level-1 plan, or decline a recommended opportunity. All three must hold:
