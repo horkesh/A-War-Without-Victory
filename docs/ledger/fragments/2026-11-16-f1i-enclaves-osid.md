@@ -23,7 +23,7 @@
   - PLAYER_TURN_GUIDE: the convoy step row is removed.
   - context.md.
   - No FORAWWV record or broader bright-line panel (canon seat).
-- **Measured** (fresh main 7588468dd = `83b8e8cd36023899` vs A' = `2afce5e4fb86b3ce`):
+- **Measured** (fresh main 7588468dd = `83b8e8cd36023899` vs A' = `2afce5e4fb86b3ce`; re-measured after merging main 71ffa0cb8 = `03159b9ee1e5877f` vs `7c79f84d4ce3d084`, same result, re-pinned):
   - The only difference in the final save is `political.enclaves`.
   - control_delta, formation_delta, activity_summary, operation_aars and weekly_report are byte-identical, so IVP, capital, patron, consequences and the negotiation ledger equal main on every turn.
   - Guards equal main.
