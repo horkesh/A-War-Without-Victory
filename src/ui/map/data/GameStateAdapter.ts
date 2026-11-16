@@ -2963,7 +2963,7 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
     const peacePlanHistory = derivePeacePlanHistory(state, playerFaction);
     const convoyDecisionHistory = deriveConvoyDecisionHistory(state, playerFaction);
     const paramilitaryDecisionHistory = deriveParamilitaryDecisionHistory(state, playerFaction);
-    const paramilitaryStaffSweeps = deriveParamilitaryStaffSweeps(state, playerFaction);
+    const paramilitaryUnrequested = deriveParamilitaryUnrequested(state, playerFaction);
     const officerDecisionHistory = deriveOfficerDecisionHistory(state, playerFaction);
     const armyReserveQueue = deriveArmyReserveQueue({
         pendingReserveRequests,
@@ -3142,7 +3142,7 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
         peacePlanHistory,
         convoyDecisionHistory,
         paramilitaryDecisionHistory,
-        paramilitaryStaffSweeps,
+        paramilitaryUnrequested,
         officerDecisionHistory,
         pendingParamilitaryRequests,
         paramilitaryPolicy: state.paramilitary_policy === 'always_allow' || state.paramilitary_policy === 'always_deny' || state.paramilitary_policy === 'ask'
@@ -4645,10 +4645,10 @@ function deriveParamilitaryDecisionHistory(
  * standing order to allow). A sweep the player decided has a decision record with the same turn and target and is not listed here.
  * Read-only: derived from the paramilitary formation each sweep created.
  */
-function deriveParamilitaryStaffSweeps(
+function deriveParamilitaryUnrequested(
     state: any,
     playerFaction: string | null | undefined,
-): LoadedGameState['paramilitaryStaffSweeps'] {
+): LoadedGameState['paramilitaryUnrequested'] {
     if (!isCanonicalPlayerFaction(playerFaction)) return undefined;
     const formations = state.military?.formations;
     if (!formations || typeof formations !== 'object') return undefined;
@@ -4656,7 +4656,7 @@ function deriveParamilitaryStaffSweeps(
     for (const record of Array.isArray(state.paramilitary_decision_history) ? state.paramilitary_decision_history : []) {
         if (record && typeof record.target_osid === 'string') decided.add(`${Number(record.turn)}:${record.target_osid}`);
     }
-    const sweeps: NonNullable<LoadedGameState['paramilitaryStaffSweeps']> = [];
+    const sweeps: NonNullable<LoadedGameState['paramilitaryUnrequested']> = [];
     for (const id of Object.keys(formations).sort(strictCompare)) {
         const formation = formations[id];
         if (!formation || formation.kind !== 'paramilitary' || !playerFactionMatch(formation.faction, playerFaction)) continue;

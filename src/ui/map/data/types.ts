@@ -724,7 +724,7 @@ export interface ParamilitaryDecisionRecordView {
  * sends them without a request at Full Control. Derived read-only from the paramilitary formation the sweep created;
  * no saved field. Not a decision: it never feeds the presidential cadence.
  */
-export interface ParamilitaryStaffSweepView {
+export interface ParamilitaryUnrequestedView {
     id: string;
     turn: number;
     target_osid: string;
@@ -1418,7 +1418,7 @@ export interface LoadedGameState {
     /** Filed paramilitary authorization decisions for Records/Chronicle consequence trail. */
     paramilitaryDecisionHistory?: ParamilitaryDecisionRecordView[];
     /** Paramilitary sweeps carried out for the player's side without a request to the player (staff or standing order). */
-    paramilitaryStaffSweeps?: ParamilitaryStaffSweepView[];
+    paramilitaryUnrequested?: ParamilitaryUnrequestedView[];
     /** Filed officer/personnel decisions for Records/Desk consequence trail. */
     officerDecisionHistory?: OfficerDecisionRecordView[];
     /** Read-only Army HQ opportunity ledger: proposal -> decision -> AAR outcome. */

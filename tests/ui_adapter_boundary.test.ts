@@ -404,11 +404,11 @@ describe('UI Adapter Boundary Discipline', () => {
 
     const parsed = parseGameState(rawState);
 
-    expect(parsed.paramilitaryStaffSweeps).toEqual([
+    expect(parsed.paramilitaryUnrequested).toEqual([
       { id: 'para_rs_t2_0', turn: 2, target_osid: 'op:srebrenica:obadi', faction: 'RS' },
     ]);
     expect(JSON.stringify(rawState)).toBe(before);
-    expect(parseGameState({ ...rawState, meta: { turn: 30, phase: 'war' } }).paramilitaryStaffSweeps).toBeUndefined();
+    expect(parseGameState({ ...rawState, meta: { turn: 30, phase: 'war' } }).paramilitaryUnrequested).toBeUndefined();
   });
 
   it('adapter exposes resolved officer decision history for the player faction', () => {

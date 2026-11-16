@@ -18,9 +18,9 @@ const bcs = bcsMessages as Record<string, string>;
 const FLAG_AND_RECEIPT_KEYS = [
     'verdict.condemnation.authorizedCleansing',
     'dayton.folder.condemnation.cleansing',
-    'decisionConsequences.title.paramilitary.staffSweep',
-    'decisionConsequences.outcome.staffSweep',
-    'decisionConsequences.detail.paramilitary.staffSweep',
+    'decisionConsequences.title.paramilitary.unrequested',
+    'decisionConsequences.outcome.unrequested',
+    'decisionConsequences.detail.paramilitary.unrequested',
     'warCost.finding.paramilitary.text',
     'warCost.finding.paramilitary.textOne',
     'eventDecision.paramilitaryPolicyRule',
@@ -55,12 +55,12 @@ describe('staff-sweep disclosure copy', () => {
     });
 
     it('the receipt names the municipality scale and says it is a simulated-war event, not a statement about the place', () => {
-        for (const text of [en['decisionConsequences.detail.paramilitary.staffSweep'], bcs['decisionConsequences.detail.paramilitary.staffSweep']]) {
+        for (const text of [en['decisionConsequences.detail.paramilitary.unrequested'], bcs['decisionConsequences.detail.paramilitary.unrequested']]) {
             expect(text).toContain('{place}');
             expect(text).toContain('{faction}');
         }
-        expect(en['decisionConsequences.detail.paramilitary.staffSweep']).toMatch(/not a statement about what happened in that place/);
-        expect(bcs['decisionConsequences.detail.paramilitary.staffSweep']).toMatch(/simuliranog rata/);
+        expect(en['decisionConsequences.detail.paramilitary.unrequested']).toMatch(/not a statement about what happened in that place/);
+        expect(bcs['decisionConsequences.detail.paramilitary.unrequested']).toMatch(/simuliranog rata/);
     });
 
     it('both opening paramilitary policy cards carry the game-rule block in the decision modal', () => {
