@@ -392,6 +392,42 @@ Evidence: `C:/Pyrrhic/AWWV-worktrees/_logs/batch-b-20261116/forawwv_b3_panel_pac
   - the player's strain text shows the concentration warning when the massing was real, where the positional map lost it.
   - All 30 commander test files pass (544 tests). tsc is clean.
 
+## 2026-11-16 — P2: the Ahmići massacre card carries only costs; Mostar's April 1993 orders carry the HVO's readiness (historical guard intact; scores unchanged)
+
+- **Why.** P2 was open since Council fix 4 (2026-11-14): `csq_hvo_central_bosnia_offensive_1993` recorded the Ahmići massacre and, on the same turn, gave the HVO morale +15, cohesion +10, aggression +0.25 for 14 weeks, military credibility +10 and patron confidence +10, listed as plus figures. Its dimension shifts netted HRHB **+1.75** on its own Pyrrhic score (VICTORY_AND_PYRRHIC_SCORING §3.1). That breaches "atrocity is never rewarded" (SENSITIVE_HISTORY_DESIGN_GATE Ring 3 #4; Scoring §6 non-goals 1 and 3). The orchestrator ruled it a pre-freeze must-fix.
+- **Panel.** Broader bright-line panel, eight independent seats (historian, scenario-tester, engine/systems, red-team, game designer, narrative designer, canon compliance, operations), no war-or-game. Two rounds, **unanimous GO** on option (c) as measured (B2-minus).
+- **Change** (`data/scenarios/events/consequences.json`).
+  - **Massacre card** keeps: alliance −1, ceiling 0.0 for 60 turns, flags `hvo_arbih_war_active` and `ahmici_1993`, HRHB international standing −15. Its narrative (EN/BCS) loses the orders sentences, and its effect text names the massacre.
+  - **Dropped:** aggression +0.25 (no reader; realism audit F6), HRHB military credibility +10 and patron confidence +10, RBiH military credibility −5, and RBiH international standing +10 (Ring 3 #4: an atrocity never improves a graded dimension for any side).
+  - **New non-atrocity consequence `csq_hvo_april_1993_offensive_orders`** ("Mostar's Orders for Central Bosnia" / "Naređenja Mostara za srednju Bosnu"; narrative-seat EN/BCS text). It fires at t53, the April ultimatum with its 15 April deadline (Prlić IT-04-74-T; Blaškić IT-95-14-T; Kordić IT-95-14/2-T).
+    - Gate: requires `croat_bosniak_war_begins_1993`, `hrhb_political_goal = croat_republic`, alliance below 0.2, and H6 (`hrhb_central_bosnia_defense`) not `evacuate` or `federate_early`. No mutex.
+    - Effects: the central-Bosnia objective shift (15 turns, expiring at t68 as before), HRHB morale +15, cohesion +10, and `hvo_arbih_war_active`. It models readiness before the offensive, not success: the 3rd Corps took Travnik in June and Bugojno in July 1993.
+- **Measured** (historical 188w, `tools/verify_checkpoints.cjs`; main 709/709/708/681; logs `C:/Pyrrhic/AWWV-worktrees/_logs/b5-scorer-20261116/p2*`).
+
+  | Variant | Scores | Guard |
+  |---|---|---|
+  | A: no readiness lift anywhere | 709/708/707/672 | BREACHED: Farz 0/4; unwarranted Petrovo t168, Makljenovac t183 |
+  | A′: A + RBiH +10 | same as A | breached |
+  | B: cohesion +10 on the orders card | 709/709/707/675 | breached |
+  | B2: morale + cohesion on the orders card, RBiH +10 kept | 709/709/708/681 | intact |
+  | **B2-minus (shipped)** | **709/709/708/681** | **intact**: cascade 31, Farz receipts on base's turns; hash `c88796667041051a`. Emergent 709/709/708/680, intact (`990b39cc1df19c0d`) |
+
+  **Re-confirmed on main `861de7ad9`** (after #748, whose t76 rewrite moved the pins to `8c9fbf1d30e8a976` and scores 709/709/708/682): P2 historical `0b86d3d742fcbf1c`, 709/709/708/682, guard intact (cascade 31). Emergent `84595a73932f3ac4`, 709/709/708/682, intact. Re-pinned on this head (`p2g_*` logs); a second run matches.
+
+  The operations seat explains why the lift is load-bearing: without it the 1993 HVO is weaker, 2nd Corps allocation shifts in 1995, and unwarranted captures appear. It is the existing magnitude moved one turn earlier, not a new lever.
+- **Tests** (`tests/consequence_chains.test.ts`).
+  - The Issue #9 block is rewritten, recording why the 2026-04-23 rationale no longer holds.
+  - An allowlist guard: the massacre card's effects may only be alliance_change, alliance_lock or narrative, and its dimension shifts must all be negative.
+  - The orders card fires at t53 with the shift, morale and cohesion, is not fired under H6 evacuate or federate, and is independent of the massacre (no shared turn, mutex or cross-reference).
+  - `tests/codex_sensitive_claim_inventory.test.ts`: consequence claims 552 → 558.
+- **Canon.** `SENSITIVE_HISTORY_DESIGN_GATE.md` gains an amended-date line and the P2 record row; the Council fix 4 and B5 Ahmići gate rows gain closure notes. No Systems Manual change (no new effect kind). P2 is closed; the owner is informed.
+- **Registered (findings, not fixed here).**
+  - The massacre trigger lacks the H6 evacuate/federate_early exclusions (a separate §6 change).
+  - The orders window is t53 only, so a war that starts later gets the massacre's costs and never the orders.
+  - Check whether `effect.text` shows untranslated in BCS mode (an existing pattern).
+  - The 1995 Farz chain is a knife-edge on 1993 HVO morale.
+- **P2b** (other atrocity cards that buff the perpetrator, all factions): the complete inventory is being built for the same panel.
+
 ## 2026-11-16 — PK5 (C7): a short queue head steps aside only for a dated, admissible op with its own roster (byte-identical)
 
 - **Ruling (orchestrator):** C7 option (a), the bounded skip. Skip and record a short head only when an op behind it is admissible now. The skip record names the op and the reason.
@@ -821,6 +857,13 @@ Docs only; no `src/` or `data/` change, no hash change.
 
 - Owner ruling, 2026-11-16 (chapters_design/TITLES_FINAL.md): the final chapter titles replace the earlier set in the work list's Chapters block: I The Lines Are Drawn / Linije su povučene; II Who Is the Enemy? / Ko je neprijatelj? (subtitle "War Within the War / Rat unutar rata" when the ARBiH-HVO war actually happens; the owner corrected the BCS from "Rat u ratu"); III War of Attrition / Rat iscrpljivanja; IV Who Breaks First? / Ko će prvi popustiti?. Guards: III names what each army can still do, never the enemy's dead; IV is never linked to Srebrenica or Žepa. Implementation is post-freeze presentation under the §6 copy panel. (The earlier titles also appear in the consult 5 ledger fragment of pass 41, which is merged and not edited.)
 - Correction to B5-10 (#748), also superseding the figure in the pass 51 fragment: the emergent check is 709 / 709 / 708 / 682, guard intact, Farz 4 of 4, cascade 31, measured by the batch-b-lane on #748's head ee8cd125a, which includes #727; the 710 / 707 / 707 / 670 figure came from a base before #727 and is withdrawn.
+
+## 2026-11-16 — Pass 54: #753 (the Ahmići effects, B2-minus) recorded; the three-President re-measure routed
+
+Docs only; no `src/` or `data/` change, no hash change.
+
+- #753, P2 of the sensitive-history gate (Council fix 4): the Ahmići massacre card now carries only costs (alliance -1, ceiling 0.0 over 60, flags, HRHB international standing -15); a new non-atrocity card `csq_hvo_april_1993_offensive_orders` (t53) carries the objective shift and the HVO readiness; the broader bright-line panel (8 seats, 2 rounds) was a unanimous GO on the merits. Guard intact (the no-lift variant breached the Farz guard); hash-moving: main pin 0b86d3d742fcbf1c, the main hash at #753 (read from the manifest on main).
+- The three-President Authority re-measure flagged by #756 is routed to the L7 lane (it owns the Appendix C harness), after #739; it must be done before the held tuning order.
 
 ## 2026-11-16 — t76 Belgrade event: Pale's historical posture in autumn 1993 is staying in step with Belgrade, not defiance
 
