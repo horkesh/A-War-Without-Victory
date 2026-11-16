@@ -4128,18 +4128,17 @@ export const warPhases: NamedPhase[] = [
         name: 'update-enclave-integrity',
         run: async (context) => {
             if (context.state.meta.phase !== 'war') return;
-            let edges = context.input.settlementEdges;
-            if (!edges || edges.length === 0) {
-                const graph = await getOperationalSettlementGraph(context);
-                edges = graph.edges;
-            }
-            if (!edges || edges.length === 0) return;
+            // F1i (2026-11-16): control is keyed by OSID, so the enclave pass reads the OSID graph's
+            // edges and the OSID supply report. The legacy settlement edges and `supply_state` never
+            // matched an OSID, so `political.enclaves` stayed empty.
             const graph = await getOperationalSettlementGraph(context);
+            const edges = graph.edges;
+            if (!edges || edges.length === 0) return;
             const report = updateEnclaveIntegrity(
                 context.state,
                 graph,
                 edges,
-                context.report.supply_resolution?.supply_state
+                context.report.supply_resolution?.supply_state_by_osid
             );
             context.report.enclave_integrity = {
                 enclaves: report.enclaves.length,
