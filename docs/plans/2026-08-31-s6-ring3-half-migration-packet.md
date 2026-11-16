@@ -152,3 +152,7 @@ Four of eighteen endgame dimension values are rail-saturated: RS and HRHB `inter
 pinned at 0, RBiH `international_standing` and `negotiating_leverage` pinned at 100.
 `international_standing` is a dead signal at Dayton for two of three factions. Same class as the
 exhaustion de-saturation work. Needs an owner.
+
+## Recorded divergence: emergent left alone (B5 fix 4, 2026-11-16, PR #727)
+
+With B5 fix 4 an emergent game left alone keeps `rs_strategic_goals = all_six`, so `drina_cleansing_decision_1992` now fires in emergent mode (the desktop default) at about t11. It stays unauthored (EV1 ruling) and the political scorer picks `restrained`, while historical mode picks `systematic` by array position. Both picks are recorded artefacts, never historical claims; `drina_command_accountability` has no reader. §6 panel (historian, scenario-tester, engine/systems, red-team; unanimous GO-with-conditions; SENSITIVE_HISTORY_DESIGN_GATE record row "B5 fix 4"): RBiH and HRHB players will now routinely see Drina's `notifications_to_other_factions` text ("RS issues immediate Drina restraints …") in a game where RS runs `always_allow`, so the Historian-signed record-register line required before R8 covers those texts too. This packet's open scope item 4 (authoring a default) is unchanged and still needs its own panel.

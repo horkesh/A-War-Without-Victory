@@ -275,7 +275,11 @@ Some SVG-derived geometry clusters may be irreducibly misaligned in coordinate s
 
 Validated 2026-05-06/05-07 across A1-A5 + B-lane (DDR + B1 + B2) + C-lane (DDR + C1 + C2) + Krivaja-95 floor work.
 
+**Amended 2026-11-16 (freeze cut B3, PR #710):** the B1 producer, the A3 pipeline step and the C1 briefing overlay are RETIRED. The producer's verb locked once war exhaustion passed 500, and its army translation acted as a hard `campaign_role` gate. Measured, it never changed control: control-identical in the five smoke scenarios plus the historical and emergent 188w, with commander state byte-identical in the historical run. Corps roles now come from the Army HQ CampaignPlan, plus the existing bilateral-front diversion. Civil-military direction now runs through the player's staged orders (`stage-op-directive-order`), the A4 officer roster and `army_clashes` compliance; no standing political verb is modelled. §X.1 and §X.2 below record the retired substrate and its remaining library and tooling use; they no longer describe a live game path.
+
 ### X.1 Canonical PoliticalDirective verbs
+Library and tooling only since B3: no game step writes the six-verb set below. `army_clashes.ts` scores compliance with a player-staged act through `computeArmyComplianceScore` / `categoryForScore`, and the `claude_plays_vrs` harness maps president intents onto it. No game step writes a directive verb to state, except in tooling runs.
+
 The canonical `PoliticalDirective` interface in `src/sim/combat/army_order_interpretation.ts` accepts EXACTLY six verbs:
 - `HOLD_AT_ALL_COSTS` — DEFENSIVE-WEIGHT
 - `PRESS_OFFENSIVE` — OFFENSIVE-WEIGHT in named theater
@@ -294,12 +298,12 @@ The six-verb set is closed, but the directive object may carry optional structur
 These fields clarify intent for the political -> army -> corps chain and API persona prompts. They do not expand the canonical verb vocabulary.
 
 ### X.2 Canonical chain wiring
-The political → army → corps chain is wired through these state slots:
-- **B1/B2 input:** `state.political.political_leader_data[faction]` (canonical leader scalars per `data/scenarios/political_leader_data.json`); `state.military.political_leaders[faction]` (officer ID per faction).
-- **B1 producer output:** `state.military.political_directives_by_faction[faction]: PoliticalDirective` (verb + optional target_corps_id + optional magnitude + optional permission_flags + directive_id).
-- **A3 interpreter output:** per-corps `ArmyCorpsDirective[]` (corps_id + role + optional directive_magnitude + optional permission_flags + deviated + optional deviation_reason).
-- **C1 persisted slot:** `state.military.army_corps_directives_by_faction[faction][corps_id]: { corps_id, role, directive_magnitude?, permission_flags?, deviated, deviation_reason? }` — read by `commander/briefing.ts` `assembleCampaignIntent` to overlay `frontPriority.role` → `briefing.campaign_role`.
-- **Corps decisions:** existing v0.8 corps commander intelligence consumes `briefing.campaign_role` via `plan.ts` chokepoints (`primary`/`secondary`/`economy`/`contain` gates).
+The chain is retired (B3). For saves and tooling:
+- **B1/B2 input:** `state.military.political_leader_data` / `political_leaders` are still loaded at scenario start and read by nothing (a state-retirement follow-up is registered).
+- **B1 producer output:** no game step writes `state.military.political_directives_by_faction`; the claude_plays_vrs harness may still write it in tooling runs. Migration v39 deletes it from saves.
+- **A3 interpreter output:** `interpretArmyDirective` remains as a library function and is not in the turn pipeline.
+- **C1 persisted slot:** `state.military.army_corps_directives_by_faction` stays a required field (since v10). No game step writes or reads it for decisions; the player-visible adapter still reads it (empty in new games), validation still checks it, and migration v39 empties it. `commander/briefing.ts` does not read it.
+- **Corps decisions:** `plan.ts` gates (`primary`/`secondary`/`economy`/`contain`) read `briefing.campaign_role`. That role is the CampaignPlan front-priority role (`army_hq_gathering.ts`), null when there is no valid plan, or `primary`/`contain` under the RBiH–HRHB bilateral-front diversion.
 
 ### X.3 A4 named-officer roster
 Canonical historical succession is encoded in `data/scenarios/army_co_roster.json` (`93c75b1d`):
@@ -406,7 +410,7 @@ The HVO Northwest Bosnia OZ (`hvo_northwest_bosnia`) is uniquely early among HRH
 
 ## XIV. Default-off byte-stability invariant
 
-Validated across A1-A5 (officer substrate), B1+B2 (political directive producer), C1+C2 (corps directive consumer + telemetry), D1+D2 (persona system), N4 (morale-collapse override).
+Validated across A1-A5 (officer substrate), B1+B2 (political directive producer), C1+C2 (corps directive consumer + telemetry), D1+D2 (persona system), N4 (morale-collapse override). (B1+B2 and C1+C2 retired 2026-11-16, B3; the invariant itself is unchanged.)
 
 ### XIV.1 Invariant
 Any env-flag-gated mechanism MUST produce byte-identical state hash when its flag is off (default off). Default-off paths must:
@@ -418,7 +422,7 @@ Any env-flag-gated mechanism MUST produce byte-identical state hash when its fla
 Default-off byte-stability is verified by parent-side 40w smoke against the predecessor baseline. Hash drift between default-off-flag and pre-feature baseline is a contract violation. Flag-state baseline references must be annotated with the env-flag state under which they were measured (durable knowledge entry 2026-05-06).
 
 ### XIV.3 Tooling-only vs engine-effecting
-Tooling-only QA features (Ring 0, e.g. D1+D2 personas, `tools/claude_plays_vrs/`) are byte-stable by construction at the engine layer when their flags are off. Engine-effecting features (Ring 1, e.g. C1's `army_corps_directives_by_faction` persistence) require explicit gate-respecting code in their state-write path.
+Tooling-only QA features (Ring 0, e.g. D1+D2 personas, `tools/claude_plays_vrs/`) are byte-stable by construction at the engine layer when their flags are off. Engine-effecting features (Ring 1; the retired C1 persistence was the historical example) require explicit gate-respecting code in their state-write path.
 
 ---
 
