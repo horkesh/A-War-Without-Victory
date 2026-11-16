@@ -18,6 +18,8 @@
   | B2: morale + cohesion on the orders card, RBiH +10 kept | 709/709/708/681 | intact |
   | **B2-minus (shipped)** | **709/709/708/681** | **intact**: cascade 31, Farz receipts on base's turns; hash `c88796667041051a`. Emergent 709/709/708/680, intact (`990b39cc1df19c0d`) |
 
+  **Re-confirmed on main `861de7ad9`** (after #748, whose t76 rewrite moved the pins to `8c9fbf1d30e8a976` and scores 709/709/708/682): P2 historical `0b86d3d742fcbf1c`, 709/709/708/682, guard intact (cascade 31). Emergent `84595a73932f3ac4`, 709/709/708/682, intact. Re-pinned on this head (`p2g_*` logs); a second run matches.
+
   The operations seat explains why the lift is load-bearing: without it the 1993 HVO is weaker, 2nd Corps allocation shifts in 1995, and unwarranted captures appear. It is the existing magnitude moved one turn earlier, not a new lever.
 - **Tests** (`tests/consequence_chains.test.ts`).
   - The Issue #9 block is rewritten, recording why the 2026-04-23 rationale no longer holds.
