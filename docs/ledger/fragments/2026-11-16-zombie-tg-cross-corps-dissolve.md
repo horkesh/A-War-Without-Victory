@@ -32,6 +32,17 @@ Four tests in `tests/tg_op_lifecycle.test.ts`: engage, dissolve and return donor
 - Two host corps with live same-name operations could both claim one third-corps TG. Names are unique per game (`pickOperationName`), so this is not reached in practice.
 - The per-corps TG cap counts against the anchor's corps, so a 7th Corps operation uses a 3rd Corps slot. This predates the fix.
 
-**Seats.** corps-army-commander: APPROVE WITH NOTES (the notes above). operations-expert: see the PR.
+**Seats.**
+- **corps-army-commander: APPROVE WITH NOTES.**
+  - The TG is the host operation's instrument, so it is right to engage, drain and dissolve it with the operation.
+  - Nothing else reads the TG caps or lent fields; the cap of 4 is now actually reachable.
+  - Farz drawing 3rd Corps donors is the distance ordering working as designed.
+- **operations-expert: APPROVE WITH NOTES.**
+  - Name plus faction is safe: generated names are unique per game, and probe names carry the corps.
+  - Do not add an anchor-in-operation check: `participating_brigades` is filtered mid-operation, and that check would bring the zombie back at recovery.
+- **Recorded from the seats:**
+  - An anchor whose faction differs from its corps' faction (the Usora HVO case) is still unmatched in a cross-corps operation.
+  - A per-turn orphan-TG sweep is needed before ENGINE FREEZE, as its own change. It would also cover old saves, and operations dropped by `deferUnauthorizedHistoricalOperationsForPlayer` without going through recovery.
+  - `buildArmyHqTelemetryFromTg` writes the anchor's corps as `anchor_corps_id` (cosmetic).
 
 Evidence: `C:/Pyrrhic/AWWV-worktrees/_logs/pkg-runB/` (`FARZ_HQ_TRACE.md`, `zombie_*.log`).
