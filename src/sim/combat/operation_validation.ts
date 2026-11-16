@@ -39,7 +39,9 @@ export type OpInjectionCheck =
     | 'axis_empty'
     | 'op_empty'
     | 'objective_overlap'
-    | 'participants_below_attack_floor';
+    | 'participants_below_attack_floor'
+    /** PK5 (2026-11-16): a short queue head was stepped past because an op behind it was admissible now. */
+    | 'queue_head_skipped';
 
 export interface OpInjectionWarning {
     op_name: string;

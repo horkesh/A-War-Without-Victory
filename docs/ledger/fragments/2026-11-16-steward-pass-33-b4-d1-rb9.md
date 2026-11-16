@@ -1,0 +1,7 @@
+## 2026-11-16 — Pass 33: #700 (B4) recorded; the owner's ruling on D1 (two stages); RB9 with rule (a) measured
+
+Docs only; no `src/` or `data/` change, no hash change.
+
+- #700, B4: the army commander's autonomous launch is retired. Inert; every simulation artifact byte-identical; main stays 01572f50dfea2378. UI follow-up: the pushback panel's "Autonomous-launch warning" shows only for a legacy save.
+- Owner ruling on D1, 2026-11-16, "Yes, approve both", on the orchestrator's two-stage plan. Stage 1, now: honest copy and canon ("authorized" only where the faction's policy allowed or ordered the sweep; no "ethnic cleansing" for a one-sweep trigger; delegation texts disclose staff acting before the policy decision), a staff-sweep receipt, then PR 1 (mode gating). Stage 2, after package P2 and before the freeze: retire the five artefact RBiH sweeps and take Bukvik (about September 1992) and Obadi (if kept) by ordinary 1992 operations (the joint HVO 108th Brčko operation). The historian found all 5 RBiH sweeps an engine artefact. Open with the owner: Biljesevo, Olovci and the Glamoč village in the January 1993 paint.
+- RB9 with rule (a), measured: scores 709 / 708 / 707 / 672; returns drain host refugee and militia pools, so the 1995 western captures (Petrovac, Drvar, Jajce, Ključ and others) do not happen; guards hold. Accepted as modelled history under the calibration HOLD (an honest loss), conditional on the historian's check of the returns magnitude (about 130,000); the lost cells join the calibration-pass list (HV-in-Bosnia modelling).

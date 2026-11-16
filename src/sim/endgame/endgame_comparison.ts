@@ -218,10 +218,13 @@ export function compareToHistorical(
     notes.push(`Military killed: ${formatCount(costLedger.total_military_killed)} in this campaign; ${formatCount(historicalMilitary)} in the historical war`);
     notes.push(`Civilians killed: ${formatCount(costLedger.total_civilian_killed)} in this campaign; ${formatCount(baseline.civilian_killed)} in the historical war`);
 
-    // Displacement ratio — sum of refugees_created across all factions vs historical displaced
+    // Displacement ratio — people displaced (routed + fled abroad) across all factions vs the
+    // historical displaced total, which does not include the killed. refugees_created is
+    // "displaced or killed" (RB1); civilian_casualties_caused is the killed share of it, from the
+    // same capital snapshot. Clamped at 0.
     let totalRefugees = 0;
     for (const entry of costLedger.entries) {
-        totalRefugees += entry.refugees_created;
+        totalRefugees += Math.max(0, entry.refugees_created - entry.civilian_casualties_caused);
     }
     const displacementRatio = baseline.total_displaced > 0
         ? totalRefugees / baseline.total_displaced
