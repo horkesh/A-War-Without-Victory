@@ -16,6 +16,7 @@ import {
     buildDecisionConsequenceLedgerSummary,
     buildStaffReadingLine,
 } from '../../data/decisionConsequenceLedger';
+import { buildRefugeeCompactLine } from '../../data/refugeeCompactLine';
 import { buildTurnAftermathRecordViews } from '../../data/turnAftermath';
 import { shouldNarrateTerritorySummary } from '../../data/territorySummaryGuard';
 import { openCodex } from '../../utils/shellNavigation';
@@ -51,6 +52,8 @@ export function RecordsContent({ eventCatalog }: RecordsContentProps = {}) {
     const operationLifecycle = useMemo(() => projectOperationLifecycle(state), [state]);
     // The weekly army reading of policy is one line here, not a card, tile or chip item.
     const staffReading = useMemo(() => buildStaffReadingLine(state), [state]);
+    // The HRHB President's refugee compact: one state line, so a standing arrangement (and its ending) is never silent.
+    const refugeeCompact = useMemo(() => buildRefugeeCompactLine(state), [state]);
 
     const archiveCounts = useMemo(() => {
         const aftermathCount = buildTurnAftermathRecordViews({ state, osidNameMap, limit: Number.MAX_SAFE_INTEGER }).length;
@@ -121,6 +124,15 @@ export function RecordsContent({ eventCatalog }: RecordsContentProps = {}) {
                         data-staff-reading-turn={staffReading.turn}
                     >
                         <span className="font-bold text-text-primary">{staffReading.label}:</span> {staffReading.text}
+                    </div>
+                )}
+                {refugeeCompact && (
+                    <div
+                        className="mt-3 border-l-2 border-[#c9a75c]/60 px-2 py-1 text-[13px] leading-snug text-text-secondary"
+                        data-testid="records-refugee-compact"
+                        data-compact-phase={refugeeCompact.phase}
+                    >
+                        {refugeeCompact.text}
                     </div>
                 )}
             </section>
