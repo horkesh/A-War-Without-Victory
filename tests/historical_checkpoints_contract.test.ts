@@ -120,10 +120,11 @@ describe('historical checkpoints', () => {
     });
 
     it('a mid-war start skips checkpoints behind it', () => {
-        // jan1993_to_dayton starts at week 39 and runs 149 weeks, so it should reach the
-        // later three but NOT re-score week 39, which is its own turn zero.
+        // A mid-war start at week 39 running 149 weeks should reach the later three
+        // checkpoints but NOT re-score week 39, which is its own turn zero.
+        // (Synthetic fixture; the jan1993_to_dayton scenario was retired 2026-11-17.)
         const midWar = {
-            scenario_id: 'jan1993_to_dayton',
+            scenario_id: 'midwar_week39_fixture',
             init_control: 'apr1992',
             calibration_scenario: true,
             scenario_start_week: 39,

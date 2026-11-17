@@ -1362,7 +1362,7 @@
         "kind": "alliance_lock",
         "mode": "floor",
         "value": 0.55,
-        "duration_turns": 60
+        "duration_turns": 17
       }
     ],
     "dimension_shifts": [

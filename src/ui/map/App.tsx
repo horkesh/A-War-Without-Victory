@@ -33,11 +33,8 @@ const AutonomyPanel = lazy(() =>
 import { TurnAftermathModal } from './components/TurnAftermathModal';
 import { OperationBriefingModal } from './components/OperationBriefingModal';
 import { SupplyPanel } from './components/SupplyPanel';
-// War Footing opens on demand from the President's Desk (surface step 5), so it loads then
-// and stays out of the entry chunk like RecruitmentModal and AutonomyPanel.
-const EconomyPanel = lazy(() =>
-  import('./components/EconomyPanel').then(m => ({ default: m.EconomyPanel })),
-);
+// The War Footing (Economy) panel was retired 2026-11-17 with the supply-reserve economy
+// (Fable consult 6): it showed reserves, smuggling routes and facility damage that no longer exist.
 // The Humanitarian Ledger and the Enclave dashboard open on demand; they load in their own
 // chunk so the entry chunk stays under the vite.config.ts chunk-size limit, which the
 // player-experience gate blocks on (council fix 4 grew the entry chunk past it, 2026-11-14).
@@ -344,38 +341,13 @@ function resolveEventDecisionAdvisor(
 function OperationBriefingModalWrapper() {
   const ctx = useGameStore((s) => s.operationBriefingContext);
   const close = useGameStore((s) => s.setOperationBriefingContext);
-  const setLoadError = useGameStore((s) => s.setLoadError);
-  const ipc = useIPC();
 
   if (!ctx) return <OperationBriefingModal isOpen={false} onClose={() => close(null)} />;
 
-  const handleDecision = async (decision: 'launch' | 'postpone' | 'abort' | 'probe') => {
-    if (!ipc.isAvailable) {
-      setLoadError(t('attention.bridgeUnavailableReadOnly'));
-      return;
-    }
-    const result = await ipc.stageOperationDecision({ corpsId: ctx.corpsId, operationName: ctx.operationName, decision });
-    if (!result.ok) {
-      setLoadError(result.error ?? t('attention.bridgeUnavailableReadOnly'));
-      return;
-    }
-    close(null);
-  };
-
-  // Force-launch (Level 3 Direct Intervention) is issued ONLY from the Presidential
-  // Decision Room (DirectiveCard, force_launch directive). This review modal stays
-  // read-only — it surfaces the commander's go/no-go callbacks but no override.
-  return (
-    <OperationBriefingModal
-      isOpen
-      onClose={() => close(null)}
-      onLaunch={() => handleDecision('launch')}
-      onPostpone={() => handleDecision('postpone')}
-      onAbort={() => handleDecision('abort')}
-      onOrderProbe={() => handleDecision('probe')}
-      commandBridgeAvailable={ipc.isAvailable}
-    />
-  );
+  // Force-launch (Level 3 Direct Intervention) and stop-op are issued ONLY from the Presidential
+  // Decision Room. This review modal is read-only: it shows the commander's go/no-go and the
+  // context, with no launch / postpone / abort / probe buttons (retired 2026-11-17).
+  return <OperationBriefingModal isOpen onClose={() => close(null)} />;
 }
 
 function CodexPanelWrapper({
@@ -740,7 +712,6 @@ function App() {
   const [summaryOpen, setSummaryOpen] = useState(false);
   const [summaryFocus, setSummaryFocus] = useState<SummaryFocusSection>('overview');
   const [enclaveDashboardOpen, setEnclaveDashboardOpen] = useState(false);
-  const [economyOpen, setEconomyOpen] = useState(false);
   // Item 2: National Humanitarian Ledger surface (read-model; 'U' hotkey toggle).
   const [humanitarianLedgerOpen, setHumanitarianLedgerOpen] = useState(false);
   const [aiSettingsOpen, setAiSettingsOpen] = useState(false);
@@ -1039,7 +1010,6 @@ function App() {
     commandStripOpen ||
     summaryOpen ||
     enclaveDashboardOpen ||
-    economyOpen ||
     humanitarianLedgerOpen ||
     aiSettingsOpen ||
     diplomacyOpen ||
@@ -1071,7 +1041,6 @@ function App() {
     turnAftermathOpen ||
     summaryOpen ||
     enclaveDashboardOpen ||
-    economyOpen ||
     humanitarianLedgerOpen ||
     aiSettingsOpen ||
     diplomacyOpen ||
@@ -1424,7 +1393,6 @@ function App() {
     setTurnAftermathOpen(false);
     setSummaryOpen(false);
     setEnclaveDashboardOpen(false);
-    setEconomyOpen(false);
     setHumanitarianLedgerOpen(false);
     setAiAdvisorOpen(false);
     suppressCommandBriefingForCurrentTurn();
@@ -2145,11 +2113,6 @@ function App() {
       {mapMode === 'supply' && loadedGameState && (
         <SupplyPanel state={loadedGameState} />
       )}
-      {economyOpen && loadedGameState && (
-        <Suspense fallback={null}>
-          <EconomyPanel state={loadedGameState} onClose={() => setEconomyOpen(false)} />
-        </Suspense>
-      )}
       {loadedGameState && (
         <Suspense fallback={null}>
           <HumanitarianLedgerPanel
@@ -2422,7 +2385,6 @@ function App() {
                 }
                 leaveWarroomForGame();
               }}
-              onOpenEconomy={() => setEconomyOpen(true)}
               onClose={() => {
                 closeWarroomDesk();
               }}

@@ -256,7 +256,7 @@ describe('Corps-Level Operation Launch', () => {
         expect(op!.sector_id).toBeUndefined();
     });
 
-    it('scores strained brigades at partial readiness when reserves do not collapse them to critical', () => {
+    it('records full supply readiness: the reserve-based readiness was retired 2026-11-17', () => {
         const state = makeState(5, {
             'b1': { corps_id: 'corps_1' as any, location_osid: 'op:a:f1' },
             'b2': { corps_id: 'corps_1' as any, location_osid: 'op:a:f2' },
@@ -295,7 +295,8 @@ describe('Corps-Level Operation Launch', () => {
         );
 
         expect(op).not.toBeNull();
-        expect(op!.supply_readiness).toBe(0.5);
+        // Fable consult 6: computeSupplyReadiness (reserve-only) retired; launches record 1.0.
+        expect(op!.supply_readiness).toBe(1.0);
     });
 
     it('rejects offensives that only look viable because defender bonuses are ignored', () => {

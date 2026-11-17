@@ -7,7 +7,7 @@ import { EXHAUSTION_LEGITIMACY_MULTIPLIER } from '../../state/exhaustion.js';
 import type { FactionId, GameState, FrontDescriptor } from '../../state/game_state.js';
 import { getFactionLegitimacyAverages } from '../../state/legitimacy.js';
 import { getExhaustionExternalModifier } from '../../state/patron_pressure.js';
-import { RESILIENCE_EFFECT_SCALE } from '../../state/supply_reserve_constants.js';
+import { RESILIENCE_EFFECT_SCALE } from '../../state/enclave_resilience_constants.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { getMaxEnclaveResilienceForFaction } from './enclave_resilience.js';
 import { hasLiveSectorFrontlineTruth } from './front_assignment.js';

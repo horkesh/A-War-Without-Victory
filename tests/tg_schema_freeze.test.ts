@@ -1,5 +1,5 @@
 /**
- * SCHEMA FREEZE GUARD (currently v41; v40 is reserved by another lane) (ADR-0005 §Determinism Impact + §Schema).
+ * SCHEMA FREEZE GUARD (currently v41) (ADR-0005 §Determinism Impact + §Schema).
  *
  * The Tactical Group schema moved v19→v34 once during the event-system merge
  * (the v19 slot was reclaimed by displacement civilian-casualty). ADR-0005
@@ -27,7 +27,7 @@ describe('C3 schema freeze guard (v41)', () => {
         // If this fails, a renumber happened. Confirm the bump is intentional
         // (new migration step appended), then update this guard + the
         // save_migration v34 one-way contract comment together.
-        // §6 E2 took v41; v40 is reserved by another lane and not yet registered.
+        // v40: September 1991 peace start retired (#773); v41: §6 E2 (negotiation_capital retired).
         expect(CURRENT_SCHEMA_VERSION).toBe(41);
     });
 

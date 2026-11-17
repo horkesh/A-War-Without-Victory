@@ -363,11 +363,7 @@ function buildStatePrompt(state: GameState, faction: FactionId, prevTerritory: R
         // else: no op + no meaningful status → emit nothing (silence is signal).
     }
 
-    // Supply
-    const generalSupply = state.military.general_supply_reserve?.[faction] ?? 'unknown';
-    const heavySupply = state.military.heavy_munitions_reserve?.[faction] ?? 'unknown';
-    lines.push('');
-    lines.push(`SUPPLY: general=${typeof generalSupply === 'number' ? generalSupply.toFixed(0) : generalSupply}, heavy=${typeof heavySupply === 'number' ? heavySupply.toFixed(0) : heavySupply}`);
+    // Supply is connection, not stock (reserve economy retired 2026-11-17): no stock line here.
 
     // Enemy strength
     lines.push('');

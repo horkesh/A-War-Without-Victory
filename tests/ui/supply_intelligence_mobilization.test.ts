@@ -4,12 +4,8 @@ import { describe, expect, it } from 'vitest';
 import { render } from '@testing-library/react';
 import React from 'react';
 
-import { computeSupplyBreakdown, getEnclaveStatuses, getMobilizationInfo, SupplyIntelligence } from '../../src/ui/map/components/army_hq/SupplyIntelligence';
+import { getEnclaveStatuses, getMobilizationInfo, SupplyIntelligence } from '../../src/ui/map/components/army_hq/SupplyIntelligence';
 import type { LoadedGameState } from '../../src/ui/map/data/types';
-import {
-    HEAVY_MAINTENANCE_PER_WEAPON,
-    MAINTENANCE_DRAIN_PER_FORMATION,
-} from '../../src/state/supply_reserve_constants';
 
 describe('SupplyIntelligence mobilization info', () => {
     it('maps the current mobilization summary shape without legacy field names', () => {
@@ -43,136 +39,15 @@ describe('SupplyIntelligence mobilization info', () => {
         expect(getMobilizationInfo(state, 'RS')).toBeNull();
     });
 
-    it('excludes active-but-forming brigades from supply maintenance estimates', () => {
-        const state = {
-            factionReserves: {
-                RBiH: { generalSupply: 100, heavyMunitions: 20 },
-            },
-            formations: [
-                {
-                    id: 'fielded',
-                    faction: 'RBiH',
-                    kind: 'brigade',
-                    status: 'active',
-                    readiness: 'active',
-                    composition: { tanks: 1, artillery: 2, aa_systems: 3 },
-                },
-                {
-                    id: 'forming',
-                    faction: 'RBiH',
-                    kind: 'brigade',
-                    status: 'active',
-                    readiness: 'forming',
-                    composition: { tanks: 10, artillery: 10, aa_systems: 10 },
-                },
-            ],
-        } as unknown as LoadedGameState;
-
-        expect(computeSupplyBreakdown(state, 'RBiH')).toMatchObject({
-            estimatedMaintenanceDrain: Math.round(MAINTENANCE_DRAIN_PER_FORMATION * 100) / 100,
-            estimatedHeavyDrain: Math.round(6 * HEAVY_MAINTENANCE_PER_WEAPON * 100) / 100,
-        });
-    });
-
-    it('marks missing faction reserves as unreported instead of explicit zero supply', () => {
-        const state = {
-            formations: [
-                {
-                    id: 'fielded',
-                    faction: 'RBiH',
-                    kind: 'brigade',
-                    status: 'active',
-                    readiness: 'ready',
-                },
-            ],
-        } as unknown as LoadedGameState;
-
-        const breakdown = computeSupplyBreakdown(state, 'RBiH');
-
-        expect(breakdown.currentGeneralReported).toBe(false);
-        expect(breakdown.currentHeavyReported).toBe(false);
-        expect(breakdown.currentGeneral).toBeNull();
-        expect(breakdown.currentHeavy).toBeNull();
-
+    it('shows no reserve breakdown (supply-reserve economy retired 2026-11-17)', () => {
         const { container } = render(React.createElement(SupplyIntelligence, {
-            breakdown,
             enclaves: [],
             mobilization: null,
-            currentTurn: 0,
         }));
 
-        expect(container.textContent).toContain('GENERAL SUPPLY: Unreported');
-        expect(container.textContent).not.toContain('GENERAL SUPPLY: 0');
-    });
-
-    it('marks heavy-equipment drain unreported when fielded formation composition is missing', () => {
-        const state = {
-            factionReserves: {
-                RBiH: { generalSupply: 50, heavyMunitions: 20 },
-            },
-            formations: [
-                {
-                    id: 'fielded_without_composition',
-                    faction: 'RBiH',
-                    kind: 'brigade',
-                    status: 'active',
-                    readiness: 'ready',
-                },
-            ],
-        } as unknown as LoadedGameState;
-
-        const breakdown = computeSupplyBreakdown(state, 'RBiH');
-
-        expect(breakdown.estimatedHeavyDrainReported).toBe(false);
-        expect(breakdown.estimatedHeavyDrain).toBeNull();
-
-        const { container } = render(React.createElement(SupplyIntelligence, {
-            breakdown,
-            enclaves: [],
-            mobilization: null,
-            currentTurn: 0,
-        }));
-
-        expect(container.textContent).toContain('heavy equip Unreported');
-        expect(container.textContent).not.toContain('heavy equip −0');
-    });
-
-    it('keeps explicit zero faction reserves as reported zero supply', () => {
-        const state = {
-            factionReserves: {
-                RBiH: { generalSupply: 0, heavyMunitions: 0 },
-            },
-            formations: [],
-        } as unknown as LoadedGameState;
-
-        const breakdown = computeSupplyBreakdown(state, 'RBiH');
-
-        expect(breakdown.currentGeneralReported).toBe(true);
-        expect(breakdown.currentHeavyReported).toBe(true);
-        expect(breakdown.currentGeneral).toBe(0);
-        expect(breakdown.currentHeavy).toBe(0);
-    });
-
-    it('renders reported zero heavy-equipment drain as zero rather than negative zero', () => {
-        const breakdown = computeSupplyBreakdown({
-            factionReserves: {
-                RBiH: { generalSupply: 50, heavyMunitions: 20 },
-            },
-            formations: [],
-        } as unknown as LoadedGameState, 'RBiH');
-
-        expect(breakdown.estimatedHeavyDrainReported).toBe(true);
-        expect(breakdown.estimatedHeavyDrain).toBe(0);
-
-        const { container } = render(React.createElement(SupplyIntelligence, {
-            breakdown,
-            enclaves: [],
-            mobilization: null,
-            currentTurn: 0,
-        }));
-
-        expect(container.textContent).toContain('heavy equip 0');
-        expect(container.textContent).not.toContain('heavy equip -0');
+        expect(container.textContent).not.toContain('GENERAL SUPPLY');
+        expect(container.textContent).not.toContain('patron');
+        expect(container.textContent).not.toContain('Depletion');
     });
 
     it('keeps missing enclave supply unreported instead of inventing adequate supply', () => {

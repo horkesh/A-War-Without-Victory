@@ -14,7 +14,7 @@ import { strictCompare, validateGameStateShape } from './validateGameState.js';
 
 
 /** Top-level keys allowed on GameState (canonical only). Wrappers like { state, phasesExecuted } are rejected. */
-const GAMESTATE_TOP_LEVEL_KEYS: ReadonlySet<string> = new Set([
+export const GAMESTATE_TOP_LEVEL_KEYS: ReadonlySet<string> = new Set([
     'schema_version',
     'meta',
     'factions',

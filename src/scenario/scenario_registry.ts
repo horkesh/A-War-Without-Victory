@@ -30,17 +30,8 @@ export interface ScenarioEntry {
  * All registered scenarios in chronological order.
  */
 export const SCENARIO_REGISTRY: ScenarioEntry[] = [
-    {
-        key: 'sep1991_to_dayton',
-        name: 'Peace to War',
-        description: 'Begin in the tense peace of late 1991. Navigate the political crisis, referendum, and JNA withdrawal before the war erupts in April 1992. Full campaign to Dayton.',
-        startDate: 'September 1991',
-        startWeek: -30,
-        durationWeeks: 218,
-        difficulty: { RBiH: 'hard', RS: 'medium', HRHB: 'hard' },
-        scenarioFile: 'sep1991_to_dayton.json',
-        available: true,
-    },
+    // The September 1991 "Peace to War" start was retired (campaign structure decision
+    // 2026-03-23; entry and scenario file removed 2026-11-16). Every campaign starts in war.
     {
         key: 'apr1992_definitive_52w',
         name: 'The War Begins',
@@ -52,17 +43,8 @@ export const SCENARIO_REGISTRY: ScenarioEntry[] = [
         scenarioFile: 'apr1992_definitive_52w.json',
         available: true,
     },
-    {
-        key: 'jan1993_to_dayton',
-        name: 'Mid-War: Shifting Alliances',
-        description: 'January 1993: the front lines have stabilized. The RBiH-HVO alliance fractures, enclaves are besieged, and international pressure mounts. Navigate the war to Dayton.',
-        startDate: 'January 1993',
-        startWeek: 39,
-        durationWeeks: 149,
-        difficulty: { RBiH: 'hard', RS: 'medium', HRHB: 'hard' },
-        scenarioFile: 'jan1993_to_dayton.json',
-        available: true,
-    },
+    // jan1993_to_dayton retired 2026-11-17 (Fable consult 6, J1): it existed to run the retired
+    // supply-reserve economy and could not be started by a player.
     {
         key: 'mar1994_washington_to_dayton',
         name: 'Washington to Dayton',

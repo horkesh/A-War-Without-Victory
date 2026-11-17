@@ -324,11 +324,11 @@
         "response_options": {
           "escalate": {
             "label": "Provesti ultimatum",
-            "description": "Narediti HVO-u u Gornjem Vakufu da nametne svoju komandu u gradu. Raskol s ARBiH se produbljuje."
+            "description": "Narediti HVO-u u Gornjem Vakufu da nametne svoju komandu u gradu. Raskol s ARBiH se produbljuje. Ako je vaš dogovor o prihvatu raseljenih na snazi, ovim prestaje zauvijek: napetost u savezu zbog raseljavanja i zagrebački pritisak se vraćaju; regrutacija se oporavlja."
           },
           "negotiate": {
             "label": "Tražiti lokalno primirje",
-            "description": "Narediti lokalne pregovore s ARBiH. Raskol zasad slabi; spor oko grada ostaje otvoren."
+            "description": "Narediti lokalne pregovore s ARBiH. Raskol zasad slabi; spor oko grada ostaje otvoren. Ako je vaš dogovor o prihvatu raseljenih na snazi, ovim se obnavlja: važit će još najmanje 30 sedmica."
           }
         }
       }
@@ -400,7 +400,7 @@
         "id": "escalate",
         "branch_tag": "hrhb_central_bosnia_war",
         "label": "Enforce the ultimatum",
-        "description": "Order the HVO in Gornji Vakuf to impose its command on the town. The break with the ARBiH deepens.",
+        "description": "Order the HVO in Gornji Vakuf to impose its command on the town. The break with the ARBiH deepens. If your refugee compact is in force, this ends it for good: displacement strain and Zagreb's pull on the alliance return, and HVO recruitment recovers.",
         "historical_marker": "historical_default",
         "aggression_affinity": 0.7,
         "risk_level": 0.7,
@@ -420,7 +420,7 @@
         "id": "negotiate",
         "branch_tag": "hrhb_central_bosnia_ceasefire",
         "label": "Seek a local ceasefire",
-        "description": "Order local talks with the ARBiH. The break eases for now; the dispute over the town stays open.",
+        "description": "Order local talks with the ARBiH. The break eases for now; the dispute over the town stays open. If your refugee compact is in force, this renews it for at least 30 more weeks.",
         "aggression_affinity": -0.5,
         "risk_level": 0.4,
         "effects": [
@@ -807,6 +807,7 @@
       {
         "id": "acknowledge_pressure",
         "label": "Acknowledge the message",
+        "description": "Note Zagreb's order to hold back during the Vance-Owen window, without arguing it. Zagreb's confidence recovers; your negotiating leverage and internal cohesion fall. If your refugee compact is in force, this neither renews nor ends it.",
         "branch_tag": "hrhb_vopp_acknowledge",
         "historical_marker": "historical_default",
         "aggression_affinity": -0.3,
@@ -832,6 +833,7 @@
       {
         "id": "resist_patron",
         "label": "Maintain our position",
+        "description": "Hold our position and insist on the provincial map despite Zagreb's call for restraint. Zagreb's confidence falls further; your negotiating leverage and military credibility rise. If your refugee compact is in force, this ends it for good: displacement strain and Zagreb's pull on the alliance return, and HVO recruitment recovers.",
         "branch_tag": "hrhb_vopp_resist",
         "historical_marker": "counterfactual",
         "aggression_affinity": 0.5,
@@ -1283,11 +1285,11 @@
           },
           "breakout_offensive": {
             "label": "Pokrenuti proboj",
-            "description": "Narediti Operativnoj zoni pokušaj proboja kroz linije 3. korpusa ARBiH. Odnos snaga je izrazito nepovoljan. Naređenje iscrpljuje ljudstvo HVO-a i troši podršku Zagreba na operaciju s malo izgleda za uspjeh."
+            "description": "Narediti Operativnoj zoni pokušaj proboja kroz linije 3. korpusa ARBiH. Odnos snaga je izrazito nepovoljan. Naređenje iscrpljuje ljudstvo HVO-a i troši podršku Zagreba na operaciju s malo izgleda za uspjeh. Ako je vaš dogovor o prihvatu raseljenih na snazi, ovim prestaje zauvijek: napetost u savezu zbog raseljavanja i zagrebački pritisak se vraćaju; regrutacija se oporavlja."
           },
           "federate_early": {
             "label": "Rana federacija s RBiH",
-            "description": "Otvoriti pregovore o federaciji sa Sarajevom u proljeće 1993, gotovo godinu prije Washingtonskog sporazuma: primirje u cijeloj srednjoj Bosni i zajednička komanda protiv VRS-a. Zagreb se tome protivi i odnosi s pokroviteljem Mostara se kidaju, dok položaj Mostara za pregovaračkim stolom jača."
+            "description": "Otvoriti pregovore o federaciji sa Sarajevom u proljeće 1993, gotovo godinu prije Washingtonskog sporazuma: primirje u cijeloj srednjoj Bosni i zajednička komanda protiv VRS-a. Zagreb se tome protivi i odnosi s pokroviteljem Mostara se kidaju, dok položaj Mostara za pregovaračkim stolom jača. Ako je vaš dogovor o prihvatu raseljenih na snazi, ovim se obnavlja: važit će još najmanje 40 sedmica."
           }
         }
       }
@@ -1425,7 +1427,7 @@
         "branch_tag": "hrhb_strategic_ambiguity",
         "historical_marker": "counterfactual",
         "label": "Mount a breakout offensive",
-        "description": "Order the Operative Zone to attempt a breakout through the ARBiH 3rd Corps lines. The force ratio is heavily against it. The order drains HVO manpower and spends Zagreb's support on an operation unlikely to succeed.",
+        "description": "Order the Operative Zone to attempt a breakout through the ARBiH 3rd Corps lines. The force ratio is heavily against it. The order drains HVO manpower and spends Zagreb's support on an operation unlikely to succeed. If your refugee compact is in force, this ends it for good: displacement strain and Zagreb's pull on the alliance return, and HVO recruitment recovers.",
         "effects": [
           {
             "kind": "morale_change",
@@ -1466,7 +1468,7 @@
         "branch_tag": "hrhb_united_front",
         "historical_marker": "counterfactual",
         "label": "Federate early with RBiH",
-        "description": "Open federation talks with Sarajevo in the spring of 1993, nearly a year before the Washington Agreement: a ceasefire across central Bosnia and joint command against the VRS. Zagreb opposes it and relations with Mostar's patron break down, while Mostar's standing at the negotiating table rises.",
+        "description": "Open federation talks with Sarajevo in the spring of 1993, nearly a year before the Washington Agreement: a ceasefire across central Bosnia and joint command against the VRS. Zagreb opposes it and relations with Mostar's patron break down, while Mostar's standing at the negotiating table rises. If your refugee compact is in force, this renews it for at least 40 more weeks.",
         "effects": [
           {
             "kind": "morale_change",
@@ -8325,7 +8327,7 @@
         "branch_tag": "hrhb_washington_accept",
         "historical_marker": "historical_default",
         "label": "Extend federation overture to Sarajevo now",
-        "description": "Accept Tudjman's directive transmitted via Galbraith and the Swoboda-Bonn channel. Extend backchannel federation language to Sarajevo NOW (October-December 1993), pre-empting US sanctions pressure and shaping the eventual Washington framework architecture. The Federation track begins to form three months ahead of the formal signature; diplomatic credit accrues to the HZ HB Presidency; the Croat-Bosniak war strain begins to ease; international standing rises sharply.",
+        "description": "Accept Tudjman's directive transmitted via Galbraith and the Swoboda-Bonn channel. Extend backchannel federation language to Sarajevo NOW (October-December 1993), pre-empting US sanctions pressure and shaping the eventual Washington framework architecture. The Federation track begins to form three months ahead of the formal signature; diplomatic credit accrues to the HZ HB Presidency; the Croat-Bosniak war strain begins to ease; international standing rises sharply. If your refugee compact is in force, this renews it for at least 30 more weeks.",
         "effects": [
           {
             "kind": "morale_change",
@@ -8370,7 +8372,7 @@
         "branch_tag": "hrhb_croat_republic",
         "historical_marker": "counterfactual",
         "label": "Maintain separate-state line; let Zagreb-hawks dictate the pace",
-        "description": "Resist the federation backchannel. The Croat-republic line holds and the HZ HB Presidency signals to Zagreb-hawks (the Šušak-Boban hardline) that Mostar will not extend federation language pre-emptively. Tudjman's accommodation of US pressure is deferred; the patron channel re-aligns around the hardline; but the diplomatic ground that Galbraith and Swoboda have prepared is yielded back to Sarajevo and the international community.",
+        "description": "Resist the federation backchannel. The Croat-republic line holds and the HZ HB Presidency signals to Zagreb-hawks (the Šušak-Boban hardline) that Mostar will not extend federation language pre-emptively. Tudjman's accommodation of US pressure is deferred; the patron channel re-aligns around the hardline; but the diplomatic ground that Galbraith and Swoboda have prepared is yielded back to Sarajevo and the international community. If your refugee compact is in force, this ends it for good: displacement strain and Zagreb's pull on the alliance return, and HVO recruitment recovers.",
         "effects": [
           {
             "kind": "morale_change",
@@ -8460,7 +8462,7 @@
         "branch_tag": "hrhb_strategic_ambiguity",
         "historical_marker": "counterfactual",
         "label": "Reject federation path; commit to permanent separate Croat republic",
-        "description": "Reject the federation backchannel entirely. The HZ HB Presidency commits to a permanent separate Croat republic outside any Federation architecture with Sarajevo. Tudjman's hawks (the Šušak-Boban hardline) are pleased; confidence among the Zagreb hawks rises sharply (+10); but the Federation channel that Galbraith, Swoboda, and Holbrooke have prepared ruptures BEFORE it forms. International standing collapses (-25), negotiating leverage collapses (-25), territorial legitimacy concedes the long-term path of isolation (-10), and the maximalist Croat-republic platform commits to a path that the Washington Agreement of March 1994 (still three months out) will eventually have to override under direct US sanctions pressure. This is the maximum-cost counterfactual.",
+        "description": "Reject the federation backchannel entirely. The HZ HB Presidency commits to a permanent separate Croat republic outside any Federation architecture with Sarajevo. Tudjman's hawks (the Šušak-Boban hardline) are pleased; confidence among the Zagreb hawks rises sharply (+10); but the Federation channel that Galbraith, Swoboda, and Holbrooke have prepared ruptures BEFORE it forms. International standing collapses (-25), negotiating leverage collapses (-25), territorial legitimacy concedes the long-term path of isolation (-10), and the maximalist Croat-republic platform commits to a path that the Washington Agreement of March 1994 (still three months out) will eventually have to override under direct US sanctions pressure. This is the maximum-cost counterfactual. If your refugee compact is in force, this ends it for good: displacement strain and Zagreb's pull on the alliance return, and HVO recruitment recovers.",
         "effects": [
           {
             "kind": "morale_change",

@@ -54,6 +54,24 @@ function existingReview(
         .sort((a, b) => strictCompare(a.id, b.id))[0];
 }
 
+/**
+ * Read-only twin of `ensureHistoricalOperationAuthorizationReview`: the status the gate would return
+ * now, without creating a review. With no review on file the gate would create one already accepted
+ * (standing authorization), so that reads as 'accepted'. Used by the Army HQ reservation predicate,
+ * which must not write state (authored-op precedence S2).
+ */
+export function peekHistoricalOperationAuthorizationStatus(
+    state: GameState,
+    input: HistoricalOperationAuthorizationInput,
+): HistoricalOperationAuthorizationStatus {
+    if (state.meta?.player_faction !== input.faction) return 'not_required';
+    const existing = existingReview(state, historicalOperationAuthorizationAction(input), input.faction);
+    if (!existing) return 'accepted';
+    if (existing.accepted === true) return 'accepted';
+    if (existing.accepted === false) return 'declined';
+    return 'pending';
+}
+
 export function ensureHistoricalOperationAuthorizationReview(
     state: GameState,
     input: HistoricalOperationAuthorizationInput,

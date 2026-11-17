@@ -2,7 +2,6 @@
 import { cleanup, fireEvent, render } from '@testing-library/react';
 import { createElement } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { EconomyPanel } from '../../src/ui/map/components/EconomyPanel';
 import { EnclaveDashboard } from '../../src/ui/map/components/EnclaveDashboard';
 import { HumanitarianLedgerPanel } from '../../src/ui/map/components/HumanitarianLedgerPanel';
 import type { LoadedGameState } from '../../src/ui/map/data/types';
@@ -10,11 +9,10 @@ import { Z } from '../../src/ui/shared/zIndex';
 
 afterEach(cleanup);
 
-const state = { player_faction: 'RBiH', productionFacilities: [], smugglingRoutes: [] } as unknown as LoadedGameState;
+const state = { player_faction: 'RBiH' } as unknown as LoadedGameState;
 
 describe('records surfaces outside the shared Modal', () => {
   const cases = [
-    ['economy-panel', (onClose: () => void) => createElement(EconomyPanel, { state, onClose })],
     ['enclave-dashboard', (onClose: () => void) => createElement(EnclaveDashboard, { state, open: true, onClose })],
     ['humanitarian-ledger-panel', (onClose: () => void) => createElement(HumanitarianLedgerPanel, { state, open: true, onClose })],
   ] as const;

@@ -29,7 +29,6 @@ describe('save migration drift audit diagnostic', () => {
             fields: Array<{ field: string }>;
         };
 
-        // 41, with no v40 yet: v40 belongs to another lane (§6 E2 took 41).
         expect(report.latest_schema_version).toBe(41);
         expect(report.anonymous_default_count).toBe(0);
         expect(report.fields).toEqual([]);

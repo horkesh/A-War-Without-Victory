@@ -13,7 +13,7 @@ import {
     HARDENING_DEFENSE_BONUS,
     MAX_ENCLAVE_RESILIENCE,
     RESILIENCE_EFFECT_SCALE,
-} from '../src/state/supply_reserve_constants.js';
+} from '../src/state/enclave_resilience_constants.js';
 
 function makeMinimalState(overrides: Partial<GameState> = {}): GameState {
     return {

@@ -52,22 +52,23 @@ describe('Negotiation Capital', () => {
             peace_plan_history: [],
             strategic_dimensions: initializeStrategicDimensions(),
         });
-        // Digests re-pinned 2026-11-17 for save schema v41 (§6 E2): the only byte change from the
-        // v39 pins is schema_version 39 -> 41 (verified by reverting that field and reproducing
-        // every v39 digest). v39 pins (freeze cut B3) wrote schema_version 39 and an emptied directive slot.
+        // Digests re-pinned 2026-11-17 for save schema v41 (§6 E2, after main's v40): the only byte
+        // change from main's v40 pins is schema_version 40 -> 41 (verified by setting that field back
+        // to 40 and reproducing every v40 digest). v40 pins (September 1991 peace start retired)
+        // wrote schema_version 40 and dropped meta.peace_war_start_control_path.
         const cases: Array<[string, (state: GameState) => void, string, string]> = [
-            ['absent', (state) => { delete state.military.negotiation; }, 'c8cf6fb2ab3decc85ad16dce0814bea1103397868cdf8d9589940746a366737a', '04b20aedce243153f64a8bafd1906bb187415e73d281b628ace3475d3acd93f1'],
-            ['empty', (state) => { state.military.negotiation = { capital: {}, patron_relationships: {}, peace_plan_history: [] }; }, 'c8cf6fb2ab3decc85ad16dce0814bea1103397868cdf8d9589940746a366737a', '04b20aedce243153f64a8bafd1906bb187415e73d281b628ace3475d3acd93f1'],
-            ['complete', (state) => { state.military.negotiation = complete(); }, 'c8cf6fb2ab3decc85ad16dce0814bea1103397868cdf8d9589940746a366737a', '04b20aedce243153f64a8bafd1906bb187415e73d281b628ace3475d3acd93f1'],
-            ['missing_entry', (state) => { const n = complete() as any; delete n.capital.HRHB; delete n.patron_relationships.RS; state.military.negotiation = n; }, 'c8cf6fb2ab3decc85ad16dce0814bea1103397868cdf8d9589940746a366737a', '04b20aedce243153f64a8bafd1906bb187415e73d281b628ace3475d3acd93f1'],
+            ['absent', (state) => { delete state.military.negotiation; }, 'bf31738e756a8b71595f4610da4a8e88a769446ac33bc745bc3ba78d9eddc45b', 'ec369b19aac63f1e3a74816c3843b1124c22780036cdc625aa98b6f68c723fb1'],
+            ['empty', (state) => { state.military.negotiation = { capital: {}, patron_relationships: {}, peace_plan_history: [] }; }, 'bf31738e756a8b71595f4610da4a8e88a769446ac33bc745bc3ba78d9eddc45b', 'ec369b19aac63f1e3a74816c3843b1124c22780036cdc625aa98b6f68c723fb1'],
+            ['complete', (state) => { state.military.negotiation = complete(); }, 'bf31738e756a8b71595f4610da4a8e88a769446ac33bc745bc3ba78d9eddc45b', 'ec369b19aac63f1e3a74816c3843b1124c22780036cdc625aa98b6f68c723fb1'],
+            ['missing_entry', (state) => { const n = complete() as any; delete n.capital.HRHB; delete n.patron_relationships.RS; state.military.negotiation = n; }, 'bf31738e756a8b71595f4610da4a8e88a769446ac33bc745bc3ba78d9eddc45b', 'ec369b19aac63f1e3a74816c3843b1124c22780036cdc625aa98b6f68c723fb1'],
             // sentinel:final re-pinned 2026-11-17 for §6 E3a1 D2: computeNegotiationBreakdown no
             // longer writes international_standing (the old second writer set RBiH's base to
             // clamp(50 − 7 × 10) = 0 here). computeDimensionBaseValues is now the single base
             // writer, so RBiH's standing stays at its initialized 50/0/50 (asserted below).
-            // The v41 value reproduces main's v39 pin (83db11b8…) with schema_version set back to 39.
-            ['sentinel', (state) => { const n = complete() as any; n.capital.RBiH.war_crimes_events = 7; n.capital.RBiH.war_crimes_events_emergent = 11; n.pending_offer = { sentinel: true }; state.military.negotiation = n; }, 'a98b2ab0fe5e375a873a3ed1b6b1a7b9901232b5d382142312f01d995239bbe5', '0c44e47c6cb409ca6620ace3839926f8d48574afac82817b2ffef4b408cf195d'],
-            ['extra_key', (state) => { const n = complete() as any; n.capital.EXTRA = { keep: 'capital' }; n.patron_relationships.EXTRA = { keep: 'patron' }; n.forward_compatible = { keep: true }; state.military.negotiation = n; }, 'c75a663a9d549b3edcfb4d8901f10451aea920115393bdc33fbfaced485bbb0b', 'feb44de0e776ceb5ad6817949152f512317250169966aab25a9d2101ce46931c'],
-            ['partial_dimensions', (state) => { const n = complete() as any; n.strategic_dimensions = { RBiH: { internal_cohesion: { base_value: 9, event_modifier: 4, effective_value: 13 } } }; state.military.negotiation = n; }, '7c5dc103ff3c5810c91ef5f4dbef2a2cbb329e549b5e23f27be9ee20add93a75', 'd93de66b4a91f16aa58c3c20357ec5869c3eb720f0a6ef2564cbba754a7fcd31'],
+            // The v41 value reproduces main's v40 pin (3474d93f…/831f85a2…) with schema_version set back to 40.
+            ['sentinel', (state) => { const n = complete() as any; n.capital.RBiH.war_crimes_events = 7; n.capital.RBiH.war_crimes_events_emergent = 11; n.pending_offer = { sentinel: true }; state.military.negotiation = n; }, '52ccac6ba28e759eb9db558926d1d61d0d7399f14791360c8c9b0a7118d80131', '42cd2f6ab4fb07cb7d28b228b38b58317e428b3fd65a80b16b71c7bfd0c1af7b'],
+            ['extra_key', (state) => { const n = complete() as any; n.capital.EXTRA = { keep: 'capital' }; n.patron_relationships.EXTRA = { keep: 'patron' }; n.forward_compatible = { keep: true }; state.military.negotiation = n; }, 'ea161742cbfddb42a41984af90229495cfed56cf7cebaf1e4a754ec4928ce674', '962776172ff6aef1da387976f57303cbbbd2bdabf93c19ab645f85dae8e6c27f'],
+            ['partial_dimensions', (state) => { const n = complete() as any; n.strategic_dimensions = { RBiH: { internal_cohesion: { base_value: 9, event_modifier: 4, effective_value: 13 } } }; state.military.negotiation = n; }, 'a168aba80895249de92be0993e17bca896e45173e8224c6de2236c8e52532289', '65929e7753f8bcb6c22a857ae75a8a2a8e5a14b7d8adbd680a456db8fe7116c1'],
         ];
         for (const [name, arrange, preludeDigest, finalDigest] of cases) {
             const input = deserializeState(startup);
