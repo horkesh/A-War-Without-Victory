@@ -13,7 +13,8 @@ export const warPhaseNegotiationSteps: NamedPhase[] = [
         name: 'evaluate-peace-plans',
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
-            evaluatePeacePlans(context.state);
+            // §6 E3a2: the catalog maps each routed log row to its plan answer.
+            evaluatePeacePlans(context.state, context.input.eventDefinitions ?? []);
         }
     },
     {

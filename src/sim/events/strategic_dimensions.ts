@@ -3,6 +3,7 @@ import { clamp } from '../../utils/math.js';
 import { CANONICAL_FACTIONS } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import type { PeacePlanResponse } from '../../state/negotiation_types.js';
+import { getPeacePlanById } from '../negotiation/peace_plan_data.js';
 import type { ParamilitarySeverityBand } from '../combat/paramilitary_sweep.js';
 
 export const DIMENSION_IDS: DimensionId[] = [
@@ -196,6 +197,7 @@ function parseDeploymentCount(text?: string): number {
  * Plans a faction accepted and rejected, derived from `peace_plan_history` (the single
  * source, §6 E3a1 D3). `computeNegotiationBreakdown` rebuilds `capital.peace_plans_*`
  * from this; the standing base reads it directly so it never depends on when that rebuild ran.
+ * Resolved rows only (§6 E3a2): an answer counts once its plan is decided, never before.
  */
 export function derivePeacePlanResponseLists(
     history: readonly PeacePlanResponse[],
@@ -204,6 +206,7 @@ export function derivePeacePlanResponseLists(
     const accepted: string[] = [];
     const rejected: string[] = [];
     for (const plan of history) {
+        if (!plan.resolved) continue;
         const response = plan.responses[faction];
         if (response === 'accepted') accepted.push(plan.plan_id);
         else if (response === 'rejected') rejected.push(plan.plan_id);
@@ -211,12 +214,33 @@ export function derivePeacePlanResponseLists(
     return { accepted, rejected };
 }
 
+/** §6 E3a2 ruling item 5: the base credit for each accepted plan (flat, every plan and side). */
+export const PEACE_PLAN_ACCEPT_STANDING = 10;
+
+/**
+ * The graded standing term of the plans a faction rejected: Σ the plan's own
+ * `credibility_change_on_reject[faction]` (§6 E3a2 ruling item 5; it replaced the flat −15).
+ * A plan without a value for the faction contributes 0.
+ */
+export function rejectedPlansStandingTerm(rejectedPlanIds: readonly string[], faction: string): number {
+    let term = 0;
+    for (const planId of rejectedPlanIds) {
+        term += getPeacePlanById(planId)?.credibility_change_on_reject?.[faction] ?? 0;
+    }
+    return term;
+}
+
 /**
  * international_standing base =
  *   clamp(50 − war_crimes_events × 10 − paramilitary_finding_penalty − civilian_casualties / 5000
- *         + plans_accepted × 10 − plans_rejected × 15, 0, 100).
+ *         + plans_accepted × 10 + Σ credibility_change_on_reject over the rejected plans, 0, 100).
  * The finding penalty ADDS to the war-crimes term; it never replaces it (§6 E3a1 D2), so a
  * sweep that brings a finding can never raise the base.
+ *
+ * §6 E3a2 ruling item 5: the plan terms are the only carrier of a plan answer's standing
+ * (no card shift, no event_modifier write at resolution) and sit INSIDE the base clamp, so a
+ * side whose base is already at 0 absorbs a refusal. Recorded rule: E3c moves the plan terms
+ * into its single outer layer, alongside the authored-incident term.
  */
 export function computeInternationalStandingBase(state: any, faction: string): number {
     const cap = state?.military?.negotiation?.capital?.[faction];
@@ -228,7 +252,9 @@ export function computeInternationalStandingBase(state: any, faction: string): n
     const civCas = cap?.civilian_casualties_caused ?? 0;
     const plans = derivePeacePlanResponseLists(state?.military?.negotiation?.peace_plan_history ?? [], faction);
     return clamp(
-        50 - (warCrimes * 10) - findingPenalty - (civCas / 5000) + (plans.accepted.length * 10) - (plans.rejected.length * 15),
+        50 - (warCrimes * 10) - findingPenalty - (civCas / 5000)
+            + (plans.accepted.length * PEACE_PLAN_ACCEPT_STANDING)
+            + rejectedPlansStandingTerm(plans.rejected, faction),
         0,
         100
     );

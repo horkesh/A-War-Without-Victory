@@ -22,6 +22,7 @@ import { isWarOutsideHistoricalBand } from '../political/historical_territory_ba
 import { isPoliticalGateEligible, isPoliticsOffHistoryFor } from '../political/political_departure_markers.js';
 import { compareCausalityEntries, strictCompare } from '../../state/validateGameState.js';
 import { findAnswerAheadOfFiring, isAnswerAheadOfFiringDecision } from './answer_ahead_of_firing.js';
+import { isRoutedPeacePlanCard, selectRoutedBotOption } from '../negotiation/plan_answer.js';
 
 /**
  * Maximum PLAYER-FACING DECISION events that can fire in a single turn.
@@ -441,6 +442,12 @@ export function selectBotEventResponse(
     respondingFaction: FactionId | null,
     forceAuthoredDefault: boolean,
 ): BotEventResponseSelection {
+    // §6 E3a2 ruling item 3: a routed peace-plan card is answered by the plan owner (historical
+    // in historical mode and at Observer, the plan scorer in emergent mode, the RBiH
+    // Owen-Stoltenberg lock), and the card applies the option whose data declares that answer.
+    if (respondingFaction !== null && isRoutedPeacePlanCard(def)) {
+        return selectRoutedBotOption(state, def, respondingFaction, forceAuthoredDefault);
+    }
     const options = def.response_options ?? [];
     // Free War Phase 0 de-railroad: in 'emergent' mode, bypass the
     // historical-default railroad and fall through to the live

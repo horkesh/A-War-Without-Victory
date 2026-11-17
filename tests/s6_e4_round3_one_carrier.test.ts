@@ -130,6 +130,26 @@ function makeState(opts: { turn?: number; player_faction?: FactionId; flags?: Re
     } as unknown as GameState;
 }
 
+/** §6 E3a2: the three contact-group response cards as routed rows (historical default first). */
+function CG_RESPONSE_CARDS(): EventDefinition[] {
+    const card = (id: string, faction: FactionId, defaultId: string, defaultAnswer: 'accepted' | 'rejected'): EventDefinition => ({
+        id,
+        trigger: { turn_min: 118, turn_max: 120, phase: 'war' },
+        effect: { kind: 'narrative', text: id },
+        once: true,
+        responding_faction: faction,
+        historical_default_response_id: defaultId,
+        response_options: [
+            { id: defaultId, label: defaultId, effects: [], plan_answer: { plan_id: 'contact_group', response: defaultAnswer } },
+        ],
+    } as EventDefinition);
+    return [
+        card('rbih_contact_group_response_1994', 'RBiH', 'accept_51_49_plan', 'accepted'),
+        card('rs_contact_group_response_1994', 'RS', 'reject_51_49_plan', 'rejected'),
+        card('hrhb_contact_group_response_1994', 'HRHB', 'accept_51_49_plan', 'accepted'),
+    ];
+}
+
 function cgRecord(rs: 'accepted' | 'rejected', resolved = true): PeacePlanResponse {
     return {
         plan_id: 'contact_group',
@@ -327,10 +347,10 @@ describe('§6 E4 round 3: the spill (costs only) through the one support writer'
     });
 
     it('the peace-plan rejection cost spills through the same writer (−5 at support 2)', () => {
-        const state = makeState({ turn: 118 });
+        const state = makeState({ turn: 120 });
         const neg = state.military.negotiation!;
         neg.patron_relationships.RS!.support_level = 2;
-        evaluatePeacePlans(state); // headless: offered and resolved at week 118 (RS historically rejects)
+        evaluatePeacePlans(state); // headless, no answering card: the close-week fallback resolves (RS historically rejects)
         expect(neg.peace_plan_history.find((h) => h.plan_id === 'contact_group')?.responses.RS).toBe('rejected');
         expect(neg.patron_relationships.RS!.support_level).toBe(0);
         expect(neg.strategic_dimensions!.RS!.patron_confidence!.event_modifier).toBe(-3);
@@ -355,7 +375,19 @@ describe('§6 E4 round 3, Q3: Belgrade\'s break has one carrier', () => {
         const state = makeState({ turn: 118 });
         const neg = state.military.negotiation!;
         const supportBefore = neg.patron_relationships.RS!.support_level;
-        evaluatePeacePlans(state);
+        // §6 E3a2: the three response cards answer at 118 (bot path) and the resolver reads the log.
+        const cards = CG_RESPONSE_CARDS();
+        for (const card of cards) {
+            (state.military.event_decision_log ??= []).push({
+                event_id: card.id,
+                response_id: card.historical_default_response_id!,
+                decision_source: 'bot_ai_default',
+                faction: card.responding_faction!,
+                turn: 118,
+            });
+        }
+        evaluatePeacePlans(state, cards);
+        expect(neg.peace_plan_history.map((row) => [row.plan_id, row.resolved_turn])).toEqual([['contact_group', 118]]);
         updatePatronPressure(state);
         evaluatePatronEvents(state);
         expect(neg.patron_relationships.RS!.relationship_events).toEqual(['rejected_contact_group', 'contact_group_rejection']);
@@ -390,8 +422,9 @@ describe('§6 E4 round 3, Q3: Belgrade\'s break has one carrier', () => {
         expect(evaluateCondition(condition, noPlatform)).toBe(false);
     });
 
-    it('a pending CG plan cannot persist past its turn: it blocks the advance (modal gate); the break waits for the answer', () => {
-        const state = makeState({ turn: 118, player_faction: 'RS' });
+    it('a pending CG fallback cannot persist past its turn: it blocks the advance (modal gate); the break waits for the answer', () => {
+        // §6 E3a2: the pointer exists only as the close-week fallback (RS's card never answered).
+        const state = makeState({ turn: 120, player_faction: 'RS' });
         const neg = state.military.negotiation!;
         evaluatePeacePlans(state);
         expect(neg.pending_peace_plan?.plan_id).toBe('contact_group');
@@ -408,7 +441,7 @@ describe('§6 E4 round 3, Q3: Belgrade\'s break has one carrier', () => {
         resolvePeacePlan(accept, 'contact_group', 'accepted');
         expect(accept.military.negotiation!.peace_plan_history.at(-1)?.responses.RS).toBe('accepted');
         expect(listBlockingPlayerDecisions(accept as never, 'RS').some((item) => item.familyId === 'peace_plan')).toBe(false);
-        for (let week = 119; week <= 140; week++) {
+        for (let week = 121; week <= 140; week++) {
             accept.meta.turn = week;
             evaluatePatronEvents(accept);
         }
@@ -417,7 +450,7 @@ describe('§6 E4 round 3, Q3: Belgrade\'s break has one carrier', () => {
         // The player rejects: the break fires at the next week.
         const reject = structuredClone(state);
         resolvePeacePlan(reject, 'contact_group', 'rejected');
-        reject.meta.turn = 119;
+        reject.meta.turn = 121;
         evaluatePatronEvents(reject);
         expect(reject.military.negotiation!.patron_relationships.RS!.relationship_events).toContain('contact_group_rejection');
     });

@@ -66,7 +66,7 @@ import { DIMENSION_WEIGHTS } from '../../../sim/events/strategic_dimensions.js';
 import type { GameVerdict } from '../../../state/negotiation_types.js';
 import { buildCostLedger } from '../../../sim/endgame/cost_ledger.js';
 import { compareToHistorical, endingBasisForState } from '../../../sim/endgame/endgame_comparison.js';
-import type { DimensionShift, EventCategory, EventEffect } from '../../../sim/events/event_types.js';
+import type { DimensionShift, EventCategory, EventEffect, PlanAnswer } from '../../../sim/events/event_types.js';
 import historicalBaseline from '../../../../data/reference/historical_baseline.json';
 import { computeCorpsCommandStrainBreakdown, getCommandStrainLabel, projectStrainDecay, deriveRecoveryForecast, deriveRecoveryForecastToken, deriveCorpsSituationAssessment, deriveReadinessTrend } from './command_strain.js';
 import type { GameState } from '../../../state/game_state.js';
@@ -4011,6 +4011,7 @@ interface RawPendingEventOption {
     historical_marker?: unknown;
     effects?: unknown;
     dimension_shifts?: unknown;
+    plan_answer?: unknown;
 }
 
 interface RawPendingEventDecision {
@@ -4058,9 +4059,19 @@ function sanitizePendingEventDecision(decision: RawPendingEventDecision): Pendin
                 ...(option.historical_marker === 'historical_default' || option.historical_marker === 'counterfactual' ? { historical_marker: option.historical_marker } : {}),
                 effects: Array.isArray(option.effects) ? option.effects as EventEffect[] : [],
                 ...(Array.isArray(option.dimension_shifts) ? { dimension_shifts: option.dimension_shifts as DimensionShift[] } : {}),
+                ...(sanitizePendingPlanAnswer(option.plan_answer)),
             }))
             : [],
     };
+}
+
+/** §6 E3a2: carry a routed option's plan answer (its plan id owns the plan modal while pending). */
+function sanitizePendingPlanAnswer(value: unknown): { plan_answer?: PlanAnswer | null } {
+    if (value === null) return { plan_answer: null };
+    if (!value || typeof value !== 'object' || Array.isArray(value)) return {};
+    const raw = value as { plan_id?: unknown; response?: unknown };
+    if (typeof raw.plan_id !== 'string' || (raw.response !== 'accepted' && raw.response !== 'rejected')) return {};
+    return { plan_answer: { plan_id: raw.plan_id, response: raw.response } };
 }
 
 function derivePendingEventDecisions(state: any, playerFaction: string | null): LoadedGameState['pendingEventDecisions'] {

@@ -18,6 +18,8 @@ const VANCE_OWEN_PLAN: PeacePlanDefinition = {
     id: 'vance_owen',
     name: 'Vance-Owen Peace Plan',
     trigger_week: 40,
+    // §6 E3a2: the last card window, rs_assembly_rejects_voplan_1993 (t56-58).
+    close_week: 58,
     historical_responses: {
         RBiH: 'accepted',
         RS: 'rejected',
@@ -64,6 +66,8 @@ const OWEN_STOLTENBERG_PLAN: PeacePlanDefinition = {
     id: 'owen_stoltenberg',
     name: 'Owen-Stoltenberg Plan',
     trigger_week: 70,
+    // §6 E3a2: the last card windows, rs_/hrhb_owen_stoltenberg_response_1993 (t75-78).
+    close_week: 78,
     historical_responses: {
         RBiH: 'rejected',
         RS: 'accepted',
@@ -102,6 +106,8 @@ const CONTACT_GROUP_PLAN: PeacePlanDefinition = {
     id: 'contact_group',
     name: 'Contact Group Plan',
     trigger_week: 118,
+    // §6 E3a2: the last card windows, the three contact-group response cards (t118-120).
+    close_week: 120,
     historical_responses: {
         RBiH: 'accepted',
         RS: 'rejected',

@@ -24,6 +24,7 @@ import { stableStringify } from '../../utils/stable_json.js';
 import sourceTierContract from './source_tiers.json';
 import patronSupportAllowlist from './patron_support_allowlist.json';
 import { DAYTON_PLAN, PEACE_PLANS } from '../negotiation/peace_plan_data.js';
+import { OPENING_FOUNDATIONAL_EVENT_IDS } from './answer_ahead_of_firing.js';
 
 /** §6 E4 round 3: plan ids a `peace_plan_response` condition may name. */
 const KNOWN_PEACE_PLAN_IDS: ReadonlySet<string> = new Set<string>([...PEACE_PLANS.map((plan) => plan.id), DAYTON_PLAN.id]);
@@ -1382,6 +1383,103 @@ export function validateOnePatronCarrier(rows: EventDefinition[]): void {
     }
 }
 
+/** §6 E3a2: plans a routed card may answer (the legacy scheduler's plans; Dayton has its own flow). */
+const ROUTED_PEACE_PLAN_IDS: ReadonlySet<string> = new Set<string>(
+    PEACE_PLANS.filter((plan) => plan.close_week != null).map((plan) => plan.id),
+);
+
+function isPlanResponse(value: unknown): value is 'accepted' | 'rejected' {
+    return value === 'accepted' || value === 'rejected';
+}
+
+/**
+ * §6 E3a2 (ruled 2026-11-17): the routed peace-plan cards. A card is routed when any of its
+ * response options declares `plan_answer`. Load-time rules (the write-once rule is a runtime
+ * check in plan_answer.ts, because RBiH has two Owen-Stoltenberg writers with exclusive gates):
+ * - every option of a routed card declares `plan_answer` (a value or null), and the card names
+ *   its `responding_faction`; its non-null answers name one plan, a routed plan;
+ * - `plan_answer` is `{ plan_id, response, accepted_if? }`; `accepted_if` is the one conditional
+ *   form `{ type: 'peace_plan_response', plan_id: <same plan>, faction: <another side>, response }`;
+ * - a routed card carries no `international_standing` shift, card or option (the record is the
+ *   one carrier of a plan answer's standing; ruling item 5 and the E3 ruling);
+ * - one patron carrier per routed answer (ruling item 6): no card-level patron effect, and an
+ *   option that can be recorded `rejected` (conditional rows included) carries no
+ *   `patron_support` and no `patron_confidence` shift of its own;
+ * - a routed card is not an answer-ahead opening event (those log before they apply).
+ */
+export function validatePlanAnswers(rows: EventDefinition[], openingEventIds: readonly string[] = []): void {
+    const violations: string[] = [];
+    const sortedRows = [...rows].sort((a, b) => strictCompare(a.id, b.id));
+    const patronIn = (scope: unknown): boolean => {
+        if (!isObject(scope)) return false;
+        if (effectList(scope).some((effect) => isObject(effect) && effect.kind === 'patron_support')) return true;
+        return Array.isArray(scope.dimension_shifts)
+            && scope.dimension_shifts.some((shift) => isObject(shift) && shift.dimension === 'patron_confidence');
+    };
+    const standingIn = (scope: unknown): boolean => isObject(scope)
+        && Array.isArray(scope.dimension_shifts)
+        && scope.dimension_shifts.some((shift) => isObject(shift) && shift.dimension === 'international_standing');
+    for (const row of sortedRows) {
+        const options = Array.isArray(row.response_options) ? row.response_options : [];
+        const declaring = options.filter((option) => isObject(option) && hasOwn(option, 'plan_answer'));
+        if (declaring.length === 0) continue;
+        if (declaring.length !== options.length) {
+            violations.push(`${row.id}: every option of a routed card declares plan_answer (a value or null)`);
+        }
+        if (!isNonEmptyString(row.responding_faction) || !VALID_EVENT_FACTION_SET.has(row.responding_faction)) {
+            violations.push(`${row.id}: a routed card names its responding_faction`);
+        }
+        if (openingEventIds.includes(row.id)) {
+            violations.push(`${row.id}: a routed card cannot be an answer-ahead opening event`);
+        }
+        if (standingIn(row)) violations.push(`${row.id}#card: international_standing shift on a routed card`);
+        if (patronIn(row)) violations.push(`${row.id}#card: card-level patron effect on a routed card`);
+        const planIds = new Set<string>();
+        for (const option of declaring) {
+            const label = `${row.id}#${String((option as { id?: unknown }).id)}`;
+            const answer = (option as { plan_answer?: unknown }).plan_answer;
+            if (standingIn(option)) violations.push(`${label}: international_standing shift on a routed option`);
+            if (answer === null) continue;
+            if (!isObject(answer)) {
+                violations.push(`${label}: plan_answer must be an object or null`);
+                continue;
+            }
+            const extraKeys = Object.keys(answer).filter((key) => key !== 'plan_id' && key !== 'response' && key !== 'accepted_if');
+            if (extraKeys.length > 0) violations.push(`${label}: unknown plan_answer keys ${extraKeys.sort(strictCompare).join(', ')}`);
+            if (!isNonEmptyString(answer.plan_id) || !ROUTED_PEACE_PLAN_IDS.has(answer.plan_id)) {
+                violations.push(`${label}: plan_answer.plan_id must be a routed plan (${[...ROUTED_PEACE_PLAN_IDS].sort(strictCompare).join(', ')})`);
+            } else {
+                planIds.add(answer.plan_id);
+            }
+            if (!isPlanResponse(answer.response)) violations.push(`${label}: plan_answer.response must be 'accepted' or 'rejected'`);
+            let canBeRejected = answer.response === 'rejected';
+            if (hasOwn(answer, 'accepted_if')) {
+                const condition = answer.accepted_if;
+                if (
+                    !isObject(condition)
+                    || condition.type !== 'peace_plan_response'
+                    || condition.plan_id !== answer.plan_id
+                    || !isNonEmptyString(condition.faction)
+                    || !VALID_EVENT_FACTION_SET.has(condition.faction)
+                    || condition.faction === row.responding_faction
+                    || !isPlanResponse(condition.response)
+                ) {
+                    violations.push(`${label}: accepted_if must be { type: 'peace_plan_response', plan_id: <same plan>, faction: <another side>, response }`);
+                }
+                canBeRejected = true;
+            }
+            if (canBeRejected && patronIn(option)) {
+                violations.push(`${label}: an option that can be recorded rejected carries no patron effect (the plan's -5 is the one carrier)`);
+            }
+        }
+        if (planIds.size > 1) violations.push(`${row.id}: a routed card answers one plan (${[...planIds].sort(strictCompare).join(', ')})`);
+    }
+    if (violations.length > 0) {
+        violations.sort(strictCompare);
+        throw new Error(`Routed peace-plan card rule violation(s) (§6 E3a2): ${violations.join('; ')}`);
+    }
+}
+
 /**
  * Load a single required event JSON file. Required catalog files fail closed:
  * missing, malformed, or non-array JSON is a loader error.
@@ -1437,6 +1535,7 @@ export function loadEventDefinitionsFromDir(scenarioStartWeek: number, eventsDir
     validateNoRepeatedEffect(allEvents);
     validatePatronSupportRules(allEvents);
     validateOnePatronCarrier(allEvents);
+    validatePlanAnswers(allEvents, OPENING_FOUNDATIONAL_EVENT_IDS);
     // ─── Phase B Sub-slice B1 catalog-level passes. ────────────────────────
     validateCrossFactionOptionIds(allEvents);
     validateRing3EnablingRejection(allEvents);

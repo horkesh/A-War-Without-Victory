@@ -63,8 +63,9 @@ function midFinding(faction: FactionId, deployments: number, turn = 20) {
 
 describe('§6 E3a1 D2: the paramilitary finding adds to the war-crimes term', () => {
     // The measured main case: RBiH, 5 war crimes, mid finding at 5 deployments (penalty 20),
-    // civCas 3150 (−0.63), two plans accepted (+20), one rejected (−15). Main replaced the
-    // −50 war-crimes term with −20 and landed at 34.37: the sweeps had raised the base.
+    // civCas 3150 (−0.63), two plans accepted (+20), one rejected (Owen-Stoltenberg: its graded
+    // −10 since §6 E3a2; the flat −15 before). Main replaced the −50 war-crimes term with −20 and
+    // landed at 34.37: the sweeps had raised the base.
     function measuredCaseNegotiation(warCrimes: number): NegotiationState {
         const neg = makeNegotiation();
         neg.capital.RBiH.war_crimes_events = warCrimes;
@@ -89,14 +90,14 @@ describe('§6 E3a1 D2: the paramilitary finding adds to the war-crimes term', ()
         const baseWith = storeWith.RBiH.international_standing.base_value;
         expect(baseWith).toBeLessThanOrEqual(baseWithout);
         // Exact additive form: the finding subtracts its 20 points on top of war crimes × 10.
-        const expectedWithout = Math.max(0, Math.min(100, 50 - warCrimes * 10 - 0.63 + 20 - 15));
+        const expectedWithout = Math.max(0, Math.min(100, 50 - warCrimes * 10 - 0.63 + 20 - 10));
         expect(baseWithout).toBeCloseTo(expectedWithout, 10);
         expect(baseWith).toBeCloseTo(Math.max(0, expectedWithout - 20), 10);
     });
 
     it('the measured RBiH case no longer lands at 34.37', () => {
         const state = makeState(measuredCaseNegotiation(5), { annotations: [midFinding('RBiH', 5)] });
-        // 50 − 50 − 20 − 0.63 + 20 − 15 = −15.63 → clamped to 0 (main: 34.37).
+        // 50 − 50 − 20 − 0.63 + 20 − 10 = −10.63 → clamped to 0 (main: 34.37).
         expect(computeInternationalStandingBase(state, 'RBiH')).toBe(0);
     });
 });
@@ -113,7 +114,10 @@ describe('§6 E3a1 D1: one accumulator rule, no clamp on event_modifier', () => 
         expect(neg.strategic_dimensions!.RS.international_standing.effective_value).toBe(0);
     });
 
-    it('a peace-plan rejection at event_modifier +176 subtracts exactly its delta (no −76 jump)', () => {
+    it('§6 E3a2: a peace-plan rejection no longer writes event_modifier; the base carries its graded value', () => {
+        // E3a1 pinned that the rejection writer subtracted exactly its delta from a +176
+        // accumulator (no −76 jump). E3a2 ruling item 5 moved the plan term into the base:
+        // the accumulator is untouched and the record carries the cost.
         const neg = makeNegotiation();
         neg.strategic_dimensions!.RBiH.international_standing = { base_value: 40, event_modifier: 176, effective_value: 100 };
         neg.pending_peace_plan = { plan_id: 'contact_group', turn_offered: 118, bot_responses: { RS: 'rejected', HRHB: 'accepted' } };
@@ -123,8 +127,8 @@ describe('§6 E3a1 D1: one accumulator rule, no clamp on event_modifier', () => 
 
         resolvePeacePlan(state, 'contact_group', 'rejected');
 
-        expect(neg.strategic_dimensions!.RBiH.international_standing.event_modifier).toBe(176 + delta);
-        expect(neg.strategic_dimensions!.RBiH.international_standing.effective_value).toBe(100);
+        expect(neg.strategic_dimensions!.RBiH.international_standing.event_modifier).toBe(176);
+        expect(computeInternationalStandingBase(state, 'RBiH')).toBe(50 + delta);
     });
 });
 
@@ -209,6 +213,7 @@ describe('§6 E3a1 D3: peace_plan_history is the single source of the plan lists
         computeDimensionBaseValues(neg.strategic_dimensions!, state, 'RS');
 
         expect(neg.strategic_dimensions!.RBiH.international_standing.base_value).toBe(60);
-        expect(neg.strategic_dimensions!.RS.international_standing.base_value).toBe(35);
+        // §6 E3a2: RS's refusal costs Vance-Owen's graded −20 (was the flat −15).
+        expect(neg.strategic_dimensions!.RS.international_standing.base_value).toBe(30);
     });
 });

@@ -1689,6 +1689,8 @@ export interface LoadedGameState {
             effects: import('../../../sim/events/event_types.js').EventEffect[];
             sets_flags?: Record<string, string | number | boolean>;
             dimension_shifts?: import('../../../sim/events/event_types.js').DimensionShift[];
+            /** §6 E3a2: the plan answer this option records (null = no write); owns the plan modal while pending. */
+            plan_answer?: import('../../../sim/events/event_types.js').PlanAnswer | null;
         }>;
     }>;
 

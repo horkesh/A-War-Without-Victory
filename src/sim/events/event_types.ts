@@ -445,6 +445,34 @@ export interface EventResponseOption {
      * `future_consequences[*].closes_events` entry on the same option.
      */
     closes_events_runtime?: string[];
+    /**
+     * §6 E3a2: the peace-plan answer this option records for the card's responding faction.
+     * A card is "routed" when its options declare this field; every option of a routed card
+     * declares it, and `null` is an explicit no-write (owen_stoltenberg_plan_1993#accept).
+     * evaluate-peace-plans reads it from the catalog for each routed row of
+     * `event_decision_log`; the option applier never writes the plan record itself.
+     */
+    plan_answer?: PlanAnswer | null;
+}
+
+/**
+ * §6 E3a2 ruling item 2: the one conditional form. The answer is `accepted` when `faction`'s
+ * answer to the same plan, as resolved in the same resolution (recorded or fallback), equals
+ * `response`; otherwise it is the declared `response` of the plan answer. Used only by
+ * hrhb_vance_owen_acceptance_1993#condition_on_arbih_reciprocity.
+ */
+export interface PlanAnswerAcceptedIf {
+    type: 'peace_plan_response';
+    plan_id: string;
+    faction: FactionId;
+    response: 'accepted' | 'rejected';
+}
+
+/** §6 E3a2 ruling item 2: the option-level carrier of a side's peace-plan answer. */
+export interface PlanAnswer {
+    plan_id: string;
+    response: 'accepted' | 'rejected';
+    accepted_if?: PlanAnswerAcceptedIf;
 }
 
 /** Event category for UI display and filtering. */

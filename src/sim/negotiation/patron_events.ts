@@ -75,8 +75,10 @@ export function rsRejectedContactGroupPlan(state: GameState): boolean {
  *
  * §6 E4 round 3 (Q3): the one carrier of Belgrade's break. It fires only after RS has
  * rejected the plan on the record, at the first war week ≥118 where that holds. Hands-off,
- * evaluate-peace-plans resolves the plan at week 118 before update-patron-pressure runs, so
- * the event still fires at 118. An RS acceptance never fires it.
+ * the three contact-group response cards answer at week 118 and evaluate-peace-plans
+ * resolves the plan from the log that same step (§6 E3a2), before update-patron-pressure
+ * runs, so the event still fires at 118. If a card slips (cap, gate), the plan resolves at
+ * its close week (120) and the event fires then. An RS acceptance never fires it.
  */
 export const CONTACT_GROUP_REJECTION: PatronEvent = {
     id: 'contact_group_rejection',

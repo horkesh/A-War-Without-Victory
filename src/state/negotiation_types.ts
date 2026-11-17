@@ -83,6 +83,13 @@ export interface PeacePlanDefinition {
     name: string;
     /** Week (from April 1992) when the plan is offered. */
     trigger_week: number;
+    /**
+     * §6 E3a2: the plan's last card window (war week). From trigger_week to close_week the
+     * plan resolves as soon as all three answers are on the decision log; at close_week a
+     * side with no recorded answer is answered by the fallback. Absent on Dayton, which the
+     * legacy scheduler never offers. Windows never overlap.
+     */
+    close_week?: number;
     /** Documented final response used by historical headless calibration. */
     historical_responses: Record<string, 'accepted' | 'rejected'>;
     /** Proposed territorial split (% per faction). */
