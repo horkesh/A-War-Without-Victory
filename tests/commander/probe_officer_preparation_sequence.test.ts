@@ -28,7 +28,16 @@ const HODZIC = 'arbih_hodzic';
 function authoredOfficers(): NamedOfficer[] {
     const path = join(process.cwd(), 'data', 'scenarios', 'officers', 'apr1992_officers.json');
     const file = JSON.parse(readFileSync(path, 'utf8')) as { officers: NamedOfficer[] };
-    return file.officers.filter((officer) => officer.id === S_DELIC || officer.id === HODZIC);
+    // Commander attribution PR 2a: an operation's commander must belong to its corps (home or
+    // compatible). This sequence test is about preparation length, not eligibility, so the fixture
+    // makes both authored officers (home 2nd Corps) compatible with the two corps they command here;
+    // their authored competence and aggressiveness, which drive preparation, are unchanged.
+    return file.officers
+        .filter((officer) => officer.id === S_DELIC || officer.id === HODZIC)
+        .map((officer) => ({
+            ...officer,
+            compatible_corps_ids: [...new Set([...(officer.compatible_corps_ids ?? []), THIRD_CORPS, FOURTH_CORPS])],
+        }));
 }
 
 function formation(id: string, corpsId: FormationId, locationOsid?: string): any {

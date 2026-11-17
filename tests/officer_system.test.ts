@@ -25,6 +25,7 @@ import {
     getOfficerQualityMult,
     getBrigadeOfficerMod,
 } from '../src/sim/combat/combat_math.js';
+import { validateCorpsCoRoster } from '../src/sim/combat/corps_co_roster.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Test helpers
@@ -857,7 +858,8 @@ describe('succession assignment penalties', () => {
         assert.equal(state.military.named_officers!['pool1']!.penalty_turns_remaining, 8);
     });
 
-    it('incompatible corps gets -2 penalty for 12 turns', () => {
+    it('the vacancy fallback never seats an officer of another corps; an acting commander takes it', () => {
+        // Commander attribution PR 2a: before, the pool officer of vrs_srk took vrs_1kk with a -2 penalty.
         const data = [
             makeOfficer({ id: 'pool1', faction: 'RS', home_corps_id: 'vrs_srk', pool_tier: 'tier_a' }),
         ];
@@ -870,7 +872,35 @@ describe('succession assignment penalties', () => {
             pool1: makeOfficerState({ officer_id: 'pool1', status: 'reserve' }),
         };
 
-        processOfficerSuccession(state, new Set());
+        const report = processOfficerSuccession(state, new Set());
+
+        assert.equal(state.military.named_officers!['pool1']!.status, 'reserve');
+        assert.equal(state.military.named_officers!['pool1']!.assigned_corps_id, null);
+        assert.equal(report.generic_replacements, 1);
+        const acting = getCorpsCommander('vrs_1kk', state);
+        assert.ok(acting?.data.id.startsWith('generic_'));
+        assert.equal(acting?.state.acting_commander, true);
+    });
+
+    it('incompatible corps gets -2 penalty for 12 turns (a scheduled holder)', () => {
+        // The dated schedule may still name an officer outside his home corps; the penalty applies there.
+        const data = [
+            makeOfficer({ id: 'pool1', faction: 'RS', home_corps_id: 'vrs_srk', pool_tier: 'tier_a' }),
+        ];
+        const state = makeMinimalState();
+        state.military.formations = {
+            vrs_1kk: makeFormation({ id: 'vrs_1kk', faction: 'RS', kind: 'corps_asset' as 'brigade' }),
+        };
+        state.military.named_officer_data = data;
+        state.military.named_officers = {
+            pool1: makeOfficerState({ officer_id: 'pool1', status: 'reserve' }),
+        };
+        const roster = validateCorpsCoRoster({
+            schema_version: 1,
+            rosters: { vrs_1kk: { schedule: [{ officer_id: 'pool1', tenure_start: 0, tenure_end: null, historical_fate: 'survived', source: 'test' }] } },
+        });
+
+        processOfficerSuccession(state, new Set(), roster);
 
         assert.equal(state.military.named_officers!['pool1']!.assigned_corps_id, 'vrs_1kk');
         assert.equal(state.military.named_officers!['pool1']!.effective_competence_penalty, 2);

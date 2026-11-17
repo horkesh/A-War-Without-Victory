@@ -418,6 +418,12 @@ export function selectOperationCommander(
         if (os.assigned_operation) continue;
         // Enclave lock: officer physically cannot reach this corps
         if (!isEnclaveCompatible(data, corpsId, currentTurn)) continue;
+        // Commander attribution PR 2a: only an officer whose home or compatible corps is this corps
+        // may command its operation. Before, any reserve officer of the faction could fill the slot
+        // (e.g. a 2nd Corps or Srebrenica officer commanding a 7th Corps operation). With no such
+        // officer free, the operation has no named commander (assignOperationCommander handles null).
+        const belongsToCorps = data.home_corps_id === corpsId || (data.compatible_corps_ids ?? []).includes(corpsId);
+        if (!belongsToCorps) continue;
 
         candidates.push(data);
     }
@@ -1166,6 +1172,12 @@ function findBestReplacement(
         const os = officers[data.id];
         if (!os || os.status !== 'reserve') continue;
         if (!isEnclaveCompatible(data, corpsId, currentTurn)) continue;
+        // Commander attribution PR 2a: the vacancy fallback takes the operation-command rule. Only an
+        // officer whose home or compatible corps is this corps may take it over. Before, any reserve
+        // officer of the faction could (e.g. a 3rd Corps officer seated in the 4th Corps). With none,
+        // the caller seats the generic acting commander.
+        const belongsToCorps = data.home_corps_id === corpsId || (data.compatible_corps_ids ?? []).includes(corpsId);
+        if (!belongsToCorps) continue;
 
         candidates.push(data);
     }
