@@ -1,0 +1,30 @@
+## 2026-11-17 — Siege counters, bombardment attrition, siege morale drain and `siege_active` retired (§6 panel unanimous; hash-neutral)
+
+- **Source:** Fable consult 6, appendix A step 1. This was the only piece of the supply-reserve model with the right shape: it works per besieged place, grows with time and falls on the besieged. The consult asked for it to be measured alone, then kept or retired.
+- **Measured alone** (siege counters plus `applySiegeBombardmentAttrition` ungated, reserves off; apr1992 historical and hands-off emergent; main `c52c34ccb`):
+  - 15,708 casualties (2,394 KIA), almost all RBiH: Goražde 10,817, Srebrenica 4,394.
+  - RS 94, HRHB 42. Sarajevo and Bihać zero.
+  - The enclave guard held both ways.
+  - Farz P-B breached (Makljenovac t168).
+  - Scores fell from 709/709/708/682 to 711/709/699/668.
+- **§6 panel** (historian, scenario-creator-runner-tester, engine/systems, red-team): unanimous RETIRE, KEEP vetoed. Reasons:
+  - The size was implausible: about 5× the killed of Zvezda-94 (BB2 p.480), and more than the whole garrison.
+  - The timing ran against the exclusion zones, and Sarajevo was absent.
+  - It hollowed Srebrenica's defenders before July 1995.
+  - Four specification defects (faction-wide fire ratio, Sarajevo and Bihać never counted, small isolated pockets bleeding, escalation compounding the rest).
+  - An RS exploit.
+  - The orchestrator approved.
+- **Hash scope:** byte-identical for the April 1992 game (historical and emergent), the only start 1.0 ships. `sep1991_to_dayton` and `jan1993_to_dayton` set `supply_reserves_enabled`, so the counters, bombardment and reserve siege drain did run there and those two scenarios change; no player can start either one (the desktop New Game accepts only `apr_1992`; jan1993 also fails preflight on main), and both are retired for 1.0 under the owner's one-start ruling (sep1991 by the batch-b lane, jan1993 with the reserve retirement).
+- **Removed:**
+  - The pipeline steps `update-siege-counters`, `apply-siege-bombardment-attrition` and `apply-siege-morale-drain`.
+  - `siege_attrition.ts` and `siege_morale_drain.ts`.
+  - The counter functions and the siege drain inside the reserve update (itself flag-gated, off in April 1992).
+  - The siege-only lifeline and casualty-split helpers.
+  - The `siege_active` event condition, which no event used.
+  - The report fields.
+- **Kept:** `siege_turn_counters` is optional and compatibility-only, so old saves load (`tests/siege_attrition_retired.test.ts`).
+- **Canon** (same change; canon and engine seats, both APPROVE-WITH-CHANGES, applied; besides the retirements, the stale siege-drain text in EI l.43/l.116, SM cold fronts and Phase B+C, Rulebook cold fronts, the SM `siege_active` condition list, War Specification, Phase Specifications and the three PLAYER_TURN_GUIDE rows):
+  - Engine Invariants §6.10 and Systems Manual §6.10 are now retired stubs.
+  - Systems Manual n292 bombardment text replaced, plus notes on the Phase B+C passage and in context.md.
+  - In `FINAL_BEHAVIOUR_AT_1_0.md`, the SD6/SD8 justification is rewritten, and a new accepted-final entry SB1 carries the historian's line verbatim and records the defects.
+- **Proof:** byte-identical. apr1992 historical `0b86d3d742fcbf1c` and emergent `84595a73932f3ac4`, equal to main `c52c34ccb`. Re-proved on current main in the PR.
