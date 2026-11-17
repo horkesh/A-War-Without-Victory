@@ -70,7 +70,7 @@ function triggerFactions(trigger: unknown): Set<FactionId> {
 export function resolveEventAudience(def: AudienceSource): EventAudience {
     const authored = def.audience;
     if (authored === 'all') return 'all';
-    if (Array.isArray(authored) && authored.length > 0 && authored.every(isFaction)) return authored as FactionId[];
+    if (Array.isArray(authored) && authored.length > 0 && authored.every(isFaction)) return authored.filter(isFaction);
     if (typeof def.id !== 'string' || !def.id.startsWith('csq_')) return 'all';
     const effectFactions = new Set<FactionId>();
     collectEffectFactions([def.effect, ...(Array.isArray(def.effects) ? def.effects : [])], effectFactions);
