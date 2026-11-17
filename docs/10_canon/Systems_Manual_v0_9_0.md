@@ -739,6 +739,19 @@ Each dimension: `base_value` (computed from game state each turn) + `event_modif
 
 Stored on `NegotiationState.strategic_dimensions`. Module: `src/sim/events/strategic_dimensions.ts`.
 
+**One accumulator rule (§6 E3a1, 2026-11-17).** Every write to a dimension's `event_modifier` goes through `applyDimensionShift()`: event `dimension_shifts`, command levers, CO replacement, stance matters, scripted patron events (`humanitarian_delta`) and peace-plan rejection (`credibility_change_on_reject`). The accumulator is not clamped. A side at −110 that takes −30 more sits at −140. Only the result is clamped: `effective_value = clamp(base_value + event_modifier, 0, 100)`. Sim readers take `effective_value`, never the raw `event_modifier`.
+
+**One base writer (§6 E3a1).** `computeDimensionBaseValues()` (pipeline step `compute-dimension-bases`) is the only function that writes any `base_value`, through `updateBaseValue()`. `computeNegotiationBreakdown()` (step `compute-negotiation-capital`) only rebuilds the raw capital record, including `peace_plans_accepted/rejected` from `peace_plan_history`. `resolvePeacePlan()` does not push into those lists; the history row is the single source.
+
+**`international_standing` base inputs:**
+
+`base = clamp(50 − war_crimes_events × 10 − paramilitary_finding_penalty − civilian_casualties_caused / 5000 + plans_accepted × 10 − plans_rejected × 15, 0, 100)`
+
+- `war_crimes_events × 10`: the capital war-crimes counter.
+- `paramilitary_finding_penalty`: from the faction's latest paramilitary war-crimes finding: 2 / 4 / 5 per deployment for the minor / mid / severe band, plus a 10-point cliff at severe. It is added to the war-crimes term and never replaces it, so a sweep that brings a finding can never raise the base.
+- `civilian_casualties_caused / 5000`.
+- Plans accepted (+10 each) and rejected (−15 each), counted from `peace_plan_history`.
+
 **Ordinary-player startup initialization (2026-10-25 candidate):** `initializeNegotiationState()` supplies absent negotiation containers and canonical capital/patron entries before the selected faction's foundational decision in Electron and browser startup. It preserves present values, references and partial dimension stores; it performs no derived update. The existing per-turn compute call retains its old initialization position and behavior. Observer/no-player startup, baked snapshots and save migration are unchanged. The retained no-player first-turn crime-counter undercount remains unresolved and cannot be used as moral or historical comparison evidence.
 
 **RBiH opening policy (2026-10-25 candidate):** after the explicit turn-0 identity response, the existing complete command-policy event is presented before first Advance through the ordinary event modal and canonical resolver. All three authored choices and consequences remain intact, with default `ask`, no preselection and historical default `always_deny`. This is an explicit policy decision, not a capture award. Catalog-authored later identity/policy decisions in older saves retain their ordinary response path and do not acquire an early policy queue. Qualification and real packaged calibration remain pending in the controlling Electron-validation plan.
