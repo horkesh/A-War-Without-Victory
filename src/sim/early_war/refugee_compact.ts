@@ -46,6 +46,29 @@
 
 import type { FactionId, GameState } from '../../state/game_state.js';
 
+/**
+ * The slice of state the compact reads: the decision log and three bilateral fields. A GameState
+ * satisfies it; the renderer builds it from the player-visible projection without a type escape.
+ */
+export interface RefugeeCompactInput {
+    military?: {
+        event_decision_log?: ReadonlyArray<{
+            event_id: string;
+            response_id: string;
+            faction?: string | null;
+            turn: number;
+            decision_source?: string;
+        }>;
+    } | null;
+    political?: {
+        rbih_hrhb_state?: {
+            washington_signed?: boolean;
+            washington_turn?: number | null;
+            refugee_compact_suspended_until?: number | null;
+        } | null;
+    } | null;
+}
+
 /** Refugee-pressure multiplier per active compact entry (historian amendment (d): 0.6, so friction remains). */
 export const REFUGEE_COMPACT_MULTIPLIER = 0.6;
 /**
@@ -118,7 +141,7 @@ interface CompactReplay {
  * Replay the HRHB decision log up to and including `turn`. Pure; the log is append-only in
  * resolution order, which is turn order.
  */
-function replayCompact(state: GameState, turn: number): CompactReplay {
+function replayCompact(state: RefugeeCompactInput, turn: number): CompactReplay {
     const log = state.military?.event_decision_log;
     if (!log || log.length === 0) return { expiries: [], granting: 0, lapsed: false, lapsed_turn: null };
     let expiries: number[] = [];
@@ -154,12 +177,12 @@ function replayCompact(state: GameState, turn: number): CompactReplay {
 }
 
 /** Turn the Washington Agreement was signed at (the compact ends there), or undefined. */
-function washingtonSignedTurn(state: GameState): number | undefined {
+function washingtonSignedTurn(state: RefugeeCompactInput): number | undefined {
     const rhs = state.political?.rbih_hrhb_state;
     return rhs?.washington_signed === true ? (rhs.washington_turn ?? undefined) : undefined;
 }
 
-export function getRefugeeCompactStatus(state: GameState, turn: number): RefugeeCompactStatus {
+export function getRefugeeCompactStatus(state: RefugeeCompactInput, turn: number): RefugeeCompactStatus {
     const { expiries, granting, lapsed } = replayCompact(state, turn);
     // The compact ends at the Washington signing: the Federation locks the alliance, so there is no
     // friction left to damp and no price left to pay (A2b follow-up; the price used to run to t117).
@@ -191,7 +214,7 @@ export interface RefugeeCompactPhase {
  * the Washington signing. A compact that had already ended before the signing keeps its own ending.
  * Pure; reads the same log and state as the multipliers, so the line can never disagree with them.
  */
-export function getRefugeeCompactPhase(state: GameState, turn: number): RefugeeCompactPhase {
+export function getRefugeeCompactPhase(state: RefugeeCompactInput, turn: number): RefugeeCompactPhase {
     const now = getRefugeeCompactStatus(state, turn);
     if (now.active_entries > 0) {
         const suspendedUntil = state.political?.rbih_hrhb_state?.refugee_compact_suspended_until;
