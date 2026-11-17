@@ -348,7 +348,7 @@ Alliance drift is computed per turn in `alliance_update.ts`: alliance deteriorat
 
 **Implementation-note (A2b HRHB refugee compact, B5 2026-11-17).** Left alone, refugee pressure, about −0.016 a week, is the largest drift term; patron drag is about −0.012. So before this change no HRHB choice altered the outcome. The game designer and historian panel (orchestrator-approved) added the following in `src/sim/early_war/refugee_compact.ts`. It is derived from `event_decision_log`, so no new array is needed.
 
-- **Grants.** HRHB answers of `united_front` (`hrhb_political_goal`) and `formal_alliance_persists` (`hrhb_1992_graz_cooperation_collapse`) each open a compact entry for 56 turns. The length reaches the H6 window even when the goal is answered ahead of firing.
+- **Grants.** The President's HRHB answers of `united_front` (`hrhb_political_goal`) and `formal_alliance_persists` (`hrhb_1992_graz_cooperation_collapse`) each open a compact entry for 56 turns. The length reaches the H6 window even when the goal is answered ahead of firing. Only answers with `decision_source: 'player'` count; a bot's answer never opens, renews or lapses a compact.
 - **Damping.** Refugee pressure is ×0.6 per active entry.
 - **Renewals.** These extend active entries; they never open one:
   - H6 `federate_early`, 40 turns;
@@ -356,7 +356,8 @@ Alliance drift is computed per turn in `alliance_update.ts`: alliance deteriorat
   - Gornji Vakuf `negotiate`, 30 turns.
 - **Lapses.** These end the compact for good: VOPP Zagreb `acknowledge_pressure`; overture `maintain_separate_state` or `reject_federation_path`; Gornji Vakuf `escalate`; H6 `breakout_offensive`.
 - **Suspension.** A bilateral flip during an active compact suspends the damping for 8 weeks (`rbih_hrhb_state.refugee_compact_suspended_until`, written only while a compact is active).
-- **Price.** HRHB recruitment is ×0.9 per active entry, the burden of taking the refugees in. patron_confidence costs a further −10 on each 1992 choice.
+- **Price.** HRHB recruitment is ×0.9 per active entry, the burden of taking the refugees in (see §12: refugee concentration adds men to the local pool, but the host administration pays for absorbing them; the compact's reading of that is a price, not a gain). patron_confidence costs a further −10 on each 1992 choice.
+- **End.** The compact ends at the Washington signing: the Federation locks the alliance, so no damping and no price remain after `washington_turn`. The 1992 stance (patron drag ×0.5 per choice) stays.
 - **Patron drag.** Patron drag is ×0.5 per 1992 choice, permanently.
 - **Related changes.**
   - `csq_federation_early_1994`'s alliance floor now lasts 17 turns, not 60, so it ends at the t87 overture and Mostar's answer there decides.
@@ -865,7 +866,7 @@ Reunification requires restored connectivity, authority consolidation, and time.
 
 Population is tracked per municipality and MCZ.
 
-Displacement permanently reduces recruitment and authority. Refugee concentration increases short-term manpower but accelerates exhaustion. Trapped populations increase humanitarian pressure.
+Displacement permanently reduces recruitment and authority. Refugee concentration adds men to the local pool in the short term but accelerates exhaustion, and the host administration pays for absorbing them: under the HRHB refugee compact (§6.6a, A2b note) that cost is a recruitment price, not a gain. Trapped populations increase humanitarian pressure.
 
 ### 12.1 Per-municipality displacement routing
 
