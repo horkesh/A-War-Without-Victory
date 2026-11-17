@@ -17,8 +17,10 @@
   - `tools/scenario_runner/run_baseline_regression.ts`: `assertHistoricalWashingtonBeforeQuietFrontWindow`. The historical 188w run must sign before t102, or both the compare and the re-pin fail loudly.
   - Canon: Systems Manual, Washington implementation note.
 - **Measured** (logs `C:/Pyrrhic/AWWV-worktrees/_logs/b5-scorer-20261116/qf_*`).
-  - Historical 188w `0b86d3d742fcbf1c`, emergent `84595a73932f3ac4`: byte-identical to main. Both sign through Path A at t98.
-  - Played probe (HRHB President: united_front, formal_alliance_persists, Gornji Vakuf negotiate; staff_recommended; 130 turns): Washington signs at **t102** through Path A' (ceasefire from t102; alliance 0.90 at t130). On main the same game signed at t112.
+  - Re-proved 2026-11-17 on main `08f486ae9` merged in (after #735, #782, #784, #787): historical 188w `2c63bd10fecd6bc7`, emergent `bfcbfa55dd206585`: byte-identical to main (`npm run test:baselines`: "all scenarios match"; manifest unchanged by this PR). Both sign through Path A at t98; the historical guard did not throw.
+  - Played pair (HRHB President: united_front, formal_alliance_persists, Gornji Vakuf negotiate; staff_recommended; 130 turns; logs `_logs/b5-scorer-20261116/land763/{ack,refuse}`):
+    - Zagreb `acknowledge_pressure` (t95): Washington signs at **t102** through Path A' (ceasefire from t102; alliance 0.90 at t130). On main the same game signed at t112.
+    - Zagreb `resist_patron` (t95, refuse): signs at **t112** (ceasefire from t108), the old Path A date. Zagreb fires at t95 on both.
 - **Copy: the cards become the framework step** (orchestrator condition 1, 2026-11-17).
   - The panel: the narrative designer drafted the copy and gave a round-2 GO with amendments; the historian gave GO with amendments (BB Vol. I p.18, Vol. II pp.450-451). Both seats' amendments were integrated.
   - **Cards.** Both Washington cards now present the framework step ("Washington Framework Agreed" / "Sarajevo and the Washington Framework"), through display-time `localizations` in EN and BCS.
@@ -39,5 +41,5 @@
     - RBiH reluctant costs more cohesion (−10) than accept (−5);
     - the entity name is HR HB, not HZ HB;
     - the unsourced hardliner attribution is removed.
-  - **Measured:** byte-identical (historical `0b86d3d742fcbf1c`, emergent `84595a73932f3ac4`).
+  - **Measured:** byte-identical (historical `2c63bd10fecd6bc7`, emergent `bfcbfa55dd206585`).
 - **Tests.** `tests/washington_quiet_front.test.ts` (9): fires with Path A effects; a held ceasefire counts; reluctant counts; closed before t102, without a war, below 0.20, on a fighting front, without Zagreb's restraint (resist or no answer), or with one card unsigned; never twice; the historical guard passes at t98 and throws at t102 or when unsigned.
