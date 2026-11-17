@@ -4656,6 +4656,12 @@ function deriveParamilitaryUnrequested(
     for (const record of Array.isArray(state.paramilitary_decision_history) ? state.paramilitary_decision_history : []) {
         if (record && typeof record.target_osid === 'string') decided.add(`${Number(record.turn)}:${record.target_osid}`);
     }
+    // The engine books civilian harm and the war-crime count ONLY when a paramilitary action takes its target (the control flip
+    // writes a `paramilitary` control event). An action that dissolves without taking it (target already friendly, combat blocked,
+    // organized defence, the fade cutoff) books nothing, so only a matching control event makes a receipt a "captured" one.
+    const captures = (Array.isArray(state.political?.control_events) ? state.political.control_events : [])
+        .filter((event: any) => event?.mechanism === 'paramilitary' && event.to === playerFaction && typeof event.settlement_id === 'string')
+        .map((event: any) => ({ turn: Number(event.turn), osid: event.settlement_id as string, used: false }));
     const sweeps: NonNullable<LoadedGameState['paramilitaryUnrequested']> = [];
     for (const id of Object.keys(formations).sort(strictCompare)) {
         const formation = formations[id];
@@ -4664,7 +4670,13 @@ function deriveParamilitaryUnrequested(
         const turn = formation.created_turn;
         if (typeof target !== 'string' || !Number.isFinite(turn)) continue;
         if (decided.has(`${Number(turn)}:${target}`)) continue;
-        sweeps.push({ id: String(formation.id ?? id), turn: Number(turn), target_osid: target, faction: String(formation.faction) });
+        // Still on its way: no outcome yet, so no receipt yet.
+        if (formation.status === 'active') continue;
+        const capture = captures.find((candidate: { turn: number; osid: string; used: boolean }) => (
+            !candidate.used && candidate.osid === target && candidate.turn >= Number(turn) && candidate.turn <= Number(turn) + 2
+        ));
+        if (capture) capture.used = true;
+        sweeps.push({ id: String(formation.id ?? id), turn: Number(turn), target_osid: target, faction: String(formation.faction), captured: Boolean(capture) });
     }
     sweeps.sort((a, b) => (a.turn !== b.turn ? b.turn - a.turn : strictCompare(a.id, b.id)));
     return sweeps.length > 0 ? sweeps : undefined;

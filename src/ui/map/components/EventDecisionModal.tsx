@@ -32,6 +32,7 @@ import { getDecisionHeaderForEventCategory } from '../data/presidentialDeskAsset
 import { isDisplayEventEffect } from '../utils/eventEffectDisplay';
 import { turnToDateString } from '../utils/formatters';
 import { t, useLocale, type Locale, type MessageKey } from '../i18n';
+import { formatWarCrimesRecordLine } from '../data/warCrimesRecordLine';
 import {
     SurfaceColumns,
     SurfaceContent,
@@ -337,10 +338,7 @@ function describeEffect(effect: EventEffect): string {
         case 'morale_change': return t('eventDecision.effect.moraleChange', { faction: army, delta: signedDelta(effect.delta) });
         case 'supply_delta': return t('eventDecision.effect.supplyDelta', { faction: army, delta: signedDelta(effect.delta) });
         case 'cohesion_change': return t('eventDecision.effect.cohesionChange', { faction: army, delta: signedDelta(effect.delta) });
-        case 'humanitarian_impact': return t('eventDecision.effect.humanitarianImpact', {
-            faction,
-            delta: effect.war_crimes_delta ? ` (${signedDelta(effect.war_crimes_delta)})` : '',
-        });
+        case 'humanitarian_impact': return formatWarCrimesRecordLine(factionId, effect.war_crimes_delta);
         case 'patron_pressure': return t('eventDecision.effect.patronPressure', { faction, delta: signedDelta(effect.delta) });
         case 'alliance_change': return t('eventDecision.effect.allianceChange', {
             rbih: eventDecisionStateShortLabel('RBiH'),

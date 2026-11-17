@@ -588,3 +588,15 @@ the 13 bot operation-pool names that were real or loaded operations replaced in 
 Merged list moved 2026-11-17 (steward pass 60), verbatim from the same paragraph:
 
 CODE3, Stop-op reaches operations in planning and a halt holds (#705, byte-identical; Engine Invariants §14.10b, Systems Manual §6.5 and Game Bible line 298 amended); the t76 Belgrade event's historical default made accept (#748, historian ruling; historical 709 / 709 / 708 / 682; main pin `8c9fbf1d30e8a976`, the main hash at #748);
+
+
+Merged list moved 2026-11-17 (steward pass 61), verbatim from the same paragraph:
+
+B5 fix 4, `divergence_threshold` wired with a historical-territory gate so hands-off emergent passes the guard (#727, §6 unanimous, Systems Manual §7.10.7; historical byte-identical; freeze condition 7 MET on main at f98c074d9, re-run at the frozen commit);
+
+
+## Merged list moved 2026-11-17 (steward pass 62)
+
+The whole "Merged since 2026-11-12" paragraph of the roadmap, verbatim (zero loss), moved on 2026-11-17 to make room:
+
+**Merged since 2026-11-12:** citation audit batch 3 (#695);  RB6 (#703, 13 bot operation names replaced) and its re-pin (#713; hash history in the gate note); CODE3 Stop-op in planning (#705); 1995 Croatian help keyed on the Federation (Washington or a kept alliance) instead of the 1993 war (#732, data only; byte-identical); the Washington Federation by consent for a never-broken alliance (#737, A2a, byte-identical); the Ahmići trigger (#744) and effects (#753, main pin 0b86d3d742fcbf1c) and the gesture turn_min (#756); the bright line for the human player and the staff-sweep disclosure, D1 stage 1 (#740, §6 panels, byte-identical, headless 0b86d3d7); the army standing order no longer overrides corps stances or hides stance matters (#757, byte-identical, Systems Manual §6.4; a Chapters pre-freeze item done); the t76 Belgrade default (#748); B5 fix 4 (#727; freeze condition 7 MET on main at f98c074d9, re-run at the frozen commit); the ARBiH 7th Corps, RF-1 Phase B (#591, 709/709/708/681, FORAWWV §XIII.1 amended 4/4; registers SE7E-h, fixed in #685, and the ARBiH plan lockout (army-wide), first filed as RF-3C-EXH, now in the 1994-95 package); Earlier items (#670, #673, #667, #665, #663, #669, #671, #674, #666, #668, #661, #660, #657, #655, #656, #647, #640, #653, #649 to #651, #654, #635, #636, #625, #639, #643, #642, #645, #641, #623, #619, #631, #621, #632, #633, #634, and #629, #628, #618, #630, #614, #622, #617, #616, #620, #615, #600, #604 with SE6 held at `archive/claude/stance-effects-se6`) are in the archive.
