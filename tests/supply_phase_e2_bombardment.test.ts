@@ -1,4 +1,8 @@
 // tests/supply_phase_e2_bombardment.test.ts
+//
+// Phase E2 scaled bombardment and suppression by the heavy-munitions reserve. That reserve was
+// retired 2026-11-17 (Fable consult 6): getHeavyMunitionsMult is gone and both functions now
+// ignore any reserve an old save carries. The cases below pin that, plus the unchanged base curve.
 import { describe, it, expect } from 'vitest';
 import { getBombardmentCasualtyMult, getArtillerySuppression } from '../src/sim/combat/combat_math.js';
 import type { FormationState, GameState } from '../src/state/game_state.js';
@@ -20,6 +24,7 @@ function makeHeavyAttacker(factionId = 'RS'): FormationState {
     } as unknown as FormationState;
 }
 
+/** An old save that still carries the retired reserve (and the retired flag). */
 function makeStateWithMunitions(reserve: number, enabled = true): GameState {
     return {
   meta: { supply_reserves_enabled: enabled },
@@ -30,32 +35,20 @@ function makeStateWithMunitions(reserve: number, enabled = true): GameState {
 } as unknown as GameState;
 }
 
-describe('Phase E2 — getBombardmentCasualtyMult with heavy munitions', () => {
+describe('getBombardmentCasualtyMult ignores the retired heavy-munitions reserve', () => {
     // Constants: MAX_BOMBARDMENT_CAS_MULT=2.2, BOMBARDMENT_DIVISOR=60
     // makeHeavyAttacker: artEff=80, totalFirepower=80, fraction=min(1,80/60)=1.0 (saturated)
-    it('adequate munitions (>=50): full bombardment multiplier (2.2)', () => {
-        const mult = getBombardmentCasualtyMult([makeHeavyAttacker()], 'RS', makeStateWithMunitions(60));
+    it.each([60, 30, 10, 0])('full bombardment multiplier (2.2) whatever an old save reserve says (reserve=%s)', (reserve) => {
+        const mult = getBombardmentCasualtyMult([makeHeavyAttacker()], 'RS', makeStateWithMunitions(reserve));
         expect(mult).toBeCloseTo(2.2, 1);
     });
 
-    it('strained munitions (20-49): bonus portion at 75%', () => {
-        const mult = getBombardmentCasualtyMult([makeHeavyAttacker()], 'RS', makeStateWithMunitions(30));
-        // 1.0 + (2.2 - 1.0) * 1.0 * 0.75 = 1.9
-        expect(mult).toBeCloseTo(1.9, 1);
-    });
-
-    it('critical munitions (<20): bonus portion at 50%', () => {
-        const mult = getBombardmentCasualtyMult([makeHeavyAttacker()], 'RS', makeStateWithMunitions(10));
-        // 1.0 + (2.2 - 1.0) * 1.0 * 0.5 = 1.6
-        expect(mult).toBeCloseTo(1.6, 1);
-    });
-
-    it('supply disabled: bombardment unaffected by munitions level', () => {
-        const mult = getBombardmentCasualtyMult([makeHeavyAttacker()], 'RS', makeStateWithMunitions(0, false));
+    it('no reserve fields at all: full multiplier', () => {
+        const mult = getBombardmentCasualtyMult([makeHeavyAttacker()], 'RS', { meta: {}, military: {} } as unknown as GameState);
         expect(mult).toBeCloseTo(2.2, 1);
     });
 
-    it('no heavy weapons: base multiplier 1.0 regardless of munitions', () => {
+    it('no heavy weapons: base multiplier 1.0', () => {
         const lightAttacker = {
             ...makeHeavyAttacker(),
             composition: {
@@ -69,19 +62,9 @@ describe('Phase E2 — getBombardmentCasualtyMult with heavy munitions', () => {
     });
 });
 
-describe('Phase E2 — getArtillerySuppression with heavy munitions', () => {
-    it('adequate munitions: suppression at full cap (0.7)', () => {
-        const sup = getArtillerySuppression([makeHeavyAttacker()], 'RS', makeStateWithMunitions(60));
+describe('getArtillerySuppression ignores the retired heavy-munitions reserve', () => {
+    it.each([60, 30, 10])('suppression at full cap (0.7) whatever an old save reserve says (reserve=%s)', (reserve) => {
+        const sup = getArtillerySuppression([makeHeavyAttacker()], 'RS', makeStateWithMunitions(reserve));
         expect(sup).toBeCloseTo(0.7, 2);
-    });
-
-    it('critical munitions: suppression at half cap (0.35)', () => {
-        const sup = getArtillerySuppression([makeHeavyAttacker()], 'RS', makeStateWithMunitions(10));
-        expect(sup).toBeCloseTo(0.35, 2);
-    });
-
-    it('strained munitions: suppression at 75% of cap (0.525)', () => {
-        const sup = getArtillerySuppression([makeHeavyAttacker()], 'RS', makeStateWithMunitions(30));
-        expect(sup).toBeCloseTo(0.525, 2);
     });
 });

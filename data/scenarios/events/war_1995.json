@@ -629,10 +629,10 @@
     "id": "second_markale_massacre_1995",
     "image": "event_markale_shelling.webp",
     "title": "Second Markale Massacre",
-    "narrative": "A second mortar attack strikes the Markale marketplace in Sarajevo, killing 34 civilians. Coming after Srebrenica and Žepa, the massacre triggers the decisive Western response that has been building for months. NATO Secretary General Willy Claes declares that the threshold for intervention has been crossed.",
+    "narrative": "A second mortar attack strikes the Markale marketplace in Sarajevo, killing at least 43 people, the vast majority of them civilians. Coming after Srebrenica and Žepa, the massacre triggers the decisive Western response that has been building for months. NATO Secretary General Willy Claes declares that the threshold for intervention has been crossed.",
     "source_note": "Existing ICTY/UN and same-id essay sources ground the row's provenance and institutional context. This note adds no casualty figures, causal claims, prohibited player choices, or alternate-outcome prevention framing.",
     "category": "humanitarian",
-    "historical_source": "ICTY Karadžić Trial Judgment (IT-95-5/18-T), second Markale incident; ICTY Dragomir Milošević Trial Judgement (IT-98-29/1-T, 12 December 2007), judgement pronouncement T.9573: SRK 120mm mortar, 34 killed, 78 wounded; conviction for this incident reversed on appeal (IT-98-29/1-A, 2009) because the accused was absent, not on occurrence or origin; UNPROFOR investigation report, August 1995",
+    "historical_source": "ICTY Karadžić Trial Judgment (IT-95-5/18-T), second Markale incident; ICTY Mladić Trial Judgement (IT-09-92-T, 22 November 2017), Scheduled Incident G.18, para. 2150: at least 43 killed, the vast majority civilians, and 88 wounded (para. 2122: 37 died that day and six more in the following days); Mladić Appeal Judgement (MICT-13-56-A, 8 June 2021), para. 346, ground dismissed; ICTY Dragomir Milošević Trial Judgement (IT-98-29/1-T, 12 December 2007), para. 721: at least 35 killed, 34 of them civilians, and at least 78 wounded; judgement pronouncement T.9573: an SRK 120 mm mortar shell; conviction for this incident reversed on appeal (IT-98-29/1-A, 2009, para. 293) because the accused was absent, not on occurrence or origin; UNPROFOR investigation report, August 1995",
     "source_tier": "icty_icj_un",
     "trigger": {
       "turn_min": 177,
@@ -697,7 +697,7 @@
       },
       {
         "kind": "narrative",
-        "text": "The second Markale massacre kills 34 civilians. NATO prepares to launch sustained air strikes against VRS forces."
+        "text": "The second Markale massacre kills at least 43 people, the vast majority of them civilians. NATO prepares to launch sustained air strikes against VRS forces."
       }
     ]
   },

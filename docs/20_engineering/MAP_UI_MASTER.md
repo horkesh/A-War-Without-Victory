@@ -79,7 +79,7 @@ src/ui/map/
 │   ├── BottomStatusStrip.tsx      Bottom-left 1-line strip: 'FRONTLINE CONTROL' telemetry + OSID/formation details (spaced wide-kerning typography)
 │   ├── Minimap.tsx                Bottom-left 250×180px secondary map
 │   ├── Tooltip.tsx                Mouse-follow tooltip (300ms delay): OSID/formation/front
-│   ├── SupplyPanel.tsx            Reserve bars when supply map mode active
+│   ├── SupplyPanel.tsx            Corridor counts and Sarajevo lifeline when supply map mode active
 │   ├── OrderQueue.tsx             Phase C5 staged order queue
 │   ├── AttackConfirmation.tsx     Attack confirmation modal
 │   ├── OfficerProfile.tsx         Shared officer profile card (archetype, origin badge, pip ratings, combat record, tenure)
@@ -291,7 +291,7 @@ Usage: `style={getPanelRailStyle(railSlot, '24rem')}`.
 - **Operational SITREP / Summary truth:** `extractWarData(...)` is the canonical raw operational snapshot owner; `getOperationalSitrepView(...)` in `src/ui/shared/operational_sitrep_views.ts` is the canonical mapped packet read path; `GameStateAdapter` maps that packet into `LoadedGameState`, and Army HQ SUMMARY / `SituationTab` render it rather than rebuilding separate front-supply-ops summaries locally. Warroom `ReportsModal` consumes that same packet for staff reporting and only reads extra contact lines from the raw snapshot. Warroom `FactionOverviewPanel` now renders its warning band from `operationalSitrep.alerts`, while its `COMMAND SHELL` block remains a shell-only handoff back to Army HQ rather than a second command analysis surface.
 - **Legacy Army HQ reporting helpers still present in repo:** `ThreatAssessment.tsx`, `ForceReadiness.tsx`, and `SupplyIntelligence.tsx` remain implementation files but are not the live top-row Army HQ owners as of the v0.8-to-v0.9 hardening pass.
 - **Corps cards** (`ArmyHQCorpsCard.tsx`) — FlipCard animation. Front: summary with equipment icons, readiness-driven left border color, incoming threat badge from sectorIntel, health stripe (cohesion + fatigue dual bar). Back: 5 collapsible sections (Commander, Sectors, Operations, ORBAT, Combat Record).
-- **Data:** `loadedGameState.commandBriefing`, `loadedGameState.operationalSitrep`, `loadedGameState.formations`, `loadedGameState.operations`, `loadedGameState.factionReserves`, `loadedGameState.corpsFrontSectors`
+- **Data:** `loadedGameState.commandBriefing`, `loadedGameState.operationalSitrep`, `loadedGameState.formations`, `loadedGameState.operations`, `loadedGameState.corpsFrontSectors`
 - **Store:** `armyHQOpen`, `armyHQExpandedCorpsId`, `armyHQExpandedSections`, `armyHQOfficerSelectionCorpsId`
 
 #### OperationsPanel
@@ -497,7 +497,6 @@ interface LoadedGameState {
   };
   namedOfficerData?: NamedOfficerView[];
   namedOfficerStateById?: Record<string, NamedOfficerStateView>;
-  factionReserves?: Record<string, { generalSupply: number; heavyMunitions: number }>;
   frontEdgesOsid?: FrontEdgeView[];
   frontPressureByEdge?: Record<string, FrontPressureView>;
   displacementByMun?: Record<string, { ... }>;
@@ -591,9 +590,9 @@ The map UI now carries the live player-agency A-H surface through these componen
 - `OperationsPanel.tsx` - operation list/detail, readiness surfacing, and objective focus
 - **NOTE (2026-03-15):** `CorpsDetail.tsx` and `ArmyDetail.tsx` now represent organizational abstractions. Functional tactical map interaction is primarily via `FormationDetail` and `CorpsFrontPanel`.
 - `SelectionPanel.tsx` - municipality support staging for the current player faction on selected municipalities
-- `EnclaveDashboard.tsx` - enclave status plus player airdrop allocation
+- `EnclaveDashboard.tsx` - enclave status (the player airdrop allocation was retired 2026-11-17)
 - `SituationTab.tsx` and `TopToolbar.tsx` - IVP/consequence surfacing and tunnel status
-- `GameStateAdapter.ts` - adapter contract for `fogOfWar`, `composite_ivp`, operation readiness, airdrop state, municipality support state, and OPSEC-visible sectors
+- `GameStateAdapter.ts` - adapter contract for `fogOfWar`, `composite_ivp`, operation readiness, municipality support state, and OPSEC-visible sectors
 
 ```ts
 interface MilitiaPoolView {
@@ -613,7 +612,7 @@ interface MilitiaPoolView {
 | `buildControlGeoJSON` | baseGeoJson, controlBySettlement | Polygon features with `controller` property | Political fill layer |
 | `buildFrontLinesGeoJSON` | controlledGeoJson, allianceFlag | LineString border edges | Faction boundary lines |
 | `buildEthnicGeoJSON` | baseGeoJson, properties, displacement | Polygon features with `majority_ethnic` | Ethnic composition fill |
-| `buildSupplyGeoJSON` | controlGeoJson, controlBySettlement, reserves, legacyPressure | Polygon features with `supply_class` | Supply reserve visualization |
+| `buildSupplyGeoJSON` | controlGeoJson, controlBySettlement, legacyPressure, supplyStateByOsid | Polygon features with `supply_class` | Supply map visualization |
 | `buildDensityGeoJSON` | controlGeoJson, sectors, frontEdgesOsid | Polygon features with `density_class` | Front density visualization |
 | `buildFormationsGeoJSON` | state, controlledGeoJson | Point markers with `icon_id` | Unit symbols on map |
 | `buildOrderArrowsGeoJSON` | state, controlledGeoJson | LineString arrows | Attack/move orders |
@@ -911,18 +910,11 @@ OPERATION_PHASE_TIMELINE = ['planning', 'execution', 'recovery']
 
 ## 11. Supply System Integration
 
-Supply reserves (Phase A–E) are present in `LoadedGameState.factionReserves` when
-`supply_reserves_enabled` is true in the scenario.
+The supply-reserve economy (Phases A to E) was retired on 2026-11-17 (Systems Manual §14.2c): there is no `LoadedGameState.factionReserves`, no reserve bars and no airdrop control. The supply map layer colours OSIDs by the explicit OSID supply state (`supplyStateByOsid`: adequate, strained, critical), with the legacy `warSupplyPressure` (0-100 scale) as the fallback.
 
-| Reserve field | Range | Thresholds |
-|---------------|-------|------------|
-| `generalSupply` | 0–100 | adequate ≥50, strained 20–49, critical <20 |
-| `heavyMunitions` | 0–100 | adequate ≥50, strained 20–49, critical <20 |
+`buildSupplyGeoJSON` colors OSIDs by the supply state of the OSID itself (live `supply_state_by_osid`), then by the controlling faction's supply condition or pressure.
 
-`buildSupplyGeoJSON` colors OSIDs by the controlling faction's supply state.
-Legacy fallback: `warSupplyPressure` (0–1 scale) when reserves unavailable.
-
-`SupplyPanel` shows reserve bars per faction (appears only when `mapMode === 'supply'`).
+`SupplyPanel` shows the corridor open/strained/cut counts and the Sarajevo lifeline indicator (appears only when `mapMode === 'supply'`).
 
 ---
 

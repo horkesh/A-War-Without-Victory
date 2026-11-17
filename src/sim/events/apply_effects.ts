@@ -374,7 +374,10 @@ function applyCohesionChange(state: GameState, faction: FactionId, delta: number
 
 /** Add delta to faction's general supply reserve. Floor at 0.
  *  Un-clamped accumulator: non-finite delta is rejected (prior reserve kept) + logged
- *  — `Math.max(0, NaN)` is NaN and would persist (P1-B). */
+ *  — `Math.max(0, NaN)` is NaN and would persist (P1-B).
+ *  Supply-reserve economy retired 2026-11-17 (Fable consult 6): no new game creates the reserve,
+ *  so this is inert there. Kept unchanged because authored events in data/scenarios/events carry
+ *  supply_delta effects; it only touches the compatibility-only field an old save may carry. */
 function applySupplyDelta(state: GameState, faction: FactionId, delta: number): void {
     if (!Number.isFinite(delta)) {
         recordNonFiniteEffectAnomaly(state, 'supply_delta', faction, delta);

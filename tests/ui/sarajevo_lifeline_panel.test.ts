@@ -27,7 +27,6 @@ function stateWithLifeline(
 ): LoadedGameState {
   return {
     player_faction: 'RBiH',
-    factionReserves: { RBiH: { generalSupply: 40, heavyMunitions: 20 } },
     sarajevoLifeline: lifeline,
   } as unknown as LoadedGameState;
 }
