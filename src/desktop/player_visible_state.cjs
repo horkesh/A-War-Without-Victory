@@ -470,17 +470,7 @@ function projectArmyHqOperations(value, playerFaction, ownCorpsIds) {
   );
 }
 
-function projectSmugglingRoutes(value, playerFaction) {
-  if (Array.isArray(value)) {
-    return value.filter((row) => isRecord(row) && row.faction === playerFaction).map(cloneJson);
-  }
-  if (!isRecord(value)) return undefined;
-  return sortedRecordFromEntries(
-    Object.entries(value)
-      .filter(([, row]) => isRecord(row) && row.faction === playerFaction)
-      .map(([id, row]) => [id, cloneJson(row)]),
-  );
-}
+// projectSmugglingRoutes retired 2026-11-17 with the supply-reserve economy (Fable consult 6).
 
 function projectMilitary(state, playerFaction, opportunityOwnership) {
   const military = isRecord(state?.military) ? state.military : {};
@@ -550,15 +540,14 @@ function projectMilitary(state, playerFaction, opportunityOwnership) {
     negotiation: projectNegotiation(military.negotiation, playerFaction),
     war_timeline: projectWarTimeline(military.war_timeline, playerFaction),
     army_hq_operations: projectArmyHqOperations(military.army_hq_operations, playerFaction, ownCorpsIds),
-    smuggling_routes: projectSmugglingRoutes(military.smuggling_routes, playerFaction),
+    // smuggling_routes, airdrop_allocation and smuggling_allocation are retired compatibility-only
+    // fields (supply-reserve economy, 2026-11-17); they are no longer projected to the player.
     ...copyKeys(military, [
       'front_edges',
       'war_front_edges_osid',
       'production_facilities',
       'sarajevo_tunnel_operational',
       'command_authority',
-      'airdrop_allocation',
-      'smuggling_allocation',
     ]),
     ...copyKeys(eventState, [
       'event_decision_log',
@@ -616,8 +605,7 @@ function projectMilitary(state, playerFaction, opportunityOwnership) {
     'front_posture',
     'front_posture_regions',
     'strategic_reserves',
-    'general_supply_reserve',
-    'heavy_munitions_reserve',
+    // general_supply_reserve / heavy_munitions_reserve retired 2026-11-17 (not projected).
     'army_stance',
     'logistics_priority',
     'equipment_quality_modifiers',

@@ -2,8 +2,9 @@ import { describe, it, expect } from 'vitest';
 import { SCENARIO_REGISTRY, getScenarioEntry, getAvailableScenarios } from '../src/scenario/scenario_registry';
 
 describe('scenario_registry', () => {
-    it('has exactly 4 entries', () => {
-        expect(SCENARIO_REGISTRY.length).toBe(4);
+    it('has exactly 3 entries', () => {
+        // sep1991_to_dayton and jan1993_to_dayton retired 2026-11-17
+        expect(SCENARIO_REGISTRY.length).toBe(3);
     });
 
     it('has no pre-war (September 1991) start', () => {
@@ -61,7 +62,8 @@ describe('scenario_registry', () => {
     it('getAvailableScenarios excludes unavailable', () => {
         const available = getAvailableScenarios();
         expect(available.every(e => e.available)).toBe(true);
-        expect(available.length).toBe(2);
+        // Only April 1992 is playable (one game, one start: owner 2026-11-17).
+        expect(available.length).toBe(1);
     });
 
     it('all three factions have difficulty ratings', () => {

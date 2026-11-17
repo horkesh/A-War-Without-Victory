@@ -1,7 +1,8 @@
 // @vitest-environment jsdom
 /**
  * Surface redesign, step 5 (shell clean-up, 2026-11-13). Pins what the step changed:
- * War Footing is reachable from the President's Desk (lazy-loaded), GameOverModal is gone,
+ * War Footing was reachable from the President's Desk (retired 2026-11-17 with the supply-reserve
+ * economy, Fable consult 6), GameOverModal is gone,
  * faction names and the rail copy go through i18n, BCS strings keep their diacritics,
  * formatTurnLabel survives a missing label, the map toolbar keeps the 13 px floor, the
  * cost-0 chip is truthful, and the balance/records colours use the surface palette.
@@ -44,24 +45,20 @@ afterEach(() => {
   setLocale('en');
 });
 
-describe('R1: War Footing from the President\'s Desk', () => {
-  it('shows the entry on the Desk and calls the handler', () => {
-    const onOpenEconomy = vi.fn();
+describe('R1: War Footing is retired (supply-reserve economy, 2026-11-17)', () => {
+  it('shows no War Footing entry on the Desk', () => {
     render(React.createElement(PresidentDeskShell, {
       state: deskState(), osidNameMap: null, onAction: vi.fn(), onAdvance: vi.fn(),
-      onOpenArmyHQ: vi.fn(), onOpenRecords: vi.fn(), onOpenEconomy,
+      onOpenArmyHQ: vi.fn(), onOpenRecords: vi.fn(),
     }));
-    const button = screen.getByTestId('desk-action-economy');
-    expect(button.textContent).toBe(t('desk.action.openEconomy'));
-    fireEvent.click(button);
-    expect(onOpenEconomy).toHaveBeenCalledTimes(1);
+    expect(screen.queryByTestId('desk-action-economy')).toBeNull();
   });
 
-  it('App wires the entry and keeps EconomyPanel out of the entry chunk', () => {
+  it('has no EconomyPanel source file and App does not mount one', () => {
+    expect(existsSync(join(process.cwd(), 'src/ui/map/components/EconomyPanel.tsx'))).toBe(false);
     const app = withoutComments(read('src/ui/map/App.tsx'));
-    expect(app).toContain('onOpenEconomy={() => setEconomyOpen(true)}');
-    expect(app).toMatch(/const EconomyPanel = lazy\(\(\) =>\s*import\('\.\/components\/EconomyPanel'\)/);
-    expect(app).not.toMatch(/import \{ EconomyPanel \} from/);
+    expect(app).not.toContain('EconomyPanel');
+    expect(app).not.toContain('onOpenEconomy');
   });
 });
 

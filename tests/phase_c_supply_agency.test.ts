@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import * as supplyReserves from '../src/state/supply_reserves.js';
-import { applySmugglingAllocation } from '../src/state/supply_reserves.js';
+import * as sarajevoLifeline from '../src/state/sarajevo_lifeline.js';
 import {
     applyIvpConsequences,
     ensureInternationalVisibilityPressure,
@@ -150,29 +149,9 @@ describe('Phase C supply agency', () => {
     });
 
     it('F1i: humanitarian convoys and the enclave-derived tunnel activation are retired (not in 1.0)', () => {
-        const mod = supplyReserves as Record<string, unknown>;
+        const mod = sarajevoLifeline as Record<string, unknown>;
         expect(mod.evaluateHumanitarianConvoys).toBeUndefined();
         expect(mod.applyHumanitarianConvoyDecisions).toBeUndefined();
         expect(mod.maybeActivateSarajevoTunnel).toBeUndefined();
-    });
-
-    it('applies smuggling allocation to ammo and food tracks', () => {
-        const state = makeState({
-  military: {
-    smuggling_allocation: {
-                ENCL_test: { type: 'ammo', amount: 0.2 },
-                sarajevo: { type: 'food', amount: 0.3 },
-            }
-  } as any,
-});
-        ensureInternationalVisibilityPressure(state);
-        state.political.international_visibility_pressure!.enclave_humanitarian_pressure = 0.5;
-
-        applySmugglingAllocation(state);
-
-        expect(state.military.heavy_munitions_reserve?.RBiH).toBeGreaterThan(5);
-        expect(state.political.international_visibility_pressure?.enclave_humanitarian_pressure).toBeLessThan(0.5);
-        // F1i: smuggling no longer opens the tunnel; it is event truth (sarajevo_lifeline.ts).
-        expect(state.military.sarajevo_tunnel_operational).toBeUndefined();
     });
 });

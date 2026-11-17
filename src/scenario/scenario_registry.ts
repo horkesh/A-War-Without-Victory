@@ -43,17 +43,8 @@ export const SCENARIO_REGISTRY: ScenarioEntry[] = [
         scenarioFile: 'apr1992_definitive_52w.json',
         available: true,
     },
-    {
-        key: 'jan1993_to_dayton',
-        name: 'Mid-War: Shifting Alliances',
-        description: 'January 1993: the front lines have stabilized. The RBiH-HVO alliance fractures, enclaves are besieged, and international pressure mounts. Navigate the war to Dayton.',
-        startDate: 'January 1993',
-        startWeek: 39,
-        durationWeeks: 149,
-        difficulty: { RBiH: 'hard', RS: 'medium', HRHB: 'hard' },
-        scenarioFile: 'jan1993_to_dayton.json',
-        available: true,
-    },
+    // jan1993_to_dayton retired 2026-11-17 (Fable consult 6, J1): it existed to run the retired
+    // supply-reserve economy and could not be started by a player.
     {
         key: 'mar1994_washington_to_dayton',
         name: 'Washington to Dayton',

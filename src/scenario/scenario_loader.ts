@@ -395,10 +395,9 @@ export function normalizeScenario(raw: unknown): Scenario {
         return Object.keys(result).length > 0 ? result : undefined;
     })();
 
-    // Supply reserves system (Phase A)
-    const supply_reserves_enabled = o.supply_reserves_enabled === true ? true : undefined;
+    // supply_reserves_enabled retired 2026-11-17 (Fable consult 6): a scenario key of that name is ignored.
 
-    // Embargo-driven offensive-eligibility gate (independent of supply_reserves_enabled)
+    // Embargo-driven offensive-eligibility gate (independent of the retired supply-reserve economy)
     const embargo_offensive_gate_enabled = o.embargo_offensive_gate_enabled === true ? true : undefined;
 
     // Attacker firepower-deficit penalty (independent of the two flags above)
@@ -498,7 +497,6 @@ export function normalizeScenario(raw: unknown): Scenario {
             war_force_transition_after_turns,
             avoided_osids_by_faction,
             must_hold_osids_by_corps,
-            supply_reserves_enabled,
             embargo_offensive_gate_enabled,
             firepower_deficit_penalty_enabled,
             consolidation_sweep_enabled,
@@ -548,7 +546,6 @@ export function normalizeScenario(raw: unknown): Scenario {
         war_force_transition_after_turns,
         avoided_osids_by_faction,
         must_hold_osids_by_corps,
-        supply_reserves_enabled,
         embargo_offensive_gate_enabled,
         firepower_deficit_penalty_enabled,
         consolidation_sweep_enabled,

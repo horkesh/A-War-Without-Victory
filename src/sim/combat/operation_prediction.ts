@@ -351,17 +351,7 @@ export function computeOperationPrediction(
             supplyStateByOsid, osidPopulationMap, slopeByOsid, ethnicComposition,
         );
         if (pred) {
-            // Estimate supply readiness from faction general reserve level
-            const reserve = state.military?.general_supply_reserve;
-            if (reserve) {
-                const formations = state.military?.formations ?? {};
-                const firstBrigade = formations[axis.brigadeIds[0]!];
-                const faction = firstBrigade?.faction;
-                if (faction && reserve[faction] !== undefined) {
-                    // Normalize: 100+ = full, 0 = critical
-                    pred.supplyReadiness = Math.min(1, Math.max(0, reserve[faction]! / 100));
-                }
-            }
+            // Reserve-based supply readiness retired 2026-11-17 (Fable consult 6).
             axisPredictions.push(pred);
         }
     }

@@ -30,7 +30,6 @@ import type {
     MilitiaPoolState
 } from '../../state/game_state.js';
 import type { SupplyStateByOsidReport } from '../../state/supply_state_derivation.js';
-import { getEffectiveSupplyState } from '../../state/supply_reserves.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { militiaPoolKey } from '../../state/militia_pool_key.js';
 import { ensureBrigadeComposition } from './equipment_effects.js';
@@ -305,11 +304,7 @@ export function applyFrontlineAttrition(
             const facEntry = supplyStateByOsid.factions.find(f => f.faction_id === factionId);
             const entry = facEntry?.by_osid?.find(e => e.osid === locationOsid);
             if (entry) {
-                let effectiveState = entry.state;
-                if (state.meta.supply_reserves_enabled && state.military.general_supply_reserve) {
-                    const reserveLevel = (state.military.general_supply_reserve as Record<string, number>)[factionId] ?? 100;
-                    effectiveState = getEffectiveSupplyState(entry.state, reserveLevel);
-                }
+                const effectiveState = entry.state;
                 if (effectiveState === 'critical') supplyMod = 2.0;
                 else if (effectiveState === 'strained') supplyMod = 1.3;
             }

@@ -51,8 +51,9 @@ export function captureAARSnapshot(state: GameState): AARSnapshot {
 
     return {
         turn,
-        supply: { ...state.military.general_supply_reserve },
-        heavy_munitions: { ...state.military.heavy_munitions_reserve },
+        // Supply reserves retired 2026-11-17 (Fable consult 6): nothing to snapshot.
+        supply: {},
+        heavy_munitions: {},
         arcs,
         decoration_tiers,
         already_destroyed,
@@ -340,20 +341,10 @@ function compileSupplyDeltas(
     state: GameState,
     snapshot: AARSnapshot,
 ): Pick<TurnSummary, 'supply_deltas' | 'heavy_munitions_deltas'> {
-    const supply_deltas: Partial<Record<FactionId, number>> = {};
-    const heavy_munitions_deltas: Partial<Record<FactionId, number>> = {};
-
-    // Derive factions from actual state rather than a hardcoded literal
-    const factions = Object.keys(state.military.general_supply_reserve ?? snapshot.supply);
-    for (const f of factions) {
-        const supplyDelta = (state.military.general_supply_reserve?.[f] ?? 0) - (snapshot.supply[f] ?? 0);
-        if (supplyDelta !== 0) supply_deltas[f] = supplyDelta;
-
-        const munDelta = (state.military.heavy_munitions_reserve?.[f] ?? 0) - (snapshot.heavy_munitions[f] ?? 0);
-        if (munDelta !== 0) heavy_munitions_deltas[f] = munDelta;
-    }
-
-    return { supply_deltas, heavy_munitions_deltas };
+    // Supply reserves retired 2026-11-17 (Fable consult 6): there are no reserve deltas.
+    void state;
+    void snapshot;
+    return { supply_deltas: {}, heavy_munitions_deltas: {} };
 }
 
 // ---------------------------------------------------------------------------
@@ -425,12 +416,8 @@ function compileTerritoryAndSupplySnapshots(
         }
     }
 
+    // Reserve supply snapshot retired 2026-11-17 (Fable consult 6).
     const supply_snapshot: Partial<Record<FactionId, number>> = {};
-    const reserves = state.military?.general_supply_reserve ?? {};
-    for (const faction of Object.keys(reserves).sort(strictCompare)) {
-        const val = reserves[faction];
-        if (val != null) supply_snapshot[faction] = val;
-    }
 
     return { territory_snapshot, supply_snapshot };
 }

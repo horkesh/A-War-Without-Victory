@@ -56,7 +56,6 @@ import {
     type OrganizationalPenetrationSeedOptions,
     type PlannedWarStartBrigadePresenceByMunicipality
 } from '../state/seed_organizational_penetration_from_control.js';
-import { applyJnaInheritanceBonus, ensureSupplyReserves } from '../state/supply_reserves.js';
 import { deserializeState, serializeState } from '../state/serialize.js';
 import { buildRunProvenance, type ConsumedInputHash, type RunHarness } from './run_provenance.js';
 import {
@@ -1779,11 +1778,8 @@ export async function buildScenarioStartupState(
         state.meta.sarajevo_overrides = scenario.sarajevo_overrides;
     }
 
-    if (scenario.supply_reserves_enabled) {
-        state.meta.supply_reserves_enabled = true;
-        ensureSupplyReserves(state);
-        applyJnaInheritanceBonus(state);
-    }
+    // supply_reserves_enabled retired 2026-11-17 (Fable consult 6): the supply-reserve economy
+    // is not modelled in 1.0. meta.supply_reserves_enabled survives only so old saves load.
 
     if (scenario.embargo_offensive_gate_enabled) {
         state.meta.embargo_offensive_gate_enabled = true;

@@ -16,7 +16,6 @@ const FILES = [
   'src/ui/map/components/verdict/CinematicVerdict.tsx',
   'src/ui/map/components/WarCostSummary.tsx',
   'src/ui/map/components/PeaceStatusPanel.tsx',
-  'src/ui/map/components/EconomyPanel.tsx',
   'src/ui/map/components/EnclaveDashboard.tsx',
   'src/ui/map/components/HumanitarianLedgerPanel.tsx',
 ] as const;
