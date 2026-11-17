@@ -347,7 +347,7 @@ describe('LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-8: 6 Ring-1 divergence events',
     it('all 6 Wave 8 events use only pre-existing condition kinds (STOP rule)', () => {
         const ALLOWED_CONDITION_KINDS = new Set([
             'territory_control', 'alliance_below', 'alliance_above',
-            'faction_controls_municipality', 'siege_active', 'operation_completed',
+            'faction_controls_municipality', 'operation_completed',
             'and', 'or', 'not',
             'supply_below', 'supply_above', 'territory_percentage',
             'dimension_above', 'dimension_below', 'flag_equals', 'flag_not_set',
