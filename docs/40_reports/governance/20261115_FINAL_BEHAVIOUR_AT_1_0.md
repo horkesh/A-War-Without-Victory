@@ -68,6 +68,12 @@ Rows: `address_to_nation_{rbih,rs,hrhb}` and `decorate_a_unit_{rbih,rs,hrhb}` (`
 - **Conditions.** (1) Rulebook "Recurring decisions" paragraph reworded: done in this change. (2) The stale five-use rationale is marked superseded in the 2026-09-08 disposition: done in this change. (3) The `address_to_nation_rbih` narrative opens "a people in the fourth year of siege" but first fires at turn 84, about the second year of the war if the campaign starts in April 1992 (not confirmed by the historian seat): done in #698: the closing line is now year-neutral ("a people who have lived under siege this long"), string only, hash unchanged. (4) Keep the decoration copy that restricts it to regular formations and the essays' warning that an honour attaches to a unit's whole record; no player text may imply that a decoration or address grows stronger with use.
 - **Seats:** game-designer ACCEPT WITH CONDITIONS; historian ACCEPT WITH CONDITIONS.
 
+### Planning-phase release for an authored operation (RF-ROSTER S3). Accepted as final (orchestrator, 2026-11-17)
+
+- **Reason for the record.** A generic corps operation already in planning is not released for an authored operation; the lead-window reservation (the lane's S2) prevents the conflict from arising, so the release is not needed. The precedence fix of the same lane is outcome-identical; the hash moves only from 18 truthful trace rows (`watched_operations`).
+- **Left alone:** the conflict does not arise. **Played:** the same.
+- **Seats:** accepted by the orchestrator as final with this reason; not a game-designer and historian sitting item.
+
 ## 2. The ARBiH plan lockout (army-wide): fixed in the package, not accepted
 
 The lockout was first filed as RF-3C-EXH. An earlier sitting (historian, scenario-creator-runner-tester, game-designer, 2026-11-15) ratified deferring it, each AGREE WITH CONDITIONS; the owner's ruling that no engine change follows 1.0 supersedes that deferral. Its findings stand and are kept here.
