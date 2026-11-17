@@ -27,16 +27,16 @@ export const EVENT_EFFECT_BCS: Readonly<Record<string, EventEffectBcsEntry>> = {
         bcs: "Lokalne snage TO-a zauzimaju skladište u Visokom. Nekoliko tenkova i minobacača pridružuje se odbrani sarajevskog koridora.",
     },
     "battle_of_the_barracks_sarajevo#0": {
-        en: "JNA soldiers killed during the seizure provoke international condemnation. VRS commanders vow to avenge the barracks.",
-        bcs: "Vojnici JNA ubijeni tokom zauzimanja izazivaju međunarodnu osudu. Komandanti VRS-a zaklinju se da će osvetiti kasarnu.",
+        en: "The deaths of JNA soldiers in the clashes around the Sarajevo barracks draw Belgrade's condemnation. Bosnian Serb commanders vow revenge for the barracks.",
+        bcs: "Smrt vojnika JNA u sukobima oko sarajevskih kasarni izaziva osudu Beograda. Komandanti bosanskih Srba zaklinju se na osvetu za kasarne.",
     },
     "jna_withdrawal_1992#0": {
         en: "The JNA formally withdraws from Bosnia. Equipment, bases, and ammunition stores are left to the VRS.",
         bcs: "JNA se formalno povlači iz Bosne. Oprema, baze i skladišta municije ostaju VRS-u.",
     },
     "battle_of_the_barracks_tuzla#0": {
-        en: "The Brčanska Malta ambush kills over 50 JNA soldiers. Belgrade and the international community condemn the attack. TDF forces secure the Simin Han barracks complex. VRS high command redirects forces toward the Tuzla corridor.",
-        bcs: "U zasjedi na Brčanskoj Malti ubijeno je više od 50 vojnika JNA. Beograd i međunarodna zajednica osuđuju napad. Snage TO-a osiguravaju kompleks kasarne Simin Han. Visoka komanda VRS-a preusmjerava snage prema tuzlanskom koridoru.",
+        en: "TDF and police forces fire on the withdrawing JNA column at Brčanska Malta. Dozens of JNA soldiers die; the toll and who fired first remain disputed. Belgrade condemns the shooting. TDF forces secure the JNA barracks in Tuzla.",
+        bcs: "TO i policijske snage otvaraju vatru na kolonu JNA koja se povlači na Brčanskoj Malti. Poginule su desetine vojnika JNA; broj žrtava i ko je prvi pucao ostaju sporni. Beograd osuđuje pucnjavu. Snage TO-a osiguravaju kasarnu JNA u Tuzli.",
     },
     "srebrenica_enclave_forms_1992#0": {
         en: "Bosniak forces consolidate around Srebrenica, forming a besieged enclave that becomes a symbol of resistance.",
@@ -99,8 +99,8 @@ export const EVENT_EFFECT_BCS: Readonly<Record<string, EventEffectBcsEntry>> = {
         bcs: "Božićni napad na Kravicu podstiče komandante VRS-a. Drinski korpus počinje pripreme za ofanzivu kojom bi jednom zauvijek slomio istočne enklave.",
     },
     "turajlic_assassination_1993#0": {
-        en: "The murder of Turajlic inside a UN vehicle exposes the fragility of UNPROFOR's protection and the VRS's contempt for international norms.",
-        bcs: "Ubistvo Turajlića u vozilu UN-a razotkriva krhkost zaštite UNPROFOR-a i prezir VRS-a prema međunarodnim normama.",
+        en: "The killing of Turajlić inside a UN vehicle exposes the fragility of UNPROFOR's protection and the VRS's disregard for international norms.",
+        bcs: "Ubistvo Turajlića u vozilu UN-a razotkriva krhkost zaštite UNPROFOR-a i nepoštovanje međunarodnih normi koje pokazuje VRS.",
     },
     "croat_bosniak_war_begins_1993#0": {
         en: "The HVO-ARBiH alliance breaks down in central Bosnia.",
@@ -171,8 +171,8 @@ export const EVENT_EFFECT_BCS: Readonly<Record<string, EventEffectBcsEntry>> = {
         bcs: "Proglašeno je šest zaštićenih zona UN-a. Obećanje zaštite budi nadu među opkoljenim stanovništvom, ali ne postoji vjerodostojan mehanizam provedbe.",
     },
     "icty_established_1993#0": {
-        en: "The ICTY opens for business in The Hague. Every commander who orders atrocities now does so with knowledge that a court exists to try them.",
-        bcs: "MKSJ počinje s radom u Hagu. Svaki komandant koji naređuje zvjerstva to sada čini znajući da postoji sud koji će mu suditi.",
+        en: "The ICTY is established by Security Council Resolution 827, with its seat in The Hague. Every commander who orders atrocities now does so knowing that a court exists to try them.",
+        bcs: "MKSJ je osnovan Rezolucijom 827 Vijeća sigurnosti, sa sjedištem u Hagu. Svaki komandant koji naređuje zvjerstva sada to čini znajući da postoji sud koji će mu suditi.",
     },
     "battle_of_travnik_1993#0": {
         en: "ARBiH forces take an HVO position near Travnik.",
@@ -187,8 +187,8 @@ export const EVENT_EFFECT_BCS: Readonly<Record<string, EventEffectBcsEntry>> = {
         bcs: "Ratni brodovi NATO-a provode jadransku blokadu. Koridor snabdijevanja Srbije se dodatno steže, ali embargo na oružje i dalje najviše pogađa slabije naoružanu ARBiH.",
     },
     "hvo_detention_camps_1993#0": {
-        en: "Images of Bosniak men crowded behind Heliodrom wire reach the international press. Croatia's patron relationship with the West enters a period of severe strain.",
-        bcs: "Slike bošnjačkih muškaraca zbijenih iza žice Heliodroma stižu u međunarodnu štampu. Odnos pokroviteljstva između Hrvatske i Zapada ulazi u razdoblje ozbiljne napetosti.",
+        en: "Images of Bosniak men crowded behind Heliodrom wire reach the international press. Herceg-Bosna's standing in the West suffers severe damage.",
+        bcs: "Slike bošnjačkih muškaraca zbijenih iza žice Heliodroma stižu u međunarodnu štampu. Ugled Herceg-Bosne na Zapadu trpi tešku štetu.",
     },
     "sarajevo_tunnel_completed_1993#0": {
         en: "Sarajevo breathes again. The tunnel is a military and psychological lifeline — proof that the city's will to resist can find a way through any encirclement.",
@@ -199,12 +199,12 @@ export const EVENT_EFFECT_BCS: Readonly<Record<string, EventEffectBcsEntry>> = {
         bcs: "Oko Maglaja se ARBiH sada suočava s VRS-om i HVO-om u istoj dolini.",
     },
     "battle_of_bugojno_1993#0": {
-        en: "Bugojno falls and its HVO arsenal is absorbed into the ARBiH. The momentum in central Bosnia has decisively shifted.",
-        bcs: "Bugojno pada, a njegov arsenal HVO-a preuzima ARBiH. Zamah u srednjoj Bosni odlučno se promijenio.",
+        en: "Bugojno falls and its HVO arsenal is absorbed into the ARBiH. The balance in central Bosnia tilts toward the ARBiH.",
+        bcs: "Bugojno pada, a HVO-ov arsenal u gradu preuzima ARBiH. Odnos snaga u srednjoj Bosni naginje u korist ARBiH.",
     },
     "markale_area_shelling_1993#0": {
-        en: "Artillery continues to target civilian areas in Sarajevo. International pressure for intervention builds steadily.",
-        bcs: "Artiljerija i dalje gađa civilna područja u Sarajevu. Međunarodni pritisak za intervenciju stalno raste.",
+        en: "VRS artillery continues to target civilian areas in Sarajevo. International pressure for intervention builds steadily.",
+        bcs: "Artiljerija VRS-a i dalje gađa civilna područja u Sarajevu. Međunarodni pritisak za intervenciju stalno raste.",
     },
     "milosevic_owen_stoltenberg_distancing#0": {
         en: "Milošević signals through back-channels that Serbia's patience with Pale is exhausted.",
@@ -223,8 +223,8 @@ export const EVENT_EFFECT_BCS: Readonly<Record<string, EventEffectBcsEntry>> = {
         bcs: "Zločini ARBiH nad hrvatskim civilima u Grabovici i Uzdolu ulaze u sudski zapis MKSJ-a; oslobađajuća presuda Haliloviću rješava pitanje njegove individualne odgovornosti nadređenog, a ne pitanje jesu li se zločini dogodili.",
     },
     "bosnian_assembly_rejects_os_1993#0": {
-        en: "The Bosnian assembly refuses partition. The war will continue — but so will Bosnia's legal claim to its full territory.",
-        bcs: "Skupština odbija podjelu Bosne. Rat će se nastaviti, ali tako će i pravni zahtjev Bosne na cijelu njenu teritoriju.",
+        en: "The Bosnian Assembly in Sarajevo accepts the Owen-Stoltenberg plan only if territory seized by force is returned. The war goes on, and Bosnia keeps its legal claim to its whole territory.",
+        bcs: "Skupština u Sarajevu prihvata Owen-Stoltenbergov plan samo ako se vrati teritorija zauzeta silom. Rat se nastavlja, a Bosna zadržava svoj pravni zahtjev na cijelu svoju teritoriju.",
     },
     "abdic_karadzic_pact_1993#0": {
         en: "Abdić and Karadžić formalize their alliance. The 5th Corps now faces encirclement from three directions — VRS, RSK, and APWB.",
@@ -239,8 +239,8 @@ export const EVENT_EFFECT_BCS: Readonly<Record<string, EventEffectBcsEntry>> = {
         bcs: "Tuđman nalaže Bobanu da obustavi operacije HVO-a protiv ARBiH u okviru Washingtonskog sporazuma.",
     },
     "markale_massacre_1994#0": {
-        en: "The Markale massacre kills 68 civilians. The atrocity becomes the catalyst for NATO's ultimatum to the VRS.",
-        bcs: "Masakr na Markalama ubija 68 civila. Zvjerstvo postaje katalizator ultimatuma NATO-a VRS-u.",
+        en: "The Markale massacre kills more than 60 civilians. The atrocity becomes the catalyst for NATO's ultimatum to the VRS.",
+        bcs: "Masakr na Markalama ubija više od 60 civila. Zvjerstvo postaje katalizator ultimatuma NATO-a VRS-u.",
     },
     "sarajevo_exclusion_zone_1994#0": {
         en: "VRS heavy weapons are withdrawn from around Sarajevo. The exclusion zone brings the first sustained relief to the besieged capital.",
@@ -287,28 +287,28 @@ export const EVENT_EFFECT_BCS: Readonly<Record<string, EventEffectBcsEntry>> = {
         bcs: "Hrvatska operacija Bljesak za tri dana razbija enklavu RSK u zapadnoj Slavoniji. Strateški odnos snaga u regiji počinje se mijenjati.",
     },
     "tuzla_gate_massacre_1995#0": {
-        en: "71 civilians, mostly young people, are killed by VRS shelling of Tuzla's town center on Youth Day. The youngest victim is two years old.",
-        bcs: "U granatiranju centra Tuzle koje je izvršio VRS na Dan mladosti ubijeno je 71 civil, uglavnom mladih ljudi. Najmlađa žrtva imala je dvije godine.",
+        en: "71 civilians, mostly young people, are killed by VRS shelling of Tuzla's town center on Youth Day. The youngest victim is a toddler.",
+        bcs: "VRS granatira centar Tuzle na Dan mladosti i ubija 71 civila, uglavnom mladih ljudi. Najmlađa žrtva je malo dijete.",
     },
     "srebrenica_falls_1995#0": {
-        en: "Srebrenica falls. Over 8,000 Bosniak men and boys are executed in the worst atrocity in Europe since World War II.",
-        bcs: "Srebrenica pada. Pogubljeno je više od 8.000 bošnjačkih muškaraca i dječaka, u najgorem zvjerstvu u Evropi od Drugog svjetskog rata.",
+        en: "Srebrenica falls. Bosnian Serb forces execute between 7,000 and 8,000 Bosniak men and boys. The ICTY and the ICJ later find it to be genocide.",
+        bcs: "Srebrenica pada. Snage bosanskih Srba pogubljuju između 7.000 i 8.000 bošnjačkih muškaraca i dječaka. MKSJ i Međunarodni sud pravde kasnije utvrđuju da je riječ o genocidu.",
     },
     "zepa_falls_1995#0": {
         en: "Žepa falls to the VRS. A second UN safe area is overrun in two weeks, deepening the international crisis.",
         bcs: "Žepa pada u ruke VRS-a. Druga zaštićena zona UN-a zauzeta je u roku od dvije sedmice, što produbljuje međunarodnu krizu.",
     },
     "srebrenica_column_breakout_1995#0": {
-        en: "The column out of Srebrenica is recorded as historical fact. ICTY judgments (Krstić, Popovic et al., Mladić) establish its flight and the killings along the route as part of the genocide.",
-        bcs: "Kolona iz Srebrenice zabilježena je kao historijska činjenica. Presude MKSJ-a (Krstić, Popović i drugi, Mladić) utvrđuju njen bijeg i ubistva duž puta kao dio genocida.",
+        en: "The column out of Srebrenica is recorded as historical fact. ICTY judgments (Krstić, Popović et al., Mladić) establish that the column was hunted down and that the men captured from it and executed were victims of the genocide.",
+        bcs: "Kolona iz Srebrenice zabilježena je kao historijska činjenica. Presude MKSJ-a (Krstić, Popović i drugi, Mladić) utvrđuju da je na kolonu vršena potjera, a da su muškarci zarobljeni u koloni i potom pogubljeni bili žrtve genocida.",
     },
     "un_safe_area_enforcement_1995#0": {
         en: "The UN safe-area regime is recorded as having failed. The 1999 UN Secretary-General report (A/54/549) documents the institutional failure of the safe-area guarantee after the fall of Srebrenica.",
         bcs: "Režim zaštićenih zona UN-a zabilježen je kao propao. Izvještaj generalnog sekretara UN-a iz 1999. (A/54/549) dokumentuje institucionalni neuspjeh jamstva zaštićenih zona nakon pada Srebrenice.",
     },
     "second_markale_massacre_1995#0": {
-        en: "The second Markale massacre kills 43 civilians. NATO prepares to launch sustained air strikes against VRS forces.",
-        bcs: "Drugi masakr na Markalama ubija 43 civila. NATO se priprema da pokrene kontinuirane zračne udare na snage VRS-a.",
+        en: "The second Markale massacre kills 34 civilians. NATO prepares to launch sustained air strikes against VRS forces.",
+        bcs: "Drugi masakr na Markalama ubija 34 civila. NATO se priprema da pokrene kontinuirane zračne udare na snage VRS-a.",
     },
     "nato_deliberate_force_1995#0": {
         en: "NATO launches Operation Deliberate Force. Sustained air strikes hit VRS military infrastructure across Bosnia.",
