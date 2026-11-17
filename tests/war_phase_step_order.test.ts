@@ -85,7 +85,7 @@ describe('war-phase step ordering', () => {
 
         // SpatialContext: pre-combat after data load, post-combat after attack resolution
         assertBefore('supply-osid', 'compute-spatial-context-pre-combat');
-        assertBefore('compute-spatial-context-pre-combat', 'update-siege-counters');
+        assertBefore('compute-spatial-context-pre-combat', 'compute-supply-reserves');
         assertBefore('resolve-attack-orders', 'compute-spatial-context-post-combat');
         assertBefore('compute-spatial-context-post-combat', 'attribute-operation-casualties');
 
@@ -302,8 +302,17 @@ describe('war-phase step ordering', () => {
         //        evaluate-events; inert unless the October 1995 ceasefire was accepted.
         // -2 from retiring produce-political-directive and apply-army-directive-interpretation
         //        (2026-11-16, freeze cut B3: the political-directive chain).
-        expect(stepNames.length).toBe(195);
+        // -3 from retiring update-siege-counters, apply-siege-morale-drain and
+        //        apply-siege-bombardment-attrition (2026-11-17, §6 panel: siege counters,
+        //        siege defender morale drain and passive bombardment attrition).
+        // -1 from retiring evaluate-humanitarian-convoys (2026-11-16, F1i §6 panel:
+        //        humanitarian convoys are not modelled in 1.0).
+        expect(stepNames.length).toBe(191);
         expect(stepNames).not.toContain('produce-political-directive');
         expect(stepNames).not.toContain('apply-army-directive-interpretation');
+        expect(stepNames).not.toContain('update-siege-counters');
+        expect(stepNames).not.toContain('apply-siege-morale-drain');
+        expect(stepNames).not.toContain('apply-siege-bombardment-attrition');
+        expect(stepNames).not.toContain('evaluate-humanitarian-convoys');
     });
 });

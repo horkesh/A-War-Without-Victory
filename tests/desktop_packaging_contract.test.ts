@@ -75,7 +75,6 @@ test('electron-builder config matches the packaged runtime resource contract', a
             'src/desktop/preload.cjs',
             'src/desktop/autonomy_ipc_contract.cjs',
             'src/desktop/command_strain.cjs',
-            'src/desktop/convoy_ipc_contract.cjs',
             'src/desktop/officer_decision_history.cjs',
             'src/desktop/player_visible_state.cjs',
             'src/desktop/save_records.cjs',

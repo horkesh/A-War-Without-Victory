@@ -5,7 +5,6 @@
 import type {
   FormationView,
   LoadedGameState,
-  ConvoyDecisionRecordView,
   OperationOpportunityRecordView,
   OfficerDecisionRecordView,
   ParamilitaryDecisionRecordView,
@@ -73,7 +72,6 @@ export type DecisionConsequenceFamilyId =
   | 'army-reserve'
   | 'peace-proposal'
   | 'dayton-settlement'
-  | 'humanitarian-convoy'
   | 'paramilitary-authorization'
   | 'paramilitary-receipt'
   | 'patron-relations'
@@ -430,70 +428,6 @@ function daytonDetailToken(verdict: NonNullable<LoadedGameState['gameVerdict']>)
       overrides: overrideCount > 0 ? t('decisionConsequences.detail.dayton.overrides', { count: overrideCount }) : '',
     },
   };
-}
-
-function convoyOutcome(record: ConvoyDecisionRecordView): string {
-  if (record.decision === 'allow') return 'Allowed';
-  if (record.decision === 'block') return 'Blocked';
-  return 'Diverted';
-}
-
-function convoyOutcomeToken(record: ConvoyDecisionRecordView): DecisionConsequenceCopyToken {
-  if (record.decision === 'allow') return { key: 'decisionConsequences.outcome.allowed' };
-  if (record.decision === 'block') return { key: 'decisionConsequences.outcome.blocked' };
-  return { key: 'decisionConsequences.outcome.diverted' };
-}
-
-function convoyTitle(record: ConvoyDecisionRecordView): string {
-  return `Convoy ${convoyOutcome(record).toLowerCase()}`;
-}
-
-function convoyTitleToken(record: ConvoyDecisionRecordView): DecisionConsequenceCopyToken {
-  if (record.decision === 'allow') return { key: 'decisionConsequences.title.convoy.allowed' };
-  if (record.decision === 'block') return { key: 'decisionConsequences.title.convoy.blocked' };
-  return { key: 'decisionConsequences.title.convoy.diverted' };
-}
-
-function convoyDetail(record: ConvoyDecisionRecordView): string {
-  const enclave = record.target_enclave
-    ? record.target_enclave.includes(' ')
-      ? record.target_enclave
-      : humanizeToken(record.target_enclave)
-    : 'the enclave';
-  const route = record.route_faction
-    ? getPlayerSafeMilitaryFactionName(record.route_faction, record.route_faction)
-    : 'route faction';
-  const target = record.target_faction
-    ? getPlayerSafeMilitaryFactionName(record.target_faction, record.target_faction)
-    : 'the enclave garrison';
-  if (record.decision === 'allow') {
-    return `Convoy to ${enclave} allowed through ${route} lines; aid delivered to ${target}.`;
-  }
-  if (record.decision === 'block') {
-    return `Convoy to ${enclave} blocked on the ${route} route; diplomatic pressure increased.`;
-  }
-  return `Convoy to ${enclave} diverted through ${route} lines; aid split with ${target}.`;
-}
-
-function convoyDetailToken(record: ConvoyDecisionRecordView): DecisionConsequenceCopyToken {
-  const enclave = record.target_enclave
-    ? record.target_enclave.includes(' ')
-      ? record.target_enclave
-      : humanizeToken(record.target_enclave)
-    : t('decisionConsequences.fallback.enclave');
-  const route = record.route_faction
-    ? getPlayerSafeMilitaryFactionName(record.route_faction, record.route_faction)
-    : t('decisionConsequences.fallback.routeFaction');
-  const target = record.target_faction
-    ? getPlayerSafeMilitaryFactionName(record.target_faction, record.target_faction)
-    : t('decisionConsequences.fallback.enclaveGarrison');
-  if (record.decision === 'allow') {
-    return { key: 'decisionConsequences.detail.convoy.allowed', params: { enclave, route, target } };
-  }
-  if (record.decision === 'block') {
-    return { key: 'decisionConsequences.detail.convoy.blocked', params: { enclave, route } };
-  }
-  return { key: 'decisionConsequences.detail.convoy.diverted', params: { enclave, route, target } };
 }
 
 function paramilitaryOutcome(record: ParamilitaryDecisionRecordView): string {
@@ -900,23 +834,6 @@ export function buildDecisionConsequenceLedger(
       outcomeToken: { key: 'decisionConsequences.outcome.agreementSigned' },
       detail: daytonDetail(state.gameVerdict),
       detailToken: daytonDetailToken(state.gameVerdict),
-      recordTarget: 'chronicle',
-    });
-  }
-
-  for (const convoy of state.convoyDecisionHistory ?? []) {
-    if (convoy.decided_by !== 'player') continue;
-    records.push({
-      id: `convoy:${convoy.id}`,
-      turn: convoy.turn,
-      familyId: 'humanitarian-convoy',
-      family: 'Humanitarian convoy',
-      title: convoyTitle(convoy),
-      titleToken: convoyTitleToken(convoy),
-      outcome: convoyOutcome(convoy),
-      outcomeToken: convoyOutcomeToken(convoy),
-      detail: convoyDetail(convoy),
-      detailToken: convoyDetailToken(convoy),
       recordTarget: 'chronicle',
     });
   }

@@ -1,0 +1,46 @@
+## 2026-11-16 — B5 political gate: a player's political departure opens the divergence gate for the bots whose history it rules out (historical byte-identical; hands-off emergent unchanged)
+
+- **Why.** #727's gate opens only when the map leaves history's territory band. A player who diverged politically without moving the map 3 pp would face bots replaying a history the player's choices had made impossible: an RBiH President who keeps the alliance with HRHB, or who rejects Vance-Owen. That weakened the "agency if played" half of the owner rule. In four played harness runs no player lever moved the map 3 pp, so the territory gate never opened there.
+- **Rulings** (game designer + historian, 2026-11-16).
+  - Use fixed markers, not a curve: the alliance has no painted reference, and a curve baked from our own run would be fitted to itself.
+  - **Choice markers** are the player's own pick of a listed departure response. **State marker:** no 1993 Croat-Bosniak war by turn 80.
+  - Each marker opens only the factions whose history it rules out. The threshold is unchanged once open.
+  - **§6 carve-out:** the political opening never applies to §6-sensitive decisions.
+  - Historian's markers and bases are in the table in `political_departure_markers.ts` (BB1 pp.44, 59, 218, 219; BB2 p.470; Prlić IT-04-74-T). Too weak to count: week-0 identity picks, the London conference, "reluctant" Washington answers, the Owen-Stoltenberg Presidency stage, "with modifications/reservations" answers, and RS Washington counter-proposals.
+- **Change.**
+  - New `src/sim/political/political_departure_markers.ts`: `POLITICAL_DEPARTURE_MARKERS`, the state marker, `POLITICAL_GATE_EXCLUDED_EVENT_IDS`, `isPoliticalGateEligible`, `isPoliticsOffHistoryFor`.
+  - `evaluate_events.ts`: the gate is the territory band OR (not §6) a political departure for the responding faction.
+  - `peace_plans.ts`: the same, for the scored plan step.
+  - Systems Manual §7.10.7 gains the paragraph.
+  - Harness: opt-in `--event-override <event>=<response>` on `tools/ai_play/desktop_calibration_compare.ts`, inert without the flag.
+- **Proof** (main `4866a4279` + #727; logs `C:/Pyrrhic/AWWV-worktrees/_logs/b5-scorer-20261116/pb_*`).
+  - Stop condition checked: left alone, `croat_bosniak_war_begins_1993` fires at **t49**, in both historical and emergent.
+  - Historical 188w byte-identical: `83b8e8cd36023899`.
+  - Hands-off emergent unchanged from #727: `25176ce62fdcca94`.
+  - **Played** (RBiH President, `staff_recommended`, autonomy as in production, 188 turns). The control and the run that rejects Vance-Owen at t39 differ in exactly three decisions:
+    - the player's own rejection;
+    - t76 RS `accept_belgrade_directive` (history: `defy_belgrade_directive`);
+    - t89 HRHB `sue_for_peace_hrhb` (history: `press_croat_objectives`).
+    These are the opened factions' picks whose margins (4.42, 3.84) beat their thresholds (3.0, 1.33). No §6 decision moves. The control run matches history.
+  - Tests: new `tests/sim/political/political_departure_markers.test.ts` pins the table to the event data, the state-marker turn to the event window, left alone closed, the faction scope, softer variants, and the §6 carve-out. Political, events and peace-plan slices: 23 files, 321 tests pass. tsc clean.
+- **§6 panel, round 1.** Historian and Red-team voted NO-GO because the carve-out list was incomplete: a choice marker is cheaper than moving the map, so rejecting Vance-Owen at t39 would have opened RS for the 1995 hostage and siege-gun decisions. Applied:
+  - Carved out as well: `un_hostage_crisis_1995`, `deliberate_force_rs_compliance_1995`, `rbih_nato_ultimatum_compliance_1994`, `rs_strategic_goals`, and every Ring-3 sensitive family.
+  - A completeness test makes every gate-reachable event flagged by the §4 classifier either carved out or on `POLITICAL_GATE_REVIEWED_ALLOWED_EVENT_IDS` (ten peace-plan answers and political or posture decisions, each with a reason).
+  - The state marker reads `rbih_hrhb_state.war_started_turn` (engine seat).
+  - Canon: a §6 record row and the §7.10.7 wording.
+  - Engine note, recorded: the harness `bot_equivalent` policy logs its answers as `'player'`, so in a harness run with the band open the player-side run can open markers the headless run never does. This is harness-only; a desktop player's rows are their own picks.
+- **§6 panel, round 2: unanimous GO.** Canon COMPLIANT WITH AMENDMENT, applied.
+  - The historian read all ten allow-listed events' options and ruled that none depicts or enables an atrocity.
+  - The allow-list ids are now pinned to real events by the test.
+  - The §6 record row names the ten ids and the round-2 outcome.
+  - The stale "to be ratified" comment is fixed.
+  - The round-1 re-measure's emergent run (`pb2_emer`) failed on a missing untracked scenario copy, so the emergent evidence is `pb3_emer` = `m4_main_emer`.
+  - Advisories, not blocking: "clearance operations" in `abdic_apwb_declared_1993` would read better as "operations"; a scenario that starts after t80 without seeding `war_started_turn` would open the state marker on load (not a regression).
+- **Re-confirmed on main `71ffa0cb8`** (#727 and #710 merged; `pb3_*` logs).
+  - Historical 188w is byte-identical to main's pin, `03159b9ee1e5877f`.
+  - Hands-off emergent is identical to main's emergent, `dde641b2c74838f0`.
+  - The played pair still differs in exactly the three decisions.
+- **Re-measured on main `7c1aca20b`** (after #782; main pins historical `2c63bd10fecd6bc7`, emergent `bfcbfa55dd206585`; logs `pg6_*`).
+  - Historical and emergent 188w: 709/709/708/682 each, guard intact (cascade 31).
+  - Both runs are byte-identical to main: after the re-pin the baselines manifest equals main's file exactly, so there is no emergent movement.
+  - A second run matches. tsc clean.

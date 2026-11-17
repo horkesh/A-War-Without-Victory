@@ -47,35 +47,9 @@ export const COMBAT_HEAVY_MUNITIONS_RATE = 1.2;
 export const COMBAT_GENERAL_SUPPLY_RATE = 0.5;
 
 // ── Consumption: Siege ───────────────────────────────────────────────────────
-/** Per-turn general supply drain for each besieged (critical) OSID. */
-export const SIEGE_BASE_RATE = 0.3;
-/** Per-turn escalation multiplier for siege drain. */
-export const SIEGE_ESCALATION_RATE = 0.1;
-/** Maximum siege drain rate per OSID. */
-export const MAX_SIEGE_PRESSURE_RATE = 2.0;
-/**
- * Maximum total general supply siege drain per faction per turn.
- * Prevents early-war cascade where many ephemeral isolated OSIDs (before
- * corridors are secured) drain reserves to 0 before patron income stabilises.
- * At cap=2.5: RS net ≈ 0 late-war (ends ~60-76 general, adequate).
- */
-export const MAX_SIEGE_DRAIN_GENERAL_PER_FACTION = 2.5;
-/** Maximum total heavy munitions siege drain per faction per turn. */
-export const MAX_SIEGE_DRAIN_HEAVY_PER_FACTION = 1.0;
-/**
- * Minimum connected-component size for escalating siege drain.
- * Critical OSIDs in pockets smaller than this get their counter frozen at 1
- * (flat drain, no escalation). Genuine siege pockets (Srebrenica, Central Bosnia)
- * with ≥ this many connected critical OSIDs escalate normally.
- * Distinguishes scattered outposts from actual besieged territory.
- *
- * Raised from 5→8: the Ozren/Maglaj RS pocket (6 OSIDs) was escalating to
- * counter=40 (1.05/turn each = 6.3/turn total general drain), causing RS general
- * supply to deplete to 0 by w15 despite adequate patron income. At 8, the 6-OSID
- * RS pocket is frozen at counter=1 (0.231/turn each = 1.39/turn total).
- * Large genuine enclaves (Srebrenica ~20+, Goražde ~15+) continue to escalate.
- */
-export const SIEGE_MIN_POCKET_SIZE = 8;
+// Retired 2026-11-17 (§6 panel, Fable consult 6): SIEGE_BASE_RATE, SIEGE_ESCALATION_RATE,
+// MAX_SIEGE_PRESSURE_RATE, MAX_SIEGE_DRAIN_*_PER_FACTION and SIEGE_MIN_POCKET_SIZE fed the
+// siege-counter reserve drain, which is not modelled in 1.0.
 
 // ── Replenishment ────────────────────────────────────────────────────────────
 /** Global multiplier for production facility income. */

@@ -67,7 +67,7 @@ const busyView = {
   },
   nextActions: {
     ...baseActions, actionableCount: 4, blockingCount: 1,
-    topItems: [{ id: 'item:1', type: 'event_decision', severity: 'blocking', title: 'Convoy to Srebrenica', detail: 'UNHCR route request', action: { kind: 'inbox' }, actionLabel: 'Decide' }],
+    topItems: [{ id: 'item:1', type: 'event_decision', severity: 'blocking', title: 'Srebrenica enclave appeal', detail: 'Municipal delegation request', action: { kind: 'inbox' }, actionLabel: 'Decide' }],
   },
 };
 

@@ -7,8 +7,6 @@ import {
     deriveSarajevoLifeline,
     isTunnelActive,
     isAirliftActive,
-    lifelineAttritionMultiplier,
-    isSarajevoCoreSiegeCounterKey,
     SARAJEVO_TUNNEL_EVENT_ID,
 } from '../src/state/sarajevo_lifeline.js';
 import type { SupplyStateByOsidReport } from '../src/state/supply_state_derivation.js';
@@ -79,21 +77,8 @@ describe('B7 lifeline pure helpers', () => {
         expect(isAirliftActive(s, true)).toBe(false);
     });
 
-    it('attrition multiplier interpolates severed→open by throughput; 1 when no lifeline', () => {
-        expect(lifelineAttritionMultiplier(undefined, 1.25)).toBe(1);
-        const severed = { status: 'SEVERED', airlift_active: false, tunnel_active: false, throughput: 0, last_updated_turn: 0 } as const;
-        const open = { status: 'OPEN', airlift_active: true, tunnel_active: true, throughput: 1, last_updated_turn: 0 } as const;
-        expect(lifelineAttritionMultiplier(severed, 1.25)).toBeCloseTo(1.25, 10);
-        // open => damped below 1
-        expect(lifelineAttritionMultiplier(open, 1.25)).toBeLessThan(1);
-    });
-
-    it('identifies RBiH Sarajevo-core siege counter keys only', () => {
-        expect(isSarajevoCoreSiegeCounterKey('RBiH:op:centar_sarajevo:radava')).toBe(true);
-        expect(isSarajevoCoreSiegeCounterKey('RBiH:op:ilidza:rakovica_2')).toBe(false); // outer ring, not core
-        expect(isSarajevoCoreSiegeCounterKey('RS:op:centar_sarajevo:radava')).toBe(false); // besieger
-        expect(isSarajevoCoreSiegeCounterKey('RBiH:op:tuzla:foo')).toBe(false); // not Sarajevo
-    });
+    // lifelineAttritionMultiplier / isSarajevoCoreSiegeCounterKey cases retired 2026-11-17
+    // with siege bombardment attrition and the siege morale drain (§6 panel).
 });
 
 describe('B7 lifeline derivation (flag ON)', () => {

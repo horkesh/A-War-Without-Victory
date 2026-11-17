@@ -77,7 +77,6 @@ The following table lists every `name:` literal from early_war_phases.ts, war_ph
 | War - Operational Setup | `load-operational-data` | No | war_phases.ts:494 |
 | War - Operational Setup | `supply-osid` | Indirect | war_phases.ts:513 |
 | War - Operational Setup | `compute-spatial-context-pre-combat` | No | war_phases.ts:542 |
-| War - Operational Setup | `update-siege-counters` | No | war_phases.ts:573 |
 | War - Operational Setup | `compute-supply-reserves` | Indirect | war_phases.ts:584 |
 | War - Operational Setup | `update-smuggling-routes` | No | war_phases.ts:593 |
 | War - Operational Setup | `enclave-resilience` | No | war_phases.ts:614 |
@@ -145,10 +144,8 @@ The following table lists every `name:` literal from early_war_phases.ts, war_ph
 | War - Resolution | `apply-casualty-pool-exhaustion` | No | war_phases.ts:1775 |
 | War - Resolution | `cohesion-drift` | No | war_phases.ts:1826 |
 | War - Resolution | `morale-drift` | No | war_phases.ts:1834 |
-| War - Resolution | `apply-siege-morale-drain` | No | war_phases.ts:1853 |
 | War - Resolution | `check-brigade-dissolution-post-combat` | No | war_phases.ts:1865 |
 | War - Resolution | `apply-frontline-attrition` | No | war_phases.ts:1885 |
-| War - Resolution | `apply-siege-bombardment-attrition` | No | war_phases.ts:1895 |
 | War - Resolution | `hostile-takeover-displacement` | Indirect | war_phases.ts:1904 |
 | War - Aftermath | `alliance-update` | Indirect | war_phases.ts:1961 |
 | War - Aftermath | `bilateral-flip-count-war` | No | war_phases.ts:1974 |
@@ -186,7 +183,6 @@ The following table lists every `name:` literal from early_war_phases.ts, war_ph
 | War - Aftermath | `update-enclave-integrity` | No | war_phases.ts:2446 |
 | War - Aftermath | `update-sarajevo-exception` | No | war_phases.ts:2469 |
 | War - Aftermath | `update-patron-ivp` | Indirect | war_phases.ts:2482 |
-| War - Aftermath | `evaluate-humanitarian-convoys` | No | war_phases.ts:2510 |
 | War - Aftermath | `update-legitimacy` | No | war_phases.ts:2524 |
 | War - Aftermath | `apply-formation-commitment` | No | war_phases.ts:2533 |
 | War - Aftermath | `update-doctrine-eligibility` | No | war_phases.ts:2552 |

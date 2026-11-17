@@ -497,7 +497,7 @@
       },
       {
         "kind": "narrative",
-        "text": "The murder of Turajlic inside a UN vehicle exposes the fragility of UNPROFOR's protection and the VRS's contempt for international norms."
+        "text": "The killing of Turajlić inside a UN vehicle exposes the fragility of UNPROFOR's protection and the VRS's disregard for international norms."
       }
     ],
     "dimension_shifts": [
@@ -1555,6 +1555,7 @@
   },
   {
     "id": "croatia_herceg_bosna_control_1993",
+    "audience": ["HRHB"],
     "image": "event_patron_relations_HRHB.webp",
     "title": "Croatia Tightens Control over Herceg-Bosna",
     "narrative": "The Republic of Croatia deepens its de facto control over the Croatian Community of Herceg-Bosna: HV officers serve in HVO command positions, Croatian state resources flow across the border, and Zagreb's directives increasingly drive HVO military strategy. The ICTY Prlić trial establishes a Joint Criminal Enterprise involving Tudjman's inner circle and HVO commanders aimed at creating ethnically homogeneous Croat territory for eventual annexation.",
@@ -2124,6 +2125,7 @@
   },
   {
     "id": "vitez_kiseljak_pockets_1993",
+    "audience": ["HRHB", "RBiH"],
     "image": "event_central_bosnia_front.webp",
     "title": "Vitez-Kiseljak Pockets Isolated",
     "narrative": "With the alliance broken, HVO garrisons in the Vitez-Busovača pocket and the Kiseljak enclave are cut off from resupply by HVO main forces in western Herzegovina. The pockets must survive on local resources and intermittent VRS cooperation, while the ARBiH weighs the cost of an assault against the benefits of encirclement.",
@@ -2465,7 +2467,7 @@
       },
       {
         "kind": "narrative",
-        "text": "The ICTY opens for business in The Hague. Every commander who orders atrocities now does so with knowledge that a court exists to try them."
+        "text": "The ICTY is established by Security Council Resolution 827, with its seat in The Hague. Every commander who orders atrocities now does so knowing that a court exists to try them."
       }
     ],
     "dimension_shifts": [
@@ -2668,7 +2670,7 @@
       },
       {
         "kind": "narrative",
-        "text": "Images of Bosniak men crowded behind Heliodrom wire reach the international press. Croatia's patron relationship with the West enters a period of severe strain."
+        "text": "Images of Bosniak men crowded behind Heliodrom wire reach the international press. Herceg-Bosna's standing in the West suffers severe damage."
       }
     ],
     "dimension_shifts": [
@@ -3100,7 +3102,7 @@
       },
       {
         "kind": "narrative",
-        "text": "Bugojno falls and its HVO arsenal is absorbed into the ARBiH. The momentum in central Bosnia has decisively shifted."
+        "text": "Bugojno falls and its HVO arsenal is absorbed into the ARBiH. The balance in central Bosnia tilts toward the ARBiH."
       }
     ],
     "dimension_shifts": [
@@ -3150,7 +3152,7 @@
       },
       {
         "kind": "narrative",
-        "text": "Artillery continues to target civilian areas in Sarajevo. International pressure for intervention builds steadily."
+        "text": "VRS artillery continues to target civilian areas in Sarajevo. International pressure for intervention builds steadily."
       }
     ]
   },
@@ -5074,7 +5076,7 @@
     "id": "bosnian_assembly_rejects_os_1993",
     "image": "event_political_session.webp",
     "title": "Bosnian Parliament Rejects Owen-Stoltenberg Plan",
-    "narrative": "After sessions aboard HMS Invincible on September 20, the Bosnian government assembly in Sarajevo votes to reject the Owen-Stoltenberg plan's ethnic partition, demanding additional territory and access to the sea. The rejection prolongs the war and frustrates international mediators but preserves the principle of a unified, multi-ethnic Bosnia.",
+    "narrative": "After sessions aboard HMS Invincible on September 20, the Bosnian government assembly in Sarajevo votes to accept the Owen-Stoltenberg plan only on condition that territory seized by force is returned. The conditional answer prolongs the war and frustrates international mediators but preserves the principle of a unified, multi-ethnic Bosnia.",
     "category": "political",
     "source_tier": "icty_icj_un",
     "source_note": "The listed adjudicative and institutional sources bound the chronology, actors, and findings described. The essay is original synthesis and does not extend individual liability, command responsibility, or institutional findings beyond the cited record.",
@@ -5095,7 +5097,7 @@
       },
       {
         "kind": "narrative",
-        "text": "The Bosnian assembly refuses partition. The war will continue — but so will Bosnia's legal claim to its full territory."
+        "text": "The Bosnian Assembly in Sarajevo accepts the Owen-Stoltenberg plan only if territory seized by force is returned. The war goes on, and Bosnia keeps its legal claim to its whole territory."
       }
     ],
     "dimension_shifts": [
@@ -5110,7 +5112,7 @@
         "delta": -5
       }
     ],
-    "historical_source": "Peace plans proposed before and during the Bosnian War. HMS Invincible negotiations, September 20 1993.",
+    "historical_source": "Peace plans proposed before and during the Bosnian War. HMS Invincible negotiations, September 20 1993; Balkan Battlegrounds Vol. I chronology, pp. 11-13 (the Assembly's conditional acceptance of 29 September 1993).",
     "effect": {
       "kind": "morale_change",
       "faction": "RBiH",
