@@ -25,10 +25,11 @@
   - `tests/ui/event_definition_display_effects.test.ts`: the display rule, no digits, no false zero, unadjudicated cards carry no delta.
   - 423 test files across the event and UI slices pass; tsc is clean.
 
-**Measured.** Pending the re-measure after #729 and Farz guard (b). Before the counter rule, the engine fix alone gave the following (188w):
-- Checkpoints 709/709/708/682 on both historical and emergent.
-- Fired events 180 → 180.
-- war_crimes_events at w188: RBiH 15 → 12, HRHB 22 → 16.
-- Farz P-A breached on identical territory: the Farz AAR lost its Army HQ marker, the launch-path knife-edge that #729 and guard (b) address.
+**Measured (188 weeks, on main `9bdefb158` with #729; main pin `3b4685bc`).**
+- Historical: `final_state_hash` `0b63e8102bddf6be`, 709/709/708/682, guard intact. Farz P-A: all four authored receipts (Vozuća t180 via Uragan 95, Gornja t181, Donja t182, Spreča t185).
+- Emergent: `73b481f79ac28e46`, 709/709/708/682, guard intact.
+- The baselines manifest is re-pinned (5 artifact hashes); the structural fingerprint check passes; `baseline_40w.json` is unchanged (the fired events do not change).
+- Before #729 the engine fix alone breached Farz P-A on identical territory (the Farz AAR lost its Army HQ marker). #729 fixed that launch-path knife-edge; guard (b) was not needed for E1.
+- The engine fix alone (before the counter rule): fired events 180 → 180; war_crimes_events at w188 RBiH 15 → 12, HRHB 22 → 16.
 
 **Held for the card batch (item 4), with reasons recorded.** Perpetrator-side gains that remain on the six cards (Kravica RBiH morale +3, the barracks grants, Turajlić RS morale +2), and the `patron_pressure` sign (it raises the target's patron support).
