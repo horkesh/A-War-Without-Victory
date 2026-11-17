@@ -1151,6 +1151,32 @@ describe('buildPresidentialDecisionRoomView', () => {
     expect(buildPresidentialDecisionRoomSourceHandoffs(view.cards).find((handoff) => handoff.id === 'presidential-inbox')?.count).toBe(2);
   });
 
+  it('weights a grouped card by its countWeight (above 1) across metrics, lenses and handoffs', () => {
+    // ui-ux seat (F1i): the convoy family was the only multi-item manifest modal; the grouped
+    // review card (two event decisions in one card) now carries the countWeight > 1 check, so a
+    // cardWeight() that ignored countWeight would fail here.
+    const view = buildPresidentialDecisionRoomView({
+      state: makeState({
+        player_faction: 'RBiH',
+        playerDecisionSummary: undefined,
+        presidentialReviewQueue: {
+          pendingCount: 2,
+          criticalCount: 0,
+          eventDecisionCount: 2,
+          commandInterpretationCount: 0,
+          personnelDirectiveCount: 0,
+          operationOpportunityCount: 0,
+        },
+      } as Partial<LoadedGameState>),
+    });
+
+    const grouped = view.cards.find((card) => card.id === 'review:pending');
+    expect(grouped?.countWeight).toBe(2);
+    expect(view.metrics.pendingReviews).toBe(2);
+    expect(view.lenses.find((lens) => lens.id === grouped?.category)?.count).toBe(2);
+    expect(buildPresidentialDecisionRoomSourceHandoffs(view.cards).find((handoff) => handoff.id === 'presidential-inbox')?.count).toBe(2);
+  });
+
   it('falls back to pending modal blockers when player decision summary is absent', () => {
     const view = buildPresidentialDecisionRoomView({
       state: makeState({

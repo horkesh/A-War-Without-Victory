@@ -16,7 +16,11 @@
   - Retire humanitarian convoys. They are dead in every reachable path: they run only with `supply_reserves_enabled`, which is true only in sep1991 and jan1993, which no player can start, and even there they read legacy SID edges and never route.
   - Retire the enclave-derived Sarajevo tunnel activation; the `sarajevo_tunnel_operational` flag stays.
   - Nothing reads `political.enclaves` any more.
-- **Convoy UI:** kept mounted but inert. `tests/f1i_convoy_surfaces_inert.test.ts` pins that no source creates a pending convoy. The convergence diagnostic gains a `retired` disposition for `convoy_decision`. The UI removal is queued as a Part-4 inert retirement.
+- **Convoy UI: retired with the family** (orchestrator ruling option 1: the convergence diagnostic stays unweakened, no carve-outs).
+  - Removed: the `convoy_decision` manifest family, `ConvoyDecisionModal`, the `stage-convoy-decision` IPC (`convoy_ipc_contract.cjs`, electron-main, preload, useIPC), the inbox/desk/records/War Summary/SituationTab convoy entries, command art, 71 i18n keys (EN and BCS), the cadence projection and the QA/browser tool entries.
+  - The convergence diagnostic counts 10 families, all durable and source-verified.
+  - The convoy save fields stay optional (`compatibility-only`). `tests/f1i_convoy_save_compat.test.ts` loads a v26 save carrying a pending convoy and a filed one through the real load path, and shows no convoy anywhere a player can see.
+  - Seats: canon APPROVE-WITH-CHANGES (applied: SM l.927, MAP_UI_MASTER, WARROOM_MASTER), ui-ux (see the PR).
 - **Canon** (same change):
   - Rulebook l.515/545: convoys "not modelled in 1.0".
   - Systems Manual: the supply-agency note, the state list, System 5 (OSID detection; `collapsed` means "integrity floor reached", not fallen; §6 review for any reader; known defects) and System 7 (no enclave term in capital).
