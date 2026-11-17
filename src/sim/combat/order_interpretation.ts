@@ -23,7 +23,7 @@ import type {
     OfficerEventType,
 } from '../../state/officer_types.js';
 import { strictCompare } from '../../state/validateGameState.js';
-import { getCorpsCommander } from './officer_system.js';
+import { getCorpsCommander, isEnclaveCompatible } from './officer_system.js';
 import { getActivePatronDirective } from './patron_directive_scope.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -611,17 +611,25 @@ export function relieveOfficer(
     // Find best available replacement from reserve pool
     type ReplacementCandidate = { id: string; competence: number; pool_tier: string };
     const TIER_PRIORITY: Record<string, number> = { starter: 0, tier_a: 1, tier_b: 2, tier_c: 3 };
+    const currentTurn = state.meta.turn;
     const candidates = officerData
         .filter(o =>
             o.faction === data.faction &&
             o.rank === 'corps_commander' &&
             o.id !== officerId &&
-            officers[o.id]?.status === 'reserve'
+            officers[o.id]?.status === 'reserve' &&
+            // Commander attribution hardening: an officer locked in an enclave is not drawn out to
+            // relieve another corps (the same check the vacancy path applies).
+            isEnclaveCompatible(o, corpsId, currentTurn)
         )
         .sort((a, b) => {
             const aHome = a.home_corps_id === corpsId ? 0 : 1;
             const bHome = b.home_corps_id === corpsId ? 0 : 1;
             if (aHome !== bHome) return aHome - bHome;
+            // Compatible corps next, as in the vacancy path (findBestReplacement).
+            const aCompat = a.compatible_corps_ids?.includes(corpsId) ? 0 : 1;
+            const bCompat = b.compatible_corps_ids?.includes(corpsId) ? 0 : 1;
+            if (aCompat !== bCompat) return aCompat - bCompat;
             const aTier = TIER_PRIORITY[a.pool_tier] ?? 99;
             const bTier = TIER_PRIORITY[b.pool_tier] ?? 99;
             if (aTier !== bTier) return aTier - bTier;
