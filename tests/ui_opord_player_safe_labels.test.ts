@@ -110,8 +110,8 @@ describe('buildOpordDisplayModel', () => {
         expect(briefingSource).not.toContain('loadedGameState.operations?.find');
         expect(attackSource).toContain('getPlayerSafeMilitaryFactionName(attacker.faction)');
         expect(attackSource).toContain('getPlayerSafeMilitaryFactionName(defender.faction)');
-        expect(eventSource).toContain('getPlayerSafePoliticalFactionName(effect.faction)');
-        expect(eventSource).toContain("getPlayerSafePoliticalFactionName('RBiH')");
+        // The card's faction badges are the only faction labels EventModal prints (the unused describeEventEffect was retired).
+        expect(eventSource).toContain('getPlayerSafePoliticalFactionName(fid)');
         expect(decisionSource).toContain('function eventDecisionFactionLabel');
         expect(decisionSource).toContain("case 'RBiH': return t('desk.faction.rbih')");
         expect(decisionSource).toContain('eventDecisionFactionLabel(localizedDecision.faction)');
