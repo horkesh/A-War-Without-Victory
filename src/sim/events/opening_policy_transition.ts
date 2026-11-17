@@ -20,8 +20,11 @@ const OPTIONS = ['always_deny', 'ask', 'always_allow'] as const;
 // "Adjudicated figures and loose lines on 13 event cards"): three consequence `explanation` strings gave the Markale I toll as
 // 68 and credited that figure to Galić; they now read "more than 60" (Galić TJ). String-only: trigger, options, effects, flags
 // and dimension shifts are byte-identical, and a saved pending decision still matches (explanations are display text).
-const REVIEWED_IDENTITY_CANONICAL_LENGTH = 70875;
-const REVIEWED_IDENTITY_FNV64 = 'a3365d034c4c2ce9';
+// Re-pinned 2026-11-17 (was 70875 / a3365d034c4c2ce9) by the §6 copy panel on latest final findings (SHDG §6 record "Latest
+// final findings for the Markale and Srebrenica figures"): the three Markale I explanations now read "68 killed, nearly all of
+// them civilians" (Mladić TJ G.8 para. 2097, upheld on appeal). String-only, as above.
+const REVIEWED_IDENTITY_CANONICAL_LENGTH = 70931;
+const REVIEWED_IDENTITY_FNV64 = 'f9e05e291c017954';
 // Re-pinned 2026-11-15 (was 10911 / 4db9c9795b1abb6d): three hidden provenance notes cited UN A/54/549 §35 (the Srebrenica enclave
 // before the safe areas) for the ARBiH chain of command; the two hidden notes now record the correction and the visible source
 // line drops the paragraph. Strings only; options, effects, flags and dimension shifts are byte-identical.
