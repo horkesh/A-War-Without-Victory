@@ -193,17 +193,7 @@ export function applyPostureOrders(state: GameState): PostureReport {
             // unloaned army-reserve elite taking its `hold` rest order; applyPostureCosts rests it.
             const reserveRest = order.posture === 'hold'
                 && brigade.elite_loan_state != null && brigade.elite_loan_state.on_loan !== true;
-            // Ruling D (2026-11-17): a brigade that left the front while dug in may stand down to
-            // `defend` or `hold`. Off the front no other posture write reaches it, so the stale
-            // `dig_in` held every later multi-hop column order to it (reserve commit, gap fill,
-            // return march) at the dig_in lockout in `processOsidColumnMovement`. The lockout itself
-            // is unchanged: it still binds every brigade that is dug in. A participant of a live
-            // operation does not stand down here: an authorized operation releases it through its own
-            // column order, and an emergent one must leave it where it is.
-            const standDown = normalizePosture(brigade.posture) === 'dig_in'
-                && (order.posture === 'defend' || order.posture === 'hold')
-                && findBrigadeLiveOperationAnywhere(state, brigadeId) == null;
-            if (!reserveRest && !standDown) {
+            if (!reserveRest) {
                 report.postures_rejected++;
                 continue;
             }
@@ -272,6 +262,19 @@ export function applyPostureCosts(state: GameState): void {
             if (brigade.elite_loan_state && brigade.elite_loan_state.on_loan !== true && normalizePosture(brigade.posture) === 'hold') {
                 const rested = Math.min(DEFEND_COHESION_CAP, (brigade.cohesion ?? 60) + POSTURE_COHESION_COST.hold);
                 if (rested > (brigade.cohesion ?? 60)) brigade.cohesion = Math.round(rested * 10) / 10;
+            }
+            // Ruling D, step 1 (orchestrator, 2026-11-17): `dig_in` is a front posture. A brigade off
+            // the front (reserve, rear or unassigned) and in no planning or execution operation stands
+            // down to `defend`. Off the front no posture order reaches it (`applyPostureOrders` rejects
+            // them), so a brigade reclassified while dug in (P2 step 1 digs in every static front
+            // brigade) kept `dig_in` for good, and every later multi-hop column order to it died at the
+            // dig_in lockout in `processOsidColumnMovement`. The lockout is unchanged, and a participant
+            // of a live operation keeps its posture: an authorized operation releases it through its own
+            // column order, and an emergent one must leave it where it is.
+            if (normalizePosture(brigade.posture) === 'dig_in'
+                && findBrigadeLiveOperationAnywhere(state, id) == null) {
+                brigade.posture = 'defend';
+                brigade.dig_in_progress = 0;
             }
             continue;
         }

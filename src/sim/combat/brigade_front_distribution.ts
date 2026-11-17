@@ -230,6 +230,41 @@ function countActiveBrigadesByOsid(formations: GameState['military']['formations
     return counts;
 }
 
+/**
+ * Ruling D step 3 (2026-11-17): true when another brigade on `loc` outranks `bid` and is not
+ * leaving (not an operation participant, not disrupted, no movement order, not in transit), so
+ * `bid` can spread from the stack without exposing the cell. Rank: more entrenchment turns,
+ * then more personnel, then id. The top-ranked staying brigade is never surplus.
+ */
+function isStackSurplus(
+    state: GameState,
+    bid: string,
+    loc: string,
+    opParticipants: Set<string>,
+): boolean {
+    const formations = state.military.formations ?? {};
+    const self = formations[bid];
+    if (!self) return false;
+    const selfEntrenchment = self.entrenchment_turns ?? 0;
+    const selfPersonnel = self.personnel ?? 0;
+    for (const [id, other] of Object.entries(formations)) {
+        if (id === bid || !other || other.status !== 'active' || other.location_osid !== loc) continue;
+        if (other.faction !== self.faction) continue;
+        if (other.kind !== 'brigade' && other.kind !== 'og' && other.kind !== 'operational_group') continue;
+        if (opParticipants.has(id) || (other.disrupted_turns ?? 0) > 0) continue;
+        if (state.military.brigade_movement_orders?.[id]) continue;
+        if (state.military.brigade_movement_state?.[id]?.status === 'in_transit') continue;
+        const entrenchment = other.entrenchment_turns ?? 0;
+        const personnel = other.personnel ?? 0;
+        if (entrenchment > selfEntrenchment
+            || (entrenchment === selfEntrenchment && (personnel > selfPersonnel
+                || (personnel === selfPersonnel && strictCompare(id, bid) < 0)))) {
+            return true;
+        }
+    }
+    return false;
+}
+
 function disperseStackedRearBrigadesForSector(
     state: GameState,
     sector: CorpsFrontSector,
@@ -1055,8 +1090,11 @@ export function distributeBrigadesToFront(
                     const loc = f?.location_osid;
                     if (!loc || !frontOsidSet.has(loc)) return false;
                     if ((osidCount.get(loc) ?? 0) < 2) return false;
-                    // Don't uproot entrenched brigades — only redistribute fresh arrivals
-                    if ((f.entrenchment_turns ?? 0) >= ENTRENCHMENT_REDISTRIBUTION_THRESHOLD) return false;
+                    // Don't uproot entrenched brigades — only redistribute fresh arrivals.
+                    // Ruling D step 3: an entrenched brigade that is surplus on its cell (another
+                    // brigade that is not leaving holds it) may still spread; the cell stays held.
+                    if ((f.entrenchment_turns ?? 0) >= ENTRENCHMENT_REDISTRIBUTION_THRESHOLD
+                        && !isStackSurplus(state, bid, loc, opParticipants)) return false;
                     return true;
                 })
                 .sort(strictCompare);

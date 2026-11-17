@@ -261,9 +261,19 @@ function getAvailableElites(state: GameState, faction: string, turn: number): Fo
     return Object.keys(formations)
         .filter(fid => {
             const f = formations[fid];
-            return f.faction === faction && isEliteAvailableForLoan(f, turn);
+            return f.faction === faction && isEliteAvailableForLoan(f, turn) && isEliteFitForGenericLoan(f);
         })
         .sort(strictCompare);
+}
+
+/**
+ * Ruling D step 4a (2026-11-17): Army HQ's generic requests offer only an elite the loan tick would
+ * not recall at once. A generic loan below ELITE_MORALE_RECALL or ELITE_COHESION_RECALL was accepted
+ * and recalled the same turn, then re-offered after the cooldown (the VRS elites on Drina,
+ * t150-t187, every 4 turns). Authored operations keep their own path; the tick exempts them.
+ */
+function isEliteFitForGenericLoan(f: FormationState): boolean {
+    return (f.morale ?? 60) >= ELITE_MORALE_RECALL && (f.cohesion ?? 50) >= ELITE_COHESION_RECALL;
 }
 
 function describeCorpsNeed(
@@ -1483,7 +1493,7 @@ export function evaluateArmyReserveAssignments(
 
         // Verify the suggested brigade is still available (another request may have claimed it)
         const f = state.military.formations?.[brigadeId];
-        if (!f || !isEliteAvailableForLoan(f, turn) || req.travel_hops > MAX_AUTO_DEPLOY_HOPS
+        if (!f || !isEliteAvailableForLoan(f, turn) || !isEliteFitForGenericLoan(f) || req.travel_hops > MAX_AUTO_DEPLOY_HOPS
             || !canEliteLoanReachCorpsTerritory(state, brigadeId, req.corps_id, adjacency)
             || (brigadeId === 'arbih_guards_brigade'
                 && !resolveEliteDeploymentTarget(state, f, brigadeId, req.corps_id, adjacency))) {
