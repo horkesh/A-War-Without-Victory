@@ -162,14 +162,6 @@ export interface EventEffectAllianceChange {
     delta: number;
 }
 
-/** Effect: negotiation capital dimension adjustment for faction. */
-export interface EventEffectNegotiationBreakdown {
-    kind: 'negotiation_capital';
-    faction: FactionId;
-    dimension: string;
-    delta: number;
-}
-
 /** Effect: grant equipment (tanks/artillery) to a faction's best-equipped brigade.
  *  Zero-sum when paired with another faction's loss. Equipment starts degraded. */
 export interface EventEffectEquipmentGrant {
@@ -342,7 +334,6 @@ export type EventEffect =
     | EventEffectHumanitarianImpact
     | EventEffectPatronPressure
     | EventEffectAllianceChange
-    | EventEffectNegotiationBreakdown
     | EventEffectEquipmentGrant
     | EventEffectAggressionModifier
     | EventEffectControlChange

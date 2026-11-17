@@ -165,12 +165,6 @@
         "delta": -3
       },
       {
-        "kind": "negotiation_capital",
-        "faction": "RS",
-        "dimension": "international_credibility",
-        "delta": -10
-      },
-      {
         "kind": "narrative",
         "text": "71 civilians, mostly young people, are killed by VRS shelling of Tuzla's town center on Youth Day. The youngest victim is two years old."
       }
@@ -272,12 +266,6 @@
             "kind": "patron_pressure",
             "faction": "RS",
             "delta": 10
-          },
-          {
-            "kind": "negotiation_capital",
-            "faction": "RS",
-            "dimension": "international_credibility",
-            "delta": -20
           }
         ],
         "sets_flags": {
@@ -309,12 +297,6 @@
             "kind": "patron_pressure",
             "faction": "RS",
             "delta": 5
-          },
-          {
-            "kind": "negotiation_capital",
-            "faction": "RS",
-            "dimension": "international_credibility",
-            "delta": -10
           }
         ],
         "sets_flags": {
@@ -451,12 +433,6 @@
         "delta": -15
       },
       {
-        "kind": "negotiation_capital",
-        "faction": "RS",
-        "dimension": "international_credibility",
-        "delta": -30
-      },
-      {
         "kind": "patron_pressure",
         "faction": "RS",
         "delta": 20
@@ -495,6 +471,13 @@
       {
         "kind": "narrative",
         "text": "Srebrenica falls. Over 8,000 Bosniak men and boys are executed in the worst atrocity in Europe since World War II."
+      }
+    ],
+    "dimension_shifts": [
+      {
+        "faction": "RS",
+        "dimension": "international_standing",
+        "delta": -30
       }
     ]
   },
@@ -538,12 +521,6 @@
         "delta": -5
       },
       {
-        "kind": "negotiation_capital",
-        "faction": "RS",
-        "dimension": "international_credibility",
-        "delta": -10
-      },
-      {
         "kind": "control_change",
         "faction": "RS",
         "osids": [
@@ -563,6 +540,13 @@
       {
         "kind": "narrative",
         "text": "Žepa falls to the VRS. A second UN safe area is overrun in two weeks, deepening the international crisis."
+      }
+    ],
+    "dimension_shifts": [
+      {
+        "faction": "RS",
+        "dimension": "international_standing",
+        "delta": -10
       }
     ],
     "sets_flags": {
@@ -690,14 +674,15 @@
         "delta": 20
       },
       {
-        "kind": "negotiation_capital",
-        "faction": "RS",
-        "dimension": "international_credibility",
-        "delta": -15
-      },
-      {
         "kind": "narrative",
         "text": "The second Markale massacre kills 43 civilians. NATO prepares to launch sustained air strikes against VRS forces."
+      }
+    ],
+    "dimension_shifts": [
+      {
+        "faction": "RS",
+        "dimension": "international_standing",
+        "delta": -20
       }
     ]
   },
@@ -2241,12 +2226,6 @@
         "description": "Stop the advance. The territorial gains are sufficient for a strong negotiating position. Holbrooke promises a seat at the table.",
         "effects": [
           {
-            "kind": "negotiation_capital",
-            "faction": "RBiH",
-            "dimension": "international_credibility",
-            "delta": 15
-          },
-          {
             "kind": "morale_change",
             "faction": "RBiH",
             "delta": -3
@@ -2282,12 +2261,6 @@
             "kind": "morale_change",
             "faction": "RBiH",
             "delta": 5
-          },
-          {
-            "kind": "negotiation_capital",
-            "faction": "RBiH",
-            "dimension": "international_credibility",
-            "delta": -20
           },
           {
             "kind": "patron_pressure",
@@ -2581,12 +2554,6 @@
         "risk_level": 0.3,
         "effects": [
           {
-            "kind": "negotiation_capital",
-            "faction": "RBiH",
-            "dimension": "international_credibility",
-            "delta": 15
-          },
-          {
             "kind": "morale_change",
             "faction": "RBiH",
             "delta": 5
@@ -2622,12 +2589,6 @@
         "aggression_affinity": 0.5,
         "risk_level": 0.8,
         "effects": [
-          {
-            "kind": "negotiation_capital",
-            "faction": "RBiH",
-            "dimension": "international_credibility",
-            "delta": -5
-          },
           {
             "kind": "morale_change",
             "faction": "RBiH",

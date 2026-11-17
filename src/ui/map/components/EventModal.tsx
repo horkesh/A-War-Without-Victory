@@ -13,7 +13,7 @@ import { Icon, type IconName } from './icons/Icon';
 import { Z } from '../../shared/zIndex';
 import { Modal } from '../../shared/Modal';
 import type { EventEffect } from '../../../sim/events/event_types';
-import { getPlayerSafeDisplayLabel, getPlayerSafePoliticalFactionName } from '../utils/playerSafeText';
+import { getPlayerSafePoliticalFactionName } from '../utils/playerSafeText';
 import { resolveEventIllustration, section6StillAlt } from '../data/eventIllustrationArt';
 import { t, type MessageKey } from '../i18n';
 import { isDisplayEventEffectKind } from '../utils/eventEffectDisplay';
@@ -70,7 +70,8 @@ const EFFECT_ICONS: Record<string, IconName> = {
     humanitarian_impact: 'dead',
     patron_pressure: 'recon',
     alliance_change: 'balanced',
-    negotiation_capital: 'star',
+    // §6 E2: a card's own strategic-dimension shifts (appended by App.tsx).
+    dimension_shift: 'star',
     equipment_grant: 'tanks',
     aggression_modifier: 'offensive',
 };
@@ -111,7 +112,6 @@ export function describeEventEffect(effect: EventEffect): string {
         case 'humanitarian_impact': return `${getPlayerSafePoliticalFactionName(effect.faction)} humanitarian impact${effect.war_crimes_delta ? ` (${effect.war_crimes_delta > 0 ? '+' : ''}${effect.war_crimes_delta})` : ''}`;
         case 'patron_pressure': return `${getPlayerSafePoliticalFactionName(effect.faction)} patron pressure ${effect.delta > 0 ? '+' : ''}${effect.delta}`;
         case 'alliance_change': return `${formatAllianceLabel()} ${effect.delta > 0 ? '+' : ''}${effect.delta}`;
-        case 'negotiation_capital': return `${getPlayerSafePoliticalFactionName(effect.faction)} ${getPlayerSafeDisplayLabel(effect.dimension, effect.dimension)} ${effect.delta > 0 ? '+' : ''}${effect.delta}`;
     }
     return effect.kind;
 }

@@ -240,7 +240,7 @@ describe('LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-10: 6 Ring-1 divergence events'
     });
 
     // ── 5. csq_political_split_temporary_RBiH ───────────────────────────────
-    it('csq_political_split_temporary_RBiH: predicate + cohesion -3 + negotiation -3', () => {
+    it('csq_political_split_temporary_RBiH: predicate + cohesion -3 + live negotiating_leverage -3', () => {
         const def = getEvent('csq_political_split_temporary_RBiH');
         const cond = def.trigger.condition!;
         // alliance_below(0.30) strict <; war_exhaustion>=50; cohesion<45 strict
@@ -260,7 +260,10 @@ describe('LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-10: 6 Ring-1 divergence events'
 
         applyEventEffects(fires, effectsOf(def));
         expect(fires.military.formations.rb_b1.cohesion).toBe(57); // 60 - 3
-        expect((fires.military.negotiation as any).capital.RBiH.international_credibility).toBe(47); // 50 - 3
+        // §6 E2: the dead negotiation_capital −3 is now a live negotiating_leverage −3 shift.
+        expect((fires.military.negotiation as any).capital.RBiH.international_credibility).toBe(50);
+        expect(effectsOf(def).some(e => (e.kind as string) === 'negotiation_capital')).toBe(false);
+        expect(def.dimension_shifts).toContainEqual({ faction: 'RBiH', dimension: 'negotiating_leverage', delta: -3 });
         const ledger = buildCostLedger(fires);
         expect(ledger.annotations?.find(a => a.tag === 'political_split_temporary_RBiH')).toBeTruthy();
     });
@@ -371,7 +374,8 @@ describe('LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-10: 6 Ring-1 divergence events'
         const ALLOWED_EFFECT_KINDS = new Set([
             'narrative', 'morale_change', 'supply_delta', 'cohesion_change',
             'humanitarian_impact', 'patron_pressure', 'alliance_change',
-            'negotiation_capital', 'equipment_grant', 'aggression_modifier',
+            // 'negotiation_capital' retired (§6 E2): the loader rejects it.
+            'equipment_grant', 'aggression_modifier',
             'control_change',
             'guerrilla_threat', 'recruitment_modifier', 'equipment_quality_modifier',
             'doctrine_constraint', 'alliance_lock', 'bot_priority_shift',

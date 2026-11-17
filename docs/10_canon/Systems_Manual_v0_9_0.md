@@ -752,6 +752,12 @@ Events WITHOUT pressure config use legacy `triggerMatches()` (backward compatibl
 
 Each dimension: `base_value` (computed from game state each turn) + `event_modifier` (accumulated from player decisions) = `effective_value` (clamped 0-100).
 
+The `event_modifier` is added after the base is clamped: `base_value` is clamped to 0-100 first, then `effective_value = clamp(base_value + event_modifier, 0, 100)`.
+
+`international_standing` base inputs (per faction, from `NegotiationBreakdown`): start at 50; war crimes `war_crimes_events × −10`; civilian casualties `civilian_casualties_caused ÷ 5000`, subtracted; peace plans accepted `+10` each; peace plans rejected `−15` each. An atrocity card's `humanitarian_impact.war_crimes_delta` therefore costs standing through this base until it reaches 0.
+
+Events write dimensions only through `dimension_shifts` (event level or response-option level), which add to `event_modifier`. The former `negotiation_capital` event effect kind is retired (§6 E2, 2026-11-17): it never reached the dimension store, the loader now rejects it, and an unknown dimension id in a shift throws. One carrier per effect: a row that already carries a live shift on a faction and dimension does not repeat it under another kind.
+
 Stored on `NegotiationState.strategic_dimensions`. Module: `src/sim/events/strategic_dimensions.ts`.
 
 **Ordinary-player startup initialization (2026-10-25 candidate):** `initializeNegotiationState()` supplies absent negotiation containers and canonical capital/patron entries before the selected faction's foundational decision in Electron and browser startup. It preserves present values, references and partial dimension stores; it performs no derived update. The existing per-turn compute call retains its old initialization position and behavior. Observer/no-player startup, baked snapshots and save migration are unchanged. The retained no-player first-turn crime-counter undercount remains unresolved and cannot be used as moral or historical comparison evidence.

@@ -1707,14 +1707,7 @@
       "kind": "narrative",
       "text": "No RS paramilitary sweep authorized in 20+ turns. This does not mean RS forces killed no one."
     },
-    "effects": [
-      {
-        "kind": "negotiation_capital",
-        "faction": "RS",
-        "dimension": "international_credibility",
-        "delta": 12
-      }
-    ],
+    "effects": [],
     "dimension_shifts": [
       {
         "faction": "RS",
@@ -1906,14 +1899,7 @@
       "kind": "narrative",
       "text": "RS officer-quality average has fallen below ARBiH and dropped >0.15 from baseline."
     },
-    "effects": [
-      {
-        "kind": "negotiation_capital",
-        "faction": "RS",
-        "dimension": "military_credibility",
-        "delta": -6
-      }
-    ],
+    "effects": [],
     "dimension_shifts": [
       {
         "faction": "RS",
@@ -2119,12 +2105,6 @@
         "label": "Press the bilateral track",
         "description": "Trade alliance for negotiating leverage.",
         "effects": [
-          {
-            "kind": "negotiation_capital",
-            "faction": "RBiH",
-            "dimension": "negotiating_leverage",
-            "delta": 8
-          },
           {
             "kind": "patron_pressure",
             "faction": "RBiH",
@@ -3248,12 +3228,6 @@
         "description": "Open the door; trade some leverage for legitimacy.",
         "effects": [
           {
-            "kind": "negotiation_capital",
-            "faction": "RBiH",
-            "dimension": "international_credibility",
-            "delta": 6
-          },
-          {
             "kind": "alliance_lock",
             "mode": "floor",
             "value": 0.2,
@@ -3745,12 +3719,6 @@
         "description": "Trade leverage for legitimacy and a defined endpoint.",
         "effects": [
           {
-            "kind": "negotiation_capital",
-            "faction": "RBiH",
-            "dimension": "international_credibility",
-            "delta": 8
-          },
-          {
             "kind": "cost_ledger_annotation",
             "tag": "partition_referendum_engaged",
             "text": "Partition referendum engaged; legitimacy traded for leverage."
@@ -4056,12 +4024,6 @@
     },
     "effects": [
       {
-        "kind": "negotiation_capital",
-        "faction": "RBiH",
-        "dimension": "negotiating_leverage",
-        "delta": 5
-      },
-      {
         "kind": "alliance_lock",
         "mode": "floor",
         "value": 0.15,
@@ -4141,12 +4103,6 @@
         "label": "Engage the third-party mediator",
         "description": "Trade internal cohesion for international credibility and a fresh diplomatic track.",
         "effects": [
-          {
-            "kind": "negotiation_capital",
-            "faction": "RBiH",
-            "dimension": "international_credibility",
-            "delta": 7
-          },
           {
             "kind": "cohesion_change",
             "faction": "RBiH",
@@ -4683,12 +4639,6 @@
         "kind": "cohesion_change",
         "faction": "HRHB",
         "delta": -4
-      },
-      {
-        "kind": "negotiation_capital",
-        "faction": "HRHB",
-        "dimension": "international_credibility",
-        "delta": -5
       },
       {
         "kind": "cost_ledger_annotation",
@@ -5506,12 +5456,6 @@
         "delta": -3
       },
       {
-        "kind": "negotiation_capital",
-        "faction": "RBiH",
-        "dimension": "international_credibility",
-        "delta": -3
-      },
-      {
         "kind": "cost_ledger_annotation",
         "tag": "political_split_temporary_RBiH",
         "text": "Political split (temporary) under alliance<0.30, war_exhaustion>50, and internal_cohesion<45. Cohesion -3 and international_credibility -3 to reflect short-term Sarajevo caucus rift; resolves within the cooldown window. AUDIT-ONLY annotation; no rupture wiring."
@@ -5522,6 +5466,11 @@
         "faction": "RBiH",
         "dimension": "internal_cohesion",
         "delta": -2
+      },
+      {
+        "faction": "RBiH",
+        "dimension": "negotiating_leverage",
+        "delta": -3
       }
     ],
     "sets_flags": {
@@ -5725,12 +5674,6 @@
         "delta": -3
       },
       {
-        "kind": "negotiation_capital",
-        "faction": "RS",
-        "dimension": "international_credibility",
-        "delta": -3
-      },
-      {
         "kind": "cost_ledger_annotation",
         "tag": "political_split_temporary_RS",
         "text": "Political split (temporary, RS variant) under war_exhaustion>55 AND internal_cohesion<45 AND cumulative_casualties>35. Cohesion -3 and international_credibility -3 to reflect short-term Pale-Banja Luka caucus rift; resolves within the cooldown window. AUDIT-ONLY annotation; no rupture wiring."
@@ -5741,6 +5684,11 @@
         "faction": "RS",
         "dimension": "internal_cohesion",
         "delta": -2
+      },
+      {
+        "faction": "RS",
+        "dimension": "negotiating_leverage",
+        "delta": -3
       }
     ],
     "sets_flags": {
@@ -6681,12 +6629,6 @@
     },
     "effects": [
       {
-        "kind": "negotiation_capital",
-        "faction": "HRHB",
-        "dimension": "negotiating_leverage",
-        "delta": 5
-      },
-      {
         "kind": "alliance_lock",
         "mode": "floor",
         "value": 0.15,
@@ -6812,12 +6754,6 @@
     },
     "effects": [
       {
-        "kind": "negotiation_capital",
-        "faction": "RBiH",
-        "dimension": "negotiating_leverage",
-        "delta": 4
-      },
-      {
         "kind": "cost_ledger_annotation",
         "tag": "mediator_engagement_streak_RBiH",
         "text": "Mediator engagement streak (RBiH variant) under patron_confidence>=55 and war_exhaustion>=40. Negotiating leverage +4 to reflect accrual during sustained mediator-channel engagement; distinct from csq_back_channel_communication which gates on patron_pressure rather than war_exhaustion. AUDIT-ONLY annotation; no rupture wiring."
@@ -6828,6 +6764,11 @@
         "faction": "RBiH",
         "dimension": "international_standing",
         "delta": 2
+      },
+      {
+        "faction": "RBiH",
+        "dimension": "negotiating_leverage",
+        "delta": 4
       }
     ],
     "sets_flags": {
@@ -6988,12 +6929,6 @@
     },
     "effects": [
       {
-        "kind": "negotiation_capital",
-        "faction": "HRHB",
-        "dimension": "negotiating_leverage",
-        "delta": 4
-      },
-      {
         "kind": "cost_ledger_annotation",
         "tag": "mediator_engagement_streak_HRHB",
         "text": "Mediator engagement streak (HRHB variant) under patron_confidence>=55 and war_exhaustion>=40. Negotiating leverage +4 to reflect accrual during sustained Zagreb-channel engagement; distinct from csq_back_channel_communication_HRHB which gates on patron_pressure rather than war_exhaustion. AUDIT-ONLY annotation; no rupture wiring."
@@ -7004,6 +6939,11 @@
         "faction": "HRHB",
         "dimension": "international_standing",
         "delta": 2
+      },
+      {
+        "faction": "HRHB",
+        "dimension": "negotiating_leverage",
+        "delta": 4
       }
     ],
     "sets_flags": {
@@ -7052,12 +6992,6 @@
     },
     "effects": [
       {
-        "kind": "negotiation_capital",
-        "faction": "RS",
-        "dimension": "negotiating_leverage",
-        "delta": 4
-      },
-      {
         "kind": "cost_ledger_annotation",
         "tag": "mediator_engagement_streak_RS",
         "text": "Mediator engagement streak (RS variant) under patron_confidence>=55 and war_exhaustion>=40. Negotiating leverage +4 to reflect accrual during sustained Belgrade-channel engagement; distinct from csq_back_channel_communication which gates on patron_pressure rather than war_exhaustion. AUDIT-ONLY annotation; no rupture wiring."
@@ -7068,6 +7002,11 @@
         "faction": "RS",
         "dimension": "international_standing",
         "delta": 2
+      },
+      {
+        "faction": "RS",
+        "dimension": "negotiating_leverage",
+        "delta": 4
       }
     ],
     "sets_flags": {
@@ -7115,12 +7054,6 @@
       "text": "A back-channel communication line opens with the patron capital (RS variant); leverage accrues quietly."
     },
     "effects": [
-      {
-        "kind": "negotiation_capital",
-        "faction": "RS",
-        "dimension": "negotiating_leverage",
-        "delta": 5
-      },
       {
         "kind": "alliance_lock",
         "mode": "floor",
@@ -7648,12 +7581,6 @@
     },
     "effects": [
       {
-        "kind": "negotiation_capital",
-        "faction": "RBiH",
-        "dimension": "negotiating_leverage",
-        "delta": 5
-      },
-      {
         "kind": "cost_ledger_annotation",
         "tag": "negotiating_capital_recovery_RBiH",
         "text": "RBiH negotiating-capital recovery under patron_pressure>=12, patron_confidence>55, no major offensive 25 turns. Negotiating leverage +5; AUDIT-ONLY annotation; no rupture wiring."
@@ -7717,12 +7644,6 @@
     },
     "effects": [
       {
-        "kind": "negotiation_capital",
-        "faction": "RS",
-        "dimension": "negotiating_leverage",
-        "delta": 5
-      },
-      {
         "kind": "cost_ledger_annotation",
         "tag": "negotiating_capital_recovery_RS",
         "text": "RS negotiating-capital recovery under patron_pressure>=12, patron_confidence>55, no major offensive 25 turns. Negotiating leverage +5; AUDIT-ONLY annotation; no rupture wiring."
@@ -7785,12 +7706,6 @@
       "text": "Negotiating-capital recovery (HRHB variant): leverage column drifts upward."
     },
     "effects": [
-      {
-        "kind": "negotiation_capital",
-        "faction": "HRHB",
-        "dimension": "negotiating_leverage",
-        "delta": 5
-      },
       {
         "kind": "cost_ledger_annotation",
         "tag": "negotiating_capital_recovery_HRHB",

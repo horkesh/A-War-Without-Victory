@@ -1,5 +1,13 @@
 # Save Schema Evolution
 
+## v41 — `negotiation_capital` event effects stripped from pending decisions (2026-11-17, §6 E2)
+
+`CURRENT_SCHEMA_VERSION` 39 → 41. **v40 is reserved by another lane (batch-b) and is not registered yet;** `applyMigrations` filters `version > current` and sorts, so the gap is tolerated. Whichever lane merges second renumbers its migration (each is a self-contained `registerMigration` call). The `negotiation_capital` event effect kind is retired (the loader rejects it; `applyEventEffects` throws on an unknown kind). Migration v41 (`src/state/save_migration.ts`):
+- strips `kind === 'negotiation_capital'` entries from `military.pending_event_decisions[].response_options[].effects`;
+- deletes a singular `response_options[].effect` of that kind.
+
+Forward-only, deterministic and idempotent; no change on a clean state, and no field is added. Accepted and recorded: a decision pending at upgrade loses the dimension shift its catalog row now carries, because pending options are stored snapshots. The startup snapshot's `schema_version` is 41 (no other byte change). Tests: `tests/s6_e2_negotiation_capital_retired.test.ts`, the `v39_negotiation_capital_pending.json` round-trip fixture.
+
 ## v39 — political-directive chain retired (2026-11-16, freeze cut B3 + B2)
 
 `CURRENT_SCHEMA_VERSION` 38 → 39. The turn pipeline no longer writes `political_directives_by_faction` or `army_corps_directives_by_faction`, and nothing reads them in a game. Migration v39 (`src/state/save_migration.ts`):

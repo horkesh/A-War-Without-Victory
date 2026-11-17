@@ -22,7 +22,10 @@ export const KNOWN_EVENT_EFFECT_KINDS = [
     'humanitarian_impact',
     'morale_change',
     'narrative',
-    'negotiation_capital',
+    // 'negotiation_capital' retired (§6 E2, 2026-11-17): it wrote into raw
+    // NegotiationBreakdown counters under dimension names that never existed there,
+    // so every catalog use was a silent no-op. Strategic-dimension effects are
+    // authored as `dimension_shifts`; the loader now rejects the old kind.
     'offensive_ops_suppression',
     'patron_pressure',
     'recruitment_modifier',

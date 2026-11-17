@@ -74,6 +74,11 @@ function makeAhmiciState(turn: number): GameState {
         },
         patron_relationships: {},
         peace_plan_history: [],
+        strategic_dimensions: {
+            HRHB: {
+                international_standing: { base_value: 50, event_modifier: 0, effective_value: 50 },
+            },
+        },
     } as any;
     return state;
 }
@@ -916,11 +921,15 @@ test('Ahmici fires from the HRHB Vitez basing cell at turn 54 and applies its di
         ['ahmici_massacre_1993'],
     );
     assert.strictEqual((eligible.military.negotiation as any).capital.HRHB.war_crimes_events, 3);
-    assert.strictEqual((eligible.military.negotiation as any).capital.HRHB.international_credibility, 25);
+    // §6 E2: the −25 international cost is a live international_standing shift; the raw
+    // capital counter it used to (only nominally) target is untouched.
+    assert.strictEqual((eligible.military.negotiation as any).capital.HRHB.international_credibility, 50);
+    assert.strictEqual((eligible.military.negotiation as any).strategic_dimensions.HRHB.international_standing.event_modifier, -25);
 
     assert.deepStrictEqual(evaluateEvents(eligible, rejectRandomness, 55, [event]).fired, []);
     assert.strictEqual((eligible.military.negotiation as any).capital.HRHB.war_crimes_events, 3);
-    assert.strictEqual((eligible.military.negotiation as any).capital.HRHB.international_credibility, 25);
+    assert.strictEqual((eligible.military.negotiation as any).capital.HRHB.international_credibility, 50);
+    assert.strictEqual((eligible.military.negotiation as any).strategic_dimensions.HRHB.international_standing.event_modifier, -25);
 });
 
 test('Ahmici stays blocked when RBiH holds the Vitez basing cell despite HRHB control elsewhere in Vitez', () => {
@@ -935,6 +944,7 @@ test('Ahmici stays blocked when RBiH holds the Vitez basing cell despite HRHB co
     assert.deepStrictEqual(evaluateEvents(state, rejectRandomness, 54, [event]).fired, []);
     assert.strictEqual((state.military.negotiation as any).capital.HRHB.war_crimes_events, 0);
     assert.strictEqual((state.military.negotiation as any).capital.HRHB.international_credibility, 50);
+    assert.strictEqual((state.military.negotiation as any).strategic_dimensions.HRHB.international_standing.event_modifier, 0);
 });
 
 test('the general safe-areas card is the turn-57 Resolution 824 expansion, not a duplicate Resolution 819 card', () => {
@@ -1166,9 +1176,11 @@ test.each(['comply_withdraw_hwez', 'defy_ultimatum_hwez'] as const)(
         true,
         );
         const rsDimensions = state.military.negotiation?.strategic_dimensions?.RS as any;
+        // §6 E2: the Markale card's own RS international_standing −15 is now live, so it
+        // stacks with the ultimatum response (+8 comply / −12 defy).
         assert.strictEqual(
         rsDimensions.international_standing.event_modifier,
-        responseId === 'comply_withdraw_hwez' ? 8 : -12,
+        responseId === 'comply_withdraw_hwez' ? -15 + 8 : -15 - 12,
         );
         assert.strictEqual(
         rsDimensions.patron_confidence.event_modifier,

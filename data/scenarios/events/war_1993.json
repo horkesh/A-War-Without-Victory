@@ -192,12 +192,6 @@
         "risk_level": 0.5,
         "effects": [
           {
-            "kind": "negotiation_capital",
-            "faction": "RBiH",
-            "dimension": "international_credibility",
-            "delta": 10
-          },
-          {
             "kind": "patron_pressure",
             "faction": "RBiH",
             "delta": -5
@@ -216,12 +210,6 @@
         "aggression_affinity": 0.4,
         "risk_level": 0.7,
         "effects": [
-          {
-            "kind": "negotiation_capital",
-            "faction": "RBiH",
-            "dimension": "international_credibility",
-            "delta": -10
-          },
           {
             "kind": "morale_change",
             "faction": "RBiH",
@@ -1698,14 +1686,15 @@
     },
     "effects": [
       {
-        "kind": "negotiation_capital",
-        "faction": "HRHB",
-        "dimension": "international_credibility",
-        "delta": -25
-      },
-      {
         "kind": "narrative",
         "text": "The Ahmići massacre shocks the international community. HVO credibility suffers a devastating blow."
+      }
+    ],
+    "dimension_shifts": [
+      {
+        "faction": "HRHB",
+        "dimension": "international_standing",
+        "delta": -25
       }
     ]
   },
@@ -2745,12 +2734,6 @@
         "delta": 10
       },
       {
-        "kind": "negotiation_capital",
-        "faction": "HRHB",
-        "dimension": "international_credibility",
-        "delta": -20
-      },
-      {
         "kind": "narrative",
         "text": "Images of Bosniak men crowded behind Heliodrom wire reach the international press. Croatia's patron relationship with the West enters a period of severe strain."
       }
@@ -3429,12 +3412,6 @@
         "description": "Keep the framework alive while reserving the Drina enclaves and Posavina corridor for the Assembly's final vote.",
         "effects": [
           {
-            "kind": "negotiation_capital",
-            "faction": "RBiH",
-            "dimension": "international_credibility",
-            "delta": 5
-          },
-          {
             "kind": "patron_pressure",
             "faction": "RBiH",
             "delta": -5
@@ -3450,12 +3427,6 @@
         "label": "Reject at the Presidency Stage",
         "description": "End Sarajevo's participation before the documented Assembly vote, defending sovereignty while frustrating the mediators.",
         "effects": [
-          {
-            "kind": "negotiation_capital",
-            "faction": "RBiH",
-            "dimension": "international_credibility",
-            "delta": -5
-          },
           {
             "kind": "morale_change",
             "faction": "RBiH",
@@ -3608,14 +3579,7 @@
             "delta": -1
           }
         ],
-        "effects": [
-          {
-            "kind": "negotiation_capital",
-            "faction": "RBiH",
-            "dimension": "international_credibility",
-            "delta": -2
-          }
-        ]
+        "effects": []
       },
       {
         "id": "accept_for_optics",
@@ -4897,12 +4861,6 @@
         "delta": -3
       },
       {
-        "kind": "negotiation_capital",
-        "faction": "RBiH",
-        "dimension": "international_credibility",
-        "delta": -10
-      },
-      {
         "kind": "narrative",
         "text": "ARBiH crimes against Croat civilians at Grabovica and Uždol enter the tribunal record; Halilović's acquittal resolves his individual superior responsibility, not whether the crimes occurred."
       }
@@ -5320,12 +5278,6 @@
         "delta": 5
       },
       {
-        "kind": "negotiation_capital",
-        "faction": "HRHB",
-        "dimension": "international_credibility",
-        "delta": -15
-      },
-      {
         "kind": "narrative",
         "text": "Stupni Do is added to the growing list of documented HVO atrocities. Rajic will eventually plead guilty at The Hague."
       }
@@ -5611,9 +5563,9 @@
     "id": "mostar_bridge_destroyed_1993",
     "image": "event_siege_city_HRHB.webp",
     "title": "Stari Most Destroyed in Mostar",
-    "narrative": "HVO forces destroy the iconic Stari Most, the 16th-century Ottoman bridge spanning the Neretva River in Mostar. The deliberate demolition of this UNESCO-recognized cultural monument becomes a global symbol of the war's cultural devastation. The act draws widespread international condemnation and deepens the stigma on the Bosnian Croat war effort.",
+    "narrative": "HVO forces destroy the iconic Stari Most, the 16th-century Ottoman bridge spanning the Neretva River in Mostar. The deliberate destruction of this 16th-century monument becomes a global symbol of the war's cultural devastation. The act draws widespread international condemnation and deepens the stigma on the Bosnian Croat war effort.",
     "category": "humanitarian",
-    "historical_source": "ICTY Prlić et al. Trial Judgment (IT-04-74-T), Stari Most destruction; UNESCO World Heritage Committee records",
+    "historical_source": "ICTY Prlić et al. Trial Judgment (IT-04-74-T), Stari Most destruction; ICTY Prlić et al. Appeal Judgement (IT-04-74-A, 29 November 2017): the Appeals Chamber found the bridge a military target at the time of the attack and reversed the Trial Chamber's wanton-destruction finding on it, Judge Pocar dissenting; UNESCO World Heritage Committee records",
     "source_tier": "icty_icj_un",
     "source_note": "The listed adjudicative and institutional sources bound the chronology, actors, and findings described. The essay is original synthesis and does not extend individual liability, command responsibility, or institutional findings beyond the cited record.",
     "trigger": {
@@ -5637,14 +5589,15 @@
     },
     "effects": [
       {
-        "kind": "negotiation_capital",
-        "faction": "HRHB",
-        "dimension": "international_credibility",
-        "delta": -10
-      },
-      {
         "kind": "narrative",
         "text": "The Stari Most is destroyed by HVO shelling. The loss of the iconic bridge becomes a symbol of cultural destruction."
+      }
+    ],
+    "dimension_shifts": [
+      {
+        "faction": "HRHB",
+        "dimension": "international_standing",
+        "delta": -10
       }
     ]
   },

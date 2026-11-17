@@ -139,14 +139,15 @@
         "delta": 15
       },
       {
-        "kind": "negotiation_capital",
-        "faction": "RS",
-        "dimension": "international_credibility",
-        "delta": -20
-      },
-      {
         "kind": "narrative",
         "text": "The Markale massacre kills 68 civilians. The atrocity becomes the catalyst for NATO's ultimatum to the VRS."
+      }
+    ],
+    "dimension_shifts": [
+      {
+        "faction": "RS",
+        "dimension": "international_standing",
+        "delta": -15
       }
     ]
   },
@@ -906,14 +907,15 @@
         "risk_level": 0.3,
         "effects": [
           {
-            "kind": "negotiation_capital",
-            "faction": "RBiH",
-            "dimension": "international_credibility",
-            "delta": 15
-          },
-          {
             "kind": "supply_delta",
             "faction": "RBiH",
+            "delta": 10
+          }
+        ],
+        "dimension_shifts": [
+          {
+            "faction": "HRHB",
+            "dimension": "international_standing",
             "delta": 10
           }
         ]
@@ -926,12 +928,12 @@
         "historical_marker": "counterfactual",
         "aggression_affinity": 0.1,
         "risk_level": 0.5,
-        "effects": [
+        "effects": [],
+        "dimension_shifts": [
           {
-            "kind": "negotiation_capital",
-            "faction": "RBiH",
-            "dimension": "international_credibility",
-            "delta": 5
+            "faction": "HRHB",
+            "dimension": "international_standing",
+            "delta": 3
           }
         ]
       }
@@ -1046,12 +1048,6 @@
             "delta": 5
           },
           {
-            "kind": "negotiation_capital",
-            "faction": "RBiH",
-            "dimension": "international_credibility",
-            "delta": 15
-          },
-          {
             "kind": "supply_delta",
             "faction": "RBiH",
             "delta": 10
@@ -1090,7 +1086,7 @@
             "material_effect_refs": [
               "alliance_change",
               "morale_change.RBiH",
-              "negotiation_capital.RBiH.international_credibility",
+              "dimension_shift.RBiH.international_standing",
               "supply_delta.RBiH"
             ],
             "explanation": "Sarajevo's signature on the Washington framework opens the federation military integration track and positions ARBiH for the 1995 joint offensives (Storm, Mistral, Sana) alongside HVO and HV forces. Croatian supply lines reopen; UNPROFOR cease-fire monitoring takes effect across Mostar, Vitez, Gornji Vakuf, Prozor, Konjic, and Jablanica within days (BB Vol. II p. 451)."
@@ -1114,12 +1110,6 @@
             "kind": "morale_change",
             "faction": "RBiH",
             "delta": 2
-          },
-          {
-            "kind": "negotiation_capital",
-            "faction": "RBiH",
-            "dimension": "international_credibility",
-            "delta": 5
           }
         ],
         "sets_flags": {
@@ -1155,7 +1145,7 @@
             "material_effect_refs": [
               "alliance_change",
               "morale_change.RBiH",
-              "negotiation_capital.RBiH.international_credibility"
+              "dimension_shift.RBiH.international_standing"
             ],
             "explanation": "Same direction as accept (per BB Vol. II p. 451 — both options are forms of acceptance), but at a different posture. Silajdžić-track skepticism dampens commitment; the federation military integration track still opens but with friction. Counterfactual gradient capturing the same-direction-different-posture register documented in BB Vol. II p. 451."
           }
@@ -1459,12 +1449,6 @@
         "risk_level": 0.3,
         "effects": [
           {
-            "kind": "negotiation_capital",
-            "faction": "RBiH",
-            "dimension": "international_credibility",
-            "delta": 10
-          },
-          {
             "kind": "patron_pressure",
             "faction": "RBiH",
             "delta": -10
@@ -1478,12 +1462,6 @@
         "aggression_affinity": 0.5,
         "risk_level": 0.8,
         "effects": [
-          {
-            "kind": "negotiation_capital",
-            "faction": "RBiH",
-            "dimension": "international_credibility",
-            "delta": -15
-          },
           {
             "kind": "patron_pressure",
             "faction": "RBiH",
@@ -1800,12 +1778,6 @@
         "description": "Sign on to the Contact Group framework under Christopher's shuttle pressure, with formal reservations on the eastern enclaves and the corridor. The Washington-track alignment holds; the Federation gains the diplomatic frame against RS rejection.",
         "effects": [
           {
-            "kind": "negotiation_capital",
-            "faction": "RBiH",
-            "dimension": "international_credibility",
-            "delta": 12
-          },
-          {
             "kind": "patron_pressure",
             "faction": "RBiH",
             "delta": -10
@@ -1881,14 +1853,7 @@
         "historical_marker": "counterfactual",
         "label": "Sign with public reservations",
         "description": "Sign the Contact Group framework while publicly reserving the Assembly's right to reject the final territorial map on the eastern enclaves. The Washington-track holds tactically; the Assembly retains veto authority for the final ratification.",
-        "effects": [
-          {
-            "kind": "negotiation_capital",
-            "faction": "RBiH",
-            "dimension": "international_credibility",
-            "delta": 5
-          }
-        ],
+        "effects": [],
         "sets_flags": {
           "rbih_contact_group_response": "reservations"
         },
@@ -3068,12 +3033,6 @@
         "label": "Seek negotiation — open Bihać-pocket ceasefire channels",
         "description": "Direct Dudaković to open talks with APWB on a Bihać-pocket ceasefire, with indirect channels to RS/RSK. Sarajevo's military pressure on the pocket axis is signaled as conditional. Talks open; no resolution arrives; the autumn-1994 operational picture stalls without the offensive momentum and without the immediate political cost of full recognition.",
         "effects": [
-          {
-            "kind": "negotiation_capital",
-            "faction": "RBiH",
-            "dimension": "international_credibility",
-            "delta": -3
-          },
           {
             "kind": "patron_pressure",
             "faction": "RBiH",

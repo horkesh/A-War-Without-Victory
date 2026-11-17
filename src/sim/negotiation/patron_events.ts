@@ -45,6 +45,13 @@ export interface PatronEventEffect {
     override_max?: number;
     /** Change to international_standing strategic dimension. */
     humanitarian_delta?: number;
+    /**
+     * §6 E2 one-carrier rule: skip `humanitarian_delta` when this catalog event id has
+     * already fired (`military.event_last_fired_turn[id]` is set), because that event
+     * card carries the same standing cost itself. Declarative; the applier never
+     * special-cases an event id. Other fields of the effect still apply.
+     */
+    humanitarian_delta_unless_event_fired?: string;
 }
 
 // ── Historical patron events ──
@@ -71,7 +78,10 @@ export const CONTACT_GROUP_REJECTION: PatronEvent = {
 /**
  * Srebrenica aftermath (July 1995, ~week 170 from April 1992).
  * International community horrified. All factions' patrons increase pressure.
- * RS humanitarian standing devastated.
+ * RS international standing: one carrier per path (§6 E2). When the
+ * srebrenica_falls_1995 card fired, the card carries the RS −30 standing cost and this
+ * event skips its own −30. When RS holds the town without the card ever firing, this
+ * event charges the −30.
  */
 export const SREBRENICA_AFTERMATH: PatronEvent = {
     id: 'srebrenica_aftermath',
@@ -88,6 +98,7 @@ export const SREBRENICA_AFTERMATH: PatronEvent = {
             faction: 'RS',
             override_delta: 20,
             humanitarian_delta: -30,
+            humanitarian_delta_unless_event_fired: 'srebrenica_falls_1995',
         },
         {
             faction: 'RBiH',
@@ -219,7 +230,9 @@ export function applyPatronEvent(state: GameState, event: PatronEvent): void {
         }
 
         // Humanitarian standing changes — applied to strategic_dimensions international_standing
-        if (effect.humanitarian_delta !== undefined && neg.strategic_dimensions?.[effect.faction]) {
+        const humanitarianCarriedByEvent = effect.humanitarian_delta_unless_event_fired !== undefined
+            && state.military.event_last_fired_turn?.[effect.humanitarian_delta_unless_event_fired] !== undefined;
+        if (effect.humanitarian_delta !== undefined && !humanitarianCarriedByEvent && neg.strategic_dimensions?.[effect.faction]) {
             const dim = neg.strategic_dimensions[effect.faction]['international_standing'];
             if (dim) {
                 dim.event_modifier = clamp(dim.event_modifier + effect.humanitarian_delta, -100, 100);

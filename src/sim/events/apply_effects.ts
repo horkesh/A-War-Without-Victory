@@ -33,7 +33,8 @@ const EFFECT_KIND_ORDER: Record<string, number> = {
     humanitarian_impact: 12,
     morale_change: 13,
     narrative: 14,
-    negotiation_capital: 15,
+    // 15 was negotiation_capital (retired, §6 E2). The gap is kept so every
+    // later index, and so the relative order, is unchanged.
     offensive_ops_suppression: 16,
     patron_pressure: 17,
     recruitment_modifier: 18,
@@ -126,9 +127,6 @@ function applySingleEffect(state: GameState, effect: EventEffect, targetFormatio
         case 'alliance_change':
             applyAllianceChange(state, effect.delta);
             break;
-        case 'negotiation_capital':
-            applyNegotiationBreakdown(state, effect.faction, effect.dimension, effect.delta);
-            break;
         case 'equipment_grant':
             applyEquipmentGrant(state, effect.faction, effect.tanks, effect.artillery, effect.aa_systems, effect.target_municipality);
             break;
@@ -168,6 +166,12 @@ function applySingleEffect(state: GameState, effect: EventEffect, targetFormatio
         case 'narrative':
             // No mechanical effect; narrative text is logged via FiredEvent.
             break;
+        default: {
+            // §6 E2: an unknown kind must fail loudly, never be skipped silently.
+            // The `never` binding makes a new union member without a case a compile error.
+            const unknownEffect: never = effect;
+            throw new Error(`Unknown event effect kind: ${String((unknownEffect as { kind?: unknown }).kind)}`);
+        }
     }
 }
 
@@ -529,29 +533,6 @@ function applyControlChange(state: GameState, faction: FactionId, osids: string[
             to: faction,
             mun_id: osid.split(':')[1] ?? undefined,
         } satisfies ControlEvent);
-    }
-}
-
-/** Adjust a specific negotiation capital dimension for a faction.
- *  Un-clamped accumulator: non-finite delta is rejected (prior value kept) + logged (P1-B). */
-function applyNegotiationBreakdown(
-    state: GameState,
-    faction: FactionId,
-    dimension: string,
-    delta: number
-): void {
-    if (!Number.isFinite(delta)) {
-        recordNonFiniteEffectAnomaly(state, 'negotiation_capital', faction, delta);
-        return;
-    }
-    const neg = state.military.negotiation;
-    if (!neg?.capital?.[faction]) return;
-    const cap = neg.capital[faction] as typeof neg.capital[typeof faction] & Record<string, unknown>;
-    if (dimension in cap) {
-        const current = cap[dimension];
-        if (typeof current === 'number') {
-            cap[dimension] = current + delta;
-        }
     }
 }
 

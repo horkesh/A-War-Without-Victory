@@ -33,8 +33,16 @@ export function initializeStrategicDimensions(): DimensionStore {
     return store;
 }
 
+const DIMENSION_ID_SET: ReadonlySet<string> = new Set<string>(DIMENSION_IDS);
+
+/** Apply an event-authored shift to one faction's dimension.
+ *  §6 E2: an unknown dimension id THROWS (it used to be a silent dead write).
+ *  A missing store or faction entry (state not yet initialised) stays a quiet no-op. */
 export function applyDimensionShift(store: DimensionStore, faction: string, dimension: string, delta: number): void {
-    if (!store[faction]?.[dimension]) return;
+    if (!DIMENSION_ID_SET.has(dimension)) {
+        throw new Error(`Unknown strategic dimension id in dimension shift: ${dimension}`);
+    }
+    if (!store?.[faction]?.[dimension]) return;
     const dim = store[faction][dimension];
     dim.event_modifier += delta;
     dim.effective_value = clamp(dim.base_value + dim.event_modifier, 0, 100);
