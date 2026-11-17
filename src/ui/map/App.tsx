@@ -124,6 +124,7 @@ import { loadLatestRunSaveAsText, loadEventDefinitions, loadEventDefinitionsFull
 import type { EventDefinition } from '../../sim/events/event_types';
 import { buildConsequenceReceipts, receiptsRealizedOnTurn } from './data/consequenceReceipts';
 import { resolveEventDisplayNarrative, resolveEventDisplayTitle } from './data/eventDisplayCopy';
+import { narrativeEffectOrdinal, resolveNarrativeEffectText } from './data/eventEffectText';
 import { buildForcedOpReceipts, forcedOpReceiptsRealizedOnTurn } from './data/forcedOpReceipts';
 import {
   buildOfficerResentmentReceipts,
@@ -219,7 +220,16 @@ function formatSignedEventShare(share: number | undefined): string {
   return typeof share === 'number' && Number.isFinite(share) ? formatSignedEventDelta(Math.round(share * 100)) : '';
 }
 
-export function formatAcknowledgementEventEffect(effect: AcknowledgementEventEffect): string {
+/** Which card the line belongs to: a narrative line is looked up by event id and position. */
+type AcknowledgementEffectSource = { eventId: string; narrativeOrdinal: number };
+
+export function formatAcknowledgementEventEffect(
+  effect: AcknowledgementEventEffect,
+  source?: AcknowledgementEffectSource,
+): string {
+  if (effect.kind === 'narrative' && effect.text) {
+    return source ? resolveNarrativeEffectText(source.eventId, source.narrativeOrdinal, effect.text) : effect.text;
+  }
   if (effect.text) return effect.text;
   // Council fix 4 (C4/C11): army attributes name the army (ARBiH, VRS, HVO); state attributes
   // (patron pressure, negotiating position, territory, humanitarian record) name the state by
@@ -267,6 +277,20 @@ export function formatAcknowledgementEventEffect(effect: AcknowledgementEventEff
     default:
       return t('eventModal.effect.default', { faction: factionPrefix });
   }
+}
+
+/** The lines under an acknowledgement card, in the active locale, for one event's displayed effects. */
+export function buildAcknowledgementEffects(
+  eventId: string,
+  effects: ReadonlyArray<AcknowledgementEventEffect>,
+): Array<{ kind: string; description: string }> {
+  return effects.map((effect, index) => ({
+    kind: effect.kind,
+    description: formatAcknowledgementEventEffect(effect, {
+      eventId,
+      narrativeOrdinal: narrativeEffectOrdinal(effects, index),
+    }),
+  }));
 }
 
 function comparePendingEventDecisionPriority(a: PendingEventDecisionView, b: PendingEventDecisionView): number {
@@ -939,10 +963,7 @@ function App() {
           title: resolveEventDisplayTitle(e.id, def?.title ?? e.title),
           narrative: resolveEventDisplayNarrative(e.id, def?.narrative ?? e.narrative ?? ''),
           category: def?.category ?? e.category ?? 'military',
-          effects: def?.effects?.map(eff => ({
-            kind: eff.kind,
-            description: formatAcknowledgementEventEffect(eff),
-          })) ?? e.effects,
+          effects: def?.effects ? buildAcknowledgementEffects(e.id, def.effects) : e.effects,
           isDecision: false,
           image: def?.image,
         };
