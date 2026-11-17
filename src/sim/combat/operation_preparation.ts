@@ -43,6 +43,7 @@
  * ═══════════════════════════════════════════════════════════════
  */
 
+import { findHostCorpsIdForOperation } from '../../state/operation_lifecycle_reconciliation.js';
 import type {
     CorpsCommandState,
     CorpsOperation,
@@ -1196,6 +1197,7 @@ function formTgForSingleAxis(
         donors,
         current_turn: currentTurn,
         army_hq_op_id: op.army_hq_op_id,
+        host_corps_id: findHostCorpsIdForOperation(state, op),
     });
     if (!formed.tg_id) { observe?.({ kind: 'tg_inner_terminal', reason: 'formation_rejected', anchor_id: anchorId, staging_osid: stagingOsid, donor_count: donors.length }); return null; }
     applyTgIdentity(state, op, anchorId);
@@ -1317,6 +1319,7 @@ export function formTgsAtReadyTransition(
         donors,
         current_turn: currentTurn,
         army_hq_op_id: op.army_hq_op_id,
+        host_corps_id: findHostCorpsIdForOperation(state, op),
     });
     if (formed.tg_id) applyTgIdentity(state, op, anchorId);
 }

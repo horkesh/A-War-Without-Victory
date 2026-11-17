@@ -1,4 +1,4 @@
-## 2026-11-16 — The September 1991 peace start is removed; schema v40 deletes `meta.peace_war_start_control_path`
+## 2026-11-17 — The September 1991 peace start is removed; schema v40 deletes `meta.peace_war_start_control_path`
 
 The campaign structure decision of 2026-03-23 (`PROJECT_LEDGER_KNOWLEDGE.md`) cut the September 1991 start: April 1992 is the only campaign. `sep1991_to_dayton` survived as a leftover scenario file, and its peace start wrote an ABSOLUTE filesystem path into GameState (`meta.peace_war_start_control_path`), so its state hash depended on where the repo was checked out. Orchestrator ruling: retire the dead path rather than make it repo-relative (the `relative-control-path` branch is dropped, never opened as a PR).
 

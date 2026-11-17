@@ -428,8 +428,9 @@ export function generateStanceMatters(
     const corpsIds = getFactionCorps(state, faction).map((c) => c.id).sort(strictCompare);
     const formations = state.military.formations ?? {};
     const caused = presidentCausedCorps(state, corpsIds, turn);
-    const armyStance = state.military.army_stance?.[faction];
-    const armyOverrides = Boolean(armyStance && armyStance !== 'balanced');
+    // The army-level stance no longer overrides corps stances (Batch B, Fable consult 5
+    // ruling 3), so it no longer hides corps stance matters from the President either.
+    // `not_put_reason: 'army_stance'` stays in the type for receipts in older saves.
 
     const candidates: Candidate[] = [];
     const notPut: StanceMatterReceipt[] = [];
@@ -445,14 +446,6 @@ export function generateStanceMatters(
         if (caused.has(corpsId)) continue;
         const t = trace.get(corpsId);
         const id = `STANCE_${turn}_${corpsId}`;
-        if (armyOverrides) {
-            notPut.push({
-                id, turn, faction, scope: 'corps', corps_id: corpsId,
-                from_stance: prev, to_stance: next, outcome: 'not_put', resolved_turn: turn,
-                not_put_reason: 'army_stance',
-            });
-            continue;
-        }
         const commander = getCorpsCommander(corpsId, state);
         const hasFigures = t !== undefined && Number.isFinite(t.avg_cohesion) && Number.isFinite(t.avg_strength);
         const ceiling = patronCeilingFor(state, faction, corpsId, turn);
