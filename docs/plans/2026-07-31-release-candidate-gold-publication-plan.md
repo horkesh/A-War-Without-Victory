@@ -13,6 +13,7 @@
 **Roadmap workstream:** R9
 **Canonical owner:** immutable release commit plus generated release manifest
 **Collision rule:** No feature, calibration, schema, content, or map change after RC freeze. A blocker fix creates a new RC from a new commit and repeats all downstream phases.
+**Language status (owner decision 2026-11-17, "Recommendation accepted"):** 1.0 ships with English as the complete language. The Bosnian option stays selectable and is labelled honestly as partial (the interface is in Bosnian, most event text is in English); the UI lane writes the label in English and native BCS, and the generated language status and the store copy's languages line state the same. Translating event content continues after 1.0 (each side's own decisions first, then the shared notices) and never blocks the freeze or 1.0. See roadmap §6.5.
 **Authority boundary:** `Execute the master roadmap` authorizes repo work, RC configuration, transient local packages, dry runs, and evidence templates. `Publish 1.0` (or equally explicit wording) authorizes signing with supplied credentials, store/upload actions, public release, final tag, and push.
 
 ---

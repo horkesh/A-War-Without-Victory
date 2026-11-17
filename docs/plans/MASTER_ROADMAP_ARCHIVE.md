@@ -568,3 +568,23 @@ RF-PM1, the paramilitary-refusal consequence fires only on a real refusal (#708,
 Merged list moved 2026-11-16 (steward pass 47), verbatim from the same paragraph:
 
 N6, enemy-concentration zones survive sector renumbering (#709, control-identical; main hash at #709 83b8e8cd36023899, #726 inert);
+
+
+Merged list moved 2026-11-16 (steward pass 51), verbatim from the same paragraph:
+
+RB1, a takeover wave counts each person once (#718, §6 panel, control-identical; the headless `final_state_hash` is now df791f73c26ed642, off-map values only, the main hash at #718);
+
+
+Merged list moved 2026-11-16 (steward pass 52), verbatim from the same paragraph:
+
+B2 and B3, the political-directive chain retired for every faction and 538 stale pushback events drained (#710, save migration v39, control-identical; main pin `03159b9ee1e5877f`, the main hash at #710; FORAWWV §X and §XIV amended in #734, unanimous panel);
+
+
+Merged list moved 2026-11-17 (steward pass 60), verbatim from the same paragraph:
+
+the 13 bot operation-pool names that were real or loaded operations replaced in place (RB6, #703; labels live in state, so the headless `final_state_hash` is claimed to move to 1391f69248072728, #703's claimed hash, label-only, zero differences after mapping the names back; #703 merged with the advisory baseline-pins check red and did not re-pin the manifest, so main's pins were stale until the standalone re-pin PR (#713) landed; main with #703 and #708 is 01572f50dfea2378, the main hash at the re-pin, #713, merged, three measurements agree);
+
+
+Merged list moved 2026-11-17 (steward pass 60), verbatim from the same paragraph:
+
+CODE3, Stop-op reaches operations in planning and a halt holds (#705, byte-identical; Engine Invariants §14.10b, Systems Manual §6.5 and Game Bible line 298 amended); the t76 Belgrade event's historical default made accept (#748, historian ruling; historical 709 / 709 / 708 / 682; main pin `8c9fbf1d30e8a976`, the main hash at #748);

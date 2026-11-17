@@ -32,11 +32,12 @@ export interface NegotiationBreakdown {
     operations_successful: number;
     war_crimes_events: number;
     /**
-     * EMERGENT-only war-crimes count: incremented ONLY by `recordWarCrime()`
-     * (genuine in-war paramilitary sweeps the player/bot authorized), NEVER by
+     * In-war war-crimes count (written in every decision mode; the verdict applies it to a
+     * faction per `isBrightLineFaction`): incremented ONLY by `recordWarCrime()`
+     * (genuine in-war paramilitary sweeps the faction's command or staff authorized), NEVER by
      * scripted `humanitarian_impact` narrative effects (`applyHumanitarianImpact`).
      * The shared `war_crimes_events` above conflates both; this counter is the clean
-     * emergent signal for the §2a `authorized_cleansing_condemnation` flag so that flag can
+     * in-war signal for the §2a `authorized_cleansing_condemnation` flag so that flag can
      * never be tripped by a calendar-windowed scripted event (SENSITIVE_HISTORY_
      * DESIGN_GATE §2 criterion 11). Additive-optional; absent ⇒ 0.
      */

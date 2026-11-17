@@ -1686,6 +1686,22 @@
             "type": "flag_equals",
             "flag": "hvo_arbih_tensions_rising",
             "value": true
+          },
+          {
+            "type": "not",
+            "condition": {
+              "type": "flag_equals",
+              "flag": "hrhb_central_bosnia_defense",
+              "value": "evacuate"
+            }
+          },
+          {
+            "type": "not",
+            "condition": {
+              "type": "flag_equals",
+              "flag": "hrhb_central_bosnia_defense",
+              "value": "federate_early"
+            }
           }
         ]
       }

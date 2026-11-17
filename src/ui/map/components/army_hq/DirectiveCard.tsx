@@ -46,6 +46,7 @@ const StanceMatterActions = lazy(() => import('../StanceMatterActions'));
 const ArmyClashActions = lazy(() => import('../ArmyClashActions'));
 import { buildObjectiveTargetOptions } from '../../utils/objectiveTargetOptions';
 import { t, type MessageKey } from '../../i18n';
+import { gestureNotYetText } from '../../utils/gestureCopy';
 import { formatAuthorityAmount, nextWeekIncome } from '../../utils/authorityIncome';
 import { strictCompare } from '../../../../state/validateGameState.js';
 import {
@@ -157,8 +158,10 @@ function gestureReasonText(
   reason: string | null | undefined,
   onCooldown: boolean,
   allCutOff: boolean,
+  availableFromTurn?: number | null,
 ): string {
   if (reason === 'on_cooldown' || (!reason && onCooldown)) return t(`directive.${kind}.onCooldown`);
+  if (reason === 'not_yet_available') return gestureNotYetText(availableFromTurn);
   if (reason === 'already_pending') return t('directive.gesture.alreadyPending');
   if (reason === 'exhausted') return t('directive.gesture.exhausted');
   if (kind === 'frontVisit' && (reason === 'all_cut_off' || allCutOff)) return t('directive.frontVisit.allCutOff');
@@ -353,7 +356,7 @@ function LeverDirectiveCard({ directive, gameState, onReceipt }: DirectiveCardPr
         setGestureUnavailableReason(null);
       } else {
         setGestureUnavailableReason(
-          gestureReasonText('frontVisit', r.reason, Boolean(r.onCooldown), !reachable),
+          gestureReasonText('frontVisit', r.reason, Boolean(r.onCooldown), !reachable, r.availableFromTurn),
         );
       }
       return;
@@ -363,7 +366,7 @@ function LeverDirectiveCard({ directive, gameState, onReceipt }: DirectiveCardPr
       setGestureReady(true);
       if (!r.ok) { setGestureUnavailableReason(t('directive.addressNation.unknown')); return; }
       setGestureUnavailableReason(
-        r.available ? null : gestureReasonText('addressNation', r.reason, Boolean(r.onCooldown), false),
+        r.available ? null : gestureReasonText('addressNation', r.reason, Boolean(r.onCooldown), false, r.availableFromTurn),
       );
       return;
     }
@@ -372,7 +375,9 @@ function LeverDirectiveCard({ directive, gameState, onReceipt }: DirectiveCardPr
       setGestureReady(true);
       if (!r.ok) { setGestureUnavailableReason(t('directive.strategicPostureReview.unknown')); return; }
       if (r.available) setGestureUnavailableReason(null);
-      else if (r.reason === 'on_cooldown' || r.onCooldown) {
+      else if (r.reason === 'not_yet_available') {
+        setGestureUnavailableReason(gestureNotYetText(r.availableFromTurn));
+      } else if (r.reason === 'on_cooldown' || r.onCooldown) {
         setGestureUnavailableReason(t('directive.strategicPostureReview.onCooldown'));
       } else if (r.reason === 'already_pending') {
         setGestureUnavailableReason(t('directive.strategicPostureReview.alreadyPending'));
@@ -388,7 +393,7 @@ function LeverDirectiveCard({ directive, gameState, onReceipt }: DirectiveCardPr
     setGestureReady(true);
     if (!r.ok) { setGestureUnavailableReason(t('directive.decorateUnit.unknown')); return; }
     setGestureUnavailableReason(
-      r.available ? null : gestureReasonText('decorateUnit', r.reason, Boolean(r.onCooldown), false),
+      r.available ? null : gestureReasonText('decorateUnit', r.reason, Boolean(r.onCooldown), false, r.availableFromTurn),
     );
   }, [ipc, isLeadershipGesture, isFrontVisit, isAddressNation, isStrategicPostureReview]);
 
