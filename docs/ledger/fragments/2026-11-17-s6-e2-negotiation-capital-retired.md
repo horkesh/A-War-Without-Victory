@@ -13,6 +13,7 @@
 - Engine: the loader rejects the kind; `applySingleEffect` throws on an unknown kind; `applyDimensionShift` throws on an unknown dimension id (a missing store stays a quiet no-op).
 - Save migration **v41** strips the kind from pending decisions. Known limit: a decision pending at upgrade loses the converted shift.
 - UI: the automatic-card acknowledgement list shows the card's own standing and leverage shifts. The retired kind's copy and i18n keys are deleted.
+- Notice audience (#784): the audience rule reads a consequence card's faction from its `effects`, and `csq_force_quality_inversion` named RS only through the dead effect. It now authors `audience: ["RS"]`, the audience #784 ruled; a full diff of every card's resolved audience against main shows no other change.
 - Docs: Systems Manual §7.10.3, authoring guide §4/§5.2/§5.3, SAVE_SCHEMA_EVOLUTION v41, open_gates (Grabovica entry resolved).
 
 **Measured (188w, on main `5d0a951e1`; main pins 2c63bd10fecd6bc7 / bfcbfa55dd206585 reproduced).**
