@@ -134,7 +134,6 @@ describe('test discovery contracts', () => {
             'tests/treaty_apply_military.test.ts',
             'tests/triggered_operations.test.ts',
             'tests/turn_pipeline.test.ts',
-            'tests/turn_pipeline_order.test.ts',
             'tests/ui_map_panel_rail.test.ts',
             'tests/osid_column_movement.test.ts',
             'tests/ui_map_deck_counter_visibility.test.ts',

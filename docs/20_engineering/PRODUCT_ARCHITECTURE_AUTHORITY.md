@@ -24,7 +24,7 @@ This is a product-architecture map, not a changelog and not a speculative vision
 
 **Canonical turn pipelines (one owner per phase):**
 - War phase → `src/sim/turn_pipeline.ts` (`runTurn()`).
-- Peace / weekly state progression → `src/state/turn_pipeline.ts` (`runOneTurn()`).
+- (The peace/state pipeline `runOneTurn()` was retired with the in-sim peace phase, schema v41, 2026-11-17.)
 
 All other turn-advance code in the repo is either a caller of these (scenario runner, CLIs, desktop sim) or a bounded UI fallback (`src/sim/run_early_war_browser.ts`). Do not treat the fallback as co-equal.
 

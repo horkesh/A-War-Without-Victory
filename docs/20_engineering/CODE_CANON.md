@@ -180,9 +180,9 @@ Enable AWWV_DEBUG_REASON_CODES=pool_flow with AWWV_DEBUG_REINFORCEMENT_POOLS con
 
 ### Canonical turn pipelines (one owner per phase)
 - **War-phase pipeline:** `src/sim/turn_pipeline.ts` — `runTurn()`. Sole canonical runtime for live war behavior. Steps in `src/sim/turn_phases/war_phases.ts` and `early_war_phases.ts`; types in `src/sim/turn_pipeline_types.ts`.
-- **Peace/state pipeline:** `src/state/turn_pipeline.ts` — `runOneTurn()`. Sole canonical runtime for non-war weekly state progression (directives → deployments → military_interaction → fragmentation_resolution → supply_resolution → political_effects → exhaustion_update → persistence).
+- The peace/state pipeline (`src/state/turn_pipeline.ts`, `runOneTurn()`) was retired with the in-sim peace phase (schema v41, 2026-11-17); `PhaseName` is `'war'` only.
 
-If you are changing war behavior, start at `src/sim/turn_pipeline.ts`. If you are changing peace/state progression, start at `src/state/turn_pipeline.ts`. Nothing else is co-equal with these two.
+If you are changing weekly behavior, start at `src/sim/turn_pipeline.ts`. Nothing else is co-equal with it.
 
 Opt-in movement observation: `src/sim/combat/movement_phase_diagnostic.ts` records
 detached selected-actor snapshots through the canonical named-phase wrapper and

@@ -11,9 +11,9 @@
 AWWV has exactly two canonical turn runtimes. Nothing else in the repo is co-equal with them:
 
 - **War-phase pipeline:** `src/sim/turn_pipeline.ts` — `runTurn()`. Steps in `src/sim/turn_phases/war_phases.ts` + `early_war_phases.ts`; shared types in `src/sim/turn_pipeline_types.ts`. If you are changing live war behavior, start here.
-- **Peace/state pipeline:** `src/state/turn_pipeline.ts` — `runOneTurn()`. Phase order: directives → deployments → military_interaction → fragmentation_resolution → supply_resolution → political_effects → exhaustion_update → persistence (see Systems Manual §1). If you are changing weekly non-war state progression, start here.
+- The peace/state pipeline (`src/state/turn_pipeline.ts`, `runOneTurn()`) was retired with the in-sim peace phase (schema v41, 2026-11-17): every game runs in the war phase.
 
-Scenario runner (`src/scenario/scenario_runner.ts`) routes to whichever pipeline matches `state.meta.phase`. The CLI harnesses and desktop sim call the same two functions.
+Scenario runner (`src/scenario/scenario_runner.ts`), the CLI harnesses and the desktop sim all call `runTurn()`.
 
 ## Canonical Entry Points
 ### Scenario Harness (Deterministic, Multi-Turn)

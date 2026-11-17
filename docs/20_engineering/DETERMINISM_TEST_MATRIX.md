@@ -131,7 +131,6 @@ Real production-function stdout fixtures qualify schema 2 ordered close manifest
 - Perf sidecars: `tests/scenario_timing_instrumentation.test.ts`, `tests/wall_clock_target_report.test.ts`, and `tests/profile_hotspot_report.test.ts` cover opt-in wall-clock/profile reports that stay outside deterministic saves and scenario truth artifacts.
 
 ### Stable ordering (collections, records, outputs)
-- Gate: `tests/turn_pipeline_order.test.ts`
 - Gate: `tests/phase_e_pressure_determinism.test.ts`
 - Gate: `tools/scenario_runner/run_baseline_regression.ts`
 - Gate: `tests/sandbox_slice_determinism.test.ts` (slice settlements/edges/controllers canonical ordering)

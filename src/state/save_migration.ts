@@ -159,10 +159,10 @@ function defaultFactionState(state: GameState): void {
         }
         // declaration_pressure / declaration_turn are legacy peace-phase fields: v3 still
         // defaults them so old saves step through the chain unchanged; v41 deletes them.
-        const legacy = f as unknown as Record<string, unknown>;
-        if (legacy.declaration_pressure === undefined) legacy.declaration_pressure = 0;
+        const legacy = asRecord(f);
+        if (legacy && legacy.declaration_pressure === undefined) legacy.declaration_pressure = 0;
         if (f.declared === undefined) f.declared = false;
-        if (legacy.declaration_turn === undefined) legacy.declaration_turn = null;
+        if (legacy && legacy.declaration_turn === undefined) legacy.declaration_turn = null;
     }
 }
 

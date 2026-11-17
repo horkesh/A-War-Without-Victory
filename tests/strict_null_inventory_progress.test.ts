@@ -822,7 +822,10 @@ describe('strict null inventory progress', () => {
             // identity (absent on legacy TGs). No new type escape. 598 -> 599.
             // Sep-1991 peace start retired (schema v40, 2026-11-17): StateMeta.peace_war_start_control_path
             // removed. 599 -> 598.
-            optional_fields_game_state: 598,
+            // In-sim peace phase retired (schema v41, 2026-11-17): 12 StateMeta peace fields, 3 FactionState
+            // fields (prewar_capital, declaration_pressure, declaration_turn), 2 PoliticalState fields
+            // (phase0_events_log, phase0_relationships) removed. 598 -> 581.
+            optional_fields_game_state: 581,
         });
         // Reason-code instrumentation (item 3): +1, `OperationAxis.launch_blocker_detail`.
         // `classifyDomain` routes it to `sim` on the /Corps|Operation/ interface-name rule,
@@ -839,13 +842,14 @@ describe('strict null inventory progress', () => {
         // (MilitaryState.army_clash_state). 595 -> 598 / state 220 -> 222 / sim 365 -> 366.
         // Zombie-TG fix: +1 state (TacticalGroup.host_corps_id). 598 -> 599 / state 222 -> 223.
         // Sep-1991 peace start retired (v40): -1 state (StateMeta.peace_war_start_control_path). 599 -> 598 / state 223 -> 222.
-        expect(current.optional_field_domains.total).toBe(598);
+        // In-sim peace phase retired (v41): -17 state (12 StateMeta, 3 FactionState, 2 PoliticalState fields). 598 -> 581 / state 222 -> 205.
+        expect(current.optional_field_domains.total).toBe(581);
         expect(current.optional_field_domains.domain_counts).toMatchObject({
             derived: 10,
             ipc: 0,
             scenario: 0,
             sim: 366,
-            state: 222,
+            state: 205,
             ui_adapter: 0,
             unknown: 0,
         });

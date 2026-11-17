@@ -628,7 +628,7 @@ describe('warroom player visibility', () => {
 
   it('warroom report subjects and headers use calendar dates instead of week counters', () => {
     const state = {
-      meta: { turn: 9, phase: 'peace', player_faction: 'RBiH' },
+      meta: { turn: 9, phase: 'war', player_faction: 'RBiH' },
       factions: [
         { id: 'RBiH', profile: { authority: 1, legitimacy: 1, control: 1, logistics: 1, exhaustion: 0 } },
         { id: 'RS', profile: { authority: 1, legitimacy: 1, control: 1, logistics: 1, exhaustion: 0 } },
@@ -665,8 +665,8 @@ describe('warroom player visibility', () => {
     } as unknown as GameState;
 
     const text = new ReportsModal(state).render().textContent ?? '';
-    expect(text).toContain(`Situation Report - ${turnToDateString(8)}`);
-    expect(text).toContain(`SITUATION REPORT - ${turnToDateString(8).toUpperCase()}`);
+    expect(text).toContain(`Operational Intelligence Brief - ${turnToDateString(8)}`);
+    expect(text).toContain(`DATE: ${turnToDateString(8)}`);
     expect(text).not.toMatch(/\bWeek \d+\b|\bWEEK \d+\b|\bTurn \d+\b/);
   });
 
