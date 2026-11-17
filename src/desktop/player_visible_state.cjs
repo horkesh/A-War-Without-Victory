@@ -70,6 +70,20 @@ function rowsForFaction(value, faction) {
     .map(cloneJson);
 }
 
+/**
+ * Peace-plan history rows carry no `faction` field: each is one resolved plan with every faction's
+ * recorded answer in `responses` (peace_plans.ts writes the whole map at the moment the player
+ * answers, so none of it is hidden information; the pending plan's precomputed bot answers are
+ * redacted separately). A row belongs to the player's history when the player's faction answered it.
+ * Filtering by `rowsForFaction` read a `faction` field that is never there, so this projection was always empty.
+ */
+function peacePlanHistoryRowsForFaction(value, faction) {
+  if (!Array.isArray(value)) return [];
+  return value
+    .filter((row) => isRecord(row) && isRecord(row.responses) && typeof row.responses[faction] === 'string')
+    .map(cloneJson);
+}
+
 function resolvePlayerFaction(state, fallbackFaction) {
   const direct = state?.meta?.player_faction;
   if (PLAYER_FACTIONS.has(direct)) return direct;
@@ -375,7 +389,7 @@ function projectNegotiation(negotiation, playerFaction) {
   for (const key of ['capital', 'patron_relationships', 'strategic_dimensions']) {
     projected[key] = scopeRecordToKey(negotiation[key], playerFaction);
   }
-  projected.peace_plan_history = rowsForFaction(negotiation.peace_plan_history, playerFaction);
+  projected.peace_plan_history = peacePlanHistoryRowsForFaction(negotiation.peace_plan_history, playerFaction);
   projected.pending_counter_offers = (Array.isArray(negotiation.pending_counter_offers)
     ? negotiation.pending_counter_offers
     : [])
