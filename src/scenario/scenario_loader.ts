@@ -231,32 +231,15 @@ export function normalizeScenario(raw: unknown): Scenario {
         throw new Error('Scenario must have weeks (integer >= 1)');
     }
     const startLifecycleRaw = typeof o.start_lifecycle_phase === 'string' ? o.start_lifecycle_phase.trim() : undefined;
-    if (
-        startLifecycleRaw !== undefined &&
-        startLifecycleRaw !== 'peace' &&
-        startLifecycleRaw !== 'war'
-    ) {
-        throw new Error(`start_lifecycle_phase must be \"peace\" or \"war\", got: ${startLifecycleRaw}`);
+    // Every scenario starts in war. The September 1991 peace start was retired (campaign
+    // structure decision 2026-03-23; scenario and runner path removed 2026-11-16).
+    if (startLifecycleRaw === 'peace') {
+        throw new Error('start_lifecycle_phase "peace" is retired: every scenario starts in war (April 1992 or later)');
     }
-    const start_lifecycle_phase: 'peace' | 'war' = (startLifecycleRaw as 'peace' | 'war' | undefined) ?? 'war';
-    const peace_referendum_held_at_start =
-        typeof o.peace_referendum_held_at_start === 'boolean'
-            ? o.peace_referendum_held_at_start
-            : undefined;
-    const peace_rs_declared_at_start =
-        typeof o.peace_rs_declared_at_start === 'boolean'
-            ? o.peace_rs_declared_at_start
-            : undefined;
-    const peace_hrhb_declared_at_start =
-        typeof o.peace_hrhb_declared_at_start === 'boolean'
-            ? o.peace_hrhb_declared_at_start
-            : undefined;
-    const peace_referendum_turn = typeof o.peace_referendum_turn === 'number' && Number.isInteger(o.peace_referendum_turn) ? o.peace_referendum_turn : undefined;
-    const peace_war_start_turn = typeof o.peace_war_start_turn === 'number' && Number.isInteger(o.peace_war_start_turn) ? o.peace_war_start_turn : undefined;
-    const peace_war_start_control =
-        typeof o.peace_war_start_control === 'string' && o.peace_war_start_control.trim() !== ''
-            ? o.peace_war_start_control.trim()
-            : undefined;
+    if (startLifecycleRaw !== undefined && startLifecycleRaw !== 'war') {
+        throw new Error(`start_lifecycle_phase must be "war", got: ${startLifecycleRaw}`);
+    }
+    const start_lifecycle_phase = 'war' as const;
     let turns: ScenarioTurn[] = Array.isArray(o.turns) ? (o.turns as ScenarioTurn[]) : [];
     turns = turns.map((t) => {
         const row = asRecord(t);
@@ -484,12 +467,6 @@ export function normalizeScenario(raw: unknown): Scenario {
             ...(calibration_scenario !== undefined ? { calibration_scenario } : {}),
             scenario_start_week,
             start_lifecycle_phase,
-            peace_referendum_held_at_start,
-            peace_rs_declared_at_start,
-            peace_hrhb_declared_at_start,
-            peace_referendum_turn,
-            peace_war_start_turn,
-            peace_war_start_control,
             weeks,
             turns: normalizedTurns,
             use_harness_bots,
@@ -540,12 +517,6 @@ export function normalizeScenario(raw: unknown): Scenario {
         ...(calibration_scenario !== undefined ? { calibration_scenario } : {}),
         scenario_start_week,
         start_lifecycle_phase,
-        peace_referendum_held_at_start,
-        peace_rs_declared_at_start,
-        peace_hrhb_declared_at_start,
-        peace_referendum_turn,
-        peace_war_start_turn,
-        peace_war_start_control,
         weeks,
         turns,
         use_harness_bots: use_harness_bots || undefined,

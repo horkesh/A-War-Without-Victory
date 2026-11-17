@@ -48,7 +48,6 @@ import type { CorpsOperation, FactionId, GameState, MunicipalityId } from '../st
 import { CANONICAL_FACTIONS, CURRENT_SCHEMA_VERSION } from '../state/game_state.js';
 import { prepareNewGameState } from '../state/initialize_new_game_state.js';
 import {
-    applyMunicipalityControllersFromMun1990Only,
     applyOsidControlOverrides,
     loadInitialMunicipalityControllers1990
 } from '../state/political_control_init.js';
@@ -1621,14 +1620,8 @@ export async function buildScenarioStartupState(
     let sidToMun = buildSidToMunFromSettlements(graph.settlements);
     let initOverrideChangeCount = 0;
     const canonicalSidToMun = sidToMun; // Preserve original canonical SID→mun map for later rebuilds
-    const warStartTurnForOrgPenSeeding =
-        scenario.start_lifecycle_phase === 'peace'
-            ? (scenario.peace_war_start_turn ?? (scenario.peace_referendum_turn ?? 0) + 4)
-            : 0;
-    const plannedWarStartBrigadeByMun = buildPlannedWarStartBrigadePresenceByMunicipality(
-        oobBrigades,
-        warStartTurnForOrgPenSeeding
-    );
+    // Every scenario starts in war at turn 0 (the September 1991 peace start was retired).
+    const plannedWarStartBrigadeByMun = buildPlannedWarStartBrigadePresenceByMunicipality(oobBrigades, 0);
     let municipalityControllerByMun: Record<string, FactionId | null> | undefined;
     if (controlPath) {
         try {
@@ -1768,7 +1761,7 @@ export async function buildScenarioStartupState(
     }
     if (typeof scenario.war_force_transition_after_turns === 'number') {
         state.meta.war_force_transition_after_turns = scenario.war_force_transition_after_turns;
-    } else if (scenario.start_lifecycle_phase === 'war' || scenario.start_lifecycle_phase === 'peace') {
+    } else if (scenario.start_lifecycle_phase === 'war') {
         state.meta.war_force_transition_after_turns = 52;
     }
 
@@ -1858,43 +1851,6 @@ export async function buildScenarioStartupState(
         }
     }
 
-    if (scenario.start_lifecycle_phase === 'peace') {
-        const referendumHeldAtStart = scenario.peace_referendum_held_at_start ?? true;
-        const refTurn = scenario.peace_referendum_turn ?? 0;
-        const warTurn = scenario.peace_war_start_turn ?? refTurn + 4;
-        const warStartControlPath = scenario.peace_war_start_control
-            ? resolveInitControlPath(scenario.peace_war_start_control, baseDir)
-            : undefined;
-        state.meta.phase = 'peace';
-        state.meta.turn = 0;
-        state.meta.referendum_held = referendumHeldAtStart;
-        state.meta.referendum_turn = referendumHeldAtStart ? refTurn : null;
-        state.meta.war_start_turn = referendumHeldAtStart ? warTurn : null;
-        state.meta.peace_scheduled_referendum_turn = referendumHeldAtStart ? null : refTurn;
-        state.meta.peace_scheduled_war_start_turn = referendumHeldAtStart ? null : warTurn;
-        state.meta.peace_war_start_control_path = warStartControlPath ?? null;
-        state.meta.referendum_eligible_turn = null;
-        state.meta.referendum_deadline_turn = null;
-        state.meta.game_over = false;
-        state.meta.outcome = undefined;
-        const rsDeclaredAtStart = scenario.peace_rs_declared_at_start ?? true;
-        const hrhbDeclaredAtStart = scenario.peace_hrhb_declared_at_start ?? true;
-        for (const f of state.factions ?? []) {
-            if (f.id === 'RS') (f as { prewar_capital?: number }).prewar_capital = 100;
-            if (f.id === 'RBiH') (f as { prewar_capital?: number }).prewar_capital = 70;
-            if (f.id === 'HRHB') (f as { prewar_capital?: number }).prewar_capital = 40;
-            (f as { declaration_pressure?: number }).declaration_pressure = 0;
-            if (f.id === 'RS') {
-                (f as { declared?: boolean }).declared = rsDeclaredAtStart;
-                (f as { declaration_turn?: number | null }).declaration_turn = rsDeclaredAtStart ? 0 : null;
-            }
-            if (f.id === 'HRHB') {
-                (f as { declared?: boolean }).declared = hrhbDeclaredAtStart;
-                (f as { declaration_turn?: number | null }).declaration_turn = hrhbDeclaredAtStart ? 0 : null;
-            }
-        }
-    }
-
     if (scenario.start_lifecycle_phase === 'war') {
         state.meta.phase = 'war';
         state.meta.turn = 0;
@@ -1903,7 +1859,6 @@ export async function buildScenarioStartupState(
         state.meta.war_start_turn = 0;
         state.meta.peace_scheduled_referendum_turn = null;
         state.meta.peace_scheduled_war_start_turn = null;
-        state.meta.peace_war_start_control_path = null;
         state.meta.rbih_hrhb_war_earliest_turn = scenario.rbih_hrhb_war_earliest_week
             ?? DEFAULT_RBIH_HRHB_WAR_EARLIEST_TURN;
         if (scenario.enable_rbih_hrhb_dynamics === false) {
@@ -1935,11 +1890,7 @@ export async function buildScenarioStartupState(
         }
     }
 
-    if (scenario.start_lifecycle_phase === 'peace') {
-        state.meta.scenario_start_date = { year: 1991, month: 8, day: 1 };
-    } else {
-        state.meta.scenario_start_date = { year: 1992, month: 3, day: 6 };
-    }
+    state.meta.scenario_start_date = { year: 1992, month: 3, day: 6 };
 
     if (
         scenario.start_lifecycle_phase === 'war' &&
@@ -2971,20 +2922,8 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             let turnReport: Awaited<ReturnType<typeof runTurn>>['report'];
             let consumedSuccessfulPublicWarTurn = false;
             if (state.meta.phase === 'peace') {
-                const phaseBeforeTurn = state.meta.phase;
                 const result = runOneTurn(state, { seed: state.meta.seed });
                 state = result.state;
-                if (
-                    phaseBeforeTurn === 'peace' &&
-                    state.meta.phase === 'war' &&
-                    state.meta.peace_war_start_control_path
-                ) {
-                    await applyMunicipalityControllersFromMun1990Only(
-                        state,
-                        graph,
-                        state.meta.peace_war_start_control_path
-                    );
-                }
                 turnReport = {
                     seed: state.meta.seed,
                     phases: result.phasesExecuted.map((name) => ({ name })),

@@ -61,20 +61,11 @@ export interface Scenario {
     decision_mode?: 'historical' | 'emergent';
     /** Optional absolute week index anchor (weeks since Jan 1992). Enables time-adaptive bot doctrine profiles. */
     scenario_start_week?: number;
-    /** Scenario lifecycle start phase. */
-    start_lifecycle_phase?: 'peace' | 'war';
-    /** For start_lifecycle_phase phase_0: whether referendum is already held at turn 0. Default: true (legacy fixtures). */
-    peace_referendum_held_at_start?: boolean;
-    /** For start_lifecycle_phase phase_0: whether RS starts already declared at turn 0. Default: true (legacy fixtures). */
-    peace_rs_declared_at_start?: boolean;
-    /** For start_lifecycle_phase phase_0: whether HRHB starts already declared at turn 0. Default: true (legacy fixtures). */
-    peace_hrhb_declared_at_start?: boolean;
-    /** For start_lifecycle_phase phase_0: turn when referendum was held. War starts at referendum_turn + 4 per canon. */
-    peace_referendum_turn?: number;
-    /** For start_lifecycle_phase phase_0: turn when war starts (Peace phase). Must be referendum_turn + 4. Default: peace_referendum_turn + 4. */
-    peace_war_start_turn?: number;
-    /** For start_lifecycle_phase phase_0: control map key/path to apply exactly when war begins (e.g. "apr1992"). */
-    peace_war_start_control?: string;
+    /**
+     * Scenario lifecycle start phase. Only "war": the September 1991 peace start and its
+     * peace_* scenario fields were retired (2026-11-16); the loader rejects "peace".
+     */
+    start_lifecycle_phase?: 'war';
     /** Optional max-turn override copied into GameState metadata for harness/runtime limits. */
     max_turns?: number;
     /**

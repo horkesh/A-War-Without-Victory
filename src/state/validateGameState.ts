@@ -174,6 +174,11 @@ interface VersionRequiredField {
      * same-version states (which skip the seeding migration). Default false.
      */
     optionalWhenAbsent?: boolean;
+    /**
+     * Schema version that RETIRED the field (its migration deletes it). States at or above
+     * this version are not required to carry it. Omit for live fields.
+     */
+    retiredAtVersion?: number;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -3893,7 +3898,7 @@ const VERSION_REQUIRED_FIELDS: readonly VersionRequiredField[] = [
     { version: 3, path: 'meta.war_start_turn', check: (v) => v === null || Number.isInteger(v) },
     { version: 3, path: 'meta.peace_scheduled_referendum_turn', check: (v) => v === null || Number.isInteger(v) },
     { version: 3, path: 'meta.peace_scheduled_war_start_turn', check: (v) => v === null || Number.isInteger(v) },
-    { version: 3, path: 'meta.peace_war_start_control_path', check: (v) => v === null || typeof v === 'string' },
+    { version: 3, path: 'meta.peace_war_start_control_path', check: (v) => v === null || typeof v === 'string', retiredAtVersion: 40 },
     { version: 3, path: 'meta.referendum_eligible_turn', check: (v) => v === null || Number.isInteger(v) },
     { version: 3, path: 'meta.referendum_deadline_turn', check: (v) => v === null || Number.isInteger(v) },
     { version: 3, path: 'meta.game_over', check: (v) => typeof v === 'boolean' },
@@ -4006,6 +4011,7 @@ export function validateGameStateShape(
     if (options.requireVersion !== undefined) {
         for (const field of VERSION_REQUIRED_FIELDS) {
             if (stateVersion < field.version || field.version > options.requireVersion) continue;
+            if (field.retiredAtVersion !== undefined && stateVersion >= field.retiredAtVersion) continue;
             const value = getPathValue(s, field.path);
             if (value === undefined) {
                 // optionalWhenAbsent additive read-models canonicalize to their
@@ -4074,8 +4080,12 @@ export function validateGameStateShape(
             if ('peace_scheduled_war_start_turn' in m && m.peace_scheduled_war_start_turn !== undefined && m.peace_scheduled_war_start_turn !== null && (typeof m.peace_scheduled_war_start_turn !== 'number' || !Number.isInteger(m.peace_scheduled_war_start_turn) || m.peace_scheduled_war_start_turn < 0)) {
                 errors.push('meta.peace_scheduled_war_start_turn must be null or a non-negative integer when present');
             }
-            if ('peace_war_start_control_path' in m && m.peace_war_start_control_path !== undefined && m.peace_war_start_control_path !== null && typeof m.peace_war_start_control_path !== 'string') {
-                errors.push('meta.peace_war_start_control_path must be string or null when present');
+            if ('peace_war_start_control_path' in m && m.peace_war_start_control_path !== undefined) {
+                if (stateVersion >= 40) {
+                    errors.push('meta.peace_war_start_control_path was retired at schema v40 and must be absent');
+                } else if (m.peace_war_start_control_path !== null && typeof m.peace_war_start_control_path !== 'string') {
+                    errors.push('meta.peace_war_start_control_path must be string or null when present');
+                }
             }
             if ('referendum_eligible_turn' in m && m.referendum_eligible_turn !== undefined && m.referendum_eligible_turn !== null && (typeof m.referendum_eligible_turn !== 'number' || !Number.isInteger(m.referendum_eligible_turn) || m.referendum_eligible_turn < 0)) {
                 errors.push('meta.referendum_eligible_turn must be null or a non-negative integer when present');

@@ -29,7 +29,6 @@ function currentVersionState(): any {
             war_start_turn: null,
             peace_scheduled_referendum_turn: null,
             peace_scheduled_war_start_turn: null,
-            peace_war_start_control_path: null,
             referendum_eligible_turn: null,
             referendum_deadline_turn: null,
             game_over: false,

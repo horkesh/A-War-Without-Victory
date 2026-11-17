@@ -39,7 +39,7 @@ import type { ArmyLabel } from './identity.js';
 import type { RecruitmentResourceState } from './recruitment_types.js';
 import type { CommanderState } from '../sim/combat/commander/commander_state.js';
 
-export const CURRENT_SCHEMA_VERSION = 39 as const;
+export const CURRENT_SCHEMA_VERSION = 40 as const;
 
 // --- ID types (canonical) ---
 export type FactionId = string;
@@ -2210,8 +2210,6 @@ export interface StateMeta {
     peace_scheduled_referendum_turn?: number | null;
     /** Phase 0: Optional scheduled war-start turn override used with scheduled referendum starts. */
     peace_scheduled_war_start_turn?: number | null;
-    /** Phase 0: Optional absolute path to a mun1990 control file to apply exactly when war starts. */
-    peace_war_start_control_path?: string | null;
     /** Phase 0: First turn when referendum became eligible (both RS and HRHB declared). */
     referendum_eligible_turn?: number | null;
     /** Phase 0: Deadline turn for referendum; if reached without referendum → non-war terminal. */
