@@ -240,6 +240,11 @@ describe('ops-only attack doctrine', () => {
                     'op:test:friendly_escape': 'RS',
                     'op:test:friendly_escape_2': 'RS',
                 },
+                // Package P2 step 3: the retake-only counter-attack targets a cell the faction lost in
+                // combat within the retreat window (the retreat below records where from; this records the loss).
+                control_events: [
+                    { turn: 2, settlement_id: 'op:test:counter_target', from: 'RS', to: 'RBiH', mechanism: 'combat' },
+                ],
             },
             military: {
                 formations: {

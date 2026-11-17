@@ -28,7 +28,38 @@ The Fable freeze-revision package, Part 2, as ratified by five seats plus the in
 - The sector variant no longer reaches enemy cells within 2 hops of a retreat.
 - Acceptance: no non-operation battle captures a cell that was not just lost.
 
-**Measured** (188w on main 9bdefb158 after #729; scored with the corrected Farz guard, #769):
+**Ruling D (orchestrator, 2026-11-17): the cause of the weak Ozren line.** On main with E1 (#766), a 3rd Corps generic op ("Operacija Odbrana") took Donja Bočinja at t161 (May 1995), an EARLY FALL under the Farz guard. Seats: corps-army-commander, operations-expert, historian; two rounds. Evidence: `C:/Users/User/AppData/Roaming/Claude/side-session-notes/local_ea8cb1d9-d0ee-452a-9381-ac503bb06273/f1g2_*.md`; runs under `C:/Pyrrhic/AWWV-worktrees/_logs/pkg-p2-ruling-d/`.
+- **Cause.** Nobody stood on Donja Bočinja: defence 176, all of it reactive (0.6 per hop), against 529.
+  - The 3rd Ozren, historically the Maglaj-face brigade (BB2 p.489 n.3; BB1 p.254 n.41, pp.387-388), had its home on the Doboj-town cell, so it never stood there.
+  - The 1st Ozren held the face until a VRS operation took it to Doboj town at t111, and nothing re-posted it.
+  - A single-brigade 3:1 attack in May 1995 should not take the cell (historian, high confidence).
+- **F1 (data).** `rs_3rd_ozren_light_infantry.home_osid` → `op:maglaj:donja_bocinja_2`; home_mun stays doboj (the HQ, Gornja Paklenica, is in the Doboj-town cell). This also moves its home reactive bonus to Maglaj targets.
+- **Q3, a P2 regression fixed.** Step 1 digs in every static front brigade. A dug-in brigade later reclassified off the front could never change posture again, so every multi-hop order to it died at the dig_in lockout: 2161 blocked marches over 188w with P2, against 796 on main. About 20 brigades were frozen, mostly ARBiH on the dormant HVO line.
+  - Now an off-front dug-in brigade may stand down to `defend` or `hold` (`applyPostureOrders`). A live-operation participant may not. The lockout is unchanged.
+  - Measured alone (with F1), the freed 1994 ARBiH strength took Donja in Aug 1994 ("Sjena", t110-120) with no VRS answer. So P2-alone's Ozren hold had been partly bought by the freeze.
+- **Corps breach answer (new movement rule, T6).** After a fresh combat loss with no healthy brigade next to it, the corps sends its strongest spare brigade (never a lone holder; at most 2 hops) next to the lost cell, so the step-3 retake can reach. Final pass only, one per corps per turn. `docs/20_engineering/MOVEMENT_AUTHORITY.md` §3b.
+  - Historical basis: OG-9 and corps intervention units answered Ozren break-ins (BB2 pp.486-487; BB1 p.385).
+  - With nothing spare, as in Sept 1995, there is no answer.
+  - The step-3 retake and the answer share `collectRecentCombatLosses`.
+- **Tried and dropped.** A post-operation return to the home cell ("E", both seats): measured inert. Step 2c for the army reserve: left out (both seats). It would send the Main Staff elites to the Ozren in Sept 1995 too.
+
+**Measured, ruling D** (188w on the branch head after merging main 40878f5fc, #776):
+
+| | P2 before ruling D (`8f39c367`, main+E1) | P2 + ruling D (`79a883cf2dd4f0bd`) |
+|---|---|---|
+| Checkpoints | 707/696/695/665 | **710/708/704/672** |
+| Guards | P-A FAIL (Donja t161) | **intact**: enclaves, Farz P-A 4/4 (t180/181/182/185), P-B, eastern provenance |
+| Twin; without E1 | - | identical hash; without E1 also `79a883cf` (E1 inert on this trajectory) |
+| Hands-off emergent | - | `8aeec32a3eb0b7e2`, 710/708/703/674, guard intact, Farz 4/4 operation-owned |
+| Corps breach answers over the war | - | 6 (Prozor t74; Kupres, Glamoč, Donji Vakuf, Jajce 1994-95); none on the Ozren |
+| VRS mean cohesion w100/120/140/160 | 60.2/58.6/53.9/49.4 | 61.2/59.5/57.6/54.7 |
+| Non-operation wins on a not-just-lost cell | 0 | 0 |
+
+- `validate_run_consistency` PASS (historical and emergent). Baseline pins re-pinned to `79a883cf`.
+- Cell changes vs the pre-ruling run: the 1993 Lašva cells stay HRHB (+9 at apr1994), plus Jablanica, Hotonj, Paklarevo, Vesela and Grdovo. Lost: Konjic Bijela, Glavatičevo and Ljuta (the Konjic September offensive fails), Golubići (Treskavica 95), and three Donji Vakuf cells at oct1995.
+- **Not proven:** that the Ozren holds structurally against a 1994-95 multi-brigade ARBiH op. In these runs the 1st Ozren happens to stay on Donja (t25-t181) and no generic op attacks the line before Farz. A defended Donja held against 1-2 brigades in measured battles, but lost to a 4-brigade op over three turns when nothing counter-attacked (isolation run C1). The forced-attack played probe (#742 levers) is the structural test.
+
+**Measured, steps 1-3** (188w on main 9bdefb158 after #729; scored with the corrected Farz guard, #769):
 
 | | main (`3b4685bc`) | P2 (`6fff19a064a7206e`, twin 8/8) |
 |---|---|---|
@@ -49,6 +80,6 @@ The Fable freeze-revision package, Part 2, as ratified by five seats plus the in
 - the step-0b retag (`9e7b64d6f`);
 - RF-STRENGTH and the gate40 probe gate (P3/P4);
 - the P-B Ćuprija trace on that experimental base;
-- step 2c (the standing commander "critical" request versus a live breach; seats to rule).
+- step 2c (the standing commander "critical" request versus a live breach). Ruling-D seats: not in this change. The served-request shuttle (two Main Staff elites cycling to Drina) is a separate measured defect, to be tested as a single variable.
 
 Evidence: `C:/Pyrrhic/AWWV-worktrees/_logs/pkg-1994-95-step0/` (STEP0B, STEP1, STEP2B, STEP3 results) and `_logs/pkg-p2-proof/`.
