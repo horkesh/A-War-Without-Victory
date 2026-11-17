@@ -244,7 +244,7 @@
   {
     "id": "kravica_attack_1993",
     "title": "Kravica Raid on Orthodox Christmas",
-    "narrative": "ARBiH forces under Naser Orić launch a raid from the Srebrenica enclave on the Serb village of Kravica on Orthodox Christmas Day, killing between 30-35 VRS soldiers and 11-13 Serb civilians. The attack provides the VRS a pretext for intensifying its spring offensive against the eastern enclaves. Orić is later indicted by the ICTY for failing to prevent crimes in the enclave's defense.",
+    "narrative": "ARBiH forces under Naser Orić launch a raid from the Srebrenica enclave on the Serb village of Kravica on Orthodox Christmas Day, killing between 30-35 VRS soldiers and 11-13 Serb civilians. The VRS cites the attack as it intensifies its spring offensive against the eastern enclaves. The ICTY later tried Orić for crimes in and around Srebrenica: convicted at trial in 2006 of failing to prevent the murder and cruel treatment of Serb detainees, he was acquitted of all charges on appeal in 2008. No court has convicted anyone for the killings at Kravica.",
     "category": "military",
     "source_tier": "icty_icj_un",
     "source_note": "The listed adjudicative and institutional sources bound the chronology, actors, and findings described. The essay is original synthesis and does not extend individual liability, command responsibility, or institutional findings beyond the cited record.",
@@ -261,20 +261,10 @@
     "once": true,
     "effects": [
       {
-        "kind": "morale_change",
-        "faction": "RBiH",
-        "delta": 3
-      },
-      {
         "kind": "aggression_modifier",
         "faction": "RS",
         "delta": 0.1,
         "duration_turns": 12
-      },
-      {
-        "kind": "humanitarian_impact",
-        "faction": "RBiH",
-        "war_crimes_delta": 1
       },
       {
         "kind": "narrative",
@@ -288,7 +278,7 @@
         "delta": 5
       }
     ],
-    "historical_source": "ICTY Orić Indictment (IT-03-68). Krstić Trial Judgment (IT-98-33-T), paras. 17-18.",
+    "historical_source": "ICTY Prosecutor v. Orić, Trial Judgment IT-03-68-T (30 June 2006) and Appeal Judgment IT-03-68-A (3 July 2008, acquitted on all counts). Krstić Trial Judgment (IT-98-33-T), paras. 17-18.",
     "effect": {
       "kind": "morale_change",
       "faction": "RBiH",
@@ -485,11 +475,6 @@
     "effects": [
       {
         "kind": "morale_change",
-        "faction": "RBiH",
-        "delta": -3
-      },
-      {
-        "kind": "morale_change",
         "faction": "RS",
         "delta": 2
       },
@@ -497,11 +482,6 @@
         "kind": "patron_pressure",
         "faction": "RS",
         "delta": 5
-      },
-      {
-        "kind": "humanitarian_impact",
-        "faction": "RS",
-        "war_crimes_delta": 1
       },
       {
         "kind": "narrative",
@@ -601,11 +581,6 @@
     "once": true,
     "effects": [
       {
-        "kind": "morale_change",
-        "faction": "RBiH",
-        "delta": 2
-      },
-      {
         "kind": "patron_pressure",
         "faction": "RS",
         "delta": 3
@@ -653,11 +628,6 @@
     },
     "once": true,
     "effects": [
-      {
-        "kind": "morale_change",
-        "faction": "RS",
-        "delta": 5
-      },
       {
         "kind": "morale_change",
         "faction": "RBiH",
@@ -713,11 +683,6 @@
     },
     "once": true,
     "effects": [
-      {
-        "kind": "patron_pressure",
-        "faction": "RS",
-        "delta": 5
-      },
       {
         "kind": "patron_pressure",
         "faction": "HRHB",
@@ -911,11 +876,6 @@
     "once": true,
     "effects": [
       {
-        "kind": "morale_change",
-        "faction": "RBiH",
-        "delta": 3
-      },
-      {
         "kind": "patron_pressure",
         "faction": "RS",
         "delta": 5
@@ -964,19 +924,14 @@
     },
     "once": true,
     "effect": {
-      "kind": "humanitarian_impact",
-      "faction": "RS",
-      "war_crimes_delta": 1
+      "kind": "narrative",
+      "text": "Srebrenica is bombarded relentlessly. International outcry mounts as the enclave's humanitarian situation deteriorates."
     },
     "effects": [
       {
         "kind": "patron_pressure",
         "faction": "RS",
         "delta": 5
-      },
-      {
-        "kind": "narrative",
-        "text": "Srebrenica is bombarded relentlessly. International outcry mounts as the enclave's humanitarian situation deteriorates."
       }
     ]
   },
@@ -1259,11 +1214,6 @@
     },
     "once": true,
     "effects": [
-      {
-        "kind": "patron_pressure",
-        "faction": "RS",
-        "delta": 5
-      },
       {
         "kind": "morale_change",
         "faction": "RBiH",
@@ -1607,11 +1557,6 @@
     "once": true,
     "effects": [
       {
-        "kind": "supply_delta",
-        "faction": "HRHB",
-        "delta": 5
-      },
-      {
         "kind": "morale_change",
         "faction": "HRHB",
         "delta": 3
@@ -1674,6 +1619,22 @@
             "type": "flag_equals",
             "flag": "hvo_arbih_tensions_rising",
             "value": true
+          },
+          {
+            "type": "not",
+            "condition": {
+              "type": "flag_equals",
+              "flag": "hrhb_central_bosnia_defense",
+              "value": "evacuate"
+            }
+          },
+          {
+            "type": "not",
+            "condition": {
+              "type": "flag_equals",
+              "flag": "hrhb_central_bosnia_defense",
+              "value": "federate_early"
+            }
           }
         ]
       }
@@ -1722,11 +1683,6 @@
     "once": true,
     "effects": [
       {
-        "kind": "humanitarian_impact",
-        "faction": "HRHB",
-        "war_crimes_delta": 1
-      },
-      {
         "kind": "morale_change",
         "faction": "HRHB",
         "delta": 2
@@ -1772,11 +1728,6 @@
     "once": true,
     "effects": [
       {
-        "kind": "humanitarian_impact",
-        "faction": "RBiH",
-        "war_crimes_delta": 1
-      },
-      {
         "kind": "morale_change",
         "faction": "HRHB",
         "delta": -3
@@ -1821,11 +1772,6 @@
     "once": true,
     "effects": [
       {
-        "kind": "morale_change",
-        "faction": "RBiH",
-        "delta": 3
-      },
-      {
         "kind": "patron_pressure",
         "faction": "RS",
         "delta": 5
@@ -1864,11 +1810,6 @@
     },
     "once": true,
     "effects": [
-      {
-        "kind": "supply_delta",
-        "faction": "RS",
-        "delta": -10
-      },
       {
         "kind": "patron_pressure",
         "faction": "RS",
@@ -2195,11 +2136,6 @@
     "once": true,
     "effects": [
       {
-        "kind": "morale_change",
-        "faction": "HRHB",
-        "delta": -3
-      },
-      {
         "kind": "supply_delta",
         "faction": "HRHB",
         "delta": -3
@@ -2513,11 +2449,6 @@
     "effects": [
       {
         "kind": "patron_pressure",
-        "faction": "RS",
-        "delta": 5
-      },
-      {
-        "kind": "patron_pressure",
         "faction": "HRHB",
         "delta": 3
       },
@@ -2626,11 +2557,6 @@
     "once": true,
     "effects": [
       {
-        "kind": "patron_pressure",
-        "faction": "RS",
-        "delta": 5
-      },
-      {
         "kind": "morale_change",
         "faction": "RBiH",
         "delta": 2
@@ -2680,11 +2606,6 @@
     "effects": [
       {
         "kind": "supply_delta",
-        "faction": "RS",
-        "delta": -3
-      },
-      {
-        "kind": "supply_delta",
         "faction": "RBiH",
         "delta": -2
       },
@@ -2723,11 +2644,6 @@
     },
     "once": true,
     "effects": [
-      {
-        "kind": "humanitarian_impact",
-        "faction": "HRHB",
-        "war_crimes_delta": 3
-      },
       {
         "kind": "patron_pressure",
         "faction": "HRHB",
@@ -2773,11 +2689,6 @@
     },
     "once": true,
     "effects": [
-      {
-        "kind": "supply_delta",
-        "faction": "RBiH",
-        "delta": 10
-      },
       {
         "kind": "morale_change",
         "faction": "RBiH",
@@ -2834,11 +2745,6 @@
     },
     "once": true,
     "effects": [
-      {
-        "kind": "morale_change",
-        "faction": "RBiH",
-        "delta": -3
-      },
       {
         "kind": "alliance_change",
         "delta": -0.05
@@ -3165,11 +3071,6 @@
     "effects": [
       {
         "kind": "morale_change",
-        "faction": "RBiH",
-        "delta": 3
-      },
-      {
-        "kind": "morale_change",
         "faction": "HRHB",
         "delta": -3
       },
@@ -3331,11 +3232,6 @@
     "priority": 50,
     "once": true,
     "effects": [
-      {
-        "kind": "patron_pressure",
-        "faction": "RS",
-        "delta": 10
-      },
       {
         "kind": "morale_change",
         "faction": "RBiH",
@@ -4851,11 +4747,6 @@
     "once": true,
     "effects": [
       {
-        "kind": "humanitarian_impact",
-        "faction": "RBiH",
-        "war_crimes_delta": 2
-      },
-      {
         "kind": "morale_change",
         "faction": "HRHB",
         "delta": -3
@@ -5156,11 +5047,6 @@
     "once": true,
     "effects": [
       {
-        "kind": "morale_change",
-        "faction": "RBiH",
-        "delta": 3
-      },
-      {
         "kind": "patron_pressure",
         "faction": "RBiH",
         "delta": 5
@@ -5206,11 +5092,6 @@
     },
     "once": true,
     "effects": [
-      {
-        "kind": "morale_change",
-        "faction": "RBiH",
-        "delta": -3
-      },
       {
         "kind": "morale_change",
         "faction": "RS",
@@ -5267,11 +5148,6 @@
     },
     "once": true,
     "effects": [
-      {
-        "kind": "humanitarian_impact",
-        "faction": "HRHB",
-        "war_crimes_delta": 2
-      },
       {
         "kind": "patron_pressure",
         "faction": "HRHB",
@@ -5583,16 +5459,10 @@
     },
     "once": true,
     "effect": {
-      "kind": "humanitarian_impact",
-      "faction": "HRHB",
-      "war_crimes_delta": 1
+      "kind": "narrative",
+      "text": "The Stari Most is destroyed by HVO shelling. The loss of the iconic bridge becomes a symbol of cultural destruction."
     },
-    "effects": [
-      {
-        "kind": "narrative",
-        "text": "The Stari Most is destroyed by HVO shelling. The loss of the iconic bridge becomes a symbol of cultural destruction."
-      }
-    ],
+    "effects": [],
     "dimension_shifts": [
       {
         "faction": "HRHB",

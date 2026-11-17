@@ -718,6 +718,24 @@ export interface ParamilitaryDecisionRecordView {
     estimated_civilian_risk?: number;
 }
 
+/**
+ * A paramilitary sweep the player's side carried out without a request ever reaching the player: the staff decides
+ * rear-area sweeps at Assisted command or above (the standing order is not consulted), and a standing order to allow
+ * sends them without a request at Full Control. Derived read-only from the paramilitary formation the sweep created;
+ * no saved field. Not a decision: it never feeds the presidential cadence.
+ */
+export interface ParamilitaryUnrequestedView {
+    id: string;
+    turn: number;
+    target_osid: string;
+    faction: string;
+    /**
+     * True only when the action took its target (the engine books civilian harm and the war-crime count only then). An action that
+     * dissolved without taking it (target already friendly, combat blocked, organized defence, the fade cutoff) books nothing.
+     */
+    captured: boolean;
+}
+
 export interface OfficerDecisionRecordView {
     id: string;
     turn: number;
@@ -1404,6 +1422,8 @@ export interface LoadedGameState {
     convoyDecisionHistory?: ConvoyDecisionRecordView[];
     /** Filed paramilitary authorization decisions for Records/Chronicle consequence trail. */
     paramilitaryDecisionHistory?: ParamilitaryDecisionRecordView[];
+    /** Paramilitary sweeps carried out for the player's side without a request to the player (staff or standing order). */
+    paramilitaryUnrequested?: ParamilitaryUnrequestedView[];
     /** Filed officer/personnel decisions for Records/Desk consequence trail. */
     officerDecisionHistory?: OfficerDecisionRecordView[];
     /** Read-only Army HQ opportunity ledger: proposal -> decision -> AAR outcome. */

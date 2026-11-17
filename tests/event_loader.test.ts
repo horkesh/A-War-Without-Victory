@@ -905,3 +905,78 @@ test.each([
         validCatalogRow({ id: 'child_event', ...overrides }),
     ], expected);
 });
+
+// §6 E1 (2026-11-16): `collectEffects` applies `effect` AND every `effects` entry, so a
+// repeated `effect` was applied twice while the UI showed it once (27 shipped rows).
+test('loader rejects an effects[] entry that repeats effect (any key order)', () => {
+    assertCatalogRowsThrow([
+        validCatalogRow({
+            effect: { kind: 'morale_change', faction: 'RBiH', delta: 3 },
+            effects: [
+                { kind: 'narrative', text: 'Other line.' },
+                { delta: 3, faction: 'RBiH', kind: 'morale_change' },
+            ],
+        }),
+    ], /Event effect repeated in effects\[\].*valid_event#event\.effects\[1\]/);
+});
+
+test('loader rejects a response option whose effects[] repeats its effect', () => {
+    assertCatalogRowsThrow([
+        validCatalogRow({
+            response_options: [{
+                id: 'accept',
+                label: 'Accept',
+                effect: { kind: 'supply_delta', faction: 'RS', delta: -3 },
+                effects: [{ kind: 'supply_delta', faction: 'RS', delta: -3 }],
+            }],
+        }),
+    ], /valid_event#accept\.effects\[0\]/);
+});
+
+test('repeated-effect violations are reported in deterministic sorted order', () => {
+    const dup = { effect: { kind: 'morale_change', faction: 'RS', delta: 1 }, effects: [{ kind: 'morale_change', faction: 'RS', delta: 1 }] };
+    const dir = makeTempEventsDir();
+    writeCatalogRows(dir, [
+        validCatalogRow({ id: 'zeta_row', ...dup }),
+        validCatalogRow({ id: 'alpha_row', trigger: { turn_min: 1, phase: 'war' }, ...dup }),
+    ]);
+    assert.throws(
+        () => loadEventDefinitionsFromDir(0, dir),
+        /alpha_row#event\.effects\[0\], zeta_row#event\.effects\[0\]/,
+    );
+});
+
+test('loader accepts effects[] entries that differ from effect', () => {
+    const dir = makeTempEventsDir();
+    writeCatalogRows(dir, [
+        validCatalogRow({
+            effect: { kind: 'morale_change', faction: 'RBiH', delta: 3 },
+            effects: [
+                { kind: 'morale_change', faction: 'RBiH', delta: 2 },
+                { kind: 'morale_change', faction: 'RS', delta: 3 },
+            ],
+        }),
+    ]);
+    assert.strictEqual(loadEventDefinitionsFromDir(0, dir).length, 1);
+});
+
+test('shipped catalog: no row repeats its effect inside effects[] (would apply twice)', () => {
+    const canonical = (value: unknown): string => {
+        if (Array.isArray(value)) return `[${value.map(canonical).join(',')}]`;
+        if (value !== null && typeof value === 'object') {
+            const obj = value as Record<string, unknown>;
+            return `{${Object.keys(obj).sort().map((k) => `${JSON.stringify(k)}:${canonical(obj[k])}`).join(',')}}`;
+        }
+        return JSON.stringify(value);
+    };
+    const offenders: string[] = [];
+    for (const file of REQUIRED_EVENT_FILES) {
+        const rows = JSON.parse(readFileSync(join(REPO_EVENTS_DIR, file), 'utf8')) as Array<Record<string, unknown>>;
+        for (const row of rows) {
+            if (!Array.isArray(row.effects)) continue;
+            const primary = canonical(row.effect);
+            if ((row.effects as unknown[]).some((entry) => canonical(entry) === primary)) offenders.push(`${file}:${String(row.id)}`);
+        }
+    }
+    assert.deepStrictEqual(offenders, []);
+});

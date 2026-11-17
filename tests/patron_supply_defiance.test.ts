@@ -80,6 +80,22 @@ describe('patron-defiance supply penalty (emergent-gated)', () => {
         }
     });
 
+    it('HISTORICAL mode WITH a human player faction: still NO cut (the bright-line predicate does not reach this gate; own lane)', () => {
+        // The atrocity bright line (isBrightLineFaction) covers the verdict layer only. The patron-defiance
+        // cut changes simulation trajectory and the recorded RS patron_confidence sits at 17, so extending
+        // it to the player's faction would break the live=headless parity gate. Pinned by the 2026-11-16 ruling.
+        for (const player of ['RS', 'HRHB'] as FactionId[]) {
+            const baseline = makeState({ decision_mode: 'historical', confidenceDelta: 0 });
+            baseline.meta.player_faction = player;
+            updatePatronState(baseline, undefined, neutralIvp(baseline));
+            const defiant = makeState({ decision_mode: 'historical', confidenceDelta: -40 });
+            defiant.meta.player_faction = player;
+            updatePatronState(defiant, undefined, neutralIvp(defiant));
+            expect(supportByFaction(defiant)).toEqual(supportByFaction(baseline));
+            expect(defiant.military?.patron_defiance_supply_cuts).toBeUndefined();
+        }
+    });
+
     it('UNSET mode: low patron_confidence does NOT cut material support (byte-identical)', () => {
         const baseline = makeState({ confidenceDelta: 0 });
         updatePatronState(baseline, undefined, neutralIvp(baseline));

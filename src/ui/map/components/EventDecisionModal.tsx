@@ -32,6 +32,7 @@ import { isDisplayEventEffect } from '../utils/eventEffectDisplay';
 import { describeDimensionShift } from '../data/dimensionShiftDisplay';
 import { turnToDateString } from '../utils/formatters';
 import { t, useLocale, type Locale, type MessageKey } from '../i18n';
+import { formatWarCrimesRecordLine } from '../data/warCrimesRecordLine';
 import {
     SurfaceColumns,
     SurfaceContent,
@@ -200,6 +201,8 @@ export interface EventDecisionModalProps {
  *  the Decision Context section. Per spec: first 200 chars with "..."
  *  truncation. */
 const SOURCE_DOSSIER_EXCERPT_MAX_CHARS = 200;
+/** The two opening paramilitary-policy cards: they carry the game rule that a standing order binds only sweeps the player decides in person. */
+const PARAMILITARY_POLICY_EVENT_IDS: ReadonlySet<string> = new Set(['rbih_paramilitary_policy_1992', 'rs_paramilitary_policy_1992']);
 const SHELL_HOTKEYS_BLOCKED_BY_REQUIRED_DECISION = new Set([
     'escape',
     'h',
@@ -314,10 +317,7 @@ function describeEffect(effect: EventEffect): string {
         case 'morale_change': return t('eventDecision.effect.moraleChange', { faction: army, delta: signedDelta(effect.delta) });
         case 'supply_delta': return t('eventDecision.effect.supplyDelta', { faction: army, delta: signedDelta(effect.delta) });
         case 'cohesion_change': return t('eventDecision.effect.cohesionChange', { faction: army, delta: signedDelta(effect.delta) });
-        case 'humanitarian_impact': return t('eventDecision.effect.humanitarianImpact', {
-            faction,
-            delta: effect.war_crimes_delta ? ` (${signedDelta(effect.war_crimes_delta)})` : '',
-        });
+        case 'humanitarian_impact': return formatWarCrimesRecordLine(factionId, effect.war_crimes_delta);
         case 'patron_pressure': return t('eventDecision.effect.patronPressure', { faction, delta: signedDelta(effect.delta) });
         case 'alliance_change': return t('eventDecision.effect.allianceChange', {
             rbih: eventDecisionStateShortLabel('RBiH'),
@@ -678,6 +678,16 @@ export function EventDecisionModal({ decision, onRespond, eventCatalog, state, a
                                         </div>
                                         <p className="m-0 text-[17px] leading-relaxed text-[#ddd1b3]">
                                             {playerSafeDossierText(localizedDecision.staff_assessment, diagMode)}
+                                        </p>
+                                    </div>
+                                )}
+                                {PARAMILITARY_POLICY_EVENT_IDS.has(decision.event_id) && (
+                                    <div className="flex flex-col gap-1.5 rounded-md border border-[#2a303c] bg-[#161a22] px-5 py-4" data-testid="event-decision-game-rule">
+                                        <div className={SURFACE_LABEL_MUTED}>
+                                            {t('eventDecision.gameRule')}
+                                        </div>
+                                        <p className="m-0 text-[17px] leading-relaxed text-[#ddd1b3]">
+                                            {t('eventDecision.paramilitaryPolicyRule')}
                                         </p>
                                     </div>
                                 )}

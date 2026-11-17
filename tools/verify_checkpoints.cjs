@@ -358,7 +358,18 @@ for (const [name, osid] of FARZ_CELLS) {
 // ⚠ NAME-FREE BY CONSTRUCTION: the authored Army HQ marker distinguishes this operation
 // from a generic name collision; the operation's AAR, combat events and battle receipts
 // must agree. The emergent name pool once emitted another `Farz` at t70.
-const FARZ_WINDOW_START = 160;   // Uragan/Farz ran 10 Sep - 11 Oct 1995; nothing before ~w160 is it.
+// Seats' ruling (2026-11-17; scenario tester, operations expert, historian): the P-A window opens
+// at t177 (21-27 Aug 1995, the week of the planning order; Uragan 95 ran 10-14 Sep 1995, BB1 file
+// p.423; Uragan's enqueue/prestage turn is 177). An RBiH capture of a Farz cell in [160, 177) is
+// the early fall the guard exists to catch and fails that cell. P-B's late 2nd-Corps scan keeps its
+// own start (160), so tightening P-A does not shrink P-B.
+const FARZ_PA_WINDOW_START = 177;
+const FARZ_EARLY_FALL_START = 160;
+const SECOND_CORPS_LATE_SCAN_START = 160;
+// Emergent mode (GameStateMeta.decision_mode === 'emergent') credits any RBiH operation-owned
+// capture inside the window; historical mode (or no mode recorded) keeps the authored Farz/Uragan
+// receipts.
+const farzMode = (save.meta && save.meta.decision_mode) === 'emergent' ? 'emergent' : 'historical';
 const SECOND_CORPS = 'arbih_2nd_corps';
 
 // Corps attribution needs formation -> corps, which lives in the save this tool already loaded.
@@ -378,18 +389,29 @@ for (const [corpsId, cmd] of Object.entries((save.military && save.military.corp
 }
 const farz = checkFarzObjectiveCaptures({
   cells: FARZ_CELLS, at188, events, battleById, aars: operationAars, corpsOf,
-  windowStart: FARZ_WINDOW_START, liveOperations, finalTurn: save.meta && save.meta.turn,
+  windowStart: FARZ_PA_WINDOW_START, earlyStart: FARZ_EARLY_FALL_START, mode: farzMode,
+  liveOperations, finalTurn: save.meta && save.meta.turn,
+  // The engine's own Army HQ registry: identifies the authored Farz even when no TG formed.
+  armyHqOperations: (save.military && save.military.army_hq_operations) || {},
 });
 if (farz.provisional) console.log('  (Farz has no AAR yet: still in progress at the last turn; read from the live operation)');
-console.log('  P-A authored Farz objective receipts — operation-owned combat in the late window');
+console.log(farz.mode === 'emergent'
+  ? `  P-A (emergent) operation-owned RBiH captures in the window t${FARZ_PA_WINDOW_START}+, none before it`
+  : `  P-A authored Farz objective receipts — operation-owned combat in the window t${FARZ_PA_WINDOW_START}+`);
 for (const row of farz.rows) {
-  console.log(`    ${row.name.padEnd(26)} ${row.ok ? `t${row.turn} ** CAPTURED **${row.via === 'uragan' ? ' (2nd Corps, Uragan 95)' : ''}` : '*** MISSING OR UNATTRIBUTED ***'}`);
+  const viaLabel = row.via === 'uragan' ? ' (2nd Corps, Uragan 95)' : row.via === 'operation' ? ' (operation-owned)' : '';
+  const earlyLabel = row.early_captures.length > 0
+    ? ` *** EARLY FALL: ${row.early_captures.map((c) => `t${c.turn}${c.operation_ids.length ? ` by ${c.operation_ids.join('+')}` : ''}`).join(', ')} ***`
+    : '';
+  console.log(`    ${row.name.padEnd(26)} ${row.ok ? `t${row.turn} ** CAPTURED **${viaLabel}` : `*** MISSING OR UNATTRIBUTED ***${earlyLabel}`}`);
 }
 if (!farz.ok) {
   farzBroken++;
   console.log(`    *** FAIL — ${farz.authoredCount} authored Farz AAR(s); all four receipts required ***`);
 } else {
-  console.log('    all four authored objectives captured ** PASS **');
+  console.log(farz.mode === 'emergent'
+    ? '    all four objectives captured by operations in the window ** PASS **'
+    : '    all four authored objectives captured ** PASS **');
 }
 console.log(`  2nd Corps participation: ${farz.secondCorpsParticipated ? 'recorded' : 'NOT RECORDED — historical fidelity diagnostic'}`);
 
@@ -414,7 +436,7 @@ console.log(`  2nd Corps participation: ${farz.secondCorpsParticipated ? 'record
 // shape of this operation is its four gains AND its two limits, and P-B checks both without either
 // being enumerated here.
 console.log('  P-B universal guard — EVERY late 2nd-Corps capture must be reference-warranted');
-const lateSecondCorps = events.filter((e) => (e.turn ?? -1) >= FARZ_WINDOW_START
+const lateSecondCorps = events.filter((e) => (e.turn ?? -1) >= SECOND_CORPS_LATE_SCAN_START
   && e.mechanism === 'combat' && corpsOf(e.attacker_brigade) === SECOND_CORPS && e.to === 'RBiH');
 const unwarranted = lateSecondCorps.filter((e) => !(ref.apr1995[e.settlement_id] === 'RS' && ref.oct1995[e.settlement_id] === 'RBiH'));
 console.log(`    ${lateSecondCorps.length} late 2nd-Corps capture(s) examined`);
