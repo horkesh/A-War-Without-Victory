@@ -233,6 +233,7 @@ Docs only; no `src/` or `data/` change, no hash change.
 - #780 (merged, 86a864005): the Farz guard P-A follow-up to #769 by the seats' ruling: the September 1995 window opens at t177; an RBiH capture of a Farz cell in [160, 177) fails that cell in both modes; emergent credits any operation-owned capture, non-operation captures never count; P-B's late 2nd-Corps scan keeps 160; tooling only, hash unchanged. It closes the emergent-semantics question the orchestrator sent the F1g seats.
 - #782 READY: §6 E3a1 (unanimous 6 of 6): one accumulator rule, one base writer, one source for the peace-plan lists; the live defect fixed (RBiH's standing base 34.4 to 0: authorizing sweeps had raised international standing); measured on main 7acbb1ad6: historical 474b0e5640ee1365, emergent 5f49121bf438cd32, 709 / 709 / 708 / 682, guards intact; hash-moving, merges on the orchestrator's GO. E4 is ruled 6 of 6 and being implemented, stacked on E2.
 - Hash-moving order: #754 (CI), #782, #735, #739, then the first READY.
+- #754 (merged, b42c6c5a9): one shared RBiH-HRHB at-war predicate (isRbihHrhbAtWar): five readers had disagreed at alliance exactly 0.0; control-identical, re-pinned; main pin d983d7bc665fdeb6 (manifest). #777 (merged, 7f9b84de3): the Bosnian option is labelled partial in both UIs with an always-visible note (owner decision of 2026-11-17; UI only).
 
 ## 2026-11-16 — `address_to_nation_rbih` closing line made year-neutral
 
@@ -322,6 +323,33 @@ Canonical combat (`combat_math.ts`) and the planner (`plan.ts`) read only the co
 Nothing moves headless because no corps was in `reorganize` under a non-balanced army stance in these runs. Where that does happen, in a played or divergent game, the corps now gets its reorganize recovery, which is the intended fix. Holds exist only for a live President, so the player path changes: stance matters now reach him in weeks 0-11 (RBiH) and from week 80.
 
 Evidence: `C:/Pyrrhic/AWWV-worktrees/_logs/batch-b-20261116/` (stance_*).
+
+## 2026-11-16 — One shared RBiH-HRHB "at war" predicate (control-identical; re-pinned)
+
+- **Why** (red-team finding on the lock-conflict panel; the orchestrator folded it in and ruled that it is measured separately). Readers of the RBiH-HRHB alliance disagreed exactly at 0.0:
+  - `isRbihHrhbAtWar` and minority erosion use ≤ 0;
+  - `bot_corps_stance` (RBiH and HRHB branches), `bot_corps_ai`'s bilateral diversion and `bot_early_war` used < 0;
+  - `bot/bot_strategy`'s RBiH appeasement penalty used > 0.
+  So for a turn with the alliance at exactly 0.0 (t93 in the baseline) some systems saw war and others did not.
+- **Change.** The five divergent readers call `isRbihHrhbAtWar` (alliance ≤ `HOSTILE_THRESHOLD`): `src/sim/combat/bot_corps_stance.ts` (two branches), `src/sim/combat/bot_corps_ai.ts`, `src/sim/early_war/bot_early_war.ts`, `src/sim/bot/bot_strategy.ts`.
+- **Proof** (on main `69c566349`; logs `C:/Pyrrhic/AWWV-worktrees/_logs/b5-scorer-20261116/aw_*`).
+  - Historical 188w: hash `044a3f85f003e7c7`. Checkpoints 709/709/708/681, guard intact.
+  - Control-identical to main: `control_delta`, activity, formations, operation AARs and the end report are all byte-identical.
+  - State does change, from the one turn at exactly 0.0 (t93) onward: HRHB cohesion is 1-2 lower from t93 to t188 (`brigade_temporal_log`), and `weekly_report` differs at t136-140 (Kupres power ratios). No control cell changes.
+  - Emergent `f98539c388ffb459`: 709/709/708/680, intact.
+  - Baselines re-pinned; a second run matches.
+  - **Re-measured on main after #753 and #758** (main pins historical `0b86d3d742fcbf1c`, emergent `84595a73932f3ac4`, 709/709/708/682; logs `aw2_*`): historical `743bc115ea3a41fe`, emergent `b098c193e64d5d88`, both 709/709/708/682 (equal to main), guard intact (cascade 31). Re-pinned on this head; a second run matches.
+  - **Re-measured on main after #729** (`9bdefb158`; main historical `3b4685bc356210d5`, 709/709/708/682; logs `aw3_*`):
+    - historical `623c46fd2e2e39fc`, emergent `3d18b7935f417681`, both 709/709/708/682 (equal to main);
+    - guard intact (cascade 31);
+    - re-pinned on this head; a second run matches.
+  - **Re-measured on main after #766** (`7acbb1ad6`; main historical `0b63e8102bddf6be`, emergent `73b481f79ac28e46`, 709/709/708/682; logs `aw5_*`):
+    - historical `d983d7bc665fdeb6`, emergent `9454c52e328dd647`, both 709/709/708/682;
+    - guard intact (cascade 31);
+    - control-identical to main: the pinned `control_delta`, `activity_summary`, `formation_delta` and `end_report` hashes equal main's; only `final_save` and `weekly_report` differ (HRHB cohesion from t93);
+    - re-pinned on this head; a second run matches.
+  - The 43 test files that touch these readers pass (716 tests). tsc clean.
+- The lock-conflict fix (the back-channel floor and the contradiction rule) is **held** on `claude/b5-alliance-lock-conflict` until package P2 and the RF-ROSTER precedence fix make the Farz chain robust. Measured alone it breaks the guard through Farz (an "all objectives already owned" skip at t179).
 
 ## 2026-11-16 — B0: bot peace-plan responses measure territory by area, the unit of the plan split
 
