@@ -2,24 +2,22 @@
 import { cleanup, fireEvent, render } from '@testing-library/react';
 import { createElement, Fragment, type ReactElement } from 'react';
 import { afterEach, describe, expect, it } from 'vitest';
-import { EconomyPanel } from '../../src/ui/map/components/EconomyPanel';
 import { EnclaveDashboard } from '../../src/ui/map/components/EnclaveDashboard';
 import { HumanitarianLedgerPanel } from '../../src/ui/map/components/HumanitarianLedgerPanel';
 import type { LoadedGameState } from '../../src/ui/map/data/types';
 
 /**
- * The records surfaces that open over the map without the shared <Modal> (Economy, the
+ * The records surfaces that open over the map without the shared <Modal> (the
  * enclave dashboard, the humanitarian ledger) are aria-modal dialogs, so keyboard focus
  * has to follow: it moves into the dialog on open, Tab cannot leave it for the toolbar
  * behind, and it returns to the opener on close.
  */
 afterEach(cleanup);
 
-const state = { player_faction: 'RBiH', productionFacilities: [], smugglingRoutes: [] } as unknown as LoadedGameState;
+const state = { player_faction: 'RBiH' } as unknown as LoadedGameState;
 const noop = () => {};
 
 const cases: ReadonlyArray<readonly [string, (open: boolean) => ReactElement | null]> = [
-  ['economy-panel', (open) => (open ? createElement(EconomyPanel, { state, onClose: noop }) : null)],
   ['enclave-dashboard', (open) => createElement(EnclaveDashboard, { state, open, onClose: noop })],
   ['humanitarian-ledger-panel', (open) => createElement(HumanitarianLedgerPanel, { state, open, onClose: noop })],
 ];

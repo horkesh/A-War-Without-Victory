@@ -270,7 +270,6 @@ export function ArmyHQModal({
         }
         const territoryPct = osidAreas.total_area_km2 > 0 ? (factionArea / osidAreas.total_area_km2) * 100 : 0;
 
-        const reserves = state.factionReserves?.[faction];
         const eff = aggregateEffectiveness(brigades);
 
         const battles = state.latestTurnSummary?.battles ?? [];
@@ -312,7 +311,7 @@ export function ArmyHQModal({
         return {
             formations, brigades, corpsFormations, totalPersonnelLabel, sectors, operations, executingOperationCount,
             sectorsByCorps, opsByCorps, readinessByCorps, presidentialHandoff,
-            territoryPct, reserves,
+            territoryPct,
             eff, commander, factionBattles, briefingItems
         };
     }, [open, state, faction]);

@@ -43,7 +43,6 @@ function makeLoadedState(): LoadedGameState {
         player_faction: 'RS',
         corpsFrontSectors: [],
         operations: [],
-        factionReserves: { RS: { generalSupply: 80, heavyMunitions: 70 } },
     } as LoadedGameState;
 }
 

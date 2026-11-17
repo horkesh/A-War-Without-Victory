@@ -120,11 +120,7 @@ function buildArmyUserPrompt(state: GameState, faction: FactionId): string {
         lines.push(`  ${corpsId}: stance=${stance}, ${opStatus}`);
     }
 
-    // Supply summary
-    const generalSupply = state.military.general_supply_reserve?.[faction] ?? 'unknown';
-    const heavySupply = state.military.heavy_munitions_reserve?.[faction] ?? 'unknown';
-    lines.push('');
-    lines.push(`Supply: general=${generalSupply}, heavy=${heavySupply}`);
+    // Reserve supply summary retired 2026-11-17 (Fable consult 6): there are no supply reserves.
 
     // Negotiation breakdown (raw data)
     const breakdown = state.military.negotiation?.capital?.[faction];
