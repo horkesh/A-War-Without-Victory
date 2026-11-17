@@ -820,7 +820,9 @@ describe('strict null inventory progress', () => {
             // MilitaryState.army_clash_state (live president only). No new type escape. 595 -> 598.
             // Zombie-TG fix (2026-11-16): TacticalGroup.host_corps_id, the TG's stable lifecycle
             // identity (absent on legacy TGs). No new type escape. 598 -> 599.
-            optional_fields_game_state: 599,
+            // A2b refugee compact (2026-11-17): RbihHrhbState.refugee_compact_suspended_until, written
+            // only while a played HRHB compact is active (absent in every bot run). No new type escape. 599 -> 600.
+            optional_fields_game_state: 600,
         });
         // Reason-code instrumentation (item 3): +1, `OperationAxis.launch_blocker_detail`.
         // `classifyDomain` routes it to `sim` on the /Corps|Operation/ interface-name rule,
@@ -836,13 +838,14 @@ describe('strict null inventory progress', () => {
         // Command loop L7: +2 state (StateMeta.army_clashes / army_clash_history), +1 sim
         // (MilitaryState.army_clash_state). 595 -> 598 / state 220 -> 222 / sim 365 -> 366.
         // Zombie-TG fix: +1 state (TacticalGroup.host_corps_id). 598 -> 599 / state 222 -> 223.
-        expect(current.optional_field_domains.total).toBe(599);
+        // A2b: +1 state (RbihHrhbState.refugee_compact_suspended_until). 599 -> 600 / state 223 -> 224.
+        expect(current.optional_field_domains.total).toBe(600);
         expect(current.optional_field_domains.domain_counts).toMatchObject({
             derived: 10,
             ipc: 0,
             scenario: 0,
             sim: 366,
-            state: 223,
+            state: 224,
             ui_adapter: 0,
             unknown: 0,
         });
