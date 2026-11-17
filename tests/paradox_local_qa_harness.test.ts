@@ -224,11 +224,11 @@ test('packaged startup waits for the embedded React owner and follows its comple
     ) as (surface: any, faction: string, onStep?: (step: string) => Promise<void>) => Promise<{ requested: string; ariaChecked: string } | null>;
     const actions: string[] = [];
     const steps: string[] = [];
-    const productionRadioNames = ['Let it run from here', 'Let history run as it did'];
+    const productionRadioNames = ['Let it run from here', 'Replay the historical record'];
     const control = (name: string) => ({
         waitFor: async ({ state }: { state: string }) => actions.push(`wait:${name}:${state}`),
         click: async () => actions.push(`click:${name}`),
-        getAttribute: async (attribute: string) => attribute === 'aria-checked' && name === '/^Let history run as it did$/i' ? 'true' : null,
+        getAttribute: async (attribute: string) => attribute === 'aria-checked' && name === '/^Replay the historical record$/i' ? 'true' : null,
         first() { return this; },
     });
     const surface = {
@@ -255,8 +255,8 @@ test('packaged startup waits for the embedded React owner and follows its comple
         'click:main-menu-faction-RBiH',
         'wait:/^Take command$/i:visible',
         'click:/^Take command$/i',
-        'wait:/^Let history run as it did$/i:visible',
-        'click:/^Let history run as it did$/i',
+        'wait:/^Replay the historical record$/i:visible',
+        'click:/^Replay the historical record$/i',
         'wait:/^Begin$/i:visible',
         'click:/^Begin$/i',
         'wait:/^Begin$/i:hidden',
