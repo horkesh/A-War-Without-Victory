@@ -1,5 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
+import { withoutComments } from './helpers/sourceComments';
 import {
     bcsMessages,
 } from '../src/ui/map/i18n/messages.bcs';
@@ -54,7 +55,7 @@ describe('UI localization substrate', () => {
             ['src/ui/map/components/MainMenu.tsx', 'main-menu-language-note'],
             ['src/ui/map/components/SettingsScreen.tsx', 'settings-language-note'],
         ] as const) {
-            const source = readFileSync(file, 'utf8');
+            const source = withoutComments(readFileSync(file, 'utf8'));
             expect(source, file).toContain(`aria-describedby="${id}"`);
             expect(source, file).toContain(`id="${id}"`);
             expect(source, file).toContain("t('settings.language.partialNote')");
