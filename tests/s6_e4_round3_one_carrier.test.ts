@@ -28,7 +28,7 @@ import { scorePoliticalOption } from '../src/sim/political/political_event_decis
 import { getPoliticalPersonality, type PoliticalAssessment } from '../src/sim/political/political_personality.js';
 import { computeDimensionBaseValues, initializeStrategicDimensions } from '../src/sim/events/strategic_dimensions.js';
 import { applyPatronSupportDelta, updatePatronPressure } from '../src/sim/negotiation/patron_pressure.js';
-import { CONTACT_GROUP_REJECTION, NATO_BOMBING, evaluatePatronEvents } from '../src/sim/negotiation/patron_events.js';
+import { CONTACT_GROUP_REJECTION, NATO_BOMBING, applyPatronEvent, evaluatePatronEvents } from '../src/sim/negotiation/patron_events.js';
 import { evaluatePeacePlans, resolvePeacePlan } from '../src/sim/negotiation/peace_plans.js';
 import { createDefaultPatronRelationship, createEmptyCapital } from '../src/state/negotiation_types.js';
 import type { NegotiationState, PeacePlanResponse } from '../src/state/negotiation_types.js';
@@ -305,14 +305,25 @@ describe('§6 E4 round 3: the spill (costs only) through the one support writer'
         expect(applyPatronSupportDelta(undefined, 'RS', -10)).toBe(0);
     });
 
-    it('the patron events spill through the same writer (NATO bombing −20 at support 5)', () => {
+    it('the patron events spill through the same writer (the Contact Group break −15 at support 5)', () => {
+        const state = makeState({ turn: CONTACT_GROUP_REJECTION.trigger_week });
+        const neg = state.military.negotiation!;
+        neg.patron_relationships.RS!.support_level = 5;
+        applyPatronEvent(state, CONTACT_GROUP_REJECTION);
+        expect(neg.patron_relationships.RS!.relationship_events).toContain('contact_group_rejection');
+        expect(neg.patron_relationships.RS!.support_level).toBe(0);
+        expect(neg.strategic_dimensions!.RS!.patron_confidence!.event_modifier).toBe(-10);
+    });
+
+    it('§6 E4 round 5: NATO bombing carries no support change (one carrier for Deliberate Force)', () => {
+        expect(NATO_BOMBING.effects.some((effect) => effect.support_delta !== undefined)).toBe(false);
         const state = makeState({ turn: NATO_BOMBING.trigger_week });
         const neg = state.military.negotiation!;
         neg.patron_relationships.RS!.support_level = 5;
         evaluatePatronEvents(state);
         expect(neg.patron_relationships.RS!.relationship_events).toContain('nato_bombing');
-        expect(neg.patron_relationships.RS!.support_level).toBe(0);
-        expect(neg.strategic_dimensions!.RS!.patron_confidence!.event_modifier).toBe(-15);
+        expect(neg.patron_relationships.RS!.support_level).toBe(5);
+        expect(neg.strategic_dimensions!.RS!.patron_confidence!.event_modifier).toBe(0);
     });
 
     it('the peace-plan rejection cost spills through the same writer (−5 at support 2)', () => {

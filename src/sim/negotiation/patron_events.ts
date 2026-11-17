@@ -132,6 +132,13 @@ export const SREBRENICA_AFTERMATH: PatronEvent = {
 /**
  * NATO bombing campaign (August-September 1995, ~week 175 from April 1992).
  * Operation Deliberate Force. RS military capability degraded, patron pressure peaks.
+ *
+ * §6 E4 round 5 (2026-11-17, unanimous): carries the override only. Its former
+ * `support_delta: -20` charged Belgrade's backing for a NATO act, and charged it a second
+ * time: the card `deliberate_force_rs_compliance_1995` is the one carrier of the Deliberate
+ * Force patron change (its net depends on RS's answer). Belgrade's backing of the VRS held
+ * through autumn 1995 (BB1 pp.376, 383, 389). The 29 Aug 1995 transfer of negotiating
+ * authority to Milošević is override, not support.
  */
 export const NATO_BOMBING: PatronEvent = {
     id: 'nato_bombing',
@@ -141,7 +148,6 @@ export const NATO_BOMBING: PatronEvent = {
         {
             faction: 'RS',
             override_delta: 20,
-            support_delta: -20,
         },
     ],
 };

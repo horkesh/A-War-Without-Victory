@@ -586,17 +586,21 @@ describe('Patron Events', () => {
         expect(neg.strategic_dimensions!.RS.international_standing.event_modifier).toBe(0);
     });
 
-    it('NATO bombing reduces RS support by 20', () => {
+    it('NATO bombing raises RS override and leaves RS support unchanged (§6 E4 round 5: the compliance card is the one carrier)', () => {
         const state = makeState({
             turn: NATO_BOMBING.trigger_week,
             war_start_turn: 0,
         });
         const neg = state.military.negotiation!;
         const supportBefore = neg.patron_relationships.RS.support_level;
+        const overrideBefore = neg.patron_relationships.RS.override_authority;
 
         evaluatePatronEvents(state);
 
-        expect(neg.patron_relationships.RS.support_level).toBe(supportBefore - 20);
+        expect(neg.patron_relationships.RS.relationship_events).toContain('nato_bombing');
+        expect(neg.patron_relationships.RS.support_level).toBe(supportBefore);
+        expect(neg.patron_relationships.RS.override_authority).toBe(Math.min(100, overrideBefore + 20));
+        expect(NATO_BOMBING.effects.every((effect) => effect.support_delta === undefined)).toBe(true);
     });
 
     it('Washington Agreement sets HRHB override to at least 85', () => {

@@ -1038,13 +1038,6 @@
       "kind": "narrative",
       "text": "Deliberate Force triggers from cumulative war-crimes evidence, Markale, and RRF deployment rather than from Srebrenica."
     },
-    "effects": [
-      {
-        "kind": "patron_support",
-        "faction": "RS",
-        "delta": -10
-      }
-    ],
     "dimension_shifts": [
       {
         "faction": "RS",
