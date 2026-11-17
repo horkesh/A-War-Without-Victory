@@ -265,14 +265,22 @@ export const WASHINGTON_AGREEMENT_WEEK = 102;
  * coherent only as the formalising of an existing alliance (BB2 pp.450-451; BB1 p.54), so it
  * carries the Federation benefits but none of the war-ending effects (no ceasefire to start, no
  * cut to an alliance already above the lock). Never fires left alone: the war starts ~t49-57.
+ * A2b (2026-11-17): there is no consent once HRHB has answered the 1993 federation overture with
+ * a refusal (`reject_federation_path` / `maintain_separate_state`); the bots answer
+ * `extend_federation_overture`, so this changes nothing left alone.
  */
 export function evaluateWashingtonByConsent(state: GameState): boolean {
     const rhs = state.political.rbih_hrhb_state;
     if (!rhs || rhs.washington_signed) return false;
     if (rhs.war_started_turn != null) return false;
     if (!((state.political.war_alliance_rbih_hrhb ?? 0) > ALLIED_THRESHOLD)) return false;
+    const overture = lastResponse(state, FEDERATION_OVERTURE_EVENT);
+    if (overture !== null && FEDERATION_REFUSALS.includes(overture)) return false;
     return state.meta.turn >= WASHINGTON_AGREEMENT_WEEK;
 }
+
+const FEDERATION_OVERTURE_EVENT = 'hrhb_federation_overture_1993';
+const FEDERATION_REFUSALS: readonly string[] = ['maintain_separate_state', 'reject_federation_path'];
 
 // ── Path A': the cards' agreement on a quiet front (B5, 2026-11-16) ──
 

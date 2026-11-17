@@ -2935,7 +2935,7 @@
           {
             "faction": "HRHB",
             "dimension": "patron_confidence",
-            "delta": -25
+            "delta": -35
           },
           {
             "faction": "HRHB",
@@ -3521,7 +3521,7 @@
           {
             "faction": "HRHB",
             "dimension": "patron_confidence",
-            "delta": -15
+            "delta": -25
           },
           {
             "faction": "HRHB",

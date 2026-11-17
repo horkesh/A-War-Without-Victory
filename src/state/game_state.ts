@@ -1990,6 +1990,12 @@ export interface RbihHrhbState {
     bilateral_diverted_corps?: Partial<Record<FactionId, FormationId>>;
     /** Per-faction release progress after ceasefire/Washington, in turns. */
     bilateral_corps_release_progress?: Partial<Record<FactionId, number>>;
+    /**
+     * A2b refugee compact (src/sim/early_war/refugee_compact.ts): the compact's refugee-pressure
+     * damping is suspended while turn < this value, after a bilateral flip during an active compact.
+     * Optional and written only while a compact is active, so saves without one never carry it.
+     */
+    refugee_compact_suspended_until?: number;
 }
 
 export interface NegotiationStatus {
