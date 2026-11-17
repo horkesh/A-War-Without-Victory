@@ -165,6 +165,113 @@ describe('Farz objective gate', () => {
         });
     });
 
+    describe('cases from other lanes (orchestrator, 2026-11-17)', () => {
+        // §6 lane E1: identical territory to main, but Farz is injected a week later (t179) with no
+        // cross-corps donor, so no Tactical Group and no army_hq_telemetry. It still counts: the
+        // registry names the operation.
+        it('E1: the same Farz launched a week later with no donor or telemetry still counts', () => {
+            const id = 'arbih_3rd_corps:Operation Farz 95:t179';
+            const late = { ...aar, operation_id: id, army_hq_telemetry: null, started_turn: 179, ended_turn: 186 };
+            const lateEvents = events.map((e, i) => ({ ...e, turn: 180 + 2 * i }));
+            const lateBattles = new Map([...battles].map(([k, b]) => [k, { ...b, operation_id: id }]));
+            const result = checkFarzObjectiveCaptures({
+                ...input, aars: [late], events: lateEvents, battleById: lateBattles,
+                armyHqOperations: { 'ahq:RBiH:3:farz_95': {
+                    id: 'ahq:RBiH:3:farz_95', faction_id: 'RBiH', name: 'Operation Farz 95',
+                    anchor_corps_id: 'arbih_3rd_corps', formed_on_turn: 179, status: 'completed',
+                } },
+            });
+            expect(result.ok).toBe(true);
+            expect(result.authoredCount).toBe(1);
+        });
+
+        // RF-ROSTER RB9 emergent: generic 1st/2nd/3rd Corps operations took the cells at t166-170, so
+        // Farz had no live objective at t179 and never launched. That early fall must fail P-A.
+        it('RF-ROSTER: generic operations taking the cells early, with Farz never launched, fail', () => {
+            const genericId = 'arbih_3rd_corps:Operacija Zamah:t160';
+            const earlyEvents = events.map((e, i) => ({ ...e, turn: 166 + 4 * i }));
+            const earlyBattles = new Map([...battles].map(([k, b]) => [k, { ...b, operation_id: genericId }]));
+            const generic = { ...aar, operation_id: genericId, army_hq_telemetry: null, started_turn: 160, ended_turn: 172 };
+            const result = checkFarzObjectiveCaptures({
+                ...input, aars: [generic], events: earlyEvents, battleById: earlyBattles, armyHqOperations: {},
+            });
+            expect(result.ok).toBe(false);
+            expect(result.authoredCount).toBe(0);
+        });
+    });
+
+    describe("seats' ruling on the window and emergent semantics (2026-11-17)", () => {
+        // P-A window opens at t177; an RBiH capture in [160, 177) is an early fall and fails the cell.
+        // Emergent mode credits any RBiH operation-owned capture inside the window; historical keeps
+        // the authored Farz/Uragan receipts.
+        const ruled = { windowStart: 177, earlyStart: 160 };
+        const farzId = 'arbih_3rd_corps:Operation Farz 95:t179';
+        const registry = { 'ahq:RBiH:3:farz_95': {
+            id: 'ahq:RBiH:3:farz_95', faction_id: 'RBiH', name: 'Operation Farz 95',
+            anchor_corps_id: 'arbih_3rd_corps', formed_on_turn: 179, status: 'completed',
+        } };
+        const farz = { ...aar, operation_id: farzId, army_hq_telemetry: null, started_turn: 179, ended_turn: 186 };
+        const inWindow = events.map((e, i) => ({ ...e, turn: 180 + 2 * i }));
+        const owned = (opId: string, eventsIn: typeof events) =>
+            new Map(eventsIn.map((e) => [e.battle_id, { ...battles.get(e.battle_id)!, operation_id: opId }]));
+        const genericId = 'arbih_2nd_corps:Operacija Lavina:t178';
+
+        for (const mode of ['historical', 'emergent'] as const) {
+            it(`${mode}: E1 (Farz at t179, no donor, no telemetry) counts`, () => {
+                const result = checkFarzObjectiveCaptures({ ...input, ...ruled, mode, aars: [farz], events: inWindow,
+                    battleById: owned(farzId, inWindow), armyHqOperations: registry });
+                expect(result.ok).toBe(true);
+            });
+
+            it(`${mode}: RB9 (generic captures at t166-170, Farz never launched) fails and names the early captures`, () => {
+                const early = events.map((e, i) => ({ ...e, turn: 166 + 4 * i }));
+                const result = checkFarzObjectiveCaptures({ ...input, ...ruled, mode, aars: [], events: early,
+                    battleById: owned('arbih_3rd_corps:Operacija Zamah:t160', early), armyHqOperations: {} });
+                expect(result.ok).toBe(false);
+                expect(result.rows.map((row: { early_captures: Array<{ turn: number }> }) => row.early_captures.map((c) => c.turn)))
+                    .toEqual([[166], [170]]);
+            });
+
+            it(`${mode}: an early capture, retaken by RS and recaptured in the window, still fails`, () => {
+                const retaken = [
+                    { ...events[0], turn: 168, battle_id: 'early_0' },
+                    { settlement_id: cells[0][1], to: 'RS', mechanism: 'combat', turn: 172, attacker_brigade: 'rs_x', battle_id: 'rs_0' },
+                    ...inWindow,
+                ];
+                const map = owned(farzId, inWindow);
+                map.set('early_0', { ...battles.get('battle_0')!, battle_id: 'early_0', operation_id: 'arbih_3rd_corps:Operacija Zamah:t160' });
+                const result = checkFarzObjectiveCaptures({ ...input, ...ruled, mode, aars: [farz], events: retaken,
+                    battleById: map, armyHqOperations: registry });
+                expect(result.ok).toBe(false);
+                expect(result.rows[0].early_captures.map((c: { turn: number }) => c.turn)).toEqual([168]);
+            });
+        }
+
+        it('emergent: a generic operation capture inside the window counts; historical does not credit it', () => {
+            const generic = { ...aar, operation_id: genericId, army_hq_telemetry: null, started_turn: 178, ended_turn: 186 };
+            const base = { ...input, ...ruled, aars: [generic], events: inWindow, battleById: owned(genericId, inWindow), armyHqOperations: {} };
+            expect(checkFarzObjectiveCaptures({ ...base, mode: 'emergent' }).ok).toBe(true);
+            expect(checkFarzObjectiveCaptures({ ...base, mode: 'historical' }).ok).toBe(false);
+        });
+
+        it('emergent: a capture no operation owned never counts', () => {
+            const noOp = new Map(inWindow.map((e) => {
+                const { operation_id: _drop, ...rest } = battles.get(e.battle_id)! as Record<string, unknown>;
+                return [e.battle_id, rest];
+            }));
+            const result = checkFarzObjectiveCaptures({ ...input, ...ruled, mode: 'emergent', aars: [], events: inWindow,
+                battleById: noOp, armyHqOperations: {} });
+            expect(result.ok).toBe(false);
+        });
+
+        it('no mode recorded behaves as historical', () => {
+            const generic = { ...aar, operation_id: genericId, army_hq_telemetry: null, started_turn: 178, ended_turn: 186 };
+            const result = checkFarzObjectiveCaptures({ ...input, ...ruled, aars: [generic], events: inWindow,
+                battleById: owned(genericId, inWindow), armyHqOperations: {} });
+            expect(result.ok).toBe(false);
+        });
+    });
+
     describe('2nd Corps Uragan 95 partner receipts (owner ruling 2026-11-07)', () => {
         const uraganId = 'arbih_2nd_corps:Operation Uragan 95:t162';
         const uragan = {
