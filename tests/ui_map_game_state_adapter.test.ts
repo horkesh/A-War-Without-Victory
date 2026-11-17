@@ -1188,7 +1188,7 @@ test('parseGameState derives enclave, mobilization, and sector entrenchment summ
 });
 
     assert.equal(parsed.enclaveResilience?.gorazde?.supply_state, 'critical');
-    assert.equal(parsed.enclaveResilience?.gorazde?.airdrop_status, 'receiving');
+    assert.equal((parsed.enclaveResilience?.gorazde as Record<string, unknown> | undefined)?.airdrop_status, undefined);
     assert.equal(parsed.enclaveResilience?.gorazde?.faction, 'RBiH');
     assert.equal(parsed.enclaveResilience?.sarajevo?.hardening_active, true);
     assert.equal(parsed.enclaveResilience?.zepce, undefined);

@@ -1,0 +1,44 @@
+## 2026-11-17 — A2b: the HRHB refugee compact; a cooperative HRHB President can keep the peace only by paying for it (byte-identical left alone)
+
+- **Why** (owner principle: history if left alone, agency if played). An HRHB President who chose `united_front` and `formal_alliance_persists` still went to war with RBiH, at t63 against t49 left alone. The driver probe (`a2b_alliance_drift_drivers.md`, shared notes) explains why:
+  - after the pre-war floor lapses, the alliance falls about 0.025 a week with no incidents;
+  - refugee pressure is about −0.016 a week, the largest term, and patron drag about −0.012;
+  - the approved patron-drag-only mechanism would have delayed the war by about 8 weeks and no more.
+- **Panel.** Game designer and historian, both GO-with-amendments; integrated ruling `a2b_refugee_term_integrated.md`, approved by the orchestrator.
+  - Historian: refugees intensified the 1993 war; they did not cause it (BB1 p.179, p.189; Blaškić and Kordić TJ rejected the refugee-threat defence; Hadžihasanović TJ on displaced men filling ARBiH formations).
+  - Game designer, code-checked: supply is a dead lever in apr1992; incidents cannot happen while the alliance is above 0.20; the Gornji Vakuf card cannot fire on the cooperative branch. The peace therefore has to depend on renewing a compact.
+- **Change.**
+  - `src/sim/early_war/refugee_compact.ts`, derived from `event_decision_log`:
+    - two 1992 grants, 56 turns each;
+    - refugee pressure ×0.6 per active entry;
+    - renewals: H6 `federate_early`, overture `extend_federation_overture`, Gornji Vakuf `negotiate`. They extend active entries and never open one.
+    - lapses: VOPP `acknowledge_pressure`, overture refusals, Gornji Vakuf `escalate`, H6 `breakout_offensive`;
+    - an 8-week suspension after a bilateral flip;
+    - price: HRHB recruitment ×0.9 per active entry;
+    - patron drag ×0.5 per 1992 choice.
+  - `alliance_update.ts` reads it.
+  - `active_modifiers.getActiveRecruitmentMultiplier` applies the price; the result is exactly 1.0 without a compact.
+  - `game_state.ts`: optional `rbih_hrhb_state.refugee_compact_suspended_until`, written only while a compact is active.
+  - `war_1992.json`: patron_confidence −10 more on both options, −35 and −25.
+  - `consequences.json`: `csq_federation_early_1994`'s floor runs 60 → 17 turns, so it ends at the t87 overture.
+  - `washington_agreement.ts`: Path C requires that the federation overture was not refused.
+- **Acceptance** (played HRHB, `desktop_calibration_compare`, logs `C:/Pyrrhic/AWWV-worktrees/_logs/b5-scorer-20261116/a2b*`).
+  - **A, pays** (`united_front`, `formal_alliance_persists`, VOPP `resist_patron`, `federate_early`, `extend_federation_overture`): no war; Path C at **t102**; alliance 0.90 at t130; HRHB patron_confidence 10.
+  - **B, careless** (the same 1992 choices, then the defaults): the compact lapses at t46; **war at t71**.
+  - **C, reneges** (A, but `reject_federation_path` at t87): the alliance falls 0.55 → 0.06 by t102; no consent; flips; **war at t103** (t104 on the 2026-11-17 re-proof below); the engine ceasefire follows at t148 (t149) and Path A signs at t152 (t153), so a refusing President reaches the pressured Washington route about 50 weeks after the one who kept paying.
+  - **D, left alone:** the historical (`6dbecd4913d6d7df` on main `ffe0fdb50`) and emergent 188w runs are byte-identical to main; this PR moves no pin.
+- **Re-proved 2026-11-17**, twice: on main `87efa8da2` (#763 squashed in), then again on main `ffe0fdb50` (#739, #792, #795, #798 merged in; the pins had moved, this PR's manifest equals main's). `npm run test:baselines`: "all scenarios match". Played probes, 130 turns (C 188), logs `_logs/b5-scorer-20261116/land768/` and `land768b/` (the second, final figures are identical):
+  - A pays: Path C at **t102**, no war, alliance 0.90.
+  - B careless: war at **t71**; Washington signs t102 after the war.
+  - C reneges: war **t104**, ceasefire **t149**, Path A signs **t153**, alliance 0.90 at t188. One week later than the earlier t103/t148/t152 on an older main. All three moved together, so the war's onset shifted by a week; main took about 33 commits in between and the cause was not isolated (no acceptance condition depends on the exact week).
+  - D no compact: the final save is byte-identical to plain main's own no-override game (same SHA-256 on both the player and headless saves, on `ffe0fdb50`).
+- **Two defects found by the acceptance runs and fixed here:**
+  - The political goal is answered ahead of firing at t0, so a 52-turn grant expired on the H6 renewal turn and the paying President still went to war. The grant now runs 56 turns.
+  - `csq_federation_early_1994`'s 60-turn floor (from t70) made the war impossible whatever the President did later. It now ends at t87.
+- **Tests.**
+  - `tests/refugee_compact.test.ts` (18): grants, renewals, lapses, suspension, the 1.0 fast path, the price in the recruitment reader, save round-trip with and without the field. Added at the merge gate (scenario-tester conditions): a t0 grant stays active on every H6 window turn t52-55 (the 52 to 56 defect, pinned); every (event, response) pair the module reads exists in `data/scenarios/events` (`REFUGEE_COMPACT_DECISION_TABLE`, so a content sweep cannot silently kill the paying path); `alliance_update` wiring (an active compact lowers `drivers.refugee_pressure` by 0.6 per entry and `drivers.patron_drag` by 0.5 per grant; no granting choice leaves the report equal to the plain one; a flip writes the suspension only while a compact is active).
+  - `tests/washington_by_consent.test.ts`: no consent after a refused overture.
+  - `strict_null_inventory_progress`: 599 → 600, state 223 → 224 (+1 optional state field, on top of the zombie-TG field already on main).
+- **Merge gate (2026-11-17, head 6498d65be; integrator: the batch-b lane).** Historian SIGN; determinism SIGN; canon-compliance, scenario-creator-runner-tester and game designer SIGN WITH CONDITIONS, all met in the next commit: Systems Manual t103 to t104; the stale "52 turns" test title; the three tests above. Open, copy-only and routed to the orchestrator: the compact is invisible to the player (VOPP is non-blocking, `auto_resolve_turns: 2`, and its default `acknowledge_pressure` silently ends the peace), so a pre-freeze staff-line item needs the §4 copy panel and the historian rule.
+- **Binding copy rule (historian).** No player-facing text may say or imply that refugees caused the 1993 war.
+- **Coordination.** H6 `federate_early` now has a real lever. The orchestrator told the batch-b lane that its ruling-5 sweep must not retire it; `evacuate` stays with that lane.

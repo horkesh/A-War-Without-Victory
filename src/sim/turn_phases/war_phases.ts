@@ -203,11 +203,6 @@ import { resolveAttackOrdersOsid, displaceFormationsInEnemyTerritory } from '../
 import { applyBrigadeMovementOrders } from '../combat/brigade_movement_orders.js';
 import { processOsidColumnMovement, type OsidColumnMovementReport } from '../combat/osid_column_movement.js';
 import { updateSupplyPressure } from '../combat/supply_pressure.js';
-import {
-    applySmugglingAllocation,
-    applyUnAirdrops,
-    updateSupplyReserves
-} from '../../state/supply_reserves.js';
 import type { Osid } from '../combat/osid_adjacency.js';
 import { enforceGuardsEnclaveBoundary, generateArmyReserveRequests, evaluateArmyReserveAssignments, tickEliteLoans } from '../combat/army_reserve_system.js';
 import { buildHomeDistanceCache } from '../combat/home_distance.js';
@@ -1630,43 +1625,12 @@ export const warPhases: NamedPhase[] = [
     },
     // Retired 2026-11-17 (§6 panel): 'update-siege-counters' (siege turn counters are not modelled in 1.0).
     {
-        name: 'compute-supply-reserves',
-        run: (context) => {
-            if (context.state.meta.phase !== 'war') return;
-            if (!context.state.meta.supply_reserves_enabled) return;
-            const productionBonus = context.report.supply_resolution?.production_bonus_by_faction ?? {};
-            context.report.supply_reserves = updateSupplyReserves(context.state, productionBonus);
-        }
-    },
-    {
-        name: 'update-smuggling-routes',
-        run: async (context) => {
-            if (context.state.meta.phase !== 'war') return;
-            if (!context.state.meta.supply_reserves_enabled) return;
-            const { updateSmugglingRoutes, getSmugglingIncome } = await import('../economy/smuggling_routes.js');
-            const turn = context.state.meta.turn;
-            updateSmugglingRoutes(context.state, turn);
-            // Apply smuggling income to supply reserves
-            const income = getSmugglingIncome(context.state);
-            const generalSupplyReserve = context.state.military.general_supply_reserve;
-            const heavyMunitionsReserve = context.state.military.heavy_munitions_reserve;
-            if (generalSupplyReserve && heavyMunitionsReserve) {
-                for (const fid of Object.keys(income.general).sort()) {
-                    generalSupplyReserve[fid] = Math.min(100,
-                        (generalSupplyReserve[fid] ?? 0) + (income.general[fid] ?? 0));
-                    heavyMunitionsReserve[fid] = Math.min(100,
-                        (heavyMunitionsReserve[fid] ?? 0) + (income.heavy[fid] ?? 0));
-                }
-            }
-        }
-    },
-    {
         name: 'enclave-resilience',
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
             const supplyByOsid = context.report.supply_resolution?.supply_state_by_osid;
             context.report.enclave_resilience = updateEnclaveResilience(context.state, supplyByOsid);
-            applyUnAirdrops(context.state);
+            // applyUnAirdrops retired 2026-11-17 (Fable consult 6): airdrops fed only the retired reserve.
         }
     },
     {
@@ -4037,7 +4001,7 @@ export const warPhases: NamedPhase[] = [
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
             updateEmbargoProfiles(context.state);
-            applySmugglingAllocation(context.state);
+            // applySmugglingAllocation retired 2026-11-17 (Fable consult 6): nothing wrote smuggling_allocation.
             ensureMaintenanceCapacity(context.state);
             context.report.embargo_update = { factions: context.state.factions.length };
         }
@@ -4105,7 +4069,7 @@ export const warPhases: NamedPhase[] = [
         }
     },
     // F1i (2026-11-16): 'evaluate-humanitarian-convoys' is retired; humanitarian convoys are not in
-    // 1.0 (see supply_reserves.ts). The step never found a route on any reachable path.
+    // 1.0 (the reserve module was retired 2026-11-17). The step never found a route on any reachable path.
     {
         name: 'update-legitimacy',
         run: async (context) => {

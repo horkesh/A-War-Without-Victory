@@ -88,7 +88,6 @@ contextBridge.exposeInMainWorld('awwv', {
   // the engine auto-selects the force + axis and builds the op (requested_by_president).
   stageOpDirectiveOrder: (payload) => ipcRenderer.invoke('stage-op-directive-order', payload),
   stageOperationDecision: (payload) => ipcRenderer.invoke('stage-operation-decision', payload),
-  stageAirdropAllocation: (allocations) => ipcRenderer.invoke('stage-airdrop-allocation', { allocations }),
   stageOpsecToggle: (sectorId, active) => ipcRenderer.invoke('stage-opsec-toggle', { sectorId, active }),
   stageMunicipalitySupportOrder: (payload) => ipcRenderer.invoke('stage-municipality-support-order', payload),
   focusWarroom: () => ipcRenderer.invoke('focus-warroom'),

@@ -13,22 +13,31 @@
       "turn_max": 103,
       "phase": "war",
       "condition": {
-        "type": "or",
+        "type": "and",
         "conditions": [
           {
-            "type": "flag_equals",
-            "flag": "hrhb_political_goal",
-            "value": "croat_republic"
+            "type": "rbih_hrhb_war_started",
+            "value": true
           },
           {
-            "type": "flag_equals",
-            "flag": "hrhb_political_goal",
-            "value": "united_front"
-          },
-          {
-            "type": "flag_equals",
-            "flag": "hrhb_political_goal",
-            "value": "strategic_ambiguity"
+            "type": "or",
+            "conditions": [
+              {
+                "type": "flag_equals",
+                "flag": "hrhb_political_goal",
+                "value": "croat_republic"
+              },
+              {
+                "type": "flag_equals",
+                "flag": "hrhb_political_goal",
+                "value": "united_front"
+              },
+              {
+                "type": "flag_equals",
+                "flag": "hrhb_political_goal",
+                "value": "strategic_ambiguity"
+              }
+            ]
           }
         ]
       }
@@ -111,10 +120,10 @@
     "id": "markale_massacre_1994",
     "image": "event_markale_shelling.webp",
     "title": "First Markale Massacre",
-    "narrative": "A mortar shell strikes the Markale marketplace in Sarajevo, killing more than 60 civilians and wounding more than 140. The images of carnage broadcast worldwide provoke outrage and push NATO toward its first decisive action in the Bosnian war. The VRS denies responsibility; the ICTY later finds that the shell was fired from territory held by the SRK.",
+    "narrative": "A mortar shell strikes the Markale marketplace in Sarajevo, killing 68 people, nearly all of them civilians, and wounding more than 140. The images of carnage broadcast worldwide provoke outrage and push NATO toward its first decisive action in the Bosnian war. The VRS denies responsibility; the ICTY later finds that the shell was fired from territory held by the SRK.",
     "source_note": "Existing ICTY/UN and same-id essay sources ground the row's provenance and institutional context. This note adds no casualty figures, causal claims, prohibited player choices, or alternate-outcome prevention framing.",
     "category": "humanitarian",
-    "historical_source": "ICTY Galić Trial Judgment (IT-98-29-T), Markale shelling incident of 5 February 1994 (more than 60 killed, more than 140 wounded; fired from SRK-held territory); ICTY Galić Appeal Judgement (IT-98-29-A, 30 November 2006), finding upheld; UNPROFOR investigation report, February 1994",
+    "historical_source": "ICTY Mladić Trial Judgement (IT-09-92-T, 22 November 2017), Scheduled Incident G.8, para. 2097: a 120 mm mortar shell fired by SRK members from Mrkovići killed 68 people and injured over 140, almost all civilians; Mladić Appeal Judgement (MICT-13-56-A, 8 June 2021), para. 334, finding upheld (Judge Nyambe dissenting); ICTY Galić Trial Judgment (IT-98-29-T), Markale shelling incident of 5 February 1994 (more than 60 killed, more than 140 wounded; fired from SRK-held territory); ICTY Galić Appeal Judgement (IT-98-29-A, 30 November 2006), finding upheld; UNPROFOR investigation report, February 1994",
     "source_tier": "icty_icj_un",
     "trigger": {
       "turn_min": 96,
@@ -135,7 +144,7 @@
     "effects": [
       {
         "kind": "narrative",
-        "text": "The Markale massacre kills more than 60 civilians. The atrocity becomes the catalyst for NATO's ultimatum to the VRS."
+        "text": "The Markale massacre kills 68 people, nearly all of them civilians. The atrocity becomes the catalyst for NATO's ultimatum to the VRS."
       }
     ],
     "dimension_shifts": [

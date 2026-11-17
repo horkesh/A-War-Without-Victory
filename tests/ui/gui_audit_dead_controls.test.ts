@@ -44,7 +44,6 @@ function makeState(overrides: Partial<LoadedGameState> = {}): LoadedGameState {
         turnSummaries: [],
         corpsFrontSectors: [],
         operations: [],
-        factionReserves: {},
         ...overrides,
     } as LoadedGameState;
 }
@@ -281,7 +280,6 @@ describe('GUI audit Batch G dead/no-op controls', () => {
                 formations: [
                     { id: 'vrs_1st_krajina', faction: 'RS', name: '1st Krajina Corps', kind: 'corps', readiness: 'ready', cohesion: 0.8, fatigue: 0.1, status: 'active', createdTurn: 1, tags: [] },
                 ],
-                factionReserves: { RS: { generalSupply: 80, heavyMunitions: 70 } },
             }),
             selectedArmyId: 'RS',
             armyHQOpen: true,

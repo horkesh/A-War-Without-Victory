@@ -1424,7 +1424,7 @@
               "rbih_state_identity"
             ],
             "material_effect_refs": [],
-            "explanation": "The civic platform aligns Sarajevo's posture with the NATO-led Sarajevo Heavy Weapons Exclusion Zone regime imposed by the North Atlantic Council ultimatum of 9 February 1994 following the Markale market shelling of 5 February 1994 (more than 60 civilians killed; ICTY Galić IT-98-29-T attributing the shelling to SRK/VRS positions). The civic line carries Sarajevo's documented cooperation with UNPROFOR HWEZ inspections and public framing of NATO enforcement as overdue Western action: the Presidency accepts the symmetric application of withdrawal demands to ARBiH heavy weapons inside the 20km perimeter (NATO NAC decision 9 February 1994; UNSCR 836 of 4 June 1993; UN A/54/549 §§ on Sarajevo HWEZ regime; BB Vol. II Sarajevo siege chronology)."
+            "explanation": "The civic platform aligns Sarajevo's posture with the NATO-led Sarajevo Heavy Weapons Exclusion Zone regime imposed by the North Atlantic Council ultimatum of 9 February 1994 following the Markale market shelling of 5 February 1994 (68 killed, nearly all of them civilians; ICTY Mladić IT-09-92-T; ICTY Galić IT-98-29-T attributing the shelling to SRK/VRS positions). The civic line carries Sarajevo's documented cooperation with UNPROFOR HWEZ inspections and public framing of NATO enforcement as overdue Western action: the Presidency accepts the symmetric application of withdrawal demands to ARBiH heavy weapons inside the 20km perimeter (NATO NAC decision 9 February 1994; UNSCR 836 of 4 June 1993; UN A/54/549 §§ on Sarajevo HWEZ regime; BB Vol. II Sarajevo siege chronology)."
           },
           {
             "id": "civic_to_bihac_5th_corps",
@@ -1699,7 +1699,7 @@
               "rbih_state_identity"
             ],
             "material_effect_refs": [],
-            "explanation": "The Bosniak-national line still reaches the February 1994 NATO ultimatum HWEZ compliance decision. The North Atlantic Council ultimatum of 9 February 1994 following the Markale market shelling of 5 February 1994 (more than 60 civilians killed; ICTY Galić IT-98-29-T) applies symmetrically to ARBiH heavy weapons inside the 20km exclusion zone. On this branch the Assembly hardline current is louder against the moral-equivalence framing of symmetric application, but the Presidency's documented historical posture of HWEZ cooperation still arrives at the table (NATO NAC decision 9 February 1994; UNSCR 836 of 4 June 1993; UN A/54/549 §§ on Sarajevo HWEZ regime; BB Vol. II Sarajevo siege chronology)."
+            "explanation": "The Bosniak-national line still reaches the February 1994 NATO ultimatum HWEZ compliance decision. The North Atlantic Council ultimatum of 9 February 1994 following the Markale market shelling of 5 February 1994 (68 killed, nearly all of them civilians; ICTY Mladić IT-09-92-T) applies symmetrically to ARBiH heavy weapons inside the 20km exclusion zone. On this branch the Assembly hardline current is louder against the moral-equivalence framing of symmetric application, but the Presidency's documented historical posture of HWEZ cooperation still arrives at the table (NATO NAC decision 9 February 1994; UNSCR 836 of 4 June 1993; UN A/54/549 §§ on Sarajevo HWEZ regime; BB Vol. II Sarajevo siege chronology)."
           },
           {
             "id": "bosniak_national_to_bihac_5th_corps",
@@ -1967,7 +1967,7 @@
               "rbih_state_identity"
             ],
             "material_effect_refs": [],
-            "explanation": "The pragmatic line carries the same instrumental posture (civic rhetoric outward, Bosniak institutions inward) into the February 1994 NATO ultimatum HWEZ compliance decision. The North Atlantic Council ultimatum of 9 February 1994 following the Markale market shelling of 5 February 1994 (more than 60 civilians killed; ICTY Galić IT-98-29-T) is read by Sarajevo as the long-overdue Western coercion the pragmatic posture has been positioning for; the Presidency's documented HWEZ cooperation lines up with the international-standing return on the diplomatic exterior (NATO NAC decision 9 February 1994; UNSCR 836 of 4 June 1993; UN A/54/549 §§ on Sarajevo HWEZ regime; BB Vol. II Sarajevo siege chronology)."
+            "explanation": "The pragmatic line carries the same instrumental posture (civic rhetoric outward, Bosniak institutions inward) into the February 1994 NATO ultimatum HWEZ compliance decision. The North Atlantic Council ultimatum of 9 February 1994 following the Markale market shelling of 5 February 1994 (68 killed, nearly all of them civilians; ICTY Mladić IT-09-92-T) is read by Sarajevo as the long-overdue Western coercion the pragmatic posture has been positioning for; the Presidency's documented HWEZ cooperation lines up with the international-standing return on the diplomatic exterior (NATO NAC decision 9 February 1994; UNSCR 836 of 4 June 1993; UN A/54/549 §§ on Sarajevo HWEZ regime; BB Vol. II Sarajevo siege chronology)."
           },
           {
             "id": "pragmatic_to_bihac_5th_corps",
@@ -2935,7 +2935,7 @@
           {
             "faction": "HRHB",
             "dimension": "patron_confidence",
-            "delta": -25
+            "delta": -35
           },
           {
             "faction": "HRHB",
@@ -3521,7 +3521,7 @@
           {
             "faction": "HRHB",
             "dimension": "patron_confidence",
-            "delta": -15
+            "delta": -25
           },
           {
             "faction": "HRHB",

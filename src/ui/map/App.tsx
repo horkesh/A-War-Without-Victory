@@ -33,11 +33,8 @@ const AutonomyPanel = lazy(() =>
 import { TurnAftermathModal } from './components/TurnAftermathModal';
 import { OperationBriefingModal } from './components/OperationBriefingModal';
 import { SupplyPanel } from './components/SupplyPanel';
-// War Footing opens on demand from the President's Desk (surface step 5), so it loads then
-// and stays out of the entry chunk like RecruitmentModal and AutonomyPanel.
-const EconomyPanel = lazy(() =>
-  import('./components/EconomyPanel').then(m => ({ default: m.EconomyPanel })),
-);
+// The War Footing (Economy) panel was retired 2026-11-17 with the supply-reserve economy
+// (Fable consult 6): it showed reserves, smuggling routes and facility damage that no longer exist.
 // The Humanitarian Ledger and the Enclave dashboard open on demand; they load in their own
 // chunk so the entry chunk stays under the vite.config.ts chunk-size limit, which the
 // player-experience gate blocks on (council fix 4 grew the entry chunk past it, 2026-11-14).
@@ -740,7 +737,6 @@ function App() {
   const [summaryOpen, setSummaryOpen] = useState(false);
   const [summaryFocus, setSummaryFocus] = useState<SummaryFocusSection>('overview');
   const [enclaveDashboardOpen, setEnclaveDashboardOpen] = useState(false);
-  const [economyOpen, setEconomyOpen] = useState(false);
   // Item 2: National Humanitarian Ledger surface (read-model; 'U' hotkey toggle).
   const [humanitarianLedgerOpen, setHumanitarianLedgerOpen] = useState(false);
   const [aiSettingsOpen, setAiSettingsOpen] = useState(false);
@@ -1039,7 +1035,6 @@ function App() {
     commandStripOpen ||
     summaryOpen ||
     enclaveDashboardOpen ||
-    economyOpen ||
     humanitarianLedgerOpen ||
     aiSettingsOpen ||
     diplomacyOpen ||
@@ -1071,7 +1066,6 @@ function App() {
     turnAftermathOpen ||
     summaryOpen ||
     enclaveDashboardOpen ||
-    economyOpen ||
     humanitarianLedgerOpen ||
     aiSettingsOpen ||
     diplomacyOpen ||
@@ -1424,7 +1418,6 @@ function App() {
     setTurnAftermathOpen(false);
     setSummaryOpen(false);
     setEnclaveDashboardOpen(false);
-    setEconomyOpen(false);
     setHumanitarianLedgerOpen(false);
     setAiAdvisorOpen(false);
     suppressCommandBriefingForCurrentTurn();
@@ -2145,11 +2138,6 @@ function App() {
       {mapMode === 'supply' && loadedGameState && (
         <SupplyPanel state={loadedGameState} />
       )}
-      {economyOpen && loadedGameState && (
-        <Suspense fallback={null}>
-          <EconomyPanel state={loadedGameState} onClose={() => setEconomyOpen(false)} />
-        </Suspense>
-      )}
       {loadedGameState && (
         <Suspense fallback={null}>
           <HumanitarianLedgerPanel
@@ -2422,7 +2410,6 @@ function App() {
                 }
                 leaveWarroomForGame();
               }}
-              onOpenEconomy={() => setEconomyOpen(true)}
               onClose={() => {
                 closeWarroomDesk();
               }}

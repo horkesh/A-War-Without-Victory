@@ -302,8 +302,9 @@ describe('desktop player-visible state projection', () => {
     expect(intel.enemy_sector_id).toBe('contact-sector:0');
     expect(intel.visible_brigade_ids).toEqual(['contact:RBiH:op:enemy:front']);
     expect(intel.confidence).toBe(0.75);
-    expect(projected.military.general_supply_reserve).toEqual({ RS: 55 });
-    expect(projected.military.heavy_munitions_reserve).toEqual({ RS: 44 });
+    // Supply reserves are retired compatibility-only fields (2026-11-17): never projected.
+    expect(projected.military.general_supply_reserve).toBeUndefined();
+    expect(projected.military.heavy_munitions_reserve).toBeUndefined();
     expect(projected.military.army_stance).toEqual({ RS: 'balanced' });
     expect(projected.military.recruitment_state.recruitment_capital).toEqual({ RS: { points: 4 } });
     expect(projected.military.recruitment_state.recruited_brigade_ids).toEqual(['rs_brigade']);
