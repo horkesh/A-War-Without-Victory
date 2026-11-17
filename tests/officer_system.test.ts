@@ -861,7 +861,8 @@ describe('succession assignment penalties', () => {
     it('the vacancy fallback never seats an officer of another corps; an acting commander takes it', () => {
         // Commander attribution PR 2a: before, the pool officer of vrs_srk took vrs_1kk with a -2 penalty.
         const data = [
-            makeOfficer({ id: 'pool1', faction: 'RS', home_corps_id: 'vrs_srk', pool_tier: 'tier_a' }),
+            makeOfficer({ id: 'pool1', faction: 'RS', home_corps_id: 'vrs_srk', pool_tier: 'tier_a', competence: 4, aggressiveness: 2, defensive_skill: 5, political_reliability: 1 }),
+            makeOfficer({ id: 'pool2', faction: 'RS', home_corps_id: 'vrs_srk', pool_tier: 'tier_a', competence: 3, aggressiveness: 4, defensive_skill: 2, political_reliability: 4 }),
         ];
         const state = makeMinimalState();
         state.military.formations = {
@@ -870,6 +871,7 @@ describe('succession assignment penalties', () => {
         state.military.named_officer_data = data;
         state.military.named_officers = {
             pool1: makeOfficerState({ officer_id: 'pool1', status: 'reserve' }),
+            pool2: makeOfficerState({ officer_id: 'pool2', status: 'reserve' }),
         };
 
         const report = processOfficerSuccession(state, new Set());
@@ -880,6 +882,12 @@ describe('succession assignment penalties', () => {
         const acting = getCorpsCommander('vrs_1kk', state);
         assert.ok(acting?.data.id.startsWith('generic_'));
         assert.equal(acting?.state.acting_commander, true);
+        // The acting commander is NEUTRAL: the faction's average corps commander, and he doesn't learn.
+        assert.equal(acting?.data.competence, 3.5);
+        assert.equal(acting?.data.aggressiveness, 3);
+        assert.equal(acting?.data.defensive_skill, 3.5);
+        assert.equal(acting?.data.political_reliability, 2.5);
+        assert.equal(acting?.data.can_improve, false);
     });
 
     it('incompatible corps gets -2 penalty for 12 turns (a scheduled holder)', () => {
