@@ -39,6 +39,33 @@
     - C reneges: war t104, ceasefire t149, Path A signs t153;
     - D no compact: final saves byte-identical (same SHA-256, player and headless) to the earlier no-compact run on #768.
 
+## 2026-11-17 — A2b PR-B: the VOPP lapse is re-keyed to `resist_patron`, the patron-drag damping rests on payment, and the cards name the compact, its price and how it ends (copy panel; byte-identical left alone)
+
+- **Why.** The #768 merge gate recorded that the compact was invisible and that VOPP's default `acknowledge_pressure` "silently ends a peace the player has been paying for". A design round (game designer, historian, narrative designer, ui-ux; two rounds, orchestrator-ruled) checked the mechanism and found the premise wrong:
+  - `auto_resolve_turns` is declared (`event_types.ts`) and read nowhere. Nothing answers a card for the President in a played game; an unanswered advisory VOPP card stays pending and the compact stays in force. The "silent default" came from the ai_play harness fallback (it logs `player`) and from a click on the Historical-default chip.
+  - The real defects: the lapse key was backwards, and nothing told the player what the compact is.
+  - VOPP (`zagreb_restrains_boban_vopp`, t46-54) is Zagreb restraining HVO offensive operations during the Vance-Owen window; `acknowledge_pressure` is the documented historical answer. Lapsing on it made a cooperative President pick the aggressive counterfactual (`resist_patron`) to keep the compact.
+- **Ruling** (round 2: game designer and historian, both L2). Re-key the lapse: `resist_patron` (pressing the provincial map despite Zagreb's call for restraint) ends the compact; `acknowledge_pressure` is neutral (it neither renews nor ends it). The card stays advisory (no blocking). Every other lapse key is a refusal, an escalation or a breakout, so the rule is now consistent.
+- **Second ruling: the patron-drag damping rests on payment** (orchestrator, with game designer and historian ratification, one round). Under the re-key alone, two 1992 choices bought a one-week war (careless: war t101, Federation t102), against the standing A2b condition "no one-click peace". The cause the orchestrator named: the drag damping from the 1992 choices was permanent (x0.5 per granting choice) while the compact needs renewing. It is now x0.5 per ACTIVE entry (exactly 1.0 with none), like the pressure and recruitment multipliers, so it returns when the entries run out, lapse or end at the signing. This amends the panel-approved "permanent stance" mechanism; the historian found no record reason for a permanent halving (Zagreb's pull reasserted itself at the Vance-Owen window and in spring 1993; the war ended when Zagreb changed course in March 1994 under US and sanctions pressure, not through a stance the HVO declared in 1992). `granting_choices` stays in the status as a count of the stance. Bots and left-alone runs: no entries, exactly 1.0.
+- **Change.**
+  - `src/sim/early_war/refugee_compact.ts`: `getPatronDragStanceMultiplier` reads `active_entries`; the VOPP lapse is `resist_patron`; `getRefugeeCompactStatus` also returns `latest_expiry` (the turn the compact is in force until; null when none), for the standing line. The header cite is corrected: the Balkan Battlegrounds Vol. I p.179 and p.189 references did not support the claim (they cover the Patriotic League and Sarajevo); the sources are now the ICTY trial judgments by name (Blaškić IT-95-14-T, Kordić and Čerkez IT-95-14/2-T, Hadžihasanović and Kubura IT-01-47-T, Prlić et al. IT-04-74-T), paragraph ranges unverified and left to the copy panel. "Burden" wording removed from the comments.
+  - **Card copy** (`data/scenarios/events/war_1992.json`, `war_1993.json`; copy panel: the narrative designer authored, the historian reviewed and amended). Text-level splice; a parsed-JSON comparison shows exactly 16 description fields changed (11 EN, 5 BCS) and nothing else. Each line is state-conditional ("If your refugee compact is in force, ...") because the same card is shown to Presidents with no compact:
+    - the two grant options (`united_front`; `formal_alliance_persists`) say it opens a compact for 56 weeks, what it eases (the strain that displacement adds to the alliance), what it costs (HVO recruitment, Zagreb's confidence) and that later answers can renew it;
+    - the renewals (GV `negotiate`, H6 `federate_early`, overture `extend_federation_overture`) say they renew it for at least 30 or 40 more weeks;
+    - the lapses (GV `escalate`, H6 `breakout_offensive`, overture `maintain_separate_state` and `reject_federation_path`, VOPP `resist_patron`) say they end it for good and that recruitment recovers;
+    - VOPP `acknowledge_pressure` and `resist_patron` had no description at all; both now have one, stating the card's own modelled effects (confidence, leverage, cohesion, credibility), and the acknowledge line says it neither renews nor ends the compact.
+    - The historian's amendments are applied: the compact damps only the refugee-pressure term, so no line says "strain on the alliance" in general; `resist_patron` does not imply the HVO defied Zagreb in the record; no "burden", no "prevents war"; nothing implies refugees caused the war.
+  - Canon: Systems Manual §6.6a A2b note (lapses, neutral acknowledge, "a played game never answers an unanswered advisory card for the President").
+- **BCS.** Shipped on the three cards that already carry a `localizations.bcs.response_options` block (`hrhb_political_goal`, `gornji_vakuf_clashes_1993`, `hrhb_central_bosnia_defense_1993`). The Graz, overture and VOPP cards have no BCS block (a bcs block replaces the whole card text), so their BCS lines wait for the event-translation lane; they are authored and filed in the shared notes (`a2b_compact_copy_final_20261117.md`), consistent with the owner's ruling that 1.0 ships English with Bosnian labelled partial.
+- **Measured** (played HRHB, 130 turns, C 188; paying = both 1992 grants, VOPP acknowledge, H6 `federate_early`, overture `extend_federation_overture`; logs `_logs/b5-scorer-20261116/fu_prb/l2/` (re-key only) and `l3/` (re-key + drag per active entry, the shipped state)):
+  - A pays: Path C at **t102**, no war (unchanged by either change).
+  - B careless (grants only): re-key alone war **t101**; with the drag per active entry war **t98**; Federation t102 (it was war t71 before the re-key). The acknowledge (Path A') probe is the same (war t98, signs t102); refuse is war t98, unsigned by t130 (alliance 0.34).
+  - V (grants, resist at VOPP, renewals): war **t67**, Federation t102 (re-key alone: war t102, unsigned by t130).
+  - C reneges at t87 (reject overture): war **t100**, ceasefire t145, Path A signs t149 (before: t104 / t149 / t153).
+  - D no compact: final save byte-identical (same SHA-256) to the earlier no-compact run.
+  - **Why the careless branch is still near-peace** (per-turn drift log, `l3` drift runs `Bd` and `Vd`): the compact entries run out at t56 and t61 and the alliance falls to 0.256 by t64; at t68 `csq_back_channel_communication_RS` fires and its `alliance_lock` floor 0.15 for 25 turns pins the RBiH-HRHB alliance at exactly 0.150 until t93; the war starts when the floor expires (war t98). In V that consequence fires only at t119, after the war. That is the known lock-conflict defect (a lock authored for the RS patron back-channel is applied to the RBiH-HRHB alliance; fix held on `claude/b5-alliance-lock-conflict` until package P2), not the compact. Referred to the orchestrator.
+- **Not in this PR.** The standing line and the suspended and ended receipts for the records panel (needs the `rbih_hrhb_state` projection, i18n keys, a rendered proof and the GUI master row) are the next piece; the final lines are in the shared notes. Line N is on VOPP acknowledge only; the silent options (`conditional_federation_with_canton_caveats`, `defend_pocket`, `evacuate_to_herzegovina`) carry no compact line.
+
 ## 2026-11-17 — A2b: the HRHB refugee compact; a cooperative HRHB President can keep the peace only by paying for it (byte-identical left alone)
 
 - **Why** (owner principle: history if left alone, agency if played). An HRHB President who chose `united_front` and `formal_alliance_persists` still went to war with RBiH, at t63 against t49 left alone. The driver probe (`a2b_alliance_drift_drivers.md`, shared notes) explains why:
@@ -155,6 +182,23 @@ Evidence: `C:/Pyrrhic/AWWV-worktrees/_logs/precedence-20261116/`.
 
 **Not done.** `eventAudience.ts` (#784) should join both consumer lists when it lands.
 
+## 2026-11-17 — Event card narrative lines: Bosnian text, pinned to the English
+
+**Why.** An acknowledgement card shows one narrative line under the event's narrative (the `{ kind: 'narrative', text }` row of `effects[]`, or the single `effect` when there is no `effects[]`). Those lines were English in every locale, and nothing said which ones a player can actually see. Counting with the loader's own rule (`eventDefinitionDisplayEffects`): 87 lines reach a card (62 from `effects[]`, 25 from a single `effect` on an event with no list), one per event. Another 65 sit on decisions the player must answer (the decision modal never shows narrative lines) and a large block of single `effect` rows beside an `effects[]` list is never shown; none of those gets a key.
+
+**Change** (UI only; no engine or catalog file touched).
+- `src/ui/map/data/eventEffectText.ts`: resolver. Key is `<event id>#<ordinal>`; the Bosnian line is used only while its pinned English still equals the catalog sentence, otherwise the card shows the English.
+- `src/ui/map/data/eventEffectBcs.ts`: the 87 lines, each `{ en, bcs }`. Written by the narrative seat; the Historian seat reviewed the sensitive ones (see the report folder).
+- `src/ui/map/App.tsx`: `buildAcknowledgementEffects` routes the card's lines through the resolver; the formatter takes the event id and ordinal.
+- Retired two dead formatters: the exported `describeEventEffect` in `EventModal.tsx` (no caller) and the unreachable narrative case of `EventDecisionModal`'s `describeEffect`; the `[narrative]` prefix filter in `EventModal` never matched.
+- `tests/ui/event_effect_text_localised.test.ts`: the table equals, key for key, the lines the shipped catalogs can show; each pin equals the catalog English; a reworded English falls back to English; hidden single effects have no key; and a list-driven record of the Bosnian title/narrative gap (`tests/ui/fixtures/event_bcs_copy_gap.json`, 286 of 303 events) that must shrink as events are translated and must grow only on purpose.
+
+**Hash.** Neutral by construction (no file the engine reads changed); proved against clean main.
+
+**Seats.** Narrative designer wrote all 87; the Historian reviewed the 38 sensitive or killing/adjudication lines (21 OK, 4 BCS fixes applied: "logor" for Omarska, Keraterm and Trnopolje, "Uzdol" and "MKSJ-a" in the Grabovica line). The decision modal and the answered-decision card never print a narrative line, and a test proves it, so the 65 narrative lines on decisions have no key.
+
+**Rebased on #795** (the 13 corrected English lines: Srebrenica 7,000-8,000 with the genocide finding, and the others; the two Markale cards then moved again under #799 to the Mladić findings: Markale I 68 killed, nearly all civilians, Markale II at least 43, the vast majority civilians). The 13 pins now carry the corrected English and the Bosnian was rewritten to the corrected facts; a second seat re-read them and its wording fixes are applied. Native-reader confirmation of "logor", "preuzimanje vlasti" and "zvjerstvo/zločin" remains with the owner.
+
 ## 2026-11-17 — Farz guard P-A: the operation's own Army HQ id identifies the authored Farz (tooling only)
 
 Orchestrator ruling on the Run B Farz trace (package "1994-95 attack and defence"). Checker-only: the simulation hash is unchanged.
@@ -253,6 +297,12 @@ No `src/` change, so the simulation hash is unchanged.
 **Seats.** Historian and Narrative Designer, independent. Where they differ, the default is private (a wrongly hidden notice costs the other side a line; a wrongly shown one is the leak).
 
 **Follow-ups, not in this change.** (1) Five Historian "public, if trimmed" notices (camps discovery, early NATO threshold, early war-crimes tribunal, Srebrenica stalemate, joint operations agreement) stay private until their private tail sentences are trimmed. (2) `csq_arms_embargo_compliance_audit` is untrue as authored (its trigger omits the RS and HRHB arms-pipeline-attenuated flags): an engine-side trigger fix for the §6 lane. (3) `csq_enclave_held_alt_intervention` wording ("resilience indices", hindsight lines). (4) Wording fixes in `csq_international_tribunal_observation` and `csq_refugee_absorption_strain`. (5) `notable_events` text lines (no event id) are not gated.
+
+## 2026-11-17 — The player's projected peace-plan history is no longer always empty
+
+`src/desktop/player_visible_state.cjs` filtered `peace_plan_history` with `rowsForFaction`, which keeps rows carrying a `faction`, `player_faction`, `target_faction` or `targetFaction` field. Peace-plan rows (`PeacePlanResponse`) carry none of those: each is one resolved plan with every faction's answer in `responses`, written whole when the player answers (`peace_plans.ts`), so the projection returned `[]` for every player and the renderer's ledger never filed a Peace proposal record or showed the other sides' answers. New `peacePlanHistoryRowsForFaction` keeps the rows the player's faction answered (`responses[<player faction>]` present); the rows hold no hidden information (the pending plan's precomputed bot answers are still redacted separately).
+
+Tests (`tests/desktop_player_visible_state.test.ts`): the projection keeps a played plan with all recorded answers and drops a row the player never answered; and an end-to-end case (real campaign, projection, `parseGameState`, ledger) files the `peace:vance_owen:40` Peace proposal record with the player's own response. Verified against `origin/main`: the same input projects 0 rows there, 1 here. Desktop projection only; no engine file, no hash input changed.
 
 ## 2026-11-17 — The staff-action receipt says "counts against your side" only when the action took its target
 
@@ -449,6 +499,57 @@ The Bosnian pins in #791 follow this English: whichever PR lands second updates 
 
 **BCS:** #791 pins both Markale cards' new English.
 
+## 2026-11-17 — §6: the RS back-channel card no longer locks the RBiH-HRHB alliance; loader guard for alliance effects (byte-identical left alone)
+
+**Why.** `csq_back_channel_communication_RS` carried an `alliance_lock` floor of 0.15 for 25 turns. `alliance_lock` and `alliance_change` move only the RBiH-HRHB alliance, so this RS card propped up the Federation; it looks copied from the RBiH variant. The washington-2 lane measured that in play the card fires at t68 for a careless cooperative HRHB President and holds the alliance at 0.15 for 25 turns, so the Croat-Bosniak war comes only at t98. The historian found the card's premise unsupported after August 1994 (s6_belgrade_cards_historian.md).
+
+**Ruling.** Orchestrator, 2026-11-17: pull this one card-batch item forward as a small early PR, with a catalog guard so it cannot recur.
+
+**Change.**
+- `consequences.json`: the `alliance_lock` is removed from `csq_back_channel_communication_RS`. Its other effects stay.
+- `event_loader.ts`: new pass `validateAllianceEffectParties`. An alliance effect on a row whose `responding_faction` is not RBiH or HRHB fails the load, in `effect`, `effects[]` or any response option. A row with no `responding_faction` is global (for example `csq_early_peace_acceptance_w120`, which floors the alliance at 0 after a peace plan is accepted).
+- The closed allowlist `NON_PARTY_ALLIANCE_EFFECT_ALLOWLIST` holds three authored RS choice options. Each is counterfactual and is never chosen hands-off in historical mode. They are held for the §6 card batch:
+  - `rs_autonomy_path_decision_1993#accept_federation_status`;
+  - `rs_owen_stoltenberg_response_1993#accept_with_modifications`;
+  - `rs_washington_rejection_1994#propose_trilateral`, whose copy says the alliance "frays" while its effect raises it.
+  A test fails if an entry stops matching, so the list can only shrink.
+- Authoring guide §4: the new pass.
+
+**Known gap, for the card batch.** The card's audit annotation still reads "soft alliance floor 0.15 for 25 turns".
+- On current main the card fires hands-off at t119, and the annotation text is stored in the save, so changing it here would move the hash.
+- After #797 and #804 the card no longer fires hands-off, and the copy fix becomes hash-neutral. The card batch already fixes or retires this card's copy.
+
+**Measured** (official runner, base main 0e310a5fc): every run artifact is byte-identical in both modes, except `run_meta.json` (output folder, input digest, dirty flag).
+- final_save: historical 964ab22c838c94a8, emergent 32f70252f45bebc4.
+- On main the card still fires at t119. The identical outputs show its lock was inert in both hands-off runs. The lock expires at t144 and is then pruned from the save.
+
+**Tests.** `tests/event_alliance_effect_parties.test.ts`: the shipped catalog loads; synthetic RS rows fail in `effects`, `effect` and options; RBiH, HRHB and global rows pass; the allowlist is closed and every entry still matches. RED: the guard run on main's catalog throws on exactly `csq_back_channel_communication_RS`. A 66-file slice (every test naming the card, `alliance_lock` or the loader) passes.
+
+## 2026-11-17 — The September 1991 peace start is removed; schema v40 deletes `meta.peace_war_start_control_path`
+
+The campaign structure decision of 2026-03-23 (`PROJECT_LEDGER_KNOWLEDGE.md`) cut the September 1991 start: April 1992 is the only campaign. `sep1991_to_dayton` survived as a leftover scenario file, and its peace start wrote an ABSOLUTE filesystem path into GameState (`meta.peace_war_start_control_path`), so its state hash depended on where the repo was checked out. Orchestrator ruling: retire the dead path rather than make it repo-relative (the `relative-control-path` branch is dropped, never opened as a PR).
+
+**Removed.**
+- `data/scenarios/sep1991_to_dayton.json` and its `SCENARIO_REGISTRY` entry ("Peace to War"; it still said `available: true`, but no runtime code reads the registry).
+- The runner's peace-start block (`start_lifecycle_phase === 'peace'`), the peace war-start turn for org-pen seeding (now always 0), the 1991 start date branch, and the control-map read at the peace-to-war transition.
+- The scenario fields `peace_referendum_held_at_start`, `peace_rs_declared_at_start`, `peace_hrhb_declared_at_start`, `peace_referendum_turn`, `peace_war_start_turn`, `peace_war_start_control`. The loader now rejects `start_lifecycle_phase: "peace"`; `"war"` is the only start.
+- `meta.peace_war_start_control_path`: removed from the `GameState` type and the player-visible meta projection. Nothing in `src/sim`, the desktop or the UI read it.
+
+**Later starts retired too: 1.0 ships ONE start, April 1992.** Owner ruling 2026-11-17: "All I want for 1.0 is one game, one start, one truthful game. Those scenarios are leftovers."
+- `data/scenarios/apr1993_start.json` and `apr1994_start.json` were placeholders: they differed only in `scenario_id` and briefing text, set no `init_control`, start week or start formations, and so both ran April 1992 for 52 weeks with the identical final hash (`914c6aaa7ed5cbe1` on main 23d130286). Deleted.
+- `data/scenarios/apr1995_start.json` was a real start (`init_control` and `init_formations` = `apr1995`) but is not 1.0 content. Deleted.
+- Nothing in `src` or the desktop offered any of the three; no registry entry named them.
+- The generic mid-war start capability is KEPT (the loader's `init_control` / `init_formations` key resolvers and the runner path), so later starts can arrive after 1.0 as pure data. It is now covered by `tests/fixtures/scenarios/mid_war_start_init_control.json` (`tests/scenario_init_control.test.ts`) instead of a shipped scenario. The apr1995 control and formation data files stay; the fixture uses them. No loader code was reachable only from these files.
+- Dated evidence records that list the files (the October 2026 provenance pins, cleanup audits, reports) are left as written. Real 1993 and 1994 starts are a content item, not engine work.
+
+**Schema v40.** `CURRENT_SCHEMA_VERSION` 39 → 40. Migration v40 deletes the key. The validator stops requiring it from v40 (`retiredAtVersion`) and rejects it if present on a v40 state. Fixture `v39_peace_control_path_retired.json` holds a legacy absolute path; an old v39 save loads, validates and round-trips without it. The startup snapshot is rebuilt at v40.
+
+**Hash-moving.** Removing the key changes every save, so the manifest pin moves (historical final `ed32f0ddc872082c`, re-blessed). Proof: apr1992 historical and hands-off emergent differ from main ONLY by the deleted key and the schema number (deep diff of the final saves: two paths each, `meta.peace_war_start_control_path` null → absent and `schema_version` 39 → 40). The 40-week structural fingerprint (`3b1ddd64fb4f1600`) is unchanged. These two runs are the whole proof set from now on.
+
+**Not in this change.** The in-sim peace phase (`runOneTurn`'s peace branch, referendum and declaration logic, `peace_scheduled_*` meta, the UI `phase === 'peace'` branches) is retired pre-freeze in its own PR, with the canon edits it needs.
+
+Tests: new `tests/sep1991_peace_start_retired.test.ts`; registry, schema-freeze, versioned-steps and drift-audit pins updated; the postturn-boundary "remaining-peace branch" case removed (a peace start can no longer be built).
+
 ## 2026-11-17 — Pass 59: #757 recorded and its two doc fixes made; the Codex sweep now covers every open PR
 
 Docs only; no `src/` or `data/` change, no hash change.
@@ -577,6 +678,14 @@ Docs only; no `src/` or `data/` change, no hash change.
 - Merged and recorded: #768 (A2b refugee compact), #776 (authored-op precedence; main hash 964ab22c838c94a8), #799 (§6 copy, Markale I 68 and II at least 43), #801 (supply-reserve economy, airdrop action, smuggling and jan1993_to_dayton retired; byte-identical), #802 (A2b follow-ups PR-A), #803 (dead desktop IPC actions).
 - Rulings: patron-defiance rewired to a live carrier (new lane); operation-decision buttons removed (option A); auto_resolve_turns retired; the RS back-channel card's alliance_lock removed (#806); P2 #774 READY with ruling D.
 - Codex sweep 17: one new inline comment, on #800 (r4601269007); open otherwise #793 x1, #774 x3, #747 x1. #776's thread now sits on a merged PR with its fix.
+
+## 2026-11-17 — Pass 75: #805, #773 and #806 recorded; the P2 and corridor_severed rulings
+
+Docs only; no `src/` or `data/` change, no hash change.
+
+- Merged and recorded: #805 (A2b PR-B; hash unchanged at 964ab22c838c94a8), #773 (the September 1991 and 1993 to 1995 starts retired; schema v40; main hash 7c88ab2a9ba3b43f) and #806 (the RS back-channel card no longer locks the alliance; hash unchanged from #773).
+- Rulings: P2 keeps P3 (a surplus brigade spreads to an adjacent empty front cell) with step 4 as (a) no loan for an elite below its recall thresholds and (b) a same-corps donor marches to a cell under operation attack; corridor_severed retired after #810; patron-defiance paused until #774; jna_herzegovina_command ends with the JNA withdrawal (19 May 1992, about t6), folded into 2c.
+- Codex sweep 18: two new inline comments, both on #808 (r4604655807, r4604655820); open otherwise #800 x1, #793 x1, #774 x3, #747 x1.
 
 ## 2026-11-16 — `address_to_nation_rbih` closing line made year-neutral
 
