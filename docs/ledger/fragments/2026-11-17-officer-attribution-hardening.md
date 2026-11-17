@@ -18,7 +18,7 @@ Pre-freeze fix (owner rule: no engine changes after 1.0). PR 1 of 2 from the com
 - Control and formations are byte-identical in historical and hands-off emergent. Guards intact.
 - 10 of 83 operation AARs differ in force-quality inputs: `faction_officer_maturity_normalized`, e.g. 0.7723 → 0.7496 for one op, with the knock-on traits (axis coordination, readiness, reserve response) and force ratio.
   - The exact cause (82-week probe on both versions): on main, Pašalić (4th Corps, availability ended at t80) is `retired` yet still commands the 4th Corps probe launched at t81 (`commander_officer_id: arbih_pasalic`; his `assigned_operation` is never cleared). With the fix he departs cleanly and the serving officer Malkić commands the probe. The probe's commander and the faction officer-maturity input change from there.
-  - No outcome field or operation commander changes. Weekly reports diverge from week 82.
+  - No outcome field changes. The only commander that changes is that probe's (Pašalić → Malkić); every AAR'd operation keeps its commander. Weekly reports diverge from week 82.
 - The startup snapshot is unchanged (check passes).
 - Live = headless on the officer pools: no commander holds a dropped operation at an RS, RBiH or HRHB campaign start. That was already true on main (standing auto-authorization defers nothing at start), so the deferral release is defensive.
 
