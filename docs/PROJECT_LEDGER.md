@@ -687,6 +687,14 @@ Docs only; no `src/` or `data/` change, no hash change.
 - Rulings: P2 keeps P3 (a surplus brigade spreads to an adjacent empty front cell) with step 4 as (a) no loan for an elite below its recall thresholds and (b) a same-corps donor marches to a cell under operation attack; corridor_severed retired after #810; patron-defiance paused until #774; jna_herzegovina_command ends with the JNA withdrawal (19 May 1992, about t6), folded into 2c.
 - Codex sweep 18: two new inline comments, both on #808 (r4604655807, r4604655820); open otherwise #800 x1, #793 x1, #774 x3, #747 x1.
 
+## 2026-11-17 — Pass 76: #791 and #809 recorded; Fable consult 7
+
+Docs only; no `src/` or `data/` change, no hash change.
+
+- Merged and recorded: #791 (Bosnian text for the narrative lines on event cards) and #809 (the peace-plan history projection). Main hash unchanged at 7c88ab2a9ba3b43f. The UI lane has stopped; its handover is handovers/ui.md.
+- Fable consult 7 (the Ozren defence answer to an attack) is recorded with its packet and measured evidence; the memo was pending when the pass ran.
+- Codex sweep 19: no new comments. Open: #808 x2, #800 x1, #793 x1, #774 x3, #747 x1.
+
 ## 2026-11-16 — `address_to_nation_rbih` closing line made year-neutral
 
 The renewable RBiH presidential address (first turn 84, then about 136 and 188; turn 0 is April 1992) said "a people in the fourth year of siege", which is wrong at turns 84 (second year) and 136 (third). It now reads "a people who have lived under siege this long". One narrative sentence in `war_1993.json`; narrative and historian seats keep it; the event has no Bosnian localization. Headless 188-week artifacts unchanged. Evidence: `docs/40_reports/evidence/20261116_address_year_copy/`.
