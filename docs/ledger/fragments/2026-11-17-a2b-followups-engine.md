@@ -1,0 +1,27 @@
+## 2026-11-17 — A2b follow-ups (engine and tests): only the President's answers count, the compact ends at the signing, Zagreb's ceasefire order needs a war (byte-identical left alone)
+
+- **Why.** The #768 merge gate (five seats) left eight findings; the orchestrator routed them as pre-freeze work (no engine changes after 1.0). This PR takes the engine, test and canon-wording ones: items 2, 3, 4, 5, 7 and 8. The compact's visibility and the VOPP default (item 1) are the next PR (copy panel); the patron-defiance rewire (item 6) is its own lane.
+- **Change.**
+  - **Player answers only** (`src/sim/early_war/refugee_compact.ts`). Only decision-log rows with `decision_source: 'player'` open, renew or lapse a compact. A bot's answer (`bot_political`, `bot_v1`, `bot_ai_default`) never does, whatever it picks. Before this, a bot-sourced HRHB answer would have counted; baselines were identical only because no bot grants.
+  - **End at the signing.** The compact ends at `washington_turn`: no damping and no recruitment price after the Federation locks the alliance. It used to charge x0.9 until about t117. The 1992 stance (patron drag x0.5 per choice) stays.
+  - **Zagreb's ceasefire order needs a war** (`data/scenarios/events/war_1994.json`). `zagreb_orders_hrhb_ceasefire` now also requires `rbih_hrhb_war_started` (a war was fought; the same fact Path A' and the war-room copy read). A no-war game (Path C) no longer gets a card that orders a ceasefire. The war-started fact (`war_started_turn` set) is used rather than the instantaneous `isRbihHrhbAtWar` (alliance at or below 0): the card's question is whether a war happened, not what the alliance value is on the week it fires, and a recovering alliance must not mute the order. Historical and emergent 188w are byte-identical with the gate, which confirms the war-started fact is true in both when the card fires.
+  - **Canon wording** (Systems Manual §12 and the §6.6a A2b note): refugee concentration adds men to the local pool, but the host administration pays for absorbing them; the compact's recruitment x0.9 is a price, not a gain.
+- **Tests** (`tests/refugee_compact.test.ts`, 21):
+  - bot answers never grant, renew or lapse; the President's own renewal does extend;
+  - the compact ends at the signing (damping, price; the stance stays);
+  - split-run versus continuous: serialize and reload mid-compact, on a flip turn and inside the suspension window, gives identical per-turn drift reports and an identical saved state.
+  - `tests/zagreb_ceasefire_needs_war.test.ts` (4): the card keeps its t95-103 window and its political-goal list, fires after a war, does not fire without one, and still needs a goal.
+- **Item 8 (probed, no code change).** Single-grant paths (HRHB President; staff_recommended; 130 turns; logs `_logs/b5-scorer-20261116/fu_single/`):
+  - `united_front` plus `local_friction_emerges`, with the Gornji Vakuf `negotiate` renewal, `federate_early`, VOPP `resist_patron` and the overture extended (S1): the GV card fires at t52 and the renewal lands; war at **t74**; Washington signs t102.
+  - the same two 1992 choices with no renewals (S1b): the GV default `escalate` fires at t50 and lapses the compact; war at **t52**.
+  - `croat_republic` plus `formal_alliance_persists` with `federate_early`, VOPP `resist_patron` and the overture extended (S2): the GV card never fires on this branch; war at **t74-76**; Washington signs t102.
+  - So the Gornji Vakuf renewal is reachable (only on the `local_friction_emerges` branch: the card needs `hrhb_1992_cooperation_state = friction_emerges` and alliance below 0.45 in t40-60) and is kept. One grant buys about 22 weeks of peace against no compact; two grants and every renewal buy the whole war (probe A, no war).
+- **Measured** (this PR's tree on main `b52512068`; logs `_logs/b5-scorer-20261116/fu_pra/`).
+  - `npm run test:baselines`: "all scenarios match"; historical and emergent 188w are byte-identical to main, so no pin moves (the Zagreb gate does not change a left-alone run).
+  - Played probes (HRHB President; staff_recommended; 130 turns, C 188), unchanged from #768:
+    - A pays: Path C at t102, no war; **Zagreb's order no longer fires** (it fired at t95 before);
+    - B careless: war t71, signs t102;
+    - acknowledge (Zagreb answered): signs t102 through Path A' (the card still fires at t95 with a war);
+    - refuse: signs t120 (war t71; engine ceasefire t116);
+    - C reneges: war t104, ceasefire t149, Path A signs t153;
+    - D no compact: final saves byte-identical (same SHA-256, player and headless) to the earlier no-compact run on #768.
