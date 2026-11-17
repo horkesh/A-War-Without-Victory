@@ -239,8 +239,8 @@ export const EVENT_EFFECT_BCS: Readonly<Record<string, EventEffectBcsEntry>> = {
         bcs: "Tuđman nalaže Bobanu da obustavi operacije HVO-a protiv ARBiH u okviru Washingtonskog sporazuma.",
     },
     "markale_massacre_1994#0": {
-        en: "The Markale massacre kills more than 60 civilians. The atrocity becomes the catalyst for NATO's ultimatum to the VRS.",
-        bcs: "Masakr na Markalama ubija više od 60 civila. Zvjerstvo postaje katalizator ultimatuma NATO-a VRS-u.",
+        en: "The Markale massacre kills 68 people, nearly all of them civilians. The atrocity becomes the catalyst for NATO's ultimatum to the VRS.",
+        bcs: "Masakr na Markalama ubija 68 ljudi, od kojih su gotovo svi civili. Zvjerstvo postaje katalizator ultimatuma NATO-a VRS-u.",
     },
     "sarajevo_exclusion_zone_1994#0": {
         en: "VRS heavy weapons are withdrawn from around Sarajevo. The exclusion zone brings the first sustained relief to the besieged capital.",
@@ -307,8 +307,8 @@ export const EVENT_EFFECT_BCS: Readonly<Record<string, EventEffectBcsEntry>> = {
         bcs: "Režim zaštićenih zona UN-a zabilježen je kao propao. Izvještaj generalnog sekretara UN-a iz 1999. (A/54/549) dokumentuje institucionalni neuspjeh jamstva zaštićenih zona nakon pada Srebrenice.",
     },
     "second_markale_massacre_1995#0": {
-        en: "The second Markale massacre kills 34 civilians. NATO prepares to launch sustained air strikes against VRS forces.",
-        bcs: "Drugi masakr na Markalama ubija 34 civila. NATO se priprema da pokrene kontinuirane zračne udare na snage VRS-a.",
+        en: "The second Markale massacre kills at least 43 people, the vast majority of them civilians. NATO prepares to launch sustained air strikes against VRS forces.",
+        bcs: "Drugi masakr na Markalama ubija najmanje 43 osobe, od kojih je velika većina civila. NATO se priprema da pokrene kontinuirane zračne udare na snage VRS-a.",
     },
     "nato_deliberate_force_1995#0": {
         en: "NATO launches Operation Deliberate Force. Sustained air strikes hit VRS military infrastructure across Bosnia.",
