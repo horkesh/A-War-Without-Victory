@@ -118,6 +118,53 @@ describe('Farz objective gate', () => {
         }).ok).toBe(false);
     });
 
+    describe("the operation's own Army HQ id, with no TG telemetry (orchestrator ruling 2026-11-16)", () => {
+        // Farz injected as the Army HQ op but formed no TG (faction TG cap full): the AAR has
+        // no army_hq_telemetry; the final save's registry holds the Army HQ record.
+        const noTgAar = { ...aar, army_hq_telemetry: null };
+        const registry = {
+            'ahq:RBiH:3:farz_95': {
+                id: 'ahq:RBiH:3:farz_95', faction_id: 'RBiH', name: 'Operation Farz 95',
+                anchor_corps_id: 'arbih_3rd_corps', formed_on_turn: 161, status: 'completed',
+            },
+        };
+        const ownIdInput = { ...input, aars: [noTgAar], armyHqOperations: registry };
+
+        it('accepts the registered Farz Army HQ operation without TG telemetry', () => {
+            const result = checkFarzObjectiveCaptures(ownIdInput);
+            expect(result.ok).toBe(true);
+            expect(result.authoredCount).toBe(1);
+        });
+
+        it('does not accept a capture by any other operation', () => {
+            // Same cells taken, but by a non-Farz operation: its AAR id matches no Farz record.
+            const otherId = 'arbih_3rd_corps:Operation Other:t161';
+            const otherAar = { ...noTgAar, operation_id: otherId };
+            const otherBattles = new Map([...battles].map(([k, b]) => [k, { ...b, operation_id: otherId }]));
+            expect(checkFarzObjectiveCaptures({ ...ownIdInput, aars: [otherAar], battleById: otherBattles }).ok).toBe(false);
+            // A Farz-named AAR from another corps or start turn is not the registered operation.
+            for (const operation_id of ['arbih_2nd_corps:Operation Farz 95:t161', 'arbih_3rd_corps:Operation Farz 95:t162']) {
+                expect(checkFarzObjectiveCaptures({ ...ownIdInput, aars: [{ ...noTgAar, operation_id }] }).ok).toBe(false);
+            }
+            // A registry entry for another Army HQ operation does not identify Farz.
+            expect(checkFarzObjectiveCaptures({ ...ownIdInput, armyHqOperations: {
+                'ahq:RBiH:3:krivaja_95': { ...registry['ahq:RBiH:3:farz_95'], id: 'ahq:RBiH:3:krivaja_95' },
+            } }).ok).toBe(false);
+            // No registry: the TG-less AAR still fails, as before.
+            expect(checkFarzObjectiveCaptures({ ...ownIdInput, armyHqOperations: undefined }).ok).toBe(false);
+        });
+
+        it('still fails when the registered Farz did not take its objectives', () => {
+            expect(checkFarzObjectiveCaptures({ ...ownIdInput, events: events.slice(0, 1) }).ok).toBe(false);
+        });
+
+        it('counts one authored AAR when both the telemetry and the registry identify it', () => {
+            const result = checkFarzObjectiveCaptures({ ...input, armyHqOperations: registry });
+            expect(result.ok).toBe(true);
+            expect(result.authoredCount).toBe(1);
+        });
+    });
+
     describe('2nd Corps Uragan 95 partner receipts (owner ruling 2026-11-07)', () => {
         const uraganId = 'arbih_2nd_corps:Operation Uragan 95:t162';
         const uragan = {
