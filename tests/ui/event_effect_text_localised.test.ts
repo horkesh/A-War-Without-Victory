@@ -9,6 +9,8 @@ import {
     resolveNarrativeEffectText,
 } from '../../src/ui/map/data/eventEffectText';
 import { setLocale } from '../../src/ui/map/i18n/index.js';
+import { isDisplayEventEffect } from '../../src/ui/map/utils/eventEffectDisplay';
+import type { EventEffect } from '../../src/sim/events/event_types';
 
 const CATALOG_FILES = [
     'war_1992.json',
@@ -95,6 +97,23 @@ describe('narrative effect lines on the acknowledgement card', () => {
             );
             expect(pinned, String(row.id)).toBe(false);
         }
+    });
+
+    it('keeps narrative lines of decisions off the decision modal, so they need no Bosnian key', () => {
+        // The decision modal lists an option's effects through `isDisplayEventEffect`; the card for
+        // an answered decision shows only the recorded response. Neither path can print a narrative line.
+        const decisions = loadCatalog().filter((row) => row.requires_player_response === true);
+        const narrativeOnDecisions = decisions.flatMap((row) => [
+            ...eventDefinitionDisplayEffects(row),
+            ...(((row as { response_options?: Array<{ effects?: unknown[] }> }).response_options ?? []).flatMap(
+                (option) => (option.effects ?? []) as EventEffect[],
+            )),
+        ]).filter((effect) => effect.kind === 'narrative');
+        expect(narrativeOnDecisions.length).toBeGreaterThan(0);
+        for (const effect of narrativeOnDecisions) expect(isDisplayEventEffect(effect as EventEffect)).toBe(false);
+        const decisionIds = new Set(decisions.map((row) => String(row.id)));
+        const keyed = Object.keys(EVENT_EFFECT_BCS).filter((key) => decisionIds.has(key.slice(0, key.lastIndexOf('#'))));
+        expect(keyed).toEqual([]);
     });
 
     it('builds the card lines in Bosnian from the shipped catalog, and in English by default', () => {

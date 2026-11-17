@@ -64,15 +64,15 @@ export const EVENT_EFFECT_BCS: Readonly<Record<string, EventEffectBcsEntry>> = {
     },
     "omarska_camp_1992#0": {
         en: "The historical record of the Omarska detention facility is documented in the Codex.",
-        bcs: "Historijski zapis o mjestu zatočenja Omarska dokumentovan je u Kodeksu.",
+        bcs: "Historijski zapis o logoru Omarska dokumentovan je u Kodeksu.",
     },
     "keraterm_camp_1992#0": {
         en: "The historical record of the Keraterm detention facility is documented in the Codex.",
-        bcs: "Historijski zapis o mjestu zatočenja Keraterm dokumentovan je u Kodeksu.",
+        bcs: "Historijski zapis o logoru Keraterm dokumentovan je u Kodeksu.",
     },
     "trnopolje_camp_1992#0": {
         en: "The historical record of the Trnopolje detention facility is documented in the Codex.",
-        bcs: "Historijski zapis o mjestu zatočenja Trnopolje dokumentovan je u Kodeksu.",
+        bcs: "Historijski zapis o logoru Trnopolje dokumentovan je u Kodeksu.",
     },
     "prijedor_takeover_1992#0": {
         en: "The historical record of the Prijedor takeover is documented in the Codex.",
@@ -220,7 +220,7 @@ export const EVENT_EFFECT_BCS: Readonly<Record<string, EventEffectBcsEntry>> = {
     },
     "grabovica_uzdol_massacres_1993#0": {
         en: "ARBiH crimes against Croat civilians at Grabovica and Uždol enter the tribunal record; Halilović's acquittal resolves his individual superior responsibility, not whether the crimes occurred.",
-        bcs: "Zločini ARBiH nad hrvatskim civilima u Grabovici i Uždolu ulaze u sudski zapis Tribunala; oslobađajuća presuda Haliloviću rješava pitanje njegove individualne odgovornosti nadređenog, a ne pitanje jesu li se zločini dogodili.",
+        bcs: "Zločini ARBiH nad hrvatskim civilima u Grabovici i Uzdolu ulaze u sudski zapis MKSJ-a; oslobađajuća presuda Haliloviću rješava pitanje njegove individualne odgovornosti nadređenog, a ne pitanje jesu li se zločini dogodili.",
     },
     "bosnian_assembly_rejects_os_1993#0": {
         en: "The Bosnian assembly refuses partition. The war will continue — but so will Bosnia's legal claim to its full territory.",
