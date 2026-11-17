@@ -70,7 +70,7 @@ describe('jna_withdrawal_1992 — consequence-block audit (LANE-NIGHTSHIFT-JNA-W
         // personnel) and gave ARBiH/HVO nothing — so the prior RS recruitment/equipment debuffs
         // and the RBiH/HRHB supply boosts were removed. The RS depot-inheritance supply gain was
         // retired 2026-11-17 with the faction supply-reserve stock (supply is connection, not
-        // stock); the primary effect is now the narrative line.
+        // stock); the RBiH morale hit is now the primary effect.
         expect(all.length).toBeGreaterThanOrEqual(2);
         // Must contain at least one *mechanical* effect (not just narrative).
         const mechanical = all.filter(e => e.kind !== 'narrative');
@@ -88,12 +88,14 @@ describe('jna_withdrawal_1992 — consequence-block audit (LANE-NIGHTSHIFT-JNA-W
         }
     });
 
-    it('T3: per-faction direction — narrative primary effect; ARBiH demoralized; no RS debuffs; no supply effects at all', () => {
+    it('T3: per-faction direction — ARBiH demoralized; narrative kept; no RS debuffs; no supply effects at all', () => {
         const ev = findJna(loadEvents());
         const all = allEffects(ev);
 
-        // The primary effect is the narrative (the VRS depot inheritance is told, not a reserve stock).
-        expect(ev.effect?.kind).toBe('narrative');
+        // The RBiH morale hit is the primary effect; the VRS depot inheritance is told in the narrative
+        // line (kept in effects[] so the event card shows it), not carried as a reserve stock.
+        expect(ev.effect?.kind).toBe('morale_change');
+        expect(all.some(e => e.kind === 'narrative')).toBe(true);
 
         // ARBiH demoralized losing JNA-heavy ground.
         const rbihMorale = all.find(e => e.kind === 'morale_change' && e.faction === 'RBiH');
