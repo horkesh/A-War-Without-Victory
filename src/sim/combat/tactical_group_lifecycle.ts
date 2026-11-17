@@ -64,6 +64,8 @@ export interface FormTgParams {
     donors: readonly TgDonorContribution[];
     /** Current turn for formed_on_turn + per-brigade ledger updates. */
     current_turn: number;
+    /** The corps hosting the operation (recorded on the TG as its lifecycle identity). */
+    host_corps_id?: FormationId | null;
 }
 
 export interface FormTgResult {
@@ -159,6 +161,7 @@ export function formTacticalGroup(
         corps_id: anchor.corps_id,
         op_id: params.op_id,
         ...(params.army_hq_op_id != null && { army_hq_op_id: params.army_hq_op_id }),
+        ...(params.host_corps_id != null && { host_corps_id: params.host_corps_id }),
         anchor_brigade_id: params.anchor_brigade_id,
         donor_contributions: sortedDonors,
         location_osid: anchor.location_osid,
