@@ -33,7 +33,7 @@
 //   main path (frontline + battle defaults): KIA 0.22 / WIA 0.74  → MIA 0.04
 //     (attack_casualty_distribution.ts KIA_FRACTION/WIA_FRACTION, imported by
 //      frontline_attrition / battle_resolution / paramilitary_sweep)
-//   siege bombardment:                       KIA 0.20 / WIA 0.65  → MIA 0.15
+//   (siege bombardment split retired 2026-11-17 with siege bombardment attrition)
 //   undefended-OSID defender:                KIA 0.15 / WIA 0.50  → MIA 0.35
 //   surrender cascade defender:              KIA 0.10 / WIA 0.40  → MIA 0.50
 //
@@ -41,7 +41,6 @@
 // ~1:3.74 killed:wounded is already on the RDC/ICTY target), and collapse the inflated
 // MIA into WIA on the paths where capture is historically nonsensical:
 //   main      0.04 → 0.02 MIA   (small-contact losses; mostly KIA-body-unrecovered)
-//   siege     0.15 → 0.02 MIA   (encircled defenders are not captured en masse)
 //   undefended 0.35 → 0.35 MIA  (UNCHANGED — historian: excess here was predominantly
 //                                KILLED, not wounded; MIA→WIA would be the most wrong
 //                                move. Reserved for a post-1.0 MIA→KIA rebalance.)
@@ -63,8 +62,6 @@ export interface CasualtySplitFractions {
 
 /** Shipped (flag-OFF) main-path split: KIA 0.22 / WIA 0.74 / MIA 0.04. */
 const SHIPPED_MAIN: CasualtySplitFractions = { kia: 0.22, wia: 0.74 };
-/** Shipped (flag-OFF) siege split: KIA 0.20 / WIA 0.65 / MIA 0.15. */
-const SHIPPED_SIEGE: CasualtySplitFractions = { kia: 0.20, wia: 0.65 };
 /** Shipped (flag-OFF) undefended-defender split: KIA 0.15 / WIA 0.50 / MIA 0.35. */
 const SHIPPED_UNDEFENDED: CasualtySplitFractions = { kia: 0.15, wia: 0.50 };
 /** Shipped (flag-OFF) surrender-cascade defender split: KIA 0.10 / WIA 0.40 / MIA 0.50. */
@@ -72,8 +69,6 @@ const SHIPPED_SURRENDER: CasualtySplitFractions = { kia: 0.10, wia: 0.40 };
 
 /** V2 main-path split: KIA 0.22 / WIA 0.76 / MIA 0.02 (halve durable-missing). */
 const V2_MAIN: CasualtySplitFractions = { kia: 0.22, wia: 0.76 };
-/** V2 siege split: KIA 0.20 / WIA 0.78 / MIA 0.02 (0.15→0.02 MIA, shelling rarely captures). */
-const V2_SIEGE: CasualtySplitFractions = { kia: 0.20, wia: 0.78 };
 /**
  * V2 undefended split: KIA 0.15 / WIA 0.50 / MIA 0.35 — UNCHANGED from shipped.
  *
@@ -147,10 +142,8 @@ export function getMainCasualtySplit(): CasualtySplitFractions {
     return isCasualtyRealismV2Enabled() ? V2_MAIN : SHIPPED_MAIN;
 }
 
-/** Siege-bombardment KIA/WIA split. */
-export function getSiegeCasualtySplit(): CasualtySplitFractions {
-    return isCasualtyRealismV2Enabled() ? V2_SIEGE : SHIPPED_SIEGE;
-}
+// getSiegeCasualtySplit retired 2026-11-17 (§6 panel): its only reader was the retired
+// siege bombardment attrition.
 
 /** Undefended-OSID defender KIA/WIA split. */
 export function getUndefendedCasualtySplit(): CasualtySplitFractions {

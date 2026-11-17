@@ -726,13 +726,13 @@ Top-level control for the entire faction's military. Accessible from faction ove
 ```
 ARMY STANCE: [BALANCED ▼]
   Options:
-  - GENERAL DEFENSIVE → all corps forced defensive
-  - BALANCED → corps choose own stance
-  - GENERAL OFFENSIVE → all corps forced offensive
-  - TOTAL MOBILIZATION → all corps reorganize
+  - GENERAL DEFENSIVE → the General Staff's proposal and display value: defensive
+  - BALANCED → the General Staff's proposal and display value: balanced
+  - GENERAL OFFENSIVE → the General Staff's proposal and display value: offensive
+  - TOTAL MOBILIZATION → the General Staff's proposal and display value: mobilization
 ```
 
-Changing army stance shows a confirmation dialog: "Setting GENERAL OFFENSIVE will override all corps stances. Proceed?"
+*(Amended 2026-11-16, #757: the army standing order is the General Staff's proposal and a display value only. It no longer overrides any corps stance and no longer hides corps stance matters from the President; each corps keeps its own stance, capped only by presidential holds and the October 1995 ceasefire, and corps stance changes are put to the President as stance matters whatever the army stance. The earlier design, in which setting GENERAL OFFENSIVE overrode all corps stances behind a confirmation dialog, no longer applies; see Systems Manual §6.4.)*
 
 ---
 

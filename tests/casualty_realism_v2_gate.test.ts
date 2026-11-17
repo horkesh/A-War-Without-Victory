@@ -25,7 +25,6 @@ import {
     resetCasualtyRealismV2Override,
     setCasualtyRealismV2Override,
     getMainCasualtySplit,
-    getSiegeCasualtySplit,
     getUndefendedCasualtySplit,
     getSurrenderCascadeCasualtySplit,
 } from '../src/sim/combat/casualty_realism_v2_gate.js';
@@ -34,10 +33,6 @@ import {
     WIA_FRACTION,
     splitKiaWiaMia,
 } from '../src/sim/combat/attack_casualty_distribution.js';
-import {
-    SIEGE_KIA_FRACTION,
-    SIEGE_WIA_FRACTION,
-} from '../src/sim/combat/siege_attrition.js';
 
 const ENV_KEY = 'AWWV_CASUALTY_REALISM_V2';
 
@@ -109,12 +104,6 @@ describe('B1 casualty-realism V2 gate', () => {
             expect(s.wia).toBe(WIA_FRACTION);
         });
 
-        it('siege split equals the live SIEGE_KIA / SIEGE_WIA constants exactly', () => {
-            const s = getSiegeCasualtySplit();
-            expect(s.kia).toBe(SIEGE_KIA_FRACTION);
-            expect(s.wia).toBe(SIEGE_WIA_FRACTION);
-        });
-
         it('undefended split is the shipped 0.15 / 0.50 (MIA 0.35)', () => {
             const s = getUndefendedCasualtySplit();
             expect(s.kia).toBe(0.15);
@@ -139,7 +128,6 @@ describe('B1 casualty-realism V2 gate', () => {
         it('holds KIA everywhere and never raises MIA on any path vs shipped', () => {
             const paths: Array<[() => { kia: number; wia: number }, { kia: number; wia: number }]> = [
                 [getMainCasualtySplit, { kia: 0.22, wia: 0.74 }],
-                [getSiegeCasualtySplit, { kia: 0.20, wia: 0.65 }],
                 [getUndefendedCasualtySplit, { kia: 0.15, wia: 0.50 }],
                 [getSurrenderCascadeCasualtySplit, { kia: 0.10, wia: 0.40 }],
             ];
@@ -153,15 +141,14 @@ describe('B1 casualty-realism V2 gate', () => {
             }
         });
 
-        it('reduces MIA on main / siege / surrender; leaves undefended UNCHANGED (historian)', () => {
+        it('reduces MIA on main / surrender; leaves undefended UNCHANGED (historian)', () => {
             // EH-2 historian correction: undefended MIA stays 0.35 (excess there was KILLED,
             // not wounded — MIA->WIA would be the most wrong move; reserved for post-1.0 MIA->KIA).
             const undef = getUndefendedCasualtySplit();
             expect(undef.kia).toBe(0.15);
             expect(undef.wia).toBe(0.50); // == shipped → MIA 0.35 unchanged
-            // The other three paths strictly reduce MIA.
+            // The other paths strictly reduce MIA.
             expect(mia(getMainCasualtySplit())).toBeLessThan(0.04);
-            expect(mia(getSiegeCasualtySplit())).toBeLessThan(0.15);
             const surr = getSurrenderCascadeCasualtySplit();
             expect(surr.kia).toBe(0.10); // KIA held
             expect(mia(surr)).toBeCloseTo(0.15, 10); // 0.50 -> 0.15

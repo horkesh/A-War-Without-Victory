@@ -80,7 +80,8 @@ import { buildDilemmaSpine } from './dilemmaSpine.js';
 import { buildDistanceFromHistory } from './distanceFromHistory.js';
 import { buildDirectiveOutcomeReceipts, directiveOutcomeReceiptsRealizedOnTurn } from './directiveOutcomeReceipts.js';
 import { buildDiplomacyView } from './diplomacyView.js';
-import { playerFactionMatch } from './playerFactionMatch.js';
+import { isCanonicalPlayerFaction, playerFactionMatch } from './playerFactionMatch.js';
+import { filterEventNoticesFor, isEventNoticeVisibleTo } from './eventAudience.js';
 import { isRequiredPendingEventDecision } from './eventDecisionRouting.js';
 import { getEliteCommanderForFormationId } from './eliteCommanderSidecar.js';
 import { shouldNarrateTerritorySummary } from './territorySummaryGuard.js';
@@ -2963,6 +2964,7 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
     const peacePlanHistory = derivePeacePlanHistory(state, playerFaction);
     const convoyDecisionHistory = deriveConvoyDecisionHistory(state, playerFaction);
     const paramilitaryDecisionHistory = deriveParamilitaryDecisionHistory(state, playerFaction);
+    const paramilitaryUnrequested = deriveParamilitaryUnrequested(state, playerFaction);
     const officerDecisionHistory = deriveOfficerDecisionHistory(state, playerFaction);
     const armyReserveQueue = deriveArmyReserveQueue({
         pendingReserveRequests,
@@ -3005,6 +3007,7 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
             .map((d: { event_id: string; response_id: string }) => `${d.event_id}:${d.response_id}`),
     );
     const firedEventsView = deriveFiredEvents(state, playerFaction);
+    const noticeVisibleTurnSummaries = deriveNoticeVisibleTurnSummaries(state, playerFaction);
     // Phase 3 Thread 2 "the dilemma spine": pure projection of the seven keystone
     // dilemmas from already-derived UI fields (firedEvents, decisionResponses,
     // raw causality substrate). Always present (full not-yet-faced backbone on
@@ -3129,9 +3132,9 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
             ? scopeToPlayerFaction(deriveSupplySummaryByFaction(state), playerFaction)
             : deriveSupplySummaryByFaction(state),
         politicalMetricsByOsid: derivePoliticalMetricsByOsid(state),
-        historicalEventsByTurn: deriveHistoricalEvents(state),
-        latestTurnSummary: (state.turn_summaries as import('../../../state/turn_summary.js').TurnSummary[] | undefined)?.[0] ?? null,
-        turnSummaries: (state.turn_summaries as import('../../../state/turn_summary.js').TurnSummary[] | undefined) ?? [],
+        historicalEventsByTurn: deriveHistoricalEvents(state, playerFaction),
+        latestTurnSummary: noticeVisibleTurnSummaries[0] ?? null,
+        turnSummaries: noticeVisibleTurnSummaries,
         operationHistory: filterPlayerFacingEntriesByFaction(rawOperationHistory, playerFaction),
         rawOperationHistory,
         activeOperations: filterPlayerFacingEntriesByFaction(deriveActiveOperations(state), playerFaction),
@@ -3141,6 +3144,7 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
         peacePlanHistory,
         convoyDecisionHistory,
         paramilitaryDecisionHistory,
+        paramilitaryUnrequested,
         officerDecisionHistory,
         pendingParamilitaryRequests,
         paramilitaryPolicy: state.paramilitary_policy === 'always_allow' || state.paramilitary_policy === 'always_deny' || state.paramilitary_policy === 'ask'
@@ -3451,7 +3455,25 @@ function collectHistoricalEventScope(source: Record<string, unknown> | null | un
     return scope;
 }
 
-function deriveHistoricalEvents(state: any): LoadedGameState['historicalEventsByTurn'] {
+/**
+ * The turn summaries with each `events_fired` list cut to the notices `playerFaction` may see (src/ui/map/data/eventAudience.ts).
+ * The Chronicle, the Turn Aftermath, the audio cues and the settlement timeline all read these lists, so cutting them here, with
+ * the same gate as `deriveFiredEvents`, keeps one rule for every surface.
+ */
+function deriveNoticeVisibleTurnSummaries(
+    state: any,
+    playerFaction: string | null | undefined,
+): import('../../../state/turn_summary.js').TurnSummary[] {
+    const summaries = state.turn_summaries as import('../../../state/turn_summary.js').TurnSummary[] | undefined;
+    if (!Array.isArray(summaries)) return [];
+    return summaries.map((summary) => (
+        Array.isArray(summary?.events_fired)
+            ? { ...summary, events_fired: filterEventNoticesFor(summary.events_fired, playerFaction) }
+            : summary
+    ));
+}
+
+function deriveHistoricalEvents(state: any, playerFaction: string | null | undefined): LoadedGameState['historicalEventsByTurn'] {
     const result: LoadedGameState['historicalEventsByTurn'] = [];
     const summaries = state.turn_summaries as Array<{ turn?: number; events_fired?: Array<Record<string, unknown>> }> | undefined;
     if (!Array.isArray(summaries)) return result;
@@ -3460,6 +3482,7 @@ function deriveHistoricalEvents(state: any): LoadedGameState['historicalEventsBy
         if (!Array.isArray(summary.events_fired)) continue;
         for (const e of summary.events_fired) {
             const rawId = String(e.id ?? '');
+            if (!isEventNoticeVisibleTo(rawId, playerFaction)) continue;
             const rawText = typeof e.text === 'string' ? e.text.trim() : '';
             const staticScope = getStaticEventDisplayInfo(rawId)?.scope ?? null;
             const scope = mergeHistoricalEventScopes(collectHistoricalEventScope(e), staticScope);
@@ -3926,6 +3949,8 @@ function deriveFiredEvents(state: any, playerFaction: string | null): LoadedGame
     for (const id of firedIds ?? []) {
         if (pendingDecisionIds.has(id) && !recordedDecisionIds.has(id)) continue;
         if (nonPlayerDecisionIds.has(id) && !recordedDecisionIds.has(id)) continue;
+        // One gate for who may read an acknowledgement notice (a player's own decision is never gated).
+        if (!recordedDecisionIds.has(id) && !isEventNoticeVisibleTo(id, playerFaction)) continue;
         if (typeof id === 'string' && id.trim() && !orderedIds.includes(id)) orderedIds.push(id);
     }
     for (const decision of playerDecisionLog) {
@@ -4636,6 +4661,48 @@ function deriveParamilitaryDecisionHistory(
     }
 
     return records.length > 0 ? records : undefined;
+}
+
+/**
+ * Paramilitary sweeps the player's side carried out with no request to the player (staff at Assisted command or above, or a
+ * standing order to allow). A sweep the player decided has a decision record with the same turn and target and is not listed here.
+ * Read-only: derived from the paramilitary formation each sweep created.
+ */
+function deriveParamilitaryUnrequested(
+    state: any,
+    playerFaction: string | null | undefined,
+): LoadedGameState['paramilitaryUnrequested'] {
+    if (!isCanonicalPlayerFaction(playerFaction)) return undefined;
+    const formations = state.military?.formations;
+    if (!formations || typeof formations !== 'object') return undefined;
+    const decided = new Set<string>();
+    for (const record of Array.isArray(state.paramilitary_decision_history) ? state.paramilitary_decision_history : []) {
+        if (record && typeof record.target_osid === 'string') decided.add(`${Number(record.turn)}:${record.target_osid}`);
+    }
+    // The engine books civilian harm and the war-crime count ONLY when a paramilitary action takes its target (the control flip
+    // writes a `paramilitary` control event). An action that dissolves without taking it (target already friendly, combat blocked,
+    // organized defence, the fade cutoff) books nothing, so only a matching control event makes a receipt a "captured" one.
+    const captures = (Array.isArray(state.political?.control_events) ? state.political.control_events : [])
+        .filter((event: any) => event?.mechanism === 'paramilitary' && event.to === playerFaction && typeof event.settlement_id === 'string')
+        .map((event: any) => ({ turn: Number(event.turn), osid: event.settlement_id as string, used: false }));
+    const sweeps: NonNullable<LoadedGameState['paramilitaryUnrequested']> = [];
+    for (const id of Object.keys(formations).sort(strictCompare)) {
+        const formation = formations[id];
+        if (!formation || formation.kind !== 'paramilitary' || !playerFactionMatch(formation.faction, playerFaction)) continue;
+        const target = formation.paramilitary_target;
+        const turn = formation.created_turn;
+        if (typeof target !== 'string' || !Number.isFinite(turn)) continue;
+        if (decided.has(`${Number(turn)}:${target}`)) continue;
+        // Still on its way: no outcome yet, so no receipt yet.
+        if (formation.status === 'active') continue;
+        const capture = captures.find((candidate: { turn: number; osid: string; used: boolean }) => (
+            !candidate.used && candidate.osid === target && candidate.turn >= Number(turn) && candidate.turn <= Number(turn) + 2
+        ));
+        if (capture) capture.used = true;
+        sweeps.push({ id: String(formation.id ?? id), turn: Number(turn), target_osid: target, faction: String(formation.faction), captured: Boolean(capture) });
+    }
+    sweeps.sort((a, b) => (a.turn !== b.turn ? b.turn - a.turn : strictCompare(a.id, b.id)));
+    return sweeps.length > 0 ? sweeps : undefined;
 }
 
 function deriveOfficerDecisionHistory(

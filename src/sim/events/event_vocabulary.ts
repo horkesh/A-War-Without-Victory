@@ -56,7 +56,6 @@ export const KNOWN_EVENT_CONDITION_TYPES = [
     'paramilitary_mode_equals',
     'patron_pressure_above',
     'rbih_hrhb_war_started',
-    'siege_active',
     'supply_above',
     'supply_below',
     'territory_control',

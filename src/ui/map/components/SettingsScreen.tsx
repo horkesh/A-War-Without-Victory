@@ -378,19 +378,26 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
                             )}
                             {activeSection === 'language' && (
                                 <SettingRow label={t('settings.language.label')} description={t('settings.language.description')}>
-                                    <select
-                                        className={SETTINGS_SELECT}
-                                        aria-label={t('settings.language.ariaLabel')}
-                                        value={locale}
-                                        onChange={(e) => setLocale(e.target.value as Locale)}>
-                                        {SUPPORTED_LOCALES.map((option) => (
-                                            <option key={option} value={option}>
-                                                {option === 'en'
-                                                    ? t('settings.language.option.en')
-                                                    : t('settings.language.option.bcs')}
-                                            </option>
-                                        ))}
-                                    </select>
+                                    <div className="flex flex-col items-end gap-1.5">
+                                        <select
+                                            className={SETTINGS_SELECT}
+                                            aria-label={t('settings.language.ariaLabel')}
+                                            aria-describedby="settings-language-note"
+                                            value={locale}
+                                            onChange={(e) => setLocale(e.target.value as Locale)}>
+                                            {SUPPORTED_LOCALES.map((option) => (
+                                                <option key={option} value={option}>
+                                                    {option === 'en'
+                                                        ? t('settings.language.option.en')
+                                                        : t('settings.language.option.bcs')}
+                                                </option>
+                                            ))}
+                                        </select>
+                                        {/* The Bosnian option is labelled partial wherever it is picked. */}
+                                        <p id="settings-language-note" className="m-0 max-w-[22rem] text-right text-[13px] leading-snug text-text-muted">
+                                            {t('settings.language.partialNote')}
+                                        </p>
+                                    </div>
                                 </SettingRow>
                             )}
                             {activeSection === 'diagnostics' && (

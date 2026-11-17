@@ -135,6 +135,7 @@ import {
 } from './data/officerResentmentReceipts';
 import { getOsidDisplayName } from './utils/osidDisplayName';
 import { t, useLocale } from './i18n';
+import { formatWarCrimesRecordLine } from './data/warCrimesRecordLine';
 import { getDecisionHeaderForFamily } from './data/presidentialDeskAssets';
 import { resolveCommandBannerArt } from './data/commandSurfaceArt';
 import { SurfaceHeader, SURFACE_CLOSE_BUTTON, SURFACE_PRIMARY_BUTTON } from './components/surface/Surface';
@@ -244,7 +245,7 @@ export function formatAcknowledgementEventEffect(effect: AcknowledgementEventEff
     case 'cohesion_change':
       return t('eventModal.effect.cohesionChange', { faction: factionPrefix, delta });
     case 'humanitarian_impact':
-      return t('eventModal.effect.humanitarianImpact', { faction: statePrefix, delta: formatSignedEventDelta(effect.war_crimes_delta) });
+      return formatWarCrimesRecordLine(effect.faction, effect.war_crimes_delta);
     case 'patron_pressure':
       return t('eventModal.effect.patronPressure', { faction: statePrefix, delta });
     case 'alliance_change':
