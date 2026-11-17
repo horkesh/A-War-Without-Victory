@@ -106,7 +106,8 @@ try {
           ...raw,
           meta: { ...raw.meta, turn: p.turn, player_faction: 'HRHB' },
           military: { ...raw.military, event_decision_log: p.log },
-          political: { ...raw.political, rbih_hrhb_state: p.bilateral },
+          // The shape the desktop player-visible projection delivers (`refugee_compact_view`).
+          political: { ...raw.political, refugee_compact_view: p.bilateral },
         },
       };
       window.__proof.store.setState({ loadedGameState: merged });

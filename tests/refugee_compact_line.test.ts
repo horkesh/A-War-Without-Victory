@@ -164,11 +164,20 @@ describe('player-visible projection: only the Washington and compact fields leav
       },
     };
     const projected = projectPlayerVisibleState(state);
-    expect(projected.political.rbih_hrhb_state).toEqual({
+    expect(projected.political.refugee_compact_view).toEqual({
       washington_signed: true,
       washington_turn: 102,
       refugee_compact_suspended_until: 40,
     });
+  });
+
+  it('never emits a partial `rbih_hrhb_state` (the war-room diplomacy extractor treats that object as complete)', () => {
+    const projected = projectPlayerVisibleState({
+      meta: { turn: 30, player_faction: 'HRHB' },
+      military: { event_decision_log: [] },
+      political: { rbih_hrhb_state: { washington_signed: true, washington_turn: 102, allied_mixed_municipalities: ['travnik'] } },
+    });
+    expect('rbih_hrhb_state' in projected.political).toBe(false);
   });
 
   it('omits the key when none of the three fields exists (no empty object)', () => {
@@ -177,6 +186,19 @@ describe('player-visible projection: only the Washington and compact fields leav
       military: { event_decision_log: [] },
       political: { rbih_hrhb_state: { ceasefire_active: false } },
     });
-    expect('rbih_hrhb_state' in projected.political).toBe(false);
+    expect('refugee_compact_view' in projected.political).toBe(false);
+  });
+
+  it('the line reads the projected shape: a view carries the signing and the suspension through `refugee_compact_view`', () => {
+    const projectedState = {
+      player_faction: 'HRHB',
+      turn: 110,
+      rawGameState: {
+        meta: { turn: 110, player_faction: 'HRHB' },
+        military: { event_decision_log: [UNITED, PERSISTS, RENEW_H6, RENEW_OVERTURE].map(([t, event_id, response_id]) => ({ event_id, response_id, decision_source: 'player', faction: 'HRHB', turn: t })) },
+        political: { refugee_compact_view: { washington_signed: true, washington_turn: 102 } },
+      },
+    } as unknown as LoadedGameState;
+    expect(buildRefugeeCompactLine(projectedState)?.phase).toBe('signed');
   });
 });
