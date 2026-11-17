@@ -83,6 +83,18 @@ No `src/` change, so the simulation hash is unchanged.
 
 **Out-of-scope, for the register.** `injectArmyHqOperations` checks the corps slot before the live-objectives check, so `active_primary_corps` names the wrong blocker. RF-ROSTER is fixing the order in its precedence PR. The guard does not read that field.
 
+## 2026-11-17 — The Bosnian language option is labelled honestly as partial
+
+**Why.** Owner decision 2026-11-17: version 1.0 ships with English as the complete language; the Bosnian option stays selectable but must say it is partial wherever the player picks it. The picker showed "BCS" (an academic abbreviation no player calls their language) and nothing about the fact that 172 of the 186 events that fire in a campaign (92%) have no Bosnian title or narrative (count in the 2026-11-17 BCS gap report).
+
+**Change** (UI strings, two components, one CSS rule; no simulation state, hash unchanged):
+- Option labels: "English" in both UIs (a language is named in itself, so a player who landed in the wrong UI can still find theirs); "Bosanski (partial)" in the English UI, "Bosanski (djelimično)" in the Bosnian UI ("djelimično", the Bosnian form, consistent with the file's lexicon). Written by the narrative seat.
+- One always-visible line under the picker, in the main menu header and in Settings > Language, wired to the select with `aria-describedby`: EN "The interface is in Bosnian; most event text is still in English." BCS "Interfejs je na bosanskom, a većina tekstova događaja još je na engleskom."
+- Settings description tidied ("Language of the game interface" / "Jezik interfejsa igre"). The saved-notice template is unchanged (`{locale}` carries the new label).
+- Tests: `tests/ui_i18n.test.ts` pins the labels in both languages and that both pickers show and describe the note.
+
+**Not done.** The translation itself (post-1.0, own decisions first, then the shared notices); the effects[] resolver and its shrinking allowlist (the tracker for that work) is a separate PR.
+
 ## 2026-11-17 — The staff-action receipt says "counts against your side" only when the action took its target
 
 **Why.** Codex found on #740 (`GameStateAdapter.ts`, reproduced) that a paramilitary action dissolving WITHOUT taking its target (target already friendly, combat blocked, organized defence, the week-20 fade cutoff) still got a "Carried out" receipt saying it counts against the player's side, because `dissolveParamilitary` keeps the target and the creation turn. A receipt that reports civilian harm that never happened is a §6 truth defect.
@@ -213,6 +225,14 @@ Docs only; no `src/` or `data/` change, no hash change.
 
 - Orchestrator ruling, 2026-11-17 (Part 4, RETIRE, S4): `minority-erosion`, `early-war-bot-posture` and `minority-militia-decay` have been dead since de5ff94cb (2026-03-01); they are registered only in `earlyWarPhases`, which runs only under recruitment_mode "bottom_up", which no scenario uses; no recorded decision dropped them. Owner: the batch-b-lane, with the peace-phase family, plus anything reachable only via bottom_up. Canon note on Phase I §4.8: cut-off minority formations are carried by the stranded-brigade lifecycle (EH-3) and by displacement.
 - `docs/20_engineering/DISPLACEMENT_MASTER.md` lines 88, 160 and 700 said minority flight was active, then disabled with code retained; the module was deleted on 2026-06-09 (#360); the three passages now say so. `PLAYER_TURN_GUIDE.md` lines 41 and 52 (canon folder) and the `game_state.ts` line 610 comment are left to the batch-b-lane's PR (canon edits with the peace phase; a src comment).
+
+## 2026-11-17 — Pass 69: #780 recorded; #782 (§6 E3a1) READY; the order
+
+Docs only; no `src/` or `data/` change, no hash change.
+
+- #780 (merged, 86a864005): the Farz guard P-A follow-up to #769 by the seats' ruling: the September 1995 window opens at t177; an RBiH capture of a Farz cell in [160, 177) fails that cell in both modes; emergent credits any operation-owned capture, non-operation captures never count; P-B's late 2nd-Corps scan keeps 160; tooling only, hash unchanged. It closes the emergent-semantics question the orchestrator sent the F1g seats.
+- #782 READY: §6 E3a1 (unanimous 6 of 6): one accumulator rule, one base writer, one source for the peace-plan lists; the live defect fixed (RBiH's standing base 34.4 to 0: authorizing sweeps had raised international standing); measured on main 7acbb1ad6: historical 474b0e5640ee1365, emergent 5f49121bf438cd32, 709 / 709 / 708 / 682, guards intact; hash-moving, merges on the orchestrator's GO. E4 is ruled 6 of 6 and being implemented, stacked on E2.
+- Hash-moving order: #754 (CI), #782, #735, #739, then the first READY.
 
 ## 2026-11-16 — `address_to_nation_rbih` closing line made year-neutral
 
