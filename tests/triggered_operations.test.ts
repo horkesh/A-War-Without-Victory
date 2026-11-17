@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { describe, it, vi } from 'vitest';
 
-import { checkTriggeredOperations, injectArmyHqOperations, _TRIGGERED_OPS } from '../src/sim/combat/triggered_operations.js';
+import { checkTriggeredOperations, corpsHasDueArmyHqReservation, injectArmyHqOperations, _TRIGGERED_OPS } from '../src/sim/combat/triggered_operations.js';
 import { warPhases } from '../src/sim/turn_phases/war_phases.js';
 import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 import type {
@@ -380,6 +380,48 @@ describe('checkTriggeredOperations', () => {
             state.military.watched_operations?.find((row: any) => row.operation_name === 'Operation Farz 95')?.blocker_code,
             'already_owned_objectives',
         );
+    });
+
+    describe('authored-op precedence S2: corpsHasDueArmyHqReservation', () => {
+        const farz = () => _TRIGGERED_OPS.find((def) => def.name === 'Operation Farz 95')!;
+        const reserved = (turn: number, mutate?: (s: GameState) => void): boolean => {
+            const state = prepareFarzState(turn);
+            setArbihThirdCorpsActiveBrigades(state, 23);
+            mutate?.(state);
+            return corpsHasDueArmyHqReservation(state, 'arbih_3rd_corps', turn);
+        };
+
+        it('reserves the primary corps from the planning lead before the trigger', () => {
+            const lead = farz().planning_duration ?? 0;
+            assert.equal(lead, 3);
+            assert.equal(reserved(178 - lead - 1), false);
+            assert.equal(reserved(178 - lead), true);
+            assert.equal(reserved(178), true);
+        });
+
+        it('lapses once the trigger has held for the expiry window without a launch (held t175-t180 for Farz)', () => {
+            assert.equal(reserved(180), true);
+            assert.equal(reserved(181), false);
+        });
+
+        it('is false for another corps, after acceptance, or when the objectives are already held', () => {
+            const state = prepareFarzState(178);
+            setArbihThirdCorpsActiveBrigades(state, 23);
+            assert.equal(corpsHasDueArmyHqReservation(state, 'arbih_2nd_corps', 178), false);
+            assert.equal(reserved(178, (s) => { s.military.triggered_operations_accepted = { 'Operation Farz 95': 170 } as any; }), false);
+            assert.equal(reserved(178, (s) => {
+                for (const axis of farz().axes) for (const o of axis.objectives) s.political.political_controllers![o] = 'RBiH';
+            }), false);
+        });
+
+        it('is pure: it writes nothing to the state', () => {
+            const state = prepareFarzState(178);
+            setArbihThirdCorpsActiveBrigades(state, 23);
+            const before = JSON.stringify(state);
+            corpsHasDueArmyHqReservation(state, 'arbih_3rd_corps', 175);
+            corpsHasDueArmyHqReservation(state, 'arbih_3rd_corps', 178);
+            assert.equal(JSON.stringify(state), before);
+        });
     });
 
     it('blocks Army HQ Farz when two non-probe operations fill both slots', () => {

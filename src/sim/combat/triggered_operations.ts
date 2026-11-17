@@ -49,7 +49,7 @@ import {
     hasAvailableSlot,
     hasAvailableSlotIgnoringRecovery,
 } from './corps_operation_helpers.js';
-import { ensureHistoricalOperationAuthorizationReview } from './historical_operation_authorization.js';
+import { ensureHistoricalOperationAuthorizationReview, peekHistoricalOperationAuthorizationStatus } from './historical_operation_authorization.js';
 import { evaluateLaunchFeasibility, type LaunchFeasibilityResult } from './sector_offensive_launch_helpers.js';
 // ADR-0005 v3.0 Army HQ Operations: faction-wide cross-corps offensives, frequency-gated.
 import {
@@ -1466,6 +1466,74 @@ function armyHqFrequencyGateOpen(state: GameState, faction: FactionId, turn: num
     const count = state.military.army_hq_op_count_by_year?.[faction]?.[year] ?? 0;
     if (count >= MAX_ARMY_HQ_OPS_PER_FACTION_PER_YEAR) return false;
     return true;
+}
+
+/** Turns after an Army HQ op's trigger first holds that its reservation lapses if it has not launched (S2). */
+const ARMY_HQ_RESERVATION_EXPIRY_TURNS = 3;
+
+/**
+ * Authored-op precedence S2: is a dated Army HQ operation due for this corps, so that the corps
+ * should not open a new generic offensive that would still hold its slot when the operation is
+ * ordered? (The corps "knows" a General Staff operation is scheduled.) True when, for some Army HQ
+ * def whose primary corps this is, every injection gate except the slot passes:
+ *   - not bound by the October 1995 ceasefire; not accepted; not declined or cooling down;
+ *   - the trigger holds now or within the def's own planning_duration (the lead), and has not held
+ *     for more than ARMY_HQ_RESERVATION_EXPIRY_TURNS turns already (stateless expiry);
+ *   - the frequency gate is open; enemy objectives and live axes remain;
+ *   - a dry-run validation finds no blocking warning; authorization is not declined.
+ * Pure: it writes nothing (no warnings collected, no review created). Faction-blind; keyed only on
+ * def fields. Panel: operations-expert, corps-army-commander, historian, scenario-tester, integrator.
+ */
+export function corpsHasDueArmyHqReservation(state: GameState, corpsId: string, turn: number): boolean {
+    if (!ENABLE_TG_ARMY_HQ_OPS) return false;
+    const cc = state.military.corps_command;
+    const cmd = cc?.[corpsId];
+    if (!cmd) return false;
+    const defs = TRIGGERED_OPS
+        .filter((d): d is TriggeredOpDef & { army_hq_op_id: string } => !!d.army_hq_op_id && d.primary_corps === corpsId)
+        .sort((a, b) => strictCompare(a.army_hq_op_id, b.army_hq_op_id));
+    for (const def of defs) {
+        if (isFactionBoundByOct1995Ceasefire(state, def.faction)) continue;
+        if (state.military.triggered_operations_accepted?.[def.name]) continue;
+        const declineInfo = state.military.declined_operations?.[def.name];
+        if (declineInfo && declineInfo.decline_count >= MAX_DECLINE_COUNT) continue;
+        if (declineInfo && (turn - declineInfo.declined_turn) < REOFFER_COOLDOWN_TURNS) continue;
+        const lead = Math.max(0, def.planning_duration ?? 0);
+        let dueTurn: number | undefined;
+        for (let k = 0; k <= lead; k++) {
+            if (def.trigger(state, turn + k)) { dueTurn = turn + k; break; }
+        }
+        if (dueTurn === undefined) continue;
+        if (def.trigger(state, turn - ARMY_HQ_RESERVATION_EXPIRY_TURNS)) continue;
+        if (!armyHqFrequencyGateOpen(state, def.faction, dueTurn)) continue;
+        if (!opStillHasEnemyObjectives(state, def)) continue;
+        const liveAxes = def.axes
+            .map((axis) => ({
+                ...axis,
+                objectives: axis.objectives.filter((osid) => {
+                    const controller = getPoliticalControllerOSID(state, osid, undefined);
+                    return isOperationObjectiveHostile(state, def.faction, controller);
+                }),
+            }))
+            .filter((axis) => axis.objectives.length > 0);
+        if (liveAxes.length === 0) continue;
+        const warnings = validateOpAtInjection({
+            name: def.name,
+            faction: def.faction,
+            axes: liveAxes.map((a) => ({ axis_id: a.axis_id, brigades: a.brigades, objectives: a.objectives, staging_osid: a.staging_osid })),
+            staging_osid: def.staging_osid,
+        }, state, undefined, cmd);
+        if (hasBlockingOpInjectionWarnings(warnings)) continue;
+        const authorization = peekHistoricalOperationAuthorizationStatus(state, {
+            kind: 'army_hq',
+            faction: def.faction,
+            corpsId: def.primary_corps,
+            operationName: def.name,
+        });
+        if (authorization === 'declined') continue;
+        return true;
+    }
+    return false;
 }
 
 /**
