@@ -40,7 +40,7 @@ Development-time validation tools may abort execution on invariant violation.
 
 **Supply Reserves (Phase A):** Faction-level reserves (`general_supply_reserve`, `heavy_munitions_reserve` [0..100]) implement the "recovery slower than degradation" invariant: maintenance drain (0.035 per formation per turn) and combat expenditure (per-battle deduction) continuously consume reserves; production income replenishes at a bounded rate. Reserve depletion degrades the effective supply state even when OSID reachability is adequate (reserve < 50 -> strained; reserve < 20 -> critical). Gated by scenario flag `supply_reserves_enabled`.
 
-**Siege, Replenishment, Enclave Hardening (Phase B+C):** Phase B extends reserves with escalating siege drain, patron aid income, and embargo reduction. Phase C adds enclave hardening: after 8+ consecutive isolation turns, enclaves gain a +5% defense bonus; enclave resilience reduces exhaustion accumulation. Production facility combat damage degrades output over time. All gated by `supply_reserves_enabled`.
+**Siege, Replenishment, Enclave Hardening (Phase B+C):** Phase B extends reserves with escalating siege drain (retired 2026-11-17, §6.10), patron aid income, and embargo reduction. Phase C adds enclave hardening: after 8+ consecutive isolation turns, enclaves gain a +5% defense bonus; enclave resilience reduces exhaustion accumulation. Production facility combat damage degrades output over time. All gated by `supply_reserves_enabled`.
 
 ## 5. Settlement Stabilization Invariants
 
@@ -113,7 +113,7 @@ RS-HRHB fronts under the Graz Accords are exempt from:
 - Frontline attrition (passive personnel drain)
 - Bombardment firepower
 
-`isColdFront()` in `frontline_attrition.ts` determines cold front status. HRHB siege drain is also skipped on cold fronts. Designed: a player break of the accords gives the opponent +0.25 aggression for 6 turns. Current build: not applied. The break turn is recorded in `truce_broken_turn`, but `getTruceBreakAggressionBonus` has no caller that feeds bot aggression; wiring is deferred post-1.0 (realism audit F6).
+`isColdFront()` in `frontline_attrition.ts` determines cold front status. Designed: a player break of the accords gives the opponent +0.25 aggression for 6 turns. Current build: not applied. The break turn is recorded in `truce_broken_turn`, but `getTruceBreakAggressionBonus` has no caller that feeds bot aggression; wiring is deferred post-1.0 (realism audit F6).
 
 ### 6.5 Unified Sector Defense
 
@@ -123,33 +123,9 @@ Defense at any OSID = `totalPower * (1/sector_edges) * densityMod`. No brigade-a
 
 **Authored operation identity:** Pre-planned, triggered, and opportunity catalogs reference historical OOB identities, while recruitment may assign a synthetic live dictionary key and preserve that identity as `oob:<authored id>`. Operation admission must prefer an exact live key, otherwise resolve exactly one matching OOB tag, and reject an ambiguous match deterministically. Validation and execution must use the same resolved live formation ID.
 
-### 6.10 Siege Defender Morale Drain
+### 6.10 Siege Defender Morale Drain (retired)
 
-**LANE-NIGHTSHIFT-SRK-SIEGE-DEFENDER-MORALE-PHASE-1 (commit `5313fd41`, 2026-05-08).** Formations of a faction `F` whose `location_osid` is keyed in `state.military.siege_turn_counters[F:osid]` with counter `c > 0` receive a per-turn morale decrement scaled to siege duration. The mechanism is faction-symmetric by construction: the predicate has zero faction/corps/OSID condition; the siege counters are faction-keyed by data and the same coefficient schedule applies regardless of which faction is besieged. Models cumulative siege manning fatigue documented in ICTY Galić IT-98-29-T (SRK 1992–1994), ICTY Dragomir Milošević IT-98-29/1 (1994–1995), and Balkan Battlegrounds 2 (chapter on VRS late-war manning).
-
-**Schedule (stepped piecewise, keyed on counter `c`):**
-
-```
-c ∈ [  0,  13]  → coefficient  0.0    (early-siege "winning" period)
-c ∈ [ 14,  26]  → coefficient -0.5    (counter-organize phase)
-c ∈ [ 27,  52]  → coefficient -1.0    (sustained positional wear)
-c ∈ [ 53, 104]  → coefficient -1.5    (late-war manning crisis)
-c ∈ [105,  ∞]   → coefficient -2.0    (endgame collapse pressure)
-```
-
-**Floor:** `SIEGE_DRAIN_MORALE_FLOOR = 25`. Matches `RBIH_EXISTENTIAL_FLOOR` and `FACTION_HOME_MORALE_FLOOR.HRHB`. Maintains a 10-point buffer above the §6.2.4 `MORALE_OVERRIDE_THRESHOLD` (15) so siege drain alone cannot push a brigade into the dissolution streak band. Existing combat-attrition drains (combat repulse, supply CRITICAL, exhaustion penalty) continue to apply on top of siege drain and may push morale lower; this floor pins siege drain alone, not the composed morale value.
-
-**Pipeline placement:** runs in `apply-siege-morale-drain` step in `war_phases.ts`, immediately after `morale-drift` and before `check-brigade-dissolution-post-combat`. Siege drain layers on top of the existing affinity drift; the net per-turn direction emerges from composition.
-
-**Implementation gate:** the morale-mutation path is gated behind environment flag `SIEGE_MORALE_DRAIN_ENABLED` (default `false`). When the flag is unset (or any value other than `'true'`), `f.morale` is not mutated; the diagnostic counter `drain_pending_count` still increments unconditionally for shadow-flag visibility (mirrors the N4 morale-collapse override `morale_low_streak` pattern). 40w hash byte-identical with the flag unset (verified: `86ebf26ae0271465` predecessor baseline preserved). Hash drift with the flag off is null per FORAWWV §XIV.1 default-off byte-stability invariant.
-
-```
-SIEGE_DRAIN_MORALE_FLOOR = 25
-SIEGE_DRAIN_SCHEDULE     = piecewise (see above)
-SIEGE_MORALE_DRAIN_ENABLED env flag, default 'false'
-```
-
-**Citations:** Recommendation `docs/40_reports/implemented/20260507_SRK_SIEGE_DEFENDER_PHASE_1_RECOMMENDATION.md` (commit `8e974004`). Predecessor DDR `docs/40_reports/audits/20260507_SRK_SIEGE_DEFENDER_MORALE_PHASE_0.md` (commit `bb0e449e`). Implementation: `src/sim/combat/siege_morale_drain.ts`; tests: `tests/siege_morale_drain.test.ts`.
+**Retired 2026-11-17 (Fable consult 6; §6 panel unanimous: historian, scenario-creator-runner-tester, engine/systems, red-team; canon + engine seats on this text).** The siege defender morale drain is not modelled in 1.0. It read `state.military.siege_turn_counters`, which ran only under the scenario flag `supply_reserves_enabled` (set only by `sep1991_to_dayton` and `jan1993_to_dayton`, which no player can start, since the desktop New Game accepts only `apr_1992`, and which are retired for 1.0 by the owner's one-start ruling; off in the scored apr1992 scenario), and its morale path sat behind a default-off switch (`SIEGE_MORALE_DRAIN_ENABLED`) since May 2026, so the drain itself never ran. Retired with it: the siege counters, the passive siege bombardment attrition, the reserve siege drain (`SIEGE_BASE_RATE` and its caps) and the `siege_active` event condition. `siege_turn_counters` stays an optional, compatibility-only save field so old saves load; nothing writes or reads it. Do not revive this mechanism as it stood: the record of why is in `docs/40_reports/governance/20261115_FINAL_BEHAVIOUR_AT_1_0.md` (SB1).
 
 ## 7. Fragmentation Invariants
 
