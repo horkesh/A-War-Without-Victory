@@ -81,6 +81,7 @@ import { updateSarajevoState, refreshSarajevoLifelineCache } from '../../state/s
 import { updateSustainability } from '../../state/sustainability.js';
 import { updateLossOfControlTrends } from '../../state/loss_of_control_trends.js';
 import { isFriendlyFaction } from '../early_war/alliance_update.js';
+import { appendFileSync as probeAppendFileSync } from 'node:fs'; // SCRATCH PROBE (never committed)
 import { buildFriendlyComponents } from '../combat/sector_utils.js';
 import { calculateFactionProductionBonus, ensureProductionFacilities } from '../../state/production_facilities.js';
 import { computeSupplyReachability } from '../../state/supply_reachability.js';
@@ -3463,6 +3464,19 @@ export const warPhases: NamedPhase[] = [
             updateMixedMunicipalitiesList(context.state);
             if (context.state.meta.enable_rbih_hrhb_dynamics !== false) {
                 context.report.alliance_update = updateAllianceValue(context.state);
+                // SCRATCH PROBE (never committed): A2b alliance-drift drivers.
+                if (process.env.AWWV_ALLIANCE_PROBE) {
+                    const s = context.state;
+                    const hr = (s.factions ?? []).find((f) => f.id === 'HRHB');
+                    probeAppendFileSync(process.env.AWWV_ALLIANCE_PROBE, JSON.stringify({
+                        pf: s.meta.player_faction ?? null, turn: s.meta.turn, phase: 'war',
+                        r: context.report.alliance_update,
+                        commit: hr?.patron_state?.patron_commitment ?? null,
+                        locks: s.military.alliance_locks ?? [],
+                        goal: s.military.event_flags?.hrhb_political_goal ?? null,
+                        susp: s.political.rbih_hrhb_state?.refugee_compact_suspended_until ?? null,
+                    }) + '\n');
+                }
             }
         }
     },
