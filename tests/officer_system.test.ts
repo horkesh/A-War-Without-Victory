@@ -1072,4 +1072,35 @@ describe('PR 2b R2-Q1: a pulled-up tactical commander holds the corps as acting'
         assert.equal(state.military.named_officers!['og_lead']!.assigned_corps_id, null);
         assert.equal(state.military.named_officers!['og_lead']!.acting_commander, false);
     });
+
+    // Codex review on #800 (P2): the assignment penalty belongs to the corps seat. Step 4 counts it
+    // down only while the officer holds a corps, so a hand-over before it expired left the reserve
+    // officer with the reduction for good, including on later TG commands in his home corps.
+    it('clears the corps assignment penalty when he hands the seat over before it expires', () => {
+        const state = corpsState();
+        state.military.named_officer_data = [
+            makeOfficer({ id: 'og_lead', faction: 'RBiH', rank: 'tactical_commander', home_corps_id: 'arbih_2nd', compatible_corps_ids: ['arbih_3rd'], competence: 4 }),
+            makeOfficer({ id: 'appointed', faction: 'RBiH', rank: 'corps_commander', home_corps_id: 'arbih_3rd', competence: 3, available_from_turn: 52 }),
+        ];
+        state.military.named_officers = {
+            og_lead: makeOfficerState({ officer_id: 'og_lead', status: 'reserve' }),
+        };
+
+        // A compatible, non-home corps: he is seated as acting with the compatible penalty.
+        processOfficerSuccession(state, new Set());
+        const ogData = state.military.named_officer_data!.find(o => o.id === 'og_lead')!;
+        const og = state.military.named_officers!['og_lead']!;
+        assert.equal(getCorpsCommander('arbih_3rd', state)?.data.id, 'og_lead');
+        assert.ok(og.penalty_turns_remaining > 0);
+        assert.equal(getEffectiveCompetence(og, ogData), 3);
+
+        // The corps-rank officer arrives two turns later, well inside the penalty window.
+        state.meta.turn = 52;
+        processOfficerSuccession(state, new Set());
+        assert.equal(getCorpsCommander('arbih_3rd', state)?.data.id, 'appointed');
+        assert.equal(og.status, 'reserve');
+        assert.equal(og.penalty_turns_remaining, 0);
+        assert.equal(og.effective_competence_penalty, 0);
+        assert.equal(getEffectiveCompetence(og, ogData), 4);
+    });
 });

@@ -21,6 +21,10 @@ Panel: corps-army-commander, operations-expert, historian (3 seats, 2 rounds). T
   - The TG probe showed the TG modifier was not involved, so the branch stays (round 1 Q4).
 - **Round 2, 2-1:** unit officers killed in 1992 (Bešić, Šehović, S. Hadžić) are excluded by data until a death date is sourced. Bešić had been seated as 5th Corps commander at t181.
 - The startup snapshot is re-baked.
+- **Review fix (Codex P2):** an officer who leaves a corps seat for the reserve leaves the assignment penalty behind (`clearAssignmentPenalty`).
+  - Before, a pulled-up tactical commander who handed over inside the penalty window kept the reduction for good, because step 4 counts it down only while he holds a corps. It hit his later TG commands too.
+  - The fix covers the acting hand-over, the scheduled hand-over and relief.
+  - Measured byte-identical in both modes (32bb0552 / da5f6acb).
 
 **Measured** (188w, against PR 2a v3 on main 08f486ae9, 709/708/707/676):
 - **708/704/703/678** in historical and hands-off emergent (identical outcomes). Guards intact. Hashes: historical 32bb0552c6b58fbf, emergent da5f6acb994edd48.

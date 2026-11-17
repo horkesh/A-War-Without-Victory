@@ -895,6 +895,7 @@ export function processOfficerSuccession(
             .some(entry => entry.schedule.some(t => t.officer_id === data.id && t.tenure_start >= turn));
         os.status = servesLater ? 'reserve' : 'retired';
         os.assigned_corps_id = null;
+        clearAssignmentPenalty(os);
         report.departures.push(data.id);
     }
 
@@ -990,6 +991,7 @@ export function processOfficerSuccession(
             incumbent.state.status = incumbent.data.id.startsWith('generic_') ? 'retired' : 'reserve';
             incumbent.state.assigned_corps_id = null;
             incumbent.state.acting_commander = false;
+            clearAssignmentPenalty(incumbent.state);
         }
         const holderState = officers[holder.id]!;
         holderState.status = 'active';
@@ -1043,6 +1045,7 @@ export function processOfficerSuccession(
                 if (existingCommander.data.rank === 'tactical_commander') {
                     existingCommander.state.status = 'reserve';
                     existingCommander.state.acting_commander = false;
+                    clearAssignmentPenalty(existingCommander.state);
                 } else {
                     existingCommander.state.status = 'retired';
                 }
@@ -1145,6 +1148,17 @@ export function isPresidentialAppointee(state: GameState, corpsId: string, offic
         || (r.event_type === 'replacement_suggested' && r.decision === 'acknowledged'
             && (r.outgoing_officer_id ?? r.current_commander_id) === officerId)
     ));
+}
+
+/**
+ * The assignment penalty belongs to the corps seat: applyAssignmentPenalty sets it on seating, and
+ * step 4 counts it down only while the officer holds a corps. An officer who leaves the seat for the
+ * reserve leaves it behind; otherwise it stays frozen on him and cuts his later operation and TG
+ * commands, even in his home corps (Codex review on #800).
+ */
+function clearAssignmentPenalty(os: NamedOfficerState): void {
+    os.effective_competence_penalty = 0;
+    os.penalty_turns_remaining = 0;
 }
 
 /** Competence penalty for an assignment outside the officer's home corps (unchanged rules, shared by the pool and the schedule). */
