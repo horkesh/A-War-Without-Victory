@@ -107,9 +107,14 @@ export const SREBRENICA_AFTERMATH: PatronEvent = {
     // RD run review (2026-11-07): only if Srebrenica actually fell (the fall event fired, or
     // RS holds the town); fires at the first week from 170 when that is true. In the
     // historical campaign the town falls at week 162, so the event still fires at week 170.
+    // §6 E2 follow-up (2026-11-17): also when the fall is recorded (`srebrenica_fell`, set by the
+    // card or by the genocide rupture at a combat fall). A combat fall at t160-169 retaken before
+    // w170 blocks the card (it requires `srebrenica_fell` unset), so this event charges the −30
+    // once; whichever path, the standing cost is charged exactly once.
     requires: (state) =>
         state.military.event_last_fired_turn?.srebrenica_falls_1995 !== undefined
-        || state.political?.political_controllers?.['op:srebrenica:srebrenica_2'] === 'RS',
+        || state.political?.political_controllers?.['op:srebrenica:srebrenica_2'] === 'RS'
+        || state.military.event_flags?.srebrenica_fell === true,
     description: 'Srebrenica falls. International outrage peaks. All patrons increase pressure toward peace.',
     effects: [
         {

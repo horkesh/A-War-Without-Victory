@@ -26,6 +26,8 @@ import {
 } from '../src/sim/events/strategic_dimensions.js';
 import { KNOWN_EVENT_EFFECT_KIND_SET } from '../src/sim/events/event_vocabulary.js';
 import { evaluatePatronEvents, SREBRENICA_AFTERMATH } from '../src/sim/negotiation/patron_events.js';
+import { evaluateRuptureConsequences } from '../src/sim/negotiation/rupture_consequences.js';
+import { evaluateCondition } from '../src/sim/events/event_types.js';
 import { createDefaultPatronRelationship } from '../src/state/negotiation_types.js';
 import { deserializeState, serializeState } from '../src/state/serialize.js';
 import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
@@ -335,5 +337,56 @@ describe('§6 E2: Srebrenica international standing, one carrier per path', () =
         evaluatePatronEvents(state);
         expect(fired(state)).toBe(false);
         expect(rsStanding(state).event_modifier).toBe(0);
+    });
+
+    // §6 E2 follow-up (Codex P2 on #793, r4596868020; §6 seats unanimous, option B): one fall, one
+    // record, one −30. A fall already recorded (`srebrenica_fell`, set by the card or by the
+    // genocide rupture at a combat fall) blocks the scripted card; the patron event then carries
+    // the cost, also when the town was retaken before w170.
+    const enclaveFlags = (state: GameState) => {
+        (state.military as any).event_flags = { srebrenica_enclave_formed: true, srebrenica_demilitarized: true };
+    };
+    const setHolder = (state: GameState, faction: 'RS' | 'RBiH') => {
+        (state.political as any).political_controllers['op:srebrenica:srebrenica_2'] = faction;
+    };
+    const cardEligible = (state: GameState) => evaluateCondition(catalogById().get('srebrenica_falls_1995')!.trigger.condition!, state);
+
+    it('(4) combat fall at or after w170, then an RBiH retake: the card stays blocked and RS standing is charged −30 once', () => {
+        const state = patronState({ cardFired: false, rsHoldsTown: true });
+        enclaveFlags(state);
+        evaluatePatronEvents(state); // the aftermath charges (the card has not fired)
+        evaluateRuptureConsequences(state); // the genocide rupture records the fall
+        expect(fired(state)).toBe(true);
+        expect(state.military.event_flags.srebrenica_fell).toBe(true);
+        expect(rsStanding(state).event_modifier).toBe(-30);
+        setHolder(state, 'RBiH');
+        expect(cardEligible(state)).toBe(false); // no scripted second fall over the retake
+        setHolder(state, 'RS'); // a re-fall by combat charges nothing more
+        evaluatePatronEvents(state);
+        evaluateRuptureConsequences(state);
+        expect(rsStanding(state).event_modifier).toBe(-30);
+    });
+
+    it('(5) combat fall at t163, RBiH retake at t166: the card stays blocked and the aftermath charges −30 once at w170', () => {
+        const state = patronState({ cardFired: false, rsHoldsTown: true });
+        enclaveFlags(state);
+        state.meta.turn = 163;
+        evaluatePatronEvents(state); // before w170: nothing
+        evaluateRuptureConsequences(state);
+        expect(fired(state)).toBe(false);
+        expect(state.military.event_flags.srebrenica_fell).toBe(true);
+        state.meta.turn = 166;
+        setHolder(state, 'RBiH');
+        expect(cardEligible(state)).toBe(false);
+        state.meta.turn = 170;
+        evaluatePatronEvents(state);
+        expect(fired(state)).toBe(true);
+        expect(rsStanding(state).event_modifier).toBe(-30);
+    });
+
+    it('(6) left alone the card is still eligible while RBiH holds the town and no fall is recorded', () => {
+        const state = patronState({ cardFired: false, rsHoldsTown: false });
+        enclaveFlags(state);
+        expect(cardEligible(state)).toBe(true);
     });
 });
