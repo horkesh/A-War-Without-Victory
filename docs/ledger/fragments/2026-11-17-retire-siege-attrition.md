@@ -27,4 +27,4 @@
   - Engine Invariants §6.10 and Systems Manual §6.10 are now retired stubs.
   - Systems Manual n292 bombardment text replaced, plus notes on the Phase B+C passage and in context.md.
   - In `FINAL_BEHAVIOUR_AT_1_0.md`, the SD6/SD8 justification is rewritten, and a new accepted-final entry SB1 carries the historian's line verbatim and records the defects.
-- **Proof:** byte-identical. apr1992 historical `0b86d3d742fcbf1c` and emergent `84595a73932f3ac4`, equal to main `c52c34ccb`. Re-proved on current main in the PR.
+- **Proof:** byte-identical. apr1992 historical `0b86d3d742fcbf1c` and emergent `84595a73932f3ac4`, equal to main `c52c34ccb`; re-proved after merging main `b42c6c5a9`: historical `d983d7bc665fdeb6` and emergent `9454c52e328dd647`, equal to main.
