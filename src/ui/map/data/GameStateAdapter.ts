@@ -1704,7 +1704,7 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
 
                 // ── Wave 4: stabilization availability ───────────────────────────
                 const currentTurn = (state.meta as { turn?: number } | undefined)?.turn ?? 0;
-                const rawCorpsCmd = (state.corps_command as Record<string, { stabilization_cooldown_until?: number }> | undefined)?.[fv.id];
+                const rawCorpsCmd = (state.military.corps_command as Record<string, { stabilization_cooldown_until?: number }> | undefined)?.[fv.id];
                 const cooldownUntil = rawCorpsCmd?.stabilization_cooldown_until ?? 0;
                 const cooldownActive = currentTurn < cooldownUntil;
                 fv.stabilizationAvailable = strain > 0 && !cooldownActive;
@@ -2540,13 +2540,11 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
 
     let corpsFrontSectors: CorpsFrontSectorView[] | undefined;
     const rawSectors = state.military.corps_front_sectors as Record<string, Record<string, unknown>> | undefined;
-    const hasReportedOpsecSectors = Array.isArray(state.military.opsec_sectors)
-        || Array.isArray(state.opsec_sectors);
+    // OPSEC sectors live under `military.opsec_sectors` only (the engine's and the IPC toggle's path).
+    const hasReportedOpsecSectors = Array.isArray(state.military.opsec_sectors);
     const rawOpsecSectors: unknown[] = Array.isArray(state.military.opsec_sectors)
         ? state.military.opsec_sectors
-        : Array.isArray(state.opsec_sectors)
-            ? state.opsec_sectors
-            : [];
+        : [];
     const opsecSectorSet = new Set(
         rawOpsecSectors.filter((value): value is string => typeof value === 'string')
     );

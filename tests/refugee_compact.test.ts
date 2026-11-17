@@ -66,17 +66,21 @@ describe('A2b refugee compact', () => {
         expect(getRefugeeCompactPressureMultiplier(s, 90)).toBe(1.0);
     });
 
-    it('grants: 0.6 per entry, recruitment 0.9 per entry, drag 0.5 per choice; expiry after 56 turns', () => {
+    it('grants: 0.6 per entry, recruitment 0.9 per entry, drag 0.5 per ACTIVE entry; expiry after 56 turns', () => {
         const s = state([UNITED, PERSISTS]);
         expect(getRefugeeCompactPressureMultiplier(s, 20)).toBeCloseTo(REFUGEE_COMPACT_MULTIPLIER ** 2, 12);
         expect(getRefugeeCompactRecruitmentMultiplier(s, 'HRHB', 20)).toBeCloseTo(REFUGEE_COMPACT_RECRUITMENT_PRICE ** 2, 12);
         expect(getRefugeeCompactRecruitmentMultiplier(s, 'RBiH', 20)).toBe(1.0);
         expect(getPatronDragStanceMultiplier(s, 20)).toBe(0.25);
-        // First grant expires at 5 + 56, the second at 8 + 56.
+        // First grant expires at 5 + 56, the second at 8 + 56: the drag damping follows the active entries.
         expect(getRefugeeCompactStatus(s, 5 + REFUGEE_COMPACT_GRANT_TURNS).active_entries).toBe(1);
+        expect(getPatronDragStanceMultiplier(s, 5 + REFUGEE_COMPACT_GRANT_TURNS)).toBe(0.5);
         expect(getRefugeeCompactStatus(s, 8 + REFUGEE_COMPACT_GRANT_TURNS).active_entries).toBe(0);
-        // The stance (drag) is permanent.
-        expect(getPatronDragStanceMultiplier(s, 150)).toBe(0.25);
+        // No stance outlives the payment: with the entries gone every multiplier is exactly 1.0
+        // (the stance is still counted for the record).
+        expect(getPatronDragStanceMultiplier(s, 8 + REFUGEE_COMPACT_GRANT_TURNS)).toBe(1.0);
+        expect(getPatronDragStanceMultiplier(s, 150)).toBe(1.0);
+        expect(getRefugeeCompactStatus(s, 150).granting_choices).toBe(2);
     });
 
     it('renewal extends the active entries; the paying path stays active to Washington', () => {
@@ -87,14 +91,14 @@ describe('A2b refugee compact', () => {
     });
 
     it('a lapse answer ends the compact for good; later renewals find nothing', () => {
-        const s = state([UNITED, PERSISTS, [47, 'zagreb_restrains_boban_vopp', 'acknowledge_pressure'], [53, 'hrhb_central_bosnia_defense_1993', 'federate_early']]);
+        const s = state([UNITED, PERSISTS, [47, 'zagreb_restrains_boban_vopp', 'resist_patron'], [53, 'hrhb_central_bosnia_defense_1993', 'federate_early']]);
         const st = getRefugeeCompactStatus(s, 60);
         expect(st.active_entries).toBe(0);
         expect(st.lapsed).toBe(true);
         expect(getRefugeeCompactPressureMultiplier(s, 60)).toBe(1.0);
-        // The price ends with the compact; the 1992 stance (drag) stays.
+        // The price and the drag damping end with the compact.
         expect(getRefugeeCompactRecruitmentMultiplier(s, 'HRHB', 60)).toBe(1.0);
-        expect(getPatronDragStanceMultiplier(s, 60)).toBe(0.25);
+        expect(getPatronDragStanceMultiplier(s, 60)).toBe(1.0);
     });
 
     it('a flip suspension lifts the damping but the price is still paid', () => {
@@ -245,17 +249,17 @@ describe('A2b follow-ups: player-only answers and the end at the Washington sign
         // The President's grant, then a bot lapse and a bot renewal: neither changes anything.
         const s = state([
             UNITED,
-            [30, 'zagreb_restrains_boban_vopp', 'acknowledge_pressure', 'HRHB', 'bot_political'],
+            [30, 'zagreb_restrains_boban_vopp', 'resist_patron', 'HRHB', 'bot_political'],
             [53, 'hrhb_central_bosnia_defense_1993', 'federate_early', 'HRHB', 'bot_v1'],
         ]);
-        expect(getRefugeeCompactStatus(s, 40)).toEqual({ active_entries: 1, granting_choices: 1, lapsed: false });
+        expect(getRefugeeCompactStatus(s, 40)).toEqual({ active_entries: 1, granting_choices: 1, lapsed: false, latest_expiry: 5 + REFUGEE_COMPACT_GRANT_TURNS });
         expect(getRefugeeCompactStatus(s, 5 + REFUGEE_COMPACT_GRANT_TURNS).active_entries).toBe(0);
         // The same renewal by the President does extend it.
         const own = state([UNITED, [53, 'hrhb_central_bosnia_defense_1993', 'federate_early']]);
         expect(getRefugeeCompactStatus(own, 5 + REFUGEE_COMPACT_GRANT_TURNS).active_entries).toBe(1);
     });
 
-    it('the compact ends at the Washington signing: no damping, no price; the 1992 stance stays', () => {
+    it('the compact ends at the Washington signing: no damping, no price, no drag damping', () => {
         const answers: D[] = [UNITED, PERSISTS, [53, 'hrhb_central_bosnia_defense_1993', 'federate_early'], [89, 'hrhb_federation_overture_1993', 'extend_federation_overture']];
         const open = state(answers);
         expect(getRefugeeCompactStatus(open, 110).active_entries).toBe(2);
@@ -264,7 +268,41 @@ describe('A2b follow-ups: player-only answers and the end at the Washington sign
         expect(getRefugeeCompactStatus(signed, 102).active_entries).toBe(0);
         expect(getRefugeeCompactRecruitmentMultiplier(signed, 'HRHB', 110)).toBe(1.0);
         expect(getRefugeeCompactPressureMultiplier(signed, 110)).toBe(1.0);
-        expect(getPatronDragStanceMultiplier(signed, 110)).toBe(0.25);
+        expect(getPatronDragStanceMultiplier(open, 110)).toBe(0.25);
+        expect(getPatronDragStanceMultiplier(signed, 110)).toBe(1.0);
+    });
+});
+
+describe('A2b PR-B: VOPP acknowledge is neutral, resist ends the compact; the expiry is exposed', () => {
+    const VOPP = 'zagreb_restrains_boban_vopp';
+
+    it('acknowledging Zagreb (the historical answer) neither renews nor ends the compact', () => {
+        const base = state([UNITED, PERSISTS]);
+        const acknowledged = state([UNITED, PERSISTS, [46, VOPP, 'acknowledge_pressure']]);
+        expect(getRefugeeCompactStatus(acknowledged, 50)).toEqual(getRefugeeCompactStatus(base, 50));
+        expect(getRefugeeCompactStatus(acknowledged, 50).lapsed).toBe(false);
+        // It does not extend either: the first entry still runs out at 5 + 56.
+        expect(getRefugeeCompactStatus(acknowledged, 5 + REFUGEE_COMPACT_GRANT_TURNS).active_entries).toBe(1);
+        expect(getRefugeeCompactStatus(acknowledged, 8 + REFUGEE_COMPACT_GRANT_TURNS).active_entries).toBe(0);
+    });
+
+    it('resisting Zagreb (pressing the provincial map against its restraint) ends the compact for good', () => {
+        const s = state([UNITED, PERSISTS, [46, VOPP, 'resist_patron'], [53, 'hrhb_central_bosnia_defense_1993', 'federate_early']]);
+        expect(getRefugeeCompactStatus(s, 46)).toMatchObject({ active_entries: 0, lapsed: true, latest_expiry: null });
+        expect(getRefugeeCompactStatus(s, 60)).toMatchObject({ active_entries: 0, lapsed: true });
+        // Zagreb's pull returns with the lapse: the drag damping is gone too.
+        expect(getPatronDragStanceMultiplier(s, 60)).toBe(1.0);
+    });
+
+    it('latest_expiry is the last active entry, follows renewals, and is null when nothing is in force', () => {
+        const paying = state([UNITED, PERSISTS, [53, 'hrhb_central_bosnia_defense_1993', 'federate_early'], [89, 'hrhb_federation_overture_1993', 'extend_federation_overture']]);
+        expect(getRefugeeCompactStatus(paying, 20).latest_expiry).toBe(8 + REFUGEE_COMPACT_GRANT_TURNS);
+        expect(getRefugeeCompactStatus(paying, 60).latest_expiry).toBe(53 + 40);
+        expect(getRefugeeCompactStatus(paying, 100).latest_expiry).toBe(89 + 30);
+        expect(getRefugeeCompactStatus(paying, 89 + 30).latest_expiry).toBeNull();
+        expect(getRefugeeCompactStatus(state([]), 20).latest_expiry).toBeNull();
+        // The Washington signing ends it.
+        expect(getRefugeeCompactStatus(state([UNITED], { washingtonTurn: 40 }), 41).latest_expiry).toBeNull();
     });
 });
 
