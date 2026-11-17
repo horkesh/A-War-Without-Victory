@@ -80,7 +80,7 @@ import { buildDilemmaSpine } from './dilemmaSpine.js';
 import { buildDistanceFromHistory } from './distanceFromHistory.js';
 import { buildDirectiveOutcomeReceipts, directiveOutcomeReceiptsRealizedOnTurn } from './directiveOutcomeReceipts.js';
 import { buildDiplomacyView } from './diplomacyView.js';
-import { playerFactionMatch } from './playerFactionMatch.js';
+import { isCanonicalPlayerFaction, playerFactionMatch } from './playerFactionMatch.js';
 import { isRequiredPendingEventDecision } from './eventDecisionRouting.js';
 import { getEliteCommanderForFormationId } from './eliteCommanderSidecar.js';
 import { shouldNarrateTerritorySummary } from './territorySummaryGuard.js';
@@ -2963,6 +2963,7 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
     const peacePlanHistory = derivePeacePlanHistory(state, playerFaction);
     const convoyDecisionHistory = deriveConvoyDecisionHistory(state, playerFaction);
     const paramilitaryDecisionHistory = deriveParamilitaryDecisionHistory(state, playerFaction);
+    const paramilitaryUnrequested = deriveParamilitaryUnrequested(state, playerFaction);
     const officerDecisionHistory = deriveOfficerDecisionHistory(state, playerFaction);
     const armyReserveQueue = deriveArmyReserveQueue({
         pendingReserveRequests,
@@ -3141,6 +3142,7 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
         peacePlanHistory,
         convoyDecisionHistory,
         paramilitaryDecisionHistory,
+        paramilitaryUnrequested,
         officerDecisionHistory,
         pendingParamilitaryRequests,
         paramilitaryPolicy: state.paramilitary_policy === 'always_allow' || state.paramilitary_policy === 'always_deny' || state.paramilitary_policy === 'ask'
@@ -4636,6 +4638,36 @@ function deriveParamilitaryDecisionHistory(
     }
 
     return records.length > 0 ? records : undefined;
+}
+
+/**
+ * Paramilitary sweeps the player's side carried out with no request to the player (staff at Assisted command or above, or a
+ * standing order to allow). A sweep the player decided has a decision record with the same turn and target and is not listed here.
+ * Read-only: derived from the paramilitary formation each sweep created.
+ */
+function deriveParamilitaryUnrequested(
+    state: any,
+    playerFaction: string | null | undefined,
+): LoadedGameState['paramilitaryUnrequested'] {
+    if (!isCanonicalPlayerFaction(playerFaction)) return undefined;
+    const formations = state.military?.formations;
+    if (!formations || typeof formations !== 'object') return undefined;
+    const decided = new Set<string>();
+    for (const record of Array.isArray(state.paramilitary_decision_history) ? state.paramilitary_decision_history : []) {
+        if (record && typeof record.target_osid === 'string') decided.add(`${Number(record.turn)}:${record.target_osid}`);
+    }
+    const sweeps: NonNullable<LoadedGameState['paramilitaryUnrequested']> = [];
+    for (const id of Object.keys(formations).sort(strictCompare)) {
+        const formation = formations[id];
+        if (!formation || formation.kind !== 'paramilitary' || !playerFactionMatch(formation.faction, playerFaction)) continue;
+        const target = formation.paramilitary_target;
+        const turn = formation.created_turn;
+        if (typeof target !== 'string' || !Number.isFinite(turn)) continue;
+        if (decided.has(`${Number(turn)}:${target}`)) continue;
+        sweeps.push({ id: String(formation.id ?? id), turn: Number(turn), target_osid: target, faction: String(formation.faction) });
+    }
+    sweeps.sort((a, b) => (a.turn !== b.turn ? b.turn - a.turn : strictCompare(a.id, b.id)));
+    return sweeps.length > 0 ? sweeps : undefined;
 }
 
 function deriveOfficerDecisionHistory(

@@ -146,12 +146,11 @@ describe('S4: player_ordered_stance is cleared at turn end', () => {
         state.meta.turn = 6;
         runPass(state);
         expect(cmd.stance).not.toBe('reorganize');
-        // The pass sets the RS early-war standing order (general_offensive), so the change is
-        // recorded as not_put(army_stance): the corps is no longer skipped.
+        // The pass sets the RS early-war standing order (general_offensive). Since Batch B the army
+        // stance no longer hides the change: it is put to the president as a matter either way.
         const probe = JSON.parse(JSON.stringify(state)) as GameState;
         generateStanceMatters(probe, 'RS', new Map());
-        expect(probe.meta.stance_matter_history?.map((r) => [r.corps_id, r.outcome, r.not_put_reason])).toEqual([[CORPS, 'not_put', 'army_stance']]);
-        // With a neutral army stance the change is put to the president as a matter.
+        expect(probe.meta.stance_matters?.map((m) => [m.corps_id, m.from_stance, m.to_stance])).toEqual([[CORPS, 'reorganize', cmd.stance]]);
         state.military.army_stance = { RS: 'balanced' } as never;
         generateStanceMatters(state, 'RS', new Map());
         expect(state.meta.stance_matters?.map((m) => [m.corps_id, m.from_stance, m.to_stance])).toEqual([[CORPS, 'reorganize', cmd.stance]]);

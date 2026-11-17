@@ -34,6 +34,7 @@ const FAMILY_LABEL_KEYS: Record<DecisionConsequenceRecord['familyId'], MessageKe
   'dayton-settlement': 'decisionConsequences.family.daytonSettlement',
   'humanitarian-convoy': 'decisionConsequences.family.humanitarianConvoy',
   'paramilitary-authorization': 'decisionConsequences.family.paramilitaryAuthorization',
+  'paramilitary-receipt': 'decisionConsequences.family.paramilitaryReceipt',
   'patron-relations': 'decisionConsequences.family.patronRelations',
   'officer-personnel': 'decisionConsequences.family.officerPersonnel',
   'stance-matter': 'decisionConsequences.family.stanceMatter',
@@ -500,7 +501,7 @@ export function DecisionConsequenceRecordsPanel({ eventCatalog }: DecisionConseq
               <div className="min-w-0 flex-1">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <div className="truncate text-[13px] font-bold text-text-primary">{title}</div>
+                    <div className={`${record.familyId === 'paramilitary-receipt' ? 'break-words' : 'truncate'} text-[13px] font-bold text-text-primary`}>{title}</div>
                     <div className="mt-1 text-[13px] uppercase tracking-[0.14em] text-text-muted">
                       {`${familyLabel(record)} / ${turnToDateString(record.turn)}`}
                     </div>

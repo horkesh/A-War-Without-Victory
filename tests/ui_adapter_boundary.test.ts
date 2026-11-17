@@ -384,6 +384,33 @@ describe('UI Adapter Boundary Discipline', () => {
     ]);
   });
 
+  it('adapter lists paramilitary sweeps carried out without a request to the player, read-only from the formations they created', () => {
+    const rawState: any = {
+      meta: { turn: 30, phase: 'war', player_faction: 'RS' },
+      military: {
+        formations: {
+          para_rs_t2_0: { id: 'para_rs_t2_0', kind: 'paramilitary', faction: 'RS', created_turn: 2, paramilitary_target: 'op:srebrenica:obadi' },
+          para_rs_t5_0: { id: 'para_rs_t5_0', kind: 'paramilitary', faction: 'RS', created_turn: 5, paramilitary_target: 'op:decided:place' },
+          para_rbih_t3_0: { id: 'para_rbih_t3_0', kind: 'paramilitary', faction: 'RBiH', created_turn: 3, paramilitary_target: 'op:foreign:place' },
+          vrs_brigade: { id: 'vrs_brigade', kind: 'brigade', faction: 'RS', created_turn: 0 },
+        },
+      },
+      paramilitary_decision_history: [
+        { id: 'paramilitary:5:op:decided:place', turn: 5, target_osid: 'op:decided:place', faction: 'RS', strength: 150, decision: 'allow' },
+      ],
+      political: { political_controllers: {} },
+    };
+    const before = JSON.stringify(rawState);
+
+    const parsed = parseGameState(rawState);
+
+    expect(parsed.paramilitaryUnrequested).toEqual([
+      { id: 'para_rs_t2_0', turn: 2, target_osid: 'op:srebrenica:obadi', faction: 'RS' },
+    ]);
+    expect(JSON.stringify(rawState)).toBe(before);
+    expect(parseGameState({ ...rawState, meta: { turn: 30, phase: 'war' } }).paramilitaryUnrequested).toBeUndefined();
+  });
+
   it('adapter exposes resolved officer decision history for the player faction', () => {
     const rawState: any = {
       meta: { turn: 12, phase: 'war', player_faction: 'RS' },
