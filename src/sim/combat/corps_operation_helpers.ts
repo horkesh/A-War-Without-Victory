@@ -89,6 +89,19 @@ export function getOperationSlotUsage(cmd: CorpsCommandState): number {
     return getOperationSlotUsageForOperations(cmd.active_operations);
 }
 
+/**
+ * Whether the corps has a free operation slot when operations already in recovery are not counted.
+ * This is the rule the commander loop applies when it starts generic operations (emit.ts filters
+ * `op.phase !== 'recovery'`). The Army HQ path uses it too (authored-op precedence, S1), so both
+ * paths count slots the same way. Before S1, on the turn a generic op entered recovery, the Army HQ
+ * step still counted it and was blocked, while the commander, later in the same turn, started the
+ * next generic op, so chained generic ops could lock out a dated Army HQ op indefinitely.
+ */
+export function hasAvailableSlotIgnoringRecovery(cmd: CorpsCommandState, activeBrigadeCount: number): boolean {
+    const live = cmd.active_operations.filter((op) => op.phase !== 'recovery');
+    return getOperationSlotUsageForOperations(live) < getMaxOperationSlots(activeBrigadeCount);
+}
+
 /** Find which operation (if any) a brigade participates in.
  * A live planning/execution match wins over an earlier recovery-only match;
  * within each phase class the corps array order remains authoritative.
