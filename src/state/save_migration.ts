@@ -888,3 +888,16 @@ registerMigration({
         }
     },
 });
+
+registerMigration({
+    version: 40,
+    description: 'The September 1991 peace start is retired (campaign structure decision 2026-03-23; '
+        + 'scenario, runner path and scenario fields removed 2026-11-16). Deletes '
+        + 'meta.peace_war_start_control_path: only the peace start ever set it (an ABSOLUTE '
+        + 'filesystem path, which made the hash depend on the checkout location), and only the '
+        + 'peace-to-war transition read it. Every war-start save holds null. Sensitive: no.',
+    migrate: (state) => {
+        const meta = asRecord(state.meta);
+        if (meta) delete meta.peace_war_start_control_path;
+    },
+});
