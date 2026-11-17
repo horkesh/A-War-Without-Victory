@@ -3,7 +3,7 @@ import { SCENARIO_REGISTRY, getScenarioEntry, getAvailableScenarios } from '../s
 
 describe('scenario_registry', () => {
     it('has exactly 5 entries', () => {
-        expect(SCENARIO_REGISTRY.length).toBe(5);
+        expect(SCENARIO_REGISTRY.length).toBe(4); // jan1993_to_dayton retired 2026-11-17
     });
 
     it('each entry has all required fields', () => {
@@ -56,7 +56,7 @@ describe('scenario_registry', () => {
     it('getAvailableScenarios excludes unavailable', () => {
         const available = getAvailableScenarios();
         expect(available.every(e => e.available)).toBe(true);
-        expect(available.length).toBe(3);
+        expect(available.length).toBe(2); // jan1993_to_dayton retired 2026-11-17
     });
 
     it('all three factions have difficulty ratings', () => {

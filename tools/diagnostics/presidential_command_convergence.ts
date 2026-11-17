@@ -160,7 +160,7 @@ export const PRESIDENTIAL_DECISION_OWNERSHIP: readonly PresidentialDecisionOwner
   },
   {
     familyId: 'convoy_decision',
-    producer: 'src/state/supply_reserves.ts -> military.pending_convoy_decisions',
+    producer: 'src/state/humanitarian_convoys.ts -> military.pending_convoy_decisions',
     blockerPredicate: 'decision is undefined',
     receiptOwner: 'military.convoy_decision_history',
     receiptDurability: 'durable',
@@ -303,12 +303,12 @@ export const PRESIDENTIAL_DECISION_SOURCE_PROOFS: readonly PresidentialDecisionS
   {
     familyId: 'convoy_decision',
     producer: [{
-      path: 'src/state/supply_reserves.ts',
+      path: 'src/state/humanitarian_convoys.ts',
       anchors: ['state.military.pending_convoy_decisions = pending.sort((a, b) => strictCompare(a.id, b.id));'],
     }],
     action: [{ path: 'src/ui/map/App.tsx', anchors: ["if (action === 'convoy_decision_modal')"] }],
     receipt: [{
-      path: 'src/state/supply_reserves.ts',
+      path: 'src/state/humanitarian_convoys.ts',
       anchors: ['state.military.convoy_decision_history = history.sort((a, b) =>'],
     }],
     consumers: [{

@@ -129,10 +129,7 @@ turn pipeline or replace the player's negotiation. The signing narrative require
   - Behavior: writes the numeric priority to `state.military.logistics_priority[faction][edgeId]` for every `edgeId` in `state.corps_front_sectors[sectorId].edge_ids`, reserializes, and broadcasts the updated state.
   - Priority is clamped by simulation consumers to `[0.5, 1.5]`; `1.0` is the byte-stable neutral default.
 
-- `stage-airdrop-allocation` (invoke)
-  - Payload: `{ enclaveId: string, allocation: number }`
-  - Returns: `{ ok: boolean, error?: string }`
-  - Behavior: writes deterministic enclave airdrop allocation into `state.airdrop_allocation`, reserializes, and broadcasts the updated state for enclave/supply UI surfaces.
+- `stage-airdrop-allocation`: retired 2026-11-17 with the supply-reserve economy (Fable consult 6). It wrote root `state.airdrop_allocation`, which nothing read.
 
 - `stage-convoy-decision` (invoke)
   - Payload: `{ convoyId: string, decision: 'allow' | 'block' | 'divert' }`

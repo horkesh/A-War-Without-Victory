@@ -1,42 +1,19 @@
 /**
  * SupplyPanel — shown when supply map mode is active.
- * Displays per-faction reserve bars (general supply + heavy munitions)
- * and corridor/isolation summary derived from faction supply pressure.
+ * Displays the reachability supply summary (adequate / strained / critical formations),
+ * the corridor summary and the Sarajevo lifeline indicator.
+ *
+ * The per-faction reserve bars (general supply + heavy munitions) were retired
+ * 2026-11-17 with the supply-reserve economy (Fable consult 6): supply is modelled
+ * as connection, not stock.
  */
 import type { LoadedGameState } from '../data/types';
-import { FACTION_COLORS } from '../utils/theme';
-import { getPlayerSafeMilitaryFactionName } from '../utils/playerSafeText';
 import { t } from '../i18n';
 
-const FACTIONS = ['RS', 'RBiH', 'HRHB'] as const;
-type MilitaryFactionId = typeof FACTIONS[number];
+type MilitaryFactionId = 'RS' | 'RBiH' | 'HRHB';
 
 interface SupplyPanelProps {
   state: LoadedGameState;
-}
-
-function ReserveBar({ label, value, color }: { label: string; value: number | null | undefined; color: string }) {
-  const reported = typeof value === 'number' && Number.isFinite(value);
-  const pct = reported ? Math.max(0, Math.min(100, value)) : 0;
-  const barColor =
-    pct >= 50 ? 'bg-green-500' :
-    pct >= 20 ? 'bg-yellow-400' :
-    'bg-red-500';
-
-  return (
-    <div className="flex items-center gap-1.5 min-w-0">
-      <span className={`w-[42px] shrink-0 text-xs ${color}`}>{label}</span>
-      <div className="relative flex-1 h-1.5 bg-panel-border/40 rounded-full overflow-hidden">
-        <div
-          className={`absolute left-0 top-0 h-full rounded-full transition-all ${barColor}`}
-          style={{ width: reported ? `${pct}%` : '0%' }}
-        />
-      </div>
-      <span className={`shrink-0 text-right text-xs tabular-nums text-text-secondary ${reported ? 'w-6' : 'w-16 italic'}`}>
-        {reported ? Math.round(pct) : t('corpsFront.unreported')}
-      </span>
-    </div>
-  );
 }
 
 function isMilitaryFactionId(value: unknown): value is MilitaryFactionId {
@@ -48,7 +25,6 @@ function strictCompare(a: string, b: string): number {
 }
 
 export function SupplyPanel({ state }: SupplyPanelProps) {
-  const reserves = state.factionReserves;
   const supplySummary = state.supplySummaryByFaction ?? {};
   const pressure = state.warPhaseSupplyPressure ?? {};
   const condition = state.warPhaseSupplyCondition ?? {};
@@ -113,27 +89,8 @@ export function SupplyPanel({ state }: SupplyPanelProps) {
         {t('supply.logistics')}
       </div>
 
-      {/* Reserve bars */}
-      {reserves ? (
-        <div className="space-y-2">
-          {(isPlayerFaction ? [playerFaction] : FACTIONS).map((faction) => {
-            const r = reserves[faction];
-            const color = FACTION_COLORS[faction] ?? 'text-text-primary';
-            return (
-              <div key={faction} className="space-y-0.5">
-                <span className={`text-xs font-semibold ${color}`}>{getPlayerSafeMilitaryFactionName(faction, faction)}</span>
-                <ReserveBar label={t('economy.supply')} value={r?.generalSupply} color="text-text-secondary" />
-                <ReserveBar label={t('economy.ammo')} value={r?.heavyMunitions} color="text-text-secondary" />
-              </div>
-            );
-          })}
-        </div>
-      ) : (
-        <div className="text-text-secondary text-xs italic">{t('supply.reservesDisabled')}</div>
-      )}
-
       {/* Corridor summary */}
-      <div className="border-t border-panel-border/50 pt-1.5 text-xs text-text-secondary space-y-1">
+      <div className="text-xs text-text-secondary space-y-1">
         {visibleSummaries.length > 0 && (
           <div className="flex gap-2">
             <span className="text-green-400">{t('supply.stateAdequateCount', { count: visibleStateTotals.adequate })}</span>

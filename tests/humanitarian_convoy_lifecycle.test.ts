@@ -6,7 +6,7 @@ import { deserializeState, serializeState } from '../src/state/serialize.js';
 import {
     applyHumanitarianConvoyDecisions,
     evaluateHumanitarianConvoys,
-} from '../src/state/supply_reserves.js';
+} from '../src/state/humanitarian_convoys.js';
 
 function makeFaction(id: FactionState['id']): FactionState {
     return {
@@ -241,9 +241,10 @@ describe('applyHumanitarianConvoyDecisions', () => {
     });
 
     it.each([
-        { composite: 0.6, expectedDecision: 'allow' as const, expectedReserve: { HRHB: 30, RBiH: 20.55, RS: 40 } },
+        // The supply-reserve economy is retired (2026-11-17, Fable consult 6): convoys leave the old reserve map untouched.
+        { composite: 0.6, expectedDecision: 'allow' as const, expectedReserve: { HRHB: 30, RBiH: 20, RS: 40 } },
         { composite: 0.2, expectedDecision: 'block' as const, expectedReserve: { HRHB: 30, RBiH: 20, RS: 40 } },
-        { composite: 0.4, expectedDecision: 'divert' as const, expectedReserve: { HRHB: 30.275, RBiH: 20.275, RS: 40 } },
+        { composite: 0.4, expectedDecision: 'divert' as const, expectedReserve: { HRHB: 30, RBiH: 20, RS: 40 } },
     ])('consumes a non-player-route convoy with IVP default $expectedDecision', ({ composite, expectedDecision, expectedReserve }) => {
         const state = makeState({
             military: {
@@ -277,7 +278,7 @@ describe('applyHumanitarianConvoyDecisions', () => {
         }
     });
 
-    it('clamps allowed convoy supply to 100 for the target enclave faction', () => {
+    it('no longer adds allowed convoy supply to the retired reserve', () => {
         const state = makeState({
             military: {
                 general_supply_reserve: { HRHB: 30, RBiH: 99.8, RS: 40 },
@@ -287,7 +288,7 @@ describe('applyHumanitarianConvoyDecisions', () => {
 
         applyHumanitarianConvoyDecisions(state);
 
-        expect(state.military.general_supply_reserve?.RBiH).toBe(100);
+        expect(state.military.general_supply_reserve?.RBiH).toBe(99.8);
         expect(state.military.pending_convoy_decisions).toEqual([]);
     });
 
@@ -305,7 +306,7 @@ describe('applyHumanitarianConvoyDecisions', () => {
         expect(state.military.pending_convoy_decisions).toEqual([]);
     });
 
-    it('applies divert supply split and smaller pressure and isolation deltas', () => {
+    it('applies divert pressure and isolation deltas without a reserve split', () => {
         const state = makeState({
             military: {
                 pending_convoy_decisions: [makeConvoy({ route_faction: 'RS', decision: 'divert' })],
@@ -314,8 +315,8 @@ describe('applyHumanitarianConvoyDecisions', () => {
 
         applyHumanitarianConvoyDecisions(state);
 
-        expect(state.military.general_supply_reserve?.RBiH).toBeCloseTo(20.275);
-        expect(state.military.general_supply_reserve?.RS).toBeCloseTo(40.275);
+        expect(state.military.general_supply_reserve?.RBiH).toBe(20);
+        expect(state.military.general_supply_reserve?.RS).toBe(40);
         expect(state.political.international_visibility_pressure?.enclave_humanitarian_pressure).toBeCloseTo(0.41);
         expect(state.factions.find((faction) => faction.id === 'RS')?.patron_state?.diplomatic_isolation).toBeCloseTo(0.02);
         expect(state.military.pending_convoy_decisions).toEqual([]);

@@ -3458,27 +3458,8 @@ app.whenReady().then(() => {
     }
   });
 
-  ipcMain.handle('stage-airdrop-allocation', async (_event, payload) => {
-    const allocations = payload?.allocations;
-    if (!currentGameStateJson || !allocations || typeof allocations !== 'object' || Array.isArray(allocations)) {
-      return { ok: false, error: 'No game loaded or invalid payload' };
-    }
-    try {
-      const sim = getDesktopSim();
-      const state = sim.deserializeState(currentGameStateJson);
-      const nextAllocations = {};
-      for (const enclaveId of Object.keys(allocations).sort()) {
-        const rawValue = allocations[enclaveId];
-        if (typeof rawValue !== 'number' || !Number.isFinite(rawValue) || rawValue < 0) continue;
-        nextAllocations[enclaveId] = rawValue;
-      }
-      state.airdrop_allocation = nextAllocations;
-      writeCanonicalCurrentState(sim, state, _event.sender);
-      return { ok: true };
-    } catch (e) {
-      return { ok: false, error: e.message || String(e) };
-    }
-  });
+  // 'stage-airdrop-allocation' retired 2026-11-17 (Fable consult 6): it wrote root state.airdrop_allocation,
+  // which nothing read (the retired airdrop step read military.airdrop_allocation, and only with reserves on).
 
   ipcMain.handle('stage-convoy-decision', async (_event, payload) => {
     const { convoyId, decision } = payload || {};

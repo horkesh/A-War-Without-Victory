@@ -6808,12 +6808,6 @@
       "mtimeMs": 1791019987769.9023
     },
     {
-      "path": "data/scenarios/jan1993_to_dayton.json",
-      "bytes": 1933,
-      "sha256": "910078ac355082d5c255871d8fa777a8f7e837c233e1c646fa4d634584ec223e",
-      "mtimeMs": 1791019987769.9023
-    },
-    {
       "path": "data/scenarios/noop_13w.json",
       "bytes": 62,
       "sha256": "a6aaf161db34667ed833be7986f589d1524b8b831cb2c3fd897f0fc95b971d5e",

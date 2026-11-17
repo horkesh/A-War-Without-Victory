@@ -364,8 +364,6 @@ export interface EnclaveResilienceView {
     isolation_turns: number;
     hardening_active: boolean;
     supply_state?: 'adequate' | 'strained' | 'critical';
-    airdrop_status?: 'receiving' | 'not_eligible' | 'not_isolated_long_enough';
-    airdrop_allocation?: number;
     faction?: FactionId;
     display_name?: string;
 }
@@ -1390,14 +1388,8 @@ export interface LoadedGameState {
     namedOfficerData?: NamedOfficerView[];
     /** Officer mutable state by id (sorted keys when iterating). */
     namedOfficerStateById?: Record<string, NamedOfficerStateView>;
-    /** Per-faction supply reserve levels (general supply + heavy munitions, 0–100 each). Only present when supply_reserves_enabled. */
-    factionReserves?: Record<string, { generalSupply?: number; heavyMunitions?: number }>;
-    /** Production facility views for EconomyPanel. */
-    productionFacilities?: Array<{ id: string; name: string; type: string; municipality: string; condition: number; controller: string | null }>;
-    /** Smuggling route views for EconomyPanel. */
-    smugglingRoutes?: Array<{ id: string; name: string; faction: string; capacity: number; disrupted: boolean; active_turns: number }>;
-    /** Embargo status per faction for EconomyPanel. */
-    embargoStatus?: Record<string, { pipeline: number; smuggling: number }>;
+    // factionReserves / productionFacilities / smugglingRoutes / embargoStatus retired 2026-11-17
+    // with the supply-reserve economy and the War Footing panel (Fable consult 6).
     /** Enclave resilience state per enclave id. Present when enclave_resilience exists in game state. */
     enclaveResilience?: Record<string, EnclaveResilienceView>;
     /** Per-sector summary of brigade entrenchment state. */

@@ -281,10 +281,9 @@ try {
       }
 
       if (!only || only === 'panels') {
-        const { factionReserves, productionFacilities, smugglingRoutes, embargoStatus, enclaveResilience, nationalDisplacement } = panelState;
-        await mergeReal({ factionReserves, productionFacilities, smugglingRoutes, embargoStatus, enclaveResilience, nationalDisplacement });
-        await mountComponent('/components/EconomyPanel.tsx', 'EconomyPanel', { state: '__store__' });
-        await shot(`economy${tag}`, size, '[data-testid="economy-panel"]');
+        // The War Footing (Economy) panel was retired 2026-11-17 with the supply-reserve economy.
+        const { enclaveResilience, nationalDisplacement } = panelState;
+        await mergeReal({ enclaveResilience, nationalDisplacement });
         await mountComponent('/components/EnclaveDashboard.tsx', 'EnclaveDashboard', { state: '__store__', open: true });
         await shot(`enclave${tag}`, size, '[data-testid="enclave-dashboard"]');
         await unmountComponent();

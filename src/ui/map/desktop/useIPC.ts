@@ -259,7 +259,6 @@ interface WindowAwwv {
     stageCoReplacementOrder: (payload: { corpsId: string; replacementOfficerId?: string }) => Promise<{ ok: boolean; error?: string; replacementOfficerId?: string }>;
     dismissEventNotification: (notificationId: string) => Promise<{ ok: boolean; error?: string }>;
     stageOperationDecision: (payload: { corpsId: string; operationName: string; decision: 'launch' | 'postpone' | 'abort' | 'probe' }) => Promise<{ ok: boolean; error?: string }>;
-    stageAirdropAllocation: (allocations: Record<string, number>) => Promise<{ ok: boolean; error?: string }>;
     respondToEventDecision: (eventId: string, responseId: string) => Promise<{ ok: boolean; error?: string }>;
     stageConvoyDecision: (convoyId: string, decision: 'allow' | 'block' | 'divert') => Promise<{ ok: boolean; error?: string }>;
     stageOpsecToggle: (sectorId: string, active: boolean) => Promise<{ ok: boolean; error?: string }>;
@@ -596,10 +595,6 @@ export function useIPC() {
             stageOperationDecision: awwv
                 ? (payload: { corpsId: string; operationName: string; decision: 'launch' | 'postpone' | 'abort' | 'probe' }) => awwv.stageOperationDecision(payload)
                 : (_payload: { corpsId: string; operationName: string; decision: 'launch' | 'postpone' | 'abort' | 'probe' }) => NOOP_RESULT as Promise<{ ok: boolean; error?: string }>,
-
-            stageAirdropAllocation: awwv
-                ? (allocations: Record<string, number>) => awwv.stageAirdropAllocation(allocations)
-                : (_allocations: Record<string, number>) => NOOP_RESULT as Promise<{ ok: boolean; error?: string }>,
 
             respondToEventDecision: awwv
                 ? (eventId: string, responseId: string) => awwv.respondToEventDecision(eventId, responseId)

@@ -1,11 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { EdgeRecord } from '../src/map/settlements.js';
-import {
-    applyHumanitarianConvoyDecisions,
-    applySmugglingAllocation,
-    evaluateHumanitarianConvoys,
-    maybeActivateSarajevoTunnel
-} from '../src/state/supply_reserves.js';
+import { applyHumanitarianConvoyDecisions, evaluateHumanitarianConvoys } from '../src/state/humanitarian_convoys.js';
+import { maybeActivateSarajevoTunnel } from '../src/state/sarajevo_lifeline.js';
 import {
     applyIvpConsequences,
     ensureInternationalVisibilityPressure,
@@ -168,29 +164,20 @@ describe('Phase C supply agency', () => {
         state.military.pending_convoy_decisions = [{ ...convoys[0], decision: 'divert' }];
         applyHumanitarianConvoyDecisions(state);
 
-        expect(state.military.general_supply_reserve?.RS).toBeCloseTo(40 + (convoys[0]?.supply_amount ?? 0) * 0.5);
-        expect(state.military.general_supply_reserve?.RBiH).toBeCloseTo(20 + (convoys[0]?.supply_amount ?? 0) * 0.5);
+        // Supply-reserve economy retired 2026-11-17 (Fable consult 6): a diverted convoy no longer splits supply.
+        expect(state.military.general_supply_reserve?.RS).toBe(40);
+        expect(state.military.general_supply_reserve?.RBiH).toBe(20);
         expect(state.military.pending_convoy_decisions).toEqual([]);
         expect(state.factions.find((f) => f.id === 'RS')?.patron_state?.diplomatic_isolation ?? 0).toBeGreaterThan(0);
     });
 
-    it('applies smuggling allocation to ammo and food tracks and unlocks Sarajevo tunnel', () => {
-        const state = makeState({
-  military: {
-    smuggling_allocation: {
-                ENCL_test: { type: 'ammo', amount: 0.2 },
-                sarajevo: { type: 'food', amount: 0.3 },
-            }
-  } as any,
-});
-        ensureInternationalVisibilityPressure(state);
-        state.political.international_visibility_pressure!.enclave_humanitarian_pressure = 0.5;
+    it('unlocks the Sarajevo tunnel without a reserve grant (smuggling allocation retired 2026-11-17)', () => {
+        const state = makeState();
+        const reserveBefore = JSON.stringify(state.military.general_supply_reserve);
 
-        applySmugglingAllocation(state);
-        maybeActivateSarajevoTunnel(state);
+        expect(maybeActivateSarajevoTunnel(state)).toBe(true);
 
-        expect(state.military.heavy_munitions_reserve?.RBiH).toBeGreaterThan(5);
-        expect(state.political.international_visibility_pressure?.enclave_humanitarian_pressure).toBeLessThan(0.5);
         expect(state.military.sarajevo_tunnel_operational).toBe(true);
+        expect(JSON.stringify(state.military.general_supply_reserve)).toBe(reserveBefore);
     });
 });
