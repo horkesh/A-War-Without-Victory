@@ -97,14 +97,14 @@ describe('supply-reserve economy retired (Fable consult 6)', () => {
     });
 
     it('the scenario loader ignores a supply_reserves_enabled key (a started game never has reserves)', () => {
-        const raw = JSON.parse(readFileSync(join(process.cwd(), 'data/scenarios/apr1992_definitive_40w.json'), 'utf8')) as Record<string, unknown>;
+        const raw = JSON.parse(readFileSync(join(process.cwd(), 'data/scenarios/apr1992_definitive_188w.json')).toString()) as Record<string, unknown>;
         const normalized = normalizeScenario({ ...raw, supply_reserves_enabled: true }) as unknown as Record<string, unknown>;
         expect(normalized.supply_reserves_enabled).toBeUndefined();
         for (const entry of SCENARIO_REGISTRY) {
             const path = join(process.cwd(), 'data/scenarios', `${entry.key}.json`);
             if (!existsSync(path)) continue;
-            const scenario = JSON.parse(readFileSync(path, 'utf8')) as Record<string, unknown>;
-            if (entry.key === 'apr1992_definitive_40w' || entry.key === 'apr1992_definitive_188w') {
+            const scenario = JSON.parse(readFileSync(path).toString()) as Record<string, unknown>;
+            if (entry.key.startsWith('apr1992')) {
                 expect(scenario.supply_reserves_enabled, entry.key).toBeUndefined();
             }
         }
