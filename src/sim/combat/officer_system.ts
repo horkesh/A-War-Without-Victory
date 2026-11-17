@@ -1013,11 +1013,21 @@ export function processOfficerSuccession(
                 // manually controlled player here; those keep the pre-existing pool path.
                 const scheduleMayAct = faction !== manualPlayerFaction
                     && !isPresidentialAppointee(state, corpsFormId, existingCommander.data.id);
-                const availableReplacement = (scheduleMayAct
+                const scheduledReplacement = scheduleMayAct
                     ? scheduledHolderForCorps(state, corpsRoster, officerData, officers, corpsFormId, turn, false)
-                    : null)
+                    : null;
+                const availableReplacement = scheduledReplacement
                     ?? findBestReplacement(officers, officerData, faction, corpsFormId, turn, officersRelievedFrom(corpsRoster, corpsFormId, turn));
                 if (!availableReplacement) continue;
+                // Commander attribution PR 2b (panel round 2, R2-Q1, 2-1): an acting holder gives way
+                // only to a candidate of higher precedence (corps rank > tactical commander > generic)
+                // or to the schedule. A pulled-up OG/brigade commander never displaces another one.
+                // Only applies when a tactical commander is on either side, so the existing acting
+                // paths (generic acting, relief acting) behave exactly as before the rank retype.
+                const tacticalInvolved = availableReplacement.rank === 'tactical_commander'
+                    || existingCommander.data.rank === 'tactical_commander';
+                if (!scheduledReplacement && tacticalInvolved
+                    && actingPrecedence(availableReplacement) >= actingPrecedence(existingCommander.data)) continue;
                 if (existingCommander.data.faction === 'HRHB') {
                     // D.4: Read delays from war_timeline if available, else hardcoded fallback
                     const hvoConfig = state.military.war_timeline?.officer_config?.HRHB;
@@ -1028,8 +1038,14 @@ export function processOfficerSuccession(
                         ? combatDelay : politicalDelay;
                     if (existingCommander.state.turns_in_command < requiredDelay) continue;
                 }
-                // Delay served — retire acting, look for pool replacement below
-                existingCommander.state.status = 'retired';
+                // Delay served — retire acting, look for pool replacement below. A pulled-up
+                // tactical commander (PR 2b, R2-Q1) goes back to his own command, not into retirement.
+                if (existingCommander.data.rank === 'tactical_commander') {
+                    existingCommander.state.status = 'reserve';
+                    existingCommander.state.acting_commander = false;
+                } else {
+                    existingCommander.state.status = 'retired';
+                }
                 existingCommander.state.assigned_corps_id = null;
             } else {
                 continue;
@@ -1038,7 +1054,8 @@ export function processOfficerSuccession(
 
         // The dated schedule names the holder first (§5E); the pool ranking is the
         // counterfactual fallback when the schedule has no free holder.
-        const replacement = scheduledHolderForCorps(state, corpsRoster, officerData, officers, corpsFormId, turn, false)
+        const scheduledHolder = scheduledHolderForCorps(state, corpsRoster, officerData, officers, corpsFormId, turn, false);
+        const replacement = scheduledHolder
             ?? findBestReplacement(officers, officerData, faction, corpsFormId, turn, officersRelievedFrom(corpsRoster, corpsFormId, turn));
 
         if (replacement) {
@@ -1046,7 +1063,11 @@ export function processOfficerSuccession(
             os.status = 'active';
             os.assigned_corps_id = corpsFormId;
             os.turns_in_command = 0;
-            os.acting_commander = false;
+            // Commander attribution PR 2b (R2-Q1): a tactical commander pulled into a vacancy by the
+            // fallback holds the corps as ACTING (0.92 combat modifier) until an officer of higher
+            // precedence is free. Real holders: corps chiefs of staff or appointed commanders took
+            // over vacancies, not OG commanders (Krstić TJ para 331; BB1 p.488, p.491; BB2 p.510).
+            os.acting_commander = !scheduledHolder && replacement.rank === 'tactical_commander';
             applyAssignmentPenalty(os, replacement, corpsFormId);
 
             report.replacements.push({
@@ -1176,6 +1197,16 @@ function scheduledHolderForCorps(
  * Find best available replacement officer for a corps.
  * Priority: pool_tier (starter > tier_a > tier_b > tier_c), then competence, then home corps match.
  */
+/**
+ * Precedence of a corps holder for the acting-replacement rule (PR 2b, R2-Q1): a corps-rank
+ * officer (0) before a pulled-up tactical commander (1) before the generic acting commander (2).
+ * Lower is stronger; an acting holder gives way only to a strictly lower value.
+ */
+function actingPrecedence(officer: NamedOfficer): number {
+    if (officer.id.startsWith('generic_')) return 2;
+    return officer.rank === 'tactical_commander' ? 1 : 0;
+}
+
 /**
  * The faction's average named corps commander (competence, aggressiveness, defensive skill,
  * political reliability), rounded to two decimals. Generic acting commanders are excluded, so

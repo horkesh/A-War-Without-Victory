@@ -1025,3 +1025,51 @@ describe('PR 2b-i: TG commanders and the vacancy rank key', () => {
         assert.equal(state.military.named_officers!['tc_strong']!.status, 'reserve');
     });
 });
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Commander attribution PR 2b round 2 (R2-Q1, 2-1): a pulled-up tactical commander holds a corps
+// as ACTING and gives way to a corps-rank officer of the corps; never to another tactical commander.
+// ═══════════════════════════════════════════════════════════════════════════
+
+describe('PR 2b R2-Q1: a pulled-up tactical commander holds the corps as acting', () => {
+    function corpsState() {
+        const state = makeMinimalState({ meta: { turn: 50, phase: 'war', scenario_id: 'test' } } as unknown as Partial<GameState>);
+        state.military.formations = {
+            arbih_3rd: makeFormation({ id: 'arbih_3rd', faction: 'RBiH', kind: 'corps_asset' as 'brigade' }),
+        };
+        return state;
+    }
+
+    it('seats him as acting, keeps him against another tactical commander, and hands over to a corps-rank officer', () => {
+        const state = corpsState();
+        state.military.named_officer_data = [
+            makeOfficer({ id: 'og_lead', faction: 'RBiH', rank: 'tactical_commander', home_corps_id: 'arbih_3rd', competence: 5 }),
+            makeOfficer({ id: 'og_two', faction: 'RBiH', rank: 'tactical_commander', home_corps_id: 'arbih_3rd', competence: 4 }),
+            makeOfficer({ id: 'appointed', faction: 'RBiH', rank: 'corps_commander', home_corps_id: 'arbih_3rd', competence: 3, available_from_turn: 52 }),
+        ];
+        state.military.named_officers = {
+            og_lead: makeOfficerState({ officer_id: 'og_lead', status: 'reserve' }),
+            og_two: makeOfficerState({ officer_id: 'og_two', status: 'reserve' }),
+        };
+
+        processOfficerSuccession(state, new Set());
+        let holder = getCorpsCommander('arbih_3rd', state);
+        assert.equal(holder?.data.id, 'og_lead');
+        assert.equal(holder?.state.acting_commander, true);
+
+        // Another tactical commander is free: no swap.
+        state.meta.turn = 51;
+        processOfficerSuccession(state, new Set());
+        assert.equal(getCorpsCommander('arbih_3rd', state)?.data.id, 'og_lead');
+
+        // The appointed corps-rank officer arrives: he takes the corps; the OG commander returns to reserve.
+        state.meta.turn = 52;
+        processOfficerSuccession(state, new Set());
+        holder = getCorpsCommander('arbih_3rd', state);
+        assert.equal(holder?.data.id, 'appointed');
+        assert.equal(holder?.state.acting_commander, false);
+        assert.equal(state.military.named_officers!['og_lead']!.status, 'reserve');
+        assert.equal(state.military.named_officers!['og_lead']!.assigned_corps_id, null);
+        assert.equal(state.military.named_officers!['og_lead']!.acting_commander, false);
+    });
+});
