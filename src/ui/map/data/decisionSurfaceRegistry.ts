@@ -20,7 +20,6 @@ export type DecisionSurfaceGatePolicy = PlayerDecisionGatePolicy | 'info';
 export type DecisionResolverSurface =
   | 'event_modal'
   | 'paramilitary_review_modal'
-  | 'convoy_decision_modal'
   | 'peace_plan_modal'
   | 'dayton_modal'
   | 'reserve_request_modal'
@@ -100,13 +99,6 @@ const SURFACE_COPY_KEYS: Record<DecisionSurfaceFamilyId, {
     sourceLabel: 'decisionSurface.paramilitary.sourceLabel',
     fallbackTitle: 'decisionSurface.paramilitary.fallbackTitle',
     fallbackSummary: 'decisionSurface.paramilitary.fallbackSummary',
-  },
-  convoy_decision: {
-    playerLabel: 'decisionSurface.convoy.playerLabel',
-    actionLabel: 'decisionSurface.convoy.actionLabel',
-    sourceLabel: 'decisionSurface.convoy.sourceLabel',
-    fallbackTitle: 'decisionSurface.convoy.fallbackTitle',
-    fallbackSummary: 'decisionSurface.convoy.fallbackSummary',
   },
   reserve_request: {
     playerLabel: 'decisionSurface.reserve.playerLabel',
@@ -290,22 +282,6 @@ export const DECISION_SURFACE_REGISTRY = {
     ),
     resolveAction: 'Authorize or deny deployment',
     consequenceRecord: 'Security decision log',
-  }),
-  convoy_decision: manifestSurface({
-    familyId: 'convoy_decision',
-    inboxType: 'convoy_decision',
-    playerLabel: 'Humanitarian convoy',
-    severity: 'modal_required',
-    ownerShell: 'desk',
-    resolverSurface: 'convoy_decision_modal',
-    opensAs: 'modal',
-    gatePolicy: 'modal_required',
-    inboxAction: 'convoy_decision_modal',
-    actionLabel: 'Review convoy',
-    sourceLabel: 'Humanitarian channel',
-    copySanitizer: (raw) => rawCopy(raw, 'Humanitarian convoy', 'A convoy request needs your instruction: allow, block, or divert.'),
-    resolveAction: 'Stage convoy decision',
-    consequenceRecord: 'Humanitarian access record',
   }),
   reserve_request: manifestSurface({
     familyId: 'reserve_request',

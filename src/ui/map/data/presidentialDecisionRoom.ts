@@ -340,10 +340,10 @@ type CandidateCard = Omit<PresidentialDecisionRoomCard, 'sortKey' | 'directive' 
   preserveActionLabel?: boolean;
 };
 
-type ManifestModalFamilyId = 'peace_plan' | 'dayton_negotiation' | 'convoy_decision';
+type ManifestModalFamilyId = 'peace_plan' | 'dayton_negotiation';
 
 function isManifestModalFamilyId(value: string): value is ManifestModalFamilyId {
-  return value === 'peace_plan' || value === 'dayton_negotiation' || value === 'convoy_decision';
+  return value === 'peace_plan' || value === 'dayton_negotiation';
 }
 
 const LARGE_SORT = 999999;
@@ -688,12 +688,6 @@ function addManifestDecisionCards(
       titleKey: 'decisionRoom.card.manifest.dayton.title',
       explanationKey: 'decisionRoom.card.manifest.dayton.explanation',
       sourceLabelKey: 'decisionRoom.card.manifest.dayton.sourceLabel',
-      actionLabelKey: 'decisionRoom.action.openInbox',
-    },
-    convoy_decision: {
-      titleKey: 'decisionRoom.card.manifest.convoy.title',
-      explanationKey: 'decisionRoom.card.manifest.convoy.explanation',
-      sourceLabelKey: 'decisionRoom.card.manifest.convoy.sourceLabel',
       actionLabelKey: 'decisionRoom.action.openInbox',
     },
   };
@@ -2088,7 +2082,6 @@ function requiredCardIds(state: LoadedGameState): Set<string> {
     if (blocker.type === 'event_decision') ids.add('review:pending');
     if (blocker.type === 'peace_plan') ids.add('manifest:peace_plan');
     if (blocker.type === 'dayton_negotiation') ids.add('manifest:dayton_negotiation');
-    if (blocker.type === 'convoy_decision') ids.add('manifest:convoy_decision');
     if (blocker.type === 'paramilitary_request') ids.add('paramilitary:pending');
     if (blocker.type === 'autonomy_proposal' && blocker.id === 'command:review-proposal:historical-ops') {
       for (const review of state.pendingProposalReviews ?? []) {

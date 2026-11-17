@@ -75,7 +75,7 @@ describe('Sarajevo siege parameter consumer integration', () => {
         const supplyReport = {
             factions: [{
                 faction_id: 'RBiH',
-                by_settlement: [{ sid: 'op:centar_sarajevo:centar_sarajevo', state: 'critical' }],
+                by_osid: [{ osid: 'op:centar_sarajevo:centar_sarajevo', state: 'critical' }],
             }],
         } as any;
 

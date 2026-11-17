@@ -440,9 +440,9 @@ describe('deriveInboxItems — peace plan', () => {
 });
 
 // ---------------------------------------------------------------------------
-// 3. Dayton and convoy decisions
+// 3. Dayton decisions (convoy decisions retired, F1i 2026-11-16)
 // ---------------------------------------------------------------------------
-describe('deriveInboxItems - Dayton and convoy decisions', () => {
+describe('deriveInboxItems - Dayton decisions', () => {
     it('surfaces a pending Dayton negotiation as a blocking inbox item', () => {
         const state = makeStub({
             pendingDayton: {
@@ -464,74 +464,6 @@ describe('deriveInboxItems - Dayton and convoy decisions', () => {
         });
     });
 
-    it('surfaces pending convoy decisions and routes them to the convoy decision modal', () => {
-        const state = makeStub({
-            pendingConvoyDecisions: [
-                {
-                    id: 'convoy_1',
-                    target_enclave: 'Gorazde',
-                    route_faction: 'RBiH',
-                    supply_amount: 25,
-                },
-            ],
-        });
-
-        const convoyItems = deriveInboxItems(state, null).filter(i => i.type === 'convoy_decision');
-
-        expect(convoyItems).toHaveLength(1);
-        expect(convoyItems[0]).toMatchObject({
-            id: 'convoy:convoy_1',
-            severity: 'normal',
-            action: 'convoy_decision_modal',
-            title: 'Humanitarian Convoy',
-        });
-        expect(convoyItems[0].subtitle).toContain('allow, block, or divert');
-    });
-
-    it('does not surface foreign-route convoy decisions to the player inbox', () => {
-        const state = makeStub({
-            player_faction: 'RBiH',
-            pendingConvoyDecisions: [
-                {
-                    id: 'convoy_foreign',
-                    target_enclave: 'Gorazde',
-                    route_faction: 'RS',
-                    supply_amount: 25,
-                },
-                {
-                    id: 'convoy_player',
-                    target_enclave: 'Bihac',
-                    route_faction: 'RBiH',
-                    supply_amount: 15,
-                },
-            ],
-        });
-
-        const convoyItems = deriveInboxItems(state, null).filter(i => i.type === 'convoy_decision');
-
-        expect(convoyItems.map((item) => item.id)).toEqual(['convoy:convoy_player']);
-    });
-
-    it('does not surface already answered convoy decisions as pending blockers', () => {
-        const state = makeStub({
-            player_faction: 'RBiH',
-            pendingConvoyDecisions: [
-                {
-                    id: 'convoy_answered',
-                    target_enclave: 'Gorazde',
-                    route_faction: 'RBiH',
-                    supply_amount: 25,
-                    decision: 'allow',
-                },
-            ],
-        });
-
-        const items = deriveInboxItems(state, null);
-
-        expect(items.filter(i => i.type === 'convoy_decision')).toHaveLength(0);
-        expect(hasBlockingItems(items)).toBe(false);
-    });
-
     it('localizes generated decision and situation inbox items in BCS mode', () => {
         setLocale('bcs');
         const state = makeStub({
@@ -541,14 +473,6 @@ describe('deriveInboxItems - Dayton and convoy decisions', () => {
                 factionCapital: { RBiH: 50, RS: 50, HRHB: 50 },
                 patronOverride: { RBiH: 0, RS: 0, HRHB: 0 },
             },
-            pendingConvoyDecisions: [
-                {
-                    id: 'convoy_1',
-                    target_enclave: 'Gorazde',
-                    route_faction: 'RBiH',
-                    supply_amount: 25,
-                },
-            ],
             formations: [
                 { id: 'first_corps', name: '1st Corps', faction: 'RBiH', kind: 'corps', status: 'active' },
             ] as LoadedGameState['formations'],
@@ -581,7 +505,6 @@ describe('deriveInboxItems - Dayton and convoy decisions', () => {
             .join('\n');
 
         expect(copy).toContain('Daytonsko pregovaranje');
-        expect(copy).toContain('Humanitarni konvoj');
         expect(copy).toContain('Zahtjev za rezervom');
         expect(copy).toContain('Izgubljena teritorija');
         expect(copy).toContain('Osvojena teritorija');
@@ -1315,21 +1238,6 @@ describe('countActionableItems / hasBlockingItems', () => {
         const state = makeStub();
         const items = deriveInboxItems(state, null);
         expect(hasBlockingItems(items)).toBe(false);
-    });
-
-    it('treats modal-required convoy items as effective blockers without mutating source severity', () => {
-        const state = makeStub({
-            player_faction: 'RBiH',
-            pendingConvoyDecisions: [
-                { id: 'convoy_rbih', target_enclave: 'gorazde', route_faction: 'RBiH', supply_amount: 18 },
-            ],
-        });
-        const items = deriveInboxItems(state, null);
-        const convoy = items.find((item) => item.type === 'convoy_decision')!;
-
-        expect(convoy.severity).toBe('normal');
-        expect(effectiveInboxSeverity(convoy)).toBe('blocking');
-        expect(hasBlockingItems(items)).toBe(true);
     });
 
     it('derives blocking from the decision manifest while preserving dynamic event advisories', () => {

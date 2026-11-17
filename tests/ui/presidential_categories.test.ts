@@ -216,7 +216,7 @@ describe('presidential command categories — count derivation', () => {
   it('counts grouped modal-required decision families by represented pending items', () => {
     const view = makeView([
       makeCard({
-        id: 'manifest:convoy_decision',
+        id: 'manifest:dayton_negotiation',
         category: 'decision',
         severity: 'blocking',
         countWeight: 3,
@@ -309,12 +309,11 @@ describe('Command Surface area and action art resolution', () => {
     }
   });
 
-  it('keeps the five action (act_*) ids mapped to consequence_stills (ready but unrendered)', () => {
+  it('keeps the four action (act_*) ids mapped to consequence_stills (ready but unrendered)', () => {
     const expected: Record<string, string> = {
       act_authorize_op: 'consequence_reserve_deployment.webp',
       act_replace_commander: 'consequence_personnel_change.webp',
       act_patron_relations: 'consequence_negotiated_settlement.webp',
-      act_convoy: 'consequence_humanitarian_access.webp',
       act_front_visit: 'consequence_public_pressure.webp',
     };
     for (const [id, basename] of Object.entries(expected)) {
