@@ -525,7 +525,7 @@ function commitCorpsBreachAnswer(
         let lost = lostByFaction.get(faction);
         if (!lost) { lost = collectRecentCombatLosses(state, faction); lostByFaction.set(faction, lost); }
         if (lost.size === 0) continue;
-        const friendly = friendlyByFaction.get(faction as FactionId);
+        const friendly = friendlyByFaction.get(faction);
         const front = frontByFaction.get(faction) ?? new Set<string>();
 
         const breaches: Array<{ sectorId: string; lostCell: string; targets: string[] }> = [];
