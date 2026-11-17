@@ -726,9 +726,8 @@
     "once": true,
     "same_turn_requires_events": true,
     "effect": {
-      "kind": "supply_delta",
-      "faction": "RS",
-      "delta": -30
+      "kind": "narrative",
+      "text": "NATO launches Operation Deliberate Force. Sustained air strikes hit VRS military infrastructure across Bosnia."
     },
     "sets_flags": {
       "nato_deliberate_force_occurred": true
@@ -749,10 +748,6 @@
         "faction": "RS",
         "multiplier": 0.7,
         "duration_turns": 10
-      },
-      {
-        "kind": "narrative",
-        "text": "NATO launches Operation Deliberate Force. Sustained air strikes hit VRS military infrastructure across Bosnia."
       }
     ]
   },
@@ -805,11 +800,6 @@
         "delta": 5
       },
       {
-        "kind": "supply_delta",
-        "faction": "RS",
-        "delta": -15
-      },
-      {
         "kind": "narrative",
         "text": "Federation forces launch a broad offensive. VRS lines collapse across western Bosnia as Republika Srpska's territory shrinks dramatically."
       }
@@ -836,9 +826,8 @@
     },
     "once": true,
     "effect": {
-      "kind": "supply_delta",
-      "faction": "RBiH",
-      "delta": 5
+      "kind": "narrative",
+      "text": "The UN Rapid Reaction Force deploys heavy artillery on Mount Igman. For the first time, the international military presence in Bosnia has offensive capability."
     },
     "effects": [
       {
@@ -850,10 +839,6 @@
         "kind": "patron_pressure",
         "faction": "RS",
         "delta": 10
-      },
-      {
-        "kind": "narrative",
-        "text": "The UN Rapid Reaction Force deploys heavy artillery on Mount Igman. For the first time, the international military presence in Bosnia has offensive capability."
       }
     ],
     "dimension_shifts": [
@@ -904,11 +889,6 @@
     "effects": [
       {
         "kind": "morale_change",
-        "faction": "RS",
-        "delta": -5
-      },
-      {
-        "kind": "supply_delta",
         "faction": "RS",
         "delta": -5
       },
@@ -974,11 +954,6 @@
         "kind": "morale_change",
         "faction": "HRHB",
         "delta": 10
-      },
-      {
-        "kind": "supply_delta",
-        "faction": "RS",
-        "delta": -15
       },
       {
         "kind": "narrative",
@@ -1842,13 +1817,8 @@
         "branch_tag": "rs_holbrooke_defy",
         "historical_marker": "counterfactual",
         "label": "Reject the US framework -- Pale speaks for Republika Srpska",
-        "description": "Refuse to be sidelined. Karadžić repudiates the Patriarch Paper delegation and insists on direct Pale representation. Milošević publicly disowns the Pale leadership; sanctions-relief is foreclosed and the FRY supply pinch tightens. International standing collapses, but RS asserts its political identity.",
+        "description": "Refuse to be sidelined. Karadžić repudiates the Patriarch Paper delegation and insists on direct Pale representation. Milošević publicly disowns the Pale leadership; sanctions-relief is foreclosed and Belgrade withdraws its backing. International standing collapses, but RS asserts its political identity.",
         "effects": [
-          {
-            "kind": "supply_delta",
-            "faction": "RS",
-            "delta": -20
-          },
           {
             "kind": "recruitment_modifier",
             "faction": "RS",
@@ -1974,13 +1944,8 @@
         "branch_tag": "rs_deliberate_force_absorb",
         "historical_marker": "counterfactual",
         "label": "Reject NATO demands -- hold positions",
-        "description": "Reject NATO demands. The bombing continues, increasing pressure on VRS command and combat capability. Continued NATO strikes degrade equipment, supply, recruitment, and morale.",
+        "description": "Reject NATO demands. The bombing continues, increasing pressure on VRS command and combat capability. Continued NATO strikes degrade equipment, recruitment, and morale.",
         "effects": [
-          {
-            "kind": "supply_delta",
-            "faction": "RS",
-            "delta": -15
-          },
           {
             "kind": "morale_change",
             "faction": "RS",
@@ -2061,11 +2026,6 @@
         "delta": 5
       },
       {
-        "kind": "supply_delta",
-        "faction": "RS",
-        "delta": -10
-      },
-      {
         "kind": "narrative",
         "text": "Jajce is recaptured after three years. HV-HVO forces advance through western Bosnia, taking substantial territory and forcing VRS withdrawals."
       }
@@ -2128,11 +2088,6 @@
           "vrs_1st_krajina",
           "vrs_2nd_krajina"
         ]
-      },
-      {
-        "kind": "supply_delta",
-        "faction": "RS",
-        "delta": -10
       },
       {
         "kind": "narrative",
@@ -2754,11 +2709,6 @@
         "delta": -10
       },
       {
-        "kind": "supply_delta",
-        "faction": "RBiH",
-        "delta": -15
-      },
-      {
         "kind": "equipment_quality_modifier",
         "faction": "RBiH",
         "multiplier": 0.95,
@@ -2829,11 +2779,6 @@
         "delta": -10
       },
       {
-        "kind": "supply_delta",
-        "faction": "RS",
-        "delta": -15
-      },
-      {
         "kind": "patron_pressure",
         "faction": "RS",
         "delta": 25
@@ -2891,11 +2836,6 @@
         "kind": "morale_change",
         "faction": "HRHB",
         "delta": -10
-      },
-      {
-        "kind": "supply_delta",
-        "faction": "HRHB",
-        "delta": -15
       },
       {
         "kind": "patron_pressure",

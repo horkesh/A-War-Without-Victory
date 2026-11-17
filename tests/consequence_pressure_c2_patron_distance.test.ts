@@ -6,7 +6,8 @@
  *   - RBiH / HRHB formal arms-review triggers set faction-scoped flags.
  *   - RBiH / HRHB partial-disavowal triggers consume those flags.
  *   - Both stages write live substrates already consumed elsewhere:
- *     recruitment_modifier, supply_delta or patron_pressure, and CostLedger.
+ *     recruitment_modifier, patron_pressure, and CostLedger.
+ *     (The former supply_delta leg was retired 2026-11-17: supply is connection, not stock.)
  *
  * No new condition kind, effect kind, or sensitive-history surface is added.
  */
@@ -133,9 +134,7 @@ describe('Packet C2 patron-distance pressure completion', () => {
             patron_arms_review_imposed_turn_RBiH: 1,
         });
 
-        const supplyBefore = fires.military.general_supply_reserve!.RBiH;
         applyEventEffects(fires, effectsOf(def));
-        expect(fires.military.general_supply_reserve!.RBiH).toBeLessThan(supplyBefore);
         expect(fires.military.recruitment_modifiers?.some(m => m.faction === 'RBiH' && m.pool_multiplier === 0.90)).toBe(true);
         expect(buildCostLedger(fires).annotations?.find(a => a.tag === 'patron_arms_review_imposed_RBiH')).toBeTruthy();
     });
@@ -177,9 +176,7 @@ describe('Packet C2 patron-distance pressure completion', () => {
             patron_arms_review_imposed_turn_HRHB: 1,
         });
 
-        const supplyBefore = fires.military.general_supply_reserve!.HRHB;
         applyEventEffects(fires, effectsOf(def));
-        expect(fires.military.general_supply_reserve!.HRHB).toBeLessThan(supplyBefore);
         expect(fires.military.recruitment_modifiers?.some(m => m.faction === 'HRHB' && m.pool_multiplier === 0.90)).toBe(true);
         expect(buildCostLedger(fires).annotations?.find(a => a.tag === 'patron_arms_review_imposed_HRHB')).toBeTruthy();
     });

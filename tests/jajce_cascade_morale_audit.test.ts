@@ -88,7 +88,6 @@ describe('LANE-NIGHTSHIFT-JAJCE-CASCADE-MORALE-AUDIT', () => {
             'negotiation_capital',
             'patron_pressure',
             'recruitment_modifier',
-            'supply_delta',
         ]);
 
         for (const e of ev.effects ?? []) {

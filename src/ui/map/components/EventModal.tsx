@@ -66,7 +66,6 @@ const CATEGORY_CONFIG: Record<string, { bg: string; color: string; labelKey: Mes
 
 const EFFECT_ICONS: Record<string, IconName> = {
     morale_change: 'morale',
-    supply_delta: 'supply',
     cohesion_change: 'cohesion',
     humanitarian_impact: 'dead',
     patron_pressure: 'recon',
@@ -107,7 +106,6 @@ export function describeEventEffect(effect: EventEffect): string {
     switch (effect.kind) {
         case 'narrative': return effect.text;
         case 'morale_change': return `${getPlayerSafePoliticalFactionName(effect.faction)} morale ${effect.delta > 0 ? '+' : ''}${effect.delta}`;
-        case 'supply_delta': return `${getPlayerSafePoliticalFactionName(effect.faction)} supply ${effect.delta > 0 ? '+' : ''}${effect.delta}`;
         case 'cohesion_change': return `${getPlayerSafePoliticalFactionName(effect.faction)} cohesion ${effect.delta > 0 ? '+' : ''}${effect.delta}`;
         case 'humanitarian_impact': return formatWarCrimesRecordLine(effect.faction, effect.war_crimes_delta);
         case 'patron_pressure': return `${getPlayerSafePoliticalFactionName(effect.faction)} patron pressure ${effect.delta > 0 ? '+' : ''}${effect.delta}`;

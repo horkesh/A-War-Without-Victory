@@ -90,7 +90,6 @@ function describeEffect(effect: EventEffect): string | null {
   switch (effect.kind) {
     case 'narrative': return null;
     case 'morale_change': return `${army} morale ${signedDelta(effect.delta)}`;
-    case 'supply_delta': return `${army} supply ${signedDelta(effect.delta)}`;
     case 'cohesion_change': return `${army} cohesion ${signedDelta(effect.delta)}`;
     case 'humanitarian_impact': return `${faction} humanitarian impact${effect.war_crimes_delta ? ` (${signedDelta(effect.war_crimes_delta)})` : ''}`;
     case 'patron_pressure': return `${faction} patron pressure ${signedDelta(effect.delta)}`;

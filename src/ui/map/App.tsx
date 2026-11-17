@@ -236,8 +236,6 @@ export function formatAcknowledgementEventEffect(effect: AcknowledgementEventEff
   switch (effect.kind) {
     case 'morale_change':
       return t('eventModal.effect.moraleChange', { faction: factionPrefix, delta });
-    case 'supply_delta':
-      return t('eventModal.effect.supplyDelta', { faction: factionPrefix, delta });
     case 'cohesion_change':
       return t('eventModal.effect.cohesionChange', { faction: factionPrefix, delta });
     case 'humanitarian_impact':

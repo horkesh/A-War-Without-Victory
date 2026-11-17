@@ -1,7 +1,7 @@
 /**
  * Robustness audit P1-B / P2-B (task #95,
  * docs/40_reports/proposals/20260609_1.0_ROBUSTNESS_LANDMINE_AUDIT.md):
- * event-effect numeric payloads reach persisted morale / cohesion / supply /
+ * event-effect numeric payloads reach persisted morale / cohesion /
  * alliance / negotiation-capital fields. A non-finite delta (NaN / ±Infinity)
  * must NEVER persist:
  *  - the writer keeps the prior value (effect is a deterministic no-op), and
@@ -35,7 +35,6 @@ function fixtureState(): GameState {
             front_posture_regions: {},
             front_pressure: {},
             militia_pools: {},
-            general_supply_reserve: { RBiH: 40, RS: 50, HRHB: 45 },
             negotiation: {
                 capital: {
                     RBiH: { war_crimes_events: 2, territorial_legitimacy: 10 },
@@ -59,11 +58,11 @@ describe('apply_effects non-finite payload guard (P1-B)', () => {
         const state = fixtureState();
         applyEventEffects(state, [
             { kind: 'morale_change', faction: 'RBiH', delta: 5 } as EventEffect,
-            { kind: 'supply_delta', faction: 'RBiH', delta: -10 } as EventEffect,
+            { kind: 'cohesion_change', faction: 'RBiH', delta: -10 } as EventEffect,
             { kind: 'alliance_change', delta: 0.1 } as EventEffect,
         ]);
         expect((state.military.formations as any).brig_rbih_1.morale).toBe(65);
-        expect((state.military as any).general_supply_reserve.RBiH).toBe(30);
+        expect((state.military.formations as any).brig_rbih_1.cohesion).toBe(45);
         expect(state.political.war_alliance_rbih_hrhb).toBeCloseTo(0.35, 10);
         // The diagnostic array must NOT exist on a well-formed path — its absence is
         // what keeps the historical-default serialized state byte-identical.
@@ -88,12 +87,14 @@ describe('apply_effects non-finite payload guard (P1-B)', () => {
         ]);
     });
 
-    it('Infinity supply delta keeps prior reserve (unbounded += accumulator guarded)', () => {
+    // The former Infinity supply_delta case (reserve accumulator) is retired 2026-11-17 (supply is
+    // connection, not stock); the unbounded `+=` accumulator guard is now proven on war_crimes_events.
+    it('Infinity war_crimes_delta keeps prior accumulator (unbounded += accumulator guarded)', () => {
         const state = fixtureState();
-        applyEventEffects(state, [{ kind: 'supply_delta', faction: 'RBiH', delta: Infinity } as EventEffect]);
-        expect((state.military as any).general_supply_reserve.RBiH).toBe(40);
+        applyEventEffects(state, [{ kind: 'humanitarian_impact', faction: 'RBiH', war_crimes_delta: Infinity } as EventEffect]);
+        expect((state.military as any).negotiation.capital.RBiH.war_crimes_events).toBe(2);
         expect(anomalies(state)).toEqual([
-            { turn: 7, effect_kind: 'supply_delta', faction: 'RBiH', value_repr: 'Infinity' },
+            { turn: 7, effect_kind: 'humanitarian_impact', faction: 'RBiH', value_repr: 'Infinity' },
         ]);
     });
 

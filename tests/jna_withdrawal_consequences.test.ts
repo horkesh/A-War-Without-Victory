@@ -38,7 +38,6 @@ const SUPPORTED_EFFECT_KINDS = new Set<string>([
     'negotiation_capital',
     'patron_pressure',
     'recruitment_modifier',
-    'supply_delta',
 ]);
 
 interface RawEffect { kind: string; faction?: string; delta?: number; multiplier?: number; pool_multiplier?: number; duration_turns?: number; text?: string; }
@@ -66,15 +65,16 @@ describe('jna_withdrawal_1992 — consequence-block audit (LANE-NIGHTSHIFT-JNA-W
     it('T1: jna_withdrawal_1992 has a non-empty consequences (effect+effects) block', () => {
         const ev = findJna(loadEvents());
         const all = allEffects(ev);
-        // Historically-correct payload (corrected 2026-05-31): RS supply gain
-        // (depot inheritance), RBiH morale hit, narrative. The JNA withdrawal
-        // STRENGTHENED the VRS (it inherited JNA equipment + Bosnian-Serb
-        // personnel) and gave ARBiH/HVO nothing — so the prior RS recruitment/
-        // equipment debuffs and the RBiH/HRHB supply boosts were removed.
-        expect(all.length).toBeGreaterThanOrEqual(3);
+        // Historically-correct payload (corrected 2026-05-31): RBiH morale hit plus the narrative.
+        // The JNA withdrawal STRENGTHENED the VRS (it inherited JNA equipment + Bosnian-Serb
+        // personnel) and gave ARBiH/HVO nothing — so the prior RS recruitment/equipment debuffs
+        // and the RBiH/HRHB supply boosts were removed. The RS depot-inheritance supply gain was
+        // retired 2026-11-17 with the faction supply-reserve stock (supply is connection, not
+        // stock); the primary effect is now the narrative line.
+        expect(all.length).toBeGreaterThanOrEqual(2);
         // Must contain at least one *mechanical* effect (not just narrative).
         const mechanical = all.filter(e => e.kind !== 'narrative');
-        expect(mechanical.length).toBeGreaterThanOrEqual(2);
+        expect(mechanical.length).toBeGreaterThanOrEqual(1);
     });
 
     it('T2: every effect kind on jna_withdrawal_1992 is dispatched by applyEventEffects', () => {
@@ -88,19 +88,17 @@ describe('jna_withdrawal_1992 — consequence-block audit (LANE-NIGHTSHIFT-JNA-W
         }
     });
 
-    it('T3: per-faction direction — RS inherits JNA materiel (supply gain); ARBiH demoralized; no RS debuffs, no ARBiH/HVO supply boosts', () => {
+    it('T3: per-faction direction — narrative primary effect; ARBiH demoralized; no RS debuffs; no supply effects at all', () => {
         const ev = findJna(loadEvents());
         const all = allEffects(ev);
 
-        // RS gets the historical depot-transfer supply gain (the primary effect).
-        const rsSupply = ev.effect && ev.effect.kind === 'supply_delta' && ev.effect.faction === 'RS' ? ev.effect : undefined;
-        expect(rsSupply, 'expected RS supply_delta (depot inheritance) preserved as primary effect').toBeDefined();
-        expect(rsSupply!.delta).toBeGreaterThan(0);
+        // The primary effect is the narrative (the VRS depot inheritance is told, not a reserve stock).
+        expect(ev.effect?.kind).toBe('narrative');
 
         // ARBiH demoralized losing JNA-heavy ground.
         const rbihMorale = all.find(e => e.kind === 'morale_change' && e.faction === 'RBiH');
         expect(rbihMorale, 'expected RBiH morale_change (demoralization)').toBeDefined();
-        expect(rbihMorale!.delta).toBeLessThan(0);
+        expect(rbihMorale!.delta).toBe(-5);
 
         // The JNA withdrawal STRENGTHENED the VRS — it must NOT carry RS recruitment
         // or equipment-quality debuffs (those were historically backwards; removed 2026-05-31).
@@ -110,11 +108,9 @@ describe('jna_withdrawal_1992 — consequence-block audit (LANE-NIGHTSHIFT-JNA-W
         expect(rsQual, 'RS equipment_quality_modifier debuff must NOT be present (JNA withdrawal strengthened RS)').toBeUndefined();
 
         // ARBiH and HVO gained nothing from the JNA withdrawal (stayed starved under the
-        // arms embargo) — no supply boosts for either.
-        const rbihSupplies = all.filter(e => e.kind === 'supply_delta' && e.faction === 'RBiH');
-        expect(rbihSupplies.length, 'RBiH must NOT receive a supply_delta from JNA withdrawal').toBe(0);
-        const hrhbSupplies = all.filter(e => e.kind === 'supply_delta' && e.faction === 'HRHB');
-        expect(hrhbSupplies.length, 'HRHB must NOT receive a supply_delta from JNA withdrawal').toBe(0);
+        // arms embargo), and the supply-reserve effect kind is retired: no supply effect for anyone.
+        const supplyKinds = all.filter(e => e.kind.startsWith('supply'));
+        expect(supplyKinds, 'JNA withdrawal must carry no supply effect').toEqual([]);
     });
 
     it('T4: deterministic — re-loading the JSON yields a structurally identical event', () => {

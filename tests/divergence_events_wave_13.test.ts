@@ -339,7 +339,7 @@ describe('LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-13: 6 Ring-1 divergence events'
             'territory_control', 'alliance_below', 'alliance_above',
             'faction_controls_municipality', 'operation_completed',
             'and', 'or', 'not',
-            'supply_below', 'supply_above', 'territory_percentage',
+            'territory_percentage',
             'dimension_above', 'dimension_below', 'flag_equals', 'flag_not_set',
             'patron_pressure_above', 'war_crimes_above', 'morale_average_below',
             'week_since_event', 'event_fire_count', 'enclave_supply_status',
@@ -369,7 +369,7 @@ describe('LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-13: 6 Ring-1 divergence events'
     // ── No new effect kinds: every Wave 13 effect uses pre-existing kinds (STOP rule)
     it('all 6 Wave 13 events use only pre-existing effect kinds (STOP rule)', () => {
         const ALLOWED_EFFECT_KINDS = new Set([
-            'narrative', 'morale_change', 'supply_delta', 'cohesion_change',
+            'narrative', 'morale_change', 'cohesion_change',
             'humanitarian_impact', 'patron_pressure', 'alliance_change',
             'negotiation_capital', 'equipment_grant', 'aggression_modifier',
             'control_change',

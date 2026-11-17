@@ -123,14 +123,13 @@ describe('turn aftermath dispatch builder', () => {
   beforeEach(() => setLocale('en'));
   afterEach(() => setLocale('en'));
 
-  it('gives a quiet week two lines built from the week figures', () => {
+  it('gives a quiet week one line built from the week figures (supply is connection, not stock: no supply figures)', () => {
     const dispatch = buildTurnAftermathDispatch({
-      view: quietView({ supply: { ownSupplyDelta: 4, ownHeavyMunitionsDelta: -1 }, formations: { spawned: 2, destroyed: 0, ownSpawned: 2, ownDestroyed: 0 } }),
+      view: quietView({ formations: { spawned: 2, destroyed: 0, ownSpawned: 2, ownDestroyed: 0 } }),
     });
     expect(dispatch.quiet).toBe(true);
     expect(dispatch.lines).toHaveLength(1);
     expect(dispatch.lines[0].kind).toBe('quiet');
-    expect(dispatch.lines[0].text).toContain('Supply +4, heavy munitions -1.');
     expect(dispatch.lines[0].text).toContain('2 new formations joined the order of battle.');
     // A formation raised outranks the quiet headline in the fixed order.
     expect(dispatch.headline).toBe('2 new formations were raised');
@@ -138,9 +137,10 @@ describe('turn aftermath dispatch builder', () => {
 
   it('changes the quiet line when the week figures change', () => {
     const steady = buildTurnAftermathDispatch({ view: quietView() }).lines[0].text;
-    const moved = buildTurnAftermathDispatch({ view: quietView({ supply: { ownSupplyDelta: -3, ownHeavyMunitionsDelta: 0 } }) }).lines[0].text;
-    expect(steady).toContain('Supply and munitions held steady.');
-    expect(moved).toContain('Supply -3, heavy munitions 0.');
+    const moved = buildTurnAftermathDispatch({ view: quietView({ formations: { spawned: 1, destroyed: 0, ownSpawned: 1, ownDestroyed: 0 } }) }).lines[0].text;
+    expect(steady.includes('Supply')).toBe(false);
+    expect(steady.includes('munitions')).toBe(false);
+    expect(moved).toContain('One new formation joined the order of battle.');
     expect(moved).not.toBe(steady);
   });
 
@@ -160,7 +160,7 @@ describe('turn aftermath dispatch builder', () => {
     expect(ground.places?.map((place) => place.label)).toEqual(['Kulen Vakuf', 'Maglaj', 'Turbe']);
     expect(fighting.text).toBe('We fought in 4 of 9 battles · our losses 120, theirs 310');
     expect(fighting.basis).toBe('battle reports');
-    expect(cost.text).toBe('900 people displaced, most around Doboj · 1 formation lost · 12 supply spent');
+    expect(cost.text).toBe('900 people displaced, most around Doboj · 1 formation lost');
     expect(orders.text).toContain('Operation Test, launched over objection: partial');
     expect(orders.text).toContain('Corps orders carried out as issued: 1; reinterpreted: 1');
     expect(orders.text).toContain('A consequence you were warned about arrived');
@@ -168,7 +168,7 @@ describe('turn aftermath dispatch builder', () => {
     expect(dispatch.lines.every((line) => line.kind === 'orders' || line.kind === 'needs' || Boolean(line.basis))).toBe(true);
   });
 
-  it('leaves out a line with nothing to report and keeps supply below the threshold out of the cost line', () => {
+  it('leaves out a line with nothing to report (the cost line never reports supply spent)', () => {
     const view = busyView();
     view.humanitarian = { displacedThisTurn: 0 };
     view.cost = { ...view.cost, displacedThisTurn: 0, ownFormationsDestroyed: 0, ownSupplySpent: 5, ownHeavyMunitionsSpent: 4 };

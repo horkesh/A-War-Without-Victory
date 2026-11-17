@@ -3257,16 +3257,9 @@
     },
     "once": true,
     "effect": {
-      "kind": "supply_delta",
-      "faction": "RBiH",
-      "delta": -10
+      "kind": "narrative",
+      "text": "The UN arms embargo leaves the ARBiH critically short of weapons and ammunition."
     },
-    "effects": [
-      {
-        "kind": "narrative",
-        "text": "The UN arms embargo leaves the ARBiH critically short of weapons and ammunition."
-      }
-    ],
     "pressure": {
       "base_rate": 3,
       "threshold": 3,
@@ -3317,11 +3310,6 @@
       "target_municipality": "visoko"
     },
     "effects": [
-      {
-        "kind": "supply_delta",
-        "faction": "RBiH",
-        "delta": 5
-      },
       {
         "kind": "morale_change",
         "faction": "RBiH",
@@ -3597,11 +3585,6 @@
     },
     "effects": [
       {
-        "kind": "supply_delta",
-        "faction": "RBiH",
-        "delta": 10
-      },
-      {
         "kind": "morale_change",
         "faction": "RBiH",
         "delta": 5
@@ -3708,19 +3691,14 @@
     },
     "once": true,
     "effect": {
-      "kind": "supply_delta",
-      "faction": "RS",
-      "delta": 20
+      "kind": "narrative",
+      "text": "The JNA formally withdraws from Bosnia. Equipment, bases, and ammunition stores are left to the VRS."
     },
     "effects": [
       {
         "kind": "morale_change",
         "faction": "RBiH",
         "delta": -5
-      },
-      {
-        "kind": "narrative",
-        "text": "The JNA formally withdraws from Bosnia. Equipment, bases, and ammunition stores are left to the VRS."
       }
     ],
     "pressure": {
@@ -3801,11 +3779,6 @@
       "target_municipality": "tuzla"
     },
     "effects": [
-      {
-        "kind": "supply_delta",
-        "faction": "RBiH",
-        "delta": 15
-      },
       {
         "kind": "morale_change",
         "faction": "RBiH",
@@ -4035,11 +4008,6 @@
       "target_municipality": "zenica"
     },
     "effects": [
-      {
-        "kind": "supply_delta",
-        "faction": "RBiH",
-        "delta": 8
-      },
       {
         "kind": "morale_change",
         "faction": "RBiH",
@@ -4315,11 +4283,6 @@
       "text": "The VRS secures the Posavina Corridor near Brčko, linking Krajina with Serbia. A vital supply artery is established."
     },
     "effects": [
-      {
-        "kind": "supply_delta",
-        "faction": "RS",
-        "delta": 5
-      },
       {
         "kind": "morale_change",
         "faction": "RS",
@@ -5062,7 +5025,6 @@
     "bot_response_logic": "strategic_weighted",
     "requires_player_response": false,
     "priority": 50,
-    "auto_resolve_turns": 2,
     "effect": {
       "kind": "narrative",
       "text": "Belgrade privately signals to Pale that international pressure is mounting and the pace of events must slow."

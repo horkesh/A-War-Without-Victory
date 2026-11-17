@@ -277,14 +277,15 @@ describe('Event timeline historical integrity', () => {
 
         expect([exclusion.trigger.turn_min, exclusion.trigger.turn_max]).toEqual([97, 98]);
         expect(exclusion.trigger.requires_events).toEqual(['nato_ultimatum_sarajevo_1994']);
-        expect(exclusion.effect).toEqual({ kind: 'supply_delta', faction: 'RS', delta: -5 });
+        // The primary effect is the narrative line (the RS supply_delta was retired 2026-11-17:
+        // supply is connection, not stock).
+        expect(exclusion.effect).toEqual({
+            kind: 'narrative',
+            text: 'VRS heavy weapons are withdrawn from around Sarajevo. The exclusion zone brings the first sustained relief to the besieged capital.',
+        });
         expect(exclusion.effects).toEqual([
             { kind: 'morale_change', faction: 'RBiH', delta: 5 },
             { kind: 'aggression_modifier', faction: 'RS', delta: -0.1, duration_turns: 12 },
-            {
-                kind: 'narrative',
-                text: 'VRS heavy weapons are withdrawn from around Sarajevo. The exclusion zone brings the first sustained relief to the besieged capital.',
-            },
         ]);
     });
 

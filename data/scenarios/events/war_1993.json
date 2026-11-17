@@ -16,7 +16,6 @@
     "bot_response_logic": "historical",
     "requires_player_response": true,
     "priority": 50,
-    "auto_resolve_turns": 2,
     "historical_source": "Balkan Battlegrounds Vol. I pp.6-8, 182; UNSCR 787 (16 November 1992), op. para. 1; UN S/25479; UNSCR 820.",
     "source_note": "The pressure is inferred from the Vance-Owen diplomatic sequence and Western/UN escalation around April 1993; this row avoids attributing an unsourced direct warning to any single mediator.",
     "staff_assessment": "Acknowledging the pressure preserves international confidence but costs leverage and internal cohesion; resisting protects Sarajevo's position while risking diplomatic isolation.",
@@ -646,11 +645,6 @@
         "delta": -5
       },
       {
-        "kind": "supply_delta",
-        "faction": "RBiH",
-        "delta": -5
-      },
-      {
         "kind": "aggression_modifier",
         "faction": "RS",
         "delta": 0.1,
@@ -800,7 +794,6 @@
     "bot_response_logic": "historical",
     "requires_player_response": false,
     "priority": 50,
-    "auto_resolve_turns": 2,
     "historical_default_response_id": "acknowledge_pressure",
     "historical_source": "ICTY Prlić et al. IT-04-74-T Trial Judgment (29 May 2013) (HZ HB Presidency acceptance of VOPP and Province-3/8/10 provincial-map framework); Prlić Appeals Judgment (29 Nov 2017); Vance-Owen Plan agreement text UN S/25221 Annex VII (29 January 1993) and UN S/25403 Annex II (12 March 1993); Tuđman Presidential Transcripts admitted at Prlić (patron coordination directing Boban to sign); Prlić (HV officer-secondment / fuel / ammunition support contingent on Zagreb axis); Balkan Battlegrounds Vol. II diplomatic chronology January-May 1993.",
     "source_note": "The row represents Zagreb's restraint order on HVO offensive operations during the Vance-Owen acceptance window and the HZ HB Presidency's posture toward patron direction. Acknowledge-pressure is the documented historical choice (Boban signed at Geneva 2 January 1993 on Tudjman's direction). Resist-patron is a structurally plausible counterfactual — no HZ HB Presidency document opposes signature in the historical record, but the analogous patron-resistance precedent exists at R6 (RS Assembly rejection 5-6 May 1993).",
@@ -1579,10 +1572,6 @@
         "faction": "HRHB",
         "tanks": 5,
         "artillery": 8
-      },
-      {
-        "kind": "narrative",
-        "text": "Zagreb's patronage deepens. HVO commanders receive Croatian Army support — and with it, the expectation that Herceg-Bosna will serve Croatian strategic interests."
       }
     ],
     "dimension_shifts": [
@@ -1599,9 +1588,8 @@
     ],
     "historical_source": "ICTY Prlić Trial Judgment (IT-04-74-T), JCE findings. ICTY Appeals Judgment (IT-04-74-A).",
     "effect": {
-      "kind": "supply_delta",
-      "faction": "HRHB",
-      "delta": 5
+      "kind": "narrative",
+      "text": "Zagreb's patronage deepens. HVO commanders receive Croatian Army support — and with it, the expectation that Herceg-Bosna will serve Croatian strategic interests."
     }
   },
   {
@@ -1811,7 +1799,7 @@
     "id": "un_resolution_820_sanctions_1993",
     "image": "event_security_council_chamber.webp",
     "title": "UN Resolution 820 — Tightened Sanctions on Serbia",
-    "narrative": "The Security Council passes Resolution 820, substantially reinforcing the sanctions regime against Serbia and Montenegro. Following the Bosnian Serb assembly's rejection of the Vance-Owen plan on April 26, all commodity transport across Serbian borders is prohibited except medical supplies and foodstuffs, further strangling the RS supply chain through its patron.",
+    "narrative": "The Security Council passes Resolution 820, substantially reinforcing the sanctions regime against Serbia and Montenegro. Following the Bosnian Serb assembly's rejection of the Vance-Owen plan on April 26, all commodity transport across Serbian borders is prohibited except medical supplies and foodstuffs, further squeezing Republika Srpska through its patron.",
     "category": "diplomatic",
     "source_tier": "agreement_text",
     "source_note": "The listed formal instruments bound the dates, terms, and institutional action described; accompanying judgments or participant accounts supply context only. The essay is original synthesis and does not treat proposed or negotiated terms as implemented beyond the cited record.",
@@ -1826,10 +1814,6 @@
         "kind": "patron_pressure",
         "faction": "RS",
         "delta": 10
-      },
-      {
-        "kind": "narrative",
-        "text": "The tightened embargo enters force. Belgrade's ability to sustain the VRS is visibly constrained, and Milošević's patience with Pale is running thin."
       }
     ],
     "dimension_shifts": [
@@ -1846,9 +1830,8 @@
     ],
     "historical_source": "UN Security Council Resolution 820 (1993), S/RES/820.",
     "effect": {
-      "kind": "supply_delta",
-      "faction": "RS",
-      "delta": -10
+      "kind": "narrative",
+      "text": "The tightened embargo enters force. Milošević's patience with Pale is running thin."
     }
   },
   {
@@ -2062,7 +2045,6 @@
     "bot_response_logic": "strategic_weighted",
     "requires_player_response": false,
     "priority": 50,
-    "auto_resolve_turns": 2,
     "effect": {
       "kind": "narrative",
       "text": "Milošević and Bulatović personally demand that the Bosnian Serb Assembly accept the Vance-Owen Plan."
@@ -2148,11 +2130,6 @@
     },
     "once": true,
     "effects": [
-      {
-        "kind": "supply_delta",
-        "faction": "HRHB",
-        "delta": -3
-      },
       {
         "kind": "narrative",
         "text": "HVO garrisons in central Bosnia hold on inside their pockets. Supplies reach them only with difficulty."
@@ -2398,11 +2375,6 @@
     },
     "effects": [
       {
-        "kind": "supply_delta",
-        "faction": "HRHB",
-        "delta": -5
-      },
-      {
         "kind": "patron_pressure",
         "faction": "HRHB",
         "delta": 5
@@ -2616,17 +2588,6 @@
       }
     },
     "once": true,
-    "effects": [
-      {
-        "kind": "supply_delta",
-        "faction": "RBiH",
-        "delta": -2
-      },
-      {
-        "kind": "narrative",
-        "text": "NATO warships enforce the Adriatic blockade. Serbia's supply corridor tightens further, but the arms embargo continues to hurt the outgunned ARBiH most."
-      }
-    ],
     "dimension_shifts": [
       {
         "faction": "RS",
@@ -2636,9 +2597,8 @@
     ],
     "historical_source": "NATO Operation Sharp Guard records. UN Security Council sanctions monitoring reports.",
     "effect": {
-      "kind": "supply_delta",
-      "faction": "RS",
-      "delta": -3
+      "kind": "narrative",
+      "text": "NATO warships enforce the Adriatic blockade. Shipping to Serbia is stopped and searched, and the arms embargo continues to hurt the outgunned ARBiH most."
     }
   },
   {
@@ -2712,10 +2672,6 @@
         "kind": "morale_change",
         "faction": "RBiH",
         "delta": 5
-      },
-      {
-        "kind": "narrative",
-        "text": "Sarajevo breathes again. The tunnel is a military and psychological lifeline — proof that the city's will to resist can find a way through any encirclement."
       }
     ],
     "dimension_shifts": [
@@ -2732,9 +2688,8 @@
     ],
     "historical_source": "Sarajevo Tunnel Museum archives. ICTY Galić Trial Judgment (IT-98-29-T).",
     "effect": {
-      "kind": "supply_delta",
-      "faction": "RBiH",
-      "delta": 10
+      "kind": "narrative",
+      "text": "Sarajevo breathes again. The tunnel is a military and psychological lifeline — proof that the city's will to resist can find a way through any encirclement."
     }
   },
   {
@@ -3175,7 +3130,6 @@
     "bot_response_logic": "strategic_weighted",
     "requires_player_response": false,
     "priority": 50,
-    "auto_resolve_turns": 2,
     "effect": {
       "kind": "narrative",
       "text": "Milošević signals through back-channels that Serbia's patience with Pale is exhausted."
@@ -5142,11 +5096,6 @@
         "delta": 2
       },
       {
-        "kind": "supply_delta",
-        "faction": "RS",
-        "delta": 3
-      },
-      {
         "kind": "narrative",
         "text": "Abdić and Karadžić formalize their alliance. The 5th Corps now faces encirclement from three directions — VRS, RSK, and APWB."
       }
@@ -5587,17 +5536,12 @@
       {
         "id": "press_offensive",
         "label": "Press the offensive",
-        "description": "Demand forward momentum from your corps commanders. The army attacks wherever it can. Supply costs rise, but morale soars and international attention focuses on Bosniak military capability.",
+        "description": "Demand forward momentum from your corps commanders. The army attacks wherever it can. The attacks will cost men, but morale rises and international attention focuses on Bosniak military capability.",
         "effects": [
           {
             "kind": "morale_change",
             "faction": "RBiH",
             "delta": 3
-          },
-          {
-            "kind": "supply_delta",
-            "faction": "RBiH",
-            "delta": -3
           },
           {
             "kind": "aggression_modifier",
@@ -5627,17 +5571,12 @@
       {
         "id": "consolidate_defend",
         "label": "Consolidate and defend",
-        "description": "Halt costly attacks. Dig in on current lines, restore cohesion, and build reserves. The army that survives the winter can fight in the spring.",
+        "description": "Halt costly attacks. Dig in on current lines and restore cohesion. The army that survives the winter can fight in the spring.",
         "effects": [
           {
             "kind": "cohesion_change",
             "faction": "RBiH",
             "delta": 5
-          },
-          {
-            "kind": "supply_delta",
-            "faction": "RBiH",
-            "delta": 3
           }
         ],
         "dimension_shifts": [
@@ -5695,13 +5634,8 @@
       {
         "id": "accept_ceasefire_terms",
         "label": "Accept ceasefire terms to buy time",
-        "description": "The war has ground your forces down. Accept international mediation and a temporary ceasefire. The army desperately needs to rest and rearm — but your hardliners will call it surrender.",
+        "description": "The war has ground your forces down. Accept international mediation and a temporary ceasefire. The army desperately needs to rest, but your hardliners will call it surrender.",
         "effects": [
-          {
-            "kind": "supply_delta",
-            "faction": "RBiH",
-            "delta": 8
-          },
           {
             "kind": "cohesion_change",
             "faction": "RBiH",
@@ -5743,7 +5677,7 @@
       "press_offensive": {
         "HRHB": {
           "headline": "Sarajevo orders a more aggressive posture",
-          "body": "RBiH commanders are directed to seek forward momentum wherever supply allows. HVO staff see higher Bosnian morale, but also heavier pressure on shared logistics and coordination."
+          "body": "RBiH commanders are directed to seek forward momentum wherever they can. HVO staff see higher Bosnian morale, but also heavier pressure on coordination."
         },
         "RS": {
           "headline": "Sarajevo signals offensive intent",
@@ -5753,11 +5687,11 @@
       "consolidate_defend": {
         "HRHB": {
           "headline": "Sarajevo shifts to consolidation",
-          "body": "RBiH halts costly attacks to restore cohesion and build reserves. HVO planners see a more defensive Bosnian posture while the army prepares for later operations."
+          "body": "RBiH halts costly attacks to restore cohesion. HVO planners see a more defensive Bosnian posture while the army prepares for later operations."
         },
         "RS": {
           "headline": "RBiH digs in on current lines",
-          "body": "Sarajevo orders its forces to defend, rebuild, and preserve supply. Pale expects fewer immediate attacks but stronger prepared positions over time."
+          "body": "Sarajevo orders its forces to defend and rebuild. Pale expects fewer immediate attacks but stronger prepared positions over time."
         }
       },
       "seek_negotiation": {
@@ -5773,11 +5707,11 @@
       "accept_ceasefire_terms": {
         "HRHB": {
           "headline": "Sarajevo accepts a ceasefire pause",
-          "body": "RBiH accepts mediation terms to rest and rearm. HVO staff note the logistical benefit for Sarajevo, even as internal critics frame the pause as weakness."
+          "body": "RBiH accepts mediation terms to rest. HVO staff note the breathing space for Sarajevo, even as internal critics frame the pause as weakness."
         },
         "RS": {
           "headline": "RBiH accepts ceasefire terms",
-          "body": "Sarajevo chooses a temporary pause to recover supply and cohesion. Pale reads the lower aggression as useful, but not as a final settlement."
+          "body": "Sarajevo chooses a temporary pause to rest its forces. Pale reads the lower aggression as useful, but not as a final settlement."
         }
       }
     }
@@ -5856,11 +5790,6 @@
             "delta": 4
           },
           {
-            "kind": "supply_delta",
-            "faction": "RS",
-            "delta": -3
-          },
-          {
             "kind": "aggression_modifier",
             "faction": "RS",
             "delta": 0.1,
@@ -5899,11 +5828,6 @@
             "kind": "cohesion_change",
             "faction": "RS",
             "delta": 5
-          },
-          {
-            "kind": "supply_delta",
-            "faction": "RS",
-            "delta": 4
           }
         ],
         "dimension_shifts": [
@@ -5964,11 +5888,6 @@
         "description": "The war has cost more than our people can bear. Signal willingness to accept a territorial settlement in exchange for international recognition. The hardliners in the Assembly will revolt — but the alternative is permanent isolation.",
         "effects": [
           {
-            "kind": "supply_delta",
-            "faction": "RS",
-            "delta": 6
-          },
-          {
             "kind": "cohesion_change",
             "faction": "RS",
             "delta": -8
@@ -6018,7 +5937,7 @@
       "consolidate_holdings": {
         "HRHB": {
           "headline": "RS shifts to holding current gains",
-          "body": "Pale orders VRS formations to fortify existing positions and rebuild supply. HVO planners expect fewer new thrusts, but stronger prepared defenses."
+          "body": "Pale orders VRS formations to fortify existing positions. HVO planners expect fewer new thrusts, but stronger prepared defenses."
         },
         "RBiH": {
           "headline": "Pale consolidates its holdings",
@@ -6126,11 +6045,6 @@
             "delta": 4
           },
           {
-            "kind": "supply_delta",
-            "faction": "HRHB",
-            "delta": -2
-          },
-          {
             "kind": "aggression_modifier",
             "faction": "HRHB",
             "delta": 0.1,
@@ -6163,11 +6077,6 @@
           {
             "kind": "alliance_change",
             "delta": 0.08
-          },
-          {
-            "kind": "supply_delta",
-            "faction": "HRHB",
-            "delta": 2
           }
         ],
         "dimension_shifts": [
@@ -6195,14 +6104,9 @@
       },
       {
         "id": "consolidate_supply",
-        "label": "Consolidate and resupply",
-        "description": "Pause offensive operations, secure the supply corridor from Croatia, and build up reserves for the spring. What we hold, we hold. What we need, we will take when we are ready.",
+        "label": "Consolidate and hold",
+        "description": "Pause offensive operations and rebuild cohesion for the spring. What we hold, we hold. What we need, we will take when we are ready.",
         "effects": [
-          {
-            "kind": "supply_delta",
-            "faction": "HRHB",
-            "delta": 6
-          },
           {
             "kind": "cohesion_change",
             "faction": "HRHB",
@@ -6295,12 +6199,12 @@
       },
       "consolidate_supply": {
         "RBiH": {
-          "headline": "Herceg-Bosna pauses to resupply",
-          "body": "Mostar slows offensive operations to secure Croatian supply routes and rebuild cohesion. Sarajevo sees a steadier HVO posture, but not a political settlement."
+          "headline": "Herceg-Bosna pauses to consolidate",
+          "body": "Mostar slows offensive operations to rebuild cohesion. Sarajevo sees a steadier HVO posture, but not a political settlement."
         },
         "RS": {
-          "headline": "HVO consolidates and rebuilds supply",
-          "body": "Herceg-Bosna focuses on holding territory and preparing reserves. Pale expects fewer immediate HVO attacks, with stronger logistics later."
+          "headline": "HVO consolidates",
+          "body": "Herceg-Bosna focuses on holding territory. Pale expects fewer immediate HVO attacks, with a steadier front later."
         }
       },
       "sue_for_peace_hrhb": {
@@ -6431,11 +6335,6 @@
             "faction": "RBiH",
             "delta": 0.05,
             "duration_turns": 6
-          },
-          {
-            "kind": "supply_delta",
-            "faction": "RBiH",
-            "delta": -1
           }
         ],
         "dimension_shifts": [
@@ -6456,7 +6355,7 @@
       {
         "id": "visit_bihac",
         "label": "Visit the Bihać pocket — 5th Corps",
-        "description": "You visit General Dudaković's isolated command. The pocket has held under severe pressure and limited relief. The visit costs logistics resources, but it tells 5th Corps that Sarajevo has not forgotten it.",
+        "description": "You visit General Dudaković's isolated command. The pocket has held under severe pressure and limited relief. The visit tells 5th Corps that Sarajevo has not forgotten it.",
         "effects": [
           {
             "kind": "morale_change",
@@ -6467,11 +6366,6 @@
             "kind": "cohesion_change",
             "faction": "RBiH",
             "delta": 2
-          },
-          {
-            "kind": "supply_delta",
-            "faction": "RBiH",
-            "delta": -2
           }
         ],
         "dimension_shifts": [
@@ -6587,11 +6481,11 @@
       "visit_bihac": {
         "HRHB": {
           "headline": "Sarajevo visits the Bihać pocket",
-          "body": "RBiH leadership directs attention to Dudakovic's isolated 5th Corps. Mostar sees a morale and cohesion signal to the western pocket, with logistics costs attached."
+          "body": "RBiH leadership directs attention to Dudakovic's isolated 5th Corps. Mostar sees a morale and cohesion signal to the western pocket."
         },
         "RS": {
           "headline": "Sarajevo visits the Bihać pocket",
-          "body": "RBiH leadership gives official attention to the isolated 5th Corps. Pale sees Sarajevo trying to reinforce morale in Bihać despite the pocket's logistical strain."
+          "body": "RBiH leadership gives official attention to the isolated 5th Corps. Pale sees Sarajevo trying to reinforce morale in the isolated Bihać pocket."
         }
       },
       "visit_press_rbih": {
@@ -6997,11 +6891,6 @@
             "kind": "cohesion_change",
             "faction": "HRHB",
             "delta": 2
-          },
-          {
-            "kind": "supply_delta",
-            "faction": "HRHB",
-            "delta": -2
           }
         ],
         "dimension_shifts": [

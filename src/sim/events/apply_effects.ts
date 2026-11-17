@@ -37,7 +37,6 @@ const EFFECT_KIND_ORDER: Record<string, number> = {
     offensive_ops_suppression: 16,
     patron_pressure: 17,
     recruitment_modifier: 18,
-    supply_delta: 19,
 };
 
 /** Robustness audit P1-B (task #95): clamp traps non-finite input (NaN/±Infinity)
@@ -106,9 +105,6 @@ function applySingleEffect(state: GameState, effect: EventEffect, targetFormatio
             } else {
                 applyMoraleChange(state, effect.faction, effect.delta, effect.affected_corps);
             }
-            break;
-        case 'supply_delta':
-            applySupplyDelta(state, effect.faction, effect.delta);
             break;
         case 'cohesion_change':
             if (targetFormationId) {
@@ -370,22 +366,6 @@ function applyCohesionChange(state: GameState, faction: FactionId, delta: number
             f.cohesion = clamp(f.cohesion + delta, 0, 100);
         }
     }
-}
-
-/** Add delta to faction's general supply reserve. Floor at 0.
- *  Un-clamped accumulator: non-finite delta is rejected (prior reserve kept) + logged
- *  — `Math.max(0, NaN)` is NaN and would persist (P1-B).
- *  Supply-reserve economy retired 2026-11-17 (Fable consult 6): no new game creates the reserve,
- *  so this is inert there. Kept unchanged because authored events in data/scenarios/events carry
- *  supply_delta effects; it only touches the compatibility-only field an old save may carry. */
-function applySupplyDelta(state: GameState, faction: FactionId, delta: number): void {
-    if (!Number.isFinite(delta)) {
-        recordNonFiniteEffectAnomaly(state, 'supply_delta', faction, delta);
-        return;
-    }
-    if (!state.military.general_supply_reserve) return;
-    const current = state.military.general_supply_reserve[faction] ?? 0;
-    state.military.general_supply_reserve[faction] = Math.max(0, current + delta);
 }
 
 /** Adjust war_crimes_events in faction's negotiation capital.

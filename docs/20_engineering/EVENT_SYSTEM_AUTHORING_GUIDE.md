@@ -269,7 +269,7 @@ aggression_modifier, alliance_change, alliance_lock, bot_priority_shift,
 cohesion_change, control_change, cost_ledger_annotation, doctrine_constraint,
 equipment_grant, equipment_quality_modifier, guerrilla_threat,
 humanitarian_impact, morale_change, narrative, negotiation_capital,
-offensive_ops_suppression, patron_pressure, recruitment_modifier, supply_delta
+offensive_ops_suppression, patron_pressure, recruitment_modifier
 ```
 
 Note that `recruitment_modifier` is a LIVE EffectKind (see `memory/recruitment_modifier_dead_channel.md` for the corrected investigation — the channel works; small multipliers on small pools round to zero deterministically). Magnitudes: `0.80x`-`1.20x` is subtle; `0.50x` or `1.50x` is stark.
