@@ -90,7 +90,6 @@ function projectMeta(meta, playerFaction) {
     'war_start_turn',
     'peace_scheduled_referendum_turn',
     'peace_scheduled_war_start_turn',
-    'peace_war_start_control_path',
     'referendum_deadline_turn',
     'referendum_eligible_turn',
     'referendum_held',

@@ -6,9 +6,13 @@
  * Driver probe (2026-11-16): after the pre-war floor lapses, a cooperative HRHB's alliance falls
  * ~0.025/week with no incidents — refugee pressure ~0.016 (the largest term), patron drag ~0.012 —
  * so no HRHB choice changed the outcome. Historian: refugees intensified the 1993 war, they did not
- * cause it (BB1 p.179, p.189; Blaškić, Kordić TJ; Hadžihasanović TJ on displaced men filling ARBiH
- * formations around Travnik and Zenica). A joint refugee administration under a settled state
- * question can damp that friction; it cannot remove the territorial contest.
+ * cause it. Sources are ICTY trial judgments, judgment names only (paragraph ranges not yet
+ * verified; the copy panel pulls them): Blaškić TJ (IT-95-14-T), Kordić and Čerkez TJ (IT-95-14/2-T),
+ * Hadžihasanović and Kubura TJ (IT-01-47-T, on displaced men filling ARBiH formations around Travnik
+ * and Zenica), Prlić et al. TJ (IT-04-74-T). The earlier Balkan Battlegrounds Vol. I p.179 and p.189
+ * cites did not support the claim (they cover the Patriotic League and Sarajevo) and are dropped.
+ * A joint refugee administration under a settled state question can damp that friction; it cannot
+ * remove the territorial contest.
  *
  * Derived entirely from `event_decision_log` (no new array; the precedent is Path A' in
  * washington_agreement.ts), so a run whose HRHB never makes a granting choice — every bot run —
@@ -19,7 +23,8 @@
  * - RENEW: a renewal answer extends every ACTIVE entry to at least turn + its duration. It never
  *   opens an entry (the federation-overture renewal is also the historical default, so a bot must not
  *   start a compact through it).
- * - LAPSE: a lapse answer ends every entry for good (later renewals find nothing active).
+ * - LAPSE: a lapse answer ends every entry for good (later renewals find nothing active). The VOPP
+ *   lapse is `resist_patron`; `acknowledge_pressure` (historical, neutral) neither renews nor lapses.
  * - PLAYER ONLY: only answers with `decision_source: 'player'` count; a bot's answer never opens,
  *   renews or lapses a compact (A2b follow-up, 2026-11-17).
  * - END: the compact ends at the Washington signing (`washington_signed`, `washington_turn`): the
@@ -30,9 +35,10 @@
  *
  * Effects while active: refugee pressure × REFUGEE_COMPACT_MULTIPLIER per entry (unless suspended);
  * the price, HRHB recruitment × REFUGEE_COMPACT_RECRUITMENT_PRICE per entry, is paid whether or not
- * the damping is suspended. Patron drag × PATRON_DRAG_STANCE_MULTIPLIER per granting choice is
- * permanent (the 1992 political stance, A2b approved mechanism). patron_confidence −10 per choice is
- * authored on the two options (war_1992.json).
+ * the damping is suspended. Patron drag × PATRON_DRAG_STANCE_MULTIPLIER per active entry, so Zagreb's
+ * pull on the alliance is held back only while the compact stands (A2b PR-B amendment: it used to be
+ * permanent per 1992 choice). `granting_choices` stays in the status as a count of the 1992 stance for
+ * the record. patron_confidence costs are authored on the two grant options (war_1992.json).
  *
  * Binding copy rule (historian): no player-facing text may say or imply that refugees caused the
  * 1993 war.
@@ -50,9 +56,9 @@ export const REFUGEE_COMPACT_MULTIPLIER = 0.6;
 export const REFUGEE_COMPACT_GRANT_TURNS = 56;
 /** Weeks the damping is suspended after a bilateral RBiH-HRHB flip (historian amendment (a)). */
 export const REFUGEE_COMPACT_FLIP_SUSPENSION_TURNS = 8;
-/** HRHB recruitment multiplier per active entry: the burden of taking the refugees in. */
+/** HRHB recruitment multiplier per active entry: the cost of absorbing the displaced. */
 export const REFUGEE_COMPACT_RECRUITMENT_PRICE = 0.9;
-/** Patron-drag multiplier per granting 1992 choice (A2b approved mechanism). */
+/** Patron-drag multiplier per ACTIVE compact entry (A2b mechanism; no longer a permanent stance). */
 export const PATRON_DRAG_STANCE_MULTIPLIER = 0.5;
 
 const COMPACT_FACTION: FactionId = 'HRHB';
@@ -73,7 +79,12 @@ const LAPSES: Readonly<Record<string, readonly string[]>> = {
     gornji_vakuf_clashes_1993: ['escalate'],
     hrhb_central_bosnia_defense_1993: ['breakout_offensive'],
     hrhb_federation_overture_1993: ['maintain_separate_state', 'reject_federation_path'],
-    zagreb_restrains_boban_vopp: ['acknowledge_pressure'],
+    // VOPP (t46-54) is Zagreb RESTRAINING the HVO during the Vance-Owen window. `acknowledge_pressure`
+    // (the documented historical answer) is neutral: it neither renews nor ends the compact. Only
+    // `resist_patron`, pressing the provincial map against that restraint, ends it (A2b PR-B round 2,
+    // game designer + historian, 2026-11-17; it used to be the other way round, which made a
+    // cooperative President pick the aggressive counterfactual to keep the peace).
+    zagreb_restrains_boban_vopp: ['resist_patron'],
 };
 
 /**
@@ -90,6 +101,8 @@ export interface RefugeeCompactStatus {
     granting_choices: number;
     /** True once a lapse answer ended the compact. */
     lapsed: boolean;
+    /** Latest expiry turn among the active entries (the compact is in force until then); null when none is active. */
+    latest_expiry: number | null;
 }
 
 /**
@@ -98,7 +111,7 @@ export interface RefugeeCompactStatus {
  */
 export function getRefugeeCompactStatus(state: GameState, turn: number): RefugeeCompactStatus {
     const log = state.military?.event_decision_log;
-    const none: RefugeeCompactStatus = { active_entries: 0, granting_choices: 0, lapsed: false };
+    const none: RefugeeCompactStatus = { active_entries: 0, granting_choices: 0, lapsed: false, latest_expiry: null };
     if (!log || log.length === 0) return none;
     let expiries: number[] = [];
     let granting = 0;
@@ -130,7 +143,13 @@ export function getRefugeeCompactStatus(state: GameState, turn: number): Refugee
     const rhs = state.political?.rbih_hrhb_state;
     const signedAt = rhs?.washington_signed === true ? rhs.washington_turn : undefined;
     const signed = signedAt != null && turn >= signedAt;
-    return { active_entries: signed ? 0 : expiries.filter((e) => e > turn).length, granting_choices: granting, lapsed };
+    const active = signed ? [] : expiries.filter((e) => e > turn);
+    return {
+        active_entries: active.length,
+        granting_choices: granting,
+        lapsed,
+        latest_expiry: active.length > 0 ? Math.max(...active) : null,
+    };
 }
 
 /** Refugee-pressure multiplier: 0.6 per active entry, 1.0 when none or while suspended. */
@@ -149,10 +168,15 @@ export function getRefugeeCompactRecruitmentMultiplier(state: GameState, faction
     return active_entries === 0 ? 1.0 : REFUGEE_COMPACT_RECRUITMENT_PRICE ** active_entries;
 }
 
-/** Patron-drag multiplier: 0.5 per 1992 granting choice (permanent); 1.0 with none. */
+/**
+ * Patron-drag multiplier: 0.5 per ACTIVE compact entry, exactly 1.0 with none. Like the pressure and
+ * recruitment multipliers it rests on continued payment: it returns to 1.0 when the entries run out,
+ * lapse or end at the Washington signing. (It was permanent per 1992 choice, which let two choices
+ * buy a one-week war; amended in A2b PR-B, game designer + historian, 2026-11-17.)
+ */
 export function getPatronDragStanceMultiplier(state: GameState, turn: number): number {
-    const { granting_choices } = getRefugeeCompactStatus(state, turn);
-    return granting_choices === 0 ? 1.0 : PATRON_DRAG_STANCE_MULTIPLIER ** granting_choices;
+    const { active_entries } = getRefugeeCompactStatus(state, turn);
+    return active_entries === 0 ? 1.0 : PATRON_DRAG_STANCE_MULTIPLIER ** active_entries;
 }
 
 /** True while at least one compact entry is active (gates the flip-suspension write). */

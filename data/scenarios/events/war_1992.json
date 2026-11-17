@@ -2362,7 +2362,7 @@
           },
           "united_front": {
             "label": "Zajednički front s ARBiH",
-            "description": "Mi smo Hrvati i Bosanci. Naša borba je protiv Velike Srbije, uz naše saveznike. Zagreb će biti bijesan. Tuđman može presjeći podršku. Ali udruženi front protiv VRS-a bit će snažan."
+            "description": "Mi smo Hrvati i Bosanci. Naša borba je protiv Velike Srbije, uz naše saveznike. Zagreb će biti bijesan. Tuđman može presjeći podršku. Ali udruženi front protiv VRS-a bit će snažan. Sklapa se dogovor o prihvatu raseljenih na 56 sedmica. Napetost u savezu zbog raseljavanja i zagrebački pritisak popuštaju dok traje; regrutacija se usporava, povjerenje Zagreba pada."
           },
           "strategic_ambiguity": {
             "label": "Javno sarađuj, tiho se pripremaj",
@@ -2690,7 +2690,7 @@
         "branch_tag": "hrhb_united_front",
         "historical_marker": "counterfactual",
         "label": "United front with ARBiH",
-        "description": "We are Croats and Bosnians. Our fight is against Greater Serbia, alongside our allies. Zagreb will be furious. Tudjman may cut support. But the combined front against the VRS will be formidable.",
+        "description": "We are Croats and Bosnians. Our fight is against Greater Serbia, alongside our allies. Zagreb will be furious. Tudjman may cut support. But the combined front against the VRS will be formidable. It opens a refugee compact for 56 weeks. Displacement strain and Zagreb's pull on the alliance ease while it stands; recruitment slows, Zagreb's confidence falls.",
         "effects": [
           {
             "kind": "alliance_change",
@@ -3463,7 +3463,7 @@
         "branch_tag": "hrhb_alliance_sustained",
         "historical_marker": "counterfactual",
         "label": "Preserve formal HVO-ARBiH alliance",
-        "description": "The Presidency disciplines local HVO commanders asserting HZ HB jurisdiction in Prozor, Novi Travnik, and Vitez. The joint anti-VRS framework is reinforced as primary; the Graz framework is treated as an external diplomatic exchange that does not bind HVO operational posture. Zagreb reads the intervention as non-alignment and pulls officer secondments, fuel, and ammunition support from HVO units; the international monitors record the cooperation as visible.",
+        "description": "The Presidency disciplines local HVO commanders asserting HZ HB jurisdiction in Prozor, Novi Travnik, and Vitez. The joint anti-VRS framework is reinforced as primary; the Graz framework is treated as an external diplomatic exchange that does not bind HVO operational posture. Zagreb reads the intervention as non-alignment and pulls officer secondments, fuel, and ammunition support from HVO units; the international monitors record the cooperation as visible. Adds a refugee compact for 56 weeks to any you hold. Displacement strain and Zagreb's pull on the alliance ease while it stands; recruitment slows.",
         "effects": [
           {
             "kind": "alliance_change",

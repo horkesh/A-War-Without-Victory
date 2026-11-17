@@ -73,7 +73,7 @@ describe('versioned save migration steps', () => {
 
     it('bumps GameState schema to the latest registered migration', () => {
         expect(CURRENT_SCHEMA_VERSION).toBe(getLatestSchemaVersion());
-        expect(getLatestSchemaVersion()).toBe(39);
+        expect(getLatestSchemaVersion()).toBe(40);
     });
 
     it('materializes legacy defaults through versioned registry steps', () => {
