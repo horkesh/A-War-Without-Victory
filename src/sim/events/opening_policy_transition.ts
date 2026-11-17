@@ -16,8 +16,12 @@ const OPTIONS = ['always_deny', 'ask', 'always_allow'] as const;
 // Re-pinned again 2026-11-15 (was 70817 / a5cda75445f4eff3): three imprecise A/54/549 and Krstić paragraph cites in visible
 // explanations and the Owen-Stoltenberg consequence label ("response decision", the event it opens is a player Accept or Resist
 // decision); string-only, reviewed with the policy event below.
-const REVIEWED_IDENTITY_CANONICAL_LENGTH = 70844;
-const REVIEWED_IDENTITY_FNV64 = 'acbebbba72173a81';
+// Re-pinned 2026-11-17 (was 70844 / acbebbba72173a81) by the §6 E4 rounds 3-4 panel (narrative seat's copy, Q4): three
+// Federation-army consequence `explanation` strings no longer speak of patron pressure (the retired convention). String-only:
+// trigger, options, effects, flags and dimension shifts are byte-identical, and a saved pending decision still matches
+// (explanations are display text).
+const REVIEWED_IDENTITY_CANONICAL_LENGTH = 70829;
+const REVIEWED_IDENTITY_FNV64 = '1e0067f9868a0e15';
 // Re-pinned 2026-11-15 (was 10911 / 4db9c9795b1abb6d): three hidden provenance notes cited UN A/54/549 §35 (the Srebrenica enclave
 // before the safe areas) for the ARBiH chain of command; the two hidden notes now record the correction and the visible source
 // line drops the paragraph. Strings only; options, effects, flags and dimension shifts are byte-identical.
