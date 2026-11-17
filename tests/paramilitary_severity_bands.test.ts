@@ -5,6 +5,7 @@ import {
     computeNegotiationBreakdown,
     computeParamilitaryInternationalStandingPenalty,
 } from '../src/sim/negotiation/compute_capital.js';
+import { computeDimensionBaseValues } from '../src/sim/events/strategic_dimensions.js';
 
 function makeState(deployments: number): GameState {
     return {
@@ -47,8 +48,15 @@ describe('paramilitary severity bands', () => {
 
         const state = makeState(deployments);
         computeNegotiationBreakdown(state);
+        // §6 E3a1 D2: computeNegotiationBreakdown no longer writes the standing base (it used to,
+        // replacing war_crimes × 10 with the finding penalty). The single base writer is
+        // computeDimensionBaseValues, where the penalty ADDS to war_crimes × 10. This state has
+        // war_crimes_events = 0, so the expected bases are unchanged (50 − penalty).
+        const dims = state.military.negotiation!.strategic_dimensions!;
+        expect(dims.RS.international_standing.base_value).toBe(50);
+        computeDimensionBaseValues(dims, state, 'RS');
 
-        expect(state.military.negotiation!.strategic_dimensions!.RS.international_standing.base_value)
+        expect(dims.RS.international_standing.base_value)
             .toBe(expectedStanding);
     });
 });

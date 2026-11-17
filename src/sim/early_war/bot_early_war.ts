@@ -13,6 +13,7 @@
 import type { FrontEdge } from '../../map/front_edges.js';
 import type { FactionId, GameState, PostureLevel } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
+import { isRbihHrhbAtWar } from './alliance_update.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Constants
@@ -87,7 +88,7 @@ export function runEarlyWarBotPosture(
     const allianceValue = state.political.war_alliance_rbih_hrhb ?? 1.0;
     const rhs = state.political.rbih_hrhb_state;
     const rbihHrhbAllied = allianceValue >= 0.2 || rhs?.ceasefire_active || rhs?.washington_signed;
-    const rbihHrhbAtWar = allianceValue < 0.0 && !rhs?.ceasefire_active && !rhs?.washington_signed;
+    const rbihHrhbAtWar = isRbihHrhbAtWar(state) && !rhs?.ceasefire_active && !rhs?.washington_signed;
 
     for (const faction of botFactions) {
         const profile = PHASE_I_PROFILES[faction];

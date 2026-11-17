@@ -970,7 +970,7 @@
     "bot_response_logic": "historical",
     "historical_default_response_id": "always_allow",
     "source_note": "ICTY Karadžić, Stakić, Brđanin, Tadić, Krajišnik, and Šešelj findings document the political leadership's tolerance of paramilitary methods. UN reports record the pattern contemporaneously. The historical RS posture was de-facto tolerance.",
-    "staff_assessment": "Standing authorization mirrors documented RS leadership posture. Per-deployment review introduces command friction; refusal forecloses paramilitary operations entirely and shifts the rear-area burden onto regular formations.",
+    "staff_assessment": "Standing authorization mirrors documented RS leadership posture. Per-deployment review introduces command friction; refusal forecloses paramilitary operations ordered in person and shifts the rear-area burden onto regular formations.",
     "trigger_evidence": [
       "The Six Strategic Goals platform has been recorded; rear-area operations follow.",
       "Crisis Staffs in Banja Luka and Prijedor are already coordinating with volunteer formations."
@@ -3618,11 +3618,6 @@
         "delta": 5
       },
       {
-        "kind": "humanitarian_impact",
-        "faction": "RBiH",
-        "war_crimes_delta": 1
-      },
-      {
         "kind": "narrative",
         "text": "JNA soldiers killed during the seizure provoke international condemnation. VRS commanders vow to avenge the barracks."
       }
@@ -3826,11 +3821,6 @@
         "kind": "patron_pressure",
         "faction": "RBiH",
         "delta": 10
-      },
-      {
-        "kind": "humanitarian_impact",
-        "faction": "RBiH",
-        "war_crimes_delta": 2
       },
       {
         "kind": "control_change",
@@ -4641,12 +4631,6 @@
       "kind": "narrative",
       "text": "A limited Croatia transit channel eases, but does not solve, the ARBiH supply crisis."
     },
-    "effects": [
-      {
-        "kind": "narrative",
-        "text": "A limited Croatia transit channel eases, but does not solve, the ARBiH supply crisis."
-      }
-    ],
     "sets_flags": {
       "embargo_croatia_transit": true
     },

@@ -23,9 +23,6 @@
 import { clamp01 } from '../utils/math.js';
 import type { GameState, SiegeLifelineState, SiegeLifelineStatus } from './game_state.js';
 import { getSarajevoSiegeParams, isSarajevoLifelineEnabled } from '../sim/combat/sarajevo_siege_params.js';
-import { SARAJEVO_CITY_CORE_MUN_IDS } from './enclave_integrity.js';
-
-const SARAJEVO_CORE_MUN_SET: ReadonlySet<string> = new Set(SARAJEVO_CITY_CORE_MUN_IDS as string[]);
 
 /** Canonical event id whose firing makes the Dobrinja–Butmir tunnel a continuous relief. */
 export const SARAJEVO_TUNNEL_EVENT_ID = 'sarajevo_tunnel_completed_1993';
@@ -105,38 +102,6 @@ export function getActiveSarajevoLifeline(state: GameState): SiegeLifelineState 
     return state.political?.sarajevo_state?.lifeline;
 }
 
-/**
- * True when a `${faction}:${osid}` siege-turn-counter key is an RBiH-defended
- * Sarajevo-core counter — i.e. the pocket the lifeline mediates. OSID format is
- * `op:<mun>:<slug>`. Faction-symmetric in mechanism: only the besieged
- * controller (data-driven) is matched, never special-cased by name beyond the
- * existing Sarajevo geometry.
- */
-export function isSarajevoCoreSiegeCounterKey(key: string): boolean {
-    const colonIdx = key.indexOf(':');
-    if (colonIdx < 0) return false;
-    const faction = key.substring(0, colonIdx);
-    if (faction !== 'RBiH') return false;
-    const osid = key.substring(colonIdx + 1);
-    const parts = osid.split(':');
-    if (parts.length < 2) return false;
-    return SARAJEVO_CORE_MUN_SET.has(parts[1]);
-}
-
-/**
- * Lifeline-mediated attrition multiplier for the bombardment fragment.
- * SEVERED ⇒ ≥1 (harder); OPEN ⇒ <1 (working lifeline damps casualties).
- * Linear in throughput between the severed multiplier and 1 at full throughput.
- * Returns 1 when no lifeline present (so the flag-OFF path multiplies by nothing).
- */
-export function lifelineAttritionMultiplier(
-    lifeline: SiegeLifelineState | undefined,
-    severedMult: number,
-): number {
-    if (!lifeline) return 1;
-    // throughput 0 → severedMult ; throughput 1 → max(1, ... ) damped toward (2 - severedMult).
-    // Keep it simple + monotonic: interpolate severedMult..(below 1) by throughput.
-    const t = clamp01(lifeline.throughput);
-    const open = Math.max(0.1, 2 - severedMult); // symmetric damp; bounded >0
-    return severedMult + (open - severedMult) * t;
-}
+// isSarajevoCoreSiegeCounterKey / lifelineAttritionMultiplier retired 2026-11-17
+// (§6 panel, Fable consult 6): their only readers were the retired siege counters,
+// siege bombardment attrition and siege morale drain.

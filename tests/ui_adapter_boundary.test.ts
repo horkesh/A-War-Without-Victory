@@ -384,6 +384,67 @@ describe('UI Adapter Boundary Discipline', () => {
     ]);
   });
 
+  it('adapter lists paramilitary sweeps carried out without a request to the player, read-only from the formations they created', () => {
+    const rawState: any = {
+      meta: { turn: 30, phase: 'war', player_faction: 'RS' },
+      military: {
+        formations: {
+          para_rs_t2_0: { id: 'para_rs_t2_0', kind: 'paramilitary', faction: 'RS', created_turn: 2, paramilitary_target: 'op:srebrenica:obadi' },
+          para_rs_t5_0: { id: 'para_rs_t5_0', kind: 'paramilitary', faction: 'RS', created_turn: 5, paramilitary_target: 'op:decided:place' },
+          para_rbih_t3_0: { id: 'para_rbih_t3_0', kind: 'paramilitary', faction: 'RBiH', created_turn: 3, paramilitary_target: 'op:foreign:place' },
+          vrs_brigade: { id: 'vrs_brigade', kind: 'brigade', faction: 'RS', created_turn: 0 },
+        },
+      },
+      paramilitary_decision_history: [
+        { id: 'paramilitary:5:op:decided:place', turn: 5, target_osid: 'op:decided:place', faction: 'RS', strength: 150, decision: 'allow' },
+      ],
+      political: { political_controllers: {} },
+    };
+    const before = JSON.stringify(rawState);
+
+    const parsed = parseGameState(rawState);
+
+    // No `paramilitary` control event for this target: the action dissolved without taking it, so it books nothing.
+    expect(parsed.paramilitaryUnrequested).toEqual([
+      { id: 'para_rs_t2_0', turn: 2, target_osid: 'op:srebrenica:obadi', faction: 'RS', captured: false },
+    ]);
+    expect(JSON.stringify(rawState)).toBe(before);
+    expect(parseGameState({ ...rawState, meta: { turn: 30, phase: 'war' } }).paramilitaryUnrequested).toBeUndefined();
+  });
+
+  it('adapter marks a receipt captured only when a paramilitary control event took that target, and lists no receipt while the action is still on its way', () => {
+    const rawState: any = {
+      meta: { turn: 30, phase: 'war', player_faction: 'RS' },
+      military: {
+        formations: {
+          // Took its target: a matching control event within the march window.
+          para_rs_t2_0: { id: 'para_rs_t2_0', kind: 'paramilitary', faction: 'RS', status: 'inactive', created_turn: 2, paramilitary_target: 'op:a:taken' },
+          // Offensive action: created at turn 6, took its target a turn later.
+          para_rs_t6_0: { id: 'para_rs_t6_0', kind: 'paramilitary', faction: 'RS', status: 'inactive', created_turn: 6, paramilitary_target: 'op:b:taken_later' },
+          // Dissolved without a capture (no control event).
+          para_rs_t3_0: { id: 'para_rs_t3_0', kind: 'paramilitary', faction: 'RS', status: 'inactive', created_turn: 3, paramilitary_target: 'op:c:dissolved' },
+          // A control event of another mechanism or faction, or from long before, is not a capture by this action.
+          para_rs_t4_0: { id: 'para_rs_t4_0', kind: 'paramilitary', faction: 'RS', status: 'inactive', created_turn: 4, paramilitary_target: 'op:d:other' },
+          // Still marching: no outcome yet, no receipt.
+          para_rs_t29_0: { id: 'para_rs_t29_0', kind: 'paramilitary', faction: 'RS', status: 'active', created_turn: 29, paramilitary_target: 'op:e:marching' },
+        },
+      },
+      political: {
+        political_controllers: {},
+        control_events: [
+          { turn: 2, settlement_id: 'op:a:taken', mechanism: 'paramilitary', from: 'RBiH', to: 'RS' },
+          { turn: 7, settlement_id: 'op:b:taken_later', mechanism: 'paramilitary', from: 'RBiH', to: 'RS' },
+          { turn: 4, settlement_id: 'op:d:other', mechanism: 'battle', from: 'RBiH', to: 'RS' },
+          { turn: 4, settlement_id: 'op:d:other', mechanism: 'paramilitary', from: 'RS', to: 'RBiH' },
+        ],
+      },
+    };
+
+    const byId = Object.fromEntries((parseGameState(rawState).paramilitaryUnrequested ?? []).map((row) => [row.id, row.captured]));
+
+    expect(byId).toEqual({ para_rs_t2_0: true, para_rs_t6_0: true, para_rs_t3_0: false, para_rs_t4_0: false });
+  });
+
   it('adapter exposes resolved officer decision history for the player faction', () => {
     const rawState: any = {
       meta: { turn: 12, phase: 'war', player_faction: 'RS' },

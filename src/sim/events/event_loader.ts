@@ -20,6 +20,7 @@ import {
     isRing3SensitiveFamily,
 } from './event_families.js';
 import { DIMENSION_IDS } from './strategic_dimensions.js';
+import { stableStringify } from '../../utils/stable_json.js';
 import sourceTierContract from './source_tiers.json';
 
 /**
@@ -431,6 +432,16 @@ function validateEventRow(row: unknown, filename: string, rowIndex: number): voi
         validateOptionalFiniteNumber(row.probability, 'probability', filename, rowIndex);
         if ((row.probability as number) < 0 || (row.probability as number) > 1) {
             failRow(filename, rowIndex, 'probability must be between 0 and 1 when present');
+        }
+    }
+    if (hasOwn(row, 'audience')) {
+        const audience = row.audience;
+        const valid = audience === 'all'
+            || (Array.isArray(audience) && audience.length > 0
+                && audience.every((faction) => faction === 'RBiH' || faction === 'RS' || faction === 'HRHB')
+                && new Set(audience).size === audience.length);
+        if (!valid) {
+            failRow(filename, rowIndex, `audience must be "all" or a non-empty list of distinct factions (RBiH, RS, HRHB) when present: ${JSON.stringify(audience)}`);
         }
     }
     if (hasOwn(row, 'once')) {
@@ -1143,6 +1154,43 @@ function validateEffectKindVocabulary(rows: EventDefinition[]): void {
 }
 
 /**
+ * §6 E1 (2026-11-16): `collectEffects` applies an event's `effect` AND every
+ * `effects` entry, so an `effect` repeated inside `effects` is applied twice
+ * while the card and the UI show it once. 27 shipped rows did this until the E1
+ * fix. Reject it at load, for rows and for response options, comparing by
+ * key-sorted content (`stableStringify`) so authored key order cannot hide it.
+ */
+function validateNoRepeatedEffect(rows: EventDefinition[]): void {
+    const violations: string[] = [];
+    const sortedRows = [...rows].sort((a, b) => strictCompare(a.id, b.id));
+    function check(effect: unknown, effects: unknown, label: string): void {
+        if (!isObject(effect) || !Array.isArray(effects)) return;
+        const primary = stableStringify(effect);
+        for (let i = 0; i < effects.length; i++) {
+            if (stableStringify(effects[i]) === primary) violations.push(`${label}.effects[${i}]`);
+        }
+    }
+    for (const row of sortedRows) {
+        check((row as { effect?: unknown }).effect, (row as { effects?: unknown }).effects, `${row.id}#event`);
+        if (!Array.isArray(row.response_options)) continue;
+        for (let optionIndex = 0; optionIndex < row.response_options.length; optionIndex++) {
+            const option = row.response_options[optionIndex];
+            if (!isObject(option)) continue;
+            const optionId = isNonEmptyString((option as { id?: unknown }).id)
+                ? (option as { id: string }).id
+                : String(optionIndex);
+            check((option as { effect?: unknown }).effect, (option as { effects?: unknown }).effects, `${row.id}#${optionId}`);
+        }
+    }
+    if (violations.length > 0) {
+        violations.sort(strictCompare);
+        throw new Error(
+            `Event effect repeated in effects[] (the engine applies effect and effects, so it would apply twice): ${violations.join(', ')}`,
+        );
+    }
+}
+
+/**
  * Load a single required event JSON file. Required catalog files fail closed:
  * missing, malformed, or non-array JSON is a loader error.
  */
@@ -1194,6 +1242,7 @@ export function loadEventDefinitionsFromDir(scenarioStartWeek: number, eventsDir
     // bug-class symptoms at runtime.
     validateDimensionShiftVocabulary(allEvents);
     validateEffectKindVocabulary(allEvents);
+    validateNoRepeatedEffect(allEvents);
     // ─── Phase B Sub-slice B1 catalog-level passes. ────────────────────────
     validateCrossFactionOptionIds(allEvents);
     validateRing3EnablingRejection(allEvents);

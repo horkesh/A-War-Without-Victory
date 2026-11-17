@@ -896,6 +896,13 @@ export interface TacticalGroup {
     op_id: string;
     /** When set, this TG is part of an Army HQ op (faction-scope donor pool). */
     army_hq_op_id?: ArmyHqOpId;
+    /**
+     * The corps whose CorpsOperation this TG serves: its stable lifecycle identity together with
+     * `op_id` (zombie-TG fix, 2026-11-16). Differs from `corps_id` when the anchor is a brigade
+     * of another corps. Absent on TGs formed before the field existed; those keep the legacy
+     * host-corps = `corps_id` match.
+     */
+    host_corps_id?: FormationId;
     anchor_brigade_id: FormationId;
     /** Pre-sorted by brigade_id (strictCompare) for determinism. */
     donor_contributions: TgDonorContribution[];
@@ -3002,7 +3009,9 @@ army_clash_state?: import('./army_clash_types.js').ArmyClashState;
 war_militia_strength?: Record<MunicipalityId, Record<FactionId, number>>;
 /** JNA withdrawal and asset transfer; Peace-phase §4.6. Does not start war. */
 war_jna?: JNATransitionState;
-/** Consecutive critical-supply turns per faction:OSID. Key: `${factionId}:${osid}`. Phase B siege. */
+/** Consecutive critical-supply turns per faction:OSID. Key: `${factionId}:${osid}`.
+ * Retired 2026-11-17 (§6 panel, Fable consult 6): siege counters / bombardment attrition / siege morale drain are not modelled in 1.0; kept optional so old saves load; nothing writes it.
+ * @persistence compatibility-only */
 siege_turn_counters?: Record<string, number>;
 /** General supply reserves per faction [0..100]. Consumed by maintenance; replenished by facilities/patron. */
 general_supply_reserve?: Record<FactionId, number>;

@@ -49,12 +49,20 @@ Two fresh read-only seats sat in parallel and independently, each checking the c
 
 ### SD6 and SD8. Siege deaths in place and military-age departures are not modelled
 
-- **Reason for the record.** A scope choice. The siege path books displacement only (0.1% a week, "none killed"; §6 panel record in `SENSITIVE_HISTORY_DESIGN_GATE.md`, unanimous GO, 2026-11-14). The omission understates harm; it does not claim that nobody died. Formation siege attrition does exist (`siege_attrition.ts`).
+- **Reason for the record.** A scope choice. The siege path books displacement only (0.1% a week, "none killed"; §6 panel record in `SENSITIVE_HISTORY_DESIGN_GATE.md`, unanimous GO, 2026-11-14). The omission understates harm; it does not claim that nobody died. Formation siege bombardment attrition was retired on 2026-11-17 (SB1), so besieged formations lose men only in combat resolution; that widens this understatement, and the disclosure conditions below carry it.
 - **Left alone:** bot runs show Sarajevo, Goražde, Srebrenica and Bihać emptying and never killing. Goražde ends near 45,000 against 60,000 to 65,000 (SD13, in batch A). The knowledge base holds no Sarajevo siege-death figure, and the Galić judgment figures are not verified.
 - **Played:** no agency is lost. Siege onset needs 3 turns unsupplied under front pressure, so a breakout or a corridor lifts it, and the player's siege and relief actions still move supply and displacement. The omission removes a cost, not a choice.
 - **Player text, grepped by the game-designer seat.** Three strings already disclose the gap, in English and BCS: `humanitarianLedger.note.scope`, `verdict.compare.civilianDead`, `verdict.basis.campaignAllSides` (`messages.en.ts:6445, 6761, 6802`). No player-visible text claims siege deaths or military-age departures in `src/` or `data`. The Verdict is unaffected (`civilian_casualties_full` is deliberately 5,000 against about 39,684 real dead).
 - **Conditions.** Keep those three strings in English and BCS. No UI shows a Sarajevo or siege civilian-death number as simulation output. No player-facing text equates the displaced count with casualties or says nobody died. The `scoring.ts:172` premise (15,000 compared against about 3,500 to 5,500 Sarajevo dead) rests on a quantity the engine does not model and stays an open note. SD8's military-age exit bar for Sarajevo is not verified against a source.
 - **Seats:** game-designer RATIFY WITH CONDITIONS; historian RATIFY WITH CONDITIONS.
+
+### SB1. Bombardment losses of besieged formations are not modelled
+
+- **The line (historian's wording):** bombardment losses of besieged formations are not modelled; shelling of the besieged fell mainly on civilians, and defender losses come from combat resolution.
+- **Reason for the record.** Retired on 2026-11-17 (Fable consult 6, appendix A step 1). The passive siege bombardment attrition was measured alone (siege counters and `applySiegeBombardmentAttrition` on, reserves off; apr1992 historical and hands-off emergent, main `c52c34ccb`). It put 15,708 casualties (2,394 KIA) almost entirely on RBiH Goražde (10,817) and Srebrenica (4,394), about five times the killed of Zvezda-94 (BB2 p.480) and more than Goražde's garrison; it peaked in 1994-95 against the exclusion zones; it hollowed Srebrenica's defenders before July 1995; it never reached Sarajevo or Bihać. It breached Farz P-B and cost 14 cells at October 1995.
+- **Specification defects, recorded so this version is never switched back on:** (1) fire was sized from faction-wide average firepower (`enemyFP = max over all other factions`), not the besiegers' guns around the pocket, so RBiH pockets sat at the 3× cap and RS pockets near 0.1; (2) Sarajevo and Bihać could never start a counter (a pocket holding its own source is "strained", only isolated OSIDs are "critical"); (3) pockets under 8 OSIDs were frozen at counter 1 but still bled every turn, so isolation was treated as siege; (4) the escalation multiplied all three.
+- **Left alone / played:** the war runs on combat resolution for defender losses; no agency is lost (the morale drain never ran; the counters and bombardment ran only under `supply_reserves_enabled`, set only by two start scenarios no player can start and retired for 1.0). The siege morale drain and the `siege_active` condition (no event used it) went with it.
+- **Seats:** historian, scenario-creator-runner-tester, engine/systems and red-team, unanimous RETIRE (KEEP vetoed); red-team's condition (these canon corrections in the same change) met. Orchestrator approved.
 
 ### BC06. The six address and decoration gesture rows stay static
 
@@ -67,6 +75,12 @@ Rows: `address_to_nation_{rbih,rs,hrhb}` and `decorate_a_unit_{rbih,rs,hrhb}` (`
 - **Not verified (historian seat):** "Zlatni ljiljan" and other decorations are not in the BB1 and BB2 pages searched; Karadžić's and Tuđman's addresses, HVO decorations and any ICTY paragraph on gestures are not verified.
 - **Conditions.** (1) Rulebook "Recurring decisions" paragraph reworded: done in this change. (2) The stale five-use rationale is marked superseded in the 2026-09-08 disposition: done in this change. (3) The `address_to_nation_rbih` narrative opens "a people in the fourth year of siege" but first fires at turn 84, about the second year of the war if the campaign starts in April 1992 (not confirmed by the historian seat): done in #698: the closing line is now year-neutral ("a people who have lived under siege this long"), string only, hash unchanged. (4) Keep the decoration copy that restricts it to regular formations and the essays' warning that an honour attaches to a unit's whole record; no player text may imply that a decoration or address grows stronger with use.
 - **Seats:** game-designer ACCEPT WITH CONDITIONS; historian ACCEPT WITH CONDITIONS.
+
+### Planning-phase release for an authored operation (RF-ROSTER S3). Accepted as final (orchestrator, 2026-11-17)
+
+- **Reason for the record.** A generic corps operation already in planning is not released for an authored operation; the lead-window reservation (the lane's S2) prevents the conflict from arising, so the release is not needed. The precedence fix of the same lane is outcome-identical; the hash moves only from 18 truthful trace rows (`watched_operations`).
+- **Left alone:** the conflict does not arise. **Played:** the same.
+- **Seats:** accepted by the orchestrator as final with this reason; not a game-designer and historian sitting item.
 
 ## 2. The ARBiH plan lockout (army-wide): fixed in the package, not accepted
 
