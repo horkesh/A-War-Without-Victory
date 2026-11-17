@@ -1,0 +1,45 @@
+## 2026-11-16 — Washington Path A': the signed cards on a quiet front sign the agreement (byte-identical left alone)
+
+- **Why.** In a played game where the HRHB President mended the alliance (probe `a2_probe2_hrhb_united`, on main), both Washington cards fired and were accepted at t102. The HRHB card's alliance +0.8 lifted the alliance to 0.82. But `washington_signed` stayed false until t112: Path A waits for an engine ceasefire (`bilateral_ceasefire` C1 needs 45 weeks of war, so 63 + 45 = t108) and then four more weeks (W2). For ten weeks the cards said "signed" while the engine withheld the Federation.
+- **Panel** (game designer and historian, 2026-11-16).
+  - Path A' fires once when all of these hold:
+    - Washington is not yet signed;
+    - a war was fought;
+    - turn ≥ 102;
+    - the front is quiet (`stalemate_turns` ≥ 4, or a held ceasefire ≥ 4 weeks);
+    - HRHB acknowledged `zagreb_orders_hrhb_ceasefire` (Zagreb's restraint);
+    - both Washington cards were signed (accept or reluctant);
+    - the alliance is > 0.20.
+  - Effects are Path A's, ceasefire included.
+  - N = 4 matches W2. The historical ceasefire, framework and signing came 1-3.5 weeks apart.
+- **Change.**
+  - `src/sim/early_war/washington_agreement.ts`: `evaluateWashingtonQuietFront` and `WASH_QUIET_FRONT_TURNS`; `trigger_path: 'quiet_front'`. Answers are read from `event_decision_log`, last answer wins (every bot, auto and player route writes it); no new state.
+  - `tools/scenario_runner/run_baseline_regression.ts`: `assertHistoricalWashingtonBeforeQuietFrontWindow`. The historical 188w run must sign before t102, or both the compare and the re-pin fail loudly.
+  - Canon: Systems Manual, Washington implementation note.
+- **Measured** (logs `C:/Pyrrhic/AWWV-worktrees/_logs/b5-scorer-20261116/qf_*`).
+  - Re-proved 2026-11-17 on main `08f486ae9` merged in (after #735, #782, #784, #787): historical 188w `2c63bd10fecd6bc7`, emergent `bfcbfa55dd206585`: byte-identical to main (`npm run test:baselines`: "all scenarios match"; manifest unchanged by this PR). Both sign through Path A at t98; the historical guard did not throw.
+  - Played pair (HRHB President: united_front, formal_alliance_persists, Gornji Vakuf negotiate; staff_recommended; 130 turns; logs `_logs/b5-scorer-20261116/land763/{ack,refuse}`):
+    - Zagreb `acknowledge_pressure` (t95): Washington signs at **t102** through Path A' (ceasefire from t102; alliance 0.90 at t130). On main the same game signed at t112.
+    - Zagreb `resist_patron` (t95, refuse): signs at **t112** (ceasefire from t108), the old Path A date. Zagreb fires at t95 on both.
+- **Copy: the cards become the framework step** (orchestrator condition 1, 2026-11-17).
+  - The panel: the narrative designer drafted the copy and gave a round-2 GO with amendments; the historian gave GO with amendments (BB Vol. I p.18, Vol. II pp.450-451). Both seats' amendments were integrated.
+  - **Cards.** Both Washington cards now present the framework step ("Washington Framework Agreed" / "Sarajevo and the Washington Framework"), through display-time `localizations` in EN and BCS.
+    - Their present tense says only what holds in both orders: the engine formed the Federation first (left alone: t98, then the cards at t102) or later (played).
+    - Dates go in the record register: the Zagreb ceasefire on 23 Feb (in force 25 Feb), the framework on 1 Mar, the Federation accords on 18 Mar.
+  - **HRHB `effects` narrative (EN).** It no longer claims the war ended or that supply pipelines opened; the card has no such supply effect.
+  - **RBiH `future_consequences`.** These no longer promise the 1995 offensives. "Within days" is now tied to the 1 March signing.
+  - **War-room strings** (declaration modal, headline, ticker, Diplomacy tracker label). They fire on the engine's flip, so they announce the state, "FEDERATION FORMED / The Croat-Bosniak war is over", with no dated signing. A left-alone run flips at week 98, before the historical ceasefire.
+    - **State-chosen** (orchestrator, 2026-11-17). Four paths flip `washington_signed`: A, B and A' follow a war; Path C (#737) forms the Federation with no war fought.
+      - The turn event carries `warFought` (`war_started_turn` set).
+      - With a war, the milestone modal uses `washington_agreement`; with no war, `washington_consent`. The headline and ticker choose the same way.
+      - Path C text (narrative seat): "FEDERATION FORMED / The ARBiH-HVO alliance becomes a federation". It says nothing about a war ending; the historical breakdown into war is stated in the record register.
+      - The Path C headline photo caption ("HVO and ARBiH officers meet in Central Bosnia") is integrator wording.
+      - Test: `tests/ui/warroom_federation_formed_copy.test.ts`.
+    - The war-room surfaces are EN-only constants with no locale path; this goes on the BCS gap list (W4 allowlist). The panel's BCS war-room text is in `washington_framework_copy_integrated.json` (shared notes) for the UI lane.
+  - **Fixes the seats found in the old copy:**
+    - HRHB "preserved autonomy" and "supply pipelines open" had no mechanic behind them;
+    - RBiH reluctant costs more cohesion (−10) than accept (−5);
+    - the entity name is HR HB, not HZ HB;
+    - the unsourced hardliner attribution is removed.
+  - **Measured:** byte-identical (historical `2c63bd10fecd6bc7`, emergent `bfcbfa55dd206585`).
+- **Tests.** `tests/washington_quiet_front.test.ts` (9): fires with Path A effects; a held ceasefire counts; reluctant counts; closed before t102, without a war, below 0.20, on a fighting front, without Zagreb's restraint (resist or no answer), or with one card unsigned; never twice; the historical guard passes at t98 and throws at t102 or when unsigned.

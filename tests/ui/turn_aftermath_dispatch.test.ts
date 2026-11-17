@@ -96,7 +96,7 @@ function busyView(): TurnAftermathView {
       actionableCount: 3,
       blockingCount: 1,
       topItems: [{
-        id: 'item:1', type: 'event_decision', severity: 'blocking', title: 'Convoy decision', detail: 'Srebrenica route',
+        id: 'item:1', type: 'event_decision', severity: 'blocking', title: 'Paramilitary request', detail: 'Srebrenica sector',
         action: { kind: 'open_event' } as never, actionLabel: 'Decide',
       }],
     },

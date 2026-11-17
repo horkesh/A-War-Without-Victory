@@ -90,7 +90,6 @@ const ACTION_TYPE_LABEL_KEYS = {
     peace_plan: 'records.actionType.peace_plan',
     dayton_negotiation: 'records.actionType.dayton_negotiation',
     paramilitary_request: 'records.actionType.paramilitary_request',
-    convoy_decision: 'records.actionType.convoy_decision',
     reserve_request: 'records.actionType.reserve_request',
     officer_event: 'records.actionType.officer_event',
     autonomy_proposal: 'records.actionType.autonomy_proposal',

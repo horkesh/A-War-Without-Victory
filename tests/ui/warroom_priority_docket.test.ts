@@ -124,15 +124,6 @@ function makeState(overrides: Partial<LoadedGameState> = {}): LoadedGameState {
   } as LoadedGameState;
 }
 
-function makeConvoyDecision(id: string) {
-  return {
-    id,
-    target_enclave: id === 'convoy_a' ? 'Gorazde' : 'Srebrenica',
-    route_faction: 'RBiH' as const,
-    supply_amount: 20,
-  };
-}
-
 describe('buildWarroomPriorityDocketView', () => {
   it('projects the top pre-advance priorities into a deterministic Warroom docket', () => {
     const state = makeState({
@@ -206,16 +197,26 @@ describe('buildWarroomPriorityDocketView', () => {
       state: makeState({
         latestTurnSummary: null,
         turnSummaries: [],
-        pendingConvoyDecisions: [
-          makeConvoyDecision('convoy_a'),
-          makeConvoyDecision('convoy_b'),
-        ],
+        // F1i (2026-11-16): convoys are retired; two required event decisions form the grouped
+        // presidential-review card instead.
+        presidentialReviewQueue: {
+          pendingCount: 2,
+          criticalCount: 0,
+          eventDecisionCount: 2,
+          commandInterpretationCount: 0,
+          personnelDirectiveCount: 0,
+          operationOpportunityCount: 0,
+        },
+        pendingEventDecisions: [
+          { event_id: 'evt_a', event_title: 'Event A', turn_fired: 41, faction: 'RBiH', requires_player_response: true, response_options: [] },
+          { event_id: 'evt_b', event_title: 'Event B', turn_fired: 41, faction: 'RBiH', requires_player_response: true, response_options: [] },
+        ] as unknown as LoadedGameState['pendingEventDecisions'],
       }),
     });
 
     expect(view.metrics.pendingReviews).toBe(2);
     expect(view.metrics.priorityCounts.required).toBe(2);
-    // The chip's number is the rows the list shows (one grouped convoy card); the two convoy
+    // The chip's number is the rows the list shows (one grouped review card); the two event
     // decisions still weigh on the pending-review count.
     expect(view.items).toHaveLength(1);
     expect(view.metrics.advanceReviewCount).toBe(1);

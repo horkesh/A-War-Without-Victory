@@ -21,6 +21,7 @@ import { applyPeaceSettlement, isSettlementPlan } from './peace_settlement.js';
 import { warDeadTotals } from './war_dead.js';
 import { getFactionTerritoryAreaPct } from '../osid_areas.js';
 import { isWarOutsideHistoricalBand } from '../political/historical_territory_band.js';
+import { isPoliticsOffHistoryFor } from '../political/political_departure_markers.js';
 
 const CANONICAL_FACTIONS: FactionId[] = ['RBiH', 'RS', 'HRHB'];
 const DAYTON_PLAN_ID = 'dayton';
@@ -133,7 +134,7 @@ function computeBotResponse(
         personality,
         warWeek,
         plan.historical_responses[faction],
-        isWarOutsideHistoricalBand(state),
+        isWarOutsideHistoricalBand(state) || isPoliticsOffHistoryFor(state, faction),
     );
 }
 
