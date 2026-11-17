@@ -346,6 +346,28 @@ When active, these corps pairs do not generate attack orders against each other'
 
 Alliance drift is computed per turn in `alliance_update.ts`: alliance deterioration from territorial friction, patron pressure (HRHB patron commitment × PATRON_PRESSURE_COEFF), and escalation events. When alliance drops below threshold and turn ≥ `war_earliest_turn`, RBiH-HRHB fronts activate and the factions enter open conflict.
 
+**Implementation-note (A2b HRHB refugee compact, B5 2026-11-17).** Left alone, refugee pressure, about −0.016 a week, is the largest drift term; patron drag is about −0.012. So before this change no HRHB choice altered the outcome. The game designer and historian panel (orchestrator-approved) added the following in `src/sim/early_war/refugee_compact.ts`. It is derived from `event_decision_log`, so no new array is needed.
+
+- **Grants.** HRHB answers of `united_front` (`hrhb_political_goal`) and `formal_alliance_persists` (`hrhb_1992_graz_cooperation_collapse`) each open a compact entry for 56 turns. The length reaches the H6 window even when the goal is answered ahead of firing.
+- **Damping.** Refugee pressure is ×0.6 per active entry.
+- **Renewals.** These extend active entries; they never open one:
+  - H6 `federate_early`, 40 turns;
+  - federation overture `extend_federation_overture`, 30 turns (this is also the historical default, so bots never start a compact);
+  - Gornji Vakuf `negotiate`, 30 turns.
+- **Lapses.** These end the compact for good: VOPP Zagreb `acknowledge_pressure`; overture `maintain_separate_state` or `reject_federation_path`; Gornji Vakuf `escalate`; H6 `breakout_offensive`.
+- **Suspension.** A bilateral flip during an active compact suspends the damping for 8 weeks (`rbih_hrhb_state.refugee_compact_suspended_until`, written only while a compact is active).
+- **Price.** HRHB recruitment is ×0.9 per active entry, the burden of taking the refugees in. patron_confidence costs a further −10 on each 1992 choice.
+- **Patron drag.** Patron drag is ×0.5 per 1992 choice, permanently.
+- **Related changes.**
+  - `csq_federation_early_1994`'s alliance floor now lasts 17 turns, not 60, so it ends at the t87 overture and Mostar's answer there decides.
+  - Path C (Federation by consent) does not fire after a refused overture.
+- **Acceptance.**
+  - Left alone, historical and emergent runs stay byte-identical.
+  - Played, a President who keeps paying reaches Path C at t102 with no war.
+  - Cooperative and then careless, the war comes at t71.
+  - Renewed and then reneged at t87, the war comes at t103.
+- **Binding copy rule (historian).** No player-facing text may say or imply that refugees caused the 1993 war.
+
 **Implementation-note (2026-09-01):** During open RBiH-HRHB war, the bilateral corps diversion assigns the operational initiative to RBiH and a defensive stance to HVO. The selected RBiH corps receives only live HVO-controlled objectives on its mixed front; the HVO corps receives no bilateral offensive objectives. Corps selection prefers a formation below the operation-exhaustion ceiling before using mixed-front overlap as a tie-break. A designated bilateral corps may form its bounded assault group from combat-ready brigades already holding its continuous front, even when front-edge allocation labels those brigades as garrison rather than residual surplus; the reserved group remains coherent across sub-sector repartition before launch. Washington/ceasefire state terminates this special bilateral offensive designation. RBiH-HRHB control may change through combat operations, but rear-pocket `consolidation` and `abandoned` resolution is prohibited between the two factions in either direction. No direct political-control authority is granted.
 
 ### 6.7 Reactive Sector Defense

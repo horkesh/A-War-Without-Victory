@@ -38,8 +38,12 @@ import type { FactionId, GameState } from '../../state/game_state.js';
 
 /** Refugee-pressure multiplier per active compact entry (historian amendment (d): 0.6, so friction remains). */
 export const REFUGEE_COMPACT_MULTIPLIER = 0.6;
-/** Turns a 1992 grant lasts before it must be renewed. */
-export const REFUGEE_COMPACT_GRANT_TURNS = 52;
+/**
+ * Turns a 1992 grant lasts before it must be renewed: long enough to reach the first renewal window
+ * (H6, t52-55) even when the political goal is answered ahead of firing at t0 (probe A, 2026-11-17:
+ * at 52 the t0 entry expired on the renewal turn itself and the paying President still went to war).
+ */
+export const REFUGEE_COMPACT_GRANT_TURNS = 56;
 /** Weeks the damping is suspended after a bilateral RBiH-HRHB flip (historian amendment (a)). */
 export const REFUGEE_COMPACT_FLIP_SUSPENSION_TURNS = 8;
 /** HRHB recruitment multiplier per active entry: the burden of taking the refugees in. */
