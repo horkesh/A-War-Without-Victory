@@ -489,20 +489,20 @@
     },
     "once": true,
     "effect": {
-      "kind": "narrative",
-      "text": "VRS heavy weapons are withdrawn from around Sarajevo. The exclusion zone brings the first sustained relief to the besieged capital."
+      "kind": "morale_change",
+      "faction": "RBiH",
+      "delta": 5
     },
     "effects": [
-      {
-        "kind": "morale_change",
-        "faction": "RBiH",
-        "delta": 5
-      },
       {
         "kind": "aggression_modifier",
         "faction": "RS",
         "delta": -0.1,
         "duration_turns": 12
+      },
+      {
+        "kind": "narrative",
+        "text": "VRS heavy weapons are withdrawn from around Sarajevo. The exclusion zone brings the first sustained relief to the besieged capital."
       }
     ],
     "historical_source": "ICTY Karadžić Judgment (IT-95-5/18-T), paras. 3521-3524. UNSCR 836. BB Vol. II."
@@ -2856,19 +2856,19 @@
       "Belgrade sanctions follow the RS rejection of the map."
     ],
     "effect": {
-      "kind": "narrative",
-      "text": "Belgrade imposes an embargo on Republika Srpska. The border with Serbia is closed to military supplies."
+      "kind": "patron_pressure",
+      "faction": "RS",
+      "delta": 15
     },
     "effects": [
-      {
-        "kind": "patron_pressure",
-        "faction": "RS",
-        "delta": 15
-      },
       {
         "kind": "morale_change",
         "faction": "RS",
         "delta": -5
+      },
+      {
+        "kind": "narrative",
+        "text": "Belgrade imposes an embargo on Republika Srpska. The border with Serbia is closed to military supplies."
       }
     ],
     "response_options": [

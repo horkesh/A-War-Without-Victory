@@ -726,18 +726,14 @@
     "once": true,
     "same_turn_requires_events": true,
     "effect": {
-      "kind": "narrative",
-      "text": "NATO launches Operation Deliberate Force. Sustained air strikes hit VRS military infrastructure across Bosnia."
+      "kind": "morale_change",
+      "faction": "RS",
+      "delta": -10
     },
     "sets_flags": {
       "nato_deliberate_force_occurred": true
     },
     "effects": [
-      {
-        "kind": "morale_change",
-        "faction": "RS",
-        "delta": -10
-      },
       {
         "kind": "morale_change",
         "faction": "RBiH",
@@ -748,6 +744,10 @@
         "faction": "RS",
         "multiplier": 0.7,
         "duration_turns": 10
+      },
+      {
+        "kind": "narrative",
+        "text": "NATO launches Operation Deliberate Force. Sustained air strikes hit VRS military infrastructure across Bosnia."
       }
     ]
   },
@@ -826,19 +826,19 @@
     },
     "once": true,
     "effect": {
-      "kind": "narrative",
-      "text": "The UN Rapid Reaction Force deploys heavy artillery on Mount Igman. For the first time, the international military presence in Bosnia has offensive capability."
+      "kind": "morale_change",
+      "faction": "RBiH",
+      "delta": 3
     },
     "effects": [
-      {
-        "kind": "morale_change",
-        "faction": "RBiH",
-        "delta": 3
-      },
       {
         "kind": "patron_pressure",
         "faction": "RS",
         "delta": 10
+      },
+      {
+        "kind": "narrative",
+        "text": "The UN Rapid Reaction Force deploys heavy artillery on Mount Igman. For the first time, the international military presence in Bosnia has offensive capability."
       }
     ],
     "dimension_shifts": [

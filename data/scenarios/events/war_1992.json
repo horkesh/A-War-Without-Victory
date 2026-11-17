@@ -3691,14 +3691,14 @@
     },
     "once": true,
     "effect": {
-      "kind": "narrative",
-      "text": "The JNA formally withdraws from Bosnia. Equipment, bases, and ammunition stores are left to the VRS."
+      "kind": "morale_change",
+      "faction": "RBiH",
+      "delta": -5
     },
     "effects": [
       {
-        "kind": "morale_change",
-        "faction": "RBiH",
-        "delta": -5
+        "kind": "narrative",
+        "text": "The JNA formally withdraws from Bosnia. Equipment, bases, and ammunition stores are left to the VRS."
       }
     ],
     "pressure": {
