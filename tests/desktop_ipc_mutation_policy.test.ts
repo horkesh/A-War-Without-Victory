@@ -86,7 +86,7 @@ describe('IPC mutation policy — membership + classification (Task 6.5)', () =>
     expect(isReadOnlyIpcChannel('advance-turn')).toBe(false);
     expect(isReadOnlyIpcChannel('load-scenario-dialog')).toBe(false); // setCurrentStateSnapshots
     expect(isReadOnlyIpcChannel('load-state-dialog')).toBe(false); // setCurrentStateSnapshots
-    expect(isReadOnlyIpcChannel('stage-deploy-order')).toBe(false); // helper-delegated write
+    expect(isReadOnlyIpcChannel('stage-opsec-toggle')).toBe(false); // staging write
     // Unknown/new channel defaults to serialized (fail-safe):
     expect(isReadOnlyIpcChannel('some-future-channel')).toBe(false);
   });

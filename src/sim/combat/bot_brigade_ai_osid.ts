@@ -60,7 +60,6 @@ import { getTacticalAdjacentOsids } from './tactical_adjacency.js';
 import { areRbihHrhbAllied } from '../early_war/alliance_update.js';
 import { shouldGrazBlockAttack, isGrazAccordsActive, isEastHerzegovinaPair } from '../local_truces.js';
 import type { SupplyStateByOsidReport } from '../../state/supply_state_derivation.js';
-import { getEffectiveSupplyState } from '../../state/supply_reserves.js';
 import { getSeasonalModifiers } from './seasonal_effects.js';
 import { getAllAxisBrigades, isMultiAxis } from './sector_offensive_axis_helpers.js';
 import { buildOfficerCombatLookup, getCorpsStance } from './combat_math.js';
@@ -867,13 +866,7 @@ function executeFactionDirectivesImpl(
         const counterAttackTarget: Osid | null = (retreatInfo && retreatInfo.turn === currentTurn - 1)
             ? retreatInfo.osid as Osid : null;
 
-        const rawOsidSupplyState = getBrigadeSupplyState(brigade, supplyStateByOsid);
-        const factionReserveLevel = state.meta?.supply_reserves_enabled
-            ? ((state.military.general_supply_reserve as Record<string, number> | undefined)?.[brigade.faction] ?? 100)
-            : 100;
-        const brigadeSupplyState = state.meta?.supply_reserves_enabled
-            ? getEffectiveSupplyState(rawOsidSupplyState, factionReserveLevel)
-            : rawOsidSupplyState;
+        const brigadeSupplyState = getBrigadeSupplyState(brigade, supplyStateByOsid);
         const sectorAssignment = sectorAssignmentByBrigade.get(brigade.id) ?? null;
         const assignedSectorFrontOsids = sectorAssignment && !sectorAssignment.isReserve
             ? sectorAssignment.frontOsids
