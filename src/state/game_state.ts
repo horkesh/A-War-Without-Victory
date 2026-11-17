@@ -39,9 +39,10 @@ import type { ArmyLabel } from './identity.js';
 import type { RecruitmentResourceState } from './recruitment_types.js';
 import type { CommanderState } from '../sim/combat/commander/commander_state.js';
 
-// v40 is claimed by another lane (batch-b) and is not yet on this branch; §6 E2 took 41
-// and §6 E4 took 42 (patron_pressure -> patron_support in pending decisions).
-export const CURRENT_SCHEMA_VERSION = 42 as const;
+// v40 is claimed by another lane (batch-b) and is not yet on this branch; §6 E2 took 41,
+// §6 E4 took 42 (patron_pressure -> patron_support in pending decisions), and the
+// patron-defiance panel took 43 (patron_supply_cut in pending decisions; legacy receipts dropped).
+export const CURRENT_SCHEMA_VERSION = 43 as const;
 
 // --- ID types (canonical) ---
 export type FactionId = string;
@@ -3291,29 +3292,40 @@ equipment_quality_modifiers?: Array<{
     faction: FactionId;
     multiplier: number;
     expires_turn: number;
+    /** Set only by the `patron_supply_cut` event effect. The combat reader floors the
+     *  product of a faction's patron entries at `PATRON_SUPPLY_CUT_FLOOR`
+     *  (active_modifiers.ts). Absent on every other entry and in older saves. */
+    source?: 'patron_supply_cut';
 }>;
 /**
- * Slice 4a — patron-defiance consequence-receipt substrate (emergent-only).
- * Append-only log of turns on which the emergent patron-defiance penalty in
- * `updatePatronState` actually CUT a faction's material support (refusing /
- * distancing from the patron collapsed patron_confidence → Belgrade/Zagreb
- * throttled materiel). Written ONLY when `state.meta.decision_mode === 'emergent'`
- * AND the realized cut fraction is > 0 (RBiH severity 0 → never written). In
- * historical/unset (calibration) mode this stays absent → material_support_level
- * and serialized state remain byte-identical. Optional → no save migration; legacy
- * saves carry none. Reader: `buildConsequenceReceipts` (consequenceReceipts.ts)
- * projects each entry into a one-shot ConsequenceReceipt surfaced by the existing
- * Turn-Aftermath "Consequences Realized" section. Deterministic: append order
- * follows the faction iteration in `updatePatronState`; no sort/timestamp. */
+ * Patron-defiance receipts (patron-defiance panel, 2026-11-17; Systems Manual §7.10.3).
+ * Append-only: one entry each time a defiance answer's `patron_supply_cut` effect applies
+ * (apply_effects.ts). The live cost itself is the paired `equipment_quality_modifiers`
+ * entry; this record has no engine reader. Readers: the patron panel (diplomacyView.ts),
+ * the consequence ledger (decisionConsequenceLedger.ts) and the turn aftermath
+ * (consequenceReceipts.ts). Only an answer writes one, and bots never pick these answers,
+ * so hands-off runs carry none. Before this panel the array held a per-turn record of a
+ * display-only term that never reached combat; the save migration drops those entries
+ * (no `tag`). Deterministic: append order is the effect-application order. */
 patron_defiance_supply_cuts?: Array<{
-    /** Faction whose patron throttled materiel (RS | HRHB; never RBiH). */
+    /** Faction whose patron cut materiel (RS | HRHB; never RBiH). */
     faction: FactionId;
-    /** Turn the cut was realized. */
+    /** Turn the cut was applied. */
     turn: number;
-    /** Realized cut fraction defiance*severity, 0..1 (> 0 by construction). */
+    /** This answer's cut, 1 - multiplier (0 < cut_fraction < 1). */
     cut_fraction: number;
-    /** material_support_level after the cut (0..1). */
+    /** The patron's support (`support_level` / 100, the §6 E4 support semantics) after the answer applied (0..1). */
     support_after: number;
+    /** The answer that drew the cut, `<event_id>#<option_id>`. Absent only on pre-panel entries. */
+    tag?: string;
+    /** Turn the cut ends (exclusive): active while `turn < expires_turn`. */
+    expires_turn?: number;
+    /** The faction's combined patron multiplier right after this cut, floored as the combat
+     *  reader applies it (0..1). */
+    combined_multiplier?: number;
+    /** Present (true) when the patron floor already limits the combined cut, so this cut adds
+     *  less than its own size until an earlier cut expires. */
+    floor_binding?: true;
 }>;
 /** Fall-1995 mechanic E-A4: cascade-pressure penalties on OSIDs adjacent to a
  *  just-lost OSID. Applied one turn after a control flip; defender power on these

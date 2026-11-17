@@ -376,8 +376,11 @@ describe('buildConsequenceReceipts', () => {
                 patron_defiance_supply_cuts: [{
                     faction: 'RS',
                     turn: 12,
-                    cut_fraction: 0.25,
+                    cut_fraction: 0.05,
                     support_after: 0.55,
+                    tag: 'milosevic_isolation_warning_aug92#resist_patron',
+                    expires_turn: 25,
+                    combined_multiplier: 0.95,
                 }],
             },
         } as unknown as GameState;
@@ -392,8 +395,37 @@ describe('buildConsequenceReceipts', () => {
 
         expect(text).toContain('Prkos pokrovitelju');
         expect(text).toContain('Odbijen zahtjev Beograda');
-        expect(text).toContain('Materijalna podrška Beograda smanjena za 25%');
-        expect(text).not.toMatch(/Patron defiance|Refused|materiel cut|front fell|refusal stands/i);
+        expect(text).toContain('Materijalna podrška Beograda uskraćena: borbena učinkovitost -5%');
+        expect(text).toContain('Dio snabdijevanja Beograda je uskraćen');
+        expect(text).not.toMatch(/Patron defiance|Refused|held back|front fell|refusal stands|podrška je pala/i);
+    });
+
+    it('patron-defiance receipts never claim lost ground or a fallen support level, and skip pre-panel entries', () => {
+        setLocale('en');
+        const state = {
+            meta: { player_faction: 'HRHB' },
+            military: {
+                patron_defiance_supply_cuts: [
+                    // Pre-panel per-turn entry (no tag): it never reached combat, so it is not shown.
+                    { faction: 'HRHB', turn: 4, cut_fraction: 0.18, support_after: 0.52 },
+                    {
+                        faction: 'HRHB', turn: 95, cut_fraction: 0.15, support_after: 0.62,
+                        tag: 'zagreb_orders_hrhb_ceasefire#resist_patron', expires_turn: 147,
+                        combined_multiplier: 0.75, floor_binding: true,
+                    },
+                ],
+            },
+        } as unknown as GameState;
+
+        const receipts = buildConsequenceReceipts(state, undefined);
+        expect(receipts.map((receipt) => receipt.id)).toEqual([
+            'patron_defiance::HRHB::95::zagreb_orders_hrhb_ceasefire#resist_patron',
+        ]);
+        const text = `${receipts[0]!.predictedLabel} ${receipts[0]!.predictedExplanation}`;
+        expect(text).toContain("Zagreb's materiel held back: combat effectiveness -15%");
+        expect(text).toContain('already at their limit');
+        expect(text).toContain('-25% in all');
+        expect(text).not.toMatch(/ground|territory|support to the front fell|support fell/i);
     });
 
     it('uses authored BCS event and response localizations without leaking English future copy', () => {
@@ -450,15 +482,23 @@ describe('buildConsequenceReceipts', () => {
             meta: { player_faction: 'RS' },
             military: {
                 patron_defiance_supply_cuts: [
-                    { faction: 'RS', turn: 12, cut_fraction: 0.25, support_after: 0.55 },
-                    { faction: 'HRHB', turn: 12, cut_fraction: 0.2, support_after: 0.6 },
+                    {
+                        faction: 'RS', turn: 12, cut_fraction: 0.05, support_after: 0.55,
+                        tag: 'milosevic_isolation_warning_aug92#resist_patron', expires_turn: 25, combined_multiplier: 0.95,
+                    },
+                    {
+                        faction: 'HRHB', turn: 12, cut_fraction: 0.1, support_after: 0.6,
+                        tag: 'hrhb_zagreb_supply_channel_1992#assert_autonomy', expires_turn: 38, combined_multiplier: 0.9,
+                    },
                 ],
             },
         } as unknown as GameState;
 
         const receipts = buildConsequenceReceipts(state, undefined);
 
-        expect(receipts.map((receipt) => receipt.id)).toEqual(['patron_defiance::RS::12']);
+        expect(receipts.map((receipt) => receipt.id)).toEqual([
+            'patron_defiance::RS::12::milosevic_isolation_warning_aug92#resist_patron',
+        ]);
         expect(receipts.map((receipt) => receipt.predictedEventId)).toEqual(['patron_supply_cut_RS']);
     });
 });

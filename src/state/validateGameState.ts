@@ -877,6 +877,17 @@ function validateExpiringFactionNumberModifiers(
         if (!isNonNegativeInteger(modifier.expires_turn)) {
             errors.push(`${path}[${i}].expires_turn must be a non-negative integer`);
         }
+        // Patron-defiance panel (2026-11-17): only an equipment-quality entry may carry a
+        // source, and the only source is the patron supply cut (floored by the combat reader).
+        if ('source' in modifier && modifier.source !== undefined) {
+            if (numericField !== 'multiplier') {
+                errors.push(`${path}[${i}].source is not allowed here`);
+            } else if (modifier.source !== 'patron_supply_cut') {
+                errors.push(`${path}[${i}].source must be "patron_supply_cut" when present`);
+            } else if (modifier.faction !== 'RS' && modifier.faction !== 'HRHB') {
+                errors.push(`${path}[${i}].faction must be RS or HRHB for a patron supply cut`);
+            }
+        }
     });
 }
 
@@ -1083,6 +1094,21 @@ function validatePatronDefianceSupplyCuts(value: unknown, errors: string[]): voi
         }
         if (!isFiniteNumber(cut.support_after) || cut.support_after < 0 || cut.support_after > 1) {
             errors.push(`${path}.support_after must be a finite number in [0,1]`);
+        }
+        // Patron-defiance panel (2026-11-17): fields written by the `patron_supply_cut` effect.
+        if (cut.tag !== undefined && (typeof cut.tag !== 'string' || cut.tag.length === 0)) {
+            errors.push(`${path}.tag must be a non-empty string when present`);
+        }
+        if (cut.expires_turn !== undefined
+            && (!isNonNegativeInteger(cut.expires_turn) || (isNonNegativeInteger(cut.turn) && cut.expires_turn <= cut.turn))) {
+            errors.push(`${path}.expires_turn must be an integer after turn when present`);
+        }
+        if (cut.combined_multiplier !== undefined
+            && (!isFiniteNumber(cut.combined_multiplier) || cut.combined_multiplier <= 0 || cut.combined_multiplier > 1)) {
+            errors.push(`${path}.combined_multiplier must be > 0 and <= 1 when present`);
+        }
+        if (cut.floor_binding !== undefined && cut.floor_binding !== true) {
+            errors.push(`${path}.floor_binding must be true when present`);
         }
     });
 }

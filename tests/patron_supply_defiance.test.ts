@@ -4,10 +4,12 @@ import { ensureInternationalVisibilityPressure, updatePatronState } from '../src
 import { applyDimensionShift, initializeStrategicDimensions } from '../src/sim/events/strategic_dimensions.js';
 
 /**
- * Patron-supply "defiance" consequence: refusing a patron demand (resist_patron,
- * which drives patron_confidence down) must cut faction.patron_state.material_support_level
- * — but ONLY in decision_mode === 'emergent'. In historical/unset (calibration) mode the
- * penalty must NOT apply, keeping material_support_level byte-identical by construction.
+ * Patron-defiance panel (2026-11-17): the per-turn "defiance cut" that scaled
+ * material_support_level by low effective patron_confidence (emergent mode only) is RETIRED.
+ * Its signal was not defiance (a hands-off RS that complied every time logged 90 weeks of
+ * cuts) and it never reached combat. A defiance answer now carries its own live cost, the
+ * `patron_supply_cut` event effect (tests/patron_supply_cut.test.ts). These tests pin that the
+ * patron state update no longer reads patron_confidence and never writes a receipt.
  */
 
 function makeState(opts: {
@@ -49,7 +51,6 @@ function makeState(opts: {
 }
 
 function neutralIvp(state: GameState): InternationalVisibilityPressure {
-    // Zero-pressure IVP so material_support_level reflects base path + defiance gate only.
     const ivp = ensureInternationalVisibilityPressure(state);
     ivp.sarajevo_siege_visibility = 0;
     ivp.enclave_humanitarian_pressure = 0;
@@ -65,94 +66,29 @@ function supportByFaction(state: GameState): Record<string, number> {
     return out;
 }
 
-describe('patron-defiance supply penalty (emergent-gated)', () => {
-    it('HISTORICAL mode: low patron_confidence does NOT cut material support (byte-identical)', () => {
-        const baseline = makeState({ decision_mode: 'historical', confidenceDelta: 0 });
-        updatePatronState(baseline, undefined, neutralIvp(baseline));
-        const baseSupport = supportByFaction(baseline);
-
-        const defiant = makeState({ decision_mode: 'historical', confidenceDelta: -40 });
-        updatePatronState(defiant, undefined, neutralIvp(defiant));
-        const defiantSupport = supportByFaction(defiant);
-
-        for (const id of ['RS', 'RBiH', 'HRHB']) {
-            expect(defiantSupport[id]).toBe(baseSupport[id]);
-        }
-    });
-
-    it('HISTORICAL mode WITH a human player faction: still NO cut (the bright-line predicate does not reach this gate; own lane)', () => {
-        // The atrocity bright line (isBrightLineFaction) covers the verdict layer only. The patron-defiance
-        // cut changes simulation trajectory and the recorded RS patron_confidence sits at 17, so extending
-        // it to the player's faction would break the live=headless parity gate. Pinned by the 2026-11-16 ruling.
-        for (const player of ['RS', 'HRHB'] as FactionId[]) {
-            const baseline = makeState({ decision_mode: 'historical', confidenceDelta: 0 });
-            baseline.meta.player_faction = player;
-            updatePatronState(baseline, undefined, neutralIvp(baseline));
-            const defiant = makeState({ decision_mode: 'historical', confidenceDelta: -40 });
-            defiant.meta.player_faction = player;
+describe('patron state: the retired per-turn defiance term', () => {
+    for (const mode of ['historical', 'emergent', undefined] as const) {
+        it(`${mode ?? 'unset'} mode: low patron_confidence leaves material_support_level unchanged`, () => {
+            const neutral = makeState({ decision_mode: mode, confidenceDelta: 0 });
+            updatePatronState(neutral, undefined, neutralIvp(neutral));
+            const defiant = makeState({ decision_mode: mode, confidenceDelta: -40 });
             updatePatronState(defiant, undefined, neutralIvp(defiant));
-            expect(supportByFaction(defiant)).toEqual(supportByFaction(baseline));
+            expect(supportByFaction(defiant)).toEqual(supportByFaction(neutral));
+        });
+
+        it(`${mode ?? 'unset'} mode: the patron state update never writes a defiance receipt`, () => {
+            const defiant = makeState({ decision_mode: mode, confidenceDelta: -60 });
+            defiant.meta.player_faction = 'HRHB';
+            updatePatronState(defiant, undefined, neutralIvp(defiant));
             expect(defiant.military?.patron_defiance_supply_cuts).toBeUndefined();
-        }
-    });
+        });
+    }
 
-    it('UNSET mode: low patron_confidence does NOT cut material support (byte-identical)', () => {
-        const baseline = makeState({ confidenceDelta: 0 });
-        updatePatronState(baseline, undefined, neutralIvp(baseline));
-        const baseSupport = supportByFaction(baseline);
-
-        const defiant = makeState({ confidenceDelta: -40 });
-        updatePatronState(defiant, undefined, neutralIvp(defiant));
-        const defiantSupport = supportByFaction(defiant);
-
-        for (const id of ['RS', 'RBiH', 'HRHB']) {
-            expect(defiantSupport[id]).toBe(baseSupport[id]);
-        }
-    });
-
-    it('EMERGENT mode: low patron_confidence cuts RS and HRHB material support, leaves RBiH untouched', () => {
-        const neutral = makeState({ decision_mode: 'emergent', confidenceDelta: 0 });
-        updatePatronState(neutral, undefined, neutralIvp(neutral));
-        const neutralSupport = supportByFaction(neutral);
-
-        const defiant = makeState({ decision_mode: 'emergent', confidenceDelta: -40 });
-        updatePatronState(defiant, undefined, neutralIvp(defiant));
-        const defiantSupport = supportByFaction(defiant);
-
-        // RS and HRHB (coercive patrons) lose material support on defiance.
-        expect(defiantSupport['RS']).toBeLessThan(neutralSupport['RS']);
-        expect(defiantSupport['HRHB']).toBeLessThan(neutralSupport['HRHB']);
-        // RBiH (arms embargo, no coercive state patron) is unaffected.
-        expect(defiantSupport['RBiH']).toBe(neutralSupport['RBiH']);
-    });
-
-    it('EMERGENT mode: severity ordering HRHB > RS > RBiH (RBiH = 0)', () => {
-        const neutral = makeState({ decision_mode: 'emergent', confidenceDelta: 0 });
-        updatePatronState(neutral, undefined, neutralIvp(neutral));
-        const n = supportByFaction(neutral);
-
-        const defiant = makeState({ decision_mode: 'emergent', confidenceDelta: -40 });
-        updatePatronState(defiant, undefined, neutralIvp(defiant));
-        const d = supportByFaction(defiant);
-
-        // Fractional cut per faction (severity * defiance). HRHB severity 0.6 > RS 0.5 > RBiH 0.0.
-        const cutFrac = (id: string) => (n[id] - d[id]) / n[id];
-        expect(cutFrac('HRHB')).toBeGreaterThan(cutFrac('RS'));
-        expect(cutFrac('RS')).toBeGreaterThan(0);
-        expect(cutFrac('RBiH')).toBe(0);
-    });
-
-    it('EMERGENT mode: neutral patron_confidence (50) applies no cut', () => {
-        const neutral = makeState({ decision_mode: 'emergent', confidenceDelta: 0 });
-        updatePatronState(neutral, undefined, neutralIvp(neutral));
-        const nEmergent = supportByFaction(neutral);
-
-        const histNeutral = makeState({ decision_mode: 'historical', confidenceDelta: 0 });
-        updatePatronState(histNeutral, undefined, neutralIvp(histNeutral));
-        const nHistorical = supportByFaction(histNeutral);
-
-        for (const id of ['RS', 'RBiH', 'HRHB']) {
-            expect(nEmergent[id]).toBe(nHistorical[id]);
-        }
+    it('emergent and historical produce the same material_support_level', () => {
+        const emergent = makeState({ decision_mode: 'emergent', confidenceDelta: -40 });
+        updatePatronState(emergent, undefined, neutralIvp(emergent));
+        const historical = makeState({ decision_mode: 'historical', confidenceDelta: -40 });
+        updatePatronState(historical, undefined, neutralIvp(historical));
+        expect(supportByFaction(emergent)).toEqual(supportByFaction(historical));
     });
 });

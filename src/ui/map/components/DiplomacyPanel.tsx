@@ -74,14 +74,21 @@ function PatronConfidenceGauge({ confidence, cuts }: { confidence?: PatronConfid
                                 count: cuts.count,
                                 pct: Math.round(cuts.latestCutFraction * 100),
                                 date: turnToDateString(cuts.latestTurn),
-                                support: Math.round(cuts.latestSupportAfter * 100),
+                                until: turnToDateString(cuts.latestExpiresTurn),
                             })
                             : t('patronRelations.defianceCutSingle', {
                                 pct: Math.round(cuts.latestCutFraction * 100),
                                 date: turnToDateString(cuts.latestTurn),
-                                support: Math.round(cuts.latestSupportAfter * 100),
+                                until: turnToDateString(cuts.latestExpiresTurn),
                             })}
                     </p>
+                    {cuts.activeCombinedCutFraction > 0 ? (
+                        <p className="mt-1 text-[15px] leading-relaxed text-red-300">
+                            {t(cuts.activeFloorBinding ? 'patronRelations.defianceActiveFloor' : 'patronRelations.defianceActive', {
+                                pct: Math.round(cuts.activeCombinedCutFraction * 100),
+                            })}
+                        </p>
+                    ) : null}
                     {cuts.entries && cuts.entries.length > 0 ? (
                         <div className="mt-2 rounded border border-red-400/20 bg-red-500/5 px-2 py-1.5">
                             <div className="text-[15px] font-mono font-bold uppercase tracking-[0.12em] text-red-200">
@@ -89,11 +96,11 @@ function PatronConfidenceGauge({ confidence, cuts }: { confidence?: PatronConfid
                             </div>
                             <ul className="mt-1 space-y-1">
                                 {cuts.entries.map((entry, index) => (
-                                    <li key={`${entry.turn}:${entry.cutFraction}:${entry.supportAfter}:${index}`} className="flex items-center justify-between gap-2 text-[15px] font-mono uppercase tracking-[0.08em] text-red-100/90">
+                                    <li key={`${entry.turn}:${entry.cutFraction}:${entry.expiresTurn}:${index}`} className="flex items-center justify-between gap-2 text-[15px] font-mono uppercase tracking-[0.08em] text-red-100/90">
                                         <span>{t('patronRelations.defianceReceiptTurn', { date: turnToDateString(entry.turn) })}</span>
-                                        <span>{t('patronRelations.defianceReceiptImpact', {
+                                        <span>{t(entry.floorBinding ? 'patronRelations.defianceReceiptImpactFloor' : 'patronRelations.defianceReceiptImpact', {
                                             pct: Math.round(entry.cutFraction * 100),
-                                            support: Math.round(entry.supportAfter * 100),
+                                            until: turnToDateString(entry.expiresTurn),
                                         })}</span>
                                     </li>
                                 ))}

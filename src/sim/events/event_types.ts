@@ -250,6 +250,34 @@ export interface EventEffectEquipmentQualityModifier {
     duration_turns: number;
 }
 
+/** Effect: a patron throttles a client's materiel because the client defied it
+ *  (patron-defiance panel, 2026-11-17; Systems Manual §7.10.3). Belgrade (RS) or
+ *  Zagreb (HRHB) holds back ammunition, fuel, spares and seconded officers, which is
+ *  combat effectiveness at the front, for `duration_turns`.
+ *
+ *  It is the one live material carrier of a defiance answer. Applying it writes one
+ *  `equipment_quality_modifiers` entry (the existing combat-power reader, attack and
+ *  defence) marked `source: 'patron_supply_cut'`, and one `patron_defiance_supply_cuts`
+ *  receipt for the patron panel, consequence ledger and chronicle. It carries a
+ *  `multiplier`, never a `delta`, so no bot scorer reads it (bot_response.ts,
+ *  political_event_decision.ts) and no hands-off answer can change.
+ *
+ *  Loader rules (event_loader.ts `validatePatronSupplyCut`): faction RS or HRHB;
+ *  0 < multiplier < 1; integer duration >= 1; a non-empty `tag`; response options only,
+ *  never the event's historical default; the same option carries a negative patron move
+ *  (a `patron_confidence` shift or a `patron_support` cost) for that faction; at most one
+ *  material carrier (this, `equipment_quality_modifier` or `recruitment_modifier`) per
+ *  option and faction. */
+export interface EventEffectPatronSupplyCut {
+    kind: 'patron_supply_cut';
+    faction: FactionId;
+    /** Multiplicative on combat power while active. 0.95 = "-5%". 0 < multiplier < 1. */
+    multiplier: number;
+    duration_turns: number;
+    /** Stable id of the defiance answer (`<event_id>#<option_id>`), written on the receipt. */
+    tag: string;
+}
+
 /** Effect: pushes operation/doctrine/scope restrictions onto the existing
  *  `state.military.event_constraints` bus (see `event_constraints.ts`).
  *  Consumer path already live — `isOperationBlocked`, `getActiveDoctrineOverride`,
@@ -357,7 +385,9 @@ export type EventEffect =
     | EventEffectCostLedgerAnnotation
     | EventEffectEnclaveFormationDisplacement
     // Fall-1995 mechanic E-A5
-    | EventEffectOffensiveOpsSuppression;
+    | EventEffectOffensiveOpsSuppression
+    // Patron-defiance panel (2026-11-17): the live material cost of defying a patron.
+    | EventEffectPatronSupplyCut;
 
 export type EventFutureConsequenceTiming = 'immediate' | 'next_turn' | 'future' | 'endgame';
 export type EventFutureConsequenceCertainty = 'guaranteed' | 'conditional' | 'risk';

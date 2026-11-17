@@ -1097,3 +1097,116 @@ registerMigration({
         }
     },
 });
+
+/** A patron supply cut as the catalog carries it (patron-defiance panel, 2026-11-17). */
+interface PatronSupplyCutSpec {
+    faction: 'RS' | 'HRHB';
+    multiplier: number;
+    duration_turns: number;
+    /** The old carrier this answer had before the panel, rewritten in place (exact numbers). */
+    replaces?: { kind: 'equipment_quality_modifier' | 'recruitment_modifier'; value: number; duration_turns: number };
+}
+
+/** Patron-defiance panel static list, by `${event_id}#${option_id}`. Embedded on purpose:
+ *  the migration never loads the event catalog. Mirrors the ruling's table. */
+export const PATRON_SUPPLY_CUT_PENDING: Readonly<Record<string, PatronSupplyCutSpec>> = {
+    'belgrade_embargo_rs_1994#defiant': {
+        faction: 'RS', multiplier: 0.93, duration_turns: 26,
+        replaces: { kind: 'recruitment_modifier', value: 0.9, duration_turns: 52 },
+    },
+    'hrhb_1992_graz_cooperation_collapse#formal_alliance_persists': {
+        faction: 'HRHB', multiplier: 0.9, duration_turns: 26,
+        replaces: { kind: 'equipment_quality_modifier', value: 0.9, duration_turns: 26 },
+    },
+    'hrhb_political_goal#united_front': {
+        faction: 'HRHB', multiplier: 0.85, duration_turns: 52,
+        replaces: { kind: 'equipment_quality_modifier', value: 0.85, duration_turns: 52 },
+    },
+    'hrhb_zagreb_supply_channel_1992#assert_autonomy': { faction: 'HRHB', multiplier: 0.9, duration_turns: 26 },
+    'hrhb_zagreb_supply_channel_1992#diversify_supply': { faction: 'HRHB', multiplier: 0.97, duration_turns: 13 },
+    'milosevic_drina_warning#resist_patron': { faction: 'RS', multiplier: 0.95, duration_turns: 13 },
+    'milosevic_isolation_warning_aug92#resist_patron': { faction: 'RS', multiplier: 0.97, duration_turns: 13 },
+    'milosevic_owen_stoltenberg_distancing#resist_patron': { faction: 'RS', multiplier: 0.97, duration_turns: 13 },
+    'milosevic_vopp_pressure#resist_patron': { faction: 'RS', multiplier: 0.95, duration_turns: 13 },
+    'rs_belgrade_pressure_response_1993#defy_belgrade_directive': { faction: 'RS', multiplier: 0.95, duration_turns: 13 },
+    'rs_belgrade_pressure_response_1993#partial_compliance': { faction: 'RS', multiplier: 0.98, duration_turns: 13 },
+    'zagreb_orders_hrhb_ceasefire#resist_patron': { faction: 'HRHB', multiplier: 0.85, duration_turns: 52 },
+    'zagreb_restrains_boban_vopp#resist_patron': { faction: 'HRHB', multiplier: 0.95, duration_turns: 13 },
+};
+
+/** Patron-defiance panel: give one pending response option its patron supply cut. Self-contained
+ *  so it can be renumbered. Idempotent: an option that already carries the cut is left alone. */
+function migratePendingOptionToPatronSupplyCut(option: Record<string, any>, key: string): void {
+    const spec = PATRON_SUPPLY_CUT_PENDING[key];
+    if (!spec) return;
+    const effects: unknown[] = Array.isArray(option.effects) ? option.effects : [];
+    if (effects.some((effect) => asRecord(effect)?.kind === 'patron_supply_cut')) return;
+    const cut = {
+        kind: 'patron_supply_cut',
+        faction: spec.faction,
+        multiplier: spec.multiplier,
+        duration_turns: spec.duration_turns,
+        tag: key,
+    };
+    let kept = effects;
+    let renamedRefKind: string | null = null;
+    if (spec.replaces) {
+        const old = spec.replaces;
+        const numberField = old.kind === 'recruitment_modifier' ? 'pool_multiplier' : 'multiplier';
+        kept = effects.filter((effect) => {
+            const e = asRecord(effect);
+            return !(e && e.kind === old.kind && e.faction === spec.faction
+                && e[numberField] === old.value && e.duration_turns === old.duration_turns);
+        });
+        if (kept.length !== effects.length) renamedRefKind = old.kind;
+    }
+    option.effects = [...kept, cut];
+    if (!Array.isArray(option.future_consequences)) return;
+    for (const consequence of option.future_consequences) {
+        const fc = asRecord(consequence);
+        if (!fc || !Array.isArray(fc.material_effect_refs)) continue;
+        if (renamedRefKind) {
+            fc.material_effect_refs = fc.material_effect_refs.map((ref: unknown) => (
+                typeof ref === 'string' && (ref === renamedRefKind || ref.startsWith(`${renamedRefKind}.`))
+                    ? ref.replace(renamedRefKind, 'patron_supply_cut')
+                    : ref
+            ));
+        }
+    }
+}
+
+registerMigration({
+    version: 43,
+    description: 'Patron-defiance panel (2026-11-17): defying a patron carries one live material cost, the '
+        + 'patron_supply_cut event effect (combat power for N weeks, floored per patron in the combat reader; '
+        + 'Systems Manual §7.10.3). In military.pending_event_decisions[].response_options[] the static list '
+        + 'gives each defiance answer its cut; united_front and formal_alliance_persists have their '
+        + 'equipment_quality_modifier, and belgrade_embargo_rs_1994#defiant its recruitment_modifier, rewritten '
+        + 'only when the stored numbers match the old carrier exactly. The per-turn receipts of the retired '
+        + 'pc-based defiance term (patron_defiance_supply_cuts entries without a tag) are dropped: they recorded a '
+        + 'cut that never reached combat. Never loads the catalog; idempotent. Known limit, recorded: '
+        + 'equipment-quality entries a mid-war save already applied carry no source, so they stay unfloored and '
+        + 'have no receipt; they expire within 52 weeks.',
+    migrate: (state) => {
+        const mil = asRecord(state.military);
+        if (!mil) return;
+        if (Array.isArray(mil.pending_event_decisions)) {
+            for (const decision of mil.pending_event_decisions) {
+                const d = asRecord(decision);
+                if (!d || !Array.isArray(d.response_options)) continue;
+                for (const option of d.response_options) {
+                    const o = asRecord(option);
+                    if (o) migratePendingOptionToPatronSupplyCut(o, `${String(d.event_id)}#${String(o.id)}`);
+                }
+            }
+        }
+        if (Array.isArray(mil.patron_defiance_supply_cuts)) {
+            const tagged = mil.patron_defiance_supply_cuts.filter((cut: unknown) => {
+                const c = asRecord(cut);
+                return c != null && typeof c.tag === 'string' && c.tag.length > 0;
+            });
+            if (tagged.length > 0) mil.patron_defiance_supply_cuts = tagged;
+            else delete mil.patron_defiance_supply_cuts;
+        }
+    },
+});

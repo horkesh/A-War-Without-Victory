@@ -6,7 +6,11 @@
 import type { GameState, FactionId, FormationId, ControlEvent } from '../../state/game_state.js';
 import type { EventEffect } from './event_types.js';
 import type { EventConstraints } from './event_constraints.js';
-import { getActiveAllianceBounds } from './active_modifiers.js';
+import {
+    getActiveAllianceBounds,
+    getEffectivePatronSupplyCutMultiplier,
+    isPatronSupplyCutFloorBinding,
+} from './active_modifiers.js';
 import { recordBattleCasualties } from '../../state/casualty_ledger.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { invalidateBrigadeJourney } from '../combat/brigade_journey_lifecycle.js';
@@ -41,6 +45,8 @@ const EFFECT_KIND_ORDER: Record<string, number> = {
     patron_support: 17,
     recruitment_modifier: 18,
     supply_delta: 19,
+    // Patron-defiance panel (2026-11-17): appended, so every existing relative order holds.
+    patron_supply_cut: 20,
 };
 
 /** Robustness audit P1-B (task #95): clamp traps non-finite input (NaN/±Infinity)
@@ -146,6 +152,9 @@ function applySingleEffect(state: GameState, effect: EventEffect, targetFormatio
             break;
         case 'equipment_quality_modifier':
             applyEquipmentQualityModifier(state, effect.faction, effect.multiplier, effect.duration_turns);
+            break;
+        case 'patron_supply_cut':
+            applyPatronSupplyCut(state, effect.faction, effect.multiplier, effect.duration_turns, effect.tag);
             break;
         case 'doctrine_constraint':
             applyDoctrineConstraint(state, effect.constraint, effect.duration_turns);
@@ -615,6 +624,60 @@ function applyEquipmentQualityModifier(
         faction,
         multiplier,
         expires_turn: currentTurn + durationTurns,
+    });
+}
+
+/** A patron throttles a client's materiel after a defiance answer (patron-defiance panel,
+ *  2026-11-17; Systems Manual §7.10.3). One live carrier: an `equipment_quality_modifiers`
+ *  entry marked `source: 'patron_supply_cut'`, read by the combat-power reader with the
+ *  per-faction patron floor (`PATRON_SUPPLY_CUT_FLOOR`, active_modifiers.ts). One receipt in
+ *  `patron_defiance_supply_cuts` for the patron panel, ledger and chronicle; the receipt has
+ *  no engine reader. `support_after` is the patron's support (`support_level` / 100, the
+ *  §6 E4 support semantics) once the answer's own effects have applied (`patron_support`
+ *  sorts before this kind). `floor_binding` records that the patron floor already limits the
+ *  faction's combined patron cut, so the receipt never claims more than the engine applies. */
+function applyPatronSupplyCut(
+    state: GameState,
+    faction: FactionId,
+    multiplier: number,
+    durationTurns: number,
+    tag: string,
+): void {
+    if (!Number.isFinite(multiplier) || multiplier <= 0 || multiplier >= 1) {
+        recordNonFiniteEffectAnomaly(state, 'patron_supply_cut', faction, multiplier);
+        return;
+    }
+    if (!Number.isInteger(durationTurns) || durationTurns < 1) {
+        recordNonFiniteEffectAnomaly(state, 'patron_supply_cut', faction, durationTurns);
+        return;
+    }
+    const currentTurn = state.meta.turn ?? 0;
+    const expiresTurn = currentTurn + durationTurns;
+    if (!state.military.equipment_quality_modifiers) {
+        state.military.equipment_quality_modifiers = [];
+    }
+    state.military.equipment_quality_modifiers.push({
+        faction,
+        multiplier,
+        expires_turn: expiresTurn,
+        source: 'patron_supply_cut',
+    });
+    const supportLevel = state.military.negotiation?.patron_relationships?.[faction]?.support_level;
+    const supportAfter = typeof supportLevel === 'number' && Number.isFinite(supportLevel)
+        ? clamp(supportLevel / 100, 0, 1)
+        : 0;
+    // Read after the entry is pushed, so both figures include this cut.
+    const floorBinding = isPatronSupplyCutFloorBinding(state, faction, currentTurn);
+    const combinedMultiplier = getEffectivePatronSupplyCutMultiplier(state, faction, currentTurn);
+    (state.military.patron_defiance_supply_cuts ??= []).push({
+        faction,
+        turn: currentTurn,
+        cut_fraction: 1 - multiplier,
+        support_after: supportAfter,
+        tag,
+        expires_turn: expiresTurn,
+        combined_multiplier: combinedMultiplier,
+        ...(floorBinding ? { floor_binding: true } : {}),
     });
 }
 

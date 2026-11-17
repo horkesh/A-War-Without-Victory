@@ -491,25 +491,34 @@ export interface PatronConfidenceView {
 }
 
 /**
- * Compact summary of realized patron-defiance supply cuts for the PLAYER faction,
- * read from `state.military.patron_defiance_supply_cuts` (#117). Emergent-only;
- * absent (undefined) when there are no player-faction cuts (historical/calibration
- * mode never writes these). Display-only — never a reward framing.
+ * The player faction's patron supply cuts (patron-defiance panel, 2026-11-17), read from
+ * `state.military.patron_defiance_supply_cuts`: one receipt per defiance answer that drew a
+ * `patron_supply_cut`. Absent when the player faction has none. Pre-panel entries (no `tag`)
+ * are never shown: they recorded a display-only term that never reached combat.
  */
 export interface PatronDefianceCutsView {
-    /** Number of realized cuts recorded for the player faction. */
+    /** Number of patron cuts on record for the player faction. */
     count: number;
-    /** Most-recent cut fraction (0..1) by turn. */
+    /** The latest cut's own size (1 - multiplier, 0..1). */
     latestCutFraction: number;
-    /** Turn of the most-recent cut. */
+    /** Turn of the latest cut. */
     latestTurn: number;
-    /** material_support_level after the most-recent cut (0..1). */
+    /** Turn the latest cut ends (exclusive). */
+    latestExpiresTurn: number;
+    /** The patron's support (0..1) after the latest answer. Kept for the record; not shown as a cut. */
     latestSupportAfter: number;
-    /** Stable, newest-first material consequence receipt rows. */
+    /** Combined patron cut in force this turn, as the combat reader applies it (1 - floored product; 0 with none). */
+    activeCombinedCutFraction: number;
+    /** True when this turn's active cuts already reach the patron floor. */
+    activeFloorBinding: boolean;
+    /** Stable, newest-first receipt rows. */
     entries?: Array<{
         turn: number;
+        /** The answer that drew the cut, `<event_id>#<option_id>`. */
+        tag: string;
         cutFraction: number;
-        supportAfter: number;
+        expiresTurn: number;
+        floorBinding: boolean;
     }>;
 }
 

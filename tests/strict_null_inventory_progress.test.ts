@@ -820,7 +820,11 @@ describe('strict null inventory progress', () => {
             // MilitaryState.army_clash_state (live president only). No new type escape. 595 -> 598.
             // Zombie-TG fix (2026-11-16): TacticalGroup.host_corps_id, the TG's stable lifecycle
             // identity (absent on legacy TGs). No new type escape. 598 -> 599.
-            optional_fields_game_state: 599,
+            // Patron-defiance panel (2026-11-17): equipment_quality_modifiers[].source and the
+            // patron_defiance_supply_cuts[] receipt fields tag, expires_turn, combined_multiplier and
+            // floor_binding, written only by the patron_supply_cut effect (played defiance answers;
+            // absent on every hands-off run). No new type escape. 599 -> 604.
+            optional_fields_game_state: 604,
         });
         // Reason-code instrumentation (item 3): +1, `OperationAxis.launch_blocker_detail`.
         // `classifyDomain` routes it to `sim` on the /Corps|Operation/ interface-name rule,
@@ -836,12 +840,15 @@ describe('strict null inventory progress', () => {
         // Command loop L7: +2 state (StateMeta.army_clashes / army_clash_history), +1 sim
         // (MilitaryState.army_clash_state). 595 -> 598 / state 220 -> 222 / sim 365 -> 366.
         // Zombie-TG fix: +1 state (TacticalGroup.host_corps_id). 598 -> 599 / state 222 -> 223.
-        expect(current.optional_field_domains.total).toBe(599);
+        // Patron-defiance panel: +5 sim (MilitaryState equipment_quality_modifiers[].source and
+        // patron_defiance_supply_cuts[] tag / expires_turn / combined_multiplier / floor_binding).
+        // 599 -> 604 / sim 366 -> 371.
+        expect(current.optional_field_domains.total).toBe(604);
         expect(current.optional_field_domains.domain_counts).toMatchObject({
             derived: 10,
             ipc: 0,
             scenario: 0,
-            sim: 366,
+            sim: 371,
             state: 223,
             ui_adapter: 0,
             unknown: 0,
