@@ -219,6 +219,6 @@ lanes:
     plans:
       - path: docs/plans/2026-07-31-release-candidate-gold-publication-plan.md
         exists: true
-        tokens: 4937
+        tokens: 5077
         fits_context: true
         tasks: null
