@@ -736,27 +736,57 @@ describe('decision consequence trail', () => {
         meta: { player_faction: 'RS' },
         military: {
           patron_defiance_supply_cuts: [
-            { faction: 'RS', turn: 44, cut_fraction: 0.35, support_after: 0.45 },
-            { faction: 'HRHB', turn: 45, cut_fraction: 0.5, support_after: 0.3 },
-            { faction: 'RS', turn: 30, cut_fraction: 0.2, support_after: 0.6 },
+            {
+              faction: 'RS', turn: 54, cut_fraction: 0.05, support_after: 0.6,
+              tag: 'milosevic_vopp_pressure#resist_patron', expires_turn: 67, combined_multiplier: 0.95,
+            },
+            {
+              faction: 'HRHB', turn: 95, cut_fraction: 0.15, support_after: 0.62,
+              tag: 'zagreb_orders_hrhb_ceasefire#resist_patron', expires_turn: 147, combined_multiplier: 0.85,
+            },
+            {
+              faction: 'RS', turn: 18, cut_fraction: 0.03, support_after: 0.8,
+              tag: 'milosevic_isolation_warning_aug92#resist_patron', expires_turn: 31, combined_multiplier: 0.97,
+            },
+            // Pre-panel per-turn entry (no tag): never reached combat, never shown.
+            { faction: 'RS', turn: 60, cut_fraction: 0.1, support_after: 0.5 },
           ],
         },
       } as any,
     } as Partial<LoadedGameState>), 10);
 
     expect(ledger.map((record) => record.id)).toEqual([
-      'patron-defiance:RS:44:0.35:0.45',
-      'patron-defiance:RS:30:0.2:0.6',
+      'patron-defiance:RS:54:milosevic_vopp_pressure#resist_patron',
+      'patron-defiance:RS:18:milosevic_isolation_warning_aug92#resist_patron',
     ]);
     expect(ledger[0]).toMatchObject({
       family: 'Patron relations',
-      turn: 44,
-      title: 'Patron defiance supply cut',
-      outcome: 'Material support reduced',
-      detail: 'Serbia cut 35% of material support for VRS; support after cut 45%.',
+      turn: 54,
+      title: 'Patron supply cut',
+      outcome: 'Combat effectiveness reduced',
+      detail: 'Serbia held back materiel from VRS: combat effectiveness -5% for 13 weeks.',
       recordTarget: 'records',
     });
-    expect(ledger.map((record) => record.detail).join(' ')).not.toMatch(/\bRS\b|_/);
+    expect(ledger.map((record) => record.detail).join(' ')).not.toMatch(/\bRS\b|_|support after cut|ground/);
+  });
+
+  it('says so when the patron floor already limits the combined cut', () => {
+    const ledger = buildDecisionConsequenceLedger(makeState({
+      player_faction: 'HRHB',
+      rawGameState: {
+        military: {
+          patron_defiance_supply_cuts: [{
+            faction: 'HRHB', turn: 46, cut_fraction: 0.05, support_after: 0.7,
+            tag: 'zagreb_restrains_boban_vopp#resist_patron', expires_turn: 59,
+            combined_multiplier: 0.75, floor_binding: true,
+          }],
+        },
+      } as any,
+    } as Partial<LoadedGameState>), 10);
+
+    expect(ledger[0]?.detail).toBe(
+      'Croatia held back materiel from HVO: this cut is -5% for 13 weeks, but patron cuts were already at their limit (-25% in all).',
+    );
   });
 
   it('resolves generated decision consequence copy through locale tokens', async () => {
@@ -767,7 +797,10 @@ describe('decision consequence trail', () => {
         meta: { player_faction: 'RS' },
         military: {
           patron_defiance_supply_cuts: [
-            { faction: 'RS', turn: 44, cut_fraction: 0.35, support_after: 0.45 },
+            {
+              faction: 'RS', turn: 54, cut_fraction: 0.05, support_after: 0.6,
+              tag: 'milosevic_vopp_pressure#resist_patron', expires_turn: 67, combined_multiplier: 0.95,
+            },
           ],
         },
       } as any,
@@ -775,10 +808,10 @@ describe('decision consequence trail', () => {
 
     try {
       setLocale('bcs', undefined);
-      expect(resolveDecisionConsequenceCopy(ledger[0]!, 'title')).toBe('Patronsko smanjenje snabdijevanja');
-      expect(resolveDecisionConsequenceCopy(ledger[0]!, 'outcome')).toBe('Materijalna podrška smanjena');
-      expect(resolveDecisionConsequenceCopy(ledger[0]!, 'detail')).toBe('Serbia je smanjio materijalnu podršku za VRS za 35%; podrška nakon smanjenja 45%.');
-      expect(resolveDecisionConsequenceCopy(ledger[0]!, 'detail')).not.toMatch(/Material support reduced|support after cut/);
+      expect(resolveDecisionConsequenceCopy(ledger[0]!, 'title')).toBe('Smanjenje snabdijevanja pokrovitelja');
+      expect(resolveDecisionConsequenceCopy(ledger[0]!, 'outcome')).toBe('Borbena učinkovitost smanjena');
+      expect(resolveDecisionConsequenceCopy(ledger[0]!, 'detail')).toBe('Serbia je uskratio dio snabdijevanja za VRS: borbena učinkovitost -5% tokom 13 sedmica.');
+      expect(resolveDecisionConsequenceCopy(ledger[0]!, 'detail')).not.toMatch(/Combat effectiveness reduced|held back/);
     } finally {
       setLocale('en', undefined);
     }
@@ -790,18 +823,27 @@ describe('decision consequence trail', () => {
       rawGameState: {
         military: {
           patron_defiance_supply_cuts: [
-            { faction: 'RS', turn: 44, cut_fraction: 0.2, support_after: 0.6 },
-            { faction: 'RS', turn: 44, cut_fraction: 0.35, support_after: 0.45 },
-            { faction: 'RS', turn: 44, cut_fraction: 0.35, support_after: 0.5 },
+            {
+              faction: 'RS', turn: 76, cut_fraction: 0.05, support_after: 0.6,
+              tag: 'rs_belgrade_pressure_response_1993#defy_belgrade_directive', expires_turn: 89, combined_multiplier: 0.95,
+            },
+            {
+              faction: 'RS', turn: 76, cut_fraction: 0.03, support_after: 0.6,
+              tag: 'milosevic_owen_stoltenberg_distancing#resist_patron', expires_turn: 89, combined_multiplier: 0.92,
+            },
+            {
+              faction: 'RS', turn: 76, cut_fraction: 0.05, support_after: 0.6,
+              tag: 'milosevic_drina_warning#resist_patron', expires_turn: 89, combined_multiplier: 0.88,
+            },
           ],
         },
       } as any,
     } as Partial<LoadedGameState>), 10);
 
     expect(ledger.map((record) => record.id)).toEqual([
-      'patron-defiance:RS:44:0.2:0.6',
-      'patron-defiance:RS:44:0.35:0.45',
-      'patron-defiance:RS:44:0.35:0.5',
+      'patron-defiance:RS:76:milosevic_drina_warning#resist_patron',
+      'patron-defiance:RS:76:milosevic_owen_stoltenberg_distancing#resist_patron',
+      'patron-defiance:RS:76:rs_belgrade_pressure_response_1993#defy_belgrade_directive',
     ]);
   });
 

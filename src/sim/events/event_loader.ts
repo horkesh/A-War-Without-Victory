@@ -1382,6 +1382,76 @@ export function validateOnePatronCarrier(rows: EventDefinition[]): void {
     }
 }
 
+/** Material carriers that may not share a scope and faction with a `patron_supply_cut`. */
+const PATRON_SUPPLY_CUT_MATERIAL_KINDS = new Set(['patron_supply_cut', 'equipment_quality_modifier', 'recruitment_modifier']);
+
+/**
+ * Patron-defiance panel (2026-11-17; Systems Manual §7.10.3): `patron_supply_cut` is a defiance
+ * answer's one live material carrier. Every use must:
+ * - sit on a response option (never a card), and never on the event's historical default, so a
+ *   hands-off run never carries one;
+ * - name RS or HRHB (RBiH has no coercive patron);
+ * - have 0 < multiplier < 1 and an integer duration_turns >= 1;
+ * - carry `tag` equal to `<event_id>#<option_id>` (the receipt's id);
+ * - share its option with a negative patron move for the same faction (a `patron_confidence`
+ *   shift below 0 or a `patron_support` cost), so the cut always follows a defiance;
+ * - be the option's only material carrier for that faction (no second `patron_supply_cut`,
+ *   `equipment_quality_modifier` or `recruitment_modifier`).
+ */
+export function validatePatronSupplyCut(rows: EventDefinition[]): void {
+    const violations: string[] = [];
+    const sortedRows = [...rows].sort((a, b) => strictCompare(a.id, b.id));
+    for (const row of sortedRows) {
+        for (const effect of effectList(row)) {
+            if (isObject(effect) && effect.kind === 'patron_supply_cut') {
+                violations.push(`${row.id}#card: patron_supply_cut belongs on a response option, not the card`);
+            }
+        }
+        if (!Array.isArray(row.response_options)) continue;
+        for (let optionIndex = 0; optionIndex < row.response_options.length; optionIndex++) {
+            const option = row.response_options[optionIndex];
+            if (!isObject(option)) continue;
+            const optionId = isNonEmptyString((option as { id?: unknown }).id)
+                ? (option as { id: string }).id
+                : String(optionIndex);
+            const label = `${row.id}#${optionId}`;
+            const effects = effectList(option).filter(isObject);
+            const cuts = effects.filter((effect) => effect.kind === 'patron_supply_cut');
+            if (cuts.length === 0) continue;
+            const isHistoricalDefault = row.historical_default_response_id === optionId
+                || (option as { historical_marker?: unknown }).historical_marker === 'historical_default';
+            if (isHistoricalDefault) violations.push(`${label}: patron_supply_cut on the historical default`);
+            for (const cut of cuts) {
+                const faction = String(cut.faction);
+                if (faction !== 'RS' && faction !== 'HRHB') violations.push(`${label}: faction must be RS or HRHB, got ${faction}`);
+                const multiplier = cut.multiplier;
+                if (typeof multiplier !== 'number' || !Number.isFinite(multiplier) || multiplier <= 0 || multiplier >= 1) {
+                    violations.push(`${label}: multiplier must be > 0 and < 1`);
+                }
+                const duration = cut.duration_turns;
+                if (typeof duration !== 'number' || !Number.isInteger(duration) || duration < 1) {
+                    violations.push(`${label}: duration_turns must be an integer >= 1`);
+                }
+                if (cut.tag !== label) violations.push(`${label}: tag must be "${label}"`);
+                const shifts = Array.isArray(option.dimension_shifts) ? option.dimension_shifts.filter(isObject) : [];
+                const negativePatronMove =
+                    shifts.some((shift) => shift.dimension === 'patron_confidence' && String(shift.faction) === faction
+                        && typeof shift.delta === 'number' && shift.delta < 0)
+                    || effects.some((effect) => effect.kind === 'patron_support' && String(effect.faction) === faction
+                        && typeof effect.delta === 'number' && effect.delta < 0);
+                if (!negativePatronMove) violations.push(`${label}: no negative patron move for ${faction} on the same option`);
+                const carriers = effects.filter((effect) => PATRON_SUPPLY_CUT_MATERIAL_KINDS.has(String(effect.kind))
+                    && String(effect.faction) === faction);
+                if (carriers.length > 1) violations.push(`${label}: more than one material carrier for ${faction}`);
+            }
+        }
+    }
+    if (violations.length > 0) {
+        violations.sort(strictCompare);
+        throw new Error(`patron_supply_cut rule violation(s) (patron-defiance panel): ${[...new Set(violations)].join('; ')}`);
+    }
+}
+
 /**
  * Load a single required event JSON file. Required catalog files fail closed:
  * missing, malformed, or non-array JSON is a loader error.
@@ -1437,6 +1507,7 @@ export function loadEventDefinitionsFromDir(scenarioStartWeek: number, eventsDir
     validateNoRepeatedEffect(allEvents);
     validatePatronSupportRules(allEvents);
     validateOnePatronCarrier(allEvents);
+    validatePatronSupplyCut(allEvents);
     // ─── Phase B Sub-slice B1 catalog-level passes. ────────────────────────
     validateCrossFactionOptionIds(allEvents);
     validateRing3EnablingRejection(allEvents);

@@ -344,6 +344,12 @@ function describeEffect(effect: EventEffect): string {
         case 'guerrilla_threat': return t('eventDecision.effect.guerrillaThreat', { faction, turns: effect.duration_turns });
         case 'recruitment_modifier': return t('eventDecision.effect.recruitmentModifier', { faction: army, percent: Math.round(effect.pool_multiplier * 100), turns: effect.duration_turns });
         case 'equipment_quality_modifier': return t('eventDecision.effect.equipmentQualityModifier', { faction: army, percent: Math.round(effect.multiplier * 100), turns: effect.duration_turns });
+        // Patron-defiance panel: the price of defying the patron, shown before the choice and
+        // generated from the effect's own numbers.
+        case 'patron_supply_cut': return t(
+            effect.faction === 'RS' ? 'eventDecision.effect.patronSupplyCut.RS' : 'eventDecision.effect.patronSupplyCut.HRHB',
+            { faction: army, percent: Math.round((1 - effect.multiplier) * 100), turns: effect.duration_turns },
+        );
         case 'doctrine_constraint': return t('eventDecision.effect.doctrineConstraint', { faction: army, turns: effect.duration_turns });
         case 'offensive_ops_suppression': return t('eventDecision.effect.offensiveOpsSuppression', { faction: army, turns: effect.duration_turns });
         case 'alliance_lock': return t('eventDecision.effect.allianceLock', {

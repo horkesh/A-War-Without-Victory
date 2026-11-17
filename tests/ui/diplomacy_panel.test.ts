@@ -145,12 +145,15 @@ describe('DiplomacyPanel', () => {
                 patronConfidence: { value: 38, band: 'low' },
                 patronDefianceCuts: {
                     count: 2,
-                    latestCutFraction: 0.3,
+                    latestCutFraction: 0.05,
                     latestTurn: 44,
+                    latestExpiresTurn: 57,
                     latestSupportAfter: 0.5,
+                    activeCombinedCutFraction: 0.15,
+                    activeFloorBinding: true,
                     entries: [
-                        { turn: 44, cutFraction: 0.3, supportAfter: 0.5 },
-                        { turn: 31, cutFraction: 0.15, supportAfter: 0.7 },
+                        { turn: 44, tag: 'milosevic_vopp_pressure#resist_patron', cutFraction: 0.05, expiresTurn: 57, floorBinding: true },
+                        { turn: 31, tag: 'rs_belgrade_pressure_response_1993#defy_belgrade_directive', cutFraction: 0.1, expiresTurn: 57, floorBinding: false },
                     ],
                 },
             }),
@@ -159,15 +162,17 @@ describe('DiplomacyPanel', () => {
 
         expect(screen.getByText('Patron confidence')).toBeTruthy();
         expect(screen.getByText(/38 \/ 100 \(Low\)/)).toBeTruthy();
-        // Sober, factual defiance line — never celebratory.
-        expect(screen.getByText(`2 defiance cuts on record. Most recent cost 30% of materiel (${turnToDateString(44)}); support fell to 50%.`)).toBeTruthy();
-        expect(screen.getByText('Material consequence records')).toBeTruthy();
+        // Sober, factual defiance line — never celebratory, never a fallen support figure.
+        expect(screen.getByText(`2 patron cuts on record. The latest cost 5% of combat effectiveness from ${turnToDateString(44)} until ${turnToDateString(57)}.`)).toBeTruthy();
+        expect(screen.getByText('Patron cuts in force now: combat effectiveness -15%, the most the patron withholds. A further cut adds nothing until one ends.')).toBeTruthy();
+        expect(screen.getByText('Patron cut records')).toBeTruthy();
         expect(screen.getByText(turnToDateString(44))).toBeTruthy();
-        expect(screen.getByText('-30% / support 50%')).toBeTruthy();
+        expect(screen.getByText(`-5% until ${turnToDateString(57)} (at the patron limit)`)).toBeTruthy();
         expect(screen.getByText(turnToDateString(31))).toBeTruthy();
-        expect(screen.getByText('-15% / support 70%')).toBeTruthy();
+        expect(screen.getByText(`-10% until ${turnToDateString(57)}`)).toBeTruthy();
 
         const panelText = screen.getByTestId('diplomacy-panel').textContent ?? '';
+        expect(panelText).not.toMatch(/support fell|\bground\b/i);
         expect(panelText).not.toMatch(/\bT(?:31|44)\b/);
         expect(panelText).not.toMatch(/\bP(?:31|44)\b/);
         expect(panelText).not.toMatch(/\bturn 44\b/i);
@@ -190,9 +195,12 @@ describe('DiplomacyPanel', () => {
                     count: 1,
                     latestCutFraction: 0.15,
                     latestTurn: 31,
+                    latestExpiresTurn: 83,
                     latestSupportAfter: 0.7,
+                    activeCombinedCutFraction: 0.15,
+                    activeFloorBinding: false,
                     entries: [
-                        { turn: 31, cutFraction: 0.15, supportAfter: 0.7 },
+                        { turn: 31, tag: 'zagreb_orders_hrhb_ceasefire#resist_patron', cutFraction: 0.15, expiresTurn: 83, floorBinding: false },
                     ],
                 },
             }),

@@ -96,6 +96,15 @@
         "historical_marker": "counterfactual",
         "aggression_affinity": 0.5,
         "risk_level": 0.7,
+        "effects": [
+          {
+            "kind": "patron_supply_cut",
+            "faction": "HRHB",
+            "multiplier": 0.85,
+            "duration_turns": 52,
+            "tag": "zagreb_orders_hrhb_ceasefire#resist_patron"
+          }
+        ],
         "dimension_shifts": [
           {
             "faction": "HRHB",
@@ -1535,6 +1544,15 @@
         "label": "Maintain our position",
         "aggression_affinity": 0.5,
         "risk_level": 0.7,
+        "effects": [
+          {
+            "kind": "patron_supply_cut",
+            "faction": "RS",
+            "multiplier": 0.95,
+            "duration_turns": 13,
+            "tag": "milosevic_drina_warning#resist_patron"
+          }
+        ],
         "dimension_shifts": [
           {
             "faction": "RS",
@@ -2874,10 +2892,11 @@
             "delta": -10
           },
           {
-            "kind": "recruitment_modifier",
+            "kind": "patron_supply_cut",
             "faction": "RS",
-            "pool_multiplier": 0.9,
-            "duration_turns": 52
+            "multiplier": 0.93,
+            "duration_turns": 26,
+            "tag": "belgrade_embargo_rs_1994#defiant"
           }
         ],
         "sets_flags": {
@@ -2894,7 +2913,8 @@
             ],
             "material_effect_refs": [
               "morale_change.RS",
-              "supply_delta.RS"
+              "supply_delta.RS",
+              "patron_supply_cut.RS"
             ],
             "explanation": "Defying Belgrade records rs_belgrade_response as defiant. No current catalog follow-up event directly keys on this value, but the branch remains visible in decision diagnostics."
           }

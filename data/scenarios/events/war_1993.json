@@ -811,6 +811,15 @@
         "historical_marker": "counterfactual",
         "aggression_affinity": 0.5,
         "risk_level": 0.7,
+        "effects": [
+          {
+            "kind": "patron_supply_cut",
+            "faction": "HRHB",
+            "multiplier": 0.95,
+            "duration_turns": 13,
+            "tag": "zagreb_restrains_boban_vopp#resist_patron"
+          }
+        ],
         "dimension_shifts": [
           {
             "faction": "HRHB",
@@ -2026,6 +2035,15 @@
         "label": "Maintain our position",
         "aggression_affinity": 0.5,
         "risk_level": 0.7,
+        "effects": [
+          {
+            "kind": "patron_supply_cut",
+            "faction": "RS",
+            "multiplier": 0.95,
+            "duration_turns": 13,
+            "tag": "milosevic_vopp_pressure#resist_patron"
+          }
+        ],
         "dimension_shifts": [
           {
             "faction": "RS",
@@ -3087,6 +3105,15 @@
         "label": "Maintain our position",
         "aggression_affinity": 0.5,
         "risk_level": 0.7,
+        "effects": [
+          {
+            "kind": "patron_supply_cut",
+            "faction": "RS",
+            "multiplier": 0.97,
+            "duration_turns": 13,
+            "tag": "milosevic_owen_stoltenberg_distancing#resist_patron"
+          }
+        ],
         "dimension_shifts": [
           {
             "faction": "RS",
@@ -4404,6 +4431,13 @@
             "kind": "morale_change",
             "faction": "RS",
             "delta": 2
+          },
+          {
+            "kind": "patron_supply_cut",
+            "faction": "RS",
+            "multiplier": 0.95,
+            "duration_turns": 13,
+            "tag": "rs_belgrade_pressure_response_1993#defy_belgrade_directive"
           }
         ],
         "sets_flags": {
@@ -4445,6 +4479,13 @@
             "kind": "morale_change",
             "faction": "RS",
             "delta": 0
+          },
+          {
+            "kind": "patron_supply_cut",
+            "faction": "RS",
+            "multiplier": 0.98,
+            "duration_turns": 13,
+            "tag": "rs_belgrade_pressure_response_1993#partial_compliance"
           }
         ],
         "sets_flags": {

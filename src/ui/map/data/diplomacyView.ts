@@ -8,6 +8,11 @@ import {
 } from '../../../state/patron_pressure.js';
 import { getPeacePlanById } from '../../../sim/negotiation/peace_plan_data.js';
 import { getDimensionEffective, type DimensionStore } from '../../../sim/events/strategic_dimensions.js';
+import {
+    getEffectivePatronSupplyCutMultiplier,
+    isPatronSupplyCutFloorBinding,
+} from '../../../sim/events/active_modifiers.js';
+import type { GameState } from '../../../state/game_state.js';
 import { strictCompare } from '../../../state/validateGameState.js';
 import { getPlayerSafeMilitaryFactionName, getPlayerSafeDisplayLabel } from '../utils/playerSafeText';
 import type {
@@ -322,8 +327,8 @@ function buildNegotiationTimeline(
     }));
     const patronCutEntries: DiplomacyTimelineEntryView[] = actorFaction && patronDefianceCuts?.entries
         ? patronDefianceCuts.entries.map((entry) => ({
-            id: `patron-defiance:${actorFaction}:${entry.turn}:${entry.cutFraction}:${entry.supportAfter}`,
-            label: `${PATRON_LABELS[FACTION_PATRON[actorFaction]] ?? 'Patron'} material support cut`,
+            id: `patron-defiance:${actorFaction}:${entry.turn}:${entry.tag}`,
+            label: `${PATRON_LABELS[FACTION_PATRON[actorFaction]] ?? 'Patron'} supply cut`,
             labelToken: {
                 key: 'diplomacy.timeline.patronCutLabel',
                 params: PATRON_LABEL_KEYS[FACTION_PATRON[actorFaction]]
@@ -333,13 +338,13 @@ function buildNegotiationTimeline(
                     ? { patron: PATRON_LABEL_KEYS[FACTION_PATRON[actorFaction]] }
                     : undefined,
             },
-            detail: `${getPlayerSafeMilitaryFactionName(actorFaction)} channel lost ${Math.round(entry.cutFraction * 100)}% of material support; support after cut ${Math.round(entry.supportAfter * 100)}%.`,
+            detail: `${getPlayerSafeMilitaryFactionName(actorFaction)} combat effectiveness -${Math.round(entry.cutFraction * 100)}% for ${entry.expiresTurn - entry.turn} weeks.`,
             detailToken: {
                 key: 'diplomacy.timeline.patronCutDetail',
                 params: {
                     force: getPlayerSafeMilitaryFactionName(actorFaction),
                     pct: Math.round(entry.cutFraction * 100),
-                    support: Math.round(entry.supportAfter * 100),
+                    weeks: entry.expiresTurn - entry.turn,
                 },
             },
             turn: entry.turn,
@@ -433,35 +438,53 @@ function buildPatronConfidence(state: any, factionId: string | null): PatronConf
 }
 
 /**
- * Compact player-faction defiance-cut summary from
- * `state.military.patron_defiance_supply_cuts` (#117). Filters to the player
- * faction; returns undefined when there are no player entries (emergent-only —
- * historical/calibration mode never writes these). Picks the most-recent cut by
- * turn (ties broken by max cut_fraction) for the headline line.
+ * The player faction's patron supply cuts (patron-defiance panel, 2026-11-17) from
+ * `state.military.patron_defiance_supply_cuts`: one receipt per defiance answer. Pre-panel
+ * entries (no `tag`) are skipped; they recorded a term that never reached combat. The cut in
+ * force this turn is read through the combat reader's own helpers, floor included, so the
+ * panel never shows more than the engine applies. Newest first (ties: larger cut first).
  */
 function buildPatronDefianceCuts(state: any, factionId: string | null): PatronDefianceCutsView | undefined {
     if (!factionId) return undefined;
     const cuts = Array.isArray(state?.military?.patron_defiance_supply_cuts)
         ? state.military.patron_defiance_supply_cuts
         : [];
-    const mine = cuts.filter((cut: any) => asRecord(cut)?.faction === factionId);
+    const mine = cuts.filter((cut: any) => {
+        const c = asRecord(cut);
+        return c?.faction === factionId && typeof c.tag === 'string' && c.tag.length > 0;
+    });
     if (mine.length === 0) return undefined;
-    const entries: NonNullable<PatronDefianceCutsView['entries']> = mine.map((cut: any) => ({
+    type Entry = NonNullable<PatronDefianceCutsView['entries']>[number];
+    const rows = mine.map((cut: any) => ({
         turn: finiteNumber(cut?.turn),
+        tag: String(cut.tag),
         cutFraction: finiteNumber(cut?.cut_fraction),
+        expiresTurn: finiteNumber(cut?.expires_turn),
+        floorBinding: cut?.floor_binding === true,
         supportAfter: finiteNumber(cut?.support_after),
-    })).sort((a: NonNullable<PatronDefianceCutsView['entries']>[number], b: NonNullable<PatronDefianceCutsView['entries']>[number]) => (
+    })).sort((a: Entry & { supportAfter: number }, b: Entry & { supportAfter: number }) => (
         b.turn - a.turn
         || b.cutFraction - a.cutFraction
-        || a.supportAfter - b.supportAfter
+        || strictCompare(a.tag, b.tag)
     ));
-    const latest = entries[0]!;
+    const latest = rows[0]!;
+    const turn = finiteNumber(state?.meta?.turn);
+    // Only RS and HRHB have a coercive patron; the guard also narrows the id to a FactionId.
+    const readable = Array.isArray(state?.military?.equipment_quality_modifiers)
+        && (factionId === 'RS' || factionId === 'HRHB');
+    const sim: GameState = state;
+    const combined = readable ? getEffectivePatronSupplyCutMultiplier(sim, factionId, turn) : 1;
     return {
-        count: mine.length,
+        count: rows.length,
         latestCutFraction: latest.cutFraction,
         latestTurn: latest.turn,
+        latestExpiresTurn: latest.expiresTurn,
         latestSupportAfter: latest.supportAfter,
-        entries,
+        activeCombinedCutFraction: 1 - combined,
+        activeFloorBinding: readable ? isPatronSupplyCutFloorBinding(sim, factionId, turn) : false,
+        entries: rows.map(({ turn: t, tag, cutFraction, expiresTurn, floorBinding }: Entry) => ({
+            turn: t, tag, cutFraction, expiresTurn, floorBinding,
+        })),
     };
 }
 

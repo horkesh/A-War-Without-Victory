@@ -34,6 +34,10 @@ export const KNOWN_EVENT_EFFECT_KINDS = [
     // does the `patron_pressure_above` condition that reads it. The loader rejects
     // the old kind name.
     'patron_support',
+    // Patron-defiance panel (2026-11-17): a defiance answer's one live material
+    // carrier (combat power for N weeks plus a patron-panel receipt). Rules in
+    // event_loader.ts `validatePatronSupplyCut`.
+    'patron_supply_cut',
     'recruitment_modifier',
     'supply_delta',
 ] as const;

@@ -2702,10 +2702,11 @@
             "delta": -3
           },
           {
-            "kind": "equipment_quality_modifier",
+            "kind": "patron_supply_cut",
             "faction": "HRHB",
             "multiplier": 0.85,
-            "duration_turns": 52
+            "duration_turns": 52,
+            "tag": "hrhb_political_goal#united_front"
           }
         ],
         "sets_flags": {
@@ -2758,9 +2759,9 @@
             "material_effect_refs": [
               "alliance_change",
               "morale_change.HRHB",
-              "equipment_quality_modifier.HRHB"
+              "patron_supply_cut.HRHB"
             ],
-            "explanation": "Choosing the united-front line records hrhb_political_goal as united_front, opening the Graz cooperation-collapse decision next (where the HZ HB Presidency can act to suppress local frictions), making the joint-operations and early-Federation branches visible if their later conditions are met, opening the Vance-Owen pressure branch (Tudjman still applies patron pressure on the HZ HB Presidency during the VOPP window, even on the united-front line) per Prlić IT-04-74 Vol. 3 §§412-498 (the earlier cite: Vol. 3 §§412-498 is Vareš and Stupni Do (October 1993), not the VOPP window or a Zagreb directive; the VOPP is Vol. 1 §§441-476 and Appeals §§734-747, and the Presidential Transcripts are discussed at Vol. 4 §§518-519; paragraph not verified for this claim), and opening the February 1994 Zagreb ceasefire-order decision that follows the Washington track (Prlić Vol. 1 §§357-422 (the earlier cite: Vol. 1 §§357-422 is expert and evidence-assessment sections and the 1990-91 background, not the Washington track or the collapse of the Croat-Bosniak war; Washington is Vol. 1 §§487-490; paragraph not verified for this claim) and Vol. 2 §§556-590 (the earlier cite: Vol. 2 §§556-590 is Jablanica detention at Sovići (April 1993), not the Washington framework or federation deliberation; Washington is Vol. 1 §§487-490; paragraph not verified for this claim), Vol. 2 §§600-680 (the earlier cite: Vol. 2 §§600-680 is the end of Jablanica and the start of Mostar, not the Washington preconditions or a 1995 HV-HVO command (1995 is outside the indictment period); Washington is Vol. 1 §§487-490; paragraph not verified for this claim); Granic-Silajdžić channel). Cost floor: Zagreb withdraws officer secondments, fuel, and ammunition support, modeled as a 0.85 equipment_quality_modifier (Prlić Vol. 2 §§220-260 (the earlier cite: Vol. 2 §§220-260 is the Prozor detention of Muslim women, children and the elderly (August 1993); HV officers inside the HVO are Vol. 3 §§546-549 and arms and money §§554-558, and the word \"fuel\" does not occur there; paragraph not verified for this claim))."
+            "explanation": "Choosing the united-front line records hrhb_political_goal as united_front, opening the Graz cooperation-collapse decision next (where the HZ HB Presidency can act to suppress local frictions), making the joint-operations and early-Federation branches visible if their later conditions are met, opening the Vance-Owen pressure branch (Tudjman still applies patron pressure on the HZ HB Presidency during the VOPP window, even on the united-front line) per Prlić IT-04-74 Vol. 3 §§412-498 (the earlier cite: Vol. 3 §§412-498 is Vareš and Stupni Do (October 1993), not the VOPP window or a Zagreb directive; the VOPP is Vol. 1 §§441-476 and Appeals §§734-747, and the Presidential Transcripts are discussed at Vol. 4 §§518-519; paragraph not verified for this claim), and opening the February 1994 Zagreb ceasefire-order decision that follows the Washington track (Prlić Vol. 1 §§357-422 (the earlier cite: Vol. 1 §§357-422 is expert and evidence-assessment sections and the 1990-91 background, not the Washington track or the collapse of the Croat-Bosniak war; Washington is Vol. 1 §§487-490; paragraph not verified for this claim) and Vol. 2 §§556-590 (the earlier cite: Vol. 2 §§556-590 is Jablanica detention at Sovići (April 1993), not the Washington framework or federation deliberation; Washington is Vol. 1 §§487-490; paragraph not verified for this claim), Vol. 2 §§600-680 (the earlier cite: Vol. 2 §§600-680 is the end of Jablanica and the start of Mostar, not the Washington preconditions or a 1995 HV-HVO command (1995 is outside the indictment period); Washington is Vol. 1 §§487-490; paragraph not verified for this claim); Granic-Silajdžić channel). Cost floor: Zagreb withdraws officer secondments, fuel, and ammunition support, modeled as a 0.85 patron_supply_cut (Prlić Vol. 2 §§220-260 (the earlier cite: Vol. 2 §§220-260 is the Prozor detention of Muslim women, children and the elderly (August 1993); HV officers inside the HVO are Vol. 3 §§546-549 and arms and money §§554-558, and the word \"fuel\" does not occur there; paragraph not verified for this claim))."
           },
           {
             "id": "united_front_to_zagreb_ceasefire",
@@ -3490,10 +3491,11 @@
             "duration_turns": 52
           },
           {
-            "kind": "equipment_quality_modifier",
+            "kind": "patron_supply_cut",
             "faction": "HRHB",
             "multiplier": 0.9,
-            "duration_turns": 26
+            "duration_turns": 26,
+            "tag": "hrhb_1992_graz_cooperation_collapse#formal_alliance_persists"
           }
         ],
         "sets_flags": {
@@ -3513,7 +3515,7 @@
             "material_effect_refs": [
               "alliance_change",
               "bot_priority_shift.HRHB",
-              "equipment_quality_modifier.HRHB"
+              "patron_supply_cut.HRHB"
             ]
           }
         ],
@@ -5060,6 +5062,15 @@
         "label": "Maintain our position",
         "aggression_affinity": 0.5,
         "risk_level": 0.7,
+        "effects": [
+          {
+            "kind": "patron_supply_cut",
+            "faction": "RS",
+            "multiplier": 0.97,
+            "duration_turns": 13,
+            "tag": "milosevic_isolation_warning_aug92#resist_patron"
+          }
+        ],
         "dimension_shifts": [
           {
             "faction": "RS",
