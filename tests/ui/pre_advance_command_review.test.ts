@@ -127,13 +127,12 @@ function makeState(overrides: Partial<LoadedGameState> = {}): LoadedGameState {
 
 function makePlayerDecisionSummary(overrides: Partial<PlayerDecisionSummaryView> = {}): PlayerDecisionSummaryView {
   return {
-    totalCount: 6,
-    blockingCount: 4,
+    totalCount: 5,
+    blockingCount: 3,
     families: [
       { id: 'peace_plan', count: 1, gatePolicy: 'modal_required' },
       { id: 'dayton_negotiation', count: 1, gatePolicy: 'modal_required' },
       { id: 'paramilitary_request', count: 1, gatePolicy: 'hard_block' },
-      { id: 'convoy_decision', count: 1, gatePolicy: 'modal_required' },
       { id: 'reserve_request', count: 1, gatePolicy: 'advisory' },
       { id: 'officer_event', count: 1, gatePolicy: 'advisory' },
     ],
@@ -372,25 +371,15 @@ describe('buildPreAdvanceCommandReviewView', () => {
     expect(view.items.map((item) => item.id)).not.toContain('review:pending');
   });
 
-  it('counts player convoy decisions as fallback blockers when the manifest summary is absent', () => {
+  it('counts player paramilitary requests as fallback blockers when the manifest summary is absent', () => {
     const view = buildPreAdvanceCommandReviewView({
       state: makeState({
         player_faction: 'RBiH',
         playerDecisionSummary: undefined,
         presidentialReviewQueue: undefined,
-        pendingConvoyDecisions: [
-          {
-            id: 'convoy_rbih',
-            target_enclave: 'gorazde',
-            route_faction: 'RBiH',
-            supply_amount: 18,
-          },
-          {
-            id: 'convoy_rs',
-            target_enclave: 'srebrenica',
-            route_faction: 'RS',
-            supply_amount: 12,
-          },
+        pendingParamilitaryRequests: [
+          { faction: 'RBiH', strength: 120, target_osid: 'gorazde_1', estimated_civilian_risk: 10 },
+          { faction: 'RS', strength: 90, target_osid: 'srebrenica_1', estimated_civilian_risk: 12 },
         ],
         latestTurnSummary: null,
         turnSummaries: [],
@@ -402,20 +391,14 @@ describe('buildPreAdvanceCommandReviewView', () => {
     expect(view.headline).toBe('Review before advance');
   });
 
-  it('does not count answered convoy decisions as fallback blockers', () => {
+  it('does not count answered paramilitary requests as fallback blockers', () => {
     const view = buildPreAdvanceCommandReviewView({
       state: makeState({
         player_faction: 'RBiH',
         playerDecisionSummary: undefined,
         presidentialReviewQueue: undefined,
-        pendingConvoyDecisions: [
-          {
-            id: 'convoy_answered',
-            target_enclave: 'gorazde',
-            route_faction: 'RBiH',
-            supply_amount: 18,
-            decision: 'allow',
-          },
+        pendingParamilitaryRequests: [
+          { faction: 'RBiH', strength: 120, target_osid: 'gorazde_1', estimated_civilian_risk: 10, decision: 'deny' },
         ],
         latestTurnSummary: null,
         turnSummaries: [],
@@ -432,15 +415,6 @@ describe('buildPreAdvanceCommandReviewView', () => {
         playerDecisionSummary: makePlayerDecisionSummary({ blockingCount: 4 }),
         presidentialReviewQueue: undefined,
         pendingParamilitaryRequests: [],
-        pendingConvoyDecisions: [
-          {
-            id: 'convoy_answered',
-            target_enclave: 'srebrenica',
-            route_faction: 'RBiH',
-            supply_amount: 20,
-            decision: 'allow',
-          },
-        ],
         pendingDayton: undefined,
         pendingPeacePlan: undefined,
         pendingReserveRequests: [],

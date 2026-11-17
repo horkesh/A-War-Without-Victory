@@ -10,6 +10,7 @@
  */
 
 import type { FactionId, GameState } from '../../state/game_state.js';
+import { getRefugeeCompactRecruitmentMultiplier } from '../early_war/refugee_compact.js';
 
 /** Product of all active recruitment modifiers for the given faction.
  *  Stacks multiplicatively (consistent with the plan's stacking rule).
@@ -19,15 +20,18 @@ export function getActiveRecruitmentMultiplier(
     faction: FactionId,
     currentTurn: number
 ): number {
+    // A2b refugee compact price (refugee_compact.ts): exactly 1.0 with no active compact, so the
+    // result is unchanged for every run in which HRHB never grants one.
+    const compactPrice = getRefugeeCompactRecruitmentMultiplier(state, faction, currentTurn);
     const mods = state.military.recruitment_modifiers;
-    if (!mods || mods.length === 0) return 1.0;
+    if (!mods || mods.length === 0) return compactPrice;
     let product = 1.0;
     for (const m of mods) {
         if (m.expires_turn <= currentTurn) continue;
         if (m.faction !== faction) continue;
         product *= m.pool_multiplier;
     }
-    return product;
+    return compactPrice === 1.0 ? product : product * compactPrice;
 }
 
 /** Product of all active equipment-quality modifiers for the given faction.

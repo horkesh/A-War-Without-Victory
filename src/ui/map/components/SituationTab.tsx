@@ -1,5 +1,5 @@
 /**
- * Situation tab — strategic / casualty / pressure / convoy / security overview.
+ * Situation tab — strategic / casualty / pressure / security overview.
  *
  * A11y LANE-NIGHTSHIFT-V093-A11Y-LANE-C — verified clean of clickable-div
  * anti-pattern: every interactive element here is a real <button>. The lane
@@ -11,14 +11,11 @@ import { useState, useEffect } from 'react';
 import type { LoadedGameState, SummaryFocusSection } from '../data/types';
 import { FACTION_COLORS } from '../utils/theme';
 import osidAreasData from '../../../../data/derived/operational/osid_areas.json';
-import { useIPC } from '../desktop/useIPC';
 import { useGameStore } from '../store/gameStore';
 import { DiplomacyOverview } from './DiplomacyOverview';
 import { filterPlayerFacingOperations, getPlayerFacingFaction } from '../../shared/playerVisibility';
 import { getPlayerFacingSectorName } from '../../shared/playerFacingLabels';
 import {
-  getPlayerSafeCorridorLabel,
-  getPlayerSafeEnclaveName,
   getPlayerSafeMilitaryFactionName,
   getPlayerSafeMunicipalityName,
 } from '../utils/playerSafeText';
@@ -195,7 +192,6 @@ function formatSitrepFrontLabel(label: string, osidDisplayNames: Record<string, 
 }
 
 export function SituationTab({ state, focusSection }: { state: LoadedGameState; focusSection?: SummaryFocusSection }) {
-  const ipc = useIPC();
   const osidDisplayNames = useGameStore((s) => s.osidDisplayNames);
   const osidAreas = useOsidAreas() ?? bundledOsidAreas;
   const playerFaction = getPlayerFacingFaction(state);
@@ -209,7 +205,6 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
   const alliance = state.war_alliance_rbih_hrhb ?? 0;
   const alliancePct = Math.max(0, Math.min(100, ((alliance + 1) / 2) * 100));
   const alerts: string[] = [];
-  const [convoyMessage, setConvoyMessage] = useState<string | null>(null);
   const playerOperations = [...filterPlayerFacingOperations(state)]
     .sort((a, b) => a.name.localeCompare(b.name) || a.corps_id.localeCompare(b.corps_id));
   const fragileOperations = playerOperations
@@ -226,11 +221,10 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
   const focusedMode = !!focusSection && focusSection !== 'overview';
   const showSection = (section: SummaryFocusSection): boolean => !focusedMode || focusSection === section;
 
-  // Faction-tagged documentary stills for the convoy + patron activity lanes
+  // Faction-tagged documentary stills for the patron activity lane
   // ("Car 4" §4 activity art). Resolve to null when no asset matches — the lane
   // then renders text-only exactly as before (graceful fallback, never a broken
   // image). Read-model/UI only; calibration-inert.
-  const convoyArt = resolveWarroomActivityArt('convoy', playerFaction);
   const patronArt = playerFaction === 'RBiH'
     ? null
     : resolveWarroomActivityArt('patron', playerFaction);
@@ -257,13 +251,6 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
       section.scrollIntoView({ block: 'start', behavior: 'smooth' });
     }
   }, [focusedMode, focusSection]);
-
-  const handleConvoyDecision = async (convoyId: string, decision: 'allow' | 'block' | 'divert') => {
-    const result = await ipc.stageConvoyDecision(convoyId, decision);
-    setConvoyMessage(result.ok
-      ? t('situation.convoyStaged', { decision })
-      : (result.error ?? t('situation.convoyStageFailed')));
-  };
 
   return (
     <div
@@ -394,63 +381,6 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
           </div>
         )}
       </section>
-      )}
-
-      {showSection('convoys') && (
-        <section data-summary-section="convoys" className="rounded-md border border-[#2a303c] bg-[#161a22] px-3 py-2.5 space-y-2">
-          <div className="uppercase font-mono text-[13px] font-semibold tracking-[0.16em] text-[#e0c27a]">{t('situation.humanitarianConvoys')}</div>
-          {convoyArt && (
-            <figure className="m-0">
-              <img
-                src={convoyArt}
-                alt=""
-                aria-hidden="true"
-                data-testid="convoy-activity-art"
-                className="h-20 w-full rounded border border-panel-border object-cover"
-              />
-              <figcaption className="sr-only">{t('situation.convoyArtCaption')}</figcaption>
-            </figure>
-          )}
-          {state.pendingConvoyDecisions && state.pendingConvoyDecisions.length > 0 ? (
-            state.pendingConvoyDecisions.map((convoy) => (
-              <div key={convoy.id} className="rounded border border-panel-border bg-panel-bg/60 p-2 space-y-1">
-                <div className="text-text-secondary">
-                  {t('situation.convoyLine', {
-                    target: getPlayerSafeEnclaveName(convoy.target_enclave),
-                    route: getPlayerSafeCorridorLabel(convoy.route_faction),
-                    supply: convoy.supply_amount.toFixed(2),
-                  })}
-                </div>
-                <div className="flex gap-1">
-                  <button
-                    type="button"
-                    onClick={() => void handleConvoyDecision(convoy.id, 'allow')}
-                    className="px-2 py-1 text-[13px] border border-panel-border rounded text-text-primary hover:bg-panel-hover"
-                  >
-                    {t('situation.allow')}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => void handleConvoyDecision(convoy.id, 'block')}
-                    className="px-2 py-1 text-[13px] border border-panel-border rounded text-text-primary hover:bg-panel-hover"
-                  >
-                    {t('situation.block')}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => void handleConvoyDecision(convoy.id, 'divert')}
-                    className="px-2 py-1 text-[13px] border border-panel-border rounded text-text-primary hover:bg-panel-hover"
-                  >
-                    {t('situation.divert')}
-                  </button>
-                </div>
-              </div>
-            ))
-          ) : (
-            <EmptyState message={t('situation.emptyConvoys')} />
-          )}
-          {convoyMessage && <div className="text-text-secondary">{convoyMessage}</div>}
-        </section>
       )}
 
       {showSection('support') && (
