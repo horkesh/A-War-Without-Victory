@@ -202,10 +202,10 @@ describe('MainMenu cinematic opening flow', () => {
 
         const modeGroup = screen.getByRole('radiogroup', { name: 'How should the war unfold?' });
         expect(within(modeGroup).getByRole('radio', { name: /Let it run from here/i }).getAttribute('aria-checked')).toBe('true');
-        expect(within(modeGroup).getByRole('radio', { name: /Let history run as it did/i }).getAttribute('aria-checked')).toBe('false');
+        expect(within(modeGroup).getByRole('radio', { name: /Replay the historical record/i }).getAttribute('aria-checked')).toBe('false');
 
         await waitFor(() => expect(document.activeElement).toBe(screen.getByRole('button', { name: 'Begin' })));
-        fireEvent.click(within(modeGroup).getByRole('radio', { name: /Let history run as it did/i }));
+        fireEvent.click(within(modeGroup).getByRole('radio', { name: /Replay the historical record/i }));
         const begin = screen.getByRole('button', { name: 'Begin' });
         fireEvent.click(begin);
         fireEvent.click(begin);
@@ -215,6 +215,40 @@ describe('MainMenu cinematic opening flow', () => {
             playerFaction: 'RBiH',
             decisionMode: 'historical',
         });
+    });
+
+    it('the mode choice is one accessible radiogroup: described by its help text, one tab stop, arrow keys move the choice and the focus', () => {
+        const { onNewGame } = renderMenu();
+        dismissSplash();
+        fireEvent.click(screen.getByRole('button', { name: 'New War' }));
+        fireEvent.click(screen.getByTestId('main-menu-faction-RBiH'));
+        fireEvent.click(screen.getByRole('button', { name: 'Take command' }));
+
+        const modeGroup = screen.getByRole('radiogroup', { name: 'How should the war unfold?' });
+        const emergent = within(modeGroup).getByRole('radio', { name: 'Let it run from here' });
+        const historical = within(modeGroup).getByRole('radio', { name: 'Replay the historical record' });
+
+        // The accessible description is the body text that carries the honesty (replays the record; decisions stay free).
+        const describedBy = (radio: HTMLElement) => document.getElementById(radio.getAttribute('aria-describedby') ?? '')?.textContent ?? '';
+        expect(describedBy(emergent)).toMatch(/intended player campaign/);
+        expect(describedBy(historical)).toMatch(/repeat their recorded moves/);
+        expect(describedBy(historical)).toMatch(/Your own decisions stay free/);
+        expect(historical.getAttribute('aria-label')).toBeNull();
+
+        // One tab stop: the selected radio.
+        expect(emergent.getAttribute('tabindex')).toBe('0');
+        expect(historical.getAttribute('tabindex')).toBe('-1');
+
+        fireEvent.keyDown(emergent, { key: 'ArrowDown' });
+        expect(historical.getAttribute('aria-checked')).toBe('true');
+        expect(document.activeElement).toBe(historical);
+        expect(historical.getAttribute('tabindex')).toBe('0');
+        expect(emergent.getAttribute('tabindex')).toBe('-1');
+
+        fireEvent.keyDown(historical, { key: 'ArrowUp' });
+        expect(emergent.getAttribute('aria-checked')).toBe('true');
+        expect(document.activeElement).toBe(emergent);
+        expect(onNewGame).not.toHaveBeenCalled();
     });
 
     it('re-enables Begin after a failed parent start sequence and permits one retry', async () => {

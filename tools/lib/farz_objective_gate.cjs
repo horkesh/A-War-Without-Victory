@@ -33,8 +33,33 @@ function provisionalFarzOwner(liveOperations, finalTurn) {
   };
 }
 
-function checkFarzObjectiveCaptures({ cells, at188, events, battleById, aars, corpsOf, windowStart, liveOperations, finalTurn }) {
-  const authored = aars.filter((aar) => FARZ_HQ_ID.test(aar.army_hq_telemetry?.army_hq_op_id || ''));
+/**
+ * AAR ids of the operations the engine itself registered as the Farz Army HQ operation
+ * (`state.military.army_hq_operations`, key `ahq:RBiH:<year>:farz_95`). `injectArmyHqOperations`
+ * builds the op on the registration turn in the anchor corps, so its AAR id is exactly
+ * `<anchor_corps_id>:<name>:t<formed_on_turn>`.
+ *
+ * Why (orchestrator ruling 2026-11-16): the AAR's `army_hq_telemetry` is built only from the
+ * operation's Tactical Group, and whether a TG forms depends on the faction TG cap on the turn the
+ * op becomes ready. A Farz that was injected as the Army HQ operation and took its objectives
+ * failed P-A whenever the cap was full. The operation's own Army HQ identity answers the
+ * provenance question directly; TG telemetry stays optional detail. Exact id match only, so no
+ * other operation (another name, corps or start turn) is ever accepted.
+ */
+function registeredFarzAarIds(armyHqOperations) {
+  const ids = new Set();
+  for (const [id, rec] of Object.entries(armyHqOperations || {})) {
+    if (!FARZ_HQ_ID.test(id) || !rec || rec.faction_id !== 'RBiH') continue;
+    if (!rec.anchor_corps_id || !rec.name || !Number.isFinite(rec.formed_on_turn)) continue;
+    ids.add(`${rec.anchor_corps_id}:${rec.name}:t${rec.formed_on_turn}`);
+  }
+  return ids;
+}
+
+function checkFarzObjectiveCaptures({ cells, at188, events, battleById, aars, corpsOf, windowStart, liveOperations, finalTurn, armyHqOperations }) {
+  const registered = registeredFarzAarIds(armyHqOperations);
+  const authored = aars.filter((aar) => FARZ_HQ_ID.test(aar.army_hq_telemetry?.army_hq_op_id || '')
+    || registered.has(aar.operation_id));
   const aar = authored.length === 1
     ? authored[0]
     : authored.length === 0 ? provisionalFarzOwner(liveOperations, finalTurn) : null;
@@ -73,4 +98,4 @@ function checkFarzObjectiveCaptures({ cells, at188, events, battleById, aars, co
     ok: !!aar && aar.started_turn >= windowStart && rows.every((row) => row.ok) };
 }
 
-module.exports = { checkFarzObjectiveCaptures };
+module.exports = { checkFarzObjectiveCaptures, registeredFarzAarIds };
