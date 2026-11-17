@@ -592,8 +592,8 @@ The map UI now carries the live player-agency A-H surface through these componen
 - **NOTE (2026-03-15):** `CorpsDetail.tsx` and `ArmyDetail.tsx` now represent organizational abstractions. Functional tactical map interaction is primarily via `FormationDetail` and `CorpsFrontPanel`.
 - `SelectionPanel.tsx` - municipality support staging for the current player faction on selected municipalities
 - `EnclaveDashboard.tsx` - enclave status plus player airdrop allocation
-- `SituationTab.tsx` and `TopToolbar.tsx` - convoy decisions, IVP/consequence surfacing, and tunnel status
-- `GameStateAdapter.ts` - adapter contract for `fogOfWar`, `composite_ivp`, operation readiness, airdrop state, convoy state, municipality support state, and OPSEC-visible sectors
+- `SituationTab.tsx` and `TopToolbar.tsx` - IVP/consequence surfacing and tunnel status
+- `GameStateAdapter.ts` - adapter contract for `fogOfWar`, `composite_ivp`, operation readiness, airdrop state, municipality support state, and OPSEC-visible sectors
 
 ```ts
 interface MilitiaPoolView {

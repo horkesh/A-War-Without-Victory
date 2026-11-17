@@ -84,7 +84,6 @@ export function typeLabel(type: string): string {
     if (type === 'event_decision') return t('inbox.type.eventDecision');
     if (type === 'peace_plan') return t('inbox.type.peacePlan');
     if (type === 'dayton_negotiation') return t('inbox.type.dayton');
-    if (type === 'convoy_decision') return t('inbox.type.convoy');
     if (type === 'paramilitary_request') return t('inbox.type.paramilitary');
     if (type === 'reserve_request') return t('inbox.type.reserve');
     if (type === 'officer_event') return t('inbox.type.personnel');

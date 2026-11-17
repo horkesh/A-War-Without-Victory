@@ -84,7 +84,7 @@ function categoryItemCount(cards: readonly PresidentialDecisionRoomCard[]): numb
  *                       president's core queue; they land in War Direction's
  *                       sibling cards by their navigation, but the decision
  *                       category itself is broad. We route the bulk of
- *                       `decision` into Diplomacy & Patrons (peace/Dayton/convoy
+ *                       `decision` into Diplomacy & Patrons (peace/Dayton
  *                       manifests + counter-offers live there), while the
  *                       paramilitary bright-line stays isolated in Conscience,
  *                       and supply/economy pressure is pulled into Home Front

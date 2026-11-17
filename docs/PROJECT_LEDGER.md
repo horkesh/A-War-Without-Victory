@@ -103,6 +103,21 @@ No `src/` change, so the simulation hash is unchanged.
 
 **Not done.** The translation itself (post-1.0, own decisions first, then the shared notices); the effects[] resolver and its shrinking allowlist (the tracker for that work) is a separate PR.
 
+## 2026-11-17 — Acknowledgement notices reach only the player who may know of them
+
+**Why.** The UI showed every fired non-decision event to every player (`App.tsx` queues each, the adapter did not filter by faction). A read-only count (2026-11-17) found that for an RBiH President 10 to 12 of the 107 shared notices were another side's private business: RS brigade morale and volunteer inflow, a private Belgrade-Pale line, Drina Corps tasking, officer rolls, "the political files do not contain the order", patron arms manifests, the Mostar back channel, HVO recruitment offices. Owner ruling: fix it.
+
+**Change** (UI and event data only; hash unchanged):
+- `src/ui/map/data/eventAudience.ts`: one gate. An authored `audience` wins; otherwise a `csq_*` consequence notice whose effect (else trigger) names exactly one faction is private to that faction; everything else to all; a player's own decisions are never gated; no player faction shows everything.
+- `GameStateAdapter.ts` uses it in `deriveFiredEvents` (modal and Chronicle list), in the turn summaries (`events_fired`, read by the Chronicle, Turn Aftermath and audio cues) and in the settlement timeline.
+- New optional event field `audience` (`"all"` or a faction list), validated by the event loader and typed in `EventDefinition`. Authored on 14 events: 12 consequence notices the Historian ruled public (Ahmići; the Bihać pocket; NATO and tribunal tracks; federation, alliance and territorial-friction notices that belong to both sides; the three mediator and plan proposals; the post-Dayton train-and-equip pair) and the two war events (`vitez_kiseljak_pockets_1993` to HRHB and RBiH, `croatia_herceg_bosna_control_1993` to HRHB).
+- Test `tests/ui/event_notice_audience.test.ts`: the rule, the loader, every consequence notice for all three sides, the ruled public set, the leak-count examples, the two war events, and the adapter's three surfaces for each player.
+- Canon: SHDG §6 Record row.
+
+**Seats.** Historian and Narrative Designer, independent. Where they differ, the default is private (a wrongly hidden notice costs the other side a line; a wrongly shown one is the leak).
+
+**Follow-ups, not in this change.** (1) Five Historian "public, if trimmed" notices (camps discovery, early NATO threshold, early war-crimes tribunal, Srebrenica stalemate, joint operations agreement) stay private until their private tail sentences are trimmed. (2) `csq_arms_embargo_compliance_audit` is untrue as authored (its trigger omits the RS and HRHB arms-pipeline-attenuated flags): an engine-side trigger fix for the §6 lane. (3) `csq_enclave_held_alt_intervention` wording ("resilience indices", hindsight lines). (4) Wording fixes in `csq_international_tribunal_observation` and `csq_refugee_absorption_strain`. (5) `notable_events` text lines (no event id) are not gated.
+
 ## 2026-11-17 — The staff-action receipt says "counts against your side" only when the action took its target
 
 **Why.** Codex found on #740 (`GameStateAdapter.ts`, reproduced) that a paramilitary action dissolving WITHOUT taking its target (target already friendly, combat blocked, organized defence, the week-20 fade cutoff) still got a "Carried out" receipt saying it counts against the player's side, because `dissolveParamilitary` keeps the target and the creation turn. A receipt that reports civilian harm that never happened is a §6 truth defect.
@@ -116,6 +131,78 @@ No `src/` change, so the simulation hash is unchanged.
 - Tests: `tests/ui/paramilitary_unrequested_receipt_truth.test.ts` (engine plus adapter plus ledger for a capture and each of four dissolve causes), `tests/ui_adapter_boundary.test.ts` (captured classification, the march window, no receipt while active), ledger fixtures.
 
 **Not done.** Nothing else; the hash is unchanged by construction (read-only view over existing state).
+
+## 2026-11-17 — Siege counters, bombardment attrition, siege morale drain and `siege_active` retired (§6 panel unanimous; hash-neutral)
+
+- **Source:** Fable consult 6, appendix A step 1. This was the only piece of the supply-reserve model with the right shape: it works per besieged place, grows with time and falls on the besieged. The consult asked for it to be measured alone, then kept or retired.
+- **Measured alone** (siege counters plus `applySiegeBombardmentAttrition` ungated, reserves off; apr1992 historical and hands-off emergent; main `c52c34ccb`):
+  - 15,708 casualties (2,394 KIA), almost all RBiH: Goražde 10,817, Srebrenica 4,394.
+  - RS 94, HRHB 42. Sarajevo and Bihać zero.
+  - The enclave guard held both ways.
+  - Farz P-B breached (Makljenovac t168).
+  - Scores fell from 709/709/708/682 to 711/709/699/668.
+- **§6 panel** (historian, scenario-creator-runner-tester, engine/systems, red-team): unanimous RETIRE, KEEP vetoed. Reasons:
+  - The size was implausible: about 5× the killed of Zvezda-94 (BB2 p.480), and more than the whole garrison.
+  - The timing ran against the exclusion zones, and Sarajevo was absent.
+  - It hollowed Srebrenica's defenders before July 1995.
+  - Four specification defects (faction-wide fire ratio, Sarajevo and Bihać never counted, small isolated pockets bleeding, escalation compounding the rest).
+  - An RS exploit.
+  - The orchestrator approved.
+- **Hash scope:** byte-identical for the April 1992 game (historical and emergent), the only start 1.0 ships. `sep1991_to_dayton` and `jan1993_to_dayton` set `supply_reserves_enabled`, so the counters, bombardment and reserve siege drain did run there and those two scenarios change; no player can start either one (the desktop New Game accepts only `apr_1992`; jan1993 also fails preflight on main), and both are retired for 1.0 under the owner's one-start ruling (sep1991 by the batch-b lane, jan1993 with the reserve retirement).
+- **Removed:**
+  - The pipeline steps `update-siege-counters`, `apply-siege-bombardment-attrition` and `apply-siege-morale-drain`.
+  - `siege_attrition.ts` and `siege_morale_drain.ts`.
+  - The counter functions and the siege drain inside the reserve update (itself flag-gated, off in April 1992).
+  - The siege-only lifeline and casualty-split helpers.
+  - The `siege_active` event condition, which no event used.
+  - The report fields.
+- **Kept:** `siege_turn_counters` is optional and compatibility-only, so old saves load (`tests/siege_attrition_retired.test.ts`).
+- **Canon** (same change; canon and engine seats, both APPROVE-WITH-CHANGES, applied; besides the retirements, the stale siege-drain text in EI l.43/l.116, SM cold fronts and Phase B+C, Rulebook cold fronts, the SM `siege_active` condition list, War Specification, Phase Specifications and the three PLAYER_TURN_GUIDE rows):
+  - Engine Invariants §6.10 and Systems Manual §6.10 are now retired stubs.
+  - Systems Manual n292 bombardment text replaced, plus notes on the Phase B+C passage and in context.md.
+  - In `FINAL_BEHAVIOUR_AT_1_0.md`, the SD6/SD8 justification is rewritten, and a new accepted-final entry SB1 carries the historian's line verbatim and records the defects.
+- **Proof:** byte-identical. apr1992 historical `0b86d3d742fcbf1c` and emergent `84595a73932f3ac4`, equal to main `c52c34ccb`; re-proved after merging main `b42c6c5a9`: historical `d983d7bc665fdeb6` and emergent `9454c52e328dd647`, equal to main.
+
+## 2026-11-17 — §6 copy: adjudicated figures on the Srebrenica and Markale cards, and 10 more corrected event lines (copy only, hash-neutral)
+
+**Why.** The UI lane's historian seat found 13 English event lines loose or wrong. Three of them showed the player a figure that is not the adjudicated one:
+- Srebrenica "over 8,000 executed", where Krstić TJ gives 7,000-8,000;
+- Markale I 68, where Galić TJ gives "more than 60";
+- Markale II 43, which is the indictment figure; the D. Milošević TJ found 34.
+
+Source hierarchy: ICTY and Court of BiH first, then Balkan Battlegrounds.
+
+**Ruling.** A sensitive-copy panel of five independent seats (historian, narrative designer, canon-compliance, red-team, game designer) gave a unanimous GO with conditions, all met here. Record: SHDG §6 "Record (Adjudicated figures and loose lines on 13 event cards …)".
+
+**Change (copy only; no effect, number, trigger or id changed).**
+- **Srebrenica:** the card names Bosnian Serb forces, gives 7,000-8,000, and states the ICTY and ICJ genocide finding. The effect line and the narrative now agree.
+- **Markale I:** "more than 60". The narrative states Galić's finding that the shell came from SRK-held territory instead of hedging. Three decision explanations that credited "68" to Galić are corrected.
+- **Markale II:** 34, citing the D. Milošević judgement pronouncement (T.9573). The Deliberate Force essay and the essay index agree.
+- **Ten more lines:**
+  - the Srebrenica column (the men captured and executed were victims of the genocide);
+  - Tuzla Gate (a toddler; Novak Đukić of TG Ozren, convicted by the Court of BiH, replaces the wrong "VRS Chief of Staff");
+  - Brčanska Malta (TDF and police fire named; the toll and who fired first stated as disputed; an inert "redirects forces" claim removed);
+  - the Sarajevo barracks;
+  - ICTY established by Resolution 827;
+  - Heliodrom (the standing cost the engine applies);
+  - Markale 1993 (VRS named);
+  - Turajlić ("killing");
+  - Bugojno ("tilts");
+  - the RBiH Assembly's conditional acceptance of 29 Sept 1993.
+- **Canon:** SHDG §2 rows for Srebrenica and Markale; VICTORY_AND_PYRRHIC_SCORING no longer calls the 8,372 memorial names an adjudicated count.
+
+**Reviewed-contract pin.** Three of the Markale I explanations sit on `rbih_state_identity`, which `opening_policy_transition.ts` pins by canonical length and FNV64. That pin moves from 70844 / acbebbba72173a81 to 70875 / a3365d034c4c2ce9. The change is strings only, and a saved pending identity decision still matches, because explanations are display text.
+
+**Measured.** 188w historical and emergent final_save hashes are equal to main (copy only).
+
+**Registered:**
+- the Uzdol spelling;
+- the Sarajevo barracks narrative, which the record contradicts (negotiated evacuations, BB1 p.140);
+- the SHDG §2 Tuzla Gate column;
+- REAL_WAR_MASTER.md:1597;
+- the Owen-Stoltenberg card title.
+
+The Bosnian pins in #791 follow this English: whichever PR lands second updates them.
 
 ## 2026-11-17 — §6 E1: each event effect applies once; war-crimes entries show no count and need a final judicial finding
 
@@ -152,6 +239,40 @@ No `src/` change, so the simulation hash is unchanged.
 - The engine fix alone (before the counter rule): fired events 180 → 180; war_crimes_events at w188 RBiH 15 → 12, HRHB 22 → 16.
 
 **Held for the card batch (item 4), with reasons recorded.** Perpetrator-side gains that remain on the six cards (Kravica RBiH morale +3, the barracks grants, Turajlić RS morale +2), and the `patron_pressure` sign (it raises the target's patron support).
+
+## 2026-11-17 — §6 E3a1: one accumulator rule and one standing-base writer; authorizing paramilitary sweeps no longer raises international standing
+
+**Why.** While the §6 E3 panel was ruling, it found a live reward for atrocity in the shipping default. `updateParamilitaryInternationalStanding` (compute_capital.ts) REPLACED the war-crimes term of the international_standing base (`war_crimes_events × 10`) with the much smaller paramilitary-finding penalty (2/4/5 per deployment, +10 cliff) as soon as a finding existed.
+- Baseline 188w: RBiH has a mid finding (5 deployments, t20). Its standing base read 34.37 = 50 − 20 − 0.63 + 20 − 15, instead of 0. **Authorizing sweeps raised the base.**
+- The effect was hidden at w188 only because RBiH sat at the ceiling.
+- Two more defects in the same writers:
+  - D1: the patron-event and peace-plan rejection writers clamped `event_modifier` to ±100, so RS at −110 hit by a −30 cost was pulled UP to −100, and RBiH at +176 lost 76 at once on a rejection;
+  - D2: two functions wrote the standing base every turn (the later one won, while mid-turn readers saw the other's value);
+  - D3: `peace_plans_accepted/rejected` were pushed and also rebuilt from history.
+
+**Ruling.** §6 E3, unanimous 6/6 (historian, canon-compliance, game designer, engine/systems, scenario-tester, red-team), three rounds; E3a1 is the first of its measured PRs. Record: SHDG §6 "Record (§6 E3 …)" (with E3c).
+
+**Change.**
+- D1: every `event_modifier` writer goes through `applyDimensionShift`. The accumulator is unclamped; only `effective_value` is clamped to 0-100. Reader audit: no simulation reader takes the raw accumulator (some UI readers display it).
+- D2: `computeDimensionBaseValues` is the single writer of every `base_value`. The finding penalty ADDS: `base = clamp(50 − war_crimes×10 − findingPenalty − civCas/5000 + accepted×10 − rejected×15, 0, 100)`. Plan counts are read from `peace_plan_history`.
+- D3: the redundant pushes are deleted; `peace_plan_history` is the single source.
+- Systems Manual §7.10.3 is updated.
+- Tests: `tests/s6_e3a1_standing_writers.test.ts`:
+  - a finding never raises the base;
+  - RS −110 −30 = −140;
+  - an RBiH rejection at +176 lands at 166;
+  - one base writer (static scan);
+  - the lists are history-derived.
+  - Three existing tests are updated to the new truth.
+
+**Measured (188w, on main `b42c6c5a9` with #754; main pin d983d7bc665fdeb6 / 9454c52e328dd647, reproduced).**
+- Historical `2c63bd10fecd6bc7` and emergent `bfcbfa55dd206585`: both 709/709/708/682, guard intact (#780 guard version), fired events identical to fresh main (181).
+- RBiH standing base 34.4 → 0; the accumulator is unclamped (RBiH +166, RS −295).
+- Effective standing unchanged for every side.
+- Baselines manifest re-pinned in this PR.
+- (Earlier, on main `7acbb1ad6`: `474b0e5640ee1365` / `5f49121bf438cd32`, the same results.)
+
+**Known timing shift.** The single base writer runs at `compute-dimension-bases`, earlier in the turn than main's winning writer. A same-turn headless plan resolution and that turn's civCas term therefore reach the base one turn later.
 
 ## 2026-11-17 — Pass 59: #757 recorded and its two doc fixes made; the Codex sweep now covers every open PR
 
@@ -265,6 +386,14 @@ Docs only; no `src/` or `data/` change, no hash change.
 Docs only; no `src/` or `data/` change, no hash change.
 
 - #785 (merged, 7bbce683d; test only): the list-driven guard that every event catalog file reaches every consumer; the work list N1a row now says merged. #784 (notice audience) is still pending. The #776 Codex thread is recorded as fixed on the PR head (pass 71).
+
+## 2026-11-17 — Pass 73: seven merges recorded; the orchestrator's register batch
+
+Docs only; no `src/` or `data/` change, no hash change.
+
+- Merged and recorded: #787 (siege retirement), #782 (§6 E3a1; main hash 2c63bd10fecd6bc7), #784 (notice audience), #735 (B5 political gate), #763 (Washington Path A'), #739 (C8 F1i; main hash 6dbecd4913d6d7df, the current manifest value) and #795 (§6 copy). The N1a row closes (#784 and #785 merged).
+- Register batch: L7 handover findings (six IPC actions writing unread root fields; inert supply_below events and supply_delta), the A2b follow-ups (after #768), the §6 E4 status (round 3 landed; round 5 on the Deliberate Force double carrier), and the roster update (#796 READY; 2c measured on top of 2a because 2c alone breaches Farz).
+- Codex sweep 16: one new inline comment, on #793 (r4596868020, §6 E2); open threads otherwise #774 x3 and #747 x1; #776 fixed on its head.
 
 ## 2026-11-16 — `address_to_nation_rbih` closing line made year-neutral
 
@@ -588,6 +717,53 @@ Evidence: `C:/Pyrrhic/AWWV-worktrees/_logs/batch-b-20261116/` (b4_*).
 - **Emergent scenario copy:** not committed. Recreate it as `data/scenarios/apr1992_definitive_188w.json` with `scenario_id` `apr1992_definitive_188w_emergent` and `"decision_mode": "emergent"`.
 - **Data finding (not changed here).** Historian: at t76 (Sept 1993) Pale went along with Belgrade (BB1 pp.47-48), so the authored default `defy_belgrade_directive` of `rs_belgrade_pressure_response_1993` is itself wrong. It is routed to the events/calibration owner.
 
+## 2026-11-16 — B5 political gate: a player's political departure opens the divergence gate for the bots whose history it rules out (historical byte-identical; hands-off emergent unchanged)
+
+- **Why.** #727's gate opens only when the map leaves history's territory band. A player who diverged politically without moving the map 3 pp would face bots replaying a history the player's choices had made impossible: an RBiH President who keeps the alliance with HRHB, or who rejects Vance-Owen. That weakened the "agency if played" half of the owner rule. In four played harness runs no player lever moved the map 3 pp, so the territory gate never opened there.
+- **Rulings** (game designer + historian, 2026-11-16).
+  - Use fixed markers, not a curve: the alliance has no painted reference, and a curve baked from our own run would be fitted to itself.
+  - **Choice markers** are the player's own pick of a listed departure response. **State marker:** no 1993 Croat-Bosniak war by turn 80.
+  - Each marker opens only the factions whose history it rules out. The threshold is unchanged once open.
+  - **§6 carve-out:** the political opening never applies to §6-sensitive decisions.
+  - Historian's markers and bases are in the table in `political_departure_markers.ts` (BB1 pp.44, 59, 218, 219; BB2 p.470; Prlić IT-04-74-T). Too weak to count: week-0 identity picks, the London conference, "reluctant" Washington answers, the Owen-Stoltenberg Presidency stage, "with modifications/reservations" answers, and RS Washington counter-proposals.
+- **Change.**
+  - New `src/sim/political/political_departure_markers.ts`: `POLITICAL_DEPARTURE_MARKERS`, the state marker, `POLITICAL_GATE_EXCLUDED_EVENT_IDS`, `isPoliticalGateEligible`, `isPoliticsOffHistoryFor`.
+  - `evaluate_events.ts`: the gate is the territory band OR (not §6) a political departure for the responding faction.
+  - `peace_plans.ts`: the same, for the scored plan step.
+  - Systems Manual §7.10.7 gains the paragraph.
+  - Harness: opt-in `--event-override <event>=<response>` on `tools/ai_play/desktop_calibration_compare.ts`, inert without the flag.
+- **Proof** (main `4866a4279` + #727; logs `C:/Pyrrhic/AWWV-worktrees/_logs/b5-scorer-20261116/pb_*`).
+  - Stop condition checked: left alone, `croat_bosniak_war_begins_1993` fires at **t49**, in both historical and emergent.
+  - Historical 188w byte-identical: `83b8e8cd36023899`.
+  - Hands-off emergent unchanged from #727: `25176ce62fdcca94`.
+  - **Played** (RBiH President, `staff_recommended`, autonomy as in production, 188 turns). The control and the run that rejects Vance-Owen at t39 differ in exactly three decisions:
+    - the player's own rejection;
+    - t76 RS `accept_belgrade_directive` (history: `defy_belgrade_directive`);
+    - t89 HRHB `sue_for_peace_hrhb` (history: `press_croat_objectives`).
+    These are the opened factions' picks whose margins (4.42, 3.84) beat their thresholds (3.0, 1.33). No §6 decision moves. The control run matches history.
+  - Tests: new `tests/sim/political/political_departure_markers.test.ts` pins the table to the event data, the state-marker turn to the event window, left alone closed, the faction scope, softer variants, and the §6 carve-out. Political, events and peace-plan slices: 23 files, 321 tests pass. tsc clean.
+- **§6 panel, round 1.** Historian and Red-team voted NO-GO because the carve-out list was incomplete: a choice marker is cheaper than moving the map, so rejecting Vance-Owen at t39 would have opened RS for the 1995 hostage and siege-gun decisions. Applied:
+  - Carved out as well: `un_hostage_crisis_1995`, `deliberate_force_rs_compliance_1995`, `rbih_nato_ultimatum_compliance_1994`, `rs_strategic_goals`, and every Ring-3 sensitive family.
+  - A completeness test makes every gate-reachable event flagged by the §4 classifier either carved out or on `POLITICAL_GATE_REVIEWED_ALLOWED_EVENT_IDS` (ten peace-plan answers and political or posture decisions, each with a reason).
+  - The state marker reads `rbih_hrhb_state.war_started_turn` (engine seat).
+  - Canon: a §6 record row and the §7.10.7 wording.
+  - Engine note, recorded: the harness `bot_equivalent` policy logs its answers as `'player'`, so in a harness run with the band open the player-side run can open markers the headless run never does. This is harness-only; a desktop player's rows are their own picks.
+- **§6 panel, round 2: unanimous GO.** Canon COMPLIANT WITH AMENDMENT, applied.
+  - The historian read all ten allow-listed events' options and ruled that none depicts or enables an atrocity.
+  - The allow-list ids are now pinned to real events by the test.
+  - The §6 record row names the ten ids and the round-2 outcome.
+  - The stale "to be ratified" comment is fixed.
+  - The round-1 re-measure's emergent run (`pb2_emer`) failed on a missing untracked scenario copy, so the emergent evidence is `pb3_emer` = `m4_main_emer`.
+  - Advisories, not blocking: "clearance operations" in `abdic_apwb_declared_1993` would read better as "operations"; a scenario that starts after t80 without seeding `war_started_turn` would open the state marker on load (not a regression).
+- **Re-confirmed on main `71ffa0cb8`** (#727 and #710 merged; `pb3_*` logs).
+  - Historical 188w is byte-identical to main's pin, `03159b9ee1e5877f`.
+  - Hands-off emergent is identical to main's emergent, `dde641b2c74838f0`.
+  - The played pair still differs in exactly the three decisions.
+- **Re-measured on main `7c1aca20b`** (after #782; main pins historical `2c63bd10fecd6bc7`, emergent `bfcbfa55dd206585`; logs `pg6_*`).
+  - Historical and emergent 188w: 709/709/708/682 each, guard intact (cascade 31).
+  - Both runs are byte-identical to main: after the re-pin the baselines manifest equals main's file exactly, so there is no emergent movement.
+  - A second run matches. tsc clean.
+
 ## 2026-11-16 — B5 scorer fixes 1-3: the emergent political scorer reads territory trend, exhaustion and the patron term in the state's own units (historical byte-identical, emergent hash-identical)
 
 - **Why.** The Batch B emergent triage (B5) found three unit and order defects in the political scorer that emergent bots, peace-plan responses and political-logic events use. Each made the scorer less tied to game state than its comments say. None decided a pick on its own.
@@ -667,6 +843,47 @@ Measuring it found a second fault, older than this change and present in the shi
 - **Fix.** Equal power breaks by `strictCompare` on formation id, in both copies. The two must stay identical.
 - **Proof.** One 188-week run on main `278e4eb55` gives final state hash `518de17970af5914`, the same as main. The canonical run has no tie that the old order resolved differently, so there is no re-pin.
 - **Tests.** New `tests/rank_defenders_tiebreak.test.ts`: tied twins rank by id in either input order, with the same total; a stronger defender still ranks first whatever its id. The first case fails on the old code. `operation_preparation_force_ratio` and `bot_orders_perf_profile` pass. tsc is clean.
+
+## 2026-11-16 — C8 F1i: `political.enclaves` reads OSID supply; its unsound readers retired (§6 panel, unanimous; control-identical)
+
+- **Defect** (same class as #617, from the RF-F1 SID sweep):
+  - `update-enclave-integrity` passed the legacy settlement edges and the legacy `supply_state` into `updateEnclaveIntegrity`. Political control is keyed by OSID, so no controlled OSID was ever "critical" and `political.enclaves` was `[]` every turn.
+- **Root fix:** read `supply_state_by_osid` and the operational graph edges.
+- **What the revived readers did** (main 7bfe7fa6d vs root fix only, one historical 188w; evidence in the session notes):
+  - Control stayed byte-identical and the enclave guard stayed intact.
+  - **IVP:** the detector's pressure stacked on the hand-curated `enclave_resilience` fallback (a double count). The term saturated at 1.0 on all 188 turns. `drina_blockade` fired at t1 instead of t8, sanctions at t17 instead of t30, and RS patron commitment fell from 0.41 to 0.28.
+  - **Capital:** the penalty fell on the besieged party. RBiH went from 120 to 59 at t10 and HRHB from 99 to 17 at t60, driven by about 30 one-OSID mixed-control "enclaves" on t1 and by the 1993 Lašva pockets.
+  - **Convoys and the tunnel activator:** inert.
+  - The detector marks Srebrenica, Žepa and Goražde "collapsed" (integrity floor) long before history does.
+- **§6 panel** (historian, scenario-creator-runner-tester, engine/systems, red-team, canon-compliance): unanimous GO on package A' in round 2. Option C (a filtered detector) was vetoed.
+  - Keep the root fix.
+  - IVP reads `enclave_resilience` only.
+  - Retire the capital enclave penalty (its zero ledger row stays, so ledger ids are unchanged).
+  - Retire humanitarian convoys. They are dead in every reachable path: they run only with `supply_reserves_enabled`, which is true only in sep1991 and jan1993, which no player can start, and even there they read legacy SID edges and never route.
+  - Retire the enclave-derived Sarajevo tunnel activation; the `sarajevo_tunnel_operational` flag stays.
+  - Nothing reads `political.enclaves` any more.
+- **Convoy UI: retired with the family** (orchestrator ruling option 1: the convergence diagnostic stays unweakened, no carve-outs).
+  - Removed: the `convoy_decision` manifest family, `ConvoyDecisionModal`, the `stage-convoy-decision` IPC (`convoy_ipc_contract.cjs`, electron-main, preload, useIPC), the inbox/desk/records/War Summary/SituationTab convoy entries, command art, 71 i18n keys (EN and BCS), the cadence projection and the QA/browser tool entries.
+  - The convergence diagnostic counts 10 families, all durable and source-verified.
+  - The convoy save fields stay optional (`compatibility-only`). `tests/f1i_convoy_save_compat.test.ts` loads a v26 save carrying a pending convoy and a filed one through the real load path, and shows no convoy anywhere a player can see.
+  - Seats: canon APPROVE-WITH-CHANGES (applied: SM l.927, MAP_UI_MASTER, WARROOM_MASTER), ui-ux (see the PR).
+- **Canon** (same change):
+  - Rulebook l.515/545: convoys "not modelled in 1.0".
+  - Systems Manual: the supply-agency note, the state list, System 5 (OSID detection; `collapsed` means "integrity floor reached", not fallen; §6 review for any reader; known defects) and System 7 (no enclave term in capital).
+  - PLAYER_TURN_GUIDE: the convoy step row is removed.
+  - context.md.
+  - No FORAWWV record or broader bright-line panel (canon seat).
+- **Measured** (fresh main 7588468dd = `83b8e8cd36023899` vs A' = `2afce5e4fb86b3ce`; re-measured after merging main 71ffa0cb8 = `03159b9ee1e5877f` vs `7c79f84d4ce3d084`, after merging main c38277368 = `3b4685bc356210d5` vs `36495534a9045b71` historical and `008a2ef97cf33d80` vs `0159d1847693a28c` emergent, and after merging main 08f486ae9 (with the siege retirement #787) = `2c63bd10fecd6bc7` vs `6dbecd4913d6d7df` historical and `bfcbfa55dd206585` vs `2520bda37cdea54b` emergent; same result each time, re-pinned):
+  - The only difference in the final save is `political.enclaves`.
+  - control_delta, formation_delta, activity_summary, operation_aars and weekly_report are byte-identical, so IVP, capital, patron, consequences and the negotiation ledger equal main on every turn.
+  - Guards equal main.
+  - sep1991 1-week start runs (its only difference from main is the run path). jan1993 fails on main too (J1, missing control file).
+- **Registered, not fixed:**
+  - Enclave identity is keyed by `settlement_ids[0]` (history resets when that OSID falls).
+  - `supplyScore` is fixed at 0.
+  - EI §12.2 gap: `enclave_resilience` pressure is linear and falls as a siege goes on.
+  - On main, `drina_blockade` fires at t8 (history: August 1994) and sanctions drop by t70.
+  - The IVP ×0.7 Sarajevo modifier reads only the tunnel flag, never the tunnel event.
 
 ## 2026-11-16 — F7b: the Army HQ plan's army stance and aggression modifier retired (freeze Batch C1b; control-identical)
 
@@ -1384,6 +1601,52 @@ No behaviour change: comments and canon text only, so the simulation hash is unc
     - 18 requests, 1 stop.
 - **Held tuning order:** NOT triggered. The trigger to tighten further (remove the 15-point reserve, then the income) was "the engaged President never falls below 25". B now falls to 6.5, and B's at-cap share of 13% is inside the ≤25% target. The earlier run, with gestures open from week 0 and priced at 10, had B at a minimum of 65.5.
 - **Logs:** `C:/Pyrrhic/AWWV-worktrees/_logs/three-president-20261116/`.
+
+## 2026-11-16 — Washington Path A': the signed cards on a quiet front sign the agreement (byte-identical left alone)
+
+- **Why.** In a played game where the HRHB President mended the alliance (probe `a2_probe2_hrhb_united`, on main), both Washington cards fired and were accepted at t102. The HRHB card's alliance +0.8 lifted the alliance to 0.82. But `washington_signed` stayed false until t112: Path A waits for an engine ceasefire (`bilateral_ceasefire` C1 needs 45 weeks of war, so 63 + 45 = t108) and then four more weeks (W2). For ten weeks the cards said "signed" while the engine withheld the Federation.
+- **Panel** (game designer and historian, 2026-11-16).
+  - Path A' fires once when all of these hold:
+    - Washington is not yet signed;
+    - a war was fought;
+    - turn ≥ 102;
+    - the front is quiet (`stalemate_turns` ≥ 4, or a held ceasefire ≥ 4 weeks);
+    - HRHB acknowledged `zagreb_orders_hrhb_ceasefire` (Zagreb's restraint);
+    - both Washington cards were signed (accept or reluctant);
+    - the alliance is > 0.20.
+  - Effects are Path A's, ceasefire included.
+  - N = 4 matches W2. The historical ceasefire, framework and signing came 1-3.5 weeks apart.
+- **Change.**
+  - `src/sim/early_war/washington_agreement.ts`: `evaluateWashingtonQuietFront` and `WASH_QUIET_FRONT_TURNS`; `trigger_path: 'quiet_front'`. Answers are read from `event_decision_log`, last answer wins (every bot, auto and player route writes it); no new state.
+  - `tools/scenario_runner/run_baseline_regression.ts`: `assertHistoricalWashingtonBeforeQuietFrontWindow`. The historical 188w run must sign before t102, or both the compare and the re-pin fail loudly.
+  - Canon: Systems Manual, Washington implementation note.
+- **Measured** (logs `C:/Pyrrhic/AWWV-worktrees/_logs/b5-scorer-20261116/qf_*`).
+  - Re-proved 2026-11-17 on main `08f486ae9` merged in (after #735, #782, #784, #787): historical 188w `2c63bd10fecd6bc7`, emergent `bfcbfa55dd206585`: byte-identical to main (`npm run test:baselines`: "all scenarios match"; manifest unchanged by this PR). Both sign through Path A at t98; the historical guard did not throw.
+  - Played pair (HRHB President: united_front, formal_alliance_persists, Gornji Vakuf negotiate; staff_recommended; 130 turns; logs `_logs/b5-scorer-20261116/land763/{ack,refuse}`):
+    - Zagreb `acknowledge_pressure` (t95): Washington signs at **t102** through Path A' (ceasefire from t102; alliance 0.90 at t130). On main the same game signed at t112.
+    - Zagreb `resist_patron` (t95, refuse): signs at **t112** (ceasefire from t108), the old Path A date. Zagreb fires at t95 on both.
+- **Copy: the cards become the framework step** (orchestrator condition 1, 2026-11-17).
+  - The panel: the narrative designer drafted the copy and gave a round-2 GO with amendments; the historian gave GO with amendments (BB Vol. I p.18, Vol. II pp.450-451). Both seats' amendments were integrated.
+  - **Cards.** Both Washington cards now present the framework step ("Washington Framework Agreed" / "Sarajevo and the Washington Framework"), through display-time `localizations` in EN and BCS.
+    - Their present tense says only what holds in both orders: the engine formed the Federation first (left alone: t98, then the cards at t102) or later (played).
+    - Dates go in the record register: the Zagreb ceasefire on 23 Feb (in force 25 Feb), the framework on 1 Mar, the Federation accords on 18 Mar.
+  - **HRHB `effects` narrative (EN).** It no longer claims the war ended or that supply pipelines opened; the card has no such supply effect.
+  - **RBiH `future_consequences`.** These no longer promise the 1995 offensives. "Within days" is now tied to the 1 March signing.
+  - **War-room strings** (declaration modal, headline, ticker, Diplomacy tracker label). They fire on the engine's flip, so they announce the state, "FEDERATION FORMED / The Croat-Bosniak war is over", with no dated signing. A left-alone run flips at week 98, before the historical ceasefire.
+    - **State-chosen** (orchestrator, 2026-11-17). Four paths flip `washington_signed`: A, B and A' follow a war; Path C (#737) forms the Federation with no war fought.
+      - The turn event carries `warFought` (`war_started_turn` set).
+      - With a war, the milestone modal uses `washington_agreement`; with no war, `washington_consent`. The headline and ticker choose the same way.
+      - Path C text (narrative seat): "FEDERATION FORMED / The ARBiH-HVO alliance becomes a federation". It says nothing about a war ending; the historical breakdown into war is stated in the record register.
+      - The Path C headline photo caption ("HVO and ARBiH officers meet in Central Bosnia") is integrator wording.
+      - Test: `tests/ui/warroom_federation_formed_copy.test.ts`.
+    - The war-room surfaces are EN-only constants with no locale path; this goes on the BCS gap list (W4 allowlist). The panel's BCS war-room text is in `washington_framework_copy_integrated.json` (shared notes) for the UI lane.
+  - **Fixes the seats found in the old copy:**
+    - HRHB "preserved autonomy" and "supply pipelines open" had no mechanic behind them;
+    - RBiH reluctant costs more cohesion (−10) than accept (−5);
+    - the entity name is HR HB, not HZ HB;
+    - the unsourced hardliner attribution is removed.
+  - **Measured:** byte-identical (historical `2c63bd10fecd6bc7`, emergent `bfcbfa55dd206585`).
+- **Tests.** `tests/washington_quiet_front.test.ts` (9): fires with Path A effects; a held ceasefire counts; reluctant counts; closed before t102, without a war, below 0.20, on a fighting front, without Zagreb's restraint (resist or no answer), or with one card unsigned; never twice; the historical guard passes at t98 and throws at t102 or when unsigned.
 
 ## 2026-11-16 — Zombie TG: a TG anchored by another corps' brigade dissolves with its operation (must-fix, measured)
 

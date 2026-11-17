@@ -25,7 +25,6 @@ function record(family: string, familyId: DecisionConsequenceFamilyId): Decision
 describe('presidential desk assets', () => {
   it('maps desk packet inbox types to packet thumbnails', () => {
     expect(getPacketThumbnailForInboxType('paramilitary_request')).toContain('packet_thumb_paramilitary');
-    expect(getPacketThumbnailForInboxType('convoy_decision')).toContain('packet_thumb_convoy');
     expect(getPacketThumbnailForInboxType('intelligence_notification')).toContain('packet_thumb_intelligence');
     expect(getPacketThumbnailForInboxType('situation')).toContain('packet_thumb_event_decision');
     expect(getPacketThumbnailForInboxType('operation_opportunity')).toContain('consequence_reserve_deployment');
@@ -43,7 +42,6 @@ describe('presidential desk assets', () => {
   it('maps filed consequence records to consequence stills', () => {
     expect(getConsequenceStillForRecord(record('Peace proposal', 'peace-proposal'))).toContain('consequence_negotiated_settlement');
     expect(getConsequenceStillForRecord(record('Army reserve', 'army-reserve'))).toContain('consequence_reserve_deployment');
-    expect(getConsequenceStillForRecord(record('Humanitarian convoy', 'humanitarian-convoy'))).toContain('consequence_humanitarian_access');
     expect(getConsequenceStillForRecord(record('Officer personnel', 'officer-personnel'))).toContain('consequence_personnel_change');
     expect(getConsequenceStillForRecord(record('Event decision', 'event-decision'))).toContain('consequence_public_pressure');
   });

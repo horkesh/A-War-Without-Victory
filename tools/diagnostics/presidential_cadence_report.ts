@@ -167,11 +167,6 @@ function projectionState(state: GameState): PresidentialCadenceProjectionState {
       faction: entry.faction,
       turn: entry.turn,
     })),
-    convoyDecisionHistory: (state.military.convoy_decision_history ?? []).map((entry) => ({
-      id: entry.id,
-      routeFaction: entry.route_faction,
-      turn: entry.turn,
-    })),
     paramilitaryDecisionHistory: (state.paramilitary_decision_history ?? []).map((entry) => ({
       id: entry.id,
       faction: entry.faction,

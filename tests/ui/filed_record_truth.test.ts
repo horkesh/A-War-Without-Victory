@@ -30,7 +30,7 @@ function makeState(overrides: Partial<LoadedGameState> = {}): LoadedGameState {
 }
 
 describe('filed record truth', () => {
-  it('does not treat bot-only convoy or army-AI reserve histories as player-filed records', () => {
+  it('does not treat army-AI reserve histories as player-filed records', () => {
     const state = makeState({
       reserveRequestHistory: [
         {
@@ -45,18 +45,6 @@ describe('filed record truth', () => {
           purpose: 'defensive',
           why_needed: 'AI filed this decision.',
           how_to_use: '',
-        },
-      ],
-      convoyDecisionHistory: [
-        {
-          id: 'convoy:64:srebrenica:RS',
-          turn: 64,
-          target_enclave: 'Srebrenica enclave',
-          route_faction: 'RS',
-          target_faction: 'RBiH',
-          supply_amount: 0.5,
-          decision: 'allow',
-          decided_by: 'bot',
         },
       ],
     } as Partial<LoadedGameState>);
