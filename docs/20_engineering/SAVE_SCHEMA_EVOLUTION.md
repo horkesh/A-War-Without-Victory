@@ -1,5 +1,14 @@
 # Save Schema Evolution
 
+## v41 — in-sim peace phase retired (2026-11-17)
+
+`CURRENT_SCHEMA_VERSION` 40 → 41. Since v40 no scenario can start in peace, so the in-sim peace phase was unreachable. Its engine (`runOneTurn` in `src/state/turn_pipeline.ts`, the no-op handlers in `src/state/turn_phases.ts`, `src/state/phase_gates.ts`, the scenario runner's peace branch), its UI and its bookkeeping are removed. `PhaseName` is now `'war'` only and the validator rejects `meta.phase: 'peace'` (no migration step converts a peace save; none can be produced since v40). Migration v41 (`src/state/save_migration.ts`) deletes:
+- `meta`: `referendum_held`, `referendum_turn`, `referendum_eligible_turn`, `referendum_deadline_turn`, `peace_scheduled_referendum_turn`, `peace_scheduled_war_start_turn`, `war_opposing_edges_streak`, `war_force_transition_after_turns`, `war_entrenchment_init_turns`, `peace_end_turn`, `war_start_lifecycle_phase_turn`, `escalation_reason`;
+- each faction: `prewar_capital`, `declaration_pressure`, `declaration_turn`;
+- `political`: `phase0_relationships`, `phase0_events_log`.
+
+Kept because war code reads them: `meta.war_start_turn`, `meta.game_over`, `meta.outcome`, `faction.declared`. The field lists live in `src/state/peace_phase_retired_fields.ts` (shared by the migration, the validator and the tests). The v3 step still writes its old defaults, so any older save steps through the chain unchanged and v41 then removes them. The migration is forward-only, deterministic and idempotent; no field is added. The validator stops requiring the v3 peace fields from v41 (`retiredAtVersion: 41`), still type-checks them on pre-v41 saves, and rejects any of the listed meta, faction or political fields on a v41 state. The startup snapshot is rebuilt at v41. Fixture: `tests/fixtures/save_migration/v40_peace_phase_fields_retired.json` (carries every deleted field, on all three factions). Test: `tests/peace_phase_retired.test.ts`.
+
 ## v40 — September 1991 peace start retired (2026-11-16)
 
 `CURRENT_SCHEMA_VERSION` 39 → 40. The September 1991 peace start was cut as playable content by the campaign structure decision of 2026-03-23 (`PROJECT_LEDGER_KNOWLEDGE.md`); its scenario (`sep1991_to_dayton.json`), registry entry, the runner's peace-start block, the peace-to-war control-map read and the `peace_*` scenario fields are now removed, and the loader rejects `start_lifecycle_phase: "peace"`. Migration v40 (`src/state/save_migration.ts`):

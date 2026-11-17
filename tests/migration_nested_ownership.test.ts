@@ -9,13 +9,7 @@ function migrationFixture(overrides: Record<string, unknown> = {}): Record<strin
         meta: {
             turn: 5,
             seed: 'migration-fixture',
-            referendum_held: false,
-            referendum_turn: null,
             war_start_turn: null,
-            peace_scheduled_referendum_turn: null,
-            peace_scheduled_war_start_turn: null,
-            referendum_eligible_turn: null,
-            referendum_deadline_turn: null,
             game_over: false,
             player_faction: 'RBiH',
             decision_mode: 'historical',
@@ -28,9 +22,7 @@ function migrationFixture(overrides: Record<string, unknown> = {}): Record<strin
                 supply_sources: [],
                 command_capacity: 0,
                 negotiation: { pressure: 0, last_change_turn: null, capital: 0, spent_total: 0, last_capital_change_turn: null },
-                declaration_pressure: 0,
                 declared: false,
-                declaration_turn: null,
             },
             {
                 id: 'RS',
@@ -39,9 +31,7 @@ function migrationFixture(overrides: Record<string, unknown> = {}): Record<strin
                 supply_sources: [],
                 command_capacity: 0,
                 negotiation: { pressure: 0, last_change_turn: null, capital: 0, spent_total: 0, last_capital_change_turn: null },
-                declaration_pressure: 0,
                 declared: false,
-                declaration_turn: null,
             },
         ],
         military: {

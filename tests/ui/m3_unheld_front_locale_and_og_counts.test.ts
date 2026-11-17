@@ -34,7 +34,7 @@ function saveJson(): string {
             profile: { authority: 0.5, legitimacy: 0.5, control: 0.5, logistics: 0.5, exhaustion: 0.1 },
             areasOfResponsibility: [], supply_sources: [], command_capacity: 3,
             negotiation: { pressure: 0, last_change_turn: null, capital: 0, spent_total: 0, last_capital_change_turn: null },
-            declaration_pressure: 0, declared: true, declaration_turn: 0,
+            declared: true,
         }],
         military: {
             formations: {

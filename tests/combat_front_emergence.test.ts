@@ -16,15 +16,13 @@ import {
 import type { GameState } from '../src/state/game_state.js';
 import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 
-function minimalState(phase: 'peace' | 'war', controllers?: Record<string, string | null>): GameState {
+function minimalState(phase: 'war', controllers?: Record<string, string | null>): GameState {
     return {
         schema_version: CURRENT_SCHEMA_VERSION,
         meta: {
             turn: 20,
             seed: 'fe-test',
             phase,
-            referendum_held: true,
-            referendum_turn: 6,
             war_start_turn: 10,
         },
         factions: [
@@ -48,18 +46,6 @@ function minimalState(phase: 'peace' | 'war', controllers?: Record<string, strin
 }
 
 describe('front emergence and stabilization', () => {
-    it('returns empty when meta.phase is peace', () => {
-        const state = minimalState('war');
-        state.meta.phase = 'peace';
-        const edges: EdgeRecord[] = [{ a: 'S1', b: 'S2' }];
-        expect(detectFronts(state, edges)).toEqual([]);
-    });
-
-    it('returns empty in phase_0 state', () => {
-        const state = minimalState('peace');
-        const edges: EdgeRecord[] = [{ a: 'S1', b: 'S2' }];
-        expect(detectFronts(state, edges)).toEqual([]);
-    });
 
     it('returns empty when there is no opposing control', () => {
         const state = minimalState('war', { S1: 'RBiH', S2: 'RBiH', S3: 'RBiH' });

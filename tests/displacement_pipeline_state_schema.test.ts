@@ -20,11 +20,7 @@ function phaseFGameStateFixture(): GameState {
             turn: 30,
             seed: 'phase-f-fixture',
             phase: 'war',
-            referendum_held: true,
-            referendum_turn: 6,
             war_start_turn: 10,
-            referendum_eligible_turn: null,
-            referendum_deadline_turn: null,
             game_over: false,
             outcome: undefined,
             player_faction: 'RBiH',
@@ -38,10 +34,7 @@ function phaseFGameStateFixture(): GameState {
                 supply_sources: [],
                 command_capacity: 0,
                 negotiation: { pressure: 0, last_change_turn: null, capital: 0, spent_total: 0, last_capital_change_turn: null },
-                prewar_capital: 70,
-                declaration_pressure: 0,
                 declared: false,
-                declaration_turn: null
             },
             {
                 id: 'RS',
@@ -50,10 +43,7 @@ function phaseFGameStateFixture(): GameState {
                 supply_sources: [],
                 command_capacity: 0,
                 negotiation: { pressure: 0, last_change_turn: null, capital: 0, spent_total: 0, last_capital_change_turn: null },
-                prewar_capital: 100,
-                declaration_pressure: 0,
                 declared: false,
-                declaration_turn: null
             },
             {
                 id: 'HRHB',
@@ -62,10 +52,7 @@ function phaseFGameStateFixture(): GameState {
                 supply_sources: [],
                 command_capacity: 0,
                 negotiation: { pressure: 0, last_change_turn: null, capital: 0, spent_total: 0, last_capital_change_turn: null },
-                prewar_capital: 40,
-                declaration_pressure: 0,
                 declared: false,
-                declaration_turn: null
             }
         ],
   military: {

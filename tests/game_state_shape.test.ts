@@ -41,7 +41,7 @@ describe('validateGameStateShape canonical shape', () => {
 
     it('returns ok when meta.phase is set to known value', () => {
         const state = minimalValidGameState();
-        state.meta.phase = 'peace';
+        state.meta.phase = 'war';
         const result = validateGameStateShape(state);
         expect(result.ok).toBe(true);
     });

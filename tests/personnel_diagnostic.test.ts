@@ -197,7 +197,7 @@ describe('personnel stdout diagnostics', () => {
     it('preserves full runTurn state, return/report, and serialized bytes with a throwing stdout sink', async () => {
         const runState = (): GameState => ({
             schema_version: CURRENT_SCHEMA_VERSION,
-            meta: { turn: 20, seed: 'personnel-real-entry', phase: 'war', recruitment_mode: 'player_choice', referendum_held: true, referendum_turn: 6, war_start_turn: 10 },
+            meta: { turn: 20, seed: 'personnel-real-entry', phase: 'war', recruitment_mode: 'player_choice', war_start_turn: 10 },
             factions: [
                 { id: 'RBiH', profile: { authority: 10, legitimacy: 10, control: 10, logistics: 10, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] },
                 { id: 'RS', profile: { authority: 10, legitimacy: 10, control: 10, logistics: 10, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] },
@@ -221,7 +221,7 @@ describe('personnel stdout diagnostics', () => {
     it('keeps movement diagnostics byte-for-byte stable while independently selecting personnel sources and writers', async () => {
         const runState = (): GameState => ({
             schema_version: CURRENT_SCHEMA_VERSION,
-            meta: { turn: 20, seed: 'selector-independence', phase: 'war', recruitment_mode: 'player_choice', referendum_held: true, referendum_turn: 6, war_start_turn: 10 },
+            meta: { turn: 20, seed: 'selector-independence', phase: 'war', recruitment_mode: 'player_choice', war_start_turn: 10 },
             factions: [
                 { id: 'RBiH', profile: { authority: 10, legitimacy: 10, control: 10, logistics: 10, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] },
                 { id: 'RS', profile: { authority: 10, legitimacy: 10, control: 10, logistics: 10, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] },

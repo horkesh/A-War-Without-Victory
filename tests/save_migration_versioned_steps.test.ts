@@ -73,7 +73,7 @@ describe('versioned save migration steps', () => {
 
     it('bumps GameState schema to the latest registered migration', () => {
         expect(CURRENT_SCHEMA_VERSION).toBe(getLatestSchemaVersion());
-        expect(getLatestSchemaVersion()).toBe(40);
+        expect(getLatestSchemaVersion()).toBe(41);
     });
 
     it('materializes legacy defaults through versioned registry steps', () => {
@@ -82,10 +82,12 @@ describe('versioned save migration steps', () => {
         applyMigrations(state);
 
         expect(state.schema_version).toBe(CURRENT_SCHEMA_VERSION);
-        expect(state.meta.referendum_held).toBe(false);
+        // v3 defaults the peace-phase fields; v41 then deletes them.
+        expect(state.meta).not.toHaveProperty('referendum_held');
         expect(state.meta.game_over).toBe(false);
         expect(state.factions[0].id).toBe('RBiH');
-        expect(state.factions[0].declaration_pressure).toBe(0);
+        expect(state.factions[0]).not.toHaveProperty('declaration_pressure');
+        expect(state.factions[0].declared).toBe(false);
         expect(state.factions[0].negotiation.capital).toBe(0);
         expect(state.military.theatres).toEqual({});
         expect(state.military.assignable_front_segments).toEqual([]);

@@ -106,8 +106,6 @@ function pipelineState(): GameState {
       seed: 'presidential-initiative-inert-fixture',
       phase: 'war',
       player_faction: 'RS',
-      referendum_held: true,
-      referendum_turn: 6,
       war_start_turn: 10,
     },
     factions: [
@@ -117,7 +115,6 @@ function pipelineState(): GameState {
         areasOfResponsibility: [],
         supply_sources: [],
         declared: false,
-        declaration_turn: null,
       },
       {
         id: 'RS',
@@ -125,7 +122,6 @@ function pipelineState(): GameState {
         areasOfResponsibility: [],
         supply_sources: [],
         declared: true,
-        declaration_turn: 5,
       },
       {
         id: 'HRHB',
@@ -133,7 +129,6 @@ function pipelineState(): GameState {
         areasOfResponsibility: [],
         supply_sources: [],
         declared: false,
-        declaration_turn: null,
       },
     ],
     military: {

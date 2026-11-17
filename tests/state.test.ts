@@ -10,13 +10,7 @@ const baseState: GameState = {
     meta: {
         turn: 0,
         seed: 'initial-seed',
-        referendum_held: false,
-        referendum_turn: null,
         war_start_turn: null,
-        peace_scheduled_referendum_turn: null,
-        peace_scheduled_war_start_turn: null,
-        referendum_eligible_turn: null,
-        referendum_deadline_turn: null,
         game_over: false,
         player_faction: 'RBiH',
         decision_mode: 'historical',
@@ -35,9 +29,7 @@ const baseState: GameState = {
             supply_sources: [],
             command_capacity: 0,
             negotiation: { pressure: 0, last_change_turn: null, capital: 0, spent_total: 0, last_capital_change_turn: null },
-            declaration_pressure: 0,
             declared: false,
-            declaration_turn: null,
         },
     ],
     military: {
@@ -235,9 +227,7 @@ describe('state serialization contracts', () => {
                 supply_sources: [],
                 command_capacity: 0,
                 negotiation: { pressure: 0, last_change_turn: null, capital: 0, spent_total: 0, last_capital_change_turn: null },
-                declaration_pressure: 0,
                 declared: false,
-                declaration_turn: null,
             },
             {
                 id: 'RS',
@@ -252,9 +242,7 @@ describe('state serialization contracts', () => {
                 supply_sources: [],
                 command_capacity: 0,
                 negotiation: { pressure: 0, last_change_turn: null, capital: 0, spent_total: 0, last_capital_change_turn: null },
-                declaration_pressure: 0,
                 declared: false,
-                declaration_turn: null,
             },
         ] as any;
         original.military.formations = {

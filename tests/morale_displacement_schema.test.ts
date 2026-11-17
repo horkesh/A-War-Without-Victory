@@ -38,11 +38,7 @@ function minimalFixture(overrides?: {
             turn: 10,
             seed: 'morale-test',
             phase: 'war',
-            referendum_held: true,
-            referendum_turn: 4,
             war_start_turn: 5,
-            referendum_eligible_turn: null,
-            referendum_deadline_turn: null,
             game_over: false,
             outcome: undefined
         },
@@ -54,10 +50,7 @@ function minimalFixture(overrides?: {
                 supply_sources: [],
                 command_capacity: 0,
                 negotiation: { pressure: 0, last_change_turn: null, capital: 0, spent_total: 0, last_capital_change_turn: null },
-                prewar_capital: 70,
-                declaration_pressure: 0,
                 declared: false,
-                declaration_turn: null
             }
         ],
         military: {

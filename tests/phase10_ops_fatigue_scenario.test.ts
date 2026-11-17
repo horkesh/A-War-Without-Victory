@@ -17,8 +17,6 @@ test('determinism: same fatigue scenario run twice produces identical scenario_s
             turn: 0,
             seed: 'determinism-test-seed',
             phase: 'war',
-            referendum_held: true,
-            referendum_turn: 0,
             war_start_turn: 0,
         },
         factions: [

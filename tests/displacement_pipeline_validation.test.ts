@@ -21,8 +21,6 @@ function minimalPhaseIIState(): GameState {
             turn: 20,
             seed: 'pf-val',
             phase: 'war',
-            referendum_held: true,
-            referendum_turn: 6,
             war_start_turn: 10
         },
   factions: [

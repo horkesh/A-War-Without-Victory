@@ -45,19 +45,19 @@ import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 function makeState(overrides?: Record<string, any>): GameState {
     const base = {
         schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 10, seed: 'hv-test', phase: 'war', referendum_held: true, war_start_turn: 1 },
+        meta: { turn: 10, seed: 'hv-test', phase: 'war', war_start_turn: 1 },
         factions: [
             {
                 id: 'RBiH', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 },
-                areasOfResponsibility: [], supply_sources: [], declared: false, declaration_turn: null
+                areasOfResponsibility: [], supply_sources: [], declared: false
             },
             {
                 id: 'RS', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 },
-                areasOfResponsibility: [], supply_sources: [], declared: true, declaration_turn: 1
+                areasOfResponsibility: [], supply_sources: [], declared: true
             },
             {
                 id: 'HRHB', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 },
-                areasOfResponsibility: [], supply_sources: [], declared: true, declaration_turn: 2,
+                areasOfResponsibility: [], supply_sources: [], declared: true,
                 patron_state: { material_support_level: 0.5, diplomatic_isolation: 0.2, constraint_severity: 0.3, patron_commitment: 0.5, last_updated: 5 }
             }
         ],
@@ -78,7 +78,7 @@ function makeState(overrides?: Record<string, any>): GameState {
 /** Create a state with Washington already signed at the given turn. */
 function makeWashingtonSignedState(washingtonTurn: number, currentTurn: number): GameState {
     const state = makeState({
-        meta: { turn: currentTurn, seed: 'hv-test', phase: 'war', referendum_held: true, war_start_turn: 1 },
+        meta: { turn: currentTurn, seed: 'hv-test', phase: 'war', war_start_turn: 1 },
     });
     ensureRbihHrhbState(state);
     state.political.political_controllers = {
@@ -408,7 +408,7 @@ describe('Washington patron override (Path B)', () => {
         const warStart = 10;
         const currentTurn = warStart + WASH_MIN_WAR_DURATION + 5;
         const state = makeState({
-            meta: { turn: currentTurn, seed: 'hv-test', phase: 'war', referendum_held: true, war_start_turn: 1 },
+            meta: { turn: currentTurn, seed: 'hv-test', phase: 'war', war_start_turn: 1 },
         });
         ensureRbihHrhbState(state);
 
@@ -443,7 +443,7 @@ describe('Washington patron override (Path B)', () => {
         const warStart = 10;
         const currentTurn = warStart + WASH_MIN_WAR_DURATION + 5;
         const state = makeState({
-            meta: { turn: currentTurn, seed: 'hv-test', phase: 'war', referendum_held: true, war_start_turn: 1 },
+            meta: { turn: currentTurn, seed: 'hv-test', phase: 'war', war_start_turn: 1 },
         });
         ensureRbihHrhbState(state);
 
@@ -478,7 +478,7 @@ describe('Washington patron override (Path B)', () => {
         const warStart = 10;
         const currentTurn = warStart + WASH_MIN_WAR_DURATION + 5;
         const state = makeState({
-            meta: { turn: currentTurn, seed: 'hv-test', phase: 'war', referendum_held: true, war_start_turn: 1 },
+            meta: { turn: currentTurn, seed: 'hv-test', phase: 'war', war_start_turn: 1 },
         });
         ensureRbihHrhbState(state);
         state.political.war_alliance_rbih_hrhb = -0.60;

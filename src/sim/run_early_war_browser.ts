@@ -48,14 +48,6 @@ export interface PhaseITurnReport {
     war_jna_transition?: JNATransitionReport;
 }
 
-function isEarlyWarAllowed(state: GameState): boolean {
-    const meta = state.meta;
-    if (!meta.referendum_held) return false;
-    const warStart = meta.war_start_turn;
-    if (warStart === undefined || warStart === null) return false;
-    return meta.turn >= warStart;
-}
-
 function assertNoAoRInEarlyWar(state: GameState): void {
     const factions = state.factions ?? [];
     for (const faction of factions) {
@@ -76,9 +68,6 @@ export async function runPhaseITurn(
     const working = cloneGameState(state);
     if (working.meta.phase !== 'war') {
         throw new Error('runPhaseITurn: state must be in war phase');
-    }
-    if (!isEarlyWarAllowed(working)) {
-        throw new Error('runPhaseITurn: Peace phase requires referendum_held and current_turn >= war_start_turn');
     }
     assertNoAoRInEarlyWar(working);
 

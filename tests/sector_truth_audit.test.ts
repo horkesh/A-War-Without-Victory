@@ -86,8 +86,6 @@ function makeState(formations: Record<string, FormationState>, frontEdges: GameS
             seed: 'sector-truth-audit',
             phase: 'war',
             scenario_start_date: { year: 1992, month: 4, day: 6 },
-            referendum_held: true,
-            referendum_turn: 1,
             war_start_turn: 1,
         },
         factions: [],
@@ -366,8 +364,6 @@ function makeSealingState(): { state: GameState; edges: EdgeRecord[] } {
             seed: 'sector-builder-sealing',
             phase: 'war',
             scenario_start_date: { year: 1992, month: 4, day: 6 },
-            referendum_held: true,
-            referendum_turn: 1,
             war_start_turn: 1,
         } as GameState['meta'],
         factions: [

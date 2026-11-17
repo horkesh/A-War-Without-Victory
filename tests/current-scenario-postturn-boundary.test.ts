@@ -15,7 +15,6 @@ type PublicTurnCapture = {
 
 const capture = vi.hoisted(() => ({
     publicTurns: [] as PublicTurnCapture[],
-    legacyTurns: [] as GameState[],
     observerStates: [] as GameState[],
     repairEntries: [] as Array<{ edgeCount: number; operationalEdgesOnly: boolean }>,
     flipApplications: [] as Array<{
@@ -112,18 +111,6 @@ vi.mock('../src/sim/turn_pipeline.js', async (importOriginal) => {
     };
 });
 
-vi.mock('../src/state/turn_pipeline.js', async (importOriginal) => {
-    const real = await importOriginal<typeof import('../src/state/turn_pipeline.js')>();
-    return {
-        ...real,
-        runOneTurn: (...args: Parameters<typeof real.runOneTurn>) => {
-            const result = real.runOneTurn(...args);
-            capture.legacyTurns.push(structuredClone(result.state));
-            return result;
-        },
-    };
-});
-
 import { loadOperationalEdges } from '../src/data/operational_data.js';
 import { assertFormationsInFriendlyTerritory } from '../src/sim/combat/assert_formation_territory.js';
 import { assertOperationLifecycle } from '../src/sim/combat/assert_operation_lifecycle.js';
@@ -206,7 +193,6 @@ async function cleanupTemporaryArtifactDirectory(path: string): Promise<void> {
 
 function resetCapture(): void {
     capture.publicTurns.length = 0;
-    capture.legacyTurns.length = 0;
     capture.observerStates.length = 0;
     capture.repairEntries.length = 0;
     capture.flipApplications.length = 0;
@@ -267,7 +253,6 @@ async function runObservedScenario(options: {
 }): Promise<{
     result: Awaited<ReturnType<typeof runScenario>>;
     publicTurns: PublicTurnCapture[];
-    legacyTurns: GameState[];
     observers: GameState[];
     weeklySaves: GameState[];
     repairEntries: Array<{ edgeCount: number; operationalEdgesOnly: boolean }>;
@@ -275,7 +260,6 @@ async function runObservedScenario(options: {
     outDir: string;
 }> {
     const publicStart = capture.publicTurns.length;
-    const legacyStart = capture.legacyTurns.length;
     const observerStart = capture.observerStates.length;
     const repairStart = capture.repairEntries.length;
     const flipStart = capture.flipApplications.length;
@@ -299,7 +283,6 @@ async function runObservedScenario(options: {
     return {
         result,
         publicTurns: capture.publicTurns.slice(publicStart),
-        legacyTurns: capture.legacyTurns.slice(legacyStart),
         observers: capture.observerStates.slice(observerStart),
         weeklySaves,
         repairEntries: capture.repairEntries.slice(repairStart),
@@ -333,7 +316,6 @@ describe('scenario post-turn repair gate', () => {
 
             for (const run of runs) {
                 expect(run.publicTurns).toHaveLength(2);
-                expect(run.legacyTurns).toHaveLength(0);
                 expect(run.observers).toHaveLength(2);
                 expect(run.weeklySaves).toHaveLength(2);
                 expect(run.flips).toHaveLength(2);

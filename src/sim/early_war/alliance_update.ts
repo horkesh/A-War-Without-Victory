@@ -208,9 +208,7 @@ export interface AllianceUpdateReport {
  */
 export function ensureRbihHrhbState(state: GameState, initValue?: number, initMixedMunicipalities?: string[]): void {
     if (state.political.war_alliance_rbih_hrhb === undefined || state.political.war_alliance_rbih_hrhb === null) {
-        const phase0Value = state.political.phase0_relationships?.rbih_hrhb;
-        state.political.war_alliance_rbih_hrhb = initValue
-            ?? (typeof phase0Value === 'number' ? mapPhase0RelationshipToAlliance(phase0Value) : DEFAULT_INIT_ALLIANCE);
+        state.political.war_alliance_rbih_hrhb = initValue ?? DEFAULT_INIT_ALLIANCE;
     }
     if (!state.political.rbih_hrhb_state) {
         const mixed = initMixedMunicipalities
@@ -241,12 +239,6 @@ export function ensureRbihHrhbState(state: GameState, initValue?: number, initMi
     }
 }
 
-export function mapPhase0RelationshipToAlliance(phase0Value: number): number {
-    const clampedPhase0 = Math.max(0, Math.min(1, phase0Value));
-    const degradation = 1 - clampedPhase0;
-    const raw = DEFAULT_INIT_ALLIANCE - degradation * 0.35;
-    return Math.max(ALLIANCE_FLOOR_BEFORE_WAR, Math.min(DEFAULT_INIT_ALLIANCE, raw));
-}
 
 /**
  * Per-turn alliance value update (Peace-phase §4.8). Pure function of state; no randomness.

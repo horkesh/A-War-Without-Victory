@@ -271,9 +271,6 @@ export async function runNamedPhase(context: TurnContext, step: NamedPhase, phas
 }
 
 async function refreshFrontEdgeSnapshot(state: GameState, input: TurnInput): Promise<void> {
-    if (state.meta.phase !== 'war') {
-        state.military.war_front_edges_osid = undefined;
-    }
     const edges = await getEdgesForTurn(input);
     const derivedFrontEdges = computeFrontEdges(state, edges);
     state.military.front_edges = derivedFrontEdges;

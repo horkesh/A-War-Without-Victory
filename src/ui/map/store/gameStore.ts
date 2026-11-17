@@ -1038,8 +1038,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
               isOperationsPanelOpen: false,
               // Staged orders are for the old save's turn — invalid after load
               stagedOrders: [],
-              // Transition overlay: only a live peace->war handoff should arm it.
-              peaceWarTransitionSeen: shouldMarkPeaceWarTransitionSeenOnLoad(previousLoadedGameState, state),
+              // War-start intro: a load never arms it; a fresh campaign start re-arms it.
+              peaceWarTransitionSeen: shouldMarkPeaceWarTransitionSeenOnLoad(state),
               // Tooltip: clear to avoid stale hover references
               tooltipTarget: null,
               tooltipPosition: null,

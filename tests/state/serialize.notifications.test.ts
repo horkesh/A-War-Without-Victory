@@ -10,13 +10,7 @@ function minimalState(): GameState {
         meta: {
             turn: 2,
             phase: 'war',
-            referendum_held: false,
-            referendum_turn: null,
             war_start_turn: null,
-            peace_scheduled_referendum_turn: null,
-            peace_scheduled_war_start_turn: null,
-            referendum_eligible_turn: null,
-            referendum_deadline_turn: null,
             game_over: false,
             player_faction: 'RBiH',
         },

@@ -14,40 +14,6 @@ import { runTurn } from '../src/sim/turn_pipeline.js';
 import type { GameState } from '../src/state/game_state.js';
 import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 
-function minimalPeaceState(): GameState {
-    return {
-  schema_version: CURRENT_SCHEMA_VERSION,
-  meta: {
-            turn: 10,
-            seed: 'fe-gate-i',
-            phase: 'peace',
-            referendum_held: true,
-            referendum_turn: 6,
-            war_start_turn: 10
-        },
-  factions: [
-            { id: 'RBiH', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [], declared: false, declaration_turn: null },
-            { id: 'RS', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [], declared: true, declaration_turn: 5 },
-            { id: 'HRHB', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [], declared: false, declaration_turn: null }
-        ],
-  military: {
-    formations: {},
-    front_segments: {},
-    front_posture: {},
-    front_posture_regions: {},
-    front_pressure: {},
-    militia_pools: {},
-    war_militia_strength: { MUN_A: { RBiH: 30, RS: 60, HRHB: 10 }, MUN_B: { RBiH: 25, RS: 70, HRHB: 5 } }
-  } as any,
-  political: {
-    political_controllers: { s1: 'RBiH', s2: 'RS' },
-    municipalities: { MUN_A: { stability_score: 50 }, MUN_B: { stability_score: 50 } },
-    war_consolidation_until: {}
-  } as any,
-        displacement: {} as any
-    };
-}
-
 function minimalPhaseIIState(controllers: Record<string, string> = { S1: 'RBiH', S2: 'RS' }): GameState {
     return {
   schema_version: CURRENT_SCHEMA_VERSION,
@@ -55,8 +21,6 @@ function minimalPhaseIIState(controllers: Record<string, string> = { S1: 'RBiH',
             turn: 20,
             seed: 'fe-ii',
             phase: 'war',
-            referendum_held: true,
-            referendum_turn: 6,
             war_start_turn: 10
         },
   factions: [
@@ -79,15 +43,6 @@ function minimalPhaseIIState(controllers: Record<string, string> = { S1: 'RBiH',
     };
 }
 
-test('peace runTurn is rejected (war pipeline only)', async () => {
-    const state = minimalPeaceState();
-    const edges: EdgeRecord[] = [{ a: 's1', b: 's2' }];
-    await assert.rejects(
-        () => runTurn(state, { seed: 'fe-gate-i', settlementEdges: edges }),
-        /unsupported lifecycle phase "peace"; expected 'war'/
-    );
-});
-
 test('runTurn includes front-emergence and runs exactly once per turn', async () => {
     const state = minimalPhaseIIState();
     const edges: EdgeRecord[] = [{ a: 'S1', b: 'S2' }];
@@ -96,13 +51,6 @@ test('runTurn includes front-emergence and runs exactly once per turn', async ()
     const count = phaseNames.filter((n) => n === 'front-emergence').length;
     assert.strictEqual(count, 1, 'front-emergence must run exactly once per turn in war phase path');
     assert.ok(Array.isArray(report.front_emergence_report), 'front_emergence_report report should be an array');
-});
-
-test('deriveFrontsFromPressureEligible: peace returns empty array', () => {
-    const state = minimalPeaceState();
-    const edges: EdgeRecord[] = [{ a: 's1', b: 's2' }];
-    const fronts = deriveFrontsFromPressureEligible(state, edges);
-    assert.deepStrictEqual(fronts, []);
 });
 
 test('deriveFrontsFromPressureEligible: war phase + opposing control + eligible edge yields front with that edge', () => {

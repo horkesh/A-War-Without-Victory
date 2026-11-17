@@ -376,7 +376,6 @@ export interface HistoricalFactionMetrics {
     brigades_total: number;
     recruitment_capital: number;
     negotiation_capital: number;
-    prewar_capital: number;
 }
 
 export interface HistoricalFactionDelta {
@@ -387,7 +386,6 @@ export interface HistoricalFactionDelta {
     brigades_total_delta: number;
     recruitment_capital_delta: number;
     negotiation_capital_delta: number;
-    prewar_capital_delta: number;
 }
 
 export interface HistoricalAlignmentDiagnostics {
@@ -990,7 +988,7 @@ export function formatEndReportMarkdown(params: FormatEndReportParams): string {
         const h = params.historicalAlignmentDiagnostics;
         lines.push('## Historical alignment diagnostics');
         lines.push('');
-        lines.push('Initial vs final by faction (personnel, brigades active/inactive/total, recruitment capital, negotiation capital, prewar capital):');
+        lines.push('Initial vs final by faction (personnel, brigades active/inactive/total, recruitment capital, negotiation capital):');
         const finalByFaction = new Map(h.final.map((row) => [row.faction, row]));
         for (const initialRow of h.initial) {
             const finalRow = finalByFaction.get(initialRow.faction);
@@ -999,8 +997,8 @@ export function formatEndReportMarkdown(params: FormatEndReportParams): string {
                 `- ${initialRow.faction}: personnel ${initialRow.personnel_total}→${finalRow.personnel_total}; ` +
                 `brigades ${initialRow.brigades_active}/${initialRow.brigades_inactive}/${initialRow.brigades_total}` +
                 `→${finalRow.brigades_active}/${finalRow.brigades_inactive}/${finalRow.brigades_total}; ` +
-                `capital ${initialRow.recruitment_capital}/${initialRow.negotiation_capital}/${initialRow.prewar_capital}` +
-                `→${finalRow.recruitment_capital}/${finalRow.negotiation_capital}/${finalRow.prewar_capital}`
+                `capital ${initialRow.recruitment_capital}/${initialRow.negotiation_capital}` +
+                `→${finalRow.recruitment_capital}/${finalRow.negotiation_capital}`
             );
         }
         lines.push('');

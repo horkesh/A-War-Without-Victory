@@ -38,8 +38,6 @@ function makeMinimalPoliticalState(turnOverride = 0): GameState {
             turn: turnOverride,
             seed: 'political-personality-test',
             phase: 'war',
-            referendum_held: true,
-            referendum_turn: 6,
             war_start_turn: 10,
         },
         factions: [
@@ -324,8 +322,6 @@ describe('Group 6: computePoliticalAssessment — faction differentiation', () =
                 turn: 0,
                 seed: 'bare',
                 phase: 'war',
-                referendum_held: false,
-                referendum_turn: null as any,
                 war_start_turn: null as any,
             },
             factions: [],

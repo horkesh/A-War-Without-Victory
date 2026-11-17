@@ -210,7 +210,6 @@ describe('pre-first-Advance RBiH paramilitary policy', () => {
 
   it.each([
     ['wrong turn', (state: GameState) => { state.meta.turn = 1; }],
-    ['wrong phase', (state: GameState) => { state.meta.phase = 'peace'; }],
     ['wrong player', (state: GameState) => { state.meta.player_faction = 'RS'; }],
     ['headless auto-control', (state: GameState) => { state.meta.headless_scenario_auto_control = true; }],
     ['already enabled', (state: GameState) => { state.military.enabled_event_ids.push(POLICY_EVENT_ID); }],
@@ -265,7 +264,6 @@ describe('pre-first-Advance RBiH paramilitary policy', () => {
 
   it.each([
     ['later opening turn', (state: GameState) => { state.meta.turn = 1; }],
-    ['wrong phase', (state: GameState) => { state.meta.phase = 'peace'; }],
     ['wrong player', (state: GameState) => { state.meta.player_faction = 'RS'; }],
     ['undefined headless marker', (state: GameState) => { delete state.meta.headless_scenario_auto_control; }],
     ['headless marker', (state: GameState) => { state.meta.headless_scenario_auto_control = true; }],

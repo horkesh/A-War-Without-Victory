@@ -18,8 +18,6 @@ function minimalPhaseIState(): GameState {
             turn: 10,
             seed: 'pf-pipe-i',
             phase: 'war',
-            referendum_held: true,
-            referendum_turn: 6,
             war_start_turn: 10
         },
   factions: [
@@ -49,8 +47,6 @@ function minimalPhaseIIState(): GameState {
             turn: 20,
             seed: 'pf-pipe-ii',
             phase: 'war',
-            referendum_held: true,
-            referendum_turn: 6,
             war_start_turn: 10
         },
   factions: [
@@ -72,13 +68,6 @@ function minimalPhaseIIState(): GameState {
         displacement: {} as any
     };
 }
-
-test('runTurn rejects peace phase (state pipeline owns peace)', async () => {
-    const state = minimalPhaseIState();
-    state.meta.phase = 'peace';
-    const edges: EdgeRecord[] = [{ a: 's1', b: 's2' }];
-    await expect(runTurn(state, { seed: 'pf-pipe-i', settlementEdges: edges })).rejects.toThrow(/unsupported lifecycle phase "peace"/);
-});
 
 test.skip('phase_ii runTurn includes phase-f-displacement after phase-e-rear-zone-derivation', async () => { // legacy-phase-term-ok
     const state = minimalPhaseIIState();

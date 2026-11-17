@@ -22,7 +22,7 @@ afterEach(() => {
 function state(): GameState {
     return {
         schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 20, seed: 'movement-observer', phase: 'war', recruitment_mode: 'bottom_up', referendum_held: true, referendum_turn: 6, war_start_turn: 10 },
+        meta: { turn: 20, seed: 'movement-observer', phase: 'war', recruitment_mode: 'bottom_up', war_start_turn: 10 },
         factions: [
             { id: 'RBiH', profile: { authority: 10, legitimacy: 10, control: 10, logistics: 10, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] },
             { id: 'RS', profile: { authority: 10, legitimacy: 10, control: 10, logistics: 10, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] },

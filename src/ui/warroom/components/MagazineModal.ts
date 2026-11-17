@@ -41,12 +41,7 @@ export class MagazineModal {
         this.gameState = gameState;
     }
 
-    /**
-     * Phase gate: render Phase 0 or war-phase content.
-     */
     render(): HTMLElement {
-        const phase = this.gameState.meta.phase ?? 'peace';
-        if (phase === 'peace') return this.renderPhase0();
         return this.renderWarPhase();
     }
 
@@ -77,21 +72,9 @@ export class MagazineModal {
         return magazine;
     }
 
-    /**
-     * Phase 0 stub — field reports are not available before the war.
-     * No raw gameState.political.* access; all deprecated Phase 0 logic removed.
-     */
-    private renderPhase0(): HTMLElement {
-        const shell = this.createShell(getPlayerFaction(this.gameState));
-        const note = document.createElement('div');
-        note.style.cssText = 'padding: 32px; text-align: center; opacity: 0.6;';
-        note.textContent = 'Field reports are not available before the war.';
-        shell.appendChild(note);
-        return shell;
-    }
 
     /**
-     * Render the war-phase magazine modal (Peace phase / War phase).
+     * Render the war-phase magazine modal.
      * Uses WarDataSnapshot for all data. Shows 6 operational sections.
      */
     private renderWarPhase(): HTMLElement {

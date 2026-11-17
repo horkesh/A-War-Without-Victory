@@ -89,7 +89,6 @@ const CreditsScreen = lazy(() =>
   import('./components/CreditsScreen').then(m => ({ default: m.CreditsScreen })),
 );
 import { MapModeLegend } from './components/MapModeLegend';
-import { PeaceStatusPanel } from './components/PeaceStatusPanel';
 import { PeaceWarTransitionOverlay } from './components/PeaceWarTransitionOverlay';
 const ChronicleOverlay = lazy(() =>
   import('./components/chronicle/ChronicleOverlay').then(m => ({ default: m.ChronicleOverlay })),
@@ -2172,7 +2171,6 @@ function App() {
           />
         </Suspense>
       )}
-      {loadedGameState?.phase === 'peace' && <PeaceStatusPanel />}
       {/* v0.4.1 Phase 5: Event modal (queue-based).
           Non-decision fired events only — remains visible until acknowledged.
           Presidential event decisions are owned by EventDecisionModal below,

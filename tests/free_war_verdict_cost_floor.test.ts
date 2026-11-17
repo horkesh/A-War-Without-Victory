@@ -326,8 +326,6 @@ function minimalWarState(overrides?: Partial<GameState['meta']>): GameState {
             turn: 30,
             seed: 'test-seed',
             phase: 'war',
-            referendum_held: true,
-            referendum_turn: 6,
             war_start_turn: 10,
             ...overrides,
         },

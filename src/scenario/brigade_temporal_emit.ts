@@ -39,7 +39,7 @@
  */
 
 import type { FormationState, GameState } from '../state/game_state.js';
-import { strictCompare } from '../state/turn_phases.js';
+import { strictCompare } from '../state/validateGameState.js';
 import { asRecord } from '../state/schema_validators.js';
 // REASON-CODE INSTRUMENTATION: env-gated, inert by default. See reason_code_debug.ts.
 import { isReasonCodeTopicEnabled } from '../sim/combat/reason_code_debug.js';

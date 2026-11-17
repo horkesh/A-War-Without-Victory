@@ -148,7 +148,7 @@ export function capturePreviousTurnSnapshot(state: GameState): PreviousTurnSnaps
 
     return {
         turn: state.meta.turn,
-        phase: state.meta.phase ?? 'peace',
+        phase: state.meta.phase ?? 'war',
         politicalControllers,
         casualtyTotals,
         exhaustion,

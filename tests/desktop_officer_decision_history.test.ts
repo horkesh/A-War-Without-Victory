@@ -158,13 +158,7 @@ describe('desktop officer decision history', () => {
       meta: {
         turn: 8,
         seed: 'desktop-officer-history-roundtrip',
-        referendum_held: false,
-        referendum_turn: null,
         war_start_turn: null,
-        peace_scheduled_referendum_turn: null,
-        peace_scheduled_war_start_turn: null,
-        referendum_eligible_turn: null,
-        referendum_deadline_turn: null,
         game_over: false,
         player_faction: 'RBiH',
       },

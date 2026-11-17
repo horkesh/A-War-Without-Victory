@@ -2,12 +2,11 @@
  * NewspaperModal — Displays faction-specific newspaper with T-1 events.
  * Shown when clicking on the desk newspaper.
  *
- * Now uses dynamic headline templates driven by Phase 0 events.
- * Falls back to generic content when no events are available.
+ * Uses the war headline templates driven by delta-based turn events, with a
+ * generic fallback when no events are available.
  */
 
-import type { FactionId, GameState, Phase0Event } from '../../../state/game_state.js';
-import { fallbackHeadline, getUrgencyLevel, pickBestHeadline } from '../content/headline_templates.js';
+import type { GameState } from '../../../state/game_state.js';
 import { PHASE0_TICKER_EVENTS } from '../content/ticker_events.js';
 import { fallbackWarHeadline, pickBestWarHeadline } from '../content/war_headline_templates.js';
 import { generateTurnEvents } from '../data/turn_event_generator.js';
@@ -28,17 +27,11 @@ interface NewspaperContent {
     urgency: string;
 }
 
-interface NewspaperModalOptions {
-    startBrief?: boolean;
-}
-
 /**
  * DATA BOUNDARY: NewspaperModal permitted/forbidden reads.
  *
  * PERMITTED:
- *   - this.gameState.meta.*                          — phase gate, turn display (meta.* always permitted)
- *   - this.gameState.political.phase0_events_log     — Phase 0 only, peace-phase gated (accepted Phase 0 exception)
- *   - this.gameState.factions[*].declaration_pressure — Phase 0 / peace only (accepted Phase 0 exception)
+ *   - this.gameState.meta.*                          — turn display (meta.* always permitted)
  *   - extractWarData(this.gameState, playerFaction)  — sole war-phase live data entry point
  *
  * FORBIDDEN:
@@ -47,45 +40,9 @@ interface NewspaperModalOptions {
  */
 export class NewspaperModal {
     private gameState: GameState;
-    private options: NewspaperModalOptions;
 
-    constructor(gameState: GameState, options?: NewspaperModalOptions) {
+    constructor(gameState: GameState) {
         this.gameState = gameState;
-        this.options = options ?? {};
-    }
-
-    /**
-     * Get faction-specific masthead name
-     */
-    private getMastheadName(factionId: string): string {
-        const mastheads: Record<string, string> = {
-            'RBiH': 'OSLOBOĐENJE',
-            'RS': 'GLAS SRPSKE',
-            'HRHB': 'CROATIAN HERALD'
-        };
-        return mastheads[factionId] || 'NEWS DAILY';
-    }
-
-
-    /**
-     * Get the last turn's events from the event log.
-     */
-    private getLastTurnEvents(): Phase0Event[] {
-        const log = this.gameState.political.phase0_events_log;
-        if (!log || log.length === 0) return [];
-        return log[log.length - 1] ?? [];
-    }
-
-    /**
-     * Get max declaration pressure across all factions.
-     */
-    private getMaxPressure(): number {
-        let maxP = 0;
-        for (const faction of this.gameState.factions) {
-            const p = faction.declaration_pressure ?? 0;
-            if (p > maxP) maxP = p;
-        }
-        return maxP;
     }
 
     /**
@@ -191,79 +148,6 @@ export class NewspaperModal {
     }
 
     /**
-     * Generate newspaper content from Phase 0 events.
-     */
-    private generateContent(): NewspaperContent {
-        const playerFaction = getPlayerFaction(this.gameState);
-        const turn = this.gameState.meta.turn;
-        const previousTurn = Math.max(0, turn - 1);
-
-        // Phase gate: war phases use delta-based TurnEvents instead of Phase 0 events
-        const phase = this.gameState.meta.phase ?? 'peace';
-        if (phase !== 'peace' && !this.options.startBrief) {
-            return this.generateWarContent();
-        }
-
-        if (this.options.startBrief) {
-            return {
-                factionId: playerFaction,
-                masthead: `${this.getMastheadName(playerFaction)} — EXTRA EDITION`,
-                date: turnToDateString(turn),
-                headline: 'SEPTEMBER 1991: PREPARE FOR THE BREAK',
-                subhead: 'Allocate capital now. Build police, party, TO, and paramilitary networks before war begins.',
-                photoCaption: 'Political structures harden while open war still appears avoidable.',
-                bodyText: 'You are in the pre-war phase. Your immediate action is organizational investment at municipality level. Open the preparation map, target vulnerable municipalities, and spend pre-war capital deliberately. These choices feed organizational penetration, which in turn shapes militia strength, pool population, and brigade availability when the war starts. Advancing turns without investment weakens your opening position.',
-                urgency: 'high',
-            };
-        }
-        const events = this.getLastTurnEvents();
-        const maxPressure = this.getMaxPressure();
-        const urgency = getUrgencyLevel(maxPressure);
-
-        // Try to pick the best headline from events
-        const match = pickBestHeadline(events);
-
-        let headline: string;
-        let subhead: string;
-        let bodyText: string;
-
-        if (match) {
-            headline = match.template.headline(match.event, playerFaction);
-            subhead = match.template.subhead(match.event, playerFaction);
-            bodyText = match.template.body(match.event, playerFaction);
-        } else {
-            const fb = fallbackHeadline(turn, playerFaction);
-            headline = fb.headline;
-            subhead = fb.subhead;
-            bodyText = fb.body;
-        }
-
-        return {
-            factionId: playerFaction,
-            masthead: this.getMastheadName(playerFaction),
-            date: turnToDateString(previousTurn),
-            headline,
-            subhead,
-            photoCaption: this.generatePhotoCaption(events),
-            bodyText,
-            urgency,
-        };
-    }
-
-    /**
-     * Generate a contextual photo caption from events.
-     */
-    private generatePhotoCaption(events: Phase0Event[]): string {
-        for (const ev of events) {
-            if (ev.type === 'declaration') return 'Assembly session during the historic vote';
-            if (ev.type === 'referendum_held') return 'Citizens queue at polling stations';
-            if (ev.type === 'stability_change') return 'Recent developments in the region';
-            if (ev.type === 'war_countdown') return 'Military positions observed near the city';
-        }
-        return 'Political leaders meet to discuss the situation';
-    }
-
-    /**
      * Collect up to 3 recent 'world' ticker events for the sidebar.
      * Picks from events at or just before the current turn, sorted
      * most-recent first then alphabetically for determinism.
@@ -287,7 +171,7 @@ export class NewspaperModal {
      * Render the newspaper modal as HTML element
      */
     render(): HTMLElement {
-        const content = this.generateContent();
+        const content = this.generateWarContent();
         const identity = getWarroomFactionIdentity(content.factionId);
 
         const newspaper = document.createElement('div');
@@ -344,28 +228,25 @@ export class NewspaperModal {
         columns.textContent = content.bodyText;
         newspaper.appendChild(columns);
 
-        // World briefs sidebar — war phases only
-        const phase = this.gameState.meta.phase ?? 'peace';
-        if (phase !== 'peace') {
-            const briefs = this.getWorldBriefs(this.gameState.meta.turn);
-            if (briefs.length > 0) {
-                const sidebar = document.createElement('div');
-                sidebar.className = 'newspaper-world-briefs';
+        // World briefs sidebar
+        const briefs = this.getWorldBriefs(this.gameState.meta.turn);
+        if (briefs.length > 0) {
+            const sidebar = document.createElement('div');
+            sidebar.className = 'newspaper-world-briefs';
 
-                const sidebarHeader = document.createElement('div');
-                sidebarHeader.className = 'newspaper-world-briefs-header';
-                sidebarHeader.textContent = 'ALSO IN THE NEWS';
-                sidebar.appendChild(sidebarHeader);
+            const sidebarHeader = document.createElement('div');
+            sidebarHeader.className = 'newspaper-world-briefs-header';
+            sidebarHeader.textContent = 'ALSO IN THE NEWS';
+            sidebar.appendChild(sidebarHeader);
 
-                for (const brief of briefs) {
-                    const item = document.createElement('div');
-                    item.className = 'newspaper-world-brief-item';
-                    item.textContent = brief;
-                    sidebar.appendChild(item);
-                }
-
-                newspaper.appendChild(sidebar);
+            for (const brief of briefs) {
+                const item = document.createElement('div');
+                item.className = 'newspaper-world-brief-item';
+                item.textContent = brief;
+                sidebar.appendChild(item);
             }
+
+            newspaper.appendChild(sidebar);
         }
 
         return newspaper;

@@ -14,7 +14,7 @@ import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 function minimalPhaseIIState(): GameState {
     return {
         schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 10, seed: 'pipeline-test', phase: 'war', referendum_held: true, referendum_turn: 0, war_start_turn: 1 },
+        meta: { turn: 10, seed: 'pipeline-test', phase: 'war', war_start_turn: 1 },
         factions: [
             { id: 'RBiH', profile: { authority: 10, legitimacy: 10, control: 10, logistics: 10, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] },
             { id: 'RS', profile: { authority: 10, legitimacy: 10, control: 10, logistics: 10, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] }
@@ -53,16 +53,6 @@ test('Pipeline: current emergence steps run in the canonical order', async () =>
     assert.ok(pressureIdx > supplyPressureIdx, 'phase-e-pressure-update after supply-pressure-exhaustion');
     assert.ok(frontEmergenceIdx > pressureIdx, 'front-emergence after phase-e-pressure-update');
     assert.ok(deriveSectorIntelIdx > frontEmergenceIdx, 'derive-sector-intel after front-emergence');
-});
-
-test('Pipeline: peace phase is rejected by war pipeline', async () => {
-    const state = minimalPhaseIIState();
-    state.meta.phase = 'peace';
-    const edges = [{ a: 'S1', b: 'S2' }];
-    await assert.rejects(
-        () => runTurn(state, { seed: 'test', settlementEdges: edges }),
-        /unsupported lifecycle phase "peace"; expected 'war'/
-    );
 });
 
 test('Pipeline: current emergence reports are populated when war phase', async () => {

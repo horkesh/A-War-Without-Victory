@@ -18,8 +18,6 @@ function minimalPhaseIIState(controllers: Record<string, string> = { S1: 'RBiH',
             turn: 20,
             seed: 'pf-trig',
             phase: 'war',
-            referendum_held: true,
-            referendum_turn: 6,
             war_start_turn: 10
         },
   factions: [
@@ -41,15 +39,6 @@ function minimalPhaseIIState(controllers: Record<string, string> = { S1: 'RBiH',
         displacement: {} as any
     };
 }
-
-test('evaluateDisplacementTriggers: peace returns empty deltas', () => {
-    const state = minimalPhaseIIState() as GameState;
-    state.meta!.phase = 'peace';
-    const edges: EdgeRecord[] = [{ a: 'S1', b: 'S2' }];
-    const { deltas, report } = evaluateDisplacementTriggers(state, edges);
-    expect(Object.keys(deltas)).toEqual([]);
-    expect(report.triggered_settlements.length).toBe(0);
-});
 
 test('evaluateDisplacementTriggers: war phase + opposing control yields bounded deltas for front-active settlements', () => {
     const state = minimalPhaseIIState({ S1: 'RBiH', S2: 'RS' });

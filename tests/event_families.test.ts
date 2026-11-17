@@ -23,7 +23,7 @@ import {
     RBIH_BRANCH_TAGS,
     RS_BRANCH_TAGS,
 } from '../src/sim/events/event_families.js';
-import { strictCompare } from '../src/state/turn_phases.js';
+import { strictCompare } from '../src/state/validateGameState.js';
 
 /** All five vocabulary sections, in the order event_families.ts composes them
  *  into ALL_BRANCH_TAGS. */

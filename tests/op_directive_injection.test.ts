@@ -206,8 +206,6 @@ describe('REQUEST-OP inject step (inject-op-directive)', () => {
     state.meta = {
       ...state.meta,
       seed: 'request-op-personnel-floor-public-turn',
-      referendum_held: true,
-      referendum_turn: 0,
       war_start_turn: 0,
     };
     state.factions = [

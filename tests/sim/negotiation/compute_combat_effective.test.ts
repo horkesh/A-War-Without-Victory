@@ -35,15 +35,13 @@ type FormationStub = {
     morale?: number;
 };
 
-function makeState(phase: 'war' | 'peace' = 'war', formations: Record<string, FormationStub> = {}): GameState {
+function makeState(phase: 'war' = 'war', formations: Record<string, FormationStub> = {}): GameState {
     return {
         schema_version: CURRENT_SCHEMA_VERSION,
         meta: {
             turn: 10,
             seed: 'combat-effective-test',
             phase,
-            referendum_held: true,
-            referendum_turn: 6,
             war_start_turn: 10,
         },
         factions: [
@@ -179,19 +177,6 @@ describe('Group 3: Multi-faction counts and phase guard', () => {
         expect(cap['RBiH'].combat_effective_brigades).toBe(2);
         expect(cap['RS'].combat_effective_brigades).toBe(1);
         expect(cap['HRHB'].combat_effective_brigades).toBe(3);
-    });
-
-    it('10. Phase guard: non-war phase → function is a no-op, negotiation state unchanged', () => {
-        const state = makeState('peace', {
-            bde_1: makeFormation({ faction: 'RBiH', personnel: 500, morale: 60 }),
-        });
-        // Ensure no negotiation state pre-exists
-        expect((state.military as any).negotiation).toBeUndefined();
-
-        computeCombatEffectiveBrigades(state);
-
-        // No-op: negotiation state must remain absent
-        expect((state.military as any).negotiation).toBeUndefined();
     });
 
     it('11. Edge: 0 eligible brigades → count = 0, not undefined', () => {

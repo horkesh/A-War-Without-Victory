@@ -55,12 +55,12 @@ function brigade(id: string, overrides: Partial<FormationState> = {}): Formation
     } as FormationState;
 }
 
-function factionFixture(id: string, exhaustion: number, prewar: number): any {
+function factionFixture(id: string, exhaustion: number, _prewar: number): any {
     return {
         id, profile: { authority: 10, legitimacy: 10, control: 10, logistics: 10, exhaustion },
         areasOfResponsibility: [], supply_sources: [], command_capacity: 0,
         negotiation: { pressure: 0, last_change_turn: null, capital: 0, spent_total: 0, last_capital_change_turn: null },
-        prewar_capital: prewar, declaration_pressure: 0, declared: false, declaration_turn: null,
+        declared: false,
     };
 }
 
@@ -80,8 +80,7 @@ function microScenario(): GameState {
         schema_version: CURRENT_SCHEMA_VERSION,
         meta: {
             turn: 5, seed: 'tg-determinism-seed', phase: 'war',
-            referendum_held: true, referendum_turn: 6, war_start_turn: 4,
-            referendum_eligible_turn: null, referendum_deadline_turn: null,
+            war_start_turn: 4,
             game_over: false, outcome: undefined, player_faction: 'RBiH',
         } as any,
         factions: [

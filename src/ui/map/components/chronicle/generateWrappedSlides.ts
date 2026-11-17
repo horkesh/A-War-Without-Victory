@@ -36,7 +36,6 @@ function getFactionDisplayLabel(faction: string | undefined): string {
 
 function getPhaseDisplayLabel(phase: string): string {
     if (phase === 'war') return t('wrapped.phase.war');
-    if (phase === 'peace') return t('wrapped.phase.peace');
     if (phase === 'postwar') return t('wrapped.phase.postwar');
     return getPlayerSafeDisplayLabel(phase, t('wrapped.phase.campaign'));
 }

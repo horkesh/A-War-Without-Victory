@@ -37,11 +37,11 @@ import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 function makeState(turn: number): GameState {
     const base = {
         schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn, seed: 'fall95-test', phase: 'war', referendum_held: true, war_start_turn: 1 },
+        meta: { turn, seed: 'fall95-test', phase: 'war', war_start_turn: 1 },
         factions: [
-            { id: 'RBiH', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [], declared: false, declaration_turn: null },
-            { id: 'RS', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [], declared: true, declaration_turn: 1 },
-            { id: 'HRHB', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [], declared: true, declaration_turn: 2 },
+            { id: 'RBiH', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [], declared: false },
+            { id: 'RS', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [], declared: true },
+            { id: 'HRHB', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [], declared: true },
         ],
         political: {} as any,
         military: {

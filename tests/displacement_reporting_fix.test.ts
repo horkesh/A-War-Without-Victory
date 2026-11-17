@@ -25,8 +25,6 @@ function makePhaseIIStateWithDisplacementState(): GameState {
             turn: 20,
             seed: 'disp-fix-test',
             phase: 'war',
-            referendum_held: true,
-            referendum_turn: 4,
             war_start_turn: 6
         },
   factions: [
@@ -36,7 +34,6 @@ function makePhaseIIStateWithDisplacementState(): GameState {
                 areasOfResponsibility: [],
                 supply_sources: [],
                 declared: false,
-                declaration_turn: null
             },
             {
                 id: 'RS',
@@ -44,7 +41,6 @@ function makePhaseIIStateWithDisplacementState(): GameState {
                 areasOfResponsibility: [],
                 supply_sources: [],
                 declared: true,
-                declaration_turn: 5
             },
             {
                 id: 'HRHB',
@@ -52,7 +48,6 @@ function makePhaseIIStateWithDisplacementState(): GameState {
                 areasOfResponsibility: [],
                 supply_sources: [],
                 declared: false,
-                declaration_turn: null
             }
         ],
   military: {

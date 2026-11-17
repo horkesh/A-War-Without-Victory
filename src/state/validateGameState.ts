@@ -9,10 +9,16 @@ import type { PhaseName } from './game_state.js';
 import { proposalDecisionIdentity } from './proposal_decision_history.js';
 import { isCompositeMilitiaPoolKey } from './militia_pool_key.js';
 import { COMMAND_AUTHORITY_ALLOWED_INCOME_SOURCES } from '../shared/commandAuthorityEconomy.js';
+import {
+    PEACE_PHASE_RETIRED_FACTION_FIELDS,
+    PEACE_PHASE_RETIRED_META_FIELDS,
+    PEACE_PHASE_RETIRED_POLITICAL_FIELDS,
+    PEACE_PHASE_RETIRED_SCHEMA_VERSION,
+} from './peace_phase_retired_fields.js';
 
 
 /** Known phase names (must match PhaseName in game_state.ts). */
-const KNOWN_PHASES: readonly PhaseName[] = ['peace', 'war'];
+const KNOWN_PHASES: readonly PhaseName[] = ['war'];
 const CANONICAL_PLAYER_FACTIONS = ['RBiH', 'RS', 'HRHB'] as const;
 const PROPOSAL_DECISION_DOMAINS = ['military', 'political', 'events', 'ops'] as const;
 const PROPOSAL_OPPORTUNITY_DECISIONS = ['approve', 'delay', 'redirect', 'under_resource', 'decline'] as const;
@@ -3892,15 +3898,90 @@ function validateNonNegativeIntegerRecordNamed(value: unknown, path: string, err
     }
 }
 
+function isNonNegativeIntegerOrNull(v: unknown): boolean {
+    return v === null || (typeof v === 'number' && Number.isInteger(v) && v >= 0);
+}
+
+/**
+ * Legacy shape of each peace-phase meta field, checked only on saves older than v41
+ * (migration v41 deletes them). At schema >= 41 every one must be absent.
+ */
+const PEACE_PHASE_RETIRED_META_CHECKS: Record<
+    (typeof PEACE_PHASE_RETIRED_META_FIELDS)[number],
+    { check: (v: unknown) => boolean; expected: string }
+> = {
+    referendum_held: { check: (v) => typeof v === 'boolean', expected: 'boolean' },
+    referendum_turn: { check: isNonNegativeIntegerOrNull, expected: 'null or a non-negative integer' },
+    referendum_eligible_turn: { check: isNonNegativeIntegerOrNull, expected: 'null or a non-negative integer' },
+    referendum_deadline_turn: { check: isNonNegativeIntegerOrNull, expected: 'null or a non-negative integer' },
+    peace_scheduled_referendum_turn: { check: isNonNegativeIntegerOrNull, expected: 'null or a non-negative integer' },
+    peace_scheduled_war_start_turn: { check: isNonNegativeIntegerOrNull, expected: 'null or a non-negative integer' },
+    war_opposing_edges_streak: {
+        check: (v) => typeof v === 'number' && Number.isInteger(v) && v >= 0,
+        expected: 'a non-negative integer',
+    },
+    war_force_transition_after_turns: {
+        check: (v) => typeof v === 'number' && Number.isInteger(v) && v >= 0,
+        expected: 'a non-negative integer',
+    },
+    war_entrenchment_init_turns: {
+        check: (v) => typeof v === 'number' && Number.isInteger(v) && v >= 0,
+        expected: 'a non-negative integer',
+    },
+    peace_end_turn: { check: isNonNegativeIntegerOrNull, expected: 'null or a non-negative integer' },
+    war_start_lifecycle_phase_turn: { check: isNonNegativeIntegerOrNull, expected: 'null or a non-negative integer' },
+    escalation_reason: { check: (v) => v === null || typeof v === 'string', expected: 'string or null' },
+};
+
+/**
+ * Peace-phase bookkeeping retired at schema v41. Pre-v41 saves may still carry the meta
+ * fields (type-checked as before); at >= v41 any meta, faction or political field from the
+ * retired lists must be absent.
+ */
+function validatePeacePhaseRetiredFields(s: Record<string, unknown>, stateVersion: number, errors: string[]): void {
+    const retired = stateVersion >= PEACE_PHASE_RETIRED_SCHEMA_VERSION;
+    const retiredMessage = (path: string) =>
+        `${path} was retired at schema v${PEACE_PHASE_RETIRED_SCHEMA_VERSION} and must be absent`;
+    const meta = s.meta;
+    if (meta && typeof meta === 'object' && !Array.isArray(meta)) {
+        const m = meta as Record<string, unknown>;
+        for (const key of PEACE_PHASE_RETIRED_META_FIELDS) {
+            if (!(key in m) || m[key] === undefined) continue;
+            if (retired) {
+                errors.push(retiredMessage(`meta.${key}`));
+            } else if (!PEACE_PHASE_RETIRED_META_CHECKS[key].check(m[key])) {
+                errors.push(`meta.${key} must be ${PEACE_PHASE_RETIRED_META_CHECKS[key].expected} when present`);
+            }
+        }
+    }
+    if (!retired) return;
+    if (Array.isArray(s.factions)) {
+        s.factions.forEach((faction: unknown, i: number) => {
+            if (!faction || typeof faction !== 'object' || Array.isArray(faction)) return;
+            const f = faction as Record<string, unknown>;
+            for (const key of PEACE_PHASE_RETIRED_FACTION_FIELDS) {
+                if (key in f && f[key] !== undefined) errors.push(retiredMessage(`factions[${i}].${key}`));
+            }
+        });
+    }
+    const political = s.political;
+    if (political && typeof political === 'object' && !Array.isArray(political)) {
+        const p = political as Record<string, unknown>;
+        for (const key of PEACE_PHASE_RETIRED_POLITICAL_FIELDS) {
+            if (key in p && p[key] !== undefined) errors.push(retiredMessage(`political.${key}`));
+        }
+    }
+}
+
 const VERSION_REQUIRED_FIELDS: readonly VersionRequiredField[] = [
-    { version: 3, path: 'meta.referendum_held', check: (v) => typeof v === 'boolean' },
-    { version: 3, path: 'meta.referendum_turn', check: (v) => v === null || Number.isInteger(v) },
+    { version: 3, path: 'meta.referendum_held', check: (v) => typeof v === 'boolean', retiredAtVersion: 41 },
+    { version: 3, path: 'meta.referendum_turn', check: (v) => v === null || Number.isInteger(v), retiredAtVersion: 41 },
     { version: 3, path: 'meta.war_start_turn', check: (v) => v === null || Number.isInteger(v) },
-    { version: 3, path: 'meta.peace_scheduled_referendum_turn', check: (v) => v === null || Number.isInteger(v) },
-    { version: 3, path: 'meta.peace_scheduled_war_start_turn', check: (v) => v === null || Number.isInteger(v) },
+    { version: 3, path: 'meta.peace_scheduled_referendum_turn', check: (v) => v === null || Number.isInteger(v), retiredAtVersion: 41 },
+    { version: 3, path: 'meta.peace_scheduled_war_start_turn', check: (v) => v === null || Number.isInteger(v), retiredAtVersion: 41 },
     { version: 3, path: 'meta.peace_war_start_control_path', check: (v) => v === null || typeof v === 'string', retiredAtVersion: 40 },
-    { version: 3, path: 'meta.referendum_eligible_turn', check: (v) => v === null || Number.isInteger(v) },
-    { version: 3, path: 'meta.referendum_deadline_turn', check: (v) => v === null || Number.isInteger(v) },
+    { version: 3, path: 'meta.referendum_eligible_turn', check: (v) => v === null || Number.isInteger(v), retiredAtVersion: 41 },
+    { version: 3, path: 'meta.referendum_deadline_turn', check: (v) => v === null || Number.isInteger(v), retiredAtVersion: 41 },
     { version: 3, path: 'meta.game_over', check: (v) => typeof v === 'boolean' },
     { version: 4, path: 'political.negotiation_status', check: isRecord },
     { version: 4, path: 'political.ceasefire', check: isRecord },
@@ -4064,21 +4145,10 @@ export function validateGameStateShape(
                     errors.push('meta.player_faction must be one of: RBiH, RS, HRHB when present');
                 }
             }
-            // Phase 0: Referendum and war-start fields (optional; validate type when present)
-            if ('referendum_held' in m && m.referendum_held !== undefined && typeof m.referendum_held !== 'boolean') {
-                errors.push('meta.referendum_held must be boolean when present');
-            }
-            if ('referendum_turn' in m && m.referendum_turn !== undefined && m.referendum_turn !== null && (typeof m.referendum_turn !== 'number' || !Number.isInteger(m.referendum_turn) || m.referendum_turn < 0)) {
-                errors.push('meta.referendum_turn must be null or a non-negative integer when present');
-            }
+            // War-start turn (optional; validate type when present). The peace-phase
+            // referendum/schedule/transition fields are checked in validatePeacePhaseRetiredFields.
             if ('war_start_turn' in m && m.war_start_turn !== undefined && m.war_start_turn !== null && (typeof m.war_start_turn !== 'number' || !Number.isInteger(m.war_start_turn) || m.war_start_turn < 0)) {
                 errors.push('meta.war_start_turn must be null or a non-negative integer when present');
-            }
-            if ('peace_scheduled_referendum_turn' in m && m.peace_scheduled_referendum_turn !== undefined && m.peace_scheduled_referendum_turn !== null && (typeof m.peace_scheduled_referendum_turn !== 'number' || !Number.isInteger(m.peace_scheduled_referendum_turn) || m.peace_scheduled_referendum_turn < 0)) {
-                errors.push('meta.peace_scheduled_referendum_turn must be null or a non-negative integer when present');
-            }
-            if ('peace_scheduled_war_start_turn' in m && m.peace_scheduled_war_start_turn !== undefined && m.peace_scheduled_war_start_turn !== null && (typeof m.peace_scheduled_war_start_turn !== 'number' || !Number.isInteger(m.peace_scheduled_war_start_turn) || m.peace_scheduled_war_start_turn < 0)) {
-                errors.push('meta.peace_scheduled_war_start_turn must be null or a non-negative integer when present');
             }
             if ('peace_war_start_control_path' in m && m.peace_war_start_control_path !== undefined) {
                 if (stateVersion >= 40) {
@@ -4086,12 +4156,6 @@ export function validateGameStateShape(
                 } else if (m.peace_war_start_control_path !== null && typeof m.peace_war_start_control_path !== 'string') {
                     errors.push('meta.peace_war_start_control_path must be string or null when present');
                 }
-            }
-            if ('referendum_eligible_turn' in m && m.referendum_eligible_turn !== undefined && m.referendum_eligible_turn !== null && (typeof m.referendum_eligible_turn !== 'number' || !Number.isInteger(m.referendum_eligible_turn) || m.referendum_eligible_turn < 0)) {
-                errors.push('meta.referendum_eligible_turn must be null or a non-negative integer when present');
-            }
-            if ('referendum_deadline_turn' in m && m.referendum_deadline_turn !== undefined && m.referendum_deadline_turn !== null && (typeof m.referendum_deadline_turn !== 'number' || !Number.isInteger(m.referendum_deadline_turn) || m.referendum_deadline_turn < 0)) {
-                errors.push('meta.referendum_deadline_turn must be null or a non-negative integer when present');
             }
             if ('game_over' in m && m.game_over !== undefined && typeof m.game_over !== 'boolean') {
                 errors.push('meta.game_over must be boolean when present');
@@ -4145,26 +4209,7 @@ export function validateGameStateShape(
             if ('outcome' in m && m.outcome !== undefined && m.outcome !== null && typeof m.outcome !== 'string') {
                 errors.push('meta.outcome must be string or null when present');
             }
-            // Phase 0→I transition audit (§8 Output Contract; optional when present)
-            if ('peace_end_turn' in m && m.peace_end_turn !== undefined && m.peace_end_turn !== null && (typeof m.peace_end_turn !== 'number' || !Number.isInteger(m.peace_end_turn) || m.peace_end_turn < 0)) {
-                errors.push('meta.peace_end_turn must be null or a non-negative integer when present');
-            }
-            if ('war_start_lifecycle_phase_turn' in m && m.war_start_lifecycle_phase_turn !== undefined && m.war_start_lifecycle_phase_turn !== null && (typeof m.war_start_lifecycle_phase_turn !== 'number' || !Number.isInteger(m.war_start_lifecycle_phase_turn) || m.war_start_lifecycle_phase_turn < 0)) {
-                errors.push('meta.war_start_lifecycle_phase_turn must be null or a non-negative integer when present');
-            }
-            if ('escalation_reason' in m && m.escalation_reason !== undefined && m.escalation_reason !== null && typeof m.escalation_reason !== 'string') {
-                errors.push('meta.escalation_reason must be string or null when present');
-            }
-            // D0.9.1: Peace phase opposing-edges streak (optional; non-negative integer when present)
-            if (
-                'war_opposing_edges_streak' in m &&
-                m.war_opposing_edges_streak !== undefined &&
-                (typeof m.war_opposing_edges_streak !== 'number' ||
-                    !Number.isInteger(m.war_opposing_edges_streak) ||
-                    m.war_opposing_edges_streak < 0)
-            ) {
-                errors.push('meta.war_opposing_edges_streak must be a non-negative integer when present');
-            }
+
             if (
                 'rbih_hrhb_war_earliest_turn' in m &&
                 m.rbih_hrhb_war_earliest_turn !== undefined &&
@@ -4191,6 +4236,8 @@ export function validateGameStateShape(
             }
         }
     }
+
+    validatePeacePhaseRetiredFields(s, stateVersion, errors);
 
     // Partition root validation: military, political, displacement
     if (!Object.prototype.hasOwnProperty.call(s, 'military') || s.military == null || typeof s.military !== 'object' || Array.isArray(s.military)) {

@@ -1,5 +1,5 @@
 /**
- * SCHEMA FREEZE GUARD (currently v40) (ADR-0005 §Determinism Impact + §Schema).
+ * SCHEMA FREEZE GUARD (currently v41) (ADR-0005 §Determinism Impact + §Schema).
  *
  * The Tactical Group schema moved v19→v34 once during the event-system merge
  * (the v19 slot was reclaimed by displacement civilian-casualty). ADR-0005
@@ -22,20 +22,20 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import type { TgParticipationRecord } from '../src/state/brigade_history.js';
 
-describe('C3 schema freeze guard (v40)', () => {
-    it('CURRENT_SCHEMA_VERSION is pinned at 40', () => {
+describe('C3 schema freeze guard (v41)', () => {
+    it('CURRENT_SCHEMA_VERSION is pinned at 41', () => {
         // If this fails, a renumber happened. Confirm the bump is intentional
         // (new migration step appended), then update this guard + the
         // save_migration v34 one-way contract comment together.
-        expect(CURRENT_SCHEMA_VERSION).toBe(40);
+        expect(CURRENT_SCHEMA_VERSION).toBe(41);
     });
 
-    it('the latest registered migration version equals CURRENT_SCHEMA_VERSION (40)', () => {
+    it('the latest registered migration version equals CURRENT_SCHEMA_VERSION (41)', () => {
         // Guards against a migration being appended at a number > 35 without
         // bumping CURRENT_SCHEMA_VERSION (or vice-versa) — the classic
         // collide-renumber footgun ADR-0005 §Determinism Impact warns about.
         expect(getLatestSchemaVersion()).toBe(CURRENT_SCHEMA_VERSION);
-        expect(getLatestSchemaVersion()).toBe(40);
+        expect(getLatestSchemaVersion()).toBe(41);
     });
 
     it('v34 ships the four TG/Army-HQ Records as the only non-undefined scaffold (omitEmpty shape)', () => {
@@ -103,14 +103,13 @@ describe('C3 schema freeze guard (v40)', () => {
             id, profile: { authority: 10, legitimacy: 10, control: 10, logistics: 10, exhaustion: 5 },
             areasOfResponsibility: [], supply_sources: [], command_capacity: 0,
             negotiation: { pressure: 0, last_change_turn: null, capital: 0, spent_total: 0, last_capital_change_turn: null },
-            prewar_capital: 50, declaration_pressure: 0, declared: false, declaration_turn: null,
+            declared: false,
         });
         const state: GameState = {
             schema_version: CURRENT_SCHEMA_VERSION,
             meta: {
                 turn: 1, seed: 's', phase: 'war',
-                referendum_held: true, referendum_turn: 6, war_start_turn: 0,
-                referendum_eligible_turn: null, referendum_deadline_turn: null,
+                war_start_turn: 0,
                 game_over: false, outcome: undefined, player_faction: 'RBiH', decision_mode: 'historical',
             } as any,
             factions: [faction('RBiH'), faction('RS'), faction('HRHB')],
@@ -140,7 +139,7 @@ describe('C3 schema freeze guard (v40)', () => {
         expect(hydrated.schema_version).toBe(CURRENT_SCHEMA_VERSION);
     });
 
-    it('C3 freeze: canonical startup save (schema 40) keeps the frozen persisted key-sets', () => {
+    it('C3 freeze: canonical startup save (schema 41) keeps the frozen persisted key-sets', () => {
         // C3 schema-freeze sentinel. A new PERSISTED field added to the initial
         // GameState (military/political/displacement) without a deliberate schema
         // bump + migration changes these key-sets and trips a RED test — the

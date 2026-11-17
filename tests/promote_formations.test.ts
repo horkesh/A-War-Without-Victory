@@ -38,8 +38,6 @@ function makeState(formations: Record<string, FormationState>): GameState {
             turn: 10,
             seed: 'promote-test',
             phase: 'war',
-            referendum_held: true,
-            referendum_turn: 2,
             war_start_turn: 3,
             recruitment_mode: 'bottom_up'
         },

@@ -29,8 +29,6 @@ function minimalStateWithUnplacedActiveBrigade(): GameState {
             turn: 0,
             seed: 'production-caller-test',
             phase: 'war',
-            referendum_held: true,
-            referendum_turn: 0,
             war_start_turn: 0,
         },
         factions: [],

@@ -345,7 +345,7 @@ export function extractWarData(
     osidAreas?: { totalArea: number; areas: Record<string, number> }
 ): WarDataSnapshot {
     const turn = gameState.meta.turn;
-    const phase = gameState.meta.phase ?? 'peace';
+    const phase = gameState.meta.phase ?? 'war';
 
     // --- Own forces ---
     const ownForces = extractOwnForces(gameState, playerFaction);

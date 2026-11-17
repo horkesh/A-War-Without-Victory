@@ -44,19 +44,6 @@ import {
     loadRecruitmentCatalog,
 } from '../turn_pipeline_types.js';
 
-/**
- * Phase C: Peace phase entry gating (Phase_I_Specification_v0_4_0.md; ROADMAP Phase C).
- * Peace phase execution occurs only when referendum_held and current_turn >= war_start_turn.
- * Phase 0 must remain the only runner before war_start_turn; use state pipeline for phase_0.
- */
-export function isEarlyWarAllowed(state: GameState): boolean {
-    const meta = state.meta;
-    if (!meta.referendum_held) return false;
-    const warStart = meta.war_start_turn;
-    if (warStart === undefined || warStart === null) return false;
-    return meta.turn >= warStart;
-}
-
 export function assertNoAoRInEarlyWar(state: GameState): void {
     const factions = state.factions ?? [];
     for (const faction of factions) {

@@ -132,24 +132,23 @@ function makeState(opts: {
             turn: opts.turn,
             seed: 'srk-siege-stance-test',
             phase: 'war',
-            referendum_held: true,
             war_start_turn: 1,
         },
         factions: [
             {
                 id: 'RBiH',
                 profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 },
-                areasOfResponsibility: [], supply_sources: [], declared: true, declaration_turn: 1,
+                areasOfResponsibility: [], supply_sources: [], declared: true,
             },
             {
                 id: 'RS',
                 profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 },
-                areasOfResponsibility: [], supply_sources: [], declared: true, declaration_turn: 1,
+                areasOfResponsibility: [], supply_sources: [], declared: true,
             },
             {
                 id: 'HRHB',
                 profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 },
-                areasOfResponsibility: [], supply_sources: [], declared: true, declaration_turn: 2,
+                areasOfResponsibility: [], supply_sources: [], declared: true,
             },
         ],
         political: {

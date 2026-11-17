@@ -114,7 +114,7 @@ function makeState(fa: ForceAssessment | undefined): GameState {
     } as unknown as CorpsCommandState;
     return {
         schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 10, seed: 'rf-ai2', phase: 'war', referendum_held: true, war_start_turn: 1 },
+        meta: { turn: 10, seed: 'rf-ai2', phase: 'war', war_start_turn: 1 },
         factions: [],
         political: { war_alliance_rbih_hrhb: 1.0, political_controllers: {} },
         military: {

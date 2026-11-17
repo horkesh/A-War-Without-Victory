@@ -50,19 +50,19 @@ import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 function makeState(overrides?: Partial<GameState>): GameState {
     return {
         schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 10, seed: 'alliance-test', phase: 'war', referendum_held: true, war_start_turn: 1 },
+        meta: { turn: 10, seed: 'alliance-test', phase: 'war', war_start_turn: 1 },
         factions: [
             {
                 id: 'RBiH', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 },
-                areasOfResponsibility: [], supply_sources: [], declared: false, declaration_turn: null
+                areasOfResponsibility: [], supply_sources: [], declared: false
             },
             {
                 id: 'RS', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 },
-                areasOfResponsibility: [], supply_sources: [], declared: true, declaration_turn: 1
+                areasOfResponsibility: [], supply_sources: [], declared: true
             },
             {
                 id: 'HRHB', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 },
-                areasOfResponsibility: [], supply_sources: [], declared: true, declaration_turn: 2,
+                areasOfResponsibility: [], supply_sources: [], declared: true,
                 patron_state: { material_support_level: 0.5, diplomatic_isolation: 0.2, constraint_severity: 0.3, patron_commitment: 0.5, last_updated: 5 }
             }
         ],
@@ -93,7 +93,6 @@ describe('alliance update', () => {
                 turn: 30,
                 seed: 'alliance-default-floor',
                 phase: 'war',
-                referendum_held: true,
                 war_start_turn: 1,
             },
             political: {

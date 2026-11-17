@@ -11,13 +11,7 @@ function legacySave(): any {
             phase: 'war',
             seed: 'counter-offer-migration',
             game_over: false,
-            referendum_held: false,
-            referendum_turn: null,
             war_start_turn: 0,
-            peace_scheduled_referendum_turn: null,
-            peace_scheduled_war_start_turn: null,
-            referendum_eligible_turn: null,
-            referendum_deadline_turn: null,
         },
         factions: [{ id: 'RBiH' }, { id: 'RS' }, { id: 'HRHB' }],
         military: {

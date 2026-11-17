@@ -36,8 +36,6 @@ describe('final sector reserve-band truth', () => {
                 seed: 'final-sector-reserve-band-truth',
                 phase: 'war',
                 scenario_start_date: { year: 1992, month: 4, day: 6 },
-                referendum_held: true,
-                referendum_turn: 1,
                 war_start_turn: 1,
             } as GameState['meta'],
             factions: [
@@ -146,8 +144,6 @@ describe('final sector reserve-band truth', () => {
                 seed: 'final-sector-rear-only-reserve-promotion',
                 phase: 'war',
                 scenario_start_date: { year: 1992, month: 4, day: 6 },
-                referendum_held: true,
-                referendum_turn: 1,
                 war_start_turn: 1,
             } as GameState['meta'],
             factions: [
@@ -261,8 +257,6 @@ describe('final sector reserve-band truth', () => {
                 seed: 'final-sector-empty-pocket-rescue',
                 phase: 'war',
                 scenario_start_date: { year: 1992, month: 4, day: 6 },
-                referendum_held: true,
-                referendum_turn: 1,
                 war_start_turn: 1,
             } as GameState['meta'],
             factions: [

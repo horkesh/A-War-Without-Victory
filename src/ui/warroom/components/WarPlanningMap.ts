@@ -4,14 +4,10 @@
  * Close via [X] or ESC. Three zoom levels (Strategic / Operational / Tactical).
  */
 
-/** @deprecated Investment types are no longer used (peace phase removed). Kept as stub for WarPlanningMap compatibility. */
-type InvestmentType = string;
-import type { FactionId, GameState, MunicipalityId, OrganizationalPenetration } from '../../../state/game_state.js';
+import type { FactionId, GameState } from '../../../state/game_state.js';
 import wallMapFrameUrl from '../assets/wall_map_frame_v1.webp?url';
-import type { InvestmentPanelMunInfo, Phase0DirectiveState } from './InvestmentPanel.js';
-import { InvestmentPanel } from './InvestmentPanel.js';
 import { SettlementInfoPanel } from './SettlementInfoPanel.js';
-import { getPlayerSafeMunicipalityName, getPlayerSafeSettlementName } from '../../map/utils/playerSafeText.js';
+import { getPlayerSafeSettlementName } from '../../map/utils/playerSafeText.js';
 import { getActiveLocale, type Locale } from '../../map/i18n/index.js';
 
 /** GeoJSON Position [x, y] or [x, y, z]. */
@@ -106,23 +102,7 @@ export class WarPlanningMap {
     private readonly ZOOM_WHEEL_SENSITIVITY = 0.0015;
     private layerPanelExpanded = true;
     private legendVisible = true;
-    // INVEST layer (Phase 0)
-    private layerInvest = false;
-    private investmentPanel: InvestmentPanel | null = null;
-    /** @deprecated Peace phase removed; directive state is a no-op stub. */
-    private directiveState: Phase0DirectiveState = {
-        getStagedForMunicipality() { return []; },
-        getStagedInvestments() { return []; },
-        getTotalStagedCost() { return 0; },
-        getStagedCount() { return 0; },
-        stage() { return { ok: false }; },
-        unstage() {},
-        validate() { return { ok: false, reason: 'Peace phase removed' }; },
-        clear() {},
-    };
     private playerFaction: FactionId = 'RBiH';
-    private selectedMunicipality: InvestmentPanelMunInfo | null = null;
-    private onInvestmentChanged: (() => void) | null = null;
 
     constructor() {
         this.container = document.createElement('div');
@@ -168,7 +148,6 @@ export class WarPlanningMap {
                 <div class="war-planning-map-layer-row war-planning-map-layer-placeholder">Stability <span class="war-planning-map-phase-badge">[0+]</span></div>
                 <div class="war-planning-map-layer-row war-planning-map-layer-placeholder">Displacement <span class="war-planning-map-phase-badge">[I+]</span></div>
                 <label class="war-planning-map-layer-row"><input type="checkbox" id="wpm-layer-ethnicity"> Ethnicity (1991)</label>
-                <label class="war-planning-map-layer-row" id="wpm-layer-invest-row" style="display:none"><input type="checkbox" id="wpm-layer-invest"> Invest <span class="war-planning-map-phase-badge">[Phase 0]</span></label>
                 <div class="war-planning-map-layer-row war-planning-map-layer-placeholder">Municipality borders</div>
             </div>
         `;
@@ -265,23 +244,6 @@ export class WarPlanningMap {
         panelWrapper.appendChild(this.settlementInfoPanel.getElement());
         frame.appendChild(panelWrapper);
 
-        // Investment panel wrapper (Phase 0 INVEST layer)
-        const investWrapper = document.createElement('div');
-        investWrapper.className = 'investment-panel-wrapper closed';
-        investWrapper.setAttribute('aria-hidden', 'true');
-        this.investmentPanel = new InvestmentPanel({
-            gameState: null,
-            playerFaction: this.playerFaction,
-            selectedMunicipality: null,
-            directiveState: this.directiveState,
-            onInvest: (munId: MunicipalityId, investmentType: InvestmentType, coordinated?: boolean) =>
-                this.handleInvest(munId, investmentType, coordinated),
-            onUndoInvestment: (id: string) => this.handleUndoInvestment(id),
-            onClose: () => this.setSelectedMunicipality(null)
-        });
-        investWrapper.appendChild(this.investmentPanel.getElement());
-        frame.appendChild(investWrapper);
-
         this.container.appendChild(backdrop);
         this.container.appendChild(frame);
 
@@ -322,26 +284,6 @@ export class WarPlanningMap {
                     if (layerControl) layerControl.checked = true;
                 }
                 this.updateLegendForMode();
-                this.render();
-            });
-        }
-
-        const layerInvest = this.container.querySelector('#wpm-layer-invest') as HTMLInputElement;
-        if (layerInvest) {
-            layerInvest.addEventListener('change', () => {
-                this.layerInvest = layerInvest.checked;
-                if (this.layerInvest) {
-                    // INVEST replaces political control
-                    this.layerPoliticalControl = true;
-                    if (layerControl) layerControl.checked = true;
-                    this.layerEthnicity = false;
-                    const ethCb = this.container.querySelector('#wpm-layer-ethnicity') as HTMLInputElement;
-                    if (ethCb) ethCb.checked = false;
-                    this.updateLegendForMode();
-                } else {
-                    this.setSelectedMunicipality(null);
-                }
-                this.updateInvestPanelVisibility();
                 this.render();
             });
         }
@@ -499,33 +441,11 @@ export class WarPlanningMap {
         this.gameState = state;
         this.updateSettlementPanel();
         this.updateTurnDisplay();
-        this.updateInvestLayerAvailability();
-        if (this.investmentPanel) {
-            this.investmentPanel.updateProps({ gameState: state });
-        }
     }
 
-    /** Set player faction for investment panel. */
+    /** Set the player faction (kept for the warroom wiring). */
     setPlayerFaction(faction: FactionId): void {
         this.playerFaction = faction;
-        if (this.investmentPanel) {
-            this.investmentPanel.updateProps({ playerFaction: faction });
-        }
-    }
-
-    /** Get the directive state for the calendar wiring. @deprecated Peace phase removed. */
-    getDirectiveState(): Phase0DirectiveState {
-        return this.directiveState;
-    }
-
-    /** Set callback when investments change (for warroom refresh). */
-    setOnInvestmentChanged(cb: () => void): void {
-        this.onInvestmentChanged = cb;
-    }
-
-    /** Check if INVEST layer is active. */
-    isInvestLayerActive(): boolean {
-        return this.layerInvest;
     }
 
     setSelectedSettlement(feature: GeoFeature | null): void {
@@ -1337,16 +1257,9 @@ export class WarPlanningMap {
         if (this.zoomLevel === 2) {
             const feature = this.getSettlementAtPoint(canvasX, canvasY);
             if (feature) {
-                if (this.layerInvest) {
-                    // INVEST mode: route to investment panel instead of settlement info
-                    this.selectMunicipalityFromFeature(feature);
-                } else {
-                    this.setSelectedSettlement(feature);
-                }
+                this.setSelectedSettlement(feature);
             } else {
-                if (this.layerInvest && this.selectedMunicipality) {
-                    this.setSelectedMunicipality(null);
-                } else if (this.selectedSettlement) {
+                if (this.selectedSettlement) {
                     this.setSelectedSettlement(null);
                 } else {
                     this.zoomLevel = 1;
@@ -1379,146 +1292,5 @@ export class WarPlanningMap {
         this.ctx.fillStyle = 'white';
         this.ctx.fillText(label, x - 4, y + 4);
         this.ctx.restore();
-    }
-
-    // ======================================
-    // INVEST Layer Methods (Phase 0)
-    // ======================================
-
-    /** Show or hide the INVEST checkbox depending on game phase. */
-    private updateInvestLayerAvailability(): void {
-        const investRow = this.container.querySelector('#wpm-layer-invest-row') as HTMLElement;
-        if (!investRow) return;
-        const phase = this.gameState?.meta?.phase ?? 'peace';
-        const isPhase0 = phase === 'peace';
-        investRow.style.display = isPhase0 ? 'block' : 'none';
-        const cb = this.container.querySelector('#wpm-layer-invest') as HTMLInputElement | null;
-        // In Phase 0 default to INVEST enabled so capital allocation is immediately discoverable.
-        if (isPhase0 && !this.layerInvest) {
-            this.layerInvest = true;
-            if (cb) cb.checked = true;
-            this.updateInvestPanelVisibility();
-        }
-        // Auto-disable INVEST if phase changed away from phase_0
-        if (!isPhase0 && this.layerInvest) {
-            this.layerInvest = false;
-            if (cb) cb.checked = false;
-            this.setSelectedMunicipality(null);
-            this.updateInvestPanelVisibility();
-        }
-    }
-
-    /** Toggle investment panel wrapper open/closed. */
-    private updateInvestPanelVisibility(): void {
-        const investWrapper = this.container.querySelector('.investment-panel-wrapper') as HTMLElement;
-        const settWrapper = this.container.querySelector('.settlement-info-panel-wrapper') as HTMLElement;
-        if (investWrapper) {
-            const isOpen = this.layerInvest;
-            investWrapper.classList.toggle('closed', !isOpen);
-            investWrapper.classList.toggle('open', isOpen);
-            investWrapper.setAttribute('aria-hidden', isOpen ? 'false' : 'true');
-        }
-        // Hide settlement panel when INVEST is active
-        if (settWrapper && this.layerInvest) {
-            settWrapper.classList.add('closed');
-            settWrapper.classList.remove('open');
-            settWrapper.setAttribute('aria-hidden', 'true');
-        }
-        if (this.investmentPanel) {
-            this.investmentPanel.updateProps({
-                gameState: this.gameState,
-                playerFaction: this.playerFaction,
-                selectedMunicipality: this.selectedMunicipality,
-                directiveState: this.directiveState
-            });
-        }
-    }
-
-    /** Resolve municipality info from a clicked GeoFeature for the investment panel. */
-    private selectMunicipalityFromFeature(feature: GeoFeature): void {
-        const sid = feature.properties?.sid;
-        if (!sid) return;
-
-        // Resolve municipality ID
-        const midStr = this.settlementToMidMap.get(sid) ?? String(feature.properties?.municipality_id ?? '');
-        if (!midStr) return;
-
-        const munName = this.municipalitiesMap.get(midStr) ?? getPlayerSafeMunicipalityName(midStr, 'Municipality');
-        const munId = midStr as MunicipalityId;
-
-        // Get municipality state
-        const mun = this.gameState?.political?.municipalities?.[munId];
-        const stabilityScore = mun?.stability_score ?? 50;
-        const controlStatus = mun?.control_status ?? 'NEUTRAL';
-        const orgPen: OrganizationalPenetration = mun?.organizational_penetration ?? {};
-
-        // Get controller
-        const controller = this.gameState?.political.political_controllers?.[munId] ?? null;
-
-        // Get majority ethnicity from first settlement in this municipality
-        let majorityEthnicity: string | null = null;
-        if (this.ethnicityData?.by_settlement_id) {
-            const ethData = this.ethnicityData.by_settlement_id[sid];
-            if (ethData?.majority) {
-                majorityEthnicity = ethData.majority.charAt(0).toUpperCase() + ethData.majority.slice(1);
-            }
-        }
-
-        this.setSelectedMunicipality({
-            munId,
-            munName,
-            controller,
-            stabilityScore,
-            controlStatus,
-            orgPen,
-            majorityEthnicity
-        });
-    }
-
-    /** Set the selected municipality for the investment panel. */
-    setSelectedMunicipality(info: InvestmentPanelMunInfo | null): void {
-        this.selectedMunicipality = info;
-        if (this.investmentPanel) {
-            this.investmentPanel.updateProps({ selectedMunicipality: info });
-        }
-        this.render();
-    }
-
-    /** Handle an investment action from the panel. */
-    private handleInvest(munId: MunicipalityId, investmentType: InvestmentType, coordinated?: boolean): void {
-        if (!this.gameState) return;
-        const result = this.directiveState.stage(
-            this.gameState,
-            this.playerFaction,
-            investmentType,
-            [munId],
-            { coordinated }
-        );
-        if (result) {
-            // Re-render panel and map to reflect staged investment
-            if (this.investmentPanel) {
-                this.investmentPanel.updateProps({
-                    gameState: this.gameState,
-                    directiveState: this.directiveState,
-                    selectedMunicipality: this.selectedMunicipality
-                });
-            }
-            this.render();
-            this.onInvestmentChanged?.();
-        }
-    }
-
-    /** Handle undo of a staged investment. */
-    private handleUndoInvestment(id: string): void {
-        this.directiveState.unstage(id);
-        if (this.investmentPanel) {
-            this.investmentPanel.updateProps({
-                gameState: this.gameState,
-                directiveState: this.directiveState,
-                selectedMunicipality: this.selectedMunicipality
-            });
-        }
-        this.render();
-        this.onInvestmentChanged?.();
     }
 }

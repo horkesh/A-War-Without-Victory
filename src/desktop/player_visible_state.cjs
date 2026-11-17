@@ -86,14 +86,7 @@ function projectMeta(meta, playerFaction) {
     'decision_mode',
     'recruitment_mode',
     'rbih_hrhb_war_earliest_turn',
-    'war_force_transition_after_turns',
     'war_start_turn',
-    'peace_scheduled_referendum_turn',
-    'peace_scheduled_war_start_turn',
-    'referendum_deadline_turn',
-    'referendum_eligible_turn',
-    'referendum_held',
-    'referendum_turn',
     'autonomy_level',
     'autonomy_level_pending',
     'tutorial_state',
@@ -733,7 +726,6 @@ function projectPolitical(political, playerFaction) {
     'ivp_consequences_active',
     'war_alliance_rbih_hrhb',
     'enclave_resilience',
-    'phase0_events_log',
   ]);
   for (const key of [
     'war_exhaustion',

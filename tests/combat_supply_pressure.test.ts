@@ -15,7 +15,7 @@ import type { SupplyStateByOsidReport, SupplyStateDerivationReport } from '../sr
 function minimalPhaseIIState(controllers?: Record<string, string | null>): GameState {
     return {
         schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 20, seed: 'sp-test', phase: 'war', referendum_held: true, referendum_turn: 6, war_start_turn: 10 },
+        meta: { turn: 20, seed: 'sp-test', phase: 'war', war_start_turn: 10 },
         factions: [
             { id: 'RBiH', profile: { authority: 10, legitimacy: 10, control: 10, logistics: 10, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] },
             { id: 'RS', profile: { authority: 10, legitimacy: 10, control: 10, logistics: 10, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] },
@@ -164,11 +164,4 @@ describe('supply pressure', () => {
         expect(state.political.war_supply_pressure?.RS).toBe(9);
     });
 
-    it('does nothing when meta.phase is peace', () => {
-        const state = minimalPhaseIIState({ S1: 'RBiH', S2: 'RS' });
-        state.meta.phase = 'peace';
-        const edges: EdgeRecord[] = [{ a: 'S1', b: 'S2' }];
-        updateSupplyPressure(state, edges);
-        expect(state.political.war_supply_pressure === undefined || Object.keys(state.political.war_supply_pressure).length === 0).toBe(true);
-    });
 });

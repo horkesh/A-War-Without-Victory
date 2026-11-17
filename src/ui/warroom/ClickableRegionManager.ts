@@ -42,7 +42,7 @@ import type { FactionId } from '../../state/game_state.js';
 import { GameState } from '../../state/game_state.js';
 import { INTERNATIONAL_SANCTIONS_THRESHOLD } from '../../state/patron_pressure.js';
 import { getPlayerFacingFaction } from '../shared/playerFacingLabels.js';
-import { checkWarTransition, findCriticalEvent, findWarMilestoneEvent, showDeclarationModal, showWarBeginsModal } from './components/DeclarationEventModal.js';
+import { findWarMilestoneEvent, showDeclarationModal } from './components/DeclarationEventModal.js';
 import { getPlayerFaction, turnToWeekString } from './components/warroom_utils.js';
 import { DiplomacyModal } from './components/DiplomacyModal.js';
 import { IvpBreakdownModal } from './components/IvpBreakdownModal.js';

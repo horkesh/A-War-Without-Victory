@@ -1,52 +1,15 @@
 /**
- * ReportsModal — Displays situation reports from municipality intelligence.
- * Shown when clicking on the report stack.
- *
- * Now uses real game state data for municipality intelligence:
- * - Org-pen levels, stability, control status
- * - Per-municipality detail with 1-turn delay
- * - Sorted by urgency (highly contested → contested → secure)
- * - Faction-specific headers (FROM/TO per faction)
- *
- * War-phase (Peace/War phase) renders operational intelligence briefs
- * using extractWarData snapshot instead of municipality org-pen.
+ * ReportsModal — Displays the operational intelligence brief.
+ * Shown when clicking on the report stack. Renders from the extractWarData
+ * snapshot and the operational sitrep view (the pre-war municipality
+ * intelligence report was retired with the peace phase).
  */
 
-import type { FactionId, GameState, MunicipalityId } from '../../../state/game_state.js';
-import { strictCompare } from '../../../state/validateGameState.js';
+import type { FactionId, GameState } from '../../../state/game_state.js';
 import { extractWarData, type WarDataSnapshot } from '../data/war_data_extractor.js';
 import { getOperationalSitrepView, type OperationalSitrepView } from '../../shared/operational_sitrep_views.js';
-import { controlStatusLabel, FACTION_COLORS, factionCssClass, getFactionPartyPen, getPlayerFaction, hasFactionParamilitary, turnToDateString } from './warroom_utils.js';
+import { FACTION_COLORS, factionCssClass, getPlayerFaction, turnToDateString } from './warroom_utils.js';
 import { getWarroomFactionIdentity } from './warroom_identity.js';
-
-interface ReportContent {
-    factionId: string;
-    from: string;
-    to: string;
-    date: string;
-    subject: string;
-    body: string;
-    signature: string;
-    classification: string;
-}
-
-const REPORT_HEADERS: Record<string, { from: string; to: string; signature: string }> = {
-    RBiH: {
-        from: 'Municipal Affairs Department',
-        to: 'Presidency of Bosnia and Herzegovina',
-        signature: 'Director, Municipal Intelligence Bureau',
-    },
-    RS: {
-        from: 'Serbian Autonomous Region Command',
-        to: 'Assembly of Republika Srpska',
-        signature: 'Chief, Regional Security Directorate',
-    },
-    HRHB: {
-        from: 'Croatian Defence Council — Intelligence Section',
-        to: 'HVO General Staff, Mostar',
-        signature: 'Head, HVO Intelligence Department',
-    },
-};
 
 const WAR_REPORT_HEADERS: Record<string, { from: string; to: string; signature: string }> = {
     RBiH: {
@@ -66,80 +29,11 @@ const WAR_REPORT_HEADERS: Record<string, { from: string; to: string; signature: 
     },
 };
 
-interface MunicipalityIntel {
-    munId: MunicipalityId;
-    stability: number;
-    controlStatus: string;
-    ownPartyPen: number;
-    policeLoyalty: string;
-    hasParamilitary: boolean;
-    jnaPresence: boolean;
-    urgency: number;
-}
-
 export class ReportsModal {
     private gameState: GameState;
 
     constructor(gameState: GameState) {
         this.gameState = gameState;
-    }
-
-
-    /**
-     * Gather intelligence on municipalities where this faction has investment.
-     */
-    private gatherMunicipalityIntel(factionId: FactionId): MunicipalityIntel[] {
-        if (!this.gameState.political.municipalities) return [];
-
-        const munIds = Object.keys(this.gameState.political.municipalities).sort(strictCompare);
-        const results: MunicipalityIntel[] = [];
-
-        for (const munId of munIds) {
-            const mun = this.gameState.political.municipalities[munId];
-            if (!mun) continue;
-            const op = mun.organizational_penetration;
-            if (!op) continue;
-
-            const ownPartyPen = getFactionPartyPen(op, factionId);
-            const hasParamilitary = hasFactionParamilitary(op, factionId);
-
-            const controller = this.gameState.political.political_controllers?.[munId];
-            const isControlled = controller === factionId;
-            if (ownPartyPen <= 0 && !hasParamilitary && !isControlled) continue;
-
-            const stability = mun.stability_score ?? 50;
-            const controlStatus = controlStatusLabel(stability);
-
-            const urgency = stability;
-
-            results.push({
-                munId,
-                stability,
-                controlStatus,
-                ownPartyPen,
-                policeLoyalty: op.police_loyalty ?? 'unknown',
-                hasParamilitary,
-                jnaPresence: op.jna_presence ?? false,
-                urgency,
-            });
-        }
-
-        results.sort((a, b) => {
-            if (a.urgency !== b.urgency) return a.urgency - b.urgency;
-            return strictCompare(a.munId, b.munId);
-        });
-
-        return results;
-    }
-
-    /**
-     * Format municipality ID for display (kebab-case to Title Case).
-     */
-    private formatMunName(munId: string): string {
-        return munId
-            .split('-')
-            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-            .join(' ');
     }
 
     private formatSettlementLabel(value: string | null | undefined): string {
@@ -153,85 +47,6 @@ export class ReportsModal {
             .filter(Boolean)
             .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
             .join(' ');
-    }
-
-    /**
-     * Generate the report body from municipality intelligence.
-     */
-    private generateReportBody(factionId: FactionId, reportTurn: number): string {
-        const intel = this.gatherMunicipalityIntel(factionId);
-        const reportDate = turnToDateString(reportTurn);
-
-        if (intel.length === 0) {
-            return `CURRENT SITUATION:\n\n` +
-                `No organizational presence established in any municipality.\n` +
-                `Intelligence coverage: NONE.\n\n` +
-                `RECOMMENDATION:\n\n` +
-                `Begin organizational investment in aligned municipalities immediately.\n` +
-                `Priority: police loyalty, party penetration.`;
-        }
-
-        const lines: string[] = [];
-        lines.push(`SITUATION REPORT - ${reportDate.toUpperCase()}`);
-        lines.push(`MUNICIPALITIES WITH PRESENCE: ${intel.length}`);
-        lines.push('');
-        lines.push('--------------------------------------------------');
-
-        const shown = intel.slice(0, 8);
-        for (const m of shown) {
-            lines.push('');
-            lines.push(`  ${this.formatMunName(m.munId).toUpperCase()}`);
-            lines.push(`  Status: ${m.controlStatus}  |  Stability: ${m.stability}`);
-            lines.push(`  Party Penetration: ${m.ownPartyPen}%  |  Police: ${m.policeLoyalty.toUpperCase()}`);
-            if (m.hasParamilitary) lines.push(`  WARNING: Paramilitary presence active`);
-            if (m.jnaPresence) lines.push(`  WARNING: JNA garrison present`);
-            lines.push('  ' + '-'.repeat(48));
-        }
-
-        if (intel.length > 8) {
-            lines.push('');
-            lines.push(`  ... and ${intel.length - 8} additional municipalities`);
-        }
-
-        const highlyContested = intel.filter(m => m.controlStatus === 'HIGHLY CONTESTED');
-        if (highlyContested.length > 0) {
-            lines.push('');
-            lines.push('PRIORITY WARNING:');
-            for (const m of highlyContested.slice(0, 3)) {
-                lines.push(`  ${this.formatMunName(m.munId)} - stability at ${m.stability}, immediate attention required`);
-            }
-        }
-
-        const jnaCount = intel.filter(m => m.jnaPresence).length;
-        if (jnaCount > 0) {
-            lines.push('');
-            lines.push(`JNA POSTURE: ${jnaCount} municipalities report garrison presence`);
-        }
-
-        return lines.join('\n');
-    }
-
-    /**
-     * Generate report content for Phase 0.
-     */
-    private generateContent(): ReportContent {
-        const turn = this.gameState.meta.turn;
-        const reportTurn = Math.max(0, turn - 1);
-        const factionId = getPlayerFaction(this.gameState);
-
-        const headers = REPORT_HEADERS[factionId] ?? REPORT_HEADERS['RBiH'];
-        const body = this.generateReportBody(factionId, reportTurn);
-
-        return {
-            factionId,
-            from: headers.from,
-            to: headers.to,
-            date: turnToDateString(reportTurn),
-            subject: `Situation Report - ${turnToDateString(reportTurn)}`,
-            body,
-            signature: headers.signature,
-            classification: 'RESTRICTED'
-        };
     }
 
     /**
@@ -333,9 +148,6 @@ export class ReportsModal {
     }
 
     /**
-     * Render Phase 0 reports modal (pre-war municipality intelligence).
-     */
-    /**
      * Create the root report shell with consistent styling, classification stamps, and faction accents.
      */
     private createShell(factionId: FactionId, classification: string): HTMLElement {
@@ -367,49 +179,7 @@ export class ReportsModal {
     }
 
     /**
-     * Render Phase 0 reports modal (pre-war municipality intelligence).
-     */
-    private renderPhase0(): HTMLElement {
-        const content = this.generateContent();
-        const identity = getWarroomFactionIdentity(content.factionId);
-        const report = this.createShell(content.factionId, content.classification);
-
-        // Header
-        const header = document.createElement('div');
-        header.className = 'report-header';
-        header.innerHTML = `
-            <div class="report-field">
-                <span class="report-field-label">FROM:</span> ${content.from}
-            </div>
-            <div class="report-field">
-                <span class="report-field-label">TO:</span> ${content.to}
-            </div>
-            <div class="report-field">
-                <span class="report-field-label">DATE:</span> ${content.date}
-            </div>
-            <div class="report-field">
-                <span class="report-field-label text-accent-gold">SUBJECT:</span> ${identity.commandBriefLabel} - ${content.subject}
-            </div>
-        `;
-        report.appendChild(header);
-
-        // Body (white-space and font already handled by CSS .report-body)
-        const body = document.createElement('div');
-        body.className = 'report-body';
-        body.textContent = content.body;
-        report.appendChild(body);
-
-        // Signature
-        const signature = document.createElement('div');
-        signature.className = 'report-signature';
-        signature.textContent = content.signature;
-        report.appendChild(signature);
-
-        return report;
-    }
-
-    /**
-     * Render war-phase (Peace/War phase) operational intelligence brief.
+     * Render the war-phase operational intelligence brief.
      */
     private renderWarPhase(): HTMLElement {
         const turn = this.gameState.meta.turn;
@@ -459,13 +229,9 @@ export class ReportsModal {
     }
 
     /**
-     * Render the reports modal as HTML element.
-     * Phase gate: Phase 0 shows municipality intelligence,
-     * war phases (Peace/War phase) show operational intelligence briefs.
+     * Render the reports modal (operational intelligence brief) as an HTML element.
      */
     render(): HTMLElement {
-        const phase = this.gameState.meta.phase ?? 'peace';
-        if (phase === 'peace') return this.renderPhase0();
         return this.renderWarPhase();
     }
 }

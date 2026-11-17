@@ -31,9 +31,7 @@ function makeMinimalSaveJson(turn = 5, playerFaction?: string): string {
                 supply_sources: [],
                 command_capacity: 3,
                 negotiation: { pressure: 0, last_change_turn: null, capital: 0, spent_total: 0, last_capital_change_turn: null },
-                declaration_pressure: 0,
                 declared: true,
-                declaration_turn: 0,
             },
         ],
         military: {

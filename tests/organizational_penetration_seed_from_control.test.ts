@@ -8,7 +8,7 @@ import { seedOrganizationalPenetrationFromControl } from '../src/state/seed_orga
 function makeState(): GameState {
     return {
   schema_version: CURRENT_SCHEMA_VERSION,
-  meta: { turn: 0, seed: 'seed-org-pen-test', phase: 'peace' },
+  meta: { turn: 0, seed: 'seed-org-pen-test', phase: 'war' },
   factions: [
             {
                 id: 'RBiH',

@@ -113,9 +113,13 @@ export function getBotStrategyProfile(faction: FactionId): BotStrategyProfile {
     };
 }
 
-export function resolveAggressionForPhase(profile: BotStrategyProfile, phase: PhaseName | undefined): number {
-    if (phase === 'war') return profile.late_war_aggression;
-    return profile.early_war_aggression;
+/**
+ * Every game runs in the war phase (the peace phase was retired at schema v41),
+ * so the phase-level baseline is always the late-war aggression; week-based
+ * tapering in resolveAggression supplies the early-war shape.
+ */
+export function resolveAggressionForPhase(profile: BotStrategyProfile, _phase: PhaseName | undefined): number {
+    return profile.late_war_aggression;
 }
 
 const AGGRESSION_TAPER_START_WEEK = 0;

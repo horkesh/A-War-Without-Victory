@@ -105,11 +105,10 @@ export class NewsTicker {
 
     /**
      * Generate dynamic war-event ticker strings for war phases.
-     * Returns an empty array during Phase 0.
+     * Returns an empty array when the state carries no phase.
      */
     private generateWarEvents(gameState: GameState): string[] {
-        const phase = gameState.meta.phase;
-        if (!phase || phase === 'peace') return [];
+        if (!gameState.meta.phase) return [];
 
         const playerFaction = getPlayerFacingFaction(gameState.meta.player_faction);
         if (!playerFaction) return [];

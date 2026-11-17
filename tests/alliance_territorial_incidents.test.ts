@@ -15,7 +15,6 @@ function makeState(): GameState {
             turn: 50,
             seed: 'territorial-incidents',
             phase: 'war',
-            referendum_held: true,
             war_start_turn: 0,
             rbih_hrhb_war_earliest_turn: 40
         },

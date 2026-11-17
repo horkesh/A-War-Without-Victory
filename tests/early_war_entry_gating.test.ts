@@ -1,23 +1,19 @@
 /**
- * Phase C Step 2: Peace phase entry and gating tests.
- * - Peace phase unreachable without referendum_held.
- * - Peace phase unreachable unless current_turn >= war_start_turn.
- * - Phase 0 continues to run safely via state pipeline (runOneTurn).
+ * War-phase entry: runTurn runs every war-phase state, whatever war_start_turn says.
+ * The peace phase (and its state pipeline runOneTurn) was retired at schema v41;
+ * the peace-only gating cases left with it.
  */
 
 import { expect, test } from 'vitest';
 import { runTurn } from '../src/sim/turn_pipeline.js';
 import type { GameState } from '../src/state/game_state.js';
 import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
-import { runOneTurn } from '../src/state/turn_pipeline.js';
 
 function minimalPhaseIState(overrides: Partial<GameState['meta']> = {}): GameState {
     const meta = {
         turn: 10,
         seed: 'gating-fixture',
         phase: 'war' as const,
-        referendum_held: true,
-        referendum_turn: 6,
         war_start_turn: 10,
         ...overrides
     };
@@ -43,43 +39,6 @@ function minimalPhaseIState(overrides: Partial<GameState['meta']> = {}): GameSta
         displacement: {} as any
     };
 }
-
-function minimalPhase0State(): GameState {
-    return {
-  schema_version: CURRENT_SCHEMA_VERSION,
-  meta: {
-            turn: 5,
-            seed: 'phase0-fixture',
-            phase: 'peace',
-            referendum_held: false,
-            referendum_turn: null,
-            war_start_turn: null
-        },
-  factions: [
-            { id: 'RBiH', profile: { authority: 10, legitimacy: 10, control: 10, logistics: 10, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] },
-            { id: 'RS', profile: { authority: 10, legitimacy: 10, control: 10, logistics: 10, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] },
-            { id: 'HRHB', profile: { authority: 10, legitimacy: 10, control: 10, logistics: 10, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] }
-        ],
-  military: {
-    formations: {},
-    front_segments: {},
-    front_posture: {},
-    front_posture_regions: {},
-    front_pressure: {},
-    militia_pools: {}
-  } as any,
-  political: {
-    political_controllers: { 'SID_001': 'RBiH' }
-  } as any,
-        displacement: {} as any
-    };
-}
-
-test('runTurn accepts war when referendum_held is false', async () => {
-    const state = minimalPhaseIState({ referendum_held: false });
-    const { nextState } = await runTurn(state, { seed: state.meta.seed });
-    expect(nextState.meta.turn).toBe(11);
-});
 
 test('runTurn accepts war when war_start_turn is null', async () => {
     const state = minimalPhaseIState({ war_start_turn: null });
@@ -108,24 +67,8 @@ test('runTurn tolerates AoR entries on war path', async () => {
     expect(nextState.meta.turn).toBe(11);
 });
 
-test('runTurn throws when peace (use state pipeline)', async () => {
-    const state = minimalPhase0State();
-    await expect(runTurn(state, { seed: state.meta.seed })).rejects.toThrow(/unsupported lifecycle phase "peace"/);
-});
-
-test('Phase 0 continues to run safely via runOneTurn when phase_0', () => {
-    const state = minimalPhase0State();
-    const result = runOneTurn(state, { seed: state.meta.seed });
-    expect(result.state.meta.turn).toBe(6);
-    expect(result.state.meta.phase).toBe('peace');
-    expect(result.phasesExecuted).toEqual([
-        'directives',
-        'deployments',
-        'military_interaction',
-        'fragmentation_resolution',
-        'supply_resolution',
-        'political_effects',
-        'exhaustion_update',
-        'persistence',
-    ]);
+test('runTurn rejects a state that carries no war phase', async () => {
+    const state = minimalPhaseIState();
+    delete (state.meta as { phase?: string }).phase;
+    await expect(runTurn(state, { seed: state.meta.seed })).rejects.toThrow(/unsupported lifecycle phase/);
 });

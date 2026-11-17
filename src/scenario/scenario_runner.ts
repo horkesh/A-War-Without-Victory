@@ -64,7 +64,6 @@ import {
     renderScenarioReadComparison,
     type ScenarioReadContext,
 } from './scenario_read_context.js';
-import { runOneTurn } from '../state/turn_pipeline.js';
 import { computeSpatialContext } from '../sim/spatial_context.js';
 import { summarizeCorpsFireSupport } from '../sim/combat/corps_fire_support.js';
 import { strictCompare } from '../state/validateGameState.js';
@@ -580,7 +579,6 @@ function captureHistoricalFactionMetrics(state: GameState): HistoricalFactionMet
         const recruitment_capital =
             recruitment?.recruitment_capital?.[faction.id]?.points ?? 0;
         const negotiation_capital = faction.negotiation?.capital ?? 0;
-        const prewar_capital = faction.prewar_capital ?? 0;
         out.push({
             faction: faction.id,
             personnel_total,
@@ -588,8 +586,7 @@ function captureHistoricalFactionMetrics(state: GameState): HistoricalFactionMet
             brigades_inactive,
             brigades_total,
             recruitment_capital,
-            negotiation_capital,
-            prewar_capital
+            negotiation_capital
         });
     }
     return out;
@@ -614,8 +611,7 @@ function computeHistoricalAlignmentDiagnostics(
                     brigades_inactive_delta: end.brigades_inactive - row.brigades_inactive,
                     brigades_total_delta: end.brigades_total - row.brigades_total,
                     recruitment_capital_delta: end.recruitment_capital - row.recruitment_capital,
-                    negotiation_capital_delta: end.negotiation_capital - row.negotiation_capital,
-                    prewar_capital_delta: end.prewar_capital - row.prewar_capital
+                    negotiation_capital_delta: end.negotiation_capital - row.negotiation_capital
                 };
             })
             .filter((row): row is NonNullable<typeof row> => row != null)
@@ -1756,14 +1752,6 @@ export async function buildScenarioStartupState(
     // Snapshot initial control for timeline provenance (before any sim turns mutate political_controllers).
     state.political.initial_political_controllers = { ...state.political.political_controllers };
 
-    if (typeof scenario.war_entrenchment_init_turns === 'number') {
-        state.meta.war_entrenchment_init_turns = scenario.war_entrenchment_init_turns;
-    }
-    if (typeof scenario.war_force_transition_after_turns === 'number') {
-        state.meta.war_force_transition_after_turns = scenario.war_force_transition_after_turns;
-    } else if (scenario.start_lifecycle_phase === 'war') {
-        state.meta.war_force_transition_after_turns = 52;
-    }
 
     if (scenario.recruitment_mode === 'bottom_up' || scenario.recruitment_mode === 'player_choice') {
         state.meta.recruitment_mode = scenario.recruitment_mode;
@@ -1854,11 +1842,7 @@ export async function buildScenarioStartupState(
     if (scenario.start_lifecycle_phase === 'war') {
         state.meta.phase = 'war';
         state.meta.turn = 0;
-        state.meta.referendum_held = true;
-        state.meta.referendum_turn = 0;
         state.meta.war_start_turn = 0;
-        state.meta.peace_scheduled_referendum_turn = null;
-        state.meta.peace_scheduled_war_start_turn = null;
         state.meta.rbih_hrhb_war_earliest_turn = scenario.rbih_hrhb_war_earliest_week
             ?? DEFAULT_RBIH_HRHB_WAR_EARLIEST_TURN;
         if (scenario.enable_rbih_hrhb_dynamics === false) {
@@ -1866,13 +1850,8 @@ export async function buildScenarioStartupState(
         }
         ensureRbihHrhbState(state, scenario.init_alliance_rbih_hrhb, scenario.init_mixed_municipalities);
         for (const f of state.factions ?? []) {
-            if (f.id === 'RS') (f as { prewar_capital?: number }).prewar_capital = 100;
-            if (f.id === 'RBiH') (f as { prewar_capital?: number }).prewar_capital = 70;
-            if (f.id === 'HRHB') (f as { prewar_capital?: number }).prewar_capital = 40;
-            (f as { declaration_pressure?: number }).declaration_pressure = 0;
             if (f.id === 'RS' || f.id === 'HRHB') {
                 (f as { declared?: boolean }).declared = true;
-                (f as { declaration_turn?: number | null }).declaration_turn = 0;
             }
             (f as { areasOfResponsibility?: string[] }).areasOfResponsibility = [];
         }
@@ -2921,93 +2900,65 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
 
             let turnReport: Awaited<ReturnType<typeof runTurn>>['report'];
             let consumedSuccessfulPublicWarTurn = false;
-            if (state.meta.phase === 'peace') {
-                const result = runOneTurn(state, { seed: state.meta.seed });
-                state = result.state;
-                turnReport = {
-                    seed: state.meta.seed,
-                    phases: result.phasesExecuted.map((name) => ({ name })),
-                    control_flip: { flips: [], municipalities_evaluated: 0, control_events: [] },
-                    phase_f_displacement: undefined,
-                    front_emergence_report: []
-                } as Awaited<ReturnType<typeof runTurn>>['report'];
-                if (!oobCreated && state.meta.phase === 'war') {
-                    await createOobFormations(
-                        state,
-                        scenario,
-                        oobCorps,
-                        oobBrigades,
-                        graph.settlements,
-                        municipalityHqSettlement,
-                        sidToMun,
-                        municipalityPopulation1991,
-                        operationalData?.canonicalToOperational,
-                        operationalData,
-                        baseDir
-                    );
-                    oobCreated = true;
-                }
-            } else {
-                const runResult = await runTurn(state, {
+            const runResult = await runTurn(state, {
                 dataBaseDir: baseDir,
-                    seed: state.meta.seed,
-                    settlementGraph: graph,
-                    operationalSettlementGraph,
-                    operationalData: operationalData && operationalCentroids
-                        ? {
-                            opData: operationalData,
-                            edges: operationalSettlementGraph.edges,
-                            centroids: operationalCentroids,
-                        }
-                        : undefined,
-                    settlementEdges: graph.edges,
-                    municipalityPopulation1991,
-                    settlementPopulationBySid,
-                    settlementDataRaw,
-                    municipalityHqSettlement: Object.keys(municipalityHqSettlement).length > 0 ? municipalityHqSettlement : undefined,
-                    historicalNameLookup,
-                    historicalCorpsLookup,
-                    historicalOobIdLookup,
-                    historicalEquipmentClassLookup,
-                    eventDefinitions,
-                    // LANE D-CONTENT (Path A): wire per-turn displacement event sink.
-                    // Engine clear-displacement-event-log step calls this with the
-                    // turn's events right before truncating the buffer.
-                    displacementEventStreamSink: (events) => {
-                        for (const evt of events) {
-                            displacementEventStream.write(stableStringify(evt) + '\n');
-                        }
+                seed: state.meta.seed,
+                settlementGraph: graph,
+                operationalSettlementGraph,
+                operationalData: operationalData && operationalCentroids
+                    ? {
+                        opData: operationalData,
+                        edges: operationalSettlementGraph.edges,
+                        centroids: operationalCentroids,
                     }
-                });
-                assertTurnSuccess(runResult);
-                state = runResult.nextState;
-                consumedSuccessfulPublicWarTurn = true;
-                turnReport = runResult.report;
-                autoResolveOpportunityProposalReviews(
-                    state,
-                    state.meta.turn,
-                    state.meta.player_faction ?? null
-                );
-                // Scenario runs are non-interactive. Any opportunity still
-                // pending after the war pipeline is headless-controlled and
-                // should follow the same deterministic staff path as bot ops.
-                applyBotOpportunityDecisions(state, state.meta.turn, null);
-                if (!oobCreated && state.meta.phase === 'war') {
-                    await createOobFormations(
-                        state,
-                        scenario,
-                        oobCorps,
-                        oobBrigades,
-                        graph.settlements,
-                        municipalityHqSettlement,
-                        sidToMun,
-                        municipalityPopulation1991,
-                        operationalData?.canonicalToOperational,
-                        operationalData,
-                        baseDir
-                    );
-                    oobCreated = true;
+                    : undefined,
+                settlementEdges: graph.edges,
+                municipalityPopulation1991,
+                settlementPopulationBySid,
+                settlementDataRaw,
+                municipalityHqSettlement: Object.keys(municipalityHqSettlement).length > 0 ? municipalityHqSettlement : undefined,
+                historicalNameLookup,
+                historicalCorpsLookup,
+                historicalOobIdLookup,
+                historicalEquipmentClassLookup,
+                eventDefinitions,
+                // LANE D-CONTENT (Path A): wire per-turn displacement event sink.
+                // Engine clear-displacement-event-log step calls this with the
+                // turn's events right before truncating the buffer.
+                displacementEventStreamSink: (events) => {
+                    for (const evt of events) {
+                        displacementEventStream.write(stableStringify(evt) + '\n');
+                    }
                 }
+            });
+            assertTurnSuccess(runResult);
+            state = runResult.nextState;
+            consumedSuccessfulPublicWarTurn = true;
+            turnReport = runResult.report;
+            autoResolveOpportunityProposalReviews(
+                state,
+                state.meta.turn,
+                state.meta.player_faction ?? null
+            );
+            // Scenario runs are non-interactive. Any opportunity still
+            // pending after the war pipeline is headless-controlled and
+            // should follow the same deterministic staff path as bot ops.
+            applyBotOpportunityDecisions(state, state.meta.turn, null);
+            if (!oobCreated && state.meta.phase === 'war') {
+                await createOobFormations(
+                    state,
+                    scenario,
+                    oobCorps,
+                    oobBrigades,
+                    graph.settlements,
+                    municipalityHqSettlement,
+                    sidToMun,
+                    municipalityPopulation1991,
+                    operationalData?.canonicalToOperational,
+                    operationalData,
+                    baseDir
+                );
+                oobCreated = true;
             }
 
             // VLAŠÍC MARCH-TIMING DIAGNOSTIC: opt-in, read-only. Inert unless
@@ -3879,16 +3830,6 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             ...(botBenchmarkSummary ? { bot_benchmark_evaluation: botBenchmarkSummary } : {}),
             ...(victoryEvaluation ? { victory: victoryEvaluation } : {}),
             ...(breachDiagnostic ? { breach_diagnostic: breachDiagnostic } : {}),
-            ...(state.meta.phase === 'war' && attackResolutionSummary.weeks_at_war === 0
-                ? {
-                      early_war_note: {
-                          message:
-                              'Opposing control edges have not yet persisted long enough',
-                          streak: state.meta.war_opposing_edges_streak ?? 0,
-                          required_streak: 4
-                      }
-                  }
-                : {}),
             anomaly_detection: {
                 count: anomalyReports.length,
                 critical: anomalyReports.filter((r) => r.severity === 'critical').length,

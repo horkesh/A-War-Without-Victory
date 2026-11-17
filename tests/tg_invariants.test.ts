@@ -93,8 +93,6 @@ function emptyV19Fixture(): GameState {
             turn: 0,
             seed: 'tg-invariants-fixture',
             phase: 'war',
-            referendum_held: true,
-            referendum_turn: 6,
             war_start_turn: 10,
             game_over: false,
             player_faction: 'RBiH',

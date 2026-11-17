@@ -341,23 +341,6 @@ export function normalizeScenario(raw: unknown): Scenario {
             ? Math.max(0, o.max_recruits_per_faction_per_turn)
             : undefined;
 
-    // Peace→War phase: optional initial entrenchment at transition (War phase Spec §4, §6).
-    const war_entrenchment_init_turns =
-        typeof o.war_entrenchment_init_turns === 'number' &&
-        Number.isInteger(o.war_entrenchment_init_turns) &&
-        o.war_entrenchment_init_turns >= 0 &&
-        o.war_entrenchment_init_turns <= 12
-            ? o.war_entrenchment_init_turns
-            : undefined;
-
-    // Stuck-in-Peace-phase fallback: optional N turns after war_start_turn to force War phase transition.
-    const war_force_transition_after_turns =
-        typeof o.war_force_transition_after_turns === 'number' &&
-        Number.isInteger(o.war_force_transition_after_turns) &&
-        o.war_force_transition_after_turns >= 1 &&
-        o.war_force_transition_after_turns <= 104
-            ? o.war_force_transition_after_turns
-            : undefined;
 
     // Deprecated per-faction OSID avoidance guardrail. Non-empty values mask bot targeting/OOB/painted-target defects.
     const avoided_osids_by_faction: Record<string, string[]> | undefined = (() => {
@@ -494,8 +477,6 @@ export function normalizeScenario(raw: unknown): Scenario {
             equipment_points,
             equipment_points_trickle,
             max_recruits_per_faction_per_turn,
-            war_entrenchment_init_turns,
-            war_force_transition_after_turns,
             avoided_osids_by_faction,
             must_hold_osids_by_corps,
             supply_reserves_enabled,
@@ -544,8 +525,6 @@ export function normalizeScenario(raw: unknown): Scenario {
         equipment_points,
         equipment_points_trickle,
         max_recruits_per_faction_per_turn,
-        war_entrenchment_init_turns,
-        war_force_transition_after_turns,
         avoided_osids_by_faction,
         must_hold_osids_by_corps,
         supply_reserves_enabled,

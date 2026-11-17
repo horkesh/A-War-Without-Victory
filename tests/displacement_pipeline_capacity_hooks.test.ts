@@ -20,8 +20,6 @@ function minimalPhaseIIState(): GameState {
             turn: 25,
             seed: 'pf-cap',
             phase: 'war',
-            referendum_held: true,
-            referendum_turn: 6,
             war_start_turn: 10
         },
   factions: [
@@ -67,11 +65,4 @@ test('buildDisplacementCapacityReport: deterministic and no control flips', () =
     expect(report.settlements_affected.includes('S1') && report.settlements_affected.includes('S2')).toBeTruthy();
     expect(report.municipality_factors['MUN_A']).toBe(0.7);
     expect(state.political.political_controllers).toEqual({ S1: 'RBiH', S2: 'RS' });
-});
-
-test('hooks return 1 when phase !== war', () => {
-    const state = minimalPhaseIIState();
-    state.meta!.phase = 'peace';
-    expect(getMunicipalityDisplacementFactor(state, 'MUN_A')).toBe(1);
-    expect(getSettlementDisplacementFactor(state, 'S1')).toBe(1);
 });

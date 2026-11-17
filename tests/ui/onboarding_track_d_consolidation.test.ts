@@ -95,19 +95,15 @@ describe('Track D onboarding consolidation', () => {
     ).toBe(false);
   });
 
-  it('arms the peace-war transition overlay only for an actual peace-to-war load transition', () => {
-    const peace = minimalState({ phase: 'peace', turn: 9 });
-    const firstWar = minimalState({ phase: 'war', turn: 10 });
+  it('a war-phase load marks the war-start intro seen; only a fresh start re-arms it', () => {
+    const firstWar = minimalState({ phase: 'war', turn: 0 });
     const laterWar = minimalState({ phase: 'war', turn: 40 });
 
-    expect(shouldMarkPeaceWarTransitionSeenOnLoad(null, firstWar)).toBe(true);
-    expect(shouldMarkPeaceWarTransitionSeenOnLoad(laterWar, firstWar)).toBe(true);
-    expect(shouldMarkPeaceWarTransitionSeenOnLoad(peace, firstWar)).toBe(false);
-    expect(shouldMarkPeaceWarTransitionSeenOnLoad(peace, peace)).toBe(false);
+    expect(shouldMarkPeaceWarTransitionSeenOnLoad(firstWar)).toBe(true);
+    expect(shouldMarkPeaceWarTransitionSeenOnLoad(laterWar)).toBe(true);
 
     expect(shouldShowPeaceWarTransition(firstWar, false)).toBe(true);
     expect(shouldShowPeaceWarTransition(firstWar, true)).toBe(false);
-    expect(shouldShowPeaceWarTransition(peace, false)).toBe(false);
   });
 
   it('re-arms the war-start intro after a fresh campaign start', () => {

@@ -161,12 +161,6 @@ export interface Scenario {
     /** Optional deterministic cap of elective recruits per faction per turn (default 1). */
     max_recruits_per_faction_per_turn?: number;
     /**
-     * Peace→War phase transition: initial entrenchment turns (0..12) for all brigades at War phase entry.
-     * Optional; default 0. When set, implementation may set state.meta.war_entrenchment_init_turns at load
-     * so the transition can apply it. See War phase Spec §4, §6 and docs/30_planning/PHASE_I_II_EDGE_CASES.md.
-     */
-    war_entrenchment_init_turns?: number;
-    /**
      * Phase A (Supply Reserves): When true, supply reserves system is enabled.
      * Defaults to false for backward compatibility. When true, each faction accumulates
      * reserves from production and replenishment, consumed by maintenance and combat.
@@ -199,12 +193,6 @@ export interface Scenario {
      * Territory taken this way costs the player the outcome class.
      */
     consolidation_sweep_enabled?: boolean;
-    /**
-     * Stuck-in-Peace-phase fallback: after this many Peace phase turns (since war_start_turn) without transition,
-     * force transition to War phase. Optional; when absent, default 52 is used for phase_0/phase_i starts. // legacy-phase-term-ok
-     * See docs/30_planning/PHASE_I_II_EDGE_CASES.md.
-     */
-    war_force_transition_after_turns?: number;
     /**
      * Baked initial OSID→faction map. When present, replaces the runtime derivation
      * (operational_political_control.json load) and already includes any osid_control_overrides.

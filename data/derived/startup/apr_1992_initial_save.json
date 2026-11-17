@@ -986,8 +986,6 @@
     {
       "areasOfResponsibility": [],
       "command_capacity": 0,
-      "declaration_pressure": 0,
-      "declaration_turn": null,
       "declared": false,
       "embargo_profile": {
         "ammunition_resupply_rate": 0.3,
@@ -1004,7 +1002,6 @@
         "pressure": 0,
         "spent_total": 0
       },
-      "prewar_capital": 70,
       "profile": {
         "authority": 50,
         "control": 50,
@@ -1024,8 +1021,6 @@
     {
       "areasOfResponsibility": [],
       "command_capacity": 0,
-      "declaration_pressure": 0,
-      "declaration_turn": 0,
       "declared": true,
       "embargo_profile": {
         "ammunition_resupply_rate": 0.8,
@@ -1042,7 +1037,6 @@
         "pressure": 0,
         "spent_total": 0
       },
-      "prewar_capital": 100,
       "profile": {
         "authority": 50,
         "control": 50,
@@ -1062,8 +1056,6 @@
     {
       "areasOfResponsibility": [],
       "command_capacity": 0,
-      "declaration_pressure": 0,
-      "declaration_turn": 0,
       "declared": true,
       "embargo_profile": {
         "ammunition_resupply_rate": 0.6,
@@ -1080,7 +1072,6 @@
         "pressure": 0,
         "spent_total": 0
       },
-      "prewar_capital": 40,
       "profile": {
         "authority": 50,
         "control": 50,
@@ -1103,15 +1094,9 @@
     "firepower_deficit_penalty_enabled": true,
     "game_over": false,
     "headless_scenario_auto_control": true,
-    "peace_scheduled_referendum_turn": null,
-    "peace_scheduled_war_start_turn": null,
     "phase": "war",
     "rbih_hrhb_war_earliest_turn": 40,
     "recruitment_mode": "player_choice",
-    "referendum_deadline_turn": null,
-    "referendum_eligible_turn": null,
-    "referendum_held": true,
-    "referendum_turn": 0,
     "scenario_start_date": {
       "day": 6,
       "month": 3,
@@ -1119,7 +1104,6 @@
     },
     "seed": "harness-seed",
     "turn": 0,
-    "war_force_transition_after_turns": 52,
     "war_start_turn": 0
   },
   "military": {
@@ -43790,6 +43774,6 @@
     "war_supply_condition": {},
     "war_supply_pressure": {}
   },
-  "schema_version": 40,
+  "schema_version": 41,
   "turn_summaries": []
 }

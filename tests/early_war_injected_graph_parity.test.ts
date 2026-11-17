@@ -21,8 +21,6 @@ function minimalPhaseIState(): GameState {
             turn: 10,
             seed: 'injected-graph-parity',
             phase: 'war',
-            referendum_held: true,
-            referendum_turn: 6,
             war_start_turn: 10
         },
   factions: [
@@ -32,7 +30,6 @@ function minimalPhaseIState(): GameState {
                 areasOfResponsibility: [],
                 supply_sources: [],
                 declared: false,
-                declaration_turn: null
             },
             {
                 id: 'RS',
@@ -40,7 +37,6 @@ function minimalPhaseIState(): GameState {
                 areasOfResponsibility: [],
                 supply_sources: [],
                 declared: false,
-                declaration_turn: null
             },
             {
                 id: 'HRHB',
@@ -48,7 +44,6 @@ function minimalPhaseIState(): GameState {
                 areasOfResponsibility: [],
                 supply_sources: [],
                 declared: false,
-                declaration_turn: null
             }
         ],
   military: {

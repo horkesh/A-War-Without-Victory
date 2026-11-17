@@ -17,8 +17,6 @@ function buildTinyState(): { state: GameState; edges: EdgeRecord[] } {
             turn: 0,
             seed: 'scenario-seed',
             phase: 'war',
-            referendum_held: true,
-            referendum_turn: 0,
             war_start_turn: 0
         },
   factions: [

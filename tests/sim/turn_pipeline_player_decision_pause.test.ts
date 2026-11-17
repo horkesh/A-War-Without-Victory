@@ -60,8 +60,6 @@ function baseState(meta: Record<string, unknown> = {}): GameState {
             turn: 0,
             seed: 'pause-test',
             phase: 'war',
-            referendum_held: true,
-            referendum_turn: 0,
             war_start_turn: 0,
             decision_mode: 'historical',
             ...meta,

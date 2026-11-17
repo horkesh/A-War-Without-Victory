@@ -14,6 +14,11 @@ import { initializeFormationDefaults } from './formation_defaults.js';
 import type { FactionId, GameState } from './game_state.js';
 import { reconcileLoadedArmyHqOperationLifecycle } from './operation_lifecycle_reconciliation.js';
 import { canonicalizePoliticalSideId } from './identity.js';
+import {
+    PEACE_PHASE_RETIRED_FACTION_FIELDS,
+    PEACE_PHASE_RETIRED_META_FIELDS,
+    PEACE_PHASE_RETIRED_POLITICAL_FIELDS,
+} from './peace_phase_retired_fields.js';
 
 interface SaveMigration {
     /** Schema version this migration brings the state TO. */
@@ -152,9 +157,12 @@ function defaultFactionState(state: GameState): void {
                 f.negotiation.last_capital_change_turn = null;
             }
         }
-        if (f.declaration_pressure === undefined) f.declaration_pressure = 0;
+        // declaration_pressure / declaration_turn are legacy peace-phase fields: v3 still
+        // defaults them so old saves step through the chain unchanged; v41 deletes them.
+        const legacy = f as unknown as Record<string, unknown>;
+        if (legacy.declaration_pressure === undefined) legacy.declaration_pressure = 0;
         if (f.declared === undefined) f.declared = false;
-        if (f.declaration_turn === undefined) f.declaration_turn = null;
+        if (legacy.declaration_turn === undefined) legacy.declaration_turn = null;
     }
 }
 
@@ -899,5 +907,33 @@ registerMigration({
     migrate: (state) => {
         const meta = asRecord(state.meta);
         if (meta) delete meta.peace_war_start_control_path;
+    },
+});
+
+registerMigration({
+    version: 41,
+    description: 'The in-sim peace phase is retired (no scenario can start in peace since v40; the '
+        + 'state pipeline runOneTurn, its no-op phase handlers and the peace UI are removed). '
+        + 'Deletes the peace-only bookkeeping: meta referendum/peace-schedule/transition-audit '
+        + 'fields, the faction prewar_capital/declaration_pressure/declaration_turn fields and '
+        + 'political.phase0_relationships/phase0_events_log. Nothing in the war pipeline reads '
+        + 'them. Keeps meta.war_start_turn, meta.game_over, meta.outcome and faction.declared. '
+        + 'Sensitive: no.',
+    migrate: (state) => {
+        const meta = asRecord(state.meta);
+        if (meta) {
+            for (const key of PEACE_PHASE_RETIRED_META_FIELDS) delete meta[key];
+        }
+        if (Array.isArray(state.factions)) {
+            for (const faction of state.factions) {
+                const f = asRecord(faction);
+                if (!f) continue;
+                for (const key of PEACE_PHASE_RETIRED_FACTION_FIELDS) delete f[key];
+            }
+        }
+        const pol = asRecord(state.political);
+        if (pol) {
+            for (const key of PEACE_PHASE_RETIRED_POLITICAL_FIELDS) delete pol[key];
+        }
     },
 });

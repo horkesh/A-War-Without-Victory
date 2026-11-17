@@ -17,8 +17,6 @@ function statePhaseI(): GameState {
             turn: 10,
             seed: 'step9-fixture',
             phase: 'war',
-            referendum_held: true,
-            referendum_turn: 6,
             war_start_turn: 10
         },
   factions: [
@@ -28,7 +26,6 @@ function statePhaseI(): GameState {
                 areasOfResponsibility: [],
                 supply_sources: [],
                 declared: false,
-                declaration_turn: null
             },
             {
                 id: 'RS',
@@ -36,7 +33,6 @@ function statePhaseI(): GameState {
                 areasOfResponsibility: [],
                 supply_sources: [],
                 declared: true,
-                declaration_turn: 5
             },
             {
                 id: 'HRHB',
@@ -44,7 +40,6 @@ function statePhaseI(): GameState {
                 areasOfResponsibility: [],
                 supply_sources: [],
                 declared: false,
-                declaration_turn: null
             }
         ],
   military: {

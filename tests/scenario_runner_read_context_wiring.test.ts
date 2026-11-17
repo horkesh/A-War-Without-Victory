@@ -7,7 +7,7 @@
  *   AWWV_READ_WIRING_OUT_BASE     the task-owned outDirBase string shared by all cases
  *   AWWV_READ_WIRING_RESULT_FILE  where this case writes its result for the parent's cross-case comparison
  * Each invocation executes exactly ONE real `runScenario` with initialStateOnly: true and ZERO
- * simulation turns (runTurn and runOneTurn are tripwires that throw if called). Direct event evidence
+ * simulation turns (runTurn is a tripwire that throws if called). Direct event evidence
  * comes from pass-through wrappers around the REAL loader, stamp and context functions; file-existence
  * observations at emission are supplementary only.
  *
@@ -66,17 +66,6 @@ vi.mock('../src/sim/turn_pipeline.js', async (importOriginal) => {
         runTurn: () => {
             wiring.events.push('TRIPWIRE:runTurn');
             throw new Error('TRIPWIRE: runTurn was called in an initialStateOnly run');
-        },
-    };
-});
-
-vi.mock('../src/state/turn_pipeline.js', async (importOriginal) => {
-    const real = await importOriginal<typeof import('../src/state/turn_pipeline.js')>();
-    return {
-        ...real,
-        runOneTurn: () => {
-            wiring.events.push('TRIPWIRE:runOneTurn');
-            throw new Error('TRIPWIRE: runOneTurn was called in an initialStateOnly run');
         },
     };
 });

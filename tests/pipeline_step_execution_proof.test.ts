@@ -101,14 +101,6 @@ describe('update-stranded-brigade-lifecycle execution proof', () => {
         expect(context.report.stranded_brigade_lifecycle).toBeUndefined();
     });
 
-    it('executes without error on non-war phase (early return)', async () => {
-        const state = makeMinimalState();
-        state.meta.phase = 'peace';
-        const context = makeContext(state);
-        await step.run(context);
-        expect(context.report.stranded_brigade_lifecycle).toBeUndefined();
-    });
-
     it('detects stranded brigade and produces report with newly_stranded', async () => {
         // Setup: brigade at osid_isolated, which has no adjacency path to corps sector territory
         const state = makeMinimalState({
@@ -213,13 +205,6 @@ describe('evaluate-rupture-consequences execution proof', () => {
         const context = makeContext(state);
         await step.run(context);
         // No negotiation state → early return, no crash
-    });
-
-    it('executes without error on non-war phase (early return)', async () => {
-        const state = makeMinimalState();
-        state.meta.phase = 'peace';
-        const context = makeContext(state);
-        await step.run(context);
     });
 
     it('does NOT record rupture when preconditions are not met (no enclave formed)', async () => {

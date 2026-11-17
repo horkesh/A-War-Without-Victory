@@ -33,9 +33,10 @@
  *                                   inversion's hex literals (`#14316d` for
  *                                   RS or `#922026` for HRHB). RS is rendered
  *                                   as red, HRHB as blue, RBiH as green.
- *   T7 (no fork RGB literals):      The five fork files (theme.ts,
- *                                   warroom_utils.ts, InvestmentPanel.ts,
- *                                   SettingsModal.ts, opsConstants.ts) no
+ *   T7 (no fork RGB literals):      The fork files (theme.ts,
+ *                                   warroom_utils.ts, SettingsModal.ts,
+ *                                   opsConstants.ts; InvestmentPanel.ts was
+ *                                   retired with the peace phase) no
  *                                   longer carry their pre-existing literal
  *                                   palette RGB tuples.
  */
@@ -133,13 +134,6 @@ describe('faction palette — canonical source-of-truth', () => {
       expect(src).not.toMatch(/RBiH:\s*\{\s*primary:\s*['"]rgb\(55,\s*140,\s*75\)['"]/);
       expect(src).not.toMatch(/RS:\s*\{\s*primary:\s*['"]rgb\(180,\s*50,\s*50\)['"]/);
       expect(src).not.toMatch(/HRHB:\s*\{\s*primary:\s*['"]rgb\(50,\s*110,\s*170\)['"]/);
-    }
-    // InvestmentPanel.ts — must not redeclare its private FACTION_COLORS.
-    {
-      const src = read('src/ui/warroom/components/InvestmentPanel.ts');
-      expect(src).not.toMatch(/RBiH:\s*['"]rgb\(27,\s*94,\s*32\)['"]/);
-      expect(src).not.toMatch(/RS:\s*['"]rgb\(226,\s*74,\s*74\)['"]/);
-      expect(src).not.toMatch(/HRHB:\s*['"]rgb\(74,\s*144,\s*226\)['"]/);
     }
     // opsConstants.ts — must not redeclare its literal hex tuple.
     {

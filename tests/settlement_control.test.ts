@@ -17,8 +17,6 @@ function makeState(overrides?: Partial<GameState>): GameState {
             turn: 10,
             seed: 'settlement-test',
             phase: 'war',
-            referendum_held: true,
-            referendum_turn: 6,
             war_start_turn: 10
         },
   factions: [

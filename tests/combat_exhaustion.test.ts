@@ -14,7 +14,7 @@ import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 function minimalPhaseIIState(): GameState {
     return {
         schema_version: CURRENT_SCHEMA_VERSION,
-        meta: { turn: 20, seed: 'ex-test', phase: 'war', referendum_held: true, referendum_turn: 6, war_start_turn: 10 },
+        meta: { turn: 20, seed: 'ex-test', phase: 'war', war_start_turn: 10 },
         factions: [
             { id: 'RBiH', profile: { authority: 10, legitimacy: 10, control: 10, logistics: 10, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] },
             { id: 'RS', profile: { authority: 10, legitimacy: 10, control: 10, logistics: 10, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] },
@@ -119,15 +119,6 @@ describe('exhaustion accumulation', () => {
         expect((state.political.war_exhaustion?.RBiH ?? 0) >= 2).toBe(true);
         expect((state.political.war_exhaustion?.RS ?? 0) >= 2).toBe(true);
         expect(state.political.war_exhaustion?.HRHB).toBe(0);
-    });
-
-    it('does nothing when meta.phase is peace', () => {
-        const state = minimalPhaseIIState();
-        state.meta.phase = 'peace';
-        state.political.war_exhaustion = { RBiH: 0, RS: 0, HRHB: 0 };
-        updateExhaustion(state, []);
-        expect(state.political.war_exhaustion?.RBiH).toBe(0);
-        expect(state.political.war_exhaustion?.RS).toBe(0);
     });
 
     it('applies attack tempo drag inside the canonical 0-10000 exhaustion range', () => {

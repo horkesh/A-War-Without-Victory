@@ -9,13 +9,7 @@ function currentVersionState(): any {
         meta: {
             turn: 0,
             seed: 'save-migration-validator-rejection',
-            referendum_held: false,
-            referendum_turn: null,
             war_start_turn: null,
-            peace_scheduled_referendum_turn: null,
-            peace_scheduled_war_start_turn: null,
-            referendum_eligible_turn: null,
-            referendum_deadline_turn: null,
             game_over: false,
             player_faction: 'RBiH',
             decision_mode: 'historical',
@@ -34,9 +28,7 @@ function currentVersionState(): any {
                     spent_total: 0,
                     last_capital_change_turn: null,
                 },
-                declaration_pressure: 0,
                 declared: false,
-                declaration_turn: null,
             },
         ],
         paramilitary_decision_history: [],
@@ -443,7 +435,7 @@ describe('save migration validator hardening', () => {
     it('migrates a v1 save before applying current-version required-field validation', () => {
         const state = currentVersionState();
         state.schema_version = 1;
-        delete state.meta.referendum_held;
+        delete state.meta.game_over;
         delete state.political.negotiation_status;
         delete state.military.army_co_decision_traces;
         delete state.military.army_corps_directives_by_faction;
@@ -475,7 +467,8 @@ describe('save migration validator hardening', () => {
         const migrated = deserializeState(JSON.stringify(state));
 
         expect(migrated.schema_version).toBe(CURRENT_SCHEMA_VERSION);
-        expect(migrated.meta.referendum_held).toBe(false);
+        expect(migrated.meta.game_over).toBe(false);
+        expect(migrated.meta).not.toHaveProperty('referendum_held');
         expect(migrated.political.negotiation_status).toEqual({
             ceasefire_active: false,
             ceasefire_since_turn: null,

@@ -44,8 +44,6 @@ function makeState(): { state: GameState; edges: EdgeRecord[] } {
             seed: 'final-sector-turn-session',
             phase: 'war',
             scenario_start_date: { year: 1992, month: 4, day: 6 },
-            referendum_held: true,
-            referendum_turn: 1,
             war_start_turn: 1,
         },
         factions: [

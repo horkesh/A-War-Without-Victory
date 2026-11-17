@@ -18,8 +18,6 @@ function minimalPhaseIIState(): GameState {
             turn: 20,
             seed: 'det',
             phase: 'war',
-            referendum_held: true,
-            referendum_turn: 6,
             war_start_turn: 10
         },
   factions: [

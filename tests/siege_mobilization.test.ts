@@ -36,7 +36,6 @@ function makeFactions() {
             areasOfResponsibility: [],
             supply_sources: [],
             declared: true,
-            declaration_turn: 1
         },
         {
             id: 'RS' as const,
@@ -44,7 +43,6 @@ function makeFactions() {
             areasOfResponsibility: [],
             supply_sources: [],
             declared: true,
-            declaration_turn: 1
         },
         {
             id: 'HRHB' as const,
@@ -52,7 +50,6 @@ function makeFactions() {
             areasOfResponsibility: [],
             supply_sources: [],
             declared: false,
-            declaration_turn: null
         }
     ];
 }
@@ -64,8 +61,6 @@ function baseState(overrides: Partial<GameState> = {}): GameState {
             turn: 5,
             seed: 'siege-test',
             phase: 'war',
-            referendum_held: true,
-            referendum_turn: 1,
             war_start_turn: 1,
             recruitment_mode: 'bottom_up',
             ...((overrides.meta) ?? {})

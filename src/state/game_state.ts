@@ -39,7 +39,7 @@ import type { ArmyLabel } from './identity.js';
 import type { RecruitmentResourceState } from './recruitment_types.js';
 import type { CommanderState } from '../sim/combat/commander/commander_state.js';
 
-export const CURRENT_SCHEMA_VERSION = 40 as const;
+export const CURRENT_SCHEMA_VERSION = 41 as const;
 
 // --- ID types (canonical) ---
 export type FactionId = string;
@@ -1217,9 +1217,10 @@ export interface SettlementHoldoutState {
 
 /**
  * Canonical phase names (game phase, not turn sub-phase).
- * Phase 0 = Pre-War; Peace phase = Early War (Phase_Specifications_v0_3_0, Phase_0/Phase_I specs). // legacy-phase-term-ok
+ * Every game runs in the war phase: the September 1991 peace start was retired at
+ * schema v40 and the in-sim peace phase at schema v41, so 'war' is the only phase.
  */
-export type PhaseName = 'peace' | 'war';
+export type PhaseName = 'war';
 
 export interface FormationAssignment {
     kind: 'region' | 'edge' | 'sector';
@@ -1755,14 +1756,8 @@ export interface FactionState {
     command_capacity?: number;
     // Phase 11A: Negotiation pressure accounting (no deal-making yet).
     negotiation?: NegotiationState;
-    // Phase 0: Pre-War Capital (non-renewable). RS=100, RBiH=70, HRHB=40 (Phase_0_Spec §4.1).
-    prewar_capital?: number;
-    // Phase 0: Declaration pressure accumulation; declares when >= 100 (Phase_0_Spec §4.4).
-    declaration_pressure?: number;
-    // Phase 0: Faction has declared (RS or HRHB independence).
+    // Faction has declared (RS and HRHB are declared from the April 1992 start).
     declared?: boolean;
-    // Phase 0: Turn when faction declared; null if not declared.
-    declaration_turn?: number | null;
 }
 
 export interface MilitiaPoolState {
@@ -2191,45 +2186,20 @@ export interface StanceMatterState {
  * World-level deterministic bookkeeping (Engine Invariants §11).
  * Conceptually "WorldState": current_turn (weeks), phase, seed.
  * No timestamps; no randomness. Turn is integer weeks only.
- * Phase 0: Referendum and war-start gating (Phase_0_Spec §4.5, CANON War Start Rule).
  */
 export interface StateMeta {
     /** Current turn (integer weeks). 1 game turn = 1 week (CANON, Engine Invariants). */
     turn: number;
     /** Deterministic seed for reproducibility; no wall-clock time. */
     seed: string;
-    /** Game phase (Phase 0 / Peace phase / War phase). Optional for backward compatibility. */
+    /** Game phase; always 'war' (the only phase since schema v41). Optional for backward compatibility. */
     phase?: PhaseName;
-    /** Phase 0: Referendum has been held. War start only when true and current_turn == war_start_turn. */
-    referendum_held?: boolean;
-    /** Phase 0: Turn when referendum was held; null if not yet held. */
-    referendum_turn?: number | null;
-    /** Phase 0: Turn when war starts (referendum_turn + 4). Peace phase entered only at this turn. */
+    /** Turn when the war started; every scenario starts at war, so this is 0. */
     war_start_turn?: number | null;
-    /** Phase 0: Optional scheduled referendum turn for deterministic historical starts when referendum is not held at turn 0. */
-    peace_scheduled_referendum_turn?: number | null;
-    /** Phase 0: Optional scheduled war-start turn override used with scheduled referendum starts. */
-    peace_scheduled_war_start_turn?: number | null;
-    /** Phase 0: First turn when referendum became eligible (both RS and HRHB declared). */
-    referendum_eligible_turn?: number | null;
-    /** Phase 0: Deadline turn for referendum; if reached without referendum → non-war terminal. */
-    referendum_deadline_turn?: number | null;
-    /** Phase 0: Game ended (e.g. non-war terminal). Peace phase unreachable when true without war. */
+    /** Game ended (end-of-war outcome reached). */
     game_over?: boolean;
-    /** Phase 0: Outcome label when game_over (e.g. 'non_war_terminal'). */
+    /** Outcome label when game_over. */
     outcome?: string;
-    /** Phase 0→I: Turn when Phase 0 ended (audit; set at transition). §8 Output Contract. */
-    peace_end_turn?: number | null;
-    /** Phase 0→I: Turn when Peace phase started (audit; set at transition). §8 Output Contract. */
-    war_start_lifecycle_phase_turn?: number | null;
-    /** Phase 0→I: What triggered transition (e.g. 'war_start_turn'). §8 Output Contract. */
-    escalation_reason?: string | null;
-    /** Peace → War phase: Consecutive turns with opposing-control edges >= MIN_OPPOSING_EDGES (D0.9.1). Default 0 on load. */
-    war_opposing_edges_streak?: number;
-    /** Peace→War phase: Optional initial entrenchment turns (0..12) for all brigades at transition; set from scenario. */
-    war_entrenchment_init_turns?: number;
-    /** Stuck-in-Peace-phase fallback: force transition after this many Peace phase turns since war_start_turn (e.g. 52). */
-    war_force_transition_after_turns?: number;
     /** War phase §11.3: Operation Storm (Oluja) actual western-theater rupture has occurred. */
     operation_storm_triggered?: boolean;
     /** War phase §11.3: Turn when abstract Operation Storm preconditions first aligned. */
@@ -2798,7 +2768,11 @@ export interface PhaseERearZoneDescriptor {
     settlement_ids: string[];
 }
 
-/** Phase 0 event (stored in phase0_events_log). */
+/**
+ * Milestone event shape (type/turn/faction/municipality/details). Originally the Phase 0
+ * event-log entry; the log itself was retired at schema v41, but war milestone modals
+ * still use this shape, so the type keeps its historical name.
+ */
 export interface Phase0Event {
     type: string;
     turn: number;
@@ -3559,13 +3533,6 @@ war_weariness_band_first_reached?: Partial<Record<FactionId, Partial<Record<WarW
 war_exhaustion_local: Record<SettlementId, number>;
 /** Enclave resilience per enclave ID. Phase C: EnclaveResilienceEntry; old saves: bare number. */
 enclave_resilience?: Record<string, number | EnclaveResilienceEntry>;
-/** Phase 0 event log: array of per-turn event arrays. Index = turn number. */
-phase0_events_log?: Phase0Event[][];
-/** Phase 0 relationship tracking (bilateral numeric values). */
-phase0_relationships?: {
-        rbih_rs: number;
-        rbih_hrhb: number;
-    };
 // --- Control change events (added in Phase 5 for GUI battle markers; now load-bearing for
 // bot priorities, ceasefire preconditions and calibration scoring — see below) ---
 /**

@@ -15,8 +15,6 @@ function makeState(): GameState {
             turn: 12,
             seed: 'logistics-priority-test',
             phase: 'war',
-            referendum_held: true,
-            referendum_turn: 6,
             war_start_turn: 10,
         },
         factions: [

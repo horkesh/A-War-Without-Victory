@@ -1,9 +1,9 @@
 /**
  * Phase D Step 8: Phase D validation suite.
- * - Fronts are emergent (derived from opposing control; no fronts in Peace phase).
+ * - Fronts are emergent (derived from opposing control).
  * - Exhaustion accumulates (never decreases).
  * - No total victory reachable (no victory/decisive in descriptors or outcomes).
- * - Phase B and C invariants still hold (Peace phase gating, no control flip before war_start_turn).
+ * - The war-start metadata (war_start_turn) is preserved.
  */
 
 import { describe, expect, it } from 'vitest';
@@ -13,15 +13,13 @@ import { detectFronts } from '../src/sim/combat/front_emergence.js';
 import type { GameState } from '../src/state/game_state.js';
 import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 
-function minimalState(phase: 'peace' | 'war', controllers?: Record<string, string | null>): GameState {
+function minimalState(phase: 'war', controllers?: Record<string, string | null>): GameState {
     return {
         schema_version: CURRENT_SCHEMA_VERSION,
         meta: {
             turn: 20,
             seed: 'phase-d-val',
             phase,
-            referendum_held: true,
-            referendum_turn: 6,
             war_start_turn: 10,
         },
         factions: [
@@ -45,11 +43,6 @@ function minimalState(phase: 'peace' | 'war', controllers?: Record<string, strin
 }
 
 describe('Phase D validation suite', () => {
-    it('keeps fronts emergent with no fronts in peace', () => {
-        const state = minimalState('peace', { S1: 'RBiH', S2: 'RS' });
-        const edges: EdgeRecord[] = [{ a: 'S1', b: 'S2' }];
-        expect(detectFronts(state, edges).length).toBe(0);
-    });
 
     it('produces fronts in war phase when control is opposing', () => {
         const state = minimalState('war', { S1: 'RBiH', S2: 'RS' });
@@ -80,9 +73,8 @@ describe('Phase D validation suite', () => {
         }
     });
 
-    it('retains Phase B/C invariants on peace-state metadata', () => {
+    it('retains the war-start metadata', () => {
         const state = minimalState('war');
-        expect(state.meta.referendum_held).toBe(true);
         expect(state.meta.war_start_turn).toBe(10);
     });
 });

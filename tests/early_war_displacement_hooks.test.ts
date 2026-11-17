@@ -19,8 +19,6 @@ function stateWithPhaseI(overrides?: { war_displacement_initiated?: Record<strin
             turn: 10,
             seed: 'disp-hooks-fixture',
             phase: 'war',
-            referendum_held: true,
-            referendum_turn: 6,
             war_start_turn: 10
         },
   factions: [
@@ -30,7 +28,6 @@ function stateWithPhaseI(overrides?: { war_displacement_initiated?: Record<strin
                 areasOfResponsibility: [],
                 supply_sources: [],
                 declared: false,
-                declaration_turn: null
             },
             {
                 id: 'RS',
@@ -38,7 +35,6 @@ function stateWithPhaseI(overrides?: { war_displacement_initiated?: Record<strin
                 areasOfResponsibility: [],
                 supply_sources: [],
                 declared: true,
-                declaration_turn: 5
             },
             {
                 id: 'HRHB',
@@ -46,7 +42,6 @@ function stateWithPhaseI(overrides?: { war_displacement_initiated?: Record<strin
                 areasOfResponsibility: [],
                 supply_sources: [],
                 declared: false,
-                declaration_turn: null
             }
         ],
   military: {

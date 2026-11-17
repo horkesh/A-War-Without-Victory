@@ -18,8 +18,6 @@ function minimalPhaseIIState(): GameState {
             turn: 25,
             seed: 'pf-acc',
             phase: 'war',
-            referendum_held: true,
-            referendum_turn: 6,
             war_start_turn: 10
         },
   factions: [
@@ -93,13 +91,4 @@ test('applySettlementDisplacementDeltas: N turns same deltas => byte-identical s
     const outA = serializeState(stateA);
     const outB = serializeState(stateB);
     expect(outA).toBe(outB);
-});
-
-test('applySettlementDisplacementDeltas: peace no-op', () => {
-    const state = minimalPhaseIIState();
-    state.meta!.phase = 'peace';
-    state.displacement.settlement_displacement = { S1: 0.1 };
-    const before = state.displacement.settlement_displacement['S1'];
-    applySettlementDisplacementDeltas(state, { S1: 0.05 });
-    expect(state.displacement.settlement_displacement!['S1']).toBe(before);
 });

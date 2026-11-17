@@ -23,8 +23,6 @@ function stateWithMunicipalities(overrides: Partial<GameState['meta']> = {}): Ga
             turn: 10,
             seed: 'militia-fixture',
             phase: 'war',
-            referendum_held: true,
-            referendum_turn: 6,
             war_start_turn: 10,
             ...overrides
         },
@@ -35,7 +33,6 @@ function stateWithMunicipalities(overrides: Partial<GameState['meta']> = {}): Ga
                 areasOfResponsibility: [],
                 supply_sources: [],
                 declared: false,
-                declaration_turn: null
             },
             {
                 id: 'RS',
@@ -43,7 +40,6 @@ function stateWithMunicipalities(overrides: Partial<GameState['meta']> = {}): Ga
                 areasOfResponsibility: [],
                 supply_sources: [],
                 declared: true,
-                declaration_turn: 5
             },
             {
                 id: 'HRHB',
@@ -51,7 +47,6 @@ function stateWithMunicipalities(overrides: Partial<GameState['meta']> = {}): Ga
                 areasOfResponsibility: [],
                 supply_sources: [],
                 declared: false,
-                declaration_turn: null
             }
         ],
   military: {

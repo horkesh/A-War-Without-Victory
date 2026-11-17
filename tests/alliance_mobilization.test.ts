@@ -25,22 +25,21 @@ function makeState(allianceValue: number, turn: number = 30): GameState {
             turn,
             seed: 'mobilization-test',
             phase: 'war',
-            referendum_held: true,
             war_start_turn: 1,
             rbih_hrhb_war_earliest_turn: 26
         },
         factions: [
             {
                 id: 'RBiH', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 },
-                areasOfResponsibility: [], supply_sources: [], declared: false, declaration_turn: null
+                areasOfResponsibility: [], supply_sources: [], declared: false
             },
             {
                 id: 'RS', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 },
-                areasOfResponsibility: [], supply_sources: [], declared: true, declaration_turn: 1
+                areasOfResponsibility: [], supply_sources: [], declared: true
             },
             {
                 id: 'HRHB', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 },
-                areasOfResponsibility: [], supply_sources: [], declared: true, declaration_turn: 2,
+                areasOfResponsibility: [], supply_sources: [], declared: true,
                 patron_state: { material_support_level: 0.5, diplomatic_isolation: 0.2, constraint_severity: 0.3, patron_commitment: 0.5, last_updated: 5 }
             }
         ],

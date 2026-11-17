@@ -207,7 +207,7 @@ interface ParamilitaryReviewOptions {
 /** Shape of window.awwv as exposed by preload.cjs. */
 interface WindowAwwv {
     startNewCampaign: (payload: StartNewCampaignPayload) => Promise<StartNewCampaignResult>;
-    advanceTurn: (payload?: { phase0Directives?: unknown[] }) => Promise<{ ok: boolean; report?: unknown; error?: string }>;
+    advanceTurn: () => Promise<{ ok: boolean; report?: unknown; error?: string }>;
     getCurrentGameState: () => Promise<string | null>;
     getRuntimeFeatureFlags: () => Promise<{ srkStranglePostureActive: boolean } | null>;
     subscribeGameStateUpdated: (cb: (stateJson: string, metadata?: GameStateUpdateMetadata) => void) => () => void;
@@ -483,7 +483,7 @@ export function useIPC() {
                 : makeNoop<StartNewCampaignResult>(),
 
             advanceTurn: awwv
-                ? (payload?: { phase0Directives?: unknown[] }) => awwv.advanceTurn(payload)
+                ? () => awwv.advanceTurn()
                 : makeNoop<{ ok: boolean; report?: unknown; error?: string }>(),
 
             getCurrentGameState: awwv

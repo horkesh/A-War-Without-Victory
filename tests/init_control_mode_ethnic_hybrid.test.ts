@@ -22,8 +22,6 @@ function makeBaseState(seed: string): GameState {
             turn: 0,
             seed,
             phase: 'war',
-            referendum_held: true,
-            referendum_turn: 0,
             war_start_turn: 0
         },
   factions: [
@@ -33,7 +31,6 @@ function makeBaseState(seed: string): GameState {
                 areasOfResponsibility: [],
                 supply_sources: [],
                 declared: true,
-                declaration_turn: 0
             },
             {
                 id: 'RS',
@@ -41,7 +38,6 @@ function makeBaseState(seed: string): GameState {
                 areasOfResponsibility: [],
                 supply_sources: [],
                 declared: true,
-                declaration_turn: 0
             },
             {
                 id: 'HRHB',
@@ -49,7 +45,6 @@ function makeBaseState(seed: string): GameState {
                 areasOfResponsibility: [],
                 supply_sources: [],
                 declared: true,
-                declaration_turn: 0
             }
         ],
   military: {
