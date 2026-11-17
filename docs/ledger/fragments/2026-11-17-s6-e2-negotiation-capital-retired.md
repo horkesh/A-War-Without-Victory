@@ -20,3 +20,14 @@
 - Historical `c7f9cefc4c0e1a37` and emergent `396922770611e479`: both 709/709/708/682, guards intact (Farz P1, P-A, P-B), control_delta byte-identical to main, 181 fired events identical with identical counts.
 - The only state change is the standing accumulator: RS −295 → −340 (historical) and −275 → −320 (emergent); HRHB −64 → −89. Effective standing is unchanged for every side (RS and HRHB at the floor, RBiH at the ceiling). E3 (saturation) decides whether these costs bite; E2 makes them real.
 - Baselines manifest re-pinned in this PR.
+
+**Follow-up: the Srebrenica standing cost is charged once (Codex P2 on #793; three §6 seats, unanimous).**
+- **The defect.** A combat fall at or after w170 let the aftermath charge −30. An RBiH retake then let the card fire, script a second fall and charge −30 again.
+- **The fix:** one fall, one record, one cost.
+  - The genocide rupture now sets `srebrenica_fell` at a combat fall.
+  - The card requires that flag unset, so no scripted second fall follows a retake.
+  - The aftermath also fires on a recorded fall, so a combat fall at t160-169 retaken before w170 still pays −30 once.
+  - The three cards that say Srebrenica holds no longer fire after a recorded fall.
+- **Tests:** `s6_e2_negotiation_capital_retired` (4)-(6).
+- **Measured on main `ffe0fdb50`** (pin `6dbecd4913d6d7df` reproduced): historical `3e0e76d8a0197ae5` and emergent `c3437e5ffc7bd5dd`. Control is byte-identical to main, fired events and decisions are identical, 709/709/708/682, guards intact. Re-pinned.
+- **Registered for the card batch:** the Drina double charge (`drina_cleansing_decision_1992#systematic`), the HVO camps weight, Markale I's early-NATO card firing after Markale, and the hands-off order of "The Enclave Holds". **For E3:** atrocity standing is charged through both the war-crimes base and the card shift.
