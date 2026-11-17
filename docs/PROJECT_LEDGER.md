@@ -90,6 +90,11 @@ Docs only; no `src/` or `data/` change, no hash change.
 - Queue rule (orchestrator, 2026-11-17), replacing the fixed order: hash-moving PRs merge one at a time, with GO to whichever is ready first unless one is mid-merge; guard (b) and every hash-neutral PR merge on green outside the queue; the UI lane self-merges hash-untouched green PRs. Open PR map: #754, #735, #739, #763, #768 (A2b, draft), #773 (the v40 retirement of sep1991 and the 1993 to 1995 starts, draft), #771 (the receipt-truth fix for the #740 Codex P2; UI lane; hash-neutral), #747.
 - RF-ROSTER S3 (planning-phase release) is accepted as final: "a generic corps op already in planning is not released for an authored op; the lead-window reservation (S2) prevents the conflict from arising." The lane's precedence fix is outcome-identical but hash-moving (18 truthful trace rows in watched_operations). Recorded in the final-behaviour record (a new accepted item) and Part 5 of the work list.
 - #751 (New Game mode labels, one accessible radiogroup; strings and one component, no hash) and #769 (the Farz guard P-A reads the operation's own Army HQ id; tooling only, hash unchanged; it had blocked P2 step 1, L7's N5 follow-up 1 and #747) are merged and recorded. No bigger roadmap archive move is needed now.
+## 2026-11-17 — Pass 63: the two #706 Codex comments closed by #742
+
+Docs only; no `src/` or `data/` change, no hash change.
+
+- The two Codex P2 comments on #706 (bind each Request-op outcome to the specific request attempt, `desktop_calibration_compare.ts:952`; report the AAR's canonical `objectives_captured`, `:958`) are FIXED by #742 (merged, 6c205f873, "Request-op outcomes bound per attempt (Codex on #706)"): the code moved into `tools/ai_play/president_policies.ts`, where `bindPresidentRequestAttempts` binds each order to its own attempt and `joinPresidentRequests` reads the AAR's canonical `objectives_captured`; `objectives_logged_captured` no longer appears in the compare harness. Read on main by the steward.
 
 ## 2026-11-16 — `address_to_nation_rbih` closing line made year-neutral
 
