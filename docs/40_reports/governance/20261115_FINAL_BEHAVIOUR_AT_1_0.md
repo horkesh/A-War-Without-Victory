@@ -47,6 +47,14 @@ Two fresh read-only seats sat in parallel and independently, each checking the c
 - **Conditions.** Accept only the no-retry half. The other half of PK5, a queue head below its floor blocking the corps chain, is a defect and is fixed as C7 (merged, #721: a bounded skip, byte-identical, inert on main and in emergent). The retry duty for the 1994 ARBiH fights (Vozuća and Ozren, Zuc and Trebević, Donji Vakuf, Bihać) goes to the package (orchestrator, 2026-11-15): P5 if the woken corps retry by themselves, otherwise the authored offensives of Part 6.
 - **Seats:** game-designer RATIFY WITH CONDITIONS (narrowed); historian RATIFY WITH CONDITIONS.
 
+### Authored-op precedence S3. A generic corps op already in planning is not released for an authored op
+
+- **Reason for the record.** A generic corps op already in planning is not released for an authored op. The lead-window reservation (S2) prevents the conflict from arising: while a dated Army HQ op is due within its planning lead, the corps opens no new generic offensive. A running op is never preempted (orchestrator ruling, 2026-11-16; historian and corps-army-commander seats: General Staff operations displaced corps activity by not starting new attacks, not by cutting a live one, BB1 pp.382, 384-388).
+- **Left alone:** the release fires in neither the historical nor the hands-off emergent 188w run.
+- **Played:** a player's own corps ops are untouched by S1-S3.
+- **Conditions.** If a measured run ever shows an authored op blocked by a generic op already in planning when its window opens, it returns to the orchestrator.
+- **Seats:** operations-expert, corps-army-commander, historian, scenario-tester, plus a named integrator (authored-op precedence panel, 2026-11-16). The S3 release was NOT UNANIMOUS (scenario-tester rejected it) and was ruled accept-as-final by the orchestrator.
+
 ### SD6 and SD8. Siege deaths in place and military-age departures are not modelled
 
 - **Reason for the record.** A scope choice. The siege path books displacement only (0.1% a week, "none killed"; §6 panel record in `SENSITIVE_HISTORY_DESIGN_GATE.md`, unanimous GO, 2026-11-14). The omission understates harm; it does not claim that nobody died. Formation siege attrition does exist (`siege_attrition.ts`).
