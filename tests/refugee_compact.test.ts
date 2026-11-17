@@ -24,18 +24,27 @@ import { getActiveRecruitmentMultiplier } from '../src/sim/events/active_modifie
 import { deserializeState, serializeState } from '../src/state/serialize.js';
 import type { GameState } from '../src/state/game_state.js';
 
-type D = [turn: number, eventId: string, responseId: string, faction?: string];
+type D = [turn: number, eventId: string, responseId: string, faction?: string, source?: string];
 const UNITED: D = [5, 'hrhb_political_goal', 'united_front'];
 const PERSISTS: D = [8, 'hrhb_1992_graz_cooperation_collapse', 'formal_alliance_persists'];
 
-function state(decisions: D[], extra: { suspendedUntil?: number; mods?: unknown[] } = {}): GameState {
+function state(
+    decisions: D[],
+    extra: { suspendedUntil?: number; mods?: unknown[]; washingtonTurn?: number } = {},
+): GameState {
+    const rhs: Record<string, unknown> = {};
+    if (extra.suspendedUntil != null) rhs.refugee_compact_suspended_until = extra.suspendedUntil;
+    if (extra.washingtonTurn != null) {
+        rhs.washington_signed = true;
+        rhs.washington_turn = extra.washingtonTurn;
+    }
     return {
         meta: { turn: 0 },
-        political: { rbih_hrhb_state: extra.suspendedUntil != null ? { refugee_compact_suspended_until: extra.suspendedUntil } : {} },
+        political: { rbih_hrhb_state: rhs },
         military: {
             recruitment_modifiers: extra.mods ?? [],
-            event_decision_log: decisions.map(([turn, event_id, response_id, faction]) => ({
-                event_id, response_id, decision_source: 'player', faction: faction ?? 'HRHB', turn,
+            event_decision_log: decisions.map(([turn, event_id, response_id, faction, source]) => ({
+                event_id, response_id, decision_source: source ?? 'player', faction: faction ?? 'HRHB', turn,
             })),
         },
     } as unknown as GameState;
@@ -222,6 +231,83 @@ describe('A2b wiring in alliance_update', () => {
         const without = allianceState([], { flips: 1 });
         updateAllianceValue(without);
         expect('refugee_compact_suspended_until' in (without.political.rbih_hrhb_state ?? {})).toBe(false);
+    });
+});
+
+describe('A2b follow-ups: player-only answers and the end at the Washington signing', () => {
+    it('a bot answer never opens, renews or lapses a compact', () => {
+        for (const source of ['bot_political', 'bot_v1', 'bot_ai_default']) {
+            const grant = state([[5, 'hrhb_political_goal', 'united_front', 'HRHB', source]]);
+            expect(getRefugeeCompactStatus(grant, 20).active_entries).toBe(0);
+            expect(getPatronDragStanceMultiplier(grant, 20)).toBe(1.0);
+            expect(getRefugeeCompactRecruitmentMultiplier(grant, 'HRHB', 20)).toBe(1.0);
+        }
+        // The President's grant, then a bot lapse and a bot renewal: neither changes anything.
+        const s = state([
+            UNITED,
+            [30, 'zagreb_restrains_boban_vopp', 'acknowledge_pressure', 'HRHB', 'bot_political'],
+            [53, 'hrhb_central_bosnia_defense_1993', 'federate_early', 'HRHB', 'bot_v1'],
+        ]);
+        expect(getRefugeeCompactStatus(s, 40)).toEqual({ active_entries: 1, granting_choices: 1, lapsed: false });
+        expect(getRefugeeCompactStatus(s, 5 + REFUGEE_COMPACT_GRANT_TURNS).active_entries).toBe(0);
+        // The same renewal by the President does extend it.
+        const own = state([UNITED, [53, 'hrhb_central_bosnia_defense_1993', 'federate_early']]);
+        expect(getRefugeeCompactStatus(own, 5 + REFUGEE_COMPACT_GRANT_TURNS).active_entries).toBe(1);
+    });
+
+    it('the compact ends at the Washington signing: no damping, no price; the 1992 stance stays', () => {
+        const answers: D[] = [UNITED, PERSISTS, [53, 'hrhb_central_bosnia_defense_1993', 'federate_early'], [89, 'hrhb_federation_overture_1993', 'extend_federation_overture']];
+        const open = state(answers);
+        expect(getRefugeeCompactStatus(open, 110).active_entries).toBe(2);
+        const signed = state(answers, { washingtonTurn: 102 });
+        expect(getRefugeeCompactStatus(signed, 101).active_entries).toBe(2);
+        expect(getRefugeeCompactStatus(signed, 102).active_entries).toBe(0);
+        expect(getRefugeeCompactRecruitmentMultiplier(signed, 'HRHB', 110)).toBe(1.0);
+        expect(getRefugeeCompactPressureMultiplier(signed, 110)).toBe(1.0);
+        expect(getPatronDragStanceMultiplier(signed, 110)).toBe(0.25);
+    });
+});
+
+describe('A2b determinism: a save taken mid-compact equals a continuous run', () => {
+    const fixture = readFileSync(resolve(__dirname, 'fixtures/negotiation/b371_apr1992_initial_save.json'), 'utf8');
+    const FIRST = 10;
+    const LAST = 40;
+    const FLIP_TURN = 25;
+
+    function fresh(): GameState {
+        const s = deserializeState(fixture);
+        s.political.war_alliance_rbih_hrhb = 0.6;
+        s.military.event_decision_log = [UNITED, PERSISTS].map(([turn, event_id, response_id]) => ({
+            event_id, response_id, decision_source: 'player' as const, faction: 'HRHB' as const, turn,
+        }));
+        ensureRbihHrhbState(s);
+        return s;
+    }
+
+    function step(s: GameState, turn: number): string {
+        s.meta.turn = turn;
+        s.political.rbih_hrhb_state!.bilateral_flips_this_turn = turn === FLIP_TURN ? 1 : 0;
+        const report = updateAllianceValue(s);
+        return JSON.stringify([report.new_value, report.drivers]);
+    }
+
+    it('serialize and deserialize between turns, through a flip and its suspension, changes nothing', () => {
+        const continuous = fresh();
+        const continuousReports: string[] = [];
+        for (let t = FIRST; t <= LAST; t += 1) continuousReports.push(step(continuous, t));
+
+        let split = fresh();
+        const splitReports: string[] = [];
+        for (let t = FIRST; t <= LAST; t += 1) {
+            splitReports.push(step(split, t));
+            // Save and reload before the flip, on the flip turn, and inside the suspension window.
+            if (t === FLIP_TURN - 1 || t === FLIP_TURN || t === FLIP_TURN + 4) split = deserializeState(serializeState(split));
+        }
+
+        expect(splitReports).toEqual(continuousReports);
+        expect(serializeState(split)).toBe(serializeState(continuous));
+        expect(continuous.political.rbih_hrhb_state?.refugee_compact_suspended_until).toBe(FLIP_TURN + REFUGEE_COMPACT_FLIP_SUSPENSION_TURNS);
+        expect(split.political.rbih_hrhb_state?.refugee_compact_suspended_until).toBe(FLIP_TURN + REFUGEE_COMPACT_FLIP_SUSPENSION_TURNS);
     });
 });
 
