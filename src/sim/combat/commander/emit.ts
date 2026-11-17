@@ -1889,9 +1889,10 @@ function buildSectorReassignmentOrders(
         }
     }
 
-    const orders: Array<{ brigade_id: string; to_sector_id: string }> = directRelief.map((relief) => ({
+    const orders: Array<{ brigade_id: string; to_sector_id: string; empty_sector_relief?: true }> = directRelief.map((relief) => ({
         brigade_id: relief.brigade_id,
         to_sector_id: relief.to_sector_id,
+        empty_sector_relief: true as const,
     }));
     const orderedBrigades = new Set(orders.map((order) => order.brigade_id));
 

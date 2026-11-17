@@ -188,8 +188,14 @@ export function applyPostureOrders(state: GameState): PostureReport {
             continue;
         }
         if (!isBrigadeAssignedToFront(state, brigadeId)) {
-            report.postures_rejected++;
-            continue;
+            // Package P2 step 2 (Codex review on #774): the one off-front posture change is an
+            // unloaned army-reserve elite taking its `hold` rest order; applyPostureCosts rests it.
+            const reserveRest = order.posture === 'hold'
+                && brigade.elite_loan_state != null && brigade.elite_loan_state.on_loan !== true;
+            if (!reserveRest) {
+                report.postures_rejected++;
+                continue;
+            }
         }
 
         // Home-ground auto-upgrade: hold → defend for home-defense brigades
