@@ -266,11 +266,6 @@
             "faction": "RS",
             "dimension": "international_standing",
             "delta": -20
-          },
-          {
-            "faction": "RS",
-            "dimension": "patron_confidence",
-            "delta": -15
           }
         ],
         "aggression_affinity": 0.8,
@@ -1289,11 +1284,6 @@
         "label": "Coordinate with ARBiH 5th Corps inside Federation",
         "description": "HVO realigns command to the Federation framework, coordinating directly with ARBiH 5th Corps (Dudaković) on the Sana / Una axis rather than the HV Guards. Zagreb is unhappy but bound by the Washington Agreement to accept the realignment. The HVO Mostar Corps fights inside a Federation joint-staff structure, not under Šušak's direction.",
         "effects": [
-          {
-            "kind": "patron_support",
-            "faction": "HRHB",
-            "delta": 15
-          },
           {
             "kind": "alliance_change",
             "delta": 0.1

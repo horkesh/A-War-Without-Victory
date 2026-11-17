@@ -197,13 +197,12 @@ describe('§6 E4: the writer', () => {
 });
 
 describe('§6 E4: the allowlist pin', () => {
+    // Round 3 (Q2) dropped abdic federation_offer, hv_hvo arbih_coordination and
+    // address_defiance_rs (no recorded patron change), with their entries.
     const EXPECTED: Record<string, string> = {
-        'abdic_apwb_declared_1993#federation_offer': 'RBiH',
-        'address_to_nation_rs#address_defiance_rs': 'RS',
         'contact_group_plan_1994#accept': 'RBiH',
         'csq_patron_recovery_offer#accept_recovery': 'RS',
         'hrhb_posavina_orasje_posture_1992#counterattack_brod': 'HRHB',
-        'hv_hvo_cooperation_1995#arbih_coordination': 'HRHB',
         'rbih_arms_embargo_lift_advocacy_1993#lobby_for_lift_and_strike': 'RBiH',
         'rbih_late_war_offensive_1995#wait_for_diplomacy': 'RBiH',
         'rs_assembly_rejects_voplan_1993#override_assembly': 'RS',
@@ -319,9 +318,11 @@ describe('§6 E4: ruled rows', () => {
             // Interim carriers until E3a2 routes these peace-plan cards into the plan resolution
             // (coordinator ruling 2026-11-17); E3a2 strips them.
             ['rs_owen_stoltenberg_response_1993', 'reject_plan', 'RS', -20],
-            ['rs_contact_group_response_1994', 'reject_51_49_plan', 'RS', -10],
             ['rs_contact_group_response_1994', 'negotiate_amendments', 'RS', -5],
-            ['rbih_contact_group_response_1994', 'reject_51_49_plan', 'RBiH', -15],
+            // Round 3 (Q3/R4-4): Belgrade's break is carried by CONTACT_GROUP_REJECTION and the
+            // RBiH reject by contact_group_plan_1994#reject, so both reject cards carry none.
+            ['rs_contact_group_response_1994', 'reject_51_49_plan', 'RS', 0],
+            ['rbih_contact_group_response_1994', 'reject_51_49_plan', 'RBiH', 0],
             ['rbih_contact_group_response_1994', 'accept_51_49_plan', 'RBiH', 0],
             ['vance_owen_plan_1993', 'accept', 'RBiH', 0],
             ['owen_stoltenberg_plan_1993', 'accept', 'RBiH', 0],
@@ -362,8 +363,10 @@ describe('§6 E4: save migration v42', () => {
         const decisions = migrated.military.pending_event_decisions!;
         const camps = decisions.find((d) => d.event_id === 'concentration_camps_revealed_1992')!;
         expect(camps.response_options.map((o) => supportSum(o.effects, 'RS'))).toEqual([-10, -5, 0]);
-        // The RS camp options keep their own patron_confidence shifts (only the HRHB ones are stripped).
-        expect(camps.response_options[0].dimension_shifts).toContainEqual({ faction: 'RS', dimension: 'patron_confidence', delta: -10 });
+        // Round 3 (Q1, one carrier per patron change): the RS camp options keep patron_support
+        // and lose their patron_confidence twins too; other shifts stay.
+        expect(camps.response_options.flatMap((o) => o.dimension_shifts ?? []).some((s) => s.dimension === 'patron_confidence')).toBe(false);
+        expect(camps.response_options[0].dimension_shifts).toContainEqual({ faction: 'RS', dimension: 'international_standing', delta: -15 });
         const hrhb = decisions.find((d) => d.event_id === 'hrhb_camp_exposure_response_1993')!;
         expect(hrhb.response_options.map((o) => supportSum(o.effects, 'HRHB'))).toEqual([-10, -5, 0]);
         expect(hrhb.response_options.flatMap((o) => o.dimension_shifts ?? []).some((s) => s.dimension === 'patron_confidence')).toBe(false);

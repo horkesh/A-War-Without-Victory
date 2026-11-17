@@ -64,6 +64,8 @@ export const KNOWN_EVENT_CONDITION_TYPES = [
     'paramilitary_deployments_at_most',
     'paramilitary_mode_equals',
     'patron_pressure_above',
+    // §6 E4 round 3 (Q3): reads negotiation.peace_plan_history (resolved entries).
+    'peace_plan_response',
     'rbih_hrhb_war_started',
     'supply_above',
     'supply_below',

@@ -1,14 +1,6 @@
 {
-  "description": "Section 6 E4 (2026-11-17): every positive patron_support effect in the event catalog must be listed here, keyed by '<event id>#<option id>' or '<event id>#card', with the faction and a reason. A positive delta means the patron's material and political backing rises. The loader fails on an unlisted positive row (rule b). The list can never override rule (a): a positive patron_support for a faction on a row that also carries humanitarian_impact, a war_crimes_delta, a negative international_standing shift for that faction, or a Ring-3 family fails regardless. Pinned by tests/s6_e4_patron_support.test.ts.",
+  "description": "Section 6 E4 (2026-11-17): every positive patron_support effect in the event catalog must be listed here, keyed by '<event id>#<option id>' or '<event id>#card', with the faction and a reason. A positive delta means the patron's material and political backing rises. The loader fails on an unlisted positive row (rule b). The list can never override rule (a): a positive patron_support for a faction on a row that also carries humanitarian_impact, a war_crimes_delta, a negative international_standing shift for that faction, or a Ring-3 family fails regardless. Pinned by tests/s6_e4_patron_support.test.ts. Round 3 (Q2) dropped abdic_apwb_declared_1993#federation_offer, hv_hvo_cooperation_1995#arbih_coordination and address_to_nation_rs#address_defiance_rs (no recorded patron change).",
   "entries": {
-    "abdic_apwb_declared_1993#federation_offer": {
-      "faction": "RBiH",
-      "reason": "Kept as authored (support convention): Washington backed the Federation-line offer to the APWB."
-    },
-    "address_to_nation_rs#address_defiance_rs": {
-      "faction": "RS",
-      "reason": "Kept as authored (support convention): an address design row, ruled KEEP with the visit, address and strategic_posture rows."
-    },
     "contact_group_plan_1994#accept": {
       "faction": "RBiH",
       "reason": "Set to +10 by the ruling: the US backed the Contact Group plan; the plan card carries the accept (one carrier)."
@@ -20,10 +12,6 @@
     "hrhb_posavina_orasje_posture_1992#counterattack_brod": {
       "faction": "HRHB",
       "reason": "Kept as authored: one of the HRHB 1992 Zagreb-relationship options, authored in the support convention."
-    },
-    "hv_hvo_cooperation_1995#arbih_coordination": {
-      "faction": "HRHB",
-      "reason": "Kept as authored: real Zagreb backing for HV-HVO coordination with the ARBiH in 1995."
     },
     "rbih_arms_embargo_lift_advocacy_1993#lobby_for_lift_and_strike": {
       "faction": "RBiH",

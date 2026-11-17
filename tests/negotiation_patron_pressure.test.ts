@@ -435,15 +435,20 @@ describe('updatePatronPressure', () => {
         expect(neg.patron_relationships.RS.override_authority).toBeGreaterThan(initialRS);
     });
 
-    it('decays support when sanctions active', () => {
+    it('does not decay support when sanctions are active (§6 E4 round 3: the decay is retired)', () => {
+        // Belgrade's break has one carrier, CONTACT_GROUP_REJECTION (−15 once). The old per-turn
+        // −0.5 sanctions decay was an endless second carrier; sanctions_active still feeds the
+        // +30 override term.
         const state = makeState();
         const neg = state.military.negotiation!;
         neg.patron_relationships.RS.sanctions_active = true;
         const initialSupport = neg.patron_relationships.RS.support_level;
+        const initialOverride = neg.patron_relationships.RS.override_authority;
 
-        updatePatronPressure(state);
+        for (let turn = 0; turn < 10; turn++) updatePatronPressure(state);
 
-        expect(neg.patron_relationships.RS.support_level).toBeLessThan(initialSupport);
+        expect(neg.patron_relationships.RS.support_level).toBe(initialSupport);
+        expect(neg.patron_relationships.RS.override_authority).toBeGreaterThan(initialOverride);
     });
 
     it('does not decay support when no sanctions', () => {
@@ -469,12 +474,19 @@ describe('updatePatronPressure', () => {
 // ═══════════════════════════════════════════════════════════════════════════
 
 describe('Patron Events', () => {
-    it('Contact Group rejection triggers Belgrade sanctions on RS', () => {
+    it('Contact Group rejection triggers Belgrade sanctions on RS once RS rejected the plan on the record', () => {
         const state = makeState({
             turn: CONTACT_GROUP_REJECTION.trigger_week,
             war_start_turn: 0,
         });
         const neg = state.military.negotiation!;
+        // §6 E4 round 3 (Q3): the event reads the resolved plan record, never the card.
+        neg.peace_plan_history.push({
+            plan_id: 'contact_group',
+            turn_offered: CONTACT_GROUP_REJECTION.trigger_week,
+            responses: { RBiH: 'accepted', RS: 'rejected', HRHB: 'accepted' },
+            resolved: true,
+        });
 
         expect(neg.patron_relationships.RS.sanctions_active).toBe(false);
         evaluatePatronEvents(state);
@@ -482,6 +494,26 @@ describe('Patron Events', () => {
         expect(neg.patron_relationships.RS.sanctions_active).toBe(true);
         expect(neg.patron_relationships.RS.override_authority).toBeGreaterThan(10);
         expect(neg.patron_relationships.RS.relationship_events).toContain('contact_group_rejection');
+    });
+
+    it('Contact Group rejection never fires when RS accepted the plan (§6 E4 round 3)', () => {
+        const state = makeState({
+            turn: CONTACT_GROUP_REJECTION.trigger_week,
+            war_start_turn: 0,
+        });
+        const neg = state.military.negotiation!;
+        neg.peace_plan_history.push({
+            plan_id: 'contact_group',
+            turn_offered: CONTACT_GROUP_REJECTION.trigger_week,
+            responses: { RBiH: 'accepted', RS: 'accepted', HRHB: 'rejected' },
+            resolved: true,
+        });
+        for (let week = CONTACT_GROUP_REJECTION.trigger_week; week < CONTACT_GROUP_REJECTION.trigger_week + 30; week++) {
+            state.meta.turn = week;
+            evaluatePatronEvents(state);
+        }
+        expect(neg.patron_relationships.RS.sanctions_active).toBe(false);
+        expect(neg.patron_relationships.RS.relationship_events).not.toContain('contact_group_rejection');
     });
 
     it('Srebrenica aftermath increases override for all factions', () => {
@@ -580,18 +612,33 @@ describe('Patron Events', () => {
         expect(neg.patron_relationships.HRHB.override_authority).toBeGreaterThanOrEqual(85);
     });
 
+    // §6 E4 round 3 (Q3): CONTACT_GROUP_REJECTION needs the RS rejection on the plan record.
+    const recordRsCgRejection = (neg: NegotiationState): void => {
+        neg.peace_plan_history.push({
+            plan_id: 'contact_group',
+            turn_offered: CONTACT_GROUP_REJECTION.trigger_week,
+            responses: { RBiH: 'accepted', RS: 'rejected', HRHB: 'accepted' },
+            resolved: true,
+        });
+    };
+
     it('events fire only once', () => {
         const state = makeState({
             turn: CONTACT_GROUP_REJECTION.trigger_week,
             war_start_turn: 0,
         });
         const neg = state.military.negotiation!;
+        recordRsCgRejection(neg);
 
         evaluatePatronEvents(state);
+        expect(neg.patron_relationships.RS.relationship_events).toContain('contact_group_rejection');
         const overrideAfterFirst = neg.patron_relationships.RS.override_authority;
+        const supportAfterFirst = neg.patron_relationships.RS.support_level;
 
+        state.meta.turn += 1;
         evaluatePatronEvents(state);
         expect(neg.patron_relationships.RS.override_authority).toBe(overrideAfterFirst);
+        expect(neg.patron_relationships.RS.support_level).toBe(supportAfterFirst);
     });
 
     it('events respect war_start_turn offset', () => {
@@ -600,6 +647,7 @@ describe('Patron Events', () => {
             war_start_turn: 10,
         });
         const neg = state.military.negotiation!;
+        recordRsCgRejection(neg);
 
         evaluatePatronEvents(state);
 
@@ -608,6 +656,16 @@ describe('Patron Events', () => {
     });
 
     it('events do not fire at wrong week', () => {
+        // Before its trigger week, even with the rejection on record.
+        const early = makeState({
+            turn: CONTACT_GROUP_REJECTION.trigger_week - 1,
+            war_start_turn: 0,
+        });
+        recordRsCgRejection(early.military.negotiation!);
+        evaluatePatronEvents(early);
+        expect(early.military.negotiation!.patron_relationships.RS.relationship_events).not.toContain('contact_group_rejection');
+
+        // From its trigger week on, never without the rejection on record.
         const state = makeState({
             turn: CONTACT_GROUP_REJECTION.trigger_week + 1,
             war_start_turn: 0,
@@ -617,6 +675,11 @@ describe('Patron Events', () => {
         evaluatePatronEvents(state);
 
         expect(neg.patron_relationships.RS.relationship_events).not.toContain('contact_group_rejection');
+
+        // A rejection recorded later fires it at the first week it holds.
+        recordRsCgRejection(neg);
+        evaluatePatronEvents(state);
+        expect(neg.patron_relationships.RS.relationship_events).toContain('contact_group_rejection');
     });
 
     it('does nothing when negotiation state missing', () => {

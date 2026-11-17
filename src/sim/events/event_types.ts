@@ -93,7 +93,15 @@ export type EventCondition =
      * Used to gate `us_halts_federation_advance_1995` on RS area-share ≤ 0.51
      * (the Holbrooke 51:49 halt line). Faction-agnostic predicate.
      */
-    | { type: 'faction_area_ratio'; faction: FactionId; comparator: 'at_most' | 'at_least'; value: number };
+    | { type: 'faction_area_ratio'; faction: FactionId; comparator: 'at_most' | 'at_least'; value: number }
+    /**
+     * §6 E4 round 3 (Q3). True when the plan record holds a RESOLVED entry for `plan_id`
+     * whose answer for `faction` is `response`. Reads
+     * `state.military.negotiation.peace_plan_history` (the single source, §6 E3a1 D3), never
+     * a card or a pending plan. Used to gate `belgrade_embargo_rs_1994` on the RS rejection
+     * of the Contact Group plan. Deterministic (existence check).
+     */
+    | { type: 'peace_plan_response'; plan_id: string; faction: FactionId; response: 'accepted' | 'rejected' };
 
 /** Trigger: when to consider firing (turn range + optional prerequisites). */
 export interface EventTrigger {
@@ -1039,6 +1047,14 @@ export function evaluateCondition(condition: EventCondition, state: GameState, e
                 if (typeof v === 'number' && Number.isFinite(v)) total += v;
             }
             return total >= condition.threshold;
+        }
+        case 'peace_plan_response': {
+            // §6 E4 round 3 (Q3): the plan record, resolved entries only.
+            return (state.military?.negotiation?.peace_plan_history ?? []).some((entry) => (
+                entry.plan_id === condition.plan_id
+                && entry.resolved
+                && entry.responses?.[condition.faction] === condition.response
+            ));
         }
         case 'faction_area_ratio': {
             // Fall-1995 E-A5: area-weighted territory share from the latest turn summary.

@@ -14,6 +14,7 @@ import type { PatronRelationship, NegotiationBreakdown } from '../../state/negot
 import { createDefaultPatronRelationship } from '../../state/negotiation_types.js';
 import { clamp } from '../../utils/math.js';
 import { strictCompare } from '../../state/validateGameState.js';
+import { applyDimensionShift, type DimensionStore } from '../events/strategic_dimensions.js';
 
 const CANONICAL_FACTIONS: FactionId[] = ['RBiH', 'RS', 'HRHB'];
 
@@ -51,11 +52,44 @@ export const RECENT_DEFEATS_WINDOW = 8;
 /** Per-defeat override authority gain. */
 export const DEFEAT_OVERRIDE_PER_EVENT = 10;
 
-/** Support level loss per turn when sanctions are active. */
-export const SANCTIONS_SUPPORT_DECAY_PER_TURN = 0.5;
+// The per-turn sanctions decay of support_level (SANCTIONS_SUPPORT_DECAY_PER_TURN = 0.5) was
+// retired by §6 E4 round 3 (Q3, 2026-11-17): it was an endless second carrier of Belgrade's
+// break, which CONTACT_GROUP_REJECTION (patron_events.ts) carries once. `sanctions_active`
+// stays: the +30 override term below and the diplomacy badge still read it.
 
 /** Support level loss when client rejects a peace plan. */
 export const PEACE_PLAN_REJECTION_SUPPORT_COST = 5;
+
+/** The negotiation-state slice the patron support writer touches. */
+export interface PatronSupportStore {
+    patron_relationships?: Record<string, PatronRelationship>;
+    strategic_dimensions?: DimensionStore;
+}
+
+/**
+ * The one writer of a `support_level` delta (§6 E4 round 3, R4-3; Systems Manual §7.10.3).
+ * Every support writer goes through it: the `patron_support` event effect (apply_effects.ts),
+ * the scripted patron events (patron_events.ts) and the peace-plan rejection cost
+ * (peace_plans.ts).
+ *
+ * It applies `clamp(support_level + delta, 0, 100)`. COSTS ONLY spill: the part of a negative
+ * delta that the floor at 0 removes goes to the faction's `patron_confidence` event_modifier
+ * through the one accumulator rule (`applyDimensionShift`), so a cost is never lost because
+ * support was already low. A gain that lands at 100 clamps and is not banked.
+ *
+ * Returns the spilled amount (0, or a negative number). A missing relationship is a no-op.
+ */
+export function applyPatronSupportDelta(neg: PatronSupportStore | undefined, faction: string, delta: number): number {
+    const rel = neg?.patron_relationships?.[faction];
+    if (!rel) return 0;
+    const raw = rel.support_level + delta;
+    rel.support_level = clamp(raw, 0, 100);
+    if (delta >= 0 || raw >= 0) return 0;
+    if (neg?.strategic_dimensions) {
+        applyDimensionShift(neg.strategic_dimensions, faction, 'patron_confidence', raw);
+    }
+    return raw;
+}
 
 /**
  * RS override-authority contribution from the 1992 Drina valley cleansing.
@@ -175,8 +209,9 @@ export const DEFAULT_SUPPORT: Record<string, number> = {
 // ═══════════════════════════════════════════════════════════════════════════
 
 /**
- * Called each turn from war_phases pipeline. Updates override_authority and
- * support_level for each faction's patron relationship.
+ * Called each turn from war_phases pipeline. Updates override_authority for each
+ * faction's patron relationship. It no longer writes support_level: the sanctions
+ * decay was retired (§6 E4 round 3, Q3).
  */
 export function updatePatronPressure(state: GameState): void {
     const neg = state.military.negotiation;
@@ -193,15 +228,6 @@ export function updatePatronPressure(state: GameState): void {
 
         // Compute override authority from current conditions
         pr.override_authority = computeOverrideAuthority(state, faction, pr, cap);
-
-        // Decay support level when sanctions active
-        if (pr.sanctions_active) {
-            pr.support_level = clamp(
-                pr.support_level - SANCTIONS_SUPPORT_DECAY_PER_TURN,
-                0,
-                100
-            );
-        }
     }
 }
 

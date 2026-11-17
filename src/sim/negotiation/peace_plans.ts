@@ -11,7 +11,7 @@ import type { GameState, FactionId } from '../../state/game_state.js';
 import type { PeacePlanDefinition, PeacePlanResponse, NegotiationState } from '../../state/negotiation_types.js';
 import { createEmptyCapital, createDefaultPatronRelationship } from '../../state/negotiation_types.js';
 import { PEACE_PLANS, getPeacePlanById } from './peace_plan_data.js';
-import { PEACE_PLAN_REJECTION_SUPPORT_COST } from './patron_pressure.js';
+import { PEACE_PLAN_REJECTION_SUPPORT_COST, applyPatronSupportDelta } from './patron_pressure.js';
 import { getPoliticalPersonality, computePoliticalAssessment } from '../political/political_personality.js';
 import { computePoliticalPeacePlanResponse } from '../political/political_peace_plan.js';
 import { freezeEndgameSnapshot } from '../endgame/endgame_snapshot.js';
@@ -557,7 +557,8 @@ function applyRejectionConsequences(
         if (pr) {
             const overrideChange = plan.override_change_on_reject[faction] ?? 0;
             pr.override_authority = clamp(pr.override_authority + overrideChange, 0, 100);
-            pr.support_level = clamp(pr.support_level - PEACE_PLAN_REJECTION_SUPPORT_COST, 0, 100);
+            // The one support writer (§6 E4 round 3): a cost below the floor spills into patron_confidence.
+            applyPatronSupportDelta(neg, faction, -PEACE_PLAN_REJECTION_SUPPORT_COST);
             pr.relationship_events.push(`rejected_${plan.id}`);
         }
 

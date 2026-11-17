@@ -23,6 +23,10 @@ import { DIMENSION_IDS } from './strategic_dimensions.js';
 import { stableStringify } from '../../utils/stable_json.js';
 import sourceTierContract from './source_tiers.json';
 import patronSupportAllowlist from './patron_support_allowlist.json';
+import { DAYTON_PLAN, PEACE_PLANS } from '../negotiation/peace_plan_data.js';
+
+/** §6 E4 round 3: plan ids a `peace_plan_response` condition may name. */
+const KNOWN_PEACE_PLAN_IDS: ReadonlySet<string> = new Set<string>([...PEACE_PLANS.map((plan) => plan.id), DAYTON_PLAN.id]);
 
 /**
  * Phase D Packet 44 — typed DimensionId vocabulary as a runtime Set. Mirrors
@@ -352,6 +356,18 @@ function validateCondition(value: unknown, path: string, filename: string, rowIn
         if (hasOwn(value, 'min_attacks')
             && !(Number.isInteger(value.min_attacks) && (value.min_attacks as number) >= 1)) {
             failRow(filename, rowIndex, `${path}.min_attacks must be an integer >= 1 when present`);
+        }
+    }
+    if (value.type === 'peace_plan_response') {
+        // §6 E4 round 3 (Q3): reads the resolved plan record.
+        if (!isNonEmptyString(value.plan_id) || !KNOWN_PEACE_PLAN_IDS.has(value.plan_id)) {
+            failRow(filename, rowIndex, `${path}.plan_id must be a known peace plan id (${[...KNOWN_PEACE_PLAN_IDS].sort(strictCompare).join(', ')}): ${String(value.plan_id)}`);
+        }
+        if (!isNonEmptyString(value.faction) || !VALID_EVENT_FACTION_SET.has(value.faction)) {
+            failRow(filename, rowIndex, `${path}.faction must be one of RBiH, RS, HRHB: ${String(value.faction)}`);
+        }
+        if (value.response !== 'accepted' && value.response !== 'rejected') {
+            failRow(filename, rowIndex, `${path}.response must be 'accepted' or 'rejected': ${String(value.response)}`);
         }
     }
 
@@ -1323,6 +1339,50 @@ export function validatePatronSupportRules(
 }
 
 /**
+ * §6 E4 round 3 (Q1, 2026-11-17): one carrier per patron change. A scope (the card, or one
+ * response option) that carries `patron_support` for faction X carries no `patron_confidence`
+ * dimension shift for X. The support writer already moves X's patron_confidence (its base is
+ * support_level, recomputed every turn), so a twin shift charged the same patron change
+ * twice. Same pattern as {@link validateNoRepeatedEffect}.
+ */
+export function validateOnePatronCarrier(rows: EventDefinition[]): void {
+    const violations: string[] = [];
+    const sortedRows = [...rows].sort((a, b) => strictCompare(a.id, b.id));
+    function check(scope: unknown, label: string): void {
+        if (!isObject(scope)) return;
+        const supportFactions = new Set<string>();
+        for (const effect of effectList(scope)) {
+            if (isObject(effect) && effect.kind === 'patron_support') supportFactions.add(String(effect.faction));
+        }
+        if (supportFactions.size === 0 || !Array.isArray(scope.dimension_shifts)) return;
+        for (const shift of scope.dimension_shifts) {
+            if (isObject(shift) && shift.dimension === 'patron_confidence' && supportFactions.has(String(shift.faction))) {
+                violations.push(`${label}:${String(shift.faction)}`);
+            }
+        }
+    }
+    for (const row of sortedRows) {
+        check(row, `${row.id}#card`);
+        if (!Array.isArray(row.response_options)) continue;
+        for (let optionIndex = 0; optionIndex < row.response_options.length; optionIndex++) {
+            const option = row.response_options[optionIndex];
+            if (!isObject(option)) continue;
+            const optionId = isNonEmptyString((option as { id?: unknown }).id)
+                ? (option as { id: string }).id
+                : String(optionIndex);
+            check(option, `${row.id}#${optionId}`);
+        }
+    }
+    if (violations.length > 0) {
+        violations.sort(strictCompare);
+        throw new Error(
+            'One carrier per patron change (§6 E4): a scope with patron_support for a faction carries no '
+            + `patron_confidence dimension shift for that faction: ${violations.join(', ')}`,
+        );
+    }
+}
+
+/**
  * Load a single required event JSON file. Required catalog files fail closed:
  * missing, malformed, or non-array JSON is a loader error.
  */
@@ -1376,6 +1436,7 @@ export function loadEventDefinitionsFromDir(scenarioStartWeek: number, eventsDir
     validateEffectKindVocabulary(allEvents);
     validateNoRepeatedEffect(allEvents);
     validatePatronSupportRules(allEvents);
+    validateOnePatronCarrier(allEvents);
     // ─── Phase B Sub-slice B1 catalog-level passes. ────────────────────────
     validateCrossFactionOptionIds(allEvents);
     validateRing3EnablingRejection(allEvents);

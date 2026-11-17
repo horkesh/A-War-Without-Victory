@@ -10,6 +10,7 @@ import { getActiveAllianceBounds } from './active_modifiers.js';
 import { recordBattleCasualties } from '../../state/casualty_ledger.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { invalidateBrigadeJourney } from '../combat/brigade_journey_lifecycle.js';
+import { applyPatronSupportDelta } from '../negotiation/patron_pressure.js';
 
 /** Deterministic kind ordering for effect application (alphabetical).
  *  NOTE: alphabetic insertion shifts indices of every kind sorted after the
@@ -405,17 +406,15 @@ function applyHumanitarianImpact(state: GameState, faction: FactionId, warCrimes
 }
 
 /** Adjust patron support_level for faction's patron relationship (§6 E4: the
- *  `patron_support` effect; positive = the patron's backing rises).
+ *  `patron_support` effect; positive = the patron's backing rises). Goes through the one
+ *  support writer, so a cost below the floor spills into patron_confidence (§6 E4 round 3).
  *  Non-finite delta is rejected (prior support kept) + logged (P1-B). */
 function applyPatronSupport(state: GameState, faction: FactionId, delta: number): void {
     if (!Number.isFinite(delta)) {
         recordNonFiniteEffectAnomaly(state, 'patron_support', faction, delta);
         return;
     }
-    const neg = state.military.negotiation;
-    if (!neg?.patron_relationships?.[faction]) return;
-    const rel = neg.patron_relationships[faction];
-    rel.support_level = clamp(rel.support_level + delta, 0, 100);
+    applyPatronSupportDelta(state.military.negotiation, faction, delta);
 }
 
 /** Adjust RBiH-HRHB alliance value.

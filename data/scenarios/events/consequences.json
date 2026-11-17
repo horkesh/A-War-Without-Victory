@@ -142,11 +142,6 @@
         "faction": "RBiH",
         "dimension": "negotiating_leverage",
         "delta": -10
-      },
-      {
-        "faction": "RBiH",
-        "dimension": "patron_confidence",
-        "delta": -10
       }
     ],
     "historical_source": "Plan: docs/plans/2026-03-24-v090-consequence-system-plan.md Chain 6. Counterfactual mirror of Contact Group diplomatic calculus 1993-94.",
@@ -571,11 +566,6 @@
         "faction": "RS",
         "dimension": "international_standing",
         "delta": -10
-      },
-      {
-        "faction": "RS",
-        "dimension": "patron_confidence",
-        "delta": -10
       }
     ],
     "sets_flags": {
@@ -802,13 +792,7 @@
         "delta": -50
       }
     ],
-    "dimension_shifts": [
-      {
-        "faction": "RS",
-        "dimension": "patron_confidence",
-        "delta": -5
-      }
-    ],
+    "dimension_shifts": [],
     "historical_source": "Derived from ICTY Milošević Trial (IT-02-54) exhibits on VJ-VRS logistics coupling. Counterfactual: cost of the coupling rises when the rear is not secured. Plan: docs/plans/2026-03-24-v090-consequence-system-plan.md Chain 1.",
     "source_tier": "design_counterfactual",
     "source_note": "This is a conditional simulation consequence, not a claim that the displayed outcome occurred historically. The historical_source field records the parent design chain and any contextual historical anchor; player-facing prose appears only when the authored state predicate fires."
@@ -1245,13 +1229,7 @@
         "delta": -40
       }
     ],
-    "dimension_shifts": [
-      {
-        "faction": "HRHB",
-        "dimension": "patron_confidence",
-        "delta": -15
-      }
-    ],
+    "dimension_shifts": [],
     "historical_source": "Counterfactual: ICTY Prlić et al. Trial Judgment (IT-04-74-T) on Zagreb-HRHB resource flows. When the HRHB political direction does not match Zagreb's preferences, the documented supply coupling weakens. Plan: docs/plans/2026-03-24-v090-consequence-system-plan.md Chain 2.",
     "source_tier": "design_counterfactual",
     "source_note": "This is a conditional simulation consequence, not a claim that the displayed outcome occurred historically. The historical_source field records the parent design chain and any contextual historical anchor; player-facing prose appears only when the authored state predicate fires."
@@ -1817,13 +1795,7 @@
         "duration_turns": 12
       }
     ],
-    "dimension_shifts": [
-      {
-        "faction": "RS",
-        "dimension": "patron_confidence",
-        "delta": -15
-      }
-    ],
+    "dimension_shifts": [],
     "historical_source": "Divergence Ring 1 (LANE-NIGHTSHIFT-ROUND2-DIVERGENCE-EVENT-SEEDS). Streak counter `patron_resist_streak` is incremented by patron-event response options. Faction-agnostic predicate; effects target the resisting faction (authored RS by default; alt-faction variants can be added downstream).",
     "source_tier": "design_counterfactual",
     "source_note": "This is a conditional simulation consequence, not a claim that the displayed outcome occurred historically. The historical_source field records the parent design chain and any contextual historical anchor; player-facing prose appears only when the authored state predicate fires."
@@ -2125,11 +2097,6 @@
             "faction": "RBiH",
             "dimension": "negotiating_leverage",
             "delta": 8
-          },
-          {
-            "faction": "RBiH",
-            "dimension": "patron_confidence",
-            "delta": -5
           }
         ],
         "sets_flags": {
@@ -2347,11 +2314,6 @@
         "delta": -5
       },
       {
-        "faction": "RS",
-        "dimension": "patron_confidence",
-        "delta": -20
-      },
-      {
         "faction": "RBiH",
         "dimension": "international_standing",
         "delta": 5
@@ -2426,11 +2388,6 @@
           }
         ],
         "dimension_shifts": [
-          {
-            "faction": "RS",
-            "dimension": "patron_confidence",
-            "delta": 12
-          },
           {
             "faction": "RS",
             "dimension": "internal_cohesion",
@@ -2591,11 +2548,6 @@
         "faction": "RBiH",
         "dimension": "international_standing",
         "delta": -2
-      },
-      {
-        "faction": "RBiH",
-        "dimension": "patron_confidence",
-        "delta": -12
       }
     ],
     "sets_flags": {
@@ -2719,11 +2671,6 @@
         "faction": "HRHB",
         "dimension": "international_standing",
         "delta": -2
-      },
-      {
-        "faction": "HRHB",
-        "dimension": "patron_confidence",
-        "delta": -12
       }
     ],
     "sets_flags": {
