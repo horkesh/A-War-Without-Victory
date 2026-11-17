@@ -27,4 +27,25 @@
 - an unpaused between-turn support choice (RED before: pc base 50 against support 60);
 - Dayton parity, the first war turn (desktop and headless births alike), idempotence ((c) then (a) byte-identical, same-state double `runTurn`, save/reload at a boundary), and a source scan (one helper, three call sites, one owner).
 
-**Measured.** TODO (lane lead): historical and emergent 188w, each run twice, against main. Expected: checkpoints and guards equal to the base; fired-event diff shows only the two Belgrade cards lost; no cell changes; the hash moves (all six bases at the boundary, plus the w188 Dayton stamp); re-pin; `ci:structural-fingerprint:check` unchanged. Knife-edges to report, not tune: RS pc at exactly 35 against `csq_patron_arms_pipeline_attenuated` (< 35); `csq_back_channel_communication_RS` at exactly 50 on a desktop path.
+**Measured** (official runner, base main fb63c8353; each branch regime run twice, byte-identical):
+
+| | historical | emergent |
+|---|---|---|
+| final_save hash, base → new | 964ab22c838c94a8 → 13ceed2efa34ea00 | 32f70252f45bebc4 → 50e1f25b12a1940d |
+| checkpoints | 709/709/708/682 = base | 709/709/708/682 = base |
+| guards | intact | intact |
+| final cells changed | 0 | 0 |
+| fired-event set | unchanged | unchanged |
+| bot decisions changed | 0 | 0 |
+| RS op launches (t56-74 / t104+) | 4 / 5 = base | 4 / 5 = base |
+
+- **One timing change**, the same in both regimes: `csq_patron_equipment_delivery_confirmed` moves t119 → t122. `csq_back_channel_communication_RS` stays at t119.
+- **Trace, RS** (end of turn, base → new):
+  - t118: support 80, `patron_confidence` base 100 → 80, effective 70 → 50.
+  - t119: the delivery card (needs pc ≥ 55) no longer fires on the stale base. The back-channel card (needs pc ≥ 50; `dimension_above` is ≥) still fires, at exactly 50.
+  - t121: RS support jumps 79 → 93.5, because main's `belgrade_embargo_rs_1994` carries a `patron_pressure +15` effect, a support writer on main. The delivery card then fires at t122 on consistent values.
+- **The ruling's expectation was measured on the §6 E4 branch.** There RS support is 35 from t118 and the embargo writes no support, so both Belgrade cards are lost (prototype: s6_phase_order_measured.md). On main, the t122 delivery is downstream of the embargo's support write, which E4 (#797) removes; it is not a phase-order effect. Whichever of E4 and this change lands second re-measures.
+- **Knife-edges**, reported, not tuned:
+  - `csq_back_channel_communication_RS` at exactly 50, here on the headless path;
+  - on E4, RS pc at exactly 35 against `csq_patron_arms_pipeline_attenuated` (< 35).
+- Re-pinned; `ci:structural-fingerprint:check` unchanged (40w control).
