@@ -3315,12 +3315,6 @@
       "kind": "narrative",
       "text": "The embargo is not formally gone, but enforcement against Bosnia is loosening."
     },
-    "effects": [
-      {
-        "kind": "narrative",
-        "text": "The embargo is not formally gone, but enforcement against Bosnia is loosening."
-      }
-    ],
     "sets_flags": {
       "embargo_lifted": true
     },

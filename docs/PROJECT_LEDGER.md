@@ -119,6 +119,13 @@ Docs only; no `src/` or `data/` change, no hash change.
 - #774 is READY: package P2, the defence repair (steps 1, 2, 2b and 3; step 4 moved to P3). On main plus #729 (188-week): every guard passes in both modes; Ozren holds until September 1995 (Farz captures at t180 to t185); VRS brigades under cohesion 30 at week 160 go from 61 to 14; scores 705 / 696 / 690 / 666 (emergent 705 / 696 / 690 / 671), recorded, not a bar. It re-proves on top of #766 before GO. After it merges the held-behind-P2 list starts re-measuring one at a time (the alliance-lock fix, RB9 #747, SE9, RF-STRENGTH, the probe gate, the N5 follow-ups, #749), plus D1 stage 2. Three Codex P2 comments on #774 are open and routed (see the tracker).
 - Hash-moving order: #766 (mid-merge), #774, #754, #735, #776, then the first READY among #773, #739, E3a1. #777 (the "Bosanski (djelimično)" language label) is hash-neutral and self-merges on green. #775 (the #706 closure) is merged.
 
+## 2026-11-17 — Pass 66: the corrected hash-moving order; #774 and #776 off the queue; the schema rule
+
+Docs only; no `src/` or `data/` change, no hash change.
+
+- Corrected hash-moving order (orchestrator, 2026-11-17): #766, then #754, then #735, then #739, then the first READY among #774, #776, #773 and E3a1. #774 (package P2) and #776 (the RF-ROSTER precedence fix) are OFF the queue and get no GO until each Codex finding is reproduced with a failing test, fixed (or answered in the PR) and re-measured; P2's merge proof re-runs after #766. The four Codex comments (#774 x3 for the F1g lane, #776 x1 for RF-ROSTER) are marked "routed, fix pending".
+- Schema rule: v40 = #773, v41 = §6 E2, and any other migration PR claims the next free number at READY time; the batch-b-lane's peace-phase PR (engine skeleton, PhaseName narrowed to 'war', peace UI, about 16 dead state fields, five canon edits) takes the next free number.
+
 ## 2026-11-16 — `address_to_nation_rbih` closing line made year-neutral
 
 The renewable RBiH presidential address (first turn 84, then about 136 and 188; turn 0 is April 1992) said "a people in the fourth year of siege", which is wrong at turns 84 (second year) and 136 (third). It now reads "a people who have lived under siege this long". One narrative sentence in `war_1993.json`; narrative and historian seats keep it; the event has no Bosnian localization. Headless 188-week artifacts unchanged. Evidence: `docs/40_reports/evidence/20261116_address_year_copy/`.
