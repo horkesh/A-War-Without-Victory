@@ -26,6 +26,8 @@ Source hierarchy: ICTY and Court of BiH first, then Balkan Battlegrounds.
   - the RBiH Assembly's conditional acceptance of 29 Sept 1993.
 - **Canon:** SHDG §2 rows for Srebrenica and Markale; VICTORY_AND_PYRRHIC_SCORING no longer calls the 8,372 memorial names an adjudicated count.
 
+**Reviewed-contract pin.** Three of the Markale I explanations sit on `rbih_state_identity`, which `opening_policy_transition.ts` pins by canonical length and FNV64. That pin moves from 70844 / acbebbba72173a81 to 70875 / a3365d034c4c2ce9. The change is strings only, and a saved pending identity decision still matches, because explanations are display text.
+
 **Measured.** 188w historical and emergent final_save hashes are equal to main (copy only).
 
 **Registered:**
