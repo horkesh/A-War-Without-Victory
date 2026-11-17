@@ -710,6 +710,11 @@ export interface ParamilitaryUnrequestedView {
     turn: number;
     target_osid: string;
     faction: string;
+    /**
+     * True only when the action took its target (the engine books civilian harm and the war-crime count only then). An action that
+     * dissolved without taking it (target already friendly, combat blocked, organized defence, the fade cutoff) books nothing.
+     */
+    captured: boolean;
 }
 
 export interface OfficerDecisionRecordView {

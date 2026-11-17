@@ -422,7 +422,7 @@ In May 1992 (approximately week 4 of the war), Bosnian Serb leader Karadzic and 
 
 **What the Graz Accords do NOT cover:** The Posavina corridor (where RS and HVO fought throughout 1992), central Bosnia outside the Kiseljak pocket, and Krajina HRHB cells including Jajce. In these areas, RS and HRHB forces may fight each other normally.
 
-**Cold fronts:** Front edges between Graz-covered corps pairs are classified as "cold fronts." Cold fronts do not generate passive frontline attrition or bombardment fire. HRHB siege drain is also skipped on cold fronts. This means RS and HRHB forces facing each other in Herzegovina conserve strength rather than grinding each other down.
+**Cold fronts:** Front edges between Graz-covered corps pairs are classified as "cold fronts." Cold fronts do not generate passive frontline attrition or bombardment fire. This means RS and HRHB forces facing each other in Herzegovina conserve strength rather than grinding each other down.
 
 **Player agency:** The player can choose to break the truce — either the Herzegovina component or the Kiseljak exclusion — by ordering an attack against protected territory. Breaking the truce is recorded in state. Designed: the wronged faction receives a +0.25 aggression modifier for 6 turns, representing the retaliatory response. Current build: this modifier is not applied to bot aggression; wiring is deferred post-1.0 (realism audit F6). Both RS and HRHB automatically accept the Graz Accords (bot behavior); future implementation will allow the player to accept or decline.
 

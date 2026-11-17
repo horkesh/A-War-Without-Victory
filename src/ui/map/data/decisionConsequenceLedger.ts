@@ -864,17 +864,23 @@ export function buildDecisionConsequenceLedger(
     // Municipality scale only: the record speaks at that scale, and a settlement name would assert village-level history.
     const place = receiptMunicipalityName(unrequested.target_osid);
     const faction = getPlayerSafeMilitaryFactionName(unrequested.faction, unrequested.faction);
+    // Only an action that took its target is booked against the side; one that dissolved without taking it gets its own outcome
+    // line (Codex finding on #740).
+    const suffix = unrequested.captured ? 'unrequested' : 'unrequestedDissolved';
+    const titleKey = `decisionConsequences.title.paramilitary.${suffix}` as MessageKey;
+    const outcomeKey = `decisionConsequences.outcome.${suffix}` as MessageKey;
+    const detailKey = `decisionConsequences.detail.paramilitary.${suffix}` as MessageKey;
     records.push({
       id: `paramilitary-staff:${unrequested.id}`,
       turn: unrequested.turn,
       familyId: 'paramilitary-receipt',
       family: t('decisionConsequences.family.paramilitaryReceipt'),
-      title: t('decisionConsequences.title.paramilitary.unrequested'),
-      titleToken: { key: 'decisionConsequences.title.paramilitary.unrequested' },
-      outcome: t('decisionConsequences.outcome.unrequested'),
-      outcomeToken: { key: 'decisionConsequences.outcome.unrequested' },
-      detail: t('decisionConsequences.detail.paramilitary.unrequested', { place, faction }),
-      detailToken: { key: 'decisionConsequences.detail.paramilitary.unrequested', params: { place, faction } },
+      title: t(titleKey),
+      titleToken: { key: titleKey },
+      outcome: t(outcomeKey),
+      outcomeToken: { key: outcomeKey },
+      detail: t(detailKey, { place, faction }),
+      detailToken: { key: detailKey, params: { place, faction } },
       recordTarget: 'records',
     });
   }

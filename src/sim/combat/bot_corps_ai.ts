@@ -48,7 +48,7 @@ import { strictCompare } from '../../state/validateGameState.js';
 import { emitCommanderCreationRecord, isReasonCodeTopicEnabled } from './reason_code_debug.js';
 import { emitCorpsPlanTrace } from './corps_plan_trace.js';
 import { botOrdersPerfTime } from './_perf_profile_bot_orders.js';
-import { isRbihHrhbCombatEnabled } from '../early_war/alliance_update.js';
+import { isRbihHrhbAtWar, isRbihHrhbCombatEnabled } from '../early_war/alliance_update.js';
 import { MAX_EXHAUSTION_FOR_OPERATION } from './bot_constants.js';
 
 // ── v0.8 Commander Loop ────────────────────────────────────────────────
@@ -259,7 +259,7 @@ export function reassignCorpsForBilateralWar(state: GameState, faction: FactionI
     }
 
     rhs.bilateral_corps_release_progress[faction] = 0;
-    if (!isRbihHrhbCombatEnabled(state) || (state.political.war_alliance_rbih_hrhb ?? 1) >= 0) {
+    if (!isRbihHrhbCombatEnabled(state) || !isRbihHrhbAtWar(state)) {
         return { diverted_corps_id: null, released_corps_id: null, release_progress: 0, joint_ops: false, reason: 'not_applicable' };
     }
 

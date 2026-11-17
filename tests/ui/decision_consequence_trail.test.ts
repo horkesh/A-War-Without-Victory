@@ -575,8 +575,8 @@ describe('decision consequence trail', () => {
       player_faction: 'RBiH',
       rawGameState: { meta: { player_faction: 'RBiH' } } as any,
       paramilitaryUnrequested: [
-        { id: 'para_rbih_t2_0', turn: 2, target_osid: 'op:kakanj:biljesevo', faction: 'RBiH' },
-        { id: 'para_rs_t2_0', turn: 2, target_osid: 'op:srebrenica:obadi', faction: 'RS' },
+        { id: 'para_rbih_t2_0', turn: 2, target_osid: 'op:kakanj:biljesevo', faction: 'RBiH', captured: true },
+        { id: 'para_rs_t2_0', turn: 2, target_osid: 'op:srebrenica:obadi', faction: 'RS', captured: true },
       ],
     } as Partial<LoadedGameState>), 10);
 
@@ -595,7 +595,7 @@ describe('decision consequence trail', () => {
     const state = makeState({
       player_faction: 'RBiH',
       rawGameState: { meta: { player_faction: 'RBiH' } } as any,
-      paramilitaryUnrequested: [{ id: 'para_rbih_t2_0', turn: 2, target_osid: 'op:kakanj:biljesevo', faction: 'RBiH' }],
+      paramilitaryUnrequested: [{ id: 'para_rbih_t2_0', turn: 2, target_osid: 'op:kakanj:biljesevo', faction: 'RBiH', captured: true }],
     } as Partial<LoadedGameState>);
     expect(countFiledDecisionRecords(state)).toBe(0);
     expect(countFiledUnrequestedReceipts(state)).toBe(1);
