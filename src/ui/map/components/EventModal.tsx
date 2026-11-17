@@ -16,6 +16,7 @@ import type { EventEffect } from '../../../sim/events/event_types';
 import { getPlayerSafeDisplayLabel, getPlayerSafePoliticalFactionName } from '../utils/playerSafeText';
 import { resolveEventIllustration, section6StillAlt } from '../data/eventIllustrationArt';
 import { t, type MessageKey } from '../i18n';
+import { formatWarCrimesRecordLine } from '../data/warCrimesRecordLine';
 import { isDisplayEventEffectKind } from '../utils/eventEffectDisplay';
 import {
     SurfaceCloseButton,
@@ -108,7 +109,7 @@ export function describeEventEffect(effect: EventEffect): string {
         case 'morale_change': return `${getPlayerSafePoliticalFactionName(effect.faction)} morale ${effect.delta > 0 ? '+' : ''}${effect.delta}`;
         case 'supply_delta': return `${getPlayerSafePoliticalFactionName(effect.faction)} supply ${effect.delta > 0 ? '+' : ''}${effect.delta}`;
         case 'cohesion_change': return `${getPlayerSafePoliticalFactionName(effect.faction)} cohesion ${effect.delta > 0 ? '+' : ''}${effect.delta}`;
-        case 'humanitarian_impact': return `${getPlayerSafePoliticalFactionName(effect.faction)} humanitarian impact${effect.war_crimes_delta ? ` (${effect.war_crimes_delta > 0 ? '+' : ''}${effect.war_crimes_delta})` : ''}`;
+        case 'humanitarian_impact': return formatWarCrimesRecordLine(effect.faction, effect.war_crimes_delta);
         case 'patron_pressure': return `${getPlayerSafePoliticalFactionName(effect.faction)} patron pressure ${effect.delta > 0 ? '+' : ''}${effect.delta}`;
         case 'alliance_change': return `${formatAllianceLabel()} ${effect.delta > 0 ? '+' : ''}${effect.delta}`;
         case 'negotiation_capital': return `${getPlayerSafePoliticalFactionName(effect.faction)} ${getPlayerSafeDisplayLabel(effect.dimension, effect.dimension)} ${effect.delta > 0 ? '+' : ''}${effect.delta}`;
@@ -120,7 +121,7 @@ export function EventModal({ event, queuePosition, queueTotal, onAcknowledge }: 
     const cat = CATEGORY_CONFIG[event.category] ?? { bg: '#444', color: '#aaa', labelKey: 'event.category.unknown', icon: 'star' as IconName };
     const factions = extractFactions(event.effects);
     const mechanicalEffects = event.effects.filter(
-        e => !e.description.startsWith('[narrative]') && isDisplayEventEffectKind(e.kind),
+        e => e.description.length > 0 && !e.description.startsWith('[narrative]') && isDisplayEventEffectKind(e.kind),
     );
     // Optional documentary-realism illustration. Resolves to null when the event
     // authors no `image` key (every shipped event today) OR the asset is not yet

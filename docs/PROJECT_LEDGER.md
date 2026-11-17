@@ -46,6 +46,20 @@ Orchestrator ruling on the Run B Farz trace (package "1994-95 attack and defence
 - **scenario-creator-runner-tester:** the id reproduces exactly. The only theoretical false accept is a President-authored op named exactly "Operation Farz 95", in the 3rd Corps, on the injection turn; that is not reachable headless.
 - **operations-expert:** registered-but-never-run and double-registration fail closed; an entry outliving its op cannot match another AAR. Suggested the engine contract test, which is added.
 
+## 2026-11-17 — The staff-action receipt says "counts against your side" only when the action took its target
+
+**Why.** Codex found on #740 (`GameStateAdapter.ts`, reproduced) that a paramilitary action dissolving WITHOUT taking its target (target already friendly, combat blocked, organized defence, the week-20 fade cutoff) still got a "Carried out" receipt saying it counts against the player's side, because `dissolveParamilitary` keeps the target and the creation turn. A receipt that reports civilian harm that never happened is a §6 truth defect.
+
+**Engine check (no change needed).** `src/sim/combat/paramilitary_sweep.ts`: the war-crime count (`recordWarCrime`) and the civilian-casualty and displacement bookings happen only after the control flip, i.e. only for an action that took its target. Every non-capturing dissolve books nothing (the defended retreat records only the action's own casualties). So the §2a flag and the war-crime tally were already correct; only the receipt was wrong. Proved by running the engine for each dissolve cause (new test).
+
+**Change** (UI only, no simulation state, hash unchanged):
+- `deriveParamilitaryUnrequested` (adapter): an action is `captured` only when a matching `paramilitary` control event to the player's side exists on that target within the march window (created turn to created turn + 2, each event consumed once); an action still `active` gets no receipt yet.
+- Ledger: a captured action keeps "Carried out ... It counts against your side."; any other gets its own outcome line, "Dissolved", "Paramilitary action dissolved without taking its target ... No harm to civilians was recorded and it does not count against your side." EN and native BCS (narrative seat); still municipality scale, still "an event of the simulated war".
+- Canon SHDG §3 (receipt rule) amended to say so.
+- Tests: `tests/ui/paramilitary_unrequested_receipt_truth.test.ts` (engine plus adapter plus ledger for a capture and each of four dissolve causes), `tests/ui_adapter_boundary.test.ts` (captured classification, the march window, no receipt while active), ledger fixtures.
+
+**Not done.** Nothing else; the hash is unchanged by construction (read-only view over existing state).
+
 ## 2026-11-17 — Pass 59: #757 recorded and its two doc fixes made; the Codex sweep now covers every open PR
 
 Docs only; no `src/` or `data/` change, no hash change.
@@ -88,6 +102,29 @@ Docs only; no `src/` or `data/` change, no hash change.
 Docs only; no `src/` or `data/` change, no hash change.
 
 - The two Codex P2 comments on #706 (bind each Request-op outcome to the specific request attempt, `desktop_calibration_compare.ts:952`; report the AAR's canonical `objectives_captured`, `:958`) are FIXED by #742 (merged, 6c205f873, "Request-op outcomes bound per attempt (Codex on #706)"): the code moved into `tools/ai_play/president_policies.ts`, where `bindPresidentRequestAttempts` binds each order to its own attempt and `joinPresidentRequests` reads the AAR's canonical `objectives_captured`; `objectives_logged_captured` no longer appears in the compare harness. Read on main by the steward.
+
+## 2026-11-17 — Pass 64: the refined queue rule and the open PR map; RF-ROSTER S3 accepted as final; #751 and #769 recorded
+
+Docs only; no `src/` or `data/` change, no hash change.
+
+- Queue rule (orchestrator, 2026-11-17), replacing the fixed order: hash-moving PRs merge one at a time, with GO to whichever is ready first unless one is mid-merge; guard (b) and every hash-neutral PR merge on green outside the queue; the UI lane self-merges hash-untouched green PRs. Open PR map: #754, #735, #739, #763, #768 (A2b, draft), #773 (the v40 retirement of sep1991 and the 1993 to 1995 starts, draft), #771 (the receipt-truth fix for the #740 Codex P2; UI lane; hash-neutral), #747.
+- RF-ROSTER S3 (planning-phase release) is accepted as final: "a generic corps op already in planning is not released for an authored op; the lead-window reservation (S2) prevents the conflict from arising." The lane's precedence fix is outcome-identical but hash-moving (18 truthful trace rows in watched_operations). Recorded in the final-behaviour record (a new accepted item) and Part 5 of the work list.
+- #751 (New Game mode labels, one accessible radiogroup; strings and one component, no hash) and #769 (the Farz guard P-A reads the operation's own Army HQ id; tooling only, hash unchanged; it had blocked P2 step 1, L7's N5 follow-up 1 and #747) are merged and recorded. No bigger roadmap archive move is needed now.
+
+## 2026-11-17 — Pass 65: #771 recorded (the #740 receipts thread fixed); #774 READY (package P2); the hash-moving order
+
+Docs only; no `src/` or `data/` change, no hash change.
+
+- #771 (merged, 15611a32b): receipt truth for the Codex P2 on #740: only a paramilitary action that took its target says it counts against the side; the engine was already correct (non-capturing sweeps book no war crime, casualty or displacement); UI only, hash untouched; SHDG §3 receipt rule amended. The #740 receipts Codex thread (r4589312813) is FIXED in merged code.
+- #774 is READY: package P2, the defence repair (steps 1, 2, 2b and 3; step 4 moved to P3). On main plus #729 (188-week): every guard passes in both modes; Ozren holds until September 1995 (Farz captures at t180 to t185); VRS brigades under cohesion 30 at week 160 go from 61 to 14; scores 705 / 696 / 690 / 666 (emergent 705 / 696 / 690 / 671), recorded, not a bar. It re-proves on top of #766 before GO. After it merges the held-behind-P2 list starts re-measuring one at a time (the alliance-lock fix, RB9 #747, SE9, RF-STRENGTH, the probe gate, the N5 follow-ups, #749), plus D1 stage 2. Three Codex P2 comments on #774 are open and routed (see the tracker).
+- Hash-moving order: #766 (mid-merge), #774, #754, #735, #776, then the first READY among #773, #739, E3a1. #777 (the "Bosanski (djelimično)" language label) is hash-neutral and self-merges on green. #775 (the #706 closure) is merged.
+
+## 2026-11-17 — Pass 66: the corrected hash-moving order; #774 and #776 off the queue; the schema rule
+
+Docs only; no `src/` or `data/` change, no hash change.
+
+- Corrected hash-moving order (orchestrator, 2026-11-17): #766, then #754, then #735, then #739, then the first READY among #774, #776, #773 and E3a1. #774 (package P2) and #776 (the RF-ROSTER precedence fix) are OFF the queue and get no GO until each Codex finding is reproduced with a failing test, fixed (or answered in the PR) and re-measured; P2's merge proof re-runs after #766. The four Codex comments (#774 x3 for the F1g lane, #776 x1 for RF-ROSTER) are marked "routed, fix pending".
+- Schema rule: v40 = #773, v41 = §6 E2, and any other migration PR claims the next free number at READY time; the batch-b-lane's peace-phase PR (engine skeleton, PhaseName narrowed to 'war', peace UI, about 16 dead state fields, five canon edits) takes the next free number.
 
 ## 2026-11-16 — `address_to_nation_rbih` closing line made year-neutral
 
