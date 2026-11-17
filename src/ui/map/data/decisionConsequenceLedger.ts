@@ -24,6 +24,15 @@ import {
     getPlayerSafeMilitaryFactionName,
 } from '../utils/playerSafeText.js';
 import { t, type MessageKey } from '../i18n/index.js';
+import { municipalityDisplayName } from '../../shared/bosnianPlaceNames.js';
+
+/** The 1991 municipality named by an OSID ("op:<municipality>:<settlement>"), in census spelling. */
+function receiptMunicipalityName(osid: string): string {
+  const municipality = typeof osid === 'string' ? osid.split(':')[1] : undefined;
+  if (!municipality) return 'rear';
+  return municipalityDisplayName(municipality)
+    ?? municipality.split('_').map((word) => (word ? word.charAt(0).toUpperCase() + word.slice(1) : '')).join(' ');
+}
 import { playerFactionMatch } from './playerFactionMatch.js';
 import { stanceMatterReceiptLine } from './stanceMatterCopy.js';
 
@@ -66,6 +75,7 @@ export type DecisionConsequenceFamilyId =
   | 'dayton-settlement'
   | 'humanitarian-convoy'
   | 'paramilitary-authorization'
+  | 'paramilitary-receipt'
   | 'patron-relations'
   | 'officer-personnel'
   | 'stance-matter'
@@ -928,6 +938,36 @@ export function buildDecisionConsequenceLedger(
     });
   }
 
+  // A paramilitary action carried out for the player's side with no request ever reaching the player (the staff decides rear-area
+  // actions at Assisted command or above; a standing order to allow sends them without a request at Full Control). It still counts
+  // against the side, so the player is told where and why instead of meeting the count at Dayton. The wording lives in the message
+  // catalog only (EN and BCS), never as a literal here.
+  for (const unrequested of state.paramilitaryUnrequested ?? []) {
+    if (playerFaction && !playerFactionMatch(unrequested.faction, playerFaction)) continue;
+    // Municipality scale only: the record speaks at that scale, and a settlement name would assert village-level history.
+    const place = receiptMunicipalityName(unrequested.target_osid);
+    const faction = getPlayerSafeMilitaryFactionName(unrequested.faction, unrequested.faction);
+    // Only an action that took its target is booked against the side; one that dissolved without taking it gets its own outcome
+    // line (Codex finding on #740).
+    const suffix = unrequested.captured ? 'unrequested' : 'unrequestedDissolved';
+    const titleKey = `decisionConsequences.title.paramilitary.${suffix}` as MessageKey;
+    const outcomeKey = `decisionConsequences.outcome.${suffix}` as MessageKey;
+    const detailKey = `decisionConsequences.detail.paramilitary.${suffix}` as MessageKey;
+    records.push({
+      id: `paramilitary-staff:${unrequested.id}`,
+      turn: unrequested.turn,
+      familyId: 'paramilitary-receipt',
+      family: t('decisionConsequences.family.paramilitaryReceipt'),
+      title: t(titleKey),
+      titleToken: { key: titleKey },
+      outcome: t(outcomeKey),
+      outcomeToken: { key: outcomeKey },
+      detail: t(detailKey, { place, faction }),
+      detailToken: { key: detailKey, params: { place, faction } },
+      recordTarget: 'records',
+    });
+  }
+
   const patronCuts = Array.isArray(state.rawGameState?.military?.patron_defiance_supply_cuts)
     ? state.rawGameState.military.patron_defiance_supply_cuts
     : [];
@@ -992,14 +1032,17 @@ export function buildDecisionConsequenceLedgerSummary(
     familySet.add(record.family);
     if (record.recordTarget === 'chronicle') {
       chronicleRouteCount += 1;
-    } else {
+    } else if (record.familyId !== 'paramilitary-receipt') {
+      // A paramilitary action carried out without a request is a receipt, not a filed decision of the President.
       recordsRouteCount += 1;
     }
   }
 
-  const latest = records[0] ?? null;
+  // Receipts are listed in Records but are not filed decisions: they stay out of the total and the "latest decision".
+  const decisions = records.filter((record) => record.familyId !== 'paramilitary-receipt');
+  const latest = decisions[0] ?? null;
   return {
-    total: records.length,
+    total: decisions.length,
     recordsRouteCount,
     chronicleRouteCount,
     latestTurn: latest?.turn ?? null,

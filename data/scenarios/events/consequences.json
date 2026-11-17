@@ -1457,7 +1457,7 @@
     "category": "military",
     "trigger": {
       "turn_min": 54,
-      "turn_max": 56,
+      "turn_max": 54,
       "phase": "war",
       "requires_events": [
         "croat_bosniak_war_begins_1993"
@@ -1473,6 +1473,22 @@
           {
             "type": "alliance_below",
             "value": 0.2
+          },
+          {
+            "type": "not",
+            "condition": {
+              "type": "flag_equals",
+              "flag": "hrhb_central_bosnia_defense",
+              "value": "evacuate"
+            }
+          },
+          {
+            "type": "not",
+            "condition": {
+              "type": "flag_equals",
+              "flag": "hrhb_central_bosnia_defense",
+              "value": "federate_early"
+            }
           }
         ]
       }
@@ -1565,6 +1581,7 @@
       }
     },
     "once": true,
+    "same_turn_requires_events": true,
     "priority": 50,
     "responding_faction": "HRHB",
     "effect": {

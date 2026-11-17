@@ -148,6 +148,22 @@ export interface EventDefinitionView {
   image?: string;
 }
 
+type EventViewEffect = NonNullable<EventDefinitionView['effects']>[number];
+
+/**
+ * Effects to show on an event card. The engine (`collectEffects`) applies the
+ * required `effect` AND every `effects` entry, so a mechanical `effect` must be
+ * shown even when `effects` exists (§6 E1, 2026-11-16: until then the card hid
+ * it, and 27 rows repeated it inside `effects`, applying it twice). A narrative
+ * `effect` beside `effects` stays hidden, as before, so card text is unchanged.
+ */
+export function eventDefinitionDisplayEffects(ev: { effect?: unknown; effects?: unknown }): EventViewEffect[] {
+  const primary = ev.effect && typeof ev.effect === 'object' ? (ev.effect as EventViewEffect) : undefined;
+  if (!Array.isArray(ev.effects)) return primary ? [primary] : [];
+  const rest = ev.effects as EventViewEffect[];
+  return primary && primary.kind !== 'narrative' ? [primary, ...rest] : rest;
+}
+
 /**
  * Load all event definitions from scenario event JSON files.
  * Returns a Map<eventId, definition>. Cached after first call.
@@ -177,7 +193,7 @@ export function loadEventDefinitions(): Promise<Map<string, EventDefinitionView>
           title: getPlayerSafeDisplayLabel(ev.title ?? ev.id, 'Untitled event'),
           narrative: ev.narrative ?? '',
           category: ev.category ?? 'military',
-          effects: Array.isArray(ev.effects) ? ev.effects : ev.effect ? [ev.effect] : [],
+          effects: eventDefinitionDisplayEffects(ev),
           dimension_shifts: Array.isArray(ev.dimension_shifts) ? ev.dimension_shifts : undefined,
           decision: ev.decision,
           image: typeof ev.image === 'string' ? ev.image : undefined,

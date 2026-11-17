@@ -897,6 +897,13 @@ export interface TacticalGroup {
     op_id: string;
     /** When set, this TG is part of an Army HQ op (faction-scope donor pool). */
     army_hq_op_id?: ArmyHqOpId;
+    /**
+     * The corps whose CorpsOperation this TG serves: its stable lifecycle identity together with
+     * `op_id` (zombie-TG fix, 2026-11-16). Differs from `corps_id` when the anchor is a brigade
+     * of another corps. Absent on TGs formed before the field existed; those keep the legacy
+     * host-corps = `corps_id` match.
+     */
+    host_corps_id?: FormationId;
     anchor_brigade_id: FormationId;
     /** Pre-sorted by brigade_id (strictCompare) for determinism. */
     donor_contributions: TgDonorContribution[];
