@@ -518,6 +518,11 @@ export function selectTacticalCommander(
         if (!os || os.status !== 'reserve') continue;
         if (os.assigned_operation) continue;
         if (!isEnclaveCompatible(data, corpsId, currentTurn)) continue;
+        // Commander attribution PR 2b (panel Q2, unanimous): a TG is led by an officer of its own
+        // corps, home or compatible, else by nobody. The faction-wide fallback (e.g. a Srebrenica
+        // officer leading a 7th Corps anchor) is the defect PR 2a removed from the other selectors.
+        const belongsToCorps = data.home_corps_id === corpsId || (data.compatible_corps_ids ?? []).includes(corpsId);
+        if (!belongsToCorps) continue;
 
         candidates.push(data);
     }
@@ -539,6 +544,20 @@ export function selectTacticalCommander(
     });
 
     return candidates[0]!.id;
+}
+
+/**
+ * Release every commander an operation holds when it ends: the TG anchor's tactical commander
+ * and the operation commander. Commander attribution PR 2b (panel Q4 condition): the normal
+ * operation ends released only the operation commander, so a TG leader stayed `active` with a
+ * stale `assigned_operation` for the rest of the war. Use this at every operation end.
+ */
+export function releaseOperationCommanders(
+    state: GameState,
+    op: import('../../state/game_state.js').CorpsOperation,
+): void {
+    releaseTacticalCommander(state, op);
+    releaseOperationCommander(state, op);
 }
 
 /**
@@ -1209,9 +1228,17 @@ function findBestReplacement(
 
     if (candidates.length === 0) return null;
 
-    // Sort by: home corps match, then pool tier, then competence desc, then id.
+    // Sort by: rank (a corps-rank officer before a tactical commander), home corps match, then pool
+    // tier, then competence desc, then id.
     // C.3: HVO sorts by political_reliability first (before competence).
     candidates.sort((a, b) => {
+        // Commander attribution PR 2b (panel Q3): a vacancy goes to a corps-rank officer of the corps
+        // first, then to one of its tactical (OG/brigade) commanders (Galic TJ para 604; Krstic TJ
+        // para 331; Alagic from OG to corps, BB2 p.510); the acting commander only when neither exists.
+        const aRank = a.rank === 'corps_commander' ? 0 : 1;
+        const bRank = b.rank === 'corps_commander' ? 0 : 1;
+        if (aRank !== bRank) return aRank - bRank;
+
         // Home corps match
         const aHome = a.home_corps_id === corpsId ? 0 : 1;
         const bHome = b.home_corps_id === corpsId ? 0 : 1;

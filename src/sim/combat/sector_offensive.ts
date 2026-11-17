@@ -65,7 +65,7 @@ import { pickOperationName } from './operation_names.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import type { ControlSide } from '../../state/political_control_types.js';
 import type { OperationalToCanonicalReverseMap } from '../../data/operational_data.js';
-import { releaseOperationCommander } from './officer_system.js';
+import { releaseOperationCommanders } from './officer_system.js';
 import { finalizeOperationAAR } from './operation_aar.js';
 import { linkOpportunityResolutionToAAR } from './operation_opportunities.js';
 import { applyOperationExperience, gradeStarsToOutcome, checkDefeatism } from './officer_experience.js';
@@ -2012,7 +2012,7 @@ export function advanceSectorOffensives(
                         }
                     }
                 }
-                releaseOperationCommander(state, op);
+                releaseOperationCommanders(state, op);
 
                 // Activate east Herzegovina truce only when Op Jackal (pre-planned HRHB op) completes.
                 // Historical: VRS-HRHB ceasefire in east Herzegovina held after June 1992 HVO offensive.
@@ -3222,7 +3222,7 @@ export function evaluateOperationProgress(
             } else if (op.phase === 'recovery') {
                 // Clear operation after recovery duration
                 if (turnsInPhase >= RECOVERY_DURATION) {
-                    releaseOperationCommander(state, op);
+                    releaseOperationCommanders(state, op);
                     completeOperationLifecycle(state, corps.id, op);
                     removeOperation(cmd, op);
                     // Add exhaustion from the operation

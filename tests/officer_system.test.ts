@@ -17,6 +17,8 @@ import {
     getOfficerCombatMod,
     initializeNamedOfficers,
     processOfficerSuccession,
+    releaseOperationCommanders,
+    selectTacticalCommander,
     validateOfficerData,
 } from '../src/sim/combat/officer_system.js';
 import {
@@ -959,5 +961,67 @@ describe('apr1992 officer data validation', () => {
         assert.ok(byFaction.get('RS')! >= 20, 'RS should have ≥20 officers');
         assert.ok(byFaction.get('RBiH')! >= 20, 'RBiH should have ≥20 officers');
         assert.ok(byFaction.get('HRHB')! >= 15, 'HRHB should have ≥15 officers');
+    });
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Commander attribution PR 2b-i: TG commander release, own-corps TG selector, vacancy rank key
+// (panel rulings Q2-Q4). All inert before the rank retype: no officer is a tactical_commander yet.
+// ═══════════════════════════════════════════════════════════════════════════
+
+describe('PR 2b-i: TG commanders and the vacancy rank key', () => {
+    it('releases the TG commander and the operation commander at an operation end, even with no operation commander', () => {
+        const state = makeMinimalState();
+        state.military.named_officer_data = [
+            makeOfficer({ id: 'op1', faction: 'RS', home_corps_id: 'vrs_1kk' }),
+            makeOfficer({ id: 'tc1', faction: 'RS', rank: 'tactical_commander', home_corps_id: 'vrs_1kk' }),
+            makeOfficer({ id: 'tc2', faction: 'RS', rank: 'tactical_commander', home_corps_id: 'vrs_1kk' }),
+        ];
+        state.military.named_officers = {
+            op1: makeOfficerState({ officer_id: 'op1', status: 'active', assigned_operation: 'A' }),
+            tc1: makeOfficerState({ officer_id: 'tc1', status: 'active', assigned_operation: 'A' }),
+            tc2: makeOfficerState({ officer_id: 'tc2', status: 'active', assigned_operation: 'B' }),
+        };
+        releaseOperationCommanders(state, { name: 'A', commander_officer_id: 'op1', tg_commander_officer_id: 'tc1' } as any);
+        // A commanderless operation (PR 2a makes them common) must still release its TG leader.
+        releaseOperationCommanders(state, { name: 'B', tg_commander_officer_id: 'tc2' } as any);
+
+        for (const id of ['op1', 'tc1', 'tc2']) {
+            assert.equal(state.military.named_officers![id]!.status, 'reserve', id);
+            assert.equal(state.military.named_officers![id]!.assigned_operation, undefined, id);
+        }
+    });
+
+    it('a TG is led only by a tactical commander of its own corps, else by nobody', () => {
+        const state = makeMinimalState();
+        state.military.named_officer_data = [
+            makeOfficer({ id: 'tc_other', faction: 'RBiH', rank: 'tactical_commander', home_corps_id: 'arbih_2nd_corps', competence: 5 }),
+            makeOfficer({ id: 'tc_compat', faction: 'RBiH', rank: 'tactical_commander', home_corps_id: 'arbih_3rd_corps', compatible_corps_ids: ['arbih_7th_corps'], competence: 3 }),
+        ];
+        state.military.named_officers = {
+            tc_other: makeOfficerState({ officer_id: 'tc_other', status: 'reserve' }),
+            tc_compat: makeOfficerState({ officer_id: 'tc_compat', status: 'reserve' }),
+        };
+        assert.equal(selectTacticalCommander(state, 'arbih_7th_corps', 'RBiH'), 'tc_compat');
+        state.military.named_officers!['tc_compat']!.status = 'active';
+        assert.equal(selectTacticalCommander(state, 'arbih_7th_corps', 'RBiH'), null);
+    });
+
+    it('a vacancy goes to a corps-rank officer of the corps before one of its tactical commanders', () => {
+        const state = makeMinimalState();
+        state.military.formations = {
+            vrs_1kk: makeFormation({ id: 'vrs_1kk', faction: 'RS', kind: 'corps_asset' as 'brigade' }),
+        };
+        state.military.named_officer_data = [
+            makeOfficer({ id: 'tc_strong', faction: 'RS', rank: 'tactical_commander', home_corps_id: 'vrs_1kk', pool_tier: 'tier_a', competence: 5 }),
+            makeOfficer({ id: 'cos', faction: 'RS', rank: 'corps_commander', home_corps_id: 'vrs_1kk', pool_tier: 'tier_b', competence: 3 }),
+        ];
+        state.military.named_officers = {
+            tc_strong: makeOfficerState({ officer_id: 'tc_strong', status: 'reserve' }),
+            cos: makeOfficerState({ officer_id: 'cos', status: 'reserve' }),
+        };
+        processOfficerSuccession(state, new Set());
+        assert.equal(state.military.named_officers!['cos']!.assigned_corps_id, 'vrs_1kk');
+        assert.equal(state.military.named_officers!['tc_strong']!.status, 'reserve');
     });
 });
