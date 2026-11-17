@@ -42,6 +42,7 @@ export interface SarajevoSiegeOverrides {
     lifeline_base_throughput?: number;
     lifeline_airlift_throughput?: number;
     lifeline_tunnel_throughput?: number;
+    /** No reader since 2026-11-17 (siege bombardment attrition retired); kept so scenario files load; retire with the reserve economy. */
     lifeline_severed_attrition_mult?: number;
 }
 

@@ -4389,6 +4389,7 @@ export function validateGameStateShape(
     if (military && typeof military === 'object' && !Array.isArray(military) && 'formation_spawn_directive' in military && military.formation_spawn_directive !== undefined) {
         validateFormationSpawnDirective(military.formation_spawn_directive, errors);
     }
+    // Retired 2026-11-17 (§6 panel, Fable consult 6): siege counters / bombardment attrition / siege morale drain are not modelled in 1.0; kept optional so old saves load; nothing writes it.
     if (military && typeof military === 'object' && !Array.isArray(military) && 'siege_turn_counters' in military && military.siege_turn_counters !== undefined) {
         validateNonNegativeIntegerRecord(military.siege_turn_counters, 'military.siege_turn_counters', errors);
     }
