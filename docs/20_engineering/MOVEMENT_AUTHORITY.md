@@ -38,7 +38,7 @@ Every writer of `sector_reassignment_orders`, `brigade_movement_orders`, `brigad
 | `src/sim/combat/brigade_reconstitution.ts` | T5 | Places newly reconstituted brigades. |
 | `src/sim/combat/army_reserve_system.ts` | T5 | Applies reserve assignment and recall lifecycle effects. |
 | `src/sim/combat/commander_march_correction.ts` | T6 repair; dormant rejected T2 helper | Production repairs invalid march paths and transit state at T6. The rejected global pre-T3 reconciliation helper remains for local tests but is absent from the War pipeline. |
-| `src/sim/combat/brigade_front_distribution.ts` | T6 | Performs bounded local front distribution without paper transfers, including the corps breach answer on the final pass (section 3b). |
+| `src/sim/combat/brigade_front_distribution.ts` | T6 | Performs bounded local front distribution without paper transfers, including the surplus-stack spread to an adjacent empty front cell (section 3b). |
 | `src/sim/combat/brigade_home_return.ts` | T6 | Routes eligible idle displaced brigades home. |
 | `src/sim/combat/corps_front_sectors.ts` | Derived truth | Classifies only roster-eligible, legally reachable formations as potential sector staff and marks a sector `unstaffed_front` when no legal donor exists. |
 
@@ -147,37 +147,23 @@ Observer-only topic `reconciliation_write` records actual command-owner pre/post
 
 **Current disposition (2026-10-23):** the global pre-T3 call/import was rejected and is absent from `war_phases.ts`; the helper remains dormant outside local tests. The accepted narrow behavior is T6 preservation of already-valid active elite-loan transit when the receiving corps owns one unique executing operation/axis and the completed-prefix proof is satisfied. Graz fallback lookup uses that same receiving-corps resolution only for a valid unique active elite-loan operation-owned attack. It does not authorize a global operation search, replace ordinary home policy, or relax participant, axis, objective, adjacency or destination guards.
 
-## 3b. Corps breach answer (package P2, ruling D, 2026-11-17)
+## 3b. Defence repairs (package P2, ruling D, 2026-11-17)
 
-T6 local coverage repair, run once per turn on the final distribution pass
-(`commitCorpsBreachAnswer`, `brigade_front_distribution.ts`; enabled by `breachAnswer: true` on the
-`final-distribute-brigades-to-front` call only). Seats: corps-army-commander, operations-expert,
-historian (two rounds).
-
-- **Trigger.** A cell the corps' faction lost in combat within the retake window and has not taken back
-  (`collectRecentCombatLosses`, shared with the P2 step-3 retake), bordering a friendly front cell of
-  one of the corps' sectors, with no healthy non-participant brigade (`COUNTER_ATTACK_MIN_*`) on, ordered
-  to or marching to a cell next to it.
-- **Donor** (`isBreachAnswerDonor`): an active brigade of the corps, or an elite on loan to it; in no
-  operation, no order, not moving, not disrupted, encircled, enclave-tagged, on home-defence or on a
-  must-hold cell; at the retake strength gates; never a lone holder of a front cell; not taken from
-  another breached sector of the corps.
-- **Target** (`isBreachAnswerTarget`): a friendly front cell of the corps next to the lost cell, inside the
-  donor's routine scope (consumer `'correction'`), so T6 correction does not march it back. At most
-  `COUNTER_ATTACK_RETREAT_WINDOW` (2) friendly hops, so the donor arrives while the retake is allowed.
-- **Choice.** Breaches: the sector with the most fresh losses, then id; then lost cell id. Donor: most
-  personnel × cohesion, then fewer hops, then id. Target: fewest brigades, then hops, then id. One answer
-  per corps per turn.
-- **Movement.** One hop or less: direct placement (as the threatened-reserve commit does). Otherwise an
-  untagged column order. `processOsidColumnMovement` releases `dig_in` for it through
-  `isBreachAnswerColumnOrder`, re-read from current state, and only after the scope and path gates.
-- **Not a strike.** The answer only positions; the P2 step-3 retake attacks, at least a costly victory and
-  at most twice per sector per turn. When the line has nothing spare (every brigade holds its cell alone),
-  there is no donor and no answer.
-
-Related posture repair (same ruling): an off-front brigade that is dug in may accept a `defend` or `hold`
-order (`applyPostureOrders`), so a stale `dig_in` no longer blocks every later multi-hop order to it; a
-participant of a live operation does not stand down there. The dig_in lockout itself is unchanged.
+- **Surplus-stack spread (T6, `brigade_front_distribution.ts`, `isStackSurplus`).** Phase A used to
+  spread only brigades on their arrival turn, so a stack that survived one turn stayed stacked beside
+  empty front cells. A brigade that is surplus on its cell may now spread to an adjacent empty front
+  cell. Surplus means another brigade on the cell outranks it (more entrenchment
+  turns, then more personnel, then id) and is staying: not an operation participant, not disrupted, no
+  movement order, not in transit. The top-ranked staying brigade never leaves, so the cell is never
+  emptied.
+- **Off-front stand-down (posture pass, `brigade_posture.ts` `applyPostureCosts`).** `dig_in` is a front
+  posture. A brigade off the front (reserve, rear or unassigned) and in no planning or execution operation
+  returns to `defend`. Off the front no posture order reaches it, so a brigade reclassified while dug in
+  used to keep `dig_in` for good, and every later multi-hop column order to it died at the dig_in lockout.
+  The lockout itself is unchanged. A live-operation participant keeps its posture.
+- **Not adopted.** An earlier draft of the ruling added a corps "breach answer" (a T6 move of a spare
+  brigade next to a fresh combat loss). Measured inert in same-attack replays, it was removed before merge
+  (orchestrator ruling, 2026-11-17), so 1.0 gets no new reserve-movement rule.
 
 ## 4. Pipeline constraints
 

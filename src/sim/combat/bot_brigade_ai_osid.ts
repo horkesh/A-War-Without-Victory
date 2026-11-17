@@ -832,7 +832,6 @@ function executeFactionDirectivesImpl(
     const sectorCounterAttackCount = new Map<string, number>();
     // Package P2 step 3 (2026-11-16): the retake-only counter-attack reads the cells this faction
     // lost in combat within the retreat window and has not taken back, militia-held losses included.
-    // Ruling D (2026-11-17): one shared reader with the corps breach answer.
     const recentLostCells = collectRecentCombatLosses(state, faction);
 
     const targetAdjacentCount = new Map<Osid, number>();

@@ -57,10 +57,6 @@ import { getSectorOffensiveApproachOsids, isOperationParticipant } from './opera
 import { getTacticalAdjacentOsids } from './tactical_adjacency.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import { isFriendlyFaction } from '../early_war/alliance_update.js';
-import { findBrigadeLiveOperationAnywhere } from './corps_operation_helpers.js';
-import { isEnclaveBrigade } from './enclave_resilience.js';
-import { COUNTER_ATTACK_MIN_COHESION, COUNTER_ATTACK_MIN_PERSONNEL } from './bot_constants.js';
-import { collectRecentCombatLosses } from './recent_combat_losses.js';
 
 /** Why a formation's routine movement is (or is not) scope-restricted. */
 export type RoutineScopeSource =
@@ -456,92 +452,6 @@ export function isEmptySectorReliefColumnOrder(
         .find((r) => r.brigade_id === brigade.id);
     if (reassign?.empty_sector_relief !== true) return false;
     return isMovementAuthorizedByCorpsReassignment(state, brigade, destinationOsid, adjacency, reverseMap);
-}
-
-/** The corps a brigade fights for: its own, or the corps an army-reserve elite is on loan to. */
-export function effectiveBreachCorpsId(brigade: FormationState): string | undefined {
-    const loan = brigade.elite_loan_state;
-    if (loan) return loan.on_loan === true && loan.loaned_to_corps ? loan.loaned_to_corps : undefined;
-    return brigade.corps_id ?? undefined;
-}
-
-/**
- * Corps breach answer, donor half (orchestrator ruling D on #774, 2026-11-17; corps-army-commander,
- * operations-expert and historian seats). May this brigade be sent toward a fresh breach without
- * opening a hole? It must be an active brigade of a corps (or an elite on loan to it), in no planning
- * or execution operation, not disrupted, not encircled, not an enclave brigade, not on home-defence,
- * not on a must-hold cell of its corps, at the retake strength gates (`COUNTER_ATTACK_MIN_PERSONNEL`,
- * `COUNTER_ATTACK_MIN_COHESION`), and it never leaves a front cell empty: it stands off its faction's
- * front, or another active friendly formation stays on its cell. A lone holder is never stripped.
- */
-export function isBreachAnswerDonor(state: GameState, brigade: FormationState, frontOsids: ReadonlySet<string>): boolean {
-    if ((brigade.kind ?? 'brigade') !== 'brigade' || brigade.status !== 'active') return false;
-    const corpsId = effectiveBreachCorpsId(brigade);
-    const loc = brigade.location_osid;
-    if (!corpsId || !loc) return false;
-    if ((brigade.disrupted_turns ?? 0) > 0 || brigade.disrupted === true) return false;
-    if (isEnclaveBrigade(brigade) || brigade.home_defense_active === true) return false;
-    if (state.military.brigade_encircled?.[brigade.id] === true) return false;
-    if ((state.military.must_hold_osids_by_corps?.[corpsId] ?? []).includes(loc)) return false;
-    if ((brigade.personnel ?? 0) < COUNTER_ATTACK_MIN_PERSONNEL || (brigade.cohesion ?? 0) < COUNTER_ATTACK_MIN_COHESION) return false;
-    if (findBrigadeLiveOperationAnywhere(state, brigade.id)) return false;
-    if (!frontOsids.has(loc)) return true;
-    for (const id in state.military.formations ?? {}) {
-        if (id === brigade.id) continue;
-        const other = state.military.formations[id];
-        if (other && other.status === 'active' && other.faction === brigade.faction && other.location_osid === loc
-            && ((other.kind ?? 'brigade') === 'brigade' || other.kind === 'og' || other.kind === 'operational_group' || other.kind === 'hv_phantom')) return true;
-    }
-    return false;
-}
-
-/**
- * Corps breach answer, target half. Is `destination` a friendly front cell of one of the donor's
- * corps sectors that borders a cell its faction lost in combat within the retake window and has not
- * taken back (`collectRecentCombatLosses`), and inside the donor's movement scope (its assigned
- * sub-segment, or unrestricted)? The scope check keeps the move inside the movement-authority
- * policy, so the T6 correction does not march the donor back.
- */
-export function isBreachAnswerTarget(
-    state: GameState,
-    brigade: FormationState,
-    destination: string,
-    adjacency: Map<string, string[]>,
-    lostCells: ReadonlySet<string>,
-): boolean {
-    const corpsId = effectiveBreachCorpsId(brigade);
-    if (!corpsId) return false;
-    if (getPoliticalControllerOSID(state, destination) !== brigade.faction) return false;
-    if (!(adjacency.get(destination) ?? []).some((cell) => lostCells.has(cell))) return false;
-    const scope = resolveRoutineMovementScope(state, brigade, 'correction');
-    if (scope.restricted && !scope.destinations.has(destination)) return false;
-    const sectors = state.military.corps_front_sectors ?? {};
-    for (const sectorId in sectors) {
-        const sector = sectors[sectorId];
-        if (!sector || sector.corps_id !== corpsId) continue;
-        if ((sector.sub_segments ?? []).some((sub) => (sub.friendly_osids ?? []).includes(destination))) return true;
-    }
-    return false;
-}
-
-/**
- * The `dig_in` release for a breach-answer column march. The corps breach answer issues an untagged
- * column order; `processOsidColumnMovement` releases `dig_in` for it (after the scope and path
- * gates) only while the donor and target conditions still hold, read from current state.
- */
-export function isBreachAnswerColumnOrder(
-    state: GameState,
-    brigade: FormationState,
-    destination: string,
-    adjacency: Map<string, string[]>,
-): boolean {
-    const front = new Set<string>();
-    for (const sector of Object.values(state.military.corps_front_sectors ?? {})) {
-        if (!sector || sector.faction !== brigade.faction) continue;
-        for (const sub of sector.sub_segments ?? []) for (const osid of sub.friendly_osids ?? []) front.add(osid);
-    }
-    if (!isBreachAnswerDonor(state, brigade, front)) return false;
-    return isBreachAnswerTarget(state, brigade, destination, adjacency, collectRecentCombatLosses(state, brigade.faction));
 }
 
 export function isMovementAuthorizedByCorpsReassignment(

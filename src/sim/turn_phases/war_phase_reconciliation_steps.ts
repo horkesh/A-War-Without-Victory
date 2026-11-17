@@ -198,7 +198,6 @@ export const warPhaseReconciliationSteps: NamedPhase[] = [
             const diagnostics = distributeBrigadesToFront(context.state, Object.values(sectorMap), adjacency as Map<string, string[]>, {
                 population1991ByMun: context.input.municipalityPopulation1991,
                 diagnosticCallsite: 'final-distribute-brigades-to-front', completedTurn: context.state.meta.turn,
-                breachAnswer: true,
                 invocationOrdinal: nextFrontDistributionInvocationOrdinal(context.report.front_distribution_diagnostics),
             });
             const mergedDiagnostics = mergeFrontDistributionDiagnostics(context.report.front_distribution_diagnostics, diagnostics);

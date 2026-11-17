@@ -1,13 +1,12 @@
 /**
  * ═══════════════════════════════════════════════════════════════
  * OWNERSHIP: shared read of a faction's fresh combat losses
- * DOMAIN:    defence (P2 step-3 retake, ruling-D corps breach answer)
+ * DOMAIN:    defence (P2 step-3 retake)
  * ═══════════════════════════════════════════════════════════════
  *
  * The cells a faction lost in combat within the counter-attack window and has not taken back.
  * Read from `political.control_events`, so it adds no state. The P2 step-3 retake-only
- * counter-attack (`bot_brigade_ai_osid.ts`) may target only these cells, and the ruling-D corps
- * breach answer (`brigade_front_distribution.ts`) sends a donor next to them, so both read one set.
+ * counter-attack (`bot_brigade_ai_osid.ts`) may target only these cells.
  *
  * Deterministic: a pure filter over the append-only event log; the result is a Set, read by
  * membership only.

@@ -10,8 +10,7 @@ export type FrontDistributionWriter =
     | 'threatened_reserve_commit'
     | 'empty_front_subsegment_fill'
     | 'shared_front_stack_deconflict'
-    | 'must_hold_garrison_pin'
-    | 'corps_breach_answer';
+    | 'must_hold_garrison_pin';
 
 export interface FrontDistributionActorSnapshot {
     formation: Presence<{

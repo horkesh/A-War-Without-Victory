@@ -57,7 +57,6 @@ import { isFriendlyFaction } from '../early_war/alliance_update.js';
 import { whenReasonCodeTopic } from './reason_code_debug.js';
 import {
     getOperationAuthorizedDestinations,
-    isBreachAnswerColumnOrder,
     isEmptySectorReliefColumnOrder,
     isRoutineScopeEnforcedForOrder,
 } from './brigade_routine_scope.js';
@@ -619,16 +618,10 @@ export function processOsidColumnMovement(
         // never-authorized operation leaves a dug-in brigade exactly where it was.
         // Package P2 step 1 (Codex review on #774): an empty-sector relief march toward its
         // ordered sector is the corps commander's explicit commitment, on the same footing.
-        // Ruling D (2026-11-17): the corps breach answer's untagged march next to a fresh breach
-        // (`isBreachAnswerColumnOrder`, re-read from current state) is the same commitment. The
-        // release still waits for the scope and path gates below.
         const digInAuthorizedForOperation = f.posture === 'dig_in'
             && (isOperationAuthorizedColumnOrder(state, f, order, adjacency, reverseMap)
                 || (order.destination_sids?.[0] != null
-                    && isEmptySectorReliefColumnOrder(state, f, order.destination_sids[0], adjacency, reverseMap))
-                || (order.owner === undefined
-                    && order.destination_sids?.[0] != null
-                    && isBreachAnswerColumnOrder(state, f, order.destination_sids[0], adjacency)));
+                    && isEmptySectorReliefColumnOrder(state, f, order.destination_sids[0], adjacency, reverseMap)));
         if (f.posture === 'dig_in' && !digInAuthorizedForOperation) {
             report.column_blocked += 1;
             recordRejection(

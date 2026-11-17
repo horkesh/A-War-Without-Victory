@@ -35,13 +35,9 @@ The Fable freeze-revision package, Part 2, as ratified by five seats plus the in
   - A single-brigade 3:1 attack in May 1995 should not take the cell (historian, high confidence).
 - **F1 (data).** `rs_3rd_ozren_light_infantry.home_osid` → `op:maglaj:donja_bocinja_2`; home_mun stays doboj (the HQ, Gornja Paklenica, is in the Doboj-town cell). This also moves its home reactive bonus to Maglaj targets.
 - **Q3, a P2 regression fixed.** Step 1 digs in every static front brigade. A dug-in brigade later reclassified off the front could never change posture again, so every multi-hop order to it died at the dig_in lockout: 2161 blocked marches over 188w with P2, against 796 on main. About 20 brigades were frozen, mostly ARBiH on the dormant HVO line.
-  - Now an off-front dug-in brigade may stand down to `defend` or `hold` (`applyPostureOrders`). A live-operation participant may not. The lockout is unchanged.
-  - Measured alone (with F1), the freed 1994 ARBiH strength took Donja in Aug 1994 ("Sjena", t110-120) with no VRS answer. So P2-alone's Ozren hold had been partly bought by the freeze.
-- **Corps breach answer (new movement rule, T6).** After a fresh combat loss with no healthy brigade next to it, the corps sends its strongest spare brigade (never a lone holder; at most 2 hops) next to the lost cell, so the step-3 retake can reach. Final pass only, one per corps per turn. `docs/20_engineering/MOVEMENT_AUTHORITY.md` §3b.
-  - Historical basis: OG-9 and corps intervention units answered Ozren break-ins (BB2 pp.486-487; BB1 p.385).
-  - With nothing spare, as in Sept 1995, there is no answer.
-  - The step-3 retake and the answer share `collectRecentCombatLosses`.
-- **Tried and dropped.** A post-operation return to the home cell ("E", both seats): measured inert. Step 2c for the army reserve: left out (both seats). It would send the Main Staff elites to the Ozren in Sept 1995 too.
+  - Now the posture pass returns any off-front dug-in brigade to `defend` (`applyPostureCosts`), no order needed; a live-operation participant keeps `dig_in`. The lockout is unchanged. (An order-based stand-down was tried first and still left 7-13 brigades frozen, since no defend order reaches a rear brigade with a march order.)
+  - Measured with F1, the freed 1994 ARBiH strength took Donja in Aug 1994 ("Korak", t103-105) with no VRS answer. So P2-alone's Ozren hold had been partly bought by the freeze.
+- **Tried and dropped.** A corps "breach answer" (a T6 move of a spare brigade next to a fresh combat loss): inert at Donja in same-attack replays, so it was removed (orchestrator ruling, 2026-11-17; 1.0 gets no new reserve mechanic). A post-operation return to the home cell ("E", both seats): measured inert. Step 2c for the army reserve: left out (both seats). It would send the Main Staff elites to the Ozren in Sept 1995 too.
 
 **Measured, ruling D** (188w on the branch head after merging main 40878f5fc, #776):
 
