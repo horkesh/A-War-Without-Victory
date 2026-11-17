@@ -1,5 +1,6 @@
 import type { FactionId, GameState, PhaseName } from '../../state/game_state.js';
 import { clamp01 } from '../../utils/math.js';
+import { isRbihHrhbAtWar } from '../early_war/alliance_update.js';
 
 export type BotDifficulty = 'easy' | 'medium' | 'hard';
 
@@ -167,7 +168,7 @@ export function resolveAggression(profile: BotStrategyProfile, phase: PhaseName 
                 }
             } else if (profile.faction === 'RBiH') {
                 // RBiH: de-escalation — reduce aggression when fragile alliance
-                if (allianceValue > 0.0 && allianceValue <= 0.50) {
+                if (!isRbihHrhbAtWar(state) && allianceValue <= 0.50) {
                     allianceMod = -0.05; // Slightly less aggressive to appease
                 }
                 // Post-Washington: boost for joint RS operations

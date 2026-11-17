@@ -18,7 +18,7 @@ export type EventCondition =
     /** B5 A2: true when the RBiH-HRHB war has started (`rbih_hrhb_state.war_started_turn` set), the engine's own record of it. */
     | { type: 'rbih_hrhb_war_started'; value: boolean }
     | { type: 'faction_controls_municipality'; faction: string; municipality: string; threshold?: number }
-    | { type: 'siege_active'; osid_or_municipality: string }
+    // 'siege_active' retired 2026-11-17 (§6 panel): siege counters are not modelled in 1.0.
     | { type: 'operation_completed'; operation_name_pattern: string; min_attacks?: number }
     | { type: 'operation_attacked'; operation_name_pattern: string; min_attacks?: number }
     | { type: 'and'; conditions: EventCondition[] }
@@ -532,6 +532,14 @@ export interface EventDefinition {
     /** Authored informational notifications shown to non-source factions after a response resolves. */
     notifications_to_other_factions?: EventNotificationTextByResponse;
     /**
+     * Who may see this event's acknowledgement notice (read-model/UI only; evaluators ignore it): `'all'`, or the list of
+     * factions whose player is shown it. Absent means the default rule of `src/ui/map/data/eventAudience.ts`: a `csq_*`
+     * consequence notice whose effect (else trigger) names exactly one faction is shown only to that faction, every other
+     * notice to all. Authored only where the rule cannot settle a case (a public event keyed to one faction, a notice
+     * both sides of an agreement must see, one side's internals in a war event); each ruling carries its panel record.
+     */
+    audience?: 'all' | FactionId[];
+    /**
      * Optional authored display localizations. Read-model/UI only; evaluators ignore it.
      * `localizations.en` is the English display copy for strings the engine persists:
      * `title` is copied into `turn_summaries[].events_fired` and notification text into
@@ -787,27 +795,6 @@ export function evaluateCondition(condition: EventCondition, state: GameState, e
             if (munOsids2.length === 0) return false;
             const controlled2 = munOsids2.filter(osid => pc2[osid] === condition.faction).length;
             return (controlled2 / munOsids2.length) >= threshold2;
-        }
-        case 'siege_active': {
-            // A position is under active siege when its consecutive-critical-supply
-            // counter is present and > 0. This mirrors the besieged-position detection
-            // used by combat (siege_attrition.ts / siege_morale_drain.ts), which read
-            // the same `state.military.siege_turn_counters` map. Keys are
-            // `${factionId}:${osid}` where osid is `op:municipality:settlement`, so the
-            // faction prefix is split on the FIRST colon (OSIDs contain colons too).
-            // `osid_or_municipality` may be either a full OSID or a municipality name.
-            const counters = state.military?.siege_turn_counters;
-            if (!counters) return false;
-            const target = condition.osid_or_municipality;
-            for (const key of Object.keys(counters)) {
-                if ((counters[key] ?? 0) <= 0) continue;
-                const colonIdx = key.indexOf(':');
-                if (colonIdx < 0) continue;
-                const osid = key.substring(colonIdx + 1);
-                if (osid === target) return true; // full-OSID match
-                if (osid.split(':')[1] === target) return true; // municipality match
-            }
-            return false;
         }
         case 'operation_completed': {
             // True when a completed operation in operation_history matches the pattern.

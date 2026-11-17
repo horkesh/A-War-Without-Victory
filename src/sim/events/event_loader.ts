@@ -434,6 +434,16 @@ function validateEventRow(row: unknown, filename: string, rowIndex: number): voi
             failRow(filename, rowIndex, 'probability must be between 0 and 1 when present');
         }
     }
+    if (hasOwn(row, 'audience')) {
+        const audience = row.audience;
+        const valid = audience === 'all'
+            || (Array.isArray(audience) && audience.length > 0
+                && audience.every((faction) => faction === 'RBiH' || faction === 'RS' || faction === 'HRHB')
+                && new Set(audience).size === audience.length);
+        if (!valid) {
+            failRow(filename, rowIndex, `audience must be "all" or a non-empty list of distinct factions (RBiH, RS, HRHB) when present: ${JSON.stringify(audience)}`);
+        }
+    }
     if (hasOwn(row, 'once')) {
         validateOptionalBoolean(row.once, 'once', filename, rowIndex);
     }
@@ -1031,9 +1041,9 @@ function validateUnreachableGates(rows: EventDefinition[]): void {
  *
  * For every `dimension_shifts[].dimension` (event-level and option-level),
  * assert membership in the typed {@link DIMENSION_IDS} set. An unknown
- * dimension name is a DEAD write: `applyDimensionShift()` no-ops when the
- * dimension is not present in the typed `DimensionStore`, and the catalog
- * silently loses the authored effect.
+ * dimension name used to be a DEAD write (the catalog silently lost the
+ * authored effect); since §6 E2 `applyDimensionShift()` also throws on it at
+ * apply time, so this load-time check names the row before a run can reach it.
  *
  * Common authoring failure mode is to pass an `EffectKind` (e.g.
  * `'patron_pressure'`, `'alliance_change'`) into a dimension slot. The error
