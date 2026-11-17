@@ -1172,6 +1172,12 @@ function findBestReplacement(
         const os = officers[data.id];
         if (!os || os.status !== 'reserve') continue;
         if (!isEnclaveCompatible(data, corpsId, currentTurn)) continue;
+        // Commander attribution PR 2a: the vacancy fallback takes the operation-command rule. Only an
+        // officer whose home or compatible corps is this corps may take it over. Before, any reserve
+        // officer of the faction could (e.g. a 3rd Corps officer seated in the 4th Corps). With none,
+        // the caller seats the generic acting commander.
+        const belongsToCorps = data.home_corps_id === corpsId || (data.compatible_corps_ids ?? []).includes(corpsId);
+        if (!belongsToCorps) continue;
 
         candidates.push(data);
     }
