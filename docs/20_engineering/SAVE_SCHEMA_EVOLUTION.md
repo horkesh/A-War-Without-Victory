@@ -1,5 +1,16 @@
 # Save Schema Evolution
 
+## v43 — `plan_answer` on pending peace-plan decisions (2026-11-17, §6 E3a2)
+
+`CURRENT_SCHEMA_VERSION` 42 → 43 (v40 is still reserved by batch-b and unregistered). The routed peace-plan cards declare `plan_answer` on every response option, and `evaluate-peace-plans` reads each side's answer from `event_decision_log` through the catalog (Systems Manual §7.10.3). A pending decision stores its options as a snapshot, so a v42 save holding one of these cards would apply its old standing shift and patron effect and would not carry the answer. Migration v43 (`src/state/save_migration.ts`), run after v42, on `military.pending_event_decisions[].response_options[]`, by static lists embedded in the migration by `(event_id, option_id)` (`S6_E3A2_PLAN_ANSWERS`, `S6_E3A2_STRIP_STANDING`, `S6_E3A2_STRIP_PATRON`, `S6_E3A2_ADD_SUPPORT`):
+- adds `plan_answer` (the historian's mapping; `null` for `owen_stoltenberg_plan_1993#accept` and for both options of `contact_group_plan_1994`, now a no-choice presentation card, so a pending snapshot of it writes nothing and costs nothing);
+- strips the routed options' own `international_standing` shifts (18 options): the plan record is the one carrier;
+- strips the patron effects (`patron_support` effects and `patron_confidence` shifts) of every option that can be recorded rejected (13 options, the four E4 interim carriers that v42 SETs and both `contact_group_plan_1994` options included);
+- adds the moved contact-group `patron_support` +10 to a pending `rbih_contact_group_response_1994#accept_51_49_plan` (only if not already present);
+- filters `future_consequences[].material_effect_refs` of the stripped effects.
+
+It never loads the event catalog (tests pin the lists equal to it). Forward-only, deterministic and idempotent; no change on a clean state. `peace_plan_history` and `pending_peace_plan` are not rewritten: a plan a v42 save already resolved keeps its row, and a later card for that plan then writes nothing and costs nothing (the resolver skips a plan with a row); a pending plan stays as the fallback pointer, answered by the modal, by the player's routed answer once it is on the log, or automatically at Observer. **Known limits, accepted and recorded:** a mid-war save keeps the standing modifier that its earlier plan rejections and card shifts already wrote, and a pending decision keeps its old copy. The startup snapshot's `schema_version` is 43 (no other byte change). Tests: `tests/s6_e3a2_save_v43.test.ts`, the `v42_plan_chain_pending.json` round-trip fixture.
+
 ## v42 — `patron_pressure` → `patron_support` in pending decisions (2026-11-17, §6 E4)
 
 `CURRENT_SCHEMA_VERSION` 41 → 42 (v40 is still reserved by batch-b and unregistered; see v41). The `patron_pressure` event effect kind is renamed `patron_support`, with one sign: positive = the patron's backing rises (pressure toward peace is the per-turn patron override). The loader rejects the old name. Migration v42 (`src/state/save_migration.ts`), on `military.pending_event_decisions[].response_options[]`:

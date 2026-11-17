@@ -571,12 +571,15 @@ describe('§6 E4 round 3: save migration v42 lists', () => {
         const [accept, reject, amend] = cg;
         expect(accept!.effects).toEqual([{ kind: 'patron_support', faction: 'RS', delta: 20 }]);
         expect(confidenceShifts(accept!, 'RS')).toEqual([]);
-        expect(accept!.dimension_shifts).toContainEqual({ faction: 'RS', dimension: 'international_standing', delta: 20 });
+        // §6 E3a2 (v43, after v42): the routed card's own standing shift is stripped and plan_answer added.
+        expect((accept!.dimension_shifts ?? []).some((s) => s.dimension === 'international_standing')).toBe(false);
+        expect(accept!.plan_answer).toEqual({ plan_id: 'contact_group', response: 'accepted' });
         expect(reject!.effects).toEqual([{ kind: 'morale_change', faction: 'RS', delta: 3 }]);
         expect(confidenceShifts(reject!, 'RS')).toEqual([]);
         expect(reject!.dimension_shifts).toEqual([{ faction: 'RS', dimension: 'internal_cohesion', delta: 5 }]);
         expect(reject!.future_consequences![0]!.material_effect_refs).toEqual(['morale_change.RS']);
-        expect(amend!.effects).toEqual([{ kind: 'patron_support', faction: 'RS', delta: -5 }]);
+        // §6 E3a2 (v43): the interim −5 that v42 sets is stripped (the plan's −5 is the one carrier).
+        expect(amend!.effects).toEqual([]);
         expect(confidenceShifts(amend!, 'RS')).toEqual([]);
         const posture = byEvent.get('strategic_posture_review_rs')![0]!;
         expect(posture.effects).toEqual([]);

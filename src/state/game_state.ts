@@ -39,9 +39,10 @@ import type { ArmyLabel } from './identity.js';
 import type { RecruitmentResourceState } from './recruitment_types.js';
 import type { CommanderState } from '../sim/combat/commander/commander_state.js';
 
-// v40 is claimed by another lane (batch-b) and is not yet on this branch; §6 E2 took 41
-// and §6 E4 took 42 (patron_pressure -> patron_support in pending decisions).
-export const CURRENT_SCHEMA_VERSION = 42 as const;
+// v40 is claimed by another lane (batch-b) and is not yet on this branch; §6 E2 took 41,
+// §6 E4 took 42 (patron_pressure -> patron_support in pending decisions) and §6 E3a2 took 43
+// (plan_answer on pending peace-plan decisions; their standing and refusal patron effects stripped).
+export const CURRENT_SCHEMA_VERSION = 43 as const;
 
 // --- ID types (canonical) ---
 export type FactionId = string;

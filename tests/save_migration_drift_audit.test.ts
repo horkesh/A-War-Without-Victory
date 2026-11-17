@@ -29,8 +29,8 @@ describe('save migration drift audit diagnostic', () => {
             fields: Array<{ field: string }>;
         };
 
-        // 42, with no v40 yet: v40 belongs to another lane (§6 E2 took 41, §6 E4 took 42).
-        expect(report.latest_schema_version).toBe(42);
+        // 43, with no v40 yet: v40 belongs to another lane (§6 E2 took 41, §6 E4 took 42, §6 E3a2 took 43).
+        expect(report.latest_schema_version).toBe(43);
         expect(report.anonymous_default_count).toBe(0);
         expect(report.fields).toEqual([]);
     });

@@ -389,7 +389,8 @@ describe('§6 E4: save migration v42', () => {
         const once = serializeState(migrated);
         const again = JSON.parse(once) as GameState;
         again.schema_version = 41;
-        expect(applyMigrations(again)).toBe(1);
+        // v42 and (§6 E3a2) v43 re-run; both are idempotent.
+        expect(applyMigrations(again)).toBe(2);
         expect(serializeState(again)).toBe(once);
     });
 
