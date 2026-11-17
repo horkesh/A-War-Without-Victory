@@ -541,6 +541,14 @@ export interface EventDefinition {
     /** Authored informational notifications shown to non-source factions after a response resolves. */
     notifications_to_other_factions?: EventNotificationTextByResponse;
     /**
+     * Who may see this event's acknowledgement notice (read-model/UI only; evaluators ignore it): `'all'`, or the list of
+     * factions whose player is shown it. Absent means the default rule of `src/ui/map/data/eventAudience.ts`: a `csq_*`
+     * consequence notice whose effect (else trigger) names exactly one faction is shown only to that faction, every other
+     * notice to all. Authored only where the rule cannot settle a case (a public event keyed to one faction, a notice
+     * both sides of an agreement must see, one side's internals in a war event); each ruling carries its panel record.
+     */
+    audience?: 'all' | FactionId[];
+    /**
      * Optional authored display localizations. Read-model/UI only; evaluators ignore it.
      * `localizations.en` is the English display copy for strings the engine persists:
      * `title` is copied into `turn_summaries[].events_fired` and notification text into
