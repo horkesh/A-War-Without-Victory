@@ -74,7 +74,6 @@ contextBridge.exposeInMainWorld('awwv', {
   querySupplyPaths: () => ipcRenderer.invoke('query-supply-paths'),
   queryCorpsSectors: () => ipcRenderer.invoke('query-corps-sectors'),
   queryBattleEvents: () => ipcRenderer.invoke('query-battle-events'),
-  clearOrders: (brigadeId) => ipcRenderer.invoke('clear-orders', { brigadeId }),
   stageLogisticsPriority: (faction, sectorId, priority) => ipcRenderer.invoke('stage-logistics-priority', { faction, sectorId, priority }),
   // Force-op pushback OBJECTION query: read-only candidate plan + commander go/no-go for
   // a REQUEST-OP target ({ forceRatio, estimatedCasualties, recommendedAction, rejectionReason? }).
@@ -87,7 +86,6 @@ contextBridge.exposeInMainWorld('awwv', {
   // (op_directive_staging.cjs → inject-op-directive). The president names a target OSID;
   // the engine auto-selects the force + axis and builds the op (requested_by_president).
   stageOpDirectiveOrder: (payload) => ipcRenderer.invoke('stage-op-directive-order', payload),
-  stageOperationDecision: (payload) => ipcRenderer.invoke('stage-operation-decision', payload),
   stageOpsecToggle: (sectorId, active) => ipcRenderer.invoke('stage-opsec-toggle', { sectorId, active }),
   stageMunicipalitySupportOrder: (payload) => ipcRenderer.invoke('stage-municipality-support-order', payload),
   focusWarroom: () => ipcRenderer.invoke('focus-warroom'),
