@@ -235,6 +235,13 @@ Docs only; no `src/` or `data/` change, no hash change.
 - Hash-moving order: #754 (CI), #782, #735, #739, then the first READY.
 - #754 (merged, b42c6c5a9): one shared RBiH-HRHB at-war predicate (isRbihHrhbAtWar): five readers had disagreed at alliance exactly 0.0; control-identical, re-pinned; main pin d983d7bc665fdeb6 (manifest). #777 (merged, 7f9b84de3): the Bosnian option is labelled partial in both UIs with an always-visible note (owner decision of 2026-11-17; UI only).
 
+## 2026-11-17 — Pass 70: #754 confirmed; the S4 stale docs carried; #784 and #785 noted
+
+Docs only; no `src/` or `data/` change, no hash change.
+
+- #754 confirmed by the orchestrator: pin d983d7bc665fdeb6; emergent 9454c52e328dd647; 709 / 709 / 708 / 682; final_save and weekly_report differ by HRHB cohesion from t93. `PLAYER_TURN_GUIDE.md` lines 41 and 52 (canon) and the `game_state.ts` line 610 comment are carried by the batch-b-lane's erosion PR (S4).
+- Pending, hash-neutral, self-merging: #784 (notice audience: one gate in `eventAudience.ts`, an optional authored `audience` field on 14 events, faction-keyed `csq_*` notices private to their side; the notices-leak finding closes when it merges) and #785 (a list-driven guard that every consumer loads every event file; the hrhb_summer "skip" was stale). Two card defects go to the §6 card batch: `csq_arms_embargo_compliance_audit` is untrue as triggered; `csq_enclave_held_alt_intervention` has hindsight wording.
+
 ## 2026-11-16 — `address_to_nation_rbih` closing line made year-neutral
 
 The renewable RBiH presidential address (first turn 84, then about 136 and 188; turn 0 is April 1992) said "a people in the fourth year of siege", which is wrong at turns 84 (second year) and 136 (third). It now reads "a people who have lived under siege this long". One narrative sentence in `war_1993.json`; narrative and historian seats keep it; the event has no Bosnian localization. Headless 188-week artifacts unchanged. Evidence: `docs/40_reports/evidence/20261116_address_year_copy/`.
