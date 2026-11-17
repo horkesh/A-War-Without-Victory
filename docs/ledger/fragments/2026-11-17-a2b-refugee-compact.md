@@ -26,12 +26,12 @@
   - **A, pays** (`united_front`, `formal_alliance_persists`, VOPP `resist_patron`, `federate_early`, `extend_federation_overture`): no war; Path C at **t102**; alliance 0.90 at t130; HRHB patron_confidence 10.
   - **B, careless** (the same 1992 choices, then the defaults): the compact lapses at t46; **war at t71**.
   - **C, reneges** (A, but `reject_federation_path` at t87): the alliance falls 0.55 → 0.06 by t102; no consent; flips; **war at t103** (t104 on the 2026-11-17 re-proof below); the engine ceasefire follows at t148 (t149) and Path A signs at t152 (t153), so a refusing President reaches the pressured Washington route about 50 weeks after the one who kept paying.
-  - **D, left alone:** historical `2c63bd10fecd6bc7` and emergent `bfcbfa55dd206585`, byte-identical to main (the pins did not move).
-- **Re-proved 2026-11-17** on main `87efa8da2` (#763 squashed in; the tree equals the proved stacked merge). `npm run test:baselines`: "all scenarios match", manifest unchanged. Played probes, 130 turns (C 188), logs `_logs/b5-scorer-20261116/land768/`:
+  - **D, left alone:** the historical (`6dbecd4913d6d7df` on main `ffe0fdb50`) and emergent 188w runs are byte-identical to main; this PR moves no pin.
+- **Re-proved 2026-11-17**, twice: on main `87efa8da2` (#763 squashed in), then again on main `ffe0fdb50` (#739, #792, #795, #798 merged in; the pins had moved, this PR's manifest equals main's). `npm run test:baselines`: "all scenarios match". Played probes, 130 turns (C 188), logs `_logs/b5-scorer-20261116/land768/` and `land768b/` (the second, final figures are identical):
   - A pays: Path C at **t102**, no war, alliance 0.90.
   - B careless: war at **t71**; Washington signs t102 after the war.
   - C reneges: war **t104**, ceasefire **t149**, Path A signs **t153**, alliance 0.90 at t188. One week later than the earlier t103/t148/t152 on an older main. All three moved together, so the war's onset shifted by a week; main took about 33 commits in between and the cause was not isolated (no acceptance condition depends on the exact week).
-  - D no compact: the final save is byte-identical to #763's own no-override game (same SHA-256 on both the player and headless saves).
+  - D no compact: the final save is byte-identical to plain main's own no-override game (same SHA-256 on both the player and headless saves, on `ffe0fdb50`).
 - **Two defects found by the acceptance runs and fixed here:**
   - The political goal is answered ahead of firing at t0, so a 52-turn grant expired on the H6 renewal turn and the paying President still went to war. The grant now runs 56 turns.
   - `csq_federation_early_1994`'s 60-turn floor (from t70) made the war impossible whatever the President did later. It now ends at t87.
