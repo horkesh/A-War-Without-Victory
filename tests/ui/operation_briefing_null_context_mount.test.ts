@@ -74,7 +74,7 @@ function loadedState(): LoadedGameState {
 function Host() {
   const ctx = useGameStore((s) => s.operationBriefingContext);
   if (!ctx) return createElement(OperationBriefingModal, { isOpen: false, onClose: () => {} });
-  return createElement(OperationBriefingModal, { isOpen: true, onClose: () => {}, commandBridgeAvailable: false });
+  return createElement(OperationBriefingModal, { isOpen: true, onClose: () => {} });
 }
 
 beforeEach(() => {

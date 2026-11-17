@@ -539,22 +539,6 @@ async function loadStatePathIntoDesktop(filePath, excludeSender) {
   return { ok: true, stateJson: projectCurrentGameStateForRenderer() };
 }
 
-function ensureCorpsCommandEntry(state, corpsId, stance = 'balanced') {
-  if (!state.corps_command) state.corps_command = {};
-  if (!state.corps_command[corpsId]) {
-    state.corps_command[corpsId] = {
-      command_span: 5,
-      subordinate_count: 0,
-      og_slots: 1,
-      active_ogs: [],
-      corps_exhaustion: 0,
-      stance,
-      active_operations: [],
-    };
-  }
-  return state.corps_command[corpsId];
-}
-
 // Must run before app.whenReady()
 if (protocol && protocol.registerSchemesAsPrivileged) {
   protocol.registerSchemesAsPrivileged([{ scheme: 'awwv', privileges: { standard: true, supportFetchAPI: true } }]);
@@ -2674,25 +2658,10 @@ app.whenReady().then(() => {
 
   // --- Order staging IPC handlers ---
 
-  const stageDeployOrder = async (brigadeId, action) => {
-    if (!currentGameStateJson || typeof brigadeId !== 'string') {
-      return { ok: false, error: 'No game loaded or invalid payload' };
-    }
-    try {
-      const sim = getDesktopSim();
-      const state = sim.deserializeState(currentGameStateJson);
-      const formation = state.formations?.[brigadeId];
-      if (!formation || (formation.kind ?? 'brigade') !== 'brigade') {
-        return { ok: false, error: 'Invalid brigade' };
-      }
-      if (!state.brigade_deploy_orders) state.brigade_deploy_orders = {};
-      state.brigade_deploy_orders[brigadeId] = action;
-      writeCanonicalCurrentState(sim, state);
-      return { ok: true };
-    } catch (e) {
-      return { ok: false, error: e.message || String(e) };
-    }
-  };
+  // Retired 2026-11-17 (L7, dead IPC actions): `stage-deploy-order` and `stage-undeploy-order` (their
+  // shared helper wrote root `state.brigade_deploy_orders`, which is not a GameState key, so every call
+  // failed at serialization), `stage-move-order` (root `brigade_mun_orders`; the direct brigade move
+  // affordance was retired 2026-06-19) and `clear-orders` (root order fields). None had a UI caller.
 
   ipcMain.handle('stage-attack-order', async (_event, payload) => {
     if (!currentGameStateJson) {
@@ -2714,33 +2683,6 @@ app.whenReady().then(() => {
   // model option 2 (the president does not set brigade posture), and it wrote a top-level
   // `state.brigade_posture_orders` that no turn step reads.
 
-  ipcMain.handle('stage-move-order', async (_event, payload) => {
-    const { brigadeId, targetMunicipalityId } = payload || {};
-    if (!currentGameStateJson || typeof brigadeId !== 'string' || typeof targetMunicipalityId !== 'string') {
-      return { ok: false, error: 'No game loaded or invalid payload' };
-    }
-    try {
-      const sim = getDesktopSim();
-      const state = sim.deserializeState(currentGameStateJson);
-      if (!state.brigade_mun_orders) state.brigade_mun_orders = {};
-      state.brigade_mun_orders[brigadeId] = [targetMunicipalityId];
-      writeCanonicalCurrentState(sim, state, _event.sender);
-      return { ok: true };
-    } catch (e) {
-      return { ok: false, error: e.message || String(e) };
-    }
-  });
-
-  ipcMain.handle('stage-deploy-order', async (_event, payload) => {
-    const { brigadeId } = payload || {};
-    return stageDeployOrder(brigadeId, 'deploy');
-  });
-
-  ipcMain.handle('stage-undeploy-order', async (_event, payload) => {
-    const { brigadeId } = payload || {};
-    return stageDeployOrder(brigadeId, 'undeploy');
-  });
-
   ipcMain.handle('assign-brigade-to-sector', async (_event, payload) => {
     const { brigadeId, sectorId } = payload || {};
     const normalizedSectorId = sectorId == null ? null : String(sectorId);
@@ -2752,33 +2694,6 @@ app.whenReady().then(() => {
       const state = sim.deserializeState(currentGameStateJson);
       const result = sim.assignBrigadeToSector(state, brigadeId, normalizedSectorId);
       if (!result.ok) return result;
-      writeCanonicalCurrentState(sim, state, _event.sender);
-      return { ok: true };
-    } catch (e) {
-      return { ok: false, error: e.message || String(e) };
-    }
-  });
-
-  ipcMain.handle('clear-orders', async (_event, payload) => {
-    const { brigadeId } = payload || {};
-    if (!currentGameStateJson || typeof brigadeId !== 'string') {
-      return { ok: false, error: 'No game loaded or invalid payload' };
-    }
-    try {
-      const sim = getDesktopSim();
-      const state = sim.deserializeState(currentGameStateJson);
-      if (state.brigade_attack_orders) delete state.brigade_attack_orders[brigadeId];
-      if (state.brigade_mun_orders) delete state.brigade_mun_orders[brigadeId];
-      if (state.brigade_reposition_orders) delete state.brigade_reposition_orders[brigadeId];
-      if (state.brigade_deploy_orders) delete state.brigade_deploy_orders[brigadeId];
-      if (state.brigade_posture_orders) {
-        state.brigade_posture_orders = state.brigade_posture_orders.filter(o => o.brigade_id !== brigadeId);
-      }
-      if (state.brigade_aor_orders && state.brigade_aor_orders.length > 0) {
-        state.brigade_aor_orders = state.brigade_aor_orders.filter(
-          o => o.from_brigade !== brigadeId && o.to_brigade !== brigadeId
-        );
-      }
       writeCanonicalCurrentState(sim, state, _event.sender);
       return { ok: true };
     } catch (e) {
@@ -3046,7 +2961,12 @@ app.whenReady().then(() => {
 
       // ── Strain computation owner: src/desktop/command_strain.cjs ────────
       const { totalStrain: strain, isCompromised } = computeCorpsCommandStrain(state, corpsId, currentTurn);
-      const corpsCmd = state.corps_command?.[corpsId];
+      // GameState keeps corps command under military.* (a root `state.corps_command` is not a GameState
+      // key: serialization rejects it, and the engine never reads it).
+      const corpsCmd = state.military?.corps_command?.[corpsId];
+      if (!corpsCmd) {
+        return { ok: false, error: 'corps_not_found' };
+      }
       const namedOfficers = state.military?.named_officers ?? {};
       const frictionEvents = state.military?.friction_events ?? [];
       const officerIds = Object.keys(namedOfficers).sort();
@@ -3088,11 +3008,7 @@ app.whenReady().then(() => {
       }
 
       // ── Set stabilization cooldown (3 turns) ────────────────────────────
-      if (!state.corps_command) state.corps_command = {};
-      if (!state.corps_command[corpsId]) {
-        state.corps_command[corpsId] = ensureCorpsCommandEntry(state, corpsId);
-      }
-      state.corps_command[corpsId].stabilization_cooldown_until = currentTurn + 3;
+      corpsCmd.stabilization_cooldown_until = currentTurn + 3;
 
       writeCanonicalCurrentState(sim, state);
       return { ok: true, resolvedCount: resolved, caCost: auth ? STABILIZE_COST : 0 };
@@ -3413,49 +3329,10 @@ app.whenReady().then(() => {
     }
   });
 
-  ipcMain.handle('stage-operation-decision', async (_event, payload) => {
-    const { corpsId, operationName, decision } = payload || {};
-    if (!currentGameStateJson || typeof corpsId !== 'string' || typeof operationName !== 'string' || typeof decision !== 'string') {
-      return { ok: false, error: 'No game loaded or invalid payload' };
-    }
-    const validDecisions = ['launch', 'postpone', 'abort', 'probe'];
-    if (!validDecisions.includes(decision)) {
-      return { ok: false, error: `Invalid decision: ${decision}` };
-    }
-    try {
-      const sim = getDesktopSim();
-      const state = sim.deserializeState(currentGameStateJson);
-      const op = (state.corps_command?.[corpsId]?.active_operations ?? []).find(o => o.name === operationName);
-      if (!op) {
-        return { ok: false, error: 'Operation not found' };
-      }
-      switch (decision) {
-        case 'launch':
-          op.force_launch = true;
-          op.commander_assessment_at_launch = op.commander_assessment ?? 'launch';
-          break;
-        case 'postpone':
-          op.postponement_count = (op.postponement_count || 0) + 1;
-          break;
-        case 'abort':
-          op.recovery_reason = 'commander_abort';
-          break;
-        case 'probe':
-          op.active_probe = {
-            target_osid: (op.objectives && op.objectives[op.current_objective_index || 0]) || (op.target_settlements && op.target_settlements[0]),
-            brigade_ids: [],
-            started_turn: state.meta?.turn ?? 0,
-            resolved: false,
-            result_confidence_gain: 0,
-          };
-          break;
-      }
-      writeCanonicalCurrentState(sim, state);
-      return { ok: true };
-    } catch (e) {
-      return { ok: false, error: e.message || String(e) };
-    }
-  });
+  // Retired 2026-11-17 (L7, dead IPC actions): `stage-operation-decision` (launch / postpone / abort /
+  // probe on a planning operation). It read the non-GameState root `state.corps_command`, so every call
+  // returned "Operation not found", and the engine read none of what it would have written. The
+  // president's levers over an operation are force-launch over an objection and stop-op (Decision Room).
 
   // 'stage-airdrop-allocation' retired 2026-11-17 (Fable consult 6): it wrote root state.airdrop_allocation,
   // which nothing read (the retired airdrop step read military.airdrop_allocation, and only with reserves on).
@@ -3468,11 +3345,13 @@ app.whenReady().then(() => {
     try {
       const sim = getDesktopSim();
       const state = sim.deserializeState(currentGameStateJson);
-      const current = Array.isArray(state.opsec_sectors) ? [...state.opsec_sectors] : [];
+      // The engine reads and writes `state.military.opsec_sectors` (sector_intel, cohesion_drift,
+      // attack_resolution, sector_offensive). A root `state.opsec_sectors` is not a GameState key.
+      const current = Array.isArray(state.military?.opsec_sectors) ? [...state.military.opsec_sectors] : [];
       const next = active
         ? Array.from(new Set([...current, sectorId])).sort()
         : current.filter((id) => id !== sectorId).sort();
-      state.opsec_sectors = next;
+      state.military.opsec_sectors = next;
       writeCanonicalCurrentState(sim, state, _event.sender);
       return { ok: true };
     } catch (e) {
@@ -3496,6 +3375,10 @@ app.whenReady().then(() => {
     }
   });
 
+  // Serves the PARKED operation planner (`src/ui/map/components/ops_modal/*`, AuthorizePhase), which is
+  // unmounted for the DLC on purpose (player planning of operations is post-1.0). Kept, and pointed at
+  // the real GameState paths (`military.corps_command`, `military.named_officers`; the root paths it used
+  // before are not GameState keys), so the planner is correct if it is ever mounted. Do not retire it.
   ipcMain.handle('stage-assign-operation-commander', async (_event, payload) => {
     const { corpsId, operationName, officerId } = payload || {};
     if (!currentGameStateJson || typeof corpsId !== 'string' || typeof operationName !== 'string' || typeof officerId !== 'string') {
@@ -3504,13 +3387,13 @@ app.whenReady().then(() => {
     try {
       const sim = getDesktopSim();
       const state = sim.deserializeState(currentGameStateJson);
-      const op = (state.corps_command?.[corpsId]?.active_operations ?? []).find(o => o.name === operationName);
+      const op = (state.military?.corps_command?.[corpsId]?.active_operations ?? []).find(o => o.name === operationName);
       if (!op) {
         return { ok: false, error: 'Operation not found' };
       }
 
       // Validate officer exists
-      const officer = state.named_officers?.[officerId];
+      const officer = state.military?.named_officers?.[officerId];
       if (!officer) return { ok: false, error: `Officer ${officerId} not found` };
 
       // Assign officer to operation

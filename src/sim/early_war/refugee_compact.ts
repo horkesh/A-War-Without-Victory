@@ -20,6 +20,10 @@
  *   opens an entry (the federation-overture renewal is also the historical default, so a bot must not
  *   start a compact through it).
  * - LAPSE: a lapse answer ends every entry for good (later renewals find nothing active).
+ * - PLAYER ONLY: only answers with `decision_source: 'player'` count; a bot's answer never opens,
+ *   renews or lapses a compact (A2b follow-up, 2026-11-17).
+ * - END: the compact ends at the Washington signing (`washington_signed`, `washington_turn`): the
+ *   Federation locks the alliance, so nothing is left to damp and no price is left to pay.
  * - SUSPEND: a bilateral flip while an entry is active suspends the damping for
  *   REFUGEE_COMPACT_FLIP_SUSPENSION_TURNS (`rbih_hrhb_state.refugee_compact_suspended_until`, written
  *   only while a compact is active; alliance_update.ts).
@@ -102,6 +106,9 @@ export function getRefugeeCompactStatus(state: GameState, turn: number): Refugee
     for (const d of log) {
         if (d.turn > turn) continue;
         if (d.faction !== COMPACT_FACTION) continue;
+        // Only the President's own answers count: a bot's answer (bot_political, bot_v1, bot_ai_default)
+        // never opens, renews or lapses a compact, whatever it picks.
+        if (d.decision_source !== 'player') continue;
         if (GRANTS[d.event_id]?.includes(d.response_id)) {
             granting += 1;
             if (!lapsed) expiries.push(d.turn + REFUGEE_COMPACT_GRANT_TURNS);
@@ -118,7 +125,12 @@ export function getRefugeeCompactStatus(state: GameState, turn: number): Refugee
             expiries = expiries.map((e) => (e > d.turn ? Math.max(e, until) : e));
         }
     }
-    return { active_entries: expiries.filter((e) => e > turn).length, granting_choices: granting, lapsed };
+    // The compact ends at the Washington signing: the Federation locks the alliance, so there is no
+    // friction left to damp and no price left to pay (A2b follow-up; the price used to run to t117).
+    const rhs = state.political?.rbih_hrhb_state;
+    const signedAt = rhs?.washington_signed === true ? rhs.washington_turn : undefined;
+    const signed = signedAt != null && turn >= signedAt;
+    return { active_entries: signed ? 0 : expiries.filter((e) => e > turn).length, granting_choices: granting, lapsed };
 }
 
 /** Refugee-pressure multiplier: 0.6 per active entry, 1.0 when none or while suspended. */

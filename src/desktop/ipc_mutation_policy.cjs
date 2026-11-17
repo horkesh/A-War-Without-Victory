@@ -14,7 +14,8 @@
 // ALLOWLIST would have the opposite, unsafe default, and a `writeCanonicalCurrentState`-
 // keyed allowlist would additionally miss the two mutation paths that bypass that predicate:
 //   - GLOBAL-REPLACE via setCurrentStateSnapshots (load-scenario-dialog / load-state-dialog),
-//   - HELPER-DELEGATED writes (stage-deploy-order / stage-undeploy-order → stageDeployOrder).
+//   - HELPER-DELEGATED writes (the former stage-deploy-order / stage-undeploy-order → stageDeployOrder
+//     pair, retired 2026-11-17; the class stays covered because the policy is default-serialize).
 // Both are correctly serialized here because they are simply NOT on the read-only list.
 //
 // A channel qualifies as READ_ONLY only if it never mutates the shared canonical state:
