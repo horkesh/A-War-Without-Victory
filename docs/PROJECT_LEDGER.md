@@ -46,6 +46,43 @@ Orchestrator ruling on the Run B Farz trace (package "1994-95 attack and defence
 - **scenario-creator-runner-tester:** the id reproduces exactly. The only theoretical false accept is a President-authored op named exactly "Operation Farz 95", in the 3rd Corps, on the injection turn; that is not reachable headless.
 - **operations-expert:** registered-but-never-run and double-registration fail closed; an entry outliving its op cannot match another AAR. Suggested the engine contract test, which is added.
 
+## 2026-11-17 — Farz guard P-A: the September 1995 window, early falls, and emergent semantics (tooling only)
+
+**Seats' ruling.** Scenario-creator-runner-tester, operations-expert and historian, convened on the orchestrator's question after the RF-ROSTER RB9 and §6 E1 cases.
+
+**Window.**
+- The P-A window now opens at t177: 21-27 Aug 1995, the week of the 25 Aug planning order. Uragan 95 ran 10-14 Sep 1995 (BB1 file p.423). Uragan's own enqueue and prestage turn is t177, so a later start would drop the Uragan match.
+- **An RBiH capture of a Farz cell in [160, 177) is an early fall and fails that cell,** in both modes. That holds even if RS retook the cell and RBiH took it again inside the window.
+- P-B's late 2nd-Corps scan keeps its own start (160), so tightening P-A does not shrink P-B.
+
+**Modes.** The mode is read from the final save's `meta.decision_mode`.
+- **Historical** (or no mode recorded): unchanged. The authored Farz receipts count (Army HQ registry id, #769), and so do the Uragan partner receipts.
+- **Emergent** (the game as players get it, freeze condition 7): any RBiH operation-owned combat capture inside the window counts, whichever operation owned it. Probes, sweeps and other non-operation captures never count. Demanding the authored operation in emergent mode would be a railroad.
+
+**Two points of the seats' report not adopted:**
+- The window is not capped at t184. Main's own historical run takes Spreča at t185: an offensive concluding its objective after the ceasefire, allowed by the ceasefire's stand-down carve-out. A cap would fail main.
+- The seats' "gap on main" (E1 failing) predates #769. With the registry id, E1 already counts on main, and the test now asserts it.
+
+**Contract tests** (`tests/farz_objective_gate.test.ts`), in both modes:
+- E1 (Farz at t179, no donor, no telemetry) counts;
+- RB9 (generic captures at t166-170, Farz never launched) fails and names the early captures with their operations, never the `active_primary_corps` trace;
+- an early capture, retaken and recaptured in the window, still fails;
+- emergent credits a generic operation capture in the window and historical does not;
+- a capture no operation owned never counts;
+- no recorded mode behaves as historical.
+
+64/64 pass with `tests/triggered_operations.test.ts`.
+
+**Measured** with the old and new checker on the same runs. Verdicts are identical:
+- main historical (`3b4685bc`): PASS;
+- P2 historical (`6fff19a0`): PASS;
+- P2 hands-off emergent (`382c3b55`): PASS, now credited as operation-owned;
+- the pre-#729 step-1 run: FAIL on Spreča, as before.
+
+No `src/` change, so the simulation hash is unchanged.
+
+**Out-of-scope, for the register.** `injectArmyHqOperations` checks the corps slot before the live-objectives check, so `active_primary_corps` names the wrong blocker. RF-ROSTER is fixing the order in its precedence PR. The guard does not read that field.
+
 ## 2026-11-17 — The staff-action receipt says "counts against your side" only when the action took its target
 
 **Why.** Codex found on #740 (`GameStateAdapter.ts`, reproduced) that a paramilitary action dissolving WITHOUT taking its target (target already friendly, combat blocked, organized defence, the week-20 fade cutoff) still got a "Carried out" receipt saying it counts against the player's side, because `dissolveParamilitary` keeps the target and the creation turn. A receipt that reports civilian harm that never happened is a §6 truth defect.
@@ -169,6 +206,13 @@ Docs only; no `src/` or `data/` change, no hash change.
 - #766 (7acbb1ad6, merged by hand with the real steps confirmed): §6 E1: each event effect applies once and the loader rejects a repeated effect; no war-crimes count is shown (the line reads "Entered in the war-crimes record against ... forces"); the §10.2 counter rule needs a final judicial finding; the Kravica and Stari Most corrections. W2 and W5 are closed in merged code. New pin: historical 0b63e8102bddf6be (read from the manifest on main), emergent 73b481f79ac28e46, scores 709 / 709 / 708 / 682, guards intact.
 - §6 E4 (ruling round 2, GO from all six seats with amendments): patron_pressure has two opposite conventions; the 1992 to 1995 historical atrocity and UN-condemnation cards RAISE the perpetrator's patron support (119 effects; the RS patron base ends at 91.5). One semantics, a catalog test, the historian per card; the measurement re-runs the A2b and Path A' probes. Open measurement finding: the sanctions decay may push RS below 30 at week 148, against the historian's "RS stays above 30 after August 1994" (VJ payments, the Perišić trial judgement); measured, not tuned.
 - Queue: #754 (going now), then #735, then #739, then the first READY (#774 and #776 after their Codex fixes, #773, E3a1).
+
+## 2026-11-17 — Pass 68: the dead minority and early-war steps registered for retirement; DISPLACEMENT_MASTER corrected
+
+Docs only; no `src/` or `data/` change, no hash change.
+
+- Orchestrator ruling, 2026-11-17 (Part 4, RETIRE, S4): `minority-erosion`, `early-war-bot-posture` and `minority-militia-decay` have been dead since de5ff94cb (2026-03-01); they are registered only in `earlyWarPhases`, which runs only under recruitment_mode "bottom_up", which no scenario uses; no recorded decision dropped them. Owner: the batch-b-lane, with the peace-phase family, plus anything reachable only via bottom_up. Canon note on Phase I §4.8: cut-off minority formations are carried by the stranded-brigade lifecycle (EH-3) and by displacement.
+- `docs/20_engineering/DISPLACEMENT_MASTER.md` lines 88, 160 and 700 said minority flight was active, then disabled with code retained; the module was deleted on 2026-06-09 (#360); the three passages now say so. `PLAYER_TURN_GUIDE.md` lines 41 and 52 (canon folder) and the `game_state.ts` line 610 comment are left to the batch-b-lane's PR (canon edits with the peace phase; a src comment).
 
 ## 2026-11-16 — `address_to_nation_rbih` closing line made year-neutral
 
