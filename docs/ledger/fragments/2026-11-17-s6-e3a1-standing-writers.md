@@ -23,11 +23,11 @@
   - the lists are history-derived.
   - Three existing tests are updated to the new truth.
 
-**Measured (188w, on main `7acbb1ad6` with #766).**
-- Historical `474b0e5640ee1365`: 709/709/708/682, guard intact, fired events identical (181).
-- RBiH standing base 34.4 → 0; RBiH event_modifier +176 → +166; RS −295 (unclamped).
-- Effective standing unchanged for all sides (RBiH 100, RS 0, HRHB 0).
-- Emergent `5f49121bf438cd32`: 709/709/708/682, guard intact, fired events identical (181); the same standing changes.
+**Measured (188w, on main `b42c6c5a9` with #754; main pin d983d7bc665fdeb6 / 9454c52e328dd647, reproduced).**
+- Historical `2c63bd10fecd6bc7` and emergent `bfcbfa55dd206585`: both 709/709/708/682, guard intact (#780 guard version), fired events identical to fresh main (181).
+- RBiH standing base 34.4 → 0; the accumulator is unclamped (RBiH +166, RS −295).
+- Effective standing unchanged for every side.
 - Baselines manifest re-pinned in this PR.
+- (Earlier, on main `7acbb1ad6`: `474b0e5640ee1365` / `5f49121bf438cd32`, the same results.)
 
 **Known timing shift.** The single base writer runs at `compute-dimension-bases`, earlier in the turn than main's winning writer. A same-turn headless plan resolution and that turn's civCas term therefore reach the base one turn later.
