@@ -269,7 +269,7 @@ describe('§6 E2: ruled rows (pins)', () => {
     it('Stari Most copy: no UNESCO anachronism, cites the Prlić Appeal Judgement, never calls it a crime', () => {
         const def = defs.get('mostar_bridge_destroyed_1993')!;
         expect(def.narrative).not.toMatch(/UNESCO/);
-        expect(def.narrative).toContain('The deliberate destruction of this 16th-century monument becomes a global symbol of the war\'s cultural devastation.');
+        expect(def.narrative).toContain('The deliberate destruction of this monument becomes a global symbol of the war\'s cultural devastation.');
         expect(def.historical_source).toMatch(/IT-04-74-A/);
         expect(def.historical_source).toMatch(/29 November 2017/);
         expect(def.historical_source).toMatch(/Pocar dissenting/);
