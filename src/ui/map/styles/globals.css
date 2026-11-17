@@ -467,6 +467,8 @@ body {
 .main-menu-opening__locale { display: flex; align-items: center; gap: 0.65rem; color: #aeb4ae; font-family: var(--font-data); font-size: 0.75rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; }
 .main-menu-opening__locale select { border: 1px solid rgba(207, 215, 207, 0.28); background: rgba(5, 9, 9, 0.86); color: #e1e4dd; padding: 0.35rem 0.5rem; font-family: var(--font-data); }
 .main-menu-opening__locale select:focus-visible { outline: 2px solid #d8ddd5; outline-offset: 3px; }
+.main-menu-opening__locale-group { display: flex; flex-direction: column; align-items: flex-end; gap: 0.35rem; }
+.main-menu-opening__locale-note { margin: 0; max-width: 22rem; color: #8f9890; font-family: var(--font-data); font-size: 0.7rem; line-height: 1.35; letter-spacing: normal; text-align: right; }
 
 .main-menu-opening__workspace {
   position: relative;

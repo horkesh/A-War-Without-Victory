@@ -46,6 +46,43 @@ Orchestrator ruling on the Run B Farz trace (package "1994-95 attack and defence
 - **scenario-creator-runner-tester:** the id reproduces exactly. The only theoretical false accept is a President-authored op named exactly "Operation Farz 95", in the 3rd Corps, on the injection turn; that is not reachable headless.
 - **operations-expert:** registered-but-never-run and double-registration fail closed; an entry outliving its op cannot match another AAR. Suggested the engine contract test, which is added.
 
+## 2026-11-17 — Farz guard P-A: the September 1995 window, early falls, and emergent semantics (tooling only)
+
+**Seats' ruling.** Scenario-creator-runner-tester, operations-expert and historian, convened on the orchestrator's question after the RF-ROSTER RB9 and §6 E1 cases.
+
+**Window.**
+- The P-A window now opens at t177: 21-27 Aug 1995, the week of the 25 Aug planning order. Uragan 95 ran 10-14 Sep 1995 (BB1 file p.423). Uragan's own enqueue and prestage turn is t177, so a later start would drop the Uragan match.
+- **An RBiH capture of a Farz cell in [160, 177) is an early fall and fails that cell,** in both modes. That holds even if RS retook the cell and RBiH took it again inside the window.
+- P-B's late 2nd-Corps scan keeps its own start (160), so tightening P-A does not shrink P-B.
+
+**Modes.** The mode is read from the final save's `meta.decision_mode`.
+- **Historical** (or no mode recorded): unchanged. The authored Farz receipts count (Army HQ registry id, #769), and so do the Uragan partner receipts.
+- **Emergent** (the game as players get it, freeze condition 7): any RBiH operation-owned combat capture inside the window counts, whichever operation owned it. Probes, sweeps and other non-operation captures never count. Demanding the authored operation in emergent mode would be a railroad.
+
+**Two points of the seats' report not adopted:**
+- The window is not capped at t184. Main's own historical run takes Spreča at t185: an offensive concluding its objective after the ceasefire, allowed by the ceasefire's stand-down carve-out. A cap would fail main.
+- The seats' "gap on main" (E1 failing) predates #769. With the registry id, E1 already counts on main, and the test now asserts it.
+
+**Contract tests** (`tests/farz_objective_gate.test.ts`), in both modes:
+- E1 (Farz at t179, no donor, no telemetry) counts;
+- RB9 (generic captures at t166-170, Farz never launched) fails and names the early captures with their operations, never the `active_primary_corps` trace;
+- an early capture, retaken and recaptured in the window, still fails;
+- emergent credits a generic operation capture in the window and historical does not;
+- a capture no operation owned never counts;
+- no recorded mode behaves as historical.
+
+64/64 pass with `tests/triggered_operations.test.ts`.
+
+**Measured** with the old and new checker on the same runs. Verdicts are identical:
+- main historical (`3b4685bc`): PASS;
+- P2 historical (`6fff19a0`): PASS;
+- P2 hands-off emergent (`382c3b55`): PASS, now credited as operation-owned;
+- the pre-#729 step-1 run: FAIL on Spreča, as before.
+
+No `src/` change, so the simulation hash is unchanged.
+
+**Out-of-scope, for the register.** `injectArmyHqOperations` checks the corps slot before the live-objectives check, so `active_primary_corps` names the wrong blocker. RF-ROSTER is fixing the order in its precedence PR. The guard does not read that field.
+
 ## 2026-11-17 — The staff-action receipt says "counts against your side" only when the action took its target
 
 **Why.** Codex found on #740 (`GameStateAdapter.ts`, reproduced) that a paramilitary action dissolving WITHOUT taking its target (target already friendly, combat blocked, organized defence, the week-20 fade cutoff) still got a "Carried out" receipt saying it counts against the player's side, because `dissolveParamilitary` keeps the target and the creation turn. A receipt that reports civilian harm that never happened is a §6 truth defect.
@@ -59,6 +96,42 @@ Orchestrator ruling on the Run B Farz trace (package "1994-95 attack and defence
 - Tests: `tests/ui/paramilitary_unrequested_receipt_truth.test.ts` (engine plus adapter plus ledger for a capture and each of four dissolve causes), `tests/ui_adapter_boundary.test.ts` (captured classification, the march window, no receipt while active), ledger fixtures.
 
 **Not done.** Nothing else; the hash is unchanged by construction (read-only view over existing state).
+
+## 2026-11-17 — §6 E1: each event effect applies once; war-crimes entries show no count and need a final judicial finding
+
+**Why.** `collectEffects` applies an event's required `effect` AND every `effects[]` entry. 27 automatic cards repeated `effect` as `effects[0]`, so the engine applied twice what the card and the UI showed once. Among them: Kravica and Cerska morale, UN 808/819/820/836, the NFZ, ICTY and NATO patron pressure, and the war-crimes counters at Sovići-Doljani, Trusina, the HVO camps, Grabovica/Uždol and Stupni Do. The card itself never listed a mechanical `effect` beside `effects[]`, so 48 figures the engine already applied were hidden from the player, among them the Ahmići war-crimes entry (W5).
+
+**Rulings.**
+- Engine fix: six independent seats (engine/systems, canon-compliance, determinism, historian, scenario-tester/calibration, red-team), **unanimous GO**.
+- Display and counter rule: historian, narrative designer, canon, red-team and game designer; two rounds; **unanimous GO**.
+- Record: SHDG §6 "Record (§6 E1 …, 2026-11-17)". Ring 3 #9 is amended.
+
+**Change.**
+- Data: the 27 duplicates are deleted. The loader rejects a repeat (`validateNoRepeatedEffect`: catalog level, `stableStringify`, violations sorted, rows and response options).
+- Card display: `eventDefinitionDisplayEffects` (DataLoader) lists a mechanical `effect` next to `effects[]`. That adds 48 shown figures and removes none; narrative prose is unchanged.
+- A war-crimes entry shows no number. One line per side names its forces: "Entered in the war-crimes record against RBiH / RS / Herzeg-Bosnia forces" / "Upisano u evidenciju ratnih zločina protiv snaga …". It appears only when the delta is > 0 (`warCrimesRecordLine.ts`). "Humanitarian impact +N" is retired from the card, the acknowledgement list and the decision modal.
+- Counter rule (§10.2): six cards with no final finding that a war crime occurred lose their delta:
+  - barracks Tuzla (RBiH 2)
+  - barracks Sarajevo (RBiH 1)
+  - Kravica (RBiH 1)
+  - Turajlić (RS 1)
+  - Srebrenica shelling 1993 (RS 1)
+  - Stari Most (HRHB 1)
+- The Kravica card now states Orić's trial conviction (2006) and his acquittal on appeal (2008), and that no court convicted anyone for Kravica.
+- Canon: SHDG Ring 3 #9 (depiction, not the counter) and the §6 record; Systems Manual §7.10; EVENT_SYSTEM_AUTHORING_GUIDE §2.2 and §4.
+- Tests:
+  - `tests/event_loader.test.ts`: key order, option level, sorted violations, clean shipped catalog.
+  - `tests/ui/event_definition_display_effects.test.ts`: the display rule, no digits, no false zero, unadjudicated cards carry no delta.
+  - 423 test files across the event and UI slices pass; tsc is clean.
+
+**Measured (188 weeks, on main `9bdefb158` with #729; main pin `3b4685bc`).**
+- Historical: `final_state_hash` `0b63e8102bddf6be`, 709/709/708/682, guard intact. Farz P-A: all four authored receipts (Vozuća t180 via Uragan 95, Gornja t181, Donja t182, Spreča t185).
+- Emergent: `73b481f79ac28e46`, 709/709/708/682, guard intact.
+- The baselines manifest is re-pinned (5 artifact hashes); the structural fingerprint check passes; `baseline_40w.json` is unchanged (the fired events do not change).
+- Before #729 the engine fix alone breached Farz P-A on identical territory (the Farz AAR lost its Army HQ marker). #729 fixed that launch-path knife-edge; guard (b) was not needed for E1.
+- The engine fix alone (before the counter rule): fired events 180 → 180; war_crimes_events at w188 RBiH 15 → 12, HRHB 22 → 16.
+
+**Held for the card batch (item 4), with reasons recorded.** Perpetrator-side gains that remain on the six cards (Kravica RBiH morale +3, the barracks grants, Turajlić RS morale +2), and the `patron_pressure` sign (it raises the target's patron support).
 
 ## 2026-11-17 — Pass 59: #757 recorded and its two doc fixes made; the Codex sweep now covers every open PR
 
@@ -125,6 +198,21 @@ Docs only; no `src/` or `data/` change, no hash change.
 
 - Corrected hash-moving order (orchestrator, 2026-11-17): #766, then #754, then #735, then #739, then the first READY among #774, #776, #773 and E3a1. #774 (package P2) and #776 (the RF-ROSTER precedence fix) are OFF the queue and get no GO until each Codex finding is reproduced with a failing test, fixed (or answered in the PR) and re-measured; P2's merge proof re-runs after #766. The four Codex comments (#774 x3 for the F1g lane, #776 x1 for RF-ROSTER) are marked "routed, fix pending".
 - Schema rule: v40 = #773, v41 = §6 E2, and any other migration PR claims the next free number at READY time; the batch-b-lane's peace-phase PR (engine skeleton, PhaseName narrowed to 'war', peace UI, about 16 dead state fields, five canon edits) takes the next free number.
+
+## 2026-11-17 — Pass 67: #766 (§6 E1) recorded; the new pin; §6 E4 ruled
+
+Docs only; no `src/` or `data/` change, no hash change.
+
+- #766 (7acbb1ad6, merged by hand with the real steps confirmed): §6 E1: each event effect applies once and the loader rejects a repeated effect; no war-crimes count is shown (the line reads "Entered in the war-crimes record against ... forces"); the §10.2 counter rule needs a final judicial finding; the Kravica and Stari Most corrections. W2 and W5 are closed in merged code. New pin: historical 0b63e8102bddf6be (read from the manifest on main), emergent 73b481f79ac28e46, scores 709 / 709 / 708 / 682, guards intact.
+- §6 E4 (ruling round 2, GO from all six seats with amendments): patron_pressure has two opposite conventions; the 1992 to 1995 historical atrocity and UN-condemnation cards RAISE the perpetrator's patron support (119 effects; the RS patron base ends at 91.5). One semantics, a catalog test, the historian per card; the measurement re-runs the A2b and Path A' probes. Open measurement finding: the sanctions decay may push RS below 30 at week 148, against the historian's "RS stays above 30 after August 1994" (VJ payments, the Perišić trial judgement); measured, not tuned.
+- Queue: #754 (going now), then #735, then #739, then the first READY (#774 and #776 after their Codex fixes, #773, E3a1).
+
+## 2026-11-17 — Pass 68: the dead minority and early-war steps registered for retirement; DISPLACEMENT_MASTER corrected
+
+Docs only; no `src/` or `data/` change, no hash change.
+
+- Orchestrator ruling, 2026-11-17 (Part 4, RETIRE, S4): `minority-erosion`, `early-war-bot-posture` and `minority-militia-decay` have been dead since de5ff94cb (2026-03-01); they are registered only in `earlyWarPhases`, which runs only under recruitment_mode "bottom_up", which no scenario uses; no recorded decision dropped them. Owner: the batch-b-lane, with the peace-phase family, plus anything reachable only via bottom_up. Canon note on Phase I §4.8: cut-off minority formations are carried by the stranded-brigade lifecycle (EH-3) and by displacement.
+- `docs/20_engineering/DISPLACEMENT_MASTER.md` lines 88, 160 and 700 said minority flight was active, then disabled with code retained; the module was deleted on 2026-06-09 (#360); the three passages now say so. `PLAYER_TURN_GUIDE.md` lines 41 and 52 (canon folder) and the `game_state.ts` line 610 comment are left to the batch-b-lane's PR (canon edits with the peace phase; a src comment).
 
 ## 2026-11-16 — `address_to_nation_rbih` closing line made year-neutral
 

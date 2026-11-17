@@ -56,7 +56,7 @@ function registeredFarzAarIds(armyHqOperations) {
   return ids;
 }
 
-function checkFarzObjectiveCaptures({ cells, at188, events, battleById, aars, corpsOf, windowStart, liveOperations, finalTurn, armyHqOperations }) {
+function checkFarzObjectiveCaptures({ cells, at188, events, battleById, aars, corpsOf, windowStart, liveOperations, finalTurn, armyHqOperations, mode, earlyStart }) {
   const registered = registeredFarzAarIds(armyHqOperations);
   const authored = aars.filter((aar) => FARZ_HQ_ID.test(aar.army_hq_telemetry?.army_hq_op_id || '')
     || registered.has(aar.operation_id));
@@ -84,18 +84,37 @@ function checkFarzObjectiveCaptures({ cells, at188, events, battleById, aars, co
           && owner.participating_brigades.includes(e.attacker_brigade)))
       && classifyCombatCapture(e, battleById.get(e.battle_id)).operation_ids?.includes(owner.operation_id))) || null;
 
+  // Seats' ruling (2026-11-17): an RBiH capture of a Farz cell before the September 1995 window
+  // (in [earlyStart, windowStart)) is the early fall this guard exists to catch; it fails the cell
+  // in both modes, even if RS retook it and RBiH took it again inside the window.
+  const early = (osid) => (earlyStart != null && earlyStart < windowStart
+    ? events.filter((e) => e.settlement_id === osid && e.to === 'RBiH' && e.mechanism === 'combat'
+      && e.turn >= earlyStart && e.turn < windowStart)
+    : []);
+  // Emergent mode (freeze condition 7): any RBiH operation-owned combat capture inside the window
+  // counts, whichever operation owned it. Probes, sweeps and other non-operation captures never do.
+  const anyOperationReceipt = (osid) => events.find((e) => e.settlement_id === osid && e.to === 'RBiH'
+    && e.mechanism === 'combat' && e.turn >= windowStart
+    && (classifyCombatCapture(e, battleById.get(e.battle_id)).operation_ids ?? []).length > 0) || null;
+
+  const emergent = mode === 'emergent';
   const rows = cells.map(([name, osid]) => {
-    const own = aar ? receipt(aar, ['arbih_2nd_corps', 'arbih_3rd_corps'], osid, true) : null;
-    const viaPartner = !own && aar ? receipt(partner, ['arbih_2nd_corps'], osid) : null;
-    const event = own || viaPartner;
+    const earlyCaptures = early(osid);
+    const own = !emergent && aar ? receipt(aar, ['arbih_2nd_corps', 'arbih_3rd_corps'], osid, true) : null;
+    const viaPartner = !emergent && !own && aar ? receipt(partner, ['arbih_2nd_corps'], osid) : null;
+    const viaAny = emergent ? anyOperationReceipt(osid) : null;
+    const event = own || viaPartner || viaAny;
     return {
       name, osid, turn: event?.turn ?? null,
-      via: own ? 'farz' : viaPartner ? 'uragan' : null,
-      ok: !!event && at188[osid] === 'RBiH',
+      via: own ? 'farz' : viaPartner ? 'uragan' : viaAny ? 'operation' : null,
+      early_captures: earlyCaptures.map((e) => ({ turn: e.turn,
+        operation_ids: classifyCombatCapture(e, battleById.get(e.battle_id)).operation_ids ?? [] })),
+      ok: !!event && earlyCaptures.length === 0 && at188[osid] === 'RBiH',
     };
   });
+  const authoredOk = emergent || (!!aar && aar.started_turn >= windowStart);
   return { aar, partner, authoredCount: authored.length, provisional: !!aar?.provisional, secondCorpsParticipated, rows,
-    ok: !!aar && aar.started_turn >= windowStart && rows.every((row) => row.ok) };
+    mode: emergent ? 'emergent' : 'historical', ok: authoredOk && rows.every((row) => row.ok) };
 }
 
 module.exports = { checkFarzObjectiveCaptures, registeredFarzAarIds };
