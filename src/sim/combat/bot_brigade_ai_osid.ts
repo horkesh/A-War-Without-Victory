@@ -86,6 +86,7 @@ import type { BrigadeEvaluationContext, SectorMarchObservation } from './bot_bri
 
 import type { OsidEthnicComposition } from './ethnic_defense.js';
 import { COUNTER_ATTACK_RETREAT_WINDOW } from './bot_constants.js';
+import { collectRecentCombatLosses } from './recent_combat_losses.js';
 import { botOrdersPerfTime } from './_perf_profile_bot_orders.js';
 import { isReasonCodeTopicEnabled, sortedIds } from './reason_code_debug.js';
 
@@ -832,13 +833,8 @@ function executeFactionDirectivesImpl(
     const sectorCounterAttackCount = new Map<string, number>();
     // Package P2 step 3 (2026-11-16): the retake-only counter-attack reads the cells this faction
     // lost in combat within the retreat window and has not taken back, militia-held losses included.
-    const recentLostCells = new Set<string>();
-    for (const event of state.political?.control_events ?? []) {
-        if (event.mechanism !== 'combat' || event.from !== faction) continue;
-        if (event.turn < currentTurn - COUNTER_ATTACK_RETREAT_WINDOW) continue;
-        if ((state.political.political_controllers ?? {})[event.settlement_id] === faction) continue;
-        recentLostCells.add(event.settlement_id);
-    }
+    // Ruling D (2026-11-17): one shared reader with the corps breach answer.
+    const recentLostCells = collectRecentCombatLosses(state, faction);
 
     const targetAdjacentCount = new Map<Osid, number>();
     for (const b of brigades) {

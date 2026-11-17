@@ -48,6 +48,9 @@ import { ENABLE_STANDING_OG_RESERVE_COMMIT } from './standing_og_defense.js';
 import { isEnclaveMovementDestinationAllowed } from './enclave_resilience.js';
 import { getQueuedDatedPrestageBrigadeIds } from './pre_planned_operations.js';
 import { createFrontDistributionRecorder, type FrontDistributionCallsite, type FrontDistributionDiagnostics, type FrontDistributionRecorder } from './front_distribution_diagnostic.js';
+import { COUNTER_ATTACK_MIN_COHESION, COUNTER_ATTACK_MIN_PERSONNEL, COUNTER_ATTACK_RETREAT_WINDOW } from './bot_constants.js';
+import { collectRecentCombatLosses } from './recent_combat_losses.js';
+import { effectiveBreachCorpsId, isBreachAnswerDonor, isBreachAnswerTarget } from './brigade_routine_scope.js';
 
 type CorpsAssetFormationState = FormationState & {
     active_operations?: CorpsCommandState['active_operations'];
@@ -61,6 +64,8 @@ export interface FrontDistributionOptions {
     diagnosticCallsite?: FrontDistributionCallsite;
     completedTurn?: number;
     invocationOrdinal?: number;
+    /** Ruling D (2026-11-17): run the corps breach answer. Set only on the final pass of a turn, so a corps answers at most once per turn. */
+    breachAnswer?: boolean;
 }
 
 // ── Corps boundary helpers ─────────────────────────────────────────────────────
@@ -433,6 +438,159 @@ function commitReserveToThreatenedFront(
     }
     state.military.brigade_movement_orders[best.bid] = createColumnMovementOrder(best.target);
     activeCounts.set(best.target, (activeCounts.get(best.target) ?? 0) + 1);
+}
+
+/** Ruling D: a breach-answer donor must arrive inside the retake window, so it moves at most this many friendly hops. */
+const BREACH_ANSWER_MAX_HOPS = COUNTER_ATTACK_RETREAT_WINDOW;
+
+/**
+ * The corps breach answer (orchestrator ruling D on #774, 2026-11-17; corps-army-commander,
+ * operations-expert and historian seats, round 2).
+ *
+ * When a corps has just lost a front cell in combat (`collectRecentCombatLosses`: within the retake
+ * window and not taken back) and no healthy brigade stands next to it or is on its way, the corps
+ * sends its strongest spare brigade to a friendly front cell next to the lost one, so the P2 step-3
+ * retake counter-attack has someone in reach. Movement only: the retake still needs at least a
+ * costly victory against what now holds the cell, at most twice per sector per turn.
+ *
+ * Why: the VRS answered Ozren break-ins with OG-9 and corps intervention units within days
+ * (BB2 pp.486-487; BB1 p.385). In-game nothing reached the Maglaj face: front distribution never
+ * moves a front brigade toward a hot cell and the army reserve was held by another corps' standing
+ * request, so a four-brigade ARBiH op took Donja Bočinja in Aug 1994 and nobody counter-attacked.
+ * When the line has nothing spare (Sept 1995: every surviving Ozren brigade holds its cell alone,
+ * BB1 p.386) there is no donor and no answer.
+ *
+ * Rules (all factions; no dates, no unit ids):
+ *  - Breaches are ranked per corps: the sector with the most fresh losses first, then sector id;
+ *    within it, the lost cell by id. A lost cell counts only when it borders a friendly front cell of
+ *    that sector and no healthy non-participant brigade (`COUNTER_ATTACK_MIN_*`) stands on, or is
+ *    ordered or marching to, a cell next to it.
+ *  - Donors: `isBreachAnswerDonor` (never a lone holder; no operation; retake strength), of this
+ *    corps or an elite on loan to it, with no order and not moving, and not taken from another
+ *    breached sector of the corps.
+ *  - Target: a cell that passes `isBreachAnswerTarget` (inside the donor's movement scope) within
+ *    `BREACH_ANSWER_MAX_HOPS` friendly hops; fewest brigades, then fewest hops, then id. Donor: most
+ *    personnel × cohesion, then fewest hops, then id.
+ *  - One answer per corps per call; the caller runs it once per turn (final pass). One hop or less:
+ *    placed directly, as `commitReserveToThreatenedFront` does; otherwise an untagged column order,
+ *    whose `dig_in` release `processOsidColumnMovement` grants via `isBreachAnswerColumnOrder`.
+ */
+function commitCorpsBreachAnswer(
+    state: GameState,
+    sectors: CorpsFrontSector[],
+    adjacency: Map<string, string[]>,
+    friendlyByFaction: Map<FactionId, Set<string>>,
+    opParticipants: Set<string>,
+    recorder?: FrontDistributionRecorder,
+): void {
+    const formations = state.military.formations ?? {};
+    const liveSectors = sectors
+        .filter((sector) => (sector.sub_segments?.length ?? 0) > 0 && !SIEGE_EXEMPT_CORPS.has(sector.corps_id))
+        .sort((a, b) => strictCompare(a.sector_id, b.sector_id));
+    if (liveSectors.length === 0) return;
+
+    const frontByFaction = new Map<string, Set<string>>();
+    for (const sector of liveSectors) {
+        const front = frontByFaction.get(sector.faction) ?? new Set<string>();
+        for (const subSegment of sector.sub_segments ?? []) for (const osid of subSegment.friendly_osids ?? []) front.add(osid);
+        frontByFaction.set(sector.faction, front);
+    }
+    const lostByFaction = new Map<string, Set<string>>();
+    const activeCounts = countActiveBrigadesByOsid(formations);
+    const formationIds = Object.keys(formations).sort(strictCompare);
+
+    const heading = (id: string): string | undefined => {
+        const order = state.military.brigade_movement_orders?.[id];
+        if (order?.destination_sids?.[0]) return order.destination_sids[0];
+        const move = state.military.brigade_movement_state?.[id];
+        return move && move.status !== 'deployed' ? move.destination_sids?.[0] : undefined;
+    };
+    const hasRetakerInReach = (faction: string, lostCell: string): boolean => {
+        const around = new Set(adjacency.get(lostCell) ?? []);
+        for (const id of formationIds) {
+            const f = formations[id];
+            if (!f || f.status !== 'active' || f.faction !== faction || opParticipants.has(id)) continue;
+            if ((f.kind ?? 'brigade') !== 'brigade' && f.kind !== 'og' && f.kind !== 'operational_group' && f.kind !== 'hv_phantom') continue;
+            if ((f.personnel ?? 0) < COUNTER_ATTACK_MIN_PERSONNEL || (f.cohesion ?? 0) < COUNTER_ATTACK_MIN_COHESION) continue;
+            const dest = heading(id);
+            if ((f.location_osid && around.has(f.location_osid)) || (dest && around.has(dest))) return true;
+        }
+        return false;
+    };
+
+    const corpsIds = [...new Set(liveSectors.map((sector) => sector.corps_id))].sort(strictCompare);
+    for (const corpsId of corpsIds) {
+        const corpsSectors = liveSectors.filter((sector) => sector.corps_id === corpsId);
+        const faction = corpsSectors[0]!.faction;
+        let lost = lostByFaction.get(faction);
+        if (!lost) { lost = collectRecentCombatLosses(state, faction); lostByFaction.set(faction, lost); }
+        if (lost.size === 0) continue;
+        const friendly = friendlyByFaction.get(faction as FactionId);
+        const front = frontByFaction.get(faction) ?? new Set<string>();
+
+        const breaches: Array<{ sectorId: string; lostCell: string; targets: string[] }> = [];
+        const breachCount = new Map<string, number>();
+        for (const sector of corpsSectors) {
+            const sectorFront = new Set((sector.sub_segments ?? []).flatMap((subSegment) => subSegment.friendly_osids ?? []));
+            for (const lostCell of [...lost].sort(strictCompare)) {
+                const targets = (adjacency.get(lostCell) ?? [])
+                    .filter((osid) => sectorFront.has(osid) && (!friendly || friendly.has(osid)))
+                    .sort(strictCompare);
+                if (targets.length === 0 || hasRetakerInReach(faction, lostCell)) continue;
+                breaches.push({ sectorId: sector.sector_id, lostCell, targets });
+                breachCount.set(sector.sector_id, (breachCount.get(sector.sector_id) ?? 0) + 1);
+            }
+        }
+        if (breaches.length === 0) continue;
+        breaches.sort((a, b) => (breachCount.get(b.sectorId)! - breachCount.get(a.sectorId)!)
+            || strictCompare(a.sectorId, b.sectorId) || strictCompare(a.lostCell, b.lostCell));
+
+        for (const breach of breaches) {
+            let pick: { id: string; formation: FormationState; target: string; dist: number; count: number; strength: number } | null = null;
+            for (const id of formationIds) {
+                const formation = formations[id];
+                if (!formation || effectiveBreachCorpsId(formation) !== corpsId) continue;
+                if (opParticipants.has(id) || heading(id) !== undefined) continue;
+                if (!isBreachAnswerDonor(state, formation, front)) continue;
+                const fromOtherBreach = corpsSectors.some((sector) => sector.sector_id !== breach.sectorId
+                    && breachCount.has(sector.sector_id)
+                    && [...(sector.assigned_brigade_ids ?? []), ...(sector.reserve_brigade_ids ?? []), ...(sector.rear_brigade_ids ?? [])].includes(id));
+                if (fromOtherBreach) continue;
+                let best: { target: string; dist: number; count: number } | null = null;
+                for (const target of breach.targets) {
+                    if (!isFormationDestinationAllowed(formation, target)) continue;
+                    if (!isBreachAnswerTarget(state, formation, target, adjacency, lost)) continue;
+                    const dist = bfsDistance(formation.location_osid as string, target, adjacency, friendly);
+                    if (!Number.isFinite(dist) || dist < 1 || dist > BREACH_ANSWER_MAX_HOPS) continue;
+                    const count = activeCounts.get(target) ?? 0;
+                    if (!best || count < best.count || (count === best.count && (dist < best.dist
+                        || (dist === best.dist && strictCompare(target, best.target) < 0)))) {
+                        best = { target, dist, count };
+                    }
+                }
+                if (!best) continue;
+                const strength = (formation.personnel ?? 0) * (formation.cohesion ?? 0);
+                if (!pick || strength > pick.strength || (strength === pick.strength && (best.dist < pick.dist
+                    || (best.dist === pick.dist && strictCompare(id, pick.id) < 0)))) {
+                    pick = { id, formation, ...best, strength };
+                }
+            }
+            if (!pick) continue;
+
+            recorder?.recordWrite({ helper: 'corps_breach_answer', action_kind: pick.dist <= 1 ? 'direct_location' : 'column_order', formation_id: pick.id, sectors: corpsSectors, op_participants: opParticipants,
+                candidate_ids: formationIds.filter((id) => effectiveBreachCorpsId(formations[id]!) === corpsId), target_ids: breach.targets, target_osid: pick.target, distance: pick.dist,
+                score: pick.strength, feature_inputs: { sector_id: breach.sectorId, lost_cell: breach.lostCell, target_count: pick.count } });
+            if (pick.dist <= 1) {
+                pick.formation.location_osid = pick.target;
+                pick.formation.entrenchment_turns = 0;
+            } else {
+                if (!state.military.brigade_movement_orders) state.military.brigade_movement_orders = {};
+                state.military.brigade_movement_orders[pick.id] = createColumnMovementOrder(pick.target);
+            }
+            activeCounts.set(pick.target, (activeCounts.get(pick.target) ?? 0) + 1);
+            break; // one answer per corps
+        }
+    }
 }
 
 function fillEmptyFrontSubsegmentsFromSectorReserve(
@@ -1048,6 +1206,12 @@ export function distributeBrigadesToFront(
             options,
             recorder,
         );
+    }
+
+    // Ruling D (2026-11-17): the corps breach answer, after the per-sector loop so Phase A cannot
+    // unstack a just-placed donor in the same pass; final pass only (`options.breachAnswer`).
+    if (options.breachAnswer === true) {
+        commitCorpsBreachAnswer(state, sectors, adjacency, friendlyByFaction, opParticipants, recorder);
     }
 
     deconflictSharedFrontOsidStacks(state, sectors, adjacency, friendlyByFaction, opParticipants, recorder);
