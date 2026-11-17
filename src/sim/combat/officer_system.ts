@@ -1044,25 +1044,29 @@ export function processOfficerSuccession(
             });
             const prefix = faction === 'HRHB' && wasCombatDeath ? 'generic_combat_' : 'generic_';
             const genericId = `${prefix}${faction}_${corpsFormId}_t${turn}`;
-            // D.4: Read generic replacement competence from war_timeline if available
-            const factionConfig = state.military.war_timeline?.officer_config?.[faction];
-            const genericComp = factionConfig?.generic_replacement_competence ?? 2;
+            // Commander attribution PR 2a: the acting commander stands in for a holder the sources
+            // don't name, so his personality is NEUTRAL: the faction's average corps commander. It
+            // drives the commander loop neither harder nor softer than an average CO. It doesn't learn,
+            // so it can't drift above average. (Before: competence 2 from the timeline config,
+            // defensive skill 2, which made every gap a below-average commander.) The acting combat
+            // modifier and the HVO replacement delays are unchanged.
+            const neutral = averageCorpsCommanderTraits(officerData, faction);
 
             const genericData: NamedOfficer = {
                 id: genericId,
                 name: `Acting Commander (${corpsFormId})`,
                 faction,
                 rank: 'corps_commander',
-                competence: genericComp,
-                aggressiveness: 3,
-                defensive_skill: 2,
-                political_reliability: 3,
+                competence: neutral.competence,
+                aggressiveness: neutral.aggressiveness,
+                defensive_skill: neutral.defensive_skill,
+                political_reliability: neutral.political_reliability,
                 home_corps_id: corpsFormId,
                 available_from_turn: turn,
                 origin: 'military',
                 casualty_vulnerability: 0.15,
-                can_improve: true,
-                improvement_rate: 0.06,
+                can_improve: false,
+                improvement_rate: 0,
                 pool_tier: 'tier_c',
             };
             officerData.push(genericData);
@@ -1153,6 +1157,27 @@ function scheduledHolderForCorps(
  * Find best available replacement officer for a corps.
  * Priority: pool_tier (starter > tier_a > tier_b > tier_c), then competence, then home corps match.
  */
+/**
+ * The faction's average named corps commander (competence, aggressiveness, defensive skill,
+ * political reliability), rounded to two decimals. Generic acting commanders are excluded, so
+ * the average never feeds on itself. Mid-scale 3 when the faction has no named corps commander.
+ * Deterministic: a sum over the authored officer list in its fixed order.
+ */
+export function averageCorpsCommanderTraits(
+    officerData: readonly NamedOfficer[],
+    faction: FactionId,
+): Pick<NamedOfficer, 'competence' | 'aggressiveness' | 'defensive_skill' | 'political_reliability'> {
+    const rows = officerData.filter(o => o.faction === faction && o.rank === 'corps_commander' && !o.id.startsWith('generic_'));
+    const mean = (pick: (o: NamedOfficer) => number): number =>
+        rows.length === 0 ? 3 : Math.round((rows.reduce((s, o) => s + pick(o), 0) / rows.length) * 100) / 100;
+    return {
+        competence: mean(o => o.competence),
+        aggressiveness: mean(o => o.aggressiveness),
+        defensive_skill: mean(o => o.defensive_skill),
+        political_reliability: mean(o => o.political_reliability),
+    };
+}
+
 function findBestReplacement(
     officers: Record<string, NamedOfficerState>,
     officerData: NamedOfficer[],
