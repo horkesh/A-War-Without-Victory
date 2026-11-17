@@ -16,7 +16,7 @@
   - the same two 1992 choices with no renewals (S1b): the GV default `escalate` fires at t50 and lapses the compact; war at **t52**.
   - `croat_republic` plus `formal_alliance_persists` with `federate_early`, VOPP `resist_patron` and the overture extended (S2): the GV card never fires on this branch; war at **t74-76**; Washington signs t102.
   - So the Gornji Vakuf renewal is reachable (only on the `local_friction_emerges` branch: the card needs `hrhb_1992_cooperation_state = friction_emerges` and alliance below 0.45 in t40-60) and is kept. One grant buys about 22 weeks of peace against no compact; two grants and every renewal buy the whole war (probe A, no war).
-- **Measured** (this PR's tree on main `b52512068`; logs `_logs/b5-scorer-20261116/fu_pra/`).
+- **Measured** (this PR's tree; first on main `b52512068`, then again after main moved with #776 and #799 to `fb63c8353`, whose pins differ; the figures below are identical on both; logs `_logs/b5-scorer-20261116/fu_pra/` and `fu_pra2/`).
   - `npm run test:baselines`: "all scenarios match"; historical and emergent 188w are byte-identical to main, so no pin moves (the Zagreb gate does not change a left-alone run).
   - Played probes (HRHB President; staff_recommended; 130 turns, C 188), unchanged from #768:
     - A pays: Path C at t102, no war; **Zagreb's order no longer fires** (it fired at t95 before);
