@@ -17,5 +17,10 @@
     - historical `623c46fd2e2e39fc`, emergent `3d18b7935f417681`, both 709/709/708/682 (equal to main);
     - guard intact (cascade 31);
     - re-pinned on this head; a second run matches.
+  - **Re-measured on main after #766** (`7acbb1ad6`; main historical `0b63e8102bddf6be`, emergent `73b481f79ac28e46`, 709/709/708/682; logs `aw5_*`):
+    - historical `d983d7bc665fdeb6`, emergent `9454c52e328dd647`, both 709/709/708/682;
+    - guard intact (cascade 31);
+    - control-identical to main: the pinned `control_delta`, `activity_summary`, `formation_delta` and `end_report` hashes equal main's; only `final_save` and `weekly_report` differ (HRHB cohesion from t93);
+    - re-pinned on this head; a second run matches.
   - The 43 test files that touch these readers pass (716 tests). tsc clean.
 - The lock-conflict fix (the back-channel floor and the contradiction rule) is **held** on `claude/b5-alliance-lock-conflict` until package P2 and the RF-ROSTER precedence fix make the Farz chain robust. Measured alone it breaks the guard through Farz (an "all objectives already owned" skip at t179).
