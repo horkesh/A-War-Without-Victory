@@ -395,7 +395,7 @@
         "branch_tag": "hrhb_zagreb_assert_autonomy",
         "historical_marker": "counterfactual",
         "label": "Assert HVO autonomy from Zagreb",
-        "description": "Tell Šušak the HVO answers to Mostar, not Zagreb. Refuse the seconded officers; insist on Bosnian Croat command of Bosnian Croat units. It is the cleanest assertion of independence and the most expensive. Zagreb throttles the channel, and HVO units at the front pay for it.",
+        "description": "Tell Šušak the HVO answers to Mostar, not Zagreb. Refuse the seconded officers; insist on Bosnian Croat command of Bosnian Croat units. It is the cleanest assertion of independence and the most expensive. Zagreb throttles the channel, which lowers HVO combat effectiveness.",
         "sets_flags": {
           "hrhb_1992_patron_posture": "autonomy_asserted"
         },
