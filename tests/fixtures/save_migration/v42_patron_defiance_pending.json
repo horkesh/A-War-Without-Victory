@@ -1,0 +1,316 @@
+{
+  "schema_version": 42,
+  "meta": {
+    "turn": 120,
+    "seed": "v41-patron-pressure-pending",
+    "referendum_held": false,
+    "referendum_turn": null,
+    "war_start_turn": null,
+    "peace_scheduled_referendum_turn": null,
+    "peace_scheduled_war_start_turn": null,
+    "peace_war_start_control_path": null,
+    "referendum_eligible_turn": null,
+    "referendum_deadline_turn": null,
+    "game_over": false,
+    "player_faction": "RS",
+    "decision_mode": "historical"
+  },
+  "factions": [
+    {
+      "id": "RBiH",
+      "profile": {
+        "authority": 1,
+        "legitimacy": 1,
+        "control": 1,
+        "logistics": 1,
+        "exhaustion": 0
+      },
+      "areasOfResponsibility": [],
+      "supply_sources": [],
+      "command_capacity": 0,
+      "negotiation": {
+        "pressure": 0,
+        "last_change_turn": null,
+        "capital": 0,
+        "spent_total": 0,
+        "last_capital_change_turn": null
+      },
+      "declaration_pressure": 0,
+      "declared": false,
+      "declaration_turn": null
+    }
+  ],
+  "paramilitary_decision_history": [],
+  "military": {
+    "front_segments": {},
+    "theatres": {},
+    "army_theatre_assignment": {},
+    "formations": {},
+    "front_posture": {},
+    "front_posture_regions": {},
+    "front_pressure": {},
+    "assignable_front_segments": [],
+    "brigade_front_assignment": {},
+    "militia_pools": {
+      "gorazde:RBiH": {
+        "mun_id": "gorazde",
+        "faction": "RBiH",
+        "available": 1200,
+        "committed": 340,
+        "exhausted": 75,
+        "updated_turn": 12,
+        "wounded_pending": 0
+      },
+      "prijedor:RS": {
+        "mun_id": "prijedor",
+        "faction": "RS",
+        "available": 0,
+        "committed": 5100,
+        "exhausted": 820,
+        "updated_turn": 12,
+        "wounded_pending": 0
+      }
+    },
+    "war_militia_strength": {},
+    "war_jna": {
+      "transition_begun": false,
+      "withdrawal_progress": 0,
+      "asset_transfer_rs": 0
+    },
+    "army_co_decision_traces": {
+      "RBiH": [
+        {
+          "turn": 120,
+          "campaign_role": "AUTONOMOUS_LAUNCH_PROPOSAL",
+          "rationale": "legacy proposal",
+          "raw_directive_id": "legacy_op"
+        }
+      ]
+    },
+    "army_corps_directives_by_faction": {},
+    "event_decision_log": [],
+    "fired_event_ids": [],
+    "event_readiness": {},
+    "event_fire_counts": {},
+    "event_last_fired_turn": {},
+    "event_flags": {},
+    "enabled_event_ids": [],
+    "event_overflow_queue": [],
+    "pending_event_decisions": [
+      {
+        "event_id": "zagreb_orders_hrhb_ceasefire",
+        "event_title": "Zagreb Orders HVO Ceasefire With ARBiH",
+        "turn_fired": 95,
+        "faction": "HRHB",
+        "requires_player_response": true,
+        "historical_default_response_id": "acknowledge_pressure",
+        "response_options": [
+          {
+            "id": "acknowledge_pressure",
+            "label": "Acknowledge the message",
+            "effects": [],
+            "dimension_shifts": [
+              {
+                "faction": "HRHB",
+                "dimension": "patron_confidence",
+                "delta": 8
+              }
+            ]
+          },
+          {
+            "id": "resist_patron",
+            "label": "Maintain our position",
+            "effects": [],
+            "dimension_shifts": [
+              {
+                "faction": "HRHB",
+                "dimension": "patron_confidence",
+                "delta": -25
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "event_id": "hrhb_political_goal",
+        "event_title": "Herceg-Bosna",
+        "turn_fired": 3,
+        "faction": "HRHB",
+        "requires_player_response": true,
+        "historical_default_response_id": "croat_republic",
+        "response_options": [
+          {
+            "id": "croat_republic",
+            "label": "Croat republic",
+            "effects": []
+          },
+          {
+            "id": "united_front",
+            "label": "United front with ARBiH",
+            "effects": [
+              {
+                "kind": "alliance_change",
+                "delta": 0.15
+              },
+              {
+                "kind": "equipment_quality_modifier",
+                "faction": "HRHB",
+                "multiplier": 0.85,
+                "duration_turns": 52
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "event_id": "belgrade_embargo_rs_1994",
+        "event_title": "Belgrade Breaks with Pale",
+        "turn_fired": 121,
+        "faction": "RS",
+        "requires_player_response": true,
+        "historical_default_response_id": "negotiate",
+        "response_options": [
+          {
+            "id": "negotiate",
+            "label": "Seek accommodation with Belgrade",
+            "effects": []
+          },
+          {
+            "id": "defiant",
+            "label": "Defy Belgrade",
+            "effects": [
+              {
+                "kind": "patron_support",
+                "faction": "RS",
+                "delta": -10
+              },
+              {
+                "kind": "recruitment_modifier",
+                "faction": "RS",
+                "pool_multiplier": 0.9,
+                "duration_turns": 52
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "pending_event_notifications": [],
+    "event_aggression_modifiers": [],
+    "recruitment_modifiers": [],
+    "equipment_quality_modifiers": [],
+    "cost_ledger_annotations": [],
+    "pending_convoy_decisions": [],
+    "convoy_decision_history": [],
+    "phantoms_spawned": [],
+    "pending_reserve_requests": [],
+    "reserve_request_history": [],
+    "triggered_operations_accepted": {},
+    "declined_operations": {},
+    "used_operation_names": {},
+    "pending_officer_events": [],
+    "officer_decision_history": [],
+    "cascade_penalties": [],
+    "offensive_ops_suppressions": [],
+    "alliance_locks": [],
+    "bot_priority_shifts": [],
+    "closed_event_ids": [],
+    "event_causality_log": [],
+    "tactical_groups": {},
+    "army_hq_operations": {},
+    "army_hq_last_op_turn": {},
+    "army_hq_op_count_by_year": {},
+    "sector_intel": {},
+    "corps_front_sectors": {},
+    "casualty_ledger": {
+      "RBiH": {
+        "killed": 120,
+        "wounded": 404,
+        "missing_captured": 22,
+        "equipment_lost": {
+          "tanks": 3,
+          "artillery": 5,
+          "aa_systems": 1
+        },
+        "per_formation": {
+          "arbih_1st_brigade": {
+            "killed": 120,
+            "wounded": 404,
+            "missing_captured": 22
+          }
+        },
+        "per_militia_pool": {}
+      },
+      "RS": {
+        "killed": 90,
+        "wounded": 303,
+        "missing_captured": 16,
+        "equipment_lost": {
+          "tanks": 2,
+          "artillery": 4,
+          "aa_systems": 0
+        },
+        "per_formation": {
+          "vrs_1st_brigade": {
+            "killed": 90,
+            "wounded": 303,
+            "missing_captured": 16
+          }
+        },
+        "per_militia_pool": {}
+      }
+    },
+    "patron_defiance_supply_cuts": [
+      {
+        "faction": "HRHB",
+        "turn": 4,
+        "cut_fraction": 0.18,
+        "support_after": 0.52
+      },
+      {
+        "faction": "HRHB",
+        "turn": 5,
+        "cut_fraction": 0.48,
+        "support_after": 0.33
+      }
+    ]
+  },
+  "political": {
+    "political_controllers": {},
+    "negotiation_status": {
+      "ceasefire_active": false,
+      "ceasefire_since_turn": null,
+      "last_offer_turn": null,
+      "last_counter_turn": {}
+    },
+    "ceasefire": {},
+    "negotiation_ledger": [],
+    "supply_rights": {
+      "corridors": []
+    },
+    "municipalities": {},
+    "war_consolidation_until": {},
+    "war_control_strain": {},
+    "war_supply_pressure": {},
+    "war_supply_condition": {},
+    "war_exhaustion": {},
+    "war_exhaustion_local": {}
+  },
+  "displacement": {
+    "displacement_state": {},
+    "displacement_event_log": [],
+    "displacement_humanitarian_aggregates": {},
+    "displacement_origin_dest_arrivals": {},
+    "displacement_recent_by_turn": {},
+    "minority_flight_state": {},
+    "war_displacement_initiated": {},
+    "hostile_takeover_timers": {},
+    "displacement_camp_state": {},
+    "settlement_displacement": {},
+    "settlement_displacement_started_turn": {},
+    "municipality_displacement": {},
+    "sustainability_state": {},
+    "civilian_casualties": {},
+    "displacement_flows_by_osid": {}
+  }
+}
