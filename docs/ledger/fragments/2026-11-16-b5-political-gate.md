@@ -40,3 +40,7 @@
   - Historical 188w is byte-identical to main's pin, `03159b9ee1e5877f`.
   - Hands-off emergent is identical to main's emergent, `dde641b2c74838f0`.
   - The played pair still differs in exactly the three decisions.
+- **Re-measured on main `7c1aca20b`** (after #782; main pins historical `2c63bd10fecd6bc7`, emergent `bfcbfa55dd206585`; logs `pg6_*`).
+  - Historical and emergent 188w: 709/709/708/682 each, guard intact (cascade 31).
+  - Both runs are byte-identical to main: after the re-pin the baselines manifest equals main's file exactly, so there is no emergent movement.
+  - A second run matches. tsc clean.
