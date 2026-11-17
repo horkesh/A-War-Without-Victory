@@ -63,7 +63,6 @@ const PeacePlanModal = lazy(() =>
 import { OnboardingOverlay, shouldShowOnboarding, type TutorialStateShape } from './components/onboarding/OnboardingOverlay';
 import { ParamilitaryReviewModal } from './components/ParamilitaryReviewModal';
 import { EventDecisionModal } from './components/EventDecisionModal';
-import { ConvoyDecisionModal } from './components/ConvoyDecisionModal';
 import { ReserveRequestModal } from './components/ReserveRequestModal';
 import { OfficerMatterModal } from './components/OfficerMatterModal';
 import { IntelligenceBriefModal } from './components/IntelligenceBriefModal';
@@ -746,7 +745,6 @@ function App() {
   const [selectedCounterOfferId, setSelectedCounterOfferId] = useState<string | null>(null);
   const [recentlyAcceptedEventDecisionId, setRecentlyAcceptedEventDecisionId] = useState<string | null>(null);
   const [actionReceiptMessage, setActionReceiptMessage] = useState<string | null>(null);
-  const [selectedConvoyDecisionId, setSelectedConvoyDecisionId] = useState<string | null>(null);
   const [recruitmentLoading, setRecruitmentLoading] = useState(false);
   const [recruitmentApplying, setRecruitmentApplying] = useState(false);
   const [recruitmentCatalog, setRecruitmentCatalog] = useState<RecruitmentCatalogBrigade[]>([]);
@@ -1064,7 +1062,6 @@ function App() {
     selectedOfficerMatterId !== null ||
     selectedIntelligenceBriefId !== null ||
     selectedCounterOfferId !== null ||
-    selectedConvoyDecisionId !== null ||
     opsPlanningModalOpen ||
     commanderSelectionContext !== null ||
     operationBriefingContext !== null ||
@@ -1761,9 +1758,6 @@ function App() {
     if (action === 'paramilitary_review') {
       setParamilitaryReviewOpen(true);
     }
-    if (action === 'convoy_decision_modal') {
-      setSelectedConvoyDecisionId(itemId.startsWith('convoy:') ? itemId.slice('convoy:'.length) : itemId);
-    }
     if (action === 'dismiss_intelligence_notification') {
       setSelectedIntelligenceBriefId(itemId);
     }
@@ -2275,15 +2269,6 @@ function App() {
           />
         );
       })()}
-      <ConvoyDecisionModal
-        convoy={loadedGameState?.pendingConvoyDecisions?.find((convoy) => convoy.id === selectedConvoyDecisionId) ?? null}
-        onClose={() => setSelectedConvoyDecisionId(null)}
-        onDecide={(convoyId, decision) => (
-          ipc.isAvailable
-            ? ipc.stageConvoyDecision(convoyId, decision)
-            : Promise.resolve({ ok: false, error: 'Convoy decisions are available in desktop mode only.' })
-        )}
-      />
       <ReserveRequestModal
         requestId={selectedReserveRequestId}
         state={loadedGameState}

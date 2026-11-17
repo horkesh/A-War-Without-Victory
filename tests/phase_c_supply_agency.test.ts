@@ -1,7 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { EdgeRecord } from '../src/map/settlements.js';
-import { applyHumanitarianConvoyDecisions, evaluateHumanitarianConvoys } from '../src/state/humanitarian_convoys.js';
-import { maybeActivateSarajevoTunnel } from '../src/state/sarajevo_lifeline.js';
+import * as sarajevoLifeline from '../src/state/sarajevo_lifeline.js';
 import {
     applyIvpConsequences,
     ensureInternationalVisibilityPressure,
@@ -150,34 +148,10 @@ describe('Phase C supply agency', () => {
         expect(ivp.composite_ivp).toBeGreaterThan(0);
     });
 
-    it('generates deterministic convoy decisions and applies divert effects', () => {
-        const state = makeState();
-        const edges: EdgeRecord[] = [
-            { a: 'enclave_1', b: 'route_rs' } as EdgeRecord,
-            { a: 'enclave_2', b: 'route_rs' } as EdgeRecord,
-        ];
-
-        const convoys = evaluateHumanitarianConvoys(state, edges);
-        expect(convoys).toHaveLength(1);
-        expect(convoys[0]?.route_faction).toBe('RS');
-
-        state.military.pending_convoy_decisions = [{ ...convoys[0], decision: 'divert' }];
-        applyHumanitarianConvoyDecisions(state);
-
-        // Supply-reserve economy retired 2026-11-17 (Fable consult 6): a diverted convoy no longer splits supply.
-        expect(state.military.general_supply_reserve?.RS).toBe(40);
-        expect(state.military.general_supply_reserve?.RBiH).toBe(20);
-        expect(state.military.pending_convoy_decisions).toEqual([]);
-        expect(state.factions.find((f) => f.id === 'RS')?.patron_state?.diplomatic_isolation ?? 0).toBeGreaterThan(0);
-    });
-
-    it('unlocks the Sarajevo tunnel without a reserve grant (smuggling allocation retired 2026-11-17)', () => {
-        const state = makeState();
-        const reserveBefore = JSON.stringify(state.military.general_supply_reserve);
-
-        expect(maybeActivateSarajevoTunnel(state)).toBe(true);
-
-        expect(state.military.sarajevo_tunnel_operational).toBe(true);
-        expect(JSON.stringify(state.military.general_supply_reserve)).toBe(reserveBefore);
+    it('F1i: humanitarian convoys and the enclave-derived tunnel activation are retired (not in 1.0)', () => {
+        const mod = sarajevoLifeline as Record<string, unknown>;
+        expect(mod.evaluateHumanitarianConvoys).toBeUndefined();
+        expect(mod.applyHumanitarianConvoyDecisions).toBeUndefined();
+        expect(mod.maybeActivateSarajevoTunnel).toBeUndefined();
     });
 });

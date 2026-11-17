@@ -685,16 +685,6 @@ function projectMilitary(state, playerFaction, opportunityOwnership) {
     : [])
     .filter((row) => isRecord(row) && row.target_faction === playerFaction)
     .map(cloneJson);
-  projected.pending_convoy_decisions = (Array.isArray(military.pending_convoy_decisions)
-    ? military.pending_convoy_decisions
-    : [])
-    .filter((row) => isRecord(row) && row.route_faction === playerFaction)
-    .map(cloneJson);
-  projected.convoy_decision_history = (Array.isArray(military.convoy_decision_history)
-    ? military.convoy_decision_history
-    : [])
-    .filter((row) => isRecord(row) && (row.route_faction === playerFaction || row.target_faction === playerFaction))
-    .map(cloneJson);
   projected.friction_events = (Array.isArray(military.friction_events) ? military.friction_events : [])
     .filter((row) => isRecord(row) && ownOfficerIds.has(row.officer_id))
     .map(cloneJson);

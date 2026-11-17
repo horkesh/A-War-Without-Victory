@@ -105,25 +105,3 @@ export function getActiveSarajevoLifeline(state: GameState): SiegeLifelineState 
 // isSarajevoCoreSiegeCounterKey / lifelineAttritionMultiplier retired 2026-11-17
 // (§6 panel, Fable consult 6): their only readers were the retired siege counters,
 // siege bombardment attrition and siege morale drain.
-
-/**
- * Open the Dobrinja-Butmir tunnel once the Sarajevo pocket has been besieged and isolated
- * long enough (moved out of the retired supply_reserves.ts, 2026-11-17). Writes only
- * `military.sarajevo_tunnel_operational`; the former +0.5 general-supply-reserve grant is
- * retired with the supply-reserve economy (Fable consult 6).
- */
-export function maybeActivateSarajevoTunnel(state: GameState): boolean {
-    if (state.military.sarajevo_tunnel_operational) return false;
-    if ((state.meta?.turn ?? 0) < 60) return false;
-    const sarajevoEnclave = (state.political.enclaves ?? []).find((enclave) =>
-        enclave.faction_id === 'RBiH' &&
-        enclave.settlement_ids.some((sid) => state.political.sarajevo_state?.settlement_ids?.includes(sid))
-    );
-    const sarajevoResilience = state.political.enclave_resilience?.sarajevo;
-    const sarajevoIsolation = typeof sarajevoResilience === 'object' && sarajevoResilience
-        ? (sarajevoResilience as EnclaveResilienceEntry).isolation_turns
-        : 0;
-    if (!sarajevoEnclave || sarajevoEnclave.siege_duration < 20 || sarajevoIsolation < 20) return false;
-    state.military.sarajevo_tunnel_operational = true;
-    return true;
-}

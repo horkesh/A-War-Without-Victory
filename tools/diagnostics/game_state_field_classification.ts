@@ -217,7 +217,6 @@ const LIVE_FIELD_CLASSIFICATION_GROUPS = {
         'MilitaryState.closed_event_ids',
         'MilitaryState.command_authority',
         'MilitaryState.comms_override_by_corps',
-        'MilitaryState.convoy_decision_history',
         'MilitaryState.corps_command',
         'MilitaryState.corps_dialogues',
         'MilitaryState.corps_equipment_reserve',
@@ -257,7 +256,6 @@ const LIVE_FIELD_CLASSIFICATION_GROUPS = {
         'MilitaryState.operation_opportunity_traces',
         'MilitaryState.opsec_sectors',
         'MilitaryState.patron_defiance_supply_cuts',
-        'MilitaryState.pending_convoy_decisions',
         'MilitaryState.pending_event_decisions',
         'MilitaryState.pending_event_notifications',
         'MilitaryState.pending_officer_events',
@@ -298,9 +296,12 @@ const LIVE_FIELD_CLASSIFICATION_GROUPS = {
         'MilitaryState.brigade_desired_aor_cap',
         'MilitaryState.brigade_front_assignment',
         'MilitaryState.brigade_reposition_orders',
+        // Retired F1i 2026-11-16: humanitarian convoys are not modelled in 1.0; old saves still load them.
+        'MilitaryState.convoy_decision_history',
         // Retired 2026-11-17 (Fable consult 6): the supply-reserve economy is not modelled in 1.0; kept optional so old saves load; nothing writes it.
         'MilitaryState.general_supply_reserve',
         'MilitaryState.heavy_munitions_reserve',
+        'MilitaryState.pending_convoy_decisions',
         // Retired 2026-11-17 (§6 panel): siege counters not modelled in 1.0; kept so old saves load.
         'MilitaryState.siege_turn_counters',
         // Retired 2026-11-17 (Fable consult 6): the supply-reserve economy is not modelled in 1.0; kept optional so old saves load; nothing writes it.

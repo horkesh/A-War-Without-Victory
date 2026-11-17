@@ -68,7 +68,6 @@ const {
   buildStrategicPostureReviewPendingDecision,
   initiateStrategicPostureReviewOnState,
 } = require('./strategic_posture_review_contract.cjs');
-const { stageConvoyDecisionOnState } = require('./convoy_ipc_contract.cjs');
 const { fileOfficerDecisionRecord } = require('./officer_decision_history.cjs');
 const { listSaveRecords, resolveSaveRecordPath, writeFileAtomically } = require('./save_records.cjs');
 const {
@@ -3460,23 +3459,6 @@ app.whenReady().then(() => {
 
   // 'stage-airdrop-allocation' retired 2026-11-17 (Fable consult 6): it wrote root state.airdrop_allocation,
   // which nothing read (the retired airdrop step read military.airdrop_allocation, and only with reserves on).
-
-  ipcMain.handle('stage-convoy-decision', async (_event, payload) => {
-    const { convoyId, decision } = payload || {};
-    if (!currentGameStateJson) {
-      return { ok: false, error: 'No game loaded or invalid payload' };
-    }
-    try {
-      const sim = getDesktopSim();
-      const state = sim.deserializeState(currentGameStateJson);
-      const result = stageConvoyDecisionOnState(state, convoyId, decision);
-      if (!result.ok) return result;
-      writeCanonicalCurrentState(sim, state, _event.sender);
-      return { ok: true };
-    } catch (e) {
-      return { ok: false, error: e.message || String(e) };
-    }
-  });
 
   ipcMain.handle('stage-opsec-toggle', async (_event, payload) => {
     const { sectorId, active } = payload || {};

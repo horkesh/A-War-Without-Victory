@@ -133,7 +133,7 @@ describe('presidential command surface repurpose panels', () => {
           assessment: 'The front can hold for one more turn.',
           recommendations: [
             { priority: 2, action: 'Review reserves', reasoning: 'A weak sector is under pressure.' },
-            { priority: 1, action: 'Open convoy channel', reasoning: 'Civilian pressure is rising.' },
+            { priority: 1, action: 'Open patron channel', reasoning: 'Civilian pressure is rising.' },
           ],
         },
         onClose: () => {},
@@ -142,6 +142,6 @@ describe('presidential command surface repurpose panels', () => {
 
     expect(html).toContain('Chief-of-Staff Counsel');
     expect(html).not.toContain('AI Advisor');
-    expect(html.indexOf('Open convoy channel')).toBeLessThan(html.indexOf('Review reserves'));
+    expect(html.indexOf('Open patron channel')).toBeLessThan(html.indexOf('Review reserves'));
   });
 });

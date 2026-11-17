@@ -7,6 +7,7 @@ import { createEmptyCapital, createDefaultPatronRelationship } from '../src/stat
 import type { NegotiationState } from '../src/state/negotiation_types.js';
 import { initializeStrategicDimensions } from '../src/sim/events/strategic_dimensions.js';
 import { resolveEventDecision } from '../src/sim/events/resolve_decision.js';
+import { computeNegotiationBreakdown } from '../src/sim/negotiation/compute_capital.js';
 import { advanceTurn, startNewCampaign } from '../src/desktop/desktop_sim.js';
 import type { GameState, FactionId } from '../src/state/game_state.js';
 
@@ -617,6 +618,10 @@ describe('resolvePeacePlan', () => {
 
         // RS rejected Vance-Owen: credibility_change_on_reject.RS = -20 → applied to international_standing
         expect(neg.strategic_dimensions!.RS.international_standing.event_modifier).toBe(rsDimBefore - 20);
+        // §6 E3a1 D3: the rejection is recorded once, in peace_plan_history (resolvePeacePlan no
+        // longer pushes capital.peace_plans_rejected; computeNegotiationBreakdown rebuilds it).
+        expect(neg.peace_plan_history[neg.peace_plan_history.length - 1]?.responses.RS).toBe('rejected');
+        computeNegotiationBreakdown(state);
         expect(neg.capital.RS.peace_plans_rejected).toContain('vance_owen');
     });
 
@@ -664,6 +669,9 @@ describe('resolvePeacePlan', () => {
         const state = makeState({ turn: 10, war_start_turn: 10, negotiation: neg });
 
         resolvePeacePlan(state, 'vance_owen', 'accepted');
+        // §6 E3a1 D3: credit comes from peace_plan_history via the per-turn rebuild, not from a
+        // push at resolution time.
+        computeNegotiationBreakdown(state);
 
         // RBiH (player) accepted, HRHB (bot) accepted — both should have credit
         expect(neg.capital.RBiH.peace_plans_accepted).toContain('vance_owen');

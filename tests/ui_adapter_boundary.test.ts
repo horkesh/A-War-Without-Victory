@@ -306,7 +306,7 @@ describe('UI Adapter Boundary Discipline', () => {
     ]);
   });
 
-  it('adapter exposes resolved convoy and paramilitary histories for the player faction', () => {
+  it('adapter exposes resolved paramilitary history for the player faction and no retired convoy history (F1i)', () => {
     const rawState: any = {
       meta: { turn: 65, phase: 'war', player_faction: 'RS' },
       military: {
@@ -359,18 +359,8 @@ describe('UI Adapter Boundary Discipline', () => {
 
     const parsed = parseGameState(rawState);
 
-    expect(parsed.convoyDecisionHistory).toEqual([
-      {
-        id: 'convoy:64:srebrenica:RS',
-        turn: 64,
-        target_enclave: 'srebrenica',
-        route_faction: 'RS',
-        target_faction: 'RBiH',
-        supply_amount: 0.5,
-        decision: 'allow',
-        decided_by: 'player',
-      },
-    ]);
+    expect(parsed).not.toHaveProperty('convoyDecisionHistory');
+    expect(parsed).not.toHaveProperty('pendingConvoyDecisions');
     expect(parsed.paramilitaryDecisionHistory).toEqual([
       {
         id: 'paramilitary:5:D',

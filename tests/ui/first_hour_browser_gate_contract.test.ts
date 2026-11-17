@@ -438,7 +438,6 @@ describe('live surface browser sweep contract', () => {
     expect(tool).toContain('records-subtab-aftermath');
     expect(tool).toContain('records-subtab-aar');
     expect(tool).toContain('data-selected="true"');
-    expect(tool).toContain('convoy_decision');
     expect(tool).toContain('Expires T');
     expect(tool).toContain('op:');
     expect(tool).toContain('.json');

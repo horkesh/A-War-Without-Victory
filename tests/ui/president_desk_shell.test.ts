@@ -365,18 +365,19 @@ describe('PresidentDeskShell', () => {
     expect(screen.queryByText('Ready')).toBeNull();
   });
 
-  it('counts modal-required convoy decisions as required desk signatures', () => {
+  it('counts modal-required peace plan decisions as required desk signatures', () => {
     const { container } = renderDesk({
       state: makeState({
         player_faction: 'RBiH',
-        pendingConvoyDecisions: [
-          {
-            id: 'convoy_rbih',
-            target_enclave: 'gorazde',
-            route_faction: 'RBiH',
-            supply_amount: 18,
-          },
-        ],
+        pendingPeacePlan: {
+          planId: 'vance_owen',
+          planName: 'Vance-Owen Peace Plan',
+          narrative: 'International mediators have presented a proposal.',
+          turnOffered: 24,
+          proposedSplit: { RBiH: 0, RS: 0, HRHB: 0 },
+          institutionalModel: 'cantons',
+          botResponses: {},
+        },
       } as Partial<LoadedGameState>),
     });
 
@@ -386,25 +387,18 @@ describe('PresidentDeskShell', () => {
     expect(screen.queryByText('No signatures required')).toBeNull();
   });
 
-  it('does not keep answered convoy decisions as required desk signatures', () => {
+  it('does not keep answered paramilitary requests as required desk signatures', () => {
     const { container } = renderDesk({
       state: makeState({
         player_faction: 'RBiH',
-        pendingConvoyDecisions: [
-          {
-            id: 'convoy_answered',
-            target_enclave: 'gorazde',
-            route_faction: 'RBiH',
-            supply_amount: 18,
-            decision: 'allow',
-          },
+        pendingParamilitaryRequests: [
+          { faction: 'RBiH', strength: 120, target_osid: 'gorazde_1', estimated_civilian_risk: 10, decision: 'deny' },
         ],
       } as Partial<LoadedGameState>),
     });
 
     expect(screen.getByText('No presidential act required')).toBeTruthy();
     expect(container.textContent).not.toMatch(/Required\s*1/);
-    expect(screen.queryByTestId('desk-packet-item-convoy:convoy_answered')).toBeNull();
   });
 
   it('routes the blocked advance action to advance review instead of generic command cards', () => {

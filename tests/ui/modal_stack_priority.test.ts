@@ -29,7 +29,7 @@ describe('presidential modal stack priority', () => {
     );
     const modalRenderBlock = app.slice(
       app.indexOf('{activeEventDecisionId !== null'),
-      app.indexOf('<ConvoyDecisionModal'),
+      app.indexOf('<ReserveRequestModal'),
     );
 
     expect(autoLaunchEffect).toContain('if (turnAftermathOpen) return;');
