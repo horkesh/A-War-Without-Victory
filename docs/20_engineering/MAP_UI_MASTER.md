@@ -910,7 +910,7 @@ OPERATION_PHASE_TIMELINE = ['planning', 'execution', 'recovery']
 
 ## 11. Supply System Integration
 
-The supply-reserve economy (Phases A to E) was retired on 2026-11-17 (Systems Manual §14.2c): there is no `LoadedGameState.factionReserves`, no reserve bars and no airdrop control. The supply map layer colours OSIDs by the explicit OSID supply state (`supplyStateByOsid`: adequate, strained, critical), with the legacy `warSupplyPressure` (0-1 scale) as the fallback.
+The supply-reserve economy (Phases A to E) was retired on 2026-11-17 (Systems Manual §14.2c): there is no `LoadedGameState.factionReserves`, no reserve bars and no airdrop control. The supply map layer colours OSIDs by the explicit OSID supply state (`supplyStateByOsid`: adequate, strained, critical), with the legacy `warSupplyPressure` (0-100 scale) as the fallback.
 
 `buildSupplyGeoJSON` colors OSIDs by the supply state of the OSID itself (live `supply_state_by_osid`), then by the controlling faction's supply condition or pressure.
 

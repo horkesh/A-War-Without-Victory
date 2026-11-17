@@ -335,7 +335,7 @@ Every operation spends at least one full turn in planning. Once prepared and sta
 
 2. **Force Staging:** Participating brigades move into position. The operation cannot proceed until sufficient forces are staged near the objective.
 
-3. **Supply Check:** The corps verifies that its formations are supplied (connected to a source) for the planned operation.
+3. **Supply Check:** This step always passes in 1.0 (supply is connection, not stock); a formation cut off from supply (Critical) is dropped from the force at launch.
 
 4. **Assessment:** The operation commander evaluates all gathered information and issues a **go/no-go recommendation** based on intel confidence, force ratio, supply status, and their own personality. The assessment score is computed against the commander's go-threshold (aggressive commanders launch at lower scores).
 
