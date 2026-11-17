@@ -75,7 +75,7 @@ describe('DiplomacyPanel — Patron Relations reframe', () => {
                     { key: 'sarajevo', label: 'Sarajevo siege visibility', band: 'high', confidence: 'known' },
                 ],
                 needleHints: [
-                    { id: 'h1', label: 'Allow a humanitarian convoy', detail: 'Eases international pressure.', confidence: 'likely' },
+                    { id: 'h1', label: 'Accept a ceasefire monitor', detail: 'Eases international pressure.', confidence: 'likely' },
                 ],
             }),
         );
@@ -85,7 +85,7 @@ describe('DiplomacyPanel — Patron Relations reframe', () => {
         expect(html).toContain('data-testid="diplomacy-related-tracks"');
         expect(html.indexOf('Your Patron')).toBeLessThan(html.indexOf('Related Diplomatic Tracks'));
         expect(html).toContain('Sarajevo siege visibility');
-        expect(html).toContain('Allow a humanitarian convoy');
+        expect(html).toContain('Accept a ceasefire monitor');
     });
 
     it('keeps other patrons (external actors) as context', () => {

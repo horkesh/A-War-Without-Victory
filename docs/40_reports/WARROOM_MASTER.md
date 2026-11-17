@@ -127,7 +127,7 @@ The campaign shell now begins with the React-owned cinematic flow in `MainMenu.t
 | War begins | peace→war transition | Full-screen “War begins” |
 | Settings | toolbar | Audio/Video settings dialog |
 | Help | toolbar | Warroom controls list |
-| Command Briefing | command_briefing_folio | “What matters now”: urgent decisions, front alarms, convoy questions, enclave warnings; when IVP ≥60% or consequences active, footer button opens IVP breakdown |
+| Command Briefing | command_briefing_folio | “What matters now”: urgent decisions, front alarms, enclave warnings; when IVP ≥60% or consequences active, footer button opens IVP breakdown |
 | Diplomatic Press Briefing (IVP) | diplomatic_telephone (footer button) | Composite IVP + four weighted components (Sarajevo siege, enclave pressure, displacement visibility, negotiation momentum), thresholds 30/60/80%, active consequences; war only |
 | Commander Selection | command_briefing_folio (via OpsPlanningModal) | Officer roster with competence/aggressiveness ratings, regional fit, prep-time estimates; triggered from OpsPlanningModal submission |
 | Operation Briefing | command_briefing_folio (via CorpsFrontPanel) | Readiness gauges, commander assessment, Launch/Probe/Postpone/Abort actions; triggered from CorpsFrontPanel assessment-ready button |
