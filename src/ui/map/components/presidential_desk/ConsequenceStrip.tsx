@@ -26,6 +26,7 @@ const FAMILY_LABEL_KEYS: Record<DecisionConsequenceRecord['familyId'], MessageKe
   'peace-proposal': 'decisionConsequences.family.peaceProposal',
   'dayton-settlement': 'decisionConsequences.family.daytonSettlement',
   'paramilitary-authorization': 'decisionConsequences.family.paramilitaryAuthorization',
+  'paramilitary-receipt': 'decisionConsequences.family.paramilitaryReceipt',
   'patron-relations': 'decisionConsequences.family.patronRelations',
   'officer-personnel': 'decisionConsequences.family.officerPersonnel',
   'stance-matter': 'decisionConsequences.family.stanceMatter',
@@ -42,7 +43,12 @@ export function ConsequenceStrip({ state, onOpenRecords, onOpenDecisionRecords, 
   const battleCount = filedSummary?.battles?.length ?? 0;
   const displacement = filedSummary?.displacement_total ?? 0;
   const notableEvents = filedSummary?.notable_events?.length ?? 0;
-  const decisionRecords = buildDecisionConsequenceLedger(state, 2);
+  // The latest rows: the President's own decisions first (two), then at most one receipt for a paramilitary action carried out without a request, so those never push them out.
+  const allRecords = buildDecisionConsequenceLedger(state, Number.MAX_SAFE_INTEGER);
+  const decisionRecords = [
+    ...allRecords.filter((record) => record.familyId !== 'paramilitary-receipt').slice(0, 2),
+    ...allRecords.filter((record) => record.familyId === 'paramilitary-receipt').slice(0, 1),
+  ].sort((a, b) => b.turn - a.turn);
   const decisionRecordCount = buildDecisionConsequenceLedgerSummary(
     buildDecisionConsequenceLedger(state, Number.MAX_SAFE_INTEGER),
   ).recordsRouteCount;

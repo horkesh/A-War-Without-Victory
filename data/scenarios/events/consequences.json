@@ -1444,25 +1444,53 @@
   {
     "id": "csq_hvo_central_bosnia_offensive_1993",
     "title": "Ahmići and the Rupture",
-    "narrative": "On 16 April 1993 HVO forces attack the Bosniak houses of Ahmići at dawn. By evening the village is burning and more than 100 Bosniak civilians have been killed in the Ahmići massacre. The alliance with the ARBiH, already broken in practice, is finished. Orders go out from Mostar naming the Lašva valley towns, Gornji Vakuf, Prozor and Mostar as HVO objectives, and Zagreb's backing of the HVO continues. Whether the HVO brigades can carry out those orders depends on the state they are in.",
+    "narrative": "On 16 April 1993 HVO forces attack the Bosniak houses of Ahmići at dawn. By evening the village is burning and more than 100 Bosniak civilians have been killed in the Ahmići massacre. The alliance with the ARBiH, already broken in practice, is finished.",
     "localizations": {
       "en": {
         "title": "The Ahmići Massacre and the End of the Alliance"
       },
       "bcs": {
         "title": "Masakr u Ahmićima i kraj saveza",
-        "narrative": "Dana 16. aprila 1993. snage HVO-a u zoru napadaju bošnjačke kuće u Ahmićima. Do večeri selo gori, a u masakru u Ahmićima ubijeno je više od 100 bošnjačkih civila. Savez s ARBiH, već raskinut u praksi, okončan je. Iz Mostara izlaze naređenja koja kao ciljeve HVO-a navode gradove Lašvanske doline, Gornji Vakuf, Prozor i Mostar, a Zagreb nastavlja podržavati HVO. Mogu li brigade HVO-a izvršiti ta naređenja, zavisi od stanja u kojem se nalaze."
+        "narrative": "Dana 16. aprila 1993. snage HVO-a u zoru napadaju bošnjačke kuće u Ahmićima. Do večeri selo gori, a u masakru u Ahmićima ubijeno je više od 100 bošnjačkih civila. Savez s ARBiH, već raskinut u praksi, okončan je."
       }
     },
     "category": "military",
     "trigger": {
       "turn_min": 54,
-      "turn_max": 56,
+      "turn_max": 54,
       "phase": "war",
+      "requires_events": [
+        "croat_bosniak_war_begins_1993"
+      ],
       "condition": {
-        "type": "flag_equals",
-        "flag": "hrhb_political_goal",
-        "value": "croat_republic"
+        "type": "and",
+        "conditions": [
+          {
+            "type": "flag_equals",
+            "flag": "hrhb_political_goal",
+            "value": "croat_republic"
+          },
+          {
+            "type": "alliance_below",
+            "value": 0.2
+          },
+          {
+            "type": "not",
+            "condition": {
+              "type": "flag_equals",
+              "flag": "hrhb_central_bosnia_defense",
+              "value": "evacuate"
+            }
+          },
+          {
+            "type": "not",
+            "condition": {
+              "type": "flag_equals",
+              "flag": "hrhb_central_bosnia_defense",
+              "value": "federate_early"
+            }
+          }
+        ]
       }
     },
     "once": true,
@@ -1471,7 +1499,7 @@
     "responding_faction": "HRHB",
     "effect": {
       "kind": "narrative",
-      "text": "Mostar orders a wider HVO offensive in central Bosnia; the alliance with the ARBiH is finished."
+      "text": "The Ahmići massacre: more than 100 Bosniak civilians killed by HVO forces; the alliance with the ARBiH is finished."
     },
     "effects": [
       {
@@ -1483,23 +1511,84 @@
         "mode": "ceiling",
         "value": 0,
         "duration_turns": 60
-      },
+      }
+    ],
+    "dimension_shifts": [
       {
-        "kind": "morale_change",
         "faction": "HRHB",
-        "delta": 15
+        "dimension": "international_standing",
+        "delta": -15
+      }
+    ],
+    "sets_flags": {
+      "hvo_arbih_war_active": true,
+      "ahmici_1993": true
+    },
+    "historical_source": "ICTY Kordić Trial Judgment (IT-95-14/2-T) on the Ahmići massacre of 16 April 1993 and the Lašva Valley operations. ICTY Prlić et al. Trial Judgment (IT-04-74-T) on Zagreb-HRHB command coupling.",
+    "source_tier": "design_counterfactual",
+    "source_note": "This is a conditional simulation consequence, not a claim that the displayed outcome occurred historically. The historical_source field records the parent design chain and any contextual historical anchor; player-facing prose appears only when the authored state predicate fires."
+  },
+  {
+    "id": "csq_hvo_april_1993_offensive_orders",
+    "title": "Mostar's Orders for Central Bosnia",
+    "narrative": "With the alliance broken, orders go out from Mostar naming the Lašva valley towns, Kiseljak, Fojnica, Kakanj, Gornji Vakuf, Prozor and Mostar as HVO objectives, and Zagreb's backing of the HVO continues. Whether the HVO brigades can carry out those orders depends on the state they are in.",
+    "localizations": {
+      "en": {
+        "title": "Mostar's Orders for Central Bosnia"
       },
-      {
-        "kind": "cohesion_change",
-        "faction": "HRHB",
-        "delta": 10
-      },
-      {
-        "kind": "aggression_modifier",
-        "faction": "HRHB",
-        "delta": 0.25,
-        "duration_turns": 14
-      },
+      "bcs": {
+        "title": "Naređenja Mostara za srednju Bosnu",
+        "narrative": "Nakon raskida saveza iz Mostara izlaze naređenja koja kao ciljeve HVO-a navode gradove Lašvanske doline, Kiseljak, Fojnicu, Kakanj, Gornji Vakuf, Prozor i Mostar, a Zagreb nastavlja podržavati HVO. Mogu li brigade HVO-a izvršiti ta naređenja, zavisi od stanja u kojem se nalaze."
+      }
+    },
+    "category": "military",
+    "trigger": {
+      "turn_min": 53,
+      "turn_max": 53,
+      "phase": "war",
+      "requires_events": [
+        "croat_bosniak_war_begins_1993"
+      ],
+      "condition": {
+        "type": "and",
+        "conditions": [
+          {
+            "type": "flag_equals",
+            "flag": "hrhb_political_goal",
+            "value": "croat_republic"
+          },
+          {
+            "type": "alliance_below",
+            "value": 0.2
+          },
+          {
+            "type": "not",
+            "condition": {
+              "type": "flag_equals",
+              "flag": "hrhb_central_bosnia_defense",
+              "value": "evacuate"
+            }
+          },
+          {
+            "type": "not",
+            "condition": {
+              "type": "flag_equals",
+              "flag": "hrhb_central_bosnia_defense",
+              "value": "federate_early"
+            }
+          }
+        ]
+      }
+    },
+    "once": true,
+    "same_turn_requires_events": true,
+    "priority": 50,
+    "responding_faction": "HRHB",
+    "effect": {
+      "kind": "narrative",
+      "text": "Mostar orders a wider HVO offensive in central Bosnia."
+    },
+    "effects": [
       {
         "kind": "bot_priority_shift",
         "faction": "HRHB",
@@ -1515,41 +1604,23 @@
           "fojnica",
           "mostar"
         ],
-        "duration_turns": 14
-      }
-    ],
-    "dimension_shifts": [
+        "duration_turns": 15
+      },
       {
+        "kind": "cohesion_change",
         "faction": "HRHB",
-        "dimension": "military_credibility",
         "delta": 10
       },
       {
+        "kind": "morale_change",
         "faction": "HRHB",
-        "dimension": "international_standing",
-        "delta": -15
-      },
-      {
-        "faction": "HRHB",
-        "dimension": "patron_confidence",
-        "delta": 10
-      },
-      {
-        "faction": "RBiH",
-        "dimension": "military_credibility",
-        "delta": -5
-      },
-      {
-        "faction": "RBiH",
-        "dimension": "international_standing",
-        "delta": 10
+        "delta": 15
       }
     ],
     "sets_flags": {
-      "hvo_arbih_war_active": true,
-      "ahmici_1993": true
+      "hvo_arbih_war_active": true
     },
-    "historical_source": "ICTY Kordić Trial Judgment (IT-95-14/2-T) on the Ahmići massacre of 16 April 1993 and the Lašva Valley operations. ICTY Prlić et al. Trial Judgment (IT-04-74-T) on Zagreb-HRHB command coupling.",
+    "historical_source": "ICTY Prlić et al. Trial Judgment (IT-04-74-T): the HZ HB ultimatums on Vance-Owen provinces 3, 8 and 10 (15 January 1993, and April 1993 with a 15 April deadline) and the April 1993 orders; ICTY Blaškić Trial Judgment (IT-95-14-T) on the 15-16 April attack orders to the Central Bosnia Operative Zone; ICTY Kordić Trial Judgment (IT-95-14/2-T) on the Lašva Valley operations; Balkan Battlegrounds II pp. 417-421.",
     "source_tier": "design_counterfactual",
     "source_note": "This is a conditional simulation consequence, not a claim that the displayed outcome occurred historically. The historical_source field records the parent design chain and any contextual historical anchor; player-facing prose appears only when the authored state predicate fires."
   },

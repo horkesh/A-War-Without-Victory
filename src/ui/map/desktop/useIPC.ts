@@ -323,6 +323,7 @@ interface WindowAwwv {
         maxFires?: number | null;
         cooldownUntil?: number | null;
         onCooldown?: boolean;
+        availableFromTurn?: number | null;
         reachableBranchIds?: string[];
         unreachableBranchIds?: string[];
         error?: string;
@@ -358,6 +359,7 @@ interface WindowAwwv {
         maxFires?: number | null;
         cooldownUntil?: number | null;
         onCooldown?: boolean;
+        availableFromTurn?: number | null;
         error?: string;
     }>;
     /**
@@ -389,6 +391,7 @@ interface WindowAwwv {
         maxFires?: number | null;
         cooldownUntil?: number | null;
         onCooldown?: boolean;
+        availableFromTurn?: number | null;
         eligibleFormations?: { id: string; name: string; kind: string }[];
         error?: string;
     }>;
@@ -417,6 +420,7 @@ interface WindowAwwv {
         maxFires?: number | null;
         cooldownUntil?: number | null;
         onCooldown?: boolean;
+        availableFromTurn?: number | null;
         error?: string;
     }>;
     initiateStrategicPostureReview: () => Promise<{
@@ -774,6 +778,7 @@ export function useIPC() {
                     maxFires?: number | null;
                     cooldownUntil?: number | null;
                     onCooldown?: boolean;
+                    availableFromTurn?: number | null;
                     reachableBranchIds?: string[];
                     unreachableBranchIds?: string[];
                     error?: string;
@@ -796,6 +801,7 @@ export function useIPC() {
                     maxFires?: number | null;
                     cooldownUntil?: number | null;
                     onCooldown?: boolean;
+                    availableFromTurn?: number | null;
                     error?: string;
                 }>(),
 
@@ -816,6 +822,7 @@ export function useIPC() {
                     maxFires?: number | null;
                     cooldownUntil?: number | null;
                     onCooldown?: boolean;
+                    availableFromTurn?: number | null;
                     eligibleFormations?: { id: string; name: string; kind: string }[];
                     error?: string;
                 }>(),
@@ -826,7 +833,7 @@ export function useIPC() {
 
             getStrategicPostureReviewAvailability: awwv
                 ? () => awwv.getStrategicPostureReviewAvailability()
-                : makeNoop<{ ok: boolean; costCA?: number; available?: boolean; reason?: string | null; eventId?: string | null; currentTurn?: number; firesLeft?: number | null; maxFires?: number | null; cooldownUntil?: number | null; onCooldown?: boolean; error?: string }>(),
+                : makeNoop<{ ok: boolean; costCA?: number; available?: boolean; reason?: string | null; eventId?: string | null; currentTurn?: number; firesLeft?: number | null; maxFires?: number | null; cooldownUntil?: number | null; onCooldown?: boolean; availableFromTurn?: number | null; error?: string }>(),
 
             initiateStrategicPostureReview: awwv
                 ? () => awwv.initiateStrategicPostureReview()

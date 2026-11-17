@@ -3,7 +3,13 @@ import { describe, it, vi } from 'vitest';
 
 import { checkTriggeredOperations, injectArmyHqOperations, _TRIGGERED_OPS } from '../src/sim/combat/triggered_operations.js';
 import { warPhases } from '../src/sim/turn_phases/war_phases.js';
+import { finalizeOperationAAR } from '../src/sim/combat/operation_aar.js';
 import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
+import { createRequire } from 'node:module';
+
+const { registeredFarzAarIds } = createRequire(import.meta.url)('../tools/lib/farz_objective_gate.cjs') as {
+    registeredFarzAarIds: (armyHqOperations: unknown) => Set<string>;
+};
 import type {
     CorpsCommandState,
     FactionId,
@@ -294,6 +300,22 @@ describe('checkTriggeredOperations', () => {
         }
         return state;
     };
+
+    it('contract: the injected Farz Army HQ record reproduces its after-action report id (P-A guard)', () => {
+        // tools/lib/farz_objective_gate.cjs identifies the authored Farz by
+        // `${anchor_corps_id}:${name}:t${formed_on_turn}` from state.military.army_hq_operations.
+        // That must equal the AAR operation_id `${corps}:${op.name}:t${op.started_turn}` the engine
+        // writes when the operation closes, whether or not a Tactical Group formed.
+        const state = prepareFarzState(178);
+        assert.ok(injectArmyHqOperations(state).includes('Operation Farz 95'));
+        const farz = _TRIGGERED_OPS.find((def) => def.name === 'Operation Farz 95')!;
+        const op = state.military.corps_command![farz.primary_corps]!.active_operations
+            .find((candidate) => candidate.name === 'Operation Farz 95')!;
+        const aar = finalizeOperationAAR(state, farz.primary_corps, op);
+        const registered: Set<string> = registeredFarzAarIds(state.military.army_hq_operations);
+        assert.deepEqual([...registered], [aar.operation_id]);
+        assert.equal(aar.army_hq_telemetry ?? null, null); // no TG formed: the registry still identifies it
+    });
 
     const setArbihThirdCorpsActiveBrigades = (state: GameState, target: number): void => {
         const current = Object.values(state.military.formations ?? {}).filter((formation) =>

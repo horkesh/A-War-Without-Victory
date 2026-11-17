@@ -558,3 +558,45 @@ B1, army-commander competence decays linearly as documented (#701, inert in head
 Merged list moved 2026-11-16 (steward pass 43), verbatim from the same paragraph:
 
 the freeze cut and work list (#681) and the emergent-mode ruling (#692); the one-axis exhausted-corps Request-op in the played-test harness (#706, tooling); B4, the army commander's autonomous launch retired (#700, inert);
+
+
+Merged list moved 2026-11-16 (steward pass 45), verbatim from the same paragraph:
+
+RF-PM1, the paramilitary-refusal consequence fires only on a real refusal (#708, §6 panel, control-identical);  B0, the bot peace-plan floors measure territory by area (#697; inert in historical mode);  B5 scorer fixes 1 to 3, territory trend, exhaustion scale and the neutral patron term (#726, historical byte-identical, emergent hash-identical);
+
+
+Merged list moved 2026-11-16 (steward pass 47), verbatim from the same paragraph:
+
+N6, enemy-concentration zones survive sector renumbering (#709, control-identical; main hash at #709 83b8e8cd36023899, #726 inert);
+
+
+Merged list moved 2026-11-16 (steward pass 51), verbatim from the same paragraph:
+
+RB1, a takeover wave counts each person once (#718, §6 panel, control-identical; the headless `final_state_hash` is now df791f73c26ed642, off-map values only, the main hash at #718);
+
+
+Merged list moved 2026-11-16 (steward pass 52), verbatim from the same paragraph:
+
+B2 and B3, the political-directive chain retired for every faction and 538 stale pushback events drained (#710, save migration v39, control-identical; main pin `03159b9ee1e5877f`, the main hash at #710; FORAWWV §X and §XIV amended in #734, unanimous panel);
+
+
+Merged list moved 2026-11-17 (steward pass 60), verbatim from the same paragraph:
+
+the 13 bot operation-pool names that were real or loaded operations replaced in place (RB6, #703; labels live in state, so the headless `final_state_hash` is claimed to move to 1391f69248072728, #703's claimed hash, label-only, zero differences after mapping the names back; #703 merged with the advisory baseline-pins check red and did not re-pin the manifest, so main's pins were stale until the standalone re-pin PR (#713) landed; main with #703 and #708 is 01572f50dfea2378, the main hash at the re-pin, #713, merged, three measurements agree);
+
+
+Merged list moved 2026-11-17 (steward pass 60), verbatim from the same paragraph:
+
+CODE3, Stop-op reaches operations in planning and a halt holds (#705, byte-identical; Engine Invariants §14.10b, Systems Manual §6.5 and Game Bible line 298 amended); the t76 Belgrade event's historical default made accept (#748, historian ruling; historical 709 / 709 / 708 / 682; main pin `8c9fbf1d30e8a976`, the main hash at #748);
+
+
+Merged list moved 2026-11-17 (steward pass 61), verbatim from the same paragraph:
+
+B5 fix 4, `divergence_threshold` wired with a historical-territory gate so hands-off emergent passes the guard (#727, §6 unanimous, Systems Manual §7.10.7; historical byte-identical; freeze condition 7 MET on main at f98c074d9, re-run at the frozen commit);
+
+
+## Merged list moved 2026-11-17 (steward pass 62)
+
+The whole "Merged since 2026-11-12" paragraph of the roadmap, verbatim (zero loss), moved on 2026-11-17 to make room:
+
+**Merged since 2026-11-12:** citation audit batch 3 (#695);  RB6 (#703, 13 bot operation names replaced) and its re-pin (#713; hash history in the gate note); CODE3 Stop-op in planning (#705); 1995 Croatian help keyed on the Federation (Washington or a kept alliance) instead of the 1993 war (#732, data only; byte-identical); the Washington Federation by consent for a never-broken alliance (#737, A2a, byte-identical); the Ahmići trigger (#744) and effects (#753, main pin 0b86d3d742fcbf1c) and the gesture turn_min (#756); the bright line for the human player and the staff-sweep disclosure, D1 stage 1 (#740, §6 panels, byte-identical, headless 0b86d3d7); the army standing order no longer overrides corps stances or hides stance matters (#757, byte-identical, Systems Manual §6.4; a Chapters pre-freeze item done); the t76 Belgrade default (#748); B5 fix 4 (#727; freeze condition 7 MET on main at f98c074d9, re-run at the frozen commit); the ARBiH 7th Corps, RF-1 Phase B (#591, 709/709/708/681, FORAWWV §XIII.1 amended 4/4; registers SE7E-h, fixed in #685, and the ARBiH plan lockout (army-wide), first filed as RF-3C-EXH, now in the 1994-95 package); Earlier items (#670, #673, #667, #665, #663, #669, #671, #674, #666, #668, #661, #660, #657, #655, #656, #647, #640, #653, #649 to #651, #654, #635, #636, #625, #639, #643, #642, #645, #641, #623, #619, #631, #621, #632, #633, #634, and #629, #628, #618, #630, #614, #622, #617, #616, #620, #615, #600, #604 with SE6 held at `archive/claude/stance-effects-se6`) are in the archive.

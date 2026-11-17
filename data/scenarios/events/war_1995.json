@@ -770,9 +770,22 @@
       "turn_max": 200,
       "phase": "war",
       "requires_events": [
-        "hrhb_washington_agreement_1994",
         "nato_deliberate_force_1995"
-      ]
+      ],
+      "condition": {
+        "type": "or",
+        "conditions": [
+          {
+            "type": "event_fire_count",
+            "event_id": "hrhb_washington_agreement_1994",
+            "min_count": 1
+          },
+          {
+            "type": "alliance_above",
+            "value": 0.2
+          }
+        ]
+      }
     },
     "once": true,
     "effect": {
@@ -867,9 +880,20 @@
       "turn_min": 172,
       "turn_max": 173,
       "phase": "war",
-      "requires_events": [
-        "hrhb_washington_agreement_1994"
-      ]
+      "condition": {
+        "type": "or",
+        "conditions": [
+          {
+            "type": "event_fire_count",
+            "event_id": "hrhb_washington_agreement_1994",
+            "min_count": 1
+          },
+          {
+            "type": "alliance_above",
+            "value": 0.2
+          }
+        ]
+      }
     },
     "once": true,
     "effect": {

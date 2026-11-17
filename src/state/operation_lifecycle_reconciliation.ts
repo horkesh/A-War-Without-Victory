@@ -55,10 +55,26 @@ export function resolveTacticalGroupIdsForOperation(
         const group = groups[id];
         const matches = group.army_hq_op_id != null
             ? group.army_hq_op_id === op.army_hq_op_id
-            : group.corps_id === hostCorpsId && group.op_id === op.name;
+            : group.op_id === op.name && (group.host_corps_id ?? group.corps_id) === hostCorpsId;
         if (matches) result.push(id);
     }
     return result;
+}
+
+/**
+ * The corps whose `active_operations` holds this operation (object identity), else the single
+ * corps holding a live operation with the same name and start turn; null when not found or
+ * ambiguous. Used once, when a TG forms, to record its `host_corps_id`.
+ */
+export function findHostCorpsIdForOperation(state: GameState, op: CorpsOperation): FormationId | null {
+    const command = state.military.corps_command ?? {};
+    const corpsIds = Object.keys(command).sort(strictCompare);
+    for (const corpsId of corpsIds) {
+        if ((command[corpsId]?.active_operations ?? []).includes(op)) return corpsId as FormationId;
+    }
+    const byName = corpsIds.filter((corpsId) => (command[corpsId]?.active_operations ?? [])
+        .some((candidate) => candidate.name === op.name && candidate.started_turn === op.started_turn));
+    return byName.length === 1 ? byName[0] as FormationId : null;
 }
 
 function findMatchingLiveCorpsOperation(

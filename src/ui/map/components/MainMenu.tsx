@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode, type RefObject } from 'react';
+import { useEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type ReactNode, type RefObject } from 'react';
 import { Z } from '../../shared/zIndex';
 import { SUPPORTED_LOCALES, t, useLocale, type Locale, type MessageKey } from '../i18n';
 import { useIPC } from '../desktop/useIPC';
@@ -269,19 +269,34 @@ function FactionDossier({ faction, onBack, onTakeCommand, primaryActionRef }: { 
 }
 
 function ModeChoice({ faction, mode, starting, onModeChange, onBack, onBegin, primaryActionRef }: { faction: PlayerFaction; mode: DecisionMode; starting: boolean; onModeChange: (mode: DecisionMode) => void; onBack: () => void; onBegin: () => void; primaryActionRef: RefObject<HTMLButtonElement> }) {
+    const emergentRef = useRef<HTMLButtonElement>(null);
+    const historicalRef = useRef<HTMLButtonElement>(null);
+    // A radiogroup is one tab stop (the selected radio); the arrow keys move the choice and the focus together.
+    const moveMode = (event: ReactKeyboardEvent<HTMLDivElement>) => {
+        const forward = event.key === 'ArrowDown' || event.key === 'ArrowRight';
+        const backward = event.key === 'ArrowUp' || event.key === 'ArrowLeft';
+        if (!forward && !backward) return;
+        event.preventDefault();
+        // Two radios that wrap around: every arrow key moves to the other one.
+        const next: DecisionMode = mode === 'emergent' ? 'historical' : 'emergent';
+        onModeChange(next);
+        (next === 'emergent' ? emergentRef : historicalRef).current?.focus();
+    };
     return <div className="command-console-stack">
         <CommandHeading eyebrow={sidePickerFactionLabel(faction)} title={t('mainMenu.mode.heading')} />
         <p className="command-console-copy">{t('mainMenu.mode.help')}</p>
-        <div role="radiogroup" aria-label={t('mainMenu.mode.ariaLabel')} className="command-mode-list">
-            <ModeRadio checked={mode === 'emergent'} title={t('mainMenu.mode.emergent')} body={t('mainMenu.mode.emergentHelp')} onClick={() => onModeChange('emergent')} />
-            <ModeRadio checked={mode === 'historical'} title={t('mainMenu.mode.historical')} body={t('mainMenu.mode.historicalHelp')} onClick={() => onModeChange('historical')} />
+        <div role="radiogroup" aria-label={t('mainMenu.mode.ariaLabel')} className="command-mode-list" onKeyDown={moveMode}>
+            <ModeRadio id="mode-emergent" radioRef={emergentRef} checked={mode === 'emergent'} title={t('mainMenu.mode.emergent')} body={t('mainMenu.mode.emergentHelp')} onClick={() => onModeChange('emergent')} />
+            <ModeRadio id="mode-historical" radioRef={historicalRef} checked={mode === 'historical'} title={t('mainMenu.mode.historical')} body={t('mainMenu.mode.historicalHelp')} onClick={() => onModeChange('historical')} />
         </div>
         <div className="command-console-footer"><BackButton onClick={onBack} compact /><button ref={primaryActionRef} type="button" disabled={starting} onClick={onBegin} className="command-primary-button disabled:cursor-wait disabled:opacity-60">{starting ? t('mainMenu.starting') : t('mainMenu.begin')}</button></div>
     </div>;
 }
 
-function ModeRadio({ checked, title, body, onClick }: { checked: boolean; title: string; body: string; onClick: () => void }) {
-    return <button type="button" role="radio" aria-checked={checked} aria-label={title} onClick={onClick} className="command-mode"><span className="command-mode__title"><span aria-hidden="true" className="command-mode__indicator">{checked ? '●' : '○'}</span><strong>{title}</strong></span><span className="command-mode__body">{body}</span></button>;
+function ModeRadio({ id, radioRef, checked, title, body, onClick }: { id: string; radioRef: RefObject<HTMLButtonElement>; checked: boolean; title: string; body: string; onClick: () => void }) {
+    // The accessible name is the title and the description is the body, so a screen reader hears what the choice means
+    // (an aria-label equal to the title used to hide the body).
+    return <button ref={radioRef} type="button" role="radio" aria-checked={checked} aria-labelledby={`${id}-title`} aria-describedby={`${id}-body`} tabIndex={checked ? 0 : -1} onClick={onClick} className="command-mode"><span className="command-mode__title"><span aria-hidden="true" className="command-mode__indicator">{checked ? '●' : '○'}</span><strong id={`${id}-title`}>{title}</strong></span><span id={`${id}-body`} className="command-mode__body">{body}</span></button>;
 }
 
 function FieldRecords({ hasSave, records, loading, loadingFilename, importing, error, onResume, onLoadRecord, onImport, onDesktopImport, onBack }: { hasSave: boolean; records: SaveRecord[]; loading: boolean; loadingFilename: string | null; importing: boolean; error: string | null; onResume: () => void; onLoadRecord: (filename: string) => void; onImport: (json: unknown) => void; onDesktopImport: (() => Promise<void>) | null; onBack: () => void }) {

@@ -3103,7 +3103,7 @@ async function startReactCampaign(surface, faction, onStep = async () => {}) {
   await takeCommand.click({ timeout: 10000 });
   await onStep('command-mode');
   if (historicalChoice) {
-    const historicalMode = surface.getByRole('radio', { name: /^Let history run as it did$/i }).first();
+    const historicalMode = surface.getByRole('radio', { name: /^Replay the historical record$/i }).first();
     await historicalMode.waitFor({ state: 'visible', timeout: 30000 });
     await historicalMode.click({ timeout: 10000 });
     const selected = await historicalMode.getAttribute('aria-checked');

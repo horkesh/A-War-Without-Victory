@@ -896,6 +896,13 @@ export interface TacticalGroup {
     op_id: string;
     /** When set, this TG is part of an Army HQ op (faction-scope donor pool). */
     army_hq_op_id?: ArmyHqOpId;
+    /**
+     * The corps whose CorpsOperation this TG serves: its stable lifecycle identity together with
+     * `op_id` (zombie-TG fix, 2026-11-16). Differs from `corps_id` when the anchor is a brigade
+     * of another corps. Absent on TGs formed before the field existed; those keep the legacy
+     * host-corps = `corps_id` match.
+     */
+    host_corps_id?: FormationId;
     anchor_brigade_id: FormationId;
     /** Pre-sorted by brigade_id (strictCompare) for determinism. */
     donor_contributions: TgDonorContribution[];
@@ -2885,7 +2892,16 @@ export interface CorpsFrontSector {
     unstaffed_front?: boolean;
     /** Density: assigned_brigades / length_edges. */
     density: number;
-    /** Threat ratio: enemy power adjacent to sector / defensive power. */
+    /**
+     * Sector pressure index (NOT a force ratio, despite the name): enemy personnel on the
+     * sector's enemy-side cells, summed over the whole sector, divided by `defensive_power`,
+     * which is own cohesion-weighted personnel PER FRONT EDGE. It therefore rises as own cohesion
+     * or own men fall, and with sector length (enemy personnel on the whole sector divided by own
+     * cohesion-weighted power per edge); 9999 when enemies face a sector with no defensive power.
+     * Typical staffed values run from 1 to several hundred. About 20 readers have thresholds
+     * tuned to this scale, so it is kept as is (accepted as final, 2026-11-16). For a real local
+     * force ratio, divide enemy personnel by own effective personnel instead.
+     */
     threat_ratio: number;
     /** Computed defensive power (same formula as LocalFront). */
     defensive_power: number;
