@@ -157,7 +157,6 @@ describe('faction-aware command-card override resolution', () => {
     'act_authorize_op',
     'act_replace_commander',
     'act_patron_relations',
-    'act_convoy',
     'act_front_visit',
   ];
 

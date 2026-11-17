@@ -132,12 +132,11 @@ function makeState(overrides: Partial<LoadedGameState> = {}): LoadedGameState {
 
 function makePlayerDecisionSummary(overrides: Partial<PlayerDecisionSummaryView> = {}): PlayerDecisionSummaryView {
   return {
-    totalCount: 5,
-    blockingCount: 3,
+    totalCount: 4,
+    blockingCount: 2,
     families: [
       { id: 'peace_plan', count: 1, gatePolicy: 'modal_required' },
       { id: 'dayton_negotiation', count: 1, gatePolicy: 'modal_required' },
-      { id: 'convoy_decision', count: 1, gatePolicy: 'modal_required' },
       { id: 'reserve_request', count: 1, gatePolicy: 'advisory' },
       { id: 'officer_event', count: 1, gatePolicy: 'advisory' },
     ],
@@ -838,9 +837,6 @@ describe('buildPresidentialDecisionRoomView', () => {
           institutionalModel: 'cantons',
           botResponses: {},
         },
-        pendingConvoyDecisions: [
-          { id: 'convoy_srebrenica', target_enclave: 'srebrenica', route_faction: 'RBiH', supply_amount: 20 },
-        ],
         pendingParamilitaryRequests: [
           { faction: 'RBiH', strength: 600, target_osid: 'op:zvornik:zvornik_2', estimated_civilian_risk: 42, mode: 'offensive' },
         ],
@@ -860,8 +856,6 @@ describe('buildPresidentialDecisionRoomView', () => {
     expect(cardsById['paramilitary:pending'].actionLabel).toBe('Pregledaj paravojsku');
     expect(cardsById['manifest:peace_plan'].sourceLabel).toBe('Mirovni prijedlog');
     expect(cardsById['manifest:peace_plan'].actionLabel).toBe('Otvori sto');
-    expect(cardsById['manifest:convoy_decision'].sourceLabel).toBe('Pregled konvoja');
-    expect(cardsById['manifest:convoy_decision'].actionLabel).toBe('Otvori sto');
     expect(Object.values(cardsById).map((card) => `${card.sourceLabel} ${card.actionLabel}`).join('\n'))
       .not.toMatch(/Presidential Inbox|Diplomatic channel|Humanitarian channel|Review paramilitary|Review proposal|Review convoy/);
 
@@ -1069,9 +1063,6 @@ describe('buildPresidentialDecisionRoomView', () => {
     const view = buildPresidentialDecisionRoomView({
       state: makeState({
         playerDecisionSummary: makePlayerDecisionSummary(),
-        pendingConvoyDecisions: [
-          { id: 'convoy_srebrenica', target_enclave: 'srebrenica', route_faction: 'RBiH', supply_amount: 20 },
-        ],
         pendingDayton: {
           territorialPackages: [],
           institutionalPackages: [],
@@ -1121,68 +1112,29 @@ describe('buildPresidentialDecisionRoomView', () => {
     expect(view.advanceReadiness.blockedByExistingSystems).toBe(true);
     expect(view.advanceReadiness.headline).toBe('Review before advance');
     expect(view.cards.find((card) => card.id === 'review:pending')).toBeUndefined();
-    expect(view.metrics.pendingReviews).toBe(3);
+    expect(view.metrics.pendingReviews).toBe(2);
     expect(view.cards.map((card) => card.id)).toContain('manifest:peace_plan');
     expect(view.cards.map((card) => card.id)).toContain('manifest:dayton_negotiation');
-    expect(view.cards.map((card) => card.id)).toContain('manifest:convoy_decision');
+    expect(view.cards.map((card) => card.id)).not.toContain('manifest:convoy_decision');
     expect(view.advanceReadiness.items.map((item) => item.id)).toContain('manifest:peace_plan');
   });
 
-  it('does not block advance for unresolved convoy decisions owned by another route faction', () => {
+  it('weights modal cards across metrics, lenses, handoffs, questions, and loop steps', () => {
+    // F1i (2026-11-16): the convoy family (the only multi-item manifest modal) is retired; peace
+    // plan + Dayton now carry the cross-surface weighting check.
     const view = buildPresidentialDecisionRoomView({
       state: makeState({
-        playerDecisionSummary: {
-          totalCount: 0,
-          blockingCount: 0,
-          families: [],
+        player_faction: 'RBiH',
+        playerDecisionSummary: undefined,
+        pendingPeacePlan: {
+          planId: 'vance_owen',
+          planName: 'Vance-Owen Peace Plan',
+          narrative: 'International mediators have presented a proposal.',
+          turnOffered: 24,
+          proposedSplit: { RBiH: 0, RS: 0, HRHB: 0 },
+          institutionalModel: 'cantons',
+          botResponses: {},
         },
-        pendingConvoyDecisions: [
-          {
-            id: 'convoy_foreign',
-            target_enclave: 'Srebrenica',
-            route_faction: 'RS',
-            supply_amount: 20,
-          },
-        ],
-      } as Partial<LoadedGameState>),
-    });
-
-    expect(view.cards.map((card) => card.id)).not.toContain('manifest:convoy_decision');
-    expect(view.advanceReadiness.items.map((item) => item.id)).not.toContain('manifest:convoy_decision');
-  });
-
-  it('weights grouped modal cards across metrics, lenses, handoffs, questions, and loop steps', () => {
-    const view = buildPresidentialDecisionRoomView({
-      state: makeState({
-        player_faction: 'RBiH',
-        playerDecisionSummary: undefined,
-        pendingConvoyDecisions: [
-          { id: 'convoy_gorazde', target_enclave: 'Gorazde', route_faction: 'RBiH', supply_amount: 20 },
-          { id: 'convoy_srebrenica', target_enclave: 'Srebrenica', route_faction: 'RBiH', supply_amount: 25 },
-        ],
-      } as Partial<LoadedGameState>),
-    });
-
-    const convoyCard = view.cards.find((card) => card.id === 'manifest:convoy_decision');
-    expect(convoyCard?.countWeight).toBe(2);
-    expect(view.metrics.pendingReviews).toBe(2);
-    expect(view.lenses.find((lens) => lens.id === 'decision')?.count).toBe(2);
-    expect(buildPresidentialDecisionRoomSourceHandoffs(view.cards).find((handoff) => handoff.id === 'presidential-inbox')?.count).toBe(2);
-  });
-
-  it('falls back to pending modal blockers when player decision summary is absent', () => {
-    const view = buildPresidentialDecisionRoomView({
-      state: makeState({
-        player_faction: 'RBiH',
-        playerDecisionSummary: undefined,
-        pendingConvoyDecisions: [
-          {
-            id: 'convoy_rbih',
-            target_enclave: 'Gorazde',
-            route_faction: 'RBiH',
-            supply_amount: 20,
-          },
-        ],
         pendingDayton: {
           territorialPackages: [],
           institutionalPackages: [],
@@ -1192,7 +1144,53 @@ describe('buildPresidentialDecisionRoomView', () => {
       } as Partial<LoadedGameState>),
     });
 
-    expect(view.cards.map((card) => card.id)).toContain('manifest:convoy_decision');
+    expect(view.cards.find((card) => card.id === 'manifest:peace_plan')?.countWeight).toBe(1);
+    expect(view.cards.find((card) => card.id === 'manifest:dayton_negotiation')?.countWeight).toBe(1);
+    expect(view.metrics.pendingReviews).toBe(2);
+    expect(view.lenses.find((lens) => lens.id === 'decision')?.count).toBe(2);
+    expect(buildPresidentialDecisionRoomSourceHandoffs(view.cards).find((handoff) => handoff.id === 'presidential-inbox')?.count).toBe(2);
+  });
+
+  it('weights a grouped card by its countWeight (above 1) across metrics, lenses and handoffs', () => {
+    // ui-ux seat (F1i): the convoy family was the only multi-item manifest modal; the grouped
+    // review card (two event decisions in one card) now carries the countWeight > 1 check, so a
+    // cardWeight() that ignored countWeight would fail here.
+    const view = buildPresidentialDecisionRoomView({
+      state: makeState({
+        player_faction: 'RBiH',
+        playerDecisionSummary: undefined,
+        presidentialReviewQueue: {
+          pendingCount: 2,
+          criticalCount: 0,
+          eventDecisionCount: 2,
+          commandInterpretationCount: 0,
+          personnelDirectiveCount: 0,
+          operationOpportunityCount: 0,
+        },
+      } as Partial<LoadedGameState>),
+    });
+
+    const grouped = view.cards.find((card) => card.id === 'review:pending');
+    expect(grouped?.countWeight).toBe(2);
+    expect(view.metrics.pendingReviews).toBe(2);
+    expect(view.lenses.find((lens) => lens.id === grouped?.category)?.count).toBe(2);
+    expect(buildPresidentialDecisionRoomSourceHandoffs(view.cards).find((handoff) => handoff.id === 'presidential-inbox')?.count).toBe(2);
+  });
+
+  it('falls back to pending modal blockers when player decision summary is absent', () => {
+    const view = buildPresidentialDecisionRoomView({
+      state: makeState({
+        player_faction: 'RBiH',
+        playerDecisionSummary: undefined,
+        pendingDayton: {
+          territorialPackages: [],
+          institutionalPackages: [],
+          factionCapital: {},
+          patronOverride: {},
+        },
+      } as Partial<LoadedGameState>),
+    });
+
     expect(view.cards.map((card) => card.id)).toContain('manifest:dayton_negotiation');
     expect(view.advanceReadiness.blockedByExistingSystems).toBe(true);
   });

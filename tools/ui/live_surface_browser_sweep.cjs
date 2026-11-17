@@ -36,7 +36,6 @@ const RAW_TECHNICAL_TOKENS = [
   { label: 'W/L/D', pattern: /\bW\s*\/\s*L\s*\/\s*D\b/i },
   { label: 'active / total', pattern: /\bactive\s*\/\s*total\b/i },
   { label: 'cap / lost', pattern: /\bcap\s*\/\s*lost\b/i },
-  { label: 'convoy_decision', pattern: /\bconvoy_decision\b/i },
   { label: 'STRAIN-SHAPED', pattern: /\bSTRAIN-SHAPED\b/ },
   { label: 'raw planning ids', pattern: /\b(?:eligible_pending_review|not_applicable|surprise_counter_offer|union_3_republics_extra|tactical_commander|in_transit|tier_1|homeDistance|ambush_risk|defender_opsec)\b/i },
   { label: 'op:', pattern: /\bop:/i },

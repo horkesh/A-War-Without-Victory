@@ -11,7 +11,6 @@ const EXPECTED_FAMILIES = [
     'peace_plan',
     'dayton_negotiation',
     'paramilitary_request',
-    'convoy_decision',
     'reserve_request',
     'officer_event',
     'autonomy_proposal',
@@ -32,7 +31,6 @@ describe('player decision manifest', () => {
             { id: 'peace_plan', source: 'military.negotiation.pending_peace_plan', destination: 'inbox', receipt: 'military.negotiation.peace_plan_history' },
             { id: 'dayton_negotiation', source: 'military.negotiation.pending_dayton', destination: 'inbox', receipt: 'military.negotiation.dayton_result' },
             { id: 'paramilitary_request', source: 'pending_paramilitary_requests', destination: 'inbox', receipt: 'paramilitary_decision_history' },
-            { id: 'convoy_decision', source: 'military.pending_convoy_decisions', destination: 'inbox', receipt: 'military.convoy_decision_history' },
             { id: 'reserve_request', source: 'military.pending_reserve_requests', destination: 'army-hq', receipt: 'military.reserve_request_history' },
             { id: 'officer_event', source: 'military.pending_officer_events', destination: 'army-hq', receipt: 'military.officer_decision_history' },
             { id: 'autonomy_proposal', source: 'meta.pending_proposal_reviews', destination: 'decision-room', receipt: 'meta.proposal_decision_history' },
@@ -119,6 +117,7 @@ describe('player decision manifest', () => {
                         patronOverride: {},
                     },
                 },
+                // F1i: a legacy pending convoy from an old save produces no decision item.
                 pending_convoy_decisions: [
                     {
                         id: 'convoy_gorazde',
@@ -172,7 +171,6 @@ describe('player decision manifest', () => {
             peace_plan: 'modal_required',
             dayton_negotiation: 'modal_required',
             paramilitary_request: 'hard_block',
-            convoy_decision: 'modal_required',
             reserve_request: 'advisory',
             officer_event: 'advisory',
             autonomy_proposal: 'advisory',
@@ -181,28 +179,27 @@ describe('player decision manifest', () => {
             army_clash: 'advisory',
         });
 
-        expect(summary.totalCount).toBe(11);
-        expect(summary.blockingCount).toBe(5);
+        expect(summary.totalCount).toBe(10);
+        expect(summary.blockingCount).toBe(4);
         expect(summary.families.map((family) => family.id)).toEqual(EXPECTED_FAMILIES);
-        expect(summary.families.map((family) => family.count)).toEqual([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]);
+        expect(summary.families.map((family) => family.count)).toEqual([1, 1, 1, 1, 1, 1, 1, 1, 1, 1]);
         expect(listBlockingPlayerDecisions(state, 'RBiH').map((item) => item.familyId)).toEqual([
             'event_decision',
             'peace_plan',
             'dayton_negotiation',
             'paramilitary_request',
-            'convoy_decision',
         ]);
-        expect(countBlockingPlayerDecisions(state, 'RBiH')).toBe(5);
+        expect(countBlockingPlayerDecisions(state, 'RBiH')).toBe(4);
     });
 
-    it('ignores unresolved convoy decisions owned by another route faction', () => {
+    it('F1i: an unresolved convoy row from an old save is not a player decision family', () => {
         const state: any = {
             military: {
                 pending_convoy_decisions: [
                     {
-                        id: 'convoy_foreign',
+                        id: 'convoy_own_route',
                         target_enclave: 'srebrenica',
-                        route_faction: 'RS',
+                        route_faction: 'RBiH',
                         supply_amount: 20,
                     },
                 ],
@@ -211,10 +208,8 @@ describe('player decision manifest', () => {
 
         const summary = summarizePlayerDecisions(state, 'RBiH');
 
-        expect(summary.families.find((family) => family.id === 'convoy_decision')).toMatchObject({
-            count: 0,
-            blockingCount: 0,
-        });
+        expect(summary.families.map((family) => family.id)).not.toContain('convoy_decision');
+        expect(summary.totalCount).toBe(0);
         expect(listBlockingPlayerDecisions(state, 'RBiH')).toEqual([]);
         expect(countBlockingPlayerDecisions(state, 'RBiH')).toBe(0);
     });
@@ -340,7 +335,6 @@ describe('player decision manifest', () => {
             ['peace_plan', 0, 0],
             ['dayton_negotiation', 0, 0],
             ['paramilitary_request', 0, 0],
-            ['convoy_decision', 0, 0],
             ['reserve_request', 1, 0],
             ['officer_event', 0, 0],
             ['autonomy_proposal', 0, 0],

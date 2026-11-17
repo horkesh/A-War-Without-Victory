@@ -55,7 +55,6 @@ function toTargetView(target: SimBriefingItem['target'] | undefined): CommandBri
 function toSummaryFocus(value: string | undefined): SummaryFocusSection | undefined {
     return value === 'overview'
         || value === 'ivp'
-        || value === 'convoys'
         || value === 'casualties'
         || value === 'support'
         || value === 'opsec'

@@ -5,7 +5,6 @@ export type PlayerDecisionFamilyId =
     | 'peace_plan'
     | 'dayton_negotiation'
     | 'paramilitary_request'
-    | 'convoy_decision'
     | 'reserve_request'
     | 'officer_event'
     | 'autonomy_proposal'
@@ -97,16 +96,6 @@ export const PLAYER_DECISION_FAMILIES: readonly PlayerDecisionFamilyDefinition[]
         gatePolicy: 'hard_block',
         recommendedDestination: 'inbox',
         receiptPath: 'paramilitary_decision_history',
-    },
-    {
-        id: 'convoy_decision',
-        statePath: 'military.pending_convoy_decisions',
-        inboxType: 'convoy_decision',
-        ownerSurface: 'convoy_decision_modal',
-        resolver: 'stage-convoy-decision',
-        gatePolicy: 'modal_required',
-        recommendedDestination: 'inbox',
-        receiptPath: 'military.convoy_decision_history',
     },
     {
         id: 'reserve_request',
@@ -255,7 +244,6 @@ function labelForFamily(familyId: PlayerDecisionFamilyId): string {
         case 'peace_plan': return 'Peace plan';
         case 'dayton_negotiation': return 'Dayton negotiation';
         case 'paramilitary_request': return 'Paramilitary request';
-        case 'convoy_decision': return 'Convoy decision';
         case 'reserve_request': return 'Reserve request';
         case 'officer_event': return 'Officer event';
         case 'autonomy_proposal': return 'Autonomy proposal';
@@ -331,17 +319,6 @@ function paramilitaryRequestInstances(state: GameStateLike, playerFaction: strin
             const target = stringFrom(item.target_osid) ?? `request:${index}`;
             return instance(family, target, true, stringFrom(item.faction));
         });
-}
-
-function convoyDecisionInstances(state: GameStateLike, playerFaction: string | null): PlayerDecisionInstance[] {
-    const family = requiredFamily('convoy_decision');
-    return arrayFrom(getMilitary(state).pending_convoy_decisions)
-        .filter((item) => item.decision === undefined)
-        .filter((item) => {
-            const routeFaction = stringFrom(item.route_faction);
-            return !playerFaction || routeFaction === playerFaction;
-        })
-        .map((item, index) => instance(family, stringFrom(item.id) ?? `convoy:${index}`, true));
 }
 
 function reserveRequestInstances(state: GameStateLike, playerFaction: string | null): PlayerDecisionInstance[] {
@@ -430,7 +407,6 @@ function collectInstances(state: GameStateLike, playerFaction: string | null): P
         singletonInstance(state, 'peace_plan', negotiation.pending_peace_plan),
         singletonInstance(state, 'dayton_negotiation', negotiation.pending_dayton),
         paramilitaryRequestInstances(state, playerFaction),
-        convoyDecisionInstances(state, playerFaction),
         reserveRequestInstances(state, playerFaction),
         officerEventInstances(state, playerFaction),
         proposalReviewInstances(state, playerFaction, 'autonomy_proposal'),

@@ -82,14 +82,29 @@ function headlineForCeasefire(_event: TurnEvent, _pf: FactionId): WarHeadline {
     };
 }
 
-function headlineForWashington(_event: TurnEvent, _pf: FactionId): WarHeadline {
+function headlineForWashington(event: TurnEvent, _pf: FactionId): WarHeadline {
+    if ((event.details as Record<string, unknown> | undefined)?.warFought === false) {
+        // Path C (Federation by consent): no war was fought (narrative seat, 2026-11-17).
+        return {
+            headline: 'FEDERATION FORMED',
+            subhead: 'The ARBiH-HVO alliance becomes a federation',
+            body: `The alliance between the ARBiH and the HVO becomes the Federation of Bosnia and Herzegovina. `
+                + `The two armies have stayed allied through the war so far and now move toward joint command under a common political framework. `
+                + `That joint command still has to be built in practice. `
+                + `In the historical record, the alliance broke down into war in 1993. A ceasefire signed in Zagreb on 23 February 1994 took effect on 25 February. `
+                + `The framework agreement followed in Washington on 1 March, and the Federation accords on 18 March.`,
+            photoCaption: 'HVO and ARBiH officers meet in Central Bosnia',
+        };
+    }
     return {
-        headline: 'WASHINGTON AGREEMENT SIGNED',
-        subhead: 'Historic accord reshapes the political landscape',
-        body: `The Washington Agreement has been formally signed, establishing a new framework `
-            + `for cooperation between Bosniak and Croat political leadership. `
-            + `The agreement creates a federation structure intended to end hostilities between the two sides.`,
-        photoCaption: 'Officials sign the Washington Agreement at the ceremony',
+        // Fires on the engine's washington_signed flip: state, not a dated signing (panel 2026-11-17).
+        headline: 'FEDERATION FORMED',
+        subhead: 'The Croat-Bosniak war is over',
+        body: `The ARBiH and the HVO have stopped fighting each other, and the Federation of Bosnia and Herzegovina is established. `
+            + `Joint command and trust between the two armies remain to be built. `
+            + `In the historical record, the two army commanders signed a ceasefire in Zagreb on 23 February 1994, in force from 25 February. `
+            + `The framework agreement followed in Washington on 1 March, and the Federation accords on 18 March.`,
+        photoCaption: 'HVO and ARBiH officers meet on a former front line',
     };
 }
 
