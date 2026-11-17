@@ -11,6 +11,7 @@ import { describe, expect, it } from 'vitest';
 import { ensureRbihHrhbState, updateAllianceValue } from '../src/sim/early_war/alliance_update.js';
 import {
     getPatronDragStanceMultiplier,
+    getRefugeeCompactPhase,
     getRefugeeCompactPressureMultiplier,
     getRefugeeCompactRecruitmentMultiplier,
     getRefugeeCompactStatus,
@@ -303,6 +304,75 @@ describe('A2b PR-B: VOPP acknowledge is neutral, resist ends the compact; the ex
         expect(getRefugeeCompactStatus(state([]), 20).latest_expiry).toBeNull();
         // The Washington signing ends it.
         expect(getRefugeeCompactStatus(state([UNITED], { washingtonTurn: 40 }), 41).latest_expiry).toBeNull();
+    });
+});
+
+describe('A2b PR-B2: the compact phase the records-panel line reads', () => {
+    const VOPP = 'zagreb_restrains_boban_vopp';
+    const paying: D[] = [UNITED, PERSISTS, [53, 'hrhb_central_bosnia_defense_1993', 'federate_early'], [89, 'hrhb_federation_overture_1993', 'extend_federation_overture']];
+
+    it('none: no granting choice was ever made by the President', () => {
+        expect(getRefugeeCompactPhase(state([]), 50)).toEqual({ phase: 'none', until: null, ended_turn: null });
+        expect(getRefugeeCompactPhase(state([[5, 'hrhb_political_goal', 'united_front', 'HRHB', 'bot_political']]), 50).phase).toBe('none');
+    });
+
+    it('active: in force until the latest expiry', () => {
+        expect(getRefugeeCompactPhase(state([UNITED, PERSISTS]), 20)).toEqual({ phase: 'active', until: 8 + REFUGEE_COMPACT_GRANT_TURNS, ended_turn: null });
+        expect(getRefugeeCompactPhase(state(paying), 100)).toEqual({ phase: 'active', until: 89 + 30, ended_turn: null });
+    });
+
+    it('suspended: the displacement damping is lifted after a flip, the compact is still in force', () => {
+        expect(getRefugeeCompactPhase(state([UNITED], { suspendedUntil: 30 }), 25)).toEqual({ phase: 'suspended', until: 5 + REFUGEE_COMPACT_GRANT_TURNS, ended_turn: null });
+        expect(getRefugeeCompactPhase(state([UNITED], { suspendedUntil: 30 }), 30).phase).toBe('active');
+    });
+
+    it("lapsed: ended by the President's own answer, on that turn", () => {
+        const s = state([UNITED, PERSISTS, [46, VOPP, 'resist_patron']]);
+        expect(getRefugeeCompactPhase(s, 45).phase).toBe('active');
+        expect(getRefugeeCompactPhase(s, 46)).toEqual({ phase: 'lapsed', until: null, ended_turn: 46 });
+        expect(getRefugeeCompactPhase(s, 130).phase).toBe('lapsed');
+    });
+
+    it('ran out: no answer renewed it; the date is the last expiry', () => {
+        const s = state([UNITED, PERSISTS]);
+        expect(getRefugeeCompactPhase(s, 8 + REFUGEE_COMPACT_GRANT_TURNS - 1).phase).toBe('active');
+        expect(getRefugeeCompactPhase(s, 8 + REFUGEE_COMPACT_GRANT_TURNS)).toEqual({ phase: 'ran_out', until: null, ended_turn: 8 + REFUGEE_COMPACT_GRANT_TURNS });
+    });
+
+    it('signed: ended by the Washington signing while it was in force', () => {
+        const s = state(paying, { washingtonTurn: 102 });
+        expect(getRefugeeCompactPhase(s, 101).phase).toBe('active');
+        expect(getRefugeeCompactPhase(s, 102)).toEqual({ phase: 'signed', until: null, ended_turn: 102 });
+        expect(getRefugeeCompactPhase(s, 150).phase).toBe('signed');
+    });
+
+    it('a compact that had already ended before the signing keeps its own ending', () => {
+        expect(getRefugeeCompactPhase(state([UNITED, PERSISTS, [46, VOPP, 'resist_patron']], { washingtonTurn: 102 }), 110).phase).toBe('lapsed');
+        expect(getRefugeeCompactPhase(state([UNITED, PERSISTS], { washingtonTurn: 102 }), 110).phase).toBe('ran_out');
+    });
+
+    it('a lapse answer that comes after every entry ran out does not rewrite the ending (Codex P2 on #808)', () => {
+        // Both grants expire (t61 and t64); the overture refusal at t87 finds nothing in force.
+        const lastExpiry = 8 + REFUGEE_COMPACT_GRANT_TURNS;
+        const s = state([UNITED, PERSISTS, [87, 'hrhb_federation_overture_1993', 'reject_federation_path']]);
+        expect(getRefugeeCompactPhase(s, 86)).toEqual({ phase: 'ran_out', until: null, ended_turn: lastExpiry });
+        // After the late answer: still "ran out", still dated at the real expiry, not "lapsed" at t87.
+        expect(getRefugeeCompactPhase(s, 90)).toEqual({ phase: 'ran_out', until: null, ended_turn: lastExpiry });
+        expect(getRefugeeCompactStatus(s, 90).lapsed).toBe(false);
+        // A lapse answer while the compact IS in force still lapses it, on that turn.
+        const inForce = state([UNITED, PERSISTS, [30, 'hrhb_federation_overture_1993', 'reject_federation_path']]);
+        expect(getRefugeeCompactPhase(inForce, 90)).toEqual({ phase: 'lapsed', until: null, ended_turn: 30 });
+        // The multipliers are untouched by the late answer: nothing was in force before or after.
+        expect(getRefugeeCompactRecruitmentMultiplier(s, 'HRHB', 90)).toBe(1.0);
+    });
+
+    it('agrees with the multipliers: the price exists exactly in the active and suspended phases', () => {
+        const s = state([UNITED, PERSISTS]);
+        for (const t of [0, 20, 61, 64, 100]) {
+            const { phase } = getRefugeeCompactPhase(s, t);
+            const inForce = phase === 'active' || phase === 'suspended';
+            expect(getRefugeeCompactRecruitmentMultiplier(s, 'HRHB', t) < 1).toBe(inForce);
+        }
     });
 });
 
