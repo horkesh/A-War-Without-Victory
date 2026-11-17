@@ -529,14 +529,6 @@ export interface DiplomacyView {
     needleHints: DiplomacyNeedleHintView[];
 }
 
-export interface PendingConvoyDecisionView {
-    id: string;
-    target_enclave: string;
-    route_faction: Exclude<FactionId, null>;
-    supply_amount: number;
-    decision?: 'allow' | 'block' | 'divert';
-}
-
 export interface LoadedParamilitaryRequest {
     faction: string;
     strength: number;
@@ -555,7 +547,7 @@ export interface MunicipalitySupportOrderView {
 }
 
 export type CommandBriefingSeverity = 'critical' | 'warning' | 'info';
-export type SummaryFocusSection = 'overview' | 'ivp' | 'convoys' | 'casualties' | 'support' | 'opsec' | 'capital';
+export type SummaryFocusSection = 'overview' | 'ivp' | 'casualties' | 'support' | 'opsec' | 'capital';
 
 export interface CommandBriefingTargetView {
     type: 'summary' | 'enclaves' | 'operation' | 'sector' | 'settlement' | 'corps' | 'officer_events' | 'peace_plan' | 'none';
@@ -695,17 +687,6 @@ export interface PeacePlanDecisionRecordView {
     playerResponse: 'accepted' | 'rejected' | 'pending';
     responses: Record<string, 'accepted' | 'rejected' | 'pending'>;
     resolved: boolean;
-}
-
-export interface ConvoyDecisionRecordView {
-    id: string;
-    turn: number;
-    target_enclave: string;
-    route_faction: string;
-    target_faction: string;
-    supply_amount: number;
-    decision: 'allow' | 'block' | 'divert';
-    decided_by: 'player' | 'bot';
 }
 
 export interface ParamilitaryDecisionRecordView {
@@ -1266,7 +1247,6 @@ export interface LoadedGameState {
     civilianCasualties?: Record<string, CivilianCasualtyView>;
     internationalVisibilityPressure?: InternationalVisibilityPressureView;
     ivpConsequencesActive?: string[];
-    pendingConvoyDecisions?: PendingConvoyDecisionView[];
     municipalitySupportOrders?: Partial<Record<'RS' | 'RBiH' | 'HRHB', MunicipalitySupportOrderView>>;
     sarajevoTunnelOperational?: boolean;
     /**
@@ -1418,8 +1398,6 @@ export interface LoadedGameState {
     reserveRequestHistory?: ReserveRequestDecisionRecordView[];
     /** Filed diplomatic peace-plan decisions for Records/Chronicle consequence trail. */
     peacePlanHistory?: PeacePlanDecisionRecordView[];
-    /** Filed humanitarian convoy decisions for Records/Chronicle consequence trail. */
-    convoyDecisionHistory?: ConvoyDecisionRecordView[];
     /** Filed paramilitary authorization decisions for Records/Chronicle consequence trail. */
     paramilitaryDecisionHistory?: ParamilitaryDecisionRecordView[];
     /** Paramilitary sweeps carried out for the player's side without a request to the player (staff or standing order). */

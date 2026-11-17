@@ -109,7 +109,7 @@ describe('event decision modal auto-launch contract', () => {
     const app = readApp();
     const modalRenderBlock = app.slice(
       app.indexOf('{activeEventDecisionId !== null'),
-      app.indexOf('<ConvoyDecisionModal'),
+      app.indexOf('<ReserveRequestModal'),
     );
 
     expect(modalRenderBlock).toContain('(loadedGameState?.pendingEventDecisions ?? [])');
@@ -146,7 +146,7 @@ describe('event decision modal auto-launch contract', () => {
     const app = readApp();
     const modalRenderBlock = app.slice(
       app.indexOf('<EventDecisionModal'),
-      app.indexOf('<ConvoyDecisionModal'),
+      app.indexOf('<ReserveRequestModal'),
     );
 
     expect(modalRenderBlock).toContain('const result = await ipc.respondToEventDecision(eventId, responseId)');
@@ -172,7 +172,7 @@ describe('event decision modal auto-launch contract', () => {
     const app = readApp();
     const modalRenderBlock = app.slice(
       app.indexOf('<EventDecisionModal'),
-      app.indexOf('<ConvoyDecisionModal'),
+      app.indexOf('<ReserveRequestModal'),
     );
 
     expect(modalRenderBlock).toContain('resolveBrowserEventDecision(nextState, eventId, responseId, eventCatalogFull)');

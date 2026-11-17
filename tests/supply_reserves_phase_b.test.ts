@@ -1,15 +1,10 @@
 import { describe, it, expect } from 'vitest';
 import {
-    updateSiegeTurnCounters,
     updateSupplyReserves,
     ensureSupplyReserves,
 } from '../src/state/supply_reserves.js';
 import type { GameState } from '../src/state/game_state.js';
 import {
-    SIEGE_BASE_RATE,
-    SIEGE_ESCALATION_RATE,
-    MAX_SIEGE_PRESSURE_RATE,
-    SIEGE_MIN_POCKET_SIZE,
     PATRON_AID_SCALE,
     PATRON_AID_FACTION_EFFICIENCY,
     PATRON_AID_GENERAL_FRACTION,
@@ -43,220 +38,26 @@ function makeMinimalState(overrides: Partial<GameState> = {}): GameState {
 } as unknown as GameState;
 }
 
-describe('updateSiegeTurnCounters', () => {
-    it('increments counter for critical OSID', () => {
-        const state = makeMinimalState();
-        const supply = {
-            schema: 1 as const,
-            turn: 10,
-            factions: [{
-                faction_id: 'RBiH',
-                by_osid: [
-                    { osid: 'op:srebrenica:center', state: 'critical' as const },
-                    { osid: 'op:tuzla:center', state: 'adequate' as const },
-                ]
-            }]
-        };
-        const report = updateSiegeTurnCounters(state, supply);
-        expect(state.military.siege_turn_counters!['RBiH:op:srebrenica:center']).toBe(1);
-        expect(state.military.siege_turn_counters!['RBiH:op:tuzla:center']).toBeUndefined();
-        expect(report.active_sieges).toBe(1);
-    });
-
-    it('accumulates counter over multiple turns', () => {
-        const state = makeMinimalState({
-  military: {
-    siege_turn_counters: { 'RBiH:op:srebrenica:center': 3 },
-  } as any,
-});
-        const supply = {
-            schema: 1 as const,
-            turn: 10,
-            factions: [{
-                faction_id: 'RBiH',
-                by_osid: [{ osid: 'op:srebrenica:center', state: 'critical' as const }]
-            }]
-        };
-        updateSiegeTurnCounters(state, supply);
-        expect(state.military.siege_turn_counters!['RBiH:op:srebrenica:center']).toBe(4);
-    });
-
-    it('resets counter when no longer critical', () => {
-        const state = makeMinimalState({
-  military: {
-    siege_turn_counters: { 'RBiH:op:srebrenica:center': 5 },
-  } as any,
-});
-        const supply = {
-            schema: 1 as const,
-            turn: 10,
-            factions: [{
-                faction_id: 'RBiH',
-                by_osid: [{ osid: 'op:srebrenica:center', state: 'adequate' as const }]
-            }]
-        };
-        const report = updateSiegeTurnCounters(state, supply);
-        expect(state.military.siege_turn_counters!['RBiH:op:srebrenica:center']).toBeUndefined();
-        expect(report.counters_reset).toBe(1);
-    });
-});
-
-describe('updateSiegeTurnCounters — pocket-size threshold', () => {
-    /** Build a linear chain adjacency: A1—A2—A3—...—An */
-    function makeChainAdjacency(osids: string[]): Map<string, string[]> {
-        const adj = new Map<string, string[]>();
-        for (let i = 0; i < osids.length; i++) {
-            const neighbors: string[] = [];
-            if (i > 0) neighbors.push(osids[i - 1]);
-            if (i < osids.length - 1) neighbors.push(osids[i + 1]);
-            adj.set(osids[i], neighbors);
-        }
-        return adj;
-    }
-
-    it('freezes counter at 1 for small pockets (below SIEGE_MIN_POCKET_SIZE)', () => {
-        // 2 connected critical OSIDs — below threshold of 5
-        const state = makeMinimalState({
-  military: {
-    siege_turn_counters: { 'RBiH:op:a:1': 10, 'RBiH:op:a:2': 10 },
-  } as any,
-});
-        const supply = {
-            schema: 1 as const,
-            turn: 10,
-            factions: [{
-                faction_id: 'RBiH',
-                by_osid: [
-                    { osid: 'op:a:1', state: 'critical' as const },
-                    { osid: 'op:a:2', state: 'critical' as const },
-                ]
-            }]
-        };
-        const adjacency = makeChainAdjacency(['op:a:1', 'op:a:2']);
-        updateSiegeTurnCounters(state, supply, adjacency);
-        // Counter frozen at 1 (was 10, now reset to 1)
-        expect(state.military.siege_turn_counters!['RBiH:op:a:1']).toBe(1);
-        expect(state.military.siege_turn_counters!['RBiH:op:a:2']).toBe(1);
-    });
-
-    it('escalates normally for large pockets (at or above SIEGE_MIN_POCKET_SIZE)', () => {
-        // Build a pocket of exactly SIEGE_MIN_POCKET_SIZE critical OSIDs
-        const osids = Array.from({ length: SIEGE_MIN_POCKET_SIZE }, (_, i) => `op:siege:${i}`);
-        const counters: Record<string, number> = {};
-        for (const osid of osids) counters[`RBiH:${osid}`] = 5;
-
-        const state = makeMinimalState({
-  military: {
-    siege_turn_counters: counters,
-  } as any,
-});
-        const supply = {
-            schema: 1 as const,
-            turn: 10,
-            factions: [{
-                faction_id: 'RBiH',
-                by_osid: osids.map(osid => ({ osid, state: 'critical' as const }))
-            }]
-        };
-        const adjacency = makeChainAdjacency(osids);
-        updateSiegeTurnCounters(state, supply, adjacency);
-        // Counter should increment normally (5 → 6)
-        expect(state.military.siege_turn_counters![`RBiH:${osids[0]}`]).toBe(6);
-    });
-
-    it('handles mixed pockets: large escalate, small frozen', () => {
-        // Large pocket (5 OSIDs) + singleton (1 OSID)
-        const largeOsids = Array.from({ length: SIEGE_MIN_POCKET_SIZE }, (_, i) => `op:large:${i}`);
-        const singleton = 'op:isolated:outpost';
-        const counters: Record<string, number> = {};
-        for (const osid of largeOsids) counters[`RS:${osid}`] = 3;
-        counters[`RS:${singleton}`] = 8;
-
-        const state = makeMinimalState({
-  military: {
-    siege_turn_counters: counters,
-  } as any,
-});
-        const allOsids = [...largeOsids, singleton];
-        const supply = {
-            schema: 1 as const,
-            turn: 10,
-            factions: [{
-                faction_id: 'RS',
-                by_osid: allOsids.map(osid => ({ osid, state: 'critical' as const }))
-            }]
-        };
-        // Large pocket is a connected chain; singleton has no neighbors in the critical set
-        const adjacency = makeChainAdjacency(largeOsids);
-        adjacency.set(singleton, []); // isolated
-
-        updateSiegeTurnCounters(state, supply, adjacency);
-        // Large pocket escalates: 3 → 4
-        expect(state.military.siege_turn_counters![`RS:${largeOsids[0]}`]).toBe(4);
-        // Singleton frozen at 1
-        expect(state.military.siege_turn_counters![`RS:${singleton}`]).toBe(1);
-    });
-
-    it('backward compat: without adjacency, all OSIDs escalate', () => {
-        const state = makeMinimalState({
-  military: {
-    siege_turn_counters: { 'RS:op:outpost:1': 5 },
-  } as any,
-});
-        const supply = {
-            schema: 1 as const,
-            turn: 10,
-            factions: [{
-                faction_id: 'RS',
-                by_osid: [{ osid: 'op:outpost:1', state: 'critical' as const }]
-            }]
-        };
-        // No adjacency passed → all escalate
-        updateSiegeTurnCounters(state, supply);
-        expect(state.military.siege_turn_counters!['RS:op:outpost:1']).toBe(6);
-    });
-
-    it('SIEGE_MIN_POCKET_SIZE constant is 8', () => {
-        expect(SIEGE_MIN_POCKET_SIZE).toBe(8);
-    });
-});
-
-describe('updateSupplyReserves — siege drain', () => {
-    it('drains reserves based on siege turn counters', () => {
-        const state = makeMinimalState({
-  military: {
-    siege_turn_counters: { 'RBiH:op:srebrenica:center': 5 },
-  } as any,
-});
-        ensureSupplyReserves(state);
-        const prevGeneral = state.military.general_supply_reserve!['RBiH']!;
-        const prevHeavy = state.military.heavy_munitions_reserve!['RBiH']!;
-
-        const report = updateSupplyReserves(state, { RBiH: 0, RS: 0, HRHB: 0 });
-
-        // Siege drain: min(MAX, BASE × (1 + ESC × counter))
-        const drain = Math.min(MAX_SIEGE_PRESSURE_RATE, SIEGE_BASE_RATE * (1 + SIEGE_ESCALATION_RATE * 5));
-        const expectedGeneralDrain = drain * 0.7;
-        const expectedHeavyDrain = drain * 0.3;
-
-        const rbihEntry = report.factions.find(f => f.faction_id === 'RBiH')!;
-        expect(rbihEntry.siege_drain_general).toBeCloseTo(expectedGeneralDrain, 5);
-        expect(rbihEntry.siege_drain_heavy).toBeCloseTo(expectedHeavyDrain, 5);
-        expect(state.military.general_supply_reserve!['RBiH']).toBeLessThan(prevGeneral);
-    });
-
-    it('caps siege drain at MAX_SIEGE_PRESSURE_RATE', () => {
-        // Very high counter → should be capped
-        const state = makeMinimalState({
+// updateSiegeTurnCounters and the siege-counter reserve drain were retired
+// 2026-11-17 (§6 panel, Fable consult 6). An old save may still carry
+// military.siege_turn_counters; the reserve economy must ignore it.
+describe('updateSupplyReserves — retired siege drain', () => {
+    it('ignores siege_turn_counters carried by an old save', () => {
+        const withCounters = makeMinimalState({
   military: {
     siege_turn_counters: { 'RBiH:op:srebrenica:center': 1000 },
   } as any,
 });
-        ensureSupplyReserves(state);
-        const report = updateSupplyReserves(state, { RBiH: 0, RS: 0, HRHB: 0 });
-        const rbihEntry = report.factions.find(f => f.faction_id === 'RBiH')!;
-        const totalDrain = rbihEntry.siege_drain_general + rbihEntry.siege_drain_heavy;
-        expect(totalDrain).toBeCloseTo(MAX_SIEGE_PRESSURE_RATE, 5);
+        const without = makeMinimalState();
+        ensureSupplyReserves(withCounters);
+        ensureSupplyReserves(without);
+        const reportWith = updateSupplyReserves(withCounters, { RBiH: 0, RS: 0, HRHB: 0 });
+        const reportWithout = updateSupplyReserves(without, { RBiH: 0, RS: 0, HRHB: 0 });
+        expect(JSON.stringify(reportWith.factions)).toBe(JSON.stringify(reportWithout.factions));
+        expect(withCounters.military.general_supply_reserve).toEqual(without.military.general_supply_reserve);
+        expect(withCounters.military.heavy_munitions_reserve).toEqual(without.military.heavy_munitions_reserve);
+        // The counters are carried through untouched; nothing writes them.
+        expect(withCounters.military.siege_turn_counters).toEqual({ 'RBiH:op:srebrenica:center': 1000 });
     });
 });
 
@@ -319,13 +120,13 @@ describe('facility combat damage', () => {
 });
 
 describe('updateSupplyReserves — disabled gate', () => {
-    it('no siege drain when no siege_turn_counters', () => {
+    it('reports no siege drain channel (retired 2026-11-17)', () => {
         const state = makeMinimalState();
         ensureSupplyReserves(state);
         const report = updateSupplyReserves(state, { RBiH: 0, RS: 0, HRHB: 0 });
         for (const entry of report.factions) {
-            expect(entry.siege_drain_general).toBe(0);
-            expect(entry.siege_drain_heavy).toBe(0);
+            expect(entry).not.toHaveProperty('siege_drain_general');
+            expect(entry).not.toHaveProperty('siege_drain_heavy');
         }
     });
 });
@@ -362,7 +163,7 @@ describe('updateSupplyReserves — determinism', () => {
 });
 
 describe('updateSupplyReserves — combined update', () => {
-    it('combines maintenance, production, siege, patron, and embargo', () => {
+    it('combines maintenance, production, patron, and embargo', () => {
         const state = makeMinimalState({
   factions: [
                 {
@@ -388,7 +189,6 @@ describe('updateSupplyReserves — combined update', () => {
         // Verify all channels are populated
         expect(rbihEntry.maintenance_drain).toBeGreaterThan(0);
         expect(rbihEntry.production_income_general).toBeGreaterThan(0);
-        expect(rbihEntry.siege_drain_general).toBeGreaterThan(0);
         expect(rbihEntry.patron_aid_general).toBeGreaterThan(0);
         expect(rbihEntry.embargo_factor_general).toBeLessThan(1.0);
         expect(rbihEntry.embargo_factor_general).toBeGreaterThan(0);

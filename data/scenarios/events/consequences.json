@@ -308,6 +308,7 @@
   },
   {
     "id": "csq_bihac_pocket_collapses_1994",
+    "audience": "all",
     "title": "The Pocket Falls",
     "narrative": "The 5th Corps has held against VRS, RSK, and Abdić's APWB for almost two years. The arithmetic of siege outlasts the arithmetic of defenders: no airdrops, no reinforcement road, no column of volunteers left to march in. The RBiH defensive perimeter breaks in sectors and does not close again. Refugees cross into Croatian territory by the tens of thousands. A Corps that had been a national symbol becomes a casualty list.",
     "category": "military",
@@ -1013,6 +1014,7 @@
   },
   {
     "id": "csq_alternative_nato_trigger_1995",
+    "audience": "all",
     "title": "The Case Assembles Without Srebrenica",
     "narrative": "The case for sustained NATO air operations over Bosnia is assembled from the evidence the war has produced rather than from a single catalysing atrocity. Markale's shelling, the accumulated ICTY record, the hostage crisis of May, the repositioning of the Rapid Reaction Force — the arguments line up differently without the fall of Srebrenica, and they line up more slowly, but they line up. Brussels, Paris, and Washington coordinate the plan that the historical record assembled around the massacre. It takes longer. It arrives with less political momentum. It arrives.",
     "category": "diplomatic",
@@ -1271,6 +1273,7 @@
   },
   {
     "id": "csq_territorial_friction_1993",
+    "audience": "all",
     "image": "event_central_bosnia_front.webp",
     "title": "Who Administers Central Bosnia",
     "narrative": "The alliance does not end; the arguments begin. In Travnik, Zenica, Bugojno, Vitez, Gornji Vakuf — the towns that make up central Bosnia — HVO commanders and ARBiH commanders coexist in practice and negotiate in committee. Committees sit longer. By summer the question of which civilian administration signs requisitions, which police collect taxes, which schools open in which language, and whose flag flies over which building has produced a paper trail that the soldiers quietly curse. None of it is fighting. All of it is tension the alliance has to absorb.",
@@ -1320,6 +1323,7 @@
   },
   {
     "id": "csq_federation_early_1994",
+    "audience": "all",
     "image": "event_washington_agreement.webp",
     "title": "Federation Before Washington",
     "narrative": "The agreement that in the historical record required American pressure and the threat of NATO sanctions on all sides arrives on its own timetable. The united-front soldiers have held a common line against the VRS for the better part of two years; the politicians who follow their lead sign a federation structure that codifies what the armies already practise. The text owes less to the State Department and more to the working arrangements of central Bosnia. It is not the Washington Agreement that the historical record produced. It is an earlier, leaner document that leaves some questions deliberately open because the signatories trust each other enough to come back to them.",
@@ -1358,7 +1362,7 @@
         "kind": "alliance_lock",
         "mode": "floor",
         "value": 0.55,
-        "duration_turns": 60
+        "duration_turns": 17
       }
     ],
     "dimension_shifts": [
@@ -1443,6 +1447,7 @@
   },
   {
     "id": "csq_hvo_central_bosnia_offensive_1993",
+    "audience": "all",
     "title": "Ahmići and the Rupture",
     "narrative": "On 16 April 1993 HVO forces attack the Bosniak houses of Ahmići at dawn. By evening the village is burning and more than 100 Bosniak civilians have been killed in the Ahmići massacre. The alliance with the ARBiH, already broken in practice, is finished.",
     "localizations": {
@@ -1847,6 +1852,7 @@
   },
   {
     "id": "csq_early_peace_acceptance_w120",
+    "audience": "all",
     "image": "event_diplomatic_negotiation.webp",
     "title": "Pen Before the Last Offensive",
     "narrative": "The plan is signed before the last offensive runs its course. The ink is dry and the cease-fire boundary is drawn while several axes still have momentum and several enclaves are still intact. The leverage that the late-war battles would have purchased never materializes; what is on the table now is what will be on the table at the final accord. The negotiators understand the trade.",
@@ -3145,6 +3151,7 @@
   },
   {
     "id": "csq_alliance_reset_after_rupture",
+    "audience": "all",
     "title": "The Alliance Resets",
     "narrative": "After many months at the floor the alliance is, in effect, a new agreement. The hostile chapter is closed; what comes after is uncoded. Capitals neither celebrate nor recriminate. The negotiating positions are redrawn. Whatever the partnership becomes from this point will not be a continuation of what came before.",
     "category": "diplomatic",
@@ -3216,6 +3223,7 @@
   },
   {
     "id": "csq_tripartite_federation_overture",
+    "audience": "all",
     "image": "event_diplomatic_negotiation.webp",
     "title": "Tripartite Federation Proposal",
     "narrative": "An ambitious draft circulates through three capitals: not a peace plan but a constitutional one. A federation of three communities, each with autonomy, each with a veto, none with a majority. The mediators see in it the only structural answer to the war's grammar; the parties see in it whatever each side most fears or most wants. The decision is not whether the proposal is good — it is whether to keep the door open.",
@@ -3713,6 +3721,7 @@
   },
   {
     "id": "csq_partition_referendum_proposal",
+    "audience": "all",
     "image": "event_referendum.webp",
     "title": "The Partition Question",
     "narrative": "A draft proposal circulates in three languages. It does not name a settlement — it names a question, to be put to the populations. The mediators frame it as legitimacy; the parties read it as either a foothold or a precipice. The decision is whether the question gets asked at all. Refusal is a posture; engagement is, in its own way, an answer the parties have not given before.",
@@ -4111,6 +4120,7 @@
   },
   {
     "id": "csq_third_party_mediation_offered",
+    "audience": "all",
     "image": "event_diplomatic_negotiation.webp",
     "title": "The Third-Party Mediator",
     "narrative": "A nation with no direct stake in the war — distant, well-resourced, signalling its diplomatic ambition — offers itself as a third-party mediator. The standing mediators are tired; the major capitals are distracted. The offer is genuine but the price is the framing it would impose. The decision is whether to engage or hold to the existing tracks.",
@@ -5277,6 +5287,7 @@
   },
   {
     "id": "csq_post_dayton_train_and_equip_RBiH",
+    "audience": "all",
     "image": "event_arms_pipeline_night.webp",
     "title": "Train and Equip",
     "narrative": "The post-Dayton settlement does not arrive without a back end. The train-and-equip program comes wrapped in conditions, accountants, and instructors. The crates that show up at the depots are not the embargo-era catch-as-catch-can; they are stamped, manifested, and matched to schedules. The brigades cycling through the new training cadre return to their formations recognizable but different. The combat-power column registers the change two quarters in.",
@@ -5842,6 +5853,7 @@
   },
   {
     "id": "csq_post_dayton_train_and_equip_HRHB",
+    "audience": "all",
     "image": "event_arms_pipeline_night.webp",
     "title": "Train and Equip — Federation Side",
     "narrative": "The Federation framework brings a parallel train-and-equip pipeline to the HVO formations that opted into the joint structure. The crates that show up at the Croatia-border depots are stamped, manifested, and matched to schedules — a different rhythm from the embargo-era catch-as-catch-can. The brigades cycling through the new training cadre return to their formations recognizable but different. The combat-power column registers the change two quarters in. The political class in West Mostar treats the pipeline as evidence of the framework's seriousness.",

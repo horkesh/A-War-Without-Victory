@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import type { LoadedSettlementGraph } from '../src/map/settlements.js';
 import { updateEnclaveIntegrity } from '../src/state/enclave_integrity.js';
 import type { GameState } from '../src/state/game_state.js';
-import type { SupplyStateDerivationReport } from '../src/state/supply_state_derivation.js';
+import type { SupplyStateByOsidReport } from '../src/state/supply_state_derivation.js';
 
 function baseState(): GameState {
     return {
@@ -38,19 +38,16 @@ describe('enclave integrity', () => {
             ]),
             edges: [{ a: 'S1', b: 'S2' }]
         };
-        const supplyReport: SupplyStateDerivationReport = {
+        const supplyReport: SupplyStateByOsidReport = {
             schema: 1,
             turn: 5,
             factions: [
                 {
                     faction_id: 'RBiH',
-                    by_settlement: [
-                        { sid: 'S1', state: 'critical' },
-                        { sid: 'S2', state: 'critical' }
-                    ],
-                    adequate_count: 0,
-                    strained_count: 0,
-                    critical_count: 2
+                    by_osid: [
+                        { osid: 'S1', state: 'critical' },
+                        { osid: 'S2', state: 'critical' }
+                    ]
                 }
             ]
         };
@@ -58,5 +55,38 @@ describe('enclave integrity', () => {
         const report = updateEnclaveIntegrity(state, graph, graph.edges, supplyReport);
         expect(report.enclaves).toHaveLength(1);
         expect(report.humanitarian_pressure_total).toBeGreaterThan(0);
+    });
+
+    it('F1i: reads the OSID supply report, so OSID-controlled critical pockets become enclaves', () => {
+        const state = baseState();
+        state.political.political_controllers = { 'op:m1:a': 'RBiH', 'op:m1:b': 'RBiH', 'op:m1:c': 'RBiH' } as any;
+        const graph: LoadedSettlementGraph = {
+            settlements: new Map([
+                ['op:m1:a', { sid: 'op:m1:a', source_id: 'op:m1:a', mun_code: 'M1', mun: 'M1', mun1990_id: 'M1' }],
+                ['op:m1:b', { sid: 'op:m1:b', source_id: 'op:m1:b', mun_code: 'M1', mun: 'M1', mun1990_id: 'M1' }],
+                ['op:m1:c', { sid: 'op:m1:c', source_id: 'op:m1:c', mun_code: 'M1', mun: 'M1', mun1990_id: 'M1' }]
+            ]),
+            edges: [{ a: 'op:m1:a', b: 'op:m1:b' }, { a: 'op:m1:b', b: 'op:m1:c' }]
+        };
+        const supplyReport: SupplyStateByOsidReport = {
+            schema: 1,
+            turn: 5,
+            factions: [{
+                faction_id: 'RBiH',
+                by_osid: [
+                    { osid: 'op:m1:a', state: 'critical' },
+                    { osid: 'op:m1:b', state: 'critical' },
+                    { osid: 'op:m1:c', state: 'adequate' }
+                ]
+            }]
+        };
+
+        const report = updateEnclaveIntegrity(state, graph, graph.edges, supplyReport);
+        expect(report.enclaves).toHaveLength(1);
+        expect(report.enclaves[0]!.settlement_ids).toEqual(['op:m1:a', 'op:m1:b']);
+        expect(state.political.enclaves).toHaveLength(1);
+
+        // Without an OSID supply report nothing is critical, so there is no enclave.
+        expect(updateEnclaveIntegrity(baseState(), graph, graph.edges, undefined).enclaves).toHaveLength(0);
     });
 });

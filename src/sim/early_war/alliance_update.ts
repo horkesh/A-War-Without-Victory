@@ -14,6 +14,12 @@
 import type { FactionId, GameState, RbihHrhbState } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { getActiveAllianceBounds } from '../events/active_modifiers.js';
+import {
+    getPatronDragStanceMultiplier,
+    getRefugeeCompactPressureMultiplier,
+    isRefugeeCompactActive,
+    REFUGEE_COMPACT_FLIP_SUSPENSION_TURNS,
+} from './refugee_compact.js';
 
 // ── Tunable constants (all canon-referenced, version-controlled) ──
 
@@ -281,10 +287,18 @@ export function updateAllianceValue(state: GameState): AllianceUpdateReport {
     const bilateralFlipsLastTurn = rhs.bilateral_flips_this_turn;
     const territorialIncidentsLastTurn = rhs.territorial_incidents_this_turn ?? 0;
     const noIncidents = bilateralFlipsLastTurn === 0;
+    const turnNow = state.meta.turn ?? 0;
+
+    // A2b refugee compact (refugee_compact.ts): a bilateral flip while a compact is active suspends
+    // its damping. Written only while a compact is active, so runs without one never carry the field.
+    if (!noIncidents && isRefugeeCompactActive(state, turnNow)) {
+        rhs.refugee_compact_suspended_until = turnNow + REFUGEE_COMPACT_FLIP_SUSPENSION_TURNS;
+    }
 
     // Compute drivers
     const appeasement = APPEASEMENT_BASE_RATE * (noIncidents ? 1.0 : 0.3);
-    const patronDrag = PATRON_PRESSURE_COEFF * patronCommitment;
+    // A2b: the 1992 HRHB stance halves Zagreb's drag per granting choice (exactly 1.0 with none).
+    const patronDrag = PATRON_PRESSURE_COEFF * patronCommitment * getPatronDragStanceMultiplier(state, turnNow);
     const incidentPenalty = INCIDENT_PENALTY_PER_FLIP * bilateralFlipsLastTurn;
     const territorialPenalty = TERRITORIAL_INCIDENT_PENALTY * territorialIncidentsLastTurn;
     const ceasefireBoost = rhs.ceasefire_active ? CEASEFIRE_RECOVERY_RATE : 0;
@@ -377,7 +391,9 @@ export function computeRefugeePressure(state: GameState): number {
         totalPressure += REFUGEE_PRESSURE_RATE * scaledRatio;
     }
 
-    return totalPressure;
+    // A2b refugee compact: a joint refugee administration damps the friction (exactly 1.0 with none).
+    const compact = getRefugeeCompactPressureMultiplier(state, state.meta.turn ?? 0);
+    return compact === 1.0 ? totalPressure : totalPressure * compact;
 }
 
 /**

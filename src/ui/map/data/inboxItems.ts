@@ -40,7 +40,7 @@ import type { RecruitmentMatter } from './recruitmentMatter';
 import { buildRecruitmentMatterCopy } from './recruitmentMatterCopy';
 import { armyClashTitle } from './armyClashCopy';
 
-export type InboxItemType = 'event_decision' | 'peace_plan' | 'dayton_negotiation' | 'convoy_decision' | 'paramilitary_request' | 'reserve_request' | 'officer_event' | 'operation_opportunity' | 'autonomy_proposal' | 'stance_matter' | 'army_clash' | 'intelligence_notification' | 'recruitment' | 'situation';
+export type InboxItemType = 'event_decision' | 'peace_plan' | 'dayton_negotiation' | 'paramilitary_request' | 'reserve_request' | 'officer_event' | 'operation_opportunity' | 'autonomy_proposal' | 'stance_matter' | 'army_clash' | 'intelligence_notification' | 'recruitment' | 'situation';
 export type InboxSeverity = 'blocking' | 'urgent' | 'normal' | 'info';
 
 export interface InboxItem {
@@ -62,7 +62,7 @@ export interface InboxItem {
     /** Keep a selected informational situation visible in the Desk packet. */
     includeInDeskPacket?: boolean;
     /** Which panel/modal to open when clicked */
-    action: 'event_modal' | 'peace_plan_modal' | 'dayton_modal' | 'paramilitary_review' | 'convoy_decision_modal' | 'army_reserve' | 'army_hq_personnel' | 'army_hq_briefing' | 'decision_room' | 'dismiss_intelligence_notification' | 'recruitment' | 'none';
+    action: 'event_modal' | 'peace_plan_modal' | 'dayton_modal' | 'paramilitary_review' | 'army_reserve' | 'army_hq_personnel' | 'army_hq_briefing' | 'decision_room' | 'dismiss_intelligence_notification' | 'recruitment' | 'none';
     /** Priority for sorting (lower = higher priority) */
     priority: number;
 }
@@ -74,8 +74,7 @@ function priorityDestinationForInboxAction(action: InboxItem['action']): Preside
     if (action === 'event_modal'
         || action === 'peace_plan_modal'
         || action === 'dayton_modal'
-        || action === 'paramilitary_review'
-        || action === 'convoy_decision_modal') return 'inbox';
+        || action === 'paramilitary_review') return 'inbox';
     if (action === 'army_reserve' || action === 'army_hq_personnel' || action === 'army_hq_briefing' || action === 'recruitment') return 'army-hq';
     return 'none';
 }
@@ -252,7 +251,6 @@ export function deriveInboxItems(
     const peaceSurface = getDecisionSurface('peace_plan');
     const daytonSurface = getDecisionSurface('dayton_negotiation');
     const paramilitarySurface = getDecisionSurface('paramilitary_request');
-    const convoySurface = getDecisionSurface('convoy_decision');
     const reserveSurface = getDecisionSurface('reserve_request');
     const officerSurface = getDecisionSurface('officer_event');
     const operationSurface = getDecisionSurface('operation_opportunity');
@@ -464,21 +462,6 @@ export function deriveInboxItems(
             subtitle: `${consequenceSummary} ${sourceContext}`,
             action: paramilitarySurface.inboxAction,
             priority: 25,
-        });
-    }
-
-    const convoyDecisions = (state.pendingConvoyDecisions ?? [])
-        .filter((convoy) => convoy.decision == null)
-        .filter((convoy) => playerFactionMatch(convoy.route_faction, playerFaction));
-    for (const convoy of convoyDecisions) {
-        items.push({
-            id: `convoy:${convoy.id}`,
-            type: 'convoy_decision',
-            severity: 'normal',
-            title: t('inbox.item.convoy.title'),
-            subtitle: t('inbox.item.convoy.subtitle', { supply: convoy.supply_amount }),
-            action: convoySurface.inboxAction,
-            priority: 38,
         });
     }
 

@@ -3,8 +3,9 @@ import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 // B7 — Phase 0 consolidation-set guard. The lifeline substrate consolidates
-// the siege "external supply" channel across EXACTLY these four fragments plus
-// the derivation home. This test fails if a NEW site starts self-deriving
+// the siege "external supply" channel across EXACTLY the consumers below plus
+// the derivation home. (Siege attrition, siege morale drain and the supply-reserve
+// siege drain were retired 2026-11-17 by the §6 panel, leaving exhaustion.) This test fails if a NEW site starts self-deriving
 // Sarajevo siege state or reading the shared scalar without being recorded
 // here — preventing double-counting (Plan §10 risk #4) and scope creep.
 
@@ -12,10 +13,7 @@ const ROOT = resolve(__dirname, '..');
 
 /** The complete set of files that consume the shared lifeline scalar. */
 const LIFELINE_CONSUMERS = [
-    'src/sim/combat/siege_attrition.ts',
-    'src/sim/combat/siege_morale_drain.ts',
     'src/sim/combat/exhaustion.ts',
-    'src/state/supply_reserves.ts',
 ] as const;
 
 /** The single derivation home that writes `lifeline` and external_supply. */
@@ -26,7 +24,7 @@ function read(rel: string): string {
 }
 
 describe('B7 lifeline consolidation set', () => {
-    it('exactly the four named fragments consume getActiveSarajevoLifeline', () => {
+    it('every named consumer reads getActiveSarajevoLifeline', () => {
         for (const f of LIFELINE_CONSUMERS) {
             expect(read(f), `${f} should consume the shared lifeline scalar`).toContain('getActiveSarajevoLifeline');
         }

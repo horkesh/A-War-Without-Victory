@@ -134,10 +134,7 @@ turn pipeline or replace the player's negotiation. The signing narrative require
   - Returns: `{ ok: boolean, error?: string }`
   - Behavior: writes deterministic enclave airdrop allocation into `state.airdrop_allocation`, reserializes, and broadcasts the updated state for enclave/supply UI surfaces.
 
-- `stage-convoy-decision` (invoke)
-  - Payload: `{ convoyId: string, decision: 'allow' | 'block' | 'divert' }`
-  - Returns: `{ ok: boolean, error?: string }`
-  - Behavior: resolves one pending convoy choice in `state.military.pending_convoy_decisions`, reserializes, and broadcasts the updated state.
+- `stage-convoy-decision` — **retired (F1i, 2026-11-16).** Humanitarian convoys are not modelled in 1.0; the channel, its handler and its preload method are removed. Old saves may still carry `military.pending_convoy_decisions` / `convoy_decision_history`; they load but no surface reads them.
 
 - `stage-municipality-support-order` (invoke)
   - Payload: `{ faction: 'RS' | 'RBiH' | 'HRHB', munId: string, type: 'weapons_shipment' | 'staff_priority' | 'croatian_support_package' }`

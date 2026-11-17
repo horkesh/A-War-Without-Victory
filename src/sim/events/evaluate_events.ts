@@ -19,6 +19,7 @@ import { applyDimensionShift, type DimensionStore } from './strategic_dimensions
 import { getPoliticalPersonality, computePoliticalAssessment } from '../political/political_personality.js';
 import { pickPoliticalResponse, pickPoliticalResponseWithHistory } from '../political/political_event_decision.js';
 import { isWarOutsideHistoricalBand } from '../political/historical_territory_band.js';
+import { isPoliticalGateEligible, isPoliticsOffHistoryFor } from '../political/political_departure_markers.js';
 import { compareCausalityEntries, strictCompare } from '../../state/validateGameState.js';
 import { findAnswerAheadOfFiring, isAnswerAheadOfFiringDecision } from './answer_ahead_of_firing.js';
 
@@ -482,7 +483,11 @@ export function selectBotEventResponse(
                     assessment,
                     personality,
                     historicalReferenceId,
-                    isWarOutsideHistoricalBand(state),
+                    // Territory band, or (not for §6 decisions) a political departure that
+                    // ruled out this faction's history.
+                    isWarOutsideHistoricalBand(state)
+                        || (isPoliticalGateEligible(def.id, def.family)
+                            && isPoliticsOffHistoryFor(state, respondingFaction)),
                 ),
                 decisionSource: 'bot_political',
             };
