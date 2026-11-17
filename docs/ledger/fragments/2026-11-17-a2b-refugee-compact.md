@@ -25,14 +25,19 @@
 - **Acceptance** (played HRHB, `desktop_calibration_compare`, logs `C:/Pyrrhic/AWWV-worktrees/_logs/b5-scorer-20261116/a2b*`).
   - **A, pays** (`united_front`, `formal_alliance_persists`, VOPP `resist_patron`, `federate_early`, `extend_federation_overture`): no war; Path C at **t102**; alliance 0.90 at t130; HRHB patron_confidence 10.
   - **B, careless** (the same 1992 choices, then the defaults): the compact lapses at t46; **war at t71**.
-  - **C, reneges** (A, but `reject_federation_path` at t87): the alliance falls 0.55 → 0.06 by t102; no consent; flips; **war at t103**.
-  - **D, left alone:** historical `0b86d3d742fcbf1c` and emergent `84595a73932f3ac4`, byte-identical to main.
+  - **C, reneges** (A, but `reject_federation_path` at t87): the alliance falls 0.55 → 0.06 by t102; no consent; flips; **war at t103** (t104 on the 2026-11-17 re-proof below); the engine ceasefire follows at t148 (t149) and Path A signs at t152 (t153), so a refusing President reaches the pressured Washington route about 50 weeks after the one who kept paying.
+  - **D, left alone:** historical `2c63bd10fecd6bc7` and emergent `bfcbfa55dd206585`, byte-identical to main (the pins did not move).
+- **Re-proved 2026-11-17** on main `87efa8da2` (#763 squashed in; the tree equals the proved stacked merge). `npm run test:baselines`: "all scenarios match", manifest unchanged. Played probes, 130 turns (C 188), logs `_logs/b5-scorer-20261116/land768/`:
+  - A pays: Path C at **t102**, no war, alliance 0.90.
+  - B careless: war at **t71**; Washington signs t102 after the war.
+  - C reneges: war **t104**, ceasefire **t149**, Path A signs **t153**, alliance 0.90 at t188. One week later than the earlier t103/t148/t152 on an older main. All three moved together, so the war's onset shifted by a week; main took about 33 commits in between and the cause was not isolated (no acceptance condition depends on the exact week).
+  - D no compact: the final save is byte-identical to #763's own no-override game (same SHA-256 on both the player and headless saves).
 - **Two defects found by the acceptance runs and fixed here:**
   - The political goal is answered ahead of firing at t0, so a 52-turn grant expired on the H6 renewal turn and the paying President still went to war. The grant now runs 56 turns.
   - `csq_federation_early_1994`'s 60-turn floor (from t70) made the war impossible whatever the President did later. It now ends at t87.
 - **Tests.**
   - `tests/refugee_compact.test.ts` (10): grants, renewals, lapses, suspension, the 1.0 fast path, the price in the recruitment reader, save round-trip with and without the field.
   - `tests/washington_by_consent.test.ts`: no consent after a refused overture.
-  - `strict_null_inventory_progress`: 598 → 599 (+1 optional state field).
+  - `strict_null_inventory_progress`: 599 → 600, state 223 → 224 (+1 optional state field, on top of the zombie-TG field already on main).
 - **Binding copy rule (historian).** No player-facing text may say or imply that refugees caused the 1993 war.
 - **Coordination.** H6 `federate_early` now has a real lever. The orchestrator told the batch-b lane that its ruling-5 sweep must not retire it; `evacuate` stays with that lane.
