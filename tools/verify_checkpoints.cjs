@@ -379,6 +379,8 @@ for (const [corpsId, cmd] of Object.entries((save.military && save.military.corp
 const farz = checkFarzObjectiveCaptures({
   cells: FARZ_CELLS, at188, events, battleById, aars: operationAars, corpsOf,
   windowStart: FARZ_WINDOW_START, liveOperations, finalTurn: save.meta && save.meta.turn,
+  // The engine's own Army HQ registry: identifies the authored Farz even when no TG formed.
+  armyHqOperations: (save.military && save.military.army_hq_operations) || {},
 });
 if (farz.provisional) console.log('  (Farz has no AAR yet: still in progress at the last turn; read from the live operation)');
 console.log('  P-A authored Farz objective receipts — operation-owned combat in the late window');

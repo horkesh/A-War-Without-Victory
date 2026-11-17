@@ -29,6 +29,25 @@ Docs only; no `src/` or `data/` change, no hash change.
 - E2: retire the negotiation_capital kind; the ruled shifts become live international_standing (Ahmići -25, Srebrenica -30, Žepa -10, Markale 94 -15, Markale 95 -20, Stari Most -10 as international reaction, Washington HRHB +10 and +3); leverage and mediator shifts as ruled; peace-plan rows dropped. A separate PR and measurement; its save migration stacks after the batch-b-lane's v40; the §6 lane also does the UI half (the standing line on automatic cards).
 - Registered: commander attribution swaps (Delić on the 7th and 2nd Corps, Orić on the 7th) to RF-ROSTER; peace-plan chain stacking across cards to §6 E3; DataLoader skipping war_1992_hrhb_summer.json to the UI lane after #766; warCost counting deltas, not events, to §6 E3. File overlap: the UI lane's W4 resolver rebases after #766 and E2.
 
+## 2026-11-17 — Pass 61: #740 (D1 stage 1) recorded; A2b approved; consult 6 step 1 result; Codex routing
+
+Docs only; no `src/` or `data/` change, no hash change.
+
+- #740 (b72e929a7), D1 stage 1: the human player's own atrocity carries the same consequences in every decision mode (`isBrightLineFaction`, verdict layer only) and the staff-sweep rule is disclosed truthfully (no "authorized" or "ethnic cleansing" wording for staff sweeps; a labelled "Game rule" block; a Records receipt); §6 panels unanimous; canon in the same change (SHDG §2a, §3, the §6 Record row; VICTORY §3.4, §3.5; the Systems Manual New Game note); byte-identical, headless 0b86d3d7 (the pin). The owner visibility notice relayed with it is in the D1 row. #742 (the harness, Codex on #706 and #742) also merged (6c205f873).
+- Codex: the #740 P2 on `GameStateAdapter.ts:4667` (a false "Carried out" receipt when a staff-dispatched sweep dissolves without capturing) is routed to the UI lane as its NEXT PR, before #751 merges; any engine half (a non-capturing sweep also counting against the side) goes to the §6 lane; the thread stays "routed, fix pending". #742's threads are fixed in merged code; #729's thread is addressed on the PR head and gets a test confirmation when it lands.
+- A2b refugee compact approved (batch-b-politics): x0.6 refugee pressure per 1992 cooperative choice for 52 turns, renewed by H6 federate_early or extend_federation_overture, lapsing on VOPP pressure, reject answers or escalation; price HRHB recruitment x0.90 per entry and patron_confidence -10; the historian's binding copy rule: never imply refugees caused the 1993 war; merges after #763; H6 federate_early is not retired by the ruling-5 sweep. #763: the Path C copy is fixed; the war-room surfaces have no locale path, so they go on the W4 allowlist. The E1 display string is final (one full string per side); E2's migration is v41, stacked on v40.
+- Consult 6 step 1 result: the §6 panel voted unanimously to retire the siege counters and bombardment attrition (measured alone: 15,708 casualties, 15,572 of them RBiH; scores 709 / 709 / 708 / 682 became 711 / 709 / 699 / 668; Farz P-A and P-B breach; three specification defects recorded). Retirement in two PRs: (a) siege, (b) supply-reserve economy plus J1; hash-neutral; owner L7. #739's convoy-family retirement is done (79 files), waiting on the ui-ux seat, then a re-pin after #729.
+- #762 (merged, byte-identical, no re-pin): the Ahmići cards: H6 evacuate and federate_early withhold both massacre cards; the consequence card fires only at t54; the orders card takes same_turn_requires_events (a war recorded at t53 still gets the orders that week; t54 or later gets neither card); ahmici_massacre_1993 keeps t54 to t70 and war crimes +3; a §6 record row in the SHDG. Historical 0b86d3d742fcbf1c, emergent 84595a73932f3ac4.
+
+## 2026-11-17 — Pass 62: one start; #729 and the merge hold; E3 ruled; the roadmap's merged list archived
+
+Docs only; no `src/` or `data/` change, no hash change.
+
+- Owner ruling, 2026-11-17: "All I want for 1.0 is one game, one start, one truthful game. Those scenarios are leftovers." 1.0 ships ONE start, April 1992. The April 1993 and April 1994 start files were placeholders (identical apart from id and briefing; no init_control or formations; both ran April 1992 for 52 weeks, hash 914c6aaa7ed5cbe1); the apr1993, apr1994 and apr1995 starts are retired in the batch-b-lane's v40 PR; the generic mid-war loader stays, covered by a test fixture; real later starts are a post-1.0 data item; the proof set is apr1992 historical plus hands-off emergent. The "1.0 scope pending" note is DECIDED. Recorded in the work list (Part 4, S3), the roadmap (section 6.6) and the release plan (a Scope line).
+- #729 (zombie TG, must-fix) merged; the merge hold is lifted; hash-moving PRs go serially: #754, #735, the batch-b v40 retirement, #739, the rest; guard (b) is hash-neutral and outside the queue. Main's pin after #729 is 3b4685bc356210d5. #762 and #742 merged (the #742 thread, with the Codex axis-corps fix, is closed).
+- §6 E3 ruled 6 of 6: four measured PRs E3a1, E3a2, E3b, E3c; a LIVE reward found and fixed first in E3a1 (updateParamilitaryInternationalStanding replaced the war-crimes term with the smaller finding penalty, raising RBiH's standing base from 0 to 34 after it authorized sweeps); E3a1 goes ahead of E2; all three A+ anchors require authored == 0; the RS and HRHB standing floor is accepted as final with a written reason; the C-cap residual goes to its own §6 panel (a pre-1.0 blocker).
+- Roadmap: the whole "Merged since 2026-11-12" paragraph moved verbatim to the archive (section "Merged list moved 2026-11-17 (steward pass 62)") with a pointer left behind; zero loss.
+
 ## 2026-11-16 — `address_to_nation_rbih` closing line made year-neutral
 
 The renewable RBiH presidential address (first turn 84, then about 136 and 188; turn 0 is April 1992) said "a people in the fourth year of siege", which is wrong at turns 84 (second year) and 136 (third). It now reads "a people who have lived under siege this long". One narrative sentence in `war_1993.json`; narrative and historian seats keep it; the event has no Bosnian localization. Headless 188-week artifacts unchanged. Evidence: `docs/40_reports/evidence/20261116_address_year_copy/`.
@@ -57,6 +76,33 @@ The renewable RBiH presidential address (first turn 84, then about 136 and 188; 
 - **Calibration-pass list (registered, not changed here).**
   - `csq_alliance_holds_past_w35` fires at t35 in every run, because the 0.40 floor makes `alliance_above 0.2` trivially true. Its 0.1 floor lock is doing history work, delaying the war to t49. Retiming it moves the hash.
   - Five consequences check `rbih_hrhb_war_active`, which nothing sets: a dead guard.
+
+## 2026-11-16 — Ahmići cards: H6 evacuate/federate_early withhold both massacre cards; consequence at t54 only; Mostar's orders reach a war recorded the same week (byte-identical)
+
+- **Why.** Two findings registered by P2 (#753):
+  - the massacre cards lacked the H6 `evacuate`/`federate_early` exclusions the orders card has, so a side that ruled out the Lašva Valley offensive could still be shown a dated massacre (Ring 3 #11);
+  - the orders window is t53 only, so a war recorded in that same week never received the orders, while the consequence card could still fire at t55-56.
+- **Panel.** Standard §6 panel, four independent seats (Historian, scenario-tester/calibration, Engine/systems, Red-team), no war-or-game, implementer excluded; **unanimous GO-with-conditions**. Record row in `SENSITIVE_HISTORY_DESIGN_GATE.md` §6 ("Ahmići windows and H6").
+- **Change.**
+  - `data/scenarios/events/war_1993.json`: `ahmici_massacre_1993` is not fired after H6 `evacuate` or `federate_early`. It keeps its t54-t70 window and `war_crimes_delta` 3.
+  - `data/scenarios/events/consequences.json`:
+    - `csq_hvo_central_bosnia_offensive_1993` gets the same H6 exclusions, and `turn_max` goes from 56 to 54.
+    - `csq_hvo_april_1993_offensive_orders` gets `same_turn_requires_events: true`.
+  - Rejected: a cross-reference between the orders and the massacre (neither is a precondition or a reward for the other).
+- **Measured** (188w; logs `C:/Pyrrhic/AWWV-worktrees/_logs/b5-scorer-20261116/h6_*`). Byte-identical to main: historical `0b86d3d742fcbf1c`, emergent `84595a73932f3ac4`. No re-pin.
+- **Tests** (`tests/consequence_chains.test.ts`, "Ahmići windows and the H6 exclusions", 65/65 pass):
+  - a war before t53 gets the orders at t53 and the massacre at t54;
+  - a war at t53 gets both;
+  - a war at t54 or later gets neither;
+  - H6 `evacuate`/`federate_early` withhold all three cards;
+  - a late war (t68) still books HRHB war crimes 3 through `ahmici_massacre_1993` (red-team condition).
+- **Binding.** No surface may present a withheld Ahmići card as restraint or a better outcome.
+- **Registered (not fixed here).**
+  - The H6 `evacuate`/`federate_early` answers set only the flag; nothing in `src/` acts on them.
+    - Not acceptable as final (orchestrator, ruling-5 class).
+    - Routed to the batch-b lane's ruling-5 sweep; the panel reconvenes for H6.
+  - In BCS the event modal shows `effects[]` narrative entries in raw English and omits `ahmici_massacre_1993`'s war crimes +3. UI lane.
+  - Its dead international-credibility −25, shown as a figure, goes to the atrocity-accounting lane (E2).
 
 ## 2026-11-16 — The army standing order no longer overrides corps stances, and no longer hides stance matters from the President
 
@@ -1080,6 +1126,62 @@ No behaviour change: comments and canon text only, so the simulation hash is unc
     - 18 requests, 1 stop.
 - **Held tuning order:** NOT triggered. The trigger to tighten further (remove the 15-point reserve, then the income) was "the engaged President never falls below 25". B now falls to 6.5, and B's at-cap share of 13% is inside the ≤25% target. The earlier run, with gestures open from week 0 and priced at 10, had B at a minimum of 65.5.
 - **Logs:** `C:/Pyrrhic/AWWV-worktrees/_logs/three-president-20261116/`.
+
+## 2026-11-16 — Zombie TG: a TG anchored by another corps' brigade dissolves with its operation (must-fix, measured)
+
+RF fidelity-pass must-fix (orchestrator ruling, package "1994-95 attack and defence", Run B trace). Calibration is held: scores are recorded and are not a merge bar.
+
+**Defect.** A Tactical Group (TG) takes its anchor brigade's corps (`formTacticalGroup`). `resolveTacticalGroupIdsForOperation` matched a non-Army-HQ TG to its operation only when `tg.corps_id === hostCorpsId`. A TG whose anchor came from another corps was therefore never engaged, drained or dissolved:
+- On main, Operation Vlasic Ridge (a 7th Corps op, t146-164, anchored by the 3rd Corps' 314th) left its TG `forming` from t162 to t188. It held one of RBiH's 4 concurrent TG slots and one of the 3rd Corps' 2. Its donor, the 705th, kept 540 men lent for the rest of the war.
+- The HVO's Operation Mistral 2 (a Tomislavgrad op anchored by a Main Staff brigade) had the same shape.
+- On the P2 step-1 branch the zombie filled the RBiH cap at t180, so Farz 95 formed no TG. That is why its AAR had no Army HQ marker. Main passed P-A by one turn of timing.
+
+**Fix: a stable lifecycle identity.**
+- A TG now records `host_corps_id` when it forms: the corps whose `active_operations` holds the operation (object identity, else a unique name + start-turn match).
+- A non-HQ TG matches its operation by host corps + operation name.
+- An earlier draft matched cross-corps TGs by name + faction. Codex review found that an unrelated same-faction corps with a same-name operation (player-authored names are not globally unique) could then claim and dissolve another corps' TG. The draft was replaced.
+- TGs formed before the field existed keep the legacy host = `corps_id` rule. `host_corps_id` is optional, so saves stay compatible.
+
+**Tests** (`tests/tg_op_lifecycle.test.ts`):
+- host recorded by object identity, and by a unique name + start-turn match;
+- engage;
+- dissolve and return donors;
+- a same-name operation in a third corps, or in the anchor's own corps, cannot claim it (the Codex case);
+- a legacy TG keeps the old rule.
+
+389/389 pass across the TG and Army HQ files; tsc 0.
+
+**Measured** (188w on main 69c566349: main reproduced its pin `03159b9ee1e5877f`; fix `27637190e868d811`, twin 8/8 identical. Re-merged as main moved; final merge onto main with pin `0b86d3d742fcbf1c`: fix `3b4685bc356210d5`, reproduced by the baseline update run, checkpoints 709/709/708/682, every guard PASS, validator PASS, no TG left at t188):
+- Unchanged against main:
+  - combat control events (204/204);
+  - final control;
+  - all 81 operations and their outcomes;
+  - battle counts (501: RS 162, HRHB 43, RBiH 296);
+  - control_delta, formation_delta, activity_summary, watched_operations.
+- Checkpoints 709/709/708/681. Enclave guard holds. Farz P1/P-A PASS. Eastern provenance clean. `validate_run_consistency` PASS.
+- **What changes.** Both zombies dissolve when their operations end, so 0 TGs are left at t188 (main: 2). The 705th's 540 men are returned.
+  - From t180 Farz 95's TG draws its donors from the 3rd Corps only: the freed 705th is nearer, and donors are ordered by distance.
+  - So a few late battles change power ratio slightly.
+- Baseline pins re-pinned (`final_save.json` `0b86d3d7…` → `3b4685bc…`).
+
+**Recorded, not fixed here.** The orphan-TG per-turn sweep is accepted as a pre-freeze must-fix, as its own change. It will cover:
+- old saves that already hold a zombie;
+- operations dropped without going through recovery (`deferUnauthorizedHistoricalOperationsForPlayer`);
+- the legacy Army HQ load-time matcher (`tacticalGroupMatchesArmyHqOperation`, corps-only for TGs without an Army HQ id);
+- the Usora-style anchor whose faction differs from its corps'.
+
+Also: the per-corps TG cap counts against the anchor's corps, which predates the fix. `buildArmyHqTelemetryFromTg` writes the anchor's corps as `anchor_corps_id`, which is cosmetic.
+
+**Seats.**
+- **corps-army-commander: APPROVE WITH NOTES.**
+  - The TG is the host operation's instrument, so it is right to engage, drain and dissolve it with the operation.
+  - Nothing else reads the TG caps or lent fields; the cap of 4 is now actually reachable.
+  - Farz drawing 3rd Corps donors is the distance ordering working as designed.
+- **operations-expert: APPROVE WITH NOTES.**
+  - Do not add an anchor-in-operation check: `participating_brigades` is filtered mid-operation, and that check would bring the zombie back at recovery.
+  - The host-corps identity needs no such check.
+
+Evidence: `C:/Pyrrhic/AWWV-worktrees/_logs/pkg-runB/` (`FARZ_HQ_TRACE.md`, `zombie3_*.log`).
 
 ## 2026-11-15 — Command loop L7: army clashes (proposal 2A step A1; owner decision 4)
 
