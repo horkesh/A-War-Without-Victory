@@ -4643,7 +4643,7 @@
       {
         "kind": "cost_ledger_annotation",
         "tag": "political_split_temporary",
-        "text": "HRHB political-fracture reckoning surface. Triggered under alliance below 0.30, cumulative_casualties above 35, and international_standing below 45: the compounded regime in which institutional fracture becomes politically expressible. The historical referent is the documented sequence of Hrvatska Republika Herceg-Bosna leadership transitions through 1993-1994: Mate Boban's resignation as HRHB president on 8 February 1994 under U.S. pressure preceding the 1 March 1994 Washington Agreement (Prosecutor v. Prlić et al. IT-04-74-T, paras. 545-572 of Volume 1; Burg & Shoup, *The War in Bosnia-Herzegovina: Ethnic Conflict and International Intervention*, 2000, ch. 6). Cohesion minus 4 short-term reflects institutional-dispute costs; negotiation capital minus 5 reflects the international perception of fracture documented in contemporaneous diplomatic cables. The annotation describes the political-pressure regime; the lawfulness of any specific HRHB institutional act remains the subject of Tribunal jurisprudence in Prlić and adjacent cases."
+        "text": "HRHB political-fracture reckoning surface. Triggered under alliance below 0.30, cumulative_casualties above 35, and international_standing below 45: the compounded regime in which institutional fracture becomes politically expressible. The historical referent is the documented sequence of Hrvatska Republika Herceg-Bosna leadership transitions through 1993-1994: Mate Boban's resignation as HRHB president on 8 February 1994 under U.S. pressure preceding the 1 March 1994 Washington Agreement (Prosecutor v. Prlić et al. IT-04-74-T, paras. 545-572 of Volume 1; Burg & Shoup, *The War in Bosnia-Herzegovina: Ethnic Conflict and International Intervention*, 2000, ch. 6). Cohesion minus 4 short-term reflects institutional-dispute costs; negotiating leverage minus 3 reflects the international perception of fracture documented in contemporaneous diplomatic cables. The annotation describes the political-pressure regime; the lawfulness of any specific HRHB institutional act remains the subject of Tribunal jurisprudence in Prlić and adjacent cases."
       }
     ],
     "dimension_shifts": [
@@ -5458,7 +5458,7 @@
       {
         "kind": "cost_ledger_annotation",
         "tag": "political_split_temporary_RBiH",
-        "text": "Political split (temporary) under alliance<0.30, war_exhaustion>50, and internal_cohesion<45. Cohesion -3 and international_credibility -3 to reflect short-term Sarajevo caucus rift; resolves within the cooldown window. AUDIT-ONLY annotation; no rupture wiring."
+        "text": "Political split (temporary) under alliance<0.30, war_exhaustion>50, and internal_cohesion<45. Internal cohesion -2 and negotiating leverage -3 to reflect short-term Sarajevo caucus rift; resolves within the cooldown window. AUDIT-ONLY annotation; no rupture wiring."
       }
     ],
     "dimension_shifts": [
@@ -5676,7 +5676,7 @@
       {
         "kind": "cost_ledger_annotation",
         "tag": "political_split_temporary_RS",
-        "text": "Political split (temporary, RS variant) under war_exhaustion>55 AND internal_cohesion<45 AND cumulative_casualties>35. Cohesion -3 and international_credibility -3 to reflect short-term Pale-Banja Luka caucus rift; resolves within the cooldown window. AUDIT-ONLY annotation; no rupture wiring."
+        "text": "Political split (temporary, RS variant) under war_exhaustion>55 AND internal_cohesion<45 AND cumulative_casualties>35. Internal cohesion -2 and negotiating leverage -3 to reflect short-term Pale-Banja Luka caucus rift; resolves within the cooldown window. AUDIT-ONLY annotation; no rupture wiring."
       }
     ],
     "dimension_shifts": [
