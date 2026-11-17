@@ -1531,6 +1531,12 @@ export function corpsHasDueArmyHqReservation(state: GameState, corpsId: string, 
             operationName: def.name,
         });
         if (authorization === 'declined') continue;
+        // Codex P2 on #776: the op must be buildable now (roster able to meet the attack floor and
+        // launch feasibility), or the reservation would hold the corps' generic offensives for a
+        // window in which nothing can launch, freezing that front. buildOperation writes no state;
+        // its elite loans and restages are applied only by the injection path after it succeeds.
+        const built = buildOperation({ ...def, axes: liveAxes }, state, turn);
+        if ('failure' in built) continue;
         return true;
     }
     return false;

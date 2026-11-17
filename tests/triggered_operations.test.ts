@@ -436,6 +436,20 @@ describe('checkTriggeredOperations', () => {
             }), false);
         });
 
+        it('Codex P2: is false when the authored op cannot be built (seed brigades below the attack floor)', () => {
+            const state = prepareFarzState(178);
+            setArbihThirdCorpsActiveBrigades(state, 23);
+            const rostered = new Set(farz().axes.flatMap((axis) => axis.brigades as string[]));
+            for (const [id, formation] of Object.entries(state.military.formations ?? {})) {
+                if (rostered.has(id)) formation.personnel = 499;
+            }
+            // Nothing can launch, so the corps must not be reserved (it would freeze generic offensives
+            // for the window with no authored operation to replace them).
+            const probe = JSON.parse(JSON.stringify(state)) as GameState;
+            assert.ok(!injectArmyHqOperations(probe).includes('Operation Farz 95'));
+            assert.equal(corpsHasDueArmyHqReservation(state, 'arbih_3rd_corps', 178), false);
+        });
+
         it('is pure: it writes nothing to the state', () => {
             const state = prepareFarzState(178);
             setArbihThirdCorpsActiveBrigades(state, 23);
