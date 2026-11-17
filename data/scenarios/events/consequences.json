@@ -1899,6 +1899,7 @@
   },
   {
     "id": "csq_force_quality_inversion",
+    "audience": ["RS"],
     "image": "event_staff_planning_room.webp",
     "title": "The Inverted Roster",
     "narrative": "The officer rolls tell the story the front line had begun to suspect. The veteran cadre on the historically dominant side has thinned past the inflection point — not from any single battle, but from accumulation: postings refused, replacements thinned, the senior class retiring into silence. On the other side, new commanders cycle through hard schools and come out the other end. The predictor's confidence in the old assumptions takes a small but real haircut.",
