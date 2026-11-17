@@ -4,15 +4,18 @@
  * approved by the orchestrator.
  */
 
-import { readFileSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
+import { ensureRbihHrhbState, updateAllianceValue } from '../src/sim/early_war/alliance_update.js';
 import {
     getPatronDragStanceMultiplier,
     getRefugeeCompactPressureMultiplier,
     getRefugeeCompactRecruitmentMultiplier,
     getRefugeeCompactStatus,
+    REFUGEE_COMPACT_DECISION_TABLE,
+    REFUGEE_COMPACT_FLIP_SUSPENSION_TURNS,
     REFUGEE_COMPACT_GRANT_TURNS,
     REFUGEE_COMPACT_MULTIPLIER,
     REFUGEE_COMPACT_RECRUITMENT_PRICE,
@@ -54,13 +57,13 @@ describe('A2b refugee compact', () => {
         expect(getRefugeeCompactPressureMultiplier(s, 90)).toBe(1.0);
     });
 
-    it('grants: 0.6 per entry, recruitment 0.9 per entry, drag 0.5 per choice; expiry after 52 turns', () => {
+    it('grants: 0.6 per entry, recruitment 0.9 per entry, drag 0.5 per choice; expiry after 56 turns', () => {
         const s = state([UNITED, PERSISTS]);
         expect(getRefugeeCompactPressureMultiplier(s, 20)).toBeCloseTo(REFUGEE_COMPACT_MULTIPLIER ** 2, 12);
         expect(getRefugeeCompactRecruitmentMultiplier(s, 'HRHB', 20)).toBeCloseTo(REFUGEE_COMPACT_RECRUITMENT_PRICE ** 2, 12);
         expect(getRefugeeCompactRecruitmentMultiplier(s, 'RBiH', 20)).toBe(1.0);
         expect(getPatronDragStanceMultiplier(s, 20)).toBe(0.25);
-        // First grant expires at 5 + 52, the second at 8 + 52.
+        // First grant expires at 5 + 56, the second at 8 + 56.
         expect(getRefugeeCompactStatus(s, 5 + REFUGEE_COMPACT_GRANT_TURNS).active_entries).toBe(1);
         expect(getRefugeeCompactStatus(s, 8 + REFUGEE_COMPACT_GRANT_TURNS).active_entries).toBe(0);
         // The stance (drag) is permanent.
@@ -103,6 +106,122 @@ describe('A2b refugee compact', () => {
         expect(getActiveRecruitmentMultiplier(state([UNITED], { mods }), 'HRHB', 20)).toBeCloseTo(0.95 * 0.9, 12);
         expect(getActiveRecruitmentMultiplier(state([UNITED]), 'HRHB', 20)).toBe(0.9);
         expect(getActiveRecruitmentMultiplier(state([]), 'HRHB', 20)).toBe(1.0);
+    });
+});
+
+describe('A2b grant reaches the H6 renewal window (the 52 to 56 defect, 2026-11-17)', () => {
+    // The political goal is answered ahead of firing, so a paying President's first grant is logged at
+    // t0. H6 `federate_early` is answered in t52-55. At 52 turns the t0 entry expired on the renewal turn
+    // itself and the paying President still went to war (probe A).
+    const H6_FIRST_TURN = 52;
+    const H6_LAST_TURN = 55;
+
+    it('a t0 grant is still active on every H6 window turn', () => {
+        const s = state([[0, 'hrhb_political_goal', 'united_front']]);
+        for (let t = H6_FIRST_TURN; t <= H6_LAST_TURN; t += 1) {
+            expect(getRefugeeCompactStatus(s, t).active_entries).toBe(1);
+        }
+        expect(REFUGEE_COMPACT_GRANT_TURNS).toBeGreaterThan(H6_LAST_TURN);
+    });
+
+    it('federate_early in the window carries the compact through the t87-89 overture to Washington', () => {
+        const s = state([
+            [0, 'hrhb_political_goal', 'united_front'],
+            [H6_LAST_TURN, 'hrhb_central_bosnia_defense_1993', 'federate_early'],
+        ]);
+        // The H6 renewal runs 40 turns from its answer (t55 + 40 = t95): active through the overture.
+        expect(getRefugeeCompactStatus(s, 89).active_entries).toBe(1);
+        expect(getRefugeeCompactStatus(s, H6_LAST_TURN + 39).active_entries).toBe(1);
+        expect(getRefugeeCompactStatus(s, H6_LAST_TURN + 40).active_entries).toBe(0);
+    });
+});
+
+describe('A2b event ids exist in the shipped event data', () => {
+    // A content sweep that renames or retires one of these would silently kill the paying path.
+    const eventsDir = resolve(__dirname, '../data/scenarios/events');
+    const responsesByEvent = new Map<string, Set<string>>();
+    for (const file of readdirSync(eventsDir).filter((f) => f.endsWith('.json')).sort()) {
+        const parsed = JSON.parse(readFileSync(resolve(eventsDir, file), 'utf8')) as unknown;
+        const events = Array.isArray(parsed) ? parsed : ((parsed as { events?: unknown[] }).events ?? []);
+        for (const e of events as Array<{ id?: string; response_options?: Array<{ id: string }> }>) {
+            if (!e?.id) continue;
+            const set = responsesByEvent.get(e.id) ?? new Set<string>();
+            for (const r of e.response_options ?? []) set.add(r.id);
+            responsesByEvent.set(e.id, set);
+        }
+    }
+
+    for (const [table, entries] of Object.entries({
+        grants: REFUGEE_COMPACT_DECISION_TABLE.grants,
+        renewals: Object.fromEntries(Object.entries(REFUGEE_COMPACT_DECISION_TABLE.renewals).map(([k, v]) => [k, v.responses])),
+        lapses: REFUGEE_COMPACT_DECISION_TABLE.lapses,
+    })) {
+        it(`every ${table} (event, response) pair resolves`, () => {
+            const rows = Object.entries(entries as Record<string, readonly string[]>);
+            expect(rows.length).toBeGreaterThan(0);
+            for (const [eventId, responses] of rows) {
+                const known = responsesByEvent.get(eventId);
+                expect(known, `event ${eventId} is missing from data/scenarios/events`).toBeDefined();
+                for (const r of responses) expect(known!.has(r), `${eventId} has no response ${r}`).toBe(true);
+            }
+        });
+    }
+});
+
+describe('A2b wiring in alliance_update', () => {
+    function allianceState(decisions: D[], opts: { flips?: number } = {}): GameState {
+        const s = {
+            schema_version: 1,
+            meta: { turn: 10, seed: 'a2b-wiring', phase: 'war', referendum_held: true, war_start_turn: 1 },
+            factions: [
+                { id: 'RBiH', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [], declared: false, declaration_turn: null },
+                { id: 'RS', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [], declared: true, declaration_turn: 1 },
+                {
+                    id: 'HRHB', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [], declared: true, declaration_turn: 2,
+                    patron_state: { material_support_level: 0.5, diplomatic_isolation: 0.2, constraint_severity: 0.3, patron_commitment: 0.5, last_updated: 5 },
+                },
+            ],
+            military: {
+                formations: {}, front_segments: {}, front_posture: {}, front_posture_regions: {}, front_pressure: {}, militia_pools: {},
+                event_decision_log: decisions.map(([turn, event_id, response_id, faction]) => ({
+                    event_id, response_id, decision_source: 'player', faction: faction ?? 'HRHB', turn,
+                })),
+            },
+            political: { political_controllers: {}, municipalities: {}, settlements: {}, war_alliance_rbih_hrhb: 0.6 },
+            displacement: {
+                displacement_state: {
+                    travnik: { mun_id: 'travnik', original_population: 100000, displaced_out: 0, displaced_in: 10000, lost_population: 0, last_updated_turn: 10 },
+                },
+            },
+        } as unknown as GameState;
+        ensureRbihHrhbState(s);
+        if (opts.flips) s.political.rbih_hrhb_state!.bilateral_flips_this_turn = opts.flips;
+        return s;
+    }
+
+    it('an active compact lowers refugee pressure and patron drag in the drift report', () => {
+        const plain = updateAllianceValue(allianceState([]));
+        const paid = updateAllianceValue(allianceState([UNITED, PERSISTS]));
+        expect(plain.drivers.refugee_pressure).toBeGreaterThan(0);
+        expect(paid.drivers.refugee_pressure).toBeCloseTo(plain.drivers.refugee_pressure * REFUGEE_COMPACT_MULTIPLIER ** 2, 12);
+        expect(paid.drivers.patron_drag).toBeCloseTo(plain.drivers.patron_drag * 0.25, 12);
+    });
+
+    it('with no granting choice the drift report equals the plain one, exactly', () => {
+        const plain = updateAllianceValue(allianceState([]));
+        const bystander = updateAllianceValue(allianceState([[5, 'hrhb_political_goal', 'croat_republic']]));
+        expect(bystander.drivers).toEqual(plain.drivers);
+        expect(bystander.new_value).toBe(plain.new_value);
+    });
+
+    it('a bilateral flip while a compact is active writes the suspension; a run without one never does', () => {
+        const withCompact = allianceState([UNITED], { flips: 1 });
+        updateAllianceValue(withCompact);
+        expect(withCompact.political.rbih_hrhb_state?.refugee_compact_suspended_until).toBe(10 + REFUGEE_COMPACT_FLIP_SUSPENSION_TURNS);
+
+        const without = allianceState([], { flips: 1 });
+        updateAllianceValue(without);
+        expect('refugee_compact_suspended_until' in (without.political.rbih_hrhb_state ?? {})).toBe(false);
     });
 });
 

@@ -365,7 +365,7 @@ Alliance drift is computed per turn in `alliance_update.ts`: alliance deteriorat
   - Left alone, historical and emergent runs stay byte-identical.
   - Played, a President who keeps paying reaches Path C at t102 with no war.
   - Cooperative and then careless, the war comes at t71.
-  - Renewed and then reneged at t87, the war comes at t103.
+  - Renewed and then reneged at t87, the war comes at t104 (t103 on the older main of the first measurement); the engine ceasefire follows at t149 and Path A signs at t153.
 - **Binding copy rule (historian).** No player-facing text may say or imply that refugees caused the 1993 war.
 
 **Implementation-note (2026-09-01):** During open RBiH-HRHB war, the bilateral corps diversion assigns the operational initiative to RBiH and a defensive stance to HVO. The selected RBiH corps receives only live HVO-controlled objectives on its mixed front; the HVO corps receives no bilateral offensive objectives. Corps selection prefers a formation below the operation-exhaustion ceiling before using mixed-front overlap as a tie-break. A designated bilateral corps may form its bounded assault group from combat-ready brigades already holding its continuous front, even when front-edge allocation labels those brigades as garrison rather than residual surplus; the reserved group remains coherent across sub-sector repartition before launch. Washington/ceasefire state terminates this special bilateral offensive designation. RBiH-HRHB control may change through combat operations, but rear-pocket `consolidation` and `abandoned` resolution is prohibited between the two factions in either direction. No direct political-control authority is granted.

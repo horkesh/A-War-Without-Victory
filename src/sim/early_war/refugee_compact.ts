@@ -72,6 +72,13 @@ const LAPSES: Readonly<Record<string, readonly string[]>> = {
     zagreb_restrains_boban_vopp: ['acknowledge_pressure'],
 };
 
+/**
+ * Every (event, response) pair this module reads. Exported for the guard in
+ * tests/refugee_compact.test.ts: a content sweep that renames or retires one of these events would
+ * otherwise silently kill the paying path (the compact would never open or renew).
+ */
+export const REFUGEE_COMPACT_DECISION_TABLE = { grants: GRANTS, renewals: RENEWALS, lapses: LAPSES } as const;
+
 export interface RefugeeCompactStatus {
     /** Entries active at `turn` (each carries its expiry). */
     active_entries: number;
