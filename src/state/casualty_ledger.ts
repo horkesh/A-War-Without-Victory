@@ -60,7 +60,7 @@ export type CasualtyLedger = Record<FactionId, FactionCasualtyLedger>;
  * three uniformly). **TERRITORY-NEUTRAL by construction** (proven byte-flat 0/188 weeks,
  * runs n176/n177): the two territory/power drivers are SEPARATE, upstream, and unscaled —
  * (a) `applyPersonnelLoss` removes personnel at the call site; (b) the `pool.exhausted +=
- * (killed+mia)*0.75` demographic feed (frontline_attrition.ts:370, siege_attrition.ts:193)
+ * (killed+mia)*0.75` demographic feed (frontline_attrition.ts; the retired siege_attrition.ts fed it too)
  * reads the LOCAL killed/mia computed at the call site, NOT this ledger's accumulation.
  * This lane RESOLVES the `casualty_realism_v2_gate.ts:50-54` "changing a total couples to
  * territory" wall: that coupling is through the LOCAL killed+mia → pool.exhausted, so

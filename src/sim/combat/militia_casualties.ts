@@ -37,7 +37,7 @@ import { munFromOsid } from './osid_adjacency.js';
 /**
  * Share of permanent battle losses (killed + missing) fed into `pool.exhausted`.
  * Matches the established demographic convention used by `pool_population.ts`,
- * `frontline_attrition.ts` and `siege_attrition.ts` — dead and missing men cannot be
+ * and `frontline_attrition.ts` (formerly also the retired `siege_attrition.ts`) — dead and missing men cannot be
  * re-mobilized, and `exhausted` is what makes that bite: `ongoing_mobilization.ts`
  * measures `available + committed + exhausted` against military-age males and throttles
  * or halts recruitment as that ratio crosses its thresholds.

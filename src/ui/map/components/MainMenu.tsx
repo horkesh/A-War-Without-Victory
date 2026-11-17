@@ -193,18 +193,23 @@ export function MainMenu({ hasSave, starting = false, errorMessage, onNewGame, o
                         <p>{t('mainMenu.theater')}</p>
                     </div>
                 </div>
-                <label className="main-menu-opening__locale">
-                    <span>{t('settings.language.label')}</span>
-                    <select
-                        aria-label={t('settings.language.ariaLabel')}
-                        value={locale}
-                        onChange={(event) => setLocale(event.target.value as Locale)}
-                    >
-                        {SUPPORTED_LOCALES.map((option) => (
-                            <option key={option} value={option}>{option === 'en' ? t('settings.language.option.en') : t('settings.language.option.bcs')}</option>
-                        ))}
-                    </select>
-                </label>
+                <div className="main-menu-opening__locale-group">
+                    <label className="main-menu-opening__locale">
+                        <span>{t('settings.language.label')}</span>
+                        <select
+                            aria-label={t('settings.language.ariaLabel')}
+                            aria-describedby="main-menu-language-note"
+                            value={locale}
+                            onChange={(event) => setLocale(event.target.value as Locale)}
+                        >
+                            {SUPPORTED_LOCALES.map((option) => (
+                                <option key={option} value={option}>{option === 'en' ? t('settings.language.option.en') : t('settings.language.option.bcs')}</option>
+                            ))}
+                        </select>
+                    </label>
+                    {/* The Bosnian option is labelled partial wherever it is picked: the interface is translated, most event text is not. */}
+                    <p id="main-menu-language-note" className="main-menu-opening__locale-note">{t('settings.language.partialNote')}</p>
+                </div>
             </header>
 
             <section className={`main-menu-opening__workspace${campaignView ? ' main-menu-opening__workspace--campaign' : ''}`}>

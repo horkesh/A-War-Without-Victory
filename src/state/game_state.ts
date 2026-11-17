@@ -3011,7 +3011,9 @@ army_clash_state?: import('./army_clash_types.js').ArmyClashState;
 war_militia_strength?: Record<MunicipalityId, Record<FactionId, number>>;
 /** JNA withdrawal and asset transfer; Peace-phase §4.6. Does not start war. */
 war_jna?: JNATransitionState;
-/** Consecutive critical-supply turns per faction:OSID. Key: `${factionId}:${osid}`. Phase B siege. */
+/** Consecutive critical-supply turns per faction:OSID. Key: `${factionId}:${osid}`.
+ * Retired 2026-11-17 (§6 panel, Fable consult 6): siege counters / bombardment attrition / siege morale drain are not modelled in 1.0; kept optional so old saves load; nothing writes it.
+ * @persistence compatibility-only */
 siege_turn_counters?: Record<string, number>;
 /** General supply reserves per faction [0..100]. Consumed by maintenance; replenished by facilities/patron. */
 general_supply_reserve?: Record<FactionId, number>;
