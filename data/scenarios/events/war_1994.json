@@ -1554,18 +1554,6 @@
     "image": "event_diplomatic_negotiation.webp",
     "source_tier": "agreement_text",
     "title": "Contact Group Plan Presented",
-    "localizations": {
-      "en": {
-        "notifications_to_other_factions": {
-          "accept": {
-            "HRHB": {
-              "headline": "RBiH accepts the Contact Group plan",
-              "body": "Sarajevo signals acceptance of the proposed territorial framework under international pressure. Mostar sees Federation diplomacy aligned for now, with the pressure shifting to Pale's answer."
-            }
-          }
-        }
-      }
-    },
     "narrative": "This week the Contact Group (the United States, Russia, Britain, France and Germany) presents its peace plan in Geneva. The map gives the Federation 51 percent of Bosnia and Republika Srpska 49 percent, far less than Bosnian Serb forces now hold. The parties have two weeks to answer. Whether Sarajevo and Pale will accept is the open question.",
     "category": "diplomatic",
     "trigger": {
@@ -1574,11 +1562,6 @@
       "phase": "war"
     },
     "once": true,
-    "tags": ["keystone_dilemma"],
-    "requires_player_response": true,
-    "responding_faction": "RBiH",
-    "bot_response_logic": "historical",
-    "historical_default_response_id": "accept",
     "historical_source": "Balkan Battlegrounds Vol. I pp. 21-23; Contact Group proposal, July 1994; ICTY Karadžić Trial Judgment (IT-95-5/18-T).",
     "source_note": "The Contact Group plan created the 51/49 formula and was accepted by Sarajevo under pressure, but it was not implemented after RS rejection.",
     "staff_assessment": "Acceptance preserves international credibility and keeps Federation diplomacy aligned, but it means accepting an unsatisfying territorial formula rather than a delivered peace.",
@@ -1589,59 +1572,6 @@
     "effect": {
       "kind": "narrative",
       "text": "The Contact Group demands acceptance of a 51/49 territorial split. Rejection risks further international isolation."
-    },
-    "response_options": [
-      {
-        "id": "accept",
-        "label": "Accept the Contact Group Plan",
-        "description": "Acceptance demonstrates good faith and strengthens the case for international support.",
-        "historical_marker": "historical_default",
-        "aggression_affinity": -0.4,
-        "risk_level": 0.3,
-        "effects": [
-          {
-            "kind": "patron_support",
-            "faction": "RBiH",
-            "delta": 10
-          }
-        ]
-      },
-      {
-        "id": "reject",
-        "label": "Reject the Territorial Division",
-        "description": "Rejection risks isolation but refuses to legitimize conquest. The war continues.",
-        "aggression_affinity": 0.5,
-        "risk_level": 0.8,
-        "effects": [
-          {
-            "kind": "patron_support",
-            "faction": "RBiH",
-            "delta": -10
-          }
-        ]
-      }
-    ],
-    "notifications_to_other_factions": {
-      "accept": {
-        "RS": {
-          "headline": "Sarajevo accepts Contact Group map",
-          "body": "RBiH accepts the proposed 51/49 Contact Group framework. Pale faces a stronger international-credibility case for Sarajevo and sharper scrutiny if RS remains outside the plan."
-        },
-        "HRHB": {
-          "headline": "RBiH accepts the Contact Group plan",
-          "body": "Sarajevo signals acceptance of the proposed territorial framework under international pressure. Mostar sees Federation diplomacy aligned for now, with the military and political burden shifting toward RS refusal."
-        }
-      },
-      "reject": {
-        "RS": {
-          "headline": "Sarajevo rejects territorial division",
-          "body": "RBiH refuses the Contact Group map rather than legitimize conquest. Pale sees the war continue, but Sarajevo risks international isolation and weaker diplomatic standing."
-        },
-        "HRHB": {
-          "headline": "RBiH rejects Contact Group division",
-          "body": "Sarajevo rejects the proposed territorial split despite international pressure. Mostar sees Federation diplomacy under strain, with the war effort continuing outside the proposed settlement."
-        }
-      }
     }
   },
   {
@@ -1708,6 +1638,10 @@
         "branch_tag": "rs_belgrade_pale_resist",
         "historical_marker": "historical_default",
         "label": "Reject the 51/49 framework",
+        "plan_answer": {
+          "plan_id": "contact_group",
+          "response": "rejected"
+        },
         "description": "The Pale Assembly records the documented Bijeljina position: the map is unacceptable on the corridor, the Drina valley, and Sarajevo. The patron rupture is the foreseeable consequence — Belgrade's embargo will follow within weeks.",
         "effects": [
           {
@@ -1724,11 +1658,6 @@
             "faction": "RS",
             "dimension": "internal_cohesion",
             "delta": 5
-          },
-          {
-            "faction": "RS",
-            "dimension": "international_standing",
-            "delta": -10
           }
         ],
         "aggression_affinity": 0.3,
@@ -1739,6 +1668,10 @@
         "branch_tag": "rs_belgrade_pale_acknowledge",
         "historical_marker": "counterfactual",
         "label": "Accept the Contact Group map",
+        "plan_answer": {
+          "plan_id": "contact_group",
+          "response": "accepted"
+        },
         "description": "Acknowledge the 51:49 framework. Belgrade's pressure has prevailed; the Six Goals platform breaks internally. Hardline deputies will resign; the recruitment pool contracts as Karadžić's authority is questioned.",
         "effects": [
           {
@@ -1766,11 +1699,6 @@
             "faction": "RS",
             "dimension": "internal_cohesion",
             "delta": -25
-          },
-          {
-            "faction": "RS",
-            "dimension": "international_standing",
-            "delta": 10
           }
         ],
         "aggression_affinity": -0.5,
@@ -1781,14 +1709,12 @@
         "branch_tag": "rs_belgrade_negotiate",
         "historical_marker": "counterfactual",
         "label": "Negotiate territorial amendments",
+        "plan_answer": {
+          "plan_id": "contact_group",
+          "response": "rejected"
+        },
         "description": "Neither accept nor reject. Send Krajišnik to Geneva; demand corridor adjustments and Sarajevo concessions before recording a posture. Belgrade is informed the line is open.",
-        "effects": [
-          {
-            "kind": "patron_support",
-            "faction": "RS",
-            "delta": -5
-          }
-        ],
+        "effects": [],
         "sets_flags": {
           "rs_contact_group_response": "negotiate"
         },
@@ -1857,29 +1783,8 @@
       "phase": "war",
       "requires_events": [
         "contact_group_plan_1994"
-      ],
-      "condition": {
-        "type": "or",
-        "conditions": [
-          {
-            "type": "flag_equals",
-            "flag": "rbih_state_identity",
-            "value": "civic"
-          },
-          {
-            "type": "flag_equals",
-            "flag": "rbih_state_identity",
-            "value": "bosniak_national"
-          },
-          {
-            "type": "flag_equals",
-            "flag": "rbih_state_identity",
-            "value": "pragmatic"
-          }
-        ]
-      }
+      ]
     },
-    "requires_enabled": true,
     "once": true,
     "requires_player_response": true,
     "responding_faction": "RBiH",
@@ -1906,17 +1811,22 @@
         "branch_tag": "rbih_washington_accept",
         "historical_marker": "historical_default",
         "label": "Accept under US pressure with reservations",
+        "plan_answer": {
+          "plan_id": "contact_group",
+          "response": "accepted"
+        },
         "description": "Sign on to the Contact Group framework under Christopher's shuttle pressure, with formal reservations on the eastern enclaves and the corridor. The Washington-track alignment holds; the Federation gains the diplomatic frame against RS rejection.",
-        "effects": [],
+        "effects": [
+          {
+            "kind": "patron_support",
+            "faction": "RBiH",
+            "delta": 10
+          }
+        ],
         "sets_flags": {
           "rbih_contact_group_response": "accept"
         },
         "dimension_shifts": [
-          {
-            "faction": "RBiH",
-            "dimension": "international_standing",
-            "delta": 15
-          },
           {
             "faction": "RBiH",
             "dimension": "negotiating_leverage",
@@ -1931,6 +1841,10 @@
         "branch_tag": "rbih_washington_reluctant",
         "historical_marker": "counterfactual",
         "label": "Reject the 51/49 framework",
+        "plan_answer": {
+          "plan_id": "contact_group",
+          "response": "rejected"
+        },
         "description": "Refuse the territorial map. Christopher's pressure is the strongest US démarche of the war; defying it incurs US patron rupture and weakens the Federation track. But the negotiating frame for full liberation is preserved.",
         "effects": [
           {
@@ -1943,11 +1857,6 @@
           "rbih_contact_group_response": "reject"
         },
         "dimension_shifts": [
-          {
-            "faction": "RBiH",
-            "dimension": "international_standing",
-            "delta": -15
-          },
           {
             "faction": "RBiH",
             "dimension": "negotiating_leverage",
@@ -1967,17 +1876,16 @@
         "branch_tag": "rbih_washington_reluctant",
         "historical_marker": "counterfactual",
         "label": "Sign with public reservations",
+        "plan_answer": {
+          "plan_id": "contact_group",
+          "response": "rejected"
+        },
         "description": "Sign the Contact Group framework while publicly reserving the Assembly's right to reject the final territorial map on the eastern enclaves. The Washington-track holds tactically; the Assembly retains veto authority for the final ratification.",
         "effects": [],
         "sets_flags": {
           "rbih_contact_group_response": "reservations"
         },
         "dimension_shifts": [
-          {
-            "faction": "RBiH",
-            "dimension": "international_standing",
-            "delta": 5
-          },
           {
             "faction": "RBiH",
             "dimension": "internal_cohesion",
@@ -2025,7 +1933,10 @@
         }
       }
     },
-    "historical_source": "Contact Group proposal, July 1994 (US/UK/France/Germany/Russia 51:49 framework). Richard Holbrooke, To End a War (Random House, 1998), Ch. 5 (Contact Group framework, Christopher and Galbraith shuttle diplomacy). Warren Christopher, In the Stream of History (Stanford University Press, 1998) Ch. 7 (US-RBiH shuttle records). UNSCR 942 (23 September 1994) — Contact Group plan and SC welcome of Federation acceptance. Balkan Battlegrounds Vol. II (Sarajevo Presidency acceptance posture under US pressure)."
+    "historical_source": "Contact Group proposal, July 1994 (US/UK/France/Germany/Russia 51:49 framework). Richard Holbrooke, To End a War (Random House, 1998), Ch. 5 (Contact Group framework, Christopher and Galbraith shuttle diplomacy). Warren Christopher, In the Stream of History (Stanford University Press, 1998) Ch. 7 (US-RBiH shuttle records). UNSCR 942 (23 September 1994) — Contact Group plan and SC welcome of Federation acceptance. Balkan Battlegrounds Vol. II (Sarajevo Presidency acceptance posture under US pressure).",
+    "tags": [
+      "keystone_dilemma"
+    ]
   },
   {
     "id": "hrhb_contact_group_response_1994",
@@ -2091,6 +2002,10 @@
         "branch_tag": "hrhb_washington_accept",
         "historical_marker": "historical_default",
         "label": "Accept via the Federation channel",
+        "plan_answer": {
+          "plan_id": "contact_group",
+          "response": "accepted"
+        },
         "description": "Acknowledge the Contact Group 51:49 framework via the Federation channel established by the Washington Agreement. Zagreb's directive aligns HR HB with the territorial settlement; Croat constitutive-nation status is preserved inside the Federation entity.",
         "effects": [
           {
@@ -2110,11 +2025,6 @@
           },
           {
             "faction": "HRHB",
-            "dimension": "international_standing",
-            "delta": 12
-          },
-          {
-            "faction": "HRHB",
             "dimension": "negotiating_leverage",
             "delta": 5
           }
@@ -2127,6 +2037,10 @@
         "branch_tag": "hrhb_washington_reluctant",
         "historical_marker": "counterfactual",
         "label": "Reject the 51/49 framework",
+        "plan_answer": {
+          "plan_id": "contact_group",
+          "response": "rejected"
+        },
         "description": "Refuse the Contact Group map. The Federation alliance with RBiH breaks; Tudjman's directive is defied. Zagreb withdraws patron confidence; the Croat-Bosniak war risks reignition without the Federation channel.",
         "effects": [
           {
@@ -2145,16 +2059,6 @@
         "dimension_shifts": [
           {
             "faction": "HRHB",
-            "dimension": "patron_confidence",
-            "delta": -20
-          },
-          {
-            "faction": "HRHB",
-            "dimension": "international_standing",
-            "delta": -15
-          },
-          {
-            "faction": "HRHB",
             "dimension": "internal_cohesion",
             "delta": -5
           }
@@ -2167,6 +2071,10 @@
         "branch_tag": "hrhb_washington_reluctant",
         "historical_marker": "counterfactual",
         "label": "Condition acceptance on central Bosnia amendments",
+        "plan_answer": {
+          "plan_id": "contact_group",
+          "response": "rejected"
+        },
         "description": "Accept the Contact Group framework but condition the signature on central Bosnia territorial amendments — Vitez, Kiseljak, Busovača. The Federation channel holds tactically; Zagreb tolerates the conditional posture without full alignment.",
         "effects": [
           {
@@ -2179,16 +2087,6 @@
           "hrhb_contact_group_response": "amendments"
         },
         "dimension_shifts": [
-          {
-            "faction": "HRHB",
-            "dimension": "patron_confidence",
-            "delta": -5
-          },
-          {
-            "faction": "HRHB",
-            "dimension": "international_standing",
-            "delta": 5
-          },
           {
             "faction": "HRHB",
             "dimension": "negotiating_leverage",

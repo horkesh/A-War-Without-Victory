@@ -186,6 +186,10 @@
         "id": "accept",
         "branch_tag": "rbih_vopp_accept",
         "label": "Accept the Vance-Owen Plan",
+        "plan_answer": {
+          "plan_id": "vance_owen",
+          "response": "accepted"
+        },
         "description": "Accepting improves international credibility and may bring relief, but legitimizes territorial losses.",
         "historical_marker": "historical_default",
         "aggression_affinity": -0.5,
@@ -199,6 +203,10 @@
         "id": "reject",
         "branch_tag": "rbih_vopp_reject",
         "label": "Reject the Vance-Owen Plan",
+        "plan_answer": {
+          "plan_id": "vance_owen",
+          "response": "rejected"
+        },
         "description": "Rejection preserves territorial claims but damages standing with the international community.",
         "historical_marker": "counterfactual",
         "aggression_affinity": 0.4,
@@ -959,6 +967,10 @@
         "branch_tag": "hrhb_vopp_acknowledge",
         "historical_marker": "historical_default",
         "label": "Accept the Vance-Owen ten-province framework",
+        "plan_answer": {
+          "plan_id": "vance_owen",
+          "response": "accepted"
+        },
         "description": "Acknowledge the VOPP map: three Croat-majority provinces (Mostar, Central Bosnia, Western Herzegovina) are ratified inside the decentralized Bosnia framework. Mate Boban signs for HZ HB at Athens; Zagreb's directive is honored.",
         "effects": [
           {
@@ -974,11 +986,6 @@
           {
             "faction": "HRHB",
             "dimension": "patron_confidence",
-            "delta": 10
-          },
-          {
-            "faction": "HRHB",
-            "dimension": "international_standing",
             "delta": 10
           },
           {
@@ -1000,6 +1007,10 @@
         "branch_tag": "hrhb_vopp_resist",
         "historical_marker": "counterfactual",
         "label": "Condition acceptance on provincial-boundary amendments",
+        "plan_answer": {
+          "plan_id": "vance_owen",
+          "response": "rejected"
+        },
         "description": "Acknowledge the ten-province framework but condition the signature on amendments to the Central Bosnia and Western Herzegovina provincial boundaries. Zagreb tolerates the conditional posture without full alignment; the central-Bosnia frictions remain unresolved.",
         "effects": [
           {
@@ -1012,11 +1023,6 @@
           "hrhb_vance_owen_response": "amendments"
         },
         "dimension_shifts": [
-          {
-            "faction": "HRHB",
-            "dimension": "patron_confidence",
-            "delta": -5
-          },
           {
             "faction": "HRHB",
             "dimension": "negotiating_leverage",
@@ -1036,6 +1042,16 @@
         "branch_tag": "hrhb_vopp_acknowledge",
         "historical_marker": "counterfactual",
         "label": "Condition signature on reciprocal ARBiH acceptance",
+        "plan_answer": {
+          "plan_id": "vance_owen",
+          "response": "rejected",
+          "accepted_if": {
+            "type": "peace_plan_response",
+            "plan_id": "vance_owen",
+            "faction": "RBiH",
+            "response": "accepted"
+          }
+        },
         "description": "Sign the VOPP framework only if Sarajevo signs simultaneously. A paradoxical joint-front overture: the central-Bosnia friction can be contained if Sarajevo reciprocates, but Zagreb reads the conditional signature as deferring patron direction to a Bosniak counter-signature rather than transmitting it cleanly.",
         "effects": [
           {
@@ -1052,11 +1068,6 @@
           "hrhb_vance_owen_response": "condition_on_reciprocity"
         },
         "dimension_shifts": [
-          {
-            "faction": "HRHB",
-            "dimension": "patron_confidence",
-            "delta": -10
-          },
           {
             "faction": "HRHB",
             "dimension": "negotiating_leverage",
@@ -1076,6 +1087,10 @@
         "branch_tag": "hrhb_vopp_resist",
         "historical_marker": "counterfactual",
         "label": "Reject the Vance-Owen ten-province framework",
+        "plan_answer": {
+          "plan_id": "vance_owen",
+          "response": "rejected"
+        },
         "description": "Refuse the VOPP map. The HZ HB Presidency defies Zagreb's directive — Tudjman's patron-confidence collapses, the alliance with RBiH breaks further, and international standing falls. The central-Bosnia war continues without a settlement frame; the Croat-majority provinces remain a contested claim rather than a ratified allocation.",
         "effects": [
           {
@@ -1092,16 +1107,6 @@
           "hrhb_vance_owen_response": "reject"
         },
         "dimension_shifts": [
-          {
-            "faction": "HRHB",
-            "dimension": "patron_confidence",
-            "delta": -25
-          },
-          {
-            "faction": "HRHB",
-            "dimension": "international_standing",
-            "delta": -15
-          },
           {
             "faction": "HRHB",
             "dimension": "negotiating_leverage",
@@ -2152,17 +2157,16 @@
         "branch_tag": "rs_vopp_accept_rejection",
         "historical_marker": "historical_default",
         "label": "Accept the assembly's vote",
+        "plan_answer": {
+          "plan_id": "vance_owen",
+          "response": "rejected"
+        },
         "description": "The people have spoken. Reject international pressure and continue the war. Internal cohesion is preserved but Serbia is furious.",
         "effects": [
           {
             "kind": "morale_change",
             "faction": "RS",
             "delta": 5
-          },
-          {
-            "kind": "patron_support",
-            "faction": "RS",
-            "delta": -10
           }
         ],
         "sets_flags": {
@@ -2175,18 +2179,12 @@
             "timing": "future",
             "certainty": "guaranteed",
             "material_effect_refs": [
-              "morale_change.RS",
-              "patron_support.RS"
+              "morale_change.RS"
             ],
             "explanation": "Accepting the Assembly's vote does not open or close any other decisions; it lifts Republika Srpska morale but costs Belgrade's backing. Karadžić had signed the Vance-Owen Plan in Athens on 2 May 1993, subject to the Assembly's approval. The Assembly rejected it, Milošević urged acceptance in vain, and a referendum on 15-16 May confirmed the rejection. (ICTY, Karadžić trial judgment, paras 372, 375 and 3283.)"
           }
         ],
         "dimension_shifts": [
-          {
-            "faction": "RS",
-            "dimension": "international_standing",
-            "delta": -15
-          },
           {
             "faction": "RS",
             "dimension": "internal_cohesion",
@@ -2201,6 +2199,10 @@
         "branch_tag": "rs_vopp_override_assembly",
         "historical_marker": "counterfactual",
         "label": "Attempt to override the assembly",
+        "plan_answer": {
+          "plan_id": "vance_owen",
+          "response": "accepted"
+        },
         "description": "Defy the nationalist vote and push for acceptance. Historically impossible — risks fracturing the RS political structure.",
         "effects": [
           {
@@ -2231,11 +2233,6 @@
           }
         ],
         "dimension_shifts": [
-          {
-            "faction": "RS",
-            "dimension": "international_standing",
-            "delta": 10
-          },
           {
             "faction": "RS",
             "dimension": "internal_cohesion",
@@ -3188,6 +3185,7 @@
         "id": "accept",
         "historical_marker": "historical_default",
         "label": "Record the Presidency's Conditional Acceptance",
+        "plan_answer": null,
         "description": "Keep the framework alive while reserving the Drina enclaves and Posavina corridor for the Assembly's final vote.",
         "effects": [],
         "sets_flags": {
@@ -3198,6 +3196,10 @@
         "id": "reject",
         "historical_marker": "counterfactual",
         "label": "Reject at the Presidency Stage",
+        "plan_answer": {
+          "plan_id": "owen_stoltenberg",
+          "response": "rejected"
+        },
         "description": "End Sarajevo's participation before the documented Assembly vote, defending sovereignty while frustrating the mediators.",
         "effects": [
           {
@@ -3319,28 +3321,20 @@
       "kind": "narrative",
       "text": "The Owen-Stoltenberg plan reaches the Sarajevo Assembly, which must accept it on conditions or reject the partition framework."
     },
-    "dimension_shifts": [
-      {
-        "faction": "RBiH",
-        "dimension": "patron_confidence",
-        "delta": -5
-      }
-    ],
     "response_options": [
       {
         "id": "reject_via_assembly",
         "branch_tag": "rbih_owen_stoltenberg_reject_via_assembly",
         "historical_marker": "historical_default",
         "label": "Assembly rejects outright (Drina enclaves & Posavina non-negotiable)",
+        "plan_answer": {
+          "plan_id": "owen_stoltenberg",
+          "response": "rejected"
+        },
         "description": "The Sarajevo Assembly votes down the package. The plan collapses; the war continues, but the legal claim to Bosnia's full territory is preserved.",
         "aggression_affinity": 0.4,
         "risk_level": 0.6,
         "dimension_shifts": [
-          {
-            "faction": "RBiH",
-            "dimension": "international_standing",
-            "delta": -8
-          },
           {
             "faction": "RBiH",
             "dimension": "negotiating_leverage",
@@ -3359,15 +3353,14 @@
         "branch_tag": "rbih_owen_stoltenberg_accept_for_optics",
         "historical_marker": "counterfactual",
         "label": "Assembly ratifies the package",
+        "plan_answer": {
+          "plan_id": "owen_stoltenberg",
+          "response": "accepted"
+        },
         "description": "An alternative parliamentary majority ratifies the package. Sarajevo gains international standing while legitimizing the partition formula in principle.",
         "aggression_affinity": -0.2,
         "risk_level": 0.4,
         "dimension_shifts": [
-          {
-            "faction": "RBiH",
-            "dimension": "international_standing",
-            "delta": 10
-          },
           {
             "faction": "RBiH",
             "dimension": "patron_confidence",
@@ -3737,6 +3730,10 @@
         "branch_tag": "hrhb_vopp_acknowledge",
         "historical_marker": "historical_default",
         "label": "Accept the Union of Three Republics framework",
+        "plan_answer": {
+          "plan_id": "owen_stoltenberg",
+          "response": "accepted"
+        },
         "description": "Acknowledge the Owen-Stoltenberg map: HZ HB is one of three constitutive ethnic republics with a favorable central-Bosnia and western Herzegovina territorial allocation. Mate Boban signs for the HZ HB Presidency; Zagreb's directive is honored.",
         "effects": [
           {
@@ -3753,11 +3750,6 @@
             "faction": "HRHB",
             "dimension": "patron_confidence",
             "delta": 10
-          },
-          {
-            "faction": "HRHB",
-            "dimension": "international_standing",
-            "delta": 8
           },
           {
             "faction": "HRHB",
@@ -3778,6 +3770,10 @@
         "branch_tag": "hrhb_vopp_resist",
         "historical_marker": "counterfactual",
         "label": "Condition acceptance on central Bosnia amendments",
+        "plan_answer": {
+          "plan_id": "owen_stoltenberg",
+          "response": "rejected"
+        },
         "description": "Acknowledge the Union of Three Republics framework but condition the signature on central Bosnia territorial amendments — Vitez, Kiseljak, Busovača, Prozor. Zagreb tolerates the conditional posture without full alignment; the central Bosnia frictions remain unresolved.",
         "effects": [
           {
@@ -3790,11 +3786,6 @@
           "hrhb_owen_stoltenberg_response": "amendments"
         },
         "dimension_shifts": [
-          {
-            "faction": "HRHB",
-            "dimension": "patron_confidence",
-            "delta": -5
-          },
           {
             "faction": "HRHB",
             "dimension": "negotiating_leverage",
@@ -3814,6 +3805,10 @@
         "branch_tag": "hrhb_vopp_resist",
         "historical_marker": "counterfactual",
         "label": "Reject the Union of Three Republics",
+        "plan_answer": {
+          "plan_id": "owen_stoltenberg",
+          "response": "rejected"
+        },
         "description": "Refuse the Owen-Stoltenberg map. The HZ HB Presidency defies Zagreb's directive — Tudjman's patron-confidence collapses, but a paradoxical opening to RBiH joint-front diplomacy materializes as the Zagreb-backed plan is rejected from the HVO side. International standing falls; the central-Bosnia war continues without a settlement frame.",
         "effects": [
           {
@@ -3830,16 +3825,6 @@
           "hrhb_owen_stoltenberg_response": "reject"
         },
         "dimension_shifts": [
-          {
-            "faction": "HRHB",
-            "dimension": "patron_confidence",
-            "delta": -25
-          },
-          {
-            "faction": "HRHB",
-            "dimension": "international_standing",
-            "delta": -10
-          },
           {
             "faction": "HRHB",
             "dimension": "internal_cohesion",
@@ -3949,6 +3934,10 @@
         "branch_tag": "rs_owen_stoltenberg_acknowledge",
         "historical_marker": "historical_default",
         "label": "Accept the Union of Three Republics framework",
+        "plan_answer": {
+          "plan_id": "owen_stoltenberg",
+          "response": "accepted"
+        },
         "description": "Acknowledge the Owen-Stoltenberg map: Republika Srpska is legitimized as a constitutive ethnic republic in a tripartite Bosnia. The corridor is narrowed but the Drina-valley axis is preserved; Sarajevo division is retained inside the tripartite frame. Karadžić signs; Belgrade's directive is honored.",
         "effects": [
           {
@@ -3964,11 +3953,6 @@
           {
             "faction": "RS",
             "dimension": "patron_confidence",
-            "delta": 10
-          },
-          {
-            "faction": "RS",
-            "dimension": "international_standing",
             "delta": 10
           },
           {
@@ -3990,6 +3974,10 @@
         "branch_tag": "rs_owen_stoltenberg_resist",
         "historical_marker": "counterfactual",
         "label": "Accept with territorial modifications",
+        "plan_answer": {
+          "plan_id": "owen_stoltenberg",
+          "response": "rejected"
+        },
         "description": "Acknowledge the Union of Three Republics framework but condition the signature on corridor widening and Sarajevo allocation amendments. Belgrade tolerates the conditional posture without full alignment; the channel remains open but the deal is not closed.",
         "effects": [
           {
@@ -4000,11 +3988,6 @@
             "kind": "morale_change",
             "faction": "RS",
             "delta": 2
-          },
-          {
-            "kind": "patron_support",
-            "faction": "RS",
-            "delta": 5
           }
         ],
         "sets_flags": {
@@ -4030,13 +4013,12 @@
         "branch_tag": "rs_owen_stoltenberg_resist",
         "historical_marker": "counterfactual",
         "label": "Reject the Union of Three Republics",
+        "plan_answer": {
+          "plan_id": "owen_stoltenberg",
+          "response": "rejected"
+        },
         "description": "Refuse the Owen-Stoltenberg map despite Belgrade's directive. The Pale Assembly defies Milošević and Belgrade's backing drops. International standing falls; negotiating leverage erodes.",
         "effects": [
-          {
-            "kind": "patron_support",
-            "faction": "RS",
-            "delta": -20
-          },
           {
             "kind": "morale_change",
             "faction": "RS",
@@ -4047,11 +4029,6 @@
           "rs_owen_stoltenberg_response": "reject"
         },
         "dimension_shifts": [
-          {
-            "faction": "RS",
-            "dimension": "international_standing",
-            "delta": -10
-          },
           {
             "faction": "RS",
             "dimension": "negotiating_leverage",

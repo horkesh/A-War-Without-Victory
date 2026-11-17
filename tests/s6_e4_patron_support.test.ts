@@ -199,18 +199,19 @@ describe('§6 E4: the writer', () => {
 describe('§6 E4: the allowlist pin', () => {
     // Round 3 (Q2) dropped abdic federation_offer, hv_hvo arbih_coordination and
     // address_defiance_rs (no recorded patron change), with their entries.
+    // §6 E3a2 (ruling items 4 and 6): the contact-group +10 moved to Sarajevo's Assembly card,
+    // and rs_owen_stoltenberg#accept_with_modifications (recorded R) lost its +5.
     const EXPECTED: Record<string, string> = {
-        'contact_group_plan_1994#accept': 'RBiH',
         'csq_patron_recovery_offer#accept_recovery': 'RS',
         'hrhb_posavina_orasje_posture_1992#counterattack_brod': 'HRHB',
         'rbih_arms_embargo_lift_advocacy_1993#lobby_for_lift_and_strike': 'RBiH',
+        'rbih_contact_group_response_1994#accept_51_49_plan': 'RBiH',
         'rbih_late_war_offensive_1995#wait_for_diplomacy': 'RBiH',
         'rs_assembly_rejects_voplan_1993#override_assembly': 'RS',
         'rs_autonomy_path_decision_1993#accept_federation_status': 'RS',
         'rs_autonomy_path_decision_1993#accept_minority_rights_only': 'RS',
         'rs_autonomy_path_decision_1993#negotiate_autonomy_within_bih': 'RS',
         'rs_contact_group_response_1994#accept_51_49_plan': 'RS',
-        'rs_owen_stoltenberg_response_1993#accept_with_modifications': 'RS',
     };
 
     it('lists exactly the ruled rows, each with its faction and a reason', () => {
@@ -311,22 +312,22 @@ describe('§6 E4: ruled rows', () => {
             ['rbih_federation_army_integration_1994', 'refuse_integration', 'RBiH', -10],
             ['hrhb_federation_army_integration_1994', 'refuse_integration', 'HRHB', 0],
             ['rbih_nato_ultimatum_compliance_1994', 'rbih_defy_hwez_regime', 'RBiH', -10],
-            ['contact_group_plan_1994', 'accept', 'RBiH', 10],
-            ['contact_group_plan_1994', 'reject', 'RBiH', -10],
             ['rs_assembly_rejects_voplan_1993', 'override_assembly', 'RS', 5],
-            ['rs_assembly_rejects_voplan_1993', 'accept_rejection', 'RS', -10],
-            // Interim carriers until E3a2 routes these peace-plan cards into the plan resolution
-            // (coordinator ruling 2026-11-17); E3a2 strips them.
-            ['rs_owen_stoltenberg_response_1993', 'reject_plan', 'RS', -20],
-            ['rs_contact_group_response_1994', 'negotiate_amendments', 'RS', -5],
-            // Round 3 (Q3/R4-4): Belgrade's break is carried by CONTACT_GROUP_REJECTION and the
-            // RBiH reject by contact_group_plan_1994#reject, so both reject cards carry none.
+            // §6 E3a2 (ruling items 4 and 6): the routed cards. The four E4 interim carriers are
+            // stripped (a refusal's patron cost is the plan's −5 at resolution, plus
+            // CONTACT_GROUP_REJECTION for Belgrade's break); the contact-group +10 moved to
+            // Sarajevo's Assembly card (contact_group_plan_1994 is a no-choice presentation card).
+            ['rs_assembly_rejects_voplan_1993', 'accept_rejection', 'RS', 0],
+            ['rs_owen_stoltenberg_response_1993', 'reject_plan', 'RS', 0],
+            ['rs_owen_stoltenberg_response_1993', 'accept_with_modifications', 'RS', 0],
+            ['rs_contact_group_response_1994', 'negotiate_amendments', 'RS', 0],
             ['rs_contact_group_response_1994', 'reject_51_49_plan', 'RS', 0],
             ['rbih_contact_group_response_1994', 'reject_51_49_plan', 'RBiH', 0],
-            ['rbih_contact_group_response_1994', 'accept_51_49_plan', 'RBiH', 0],
+            ['rbih_contact_group_response_1994', 'accept_51_49_plan', 'RBiH', 10],
             ['vance_owen_plan_1993', 'accept', 'RBiH', 0],
             ['owen_stoltenberg_plan_1993', 'accept', 'RBiH', 0],
         ];
+        expect(defs.get('contact_group_plan_1994')!.response_options ?? []).toEqual([]);
         for (const [eventId, optionId, faction, value] of expected) {
             expect(supportSum(optionOf(defs.get(eventId)!, optionId).effects ?? [], faction), `${eventId}#${optionId}`).toBe(value);
         }

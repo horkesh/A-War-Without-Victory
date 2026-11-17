@@ -163,11 +163,14 @@ describe('event notification content backfill', () => {
         const events = loadWar1994Events();
         const cases = [
             {
-                eventId: 'contact_group_plan_1994',
+                // §6 E3a2 (ruling item 4): Sarajevo's answer is the Assembly card; the
+                // presentation card contact_group_plan_1994 has no options and no notifications.
+                eventId: 'rbih_contact_group_response_1994',
                 source: 'RBiH',
                 responses: {
-                    accept: ['HRHB', 'RS'],
-                    reject: ['HRHB', 'RS'],
+                    accept_51_49_plan: ['HRHB', 'RS'],
+                    reject_51_49_plan: ['HRHB', 'RS'],
+                    accept_with_public_reservations: ['HRHB', 'RS'],
                 },
             },
             {

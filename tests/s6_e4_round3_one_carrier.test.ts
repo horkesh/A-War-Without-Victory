@@ -185,7 +185,8 @@ describe('§6 E4 round 3, Q1: one carrier per patron change (loader rule)', () =
         for (const [eventId, optionId, faction, value] of [
             ['concentration_camps_revealed_1992', 'deny', 'RS', -10],
             ['concentration_camps_revealed_1992', 'obstruct', 'RS', -5],
-            ['rs_assembly_rejects_voplan_1993', 'accept_rejection', 'RS', -10],
+            // §6 E3a2 stripped the interim −10 (a refusal's patron cost is the plan's −5).
+            ['rs_assembly_rejects_voplan_1993', 'accept_rejection', 'RS', 0],
             ['rs_contact_group_response_1994', 'accept_51_49_plan', 'RS', 20],
             ['belgrade_embargo_rs_1994', 'defiant', 'RS', -10],
             ['un_hostage_crisis_1995', 'maintain_hostages', 'RS', -10],
@@ -455,15 +456,16 @@ describe('§6 E4 round 3, Q3: Belgrade\'s break has one carrier', () => {
         expect(reject.military.negotiation!.patron_relationships.RS!.relationship_events).toContain('contact_group_rejection');
     });
 
-    it('the reject cards carry neither support nor confidence; contact_group_plan_1994#reject keeps −10', () => {
+    it('the reject cards carry neither support nor confidence; the RBiH accept carries the +10 (§6 E3a2: the −10 interim went)', () => {
         const rs = optionOf('rs_contact_group_response_1994', 'reject_51_49_plan');
         expect(supportSum(rs.effects, 'RS')).toBe(0);
         expect(confidenceShifts(rs, 'RS')).toEqual([]);
         const rbih = optionOf('rbih_contact_group_response_1994', 'reject_51_49_plan');
         expect(supportSum(rbih.effects, 'RBiH')).toBe(0);
         expect(confidenceShifts(rbih, 'RBiH')).toEqual([]);
-        expect(supportSum(optionOf('contact_group_plan_1994', 'reject').effects, 'RBiH')).toBe(-10);
-        expect(supportSum(optionOf('contact_group_plan_1994', 'accept').effects, 'RBiH')).toBe(10);
+        // contact_group_plan_1994 is a no-choice presentation card; its +10 moved, same size.
+        expect(byId().get('contact_group_plan_1994')!.response_options ?? []).toEqual([]);
+        expect(supportSum(optionOf('rbih_contact_group_response_1994', 'accept_51_49_plan').effects, 'RBiH')).toBe(10);
     });
 });
 
@@ -506,12 +508,25 @@ describe('§6 E4 round 3: save migration v42 lists', () => {
     });
 
     it('the lists match the catalog: DROP options carry no support, SET options carry the set value, shift-drop options carry no twin', () => {
+        // §6 E3a2 (v43) moved these on after v42: the four interim carriers are stripped, the
+        // contact-group +10 moved from contact_group_plan_1994#accept (now no options) to
+        // rbih_contact_group_response_1994#accept_51_49_plan (a v42 DROP key). v42 keeps its lists.
+        const MOVED_BY_E3A2 = new Set([
+            'contact_group_plan_1994#accept',
+            'contact_group_plan_1994#reject',
+            'rbih_contact_group_response_1994#accept_51_49_plan',
+            'rs_assembly_rejects_voplan_1993#accept_rejection',
+            'rs_contact_group_response_1994#negotiate_amendments',
+            'rs_owen_stoltenberg_response_1993#reject_plan',
+        ]);
         for (const key of S6_E4_PATRON_SUPPORT_DROP) {
+            if (MOVED_BY_E3A2.has(key)) continue;
             const [eventId, optionId] = key.split('#') as [string, string];
             const option = optionOf(eventId, optionId);
             expect((option.effects ?? []).some((e) => e.kind === 'patron_support'), key).toBe(false);
         }
         for (const [key, value] of Object.entries(S6_E4_PATRON_SUPPORT_SET)) {
+            if (MOVED_BY_E3A2.has(key)) continue;
             const [eventId, optionId] = key.split('#') as [string, string];
             const option = optionOf(eventId, optionId);
             const total = (option.effects ?? []).filter((e) => e.kind === 'patron_support').reduce((s, e) => s + (e as { delta: number }).delta, 0);

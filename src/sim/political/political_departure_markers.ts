@@ -57,10 +57,8 @@ export const POLITICAL_DEPARTURE_MARKERS: readonly PoliticalDepartureMarker[] = 
         event_id: 'rs_contact_group_response_1994', responder: 'RS', departure_response_ids: ['accept_51_49_plan'], opens: ['RBiH', 'HRHB'],
         basis: 'RS rejected the Contact Group plan twice (BB1 p.59).',
     },
-    {
-        event_id: 'contact_group_plan_1994', responder: 'RBiH', departure_response_ids: ['reject'], opens: ['RS', 'HRHB'],
-        basis: 'Sarajevo accepted the Contact Group plan (BB1 p.59).',
-    },
+    // §6 E3a2: contact_group_plan_1994 is a no-choice presentation card; Sarajevo's answer
+    // (and its departure) is rbih_contact_group_response_1994 below.
     {
         event_id: 'rbih_contact_group_response_1994', responder: 'RBiH', departure_response_ids: ['reject_51_49_plan'], opens: ['RS', 'HRHB'],
         basis: 'Sarajevo accepted the Contact Group plan (BB1 p.59).',

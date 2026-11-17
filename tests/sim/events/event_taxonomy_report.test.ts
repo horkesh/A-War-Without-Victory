@@ -443,7 +443,7 @@ describe('event taxonomy diagnostic report', () => {
             'hrhb_washington_agreement_1994',
             'rbih_washington_agreement_1994',
             'ic_rbih_restraint_post_washington',
-            'contact_group_plan_1994',
+            // §6 E3a2: contact_group_plan_1994 is a no-choice presentation card (ruling item 4).
             'hrhb_contact_group_response_1994',
             'rbih_contact_group_response_1994',
             'rs_contact_group_response_1994',
@@ -498,7 +498,7 @@ describe('event taxonomy diagnostic report', () => {
 
         for (const [id, expectedDefault] of [
             ['hrhb_washington_agreement_1994', 'accept'],
-            ['contact_group_plan_1994', 'accept'],
+            ['rbih_contact_group_response_1994', 'accept_51_49_plan'],
             ['dayton_talks_begin_1995', 'accept'],
         ] as const) {
             const row = report.rows.find((entry) => entry.id === id);
