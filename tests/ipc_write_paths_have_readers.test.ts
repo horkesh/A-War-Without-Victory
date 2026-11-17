@@ -19,6 +19,7 @@
 import { readdirSync, readFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { describe, expect, it } from 'vitest';
+import { GAMESTATE_TOP_LEVEL_KEYS } from '../src/state/serializeGameState.js';
 
 const ROOT = process.cwd();
 
@@ -28,20 +29,13 @@ const UI_ONLY_FIELDS: Record<string, string> = {
 };
 
 /**
- * KNOWN DEFECTS found by this guard on 2026-11-17 and reported to the orchestrator:
- * each handler writes a ROOT field while the engine reads the military.* path (or
- * nothing), so the player action has no effect. Out of scope for the supply-reserve
- * retirement; fix the handler and delete the entry. The test fails if an entry here
- * gains a reader, so the list cannot go stale.
+ * Known defects. The six that the first run of this guard found on 2026-11-17 (root
+ * `brigade_aor_orders`, `brigade_deploy_orders`, `brigade_mun_orders`, `brigade_posture_orders`,
+ * `corps_command`, `opsec_sectors`) were fixed or retired in the dead-IPC change, so the list is
+ * empty. An entry must give the reason and is checked: the test fails if an entry gains a reader
+ * or stops being written, so the list cannot go stale.
  */
-const KNOWN_DEAD_WRITES: Record<string, string> = {
-    brigade_aor_orders: 'clear-orders filters root brigade_aor_orders; deserialize deletes that root field and nothing reads it',
-    brigade_deploy_orders: 'apply-recruitment writes root brigade_deploy_orders; brigade_movement.ts reads military.brigade_deploy_orders',
-    brigade_mun_orders: 'stage-move-order writes root brigade_mun_orders; deserialize deletes that root field and nothing reads it',
-    brigade_posture_orders: 'clear-orders filters root brigade_posture_orders; the engine reads military.brigade_posture_orders',
-    corps_command: 'stabilize-command-relationship writes root corps_command; the engine reads military.corps_command',
-    opsec_sectors: 'stage-opsec-toggle writes root opsec_sectors; the engine reads military.opsec_sectors',
-};
+const KNOWN_DEAD_WRITES: Record<string, string> = {};
 
 function stripComments(source: string): string {
     return source
@@ -123,6 +117,66 @@ describe('IPC write paths have engine readers', () => {
         for (const field of Object.keys(KNOWN_DEAD_WRITES).sort()) {
             expect(writes.has(field), `${field} is no longer written; delete its entry`).toBe(true);
             expect(readersOf(field, sources), `${field} now has a reader; delete its entry`).toEqual([]);
+        }
+    });
+});
+
+/**
+ * READ half of the guard (2026-11-17, L7). The write scan above cannot see a handler that READS a
+ * root field GameState does not have: `state.corps_command?.[id]` found no operation and
+ * `stage-operation-decision` always answered "Operation not found"; `stabilize-command-relationship`
+ * kept its cooldown and its force-launch strain source on a root `corps_command` the engine never
+ * fills. GameState has twelve top-level keys (`GAMESTATE_TOP_LEVEL_KEYS`); everything else lives
+ * under `military`, `political`, `displacement`, `meta`. A root `state.<key>` whose key is not one
+ * of those twelve is a read or write of a field that does not exist, and a write also fails at
+ * serialization (`assertNoWrapper`).
+ */
+describe('desktop code touches only real GameState root keys', () => {
+    /**
+     * Files where `state` is NOT a GameState (a renderer projection or another shape). Empty today:
+     * `player_visible_state.cjs` is excluded by file name below because it builds projections.
+     */
+    const EXCLUDED_FILES = new Set(['player_visible_state.cjs']);
+    /** Root keys that are knowingly not GameState keys, with the reason. Empty today. */
+    const ALLOWED_NON_GAMESTATE_KEYS: Record<string, string> = {};
+
+    function scan(): Array<{ file: string; line: number; key: string }> {
+        const dir = join(ROOT, 'src/desktop');
+        const found: Array<{ file: string; line: number; key: string }> = [];
+        for (const name of readdirSync(dir).filter((f) => f.endsWith('.cjs') && !EXCLUDED_FILES.has(f)).sort()) {
+            const text = stripComments(readFileSync(join(dir, name), 'utf8'));
+            text.split('\n').forEach((line, i) => {
+                const re = /(?<![A-Za-z0-9_.$])state\??\.([A-Za-z_][A-Za-z0-9_]*)/g;
+                for (let m = re.exec(line); m; m = re.exec(line)) {
+                    const key = m[1]!;
+                    if (!GAMESTATE_TOP_LEVEL_KEYS.has(key) && !(key in ALLOWED_NON_GAMESTATE_KEYS)) {
+                        found.push({ file: `src/desktop/${name}`, line: i + 1, key });
+                    }
+                }
+            });
+        }
+        return found;
+    }
+
+    it('scans the desktop modules (the scan is not vacuous)', () => {
+        const text = readFileSync(join(ROOT, 'src/desktop/electron-main.cjs'), 'utf8');
+        expect(text.includes('state.military')).toBe(true);
+        expect(GAMESTATE_TOP_LEVEL_KEYS.has('military')).toBe(true);
+        expect(GAMESTATE_TOP_LEVEL_KEYS.has('corps_command')).toBe(false);
+        expect(GAMESTATE_TOP_LEVEL_KEYS.has('opsec_sectors')).toBe(false);
+    });
+
+    it('no desktop handler reads or writes a root state key that is not a GameState key', () => {
+        const offenders = scan().map((hit) => `${hit.file}:${hit.line} state.${hit.key}`);
+        expect(offenders).toEqual([]);
+    });
+
+    it('the retired root-path actions are gone from the main process and the bridge', () => {
+        const main = readFileSync(join(ROOT, 'src/desktop/electron-main.cjs'), 'utf8');
+        const preload = readFileSync(join(ROOT, 'src/desktop/preload.cjs'), 'utf8');
+        for (const channel of ['stage-move-order', 'stage-deploy-order', 'stage-undeploy-order', 'clear-orders', 'stage-operation-decision']) {
+            expect(main.includes(`ipcMain.handle('${channel}'`), channel).toBe(false);
+            expect(preload.includes(`'${channel}'`), channel).toBe(false);
         }
     });
 });
