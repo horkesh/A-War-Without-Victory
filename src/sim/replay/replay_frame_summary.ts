@@ -115,7 +115,7 @@ function nonNegativeCount(value: unknown): number {
  *
  * The engine creates the ledger on its first casualty write
  * (`initializeCasualtyLedger` in battle_resolution, attack_resolution_osid,
- * frontline_attrition, siege_attrition), with a row for every side, so a
+ * frontline_attrition), with a row for every side, so a
  * `military` record without a ledger means no casualty has been recorded yet:
  * a true 0. `null` when the frame has no `military` record, the ledger is not an
  * object, or the ledger lacks a canonical side. The last case is the

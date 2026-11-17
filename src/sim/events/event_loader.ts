@@ -434,6 +434,16 @@ function validateEventRow(row: unknown, filename: string, rowIndex: number): voi
             failRow(filename, rowIndex, 'probability must be between 0 and 1 when present');
         }
     }
+    if (hasOwn(row, 'audience')) {
+        const audience = row.audience;
+        const valid = audience === 'all'
+            || (Array.isArray(audience) && audience.length > 0
+                && audience.every((faction) => faction === 'RBiH' || faction === 'RS' || faction === 'HRHB')
+                && new Set(audience).size === audience.length);
+        if (!valid) {
+            failRow(filename, rowIndex, `audience must be "all" or a non-empty list of distinct factions (RBiH, RS, HRHB) when present: ${JSON.stringify(audience)}`);
+        }
+    }
     if (hasOwn(row, 'once')) {
         validateOptionalBoolean(row.once, 'once', filename, rowIndex);
     }

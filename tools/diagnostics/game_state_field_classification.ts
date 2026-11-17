@@ -273,7 +273,6 @@ const LIVE_FIELD_CLASSIFICATION_GROUPS = {
         'MilitaryState.sarajevo_tunnel_operational',
         'MilitaryState.sector_stance_orders',
         'MilitaryState.settlement_holdouts',
-        'MilitaryState.siege_turn_counters',
         'MilitaryState.smuggling_allocation',
         'MilitaryState.smuggling_routes',
         'MilitaryState.strategic_reserves',
@@ -302,6 +301,8 @@ const LIVE_FIELD_CLASSIFICATION_GROUPS = {
         'MilitaryState.brigade_desired_aor_cap',
         'MilitaryState.brigade_front_assignment',
         'MilitaryState.brigade_reposition_orders',
+        // Retired 2026-11-17 (§6 panel): siege counters not modelled in 1.0; kept so old saves load.
+        'MilitaryState.siege_turn_counters',
         'MilitaryState.theatres',
     ],
     dead: [],

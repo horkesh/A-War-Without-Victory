@@ -39,15 +39,7 @@ describe('state supply and enclave BFS queue cursor contracts', () => {
         }
     });
 
-    it('supply reserve siege pocket BFS uses a head cursor, not Array.shift()', () => {
-        const raw = readFileSync(resolve('src/state/supply_reserves.ts'), 'utf8');
-        const region = regionBetween(raw, 'function computeCriticalPockets(', 'export function updateSiegeTurnCounters');
-
-        expect(region).not.toContain('.shift()');
-        expect(region).not.toMatch(/\bDate\.now\s*\(/);
-        expect(region).not.toMatch(/\bnew\s+Date\s*\(/);
-        expect(region).not.toMatch(/\bperformance\.now\s*\(/);
-    });
+    // Supply-reserve siege pocket BFS (computeCriticalPockets) retired 2026-11-17 (§6 panel).
 
     it('sustainability surrounded-search BFS uses a head cursor, not Array.shift()', () => {
         const raw = readFileSync(resolve('src/state/sustainability.ts'), 'utf8');

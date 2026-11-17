@@ -329,7 +329,7 @@ When active, these corps pairs do not generate attack orders against each other'
 
 **NOT covered:** Posavina corridor, central Bosnia outside Kiseljak, Krajina HRHB cells (including Jajce).
 
-**Cold fronts:** `isColdFront()` in `frontline_attrition.ts` — RS↔HRHB fronts under corps-pair truce are exempt from frontline attrition (sniping, disease, desertion) and bombardment firepower. HRHB siege drain also skipped on cold fronts.
+**Cold fronts:** `isColdFront()` in `frontline_attrition.ts` — RS↔HRHB fronts under corps-pair truce are exempt from frontline attrition (sniping, disease, desertion) and bombardment firepower.
 
 **Player break:** Player may attack across the truce. First violation sets `truce_broken_turn[faction]`. Designed: the opponent bot gains `+0.25 aggression` for `6 turns` after truce break (`TRUCE_BREAK_SPIKE_TURNS`, `TRUCE_BREAK_AGGRESSION_SPIKE`). Current build: not applied. `truce_broken_turn` is recorded in state, but `getTruceBreakAggressionBonus` has no caller that feeds bot or corps aggression. Wiring is deferred post-1.0 (realism audit F6, `docs/40_reports/proposals/20261114_PRE_1_0_REALISM_AUDIT.md`).
 
@@ -410,27 +410,11 @@ Items 1, 2, 4 and 5 apply only when the lost position is still in the friendly s
 
 **Formation admission contract (2026-07-17):** `lifecycle_status: 'forming'` is pre-operational state. Forming formations remain outside front/reserve/security sector rosters, elite-loan rescue placement, and historical or generated operation participant pools until they satisfy the shared sector-roster eligibility predicate.
 
-### 6.10 Siege Defender Morale Drain
+### 6.10 Siege Defender Morale Drain (retired)
 
-**LANE-NIGHTSHIFT-SRK-SIEGE-DEFENDER-MORALE-PHASE-1 (commit `5313fd41`, 2026-05-08).** A new mechanism (`siege_morale_drain.ts`) applies a graduated morale decrement to defenders whose OSID appears in `state.military.siege_turn_counters[<faction>:<osid>]`. Models cumulative siege manning fatigue over the long-siege envelope (1992–1995) documented in ICTY Galić IT-98-29-T and Dragomir Milošević IT-98-29/1, and BB2's chapter on VRS late-war manning. The early "winning period" (turns 0–13) is morale-neutral; erosion deepens through 1993, 1994, and 1995. Faction-symmetric: the predicate has no faction/corps/OSID condition; siege counters are faction-keyed by data and the same coefficient table applies to any besieged faction.
+**Retired 2026-11-17 (Fable consult 6; §6 panel unanimous: historian, scenario-creator-runner-tester, engine/systems, red-team; canon + engine seats on this text).** The siege defender morale drain is not modelled in 1.0. It read `state.military.siege_turn_counters`, which ran only under the scenario flag `supply_reserves_enabled` (set only by `sep1991_to_dayton` and `jan1993_to_dayton`, which no player can start, since the desktop New Game accepts only `apr_1992`, and which are retired for 1.0 by the owner's one-start ruling; off in the scored apr1992 scenario), and its morale path sat behind a default-off switch (`SIEGE_MORALE_DRAIN_ENABLED`) since May 2026, so the drain itself never ran. Retired with it: the siege counters, the passive siege bombardment attrition, the reserve siege drain (`SIEGE_BASE_RATE` and its caps) and the `siege_active` event condition. `siege_turn_counters` stays an optional, compatibility-only save field so old saves load; nothing writes or reads it. Do not revive this mechanism as it stood: the record of why is in `docs/40_reports/governance/20261115_FINAL_BEHAVIOUR_AT_1_0.md` (SB1).
 
-**Schedule (per-turn morale delta, by counter `c` in turns):**
-
-```
-c ∈ [  0,  13]  → 0.0
-c ∈ [ 14,  26]  → -0.5
-c ∈ [ 27,  52]  → -1.0
-c ∈ [ 53, 104]  → -1.5
-c ∈ [105,  ∞]   → -2.0
-```
-
-**Floor:** drain stops at morale `25` (`SIEGE_DRAIN_MORALE_FLOOR`), matching `RBIH_EXISTENTIAL_FLOOR`. Other drains (combat, supply, exhaustion) may push morale lower; this floor pins the siege drain itself, not the composed value.
-
-**Pipeline:** runs in step `apply-siege-morale-drain` immediately after `morale-drift` and before `check-brigade-dissolution-post-combat`. Siege drain layers on top of the existing affinity drift; net per-turn morale direction emerges from composition. Affinity drift (`+2/turn` in own-population areas) is preserved; the siege drain offsets it after the duration threshold.
-
-**Implementation gate:** behind environment flag `SIEGE_MORALE_DRAIN_ENABLED` (default `false`) for shadow-flag rollout per FORAWWV §XIV.1. With the flag off, drain is computed and the diagnostic counter `drain_pending_count` increments unconditionally, but `f.morale` is not mutated. Mirrors the N4 morale-collapse override `morale_low_streak` precedent (commit `58624617`). 40w hash byte-identical with the flag unset (verified: `86ebf26ae0271465`).
-
-Authoritative invariant: Engine Invariants v0.9.0 §6.10. Implementation: `src/sim/combat/siege_morale_drain.ts`. Tests: `tests/siege_morale_drain.test.ts`. Recommendation: `docs/40_reports/implemented/20260507_SRK_SIEGE_DEFENDER_PHASE_1_RECOMMENDATION.md` (`8e974004`). Predecessor DDR: `docs/40_reports/audits/20260507_SRK_SIEGE_DEFENDER_MORALE_PHASE_0.md` (`bb0e449e`).
+Authoritative invariant: Engine Invariants v0.9.0 §6.10 (retired).
 
 ## 7. Combat interaction and attack resolution
 
@@ -492,7 +476,7 @@ When War phase runs, attack orders are resolved as **discrete attacks** per targ
 
 **Frontline attrition entrenchment reduction:** Passive frontline attrition (sniping, disease, desertion) and bombardment exposure attrition are both reduced by entrenchment. Modifier: `max(0.40, 1.0 - sqrt(entrenchment_turns) * 0.10)` — sqrt diminishing returns matching the combat entrenchment model. At 6 turns: 24.5% reduction. At 20 turns: 44.7% reduction. At 52 turns: 60% reduction (floor 0.40). **Sector-based lookup (n366):** frontline attrition uses `corps_front_sectors` `assigned_brigade_ids` to determine which brigades are on the front (replaces legacy `brigade_front_assignment` + `local_fronts`). Reserves not in any sector territory are exempt. Density modifier: `sector.assigned_brigade_ids.length / sector.length_edges`. Module: `src/sim/combat/frontline_attrition.ts`.
 
-**Siege bombardment attrition (n292):** Besieged OSIDs with enemy artillery in range suffer passive casualties each turn, independent of active combat. This models the slow attrition of garrison forces under sustained bombardment (e.g. Sarajevo, enclaves). Module: `src/sim/combat/siege_attrition.ts`.
+**Siege bombardment attrition (n292): retired 2026-11-17.** Bombardment losses of besieged formations are not modelled; shelling of the besieged fell mainly on civilians, and defender losses come from combat resolution. The retired module (`siege_attrition.ts`) never reached Sarajevo or Bihać (neither is ever a critical-supply pocket), sized its fire from faction-wide average firepower rather than the guns around a pocket, and bled any small isolated pocket every turn; measured alone it put about 10.8k casualties on Goražde and 4.4k on Srebrenica (several times the worst ground battle) and none on Sarajevo. See SB1 in the final-behaviour record.
 
 **State (per brigade):** location_osid, entrenchment_turns, defense_streak, disrupted_turns, movement_state, **garrison** (boolean; see below). **Invariant:** No single resolution flips more than one OSID.
 
@@ -682,7 +666,6 @@ Army HQ gathering follows the existing deterministic staff-execution boundary: i
 - `territory_control` — faction controls municipality/OSID above threshold
 - `alliance_below` / `alliance_above` — RBiH-HRHB alliance level check
 - `faction_controls_municipality` — faction controls ≥threshold fraction of municipality OSIDs
-- `siege_active` — siege detected at OSID or municipality
 - `operation_completed` — named operation matching pattern has completed; optional `min_attacks` requires recorded combat attempts
 - `operation_attacked` — matching operation has recorded at least one attack (or `min_attacks` if supplied); reads live execution, completed AARs, and player-halted attack records, so a merely queued or planned operation does not qualify
 - `and` / `or` / `not` — logical combinators (recursive)
@@ -755,6 +738,19 @@ Events WITHOUT pressure config use legacy `triggerMatches()` (backward compatibl
 Each dimension: `base_value` (computed from game state each turn) + `event_modifier` (accumulated from player decisions) = `effective_value` (clamped 0-100).
 
 Stored on `NegotiationState.strategic_dimensions`. Module: `src/sim/events/strategic_dimensions.ts`.
+
+**One accumulator rule (§6 E3a1, 2026-11-17).** Every write to a dimension's `event_modifier` goes through `applyDimensionShift()`: event `dimension_shifts`, command levers, CO replacement, stance matters, scripted patron events (`humanitarian_delta`) and peace-plan rejection (`credibility_change_on_reject`). The accumulator is not clamped. A side at −110 that takes −30 more sits at −140. Only the result is clamped: `effective_value = clamp(base_value + event_modifier, 0, 100)`. Sim readers take `effective_value`, never the raw `event_modifier`.
+
+**One base writer (§6 E3a1).** `computeDimensionBaseValues()` (pipeline step `compute-dimension-bases`) is the only function that writes any `base_value`, through `updateBaseValue()`. `computeNegotiationBreakdown()` (step `compute-negotiation-capital`) only rebuilds the raw capital record, including `peace_plans_accepted/rejected` from `peace_plan_history`. `resolvePeacePlan()` does not push into those lists; the history row is the single source.
+
+**`international_standing` base inputs:**
+
+`base = clamp(50 − war_crimes_events × 10 − paramilitary_finding_penalty − civilian_casualties_caused / 5000 + plans_accepted × 10 − plans_rejected × 15, 0, 100)`
+
+- `war_crimes_events × 10`: the capital war-crimes counter.
+- `paramilitary_finding_penalty`: from the faction's latest paramilitary war-crimes finding: 2 / 4 / 5 per deployment for the minor / mid / severe band, plus a 10-point cliff at severe. It is added to the war-crimes term and never replaces it, so a sweep that brings a finding can never raise the base.
+- `civilian_casualties_caused / 5000`.
+- Plans accepted (+10 each) and rejected (−15 each), counted from `peace_plan_history`.
 
 **Ordinary-player startup initialization (2026-10-25 candidate):** `initializeNegotiationState()` supplies absent negotiation containers and canonical capital/patron entries before the selected faction's foundational decision in Electron and browser startup. It preserves present values, references and partial dimension stores; it performs no derived update. The existing per-turn compute call retains its old initialization position and behavior. Observer/no-player startup, baked snapshots and save migration are unchanged. The retained no-player first-turn crime-counter undercount remains unresolved and cannot be used as moral or historical comparison evidence.
 
@@ -965,7 +961,7 @@ When the operational graph (OSID) is the base layer, “supply at OSID” is the
 
 Integration: `getSupplyMult()` in `combat_math.ts` uses `getEffectiveSupplyState()` when `supply_reserves_enabled` is true. Pipeline step **compute-supply-reserves** (after supply-osid, before enclave-resilience) runs `updateSupplyReserves()`. Combat expenditure deducted per battle in `attack_resolution_osid.ts`. All behavior gated by scenario flag `supply_reserves_enabled` (enabled by default in `apr1992_definitive_40w`). Constants: `src/state/supply_reserve_constants.ts`. Core module: `src/state/supply_reserves.ts`. See SUPPLY_AMMO_SYSTEM_PLAN.md and `docs/40_reports/implemented/20260301_SUPPLY_RESERVES_PHASE_A_IMPLEMENTATION.md`.
 
-**Implementation-note (Phase B+C — Siege, Replenishment, Enclave Hardening, 2026-03-02):** Phase B adds escalating siege drain per besieged OSID (`siege_turn_counters`, key `${factionId}:${osid}`), patron aid income (from `patron_state.material_support_level`), embargo reduction (multiplicative cap on income from `embargo_profile`), and production facility combat damage (0.05 condition per battle in target municipality). Pipeline step **update-siege-counters** inserted between supply-osid and compute-supply-reserves. Phase C enhances enclave resilience with structured `EnclaveResilienceEntry` (resilience, isolation_turns, hardening_active); hardening defense bonus (+5%) activates after 8+ consecutive isolation turns; enclave-based exhaustion reduction for RBiH (up to 30% at max resilience 30). 25+ calibration constants in `supply_reserve_constants.ts`. All gated by `supply_reserves_enabled`. See `docs/40_reports/implemented/20260302_SUPPLY_SYSTEM_PHASE_B_C_IMPLEMENTATION.md`.
+**Implementation-note (Phase B+C — Siege, Replenishment, Enclave Hardening, 2026-03-02):** Phase B adds escalating siege drain per besieged OSID (`siege_turn_counters`, key `${factionId}:${osid}`; retired 2026-11-17, §6.10), patron aid income (from `patron_state.material_support_level`), embargo reduction (multiplicative cap on income from `embargo_profile`), and production facility combat damage (0.05 condition per battle in target municipality). Pipeline step **update-siege-counters** inserted between supply-osid and compute-supply-reserves (retired 2026-11-17 with the siege drain and siege counters; see §6.10). Phase C enhances enclave resilience with structured `EnclaveResilienceEntry` (resilience, isolation_turns, hardening_active); hardening defense bonus (+5%) activates after 8+ consecutive isolation turns; enclave-based exhaustion reduction for RBiH (up to 30% at max resilience 30). 25+ calibration constants in `supply_reserve_constants.ts`. All gated by `supply_reserves_enabled`. See `docs/40_reports/implemented/20260302_SUPPLY_SYSTEM_PHASE_B_C_IMPLEMENTATION.md`.
 
 **Implementation-note (Phase D — Supply UX + UN Airdrops + Bot Targeting, 2026-03-03):** Phase D adds three capabilities: (1) **Supply map layer** — map mode 'supply' colors OSIDs by faction supply pressure (adequate ≥80 green, strained 50–79 amber, critical <50 red), derived via `buildSupplyGeoJSON.ts` from `controlBySettlement` + `war_supply_pressure`; (2) **Logistics panel** — `SupplyPanel.tsx` (bottom-left overlay when supply mode active) shows per-faction reserve bars (general + heavy munitions, color-coded ≥50/20-49/<20) and corridor summary (open/strained/cut count); `factionReserves` extracted from `general_supply_reserve` + `heavy_munitions_reserve` in `GameStateAdapter.ts` and exposed on `LoadedGameState`; (3) **UN Airdrops** — deterministic weekly general supply injection to RBiH enclaves with `isolation_turns ≥ AIRDROP_ISOLATION_THRESHOLD` (4 turns); capped at `AIRDROP_MAX_SUPPLY_PER_TURN` (3; was 15, reduced in n159 audit); humanitarian only (no munitions); pipeline function `applyUnAirdrops()` runs after `enclave-resilience`; (4) **Bot supply-aware targeting** — enemy offensive targets sorted by supply state (critical → strained → adequate → unknown) in `bot_corps_ai.ts`. Scenario `apr1992_definitive_40w` enables `supply_reserves_enabled: true` by default. 8 Vitest tests in `tests/supply_airdrop.test.ts`. Calibration: n407 90.5% area-weighted (ATH), 86.7% count-based. See `docs/40_reports/implemented/20260303_SUPPLY_PHASE_D_IMPLEMENTATION.md`.
 
