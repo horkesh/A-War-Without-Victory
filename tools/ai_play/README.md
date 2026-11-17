@@ -89,18 +89,37 @@ Nonzero horizons require the approved phase/source-bound run brief after consist
 
 ### Played test: a one-axis President (package "1994-95 attack and defence")
 
-With `--president engaged|meddler`, two opt-in flags make the President's Request-ops usable as the package's played test. Without them, the President and the output are unchanged.
+With `--president engaged|meddler`, these opt-in flags make the President's Request-ops usable as the package's played test. Without them, the President and the output are unchanged.
 
-- `--request-axis <corps>:<mun>[,<mun>...]`: every Request-op goes to that corps, against targets in the named municipalities only. If no axis target is buildable, it records `request_op:no_buildable_axis_target`.
+- `--request-axis <corps>[+<corps>...]:<mun>[,<mun>...]`: every Request-op goes to the named corps, against targets in the named municipalities only. If no axis target is buildable, it records `request_op:no_buildable_axis_target`.
+  - With several corps (`arbih_2nd_corps+arbih_3rd_corps:...`), each request week stages one Request-op per corps. Each is paid and checked on its own, so several corps converge on one axis.
 - `--request-prefer-exhausted on`: among candidate corps, one whose corps exhaustion is above the planning gate (`MAX_EXHAUSTION_FOR_OPERATION`) is ordered first.
+- `--request-only on`: the President spends Command Authority on Request-ops only, with no gestures, Stop-ops or backing. A player set on one push can do the same.
+- `--request-every <weeks>` (1-52): the Request-op cadence. The default is every 8 weeks for engaged and every 4 for meddler. `1` orders every week, a sustained push.
 
-With either flag set, the output adds:
+Every Request-op still costs Command Authority. A week the President cannot pay records `request_op:insufficient_ca`, as the desktop refuses it.
+
+With any of these flags set, the output adds:
 - `player_policy.president_options`;
 - per turn, `requested_corps_exhaustion`;
-- `president_requests`: each order with its turn, corps, target, exhaustion at the order, objection, Authority cost and clash, joined to its result. The result is the after-action report from `state.operation_history` (outcome, attacks, killed on each side, objectives captured), a still-running phase, or the `op_directive_rejection`.
+- `president_requests`: each order with its turn, corps, target, exhaustion at the order, objection, Authority cost and clash, joined to its result.
+
+How each result is read:
+- Each order is bound to its own attempt right after the week that consumed it. A rejection counts only when it names the order's target and was written that week. An operation counts only when it has the order's name and corps and started that week.
+- The result is one of:
+  - the after-action report from `state.operation_history` (outcome, attacks, killed on each side, and the AAR's canonical `objectives_captured`);
+  - a still-running phase;
+  - the rejection;
+  - `not_found`.
 
 ```bash
 node --import tsx tools/ai_play/desktop_calibration_compare.ts --faction RBiH --turns 120 --president engaged --event-policy staff_recommended --request-axis arbih_3rd_corps:maglaj,zavidovici --request-prefer-exhausted on
+```
+
+A sustained push by two corps on the Ozren axis:
+
+```bash
+node --import tsx tools/ai_play/desktop_calibration_compare.ts --faction RBiH --turns 160 --president engaged --event-policy staff_recommended --request-axis "arbih_2nd_corps+arbih_3rd_corps:doboj,gracanica,lukavac,maglaj,zavidovici" --request-every 1
 ```
 
 `--event-policy bot_equivalent` with an engaged President currently stops with `No response option "accept_ceasefire_terms" for event "strategic_posture_review_rbih"`. Use `staff_recommended` or `historical_default` until that is fixed.

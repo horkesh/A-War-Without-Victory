@@ -101,6 +101,9 @@ describe('Event timeline historical integrity', () => {
             conditions: [
                 { type: 'territory_control', osid: 'op:vitez:vitez_2', faction: 'HRHB' },
                 { type: 'flag_equals', flag: 'hvo_arbih_tensions_rising', value: true },
+                // §6 panel 2026-11-16 (Ahmići windows and H6): withheld after H6 evacuate/federate_early.
+                { type: 'not', condition: { type: 'flag_equals', flag: 'hrhb_central_bosnia_defense', value: 'evacuate' } },
+                { type: 'not', condition: { type: 'flag_equals', flag: 'hrhb_central_bosnia_defense', value: 'federate_early' } },
             ],
         });
         expect(JSON.stringify(ahmici.trigger.condition)).not.toContain('op:vitez:preocica_3');

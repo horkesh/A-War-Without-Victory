@@ -818,7 +818,9 @@ describe('strict null inventory progress', () => {
             // the live recovery step. No new type escape. 594 -> 595.
             // Command loop L7 (2026-11-15): StateMeta.army_clashes / army_clash_history and
             // MilitaryState.army_clash_state (live president only). No new type escape. 595 -> 598.
-            optional_fields_game_state: 598,
+            // Zombie-TG fix (2026-11-16): TacticalGroup.host_corps_id, the TG's stable lifecycle
+            // identity (absent on legacy TGs). No new type escape. 598 -> 599.
+            optional_fields_game_state: 599,
         });
         // Reason-code instrumentation (item 3): +1, `OperationAxis.launch_blocker_detail`.
         // `classifyDomain` routes it to `sim` on the /Corps|Operation/ interface-name rule,
@@ -833,13 +835,14 @@ describe('strict null inventory progress', () => {
         // Command loop L6: +1 state (command_authority.last_recovery_breakdown). 594 -> 595 / state 219 -> 220.
         // Command loop L7: +2 state (StateMeta.army_clashes / army_clash_history), +1 sim
         // (MilitaryState.army_clash_state). 595 -> 598 / state 220 -> 222 / sim 365 -> 366.
-        expect(current.optional_field_domains.total).toBe(598);
+        // Zombie-TG fix: +1 state (TacticalGroup.host_corps_id). 598 -> 599 / state 222 -> 223.
+        expect(current.optional_field_domains.total).toBe(599);
         expect(current.optional_field_domains.domain_counts).toMatchObject({
             derived: 10,
             ipc: 0,
             scenario: 0,
             sim: 366,
-            state: 222,
+            state: 223,
             ui_adapter: 0,
             unknown: 0,
         });
