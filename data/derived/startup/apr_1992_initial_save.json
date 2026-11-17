@@ -43791,6 +43791,6 @@
     "war_supply_condition": {},
     "war_supply_pressure": {}
   },
-  "schema_version": 41,
+  "schema_version": 42,
   "turn_summaries": []
 }

@@ -39,8 +39,9 @@ import type { ArmyLabel } from './identity.js';
 import type { RecruitmentResourceState } from './recruitment_types.js';
 import type { CommanderState } from '../sim/combat/commander/commander_state.js';
 
-// 41, not 40: v40 is claimed by another lane (batch-b), not yet on this branch (§6 E2).
-export const CURRENT_SCHEMA_VERSION = 41 as const;
+// v40 is claimed by another lane (batch-b) and is not yet on this branch; §6 E2 took 41
+// and §6 E4 took 42 (patron_pressure -> patron_support in pending decisions).
+export const CURRENT_SCHEMA_VERSION = 42 as const;
 
 // --- ID types (canonical) ---
 export type FactionId = string;

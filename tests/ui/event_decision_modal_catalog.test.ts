@@ -93,7 +93,7 @@ function describeEffect(effect: EventEffect): string | null {
     case 'supply_delta': return `${army} supply ${signedDelta(effect.delta)}`;
     case 'cohesion_change': return `${army} cohesion ${signedDelta(effect.delta)}`;
     case 'humanitarian_impact': return `${faction} humanitarian impact${effect.war_crimes_delta ? ` (${signedDelta(effect.war_crimes_delta)})` : ''}`;
-    case 'patron_pressure': return `${faction} patron pressure ${signedDelta(effect.delta)}`;
+    case 'patron_support': return `${faction} patron support ${signedDelta(effect.delta)}`;
     case 'alliance_change': return `RBiH–HRHB alliance ${signedDelta(points(effect.delta))}`;
     // §6 E2: no 'negotiation_capital' case; the kind is retired and the loader rejects it.
     case 'equipment_grant': {

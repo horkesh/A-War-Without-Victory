@@ -7,7 +7,7 @@
  * (data/scenarios/events/war_1993.json) into
  * `state.military.pending_event_decisions` so EventDecisionModal surfaces it.
  * ZERO new sim/event code — the event's authored effects (morale +5 / cohesion
- * +3 / patron_pressure -3 / standing shifts), voluntary action cadence (renewable
+ * +3 / patron_support -3 / standing shifts), voluntary action cadence (renewable
  * cooldown since appendix D, 2026-11-15), and branches are reused verbatim.
  *
  * ⚠ ENCLAVE REACHABILITY GATE (owner constraint, 2026-06-01):

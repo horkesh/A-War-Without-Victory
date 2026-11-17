@@ -444,6 +444,8 @@ As exhaustion rises, actions become harder to execute and outcomes more unpredic
 
 External patrons provide conditional support and apply pressure. Patron objectives may change over time and may not align fully with player goals.
 
+Support and pressure are two separate things (§6 E4, 2026-11-17). **Patron support** is how much material and political backing the patron gives; event choices raise or lower it (the `patron_support` effect, positive = backing rises), and it is the base of the faction's patron confidence. Condemnation, UN, NATO and atrocity events do not raise a perpetrator's patron support. **Patron pressure** is how hard the patron pushes the faction toward peace. It is the patron override, recomputed every turn, and it already reflects war crimes and atrocities. The `patron_pressure_above` event condition is named for pressure because it reads the override, not support.
+
 ## 15. Negotiation and War Termination
 
 ### 15.1 Opening negotiation windows

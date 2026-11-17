@@ -221,7 +221,7 @@ describe('EventDecisionModal presidential dossier', () => {
             historical_marker: 'historical_default',
             effects: [
               { kind: 'morale_change', faction: 'HRHB', delta: 4 },
-              { kind: 'patron_pressure', faction: 'HRHB', delta: -2 },
+              { kind: 'patron_support', faction: 'HRHB', delta: -2 },
             ],
             sets_flags: { hrhb_strategy: 'separate' },
             dimension_shifts: [
@@ -251,7 +251,7 @@ describe('EventDecisionModal presidential dossier', () => {
     expect(screen.getByText(/historically attested choice/)).toBeTruthy();
     expect(screen.getByText('Keep the institutions aligned with the existing wartime project.')).toBeTruthy();
     expect(screen.getByText('HVO morale +4')).toBeTruthy();
-    expect(screen.getByText('HRHB patron pressure -2')).toBeTruthy();
+    expect(screen.getByText('HRHB patron support -2')).toBeTruthy();
     expect(screen.getByText('HRHB Patron Confidence +6')).toBeTruthy();
     expect(screen.getByText('No immediate mechanical effects.')).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Choose response: Maintain the separate project' })).toBeTruthy();

@@ -925,3 +925,106 @@ registerMigration({
         }
     },
 });
+
+/** §6 E4 static lists, by `${event_id}#${option_id}`. Embedded here on purpose: the
+ *  migration never loads the event catalog. Every flip in the ruling is expressed as
+ *  an absolute SET value, so there is no separate FLIP list. */
+const S6_E4_PATRON_SUPPORT_DROP: ReadonlySet<string> = new Set([
+    'bihac_5th_corps_offensive_1994#seek_negotiation',
+    'concentration_camps_revealed_1992#cooperate',
+    'hrhb_camp_exposure_response_1993#cooperate',
+    'hrhb_federation_army_integration_1994#refuse_integration',
+    'london_conference_1992#accept_principles',
+    'owen_stoltenberg_plan_1993#accept',
+    'rbih_contact_group_response_1994#accept_51_49_plan',
+    'srebrenica_demilitarization_1993#comply_fully',
+    'srebrenica_demilitarization_1993#refuse',
+    'un_hostage_crisis_1995#release_gradually',
+    'vance_owen_plan_1993#accept',
+    'visit_to_front_hrhb#visit_mostar_front',
+    'visit_to_front_hrhb#visit_press_hrhb',
+    'visit_to_front_rs#visit_drina_front',
+    'visit_to_front_rs#visit_press_rs',
+    'visit_to_front_rs#visit_sarajevo_lines',
+]);
+const S6_E4_PATRON_SUPPORT_SET: Readonly<Record<string, number>> = {
+    'belgrade_embargo_rs_1994#defiant': -10,
+    'concentration_camps_revealed_1992#deny': -10,
+    'concentration_camps_revealed_1992#obstruct': -5,
+    'contact_group_plan_1994#accept': 10,
+    'hrhb_camp_exposure_response_1993#deny': -10,
+    'hrhb_camp_exposure_response_1993#obstruct': -5,
+    'rbih_federation_army_integration_1994#refuse_integration': -10,
+    'rbih_minority_retention_1992#mandatory_purge': -20,
+    'rbih_nato_ultimatum_compliance_1994#rbih_defy_hwez_regime': -10,
+    'rs_assembly_rejects_voplan_1993#override_assembly': 5,
+    'un_hostage_crisis_1995#maintain_hostages': -10,
+    'us_halts_federation_advance_1995#push_further': -15,
+    // Interim carriers until E3a2 routes these peace-plan cards into the plan resolution
+    // (today only the Vance-Owen and Owen-Stoltenberg Presidency/Assembly cards reach
+    // resolvePeacePlan): the authored magnitude with the sign corrected to SUPPORT.
+    // E3a2 strips them when it routes the cards.
+    'contact_group_plan_1994#reject': -10,
+    'rbih_contact_group_response_1994#reject_51_49_plan': -15,
+    'rs_assembly_rejects_voplan_1993#accept_rejection': -10,
+    'rs_contact_group_response_1994#negotiate_amendments': -5,
+    'rs_contact_group_response_1994#reject_51_49_plan': -10,
+    'rs_owen_stoltenberg_response_1993#reject_plan': -20,
+};
+/** One carrier per camp option: the options' own patron_confidence shifts go. */
+const S6_E4_PATRON_CONFIDENCE_SHIFT_DROP: ReadonlySet<string> = new Set([
+    'hrhb_camp_exposure_response_1993#cooperate',
+    'hrhb_camp_exposure_response_1993#deny',
+]);
+
+/** §6 E4: transform one stored effect that still has the old kind. Returns false to drop it. */
+function migrateLegacyPatronEffect(effect: Record<string, any>, key: string): boolean {
+    if (S6_E4_PATRON_SUPPORT_DROP.has(key)) return false;
+    effect.kind = 'patron_support';
+    const setValue = S6_E4_PATRON_SUPPORT_SET[key];
+    if (setValue !== undefined) effect.delta = setValue;
+    return true;
+}
+
+/** §6 E4: migrate one pending response option. Self-contained so it can be renumbered. */
+function migratePendingOptionToPatronSupport(option: Record<string, any>, key: string): void {
+    if (Array.isArray(option.effects)) {
+        option.effects = option.effects.filter((effect: unknown) => {
+            const e = asRecord(effect);
+            if (!e || e.kind !== 'patron_pressure') return true;
+            return migrateLegacyPatronEffect(e, key);
+        });
+    }
+    const single = asRecord(option.effect);
+    if (single && single.kind === 'patron_pressure' && !migrateLegacyPatronEffect(single, key)) {
+        delete option.effect;
+    }
+    if (S6_E4_PATRON_CONFIDENCE_SHIFT_DROP.has(key) && Array.isArray(option.dimension_shifts)) {
+        option.dimension_shifts = option.dimension_shifts.filter(
+            (shift: unknown) => asRecord(shift)?.dimension !== 'patron_confidence',
+        );
+    }
+}
+
+registerMigration({
+    version: 42,
+    description: 'Section 6 E4: the patron_pressure event effect kind is renamed patron_support, with one '
+        + 'sign (positive = the patron\'s backing rises); pressure toward peace is the per-turn patron '
+        + 'override. In military.pending_event_decisions[].response_options[], only effects whose kind is '
+        + 'still patron_pressure are transformed: renamed, then the static DROP and SET lists apply by '
+        + '(event_id, option_id), SET as absolute values; the hrhb_camp_exposure options lose their own '
+        + 'patron_confidence shifts. Never loads the catalog; idempotent. Known limit: a mid-war save keeps '
+        + 'the support it already accumulated. Sensitive: yes (atrocity and condemnation cards).',
+    migrate: (state) => {
+        const mil = asRecord(state.military);
+        if (!mil || !Array.isArray(mil.pending_event_decisions)) return;
+        for (const decision of mil.pending_event_decisions) {
+            const d = asRecord(decision);
+            if (!d || !Array.isArray(d.response_options)) continue;
+            for (const option of d.response_options) {
+                const o = asRecord(option);
+                if (o) migratePendingOptionToPatronSupport(o, `${String(d.event_id)}#${String(o.id)}`);
+            }
+        }
+    },
+});

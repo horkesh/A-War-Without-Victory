@@ -221,7 +221,7 @@ function pendingPoliticalObjectiveEventDecision(
                 (dimension === 'internal_cohesion'
                     && effect.kind === 'alliance_change'
                     && (faction === 'RBiH' || faction === 'HRHB'))
-                || (dimension === 'patron_confidence' && effect.kind === 'patron_pressure' && effect.faction === faction)
+                || (dimension === 'patron_confidence' && effect.kind === 'patron_support' && effect.faction === faction)
             ))
         ))) ?? null;
 }

@@ -69,7 +69,7 @@ const EFFECT_ICONS: Record<string, IconName> = {
     supply_delta: 'supply',
     cohesion_change: 'cohesion',
     humanitarian_impact: 'dead',
-    patron_pressure: 'recon',
+    patron_support: 'recon',
     alliance_change: 'balanced',
     // §6 E2: a card's own strategic-dimension shifts (appended by App.tsx).
     dimension_shift: 'star',
@@ -111,7 +111,7 @@ export function describeEventEffect(effect: EventEffect): string {
         case 'supply_delta': return `${getPlayerSafePoliticalFactionName(effect.faction)} supply ${effect.delta > 0 ? '+' : ''}${effect.delta}`;
         case 'cohesion_change': return `${getPlayerSafePoliticalFactionName(effect.faction)} cohesion ${effect.delta > 0 ? '+' : ''}${effect.delta}`;
         case 'humanitarian_impact': return formatWarCrimesRecordLine(effect.faction, effect.war_crimes_delta);
-        case 'patron_pressure': return `${getPlayerSafePoliticalFactionName(effect.faction)} patron pressure ${effect.delta > 0 ? '+' : ''}${effect.delta}`;
+        case 'patron_support': return `${getPlayerSafePoliticalFactionName(effect.faction)} patron support ${effect.delta > 0 ? '+' : ''}${effect.delta}`;
         case 'alliance_change': return `${formatAllianceLabel()} ${effect.delta > 0 ? '+' : ''}${effect.delta}`;
     }
     return effect.kind;

@@ -8,7 +8,7 @@
  * `address_to_nation_<faction>` event (data/scenarios/events/war_1993.json) into
  * `state.military.pending_event_decisions` so EventDecisionModal surfaces it.
  * ZERO new sim/event code — the event's authored effects (morale / cohesion /
- * patron_pressure / standing shifts, all double-edged), voluntary action cadence (renewable
+ * patron_support / standing shifts, all double-edged), voluntary action cadence (renewable
  * cooldown since appendix D, 2026-11-15), and branches are reused verbatim.
  *
  * Unlike the front visit, an address is FACTION-WIDE: there is NO reachability /

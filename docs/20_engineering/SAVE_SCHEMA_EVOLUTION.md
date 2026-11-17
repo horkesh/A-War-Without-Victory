@@ -1,5 +1,14 @@
 # Save Schema Evolution
 
+## v42 — `patron_pressure` → `patron_support` in pending decisions (2026-11-17, §6 E4)
+
+`CURRENT_SCHEMA_VERSION` 41 → 42 (v40 is still reserved by batch-b and unregistered; see v41). The `patron_pressure` event effect kind is renamed `patron_support`, with one sign: positive = the patron's backing rises (pressure toward peace is the per-turn patron override). The loader rejects the old name. Migration v42 (`src/state/save_migration.ts`), on `military.pending_event_decisions[].response_options[]`:
+- transforms only effects whose kind is still `patron_pressure` (in `effects[]` and a singular `effect`);
+- renames them, then applies static lists embedded in the migration by `(event_id, option_id)`: DROP (16 options, including the six dropped by loader rule (a)) removes the effect; SET (18 options) writes the ruled value as an absolute delta (six of them are interim peace-plan reject carriers, the authored magnitude with the sign corrected, until E3a2 routes those cards into the plan resolution); every other option is renamed only. Every flip in the ruling is expressed as an absolute SET, so there is no separate FLIP list;
+- strips the `patron_confidence` dimension shifts of `hrhb_camp_exposure_response_1993` `cooperate` and `deny` (DROP-SHIFT list; one carrier per option).
+
+It never loads the event catalog. Forward-only, deterministic and idempotent (a second run finds no `patron_pressure` effect, and the shift strip is a no-op); no change on a clean state, and no field is added. **Known limit, accepted and recorded:** a mid-war save keeps the patron support it has already accumulated under the old pressure convention; only pending decisions are converted. No other persisted store holds inline applicable event effects (checked: `event_overflow_queue` holds ids only, `pending_event_notifications` holds text, `future_consequences` hold metadata strings, and opening and voluntary-action decisions are stored as `pending_event_decisions`). The startup snapshot's `schema_version` is 42 (no other byte change). Tests: `tests/s6_e4_patron_support.test.ts`, the `v41_patron_pressure_pending.json` round-trip fixture.
+
 ## v41 — `negotiation_capital` event effects stripped from pending decisions (2026-11-17, §6 E2)
 
 `CURRENT_SCHEMA_VERSION` 39 → 41. **v40 is reserved by another lane (batch-b) and is not registered yet;** `applyMigrations` filters `version > current` and sorts, so the gap is tolerated. Whichever lane merges second renumbers its migration (each is a self-contained `registerMigration` call). The `negotiation_capital` event effect kind is retired (the loader rejects it; `applyEventEffects` throws on an unknown kind). Migration v41 (`src/state/save_migration.ts`):

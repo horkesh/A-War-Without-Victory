@@ -22,6 +22,7 @@ import {
 import { DIMENSION_IDS } from './strategic_dimensions.js';
 import { stableStringify } from '../../utils/stable_json.js';
 import sourceTierContract from './source_tiers.json';
+import patronSupportAllowlist from './patron_support_allowlist.json';
 
 /**
  * Phase D Packet 44 — typed DimensionId vocabulary as a runtime Set. Mirrors
@@ -167,6 +168,10 @@ function validateKindedObject(value: unknown, path: string, filename: string, ro
     }
     if (!isNonEmptyString(value.kind)) {
         failRow(filename, rowIndex, `${path}.kind must be a non-empty string`);
+    }
+    if (value.kind === 'patron_pressure') {
+        // §6 E4 (rule d): the kind was renamed; its sign is now SUPPORT (positive = backing rises).
+        failRow(filename, rowIndex, `${path}.kind 'patron_pressure' was renamed to 'patron_support' (§6 E4; positive = the patron's backing rises)`);
     }
     if (!KNOWN_EVENT_EFFECT_KIND_SET.has(value.kind)) {
         failRow(filename, rowIndex, `${path}.kind must be a known event effect kind: ${value.kind}`);
@@ -1036,7 +1041,7 @@ function validateUnreachableGates(rows: EventDefinition[]): void {
  * silently loses the authored effect.
  *
  * Common authoring failure mode is to pass an `EffectKind` (e.g.
- * `'patron_pressure'`, `'alliance_change'`) into a dimension slot. The error
+ * `'patron_support'`, formerly `'patron_pressure'`, or `'alliance_change'`) into a dimension slot. The error
  * message names the offending row/option/dimension and suggests authoring via
  * `effects[].kind` instead.
  */
@@ -1180,6 +1185,133 @@ function validateNoRepeatedEffect(rows: EventDefinition[]): void {
     }
 }
 
+/** §6 E4: one allowlist entry per positive `patron_support` row, keyed
+ *  `<event id>#<option id>` or `<event id>#card`. */
+export interface PatronSupportAllowlistEntry {
+    faction: string;
+    reason: string;
+}
+
+/** §6 E4: the data allowlist for positive `patron_support` rows (rule b). */
+export const PATRON_SUPPORT_ALLOWLIST: Readonly<Record<string, PatronSupportAllowlistEntry>> =
+    patronSupportAllowlist.entries as Record<string, PatronSupportAllowlistEntry>;
+
+function effectList(scope: unknown): unknown[] {
+    if (!isObject(scope)) return [];
+    const out: unknown[] = [];
+    if (isObject(scope.effect)) out.push(scope.effect);
+    if (Array.isArray(scope.effects)) out.push(...scope.effects);
+    return out;
+}
+
+/** Rule (a) markers for `faction` in one scope: humanitarian_impact, a
+ *  war_crimes_delta, or a negative international_standing shift. */
+function atrocityOrCondemnationMarkers(scope: unknown, faction: string): string[] {
+    if (!isObject(scope)) return [];
+    const markers: string[] = [];
+    for (const effect of effectList(scope)) {
+        if (!isObject(effect) || effect.faction !== faction) continue;
+        if (effect.kind === 'humanitarian_impact') markers.push('humanitarian_impact');
+        if (hasOwn(effect, 'war_crimes_delta')) markers.push('war_crimes_delta');
+    }
+    if (Array.isArray(scope.dimension_shifts)) {
+        for (const shift of scope.dimension_shifts) {
+            if (
+                isObject(shift)
+                && shift.faction === faction
+                && shift.dimension === 'international_standing'
+                && typeof shift.delta === 'number'
+                && shift.delta < 0
+            ) {
+                markers.push('negative international_standing');
+            }
+        }
+    }
+    return markers;
+}
+
+/**
+ * §6 E4 (2026-11-17): `patron_support` has one semantics, SUPPORT (positive =
+ * the patron's material and political backing rises). The 1992-95
+ * condemnation, UN, NATO and atrocity cards were authored in the old pressure
+ * convention, so each one raised the perpetrator's patron support: a reward for
+ * atrocity. Pressure toward peace is the per-turn patron override.
+ *
+ * - (a) a positive `patron_support` for faction X fails on any row (card, or
+ *   option together with its card) where X also has `humanitarian_impact`, a
+ *   `war_crimes_delta`, or a negative `international_standing` shift, or where
+ *   the row's family is Ring-3 sensitive. The allowlist can NEVER override (a).
+ * - (b) every other positive `patron_support` must be on the allowlist.
+ * - (c) a zero-delta `patron_support` fails (an effect with no effect).
+ * - (d) the old kind name is rejected by the vocabulary check.
+ *
+ * Exported with an injectable allowlist so tests can prove (a) wins over it.
+ */
+export function validatePatronSupportRules(
+    rows: EventDefinition[],
+    allowlist: Readonly<Record<string, PatronSupportAllowlistEntry>> = PATRON_SUPPORT_ALLOWLIST,
+): void {
+    const ruleA: string[] = [];
+    const ruleB: string[] = [];
+    const ruleC: string[] = [];
+    const sortedRows = [...rows].sort((a, b) => strictCompare(a.id, b.id));
+    function check(scopes: unknown[], label: string, ring3: boolean): void {
+        for (const effect of effectList(scopes[0])) {
+            if (!isObject(effect) || effect.kind !== 'patron_support') continue;
+            const faction = String(effect.faction);
+            const delta = effect.delta;
+            if (delta === 0) {
+                ruleC.push(`${label}:${faction}`);
+                continue;
+            }
+            if (typeof delta !== 'number' || delta <= 0) continue;
+            const markers = scopes.flatMap((scope) => atrocityOrCondemnationMarkers(scope, faction));
+            if (ring3) markers.push('Ring-3 family');
+            if (markers.length > 0) {
+                const unique = [...new Set(markers)].sort(strictCompare);
+                ruleA.push(`${label}:${faction}+${delta} (${unique.join(', ')})`);
+                continue;
+            }
+            const entry = allowlist[label];
+            if (!entry || entry.faction !== faction || !isNonEmptyString(entry.reason)) {
+                ruleB.push(`${label}:${faction}+${delta}`);
+            }
+        }
+    }
+    for (const row of sortedRows) {
+        const ring3 = isRing3SensitiveFamily(row.family);
+        check([row], `${row.id}#card`, ring3);
+        if (!Array.isArray(row.response_options)) continue;
+        for (let optionIndex = 0; optionIndex < row.response_options.length; optionIndex++) {
+            const option = row.response_options[optionIndex];
+            if (!isObject(option)) continue;
+            const optionId = isNonEmptyString((option as { id?: unknown }).id)
+                ? (option as { id: string }).id
+                : String(optionIndex);
+            check([option, row], `${row.id}#${optionId}`, ring3);
+        }
+    }
+    const failures: string[] = [];
+    if (ruleA.length > 0) {
+        failures.push(
+            `rule (a): positive patron_support on a row where the same faction has humanitarian_impact, a war_crimes_delta, `
+            + `a negative international_standing shift, or a Ring-3 family (the allowlist cannot override this): ${ruleA.sort(strictCompare).join(', ')}`,
+        );
+    }
+    if (ruleB.length > 0) {
+        failures.push(
+            `rule (b): positive patron_support not on the allowlist (src/sim/events/patron_support_allowlist.json, `
+            + `with the faction and a reason): ${ruleB.sort(strictCompare).join(', ')}`,
+        );
+    }
+    if (ruleC.length > 0) {
+        failures.push(`rule (c): zero-delta patron_support (remove the entry instead): ${ruleC.sort(strictCompare).join(', ')}`);
+    }
+    if (failures.length > 0) {
+        throw new Error(`Patron support rule violation(s) in required event catalog (§6 E4): ${failures.join('; ')}`);
+    }
+}
+
 /**
  * Load a single required event JSON file. Required catalog files fail closed:
  * missing, malformed, or non-array JSON is a loader error.
@@ -1233,6 +1365,7 @@ export function loadEventDefinitionsFromDir(scenarioStartWeek: number, eventsDir
     validateDimensionShiftVocabulary(allEvents);
     validateEffectKindVocabulary(allEvents);
     validateNoRepeatedEffect(allEvents);
+    validatePatronSupportRules(allEvents);
     // ─── Phase B Sub-slice B1 catalog-level passes. ────────────────────────
     validateCrossFactionOptionIds(allEvents);
     validateRing3EnablingRejection(allEvents);

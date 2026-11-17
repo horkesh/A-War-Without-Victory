@@ -149,9 +149,11 @@ export interface EventEffectHumanitarianImpact {
     war_crimes_delta?: number;
 }
 
-/** Effect: patron pressure delta for faction. */
-export interface EventEffectPatronPressure {
-    kind: 'patron_pressure';
+/** Effect: patron support delta for faction (§6 E4: positive = the patron's backing rises).
+ *  Writes `patron_relationships[faction].support_level`. Pressure toward peace is the
+ *  per-turn patron override, not this effect. */
+export interface EventEffectPatronSupport {
+    kind: 'patron_support';
     faction: FactionId;
     delta: number;
 }
@@ -332,7 +334,7 @@ export type EventEffect =
     | EventEffectSupplyDelta
     | EventEffectCohesionChange
     | EventEffectHumanitarianImpact
-    | EventEffectPatronPressure
+    | EventEffectPatronSupport
     | EventEffectAllianceChange
     | EventEffectEquipmentGrant
     | EventEffectAggressionModifier

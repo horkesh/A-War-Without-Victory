@@ -134,11 +134,6 @@
     },
     "effects": [
       {
-        "kind": "patron_pressure",
-        "faction": "RS",
-        "delta": 15
-      },
-      {
         "kind": "narrative",
         "text": "The Markale massacre kills 68 civilians. The atrocity becomes the catalyst for NATO's ultimatum to the VRS."
       }
@@ -180,16 +175,10 @@
     "historical_source": "NATO North Atlantic Council decision of 9 February 1994 (Sarajevo Heavy Weapons Exclusion Zone ultimatum; UN S/1994/154); UN Security Council Resolution 836 (4 June 1993); ICTY Galić Trial Judgement IT-98-29-T (5 December 2003); ICTY Karadžić Trial Judgement IT-95-5/18-T (24 March 2016); Balkan Battlegrounds Vol. II, Sarajevo HWEZ chronology.",
     "source_note": "The North Atlantic Council demanded removal or UNPROFOR control of heavy weapons within 20 kilometres of Sarajevo by the February 1994 deadline and threatened air strikes for non-compliance. The documented VRS/RS posture was substantial compliance under coercion; the defy option is the explicit counterfactual branch.",
     "effect": {
-      "kind": "patron_pressure",
-      "faction": "RS",
-      "delta": 10
+      "kind": "narrative",
+      "text": "NATO demands VRS withdrawal of heavy weapons from around Sarajevo. The threat of air strikes becomes credible for the first time."
     },
-    "effects": [
-      {
-        "kind": "narrative",
-        "text": "NATO demands VRS withdrawal of heavy weapons from around Sarajevo. The threat of air strikes becomes credible for the first time."
-      }
-    ],
+    "effects": [],
     "response_options": [
       {
         "id": "comply_withdraw_hwez",
@@ -390,9 +379,9 @@
         "risk_level": 0.7,
         "effects": [
           {
-            "kind": "patron_pressure",
+            "kind": "patron_support",
             "faction": "RBiH",
-            "delta": 10
+            "delta": -10
           }
         ],
         "sets_flags": {
@@ -428,7 +417,7 @@
             "material_effect_refs": [
               "dimension_shift.RBiH.international_standing",
               "dimension_shift.RBiH.negotiating_leverage",
-              "patron_pressure.RBiH",
+              "patron_support.RBiH",
               "dimension_shift.RBiH.internal_cohesion"
             ],
             "explanation": "Sarajevo's HWEZ refusal carries international-standing and negotiating-leverage costs that propagate into the March 1994 Washington Agreement deliberations and the federation-track readiness conditions. Per Phase A B9 worksheet §5, the federation framework was historically achieved despite RBiH-Western friction, so the closure of federation precursors is soft rather than direct; the diplomatic conditions on the Washington decision shift adversely without statically blocking the row."
@@ -521,19 +510,14 @@
     },
     "once": true,
     "effect": {
-      "kind": "patron_pressure",
-      "faction": "RS",
-      "delta": 5
+      "kind": "narrative",
+      "text": "NATO shoots down four of six VRS aircraft violating the no-fly zone. The alliance demonstrates its willingness to use force for the first time."
     },
     "effects": [
       {
         "kind": "morale_change",
         "faction": "RS",
         "delta": -3
-      },
-      {
-        "kind": "narrative",
-        "text": "NATO shoots down four of six VRS aircraft violating the no-fly zone. The alliance demonstrates its willingness to use force for the first time."
       }
     ]
   },
@@ -1197,11 +1181,6 @@
     },
     "effects": [
       {
-        "kind": "patron_pressure",
-        "faction": "RS",
-        "delta": 5
-      },
-      {
         "kind": "narrative",
         "text": "The VRS attacks the Goražde safe area. Limited NATO strikes fail to stop the offensive, exposing the fragility of safe area protection."
       }
@@ -1449,9 +1428,9 @@
         "risk_level": 0.3,
         "effects": [
           {
-            "kind": "patron_pressure",
+            "kind": "patron_support",
             "faction": "RBiH",
-            "delta": -10
+            "delta": 10
           }
         ]
       },
@@ -1463,9 +1442,9 @@
         "risk_level": 0.8,
         "effects": [
           {
-            "kind": "patron_pressure",
+            "kind": "patron_support",
             "faction": "RBiH",
-            "delta": 10
+            "delta": -10
           }
         ]
       }
@@ -1565,9 +1544,9 @@
             "delta": 3
           },
           {
-            "kind": "patron_pressure",
+            "kind": "patron_support",
             "faction": "RS",
-            "delta": 10
+            "delta": -10
           }
         ],
         "sets_flags": {
@@ -1601,7 +1580,7 @@
         "description": "Acknowledge the 51:49 framework. Belgrade's pressure has prevailed; the Six Goals platform breaks internally. Hardline deputies will resign; the recruitment pool contracts as Karadžić's authority is questioned.",
         "effects": [
           {
-            "kind": "patron_pressure",
+            "kind": "patron_support",
             "faction": "RS",
             "delta": 20
           },
@@ -1648,9 +1627,9 @@
         "description": "Neither accept nor reject. Send Krajišnik to Geneva; demand corridor adjustments and Sarajevo concessions before recording a posture. Belgrade is informed the line is open.",
         "effects": [
           {
-            "kind": "patron_pressure",
+            "kind": "patron_support",
             "faction": "RS",
-            "delta": 5
+            "delta": -5
           }
         ],
         "sets_flags": {
@@ -1776,13 +1755,7 @@
         "historical_marker": "historical_default",
         "label": "Accept under US pressure with reservations",
         "description": "Sign on to the Contact Group framework under Christopher's shuttle pressure, with formal reservations on the eastern enclaves and the corridor. The Washington-track alignment holds; the Federation gains the diplomatic frame against RS rejection.",
-        "effects": [
-          {
-            "kind": "patron_pressure",
-            "faction": "RBiH",
-            "delta": -10
-          }
-        ],
+        "effects": [],
         "sets_flags": {
           "rbih_contact_group_response": "accept"
         },
@@ -1809,9 +1782,9 @@
         "description": "Refuse the territorial map. Christopher's pressure is the strongest US démarche of the war; defying it incurs US patron rupture and weakens the Federation track. But the negotiating frame for full liberation is preserved.",
         "effects": [
           {
-            "kind": "patron_pressure",
+            "kind": "patron_support",
             "faction": "RBiH",
-            "delta": 15
+            "delta": -15
           },
           {
             "kind": "morale_change",
@@ -2287,9 +2260,9 @@
             "delta": -0.20
           },
           {
-            "kind": "patron_pressure",
+            "kind": "patron_support",
             "faction": "RBiH",
-            "delta": 25
+            "delta": -10
           },
           {
             "kind": "recruitment_modifier",
@@ -2530,11 +2503,6 @@
             "delta": -0.20
           },
           {
-            "kind": "patron_pressure",
-            "faction": "HRHB",
-            "delta": 25
-          },
-          {
             "kind": "recruitment_modifier",
             "faction": "HRHB",
             "pool_multiplier": 0.90,
@@ -2665,11 +2633,6 @@
     },
     "effects": [
       {
-        "kind": "patron_pressure",
-        "faction": "RS",
-        "delta": 15
-      },
-      {
         "kind": "morale_change",
         "faction": "RS",
         "delta": -5
@@ -2749,9 +2712,9 @@
             "delta": -10
           },
           {
-            "kind": "patron_pressure",
+            "kind": "patron_support",
             "faction": "RS",
-            "delta": 10
+            "delta": -10
           },
           {
             "kind": "recruitment_modifier",
@@ -3032,13 +2995,7 @@
         "historical_marker": "counterfactual",
         "label": "Seek negotiation — open Bihać-pocket ceasefire channels",
         "description": "Direct Dudaković to open talks with APWB on a Bihać-pocket ceasefire, with indirect channels to RS/RSK. Sarajevo's military pressure on the pocket axis is signaled as conditional. Talks open; no resolution arrives; the autumn-1994 operational picture stalls without the offensive momentum and without the immediate political cost of full recognition.",
-        "effects": [
-          {
-            "kind": "patron_pressure",
-            "faction": "RBiH",
-            "delta": 5
-          }
-        ],
+        "effects": [],
         "sets_flags": {
           "bihac_5th_corps_1994_response": "seek_negotiation"
         },
@@ -3242,11 +3199,6 @@
       "delta": -5
     },
     "effects": [
-      {
-        "kind": "patron_pressure",
-        "faction": "RS",
-        "delta": 5
-      },
       {
         "kind": "narrative",
         "text": "The Bihać pocket faces collapse as VRS and allied forces close in. NATO strikes prove inadequate to lift the siege."

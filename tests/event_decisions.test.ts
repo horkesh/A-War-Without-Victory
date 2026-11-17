@@ -98,14 +98,14 @@ describe('Operation Lukavac 93 historical compatibility', () => {
                 {
                     id: 'comply',
                     label: 'Comply with withdrawal demand',
-                    effects: [{ kind: 'patron_pressure', faction: 'RS', delta: 10 }],
+                    effects: [{ kind: 'patron_support', faction: 'RS', delta: 10 }],
                 },
                 {
                     id: 'defy_nato',
                     label: 'Defy NATO — hold Igman',
                     effects: [
                         { kind: 'supply_delta', faction: 'RS', delta: -15 },
-                        { kind: 'patron_pressure', faction: 'RS', delta: 20 },
+                        { kind: 'patron_support', faction: 'RS', delta: 20 },
                     ],
                 },
             ],

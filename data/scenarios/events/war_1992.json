@@ -3613,11 +3613,6 @@
         "duration_turns": 8
       },
       {
-        "kind": "patron_pressure",
-        "faction": "RBiH",
-        "delta": 5
-      },
-      {
         "kind": "narrative",
         "text": "JNA soldiers killed during the seizure provoke international condemnation. VRS commanders vow to avenge the barracks."
       }
@@ -3663,11 +3658,6 @@
         "kind": "humanitarian_impact",
         "faction": "RS",
         "war_crimes_delta": 3
-      },
-      {
-        "kind": "patron_pressure",
-        "faction": "RS",
-        "delta": 15
       }
     ],
     "pressure": {
@@ -3816,11 +3806,6 @@
         "faction": "RS",
         "delta": 0.2,
         "duration_turns": 10
-      },
-      {
-        "kind": "patron_pressure",
-        "faction": "RBiH",
-        "delta": 10
       },
       {
         "kind": "control_change",
@@ -4495,9 +4480,9 @@
             "delta": -0.15
           },
           {
-            "kind": "patron_pressure",
+            "kind": "patron_support",
             "faction": "RBiH",
-            "delta": 20
+            "delta": -20
           },
           {
             "kind": "recruitment_modifier",
@@ -4847,13 +4832,7 @@
       "faction": "RS",
       "war_crimes_delta": 3
     },
-    "effects": [
-      {
-        "kind": "patron_pressure",
-        "faction": "RS",
-        "delta": 15
-      }
-    ],
+    "effects": [],
     "requires_player_response": true,
     "responding_faction": "RS",
     "bot_response_logic": "historical",
@@ -4880,9 +4859,9 @@
         "description": "RS Crisis Staff issues public denial of detention-camp operations and refuses outside investigator access. The ITN footage is dismissed as Western propaganda. A total refusal of access is the counterfactual; the documented Pale response combined public denial with staged, restricted visits (ICTY Stakić IT-97-24-T; Karadžić IT-95-5/18-T §§3473-3475).",
         "effects": [
           {
-            "kind": "patron_pressure",
+            "kind": "patron_support",
             "faction": "RS",
-            "delta": 10
+            "delta": -10
           }
         ],
         "sets_flags": {
@@ -4911,9 +4890,9 @@
         "description": "RS Crisis Staff restricts press and ICRC access to the Prijedor-area camps and stages limited controlled visits. The restriction posture is documented in ICTY Stakić IT-97-24-T §§220-300 and Kvočka IT-98-30/1-T as Crisis Staff command-responsibility findings on access denial and obstruction of impartial inspection.",
         "effects": [
           {
-            "kind": "patron_pressure",
+            "kind": "patron_support",
             "faction": "RS",
-            "delta": 5
+            "delta": -5
           }
         ],
         "sets_flags": {
@@ -4940,13 +4919,7 @@
         "historical_marker": "counterfactual",
         "label": "Permit ICRC and press access",
         "description": "RS Crisis Staff permits ICRC inspection and press access at the Prijedor-area camps. Access slows the further loss of international standing; it does not undo what the cameras have already recorded.",
-        "effects": [
-          {
-            "kind": "patron_pressure",
-            "faction": "RS",
-            "delta": 2
-          }
-        ],
+        "effects": [],
         "sets_flags": {
           "camps_response": "cooperate"
         },
@@ -5178,13 +5151,7 @@
         "description": "Subscribe to the Statement of Principles alongside the other Bosnian delegations. Improves international standing but may constrain military operations.",
         "historical_marker": "historical_default",
         "branch_tag": "diplomacy_london_subscribed",
-        "effects": [
-          {
-            "kind": "patron_pressure",
-            "faction": "RBiH",
-            "delta": -5
-          }
-        ],
+        "effects": [],
         "dimension_shifts": [
           {
             "faction": "RBiH",

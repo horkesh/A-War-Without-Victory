@@ -318,7 +318,7 @@ function describeEffect(effect: EventEffect): string {
         case 'supply_delta': return t('eventDecision.effect.supplyDelta', { faction: army, delta: signedDelta(effect.delta) });
         case 'cohesion_change': return t('eventDecision.effect.cohesionChange', { faction: army, delta: signedDelta(effect.delta) });
         case 'humanitarian_impact': return formatWarCrimesRecordLine(factionId, effect.war_crimes_delta);
-        case 'patron_pressure': return t('eventDecision.effect.patronPressure', { faction, delta: signedDelta(effect.delta) });
+        case 'patron_support': return t('eventDecision.effect.patronSupport', { faction, delta: signedDelta(effect.delta) });
         case 'alliance_change': return t('eventDecision.effect.allianceChange', {
             rbih: eventDecisionStateShortLabel('RBiH'),
             hrhb: eventDecisionStateShortLabel('HRHB'),

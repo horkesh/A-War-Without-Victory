@@ -155,11 +155,6 @@
     },
     "effects": [
       {
-        "kind": "patron_pressure",
-        "faction": "RS",
-        "delta": 10
-      },
-      {
         "kind": "morale_change",
         "faction": "RBiH",
         "delta": -3
@@ -234,9 +229,8 @@
       ]
     },
     "effect": {
-      "kind": "patron_pressure",
-      "faction": "RS",
-      "delta": 15
+      "kind": "narrative",
+      "text": "377 UN peacekeepers are taken hostage by the VRS. Images of soldiers chained to military targets as human shields shock the world."
     },
     "effects": [
       {
@@ -248,10 +242,6 @@
         "kind": "humanitarian_impact",
         "faction": "RS",
         "war_crimes_delta": 1
-      },
-      {
-        "kind": "narrative",
-        "text": "377 UN peacekeepers are taken hostage by the VRS. Images of soldiers chained to military targets as human shields shock the world."
       }
     ],
     "response_options": [
@@ -263,9 +253,9 @@
         "description": "Maximum leverage. NATO stops bombing. But every day the hostages remain deepens the diplomatic catastrophe.",
         "effects": [
           {
-            "kind": "patron_pressure",
+            "kind": "patron_support",
             "faction": "RS",
-            "delta": 10
+            "delta": -10
           }
         ],
         "sets_flags": {
@@ -292,13 +282,7 @@
         "historical_marker": "historical_default",
         "label": "Release hostages in exchange for concessions",
         "description": "Trade hostages for guarantees. Some diplomatic damage can be contained. NATO may hesitate to strike again.",
-        "effects": [
-          {
-            "kind": "patron_pressure",
-            "faction": "RS",
-            "delta": 5
-          }
-        ],
+        "effects": [],
         "sets_flags": {
           "un_hostage_response": "gradual_release"
         },
@@ -431,11 +415,6 @@
         "kind": "morale_change",
         "faction": "RBiH",
         "delta": -15
-      },
-      {
-        "kind": "patron_pressure",
-        "faction": "RS",
-        "delta": 20
       },
       {
         "kind": "control_change",
@@ -669,11 +648,6 @@
     },
     "effects": [
       {
-        "kind": "patron_pressure",
-        "faction": "RS",
-        "delta": 20
-      },
-      {
         "kind": "narrative",
         "text": "The second Markale massacre kills 43 civilians. NATO prepares to launch sustained air strikes against VRS forces."
       }
@@ -830,11 +804,6 @@
         "kind": "morale_change",
         "faction": "RBiH",
         "delta": 3
-      },
-      {
-        "kind": "patron_pressure",
-        "faction": "RS",
-        "delta": 10
       },
       {
         "kind": "narrative",
@@ -1321,7 +1290,7 @@
         "description": "HVO realigns command to the Federation framework, coordinating directly with ARBiH 5th Corps (Dudaković) on the Sana / Una axis rather than the HV Guards. Zagreb is unhappy but bound by the Washington Agreement to accept the realignment. The HVO Mostar Corps fights inside a Federation joint-staff structure, not under Šušak's direction.",
         "effects": [
           {
-            "kind": "patron_pressure",
+            "kind": "patron_support",
             "faction": "HRHB",
             "delta": 15
           },
@@ -1634,7 +1603,7 @@
         "description": "Defer to the new US peace initiative and keep operations limited. The 5th Corps stays near Bihać pending a ceasefire, and any HV-HVO operations go ahead without coordinated ARBiH weight. Without more military pressure on the VRS, Washington may push for an early settlement on terms closer to the present front than to the 51/49 split.",
         "effects": [
           {
-            "kind": "patron_pressure",
+            "kind": "patron_support",
             "faction": "RBiH",
             "delta": 5
           },
@@ -2263,9 +2232,9 @@
             "delta": 5
           },
           {
-            "kind": "patron_pressure",
+            "kind": "patron_support",
             "faction": "RBiH",
-            "delta": 15
+            "delta": -15
           }
         ],
         "dimension_shifts": [
@@ -2729,11 +2698,6 @@
         "kind": "cohesion_change",
         "faction": "RBiH",
         "delta": -10
-      },
-      {
-        "kind": "patron_pressure",
-        "faction": "RBiH",
-        "delta": 20
       }
     ],
     "dimension_shifts": [
@@ -2793,11 +2757,6 @@
         "kind": "supply_delta",
         "faction": "RS",
         "delta": -15
-      },
-      {
-        "kind": "patron_pressure",
-        "faction": "RS",
-        "delta": 25
       }
     ],
     "dimension_shifts": [
@@ -2857,11 +2816,6 @@
         "kind": "supply_delta",
         "faction": "HRHB",
         "delta": -15
-      },
-      {
-        "kind": "patron_pressure",
-        "faction": "HRHB",
-        "delta": 25
       }
     ],
     "dimension_shifts": [

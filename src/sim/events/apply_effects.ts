@@ -36,7 +36,8 @@ const EFFECT_KIND_ORDER: Record<string, number> = {
     // 15 was negotiation_capital (retired, §6 E2). The gap is kept so every
     // later index, and so the relative order, is unchanged.
     offensive_ops_suppression: 16,
-    patron_pressure: 17,
+    // §6 E4: renamed from patron_pressure; same slot, so the application order is unchanged.
+    patron_support: 17,
     recruitment_modifier: 18,
     supply_delta: 19,
 };
@@ -121,8 +122,8 @@ function applySingleEffect(state: GameState, effect: EventEffect, targetFormatio
         case 'humanitarian_impact':
             applyHumanitarianImpact(state, effect.faction, effect.war_crimes_delta);
             break;
-        case 'patron_pressure':
-            applyPatronPressure(state, effect.faction, effect.delta);
+        case 'patron_support':
+            applyPatronSupport(state, effect.faction, effect.delta);
             break;
         case 'alliance_change':
             applyAllianceChange(state, effect.delta);
@@ -403,11 +404,12 @@ function applyHumanitarianImpact(state: GameState, faction: FactionId, warCrimes
     cap.war_crimes_events = (cap.war_crimes_events ?? 0) + warCrimesDelta;
 }
 
-/** Adjust patron support_level for faction's patron relationship.
+/** Adjust patron support_level for faction's patron relationship (§6 E4: the
+ *  `patron_support` effect; positive = the patron's backing rises).
  *  Non-finite delta is rejected (prior support kept) + logged (P1-B). */
-function applyPatronPressure(state: GameState, faction: FactionId, delta: number): void {
+function applyPatronSupport(state: GameState, faction: FactionId, delta: number): void {
     if (!Number.isFinite(delta)) {
-        recordNonFiniteEffectAnomaly(state, 'patron_pressure', faction, delta);
+        recordNonFiniteEffectAnomaly(state, 'patron_support', faction, delta);
         return;
     }
     const neg = state.military.negotiation;

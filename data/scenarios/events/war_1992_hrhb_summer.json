@@ -116,7 +116,7 @@
         },
         "effects": [
           { "kind": "alliance_change", "delta": 0.1 },
-          { "kind": "patron_pressure", "faction": "HRHB", "delta": -10 },
+          { "kind": "patron_support", "faction": "HRHB", "delta": -10 },
           { "kind": "cost_ledger_annotation", "tag": "hzhb_institutions_minimal_1992", "text": "Summer 1992: HZ HB statutory consolidation deferred; the joint front held at the cost of Zagreb's displeasure and a weaker Croat institutional anchor.", "faction": "HRHB" }
         ],
         "future_consequences": [
@@ -126,8 +126,8 @@
             "timing": "future",
             "certainty": "conditional",
             "opens_flags": [ "hrhb_1992_institutionalization" ],
-            "material_effect_refs": [ "alliance_change", "patron_pressure" ],
-            "explanation": "Counterfactual: deferring the HZ HB statute keeps the anti-VRS front cleanest but ruptures the Zagreb patron channel (patron_pressure -10). Structurally consistent with the united-front H1 line. Never fires on the historical default path."
+            "material_effect_refs": [ "alliance_change", "patron_support" ],
+            "explanation": "Counterfactual: deferring the HZ HB statute keeps the anti-VRS front cleanest but ruptures the Zagreb patron channel (patron_support -10). Structurally consistent with the united-front H1 line. Never fires on the historical default path."
           }
         ],
         "dimension_shifts": [
@@ -226,7 +226,7 @@
         },
         "effects": [
           { "kind": "alliance_change", "delta": 0.1 },
-          { "kind": "patron_pressure", "faction": "HRHB", "delta": -8 },
+          { "kind": "patron_support", "faction": "HRHB", "delta": -8 },
           { "kind": "cost_ledger_annotation", "tag": "hrhb_summer_discipline_1992", "text": "July 1992: Presidency intervened to suppress local arms-site frictions; the joint front held at the cost of Zagreb's logistical leverage and internal Croat-nationalist friction.", "faction": "HRHB" }
         ],
         "future_consequences": [
@@ -236,8 +236,8 @@
             "timing": "future",
             "certainty": "conditional",
             "opens_flags": [ "hrhb_1992_summer_friction" ],
-            "material_effect_refs": [ "alliance_change", "patron_pressure" ],
-            "explanation": "Counterfactual: a Presidency intervention to suppress the July frictions is structurally consistent with the united-front H1 line — it preserves the alliance floor (positive alliance_change) at the cost of the Zagreb patron channel (patron_pressure -8). Never fires on the historical default path (bot lets consolidation stand)."
+            "material_effect_refs": [ "alliance_change", "patron_support" ],
+            "explanation": "Counterfactual: a Presidency intervention to suppress the July frictions is structurally consistent with the united-front H1 line — it preserves the alliance floor (positive alliance_change) at the cost of the Zagreb patron channel (patron_support -8). Never fires on the historical default path (bot lets consolidation stand)."
           }
         ],
         "dimension_shifts": [
@@ -367,7 +367,7 @@
           "hrhb_1992_patron_posture": "supply_diversified"
         },
         "effects": [
-          { "kind": "patron_pressure", "faction": "HRHB", "delta": -6 },
+          { "kind": "patron_support", "faction": "HRHB", "delta": -6 },
           { "kind": "supply_delta", "faction": "HRHB", "delta": -5 },
           { "kind": "alliance_change", "delta": 0.05 },
           { "kind": "cost_ledger_annotation", "tag": "hrhb_zagreb_diversify_1992", "text": "Summer 1992: the HVO diversified its supply base away from sole Zagreb dependence; a measure of autonomy bought at a material cost and Susak's irritation.", "faction": "HRHB" }
@@ -379,8 +379,8 @@
             "timing": "future",
             "certainty": "conditional",
             "opens_flags": [ "hrhb_1992_patron_posture" ],
-            "material_effect_refs": [ "patron_pressure", "supply_delta", "alliance_change" ],
-            "explanation": "Counterfactual: diversifying away from sole Zagreb dependence costs materiel now (supply_delta -5) and patron confidence (patron_pressure -6) but buys autonomy and a small ARBiH-cooperation alliance gain. Structurally consistent with the united-front H1 line. Never fires on the historical default path."
+            "material_effect_refs": [ "patron_support", "supply_delta", "alliance_change" ],
+            "explanation": "Counterfactual: diversifying away from sole Zagreb dependence costs materiel now (supply_delta -5) and patron confidence (patron_support -6) but buys autonomy and a small ARBiH-cooperation alliance gain. Structurally consistent with the united-front H1 line. Never fires on the historical default path."
           }
         ],
         "dimension_shifts": [
@@ -401,7 +401,7 @@
           "hrhb_1992_patron_posture": "autonomy_asserted"
         },
         "effects": [
-          { "kind": "patron_pressure", "faction": "HRHB", "delta": -18 },
+          { "kind": "patron_support", "faction": "HRHB", "delta": -18 },
           { "kind": "supply_delta", "faction": "HRHB", "delta": -12 },
           { "kind": "alliance_change", "delta": 0.1 },
           { "kind": "cost_ledger_annotation", "tag": "hrhb_zagreb_autonomy_1992", "text": "Summer 1992: the HVO asserted command autonomy from Zagreb; the cleanest break, paid for by a throttled supply channel and a thinned order of battle.", "faction": "HRHB" }
@@ -413,8 +413,8 @@
             "timing": "future",
             "certainty": "conditional",
             "opens_flags": [ "hrhb_1992_patron_posture" ],
-            "material_effect_refs": [ "patron_pressure", "supply_delta", "alliance_change" ],
-            "explanation": "Counterfactual maximum-autonomy posture: refusing the Zagreb channel ruptures the patron relationship (patron_pressure -18) and thins the order of battle (supply_delta -12) for the cleanest independence. Structurally consistent with the united-front H1 line at maximum patron cost. Never fires on the historical default path."
+            "material_effect_refs": [ "patron_support", "supply_delta", "alliance_change" ],
+            "explanation": "Counterfactual maximum-autonomy posture: refusing the Zagreb channel ruptures the patron relationship (patron_support -18) and thins the order of battle (supply_delta -12) for the cleanest independence. Structurally consistent with the united-front H1 line at maximum patron cost. Never fires on the historical default path."
           }
         ],
         "dimension_shifts": [
@@ -512,7 +512,7 @@
         },
         "effects": [
           { "kind": "supply_delta", "faction": "HRHB", "delta": -8 },
-          { "kind": "patron_pressure", "faction": "HRHB", "delta": 4 },
+          { "kind": "patron_support", "faction": "HRHB", "delta": 4 },
           { "kind": "cost_ledger_annotation", "tag": "hrhb_brod_counterattack_1992", "text": "October 1992: an immediate counterattack toward Bosanski Brod was ordered after the VRS breakthrough.", "faction": "HRHB" }
         ],
         "dimension_shifts": [
@@ -532,7 +532,7 @@
           "hrhb_1992_posavina_posture": "reduced"
         },
         "effects": [
-          { "kind": "patron_pressure", "faction": "HRHB", "delta": -5 },
+          { "kind": "patron_support", "faction": "HRHB", "delta": -5 },
           { "kind": "cost_ledger_annotation", "tag": "hrhb_posavina_reduced_1992", "text": "October 1992: the HVO reduced its northern commitment after Bosanski Brod fell.", "faction": "HRHB" }
         ],
         "dimension_shifts": [
@@ -651,7 +651,7 @@
         },
         "effects": [
           { "kind": "alliance_change", "delta": -0.05 },
-          { "kind": "patron_pressure", "faction": "HRHB", "delta": -4 },
+          { "kind": "patron_support", "faction": "HRHB", "delta": -4 },
           { "kind": "cost_ledger_annotation", "tag": "hrhb_jajce_early_withdrawal_1992", "text": "October 1992: the HVO ordered an early withdrawal from Jajce before the final VRS assault.", "faction": "HRHB" }
         ],
         "dimension_shifts": [

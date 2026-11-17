@@ -106,12 +106,12 @@ describe('apply_effects non-finite payload guard (P1-B)', () => {
         ]);
     });
 
-    it('NaN patron pressure keeps prior support_level and logs', () => {
+    it('NaN patron support keeps prior support_level and logs', () => {
         const state = fixtureState();
-        applyEventEffects(state, [{ kind: 'patron_pressure', faction: 'RS', delta: NaN } as EventEffect]);
+        applyEventEffects(state, [{ kind: 'patron_support', faction: 'RS', delta: NaN } as EventEffect]);
         expect((state.military as any).negotiation.patron_relationships.RS.support_level).toBe(70);
         expect(anomalies(state)).toEqual([
-            { turn: 7, effect_kind: 'patron_pressure', faction: 'RS', value_repr: 'NaN' },
+            { turn: 7, effect_kind: 'patron_support', faction: 'RS', value_repr: 'NaN' },
         ]);
     });
 

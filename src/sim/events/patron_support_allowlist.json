@@ -1,0 +1,61 @@
+{
+  "description": "Section 6 E4 (2026-11-17): every positive patron_support effect in the event catalog must be listed here, keyed by '<event id>#<option id>' or '<event id>#card', with the faction and a reason. A positive delta means the patron's material and political backing rises. The loader fails on an unlisted positive row (rule b). The list can never override rule (a): a positive patron_support for a faction on a row that also carries humanitarian_impact, a war_crimes_delta, a negative international_standing shift for that faction, or a Ring-3 family fails regardless. Pinned by tests/s6_e4_patron_support.test.ts.",
+  "entries": {
+    "abdic_apwb_declared_1993#federation_offer": {
+      "faction": "RBiH",
+      "reason": "Kept as authored (support convention): Washington backed the Federation-line offer to the APWB."
+    },
+    "address_to_nation_rs#address_defiance_rs": {
+      "faction": "RS",
+      "reason": "Kept as authored (support convention): an address design row, ruled KEEP with the visit, address and strategic_posture rows."
+    },
+    "contact_group_plan_1994#accept": {
+      "faction": "RBiH",
+      "reason": "Set to +10 by the ruling: the US backed the Contact Group plan; the plan card carries the accept (one carrier)."
+    },
+    "csq_patron_recovery_offer#accept_recovery": {
+      "faction": "RS",
+      "reason": "Kept as authored: a csq_ consequence card (recovery) in the support convention; accepting the patron's recovery offer restores backing."
+    },
+    "hrhb_posavina_orasje_posture_1992#counterattack_brod": {
+      "faction": "HRHB",
+      "reason": "Kept as authored: one of the HRHB 1992 Zagreb-relationship options, authored in the support convention."
+    },
+    "hv_hvo_cooperation_1995#arbih_coordination": {
+      "faction": "HRHB",
+      "reason": "Kept as authored: real Zagreb backing for HV-HVO coordination with the ARBiH in 1995."
+    },
+    "rbih_arms_embargo_lift_advocacy_1993#lobby_for_lift_and_strike": {
+      "faction": "RBiH",
+      "reason": "Kept as authored (support convention): lift-and-strike advocacy with Washington."
+    },
+    "rbih_late_war_offensive_1995#wait_for_diplomacy": {
+      "faction": "RBiH",
+      "reason": "Kept as authored (support convention): waiting for Washington's diplomacy keeps its backing."
+    },
+    "rs_assembly_rejects_voplan_1993#override_assembly": {
+      "faction": "RS",
+      "reason": "Set to +5 by the ruling: Belgrade pressed Pale to accept the Vance-Owen plan, so overriding the assembly earns Belgrade's backing."
+    },
+    "rs_autonomy_path_decision_1993#accept_federation_status": {
+      "faction": "RS",
+      "reason": "Kept as authored: rs_autonomy_path_decision_1993 (all options) is a support-convention design row."
+    },
+    "rs_autonomy_path_decision_1993#accept_minority_rights_only": {
+      "faction": "RS",
+      "reason": "Kept as authored: rs_autonomy_path_decision_1993 (all options) is a support-convention design row."
+    },
+    "rs_autonomy_path_decision_1993#negotiate_autonomy_within_bih": {
+      "faction": "RS",
+      "reason": "Kept as authored: rs_autonomy_path_decision_1993 (all options) is a support-convention design row."
+    },
+    "rs_contact_group_response_1994#accept_51_49_plan": {
+      "faction": "RS",
+      "reason": "Kept as authored (+20): Belgrade backed Pale's acceptance of the Contact Group 51/49 plan."
+    },
+    "rs_owen_stoltenberg_response_1993#accept_with_modifications": {
+      "faction": "RS",
+      "reason": "Kept as authored (+5): Belgrade backed the Owen-Stoltenberg plan."
+    }
+  }
+}

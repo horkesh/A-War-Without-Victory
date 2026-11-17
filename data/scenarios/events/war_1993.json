@@ -190,13 +190,7 @@
         "historical_marker": "historical_default",
         "aggression_affinity": -0.5,
         "risk_level": 0.5,
-        "effects": [
-          {
-            "kind": "patron_pressure",
-            "faction": "RBiH",
-            "delta": -5
-          }
-        ],
+        "effects": [],
         "sets_flags": {
           "vance_owen_accepted": true
         }
@@ -479,11 +473,6 @@
         "delta": 2
       },
       {
-        "kind": "patron_pressure",
-        "faction": "RS",
-        "delta": 5
-      },
-      {
         "kind": "narrative",
         "text": "The murder of Turajlic inside a UN vehicle exposes the fragility of UNPROFOR's protection and the VRS's contempt for international norms."
       }
@@ -581,11 +570,6 @@
     "once": true,
     "effects": [
       {
-        "kind": "patron_pressure",
-        "faction": "RS",
-        "delta": 3
-      },
-      {
         "kind": "narrative",
         "text": "American diplomacy enters the Bosnian arena. The 'lift and strike' proposal fails in Europe, but Washington's trajectory toward intervention has begun."
       }
@@ -682,17 +666,7 @@
       "phase": "war"
     },
     "once": true,
-    "effects": [
-      {
-        "kind": "patron_pressure",
-        "faction": "HRHB",
-        "delta": 3
-      },
-      {
-        "kind": "narrative",
-        "text": "Resolution 808 puts all commanders on notice: the international community is documenting crimes and building the architecture for prosecution."
-      }
-    ],
+    "effects": [],
     "dimension_shifts": [
       {
         "faction": "RS",
@@ -707,9 +681,8 @@
     ],
     "historical_source": "UN Security Council Resolution 808 (1993), S/RES/808.",
     "effect": {
-      "kind": "patron_pressure",
-      "faction": "RS",
-      "delta": 5
+      "kind": "narrative",
+      "text": "Resolution 808 puts all commanders on notice: the international community is documenting crimes and building the architecture for prosecution."
     }
   },
   {
@@ -876,11 +849,6 @@
     "once": true,
     "effects": [
       {
-        "kind": "patron_pressure",
-        "faction": "RS",
-        "delta": 5
-      },
-      {
         "kind": "narrative",
         "text": "Morillon's dramatic declaration creates an obligation the UN cannot fulfill. The gap between his promise and UNPROFOR's means defines the enclave's tragic position."
       }
@@ -927,13 +895,7 @@
       "kind": "narrative",
       "text": "Srebrenica is bombarded relentlessly. International outcry mounts as the enclave's humanitarian situation deteriorates."
     },
-    "effects": [
-      {
-        "kind": "patron_pressure",
-        "faction": "RS",
-        "delta": 5
-      }
-    ]
+    "effects": []
   },
   {
     "id": "hrhb_vance_owen_acceptance_1993",
@@ -1218,15 +1180,6 @@
         "kind": "morale_change",
         "faction": "RBiH",
         "delta": 2
-      },
-      {
-        "kind": "patron_pressure",
-        "faction": "RS",
-        "delta": 3
-      },
-      {
-        "kind": "narrative",
-        "text": "NATO combat aircraft now patrol Bosnian airspace. The VRS loses its fixed-wing air support but retains overwhelming ground-based fire superiority."
       }
     ],
     "dimension_shifts": [
@@ -1238,9 +1191,8 @@
     ],
     "historical_source": "UN Security Council Resolution 816 (1993), S/RES/816. Operation Deny Flight USAF history.",
     "effect": {
-      "kind": "patron_pressure",
-      "faction": "RS",
-      "delta": 5
+      "kind": "narrative",
+      "text": "NATO combat aircraft now patrol Bosnian airspace. The VRS loses its fixed-wing air support but retains overwhelming ground-based fire superiority."
     }
   },
   {
@@ -1772,11 +1724,6 @@
     "once": true,
     "effects": [
       {
-        "kind": "patron_pressure",
-        "faction": "RS",
-        "delta": 5
-      },
-      {
         "kind": "narrative",
         "text": "Srebrenica is declared a UN safe area. The VRS ignores the ceasefire demand while the UN lacks any credible enforcement mechanism."
       }
@@ -1810,11 +1757,6 @@
     },
     "once": true,
     "effects": [
-      {
-        "kind": "patron_pressure",
-        "faction": "RS",
-        "delta": 10
-      },
       {
         "kind": "narrative",
         "text": "The tightened embargo enters force. Belgrade's ability to sustain the VRS is visibly constrained, and Milošević's patience with Pale is running thin."
@@ -1930,11 +1872,6 @@
             "kind": "morale_change",
             "faction": "RBiH",
             "delta": -5
-          },
-          {
-            "kind": "patron_pressure",
-            "faction": "RS",
-            "delta": 5
           }
         ],
         "dimension_shifts": [
@@ -1968,11 +1905,6 @@
             "kind": "morale_change",
             "faction": "RBiH",
             "delta": 3
-          },
-          {
-            "kind": "patron_pressure",
-            "faction": "RBiH",
-            "delta": 10
           }
         ],
         "dimension_shifts": [
@@ -2226,9 +2158,9 @@
             "delta": 5
           },
           {
-            "kind": "patron_pressure",
+            "kind": "patron_support",
             "faction": "RS",
-            "delta": 10
+            "delta": -10
           }
         ],
         "sets_flags": {
@@ -2242,7 +2174,7 @@
             "certainty": "guaranteed",
             "material_effect_refs": [
               "morale_change.RS",
-              "patron_pressure.RS"
+              "patron_support.RS"
             ],
             "explanation": "Accepting the Assembly's vote does not open or close any other decisions; its cost shows up in Republika Srpska morale and in pressure from Belgrade. Karadžić had signed the Vance-Owen Plan in Athens on 2 May 1993, subject to the Assembly's approval. The Assembly rejected it, Milošević urged acceptance in vain, and a referendum on 15-16 May confirmed the rejection. (ICTY, Karadžić trial judgment, paras 372, 375 and 3283.)"
           }
@@ -2280,9 +2212,9 @@
             "delta": -5
           },
           {
-            "kind": "patron_pressure",
+            "kind": "patron_support",
             "faction": "RS",
-            "delta": -5
+            "delta": 5
           }
         ],
         "sets_flags": {
@@ -2296,7 +2228,7 @@
             "certainty": "risk",
             "material_effect_refs": [
               "morale_change.RS",
-              "patron_pressure.RS"
+              "patron_support.RS"
             ],
             "explanation": "Attempting to override the assembly does not open or close catalog events by metadata; it makes the internal-fracture branch visible through the existing RS morale and patron-pressure effects. Krajišnik IT-00-39-T §§995-1019 (the earlier cite is imprecise: Krajišnik §§995-1019 says Assembly deputies took their cues from Karadžić and Krajišnik, not that the leadership deferred to the Assembly; it serves only for centre-periphery coordination) records the SDS Assembly architecture and the leadership's structural deference; override fractures the legitimating institution at the cost-floor levels documented in the R7 worksheet (internal_cohesion ≤-15, patron_confidence ≤-20)."
           }
@@ -2390,11 +2322,6 @@
         "delta": -5
       },
       {
-        "kind": "patron_pressure",
-        "faction": "HRHB",
-        "delta": 5
-      },
-      {
         "kind": "narrative",
         "text": "Mostar is divided between the HVO on the west bank and the ARBiH on the east."
       }
@@ -2421,11 +2348,6 @@
     },
     "effects": [
       {
-        "kind": "patron_pressure",
-        "faction": "RS",
-        "delta": 5
-      },
-      {
         "kind": "narrative",
         "text": "Six UN safe areas are declared. The promise of protection raises hope among besieged populations, but no credible enforcement mechanism exists."
       }
@@ -2446,17 +2368,7 @@
       "phase": "war"
     },
     "once": true,
-    "effects": [
-      {
-        "kind": "patron_pressure",
-        "faction": "HRHB",
-        "delta": 3
-      },
-      {
-        "kind": "narrative",
-        "text": "The ICTY opens for business in The Hague. Every commander who orders atrocities now does so with knowledge that a court exists to try them."
-      }
-    ],
+    "effects": [],
     "dimension_shifts": [
       {
         "faction": "RS",
@@ -2476,9 +2388,8 @@
     ],
     "historical_source": "UN Security Council Resolution 827 (1993), S/RES/827.",
     "effect": {
-      "kind": "patron_pressure",
-      "faction": "RS",
-      "delta": 5
+      "kind": "narrative",
+      "text": "The ICTY opens for business in The Hague. Every commander who orders atrocities now does so with knowledge that a court exists to try them."
     }
   },
   {
@@ -2560,10 +2471,6 @@
         "kind": "morale_change",
         "faction": "RBiH",
         "delta": 2
-      },
-      {
-        "kind": "narrative",
-        "text": "NATO now has legal authority to strike VRS positions. Whether it has the political will to use it is another question entirely."
       }
     ],
     "dimension_shifts": [
@@ -2580,9 +2487,8 @@
     ],
     "historical_source": "UN Security Council Resolution 836 (1993), S/RES/836.",
     "effect": {
-      "kind": "patron_pressure",
-      "faction": "RS",
-      "delta": 5
+      "kind": "narrative",
+      "text": "NATO now has legal authority to strike VRS positions. Whether it has the political will to use it is another question entirely."
     }
   },
   {
@@ -2644,11 +2550,6 @@
     },
     "once": true,
     "effects": [
-      {
-        "kind": "patron_pressure",
-        "faction": "HRHB",
-        "delta": 10
-      },
       {
         "kind": "narrative",
         "text": "Images of Bosniak men crowded behind Heliodrom wire reach the international press. Croatia's patron relationship with the West enters a period of severe strain."
@@ -3127,11 +3028,6 @@
     },
     "effects": [
       {
-        "kind": "patron_pressure",
-        "faction": "RS",
-        "delta": 5
-      },
-      {
         "kind": "narrative",
         "text": "Artillery continues to target civilian areas in Sarajevo. International pressure for intervention builds steadily."
       }
@@ -3242,10 +3138,6 @@
         "faction": "RS",
         "delta": -0.05,
         "duration_turns": 12
-      },
-      {
-        "kind": "narrative",
-        "text": "NATO's ultimatum is the clearest signal yet that the international community may use force. The VRS calculates its next move carefully."
       }
     ],
     "dimension_shifts": [
@@ -3263,9 +3155,8 @@
     "historical_source": "NATO Council decision, August 9 1993. Operation Deny Flight history.",
     "source_note": "This exogenous NATO Council notice records authorization and pressure only. It neither depends on nor resolves the separate RS decision over the Igman positions.",
     "effect": {
-      "kind": "patron_pressure",
-      "faction": "RS",
-      "delta": 10
+      "kind": "narrative",
+      "text": "NATO's ultimatum is the clearest signal yet that the international community may use force. The VRS calculates its next move carefully."
     }
   },
   {
@@ -3306,13 +3197,7 @@
         "historical_marker": "historical_default",
         "label": "Record the Presidency's Conditional Acceptance",
         "description": "Keep the framework alive while reserving the Drina enclaves and Posavina corridor for the Assembly's final vote.",
-        "effects": [
-          {
-            "kind": "patron_pressure",
-            "faction": "RBiH",
-            "delta": -5
-          }
-        ],
+        "effects": [],
         "sets_flags": {
           "owen_stoltenberg_accepted": true
         }
@@ -3603,7 +3488,7 @@
             "delta": 3
           },
           {
-            "kind": "patron_pressure",
+            "kind": "patron_support",
             "faction": "RBiH",
             "delta": 5
           }
@@ -4125,7 +4010,7 @@
             "delta": 2
           },
           {
-            "kind": "patron_pressure",
+            "kind": "patron_support",
             "faction": "RS",
             "delta": 5
           }
@@ -4156,9 +4041,9 @@
         "description": "Refuse the Owen-Stoltenberg map despite Belgrade's directive. The Pale Assembly defies Milošević; the patron-pressure spike foreshadows the 1994 Contact Group rupture and Belgrade's August 1994 embargo. International standing falls; negotiating leverage erodes.",
         "effects": [
           {
-            "kind": "patron_pressure",
+            "kind": "patron_support",
             "faction": "RS",
-            "delta": 20
+            "delta": -20
           },
           {
             "kind": "morale_change",
@@ -4278,13 +4163,7 @@
       "faction": "HRHB",
       "war_crimes_delta": 3
     },
-    "effects": [
-      {
-        "kind": "patron_pressure",
-        "faction": "HRHB",
-        "delta": 15
-      }
-    ],
+    "effects": [],
     "requires_player_response": true,
     "responding_faction": "HRHB",
     "bot_response_logic": "historical",
@@ -4308,9 +4187,9 @@
         "description": "Continue framing Heliodrom/Dretelj/Gabela detentions as 'POW arrangements' and 'voluntary collection centers.' The historical pattern — delay disclosure, contest ICRC framings.",
         "effects": [
           {
-            "kind": "patron_pressure",
+            "kind": "patron_support",
             "faction": "HRHB",
-            "delta": 10
+            "delta": -10
           }
         ],
         "sets_flags": {
@@ -4339,9 +4218,9 @@
         "description": "Permit limited inspection while delaying access to key sites and detainee transfers between Heliodrom, Dretelj, and Gabela.",
         "effects": [
           {
-            "kind": "patron_pressure",
+            "kind": "patron_support",
             "faction": "HRHB",
-            "delta": 5
+            "delta": -5
           }
         ],
         "sets_flags": {
@@ -4368,13 +4247,7 @@
         "historical_marker": "counterfactual",
         "label": "Permit unrestricted ICRC inspection",
         "description": "Open Heliodrom, Dretelj, and Gabela to full ICRC and international press access. The documented detention regime enters the international record on its actual terms.",
-        "effects": [
-          {
-            "kind": "patron_pressure",
-            "faction": "HRHB",
-            "delta": 20
-          }
-        ],
+        "effects": [],
         "sets_flags": {
           "hrhb_camps_response": "cooperate"
         },
@@ -4388,11 +4261,6 @@
             "faction": "HRHB",
             "dimension": "military_credibility",
             "delta": -10
-          },
-          {
-            "faction": "HRHB",
-            "dimension": "patron_confidence",
-            "delta": -15
           }
         ],
         "aggression_affinity": -0.8,
@@ -4907,7 +4775,7 @@
         "description": "Open U.S.-backed Federation-line channels to Abdić with conditional autonomy framings short of formal recognition. The signal is conditional military pressure on the Bihać-pocket axis. Belgrade-aligned Abdić reads the offer as Sarajevo weakness; patron pressure on Sarajevo rises as backers question the discipline of the line, and negotiating leverage drops on the Owen-Stoltenberg / Washington-track follow-through.",
         "effects": [
           {
-            "kind": "patron_pressure",
+            "kind": "patron_support",
             "faction": "RBiH",
             "delta": 10
           },
@@ -5047,11 +4915,6 @@
     "once": true,
     "effects": [
       {
-        "kind": "patron_pressure",
-        "faction": "RBiH",
-        "delta": 5
-      },
-      {
         "kind": "narrative",
         "text": "The Bosnian assembly refuses partition. The war will continue — but so will Bosnia's legal claim to its full territory."
       }
@@ -5148,11 +5011,6 @@
     },
     "once": true,
     "effects": [
-      {
-        "kind": "patron_pressure",
-        "faction": "HRHB",
-        "delta": 5
-      },
       {
         "kind": "narrative",
         "text": "Stupni Do is added to the growing list of documented HVO atrocities. Rajic will eventually plead guilty at The Hague."
@@ -5614,7 +5472,7 @@
         "description": "Engage the international community. Signal willingness to negotiate. International standing improves and patron pressure eases, but hardliners in your own government are furious.",
         "effects": [
           {
-            "kind": "patron_pressure",
+            "kind": "patron_support",
             "faction": "RBiH",
             "delta": -5
           }
@@ -5880,7 +5738,7 @@
         "description": "Engage the international mediators from a position of military advantage. Belgrade's pressure becomes manageable if you demonstrate willingness to talk — while holding every kilometer.",
         "effects": [
           {
-            "kind": "patron_pressure",
+            "kind": "patron_support",
             "faction": "RS",
             "delta": -8
           }
@@ -5924,7 +5782,7 @@
             "delta": -8
           },
           {
-            "kind": "patron_pressure",
+            "kind": "patron_support",
             "faction": "RS",
             "delta": -12
           }
@@ -6192,7 +6050,7 @@
             "delta": -10
           },
           {
-            "kind": "patron_pressure",
+            "kind": "patron_support",
             "faction": "HRHB",
             "delta": -10
           }
@@ -6341,7 +6199,7 @@
             "delta": 3
           },
           {
-            "kind": "patron_pressure",
+            "kind": "patron_support",
             "faction": "RBiH",
             "delta": -3
           }
@@ -6445,7 +6303,7 @@
         "description": "The diplomatic calendar is full. The UN is negotiating. The army will understand. You remain at the Presidency and conduct the visit through your chief of staff.",
         "effects": [
           {
-            "kind": "patron_pressure",
+            "kind": "patron_support",
             "faction": "RBiH",
             "delta": -2
           },
@@ -6481,7 +6339,7 @@
             "delta": 3
           },
           {
-            "kind": "patron_pressure",
+            "kind": "patron_support",
             "faction": "RBiH",
             "delta": -8
           }
@@ -6662,11 +6520,6 @@
             "faction": "RS",
             "delta": 0.05,
             "duration_turns": 6
-          },
-          {
-            "kind": "patron_pressure",
-            "faction": "RS",
-            "delta": 3
           }
         ],
         "dimension_shifts": [
@@ -6698,11 +6551,6 @@
             "kind": "morale_change",
             "faction": "RS",
             "delta": 5
-          },
-          {
-            "kind": "patron_pressure",
-            "faction": "RS",
-            "delta": 3
           }
         ],
         "dimension_shifts": [
@@ -6731,7 +6579,7 @@
         "description": "The Assembly is in session. International contacts require your attention. The front will see you another time. Your staff relays your greetings to the corps commanders.",
         "effects": [
           {
-            "kind": "patron_pressure",
+            "kind": "patron_support",
             "faction": "RS",
             "delta": -2
           },
@@ -6765,11 +6613,6 @@
             "kind": "morale_change",
             "faction": "RS",
             "delta": 3
-          },
-          {
-            "kind": "patron_pressure",
-            "faction": "RS",
-            "delta": 2
           }
         ],
         "dimension_shifts": [
@@ -6906,11 +6749,6 @@
             "kind": "cohesion_change",
             "faction": "HRHB",
             "delta": 3
-          },
-          {
-            "kind": "patron_pressure",
-            "faction": "HRHB",
-            "delta": 2
           }
         ],
         "dimension_shifts": [
@@ -7007,7 +6845,7 @@
         "description": "The Zagreb line is active. The European monitors want a meeting. You remain in the capital and conduct the visit through your deputy commander. The front will understand.",
         "effects": [
           {
-            "kind": "patron_pressure",
+            "kind": "patron_support",
             "faction": "HRHB",
             "delta": -3
           },
@@ -7041,11 +6879,6 @@
             "kind": "morale_change",
             "faction": "HRHB",
             "delta": 3
-          },
-          {
-            "kind": "patron_pressure",
-            "faction": "HRHB",
-            "delta": 2
           }
         ],
         "dimension_shifts": [
@@ -7247,7 +7080,7 @@
             "delta": 3
           },
           {
-            "kind": "patron_pressure",
+            "kind": "patron_support",
             "faction": "RBiH",
             "delta": -6
           }
@@ -7408,7 +7241,7 @@
             "delta": 3
           },
           {
-            "kind": "patron_pressure",
+            "kind": "patron_support",
             "faction": "RS",
             "delta": 4
           }
@@ -7470,7 +7303,7 @@
             "delta": -2
           },
           {
-            "kind": "patron_pressure",
+            "kind": "patron_support",
             "faction": "RS",
             "delta": -6
           }
@@ -7688,7 +7521,7 @@
             "delta": -2
           },
           {
-            "kind": "patron_pressure",
+            "kind": "patron_support",
             "faction": "HRHB",
             "delta": -6
           }
@@ -8614,7 +8447,7 @@
             "delta": 3
           },
           {
-            "kind": "patron_pressure",
+            "kind": "patron_support",
             "faction": "RS",
             "delta": -5
           }
@@ -8655,7 +8488,7 @@
             "delta": -2
           },
           {
-            "kind": "patron_pressure",
+            "kind": "patron_support",
             "faction": "RS",
             "delta": 15
           }
@@ -8705,7 +8538,7 @@
             "delta": -4
           },
           {
-            "kind": "patron_pressure",
+            "kind": "patron_support",
             "faction": "RS",
             "delta": 20
           },
@@ -8752,7 +8585,7 @@
             "delta": -6
           },
           {
-            "kind": "patron_pressure",
+            "kind": "patron_support",
             "faction": "RS",
             "delta": 30
           },
