@@ -42,7 +42,7 @@ import type {
     SupplyStateDerivationReport,
     SupplyStateByOsidReport
 } from '../state/supply_state_derivation.js';
-import type { SupplyReservesReport, SiegeTurnCounterReport } from '../state/supply_reserves.js';
+import type { SupplyReservesReport } from '../state/supply_reserves.js';
 import type { Phase3DCollapseResolutionResult } from './collapse/phase3d_collapse_resolution.js';
 import type { SpawnFormationsReport, ReinforceBrigadesReport, WiaTricklebackReport } from './formation_spawn.js';
 import type { FormationHqRelocationReport } from './formation_hq_relocation.js';
@@ -76,8 +76,6 @@ import type { EnclaveResilienceReport } from './combat/enclave_resilience.js';
 import type { ContainDiagnosticReport } from './combat/contain_diagnostic.js';
 import type { EquipmentProgressionReport } from './combat/faction_progression.js';
 import type { FrontlineAttritionReport } from './combat/frontline_attrition.js';
-import type { SiegeAttritionReport } from './combat/siege_attrition.js';
-import type { SiegeDrainDiagnostic } from './combat/siege_morale_drain.js';
 import type { ObserverThresholdReport } from './codex/observer_threshold_flags.js';
 import type { MoraleDriftReport } from './combat/morale_drift.js';
 import type { OngoingMobilizationReport } from './combat/ongoing_mobilization.js';
@@ -246,12 +244,7 @@ export interface TurnReport {
     cohesion_drift_report?: CohesionDriftReport;
     morale_drift_report?: MoraleDriftReport;
     frontline_attrition?: FrontlineAttritionReport;
-    siege_bombardment_attrition?: SiegeAttritionReport;
-    /** LANE-NIGHTSHIFT-SRK-SIEGE-DEFENDER-MORALE-PHASE-1: per-turn diagnostic
-     * for siege defender morale drain (Engine Invariants v0.9.0 §6.10). The
-     * `drain_pending_count` field increments unconditionally for shadow-flag
-     * visibility per N4 morale-collapse override precedent. */
-    siege_morale_drain?: SiegeDrainDiagnostic;
+    // siege_bombardment_attrition / siege_morale_drain report fields retired 2026-11-17 (§6 panel).
     /** LANE-OBSERVER-FLAG-WRITER (owner decision #3): per-turn diagnostic for
      * the default-OFF threshold observer that writes the two non-Srebrenica
      * positive observer flags read by the dormant Ring-2 ghost-codex entries.
@@ -293,7 +286,6 @@ export interface TurnReport {
      *  Byte-identity gate. See contain_diagnostic.ts. */
     contain_diagnostic?: ContainDiagnosticReport;
     supply_reserves?: SupplyReservesReport;
-    siege_turn_counters?: SiegeTurnCounterReport;
     corps_ai_report?: CorpsAiReportEntry[];
     recruitment_report?: {
         accrual_by_faction: Record<FactionId, { capital_delta: number; equipment_delta: number }>;
