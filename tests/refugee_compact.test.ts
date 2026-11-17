@@ -351,6 +351,21 @@ describe('A2b PR-B2: the compact phase the records-panel line reads', () => {
         expect(getRefugeeCompactPhase(state([UNITED, PERSISTS], { washingtonTurn: 102 }), 110).phase).toBe('ran_out');
     });
 
+    it('a lapse answer that comes after every entry ran out does not rewrite the ending (Codex P2 on #808)', () => {
+        // Both grants expire (t61 and t64); the overture refusal at t87 finds nothing in force.
+        const lastExpiry = 8 + REFUGEE_COMPACT_GRANT_TURNS;
+        const s = state([UNITED, PERSISTS, [87, 'hrhb_federation_overture_1993', 'reject_federation_path']]);
+        expect(getRefugeeCompactPhase(s, 86)).toEqual({ phase: 'ran_out', until: null, ended_turn: lastExpiry });
+        // After the late answer: still "ran out", still dated at the real expiry, not "lapsed" at t87.
+        expect(getRefugeeCompactPhase(s, 90)).toEqual({ phase: 'ran_out', until: null, ended_turn: lastExpiry });
+        expect(getRefugeeCompactStatus(s, 90).lapsed).toBe(false);
+        // A lapse answer while the compact IS in force still lapses it, on that turn.
+        const inForce = state([UNITED, PERSISTS, [30, 'hrhb_federation_overture_1993', 'reject_federation_path']]);
+        expect(getRefugeeCompactPhase(inForce, 90)).toEqual({ phase: 'lapsed', until: null, ended_turn: 30 });
+        // The multipliers are untouched by the late answer: nothing was in force before or after.
+        expect(getRefugeeCompactRecruitmentMultiplier(s, 'HRHB', 90)).toBe(1.0);
+    });
+
     it('agrees with the multipliers: the price exists exactly in the active and suspended phases', () => {
         const s = state([UNITED, PERSISTS]);
         for (const t of [0, 20, 61, 64, 100]) {

@@ -160,11 +160,14 @@ function replayCompact(state: RefugeeCompactInput, turn: number): CompactReplay 
             continue;
         }
         if (LAPSES[d.event_id]?.includes(d.response_id)) {
-            if (expiries.length > 0 && !lapsed) {
+            // A lapse answer ends the compact only while it is still in force. If every entry had already
+            // run out, the compact ended by time: it keeps that ending and its date (the last expiry), and
+            // the late answer changes nothing.
+            if (expiries.some((e) => e > d.turn)) {
                 lapsed = true;
                 lapsedTurn = d.turn;
+                expiries = [];
             }
-            expiries = [];
             continue;
         }
         const renewal = RENEWALS[d.event_id];

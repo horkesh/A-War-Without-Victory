@@ -10,7 +10,7 @@ import { OpportunityLedgerPanel } from './OpportunityLedgerPanel';
 import { TurnAftermathRecordsPanel } from './TurnAftermathRecordsPanel';
 import { DecisionConsequenceRecordsPanel } from './DecisionConsequenceRecordsPanel';
 import { TerritoryOverTimeChart } from '../TerritoryOverTimeChart';
-import { t, type MessageKey } from '../../i18n';
+import { t, useLocale, type MessageKey } from '../../i18n';
 import {
     buildDecisionConsequenceLedger,
     buildDecisionConsequenceLedgerSummary,
@@ -53,7 +53,9 @@ export function RecordsContent({ eventCatalog }: RecordsContentProps = {}) {
     // The weekly army reading of policy is one line here, not a card, tile or chip item.
     const staffReading = useMemo(() => buildStaffReadingLine(state), [state]);
     // The HRHB President's refugee compact: one state line, so a standing arrangement (and its ending) is never silent.
-    const refugeeCompact = useMemo(() => buildRefugeeCompactLine(state), [state]);
+    // The line is built with `t()` and a locale-aware date, so the memo must follow the active locale.
+    const [locale] = useLocale();
+    const refugeeCompact = useMemo(() => buildRefugeeCompactLine(state), [state, locale]);
 
     const archiveCounts = useMemo(() => {
         const aftermathCount = buildTurnAftermathRecordViews({ state, osidNameMap, limit: Number.MAX_SAFE_INTEGER }).length;
