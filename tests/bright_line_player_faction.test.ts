@@ -8,7 +8,9 @@
  * emergent mode, and the human player's own faction in any mode. A headless / no-human historical run has no
  * player faction, so it is unchanged by construction.
  *
- * Out of scope on purpose (pinned below): the patron-defiance supply cut stays emergent-only.
+ * Out of scope on purpose (pinned below): the patron state update. Its per-turn emergent-only defiance term
+ * was retired by the patron-defiance panel (2026-11-17); a defiance answer now carries its own
+ * `patron_supply_cut` event effect, which no decision mode gates.
  */
 
 import { readdirSync, readFileSync } from 'node:fs';
@@ -217,9 +219,12 @@ describe('static guards', () => {
         expect(source.match(/isBrightLineFaction\(/g)?.length).toBe(3);
     });
 
-    it('the patron-defiance supply cut stays emergent-only (its own lane, its own measured runs)', () => {
-        expect(code('src/state/patron_pressure.ts')).toMatch(/state\.meta\?\.decision_mode === 'emergent'/);
-        expect(code('src/state/patron_pressure.ts')).not.toMatch(/isBrightLineFaction/);
+    it('the patron state update carries no defiance term and no bright-line gate (patron-defiance panel)', () => {
+        const source = code('src/state/patron_pressure.ts');
+        expect(source).not.toMatch(/decision_mode/);
+        expect(source).not.toMatch(/patron_confidence/);
+        expect(source).not.toMatch(/patron_defiance_supply_cuts/);
+        expect(source).not.toMatch(/isBrightLineFaction/);
     });
 
     it('the predicate does not default the faction and needs the headless marker check', () => {

@@ -913,8 +913,8 @@ export function buildDecisionConsequenceLedger(
       outcome: 'Combat effectiveness reduced',
       outcomeToken: { key: 'decisionConsequences.outcome.combatEffectivenessReduced' },
       detail: floorBinding
-        ? `${patron} held back materiel from ${forceLabel}: this cut is -${cutPct}% for ${weeks} weeks, but patron cuts were already at their limit (-${combinedPct}% in all).`
-        : `${patron} held back materiel from ${forceLabel}: combat effectiveness -${cutPct}% for ${weeks} weeks.`,
+        ? `${forceLabel}: ${patron} held back part of its materiel; -${cutPct}% for ${weeks} weeks. With earlier cuts in force, the combined cut reached its limit: combat effectiveness -${combinedPct}% in all.`
+        : `${forceLabel}: ${patron} held back part of its materiel; combat effectiveness -${cutPct}% for ${weeks} weeks.`,
       detailToken: {
         key: floorBinding
           ? 'decisionConsequences.detail.patron.defianceSupplyCutFloor'

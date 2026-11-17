@@ -380,7 +380,7 @@
             "certainty": "conditional",
             "opens_flags": [ "hrhb_1992_patron_posture" ],
             "material_effect_refs": [ "patron_support", "supply_delta", "patron_supply_cut", "alliance_change" ],
-            "explanation": "Counterfactual: diversifying away from sole Zagreb dependence costs materiel now (supply -5) and Zagreb's backing (patron support -6) but buys autonomy and a small ARBiH-cooperation alliance gain. Structurally consistent with the united-front H1 line. Never fires on the historical default path."
+            "explanation": "Diversifying away from sole dependence on Zagreb costs some of Zagreb's backing. Zagreb holds back part of its ammunition, fuel and seconded officers for a time, which lowers HVO combat effectiveness. The HVO gains a measure of autonomy and slightly closer cooperation with the ARBiH."
           }
         ],
         "dimension_shifts": [
@@ -395,7 +395,7 @@
         "branch_tag": "hrhb_zagreb_assert_autonomy",
         "historical_marker": "counterfactual",
         "label": "Assert HVO autonomy from Zagreb",
-        "description": "Tell Šušak the HVO answers to Mostar, not Zagreb. Refuse the seconded officers; insist on Bosnian Croat command of Bosnian Croat units. It is the cleanest assertion of independence — and the most expensive: Zagreb throttles the channel, and the HVO order of battle pays for it.",
+        "description": "Tell Šušak the HVO answers to Mostar, not Zagreb. Refuse the seconded officers; insist on Bosnian Croat command of Bosnian Croat units. It is the cleanest assertion of independence and the most expensive. Zagreb throttles the channel, and HVO units at the front pay for it.",
         "sets_flags": {
           "hrhb_1992_patron_posture": "autonomy_asserted"
         },
@@ -404,7 +404,7 @@
           { "kind": "supply_delta", "faction": "HRHB", "delta": -12 },
           { "kind": "patron_supply_cut", "faction": "HRHB", "multiplier": 0.9, "duration_turns": 26, "tag": "hrhb_zagreb_supply_channel_1992#assert_autonomy" },
           { "kind": "alliance_change", "delta": 0.1 },
-          { "kind": "cost_ledger_annotation", "tag": "hrhb_zagreb_autonomy_1992", "text": "Summer 1992: the HVO asserted command autonomy from Zagreb; the cleanest break, paid for by a throttled supply channel and a thinned order of battle.", "faction": "HRHB" }
+          { "kind": "cost_ledger_annotation", "tag": "hrhb_zagreb_autonomy_1992", "text": "Summer 1992: the HVO asserted command autonomy from Zagreb; the cleanest break, paid for by a throttled supply channel and weaker units at the front.", "faction": "HRHB" }
         ],
         "future_consequences": [
           {
@@ -414,7 +414,7 @@
             "certainty": "conditional",
             "opens_flags": [ "hrhb_1992_patron_posture" ],
             "material_effect_refs": [ "patron_support", "supply_delta", "patron_supply_cut", "alliance_change" ],
-            "explanation": "Counterfactual maximum-autonomy posture: refusing the Zagreb channel ruptures the patron relationship (patron support -18) and thins the order of battle (supply -12) for the cleanest independence. Structurally consistent with the united-front H1 line at maximum patron cost. Never fires on the historical default path."
+            "explanation": "Refusing the Zagreb channel ruptures the patron relationship. Zagreb holds back part of its ammunition, fuel and seconded officers for months, which lowers HVO combat effectiveness. It is the cleanest assertion of HVO independence and the most costly."
           }
         ],
         "dimension_shifts": [

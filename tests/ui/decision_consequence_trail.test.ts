@@ -764,7 +764,7 @@ describe('decision consequence trail', () => {
       turn: 54,
       title: 'Patron supply cut',
       outcome: 'Combat effectiveness reduced',
-      detail: 'Serbia held back materiel from VRS: combat effectiveness -5% for 13 weeks.',
+      detail: 'VRS: Serbia held back part of its materiel; combat effectiveness -5% for 13 weeks.',
       recordTarget: 'records',
     });
     expect(ledger.map((record) => record.detail).join(' ')).not.toMatch(/\bRS\b|_|support after cut|ground/);
@@ -785,7 +785,7 @@ describe('decision consequence trail', () => {
     } as Partial<LoadedGameState>), 10);
 
     expect(ledger[0]?.detail).toBe(
-      'Croatia held back materiel from HVO: this cut is -5% for 13 weeks, but patron cuts were already at their limit (-25% in all).',
+      'HVO: Croatia held back part of its materiel; -5% for 13 weeks. With earlier cuts in force, the combined cut reached its limit: combat effectiveness -25% in all.',
     );
   });
 
@@ -808,9 +808,9 @@ describe('decision consequence trail', () => {
 
     try {
       setLocale('bcs', undefined);
-      expect(resolveDecisionConsequenceCopy(ledger[0]!, 'title')).toBe('Smanjenje snabdijevanja pokrovitelja');
+      expect(resolveDecisionConsequenceCopy(ledger[0]!, 'title')).toBe('Snabdijevanje od pokrovitelja smanjeno');
       expect(resolveDecisionConsequenceCopy(ledger[0]!, 'outcome')).toBe('Borbena učinkovitost smanjena');
-      expect(resolveDecisionConsequenceCopy(ledger[0]!, 'detail')).toBe('Serbia je uskratio dio snabdijevanja za VRS: borbena učinkovitost -5% tokom 13 sedmica.');
+      expect(resolveDecisionConsequenceCopy(ledger[0]!, 'detail')).toBe('VRS: dio snabdijevanja od pokrovitelja (Serbia) uskraćen; borbena učinkovitost -5% tokom 13 sedmica.');
       expect(resolveDecisionConsequenceCopy(ledger[0]!, 'detail')).not.toMatch(/Combat effectiveness reduced|held back/);
     } finally {
       setLocale('en', undefined);

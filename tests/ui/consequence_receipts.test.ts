@@ -394,9 +394,9 @@ describe('buildConsequenceReceipts', () => {
         ].join(' ');
 
         expect(text).toContain('Prkos pokrovitelju');
-        expect(text).toContain('Odbijen zahtjev Beograda');
-        expect(text).toContain('Materijalna podrška Beograda uskraćena: borbena učinkovitost -5%');
-        expect(text).toContain('Dio snabdijevanja Beograda je uskraćen');
+        expect(text).toContain('Postupljeno protiv volje Beograda');
+        expect(text).toContain('Dio snabdijevanja iz Beograda uskraćen: borbena učinkovitost -5%');
+        expect(text).toContain('Odgovor Beograda na vašu odluku');
         expect(text).not.toMatch(/Patron defiance|Refused|held back|front fell|refusal stands|podrška je pala/i);
     });
 
@@ -421,11 +421,12 @@ describe('buildConsequenceReceipts', () => {
         expect(receipts.map((receipt) => receipt.id)).toEqual([
             'patron_defiance::HRHB::95::zagreb_orders_hrhb_ceasefire#resist_patron',
         ]);
-        const text = `${receipts[0]!.predictedLabel} ${receipts[0]!.predictedExplanation}`;
-        expect(text).toContain("Zagreb's materiel held back: combat effectiveness -15%");
-        expect(text).toContain('already at their limit');
+        const text = `${receipts[0]!.decisionOptionLabel} ${receipts[0]!.predictedLabel} ${receipts[0]!.predictedExplanation}`;
+        expect(text).toContain("Went against Zagreb's wishes");
+        expect(text).toContain("Part of Zagreb's supply held back: combat effectiveness -15%");
+        expect(text).toContain('the combined cut is at its limit');
         expect(text).toContain('-25% in all');
-        expect(text).not.toMatch(/ground|territory|support to the front fell|support fell/i);
+        expect(text).not.toMatch(/ground|territory|support to the front fell|support fell|refus/i);
     });
 
     it('uses authored BCS event and response localizations without leaking English future copy', () => {

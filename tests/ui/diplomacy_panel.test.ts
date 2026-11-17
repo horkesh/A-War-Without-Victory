@@ -163,11 +163,11 @@ describe('DiplomacyPanel', () => {
         expect(screen.getByText('Patron confidence')).toBeTruthy();
         expect(screen.getByText(/38 \/ 100 \(Low\)/)).toBeTruthy();
         // Sober, factual defiance line — never celebratory, never a fallen support figure.
-        expect(screen.getByText(`2 patron cuts on record. The latest cost 5% of combat effectiveness from ${turnToDateString(44)} until ${turnToDateString(57)}.`)).toBeTruthy();
-        expect(screen.getByText('Patron cuts in force now: combat effectiveness -15%, the most the patron withholds. A further cut adds nothing until one ends.')).toBeTruthy();
+        expect(screen.getByText(`2 patron cuts on record. The latest: combat effectiveness -5% from ${turnToDateString(44)} until ${turnToDateString(57)}.`)).toBeTruthy();
+        expect(screen.getByText('Patron cuts in force now: combat effectiveness -15%, already at the limit. A further cut goes no deeper while the limit holds.')).toBeTruthy();
         expect(screen.getByText('Patron cut records')).toBeTruthy();
         expect(screen.getByText(turnToDateString(44))).toBeTruthy();
-        expect(screen.getByText(`-5% until ${turnToDateString(57)} (at the patron limit)`)).toBeTruthy();
+        expect(screen.getByText(`-5% until ${turnToDateString(57)} (limit reached)`)).toBeTruthy();
         expect(screen.getByText(turnToDateString(31))).toBeTruthy();
         expect(screen.getByText(`-10% until ${turnToDateString(57)}`)).toBeTruthy();
 

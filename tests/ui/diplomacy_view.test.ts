@@ -215,7 +215,7 @@ describe('buildDiplomacyView', () => {
 
         expect(withCuts.negotiationTimeline).toContainEqual(expect.objectContaining({
             id: 'patron-defiance:RS:54:milosevic_vopp_pressure#resist_patron',
-            label: 'Serbia supply cut',
+            label: 'Serbia holds back part of its supply',
             detail: 'VRS combat effectiveness -5% for 13 weeks.',
             turn: 54,
             confidence: 'known',

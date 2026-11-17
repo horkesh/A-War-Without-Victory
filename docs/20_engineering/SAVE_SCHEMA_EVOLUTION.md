@@ -1,5 +1,12 @@
 # Save Schema Evolution
 
+## v43 — `patron_supply_cut` in pending decisions; pre-panel defiance receipts dropped (2026-11-17, patron-defiance panel)
+
+`CURRENT_SCHEMA_VERSION` 42 → 43 (stacked on §6 E4's v42; renumber if another schema bump merges first). A defiance answer now carries the `patron_supply_cut` event effect (Systems Manual §7.10.3). Migration v43 (`src/state/save_migration.ts`, static list `PATRON_SUPPLY_CUT_PENDING`, never loads the catalog, idempotent):
+- in `military.pending_event_decisions[].response_options[]`, each listed `<event_id>#<option_id>` without a cut gets its `patron_supply_cut` (with `tag`); `hrhb_political_goal#united_front` and `hrhb_1992_graz_cooperation_collapse#formal_alliance_persists` lose their `equipment_quality_modifier`, and `belgrade_embargo_rs_1994#defiant` its `recruitment_modifier`, only when the stored numbers match the old carrier exactly; matching `material_effect_refs` are renamed;
+- `military.patron_defiance_supply_cuts` entries without a `tag` are dropped (they recorded the retired per-turn term, which never reached combat); the key is removed when none remain.
+New optional fields (validator): `equipment_quality_modifiers[].source` (`'patron_supply_cut'` only, RS/HRHB only) and receipt `tag`, `expires_turn` (after `turn`), `combined_multiplier` (0-1], `floor_binding` (`true`). Known limit: equipment entries a mid-war save already applied carry no `source`, so they stay unfloored and have no receipt; they expire within 52 weeks. Hands-off: the historical 188w final save differs from v42 only in `schema_version`.
+
 ## v42 — `patron_pressure` → `patron_support` in pending decisions (2026-11-17, §6 E4)
 
 `CURRENT_SCHEMA_VERSION` 41 → 42 (v40 is still reserved by batch-b and unregistered; see v41). The `patron_pressure` event effect kind is renamed `patron_support`, with one sign: positive = the patron's backing rises (pressure toward peace is the per-turn patron override). The loader rejects the old name. Migration v42 (`src/state/save_migration.ts`), on `military.pending_event_decisions[].response_options[]`:

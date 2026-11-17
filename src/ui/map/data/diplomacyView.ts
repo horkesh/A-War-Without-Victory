@@ -328,7 +328,7 @@ function buildNegotiationTimeline(
     const patronCutEntries: DiplomacyTimelineEntryView[] = actorFaction && patronDefianceCuts?.entries
         ? patronDefianceCuts.entries.map((entry) => ({
             id: `patron-defiance:${actorFaction}:${entry.turn}:${entry.tag}`,
-            label: `${PATRON_LABELS[FACTION_PATRON[actorFaction]] ?? 'Patron'} supply cut`,
+            label: `${PATRON_LABELS[FACTION_PATRON[actorFaction]] ?? 'Patron'} holds back part of its supply`,
             labelToken: {
                 key: 'diplomacy.timeline.patronCutLabel',
                 params: PATRON_LABEL_KEYS[FACTION_PATRON[actorFaction]]

@@ -112,7 +112,7 @@ function describeEffect(effect: EventEffect): string | null {
     // Patron-defiance panel: the price of defying the patron, generated from the effect's numbers.
     case 'patron_supply_cut': return effect.faction === 'RS'
       ? `Belgrade holds back part of its fuel and ammunition: ${army} combat effectiveness -${Math.round((1 - effect.multiplier) * 100)}% for ${effect.duration_turns} weeks`
-      : `Zagreb holds back ammunition, fuel and seconded officers: ${army} combat effectiveness -${Math.round((1 - effect.multiplier) * 100)}% for ${effect.duration_turns} weeks`;
+      : `Zagreb holds back some of its ammunition, fuel and seconded officers: ${army} combat effectiveness -${Math.round((1 - effect.multiplier) * 100)}% for ${effect.duration_turns} weeks`;
     case 'doctrine_constraint': return `${army} doctrine constraint for ${effect.duration_turns} weeks`;
     case 'offensive_ops_suppression': return `${army} offensive operations suppressed for ${effect.duration_turns} weeks`;
     case 'alliance_lock': return `RBiH–HRHB alliance kept ${effect.mode === 'floor' ? 'at or above' : 'at or below'} ${points(effect.value)} for ${effect.duration_turns} weeks`;

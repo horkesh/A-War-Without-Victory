@@ -245,7 +245,7 @@ describe('DecisionConsequenceRecordsPanel', () => {
 
     expect(screen.getByText('Patron supply cut')).toBeTruthy();
     expect(screen.getByText('Combat effectiveness reduced')).toBeTruthy();
-    expect(screen.getByText('Serbia held back materiel from VRS: combat effectiveness -5% for 13 weeks.')).toBeTruthy();
+    expect(screen.getByText('VRS: Serbia held back part of its materiel; combat effectiveness -5% for 13 weeks.')).toBeTruthy();
     expect(screen.getByText(`Patron relations / ${turnToDateString(44)}`)).toBeTruthy();
     expect(screen.queryByText(/Patron relations \/ Turn 44/)).toBeNull();
     expect(screen.getByText('Filed to Records')).toBeTruthy();

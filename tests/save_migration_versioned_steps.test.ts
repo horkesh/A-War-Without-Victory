@@ -73,8 +73,9 @@ describe('versioned save migration steps', () => {
 
     it('bumps GameState schema to the latest registered migration', () => {
         expect(CURRENT_SCHEMA_VERSION).toBe(getLatestSchemaVersion());
-        // 42, with no v40 yet: v40 belongs to another lane (§6 E2 took 41, §6 E4 took 42).
-        expect(getLatestSchemaVersion()).toBe(42);
+        // 43, with no v40 yet: v40 belongs to another lane (§6 E2 took 41, §6 E4 took 42, the
+        // patron-defiance panel took 43).
+        expect(getLatestSchemaVersion()).toBe(43);
     });
 
     it('materializes legacy defaults through versioned registry steps', () => {
