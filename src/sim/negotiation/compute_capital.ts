@@ -8,28 +8,17 @@
  */
 
 import { CANONICAL_FACTIONS, type GameState, type FactionId } from '../../state/game_state.js';
-import type { NegotiationBreakdown, NegotiationState } from '../../state/negotiation_types.js';
+import type { NegotiationBreakdown } from '../../state/negotiation_types.js';
 import { initializeNegotiationState } from './initialize_negotiation_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
-import type { ParamilitarySeverityBand } from '../combat/paramilitary_sweep.js';
+import { derivePeacePlanResponseLists } from '../events/strategic_dimensions.js';
 
 import { getOsidAreas } from '../osid_areas.js';
 
-const PARAMILITARY_MINOR_PENALTY_PER_DEPLOYMENT = 2;
-const PARAMILITARY_MID_PENALTY_PER_DEPLOYMENT = 4;
-const PARAMILITARY_SEVERE_PENALTY_PER_DEPLOYMENT = 5;
-const PARAMILITARY_SEVERE_STANDING_CLIFF = 10;
-
-export function computeParamilitaryInternationalStandingPenalty(
-    band: ParamilitarySeverityBand,
-    deploymentCount: number
-): number {
-    const count = Math.max(0, Math.trunc(deploymentCount));
-    if (count === 0) return 0;
-    if (band === 'severe') return (count * PARAMILITARY_SEVERE_PENALTY_PER_DEPLOYMENT) + PARAMILITARY_SEVERE_STANDING_CLIFF;
-    if (band === 'mid') return count * PARAMILITARY_MID_PENALTY_PER_DEPLOYMENT;
-    return count * PARAMILITARY_MINOR_PENALTY_PER_DEPLOYMENT;
-}
+// §6 E3a1 D2: the paramilitary-finding penalty moved into the single international_standing
+// base writer (computeDimensionBaseValues → computeInternationalStandingBase). Re-exported here
+// so existing importers keep one definition.
+export { computeParamilitaryInternationalStandingPenalty } from '../events/strategic_dimensions.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Main computation
@@ -38,59 +27,15 @@ export function computeParamilitaryInternationalStandingPenalty(
 /**
  * Initialize or update negotiation state for all factions.
  * Called once per turn from war_phases pipeline.
+ *
+ * Rebuilds the raw capital record only. It writes no strategic-dimension base_value:
+ * computeDimensionBaseValues is the one owner of every base (§6 E3a1 D2).
  */
 export function computeNegotiationBreakdown(state: GameState): void {
     const neg = initializeNegotiationState(state);
     for (const faction of CANONICAL_FACTIONS) {
         updateFactionCapital(state, faction, neg.capital[faction]);
-        updateParamilitaryInternationalStanding(state, faction, neg);
     }
-}
-
-function updateParamilitaryInternationalStanding(state: GameState, faction: FactionId, neg: NegotiationState): void {
-    const dimension = neg.strategic_dimensions?.[faction]?.international_standing;
-    if (!dimension) return;
-    const finding = getLatestParamilitaryFinding(state, faction);
-    const cap = neg.capital[faction];
-    const warCrimes = cap?.war_crimes_events ?? 0;
-    const civCas = cap?.civilian_casualties_caused ?? 0;
-    const plansAccepted = cap?.peace_plans_accepted?.length ?? 0;
-    const plansRejected = cap?.peace_plans_rejected?.length ?? 0;
-    const warCrimePenalty = finding
-        ? computeParamilitaryInternationalStandingPenalty(finding.band, finding.deploymentCount)
-        : warCrimes * 10;
-    const base = clamp(50 - warCrimePenalty - (civCas / 5000) + (plansAccepted * 10) - (plansRejected * 15), 0, 100);
-    dimension.base_value = base;
-    dimension.effective_value = clamp(dimension.base_value + dimension.event_modifier, 0, 100);
-}
-
-function getLatestParamilitaryFinding(
-    state: GameState,
-    faction: FactionId
-): { band: ParamilitarySeverityBand; deploymentCount: number } | null {
-    const entries = (state.military.cost_ledger_annotations ?? [])
-        .filter((entry) => entry.faction === faction && entry.event_id === `cost_war_crimes_findings_${faction}`)
-        .sort((a, b) => {
-            if (a.turn !== b.turn) return b.turn - a.turn;
-            return strictCompare(b.tag, a.tag);
-        });
-    const latest = entries[0];
-    if (!latest) return null;
-    const band = parseParamilitaryBand(latest.tag);
-    if (!band) return null;
-    return { band, deploymentCount: parseDeploymentCount(latest.text) };
-}
-
-function parseParamilitaryBand(tag: string): ParamilitarySeverityBand | null {
-    if (tag === 'paramilitary_war_crimes_minor') return 'minor';
-    if (tag === 'paramilitary_war_crimes_mid') return 'mid';
-    if (tag === 'paramilitary_war_crimes_severe') return 'severe';
-    return null;
-}
-
-function parseDeploymentCount(text?: string): number {
-    const match = text?.match(/\bdeployment_count=(\d+)\b/);
-    return match ? Number.parseInt(match[1]!, 10) : 0;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -252,16 +197,9 @@ function computeCredibilityData(state: GameState, faction: FactionId): {
     const neg = state.military.negotiation;
     if (!neg) return { accepted: [], rejected: [] };
 
-    const accepted: string[] = [];
-    const rejected: string[] = [];
-
-    for (const plan of neg.peace_plan_history) {
-        const response = plan.responses[faction];
-        if (response === 'accepted') accepted.push(plan.plan_id);
-        else if (response === 'rejected') rejected.push(plan.plan_id);
-    }
-
-    return { accepted, rejected };
+    // peace_plan_history is the single source of these lists (§6 E3a1 D3); resolvePeacePlan
+    // no longer pushes into them.
+    return derivePeacePlanResponseLists(neg.peace_plan_history, faction);
 }
 
 // computeCohesionData removed — cohesion now derived via internal_cohesion in strategic_dimensions.ts

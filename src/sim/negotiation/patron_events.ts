@@ -12,6 +12,7 @@
 import type { GameState, FactionId } from '../../state/game_state.js';
 import type { PatronRelationship } from '../../state/negotiation_types.js';
 import { clamp } from '../../utils/math.js';
+import { applyDimensionShift } from '../events/strategic_dimensions.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Event definitions
@@ -219,12 +220,9 @@ export function applyPatronEvent(state: GameState, event: PatronEvent): void {
         }
 
         // Humanitarian standing changes — applied to strategic_dimensions international_standing
-        if (effect.humanitarian_delta !== undefined && neg.strategic_dimensions?.[effect.faction]) {
-            const dim = neg.strategic_dimensions[effect.faction]['international_standing'];
-            if (dim) {
-                dim.event_modifier = clamp(dim.event_modifier + effect.humanitarian_delta, -100, 100);
-                dim.effective_value = clamp(dim.base_value + dim.event_modifier, 0, 100);
-            }
+        // through the one accumulator rule (§6 E3a1 D1): no ±100 clamp on event_modifier.
+        if (effect.humanitarian_delta !== undefined && neg.strategic_dimensions) {
+            applyDimensionShift(neg.strategic_dimensions, effect.faction, 'international_standing', effect.humanitarian_delta);
         }
     }
 }
