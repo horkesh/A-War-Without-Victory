@@ -1424,7 +1424,7 @@
               "rbih_state_identity"
             ],
             "material_effect_refs": [],
-            "explanation": "The civic platform aligns Sarajevo's posture with the NATO-led Sarajevo Heavy Weapons Exclusion Zone regime imposed by the North Atlantic Council ultimatum of 9 February 1994 following the Markale market shelling of 5 February 1994 (68 civilians killed; ICTY Galić IT-98-29-T attributing attribution to SRK/VRS positions). The civic line carries Sarajevo's documented cooperation with UNPROFOR HWEZ inspections and public framing of NATO enforcement as overdue Western action: the Presidency accepts the symmetric application of withdrawal demands to ARBiH heavy weapons inside the 20km perimeter (NATO NAC decision 9 February 1994; UNSCR 836 of 4 June 1993; UN A/54/549 §§ on Sarajevo HWEZ regime; BB Vol. II Sarajevo siege chronology)."
+            "explanation": "The civic platform aligns Sarajevo's posture with the NATO-led Sarajevo Heavy Weapons Exclusion Zone regime imposed by the North Atlantic Council ultimatum of 9 February 1994 following the Markale market shelling of 5 February 1994 (more than 60 civilians killed; ICTY Galić IT-98-29-T attributing the shelling to SRK/VRS positions). The civic line carries Sarajevo's documented cooperation with UNPROFOR HWEZ inspections and public framing of NATO enforcement as overdue Western action: the Presidency accepts the symmetric application of withdrawal demands to ARBiH heavy weapons inside the 20km perimeter (NATO NAC decision 9 February 1994; UNSCR 836 of 4 June 1993; UN A/54/549 §§ on Sarajevo HWEZ regime; BB Vol. II Sarajevo siege chronology)."
           },
           {
             "id": "civic_to_bihac_5th_corps",
@@ -1699,7 +1699,7 @@
               "rbih_state_identity"
             ],
             "material_effect_refs": [],
-            "explanation": "The Bosniak-national line still reaches the February 1994 NATO ultimatum HWEZ compliance decision. The North Atlantic Council ultimatum of 9 February 1994 following the Markale market shelling of 5 February 1994 (68 civilians killed; ICTY Galić IT-98-29-T) applies symmetrically to ARBiH heavy weapons inside the 20km exclusion zone. On this branch the Assembly hardline current is louder against the moral-equivalence framing of symmetric application, but the Presidency's documented historical posture of HWEZ cooperation still arrives at the table (NATO NAC decision 9 February 1994; UNSCR 836 of 4 June 1993; UN A/54/549 §§ on Sarajevo HWEZ regime; BB Vol. II Sarajevo siege chronology)."
+            "explanation": "The Bosniak-national line still reaches the February 1994 NATO ultimatum HWEZ compliance decision. The North Atlantic Council ultimatum of 9 February 1994 following the Markale market shelling of 5 February 1994 (more than 60 civilians killed; ICTY Galić IT-98-29-T) applies symmetrically to ARBiH heavy weapons inside the 20km exclusion zone. On this branch the Assembly hardline current is louder against the moral-equivalence framing of symmetric application, but the Presidency's documented historical posture of HWEZ cooperation still arrives at the table (NATO NAC decision 9 February 1994; UNSCR 836 of 4 June 1993; UN A/54/549 §§ on Sarajevo HWEZ regime; BB Vol. II Sarajevo siege chronology)."
           },
           {
             "id": "bosniak_national_to_bihac_5th_corps",
@@ -1967,7 +1967,7 @@
               "rbih_state_identity"
             ],
             "material_effect_refs": [],
-            "explanation": "The pragmatic line carries the same instrumental posture (civic rhetoric outward, Bosniak institutions inward) into the February 1994 NATO ultimatum HWEZ compliance decision. The North Atlantic Council ultimatum of 9 February 1994 following the Markale market shelling of 5 February 1994 (68 civilians killed; ICTY Galić IT-98-29-T) is read by Sarajevo as the long-overdue Western coercion the pragmatic posture has been positioning for; the Presidency's documented HWEZ cooperation lines up with the international-standing return on the diplomatic exterior (NATO NAC decision 9 February 1994; UNSCR 836 of 4 June 1993; UN A/54/549 §§ on Sarajevo HWEZ regime; BB Vol. II Sarajevo siege chronology)."
+            "explanation": "The pragmatic line carries the same instrumental posture (civic rhetoric outward, Bosniak institutions inward) into the February 1994 NATO ultimatum HWEZ compliance decision. The North Atlantic Council ultimatum of 9 February 1994 following the Markale market shelling of 5 February 1994 (more than 60 civilians killed; ICTY Galić IT-98-29-T) is read by Sarajevo as the long-overdue Western coercion the pragmatic posture has been positioning for; the Presidency's documented HWEZ cooperation lines up with the international-standing return on the diplomatic exterior (NATO NAC decision 9 February 1994; UNSCR 836 of 4 June 1993; UN A/54/549 §§ on Sarajevo HWEZ regime; BB Vol. II Sarajevo siege chronology)."
           },
           {
             "id": "pragmatic_to_bihac_5th_corps",
@@ -3619,7 +3619,7 @@
       },
       {
         "kind": "narrative",
-        "text": "JNA soldiers killed during the seizure provoke international condemnation. VRS commanders vow to avenge the barracks."
+        "text": "The deaths of JNA soldiers in the clashes around the Sarajevo barracks draw Belgrade's condemnation. Bosnian Serb commanders vow revenge for the barracks."
       }
     ],
     "dimension_shifts": [
@@ -3776,7 +3776,7 @@
   {
     "id": "battle_of_the_barracks_tuzla",
     "title": "Battle of the Barracks — Tuzla",
-    "narrative": "The Tuzla column incident: JNA's 92nd Motorized Brigade is ambushed on Brčanska Malta while withdrawing from the city. In the chaos, TDF forces seize the barracks complex with its armored vehicles and artillery depot. Over 50 JNA soldiers are killed — the bloodiest barracks seizure in Bosnia. The captured equipment transforms 2nd Corps capability.",
+    "narrative": "The Tuzla column incident: as the JNA's 92nd Motorized Brigade withdraws from the city, TDF and police forces fire on the column at Brčanska Malta. In the aftermath, TDF forces take over the barracks complex with its armored vehicles and artillery depot. Dozens of JNA soldiers are killed; the toll and who fired first remain disputed. The captured equipment transforms 2nd Corps capability.",
     "source_note": "Existing barracks/JNA-withdrawal sources ground the row's military-provenance context. This note adds no casualty figures, equipment quantities, causal claims, prohibited player choices, or alternate-outcome framing.",
     "category": "military",
     "historical_source": "ICTY Mladić Trial Judgment (IT-09-92-T), JNA withdrawal and VRS formation context; ICTY Tolimir Trial Judgment (IT-05-88/2), VRS intelligence operations in northeastern Bosnia",
@@ -3831,7 +3831,7 @@
       },
       {
         "kind": "narrative",
-        "text": "The Brčanska Malta ambush kills over 50 JNA soldiers. Belgrade and the international community condemn the attack. TDF forces secure the Simin Han barracks complex. VRS high command redirects forces toward the Tuzla corridor."
+        "text": "TDF and police forces fire on the withdrawing JNA column at Brčanska Malta. Dozens of JNA soldiers die; the toll and who fired first remain disputed. Belgrade condemns the shooting. TDF forces secure the JNA barracks in Tuzla."
       }
     ],
     "dimension_shifts": [
