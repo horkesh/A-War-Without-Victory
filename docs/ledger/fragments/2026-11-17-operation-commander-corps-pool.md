@@ -11,6 +11,9 @@ Pre-freeze fix (owner rule: no engine changes after 1.0). PR 2a of the commander
 - Both selectors keep only an officer whose home or compatible corps is this corps.
 - With none free, an operation has no named commander. Combat then uses the corps commander's modifier, the existing fallback.
 - A vacancy with none free gets the existing generic acting commander. It is replaced as soon as an officer of the corps is free.
+- The acting commander is **neutral** (orchestrator ruling). He stands in for a holder the sources don't name, so his competence, aggressiveness, defensive skill and political reliability are his faction's average named corps commander (`averageCorpsCommanderTraits`), and he doesn't learn.
+  - Before, he had competence 2 from the timeline config and defensive skill 2: a below-average personality driving the commander loop for every gap.
+  - The acting combat modifier and the HVO replacement delays are unchanged.
 - Data (historian seat, `_logs/officers-20261117/historian_officer_table.md` §2):
   - Alagić: home 7th Corps, compatible 3rd. He was 7th Corps commander 1994-95 (BB1 p.491; BB2 pp.465-510).
   - Čuskić: home 7th Corps, compatible 3rd. He commanded OG Bosanska Krajina, which passed to the 7th Corps (BB2 p.510).
@@ -21,8 +24,12 @@ Pre-freeze fix (owner rule: no engine changes after 1.0). PR 2a of the commander
 - Restricting operation command alone (first version) gave 709/709/705/671 in both modes.
   - Cause, traced turn by turn with a runner observer: the 4th Corps had no eligible officer, so its operations ran commanderless (10 of 12).
   - Because the vacancy fallback was still faction-wide, Hadžihasanović (t66-80) and then Alagić (t80-99) were seated in the 4th Corps. The corps commander's personality drives the commander loop, so the 4th Corps made 12 attacks against 5 on main and over-captured RS cells in Mostar, Nevesinje and Kalinovik.
-- With both selectors restricted (this change): **709/708/707/676** in historical and hands-off emergent. Guards intact. Hashes: historical b8926901b6359d76, emergent c71c1a8cdb2e7317.
-  - The 4th Corps runs on an acting commander from t65 (Hujdur's death). Pašalić, the corps' only other officer, is commanding a probe when the seat opens and stays on its operations. PR 2c's schedule names him for t24-80.
+- With both selectors restricted and the neutral acting commander (this change): **709/708/707/676** in historical and hands-off emergent. Guards intact. Hashes: historical f5fc27c7700d4dcf, emergent a812b619fb0a05c0.
+  - Making the acting commander neutral changed no cell.
+  - Acting-commander corps-turns, all factions: 321 of 3098 commanded corps-turns. 188 of them are `jna_herzegovina_command`, which is acting all war. The others: 4th Corps 124 (t65-t188), 3rd Corps 8, 7th Corps 1.
+  - Main has 1 acting corps-turn: on main, Gavrić, the East Bosnian Corps' chief of staff, commands the JNA Herzegovina Command all war, another cross-corps attribution this change removes.
+  - The historian is sourcing the 4th Corps successors and that command's end.
+  - The 4th Corps runs on an acting commander from t65 (Hujdur's death). Pašalić, the corps' only other officer, is commanding a probe when the seat opens and stays on its operations. PR 2c's schedule names him for t24-80, and the historian is sourcing the successors.
   - The 7th Corps keeps Alagić to t167.
   - Cells, apr1994 to oct1995:
     - konjic:bijela_2 falls at t101 instead of t130 (the reference is RS in April 1994).
