@@ -260,6 +260,12 @@ Docs only; no `src/` or `data/` change, no hash change.
 - Commander attribution plan (RF-ROSTER): PR1 hardening, 2a home and compatible restriction plus the 7th Corps ties, 2c dated corps-CO schedule for 14 corps (fixes the reversed 2nd Krajina order), 2b rank retype after the seats design op-commander eligibility; each measured alone.
 - #776's Codex finding is fixed on the PR head (341a9973b), not merged; #776 merges after #739.
 
+## 2026-11-17 — Pass 72: #785 merged
+
+Docs only; no `src/` or `data/` change, no hash change.
+
+- #785 (merged, 7bbce683d; test only): the list-driven guard that every event catalog file reaches every consumer; the work list N1a row now says merged. #784 (notice audience) is still pending. The #776 Codex thread is recorded as fixed on the PR head (pass 71).
+
 ## 2026-11-16 — `address_to_nation_rbih` closing line made year-neutral
 
 The renewable RBiH presidential address (first turn 84, then about 136 and 188; turn 0 is April 1992) said "a people in the fourth year of siege", which is wrong at turns 84 (second year) and 136 (third). It now reads "a people who have lived under siege this long". One narrative sentence in `war_1993.json`; narrative and historian seats keep it; the event has no Bosnian localization. Headless 188-week artifacts unchanged. Evidence: `docs/40_reports/evidence/20261116_address_year_copy/`.
