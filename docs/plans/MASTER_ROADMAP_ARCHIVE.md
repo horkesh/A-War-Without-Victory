@@ -588,3 +588,8 @@ the 13 bot operation-pool names that were real or loaded operations replaced in 
 Merged list moved 2026-11-17 (steward pass 60), verbatim from the same paragraph:
 
 CODE3, Stop-op reaches operations in planning and a halt holds (#705, byte-identical; Engine Invariants §14.10b, Systems Manual §6.5 and Game Bible line 298 amended); the t76 Belgrade event's historical default made accept (#748, historian ruling; historical 709 / 709 / 708 / 682; main pin `8c9fbf1d30e8a976`, the main hash at #748);
+
+
+Merged list moved 2026-11-17 (steward pass 61), verbatim from the same paragraph:
+
+B5 fix 4, `divergence_threshold` wired with a historical-territory gate so hands-off emergent passes the guard (#727, §6 unanimous, Systems Manual §7.10.7; historical byte-identical; freeze condition 7 MET on main at f98c074d9, re-run at the frozen commit);
