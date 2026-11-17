@@ -21,11 +21,11 @@ Pre-freeze engine fix (latent defect; owner rule: no engine changes after 1.0). 
   - Authored plans, running ops, probes, defence and posture are untouched. No running op is preempted.
 - **S3** (release of a generic op still in planning) is accepted as final, not built. The lead-window reservation prevents the conflict, and it fires in neither run (recorded in `20261115_FINAL_BEHAVIOUR_AT_1_0.md`).
 
-**Measured** (188w, against main runs at the same commit 9bdefb158, historical and hands-off emergent):
+**Measured** (188w, against main runs at the same commit 5525ada3d, after #766, historical and hands-off emergent; the Codex P2 build check is included):
 - control_delta, formation_delta, operation_aars, activity_summary, weekly_report and end_report are byte-identical in both modes. Guards intact.
-- final_state_hash moves only through `military.watched_operations` trace rows (18 diffs). Krivaja 95's row now records `already_owned_objectives` (window 170-178) instead of `active_primary_corps` at t176, and the rows around it reorder.
-  - Historical: 3b4685bc356210d5 → e6008b2991061ae6.
-  - Emergent: 008a2ef97cf33d80 → a655770ba3a42532.
+- final_state_hash moves only through `military.watched_operations` trace rows (17 diffs on 5525ada3d). Krivaja 95's row now records `already_owned_objectives` (window 170-178) instead of `active_primary_corps` at t176, and the rows around it reorder.
+  - Historical: 0b63e8102bddf6be → 21b9aaa9dfd763da.
+  - Emergent: 73b481f79ac28e46 → d4ff54df0a81284f.
 - Re-pinned: final_save.json, run_summary.json and watched_operations.json. The 40w structural fingerprint is unchanged.
 
 **Not fixed here** (orchestrator ruling): in RB9's emergent run, Ozren falls to generic ops at t166-170, before Farz's window, so the history guard correctly fails. That goes to package P2/P3, not to a guard loosening or an RB9 condition.
