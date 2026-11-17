@@ -89,10 +89,13 @@ export interface PeacePlanDefinition {
     proposed_split: Record<string, number>;
     /** Institutional model description. */
     institutional_model: string;
-    /** Override authority change on rejection (per faction). */
-    override_change_on_reject: Record<string, number>;
-    /** International credibility change on rejection (per faction). */
-    credibility_change_on_reject: Record<string, number>;
+    /**
+     * International credibility change on rejection (per faction). Absent on Dayton, which
+     * the legacy plan scheduler never offers: its refusal cost is carried by
+     * `us_forces_dayton_rbih_1995` (§6 E3a2 ruling item 7). `override_change_on_reject`
+     * was retired by the same ruling (it was rebuilt away the same turn on the headless path).
+     */
+    credibility_change_on_reject?: Record<string, number>;
     /** Narrative text shown to player. */
     narrative: string;
 }

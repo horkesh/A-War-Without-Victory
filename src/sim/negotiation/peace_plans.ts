@@ -543,7 +543,10 @@ export function resolvePeacePlan(
 // ═══════════════════════════════════════════════════════════════════════════
 
 /**
- * Apply credibility and override authority changes to factions that rejected.
+ * Apply credibility changes and the patron support cost to factions that rejected.
+ * (`override_change_on_reject` was retired by the §6 E3a2 ruling item 7: update-patron-pressure
+ * rebuilt the override from scratch the same turn, so the bump only lived between turns on
+ * the player path.)
  */
 function applyRejectionConsequences(
     state: GameState,
@@ -556,8 +559,6 @@ function applyRejectionConsequences(
     for (const faction of rejectionFactions) {
         const pr = neg.patron_relationships[faction];
         if (pr) {
-            const overrideChange = plan.override_change_on_reject[faction] ?? 0;
-            pr.override_authority = clamp(pr.override_authority + overrideChange, 0, 100);
             // The one support writer (§6 E4 round 3): a cost below the floor spills into patron_confidence.
             applyPatronSupportDelta(neg, faction, -PEACE_PLAN_REJECTION_SUPPORT_COST);
             pr.relationship_events.push(`rejected_${plan.id}`);
@@ -565,7 +566,7 @@ function applyRejectionConsequences(
 
         // Apply international credibility change → strategic_dimensions international_standing,
         // through the one accumulator rule (§6 E3a1 D1): no ±100 clamp on event_modifier.
-        const credChange = plan.credibility_change_on_reject[faction] ?? 0;
+        const credChange = plan.credibility_change_on_reject?.[faction] ?? 0;
         if (credChange !== 0 && neg.strategic_dimensions) {
             applyDimensionShift(neg.strategic_dimensions, faction, 'international_standing', credChange);
         }
@@ -574,8 +575,4 @@ function applyRejectionConsequences(
     // §6 E3a1 D3: no capital.peace_plans_accepted/rejected pushes here. The entry already
     // recorded in peace_plan_history is the single source; computeNegotiationBreakdown rebuilds
     // those lists from it every turn, and the standing base reads the history directly.
-}
-
-function clamp(value: number, min: number, max: number): number {
-    return Math.max(min, Math.min(max, value));
 }

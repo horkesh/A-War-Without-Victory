@@ -5,7 +5,7 @@
  * Group 1: Dayton plan definition (3 tests)
  *   1. DAYTON_PLAN has id === 'dayton'
  *   2. proposed_split.RS === 49
- *   3. credibility_change_on_reject.RS <= -25 (most severe rejection cost)
+ *   3. no legacy rejection data on Dayton (§6 E3a2: dead data deleted)
  *
  * Group 2: Dayton RS floor and patron behavior (5 tests)
  *   4. RS gap=3pp equals floor=3pp → NOT hard-rejected (strictly greater, so routes to scoring)
@@ -61,7 +61,6 @@ function makePlan(overrides: Partial<PeacePlanDefinition> & { id: string }): Pea
         historical_responses: { RBiH: 'accepted', RS: 'accepted', HRHB: 'accepted' },
         proposed_split: { RS: 49, RBiH: 33, HRHB: 18 },
         institutional_model: 'canton',
-        override_change_on_reject: { RS: 5, RBiH: 5, HRHB: 5 },
         credibility_change_on_reject: { RS: -5, RBiH: -5, HRHB: -5 },
         narrative: 'Test plan narrative.',
         ...overrides,
@@ -81,8 +80,13 @@ describe('Phase 7 Group 1: Dayton plan definition', () => {
         expect(DAYTON_PLAN.proposed_split['RS']).toBe(49);
     });
 
-    it('3. DAYTON_PLAN credibility_change_on_reject.RS <= -25 (most severe rejection cost in sequence)', () => {
-        expect(DAYTON_PLAN.credibility_change_on_reject['RS']).toBeLessThanOrEqual(-25);
+    it('3. DAYTON_PLAN carries no legacy rejection data (§6 E3a2 ruling item 7: dead, deleted)', () => {
+        // The legacy scheduler never offers Dayton; its refusal cost lives on
+        // us_forces_dayton_rbih_1995. The retired override field exists on no plan.
+        expect(DAYTON_PLAN.credibility_change_on_reject).toBeUndefined();
+        for (const plan of PEACE_PLANS) {
+            expect(Object.prototype.hasOwnProperty.call(plan, 'override_change_on_reject'), plan.id).toBe(false);
+        }
     });
 
     it('3b. DAYTON_PLAN is present in PEACE_PLANS array', () => {

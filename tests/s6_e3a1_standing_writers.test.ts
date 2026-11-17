@@ -118,7 +118,7 @@ describe('§6 E3a1 D1: one accumulator rule, no clamp on event_modifier', () => 
         neg.strategic_dimensions!.RBiH.international_standing = { base_value: 40, event_modifier: 176, effective_value: 100 };
         neg.pending_peace_plan = { plan_id: 'contact_group', turn_offered: 118, bot_responses: { RS: 'rejected', HRHB: 'accepted' } };
         const state = makeState(neg, { turn: 118 });
-        const delta = getPeacePlanById('contact_group')!.credibility_change_on_reject.RBiH!;
+        const delta = getPeacePlanById('contact_group')!.credibility_change_on_reject!.RBiH!;
         expect(delta).toBeLessThan(0);
 
         resolvePeacePlan(state, 'contact_group', 'rejected');

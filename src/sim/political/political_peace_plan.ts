@@ -172,7 +172,7 @@ export function computePoliticalPeacePlanResponse(
     const acceptAggression = Math.max(-1.0, Math.min(0.0, -0.5 - territoryBias));
 
     // Credibility signal: accepting avoids the reject penalty; rejecting incurs it.
-    const credentialityChangeOnReject = plan.credibility_change_on_reject[faction] ?? 0;
+    const credentialityChangeOnReject = plan.credibility_change_on_reject?.[faction] ?? 0;
 
     const acceptDimensionShifts: NonNullable<EventResponseOption['dimension_shifts']> = [
         {

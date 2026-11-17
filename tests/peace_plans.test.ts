@@ -625,7 +625,7 @@ describe('resolvePeacePlan', () => {
         expect(neg.capital.RS.peace_plans_rejected).toContain('vance_owen');
     });
 
-    it('rejection applies override authority increase', () => {
+    it('rejection leaves override authority alone (§6 E3a2 ruling item 7: override_change_on_reject retired)', () => {
         const neg = makeNegotiationState();
         neg.pending_peace_plan = {
             plan_id: 'contact_group',
@@ -634,12 +634,16 @@ describe('resolvePeacePlan', () => {
         };
         const state = makeState({ turn: 118, war_start_turn: 0, negotiation: neg });
 
-        const rsOverrideBefore = neg.patron_relationships.RS.override_authority; // 10
+        const overrideBefore = Object.fromEntries(
+            CANONICAL_FACTIONS.map((faction) => [faction, neg.patron_relationships[faction].override_authority]),
+        );
 
         resolvePeacePlan(state, 'contact_group', 'accepted');
 
-        // RS rejected Contact Group: override_change_on_reject.RS = 30
-        expect(neg.patron_relationships.RS.override_authority).toBe(rsOverrideBefore + 30);
+        // The per-turn rebuild (update-patron-pressure) owns override_authority; the plan writes none.
+        for (const faction of CANONICAL_FACTIONS) {
+            expect(neg.patron_relationships[faction].override_authority, faction).toBe(overrideBefore[faction]);
+        }
         expect(neg.patron_relationships.RS.relationship_events).toContain('rejected_contact_group');
     });
 
