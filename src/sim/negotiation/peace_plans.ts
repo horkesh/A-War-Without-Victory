@@ -16,6 +16,7 @@ import { getPoliticalPersonality, computePoliticalAssessment } from '../politica
 import { computePoliticalPeacePlanResponse } from '../political/political_peace_plan.js';
 import { freezeEndgameSnapshot } from '../endgame/endgame_snapshot.js';
 import { resolveEventDecisionCore } from '../events/resolve_decision_core.js';
+import { applyDimensionShift } from '../events/strategic_dimensions.js';
 import { applyPeaceSettlement, isSettlementPlan } from './peace_settlement.js';
 import { warDeadTotals } from './war_dead.js';
 import { getFactionTerritoryAreaPct } from '../osid_areas.js';
@@ -561,27 +562,17 @@ function applyRejectionConsequences(
             pr.relationship_events.push(`rejected_${plan.id}`);
         }
 
-        // Apply international credibility change → strategic_dimensions international_standing
+        // Apply international credibility change → strategic_dimensions international_standing,
+        // through the one accumulator rule (§6 E3a1 D1): no ±100 clamp on event_modifier.
         const credChange = plan.credibility_change_on_reject[faction] ?? 0;
-        if (credChange !== 0) {
-            if (neg.strategic_dimensions?.[faction]?.['international_standing']) {
-                const dim = neg.strategic_dimensions[faction]['international_standing'];
-                dim.event_modifier = clamp(dim.event_modifier + credChange, -100, 100);
-                dim.effective_value = clamp(dim.base_value + dim.event_modifier, 0, 100);
-            }
-            if (neg.capital[faction]) {
-                neg.capital[faction].peace_plans_rejected.push(plan.id);
-            }
+        if (credChange !== 0 && neg.strategic_dimensions) {
+            applyDimensionShift(neg.strategic_dimensions, faction, 'international_standing', credChange);
         }
     }
 
-    // Factions that accepted get credit
-    for (const faction of CANONICAL_FACTIONS) {
-        if (rejectionFactions.includes(faction)) continue;
-        if (neg.capital[faction]) {
-            neg.capital[faction].peace_plans_accepted.push(plan.id);
-        }
-    }
+    // §6 E3a1 D3: no capital.peace_plans_accepted/rejected pushes here. The entry already
+    // recorded in peace_plan_history is the single source; computeNegotiationBreakdown rebuilds
+    // those lists from it every turn, and the standing base reads the history directly.
 }
 
 function clamp(value: number, min: number, max: number): number {
