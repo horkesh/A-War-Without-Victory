@@ -21,7 +21,7 @@
  */
 
 import { clamp01 } from '../utils/math.js';
-import type { EnclaveResilienceEntry, GameState, SiegeLifelineState, SiegeLifelineStatus } from './game_state.js';
+import type { GameState, SiegeLifelineState, SiegeLifelineStatus } from './game_state.js';
 import { getSarajevoSiegeParams, isSarajevoLifelineEnabled } from '../sim/combat/sarajevo_siege_params.js';
 
 /** Canonical event id whose firing makes the Dobrinja–Butmir tunnel a continuous relief. */

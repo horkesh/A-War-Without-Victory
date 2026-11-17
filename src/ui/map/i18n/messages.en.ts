@@ -3381,6 +3381,8 @@ export const enMessages = {
     'orderQueue.collapseAria': 'Collapse staged orders queue',
     'orderQueue.remove': 'Remove',
     'supply.logistics': 'Logistics',
+    'supply.formationsHeading': 'Formations',
+    'supply.corridorsHeading': 'Corridors',
     'supply.stateAdequateCount': '{count} adequate',
     'supply.stateStrainedCount': '{count} strained',
     'supply.stateCriticalCount': '{count} critical',

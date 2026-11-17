@@ -38,9 +38,9 @@ Development-time validation tools may abort execution on invariant violation.
 - Supply recovery must be slower than degradation
 - Supply cannot improve without improved connectivity or authority
 
-**Supply Reserves (Phase A):** Faction-level reserves (`general_supply_reserve`, `heavy_munitions_reserve` [0..100]) implement the "recovery slower than degradation" invariant: maintenance drain (0.035 per formation per turn) and combat expenditure (per-battle deduction) continuously consume reserves; production income replenishes at a bounded rate. Reserve depletion degrades the effective supply state even when OSID reachability is adequate (reserve < 50 -> strained; reserve < 20 -> critical). Gated by scenario flag `supply_reserves_enabled`.
+**Supply is connection, not stock (supply-reserve economy retired 2026-11-17, Fable consult 6):** A formation is supplied if it can be reached from a source over the OSID graph (Systems Manual §14.2); there are no depots, ammunition stocks or patron shipments. The faction-level reserve layer (`general_supply_reserve`, `heavy_munitions_reserve`: maintenance drain, per-battle expenditure, production and patron-aid income, the embargo income multiplier, production-facility damage, airdrops, the smuggling allocation, the JNA warehouse bonus and the reserve-based supply states) is not modelled in 1.0. It ran only under the scenario flag `supply_reserves_enabled`, which no apr1992 scenario sets (only `sep1991_to_dayton` and the retired `jan1993_to_dayton` did; no player can start either), so the retirement is byte-identical on apr1992. The "recovery slower than degradation" invariant is carried by the corridor and cut rules above, not by a stock. The reserve fields stay optional, compatibility-only save fields so old saves load; no new game creates them, and an old save's value is read only by the retired `supply_below`/`supply_above` conditions and `supply_delta` effect, which the supply-events change retires. Do not revive this mechanism as it stood; the record is `docs/40_reports/governance/20261115_FINAL_BEHAVIOUR_AT_1_0.md` (SB2).
 
-**Siege, Replenishment, Enclave Hardening (Phase B+C):** Phase B extends reserves with escalating siege drain (retired 2026-11-17, §6.10), patron aid income, and embargo reduction. Phase C adds enclave hardening: after 8+ consecutive isolation turns, enclaves gain a +5% defense bonus; enclave resilience reduces exhaustion accumulation. Production facility combat damage degrades output over time. All gated by `supply_reserves_enabled`.
+**Enclave Hardening (Phase C):** After 8+ consecutive isolation turns, enclaves gain a +5% defense bonus; enclave resilience reduces exhaustion accumulation. Enclave resilience runs in 1.0 (the `enclave-resilience` pipeline step, not behind any flag; constants in `src/state/enclave_resilience_constants.ts`). The Phase B siege drain (retired 2026-11-17, §6.10), patron aid income, embargo income reduction and production-facility damage retired with the reserve economy.
 
 ## 5. Settlement Stabilization Invariants
 
@@ -567,7 +567,7 @@ The following systems have been fully removed from the codebase and must not be 
 - **v0.7.0** (2026-03-15): Brigade no-destruction, ops-only attack, officer succession, cold front, elite loan invariants. Removed Systems appendix. Enclave/Sarajevo detail. Morale retreat resistance floors.
 - **v0.7.3**: Single-phase (War only) model. Peace phase and Phase 0 removed.
 - **v0.6.0**: Two-phase (Peace/War) model. Purged Phase I/II terminology. <!-- legacy-phase-term-ok -->
-- **v0.5.0**: OSID model, supply reserves, paramilitary lifecycle.
+- **v0.5.0**: OSID model, supply reserves (retired 2026-11-17), paramilitary lifecycle.
 
 ---
 

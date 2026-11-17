@@ -3248,6 +3248,8 @@ export const bcsMessages: Partial<Record<MessageKey, string>> = {
     'orderQueue.posture.retreat': 'Povlačenje',
     'orderQueue.remove': 'Ukloni',
     'supply.logistics': 'Logistika',
+    'supply.formationsHeading': 'Formacije',
+    'supply.corridorsHeading': 'Koridori',
     'supply.stateAdequateCount': '{count} uredno',
     'supply.stateStrainedCount': '{count} napregnuto',
     'supply.stateCriticalCount': '{count} kritično',

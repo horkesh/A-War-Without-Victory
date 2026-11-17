@@ -4,7 +4,7 @@
  * The reserve fields stay optional, validated and compatibility-only so an old save that
  * carries them still loads; nothing in the turn pipeline writes or runs them any more.
  */
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
@@ -13,6 +13,7 @@ import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 import { deserializeState, serializeState } from '../src/state/serialize.js';
 import { warPhases } from '../src/sim/turn_phases/war_phases.js';
 import { SCENARIO_REGISTRY } from '../src/scenario/scenario_registry.js';
+import { normalizeScenario } from '../src/scenario/scenario_loader.js';
 
 function makeFaction(id: FactionState['id']): FactionState {
     return {
@@ -93,6 +94,20 @@ describe('supply-reserve economy retired (Fable consult 6)', () => {
         // Enclave resilience (Phase C) and the embargo profile step keep running.
         expect(names).toContain('enclave-resilience');
         expect(names).toContain('update-embargo-profiles');
+    });
+
+    it('the scenario loader ignores a supply_reserves_enabled key (a started game never has reserves)', () => {
+        const raw = JSON.parse(readFileSync(join(process.cwd(), 'data/scenarios/apr1992_definitive_40w.json'), 'utf8')) as Record<string, unknown>;
+        const normalized = normalizeScenario({ ...raw, supply_reserves_enabled: true }) as unknown as Record<string, unknown>;
+        expect(normalized.supply_reserves_enabled).toBeUndefined();
+        for (const entry of SCENARIO_REGISTRY) {
+            const path = join(process.cwd(), 'data/scenarios', `${entry.key}.json`);
+            if (!existsSync(path)) continue;
+            const scenario = JSON.parse(readFileSync(path, 'utf8')) as Record<string, unknown>;
+            if (entry.key === 'apr1992_definitive_40w' || entry.key === 'apr1992_definitive_188w') {
+                expect(scenario.supply_reserves_enabled, entry.key).toBeUndefined();
+            }
+        }
     });
 
     it('the retired modules and the jan1993_to_dayton scenario are gone', () => {

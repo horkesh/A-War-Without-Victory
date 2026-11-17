@@ -5,7 +5,10 @@
  * Added 2026-11-17 with the supply-reserve retirement (Fable consult 6): the
  * "Stage Airdrop Allocation" action wrote root `state.airdrop_allocation`, while the
  * engine read only `state.military.airdrop_allocation` (and only with reserves on), so
- * the player's choice went nowhere. This static scan catches that class of dead write.
+ * the player's choice went nowhere. In fact the handler never succeeded: the save path
+ * (`serializeGameState.ts`, `assertNoWrapper`) rejects any top-level key that is not a
+ * canonical GameState key, so the call returned `ok: false`. This static scan catches that
+ * class of dead write.
  *
  * The scan is path-aware: a root write `state.X = ...` needs a reader of `state.X`, and
  * a `state.military.X = ...` write needs a reader of `military.X`. Comments are stripped

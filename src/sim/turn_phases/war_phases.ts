@@ -4069,7 +4069,7 @@ export const warPhases: NamedPhase[] = [
         }
     },
     // F1i (2026-11-16): 'evaluate-humanitarian-convoys' is retired; humanitarian convoys are not in
-    // 1.0 (see supply_reserves.ts). The step never found a route on any reachable path.
+    // 1.0 (the reserve module was retired 2026-11-17). The step never found a route on any reachable path.
     {
         name: 'update-legitimacy',
         run: async (context) => {

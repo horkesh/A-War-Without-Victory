@@ -93,12 +93,14 @@ export function SupplyPanel({ state }: SupplyPanelProps) {
       <div className="text-xs text-text-secondary space-y-1">
         {visibleSummaries.length > 0 && (
           <div className="flex gap-2">
+            <span className="shrink-0 text-text-secondary">{t('supply.formationsHeading')}</span>
             <span className="text-green-400">{t('supply.stateAdequateCount', { count: visibleStateTotals.adequate })}</span>
             <span className="text-yellow-400">{t('supply.stateStrainedCount', { count: visibleStateTotals.strained })}</span>
             <span className="text-red-400">{t('supply.stateCriticalCount', { count: visibleStateTotals.critical })}</span>
           </div>
         )}
         <div className="flex gap-2">
+          <span className="shrink-0 text-text-secondary">{t('supply.corridorsHeading')}</span>
           <span className="text-green-400">{t('supply.corridorOpenCount', { count: corridorTotals.open })}</span>
           <span className="text-yellow-400">{t('supply.corridorStrainedCount', { count: corridorTotals.brittle })}</span>
           <span className="text-red-400">{t('supply.corridorCutCount', { count: corridorTotals.cut })}</span>

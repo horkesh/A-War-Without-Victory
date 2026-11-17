@@ -1551,7 +1551,7 @@ export interface InternationalVisibilityPressure {
 }
 
 /** Retired smuggling-route record (moved from the deleted smuggling_routes.ts, 2026-11-17).
- * Retired 2026-11-17 (Fable consult 6): the supply-reserve economy is not modelled in 1.0; kept optional so old saves load; nothing writes it.
+ * Retired 2026-11-17 (Fable consult 6): the supply-reserve economy is not modelled in 1.0; kept optional so old saves load; no new game creates it.
  * @persistence compatibility-only */
 export interface SmugglingRouteState {
     id: string;
@@ -2289,7 +2289,7 @@ export interface StateMeta {
      */
     avoided_osids_by_faction?: Record<string, string[]>;
     /** Former supply-reserve economy switch.
-     * Retired 2026-11-17 (Fable consult 6): the supply-reserve economy is not modelled in 1.0; kept optional so old saves load; nothing writes it.
+     * Retired 2026-11-17 (Fable consult 6): the supply-reserve economy is not modelled in 1.0; kept optional so old saves load; no new game creates it.
      * @persistence compatibility-only */
     supply_reserves_enabled?: boolean;
     /**
@@ -3031,7 +3031,7 @@ war_jna?: JNATransitionState;
  * @persistence compatibility-only */
 siege_turn_counters?: Record<string, number>;
 /** General supply reserves per faction [0..100].
- * Retired 2026-11-17 (Fable consult 6): the supply-reserve economy is not modelled in 1.0; kept optional so old saves load; nothing writes it.
+ * Retired 2026-11-17 (Fable consult 6): the supply-reserve economy is not modelled in 1.0; kept optional so old saves load; no new game creates it.
  * @persistence compatibility-only */
 general_supply_reserve?: Record<FactionId, number>;
 /** Scenario-authored must-hold OSIDs per corps. Set once at scenario load; read by commander briefing. Key: corps_id. */
@@ -3039,7 +3039,7 @@ must_hold_osids_by_corps?: Record<string, string[]>;
 /** Per-corps comms quality override loaded from scenario. Key: corps_id. */
 comms_override_by_corps?: Record<string, { before_turn: number; mode: 'radio' | 'full' }>;
 /** Heavy munitions reserves per faction [0..100].
- * Retired 2026-11-17 (Fable consult 6): the supply-reserve economy is not modelled in 1.0; kept optional so old saves load; nothing writes it.
+ * Retired 2026-11-17 (Fable consult 6): the supply-reserve economy is not modelled in 1.0; kept optional so old saves load; no new game creates it.
  * @persistence compatibility-only */
 heavy_munitions_reserve?: Record<FactionId, number>;
 /** Canonical front-edge snapshot for GUI rendering and deterministic diagnostics. */
@@ -3139,7 +3139,7 @@ named_officer_data?: import('./officer_types.js').NamedOfficer[];
 /** Named officer mutable state keyed by officer ID. */
 named_officers?: Record<string, import('./officer_types.js').NamedOfficerState>;
 /** Humanitarian airdrop split by enclave id.
- * Retired 2026-11-17 (Fable consult 6): the supply-reserve economy is not modelled in 1.0; kept optional so old saves load; nothing writes it.
+ * Retired 2026-11-17 (Fable consult 6): the supply-reserve economy is not modelled in 1.0; kept optional so old saves load; no new game creates it.
  * @persistence compatibility-only */
 airdrop_allocation?: Record<string, number>;
 /** Retired F1i 2026-11-16: humanitarian convoys are not modelled in 1.0; kept optional so old saves load; nothing writes it. */
@@ -3147,7 +3147,7 @@ pending_convoy_decisions?: PendingConvoyDecision[];
 /** Retired F1i 2026-11-16: humanitarian convoys are not modelled in 1.0; kept optional so old saves load; nothing writes it. */
 convoy_decision_history?: ConvoyDecisionRecord[];
 /** Smuggling split by enclave id.
- * Retired 2026-11-17 (Fable consult 6): the supply-reserve economy is not modelled in 1.0; kept optional so old saves load; nothing writes it.
+ * Retired 2026-11-17 (Fable consult 6): the supply-reserve economy is not modelled in 1.0; kept optional so old saves load; no new game creates it.
  * @persistence compatibility-only */
 smuggling_allocation?: Record<string, { type: 'ammo' | 'food'; amount: number }>;
 /** One-turn municipality-targeted local support orders for asymmetric Phase E player agency. */
@@ -3155,7 +3155,7 @@ municipality_support_orders?: Partial<Record<FactionId, MunicipalitySupportOrder
 /** One-time Sarajevo tunnel unlock. */
 sarajevo_tunnel_operational?: boolean;
 /** Smuggling route capacity and disruption state per route id.
- * Retired 2026-11-17 (Fable consult 6): the supply-reserve economy is not modelled in 1.0; kept optional so old saves load; nothing writes it.
+ * Retired 2026-11-17 (Fable consult 6): the supply-reserve economy is not modelled in 1.0; kept optional so old saves load; no new game creates it.
  * @persistence compatibility-only */
 smuggling_routes?: SmugglingRouteState[];
 /** Sector ids with OPSEC active. */
