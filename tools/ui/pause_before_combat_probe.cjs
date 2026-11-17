@@ -98,7 +98,7 @@ async function domSnapshot(frame) {
     await surface.getByRole('button', { name: /^New War$/i }).first().click({ timeout: 60000 });
     await surface.getByTestId('main-menu-faction-RS').click({ timeout: 30000 });
     await surface.getByRole('button', { name: /^Take command$/i }).first().click({ timeout: 30000 });
-    await surface.getByRole('radio', { name: /^Let history run as it did$/i }).first().click({ timeout: 30000 });
+    await surface.getByRole('radio', { name: /^Replay the historical record$/i }).first().click({ timeout: 30000 });
     const begin = surface.getByRole('button', { name: /^Begin$/i }).first();
     await begin.click({ timeout: 30000 });
     await begin.waitFor({ state: 'hidden', timeout: 120000 });

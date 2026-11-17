@@ -672,6 +672,8 @@ Army HQ gathering follows the existing deterministic staff-execution boundary: i
 
 **Evaluator:** `evaluateCondition(condition, state)` — recursive evaluator in `event_types.ts`. Called from `shouldEventFire()` when an event's trigger includes a `condition` field. Returns boolean.
 
+**Effect application (§6 E1, 2026-11-16):** A firing event applies its required `effect` and then every entry of its optional `effects[]`, each once (`collectEffects`). An `effect` must not be repeated inside `effects[]`. The loader rejects any row or response option whose `effect` equals an `effects[]` entry by key-sorted content (`validateNoRepeatedEffect`, `stableStringify`). Until E1, 27 automatic cards repeated it, so the engine applied those effects twice while the card showed them once. The event card lists a mechanical `effect` together with `effects[]`, as the engine applies them.
+
 **Terminal follow-up persistence (2026-09-27 candidate):** If play ends before the next turn, `writeOwedRecordsAtTermination` writes only once-only, no-choice, no-pressure event rows whose single-turn window opens immediately next turn, all prerequisite events have fired, at least one prerequisite fired on the terminal turn, and every prerequisite window closes on that terminal turn. The row must still pass its normal eligibility checks. It is stamped at that retrospective opening turn before the terminal save and endgame snapshot are finalized. It does not advance combat, offer a decision, or evaluate unrelated future events. The write is idempotent across war-pipeline and desktop persistence paths.
 
 **Converted events** (in `data/scenarios/events/war_1992.json`):

@@ -1,4 +1,6 @@
+import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
+import { withoutComments } from './helpers/sourceComments';
 import {
     bcsMessages,
 } from '../src/ui/map/i18n/messages.bcs';
@@ -39,7 +41,25 @@ describe('UI localization substrate', () => {
 
     it('returns BCS copy for first-batch keys', () => {
         expect(t('settings.title', undefined, 'bcs')).toBe('Postavke');
-        expect(t('settings.language.option.bcs', undefined, 'bcs')).toBe('BCS');
+        // The Bosnian option is named in itself and labelled partial in both UI languages (owner decision 2026-11-17: English is the
+        // complete language of 1.0); English is named in itself too.
+        expect(t('settings.language.option.bcs', undefined, 'bcs')).toBe('Bosanski (djelimično)');
+        expect(t('settings.language.option.bcs', undefined, 'en')).toBe('Bosanski (partial)');
+        expect(t('settings.language.option.en', undefined, 'bcs')).toBe('English');
+        expect(t('settings.language.partialNote', undefined, 'en')).toBe('The interface is in Bosnian; most event text is still in English.');
+        expect(t('settings.language.partialNote', undefined, 'bcs')).toBe('Interfejs je na bosanskom, a većina tekstova događaja još je na engleskom.');
+    });
+
+    it('both language pickers show the partial note and describe the select by it', () => {
+        for (const [file, id] of [
+            ['src/ui/map/components/MainMenu.tsx', 'main-menu-language-note'],
+            ['src/ui/map/components/SettingsScreen.tsx', 'settings-language-note'],
+        ] as const) {
+            const source = withoutComments(readFileSync(file, 'utf8'));
+            expect(source, file).toContain(`aria-describedby="${id}"`);
+            expect(source, file).toContain(`id="${id}"`);
+            expect(source, file).toContain("t('settings.language.partialNote')");
+        }
     });
 
     it('falls back to English when a locale dictionary is missing a key', () => {
@@ -47,7 +67,7 @@ describe('UI localization substrate', () => {
     });
 
     it('interpolates message parameters after locale fallback', () => {
-        expect(t('settings.language.savedNotice', { locale: 'BCS' }, 'bcs')).toBe('Jezik sačuvan: BCS');
+        expect(t('settings.language.savedNotice', { locale: 'Bosanski (djelimično)' }, 'bcs')).toBe('Jezik sačuvan: Bosanski (djelimično)');
     });
 
     it('resolves unsupported locales to English', () => {
