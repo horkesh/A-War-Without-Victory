@@ -23,7 +23,6 @@ const capture = vi.hoisted(() => ({
         targetSid: string | null;
         targetFaction: string | null;
     }>,
-    controlMapApplications: 0,
     syntheticPositiveFlip: false,
 }));
 
@@ -125,19 +124,6 @@ vi.mock('../src/state/turn_pipeline.js', async (importOriginal) => {
     };
 });
 
-vi.mock('../src/state/political_control_init.js', async (importOriginal) => {
-    const real = await importOriginal<typeof import('../src/state/political_control_init.js')>();
-    return {
-        ...real,
-        applyMunicipalityControllersFromMun1990Only: async (
-            ...args: Parameters<typeof real.applyMunicipalityControllersFromMun1990Only>
-        ) => {
-            capture.controlMapApplications += 1;
-            return real.applyMunicipalityControllersFromMun1990Only(...args);
-        },
-    };
-});
-
 import { loadOperationalEdges } from '../src/data/operational_data.js';
 import { assertFormationsInFriendlyTerritory } from '../src/sim/combat/assert_formation_territory.js';
 import { assertOperationLifecycle } from '../src/sim/combat/assert_operation_lifecycle.js';
@@ -224,7 +210,6 @@ function resetCapture(): void {
     capture.observerStates.length = 0;
     capture.repairEntries.length = 0;
     capture.flipApplications.length = 0;
-    capture.controlMapApplications = 0;
     capture.syntheticPositiveFlip = false;
 }
 
@@ -287,7 +272,6 @@ async function runObservedScenario(options: {
     weeklySaves: GameState[];
     repairEntries: Array<{ edgeCount: number; operationalEdgesOnly: boolean }>;
     flips: Array<{ applied: number; targetSid: string | null; targetFaction: string | null }>;
-    controlMapApplications: number;
     outDir: string;
 }> {
     const publicStart = capture.publicTurns.length;
@@ -295,7 +279,6 @@ async function runObservedScenario(options: {
     const observerStart = capture.observerStates.length;
     const repairStart = capture.repairEntries.length;
     const flipStart = capture.flipApplications.length;
-    const controlMapStart = capture.controlMapApplications;
     const outDir = await createOwnedArtifactDirectory(options.artifactLabel, 'awwv-postturn-gate-');
     capture.syntheticPositiveFlip = options.positiveFlip === true;
 
@@ -321,7 +304,6 @@ async function runObservedScenario(options: {
         weeklySaves,
         repairEntries: capture.repairEntries.slice(repairStart),
         flips: capture.flipApplications.slice(flipStart),
-        controlMapApplications: capture.controlMapApplications - controlMapStart,
         outDir,
     };
 }
@@ -409,49 +391,6 @@ describe('scenario post-turn repair gate', () => {
             if (run) await cleanupTemporaryArtifactDirectory(run.outDir);
         }
     }, 180_000);
-
-    it('preserves the authentic remaining-peace branch and its repair phase guard', async () => {
-        const fixtureRoot = await createOwnedArtifactDirectory(
-            'remaining-peace-fixture',
-            'awwv-postturn-peace-fixture-',
-        );
-        const scenarioPath = join(fixtureRoot, 'remaining-peace.json');
-        let run: Awaited<ReturnType<typeof runObservedScenario>> | undefined;
-        try {
-            await writeFile(scenarioPath, JSON.stringify({
-                scenario_id: 'remaining_peace_postturn_gate',
-                start_lifecycle_phase: 'peace',
-                peace_referendum_held_at_start: true,
-                peace_referendum_turn: 0,
-                peace_war_start_turn: 4,
-                peace_war_start_control: 'apr1992',
-                weeks: 1,
-                init_control: 'apr1992',
-                init_control_mode: 'hybrid_1992',
-                init_formations_oob: true,
-                turns: [],
-            }, null, 2), 'utf8');
-
-            run = await runObservedScenario({
-                scenarioPath,
-                weeks: 1,
-                artifactLabel: 'remaining-peace-run',
-            });
-            expect(run.publicTurns).toHaveLength(0);
-            expect(run.legacyTurns).toHaveLength(1);
-            expect(run.observers).toHaveLength(1);
-            expect(run.legacyTurns[0]!.meta.phase).toBe('peace');
-            expect(run.observers[0]!.meta.phase).toBe('peace');
-            expect(run.legacyTurns[0]!.meta.turn).toBe(1);
-            expect(run.observers[0]!.meta.turn).toBe(1);
-            expect(run.controlMapApplications).toBe(0);
-            expect(run.repairEntries).toEqual([]);
-            expect(serializeState(run.observers[0]!)).toBe(serializeState(run.legacyTurns[0]!));
-            expect(persistedState(run.observers[0]!)).toEqual(run.weeklySaves[0]);
-            expect(existsSync(run.result.paths.final_save)).toBe(true);
-        } finally {
-            if (run) await cleanupTemporaryArtifactDirectory(run.outDir);
-            await cleanupTemporaryArtifactDirectory(fixtureRoot);
-        }
-    }, 180_000);
+    // The "remaining-peace branch" case was removed with the September 1991 peace start
+    // (2026-11-16): no scenario can start in the peace phase any more.
 });

@@ -39,12 +39,6 @@ import {
 interface OperationBriefingModalProps {
     isOpen: boolean;
     onClose: () => void;
-    /** Player decision callbacks. */
-    onLaunch?: () => void;
-    onPostpone?: () => void;
-    onAbort?: () => void;
-    onOrderProbe?: () => void;
-    commandBridgeAvailable?: boolean;
 }
 
 /** A plain-language note block (delegation, trend, recommendation, constraint). */
@@ -347,12 +341,14 @@ export function OperationConstraintContext({ assessment }: {
 // FULL DECISION-ROOM CONVERGENCE: the force-launch (Level 3 Direct Intervention) lever
 // is issued ONLY from the Presidential Decision Room (DirectiveCard, force_launch
 // directive). This modal is a read-only commander-decision review — it shows the
-// commander's go/no-go assessment, intel/supply/force context, and the player's
-// passive go/no-go callbacks (launch/postpone/abort/probe), but it no longer renders
-// a force-launch / override-command-chain affordance. The override lives in the
-// Decision Room so presidential command stays single-surface.
+// commander's go/no-go assessment and the intel/supply/force context. It has no
+// launch / postpone / abort / probe buttons (retired 2026-11-17: their IPC read the
+// non-GameState root `corps_command`, so every call failed, and the engine read none
+// of what they wrote) and no force-launch / override-command-chain affordance. The
+// president's levers over an operation (force-launch over an objection, stop-op) live
+// in the Decision Room so presidential command stays single-surface.
 
-export function OperationBriefingModal({ isOpen, onClose, onLaunch, onPostpone, onAbort, onOrderProbe, commandBridgeAvailable = true }: OperationBriefingModalProps) {
+export function OperationBriefingModal({ isOpen, onClose }: OperationBriefingModalProps) {
     const loadedGameState = useGameStore((s) => s.loadedGameState);
     const context = useGameStore((s) => s.operationBriefingContext);
 
@@ -381,7 +377,6 @@ export function OperationBriefingModal({ isOpen, onClose, onLaunch, onPostpone, 
     const forceBalance = forceRatio != null ? getPlayerSafeOperationBalancePresentation(forceRatio) : null;
     const assessment = operation.commander_assessment;
     const postponements = operation.postponement_count ?? 0;
-    const isDecisionReady = operation.phase === 'planning';
     const corpsLabel = getPlayerSafeCorpsName(
         operation.corps_name ?? null,
         operation.corps_id,
@@ -543,52 +538,9 @@ export function OperationBriefingModal({ isOpen, onClose, onLaunch, onPostpone, 
 
                 {/* Action footer */}
                 <SurfaceModalFooter className="justify-between">
-                    {!isDecisionReady && (
-                        <p className="m-0 basis-full text-[16px] text-[#c2b69c]">
-                            {t('operationBriefing.reviewReadOnly')}
-                        </p>
-                    )}
-                    {isDecisionReady && !commandBridgeAvailable && (
-                        <p className="m-0 basis-full text-[16px] text-[#c2b69c]">
-                            {t('attention.bridgeUnavailableReadOnly')}
-                        </p>
-                    )}
-                    {isDecisionReady && (
-                        <div className="flex flex-wrap gap-3">
-                            <button
-                                type="button"
-                                onClick={onLaunch}
-                                disabled={!commandBridgeAvailable}
-                                className={`kbd-focus ${SURFACE_PRIMARY_BUTTON_COMPACT}`}
-                            >
-                                {t('operationBriefing.launchOperation')}
-                            </button>
-                            <button
-                                type="button"
-                                onClick={onOrderProbe}
-                                disabled={!commandBridgeAvailable}
-                                className={`kbd-focus ${SURFACE_SECONDARY_BUTTON}`}
-                            >
-                                {t('operationBriefing.orderProbe')}
-                            </button>
-                            <button
-                                type="button"
-                                onClick={onPostpone}
-                                disabled={!commandBridgeAvailable || postponements >= 2}
-                                className={`kbd-focus ${SURFACE_SECONDARY_BUTTON}`}
-                            >
-                                {t('operationBriefing.postpone')}{postponements >= 2 ? ` (${t('operationBriefing.maxReached')})` : ''}
-                            </button>
-                            <button
-                                type="button"
-                                onClick={onAbort}
-                                disabled={!commandBridgeAvailable}
-                                className="kbd-focus h-12 rounded-md border border-red-400/60 bg-red-950/50 px-5 text-[16px] font-semibold text-red-100 transition hover:bg-red-900/60 disabled:cursor-default disabled:opacity-45"
-                            >
-                                {t('operationBriefing.abortOperation')}
-                            </button>
-                        </div>
-                    )}
+                    <p className="m-0 basis-full text-[16px] text-[#c2b69c]">
+                        {t('operationBriefing.reviewReadOnly')}
+                    </p>
                     <button
                         type="button"
                         onClick={onClose}

@@ -1105,7 +1105,6 @@
     "headless_scenario_auto_control": true,
     "peace_scheduled_referendum_turn": null,
     "peace_scheduled_war_start_turn": null,
-    "peace_war_start_control_path": null,
     "phase": "war",
     "rbih_hrhb_war_earliest_turn": 40,
     "recruitment_mode": "player_choice",
@@ -43791,6 +43790,6 @@
     "war_supply_condition": {},
     "war_supply_pressure": {}
   },
-  "schema_version": 39,
+  "schema_version": 40,
   "turn_summaries": []
 }

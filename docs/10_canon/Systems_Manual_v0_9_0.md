@@ -348,24 +348,26 @@ Alliance drift is computed per turn in `alliance_update.ts`: alliance deteriorat
 
 **Implementation-note (A2b HRHB refugee compact, B5 2026-11-17).** Left alone, refugee pressure, about −0.016 a week, is the largest drift term; patron drag is about −0.012. So before this change no HRHB choice altered the outcome. The game designer and historian panel (orchestrator-approved) added the following in `src/sim/early_war/refugee_compact.ts`. It is derived from `event_decision_log`, so no new array is needed.
 
-- **Grants.** HRHB answers of `united_front` (`hrhb_political_goal`) and `formal_alliance_persists` (`hrhb_1992_graz_cooperation_collapse`) each open a compact entry for 56 turns. The length reaches the H6 window even when the goal is answered ahead of firing.
+- **Grants.** The President's HRHB answers of `united_front` (`hrhb_political_goal`) and `formal_alliance_persists` (`hrhb_1992_graz_cooperation_collapse`) each open a compact entry for 56 turns. The length reaches the H6 window even when the goal is answered ahead of firing. Only answers with `decision_source: 'player'` count; a bot's answer never opens, renews or lapses a compact.
 - **Damping.** Refugee pressure is ×0.6 per active entry.
 - **Renewals.** These extend active entries; they never open one:
   - H6 `federate_early`, 40 turns;
   - federation overture `extend_federation_overture`, 30 turns (this is also the historical default, so bots never start a compact);
   - Gornji Vakuf `negotiate`, 30 turns.
-- **Lapses.** These end the compact for good: VOPP Zagreb `acknowledge_pressure`; overture `maintain_separate_state` or `reject_federation_path`; Gornji Vakuf `escalate`; H6 `breakout_offensive`.
+- **Lapses.** These end the compact for good: VOPP `resist_patron` (pressing the provincial map against Zagreb's restraint); overture `maintain_separate_state` or `reject_federation_path`; Gornji Vakuf `escalate`; H6 `breakout_offensive`. VOPP `acknowledge_pressure`, the documented historical answer, is neutral: it neither renews nor ends the compact (re-keyed in A2b PR-B; before that a cooperative President had to choose the aggressive counterfactual to keep the compact). A played game never answers an unanswered advisory card for the President, so an unanswered VOPP card leaves the compact in force.
 - **Suspension.** A bilateral flip during an active compact suspends the damping for 8 weeks (`rbih_hrhb_state.refugee_compact_suspended_until`, written only while a compact is active).
-- **Price.** HRHB recruitment is ×0.9 per active entry, the burden of taking the refugees in. patron_confidence costs a further −10 on each 1992 choice.
-- **Patron drag.** Patron drag is ×0.5 per 1992 choice, permanently.
+- **Price.** HRHB recruitment is ×0.9 per active entry, the cost of absorbing the displaced (see §12: refugee concentration adds men to the local pool, but the host administration pays for absorbing them; the compact's reading of that is a price, not a gain). patron_confidence costs a further −10 on each 1992 choice.
+- **End.** The compact ends at the Washington signing: the Federation locks the alliance, so no damping, no price and no drag damping remain after `washington_turn`.
+- **Patron drag.** Patron drag is ×0.5 per ACTIVE compact entry, exactly 1.0 with none: Zagreb's pull on the alliance is held back only while the compact stands, and returns in full when the entries run out, lapse or end at the signing (A2b PR-B amendment, game designer and historian, orchestrator-directed; it used to be ×0.5 per 1992 choice, permanently, which let two choices buy a one-week war). The 8-week flip suspension lifts only the refugee-pressure damping, not the drag damping or the price.
 - **Related changes.**
   - `csq_federation_early_1994`'s alliance floor now lasts 17 turns, not 60, so it ends at the t87 overture and Mostar's answer there decides.
   - Path C (Federation by consent) does not fire after a refused overture.
 - **Acceptance.**
   - Left alone, historical and emergent runs stay byte-identical.
   - Played, a President who keeps paying reaches Path C at t102 with no war.
-  - Cooperative and then careless, the war comes at t71.
-  - Renewed and then reneged at t87, the war comes at t104 (t103 on the older main of the first measurement); the engine ceasefire follows at t149 and Path A signs at t153.
+  - Cooperative and then careless (both 1992 grants, no renewals): the compact runs out by time at t56 and t61, the alliance falls, and the war comes at t72, thirty weeks before the Federation (t102). (Until #806 the RS back-channel card carried an `alliance_lock` that pinned the RBiH-HRHB alliance at a 0.15 floor from t68 to t93 and the war came at t98; that lock is gone. Before the PR-B re-key the war came at t71.)
+  - Grants, then resisting Zagreb at VOPP (t46; the compact lapses): the war comes at t67 and the Federation at t102.
+  - Renewed and then reneged at t87, the war comes at t100, the engine ceasefire at t145 and Path A signs at t149.
 - **Binding copy rule (historian).** No player-facing text may say or imply that refugees caused the 1993 war.
 
 **Implementation-note (2026-09-01):** During open RBiH-HRHB war, the bilateral corps diversion assigns the operational initiative to RBiH and a defensive stance to HVO. The selected RBiH corps receives only live HVO-controlled objectives on its mixed front; the HVO corps receives no bilateral offensive objectives. Corps selection prefers a formation below the operation-exhaustion ceiling before using mixed-front overlap as a tie-break. A designated bilateral corps may form its bounded assault group from combat-ready brigades already holding its continuous front, even when front-edge allocation labels those brigades as garrison rather than residual surplus; the reserved group remains coherent across sub-sector repartition before launch. Washington/ceasefire state terminates this special bilateral offensive designation. RBiH-HRHB control may change through combat operations, but rear-pocket `consolidation` and `abandoned` resolution is prohibited between the two factions in either direction. No direct political-control authority is granted.
@@ -867,7 +869,7 @@ Reunification requires restored connectivity, authority consolidation, and time.
 
 Population is tracked per municipality and MCZ.
 
-Displacement permanently reduces recruitment and authority. Refugee concentration increases short-term manpower but accelerates exhaustion. Trapped populations increase humanitarian pressure.
+Displacement permanently reduces recruitment and authority. Refugee concentration adds men to the local pool in the short term but accelerates exhaustion, and the host administration pays for absorbing them: under the HRHB refugee compact (§6.6a, A2b note) that cost is a recruitment price, not a gain. Trapped populations increase humanitarian pressure.
 
 ### 12.1 Per-municipality displacement routing
 
