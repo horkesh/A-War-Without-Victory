@@ -5,7 +5,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { axisCorpsOrder, bindPresidentRequestAttempts, joinPresidentRequests, requestCandidates, type PresidentRequestDetail } from '../tools/ai_play/president_policies.js';
+import { axisCorpsOrder, bindPresidentRequestAttempts, joinPresidentRequests, recordsRequestDetails, requestCandidates, type PresidentRequestDetail } from '../tools/ai_play/president_policies.js';
 import type { GameState } from '../src/state/game_state.js';
 
 function makeState(): GameState {
@@ -61,6 +61,22 @@ describe('President Request-op: several corps on one axis', () => {
             { corpsId: 'arbih_2nd_corps', targets: ['op:doboj:x'] },
             { corpsId: 'arbih_3rd_corps', targets: ['op:maglaj:donja_bocinja_2'] },
         ]);
+    });
+});
+
+describe('Request-op detail records (Codex review on #821)', () => {
+    it('--request-from alone turns on request_details (the old predicate left it out)', () => {
+        expect(recordsRequestDetails({ requestFrom: 91 })).toBe(true);
+        expect(recordsRequestDetails({ requestFrom: 0 })).toBe(true);
+    });
+
+    it('every other played-test option still turns it on; none leaves it off', () => {
+        expect(recordsRequestDetails({ requestAxis: { corpsIds: ['arbih_2nd_corps'], municipalities: ['doboj'] } })).toBe(true);
+        expect(recordsRequestDetails({ preferExhausted: true })).toBe(true);
+        expect(recordsRequestDetails({ requestEvery: 1 })).toBe(true);
+        expect(recordsRequestDetails({ requestOnly: true })).toBe(true);
+        expect(recordsRequestDetails({})).toBe(false);
+        expect(recordsRequestDetails(undefined)).toBe(false);
     });
 });
 
