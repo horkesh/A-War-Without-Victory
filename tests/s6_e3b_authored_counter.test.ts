@@ -22,6 +22,7 @@ import { computeFactionGrade, computeWarCostIndex } from '../src/sim/negotiation
 import { buildGhostEntries } from '../src/sim/codex/dynamic_section_builder.js';
 import type { GameState } from '../src/state/game_state.js';
 import type { NegotiationBreakdown } from '../src/state/negotiation_types.js';
+import { withoutComments } from './helpers/sourceComments.js';
 
 const row = (partial: Record<string, unknown>): EventDefinition => ({
     trigger: { turn_min: 1 },
@@ -228,12 +229,10 @@ function sourceFiles(dir: string): string[] {
     return out;
 }
 
-/** Code lines only: block comments, line comments and JSDoc lines are dropped. */
+/** Code lines only: comments are stripped by the shared helper, then blank lines are dropped. */
 function codeLines(text: string): string[] {
-    return text
-        .replace(/\/\*[\s\S]*?\*\//g, '')
+    return withoutComments(text)
         .split('\n')
-        .map((line) => line.replace(/\/\/.*$/, ''))
         .filter((line) => line.trim().length > 0);
 }
 
