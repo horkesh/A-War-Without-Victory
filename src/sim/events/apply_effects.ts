@@ -84,10 +84,15 @@ export function applyEventEffects(
     effects: EventEffect[],
     targetFormationId?: string,
 ): void {
-    if (effects.length === 0) return;
+    // The `supply_delta` kind is retired (2026-11-17; supply is connection, not stock). A pending
+    // decision in an old save may still carry one in its staged response options. It was a silent
+    // no-op without the reserve layer, so it is dropped here, explicitly, so the decision can still be
+    // answered. The retired-field sweep migration strips staged entries; this filter goes with it.
+    const live = effects.filter((effect) => (effect as { kind?: unknown }).kind !== 'supply_delta');
+    if (live.length === 0) return;
 
     // Sort by kind for deterministic application order
-    const sorted = [...effects].sort((a, b) => {
+    const sorted = [...live].sort((a, b) => {
         const oa = EFFECT_KIND_ORDER[a.kind] ?? 99;
         const ob = EFFECT_KIND_ORDER[b.kind] ?? 99;
         return oa - ob;
