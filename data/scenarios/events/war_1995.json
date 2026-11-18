@@ -180,6 +180,7 @@
   },
   {
     "id": "un_hostage_crisis_1995",
+    "authored_by_choice": false,
     "title": "UN Hostages Chained to VRS Targets",
     "narrative": "The VRS response to NATO air strikes near Pale is swift and calculated. Within hours, 377 UN peacekeepers are seized across Bosnian Serb territory. Some are chained to bridges and military installations as human shields against further bombing. The images -- blue-helmeted soldiers handcuffed to ammunition bunkers -- are broadcast worldwide. NATO's air campaign stops. UNPROFOR is paralyzed. The tactic works in the short term. But in the corridors of Washington, London, and Paris, the humiliation is hardening resolve. The rules of engagement are about to change.",
     "source_note": "Per Sensitive History Design Gate §3 + v1.3 packet §3.6 named-row carve-out: `un_hostage_crisis_1995 → maintain_hostages` is a response-to-existing-state crisis (377 UN peacekeepers already seized per UNSCR 998), not authorization of new hostage-taking. The `paramilitary_policy` field remains the canon-bound player-authorized war-crime surface; no other response-option path authorizes new sensitive acts.",

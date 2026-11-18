@@ -7,6 +7,7 @@
  * Display only: every value is read from the frozen verdict or the end-of-war control map.
  */
 import type { FactionVerdict } from '../../../state/negotiation_types.js';
+import { visibleWarCrimeLines } from '../../../sim/endgame/cost_ledger.js';
 import { t } from '../i18n';
 import { formatCount } from '../utils/formatters.js';
 
@@ -157,13 +158,29 @@ export function buildFactionFigureRows({ verdict, frontLine, settled, brigadeCou
             basis: t('verdict.basis.campaignRecord'),
         },
     );
-    if (cap.war_crimes_events > 0) {
+    // §6 E3b (2026-11-17): the two war-crimes counts, in incidents, never the shared delta
+    // counter. No false zero (`visibleWarCrimeLines`, SHDG §4 panel 2026-11-18): the
+    // historical-record row only above zero; the decisions-in-play row above zero or beside a
+    // shown record row. A verdict frozen before E3b carries no incident counts and shows neither.
+    // Labels signed: SHDG §4 panel (narrative designer + historian), 2026-11-18.
+    const incidents = verdict.war_crime_incidents;
+    const shown = incidents ? visibleWarCrimeLines(incidents) : { record: false, authorized: false };
+    if (incidents && shown.record) {
         rows.push({
-            id: 'war_crimes_events',
+            id: 'war_crimes_recorded',
             kind: 'record',
-            label: t('verdict.report.stat.warCrimesEvents'),
-            value: String(cap.war_crimes_events),
-            basis: t('verdict.basis.warCrimesRecord'),
+            label: t('verdict.report.stat.warCrimesRecorded'),
+            value: formatCount(incidents.recorded),
+            basis: t('verdict.basis.campaignRecord'),
+        });
+    }
+    if (incidents && shown.authorized) {
+        rows.push({
+            id: 'war_crimes_authorized',
+            kind: 'record',
+            label: t('verdict.report.stat.warCrimesAuthorized'),
+            value: formatCount(incidents.authorized),
+            basis: t('verdict.basis.campaignRecord'),
         });
     }
     return rows;

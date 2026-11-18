@@ -150,8 +150,8 @@ describe('THIRD_PARTY_NOTICES.md bundled content', () => {
     expect(notices).toContain('data/derived/tiles/terrain.pmtiles');
     expect(notices).toContain('data/derived/tiles/hillshade.pmtiles');
     expect(notices).toContain('Copernicus GLO-30');
-    expect(notices).toContain('docs/40_reports/implemented/20260320_3D_TERRAIN_DECKGL_ARROWS_COMBAT_EFFECTIVENESS.md');
-    expect(notices).toContain('docs/40_reports/handovers/AWWV_GUI_REWORK_PROGRESS_20260228.md');
+    expect(notices).toContain('docs/provenance/geography_records/20260320_3D_TERRAIN_DECKGL_ARROWS_COMBAT_EFFECTIVENESS.md');
+    expect(notices).toContain('docs/provenance/geography_records/AWWV_GUI_REWORK_PROGRESS_20260228.md');
   });
 
   it('lists the UI fonts and the VSCO 2 Community Edition samples with their licences', () => {

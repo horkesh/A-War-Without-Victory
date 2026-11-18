@@ -3,6 +3,8 @@ name: awwv-pre-commit-check
 description: Provide pre-commit checklist covering canon, determinism, ordering, tests, ledger, and life lessons compliance. Use when the user runs /awwv_pre_commit_check or asks for a pre-commit review.
 ---
 
+> **Until 1.0:** `docs/PROJECT_LEDGER*`, `docs/ledger/`, `docs/plans/` and `docs/40_reports/` paths below mean `C:/Pyrrhic/AWWV-coordination/repo-docs/docs/<same path>` (owner ruling 2026-11-18). Read and edit them there; open no docs PRs. See `docs/20_engineering/AGENT_WORKFLOW.md`.
+
 # /awwv_pre_commit_check
 
 ## Trigger

@@ -37,7 +37,7 @@ import { backfillFormationLocationOsid, computeOsidPopulation } from '../../data
 import { loadSettlementEthnicityData } from '../../data/settlement_ethnicity.js';
 import { buildSidToMunFromSettlements } from '../../scenario/oob_early_war_entry.js';
 import { updateCapabilityProfiles } from '../../state/capability_progression.js';
-import { computeDimensionBaseValues, applyDimensionShift } from '../events/strategic_dimensions.js';
+import { recomputeDimensionBases, applyDimensionShift } from '../events/strategic_dimensions.js';
 import { relieveOfficer, recordPresidentialOverride } from '../combat/order_interpretation.js';
 import { applyReplaceCoConsequence, applyForceOpConsequence, applyStopOpConsequence } from '../combat/command_lever_consequences.js';
 import { clamp } from '../../utils/math.js';
@@ -1164,6 +1164,25 @@ export const warPhases: NamedPhase[] = [
         }
     },
     {
+        // §6 phase order (ruling 2026-11-17), point (a) of three. Re-runs the one base owner
+        // so this turn's events see every base input written since the last turn: the
+        // previous turn's late steps and every between-turn write (IPC peace-plan answers,
+        // decisions answered while the turn was not paused, saves from before this step).
+        // Headless it is a no-op against last turn's `refresh-dimension-bases`.
+        // Skipped on the first war turn so turn-1 events read the initialised bases, the same
+        // for a desktop birth and a headless one. runTurn increments meta.turn before the
+        // steps, so a war that starts at war_start_turn W executes its first turn as W + 1
+        // (displacement_takeover.ts reads the first war turn the same way).
+        name: 'refresh-dimension-bases-turn-start',
+        run: (context) => {
+            const meta = context.state.meta;
+            if (meta.phase !== 'war') return;
+            if (meta.game_over) return;
+            if (meta.turn <= (meta.war_start_turn ?? 0) + 1) return;
+            recomputeDimensionBases(context.state);
+        }
+    },
+    {
         name: 'update-event-readiness',
         run: (context) => {
             if (context.input.eventDefinitions) {
@@ -1234,13 +1253,11 @@ export const warPhases: NamedPhase[] = [
         }
     },
     {
+        // §6 phase order (ruling 2026-11-17), point (b) of three: mid-turn, after
+        // evaluate-events, so a choice's base input reaches the base before operations.
         name: 'compute-dimension-bases',
         run: (context) => {
-            const neg = context.state.military.negotiation;
-            if (!neg?.strategic_dimensions) return;
-            for (const faction of ['RBiH', 'RS', 'HRHB'] as const) {
-                computeDimensionBaseValues(neg.strategic_dimensions, context.state, faction);
-            }
+            recomputeDimensionBases(context.state);
         }
     },
     {

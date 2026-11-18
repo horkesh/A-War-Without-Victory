@@ -8,4 +8,4 @@
 
 ## Ledger
 
-- [ ] I added `docs/ledger/fragments/YYYY-MM-DD-<slug>.md` (first line `## YYYY-MM-DD — <title>`) instead of editing the top of `docs/PROJECT_LEDGER.md`. Required when the PR changes `src/` or `data/`. Label the PR `no-ledger` if there is nothing to record.
+- [ ] Ledger moved out of the repo until 1.0 (owner 2026-11-18). If this change needs a record, add the fragment in the coordination repo (`C:/Pyrrhic/AWWV-coordination/repo-docs/docs/ledger/fragments/`), not in this PR.

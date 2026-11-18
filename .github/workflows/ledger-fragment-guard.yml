@@ -1,8 +1,9 @@
 name: Ledger Fragment Guard
 
-# A PR that changes src/ or data/ must add one ledger fragment,
-# docs/ledger/fragments/YYYY-MM-DD-<slug>.md. See docs/ledger/fragments/README.md and
-# tools/ledger_fragment_check.cjs. Label a PR `no-ledger` to skip the check.
+# No-op until 1.0. The project ledger and its fragments moved out of the repo to the
+# coordination folder (owner ruling 2026-11-18). The job name `ledger-fragment` is kept so
+# branch protection needs no change. tools/ledger_fragment_check.cjs stays for the 1.0
+# consolidation but is not run.
 
 on:
   pull_request:
@@ -10,15 +11,8 @@ on:
 
 jobs:
   ledger-fragment:
-    if: ${{ !contains(github.event.pull_request.labels.*.name, 'no-ledger') }}
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 2
     steps:
-      - uses: actions/checkout@v5
-        with:
-          fetch-depth: 0
-      - uses: actions/setup-node@v5
-        with:
-          node-version: 22
-      - name: Check for a ledger fragment
-        run: node tools/ledger_fragment_check.cjs --base "origin/${{ github.base_ref }}"
+      - name: Ledger fragment check retired
+        run: echo "ledger moved out of the repo until 1.0 (owner 2026-11-18)"
