@@ -707,7 +707,7 @@ Army HQ gathering follows the existing deterministic staff-execution boundary: i
 
 #### §7.10.1 v0.6.0 Expanded Condition Types
 
-14 additional condition types added to `EventCondition` union in `event_types.ts`:
+14 additional condition types were added to the `EventCondition` union in `event_types.ts`. Three are retired and the loader rejects them: `supply_below` and `supply_above` (2026-11-17, supply is connection, not stock) and `corridor_severed` (2026-11-18: its BFS ran over settlement edges but compared OSID ids, so it could never evaluate an OSID pair; no shipped event used it). The 11 live types:
 
 | Type | Parameters | Evaluates |
 |------|-----------|-----------|
@@ -722,7 +722,6 @@ Army HQ gathering follows the existing deterministic staff-execution boundary: i
 | `week_since_event` | event_id, min_weeks?, max_weeks? | Weeks since event last fired within range |
 | `event_fire_count` | event_id, min_count?, max_count? | Event fire count within range |
 | `enclave_supply_status` | municipality, status | Placeholder — deferred to supply integration |
-| `corridor_severed` | from_osid, to_osid, faction | Placeholder — deferred to BFS integration |
 | `peace_plan_response` | plan_id, faction, response (`accepted`/`rejected`) | A RESOLVED `negotiation.peace_plan_history` entry for `plan_id` whose answer for `faction` is `response`. Reads the plan record, never a card or a pending plan; the loader checks the plan id, faction and response (§6 E4 round 3, 2026-11-17). Gates `belgrade_embargo_rs_1994` on the RS rejection of the Contact Group plan |
 
 All combinators (`and`, `or`, `not`) work with all condition types.
