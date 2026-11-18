@@ -15,7 +15,7 @@ import type {
     GameState,
 } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
-import { releaseOperationCommander } from './officer_system.js';
+import { releaseOperationCommanders } from './officer_system.js';
 import { capEffectiveStanceByHold } from './stance_matter_holds.js';
 import { capStanceForOct1995Ceasefire } from './oct1995_ceasefire.js';
 import { hasActiveOperation, findBrigadeOperation, removeOperation } from './corps_operation_helpers.js';
@@ -276,7 +276,7 @@ export function advanceOperations(state: GameState): void {
                 enterOperationRecovery(state, cid, op, state.meta.turn, 'completed');
             } else if (op.phase === 'recovery' && turnsInPhase >= OP_PHASE_DURATION.recovery) {
                 // Operation complete
-                releaseOperationCommander(state, op);
+                releaseOperationCommanders(state, op);
                 completeOperationLifecycle(state, cid, op);
                 removeOperation(cmd, op);
             }

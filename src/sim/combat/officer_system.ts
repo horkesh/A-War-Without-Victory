@@ -518,6 +518,11 @@ export function selectTacticalCommander(
         if (!os || os.status !== 'reserve') continue;
         if (os.assigned_operation) continue;
         if (!isEnclaveCompatible(data, corpsId, currentTurn)) continue;
+        // Commander attribution PR 2b (panel Q2, unanimous): a TG is led by an officer of its own
+        // corps, home or compatible, else by nobody. The faction-wide fallback (e.g. a Srebrenica
+        // officer leading a 7th Corps anchor) is the defect PR 2a removed from the other selectors.
+        const belongsToCorps = data.home_corps_id === corpsId || (data.compatible_corps_ids ?? []).includes(corpsId);
+        if (!belongsToCorps) continue;
 
         candidates.push(data);
     }
@@ -539,6 +544,20 @@ export function selectTacticalCommander(
     });
 
     return candidates[0]!.id;
+}
+
+/**
+ * Release every commander an operation holds when it ends: the TG anchor's tactical commander
+ * and the operation commander. Commander attribution PR 2b (panel Q4 condition): the normal
+ * operation ends released only the operation commander, so a TG leader stayed `active` with a
+ * stale `assigned_operation` for the rest of the war. Use this at every operation end.
+ */
+export function releaseOperationCommanders(
+    state: GameState,
+    op: import('../../state/game_state.js').CorpsOperation,
+): void {
+    releaseTacticalCommander(state, op);
+    releaseOperationCommander(state, op);
 }
 
 /**
@@ -883,6 +902,7 @@ export function processOfficerSuccession(
             .some(entry => entry.schedule.some(t => t.officer_id === data.id && t.tenure_start >= turn));
         os.status = servesLater ? 'reserve' : 'retired';
         os.assigned_corps_id = null;
+        clearAssignmentPenalty(os);
         report.departures.push(data.id);
     }
 
@@ -978,6 +998,7 @@ export function processOfficerSuccession(
             incumbent.state.status = incumbent.data.id.startsWith('generic_') ? 'retired' : 'reserve';
             incumbent.state.assigned_corps_id = null;
             incumbent.state.acting_commander = false;
+            clearAssignmentPenalty(incumbent.state);
         }
         const holderState = officers[holder.id]!;
         holderState.status = 'active';
@@ -1001,11 +1022,21 @@ export function processOfficerSuccession(
                 // manually controlled player here; those keep the pre-existing pool path.
                 const scheduleMayAct = faction !== manualPlayerFaction
                     && !isPresidentialAppointee(state, corpsFormId, existingCommander.data.id);
-                const availableReplacement = (scheduleMayAct
+                const scheduledReplacement = scheduleMayAct
                     ? scheduledHolderForCorps(state, corpsRoster, officerData, officers, corpsFormId, turn, false)
-                    : null)
+                    : null;
+                const availableReplacement = scheduledReplacement
                     ?? findBestReplacement(officers, officerData, faction, corpsFormId, turn, officersRelievedFrom(corpsRoster, corpsFormId, turn));
                 if (!availableReplacement) continue;
+                // Commander attribution PR 2b (panel round 2, R2-Q1, 2-1): an acting holder gives way
+                // only to a candidate of higher precedence (corps rank > tactical commander > generic)
+                // or to the schedule. A pulled-up OG/brigade commander never displaces another one.
+                // Only applies when a tactical commander is on either side, so the existing acting
+                // paths (generic acting, relief acting) behave exactly as before the rank retype.
+                const tacticalInvolved = availableReplacement.rank === 'tactical_commander'
+                    || existingCommander.data.rank === 'tactical_commander';
+                if (!scheduledReplacement && tacticalInvolved
+                    && actingPrecedence(availableReplacement) >= actingPrecedence(existingCommander.data)) continue;
                 if (existingCommander.data.faction === 'HRHB') {
                     // D.4: Read delays from war_timeline if available, else hardcoded fallback
                     const hvoConfig = state.military.war_timeline?.officer_config?.HRHB;
@@ -1016,8 +1047,15 @@ export function processOfficerSuccession(
                         ? combatDelay : politicalDelay;
                     if (existingCommander.state.turns_in_command < requiredDelay) continue;
                 }
-                // Delay served — retire acting, look for pool replacement below
-                existingCommander.state.status = 'retired';
+                // Delay served — retire acting, look for pool replacement below. A pulled-up
+                // tactical commander (PR 2b, R2-Q1) goes back to his own command, not into retirement.
+                if (existingCommander.data.rank === 'tactical_commander') {
+                    existingCommander.state.status = 'reserve';
+                    existingCommander.state.acting_commander = false;
+                    clearAssignmentPenalty(existingCommander.state);
+                } else {
+                    existingCommander.state.status = 'retired';
+                }
                 existingCommander.state.assigned_corps_id = null;
             } else {
                 continue;
@@ -1026,7 +1064,8 @@ export function processOfficerSuccession(
 
         // The dated schedule names the holder first (§5E); the pool ranking is the
         // counterfactual fallback when the schedule has no free holder.
-        const replacement = scheduledHolderForCorps(state, corpsRoster, officerData, officers, corpsFormId, turn, false)
+        const scheduledHolder = scheduledHolderForCorps(state, corpsRoster, officerData, officers, corpsFormId, turn, false);
+        const replacement = scheduledHolder
             ?? findBestReplacement(officers, officerData, faction, corpsFormId, turn, officersRelievedFrom(corpsRoster, corpsFormId, turn));
 
         if (replacement) {
@@ -1034,7 +1073,11 @@ export function processOfficerSuccession(
             os.status = 'active';
             os.assigned_corps_id = corpsFormId;
             os.turns_in_command = 0;
-            os.acting_commander = false;
+            // Commander attribution PR 2b (R2-Q1): a tactical commander pulled into a vacancy by the
+            // fallback holds the corps as ACTING (0.92 combat modifier) until an officer of higher
+            // precedence is free. Real holders: corps chiefs of staff or appointed commanders took
+            // over vacancies, not OG commanders (Krstić TJ para 331; BB1 p.488, p.491; BB2 p.510).
+            os.acting_commander = !scheduledHolder && replacement.rank === 'tactical_commander';
             applyAssignmentPenalty(os, replacement, corpsFormId);
 
             report.replacements.push({
@@ -1119,6 +1162,17 @@ export function isPresidentialAppointee(state: GameState, corpsId: string, offic
     ));
 }
 
+/**
+ * The assignment penalty belongs to the corps seat: applyAssignmentPenalty sets it on seating, and
+ * step 4 counts it down only while the officer holds a corps. An officer who leaves the seat for the
+ * reserve leaves it behind; otherwise it stays frozen on him and cuts his later operation and TG
+ * commands, even in his home corps (Codex review on #800).
+ */
+function clearAssignmentPenalty(os: NamedOfficerState): void {
+    os.effective_competence_penalty = 0;
+    os.penalty_turns_remaining = 0;
+}
+
 /** Competence penalty for an assignment outside the officer's home corps (unchanged rules, shared by the pool and the schedule). */
 function applyAssignmentPenalty(os: NamedOfficerState, data: NamedOfficer, corpsId: string): void {
     const isHome = data.home_corps_id === corpsId;
@@ -1169,6 +1223,16 @@ function scheduledHolderForCorps(
  * Find best available replacement officer for a corps.
  * Priority: pool_tier (starter > tier_a > tier_b > tier_c), then competence, then home corps match.
  */
+/**
+ * Precedence of a corps holder for the acting-replacement rule (PR 2b, R2-Q1): a corps-rank
+ * officer (0) before a pulled-up tactical commander (1) before the generic acting commander (2).
+ * Lower is stronger; an acting holder gives way only to a strictly lower value.
+ */
+function actingPrecedence(officer: NamedOfficer): number {
+    if (officer.id.startsWith('generic_')) return 2;
+    return officer.rank === 'tactical_commander' ? 1 : 0;
+}
+
 /**
  * The faction's average named corps commander (competence, aggressiveness, defensive skill,
  * political reliability), rounded to two decimals. Generic acting commanders are excluded, so
@@ -1221,9 +1285,17 @@ function findBestReplacement(
 
     if (candidates.length === 0) return null;
 
-    // Sort by: home corps match, then pool tier, then competence desc, then id.
+    // Sort by: rank (a corps-rank officer before a tactical commander), home corps match, then pool
+    // tier, then competence desc, then id.
     // C.3: HVO sorts by political_reliability first (before competence).
     candidates.sort((a, b) => {
+        // Commander attribution PR 2b (panel Q3): a vacancy goes to a corps-rank officer of the corps
+        // first, then to one of its tactical (OG/brigade) commanders (Galic TJ para 604; Krstic TJ
+        // para 331; Alagic from OG to corps, BB2 p.510); the acting commander only when neither exists.
+        const aRank = a.rank === 'corps_commander' ? 0 : 1;
+        const bRank = b.rank === 'corps_commander' ? 0 : 1;
+        if (aRank !== bRank) return aRank - bRank;
+
         // Home corps match
         const aHome = a.home_corps_id === corpsId ? 0 : 1;
         const bHome = b.home_corps_id === corpsId ? 0 : 1;
