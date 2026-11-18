@@ -1042,6 +1042,16 @@ function advanceExistingPlan(
     plan: CommanderPlan,
     turn: number,
 ): PlanDecision {
+    // Clear already-abandoned plans so new plans can be created next turn.
+    // Abandoned plans are stored in state for one turn to allow EMIT to see the reason,
+    // but on the NEXT advance they must be cleared rather than re-evaluated. This runs first
+    // (package P3, consult 4 step 2): when it ran after the bilateral check, a bilateral plan
+    // abandoned by the ceasefire or Washington was re-abandoned every turn and never cleared,
+    // locking the corps out of planning for the rest of the war.
+    if (plan.status === 'abandoned') {
+        return { plan: null, action: 'none', reason: 'clearing abandoned plan' };
+    }
+
     if (plan.bilateral_offensive) {
         const bilateralState = briefing.state_ref?.political.rbih_hrhb_state;
         if (bilateralState?.ceasefire_active || bilateralState?.washington_signed) {
@@ -1053,13 +1063,6 @@ function advanceExistingPlan(
                     : 'bilateral ceasefire ended offensive authority',
             };
         }
-    }
-
-    // Clear already-abandoned plans so new plans can be created next turn.
-    // Abandoned plans are stored in state for one turn to allow EMIT to see the reason,
-    // but on the NEXT advance they must be cleared rather than re-evaluated.
-    if (plan.status === 'abandoned') {
-        return { plan: null, action: 'none', reason: 'clearing abandoned plan' };
     }
 
     // October 1995 general ceasefire (council fix 3): a plan not yet handed to execution is
