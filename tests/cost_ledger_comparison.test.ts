@@ -48,6 +48,8 @@ function makeState(overrides: {
     opportunityResolutions?: unknown[];
     opportunities?: unknown[];
     operationHistory?: unknown[];
+    /** Scripted cards that fired (the war-crimes lines count them as incidents, §6 E3b). */
+    eventFireCounts?: Record<string, number>;
 } = {}): GameState {
     const {
         turn = 40,
@@ -58,6 +60,7 @@ function makeState(overrides: {
         opportunityResolutions = [],
         opportunities = [],
         operationHistory = [],
+        eventFireCounts = {},
     } = overrides;
 
     const cl = casualtyLedger ?? initializeCasualtyLedger(['RBiH', 'RS', 'HRHB']);
@@ -71,6 +74,8 @@ function makeState(overrides: {
             casualty_ledger: cl,
             operation_opportunity_resolutions: opportunityResolutions,
             operation_opportunities: opportunities,
+            event_fire_counts: eventFireCounts,
+            event_decision_log: [],
         },
         operation_history: operationHistory,
         political: {
@@ -246,7 +251,7 @@ describe('buildCostLedger', () => {
         const state = makeState({
             casualtyLedger: cl,
             factionBreakdowns: {
-                RBiH: { refugees_created: 1200000, civilian_casualties_caused: 2000, war_crimes_events: 5 },
+                RBiH: { refugees_created: 1200000, civilian_casualties_caused: 2000, war_crimes_events: 5, war_crimes_events_emergent: 3 },
                 RS: { refugees_created: 600000, civilian_casualties_caused: 35000, war_crimes_events: 35 },
                 HRHB: { refugees_created: 150000, civilian_casualties_caused: 1000, war_crimes_events: 3 },
             },
@@ -256,18 +261,28 @@ describe('buildCostLedger', () => {
                 HRHB: { killed: 1000, fled_abroad: 0 },
             },
             ruptures,
+            eventFireCounts: {
+                grabovica_uzdol_massacres_1993: 1,
+                sarajevo_siege_begins_1992: 1,
+                srebrenica_falls_1995: 1,
+                hvo_detention_camps_1993: 1,
+            },
         });
 
         const ledger = buildCostLedger(state);
 
-        // War-crimes cards follow the fixed side order (RBiH, RS, HRHB), never ranked by count.
+        // War-crimes lines follow the fixed side order (RBiH, RS, HRHB), never ranked by count;
+        // per side the historical record, then what was authorized in play (§6 E3b).
         expect(ledger.findings.map((f) => f.id)).toEqual([
             'human_cost_record',
             'civilian_displacement_record',
             'rupture_srebrenica_genocide_1995',
             'war_crimes_record_RBiH',
+            'war_crimes_authorized_RBiH',
             'war_crimes_record_RS',
+            'war_crimes_authorized_RS',
             'war_crimes_record_HRHB',
+            'war_crimes_authorized_HRHB',
         ]);
         const rupture = ledger.findings.find((f) => f.id === 'rupture_srebrenica_genocide_1995')!;
         expect(rupture.title).toBe('Srebrenica genocide');
@@ -278,16 +293,22 @@ describe('buildCostLedger', () => {
         expect(rupture.sources).toEqual([COST_LEDGER_SOURCES.srebrenica]);
         expect(rupture.sources.join(' ')).toContain('ICTY');
         expect(rupture.sources.join(' ')).toContain('ICJ, Bosnia and Herzegovina v. Serbia and Montenegro (2007)');
-        // Findings that count the campaign's own record carry no source (no court counted game events).
-        for (const finding of ledger.findings.filter((f) => f.id !== rupture.id)) {
+        // Findings that count the campaign's own record carry no source (no court counted game
+        // events); the RS record line cites only the adjudication of the genocide it states.
+        const rsRecord = ledger.findings.find((f) => f.id === 'war_crimes_record_RS')!;
+        expect(rsRecord.sources).toEqual([COST_LEDGER_SOURCES.srebrenicaGenocideAdjudication]);
+        for (const finding of ledger.findings.filter((f) => f.id !== rupture.id && f.id !== rsRecord.id)) {
             expect(finding.sources).toEqual([]);
         }
         expect(ledger.findings.find((f) => f.id === 'human_cost_record')!.text).toBe(
             'This campaign recorded 46,500 military dead and 38,000 civilian dead on all sides.',
         );
-        expect(ledger.findings.find((f) => f.id === 'war_crimes_record_RS')!.text).toBe(
-            'This campaign recorded 35 war-crime events by Bosnian Serb forces.',
+        // Incidents, never the shared counter's deltas (35).
+        expect(rsRecord.text).toBe(
+            '2 recorded incidents: Siege of Sarajevo Intensifies, Srebrenica Falls. '
+            + 'The ICTY held the Srebrenica killings to be genocide, as did the International Court of Justice.',
         );
+        expect(ledger.findings.find((f) => f.id === 'war_crimes_authorized_RBiH')!.text).toBe('3 incidents authorized in play.');
         for (const finding of ledger.findings) {
             expect(finding.text).not.toMatch(/\byou\b/i);
             expect(finding.text).not.toMatch(/less costly|more costly|achievement|badge/i);

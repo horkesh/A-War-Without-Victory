@@ -740,16 +740,18 @@ describe('FactionReport — direct component mount proof', () => {
         expect(trace).toContain('catastrophic moral cost');
     });
 
-    it('renders war crimes count in statistics', () => {
+    it('renders the two war-crimes lines in statistics, counting incidents (§6 E3b)', () => {
         const html = renderComponentMP(FactionReport, {
-            verdict: makeRsVerdictMP(),
+            verdict: makeRsVerdictMP({ war_crime_incidents: { recorded: 9, authorized: 4 } }),
             factionOsids: 413,
             totalOsids: 712,
             brigadeCount: 35,
             personnel: 85000,
         });
-        expect(html).toContain('War Crimes Events');
-        expect(html).toContain('35');
+        expect(html).toContain('Recorded in the historical record of this campaign');
+        expect(html).toContain('Authorized in play');
+        // Never the shared counter's delta sum (35) under a war-crimes label.
+        expect(html).not.toContain('War Crimes Events');
     });
 
     it('renders peace plan history with plan names instead of raw ids', () => {

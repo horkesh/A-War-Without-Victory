@@ -157,14 +157,27 @@ export function buildFactionFigureRows({ verdict, frontLine, settled, brigadeCou
             basis: t('verdict.basis.campaignRecord'),
         },
     );
-    if (cap.war_crimes_events > 0) {
-        rows.push({
-            id: 'war_crimes_events',
-            kind: 'record',
-            label: t('verdict.report.stat.warCrimesEvents'),
-            value: String(cap.war_crimes_events),
-            basis: t('verdict.basis.warCrimesRecord'),
-        });
+    // §6 E3b (2026-11-17): the two war-crimes lines, in incidents, never the shared delta
+    // counter; shown together whenever either is non-zero (equal prominence). A verdict frozen
+    // before E3b carries no incident counts and shows neither. Labels DRAFT for §4 panel.
+    const incidents = verdict.war_crime_incidents;
+    if (incidents && (incidents.recorded > 0 || incidents.authorized > 0)) {
+        rows.push(
+            {
+                id: 'war_crimes_recorded',
+                kind: 'record',
+                label: t('verdict.report.stat.warCrimesRecorded'),
+                value: formatCount(incidents.recorded),
+                basis: t('verdict.basis.campaignRecord'),
+            },
+            {
+                id: 'war_crimes_authorized',
+                kind: 'record',
+                label: t('verdict.report.stat.warCrimesAuthorized'),
+                value: formatCount(incidents.authorized),
+                basis: t('verdict.basis.campaignRecord'),
+            },
+        );
     }
     return rows;
 }

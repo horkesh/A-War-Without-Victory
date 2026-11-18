@@ -26,7 +26,7 @@ import { strictCompare } from '../../state/validateGameState.js';
 import { isBrightLineFaction } from '../../state/atrocity_accountability.js';
 import { capGradeBySettlement, settlementControllersFor } from './peace_settlement.js';
 import { creditedTerritoryPct, overrunEnclaveCells } from './enclave_credit.js';
-import { authoredWarCrimeIncidents } from '../events/authored_war_crimes.js';
+import { authoredWarCrimeIncidents, recordedWarCrimeIncidents } from '../events/authored_war_crimes.js';
 
 const CANONICAL_FACTIONS: FactionId[] = ['RBiH', 'RS', 'HRHB'];
 
@@ -844,6 +844,7 @@ export function computeFactionVerdict(
             dimension_grades: emptyDims,
             outcome_class: 'collapse' as OutcomeClass,
             condemnation_flags: [],
+            war_crime_incidents: warCrimeIncidents(state, faction),
         };
     }
 
@@ -971,6 +972,15 @@ export function computeFactionVerdict(
             peace_dysfunction_band: peaceDysfunctionBand(baseOutcomeClass, sideDysfunction?.index ?? null, dysfunctionFlags),
             outcome_class: outcomeClass,
         },
+        war_crime_incidents: warCrimeIncidents(state, faction),
+    };
+}
+
+/** §6 E3b: the verdict's two war-crimes counts, in incidents (see FactionVerdict.war_crime_incidents). */
+function warCrimeIncidents(state: GameState, faction: string): { recorded: number; authorized: number } {
+    return {
+        recorded: recordedWarCrimeIncidents(state, faction),
+        authorized: authoredWarCrimeIncidents(state, faction),
     };
 }
 
