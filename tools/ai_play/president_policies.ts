@@ -34,7 +34,8 @@
  *                      backing), as a President set on one push would. Every order is still paid.
  *   preferExhausted  : among candidate corps, prefer one whose corps exhaustion is above the planning
  *                      gate (MAX_EXHAUSTION_FOR_OPERATION), so an exhausted corps is ordered forward.
- * With either option set, each staged Request-op also leaves a `request_details` record (corps
+ *   requestFrom      : the first game turn on which a Request-op may be staged.
+ * With any of these options set, each staged Request-op also leaves a `request_details` record (corps
  * exhaustion at the order, objection, cost, clash) that the compare tool joins to the operation's
  * after-action report.
  */
@@ -67,6 +68,14 @@ export interface PresidentPolicyOptions {
     requestEvery?: number;
     /** Spend Authority on Request-ops only: no gestures, Stop-ops or backing. */
     requestOnly?: boolean;
+    /** First game turn (`state.meta.turn`) on which a Request-op may be staged. Absent: from the start. */
+    requestFrom?: number;
+}
+
+/** True when any played-test option is set, so each staged Request-op leaves a `request_details` record. */
+export function recordsRequestDetails(opts?: PresidentPolicyOptions): boolean {
+    return !!opts && (!!opts.requestAxis || !!opts.preferExhausted || opts.requestEvery != null
+        || !!opts.requestOnly || opts.requestFrom != null);
 }
 
 /** One staged Request-op, recorded only when a played-test option is set. */
@@ -245,7 +254,7 @@ async function applyOneRequestOp(state: GameState, faction: FactionId, baseDir: 
                 log.clashes.push(`${raised.outcome}:${raised.receiptId}`);
                 clash = `${raised.outcome}:${raised.receiptId}`;
             }
-            if (opts && (opts.requestAxis || opts.preferExhausted || opts.requestEvery != null || opts.requestOnly)) {
+            if (recordsRequestDetails(opts)) {
                 const exhaustion = state.military.corps_command?.[candidate.corpsId]?.corps_exhaustion ?? 0;
                 (log.request_details ??= []).push({
                     turn: state.meta.turn, corps_id: candidate.corpsId, target_osid: targetOsid,
@@ -354,12 +363,14 @@ export async function applyPresidentPolicy(
 ): Promise<void> {
     if (kind === 'hands_off') return;
     const requestEvery = opts?.requestEvery ?? (kind === 'meddler' ? 4 : 8);
+    const requestDue = turnIndex % requestEvery === requestEvery - 1
+        && (opts?.requestFrom === undefined || (state.meta?.turn ?? 0) >= opts.requestFrom);
     if (opts?.requestOnly) {
-        if (turnIndex % requestEvery === requestEvery - 1) await applyRequestOp(state, faction, baseDir, log, opts);
+        if (requestDue) await applyRequestOp(state, faction, baseDir, log, opts);
         return;
     }
     applyGestures(state, faction, eventDefs, log);
-    if (turnIndex % requestEvery === requestEvery - 1) await applyRequestOp(state, faction, baseDir, log, opts);
+    if (requestDue) await applyRequestOp(state, faction, baseDir, log, opts);
     const stopEvery = kind === 'meddler' ? 6 : 12;
     if (turnIndex % stopEvery === stopEvery - 1) stopOpDue = true;
     if (stopOpDue && applyStopOp(state, faction, log) !== 'no_operation') stopOpDue = false;
