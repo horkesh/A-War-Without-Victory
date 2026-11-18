@@ -80,7 +80,7 @@ Required fields on a new event row:
 - `bot_response_logic: "historical"` — canonical for every authored Phase D row. Preserves calibration discipline (napkin lesson).
 - `responding_faction` — `RBiH` / `RS` / `HRHB`. The faction whose government chooses.
 - `notifications_to_other_factions[]` — list of factions that observe the resolution.
-- An OR-trigger condition predicate referencing one of the registered condition types in `event_vocabulary.ts:KNOWN_EVENT_CONDITION_TYPES`.
+- An OR-trigger condition predicate referencing one of the registered condition types in `event_vocabulary.ts:KNOWN_EVENT_CONDITION_TYPES`. Retired types are no longer registered and the loader rejects them, also when nested in `and`/`or`/`not`: `supply_below` and `supply_above` (2026-11-17) and `corridor_severed` (2026-11-18; its BFS ran over settlement edges but compared OSID ids, so it could never evaluate an OSID pair).
 - `response_options[]` — typically 3 options. Each must carry an `id`, a `label`, optional `dimension_shifts[]`, optional `effects[]`, optional `future_consequences[]`, optional `enables_events_runtime[]`, optional `closes_events_runtime[]`.
 - `source_note` — prose paragraph. Sensitive-adjacent rows MUST include the §3.6 forward-looking guard text (see §3 below).
 
