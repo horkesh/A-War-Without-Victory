@@ -586,7 +586,8 @@ describe('decision consequence trail', () => {
     // Municipality scale, never the settlement: the record does not support a village-level claim, and the text says so.
     expect(record.detail).toContain('into the Kakanj area for');
     expect(record.detail).not.toMatch(/Bilješevo|Biljesevo/);
-    expect(record.detail).toContain('your staff decides rear-area sweeps without asking');
+    // No derivable cause on this row: the stage-1 cause, stated as the rule in force when the sweep was sent (§6 D1 stage 2, A3).
+    expect(record.detail).toContain('under the rule in force when it was sent, your staff at Assisted, Delegated or Observer decided rear-area sweeps without asking');
     expect(record.detail).toContain('It counts against your side.');
     expect(record.detail).toContain('an event of the simulated war, not a statement about what happened in that place');
     expect(record.detail).not.toMatch(/authorized|ethnic cleansing|_|op:/i);

@@ -855,10 +855,11 @@ export function buildDecisionConsequenceLedger(
     });
   }
 
-  // A paramilitary action carried out for the player's side with no request ever reaching the player (the staff decides rear-area
-  // actions at Assisted command or above; a standing order to allow sends them without a request at Full Control). It still counts
-  // against the side, so the player is told where and why instead of meeting the count at Dayton. The wording lives in the message
-  // catalog only (EN and BCS), never as a literal here.
+  // A paramilitary action carried out for the player's side with no request ever reaching the player (§6 D1 stage 2: only the
+  // standing order Always allow sends one, at any command level; a pre-stage-2 save also holds staff sweeps sent under any order).
+  // It still counts against the side, so the player is told where and why instead of meeting the count at Dayton. The "why" is one
+  // cause derived from the saved basis at the sweep's turn (GameStateAdapter `deriveParamilitaryReceiptCause`); with no derivable
+  // cause the stage-1 text stays. The wording lives in the message catalog only (EN and BCS), never as a literal here.
   for (const unrequested of state.paramilitaryUnrequested ?? []) {
     if (playerFaction && !playerFactionMatch(unrequested.faction, playerFaction)) continue;
     // Municipality scale only: the record speaks at that scale, and a settlement name would assert village-level history.
@@ -869,7 +870,14 @@ export function buildDecisionConsequenceLedger(
     const suffix = unrequested.captured ? 'unrequested' : 'unrequestedDissolved';
     const titleKey = `decisionConsequences.title.paramilitary.${suffix}` as MessageKey;
     const outcomeKey = `decisionConsequences.outcome.${suffix}` as MessageKey;
-    const detailKey = `decisionConsequences.detail.paramilitary.${suffix}` as MessageKey;
+    const causeSuffix = unrequested.cause === 'standing_order'
+      ? 'StandingOrder'
+      : unrequested.cause === 'standing_order_automatic'
+        ? 'AutomaticOrder'
+        : unrequested.cause === 'neutral'
+          ? 'Neutral'
+          : '';
+    const detailKey = `decisionConsequences.detail.paramilitary.${suffix}${causeSuffix}` as MessageKey;
     records.push({
       id: `paramilitary-staff:${unrequested.id}`,
       turn: unrequested.turn,
