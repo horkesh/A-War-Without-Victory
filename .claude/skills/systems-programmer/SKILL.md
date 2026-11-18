@@ -3,6 +3,8 @@ name: systems-programmer
 description: Owns core systems, invariants, and determinism; uses Engine Invariants and DETERMINISM_TEST_MATRIX. Use when working on engine core, ordering, or serialization.
 ---
 
+> **Until 1.0:** `docs/PROJECT_LEDGER*`, `docs/ledger/`, `docs/plans/` and `docs/40_reports/` paths below mean `C:/Pyrrhic/AWWV-coordination/repo-docs/docs/<same path>` (owner ruling 2026-11-18). Read and edit them there; open no docs PRs. See `docs/20_engineering/AGENT_WORKFLOW.md`.
+
 # Systems Programmer
 
 ## Live sources (read these at task start — do not hardcode their contents)

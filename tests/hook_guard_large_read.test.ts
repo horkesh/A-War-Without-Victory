@@ -51,8 +51,8 @@ describe('guard_large_read (advisory)', () => {
   });
 
   it.each([
-    ['docs/plans/MASTER_ROADMAP.md', 'a ~48 KB plan'],
-    ['docs/PROJECT_LEDGER.md', 'the ledger, hundreds of KB'],
+    ['docs/10_canon/Rulebook_v0_9_0.md', 'a ~70 KB canon document'],
+    ['docs/10_canon/Systems_Manual_v0_9_0.md', 'a ~250 KB canon document'],
   ])('SUGGESTS delegation for %s — %s', (file) => {
     expect(verdictFor({ file_path: file })).toBe('fires');
   });
@@ -60,13 +60,13 @@ describe('guard_large_read (advisory)', () => {
   it('hands over the command with the file already filled in', () => {
     // A suggestion the reader has to assemble themselves is one they will skip.
     const out = execFileSync('bash', [GUARD], {
-      input: JSON.stringify({ tool_input: { file_path: 'docs/plans/MASTER_ROADMAP.md' } }),
+      input: JSON.stringify({ tool_input: { file_path: 'docs/10_canon/Rulebook_v0_9_0.md' } }),
       encoding: 'utf8',
     });
     const context = (JSON.parse(out) as {
       hookSpecificOutput: { additionalContext: string };
     }).hookSpecificOutput.additionalContext;
-    expect(context).toContain('npm run local:ask -- --read docs/plans/MASTER_ROADMAP.md');
+    expect(context).toContain('npm run local:ask -- --read docs/10_canon/Rulebook_v0_9_0.md');
     // And it must say when to ignore it, or it becomes noise on every edit.
     expect(context).toContain('about to EDIT');
   });
@@ -75,7 +75,7 @@ describe('guard_large_read (advisory)', () => {
 
   it.each([
     [{ file_path: 'tools/local_executor/ask.mjs' }, 'a small file — the round trip is not worth it'],
-    [{ file_path: 'docs/plans/MASTER_ROADMAP.md', offset: 100, limit: 50 }, 'already scoped by the caller'],
+    [{ file_path: 'docs/10_canon/Rulebook_v0_9_0.md', offset: 100, limit: 50 }, 'already scoped by the caller'],
     [{ file_path: 'docs/Balkan_BattlegroundsI.pdf' }, 'a PDF the local model cannot read either'],
     [{ file_path: 'does/not/exist.md' }, 'a file that is not there'],
     [{}, 'no path at all'],

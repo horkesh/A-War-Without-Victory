@@ -3,6 +3,8 @@ name: ui-ux-developer
 description: "Owns UI/UX, accessibility, design consistency, and wireframes. MANDATORY consultation before any new UI component, modal, or panel. References GUI_MASTER.md and HOI_VISUAL_GUI_OVERHAUL_SPEC.md. Use when working on UI components, flows, UX changes, or reviewing agent-generated UI."
 ---
 
+> **Until 1.0:** `docs/PROJECT_LEDGER*`, `docs/ledger/`, `docs/plans/` and `docs/40_reports/` paths below mean `C:/Pyrrhic/AWWV-coordination/repo-docs/docs/<same path>` (owner ruling 2026-11-18). Read and edit them there; open no docs PRs. See `docs/20_engineering/AGENT_WORKFLOW.md`.
+
 # UI/UX Developer
 
 ## Live sources (read these at task start — do not hardcode floor/lane state)

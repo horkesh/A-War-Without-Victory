@@ -1,7 +1,0 @@
-## 2026-11-16 — Pass 42: P2 step 2b measured; the VRS reserve-elite OOB list; the Guards Brigade docs correction
-
-Docs only (plus a knowledge-doc correction); no `src/` or `data/` change, no hash change.
-
-- P2 step 2b (candidate 3 of 8, run cccc2d37901f7624): the army reserve reads a real local ratio; Farz P-A passes on the step-0 base; the ARBiH holds 59% of objectives (was 71%); RS loans still go to the Drina corps through a standing commander "critical" request (95) that outranks the capped gap requests (85): that priority question goes to the package seats as step 2c.
-- Calibration-pass OOB list (Part 6): the historian's VRS reserve-elite draft (C:/Pyrrhic/AWWV-worktrees/_logs/pkg-runB/VRS_RESERVE_ELITES_DRAFT.md): 24 formations, 7 in the OOB, 2 flagged elite; the 1st Krajina package; the Herzegovina Combined Brigade; the MUP brigade; the 1st Guards date and location fixes; with its §6 condition on naming Srebrenica-linked units.
-- `docs/knowledge/VRS_ORDER_OF_BATTLE_MASTER.md`: the East Bosnian Corps "Guards Brigade (Bijeljina-based elite formation)" is corrected to the 1st Bijeljina Light Infantry Brigade "Panthers" ("Serbian Guard-Panthers"), which the same document already lists in its roster: no unit of that name appears in Balkan Battlegrounds' VRS charts (BB1 pp.459-464, BB2 pp.277-285) and the historian reads it as the Panthers (draft section D1). A docs correction, not a data change.

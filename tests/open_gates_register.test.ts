@@ -169,8 +169,17 @@ describe('open gates register', () => {
 
   it('rejects a source path that does not exist', () => {
     const register = validFixture();
-    register.gates[0].source = 'docs/plans/no-such-plan.md';
+    register.gates[0].source = 'docs/10_canon/no-such-canon.md';
     expect(validateRegister(register).join('\n')).toMatch(/source .* does not exist/);
+  });
+
+  it('accepts a source or evidence_path under a relocated working-docs tree', () => {
+    const register = validFixture();
+    register.gates[0].source = 'docs/plans/no-such-plan.md';
+    register.gates[0].status = 'closed';
+    register.gates[0].closed = '2026-09-02';
+    register.gates[0].evidence_path = 'docs/40_reports/no-such-report.md';
+    expect(validateRegister(register).join('\n')).not.toMatch(/does not exist/);
   });
 
   it('rejects a placeholder evidence_required', () => {

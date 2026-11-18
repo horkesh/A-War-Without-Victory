@@ -14,7 +14,8 @@ describe('presidential cadence CLI source-save provenance', () => {
       resolveTsxCli(process.cwd()),
       resolve('tools/diagnostics/presidential_cadence_report.ts'),
       '--save',
-      resolve('docs/40_reports/playtests/evidence/20260731_session16_rs_104week_player/autosaves/initial-autosave.json'),
+      // Minimal turn-0 save: the CLI parses the save and checks meta.turn first.
+      resolve('tests/fixtures/diagnostics/turn0_save_stub.json'),
       // Any real scenario file serves here: this asserts the CLI REFUSES a save whose turn
       // does not match --end-turn, a check that runs before scenario content matters.
       // Was apr1992_definitive_104w.json until that fork was retired 2026-09-08.
