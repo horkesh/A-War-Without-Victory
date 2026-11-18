@@ -4505,13 +4505,19 @@ function deriveParamilitaryReceiptCause(
             answer = { turn: answeredTurn, responseId: String(entry.response_id), inPerson: entry.decision_source === 'player' };
         }
     }
-    const answeredTurn = answer?.turn ?? Number.NEGATIVE_INFINITY;
-    const filedAfterAnswer = (Array.isArray(state.paramilitary_decision_history) ? state.paramilitary_decision_history : [])
+    // A decision this side filed after the card answer: the review modal may have changed the order there. Condition C1 (§4
+    // copy panel, 2026-11-18): an automatic answer never replaces an Always allow or Always deny the human gave in person in the
+    // review modal (A1, `hasInPersonParamilitaryStandingOrder`), and the saved basis cannot tell such a kept order from
+    // per-request answers followed by the automatic write (both file records). So under an automatic answer any decision this
+    // side filed up to the sweep, before the answer included, makes the cause neutral: the receipt never credits the human's own
+    // order to the historical policy.
+    const filedFrom = answer && !answer.inPerson ? Number.NEGATIVE_INFINITY : answer?.turn ?? Number.NEGATIVE_INFINITY;
+    const filedOnBasis = (Array.isArray(state.paramilitary_decision_history) ? state.paramilitary_decision_history : [])
         .some((record: any) => record
             && record.faction === faction
-            && Number(record.turn) > answeredTurn
+            && Number(record.turn) > filedFrom
             && Number(record.turn) <= turn);
-    if (filedAfterAnswer) return 'neutral';
+    if (filedOnBasis) return 'neutral';
     if (answer?.responseId === 'always_allow') return answer.inPerson ? 'standing_order' : 'standing_order_automatic';
     return undefined;
 }
