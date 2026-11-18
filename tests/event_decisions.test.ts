@@ -9,7 +9,7 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import type { GameState } from '../src/state/game_state';
-import type { EventDefinition } from '../src/sim/events/event_types';
+import type { EventDefinition, EventEffect } from '../src/sim/events/event_types';
 import { resolveEventDecision } from '../src/sim/events/resolve_decision';
 import { evaluateEvents } from '../src/sim/events/evaluate_events';
 import { updateEventReadiness } from '../src/sim/events/pressure_system';
@@ -20,18 +20,25 @@ function makeMinimalState(playerFaction?: string): GameState {
         factions: { RBiH: {} as any, RS: {} as any, HRHB: {} as any },
         meta: { turn: 5, phase: 'war', player_faction: playerFaction } as any,
         military: {
-            formations: {},
+            // One live brigade per side so a morale_change option has an observable effect.
+            formations: {
+                rbih_b1: { id: 'rbih_b1', faction: 'RBiH', name: 'B1', created_turn: 0, status: 'active', assignment: null, morale: 50, cohesion: 50 },
+                rs_b1: { id: 'rs_b1', faction: 'RS', name: 'B2', created_turn: 0, status: 'active', assignment: null, morale: 50, cohesion: 50 },
+            },
             front_segments: {},
             front_posture: {} as any,
             front_posture_regions: {} as any,
             front_pressure: {},
             militia_pools: {},
-            general_supply_reserve: { RBiH: 50, RS: 50, HRHB: 50 },
         },
         political: {} as any,
         displacement: {} as any,
         economic: {} as any,
     } as unknown as GameState;
+}
+
+function moraleOf(state: GameState, faction: 'RBiH' | 'RS'): number | undefined {
+    return state.military.formations[faction === 'RBiH' ? 'rbih_b1' : 'rs_b1'].morale;
 }
 
 function loadNatoAirStrikeThreatEvent(): EventDefinition {
@@ -82,12 +89,17 @@ describe('Operation Lukavac 93 historical compatibility', () => {
         )).toBe(true);
     });
 
+    // The legacy defy_nato option still carries a saved `supply_delta` (retired 2026-11-17: supply is
+    // connection, not stock). It must resolve cleanly, ignoring that effect and applying the rest.
     it.each([
-        ['comply', 50],
-        ['defy_nato', 35],
-    ] as const)('resolves a legacy pending %s choice from its serialized response options', (responseId, expectedSupply) => {
+        ['comply', 60],
+        ['defy_nato', 70],
+    ] as const)('resolves a legacy pending %s choice from its serialized response options', (responseId, expectedPatronSupport) => {
         const state = makeMinimalState('RS');
         state.meta.turn = 70;
+        state.military.negotiation = {
+            patron_relationships: { RS: { support_level: 50 } },
+        } as any;
         state.military.pending_event_decisions = [{
             event_id: 'operation_lukavac_93',
             event_title: 'Operation Lukavac 93 — VRS Offensive on Igman',
@@ -104,7 +116,7 @@ describe('Operation Lukavac 93 historical compatibility', () => {
                     id: 'defy_nato',
                     label: 'Defy NATO — hold Igman',
                     effects: [
-                        { kind: 'supply_delta', faction: 'RS', delta: -15 },
+                        { kind: 'supply_delta', faction: 'RS', delta: -15 } as unknown as EventEffect,
                         { kind: 'patron_support', faction: 'RS', delta: 20 },
                     ],
                 },
@@ -113,7 +125,8 @@ describe('Operation Lukavac 93 historical compatibility', () => {
 
         resolveEventDecision(state, 'operation_lukavac_93', responseId);
 
-        expect(state.military.general_supply_reserve?.RS).toBe(expectedSupply);
+        expect(state.military.negotiation?.patron_relationships?.RS?.support_level).toBe(expectedPatronSupport);
+        expect(state.military.general_supply_reserve).toBeUndefined();
         expect(state.military.pending_event_decisions).toEqual([]);
         expect(state.military.event_decision_log).toContainEqual(expect.objectContaining({
             event_id: 'operation_lukavac_93',
@@ -155,8 +168,8 @@ const DECISION_EVENT: EventDefinition = {
         {
             id: 'accept',
             label: 'Accept the proposal',
-            description: 'Improves supply situation.',
-            effects: [{ kind: 'supply_delta', faction: 'RBiH', delta: 10 }],
+            description: 'Improves the army\'s morale.',
+            effects: [{ kind: 'morale_change', faction: 'RBiH', delta: 10 }],
         },
         {
             id: 'reject',
@@ -182,13 +195,13 @@ const EXPLICIT_HISTORICAL_EVENT: EventDefinition = {
             id: 'counterfactual_path',
             label: 'Counterfactual path',
             historical_marker: 'counterfactual',
-            effects: [{ kind: 'supply_delta', faction: 'RBiH', delta: -7 }],
+            effects: [{ kind: 'morale_change', faction: 'RBiH', delta: -7 }],
         },
         {
             id: 'historical_path',
             label: 'Historical path',
             historical_marker: 'historical_default',
-            effects: [{ kind: 'supply_delta', faction: 'RBiH', delta: 13 }],
+            effects: [{ kind: 'morale_change', faction: 'RBiH', delta: 13 }],
         },
     ],
 };
@@ -203,12 +216,12 @@ const REJECT_ALL_EVENT: EventDefinition = {
         {
             id: 'accept',
             label: 'Accept ceasefire',
-            effects: [{ kind: 'supply_delta', faction: 'RS', delta: 5 }],
+            effects: [{ kind: 'morale_change', faction: 'RS', delta: 5 }],
         },
         {
             id: 'reject',
             label: 'Reject ceasefire',
-            effects: [{ kind: 'supply_delta', faction: 'RS', delta: -5 }],
+            effects: [{ kind: 'morale_change', faction: 'RS', delta: -5 }],
         },
     ],
 };
@@ -225,12 +238,12 @@ const RS_REQUIRED_EVENT: EventDefinition = {
         {
             id: 'comply',
             label: 'Comply',
-            effects: [{ kind: 'supply_delta', faction: 'RS', delta: 5 }],
+            effects: [{ kind: 'morale_change', faction: 'RS', delta: 5 }],
         },
         {
             id: 'defy',
             label: 'Defy',
-            effects: [{ kind: 'supply_delta', faction: 'RS', delta: -5 }],
+            effects: [{ kind: 'morale_change', faction: 'RS', delta: -5 }],
         },
     ],
 };
@@ -283,25 +296,25 @@ describe('Event Decisions', () => {
     it('bot auto-responds once with accept_first (no player faction)', () => {
         // No player faction — bot auto-responds once (not per-faction)
         const state = makeMinimalState(undefined);
-        const initialSupply = state.military.general_supply_reserve!['RBiH'];
+        const initialMorale = moraleOf(state, 'RBiH')!;
         const rng = () => 0.5;
 
         evaluateEvents(state, rng, 5, [DECISION_EVENT]);
 
-        // Bot responds once → +10 supply to RBiH (not ×3)
-        expect(state.military.general_supply_reserve!['RBiH']).toBe(initialSupply + 10);
+        // Bot responds once → +10 morale to RBiH (not ×3)
+        expect(moraleOf(state, 'RBiH')).toBe(initialMorale + 10);
         // No pending decisions (no player faction)
         expect(state.military.pending_event_decisions ?? []).toHaveLength(0);
     });
 
     it('bot historical logic chooses explicit historical_default_response_id instead of option 0', () => {
         const state = makeMinimalState(undefined);
-        const initialSupply = state.military.general_supply_reserve!['RBiH'];
+        const initialMorale = moraleOf(state, 'RBiH')!;
         const rng = () => 0.5;
 
         evaluateEvents(state, rng, 5, [EXPLICIT_HISTORICAL_EVENT]);
 
-        expect(state.military.general_supply_reserve!['RBiH']).toBe(initialSupply + 13);
+        expect(moraleOf(state, 'RBiH')).toBe(initialMorale + 13);
         expect(state.military.event_decision_log).toEqual([
             {
                 event_id: 'test_explicit_historical_event',
@@ -338,7 +351,7 @@ describe('Event Decisions', () => {
 
     it('accept_first preserves option 0 even when an explicit historical default points elsewhere', () => {
         const state = makeMinimalState(undefined);
-        const initialSupply = state.military.general_supply_reserve!['RBiH'];
+        const initialMorale = moraleOf(state, 'RBiH')!;
         const rng = () => 0.5;
 
         evaluateEvents(state, rng, 5, [
@@ -349,13 +362,13 @@ describe('Event Decisions', () => {
             },
         ]);
 
-        expect(state.military.general_supply_reserve!['RBiH']).toBe(initialSupply - 7);
+        expect(moraleOf(state, 'RBiH')).toBe(initialMorale - 7);
         expect(state.military.event_decision_log?.[0]?.response_id).toBe('counterfactual_path');
     });
 
     it('authored accept_first keeps option 0 when explicit historical default points to option 2', () => {
         const state = makeMinimalState(undefined);
-        const initialSupply = state.military.general_supply_reserve!['RBiH'];
+        const initialMorale = moraleOf(state, 'RBiH')!;
         const rng = () => 0.5;
 
         evaluateEvents(state, rng, 5, [
@@ -369,25 +382,25 @@ describe('Event Decisions', () => {
                         id: 'option_0',
                         label: 'Option 0',
                         historical_marker: 'counterfactual',
-                        effects: [{ kind: 'supply_delta', faction: 'RBiH', delta: -7 }],
+                        effects: [{ kind: 'morale_change', faction: 'RBiH', delta: -7 }],
                     },
                     {
                         id: 'option_1',
                         label: 'Option 1',
                         historical_marker: 'counterfactual',
-                        effects: [{ kind: 'supply_delta', faction: 'RBiH', delta: 3 }],
+                        effects: [{ kind: 'morale_change', faction: 'RBiH', delta: 3 }],
                     },
                     {
                         id: 'historical_option_2',
                         label: 'Historical option 2',
                         historical_marker: 'historical_default',
-                        effects: [{ kind: 'supply_delta', faction: 'RBiH', delta: 13 }],
+                        effects: [{ kind: 'morale_change', faction: 'RBiH', delta: 13 }],
                     },
                 ],
             },
         ]);
 
-        expect(state.military.general_supply_reserve!['RBiH']).toBe(initialSupply - 7);
+        expect(moraleOf(state, 'RBiH')).toBe(initialMorale - 7);
         expect(state.military.event_decision_log).toEqual([
             {
                 event_id: 'test_two_level_accept_first_conflict_event',
@@ -401,13 +414,13 @@ describe('Event Decisions', () => {
 
     it('bot auto-responds once with reject_all (picks last option)', () => {
         const state = makeMinimalState(undefined);
-        const initialSupply = state.military.general_supply_reserve!['RS'];
+        const initialMorale = moraleOf(state, 'RS')!;
         const rng = () => 0.5;
 
         evaluateEvents(state, rng, 5, [REJECT_ALL_EVENT]);
 
-        // Bot responds once → -5 supply to RS (not ×3)
-        expect(state.military.general_supply_reserve!['RS']).toBe(initialSupply - 5);
+        // Bot responds once → -5 morale to RS (not ×3)
+        expect(moraleOf(state, 'RS')).toBe(initialMorale - 5);
     });
 
     it('queues required decisions only for the responding faction', () => {
@@ -624,12 +637,48 @@ describe('Event Decisions', () => {
                 response_options: DECISION_EVENT.response_options!,
             },
         ];
-        const initialSupply = state.military.general_supply_reserve!['RBiH'];
+        const initialMorale = moraleOf(state, 'RBiH')!;
 
         resolveEventDecision(state, 'test_decision_event', 'accept');
 
-        expect(state.military.general_supply_reserve!['RBiH']).toBe(initialSupply + 10);
+        expect(moraleOf(state, 'RBiH')).toBe(initialMorale + 10);
         expect(state.military.pending_event_decisions!.length).toBe(0);
+    });
+
+    // Old-save case: a staged decision saved before the supply-reserve retirement (2026-11-17) can
+    // still carry a `supply_delta` effect on a response option. Resolving it must not throw, must not
+    // write a reserve stock, and must still apply the option's other effects.
+    it('resolveEventDecision resolves an old-save option carrying a retired supply_delta and applies its other effects', () => {
+        const state = makeMinimalState('RS');
+        state.military.pending_event_decisions = [
+            {
+                event_id: 'old_save_supply_event',
+                event_title: 'Saved before the supply-reserve retirement',
+                turn_fired: 5,
+                faction: 'RS',
+                response_options: [
+                    {
+                        id: 'defy',
+                        label: 'Defy',
+                        effects: [
+                            { kind: 'supply_delta', faction: 'RS', delta: -5 } as unknown as EventEffect,
+                            { kind: 'morale_change', faction: 'RS', delta: -5 },
+                        ],
+                    },
+                ],
+            },
+        ];
+        const initialMorale = moraleOf(state, 'RS')!;
+
+        expect(() => resolveEventDecision(state, 'old_save_supply_event', 'defy')).not.toThrow();
+
+        expect(moraleOf(state, 'RS')).toBe(initialMorale - 5);
+        expect(state.military.general_supply_reserve).toBeUndefined();
+        expect(state.military.pending_event_decisions).toEqual([]);
+        expect(state.military.event_decision_log).toContainEqual(expect.objectContaining({
+            event_id: 'old_save_supply_event',
+            response_id: 'defy',
+        }));
     });
 
     it('resolveEventDecision throws on unknown event_id', () => {

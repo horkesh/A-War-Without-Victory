@@ -1,7 +1,8 @@
 /**
  * LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-18
  *
- * Four additive Ring 1 / no-section-6 consequence authoring records.
+ * Four additive Ring 1 / no-section-6 consequence authoring records
+ * (three survive the 2026-11-17 supply-reserve retirement).
  * No new condition kinds, effect kinds, state fields, or sensitive-history
  * rupture wiring are introduced in this lane.
  */
@@ -15,10 +16,10 @@ import type { GameState } from '../src/state/game_state.js';
 
 const ALL_EVENTS: EventDefinition[] = loadEventDefinitions(0);
 
+// csq_winter_supply_attrition_RS retired 2026-11-17 (supply is connection, not stock).
 const WAVE_18_IDS = [
     'csq_third_party_arms_channel_HRHB',
     'csq_captured_equipment_windfall_HRHB',
-    'csq_winter_supply_attrition_RS',
     'csq_doctrine_drift_RS',
 ];
 
@@ -48,9 +49,6 @@ function strategicDims(overrides: Partial<Record<string, number>> = {}) {
 }
 
 function baseState(turn: number, opts: {
-    rbihSupply?: number;
-    rsSupply?: number;
-    hrhbSupply?: number;
     rbihDims?: Partial<Record<string, number>>;
     rsDims?: Partial<Record<string, number>>;
     hrhbDims?: Partial<Record<string, number>>;
@@ -71,11 +69,6 @@ function baseState(turn: number, opts: {
             front_posture_regions: {},
             front_pressure: {},
             militia_pools: {},
-            general_supply_reserve: {
-                RBiH: opts.rbihSupply ?? 50,
-                RS: opts.rsSupply ?? 70,
-                HRHB: opts.hrhbSupply ?? 40,
-            },
             heavy_munitions_reserve: { RBiH: 30, RS: 50, HRHB: 20 },
             fired_event_ids: [],
             event_flags: {},
@@ -141,7 +134,7 @@ function hrhbFormation(morale = 50, cohesion = 60) {
 }
 
 describe('LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-18', () => {
-    it('all four authored events load via event_loader', () => {
+    it('all three surviving authored events load via event_loader', () => {
         for (const id of WAVE_18_IDS) {
             expect(ALL_EVENTS.find((event) => event.id === id)?.id).toBe(id);
         }
@@ -187,23 +180,7 @@ describe('LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-18', () => {
         expect(buildCostLedger(fires).annotations?.find((a) => a.tag === 'captured_equipment_windfall_HRHB')).toBeTruthy();
     });
 
-    it('csq_winter_supply_attrition_RS: predicate and supply/cohesion drain', () => {
-        const def = getEvent('csq_winter_supply_attrition_RS');
-        const fires = baseState(55, { rsSupply: 35 });
-        fires.military.formations = rsFormation(50, 60);
-        fires.military.event_flags = { war_exhaustion_x100_RS: 55 };
-        expect(evaluateCondition(def.trigger.condition!, fires)).toBe(true);
-
-        const lapsed = baseState(55, { rsSupply: 40 });
-        lapsed.military.formations = rsFormation(50, 60);
-        lapsed.military.event_flags = { war_exhaustion_x100_RS: 55 };
-        expect(evaluateCondition(def.trigger.condition!, lapsed)).toBe(false);
-
-        applyEventEffects(fires, effectsOf(def));
-        expect(fires.military.general_supply_reserve!.RS).toBe(27);
-        expect(fires.military.formations.rs_b1.cohesion).toBe(57);
-        expect(buildCostLedger(fires).annotations?.find((a) => a.tag === 'winter_supply_attrition_RS')).toBeTruthy();
-    });
+    // csq_winter_supply_attrition_RS: retired 2026-11-17 (supply is connection, not stock)
 
     it('csq_doctrine_drift_RS: predicate and late-war institutional drag', () => {
         const def = getEvent('csq_doctrine_drift_RS');
@@ -237,7 +214,6 @@ describe('LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-18', () => {
             'flag_not_set',
             'morale_average_below',
             'patron_pressure_above',
-            'supply_below',
             'territory_loss_window',
         ]);
         const allowedEffects = new Set([
@@ -247,7 +223,6 @@ describe('LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-18', () => {
             'morale_change',
             'narrative',
             'recruitment_modifier',
-            'supply_delta',
         ]);
 
         const visitCondition = (id: string, condition: any): void => {

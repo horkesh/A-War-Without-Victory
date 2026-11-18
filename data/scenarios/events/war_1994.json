@@ -48,7 +48,6 @@
     "bot_response_logic": "historical",
     "requires_player_response": false,
     "priority": 50,
-    "auto_resolve_turns": 2,
     "historical_default_response_id": "acknowledge_pressure",
     "historical_source": "Washington Agreement, 1 March 1994; ICTY Prlić et al. IT-04-74-T Trial Judgment (29 May 2013) Vol. 1 §§357-422 (the earlier cite: Vol. 1 §§357-422 is expert and evidence-assessment sections and the 1990-91 background, not the Washington track or the collapse of the Croat-Bosniak war; Washington is Vol. 1 §§487-490; paragraph not verified for this claim) and §§556-590 (HZ HB Presidency-Zagreb axis directing the February 1994 ceasefire posture and the Washington Agreement framework preconditions); Vol. 2 §§600-680 (the earlier cite: Vol. 2 §§600-680 is the end of Jablanica and the start of Mostar, not the Washington preconditions or a 1995 HV-HVO command (1995 is outside the indictment period); Washington is Vol. 1 §§487-490; paragraph not verified for this claim) (Tudjman-Boban coordination through the Granic-Silajdžić diplomatic channel preceding the 23 February 1994 ceasefire); Granić, Vanjski poslovi (2005) — Granić-Šilajdžić channel record; Tudjman Presidential Transcripts admitted at Prlić (February 1994 set); US State Department Christopher/Redman shuttle records, February 1994; Balkan Battlegrounds Vol. II pp. 506-520 (the earlier cite: Balkan Battlegrounds Vol. II pp. 506-520 does not carry this claim; Vol II Annex 47 pp.449-453 (Granic named p.450).).",
     "source_note": "The February 1994 Zagreb ceasefire order follows the Washington track: with Croatia's EU trajectory and credible US sanctions on the table, Tudjman directs Boban via the Granic-Silajdžić channel to stand down HVO operations against ARBiH (Prlić; Balkan Battlegrounds Vol. II). Acknowledge-pressure is the documented historical posture — Boban accepted the directive, opening the Washington Agreement signature window (1 March 1994). Resist-patron is a structurally plausible counterfactual grounded in the analogous patron-resistance precedent at R6 (RS Assembly rejection of VOPP, 5-6 May 1993).",
@@ -480,16 +479,11 @@
     },
     "once": true,
     "effect": {
-      "kind": "supply_delta",
-      "faction": "RS",
-      "delta": -5
+      "kind": "morale_change",
+      "faction": "RBiH",
+      "delta": 5
     },
     "effects": [
-      {
-        "kind": "morale_change",
-        "faction": "RBiH",
-        "delta": 5
-      },
       {
         "kind": "aggression_modifier",
         "faction": "RS",
@@ -984,13 +978,7 @@
         "historical_marker": "historical_default",
         "aggression_affinity": -0.3,
         "risk_level": 0.3,
-        "effects": [
-          {
-            "kind": "supply_delta",
-            "faction": "RBiH",
-            "delta": 10
-          }
-        ],
+        "effects": [],
         "dimension_shifts": [
           {
             "faction": "HRHB",
@@ -1211,11 +1199,6 @@
             "kind": "morale_change",
             "faction": "RBiH",
             "delta": 5
-          },
-          {
-            "kind": "supply_delta",
-            "faction": "RBiH",
-            "delta": 10
           }
         ],
         "sets_flags": {
@@ -1251,8 +1234,7 @@
             "material_effect_refs": [
               "alliance_change",
               "morale_change.RBiH",
-              "dimension_shift.RBiH.international_standing",
-              "supply_delta.RBiH"
+              "dimension_shift.RBiH.international_standing"
             ],
             "explanation": "Sarajevo's signature on the framework opens the Federation military integration track with the HVO. Relations with the HVO improve and supply to the ARBiH rises. In the historical record, UNPROFOR took on ceasefire monitoring in Mostar, Vitez, Gornji Vakuf, Prozor, Konjic and Jablanica within days of the 1 March signing (BB Vol. II p. 451)."
           }
@@ -1392,7 +1374,6 @@
     ],
     "requires_player_response": true,
     "priority": 50,
-    "auto_resolve_turns": 2,
     "effect": {
       "kind": "narrative",
       "text": "Western capitals warn Sarajevo not to exploit the post-Washington military window with aggressive offensives."
@@ -1494,7 +1475,6 @@
     "bot_response_logic": "strategic_weighted",
     "requires_player_response": false,
     "priority": 50,
-    "auto_resolve_turns": 2,
     "effect": {
       "kind": "narrative",
       "text": "Milošević warns Pale that rejection of the Contact Group Plan means Belgrade will close the Drina."
@@ -2727,7 +2707,7 @@
     "id": "belgrade_embargo_rs_1994",
     "image": "event_patron_relations_RS.webp",
     "title": "Belgrade Breaks with Pale",
-    "narrative": "Milošević has had enough. After the Bosnian Serb assembly rejects the Contact Group plan, Belgrade imposes sanctions on Republika Srpska, closing the border to military supplies and severing the political lifeline that has sustained the war effort. Your army's supply lines from Serbia are now severed. The international community watches to see if this is real or theater.",
+    "narrative": "Milošević has had enough. After the Bosnian Serb assembly rejects the Contact Group plan, Belgrade imposes sanctions on Republika Srpska, closing the border to military supplies and severing the political lifeline that has sustained the war effort. Your army can no longer count on open help from Serbia. The international community watches to see if this is real or theater.",
     "category": "political",
     "family": "rs_belgrade_response",
     "source_tier": "icty_icj_un",
@@ -2778,22 +2758,17 @@
     "bot_response_logic": "historical",
     "historical_default_response_id": "negotiate",
     "source_note": "Balkan Battlegrounds Vol. II summarizes the Belgrade-Pale break after the Contact Group crisis.",
-    "staff_assessment": "Pale leadership can hold its rejectionist line by defying Belgrade, but the choice trades internal cohesion for sharper supply pressure and a weaker patron relationship.",
+    "staff_assessment": "Pale leadership can hold its rejectionist line by defying Belgrade, but the choice weakens the patron relationship and costs standing abroad.",
     "trigger_evidence": [
       "The Contact Group plan has entered the event chain.",
       "Belgrade sanctions follow the RS rejection of the map."
     ],
     "effect": {
-      "kind": "supply_delta",
+      "kind": "morale_change",
       "faction": "RS",
-      "delta": -10
+      "delta": -5
     },
     "effects": [
-      {
-        "kind": "morale_change",
-        "faction": "RS",
-        "delta": -5
-      },
       {
         "kind": "narrative",
         "text": "Belgrade imposes an embargo on Republika Srpska. The border with Serbia is closed to military supplies."
@@ -2805,14 +2780,8 @@
         "branch_tag": "rs_belgrade_negotiate",
         "historical_marker": "historical_default",
         "label": "Seek accommodation with Belgrade",
-        "description": "Open back-channels to Milošević. Signal willingness to reconsider the Contact Group map. The embargo may be softened.",
-        "effects": [
-          {
-            "kind": "supply_delta",
-            "faction": "RS",
-            "delta": 5
-          }
-        ],
+        "description": "Open back-channels to Milošević. Signal willingness to reconsider the Contact Group map. Belgrade's backing may return, at a price in your own ranks.",
+        "effects": [],
         "sets_flags": {
           "rs_belgrade_response": "negotiate"
         },
@@ -2825,9 +2794,7 @@
             "opens_flags": [
               "rs_belgrade_response"
             ],
-            "material_effect_refs": [
-              "supply_delta.RS"
-            ],
+            "material_effect_refs": [],
             "explanation": "Seeking accommodation records rs_belgrade_response as negotiate. No current catalog follow-up event directly keys on this value, but the branch remains visible in decision diagnostics."
           }
         ],
@@ -2864,11 +2831,6 @@
             "delta": 3
           },
           {
-            "kind": "supply_delta",
-            "faction": "RS",
-            "delta": -10
-          },
-          {
             "kind": "patron_support",
             "faction": "RS",
             "delta": -10
@@ -2893,8 +2855,7 @@
               "rs_belgrade_response"
             ],
             "material_effect_refs": [
-              "morale_change.RS",
-              "supply_delta.RS"
+              "morale_change.RS"
             ],
             "explanation": "Defying Belgrade records rs_belgrade_response as defiant. No current catalog follow-up event directly keys on this value, but the branch remains visible in decision diagnostics."
           }
@@ -2923,17 +2884,17 @@
         },
         "HRHB": {
           "headline": "RS stands against Belgrade",
-          "body": "Pale chooses defiance despite the border closure and military-supply shock. Mostar sees RS cohesion harden internally while patron confidence and international standing deteriorate."
+          "body": "Pale chooses defiance despite the border closure. Mostar sees RS cohesion harden internally while patron confidence and international standing deteriorate."
         }
       },
       "negotiate": {
         "RBiH": {
           "headline": "Pale seeks accommodation with Belgrade",
-          "body": "RS opens back-channel accommodation with Milosevic and signals room to revisit the Contact Group map. Sarajevo sees possible relief for RS supply pressure, but also internal strains inside Pale."
+          "body": "RS opens back-channel accommodation with Milosevic and signals room to revisit the Contact Group map. Sarajevo sees a possible thaw between Pale and Belgrade, but also internal strains inside Pale."
         },
         "HRHB": {
           "headline": "RS moves to soften Belgrade break",
-          "body": "Pale looks for a way back toward Belgrade after the embargo. Mostar sees reduced immediate supply shock for RS if talks hold, at the cost of visible internal cohesion."
+          "body": "Pale looks for a way back toward Belgrade after the embargo. Mostar sees a possible way back for RS if talks hold, at the cost of visible internal cohesion."
         }
       },
       "defiant": {
@@ -2943,7 +2904,7 @@
         },
         "HRHB": {
           "headline": "RS stands against Belgrade",
-          "body": "Pale chooses defiance despite the border closure and military-supply shock. Mostar sees RS cohesion harden internally while patron confidence and international standing deteriorate."
+          "body": "Pale chooses defiance despite the border closure. Mostar sees RS cohesion harden internally while patron confidence and international standing deteriorate."
         }
       }
     },
@@ -3299,11 +3260,6 @@
         "delta": -3
       },
       {
-        "kind": "supply_delta",
-        "faction": "RS",
-        "delta": -3
-      },
-      {
         "kind": "narrative",
         "text": "Kupres falls to HVO forces in Operation Cincar. VRS supply routes in western Bosnia are threatened."
       }
@@ -3392,7 +3348,7 @@
     "source_tier": "agreement_text",
     "image": "event_ceasefire.webp",
     "title": "Carter Brokers Winter Ceasefire",
-    "narrative": "Jimmy Carter arrives in Sarajevo. The former president, acting as private mediator, shuttles between the warring parties and extracts a commitment to a complete cessation of hostilities effective New Year's Day. Humanitarian corridors will reopen. Behind the scenes, both sides know the ceasefire is a breathing space — time to rearm, resupply, and prepare for whatever comes next.",
+    "narrative": "Jimmy Carter arrives in Sarajevo. The former president, acting as private mediator, shuttles between the warring parties and extracts a commitment to a complete cessation of hostilities effective New Year's Day. Humanitarian corridors will reopen. Behind the scenes, both sides know the ceasefire is a breathing space, a time to regroup and prepare for whatever comes next.",
     "category": "diplomatic",
     "trigger": {
       "turn_min": 141,
@@ -3414,23 +3370,12 @@
       "kind": "narrative",
       "text": "A four-month cessation of hostilities is agreed. The guns fall temporarily silent across Bosnia."
     },
-    "effects": [
-      {
-        "kind": "supply_delta",
-        "faction": "RBiH",
-        "delta": 5
-      },
-      {
-        "kind": "supply_delta",
-        "faction": "RS",
-        "delta": 3
-      }
-    ],
+    "effects": [],
     "response_options": [
       {
         "id": "respect",
         "label": "Honor the ceasefire",
-        "description": "Use the pause to resupply and rebuild. Comply with the agreement's terms. International credibility improves.",
+        "description": "Use the pause to reorganize. Comply with the agreement's terms. International credibility improves.",
         "historical_marker": "historical_default",
         "effects": [
           {
@@ -3453,13 +3398,8 @@
       {
         "id": "exploit",
         "label": "Use the pause to prepare offensives",
-        "description": "Nominally comply while aggressively repositioning forces and stockpiling supplies. The spring offensive will be stronger.",
+        "description": "Nominally comply while repositioning forces for the spring offensive. Military credibility and offensive drive rise, but international standing falls.",
         "effects": [
-          {
-            "kind": "supply_delta",
-            "faction": "RBiH",
-            "delta": 5
-          },
           {
             "kind": "aggression_modifier",
             "faction": "RBiH",
@@ -3491,13 +3431,13 @@
         },
         "HRHB": {
           "headline": "RBiH respects winter ceasefire",
-          "body": "Sarajevo commits to honoring the Carter pause while resupplying and rebuilding. Mostar sees the Federation side preserving diplomatic credibility during the temporary quiet."
+          "body": "Sarajevo commits to honoring the Carter pause and reorganizing. Mostar sees the Federation side preserving diplomatic credibility during the temporary quiet."
         }
       },
       "exploit": {
         "RS": {
           "headline": "Sarajevo prepares under ceasefire cover",
-          "body": "RBiH nominally accepts the winter pause while stockpiling and repositioning for future operations. Pale sees a stronger spring threat and some erosion in Sarajevo's international standing."
+          "body": "RBiH nominally accepts the winter pause while repositioning for future operations. Pale sees a stronger spring threat and some erosion in Sarajevo's international standing."
         },
         "HRHB": {
           "headline": "RBiH uses the pause for force buildup",

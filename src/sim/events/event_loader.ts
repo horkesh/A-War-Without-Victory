@@ -532,6 +532,9 @@ function validateEventRow(row: unknown, filename: string, rowIndex: number): voi
             failRow(filename, rowIndex, 'enables_events must be a string array when present');
         }
     }
+    if (hasOwn(row, 'auto_resolve_turns')) {
+        failRow(filename, rowIndex, 'auto_resolve_turns is retired (2026-11-17): the engine never auto-resolves an unanswered decision after N turns');
+    }
     if (hasOwn(row.trigger, 'condition')) {
         validateCondition(row.trigger.condition, 'trigger.condition', filename, rowIndex);
     }

@@ -3311,7 +3311,7 @@
           "op:srebrenik:sladna_2",
           "op:zavidovici:ribnica_dio"
         ],
-        "threat_ratio": 136.5268329554044
+        "threat_ratio": 91.01788863693625
       },
       "sector:arbih_2nd_corps:1": {
         "assigned_brigade_ids": [],
@@ -5597,7 +5597,7 @@
           "op:tesanj:tesanj_2",
           "op:tesanj:ularice_2"
         ],
-        "threat_ratio": 1144.2974318914169
+        "threat_ratio": 915.4379455131334
       },
       "sector:arbih_3rd_corps:7": {
         "assigned_brigade_ids": [],
@@ -25918,11 +25918,11 @@
         },
         "faction": "RS",
         "force_label": "VRS",
-        "home_osid": "op:doboj:boljanic_2",
+        "home_osid": "op:maglaj:donja_bocinja_2",
         "hq_sid": "op:doboj:boljanic_2",
         "id": "rs_3rd_ozren_light_infantry",
         "kind": "brigade",
-        "location_osid": "op:doboj:boljanic_2",
+        "location_osid": "op:maglaj:donja_bocinja_2",
         "max_personnel": 2000,
         "morale": 60,
         "name": "3rd Ozren Light Infantry",

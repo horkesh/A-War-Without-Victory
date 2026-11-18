@@ -318,7 +318,6 @@ function describeEffect(effect: EventEffect): string {
         // shown by the acknowledgement card, through `resolveNarrativeEffectText`.
         case 'narrative': return '';
         case 'morale_change': return t('eventDecision.effect.moraleChange', { faction: army, delta: signedDelta(effect.delta) });
-        case 'supply_delta': return t('eventDecision.effect.supplyDelta', { faction: army, delta: signedDelta(effect.delta) });
         case 'cohesion_change': return t('eventDecision.effect.cohesionChange', { faction: army, delta: signedDelta(effect.delta) });
         case 'humanitarian_impact': return formatWarCrimesRecordLine(factionId, effect.war_crimes_delta);
         case 'patron_support': return t('eventDecision.effect.patronSupport', { faction, delta: signedDelta(effect.delta) });

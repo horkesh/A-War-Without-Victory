@@ -66,7 +66,6 @@ const CATEGORY_CONFIG: Record<string, { bg: string; color: string; labelKey: Mes
 
 const EFFECT_ICONS: Record<string, IconName> = {
     morale_change: 'morale',
-    supply_delta: 'supply',
     cohesion_change: 'cohesion',
     humanitarian_impact: 'dead',
     patron_support: 'recon',

@@ -35,7 +35,6 @@ export const KNOWN_EVENT_EFFECT_KINDS = [
     // the old kind name.
     'patron_support',
     'recruitment_modifier',
-    'supply_delta',
 ] as const;
 
 export const KNOWN_EVENT_CONDITION_TYPES = [
@@ -67,8 +66,6 @@ export const KNOWN_EVENT_CONDITION_TYPES = [
     // §6 E4 round 3 (Q3): reads negotiation.peace_plan_history (resolved entries).
     'peace_plan_response',
     'rbih_hrhb_war_started',
-    'supply_above',
-    'supply_below',
     'territory_control',
     'territory_loss_window',
     'territory_percentage',

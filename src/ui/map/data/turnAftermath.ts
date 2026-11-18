@@ -386,8 +386,6 @@ export interface TurnAftermathDispatchInput {
 
 /** The dispatch never shows more than six lines, the headline included. */
 export const TURN_AFTERMATH_DISPATCH_MAX_LINES = 5;
-/** Supply appears in the cost line only once the week's spending crosses this. */
-const DISPATCH_SUPPLY_THRESHOLD = 10;
 const DISPATCH_MAX_PLACES = 3;
 
 function countKey(count: number, one: MessageKey, many: MessageKey): MessageKey {
@@ -497,10 +495,6 @@ function buildDispatchCost(view: TurnAftermathView): TurnAftermathDispatchLine |
       })
       : t(countKey(lost, 'dispatch.cost.formationsLost.one', 'dispatch.cost.formationsLost.many'), { count: lost }));
   }
-  const spent = view.cost.ownSupplySpent + view.cost.ownHeavyMunitionsSpent;
-  if (spent >= DISPATCH_SUPPLY_THRESHOLD) {
-    parts.push(t('dispatch.cost.supplySpent', { count: spent }));
-  }
   if (parts.length === 0) return null;
   return { kind: 'cost', text: parts.join(' · '), basis: t('dispatch.basis.weekSummary') };
 }
@@ -546,12 +540,8 @@ function buildDispatchNeeds(view: TurnAftermathView): TurnAftermathDispatchLine 
 }
 
 function buildDispatchQuietLine(view: TurnAftermathView): TurnAftermathDispatchLine {
-  const supply = view.supply.ownSupplyDelta;
-  const heavy = view.supply.ownHeavyMunitionsDelta;
+  // Supply is connection, not stock (2026-11-17): there is no per-week supply or munitions delta to report.
   const parts = [t('dispatch.quiet.held')];
-  parts.push(supply === 0 && heavy === 0
-    ? t('dispatch.quiet.supplyUnchanged')
-    : t('dispatch.quiet.supply', { supply: signedCount(supply), heavy: signedCount(heavy) }));
   if (view.formations.ownSpawned > 0) {
     parts.push(t(countKey(view.formations.ownSpawned, 'dispatch.quiet.raised.one', 'dispatch.quiet.raised.many'), { count: view.formations.ownSpawned }));
   }

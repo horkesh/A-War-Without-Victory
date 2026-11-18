@@ -1,8 +1,10 @@
 /**
  * LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-5
  *
- * Per-event predicate + consequence proofs for the 7 Ring 1 / no-§6
+ * Per-event predicate + consequence proofs for the Ring 1 / no-§6
  * divergence events authored in data/scenarios/events/consequences.json.
+ * (7 authored; csq_arms_pipeline_disrupted retired 2026-11-17 with the
+ * faction supply-reserve stock — supply is connection, not stock.)
  *
  * Each test:
  *   1. Constructs a GameState that satisfies the predicate.
@@ -106,8 +108,8 @@ function baseState(turn: number, overrides: { political?: any; military?: any; d
     } as unknown as GameState;
 }
 
+// csq_arms_pipeline_disrupted retired 2026-11-17 (supply is connection, not stock).
 const WAVE_5_IDS = [
-    'csq_arms_pipeline_disrupted',
     'csq_captured_equipment_windfall',
     'csq_post_dayton_arms_normalization',
     'csq_back_channel_communication',
@@ -116,47 +118,14 @@ const WAVE_5_IDS = [
     'csq_corps_reorganization_attempted',
 ];
 
-describe('LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-5: 7 Ring-1 divergence events', () => {
-    it('all 7 authored events load via event_loader', () => {
+describe('LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-5: 6 surviving Ring-1 divergence events', () => {
+    it('all 6 surviving authored events load via event_loader', () => {
         for (const id of WAVE_5_IDS) {
             expect(ALL_EVENTS.find(e => e.id === id)?.id).toBe(id);
         }
     });
 
-    // ── 1. csq_arms_pipeline_disrupted ─────────────────────────────────────
-    it('csq_arms_pipeline_disrupted: predicate + equipment_quality 0.92x + recruitment 0.95x', () => {
-        const def = getEvent('csq_arms_pipeline_disrupted');
-        const cond = def.trigger.condition!;
-        const fires = baseState(55, {
-            military: { general_supply_reserve: { RBiH: 50, RS: 25, HRHB: 40 } },
-        });
-        // Re-attach negotiation since military was overridden
-        (fires.military as any).negotiation = {
-            capital: { RBiH: { war_crimes_events: 0 }, RS: { war_crimes_events: 0 }, HRHB: { war_crimes_events: 0 } },
-            patron_relationships: { RBiH: { override_authority: 0 }, RS: { override_authority: 25 }, HRHB: { override_authority: 0 } },
-            strategic_dimensions: { RBiH: fullStrategicDims(), RS: fullStrategicDims(), HRHB: fullStrategicDims() },
-        };
-        fires.military.event_flags = { patron_arms_review_active: 1 };
-        expect(evaluateCondition(cond, fires)).toBe(true);
-
-        // Lapsed: arms review flag absent
-        const lapsed = baseState(55, {
-            military: { general_supply_reserve: { RBiH: 50, RS: 25, HRHB: 40 } },
-        });
-        (lapsed.military as any).negotiation = {
-            capital: { RBiH: {}, RS: {}, HRHB: {} },
-            patron_relationships: { RBiH: { override_authority: 0 }, RS: { override_authority: 25 }, HRHB: { override_authority: 0 } },
-            strategic_dimensions: { RBiH: fullStrategicDims(), RS: fullStrategicDims(), HRHB: fullStrategicDims() },
-        };
-        lapsed.military.event_flags = {};
-        expect(evaluateCondition(cond, lapsed)).toBe(false);
-
-        applyEventEffects(fires, effectsOf(def));
-        expect(fires.military.equipment_quality_modifiers?.some(m => m.faction === 'RS' && m.multiplier === 0.92)).toBe(true);
-        expect(fires.military.recruitment_modifiers?.some(m => m.faction === 'RS' && m.pool_multiplier === 0.95)).toBe(true);
-        const ledger = buildCostLedger(fires);
-        expect(ledger.annotations?.find(a => a.tag === 'arms_pipeline_disrupted')).toBeTruthy();
-    });
+    // ── 1. csq_arms_pipeline_disrupted: retired 2026-11-17 (supply is connection, not stock) ──
 
     // ── 2. csq_captured_equipment_windfall ─────────────────────────────────
     it('csq_captured_equipment_windfall: predicate + equipment_quality 1.06x + morale uplift', () => {
@@ -194,7 +163,7 @@ describe('LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-5: 7 Ring-1 divergence events',
     });
 
     // ── 3. csq_post_dayton_arms_normalization ─────────────────────────────
-    it('csq_post_dayton_arms_normalization: predicate + equipment_quality 1.04x + supply uplift', () => {
+    it('csq_post_dayton_arms_normalization: predicate + equipment_quality 1.04x (supply uplift retired)', () => {
         const def = getEvent('csq_post_dayton_arms_normalization');
         const cond = def.trigger.condition!;
         const fires = baseState(145);
@@ -210,7 +179,8 @@ describe('LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-5: 7 Ring-1 divergence events',
 
         applyEventEffects(fires, effectsOf(def));
         expect(fires.military.equipment_quality_modifiers?.some(m => m.faction === 'RBiH' && m.multiplier === 1.04)).toBe(true);
-        expect((fires.military.general_supply_reserve as any).RBiH).toBe(60); // 50 + 10
+        // The former RBiH supply +10 was retired 2026-11-17 (supply is connection, not stock): the reserve is untouched.
+        expect((fires.military.general_supply_reserve as any).RBiH).toBe(50);
         const ledger = buildCostLedger(fires);
         expect(ledger.annotations?.find(a => a.tag === 'post_dayton_arms_normalization')).toBeTruthy();
     });
@@ -351,7 +321,7 @@ describe('LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-5: 7 Ring-1 divergence events',
     });
 
     // ── Faction-symmetric audit: every Wave 5 event predicate is parameterized over faction
-    it('all 7 Wave 5 events are faction-agnostic (no hardcoded OSIDs in conditions)', () => {
+    it('all 6 surviving Wave 5 events are faction-agnostic (no hardcoded OSIDs in conditions)', () => {
         for (const id of WAVE_5_IDS) {
             const def = getEvent(id);
             const cond = def.trigger.condition;

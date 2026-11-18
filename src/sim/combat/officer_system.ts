@@ -374,7 +374,7 @@ const CORPS_ENCLAVE_MAP: Record<string, string> = {
 };
 
 /** Check whether an enclave-locked officer can command ops for a given corps. */
-function isEnclaveCompatible(data: NamedOfficer, corpsId: string, currentTurn: number): boolean {
+export function isEnclaveCompatible(data: NamedOfficer, corpsId: string, currentTurn: number): boolean {
     if (!data.enclave_lock) return true; // No lock — always compatible
     // Lock expired (enclave broke out / officer evacuated)
     if (data.enclave_lock.locked_until_turn !== undefined && currentTurn >= data.enclave_lock.locked_until_turn) return true;
@@ -572,7 +572,8 @@ export function releaseTacticalCommander(
 
     const os = officers[op.tg_commander_officer_id];
     if (os && os.assigned_operation) {
-        os.status = 'reserve';
+        // Only an officer still serving returns to reserve (commander attribution hardening).
+        if (os.status === 'active') os.status = 'reserve';
         os.assigned_operation = undefined;
     }
 }
@@ -590,7 +591,10 @@ export function releaseOperationCommander(
 
     const os = officers[op.commander_officer_id];
     if (os && os.assigned_operation) {
-        os.status = 'reserve';
+        // Only an officer still serving returns to the reserve pool. A retired, killed, captured or
+        // defected officer stays out: releasing his old operation must not bring him back (commander
+        // attribution hardening).
+        if (os.status === 'active') os.status = 'reserve';
         os.assigned_operation = undefined;
     }
 }
@@ -758,6 +762,9 @@ export function processOfficerSuccession(
             if (os.assigned_corps_id) {
                 os.assigned_corps_id = null;
             }
+            // A departing officer leaves any operation command too, so he can never be released
+            // back into the reserve pool later (commander attribution hardening).
+            os.assigned_operation = undefined;
             report.departures.push(data.id);
         }
     }

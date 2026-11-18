@@ -1,7 +1,7 @@
 import { isSupportBrigadeOnActiveOp } from './sector_offensive_axis_helpers.js';
 import {computeAttackForcePower, findTgForAnchor} from './attack_force_power.js';
 import { getAttackIntelConfidence } from './attack_intel_context.js';
-import { collectSectorDefenseBrigades } from './sector_defense_roster.js';
+import { collectAverageDefenseRoster, collectSectorDefenseBrigades } from './sector_defense_roster.js';
 /**
  * ═══════════════════════════════════════════════════════════════
  * OWNERSHIP: Execution-Only
@@ -707,7 +707,11 @@ export function resolveAttackOrdersOsid(
             );
             if (sectorBrigades.length > 0) {
                 const { primary, totalPower, rankedDefenders } = rankDefendersByPower(sectorBrigades, state, targetOsid, terrainMultByOsid, artSuppression, supplyStateByOsid, ethBonus);
-                const avgBrigadePower = totalPower / sectorBrigades.length;
+                // Fable consult 7 bound: seam brigades only add; the cap and floor average the owning roster.
+                const averageRoster = collectAverageDefenseRoster(state, sector, targetOsid, controller!, adjacency, defenderFormations, sectorBrigades);
+                const avgBrigadePower = averageRoster
+                    ? rankDefendersByPower(averageRoster, state, targetOsid, terrainMultByOsid, artSuppression, supplyStateByOsid, ethBonus).totalPower / averageRoster.length
+                    : totalPower / sectorBrigades.length;
                 const targetMun = munFromOsid(targetOsid);
 
                 // Single-pass: compute per-brigade power, distance weight, and accumulate

@@ -151,8 +151,8 @@ export const EVENT_EFFECT_BCS: Readonly<Record<string, EventEffectBcsEntry>> = {
         bcs: "Srebrenica je proglašena zaštićenom zonom UN-a. VRS ignoriše zahtjev za prekid vatre, a UN nemaju nikakav vjerodostojan mehanizam provedbe.",
     },
     "un_resolution_820_sanctions_1993#0": {
-        en: "The tightened embargo enters force. Belgrade's ability to sustain the VRS is visibly constrained, and Milošević's patience with Pale is running thin.",
-        bcs: "Pooštreni embargo stupa na snagu. Sposobnost Beograda da izdržava VRS vidljivo je ograničena, a Miloševiću ponestaje strpljenja s Palama.",
+        en: "The tightened embargo enters force. Milošević's patience with Pale is running thin.",
+        bcs: "Pooštreni embargo stupa na snagu. Miloševiću ponestaje strpljenja s Palama.",
     },
     "milosevic_vopp_pressure#0": {
         en: "Milošević and Bulatović personally demand that the Bosnian Serb Assembly accept the Vance-Owen Plan.",
@@ -183,8 +183,8 @@ export const EVENT_EFFECT_BCS: Readonly<Record<string, EventEffectBcsEntry>> = {
         bcs: "NATO sada ima pravno ovlaštenje da udara na položaje VRS-a. Ima li političku volju da ga upotrijebi, sasvim je drugo pitanje.",
     },
     "operation_sharp_guard_1993#0": {
-        en: "NATO warships enforce the Adriatic blockade. Serbia's supply corridor tightens further, but the arms embargo continues to hurt the outgunned ARBiH most.",
-        bcs: "Ratni brodovi NATO-a provode jadransku blokadu. Koridor snabdijevanja Srbije se dodatno steže, ali embargo na oružje i dalje najviše pogađa slabije naoružanu ARBiH.",
+        en: "NATO warships enforce the Adriatic blockade. Shipping to Serbia is stopped and searched, and the arms embargo continues to hurt the outgunned ARBiH most.",
+        bcs: "Ratni brodovi NATO-a provode jadransku blokadu. Brodovi koji idu prema Srbiji zaustavljaju se i pretresaju, a embargo na oružje i dalje najviše pogađa slabije naoružanu ARBiH.",
     },
     "hvo_detention_camps_1993#0": {
         en: "Images of Bosniak men crowded behind Heliodrom wire reach the international press. Herceg-Bosna's standing in the West suffers severe damage.",
@@ -343,8 +343,8 @@ export const EVENT_EFFECT_BCS: Readonly<Record<string, EventEffectBcsEntry>> = {
         bcs: "5. korpus napreduje iz bihaćkog džepa prema Bosanskom Petrovcu, Ključu, Bosanskoj Krupi i Sanskom Mostu.",
     },
     "csq_winter_held_audit#0": {
-        en: "No side's winter supply broke down this season.",
-        bcs: "Zimsko snabdijevanje nijedne strane nije se urušilo ove sezone.",
+        en: "The cold broke no side's front this season.",
+        bcs: "Hladnoća ove sezone nije slomila front nijedne strane.",
     },
     "csq_corridor_blocked_audit#0": {
         en: "The Posavina corridor is still cut; the corridor operation did not reach its objective.",
