@@ -5,8 +5,6 @@
  */
 
 import type { FactionId, GameState } from '../../state/game_state.js';
-import type { EdgeRecord } from '../../map/settlements.js';
-import { buildOsidAdjacency } from '../combat/osid_adjacency.js';
 import { operationExecutedAttackCount } from '../combat/operation_attack_count.js';
 import type { EventConstraints } from './event_constraints.js';
 
@@ -27,7 +25,7 @@ export type EventCondition =
     // v0.6.0 emergent condition types
     // 'supply_below' / 'supply_above' retired 2026-11-17 (Fable consult 6): they read the faction supply
     // reserve, which is not modelled in 1.0 (supply is connection, not stock). Use `enclave_supply_status`
-    // or `corridor_severed` for live supply.
+    // for live supply.
     | { type: 'territory_percentage'; faction: FactionId; comparator: 'above' | 'below'; threshold: number }
     | { type: 'dimension_above'; faction: FactionId; dimension: DimensionId; threshold: number }
     | { type: 'dimension_below'; faction: FactionId; dimension: DimensionId; threshold: number }
@@ -39,7 +37,6 @@ export type EventCondition =
     | { type: 'week_since_event'; event_id: string; min_weeks?: number; max_weeks?: number }
     | { type: 'event_fire_count'; event_id: string; min_count?: number; max_count?: number }
     | { type: 'enclave_supply_status'; municipality: string; status: 'adequate' | 'strained' | 'critical' }
-    | { type: 'corridor_severed'; from_osid: string; to_osid: string; faction: FactionId }
     // ─── Ring-1 divergence-event predicates (LANE-NIGHTSHIFT-ROUND2-DIVERGENCE-EVENT-SEEDS) ──
     /** True when state.political.paramilitary_mode equals the given value (defaults to 'rear_pocket' when undefined). Faction-agnostic. */
     | { type: 'paramilitary_mode_equals'; value: 'rear_pocket' | 'offensive' }
@@ -617,6 +614,16 @@ export interface EventDefinition {
         | 'compound'
         | 'exogenous'
         | 'legacy_calendar_pending_conversion';
+    /**
+     * §6 E3b (ruling 2026-11-17): whether this war-crimes row's firing is an incident its side
+     * AUTHORIZED in play. `true` counts each firing in `authoredWarCrimeIncidents`
+     * (`authored_war_crimes.ts`); `false` keeps it in the historical record only. Required on a
+     * row that books a `war_crimes_delta` and whose trigger or prerequisites read a flag a
+     * response option writes (or a `paramilitary_*` condition); allowed on no other row
+     * (`validateWarCrimeAuthorship`, event_loader.ts). An authored row may not carry a negative
+     * `international_standing` shift. Option-level `war_crimes_delta` is always authored.
+     */
+    authored_by_choice?: boolean;
 }
 
 /** A pending decision awaiting player response. Stored on MilitaryState. */
@@ -735,7 +742,7 @@ export interface ActionCadenceConfig {
 }
 
 /** Check if trigger matches current state (deterministic). */
-export function triggerMatches(def: EventDefinition, state: GameState, currentTurn: number, edges?: EdgeRecord[]): boolean {
+export function triggerMatches(def: EventDefinition, state: GameState, currentTurn: number): boolean {
     const t = def.trigger;
     if (t.turn_min != null && currentTurn < t.turn_min) return false;
     if (t.turn_max != null && currentTurn > t.turn_max) return false;
@@ -746,13 +753,13 @@ export function triggerMatches(def: EventDefinition, state: GameState, currentTu
     }
     // State-based condition check
     if (t.condition) {
-        if (!evaluateCondition(t.condition, state, edges)) return false;
+        if (!evaluateCondition(t.condition, state)) return false;
     }
     return true;
 }
 
 /** Evaluate a state-based condition against current game state. */
-export function evaluateCondition(condition: EventCondition, state: GameState, edges?: EdgeRecord[]): boolean {
+export function evaluateCondition(condition: EventCondition, state: GameState): boolean {
     switch (condition.type) {
         case 'territory_control': {
             const pc = state.political?.political_controllers ?? {};
@@ -829,11 +836,11 @@ export function evaluateCondition(condition: EventCondition, state: GameState, e
             return false;
         }
         case 'and':
-            return condition.conditions.every(c => evaluateCondition(c, state, edges));
+            return condition.conditions.every(c => evaluateCondition(c, state));
         case 'or':
-            return condition.conditions.some(c => evaluateCondition(c, state, edges));
+            return condition.conditions.some(c => evaluateCondition(c, state));
         case 'not':
-            return !evaluateCondition(condition.condition, state, edges);
+            return !evaluateCondition(condition.condition, state);
         case 'territory_percentage': {
             const pc = state.political?.political_controllers ?? {};
             const allOsids = Object.keys(pc);
@@ -1020,32 +1027,6 @@ export function evaluateCondition(condition: EventCondition, state: GameState, e
             return condition.comparator === 'at_most'
                 ? snap <= condition.value
                 : snap >= condition.value;
-        }
-        case 'corridor_severed': {
-            // BFS from from_osid to to_osid through faction-controlled territory
-            // If no path found, corridor is severed → return true
-            const pc = state.political?.political_controllers;
-            if (!pc) return false;
-            if (pc[condition.from_osid] !== condition.faction) return true; // start not held
-            if (pc[condition.to_osid] !== condition.faction) return true; // end not held
-            // Build adjacency from edges if available
-            if (!edges) return false; // can't evaluate without edges
-            const adj = buildOsidAdjacency(edges);
-            // BFS through faction-controlled OSIDs
-            const visited = new Set<string>([condition.from_osid]);
-            const queue = [condition.from_osid];
-            let head = 0;
-            while (head < queue.length) {
-                const current = queue[head++]!;
-                if (current === condition.to_osid) return false; // path found → not severed
-                for (const neighbor of adj.get(current) ?? []) {
-                    if (visited.has(neighbor)) continue;
-                    if (pc[neighbor] !== condition.faction) continue;
-                    visited.add(neighbor);
-                    queue.push(neighbor);
-                }
-            }
-            return true; // no path found → corridor severed
         }
         default:
             return true;

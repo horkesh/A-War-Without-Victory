@@ -565,6 +565,14 @@ export interface FactionVerdict {
      * computeFactionVerdict and changes no value. Optional: absent on saves frozen before it.
      */
     grade_trace?: VerdictGradeTrace;
+    /**
+     * §6 E3b (2026-11-17): the side's war-crime INCIDENTS, never `war_crimes_delta` units.
+     * `recorded`: the historical war-crimes record of this campaign (every scripted war-crimes
+     * card that fired, and every chosen option with a delta); `authorized`: war crimes arising
+     * from decisions in play (`authoredWarCrimeIncidents`). Derived at the verdict from fields the save already holds;
+     * no new counter. Optional: absent on saves frozen before it.
+     */
+    war_crime_incidents?: { recorded: number; authorized: number };
 }
 
 /** Steps from the earned grade to the final grade and outcome class (see FactionVerdict.grade_trace). */
