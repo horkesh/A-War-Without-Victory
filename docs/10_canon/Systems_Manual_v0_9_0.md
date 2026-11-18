@@ -707,7 +707,7 @@ Army HQ gathering follows the existing deterministic staff-execution boundary: i
 
 #### §7.10.1 v0.6.0 Expanded Condition Types
 
-14 additional condition types added to `EventCondition` union in `event_types.ts`:
+14 additional condition types were added to the `EventCondition` union in `event_types.ts`. Three are retired and the loader rejects them: `supply_below` and `supply_above` (2026-11-17, supply is connection, not stock) and `corridor_severed` (2026-11-18: its BFS ran over settlement edges but compared OSID ids, so it could never evaluate an OSID pair; no shipped event used it). The 11 live types:
 
 | Type | Parameters | Evaluates |
 |------|-----------|-----------|
@@ -722,7 +722,6 @@ Army HQ gathering follows the existing deterministic staff-execution boundary: i
 | `week_since_event` | event_id, min_weeks?, max_weeks? | Weeks since event last fired within range |
 | `event_fire_count` | event_id, min_count?, max_count? | Event fire count within range |
 | `enclave_supply_status` | municipality, status | Placeholder — deferred to supply integration |
-| `corridor_severed` | from_osid, to_osid, faction | Placeholder — deferred to BFS integration |
 
 All combinators (`and`, `or`, `not`) work with all condition types.
 
@@ -769,7 +768,14 @@ Stored on `NegotiationState.strategic_dimensions`. Module: `src/sim/events/strat
 
 **One accumulator rule (§6 E3a1, 2026-11-17).** Every write to a dimension's `event_modifier` goes through `applyDimensionShift()`: event `dimension_shifts`, command levers, CO replacement, stance matters, scripted patron events (`humanitarian_delta`) and peace-plan rejection (`credibility_change_on_reject`). The accumulator is not clamped. A side at −110 that takes −30 more sits at −140. Only the result is clamped: `effective_value = clamp(base_value + event_modifier, 0, 100)`. Sim readers take `effective_value`, never the raw `event_modifier`.
 
-**One base writer (§6 E3a1).** `computeDimensionBaseValues()` (pipeline step `compute-dimension-bases`) is the only function that writes any `base_value`, through `updateBaseValue()`. `computeNegotiationBreakdown()` (step `compute-negotiation-capital`) only rebuilds the raw capital record, including `peace_plans_accepted/rejected` from `peace_plan_history`. `resolvePeacePlan()` does not push into those lists; the history row is the single source.
+**One base writer (§6 E3a1; phase order, §6 ruling 2026-11-17).** `computeDimensionBaseValues()` is the only function that writes any `base_value`, through `updateBaseValue()`. It is called only through `recomputeDimensionBases()` (`strategic_dimensions.ts`), which runs it for `RBiH`, `RS`, `HRHB` in that order. The owner runs for every faction at three fixed points each war turn: at turn start (so the turn's events see every write made since the last turn, between-turn IPC writes included), mid-turn after evaluate-events (so a choice's base input reaches the base before operations), and after compute-negotiation-capital (so the Dayton menu is priced, and the turn boundary saved, on the turn's plan, patron, capital and combat writes). Still one owner; a pure overwrite. The three pipeline steps:
+- `refresh-dimension-bases-turn-start`, after `ensure-negotiation-state` and before `update-event-readiness`. Guarded `phase === 'war'` and not `game_over`, and skipped on the first war turn (`meta.turn <= war_start_turn + 1`; `runTurn` increments `meta.turn` before the steps, so a war starting at `war_start_turn` 0 executes its first turn as turn 1). Turn-1 events therefore read the initialised values, for a desktop birth and a headless one alike.
+- `compute-dimension-bases`, mid-turn after `evaluate-events`.
+- `refresh-dimension-bases`, directly after `compute-negotiation-capital` and before `evaluate-dayton-trigger`. Guarded `phase === 'war'` and not `game_over`. The Dayton menu's frozen `faction_capital` then equals the live composite enforced at submission and resolution.
+
+Headless, the turn-start call is a no-op against the previous turn's `refresh-dimension-bases`: nothing between them writes a base input. The one exception is `recruitment_mode: 'bottom_up'`, whose formation steps after the war phases change the active-brigade set that `internal_cohesion` reads. Known limits: between turns, the view shows the pre-IPC base until the next turn start (display only); a save from before this change self-heals at the next turn start.
+
+`computeNegotiationBreakdown()` (step `compute-negotiation-capital`) only rebuilds the raw capital record, including `peace_plans_accepted/rejected` from `peace_plan_history`. `resolvePeacePlan()` does not push into those lists; the history row is the single source.
 
 **`international_standing` base inputs:**
 

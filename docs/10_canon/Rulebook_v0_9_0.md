@@ -358,7 +358,7 @@ Operations move through proposed, planning, executing, recovery, completed, and 
 
 ### 7.4 Event Conditions (v0.6.0 expansion)
 
-**v0.6.0 expansion:** 12 additional condition types (`supply_below/above` retired 2026-11-17): `territory_percentage`, `dimension_above/below`, `flag_equals/not_set`, `patron_pressure_above`, `war_crimes_above`, `morale_average_below`, `week_since_event`, `event_fire_count`, `enclave_supply_status`, `corridor_severed`.
+**v0.6.0 expansion:** 11 additional condition types (`supply_below/above` retired 2026-11-17; `corridor_severed` retired 2026-11-18): `territory_percentage`, `dimension_above/below`, `flag_equals/not_set`, `patron_pressure_above`, `war_crimes_above`, `morale_average_below`, `week_since_event`, `event_fire_count`, `enclave_supply_status`.
 
 ## 8. Authority and Governance
 

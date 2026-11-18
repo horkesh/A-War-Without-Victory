@@ -3947,10 +3947,21 @@ app.whenReady().then(() => {
       const state = sim.deserializeState(currentGameStateJson);
       const officers = state.military?.named_officers;
       if (officers) {
+        // Commander attribution hardening: refuse an officer who still holds an operation or
+        // another corps, or who is no longer serving, before changing anything.
+        const incoming = officers[newOfficerId];
+        if (incoming && (
+          incoming.assigned_operation
+          || (incoming.assigned_corps_id && incoming.assigned_corps_id !== corpsId)
+          || (incoming.status !== 'reserve' && incoming.status !== 'active')
+        )) {
+          return { ok: false, error: 'Officer is not available: they hold another command or are no longer serving' };
+        }
         // Retire current commander
         if (currentOfficerId && officers[currentOfficerId]) {
           officers[currentOfficerId].status = 'retired';
           officers[currentOfficerId].assigned_corps_id = null;
+          officers[currentOfficerId].assigned_operation = undefined;
         }
         // Assign new officer
         if (officers[newOfficerId]) {
