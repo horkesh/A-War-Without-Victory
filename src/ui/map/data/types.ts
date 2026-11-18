@@ -364,8 +364,6 @@ export interface EnclaveResilienceView {
     isolation_turns: number;
     hardening_active: boolean;
     supply_state?: 'adequate' | 'strained' | 'critical';
-    airdrop_status?: 'receiving' | 'not_eligible' | 'not_isolated_long_enough';
-    airdrop_allocation?: number;
     faction?: FactionId;
     display_name?: string;
 }
@@ -529,14 +527,6 @@ export interface DiplomacyView {
     needleHints: DiplomacyNeedleHintView[];
 }
 
-export interface PendingConvoyDecisionView {
-    id: string;
-    target_enclave: string;
-    route_faction: Exclude<FactionId, null>;
-    supply_amount: number;
-    decision?: 'allow' | 'block' | 'divert';
-}
-
 export interface LoadedParamilitaryRequest {
     faction: string;
     strength: number;
@@ -555,7 +545,7 @@ export interface MunicipalitySupportOrderView {
 }
 
 export type CommandBriefingSeverity = 'critical' | 'warning' | 'info';
-export type SummaryFocusSection = 'overview' | 'ivp' | 'convoys' | 'casualties' | 'support' | 'opsec' | 'capital';
+export type SummaryFocusSection = 'overview' | 'ivp' | 'casualties' | 'support' | 'opsec' | 'capital';
 
 export interface CommandBriefingTargetView {
     type: 'summary' | 'enclaves' | 'operation' | 'sector' | 'settlement' | 'corps' | 'officer_events' | 'peace_plan' | 'none';
@@ -697,17 +687,6 @@ export interface PeacePlanDecisionRecordView {
     resolved: boolean;
 }
 
-export interface ConvoyDecisionRecordView {
-    id: string;
-    turn: number;
-    target_enclave: string;
-    route_faction: string;
-    target_faction: string;
-    supply_amount: number;
-    decision: 'allow' | 'block' | 'divert';
-    decided_by: 'player' | 'bot';
-}
-
 export interface ParamilitaryDecisionRecordView {
     id: string;
     turn: number;
@@ -716,6 +695,24 @@ export interface ParamilitaryDecisionRecordView {
     strength: number;
     decision: 'allow' | 'deny' | 'regular';
     estimated_civilian_risk?: number;
+}
+
+/**
+ * A paramilitary sweep the player's side carried out without a request ever reaching the player: the staff decides
+ * rear-area sweeps at Assisted command or above (the standing order is not consulted), and a standing order to allow
+ * sends them without a request at Full Control. Derived read-only from the paramilitary formation the sweep created;
+ * no saved field. Not a decision: it never feeds the presidential cadence.
+ */
+export interface ParamilitaryUnrequestedView {
+    id: string;
+    turn: number;
+    target_osid: string;
+    faction: string;
+    /**
+     * True only when the action took its target (the engine books civilian harm and the war-crime count only then). An action that
+     * dissolved without taking it (target already friendly, combat blocked, organized defence, the fade cutoff) books nothing.
+     */
+    captured: boolean;
 }
 
 export interface OfficerDecisionRecordView {
@@ -1248,7 +1245,6 @@ export interface LoadedGameState {
     civilianCasualties?: Record<string, CivilianCasualtyView>;
     internationalVisibilityPressure?: InternationalVisibilityPressureView;
     ivpConsequencesActive?: string[];
-    pendingConvoyDecisions?: PendingConvoyDecisionView[];
     municipalitySupportOrders?: Partial<Record<'RS' | 'RBiH' | 'HRHB', MunicipalitySupportOrderView>>;
     sarajevoTunnelOperational?: boolean;
     /**
@@ -1372,14 +1368,8 @@ export interface LoadedGameState {
     namedOfficerData?: NamedOfficerView[];
     /** Officer mutable state by id (sorted keys when iterating). */
     namedOfficerStateById?: Record<string, NamedOfficerStateView>;
-    /** Per-faction supply reserve levels (general supply + heavy munitions, 0–100 each). Only present when supply_reserves_enabled. */
-    factionReserves?: Record<string, { generalSupply?: number; heavyMunitions?: number }>;
-    /** Production facility views for EconomyPanel. */
-    productionFacilities?: Array<{ id: string; name: string; type: string; municipality: string; condition: number; controller: string | null }>;
-    /** Smuggling route views for EconomyPanel. */
-    smugglingRoutes?: Array<{ id: string; name: string; faction: string; capacity: number; disrupted: boolean; active_turns: number }>;
-    /** Embargo status per faction for EconomyPanel. */
-    embargoStatus?: Record<string, { pipeline: number; smuggling: number }>;
+    // factionReserves / productionFacilities / smugglingRoutes / embargoStatus retired 2026-11-17
+    // with the supply-reserve economy and the War Footing panel (Fable consult 6).
     /** Enclave resilience state per enclave id. Present when enclave_resilience exists in game state. */
     enclaveResilience?: Record<string, EnclaveResilienceView>;
     /** Per-sector summary of brigade entrenchment state. */
@@ -1400,10 +1390,10 @@ export interface LoadedGameState {
     reserveRequestHistory?: ReserveRequestDecisionRecordView[];
     /** Filed diplomatic peace-plan decisions for Records/Chronicle consequence trail. */
     peacePlanHistory?: PeacePlanDecisionRecordView[];
-    /** Filed humanitarian convoy decisions for Records/Chronicle consequence trail. */
-    convoyDecisionHistory?: ConvoyDecisionRecordView[];
     /** Filed paramilitary authorization decisions for Records/Chronicle consequence trail. */
     paramilitaryDecisionHistory?: ParamilitaryDecisionRecordView[];
+    /** Paramilitary sweeps carried out for the player's side without a request to the player (staff or standing order). */
+    paramilitaryUnrequested?: ParamilitaryUnrequestedView[];
     /** Filed officer/personnel decisions for Records/Desk consequence trail. */
     officerDecisionHistory?: OfficerDecisionRecordView[];
     /** Read-only Army HQ opportunity ledger: proposal -> decision -> AAR outcome. */

@@ -110,12 +110,8 @@ const SUBSTRATE_OWNERS = {
     consumer: 'Chronicle / event log / Codex context',
     status: 'live',
   },
-  negotiation_capital: {
-    class: 'mechanical',
-    writer: 'applyEventEffects -> negotiation capital',
-    consumer: 'treaty acceptance / endgame negotiation surfaces',
-    status: 'live',
-  },
+  // negotiation_capital retired (§6 E2, 2026-11-17): it was never live (every catalog use
+  // was a silent no-op) and the loader now rejects it; a stray row reports as unknown.
   offensive_ops_suppression: {
     class: 'mechanical',
     writer: 'applyEventEffects -> state.military.offensive_ops_suppressions',

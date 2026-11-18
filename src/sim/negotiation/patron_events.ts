@@ -12,6 +12,7 @@
 import type { GameState, FactionId } from '../../state/game_state.js';
 import type { PatronRelationship } from '../../state/negotiation_types.js';
 import { clamp } from '../../utils/math.js';
+import { applyDimensionShift } from '../events/strategic_dimensions.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Event definitions
@@ -45,6 +46,13 @@ export interface PatronEventEffect {
     override_max?: number;
     /** Change to international_standing strategic dimension. */
     humanitarian_delta?: number;
+    /**
+     * §6 E2 one-carrier rule: skip `humanitarian_delta` when this catalog event id has
+     * already fired (`military.event_last_fired_turn[id]` is set), because that event
+     * card carries the same standing cost itself. Declarative; the applier never
+     * special-cases an event id. Other fields of the effect still apply.
+     */
+    humanitarian_delta_unless_event_fired?: string;
 }
 
 // ── Historical patron events ──
@@ -71,7 +79,10 @@ export const CONTACT_GROUP_REJECTION: PatronEvent = {
 /**
  * Srebrenica aftermath (July 1995, ~week 170 from April 1992).
  * International community horrified. All factions' patrons increase pressure.
- * RS humanitarian standing devastated.
+ * RS international standing: one carrier per path (§6 E2). When the
+ * srebrenica_falls_1995 card fired, the card carries the RS −30 standing cost and this
+ * event skips its own −30. When RS holds the town without the card ever firing, this
+ * event charges the −30.
  */
 export const SREBRENICA_AFTERMATH: PatronEvent = {
     id: 'srebrenica_aftermath',
@@ -79,15 +90,21 @@ export const SREBRENICA_AFTERMATH: PatronEvent = {
     // RD run review (2026-11-07): only if Srebrenica actually fell (the fall event fired, or
     // RS holds the town); fires at the first week from 170 when that is true. In the
     // historical campaign the town falls at week 162, so the event still fires at week 170.
+    // §6 E2 follow-up (2026-11-17): also when the fall is recorded (`srebrenica_fell`, set by the
+    // card or by the genocide rupture at a combat fall). A combat fall at t160-169 retaken before
+    // w170 blocks the card (it requires `srebrenica_fell` unset), so this event charges the −30
+    // once; whichever path, the standing cost is charged exactly once.
     requires: (state) =>
         state.military.event_last_fired_turn?.srebrenica_falls_1995 !== undefined
-        || state.political?.political_controllers?.['op:srebrenica:srebrenica_2'] === 'RS',
+        || state.political?.political_controllers?.['op:srebrenica:srebrenica_2'] === 'RS'
+        || state.military.event_flags?.srebrenica_fell === true,
     description: 'Srebrenica falls. International outrage peaks. All patrons increase pressure toward peace.',
     effects: [
         {
             faction: 'RS',
             override_delta: 20,
             humanitarian_delta: -30,
+            humanitarian_delta_unless_event_fired: 'srebrenica_falls_1995',
         },
         {
             faction: 'RBiH',
@@ -219,12 +236,12 @@ export function applyPatronEvent(state: GameState, event: PatronEvent): void {
         }
 
         // Humanitarian standing changes — applied to strategic_dimensions international_standing
-        if (effect.humanitarian_delta !== undefined && neg.strategic_dimensions?.[effect.faction]) {
-            const dim = neg.strategic_dimensions[effect.faction]['international_standing'];
-            if (dim) {
-                dim.event_modifier = clamp(dim.event_modifier + effect.humanitarian_delta, -100, 100);
-                dim.effective_value = clamp(dim.base_value + dim.event_modifier, 0, 100);
-            }
+        // through the one accumulator rule (§6 E3a1 D1): no ±100 clamp on event_modifier.
+        // §6 E2: skipped when the named event card has already fired and carried the cost.
+        const humanitarianCarriedByEvent = effect.humanitarian_delta_unless_event_fired !== undefined
+            && state.military.event_last_fired_turn?.[effect.humanitarian_delta_unless_event_fired] !== undefined;
+        if (effect.humanitarian_delta !== undefined && !humanitarianCarriedByEvent && neg.strategic_dimensions) {
+            applyDimensionShift(neg.strategic_dimensions, effect.faction, 'international_standing', effect.humanitarian_delta);
         }
     }
 }

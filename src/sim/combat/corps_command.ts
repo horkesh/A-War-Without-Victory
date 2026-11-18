@@ -189,17 +189,11 @@ export function getEffectiveCorpsStance(state: GameState, corpsId: FormationId):
     return capStanceForOct1995Ceasefire(state, corps.faction, held);
 }
 
-function uncappedEffectiveCorpsStance(state: GameState, faction: FactionId, corpsId: FormationId): CorpsStance {
-    const armyStance = state.military.army_stance?.[faction];
-    if (!armyStance || armyStance === 'balanced') {
-        return state.military.corps_command?.[corpsId]?.stance ?? 'balanced';
-    }
-
-    // Army stance overrides
-    if (armyStance === 'general_offensive') return 'offensive';
-    if (armyStance === 'general_defensive') return 'defensive';
-    if (armyStance === 'total_mobilization') return 'reorganize';
-
+function uncappedEffectiveCorpsStance(state: GameState, _faction: FactionId, corpsId: FormationId): CorpsStance {
+    // The army-level stance (standing order) no longer overrides a corps stance
+    // (Batch B, Fable consult 5 ruling 3). `military.army_stance` is still written
+    // each turn as the General Staff's proposal and display value; corps act on
+    // their own stance, capped only by presidential holds and the Oct 1995 ceasefire.
     return state.military.corps_command?.[corpsId]?.stance ?? 'balanced';
 }
 

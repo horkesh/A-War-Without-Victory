@@ -5,7 +5,6 @@
 import type {
   FormationView,
   LoadedGameState,
-  ConvoyDecisionRecordView,
   OperationOpportunityRecordView,
   OfficerDecisionRecordView,
   ParamilitaryDecisionRecordView,
@@ -24,6 +23,15 @@ import {
     getPlayerSafeMilitaryFactionName,
 } from '../utils/playerSafeText.js';
 import { t, type MessageKey } from '../i18n/index.js';
+import { municipalityDisplayName } from '../../shared/bosnianPlaceNames.js';
+
+/** The 1991 municipality named by an OSID ("op:<municipality>:<settlement>"), in census spelling. */
+function receiptMunicipalityName(osid: string): string {
+  const municipality = typeof osid === 'string' ? osid.split(':')[1] : undefined;
+  if (!municipality) return 'rear';
+  return municipalityDisplayName(municipality)
+    ?? municipality.split('_').map((word) => (word ? word.charAt(0).toUpperCase() + word.slice(1) : '')).join(' ');
+}
 import { playerFactionMatch } from './playerFactionMatch.js';
 import { stanceMatterReceiptLine } from './stanceMatterCopy.js';
 
@@ -64,8 +72,8 @@ export type DecisionConsequenceFamilyId =
   | 'army-reserve'
   | 'peace-proposal'
   | 'dayton-settlement'
-  | 'humanitarian-convoy'
   | 'paramilitary-authorization'
+  | 'paramilitary-receipt'
   | 'patron-relations'
   | 'officer-personnel'
   | 'stance-matter'
@@ -420,70 +428,6 @@ function daytonDetailToken(verdict: NonNullable<LoadedGameState['gameVerdict']>)
       overrides: overrideCount > 0 ? t('decisionConsequences.detail.dayton.overrides', { count: overrideCount }) : '',
     },
   };
-}
-
-function convoyOutcome(record: ConvoyDecisionRecordView): string {
-  if (record.decision === 'allow') return 'Allowed';
-  if (record.decision === 'block') return 'Blocked';
-  return 'Diverted';
-}
-
-function convoyOutcomeToken(record: ConvoyDecisionRecordView): DecisionConsequenceCopyToken {
-  if (record.decision === 'allow') return { key: 'decisionConsequences.outcome.allowed' };
-  if (record.decision === 'block') return { key: 'decisionConsequences.outcome.blocked' };
-  return { key: 'decisionConsequences.outcome.diverted' };
-}
-
-function convoyTitle(record: ConvoyDecisionRecordView): string {
-  return `Convoy ${convoyOutcome(record).toLowerCase()}`;
-}
-
-function convoyTitleToken(record: ConvoyDecisionRecordView): DecisionConsequenceCopyToken {
-  if (record.decision === 'allow') return { key: 'decisionConsequences.title.convoy.allowed' };
-  if (record.decision === 'block') return { key: 'decisionConsequences.title.convoy.blocked' };
-  return { key: 'decisionConsequences.title.convoy.diverted' };
-}
-
-function convoyDetail(record: ConvoyDecisionRecordView): string {
-  const enclave = record.target_enclave
-    ? record.target_enclave.includes(' ')
-      ? record.target_enclave
-      : humanizeToken(record.target_enclave)
-    : 'the enclave';
-  const route = record.route_faction
-    ? getPlayerSafeMilitaryFactionName(record.route_faction, record.route_faction)
-    : 'route faction';
-  const target = record.target_faction
-    ? getPlayerSafeMilitaryFactionName(record.target_faction, record.target_faction)
-    : 'the enclave garrison';
-  if (record.decision === 'allow') {
-    return `Convoy to ${enclave} allowed through ${route} lines; aid delivered to ${target}.`;
-  }
-  if (record.decision === 'block') {
-    return `Convoy to ${enclave} blocked on the ${route} route; diplomatic pressure increased.`;
-  }
-  return `Convoy to ${enclave} diverted through ${route} lines; aid split with ${target}.`;
-}
-
-function convoyDetailToken(record: ConvoyDecisionRecordView): DecisionConsequenceCopyToken {
-  const enclave = record.target_enclave
-    ? record.target_enclave.includes(' ')
-      ? record.target_enclave
-      : humanizeToken(record.target_enclave)
-    : t('decisionConsequences.fallback.enclave');
-  const route = record.route_faction
-    ? getPlayerSafeMilitaryFactionName(record.route_faction, record.route_faction)
-    : t('decisionConsequences.fallback.routeFaction');
-  const target = record.target_faction
-    ? getPlayerSafeMilitaryFactionName(record.target_faction, record.target_faction)
-    : t('decisionConsequences.fallback.enclaveGarrison');
-  if (record.decision === 'allow') {
-    return { key: 'decisionConsequences.detail.convoy.allowed', params: { enclave, route, target } };
-  }
-  if (record.decision === 'block') {
-    return { key: 'decisionConsequences.detail.convoy.blocked', params: { enclave, route } };
-  }
-  return { key: 'decisionConsequences.detail.convoy.diverted', params: { enclave, route, target } };
 }
 
 function paramilitaryOutcome(record: ParamilitaryDecisionRecordView): string {
@@ -894,23 +838,6 @@ export function buildDecisionConsequenceLedger(
     });
   }
 
-  for (const convoy of state.convoyDecisionHistory ?? []) {
-    if (convoy.decided_by !== 'player') continue;
-    records.push({
-      id: `convoy:${convoy.id}`,
-      turn: convoy.turn,
-      familyId: 'humanitarian-convoy',
-      family: 'Humanitarian convoy',
-      title: convoyTitle(convoy),
-      titleToken: convoyTitleToken(convoy),
-      outcome: convoyOutcome(convoy),
-      outcomeToken: convoyOutcomeToken(convoy),
-      detail: convoyDetail(convoy),
-      detailToken: convoyDetailToken(convoy),
-      recordTarget: 'chronicle',
-    });
-  }
-
   for (const paramilitary of state.paramilitaryDecisionHistory ?? []) {
     if (playerFaction && !playerFactionMatch(paramilitary.faction, playerFaction)) continue;
     records.push({
@@ -924,6 +851,36 @@ export function buildDecisionConsequenceLedger(
       outcomeToken: paramilitaryOutcomeToken(paramilitary),
       detail: paramilitaryDetail(paramilitary),
       detailToken: paramilitaryDetailToken(paramilitary),
+      recordTarget: 'records',
+    });
+  }
+
+  // A paramilitary action carried out for the player's side with no request ever reaching the player (the staff decides rear-area
+  // actions at Assisted command or above; a standing order to allow sends them without a request at Full Control). It still counts
+  // against the side, so the player is told where and why instead of meeting the count at Dayton. The wording lives in the message
+  // catalog only (EN and BCS), never as a literal here.
+  for (const unrequested of state.paramilitaryUnrequested ?? []) {
+    if (playerFaction && !playerFactionMatch(unrequested.faction, playerFaction)) continue;
+    // Municipality scale only: the record speaks at that scale, and a settlement name would assert village-level history.
+    const place = receiptMunicipalityName(unrequested.target_osid);
+    const faction = getPlayerSafeMilitaryFactionName(unrequested.faction, unrequested.faction);
+    // Only an action that took its target is booked against the side; one that dissolved without taking it gets its own outcome
+    // line (Codex finding on #740).
+    const suffix = unrequested.captured ? 'unrequested' : 'unrequestedDissolved';
+    const titleKey = `decisionConsequences.title.paramilitary.${suffix}` as MessageKey;
+    const outcomeKey = `decisionConsequences.outcome.${suffix}` as MessageKey;
+    const detailKey = `decisionConsequences.detail.paramilitary.${suffix}` as MessageKey;
+    records.push({
+      id: `paramilitary-staff:${unrequested.id}`,
+      turn: unrequested.turn,
+      familyId: 'paramilitary-receipt',
+      family: t('decisionConsequences.family.paramilitaryReceipt'),
+      title: t(titleKey),
+      titleToken: { key: titleKey },
+      outcome: t(outcomeKey),
+      outcomeToken: { key: outcomeKey },
+      detail: t(detailKey, { place, faction }),
+      detailToken: { key: detailKey, params: { place, faction } },
       recordTarget: 'records',
     });
   }
@@ -992,14 +949,17 @@ export function buildDecisionConsequenceLedgerSummary(
     familySet.add(record.family);
     if (record.recordTarget === 'chronicle') {
       chronicleRouteCount += 1;
-    } else {
+    } else if (record.familyId !== 'paramilitary-receipt') {
+      // A paramilitary action carried out without a request is a receipt, not a filed decision of the President.
       recordsRouteCount += 1;
     }
   }
 
-  const latest = records[0] ?? null;
+  // Receipts are listed in Records but are not filed decisions: they stay out of the total and the "latest decision".
+  const decisions = records.filter((record) => record.familyId !== 'paramilitary-receipt');
+  const latest = decisions[0] ?? null;
   return {
-    total: records.length,
+    total: decisions.length,
     recordsRouteCount,
     chronicleRouteCount,
     latestTurn: latest?.turn ?? null,

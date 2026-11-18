@@ -85,7 +85,7 @@ Runs every turn after attack resolution. The primary displacement writer since 2
 
 **Also handles re-displacement pass-through:** When a municipality with `displaced_in > 0` has a timer mature, displaced people already sheltering there are re-routed to new friendly municipalities with **zero casualties and zero flee-abroad**. This prevents double-counting — a person displaced twice counts as 1 displaced person.
 
-**Minority flight** (`processMinorityFlight()`) is **active** in the pipeline (`minority-flight` step). Confirmed running: ~493k displaced in 52w (378k spike at w4, ~9.4k/4-week cycle after). It runs independently of takeover displacement.
+**Minority flight** (`processMinorityFlight()`) is **retired and deleted**: it was switched off in the pipeline on 2026-03-01 and the module `src/state/minority_flight.ts` was deleted on 2026-06-09 (#360, "dead minority_flight removal"). The earlier note here that it was active (about 493k displaced in 52 weeks) is superseded; displacement is carried by takeover displacement, the war-displacement triggers and the stranded-brigade lifecycle (EH-3). *(Corrected 2026-11-17, steward, on the orchestrator's ruling that the minority family is dead.)*
 
 ### 2.2 `war-displacement-triggers` (settlement-level)
 
@@ -178,7 +178,7 @@ Per-OSID data is loaded from `data/derived/operational/operational_settlements.g
 
 ### 3.2 Minority Flight — **DISABLED**
 
-As of 2026-03-01, `processMinorityFlight()` is **not called** in `turn_pipeline.ts`. The code remains in `src/state/minority_flight.ts` for potential future use, but the pipeline returns an empty report.
+As of 2026-03-01, `processMinorityFlight()` was **not called** in `turn_pipeline.ts`; the module `src/state/minority_flight.ts` was then deleted on 2026-06-09 (#360) and no longer exists. *(Corrected 2026-11-17: the earlier text said the code remained for potential future use.)*
 
 **Rationale:** Displacement should only trigger from hostile OSID takeover (war-start seeding handles the "minorities flee from day one" case that minority flight previously covered).
 
@@ -718,7 +718,7 @@ After the initial 4-turn timer fires (Branch A), the OSID enters **sustained dis
 |------|-------|---------|
 | `src/state/displacement.ts` | ~1003 | Continuous pressure displacement; routing (BFS-based) |
 | `src/state/displacement_takeover.ts` | ~550 | Hostile takeover: OSID-based timers, war-start seeding, timer→camp→route state machine, re-displacement pass-through |
-| `src/state/minority_flight.ts` | ~360 | Settlement-level minority flight (**DISABLED** in pipeline; code retained) |
+| `src/state/minority_flight.ts` | (deleted 2026-06-09, #360) | Settlement-level minority flight, retired and removed; kept in this table as history |
 | `src/state/displacement_routing_data.ts` | ~273 | Per-municipality per-ethnicity routing tables (19+15+12 sub-regions) |
 | `src/state/displacement_state_utils.ts` | ~94 | Shared helpers: getOrInitDisplacementState, factionHasBrigadeInMunicipality, recordCivilianDisplacementCasualties |
 | `src/state/displacement_loss_constants.ts` | ~30 | Kill/flee-abroad fractions (single source of truth) |

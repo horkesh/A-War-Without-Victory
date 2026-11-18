@@ -32,11 +32,12 @@ export interface NegotiationBreakdown {
     operations_successful: number;
     war_crimes_events: number;
     /**
-     * EMERGENT-only war-crimes count: incremented ONLY by `recordWarCrime()`
-     * (genuine in-war paramilitary sweeps the player/bot authorized), NEVER by
+     * In-war war-crimes count (written in every decision mode; the verdict applies it to a
+     * faction per `isBrightLineFaction`): incremented ONLY by `recordWarCrime()`
+     * (genuine in-war paramilitary sweeps the faction's command or staff authorized), NEVER by
      * scripted `humanitarian_impact` narrative effects (`applyHumanitarianImpact`).
      * The shared `war_crimes_events` above conflates both; this counter is the clean
-     * emergent signal for the §2a `authorized_cleansing_condemnation` flag so that flag can
+     * in-war signal for the §2a `authorized_cleansing_condemnation` flag so that flag can
      * never be tripped by a calendar-windowed scripted event (SENSITIVE_HISTORY_
      * DESIGN_GATE §2 criterion 11). Additive-optional; absent ⇒ 0.
      */
@@ -564,6 +565,14 @@ export interface FactionVerdict {
      * computeFactionVerdict and changes no value. Optional: absent on saves frozen before it.
      */
     grade_trace?: VerdictGradeTrace;
+    /**
+     * §6 E3b (2026-11-17): the side's war-crime INCIDENTS, never `war_crimes_delta` units.
+     * `recorded`: the historical war-crimes record of this campaign (every scripted war-crimes
+     * card that fired, and every chosen option with a delta); `authorized`: war crimes arising
+     * from decisions in play (`authoredWarCrimeIncidents`). Derived at the verdict from fields the save already holds;
+     * no new counter. Optional: absent on saves frozen before it.
+     */
+    war_crime_incidents?: { recorded: number; authorized: number };
 }
 
 /** Steps from the earned grade to the final grade and outcome class (see FactionVerdict.grade_trace). */

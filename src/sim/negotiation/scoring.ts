@@ -23,8 +23,10 @@ import { computePeaceDysfunctionBreakdown, computePeaceDysfunctionIndex, capOutc
 import { DIMENSION_WEIGHTS, computeNegotiatingCapital } from '../events/strategic_dimensions.js';
 import type { DimensionStore } from '../events/strategic_dimensions.js';
 import { strictCompare } from '../../state/validateGameState.js';
+import { isBrightLineFaction } from '../../state/atrocity_accountability.js';
 import { capGradeBySettlement, settlementControllersFor } from './peace_settlement.js';
 import { creditedTerritoryPct, overrunEnclaveCells } from './enclave_credit.js';
+import { authoredWarCrimeIncidents, recordedWarCrimeIncidents } from '../events/authored_war_crimes.js';
 
 const CANONICAL_FACTIONS: FactionId[] = ['RBiH', 'RS', 'HRHB'];
 
@@ -92,7 +94,8 @@ const COST_REFERENCE = Object.freeze({
     // deliberately LOW so that even a modest cleansing campaign pushes the
     // atrocity sub-score toward 1.0 — the bright line requires atrocity to
     // dominate any territory-driven grade gain, never merely shade it.
-    /** War-crimes event count at which the war-crimes component saturates. */
+    /** Authored war-crime incidents (§6 E3b, `authoredWarCrimeIncidents`) at which the
+     *  war-crimes component saturates. */
     war_crimes_full: 3,
     /** Refugees created at which the displacement component saturates. */
     refugees_full: 50000,
@@ -120,11 +123,16 @@ const COST_WEIGHTS = Object.freeze({
 // otherwise-A+ territory grade down to C. That is the whole point: the extra
 // territory cleansing buys is NET-NEGATIVE at the verdict.
 //
-// CRITICAL — EMERGENT-GATED: the atrocity term applies ONLY when
-// state.meta.decision_mode === 'emergent'. The historical 52w baseline contains
-// the real Drina cleansing (war_crimes_events > 0); applying the term there
-// would raise its cost index, lower its grade, and break the byte-identical
-// baseline. Historical/unset mode is therefore left exactly as before.
+// CRITICAL — BRIGHT-LINE-GATED: the atrocity term applies to a faction only when
+// isBrightLineFaction(state, faction): every faction in emergent mode, and the
+// human player's own faction in ANY mode. The historical 52w baseline contains
+// the real Drina cleansing (war_crimes_events > 0) booked to bot factions;
+// applying the term to them would raise their cost index, lower their grade, and
+// break the byte-identical baseline. A headless/no-human historical run has no
+// player faction, so it is left exactly as before; a human's own orders are new
+// acts and carry the term in either mode (§6 bright line, panel 2026-11-16).
+// Its war-crimes input is the AUTHORED incident count (§6 E3b, 2026-11-17), never the
+// shared `war_crimes_events` delta counter, which also holds scripted historical records.
 
 /** Blend weights for the three atrocity components. Must sum to 1.0. */
 const ATROCITY_WEIGHTS = Object.freeze({
@@ -153,7 +161,8 @@ const ATROCITY_COST_GAIN = 0.85;
  * `authorized_cleansing_condemnation`, which `classifyOutcome` turns into a
  * hollow_victory — so atrocity is grade-DECISIVE at the outcome-class level (a bloody
  * campaign's `pyrrhic_success` C becomes `hollow_victory`) without any casualty-scoring
- * change. EMERGENT-ONLY (historical mode byte-identical). Genocide takes precedence.
+ * change. Applies to every faction in emergent mode and to the human player's own faction in any
+ * mode (isBrightLineFaction); a headless/no-human historical run stays byte-identical. Genocide takes precedence.
  *
  * TRIGGER — UNION of two calendar-CLEAN emergent signals (§6-panel v2, 2026-08-10):
  *   (1) `war_crimes_events_emergent ≥ 1` — any single player/bot-AUTHORIZED paramilitary
@@ -249,10 +258,11 @@ function freshDisplacementHarm(
  * Reads already-accrued, monotonic per-faction war-data, sourced so the score
  * holds on TERMINAL turns (when the negotiation.capital snapshot may be frozen
  * one step before compute-negotiation-capital refreshes its displacement copy):
- *   - war_crimes_events         — read from negotiation.capital. recordWarCrime
- *                                 (paramilitary_sweep.ts) and apply_effects.ts
- *                                 increment this IN PLACE during the turn, so
- *                                 capital is already the freshest store.
+ *   - authored war crimes       — `authoredWarCrimeIncidents` (§6 E3b): the side's own
+ *                                 incidents (recordWarCrime's in-place counter, authored
+ *                                 cards' fire counts, chosen options), all current in the
+ *                                 turn. Scripted historical records are not the side's
+ *                                 own conduct and do not enter the term.
  *   - refugees_created          — max(capital, FRESH displacement aggregate).
  *   - civilian_casualties_caused — max(capital, FRESH displacement aggregate).
  *
@@ -264,12 +274,12 @@ function freshDisplacementHarm(
  *
  * Each component saturates at its COST_REFERENCE ceiling, then blends by
  * ATROCITY_WEIGHTS. Higher = more atrocity. Pure & deterministic. This is the
- * raw signal; the emergent gate and additive gain are applied by the caller.
+ * raw signal; the bright-line gate (isBrightLineFaction) and additive gain are applied by the caller.
  */
 function computeAtrocitySubScore(state: GameState, faction: string): number {
     const cap = state.military?.negotiation?.capital?.[faction];
 
-    const warCrimes = cap?.war_crimes_events ?? 0;
+    const warCrimes = authoredWarCrimeIncidents(state, faction);
     const capRefugees = cap?.refugees_created ?? 0;
     const capCivilian = cap?.civilian_casualties_caused ?? 0;
 
@@ -301,9 +311,11 @@ function computeAtrocitySubScore(state: GameState, faction: string): number {
  * the raw capital values can be STALE. Displaying the raw snapshot would put a
  * fresh-derived grade next to stale numbers — internally inconsistent.
  *
- * EMERGENT-GATED: the atrocity term (and thus this display correction) is OFF in
- * historical/unset mode, where the raw capital snapshot is returned UNCHANGED so
- * the byte-identical 52w baseline is preserved by construction. war_crimes_events
+ * BRIGHT-LINE-GATED: the atrocity term (and thus this display correction) is OFF for a
+ * faction that does not bear the consequences (a bot in historical mode, or any faction of a
+ * headless/no-human historical run), where the raw capital snapshot is returned UNCHANGED so
+ * the byte-identical 52w baseline is preserved by construction. It must move with the flag
+ * gate, so the Dayton room and the terminal turn warn truthfully. war_crimes_events
  * is already fresh on capital (recordWarCrime increments it in place), so it is
  * left as-is. Pure & deterministic; never lowers a displayed value (max only).
  */
@@ -312,9 +324,11 @@ function computeAtrocitySubScore(state: GameState, faction: string): number {
  * rupture flags plus the EMERGENT-ONLY non-genocide authorized_cleansing_condemnation
  * (§3.4 tier — see AUTHORIZED_CLEANSING_WAR_CRIMES_MIN / CATASTROPHIC_CIVILIAN_HARM_MIN):
  * significant cleansing that isn't the adjudicated Srebrenica genocide still taints the
- * outcome to hollow_victory. UNION of two calendar-clean emergent signals — ≥1 authorized
+ * outcome to hollow_victory. UNION of two calendar-clean signals — ≥1 authorized
  * paramilitary sweep OR catastrophic siege/encirclement civilian harm. Skipped when
- * genocide is already flagged. Historical/unset mode untouched (emergent-gated).
+ * genocide is already flagged. Gated by isBrightLineFaction: every faction in emergent mode,
+ * the human player's own faction in any mode; a bot faction in historical mode, and every
+ * faction of a headless/no-human historical run, is untouched.
  *
  * `displayBreakdown` must be the FRESHENED breakdown (max(capital, fresh displacement
  * harm)), not the raw capital snapshot: on a terminal turn capital can be frozen one step
@@ -326,7 +340,7 @@ function condemnationFlagsWith(state: GameState, faction: string, displayBreakdo
     const emergentWarCrimes = atrocityCapital?.war_crimes_events_emergent ?? 0;
     const civilianHarmCaused = displayBreakdown?.civilian_casualties_caused
         ?? (atrocityCapital?.civilian_casualties_caused ?? 0);
-    if (state.meta?.decision_mode === 'emergent'
+    if (isBrightLineFaction(state, faction)
         && !condemnationFlags.includes('genocide_condemnation')
         && !condemnationFlags.includes('authorized_cleansing_condemnation')
         && (emergentWarCrimes >= AUTHORIZED_CLEANSING_WAR_CRIMES_MIN
@@ -348,8 +362,8 @@ function freshenBreakdownForDisplay(
     faction: string,
     capital: NegotiationBreakdown,
 ): NegotiationBreakdown {
-    // Historical/unset mode: the atrocity term is OFF, so display is untouched.
-    if (state.meta?.decision_mode !== 'emergent') return capital;
+    // A faction that does not bear the consequences: the atrocity term is OFF, so display is untouched.
+    if (!isBrightLineFaction(state, faction)) return capital;
 
     const fresh = freshDisplacementHarm(state, faction);
     const freshRefugees = Math.max(capital.refugees_created ?? 0, fresh.refugees);
@@ -378,12 +392,14 @@ function freshenBreakdownForDisplay(
  * Each sub-score saturates at its COST_REFERENCE ceiling, then blends by
  * COST_WEIGHTS. Higher = more catastrophic war. Pure & deterministic.
  *
- * EMERGENT-ONLY atrocity term (Free War Phase 5, Slice 1 — the ethics bright
- * line): when meta.decision_mode === 'emergent', an additive atrocity penalty
- * (war_crimes_events + refugees + civilian casualties, scaled by
+ * BRIGHT-LINE atrocity term (Free War Phase 5, Slice 1 — the ethics bright
+ * line): when isBrightLineFaction(state, faction) (every faction in emergent mode, the
+ * human player's own faction in any mode), an additive atrocity penalty
+ * (authored war-crime incidents + refugees + civilian casualties, scaled by
  * ATROCITY_COST_GAIN) is folded in so cleansing RAISES the cost index — pushing
  * the grade cap down enough that the territory cleansing buys is net-negative at
- * the verdict. In historical/unset mode the term is OFF, so the index (and thus
+ * the verdict. For a faction that does not bear the consequences (a bot in historical
+ * mode, or any faction of a headless/no-human run) the term is OFF, so the index (and thus
  * the 52w baseline grade) is byte-identical to before this slice.
  */
 export function computeWarCostIndex(state: GameState, faction: string): number {
@@ -408,9 +424,10 @@ export function computeWarCostIndex(state: GameState, faction: string): number {
         casualtyScore * COST_WEIGHTS.casualties +
         durationScore * COST_WEIGHTS.duration;
 
-    // EMERGENT-GATED: the atrocity term is OFF in historical/unset mode, keeping
-    // the historical 52w war_cost_index (and verdict) byte-identical.
-    if (state.meta?.decision_mode !== 'emergent') {
+    // BRIGHT-LINE-GATED: the atrocity term is OFF for a faction that does not bear the
+    // consequences, keeping the headless historical 52w war_cost_index (and verdict)
+    // byte-identical.
+    if (!isBrightLineFaction(state, faction)) {
         return clamp01(baseIndex);
     }
 
@@ -451,8 +468,9 @@ export function capGradeByCost(grade: string, costIndex: number): string {
  * grade A. This makes the bright line STRUCTURAL: a condemnation caps the letter grade
  * regardless of how low the cost index is driven. Determinism: pure, order-independent.
  *
- * Historical/unset mode is byte-identical: no condemnation flag fires there (genocide is
- * event-gated to the Srebrenica path; authorized_cleansing is emergent-only), so with an
+ * A headless/no-human historical run is byte-identical: no condemnation flag fires there
+ * (genocide is event-gated to the Srebrenica path; authorized_cleansing is gated by
+ * isBrightLineFaction, which needs emergent mode or a human player's faction), so with an
  * empty flag list this returns the input grade unchanged.
  */
 export function capGradeByCondemnation(grade: string, condemnationFlags: readonly string[]): string {
@@ -480,8 +498,9 @@ export function capGradeByCondemnation(grade: string, condemnationFlags: readonl
  * - atrocityGate: capGradeByCondemnation (already shipped) — any authorized atrocity
  *   caps to C regardless of how "cheap" the war was, closing the A0 inversion.
  *
- * Flag-gated `AWWV_SCORING_SIMPLE`; default OFF ⇒ the legacy war_cost_index path
- * (byte-identical). The frozen baseline is a HISTORICAL FACT (KIA+WIA+MIA), not fit to
+ * DEFAULT-ON (owner-adopted 2026-08-10; see scoringSimpleEnabled): only an explicit
+ * `AWWV_SCORING_SIMPLE=0|false|off` restores the legacy war_cost_index cap, kept for
+ * regression and comparison. The frozen baseline is a HISTORICAL FACT (KIA+WIA+MIA), not fit to
  * sim output (§3.5 A2), and the cost axis is casualties, never territory (§3.5 A3).
  */
 const HISTORICAL_CASUALTY_BASELINE: Record<string, number> = Object.freeze({
@@ -538,19 +557,24 @@ function factionTotalCasualties(state: GameState, faction: string): number {
 interface GradeAnchor {
     grade: string;
     description: string;
-    test: (cap: NegotiationBreakdown, state: GameState) => boolean;
+    /** `authored`: the side's authored war-crime incidents (§6 E3b), computed once per grade. */
+    test: (cap: NegotiationBreakdown, state: GameState, authored: number) => boolean;
 }
 
 const RBIH_GRADE_ANCHORS: GradeAnchor[] = [
     {
         grade: 'A+',
-        description: 'Defended most territory, minimal civilian losses, enclaves held, strong international position',
-        test: (cap) =>
+        // §6 E3b: the three A+ descriptions signed by the SHDG §4 panel (narrative designer +
+        // historian), 2026-11-18.
+        description: 'Held more than 33% of the territory and lost no enclave, with no war-crime incident arising from decisions in play',
+        test: (cap, _state, authored) =>
             cap.territory_controlled_pct > 33 &&
             cap.enclaves_lost.length === 0 &&
             // Owner, 2026-11-10: only war crimes RBiH authorized in play block A+; scripted
             // historical records (the shared counter) no longer put A+ out of reach.
-            (cap.war_crimes_events_emergent ?? 0) === 0,
+            // §6 E3b (2026-11-17): the one shared authored count (the verdict line "War crimes
+            // arising from decisions in play").
+            authored === 0,
     },
     {
         grade: 'A',
@@ -589,10 +613,13 @@ const RBIH_GRADE_ANCHORS: GradeAnchor[] = [
 const RS_GRADE_ANCHORS: GradeAnchor[] = [
     {
         grade: 'A+',
-        description: 'Held >55% territory, maintained international standing, avoided catastrophic isolation',
-        test: (cap) =>
+        description: 'Held more than 55% of the territory, with no war-crime incident arising from decisions in play',
+        // §6 E3b (2026-11-17): no war-crime incident arising from decisions in play, like RBiH and HRHB. The old
+        // `war_crimes_events <= 2` read the shared delta counter, so scripted historical records
+        // (sieges, camps, Srebrenica) put A+ out of reach regardless of play.
+        test: (cap, _state, authored) =>
             cap.territory_controlled_pct > 55 &&
-            cap.war_crimes_events <= 2, // proxy for international standing
+            authored === 0,
     },
     // RE-ANCHORED 2026-11-07 (owner): the grade reads the WARTIME control map, so the RS
     // A anchor is the pre-Dayton ceasefire line (~46%: published accounts ~46%, painted
@@ -634,11 +661,12 @@ const RS_GRADE_ANCHORS: GradeAnchor[] = [
 const HRHB_GRADE_ANCHORS: GradeAnchor[] = [
     {
         grade: 'A+',
-        description: 'Strong territorial position with high political cohesion, Herzegovina secured',
-        test: (cap, state) => {
+        description: 'Held more than 20% of the territory with internal cohesion at 50 or above, and no war-crime incident arising from decisions in play',
+        test: (cap, state, authored) => {
             const dimStore = state.military?.negotiation?.strategic_dimensions;
             const cohesion = dimStore?.HRHB?.internal_cohesion?.effective_value ?? 50;
-            return cap.territory_controlled_pct > 20 && cohesion >= 50;
+            // §6 E3b (2026-11-17): no war-crime incident arising from decisions in play, as for RBiH and RS.
+            return cap.territory_controlled_pct > 20 && cohesion >= 50 && authored === 0;
         },
     },
     {
@@ -756,8 +784,17 @@ export function computeFactionGrade(
     const anchors = FACTION_GRADE_ANCHORS[faction];
     if (!anchors) return { grade: 'F', description: 'Unknown faction' };
 
+    // §6 E3b: the authored count reads the capital being graded (the verdict passes the side's
+    // own capital with only its territory credited) and the state's fire counts and decisions.
+    const authored = authoredWarCrimeIncidents({
+        military: {
+            event_fire_counts: state.military?.event_fire_counts,
+            event_decision_log: state.military?.event_decision_log,
+            negotiation: { capital: { [faction]: capital } },
+        },
+    }, faction);
     for (const anchor of anchors) {
-        if (anchor.test(capital, state)) {
+        if (anchor.test(capital, state, authored)) {
             return { grade: anchor.grade, description: anchor.description };
         }
     }
@@ -810,6 +847,7 @@ export function computeFactionVerdict(
             dimension_grades: emptyDims,
             outcome_class: 'collapse' as OutcomeClass,
             condemnation_flags: [],
+            war_crime_incidents: warCrimeIncidents(state, faction),
         };
     }
 
@@ -843,10 +881,11 @@ export function computeFactionVerdict(
     // read as a clean triumph. Post-termination reflection — reads accrued cost,
     // caps the grade downward only. Territory alone can no longer buy A+.
     const costIndex = computeWarCostIndex(state, faction);
-    // Human-cost step (simple model, flag ON) OR the legacy war_cost_index cap (default).
-    // Either way the atrocity condemnation LETTER-grade cap (§6 bright line) is applied
-    // AFTER the condemnation flags are collected below, then drives description +
-    // classifyOutcome. Default OFF ⇒ the legacy cap ⇒ byte-identical.
+    // Human-cost step (the simple model, the default) OR the legacy war_cost_index cap (only
+    // with AWWV_SCORING_SIMPLE explicitly off). Either way the atrocity condemnation
+    // LETTER-grade cap (§6 bright line) is applied AFTER the condemnation flags are collected
+    // below, then drives description + classifyOutcome. The cost index is still computed on
+    // the default path but read only by the legacy cap and its description below.
     const costCappedGrade = scoringSimpleEnabled()
         ? applyHumanCostShift(earned.grade, faction, factionTotalCasualties(state, faction))
         : capGradeByCost(earned.grade, costIndex);
@@ -862,8 +901,8 @@ export function computeFactionVerdict(
     // displayed the raw snapshot, the verdict would show a grade derived from
     // fresh terminal-turn atrocities next to stale pre-refresh numbers — an
     // internally inconsistent display. So the displayed breakdown takes the SAME
-    // max(capital, fresh) the grade used. EMERGENT-GATED to keep historical mode
-    // byte-identical (the term is emergent-only by construction).
+    // max(capital, fresh) the grade used. BRIGHT-LINE-GATED to keep a headless
+    // historical run byte-identical (the term is off for a faction with no human behind it).
     const displayBreakdown = typeof settledTerritory === 'number'
         ? { ...freshenBreakdownForDisplay(state, faction, capital), territory_controlled_pct: settledTerritory }
         : freshenBreakdownForDisplay(state, faction, creditedCapital);
@@ -936,6 +975,15 @@ export function computeFactionVerdict(
             peace_dysfunction_band: peaceDysfunctionBand(baseOutcomeClass, sideDysfunction?.index ?? null, dysfunctionFlags),
             outcome_class: outcomeClass,
         },
+        war_crime_incidents: warCrimeIncidents(state, faction),
+    };
+}
+
+/** §6 E3b: the verdict's two war-crimes counts, in incidents (see FactionVerdict.war_crime_incidents). */
+function warCrimeIncidents(state: GameState, faction: string): { recorded: number; authorized: number } {
+    return {
+        recorded: recordedWarCrimeIncidents(state, faction),
+        authorized: authoredWarCrimeIncidents(state, faction),
     };
 }
 

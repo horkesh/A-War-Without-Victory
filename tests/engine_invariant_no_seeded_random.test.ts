@@ -10,7 +10,6 @@ const OWNED_SIMULATION_FILES = [
     'src/sim/bot/bot_manager.ts',
     'src/sim/bot/simple_general_bot.ts',
     'src/state/deterministic_random.ts',
-    'src/sim/economy/smuggling_routes.ts',
     'src/sim/combat/frontline_attrition.ts',
     'src/sim/combat/warlord_friction.ts',
     'src/sim/combat/paramilitary_sweep.ts',

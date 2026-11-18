@@ -818,10 +818,18 @@ describe('strict null inventory progress', () => {
             // the live recovery step. No new type escape. 594 -> 595.
             // Command loop L7 (2026-11-15): StateMeta.army_clashes / army_clash_history and
             // MilitaryState.army_clash_state (live president only). No new type escape. 595 -> 598.
+            // Zombie-TG fix (2026-11-16): TacticalGroup.host_corps_id, the TG's stable lifecycle
+            // identity (absent on legacy TGs). No new type escape. 598 -> 599.
+            // A2b refugee compact (2026-11-17): RbihHrhbState.refugee_compact_suspended_until, written
+            // only while a played HRHB compact is active (absent in every bot run). No new type escape. 599 -> 600.
+            // Sep-1991 peace start retired (schema v40, 2026-11-17): StateMeta.peace_war_start_control_path
+            // removed. 600 -> 599.
+            // Package P2 (2026-11-17): CorpsDirective.sector_reassignment_orders[].empty_sector_relief,
+            // set only on an empty-sector relief order. No new type escape. 599 -> 600.
             // RB9 (2026-11-16): HostileTakeoverTimerState.dormant_since_turn / cumulative_routed /
             // return_hold_since_turn / cumulative_pool_cut and DisplacementEvent.returned, absent on every
-            // timer and event before RB9. No new type escape. 598 -> 603.
-            optional_fields_game_state: 603,
+            // timer and event before RB9. No new type escape. 600 -> 605.
+            optional_fields_game_state: 605,
         });
         // Reason-code instrumentation (item 3): +1, `OperationAxis.launch_blocker_detail`.
         // `classifyDomain` routes it to `sim` on the /Corps|Operation/ interface-name rule,
@@ -836,14 +844,18 @@ describe('strict null inventory progress', () => {
         // Command loop L6: +1 state (command_authority.last_recovery_breakdown). 594 -> 595 / state 219 -> 220.
         // Command loop L7: +2 state (StateMeta.army_clashes / army_clash_history), +1 sim
         // (MilitaryState.army_clash_state). 595 -> 598 / state 220 -> 222 / sim 365 -> 366.
-        // RB9: +5 (four HostileTakeoverTimerState fields and DisplacementEvent.returned). 598 -> 603.
-        expect(current.optional_field_domains.total).toBe(603);
+        // Zombie-TG fix: +1 state (TacticalGroup.host_corps_id). 598 -> 599 / state 222 -> 223.
+        // A2b: +1 state (RbihHrhbState.refugee_compact_suspended_until). 599 -> 600 / state 223 -> 224.
+        // Sep-1991 peace start retired (v40): -1 state (StateMeta.peace_war_start_control_path). 600 -> 599 / state 224 -> 223.
+        // Package P2: +1 sim (CorpsDirective.sector_reassignment_orders[].empty_sector_relief). 599 -> 600 / sim 366 -> 367.
+        // RB9: +5 state (four HostileTakeoverTimerState fields and DisplacementEvent.returned). 600 -> 605 / state 223 -> 228.
+        expect(current.optional_field_domains.total).toBe(605);
         expect(current.optional_field_domains.domain_counts).toMatchObject({
             derived: 10,
             ipc: 0,
             scenario: 0,
-            sim: 366,
-            state: 227, // RB9: +5 state (222 -> 227)
+            sim: 367,
+            state: 228,
             ui_adapter: 0,
             unknown: 0,
         });

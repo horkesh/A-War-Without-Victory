@@ -80,9 +80,11 @@ Required fields on a new event row:
 - `bot_response_logic: "historical"` — canonical for every authored Phase D row. Preserves calibration discipline (napkin lesson).
 - `responding_faction` — `RBiH` / `RS` / `HRHB`. The faction whose government chooses.
 - `notifications_to_other_factions[]` — list of factions that observe the resolution.
-- An OR-trigger condition predicate referencing one of the registered condition types in `event_vocabulary.ts:KNOWN_EVENT_CONDITION_TYPES`.
+- An OR-trigger condition predicate referencing one of the registered condition types in `event_vocabulary.ts:KNOWN_EVENT_CONDITION_TYPES`. Retired types are no longer registered and the loader rejects them, also when nested in `and`/`or`/`not`: `supply_below` and `supply_above` (2026-11-17) and `corridor_severed` (2026-11-18; its BFS ran over settlement edges but compared OSID ids, so it could never evaluate an OSID pair).
 - `response_options[]` — typically 3 options. Each must carry an `id`, a `label`, optional `dimension_shifts[]`, optional `effects[]`, optional `future_consequences[]`, optional `enables_events_runtime[]`, optional `closes_events_runtime[]`.
 - `source_note` — prose paragraph. Sensitive-adjacent rows MUST include the §3.6 forward-looking guard text (see §3 below).
+
+`effect` and `effects[]`: the engine applies the row's required `effect` AND every `effects[]` entry. Put each mechanic in exactly one of them. Never copy `effect` into `effects[0]`; the loader rejects it (§4, `validateNoRepeatedEffect`). Before §6 E1 (2026-11-16), 27 rows did this and applied the effect twice.
 
 ### 2.3 Foundational extension (when adding a downstream)
 
@@ -203,17 +205,20 @@ Reference: `hrhb_camp_exposure_response_1993` Packet 42.
 
 ## 4. Loader validation guarantees (Packet 44 + Phase B passes)
 
-`event_loader.ts` runs twelve validation passes at catalog load. A failure throws and the catalog does NOT load, so authoring errors surface immediately. The passes most relevant to authoring:
+`event_loader.ts` runs fourteen validation passes at catalog load. A failure throws and the catalog does NOT load, so authoring errors surface immediately. The passes most relevant to authoring:
 
 | Pass | What it catches |
 |---|---|
 | `validateDimensionShiftVocabulary` | `dimension_shifts[].dimension` not in canonical 6 DimensionIds (see §5) |
-| `validateEffectKindVocabulary` | `effects[].kind` not in `KNOWN_EVENT_EFFECT_KIND_SET` (see §5) |
+| `validateEffectKindVocabulary` | `effects[].kind` not in `KNOWN_EVENT_EFFECT_KIND_SET` (see §5). This includes the retired `negotiation_capital` kind, which the loader rejects since §6 E2 (2026-11-17) |
+| `validateNoRepeatedEffect` | A row's or response option's `effect` repeated inside its `effects[]` (key-sorted content), which would apply twice (§6 E1, 2026-11-16) |
 | `validateRing3EnablingRejection` | Any `enables_events_runtime[]` targeting a Ring 3 family |
 | `validateRuptureForeclosurePolicy` | Any `closes_events_runtime[]` referencing `srebrenica_falls_1995` or `srebrenica_genocide_1995` without an allowlist entry |
 | Camp-exposure freeze | Catalog row in `concentration_camps_revealed_1992` or camp-exposure family with non-canonical option ids |
 | Forbidden family slugs | Catalog row carrying `family: 'rs_drina_campaign'` (categorically rejected) |
 | Cross-faction option-id disjointness | Same option id appearing across faction-distinct rows with causality wiring |
+| `validateAllianceEffectParties` | An `alliance_change` or `alliance_lock` (they move only the RBiH-HRHB alliance) on a row whose `responding_faction` is not RBiH or HRHB, in `effect`, `effects[]` or any response option. A row with no `responding_faction` is global. A closed allowlist, `NON_PARTY_ALLIANCE_EFFECT_ALLOWLIST`, holds three authored RS options for the §6 card batch, and may only shrink (§6, 2026-11-17) |
+| `validateWarCrimeAuthorship` | A row carrying a `war_crimes_delta` whose trigger, or any prerequisite's (transitively over `requires_events`), reads a flag some response option writes in `sets_flags`, or a `paramilitary_*` condition, and declares no `authored_by_choice` (`true`: each firing is an incident its side authorized in play; `false`: historical record only). Also rejected: `authored_by_choice` on a row with no `war_crimes_delta`, and a negative `international_standing` shift on an authored row or on an option with a `war_crimes_delta` (option-level deltas are always authored). The authored count is `authoredWarCrimeIncidents` (`authored_war_crimes.ts`). Shipped: `csq_accelerated_camps_discovery_1992` true; `un_hostage_crisis_1995` false (it fires under all three RS goals); `ahmici_massacre_1993` false (lane lead 2026-11-18, under the SHDG §6 record "Ahmići windows and H6", 2026-11-16: no surface may present a withheld Ahmići card as restraint, a better outcome or a spared village; the H6 exclusion is truthfulness to the modelled war, Ring 3 #11, not a choice to commit or avoid the crime). A closed allowlist, `AUTHORED_NEGATIVE_STANDING_ALLOWLIST`, holds the camps row's own −10 until §6 E3c strips it, and may only shrink (§6 E3b, 2026-11-17) |
 | Source-tier vocabulary | `source_tier` not in `VALID_SOURCE_TIERS` |
 | Emergence-class vocabulary | `emergence_class` not in `VALID_EMERGENCE_CLASSES` |
 | `bot_response_logic` vocabulary | Not in `VALID_BOT_RESPONSE_LOGIC` |
@@ -251,7 +256,7 @@ The six canonical DimensionIds:
 | `internal_cohesion` | Faction's internal political cohesion |
 | `negotiating_leverage` | Faction's negotiating position strength |
 
-Any other name in this channel is silently dropped (pre-Packet 44) or throws (post-Packet 44).
+Any other name in this channel is silently dropped (pre-Packet 44) or throws at load (post-Packet 44). Since §6 E2 (2026-11-17), `applyDimensionShift` also throws on an unknown id at apply time; a missing store or faction entry (state not yet initialised) stays a quiet no-op.
 
 ### 5.2 Channel B — EffectKind (separate dispatch, many names)
 
@@ -265,9 +270,11 @@ The canonical EffectKinds (alphabetical, matches `EFFECT_KIND_ORDER`):
 aggression_modifier, alliance_change, alliance_lock, bot_priority_shift,
 cohesion_change, control_change, cost_ledger_annotation, doctrine_constraint,
 equipment_grant, equipment_quality_modifier, guerrilla_threat,
-humanitarian_impact, morale_change, narrative, negotiation_capital,
-offensive_ops_suppression, patron_pressure, recruitment_modifier, supply_delta
+enclave_formation_displacement, humanitarian_impact, morale_change, narrative,
+offensive_ops_suppression, patron_pressure, recruitment_modifier
 ```
+
+`negotiation_capital` is **retired** (§6 E2, 2026-11-17). It wrote into the raw `NegotiationBreakdown` counters under dimension names that never existed there, so all 51 catalog uses were silent no-ops. The loader rejects it, and `applyEventEffects` throws on any kind it does not handle. Write a strategic-dimension cost or gain as a `dimension_shifts` entry (Channel A); see §5.3.
 
 Note that `recruitment_modifier` is a LIVE EffectKind (see `memory/recruitment_modifier_dead_channel.md` for the corrected investigation — the channel works; small multipliers on small pools round to zero deterministically). Magnitudes: `0.80x`-`1.20x` is subtle; `0.50x` or `1.50x` is stark.
 
@@ -286,6 +293,7 @@ Historian worksheets often use natural-language dimension names. Substitutions:
 | `territorial_loss` | `territorial_legitimacy -N` | Channel A | DimensionId |
 | `recruitment_pool -N%` | `recruitment_modifier (1-N/100)x/Nt` | Channel B (EffectKind) | NOT `dimension_shifts` |
 | `enclave_resilience` | `military_credibility -N` | Channel A surrogate | No direct field; `enclave_resilience` is NOT a registered name (retired in Packet 41) |
+| `international_credibility` (old `negotiation_capital` effect) | `international_standing ±N` via `dimension_shifts` | Channel A (DimensionId) | §6 E2: the `negotiation_capital` kind is retired. One carrier per effect: if the row already has a live shift on the same faction and dimension, do not add another |
 
 ### 5.4 Critical rule
 

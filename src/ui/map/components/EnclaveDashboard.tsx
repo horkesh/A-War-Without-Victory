@@ -3,28 +3,24 @@
  *
  * Surface redesign, step 4 (2026-11-12): one surface in the Command Surface style
  * (was a small translucent panel at the right edge): header, the readout as figure
- * tiles, the enclaves as cards in the middle, and the airdrop budget with its Stage
- * action in the right column when any enclave can receive drops. Presentation only;
- * the budget arithmetic and the staging IPC call are unchanged.
+ * tiles and the enclaves as cards. Presentation only; it reads enclave resilience,
+ * which runs in 1.0.
+ *
+ * The airdrop budget and its "Stage Airdrop Allocation" action were retired 2026-11-17
+ * with the supply-reserve economy (Fable consult 6): airdrops only ever fed the retired
+ * faction reserve, and nothing read the staged allocation.
  */
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import type { EnclaveResilienceView, LoadedGameState } from '../data/types';
-import { AIRDROP_GENERAL_SUPPLY_PER_ENCLAVE, AIRDROP_MAX_SUPPLY_PER_TURN } from '../../../state/supply_reserve_constants';
-import { useIPC } from '../desktop/useIPC';
 import { getPlayerSafeEnclaveName, getPlayerSafePoliticalFactionName } from '../utils/playerSafeText';
 import { t, type MessageKey } from '../i18n';
 import { strictCompare } from '../../../state/validateGameState';
 import {
   SURFACE_CHIP,
-  SURFACE_LABEL_MUTED,
-  SURFACE_PRIMARY_BUTTON_COMPACT,
   SURFACE_TONE,
   SurfaceCloseButton,
   SurfaceColumns,
   SurfaceContent,
-  SurfaceDetail,
-  SurfaceDetailBody,
-  SurfaceDetailFooter,
   SurfaceFigure,
   SurfaceFrame,
   SurfaceHeader,
@@ -58,12 +54,6 @@ const SUPPLY_LABEL_KEYS: Record<'adequate' | 'strained' | 'critical', MessageKey
   critical: 'enclave.supplyState.critical',
 };
 
-const AIRDROP_LABEL_KEYS: Record<'receiving' | 'not_eligible' | 'not_isolated_long_enough', MessageKey> = {
-  receiving: 'enclave.airdrop.receiving',
-  not_eligible: 'enclave.airdrop.notEligible',
-  not_isolated_long_enough: 'enclave.airdrop.notIsolatedLongEnough',
-};
-
 function getEnclaveRisk(enclave: EnclaveResilienceView) {
   if (enclave.supply_state === 'critical' || enclave.resilience <= 8) {
     return {
@@ -87,11 +77,8 @@ function getEnclaveRisk(enclave: EnclaveResilienceView) {
 }
 
 export function EnclaveDashboard({ state, open, onClose }: EnclaveDashboardProps) {
-  const ipc = useIPC();
   useSurfaceEscape(open, onClose);
   const dialogFocus = useDialogFocus(open);
-  const [allocations, setAllocations] = useState<Record<string, number>>({});
-  const [actionMessage, setActionMessage] = useState<string | null>(null);
   const enclaves = useMemo(
     () => Object.entries(state.enclaveResilience ?? {})
       .filter(([, enclave]) => !state.player_faction || enclave.faction === state.player_faction)
@@ -101,55 +88,13 @@ export function EnclaveDashboard({ state, open, onClose }: EnclaveDashboardProps
       )),
     [state.enclaveResilience, state.player_faction]
   );
-  const eligibleEnclaveIds = useMemo(
-    () => enclaves
-      .filter(([, enclave]) => enclave.faction === 'RBiH' && enclave.isolation_turns >= 4)
-      .map(([enclaveId]) => enclaveId),
-    [enclaves]
-  );
-  const eligibleEnclaveIdSet = useMemo(() => new Set(eligibleEnclaveIds), [eligibleEnclaveIds]);
-  const airdropBudget = Math.min(eligibleEnclaveIds.length * AIRDROP_GENERAL_SUPPLY_PER_ENCLAVE, AIRDROP_MAX_SUPPLY_PER_TURN);
-  const allocated = Object.values(allocations).reduce((sum, value) => sum + value, 0);
-  const overAllocated = allocated > airdropBudget;
-  const remaining = Math.max(0, airdropBudget - allocated);
-  const allocatedPct = airdropBudget > 0 ? Math.min(100, (allocated / airdropBudget) * 100) : 0;
-  const canStageAirdrop = ipc.isAvailable && !overAllocated;
-  const airdropStageDisabledReason = !ipc.isAvailable
-    ? t('formationDetail.commandBridgeUnavailable')
-    : overAllocated
-      ? t('enclave.airdropOverBudget', { budget: airdropBudget.toFixed(1) })
-      : undefined;
   const criticalCount = enclaves.filter(([, enclave]) => enclave.supply_state === 'critical' || enclave.resilience <= 8).length;
   const heightenedCount = enclaves.filter(([, enclave]) => (
     !(enclave.supply_state === 'critical' || enclave.resilience <= 8)
     && (enclave.supply_state === 'strained' || enclave.isolation_turns >= 4)
   )).length;
 
-  useEffect(() => {
-    setAllocations(Object.fromEntries(
-      enclaves
-        .filter(([, enclave]) => (enclave.airdrop_allocation ?? 0) > 0)
-        .map(([enclaveId, enclave]) => [enclaveId, enclave.airdrop_allocation ?? 0])
-    ));
-    setActionMessage(null);
-  }, [open, enclaves]);
-
-  const stageAllocations = async () => {
-    if (!ipc.isAvailable) {
-      setActionMessage(t('formationDetail.commandBridgeUnavailable'));
-      return;
-    }
-    if (overAllocated) {
-      setActionMessage(t('enclave.airdropOverBudget', { budget: airdropBudget.toFixed(1) }));
-      return;
-    }
-    const result = await ipc.stageAirdropAllocation(allocations);
-    setActionMessage(result.ok ? t('enclave.airdropStaged') : (result.error ?? t('enclave.airdropFailed')));
-  };
-
   if (!open) return null;
-
-  const hasAirdrop = eligibleEnclaveIds.length > 0;
 
   return (
     <SurfaceModalLayer>
@@ -167,14 +112,13 @@ export function EnclaveDashboard({ state, open, onClose }: EnclaveDashboardProps
         title={<span id="enclave-dashboard-title">{t('enclave.title')}</span>}
         close={<SurfaceCloseButton onClick={onClose} aria-label={t('enclave.close')} />}
       />
-      <SurfaceColumns layout={hasAirdrop ? 'content-detail' : 'single'}>
+      <SurfaceColumns layout="single">
         <SurfaceContent>
-          <SurfaceSections className={hasAirdrop ? undefined : 'max-w-[96rem]'}>
+          <SurfaceSections className="max-w-[96rem]">
             <SurfaceSection label={t('enclave.summaryTitle')}>
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-2 gap-3">
                 <SurfaceFigure label={t('enclave.summaryCritical')} value={criticalCount} tone="font-mono text-red-200" />
                 <SurfaceFigure label={t('enclave.summaryHeightened')} value={heightenedCount} tone="font-mono text-amber-200" />
-                <SurfaceFigure label={t('enclave.summaryAirdropReady')} value={eligibleEnclaveIds.length} tone="font-mono text-sky-200" />
               </div>
             </SurfaceSection>
 
@@ -186,10 +130,7 @@ export function EnclaveDashboard({ state, open, onClose }: EnclaveDashboardProps
                   const resiliencePct = Math.max(0, Math.min(100, (enclave.resilience / 30) * 100));
                   const hardeningMarkerPct = (8 / 30) * 100;
                   const supplyState = enclave.supply_state;
-                  const airdropStatus = enclave.airdrop_status ?? 'not_eligible';
                   const risk = getEnclaveRisk(enclave);
-                  const currentAllocation = allocations[enclaveId] ?? 0;
-                  const maxAllocation = remaining + currentAllocation;
                   return (
                     <SurfacePanel key={enclaveId} className="flex flex-col gap-3" data-enclave-id={enclaveId}>
                       <div className="flex items-start justify-between gap-3">
@@ -228,39 +169,7 @@ export function EnclaveDashboard({ state, open, onClose }: EnclaveDashboardProps
                           value={supplyState ? t(SUPPLY_LABEL_KEYS[supplyState]) : t('corpsFront.unreported')}
                           tone={supplyState ? SUPPLY_CLASSES[supplyState] : SUPPLY_UNREPORTED_CLASS}
                         />
-                        <SurfaceStat label={t('enclave.airdrop')} value={t(AIRDROP_LABEL_KEYS[airdropStatus])} />
                       </div>
-
-                      {eligibleEnclaveIdSet.has(enclaveId) && (
-                        <div className="flex flex-col gap-1.5">
-                          <label
-                            htmlFor={`enclave-allocation-${enclaveId}`}
-                            className="text-[15px] text-[#b9ad94]"
-                          >
-                            {t('enclave.allocatedSupply')}
-                          </label>
-                          <input
-                            id={`enclave-allocation-${enclaveId}`}
-                            type="number"
-                            min={0}
-                            max={maxAllocation}
-                            step={0.1}
-                            value={currentAllocation.toFixed(1)}
-                            disabled={!ipc.isAvailable}
-                            onChange={(event) => {
-                              const value = Number(event.target.value);
-                              const clampedValue = Number.isFinite(value)
-                                ? Math.min(Math.max(value, 0), maxAllocation)
-                                : 0;
-                              setAllocations((prev) => ({
-                                ...prev,
-                                [enclaveId]: clampedValue,
-                              }));
-                            }}
-                            className="h-11 w-full rounded-md border border-[#3a4150] bg-[#0f1218] px-3 font-mono text-[16px] text-[#f1e6c8] focus:border-accent-gold/60 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
-                          />
-                        </div>
-                      )}
                     </SurfacePanel>
                   );
                 })}
@@ -268,38 +177,6 @@ export function EnclaveDashboard({ state, open, onClose }: EnclaveDashboardProps
             )}
           </SurfaceSections>
         </SurfaceContent>
-
-        {hasAirdrop && (
-          <SurfaceDetail aria-label={t('enclave.airdropBudget')}>
-            <SurfaceDetailBody eyebrow={t('enclave.airdrop')} title={t('enclave.airdropBudget')}>
-              <div className="flex flex-col gap-2">
-                <div className="flex items-baseline justify-between gap-3">
-                  <span className={SURFACE_LABEL_MUTED}>{t('enclave.allocatedSupply')}</span>
-                  <span className="font-mono text-[22px] font-semibold tabular-nums text-[#f1e6c8]">{allocated.toFixed(1)} / {airdropBudget.toFixed(1)}</span>
-                </div>
-                <div className="h-3 overflow-hidden rounded-full bg-[#262b35]">
-                  <div className="h-full bg-sky-300/80" style={{ width: `${allocatedPct}%` }} />
-                </div>
-                <p className="m-0 text-[17px] text-[#ddd1b3]">{t('enclave.remaining', { value: remaining.toFixed(1) })}</p>
-              </div>
-            </SurfaceDetailBody>
-            <SurfaceDetailFooter>
-              {actionMessage && <p role="status" aria-live="polite" className="m-0 text-[16px] text-[#e0c27a]">{actionMessage}</p>}
-              {airdropStageDisabledReason && !actionMessage && (
-                <p className="m-0 text-[15px] text-[#b9ad94]">{airdropStageDisabledReason}</p>
-              )}
-              <button
-                type="button"
-                onClick={() => void stageAllocations()}
-                disabled={!canStageAirdrop}
-                title={airdropStageDisabledReason}
-                className={`w-full ${SURFACE_PRIMARY_BUTTON_COMPACT}`}
-              >
-                {t('enclave.stageAirdropAllocation')}
-              </button>
-            </SurfaceDetailFooter>
-          </SurfaceDetail>
-        )}
       </SurfaceColumns>
     </SurfaceFrame>
     </SurfaceModalLayer>

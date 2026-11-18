@@ -57,6 +57,7 @@ import { isFriendlyFaction } from '../early_war/alliance_update.js';
 import { whenReasonCodeTopic } from './reason_code_debug.js';
 import {
     getOperationAuthorizedDestinations,
+    isEmptySectorReliefColumnOrder,
     isRoutineScopeEnforcedForOrder,
 } from './brigade_routine_scope.js';
 
@@ -615,8 +616,12 @@ export function processOsidColumnMovement(
         // commitment and must not be vetoed by a stale defensive posture; the posture is released
         // further below, and only once the order is actually accepted for transit. An emergent,
         // never-authorized operation leaves a dug-in brigade exactly where it was.
+        // Package P2 step 1 (Codex review on #774): an empty-sector relief march toward its
+        // ordered sector is the corps commander's explicit commitment, on the same footing.
         const digInAuthorizedForOperation = f.posture === 'dig_in'
-            && isOperationAuthorizedColumnOrder(state, f, order, adjacency, reverseMap);
+            && (isOperationAuthorizedColumnOrder(state, f, order, adjacency, reverseMap)
+                || (order.destination_sids?.[0] != null
+                    && isEmptySectorReliefColumnOrder(state, f, order.destination_sids[0], adjacency, reverseMap)));
         if (f.posture === 'dig_in' && !digInAuthorizedForOperation) {
             report.column_blocked += 1;
             recordRejection(

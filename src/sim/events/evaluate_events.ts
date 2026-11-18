@@ -7,7 +7,6 @@
  */
 
 import type { GameState, FactionId, CausalityLogEntry } from '../../state/game_state.js';
-import type { EdgeRecord } from '../../map/settlements.js';
 import { applyEventEffects } from './apply_effects.js';
 import type { EventDefinition, DimensionShift, EventResponseOption, FiredEvent, PendingEventDecision, Rng } from './event_types.js';
 import { triggerMatches } from './event_types.js';
@@ -19,6 +18,7 @@ import { applyDimensionShift, type DimensionStore } from './strategic_dimensions
 import { getPoliticalPersonality, computePoliticalAssessment } from '../political/political_personality.js';
 import { pickPoliticalResponse, pickPoliticalResponseWithHistory } from '../political/political_event_decision.js';
 import { isWarOutsideHistoricalBand } from '../political/historical_territory_band.js';
+import { isPoliticalGateEligible, isPoliticsOffHistoryFor } from '../political/political_departure_markers.js';
 import { compareCausalityEntries, strictCompare } from '../../state/validateGameState.js';
 import { findAnswerAheadOfFiring, isAnswerAheadOfFiringDecision } from './answer_ahead_of_firing.js';
 
@@ -314,7 +314,6 @@ function isCandidateEligible(
     def: EventDefinition,
     state: GameState,
     currentTurn: number,
-    edges?: EdgeRecord[],
 ): boolean {
     // Phase B Sub-slice B3: short-circuit on closed/disabled BEFORE pressure or
     // eligibility work. Packet §3.2, §3.5 — closed events never reach pressure
@@ -337,9 +336,9 @@ function isCandidateEligible(
     if (def.pressure) {
         // Pressure events: readiness can persist briefly after a trigger gate closes;
         // require the trigger to still match before allowing the event to fire.
-        if (!triggerMatches(def, state, currentTurn, edges)) return false;
+        if (!triggerMatches(def, state, currentTurn)) return false;
         if (!isEventReady(state, def)) return false;
-    } else if (!triggerMatches(def, state, currentTurn, edges)) {
+    } else if (!triggerMatches(def, state, currentTurn)) {
         return false;
     }
 
@@ -482,7 +481,11 @@ export function selectBotEventResponse(
                     assessment,
                     personality,
                     historicalReferenceId,
-                    isWarOutsideHistoricalBand(state),
+                    // Territory band, or (not for §6 decisions) a political departure that
+                    // ruled out this faction's history.
+                    isWarOutsideHistoricalBand(state)
+                        || (isPoliticalGateEligible(def.id, def.family)
+                            && isPoliticsOffHistoryFor(state, respondingFaction)),
                 ),
                 decisionSource: 'bot_political',
             };
@@ -605,7 +608,6 @@ export function fireOwedFollowUpsAtTermination(
     state: GameState,
     registry: EventDefinition[],
     terminalTurn: number,
-    edges?: EdgeRecord[],
 ): FiredEvent[] {
     if (state.meta.game_over !== true) return [];
     const owedTurn = terminalTurn + 1;
@@ -623,7 +625,7 @@ export function fireOwedFollowUpsAtTermination(
             && requires.length > 0
             && requires.every((id) => firedIds.includes(id) && byId.get(id)?.trigger.turn_max === terminalTurn)
             && requires.some((id) => lastFired[id] === terminalTurn)
-            && isCandidateEligible(def, state, owedTurn, edges);
+            && isCandidateEligible(def, state, owedTurn);
     });
     const fired: FiredEvent[] = [];
     for (const def of owed) {
@@ -653,7 +655,6 @@ export function evaluateEvents(
     _rng: Rng,
     currentTurn: number,
     registry: EventDefinition[],
-    edges?: EdgeRecord[]
 ): EventsEvaluationReport {
     const fired: FiredEvent[] = [];
     const phase = state.meta.phase;
@@ -723,7 +724,7 @@ export function evaluateEvents(
     for (const id of queuedIds) {
         const def = eventsById.get(id);
         if (!def) continue;
-        if (isCandidateEligible(def, state, currentTurn, edges)) {
+        if (isCandidateEligible(def, state, currentTurn)) {
             queuedCandidates.push(def);
         }
     }
@@ -732,7 +733,7 @@ export function evaluateEvents(
     const seenNewIds = new Set<string>();
     for (const def of canonicalEvents) {
         if (queuedIdSet.has(def.id) || seenNewIds.has(def.id)) continue;
-        if (isCandidateEligible(def, state, currentTurn, edges)) {
+        if (isCandidateEligible(def, state, currentTurn)) {
             newCandidates.push(def);
             seenNewIds.add(def.id);
         }
@@ -987,7 +988,7 @@ export function evaluateEvents(
     const followUpSnapshot: EventDefinition[] = [];
     for (const def of canonicalEvents) {
         if (def.same_turn_requires_events !== true || primaryCandidateIds.has(def.id)) continue;
-        if (!isCandidateEligible(def, state, currentTurn, edges)) continue;
+        if (!isCandidateEligible(def, state, currentTurn)) continue;
         if (def.mutex_group && occupiedMutexGroups.has(def.mutex_group)) {
             mutexFiltered.mutex_suppressed_ids.push(def.id);
             recordCausality(state, {

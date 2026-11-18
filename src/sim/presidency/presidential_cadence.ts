@@ -130,7 +130,6 @@ export interface PresidentialCadenceProjectionState {
     decision: 'acknowledged' | 'override_confirmed' | 'replacement_accepted';
   }>;
   reserveDecisionHistory?: Array<{ id: string; faction: string; turn: number }>;
-  convoyDecisionHistory?: Array<{ id: string; routeFaction: string; turn: number }>;
   paramilitaryDecisionHistory?: Array<{ id: string; faction: string; turn: number }>;
   daytonResult?: { turn: number };
   operationOpportunities?: Array<{ proposalId: string; approverFaction: string }>;
@@ -417,17 +416,6 @@ export function projectPresidentialCadenceReceipts(
     if (record.faction !== faction) continue;
     projected.push({
       id: `reserve:${record.id}`,
-      faction,
-      turn: record.turn,
-      classification: 'ordinary_emergent',
-      sourceIds: [],
-    });
-  }
-
-  for (const record of state.convoyDecisionHistory ?? []) {
-    if (record.routeFaction !== faction) continue;
-    projected.push({
-      id: `convoy:${record.id}`,
       faction,
       turn: record.turn,
       classification: 'ordinary_emergent',

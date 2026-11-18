@@ -37,7 +37,7 @@ import { backfillFormationLocationOsid, computeOsidPopulation } from '../../data
 import { loadSettlementEthnicityData } from '../../data/settlement_ethnicity.js';
 import { buildSidToMunFromSettlements } from '../../scenario/oob_early_war_entry.js';
 import { updateCapabilityProfiles } from '../../state/capability_progression.js';
-import { computeDimensionBaseValues, applyDimensionShift } from '../events/strategic_dimensions.js';
+import { recomputeDimensionBases, applyDimensionShift } from '../events/strategic_dimensions.js';
 import { relieveOfficer, recordPresidentialOverride } from '../combat/order_interpretation.js';
 import { applyReplaceCoConsequence, applyForceOpConsequence, applyStopOpConsequence } from '../combat/command_lever_consequences.js';
 import { clamp } from '../../utils/math.js';
@@ -203,15 +203,6 @@ import { resolveAttackOrdersOsid, displaceFormationsInEnemyTerritory } from '../
 import { applyBrigadeMovementOrders } from '../combat/brigade_movement_orders.js';
 import { processOsidColumnMovement, type OsidColumnMovementReport } from '../combat/osid_column_movement.js';
 import { updateSupplyPressure } from '../combat/supply_pressure.js';
-import {
-    applyHumanitarianConvoyDecisions,
-    applySmugglingAllocation,
-    applyUnAirdrops,
-    evaluateHumanitarianConvoys,
-    maybeActivateSarajevoTunnel,
-    updateSiegeTurnCounters,
-    updateSupplyReserves
-} from '../../state/supply_reserves.js';
 import type { Osid } from '../combat/osid_adjacency.js';
 import { enforceGuardsEnclaveBoundary, generateArmyReserveRequests, evaluateArmyReserveAssignments, tickEliteLoans } from '../combat/army_reserve_system.js';
 import { buildHomeDistanceCache } from '../combat/home_distance.js';
@@ -1173,6 +1164,25 @@ export const warPhases: NamedPhase[] = [
         }
     },
     {
+        // §6 phase order (ruling 2026-11-17), point (a) of three. Re-runs the one base owner
+        // so this turn's events see every base input written since the last turn: the
+        // previous turn's late steps and every between-turn write (IPC peace-plan answers,
+        // decisions answered while the turn was not paused, saves from before this step).
+        // Headless it is a no-op against last turn's `refresh-dimension-bases`.
+        // Skipped on the first war turn so turn-1 events read the initialised bases, the same
+        // for a desktop birth and a headless one. runTurn increments meta.turn before the
+        // steps, so a war that starts at war_start_turn W executes its first turn as W + 1
+        // (displacement_takeover.ts reads the first war turn the same way).
+        name: 'refresh-dimension-bases-turn-start',
+        run: (context) => {
+            const meta = context.state.meta;
+            if (meta.phase !== 'war') return;
+            if (meta.game_over) return;
+            if (meta.turn <= (meta.war_start_turn ?? 0) + 1) return;
+            recomputeDimensionBases(context.state);
+        }
+    },
+    {
         name: 'update-event-readiness',
         run: (context) => {
             if (context.input.eventDefinitions) {
@@ -1184,7 +1194,7 @@ export const warPhases: NamedPhase[] = [
         name: 'evaluate-events',
         run: (context) => {
             const turn = context.state.meta.turn;
-            const result = evaluateEvents(context.state, context.rng, turn, context.input.eventDefinitions ?? [], context.input.settlementEdges);
+            const result = evaluateEvents(context.state, context.rng, turn, context.input.eventDefinitions ?? []);
             context.report.events_fired = result.fired;
             // Graz Accords: fires at week 4 (6 May 1992), sets state.political.vienna_declaration_turn
             const grazText = checkAndFireGrazAccords(context.state);
@@ -1243,13 +1253,11 @@ export const warPhases: NamedPhase[] = [
         }
     },
     {
+        // §6 phase order (ruling 2026-11-17), point (b) of three: mid-turn, after
+        // evaluate-events, so a choice's base input reaches the base before operations.
         name: 'compute-dimension-bases',
         run: (context) => {
-            const neg = context.state.military.negotiation;
-            if (!neg?.strategic_dimensions) return;
-            for (const faction of ['RBiH', 'RS', 'HRHB'] as const) {
-                computeDimensionBaseValues(neg.strategic_dimensions, context.state, faction);
-            }
+            recomputeDimensionBases(context.state);
         }
     },
     {
@@ -1632,55 +1640,14 @@ export const warPhases: NamedPhase[] = [
             );
         }
     },
-    {
-        name: 'update-siege-counters',
-        run: (context) => {
-            if (context.state.meta.phase !== 'war') return;
-            if (!context.state.meta.supply_reserves_enabled) return;
-            const supplyByOsid = context.report.supply_resolution?.supply_state_by_osid;
-            const spatial = getSpatialContextCache(context);
-            const adjacency = spatial ? spatial.preCombat.adjacency as Map<string, string[]> : undefined;
-            context.report.siege_turn_counters = updateSiegeTurnCounters(context.state, supplyByOsid, adjacency);
-        }
-    },
-    {
-        name: 'compute-supply-reserves',
-        run: (context) => {
-            if (context.state.meta.phase !== 'war') return;
-            if (!context.state.meta.supply_reserves_enabled) return;
-            const productionBonus = context.report.supply_resolution?.production_bonus_by_faction ?? {};
-            context.report.supply_reserves = updateSupplyReserves(context.state, productionBonus);
-        }
-    },
-    {
-        name: 'update-smuggling-routes',
-        run: async (context) => {
-            if (context.state.meta.phase !== 'war') return;
-            if (!context.state.meta.supply_reserves_enabled) return;
-            const { updateSmugglingRoutes, getSmugglingIncome } = await import('../economy/smuggling_routes.js');
-            const turn = context.state.meta.turn;
-            updateSmugglingRoutes(context.state, turn);
-            // Apply smuggling income to supply reserves
-            const income = getSmugglingIncome(context.state);
-            const generalSupplyReserve = context.state.military.general_supply_reserve;
-            const heavyMunitionsReserve = context.state.military.heavy_munitions_reserve;
-            if (generalSupplyReserve && heavyMunitionsReserve) {
-                for (const fid of Object.keys(income.general).sort()) {
-                    generalSupplyReserve[fid] = Math.min(100,
-                        (generalSupplyReserve[fid] ?? 0) + (income.general[fid] ?? 0));
-                    heavyMunitionsReserve[fid] = Math.min(100,
-                        (heavyMunitionsReserve[fid] ?? 0) + (income.heavy[fid] ?? 0));
-                }
-            }
-        }
-    },
+    // Retired 2026-11-17 (§6 panel): 'update-siege-counters' (siege turn counters are not modelled in 1.0).
     {
         name: 'enclave-resilience',
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
             const supplyByOsid = context.report.supply_resolution?.supply_state_by_osid;
             context.report.enclave_resilience = updateEnclaveResilience(context.state, supplyByOsid);
-            applyUnAirdrops(context.state);
+            // applyUnAirdrops retired 2026-11-17 (Fable consult 6): airdrops fed only the retired reserve.
         }
     },
     {
@@ -3408,22 +3375,7 @@ export const warPhases: NamedPhase[] = [
             );
         }
     },
-    // LANE-NIGHTSHIFT-SRK-SIEGE-DEFENDER-MORALE-PHASE-1 (Engine Invariants
-    // v0.9.0 §6.10 + Systems Manual v0.9.0 §6.10, 2026-05-08): siege defender
-    // morale drain. Runs AFTER morale-drift so the graduated siege drain
-    // layers on top of the existing affinity drift; net direction is what
-    // matters. Faction-symmetric — reads `state.military.siege_turn_counters`
-    // (already faction-keyed). Default-off shadow flag
-    // SIEGE_MORALE_DRAIN_ENABLED; diagnostic counter increments
-    // unconditionally per N4 precedent.
-    {
-        name: 'apply-siege-morale-drain',
-        run: async (context) => {
-            if (context.state.meta.phase !== 'war') return;
-            const { applySiegeMoraleDrain } = await import('../combat/siege_morale_drain.js');
-            context.report.siege_morale_drain = applySiegeMoraleDrain(context.state);
-        }
-    },
+    // Retired 2026-11-17 (§6 panel): 'apply-siege-morale-drain' (siege defender morale drain is not modelled in 1.0).
     // --- Second dissolution pass: catches brigades whose morale/cohesion dropped
     // below threshold during post-combat drift (morale-drift, cohesion-drift).
     // The first pass (line ~373) runs before combat and cannot catch these.
@@ -3460,15 +3412,7 @@ export const warPhases: NamedPhase[] = [
             );
         }
     },
-    {
-        name: 'apply-siege-bombardment-attrition',
-        run: async (context) => {
-            if (context.state.meta.phase !== 'war') return;
-            if (!context.state.meta.supply_reserves_enabled) return;
-            const { applySiegeBombardmentAttrition } = await import('../combat/siege_attrition.js');
-            context.report.siege_bombardment_attrition = applySiegeBombardmentAttrition(context.state);
-        }
-    },
+    // Retired 2026-11-17 (§6 panel): 'apply-siege-bombardment-attrition' (passive siege bombardment attrition is not modelled in 1.0).
     {
         name: 'hostile-takeover-displacement',
         run: async (context) => {
@@ -4074,7 +4018,7 @@ export const warPhases: NamedPhase[] = [
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
             updateEmbargoProfiles(context.state);
-            applySmugglingAllocation(context.state);
+            // applySmugglingAllocation retired 2026-11-17 (Fable consult 6): nothing wrote smuggling_allocation.
             ensureMaintenanceCapacity(context.state);
             context.report.embargo_update = { factions: context.state.factions.length };
         }
@@ -4083,18 +4027,17 @@ export const warPhases: NamedPhase[] = [
         name: 'update-enclave-integrity',
         run: async (context) => {
             if (context.state.meta.phase !== 'war') return;
-            let edges = context.input.settlementEdges;
-            if (!edges || edges.length === 0) {
-                const graph = await getOperationalSettlementGraph(context);
-                edges = graph.edges;
-            }
-            if (!edges || edges.length === 0) return;
+            // F1i (2026-11-16): control is keyed by OSID, so the enclave pass reads the OSID graph's
+            // edges and the OSID supply report. The legacy settlement edges and `supply_state` never
+            // matched an OSID, so `political.enclaves` stayed empty.
             const graph = await getOperationalSettlementGraph(context);
+            const edges = graph.edges;
+            if (!edges || edges.length === 0) return;
             const report = updateEnclaveIntegrity(
                 context.state,
                 graph,
                 edges,
-                context.report.supply_resolution?.supply_state
+                context.report.supply_resolution?.supply_state_by_osid
             );
             context.report.enclave_integrity = {
                 enclaves: report.enclaves.length,
@@ -4107,7 +4050,8 @@ export const warPhases: NamedPhase[] = [
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
             const sarajevo = updateSarajevoState(context.state, context.report.supply_resolution?.supply_state_by_osid);
-            maybeActivateSarajevoTunnel(context.state);
+            // F1i (2026-11-16): the enclave-derived tunnel activation is retired (it could never
+            // fire); the tunnel is event truth in sarajevo_lifeline.ts.
             context.report.sarajevo_exception = {
                 siege_status: sarajevo.siege_status,
                 siege_intensity: sarajevo.siege_intensity,
@@ -4120,14 +4064,12 @@ export const warPhases: NamedPhase[] = [
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
             ensureInternationalVisibilityPressure(context.state);
-            // #23 phase 2: bridge enclave_resilience map into IVP rollup. The
-            // primary supply-critical-component detection produces zero entries
-            // despite historically-correct sieges (n10 empirical); the fallback
-            // reads the hand-curated enclave_resilience map so siege humanitarian
-            // pressure surfaces in IVP and constraint_severity can clear W4 (>0.55).
-            const primaryPressure = context.report.enclave_integrity?.humanitarian_pressure_total ?? 0;
-            const fallbackPressure = computeEnclaveResilienceFallbackPressure(context.state);
-            const enclavePressure = primaryPressure + fallbackPressure;
+            // F1i (2026-11-16, §6 panel, unanimous): IVP's enclave humanitarian term has ONE
+            // source, the hand-curated enclave_resilience map (SENSITIVE_HISTORY_DESIGN_GATE's
+            // enclave authority). The generic supply-critical detector (political.enclaves) is
+            // not added: once its read was fixed it double-counted the same sieges, saturated the
+            // term at 1.0 every turn and billed turn-1 mixed-control noise pockets.
+            const enclavePressure = computeEnclaveResilienceFallbackPressure(context.state);
             const ivp = updateInternationalVisibilityPressure(
                 context.state,
                 context.state.political.sarajevo_state,
@@ -4143,20 +4085,8 @@ export const warPhases: NamedPhase[] = [
             (context.report as TurnReport & { patron_ivp_active_consequences?: string[] }).patron_ivp_active_consequences = consequences;
         }
     },
-    {
-        name: 'evaluate-humanitarian-convoys',
-        run: (context) => {
-            if (context.state.meta.phase !== 'war') return;
-            const edges = context.input.settlementEdges;
-            if (!edges?.length) return;
-            const created = evaluateHumanitarianConvoys(context.state, edges);
-            applyHumanitarianConvoyDecisions(context.state);
-            (context.report as TurnReport & { humanitarian_convoys?: { created: number; pending: number } }).humanitarian_convoys = {
-                created: created.length,
-                pending: context.state.military.pending_convoy_decisions?.length ?? 0,
-            };
-        }
-    },
+    // F1i (2026-11-16): 'evaluate-humanitarian-convoys' is retired; humanitarian convoys are not in
+    // 1.0 (the reserve module was retired 2026-11-17). The step never found a route on any reachable path.
     {
         name: 'update-legitimacy',
         run: async (context) => {

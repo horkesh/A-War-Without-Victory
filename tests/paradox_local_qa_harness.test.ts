@@ -224,11 +224,11 @@ test('packaged startup waits for the embedded React owner and follows its comple
     ) as (surface: any, faction: string, onStep?: (step: string) => Promise<void>) => Promise<{ requested: string; ariaChecked: string } | null>;
     const actions: string[] = [];
     const steps: string[] = [];
-    const productionRadioNames = ['Let it run from here', 'Let history run as it did'];
+    const productionRadioNames = ['Let it run from here', 'Replay the historical record'];
     const control = (name: string) => ({
         waitFor: async ({ state }: { state: string }) => actions.push(`wait:${name}:${state}`),
         click: async () => actions.push(`click:${name}`),
-        getAttribute: async (attribute: string) => attribute === 'aria-checked' && name === '/^Let history run as it did$/i' ? 'true' : null,
+        getAttribute: async (attribute: string) => attribute === 'aria-checked' && name === '/^Replay the historical record$/i' ? 'true' : null,
         first() { return this; },
     });
     const surface = {
@@ -255,8 +255,8 @@ test('packaged startup waits for the embedded React owner and follows its comple
         'click:main-menu-faction-RBiH',
         'wait:/^Take command$/i:visible',
         'click:/^Take command$/i',
-        'wait:/^Let history run as it did$/i:visible',
-        'click:/^Let history run as it did$/i',
+        'wait:/^Replay the historical record$/i:visible',
+        'click:/^Replay the historical record$/i',
         'wait:/^Begin$/i:visible',
         'click:/^Begin$/i',
         'wait:/^Begin$/i:hidden',
@@ -3202,24 +3202,24 @@ test('durable decision histories require a new exact identity and expected playe
     ) => Record<string, unknown>>(harness, 'assertNewExactDecisionReceipt', { decisionReceiptKey, strictAsciiCompare });
 
     const receipt = assertNewExactDecisionReceipt(
-        'convoy',
+        'paramilitary',
         'id',
-        'convoy-a',
+        'para-a',
         [],
-        [{ id: 'convoy-a', decision: 'allow', decidedBy: 'player', turn: 4 }],
-        { decision: 'allow', decidedBy: 'player' },
+        [{ id: 'para-a', decision: 'deny', decidedBy: 'player', turn: 4 }],
+        { decision: 'deny', decidedBy: 'player' },
     );
-    assert.equal(receipt.id, 'convoy-a');
+    assert.equal(receipt.id, 'para-a');
     assert.throws(
         () => assertNewExactDecisionReceipt(
-            'convoy',
+            'paramilitary',
             'id',
-            'convoy-a',
-            [{ id: 'convoy-a', decision: 'allow', decidedBy: 'player', turn: 4 }],
-            [{ id: 'convoy-a', decision: 'allow', decidedBy: 'player', turn: 4 }],
-            { decision: 'allow', decidedBy: 'player' },
+            'para-a',
+            [{ id: 'para-a', decision: 'deny', decidedBy: 'player', turn: 4 }],
+            [{ id: 'para-a', decision: 'deny', decidedBy: 'player', turn: 4 }],
+            { decision: 'deny', decidedBy: 'player' },
         ),
-        /No new exact convoy decision receipt/,
+        /No new exact paramilitary decision receipt/,
     );
     assert.throws(
         () => assertNewExactDecisionReceipt(
@@ -3247,7 +3247,8 @@ test('durable decision histories require a new exact identity and expected playe
     const readState = extractFunctionSource(harness, 'readState');
     assert.match(readState, /peacePlanDecisionReceipts/);
     assert.match(readState, /reserveDecisionReceipts/);
-    assert.match(readState, /convoyDecisionReceipts/);
+    // F1i (2026-11-16): convoy receipts are retired with the convoy decision family.
+    assert.doesNotMatch(readState, /convoyDecisionReceipts/);
     assert.match(readState, /officerDecisionReceipts/);
     assert.match(readState, /paramilitaryDecisionReceipts/);
 });
@@ -3283,6 +3284,7 @@ test('canonical autosave receipt projection exposes only the player decision led
                 { request_id: 'reserve-rs', faction: 'RS', outcome: 'accepted', decided_by: 'player', turn: 7 },
                 { request_id: 'reserve-rbih', faction: 'RBiH', outcome: 'accepted', decided_by: 'player', turn: 7 },
             ],
+            // F1i: an old save's convoy history is not a player decision ledger any more.
             convoy_decision_history: [
                 { id: 'convoy-rs', route_faction: 'RS', target_faction: 'RBiH', decision: 'allow', decided_by: 'player', turn: 8 },
                 { id: 'convoy-rbih', route_faction: 'RBiH', target_faction: 'RS', decision: 'block', decided_by: 'player', turn: 8 },
@@ -3300,7 +3302,7 @@ test('canonical autosave receipt projection exposes only the player decision led
 
     assert.deepEqual(receipts.peacePlanDecisionReceipts.map((row) => row.planId), ['vance_owen']);
     assert.deepEqual(receipts.reserveDecisionReceipts.map((row) => row.requestId), ['reserve-rs']);
-    assert.deepEqual(receipts.convoyDecisionReceipts.map((row) => row.id), ['convoy-rs']);
+    assert.equal(receipts.convoyDecisionReceipts, undefined);
     assert.deepEqual(receipts.officerDecisionReceipts.map((row) => row.eventId), ['event-rs']);
     assert.deepEqual(receipts.paramilitaryDecisionReceipts.map((row) => row.targetOsid), ['target-rs']);
     assert.match(extractFunctionSource(harness, 'readState'), /readCanonicalDecisionReceiptsFromAutosave/);
@@ -3698,6 +3700,7 @@ test('final blocker inventory covers every canonical player decision queue', () 
     const inventory = buildPlayerBlockerInventory({
         military: {
             pending_reserve_requests: [{ faction: 'RS' }, { faction: 'RBiH' }],
+            // F1i: a legacy pending convoy is not a player blocker (the family is retired).
             pending_convoy_decisions: [{ route_faction: 'RS' }, { route_faction: 'RS', decision: 'allow' }],
             pending_officer_events: [{ faction: 'RS', acknowledged: false }, { faction: 'RS', acknowledged: true }],
             operation_opportunities: [
@@ -3732,7 +3735,6 @@ test('final blocker inventory covers every canonical player decision queue', () 
         proposals: 1,
         paramilitary: 1,
         reserves: 1,
-        convoys: 1,
         officerEvents: 1,
         peacePlan: 1,
         counterOffers: 1,
@@ -3758,7 +3760,6 @@ test('zero-count Review Before Advance telemetry cannot masquerade as a blocking
         proposals: 0,
         paramilitary: 0,
         reserves: 0,
-        convoys: 0,
         officerEvents: 0,
         peacePlan: 0,
         counterOffers: 0,
@@ -3790,7 +3791,7 @@ test('counter-offer handler targets an exact player-visible offer and requires s
     assert.match(counterBranch, /remained pending after visible response/);
 });
 
-test('peace reserve convoy officer and paramilitary UI decisions prove durable exact receipts', () => {
+test('peace reserve officer and paramilitary UI decisions prove durable exact receipts', () => {
     const harness = readHarness();
     const handler = extractFunctionSource(harness, 'handleCurrentSurface');
 
@@ -3800,10 +3801,6 @@ test('peace reserve convoy officer and paramilitary UI decisions prove durable e
     );
     const reserveBranch = handler.slice(
         handler.indexOf('if ((pendingState?.reserveRequests ?? 0) > 0)'),
-        handler.indexOf('if ((pendingState?.convoyDecisions ?? 0) > 0)'),
-    );
-    const convoyBranch = handler.slice(
-        handler.indexOf('if ((pendingState?.convoyDecisions ?? 0) > 0)'),
         handler.indexOf('if ((pendingState?.pendingOfficerEvents ?? 0) > 0)'),
     );
     const officerBranch = handler.slice(
@@ -3817,7 +3814,7 @@ test('peace reserve convoy officer and paramilitary UI decisions prove durable e
 
     assert.match(peaceBranch, /assertNewExactDecisionReceipt\([\s\S]*?'peace-plan'/);
     assert.match(reserveBranch, /assertNewExactDecisionReceipt\([\s\S]*?'reserve'/);
-    assert.match(convoyBranch, /assertNewExactDecisionReceipt\([\s\S]*?'convoy'/);
+    assert.doesNotMatch(handler, /convoyDecisions|pendingConvoyDecisionIds/);
     assert.match(officerBranch, /waitForNewExactDecisionReceipt\([\s\S]*?'officer'/);
     assert.match(paramilitaryBranch, /assertExactParamilitaryDecisionReceipts/);
     assert.match(paramilitaryBranch, /pendingParamilitaryRequestIds/);

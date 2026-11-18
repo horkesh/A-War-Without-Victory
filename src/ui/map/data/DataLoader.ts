@@ -1,5 +1,5 @@
 import type { FeatureCollection } from 'geojson';
-import type { EventDefinition } from '../../../sim/events/event_types.js';
+import type { DimensionShift, EventDefinition } from '../../../sim/events/event_types.js';
 import { getPlayerSafeDisplayLabel } from '../utils/playerSafeText.js';
 import { countMapTransitionResource } from '../perf/mapTransitionTiming.js';
 import type { OsidDamageSeed } from '../layers/buildOsidDamageOverlay.js';
@@ -141,9 +141,27 @@ export interface EventDefinitionView {
   narrative: string;
   category: string;
   effects?: Array<{ kind: string; faction?: string; delta?: number; text?: string }>;
+  /** §6 E2: the card's own strategic-dimension shifts, shown on the acknowledgement list. */
+  dimension_shifts?: DimensionShift[];
   decision?: { options: Array<{ id: string; label: string; description?: string }> };
   /** Optional documentary-realism illustration key (basename or path). */
   image?: string;
+}
+
+type EventViewEffect = NonNullable<EventDefinitionView['effects']>[number];
+
+/**
+ * Effects to show on an event card. The engine (`collectEffects`) applies the
+ * required `effect` AND every `effects` entry, so a mechanical `effect` must be
+ * shown even when `effects` exists (§6 E1, 2026-11-16: until then the card hid
+ * it, and 27 rows repeated it inside `effects`, applying it twice). A narrative
+ * `effect` beside `effects` stays hidden, as before, so card text is unchanged.
+ */
+export function eventDefinitionDisplayEffects(ev: { effect?: unknown; effects?: unknown }): EventViewEffect[] {
+  const primary = ev.effect && typeof ev.effect === 'object' ? (ev.effect as EventViewEffect) : undefined;
+  if (!Array.isArray(ev.effects)) return primary ? [primary] : [];
+  const rest = ev.effects as EventViewEffect[];
+  return primary && primary.kind !== 'narrative' ? [primary, ...rest] : rest;
 }
 
 /**
@@ -175,7 +193,8 @@ export function loadEventDefinitions(): Promise<Map<string, EventDefinitionView>
           title: getPlayerSafeDisplayLabel(ev.title ?? ev.id, 'Untitled event'),
           narrative: ev.narrative ?? '',
           category: ev.category ?? 'military',
-          effects: Array.isArray(ev.effects) ? ev.effects : ev.effect ? [ev.effect] : [],
+          effects: eventDefinitionDisplayEffects(ev),
+          dimension_shifts: Array.isArray(ev.dimension_shifts) ? ev.dimension_shifts : undefined,
           decision: ev.decision,
           image: typeof ev.image === 'string' ? ev.image : undefined,
         });

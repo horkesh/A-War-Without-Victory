@@ -374,7 +374,7 @@ const CORPS_ENCLAVE_MAP: Record<string, string> = {
 };
 
 /** Check whether an enclave-locked officer can command ops for a given corps. */
-function isEnclaveCompatible(data: NamedOfficer, corpsId: string, currentTurn: number): boolean {
+export function isEnclaveCompatible(data: NamedOfficer, corpsId: string, currentTurn: number): boolean {
     if (!data.enclave_lock) return true; // No lock — always compatible
     // Lock expired (enclave broke out / officer evacuated)
     if (data.enclave_lock.locked_until_turn !== undefined && currentTurn >= data.enclave_lock.locked_until_turn) return true;
@@ -418,6 +418,12 @@ export function selectOperationCommander(
         if (os.assigned_operation) continue;
         // Enclave lock: officer physically cannot reach this corps
         if (!isEnclaveCompatible(data, corpsId, currentTurn)) continue;
+        // Commander attribution PR 2a: only an officer whose home or compatible corps is this corps
+        // may command its operation. Before, any reserve officer of the faction could fill the slot
+        // (e.g. a 2nd Corps or Srebrenica officer commanding a 7th Corps operation). With no such
+        // officer free, the operation has no named commander (assignOperationCommander handles null).
+        const belongsToCorps = data.home_corps_id === corpsId || (data.compatible_corps_ids ?? []).includes(corpsId);
+        if (!belongsToCorps) continue;
 
         candidates.push(data);
     }
@@ -572,7 +578,8 @@ export function releaseTacticalCommander(
 
     const os = officers[op.tg_commander_officer_id];
     if (os && os.assigned_operation) {
-        os.status = 'reserve';
+        // Only an officer still serving returns to reserve (commander attribution hardening).
+        if (os.status === 'active') os.status = 'reserve';
         os.assigned_operation = undefined;
     }
 }
@@ -590,7 +597,10 @@ export function releaseOperationCommander(
 
     const os = officers[op.commander_officer_id];
     if (os && os.assigned_operation) {
-        os.status = 'reserve';
+        // Only an officer still serving returns to the reserve pool. A retired, killed, captured or
+        // defected officer stays out: releasing his old operation must not bring him back (commander
+        // attribution hardening).
+        if (os.status === 'active') os.status = 'reserve';
         os.assigned_operation = undefined;
     }
 }
@@ -758,6 +768,9 @@ export function processOfficerSuccession(
             if (os.assigned_corps_id) {
                 os.assigned_corps_id = null;
             }
+            // A departing officer leaves any operation command too, so he can never be released
+            // back into the reserve pool later (commander attribution hardening).
+            os.assigned_operation = undefined;
             report.departures.push(data.id);
         }
     }
@@ -1038,26 +1051,34 @@ export function processOfficerSuccession(
             });
             const prefix = faction === 'HRHB' && wasCombatDeath ? 'generic_combat_' : 'generic_';
             const genericId = `${prefix}${faction}_${corpsFormId}_t${turn}`;
-            // D.4: Read generic replacement competence from war_timeline if available
-            const factionConfig = state.military.war_timeline?.officer_config?.[faction];
-            const genericComp = factionConfig?.generic_replacement_competence ?? 2;
+            // Commander attribution PR 2a: the acting commander stands in for a holder the sources
+            // don't name, so his personality is NEUTRAL: the faction's average corps commander. It
+            // drives the commander loop neither harder nor softer than an average CO. It doesn't learn,
+            // so it can't drift above average. (Before: competence 2 from the timeline config,
+            // defensive skill 2, which made every gap a below-average commander.) The acting combat
+            // modifier and the HVO replacement delays are unchanged.
+            const neutral = averageCorpsCommanderTraits(officerData, faction);
 
             const genericData: NamedOfficer = {
                 id: genericId,
                 name: `Acting Commander (${corpsFormId})`,
                 faction,
                 rank: 'corps_commander',
-                competence: genericComp,
-                aggressiveness: 3,
-                defensive_skill: 2,
-                political_reliability: 3,
+                competence: neutral.competence,
+                aggressiveness: neutral.aggressiveness,
+                defensive_skill: neutral.defensive_skill,
+                political_reliability: neutral.political_reliability,
                 home_corps_id: corpsFormId,
                 available_from_turn: turn,
                 origin: 'military',
                 casualty_vulnerability: 0.15,
-                can_improve: true,
-                improvement_rate: 0.06,
+                can_improve: false,
+                improvement_rate: 0,
                 pool_tier: 'tier_c',
+                // The A2 defaults every other officer row carries (save migration v10). Without them
+                // a reload fills them in and the live and reloaded states differ (reload contract).
+                stubbornness: 3,
+                override_tolerance: 3,
             };
             officerData.push(genericData);
             officers[genericId] = {
@@ -1070,6 +1091,7 @@ export function processOfficerSuccession(
                 effective_competence_penalty: 0,
                 penalty_turns_remaining: 0,
                 acting_commander: true,
+                recent_overrides: [], // migration v10 default; keeps the reload contract exact
             };
             report.generic_replacements++;
         }
@@ -1147,6 +1169,27 @@ function scheduledHolderForCorps(
  * Find best available replacement officer for a corps.
  * Priority: pool_tier (starter > tier_a > tier_b > tier_c), then competence, then home corps match.
  */
+/**
+ * The faction's average named corps commander (competence, aggressiveness, defensive skill,
+ * political reliability), rounded to two decimals. Generic acting commanders are excluded, so
+ * the average never feeds on itself. Mid-scale 3 when the faction has no named corps commander.
+ * Deterministic: a sum over the authored officer list in its fixed order.
+ */
+export function averageCorpsCommanderTraits(
+    officerData: readonly NamedOfficer[],
+    faction: FactionId,
+): Pick<NamedOfficer, 'competence' | 'aggressiveness' | 'defensive_skill' | 'political_reliability'> {
+    const rows = officerData.filter(o => o.faction === faction && o.rank === 'corps_commander' && !o.id.startsWith('generic_'));
+    const mean = (pick: (o: NamedOfficer) => number): number =>
+        rows.length === 0 ? 3 : Math.round((rows.reduce((s, o) => s + pick(o), 0) / rows.length) * 100) / 100;
+    return {
+        competence: mean(o => o.competence),
+        aggressiveness: mean(o => o.aggressiveness),
+        defensive_skill: mean(o => o.defensive_skill),
+        political_reliability: mean(o => o.political_reliability),
+    };
+}
+
 function findBestReplacement(
     officers: Record<string, NamedOfficerState>,
     officerData: NamedOfficer[],
@@ -1166,6 +1209,12 @@ function findBestReplacement(
         const os = officers[data.id];
         if (!os || os.status !== 'reserve') continue;
         if (!isEnclaveCompatible(data, corpsId, currentTurn)) continue;
+        // Commander attribution PR 2a: the vacancy fallback takes the operation-command rule. Only an
+        // officer whose home or compatible corps is this corps may take it over. Before, any reserve
+        // officer of the faction could (e.g. a 3rd Corps officer seated in the 4th Corps). With none,
+        // the caller seats the generic acting commander.
+        const belongsToCorps = data.home_corps_id === corpsId || (data.compatible_corps_ids ?? []).includes(corpsId);
+        if (!belongsToCorps) continue;
 
         candidates.push(data);
     }

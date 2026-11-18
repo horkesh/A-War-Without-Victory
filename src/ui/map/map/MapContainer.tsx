@@ -3993,7 +3993,6 @@ export function MapContainer({
       const supplyGeoJson = buildSupplyGeoJSON(
         controlGeoJson,
         loadedGameState.controlBySettlement,
-        loadedGameState.factionReserves,
         loadedGameState.warPhaseSupplyPressure,
         loadedGameState.warPhaseSupplyCondition,
         loadedGameState.supplyStateByOsid

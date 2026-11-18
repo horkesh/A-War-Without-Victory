@@ -55,13 +55,11 @@ describe('decision surface registry', () => {
       actionLabel: 'Review paramilitary',
       severity: 'hard_block',
     });
-    expect(getDecisionSurface('convoy_decision')).toMatchObject({
-      ownerShell: 'desk',
-      resolverSurface: 'convoy_decision_modal',
-      inboxAction: 'convoy_decision_modal',
-      actionLabel: 'Review convoy',
-      severity: 'modal_required',
-    });
+  });
+
+  it('F1i: has no convoy decision surface (humanitarian convoys are not modelled in 1.0)', () => {
+    expect(Object.keys(DECISION_SURFACE_REGISTRY)).not.toContain('convoy_decision');
+    expect(Object.values(DECISION_SURFACE_REGISTRY).map((surface) => surface.inboxAction)).not.toContain('convoy_decision_modal');
   });
 
   it('resolves existing inbox types through the same registry', () => {
@@ -136,12 +134,12 @@ describe('decision surface registry', () => {
         actionLabel: 'Otvori sobu odluka',
         sourceLabel: 'Štab armije',
       });
-      expect(sanitizeDecisionCopy('convoy_decision', {
+      expect(sanitizeDecisionCopy('reserve_request', {
         title: 'pending_required_decisions',
-        summary: 'convoy_decision_raw_id',
+        summary: 'reserve_request_raw_id',
       })).toEqual({
-        title: 'Humanitarni konvoj',
-        summary: 'Zahtjev za konvoj treba vašu instrukciju: propustiti, blokirati ili preusmjeriti.',
+        title: 'Zahtjev za rezervom',
+        summary: 'Komandant korpusa traži pojačanje.',
       });
     } finally {
       setLocale('en', undefined);
@@ -203,20 +201,11 @@ describe('decision surface registry', () => {
           institutionalModel: 'cantons',
           botResponses: {},
         },
-        pendingConvoyDecisions: [
-          {
-            id: 'convoy_srebrenica',
-            target_enclave: 'srebrenica',
-            route_faction: 'RBiH',
-            supply_amount: 20,
-          },
-        ],
         playerDecisionSummary: {
-          totalCount: 2,
-          blockingCount: 2,
+          totalCount: 1,
+          blockingCount: 1,
           families: [
             { id: 'peace_plan', count: 1, blockingCount: 1, gatePolicy: 'modal_required' },
-            { id: 'convoy_decision', count: 1, blockingCount: 1, gatePolicy: 'modal_required' },
           ],
         },
       } as Parameters<typeof buildPreAdvanceCommandReviewView>[0]['state'],
@@ -226,17 +215,10 @@ describe('decision surface registry', () => {
       actionLabel: "Open President's Desk",
       sourceLabel: 'Peace proposal',
     });
-    expect(view.items.find((item) => item.id === 'manifest:convoy_decision')).toMatchObject({
-      actionLabel: "Open President's Desk",
-      sourceLabel: 'Convoy review',
-    });
+    expect(view.items.find((item) => item.id === 'manifest:convoy_decision')).toBeUndefined();
     expect(getDecisionSurface('peace_plan')).toMatchObject({
       actionLabel: 'Review proposal',
       sourceLabel: 'Diplomatic channel',
-    });
-    expect(getDecisionSurface('convoy_decision')).toMatchObject({
-      actionLabel: 'Review convoy',
-      sourceLabel: 'Humanitarian channel',
     });
   });
 });

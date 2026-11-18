@@ -740,16 +740,29 @@ describe('FactionReport — direct component mount proof', () => {
         expect(trace).toContain('catastrophic moral cost');
     });
 
-    it('renders war crimes count in statistics', () => {
+    it('renders the two war-crimes lines in statistics, counting incidents (§6 E3b)', () => {
+        const props = { factionOsids: 413, totalOsids: 712, brigadeCount: 35, personnel: 85000 };
         const html = renderComponentMP(FactionReport, {
-            verdict: makeRsVerdictMP(),
-            factionOsids: 413,
-            totalOsids: 712,
-            brigadeCount: 35,
-            personnel: 85000,
+            ...props,
+            verdict: makeRsVerdictMP({ war_crime_incidents: { recorded: 9, authorized: 4 } }),
         });
-        expect(html).toContain('War Crimes Events');
-        expect(html).toContain('35');
+        // Signed: SHDG §4 panel (narrative designer + historian), 2026-11-18.
+        expect(html).toContain('War-crime incidents, historical record');
+        expect(html).toContain('War-crime incidents arising from decisions in play');
+        // Never the shared counter's delta sum (35) under a war-crimes label.
+        expect(html).not.toContain('War Crimes Events');
+        // No false zero: the record row is hidden at 0; the decisions-in-play row then shows only above 0.
+        const authoredOnly = renderComponentMP(FactionReport, {
+            ...props,
+            verdict: makeRsVerdictMP({ war_crime_incidents: { recorded: 0, authorized: 2 } }),
+        });
+        expect(authoredOnly).not.toContain('War-crime incidents, historical record');
+        expect(authoredOnly).toContain('War-crime incidents arising from decisions in play');
+        const none = renderComponentMP(FactionReport, {
+            ...props,
+            verdict: makeRsVerdictMP({ war_crime_incidents: { recorded: 0, authorized: 0 } }),
+        });
+        expect(none).not.toContain('War-crime incidents');
     });
 
     it('renders peace plan history with plan names instead of raw ids', () => {

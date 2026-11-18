@@ -39,7 +39,7 @@ import { resolvePeacePlan } from '../../src/sim/negotiation/peace_plans.js';
 import { getPeacePlanById } from '../../src/sim/negotiation/peace_plan_data.js';
 import { createRequire } from 'node:module';
 import { raiseArmyClash, sweepLapsedArmyClashes } from '../../src/sim/combat/army_clashes.js';
-import { applyPresidentPolicy, emptyPresidentTurnLog, type PresidentKind, type PresidentPolicyOptions, type PresidentRequestDetail } from './president_policies.js';
+import { applyPresidentPolicy, bindPresidentRequestAttempts, emptyPresidentTurnLog, joinPresidentRequests, type PresidentKind, type PresidentPolicyOptions, type PresidentRequestDetail } from './president_policies.js';
 import { readFileSync } from 'node:fs';
 
 /** The gesture event rows as the desktop loads them (electron-main `loadFrontVisitEventDef`). */
@@ -110,7 +110,9 @@ interface CliOptions {
     president?: PresidentKind;
     /**
      * Played-test options for the President (package "1994-95 attack and defence"), opt-in:
-     * `--request-axis <corps>:<mun>[,<mun>...]` and `--request-prefer-exhausted on`. With either,
+     * `--request-axis <corps>[+<corps>...]:<mun>[,<mun>...]`, `--request-prefer-exhausted on` and
+     * `--request-every <weeks>` (1-52; 1 = a sustained weekly push) and `--request-only on` (spend
+     * Authority on Request-ops only). With any of them,
      * the output adds `president_requests` (each order joined to its after-action report) and the
      * requested corps' exhaustion per turn. Without them the output is unchanged.
      */
@@ -300,6 +302,11 @@ function parseArgs(argv: string[]): CliOptions {
     if ((presidentArg === 'engaged' || presidentArg === 'meddler') && (values.get('--event-policy') ?? 'defer') === 'defer') {
         throw new Error(`--president ${presidentArg} needs an --event-policy that answers decisions (bot_equivalent, historical_default or staff_recommended), not defer`);
     }
+    for (const pair of (values.get('--event-override') ?? '').split(',').filter(Boolean)) {
+        const [eventId, responseId] = pair.split('=');
+        if (!eventId || !responseId) throw new Error(`--event-override expects <event_id>=<response_id>[,...], got "${pair}"`);
+        eventResponseOverrides.set(eventId, responseId);
+    }
 
     return {
         turns,
@@ -346,18 +353,31 @@ function parseArgs(argv: string[]): CliOptions {
         ...(() => {
             const axisRaw = values.get('--request-axis');
             const exhaustedRaw = parseEnum(values.get('--request-prefer-exhausted') ?? 'off', ['off', 'on'] as const, '--request-prefer-exhausted');
-            if (!axisRaw && exhaustedRaw === 'off') return {};
-            if ((axisRaw || exhaustedRaw === 'on') && !presidentArg) {
-                throw new Error('--request-axis / --request-prefer-exhausted need --president engaged or meddler');
+            const everyRaw = values.get('--request-every');
+            const onlyRaw = parseEnum(values.get('--request-only') ?? 'off', ['off', 'on'] as const, '--request-only');
+            if (!axisRaw && exhaustedRaw === 'off' && everyRaw == null && onlyRaw === 'off') return {};
+            if (!presidentArg) {
+                throw new Error('--request-axis / --request-prefer-exhausted / --request-every / --request-only need --president engaged or meddler');
             }
             let requestAxis: PresidentPolicyOptions['requestAxis'];
             if (axisRaw) {
-                const [corpsId, munList] = axisRaw.split(':');
+                const [corpsList, munList] = axisRaw.split(':');
+                const corpsIds = [...new Set((corpsList ?? '').split('+').map((c) => c.trim()).filter(Boolean))].sort(strictCompare);
                 const municipalities = (munList ?? '').split(',').map((m) => m.trim()).filter(Boolean).sort(strictCompare);
-                if (!corpsId || municipalities.length === 0) throw new Error(`--request-axis expects <corps>:<mun>[,<mun>...], got ${axisRaw}`);
-                requestAxis = { corpsId, municipalities };
+                if (corpsIds.length === 0 || municipalities.length === 0) throw new Error(`--request-axis expects <corps>[+<corps>...]:<mun>[,<mun>...], got ${axisRaw}`);
+                requestAxis = { corpsIds, municipalities };
             }
-            return { presidentOptions: { ...(requestAxis ? { requestAxis } : {}), ...(exhaustedRaw === 'on' ? { preferExhausted: true } : {}) } };
+            let requestEvery: number | undefined;
+            if (everyRaw != null) {
+                requestEvery = Number(everyRaw);
+                if (!Number.isInteger(requestEvery) || requestEvery < 1 || requestEvery > 52) throw new Error(`--request-every expects an integer 1-52, got ${everyRaw}`);
+            }
+            return { presidentOptions: {
+                ...(requestAxis ? { requestAxis } : {}),
+                ...(exhaustedRaw === 'on' ? { preferExhausted: true } : {}),
+                ...(requestEvery != null ? { requestEvery } : {}),
+                ...(onlyRaw === 'on' ? { requestOnly: true } : {}),
+            } };
         })(),
     };
 }
@@ -387,13 +407,26 @@ function applyBotParityParamilitaryDiagnostic(state: GameState, faction: Faction
     state.paramilitary_policy = 'always_allow';
 }
 
+/**
+ * Opt-in `--event-override <event_id>=<response_id>[,...]`: the President answers these events
+ * with the named response whatever the event policy (e.g. a played political departure). Empty
+ * by default, so runs without the flag are unchanged.
+ */
+const eventResponseOverrides = new Map<string, string>();
+
 /** Event catalog for `bot_equivalent` (loaded once per run, from the same files the desktop loads). */
 let botEquivalentCatalog: Map<string, EventDefinition> | null = null;
 
 function botEquivalentResponseId(state: GameState, decision: PendingEventDecision): string | undefined {
     const def = botEquivalentCatalog?.get(decision.event_id);
     if (!def || !def.response_options || def.response_options.length === 0) return undefined;
-    return selectBotEventResponse(state, def, decision.faction, false).chosen.id;
+    // Choose among the options this decision actually OFFERS. A player-initiated gesture is queued
+    // with options filtered by fire number and reach (responseOptionsForFire); the full catalog can
+    // hold an option the decision does not carry, which resolveEventDecision rejects.
+    const offered = new Set((decision.response_options ?? []).map((option) => option.id));
+    const narrowed = { ...def, response_options: def.response_options.filter((option) => offered.has(option.id)) };
+    if (narrowed.response_options.length === 0) return undefined;
+    return selectBotEventResponse(state, narrowed, decision.faction, false).chosen.id;
 }
 
 function applyEventPolicy(
@@ -412,7 +445,10 @@ function applyEventPolicy(
             .sort((a, b) => strictCompare(a.event_id, b.event_id));
 
     for (const decision of pending) {
-        const responseId = policy === 'historical_default'
+        const overrideId = eventResponseOverrides.get(decision.event_id);
+        const responseId = overrideId != null && decision.response_options.some((o) => o.id === overrideId)
+            ? overrideId
+            : policy === 'historical_default'
             ? decision.historical_default_response_id ?? decision.response_options[0]?.id
             : policy === 'staff_recommended'
                 ? decision.staff_recommended_response_id ?? decision.historical_default_response_id
@@ -937,35 +973,6 @@ function reportSummary(state: GameState, report: unknown, playerFaction: Faction
 }
 
 /** Diagnostic snapshot of each traced corps' queue and live operations, in deterministic order. */
-/**
- * Played test: each staged Request-op joined to what became of it. The inject-op-directive step
- * names the operation `Presidential Directive — <target>`; a finished one has an after-action report
- * in `state.operation_history`, a running one is still in the corps' active operations, and a refused one
- * leaves `op_directive_rejection`.
- */
-function joinPresidentRequests(requests: PresidentRequestDetail[], state: GameState) {
-    const history = (state.operation_history ?? []) as Array<Record<string, any>>;
-    return requests.map((request) => {
-        const aar = history.find((a) => a.operation_name === request.operation_name && (a.started_turn ?? 0) >= request.turn);
-        const command = state.military.corps_command?.[request.corps_id];
-        const running = (command?.active_operations ?? []).find((op) => op.name === request.operation_name);
-        const rejection = command?.op_directive_rejection;
-        const result = aar
-            ? {
-                status: 'completed', outcome: aar.outcome ?? null, recovery_reason: aar.recovery_reason ?? null,
-                started_turn: aar.started_turn ?? null, ended_turn: aar.ended_turn ?? null, total_attacks: aar.total_attacks ?? null,
-                killed_suffered: aar.casualties_suffered?.killed ?? null, killed_inflicted: aar.casualties_inflicted?.killed ?? null,
-                objectives_captured: [...(aar.objectives_logged_captured ?? [])].sort(strictCompare),
-            }
-            : running
-                ? { status: 'running', phase: running.phase }
-                : rejection && rejection.target_osid === request.target_osid
-                    ? { status: 'rejected', reason: rejection.reason, turn: rejection.turn }
-                    : { status: 'not_found' };
-        return { ...request, result };
-    });
-}
-
 function corpsTrace(state: GameState, corpsIds: string[]) {
     return Object.fromEntries(corpsIds.map((corpsId) => {
         const command = state.military.corps_command?.[corpsId];
@@ -1053,6 +1060,7 @@ async function runComparison(baseDir: string, options: CliOptions) {
         // this turn's movement and combat, exactly like a bot's. Anything still pending
         // between turns (opening decisions, deferred ones, peace plans) is answered by
         // applyPlayerPolicy above.
+        const weekStartTurn = playerState.meta.turn;
         const playerResult = await advanceTurn(playerState, baseDir, {
             onPlayerDecisionsPending: (workingState, decisions) => {
                 applyEventPolicy(workingState, options.faction, options.eventPolicy, transcript, decisions);
@@ -1062,6 +1070,7 @@ async function runComparison(baseDir: string, options: CliOptions) {
         if (playerResult.error) throw new Error(`Player advance failed: ${playerResult.error}`);
         headlessState = headlessResult.state;
         playerState = playerResult.state;
+        if (presidentLog.request_details) bindPresidentRequestAttempts(presidentLog.request_details, playerState, weekStartTurn);
         const headless = reportSummary(headlessState, headlessResult.report?.details, options.faction);
         const player = reportSummary(playerState, playerResult.report?.details, options.faction);
         const row: Record<string, unknown> = {

@@ -92,6 +92,11 @@ function interpolate(template: string, params: MessageParams | undefined, locale
     });
 }
 
+/** True when `key` is a catalogued message (an EN key; every BCS key has one). Use it to guard a built key instead of casting. */
+export function isMessageKey(key: string): key is MessageKey {
+    return Object.prototype.hasOwnProperty.call(enMessages, key);
+}
+
 export function t(key: MessageKey, params?: MessageParams, locale: Locale = getActiveLocale()): string {
     const template = dictionaries[locale][key] ?? enMessages[key];
     return interpolate(template, params, locale);

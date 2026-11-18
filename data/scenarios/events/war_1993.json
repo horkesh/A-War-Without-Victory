@@ -16,7 +16,6 @@
     "bot_response_logic": "historical",
     "requires_player_response": true,
     "priority": 50,
-    "auto_resolve_turns": 2,
     "historical_source": "Balkan Battlegrounds Vol. I pp.6-8, 182; UNSCR 787 (16 November 1992), op. para. 1; UN S/25479; UNSCR 820.",
     "source_note": "The pressure is inferred from the Vance-Owen diplomatic sequence and Western/UN escalation around April 1993; this row avoids attributing an unsourced direct warning to any single mediator.",
     "staff_assessment": "Acknowledging the pressure preserves international confidence but costs leverage and internal cohesion; resisting protects Sarajevo's position while risking diplomatic isolation.",
@@ -192,12 +191,6 @@
         "risk_level": 0.5,
         "effects": [
           {
-            "kind": "negotiation_capital",
-            "faction": "RBiH",
-            "dimension": "international_credibility",
-            "delta": 10
-          },
-          {
             "kind": "patron_pressure",
             "faction": "RBiH",
             "delta": -5
@@ -216,12 +209,6 @@
         "aggression_affinity": 0.4,
         "risk_level": 0.7,
         "effects": [
-          {
-            "kind": "negotiation_capital",
-            "faction": "RBiH",
-            "dimension": "international_credibility",
-            "delta": -10
-          },
           {
             "kind": "morale_change",
             "faction": "RBiH",
@@ -256,7 +243,7 @@
   {
     "id": "kravica_attack_1993",
     "title": "Kravica Raid on Orthodox Christmas",
-    "narrative": "ARBiH forces under Naser Orić launch a raid from the Srebrenica enclave on the Serb village of Kravica on Orthodox Christmas Day, killing between 30-35 VRS soldiers and 11-13 Serb civilians. The attack provides the VRS a pretext for intensifying its spring offensive against the eastern enclaves. Orić is later indicted by the ICTY for failing to prevent crimes in the enclave's defense.",
+    "narrative": "ARBiH forces under Naser Orić launch a raid from the Srebrenica enclave on the Serb village of Kravica on Orthodox Christmas Day, killing between 30-35 VRS soldiers and 11-13 Serb civilians. The VRS cites the attack as it intensifies its spring offensive against the eastern enclaves. The ICTY later tried Orić for crimes in and around Srebrenica: convicted at trial in 2006 of failing to prevent the murder and cruel treatment of Serb detainees, he was acquitted of all charges on appeal in 2008. No court has convicted anyone for the killings at Kravica.",
     "category": "military",
     "source_tier": "icty_icj_un",
     "source_note": "The listed adjudicative and institutional sources bound the chronology, actors, and findings described. The essay is original synthesis and does not extend individual liability, command responsibility, or institutional findings beyond the cited record.",
@@ -273,20 +260,10 @@
     "once": true,
     "effects": [
       {
-        "kind": "morale_change",
-        "faction": "RBiH",
-        "delta": 3
-      },
-      {
         "kind": "aggression_modifier",
         "faction": "RS",
         "delta": 0.1,
         "duration_turns": 12
-      },
-      {
-        "kind": "humanitarian_impact",
-        "faction": "RBiH",
-        "war_crimes_delta": 1
       },
       {
         "kind": "narrative",
@@ -300,7 +277,7 @@
         "delta": 5
       }
     ],
-    "historical_source": "ICTY Orić Indictment (IT-03-68). Krstić Trial Judgment (IT-98-33-T), paras. 17-18.",
+    "historical_source": "ICTY Prosecutor v. Orić, Trial Judgment IT-03-68-T (30 June 2006) and Appeal Judgment IT-03-68-A (3 July 2008, acquitted on all counts). Krstić Trial Judgment (IT-98-33-T), paras. 17-18.",
     "effect": {
       "kind": "morale_change",
       "faction": "RBiH",
@@ -346,11 +323,11 @@
         "response_options": {
           "escalate": {
             "label": "Provesti ultimatum",
-            "description": "Narediti HVO-u u Gornjem Vakufu da nametne svoju komandu u gradu. Raskol s ARBiH se produbljuje."
+            "description": "Narediti HVO-u u Gornjem Vakufu da nametne svoju komandu u gradu. Raskol s ARBiH se produbljuje. Ako je vaš dogovor o prihvatu raseljenih na snazi, ovim prestaje zauvijek: napetost u savezu zbog raseljavanja i zagrebački pritisak se vraćaju; regrutacija se oporavlja."
           },
           "negotiate": {
             "label": "Tražiti lokalno primirje",
-            "description": "Narediti lokalne pregovore s ARBiH. Raskol zasad slabi; spor oko grada ostaje otvoren."
+            "description": "Narediti lokalne pregovore s ARBiH. Raskol zasad slabi; spor oko grada ostaje otvoren. Ako je vaš dogovor o prihvatu raseljenih na snazi, ovim se obnavlja: važit će još najmanje 30 sedmica."
           }
         }
       }
@@ -422,7 +399,7 @@
         "id": "escalate",
         "branch_tag": "hrhb_central_bosnia_war",
         "label": "Enforce the ultimatum",
-        "description": "Order the HVO in Gornji Vakuf to impose its command on the town. The break with the ARBiH deepens.",
+        "description": "Order the HVO in Gornji Vakuf to impose its command on the town. The break with the ARBiH deepens. If your refugee compact is in force, this ends it for good: displacement strain and Zagreb's pull on the alliance return, and HVO recruitment recovers.",
         "historical_marker": "historical_default",
         "aggression_affinity": 0.7,
         "risk_level": 0.7,
@@ -442,7 +419,7 @@
         "id": "negotiate",
         "branch_tag": "hrhb_central_bosnia_ceasefire",
         "label": "Seek a local ceasefire",
-        "description": "Order local talks with the ARBiH. The break eases for now; the dispute over the town stays open.",
+        "description": "Order local talks with the ARBiH. The break eases for now; the dispute over the town stays open. If your refugee compact is in force, this renews it for at least 30 more weeks.",
         "aggression_affinity": -0.5,
         "risk_level": 0.4,
         "effects": [
@@ -497,11 +474,6 @@
     "effects": [
       {
         "kind": "morale_change",
-        "faction": "RBiH",
-        "delta": -3
-      },
-      {
-        "kind": "morale_change",
         "faction": "RS",
         "delta": 2
       },
@@ -511,13 +483,8 @@
         "delta": 5
       },
       {
-        "kind": "humanitarian_impact",
-        "faction": "RS",
-        "war_crimes_delta": 1
-      },
-      {
         "kind": "narrative",
-        "text": "The murder of Turajlic inside a UN vehicle exposes the fragility of UNPROFOR's protection and the VRS's contempt for international norms."
+        "text": "The killing of Turajlić inside a UN vehicle exposes the fragility of UNPROFOR's protection and the VRS's disregard for international norms."
       }
     ],
     "dimension_shifts": [
@@ -613,11 +580,6 @@
     "once": true,
     "effects": [
       {
-        "kind": "morale_change",
-        "faction": "RBiH",
-        "delta": 2
-      },
-      {
         "kind": "patron_pressure",
         "faction": "RS",
         "delta": 3
@@ -667,16 +629,6 @@
     "effects": [
       {
         "kind": "morale_change",
-        "faction": "RS",
-        "delta": 5
-      },
-      {
-        "kind": "morale_change",
-        "faction": "RBiH",
-        "delta": -5
-      },
-      {
-        "kind": "supply_delta",
         "faction": "RBiH",
         "delta": -5
       },
@@ -725,11 +677,6 @@
     },
     "once": true,
     "effects": [
-      {
-        "kind": "patron_pressure",
-        "faction": "RS",
-        "delta": 5
-      },
       {
         "kind": "patron_pressure",
         "faction": "HRHB",
@@ -835,7 +782,6 @@
     "bot_response_logic": "historical",
     "requires_player_response": false,
     "priority": 50,
-    "auto_resolve_turns": 2,
     "historical_default_response_id": "acknowledge_pressure",
     "historical_source": "ICTY Prlić et al. IT-04-74-T Trial Judgment (29 May 2013) (HZ HB Presidency acceptance of VOPP and Province-3/8/10 provincial-map framework); Prlić Appeals Judgment (29 Nov 2017); Vance-Owen Plan agreement text UN S/25221 Annex VII (29 January 1993) and UN S/25403 Annex II (12 March 1993); Tuđman Presidential Transcripts admitted at Prlić (patron coordination directing Boban to sign); Prlić (HV officer-secondment / fuel / ammunition support contingent on Zagreb axis); Balkan Battlegrounds Vol. II diplomatic chronology January-May 1993.",
     "source_note": "The row represents Zagreb's restraint order on HVO offensive operations during the Vance-Owen acceptance window and the HZ HB Presidency's posture toward patron direction. Acknowledge-pressure is the documented historical choice (Boban signed at Geneva 2 January 1993 on Tudjman's direction). Resist-patron is a structurally plausible counterfactual — no HZ HB Presidency document opposes signature in the historical record, but the analogous patron-resistance precedent exists at R6 (RS Assembly rejection 5-6 May 1993).",
@@ -854,6 +800,7 @@
       {
         "id": "acknowledge_pressure",
         "label": "Acknowledge the message",
+        "description": "Note Zagreb's order to hold back during the Vance-Owen window, without arguing it. Zagreb's confidence recovers; your negotiating leverage and internal cohesion fall. If your refugee compact is in force, this neither renews nor ends it.",
         "branch_tag": "hrhb_vopp_acknowledge",
         "historical_marker": "historical_default",
         "aggression_affinity": -0.3,
@@ -879,6 +826,7 @@
       {
         "id": "resist_patron",
         "label": "Maintain our position",
+        "description": "Hold our position and insist on the provincial map despite Zagreb's call for restraint. Zagreb's confidence falls further; your negotiating leverage and military credibility rise. If your refugee compact is in force, this ends it for good: displacement strain and Zagreb's pull on the alliance return, and HVO recruitment recovers.",
         "branch_tag": "hrhb_vopp_resist",
         "historical_marker": "counterfactual",
         "aggression_affinity": 0.5,
@@ -922,11 +870,6 @@
     },
     "once": true,
     "effects": [
-      {
-        "kind": "morale_change",
-        "faction": "RBiH",
-        "delta": 3
-      },
       {
         "kind": "patron_pressure",
         "faction": "RS",
@@ -976,19 +919,14 @@
     },
     "once": true,
     "effect": {
-      "kind": "humanitarian_impact",
-      "faction": "RS",
-      "war_crimes_delta": 1
+      "kind": "narrative",
+      "text": "Srebrenica is bombarded relentlessly. International outcry mounts as the enclave's humanitarian situation deteriorates."
     },
     "effects": [
       {
         "kind": "patron_pressure",
         "faction": "RS",
         "delta": 5
-      },
-      {
-        "kind": "narrative",
-        "text": "Srebrenica is bombarded relentlessly. International outcry mounts as the enclave's humanitarian situation deteriorates."
       }
     ]
   },
@@ -1272,11 +1210,6 @@
     "once": true,
     "effects": [
       {
-        "kind": "patron_pressure",
-        "faction": "RS",
-        "delta": 5
-      },
-      {
         "kind": "morale_change",
         "faction": "RBiH",
         "delta": 2
@@ -1345,11 +1278,11 @@
           },
           "breakout_offensive": {
             "label": "Pokrenuti proboj",
-            "description": "Narediti Operativnoj zoni pokušaj proboja kroz linije 3. korpusa ARBiH. Odnos snaga je izrazito nepovoljan. Naređenje iscrpljuje ljudstvo HVO-a i troši podršku Zagreba na operaciju s malo izgleda za uspjeh."
+            "description": "Narediti Operativnoj zoni pokušaj proboja kroz linije 3. korpusa ARBiH. Odnos snaga je izrazito nepovoljan. Naređenje iscrpljuje ljudstvo HVO-a i troši podršku Zagreba na operaciju s malo izgleda za uspjeh. Ako je vaš dogovor o prihvatu raseljenih na snazi, ovim prestaje zauvijek: napetost u savezu zbog raseljavanja i zagrebački pritisak se vraćaju; regrutacija se oporavlja."
           },
           "federate_early": {
             "label": "Rana federacija s RBiH",
-            "description": "Otvoriti pregovore o federaciji sa Sarajevom u proljeće 1993, gotovo godinu prije Washingtonskog sporazuma: primirje u cijeloj srednjoj Bosni i zajednička komanda protiv VRS-a. Zagreb se tome protivi i odnosi s pokroviteljem Mostara se kidaju, dok položaj Mostara za pregovaračkim stolom jača."
+            "description": "Otvoriti pregovore o federaciji sa Sarajevom u proljeće 1993, gotovo godinu prije Washingtonskog sporazuma: primirje u cijeloj srednjoj Bosni i zajednička komanda protiv VRS-a. Zagreb se tome protivi i odnosi s pokroviteljem Mostara se kidaju, dok položaj Mostara za pregovaračkim stolom jača. Ako je vaš dogovor o prihvatu raseljenih na snazi, ovim se obnavlja: važit će još najmanje 40 sedmica."
           }
         }
       }
@@ -1487,7 +1420,7 @@
         "branch_tag": "hrhb_strategic_ambiguity",
         "historical_marker": "counterfactual",
         "label": "Mount a breakout offensive",
-        "description": "Order the Operative Zone to attempt a breakout through the ARBiH 3rd Corps lines. The force ratio is heavily against it. The order drains HVO manpower and spends Zagreb's support on an operation unlikely to succeed.",
+        "description": "Order the Operative Zone to attempt a breakout through the ARBiH 3rd Corps lines. The force ratio is heavily against it. The order drains HVO manpower and spends Zagreb's support on an operation unlikely to succeed. If your refugee compact is in force, this ends it for good: displacement strain and Zagreb's pull on the alliance return, and HVO recruitment recovers.",
         "effects": [
           {
             "kind": "morale_change",
@@ -1528,7 +1461,7 @@
         "branch_tag": "hrhb_united_front",
         "historical_marker": "counterfactual",
         "label": "Federate early with RBiH",
-        "description": "Open federation talks with Sarajevo in the spring of 1993, nearly a year before the Washington Agreement: a ceasefire across central Bosnia and joint command against the VRS. Zagreb opposes it and relations with Mostar's patron break down, while Mostar's standing at the negotiating table rises.",
+        "description": "Open federation talks with Sarajevo in the spring of 1993, nearly a year before the Washington Agreement: a ceasefire across central Bosnia and joint command against the VRS. Zagreb opposes it and relations with Mostar's patron break down, while Mostar's standing at the negotiating table rises. If your refugee compact is in force, this renews it for at least 40 more weeks.",
         "effects": [
           {
             "kind": "morale_change",
@@ -1605,6 +1538,7 @@
   },
   {
     "id": "croatia_herceg_bosna_control_1993",
+    "audience": ["HRHB"],
     "image": "event_patron_relations_HRHB.webp",
     "title": "Croatia Tightens Control over Herceg-Bosna",
     "narrative": "The Republic of Croatia deepens its de facto control over the Croatian Community of Herceg-Bosna: HV officers serve in HVO command positions, Croatian state resources flow across the border, and Zagreb's directives increasingly drive HVO military strategy. The ICTY Prlić trial establishes a Joint Criminal Enterprise involving Tudjman's inner circle and HVO commanders aimed at creating ethnically homogeneous Croat territory for eventual annexation.",
@@ -1618,16 +1552,6 @@
     },
     "once": true,
     "effects": [
-      {
-        "kind": "supply_delta",
-        "faction": "HRHB",
-        "delta": 5
-      },
-      {
-        "kind": "morale_change",
-        "faction": "HRHB",
-        "delta": 3
-      },
       {
         "kind": "equipment_grant",
         "faction": "HRHB",
@@ -1653,13 +1577,14 @@
     ],
     "historical_source": "ICTY Prlić Trial Judgment (IT-04-74-T), JCE findings. ICTY Appeals Judgment (IT-04-74-A).",
     "effect": {
-      "kind": "supply_delta",
+      "kind": "morale_change",
       "faction": "HRHB",
-      "delta": 5
+      "delta": 3
     }
   },
   {
     "id": "ahmici_massacre_1993",
+    "authored_by_choice": false,
     "image": "event_ahmici_massacre_1993.webp",
     "title": "Ahmići Massacre",
     "narrative": "HVO forces, supported by the Jokers special police unit, launch a coordinated attack on the Bosniak village of Ahmići in the Lašva Valley. Over 100 civilians are killed, including women and children, and the village is systematically burned. The massacre becomes one of the most documented war crimes of the conflict and a defining atrocity of the Croat-Bosniak war.",
@@ -1686,6 +1611,22 @@
             "type": "flag_equals",
             "flag": "hvo_arbih_tensions_rising",
             "value": true
+          },
+          {
+            "type": "not",
+            "condition": {
+              "type": "flag_equals",
+              "flag": "hrhb_central_bosnia_defense",
+              "value": "evacuate"
+            }
+          },
+          {
+            "type": "not",
+            "condition": {
+              "type": "flag_equals",
+              "flag": "hrhb_central_bosnia_defense",
+              "value": "federate_early"
+            }
           }
         ]
       }
@@ -1698,14 +1639,15 @@
     },
     "effects": [
       {
-        "kind": "negotiation_capital",
-        "faction": "HRHB",
-        "dimension": "international_credibility",
-        "delta": -25
-      },
-      {
         "kind": "narrative",
         "text": "The Ahmići massacre shocks the international community. HVO credibility suffers a devastating blow."
+      }
+    ],
+    "dimension_shifts": [
+      {
+        "faction": "HRHB",
+        "dimension": "international_standing",
+        "delta": -25
       }
     ]
   },
@@ -1732,11 +1674,6 @@
     },
     "once": true,
     "effects": [
-      {
-        "kind": "humanitarian_impact",
-        "faction": "HRHB",
-        "war_crimes_delta": 1
-      },
       {
         "kind": "morale_change",
         "faction": "HRHB",
@@ -1783,11 +1720,6 @@
     "once": true,
     "effects": [
       {
-        "kind": "humanitarian_impact",
-        "faction": "RBiH",
-        "war_crimes_delta": 1
-      },
-      {
         "kind": "morale_change",
         "faction": "HRHB",
         "delta": -3
@@ -1832,11 +1764,6 @@
     "once": true,
     "effects": [
       {
-        "kind": "morale_change",
-        "faction": "RBiH",
-        "delta": 3
-      },
-      {
         "kind": "patron_pressure",
         "faction": "RS",
         "delta": 5
@@ -1864,7 +1791,7 @@
     "id": "un_resolution_820_sanctions_1993",
     "image": "event_security_council_chamber.webp",
     "title": "UN Resolution 820 — Tightened Sanctions on Serbia",
-    "narrative": "The Security Council passes Resolution 820, substantially reinforcing the sanctions regime against Serbia and Montenegro. Following the Bosnian Serb assembly's rejection of the Vance-Owen plan on April 26, all commodity transport across Serbian borders is prohibited except medical supplies and foodstuffs, further strangling the RS supply chain through its patron.",
+    "narrative": "The Security Council passes Resolution 820, substantially reinforcing the sanctions regime against Serbia and Montenegro. Following the Bosnian Serb assembly's rejection of the Vance-Owen plan on April 26, all commodity transport across Serbian borders is prohibited except medical supplies and foodstuffs, further squeezing Republika Srpska through its patron.",
     "category": "diplomatic",
     "source_tier": "agreement_text",
     "source_note": "The listed formal instruments bound the dates, terms, and institutional action described; accompanying judgments or participant accounts supply context only. The essay is original synthesis and does not treat proposed or negotiated terms as implemented beyond the cited record.",
@@ -1876,18 +1803,8 @@
     "once": true,
     "effects": [
       {
-        "kind": "supply_delta",
-        "faction": "RS",
-        "delta": -10
-      },
-      {
-        "kind": "patron_pressure",
-        "faction": "RS",
-        "delta": 10
-      },
-      {
         "kind": "narrative",
-        "text": "The tightened embargo enters force. Belgrade's ability to sustain the VRS is visibly constrained, and Milošević's patience with Pale is running thin."
+        "text": "The tightened embargo enters force. Milošević's patience with Pale is running thin."
       }
     ],
     "dimension_shifts": [
@@ -1904,9 +1821,9 @@
     ],
     "historical_source": "UN Security Council Resolution 820 (1993), S/RES/820.",
     "effect": {
-      "kind": "supply_delta",
+      "kind": "patron_pressure",
       "faction": "RS",
-      "delta": -10
+      "delta": 10
     }
   },
   {
@@ -2120,7 +2037,6 @@
     "bot_response_logic": "strategic_weighted",
     "requires_player_response": false,
     "priority": 50,
-    "auto_resolve_turns": 2,
     "effect": {
       "kind": "narrative",
       "text": "Milošević and Bulatović personally demand that the Bosnian Serb Assembly accept the Vance-Owen Plan."
@@ -2183,6 +2099,7 @@
   },
   {
     "id": "vitez_kiseljak_pockets_1993",
+    "audience": ["HRHB", "RBiH"],
     "image": "event_central_bosnia_front.webp",
     "title": "Vitez-Kiseljak Pockets Isolated",
     "narrative": "With the alliance broken, HVO garrisons in the Vitez-Busovača pocket and the Kiseljak enclave are cut off from resupply by HVO main forces in western Herzegovina. The pockets must survive on local resources and intermittent VRS cooperation, while the ARBiH weighs the cost of an assault against the benefits of encirclement.",
@@ -2205,16 +2122,6 @@
     },
     "once": true,
     "effects": [
-      {
-        "kind": "morale_change",
-        "faction": "HRHB",
-        "delta": -3
-      },
-      {
-        "kind": "supply_delta",
-        "faction": "HRHB",
-        "delta": -3
-      },
       {
         "kind": "narrative",
         "text": "HVO garrisons in central Bosnia hold on inside their pockets. Supplies reach them only with difficulty."
@@ -2460,11 +2367,6 @@
     },
     "effects": [
       {
-        "kind": "supply_delta",
-        "faction": "HRHB",
-        "delta": -5
-      },
-      {
         "kind": "patron_pressure",
         "faction": "HRHB",
         "delta": 5
@@ -2524,17 +2426,12 @@
     "effects": [
       {
         "kind": "patron_pressure",
-        "faction": "RS",
-        "delta": 5
-      },
-      {
-        "kind": "patron_pressure",
         "faction": "HRHB",
         "delta": 3
       },
       {
         "kind": "narrative",
-        "text": "The ICTY opens for business in The Hague. Every commander who orders atrocities now does so with knowledge that a court exists to try them."
+        "text": "The ICTY is established by Security Council Resolution 827, with its seat in The Hague. Every commander who orders atrocities now does so knowing that a court exists to try them."
       }
     ],
     "dimension_shifts": [
@@ -2637,11 +2534,6 @@
     "once": true,
     "effects": [
       {
-        "kind": "patron_pressure",
-        "faction": "RS",
-        "delta": 5
-      },
-      {
         "kind": "morale_change",
         "faction": "RBiH",
         "delta": 2
@@ -2688,22 +2580,6 @@
       }
     },
     "once": true,
-    "effects": [
-      {
-        "kind": "supply_delta",
-        "faction": "RS",
-        "delta": -3
-      },
-      {
-        "kind": "supply_delta",
-        "faction": "RBiH",
-        "delta": -2
-      },
-      {
-        "kind": "narrative",
-        "text": "NATO warships enforce the Adriatic blockade. Serbia's supply corridor tightens further, but the arms embargo continues to hurt the outgunned ARBiH most."
-      }
-    ],
     "dimension_shifts": [
       {
         "faction": "RS",
@@ -2713,9 +2589,8 @@
     ],
     "historical_source": "NATO Operation Sharp Guard records. UN Security Council sanctions monitoring reports.",
     "effect": {
-      "kind": "supply_delta",
-      "faction": "RS",
-      "delta": -3
+      "kind": "narrative",
+      "text": "NATO warships enforce the Adriatic blockade. Shipping to Serbia is stopped and searched, and the arms embargo continues to hurt the outgunned ARBiH most."
     }
   },
   {
@@ -2735,24 +2610,13 @@
     "once": true,
     "effects": [
       {
-        "kind": "humanitarian_impact",
-        "faction": "HRHB",
-        "war_crimes_delta": 3
-      },
-      {
         "kind": "patron_pressure",
         "faction": "HRHB",
         "delta": 10
       },
       {
-        "kind": "negotiation_capital",
-        "faction": "HRHB",
-        "dimension": "international_credibility",
-        "delta": -20
-      },
-      {
         "kind": "narrative",
-        "text": "Images of Bosniak men crowded behind Heliodrom wire reach the international press. Croatia's patron relationship with the West enters a period of severe strain."
+        "text": "Images of Bosniak men crowded behind Heliodrom wire reach the international press. Herceg-Bosna's standing in the West suffers severe damage."
       }
     ],
     "dimension_shifts": [
@@ -2791,16 +2655,6 @@
     "once": true,
     "effects": [
       {
-        "kind": "supply_delta",
-        "faction": "RBiH",
-        "delta": 10
-      },
-      {
-        "kind": "morale_change",
-        "faction": "RBiH",
-        "delta": 5
-      },
-      {
         "kind": "narrative",
         "text": "Sarajevo breathes again. The tunnel is a military and psychological lifeline — proof that the city's will to resist can find a way through any encirclement."
       }
@@ -2819,9 +2673,9 @@
     ],
     "historical_source": "Sarajevo Tunnel Museum archives. ICTY Galić Trial Judgment (IT-98-29-T).",
     "effect": {
-      "kind": "supply_delta",
+      "kind": "morale_change",
       "faction": "RBiH",
-      "delta": 10
+      "delta": 5
     }
   },
   {
@@ -2851,11 +2705,6 @@
     },
     "once": true,
     "effects": [
-      {
-        "kind": "morale_change",
-        "faction": "RBiH",
-        "delta": -3
-      },
       {
         "kind": "alliance_change",
         "delta": -0.05
@@ -3182,11 +3031,6 @@
     "effects": [
       {
         "kind": "morale_change",
-        "faction": "RBiH",
-        "delta": 3
-      },
-      {
-        "kind": "morale_change",
         "faction": "HRHB",
         "delta": -3
       },
@@ -3199,7 +3043,7 @@
       },
       {
         "kind": "narrative",
-        "text": "Bugojno falls and its HVO arsenal is absorbed into the ARBiH. The momentum in central Bosnia has decisively shifted."
+        "text": "Bugojno falls and its HVO arsenal is absorbed into the ARBiH. The balance in central Bosnia tilts toward the ARBiH."
       }
     ],
     "dimension_shifts": [
@@ -3249,7 +3093,7 @@
       },
       {
         "kind": "narrative",
-        "text": "Artillery continues to target civilian areas in Sarajevo. International pressure for intervention builds steadily."
+        "text": "VRS artillery continues to target civilian areas in Sarajevo. International pressure for intervention builds steadily."
       }
     ]
   },
@@ -3272,7 +3116,6 @@
     "bot_response_logic": "strategic_weighted",
     "requires_player_response": false,
     "priority": 50,
-    "auto_resolve_turns": 2,
     "effect": {
       "kind": "narrative",
       "text": "Milošević signals through back-channels that Serbia's patience with Pale is exhausted."
@@ -3349,11 +3192,6 @@
     "once": true,
     "effects": [
       {
-        "kind": "patron_pressure",
-        "faction": "RS",
-        "delta": 10
-      },
-      {
         "kind": "morale_change",
         "faction": "RBiH",
         "delta": 3
@@ -3429,12 +3267,6 @@
         "description": "Keep the framework alive while reserving the Drina enclaves and Posavina corridor for the Assembly's final vote.",
         "effects": [
           {
-            "kind": "negotiation_capital",
-            "faction": "RBiH",
-            "dimension": "international_credibility",
-            "delta": 5
-          },
-          {
             "kind": "patron_pressure",
             "faction": "RBiH",
             "delta": -5
@@ -3450,12 +3282,6 @@
         "label": "Reject at the Presidency Stage",
         "description": "End Sarajevo's participation before the documented Assembly vote, defending sovereignty while frustrating the mediators.",
         "effects": [
-          {
-            "kind": "negotiation_capital",
-            "faction": "RBiH",
-            "dimension": "international_credibility",
-            "delta": -5
-          },
           {
             "kind": "morale_change",
             "faction": "RBiH",
@@ -3608,14 +3434,7 @@
             "delta": -1
           }
         ],
-        "effects": [
-          {
-            "kind": "negotiation_capital",
-            "faction": "RBiH",
-            "dimension": "international_credibility",
-            "delta": -2
-          }
-        ]
+        "effects": []
       },
       {
         "id": "accept_for_optics",
@@ -4577,7 +4396,7 @@
     "id": "rs_belgrade_pressure_response_1993",
     "image": "event_patron_relations_RS.webp",
     "title": "Belgrade Calls: Pale Records Its Posture",
-    "narrative": "Milošević's envoys arrive at Pale through the FRY-RS channel. The directive is unambiguous: ease the Drina-corridor tempo, signal flexibility on Sarajevo division, and accept the corridor-narrowing implied by the Owen-Stoltenberg track and the diplomatic envelope Belgrade is brokering. The pressure is diplomatic, not material — no embargo, no border closure, no supply rupture. But Belgrade is exhausted by sanctions and the patron channel matters for ammunition reliability and political cover at the Security Council. Karadžić, Krajišnik, and Mladić disagree on the response. The Pale Assembly must record its posture: defy the directive on principle, accept the directive and adjust operations, partially comply by signaling some flexibility without breaking the platform, or attempt to broker a compromise that preserves Pale's leverage.",
+    "narrative": "On 20 September 1993, aboard the British carrier HMS Invincible, Owen and Stoltenberg put a package to the parties with Milošević at the table. It gave 49 percent of Bosnia to the Serb republic. Sarajevo would stay undivided, under UN administration for two years. Pale had already said yes once. On 28 August the Bosnian Serb Assembly accepted the Geneva accord without conditions. In the same month the VRS left Igman and Bjelašnica after the UN and NATO threatened air strikes. Belgrade stood behind Pale. The Bosnian Assembly had yet to vote. Pale must now record its posture toward Belgrade.",
     "category": "diplomatic",
     "family": "rs_belgrade_pressure_response",
     "source_tier": "balkan_battlegrounds",
@@ -4612,7 +4431,7 @@
     "requires_player_response": true,
     "responding_faction": "RS",
     "bot_response_logic": "historical",
-    "historical_default_response_id": "defy_belgrade_directive",
+    "historical_default_response_id": "accept_belgrade_directive",
     "pressure": {
       "base_rate": 3,
       "threshold": 3,
@@ -4620,22 +4439,63 @@
     },
     "effect": {
       "kind": "narrative",
-      "text": "Pale records its posture toward Belgrade's soft diplomatic pressure on the Owen-Stoltenberg / pre-embargo channel."
+      "text": "Pale records its posture toward Belgrade on the HMS Invincible package."
     },
-    "source_note": "Belgrade-Pale soft diplomatic pressure was an intermittent thread across the war's mid-period (1993-1995). Milošević applied diplomatic — not material — pressure on the Pale leadership (Karadžić, Krajišnik, Mladić) to accept successive peace plans (VOPP, Owen-Stoltenberg, Contact Group); Pale repeatedly defied these overtures short of the formal August 1994 FRY embargo. The autumn 1993 Owen-Stoltenberg-adjacent window is the densest documented soft-pressure phase: Belgrade brokered the Invincible package signature track but Pale's tempo on the Drina-corridor and Sarajevo-axis operations diverged from the diplomatic envelope, producing the patron-channel friction Karadžić IT-95-5/18-T paras 3283-3295 document on the Pale side (the earlier cite \"Vol. III §§4263-4310\" is Markale II of 28 August 1995; the judgment shows Belgrade supporting rather than restraining Pale in 1993, paras 3286-3287). Sources: ICTY Krajišnik IT-00-39-T Trial Judgment (27 September 2006) §§1006-1040 (the earlier cite: Krajišnik §§1006-1040 is his knowledge of 1992 events (information flows, travel, reports of expulsions and detention) and the judgment ends at 30 December 1992, so it cannot carry a 1993-94 claim; Owen-Stoltenberg is Karadžić ¶¶377-383 and the Belgrade-Pale rift and Drina blockade ¶¶3289-3297) (Pale leadership response to Belgrade pressure on diplomatic envelope, 1993-1994); ICTY Karadžić IT-95-5/18-T Trial Judgment (24 March 2016) paras 3283-3295 (the earlier cite \"Vol. III §§4263-4310\" is Markale II of 28 August 1995; FRY-RS channel friction across the autumn 1993 - August 1994 corridor); ICTY Milošević IT-02-54-T (FRY-RS channel context; Belgrade's diplomatic envelope and patron-pressure modulation); Richard Holbrooke, To End a War (Random House 1998) chs. 4-5 (Belgrade-Pale split as defining political-military thread of the war's mid-period; soft diplomatic pressure phase distinct from the August 1994 embargo); David Owen, Balkan Odyssey (Harcourt 1995) ch. 7 (Belgrade-brokered Invincible package; Pale acquiescence pattern); Balkan Battlegrounds Vol. II Ch. 11 (the earlier cite: BB Vol. II has annexes and addenda, not chapters, and the claim has no BB anchor; Balkan Battlegrounds Vol. II Ch. 11 is not a BB location) (FRY-RS channel modulation through the autumn 1993 Owen-Stoltenberg window and across the 1993-1994 Contact Group prelude). This row is DISTINCT from R8 (`belgrade_embargo_rs_1994`, war_1994.json turn 121-122): R7 covers the SOFT diplomatic-pressure phase (1993 — no material embargo, no border closure, no supply rupture); R8 covers the HARD material embargo response (4 August 1994 onward — FRY border closure, supply rupture, UNSCR 943 of 23 September 1994 endorsement). Cost-floor topology reflects the soft/hard distinction: R7 lever pulls patron-confidence + international-standing + internal-cohesion via political signalling; R8 lever pulls supply_delta, patron_pressure, recruitment_modifier via material rupture. §3.6 forward-looking guard: any future `csq_rs_belgrade_pressure_*` row consuming this row's outcomes MUST NOT re-author cleansing, forced-displacement, hostage-taking, civilian-targeting, paramilitary deployment, or any sensitive-act response option. This is a CONSTITUTIONAL-POLITICAL crisis lane (Belgrade-Pale patron-channel friction; Karadžić-Milošević split politics) — NOT operational ethnic-targeting. The Drina-corridor cleansing, Sarajevo-siege fires, Srebrenica enclave operations, and any associated atrocity surfaces remain canon-gated through their existing event surfaces (rs_drina_campaign, rs_camp_exposure_response, un_safe_area_enforcement, un_hostage_crisis_1995 family slugs). Engine vocabulary substitutions per memory/engine_dimension_vocabulary.md: counterfactual accept costs Pale hawks (internal_cohesion -20) + boosts patron_confidence (+20) and international_standing (+10); historical defy keeps internal cohesion intact and burns negotiating leverage; partial compliance and broker-compromise occupy the middle band with proportional shifts. New event reuses existing RS_BRANCH_TAGS entries (`rs_belgrade_pale_resist`, `rs_belgrade_pale_acknowledge`, `rs_belgrade_negotiate`) — no vocabulary additions; no new carrier flags.",
-    "staff_assessment": "Defying Belgrade's directive is the documented Pale posture across the soft-pressure 1993-1995 window: Karadžić, Krajišnik, and Mladić agreed the platform mattered more than the patron channel until the August 1994 embargo forced re-evaluation. Acceptance is the maximum-cost counterfactual — Belgrade is satisfied (Belgrade's confidence +20) and the West signals approval (international standing +10), but Pale hawks rebel and internal cohesion collapses by 20, with a six-week recruitment penalty. Partial compliance and brokered compromise occupy the middle band: smaller patron gains, proportional internal-cohesion costs. The Russian channel and the Patriarchate soften the cost of a brokered compromise (negotiating leverage +10).",
+    "source_note": "CORRECTED 2026-11-16 (historian seat, Batch B t76): in the September-October 1993 window Pale went along with Belgrade, it did not defy it. The Bosnian Serb Assembly accepted the Geneva accord without conditions on 28 August 1993 (Balkan Battlegrounds Vol. I p. 11). On 20 September Milošević sat in on the HMS Invincible package: 49 percent to the Serb republic, Sarajevo undivided under UN administration for two years (BB Vol. I pp. 12-13; ICTY Karadžić IT-95-5/18-T paras 377-383, 381). The judgment shows Belgrade supporting rather than restraining Pale in 1993 (paras 3286-3287). The VRS left Igman and Bjelašnica in August 1993 under UN and NATO pressure (BB Vol. I pp. 185-186; BB does not name Belgrade as the source). After the Bosnian Assembly made its acceptance conditional on 29 September, Pale withdrew its concessions on 2 October, a day after the Croat Assembly (BB Vol. I p. 13). The internal strain that September was the Banja Luka mutiny over war profiteering, settled on 16 September. Open defiance of Belgrade belongs to May 1993 (Vance-Owen; BB Vol. I pp. 182-183) and July-August 1994 (Contact Group; Karadžić paras 396-401, 3289-3295). The earlier framing of this row (Pale defying Belgrade in autumn 1993; easing the Drina tempo; flexibility on dividing Sarajevo; a corridor narrowing; a Patriarch Pavle / Russian channel) has no source and is withdrawn. This row is DISTINCT from R8 (`belgrade_embargo_rs_1994`, war_1994.json turns 121-122): R7 is the 1993 political posture with no material pressure; R8 is the material embargo from 4 August 1994. §3.6 forward-looking guard: any future `csq_rs_belgrade_pressure_*` row consuming this row's outcomes MUST NOT author cleansing, forced displacement, hostage-taking, civilian targeting, siege fire, paramilitary deployment or any other sensitive act as a response option. This is a constitutional-political lane, not operational ethnic targeting. Costs (historian seat): staying in step with Belgrade is cheap in cohesion and earns patron confidence; defiance is the costly counterfactual. No recruitment modifier: Pale's cohesion did not break that autumn.",
+    "staff_assessment": "Staying in step with Belgrade is the documented line. Belgrade backed Pale that autumn and did not hold it back. The strain inside the Serb republic that September came from Banja Luka, where a mutiny over war profiteering was settled on 16 September. It was not a revolt against Belgrade. When the Bosnian Assembly attached conditions on 29 September, Pale withdrew its concessions on 2 October, a day after the Croat Assembly did the same. The open break with Belgrade came later, over the Contact Group map in the summer of 1994.",
     "trigger_evidence": [
-      "FRY envoys have arrived at Pale through the documented Belgrade-RS channel.",
-      "The Owen-Stoltenberg diplomatic envelope and the corridor-narrowing implications are in active play.",
-      "The Pale leadership (Karadžić, Krajišnik, Mladić) disagrees on the response posture and must record a decision."
+      "On 28 August 1993 the Bosnian Serb Assembly accepted the Geneva accord without conditions.",
+      "On 20 September, aboard HMS Invincible, Milošević sat in on a package that gave 49 percent of Bosnia to the Serb republic and put Sarajevo under UN administration for two years.",
+      "Belgrade is backing Pale's acceptance, and the Bosnian Assembly has not yet voted on the package."
     ],
     "response_options": [
       {
+        "id": "accept_belgrade_directive",
+        "branch_tag": "rs_belgrade_pale_acknowledge",
+        "historical_marker": "historical_default",
+        "label": "Stay in step with Belgrade",
+        "description": "Hold to the package Milošević backed. If Sarajevo attaches conditions, withdraw the concessions offered to it. Belgrade's confidence rises, and Pale stands on record as the party that said yes.",
+        "effects": [
+          {
+            "kind": "morale_change",
+            "faction": "RS",
+            "delta": 0
+          }
+        ],
+        "sets_flags": {
+          "rs_belgrade_pressure_response": "accept"
+        },
+        "dimension_shifts": [
+          {
+            "faction": "RS",
+            "dimension": "patron_confidence",
+            "delta": 10
+          },
+          {
+            "faction": "RS",
+            "dimension": "international_standing",
+            "delta": 5
+          },
+          {
+            "faction": "RS",
+            "dimension": "internal_cohesion",
+            "delta": -2
+          },
+          {
+            "faction": "RS",
+            "dimension": "negotiating_leverage",
+            "delta": 5
+          }
+        ],
+        "aggression_affinity": -0.3,
+        "risk_level": 0.6
+      },
+      {
         "id": "defy_belgrade_directive",
         "branch_tag": "rs_belgrade_pale_resist",
-        "historical_marker": "historical_default",
-        "label": "Defy Belgrade's directive",
-        "description": "Reject the FRY envoys' demand. The platform matters more than the patron channel; the corridor tempo, Drina-valley axis, and Sarajevo-division operations continue without adjustment. Karadžić, Krajišnik, and Mladić align on rejection. The patron-confidence cost is real but recoverable short of the August 1994 embargo.",
+        "historical_marker": "counterfactual",
+        "label": "Break with Belgrade",
+        "description": "Break with the package Belgrade backed and let the Assembly decide alone. The failure of the plan is laid at Pale's door, and Belgrade's support is put at risk.",
         "effects": [
           {
             "kind": "morale_change",
@@ -4650,6 +4510,11 @@
           {
             "faction": "RS",
             "dimension": "patron_confidence",
+            "delta": -15
+          },
+          {
+            "faction": "RS",
+            "dimension": "international_standing",
             "delta": -10
           },
           {
@@ -4660,60 +4525,18 @@
           {
             "faction": "RS",
             "dimension": "negotiating_leverage",
-            "delta": -5
+            "delta": -10
           }
         ],
         "aggression_affinity": 0.3,
         "risk_level": 0.5
       },
       {
-        "id": "accept_belgrade_directive",
-        "branch_tag": "rs_belgrade_pale_acknowledge",
-        "historical_marker": "counterfactual",
-        "label": "Accept Belgrade's directive",
-        "description": "Honor Milošević's request. Ease the Drina-corridor tempo, signal flexibility on Sarajevo, and align the Pale posture with the FRY diplomatic envelope. Belgrade is satisfied; international standing rises. But Pale hawks rebel: Mladić and the Assembly hardliners challenge the leadership, internal cohesion collapses, and recruitment suffers for six turns as the platform faction questions the political track.",
-        "effects": [
-          {
-            "kind": "morale_change",
-            "faction": "RS",
-            "delta": -2
-          },
-          {
-            "kind": "recruitment_modifier",
-            "faction": "RS",
-            "pool_multiplier": 0.9,
-            "duration_turns": 6
-          }
-        ],
-        "sets_flags": {
-          "rs_belgrade_pressure_response": "accept"
-        },
-        "dimension_shifts": [
-          {
-            "faction": "RS",
-            "dimension": "patron_confidence",
-            "delta": 20
-          },
-          {
-            "faction": "RS",
-            "dimension": "international_standing",
-            "delta": 10
-          },
-          {
-            "faction": "RS",
-            "dimension": "internal_cohesion",
-            "delta": -20
-          }
-        ],
-        "aggression_affinity": -0.3,
-        "risk_level": 0.6
-      },
-      {
         "id": "partial_compliance",
         "branch_tag": "rs_belgrade_negotiate",
         "historical_marker": "counterfactual",
-        "label": "Partial compliance",
-        "description": "Signal some flexibility to Belgrade without breaking the platform. Slow the corridor tempo on selected axes, keep the Sarajevo-axis fires unchanged, and offer the diplomatic envelope a narrower acceptance window. Belgrade is partly mollified; Pale hawks grumble but do not rebel. The patron channel holds at reduced confidence.",
+        "label": "Endorse in public, delay the vote",
+        "description": "Endorse the package in public but hold back the Assembly's vote, and press for map changes of Pale's own. Belgrade is irritated. The hardliners are pleased.",
         "effects": [
           {
             "kind": "morale_change",
@@ -4728,17 +4551,22 @@
           {
             "faction": "RS",
             "dimension": "patron_confidence",
-            "delta": 5
+            "delta": -5
           },
           {
             "faction": "RS",
             "dimension": "international_standing",
-            "delta": 5
+            "delta": -5
           },
           {
             "faction": "RS",
             "dimension": "internal_cohesion",
-            "delta": -10
+            "delta": 3
+          },
+          {
+            "faction": "RS",
+            "dimension": "negotiating_leverage",
+            "delta": 3
           }
         ],
         "aggression_affinity": -0.1,
@@ -4748,13 +4576,13 @@
         "id": "broker_compromise",
         "branch_tag": "rs_belgrade_negotiate",
         "historical_marker": "counterfactual",
-        "label": "Broker a compromise",
-        "description": "Open back-channels through Patriarch Pavle and the Russian envoys. Offer Belgrade a face-saving formula that preserves the Six Strategic Goals platform while signalling diplomatic engagement on the Owen-Stoltenberg envelope. The patron channel strengthens and negotiating leverage rises; internal cohesion takes a small hit from the optical compromise.",
+        "label": "Ask Belgrade to reopen the map",
+        "description": "Ask Milošević to reopen the map in Pale's favor before any new vote. If it works, Pale's leverage rises. Belgrade's patience wears thinner.",
         "effects": [
           {
             "kind": "morale_change",
             "faction": "RS",
-            "delta": 1
+            "delta": 0
           }
         ],
         "sets_flags": {
@@ -4763,18 +4591,18 @@
         "dimension_shifts": [
           {
             "faction": "RS",
-            "dimension": "patron_confidence",
-            "delta": 10
-          },
-          {
-            "faction": "RS",
-            "dimension": "negotiating_leverage",
-            "delta": 10
+            "dimension": "international_standing",
+            "delta": -5
           },
           {
             "faction": "RS",
             "dimension": "internal_cohesion",
-            "delta": -5
+            "delta": 2
+          },
+          {
+            "faction": "RS",
+            "dimension": "negotiating_leverage",
+            "delta": 8
           }
         ],
         "aggression_affinity": -0.1,
@@ -4782,44 +4610,44 @@
       }
     ],
     "notifications_to_other_factions": {
-      "defy_belgrade_directive": {
-        "RBiH": {
-          "headline": "Pale defies Belgrade on diplomatic envelope",
-          "body": "RS rejects FRY pressure to ease the corridor tempo and align with the Owen-Stoltenberg envelope. Sarajevo reads the patron-channel friction but no material rupture — Pale's platform holds even as Belgrade's diplomatic envelope narrows."
-        },
-        "HRHB": {
-          "headline": "Karadzic rejects Milosevic's envoys",
-          "body": "Pale defies Belgrade's soft diplomatic pressure on the corridor and Sarajevo axes. Mostar reads the FRY-RS friction as a leading indicator but no embargo; the patron channel holds at reduced confidence."
-        }
-      },
       "accept_belgrade_directive": {
         "RBiH": {
-          "headline": "Pale aligns with Belgrade's envelope",
-          "body": "RS accepts FRY pressure to ease the corridor tempo and align with the diplomatic envelope. Sarajevo reads the Belgrade-Pale alignment as a leading indicator — but Pale's internal cohesion suffers and recruitment tightens for six turns."
+          "headline": "Pale holds to the Invincible package",
+          "body": "Pale stays in step with Belgrade behind the package. Its concessions depend on Sarajevo accepting the terms as offered."
         },
         "HRHB": {
-          "headline": "Karadzic honors Milosevic's directive",
-          "body": "Pale aligns with Belgrade's diplomatic envelope on the Owen-Stoltenberg envelope and the Sarajevo axis. Mostar reads the FRY-RS rapprochement but notes Pale's internal cohesion damage from the platform-faction backlash."
+          "headline": "Pale and Belgrade keep one line",
+          "body": "Pale backs the package Milošević sat in on. Mostar expects Pale to drop its concessions if Sarajevo attaches conditions."
         }
       },
       "partial_compliance": {
         "RBiH": {
-          "headline": "Pale signals partial flexibility to Belgrade",
-          "body": "RS narrows tempo on selected corridor axes while keeping Sarajevo-axis fires unchanged. Sarajevo reads the Pale-Belgrade signal as partial flexibility — Pale hawks grumble but the platform holds."
+          "headline": "Pale endorses the package but delays its vote",
+          "body": "Pale backs the package in public while holding back the Assembly's vote and pressing for map changes of its own. Belgrade is reported to be irritated."
         },
         "HRHB": {
-          "headline": "Karadzic offers Milosevic a narrower window",
-          "body": "Pale signals partial compliance with Belgrade's directive on the corridor envelope. Mostar reads the FRY-RS friction as moderated but unresolved; the patron channel holds at reduced confidence."
+          "headline": "Pale stalls on the Assembly vote",
+          "body": "Pale endorses the package but will not put it to a vote. Mostar sees friction between Pale and Belgrade, short of a break."
         }
       },
       "broker_compromise": {
         "RBiH": {
-          "headline": "Pale opens Pavle channel to Belgrade",
-          "body": "RS opens back-channels through Patriarch Pavle and the Russian envoys to offer Belgrade a face-saving formula. Sarajevo reads the optical compromise but the corridor and Sarajevo claims persist on the platform."
+          "headline": "Pale asks Belgrade to reopen the map",
+          "body": "Pale wants the map redrawn in its favor before any new vote. Sarajevo reads it as a bid for more ground with Belgrade's help."
         },
         "HRHB": {
-          "headline": "Karadzic seeks face-saving formula with Belgrade",
-          "body": "Pale routes a compromise proposal through Patriarch Pavle and the Russian envoys. Mostar reads the patron-channel strengthening and the negotiating-leverage rise; the platform itself remains intact."
+          "headline": "Pale presses Milošević on the map",
+          "body": "Pale asks Belgrade to reopen the map before the Assembly votes again. Mostar is watching whether Milošević takes the request to the mediators."
+        }
+      },
+      "defy_belgrade_directive": {
+        "RBiH": {
+          "headline": "Pale breaks with Belgrade's package",
+          "body": "Pale walks away from the package Milošević backed, and its Assembly will decide alone. The failure of the plan now falls on Pale."
+        },
+        "HRHB": {
+          "headline": "Pale goes its own way",
+          "body": "Pale breaks with Belgrade over the package. Mostar sees an open rift between Pale and Belgrade, and the plan stalls on the Serb side."
         }
       }
     },
@@ -4878,20 +4706,9 @@
     "once": true,
     "effects": [
       {
-        "kind": "humanitarian_impact",
-        "faction": "RBiH",
-        "war_crimes_delta": 2
-      },
-      {
         "kind": "morale_change",
         "faction": "HRHB",
         "delta": -3
-      },
-      {
-        "kind": "negotiation_capital",
-        "faction": "RBiH",
-        "dimension": "international_credibility",
-        "delta": -10
       },
       {
         "kind": "narrative",
@@ -5174,7 +4991,7 @@
     "id": "bosnian_assembly_rejects_os_1993",
     "image": "event_political_session.webp",
     "title": "Bosnian Parliament Rejects Owen-Stoltenberg Plan",
-    "narrative": "After sessions aboard HMS Invincible on September 20, the Bosnian government assembly in Sarajevo votes to reject the Owen-Stoltenberg plan's ethnic partition, demanding additional territory and access to the sea. The rejection prolongs the war and frustrates international mediators but preserves the principle of a unified, multi-ethnic Bosnia.",
+    "narrative": "After sessions aboard HMS Invincible on September 20, the Bosnian government assembly in Sarajevo votes to accept the Owen-Stoltenberg plan only on condition that territory seized by force is returned. The conditional answer prolongs the war and frustrates international mediators but preserves the principle of a unified, multi-ethnic Bosnia.",
     "category": "political",
     "source_tier": "icty_icj_un",
     "source_note": "The listed adjudicative and institutional sources bound the chronology, actors, and findings described. The essay is original synthesis and does not extend individual liability, command responsibility, or institutional findings beyond the cited record.",
@@ -5189,18 +5006,13 @@
     "once": true,
     "effects": [
       {
-        "kind": "morale_change",
-        "faction": "RBiH",
-        "delta": 3
-      },
-      {
         "kind": "patron_pressure",
         "faction": "RBiH",
         "delta": 5
       },
       {
         "kind": "narrative",
-        "text": "The Bosnian assembly refuses partition. The war will continue — but so will Bosnia's legal claim to its full territory."
+        "text": "The Bosnian Assembly in Sarajevo accepts the Owen-Stoltenberg plan only if territory seized by force is returned. The war goes on, and Bosnia keeps its legal claim to its whole territory."
       }
     ],
     "dimension_shifts": [
@@ -5215,7 +5027,7 @@
         "delta": -5
       }
     ],
-    "historical_source": "Peace plans proposed before and during the Bosnian War. HMS Invincible negotiations, September 20 1993.",
+    "historical_source": "Peace plans proposed before and during the Bosnian War. HMS Invincible negotiations, September 20 1993; Balkan Battlegrounds Vol. I chronology, pp. 11-13 (the Assembly's conditional acceptance of 29 September 1993).",
     "effect": {
       "kind": "morale_change",
       "faction": "RBiH",
@@ -5241,18 +5053,8 @@
     "effects": [
       {
         "kind": "morale_change",
-        "faction": "RBiH",
-        "delta": -3
-      },
-      {
-        "kind": "morale_change",
         "faction": "RS",
         "delta": 2
-      },
-      {
-        "kind": "supply_delta",
-        "faction": "RS",
-        "delta": 3
       },
       {
         "kind": "narrative",
@@ -5301,20 +5103,9 @@
     "once": true,
     "effects": [
       {
-        "kind": "humanitarian_impact",
-        "faction": "HRHB",
-        "war_crimes_delta": 2
-      },
-      {
         "kind": "patron_pressure",
         "faction": "HRHB",
         "delta": 5
-      },
-      {
-        "kind": "negotiation_capital",
-        "faction": "HRHB",
-        "dimension": "international_credibility",
-        "delta": -15
       },
       {
         "kind": "narrative",
@@ -5602,9 +5393,9 @@
     "id": "mostar_bridge_destroyed_1993",
     "image": "event_siege_city_HRHB.webp",
     "title": "Stari Most Destroyed in Mostar",
-    "narrative": "HVO forces destroy the iconic Stari Most, the 16th-century Ottoman bridge spanning the Neretva River in Mostar. The deliberate demolition of this UNESCO-recognized cultural monument becomes a global symbol of the war's cultural devastation. The act draws widespread international condemnation and deepens the stigma on the Bosnian Croat war effort.",
+    "narrative": "HVO forces destroy the iconic Stari Most, the 16th-century Ottoman bridge spanning the Neretva River in Mostar. The deliberate destruction of this monument becomes a global symbol of the war's cultural devastation. The act draws widespread international condemnation and deepens the stigma on the Bosnian Croat war effort.",
     "category": "humanitarian",
-    "historical_source": "ICTY Prlić et al. Trial Judgment (IT-04-74-T), Stari Most destruction; UNESCO World Heritage Committee records",
+    "historical_source": "ICTY Prlić et al. Trial Judgment (IT-04-74-T), Stari Most destruction; ICTY Prlić et al. Appeal Judgement (IT-04-74-A, 29 November 2017): the Appeals Chamber found the bridge a military target at the time of the attack and reversed the Trial Chamber's wanton-destruction finding on it, Judge Pocar dissenting; UNESCO World Heritage Committee records",
     "source_tier": "icty_icj_un",
     "source_note": "The listed adjudicative and institutional sources bound the chronology, actors, and findings described. The essay is original synthesis and does not extend individual liability, command responsibility, or institutional findings beyond the cited record.",
     "trigger": {
@@ -5622,20 +5413,15 @@
     },
     "once": true,
     "effect": {
-      "kind": "humanitarian_impact",
-      "faction": "HRHB",
-      "war_crimes_delta": 1
+      "kind": "narrative",
+      "text": "The Stari Most is destroyed by HVO shelling. The loss of the iconic bridge becomes a symbol of cultural destruction."
     },
-    "effects": [
+    "effects": [],
+    "dimension_shifts": [
       {
-        "kind": "negotiation_capital",
         "faction": "HRHB",
-        "dimension": "international_credibility",
+        "dimension": "international_standing",
         "delta": -10
-      },
-      {
-        "kind": "narrative",
-        "text": "The Stari Most is destroyed by HVO shelling. The loss of the iconic bridge becomes a symbol of cultural destruction."
       }
     ]
   },
@@ -5705,17 +5491,12 @@
       {
         "id": "press_offensive",
         "label": "Press the offensive",
-        "description": "Demand forward momentum from your corps commanders. The army attacks wherever it can. Supply costs rise, but morale soars and international attention focuses on Bosniak military capability.",
+        "description": "Demand forward momentum from your corps commanders. The army attacks wherever it can. The attacks will cost men, but morale rises and international attention focuses on Bosniak military capability.",
         "effects": [
           {
             "kind": "morale_change",
             "faction": "RBiH",
             "delta": 3
-          },
-          {
-            "kind": "supply_delta",
-            "faction": "RBiH",
-            "delta": -3
           },
           {
             "kind": "aggression_modifier",
@@ -5745,17 +5526,12 @@
       {
         "id": "consolidate_defend",
         "label": "Consolidate and defend",
-        "description": "Halt costly attacks. Dig in on current lines, restore cohesion, and build reserves. The army that survives the winter can fight in the spring.",
+        "description": "Halt costly attacks. Dig in on current lines and restore cohesion. The army that survives the winter can fight in the spring.",
         "effects": [
           {
             "kind": "cohesion_change",
             "faction": "RBiH",
             "delta": 5
-          },
-          {
-            "kind": "supply_delta",
-            "faction": "RBiH",
-            "delta": 3
           }
         ],
         "dimension_shifts": [
@@ -5813,13 +5589,8 @@
       {
         "id": "accept_ceasefire_terms",
         "label": "Accept ceasefire terms to buy time",
-        "description": "The war has ground your forces down. Accept international mediation and a temporary ceasefire. The army desperately needs to rest and rearm — but your hardliners will call it surrender.",
+        "description": "The war has ground your forces down. Accept international mediation and a temporary ceasefire. The army desperately needs to rest, but your hardliners will call it surrender.",
         "effects": [
-          {
-            "kind": "supply_delta",
-            "faction": "RBiH",
-            "delta": 8
-          },
           {
             "kind": "cohesion_change",
             "faction": "RBiH",
@@ -5861,7 +5632,7 @@
       "press_offensive": {
         "HRHB": {
           "headline": "Sarajevo orders a more aggressive posture",
-          "body": "RBiH commanders are directed to seek forward momentum wherever supply allows. HVO staff see higher Bosnian morale, but also heavier pressure on shared logistics and coordination."
+          "body": "RBiH commanders are directed to seek forward momentum wherever they can. HVO staff see higher Bosnian morale, but also heavier pressure on coordination."
         },
         "RS": {
           "headline": "Sarajevo signals offensive intent",
@@ -5871,11 +5642,11 @@
       "consolidate_defend": {
         "HRHB": {
           "headline": "Sarajevo shifts to consolidation",
-          "body": "RBiH halts costly attacks to restore cohesion and build reserves. HVO planners see a more defensive Bosnian posture while the army prepares for later operations."
+          "body": "RBiH halts costly attacks to restore cohesion. HVO planners see a more defensive Bosnian posture while the army prepares for later operations."
         },
         "RS": {
           "headline": "RBiH digs in on current lines",
-          "body": "Sarajevo orders its forces to defend, rebuild, and preserve supply. Pale expects fewer immediate attacks but stronger prepared positions over time."
+          "body": "Sarajevo orders its forces to defend and rebuild. Pale expects fewer immediate attacks but stronger prepared positions over time."
         }
       },
       "seek_negotiation": {
@@ -5891,11 +5662,11 @@
       "accept_ceasefire_terms": {
         "HRHB": {
           "headline": "Sarajevo accepts a ceasefire pause",
-          "body": "RBiH accepts mediation terms to rest and rearm. HVO staff note the logistical benefit for Sarajevo, even as internal critics frame the pause as weakness."
+          "body": "RBiH accepts mediation terms to rest. HVO staff note the breathing space for Sarajevo, even as internal critics frame the pause as weakness."
         },
         "RS": {
           "headline": "RBiH accepts ceasefire terms",
-          "body": "Sarajevo chooses a temporary pause to recover supply and cohesion. Pale reads the lower aggression as useful, but not as a final settlement."
+          "body": "Sarajevo chooses a temporary pause to rest its forces. Pale reads the lower aggression as useful, but not as a final settlement."
         }
       }
     }
@@ -5974,11 +5745,6 @@
             "delta": 4
           },
           {
-            "kind": "supply_delta",
-            "faction": "RS",
-            "delta": -3
-          },
-          {
             "kind": "aggression_modifier",
             "faction": "RS",
             "delta": 0.1,
@@ -6017,11 +5783,6 @@
             "kind": "cohesion_change",
             "faction": "RS",
             "delta": 5
-          },
-          {
-            "kind": "supply_delta",
-            "faction": "RS",
-            "delta": 4
           }
         ],
         "dimension_shifts": [
@@ -6082,11 +5843,6 @@
         "description": "The war has cost more than our people can bear. Signal willingness to accept a territorial settlement in exchange for international recognition. The hardliners in the Assembly will revolt — but the alternative is permanent isolation.",
         "effects": [
           {
-            "kind": "supply_delta",
-            "faction": "RS",
-            "delta": 6
-          },
-          {
             "kind": "cohesion_change",
             "faction": "RS",
             "delta": -8
@@ -6136,7 +5892,7 @@
       "consolidate_holdings": {
         "HRHB": {
           "headline": "RS shifts to holding current gains",
-          "body": "Pale orders VRS formations to fortify existing positions and rebuild supply. HVO planners expect fewer new thrusts, but stronger prepared defenses."
+          "body": "Pale orders VRS formations to fortify existing positions. HVO planners expect fewer new thrusts, but stronger prepared defenses."
         },
         "RBiH": {
           "headline": "Pale consolidates its holdings",
@@ -6244,11 +6000,6 @@
             "delta": 4
           },
           {
-            "kind": "supply_delta",
-            "faction": "HRHB",
-            "delta": -2
-          },
-          {
             "kind": "aggression_modifier",
             "faction": "HRHB",
             "delta": 0.1,
@@ -6281,11 +6032,6 @@
           {
             "kind": "alliance_change",
             "delta": 0.08
-          },
-          {
-            "kind": "supply_delta",
-            "faction": "HRHB",
-            "delta": 2
           }
         ],
         "dimension_shifts": [
@@ -6313,14 +6059,9 @@
       },
       {
         "id": "consolidate_supply",
-        "label": "Consolidate and resupply",
-        "description": "Pause offensive operations, secure the supply corridor from Croatia, and build up reserves for the spring. What we hold, we hold. What we need, we will take when we are ready.",
+        "label": "Consolidate and hold",
+        "description": "Pause offensive operations and rebuild cohesion for the spring. What we hold, we hold. What we need, we will take when we are ready.",
         "effects": [
-          {
-            "kind": "supply_delta",
-            "faction": "HRHB",
-            "delta": 6
-          },
           {
             "kind": "cohesion_change",
             "faction": "HRHB",
@@ -6413,12 +6154,12 @@
       },
       "consolidate_supply": {
         "RBiH": {
-          "headline": "Herceg-Bosna pauses to resupply",
-          "body": "Mostar slows offensive operations to secure Croatian supply routes and rebuild cohesion. Sarajevo sees a steadier HVO posture, but not a political settlement."
+          "headline": "Herceg-Bosna pauses to consolidate",
+          "body": "Mostar slows offensive operations to rebuild cohesion. Sarajevo sees a steadier HVO posture, but not a political settlement."
         },
         "RS": {
-          "headline": "HVO consolidates and rebuilds supply",
-          "body": "Herceg-Bosna focuses on holding territory and preparing reserves. Pale expects fewer immediate HVO attacks, with stronger logistics later."
+          "headline": "HVO consolidates",
+          "body": "Herceg-Bosna focuses on holding territory. Pale expects fewer immediate HVO attacks, with a steadier front later."
         }
       },
       "sue_for_peace_hrhb": {
@@ -6549,11 +6290,6 @@
             "faction": "RBiH",
             "delta": 0.05,
             "duration_turns": 6
-          },
-          {
-            "kind": "supply_delta",
-            "faction": "RBiH",
-            "delta": -1
           }
         ],
         "dimension_shifts": [
@@ -6574,7 +6310,7 @@
       {
         "id": "visit_bihac",
         "label": "Visit the Bihać pocket — 5th Corps",
-        "description": "You visit General Dudaković's isolated command. The pocket has held under severe pressure and limited relief. The visit costs logistics resources, but it tells 5th Corps that Sarajevo has not forgotten it.",
+        "description": "You visit General Dudaković's isolated command. The pocket has held under severe pressure and limited relief. The visit tells 5th Corps that Sarajevo has not forgotten it.",
         "effects": [
           {
             "kind": "morale_change",
@@ -6585,11 +6321,6 @@
             "kind": "cohesion_change",
             "faction": "RBiH",
             "delta": 2
-          },
-          {
-            "kind": "supply_delta",
-            "faction": "RBiH",
-            "delta": -2
           }
         ],
         "dimension_shifts": [
@@ -6705,11 +6436,11 @@
       "visit_bihac": {
         "HRHB": {
           "headline": "Sarajevo visits the Bihać pocket",
-          "body": "RBiH leadership directs attention to Dudakovic's isolated 5th Corps. Mostar sees a morale and cohesion signal to the western pocket, with logistics costs attached."
+          "body": "RBiH leadership directs attention to Dudakovic's isolated 5th Corps. Mostar sees a morale and cohesion signal to the western pocket."
         },
         "RS": {
           "headline": "Sarajevo visits the Bihać pocket",
-          "body": "RBiH leadership gives official attention to the isolated 5th Corps. Pale sees Sarajevo trying to reinforce morale in Bihać despite the pocket's logistical strain."
+          "body": "RBiH leadership gives official attention to the isolated 5th Corps. Pale sees Sarajevo trying to reinforce morale in the isolated Bihać pocket."
         }
       },
       "visit_press_rbih": {
@@ -7115,11 +6846,6 @@
             "kind": "cohesion_change",
             "faction": "HRHB",
             "delta": 2
-          },
-          {
-            "kind": "supply_delta",
-            "faction": "HRHB",
-            "delta": -2
           }
         ],
         "dimension_shifts": [
@@ -8492,7 +8218,7 @@
         "branch_tag": "hrhb_washington_accept",
         "historical_marker": "historical_default",
         "label": "Extend federation overture to Sarajevo now",
-        "description": "Accept Tudjman's directive transmitted via Galbraith and the Swoboda-Bonn channel. Extend backchannel federation language to Sarajevo NOW (October-December 1993), pre-empting US sanctions pressure and shaping the eventual Washington framework architecture. The Federation track begins to form three months ahead of the formal signature; diplomatic credit accrues to the HZ HB Presidency; the Croat-Bosniak war strain begins to ease; international standing rises sharply.",
+        "description": "Accept Tudjman's directive transmitted via Galbraith and the Swoboda-Bonn channel. Extend backchannel federation language to Sarajevo NOW (October-December 1993), pre-empting US sanctions pressure and shaping the eventual Washington framework architecture. The Federation track begins to form three months ahead of the formal signature; diplomatic credit accrues to the HZ HB Presidency; the Croat-Bosniak war strain begins to ease; international standing rises sharply. If your refugee compact is in force, this renews it for at least 30 more weeks.",
         "effects": [
           {
             "kind": "morale_change",
@@ -8537,7 +8263,7 @@
         "branch_tag": "hrhb_croat_republic",
         "historical_marker": "counterfactual",
         "label": "Maintain separate-state line; let Zagreb-hawks dictate the pace",
-        "description": "Resist the federation backchannel. The Croat-republic line holds and the HZ HB Presidency signals to Zagreb-hawks (the Šušak-Boban hardline) that Mostar will not extend federation language pre-emptively. Tudjman's accommodation of US pressure is deferred; the patron channel re-aligns around the hardline; but the diplomatic ground that Galbraith and Swoboda have prepared is yielded back to Sarajevo and the international community.",
+        "description": "Resist the federation backchannel. The Croat-republic line holds and the HZ HB Presidency signals to Zagreb-hawks (the Šušak-Boban hardline) that Mostar will not extend federation language pre-emptively. Tudjman's accommodation of US pressure is deferred; the patron channel re-aligns around the hardline; but the diplomatic ground that Galbraith and Swoboda have prepared is yielded back to Sarajevo and the international community. If your refugee compact is in force, this ends it for good: displacement strain and Zagreb's pull on the alliance return, and HVO recruitment recovers.",
         "effects": [
           {
             "kind": "morale_change",
@@ -8627,7 +8353,7 @@
         "branch_tag": "hrhb_strategic_ambiguity",
         "historical_marker": "counterfactual",
         "label": "Reject federation path; commit to permanent separate Croat republic",
-        "description": "Reject the federation backchannel entirely. The HZ HB Presidency commits to a permanent separate Croat republic outside any Federation architecture with Sarajevo. Tudjman's hawks (the Šušak-Boban hardline) are pleased; confidence among the Zagreb hawks rises sharply (+10); but the Federation channel that Galbraith, Swoboda, and Holbrooke have prepared ruptures BEFORE it forms. International standing collapses (-25), negotiating leverage collapses (-25), territorial legitimacy concedes the long-term path of isolation (-10), and the maximalist Croat-republic platform commits to a path that the Washington Agreement of March 1994 (still three months out) will eventually have to override under direct US sanctions pressure. This is the maximum-cost counterfactual.",
+        "description": "Reject the federation backchannel entirely. The HZ HB Presidency commits to a permanent separate Croat republic outside any Federation architecture with Sarajevo. Tudjman's hawks (the Šušak-Boban hardline) are pleased; confidence among the Zagreb hawks rises sharply (+10); but the Federation channel that Galbraith, Swoboda, and Holbrooke have prepared ruptures BEFORE it forms. International standing collapses (-25), negotiating leverage collapses (-25), territorial legitimacy concedes the long-term path of isolation (-10), and the maximalist Croat-republic platform commits to a path that the Washington Agreement of March 1994 (still three months out) will eventually have to override under direct US sanctions pressure. This is the maximum-cost counterfactual. If your refugee compact is in force, this ends it for good: displacement strain and Zagreb's pull on the alliance return, and HVO recruitment recovers.",
         "effects": [
           {
             "kind": "morale_change",

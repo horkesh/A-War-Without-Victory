@@ -86,7 +86,6 @@ function isBlockerReviewDuplicate(item: PreAdvanceCommandReviewItem, blockers: P
       case 'event_decision': return item.id === 'review:pending';
       case 'peace_plan': return item.id === 'manifest:peace_plan';
       case 'dayton_negotiation': return item.id === 'manifest:dayton_negotiation';
-      case 'convoy_decision': return item.id === 'manifest:convoy_decision';
       case 'paramilitary_request': return item.id === 'paramilitary:pending';
       default: return false;
     }

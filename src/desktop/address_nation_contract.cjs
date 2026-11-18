@@ -27,7 +27,7 @@ const ADDRESS_NATION_EVENT_BY_FACTION = {
   HRHB: 'address_to_nation_hrhb',
 };
 
-const { responseOptionsForFire } = require('./action_cadence_contract.cjs');
+const { eventNotYetAvailableUntil, responseOptionsForFire } = require('./action_cadence_contract.cjs');
 
 /** Returns the authored address-to-nation event id for a faction, or null. */
 function addressNationEventIdForFaction(faction) {
@@ -70,6 +70,11 @@ function computeAddressNationAvailability(state, playerFaction, eventDef) {
   if ((state?.military?.pending_event_decisions ?? []).some((decision) => decision?.event_id === eventId)) {
     return { ...base, reason: 'already_pending' };
   }
+  // G1 (2026-11-16): the event's own trigger.turn_min holds for the human President too. The bot
+  // path fires these authored events only from turn_min (84); the desktop path used to queue them
+  // from turn 0.
+  const notYetUntil = eventNotYetAvailableUntil(currentTurn, eventDef);
+  if (notYetUntil != null) return { ...base, reason: 'not_yet_available', availableFromTurn: notYetUntil };
 
   // ── Cooldown / cap (voluntary desktop action only; engine ignores it) ───────
   const actionCadence = eventDef.action_cadence;

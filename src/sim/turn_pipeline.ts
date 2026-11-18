@@ -188,7 +188,7 @@ export async function runTurn(state: GameState, input: TurnInput): Promise<TurnR
     // A war that ended during this turn gets no later event evaluation (the next turn
     // short-circuits above), so write the no-choice records it already owes.
     if (working.meta.game_over === true && input.eventDefinitions) {
-        const owed = writeOwedRecordsAtTermination(working, input.eventDefinitions, input.settlementEdges);
+        const owed = writeOwedRecordsAtTermination(working, input.eventDefinitions);
         if (owed.length > 0) report.events_fired = [...(report.events_fired ?? []), ...owed];
     }
 

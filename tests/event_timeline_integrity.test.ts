@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
+import { ALLIED_THRESHOLD } from '../src/sim/early_war/alliance_update.js';
 
 function loadEvents(filename: string) {
     const raw = readFileSync(resolve(__dirname, '..', 'data', 'scenarios', 'events', filename), 'utf-8');
@@ -100,6 +101,9 @@ describe('Event timeline historical integrity', () => {
             conditions: [
                 { type: 'territory_control', osid: 'op:vitez:vitez_2', faction: 'HRHB' },
                 { type: 'flag_equals', flag: 'hvo_arbih_tensions_rising', value: true },
+                // §6 panel 2026-11-16 (Ahmići windows and H6): withheld after H6 evacuate/federate_early.
+                { type: 'not', condition: { type: 'flag_equals', flag: 'hrhb_central_bosnia_defense', value: 'evacuate' } },
+                { type: 'not', condition: { type: 'flag_equals', flag: 'hrhb_central_bosnia_defense', value: 'federate_early' } },
             ],
         });
         expect(JSON.stringify(ahmici.trigger.condition)).not.toContain('op:vitez:preocica_3');
@@ -111,15 +115,14 @@ describe('Event timeline historical integrity', () => {
         });
         expect(ahmici.effects).toEqual([
             {
-                kind: 'negotiation_capital',
-                faction: 'HRHB',
-                dimension: 'international_credibility',
-                delta: -25,
-            },
-            {
                 kind: 'narrative',
                 text: 'The Ahmići massacre shocks the international community. HVO credibility suffers a devastating blow.',
             },
+        ]);
+        // §6 E2: the international cost is a live dimension shift, not the retired
+        // (silently dead) negotiation_capital effect.
+        expect(ahmici.dimension_shifts).toEqual([
+            { faction: 'HRHB', dimension: 'international_standing', delta: -25 },
         ]);
     });
 
@@ -245,9 +248,13 @@ describe('Event timeline historical integrity', () => {
         expect(cohaExpires.sets_flags?.coha_expired).toBe(true);
     });
 
-    it('Washington Agreement requires Croat-Bosniak war', () => {
-        const wa = allEvents.find((e: any) => e.id === 'hrhb_washington_agreement_1994');
-        expect(wa.trigger.requires_events).toContain('croat_bosniak_war_begins_1993');
+    // B5 A2 (2026-11-16): both Washington cards require the Croat-Bosniak war through the
+    // engine's own record of it (rbih_hrhb_state.war_started_turn), not the 1993 event id, so a
+    // war that starts by another route still counts and the card and the engine cannot disagree.
+    it.each(['hrhb_washington_agreement_1994', 'rbih_washington_agreement_1994'])('%s requires the Croat-Bosniak war', (id) => {
+        const wa = allEvents.find((e: any) => e.id === id);
+        expect(wa.trigger.condition.type).toBe('and');
+        expect(wa.trigger.condition.conditions).toContainEqual({ type: 'rbih_hrhb_war_started', value: true });
     });
 
     it('NATO ultimatum and Sarajevo exclusion zone retain their bounded chronology and effects', () => {
@@ -269,9 +276,11 @@ describe('Event timeline historical integrity', () => {
 
         expect([exclusion.trigger.turn_min, exclusion.trigger.turn_max]).toEqual([97, 98]);
         expect(exclusion.trigger.requires_events).toEqual(['nato_ultimatum_sarajevo_1994']);
-        expect(exclusion.effect).toEqual({ kind: 'supply_delta', faction: 'RS', delta: -5 });
+        // The RS supply_delta primary was retired 2026-11-17 (supply is connection, not stock); the
+        // morale effect took the primary slot and the narrative line stays in the list, where the
+        // event card shows it.
+        expect(exclusion.effect).toEqual({ kind: 'morale_change', faction: 'RBiH', delta: 5 });
         expect(exclusion.effects).toEqual([
-            { kind: 'morale_change', faction: 'RBiH', delta: 5 },
             { kind: 'aggression_modifier', faction: 'RS', delta: -0.1, duration_turns: 12 },
             {
                 kind: 'narrative',
@@ -280,10 +289,28 @@ describe('Event timeline historical integrity', () => {
         ]);
     });
 
-    it('Federation ground offensive requires both Washington and Deliberate Force', () => {
+    // B5 1995 alliance gate (2026-11-16): Croatian involvement in 1995 keys on the Federation
+    // actually existing — Washington signed, OR an RBiH-HRHB alliance kept above ALLIED_THRESHOLD —
+    // not on the 1993 war that Washington ended. Left alone the Washington branch is true exactly
+    // where the old requires_events was.
+    const ALLIANCE_OR_WASHINGTON = {
+        type: 'or',
+        conditions: [
+            { type: 'event_fire_count', event_id: 'hrhb_washington_agreement_1994', min_count: 1 },
+            { type: 'alliance_above', value: ALLIED_THRESHOLD },
+        ],
+    };
+
+    it('Federation ground offensive requires Deliberate Force and a Federation (Washington or a kept alliance)', () => {
         const fgo = allEvents.find((e: any) => e.id === 'federation_ground_offensive_1995');
-        expect(fgo.trigger.requires_events).toContain('hrhb_washington_agreement_1994');
-        expect(fgo.trigger.requires_events).toContain('nato_deliberate_force_1995');
+        expect(fgo.trigger.requires_events).toEqual(['nato_deliberate_force_1995']);
+        expect(fgo.trigger.condition).toEqual(ALLIANCE_OR_WASHINGTON);
+    });
+
+    it('Operation Summer 95 requires a Federation (Washington or a kept alliance), not the 1993 war', () => {
+        const summer = allEvents.find((e: any) => e.id === 'operation_summer_95');
+        expect(summer.trigger.requires_events).toBeUndefined();
+        expect(summer.trigger.condition).toEqual(ALLIANCE_OR_WASHINGTON);
     });
 
     it('Holbrooke ceasefire demand requires the Federation ground offensive', () => {

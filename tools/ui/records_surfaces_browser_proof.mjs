@@ -105,22 +105,11 @@ const peaceState = {
 const panelState = {
   turn: 60, phase: 'war', player_faction: 'RBiH', formations: [], controlBySettlement: {},
   metadata: { turn: 60, date: '1993-05-24' },
-  factionReserves: { RBiH: { generalSupply: 12, heavyMunitions: 55 } },
-  productionFacilities: [
-    { id: 'a', name: 'Bugojno Works', type: 'small_arms', municipality: 'bugojno', condition: 0.5, controller: 'RBiH' },
-    { id: 'b', name: 'Zenica Steelworks', type: 'heavy_equipment', municipality: 'zenica', condition: 0.8, controller: 'RBiH' },
-    { id: 'c', name: 'Vitez Explosives', type: 'ammunition', municipality: 'vitez', condition: 0.3, controller: 'RBiH' },
-  ],
-  smugglingRoutes: [
-    { id: 'r1', name: 'Igman road', faction: 'RBiH', capacity: 35, disrupted: true, active_turns: 2 },
-    { id: 'r2', name: 'Tarčin track', faction: 'RBiH', capacity: 62, disrupted: false, active_turns: 6 },
-  ],
-  embargoStatus: { RBiH: { pipeline: 0.4, smuggling: 0.35 } },
   enclaveResilience: {
-    srebrenica: { display_name: 'Srebrenica', resilience: 6.5, isolation_turns: 9, hardening_active: true, supply_state: 'critical', faction: 'RBiH', airdrop_status: 'receiving' },
-    zepa: { display_name: 'Žepa', resilience: 11.2, isolation_turns: 7, hardening_active: false, supply_state: 'strained', faction: 'RBiH', airdrop_status: 'receiving' },
-    gorazde: { display_name: 'Goražde', resilience: 18.0, isolation_turns: 5, hardening_active: false, supply_state: 'strained', faction: 'RBiH', airdrop_status: 'receiving' },
-    bihac: { display_name: 'Bihać', resilience: 24.0, isolation_turns: 2, hardening_active: false, supply_state: 'adequate', faction: 'RBiH', airdrop_status: 'not_isolated_long_enough' },
+    srebrenica: { display_name: 'Srebrenica', resilience: 6.5, isolation_turns: 9, hardening_active: true, supply_state: 'critical', faction: 'RBiH' },
+    zepa: { display_name: 'Žepa', resilience: 11.2, isolation_turns: 7, hardening_active: false, supply_state: 'strained', faction: 'RBiH' },
+    gorazde: { display_name: 'Goražde', resilience: 18.0, isolation_turns: 5, hardening_active: false, supply_state: 'strained', faction: 'RBiH' },
+    bihac: { display_name: 'Bihać', resilience: 24.0, isolation_turns: 2, hardening_active: false, supply_state: 'adequate', faction: 'RBiH' },
   },
   nationalDisplacement: {
     civilianCasualtiesByEthnicity: { RBiH: { killed: 21400, fledAbroad: 310000 }, RS: { killed: 4100, fledAbroad: 96000 }, HRHB: { killed: 2200, fledAbroad: 120000 } },
@@ -281,10 +270,9 @@ try {
       }
 
       if (!only || only === 'panels') {
-        const { factionReserves, productionFacilities, smugglingRoutes, embargoStatus, enclaveResilience, nationalDisplacement } = panelState;
-        await mergeReal({ factionReserves, productionFacilities, smugglingRoutes, embargoStatus, enclaveResilience, nationalDisplacement });
-        await mountComponent('/components/EconomyPanel.tsx', 'EconomyPanel', { state: '__store__' });
-        await shot(`economy${tag}`, size, '[data-testid="economy-panel"]');
+        // The War Footing (Economy) panel was retired 2026-11-17 with the supply-reserve economy.
+        const { enclaveResilience, nationalDisplacement } = panelState;
+        await mergeReal({ enclaveResilience, nationalDisplacement });
         await mountComponent('/components/EnclaveDashboard.tsx', 'EnclaveDashboard', { state: '__store__', open: true });
         await shot(`enclave${tag}`, size, '[data-testid="enclave-dashboard"]');
         await unmountComponent();

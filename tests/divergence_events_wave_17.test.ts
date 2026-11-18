@@ -1,9 +1,10 @@
 /**
  * LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-17
  *
- * Per-event predicate + consequence proofs for the 8 Ring 1 / no-§6
+ * Per-event predicate + consequence proofs for the Ring 1 / no-§6
  * divergence events authored in data/scenarios/events/consequences.json
- * during the Wave 17 lane.
+ * during the Wave 17 lane (8 authored; 3 survive the 2026-11-17
+ * supply-reserve retirement).
  *
  * Each test:
  *   1. Constructs a GameState that satisfies the predicate.
@@ -17,19 +18,14 @@
  * in src/sim/events/event_types.ts and writers in src/sim/events/apply_effects.ts.
  *
  * Themes covered (additive Ring 1 / no-§6):
- *   - Recovery-side: csq_spring_thaw_supply_recovery_HRHB (Wave-16 handoff #1 — closes triad)
  *   - Recovery-side: csq_equipment_quality_recovery_streak_RS (Wave-16 handoff #2)
  *   - Recovery-side: csq_equipment_quality_recovery_streak_HRHB (Wave-16 handoff #3 — closes triad)
- *   - Mirror gap:    csq_grain_corridor_reopened_RS (Wave-3 mirror)
- *   - Mirror gap:    csq_grain_corridor_reopened_HRHB (Wave-3 mirror — closes triad)
- *   - Mirror gap:    csq_arms_pipeline_disrupted_RBiH (Wave-5 mirror)
- *   - Mirror gap:    csq_arms_pipeline_disrupted_HRHB (Wave-5 mirror — closes triad)
  *   - Mirror gap:    csq_captured_equipment_windfall_RS (Wave-5 mirror)
+ *   - (spring-thaw HRHB, grain-corridor RS/HRHB and arms-pipeline RBiH/HRHB retired 2026-11-17)
  *
  * Engine-truth quirks honored:
  *   - `flag_at_least` reads numeric flags with `>=` (event_types.ts:627-631)
  *   - `dimension_above` reads `.effective_value` strict `>` (event_types.ts:535-541)
- *   - `supply_below` reads `general_supply_reserve[faction]` strict `<`
  *   - `territory_loss_window` reads `state.turn_summaries` most-recent-first (index 0 = latest)
  *   - `flag_equals` reads `event_flags[flag]` with strict equality
  *   - `flag_not_set` reads truthy `event_flags[flag]` and inverts
@@ -76,15 +72,9 @@ interface BaseStateOverrides {
     rbihDims?: Partial<Record<string, number>>;
     rsDims?: Partial<Record<string, number>>;
     hrhbDims?: Partial<Record<string, number>>;
-    rbihSupply?: number;
-    rsSupply?: number;
-    hrhbSupply?: number;
 }
 
 function baseState(turn: number, overrides: BaseStateOverrides = {}): GameState {
-    const rbihSupply = overrides.rbihSupply ?? 50;
-    const rsSupply = overrides.rsSupply ?? 70;
-    const hrhbSupply = overrides.hrhbSupply ?? 40;
     return {
         schema_version: 1,
         meta: { supply_reserves_enabled: true, turn, phase: 'war', scenario_id: 'test', player_faction: 'RBiH', seed: 'div17' } as GameState['meta'],
@@ -100,7 +90,6 @@ function baseState(turn: number, overrides: BaseStateOverrides = {}): GameState 
             front_posture_regions: {},
             front_pressure: {},
             militia_pools: {},
-            general_supply_reserve: { RBiH: rbihSupply, RS: rsSupply, HRHB: hrhbSupply },
             heavy_munitions_reserve: { RBiH: 30, RS: 50, HRHB: 20 },
             fired_event_ids: [],
             event_flags: {},
@@ -135,58 +124,22 @@ function baseState(turn: number, overrides: BaseStateOverrides = {}): GameState 
     } as unknown as GameState;
 }
 
+// csq_spring_thaw_supply_recovery_HRHB, csq_grain_corridor_reopened_RS/_HRHB and
+// csq_arms_pipeline_disrupted_RBiH/_HRHB retired 2026-11-17 (supply is connection, not stock).
 const WAVE_17_IDS = [
-    'csq_spring_thaw_supply_recovery_HRHB',
     'csq_equipment_quality_recovery_streak_RS',
     'csq_equipment_quality_recovery_streak_HRHB',
-    'csq_grain_corridor_reopened_RS',
-    'csq_grain_corridor_reopened_HRHB',
-    'csq_arms_pipeline_disrupted_RBiH',
-    'csq_arms_pipeline_disrupted_HRHB',
     'csq_captured_equipment_windfall_RS',
 ];
 
-describe('LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-17: 8 Ring-1 divergence events', () => {
-    it('all 8 authored events load via event_loader', () => {
+describe('LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-17: 3 surviving Ring-1 divergence events', () => {
+    it('all 3 surviving authored events load via event_loader', () => {
         for (const id of WAVE_17_IDS) {
             expect(ALL_EVENTS.find(e => e.id === id)?.id).toBe(id);
         }
     });
 
-    // 1. csq_spring_thaw_supply_recovery_HRHB
-    it('csq_spring_thaw_supply_recovery_HRHB: predicate + supply +10 + cohesion +2', () => {
-        const def = getEvent('csq_spring_thaw_supply_recovery_HRHB');
-        const cond = def.trigger.condition!;
-
-        const fires = baseState(75, { hrhbSupply: 40 });
-        fires.military.formations = {
-            'h_b1': { id: 'h_b1', faction: 'HRHB', kind: 'brigade', status: 'active', name: 'h1', created_turn: 0, assignment: null, morale: 50, cohesion: 60 } as any,
-        };
-        fires.military.event_flags = {
-            war_exhaustion_x100_HRHB: 35,
-            turns_since_major_offensive_HRHB: 25,
-        };
-        expect(evaluateCondition(cond, fires)).toBe(true);
-
-        // Lapsed: war_exhaustion at 29 (< 30, flag_at_least uses >=)
-        const lapsed = baseState(75, { hrhbSupply: 40 });
-        lapsed.military.formations = {
-            'h_b1': { id: 'h_b1', faction: 'HRHB', kind: 'brigade', status: 'active', name: 'h1', created_turn: 0, assignment: null, morale: 50, cohesion: 60 } as any,
-        };
-        lapsed.military.event_flags = {
-            war_exhaustion_x100_HRHB: 29,
-            turns_since_major_offensive_HRHB: 25,
-        };
-        expect(evaluateCondition(cond, lapsed)).toBe(false);
-
-        const supplyBefore = fires.military.general_supply_reserve!.HRHB;
-        applyEventEffects(fires, effectsOf(def));
-        const supplyAfter = fires.military.general_supply_reserve!.HRHB;
-        expect(supplyAfter).toBeGreaterThan(supplyBefore);
-        expect(fires.military.formations.h_b1.cohesion).toBe(62); // 60 + 2
-        const ledger = buildCostLedger(fires);
-        expect(ledger.annotations?.find(a => a.tag === 'spring_thaw_supply_recovery_HRHB')).toBeTruthy();
-    });
+    // 1. csq_spring_thaw_supply_recovery_HRHB: retired 2026-11-17 (supply is connection, not stock)
 
     // 2. csq_equipment_quality_recovery_streak_RS
     it('csq_equipment_quality_recovery_streak_RS: predicate + equipment quality uplift', () => {
@@ -245,111 +198,8 @@ describe('LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-17: 8 Ring-1 divergence events'
         expect(ledger.annotations?.find(a => a.tag === 'equipment_quality_recovery_streak_HRHB')).toBeTruthy();
     });
 
-    // 4. csq_grain_corridor_reopened_RS
-    it('csq_grain_corridor_reopened_RS: predicate + supply +25 + cost-ledger annotation', () => {
-        const def = getEvent('csq_grain_corridor_reopened_RS');
-        const cond = def.trigger.condition!;
-
-        const fires = baseState(55);
-        fires.military.event_flags = {
-            supply_route_open_grain_corridor_RS: true,
-            turns_since_corridor_hostility_RS: 10,
-        };
-        expect(evaluateCondition(cond, fires)).toBe(true);
-
-        // Lapsed: corridor closed (flag_equals fails on absent flag)
-        const lapsed = baseState(55);
-        lapsed.military.event_flags = {
-            supply_route_open_grain_corridor_RS: false,
-            turns_since_corridor_hostility_RS: 10,
-        };
-        expect(evaluateCondition(cond, lapsed)).toBe(false);
-
-        const supplyBefore = fires.military.general_supply_reserve!.RS;
-        applyEventEffects(fires, effectsOf(def));
-        const supplyAfter = fires.military.general_supply_reserve!.RS;
-        expect(supplyAfter).toBeGreaterThan(supplyBefore);
-        const ledger = buildCostLedger(fires);
-        expect(ledger.annotations?.find(a => a.tag === 'grain_corridor_reopened_RS')).toBeTruthy();
-    });
-
-    // 5. csq_grain_corridor_reopened_HRHB
-    it('csq_grain_corridor_reopened_HRHB: predicate + supply +25 + cost-ledger annotation', () => {
-        const def = getEvent('csq_grain_corridor_reopened_HRHB');
-        const cond = def.trigger.condition!;
-
-        const fires = baseState(55);
-        fires.military.event_flags = {
-            supply_route_open_grain_corridor_HRHB: true,
-            turns_since_corridor_hostility_HRHB: 10,
-        };
-        expect(evaluateCondition(cond, fires)).toBe(true);
-
-        // Lapsed: hostility-streak only 5 turns (< 8, flag_at_least uses >=)
-        const lapsed = baseState(55);
-        lapsed.military.event_flags = {
-            supply_route_open_grain_corridor_HRHB: true,
-            turns_since_corridor_hostility_HRHB: 5,
-        };
-        expect(evaluateCondition(cond, lapsed)).toBe(false);
-
-        const supplyBefore = fires.military.general_supply_reserve!.HRHB;
-        applyEventEffects(fires, effectsOf(def));
-        const supplyAfter = fires.military.general_supply_reserve!.HRHB;
-        expect(supplyAfter).toBeGreaterThan(supplyBefore);
-        const ledger = buildCostLedger(fires);
-        expect(ledger.annotations?.find(a => a.tag === 'grain_corridor_reopened_HRHB')).toBeTruthy();
-    });
-
-    // 6. csq_arms_pipeline_disrupted_RBiH
-    it('csq_arms_pipeline_disrupted_RBiH: predicate + cost-ledger annotation', () => {
-        const def = getEvent('csq_arms_pipeline_disrupted_RBiH');
-        const cond = def.trigger.condition!;
-
-        const fires = baseState(65, { rbihSupply: 30 });
-        fires.military.formations = {
-            'a_b1': { id: 'a_b1', faction: 'RBiH', kind: 'brigade', status: 'active', name: 'a1', created_turn: 0, assignment: null, morale: 50, cohesion: 60 } as any,
-        };
-        fires.military.event_flags = { patron_arms_review_active_RBiH: 1 };
-        expect(evaluateCondition(cond, fires)).toBe(true);
-
-        // Lapsed: supply at 35 (supply_below uses strict <, so 35 fails the <35 check)
-        const lapsed = baseState(65, { rbihSupply: 35 });
-        lapsed.military.formations = {
-            'a_b1': { id: 'a_b1', faction: 'RBiH', kind: 'brigade', status: 'active', name: 'a1', created_turn: 0, assignment: null, morale: 50, cohesion: 60 } as any,
-        };
-        lapsed.military.event_flags = { patron_arms_review_active_RBiH: 1 };
-        expect(evaluateCondition(cond, lapsed)).toBe(false);
-
-        applyEventEffects(fires, effectsOf(def));
-        const ledger = buildCostLedger(fires);
-        expect(ledger.annotations?.find(a => a.tag === 'arms_pipeline_disrupted_RBiH')).toBeTruthy();
-    });
-
-    // 7. csq_arms_pipeline_disrupted_HRHB
-    it('csq_arms_pipeline_disrupted_HRHB: predicate + cost-ledger annotation', () => {
-        const def = getEvent('csq_arms_pipeline_disrupted_HRHB');
-        const cond = def.trigger.condition!;
-
-        const fires = baseState(65, { hrhbSupply: 30 });
-        fires.military.formations = {
-            'h_b1': { id: 'h_b1', faction: 'HRHB', kind: 'brigade', status: 'active', name: 'h1', created_turn: 0, assignment: null, morale: 50, cohesion: 60 } as any,
-        };
-        fires.military.event_flags = { patron_arms_review_active_HRHB: 1 };
-        expect(evaluateCondition(cond, fires)).toBe(true);
-
-        // Lapsed: patron_arms_review_active_HRHB unset (flag_at_least requires >=1)
-        const lapsed = baseState(65, { hrhbSupply: 30 });
-        lapsed.military.formations = {
-            'h_b1': { id: 'h_b1', faction: 'HRHB', kind: 'brigade', status: 'active', name: 'h1', created_turn: 0, assignment: null, morale: 50, cohesion: 60 } as any,
-        };
-        lapsed.military.event_flags = {};
-        expect(evaluateCondition(cond, lapsed)).toBe(false);
-
-        applyEventEffects(fires, effectsOf(def));
-        const ledger = buildCostLedger(fires);
-        expect(ledger.annotations?.find(a => a.tag === 'arms_pipeline_disrupted_HRHB')).toBeTruthy();
-    });
+    // 4-7. csq_grain_corridor_reopened_RS/_HRHB and csq_arms_pipeline_disrupted_RBiH/_HRHB:
+    //    retired 2026-11-17 (supply is connection, not stock)
 
     // 8. csq_captured_equipment_windfall_RS
     // Engine truth: territory_loss_window reads state.turn_summaries most-recent-first;
@@ -406,7 +256,7 @@ describe('LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-17: 8 Ring-1 divergence events'
     });
 
     // turn_min audit: every Wave 17 event has turn_min >= 50 (40w byte-stable by construction)
-    it('all 8 Wave 17 events have turn_min >= 50 (40w byte-stable)', () => {
+    it('all 3 surviving Wave 17 events have turn_min >= 50 (40w byte-stable)', () => {
         for (const id of WAVE_17_IDS) {
             const def = getEvent(id);
             const turnMin = def.trigger.turn_min ?? 0;
@@ -418,7 +268,7 @@ describe('LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-17: 8 Ring-1 divergence events'
     });
 
     // Faction-symmetric audit: every Wave 17 event predicate is parameterized over faction
-    it('all 8 Wave 17 events are faction-agnostic (no hardcoded OSIDs in conditions)', () => {
+    it('all 3 surviving Wave 17 events are faction-agnostic (no hardcoded OSIDs in conditions)', () => {
         for (const id of WAVE_17_IDS) {
             const def = getEvent(id);
             const cond = def.trigger.condition;
@@ -435,16 +285,15 @@ describe('LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-17: 8 Ring-1 divergence events'
     });
 
     // No new condition kinds: every Wave 17 predicate uses pre-existing kinds (STOP rule)
-    it('all 8 Wave 17 events use only pre-existing condition kinds (STOP rule)', () => {
+    it('all 3 surviving Wave 17 events use only pre-existing condition kinds (STOP rule)', () => {
         const ALLOWED_CONDITION_KINDS = new Set([
             'territory_control', 'alliance_below', 'alliance_above',
-            'faction_controls_municipality', 'siege_active', 'operation_completed',
+            'faction_controls_municipality', 'operation_completed',
             'and', 'or', 'not',
-            'supply_below', 'supply_above', 'territory_percentage',
+            'territory_percentage',
             'dimension_above', 'dimension_below', 'flag_equals', 'flag_not_set',
             'patron_pressure_above', 'war_crimes_above', 'morale_average_below',
             'week_since_event', 'event_fire_count', 'enclave_supply_status',
-            'corridor_severed',
             'paramilitary_mode_equals', 'enclave_resilience_aggregate', 'flag_at_least',
             'metric_compare_factions', 'alliance_drift', 'territory_loss_window',
             'displaced_in_aggregate',
@@ -468,11 +317,12 @@ describe('LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-17: 8 Ring-1 divergence events'
     });
 
     // No new effect kinds: every Wave 17 effect uses pre-existing kinds (STOP rule)
-    it('all 8 Wave 17 events use only pre-existing effect kinds (STOP rule)', () => {
+    it('all 3 surviving Wave 17 events use only pre-existing effect kinds (STOP rule)', () => {
         const ALLOWED_EFFECT_KINDS = new Set([
-            'narrative', 'morale_change', 'supply_delta', 'cohesion_change',
+            'narrative', 'morale_change', 'cohesion_change',
             'humanitarian_impact', 'patron_pressure', 'alliance_change',
-            'negotiation_capital', 'equipment_grant', 'aggression_modifier',
+            // 'negotiation_capital' retired (§6 E2): the loader rejects it.
+            'equipment_grant', 'aggression_modifier',
             'control_change',
             'guerrilla_threat', 'recruitment_modifier', 'equipment_quality_modifier',
             'doctrine_constraint', 'alliance_lock', 'bot_priority_shift',

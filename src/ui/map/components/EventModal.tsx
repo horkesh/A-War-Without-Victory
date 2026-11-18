@@ -13,9 +13,10 @@ import { Icon, type IconName } from './icons/Icon';
 import { Z } from '../../shared/zIndex';
 import { Modal } from '../../shared/Modal';
 import type { EventEffect } from '../../../sim/events/event_types';
-import { getPlayerSafeDisplayLabel, getPlayerSafePoliticalFactionName } from '../utils/playerSafeText';
+import { getPlayerSafePoliticalFactionName } from '../utils/playerSafeText';
 import { resolveEventIllustration, section6StillAlt } from '../data/eventIllustrationArt';
 import { t, type MessageKey } from '../i18n';
+import { formatWarCrimesRecordLine } from '../data/warCrimesRecordLine';
 import { isDisplayEventEffectKind } from '../utils/eventEffectDisplay';
 import {
     SurfaceCloseButton,
@@ -65,12 +66,12 @@ const CATEGORY_CONFIG: Record<string, { bg: string; color: string; labelKey: Mes
 
 const EFFECT_ICONS: Record<string, IconName> = {
     morale_change: 'morale',
-    supply_delta: 'supply',
     cohesion_change: 'cohesion',
     humanitarian_impact: 'dead',
     patron_pressure: 'recon',
     alliance_change: 'balanced',
-    negotiation_capital: 'star',
+    // §6 E2: a card's own strategic-dimension shifts (appended by App.tsx).
+    dimension_shift: 'star',
     equipment_grant: 'tanks',
     aggression_modifier: 'offensive',
 };
@@ -97,30 +98,11 @@ function extractFactions(effects: EventDisplayData['effects']): string[] {
     return Array.from(factions).sort();
 }
 
-function formatAllianceLabel(): string {
-    return `${getPlayerSafePoliticalFactionName('RBiH')} / ${getPlayerSafePoliticalFactionName('HRHB')} alliance`;
-}
-
-/** Describe an EventEffect for display. Reuses logic from EventDecisionModal. */
-export function describeEventEffect(effect: EventEffect): string {
-    switch (effect.kind) {
-        case 'narrative': return effect.text;
-        case 'morale_change': return `${getPlayerSafePoliticalFactionName(effect.faction)} morale ${effect.delta > 0 ? '+' : ''}${effect.delta}`;
-        case 'supply_delta': return `${getPlayerSafePoliticalFactionName(effect.faction)} supply ${effect.delta > 0 ? '+' : ''}${effect.delta}`;
-        case 'cohesion_change': return `${getPlayerSafePoliticalFactionName(effect.faction)} cohesion ${effect.delta > 0 ? '+' : ''}${effect.delta}`;
-        case 'humanitarian_impact': return `${getPlayerSafePoliticalFactionName(effect.faction)} humanitarian impact${effect.war_crimes_delta ? ` (${effect.war_crimes_delta > 0 ? '+' : ''}${effect.war_crimes_delta})` : ''}`;
-        case 'patron_pressure': return `${getPlayerSafePoliticalFactionName(effect.faction)} patron pressure ${effect.delta > 0 ? '+' : ''}${effect.delta}`;
-        case 'alliance_change': return `${formatAllianceLabel()} ${effect.delta > 0 ? '+' : ''}${effect.delta}`;
-        case 'negotiation_capital': return `${getPlayerSafePoliticalFactionName(effect.faction)} ${getPlayerSafeDisplayLabel(effect.dimension, effect.dimension)} ${effect.delta > 0 ? '+' : ''}${effect.delta}`;
-    }
-    return effect.kind;
-}
-
 export function EventModal({ event, queuePosition, queueTotal, onAcknowledge }: EventModalProps) {
     const cat = CATEGORY_CONFIG[event.category] ?? { bg: '#444', color: '#aaa', labelKey: 'event.category.unknown', icon: 'star' as IconName };
     const factions = extractFactions(event.effects);
     const mechanicalEffects = event.effects.filter(
-        e => !e.description.startsWith('[narrative]') && isDisplayEventEffectKind(e.kind),
+        e => e.description.length > 0 && isDisplayEventEffectKind(e.kind),
     );
     // Optional documentary-realism illustration. Resolves to null when the event
     // authors no `image` key (every shipped event today) OR the asset is not yet

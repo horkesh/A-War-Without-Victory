@@ -9,6 +9,7 @@ import {
     evaluateOperationTacticalGroupExhaustion,
     markOperationExecuting,
 } from '../src/sim/combat/tactical_group_lifecycle.js';
+import { findHostCorpsIdForOperation } from '../src/state/operation_lifecycle_reconciliation.js';
 import {
     advanceSectorOffensives,
     evaluateOperationProgress,
@@ -133,6 +134,83 @@ describe('Tactical Group operation lifecycle', () => {
         });
         expect(state.military.tactical_groups?.tg_a).toBeUndefined();
         expect(state.military.tactical_groups?.tg_b).toBeDefined();
+    });
+
+    describe('a TG anchored by a brigade of another corps (zombie-TG fix, 2026-11-16)', () => {
+        // Operation Vlasic Ridge shape: a corps_b operation whose anchor belongs to corps_a, so the
+        // TG carries corps_id corps_a (formTacticalGroup takes the anchor's corps) and records its
+        // host, corps_b, as host_corps_id: the stable lifecycle identity with the operation name.
+        function makeCrossCorpsState(): { state: GameState; op: CorpsOperation } {
+            const op = makeOperation('Cross Corps Op');
+            op.participating_brigades = ['anchor_a'];
+            const state = makeLifecycleState(makeOperation('Other A'));
+            state.military.corps_command!.corps_b!.active_operations = [op];
+            state.military.formations!.donor_b = makeFormation({
+                id: 'donor_b', faction: 'RBiH', corps_id: 'corps_b', hq_sid: 'S2',
+                location_osid: 'op:friendly:anchor_b', personnel: 1500, cohesion: 70,
+            });
+            state.military.formations!.donor_b!.personnel_lent_by_tg = { tg_x: 540 };
+            const tg = makeTg('tg_x', 'corps_a', op.name, 'anchor_a');
+            tg.host_corps_id = 'corps_b';
+            tg.donor_contributions = [{
+                brigade_id: 'donor_b', personnel_lent: 540, heavy_equipment_lent: { tanks: 0, artillery: 0, aa_systems: 0 },
+                distance_hops: 1, source_corps_id: 'corps_b', casualties_so_far: 0,
+                equipment_losses_so_far: { tanks: 0, artillery: 0, aa_systems: 0 }, cohesion_bleed_applied: 0,
+            } as any];
+            state.military.tactical_groups = { tg_x: tg };
+            return { state, op };
+        }
+
+        it('records the host corps when the TG forms (object identity of the operation)', () => {
+            const { state, op } = makeCrossCorpsState();
+            expect(findHostCorpsIdForOperation(state, op)).toBe('corps_b');
+            // A copy with the same name and start turn resolves by name only when unique.
+            expect(findHostCorpsIdForOperation(state, { ...op })).toBe('corps_b');
+            state.military.corps_command!.corps_a!.active_operations = [{ ...op }];
+            expect(findHostCorpsIdForOperation(state, { ...op })).toBeNull();
+        });
+
+        it('engages with its operation', () => {
+            const { state, op } = makeCrossCorpsState();
+            markOperationExecuting(state, 'corps_b', op);
+            expect(state.military.tactical_groups?.tg_x?.status).toBe('engaged');
+        });
+
+        it('dissolves when its operation enters recovery and returns its donors', () => {
+            const { state, op } = makeCrossCorpsState();
+            op.phase = 'execution';
+            enterOperationRecovery(state, 'corps_b', op, 15, 'completed');
+            expect(state.military.tactical_groups?.tg_x).toBeUndefined();
+            expect(state.military.formations?.donor_b?.personnel_lent_by_tg).toBeUndefined();
+        });
+
+        it('a same-name operation in a third corps of the same faction cannot claim it (Codex review on #729)', () => {
+            const { state, op } = makeCrossCorpsState();
+            // corps_c hosts a player-authored operation with the same name.
+            state.military.formations!.corps_c = makeCorps({ id: 'corps_c', faction: 'RBiH', hq_sid: 'S3' });
+            const other = makeOperation('Cross Corps Op');
+            other.phase = 'execution';
+            state.military.corps_command!.corps_c = { ...state.military.corps_command!.corps_b!, active_operations: [other] };
+            markOperationExecuting(state, 'corps_c', other);
+            expect(state.military.tactical_groups?.tg_x?.status).toBe('forming');
+            enterOperationRecovery(state, 'corps_c', other, 15, 'completed');
+            expect(state.military.tactical_groups?.tg_x).toBeDefined();
+            expect(state.military.formations?.donor_b?.personnel_lent_by_tg).toEqual({ tg_x: 540 });
+            // Nor can the anchor's own corps with a same-name operation.
+            const anchorCorpsOp = makeOperation('Cross Corps Op');
+            anchorCorpsOp.phase = 'execution';
+            state.military.corps_command!.corps_a!.active_operations = [anchorCorpsOp];
+            enterOperationRecovery(state, 'corps_a', anchorCorpsOp, 15, 'completed');
+            expect(state.military.tactical_groups?.tg_x).toBeDefined();
+        });
+
+        it('a legacy TG without host_corps_id keeps the host = corps_id match', () => {
+            const { state, op } = makeCrossCorpsState();
+            delete state.military.tactical_groups!.tg_x!.host_corps_id;
+            op.phase = 'execution';
+            enterOperationRecovery(state, 'corps_b', op, 15, 'completed');
+            expect(state.military.tactical_groups?.tg_x).toBeDefined();
+        });
     });
 
     it('completion is idempotent and does not mutate an unlinked CorpsOperation', () => {

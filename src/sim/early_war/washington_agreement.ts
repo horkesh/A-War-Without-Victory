@@ -31,7 +31,7 @@
 import type { GameState } from '../../state/game_state.js';
 import { parseMilitiaPoolKey } from '../../state/militia_pool_key.js';
 import { strictCompare } from '../../state/validateGameState.js';
-import { DEFAULT_MIXED_MUNICIPALITIES } from './alliance_update.js';
+import { ALLIED_THRESHOLD, DEFAULT_MIXED_MUNICIPALITIES } from './alliance_update.js';
 
 // ── Tunable Washington precondition thresholds ──
 
@@ -93,8 +93,8 @@ export interface WashingtonPreconditionResult {
 export interface WashingtonCheckReport {
     preconditions: WashingtonPreconditionResult;
     patron_override?: WashingtonPatronOverrideResult;
-    /** Which trigger path fired: 'diplomatic' (Path A), 'patron_override' (Path B), or null. */
-    trigger_path?: 'diplomatic' | 'patron_override' | null;
+    /** Which trigger path fired: 'diplomatic' (Path A), 'patron_override' (Path B), 'quiet_front' (Path A'), 'consent' (Path C), or null. */
+    trigger_path?: 'diplomatic' | 'patron_override' | 'quiet_front' | 'consent' | null;
     fired: boolean;
     already_signed: boolean;
 }
@@ -248,10 +248,120 @@ export function evaluateWashingtonPatronOverride(state: GameState): WashingtonPa
     };
 }
 
+// ── Path C: Federation by consent (B5 A2, 2026-11-16) ──
+
+/**
+ * Week of the Washington framework (1 March 1994; the Washington event cards' turn_min).
+ * Single owner: political_peace_plan.ts reads it for the HRHB Contact Group / Dayton alignment.
+ */
+export const WASHINGTON_AGREEMENT_WEEK = 102;
+
+/**
+ * Path C — Federation by consent. A President who never broke the RBiH-HRHB alliance must not be
+ * treated worse than one who broke it and mended it (Paths A and B both need a prior war). Fires
+ * once when ALL hold: not yet signed; the bilateral war never started (`war_started_turn` null,
+ * the engine's record of it); the alliance is above ALLIED_THRESHOLD (0.20, the isAllied rule);
+ * and the calendar has reached the Washington week. Game designer + historian 2026-11-16:
+ * coherent only as the formalising of an existing alliance (BB2 pp.450-451; BB1 p.54), so it
+ * carries the Federation benefits but none of the war-ending effects (no ceasefire to start, no
+ * cut to an alliance already above the lock). Never fires left alone: the war starts ~t49-57.
+ * A2b (2026-11-17): there is no consent once HRHB has answered the 1993 federation overture with
+ * a refusal (`reject_federation_path` / `maintain_separate_state`); the bots answer
+ * `extend_federation_overture`, so this changes nothing left alone.
+ */
+export function evaluateWashingtonByConsent(state: GameState): boolean {
+    const rhs = state.political.rbih_hrhb_state;
+    if (!rhs || rhs.washington_signed) return false;
+    if (rhs.war_started_turn != null) return false;
+    if (!((state.political.war_alliance_rbih_hrhb ?? 0) > ALLIED_THRESHOLD)) return false;
+    const overture = lastResponse(state, FEDERATION_OVERTURE_EVENT);
+    if (overture !== null && FEDERATION_REFUSALS.includes(overture)) return false;
+    return state.meta.turn >= WASHINGTON_AGREEMENT_WEEK;
+}
+
+const FEDERATION_OVERTURE_EVENT = 'hrhb_federation_overture_1993';
+const FEDERATION_REFUSALS: readonly string[] = ['maintain_separate_state', 'reject_federation_path'];
+
+// ── Path A': the cards' agreement on a quiet front (B5, 2026-11-16) ──
+
+/** Weeks the front must be quiet (stalemate or a held ceasefire); matches W2. */
+export const WASH_QUIET_FRONT_TURNS = WASH_CEASEFIRE_DURATION;
+
+/** Responses that sign each Washington card (both options of each card sign). */
+const WASHINGTON_SIGNING_RESPONSES: Readonly<Record<string, readonly string[]>> = {
+    hrhb_washington_agreement_1994: ['accept', 'reluctant'],
+    rbih_washington_agreement_1994: ['accept', 'reluctant'],
+};
+const ZAGREB_CEASEFIRE_EVENT = 'zagreb_orders_hrhb_ceasefire';
+const ZAGREB_RESTRAINT_RESPONSE = 'acknowledge_pressure';
+
+/** Last recorded response to an event (the decision log is append-only; last wins). */
+function lastResponse(state: GameState, eventId: string): string | null {
+    const log = state.military?.event_decision_log ?? [];
+    for (let i = log.length - 1; i >= 0; i--) {
+        if (log[i].event_id === eventId) return log[i].response_id;
+    }
+    return null;
+}
+
+export interface WashingtonQuietFrontResult {
+    war_fought: boolean;
+    calendar_reached: boolean;
+    front_quiet: boolean;
+    zagreb_restraint: boolean;
+    cards_signed: boolean;
+    alliance_restored: boolean;
+    all_met: boolean;
+}
+
+/**
+ * Path A' — the agreement the cards record, on a quiet front. Both Washington cards can be answered
+ * at t102 while Path A still waits for an engine ceasefire whose start is keyed to how long the war
+ * ran, so for weeks the cards say "signed" and the engine withholds the Federation. Path A' fires
+ * once when ALL hold: not yet signed; a bilateral war was fought (`war_started_turn` set); the
+ * Washington week has arrived; the front is quiet (stalemate_turns, or a held ceasefire, at least
+ * WASH_QUIET_FRONT_TURNS); HRHB acknowledged Zagreb's ceasefire order (the patron price); both
+ * Washington cards were signed (accept or reluctant); and the alliance is above ALLIED_THRESHOLD.
+ * Effects are Path A's, ceasefire included. Game designer + historian 2026-11-16 (the real
+ * ceasefire → framework → signing gap was 1-3.5 weeks: 23 Feb, 1 Mar, 18 Mar 1994; BB2 pp.450-451).
+ * Never fires left alone: the historical run signs through Path A before t102, which the baseline
+ * runner asserts (tools/scenario_runner/run_baseline_regression.ts).
+ */
+export function evaluateWashingtonQuietFront(state: GameState): WashingtonQuietFrontResult {
+    const rhs = state.political.rbih_hrhb_state;
+    const turn = state.meta.turn;
+    const warFought = rhs?.war_started_turn != null;
+    const calendarReached = turn >= WASHINGTON_AGREEMENT_WEEK;
+    const ceasefireSince = rhs?.ceasefire_since_turn ?? null;
+    const ceasefireHeld = rhs?.ceasefire_active === true && ceasefireSince !== null
+        ? turn - ceasefireSince
+        : 0;
+    const frontQuiet = (rhs?.stalemate_turns ?? 0) >= WASH_QUIET_FRONT_TURNS
+        || ceasefireHeld >= WASH_QUIET_FRONT_TURNS;
+    const zagrebRestraint = lastResponse(state, ZAGREB_CEASEFIRE_EVENT) === ZAGREB_RESTRAINT_RESPONSE;
+    const cardsSigned = Object.keys(WASHINGTON_SIGNING_RESPONSES).sort(strictCompare).every((eventId) => {
+        const response = lastResponse(state, eventId);
+        return response !== null && WASHINGTON_SIGNING_RESPONSES[eventId].includes(response);
+    });
+    const allianceRestored = (state.political.war_alliance_rbih_hrhb ?? 0) > ALLIED_THRESHOLD;
+    return {
+        war_fought: warFought,
+        calendar_reached: calendarReached,
+        front_quiet: frontQuiet,
+        zagreb_restraint: zagrebRestraint,
+        cards_signed: cardsSigned,
+        alliance_restored: allianceRestored,
+        all_met: !!rhs && !rhs.washington_signed && warFought && calendarReached && frontQuiet
+            && zagrebRestraint && cardsSigned && allianceRestored,
+    };
+}
+
 /**
  * Apply post-Washington effects to HRHB capabilities, embargo, and alliance.
+ * `byConsent` (Path C): the alliance is raised to the lock value but never cut below its current
+ * value, and no bilateral ceasefire is started (there is no war to end).
  */
-function applyWashingtonEffects(state: GameState): void {
+function applyWashingtonEffects(state: GameState, byConsent = false): void {
     const rhs = state.political.rbih_hrhb_state!;
 
     // Lock alliance.
@@ -268,7 +378,9 @@ function applyWashingtonEffects(state: GameState): void {
     //
     // The peace-phase per-turn alliance_update.ts:260 already respects washington_signed
     // and exits early; this commit closes the symmetric gap on the event-effect path.
-    state.political.war_alliance_rbih_hrhb = WASH_ALLIANCE_LOCK_VALUE;
+    state.political.war_alliance_rbih_hrhb = byConsent
+        ? Math.max(state.political.war_alliance_rbih_hrhb ?? 0, WASH_ALLIANCE_LOCK_VALUE)
+        : WASH_ALLIANCE_LOCK_VALUE;
     if (!state.military.alliance_locks) {
         state.military.alliance_locks = [];
     }
@@ -304,8 +416,8 @@ function applyWashingtonEffects(state: GameState): void {
     rhs.washington_signed = true;
     rhs.washington_turn = state.meta.turn;
 
-    // Activate bilateral ceasefire (if not already active)
-    if (!rhs.ceasefire_active) {
+    // Activate bilateral ceasefire (if not already active). Not for Path C: no war was fought.
+    if (!byConsent && !rhs.ceasefire_active) {
         rhs.ceasefire_active = true;
         rhs.ceasefire_since_turn = state.meta.turn;
     }
@@ -388,6 +500,18 @@ export function checkAndApplyWashington(state: GameState): WashingtonCheckReport
     if (patronOverride.all_met) {
         applyWashingtonEffects(state);
         return { preconditions, patron_override: patronOverride, trigger_path: 'patron_override', fired: true, already_signed: false };
+    }
+
+    // Path A': the signed cards on a quiet front (a war was fought, so Path A's effects)
+    if (evaluateWashingtonQuietFront(state).all_met) {
+        applyWashingtonEffects(state);
+        return { preconditions, patron_override: patronOverride, trigger_path: 'quiet_front', fired: true, already_signed: false };
+    }
+
+    // Path C: Federation by consent (the alliance never broke)
+    if (evaluateWashingtonByConsent(state)) {
+        applyWashingtonEffects(state, true);
+        return { preconditions, patron_override: patronOverride, trigger_path: 'consent', fired: true, already_signed: false };
     }
 
     return { preconditions, patron_override: patronOverride, trigger_path: null, fired: false, already_signed: false };

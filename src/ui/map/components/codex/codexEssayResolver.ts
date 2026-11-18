@@ -4,6 +4,10 @@
 
 import type { ComparisonResult } from '../../../../sim/endgame/endgame_comparison.js';
 import type { CostLedger, CostLedgerAnnotation, CostLedgerFinding } from '../../../../sim/endgame/cost_ledger.js';
+import {
+    WAR_CRIMES_AUTHORIZED_FINDING_PREFIX,
+    WAR_CRIMES_RECORD_FINDING_PREFIX,
+} from '../../../../sim/endgame/cost_ledger.js';
 import { getPeacePlanById } from '../../../../sim/negotiation/peace_plan_data.js';
 import { strictCompare } from '../../../../state/validateGameState.js';
 import type { Locale } from '../../i18n';
@@ -259,7 +263,16 @@ function costFindings(context: CodexRenderContext): CostLedgerFinding[] {
 }
 
 function hasCostFinding(context: CodexRenderContext, id: string): boolean {
-    return costFindings(context).some((finding) => finding.id === id);
+    const findings = costFindings(context);
+    if (findings.some((finding) => finding.id === id)) return true;
+    // §6 E3b (2026-11-18): essays join on `FINDING:war_crimes_record_<side>`, meaning "this side
+    // has a war-crimes line on the Verdict". The historical-record line is hidden at a false zero,
+    // so a side whose only incidents arose from decisions in play still answers the key.
+    if (id.startsWith(WAR_CRIMES_RECORD_FINDING_PREFIX)) {
+        const side = id.slice(WAR_CRIMES_RECORD_FINDING_PREFIX.length);
+        return findings.some((finding) => finding.id === `${WAR_CRIMES_AUTHORIZED_FINDING_PREFIX}${side}`);
+    }
+    return false;
 }
 
 function hasCostFindingField(
