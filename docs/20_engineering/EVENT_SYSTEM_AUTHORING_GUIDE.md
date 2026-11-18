@@ -270,7 +270,7 @@ aggression_modifier, alliance_change, alliance_lock, bot_priority_shift,
 cohesion_change, control_change, cost_ledger_annotation, doctrine_constraint,
 equipment_grant, equipment_quality_modifier, guerrilla_threat,
 enclave_formation_displacement, humanitarian_impact, morale_change, narrative,
-offensive_ops_suppression, patron_pressure, recruitment_modifier, supply_delta
+offensive_ops_suppression, patron_pressure, recruitment_modifier
 ```
 
 `negotiation_capital` is **retired** (§6 E2, 2026-11-17). It wrote into the raw `NegotiationBreakdown` counters under dimension names that never existed there, so all 51 catalog uses were silent no-ops. The loader rejects it, and `applyEventEffects` throws on any kind it does not handle. Write a strategic-dimension cost or gain as a `dimension_shifts` entry (Channel A); see §5.3.

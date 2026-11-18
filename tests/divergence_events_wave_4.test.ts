@@ -1,8 +1,10 @@
 /**
  * LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-4
  *
- * Per-event predicate + consequence proofs for the 10 Ring 1 / no-§6
+ * Per-event predicate + consequence proofs for the Ring 1 / no-§6
  * divergence events authored in data/scenarios/events/consequences.json.
+ * (10 authored; csq_black_market_supply_route retired 2026-11-17 with the
+ * faction supply-reserve stock — supply is connection, not stock.)
  *
  * Each test:
  *   1. Constructs a GameState that satisfies the predicate.
@@ -96,15 +98,14 @@ function baseState(turn: number, overrides: { political?: any; military?: any; d
     } as unknown as GameState;
 }
 
-describe('LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-4: 10 Ring-1 divergence events', () => {
-    it('all 10 authored events load via event_loader', () => {
+describe('LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-4: 9 surviving Ring-1 divergence events', () => {
+    it('all 9 surviving authored events load via event_loader (csq_black_market_supply_route retired)', () => {
         const expected = [
             'csq_separate_track_recovery',
             'csq_alliance_reset_after_rupture',
             'csq_tripartite_federation_overture',
             'csq_patron_equipment_delivery_confirmed',
             'csq_international_tribunal_observation',
-            'csq_black_market_supply_route',
             'csq_refugee_labor_mobilization',
             'csq_late_war_volunteer_surge',
             'csq_reservist_exhaustion_callup',
@@ -188,7 +189,7 @@ describe('LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-4: 10 Ring-1 divergence events'
     });
 
     // ── 4. csq_patron_equipment_delivery_confirmed ─────────────────────────
-    it('csq_patron_equipment_delivery_confirmed: predicate + equipment_quality_modifier + supply', () => {
+    it('csq_patron_equipment_delivery_confirmed: predicate + equipment_quality_modifier (supply uplift retired)', () => {
         const def = getEvent('csq_patron_equipment_delivery_confirmed');
         const cond = def.trigger.condition!;
         const fires = baseState(55);
@@ -206,7 +207,8 @@ describe('LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-4: 10 Ring-1 divergence events'
 
         applyEventEffects(fires, effectsOf(def));
         expect(fires.military.equipment_quality_modifiers?.some(m => m.faction === 'RS' && m.multiplier === 1.04)).toBe(true);
-        expect((fires.military.general_supply_reserve as any).RS).toBe(85); // 70 + 15
+        // The former RS supply +15 was retired 2026-11-17 (supply is connection, not stock): the reserve is untouched.
+        expect((fires.military.general_supply_reserve as any).RS).toBe(70);
     });
 
     // ── 5. csq_international_tribunal_observation ──────────────────────────
@@ -231,45 +233,7 @@ describe('LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-4: 10 Ring-1 divergence events'
         expect(def.dimension_shifts?.every(s => s.faction === 'RS')).toBe(true);
     });
 
-    // ── 6. csq_black_market_supply_route ───────────────────────────────────
-    it('csq_black_market_supply_route: predicate + supply uplift + cohesion drain', () => {
-        const def = getEvent('csq_black_market_supply_route');
-        const cond = def.trigger.condition!;
-        const fires = baseState(55, {
-            military: {
-                general_supply_reserve: { RBiH: 20, RS: 70, HRHB: 40 },
-            },
-        });
-        fires.military.event_flags = { war_exhaustion_x100_RBiH: 35 };
-        // Need to seed strategic dimensions etc — re-attach since we overrode military
-        (fires.military as any).negotiation = {
-            capital: {
-                RBiH: { international_credibility: 50, military_credibility: 50, war_crimes_events: 0 },
-                RS: { international_credibility: 50, military_credibility: 50, war_crimes_events: 0 },
-                HRHB: { international_credibility: 50, military_credibility: 50, war_crimes_events: 0 },
-            },
-            patron_relationships: { RBiH: { support_level: 60, override_authority: 0 }, RS: { support_level: 70, override_authority: 0 }, HRHB: { support_level: 60, override_authority: 0 } },
-            strategic_dimensions: { RBiH: fullStrategicDims(), RS: fullStrategicDims(), HRHB: fullStrategicDims() },
-        };
-        // Add an active formation so cohesion_change has a target (zero brigades = no-op, still valid)
-        fires.military.formations = {
-            'rb_b1': { id: 'rb_b1', faction: 'RBiH', kind: 'brigade', status: 'active', name: 'rb1', created_turn: 0, assignment: null, cohesion: 60 } as any,
-        };
-        expect(evaluateCondition(cond, fires)).toBe(true);
-
-        // Lapsed: supply at threshold (not below)
-        const lapsed = baseState(55, {
-            military: { general_supply_reserve: { RBiH: 35, RS: 70, HRHB: 40 } },
-        });
-        lapsed.military.event_flags = { war_exhaustion_x100_RBiH: 35 };
-        expect(evaluateCondition(cond, lapsed)).toBe(false);
-
-        applyEventEffects(fires, effectsOf(def));
-        expect((fires.military.general_supply_reserve as any).RBiH).toBe(40); // 20 + 20
-        expect(fires.military.formations.rb_b1.cohesion).toBe(57); // 60 - 3
-        const ledger = buildCostLedger(fires);
-        expect(ledger.annotations?.find(a => a.tag === 'black_market_supply_route')).toBeTruthy();
-    });
+    // ── 6. csq_black_market_supply_route: retired 2026-11-17 (supply is connection, not stock) ──
 
     // ── 7. csq_refugee_labor_mobilization ──────────────────────────────────
     it('csq_refugee_labor_mobilization: predicate + recruitment uplift + cohesion drain', () => {
@@ -394,14 +358,13 @@ describe('LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-4: 10 Ring-1 divergence events'
     });
 
     // ── Faction-symmetric audit: every event predicate is parameterized over faction
-    it('all 10 events are faction-agnostic (no hardcoded enclave OSIDs in conditions)', () => {
+    it('all 9 surviving events are faction-agnostic (no hardcoded enclave OSIDs in conditions)', () => {
         const expectedIds = [
             'csq_separate_track_recovery',
             'csq_alliance_reset_after_rupture',
             'csq_tripartite_federation_overture',
             'csq_patron_equipment_delivery_confirmed',
             'csq_international_tribunal_observation',
-            'csq_black_market_supply_route',
             'csq_refugee_labor_mobilization',
             'csq_late_war_volunteer_surge',
             'csq_reservist_exhaustion_callup',
