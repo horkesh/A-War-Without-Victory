@@ -437,7 +437,7 @@ export class DiplomacyModal {
 
         const washingtonSigned = alliance?.washingtonSigned ?? false;
         const statusLabel = washingtonSigned
-            ? '<div style="text-align:center;color:#00e878;font-size: 12px;font-weight:600;margin-bottom:8px;">WASHINGTON AGREEMENT SIGNED</div>'
+            ? '<div style="text-align:center;color:#00e878;font-size: 12px;font-weight:600;margin-bottom:8px;">FEDERATION FORMED</div>'
             : '';
 
         return this.createSection('WASHINGTON TRACKER', `

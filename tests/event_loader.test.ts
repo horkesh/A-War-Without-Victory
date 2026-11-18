@@ -313,6 +313,56 @@ test('loadEventDefinitionsFromDir throws on unknown effect kind', () => {
     );
 });
 
+// Retired 2026-11-17 (supply is connection, not stock): the faction supply-reserve effect kind and
+// conditions are no longer vocabulary, so authored data using them must be rejected at load.
+test('loadEventDefinitionsFromDir rejects the retired supply_delta effect kind (event, effects[], option)', () => {
+    assertCatalogRowsThrow(
+        [validCatalogRow({ effect: { kind: 'supply_delta', faction: 'RS', delta: -3 } })],
+        /Invalid event row in war_1992\.json\[0\]: effect\.kind must be a known event effect kind: supply_delta/,
+    );
+    assertCatalogRowsThrow(
+        [validCatalogRow({ effects: [{ kind: 'supply_delta', faction: 'RS', delta: -3 }] })],
+        /Invalid event row in war_1992\.json\[0\]: effects\[0\]\.kind must be a known event effect kind: supply_delta/,
+    );
+    assertCatalogRowsThrow(
+        [validCatalogRow({
+            response_options: [{
+                id: 'accept',
+                label: 'Accept',
+                effects: [{ kind: 'supply_delta', faction: 'RBiH', delta: 5 }],
+            }],
+        })],
+        /response_options\[0\]\.effects\[0\]\.kind must be a known event effect kind: supply_delta/,
+    );
+});
+
+test.each(['supply_below', 'supply_above'])(
+    'loadEventDefinitionsFromDir rejects the retired %s condition type (trigger and nested)',
+    (conditionType) => {
+        assertCatalogRowsThrow(
+            [validCatalogRow({
+                trigger: { turn_min: 0, condition: { type: conditionType, faction: 'RBiH', threshold: 40 } },
+            })],
+            new RegExp(`Invalid event row in war_1992\\.json\\[0\\]: trigger\\.condition\\.type must be a known event condition type: ${conditionType}`),
+        );
+        assertCatalogRowsThrow(
+            [validCatalogRow({
+                trigger: {
+                    turn_min: 0,
+                    condition: {
+                        type: 'and',
+                        conditions: [
+                            { type: 'flag_equals', flag: 'fixture', value: true },
+                            { type: conditionType, faction: 'RS', threshold: 30 },
+                        ],
+                    },
+                },
+            })],
+            new RegExp(`trigger\\.condition\\.conditions\\[1\\]\\.type must be a known event condition type: ${conditionType}`),
+        );
+    },
+);
+
 test('loadEventDefinitionsFromDir throws on malformed effects', () => {
     assertCatalogRowsThrow(
         [validCatalogRow({ effects: { kind: 'narrative' } })],
@@ -796,7 +846,7 @@ test('loadEventDefinitionsFromDir accepts valid response option future_consequen
                     closes_events: ['valid_event'],
                     opens_flags: ['accepted_branch'],
                     closes_flags: ['rejected_branch'],
-                    material_effect_refs: ['supply_delta.RBiH'],
+                    material_effect_refs: ['morale_change.RBiH'],
                     explanation: 'Accepting makes the later branch visible.',
                 }],
             }],
@@ -816,7 +866,7 @@ test('loadEventDefinitionsFromDir accepts valid response option future_consequen
         closes_events: ['valid_event'],
         opens_flags: ['accepted_branch'],
         closes_flags: ['rejected_branch'],
-        material_effect_refs: ['supply_delta.RBiH'],
+        material_effect_refs: ['morale_change.RBiH'],
         explanation: 'Accepting makes the later branch visible.',
     }]);
 });
@@ -926,8 +976,8 @@ test('loader rejects a response option whose effects[] repeats its effect', () =
             response_options: [{
                 id: 'accept',
                 label: 'Accept',
-                effect: { kind: 'supply_delta', faction: 'RS', delta: -3 },
-                effects: [{ kind: 'supply_delta', faction: 'RS', delta: -3 }],
+                effect: { kind: 'morale_change', faction: 'RS', delta: -3 },
+                effects: [{ kind: 'morale_change', faction: 'RS', delta: -3 }],
             }],
         }),
     ], /valid_event#accept\.effects\[0\]/);

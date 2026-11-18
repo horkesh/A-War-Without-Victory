@@ -62,20 +62,11 @@ export interface Scenario {
     decision_mode?: 'historical' | 'emergent';
     /** Optional absolute week index anchor (weeks since Jan 1992). Enables time-adaptive bot doctrine profiles. */
     scenario_start_week?: number;
-    /** Scenario lifecycle start phase. */
-    start_lifecycle_phase?: 'peace' | 'war';
-    /** For start_lifecycle_phase phase_0: whether referendum is already held at turn 0. Default: true (legacy fixtures). */
-    peace_referendum_held_at_start?: boolean;
-    /** For start_lifecycle_phase phase_0: whether RS starts already declared at turn 0. Default: true (legacy fixtures). */
-    peace_rs_declared_at_start?: boolean;
-    /** For start_lifecycle_phase phase_0: whether HRHB starts already declared at turn 0. Default: true (legacy fixtures). */
-    peace_hrhb_declared_at_start?: boolean;
-    /** For start_lifecycle_phase phase_0: turn when referendum was held. War starts at referendum_turn + 4 per canon. */
-    peace_referendum_turn?: number;
-    /** For start_lifecycle_phase phase_0: turn when war starts (Peace phase). Must be referendum_turn + 4. Default: peace_referendum_turn + 4. */
-    peace_war_start_turn?: number;
-    /** For start_lifecycle_phase phase_0: control map key/path to apply exactly when war begins (e.g. "apr1992"). */
-    peace_war_start_control?: string;
+    /**
+     * Scenario lifecycle start phase. Only "war": the September 1991 peace start and its
+     * peace_* scenario fields were retired (2026-11-16); the loader rejects "peace".
+     */
+    start_lifecycle_phase?: 'war';
     /** Optional max-turn override copied into GameState metadata for harness/runtime limits. */
     max_turns?: number;
     /**
@@ -176,15 +167,10 @@ export interface Scenario {
      * so the transition can apply it. See War phase Spec §4, §6 and docs/30_planning/PHASE_I_II_EDGE_CASES.md.
      */
     war_entrenchment_init_turns?: number;
-    /**
-     * Phase A (Supply Reserves): When true, supply reserves system is enabled.
-     * Defaults to false for backward compatibility. When true, each faction accumulates
-     * reserves from production and replenishment, consumed by maintenance and combat.
-     */
-    supply_reserves_enabled?: boolean;
+    // supply_reserves_enabled retired 2026-11-17 (Fable consult 6): the supply-reserve economy is not modelled in 1.0.
     /**
      * When true, gates offensive-operation launch eligibility on the RBiH arms
-     * embargo phase, independent of `supply_reserves_enabled`. See
+     * embargo phase. See
      * `GameState.meta.embargo_offensive_gate_enabled` for the mechanism.
      */
     embargo_offensive_gate_enabled?: boolean;

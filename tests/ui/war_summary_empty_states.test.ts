@@ -15,7 +15,7 @@ vi.mock('../../src/ui/map/store/gameStore', () => ({
 }));
 
 vi.mock('../../src/ui/map/desktop/useIPC', () => ({
-    useIPC: () => ({ stageConvoyDecision: vi.fn() }),
+    useIPC: () => ({}),
 }));
 
 // @ts-expect-error TS1378: Vitest supports top-level await in ESM tests.
@@ -27,22 +27,9 @@ function stateForEmptySummary(): LoadedGameState {
     return {
         ...makeMockLoadedGameState(),
         player_faction: 'RS',
-        pendingConvoyDecisions: [],
         municipalitySupportOrders: undefined,
         strategicDimensions: undefined,
         patronOverrideAuthority: undefined,
-    } as LoadedGameState;
-}
-
-function stateForPendingConvoySummary(): LoadedGameState {
-    return {
-        ...stateForEmptySummary(),
-        pendingConvoyDecisions: [{
-            id: 'convoy:srebrenica:rs',
-            target_enclave: 'Srebrenica',
-            route_faction: 'RS',
-            supply_amount: 0.4,
-        }],
     } as LoadedGameState;
 }
 
@@ -61,7 +48,6 @@ describe('War Summary empty states', () => {
     });
 
     it.each([
-        ['convoys', 'No convoy decisions are pending.'],
         ['support', 'No local support order is staged this week.'],
         ['capital', 'Diplomacy capital is not available in this view.'],
     ] as const)('renders an EmptyState for the empty %s section', (section, message) => {
@@ -73,7 +59,6 @@ describe('War Summary empty states', () => {
     });
 
     it.each([
-        ['convoys', 'Nema konvojskih odluka na čekanju.'],
         ['support', 'Nema lokalne naredbe podrške za ovaj potez.'],
         ['capital', 'Diplomatski kapital nije dostupan u ovom prikazu.'],
     ] as const)('localizes the empty %s section in BCS mode', (section, message) => {
@@ -83,18 +68,17 @@ describe('War Summary empty states', () => {
         render(createElement(WarSummaryContent, { focusSection: section }));
 
         expect(screen.getByText(message)).toBeTruthy();
-        expect(screen.queryByText('No convoy decisions are pending.')).toBeNull();
+        expect(screen.queryByText('No local support order is staged this week.')).toBeNull();
     });
 
-    it('localizes convoy action buttons in BCS mode', () => {
-        setLocale('bcs');
-        storeState.loadedGameState = stateForPendingConvoySummary();
+    it('F1i: shows no convoy section or convoy decision buttons (convoys are not modelled in 1.0)', () => {
+        storeState.loadedGameState = stateForEmptySummary();
 
-        render(createElement(WarSummaryContent, { focusSection: 'convoys' }));
+        const { container } = render(createElement(WarSummaryContent, { focusSection: 'overview' }));
 
-        expect(screen.getByRole('button', { name: 'Dozvoli' })).toBeTruthy();
-        expect(screen.getByRole('button', { name: 'Blokiraj' })).toBeTruthy();
-        expect(screen.getByRole('button', { name: 'Preusmjeri' })).toBeTruthy();
+        expect(container.querySelector('[data-summary-section="convoys"]')).toBeNull();
+        expect(container.textContent ?? '').not.toMatch(/convoy/i);
         expect(screen.queryByRole('button', { name: 'Allow' })).toBeNull();
+        expect(screen.queryByRole('button', { name: 'Divert' })).toBeNull();
     });
 });

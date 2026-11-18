@@ -302,8 +302,9 @@ describe('desktop player-visible state projection', () => {
     expect(intel.enemy_sector_id).toBe('contact-sector:0');
     expect(intel.visible_brigade_ids).toEqual(['contact:RBiH:op:enemy:front']);
     expect(intel.confidence).toBe(0.75);
-    expect(projected.military.general_supply_reserve).toEqual({ RS: 55 });
-    expect(projected.military.heavy_munitions_reserve).toEqual({ RS: 44 });
+    // Supply reserves are retired compatibility-only fields (2026-11-17): never projected.
+    expect(projected.military.general_supply_reserve).toBeUndefined();
+    expect(projected.military.heavy_munitions_reserve).toBeUndefined();
     expect(projected.military.army_stance).toEqual({ RS: 'balanced' });
     expect(projected.military.recruitment_state.recruitment_capital).toEqual({ RS: { points: 4 } });
     expect(projected.military.recruitment_state.recruited_brigade_ids).toEqual(['rs_brigade']);
@@ -380,6 +381,33 @@ describe('desktop player-visible state projection', () => {
       RBiH: 'accepted',
       HRHB: 'rejected',
     });
+  });
+
+  it('projects the resolved peace-plan history: rows carry `responses` by faction and no `faction` field', () => {
+    const state = makeState();
+    const negotiation = state.military.negotiation as unknown as { peace_plan_history: unknown[] };
+    const played = {
+      plan_id: 'vance_owen',
+      turn_offered: 40,
+      responses: { RBiH: 'accepted', RS: 'rejected', HRHB: 'accepted' },
+      resolved: true,
+      resolved_turn: 41,
+      dead_at_resolution: { military: 1200, civilian: 900 },
+    };
+    const notAnsweredByPlayer = {
+      plan_id: 'legacy_row',
+      turn_offered: 12,
+      responses: { RBiH: 'accepted', HRHB: 'rejected' },
+      resolved: true,
+    };
+    negotiation.peace_plan_history = [played, notAnsweredByPlayer];
+
+    const projected = loadProjector().projectPlayerVisibleState(state);
+
+    // The player is RS: the played plan is in the projected history with every recorded answer, a row RS never answered is not.
+    expect(projected.military.negotiation.peace_plan_history).toEqual([played]);
+    // A copy, not the live row.
+    expect(projected.military.negotiation.peace_plan_history[0]).not.toBe(played);
   });
 
   it('shows every own attacker and keeps a concentrated enemy assault fogged (realism audit F10)', () => {
@@ -569,6 +597,28 @@ describe('desktop player-visible state projection', () => {
     const loaded = parseGameState(projected);
     expect(buildDecisionConsequenceLedger(loaded, 10).map((record) => record.id))
       .toContain('proposal:rs_receipt::1');
+  }, 120_000);
+
+  it('a played peace plan reaches the renderer: it survives the projection and files a Peace proposal record in the ledger', async () => {
+    const projector = loadProjector();
+    const { state } = await startNewCampaign(process.cwd(), 'RS', 'apr_1992');
+    state.military.negotiation!.peace_plan_history = [
+      {
+        plan_id: 'vance_owen',
+        turn_offered: 40,
+        responses: { RBiH: 'accepted', RS: 'rejected', HRHB: 'accepted' },
+        resolved: true,
+        resolved_turn: 41,
+      },
+    ];
+
+    const projected = JSON.parse(projector.projectPlayerVisibleStateJson(serializeState(state)));
+    expect(projected.military.negotiation.peace_plan_history.map((row: any) => row.plan_id)).toEqual(['vance_owen']);
+
+    const loaded = parseGameState(projected);
+    expect(loaded.peacePlanHistory?.map((row) => [row.planId, row.playerResponse])).toEqual([['vance_owen', 'rejected']]);
+    const peaceRecords = buildDecisionConsequenceLedger(loaded, 10).filter((record) => record.familyId === 'peace-proposal');
+    expect(peaceRecords.map((record) => record.id)).toEqual(['peace:vance_owen:40']);
   }, 120_000);
 
   it('projects every replay frame instead of sending canonical saves to the renderer', () => {

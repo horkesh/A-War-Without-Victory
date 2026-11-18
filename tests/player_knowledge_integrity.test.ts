@@ -1,6 +1,6 @@
 /**
  * Player-knowledge integrity: verifies that the adapter filters enemy-truth
- * families (casualtyLedger, factionReserves, warPhaseSupplyPressure,
+ * families (casualtyLedger, warPhaseSupplyPressure,
  * warPhaseExhaustion) to the player faction only when player_faction is set,
  * and passes all factions through in observer mode.
  *
@@ -42,23 +42,9 @@ describe('player-knowledge integrity — adapter-level filtering', () => {
         expect(parsed.casualtyLedger!['HRHB']).toBeUndefined();
     });
 
-    it('scopes factionReserves to player faction only', () => {
-        const parsed = parseGameState(buildMinimalState('RBiH'));
-        expect(parsed.factionReserves).toBeDefined();
-        expect(Object.keys(parsed.factionReserves!)).toEqual(['RBiH']);
-        expect(parsed.factionReserves!['RBiH'].generalSupply).toBe(500);
-        expect(parsed.factionReserves!['RS']).toBeUndefined();
-    });
-
-    it('preserves missing heavy-munitions reserve as unreported instead of zero', () => {
-        const state = buildMinimalState('RBiH');
-        delete state.military.heavy_munitions_reserve;
-
-        const parsed = parseGameState(state);
-
-        expect(parsed.factionReserves).toBeDefined();
-        expect(parsed.factionReserves!['RBiH'].generalSupply).toBe(500);
-        expect(parsed.factionReserves!['RBiH'].heavyMunitions).toBeUndefined();
+    it('projects no faction reserves from an old save that carries them (retired 2026-11-17)', () => {
+        const parsed = parseGameState(buildMinimalState('RBiH')) as unknown as Record<string, unknown>;
+        expect(parsed.factionReserves).toBeUndefined();
     });
 
     it('scopes warPhaseSupplyPressure to player faction only', () => {
@@ -80,7 +66,6 @@ describe('player-knowledge integrity — adapter-level filtering', () => {
     it('works for RS player faction', () => {
         const parsed = parseGameState(buildMinimalState('RS'));
         expect(Object.keys(parsed.casualtyLedger!)).toEqual(['RS']);
-        expect(Object.keys(parsed.factionReserves!)).toEqual(['RS']);
         expect(Object.keys(parsed.warPhaseSupplyPressure!)).toEqual(['RS']);
         expect(Object.keys(parsed.warPhaseExhaustion!)).toEqual(['RS']);
     });
@@ -93,13 +78,11 @@ describe('player-knowledge integrity — adapter-level filtering', () => {
         const parsed = parseGameState(buildMinimalState(null));
         if (parsed.player_faction == null) {
             expect(parsed.casualtyLedger).toBeUndefined();
-            expect(parsed.factionReserves).toBeUndefined();
             expect(parsed.warPhaseSupplyPressure).toBeUndefined();
             expect(parsed.warPhaseExhaustion).toBeUndefined();
         } else {
             // Dev fallback resolved a faction — verify scoping is consistent
             expect(Object.keys(parsed.casualtyLedger ?? {})).toHaveLength(1);
-            expect(Object.keys(parsed.factionReserves ?? {})).toHaveLength(1);
             expect(Object.keys(parsed.warPhaseSupplyPressure ?? {})).toHaveLength(1);
             expect(Object.keys(parsed.warPhaseExhaustion ?? {})).toHaveLength(1);
         }

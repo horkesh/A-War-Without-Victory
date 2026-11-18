@@ -48,7 +48,11 @@ describe('acknowledgement notices reach only the player who may know of them', (
     it('the authored audience is valid event data (the event loader accepts every shipped row)', () => {
         expect(() => loadEventDefinitionsFromDir(0, 'data/scenarios/events')).not.toThrow();
         const authored = rows.filter((row) => row && 'audience' in row);
-        expect(authored.length).toBe(RULED_PUBLIC.length + 2);
+        // +2: the two war events below. +1: csq_force_quality_inversion (§6 E2 retired the dead
+        // negotiation_capital effect the rule read its RS faction from; its live RS twin is a
+        // dimension_shifts entry, which the rule does not read, so the ruled audience is authored).
+        expect(authored.length).toBe(RULED_PUBLIC.length + 3);
+        expect(byId.get('csq_force_quality_inversion')?.audience).toEqual(['RS']);
         for (const row of authored) {
             expect(row.audience === 'all' || (Array.isArray(row.audience) && row.audience.every((f: string) => (FACTIONS as readonly string[]).includes(f)))).toBe(true);
         }

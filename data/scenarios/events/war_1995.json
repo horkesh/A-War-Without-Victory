@@ -138,7 +138,7 @@
   {
     "id": "tuzla_gate_massacre_1995",
     "title": "Tuzla Gate Massacre",
-    "narrative": "A single artillery shell strikes the Kapija -- the Gate -- in downtown Tuzla on a warm May evening. The date is Youth Day, and hundreds of young people crowd the streets. The shell detonates at 8:55 PM. Seventy-one people are killed. Two hundred and forty are wounded. The average age of the dead is twenty-one years. The youngest victim is two and a half years old. The VRS Chief of Staff ordered the bombardment of a city that has no military targets in its center.",
+    "narrative": "A single artillery shell strikes the Kapija -- the Gate -- in downtown Tuzla on a warm May evening. The date is Youth Day, and hundreds of young people crowd the streets. The shell detonates at 8:55 PM. Seventy-one people are killed. Two hundred and forty are wounded. The average age of the dead is twenty-one years. The youngest victim is two and a half years old. The shell is fired on the order of Novak Đukić, commander of the VRS Tactical Group Ozren; the Court of Bosnia and Herzegovina later convicts him for the attack.",
     "category": "humanitarian",
     "source_tier": "icty_icj_un",
     "source_note": "The listed adjudicative and institutional sources bound the chronology, actors, and findings described. The essay is original synthesis and does not extend individual liability, command responsibility, or institutional findings beyond the cited record.",
@@ -165,14 +165,8 @@
         "delta": -3
       },
       {
-        "kind": "negotiation_capital",
-        "faction": "RS",
-        "dimension": "international_credibility",
-        "delta": -10
-      },
-      {
         "kind": "narrative",
-        "text": "71 civilians, mostly young people, are killed by VRS shelling of Tuzla's town center on Youth Day. The youngest victim is two years old."
+        "text": "71 civilians, mostly young people, are killed by VRS shelling of Tuzla's town center on Youth Day. The youngest victim is a toddler."
       }
     ],
     "dimension_shifts": [
@@ -182,7 +176,7 @@
         "delta": -10
       }
     ],
-    "historical_source": "ICTY Karadžić Judgment (IT-95-5/18-T). Bosnian State Court, Novak Djukic conviction (2014). BB Vol. II."
+    "historical_source": "ICTY Karadžić Judgment (IT-95-5/18-T). Court of Bosnia and Herzegovina, Novak Đukić, X-KR-07/394 (verdict 12 June 2009, upheld 2010; sentence reduced to 20 years in 2014); BB Vol. I, pp. 384-387. BB Vol. II."
   },
   {
     "id": "un_hostage_crisis_1995",
@@ -272,12 +266,6 @@
             "kind": "patron_pressure",
             "faction": "RS",
             "delta": 10
-          },
-          {
-            "kind": "negotiation_capital",
-            "faction": "RS",
-            "dimension": "international_credibility",
-            "delta": -20
           }
         ],
         "sets_flags": {
@@ -309,12 +297,6 @@
             "kind": "patron_pressure",
             "faction": "RS",
             "delta": 5
-          },
-          {
-            "kind": "negotiation_capital",
-            "faction": "RS",
-            "dimension": "international_credibility",
-            "delta": -10
           }
         ],
         "sets_flags": {
@@ -374,7 +356,7 @@
     "id": "srebrenica_falls_1995",
     "image": "event_srebrenica_falls_1995.webp",
     "title": "Srebrenica Falls",
-    "narrative": "The VRS overruns the Srebrenica safe area in a carefully planned operation. Dutch UNPROFOR peacekeepers are unable to prevent the advance. In the days that follow, over 8,000 Bosniak men and boys are systematically executed in the worst massacre in Europe since World War II. The fall of Srebrenica becomes a defining moment of the war and of international failure.",
+    "narrative": "The VRS overruns the Srebrenica safe area in a carefully planned operation. Dutch UNPROFOR peacekeepers are unable to prevent the advance. In the days that follow, between 7,000 and 8,000 Bosniak men and boys are systematically executed in the worst massacre in Europe since World War II. The fall of Srebrenica becomes a defining moment of the war and of international failure.",
     "source_note": "Existing Srebrenica arc sources, including ICTY/ICJ and UN reporting, ground the row's provenance. This note adds no casualty figures, causal claims, prohibited player choices, or alternate-outcome prevention framing. SCOPE OF control_change.osids: this list is NOT a claim about which settlements were overrun in July 1995. It is a control-restoration set: five cells (srebrenica_2, donji_potocari_2, milacevici, bostahovine_2, suceska) are painted RBiH through apr1995 and RS at oct1995, while six (ljeskovik_2, sulice_2, luka_2, radovcici, obadi, brezovice_2) were already painted RS from apr1994 or earlier and are restored here as a backstop because the engine lacks the March-April 1993 VRS Final Push that historically took them. The casualty and displacement footprint is carried separately by enclave_formation_displacement.source_osids and by the flat war_crimes_delta, neither of which this list affects.",
     "category": "humanitarian",
     "historical_source": "ICTY Karadžić Trial Judgment (IT-95-5/18-T), Srebrenica genocide findings; ICTY Mladić Trial Judgment (IT-09-92-T), Srebrenica; ICTY Krstić Trial Judgment (IT-98-33-T); ICJ Bosnia v. Serbia (2007), genocide finding; UN Report on Srebrenica (A/54/549, 1999)",
@@ -400,6 +382,10 @@
             "type": "territory_control",
             "osid": "op:srebrenica:srebrenica_2",
             "faction": "RBiH"
+          },
+          {
+            "type": "flag_not_set",
+            "flag": "srebrenica_fell"
           }
         ]
       }
@@ -451,12 +437,6 @@
         "delta": -15
       },
       {
-        "kind": "negotiation_capital",
-        "faction": "RS",
-        "dimension": "international_credibility",
-        "delta": -30
-      },
-      {
         "kind": "patron_pressure",
         "faction": "RS",
         "delta": 20
@@ -494,7 +474,14 @@
       },
       {
         "kind": "narrative",
-        "text": "Srebrenica falls. Over 8,000 Bosniak men and boys are executed in the worst atrocity in Europe since World War II."
+        "text": "Srebrenica falls. Bosnian Serb forces execute between 7,000 and 8,000 Bosniak men and boys. The ICTY and the ICJ later find it to be genocide."
+      }
+    ],
+    "dimension_shifts": [
+      {
+        "faction": "RS",
+        "dimension": "international_standing",
+        "delta": -30
       }
     ]
   },
@@ -538,12 +525,6 @@
         "delta": -5
       },
       {
-        "kind": "negotiation_capital",
-        "faction": "RS",
-        "dimension": "international_credibility",
-        "delta": -10
-      },
-      {
         "kind": "control_change",
         "faction": "RS",
         "osids": [
@@ -565,6 +546,13 @@
         "text": "Žepa falls to the VRS. A second UN safe area is overrun in two weeks, deepening the international crisis."
       }
     ],
+    "dimension_shifts": [
+      {
+        "faction": "RS",
+        "dimension": "international_standing",
+        "delta": -10
+      }
+    ],
     "sets_flags": {
       "zepa_fell": true
     }
@@ -572,7 +560,7 @@
   {
     "id": "srebrenica_column_breakout_1995",
     "title": "The Column Leaves Srebrenica",
-    "narrative": "As the safe area falls, a column of Bosniak men and boys gathers near Susnjari and sets out on foot through the forests toward the front lines at Tuzla. The route is ambushed along its length. ICTY judgments in the Krstić, Popovic et al., and Mladić cases establish the column's flight and the killings that followed as part of the genocide at Srebrenica. The fate of the column is recorded here as historical fact.",
+    "narrative": "As the safe area falls, a column of Bosniak men and boys gathers near Susnjari and sets out on foot through the forests toward the front lines at Tuzla. The route is ambushed along its length. ICTY judgments in the Krstić, Popović et al., and Mladić cases establish that the column was hunted down and that the men captured from it and executed were victims of the genocide at Srebrenica. The fate of the column is recorded here as historical fact.",
     "source_note": "This row is an informational timeline record. The ICTY Krstić (IT-98-33), Popovic et al. (IT-05-88), and Mladić (IT-09-92) judgments and the UN Secretary-General's Srebrenica report (A/54/549) ground the row's provenance and institutional context. This sensitive genocide subject is canon-gated: it is a record only and must not be re-authored as a player choice, a prevent-or-save mechanic, or an alternate-outcome path. This note adds no casualty figures, causal claims, prohibited player choices, or alternate-outcome prevention framing.",
     "category": "humanitarian",
     "historical_source": "ICTY Krstić Trial Judgement (IT-98-33-T), paras 546, 598 (the column; genocide finding); ICTY Krstić Appeals Judgement (IT-98-33-A, 2004); ICTY Popovic et al. Trial Judgement (IT-05-88-T); ICTY Mladić Trial Judgement (IT-09-92-T); ICJ Bosnia v. Serbia (2007), genocide finding; UN Report on Srebrenica (A/54/549, 1999)",
@@ -594,7 +582,7 @@
     "same_turn_requires_events": true,
     "effect": {
       "kind": "narrative",
-      "text": "The column out of Srebrenica is recorded as historical fact. ICTY judgments (Krstić, Popovic et al., Mladić) establish its flight and the killings along the route as part of the genocide."
+      "text": "The column out of Srebrenica is recorded as historical fact. ICTY judgments (Krstić, Popović et al., Mladić) establish that the column was hunted down and that the men captured from it and executed were victims of the genocide."
     }
   },
   {
@@ -629,10 +617,10 @@
     "id": "second_markale_massacre_1995",
     "image": "event_markale_shelling.webp",
     "title": "Second Markale Massacre",
-    "narrative": "A second mortar attack strikes the Markale marketplace in Sarajevo, killing 43 civilians. Coming after Srebrenica and Žepa, the massacre triggers the decisive Western response that has been building for months. NATO Secretary General Willy Claes declares that the threshold for intervention has been crossed.",
+    "narrative": "A second mortar attack strikes the Markale marketplace in Sarajevo, killing at least 43 people, the vast majority of them civilians. Coming after Srebrenica and Žepa, the massacre triggers the decisive Western response that has been building for months. NATO Secretary General Willy Claes declares that the threshold for intervention has been crossed.",
     "source_note": "Existing ICTY/UN and same-id essay sources ground the row's provenance and institutional context. This note adds no casualty figures, causal claims, prohibited player choices, or alternate-outcome prevention framing.",
     "category": "humanitarian",
-    "historical_source": "ICTY Karadžić Trial Judgment (IT-95-5/18-T), second Markale incident; UNPROFOR investigation report, August 1995",
+    "historical_source": "ICTY Karadžić Trial Judgment (IT-95-5/18-T), second Markale incident; ICTY Mladić Trial Judgement (IT-09-92-T, 22 November 2017), Scheduled Incident G.18, para. 2150: at least 43 killed, the vast majority civilians, and 88 wounded (para. 2122: 37 died that day and six more in the following days); Mladić Appeal Judgement (MICT-13-56-A, 8 June 2021), para. 346, ground dismissed; ICTY Dragomir Milošević Trial Judgement (IT-98-29/1-T, 12 December 2007), para. 721: at least 35 killed, 34 of them civilians, and at least 78 wounded; judgement pronouncement T.9573: an SRK 120 mm mortar shell; conviction for this incident reversed on appeal (IT-98-29/1-A, 2009, para. 293) because the accused was absent, not on occurrence or origin; UNPROFOR investigation report, August 1995",
     "source_tier": "icty_icj_un",
     "trigger": {
       "turn_min": 177,
@@ -690,14 +678,15 @@
         "delta": 20
       },
       {
-        "kind": "negotiation_capital",
-        "faction": "RS",
-        "dimension": "international_credibility",
-        "delta": -15
-      },
-      {
         "kind": "narrative",
-        "text": "The second Markale massacre kills 43 civilians. NATO prepares to launch sustained air strikes against VRS forces."
+        "text": "The second Markale massacre kills at least 43 people, the vast majority of them civilians. NATO prepares to launch sustained air strikes against VRS forces."
+      }
+    ],
+    "dimension_shifts": [
+      {
+        "faction": "RS",
+        "dimension": "international_standing",
+        "delta": -20
       }
     ]
   },
@@ -726,19 +715,14 @@
     "once": true,
     "same_turn_requires_events": true,
     "effect": {
-      "kind": "supply_delta",
+      "kind": "morale_change",
       "faction": "RS",
-      "delta": -30
+      "delta": -10
     },
     "sets_flags": {
       "nato_deliberate_force_occurred": true
     },
     "effects": [
-      {
-        "kind": "morale_change",
-        "faction": "RS",
-        "delta": -10
-      },
       {
         "kind": "morale_change",
         "faction": "RBiH",
@@ -805,11 +789,6 @@
         "delta": 5
       },
       {
-        "kind": "supply_delta",
-        "faction": "RS",
-        "delta": -15
-      },
-      {
         "kind": "narrative",
         "text": "Federation forces launch a broad offensive. VRS lines collapse across western Bosnia as Republika Srpska's territory shrinks dramatically."
       }
@@ -836,16 +815,11 @@
     },
     "once": true,
     "effect": {
-      "kind": "supply_delta",
+      "kind": "morale_change",
       "faction": "RBiH",
-      "delta": 5
+      "delta": 3
     },
     "effects": [
-      {
-        "kind": "morale_change",
-        "faction": "RBiH",
-        "delta": 3
-      },
       {
         "kind": "patron_pressure",
         "faction": "RS",
@@ -904,11 +878,6 @@
     "effects": [
       {
         "kind": "morale_change",
-        "faction": "RS",
-        "delta": -5
-      },
-      {
-        "kind": "supply_delta",
         "faction": "RS",
         "delta": -5
       },
@@ -974,11 +943,6 @@
         "kind": "morale_change",
         "faction": "HRHB",
         "delta": 10
-      },
-      {
-        "kind": "supply_delta",
-        "faction": "RS",
-        "delta": -15
       },
       {
         "kind": "narrative",
@@ -1842,13 +1806,8 @@
         "branch_tag": "rs_holbrooke_defy",
         "historical_marker": "counterfactual",
         "label": "Reject the US framework -- Pale speaks for Republika Srpska",
-        "description": "Refuse to be sidelined. Karadžić repudiates the Patriarch Paper delegation and insists on direct Pale representation. Milošević publicly disowns the Pale leadership; sanctions-relief is foreclosed and the FRY supply pinch tightens. International standing collapses, but RS asserts its political identity.",
+        "description": "Refuse to be sidelined. Karadžić repudiates the Patriarch Paper delegation and insists on direct Pale representation. Milošević publicly disowns the Pale leadership; sanctions-relief is foreclosed and Belgrade withdraws its backing. International standing collapses, but RS asserts its political identity.",
         "effects": [
-          {
-            "kind": "supply_delta",
-            "faction": "RS",
-            "delta": -20
-          },
           {
             "kind": "recruitment_modifier",
             "faction": "RS",
@@ -1974,13 +1933,8 @@
         "branch_tag": "rs_deliberate_force_absorb",
         "historical_marker": "counterfactual",
         "label": "Reject NATO demands -- hold positions",
-        "description": "Reject NATO demands. The bombing continues, increasing pressure on VRS command and combat capability. Continued NATO strikes degrade equipment, supply, recruitment, and morale.",
+        "description": "Reject NATO demands. The bombing continues, increasing pressure on VRS command and combat capability. Continued NATO strikes degrade equipment, recruitment, and morale.",
         "effects": [
-          {
-            "kind": "supply_delta",
-            "faction": "RS",
-            "delta": -15
-          },
           {
             "kind": "morale_change",
             "faction": "RS",
@@ -2061,11 +2015,6 @@
         "delta": 5
       },
       {
-        "kind": "supply_delta",
-        "faction": "RS",
-        "delta": -10
-      },
-      {
         "kind": "narrative",
         "text": "Jajce is recaptured after three years. HV-HVO forces advance through western Bosnia, taking substantial territory and forcing VRS withdrawals."
       }
@@ -2128,11 +2077,6 @@
           "vrs_1st_krajina",
           "vrs_2nd_krajina"
         ]
-      },
-      {
-        "kind": "supply_delta",
-        "faction": "RS",
-        "delta": -10
       },
       {
         "kind": "narrative",
@@ -2241,12 +2185,6 @@
         "description": "Stop the advance. The territorial gains are sufficient for a strong negotiating position. Holbrooke promises a seat at the table.",
         "effects": [
           {
-            "kind": "negotiation_capital",
-            "faction": "RBiH",
-            "dimension": "international_credibility",
-            "delta": 15
-          },
-          {
             "kind": "morale_change",
             "faction": "RBiH",
             "delta": -3
@@ -2282,12 +2220,6 @@
             "kind": "morale_change",
             "faction": "RBiH",
             "delta": 5
-          },
-          {
-            "kind": "negotiation_capital",
-            "faction": "RBiH",
-            "dimension": "international_credibility",
-            "delta": -20
           },
           {
             "kind": "patron_pressure",
@@ -2581,12 +2513,6 @@
         "risk_level": 0.3,
         "effects": [
           {
-            "kind": "negotiation_capital",
-            "faction": "RBiH",
-            "dimension": "international_credibility",
-            "delta": 15
-          },
-          {
             "kind": "morale_change",
             "faction": "RBiH",
             "delta": 5
@@ -2622,12 +2548,6 @@
         "aggression_affinity": 0.5,
         "risk_level": 0.8,
         "effects": [
-          {
-            "kind": "negotiation_capital",
-            "faction": "RBiH",
-            "dimension": "international_credibility",
-            "delta": -5
-          },
           {
             "kind": "morale_change",
             "faction": "RBiH",
@@ -2754,11 +2674,6 @@
         "delta": -10
       },
       {
-        "kind": "supply_delta",
-        "faction": "RBiH",
-        "delta": -15
-      },
-      {
         "kind": "equipment_quality_modifier",
         "faction": "RBiH",
         "multiplier": 0.95,
@@ -2829,11 +2744,6 @@
         "delta": -10
       },
       {
-        "kind": "supply_delta",
-        "faction": "RS",
-        "delta": -15
-      },
-      {
         "kind": "patron_pressure",
         "faction": "RS",
         "delta": 25
@@ -2891,11 +2801,6 @@
         "kind": "morale_change",
         "faction": "HRHB",
         "delta": -10
-      },
-      {
-        "kind": "supply_delta",
-        "faction": "HRHB",
-        "delta": -15
       },
       {
         "kind": "patron_pressure",

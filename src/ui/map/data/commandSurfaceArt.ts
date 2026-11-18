@@ -27,7 +27,6 @@ export const COMMAND_CARD_DESK_ASSET: Readonly<Record<string, string>> = {
   act_authorize_op: 'consequence_reserve_deployment.webp',
   act_replace_commander: 'consequence_personnel_change.webp',
   act_patron_relations: 'consequence_negotiated_settlement.webp',
-  act_convoy: 'consequence_humanitarian_access.webp',
   act_front_visit: 'consequence_public_pressure.webp',
 };
 

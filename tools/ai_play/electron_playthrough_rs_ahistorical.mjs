@@ -228,19 +228,6 @@ async function resolveOtherDecisionFamilies(page) {
     }
   }
 
-  const convoys = (state.military?.pending_convoy_decisions ?? []).filter((c) => !c.decision);
-  for (const c of convoys) {
-    let result;
-    try {
-      result = await ipc(page, 'stageConvoyDecision', c.id, 'divert');
-    } catch (e) {
-      anomaly({ type: 'convoy_threw', convoyId: c.id, error: String(e) });
-      continue;
-    }
-    log({ type: 'decision_family', family: 'convoy_decision', convoyId: c.id, chosen: 'divert', result });
-    if (result?.ok === false) anomaly({ type: 'convoy_resolve_failed', convoyId: c.id, result });
-  }
-
   const dayton = state.military?.negotiation?.pending_dayton;
   if (dayton) {
     let result;

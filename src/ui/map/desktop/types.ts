@@ -99,7 +99,6 @@ export interface AwwvBridge {
     subscribeTurnReportUpdated?(callback: (report: unknown) => void): () => void;
     advanceTurn?(payload?: unknown): Promise<AdvanceTurnResult>;
     startNewCampaign?(payload: StartNewCampaignPayload): Promise<StartNewCampaignResult>;
-    stageMoveOrder?(brigadeId: string, targetMunicipalityId: string): Promise<DesktopOkError>;
     getRecruitmentCatalog?(): Promise<RecruitmentCatalogResult | null>;
     applyRecruitment?(brigadeId: string, equipmentClass: string): Promise<ApplyRecruitmentResult>;
 }
@@ -114,7 +113,6 @@ export interface DesktopBridgeClient {
     subscribeTurnReportUpdated(callback: (report: unknown) => void): () => void;
     advanceTurn(payload?: unknown): Promise<AdvanceTurnResult>;
     startNewCampaign(payload: StartNewCampaignPayload): Promise<StartNewCampaignResult>;
-    stageMoveOrder(brigadeId: string, targetMunicipalityId: string): Promise<DesktopOkError>;
     getRecruitmentCatalog(): Promise<RecruitmentCatalogResult | null>;
     applyRecruitment(brigadeId: string, equipmentClass: string): Promise<ApplyRecruitmentResult>;
 }

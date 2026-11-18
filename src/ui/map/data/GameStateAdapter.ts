@@ -236,7 +236,6 @@ function hasPendingPoliticalObjectiveDecision(
     return Boolean(state.pendingPeacePlan)
         || Boolean(state.pendingDayton)
         || (state.pendingCounterOffers ?? []).some((offer) => !offer.targetFaction || offer.targetFaction === faction)
-        || (state.pendingConvoyDecisions ?? []).some((convoy) => convoy.route_faction === faction && convoy.decision == null)
         || (state.pendingParamilitaryRequests ?? []).some((request) => request.faction === faction && request.decision == null);
 }
 
@@ -855,10 +854,6 @@ function buildIsolatedUnmannedPocketPredicate(
         return !manned;
     };
     return (faction, osids) => osids.length > 0 && osids.every((osid) => isUnmanned(faction, osid));
-}
-
-function getAirdropAllocationValue(state: GameState, enclaveId: string): number {
-    return finiteNumber((state.military.airdrop_allocation as Record<string, number> | undefined)?.[enclaveId]);
 }
 
 const ENCLAVE_UI_DEFINITIONS: Array<{
@@ -1709,7 +1704,7 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
 
                 // ── Wave 4: stabilization availability ───────────────────────────
                 const currentTurn = (state.meta as { turn?: number } | undefined)?.turn ?? 0;
-                const rawCorpsCmd = (state.corps_command as Record<string, { stabilization_cooldown_until?: number }> | undefined)?.[fv.id];
+                const rawCorpsCmd = (state.military.corps_command as Record<string, { stabilization_cooldown_until?: number }> | undefined)?.[fv.id];
                 const cooldownUntil = rawCorpsCmd?.stabilization_cooldown_until ?? 0;
                 const cooldownActive = currentTurn < cooldownUntil;
                 fv.stabilizationAvailable = strain > 0 && !cooldownActive;
@@ -2046,31 +2041,6 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
             .filter((value: unknown): value is string => typeof value === 'string' && value.length > 0)
             .sort(strictCompare)
         : undefined;
-    const pendingConvoyDecisions = Array.isArray(state.military.pending_convoy_decisions)
-        ? (state.military.pending_convoy_decisions as Array<Record<string, unknown>>)
-            .map((convoy) => {
-                const id = typeof convoy.id === 'string' ? convoy.id : '';
-                const targetEnclave = typeof convoy.target_enclave === 'string' ? convoy.target_enclave : '';
-                const routeFaction = convoy.route_faction === 'RS' || convoy.route_faction === 'RBiH' || convoy.route_faction === 'HRHB'
-                    ? convoy.route_faction
-                    : null;
-                if (!id || !targetEnclave || !routeFaction) return null;
-                const decision = convoy.decision === 'allow' || convoy.decision === 'block' || convoy.decision === 'divert'
-                    ? convoy.decision
-                    : undefined;
-                return {
-                    id,
-                    target_enclave: targetEnclave,
-                    route_faction: routeFaction as 'RS' | 'RBiH' | 'HRHB',
-                    supply_amount: finiteNumber(convoy.supply_amount),
-                    ...(decision ? { decision: decision as 'allow' | 'block' | 'divert' } : {}),
-                };
-            })
-            .filter((value): value is NonNullable<typeof value> => value !== null)
-            .filter((convoy) => !playerFaction || convoy.route_faction === playerFaction)
-            .sort((a, b) => a.id.localeCompare(b.id))
-        : undefined;
-
     const municipalitySupportOrders = state.military.municipality_support_orders && typeof state.military.municipality_support_orders === 'object'
         ? Object.fromEntries(
             Object.entries(state.military.municipality_support_orders as Record<string, Record<string, unknown>>)
@@ -2115,107 +2085,8 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
             );
     }
 
-    let factionReserves: LoadedGameState['factionReserves'] | undefined;
-    const rawGeneral = state.military.general_supply_reserve;
-    const rawHeavy = state.military.heavy_munitions_reserve;
-    const generalReserves = rawGeneral && typeof rawGeneral === 'object' && !Array.isArray(rawGeneral)
-        ? rawGeneral as Record<string, unknown>
-        : undefined;
-    const heavyReserves = rawHeavy && typeof rawHeavy === 'object' && !Array.isArray(rawHeavy)
-        ? rawHeavy as Record<string, unknown>
-        : undefined;
-    if (generalReserves || heavyReserves) {
-        const out: NonNullable<LoadedGameState['factionReserves']> = {};
-        const factions = Array.from(new Set([
-            ...Object.keys(generalReserves ?? {}),
-            ...Object.keys(heavyReserves ?? {}),
-        ])).sort(strictCompare);
-        for (const faction of factions) {
-            const row: NonNullable<LoadedGameState['factionReserves']>[string] = {};
-            if (generalReserves && hasFiniteNumber(generalReserves, faction)) {
-                row.generalSupply = finiteNumber(generalReserves[faction]);
-            }
-            if (heavyReserves && hasFiniteNumber(heavyReserves, faction)) {
-                row.heavyMunitions = finiteNumber(heavyReserves[faction]);
-            }
-            if (Object.keys(row).length > 0) out[faction] = row;
-        }
-        if (Object.keys(out).length > 0) factionReserves = out;
-    }
-
-    // Economy: Production facilities
-    let productionFacilities: LoadedGameState['productionFacilities'] | undefined;
-    const rawFacilities = state.military.production_facilities as Record<string, any> | undefined;
-    if (rawFacilities && typeof rawFacilities === 'object') {
-        const pc = state.political.political_controllers ?? {};
-        // Simple municipality controller lookup from OSID keys
-        const munControllers = new Map<string, string>();
-        for (const key of Object.keys(pc).sort()) {
-            const ctrl = pc[key];
-            if (!ctrl) continue;
-            const parts = key.split(':');
-            const mun = parts.length >= 2 ? parts[1] : key;
-            if (!munControllers.has(mun)) munControllers.set(mun, ctrl);
-        }
-        productionFacilities = Object.keys(rawFacilities).sort().map(fid => {
-            const f = rawFacilities[fid];
-            return {
-                id: f.facility_id ?? fid,
-                name: getPlayerSafeDisplayLabel(f.name ?? fid, 'Production facility'),
-                type: f.type ?? 'unknown',
-                municipality: f.municipality_id ?? '',
-                condition: typeof f.current_condition === 'number' ? f.current_condition : 1,
-                controller: munControllers.get(f.municipality_id ?? '') ?? null,
-            };
-        });
-    }
-
-    // Economy: Smuggling routes
-    let smugglingRoutes: LoadedGameState['smugglingRoutes'] | undefined;
-    const rawRoutes = state.military.smuggling_routes;
-    if (Array.isArray(rawRoutes) && rawRoutes.length > 0) {
-        // Build name lookup from route defs
-        const ROUTE_NAMES: Record<string, { name: string; faction: string }> = {
-            rbih_sarajevo_tunnel: { name: 'Sarajevo Tunnel', faction: 'RBiH' },
-            rbih_adriatic_coast: { name: 'Adriatic Coast', faction: 'RBiH' },
-            rbih_dinaric_spine: { name: 'Dinaric Spine', faction: 'RBiH' },
-            rs_belgrade_pipeline: { name: 'Belgrade Pipeline', faction: 'RS' },
-            rs_corridor: { name: 'Posavina Corridor', faction: 'RS' },
-            rs_montenegro: { name: 'Montenegro Route', faction: 'RS' },
-            hrhb_croatian_supply: { name: 'Croatian Supply Line', faction: 'HRHB' },
-            hrhb_adriatic: { name: 'Adriatic Port', faction: 'HRHB' },
-            hrhb_herzegovina: { name: 'Herzegovina Network', faction: 'HRHB' },
-        };
-        smugglingRoutes = rawRoutes
-            .sort((a: any, b: any) => String(a.id ?? '').localeCompare(String(b.id ?? '')))
-            .map((r: any) => {
-                const meta = ROUTE_NAMES[r.id] ?? { name: getPlayerSafeDisplayLabel(r.id, 'Supply route'), faction: '' };
-                return {
-                    id: String(r.id ?? ''),
-                    name: meta.name,
-                    faction: meta.faction,
-                    capacity: typeof r.capacity === 'number' ? r.capacity : 0,
-                    disrupted: Boolean(r.disrupted),
-                    active_turns: typeof r.active_turns === 'number' ? r.active_turns : 0,
-                };
-            });
-    }
-
-    // Economy: Embargo status
-    let embargoStatus: LoadedGameState['embargoStatus'] | undefined;
-    const factionsList = state.factions ?? [];
-    const embargoEntries: Array<[string, { pipeline: number; smuggling: number }]> = [];
-    for (const fac of factionsList) {
-        const ep = fac.embargo_profile;
-        if (!ep) continue;
-        embargoEntries.push([fac.id, {
-            pipeline: typeof ep.external_pipeline_status === 'number' ? ep.external_pipeline_status : 0,
-            smuggling: typeof ep.smuggling_efficiency === 'number' ? ep.smuggling_efficiency : 0,
-        }]);
-    }
-    if (embargoEntries.length > 0) {
-        embargoStatus = Object.fromEntries(embargoEntries.sort(([a], [b]) => a.localeCompare(b)));
-    }
+    // factionReserves, productionFacilities, smugglingRoutes and embargoStatus (the War Footing
+    // panel's inputs) were retired 2026-11-17 with the supply-reserve economy (Fable consult 6).
 
     let mobilizationSummary: LoadedGameState['mobilizationSummary'] | undefined;
     const rawMilitiaPoolsForSummary = state.military.militia_pools as Record<string, Record<string, unknown>> | undefined;
@@ -2669,13 +2540,11 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
 
     let corpsFrontSectors: CorpsFrontSectorView[] | undefined;
     const rawSectors = state.military.corps_front_sectors as Record<string, Record<string, unknown>> | undefined;
-    const hasReportedOpsecSectors = Array.isArray(state.military.opsec_sectors)
-        || Array.isArray(state.opsec_sectors);
+    // OPSEC sectors live under `military.opsec_sectors` only (the engine's and the IPC toggle's path).
+    const hasReportedOpsecSectors = Array.isArray(state.military.opsec_sectors);
     const rawOpsecSectors: unknown[] = Array.isArray(state.military.opsec_sectors)
         ? state.military.opsec_sectors
-        : Array.isArray(state.opsec_sectors)
-            ? state.opsec_sectors
-            : [];
+        : [];
     const opsecSectorSet = new Set(
         rawOpsecSectors.filter((value): value is string => typeof value === 'string')
     );
@@ -2885,8 +2754,6 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
                     isolation_turns: 0,
                     hardening_active: false,
                     supply_state: deriveEnclaveSupplyState(key, rawSupplyStateByOsid, 0, false, entry),
-                    airdrop_status: enclaveDef?.faction === 'RBiH' ? 'not_isolated_long_enough' : 'not_eligible',
-                    airdrop_allocation: getAirdropAllocationValue(gameState, key),
                     faction: enclaveDef?.faction,
                     display_name: enclaveDef?.display_name ?? humanizeMunicipalitySlug(key.replace(/_/g, '-')),
                 };
@@ -2900,14 +2767,6 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
                     isolation_turns: isolationTurns,
                     hardening_active: hardeningActive,
                     supply_state: deriveEnclaveSupplyState(key, rawSupplyStateByOsid, isolationTurns, hardeningActive, resilienceValue),
-                    airdrop_status: enclaveDef?.faction !== 'RBiH'
-                        ? 'not_eligible'
-                        : isolationTurns >= 4
-                            ? 'receiving'
-                        : isolationTurns > 0
-                            ? 'not_isolated_long_enough'
-                            : 'not_eligible',
-                    airdrop_allocation: getAirdropAllocationValue(gameState, key),
                     faction: enclaveDef?.faction,
                     display_name: enclaveDef?.display_name ?? humanizeMunicipalitySlug(key.replace(/_/g, '-')),
                 };
@@ -2962,7 +2821,6 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
     const corpsCommanderActions = derivePlayerCorpsCommanderActions(state, playerFaction);
     const reserveRequestHistory = deriveReserveRequestHistory(state, playerFaction);
     const peacePlanHistory = derivePeacePlanHistory(state, playerFaction);
-    const convoyDecisionHistory = deriveConvoyDecisionHistory(state, playerFaction);
     const paramilitaryDecisionHistory = deriveParamilitaryDecisionHistory(state, playerFaction);
     const paramilitaryUnrequested = deriveParamilitaryUnrequested(state, playerFaction);
     const officerDecisionHistory = deriveOfficerDecisionHistory(state, playerFaction);
@@ -3046,7 +2904,7 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
         directiveOutcomeReceipts: directiveOutcomeReceiptsRealizedOnTurn(buildDirectiveOutcomeReceipts(state as GameState), turn),
         runtimeFeatureFlags: options?.runtimeFeatureFlags,
         armyStance, armyCoDecisionTraces, armyCorpsDirectives, corpsCommanderActions,
-        casualtyLedger: scopeToPlayerFaction(casualtyLedger, playerFaction), civilianCasualties, internationalVisibilityPressure, ivpConsequencesActive, pendingConvoyDecisions, municipalitySupportOrders,
+        casualtyLedger: scopeToPlayerFaction(casualtyLedger, playerFaction), civilianCasualties, internationalVisibilityPressure, ivpConsequencesActive, municipalitySupportOrders,
         sarajevoTunnelOperational: Boolean(state.military.sarajevo_tunnel_operational), sarajevoLifeline: deriveSarajevoLifelineView(state), warPhaseSupplyPressure: scopeToPlayerFaction(warPhaseSupplyPressure, playerFaction), warPhaseSupplyCondition: scopeToPlayerFaction(warPhaseSupplyCondition, playerFaction), warPhaseExhaustion: scopeToPlayerFaction(warPhaseExhaustion, playerFaction),
         player_faction: playerFaction ?? undefined,
         rbih_hrhb_war_earliest_turn: rbih_hrhb_war_earliest_turn ?? null,
@@ -3091,10 +2949,6 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
         opProposalCards: opProposalCards.length > 0 ? opProposalCards : undefined,
         namedOfficerData,
         namedOfficerStateById,
-        factionReserves: scopeToPlayerFaction(factionReserves, playerFaction),
-        productionFacilities,
-        smugglingRoutes,
-        embargoStatus,
         enclaveResilience,
         sectorEntrenchmentSummary,
         mobilizationSummary,
@@ -3142,7 +2996,6 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
         pendingReserveRequests,
         reserveRequestHistory,
         peacePlanHistory,
-        convoyDecisionHistory,
         paramilitaryDecisionHistory,
         paramilitaryUnrequested,
         officerDecisionHistory,
@@ -4582,10 +4435,6 @@ function derivePeacePlanHistory(
     return records.length > 0 ? records : undefined;
 }
 
-function asConvoyDecision(value: unknown): 'allow' | 'block' | 'divert' | null {
-    return value === 'allow' || value === 'block' || value === 'divert' ? value : null;
-}
-
 function asParamilitaryDecision(value: unknown): 'allow' | 'deny' | 'regular' | null {
     return value === 'allow' || value === 'deny' || value === 'regular' ? value : null;
 }
@@ -4594,39 +4443,6 @@ function asOfficerDecision(value: unknown): 'acknowledged' | 'override_confirmed
     return value === 'acknowledged' || value === 'override_confirmed' || value === 'replacement_accepted'
         ? value
         : null;
-}
-
-function deriveConvoyDecisionHistory(
-    state: any,
-    playerFaction: string | null | undefined,
-): LoadedGameState['convoyDecisionHistory'] {
-    const history = state.military?.convoy_decision_history;
-    if (!Array.isArray(history) || history.length === 0) return undefined;
-    const records: NonNullable<LoadedGameState['convoyDecisionHistory']> = [];
-
-    for (const raw of [...history].sort((a, b) => {
-        const turnA = Number.isFinite(a?.turn) ? Number(a.turn) : 0;
-        const turnB = Number.isFinite(b?.turn) ? Number(b.turn) : 0;
-        if (turnA !== turnB) return turnB - turnA;
-        return strictCompare(String(a?.id ?? ''), String(b?.id ?? ''));
-    })) {
-        const decision = asConvoyDecision(raw?.decision);
-        if (!raw || typeof raw.id !== 'string' || !decision) continue;
-        const routeFaction = String(raw.route_faction ?? '');
-        if (!playerFactionMatch(routeFaction, playerFaction)) continue;
-        records.push({
-            id: raw.id,
-            turn: Number.isFinite(raw.turn) ? Number(raw.turn) : 0,
-            target_enclave: String(raw.target_enclave ?? ''),
-            route_faction: routeFaction,
-            target_faction: String(raw.target_faction ?? ''),
-            supply_amount: finiteNumber(raw.supply_amount),
-            decision,
-            decided_by: raw.decided_by === 'player' ? 'player' : 'bot',
-        });
-    }
-
-    return records.length > 0 ? records : undefined;
 }
 
 function deriveParamilitaryDecisionHistory(

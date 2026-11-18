@@ -79,9 +79,9 @@ export function historicalBandOvershootPp(turn: number, shareOf: (faction: Facti
 /**
  * True when the war's map has left history's band by more than DIVERGENCE_GATE_MARGIN_PP.
  *
- * The band is keyed on the war week (turn − war_start_turn, as peace_plans' getWarWeek), so a
- * pre-war start (sep1991_to_dayton) reads the April 1992 band when its war begins. A scenario that
- * starts mid-war (jan1993_to_dayton: turn 0 is calendar week 39 and war_start_turn is 0) would read
+ * The band is keyed on the war week (turn − war_start_turn, as peace_plans' getWarWeek). Every
+ * scenario starts in war (the September 1991 peace start was retired). A scenario that
+ * starts mid-war (e.g. a January 1993 start: turn 0 is calendar week 39 and war_start_turn is 0) would read
  * the band 39 weeks early; GameState carries no scenario start week, so this gate is calibrated for
  * the April 1992 start only. Accepted as final for 1.0: emergent mode is reached only through the
  * desktop New Game, which is fixed to April 1992, and the later starts are historical-mode scenarios.

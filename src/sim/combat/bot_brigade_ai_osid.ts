@@ -60,11 +60,12 @@ import { getTacticalAdjacentOsids } from './tactical_adjacency.js';
 import { areRbihHrhbAllied } from '../early_war/alliance_update.js';
 import { shouldGrazBlockAttack, isGrazAccordsActive, isEastHerzegovinaPair } from '../local_truces.js';
 import type { SupplyStateByOsidReport } from '../../state/supply_state_derivation.js';
-import { getEffectiveSupplyState } from '../../state/supply_reserves.js';
 import { getSeasonalModifiers } from './seasonal_effects.js';
 import { getAllAxisBrigades, isMultiAxis } from './sector_offensive_axis_helpers.js';
 import { buildOfficerCombatLookup, getCorpsStance } from './combat_math.js';
 import { findBrigadeOperation, findBrigadeOperationAnywhere, findBrigadeLiveOperationAnywhere } from './corps_operation_helpers.js';
+import { canAdoptPosture } from './brigade_posture.js';
+import { isBrigadeAssignedToFront } from './front_assignment.js';
 import { isVlasicCohaExceptionAttackOrder } from './coha_operation_exception.js';
 import {
     isCorpsBoundByOct1995Ceasefire,
@@ -78,12 +79,13 @@ import { buildSectorDefenseByFactionAndOsid } from './corps_front_sectors.js';
 
 import { evaluateGarrisonAndDetachments, evaluateReserve, evaluateHold } from './bot_brigade_eval_hold.js';
 import { evaluateSectorMarch, evaluateReturnToCorps, evaluatePocketEvacuation, evaluateFrontCoverage } from './bot_brigade_eval_front.js';
-import { evaluateHomeDefense, evaluateSupplyGate, evaluateSectorAttack, evaluateReorganize, evaluateDefensive, evaluateOffensive, recordAxisOrderGenerationDetail } from './bot_brigade_eval_attack.js';
+import { evaluateHomeDefense, evaluateSupplyGate, evaluateSectorAttack, evaluateReorganize, evaluateDefensive, evaluateRetakeCounterAttack, evaluateOffensive, recordAxisOrderGenerationDetail } from './bot_brigade_eval_attack.js';
 import { evaluateInteriorMovement } from './bot_brigade_eval_movement.js';
 import type { BrigadeEvaluationContext, SectorMarchObservation } from './bot_brigade_eval_types.js';
 
 import type { OsidEthnicComposition } from './ethnic_defense.js';
 import { COUNTER_ATTACK_RETREAT_WINDOW } from './bot_constants.js';
+import { collectRecentCombatLosses } from './recent_combat_losses.js';
 import { botOrdersPerfTime } from './_perf_profile_bot_orders.js';
 import { isReasonCodeTopicEnabled, sortedIds } from './reason_code_debug.js';
 
@@ -313,6 +315,7 @@ export type BotDispatcherHandler =
     | 'sector_attack'
     | 'hold'
     | 'reorganize'
+    | 'retake'
     | 'defensive'
     | 'offensive'
     | 'front_coverage'
@@ -827,6 +830,9 @@ function executeFactionDirectivesImpl(
         arr.sort((a, b) => strictCompare(a.osid, b.osid));
     }
     const sectorCounterAttackCount = new Map<string, number>();
+    // Package P2 step 3 (2026-11-16): the retake-only counter-attack reads the cells this faction
+    // lost in combat within the retreat window and has not taken back, militia-held losses included.
+    const recentLostCells = collectRecentCombatLosses(state, faction);
 
     const targetAdjacentCount = new Map<Osid, number>();
     for (const b of brigades) {
@@ -867,13 +873,7 @@ function executeFactionDirectivesImpl(
         const counterAttackTarget: Osid | null = (retreatInfo && retreatInfo.turn === currentTurn - 1)
             ? retreatInfo.osid as Osid : null;
 
-        const rawOsidSupplyState = getBrigadeSupplyState(brigade, supplyStateByOsid);
-        const factionReserveLevel = state.meta?.supply_reserves_enabled
-            ? ((state.military.general_supply_reserve as Record<string, number> | undefined)?.[brigade.faction] ?? 100)
-            : 100;
-        const brigadeSupplyState = state.meta?.supply_reserves_enabled
-            ? getEffectiveSupplyState(rawOsidSupplyState, factionReserveLevel)
-            : rawOsidSupplyState;
+        const brigadeSupplyState = getBrigadeSupplyState(brigade, supplyStateByOsid);
         const sectorAssignment = sectorAssignmentByBrigade.get(brigade.id) ?? null;
         const assignedSectorFrontOsids = sectorAssignment && !sectorAssignment.isReserve
             ? sectorAssignment.frontOsids
@@ -920,6 +920,7 @@ function executeFactionDirectivesImpl(
             isHoldBrigade: false,
             sectorRecentRetreats,
             sectorCounterAttackCount,
+            recentLostCells,
             sectorAssignment,
             assignedSectorFrontOsids,
             corpsBrigadeCountsByOsid,
@@ -1008,6 +1009,7 @@ function executeFactionDirectivesImpl(
             if (runEvaluator('sector_attack', 'bot_orders.executeFactionDirectives.eval.sectorAttack', () => evaluateSectorAttack(ctx))) return true;
             if (runEvaluator('hold', 'bot_orders.executeFactionDirectives.eval.hold', () => evaluateHold(ctx))) return true;
             if (runEvaluator('reorganize', 'bot_orders.executeFactionDirectives.eval.reorganize', () => evaluateReorganize(ctx))) return true;
+            if (runEvaluator('retake', 'bot_orders.executeFactionDirectives.eval.retake', () => evaluateRetakeCounterAttack(ctx))) return true;
             if (runEvaluator('defensive', 'bot_orders.executeFactionDirectives.eval.defensive', () => evaluateDefensive(ctx))) return true;
             if (runEvaluator('offensive', 'bot_orders.executeFactionDirectives.eval.offensive', () => evaluateOffensive(ctx))) return true;
             if (runEvaluator('front_coverage', 'bot_orders.executeFactionDirectives.eval.frontCoverage', () => evaluateFrontCoverage(ctx))) return true;
@@ -1464,6 +1466,48 @@ export function generateAllBotOrdersOsid(
         const corpsId = brig?.corps_id;
         if (!corpsId) continue;
         allEligibleAttackersByCorps[corpsId] = (allEligibleAttackersByCorps[corpsId] ?? 0) + 1;
+    }
+
+    // Package "1994-95 attack and defence", P2 step 1 (2026-11-16): a static front brigade digs in
+    // at any cohesion. Every evaluator's `defend` for a front brigade that is neither moving nor
+    // attacking becomes `dig_in` here, at the one point where the pass's orders are final. `defend`
+    // drains cohesion (-1/turn) and `dig_in` recovers it (+0.5) and defends at least as well, so a
+    // static `defend` held worn brigades on their cohesion floor (consult 3). Kept as `defend`:
+    // brigades with an attack or movement order this pass or an existing move, sector reserves
+    // (step 2 owns them), brigades off the front, brigades in an operation's execution phase,
+    // disrupted brigades, and any brigade that may not adopt `dig_in` (e.g. forming). The post-repulse
+    // `defend` is a combat write, not a bot order, and is untouched.
+    // P2 step 2 (2026-11-16): an unassigned army-reserve brigade (an elite not on loan and in no
+    // operation, with no move this pass) stands in `hold`, the existing rest posture, instead of the
+    // draining `defend` (step 0b: both VRS elites sat at cohesion 20 in defend in 157/157 samples).
+    for (const order of allPostureOrders) {
+        if (order.posture !== 'defend' && order.posture !== 'dig_in') continue;
+        const bid = order.brigade_id;
+        const formation = state.military.formations?.[bid];
+        if (!formation?.elite_loan_state || formation.elite_loan_state.on_loan === true) continue;
+        if (allAttackOrders[bid] != null || allMovementOrders[bid] != null || allColumnMarchOrders[bid] != null) continue;
+        if (state.military.brigade_movement_orders?.[bid]) continue;
+        if (findBrigadeLiveOperationAnywhere(state, bid) != null) continue;
+        if (!canAdoptPosture(formation, 'hold')) continue;
+        order.posture = 'hold';
+    }
+    const staticDigInRoles = buildSectorAssignmentByBrigade(state);
+    for (const order of allPostureOrders) {
+        if (order.posture !== 'defend') continue;
+        const bid = order.brigade_id;
+        if (allAttackOrders[bid] != null) continue;
+        if (allMovementOrders[bid] != null || allColumnMarchOrders[bid] != null) continue;
+        if (state.military.brigade_movement_orders?.[bid]) continue;
+        const movementState = state.military.brigade_movement_state?.[bid];
+        if (movementState && movementState.status !== 'deployed') continue;
+        const formation = state.military.formations?.[bid];
+        if (!formation || formation.status !== 'active' || (formation.kind ?? 'brigade') !== 'brigade') continue;
+        if (((formation as { disrupted_turns?: number }).disrupted_turns ?? 0) > 0 || (formation as { disrupted?: boolean }).disrupted === true) continue;
+        if (!canAdoptPosture(formation, 'dig_in')) continue;
+        if (staticDigInRoles.get(bid)?.isReserve === true) continue;
+        if (!isBrigadeAssignedToFront(state, bid)) continue;
+        if (findBrigadeLiveOperationAnywhere(state, bid)?.op?.phase === 'execution') continue;
+        order.posture = 'dig_in';
     }
 
     if (!state.military.brigade_posture_orders) state.military.brigade_posture_orders = [];

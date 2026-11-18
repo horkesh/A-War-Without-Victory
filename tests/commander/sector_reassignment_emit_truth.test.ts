@@ -133,6 +133,8 @@ describe('commander sector reassignment emission truth', () => {
         expect(output.directive.sector_reassignment_orders).toEqual([{
             brigade_id: 'shift_me',
             to_sector_id: 'sector:test:1',
+            // Package P2 step 1 (Codex review on #774): the relief march releases a dug-in donor.
+            empty_sector_relief: true,
         }]);
     });
 });

@@ -517,12 +517,14 @@ describe('Patron Events', () => {
         expect(neg.patron_relationships.RS.relationship_events).toContain('srebrenica_aftermath');
     });
 
-    it('Srebrenica reduces RS international_standing dimension by 30', () => {
+    it('Srebrenica reduces RS international_standing dimension by 30 when RS holds the town without the card', () => {
         const state = makeState({
             turn: SREBRENICA_AFTERMATH.trigger_week,
             war_start_turn: 0,
         });
-        state.military.event_last_fired_turn = { srebrenica_falls_1995: 162 }; // the town fell
+        // §6 E2 one-carrier rule: this path (the town is RS-held but srebrenica_falls_1995
+        // never fired) is the one where the patron event itself carries the −30.
+        (state.political as any).political_controllers = { 'op:srebrenica:srebrenica_2': 'RS' };
         const neg = state.military.negotiation!;
         // Set international_standing base to 50, event_modifier to 0
         neg.strategic_dimensions!.RS.international_standing = { base_value: 50, event_modifier: 0, effective_value: 50 };
@@ -530,8 +532,26 @@ describe('Patron Events', () => {
         evaluatePatronEvents(state);
 
         // humanitarian_delta of -30 now applies to strategic_dimensions.international_standing.event_modifier
+        expect(neg.patron_relationships.RS.relationship_events).toContain('srebrenica_aftermath');
         expect(neg.strategic_dimensions!.RS.international_standing.event_modifier).toBe(-30);
         expect(neg.strategic_dimensions!.RS.international_standing.effective_value).toBe(20);
+    });
+
+    it('Srebrenica aftermath skips its −30 when the srebrenica_falls_1995 card already carried it (§6 E2)', () => {
+        const state = makeState({
+            turn: SREBRENICA_AFTERMATH.trigger_week,
+            war_start_turn: 0,
+        });
+        state.military.event_last_fired_turn = { srebrenica_falls_1995: 162 }; // the card fired
+        const neg = state.military.negotiation!;
+        neg.strategic_dimensions!.RS.international_standing = { base_value: 50, event_modifier: 0, effective_value: 50 };
+        const rsOverrideBefore = neg.patron_relationships.RS.override_authority;
+
+        evaluatePatronEvents(state);
+
+        expect(neg.patron_relationships.RS.relationship_events).toContain('srebrenica_aftermath');
+        expect(neg.patron_relationships.RS.override_authority).toBe(Math.min(100, rsOverrideBefore + 20));
+        expect(neg.strategic_dimensions!.RS.international_standing.event_modifier).toBe(0);
     });
 
     it('NATO bombing reduces RS support by 20', () => {

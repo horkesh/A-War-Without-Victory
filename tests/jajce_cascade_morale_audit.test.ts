@@ -85,10 +85,9 @@ describe('LANE-NIGHTSHIFT-JAJCE-CASCADE-MORALE-AUDIT', () => {
             'humanitarian_impact',
             'morale_change',
             'narrative',
-            'negotiation_capital',
+            // 'negotiation_capital' retired (§6 E2); the loader rejects it.
             'patron_pressure',
             'recruitment_modifier',
-            'supply_delta',
         ]);
 
         for (const e of ev.effects ?? []) {

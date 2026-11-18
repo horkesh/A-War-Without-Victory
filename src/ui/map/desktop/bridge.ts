@@ -86,12 +86,6 @@ export function createDesktopBridgeClient(bridge: AwwvBridge | null): DesktopBri
         { ok: false, error: BRIDGE_UNAVAILABLE }
       );
     },
-    stageMoveOrder(brigadeId: string, targetMunicipalityId: string): Promise<DesktopOkError> {
-      return invokeOrUnavailable(
-        bridge?.stageMoveOrder ? () => bridge.stageMoveOrder!(brigadeId, targetMunicipalityId) : undefined,
-        { ok: false, error: BRIDGE_UNAVAILABLE }
-      );
-    },
     getRecruitmentCatalog(): Promise<RecruitmentCatalogResult | null> {
       if (!bridge?.getRecruitmentCatalog) return Promise.resolve(null);
       return bridge.getRecruitmentCatalog();

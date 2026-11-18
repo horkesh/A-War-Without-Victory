@@ -332,23 +332,23 @@ describe('OOB and operations panel operation labels', () => {
     expect(state.selectedOperationKey).toBeNull();
   });
 
-  it('keeps operation briefing decisions read-only when the desktop bridge is unavailable', () => {
+  it('shows a planning operation briefing as read-only: no decision controls, decisions are issued from the Decision Room', () => {
     setOperationPatch({ phase: 'planning' });
     useGameStore.setState({
       operationBriefingContext: { corpsId: CORPS_ID, operationName: RAW_OP_NAME },
     });
 
-    render(createElement(OperationBriefingModal, {
+    const { container } = render(createElement(OperationBriefingModal, {
       isOpen: true,
       onClose: () => {},
-      commandBridgeAvailable: false,
     }));
 
-    expect(screen.getByText('Desktop command bridge unavailable. Decision controls are read-only in this browser view.')).toBeTruthy();
-    expect((screen.getByRole('button', { name: 'Launch Operation' }) as HTMLButtonElement).disabled).toBe(true);
-    expect((screen.getByRole('button', { name: 'Order Probe' }) as HTMLButtonElement).disabled).toBe(true);
-    expect((screen.getByRole('button', { name: 'Postpone' }) as HTMLButtonElement).disabled).toBe(true);
-    expect((screen.getByRole('button', { name: 'Abort Operation' }) as HTMLButtonElement).disabled).toBe(true);
+    expect(container.textContent).toContain('Command decision review only');
+    expect(container.textContent).toContain('Presidential Decision Room');
+    expect(screen.queryByRole('button', { name: 'Launch Operation' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Order Probe' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Postpone' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Abort Operation' })).toBeNull();
   });
 
   it('renders active operation command reviews as read-only instead of exposing decision controls', () => {
@@ -359,10 +359,6 @@ describe('OOB and operations panel operation labels', () => {
     const { container } = render(createElement(OperationBriefingModal, {
       isOpen: true,
       onClose: () => {},
-      onLaunch: () => { throw new Error('launch should stay hidden in review mode'); },
-      onPostpone: () => { throw new Error('postpone should stay hidden in review mode'); },
-      onAbort: () => { throw new Error('abort should stay hidden in review mode'); },
-      onOrderProbe: () => { throw new Error('probe should stay hidden in review mode'); },
     }));
 
     expect(container.textContent).toContain('Command decision review only');
