@@ -84,6 +84,30 @@ describe('shipped schedule', () => {
     });
 });
 
+describe('a corps that is no longer active releases its commander (PR 2c)', () => {
+    it('retires a generic acting commander, returns a named one to the reserve, and leaves active corps alone', () => {
+        const s = state(10, [
+            officer('generic_RS_c1_t1', { faction: 'RS', home_corps_id: 'c1' }),
+            officer('n', { home_corps_id: 'c3' }),
+            officer('k', { home_corps_id: 'c3' }),
+        ], {
+            generic_RS_c1_t1: os('generic_RS_c1_t1', { status: 'active', assigned_corps_id: 'c1', acting_commander: true, turns_in_command: 9 }),
+            n: os('n', { status: 'active', assigned_corps_id: 'c2', turns_in_command: 4, effective_competence_penalty: 1, penalty_turns_remaining: 3 }),
+            k: os('k', { status: 'active', assigned_corps_id: 'c3', turns_in_command: 9 }),
+        }, ['c1', 'c2', 'c3']);
+        // c1 is a synthetic JNA command whose last subordinate withdrew; c2 was retired.
+        s.military.formations!.c1!.status = 'inactive';
+        s.military.formations!.c2!.status = 'inactive';
+        const report = processOfficerSuccession(s, new Set(), EMPTY_CORPS_CO_ROSTER);
+        const officers = s.military.named_officers!;
+        expect(officers.generic_RS_c1_t1).toMatchObject({ status: 'retired', assigned_corps_id: null, acting_commander: false });
+        expect(officers.n).toMatchObject({ status: 'reserve', assigned_corps_id: null, effective_competence_penalty: 0, penalty_turns_remaining: 0 });
+        expect(officers.k).toMatchObject({ status: 'active', assigned_corps_id: 'c3', turns_in_command: 10 });
+        // A seat that no longer exists is not a departure from the war.
+        expect(report.departures).toEqual([]);
+    });
+});
+
 describe('inertness with an empty schedule', () => {
     it('produces exactly the pre-schedule succession (death clock, vacancy fill, generic acting commander)', () => {
         const build = () => state(120, [
