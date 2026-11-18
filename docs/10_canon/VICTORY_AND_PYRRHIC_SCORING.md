@@ -1,7 +1,8 @@
 # Victory Conditions and Pyrrhic Scoring — Canonical
 
 **Status:** CANON (v0.9.0 gate)
-**Last Updated:** 2026-11-16
+**Last Updated:** 2026-11-18
+**Amended:** 2026-11-18 (§6 E3b, authored counter, ruling 2026-11-17 signed 6/6): §3.2 — all three A+ anchors require zero authored war-crime incidents (RS no longer reads "≤2 war crimes events"; HRHB gains the condition); §3.4 defines "authored" (one shared count, incidents not deltas) and the two verdict lines. Nothing renumbered.
 **Amended:** 2026-11-16 (bright-line mode gating, §6 panel): §3.4 source (2) and the §3.5 grade-reachability and historical-baseline sentences re-scoped from "emergent-only" to "emergent mode, and the faction the player commands" (`SENSITIVE_HISTORY_DESIGN_GATE.md` §2a(i)). Nothing renumbered.
 **Amended:** 2026-11-15 (owner directive: war-or-game removed from all seats; owner approved this canon edit 2026-11-15, "Amend the canon docs"): the sign-off table row for grade anchor thresholds names `/scenario-creator-runner-tester` instead of `/war-or-game`. The 2026-11-07 sign-off record is history and stays as written. Nothing renumbered.
 **Amended:** 2026-11-14 (ending truth pass, R8 council fix 1): §2 table rows for `hollow_victory` and `failure` name the settlement cap; §2 "must not mean" gains the no-condemnation line for a settlement cap; §3.5a follow-up line updated; new §3.6 (peace-dysfunction cap, every decision mode, each side's own reading); §3.5 reference basis gains the week 189 / 183 endpoints; §3.5 A2 civilian-dead citation corrected to RDC 39,684 (the 5,000 constant is unchanged). Nothing renumbered.
@@ -129,7 +130,7 @@ Grades A+/A/B/C/D/F are assigned by faction-specific anchors (the anchor tables 
 
 | RBiH anchor | Condition |
 |---|---|
-| A+ | >33% territory AND no enclaves lost AND zero war crimes recorded in play (`war_crimes_events_emergent`; owner 2026-11-10: scripted historical records no longer block it) |
+| A+ | >33% territory AND no enclaves lost AND zero authored war-crime incidents (§3.4 "Authored"; owner 2026-11-10: scripted historical records no longer block it; §6 E3b 2026-11-17: the one shared authored count) |
 | A | ≥30% territory AND ≤1 enclave lost AND Sarajevo held |
 | B | ≥25% territory AND Sarajevo held |
 | C | ≥18% territory AND ≤3 enclaves lost |
@@ -138,7 +139,7 @@ Grades A+/A/B/C/D/F are assigned by faction-specific anchors (the anchor tables 
 
 | RS anchor | Condition |
 |---|---|
-| A+ | >55% territory AND ≤2 war crimes events |
+| A+ | >55% territory AND zero authored war-crime incidents (§3.4 "Authored"; §6 E3b 2026-11-17, replacing "≤2 war crimes events", which read the shared delta counter and so let scripted historical records block it) |
 | A | ≥46% territory AND internal cohesion ≥30 |
 | B | ≥42% territory |
 | C | ≥37% territory |
@@ -149,7 +150,7 @@ Grades A+/A/B/C/D/F are assigned by faction-specific anchors (the anchor tables 
 
 | HRHB anchor | Condition |
 |---|---|
-| A+ | >20% territory AND cohesion ≥50 |
+| A+ | >20% territory AND cohesion ≥50 AND zero authored war-crime incidents (§3.4 "Authored"; §6 E3b 2026-11-17) |
 | A | ≥15% territory AND cohesion ≥40 |
 | B | ≥12% territory AND cohesion ≥30 |
 | C | ≥8% territory |
@@ -183,6 +184,8 @@ Condemnation flags come from **two sources**:
 2. A verdict-time, **non-rupture** `authorized_cleansing_condemnation` flag, applied in emergent mode and to the faction the player commands in any mode (`SENSITIVE_HISTORY_DESIGN_GATE.md §2a(i)`), computed from terminal modeled-atrocity state per `SENSITIVE_HISTORY_DESIGN_GATE.md §2a` — a general aggregate severity judgment (a union of ≥1 recorded war crime (a paramilitary sweep the faction carried out, whether the player approved it, its staff ran it, or a bot faction ran it; or the first wave of a bot faction's minority-expulsion policy; `SENSITIVE_HISTORY_DESIGN_GATE.md` §2a(ii)(a)) OR catastrophic civilian harm booked to the side that took or held control of the area or conducted the paramilitary action; siege departures are booked to the besieger with none killed, and siege deaths are not modelled; corrected 2026-11-13 per the §6 displacement attribution record), NOT an accusation of any specific historical incident.
 
 Both feed `FactionVerdict.condemnation_flags[]` and `classifyOutcome`. **Only source (1) may be cited with an ICTY or Court of BiH finding, or a named historical event, in any narrative surface.** Below-C atrocity decisiveness for non-genocide cases is delivered by the §2a flag (→ `hollow_victory`), NOT the cost cap (which bottoms at C per §3.5); the additive `ATROCITY_COST_GAIN` term is retained (it still forces the C-cap for otherwise-cheap wars, invariant A1).
+
+**Authored war-crime incidents (§6 E3b, 2026-11-17, signed 6/6).** A war-crime incident is *authored* when the side authorized it in play. The one count is `authoredWarCrimeIncidents(state, faction)` (`src/sim/events/authored_war_crimes.ts`): `war_crimes_events_emergent` (sole writer `recordWarCrime`: a paramilitary capture, or the first wave of a bot faction's minority-expulsion policy) + every firing of a scripted card marked `authored_by_choice: true` + every chosen response option that carries a `war_crimes_delta` (option-level deltas are always authored). It counts **incidents** (one firing, one chosen response, one recorded war crime), never `war_crimes_delta` units. Every reader that judges a side's own conduct uses it: the atrocity cost term (§3.5), all three A+ anchors (§3.2), the Codex clean-hands ghost entries (`cleansing_refused`, `rear_pocket_sustained`), and the international-standing ceiling (E3c). A scripted card is classified when its firing depends on a choice (its trigger, or a prerequisite's, reads a flag a response option writes, or a `paramilitary_*` condition); the event loader rejects an unclassified one (`validateWarCrimeAuthorship`). Shipped: `csq_accelerated_camps_discovery_1992` authored (it fires only on the RS "aggressive" goals); `un_hostage_crisis_1995` not authored (it fires under all three RS goals); `ahmici_massacre_1993` not authored (`SENSITIVE_HISTORY_DESIGN_GATE.md` §6 "Ahmići windows and H6": a withheld Ahmići card is never restraint or a better outcome). Every other war-crimes card is the historical record of the campaign, not the side's own conduct. The shared `war_crimes_events` counter (deltas from both sources) is not an incident count and no verdict surface reads it. The §2a `authorized_cleansing_condemnation` signal (1) keeps its own definition, `war_crimes_events_emergent ≥ 1` (`SENSITIVE_HISTORY_DESIGN_GATE.md` §2a(ii)(a)). **Verdict lines:** the cost ledger prints two lines per side, in fixed side order (RBiH, RS, HRHB), both in incidents: "Recorded in the historical record of this campaign" (every scripted war-crimes card that fired, by title, and chosen options with a delta, read from `event_decision_log`; where the Srebrenica record holds the side, it states that the ICTY and the ICJ held the killings to be genocide, cited to Krstić IT-98-33-A and ICJ 2007) and "Authorized in play" (the authored count). A side's lines are **grave** when it authored an incident or holds a condemnation flag of this section, and then both lines carry it (equal prominence). No new counter and no schema change: the counts are derived at the verdict (`FactionVerdict.war_crime_incidents`).
 
 **Overrun before the genocide window (DC A6 follow-up 1, 2026-11-09).** An RS capture of Srebrenica before turn 160 records no rupture and adds no flag of its own: the genocide rupture is the adjudicated July 1995 event, and a counterfactual overrun has no legal finding (SHDG §2 criterion 3, counterfactual silence). It earns nothing at the verdict (§3.2, no credit for an overrun enclave). The end of the war re-runs the rupture check before the verdict is frozen (`freezeEndgameSnapshot`), so a rupture whose conditions first hold on the final turn is not lost. A new condemnation for a counterfactual overrun would be a third §2a signal driven by modelled harm, not by the capture, and goes to the post-1.0 backlog.
 
