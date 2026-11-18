@@ -95,7 +95,7 @@ function describeEffect(effect: EventEffect): string | null {
     case 'humanitarian_impact': return `${faction} humanitarian impact${effect.war_crimes_delta ? ` (${signedDelta(effect.war_crimes_delta)})` : ''}`;
     case 'patron_pressure': return `${faction} patron pressure ${signedDelta(effect.delta)}`;
     case 'alliance_change': return `RBiH–HRHB alliance ${signedDelta(points(effect.delta))}`;
-    case 'negotiation_capital': return `${faction} negotiating capital ${signedDelta(effect.delta)} (${effect.dimension === 'international_credibility' ? 'international credibility' : displayDimensionName(effect.dimension).toLocaleLowerCase()})`;
+    // §6 E2: no 'negotiation_capital' case; the kind is retired and the loader rejects it.
     case 'equipment_grant': {
       const granted = [
         effect.tanks ? `${effect.tanks} tanks` : '',

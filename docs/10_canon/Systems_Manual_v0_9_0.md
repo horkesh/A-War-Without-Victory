@@ -761,6 +761,12 @@ Events WITHOUT pressure config use legacy `triggerMatches()` (backward compatibl
 
 Each dimension: `base_value` (computed from game state each turn) + `event_modifier` (accumulated from player decisions) = `effective_value` (clamped 0-100).
 
+The `event_modifier` is added after the base is clamped: `base_value` is clamped to 0-100 first, then `effective_value = clamp(base_value + event_modifier, 0, 100)`.
+
+`international_standing` base inputs (per faction, from `NegotiationBreakdown`): start at 50; war crimes `war_crimes_events × −10`; civilian casualties `civilian_casualties_caused ÷ 5000`, subtracted; peace plans accepted `+10` each; peace plans rejected `−15` each. An atrocity card's `humanitarian_impact.war_crimes_delta` therefore costs standing through this base until it reaches 0.
+
+Events write dimensions only through `dimension_shifts` (event level or response-option level), which add to `event_modifier`. The former `negotiation_capital` event effect kind is retired (§6 E2, 2026-11-17): it never reached the dimension store, the loader now rejects it, and an unknown dimension id in a shift throws. One carrier per effect: a row that already carries a live shift on a faction and dimension does not repeat it under another kind.
+
 Stored on `NegotiationState.strategic_dimensions`. Module: `src/sim/events/strategic_dimensions.ts`.
 
 **One accumulator rule (§6 E3a1, 2026-11-17).** Every write to a dimension's `event_modifier` goes through `applyDimensionShift()`: event `dimension_shifts`, command levers, CO replacement, stance matters, scripted patron events (`humanitarian_delta`) and peace-plan rejection (`credibility_change_on_reject`). The accumulator is not clamped. A side at −110 that takes −30 more sits at −140. Only the result is clamped: `effective_value = clamp(base_value + event_modifier, 0, 100)`. Sim readers take `effective_value`, never the raw `event_modifier`.

@@ -13,7 +13,7 @@ import { Icon, type IconName } from './icons/Icon';
 import { Z } from '../../shared/zIndex';
 import { Modal } from '../../shared/Modal';
 import type { EventEffect } from '../../../sim/events/event_types';
-import { getPlayerSafeDisplayLabel, getPlayerSafePoliticalFactionName } from '../utils/playerSafeText';
+import { getPlayerSafePoliticalFactionName } from '../utils/playerSafeText';
 import { resolveEventIllustration, section6StillAlt } from '../data/eventIllustrationArt';
 import { t, type MessageKey } from '../i18n';
 import { formatWarCrimesRecordLine } from '../data/warCrimesRecordLine';
@@ -71,7 +71,8 @@ const EFFECT_ICONS: Record<string, IconName> = {
     humanitarian_impact: 'dead',
     patron_pressure: 'recon',
     alliance_change: 'balanced',
-    negotiation_capital: 'star',
+    // §6 E2: a card's own strategic-dimension shifts (appended by App.tsx).
+    dimension_shift: 'star',
     equipment_grant: 'tanks',
     aggression_modifier: 'offensive',
 };

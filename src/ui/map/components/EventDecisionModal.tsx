@@ -15,7 +15,6 @@ import type {
     PendingEventDecision,
     EventResponseOption,
     EventEffect,
-    DimensionShift,
     EventDefinition,
 } from '../../../sim/events/event_types';
 import type { GameState } from '../../../state/game_state';
@@ -30,6 +29,7 @@ import { displayEventProse, isDesignCounterfactualEvent, resolveEventSourceLine 
 import { restoreBosnianProperNames } from '../../shared/bosnianPlaceNames';
 import { getDecisionHeaderForEventCategory } from '../data/presidentialDeskAssets';
 import { isDisplayEventEffect } from '../utils/eventEffectDisplay';
+import { describeDimensionShift } from '../data/dimensionShiftDisplay';
 import { turnToDateString } from '../utils/formatters';
 import { t, useLocale, type Locale, type MessageKey } from '../i18n';
 import { formatWarCrimesRecordLine } from '../data/warCrimesRecordLine';
@@ -250,27 +250,6 @@ function eventDecisionFactionLabel(faction: string | undefined): string {
     }
 }
 
-const EVENT_DIMENSION_LABEL_KEYS: Partial<Record<string, MessageKey>> = {
-    military_credibility: 'diplomacyOverview.dimension.military_credibility',
-    territorial_legitimacy: 'diplomacyOverview.dimension.territorial_legitimacy',
-    international_standing: 'diplomacyOverview.dimension.international_standing',
-    patron_confidence: 'diplomacyOverview.dimension.patron_confidence',
-    internal_cohesion: 'diplomacyOverview.dimension.internal_cohesion',
-    negotiating_leverage: 'diplomacyOverview.dimension.negotiating_leverage',
-};
-
-function eventDecisionDimensionLabel(dimension: string | undefined): string {
-    if (!dimension) return t('eventDecision.unknown');
-    const key = EVENT_DIMENSION_LABEL_KEYS[dimension];
-    return key ? t(key) : humanizeToken(dimension);
-}
-
-/** Negotiating-capital components are a separate store from the strategic dimensions (C11). */
-function negotiationCapitalComponentLabel(component: string | undefined): string {
-    if (component === 'international_credibility') return t('eventDecision.capital.internationalCredibility');
-    return eventDecisionDimensionLabel(component).toLocaleLowerCase();
-}
-
 /**
  * Effect-line nouns (council fix 4, C4/C11): what belongs to an army (morale, supply,
  * cohesion, recruitment, combat effectiveness, offensives) names the army — ARBiH, VRS, HVO;
@@ -348,11 +327,6 @@ function describeEffect(effect: EventEffect): string {
             hrhb: eventDecisionStateShortLabel('HRHB'),
             delta: signedDelta(shareToPoints(effect.delta)),
         });
-        case 'negotiation_capital': return t('eventDecision.effect.negotiationCapital', {
-            faction,
-            dimension: negotiationCapitalComponentLabel(effect.dimension),
-            delta: signedDelta(effect.delta),
-        });
         case 'equipment_grant': {
             const granted = [
                 effect.tanks ? t('eventDecision.equipment.tanks', { count: effect.tanks }) : '',
@@ -388,14 +362,6 @@ function describeEffect(effect: EventEffect): string {
     return t('eventDecision.effect.recorded');
 }
 
-function describeDimensionShift(shift: DimensionShift): string {
-    return t('eventDecision.effect.dimensionShift', {
-        faction: eventDecisionStateShortLabel(shift.faction),
-        dimension: eventDecisionDimensionLabel(shift.dimension),
-        delta: signedDelta(shift.delta),
-    });
-}
-
 function describeFlagValue(value: string | number | boolean, option: EventResponseOption): string {
     const valueText = String(value);
     if (valueText === option.id) return option.label;
@@ -408,7 +374,7 @@ function buildPreviewRows(option: EventResponseOption): string[] {
         .filter(isDisplayEventEffect)
         .map(describeEffect);
     for (const shift of option.dimension_shifts ?? []) {
-        rows.push(describeDimensionShift(shift));
+        rows.push(describeDimensionShift(shift, eventDecisionStateShortLabel));
     }
     const flagValues = Object.values(option.sets_flags ?? {});
     if (flagValues.length > 0) {

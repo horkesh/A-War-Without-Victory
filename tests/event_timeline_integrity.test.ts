@@ -115,15 +115,14 @@ describe('Event timeline historical integrity', () => {
         });
         expect(ahmici.effects).toEqual([
             {
-                kind: 'negotiation_capital',
-                faction: 'HRHB',
-                dimension: 'international_credibility',
-                delta: -25,
-            },
-            {
                 kind: 'narrative',
                 text: 'The Ahmići massacre shocks the international community. HVO credibility suffers a devastating blow.',
             },
+        ]);
+        // §6 E2: the international cost is a live dimension shift, not the retired
+        // (silently dead) negotiation_capital effect.
+        expect(ahmici.dimension_shifts).toEqual([
+            { faction: 'HRHB', dimension: 'international_standing', delta: -25 },
         ]);
     });
 
