@@ -49,3 +49,19 @@
   - `csq_back_channel_communication_RS` at exactly 50, here on the headless path;
   - on E4, RS pc at exactly 35 against `csq_patron_arms_pipeline_attenuated` (< 35).
 - Re-pinned; `ci:structural-fingerprint:check` unchanged (40w control).
+
+**Re-measured on main `d3938c3b5`** (2026-11-18, after #810, #774, #794, #818 and #796). Main's pins were reproduced first: historical `03833ed22dee182f`, emergent `14515fd1837f05dd`.
+
+| | historical | emergent |
+|---|---|---|
+| final_save hash, main → this change | 03833ed22dee182f → d61f10e101f9fc39 | 14515fd1837f05dd → 8d177a55df87dd42 |
+| checkpoints | 694/686/685/656 = main | 694/686/683/656 = main |
+| guards (enclaves, Farz P1, P-A, P-B, cascade) | intact | intact |
+| final cells changed | 0 | 0 |
+| fired-event set | unchanged | unchanged |
+| bot decisions changed | 0 | 0 |
+| RS op launches (t56-74 / t104+) | 6 / 11 = main | 6 / 8 = main |
+
+- On this base both Belgrade cards fire at main's own turns, with or without this change: `csq_back_channel_communication_RS` at t80 and `csq_patron_equipment_delivery_confirmed` at t114. The earlier base's t119 → t122 move no longer arises.
+- This change now lands before §6 E4 (#797). E4 therefore re-measures on top of it, and E4's phrase "after the next base recompute" becomes "by the end of the turn in which it is charged".
+- Re-pinned (manifest 8/8 against the historical run). The structural fingerprint `d97b4cf4411da430` is unchanged.
