@@ -88,7 +88,6 @@ The following table lists every `name:` literal from early_war_phases.ts, war_ph
 | War - Operational Setup | `return-displaced-brigades` | No | war_phases.ts:745 |
 | War - Operational Setup | `compute-sector-combat-ratings` | No | war_phases.ts:756 |
 | War - Operational Setup | `paramilitary-detect` | No | war_phases.ts:769 |
-| War - Operational Setup | `offensive-paramilitary-detect` | No | war_phases.ts:785 |
 | War - Operational Setup | `consolidate-rear-pockets` | No | war_phases.ts:807 |
 | War - Operational Setup | `paramilitary-advance` | No | war_phases.ts:821 |
 | War - Operational Setup | `process-brigade-movement` | No | war_phases.ts:841 |

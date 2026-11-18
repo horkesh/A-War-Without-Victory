@@ -139,10 +139,8 @@ Paramilitary formations (`kind: 'paramilitary'`) are a separate formation kind f
 | PARAMILITARY_MARCH_TURNS | 0 | Instant capture (rear pockets already surrounded) |
 | PARAMILITARY_FADE_WEEK | 20 | Cutoff week (war professionalizes) |
 | PARAMILITARY_MAX_REAR_DEPLOYMENTS_PER_FACTION_TURN | 2 | Rear-pocket deployment cap per faction and turn |
-| OFFENSIVE_PARA_MAX_DEPLOYMENTS_PER_FACTION_TURN | 2 | Offensive deployment cap per faction and turn |
 | PARAMILITARY_MAX_DEPLOYMENTS_PER_MUNICIPALITY_TURN | 1 | Combined deployment cap per municipality and turn |
 | PARAMILITARY_REAR_MIN_ORGANIZATIONAL_PENETRATION | 25 | Rear-pocket attacker penetration floor |
-| OFFENSIVE_PARA_MIN_ORGANIZATIONAL_PENETRATION | 60 | Offensive attacker penetration floor |
 | PARAMILITARY_CASUALTY_RATE | 0.08 | Military casualty fraction per sweep |
 | PARAMILITARY_CIVILIAN_CASUALTY_RATE | 0.02 | Civilian casualty fraction (war crimes) |
 | PARAMILITARY_COHESION | 20 | Very low — irregular forces |
