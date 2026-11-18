@@ -427,6 +427,14 @@ describe('commander_handover', () => {
         const events = await loadCorpsReorganisationEvents(process.cwd());
         expect(events.find((e) => e.type === 'commander_handover')).toMatchObject({ corps_id: 'arbih_7th_corps', officer_id: 'arbih_alagic', trigger_turn: 99 });
     });
+
+    it('the shipped data retires the JNA Herzegovina Command into the VRS Herzegovina Corps on 19 May 1992 (commander attribution PR 2c)', async () => {
+        const events = await loadCorpsReorganisationEvents(process.cwd());
+        // Turn 7 is the first turn starting on or after 19 May 1992 (turn 0 = 6 Apr 1992).
+        expect(events.filter((e) => e.type === 'corps_retire')).toEqual([
+            expect.objectContaining({ id: 'jna_herzegovina_command_retire', corps_id: 'jna_herzegovina_command', successor_corps_id: 'vrs_herzegovina', trigger_turn: 7 }),
+        ]);
+    });
 });
 
 describe('determinism', () => {
