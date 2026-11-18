@@ -91,7 +91,7 @@ const ARTIFACT_POLICY_GROUPS = {
         'data/derived/tiles/hillshade.pmtiles',
         'data/derived/tiles/osm.pmtiles',
         'data/derived/tiles/terrain.pmtiles',
-        'tools/diagnostics/output/SARAJEVO_CONSTANT_INVENTORY.md',
+        'tests/fixtures/diagnostics/SARAJEVO_CONSTANT_INVENTORY.md',
         'tools/diagnostics/_phase5a_painted_compares/*.txt',
         'tools/diagnostics/output/save_migration_drift.json',
     ],
@@ -333,7 +333,7 @@ function inferredOwnerForDynamicWrite(relativePath: string, argumentText: string
         return 'data/calibration/structural_fingerprint_188w.json';
     }
     if (relativePath === 'tools/diagnostics/sarajevo_constant_inventory.cjs') {
-        return 'tools/diagnostics/output/SARAJEVO_CONSTANT_INVENTORY.md';
+        return 'tests/fixtures/diagnostics/SARAJEVO_CONSTANT_INVENTORY.md';
     }
     if (/^tools\/diagnostics\/(?:late_war_atrocity_pre_conditions|srebrenica_rupture_trace|verify_replay_streaming_finalize_n1641)\.cjs$/.test(relativePath)) {
         return 'runs/<scenario_run>/...';

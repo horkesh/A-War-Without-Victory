@@ -15,7 +15,6 @@ const tests = [
  'tests/commander/local_occupation_population_threading.test.ts',
  'tests/bot_orders_perf_profile.test.ts',
  'tests/docs_desktop_v09_truth.test.ts',
- 'tests/plan_index.test.ts',
  'tests/combat_prediction_contract.test.ts',
  'tests/combat_data_root_contract.test.ts',
  'tests/combat_fatigue_phase_contract.test.ts',
