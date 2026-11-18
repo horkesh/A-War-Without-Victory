@@ -276,6 +276,15 @@ never seed it, and captured, uncontrolled or missing origins offer no protection
 grant adequate supply, weaken the critical-supply stranded rule, change ordinary combat retreat,
 or protect control that combat actually lost.
 
+**Garrisoned-pocket retention (package P2-R, 2026-11-18):** the same withdrawal also retains any
+cut-off component that holds at least two (`SALIENT_GARRISON_RETENTION_MIN_BRIGADES`) of the
+displaced faction's active brigades; those brigades stay and defend the pocket instead of being
+moved through the captured cell in one turn. A lone stranded brigade still withdraws. A retained
+pocket is never a withdrawal destination: brigades are only ever withdrawn to the main component
+and own-origin pockets. A brigade with an owner-authored evacuation rule (the 102nd below) neither
+counts toward a garrison nor is held by one. The rule is faction-blind, grants no supply, and leaves
+the critical-supply stranded rule in force, so a held pocket costs its garrison cohesion and men.
+
 **Owner-directed 102nd Odžak→Orašje evacuation (2026-10-28):** when the capture-triggered
 salient lifecycle would evacuate `hrhb_102nd_brigade` from the Odžak/Bosanski Šamac neck, the
 brigade is placed in its own held Orašje pocket and retains `hvo_northwest_bosnia` rather than
