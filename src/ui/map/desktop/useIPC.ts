@@ -232,9 +232,6 @@ interface WindowAwwv {
     setAiCommanderConfig: (payload: { mode: string; anthropic_api_key?: string }) => Promise<{ ok: boolean; error?: string }>;
     getAdvisorRecommendation: (payload: { faction?: string; context_type?: string }) => Promise<IpcAdvisorRecommendationResult>;
     stageAttackOrder: (brigadeId: string, targetSettlementId: string) => Promise<{ ok: boolean; error?: string }>;
-    stageMoveOrder: (brigadeId: string, targetMunicipalityId: string) => Promise<{ ok: boolean; error?: string }>;
-    stageDeployOrder: (brigadeId: string) => Promise<{ ok: boolean; error?: string }>;
-    stageUndeployOrder: (brigadeId: string) => Promise<{ ok: boolean; error?: string }>;
     stageLogisticsPriority: (faction: string, sectorId: string, priority: number) => Promise<{ ok: boolean; error?: string }>;
     stageCorpsOperationOrder: (payload: CorpsOperationOrderPayload) => Promise<{ ok: boolean; error?: string }>;
     queryOperationPrediction: (payload: Record<string, unknown>) => Promise<{ ok: boolean; data?: Record<string, unknown>; error?: string }>;
@@ -258,13 +255,9 @@ interface WindowAwwv {
      *  a cohesion/morale cost. Supersedes the removed broken assignCommander/dismissOfficer. */
     stageCoReplacementOrder: (payload: { corpsId: string; replacementOfficerId?: string }) => Promise<{ ok: boolean; error?: string; replacementOfficerId?: string }>;
     dismissEventNotification: (notificationId: string) => Promise<{ ok: boolean; error?: string }>;
-    stageOperationDecision: (payload: { corpsId: string; operationName: string; decision: 'launch' | 'postpone' | 'abort' | 'probe' }) => Promise<{ ok: boolean; error?: string }>;
-    stageAirdropAllocation: (allocations: Record<string, number>) => Promise<{ ok: boolean; error?: string }>;
     respondToEventDecision: (eventId: string, responseId: string) => Promise<{ ok: boolean; error?: string }>;
-    stageConvoyDecision: (convoyId: string, decision: 'allow' | 'block' | 'divert') => Promise<{ ok: boolean; error?: string }>;
     stageOpsecToggle: (sectorId: string, active: boolean) => Promise<{ ok: boolean; error?: string }>;
     stageMunicipalitySupportOrder: (payload: { faction: 'RS' | 'RBiH' | 'HRHB'; munId: string; type: 'weapons_shipment' | 'staff_priority' | 'croatian_support_package' }) => Promise<{ ok: boolean; error?: string }>;
-    clearOrders: (brigadeId: string) => Promise<{ ok: boolean; error?: string }>;
     assignBrigadeToSector: (brigadeId: string, sectorId: string | null) => Promise<{ ok: boolean; error?: string }>;
     queryMovementRange: (brigadeId: string) => Promise<IpcMovementRangeResult>;
     queryMovementPath: (brigadeId: string, destinationSid: string) => Promise<IpcMovementPathResult>;
@@ -324,6 +317,7 @@ interface WindowAwwv {
         maxFires?: number | null;
         cooldownUntil?: number | null;
         onCooldown?: boolean;
+        availableFromTurn?: number | null;
         reachableBranchIds?: string[];
         unreachableBranchIds?: string[];
         error?: string;
@@ -359,6 +353,7 @@ interface WindowAwwv {
         maxFires?: number | null;
         cooldownUntil?: number | null;
         onCooldown?: boolean;
+        availableFromTurn?: number | null;
         error?: string;
     }>;
     /**
@@ -390,6 +385,7 @@ interface WindowAwwv {
         maxFires?: number | null;
         cooldownUntil?: number | null;
         onCooldown?: boolean;
+        availableFromTurn?: number | null;
         eligibleFormations?: { id: string; name: string; kind: string }[];
         error?: string;
     }>;
@@ -418,6 +414,7 @@ interface WindowAwwv {
         maxFires?: number | null;
         cooldownUntil?: number | null;
         onCooldown?: boolean;
+        availableFromTurn?: number | null;
         error?: string;
     }>;
     initiateStrategicPostureReview: () => Promise<{
@@ -546,18 +543,6 @@ export function useIPC() {
                 ? (brigadeId: string, targetSettlementId: string) => awwv.stageAttackOrder(brigadeId, targetSettlementId)
                 : makeNoop<{ ok: boolean; error?: string }>(),
 
-            stageMoveOrder: awwv
-                ? (brigadeId: string, targetMunicipalityId: string) => awwv.stageMoveOrder(brigadeId, targetMunicipalityId)
-                : makeNoop<{ ok: boolean; error?: string }>(),
-
-            stageDeployOrder: awwv
-                ? (brigadeId: string) => awwv.stageDeployOrder(brigadeId)
-                : makeNoop<{ ok: boolean; error?: string }>(),
-
-            stageUndeployOrder: awwv
-                ? (brigadeId: string) => awwv.stageUndeployOrder(brigadeId)
-                : makeNoop<{ ok: boolean; error?: string }>(),
-
             stageLogisticsPriority: awwv
                 ? (faction: string, sectorId: string, priority: number) => awwv.stageLogisticsPriority(faction, sectorId, priority)
                 : makeNoop<{ ok: boolean; error?: string }>(),
@@ -589,21 +574,9 @@ export function useIPC() {
                 ? (notificationId: string) => awwv.dismissEventNotification(notificationId)
                 : (_notificationId: string) => NOOP_RESULT as Promise<{ ok: boolean; error?: string }>,
 
-            stageOperationDecision: awwv
-                ? (payload: { corpsId: string; operationName: string; decision: 'launch' | 'postpone' | 'abort' | 'probe' }) => awwv.stageOperationDecision(payload)
-                : (_payload: { corpsId: string; operationName: string; decision: 'launch' | 'postpone' | 'abort' | 'probe' }) => NOOP_RESULT as Promise<{ ok: boolean; error?: string }>,
-
-            stageAirdropAllocation: awwv
-                ? (allocations: Record<string, number>) => awwv.stageAirdropAllocation(allocations)
-                : (_allocations: Record<string, number>) => NOOP_RESULT as Promise<{ ok: boolean; error?: string }>,
-
             respondToEventDecision: awwv
                 ? (eventId: string, responseId: string) => awwv.respondToEventDecision(eventId, responseId)
                 : (_eventId: string, _responseId: string) => NOOP_RESULT as Promise<{ ok: boolean; error?: string }>,
-
-            stageConvoyDecision: awwv
-                ? (convoyId: string, decision: 'allow' | 'block' | 'divert') => awwv.stageConvoyDecision(convoyId, decision)
-                : (_convoyId: string, _decision: 'allow' | 'block' | 'divert') => NOOP_RESULT as Promise<{ ok: boolean; error?: string }>,
 
             stageOpsecToggle: awwv
                 ? (sectorId: string, active: boolean) => awwv.stageOpsecToggle(sectorId, active)
@@ -612,10 +585,6 @@ export function useIPC() {
             stageMunicipalitySupportOrder: awwv
                 ? (payload: { faction: 'RS' | 'RBiH' | 'HRHB'; munId: string; type: 'weapons_shipment' | 'staff_priority' | 'croatian_support_package' }) => awwv.stageMunicipalitySupportOrder(payload)
                 : (_payload: { faction: 'RS' | 'RBiH' | 'HRHB'; munId: string; type: 'weapons_shipment' | 'staff_priority' | 'croatian_support_package' }) => NOOP_RESULT as Promise<{ ok: boolean; error?: string }>,
-
-            clearOrders: awwv
-                ? (brigadeId: string) => awwv.clearOrders(brigadeId)
-                : makeNoop<{ ok: boolean; error?: string }>(),
 
             assignBrigadeToSector: awwv
                 ? (brigadeId: string, sectorId: string | null) => awwv.assignBrigadeToSector(brigadeId, sectorId)
@@ -779,6 +748,7 @@ export function useIPC() {
                     maxFires?: number | null;
                     cooldownUntil?: number | null;
                     onCooldown?: boolean;
+                    availableFromTurn?: number | null;
                     reachableBranchIds?: string[];
                     unreachableBranchIds?: string[];
                     error?: string;
@@ -801,6 +771,7 @@ export function useIPC() {
                     maxFires?: number | null;
                     cooldownUntil?: number | null;
                     onCooldown?: boolean;
+                    availableFromTurn?: number | null;
                     error?: string;
                 }>(),
 
@@ -821,6 +792,7 @@ export function useIPC() {
                     maxFires?: number | null;
                     cooldownUntil?: number | null;
                     onCooldown?: boolean;
+                    availableFromTurn?: number | null;
                     eligibleFormations?: { id: string; name: string; kind: string }[];
                     error?: string;
                 }>(),
@@ -831,7 +803,7 @@ export function useIPC() {
 
             getStrategicPostureReviewAvailability: awwv
                 ? () => awwv.getStrategicPostureReviewAvailability()
-                : makeNoop<{ ok: boolean; costCA?: number; available?: boolean; reason?: string | null; eventId?: string | null; currentTurn?: number; firesLeft?: number | null; maxFires?: number | null; cooldownUntil?: number | null; onCooldown?: boolean; error?: string }>(),
+                : makeNoop<{ ok: boolean; costCA?: number; available?: boolean; reason?: string | null; eventId?: string | null; currentTurn?: number; firesLeft?: number | null; maxFires?: number | null; cooldownUntil?: number | null; onCooldown?: boolean; availableFromTurn?: number | null; error?: string }>(),
 
             initiateStrategicPostureReview: awwv
                 ? () => awwv.initiateStrategicPostureReview()

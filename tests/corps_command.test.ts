@@ -105,13 +105,15 @@ describe('corps command - getEffectiveCorpsStance', () => {
         expect(stance).toBe('balanced');
     });
 
-    it('returns offensive when army stance is general_offensive', () => {
+    it('an army stance no longer overrides the corps stance (Batch B, Fable consult 5 ruling 3)', () => {
         const state = makeCorpsState();
         initializeCorpsCommand(state);
         setArmyStance(state, 'RS', 'general_offensive');
+        expect(getEffectiveCorpsStance(state, 'rs-corps-1')).toBe('balanced');
 
-        const stance = getEffectiveCorpsStance(state, 'rs-corps-1');
-        expect(stance).toBe('offensive');
+        state.military.corps_command!['rs-corps-1'].stance = 'reorganize';
+        setArmyStance(state, 'RS', 'general_defensive');
+        expect(getEffectiveCorpsStance(state, 'rs-corps-1')).toBe('reorganize');
     });
 });
 

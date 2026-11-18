@@ -22,6 +22,7 @@ export interface SarajevoSiegeParams {
     /** B7 throughput contribution of the completed Dobrinja–Butmir tunnel (0..1). */
     lifeline_tunnel_throughput: number;
     /** B7 attrition multiplier when the lifeline is fully SEVERED (≥1). */
+    /** No reader since 2026-11-17 (siege bombardment attrition retired); kept so scenario files load; retire with the reserve economy. */
     lifeline_severed_attrition_mult: number;
 }
 

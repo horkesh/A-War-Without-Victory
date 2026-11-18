@@ -32,7 +32,6 @@ function buildReceiptRouteSave() {
     ...(save.military || {}),
     pending_event_decisions: [],
     pending_event_notifications: [],
-    pending_convoy_decisions: [],
     patron_defiance_supply_cuts: [
       { faction: 'RS', turn: 44, cut_fraction: 0.35, support_after: 0.45 },
     ],
@@ -51,18 +50,20 @@ function buildReceiptRouteSave() {
         how_to_use: 'Anchor the weakest sector.',
       },
     ],
-    convoy_decision_history: [
-      {
-        id: 'receipt-route-convoy',
-        turn: 43,
-        target_enclave: 'Srebrenica enclave',
-        route_faction: 'RS',
-        target_faction: 'RBiH',
-        supply_amount: 0.5,
-        decision: 'allow',
-        decided_by: 'player',
-      },
-    ],
+    // F1i (2026-11-16): the convoy receipt was the Chronicle-filed family here; convoys are
+    // retired from 1.0, so a resolved peace-plan answer now carries the Chronicle route.
+    negotiation: {
+      ...((save.military && save.military.negotiation) || {}),
+      peace_plan_history: [
+        {
+          plan_id: 'vance_owen',
+          turn_offered: 43,
+          responses: { RS: 'rejected', RBiH: 'accepted', HRHB: 'accepted' },
+          resolved: true,
+          resolved_turn: 43,
+        },
+      ],
+    },
     operation_opportunities: [
       {
         proposal_id: 'receipt-route-opportunity',
@@ -384,8 +385,8 @@ async function run() {
       await waitForVisibleText(page, 'Review in Records');
       await waitForVisibleText(page, 'Reserve request accepted');
       await waitForVisibleText(page, 'Operation Receipt Corridor');
-      await waitForVisibleText(page, 'Convoy allowed');
-      await waitForVisibleText(page, 'Humanitarian convoy');
+      await waitForVisibleText(page, 'Vance-Owen Peace Plan');
+      await waitForVisibleText(page, 'Peace proposal');
       await waitForVisibleText(page, 'Filed to Chronicle');
       await waitForButtonLabel(page, 'After-Action Report0');
       await waitForButtonLabel(page, 'Operation History1');
@@ -399,7 +400,7 @@ async function run() {
           hasChronicleFiled: lowerBodyText.includes('filed to chronicle'),
           hasReserveReceipt: lowerBodyText.includes('reserve request accepted'),
           hasOpportunityReceipt: lowerBodyText.includes('operation receipt corridor'),
-          hasConvoyReceipt: lowerBodyText.includes('convoy allowed'),
+          hasPeaceReceipt: lowerBodyText.includes('vance-owen peace plan'),
           hasChronicleOpen: lowerBodyText.includes('war chronicle'),
           hasAarZero: Array.from(document.querySelectorAll('button')).some((button) =>
             (button.textContent ?? '').replace(/\s+/g, ' ').trim().toLowerCase().includes('after-action report0')
@@ -425,7 +426,7 @@ async function run() {
       if (!recordsEvidence.hasDecisionRecords || !recordsEvidence.hasRecordsFiled) {
         throw new Error(`Patron consequence did not route to Decision consequence records: ${JSON.stringify(evidence)}`);
       }
-      if (!recordsEvidence.hasChronicleFiled || !recordsEvidence.hasReserveReceipt || !recordsEvidence.hasOpportunityReceipt || !recordsEvidence.hasConvoyReceipt) {
+      if (!recordsEvidence.hasChronicleFiled || !recordsEvidence.hasReserveReceipt || !recordsEvidence.hasOpportunityReceipt || !recordsEvidence.hasPeaceReceipt) {
         throw new Error(`Receipt family coverage was incomplete: ${JSON.stringify(evidence)}`);
       }
       if (!chronicleEvidence.hasChronicleOpen) {

@@ -809,7 +809,13 @@ test('inventory documents conditional consequence rows as design counterfactuals
     // 551: +2 for the BCS title and narrative of csq_hvo_central_bosnia_offensive_1993
     // (1993 HVO-ARBiH truthful-cards lane, 2026-11-14).
     // 552: +1 for its English display title (localizations.en.title; council fix 4 §4 panel, 2026-11-14).
-    assert.strictEqual(claims.length, 552);
+    // 558: +6 for csq_hvo_april_1993_offensive_orders ("Mostar's Orders for Central Bosnia", EN and
+    // BCS title and narrative, effect text; P2 bright-line panel, 2026-11-16).
+    // 483: -75 for the 18 supply-reserve consequence events deleted 2026-11-17 (supply is connection,
+    // not stock): csq_black_market_supply_route, csq_arms_pipeline_disrupted (+_RBiH, _HRHB),
+    // csq_supply_corridor_chronic_strain (+_RS, _HRHB, _RBiH), csq_winter_supply_attrition (+_RBiH,
+    // _HRHB, _RS), csq_spring_thaw_supply_recovery_RBiH/_RS/_HRHB, csq_grain_corridor_reopened (+_RS, _HRHB).
+    assert.strictEqual(claims.length, 483);
     assert.strictEqual(claims.every((claim: { status: string }) => (
         claim.status === 'documented'
     )), true);

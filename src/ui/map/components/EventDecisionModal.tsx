@@ -15,7 +15,6 @@ import type {
     PendingEventDecision,
     EventResponseOption,
     EventEffect,
-    DimensionShift,
     EventDefinition,
 } from '../../../sim/events/event_types';
 import type { GameState } from '../../../state/game_state';
@@ -30,8 +29,10 @@ import { displayEventProse, isDesignCounterfactualEvent, resolveEventSourceLine 
 import { restoreBosnianProperNames } from '../../shared/bosnianPlaceNames';
 import { getDecisionHeaderForEventCategory } from '../data/presidentialDeskAssets';
 import { isDisplayEventEffect } from '../utils/eventEffectDisplay';
+import { describeDimensionShift } from '../data/dimensionShiftDisplay';
 import { turnToDateString } from '../utils/formatters';
 import { t, useLocale, type Locale, type MessageKey } from '../i18n';
+import { formatWarCrimesRecordLine } from '../data/warCrimesRecordLine';
 import {
     SurfaceColumns,
     SurfaceContent,
@@ -200,6 +201,8 @@ export interface EventDecisionModalProps {
  *  the Decision Context section. Per spec: first 200 chars with "..."
  *  truncation. */
 const SOURCE_DOSSIER_EXCERPT_MAX_CHARS = 200;
+/** The two opening paramilitary-policy cards: they carry the game rule that a standing order binds only sweeps the player decides in person. */
+const PARAMILITARY_POLICY_EVENT_IDS: ReadonlySet<string> = new Set(['rbih_paramilitary_policy_1992', 'rs_paramilitary_policy_1992']);
 const SHELL_HOTKEYS_BLOCKED_BY_REQUIRED_DECISION = new Set([
     'escape',
     'h',
@@ -245,27 +248,6 @@ function eventDecisionFactionLabel(faction: string | undefined): string {
         case 'HRHB': return t('desk.faction.hrhb');
         default: return faction ? getPlayerSafePoliticalFactionName(faction) : t('desk.faction.fallback');
     }
-}
-
-const EVENT_DIMENSION_LABEL_KEYS: Partial<Record<string, MessageKey>> = {
-    military_credibility: 'diplomacyOverview.dimension.military_credibility',
-    territorial_legitimacy: 'diplomacyOverview.dimension.territorial_legitimacy',
-    international_standing: 'diplomacyOverview.dimension.international_standing',
-    patron_confidence: 'diplomacyOverview.dimension.patron_confidence',
-    internal_cohesion: 'diplomacyOverview.dimension.internal_cohesion',
-    negotiating_leverage: 'diplomacyOverview.dimension.negotiating_leverage',
-};
-
-function eventDecisionDimensionLabel(dimension: string | undefined): string {
-    if (!dimension) return t('eventDecision.unknown');
-    const key = EVENT_DIMENSION_LABEL_KEYS[dimension];
-    return key ? t(key) : humanizeToken(dimension);
-}
-
-/** Negotiating-capital components are a separate store from the strategic dimensions (C11). */
-function negotiationCapitalComponentLabel(component: string | undefined): string {
-    if (component === 'international_credibility') return t('eventDecision.capital.internationalCredibility');
-    return eventDecisionDimensionLabel(component).toLocaleLowerCase();
 }
 
 /**
@@ -331,24 +313,18 @@ function describeEffect(effect: EventEffect): string {
     const faction = factionId ? eventDecisionStateShortLabel(factionId) : '';
     const army = factionId ? eventDecisionArmyLabel(factionId) : '';
     switch (effect.kind) {
-        case 'narrative': return effect.text;
+        // A narrative line never reaches this switch: `buildPreviewRows` keeps only
+        // `isDisplayEventEffect` rows, and that predicate excludes narrative. Narrative lines are
+        // shown by the acknowledgement card, through `resolveNarrativeEffectText`.
+        case 'narrative': return '';
         case 'morale_change': return t('eventDecision.effect.moraleChange', { faction: army, delta: signedDelta(effect.delta) });
-        case 'supply_delta': return t('eventDecision.effect.supplyDelta', { faction: army, delta: signedDelta(effect.delta) });
         case 'cohesion_change': return t('eventDecision.effect.cohesionChange', { faction: army, delta: signedDelta(effect.delta) });
-        case 'humanitarian_impact': return t('eventDecision.effect.humanitarianImpact', {
-            faction,
-            delta: effect.war_crimes_delta ? ` (${signedDelta(effect.war_crimes_delta)})` : '',
-        });
+        case 'humanitarian_impact': return formatWarCrimesRecordLine(factionId, effect.war_crimes_delta);
         case 'patron_pressure': return t('eventDecision.effect.patronPressure', { faction, delta: signedDelta(effect.delta) });
         case 'alliance_change': return t('eventDecision.effect.allianceChange', {
             rbih: eventDecisionStateShortLabel('RBiH'),
             hrhb: eventDecisionStateShortLabel('HRHB'),
             delta: signedDelta(shareToPoints(effect.delta)),
-        });
-        case 'negotiation_capital': return t('eventDecision.effect.negotiationCapital', {
-            faction,
-            dimension: negotiationCapitalComponentLabel(effect.dimension),
-            delta: signedDelta(effect.delta),
         });
         case 'equipment_grant': {
             const granted = [
@@ -385,14 +361,6 @@ function describeEffect(effect: EventEffect): string {
     return t('eventDecision.effect.recorded');
 }
 
-function describeDimensionShift(shift: DimensionShift): string {
-    return t('eventDecision.effect.dimensionShift', {
-        faction: eventDecisionStateShortLabel(shift.faction),
-        dimension: eventDecisionDimensionLabel(shift.dimension),
-        delta: signedDelta(shift.delta),
-    });
-}
-
 function describeFlagValue(value: string | number | boolean, option: EventResponseOption): string {
     const valueText = String(value);
     if (valueText === option.id) return option.label;
@@ -405,7 +373,7 @@ function buildPreviewRows(option: EventResponseOption): string[] {
         .filter(isDisplayEventEffect)
         .map(describeEffect);
     for (const shift of option.dimension_shifts ?? []) {
-        rows.push(describeDimensionShift(shift));
+        rows.push(describeDimensionShift(shift, eventDecisionStateShortLabel));
     }
     const flagValues = Object.values(option.sets_flags ?? {});
     if (flagValues.length > 0) {
@@ -712,6 +680,16 @@ export function EventDecisionModal({ decision, onRespond, eventCatalog, state, a
                                         </div>
                                         <p className="m-0 text-[17px] leading-relaxed text-[#ddd1b3]">
                                             {playerSafeDossierText(localizedDecision.staff_assessment, diagMode)}
+                                        </p>
+                                    </div>
+                                )}
+                                {PARAMILITARY_POLICY_EVENT_IDS.has(decision.event_id) && (
+                                    <div className="flex flex-col gap-1.5 rounded-md border border-[#2a303c] bg-[#161a22] px-5 py-4" data-testid="event-decision-game-rule">
+                                        <div className={SURFACE_LABEL_MUTED}>
+                                            {t('eventDecision.gameRule')}
+                                        </div>
+                                        <p className="m-0 text-[17px] leading-relaxed text-[#ddd1b3]">
+                                            {t('eventDecision.paramilitaryPolicyRule')}
                                         </p>
                                     </div>
                                 )}

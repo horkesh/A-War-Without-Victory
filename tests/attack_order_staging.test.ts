@@ -114,7 +114,7 @@ describe('desktop attack-order canon staging', () => {
     );
     const start = source.indexOf("ipcMain.handle('stage-attack-order'");
     // The next handler after the attack handler (the posture-order channel was retired).
-    const end = source.indexOf("ipcMain.handle('stage-move-order'", start);
+    const end = source.indexOf("ipcMain.handle('assign-brigade-to-sector'", start);
     const handler = source.slice(start, end);
 
     expect(start).toBeGreaterThanOrEqual(0);

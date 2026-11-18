@@ -5,8 +5,6 @@
  */
 
 import type { FactionId, GameState } from '../../state/game_state.js';
-import type { EdgeRecord } from '../../map/settlements.js';
-import { buildOsidAdjacency } from '../combat/osid_adjacency.js';
 import { operationExecutedAttackCount } from '../combat/operation_attack_count.js';
 import type { EventConstraints } from './event_constraints.js';
 
@@ -15,16 +13,19 @@ export type EventCondition =
     | { type: 'territory_control'; municipality?: string; osid?: string; faction: string; threshold?: number }
     | { type: 'alliance_below'; value: number }
     | { type: 'alliance_above'; value: number }
+    /** B5 A2: true when the RBiH-HRHB war has started (`rbih_hrhb_state.war_started_turn` set), the engine's own record of it. */
+    | { type: 'rbih_hrhb_war_started'; value: boolean }
     | { type: 'faction_controls_municipality'; faction: string; municipality: string; threshold?: number }
-    | { type: 'siege_active'; osid_or_municipality: string }
+    // 'siege_active' retired 2026-11-17 (§6 panel): siege counters are not modelled in 1.0.
     | { type: 'operation_completed'; operation_name_pattern: string; min_attacks?: number }
     | { type: 'operation_attacked'; operation_name_pattern: string; min_attacks?: number }
     | { type: 'and'; conditions: EventCondition[] }
     | { type: 'or'; conditions: EventCondition[] }
     | { type: 'not'; condition: EventCondition }
     // v0.6.0 emergent condition types
-    | { type: 'supply_below'; faction: FactionId; threshold: number }
-    | { type: 'supply_above'; faction: FactionId; threshold: number }
+    // 'supply_below' / 'supply_above' retired 2026-11-17 (Fable consult 6): they read the faction supply
+    // reserve, which is not modelled in 1.0 (supply is connection, not stock). Use `enclave_supply_status`
+    // for live supply.
     | { type: 'territory_percentage'; faction: FactionId; comparator: 'above' | 'below'; threshold: number }
     | { type: 'dimension_above'; faction: FactionId; dimension: DimensionId; threshold: number }
     | { type: 'dimension_below'; faction: FactionId; dimension: DimensionId; threshold: number }
@@ -36,7 +37,6 @@ export type EventCondition =
     | { type: 'week_since_event'; event_id: string; min_weeks?: number; max_weeks?: number }
     | { type: 'event_fire_count'; event_id: string; min_count?: number; max_count?: number }
     | { type: 'enclave_supply_status'; municipality: string; status: 'adequate' | 'strained' | 'critical' }
-    | { type: 'corridor_severed'; from_osid: string; to_osid: string; faction: FactionId }
     // ─── Ring-1 divergence-event predicates (LANE-NIGHTSHIFT-ROUND2-DIVERGENCE-EVENT-SEEDS) ──
     /** True when state.political.paramilitary_mode equals the given value (defaults to 'rear_pocket' when undefined). Faction-agnostic. */
     | { type: 'paramilitary_mode_equals'; value: 'rear_pocket' | 'offensive' }
@@ -126,13 +126,6 @@ export interface EventEffectMoraleChange {
     affected_corps?: string[];
 }
 
-/** Effect: general supply reserve delta for faction. */
-export interface EventEffectSupplyDelta {
-    kind: 'supply_delta';
-    faction: FactionId;
-    delta: number;
-}
-
 /** Effect: cohesion delta applied to all brigades of faction. Clamped [0, 100]. */
 export interface EventEffectCohesionChange {
     kind: 'cohesion_change';
@@ -157,14 +150,6 @@ export interface EventEffectPatronPressure {
 /** Effect: RBiH–HRHB alliance value delta. Clamped [-1, 1]. */
 export interface EventEffectAllianceChange {
     kind: 'alliance_change';
-    delta: number;
-}
-
-/** Effect: negotiation capital dimension adjustment for faction. */
-export interface EventEffectNegotiationBreakdown {
-    kind: 'negotiation_capital';
-    faction: FactionId;
-    dimension: string;
     delta: number;
 }
 
@@ -335,12 +320,10 @@ export interface EventEffectEnclaveFormationDisplacement {
 export type EventEffect =
     | EventEffectNarrative
     | EventEffectMoraleChange
-    | EventEffectSupplyDelta
     | EventEffectCohesionChange
     | EventEffectHumanitarianImpact
     | EventEffectPatronPressure
     | EventEffectAllianceChange
-    | EventEffectNegotiationBreakdown
     | EventEffectEquipmentGrant
     | EventEffectAggressionModifier
     | EventEffectControlChange
@@ -539,6 +522,14 @@ export interface EventDefinition {
     /** Authored informational notifications shown to non-source factions after a response resolves. */
     notifications_to_other_factions?: EventNotificationTextByResponse;
     /**
+     * Who may see this event's acknowledgement notice (read-model/UI only; evaluators ignore it): `'all'`, or the list of
+     * factions whose player is shown it. Absent means the default rule of `src/ui/map/data/eventAudience.ts`: a `csq_*`
+     * consequence notice whose effect (else trigger) names exactly one faction is shown only to that faction, every other
+     * notice to all. Authored only where the rule cannot settle a case (a public event keyed to one faction, a notice
+     * both sides of an agreement must see, one side's internals in a war event); each ruling carries its panel record.
+     */
+    audience?: 'all' | FactionId[];
+    /**
      * Optional authored display localizations. Read-model/UI only; evaluators ignore it.
      * `localizations.en` is the English display copy for strings the engine persists:
      * `title` is copied into `turn_summaries[].events_fired` and notification text into
@@ -558,8 +549,8 @@ export interface EventDefinition {
     sets_flags?: Record<string, string | number | boolean>;
     /** Strategic dimension shifts on fire (before player choice). */
     dimension_shifts?: DimensionShift[];
-    /** Auto-resolve after N turns if player doesn't respond. Worst option applied. */
-    auto_resolve_turns?: number;
+    // `auto_resolve_turns` retired 2026-11-17: nothing in the engine auto-resolves an unanswered decision
+    // after N turns (the loader rejects the field).
     /**
      * Lower = fires first when multiple events trigger. Default 100.
      * Priority tiers: 1=fire-or-miss anchors (single-turn windows),
@@ -623,6 +614,16 @@ export interface EventDefinition {
         | 'compound'
         | 'exogenous'
         | 'legacy_calendar_pending_conversion';
+    /**
+     * §6 E3b (ruling 2026-11-17): whether this war-crimes row's firing is an incident its side
+     * AUTHORIZED in play. `true` counts each firing in `authoredWarCrimeIncidents`
+     * (`authored_war_crimes.ts`); `false` keeps it in the historical record only. Required on a
+     * row that books a `war_crimes_delta` and whose trigger or prerequisites read a flag a
+     * response option writes (or a `paramilitary_*` condition); allowed on no other row
+     * (`validateWarCrimeAuthorship`, event_loader.ts). An authored row may not carry a negative
+     * `international_standing` shift. Option-level `war_crimes_delta` is always authored.
+     */
+    authored_by_choice?: boolean;
 }
 
 /** A pending decision awaiting player response. Stored on MilitaryState. */
@@ -741,7 +742,7 @@ export interface ActionCadenceConfig {
 }
 
 /** Check if trigger matches current state (deterministic). */
-export function triggerMatches(def: EventDefinition, state: GameState, currentTurn: number, edges?: EdgeRecord[]): boolean {
+export function triggerMatches(def: EventDefinition, state: GameState, currentTurn: number): boolean {
     const t = def.trigger;
     if (t.turn_min != null && currentTurn < t.turn_min) return false;
     if (t.turn_max != null && currentTurn > t.turn_max) return false;
@@ -752,20 +753,13 @@ export function triggerMatches(def: EventDefinition, state: GameState, currentTu
     }
     // State-based condition check
     if (t.condition) {
-        if (!evaluateCondition(t.condition, state, edges)) return false;
+        if (!evaluateCondition(t.condition, state)) return false;
     }
     return true;
 }
 
-/** A faction's general supply reserve when the reserve model runs, else null (no reserve exists). */
-function readEnabledSupplyReserve(state: GameState, faction: FactionId): number | null {
-    if (state.meta?.supply_reserves_enabled !== true) return null;
-    const supply = state.military.general_supply_reserve?.[faction];
-    return typeof supply === 'number' ? supply : null;
-}
-
 /** Evaluate a state-based condition against current game state. */
-export function evaluateCondition(condition: EventCondition, state: GameState, edges?: EdgeRecord[]): boolean {
+export function evaluateCondition(condition: EventCondition, state: GameState): boolean {
     switch (condition.type) {
         case 'territory_control': {
             const pc = state.political?.political_controllers ?? {};
@@ -785,6 +779,8 @@ export function evaluateCondition(condition: EventCondition, state: GameState, e
             return (state.political?.war_alliance_rbih_hrhb ?? 1.0) < condition.value;
         case 'alliance_above':
             return (state.political?.war_alliance_rbih_hrhb ?? 1.0) > condition.value;
+        case 'rbih_hrhb_war_started':
+            return (state.political?.rbih_hrhb_state?.war_started_turn != null) === condition.value;
         case 'faction_controls_municipality': {
             const pc2 = state.political?.political_controllers ?? {};
             const threshold2 = condition.threshold ?? 0.5;
@@ -792,27 +788,6 @@ export function evaluateCondition(condition: EventCondition, state: GameState, e
             if (munOsids2.length === 0) return false;
             const controlled2 = munOsids2.filter(osid => pc2[osid] === condition.faction).length;
             return (controlled2 / munOsids2.length) >= threshold2;
-        }
-        case 'siege_active': {
-            // A position is under active siege when its consecutive-critical-supply
-            // counter is present and > 0. This mirrors the besieged-position detection
-            // used by combat (siege_attrition.ts / siege_morale_drain.ts), which read
-            // the same `state.military.siege_turn_counters` map. Keys are
-            // `${factionId}:${osid}` where osid is `op:municipality:settlement`, so the
-            // faction prefix is split on the FIRST colon (OSIDs contain colons too).
-            // `osid_or_municipality` may be either a full OSID or a municipality name.
-            const counters = state.military?.siege_turn_counters;
-            if (!counters) return false;
-            const target = condition.osid_or_municipality;
-            for (const key of Object.keys(counters)) {
-                if ((counters[key] ?? 0) <= 0) continue;
-                const colonIdx = key.indexOf(':');
-                if (colonIdx < 0) continue;
-                const osid = key.substring(colonIdx + 1);
-                if (osid === target) return true; // full-OSID match
-                if (osid.split(':')[1] === target) return true; // municipality match
-            }
-            return false;
         }
         case 'operation_completed': {
             // True when a completed operation in operation_history matches the pattern.
@@ -861,25 +836,11 @@ export function evaluateCondition(condition: EventCondition, state: GameState, e
             return false;
         }
         case 'and':
-            return condition.conditions.every(c => evaluateCondition(c, state, edges));
+            return condition.conditions.every(c => evaluateCondition(c, state));
         case 'or':
-            return condition.conditions.some(c => evaluateCondition(c, state, edges));
+            return condition.conditions.some(c => evaluateCondition(c, state));
         case 'not':
-            return !evaluateCondition(condition.condition, state, edges);
-        // Supply-reserve conditions describe the reserve model, so they hold only where it runs
-        // (F7, 2026-11-15). With reserves off (the shipping campaign) there is no reserve to be low
-        // or high: both are false. Reading a missing reserve as 0 made every supply_below true and
-        // fired csq_supply_corridor_chronic_strain_RS at t180. The gate is the meta flag, as in
-        // combat (attack_resource_aftermath.ts), not the field's presence: a feint writes the field
-        // even with reserves off (sector_offensive.ts).
-        case 'supply_below': {
-            const supply = readEnabledSupplyReserve(state, condition.faction);
-            return supply !== null && supply < condition.threshold;
-        }
-        case 'supply_above': {
-            const supply = readEnabledSupplyReserve(state, condition.faction);
-            return supply !== null && supply >= condition.threshold;
-        }
+            return !evaluateCondition(condition.condition, state);
         case 'territory_percentage': {
             const pc = state.political?.political_controllers ?? {};
             const allOsids = Object.keys(pc);
@@ -1066,32 +1027,6 @@ export function evaluateCondition(condition: EventCondition, state: GameState, e
             return condition.comparator === 'at_most'
                 ? snap <= condition.value
                 : snap >= condition.value;
-        }
-        case 'corridor_severed': {
-            // BFS from from_osid to to_osid through faction-controlled territory
-            // If no path found, corridor is severed → return true
-            const pc = state.political?.political_controllers;
-            if (!pc) return false;
-            if (pc[condition.from_osid] !== condition.faction) return true; // start not held
-            if (pc[condition.to_osid] !== condition.faction) return true; // end not held
-            // Build adjacency from edges if available
-            if (!edges) return false; // can't evaluate without edges
-            const adj = buildOsidAdjacency(edges);
-            // BFS through faction-controlled OSIDs
-            const visited = new Set<string>([condition.from_osid]);
-            const queue = [condition.from_osid];
-            let head = 0;
-            while (head < queue.length) {
-                const current = queue[head++]!;
-                if (current === condition.to_osid) return false; // path found → not severed
-                for (const neighbor of adj.get(current) ?? []) {
-                    if (visited.has(neighbor)) continue;
-                    if (pc[neighbor] !== condition.faction) continue;
-                    visited.add(neighbor);
-                    queue.push(neighbor);
-                }
-            }
-            return true; // no path found → corridor severed
         }
         default:
             return true;

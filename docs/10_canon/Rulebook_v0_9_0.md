@@ -1,7 +1,7 @@
 # A War Without Victory -- Rulebook v0.9.0
 
 **Last Updated:** 2026-05-05
-**Amended:** 2026-11-16 (BC06 sitting of the game-designer and historian seats, orchestrator ruling; wording only, no mechanic change): the "Recurring decisions" paragraph in the event-system section now says which events escalate and that the address to the nation and the decoration of a unit are renewable but static. Nothing renumbered.
+**Amended:** 2026-11-16 (BC06 sitting of the game-designer and historian seats, orchestrator ruling; wording only, no mechanic change): the "Recurring decisions" paragraph in the event-system section now says which events escalate and that the address to the nation and the decoration of a unit are renewable but static. Nothing renumbered. Amended again 2026-11-16 (G1, game-designer and canon seats): the same paragraph records that all four leadership gestures open at week 84, their events' first trigger week, for the human President as for bots.
 
 One game turn equals one week.
 
@@ -335,7 +335,7 @@ Every operation spends at least one full turn in planning. Once prepared and sta
 
 2. **Force Staging:** Participating brigades move into position. The operation cannot proceed until sufficient forces are staged near the objective.
 
-3. **Supply Check:** The corps verifies that supply reserves are adequate to sustain the planned operation.
+3. **Supply Check:** This step always passes in 1.0 (supply is connection, not stock); a formation cut off from supply (Critical) is dropped from the force at launch.
 
 4. **Assessment:** The operation commander evaluates all gathered information and issues a **go/no-go recommendation** based on intel confidence, force ratio, supply status, and their own personality. The assessment score is computed against the commander's go-threshold (aggressive commanders launch at lower scores).
 
@@ -358,7 +358,7 @@ Operations move through proposed, planning, executing, recovery, completed, and 
 
 ### 7.4 Event Conditions (v0.6.0 expansion)
 
-**v0.6.0 expansion:** 14 additional condition types: `supply_below/above`, `territory_percentage`, `dimension_above/below`, `flag_equals/not_set`, `patron_pressure_above`, `war_crimes_above`, `morale_average_below`, `week_since_event`, `event_fire_count`, `enclave_supply_status`, `corridor_severed`.
+**v0.6.0 expansion:** 11 additional condition types (`supply_below/above` retired 2026-11-17; `corridor_severed` retired 2026-11-18): `territory_percentage`, `dimension_above/below`, `flag_equals/not_set`, `patron_pressure_above`, `war_crimes_above`, `morale_average_below`, `week_since_event`, `event_fire_count`, `enclave_supply_status`.
 
 ## 8. Authority and Governance
 
@@ -422,7 +422,7 @@ In May 1992 (approximately week 4 of the war), Bosnian Serb leader Karadzic and 
 
 **What the Graz Accords do NOT cover:** The Posavina corridor (where RS and HVO fought throughout 1992), central Bosnia outside the Kiseljak pocket, and Krajina HRHB cells including Jajce. In these areas, RS and HRHB forces may fight each other normally.
 
-**Cold fronts:** Front edges between Graz-covered corps pairs are classified as "cold fronts." Cold fronts do not generate passive frontline attrition or bombardment fire. HRHB siege drain is also skipped on cold fronts. This means RS and HRHB forces facing each other in Herzegovina conserve strength rather than grinding each other down.
+**Cold fronts:** Front edges between Graz-covered corps pairs are classified as "cold fronts." Cold fronts do not generate passive frontline attrition or bombardment fire. This means RS and HRHB forces facing each other in Herzegovina conserve strength rather than grinding each other down.
 
 **Player agency:** The player can choose to break the truce — either the Herzegovina component or the Kiseljak exclusion — by ordering an attack against protected territory. Breaking the truce is recorded in state. Designed: the wronged faction receives a +0.25 aggression modifier for 6 turns, representing the retaliatory response. Current build: this modifier is not applied to bot aggression; wiring is deferred post-1.0 (realism audit F6). Both RS and HRHB automatically accept the Graz Accords (bot behavior); future implementation will allow the player to accept or decline.
 
@@ -512,7 +512,7 @@ In practice, this means the player can:
 - request elite brigades from the Army HQ reserve pool for critical operations, and manually recall them when the need has passed
 - accept or break the Graz Accords (RS-HRHB non-aggression pact), weighing the cost of a new front against the strategic opportunity
 - use information-warfare tools such as OPSEC, feints, and probes
-- make constrained supply-agency decisions such as enclave airdrops, convoy approvals, smuggling allocation, and municipality support
+- make constrained supply-agency decisions such as municipality support. Enclave airdrops, smuggling allocation and humanitarian convoy decisions are not modelled in 1.0 (supply is connection, not stock: Fable consult 6, 2026-11-17; F1i, 2026-11-16).
 
 These tools expand agency without overriding command friction, logistics, exhaustion, or international consequences.
 
@@ -542,7 +542,7 @@ Each turn the player:
 3. **Exercises presidential operation authority**: authorizes or rejects concrete corps plans, requests an operation against a strategic objective, and orders an operation stopped when required. Corps commanders own brigade assignments, attack axes, tempo, preparation, and launch execution. Commander personality (competence x aggressiveness) shapes preparation tempo, recommendations, and institutional resistance. **This authority is autonomy-dependent (clarified 2026-09-05).** At autonomy 0-1 the president authorizes or rejects the concrete corps plans his staff puts to him. The autonomy level governs only the president's own faction: every other faction's generals, allied or hostile, plan and launch their operations at every level and never wait on his authorization (clarified 2026-11-14, PK1; Engine Invariants §14.10b). At autonomy 2 and above he has delegated that decision: staff-generated corps plans launch without his authorization, and his operation lever is the stop order rather than the authorization — he does not approve the offensive, but he can halt one, at a cost in command authority. Requesting an operation and stopping one remain available at every autonomy level, as does authorization of authored historical operations, which never delegates. See §1 (Presidential Command Model), Systems Manual §6.5 "Player automation boundary", and Engine Invariants §14.10b.
 4. **Manages the officer corps**: responds to succession events, appoints or replaces corps commanders through the presidential personnel process, and reviews officer combat records. Operation-command appointments and brigade assignments remain staff responsibilities rather than direct player controls.
 5. **Manages army reserves**: reviews elite brigade loan requests from corps commanders, approves or denies deployments, recalls loaned brigades when the need has passed.
-6. **Allocates constrained supply agency**: enclave airdrops, convoy decisions, smuggling focus, municipality support, and related relief choices where available
+6. **Allocates constrained supply agency**: municipality support and related relief choices where available. Enclave airdrops, smuggling focus and humanitarian convoy decisions are not modelled in 1.0.
 7. **Monitors** exhaustion, recruitment, equipment degradation, alliance dynamics, truce status (Graz Accords), and international visibility pressure consequences
 8. **Responds** to events: ceasefire conditions, Washington Agreement preconditions, enclave integrity, officer succession notifications (implementation-note: enclave protection for Srebrenica/Gorazde/Cazin is not yet implemented; see CALIBRATION_REPORT_BOT_AI_FEB_2026.md §7)
 9. **Ends turn** — brigade movement resolves (brigade_movement_orders.ts); attacks resolve; supply/exhaustion update; recruitment accrues. *(ZoC-constrained movement removed 2026-03-02.)*
@@ -576,7 +576,7 @@ The event system presents the player with political and strategic decisions thro
 - **Scope restrictions:** offensive targets limited to specific municipalities
 - **Doctrine overrides:** forced defensive/offensive posture
 
-**Recurring decisions** — some events fire again after a cooldown. Where an event escalates (front visits and strategic posture reviews), a later fire unlocks an additional option. The address to the nation and the decoration of a unit are renewable but static: each use offers the same choices, priced at 20 Authority with a 52-turn cooldown, and the calendar allows about three uses in a war.
+**Recurring decisions** — some events fire again after a cooldown. Where an event escalates (front visits and strategic posture reviews), a later fire unlocks an additional option. The address to the nation and the decoration of a unit are renewable but static: each use offers the same choices, priced at 20 Authority with a 52-turn cooldown, and the calendar allows about three uses in a war. All four leadership gestures (front visit, strategic posture review, address to the nation, decoration of a unit) become available from week 84, their events' first trigger week, for bots and the human President alike.
 
 **Maximum 4 events per turn.** Candidates are sorted by priority, trigger week, then event id. Events sharing a `mutex_group` cannot co-fire in the same turn; only the first candidate in canonical order remains eligible. Events delayed only by the four-event cap are persisted as an overflow queue and rechecked on later turns before they can fire.
 

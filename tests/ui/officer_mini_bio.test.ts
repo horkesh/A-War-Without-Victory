@@ -57,7 +57,6 @@ function makeLoadedState(officer: NamedOfficerView): LoadedGameState {
         player_faction: 'RS',
         corpsFrontSectors: [],
         operations: [],
-        factionReserves: { RS: { generalSupply: 80, heavyMunitions: 70 } },
         mobilizationSummary: {
             RS: {
                 faction: 'RS',

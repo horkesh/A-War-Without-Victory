@@ -1,5 +1,6 @@
 import type { CorpsOperation, FactionId, GameState, PendingProposalReview } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
+import { releaseOperationCommander, releaseTacticalCommander } from './officer_system.js';
 
 export type HistoricalOperationAuthorizationKind = 'preplanned' | 'triggered' | 'army_hq';
 export type HistoricalOperationAuthorizationStatus = 'not_required' | 'pending' | 'accepted' | 'declined';
@@ -52,6 +53,24 @@ function existingReview(
     return [...(state.meta.pending_proposal_reviews ?? [])]
         .filter((review) => review.proposed_action === action && review.faction === faction)
         .sort((a, b) => strictCompare(a.id, b.id))[0];
+}
+
+/**
+ * Read-only twin of `ensureHistoricalOperationAuthorizationReview`: the status the gate would return
+ * now, without creating a review. With no review on file the gate would create one already accepted
+ * (standing authorization), so that reads as 'accepted'. Used by the Army HQ reservation predicate,
+ * which must not write state (authored-op precedence S2).
+ */
+export function peekHistoricalOperationAuthorizationStatus(
+    state: GameState,
+    input: HistoricalOperationAuthorizationInput,
+): HistoricalOperationAuthorizationStatus {
+    if (state.meta?.player_faction !== input.faction) return 'not_required';
+    const existing = existingReview(state, historicalOperationAuthorizationAction(input), input.faction);
+    if (!existing) return 'accepted';
+    if (existing.accepted === true) return 'accepted';
+    if (existing.accepted === false) return 'declined';
+    return 'pending';
 }
 
 export function ensureHistoricalOperationAuthorizationReview(
@@ -171,6 +190,10 @@ export function deferUnauthorizedHistoricalOperationsForPlayer(state: GameState)
                 retained.push(operation);
                 continue;
             }
+            // Commander attribution hardening: a deferred operation releases its commanders, so the
+            // officer pool a player sees matches a headless run (no commander left holding a dropped op).
+            releaseOperationCommander(state, operation);
+            releaseTacticalCommander(state, operation);
             deferredAny = true;
         }
 

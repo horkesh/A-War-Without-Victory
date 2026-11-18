@@ -159,14 +159,6 @@ export const PRESIDENTIAL_DECISION_OWNERSHIP: readonly PresidentialDecisionOwner
     receiptDisposition: 'Resolved authorization remains in the top-level paramilitary decision history.',
   },
   {
-    familyId: 'convoy_decision',
-    producer: 'src/state/supply_reserves.ts -> military.pending_convoy_decisions',
-    blockerPredicate: 'decision is undefined',
-    receiptOwner: 'military.convoy_decision_history',
-    receiptDurability: 'durable',
-    receiptDisposition: 'Resolved convoy instruction remains in the humanitarian access history.',
-  },
-  {
     familyId: 'reserve_request',
     producer: 'src/sim/combat/army_reserve_system.ts -> military.pending_reserve_requests',
     blockerPredicate: 'advisory; never blocks Advance',
@@ -298,24 +290,6 @@ export const PRESIDENTIAL_DECISION_SOURCE_PROOFS: readonly PresidentialDecisionS
       label: 'decision-consequence ledger',
       path: 'src/ui/map/data/decisionConsequenceLedger.ts',
       anchors: ['for (const paramilitary of state.paramilitaryDecisionHistory ?? [])'],
-    }],
-  },
-  {
-    familyId: 'convoy_decision',
-    producer: [{
-      path: 'src/state/supply_reserves.ts',
-      anchors: ['state.military.pending_convoy_decisions = pending.sort((a, b) => strictCompare(a.id, b.id));'],
-    }],
-    action: [{ path: 'src/ui/map/App.tsx', anchors: ["if (action === 'convoy_decision_modal')"] }],
-    receipt: [{
-      path: 'src/state/supply_reserves.ts',
-      anchors: ['state.military.convoy_decision_history = history.sort((a, b) =>'],
-    }],
-    consumers: [{
-      channel: 'chronicle',
-      label: 'decision-consequence ledger',
-      path: 'src/ui/map/data/decisionConsequenceLedger.ts',
-      anchors: ['for (const convoy of state.convoyDecisionHistory ?? [])'],
     }],
   },
   {

@@ -202,16 +202,8 @@ describe('LANE-NIGHTSHIFT-CONSEQUENCE-BREADTH — event predicates', () => {
         expect(state.military.fired_event_ids).toContain('csq_demobilization_pressure_wave');
     });
 
-    it('csq_grain_corridor_reopened fires under route open + 8 turns no hostility', () => {
-        const state = baseState(35, {
-            flags: {
-                supply_route_open_grain_corridor: true,
-                turns_since_corridor_hostility: 10,
-            },
-        });
-        evaluateEvents(state, rng, 35, ALL_EVENTS);
-        expect(state.military.fired_event_ids).toContain('csq_grain_corridor_reopened');
-    });
+    // csq_grain_corridor_reopened (route open + 8 turns no hostility): retired 2026-11-17
+    // (supply is connection, not stock).
 
     it('csq_refugee_absorption_strain fires under displaced_in_aggregate ≥100,000 for receiving faction', () => {
         const state = baseState(30);

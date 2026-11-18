@@ -6,6 +6,7 @@ import {
   resolveDecisionConsequenceCopy,
 } from '../../src/ui/map/data/decisionConsequenceLedger.js';
 import type { LoadedGameState } from '../../src/ui/map/data/types.js';
+import { countFiledDecisionRecords, countFiledUnrequestedReceipts, hasFiledRecord } from '../../src/ui/map/data/filedRecordTruth.js';
 
 function makeState(overrides: Partial<LoadedGameState> = {}): LoadedGameState {
   return {
@@ -543,52 +544,6 @@ describe('decision consequence trail', () => {
     expect(`${ledger[0]?.family} ${ledger[0]?.title} ${ledger[0]?.outcome} ${ledger[0]?.detail}`).not.toMatch(/_/);
   });
 
-  it('includes resolved humanitarian convoy decisions from persisted history', () => {
-    const ledger = buildDecisionConsequenceLedger(makeState({
-      convoyDecisionHistory: [
-        {
-          id: 'convoy:64:srebrenica:RS',
-          turn: 64,
-          target_enclave: 'Srebrenica enclave',
-          route_faction: 'RS',
-          target_faction: 'RBiH',
-          supply_amount: 0.5,
-          decision: 'allow',
-          decided_by: 'player',
-        },
-      ],
-    } as Partial<LoadedGameState>));
-
-    expect(ledger[0]).toMatchObject({
-      id: 'convoy:convoy:64:srebrenica:RS',
-      family: 'Humanitarian convoy',
-      turn: 64,
-      title: 'Convoy allowed',
-      outcome: 'Allowed',
-      detail: 'Convoy to Srebrenica enclave allowed through VRS lines; aid delivered to ARBiH.',
-    });
-    expect(`${ledger[0]?.family} ${ledger[0]?.title} ${ledger[0]?.outcome} ${ledger[0]?.detail}`).not.toMatch(/_/);
-  });
-
-  it('excludes bot convoy decisions from player consequence receipts', () => {
-    const ledger = buildDecisionConsequenceLedger(makeState({
-      convoyDecisionHistory: [
-        {
-          id: 'convoy:64:srebrenica:RS',
-          turn: 64,
-          target_enclave: 'Srebrenica enclave',
-          route_faction: 'RS',
-          target_faction: 'RBiH',
-          supply_amount: 0.5,
-          decision: 'allow',
-          decided_by: 'bot',
-        },
-      ],
-    } as Partial<LoadedGameState>));
-
-    expect(ledger.find((record) => record.familyId === 'humanitarian-convoy')).toBeUndefined();
-  });
-
   it('includes resolved paramilitary authorization decisions from persisted history', () => {
     const ledger = buildDecisionConsequenceLedger(makeState({
       paramilitaryDecisionHistory: [
@@ -613,6 +568,42 @@ describe('decision consequence trail', () => {
       detail: 'Paramilitary deployment authorized for VRS rear-pocket cleanup. Estimated civilian risk: 12.',
     });
     expect(`${ledger[0]?.family} ${ledger[0]?.title} ${ledger[0]?.outcome} ${ledger[0]?.detail}`).not.toMatch(/_/);
+  });
+
+  it('tells the player when a paramilitary sweep ran without a request: where, when and why, in plain words', () => {
+    const ledger = buildDecisionConsequenceLedger(makeState({
+      player_faction: 'RBiH',
+      rawGameState: { meta: { player_faction: 'RBiH' } } as any,
+      paramilitaryUnrequested: [
+        { id: 'para_rbih_t2_0', turn: 2, target_osid: 'op:kakanj:biljesevo', faction: 'RBiH', captured: true },
+        { id: 'para_rs_t2_0', turn: 2, target_osid: 'op:srebrenica:obadi', faction: 'RS', captured: true },
+      ],
+    } as Partial<LoadedGameState>), 10);
+
+    expect(ledger.map((record) => record.id)).toEqual(['paramilitary-staff:para_rbih_t2_0']);
+    const record = ledger[0]!;
+    expect(record).toMatchObject({ turn: 2, familyId: 'paramilitary-receipt', family: 'Paramilitary sweep', title: 'Paramilitary sweep carried out without a request to you', outcome: 'Carried out' });
+    // Municipality scale, never the settlement: the record does not support a village-level claim, and the text says so.
+    expect(record.detail).toContain('into the Kakanj area for');
+    expect(record.detail).not.toMatch(/Bilješevo|Biljesevo/);
+    expect(record.detail).toContain('your staff decides rear-area sweeps without asking');
+    expect(record.detail).toContain('It counts against your side.');
+    expect(record.detail).toContain('an event of the simulated war, not a statement about what happened in that place');
+    expect(record.detail).not.toMatch(/authorized|ethnic cleansing|_|op:/i);
+    expect(record.detailToken?.key).toBe('decisionConsequences.detail.paramilitary.unrequested');
+    // A receipt is not a filed decision: it is listed in Records but never counted as one.
+    const state = makeState({
+      player_faction: 'RBiH',
+      rawGameState: { meta: { player_faction: 'RBiH' } } as any,
+      paramilitaryUnrequested: [{ id: 'para_rbih_t2_0', turn: 2, target_osid: 'op:kakanj:biljesevo', faction: 'RBiH', captured: true }],
+    } as Partial<LoadedGameState>);
+    expect(countFiledDecisionRecords(state)).toBe(0);
+    expect(countFiledUnrequestedReceipts(state)).toBe(1);
+    expect(hasFiledRecord(state)).toBe(true);
+    const summary = buildDecisionConsequenceLedgerSummary(buildDecisionConsequenceLedger(state, 10));
+    expect(summary.recordsRouteCount).toBe(0);
+    expect(summary.total).toBe(0);
+    expect(summary.latestTitle).toBeNull();
   });
 
   it('excludes paramilitary authorization decisions outside the loaded player faction', () => {

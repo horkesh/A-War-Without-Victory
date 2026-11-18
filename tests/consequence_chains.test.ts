@@ -277,13 +277,14 @@ describe('Chain 4 — Bihac Collapses: gated collapse', () => {
         expect(shifts.some(s => s.faction === 'RS' && s.add_objectives?.includes('zenica'))).toBe(true);
     });
 
-    it('csq_bihac_refugee_crisis_1994 fires after Bihac collapse and lands supply_delta', () => {
+    // Supply reserve stock retired 2026-11-17 (supply is connection, not stock): the refugee crisis lands
+    // as a cost-ledger annotation (and a patron-pressure shift), not as a reserve drain.
+    it('csq_bihac_refugee_crisis_1994 fires after Bihac collapse and lands its cost-ledger annotation', () => {
         const state = makeBihacChainState(125, { bihacCollapseFired: true });
-        const rbihBefore = state.military.general_supply_reserve!['RBiH'];
         evaluateEvents(state, rng, 125, ALL_EVENTS);
         expect(state.military.fired_event_ids).toContain('csq_bihac_refugee_crisis_1994');
-        const rbihAfter = state.military.general_supply_reserve!['RBiH'];
-        expect(rbihAfter).toBeLessThan(rbihBefore);
+        const notes = state.military.cost_ledger_annotations ?? [];
+        expect(notes.some(n => n.tag === 'bihac_refugee_crisis_1994' && n.faction === 'RBiH')).toBe(true);
     });
 
     it('all three Chain 4 events present in registry', () => {
@@ -830,14 +831,17 @@ describe('hrhb_political_goal historical ordering fix', () => {
     });
 });
 
-// ─── Issue #9 — csq_hvo_central_bosnia_offensive_1993 ─────────────────────
+// ─── Issue #9 — csq_hvo_central_bosnia_offensive_1993 (the Ahmići massacre card) ──────
 //
-// Per the corps-army-commander + war-or-game design consult (2026-04-23),
-// the HVO Croat-Bosniak war requires:
-//   1. alliance_change -1.0 + alliance_lock ceiling 0.0 (flips hostility)
-//   2. morale/cohesion bump (un-sticks HVO brigades idle at morale 0)
-//   3. aggression_modifier +0.25 + bot_priority_shift on central-Bosnia munis
-// Phase 2 (ARBiH counter-offensive) emerges organically once alliance breaks.
+// History of this block: a 2026-04-23 design consult gave the massacre card HRHB morale +15,
+// cohesion +10, aggression +0.25 and the central-Bosnia objective shift to "un-stick HVO
+// brigades idle at morale 0". The P2 bright-line panel (2026-11-16; eight seats, unanimous)
+// found that premise stale (no HRHB brigade was below morale 15 at any turn t40-80; the
+// aggression modifier has no reader) and the buffs a reward for an atrocity (Ring 3 #4; the
+// dimension shifts netted HRHB +1.75 on its own score). Now the massacre card carries only
+// costs: the alliance rupture (-1, ceiling 0.0 for 60 turns), the record flags and HRHB
+// international standing -15. The objective shift moved, unchanged, to the separate
+// non-atrocity consequence csq_hvo_april_1993_offensive_orders (t53, "Mostar's Orders").
 
 describe('Issue #9 — csq_hvo_central_bosnia_offensive_1993', () => {
     it('does NOT fire before w54', () => {
@@ -852,9 +856,29 @@ describe('Issue #9 — csq_hvo_central_bosnia_offensive_1993', () => {
         expect(state.military.fired_event_ids).not.toContain('csq_hvo_central_bosnia_offensive_1993');
     });
 
-    it('fires w54-w56 under croat_republic and lands all five effect kinds', () => {
+    // B5 Ahmići gate (2026-11-16): the consequence fires only once the 1993 Croat-Bosniak war has
+    // begun and the alliance is below ALLIED_THRESHOLD (0.2), as ahmici_massacre_1993 already
+    // requires. A President who kept the alliance is no longer railroaded into it by a week-3 flag.
+    it('does NOT fire while the alliance holds (no 1993 war, alliance above 0.2)', () => {
         const state = makeChain1State(54, { flags: { hrhb_political_goal: 'croat_republic' } });
-        state.political.war_alliance_rbih_hrhb = 1.0;
+        state.political.war_alliance_rbih_hrhb = 0.4;
+        evaluateEvents(state, rng, 54, CSQ_EVENTS);
+        expect(state.military.fired_event_ids).not.toContain('csq_hvo_central_bosnia_offensive_1993');
+    });
+
+    it('does NOT fire before the 1993 war event, even with a broken alliance', () => {
+        const state = makeChain1State(54, { flags: { hrhb_political_goal: 'croat_republic' } });
+        state.political.war_alliance_rbih_hrhb = -0.5;
+        evaluateEvents(state, rng, 54, CSQ_EVENTS);
+        expect(state.military.fired_event_ids).not.toContain('csq_hvo_central_bosnia_offensive_1993');
+    });
+
+    it('fires w54-w56 under croat_republic and carries only costs (P2)', () => {
+        const state = makeChain1State(54, {
+            flags: { hrhb_political_goal: 'croat_republic' },
+            firedEvents: ['croat_bosniak_war_begins_1993'],
+        });
+        state.political.war_alliance_rbih_hrhb = -0.5;
         evaluateEvents(state, rng, 54, CSQ_EVENTS);
         expect(state.military.fired_event_ids).toContain('csq_hvo_central_bosnia_offensive_1993');
         expect(state.military.fired_event_ids).not.toContain('csq_alliance_holds_past_w35');
@@ -870,25 +894,82 @@ describe('Issue #9 — csq_hvo_central_bosnia_offensive_1993', () => {
         expect(ceilingLock).toBeDefined();
         expect(ceilingLock?.expires_turn).toBe(114);
 
-        // aggression_modifier HRHB +0.25 duration 14
-        const aggMods = state.military.event_aggression_modifiers ?? [];
-        const hrhbAgg = aggMods.find(m => m.faction === 'HRHB' && m.delta === 0.25);
-        expect(hrhbAgg).toBeDefined();
-        expect(hrhbAgg?.expires_turn).toBe(68); // 54 + 14
-
-        // bot_priority_shift HRHB with central-Bosnia munis
-        const shifts = state.military.bot_priority_shifts ?? [];
-        const hrhbShift = shifts.find(s => s.faction === 'HRHB' && (s.add_objectives ?? []).includes('vitez'));
-        expect(hrhbShift).toBeDefined();
-        expect(hrhbShift?.add_objectives).toEqual(
-            expect.arrayContaining(['vitez', 'busovaca', 'novi_travnik', 'gornji_vakuf', 'prozor', 'kiseljak', 'travnik', 'kakanj', 'fojnica', 'mostar']),
-        );
-        expect(hrhbShift?.expires_turn).toBe(68); // 54 + 14
+        // No perpetrator buff and no objective shift on the massacre turn.
+        expect(state.military.event_aggression_modifiers ?? []).toEqual([]);
+        expect(state.military.bot_priority_shifts ?? []).toEqual([]);
     });
 
+    it('the massacre card gives no faction a positive delta (atrocity is never rewarded)', () => {
+        const def = CSQ_EVENTS.find(e => e.id === 'csq_hvo_central_bosnia_offensive_1993')!;
+        // Allowlist (engine seat, P2 round 2): only the rupture itself and narrative may appear.
+        const allowedKinds = new Set(['alliance_change', 'alliance_lock', 'narrative']);
+        for (const effect of def.effects ?? []) {
+            expect(allowedKinds.has(effect.kind), effect.kind).toBe(true);
+        }
+        for (const shift of def.dimension_shifts ?? []) {
+            expect(shift.delta, `${shift.faction}.${shift.dimension}`).toBeLessThan(0);
+        }
+    });
+});
+
+describe('P2 — csq_hvo_april_1993_offensive_orders (Mostar\'s orders, no atrocity)', () => {
+    const ORDERS = 'csq_hvo_april_1993_offensive_orders';
+    const AHMICI = 'csq_hvo_central_bosnia_offensive_1993';
+
+    it('fires at t53 in the war under croat_republic and carries the central-Bosnia objective shift', () => {
+        const state = makeChain1State(53, {
+            flags: { hrhb_political_goal: 'croat_republic' },
+            firedEvents: ['croat_bosniak_war_begins_1993'],
+        });
+        state.political.war_alliance_rbih_hrhb = -0.5;
+        evaluateEvents(state, rng, 53, CSQ_EVENTS);
+        expect(state.military.fired_event_ids).toContain(ORDERS);
+        expect(state.military.fired_event_ids).not.toContain(AHMICI);
+        expect(state.military.event_flags?.hvo_arbih_war_active).toBe(true);
+        expect(state.military.event_flags?.ahmici_1993).toBeUndefined();
+        const shift = (state.military.bot_priority_shifts ?? []).find(s => s.faction === 'HRHB');
+        expect(shift?.add_objectives).toEqual(
+            expect.arrayContaining(['vitez', 'busovaca', 'novi_travnik', 'gornji_vakuf', 'prozor', 'kiseljak', 'travnik', 'kakanj', 'fojnica', 'mostar']),
+        );
+        expect(shift?.expires_turn).toBe(68); // 53 + 15, the same expiry as before
+        // The readiness lift of Mostar's April orders (B2-minus, P2 round 2).
+        const orders = CSQ_EVENTS.find(e => e.id === ORDERS)!;
+        expect(orders.effects).toEqual(expect.arrayContaining([
+            expect.objectContaining({ kind: 'morale_change', faction: 'HRHB', delta: 15 }),
+            expect.objectContaining({ kind: 'cohesion_change', faction: 'HRHB', delta: 10 }),
+        ]));
+    });
+
+    it('does not fire when the HVO leadership chose to evacuate or federate (H6)', () => {
+        for (const choice of ['evacuate', 'federate_early']) {
+            const state = makeChain1State(53, {
+                flags: { hrhb_political_goal: 'croat_republic', hrhb_central_bosnia_defense: choice },
+                firedEvents: ['croat_bosniak_war_begins_1993'],
+            });
+            state.political.war_alliance_rbih_hrhb = -0.5;
+            evaluateEvents(state, rng, 53, CSQ_EVENTS);
+            expect(state.military.fired_event_ids, choice).not.toContain(ORDERS);
+        }
+    });
+
+    it('is independent of the massacre: neither trigger reads the other, and they never share a turn or mutex', () => {
+        const orders = CSQ_EVENTS.find(e => e.id === ORDERS)!;
+        const ahmici = CSQ_EVENTS.find(e => e.id === AHMICI)!;
+        const text = (d: unknown) => JSON.stringify((d as { trigger: unknown }).trigger);
+        expect(text(orders)).not.toMatch(/ahmici/);
+        expect(text(ahmici)).not.toContain(ORDERS);
+        expect(orders.mutex_group).toBeUndefined();
+        expect(orders.trigger.turn_max).toBeLessThan(ahmici.trigger.turn_min!);
+    });
+});
+
+describe('Issue #9 (cont.) — rupture stays combat-enabled', () => {
     it('keeps the rupture combat-enabled after the same-turn alliance update', () => {
-        const state = makeChain1State(54, { flags: { hrhb_political_goal: 'croat_republic' } });
-        state.political.war_alliance_rbih_hrhb = 1.0;
+        const state = makeChain1State(54, {
+            flags: { hrhb_political_goal: 'croat_republic' },
+            firedEvents: ['croat_bosniak_war_begins_1993'],
+        });
+        state.political.war_alliance_rbih_hrhb = 0.1;
         evaluateEvents(state, rng, 54, CSQ_EVENTS);
         const report = updateAllianceValue(state);
 
@@ -901,5 +982,98 @@ describe('Issue #9 — csq_hvo_central_bosnia_offensive_1993', () => {
     it('is present in the loaded registry', () => {
         const ids = new Set(CSQ_EVENTS.map(e => e.id));
         expect(ids.has('csq_hvo_central_bosnia_offensive_1993')).toBe(true);
+    });
+});
+
+// ─── Ahmići windows and H6 (§6 panel, 2026-11-16) ─────────────────────────────
+// The massacre card fires only at t54 (Ahmići week), never after H6 evacuate/federate_early;
+// Mostar's orders reach a war recorded the same week (same_turn_requires_events). Neither
+// trigger reads the other (the cross-reference was rejected).
+describe('Ahmići windows and the H6 exclusions', () => {
+    const ORDERS = 'csq_hvo_april_1993_offensive_orders';
+    const AHMICI = 'csq_hvo_central_bosnia_offensive_1993';
+    const WAR = 'croat_bosniak_war_begins_1993';
+    const registry = ALL_EVENTS.filter(e => e.id === ORDERS || e.id === AHMICI || e.id === WAR);
+
+    /** Runs turns 53..56 from a state where the war was recorded at `warTurn` (or fires at 53). */
+    function play(warTurn: number, h6?: string): { orders?: number; ahmici?: number } {
+        const flags: Record<string, string> = { hrhb_political_goal: 'croat_republic' };
+        if (h6) flags.hrhb_central_bosnia_defense = h6;
+        const preFired = warTurn < 53;
+        const state = makeChain1State(53, { flags, firedEvents: preFired ? [WAR] : [] });
+        state.military.event_fire_counts = preFired ? { [WAR]: 1 } : {};
+        // The war event is pressure-gated; seed readiness so it fires on its recorded turn.
+        state.military.event_readiness = { [WAR]: 10 };
+        // A war recorded at 53 fires in the primary pass (alliance below 0.1); a later war is not yet due.
+        state.political.war_alliance_rbih_hrhb = warTurn <= 53 ? 0.05 : 0.15;
+        if (preFired) state.political.war_alliance_rbih_hrhb = -0.5;
+        const firedAt: { orders?: number; ahmici?: number } = {};
+        for (let turn = 53; turn <= 56; turn++) {
+            state.meta.turn = turn;
+            if (turn === warTurn && warTurn > 53) state.political.war_alliance_rbih_hrhb = 0.05;
+            evaluateEvents(state, rng, turn, registry);
+            const ids = state.military.fired_event_ids ?? [];
+            if (firedAt.orders == null && ids.includes(ORDERS)) firedAt.orders = turn;
+            if (firedAt.ahmici == null && ids.includes(AHMICI)) firedAt.ahmici = turn;
+        }
+        return firedAt;
+    }
+
+    it('a war recorded before t53: orders at t53, massacre at t54', () => {
+        for (const h6 of [undefined, 'defend', 'breakout']) {
+            expect(play(49, h6), String(h6)).toEqual({ orders: 53, ahmici: 54 });
+        }
+    });
+
+    it('a war recorded at t53: the orders reach it the same week, massacre at t54', () => {
+        expect(play(53)).toEqual({ orders: 53, ahmici: 54 });
+    });
+
+    it('a war recorded at t54 or later gets neither card (no dated massacre from another war)', () => {
+        for (const w of [54, 55]) expect(play(w), String(w)).toEqual({});
+    });
+
+    it('H6 evacuate or federate_early withholds both cards', () => {
+        for (const h6 of ['evacuate', 'federate_early']) expect(play(49, h6), h6).toEqual({});
+    });
+
+    it('ahmici_massacre_1993 is withheld after H6 evacuate or federate_early, kept otherwise', () => {
+        const card = ALL_EVENTS.find(e => e.id === 'ahmici_massacre_1993')!;
+        const base = (h6?: string) => {
+            const s = makeChain1State(60, {
+                flags: { hvo_arbih_tensions_rising: true, ...(h6 ? { hrhb_central_bosnia_defense: h6 } : {}) },
+                firedEvents: [WAR],
+            });
+            (s.political.political_controllers as Record<string, string>)['op:vitez:vitez_2'] = 'HRHB';
+            return s;
+        };
+        const fires = (h6?: string) => {
+            const s = base(h6);
+            evaluateEvents(s, rng, 60, [card]);
+            return (s.military.fired_event_ids ?? []).includes(card.id);
+        };
+        expect(fires()).toBe(true);
+        expect(fires('breakout')).toBe(true);
+        expect(fires('evacuate')).toBe(false);
+        expect(fires('federate_early')).toBe(false);
+    });
+
+    it('a late war (recorded after t54) still books the Ahmići war crimes; only the t54 consequence is withheld', () => {
+        // Red-team condition (§6 panel): narrowing the consequence window must not let a later war
+        // escape the record. ahmici_massacre_1993 keeps its t54-t70 window and its war_crimes_delta 3.
+        const card = ALL_EVENTS.find(e => e.id === 'ahmici_massacre_1993')!;
+        const consequence = ALL_EVENTS.find(e => e.id === AHMICI)!;
+        const s = makeChain1State(68, {
+            flags: { hvo_arbih_tensions_rising: true, hrhb_political_goal: 'croat_republic' },
+            firedEvents: [WAR],
+        });
+        s.military.event_fire_counts = { [WAR]: 1 };
+        s.political.war_alliance_rbih_hrhb = -0.5;
+        (s.political.political_controllers as Record<string, string>)['op:vitez:vitez_2'] = 'HRHB';
+        evaluateEvents(s, rng, 68, [card, consequence]);
+        const fired = s.military.fired_event_ids ?? [];
+        expect(fired).toContain('ahmici_massacre_1993');
+        expect(fired).not.toContain(AHMICI);
+        expect((s.military.negotiation as any).capital.HRHB.war_crimes_events).toBe(3);
     });
 });

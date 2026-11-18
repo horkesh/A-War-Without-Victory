@@ -158,13 +158,13 @@ describe('TurnAftermathModal localization', () => {
             ...view.nextActions,
             actionableCount: 1,
             topItems: [{
-                id: 'convoy:one',
-                type: 'convoy_decision',
+                id: 'paramilitary:one',
+                type: 'paramilitary_request',
                 severity: 'urgent',
-                title: 'Convoy to Srebrenica',
-                detail: 'Srebrenica route; 20 supply points.',
-                action: 'convoy_decision_modal',
-                actionLabel: 'Review convoy',
+                title: 'Deployment near Bratunac',
+                detail: 'Bratunac sector; 120 men.',
+                action: 'paramilitary_review',
+                actionLabel: 'Review paramilitary',
             }],
         };
 
@@ -179,11 +179,11 @@ describe('TurnAftermathModal localization', () => {
             onOpenCodex: vi.fn(),
         }));
 
-        expect(screen.getByText('Humanitarian convoy')).toBeTruthy();
-        expect(screen.getByText('Srebrenica route; 20 supply points.')).toBeTruthy();
-        expect(screen.getByTestId('turn-aftermath-action-convoy:one').getAttribute('aria-label'))
-            .toContain('Srebrenica route; 20 supply points.');
-        expect(container.textContent).not.toMatch(/\bconvoy decision\b|convoy_decision/i);
+        expect(screen.getByText('Paramilitary authorization')).toBeTruthy();
+        expect(screen.getByText('Bratunac sector; 120 men.')).toBeTruthy();
+        expect(screen.getByTestId('turn-aftermath-action-paramilitary:one').getAttribute('aria-label'))
+            .toContain('Bratunac sector; 120 men.');
+        expect(container.textContent).not.toMatch(/\bparamilitary request\b|paramilitary_request/i);
     });
 
     it('explains when notable territory changes do not reconcile to the net total', () => {
@@ -255,12 +255,12 @@ describe('TurnAftermathModal localization', () => {
             actionableCount: 2,
             blockingCount: 1,
             topItems: [{
-                id: 'convoy:convoy_srebrenica',
-                type: 'convoy_decision',
+                id: 'paramilitary:bratunac_1',
+                type: 'paramilitary_request',
                 severity: 'blocking',
-                title: 'Convoy to Srebrenica',
-                action: 'convoy_decision_modal',
-                actionLabel: 'Review convoy',
+                title: 'Deployment near Bratunac',
+                action: 'paramilitary_review',
+                actionLabel: 'Review paramilitary',
             }, {
                 id: 'command:review-proposal:rev_1',
                 type: 'autonomy_proposal',
@@ -287,7 +287,7 @@ describe('TurnAftermathModal localization', () => {
 
         const footerAction = screen.getByTestId('turn-aftermath-primary-action');
         expect(footerAction.getAttribute('aria-label')).toContain('Next presidential action');
-        expect(footerAction.textContent).toContain('Review convoy');
+        expect(footerAction.textContent).toContain('Review paramilitary');
         expect(document.activeElement).toBe(footerAction);
 
         const reserveAction = screen.getByTestId('turn-aftermath-action-command:review-proposal:rev_1');
@@ -303,8 +303,8 @@ describe('TurnAftermathModal localization', () => {
         fireEvent.click(footerAction);
 
         expect(onReviewAction).toHaveBeenCalledWith(expect.objectContaining({
-            id: 'convoy:convoy_srebrenica',
-            action: 'convoy_decision_modal',
+            id: 'paramilitary:bratunac_1',
+            action: 'paramilitary_review',
         }));
         expect(onOpenInbox).not.toHaveBeenCalled();
     });

@@ -20,7 +20,7 @@ const FILTERS = new Set(['not_present', 'not_invoked', 'accepted', 'rejected']);
 const HANDLERS = new Set([
     'active_column_skip', 'garrison_and_detachments', 'sector_march', 'return_to_corps',
     'pocket_evacuation', 'home_defense', 'reserve', 'supply_gate', 'sector_attack',
-    'hold', 'reorganize', 'defensive', 'offensive', 'front_coverage', 'interior_movement',
+    'hold', 'reorganize', 'retake', 'defensive', 'offensive', 'front_coverage', 'interior_movement',
 ]);
 const KINDS = new Set(['brigade', 'og', 'operational_group', 'militia', 'jna_phantom', 'hv_phantom']);
 const POSTURES = new Set(['hold', 'defend', 'defend_at_all_costs', 'elastic_defense', 'counterattack', 'dig_in', 'attack', 'assault']);

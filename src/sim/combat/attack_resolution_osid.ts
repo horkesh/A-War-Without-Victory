@@ -1,7 +1,7 @@
 import { isSupportBrigadeOnActiveOp } from './sector_offensive_axis_helpers.js';
 import {computeAttackForcePower, findTgForAnchor} from './attack_force_power.js';
 import { getAttackIntelConfidence } from './attack_intel_context.js';
-import { collectSectorDefenseBrigades } from './sector_defense_roster.js';
+import { collectAverageDefenseRoster, collectSectorDefenseBrigades } from './sector_defense_roster.js';
 /**
  * ═══════════════════════════════════════════════════════════════
  * OWNERSHIP: Execution-Only
@@ -181,12 +181,8 @@ import {
 // ── Morale absorption & homeland determination (extracted to attack_morale_absorption.ts) ──
 import { evaluateAndApplyMoraleAbsorption } from './attack_morale_absorption.js';
 
-// ── Resource aftermath: supply expenditure, facility damage, fatigue (extracted to attack_resource_aftermath.ts) ──
-import {
-    deductCombatSupplyExpenditure,
-    applyFacilityCombatDamage,
-    applyCombatFatigue,
-} from './attack_resource_aftermath.js';
+// ── Resource aftermath: combat fatigue (extracted to attack_resource_aftermath.ts) ──
+import { applyCombatFatigue } from './attack_resource_aftermath.js';
 
 // ── Casualty calculation & distribution (extracted to attack_casualty_distribution.ts) ──
 import {
@@ -712,7 +708,11 @@ export function resolveAttackOrdersOsid(
             );
             if (sectorBrigades.length > 0) {
                 const { primary, totalPower } = rankDefendersByPower(sectorBrigades, state, targetOsid, terrainMultByOsid, artSuppression, supplyStateByOsid, ethBonus);
-                const avgBrigadePower = totalPower / sectorBrigades.length;
+                // Fable consult 7 bound: seam brigades only add; the cap and floor average the owning roster.
+                const averageRoster = collectAverageDefenseRoster(state, sector, targetOsid, controller!, adjacency, defenderFormations, sectorBrigades);
+                const avgBrigadePower = averageRoster
+                    ? rankDefendersByPower(averageRoster, state, targetOsid, terrainMultByOsid, artSuppression, supplyStateByOsid, ethBonus).totalPower / averageRoster.length
+                    : totalPower / sectorBrigades.length;
                 const targetMun = munFromOsid(targetOsid);
 
                 // Single-pass: compute per-brigade power, distance weight, and accumulate
@@ -1350,17 +1350,8 @@ export function resolveAttackOrdersOsid(
             pushSnapEvent(report, crisisEvent);
         }
 
-        // Part 6b: Supply reserve expenditure (Phase A)
-        deductCombatSupplyExpenditure({
-            state,
-            attackerFaction,
-            attackerCount: attackerFormations.length,
-            powerRatio,
-            defenderFormation,
-        });
-
-        // Part 6c: Facility combat damage (Phase B)
-        applyFacilityCombatDamage({ state, targetOsid });
+        // Parts 6b/6c (supply-reserve expenditure, facility combat damage) retired 2026-11-17
+        // (Fable consult 6): both were no-ops unless supply_reserves_enabled.
 
         // Part 7a: Experience gain (extracted to attack_post_battle_effects.ts)
         for (const a of attackerFormations) applyExperienceGain(a, attackerWon);

@@ -2,6 +2,8 @@ import type { DimensionId } from './event_types.js';
 import { clamp } from '../../utils/math.js';
 import { CANONICAL_FACTIONS } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
+import type { PeacePlanResponse } from '../../state/negotiation_types.js';
+import type { ParamilitarySeverityBand } from '../combat/paramilitary_sweep.js';
 
 export const DIMENSION_IDS: DimensionId[] = [
     'military_credibility',
@@ -33,8 +35,22 @@ export function initializeStrategicDimensions(): DimensionStore {
     return store;
 }
 
+const DIMENSION_ID_SET: ReadonlySet<string> = new Set<string>(DIMENSION_IDS);
+
+/**
+ * The one accumulator rule (§6 E3a1 D1; Systems Manual §7.10.3). Every writer of a
+ * dimension's `event_modifier` goes through this function. The accumulator is NOT
+ * clamped: a side at −110 that takes −30 more sits at −140, so a later +30 does not
+ * erase it. Only `effective_value = clamp(base_value + event_modifier, 0, 100)` is clamped.
+ *
+ * §6 E2: an unknown dimension id THROWS (it used to be a silent dead write).
+ * A missing store or faction entry (state not yet initialised) stays a quiet no-op.
+ */
 export function applyDimensionShift(store: DimensionStore, faction: string, dimension: string, delta: number): void {
-    if (!store[faction]?.[dimension]) return;
+    if (!DIMENSION_ID_SET.has(dimension)) {
+        throw new Error(`Unknown strategic dimension id in dimension shift: ${dimension}`);
+    }
+    if (!store?.[faction]?.[dimension]) return;
     const dim = store[faction][dimension];
     dim.event_modifier += delta;
     dim.effective_value = clamp(dim.base_value + dim.event_modifier, 0, 100);
@@ -71,6 +87,11 @@ export function computeNegotiatingCapital(store: DimensionStore, faction: string
     return clamp(total, 0, 100);
 }
 
+/**
+ * The one owner of every dimension `base_value` (§6 E3a1 D2). Runs once per faction per
+ * turn at the `compute-dimension-bases` pipeline step. No other function writes a
+ * `base_value`; `computeNegotiationBreakdown` only rebuilds the raw capital record.
+ */
 export function computeDimensionBaseValues(store: DimensionStore, state: any, faction: string): void {
     if (!store[faction]) return;
     const cap = state.military?.negotiation?.capital?.[faction];
@@ -89,12 +110,8 @@ export function computeDimensionBaseValues(store: DimensionStore, state: any, fa
     const terrPct = cap?.territory_controlled_pct ?? 0;
     updateBaseValue(store, faction, 'territorial_legitimacy', clamp(terrPct * 1.2, 0, 100));
 
-    // international_standing: compliance - war crimes - civilian casualties
-    const warCrimes = cap?.war_crimes_events ?? 0;
-    const civCas = cap?.civilian_casualties_caused ?? 0;
-    const plansAccepted = cap?.peace_plans_accepted?.length ?? 0;
-    const plansRejected = cap?.peace_plans_rejected?.length ?? 0;
-    updateBaseValue(store, faction, 'international_standing', clamp(50 - (warCrimes * 10) - (civCas / 5000) + (plansAccepted * 10) - (plansRejected * 15), 0, 100));
+    // international_standing: the single base writer (§6 E3a1 D2) — see computeInternationalStandingBase.
+    updateBaseValue(store, faction, 'international_standing', computeInternationalStandingBase(state, faction));
 
     // patron_confidence: patron support level
     const patronSupport = patron?.support_level ?? 50;
@@ -120,4 +137,99 @@ export function computeDimensionBaseValues(store: DimensionStore, state: any, fa
     const terrEff = store[faction].territorial_legitimacy.effective_value;
     const patEff = store[faction].patron_confidence.effective_value;
     updateBaseValue(store, faction, 'negotiating_leverage', clamp((milEff + terrEff + patEff) / 3, 0, 100));
+}
+
+// ---------------------------------------------------------------------------
+// international_standing base inputs (§6 E3a1 D2; Systems Manual §7.10.3)
+// ---------------------------------------------------------------------------
+
+const PARAMILITARY_MINOR_PENALTY_PER_DEPLOYMENT = 2;
+const PARAMILITARY_MID_PENALTY_PER_DEPLOYMENT = 4;
+const PARAMILITARY_SEVERE_PENALTY_PER_DEPLOYMENT = 5;
+const PARAMILITARY_SEVERE_STANDING_CLIFF = 10;
+
+/** Standing penalty of a paramilitary war-crimes finding: 2/4/5 per deployment by band, +10 cliff at severe. */
+export function computeParamilitaryInternationalStandingPenalty(
+    band: ParamilitarySeverityBand,
+    deploymentCount: number
+): number {
+    const count = Math.max(0, Math.trunc(deploymentCount));
+    if (count === 0) return 0;
+    if (band === 'severe') return (count * PARAMILITARY_SEVERE_PENALTY_PER_DEPLOYMENT) + PARAMILITARY_SEVERE_STANDING_CLIFF;
+    if (band === 'mid') return count * PARAMILITARY_MID_PENALTY_PER_DEPLOYMENT;
+    return count * PARAMILITARY_MINOR_PENALTY_PER_DEPLOYMENT;
+}
+
+/** The faction's latest paramilitary war-crimes finding (cost-ledger annotation), or null. */
+export function getLatestParamilitaryFinding(
+    state: any,
+    faction: string
+): { band: ParamilitarySeverityBand; deploymentCount: number } | null {
+    const annotations: Array<{ faction?: string; event_id?: string; turn: number; tag: string; text?: string }> =
+        state?.military?.cost_ledger_annotations ?? [];
+    const entries = annotations
+        .filter((entry) => entry.faction === faction && entry.event_id === `cost_war_crimes_findings_${faction}`)
+        .sort((a, b) => {
+            if (a.turn !== b.turn) return b.turn - a.turn;
+            return strictCompare(b.tag, a.tag);
+        });
+    const latest = entries[0];
+    if (!latest) return null;
+    const band = parseParamilitaryBand(latest.tag);
+    if (!band) return null;
+    return { band, deploymentCount: parseDeploymentCount(latest.text) };
+}
+
+function parseParamilitaryBand(tag: string): ParamilitarySeverityBand | null {
+    if (tag === 'paramilitary_war_crimes_minor') return 'minor';
+    if (tag === 'paramilitary_war_crimes_mid') return 'mid';
+    if (tag === 'paramilitary_war_crimes_severe') return 'severe';
+    return null;
+}
+
+function parseDeploymentCount(text?: string): number {
+    const match = text?.match(/\bdeployment_count=(\d+)\b/);
+    return match ? Number.parseInt(match[1]!, 10) : 0;
+}
+
+/**
+ * Plans a faction accepted and rejected, derived from `peace_plan_history` (the single
+ * source, §6 E3a1 D3). `computeNegotiationBreakdown` rebuilds `capital.peace_plans_*`
+ * from this; the standing base reads it directly so it never depends on when that rebuild ran.
+ */
+export function derivePeacePlanResponseLists(
+    history: readonly PeacePlanResponse[],
+    faction: string
+): { accepted: string[]; rejected: string[] } {
+    const accepted: string[] = [];
+    const rejected: string[] = [];
+    for (const plan of history) {
+        const response = plan.responses[faction];
+        if (response === 'accepted') accepted.push(plan.plan_id);
+        else if (response === 'rejected') rejected.push(plan.plan_id);
+    }
+    return { accepted, rejected };
+}
+
+/**
+ * international_standing base =
+ *   clamp(50 − war_crimes_events × 10 − paramilitary_finding_penalty − civilian_casualties / 5000
+ *         + plans_accepted × 10 − plans_rejected × 15, 0, 100).
+ * The finding penalty ADDS to the war-crimes term; it never replaces it (§6 E3a1 D2), so a
+ * sweep that brings a finding can never raise the base.
+ */
+export function computeInternationalStandingBase(state: any, faction: string): number {
+    const cap = state?.military?.negotiation?.capital?.[faction];
+    const warCrimes = cap?.war_crimes_events ?? 0;
+    const finding = getLatestParamilitaryFinding(state, faction);
+    const findingPenalty = finding
+        ? computeParamilitaryInternationalStandingPenalty(finding.band, finding.deploymentCount)
+        : 0;
+    const civCas = cap?.civilian_casualties_caused ?? 0;
+    const plans = derivePeacePlanResponseLists(state?.military?.negotiation?.peace_plan_history ?? [], faction);
+    return clamp(
+        50 - (warCrimes * 10) - findingPenalty - (civCas / 5000) + (plans.accepted.length * 10) - (plans.rejected.length * 15),
+        0,
+        100
+    );
 }

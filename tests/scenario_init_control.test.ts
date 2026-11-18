@@ -111,7 +111,10 @@ test('init_control apr1995: municipal anchors match apr1995 source snapshot', { 
 
     const baseOut = join(process.cwd(), '.tmp_scenario_init_control_apr1995');
     await ensureRemoved(baseOut);
-    const scenarioPath = join(process.cwd(), 'data', 'scenarios', 'apr1995_start.json');
+    // 1.0 ships one start (April 1992; owner ruling 2026-11-17). The generic mid-war start path
+    // (init_control + init_formations by key) is kept for later data-only starts and is covered by
+    // this test fixture instead of a shipped scenario.
+    const scenarioPath = join(process.cwd(), 'tests', 'fixtures', 'scenarios', 'mid_war_start_init_control.json');
     const result = await runScenario({ scenarioPath, outDirBase: baseOut, weeksOverride: 4 });
 
     expect(existsSync(result.paths.initial_save)).toBe(true);
