@@ -16,6 +16,9 @@ import { emitSalientEvacuationRecord, isReasonCodeTopicEnabled } from './reason_
 import historicalFormationEvacuations from '../../../data/source/historical_formation_evacuations.json';
 import type { OperationalToCanonicalReverseMap } from '../../data/operational_data_types.js';
 
+/** A cut-off component holding at least this many of the displaced faction's active brigades is retained. */
+export const SALIENT_GARRISON_RETENTION_MIN_BRIGADES = 2;
+
 export interface SalientWithdrawalReport {
     evacuated_formation_ids: string[];
 }
@@ -301,12 +304,43 @@ export function evacuateFormationsSeveredByCapture(
             }
         }
     }
+    // Garrisoned pockets hold (package P2-R, 2026-11-18): a cut-off component that still holds
+    // at least SALIENT_GARRISON_RETENTION_MIN_BRIGADES of the displaced faction's active brigades
+    // is defended, not abandoned. Pulling a whole garrison out through the collapsing neck in one
+    // turn left its cells held but empty (played Ozren probe: three VRS brigades evacuated at the
+    // fall of Boljanić, then ARBiH took the six cells at 49 dead each). A lone stranded brigade still
+    // withdraws. Faction-blind; it grants no supply (the critical-supply stranded rule still applies).
+    // Two sets (panel P2-R r1): `main` stays the withdrawal target (main + own-origin pockets), so no
+    // brigade is ever withdrawn INTO a retained pocket; `retained` adds the garrisoned pockets and is
+    // used only to keep their brigades in place. A brigade with an owner-authored evacuation rule
+    // (the 102nd Odžak→Orašje) neither counts toward a garrison nor is held by one: the authored
+    // relocation keeps precedence.
+    const retained = new Set(main);
+    const garrisonIds = new Map<number, string[]>();
+    const componentOf = new Map<string, number>();
+    components.forEach((component, index) => { for (const osid of component) componentOf.set(osid, index); });
+    for (const id of Object.keys(formations).sort(strictCompare)) {
+        const formation = formations[id] as FormationState | undefined;
+        if (!formation || formation.status !== 'active' || formation.kind !== 'brigade') continue;
+        if (formation.faction !== displacedFaction || !formation.location_osid) continue;
+        if (historicalEvacuationRuleFor(formation, formation.location_osid)) continue;
+        const index = componentOf.get(formation.location_osid);
+        if (index !== undefined) garrisonIds.set(index, [...(garrisonIds.get(index) ?? []), id]);
+    }
+    const garrisonedRetained: Array<{ osids: string[]; garrison_ids: string[] }> = [];
+    components.forEach((component, index) => {
+        const garrison = garrisonIds.get(index) ?? [];
+        if (main.has(component[0]!) || garrison.length < SALIENT_GARRISON_RETENTION_MIN_BRIGADES) return;
+        for (const osid of component) retained.add(osid);
+        garrisonedRetained.push({ osids: [...component], garrison_ids: [...garrison] });
+    });
     const operationHolders = operationPocketHolders(state, displacedFaction);
     if (observation) {
         emitSalientEvacuationRecord({ kind: 'component_rank', turn: state.meta.turn,
             components: components.map(osids => ({ osids: [...osids], size: osids.length,
                 supplied_count: osids.filter(osid => supply[osid] !== 'critical').length })),
-            initial_main_osids: [...main].sort(strictCompare) });
+            initial_main_osids: [...main].sort(strictCompare),
+            garrisoned_retained: garrisonedRetained });
         emitSalientEvacuationRecord({ kind: 'operation_holders', turn: state.meta.turn,
             participant_ids: [...operationHolders.participants].sort(strictCompare),
             staging_osids: [...operationHolders.stagingOsids].sort(strictCompare) });
@@ -333,6 +367,7 @@ export function evacuateFormationsSeveredByCapture(
         if (operationHolders.participants.has(id)) { terminal('ineligible_operation_participant', { start_osid: start }); continue; }
         if (operationHolders.stagingOsids.has(start)) { terminal('ineligible_operation_staging', { start_osid: start }); continue; }
         const historicalRule = historicalEvacuationRuleFor(formation, start);
+        if (retained.has(start) && !historicalRule) { terminal('garrisoned_pocket_retained', { start_osid: start }); continue; }
         const trace: SalientReachTrace | undefined = selected && !historicalRule ? {} : undefined;
         const genericDestination = findEvacuationDestination(
             state, start, capturedOsid, displacedFaction, main, adjacency,

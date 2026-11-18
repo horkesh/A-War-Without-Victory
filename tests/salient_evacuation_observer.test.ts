@@ -70,7 +70,8 @@ describe('salient evacuation stdout observer', () => {
         setEnv(true);
         const state = stateWith({
             [IDS[0]!]: brigade(IDS[0]!, 'pocket'),
-            [IDS[1]!]: brigade(IDS[1]!, 'pocket', { tags: ['enclave'] }),
+            // Off the pocket: two brigades in one pocket would now hold it (package P2-R).
+            [IDS[1]!]: brigade(IDS[1]!, 'rear2', { tags: ['enclave'] }),
         });
         state.military.brigade_movement_orders![IDS[0]!] = { destination_osid: 'corridor' } as any;
         state.military.brigade_movement_state![IDS[0]!] = { status: 'moving' } as any;
@@ -120,7 +121,8 @@ describe('salient evacuation stdout observer', () => {
         // Committed copy of the former local-only logs/claude-channel-20261004/314-salient-reader.cjs.
         const reader = 'tools/diagnostics/salient_evacuation_reader.cjs';
         setEnv(true);
-        const base: any[] = runAndRows(stateWith(Object.fromEntries(IDS.map(id => [id, brigade(id, 'pocket')])))).rows;
+        // One brigade in the pocket (evacuates), one on the main line: two in the pocket would hold it (P2-R).
+        const base: any[] = runAndRows(stateWith({ [IDS[0]!]: brigade(IDS[0]!, 'pocket'), [IDS[1]!]: brigade(IDS[1]!, 'rear') })).rows;
         const invoke = (rows: any[]) => spawnSync(process.execPath, [reader, '--turn', '10', '--capture', 'neck', '--faction', 'HRHB', '--brigades', IDS.join(','), '--emit', 'JSON'], { input: rows.map(r => `${SALIENT_EVACUATION_PREFIX} ${JSON.stringify(r)}`).join('\n'), encoding: 'utf8' });
         expect(invoke(base).status).toBe(0);
         const invalids = [
