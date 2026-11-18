@@ -147,7 +147,7 @@ Paramilitary formations (`kind: 'paramilitary'`) are a separate formation kind f
 | PARAMILITARY_INITIAL_MORALE | 80 | Starting morale |
 | PARAMILITARY_TARGET_AVG_POPULATION | 5000 | Avg civilian pop at target OSID |
 
-**Player agency:** `paramilitary_policy` ('ask'/'always_allow'/'always_deny') + per-request decisions. Bot factions auto-approve. `paramilitary_deployment_count` tracks cumulative deployments.
+**Player agency:** `paramilitary_policy` ('ask'/'always_allow'/'always_deny') + per-request decisions at Full Control. At Assisted, Delegated and Observer the staff follows the player's standing order (only Always allow sends sweeps; nothing before the first answer), and bot factions follow their policy card's decided answer, else its historical default; `ask` with no human asking sends none (§6 D1 stage 2, `resolveNonManualParamilitaryPolicy` in `paramilitary_policy.ts`; SENSITIVE_HISTORY_DESIGN_GATE.md §3). `paramilitary_deployment_count` tracks cumulative deployments.
 
 **Truth writes:** Captures emit `control_events` with `mechanism: 'paramilitary'`. Civilian killings update the faction casualty ledger, displacement event log/aggregates, and target municipality `displacement_state.lost_population` in the same resolution.
 
