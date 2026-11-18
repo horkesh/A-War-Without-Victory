@@ -301,6 +301,9 @@ describe('Free War — ethics bright line: atrocity never yields a better end-st
                 RS: {
                     territory_controlled_pct: 75, // far above any A+ territory anchor
                     war_crimes_events: 5,
+                    // §6 E3b: cleansing is authorized sweeps (recordWarCrime writes both counters);
+                    // the A+ anchors read only the authored count, never the shared delta counter.
+                    war_crimes_events_emergent: 5,
                     refugees_created: 120000,
                     civilian_casualties_caused: 12000,
                 },

@@ -205,7 +205,7 @@ Reference: `hrhb_camp_exposure_response_1993` Packet 42.
 
 ## 4. Loader validation guarantees (Packet 44 + Phase B passes)
 
-`event_loader.ts` runs thirteen validation passes at catalog load. A failure throws and the catalog does NOT load, so authoring errors surface immediately. The passes most relevant to authoring:
+`event_loader.ts` runs fourteen validation passes at catalog load. A failure throws and the catalog does NOT load, so authoring errors surface immediately. The passes most relevant to authoring:
 
 | Pass | What it catches |
 |---|---|
@@ -221,6 +221,7 @@ Reference: `hrhb_camp_exposure_response_1993` Packet 42.
 | Forbidden family slugs | Catalog row carrying `family: 'rs_drina_campaign'` (categorically rejected) |
 | Cross-faction option-id disjointness | Same option id appearing across faction-distinct rows with causality wiring |
 | `validateAllianceEffectParties` | An `alliance_change` or `alliance_lock` (they move only the RBiH-HRHB alliance) on a row whose `responding_faction` is not RBiH or HRHB, in `effect`, `effects[]` or any response option. A row with no `responding_faction` is global. A closed allowlist, `NON_PARTY_ALLIANCE_EFFECT_ALLOWLIST`, holds three authored RS options for the §6 card batch, and may only shrink (§6, 2026-11-17) |
+| `validateWarCrimeAuthorship` | A row carrying a `war_crimes_delta` whose trigger, or any prerequisite's (transitively over `requires_events`), reads a flag some response option writes in `sets_flags`, or a `paramilitary_*` condition, and declares no `authored_by_choice` (`true`: each firing is an incident its side authorized in play; `false`: historical record only). Also rejected: `authored_by_choice` on a row with no `war_crimes_delta`, and a negative `international_standing` shift on an authored row or on an option with a `war_crimes_delta` (option-level deltas are always authored). The authored count is `authoredWarCrimeIncidents` (`authored_war_crimes.ts`). Shipped: `csq_accelerated_camps_discovery_1992` true; `un_hostage_crisis_1995` false (it fires under all three RS goals); `ahmici_massacre_1993` false (lane lead 2026-11-18, under the SHDG §6 record "Ahmići windows and H6", 2026-11-16: no surface may present a withheld Ahmići card as restraint, a better outcome or a spared village; the H6 exclusion is truthfulness to the modelled war, Ring 3 #11, not a choice to commit or avoid the crime). A closed allowlist, `AUTHORED_NEGATIVE_STANDING_ALLOWLIST`, holds the camps row's own −10 until §6 E3c strips it, and may only shrink (§6 E3b, 2026-11-17) |
 | Source-tier vocabulary | `source_tier` not in `VALID_SOURCE_TIERS` |
 | Emergence-class vocabulary | `emergence_class` not in `VALID_EMERGENCE_CLASSES` |
 | `bot_response_logic` vocabulary | Not in `VALID_BOT_RESPONSE_LOGIC` |

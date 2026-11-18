@@ -1,6 +1,7 @@
 import { applyWarTermination, checkWarTermination } from '../war_termination.js';
 import { enforceDaytonImposition, initiateDaytonNegotiation, shouldInitiateDayton } from '../negotiation/dayton_negotiation.js';
 import { computeNegotiationBreakdown } from '../negotiation/compute_capital.js';
+import { recomputeDimensionBases } from '../events/strategic_dimensions.js';
 import { evaluatePeacePlans } from '../negotiation/peace_plans.js';
 import { resolveCounterOffers } from '../negotiation/counter_offer_generator.js';
 import { evaluatePatronEvents } from '../negotiation/patron_events.js';
@@ -61,6 +62,20 @@ export const warPhaseNegotiationSteps: NamedPhase[] = [
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
             computeNegotiationBreakdown(context.state);
+        }
+    },
+    {
+        // §6 phase order (ruling 2026-11-17), point (c) of three. Re-runs the one base owner
+        // after the turn's last base-input writers (peace-plan answers, patron pressure and
+        // events, the capital rebuild), so the Dayton menu's frozen faction_capital equals the
+        // live composite enforced at submission and resolution, and the turn boundary (save,
+        // between-turn view, next turn's events) is current. Nothing after this step writes a
+        // base input except the bottom_up formation steps.
+        name: 'refresh-dimension-bases',
+        run: (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            if (context.state.meta.game_over) return;
+            recomputeDimensionBases(context.state);
         }
     },
     {

@@ -624,6 +624,16 @@ export interface EventDefinition {
         | 'compound'
         | 'exogenous'
         | 'legacy_calendar_pending_conversion';
+    /**
+     * §6 E3b (ruling 2026-11-17): whether this war-crimes row's firing is an incident its side
+     * AUTHORIZED in play. `true` counts each firing in `authoredWarCrimeIncidents`
+     * (`authored_war_crimes.ts`); `false` keeps it in the historical record only. Required on a
+     * row that books a `war_crimes_delta` and whose trigger or prerequisites read a flag a
+     * response option writes (or a `paramilitary_*` condition); allowed on no other row
+     * (`validateWarCrimeAuthorship`, event_loader.ts). An authored row may not carry a negative
+     * `international_standing` shift. Option-level `war_crimes_delta` is always authored.
+     */
+    authored_by_choice?: boolean;
 }
 
 /** A pending decision awaiting player response. Stored on MilitaryState. */
