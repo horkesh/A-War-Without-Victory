@@ -67,17 +67,7 @@ describe('applyEventEffects', () => {
         expect(state.military.formations['brig_2'].morale).toBe(0);
     });
 
-    it('supply_delta modifies general reserve', () => {
-        const state = makeState();
-        applyEventEffects(state, [{ kind: 'supply_delta', faction: 'RBiH', delta: 10 }]);
-        expect(state.military.general_supply_reserve!['RBiH']).toBe(60);
-    });
-
-    it('supply_delta floors at 0', () => {
-        const state = makeState();
-        applyEventEffects(state, [{ kind: 'supply_delta', faction: 'HRHB', delta: -100 }]);
-        expect(state.military.general_supply_reserve!['HRHB']).toBe(0);
-    });
+    // supply_delta effect tests (modifies reserve / floors at 0): retired 2026-11-17 (supply is connection, not stock)
 
     it('alliance_change clamps to [-1, 1]', () => {
         const state = makeState();
@@ -107,10 +97,10 @@ describe('applyEventEffects', () => {
 
     it('effects applied in sorted order (deterministic)', () => {
         const state = makeState();
-        // Supply delta before morale (alphabetical: 'morale_change' < 'supply_delta')
-        // Application order: alliance_change, cohesion, humanitarian, morale, narrative, negotiation, patron, supply
+        // Cohesion listed before morale and alliance (alphabetical: 'alliance_change' < 'cohesion_change' < 'morale_change')
+        // Application order is by kind, not by authoring order.
         const effects: EventEffect[] = [
-            { kind: 'supply_delta', faction: 'RBiH', delta: 5 },
+            { kind: 'cohesion_change', faction: 'RBiH', delta: 5 },
             { kind: 'alliance_change', delta: 0.1 },
             { kind: 'morale_change', faction: 'RBiH', delta: 3 },
         ];
@@ -118,7 +108,7 @@ describe('applyEventEffects', () => {
         // All three applied
         expect(state.political.war_alliance_rbih_hrhb).toBeCloseTo(0.6);
         expect(state.military.formations['brig_1'].morale).toBe(63);
-        expect(state.military.general_supply_reserve!['RBiH']).toBe(55);
+        expect(state.military.formations['brig_1'].cohesion).toBe(75);
     });
 });
 

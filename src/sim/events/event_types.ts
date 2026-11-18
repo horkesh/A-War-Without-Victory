@@ -25,8 +25,9 @@ export type EventCondition =
     | { type: 'or'; conditions: EventCondition[] }
     | { type: 'not'; condition: EventCondition }
     // v0.6.0 emergent condition types
-    | { type: 'supply_below'; faction: FactionId; threshold: number }
-    | { type: 'supply_above'; faction: FactionId; threshold: number }
+    // 'supply_below' / 'supply_above' retired 2026-11-17 (Fable consult 6): they read the faction supply
+    // reserve, which is not modelled in 1.0 (supply is connection, not stock). Use `enclave_supply_status`
+    // or `corridor_severed` for live supply.
     | { type: 'territory_percentage'; faction: FactionId; comparator: 'above' | 'below'; threshold: number }
     | { type: 'dimension_above'; faction: FactionId; dimension: DimensionId; threshold: number }
     | { type: 'dimension_below'; faction: FactionId; dimension: DimensionId; threshold: number }
@@ -126,13 +127,6 @@ export interface EventEffectMoraleChange {
     faction: FactionId;
     delta: number;
     affected_corps?: string[];
-}
-
-/** Effect: general supply reserve delta for faction. */
-export interface EventEffectSupplyDelta {
-    kind: 'supply_delta';
-    faction: FactionId;
-    delta: number;
 }
 
 /** Effect: cohesion delta applied to all brigades of faction. Clamped [0, 100]. */
@@ -329,7 +323,6 @@ export interface EventEffectEnclaveFormationDisplacement {
 export type EventEffect =
     | EventEffectNarrative
     | EventEffectMoraleChange
-    | EventEffectSupplyDelta
     | EventEffectCohesionChange
     | EventEffectHumanitarianImpact
     | EventEffectPatronPressure
@@ -559,8 +552,8 @@ export interface EventDefinition {
     sets_flags?: Record<string, string | number | boolean>;
     /** Strategic dimension shifts on fire (before player choice). */
     dimension_shifts?: DimensionShift[];
-    /** Auto-resolve after N turns if player doesn't respond. Worst option applied. */
-    auto_resolve_turns?: number;
+    // `auto_resolve_turns` retired 2026-11-17: nothing in the engine auto-resolves an unanswered decision
+    // after N turns (the loader rejects the field).
     /**
      * Lower = fires first when multiple events trigger. Default 100.
      * Priority tiers: 1=fire-or-miss anchors (single-turn windows),
@@ -758,13 +751,6 @@ export function triggerMatches(def: EventDefinition, state: GameState, currentTu
     return true;
 }
 
-/** A faction's general supply reserve when the reserve model runs, else null (no reserve exists). */
-function readEnabledSupplyReserve(state: GameState, faction: FactionId): number | null {
-    if (state.meta?.supply_reserves_enabled !== true) return null;
-    const supply = state.military.general_supply_reserve?.[faction];
-    return typeof supply === 'number' ? supply : null;
-}
-
 /** Evaluate a state-based condition against current game state. */
 export function evaluateCondition(condition: EventCondition, state: GameState, edges?: EdgeRecord[]): boolean {
     switch (condition.type) {
@@ -848,20 +834,6 @@ export function evaluateCondition(condition: EventCondition, state: GameState, e
             return condition.conditions.some(c => evaluateCondition(c, state, edges));
         case 'not':
             return !evaluateCondition(condition.condition, state, edges);
-        // Supply-reserve conditions describe the reserve model, so they hold only where it runs
-        // (F7, 2026-11-15). With reserves off (the shipping campaign) there is no reserve to be low
-        // or high: both are false. Reading a missing reserve as 0 made every supply_below true and
-        // fired csq_supply_corridor_chronic_strain_RS at t180. The gate is the meta flag, as in
-        // combat (attack_resource_aftermath.ts), not the field's presence: a feint writes the field
-        // even with reserves off (sector_offensive.ts).
-        case 'supply_below': {
-            const supply = readEnabledSupplyReserve(state, condition.faction);
-            return supply !== null && supply < condition.threshold;
-        }
-        case 'supply_above': {
-            const supply = readEnabledSupplyReserve(state, condition.faction);
-            return supply !== null && supply >= condition.threshold;
-        }
         case 'territory_percentage': {
             const pc = state.political?.political_controllers ?? {};
             const allOsids = Object.keys(pc);
