@@ -89,8 +89,14 @@ describe('shipped schedule', () => {
         // Hadzihasanovic & Kubura TJ paras 2/330/340, Blaskic TJ para 745, Prlic TJ Vol.2 para 13.
         expect(span('vrs_sarajevo_romanija')).toEqual(['vrs_sipcic:0-23', 'vrs_galic:23-123', 'vrs_d_milosevic:123-end']);
         expect(span('vrs_drina')).toEqual(['vrs_zivanovic:30-171', 'vrs_krstic:171-end']);
-        expect(span('arbih_3rd_corps').slice(0, 2)).toEqual(['arbih_hadzihasanovic:24-82', 'arbih_alagic:82-91']);
-        expect(span('hvo_central_bosnia')[0]).toBe('hvo_blaskic:12-120');
+        // Historian source check (2026-11-18): Delic TJ para 117 / fn 294 (order of 26 Feb 1994, turn 99)
+        // closes the 3rd Corps gap; Dreković commanded the 4th Corps from January 1994 (his sworn
+        // testimony; Court of BiH S1 1 K 012247 19 Kri); Blaškić was Deputy Chief of Staff by June 1994
+        // (Blaskic TJ para 493); Lasić held the South-East Herzegovina OZ (Prlic TJ Vol.1 para 783).
+        expect(span('arbih_3rd_corps')).toEqual(['arbih_hadzihasanovic:24-82', 'arbih_alagic:82-99', 'arbih_mahmuljin:99-end']);
+        expect(span('arbih_4th_corps')).toEqual(['arbih_pasalic:24-80', 'arbih_drekovic:91-174']);
+        expect(span('hvo_central_bosnia')[0]).toBe('hvo_blaskic:12-113');
+        expect(span('hvo_southeast_herzegovina')).toEqual(['hvo_lasic:10-end']);
         expect(span('hvo_tomislavgrad').slice(1, 2)).toEqual(['hvo_siljeg:26-89']);
         // BB1 p.487, BB2 p.536: Boric first, relieved after Grmec-94; the 2026-03-15 order was reversed.
         expect(span('vrs_2nd_krajina')).toEqual(['vrs_boric:0-135', 'vrs_tomanic:135-end']);

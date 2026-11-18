@@ -11,15 +11,16 @@
       { "officer_id": "arbih_s_delic", "tenure_start": 132, "tenure_end": null, "historical_fate": "survived", "source": "BB1 pp.384, 388 (commanding in 1995); start UNCONFIRMED, shipped turn 132" } ] },
     "arbih_3rd_corps": { "schedule": [
       { "officer_id": "arbih_hadzihasanovic", "tenure_start": 24, "tenure_end": 82, "historical_fate": "survived", "source": "ICTY Hadzihasanovic & Kubura TJ IT-01-47-T paras 2, 330 (commander until 1 Nov 1993); BB1 p.491" },
-      { "officer_id": "arbih_alagic", "tenure_start": 82, "tenure_end": 91, "historical_fate": "survived", "source": "ICTY Hadzihasanovic & Kubura TJ IT-01-47-T para 340 (replaced Hadzihasanovic 1 Nov 1993); BB1 p.491; end UNCONFIRMED (Wikipedia Jan 1994)" },
-      { "officer_id": "arbih_mahmuljin", "tenure_start": 110, "tenure_end": null, "historical_fate": "survived", "source": "BB1 p.491 (3rd Corps 1994-97); BB1 p.384; start UNCONFIRMED, shipped turn 110" } ] },
+      { "officer_id": "arbih_alagic", "tenure_start": 82, "tenure_end": 99, "historical_fate": "survived", "source": "ICTY Hadzihasanovic & Kubura TJ IT-01-47-T paras 2, 330, 340 (replaced Hadzihasanovic 1 Nov 1993); ICTY Delic TJ IT-04-83-T para 117 and fn 294 (Ex. 331: Izetbegovic's order of 26 Feb 1994 appointed the new 3rd and 7th Corps commanders); BB1 p.491" },
+      { "officer_id": "arbih_mahmuljin", "tenure_start": 99, "tenure_end": null, "historical_fate": "survived", "source": "ICTY Delic TJ IT-04-83-T para 117 and fn 294 (appointed in early 1994 by the order of 26 Feb 1994, held the post until the end of the war); BB1 p.491 (3rd Corps 1994-97); BB1 p.384" } ] },
     "arbih_4th_corps": { "schedule": [
-      { "officer_id": "arbih_pasalic", "tenure_start": 24, "tenure_end": 80, "historical_fate": "survived", "source": "BB2 p.433 (in post Apr 1993); end UNCONFIRMED (Wikipedia 6 Nov 1993, uncited), shipped turn 80. No sourced successor in the pool" } ] },
+      { "officer_id": "arbih_pasalic", "tenure_start": 24, "tenure_end": 80, "historical_fate": "survived", "source": "ICTY Prlic et al. TJ IT-04-74-T Vol.2 para 709 (corps formed 17 Nov 1992 under Pasalic); ICTY Halilovic TJ IT-01-48-T fn 687 (Ex. 129: still in command 8 Oct 1993, turn 78); BB2 p.433; end UNCONFIRMED (Wikipedia and herojimostara.ba: 6 Nov 1993, turn 83), shipped turn 80" },
+      { "officer_id": "arbih_drekovic", "tenure_start": 91, "tenure_end": 174, "historical_fate": "survived", "source": "Start: his sworn testimony in the Court of BiH (Memic et al.), appointed 4th Corps commander in January 1994 (BIRN, 20 Jan 2014). In command 21 May - 7 Jun 1995 (turn 165): Court of BiH S1 1 K 012247 19 Kri (acquitted 2023; his post was not in dispute). End UNCONFIRMED: herojimostara.ba (left mid-1995; Polutak from August 1995, turn 174). Turns 83-91 (Budakovic) and 174 on (Polutak) are named only in tier-C sources and stay with the pool fallback" } ] },
     "arbih_5th_corps": { "schedule": [
       { "officer_id": "arbih_drekovic", "tenure_start": 24, "tenure_end": 80, "historical_fate": "survived", "source": "BB1 p.149, p.166 n.202 (5th Corps formed 20 Oct 1992 under Drekovic); end UNCONFIRMED (Wikipedia 1 Nov 1993, uncited), shipped turn 80" },
       { "officer_id": "arbih_dudakovic", "tenure_start": 80, "tenure_end": null, "historical_fate": "survived", "source": "BB1 p.491 (5th Corps 1993-97); start follows Drekovic's shipped end" } ] },
     "arbih_7th_corps": { "schedule": [
-      { "officer_id": "arbih_alagic", "tenure_start": 99, "tenure_end": null, "historical_fate": "survived", "source": "ICTY IT-01-47 case information sheet (appointed 26 Feb 1994); BB1 p.491; BB1 pp.380, 382" } ] },
+      { "officer_id": "arbih_alagic", "tenure_start": 99, "tenure_end": null, "historical_fate": "survived", "source": "ICTY Delic TJ IT-04-83-T para 117 and fn 294 (Ex. 331: Izetbegovic's order of 26 Feb 1994); ICTY IT-01-47 case information sheet (appointed 26 Feb 1994); BB1 p.491; BB1 pp.380, 382" } ] },
     "vrs_1st_krajina": { "schedule": [
       { "officer_id": "vrs_talic", "tenure_start": 0, "tenure_end": null, "historical_fate": "survived", "source": "BB1 p.487 (1st Krajina Corps 1992-97); ICTY Brdjanin TJ IT-99-36-T" } ] },
     "vrs_2nd_krajina": { "schedule": [
@@ -37,11 +38,13 @@
     "vrs_herzegovina": { "schedule": [
       { "officer_id": "vrs_grubac", "tenure_start": 0, "tenure_end": null, "historical_fate": "survived", "source": "BB1 p.488 (Herzegovina Corps 1992-96); BB1 p.156; BB2 p.459" } ] },
     "hvo_central_bosnia": { "schedule": [
-      { "officer_id": "hvo_blaskic", "tenure_start": 12, "tenure_end": 120, "historical_fate": "survived", "source": "ICTY Blaskic TJ IT-95-14-T para 745 (designated 27 Jun 1992); BB2 p.427; end UNCONFIRMED, shipped turn 120 (para 493: Deputy Chief of Staff in 1994, undated)" } ] },
+      { "officer_id": "hvo_blaskic", "tenure_start": 12, "tenure_end": 113, "historical_fate": "survived", "source": "ICTY Blaskic TJ IT-95-14-T para 745 (designated 27 Jun 1992); BB2 p.427. Still Central Bosnia OZ commander on 14 Feb 1994 (turn 97): ICTY Prlic et al. TJ IT-04-74-T Vol.1 fn 1848. HVO Deputy Chief of Staff by June 1994: Blaskic TJ para 493. The day is not known; 113 (1 Jun 1994) is the latest turn the sources allow, and the shipped 120 was past it" } ] },
+    "hvo_southeast_herzegovina": { "schedule": [
+      { "officer_id": "hvo_lasic", "tenure_start": 10, "tenure_end": null, "historical_fate": "survived", "source": "ICTY Prlic et al. TJ IT-04-74-T Vol.1 para 783 and fn 1838 (South-East Herzegovina OZ commander 'between at least 28 October 1992 and 11 January 1994'), para 784; Vol.2 para 703. Start is the OZ's first turn (oob_corps available_from 10). End UNCONFIRMED: 11 Jan 1994 is the last attestation, not a departure, and no source names a successor, so the tenure runs on (shipped availability)" } ] },
     "hvo_tomislavgrad": { "schedule": [
       { "officer_id": "hvo_tole", "tenure_start": 10, "tenure_end": 26, "historical_fate": "survived", "source": "ICTY Prlic et al. TJ IT-04-74-T Vol.2 para 13 (his successor from October 1992)" },
       { "officer_id": "hvo_siljeg", "tenure_start": 26, "tenure_end": 89, "historical_fate": "survived", "source": "ICTY Prlic et al. TJ IT-04-74-T Vol.2 para 13 (North-West OZ from October 1992 until 20 December 1993; first October turn)" },
-      { "officer_id": "hvo_skender", "tenure_start": 89, "tenure_end": 143, "historical_fate": "survived", "source": "UNCONFIRMED: docs/knowledge/WIKIPEDIA_OOB_CROSS_REFERENCE.md:391 (93-94); start follows Siljeg's sourced end" },
+      { "officer_id": "hvo_skender", "tenure_start": 89, "tenure_end": 143, "historical_fate": "survived", "source": "ICTY Prlic et al. TJ IT-04-74-T Vol.1 fn 1840 (commander 'between at least December 1993 and 24 February 1994'); start follows Siljeg's sourced end; end UNCONFIRMED (docs/knowledge/WIKIPEDIA_OOB_CROSS_REFERENCE.md:391, 93-94), shipped turn 143" },
       { "officer_id": "hvo_glasnovic", "tenure_start": 143, "tenure_end": null, "historical_fate": "survived", "source": "BB1 p.490 (Tomislavgrad Corps District 1995); BB1 p.418; first 1995 turn" } ] }
   }
 }
