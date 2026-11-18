@@ -459,6 +459,9 @@ function validateEventRow(row: unknown, filename: string, rowIndex: number): voi
     if (hasOwn(row, 'requires_player_response')) {
         validateOptionalBoolean(row.requires_player_response, 'requires_player_response', filename, rowIndex);
     }
+    if (hasOwn(row, 'authored_by_choice')) {
+        validateOptionalBoolean(row.authored_by_choice, 'authored_by_choice', filename, rowIndex);
+    }
     // Optional documentary-realism illustration key (EventModal renders it when an
     // asset resolves; absent → text-only). Validated as a non-empty string only —
     // the asset itself need not exist on disk yet (the UI degrades gracefully).
@@ -855,6 +858,169 @@ export function validateAllianceEffectParties(rows: EventDefinition[]): void {
         throw new Error(
             `Alliance effect on a row keyed to a faction that is not a party of the RBiH-HRHB alliance: ${violations.join(', ')}`,
         );
+    }
+}
+
+/**
+ * Closed allowlist for `validateWarCrimeAuthorship`'s negative-standing check: authored rows
+ * that still carry their own negative international_standing shift. Only
+ * `csq_accelerated_camps_discovery_1992` (RS −10), whose shift §6 E3c strips when the authored
+ * ceiling makes it a double count (lane-lead decision 2026-11-18, option (a)). The list may only
+ * shrink: tests/s6_e3b_loader_rule.test.ts fails once an entry no longer matches.
+ */
+export const AUTHORED_NEGATIVE_STANDING_ALLOWLIST: ReadonlySet<string> = new Set([
+    'csq_accelerated_camps_discovery_1992',
+]);
+
+const FLAG_READING_CONDITION_TYPES: ReadonlySet<string> = new Set(['flag_equals', 'flag_not_set', 'flag_at_least']);
+
+/** Flags written by any response option's `sets_flags`: the state a choice leaves behind. */
+export function choiceWrittenFlags(rows: readonly EventDefinition[]): Set<string> {
+    const flags = new Set<string>();
+    for (const row of rows) {
+        for (const option of row.response_options ?? []) {
+            if (!isObject(option.sets_flags)) continue;
+            for (const key of Object.keys(option.sets_flags)) flags.add(key);
+        }
+    }
+    return flags;
+}
+
+/** What a condition tree reads that a choice can set: choice-written flags and `paramilitary_*` conditions. */
+function collectChoiceReads(condition: unknown, choiceFlags: ReadonlySet<string>, out: Set<string>): void {
+    if (!isObject(condition)) return;
+    const type = typeof condition.type === 'string' ? condition.type : '';
+    if (FLAG_READING_CONDITION_TYPES.has(type) && typeof condition.flag === 'string' && choiceFlags.has(condition.flag)) {
+        out.add(condition.flag);
+    }
+    if (type.startsWith('paramilitary_')) out.add(type);
+    if (Array.isArray(condition.conditions)) {
+        for (const entry of condition.conditions) collectChoiceReads(entry, choiceFlags, out);
+    }
+    collectChoiceReads(condition.condition, choiceFlags, out);
+}
+
+function hasWarCrimesDelta(...effectSources: unknown[]): boolean {
+    for (const source of effectSources) {
+        const list = Array.isArray(source) ? source : source ? [source] : [];
+        if (list.some((effect) => isObject(effect) && typeof effect.war_crimes_delta === 'number' && effect.war_crimes_delta > 0)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+function hasNegativeStandingShift(shifts: unknown): boolean {
+    return Array.isArray(shifts) && shifts.some((shift) =>
+        isObject(shift) && shift.dimension === 'international_standing' && typeof shift.delta === 'number' && shift.delta < 0);
+}
+
+export interface WarCrimeAuthorshipIssues {
+    /** War-crimes rows whose trigger or prerequisites read a choice (sorted ids). */
+    choiceDependent: string[];
+    /** Choice-dependent rows that declare no `authored_by_choice`, with what they read. */
+    unclassified: string[];
+    /** Authored rows or options carrying a negative international_standing shift. */
+    negativeStanding: string[];
+    /** Authored rows whose negative shift the closed allowlist holds. */
+    allowlisted: string[];
+    /** `authored_by_choice` on a row that books no war-crimes delta. */
+    strayClassification: string[];
+    /** Response options carrying a war-crimes delta (authored by default), `event#option`. */
+    authoredOptions: string[];
+}
+
+/**
+ * §6 E3b loader rule (ruling 2026-11-17, signed 6/6). A row that books a `war_crimes_delta`
+ * and whose trigger — or any prerequisite, transitively over `trigger.requires_events` — reads a
+ * flag some response option writes (`sets_flags`), or a `paramilitary_*` condition, depends on a
+ * choice, so it must say whether its firing is an incident its side authorized
+ * (`authored_by_choice: true`) or a historical record that would happen regardless (`false`).
+ * Every option-level `war_crimes_delta` is authored. An authored row or option may not carry a
+ * negative international_standing shift (game-designer condition: the authored count is the
+ * standing cost, E3c), save the closed `AUTHORED_NEGATIVE_STANDING_ALLOWLIST`.
+ *
+ * Shipped classifications: `csq_accelerated_camps_discovery_1992` true (it fires only on RS's
+ * "aggressive" goals); `un_hostage_crisis_1995` false (it fires under all three RS goals);
+ * `ahmici_massacre_1993` false (lane lead 2026-11-18, under SHDG §6 "Record (Ahmići windows and
+ * H6, 2026-11-16)": no surface may present a withheld Ahmići card as restraint, a better outcome
+ * or a spared village; the H6 exclusion is truthfulness to the modelled war, Ring 3 #11, not a
+ * choice to commit or avoid the crime).
+ */
+export function findWarCrimeAuthorshipIssues(rows: readonly EventDefinition[]): WarCrimeAuthorshipIssues {
+    const choiceFlags = choiceWrittenFlags(rows);
+    const byId = new Map(rows.map((row) => [row.id, row]));
+    const issues: WarCrimeAuthorshipIssues = {
+        choiceDependent: [],
+        unclassified: [],
+        negativeStanding: [],
+        allowlisted: [],
+        strayClassification: [],
+        authoredOptions: [],
+    };
+
+    /** What `id`'s trigger reads, and each prerequisite's, as `read` or `read via a>b`. */
+    const choiceReads = (id: string): string[] => {
+        const found: string[] = [];
+        const visited = new Set<string>();
+        const visit = (current: string, chain: string[]): void => {
+            if (visited.has(current)) return;
+            visited.add(current);
+            const row = byId.get(current);
+            if (!row) return;
+            const reads = new Set<string>();
+            collectChoiceReads(row.trigger?.condition, choiceFlags, reads);
+            for (const read of [...reads].sort(strictCompare)) {
+                found.push(chain.length === 0 ? read : `${read} via ${chain.join('>')}`);
+            }
+            for (const prerequisite of [...(row.trigger?.requires_events ?? [])].sort(strictCompare)) {
+                visit(prerequisite, [...chain, prerequisite]);
+            }
+        };
+        visit(id, []);
+        return found;
+    };
+
+    for (const row of [...rows].sort((a, b) => strictCompare(a.id, b.id))) {
+        const rowCarriesDelta = hasWarCrimesDelta(row.effect, row.effects);
+        const classification = (row as { authored_by_choice?: unknown }).authored_by_choice;
+        if (!rowCarriesDelta) {
+            if (classification !== undefined) issues.strayClassification.push(row.id);
+        } else {
+            const reads = choiceReads(row.id);
+            if (reads.length > 0) {
+                issues.choiceDependent.push(row.id);
+                if (typeof classification !== 'boolean') issues.unclassified.push(`${row.id} (reads ${reads.join(', ')})`);
+            }
+            if (classification === true && hasNegativeStandingShift(row.dimension_shifts)) {
+                if (AUTHORED_NEGATIVE_STANDING_ALLOWLIST.has(row.id)) issues.allowlisted.push(row.id);
+                else issues.negativeStanding.push(row.id);
+            }
+        }
+        for (const option of row.response_options ?? []) {
+            if (!hasWarCrimesDelta((option as { effect?: unknown }).effect, option.effects)) continue;
+            const key = `${row.id}#${option.id}`;
+            issues.authoredOptions.push(key);
+            if (hasNegativeStandingShift(option.dimension_shifts)) issues.negativeStanding.push(key);
+        }
+    }
+    return issues;
+}
+
+export function validateWarCrimeAuthorship(rows: readonly EventDefinition[]): void {
+    const issues = findWarCrimeAuthorshipIssues(rows);
+    const problems: string[] = [];
+    if (issues.unclassified.length > 0) {
+        problems.push(`war-crimes row reads a choice but declares no authored_by_choice: ${issues.unclassified.join(', ')}`);
+    }
+    if (issues.negativeStanding.length > 0) {
+        problems.push(`authored war-crimes row or option carries a negative international_standing shift: ${issues.negativeStanding.join(', ')}`);
+    }
+    if (issues.strayClassification.length > 0) {
+        problems.push(`authored_by_choice on a row with no war_crimes_delta: ${issues.strayClassification.join(', ')}`);
+    }
+    if (problems.length > 0) {
+        throw new Error(`War-crimes authorship (§6 E3b) in required event catalog: ${problems.join('; ')}`);
     }
 }
 
@@ -1305,6 +1471,7 @@ export function loadEventDefinitionsFromDir(scenarioStartWeek: number, eventsDir
     // ─── Phase B Sub-slice B1 catalog-level passes. ────────────────────────
     validateCrossFactionOptionIds(allEvents);
     validateAllianceEffectParties(allEvents);
+    validateWarCrimeAuthorship(allEvents);
     validateRing3EnablingRejection(allEvents);
     validateRuptureForeclosurePolicy(allEvents);
     validateForbiddenFamilyExclusions(allEvents);
