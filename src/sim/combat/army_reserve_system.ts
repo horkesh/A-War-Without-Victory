@@ -75,6 +75,8 @@ import {
 } from './historical_elite_reservations.js';
 import { isVlasicCohaExceptionOperation } from './coha_operation_exception.js';
 import { strictCompare } from '../../state/validateGameState.js';
+import { effectivePersonnel } from './tactical_group_personnel.js';
+import { isSectorRosterEligibleFormation } from './sector_roster_eligibility.js';
 import { selectStaffControlledFactions } from '../bot/staff_control.js';
 import { getPrimaryOperation } from './corps_operation_helpers.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
@@ -259,9 +261,19 @@ function getAvailableElites(state: GameState, faction: string, turn: number): Fo
     return Object.keys(formations)
         .filter(fid => {
             const f = formations[fid];
-            return f.faction === faction && isEliteAvailableForLoan(f, turn);
+            return f.faction === faction && isEliteAvailableForLoan(f, turn) && isEliteFitForGenericLoan(f);
         })
         .sort(strictCompare);
+}
+
+/**
+ * Ruling D step 4a (2026-11-17): Army HQ's generic requests offer only an elite the loan tick would
+ * not recall at once. A generic loan below ELITE_MORALE_RECALL or ELITE_COHESION_RECALL was accepted
+ * and recalled the same turn, then re-offered after the cooldown (the VRS elites on Drina,
+ * t150-t187, every 4 turns). Authored operations keep their own path; the tick exempts them.
+ */
+function isEliteFitForGenericLoan(f: FormationState): boolean {
+    return (f.morale ?? 60) >= ELITE_MORALE_RECALL && (f.cohesion ?? 50) >= ELITE_COHESION_RECALL;
 }
 
 function describeCorpsNeed(
@@ -331,6 +343,49 @@ function sortedCorpsSectors(state: GameState, corpsId: string): CorpsFrontSector
     return Object.values(state.military.corps_front_sectors ?? {})
         .filter((sector) => sector.corps_id === corpsId)
         .sort((a, b) => strictCompare(a.sector_id, b.sector_id));
+}
+
+/**
+ * Local force ratio of a sector for the army-reserve gap check (package P2 step 2b, 2026-11-16):
+ * hostile personnel standing on the sector's enemy-side cells ÷ the effective personnel of the
+ * brigades assigned to the sector. `CorpsFrontSector.threat_ratio` is a sector pressure index,
+ * not a force ratio (whole-sector enemy men over own weighted men PER EDGE), so it grows with
+ * sector length: 82% of RS sector-turns read above 5.5 and every RS corps requested at the
+ * priority cap. The ratified gap rule ("threat above 2", breach first) needs a real ratio.
+ * An unstaffed sector returns Infinity when enemies face it (it is also flagged unstaffed).
+ */
+function sectorLocalForceRatio(
+    state: GameState,
+    sector: CorpsFrontSector,
+    faction: FactionId,
+    hostileByOsid: Map<string, number>,
+): number {
+    const enemyOsids = new Set<string>();
+    for (const subSegment of sector.sub_segments ?? []) {
+        for (const osid of subSegment.enemy_osids ?? []) enemyOsids.add(osid);
+    }
+    let enemy = 0;
+    for (const osid of enemyOsids) enemy += hostileByOsid.get(osid) ?? 0;
+    let own = 0;
+    for (const id of sector.assigned_brigade_ids) {
+        const f = state.military.formations?.[id];
+        if (f && f.status === 'active' && f.faction === faction) own += effectivePersonnel(f);
+    }
+    if (own > 0) return enemy / own;
+    return enemy > 0 ? Infinity : 0;
+}
+
+/** Hostile (not this faction, not an ally) roster-eligible personnel by location OSID. */
+function hostilePersonnelByOsid(state: GameState, faction: FactionId): Map<string, number> {
+    const byOsid = new Map<string, number>();
+    const formations = state.military.formations ?? {};
+    for (const id of Object.keys(formations).sort(strictCompare)) {
+        const f = formations[id]!;
+        if (!f.location_osid || f.faction === faction || isFriendlyFaction(f.faction, faction, state)) continue;
+        if (!isSectorRosterEligibleFormation(f)) continue;
+        byOsid.set(f.location_osid, (byOsid.get(f.location_osid) ?? 0) + effectivePersonnel(f));
+    }
+    return byOsid;
 }
 
 function sectorFrontOsids(sector: CorpsFrontSector): string[] {
@@ -499,6 +554,18 @@ function resolveEliteDeploymentTarget(
     const faction = formation.faction;
     const sectors = sortedCorpsSectors(state, corpsId);
     const sectorById = new Map(sectors.map((sector) => [sector.sector_id, sector]));
+    // A defensive-gap loan reinforces the sector its request chose (breach first), unless the elite
+    // is already a participant of a live operation (package P2 step 2, Codex review on #774).
+    const defendSectorId = formation.elite_loan_state?.on_loan === true
+        && formation.elite_loan_state.loaned_to_corps === corpsId
+        ? formation.elite_loan_state.defend_sector_id : undefined;
+    const participatesInOperation = (state.military.corps_command?.[corpsId]?.active_operations ?? [])
+        .some((op) => (op.phase === 'planning' || op.phase === 'execution') && op.participating_brigades?.includes(brigadeId));
+    if (defendSectorId && !participatesInOperation) {
+        const defendSector = sectorById.get(defendSectorId);
+        const target = defendSector ? firstFriendlySectorOsid(state, faction, brigadeId, defendSector) : null;
+        if (target) return target;
+    }
     const operation = pickActiveOperation(state, corpsId, brigadeId);
     if (operation) {
         const axis = pickOperationAxis(operation, brigadeId);
@@ -839,6 +906,7 @@ export function generateArmyReserveRequests(
         let bestCommanderBrigadesNeeded: number | undefined;
         let bestCommanderFocusZoneId: string | undefined;
         let bestSectorThreatRatio: number | undefined;
+        let bestSectorId: string | undefined;
         let bestSectorAssignedBrigadeCount: number | undefined;
         let bestOperationName: string | undefined;
         let bestOperationPhase: string | undefined;
@@ -866,6 +934,7 @@ export function generateArmyReserveRequests(
                 bestRawPriority = rawPriority;
                 bestDescription = `Op "${op.name}" (${op.phase === 'execution' ? 'execution' : op.preparation_sub_phase}) — elite deployment for offensive`;
                 bestSectorThreatRatio = undefined;
+                bestSectorId = undefined;
                 bestSectorAssignedBrigadeCount = undefined;
                 bestOperationName = op.name;
                 bestOperationPhase = op.phase;
@@ -875,15 +944,38 @@ export function generateArmyReserveRequests(
             }
         }
 
-        // 2. Defensive gap — any sector with threat_ratio > 2.0 and ≤ 1 brigade
-        if (sector && sector.threat_ratio > 2.0 && sector.assigned_brigade_ids.length <= 1) {
-            const rawPriority = Math.min(85, 50 + (sector.threat_ratio - 2.0) * 10);
-            if (rawPriority > bestRawPriority) {
+        // 2. Defensive gap (package P2 step 2, 2026-11-16; was: the corps' FIRST sector only, with
+        // threat > 2.0 AND at most 1 brigade). Every sector of the corps is read. A sector is a gap
+        // when its threat ratio is above 2.0, when it fronts a cell this faction lost in combat in the
+        // last 2 turns, or when it is an unstaffed front. The breached sector ranks first, then the
+        // unstaffed one, then the most threatened. A gap outranks offensive support: defence first.
+        const lostCells = (state.political?.control_events ?? [])
+            .filter((e) => e.mechanism === 'combat' && e.from === corpsFaction && e.to !== corpsFaction && e.turn >= turn - 2)
+            .map((e) => e.settlement_id);
+        let gapSector: CorpsFrontSector | undefined;
+        let gapScore = -Infinity;
+        let gapRatio = 0;
+        const hostileByOsid = hostilePersonnelByOsid(state, corpsFaction);
+        for (const candidate of Object.keys(corpsSectors).sort(strictCompare).map((k) => corpsSectors[k]!).filter((s) => s.corps_id === corpsId)) {
+            const front = new Set(sectorFrontOsids(candidate));
+            const breached = lostCells.some((cell) => (adjacency.get(cell as Osid) ?? []).some((n) => front.has(n)));
+            const unstaffed = candidate.unstaffed_front === true;
+            // Step 2b: a real local force ratio, not the sector pressure index (threat_ratio).
+            const ratio = sectorLocalForceRatio(state, candidate, corpsFaction, hostileByOsid);
+            if (!(ratio > 2.0 || breached || unstaffed)) continue;
+            const score = (breached ? 2e6 : 0) + (unstaffed ? 1e6 : 0) + Math.min(ratio, 1e5);
+            if (score > gapScore) { gapScore = score; gapSector = candidate; gapRatio = ratio; }
+        }
+        if (gapSector) {
+            const sector = gapSector;
+            const rawPriority = Math.max(bestRawPriority, Math.min(85, 50 + Math.max(0, Math.min(gapRatio, 1e3) - 2.0) * 10));
+            {
                 bestReason = 'defensive_gap';
                 bestProvenanceDriver = 'sector_threat';
                 bestRawPriority = rawPriority;
-                bestDescription = `Sector threat ratio ${sector.threat_ratio.toFixed(1)} with only ${sector.assigned_brigade_ids.length} brigade(s) — line is thin`;
+                bestDescription = `Sector force ratio ${Number.isFinite(gapRatio) ? gapRatio.toFixed(1) : 'unopposed'} with only ${sector.assigned_brigade_ids.length} brigade(s) — line is thin`;
                 bestSectorThreatRatio = sector.threat_ratio;
+                bestSectorId = sector.sector_id;
                 bestSectorAssignedBrigadeCount = sector.assigned_brigade_ids.length;
                 bestOperationName = undefined;
                 bestOperationPhase = undefined;
@@ -905,6 +997,7 @@ export function generateArmyReserveRequests(
                     bestRawPriority = rawPriority;
                     bestDescription = `Op "${op.name}" captured ${objectiveCaptureCount} objective${objectiveCaptureCount === 1 ? '' : 's'} — elite needed to exploit gains`;
                     bestSectorThreatRatio = undefined;
+                    bestSectorId = undefined;
                     bestSectorAssignedBrigadeCount = undefined;
                     bestOperationName = op.name;
                     bestOperationPhase = op.phase;
@@ -935,6 +1028,7 @@ export function generateArmyReserveRequests(
                 bestCommanderBrigadesNeeded = commanderNeed.brigadesNeeded;
                 bestCommanderFocusZoneId = commanderNeed.focusZoneId;
                 bestSectorThreatRatio = undefined;
+                bestSectorId = undefined;
                 bestSectorAssignedBrigadeCount = undefined;
                 bestOperationName = undefined;
                 bestOperationPhase = undefined;
@@ -993,6 +1087,7 @@ export function generateArmyReserveRequests(
                 commander_request_brigades_needed: bestCommanderBrigadesNeeded,
                 commander_focus_zone_id: bestCommanderFocusZoneId,
                 sector_threat_ratio: bestSectorThreatRatio,
+                ...(bestReason === 'defensive_gap' && bestSectorId ? { sector_id: bestSectorId } : {}),
                 sector_assigned_brigade_count: bestSectorAssignedBrigadeCount,
                 operation_name: bestOperationName,
                 operation_phase: bestOperationPhase,
@@ -1094,6 +1189,8 @@ export function deployEliteLoan(
          * auto-join cannot also attach it to an unrelated concurrent operation.
          */
         auto_join_operation?: boolean;
+        /** The defensive-gap sector the request chose; recorded on the loan for deployment. */
+        defend_sector_id?: string;
     },
 ): boolean {
     const f = state.military.formations?.[brigadeId];
@@ -1107,6 +1204,8 @@ export function deployEliteLoan(
     ls.loaned_to_corps = corpsId;
     ls.loan_start_turn = turn;
     ls.loan_start_personnel = f.personnel ?? 0;
+    if (reason === 'defensive_gap' && options?.defend_sector_id) ls.defend_sector_id = options.defend_sector_id;
+    else delete ls.defend_sector_id;
     if (!f.base_osid) {
         f.base_osid = f.location_osid ?? f.home_osid;
     }
@@ -1368,6 +1467,7 @@ export function evaluateArmyReserveAssignments(
                 'Army CO accepted: nearest available elite can reinforce in time.',
                 'army_ai',
                 adjacency,
+                req.sector_id ? { defend_sector_id: req.sector_id } : undefined,
             );
             if (!deployed) {
                 remaining.push(req);
@@ -1393,7 +1493,7 @@ export function evaluateArmyReserveAssignments(
 
         // Verify the suggested brigade is still available (another request may have claimed it)
         const f = state.military.formations?.[brigadeId];
-        if (!f || !isEliteAvailableForLoan(f, turn) || req.travel_hops > MAX_AUTO_DEPLOY_HOPS
+        if (!f || !isEliteAvailableForLoan(f, turn) || !isEliteFitForGenericLoan(f) || req.travel_hops > MAX_AUTO_DEPLOY_HOPS
             || !canEliteLoanReachCorpsTerritory(state, brigadeId, req.corps_id, adjacency)
             || (brigadeId === 'arbih_guards_brigade'
                 && !resolveEliteDeploymentTarget(state, f, brigadeId, req.corps_id, adjacency))) {
@@ -1416,6 +1516,7 @@ export function evaluateArmyReserveAssignments(
             'Army CO accepted: request aligns with current operational priorities.',
             'army_ai',
             adjacency,
+            req.sector_id ? { defend_sector_id: req.sector_id } : undefined,
         );
         if (!deployed) {
             remaining.push(req);

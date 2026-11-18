@@ -412,9 +412,12 @@ describe('empty reachable same-corps sector donor movement authority', () => {
             { threatened_zones: [], global_threat_level: 'low' } as any,
             null,
         );
+        // Package P2 step 1 (Codex review on #774): an empty-sector relief order carries its tag, which
+        // lets the relief march release a dug-in donor (`isEmptySectorReliefColumnOrder`).
         expect(output.directive.sector_reassignment_orders).toEqual([{
             brigade_id: 'donor_brigade',
             to_sector_id: fixture.emptySector.sector_id,
+            empty_sector_relief: true,
         }]);
 
         // ── T2: the reassignment becomes a column destination, still without a move ──

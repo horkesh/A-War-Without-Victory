@@ -26,6 +26,7 @@ function minState(): GameState {
 
 describe('evaluateCondition — new v0.6.0 condition types', () => {
     // supply_below / supply_above condition tests: retired 2026-11-17 (supply is connection, not stock)
+    // corridor_severed condition tests: retired 2026-11-18 (the condition is gone; the loader rejects it, see tests/events_corridor_severed_retired.test.ts)
 
     it('flag_equals: matches set flag', () => {
         const state = minState();
@@ -163,53 +164,5 @@ describe('evaluateCondition — new v0.6.0 condition types', () => {
     it('enclave_supply_status: false when no supply data', () => {
         const state = minState();
         expect(evaluateCondition({ type: 'enclave_supply_status', municipality: 'srebrenica', status: 'critical' }, state)).toBe(false);
-    });
-
-    // ── corridor_severed (v0.7.0) ────────────────────────────────────
-
-    it('corridor_severed: true when enemy OSID blocks path', () => {
-        const state = minState();
-        state.political.political_controllers = {
-            'op:a:a_1': 'RBiH',
-            'op:a:a_2': 'RS', // blocks path
-            'op:a:a_3': 'RBiH',
-        };
-        const edges = [
-            { a: 'op:a:a_1', b: 'op:a:a_2' },
-            { a: 'op:a:a_2', b: 'op:a:a_3' },
-        ] as any;
-        expect(evaluateCondition({ type: 'corridor_severed', from_osid: 'op:a:a_1', to_osid: 'op:a:a_3', faction: 'RBiH' }, state, edges)).toBe(true);
-    });
-
-    it('corridor_severed: false when path exists through friendly territory', () => {
-        const state = minState();
-        state.political.political_controllers = {
-            'op:a:a_1': 'RBiH',
-            'op:a:a_2': 'RBiH',
-            'op:a:a_3': 'RBiH',
-        };
-        const edges = [
-            { a: 'op:a:a_1', b: 'op:a:a_2' },
-            { a: 'op:a:a_2', b: 'op:a:a_3' },
-        ] as any;
-        expect(evaluateCondition({ type: 'corridor_severed', from_osid: 'op:a:a_1', to_osid: 'op:a:a_3', faction: 'RBiH' }, state, edges)).toBe(false);
-    });
-
-    it('corridor_severed: true when start OSID not held by faction', () => {
-        const state = minState();
-        state.political.political_controllers = {
-            'op:a:a_1': 'RS',
-            'op:a:a_3': 'RBiH',
-        };
-        expect(evaluateCondition({ type: 'corridor_severed', from_osid: 'op:a:a_1', to_osid: 'op:a:a_3', faction: 'RBiH' }, state)).toBe(true);
-    });
-
-    it('corridor_severed: false when no edges (cannot evaluate)', () => {
-        const state = minState();
-        state.political.political_controllers = {
-            'op:a:a_1': 'RBiH',
-            'op:a:a_3': 'RBiH',
-        };
-        expect(evaluateCondition({ type: 'corridor_severed', from_osid: 'op:a:a_1', to_osid: 'op:a:a_3', faction: 'RBiH' }, state)).toBe(false);
     });
 });
