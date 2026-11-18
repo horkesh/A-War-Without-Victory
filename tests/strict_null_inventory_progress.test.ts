@@ -826,7 +826,10 @@ describe('strict null inventory progress', () => {
             // removed. 600 -> 599.
             // Package P2 (2026-11-17): CorpsDirective.sector_reassignment_orders[].empty_sector_relief,
             // set only on an empty-sector relief order. No new type escape. 599 -> 600.
-            optional_fields_game_state: 600,
+            // RB9 (2026-11-16): HostileTakeoverTimerState.dormant_since_turn / cumulative_routed /
+            // return_hold_since_turn / cumulative_pool_cut and DisplacementEvent.returned, absent on every
+            // timer and event before RB9. No new type escape. 600 -> 605.
+            optional_fields_game_state: 605,
         });
         // Reason-code instrumentation (item 3): +1, `OperationAxis.launch_blocker_detail`.
         // `classifyDomain` routes it to `sim` on the /Corps|Operation/ interface-name rule,
@@ -845,13 +848,14 @@ describe('strict null inventory progress', () => {
         // A2b: +1 state (RbihHrhbState.refugee_compact_suspended_until). 599 -> 600 / state 223 -> 224.
         // Sep-1991 peace start retired (v40): -1 state (StateMeta.peace_war_start_control_path). 600 -> 599 / state 224 -> 223.
         // Package P2: +1 sim (CorpsDirective.sector_reassignment_orders[].empty_sector_relief). 599 -> 600 / sim 366 -> 367.
-        expect(current.optional_field_domains.total).toBe(600);
+        // RB9: +5 state (four HostileTakeoverTimerState fields and DisplacementEvent.returned). 600 -> 605 / state 223 -> 228.
+        expect(current.optional_field_domains.total).toBe(605);
         expect(current.optional_field_domains.domain_counts).toMatchObject({
             derived: 10,
             ipc: 0,
             scenario: 0,
             sim: 367,
-            state: 223,
+            state: 228,
             ui_adapter: 0,
             unknown: 0,
         });

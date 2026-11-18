@@ -4681,6 +4681,20 @@ export function validateGameStateShape(
                     if (rec.cause !== undefined && rec.cause !== 'policy_expulsion') {
                         errors.push(`displacement.hostile_takeover_timers.${munId}.cause must be 'policy_expulsion' when present`);
                     }
+                    // RB9: optional dormant marker (a fired timer kept only as a record of who was expelled).
+                    if (
+                        rec.dormant_since_turn !== undefined &&
+                        (typeof rec.dormant_since_turn !== 'number' || !Number.isInteger(rec.dormant_since_turn) || rec.dormant_since_turn < 0)
+                    ) {
+                        errors.push(`displacement.hostile_takeover_timers.${munId}.dormant_since_turn must be a non-negative integer when present`);
+                    }
+                    // RB9 return rule: optional routed-survivor count and safe-hold start turn.
+                    for (const field of ['cumulative_routed', 'return_hold_since_turn', 'cumulative_pool_cut'] as const) {
+                        const v = rec[field];
+                        if (v !== undefined && (typeof v !== 'number' || !Number.isInteger(v) || v < 0)) {
+                            errors.push(`displacement.hostile_takeover_timers.${munId}.${field} must be a non-negative integer when present`);
+                        }
+                    }
                 }
             } else {
                 errors.push('displacement.hostile_takeover_timers must be an object (Record<string, HostileTakeoverTimerState>) when present');
