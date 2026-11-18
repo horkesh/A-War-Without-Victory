@@ -112,7 +112,8 @@ interface CliOptions {
      * Played-test options for the President (package "1994-95 attack and defence"), opt-in:
      * `--request-axis <corps>[+<corps>...]:<mun>[,<mun>...]`, `--request-prefer-exhausted on` and
      * `--request-every <weeks>` (1-52; 1 = a sustained weekly push) and `--request-only on` (spend
-     * Authority on Request-ops only). With any of them,
+     * Authority on Request-ops only) and `--request-from <turn>` (no Request-op before that game
+     * turn, e.g. 91 ≈ 1 Jan 1994). With any of them,
      * the output adds `president_requests` (each order joined to its after-action report) and the
      * requested corps' exhaustion per turn. Without them the output is unchanged.
      */
@@ -355,9 +356,15 @@ function parseArgs(argv: string[]): CliOptions {
             const exhaustedRaw = parseEnum(values.get('--request-prefer-exhausted') ?? 'off', ['off', 'on'] as const, '--request-prefer-exhausted');
             const everyRaw = values.get('--request-every');
             const onlyRaw = parseEnum(values.get('--request-only') ?? 'off', ['off', 'on'] as const, '--request-only');
-            if (!axisRaw && exhaustedRaw === 'off' && everyRaw == null && onlyRaw === 'off') return {};
+            const fromRaw = values.get('--request-from');
+            if (!axisRaw && exhaustedRaw === 'off' && everyRaw == null && onlyRaw === 'off' && fromRaw == null) return {};
             if (!presidentArg) {
-                throw new Error('--request-axis / --request-prefer-exhausted / --request-every / --request-only need --president engaged or meddler');
+                throw new Error('--request-axis / --request-prefer-exhausted / --request-every / --request-only / --request-from need --president engaged or meddler');
+            }
+            let requestFrom: number | undefined;
+            if (fromRaw != null) {
+                requestFrom = Number(fromRaw);
+                if (!Number.isInteger(requestFrom) || requestFrom < 0) throw new Error(`--request-from expects a game turn (integer >= 0), got ${fromRaw}`);
             }
             let requestAxis: PresidentPolicyOptions['requestAxis'];
             if (axisRaw) {
@@ -377,6 +384,7 @@ function parseArgs(argv: string[]): CliOptions {
                 ...(exhaustedRaw === 'on' ? { preferExhausted: true } : {}),
                 ...(requestEvery != null ? { requestEvery } : {}),
                 ...(onlyRaw === 'on' ? { requestOnly: true } : {}),
+                ...(requestFrom != null ? { requestFrom } : {}),
             } };
         })(),
     };

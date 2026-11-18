@@ -67,6 +67,8 @@ export interface PresidentPolicyOptions {
     requestEvery?: number;
     /** Spend Authority on Request-ops only: no gestures, Stop-ops or backing. */
     requestOnly?: boolean;
+    /** First game turn (`state.meta.turn`) on which a Request-op may be staged. Absent: from the start. */
+    requestFrom?: number;
 }
 
 /** One staged Request-op, recorded only when a played-test option is set. */
@@ -354,12 +356,14 @@ export async function applyPresidentPolicy(
 ): Promise<void> {
     if (kind === 'hands_off') return;
     const requestEvery = opts?.requestEvery ?? (kind === 'meddler' ? 4 : 8);
+    const requestDue = turnIndex % requestEvery === requestEvery - 1
+        && (opts?.requestFrom === undefined || (state.meta?.turn ?? 0) >= opts.requestFrom);
     if (opts?.requestOnly) {
-        if (turnIndex % requestEvery === requestEvery - 1) await applyRequestOp(state, faction, baseDir, log, opts);
+        if (requestDue) await applyRequestOp(state, faction, baseDir, log, opts);
         return;
     }
     applyGestures(state, faction, eventDefs, log);
-    if (turnIndex % requestEvery === requestEvery - 1) await applyRequestOp(state, faction, baseDir, log, opts);
+    if (requestDue) await applyRequestOp(state, faction, baseDir, log, opts);
     const stopEvery = kind === 'meddler' ? 6 : 12;
     if (turnIndex % stopEvery === stopEvery - 1) stopOpDue = true;
     if (stopOpDue && applyStopOp(state, faction, log) !== 'no_operation') stopOpDue = false;
