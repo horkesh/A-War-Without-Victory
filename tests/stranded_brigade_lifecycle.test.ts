@@ -747,6 +747,74 @@ describe('stranded_brigade_lifecycle', () => {
         });
     });
 
+    describe('garrisoned critical pockets (package P2-L)', () => {
+        // pocket_a -- pocket_b form one cut-off critical pocket, ringed by RS.
+        const adj = new Map<Osid, Osid[]>([
+            ['op:mun:pocket_a' as Osid, ['op:mun:pocket_b', 'op:mun:north'] as Osid[]],
+            ['op:mun:pocket_b' as Osid, ['op:mun:pocket_a', 'op:mun:south'] as Osid[]],
+            ['op:mun:north' as Osid, ['op:mun:pocket_a'] as Osid[]],
+            ['op:mun:south' as Osid, ['op:mun:pocket_b'] as Osid[]],
+        ]);
+        const controllers: Record<string, string | null> = {
+            'op:mun:pocket_a': 'HRHB', 'op:mun:pocket_b': 'HRHB', 'op:mun:north': 'RBiH', 'op:mun:south': 'RBiH',
+        };
+        const supply = { 'op:mun:pocket_a': 'critical', 'op:mun:pocket_b': 'critical' };
+        const sectorIn = (osid: string) => ({ 'sector:hvo_cb': makeSector('hvo_cb', 'HRHB', [osid]) });
+
+        it('two brigades in a pocket holding their corps sector ground are a garrison, not stranded', () => {
+            const formations = {
+                b1: makeBrigade('b1', 'HRHB', 'hvo_cb', 'op:mun:pocket_a'),
+                b2: makeBrigade('b2', 'HRHB', 'hvo_cb', 'op:mun:pocket_b'),
+            };
+            const state = makeState({ formations, corps_front_sectors: sectorIn('op:mun:pocket_b'), political_controllers: controllers, last_supply_state_by_osid: supply });
+            const report = updateStrandedBrigadeLifecycle(state, adj);
+            expect(report.newly_stranded).toEqual([]);
+            expect(formations.b1.stranded_status).toBeUndefined();
+            expect(formations.b1.cohesion).toBe(60);
+        });
+
+        it('a garrison already holding reconnects instead of decaying', () => {
+            const formations = {
+                b1: makeBrigade('b1', 'HRHB', 'hvo_cb', 'op:mun:pocket_a', { stranded_status: 'holding', stranded_since_turn: 3 }),
+                b2: makeBrigade('b2', 'HRHB', 'hvo_cb', 'op:mun:pocket_b', { stranded_status: 'holding', stranded_since_turn: 3 }),
+            };
+            const state = makeState({ formations, corps_front_sectors: sectorIn('op:mun:pocket_a'), political_controllers: controllers, last_supply_state_by_osid: supply });
+            const report = updateStrandedBrigadeLifecycle(state, adj);
+            expect(report.reconnected).toEqual(['b1', 'b2']);
+            expect(report.still_holding).toEqual([]);
+            expect(formations.b1.cohesion).toBe(60);
+        });
+
+        it('a lone brigade in the pocket stays stranded', () => {
+            const formations = { b1: makeBrigade('b1', 'HRHB', 'hvo_cb', 'op:mun:pocket_a') };
+            const state = makeState({ formations, corps_front_sectors: sectorIn('op:mun:pocket_b'), political_controllers: controllers, last_supply_state_by_osid: supply });
+            expect(updateStrandedBrigadeLifecycle(state, adj).newly_stranded).toEqual(['b1']);
+        });
+
+        it('two brigades in a pocket with none of their corps sector ground stay stranded', () => {
+            const formations = {
+                b1: makeBrigade('b1', 'HRHB', 'hvo_cb', 'op:mun:pocket_a'),
+                b2: makeBrigade('b2', 'HRHB', 'hvo_cb', 'op:mun:pocket_b'),
+            };
+            const state = makeState({ formations, corps_front_sectors: sectorIn('op:mun:elsewhere'), political_controllers: controllers, last_supply_state_by_osid: supply });
+            expect(updateStrandedBrigadeLifecycle(state, adj).newly_stranded).toEqual(['b1', 'b2']);
+        });
+
+        it('a brigade beyond a supplied own cell is not counted: the pocket is the critical component only', () => {
+            const formations = {
+                b1: makeBrigade('b1', 'HRHB', 'hvo_cb', 'op:mun:pocket_a'),
+                b2: makeBrigade('b2', 'HRHB', 'hvo_cb', 'op:mun:pocket_b'),
+            };
+            const state = makeState({
+                formations, corps_front_sectors: sectorIn('op:mun:pocket_a'), political_controllers: controllers,
+                last_supply_state_by_osid: { 'op:mun:pocket_a': 'critical', 'op:mun:pocket_b': 'adequate' },
+            });
+            // b2 stands on a supplied cell and reaches its sector by friendly BFS, so it is not stranded.
+            // b1 is alone in the critical component and stays stranded.
+            expect(updateStrandedBrigadeLifecycle(state, adj).newly_stranded).toEqual(['b1']);
+        });
+    });
+
     describe('corps with no sectors', () => {
         it('does not classify brigade as stranded if corps has no sectors', () => {
             // Corps has no sectors — entire corps is in reserve/rear

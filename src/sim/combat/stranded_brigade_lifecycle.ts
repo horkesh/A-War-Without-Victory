@@ -23,6 +23,7 @@ import type { Osid } from './osid_adjacency.js';
 import { isFriendlyFaction } from '../early_war/alliance_update.js';
 import { createColumnMovementOrder } from './brigade_movement_order_helpers.js';
 import { getQueuedPrePlannedBrigadeIds } from './pre_planned_operations.js';
+import { SALIENT_GARRISON_RETENTION_MIN_BRIGADES } from './salient_withdrawal.js';
 import {
     isMovementOwnedActiveLoanDeployment,
     isMovementOwnedHomeReturn,
@@ -107,6 +108,63 @@ function isInActiveOperation(state: GameState, brigadeId: FormationId, corpsId: 
 }
 
 /**
+ * Garrisoned critical pocket (package P2-L, 2026-11-18). The pocket is the faction's own
+ * critical-supply cells connected to the brigade's cell. It is a held garrison, not a place
+ * where brigades are lost, when it holds ground of the brigade's own corps sectors and at least
+ * `SALIENT_GARRISON_RETENTION_MIN_BRIGADES` of the faction's active brigades (the same number
+ * that keeps such a pocket from being evacuated). Its brigades are then not stranded: no
+ * stranded decay, the faction cohesion floor applies, and they stay on their corps' rosters.
+ * The pocket is still unsupplied: the ordinary unsupplied loss and the critical-supply refill
+ * block are unchanged. A lone cut-off brigade stays stranded. Faction-blind.
+ * Deterministic: BFS over sorted frontiers; formations in sorted id order.
+ */
+function isGarrisonedCriticalPocket(
+    locationOsid: string,
+    faction: FactionId,
+    corpsId: string,
+    state: GameState,
+    adjacency: ReadonlyMap<Osid, readonly Osid[]>,
+): boolean {
+    const controllers = state.political.political_controllers ?? {};
+    const supply = state.political.last_supply_state_by_osid ?? {};
+    const pocket = new Set<string>([locationOsid]);
+    let frontier = [locationOsid];
+    while (frontier.length > 0) {
+        const next: string[] = [];
+        for (const osid of frontier) {
+            for (const neighbor of adjacency.get(osid as Osid) ?? []) {
+                if (pocket.has(neighbor)) continue;
+                if (controllers[neighbor] !== faction || supply[neighbor] !== 'critical') continue;
+                pocket.add(neighbor);
+                next.push(neighbor);
+            }
+        }
+        next.sort(strictCompare);
+        frontier = next;
+    }
+
+    const sectors = state.military.corps_front_sectors ?? {};
+    let holdsOwnSector = false;
+    for (const sectorId of Object.keys(sectors).sort(strictCompare)) {
+        const sector = sectors[sectorId];
+        if (!sector || sector.corps_id !== corpsId) continue;
+        if (sector.territory_osids.some((osid) => pocket.has(osid))) { holdsOwnSector = true; break; }
+    }
+    if (!holdsOwnSector) return false;
+
+    const formations = state.military.formations ?? {};
+    let garrison = 0;
+    for (const id of Object.keys(formations).sort(strictCompare)) {
+        const formation = formations[id];
+        if (!formation || formation.status !== 'active' || formation.kind !== 'brigade') continue;
+        if (formation.faction !== faction || !formation.location_osid || !pocket.has(formation.location_osid)) continue;
+        garrison += 1;
+        if (garrison >= SALIENT_GARRISON_RETENTION_MIN_BRIGADES) return true;
+    }
+    return false;
+}
+
+/**
  * BFS reachability: can brigade reach any OSID in a same-corps sector's territory
  * via friendly-controlled OSIDs?
  *
@@ -130,9 +188,10 @@ function canReachCorpsSectorFront(
     // faction sources over friendly-controlled graph paths. A critical OSID is
     // therefore isolated even if sector partitioning has wrapped that pocket in
     // a one-cell same-corps sector. Sector membership must not self-certify a
-    // surrounded brigade as reachable.
+    // surrounded brigade as reachable. A held garrison is the exception (package
+    // P2-L): it is cut off, not lost, so it keeps its corps' standing rules.
     if (state.political.last_supply_state_by_osid?.[locationOsid] === 'critical') {
-        return false;
+        return isGarrisonedCriticalPocket(locationOsid, faction, corpsId, state, adjacency);
     }
 
     // Build target set: all territory OSIDs from same-corps sectors
