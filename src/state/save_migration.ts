@@ -971,6 +971,13 @@ export const S6_E4_PATRON_SUPPORT_DROP: ReadonlySet<string> = new Set([
     'visit_to_front_rs#visit_drina_front',
     'visit_to_front_rs#visit_press_rs',
     'visit_to_front_rs#visit_sarajevo_lines',
+    // P-B panel (historian, game designer, operations/engine; 3/3, two rounds, 2026-11-18):
+    // pressure-convention leftovers on the front-visit card; no recorded patron change.
+    'visit_to_front_hrhb#stay_mostar_hrhb',
+    'visit_to_front_rbih#stay_capital_rbih',
+    'visit_to_front_rbih#visit_press_rbih',
+    'visit_to_front_rbih#visit_sarajevo',
+    'visit_to_front_rs#stay_pale_rs',
 ]);
 export const S6_E4_PATRON_SUPPORT_SET: Readonly<Record<string, number>> = {
     'belgrade_embargo_rs_1994#defiant': -10,

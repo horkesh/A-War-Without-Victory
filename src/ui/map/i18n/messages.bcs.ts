@@ -5487,7 +5487,7 @@ export const bcsMessages: Partial<Record<MessageKey, string>> = {
     'turnAftermath.opOutcome.orphaned': 'napušteno',
     'frontVisit.title': 'Predsjedničko vodstvo',
     'frontVisit.action': 'Posjeti front',
-    'frontVisit.stake': 'Predsjednička posjeta podiže moral i koheziju na frontu, ali može koštati međunarodnog ugleda ili podrške pokrovitelja.',
+    'frontVisit.stake': 'Predsjednička posjeta podiže moral i koheziju na frontu, ali može koštati međunarodnog ugleda.',
     'frontVisit.button': 'Posjeti front',
     'frontVisit.cost': '[-{cost} KA]',
     'frontVisit.firesLeft': 'Preostalo posjeta: {count}',

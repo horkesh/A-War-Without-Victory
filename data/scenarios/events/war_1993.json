@@ -6065,11 +6065,6 @@
             "kind": "cohesion_change",
             "faction": "RBiH",
             "delta": 3
-          },
-          {
-            "kind": "patron_support",
-            "faction": "RBiH",
-            "delta": -3
           }
         ],
         "dimension_shifts": [
@@ -6161,11 +6156,6 @@
         "description": "The diplomatic calendar is full. The UN is negotiating. The army will understand. You remain at the Presidency and conduct the visit through your chief of staff.",
         "effects": [
           {
-            "kind": "patron_support",
-            "faction": "RBiH",
-            "delta": -2
-          },
-          {
             "kind": "morale_change",
             "faction": "RBiH",
             "delta": -2
@@ -6195,11 +6185,6 @@
             "kind": "morale_change",
             "faction": "RBiH",
             "delta": 3
-          },
-          {
-            "kind": "patron_support",
-            "faction": "RBiH",
-            "delta": -8
           }
         ],
         "dimension_shifts": [
@@ -6436,11 +6421,6 @@
         "label": "Stay in Pale — governance demands it",
         "description": "The Assembly is in session. International contacts require your attention. The front will see you another time. Your staff relays your greetings to the corps commanders.",
         "effects": [
-          {
-            "kind": "patron_support",
-            "faction": "RS",
-            "delta": -2
-          },
           {
             "kind": "morale_change",
             "faction": "RS",
@@ -6697,11 +6677,6 @@
         "label": "Stay in Mostar — diplomatic contacts are urgent",
         "description": "The Zagreb line is active. The European monitors want a meeting. You remain in the capital and conduct the visit through your deputy commander. The front will understand.",
         "effects": [
-          {
-            "kind": "patron_support",
-            "faction": "HRHB",
-            "delta": -3
-          },
           {
             "kind": "morale_change",
             "faction": "HRHB",

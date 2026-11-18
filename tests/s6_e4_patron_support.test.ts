@@ -238,6 +238,40 @@ describe('§6 E4: the allowlist pin', () => {
             expect((opt.effects ?? []).some((e) => e.kind === 'patron_support'), `${eventId}#${optionId}`).toBe(false);
         }
     });
+
+    it('P-B (2026-11-18): the five front-visit pressure-convention rows are dropped; no front-visit option carries patron_support', () => {
+        const defs = byId();
+        const pb = [
+            ['visit_to_front_rbih', 'visit_sarajevo'],
+            ['visit_to_front_rbih', 'visit_press_rbih'],
+            ['visit_to_front_rbih', 'stay_capital_rbih'],
+            ['visit_to_front_rs', 'stay_pale_rs'],
+            ['visit_to_front_hrhb', 'stay_mostar_hrhb'],
+        ] as const;
+        for (const [eventId, optionId] of pb) {
+            const opt = optionOf(defs.get(eventId)!, optionId);
+            expect((opt.effects ?? []).some((e) => e.kind === 'patron_support'), `${eventId}#${optionId}`).toBe(false);
+        }
+        for (const eventId of ['visit_to_front_rbih', 'visit_to_front_rs', 'visit_to_front_hrhb']) {
+            const def = defs.get(eventId)!;
+            expect(cardEffects(def).filter((e) => e.kind === 'patron_support'), eventId).toEqual([]);
+            for (const o of def.response_options ?? []) {
+                expect((o.effects ?? []).filter((e) => e.kind === 'patron_support'), `${eventId}#${o.id}`).toEqual([]);
+            }
+        }
+        // The pending-decision migration drops them too.
+        for (const [eventId, optionId] of pb) {
+            const state = JSON.parse(readFileSync(resolve(__dirname, '..', 'data', 'derived', 'startup', 'apr_1992_initial_save.json'), 'utf8'));
+            state.schema_version = 41;
+            state.military.pending_event_decisions = [{
+                event_id: eventId,
+                response_options: [{ id: optionId, label: 'x', effects: [{ kind: 'patron_pressure', faction: 'RBiH', delta: -3 }, { kind: 'morale_change', faction: 'RBiH', delta: -2 }] }],
+            }];
+            applyMigrations(state);
+            expect(state.military.pending_event_decisions[0].response_options[0].effects, `${eventId}#${optionId}`)
+                .toEqual([{ kind: 'morale_change', faction: 'RBiH', delta: -2 }]);
+        }
+    });
 });
 
 describe('§6 E4: ruled rows', () => {

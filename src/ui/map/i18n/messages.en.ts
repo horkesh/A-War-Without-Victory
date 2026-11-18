@@ -1410,7 +1410,7 @@ export const enMessages = {
     // Presidential FRONT VISIT (Command Surface §10)
     'frontVisit.title': 'Presidential Leadership',
     'frontVisit.action': 'Visit the Front',
-    'frontVisit.stake': 'A presidential visit lifts morale and cohesion at the front, but it can cost international standing or patron support.',
+    'frontVisit.stake': 'A presidential visit lifts morale and cohesion at the front, but it can cost international standing.',
     'frontVisit.button': 'Visit the Front',
     'frontVisit.cost': '[-{cost} CA]',
     'frontVisit.firesLeft': '{count} visits remaining',
