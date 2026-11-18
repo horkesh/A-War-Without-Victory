@@ -6,6 +6,10 @@
  * - 6a row: the cause-less receipt (`...unrequested` / `...unrequestedDissolved`) dropped its Full Control clause because a Full
  *   Control Always-allow sweep always has a derivable cause: a card answer gives `standing_order`, and the review modal files
  *   history, which gives `neutral`.
+ * - Condition C1 (both seats): an RS human picks Always allow in the review modal at Full Control, then switches to Observer;
+ *   the card is answered automatically, and E1 keeps the in-person order. The receipt must not credit that order to "the
+ *   historical policy" (6d/6g). The saved basis cannot tell a kept modal Always allow from per-request answers followed by the
+ *   automatic write (both file `allow` records), so the honest cause is A3's neutral line.
  */
 
 import { describe, expect, it } from 'vitest';
@@ -200,5 +204,45 @@ describe('§6 D1 stage 2: receipt causes on the panel\'s engine paths', () => {
         expect(shown).toHaveLength(1);
         expect(shown[0]!.cause).toBe('standing_order');
         expect(CAUSE_LESS_KEYS).not.toContain(shown[0]!.key);
+    });
+
+    it('C1: a review-modal Always allow kept at Observer is never credited to the historical policy (the cause is neutral)', () => {
+        const state = rsHumanState();
+        // t1, Full Control: one pocket raises a request; the human picks Always allow in the modal, then answers the goals card.
+        expect(detectAndMarch(state)).toEqual([0, 1]);
+        modalAlwaysAllow(state);
+        answerGoalsInPerson(state);
+        // t2: the human is at Observer; the card fires and is answered automatically with the historical default.
+        state.meta.turn = 2;
+        state.meta.autonomy_level = 3;
+        evaluateEvents(state, noRng, 2, [RS_CARD] as EventDefinition[]);
+        expect(cardDecision(state)).toMatchObject({ response_id: 'always_allow', decision_source: 'bot_ai_default', faction: 'RS' });
+        // E1 keeps the in-person order (the same value here); the staff sends the second pocket's sweep under it.
+        expect(state.paramilitary_policy).toBe('always_allow');
+        expect(detectAndMarch(state)).toEqual([1, 0]);
+        marchToOutcome(state);
+
+        const shown = receipts(state);
+        expect(shown).toHaveLength(1);
+        expect(shown[0]!.key).not.toMatch(/AutomaticOrder$/);
+        expect(shown[0]!.cause).toBe('neutral');
+        expect(shown[0]!.key).toMatch(/^decisionConsequences\.detail\.paramilitary\.unrequested(Dissolved)?Neutral$/);
+    });
+
+    it('C1 control: with no in-person order, the automatic answer is the cause (6d/6g)', () => {
+        const state = rsHumanState();
+        answerGoalsInPerson(state);
+        state.meta.turn = 2;
+        state.meta.autonomy_level = 3;
+        evaluateEvents(state, noRng, 2, [RS_CARD] as EventDefinition[]);
+        expect(cardDecision(state)).toMatchObject({ response_id: 'always_allow', decision_source: 'bot_ai_default', faction: 'RS' });
+        expect(state.paramilitary_policy).toBe('always_allow');
+        expect(detectAndMarch(state)).toEqual([1, 0]);
+        marchToOutcome(state);
+
+        const shown = receipts(state);
+        expect(shown).toHaveLength(1);
+        expect(shown[0]!.cause).toBe('standing_order_automatic');
+        expect(shown[0]!.key).toMatch(/^decisionConsequences\.detail\.paramilitary\.unrequested(Dissolved)?AutomaticOrder$/);
     });
 });

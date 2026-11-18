@@ -91,6 +91,23 @@ describe('the unrequested-sweep receipt cause is derived from the saved basis', 
         ]))).toBe('standing_order');
     });
 
+    it('C1: an automatic answer with the side\'s own decision filed at or before it is not credited with the order (neutral)', () => {
+        const automatic = { event_id: 'rs_paramilitary_policy_1992', response_id: 'always_allow', decision_source: 'bot_ai_default', faction: 'RS', turn: 2 };
+        for (const filedTurn of [1, 2]) {
+            expect(causeOf(rawSave('RS', [automatic], [
+                { id: `paramilitary:${filedTurn}:op:x:y`, turn: filedTurn, target_osid: 'op:x:y', faction: 'RS', strength: 150, decision: 'allow' },
+            ])), `filed at t${filedTurn}`).toBe('neutral');
+        }
+        // Another side's filed decision does not touch this side's basis.
+        expect(causeOf(rawSave('RS', [automatic], [
+            { id: 'paramilitary:1:op:x:y', turn: 1, target_osid: 'op:x:y', faction: 'RBiH', strength: 150, decision: 'allow' },
+        ]))).toBe('standing_order_automatic');
+        // An in-person card answer is still the cause when the decision was filed before it.
+        expect(causeOf(rawSave('RS', [{ ...automatic, decision_source: 'player' }], [
+            { id: 'paramilitary:1:op:x:y', turn: 1, target_osid: 'op:x:y', faction: 'RS', strength: 150, decision: 'allow' },
+        ]))).toBe('standing_order');
+    });
+
     it('a real stage-2 campaign: Always allow at Delegated, then the first Advance, gives standing-order receipts', async () => {
         const opening = (await startNewCampaign(process.cwd(), 'RBiH', 'apr_1992', 'historical')).state;
         const pending = resolveDesktopEventDecision(opening, 'rbih_state_identity', 'civic', process.cwd());
