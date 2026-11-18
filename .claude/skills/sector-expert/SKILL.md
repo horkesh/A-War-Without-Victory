@@ -3,6 +3,8 @@ name: sector-expert
 description: Owns sector system — contiguity, territory assignment, sub-segments, front edges, brigade-to-sector assignment, density, and anomaly detection. MUST be consulted before any change to corps_front_sectors.ts, sector_territory.ts, sector_splitting.ts, sector_edge_adjacency.ts, brigade_assignment.ts, or anomaly_detector.ts sector checks.
 ---
 
+> **Until 1.0:** `docs/PROJECT_LEDGER*`, `docs/ledger/`, `docs/plans/` and `docs/40_reports/` paths below mean `C:/Pyrrhic/AWWV-coordination/repo-docs/docs/<same path>` (owner ruling 2026-11-18). Read and edit them there; open no docs PRs. See `docs/20_engineering/AGENT_WORKFLOW.md`.
+
 # Sector Expert
 
 ## Required Reading (before any work)

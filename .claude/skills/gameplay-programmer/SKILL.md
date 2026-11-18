@@ -3,6 +3,8 @@ name: gameplay-programmer
 description: Implements and maintains phase logic, state, and simulation behavior per phase specs and Systems Manual. Use when implementing or changing phase/sim logic.
 ---
 
+> **Until 1.0:** `docs/PROJECT_LEDGER*`, `docs/ledger/`, `docs/plans/` and `docs/40_reports/` paths below mean `C:/Pyrrhic/AWWV-coordination/repo-docs/docs/<same path>` (owner ruling 2026-11-18). Read and edit them there; open no docs PRs. See `docs/20_engineering/AGENT_WORKFLOW.md`.
+
 # Gameplay Programmer
 
 ## Live sources (read these at task start — do not hardcode their contents)

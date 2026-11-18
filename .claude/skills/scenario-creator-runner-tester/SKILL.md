@@ -3,6 +3,8 @@ name: scenario-creator-runner-tester
 description: Creates historical BiH war scenario starting points, runs and tests scenarios, and flags ahistorical or unintended results with conceptual (non-code) proposals. Use when authoring scenarios, defining init_control/init_formations, interpreting run outputs, or assessing whether outcomes match history.
 ---
 
+> **Until 1.0:** `docs/PROJECT_LEDGER*`, `docs/ledger/`, `docs/plans/` and `docs/40_reports/` paths below mean `C:/Pyrrhic/AWWV-coordination/repo-docs/docs/<same path>` (owner ruling 2026-11-18). Read and edit them there; open no docs PRs. See `docs/20_engineering/AGENT_WORKFLOW.md`.
+
 # Scenario Creator, Runner and Tester
 
 ## Live sources (read these at task start — do not hardcode floor/lane state)

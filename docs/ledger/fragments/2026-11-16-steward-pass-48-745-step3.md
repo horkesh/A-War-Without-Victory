@@ -1,8 +1,0 @@
-## 2026-11-16 — Pass 48: #745 (threat_ratio as a pressure index) and package P2 step 3 recorded; the wording defect left on main
-
-Docs only; no `src/` or `data/` change, no hash change.
-
-- #745: `threat_ratio` is described as a sector pressure index, not a force ratio (description only; comments plus the Systems Manual; hash unchanged, the pin stays 03159b9ee1e5877f). Registered as an ACCEPT-AS-FINAL candidate for the next Part 5 sitting (game-designer and historian): about 20 readers have thresholds tuned to its scale; rescaling is calibration-sized; documented honestly as a pressure index. Measured on a package P2 run (t99 to t178): RS staffed sectors median 48, maximum 5,346; 87% of RS sector-turns above 2.0.
-- The merged wording of #745 still says the index "falls with own cohesion" in the `game_state.ts` field comment and the Systems Manual, although the orchestrator reported the Codex direction fix as applied. The steward read the code (`brigadePower` multiplies cohesion; the index is enemy personnel divided by defensive power): falling own cohesion raises the index, so the wording is inverted and Codex comment r4588239176 stays open on main. The fix is a code comment plus a canon sentence; not made here.
-- Package P2 step 3 (candidate 4 of 8, run 80aaf7ae31900002): a retake-only counter-attack in any stance; 6 battles outside an operation, all on just-lost cells, 3 won; scores recorded 704 / 700 / 700 / 663 on the step-0 base.
-- Harness evidence in #742 (open): a sustained multi-corps Request-op lever moves the war about 2.8 percentage points off history (the old ceiling was 0.75).

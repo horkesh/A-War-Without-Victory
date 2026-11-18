@@ -3,6 +3,8 @@ name: reports-custodian
 description: Owns docs/40_reports structure; classifies and places new reports, keeps CONSOLIDATED_* and README in sync, archives superseded reports. Use when adding, moving, or retiring reports in 40_reports.
 ---
 
+> **Until 1.0:** `docs/PROJECT_LEDGER*`, `docs/ledger/`, `docs/plans/` and `docs/40_reports/` paths below mean `C:/Pyrrhic/AWWV-coordination/repo-docs/docs/<same path>` (owner ruling 2026-11-18). Read and edit them there; open no docs PRs. See `docs/20_engineering/AGENT_WORKFLOW.md`.
+
 # Reports Custodian
 
 ## Mandate
