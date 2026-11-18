@@ -357,7 +357,6 @@ describe('LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-15: 6 Ring-1 divergence events'
             'dimension_above', 'dimension_below', 'flag_equals', 'flag_not_set',
             'patron_pressure_above', 'war_crimes_above', 'morale_average_below',
             'week_since_event', 'event_fire_count', 'enclave_supply_status',
-            'corridor_severed',
             'paramilitary_mode_equals', 'enclave_resilience_aggregate', 'flag_at_least',
             'metric_compare_factions', 'alliance_drift', 'territory_loss_window',
             'displaced_in_aggregate',

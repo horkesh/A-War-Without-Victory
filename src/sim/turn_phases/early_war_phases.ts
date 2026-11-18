@@ -72,7 +72,7 @@ export const earlyWarPhases: NamedPhase[] = [
         name: 'evaluate-events',
         run: (context) => {
             const turn = context.state.meta.turn;
-            const result = evaluateEvents(context.state, context.rng, turn, context.input.eventDefinitions ?? [], context.input.settlementEdges);
+            const result = evaluateEvents(context.state, context.rng, turn, context.input.eventDefinitions ?? []);
             context.report.events_fired = result.fired;
         }
     },
