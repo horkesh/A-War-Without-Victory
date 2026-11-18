@@ -1,7 +1,7 @@
 {
   "generated_by": "tools/diagnostics/save_migration_drift_audit.cjs",
-  "latest_schema_version": 40,
-  "registered_migration_count": 40,
+  "latest_schema_version": 41,
+  "registered_migration_count": 41,
   "strict_required_field_count": 79,
   "anonymous_default_count": 0,
   "fields": [],
@@ -165,6 +165,10 @@
     {
       "version": 40,
       "description": "The September 1991 peace start is retired (campaign structure decision 2026-03-23; "
+    },
+    {
+      "version": 41,
+      "description": "Section 6 E2: the negotiation_capital event effect kind is retired (every catalog "
     }
   ],
   "required_fields": [

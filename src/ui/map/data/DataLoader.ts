@@ -1,5 +1,5 @@
 import type { FeatureCollection } from 'geojson';
-import type { EventDefinition } from '../../../sim/events/event_types.js';
+import type { DimensionShift, EventDefinition } from '../../../sim/events/event_types.js';
 import { getPlayerSafeDisplayLabel } from '../utils/playerSafeText.js';
 import { countMapTransitionResource } from '../perf/mapTransitionTiming.js';
 import type { OsidDamageSeed } from '../layers/buildOsidDamageOverlay.js';
@@ -141,6 +141,8 @@ export interface EventDefinitionView {
   narrative: string;
   category: string;
   effects?: Array<{ kind: string; faction?: string; delta?: number; text?: string }>;
+  /** §6 E2: the card's own strategic-dimension shifts, shown on the acknowledgement list. */
+  dimension_shifts?: DimensionShift[];
   decision?: { options: Array<{ id: string; label: string; description?: string }> };
   /** Optional documentary-realism illustration key (basename or path). */
   image?: string;
@@ -192,6 +194,7 @@ export function loadEventDefinitions(): Promise<Map<string, EventDefinitionView>
           narrative: ev.narrative ?? '',
           category: ev.category ?? 'military',
           effects: eventDefinitionDisplayEffects(ev),
+          dimension_shifts: Array.isArray(ev.dimension_shifts) ? ev.dimension_shifts : undefined,
           decision: ev.decision,
           image: typeof ev.image === 'string' ? ev.image : undefined,
         });

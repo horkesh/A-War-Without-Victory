@@ -203,7 +203,7 @@ describe('LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-8: 4 surviving Ring-1 divergenc
     });
 
     // ── 5. csq_political_split_temporary ────────────────────────────────────
-    it('csq_political_split_temporary: predicate + cohesion drain + negotiation_capital -5', () => {
+    it('csq_political_split_temporary: predicate + cohesion drain; leverage cost carried by the live dimension shift', () => {
         const def = getEvent('csq_political_split_temporary');
         const cond = def.trigger.condition!;
         const fires = baseState(55, { political: { war_alliance_rbih_hrhb: 0.20 } });
@@ -223,9 +223,12 @@ describe('LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-8: 4 surviving Ring-1 divergenc
 
         applyEventEffects(fires, effectsOf(def));
         expect(fires.military.formations.hv_b1.cohesion).toBe(56); // 60 - 4
-        // negotiation_capital writer guards `if (dimension in cap)`; international_credibility is pre-seeded.
+        // §6 E2: the dead negotiation_capital −5 is dropped (no effect writes the raw capital
+        // counters any more); the live negotiating_leverage −3 dimension shift is the single carrier.
         const cap = (fires.military.negotiation as any).capital.HRHB;
-        expect(cap.international_credibility).toBe(45); // 50 - 5
+        expect(cap.international_credibility).toBe(50);
+        expect(effectsOf(def).some(e => (e.kind as string) === 'negotiation_capital')).toBe(false);
+        expect(def.dimension_shifts).toContainEqual({ faction: 'HRHB', dimension: 'negotiating_leverage', delta: -3 });
         const ledger = buildCostLedger(fires);
         expect(ledger.annotations?.find(a => a.tag === 'political_split_temporary')).toBeTruthy();
     });
@@ -303,7 +306,8 @@ describe('LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-8: 4 surviving Ring-1 divergenc
         const ALLOWED_EFFECT_KINDS = new Set([
             'narrative', 'morale_change', 'cohesion_change',
             'humanitarian_impact', 'patron_pressure', 'alliance_change',
-            'negotiation_capital', 'equipment_grant', 'aggression_modifier',
+            // 'negotiation_capital' retired (§6 E2): the loader rejects it.
+            'equipment_grant', 'aggression_modifier',
             'control_change',
             'guerrilla_threat', 'recruitment_modifier', 'equipment_quality_modifier',
             'doctrine_constraint', 'alliance_lock', 'bot_priority_shift',

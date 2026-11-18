@@ -735,6 +735,18 @@ function projectPolitical(political, playerFaction) {
   ]) {
     projected[key] = playerFaction ? scopeRecordToKey(political[key], playerFaction) : {};
   }
+  // The HRHB refugee compact line (Army HQ Records) reads when the Washington Agreement was signed
+  // and when the displacement damping is suspended. These three fields leave under their own key,
+  // never as a partial `rbih_hrhb_state` (the war-room diplomacy extractor treats that object as
+  // complete), and nothing else of the bilateral state leaves.
+  if (isRecord(political.rbih_hrhb_state)) {
+    const compactView = copyKeys(political.rbih_hrhb_state, [
+      'washington_signed',
+      'washington_turn',
+      'refugee_compact_suspended_until',
+    ]);
+    if (Object.keys(compactView).length > 0) projected.refugee_compact_view = compactView;
+  }
   if (isRecord(political.last_contained_osids_by_faction)) {
     projected.last_contained_osids_by_faction = {};
     for (const faction of ['RBiH', playerFaction]) {

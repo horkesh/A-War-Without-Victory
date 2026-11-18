@@ -138,10 +138,9 @@ describe('LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-16: 4 surviving Ring-1 divergen
     });
 
     // 1. csq_negotiating_capital_recovery_RBiH
-    // Engine truth: applyNegotiationBreakdown writes to neg.capital[faction][dimension].
-    // negotiating_leverage is a strategic_dimensions field, not a capital field, so the
-    // negotiation_capital effect kind is a no-op for state mutation when targeting
-    // negotiating_leverage; we assert the cost-ledger annotation lands instead.
+    // Engine truth (§6 E2): the negotiation_capital effect kind is retired; the row's
+    // negotiating_leverage +5 lives only in its `dimension_shifts` (applied by the fire
+    // path, not by applyEventEffects), so here we assert the cost-ledger annotation lands.
     it('csq_negotiating_capital_recovery_RBiH: predicate + cost-ledger annotation', () => {
         const def = getEvent('csq_negotiating_capital_recovery_RBiH');
         const cond = def.trigger.condition!;
@@ -318,7 +317,8 @@ describe('LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-16: 4 surviving Ring-1 divergen
         const ALLOWED_EFFECT_KINDS = new Set([
             'narrative', 'morale_change', 'cohesion_change',
             'humanitarian_impact', 'patron_pressure', 'alliance_change',
-            'negotiation_capital', 'equipment_grant', 'aggression_modifier',
+            // 'negotiation_capital' retired (§6 E2): the loader rejects it.
+            'equipment_grant', 'aggression_modifier',
             'control_change',
             'guerrilla_threat', 'recruitment_modifier', 'equipment_quality_modifier',
             'doctrine_constraint', 'alliance_lock', 'bot_priority_shift',

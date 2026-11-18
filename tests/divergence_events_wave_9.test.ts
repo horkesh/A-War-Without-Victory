@@ -307,7 +307,8 @@ describe('LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-9-REDO: 4 surviving Ring-1 dive
         const ALLOWED_EFFECT_KINDS = new Set([
             'narrative', 'morale_change', 'cohesion_change',
             'humanitarian_impact', 'patron_pressure', 'alliance_change',
-            'negotiation_capital', 'equipment_grant', 'aggression_modifier',
+            // 'negotiation_capital' retired (§6 E2): the loader rejects it.
+            'equipment_grant', 'aggression_modifier',
             'control_change',
             'guerrilla_threat', 'recruitment_modifier', 'equipment_quality_modifier',
             'doctrine_constraint', 'alliance_lock', 'bot_priority_shift',

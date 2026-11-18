@@ -125,14 +125,19 @@ describe('apply_effects non-finite payload guard (P1-B)', () => {
         ]);
     });
 
-    it('-Infinity negotiation_capital delta keeps prior dimension value and logs', () => {
+    // §6 E2: this case used the retired negotiation_capital kind (an un-clamped capital
+    // accumulator). It now exercises the remaining un-clamped capital accumulator,
+    // humanitarian_impact's war_crimes_events, with -Infinity; the capital counters it
+    // does not touch stay unchanged.
+    it('-Infinity humanitarian war_crimes_delta keeps prior capital values and logs', () => {
         const state = fixtureState();
         applyEventEffects(state, [
-            { kind: 'negotiation_capital', faction: 'RBiH', dimension: 'territorial_legitimacy', delta: -Infinity } as EventEffect,
+            { kind: 'humanitarian_impact', faction: 'RBiH', war_crimes_delta: -Infinity } as EventEffect,
         ]);
+        expect((state.military as any).negotiation.capital.RBiH.war_crimes_events).toBe(2);
         expect((state.military as any).negotiation.capital.RBiH.territorial_legitimacy).toBe(10);
         expect(anomalies(state)).toEqual([
-            { turn: 7, effect_kind: 'negotiation_capital', faction: 'RBiH', value_repr: '-Infinity' },
+            { turn: 7, effect_kind: 'humanitarian_impact', faction: 'RBiH', value_repr: '-Infinity' },
         ]);
     });
 

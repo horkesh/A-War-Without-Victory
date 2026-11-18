@@ -365,7 +365,7 @@ Alliance drift is computed per turn in `alliance_update.ts`: alliance deteriorat
 - **Acceptance.**
   - Left alone, historical and emergent runs stay byte-identical.
   - Played, a President who keeps paying reaches Path C at t102 with no war.
-  - Cooperative and then careless (both 1992 grants, no renewals): the compact runs out by time at t56 and t61, the alliance falls, and `csq_back_channel_communication_RS` (t68) then pins the RBiH-HRHB alliance at its 0.15 floor until t93, so the war comes at t98, four weeks before the Federation (t102). It came at t71 before the PR-B re-key. That floor is the known lock-conflict defect (a lock authored for the RS back-channel applies to the RBiH-HRHB alliance; fix held until package P2), not the compact: with it fixed the careless war would come well before t98 (not yet measured).
+  - Cooperative and then careless (both 1992 grants, no renewals): the compact runs out by time at t56 and t61, the alliance falls, and the war comes at t72, thirty weeks before the Federation (t102). (Until #806 the RS back-channel card carried an `alliance_lock` that pinned the RBiH-HRHB alliance at a 0.15 floor from t68 to t93 and the war came at t98; that lock is gone. Before the PR-B re-key the war came at t71.)
   - Grants, then resisting Zagreb at VOPP (t46; the compact lapses): the war comes at t67 and the Federation at t102.
   - Renewed and then reneged at t87, the war comes at t100, the engine ceasefire at t145 and Path A signs at t149.
 - **Binding copy rule (historian).** No player-facing text may say or imply that refugees caused the 1993 war.
@@ -758,6 +758,12 @@ Events WITHOUT pressure config use legacy `triggerMatches()` (backward compatibl
 | `negotiating_leverage` | Weighted composite of the other five |
 
 Each dimension: `base_value` (computed from game state each turn) + `event_modifier` (accumulated from player decisions) = `effective_value` (clamped 0-100).
+
+The `event_modifier` is added after the base is clamped: `base_value` is clamped to 0-100 first, then `effective_value = clamp(base_value + event_modifier, 0, 100)`.
+
+`international_standing` base inputs (per faction, from `NegotiationBreakdown`): start at 50; war crimes `war_crimes_events × −10`; civilian casualties `civilian_casualties_caused ÷ 5000`, subtracted; peace plans accepted `+10` each; peace plans rejected `−15` each. An atrocity card's `humanitarian_impact.war_crimes_delta` therefore costs standing through this base until it reaches 0.
+
+Events write dimensions only through `dimension_shifts` (event level or response-option level), which add to `event_modifier`. The former `negotiation_capital` event effect kind is retired (§6 E2, 2026-11-17): it never reached the dimension store, the loader now rejects it, and an unknown dimension id in a shift throws. One carrier per effect: a row that already carries a live shift on a faction and dimension does not repeat it under another kind.
 
 Stored on `NegotiationState.strategic_dimensions`. Module: `src/sim/events/strategic_dimensions.ts`.
 

@@ -1103,9 +1103,9 @@ function validateUnreachableGates(rows: EventDefinition[]): void {
  *
  * For every `dimension_shifts[].dimension` (event-level and option-level),
  * assert membership in the typed {@link DIMENSION_IDS} set. An unknown
- * dimension name is a DEAD write: `applyDimensionShift()` no-ops when the
- * dimension is not present in the typed `DimensionStore`, and the catalog
- * silently loses the authored effect.
+ * dimension name used to be a DEAD write (the catalog silently lost the
+ * authored effect); since §6 E2 `applyDimensionShift()` also throws on it at
+ * apply time, so this load-time check names the row before a run can reach it.
  *
  * Common authoring failure mode is to pass an `EffectKind` (e.g.
  * `'patron_pressure'`, `'alliance_change'`) into a dimension slot. The error

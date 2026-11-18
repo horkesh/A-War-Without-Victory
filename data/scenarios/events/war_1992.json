@@ -4183,12 +4183,6 @@
     },
     "effects": [
       {
-        "kind": "negotiation_capital",
-        "faction": "RS",
-        "dimension": "international_credibility",
-        "delta": -20
-      },
-      {
         "kind": "narrative",
         "text": "Systematic ethnic cleansing sweeps through the Drina Valley. Tens of thousands of Bosniaks are expelled or killed."
       }
@@ -5148,12 +5142,6 @@
         "branch_tag": "diplomacy_london_subscribed",
         "effects": [
           {
-            "kind": "negotiation_capital",
-            "faction": "RBiH",
-            "dimension": "international_credibility",
-            "delta": 10
-          },
-          {
             "kind": "patron_pressure",
             "faction": "RBiH",
             "delta": -5
@@ -5174,12 +5162,6 @@
         "historical_marker": "counterfactual",
         "branch_tag": "diplomacy_london_rejected",
         "effects": [
-          {
-            "kind": "negotiation_capital",
-            "faction": "RBiH",
-            "dimension": "international_credibility",
-            "delta": -5
-          },
           {
             "kind": "morale_change",
             "faction": "RBiH",

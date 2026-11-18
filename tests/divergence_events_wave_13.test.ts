@@ -243,13 +243,15 @@ describe('LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-13: 6 Ring-1 divergence events'
         (lapsed.military.negotiation as any).strategic_dimensions.HRHB.patron_confidence.effective_value = 49;
         expect(evaluateCondition(cond, lapsed)).toBe(false);
 
-        // Seed capital.HRHB.negotiating_leverage so the writer can mutate it
-        // (engine truth: applyNegotiationBreakdown writes to neg.capital[faction][dimension],
-        // not to strategic_dimensions)
+        // Seed capital.HRHB.negotiating_leverage to prove nothing writes it any more (§6 E2).
         (fires.military.negotiation as any).capital.HRHB.negotiating_leverage = 50;
         applyEventEffects(fires, effectsOf(def));
         const cap = (fires.military.negotiation as any).capital.HRHB;
-        expect(cap.negotiating_leverage).toBe(55); // 50 + 5
+        // §6 E2: the retired negotiation_capital effect no longer writes the (fixture-seeded)
+        // capital key; the +5 leverage is carried by the row's live dimension shift.
+        expect(cap.negotiating_leverage).toBe(50);
+        expect(effectsOf(def).some(e => (e.kind as string) === 'negotiation_capital')).toBe(false);
+        expect(def.dimension_shifts).toContainEqual({ faction: 'HRHB', dimension: 'negotiating_leverage', delta: 5 });
         const ledger = buildCostLedger(fires);
         expect(ledger.annotations?.find(a => a.tag === 'back_channel_communication_HRHB')).toBeTruthy();
     });
@@ -291,11 +293,15 @@ describe('LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-13: 6 Ring-1 divergence events'
         lapsed.military.event_flags = { war_exhaustion_x100_RBiH: 45 };
         expect(evaluateCondition(cond, lapsed)).toBe(false);
 
-        // Seed capital.RBiH.negotiating_leverage (engine truth: writer mutates capital, not strategic_dimensions)
+        // Seed capital.RBiH.negotiating_leverage to prove nothing writes it any more (§6 E2).
         (fires.military.negotiation as any).capital.RBiH.negotiating_leverage = 50;
         applyEventEffects(fires, effectsOf(def));
         const cap = (fires.military.negotiation as any).capital.RBiH;
-        expect(cap.negotiating_leverage).toBe(54); // 50 + 4
+        // §6 E2: the retired negotiation_capital effect no longer writes the (fixture-seeded)
+        // capital key; the +4 leverage is carried by the row's live dimension shift.
+        expect(cap.negotiating_leverage).toBe(50);
+        expect(effectsOf(def).some(e => (e.kind as string) === 'negotiation_capital')).toBe(false);
+        expect(def.dimension_shifts).toContainEqual({ faction: 'RBiH', dimension: 'negotiating_leverage', delta: 4 });
         const ledger = buildCostLedger(fires);
         expect(ledger.annotations?.find(a => a.tag === 'mediator_engagement_streak_RBiH')).toBeTruthy();
     });
@@ -371,7 +377,8 @@ describe('LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-13: 6 Ring-1 divergence events'
         const ALLOWED_EFFECT_KINDS = new Set([
             'narrative', 'morale_change', 'cohesion_change',
             'humanitarian_impact', 'patron_pressure', 'alliance_change',
-            'negotiation_capital', 'equipment_grant', 'aggression_modifier',
+            // 'negotiation_capital' retired (§6 E2): the loader rejects it.
+            'equipment_grant', 'aggression_modifier',
             'control_change',
             'guerrilla_threat', 'recruitment_modifier', 'equipment_quality_modifier',
             'doctrine_constraint', 'alliance_lock', 'bot_priority_shift',
