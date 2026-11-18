@@ -70,6 +70,20 @@ function rowsForFaction(value, faction) {
     .map(cloneJson);
 }
 
+/**
+ * Peace-plan history rows carry no `faction` field: each is one resolved plan with every faction's
+ * recorded answer in `responses` (peace_plans.ts writes the whole map at the moment the player
+ * answers, so none of it is hidden information; the pending plan's precomputed bot answers are
+ * redacted separately). A row belongs to the player's history when the player's faction answered it.
+ * Filtering by `rowsForFaction` read a `faction` field that is never there, so this projection was always empty.
+ */
+function peacePlanHistoryRowsForFaction(value, faction) {
+  if (!Array.isArray(value)) return [];
+  return value
+    .filter((row) => isRecord(row) && isRecord(row.responses) && typeof row.responses[faction] === 'string')
+    .map(cloneJson);
+}
+
 function resolvePlayerFaction(state, fallbackFaction) {
   const direct = state?.meta?.player_faction;
   if (PLAYER_FACTIONS.has(direct)) return direct;
@@ -374,7 +388,7 @@ function projectNegotiation(negotiation, playerFaction) {
   for (const key of ['capital', 'patron_relationships', 'strategic_dimensions']) {
     projected[key] = scopeRecordToKey(negotiation[key], playerFaction);
   }
-  projected.peace_plan_history = rowsForFaction(negotiation.peace_plan_history, playerFaction);
+  projected.peace_plan_history = peacePlanHistoryRowsForFaction(negotiation.peace_plan_history, playerFaction);
   projected.pending_counter_offers = (Array.isArray(negotiation.pending_counter_offers)
     ? negotiation.pending_counter_offers
     : [])
@@ -720,6 +734,18 @@ function projectPolitical(political, playerFaction) {
     'collapse_eligibility',
   ]) {
     projected[key] = playerFaction ? scopeRecordToKey(political[key], playerFaction) : {};
+  }
+  // The HRHB refugee compact line (Army HQ Records) reads when the Washington Agreement was signed
+  // and when the displacement damping is suspended. These three fields leave under their own key,
+  // never as a partial `rbih_hrhb_state` (the war-room diplomacy extractor treats that object as
+  // complete), and nothing else of the bilateral state leaves.
+  if (isRecord(political.rbih_hrhb_state)) {
+    const compactView = copyKeys(political.rbih_hrhb_state, [
+      'washington_signed',
+      'washington_turn',
+      'refugee_compact_suspended_until',
+    ]);
+    if (Object.keys(compactView).length > 0) projected.refugee_compact_view = compactView;
   }
   if (isRecord(political.last_contained_osids_by_faction)) {
     projected.last_contained_osids_by_faction = {};

@@ -46,6 +46,29 @@
 
 import type { FactionId, GameState } from '../../state/game_state.js';
 
+/**
+ * The slice of state the compact reads: the decision log and three bilateral fields. A GameState
+ * satisfies it; the renderer builds it from the player-visible projection without a type escape.
+ */
+export interface RefugeeCompactInput {
+    military?: {
+        event_decision_log?: ReadonlyArray<{
+            event_id: string;
+            response_id: string;
+            faction?: string | null;
+            turn: number;
+            decision_source?: string;
+        }>;
+    } | null;
+    political?: {
+        rbih_hrhb_state?: {
+            washington_signed?: boolean;
+            washington_turn?: number | null;
+            refugee_compact_suspended_until?: number | null;
+        } | null;
+    } | null;
+}
+
 /** Refugee-pressure multiplier per active compact entry (historian amendment (d): 0.6, so friction remains). */
 export const REFUGEE_COMPACT_MULTIPLIER = 0.6;
 /**
@@ -105,17 +128,26 @@ export interface RefugeeCompactStatus {
     latest_expiry: number | null;
 }
 
+interface CompactReplay {
+    /** Every entry's final expiry (entries are kept after they run out; a lapse empties the list). */
+    expiries: number[];
+    granting: number;
+    lapsed: boolean;
+    /** Turn of the lapse answer, when one ended the compact. */
+    lapsed_turn: number | null;
+}
+
 /**
  * Replay the HRHB decision log up to and including `turn`. Pure; the log is append-only in
  * resolution order, which is turn order.
  */
-export function getRefugeeCompactStatus(state: GameState, turn: number): RefugeeCompactStatus {
+function replayCompact(state: RefugeeCompactInput, turn: number): CompactReplay {
     const log = state.military?.event_decision_log;
-    const none: RefugeeCompactStatus = { active_entries: 0, granting_choices: 0, lapsed: false, latest_expiry: null };
-    if (!log || log.length === 0) return none;
+    if (!log || log.length === 0) return { expiries: [], granting: 0, lapsed: false, lapsed_turn: null };
     let expiries: number[] = [];
     let granting = 0;
     let lapsed = false;
+    let lapsedTurn: number | null = null;
     for (const d of log) {
         if (d.turn > turn) continue;
         if (d.faction !== COMPACT_FACTION) continue;
@@ -128,8 +160,14 @@ export function getRefugeeCompactStatus(state: GameState, turn: number): Refugee
             continue;
         }
         if (LAPSES[d.event_id]?.includes(d.response_id)) {
-            if (expiries.length > 0) lapsed = true;
-            expiries = [];
+            // A lapse answer ends the compact only while it is still in force. If every entry had already
+            // run out, the compact ended by time: it keeps that ending and its date (the last expiry), and
+            // the late answer changes nothing.
+            if (expiries.some((e) => e > d.turn)) {
+                lapsed = true;
+                lapsedTurn = d.turn;
+                expiries = [];
+            }
             continue;
         }
         const renewal = RENEWALS[d.event_id];
@@ -138,10 +176,20 @@ export function getRefugeeCompactStatus(state: GameState, turn: number): Refugee
             expiries = expiries.map((e) => (e > d.turn ? Math.max(e, until) : e));
         }
     }
+    return { expiries, granting, lapsed, lapsed_turn: lapsedTurn };
+}
+
+/** Turn the Washington Agreement was signed at (the compact ends there), or undefined. */
+function washingtonSignedTurn(state: RefugeeCompactInput): number | undefined {
+    const rhs = state.political?.rbih_hrhb_state;
+    return rhs?.washington_signed === true ? (rhs.washington_turn ?? undefined) : undefined;
+}
+
+export function getRefugeeCompactStatus(state: RefugeeCompactInput, turn: number): RefugeeCompactStatus {
+    const { expiries, granting, lapsed } = replayCompact(state, turn);
     // The compact ends at the Washington signing: the Federation locks the alliance, so there is no
     // friction left to damp and no price left to pay (A2b follow-up; the price used to run to t117).
-    const rhs = state.political?.rbih_hrhb_state;
-    const signedAt = rhs?.washington_signed === true ? rhs.washington_turn : undefined;
+    const signedAt = washingtonSignedTurn(state);
     const signed = signedAt != null && turn >= signedAt;
     const active = signed ? [] : expiries.filter((e) => e > turn);
     return {
@@ -150,6 +198,41 @@ export function getRefugeeCompactStatus(state: GameState, turn: number): Refugee
         lapsed,
         latest_expiry: active.length > 0 ? Math.max(...active) : null,
     };
+}
+
+export type RefugeeCompactPhaseName = 'none' | 'active' | 'suspended' | 'lapsed' | 'ran_out' | 'signed';
+
+export interface RefugeeCompactPhase {
+    phase: RefugeeCompactPhaseName;
+    /** While active or suspended: the turn the compact is in force until. */
+    until: number | null;
+    /** For an ended compact: the turn it ended (the lapse answer, the last expiry, or the signing). */
+    ended_turn: number | null;
+}
+
+/**
+ * Where the compact stands, for the player's own surfaces (the records-panel line): none (never
+ * granted), active, suspended (the displacement damping is lifted for a few weeks after a bilateral
+ * flip; the price and the held-back drag continue), or ended by a lapse answer, by running out, or by
+ * the Washington signing. A compact that had already ended before the signing keeps its own ending.
+ * Pure; reads the same log and state as the multipliers, so the line can never disagree with them.
+ */
+export function getRefugeeCompactPhase(state: RefugeeCompactInput, turn: number): RefugeeCompactPhase {
+    const now = getRefugeeCompactStatus(state, turn);
+    if (now.active_entries > 0) {
+        const suspendedUntil = state.political?.rbih_hrhb_state?.refugee_compact_suspended_until;
+        const suspended = suspendedUntil != null && turn < suspendedUntil;
+        return { phase: suspended ? 'suspended' : 'active', until: now.latest_expiry, ended_turn: null };
+    }
+    if (now.granting_choices === 0) return { phase: 'none', until: null, ended_turn: null };
+    const signedAt = washingtonSignedTurn(state);
+    if (signedAt != null && turn >= signedAt && getRefugeeCompactStatus(state, signedAt - 1).active_entries > 0) {
+        return { phase: 'signed', until: null, ended_turn: signedAt };
+    }
+    // Ended before the signing (or no signing): a lapse answer, else the entries ran out.
+    const replay = replayCompact(state, turn);
+    if (replay.lapsed) return { phase: 'lapsed', until: null, ended_turn: replay.lapsed_turn };
+    return { phase: 'ran_out', until: null, ended_turn: replay.expiries.length > 0 ? Math.max(...replay.expiries) : null };
 }
 
 /** Refugee-pressure multiplier: 0.6 per active entry, 1.0 when none or while suspended. */

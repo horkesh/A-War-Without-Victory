@@ -125,6 +125,7 @@ import { buildAcknowledgementDimensionShiftEntries } from './data/dimensionShift
 import type { EventDefinition } from '../../sim/events/event_types';
 import { buildConsequenceReceipts, receiptsRealizedOnTurn } from './data/consequenceReceipts';
 import { resolveEventDisplayNarrative, resolveEventDisplayTitle } from './data/eventDisplayCopy';
+import { narrativeEffectOrdinal, resolveNarrativeEffectText } from './data/eventEffectText';
 import { buildForcedOpReceipts, forcedOpReceiptsRealizedOnTurn } from './data/forcedOpReceipts';
 import {
   buildOfficerResentmentReceipts,
@@ -220,7 +221,16 @@ function formatSignedEventShare(share: number | undefined): string {
   return typeof share === 'number' && Number.isFinite(share) ? formatSignedEventDelta(Math.round(share * 100)) : '';
 }
 
-export function formatAcknowledgementEventEffect(effect: AcknowledgementEventEffect): string {
+/** Which card the line belongs to: a narrative line is looked up by event id and position. */
+type AcknowledgementEffectSource = { eventId: string; narrativeOrdinal: number };
+
+export function formatAcknowledgementEventEffect(
+  effect: AcknowledgementEventEffect,
+  source?: AcknowledgementEffectSource,
+): string {
+  if (effect.kind === 'narrative' && effect.text) {
+    return source ? resolveNarrativeEffectText(source.eventId, source.narrativeOrdinal, effect.text) : effect.text;
+  }
   if (effect.text) return effect.text;
   // Council fix 4 (C4/C11): army attributes name the army (ARBiH, VRS, HVO); state attributes
   // (patron pressure, negotiating position, territory, humanitarian record) name the state by
@@ -268,6 +278,20 @@ export function formatAcknowledgementEventEffect(effect: AcknowledgementEventEff
   }
 }
 
+/** The lines under an acknowledgement card, in the active locale, for one event's displayed effects. */
+export function buildAcknowledgementEffects(
+  eventId: string,
+  effects: ReadonlyArray<AcknowledgementEventEffect>,
+): Array<{ kind: string; description: string }> {
+  return effects.map((effect, index) => ({
+    kind: effect.kind,
+    description: formatAcknowledgementEventEffect(effect, {
+      eventId,
+      narrativeOrdinal: narrativeEffectOrdinal(effects, index),
+    }),
+  }));
+}
+
 /**
  * Acknowledgement-list entries for a fired automatic card: its authored effects, then
  * (§6 E2) its own `dimension_shifts`, so a standing or leverage cost the engine applies is
@@ -275,13 +299,11 @@ export function formatAcknowledgementEventEffect(effect: AcknowledgementEventEff
  * (strictCompare) and zero deltas are omitted.
  */
 export function buildAcknowledgementEventEffects(
+  eventId: string,
   def: Pick<EventDefinitionView, 'effects' | 'dimension_shifts'>,
 ): Array<{ kind: string; description: string }> {
   return [
-    ...(def.effects ?? []).map(eff => ({
-      kind: eff.kind,
-      description: formatAcknowledgementEventEffect(eff),
-    })),
+    ...buildAcknowledgementEffects(eventId, def.effects ?? []),
     ...buildAcknowledgementDimensionShiftEntries(def.dimension_shifts),
   ];
 }
@@ -956,7 +978,7 @@ function App() {
           title: resolveEventDisplayTitle(e.id, def?.title ?? e.title),
           narrative: resolveEventDisplayNarrative(e.id, def?.narrative ?? e.narrative ?? ''),
           category: def?.category ?? e.category ?? 'military',
-          effects: def ? buildAcknowledgementEventEffects(def) : e.effects,
+          effects: def ? buildAcknowledgementEventEffects(e.id, def) : e.effects,
           isDecision: false,
           image: def?.image,
         };

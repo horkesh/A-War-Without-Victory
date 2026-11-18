@@ -32,7 +32,7 @@ function viewOf(id: string) {
 
 describe('§6 E2: acknowledgement list shows a card\'s live standing shift', () => {
     it('the ahmici_massacre_1993 acknowledgement list contains "HRHB international standing -25" (EN)', () => {
-        const entries = buildAcknowledgementEventEffects(viewOf('ahmici_massacre_1993'));
+        const entries = buildAcknowledgementEventEffects('ahmici_massacre_1993', viewOf('ahmici_massacre_1993'));
         expect(entries).toContainEqual({ kind: 'dimension_shift', description: 'HRHB international standing -25' });
         expect(isDisplayEventEffectKind('dimension_shift')).toBe(true);
     });
