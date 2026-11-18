@@ -109,7 +109,7 @@ function makeState(opts: StateOpts): GameState {
         }
     }
     return {
-        meta: { turn: 100, phase: 'war', supply_reserves_enabled: false },
+        meta: { turn: 100, phase: 'war' },
         political: { political_controllers: {} },
         military: {
             formations,
@@ -367,7 +367,7 @@ describe('LANE-2026-05-02-IN-TRANSIT-COMBAT-POWER-CONTEXT T7: estimateForceRatio
             };
 
             const state = {
-                meta: { turn: 100, phase: 'war', supply_reserves_enabled: false },
+                meta: { turn: 100, phase: 'war' },
                 political: {
                     political_controllers: {
                         [FRIENDLY]: 'TEST_FACTION',

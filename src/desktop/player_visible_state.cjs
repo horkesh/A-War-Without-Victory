@@ -554,8 +554,6 @@ function projectMilitary(state, playerFaction, opportunityOwnership) {
     negotiation: projectNegotiation(military.negotiation, playerFaction),
     war_timeline: projectWarTimeline(military.war_timeline, playerFaction),
     army_hq_operations: projectArmyHqOperations(military.army_hq_operations, playerFaction, ownCorpsIds),
-    // smuggling_routes, airdrop_allocation and smuggling_allocation are retired compatibility-only
-    // fields (supply-reserve economy, 2026-11-17); they are no longer projected to the player.
     ...copyKeys(military, [
       'front_edges',
       'war_front_edges_osid',
@@ -581,7 +579,6 @@ function projectMilitary(state, playerFaction, opportunityOwnership) {
   for (const key of [
     'brigade_movement_state',
     'brigade_movement_orders',
-    'brigade_reposition_orders',
     'brigade_deploy_orders',
     'brigade_encircled',
     'brigade_attack_orders',
@@ -619,7 +616,6 @@ function projectMilitary(state, playerFaction, opportunityOwnership) {
     'front_posture',
     'front_posture_regions',
     'strategic_reserves',
-    // general_supply_reserve / heavy_munitions_reserve retired 2026-11-17 (not projected).
     'army_stance',
     'logistics_priority',
     'equipment_quality_modifiers',
@@ -886,9 +882,6 @@ function projectTurnSummaries(summaries, context, allowedEventIds) {
     projected.movements = (Array.isArray(summary.movements) ? summary.movements : [])
       .filter((row) => isRecord(row) && ownFormationIds.has(row.formation_id))
       .map(cloneJson);
-    projected.supply_deltas = scopeRecordToKey(summary.supply_deltas, playerFaction);
-    projected.heavy_munitions_deltas = scopeRecordToKey(summary.heavy_munitions_deltas, playerFaction);
-    projected.supply_snapshot = scopeRecordToKey(summary.supply_snapshot, playerFaction);
     projected.supply_transitions = (Array.isArray(summary.supply_transitions) ? summary.supply_transitions : [])
       .filter((row) => isRecord(row) && politicalControllers[row.osid] === playerFaction)
       .map(cloneJson);

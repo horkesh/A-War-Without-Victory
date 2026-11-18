@@ -26,7 +26,7 @@ function makeTurnSummary(turn: number) {
         battles: [], notable_flips: [], events_fired: [], notable_events: [],
         decoration_awards: [], arc_transitions: [], formation_spawns: [], formation_destructions: [],
         displacement_total: 0, displacement_by_ethnicity: {},
-        territory_net: {}, supply_deltas: {}, heavy_munitions_deltas: {},
+        territory_net: {}, 
         movements: [], supply_transitions: [],
     };
 }

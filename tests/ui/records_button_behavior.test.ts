@@ -63,8 +63,6 @@ function makeAftermathView(): TurnAftermathView {
             theaterMilitaryCasualties: 73,
             displacedThisTurn: 500,
             ownFormationsDestroyed: 0,
-            ownSupplySpent: 8,
-            ownHeavyMunitionsSpent: 2,
             reasons: ['cost signal'],
         },
         signals: [],
@@ -87,7 +85,6 @@ function makeAftermathView(): TurnAftermathView {
             topItems: [],
         },
         formations: { ownSpawned: 0, ownDestroyed: 0, spawned: 0, destroyed: 0 },
-        supply: { ownSupplyDelta: -8, ownHeavyMunitionsDelta: -2 },
     } as TurnAftermathView;
 }
 

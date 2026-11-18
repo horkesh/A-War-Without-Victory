@@ -126,7 +126,6 @@ describe('Operation Lukavac 93 historical compatibility', () => {
         resolveEventDecision(state, 'operation_lukavac_93', responseId);
 
         expect(state.military.negotiation?.patron_relationships?.RS?.support_level).toBe(expectedPatronSupport);
-        expect(state.military.general_supply_reserve).toBeUndefined();
         expect(state.military.pending_event_decisions).toEqual([]);
         expect(state.military.event_decision_log).toContainEqual(expect.objectContaining({
             event_id: 'operation_lukavac_93',
@@ -646,8 +645,8 @@ describe('Event Decisions', () => {
     });
 
     // Old-save case: a staged decision saved before the supply-reserve retirement (2026-11-17) can
-    // still carry a `supply_delta` effect on a response option. Resolving it must not throw, must not
-    // write a reserve stock, and must still apply the option's other effects.
+    // still carry a `supply_delta` effect on a response option. Resolving it must not throw and must
+    // still apply the option's other effects.
     it('resolveEventDecision resolves an old-save option carrying a retired supply_delta and applies its other effects', () => {
         const state = makeMinimalState('RS');
         state.military.pending_event_decisions = [
@@ -673,7 +672,6 @@ describe('Event Decisions', () => {
         expect(() => resolveEventDecision(state, 'old_save_supply_event', 'defy')).not.toThrow();
 
         expect(moraleOf(state, 'RS')).toBe(initialMorale - 5);
-        expect(state.military.general_supply_reserve).toBeUndefined();
         expect(state.military.pending_event_decisions).toEqual([]);
         expect(state.military.event_decision_log).toContainEqual(expect.objectContaining({
             event_id: 'old_save_supply_event',

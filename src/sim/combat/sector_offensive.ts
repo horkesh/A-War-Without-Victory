@@ -198,8 +198,7 @@ const MIN_BRIGADES_FOR_OFFENSIVE = 2;
  */
 const EMBARGO_OFFENSIVE_GATE_CAP_THRESHOLD = 0.7;
 
-/** Independent of `supply_reserves_enabled` — reads only the embargo phase,
- *  never touches general_supply_reserve, siege counters, or enclave resilience. */
+/** Reads only the embargo phase; touches no reserve, siege, or enclave-resilience state. */
 function isFactionOffensiveGatedByEmbargo(state: GameState, faction: FactionId): boolean {
     if (!state.meta?.embargo_offensive_gate_enabled) return false;
     const phase = resolveActiveEmbargoPhase(state);
@@ -341,8 +340,7 @@ export function getIntlStandingOpsHesitationMultiplier(
 /**
  * Embargo-driven op-launch dampener — chains alongside the four hesitation
  * multipliers above (same `combinedMult` consumer, `emit.ts` buildOperations).
- * Gated by `embargo_offensive_gate_enabled` (independent of
- * `supply_reserves_enabled`, touches no reserve/siege/enclave state).
+ * Gated by `embargo_offensive_gate_enabled` (touches no reserve/siege/enclave state).
  *
  * Unlike the political-hesitation multipliers (0.7-0.85×, soft caution), this
  * models a hard material constraint — no ammunition means no sustained

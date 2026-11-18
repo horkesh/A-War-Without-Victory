@@ -64,7 +64,7 @@ function fullStrategicDims() {
 function baseState(turn: number, overrides: { political?: any; military?: any; displacement?: any; turn_summaries?: any } = {}): GameState {
     return {
         schema_version: 1,
-        meta: { supply_reserves_enabled: true, turn, phase: 'war', scenario_id: 'test', player_faction: 'RBiH', seed: 'div11' } as GameState['meta'],
+        meta: { turn, phase: 'war', scenario_id: 'test', player_faction: 'RBiH', seed: 'div11' } as GameState['meta'],
         factions: [
             { id: 'RBiH', profile: {} as any, areasOfResponsibility: [], supply_sources: [] },
             { id: 'RS', profile: {} as any, areasOfResponsibility: [], supply_sources: [] },
@@ -77,8 +77,6 @@ function baseState(turn: number, overrides: { political?: any; military?: any; d
             front_posture_regions: {},
             front_pressure: {},
             militia_pools: {},
-            general_supply_reserve: { RBiH: 50, RS: 70, HRHB: 40 },
-            heavy_munitions_reserve: { RBiH: 30, RS: 50, HRHB: 20 },
             fired_event_ids: [],
             event_flags: {},
             event_fire_counts: {},

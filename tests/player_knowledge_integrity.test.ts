@@ -21,8 +21,6 @@ function buildMinimalState(playerFaction: string | null) {
                 RS:   { killed: 300, wounded: 400, missing_captured: 20 },
                 HRHB: { killed: 50,  wounded: 60,  missing_captured: 5 },
             },
-            general_supply_reserve: { RBiH: 500, RS: 800, HRHB: 300 },
-            heavy_munitions_reserve: { RBiH: 100, RS: 200, HRHB: 50 },
         } as any,
         political: {
             political_controllers: {},

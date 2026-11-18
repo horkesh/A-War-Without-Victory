@@ -1,8 +1,8 @@
 /**
  * F1i (2026-11-16): humanitarian convoys are not modelled in 1.0. The convoy_decision player
- * family, its modal, IPC channel, inbox/desk/records surfaces and i18n are retired. The optional
- * save fields `military.pending_convoy_decisions` / `convoy_decision_history` stay so an old save
- * still loads; nothing writes them and no player surface reads them.
+ * family, its modal, IPC channel, inbox/desk/records surfaces and i18n are retired. The state
+ * fields `military.pending_convoy_decisions` / `convoy_decision_history` were removed from
+ * GameState in the retired-field sweep (see tests/dead_state_fields_retired.test.ts).
  *
  * This proves the old-save path end to end: a save carrying one unanswered convoy plus a filed
  * convoy record goes through the real load path (migrate + shape validation + state validation),
@@ -62,11 +62,8 @@ describe('F1i convoy save compatibility', () => {
         const loaded = deserializeState(legacyConvoySavePayload());
 
         expect(loaded.schema_version).toBe(CURRENT_SCHEMA_VERSION);
-        // The legacy rows are kept as-is (nothing rewrites or resolves them).
-        expect(loaded.military.pending_convoy_decisions).toEqual([PENDING_CONVOY]);
-        expect(loaded.military.convoy_decision_history).toEqual([FILED_CONVOY]);
         // And the loaded save round-trips through the canonical serializer.
-        expect(deserializeState(serializeState(loaded)).military.pending_convoy_decisions).toEqual([PENDING_CONVOY]);
+        expect(deserializeState(serializeState(loaded)).schema_version).toBe(CURRENT_SCHEMA_VERSION);
     });
 
     it('shows no convoy item in the player-visible projection, inbox, blockers, manifest or records', () => {

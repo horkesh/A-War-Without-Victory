@@ -326,7 +326,7 @@ Pass 5: Formation Markers
   After Pass 5, when the selected formation is a corps or army_hq, **white** dashed lines (#ffffff, 60% opacity, 2px, 6/4 dash) are drawn from the formation to each subordinate (drawCorpsSubordinateLines); army_hq draws to subordinate corps.
 
 Pass 5a: Order Arrows
-  Only when game state loaded. Attack orders (red solid) from `loadedGameState.attackOrders`; municipality movement orders (dashed faction color) from `loadedGameState.movementOrders`; settlement movement orders (dashed faction color) from `loadedGameState.movementOrdersSettlement`. Retired `brigade_reposition_orders` are not surfaced by the player-facing adapter. Drawn in deterministic order (formation/target sorted).
+  Only when game state loaded. Attack orders (red solid) from `loadedGameState.attackOrders`; municipality movement orders (dashed faction color) from `loadedGameState.movementOrders`; settlement movement orders (dashed faction color) from `loadedGameState.movementOrdersSettlement`. Reposition orders are retired (the `brigade_reposition_orders` state field was removed 2026-11-18) and are not surfaced by the player-facing adapter. Drawn in deterministic order (formation/target sorted).
 
 Pass 6: Brigade AoR Highlight
   Only when game state loaded, brigade AoR layer on, and a formation selected.
@@ -693,7 +693,7 @@ User loads state via main menu (Load Save) or desktop IPC (e.g. after New Campai
 - **attackOrders** — from `state.brigade_attack_orders`; each entry has formationId, targetSid, faction; sorted by formationId then targetSid.
 - **movementOrders** — from `state.brigade_mun_orders`; each entry has formationId, fromSid, toSid, faction; sorted by formationId then toSid.
 - **movementOrdersSettlement** — from `state.brigade_movement_orders`; each entry has brigadeId + sorted destination settlement IDs.
-- **repositionOrders** — retired. Player-facing `LoadedGameState` no longer exposes `state.brigade_reposition_orders`.
+- **repositionOrders** — retired. The `brigade_reposition_orders` state field was removed from GameState in the retired-field sweep (2026-11-18); the adapter's `repositionOrders` view is always empty.
 - **recentControlEvents** — from `state.control_events` (or replay `control_events`), filtered to the current turn and sorted by settlement id for stable display.
 - **recruitment** — when `state.recruitment_state` exists: `capitalByFaction`, `equipmentByFaction` (via `pointsByFaction()` with sorted keys), and `recruitedBrigadeIds` (sorted); used by the Recruitment modal (§13.8).
 - **player_faction** — from `state.meta.player_faction` when set by New Campaign; indicates which side the human plays (RBiH, RS, or HRHB). The adjacent `state.meta.decision_mode` is explicitly chosen after splash → neutral monitoring room → deliberate faction preview → dossier/mode (`historical` or `emergent`). Recruitment shows only the player's brigades and only those recruitable at the moment (§13.8).

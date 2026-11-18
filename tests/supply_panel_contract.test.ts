@@ -17,8 +17,6 @@ describe('SupplyPanel adapter contract', () => {
                 front_posture_regions: {},
                 front_pressure: {},
                 militia_pools: {},
-                general_supply_reserve: { RBiH: 75, RS: 60 },
-                heavy_munitions_reserve: { RBiH: 30, RS: 40 },
             },
             political: {
                 political_controllers: {},

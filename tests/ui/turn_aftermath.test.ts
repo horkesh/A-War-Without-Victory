@@ -16,8 +16,6 @@ function makeSummary(overrides: Partial<TurnSummary> = {}): TurnSummary {
     arc_transitions: [],
     formation_spawns: [],
     formation_destructions: [],
-    supply_deltas: {},
-    heavy_munitions_deltas: {},
     movements: [],
     supply_transitions: [],
     events_fired: [],
@@ -123,8 +121,6 @@ describe('buildTurnAftermathView', () => {
         formation_destructions: [
           { formation_id: 'arbih_lost', formation_name: 'Lost Brigade', faction: 'RBiH' },
         ],
-        supply_deltas: { RBiH: -4 },
-        heavy_munitions_deltas: { RBiH: 2 },
       }),
       pendingEventDecisions: [
         { event_id: 'evt_a', event_title: 'Convoy Decision', turn_fired: 12, faction: 'RBiH', requires_player_response: true, response_options: [{ id: 'yes', label: 'Yes', effects: [] }] },
@@ -226,14 +222,11 @@ describe('buildTurnAftermathView', () => {
       hotspotLabel: 'Bihac',
     });
     expect(view?.formations).toMatchObject({ spawned: 2, destroyed: 1, ownSpawned: 1, ownDestroyed: 1 });
-    expect(view?.supply).toEqual({ ownSupplyDelta: -4, ownHeavyMunitionsDelta: 2 });
     expect(view?.cost).toEqual({
       friendlyMilitaryCasualties: 40,
       theaterMilitaryCasualties: 94,
       displacedThisTurn: 350,
       ownFormationsDestroyed: 1,
-      ownSupplySpent: 4,
-      ownHeavyMunitionsSpent: 0,
       severity: 'critical',
       reasons: ['40 friendly casualties', '1 formation destroyed', '350 displaced'],
     });
@@ -503,8 +496,6 @@ describe('buildTurnAftermathView', () => {
           formation_destructions: [
             { formation_id: 'arbih_setup_lost', formation_name: 'Setup Lost Brigade', faction: 'RBiH' },
           ],
-          supply_deltas: { RBiH: -12 },
-          heavy_munitions_deltas: { RBiH: -3 },
           events_fired: [
             { id: 'setup_event', text: 'Setup event should not be a turn signal.' },
           ],
@@ -548,14 +539,11 @@ describe('buildTurnAftermathView', () => {
     });
     expect(view?.humanitarian).toEqual({ displacedThisTurn: 0, hotspotLabel: undefined });
     expect(view?.formations).toEqual({ spawned: 0, destroyed: 0, ownSpawned: 0, ownDestroyed: 0, ownDestroyedList: [] });
-    expect(view?.supply).toEqual({ ownSupplyDelta: 0, ownHeavyMunitionsDelta: 0 });
     expect(view?.cost).toEqual({
       friendlyMilitaryCasualties: 0,
       theaterMilitaryCasualties: 0,
       displacedThisTurn: 0,
       ownFormationsDestroyed: 0,
-      ownSupplySpent: 0,
-      ownHeavyMunitionsSpent: 0,
       severity: 'low',
       reasons: ['No major costs recorded'],
     });
@@ -590,7 +578,6 @@ describe('buildTurnAftermathView', () => {
           formation_destructions: [
             { formation_id: 'arbih_setup_lost', formation_name: 'Setup Lost Brigade', faction: 'RBiH' },
           ],
-          supply_deltas: { RBiH: -12 },
           events_fired: [
             { id: 'setup_event', text: 'Setup event should not be a turn signal.' },
           ],
@@ -611,7 +598,6 @@ describe('buildTurnAftermathView', () => {
       theaterMilitaryCasualties: 0,
       displacedThisTurn: 0,
       ownFormationsDestroyed: 0,
-      ownSupplySpent: 0,
       severity: 'low',
     });
     expect(view?.signals).toEqual([]);

@@ -135,7 +135,7 @@ function stateAt(turn: 180 | 182 | 183 | 184): GameState {
 
     return {
         schema_version: 0,
-        meta: { turn, seed: 'grdovo-717-fixture', phase: 'war', supply_reserves_enabled: false },
+        meta: { turn, seed: 'grdovo-717-fixture', phase: 'war' },
         factions: [{ id: 'RBiH' }, { id: 'RS' }],
         military: {
             formations: {

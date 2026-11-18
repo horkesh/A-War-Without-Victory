@@ -46,7 +46,6 @@ function makeMinimalState(playerFaction?: string, turn = 5): GameState {
             front_posture_regions: {} as any,
             front_pressure: {},
             militia_pools: {},
-            general_supply_reserve: { RBiH: 50, RS: 50, HRHB: 50 },
         },
         political: {} as any,
         displacement: {} as any,

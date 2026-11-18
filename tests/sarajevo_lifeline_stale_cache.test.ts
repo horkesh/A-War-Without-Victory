@@ -27,7 +27,6 @@ function baseState(turn: number): GameState {
         ],
         military: {
             formations: {},
-            siege_turn_counters: {},
             // tunnel NOT yet fired this turn — lifeline must reflect current truth
             fired_event_ids: [],
             event_flags: { sarajevo_siege_active: true },

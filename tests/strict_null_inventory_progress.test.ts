@@ -826,7 +826,10 @@ describe('strict null inventory progress', () => {
             // removed. 600 -> 599.
             // Package P2 (2026-11-17): CorpsDirective.sector_reassignment_orders[].empty_sector_relief,
             // set only on an empty-sector relief order. No new type escape. 599 -> 600.
-            optional_fields_game_state: 600,
+            // Retired-field sweep (2026-11-18): -13 dead optional fields removed from GameState
+            // (10 MilitaryState fields, StateMeta.supply_reserves_enabled,
+            // CorpsOperation.artillery_preparation_consumed, PendingConvoyDecision.decision). 600 -> 587.
+            optional_fields_game_state: 587,
         });
         // Reason-code instrumentation (item 3): +1, `OperationAxis.launch_blocker_detail`.
         // `classifyDomain` routes it to `sim` on the /Corps|Operation/ interface-name rule,
@@ -845,13 +848,15 @@ describe('strict null inventory progress', () => {
         // A2b: +1 state (RbihHrhbState.refugee_compact_suspended_until). 599 -> 600 / state 223 -> 224.
         // Sep-1991 peace start retired (v40): -1 state (StateMeta.peace_war_start_control_path). 600 -> 599 / state 224 -> 223.
         // Package P2: +1 sim (CorpsDirective.sector_reassignment_orders[].empty_sector_relief). 599 -> 600 / sim 366 -> 367.
-        expect(current.optional_field_domains.total).toBe(600);
+        // Retired-field sweep (2026-11-18): -11 sim (10 MilitaryState fields, CorpsOperation.artillery_preparation_consumed),
+        // -2 state (StateMeta.supply_reserves_enabled, PendingConvoyDecision.decision). 600 -> 587 / sim 367 -> 356 / state 223 -> 221.
+        expect(current.optional_field_domains.total).toBe(587);
         expect(current.optional_field_domains.domain_counts).toMatchObject({
             derived: 10,
             ipc: 0,
             scenario: 0,
-            sim: 367,
-            state: 223,
+            sim: 356,
+            state: 221,
             ui_adapter: 0,
             unknown: 0,
         });

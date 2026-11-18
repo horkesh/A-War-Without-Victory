@@ -311,6 +311,7 @@ describe('UI Adapter Boundary Discipline', () => {
       meta: { turn: 65, phase: 'war', player_faction: 'RS' },
       military: {
         formations: {},
+        // Legacy payload from an old save (the field was removed from GameState): ignored.
         convoy_decision_history: [
           {
             id: 'convoy:64:srebrenica:RS',

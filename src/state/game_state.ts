@@ -693,8 +693,6 @@ export interface CorpsOperation {
      *  re-charging the same override every turn the op stays active. Player-only: never set
      *  in headless (was_force_launched is never set on the bot path) → byte-identical baselines. */
     force_launch_consequence_applied?: boolean;
-    /** Internal consumption flag for artillery preparation. */
-    artillery_preparation_consumed?: boolean;
     /** Reason the operation entered recovery.
      *  ENGINE-HEALTH B3 (2026-09-19): `'insufficient_donation'` is RETIRED as a producible
      *  reason — it reached this union only by being propagated from the removed
@@ -1558,40 +1556,6 @@ export interface InternationalVisibilityPressure {
     last_major_shift: number | null; // turn index
 }
 
-/** Retired smuggling-route record (moved from the deleted smuggling_routes.ts, 2026-11-17).
- * Retired 2026-11-17 (Fable consult 6): the supply-reserve economy is not modelled in 1.0; kept optional so old saves load; no new game creates it.
- * @persistence compatibility-only */
-export interface SmugglingRouteState {
-    id: string;
-    /** Capacity [0-100]. */
-    capacity: number;
-    /** Whether the route was disrupted that turn. */
-    disrupted: boolean;
-    /** Cumulative turns the route had been active. */
-    active_turns: number;
-}
-
-/** Retired F1i 2026-11-16: humanitarian convoys are not modelled in 1.0; kept optional so old saves load; nothing writes it. */
-export interface PendingConvoyDecision {
-    id: string;
-    target_enclave: string;
-    route_faction: FactionId;
-    supply_amount: number;
-    decision?: 'allow' | 'block' | 'divert';
-}
-
-/** Retired F1i 2026-11-16: humanitarian convoys are not modelled in 1.0; kept optional so old saves load; nothing writes it. */
-export interface ConvoyDecisionRecord {
-    id: string;
-    turn: number;
-    target_enclave: string;
-    route_faction: FactionId;
-    target_faction: FactionId;
-    supply_amount: number;
-    decision: 'allow' | 'block' | 'divert';
-    decided_by: 'player' | 'bot';
-}
-
 /** Paramilitary deployment request awaiting player authorization. */
 export interface ParamilitaryRequest {
     /** Target OSID to capture. */
@@ -2300,10 +2264,6 @@ export interface StateMeta {
      * factual initial-control corrections.
      */
     avoided_osids_by_faction?: Record<string, string[]>;
-    /** Former supply-reserve economy switch.
-     * Retired 2026-11-17 (Fable consult 6): the supply-reserve economy is not modelled in 1.0; kept optional so old saves load; no new game creates it.
-     * @persistence compatibility-only */
-    supply_reserves_enabled?: boolean;
     /**
      * When true, gates offensive-operation launch eligibility on the RBiH arms
      * embargo phase (`EMBARGO_PHASE_CAPS`), independent of the retired supply-reserve economy
@@ -3014,8 +2974,6 @@ militia_garrison?: Record<SettlementId, number>;
 brigade_movement_state?: Record<FormationId, BrigadeMovementState>;
 /** War phase (Brigade AoR Redesign Phase C): Pending movement orders (consumed each turn). destination_sids = 1–4 contiguous faction-controlled settlements. */
 brigade_movement_orders?: Record<FormationId, BrigadeMovementOrder>;
-/** Retired compatibility residue from older saves/tools. Live runtime no longer consumes brigade reposition orders. Supported load boundary: every schema accepted by applyMigrations (v0 through CURRENT_SCHEMA_VERSION). @persistence compatibility-only */
-brigade_reposition_orders?: Record<FormationId, { settlement_ids: SettlementId[] }>;
 /** War phase tactical deploy/undeploy staging (consumed each turn). */
 brigade_deploy_orders?: Record<FormationId, BrigadeDeployAction>;
 /** War phase (Brigade AoR Redesign Phase G): Per-brigade encirclement (AoR entirely in enclave). Used for cohesion drain, garrison penalty, movement block. */
@@ -3038,22 +2996,10 @@ army_clash_state?: import('./army_clash_types.js').ArmyClashState;
 war_militia_strength?: Record<MunicipalityId, Record<FactionId, number>>;
 /** JNA withdrawal and asset transfer; Peace-phase §4.6. Does not start war. */
 war_jna?: JNATransitionState;
-/** Consecutive critical-supply turns per faction:OSID. Key: `${factionId}:${osid}`.
- * Retired 2026-11-17 (§6 panel, Fable consult 6): siege counters / bombardment attrition / siege morale drain are not modelled in 1.0; kept optional so old saves load; nothing writes it.
- * @persistence compatibility-only */
-siege_turn_counters?: Record<string, number>;
-/** General supply reserves per faction [0..100].
- * Retired 2026-11-17 (Fable consult 6): the supply-reserve economy is not modelled in 1.0; kept optional so old saves load; no new game creates it.
- * @persistence compatibility-only */
-general_supply_reserve?: Record<FactionId, number>;
 /** Scenario-authored must-hold OSIDs per corps. Set once at scenario load; read by commander briefing. Key: corps_id. */
 must_hold_osids_by_corps?: Record<string, string[]>;
 /** Per-corps comms quality override loaded from scenario. Key: corps_id. */
 comms_override_by_corps?: Record<string, { before_turn: number; mode: 'radio' | 'full' }>;
-/** Heavy munitions reserves per faction [0..100].
- * Retired 2026-11-17 (Fable consult 6): the supply-reserve economy is not modelled in 1.0; kept optional so old saves load; no new game creates it.
- * @persistence compatibility-only */
-heavy_munitions_reserve?: Record<FactionId, number>;
 /** Canonical front-edge snapshot for GUI rendering and deterministic diagnostics. */
 front_edges?: FrontEdgeState[];
 /** OSID front-edge snapshot (War phase operational view) for HoI/OSID consumers. */
@@ -3070,8 +3016,6 @@ brigade_front_assignment?: Record<FormationId, string | null>;
 theatres: Record<string, TheatreState>;
 /** Legacy theatre compatibility assignment. Required current-save record; preserved only for old saves/tools. Supported load boundary: every schema accepted by applyMigrations (v0 through CURRENT_SCHEMA_VERSION). @persistence compatibility-only */
 army_theatre_assignment: Record<FormationId, string>;
-/** Legacy AoR tuning compatibility field. Do not expose in the live player shell and do not write new values. Supported load boundary: every schema accepted by applyMigrations (v0 through CURRENT_SCHEMA_VERSION). @persistence compatibility-only */
-brigade_desired_aor_cap?: Record<FormationId, number>;
 /** Pending brigade posture orders (consumed once per turn). */
 brigade_posture_orders?: BrigadePostureOrder[];
 /** Attack orders: one target settlement per brigade per turn; null = no attack (Brigade Realism plan §3.4). Consumed once per turn. */
@@ -3150,26 +3094,10 @@ war_timeline?: import('./war_timeline.js').WarTimeline;
 named_officer_data?: import('./officer_types.js').NamedOfficer[];
 /** Named officer mutable state keyed by officer ID. */
 named_officers?: Record<string, import('./officer_types.js').NamedOfficerState>;
-/** Humanitarian airdrop split by enclave id.
- * Retired 2026-11-17 (Fable consult 6): the supply-reserve economy is not modelled in 1.0; kept optional so old saves load; no new game creates it.
- * @persistence compatibility-only */
-airdrop_allocation?: Record<string, number>;
-/** Retired F1i 2026-11-16: humanitarian convoys are not modelled in 1.0; kept optional so old saves load; nothing writes it. */
-pending_convoy_decisions?: PendingConvoyDecision[];
-/** Retired F1i 2026-11-16: humanitarian convoys are not modelled in 1.0; kept optional so old saves load; nothing writes it. */
-convoy_decision_history?: ConvoyDecisionRecord[];
-/** Smuggling split by enclave id.
- * Retired 2026-11-17 (Fable consult 6): the supply-reserve economy is not modelled in 1.0; kept optional so old saves load; no new game creates it.
- * @persistence compatibility-only */
-smuggling_allocation?: Record<string, { type: 'ammo' | 'food'; amount: number }>;
 /** One-turn municipality-targeted local support orders for asymmetric Phase E player agency. */
 municipality_support_orders?: Partial<Record<FactionId, MunicipalitySupportOrder>>;
 /** One-time Sarajevo tunnel unlock. */
 sarajevo_tunnel_operational?: boolean;
-/** Smuggling route capacity and disruption state per route id.
- * Retired 2026-11-17 (Fable consult 6): the supply-reserve economy is not modelled in 1.0; kept optional so old saves load; no new game creates it.
- * @persistence compatibility-only */
-smuggling_routes?: SmugglingRouteState[];
 /** Sector ids with OPSEC active. */
 opsec_sectors?: string[];
 /** Tracks which operation names have been used (name → turn used). Sequential consumption, no repeats. */

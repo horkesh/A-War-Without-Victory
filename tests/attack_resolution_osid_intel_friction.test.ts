@@ -199,8 +199,6 @@ function makeScenario() {
 function makeSnapshot(turn: number): AARSnapshot {
     return {
         turn,
-        supply: {},
-        heavy_munitions: {},
         arcs: {},
         decoration_tiers: {},
         already_destroyed: new Set(),

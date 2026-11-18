@@ -35,14 +35,11 @@ function quietView(overrides: Partial<TurnAftermathView> = {}): TurnAftermathVie
     combat: { battleCount: 0, friendlyBattleCount: 0, friendlyCasualties: 0, opposingCasualties: 0, territoryFlipsFromBattles: 0 },
     humanitarian: { displacedThisTurn: 0 },
     formations: { spawned: 0, destroyed: 0, ownSpawned: 0, ownDestroyed: 0 },
-    supply: { ownSupplyDelta: 0, ownHeavyMunitionsDelta: 0 },
     cost: {
       friendlyMilitaryCasualties: 0,
       theaterMilitaryCasualties: 0,
       displacedThisTurn: 0,
       ownFormationsDestroyed: 0,
-      ownSupplySpent: 0,
-      ownHeavyMunitionsSpent: 0,
       severity: 'low',
       reasons: [],
     },
@@ -83,7 +80,7 @@ function busyView(): TurnAftermathView {
     combat: { battleCount: 9, friendlyBattleCount: 4, friendlyCasualties: 120, opposingCasualties: 310, territoryFlipsFromBattles: 3 },
     humanitarian: { displacedThisTurn: 900, hotspotLabel: 'Doboj' },
     formations: { spawned: 1, destroyed: 1, ownSpawned: 0, ownDestroyed: 1 },
-    cost: { ...base.cost, friendlyMilitaryCasualties: 120, displacedThisTurn: 900, ownFormationsDestroyed: 1, ownSupplySpent: 8, ownHeavyMunitionsSpent: 4, severity: 'critical' },
+    cost: { ...base.cost, friendlyMilitaryCasualties: 120, displacedThisTurn: 900, ownFormationsDestroyed: 1, severity: 'critical' },
     commandRecord: {
       directives: [],
       rows: [
@@ -171,7 +168,7 @@ describe('turn aftermath dispatch builder', () => {
   it('leaves out a line with nothing to report (the cost line never reports supply spent)', () => {
     const view = busyView();
     view.humanitarian = { displacedThisTurn: 0 };
-    view.cost = { ...view.cost, displacedThisTurn: 0, ownFormationsDestroyed: 0, ownSupplySpent: 5, ownHeavyMunitionsSpent: 4 };
+    view.cost = { ...view.cost, displacedThisTurn: 0, ownFormationsDestroyed: 0 };
     view.commandRecord = { directives: [], rows: [] };
     const kinds = buildTurnAftermathDispatch({ view }).lines.map((line) => line.kind);
     expect(kinds).toEqual(['ground', 'fighting', 'needs']);

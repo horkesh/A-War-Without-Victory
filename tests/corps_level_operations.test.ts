@@ -270,8 +270,6 @@ describe('Corps-Level Operation Launch', () => {
             { a: 'op:a:f1', b: 'op:e:t1' },
             { a: 'op:a:f2', b: 'op:e:t2' },
         ]);
-        state.meta.supply_reserves_enabled = true;
-        state.military.general_supply_reserve = { RS: 45 } as any;
 
         const supplyReport: SupplyStateByOsidReport = {
             schema: 1,

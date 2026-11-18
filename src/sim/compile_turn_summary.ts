@@ -51,9 +51,6 @@ export function captureAARSnapshot(state: GameState): AARSnapshot {
 
     return {
         turn,
-        // Supply reserves retired 2026-11-17 (Fable consult 6): nothing to snapshot.
-        supply: {},
-        heavy_munitions: {},
         arcs,
         decoration_tiers,
         already_destroyed,
@@ -83,12 +80,11 @@ export function compileTurnSummary(
         ...compileTerritory(turnControlEvents),
         ...compileDisplacement(state, turn),
         ...compileUnitEvents(state, snapshot),
-        ...compileSupplyDeltas(state, snapshot),
         movements: compileMovements(state, snapshot),
         supply_transitions: compileSupplyTransitions(state, snapshot),
         events_fired: report.events_fired ?? [],
         notable_events: compileNotableEvents(state, turn),
-        ...compileTerritoryAndSupplySnapshots(state),
+        ...compileTerritorySnapshot(state),
     };
 }
 
@@ -334,20 +330,6 @@ function compileUnitEvents(
 }
 
 // ---------------------------------------------------------------------------
-// Section: Supply Deltas
-// ---------------------------------------------------------------------------
-
-function compileSupplyDeltas(
-    state: GameState,
-    snapshot: AARSnapshot,
-): Pick<TurnSummary, 'supply_deltas' | 'heavy_munitions_deltas'> {
-    // Supply reserves retired 2026-11-17 (Fable consult 6): there are no reserve deltas.
-    void state;
-    void snapshot;
-    return { supply_deltas: {}, heavy_munitions_deltas: {} };
-}
-
-// ---------------------------------------------------------------------------
 // Section: Notable Events
 // ---------------------------------------------------------------------------
 // Section: Movements
@@ -392,12 +374,12 @@ function compileSupplyTransitions(state: GameState, snapshot: AARSnapshot): Turn
 }
 
 // ---------------------------------------------------------------------------
-// Section: Territory + Supply Snapshots (end-of-turn absolute values)
+// Section: Territory snapshot (end-of-turn absolute values)
 // ---------------------------------------------------------------------------
 
-function compileTerritoryAndSupplySnapshots(
+function compileTerritorySnapshot(
     state: GameState,
-): Pick<TurnSummary, 'territory_snapshot' | 'supply_snapshot'> {
+): Pick<TurnSummary, 'territory_snapshot'> {
     const pc = state.political?.political_controllers ?? {};
     const { total, areas } = getOsidAreas();
 
@@ -416,10 +398,7 @@ function compileTerritoryAndSupplySnapshots(
         }
     }
 
-    // Reserve supply snapshot retired 2026-11-17 (Fable consult 6).
-    const supply_snapshot: Partial<Record<FactionId, number>> = {};
-
-    return { territory_snapshot, supply_snapshot };
+    return { territory_snapshot };
 }
 
 // ---------------------------------------------------------------------------

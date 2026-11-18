@@ -1200,8 +1200,7 @@ test.each(['comply_withdraw_hwez', 'defy_ultimatum_hwez'] as const)(
         'nato_ultimatum_sarajevo_1994',
         'sarajevo_exclusion_zone_1994',
         ]);
-        // The former RS supply -5 was retired 2026-11-17 (supply is connection, not stock): no reserve is written.
-        assert.strictEqual(state.military.general_supply_reserve, undefined);
+        // The former RS supply -5 was retired 2026-11-17 (supply is connection, not stock).
         assert.strictEqual(state.military.formations.rbih_brigade?.morale, 55);
         assert.deepStrictEqual(state.military.event_aggression_modifiers, [
         { faction: 'RS', delta: -0.1, expires_turn: 110 },

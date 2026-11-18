@@ -120,7 +120,7 @@ describe('H phase intelligence warfare', () => {
     it('probe operations clamp to two participating brigades and one-turn planning', () => {
         const state = {
   schema_version: CURRENT_SCHEMA_VERSION,
-  meta: { turn: 10, seed: 'probe-test', phase: 'war', supply_reserves_enabled: true } as any,
+  meta: { turn: 10, seed: 'probe-test', phase: 'war' } as any,
   factions: [
                 { id: 'RS', profile: { authority: 10, legitimacy: 10, control: 10, logistics: 10, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] },
             ],
@@ -134,8 +134,6 @@ describe('H phase intelligence warfare', () => {
     corps_front_sectors: {
                 rs_sector: makeSector('rs_sector', 'rs_corps', 'RS', ['e1'], ['op:test:staging'], ['op:test:objective']),
             },
-    general_supply_reserve: { RS: 10, RBiH: 10, HRHB: 10 },
-    heavy_munitions_reserve: { RS: 10, RBiH: 0, HRHB: 0 },
     corps_command: {
                 rs_corps: {
                     command_span: 5,
@@ -174,14 +172,11 @@ describe('H phase intelligence warfare', () => {
     });
 
     // F7 (2026-11-15) made the feint's 0.5 supply cost reserve-only; the supply-reserve economy was
-    // retired 2026-11-17 (Fable consult 6), so a feint never touches the reserve, even an old save's.
-    it.each([
-        { reserves: false, expected: undefined },
-        { reserves: true, expected: 10 },
-    ])('a finished feint never drains the supply reserve (old-save reserves=$reserves)', ({ reserves, expected }) => {
+    // retired 2026-11-17 (Fable consult 6), so a feint has no supply cost.
+    it('a finished feint runs its course into recovery at no supply cost', () => {
         const state = {
   schema_version: CURRENT_SCHEMA_VERSION,
-  meta: { turn: 10, seed: 'feint-supply', phase: 'war', ...(reserves ? { supply_reserves_enabled: true } : {}) } as any,
+  meta: { turn: 10, seed: 'feint-supply', phase: 'war' } as any,
   factions: [
                 { id: 'RS', profile: { authority: 10, legitimacy: 10, control: 10, logistics: 10, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] },
             ],
@@ -193,7 +188,6 @@ describe('H phase intelligence warfare', () => {
     corps_front_sectors: {
                 rs_sector: makeSector('rs_sector', 'rs_corps', 'RS', ['e1'], ['op:test:staging'], ['op:test:objective']),
             },
-    ...(reserves ? { general_supply_reserve: { RS: 10, RBiH: 10, HRHB: 10 }, heavy_munitions_reserve: { RS: 10, RBiH: 0, HRHB: 0 } } : {}),
     corps_command: {
                 rs_corps: {
                     command_span: 5,
@@ -226,7 +220,6 @@ describe('H phase intelligence warfare', () => {
 
         const op = state.military.corps_command?.rs_corps?.active_operations[0];
         expect(op?.phase).toBe('recovery'); // the feint ran its course
-        expect(state.military.general_supply_reserve?.RS).toBe(expected);
     });
 
     it('opsec halves positive cohesion drift for formations in the marked sector', () => {

@@ -67,7 +67,6 @@ describe('event calendar chronology', () => {
             expect(result.fired.map((event) => event.id)).toContain('carter_ceasefire_1994');
             expect(state.military.event_flags?.carter_ceasefire_active).toBe(true);
             // The former RBiH +5 / RS +3 supply effects were retired 2026-11-17 (supply is connection, not stock).
-            expect(state.military.general_supply_reserve).toBeUndefined();
             expect(state.military.pending_event_decisions?.[0]).toMatchObject({
                 event_id: 'carter_ceasefire_1994',
                 requires_player_response: true,

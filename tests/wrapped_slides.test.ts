@@ -17,8 +17,6 @@ function makeTurnSummary(turn: number, overrides: Record<string, any> = {}) {
         formation_destructions: [],
         displacement_total: 0,
         displacement_by_ethnicity: {},
-        supply_deltas: {},
-        heavy_munitions_deltas: {},
         movements: [],
         supply_transitions: [],
         ...overrides,

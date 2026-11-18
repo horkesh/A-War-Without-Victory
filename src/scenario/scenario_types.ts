@@ -167,7 +167,6 @@ export interface Scenario {
      * so the transition can apply it. See War phase Spec §4, §6 and docs/30_planning/PHASE_I_II_EDGE_CASES.md.
      */
     war_entrenchment_init_turns?: number;
-    // supply_reserves_enabled retired 2026-11-17 (Fable consult 6): the supply-reserve economy is not modelled in 1.0.
     /**
      * When true, gates offensive-operation launch eligibility on the RBiH arms
      * embargo phase. See

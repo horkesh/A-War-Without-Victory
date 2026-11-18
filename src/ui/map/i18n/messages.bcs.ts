@@ -4855,7 +4855,6 @@ export const bcsMessages: Partial<Record<MessageKey, string>> = {
     'turnAftermath.cost.reason.formationDestroyed.one': '{count} formacija uništena',
     'turnAftermath.cost.reason.formationDestroyed.many': '{count} formacije uništene',
     'turnAftermath.cost.reason.displaced': '{count} raseljenih',
-    'turnAftermath.cost.reason.supplySpent': '{count} snabdijevanja potrošeno',
     'turnAftermath.cost.reason.none': 'Nema zabilježenih velikih troškova',
     'turnAftermath.signal.detail.historicalEvent': 'Historijski događaj',
     'turnAftermath.signal.detail.notableEvent': 'Značajan događaj',

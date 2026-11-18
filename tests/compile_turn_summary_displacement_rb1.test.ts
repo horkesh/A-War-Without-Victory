@@ -15,7 +15,7 @@ function makeState(turn: number, events: DisplacementEvent[]): GameState {
     return {
         meta: { turn, phase: 'war', seed: 'rb1-turn-summary' },
         political: { control_events: [], political_controllers: {} },
-        military: { formations: {}, general_supply_reserve: {}, heavy_munitions_reserve: {} },
+        military: { formations: {}, },
         displacement: { displacement_event_log: events },
     } as unknown as GameState;
 }
@@ -23,8 +23,6 @@ function makeState(turn: number, events: DisplacementEvent[]): GameState {
 function makeSnapshot(turn: number): AARSnapshot {
     return {
         turn,
-        supply: {},
-        heavy_munitions: {},
         arcs: {},
         decoration_tiers: {},
         already_destroyed: new Set(),

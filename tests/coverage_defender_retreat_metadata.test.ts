@@ -174,10 +174,8 @@ describe('coverage defenders do not acquire retreat-origin metadata', () => {
             turns_remaining: 1,
             owner: 'bot_discretionary' as const,
         };
-        const pendingReposition = { settlement_ids: [B] };
         const state = makeState([strongAttacker(), coverage], {});
         state.military.brigade_movement_state = { rs_cover: packingJourney };
-        state.military.brigade_reposition_orders = { rs_cover: pendingReposition };
         state.military.corps_front_sectors = {
             'sector:rs_corps:0': makeSector(['rs_cover']),
         };
@@ -199,7 +197,6 @@ describe('coverage defenders do not acquire retreat-origin metadata', () => {
         expect(report.battles[0]?.defending_sub_segment_id).toBe('subseg:rs_corps:0');
         expect(coverage.location_osid).toBe(K);
         expect(state.military.brigade_movement_state?.rs_cover).toEqual(packingJourney);
-        expect(state.military.brigade_reposition_orders?.rs_cover).toEqual(pendingReposition);
         expect(coverage.last_retreat_from).toEqual({ osid: PREVIOUS, turn: 179 });
         expect(coverage.entrenchment_turns).toBe(0);
         expect(coverage.disrupted_turns ?? 0).toBeGreaterThan(0);

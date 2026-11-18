@@ -65,8 +65,6 @@ function baseState(turn = 100): GameState {
             front_posture_regions: {},
             front_pressure: {},
             militia_pools: {},
-            general_supply_reserve: { RBiH: 50, RS: 50, HRHB: 50 },
-            heavy_munitions_reserve: { RBiH: 30, RS: 30, HRHB: 30 },
             fired_event_ids: [],
             event_flags: {},
             event_fire_counts: {},

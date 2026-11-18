@@ -7,7 +7,7 @@
  * Extracted from attack_resolution_osid.ts (tranche 6).
  * Fire-and-forget aftermath that mutates state after each battle resolution.
  * Supply-reserve expenditure and production-facility combat damage were retired
- * 2026-11-17 (Fable consult 6); both were no-ops unless supply_reserves_enabled.
+ * 2026-11-17 (Fable consult 6); the supply-reserve economy is not modelled in 1.0.
  *
  * UPSTREAM:  attack_resolution_osid.ts (calls after combat outcome)
  * DOWNSTREAM: formation ops.fatigue

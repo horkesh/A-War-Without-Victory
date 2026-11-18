@@ -988,8 +988,8 @@ describe('save migration validator hardening', () => {
         const migrated = deserializeState(JSON.stringify(state));
 
         expect(migrated.schema_version).toBe(CURRENT_SCHEMA_VERSION);
-        expect(migrated.military.pending_convoy_decisions).toEqual([]);
-        expect(migrated.military.convoy_decision_history).toEqual([]);
+        expect((migrated.military as unknown as Record<string, unknown>).pending_convoy_decisions).toEqual([]);
+        expect((migrated.military as unknown as Record<string, unknown>).convoy_decision_history).toEqual([]);
     });
 
     it('rejects current-version saves missing convoy decision queues', () => {
@@ -1003,22 +1003,6 @@ describe('save migration validator hardening', () => {
         );
         expect(() => deserializeState(JSON.stringify(missingHistory))).toThrow(
             /Save schema validation failed after migration[\s\S]*v27[\s\S]*military\.convoy_decision_history/
-        );
-    });
-
-    it('rejects current-version saves with malformed convoy decision queues', () => {
-        const state = currentVersionState();
-        state.military.pending_convoy_decisions = [
-            { id: '', target_enclave: 42, route_faction: 'JNA', supply_amount: -1, decision: 'approve' },
-            42,
-        ];
-        state.military.convoy_decision_history = [
-            { id: '', turn: 1.5, target_enclave: '', route_faction: 'JNA', target_faction: 'UN', supply_amount: Number.POSITIVE_INFINITY, decision: 'approve', decided_by: 'staff' },
-            42,
-        ];
-
-        expect(() => deserializeState(JSON.stringify(state))).toThrow(
-            /Save schema validation failed after migration[\s\S]*military\.pending_convoy_decisions\[0\]\.id must be a non-empty string[\s\S]*military\.pending_convoy_decisions\[0\]\.route_faction must be one of: RBiH, RS, HRHB[\s\S]*military\.pending_convoy_decisions\[1\] must be an object[\s\S]*military\.convoy_decision_history\[0\]\.turn must be a non-negative integer[\s\S]*military\.convoy_decision_history\[0\]\.decided_by must be one of: player, bot[\s\S]*military\.convoy_decision_history\[1\] must be an object/
         );
     });
 
@@ -1584,93 +1568,6 @@ describe('save migration validator hardening', () => {
         );
     });
 
-    it('accepts current-version saves with absent or well-formed airdrop allocations', () => {
-        const absent = currentVersionState();
-        delete absent.military.airdrop_allocation;
-        const withAllocation = currentVersionState();
-        withAllocation.military.airdrop_allocation = {
-            gorazde: 0.75,
-            srebrenica: 0.25,
-        };
-
-        const migratedAbsent = deserializeState(JSON.stringify(absent));
-        const migratedWithAllocation = deserializeState(JSON.stringify(withAllocation));
-
-        expect(migratedAbsent.military.airdrop_allocation).toBeUndefined();
-        expect(migratedWithAllocation.military.airdrop_allocation).toEqual({
-            gorazde: 0.75,
-            srebrenica: 0.25,
-        });
-    });
-
-    it('rejects current-version saves with malformed airdrop allocations', () => {
-        const state = currentVersionState();
-        state.military.airdrop_allocation = {
-            ok: 0,
-            negative: -1,
-            infinite: Number.POSITIVE_INFINITY,
-            text: '1',
-        };
-
-        expect(() => deserializeState(JSON.stringify(state))).toThrow(
-            /Save schema validation failed after migration[\s\S]*military\.airdrop_allocation\.negative must be a finite non-negative number[\s\S]*military\.airdrop_allocation\.infinite must be a finite non-negative number[\s\S]*military\.airdrop_allocation\.text must be a finite non-negative number/
-        );
-    });
-
-    it('rejects current-version saves with non-record airdrop allocations', () => {
-        const state = currentVersionState();
-        state.military.airdrop_allocation = [];
-
-        expect(() => deserializeState(JSON.stringify(state))).toThrow(
-            /Save schema validation failed after migration[\s\S]*military\.airdrop_allocation must be an object when present/
-        );
-    });
-
-    it('accepts current-version saves with absent or well-formed smuggling allocations', () => {
-        const absent = currentVersionState();
-        delete absent.military.smuggling_allocation;
-        const withAllocation = currentVersionState();
-        withAllocation.military.smuggling_allocation = {
-            gorazde: { type: 'ammo', amount: 0.4 },
-            sarajevo: { type: 'food', amount: 0 },
-        };
-
-        const migratedAbsent = deserializeState(JSON.stringify(absent));
-        const migratedWithAllocation = deserializeState(JSON.stringify(withAllocation));
-
-        expect(migratedAbsent.military.smuggling_allocation).toBeUndefined();
-        expect(migratedWithAllocation.military.smuggling_allocation).toEqual({
-            gorazde: { type: 'ammo', amount: 0.4 },
-            sarajevo: { type: 'food', amount: 0 },
-        });
-    });
-
-    it('rejects current-version saves with malformed smuggling allocation entries', () => {
-        const state = currentVersionState();
-        state.military.smuggling_allocation = {
-            ok: { type: 'food', amount: 0 },
-            badType: { type: 'medicine', amount: 1 },
-            negative: { type: 'ammo', amount: -1 },
-            infinite: { type: 'food', amount: Number.POSITIVE_INFINITY },
-            textAmount: { type: 'ammo', amount: '1' },
-            missingAmount: { type: 'ammo' },
-            nonRecord: 1,
-        } as any;
-
-        expect(() => deserializeState(JSON.stringify(state))).toThrow(
-            /Save schema validation failed after migration[\s\S]*military\.smuggling_allocation\.badType\.type must be ammo or food[\s\S]*military\.smuggling_allocation\.negative\.amount must be a finite non-negative number[\s\S]*military\.smuggling_allocation\.infinite\.amount must be a finite non-negative number[\s\S]*military\.smuggling_allocation\.textAmount\.amount must be a finite non-negative number[\s\S]*military\.smuggling_allocation\.missingAmount\.amount must be a finite non-negative number[\s\S]*military\.smuggling_allocation\.nonRecord must be an object/
-        );
-    });
-
-    it('rejects current-version saves with non-record smuggling allocations', () => {
-        const state = currentVersionState();
-        state.military.smuggling_allocation = [] as any;
-
-        expect(() => deserializeState(JSON.stringify(state))).toThrow(
-            /Save schema validation failed after migration[\s\S]*military\.smuggling_allocation must be an object when present/
-        );
-    });
-
     it('accepts current-version saves with absent or well-formed army stance records', () => {
         const absent = currentVersionState();
         delete absent.military.army_stance;
@@ -1986,46 +1883,25 @@ describe('save migration validator hardening', () => {
         );
     });
 
-    it('accepts current-version saves with absent or well-formed supply siege state', () => {
+    it('accepts current-version saves with absent or well-formed Sarajevo tunnel state', () => {
         const absent = currentVersionState();
-        delete absent.military.siege_turn_counters;
         delete absent.military.sarajevo_tunnel_operational;
         const withSiegeState = currentVersionState();
-        withSiegeState.military.siege_turn_counters = {
-            'RBiH:op:sarajevo:sarajevo_1': 3,
-            'HRHB:op:mostar:mostar_zapad_2': 0,
-        };
         withSiegeState.military.sarajevo_tunnel_operational = true;
 
         const migratedAbsent = deserializeState(JSON.stringify(absent));
         const migratedWithSiegeState = deserializeState(JSON.stringify(withSiegeState));
 
-        expect(migratedAbsent.military.siege_turn_counters).toBeUndefined();
         expect(migratedAbsent.military.sarajevo_tunnel_operational).toBeUndefined();
-        expect(migratedWithSiegeState.military.siege_turn_counters).toEqual(withSiegeState.military.siege_turn_counters);
         expect(migratedWithSiegeState.military.sarajevo_tunnel_operational).toBe(true);
     });
 
-    it('rejects current-version saves with malformed supply siege state', () => {
+    it('rejects current-version saves with malformed Sarajevo tunnel state', () => {
         const state = currentVersionState();
-        state.military.siege_turn_counters = {
-            'RBiH:op:sarajevo:sarajevo_1': -1,
-            'RS:op:gorazde:gorazde_1': 1.5,
-            'HRHB:op:mostar:mostar_zapad_2': 'two',
-        } as any;
         state.military.sarajevo_tunnel_operational = 'yes' as any;
 
         expect(() => deserializeState(JSON.stringify(state))).toThrow(
-            /Save schema validation failed after migration[\s\S]*military\.siege_turn_counters\.HRHB:op:mostar:mostar_zapad_2 must be a non-negative integer[\s\S]*military\.siege_turn_counters\.RBiH:op:sarajevo:sarajevo_1 must be a non-negative integer[\s\S]*military\.siege_turn_counters\.RS:op:gorazde:gorazde_1 must be a non-negative integer[\s\S]*military\.sarajevo_tunnel_operational must be a boolean when present/
-        );
-    });
-
-    it('rejects current-version saves with non-object siege turn counters', () => {
-        const state = currentVersionState();
-        state.military.siege_turn_counters = [] as any;
-
-        expect(() => deserializeState(JSON.stringify(state))).toThrow(
-            /Save schema validation failed after migration[\s\S]*military\.siege_turn_counters must be an object when present/
+            /Save schema validation failed after migration[\s\S]*military\.sarajevo_tunnel_operational must be a boolean when present/
         );
     });
 
@@ -2083,7 +1959,6 @@ describe('save migration validator hardening', () => {
     it('accepts current-version saves with absent or well-formed recruitment economy state', () => {
         const absent = currentVersionState();
         delete absent.military.recruitment_state;
-        delete absent.military.smuggling_routes;
 
         const withEconomyState = currentVersionState();
         withEconomyState.military.recruitment_state = {
@@ -2100,15 +1975,10 @@ describe('save migration validator hardening', () => {
             max_recruits_per_faction_per_turn: 1,
             recruited_brigade_ids: ['arbih_1st_brigade', 'rs_1st_krajina_light_infantry'],
         };
-        withEconomyState.military.smuggling_routes = [
-            { id: 'rbih_adriatic_coast', capacity: 20.5, disrupted: false, active_turns: 4 },
-            { id: 'rs_belgrade_pipeline', capacity: 0, disrupted: true, active_turns: 0 },
-        ];
 
         expect(deserializeState(JSON.stringify(absent)).military.recruitment_state).toBeUndefined();
         const migrated = deserializeState(JSON.stringify(withEconomyState));
         expect(migrated.military.recruitment_state).toEqual(withEconomyState.military.recruitment_state);
-        expect(migrated.military.smuggling_routes).toEqual(withEconomyState.military.smuggling_routes);
     });
 
     it('rejects current-version saves with malformed recruitment economy state', () => {
@@ -2128,36 +1998,27 @@ describe('save migration validator hardening', () => {
             max_recruits_per_faction_per_turn: -1,
             recruited_brigade_ids: ['ok', 42],
         } as any;
-        state.military.smuggling_routes = [
-            { id: '', capacity: -1, disrupted: 'no', active_turns: 1.5 },
-            7,
-        ] as any;
 
         expect(() => deserializeState(JSON.stringify(state))).toThrow(
-            /Save schema validation failed after migration[\s\S]*military\.smuggling_routes\[0\]\.id must be a non-empty string[\s\S]*military\.smuggling_routes\[0\]\.capacity must be a finite non-negative number[\s\S]*military\.smuggling_routes\[0\]\.disrupted must be a boolean[\s\S]*military\.smuggling_routes\[0\]\.active_turns must be a non-negative integer[\s\S]*military\.smuggling_routes\[1\] must be an object[\s\S]*military\.recruitment_state\.recruitment_capital\.RBiH\.faction must match its canonical faction key[\s\S]*military\.recruitment_state\.recruitment_capital\.RBiH\.points must be a finite non-negative number[\s\S]*military\.recruitment_state\.recruitment_capital\.RBiH\.points_initial must be a finite non-negative number[\s\S]*military\.recruitment_state\.recruitment_capital\.bad must use a canonical faction id key[\s\S]*military\.recruitment_state\.recruitment_capital\.empty must use a canonical faction id key[\s\S]*military\.recruitment_state\.recruitment_capital\.empty must be an object[\s\S]*military\.recruitment_state\.equipment_pools\.HRHB\.points_initial must be a finite non-negative number[\s\S]*military\.recruitment_state\.recruited_brigade_ids must be string\[\][\s\S]*military\.recruitment_state\.recruitment_capital_trickle\.RBiH must be a finite non-negative number[\s\S]*military\.recruitment_state\.equipment_points_trickle must be an object when present[\s\S]*military\.recruitment_state\.max_recruits_per_faction_per_turn must be a non-negative integer when present/
+            /Save schema validation failed after migration[\s\S]*military\.recruitment_state\.recruitment_capital\.RBiH\.faction must match its canonical faction key[\s\S]*military\.recruitment_state\.recruitment_capital\.RBiH\.points must be a finite non-negative number[\s\S]*military\.recruitment_state\.recruitment_capital\.RBiH\.points_initial must be a finite non-negative number[\s\S]*military\.recruitment_state\.recruitment_capital\.bad must use a canonical faction id key[\s\S]*military\.recruitment_state\.recruitment_capital\.empty must use a canonical faction id key[\s\S]*military\.recruitment_state\.recruitment_capital\.empty must be an object[\s\S]*military\.recruitment_state\.equipment_pools\.HRHB\.points_initial must be a finite non-negative number[\s\S]*military\.recruitment_state\.recruited_brigade_ids must be string\[\][\s\S]*military\.recruitment_state\.recruitment_capital_trickle\.RBiH must be a finite non-negative number[\s\S]*military\.recruitment_state\.equipment_points_trickle must be an object when present[\s\S]*military\.recruitment_state\.max_recruits_per_faction_per_turn must be a non-negative integer when present/
         );
     });
 
-    it('rejects current-version saves with non-object recruitment state and non-array smuggling routes', () => {
+    it('rejects current-version saves with non-object recruitment state', () => {
         const state = currentVersionState();
         state.military.recruitment_state = [] as any;
-        state.military.smuggling_routes = {} as any;
 
         expect(() => deserializeState(JSON.stringify(state))).toThrow(
-            /Save schema validation failed after migration[\s\S]*military\.smuggling_routes must be an array when present[\s\S]*military\.recruitment_state must be an object when present/
+            /Save schema validation failed after migration[\s\S]*military\.recruitment_state must be an object when present/
         );
     });
 
     it('accepts current-version saves with absent or well-formed supply production economy state', () => {
         const absent = currentVersionState();
-        delete absent.military.general_supply_reserve;
-        delete absent.military.heavy_munitions_reserve;
         delete absent.military.strategic_reserves;
         delete absent.military.production_facilities;
 
         const withSupplyProduction = currentVersionState();
-        withSupplyProduction.military.general_supply_reserve = { RBiH: 150, RS: 80, HRHB: 40 };
-        withSupplyProduction.military.heavy_munitions_reserve = { RBiH: 120, RS: 60, HRHB: 25 };
         withSupplyProduction.military.strategic_reserves = { RBiH: 1000, RS: 500, HRHB: 0 };
         withSupplyProduction.military.production_facilities = {
             prod_breza_ammo: {
@@ -2175,18 +2036,14 @@ describe('save migration validator hardening', () => {
             },
         };
 
-        expect(deserializeState(JSON.stringify(absent)).military.general_supply_reserve).toBeUndefined();
+        expect(deserializeState(JSON.stringify(absent)).military.strategic_reserves).toBeUndefined();
         const migrated = deserializeState(JSON.stringify(withSupplyProduction));
-        expect(migrated.military.general_supply_reserve).toEqual(withSupplyProduction.military.general_supply_reserve);
-        expect(migrated.military.heavy_munitions_reserve).toEqual(withSupplyProduction.military.heavy_munitions_reserve);
         expect(migrated.military.strategic_reserves).toEqual(withSupplyProduction.military.strategic_reserves);
         expect(migrated.military.production_facilities).toEqual(withSupplyProduction.military.production_facilities);
     });
 
     it('rejects current-version saves with malformed supply production economy state', () => {
         const state = currentVersionState();
-        state.military.general_supply_reserve = { RBiH: -1, bad: 4, RS: Number.POSITIVE_INFINITY } as any;
-        state.military.heavy_munitions_reserve = [] as any;
         state.military.strategic_reserves = { HRHB: -1, bad: 'many' } as any;
         state.military.production_facilities = {
             prod_breza_ammo: {
@@ -2205,17 +2062,16 @@ describe('save migration validator hardening', () => {
         } as any;
 
         expect(() => deserializeState(JSON.stringify(state))).toThrow(
-            /Save schema validation failed after migration[\s\S]*military\.general_supply_reserve\.RBiH must be a finite non-negative number[\s\S]*military\.general_supply_reserve\.bad must use a canonical faction id key[\s\S]*military\.general_supply_reserve\.RS must be a finite non-negative number[\s\S]*military\.heavy_munitions_reserve must be an object when present[\s\S]*military\.strategic_reserves\.HRHB must be a finite non-negative number[\s\S]*military\.strategic_reserves\.bad must use a canonical faction id key[\s\S]*military\.strategic_reserves\.bad must be a finite non-negative number[\s\S]*military\.production_facilities\.prod_breza_ammo\.facility_id must match its facility key[\s\S]*military\.production_facilities\.prod_breza_ammo\.name must be a non-empty string[\s\S]*military\.production_facilities\.prod_breza_ammo\.municipality_id must be a non-empty string[\s\S]*military\.production_facilities\.prod_breza_ammo\.type must be one of: ammunition, heavy_equipment, small_arms[\s\S]*military\.production_facilities\.prod_breza_ammo\.base_capacity must be a finite non-negative number[\s\S]*military\.production_facilities\.prod_breza_ammo\.current_condition must be a finite non-negative number[\s\S]*military\.production_facilities\.prod_breza_ammo\.required_inputs\.raw_materials must be boolean[\s\S]*military\.production_facilities\.prod_breza_ammo\.required_inputs\.skilled_labor must be boolean[\s\S]*military\.production_facilities\.bad_facility must be an object/
+            /Save schema validation failed after migration[\s\S]*military\.strategic_reserves\.HRHB must be a finite non-negative number[\s\S]*military\.strategic_reserves\.bad must use a canonical faction id key[\s\S]*military\.strategic_reserves\.bad must be a finite non-negative number[\s\S]*military\.production_facilities\.prod_breza_ammo\.facility_id must match its facility key[\s\S]*military\.production_facilities\.prod_breza_ammo\.name must be a non-empty string[\s\S]*military\.production_facilities\.prod_breza_ammo\.municipality_id must be a non-empty string[\s\S]*military\.production_facilities\.prod_breza_ammo\.type must be one of: ammunition, heavy_equipment, small_arms[\s\S]*military\.production_facilities\.prod_breza_ammo\.base_capacity must be a finite non-negative number[\s\S]*military\.production_facilities\.prod_breza_ammo\.current_condition must be a finite non-negative number[\s\S]*military\.production_facilities\.prod_breza_ammo\.required_inputs\.raw_materials must be boolean[\s\S]*military\.production_facilities\.prod_breza_ammo\.required_inputs\.skilled_labor must be boolean[\s\S]*military\.production_facilities\.bad_facility must be an object/
         );
     });
 
     it('rejects current-version saves with non-object supply production economy maps', () => {
         const state = currentVersionState();
-        state.military.general_supply_reserve = null as any;
         state.military.production_facilities = [] as any;
 
         expect(() => deserializeState(JSON.stringify(state))).toThrow(
-            /Save schema validation failed after migration[\s\S]*military\.general_supply_reserve must be an object when present[\s\S]*military\.production_facilities must be an object when present/
+            /Save schema validation failed after migration[\s\S]*military\.production_facilities must be an object when present/
         );
     });
 
@@ -2223,7 +2079,6 @@ describe('save migration validator hardening', () => {
         const absent = currentVersionState();
         delete absent.military.brigade_movement_state;
         delete absent.military.brigade_movement_orders;
-        delete absent.military.brigade_reposition_orders;
         delete absent.military.brigade_deploy_orders;
         delete absent.military.brigade_posture_orders;
         delete absent.military.brigade_attack_orders;
@@ -2248,11 +2103,6 @@ describe('save migration validator hardening', () => {
                 stance: 'combat',
             },
         };
-        withOrders.military.brigade_reposition_orders = {
-            arbih_4th_brigade: {
-                settlement_ids: ['op:sarajevo:stup_1'],
-            },
-        };
         withOrders.military.brigade_deploy_orders = {
             arbih_5th_brigade: 'deploy',
             arbih_6th_brigade: 'undeploy',
@@ -2274,14 +2124,12 @@ describe('save migration validator hardening', () => {
 
         expect(migratedAbsent.military.brigade_movement_state).toBeUndefined();
         expect(migratedAbsent.military.brigade_movement_orders).toBeUndefined();
-        expect(migratedAbsent.military.brigade_reposition_orders).toBeUndefined();
         expect(migratedAbsent.military.brigade_deploy_orders).toBeUndefined();
         expect(migratedAbsent.military.brigade_posture_orders).toBeUndefined();
         expect(migratedAbsent.military.brigade_attack_orders).toBeUndefined();
         expect(migratedAbsent.military.brigade_sector_override).toBeUndefined();
         expect(migratedWithOrders.military.brigade_movement_state).toEqual(withOrders.military.brigade_movement_state);
         expect(migratedWithOrders.military.brigade_movement_orders).toEqual(withOrders.military.brigade_movement_orders);
-        expect(migratedWithOrders.military.brigade_reposition_orders).toEqual(withOrders.military.brigade_reposition_orders);
         expect(migratedWithOrders.military.brigade_deploy_orders).toEqual(withOrders.military.brigade_deploy_orders);
         expect(migratedWithOrders.military.brigade_posture_orders).toEqual(withOrders.military.brigade_posture_orders);
         expect(migratedWithOrders.military.brigade_attack_orders).toEqual(withOrders.military.brigade_attack_orders);
@@ -2307,12 +2155,6 @@ describe('save migration validator hardening', () => {
             },
             arbih_4th_brigade: 43,
         } as any;
-        state.military.brigade_reposition_orders = {
-            arbih_5th_brigade: {
-                settlement_ids: ['op:sarajevo:stup_1', 44],
-            },
-            arbih_6th_brigade: 45,
-        } as any;
         state.military.brigade_deploy_orders = {
             arbih_7th_brigade: 'hold',
             arbih_8th_brigade: 46,
@@ -2329,7 +2171,7 @@ describe('save migration validator hardening', () => {
         } as any;
 
         expect(() => deserializeState(JSON.stringify(state))).toThrow(
-            /Save schema validation failed after migration[\s\S]*military\.brigade_movement_state\.arbih_1st_brigade\.status must be one of: deployed, packing, in_transit, unpacking[\s\S]*military\.brigade_movement_state\.arbih_1st_brigade\.stance must be one of: combat, column when present[\s\S]*military\.brigade_movement_state\.arbih_1st_brigade\.destination_sids must be a non-empty string array when present[\s\S]*military\.brigade_movement_state\.arbih_1st_brigade\.path must be a string array when present[\s\S]*military\.brigade_movement_state\.arbih_1st_brigade\.turns_remaining must be a non-negative integer when present[\s\S]*military\.brigade_movement_state\.arbih_2nd_brigade must be an object[\s\S]*military\.brigade_movement_orders\.arbih_3rd_brigade\.destination_sids must be a non-empty string array[\s\S]*military\.brigade_movement_orders\.arbih_3rd_brigade\.stance must be one of: combat, column when present[\s\S]*military\.brigade_movement_orders\.arbih_4th_brigade must be an object[\s\S]*military\.brigade_reposition_orders\.arbih_5th_brigade\.settlement_ids must be a non-empty string array[\s\S]*military\.brigade_reposition_orders\.arbih_6th_brigade must be an object[\s\S]*military\.brigade_deploy_orders\.arbih_7th_brigade must be one of: deploy, undeploy[\s\S]*military\.brigade_deploy_orders\.arbih_8th_brigade must be one of: deploy, undeploy[\s\S]*military\.brigade_posture_orders\[0\]\.brigade_id must be a non-empty string[\s\S]*military\.brigade_posture_orders\[0\]\.posture must be a valid brigade posture[\s\S]*military\.brigade_posture_orders\[1\] must be an object[\s\S]*military\.brigade_attack_orders\.arbih_9th_brigade must be a string or null[\s\S]*military\.brigade_sector_override\.arbih_10th_brigade must be a string/
+            /Save schema validation failed after migration[\s\S]*military\.brigade_movement_state\.arbih_1st_brigade\.status must be one of: deployed, packing, in_transit, unpacking[\s\S]*military\.brigade_movement_state\.arbih_1st_brigade\.stance must be one of: combat, column when present[\s\S]*military\.brigade_movement_state\.arbih_1st_brigade\.destination_sids must be a non-empty string array when present[\s\S]*military\.brigade_movement_state\.arbih_1st_brigade\.path must be a string array when present[\s\S]*military\.brigade_movement_state\.arbih_1st_brigade\.turns_remaining must be a non-negative integer when present[\s\S]*military\.brigade_movement_state\.arbih_2nd_brigade must be an object[\s\S]*military\.brigade_movement_orders\.arbih_3rd_brigade\.destination_sids must be a non-empty string array[\s\S]*military\.brigade_movement_orders\.arbih_3rd_brigade\.stance must be one of: combat, column when present[\s\S]*military\.brigade_movement_orders\.arbih_4th_brigade must be an object[\s\S]*military\.brigade_deploy_orders\.arbih_7th_brigade must be one of: deploy, undeploy[\s\S]*military\.brigade_deploy_orders\.arbih_8th_brigade must be one of: deploy, undeploy[\s\S]*military\.brigade_posture_orders\[0\]\.brigade_id must be a non-empty string[\s\S]*military\.brigade_posture_orders\[0\]\.posture must be a valid brigade posture[\s\S]*military\.brigade_posture_orders\[1\] must be an object[\s\S]*military\.brigade_attack_orders\.arbih_9th_brigade must be a string or null[\s\S]*military\.brigade_sector_override\.arbih_10th_brigade must be a string/
         );
     });
 
@@ -2338,8 +2180,6 @@ describe('save migration validator hardening', () => {
         movementState.military.brigade_movement_state = [] as any;
         const movementOrders = currentVersionState();
         movementOrders.military.brigade_movement_orders = [] as any;
-        const repositionOrders = currentVersionState();
-        repositionOrders.military.brigade_reposition_orders = [] as any;
         const deployOrders = currentVersionState();
         deployOrders.military.brigade_deploy_orders = [] as any;
         const postureOrders = currentVersionState();
@@ -2354,9 +2194,6 @@ describe('save migration validator hardening', () => {
         );
         expect(() => deserializeState(JSON.stringify(movementOrders))).toThrow(
             /Save schema validation failed after migration[\s\S]*military\.brigade_movement_orders must be an object when present/
-        );
-        expect(() => deserializeState(JSON.stringify(repositionOrders))).toThrow(
-            /Save schema validation failed after migration[\s\S]*military\.brigade_reposition_orders must be an object when present/
         );
         expect(() => deserializeState(JSON.stringify(deployOrders))).toThrow(
             /Save schema validation failed after migration[\s\S]*military\.brigade_deploy_orders must be an object when present/
@@ -3330,16 +3167,11 @@ describe('save migration validator hardening', () => {
 
     it('accepts current-version saves with absent or well-formed local military order and scalar state', () => {
         const absent = currentVersionState();
-        delete absent.military.brigade_desired_aor_cap;
         delete absent.military.og_orders;
         delete absent.military.settlement_holdouts;
         delete absent.military.faction_officer_maturity;
 
         const wellFormed = currentVersionState();
-        wellFormed.military.brigade_desired_aor_cap = {
-            rbih_101st_mountain: 4,
-            rs_1st_krajina_light: 0,
-        };
         wellFormed.military.og_orders = [{
             corps_id: 'rbih_1st_corps',
             donors: [{ brigade_id: 'rbih_101st_mountain', personnel_contribution: 200 }],
@@ -3365,11 +3197,9 @@ describe('save migration validator hardening', () => {
         const migratedAbsent = deserializeState(JSON.stringify(absent));
         const migratedWellFormed = deserializeState(JSON.stringify(wellFormed));
 
-        expect(migratedAbsent.military.brigade_desired_aor_cap).toBeUndefined();
         expect(migratedAbsent.military.og_orders).toBeUndefined();
         expect(migratedAbsent.military.settlement_holdouts).toBeUndefined();
         expect(migratedAbsent.military.faction_officer_maturity).toBeUndefined();
-        expect(migratedWellFormed.military.brigade_desired_aor_cap).toEqual(wellFormed.military.brigade_desired_aor_cap);
         expect(migratedWellFormed.military.og_orders).toEqual(wellFormed.military.og_orders);
         expect(migratedWellFormed.military.settlement_holdouts).toEqual(wellFormed.military.settlement_holdouts);
         expect(migratedWellFormed.military.faction_officer_maturity).toEqual(wellFormed.military.faction_officer_maturity);
@@ -3377,10 +3207,6 @@ describe('save migration validator hardening', () => {
 
     it('rejects current-version saves with malformed local military order and scalar state', () => {
         const state = currentVersionState();
-        state.military.brigade_desired_aor_cap = {
-            rbih_101st_mountain: -1,
-            rs_1st_krajina_light: 1.5,
-        };
         state.military.og_orders = [{
             corps_id: '',
             donors: [{ brigade_id: 42, personnel_contribution: -1 }, 7],
@@ -3405,7 +3231,7 @@ describe('save migration validator hardening', () => {
         };
 
         expect(() => deserializeState(JSON.stringify(state))).toThrow(
-            /Save schema validation failed after migration[\s\S]*military\.brigade_desired_aor_cap\.rbih_101st_mountain must be a non-negative integer[\s\S]*military\.brigade_desired_aor_cap\.rs_1st_krajina_light must be a non-negative integer[\s\S]*military\.og_orders\[0\]\.corps_id must be a non-empty string[\s\S]*military\.og_orders\[0\]\.donors\[0\]\.brigade_id must be a non-empty string[\s\S]*military\.og_orders\[0\]\.donors\[0\]\.personnel_contribution must be a finite non-negative number[\s\S]*military\.og_orders\[0\]\.donors\[1\] must be an object[\s\S]*military\.og_orders\[0\]\.focus_settlements must be a string array[\s\S]*military\.og_orders\[0\]\.posture must be a brigade posture[\s\S]*military\.og_orders\[0\]\.max_duration must be a positive integer[\s\S]*military\.og_orders\[1\] must be an object[\s\S]*military\.settlement_holdouts\.bad must be an object[\s\S]*military\.settlement_holdouts\.op:sarajevo:centar_2\.holdout must be a boolean[\s\S]*military\.settlement_holdouts\.op:sarajevo:centar_2\.holdout_faction must be a non-empty string[\s\S]*military\.settlement_holdouts\.op:sarajevo:centar_2\.occupying_faction must be a string when present[\s\S]*military\.settlement_holdouts\.op:sarajevo:centar_2\.holdout_resistance must be a finite non-negative number[\s\S]*military\.settlement_holdouts\.op:sarajevo:centar_2\.holdout_since_turn must be a non-negative integer[\s\S]*military\.settlement_holdouts\.op:sarajevo:centar_2\.isolated_turns must be a non-negative integer[\s\S]*military\.faction_officer_maturity\.RBiH must be a finite non-negative number[\s\S]*military\.faction_officer_maturity\.RS must be a finite non-negative number/
+            /Save schema validation failed after migration[\s\S]*military\.og_orders\[0\]\.corps_id must be a non-empty string[\s\S]*military\.og_orders\[0\]\.donors\[0\]\.brigade_id must be a non-empty string[\s\S]*military\.og_orders\[0\]\.donors\[0\]\.personnel_contribution must be a finite non-negative number[\s\S]*military\.og_orders\[0\]\.donors\[1\] must be an object[\s\S]*military\.og_orders\[0\]\.focus_settlements must be a string array[\s\S]*military\.og_orders\[0\]\.posture must be a brigade posture[\s\S]*military\.og_orders\[0\]\.max_duration must be a positive integer[\s\S]*military\.og_orders\[1\] must be an object[\s\S]*military\.settlement_holdouts\.bad must be an object[\s\S]*military\.settlement_holdouts\.op:sarajevo:centar_2\.holdout must be a boolean[\s\S]*military\.settlement_holdouts\.op:sarajevo:centar_2\.holdout_faction must be a non-empty string[\s\S]*military\.settlement_holdouts\.op:sarajevo:centar_2\.occupying_faction must be a string when present[\s\S]*military\.settlement_holdouts\.op:sarajevo:centar_2\.holdout_resistance must be a finite non-negative number[\s\S]*military\.settlement_holdouts\.op:sarajevo:centar_2\.holdout_since_turn must be a non-negative integer[\s\S]*military\.settlement_holdouts\.op:sarajevo:centar_2\.isolated_turns must be a non-negative integer[\s\S]*military\.faction_officer_maturity\.RBiH must be a finite non-negative number[\s\S]*military\.faction_officer_maturity\.RS must be a finite non-negative number/
         );
     });
 

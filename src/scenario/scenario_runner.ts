@@ -1778,9 +1778,6 @@ export async function buildScenarioStartupState(
         state.meta.sarajevo_overrides = scenario.sarajevo_overrides;
     }
 
-    // supply_reserves_enabled retired 2026-11-17 (Fable consult 6): the supply-reserve economy
-    // is not modelled in 1.0. meta.supply_reserves_enabled survives only so old saves load.
-
     if (scenario.embargo_offensive_gate_enabled) {
         state.meta.embargo_offensive_gate_enabled = true;
     }

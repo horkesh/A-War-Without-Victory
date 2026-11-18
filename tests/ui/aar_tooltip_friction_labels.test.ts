@@ -41,8 +41,6 @@ function makeSummary(): TurnSummary {
     arc_transitions: [],
     formation_spawns: [],
     formation_destructions: [],
-    supply_deltas: {},
-    heavy_munitions_deltas: {},
     movements: [],
     supply_transitions: [],
     events_fired: [],
@@ -113,7 +111,6 @@ describe('AAR and tooltip friction labels', () => {
       formation_spawns: [
         { formation_id: 'setup_bde', formation_name: 'Setup Brigade', faction: 'RBiH', kind: 'brigade' },
       ],
-      supply_deltas: { RBiH: -5 },
       notable_events: [
         { kind: 'siege_formed', description: 'Setup signal should stay quiet.', osid: 'op:sarajevo:center' },
       ],

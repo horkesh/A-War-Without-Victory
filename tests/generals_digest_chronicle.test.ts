@@ -32,8 +32,6 @@ function summary(turn: number, over: Record<string, unknown> = {}) {
         displacement_total: 0,
         displacement_by_ethnicity: {},
         territory_net: {},
-        supply_deltas: {},
-        heavy_munitions_deltas: {},
         movements: [],
         supply_transitions: [],
         ...over,

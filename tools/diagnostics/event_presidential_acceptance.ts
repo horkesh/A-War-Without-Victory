@@ -106,7 +106,6 @@ function makeState(playerFaction: FactionId | null): GameState {
             fired_event_ids: [],
             event_decision_log: [],
             event_overflow_queue: [],
-            general_supply_reserve: { RBiH: 50, RS: 50, HRHB: 50 },
             negotiation: {
                 strategic_dimensions: {
                     RBiH: {},

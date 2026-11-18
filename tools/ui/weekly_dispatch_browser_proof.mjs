@@ -19,7 +19,7 @@ const SIZES = [{ width: 1280, height: 720 }, { width: 2293, height: 960 }];
 
 const baseCost = {
   friendlyMilitaryCasualties: 0, theaterMilitaryCasualties: 0, displacedThisTurn: 0,
-  ownFormationsDestroyed: 0, ownSupplySpent: 0, ownHeavyMunitionsSpent: 0, severity: 'low', reasons: [],
+  ownFormationsDestroyed: 0, severity: 'low', reasons: [],
 };
 const baseActions = {
   actionableCount: 0, blockingCount: 0, opportunityCount: 0, reserveCount: 0,
@@ -32,7 +32,6 @@ const quietView = {
   combat: { battleCount: 0, friendlyBattleCount: 0, friendlyCasualties: 0, opposingCasualties: 0, territoryFlipsFromBattles: 0 },
   humanitarian: { displacedThisTurn: 0 },
   formations: { spawned: 1, destroyed: 0, ownSpawned: 1, ownDestroyed: 0 },
-  supply: { ownSupplyDelta: 3, ownHeavyMunitionsDelta: -1 },
   cost: baseCost,
   signals: [],
   commandRecord: { directives: [], rows: [] },
@@ -56,8 +55,7 @@ const busyView = {
   combat: { battleCount: 23, friendlyBattleCount: 11, friendlyCasualties: 412, opposingCasualties: 655, territoryFlipsFromBattles: 7 },
   humanitarian: { displacedThisTurn: 4800, hotspotLabel: 'Srebrenica' },
   formations: { spawned: 2, destroyed: 1, ownSpawned: 0, ownDestroyed: 1 },
-  supply: { ownSupplyDelta: -14, ownHeavyMunitionsDelta: -6 },
-  cost: { ...baseCost, friendlyMilitaryCasualties: 412, theaterMilitaryCasualties: 2100, displacedThisTurn: 4800, ownFormationsDestroyed: 1, ownSupplySpent: 14, ownHeavyMunitionsSpent: 6, severity: 'critical' },
+  cost: { ...baseCost, friendlyMilitaryCasualties: 412, theaterMilitaryCasualties: 2100, displacedThisTurn: 4800, ownFormationsDestroyed: 1, severity: 'critical' },
   commandRecord: {
     directives: [],
     rows: [

@@ -135,8 +135,6 @@ function makeState() {
         max_recruits_per_faction_per_turn: 2,
       },
       army_stance: { RS: 'balanced', RBiH: 'offensive' },
-      general_supply_reserve: { RS: 55, RBiH: 91 },
-      heavy_munitions_reserve: { RS: 44, RBiH: 92 },
       casualty_ledger: {
         RS: { killed: 10, wounded: 20, per_formation: { rs_brigade: { killed: 10 } } },
         RBiH: { killed: 30, wounded: 40, per_formation: { rbih_visible: { killed: 30 } } },
@@ -234,13 +232,13 @@ function makeState() {
       arc_transitions: [],
       formation_spawns: [{ formation_id: 'rbih_hidden', formation_name: 'SECRET HIDDEN BRIGADE', faction: 'RBiH', kind: 'brigade' }],
       formation_destructions: [],
-      supply_deltas: { RS: -1, RBiH: 4 }, heavy_munitions_deltas: { RS: -2, RBiH: 5 },
+      
       movements: [
         { formation_id: 'rs_brigade', formation_name: 'Own Brigade', from_osid: 'op:own:rear', to_osid: 'op:own:front' },
         { formation_id: 'rbih_hidden', formation_name: 'SECRET HIDDEN BRIGADE', from_osid: 'op:enemy:rear', to_osid: 'op:enemy:front' },
       ],
       supply_transitions: [], events_fired: [{ id: 'public_event', text: 'Public event' }], notable_events: [],
-      territory_snapshot: { RS: 50, RBiH: 40, HRHB: 10 }, supply_snapshot: { RS: 55, RBiH: 91 },
+      territory_snapshot: { RS: 50, RBiH: 40, HRHB: 10 },
     }],
   };
 }
@@ -302,9 +300,6 @@ describe('desktop player-visible state projection', () => {
     expect(intel.enemy_sector_id).toBe('contact-sector:0');
     expect(intel.visible_brigade_ids).toEqual(['contact:RBiH:op:enemy:front']);
     expect(intel.confidence).toBe(0.75);
-    // Supply reserves are retired compatibility-only fields (2026-11-17): never projected.
-    expect(projected.military.general_supply_reserve).toBeUndefined();
-    expect(projected.military.heavy_munitions_reserve).toBeUndefined();
     expect(projected.military.army_stance).toEqual({ RS: 'balanced' });
     expect(projected.military.recruitment_state.recruitment_capital).toEqual({ RS: { points: 4 } });
     expect(projected.military.recruitment_state.recruited_brigade_ids).toEqual(['rs_brigade']);
@@ -461,8 +456,6 @@ describe('desktop player-visible state projection', () => {
     expect(summary.decoration_awards.map((row: any) => row.formation_id)).toEqual(['rs_brigade']);
     expect(summary.formation_spawns).toEqual([]);
     expect(summary.movements.map((row: any) => row.formation_id)).toEqual(['rs_brigade']);
-    expect(summary.supply_deltas).toEqual({ RS: -1 });
-    expect(summary.supply_snapshot).toEqual({ RS: 55 });
     expect(summary.territory_snapshot).toEqual({ RS: 50, RBiH: 40, HRHB: 10 });
   });
 

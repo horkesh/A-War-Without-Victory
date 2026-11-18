@@ -31,15 +31,12 @@ function makeState(overrides: Partial<GameState> = {}): GameState {
             turn: 64,
             seed: 'phase-c-test',
             phase: 'war',
-            supply_reserves_enabled: true,
             player_faction: 'RS',
         } as GameState['meta'],
   factions: [makeFaction('RS'), makeFaction('RBiH'), makeFaction('HRHB')],
   ...overrides,
   military: {
     formations: {},
-    general_supply_reserve: { RS: 40, RBiH: 20, HRHB: 30 },
-    heavy_munitions_reserve: { RS: 20, RBiH: 5, HRHB: 10 },
       ...(overrides?.military || {})
 } as any,
   political: {

@@ -1615,33 +1615,6 @@ function validateRecruitmentState(value: unknown, errors: string[]): void {
     }
 }
 
-function validateSmugglingRoutes(value: unknown, errors: string[]): void {
-    if (!Array.isArray(value)) {
-        errors.push('military.smuggling_routes must be an array when present');
-        return;
-    }
-
-    value.forEach((entry, i) => {
-        const path = `military.smuggling_routes[${i}]`;
-        if (!isRecord(entry)) {
-            errors.push(`${path} must be an object`);
-            return;
-        }
-        if (!isNonEmptyString(entry.id)) {
-            errors.push(`${path}.id must be a non-empty string`);
-        }
-        if (!isFiniteNonNegativeNumber(entry.capacity)) {
-            errors.push(`${path}.capacity must be a finite non-negative number`);
-        }
-        if (typeof entry.disrupted !== 'boolean') {
-            errors.push(`${path}.disrupted must be a boolean`);
-        }
-        if (!isNonNegativeInteger(entry.active_turns)) {
-            errors.push(`${path}.active_turns must be a non-negative integer`);
-        }
-    });
-}
-
 const PRODUCTION_FACILITY_TYPES = ['ammunition', 'heavy_equipment', 'small_arms'] as const;
 
 function validateProductionFacilities(value: unknown, errors: string[]): void {
@@ -1685,27 +1658,6 @@ function validateProductionFacilities(value: unknown, errors: string[]): void {
             if (typeof entry.required_inputs[input] !== 'boolean') {
                 errors.push(`${path}.required_inputs.${input} must be boolean`);
             }
-        }
-    }
-}
-
-function validateSmugglingAllocation(value: unknown, errors: string[]): void {
-    if (!isRecord(value)) {
-        errors.push('military.smuggling_allocation must be an object when present');
-        return;
-    }
-
-    for (const [key, entry] of Object.entries(value)) {
-        const path = `military.smuggling_allocation.${key}`;
-        if (!isRecord(entry)) {
-            errors.push(`${path} must be an object`);
-            continue;
-        }
-        if (entry.type !== 'ammo' && entry.type !== 'food') {
-            errors.push(`${path}.type must be ammo or food`);
-        }
-        if (!isFiniteNonNegativeNumber(entry.amount)) {
-            errors.push(`${path}.amount must be a finite non-negative number`);
         }
     }
 }
@@ -1898,24 +1850,6 @@ function validateBrigadeMovementOrders(value: unknown, errors: string[]): void {
         }
         if ('owner' in entry && entry.owner !== undefined && entry.owner !== 'bot_discretionary' && entry.owner !== 'authored_preplanned') {
             errors.push(`${path}.owner must be bot_discretionary or authored_preplanned when present`);
-        }
-    }
-}
-
-function validateBrigadeRepositionOrders(value: unknown, errors: string[]): void {
-    if (!isRecord(value)) {
-        errors.push('military.brigade_reposition_orders must be an object when present');
-        return;
-    }
-
-    for (const [brigadeId, entry] of Object.entries(value)) {
-        const path = `military.brigade_reposition_orders.${brigadeId}`;
-        if (!isRecord(entry)) {
-            errors.push(`${path} must be an object`);
-            continue;
-        }
-        if (!isNonEmptyStringArray(entry.settlement_ids)) {
-            errors.push(`${path}.settlement_ids must be a non-empty string array`);
         }
     }
 }
@@ -3432,75 +3366,6 @@ function validateCostLedgerAnnotations(value: unknown, errors: string[]): void {
     });
 }
 
-function isConvoyDecision(value: unknown): boolean {
-    return value === 'allow' || value === 'block' || value === 'divert';
-}
-
-function validatePendingConvoyDecisions(value: unknown, errors: string[]): void {
-    if (!Array.isArray(value)) {
-        errors.push('military.pending_convoy_decisions must be an array when present');
-        return;
-    }
-
-    value.forEach((decision, i) => {
-        if (!isRecord(decision)) {
-            errors.push(`military.pending_convoy_decisions[${i}] must be an object`);
-            return;
-        }
-        for (const key of ['id', 'target_enclave']) {
-            if (!isNonEmptyString(decision[key])) {
-                errors.push(`military.pending_convoy_decisions[${i}].${key} must be a non-empty string`);
-            }
-        }
-        if (!isCanonicalPlayerFaction(decision.route_faction)) {
-            errors.push(`military.pending_convoy_decisions[${i}].route_faction must be one of: RBiH, RS, HRHB`);
-        }
-        if (!isFiniteNonNegativeNumber(decision.supply_amount)) {
-            errors.push(`military.pending_convoy_decisions[${i}].supply_amount must be a finite non-negative number`);
-        }
-        if ('decision' in decision && decision.decision !== undefined && !isConvoyDecision(decision.decision)) {
-            errors.push(`military.pending_convoy_decisions[${i}].decision must be one of: allow, block, divert when present`);
-        }
-    });
-}
-
-function validateConvoyDecisionHistory(value: unknown, errors: string[]): void {
-    if (!Array.isArray(value)) {
-        errors.push('military.convoy_decision_history must be an array when present');
-        return;
-    }
-
-    value.forEach((decision, i) => {
-        if (!isRecord(decision)) {
-            errors.push(`military.convoy_decision_history[${i}] must be an object`);
-            return;
-        }
-        for (const key of ['id', 'target_enclave']) {
-            if (!isNonEmptyString(decision[key])) {
-                errors.push(`military.convoy_decision_history[${i}].${key} must be a non-empty string`);
-            }
-        }
-        if (!isNonNegativeInteger(decision.turn)) {
-            errors.push(`military.convoy_decision_history[${i}].turn must be a non-negative integer`);
-        }
-        if (!isCanonicalPlayerFaction(decision.route_faction)) {
-            errors.push(`military.convoy_decision_history[${i}].route_faction must be one of: RBiH, RS, HRHB`);
-        }
-        if (!isCanonicalPlayerFaction(decision.target_faction)) {
-            errors.push(`military.convoy_decision_history[${i}].target_faction must be one of: RBiH, RS, HRHB`);
-        }
-        if (!isFiniteNonNegativeNumber(decision.supply_amount)) {
-            errors.push(`military.convoy_decision_history[${i}].supply_amount must be a finite non-negative number`);
-        }
-        if (!isConvoyDecision(decision.decision)) {
-            errors.push(`military.convoy_decision_history[${i}].decision must be one of: allow, block, divert`);
-        }
-        if (decision.decided_by !== 'player' && decision.decided_by !== 'bot') {
-            errors.push(`military.convoy_decision_history[${i}].decided_by must be one of: player, bot`);
-        }
-    });
-}
-
 function isReserveRequestReason(value: unknown): boolean {
     return value === 'offensive_support' || value === 'defensive_gap' || value === 'exploitation' || value === 'enclave_relief';
 }
@@ -4234,12 +4099,6 @@ export function validateGameStateShape(
     if (military && typeof military === 'object' && !Array.isArray(military) && 'cost_ledger_annotations' in military && military.cost_ledger_annotations !== undefined) {
         validateCostLedgerAnnotations(military.cost_ledger_annotations, errors);
     }
-    if (military && typeof military === 'object' && !Array.isArray(military) && 'pending_convoy_decisions' in military && military.pending_convoy_decisions !== undefined) {
-        validatePendingConvoyDecisions(military.pending_convoy_decisions, errors);
-    }
-    if (military && typeof military === 'object' && !Array.isArray(military) && 'convoy_decision_history' in military && military.convoy_decision_history !== undefined) {
-        validateConvoyDecisionHistory(military.convoy_decision_history, errors);
-    }
     if (military && typeof military === 'object' && !Array.isArray(military) && 'pending_reserve_requests' in military && military.pending_reserve_requests !== undefined) {
         validatePendingReserveRequests(military.pending_reserve_requests, errors);
     }
@@ -4291,15 +4150,6 @@ export function validateGameStateShape(
     if (military && typeof military === 'object' && !Array.isArray(military) && 'patron_defiance_supply_cuts' in military && military.patron_defiance_supply_cuts !== undefined) {
         validatePatronDefianceSupplyCuts(military.patron_defiance_supply_cuts, errors);
     }
-    if (military && typeof military === 'object' && !Array.isArray(military) && 'airdrop_allocation' in military && military.airdrop_allocation !== undefined) {
-        validateFiniteNonNegativeNumberRecord(military.airdrop_allocation, 'military.airdrop_allocation', errors);
-    }
-    if (military && typeof military === 'object' && !Array.isArray(military) && 'smuggling_allocation' in military && military.smuggling_allocation !== undefined) {
-        validateSmugglingAllocation(military.smuggling_allocation, errors);
-    }
-    if (military && typeof military === 'object' && !Array.isArray(military) && 'smuggling_routes' in military && military.smuggling_routes !== undefined) {
-        validateSmugglingRoutes(military.smuggling_routes, errors);
-    }
     if (military && typeof military === 'object' && !Array.isArray(military) && 'army_stance' in military && military.army_stance !== undefined) {
         validateArmyStanceRecord(military.army_stance, errors);
     }
@@ -4318,14 +4168,8 @@ export function validateGameStateShape(
     if (military && typeof military === 'object' && !Array.isArray(military) && 'brigade_movement_orders' in military && military.brigade_movement_orders !== undefined) {
         validateBrigadeMovementOrders(military.brigade_movement_orders, errors);
     }
-    if (military && typeof military === 'object' && !Array.isArray(military) && 'brigade_reposition_orders' in military && military.brigade_reposition_orders !== undefined) {
-        validateBrigadeRepositionOrders(military.brigade_reposition_orders, errors);
-    }
     if (military && typeof military === 'object' && !Array.isArray(military) && 'brigade_deploy_orders' in military && military.brigade_deploy_orders !== undefined) {
         validateBrigadeDeployOrders(military.brigade_deploy_orders, errors);
-    }
-    if (military && typeof military === 'object' && !Array.isArray(military) && 'brigade_desired_aor_cap' in military && military.brigade_desired_aor_cap !== undefined) {
-        validateNonNegativeIntegerRecord(military.brigade_desired_aor_cap, 'military.brigade_desired_aor_cap', errors);
     }
     if (military && typeof military === 'object' && !Array.isArray(military) && 'brigade_encircled' in military && military.brigade_encircled !== undefined) {
         validateBooleanRecord(military.brigade_encircled, 'military.brigade_encircled', errors);
@@ -4389,10 +4233,6 @@ export function validateGameStateShape(
     if (military && typeof military === 'object' && !Array.isArray(military) && 'formation_spawn_directive' in military && military.formation_spawn_directive !== undefined) {
         validateFormationSpawnDirective(military.formation_spawn_directive, errors);
     }
-    // Retired 2026-11-17 (§6 panel, Fable consult 6): siege counters / bombardment attrition / siege morale drain are not modelled in 1.0; kept optional so old saves load; nothing writes it.
-    if (military && typeof military === 'object' && !Array.isArray(military) && 'siege_turn_counters' in military && military.siege_turn_counters !== undefined) {
-        validateNonNegativeIntegerRecord(military.siege_turn_counters, 'military.siege_turn_counters', errors);
-    }
     if (military && typeof military === 'object' && !Array.isArray(military) && 'sarajevo_tunnel_operational' in military && military.sarajevo_tunnel_operational !== undefined && typeof military.sarajevo_tunnel_operational !== 'boolean') {
         errors.push('military.sarajevo_tunnel_operational must be a boolean when present');
     }
@@ -4401,12 +4241,6 @@ export function validateGameStateShape(
     }
     if (military && typeof military === 'object' && !Array.isArray(military) && 'comms_override_by_corps' in military && military.comms_override_by_corps !== undefined) {
         validateCommsOverrideByCorps(military.comms_override_by_corps, errors);
-    }
-    if (military && typeof military === 'object' && !Array.isArray(military) && 'general_supply_reserve' in military && military.general_supply_reserve !== undefined) {
-        validateFactionNumberRecord(military.general_supply_reserve, 'military.general_supply_reserve', errors);
-    }
-    if (military && typeof military === 'object' && !Array.isArray(military) && 'heavy_munitions_reserve' in military && military.heavy_munitions_reserve !== undefined) {
-        validateFactionNumberRecord(military.heavy_munitions_reserve, 'military.heavy_munitions_reserve', errors);
     }
     if (military && typeof military === 'object' && !Array.isArray(military) && 'strategic_reserves' in military && military.strategic_reserves !== undefined) {
         validateFactionNumberRecord(military.strategic_reserves, 'military.strategic_reserves', errors);

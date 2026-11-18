@@ -195,6 +195,7 @@ describe('player decision manifest', () => {
     it('F1i: an unresolved convoy row from an old save is not a player decision family', () => {
         const state: any = {
             military: {
+                // Legacy payload from an old save (the field was removed from GameState): ignored.
                 pending_convoy_decisions: [
                     {
                         id: 'convoy_own_route',
@@ -308,6 +309,7 @@ describe('player decision manifest', () => {
                     pending_peace_plan: undefined,
                     pending_dayton: undefined,
                 },
+                // Legacy payload from an old save (the field was removed from GameState): ignored.
                 pending_convoy_decisions: [
                     {
                         id: 'convoy_decided',

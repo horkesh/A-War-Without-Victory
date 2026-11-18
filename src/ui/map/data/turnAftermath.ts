@@ -63,8 +63,6 @@ export interface TurnAftermathCostView {
   theaterMilitaryCasualties: number;
   displacedThisTurn: number;
   ownFormationsDestroyed: number;
-  ownSupplySpent: number;
-  ownHeavyMunitionsSpent: number;
   severity: TurnAftermathCostSeverity;
   reasons: string[];
 }
@@ -201,10 +199,6 @@ export interface TurnAftermathView {
      */
     ownDestroyedList?: TurnAftermathLostFormation[];
   };
-  supply: {
-    ownSupplyDelta: number;
-    ownHeavyMunitionsDelta: number;
-  };
   cost: TurnAftermathCostView;
   signals: TurnAftermathSignalView[];
   commandRecord: TurnAftermathCommandRecordView;
@@ -238,7 +232,6 @@ const TURN_AFTERMATH_VIEW_KEYS = [
   'combat',
   'humanitarian',
   'formations',
-  'supply',
   'cost',
   'signals',
   'commandRecord',
@@ -250,14 +243,11 @@ const TURN_AFTERMATH_FLIP_KEYS = ['osid', 'label', 'direction', 'significance', 
 const TURN_AFTERMATH_COMBAT_KEYS = ['battleCount', 'friendlyBattleCount', 'friendlyCasualties', 'opposingCasualties', 'territoryFlipsFromBattles'] as const;
 const TURN_AFTERMATH_HUMANITARIAN_KEYS = ['displacedThisTurn', 'hotspotLabel'] as const;
 const TURN_AFTERMATH_FORMATION_KEYS = ['spawned', 'destroyed', 'ownSpawned', 'ownDestroyed', 'ownDestroyedList'] as const;
-const TURN_AFTERMATH_SUPPLY_KEYS = ['ownSupplyDelta', 'ownHeavyMunitionsDelta'] as const;
 const TURN_AFTERMATH_COST_KEYS = [
   'friendlyMilitaryCasualties',
   'theaterMilitaryCasualties',
   'displacedThisTurn',
   'ownFormationsDestroyed',
-  'ownSupplySpent',
-  'ownHeavyMunitionsSpent',
   'severity',
   'reasons',
 ] as const;
@@ -304,7 +294,6 @@ function hasRecognizedTurnAftermathShape(view: TurnAftermathView): boolean {
     && hasOnlyKeys(view.combat, TURN_AFTERMATH_COMBAT_KEYS)
     && hasOnlyKeys(view.humanitarian, TURN_AFTERMATH_HUMANITARIAN_KEYS)
     && hasOnlyKeys(view.formations, TURN_AFTERMATH_FORMATION_KEYS)
-    && hasOnlyKeys(view.supply, TURN_AFTERMATH_SUPPLY_KEYS)
     && hasOnlyKeys(view.cost, TURN_AFTERMATH_COST_KEYS)
     && Array.isArray(view.cost.reasons)
     && arrayItemsHaveOnlyKeys(view.signals, TURN_AFTERMATH_SIGNAL_KEYS)
@@ -836,7 +825,6 @@ function costReason(key: MessageKey, count: number): string {
 
 function buildTurnCost(input: {
   summary: TurnSummary | null;
-  playerFaction: string | null;
   friendlyMilitaryCasualties: number;
   ownFormationsDestroyed: number;
 }): TurnAftermathCostView {
@@ -846,14 +834,6 @@ function buildTurnCost(input: {
       + (reportedNumber(battle.defender_casualties) ?? 0),
     0,
   );
-  const ownSupplyDelta = input.playerFaction
-    ? (input.summary?.supply_deltas?.[input.playerFaction] ?? 0)
-    : 0;
-  const ownHeavyMunitionsDelta = input.playerFaction
-    ? (input.summary?.heavy_munitions_deltas?.[input.playerFaction] ?? 0)
-    : 0;
-  const ownSupplySpent = Math.max(0, -ownSupplyDelta);
-  const ownHeavyMunitionsSpent = Math.max(0, -ownHeavyMunitionsDelta);
   const displacedThisTurn = reportedNumber(input.summary?.displacement_total) ?? 0;
 
   let severity: TurnAftermathCostSeverity = 'low';
@@ -866,14 +846,12 @@ function buildTurnCost(input: {
   } else if (
     input.friendlyMilitaryCasualties >= 50
     || displacedThisTurn >= 500
-    || ownSupplySpent + ownHeavyMunitionsSpent >= 10
   ) {
     severity = 'severe';
   } else if (
     input.friendlyMilitaryCasualties > 0
     || theaterMilitaryCasualties > 0
     || displacedThisTurn > 0
-    || ownSupplySpent + ownHeavyMunitionsSpent > 0
   ) {
     severity = 'moderate';
   }
@@ -894,9 +872,6 @@ function buildTurnCost(input: {
   if (displacedThisTurn > 0) {
     reasons.push(costReason('turnAftermath.cost.reason.displaced', displacedThisTurn));
   }
-  if (reasons.length === 0 && ownSupplySpent + ownHeavyMunitionsSpent > 0) {
-    reasons.push(costReason('turnAftermath.cost.reason.supplySpent', ownSupplySpent + ownHeavyMunitionsSpent));
-  }
   if (reasons.length === 0) {
     reasons.push(t('turnAftermath.cost.reason.none'));
   }
@@ -906,8 +881,6 @@ function buildTurnCost(input: {
     theaterMilitaryCasualties,
     displacedThisTurn,
     ownFormationsDestroyed: input.ownFormationsDestroyed,
-    ownSupplySpent,
-    ownHeavyMunitionsSpent,
     severity,
     reasons,
   };
@@ -1210,7 +1183,6 @@ export function buildTurnAftermathView(input: TurnAftermathBuildInput): TurnAfte
     .filter((formation) => formation.faction === playerFaction).length;
   const cost = buildTurnCost({
     summary: narratedSummary,
-    playerFaction,
     friendlyMilitaryCasualties: friendlyCasualties,
     ownFormationsDestroyed,
   });
@@ -1255,10 +1227,6 @@ export function buildTurnAftermathView(input: TurnAftermathBuildInput): TurnAfte
       ownSpawned: (narratedSummary?.formation_spawns ?? []).filter((formation) => formation.faction === playerFaction).length,
       ownDestroyed: ownFormationsDestroyed,
       ownDestroyedList: buildOwnDestroyedList(narratedSummary, nextState, playerFaction),
-    },
-    supply: {
-      ownSupplyDelta: playerFaction ? (narratedSummary?.supply_deltas?.[playerFaction] ?? 0) : 0,
-      ownHeavyMunitionsDelta: playerFaction ? (narratedSummary?.heavy_munitions_deltas?.[playerFaction] ?? 0) : 0,
     },
     cost,
     signals,

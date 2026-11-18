@@ -63,7 +63,6 @@ function makeEligibleState(options: {
             sector_intel: {},
             opsec_sectors: [],
             sector_combat_ratings: {},
-            general_supply_reserve: { RBiH: 5000 },
             last_gathering_turn: {},
             fired_event_ids: [],
         },

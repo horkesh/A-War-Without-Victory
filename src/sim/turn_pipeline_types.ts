@@ -584,8 +584,6 @@ import type { FormationId } from '../state/game_state.js';
  */
 export interface AARSnapshot {
     turn: number;
-    supply: Partial<Record<FactionId, number>>;
-    heavy_munitions: Partial<Record<FactionId, number>>;
     /** war_story.arc per formation, before generate-war-stories runs. */
     arcs: Record<FormationId, NarrativeArc>;
     /** Decoration tier strings per formation, before evaluate-brigade-decorations runs. */

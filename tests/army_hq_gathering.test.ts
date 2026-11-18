@@ -176,7 +176,6 @@ function makeTheaterState(overrides: {
     turn?: number;
     formations?: Record<string, Partial<FormationState>>;
     corpsCommand?: Record<string, Partial<CorpsCommandState>>;
-    generalSupplyReserve?: Record<string, number>;
     controlEvents?: Array<{ turn: number; settlement_id: string; from: string | null; to: string | null; mechanism?: 'combat' | 'consolidation' | 'abandoned' | 'event' }>;
     corpsFrontSectors?: Record<string, unknown>;
 } = {}): GameState {
@@ -204,7 +203,6 @@ function makeTheaterState(overrides: {
             front_segments: {},
             front_posture: {},
             corps_command: overrides.corpsCommand ?? {},
-            general_supply_reserve: overrides.generalSupplyReserve ?? {},
             corps_front_sectors: overrides.corpsFrontSectors ?? {},
             fired_event_ids: [],
         } as unknown as GameState['military'],
@@ -263,7 +261,6 @@ describe('assessTheater', () => {
     it('carries no retired theater-level status fields', () => {
         const state = makeTheaterState({
             formations: { bde_1: { faction: 'RS', corps_id: 'vrs_1st_krajina', personnel: 1000, status: 'active' } },
-            generalSupplyReserve: { RS: 10 },
         });
         const assessment = assessTheater(state, 'RS') as unknown as Record<string, unknown>;
         expect(Object.keys(assessment).sort()).toEqual(['corps_assessments', 'strongest_threat', 'weakest_enemy_front']);

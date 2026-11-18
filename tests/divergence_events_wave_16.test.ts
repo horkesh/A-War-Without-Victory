@@ -75,7 +75,7 @@ interface BaseStateOverrides {
 function baseState(turn: number, overrides: BaseStateOverrides = {}): GameState {
     return {
         schema_version: 1,
-        meta: { supply_reserves_enabled: true, turn, phase: 'war', scenario_id: 'test', player_faction: 'RBiH', seed: 'div16' } as GameState['meta'],
+        meta: { turn, phase: 'war', scenario_id: 'test', player_faction: 'RBiH', seed: 'div16' } as GameState['meta'],
         factions: [
             { id: 'RBiH', profile: {} as any, areasOfResponsibility: [], supply_sources: [] },
             { id: 'RS', profile: {} as any, areasOfResponsibility: [], supply_sources: [] },
@@ -88,7 +88,6 @@ function baseState(turn: number, overrides: BaseStateOverrides = {}): GameState 
             front_posture_regions: {},
             front_pressure: {},
             militia_pools: {},
-            heavy_munitions_reserve: { RBiH: 30, RS: 50, HRHB: 20 },
             fired_event_ids: [],
             event_flags: {},
             event_fire_counts: {},

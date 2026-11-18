@@ -60,7 +60,7 @@ function fullStrategicDims() {
 function baseState(turn: number, overrides: { political?: any; military?: any; displacement?: any; turn_summaries?: any } = {}): GameState {
     return {
         schema_version: 1,
-        meta: { supply_reserves_enabled: true, turn, phase: 'war', scenario_id: 'test', player_faction: 'RBiH', seed: 'div5' } as GameState['meta'],
+        meta: { turn, phase: 'war', scenario_id: 'test', player_faction: 'RBiH', seed: 'div5' } as GameState['meta'],
         factions: [
             { id: 'RBiH', profile: {} as any, areasOfResponsibility: [], supply_sources: [] },
             { id: 'RS', profile: {} as any, areasOfResponsibility: [], supply_sources: [] },
@@ -73,8 +73,6 @@ function baseState(turn: number, overrides: { political?: any; military?: any; d
             front_posture_regions: {},
             front_pressure: {},
             militia_pools: {},
-            general_supply_reserve: { RBiH: 50, RS: 70, HRHB: 40 },
-            heavy_munitions_reserve: { RBiH: 30, RS: 50, HRHB: 20 },
             fired_event_ids: [],
             event_flags: {},
             event_fire_counts: {},
@@ -179,8 +177,7 @@ describe('LANE-NIGHTSHIFT-DIVERGENCE-EVENTS-WAVE-5: 6 surviving Ring-1 divergenc
 
         applyEventEffects(fires, effectsOf(def));
         expect(fires.military.equipment_quality_modifiers?.some(m => m.faction === 'RBiH' && m.multiplier === 1.04)).toBe(true);
-        // The former RBiH supply +10 was retired 2026-11-17 (supply is connection, not stock): the reserve is untouched.
-        expect((fires.military.general_supply_reserve as any).RBiH).toBe(50);
+        // The former RBiH supply +10 was retired 2026-11-17 (supply is connection, not stock).
         const ledger = buildCostLedger(fires);
         expect(ledger.annotations?.find(a => a.tag === 'post_dayton_arms_normalization')).toBeTruthy();
     });

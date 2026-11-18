@@ -96,8 +96,6 @@ function makeTurnSummary(turn: number, rsNet: number) {
         arc_transitions: [],
         formation_spawns: [],
         formation_destructions: [],
-        supply_deltas: {},
-        heavy_munitions_deltas: {},
         notable_events: [],
     };
 }

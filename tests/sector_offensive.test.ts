@@ -373,10 +373,9 @@ describe('sector offensive launch evaluation', () => {
 
     // The reserve-on branch (critical reachability upgraded to strained by a full reserve) was
     // retired 2026-11-17 with the supply-reserve economy (Fable consult 6): supply is reachability
-    // only, so critical-supply brigades are excluded from a new offensive, as with reserves off.
-    it('excludes critical-supply brigades from a new offensive, even on an old save carrying the reserve flag', () => {
+    // only, so critical-supply brigades are excluded from a new offensive.
+    it('excludes critical-supply brigades from a new offensive', () => {
         const state = makeLaunchState();
-        state.meta.supply_reserves_enabled = true;
 
         const supplyReport: SupplyStateByOsidReport = {
             schema: 1,
@@ -407,8 +406,6 @@ describe('sector offensive launch evaluation', () => {
 
     it('records full supply readiness for strained brigades (reserve-based readiness retired)', () => {
         const state = makeLaunchState();
-        state.meta.supply_reserves_enabled = true;
-        state.military.general_supply_reserve = { RS: 45 } as any;
 
         const supplyReport: SupplyStateByOsidReport = {
             schema: 1,

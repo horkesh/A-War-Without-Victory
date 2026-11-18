@@ -113,9 +113,9 @@ turn pipeline or replace the player's negotiation. The signing narrative require
   - Behavior: writes the numeric priority to `state.military.logistics_priority[faction][edgeId]` for every `edgeId` in `state.corps_front_sectors[sectorId].edge_ids`, reserializes, and broadcasts the updated state.
   - Priority is clamped by simulation consumers to `[0.5, 1.5]`; `1.0` is the byte-stable neutral default.
 
-- `stage-airdrop-allocation`: retired 2026-11-17 with the supply-reserve economy (Fable consult 6). It wrote root `state.airdrop_allocation`, which nothing read.
+- `stage-airdrop-allocation`: retired 2026-11-17 with the supply-reserve economy (Fable consult 6). It wrote a root `airdrop_allocation` key that nothing read; the airdrop allocation state was removed from GameState in the retired-field sweep (2026-11-18).
 
-- `stage-convoy-decision` — **retired (F1i, 2026-11-16).** Humanitarian convoys are not modelled in 1.0; the channel, its handler and its preload method are removed. Old saves may still carry `military.pending_convoy_decisions` / `convoy_decision_history`; they load but no surface reads them.
+- `stage-convoy-decision` — **retired (F1i, 2026-11-16).** Humanitarian convoys are not modelled in 1.0; the channel, its handler and its preload method are removed. `military.pending_convoy_decisions` / `convoy_decision_history` were removed from GameState in the retired-field sweep (2026-11-18); a save migration drops them from old saves.
 
 - `stage-municipality-support-order` (invoke)
   - Payload: `{ faction: 'RS' | 'RBiH' | 'HRHB', munId: string, type: 'weapons_shipment' | 'staff_priority' | 'croatian_support_package' }`

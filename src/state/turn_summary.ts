@@ -136,11 +136,6 @@ export interface TurnSummary {
     formation_spawns: FormationSpawn[];
     formation_destructions: FormationDestruction[];
 
-    // --- Faction pulse ---
-    /** Change in general_supply_reserve per faction this turn (positive = gained). */
-    supply_deltas: Partial<Record<FactionId, number>>;
-    heavy_munitions_deltas: Partial<Record<FactionId, number>>;
-
     // --- Movement ---
     /** Brigade movements this turn (location_osid changed from snapshot). */
     movements: Array<{ formation_id: string; formation_name: string; from_osid: string; to_osid: string }>;
@@ -159,8 +154,6 @@ export interface TurnSummary {
     // --- Snapshots (for Chronicle / trend tracking) ---
     /** Area-weighted territory % per faction at end of this turn. */
     territory_snapshot?: Partial<Record<FactionId, number>>;
-    /** General supply reserve per faction at end of this turn. */
-    supply_snapshot?: Partial<Record<FactionId, number>>;
 }
 
 /** Keep all turn summaries — battle history feeds the settlement timeline. */

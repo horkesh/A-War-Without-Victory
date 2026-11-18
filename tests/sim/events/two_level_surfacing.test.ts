@@ -22,7 +22,6 @@ function state(playerFaction: 'RBiH' | 'RS' | 'HRHB', turn = 1): GameState {
             front_posture_regions: {},
             front_pressure: {},
             militia_pools: {},
-            general_supply_reserve: { RBiH: 50, RS: 50, HRHB: 50 },
         },
         political: { political_controllers: {} },
         displacement: {},

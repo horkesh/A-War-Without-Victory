@@ -5009,7 +5009,6 @@ export const enMessages = {
     'turnAftermath.cost.reason.formationDestroyed.one': '{count} formation destroyed',
     'turnAftermath.cost.reason.formationDestroyed.many': '{count} formations destroyed',
     'turnAftermath.cost.reason.displaced': '{count} displaced',
-    'turnAftermath.cost.reason.supplySpent': '{count} supply spent',
     'turnAftermath.cost.reason.none': 'No major costs recorded',
     'turnAftermath.signal.detail.historicalEvent': 'Historical event',
     'turnAftermath.signal.detail.notableEvent': 'Notable event',

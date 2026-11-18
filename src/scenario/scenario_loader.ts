@@ -395,8 +395,6 @@ export function normalizeScenario(raw: unknown): Scenario {
         return Object.keys(result).length > 0 ? result : undefined;
     })();
 
-    // supply_reserves_enabled retired 2026-11-17 (Fable consult 6): a scenario key of that name is ignored.
-
     // Embargo-driven offensive-eligibility gate (independent of the retired supply-reserve economy)
     const embargo_offensive_gate_enabled = o.embargo_offensive_gate_enabled === true ? true : undefined;
 

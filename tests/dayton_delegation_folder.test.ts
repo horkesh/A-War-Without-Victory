@@ -23,7 +23,7 @@ function battle(turn: number, cas: number) {
 function summary(turn: number, net: Record<string, number>, cas: number, displaced: number) {
     return { turn, battles: [battle(turn, cas)], territory_net: net, notable_flips: [], displacement_total: displaced,
         displacement_by_ethnicity: {}, decoration_awards: [], arc_transitions: [], formation_spawns: [], formation_destructions: [],
-        supply_deltas: {}, heavy_munitions_deltas: {} };
+        };
 }
 
 function makeState(player: 'RBiH' | 'RS' | 'HRHB' | null = 'RBiH', mode?: string): GameState {

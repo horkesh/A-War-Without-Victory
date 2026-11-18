@@ -80,9 +80,6 @@ describe('engine honesty legacy contracts', () => {
             tags: [],
           },
         },
-        brigade_reposition_orders: {
-          b1: { settlement_ids: ['S2', 'S3'] },
-        },
       } as any,
       political: {
         political_controllers: { S2: 'RBiH', S3: 'RBiH' },
@@ -384,7 +381,6 @@ describe('engine honesty legacy contracts', () => {
     expect(gameState).toContain('Legacy compatibility fallback only. Null = reserve; sectors/front edges are the live frontline truth.');
     expect(gameState).toContain('Legacy theatre compatibility state. Required current-save record; not a live player-shell or turn-pipeline authority.');
     expect(gameState).toContain('Legacy theatre compatibility assignment. Required current-save record; preserved only for old saves/tools.');
-    expect(gameState).toContain('Legacy AoR tuning compatibility field. Do not expose in the live player shell and do not write new values.');
   });
 
   it('does not advertise retired AoR-cap IPC channels in the desktop contract doc', () => {

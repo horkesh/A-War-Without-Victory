@@ -3334,8 +3334,8 @@ app.whenReady().then(() => {
   // returned "Operation not found", and the engine read none of what it would have written. The
   // president's levers over an operation are force-launch over an objection and stop-op (Decision Room).
 
-  // 'stage-airdrop-allocation' retired 2026-11-17 (Fable consult 6): it wrote root state.airdrop_allocation,
-  // which nothing read (the retired airdrop step read military.airdrop_allocation, and only with reserves on).
+  // 'stage-airdrop-allocation' retired 2026-11-17 (Fable consult 6): it wrote a root airdrop-allocation key
+  // that nothing read; the airdrop allocation state itself is gone with the supply-reserve economy.
 
   ipcMain.handle('stage-opsec-toggle', async (_event, payload) => {
     const { sectorId, active } = payload || {};

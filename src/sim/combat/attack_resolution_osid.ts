@@ -1348,7 +1348,7 @@ export function resolveAttackOrdersOsid(
         }
 
         // Parts 6b/6c (supply-reserve expenditure, facility combat damage) retired 2026-11-17
-        // (Fable consult 6): both were no-ops unless supply_reserves_enabled.
+        // (Fable consult 6): the supply-reserve economy is not modelled in 1.0.
 
         // Part 7a: Experience gain (extracted to attack_post_battle_effects.ts)
         for (const a of attackerFormations) applyExperienceGain(a, attackerWon);

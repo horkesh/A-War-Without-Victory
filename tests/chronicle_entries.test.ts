@@ -21,8 +21,6 @@ function makeTurnSummary(turn: number, overrides: Record<string, any> = {}) {
         displacement_total: 0,
         displacement_by_ethnicity: {},
         territory_net: {},
-        supply_deltas: {},
-        heavy_munitions_deltas: {},
         movements: [],
         supply_transitions: [],
         ...overrides,
@@ -107,7 +105,7 @@ describe('generateChronicleEntries', () => {
                 notable_flips: [], events_fired: [], notable_events: [],
                 decoration_awards: [], arc_transitions: [], formation_spawns: [], formation_destructions: [],
                 displacement_total: 0, displacement_by_ethnicity: {},
-                territory_net: { RS: 1, RBiH: -1 }, supply_deltas: {}, heavy_munitions_deltas: {},
+                territory_net: { RS: 1, RBiH: -1 }, 
                 movements: [], supply_transitions: [],
             }],
             firedEvents: [],
@@ -158,7 +156,7 @@ describe('generateChronicleEntries', () => {
                 events_fired: [{ id: 'rs_strategic_goals', text: 'The Assembly Speaks' }],
                 decoration_awards: [], arc_transitions: [], formation_spawns: [], formation_destructions: [],
                 displacement_total: 0, displacement_by_ethnicity: {},
-                territory_net: {}, supply_deltas: {}, heavy_munitions_deltas: {},
+                territory_net: {}, 
                 movements: [], supply_transitions: [],
             }],
         };
@@ -372,7 +370,7 @@ describe('generateChronicleEntries', () => {
                 notable_flips: [], events_fired: [], notable_events: [],
                 decoration_awards: [], arc_transitions: [], formation_spawns: [], formation_destructions: [],
                 displacement_total: 0, displacement_by_ethnicity: {},
-                territory_net: {}, supply_deltas: {}, heavy_munitions_deltas: {},
+                territory_net: {}, 
                 movements: [], supply_transitions: [],
             }],
         };
@@ -390,7 +388,7 @@ describe('generateChronicleEntries', () => {
                 events_fired: [],
                 decoration_awards: [], arc_transitions: [], formation_spawns: [], formation_destructions: [],
                 displacement_total: 1700, displacement_by_ethnicity: { RBiH: 1200, RS: 300, HRHB: 200 },
-                territory_net: {}, supply_deltas: {}, heavy_munitions_deltas: {},
+                territory_net: {}, 
                 movements: [], supply_transitions: [],
             }],
         };
@@ -443,7 +441,7 @@ describe('generateChronicleEntries', () => {
                 decoration_awards: [], arc_transitions: [], formation_spawns: [],
                 formation_destructions: [{ formation_id: 'arbih_lost', formation_name: 'Lost Brigade', faction: 'RBiH' }],
                 displacement_total: 1250, displacement_by_ethnicity: {},
-                territory_net: { RBiH: -2, RS: 2 }, supply_deltas: {}, heavy_munitions_deltas: {},
+                territory_net: { RBiH: -2, RS: 2 }, 
                 movements: [], supply_transitions: [],
             }],
         };
@@ -549,7 +547,7 @@ describe('generateChronicleEntries', () => {
                 notable_flips: [], notable_events: [], events_fired: [],
                 decoration_awards: [], arc_transitions: [], formation_spawns: [], formation_destructions: [],
                 displacement_total: 25, displacement_by_ethnicity: {},
-                territory_net: { RBiH: 0 }, supply_deltas: {}, heavy_munitions_deltas: {},
+                territory_net: { RBiH: 0 }, 
                 movements: [], supply_transitions: [],
             }],
         };
@@ -573,7 +571,7 @@ describe('generateChronicleEntries', () => {
                 notable_flips: [], notable_events: [], events_fired: [],
                 decoration_awards: [], arc_transitions: [], formation_spawns: [], formation_destructions: [],
                 displacement_total: 2600, displacement_by_ethnicity: {},
-                territory_net: { RBiH: 0 }, supply_deltas: {}, heavy_munitions_deltas: {},
+                territory_net: { RBiH: 0 }, 
                 movements: [], supply_transitions: [],
             }],
         };
@@ -622,7 +620,7 @@ describe('generateChronicleEntries', () => {
                 formation_spawns: [{ formation_id: 'rs_1st_krajina_1', formation_name: '1st Krajina Brigade', faction: 'RS' }],
                 formation_destructions: [],
                 displacement_total: 0, displacement_by_ethnicity: {},
-                territory_net: {}, supply_deltas: {}, heavy_munitions_deltas: {},
+                territory_net: {}, 
                 movements: [], supply_transitions: [],
             }],
         };
@@ -641,7 +639,7 @@ describe('generateChronicleEntries', () => {
                 events_fired: [{ id: 'graz_accords', text: 'Graz Agreement Signed' }],
                 decoration_awards: [], arc_transitions: [], formation_spawns: [], formation_destructions: [],
                 displacement_total: 0, displacement_by_ethnicity: {},
-                territory_net: {}, supply_deltas: {}, heavy_munitions_deltas: {},
+                territory_net: {}, 
                 movements: [], supply_transitions: [],
             }],
         };
@@ -661,7 +659,7 @@ describe('generateChronicleEntries', () => {
                 events_fired: [],
                 decoration_awards: [], arc_transitions: [], formation_spawns: [], formation_destructions: [],
                 displacement_total: 0, displacement_by_ethnicity: {},
-                territory_net: {}, supply_deltas: {}, heavy_munitions_deltas: {},
+                territory_net: {}, 
                 movements: [], supply_transitions: [],
             }],
         };
@@ -707,7 +705,7 @@ describe('generateChronicleEntries', () => {
                 formation_spawns: [],
                 formation_destructions: [{ formation_id: 'rbih_lost_bde', formation_name: '305th Brigade', faction: 'RBiH' }],
                 displacement_total: 0, displacement_by_ethnicity: {},
-                territory_net: {}, supply_deltas: {}, heavy_munitions_deltas: {},
+                territory_net: {}, 
                 movements: [], supply_transitions: [],
             }],
         };

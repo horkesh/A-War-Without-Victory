@@ -27,8 +27,6 @@ function makeSummary(overrides: Partial<TurnSummary> = {}): TurnSummary {
     arc_transitions: [],
     formation_spawns: [],
     formation_destructions: [],
-    supply_deltas: {},
-    heavy_munitions_deltas: {},
     movements: [],
     supply_transitions: [],
     events_fired: [],

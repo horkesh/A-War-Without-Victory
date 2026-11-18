@@ -4001,7 +4001,7 @@ export const warPhases: NamedPhase[] = [
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
             updateEmbargoProfiles(context.state);
-            // applySmugglingAllocation retired 2026-11-17 (Fable consult 6): nothing wrote smuggling_allocation.
+            // applySmugglingAllocation retired 2026-11-17 (Fable consult 6): the smuggling allocation state is gone.
             ensureMaintenanceCapacity(context.state);
             context.report.embargo_update = { factions: context.state.factions.length };
         }

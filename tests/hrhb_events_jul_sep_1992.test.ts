@@ -72,7 +72,6 @@ function makeHrhbState(turn: number, playerFaction: string | undefined): GameSta
             front_posture_regions: {} as any,
             front_pressure: {},
             militia_pools: {},
-            general_supply_reserve: { RBiH: 50, RS: 50, HRHB: 50 },
             // hrhb_political_goal gate satisfied (set by the H1 keystone dilemma).
             event_flags: { hrhb_political_goal: 'croat_republic' },
         },

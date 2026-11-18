@@ -32,9 +32,6 @@ function fixture(faction:FactionId,autonomy:0|1|2,headless:boolean){
  const state=structuredClone(bases.get(faction)!);
  // Synthetic later-turn boundary, not a campaign result or historical outcome.
  state.meta.turn=12;state.meta.autonomy_level=autonomy;state.meta.headless_scenario_auto_control=headless;
- state.meta.supply_reserves_enabled=true;
- state.military.general_supply_reserve={RS:35,RBiH:19,HRHB:55};
- state.military.heavy_munitions_reserve={RS:40,RBiH:20,HRHB:60};
  const active=Object.entries(state.military.corps_command??{}).sort(([a],[b])=>a<b?-1:a>b?1:0).flatMap(([,c])=>c.active_operations??[]).find(op=>op.participating_brigades.length>0)!;
  expect(active).toBeDefined();active.phase='execution';active.phase_started_turn=12;
  for(const axis of active.axes??[])if(axis.status!=='complete')axis.status='executing';
@@ -54,7 +51,6 @@ describe('production/shared-turn and mid-run reload contract',()=>{
   const bytes=serializeRuntimeState(state),loaded=deserializeState(bytes);
   expect(loaded.military.brigade_movement_state?.[transitId].status).toBe('in_transit');
   expect(Object.values(loaded.military.corps_command??{}).flatMap(c=>c.active_operations).some(op=>op.name===operationName&&op.phase==='execution')).toBe(true);
-  expect(loaded.military.general_supply_reserve).toEqual(state.military.general_supply_reserve);
   expect(serializeRuntimeState(loaded)).toBe(bytes);
   let captured:{state:GameState,input:TurnInput}|undefined;
   const spy=vi.spyOn(pipeline,'runTurn').mockImplementation(async(s,input)=>{captured={state:structuredClone(s),input};return actualRunTurn(s,input);});
@@ -97,7 +93,6 @@ it('actual adapters and a fresh-process canonical reload agree at the full bound
   botSpy.mockRestore();expect(botCalls).toBe(1);expect(observations).toHaveLength(1);expect(result.paths.final_save).toBeTruthy();
   expect(beforeBot?.military.brigade_movement_state?.[transitId].status).toBe('in_transit');
   expect(Object.values(beforeBot!.military.corps_command??{}).flatMap(c=>c.active_operations).some(op=>op.name===operationName&&op.phase==='execution')).toBe(true);
-  expect(beforeBot!.military.general_supply_reserve).toEqual(state.military.general_supply_reserve);
   const preparedSave=join(dir,'prepared-canonical.json');await writeFile(preparedSave,serializeState(beforeBot!));
   const cold=(await loadStateFromPath(preparedSave,root)).state;
   const direct=await advanceTurn(beforeBot!,root),loaded=await advanceTurn(cold,root);

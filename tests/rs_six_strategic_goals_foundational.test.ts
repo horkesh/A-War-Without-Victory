@@ -73,7 +73,6 @@ function makeOpeningState(playerFaction: 'RBiH' | 'RS' | 'HRHB'): GameState {
             front_posture_regions: {} as any,
             front_pressure: {},
             militia_pools: {},
-            general_supply_reserve: { RBiH: 50, RS: 50, HRHB: 50 },
             event_flags: {},
         },
         political: { political_controllers: {} } as any,

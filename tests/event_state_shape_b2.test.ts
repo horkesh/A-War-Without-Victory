@@ -82,8 +82,6 @@ function currentVersionState(): any {
             recruitment_modifiers: [],
             equipment_quality_modifiers: [],
             cost_ledger_annotations: [],
-            pending_convoy_decisions: [],
-            convoy_decision_history: [],
             pending_reserve_requests: [],
             reserve_request_history: [],
             triggered_operations_accepted: {},

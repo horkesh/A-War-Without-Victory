@@ -25,7 +25,7 @@ function makeBrigade(id: string, faction: FactionId, corpsId: string, locationOs
 function makeState(): GameState {
     return {
   schema_version: CURRENT_SCHEMA_VERSION,
-  meta: { turn: 10, seed: 'op-tempo-test', phase: 'war', supply_reserves_enabled: true } as any,
+  meta: { turn: 10, seed: 'op-tempo-test', phase: 'war' } as any,
   factions: [
             { id: 'RS', profile: { authority: 10, legitimacy: 10, control: 10, logistics: 10, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] },
             { id: 'RBiH', profile: { authority: 10, legitimacy: 10, control: 10, logistics: 10, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] }
@@ -44,8 +44,6 @@ function makeState(): GameState {
     front_posture_regions: {},
     front_pressure: {},
     militia_pools: {},
-    heavy_munitions_reserve: { RS: 5, RBiH: 0, HRHB: 0 },
-    general_supply_reserve: { RS: 10, RBiH: 10, HRHB: 10 },
     corps_command: {
             'rs-corps-1': {
                 command_span: 5,
@@ -89,10 +87,9 @@ describe('advanceSectorOffensives', () => {
         expect(op?.phase).toBe('execution');
         expect(state.military.formations['rs-brig-1'].cohesion).toBe(55);
         // Artillery preparation drew on the retired heavy-munitions reserve (Fable consult 6):
-        // the defender is untouched and the old reserve value is not spent.
+        // the defender is untouched.
         expect(state.military.formations['rbih-brig-1'].dig_in_progress).toBeUndefined();
         expect(state.military.formations['rbih-brig-1'].cohesion).toBe(70);
-        expect(state.military.heavy_munitions_reserve?.RS).toBe(5);
     });
 
     it('all-out tempo applies extra execution cohesion cost each turn', () => {
