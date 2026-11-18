@@ -57,7 +57,7 @@ The Fable freeze-revision package, Part 2, as ratified by five seats plus the in
 | S5 | + 4c | `5de1866e` | 694/688/685/658 | intact | t181 (Farz) |
 | S6 | + 4c bound | `b4fd13c9` | 694/686/684/655 | intact | t181 (Farz) |
 
-**Final proof** (branch head after merging main a37d0ce39; re-run after merging #793 at 1f3d81633, control-identical: historical `42df27a3f129598f`, twin identical, emergent `31ed9cfb79c0d5a0`, same checkpoints and guards):
+**Final proof** (branch head after merging main a37d0ce39; re-run after merging #793 at 1f3d81633, control-identical: historical `42df27a3f129598f`, twin identical, emergent `31ed9cfb79c0d5a0`; re-run after merging #810 at 151b08206 (copy only): historical `146540d965f61e29`, emergent `ffba50a980696748`; same checkpoints and guards each time):
 
 | | historical | hands-off emergent | roster 2c on top (scratch merge, on the a37d0ce39 head) |
 |---|---|---|---|
@@ -69,7 +69,7 @@ The Fable freeze-revision package, Part 2, as ratified by five seats plus the in
 | P-B | 0 late 2nd-Corps captures | 0 | 0 / 1, warranted PASS |
 | HRHB western cascade (reported) | 30 matched | 30 | 31 / 32 |
 
-- `validate_run_consistency` PASS (historical and emergent). Baseline pins re-pinned to `42df27a3` (after #793); structural fingerprint re-recorded; startup snapshot rebuilt.
+- `validate_run_consistency` PASS (historical and emergent). Baseline pins re-pinned to `146540d9` (after #810); structural fingerprint re-recorded; startup snapshot rebuilt.
 - Cells, S5 → S6 at oct1995: −10/+7 (`steps/s5_vs_s6_cells.txt`); S4 → S6: `steps/s4_vs_s6_cells.txt`.
 - ARBiH non-probe operations t99-178 / success: S5 4 / 2, S6 13 / 5 (more 1994 launches, mostly failing at high ARBiH cost; trajectory diverges from week 11).
 - **Not proven:** that the Ozren holds structurally against a concentrated 1994-95 ARBiH push by a player. The forced-attack played probe is the structural test, the first task after merge.
