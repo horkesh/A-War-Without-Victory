@@ -96,6 +96,16 @@ describe('package P2-D: no-retreat formations get the canonical dissolution reco
         expectDestroyedRecord(state, f);
     });
 
+    it('a non-brigade kind keeps the plain terminal path: no reserve share for a unit that never re-forms (seat ops r1)', () => {
+        const f = brigade({ kind: 'militia' as FormationState['kind'] });
+        const state = stateWith(f);
+        forceRetreatWithPenalties(state, f, reverseMap, LOST, { adjacency: adjacency as any, friendlyOsids: new Set() });
+        expect(f.status).toBe('inactive');
+        expect(f.destruction_turn).toBe(16);
+        expect(f.lifecycle_status).toBeUndefined();
+        expect((state.military.strategic_reserves as Record<string, number>).RS).toBe(1000);
+    });
+
     it('resolveAttackOrdersOsid final displacement pass', () => {
         const f = brigade();
         const state = stateWith(f);
