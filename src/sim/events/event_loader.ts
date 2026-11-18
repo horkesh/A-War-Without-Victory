@@ -337,6 +337,14 @@ function validateCondition(value: unknown, path: string, filename: string, rowIn
     if (!isNonEmptyString(value.type)) {
         failRow(filename, rowIndex, `${path}.type must be a non-empty string`);
     }
+    if (value.type === 'corridor_severed') {
+        // evaluateCondition has `default: return true` for unknown types, so a retired type must be refused here.
+        failRow(
+            filename,
+            rowIndex,
+            `${path}.type must be a known event condition type: corridor_severed is retired (2026-11-18): its BFS ran over settlement edges but compared OSID ids, so it could never evaluate an OSID pair`,
+        );
+    }
     if (!KNOWN_EVENT_CONDITION_TYPE_SET.has(value.type)) {
         failRow(filename, rowIndex, `${path}.type must be a known event condition type: ${value.type}`);
     }

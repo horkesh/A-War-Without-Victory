@@ -36,7 +36,6 @@ export const KNOWN_EVENT_CONDITION_TYPES = [
     'alliance_below',
     'alliance_drift',
     'and',
-    'corridor_severed',
     'dimension_above',
     'dimension_below',
     'displaced_in_aggregate',
