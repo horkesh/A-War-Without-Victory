@@ -91,7 +91,7 @@ import { COMMITMENT_RATIO_UNBOUNDED_PERSISTED } from './zone_detection.js';
 import type { DecisionResult, StanceRecommendation } from './decide.js';
 import { augmentOffensiveTargetsWithShifts } from './bot_priority_shift_augmentation.js';
 import { botOrdersPerfTime } from '../_perf_profile_bot_orders.js';
-import { shouldLaunchProbeInstead, type ProbeLaunchDecisionTrace } from '../bot_corps_directives.js';
+import { noPlanFallbackAllowedAtExhaustion, shouldLaunchProbeInstead, type ProbeLaunchDecisionTrace } from '../bot_corps_directives.js';
 import { getStalestSectorIntelConfidence, stableSectorKey } from '../sector_intel.js';
 import { computePlanningDuration } from '../sector_offensive_axis_helpers.js';
 import { canFormationReachAssemblyInTime } from '../sector_offensive_launch_helpers.js';
@@ -2883,13 +2883,19 @@ function buildOperationsImpl(
         },
     );
 
-    const canConsiderLocalOpportunity = obs
+    // Package P3, consult 4 step 3 (2026-11-18): the no-plan fallback (probe or local
+    // occupation) stops where plans stop, at MAX_EXHAUSTION_FOR_OPERATION. Before, a corps
+    // between 30 and 40 could probe but not plan, and its probes kept it there (2nd Corps:
+    // over the threshold on 68 of 80 turns from 22 probes and 1 real operation).
+    const fallbackExhaustionAllows = noPlanFallbackAllowedAtExhaustion(briefing.corps_exhaustion);
+    const canConsiderLocalOpportunity = (obs
         ? observeCanConsiderLocalOpportunity(obs, ops, allocation, personality, briefing)
         : ops.length === 0 &&
             allocation.can_launch_ops &&
             allocation.surplus_pool.length > 0 &&
             personality.initiative > 0.3 &&
-            getOperationSlotUsageForOperations(briefing.active_operations.filter(op => op.phase !== 'recovery')) < getMaxOperationSlots(briefing.brigades.length);
+            getOperationSlotUsageForOperations(briefing.active_operations.filter(op => op.phase !== 'recovery')) < getMaxOperationSlots(briefing.brigades.length))
+        && fallbackExhaustionAllows;
     const localOccupationCandidate = canConsiderLocalOpportunity
         ? botOrdersPerfTime(
             `${BUILD_OPERATIONS_PROFILE_PREFIX}.localOccupation.selectCandidate`,

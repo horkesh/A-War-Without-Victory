@@ -202,9 +202,15 @@ export const SECONDARY_OP_COOLDOWN_TURNS = 5;
 /** Offensive corps use shorter cooldown — sustained pressure is the point of offensive stance. */
 export const SECONDARY_OP_COOLDOWN_TURNS_OFFENSIVE = 3;
 
-/** Probes are cheaper than full offensives — allow at higher exhaustion.
- *  Threshold = MAX_EXHAUSTION_FOR_OPERATION + PROBE_EXHAUSTION_MARGIN. */
-export const PROBE_EXHAUSTION_MARGIN = 10;
+/**
+ * The commander's no-plan fallback (a probe or a local occupation) is allowed only where plans
+ * are: at or below MAX_EXHAUSTION_FOR_OPERATION. Package P3, consult 4 step 3 (2026-11-18): the
+ * old PROBE_EXHAUSTION_MARGIN (+10, a probe band 30-40) is retired; probes kept a corps in that
+ * band where it could probe but never plan.
+ */
+export function noPlanFallbackAllowedAtExhaustion(corpsExhaustion: number): boolean {
+    return corpsExhaustion <= MAX_EXHAUSTION_FOR_OPERATION;
+}
 
 /**
  * Collect all objective OSIDs from an operation (from both the flat objectives list and
