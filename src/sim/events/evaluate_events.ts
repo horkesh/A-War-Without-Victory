@@ -21,7 +21,7 @@ import { isWarOutsideHistoricalBand } from '../political/historical_territory_ba
 import { isPoliticalGateEligible, isPoliticsOffHistoryFor } from '../political/political_departure_markers.js';
 import { compareCausalityEntries, strictCompare } from '../../state/validateGameState.js';
 import { findAnswerAheadOfFiring, isAnswerAheadOfFiringDecision } from './answer_ahead_of_firing.js';
-import { paramilitaryPolicyFlagKey } from './paramilitary_policy_flag.js';
+import { hasInPersonParamilitaryStandingOrder, paramilitaryPolicyFlagKey } from './paramilitary_policy_flag.js';
 
 /**
  * Maximum PLAYER-FACING DECISION events that can fire in a single turn.
@@ -160,8 +160,16 @@ export function applyDefinitionDimensionShifts(state: GameState, shifts: Dimensi
     }
 }
 
-/** Apply sets_flags from an event definition to event_flags on state. */
-export function applyDefinitionFlags(state: GameState, flags: Record<string, string | number | boolean> | undefined): void {
+/**
+ * Apply sets_flags from an event definition to event_flags on state.
+ * `answeredBy` is who chose the card answer behind these flags: the human in person (the default),
+ * or an automatic answer (a bot's, or Observer's for the human's own side).
+ */
+export function applyDefinitionFlags(
+    state: GameState,
+    flags: Record<string, string | number | boolean> | undefined,
+    answeredBy: 'in_person' | 'automatic' = 'in_person',
+): void {
     if (!flags) return;
     if (!state.military.event_flags) {
         state.military.event_flags = {};
@@ -179,6 +187,12 @@ export function applyDefinitionFlags(state: GameState, flags: Record<string, str
         : null;
     const policy = policyFlag ? flags[policyFlag] : undefined;
     if (policy === 'always_allow' || policy === 'always_deny' || policy === 'ask') {
+        // A1: an order the human gives in person wins. An automatic answer never replaces an
+        // Always allow or Always deny the human set in the review modal; the card's flag and its
+        // other effects still apply, so the automatic answer stays on the record.
+        if (answeredBy === 'automatic' && playerFaction && hasInPersonParamilitaryStandingOrder(state, playerFaction)) {
+            return;
+        }
         state.paramilitary_policy = policy;
     }
 }
@@ -948,7 +962,7 @@ export function evaluateEvents(
                     observerAutoResolves,
                 );
                 applyEventEffects(state, chosen.effects ?? []);
-                applyDefinitionFlags(state, chosen.sets_flags);
+                applyDefinitionFlags(state, chosen.sets_flags, 'automatic');
                 applyDefinitionDimensionShifts(state, chosen.dimension_shifts);
                 recordEventDecision(state, def.id, chosen.id, decisionSource, respondingFaction, currentTurn);
                 // Phase B Sub-slice B3: bot path response-level runtime causality

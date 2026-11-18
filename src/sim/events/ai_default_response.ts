@@ -28,7 +28,7 @@ export function selectAIDefaultResponse(def: EventDefinition): EventResponseOpti
 export function applyAIDefaultResponse(state: GameState, def: EventDefinition): EventResponseOption {
     const chosen = selectAIDefaultResponse(def);
     applyEventEffects(state, chosen.effects ?? []);
-    applyDefinitionFlags(state, chosen.sets_flags);
+    applyDefinitionFlags(state, chosen.sets_flags, 'automatic');
     applyDefinitionDimensionShifts(state, chosen.dimension_shifts);
     return chosen;
 }

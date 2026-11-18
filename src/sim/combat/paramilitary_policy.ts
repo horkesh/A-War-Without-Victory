@@ -23,7 +23,9 @@
  *
  * At Observer the card's automatic answer writes the human's order on its fire turn (the
  * player-faction mirror in `applyDefinitionFlags`), so the side follows the historical policy from
- * then on and its acts are charged; before that answer it sends none (A1).
+ * then on and its acts are charged; before that answer it sends none (A1). An Always allow or
+ * Always deny the human already gave in person in the review modal is kept: the automatic answer
+ * never replaces it (`hasInPersonParamilitaryStandingOrder`).
  *
  * Pure and deterministic: reads persisted state and the loader-sorted catalog; no RNG, no clock,
  * no writes. No new state field and no migration.

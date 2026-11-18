@@ -2,10 +2,11 @@
  * The paramilitary policy card's data vocabulary, in one place (§6 D1 stage 2, engine C2).
  *
  * Leaf module: it imports only types, so `evaluate_events.ts` (the card-to-order mirror), the
- * sweep's pending gate and the policy resolver can all read it without an import cycle.
+ * sweep's pending gate and the policy resolver can all read it without an import cycle. The
+ * mirror's in-person check lives here for the same reason.
  */
 
-import type { FactionId } from '../../state/game_state.js';
+import type { FactionId, GameState } from '../../state/game_state.js';
 
 /** The three standing orders a policy card or the review modal can write. */
 export type ParamilitaryPolicy = 'always_allow' | 'always_deny' | 'ask';
@@ -30,3 +31,35 @@ export const PARAMILITARY_POLICY_CARD_ID_BY_FACTION: Readonly<Partial<Record<Fac
     RS: 'rs_paramilitary_policy_1992',
     RBiH: 'rbih_paramilitary_policy_1992',
 };
+
+/**
+ * Whether the human's standing order `state.paramilitary_policy` is an Always allow or Always deny
+ * the human gave in person for `faction` in the review modal. The modal offers only those two
+ * standing orders and files this faction's requests in `paramilitary_decision_history` in the same
+ * step. Same own-record rule as the resolver (`humanStandingParamilitaryOrder`): a newer human
+ * decision for another side (a faction switch) means the order is not this side's.
+ *
+ * Ruling A1 (an order the human gives in person wins): the card-to-order mirror reads this so an
+ * automatic answer to this faction's card (Observer's, at fire time or from the pending drain)
+ * never replaces such an order. Headless runs file no paramilitary decisions, so this is false there.
+ */
+export function hasInPersonParamilitaryStandingOrder(state: GameState, faction: FactionId): boolean {
+    const order = state.paramilitary_policy;
+    if (order !== 'always_allow' && order !== 'always_deny') return false;
+    const history = Array.isArray(state.paramilitary_decision_history) ? state.paramilitary_decision_history : [];
+    let newestOwn = Number.NEGATIVE_INFINITY;
+    let newestOther = Number.NEGATIVE_INFINITY;
+    for (const record of history) {
+        if (!record) continue;
+        if (record.faction === faction) newestOwn = Math.max(newestOwn, Number(record.turn));
+        else newestOther = Math.max(newestOther, Number(record.turn));
+    }
+    if (newestOwn === Number.NEGATIVE_INFINITY) return false;
+    const ownCardId = PARAMILITARY_POLICY_CARD_ID_BY_FACTION[faction];
+    const cardIds: readonly (string | undefined)[] = Object.values(PARAMILITARY_POLICY_CARD_ID_BY_FACTION);
+    for (const entry of state.military?.event_decision_log ?? []) {
+        if (entry?.decision_source !== 'player' || entry.event_id === ownCardId) continue;
+        if (cardIds.includes(entry.event_id)) newestOther = Math.max(newestOther, Number(entry.turn));
+    }
+    return newestOwn >= newestOther;
+}
