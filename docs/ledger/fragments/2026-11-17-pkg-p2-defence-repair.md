@@ -1,4 +1,4 @@
-## 2026-11-17 — Package "1994-95 attack and defence", P2: the defence repair (steps 1, 2, 2b, 3; measured, re-pinned)
+## 2026-11-17 — Package "1994-95 attack and defence", P2: the defence repair (steps 1, 2, 2b, 3 and ruling D; measured, re-pinned)
 
 The Fable freeze-revision package, Part 2, as ratified by five seats plus the integrator (consult 3 addendum, appendix A). Calibration is held: scores are recorded and are not a merge bar. Step 4 (stance coherence) moves to P3 by orchestrator ruling (option C): it will key on consult 4's single launch estimate, because the ratified launch-feasibility signal (`sector_offensive_launch_helpers.ts:77`) runs for almost no corps. The dead `evaluateCorpsOffensiveLaunch` caller is registered as RETIRE.
 
@@ -37,23 +37,42 @@ The Fable freeze-revision package, Part 2, as ratified by five seats plus the in
 - **Q3, a P2 regression fixed.** Step 1 digs in every static front brigade. A dug-in brigade later reclassified off the front could never change posture again, so every multi-hop order to it died at the dig_in lockout: 2161 blocked marches over 188w with P2, against 796 on main. About 20 brigades were frozen, mostly ARBiH on the dormant HVO line.
   - Now the posture pass returns any off-front dug-in brigade to `defend` (`applyPostureCosts`), no order needed; a live-operation participant keeps `dig_in`. The lockout is unchanged. (An order-based stand-down was tried first and still left 7-13 brigades frozen, since no defend order reaches a rear brigade with a march order.)
   - Measured with F1, the freed 1994 ARBiH strength took Donja in Aug 1994 ("Korak", t103-105) with no VRS answer. So P2-alone's Ozren hold had been partly bought by the freeze.
+- **P3, the surplus-stack spread (T6).** Front distribution spread only brigades on their arrival turn, so a stack that survived one turn stayed stacked beside empty front cells (the 1st Krnjin and 3rd Ozren sat on Grapska t21-t174 beside empty Zelinja, Petrovo and Gornja). A brigade that is surplus on its cell (another staying brigade outranks it by entrenchment, personnel, id) may now spread to an adjacent empty front cell. `MOVEMENT_AUTHORITY.md` §3b.
+- **4a, no generic loan for a worn elite.** Generic Army HQ loans skip an elite already below its morale or cohesion recall line (`isEliteFitForGenericLoan`), ending the Drina cycle (two Main Staff elites loaned and recalled for morale collapse in the same turn, every 4 turns, t150-187). Authored-operation loans are untouched.
+- **4c, the same-corps seam roster.** The sector lookup returns one sector per cell, so a cell on the fronts of two sectors of one corps was defended by one roster, chosen by lookup order. At Donja the 2nd Armored (sector 0) stood two hops away and never reacted. `collectSectorDefenseBrigades` now adds the other same-corps sector's brigades; other corps are not added. Used by the resolver and the planner.
+  - **Bound (Fable consult 7).** Seam brigades only add: the reaction's cap and floor average the owning sector's roster (`collectAverageDefenseRoster`). Unbounded, weak distant seam brigades diluted the average and made a seam cell weaker in 15 of 49 seam battles (Fable's survey). With the bound, 60 seam battles in the final trajectory: stronger 35, same 25, weaker 0.
+  - The 1992 eastern losses (Foča, Čajniče, Gacko, Trnovo, DV Korenići, Hadžići) are an honest effect: without the seam roster one brigade (the 851st) took the wear for three cells. They go to the data pass, not a dated limit (Fable: that would be a railroad).
+  - Korak replay (same attack, S2 t100 checkpoint): Korak fails (0.43, 0.38) and Donja holds to t125, defended by the 2nd Armored.
 - **Tried and dropped.** A corps "breach answer" (a T6 move of a spare brigade next to a fresh combat loss): inert at Donja in same-attack replays, so it was removed (orchestrator ruling, 2026-11-17; 1.0 gets no new reserve mechanic). A post-operation return to the home cell ("E", both seats): measured inert. Step 2c for the army reserve: left out (both seats). It would send the Main Staff elites to the Ozren in Sept 1995 too.
 
-**Measured, ruling D** (188w on the branch head after merging main 40878f5fc, #776):
+**Measured, ruling D, one change per run** (188w historical; breach answer off in all; logs `_logs/pkg-p2-ruling-d/steps/`):
 
-| | P2 before ruling D (`8f39c367`, main+E1) | P2 + ruling D (`79a883cf2dd4f0bd`) |
-|---|---|---|
-| Checkpoints | 707/696/695/665 | **710/708/704/672** |
-| Guards | P-A FAIL (Donja t161) | **intact**: enclaves, Farz P-A 4/4 (t180/181/182/185), P-B, eastern provenance |
-| Twin; without E1 | - | identical hash; without E1 also `79a883cf` (E1 inert on this trajectory) |
-| Hands-off emergent | - | `8aeec32a3eb0b7e2`, 710/708/703/674, guard intact, Farz 4/4 operation-owned |
-| Corps breach answers over the war | - | 6 (Prozor t74; Kupres, Glamoč, Donji Vakuf, Jajce 1994-95); none on the Ozren |
-| VRS mean cohesion w100/120/140/160 | 60.2/58.6/53.9/49.4 | 61.2/59.5/57.6/54.7 |
-| Non-operation wins on a not-just-lost cell | 0 | 0 |
+| step | change | hash | checkpoints | guard | Donja falls |
+|---|---|---|---|---|---|
+| S0 | P2 base | `f9b95c40` | 707/696/695/665 | P-A FAIL | t161 (Odbrana) |
+| S1b | + automatic stand-down | `db04c83e` | 708/705/701/666 | intact | t182 (Farz) |
+| S2 | + F1 | `a76d1a72` | 710/708/702/675 | breached (P-B) | t105 (Korak) |
+| S3 | + P3 | `f28cffd3` | 703/701/698/665 | intact | t181 (Farz) |
+| S4 | + 4a | `cc9132d8` | 703/701/698/665 | intact | t181 (Farz) |
+| S5 | + 4c | `5de1866e` | 694/688/685/658 | intact | t181 (Farz) |
+| S6 | + 4c bound | `b4fd13c9` | 694/686/684/655 | intact | t181 (Farz) |
 
-- `validate_run_consistency` PASS (historical and emergent). Baseline pins re-pinned to `79a883cf`.
-- Cell changes vs the pre-ruling run: the 1993 Lašva cells stay HRHB (+9 at apr1994), plus Jablanica, Hotonj, Paklarevo, Vesela and Grdovo. Lost: Konjic Bijela, Glavatičevo and Ljuta (the Konjic September offensive fails), Golubići (Treskavica 95), and three Donji Vakuf cells at oct1995.
-- **Not proven:** that the Ozren holds structurally against a 1994-95 multi-brigade ARBiH op. In these runs the 1st Ozren happens to stay on Donja (t25-t181) and no generic op attacks the line before Farz. A defended Donja held against 1-2 brigades in measured battles, but lost to a 4-brigade op over three turns when nothing counter-attacked (isolation run C1). The forced-attack played probe (#742 levers) is the structural test.
+**Final proof** (branch head after merging main a37d0ce39):
+
+| | historical | hands-off emergent | roster 2c on top (scratch merge) |
+|---|---|---|---|
+| Hash | `6b533ad4ee66670d` (twin identical; without E1 identical) | `a39eb715e88af21b` | `23335ba2` / emergent `babab9a5` |
+| Checkpoints | 694/686/685/655 | 694/686/685/655 | 694/682/679/645 / 694/682/677/651 |
+| Enclaves; scheduled falls | 7/7 hold; 2/2 | 7/7; 2/2 | 7/7; 2/2 (both) |
+| Eastern provenance | CLEAN | CLEAN | CLEAN (both) |
+| Farz P1; P-A | 4/4; t179/180/181/183 PASS | 4/4; t179-183 operation-owned PASS | 4/4; PASS (both) |
+| P-B | 0 late 2nd-Corps captures | 0 | 0 / 1, warranted PASS |
+| HRHB western cascade (reported) | 30 matched | 30 | 31 / 32 |
+
+- `validate_run_consistency` PASS (historical and emergent). Baseline pins re-pinned to `6b533ad4`; structural fingerprint re-recorded (`d97b4cf4`); startup snapshot rebuilt (unchanged).
+- Cells, S5 → S6 at oct1995: −10/+7 (`steps/s5_vs_s6_cells.txt`); S4 → S6: `steps/s4_vs_s6_cells.txt`.
+- ARBiH non-probe operations t99-178 / success: S5 4 / 2, S6 13 / 5 (more 1994 launches, mostly failing at high ARBiH cost; trajectory diverges from week 11).
+- **Not proven:** that the Ozren holds structurally against a concentrated 1994-95 ARBiH push by a player. The forced-attack played probe is the structural test, the first task after merge.
 
 **Measured, steps 1-3** (188w on main 9bdefb158 after #729; scored with the corrected Farz guard, #769):
 
