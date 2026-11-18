@@ -119,6 +119,7 @@ import {
     getIntelAmbushAttackerCasualtyMult,
     getIntelAmbushDefenderCasualtyMult,
     getIntelExecutionFrictionMultipliers,
+    selectWeightedPrimaryDefender,
 } from './combat_math.js';
 // OFFICER_CASUALTY_MULT, OFFICER_QUALITY_FLOOR moved to attack_post_battle_effects.ts
 // Nested default-OFF ambush-DEPTH amplifier (packet 20260605_INTEL_AMBUSH_FRICTION_DESIGN).
@@ -706,7 +707,7 @@ export function resolveAttackOrdersOsid(
                 state, sector, targetOsid, controller!, adjacency, defenderFormations,
             );
             if (sectorBrigades.length > 0) {
-                const { primary, totalPower, rankedDefenders } = rankDefendersByPower(sectorBrigades, state, targetOsid, terrainMultByOsid, artSuppression, supplyStateByOsid, ethBonus);
+                const { primary, totalPower } = rankDefendersByPower(sectorBrigades, state, targetOsid, terrainMultByOsid, artSuppression, supplyStateByOsid, ethBonus);
                 // Fable consult 7 bound: seam brigades only add; the cap and floor average the owning roster.
                 const averageRoster = collectAverageDefenseRoster(state, sector, targetOsid, controller!, adjacency, defenderFormations, sectorBrigades);
                 const avgBrigadePower = averageRoster
@@ -784,12 +785,14 @@ export function resolveAttackOrdersOsid(
                 // defender or route militia casualties into remote brigades.
                 if (contributingBrigadeCount > 0) {
                     // Power/caps/floors above still use the nominal full roster.
-                    // Only a positive contributor may carry primary-defender
-                    // effects; pick it with the existing nominal power ranking
-                    // (stable tie order) rather than introducing a new score.
-                    const eligiblePrimary = rankedDefenders
-                        .map((entry) => sectorBrigades.find((b) => b.id === entry.id))
-                        .find((b): b is FormationState => b !== undefined && (brigadeWeights.get(b.id) ?? 0) > 0);
+                    // N5 (2026-11-16): the primary defender (who carries the defender-only
+                    // aftermath) is the brigade in the cell with the largest weight, else the
+                    // largest weighted contributor; ties by fewer hops, then id. It used to be
+                    // the nominally strongest contributor, so a strong brigade five hops away
+                    // took the defeat effects while the brigade in contact took none.
+                    const hopsById = new Map<string, number>();
+                    for (const [id, meta] of brigadeMeta) hopsById.set(id, meta.hops);
+                    const eligiblePrimary = selectWeightedPrimaryDefender(sectorBrigades, brigadeWeights, hopsById);
                     defenderFormation = eligiblePrimary ?? primary;
                     isSectorCoverageDefense = true;
                     sectorDefenseBrigades = sectorBrigades;
