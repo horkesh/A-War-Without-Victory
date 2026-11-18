@@ -13,6 +13,24 @@
 - Commits: A `fad6e4a8e`, B `81d230226`, C `197d0cb87`, D `03afccf6c`, then this docs commit.
 - Tests: `tests/s6_e3a2_plan_chain.test.ts` (engine), `tests/s6_e3a2_routed_catalog.test.ts` (catalog, historical chain, Belgrade's break), `tests/s6_e3a2_save_v43.test.ts` (migration); existing tests moved to the new truth.
 
-**Measured.** TODO (lane lead, B-D as one step; split B from C if a guard breaks): 188w historical and emergent, each twice (hashes, checkpoints, guards); commit A hash-neutral in both modes; plan rows with `resolved_turn` (expected about t56, t75, t118); CONTACT_GROUP_REJECTION at t118 on the historical path; RBiH and RS `patron_confidence` below-30 spells and Phase E hesitation weeks; RS support against the back_channel and equipment_delivery gates (pc ≥ 50/55); standing per side at w54/w102/w154/w172/w188 with the absorbed plan terms; `csq_weapons_embargo_partial_lift` (w172) and the seven `dimension_above/below` fire weeks; cap overflow at t117/t118 and at the VOPP and OS root weeks; emergent card-versus-plan disagreements; the Dayton outcome.
+**Measured** (lane lead, official runner, against E4 `cbd683997` runs; B-D as one step, no guard broke, so no split).
+- **Commit A alone** is byte-identical to E4 in both modes (historical `28f02e09`, emergent `eced6db6`; every artifact except `run_meta.json`).
+- **B-D** at `f0a9cc9e7`: historical `28f02e09` → `52b0dbab`, emergent `eced6db6` → `ba2ce85b`. Each was run twice, byte-identical.
+- Final control unchanged (0 cells). Checkpoints 709/709/708/682, equal to E4. Enclave and P-B guards intact.
+- Plans resolve at VOPP t56 A/R/A, OS t75 R/A/A, CG t118 A/R/A (E4: t40, t70, t118). No Dayton row; every run ends at t188 in war with Dayton prepared, not accepted.
+- Emergent answers equal historical: 10 routed rows, 0 card-versus-record disagreements. The plan scorer's own pick is not logged.
+- CONTACT_GROUP_REJECTION stays at t118 (inferred from the CG row and the RS override; no fire turn is recorded).
+- RS support is +10 from t56 (end 45, was 35). The plan's −5 moves from t40 to t56.
+- RBiH `patron_confidence` no longer drops below 30 (E4: t91-116, minimum 29; now minimum 34). The cause is the stripped card-level −5 on `os_rbih_tactical_acceptance_1993`. Phase E hesitation weeks are not recorded; that 26-week E4 spell is their proxy.
+- **Knock-on cards:**
+  - `csq_third_party_arms_channel` (E4: t172, RBiH pc 39 against < 40, a 1-point margin) no longer fires.
+  - `csq_back_channel_communication` (RBiH) fires at t175.
+  - `csq_weapons_embargo_partial_lift` stays at t172. No other dimension-gated card moved; 7 of 33 fire.
+- **The Belgrade cards on E4 alone:** `csq_back_channel_communication_RS` and `csq_patron_equipment_delivery_confirmed` fire at t119 in both E4 and E3a2. RS pc margins: E4 5 and 0, E3a2 15 and 10.
+- **With #804's phase-order fix on top** (cherry-picked `419a92605`, both modes): the delivery card stays unfired, but the RS back-channel card fires at t122 (E4 with #804: unfired). RS pc reads 58 against its ≥ 50 gate. After #806 the card's only effect is its audit annotation, whose text the card batch fixes or retires.
+- Standing (effective) is unchanged at w54, w102, w154, w172 and w188 (RS 0, HRHB 0, RBiH 100 from w102).
+  - Absorbed plan terms: all three RS terms (VOPP −20, OS +10, CG −25); HRHB's OS and CG acceptances; HRHB's VOPP acceptance at most 10; probably RBiH's CG acceptance.
+  - The base is not recorded per turn, so RBiH's absorption is a bound.
+- **Cap:** no overflow in any plan week. The only overflow is t90 (`visit_to_front`), unchanged. t118 has 3 decision cards.
 
-**Register (out of scope).** `bosnian_assembly_rejects_os_1993` fires whatever RBiH answered; `hrhb_vance_owen_acceptance_1993` lacks its claimed `requires_events` and its window is late; the player projection filters plan rows by a `faction` field they do not have; the VOPP and OS root cards can overflow the 4-per-turn cap; card copy from the answer mapping (conflicts 2-5, "Attempt", the os_rbih ratify option ending the war unannounced, option copy that still promises standing); the Owen-Stoltenberg counter-offer code is live only under the fallback; `territory_sweep`'s per-plan peace strategies now answer only the fallback pointer.
+**Register (out of scope).** `bosnian_assembly_rejects_os_1993` fires whatever RBiH answered; `hrhb_vance_owen_acceptance_1993` lacks its claimed `requires_events` and its window is late; the player projection filters plan rows by a `faction` field they do not have; the VOPP and OS root cards can overflow the 4-per-turn cap; card copy from the answer mapping (conflicts 2-5, "Attempt", the os_rbih ratify option ending the war unannounced, option copy that still promises standing); the Owen-Stoltenberg counter-offer code is live only under the fallback; `territory_sweep`'s per-plan peace strategies now answer only the fallback pointer; the essay index's RESPONSE arcs on `contact_group_plan_1994` can no longer match; `rbih_contact_group_response_1994#accept_with_public_reservations` is recorded R but is not a departure marker; `pending_counter_offers` are not cleared when a pointer resolves (older than E3a2); the RBiH patron-confidence and RS-support moves above put `csq_third_party_arms_channel` and `csq_back_channel_communication_RS` on the other side of their gates.
