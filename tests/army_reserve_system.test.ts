@@ -2035,6 +2035,49 @@ describe('evaluateArmyReserveAssignments', () => {
 });
 
 describe('generateArmyReserveRequests', () => {
+    // Ruling D step 4a (2026-11-17): a generic Army HQ loan the tick would recall at once is not offered.
+    function makeUnfitEliteState(eliteOverrides: Partial<FormationState>): GameState {
+        const state = makeState({
+            formations: {
+                rs_tired_elite: makeElite('rs_tired_elite', 'RS', 'op:mun:o2', eliteOverrides),
+                corps_zulu_line: {
+                    id: 'corps_zulu_line', faction: 'RS', name: 'Zulu Line Brigade', created_turn: 0,
+                    status: 'active', kind: 'brigade', assignment: null, personnel: 1200, morale: 60, cohesion: 55,
+                    corps_id: 'corps_zulu', location_osid: 'op:mun:o4', home_osid: 'op:mun:o4',
+                } as FormationState,
+            },
+            corps_command: {
+                corps_zulu: {
+                    commander_reinforcement_requests: [{ zone_id: 'zone:zulu', brigades_needed: 1, priority: 'critical' }],
+                    active_operations: [],
+                },
+            },
+            corps_front_sectors: { zulu_sector: makeSector('corps_zulu', 'RS', 'op:mun:o4', { threat_ratio: 1 }) },
+            turn: 12,
+        });
+        makeChainFriendlyToCorps(state, 'RS', 5);
+        return state;
+    }
+
+    it('does not offer an elite whose morale is below the loan recall line', () => {
+        const state = makeUnfitEliteState({ morale: ELITE_MORALE_RECALL - 1 });
+        generateArmyReserveRequests(state, chainAdj(5));
+        expect(state.military.pending_reserve_requests ?? []).toHaveLength(0);
+    });
+
+    it('does not offer an elite whose cohesion is below the loan recall line', () => {
+        const state = makeUnfitEliteState({ cohesion: ELITE_COHESION_RECALL - 1 });
+        generateArmyReserveRequests(state, chainAdj(5));
+        expect(state.military.pending_reserve_requests ?? []).toHaveLength(0);
+    });
+
+    it('offers the same elite once it is at the recall lines', () => {
+        const state = makeUnfitEliteState({ morale: ELITE_MORALE_RECALL, cohesion: ELITE_COHESION_RECALL });
+        generateArmyReserveRequests(state, chainAdj(5));
+        expect(state.military.pending_reserve_requests).toHaveLength(1);
+        expect(state.military.pending_reserve_requests?.[0]).toMatchObject({ corps_id: 'corps_zulu', suggested_brigade_id: 'rs_tired_elite' });
+    });
+
     it('emits one actionable request when multiple corps compete for the same elite brigade', () => {
         const adj = chainAdj(5);
         const state = makeState({
@@ -2557,10 +2600,18 @@ describe('generateArmyReserveRequests', () => {
             home_osid: 'op:mun:o3',
         } as unknown as FormationState;
 
-        const state = makeState({
+        // Package P2 step 2b: the gap check reads a real local force ratio (hostile men on the
+        // sector's enemy-side cells ÷ own effective men assigned), not threat_ratio. 3,120 RS
+        // facing 1,200 RBiH is 2.6.
+        const enemy = {
+            ...frontline, id: 'rs_facing_bde', faction: 'RS', name: 'Facing Brigade',
+            personnel: 3120, corps_id: 'vrs_east_bosnian', location_osid: 'op:mun:o4', home_osid: 'op:mun:o4',
+        } as unknown as FormationState;
+        const makeThinFrontState = (withEnemy: boolean) => makeState({
             formations: {
                 arbih_guards: elite,
                 arbih_1st_corps_bde_1: frontline,
+                ...(withEnemy ? { rs_facing_bde: enemy } : {}),
             },
             corps_command: {
                 arbih_1st_corps: {
@@ -2573,12 +2624,20 @@ describe('generateArmyReserveRequests', () => {
                     corps_id: 'arbih_1st_corps',
                     threat_ratio: 2.6,
                     assigned_brigade_ids: ['arbih_1st_corps_bde_1'],
+                    sub_segments: [{ sub_segment_id: 'sec_a:0', friendly_osids: ['op:mun:o3'], enemy_osids: ['op:mun:o4'] }],
                 },
             },
             player_faction: 'RBiH',
             turn: 10,
         });
 
+        // The sector pressure index alone (threat_ratio 2.6, no hostile men facing) is not a gap.
+        const noEnemy = makeThinFrontState(false);
+        makeChainFriendlyToCorps(noEnemy, 'RBiH');
+        generateArmyReserveRequests(noEnemy, adj);
+        expect(noEnemy.military.pending_reserve_requests ?? []).toHaveLength(0);
+
+        const state = makeThinFrontState(true);
         makeChainFriendlyToCorps(state, 'RBiH');
         generateArmyReserveRequests(state, adj);
 
