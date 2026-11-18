@@ -1,8 +1,9 @@
 /**
  * B5 (2026-11-16): Washington "Path A'" — the agreement the cards record, on a quiet front.
  * Fires with Path A's effects (ceasefire included) once a fought war is quiet, Zagreb's ceasefire
- * order was acknowledged and both Washington cards were signed. Never in the historical run: that
- * run signs through Path A before WASHINGTON_AGREEMENT_WEEK, which the baseline runner asserts.
+ * order was acknowledged and both Washington cards were signed. It opens the week after the Washington
+ * week (WASH_QUIET_FRONT_OPENS_WEEK). Never in the historical run: that run signs through Path A by
+ * WASHINGTON_AGREEMENT_WEEK (t102, the historical date), which the baseline runner asserts.
  */
 
 import { describe, it, expect } from 'vitest';
@@ -13,6 +14,7 @@ import {
     WASHINGTON_AGREEMENT_WEEK,
     WASH_ALLIANCE_LOCK_VALUE,
     WASH_QUIET_FRONT_TURNS,
+    WASH_QUIET_FRONT_OPENS_WEEK,
     POST_WASH_CROATIAN_SUPPORT,
 } from '../src/sim/early_war/washington_agreement.js';
 import { assertHistoricalWashingtonBeforeQuietFrontWindow } from '../tools/scenario_runner/run_baseline_regression.js';
@@ -36,7 +38,7 @@ function state(opts: {
 } = {}): GameState {
     const ceasefireSince = opts.ceasefireSince ?? null;
     return {
-        meta: { turn: opts.turn ?? WASHINGTON_AGREEMENT_WEEK },
+        meta: { turn: opts.turn ?? WASH_QUIET_FRONT_OPENS_WEEK },
         political: {
             war_alliance_rbih_hrhb: opts.alliance ?? 0.82,
             rbih_hrhb_state: {
@@ -71,9 +73,9 @@ describe("Path A' — Washington on a quiet front", () => {
         expect(report.trigger_path).toBe('quiet_front');
         const rhs = s.political.rbih_hrhb_state!;
         expect(rhs.washington_signed).toBe(true);
-        expect(rhs.washington_turn).toBe(WASHINGTON_AGREEMENT_WEEK);
+        expect(rhs.washington_turn).toBe(WASH_QUIET_FRONT_OPENS_WEEK);
         expect(rhs.ceasefire_active).toBe(true);
-        expect(rhs.ceasefire_since_turn).toBe(WASHINGTON_AGREEMENT_WEEK);
+        expect(rhs.ceasefire_since_turn).toBe(WASH_QUIET_FRONT_OPENS_WEEK);
         expect(s.political.war_alliance_rbih_hrhb).toBe(WASH_ALLIANCE_LOCK_VALUE);
         expect((s.factions as any)[0].capability_profile.croatian_support).toBe(POST_WASH_CROATIAN_SUPPORT);
     });
@@ -81,7 +83,7 @@ describe("Path A' — Washington on a quiet front", () => {
     it('a held ceasefire counts as a quiet front; reluctant signatures count as signed', () => {
         expect(evaluateWashingtonQuietFront(state({
             stalemate: 0,
-            ceasefireSince: WASHINGTON_AGREEMENT_WEEK - WASH_QUIET_FRONT_TURNS,
+            ceasefireSince: WASH_QUIET_FRONT_OPENS_WEEK - WASH_QUIET_FRONT_TURNS,
         })).all_met).toBe(true);
         expect(evaluateWashingtonQuietFront(state({ decisions: [
             ['zagreb_orders_hrhb_ceasefire', 'acknowledge_pressure'],
@@ -90,8 +92,10 @@ describe("Path A' — Washington on a quiet front", () => {
         ] })).all_met).toBe(true);
     });
 
-    it('does not fire before the Washington week, without a war, or below the allied threshold', () => {
-        expect(evaluateWashingtonQuietFront(state({ turn: WASHINGTON_AGREEMENT_WEEK - 1 })).all_met).toBe(false);
+    it('does not fire in or before the Washington week, without a war, or below the allied threshold', () => {
+        expect(WASH_QUIET_FRONT_OPENS_WEEK).toBe(WASHINGTON_AGREEMENT_WEEK + 1);
+        expect(evaluateWashingtonQuietFront(state({ turn: WASHINGTON_AGREEMENT_WEEK })).calendar_reached).toBe(false);
+        expect(evaluateWashingtonQuietFront(state({ turn: WASHINGTON_AGREEMENT_WEEK })).all_met).toBe(false);
         expect(evaluateWashingtonQuietFront(state({ warStartedTurn: null })).all_met).toBe(false);
         expect(evaluateWashingtonQuietFront(state({ alliance: 0.2 })).all_met).toBe(false);
     });
@@ -102,7 +106,7 @@ describe("Path A' — Washington on a quiet front", () => {
         expect(r.all_met).toBe(false);
         expect(evaluateWashingtonQuietFront(state({
             stalemate: 0,
-            ceasefireSince: WASHINGTON_AGREEMENT_WEEK - WASH_QUIET_FRONT_TURNS + 1,
+            ceasefireSince: WASH_QUIET_FRONT_OPENS_WEEK - WASH_QUIET_FRONT_TURNS + 1,
         })).all_met).toBe(false);
     });
 
@@ -132,12 +136,13 @@ describe("Historical guard: the 188w run signs before Path A' can open", () => {
         political: { rbih_hrhb_state: { washington_signed: signed, washington_turn: turn } },
     });
 
-    it('passes when history signs before the Washington week', () => {
+    it('passes when history signs by the Washington week (t102, the historical date)', () => {
         expect(() => assertHistoricalWashingtonBeforeQuietFrontWindow(save(true, 98))).not.toThrow();
+        expect(() => assertHistoricalWashingtonBeforeQuietFrontWindow(save(true, WASHINGTON_AGREEMENT_WEEK))).not.toThrow();
     });
 
-    it('fails loudly when history signs at or after the Washington week, or never', () => {
-        expect(() => assertHistoricalWashingtonBeforeQuietFrontWindow(save(true, WASHINGTON_AGREEMENT_WEEK))).toThrow(/Path A'/);
+    it("fails loudly when history signs once Path A' can open, or never", () => {
+        expect(() => assertHistoricalWashingtonBeforeQuietFrontWindow(save(true, WASH_QUIET_FRONT_OPENS_WEEK))).toThrow(/Path A'/);
         expect(() => assertHistoricalWashingtonBeforeQuietFrontWindow(save(false, null))).toThrow(/Path A'/);
     });
 });
