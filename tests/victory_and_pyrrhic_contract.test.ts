@@ -167,12 +167,22 @@ describe('v0.9.0 — faction grade anchor canon', () => {
         expect(computeFactionGrade(sarajevoLost, 'RBiH', state).grade).not.toBe('B');
     });
 
-    test('RS A+ permits up to 2 war_crimes_events', () => {
+    // §6 E3b (2026-11-17): RS A+ requires zero authored war-crime incidents, like RBiH and HRHB.
+    // It no longer reads "≤2 war_crimes_events" (the shared delta counter with scripted records).
+    test('RS A+ requires zero war crimes authorized in play; scripted records do not block it', () => {
         const state = minimalState();
-        const acceptable = emptyBreakdown({ territory_controlled_pct: 60, war_crimes_events: 2 });
-        const excessive = emptyBreakdown({ territory_controlled_pct: 60, war_crimes_events: 3 });
-        expect(computeFactionGrade(acceptable, 'RS', state).grade).toBe('A+');
-        expect(computeFactionGrade(excessive, 'RS', state).grade).not.toBe('A+');
+        const scripted = emptyBreakdown({ territory_controlled_pct: 60, war_crimes_events: 30 });
+        const authored = emptyBreakdown({ territory_controlled_pct: 60, war_crimes_events: 1, war_crimes_events_emergent: 1 });
+        expect(computeFactionGrade(scripted, 'RS', state).grade).toBe('A+');
+        expect(computeFactionGrade(authored, 'RS', state).grade).not.toBe('A+');
+    });
+
+    test('HRHB A+ requires zero war crimes authorized in play', () => {
+        const state = minimalState();
+        const clean = emptyBreakdown({ territory_controlled_pct: 25, war_crimes_events: 3 });
+        const authored = emptyBreakdown({ territory_controlled_pct: 25, war_crimes_events: 1, war_crimes_events_emergent: 1 });
+        expect(computeFactionGrade(clean, 'HRHB', state).grade).toBe('A+');
+        expect(computeFactionGrade(authored, 'HRHB', state).grade).not.toBe('A+');
     });
 });
 

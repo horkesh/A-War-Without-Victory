@@ -64,6 +64,7 @@ function makeRichVerdict(): FactionVerdict {
         ],
         outcome_class: 'failure' as FactionVerdict['outcome_class'],
         condemnation_flags: [],
+        war_crime_incidents: { recorded: 9, authorized: 4 },
     };
 }
 
@@ -146,7 +147,9 @@ describe('FactionReport mobile subdivision (UI-5 / Batch 44)', () => {
         expect(html).toContain('Refugees Received');
         expect(html).toContain('Operations Launched');
         expect(html).toContain('Operations Successful');
-        expect(html).toContain('War Crimes Events');
+        // §6 E3b: the two war-crimes counts, in incidents (signed: SHDG §4 panel, 2026-11-18).
+        expect(html).toContain('War-crime incidents, historical record');
+        expect(html).toContain('War-crime incidents arising from decisions in play');
         // Every figure row states what it counts.
         expect(html).toContain('data-awwv-figure-basis="Share of the country&#x27;s area held at the war&#x27;s end (front line); cells of an overrun safe area are not credited"');
         expect(html).toContain('data-awwv-figure-basis="Killed, wounded and missing, summed over this side&#x27;s engagements; this campaign"');
