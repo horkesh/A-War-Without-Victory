@@ -29,6 +29,10 @@ Pre-freeze fix (owner rule: no engine changes after 1.0). PR 2a of the commander
   - oct95, net +2.
 - The first control divergence is at t119: Konjic bijela_2 falls to RBiH 9 turns earlier.
 - Guards intact in both modes: enclaves H1.8, Farz P-A, P-B, HRHB western cascade (30 matched).
+- Reload contract (CI fix):
+  - A generic acting commander now carries the migration-v10 defaults: stubbornness 3, override_tolerance 3, recent_overrides [].
+  - Before, a fresh-process reload filled them in (`tests/desktop_spawn_reload_contract.test.ts`). This PR exposes the gap at t1: the JNA Herzegovina Command gets a generic where main borrowed Gavrić.
+  - Measured byte-identical in both modes.
 - Acting corps-turns: 328 of 3098 (10.6%).
   - JNA Herzegovina Command 188 (all war; ruled to end with the JNA withdrawal, in PR 2c).
   - 4th Corps 126 (t63-188), 7th Corps 13 (t176-188), 3rd Corps 1.
