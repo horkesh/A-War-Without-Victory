@@ -23,13 +23,9 @@ function findOwnershipRow(ownershipDoc: string, artifact: string): string | unde
 
 test('painted compare diagnostics are committed static artifacts with documented ownership', async () => {
     const repoRoot = process.cwd();
-    const [ownershipDoc, rawDataReport, freshDeltaReport] = await Promise.all([
+    const [ownershipDoc, rawDataReport] = await Promise.all([
         readFile(join(repoRoot, 'docs', '20_engineering', 'GENERATED_ARTIFACT_OWNERSHIP.md'), 'utf8'),
         readFile(join(repoRoot, 'tools', 'diagnostics', '_force_quality_post_phase4_runs.md'), 'utf8'),
-        readFile(
-            join(repoRoot, 'docs', '40_reports', 'audits', '20260522_PAINTED_COMPARE_FRESH_DELTA_ANALYSIS.md'),
-            'utf8',
-        ),
     ]);
 
     const ownershipRow = findOwnershipRow(ownershipDoc, PAINTED_COMPARE_PATTERN);
@@ -66,13 +62,5 @@ test('painted compare diagnostics are committed static artifacts with documented
     assert.ok(
         rawDataReport.includes('Painted compares:** `tools/diagnostics/_phase5a_painted_compares/painted_<window>_<target>.txt`'),
         'raw-data report should name the painted-compare output pattern',
-    );
-    assert.ok(
-        freshDeltaReport.includes('tools/diagnostics/_phase5a_painted_compares/'),
-        'fresh-delta report should cite the painted-compare diagnostics directory',
-    );
-    assert.ok(
-        freshDeltaReport.includes('all four `tools/compare_painted_vs_sim.cjs` commands'),
-        'fresh-delta report should document parent-side command rerun verification for the analyzed compares',
     );
 });

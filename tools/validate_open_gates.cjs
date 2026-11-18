@@ -23,7 +23,31 @@ const yaml = require('js-yaml');
 const REPO_ROOT = path.resolve(__dirname, '..');
 const REGISTER_PATH = path.join(REPO_ROOT, 'docs', 'open_gates.yml');
 
-const ALLOWED_STATUS = ['open', 'blocked', 'closed'];
+/**
+ * Working docs live in the coordination folder until 1.0 (owner ruling 2026-11-18), so
+ * the register may cite them but the repo cannot check they exist. A path under one of
+ * these prefixes is accepted as an external reference. The 1.0 consolidation returns the
+ * docs to the repo, and removing this list then restores the existence check.
+ */
+const RELOCATED_PREFIXES = [
+  'docs/plans/',
+  'docs/40_reports/',
+  'docs/ledger/',
+  'docs/60_visualisations/',
+  'docs/_old/',
+  'docs/70_archive/',
+  'docs/research/',
+  'docs/PROJECT_LEDGER',
+  'docs/CANON_PROPAGATION_NEEDED.md',
+];
+
+function pathResolves(repoRoot, relPath) {
+  const normalized = String(relPath).replace(/\\/g, '/').split('#')[0];
+  if (RELOCATED_PREFIXES.some((prefix) => normalized.startsWith(prefix))) return true;
+  return fs.existsSync(path.join(repoRoot, relPath));
+}
+
+const ALLOWED_STATUS =['open', 'blocked', 'closed'];
 const ALLOWED_KIND = ['acceptance', 'bug', 'friction', 'propagation'];
 const REQUIRED_FIELDS = [
   'id', 'lane', 'title', 'status', 'kind', 'opened', 'blocks', 'evidence_required', 'source',
@@ -138,18 +162,18 @@ function validateRegister(register, options = {}) {
     if (gate.status === 'closed') {
       if (!gate.evidence_path) {
         push(`${label}: status is closed but evidence_path is null`);
-      } else if (!fs.existsSync(path.join(repoRoot, gate.evidence_path))) {
+      } else if (!pathResolves(repoRoot, gate.evidence_path)) {
         push(`${label}: evidence_path \`${gate.evidence_path}\` does not exist`);
       }
       if (!gate.closed) push(`${label}: status is closed but no \`closed\` date is recorded`);
     } else if (gate.evidence_path) {
       // An open gate may cite partial evidence, but the path still has to be real.
-      if (!fs.existsSync(path.join(repoRoot, gate.evidence_path))) {
+      if (!pathResolves(repoRoot, gate.evidence_path)) {
         push(`${label}: evidence_path \`${gate.evidence_path}\` does not exist`);
       }
     }
 
-    if (typeof gate.source === 'string' && !fs.existsSync(path.join(repoRoot, gate.source))) {
+    if (typeof gate.source === 'string' && !pathResolves(repoRoot, gate.source)) {
       push(`${label}: source \`${gate.source}\` does not exist`);
     }
   }

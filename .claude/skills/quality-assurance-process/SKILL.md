@@ -3,6 +3,8 @@ name: quality-assurance-process
 description: Process QA — Validates that other Pyrrhic roles followed established process. Single checkpoint; eliminates micromanagement. Invoke after handoffs, after Orchestrator/PM execution, or before merge.
 ---
 
+> **Until 1.0:** `docs/PROJECT_LEDGER*`, `docs/ledger/`, `docs/plans/` and `docs/40_reports/` paths below mean `C:/Pyrrhic/AWWV-coordination/repo-docs/docs/<same path>` (owner ruling 2026-11-18). Read and edit them there; open no docs PRs. See `docs/20_engineering/AGENT_WORKFLOW.md`.
+
 # Process QA (Quality Assurance — Process)
 
 **Principle:** *Process QA changes everything.* A dedicated agent that validates that **others** followed established process is transformative: it virtually eliminates micromanagement. Other roles do the work; Process QA verifies they did it by the book.

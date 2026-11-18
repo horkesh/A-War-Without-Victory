@@ -3,6 +3,8 @@ name: scenario-report
 description: Use when running a scenario (e.g. 52-week) and producing a full Pyrrhic team report with tracked metrics and per-role assessments, or when the user asks for a scenario run with everyone weighing in.
 ---
 
+> **Until 1.0:** `docs/PROJECT_LEDGER*`, `docs/ledger/`, `docs/plans/` and `docs/40_reports/` paths below mean `C:/Pyrrhic/AWWV-coordination/repo-docs/docs/<same path>` (owner ruling 2026-11-18). Read and edit them there; open no docs PRs. See `docs/20_engineering/AGENT_WORKFLOW.md`.
+
 # Scenario Report (Full Pyrrhic Team Run Review)
 
 ## Overview

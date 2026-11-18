@@ -3,6 +3,8 @@ name: deterministic-script-implementation
 description: Enforces deterministic behavior in scripts that affect simulation outputs. Use when implementing or modifying scripts, data pipelines, or tooling that can change simulation results, ordering, or persisted outputs.
 ---
 
+> **Until 1.0:** `docs/PROJECT_LEDGER*`, `docs/ledger/`, `docs/plans/` and `docs/40_reports/` paths below mean `C:/Pyrrhic/AWWV-coordination/repo-docs/docs/<same path>` (owner ruling 2026-11-18). Read and edit them there; open no docs PRs. See `docs/20_engineering/AGENT_WORKFLOW.md`.
+
 # Deterministic Script Implementation
 
 ## When to use

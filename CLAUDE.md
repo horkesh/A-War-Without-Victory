@@ -4,6 +4,10 @@ AWWV is a deterministic strategic simulation of the 1992–1995 Bosnian War. It 
 
 Read [AGENT_WORKFLOW.md](docs/20_engineering/AGENT_WORKFLOW.md) for the shared execution contract and [CLAUDE_EXECUTION_STANDARD.md](docs/20_engineering/CLAUDE_EXECUTION_STANDARD.md) for Claude-specific routing. Read `.claude/napkin.md` as an index, then load only relevant topic files.
 
+## Working docs live outside the repo until 1.0
+
+Owner ruling 2026-11-18: the ledger and fragments, plans, roadmap and command board, reports (including the `*_MASTER.md` authorities such as `CALIBRATION_MASTER.md`), visualisations and archives are in the coordination repo at `C:/Pyrrhic/AWWV-coordination/repo-docs/docs/<same path>`. A `docs/plans/…`, `docs/40_reports/…`, `docs/PROJECT_LEDGER*` or `docs/ledger/…` path in a skill, napkin, command or older text means that location. Edit and commit them there; do not open docs PRs for them. Canon (`docs/10_canon`) and `docs/20_engineering` stay here, so canon records, FORAWWV panels and every hard boundary below apply unchanged and still land in the same change. Details: [AGENT_WORKFLOW.md](docs/20_engineering/AGENT_WORKFLOW.md).
+
 ## Hard boundaries
 
 - Canon precedence: Engine Invariants > Phase Specifications > Systems Manual > Rulebook > Game Bible > `context.md`.
@@ -46,7 +50,7 @@ Select commands from the changed behavior; the smoke triad is not a documentatio
 
 The local executor is a bounded proposal tool. Claude owns repository writes, repo-derived expectations, verification, and verdicts. Use `npm run local:check` for availability. Prove applied proposals with `npm run gate:local -- --tests <files>`; see [tools/local_executor/README.md](tools/local_executor/README.md) for procedures, schemas, context limits, ledger use, and benchmark evidence.
 
-Architecture entrypoints: simulation `src/sim/`; state `src/state/`; scenarios `src/scenario/`; desktop `src/desktop/`; tactical map `src/ui/map/`; canon `docs/10_canon/`; engineering `docs/20_engineering/`; reports `docs/40_reports/`.
+Architecture entrypoints: simulation `src/sim/`; state `src/state/`; scenarios `src/scenario/`; desktop `src/desktop/`; tactical map `src/ui/map/`; canon `docs/10_canon/`; engineering `docs/20_engineering/`; reports in the coordination repo (see "Working docs live outside the repo until 1.0").
 
 ## Repository and Branch Maintenance
 

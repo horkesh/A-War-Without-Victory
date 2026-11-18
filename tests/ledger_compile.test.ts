@@ -99,12 +99,6 @@ describe('ledger_compile', () => {
       console.error = quiet.error;
     }
   });
-
-  it('the real fragments directory is valid', () => {
-    const real = join(__dirname, '..', 'docs', 'ledger', 'fragments');
-    const { errors } = compile.loadFragments(real);
-    expect(errors).toEqual([]);
-  });
 });
 
 describe('ledger_fragment_check', () => {

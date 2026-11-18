@@ -3,6 +3,8 @@ name: code-review
 description: Reviews code for style, correctness, and security; for canon/specs defers to canon-compliance-reviewer. Use when performing PR review or pre-merge review.
 ---
 
+> **Until 1.0:** `docs/PROJECT_LEDGER*`, `docs/ledger/`, `docs/plans/` and `docs/40_reports/` paths below mean `C:/Pyrrhic/AWWV-coordination/repo-docs/docs/<same path>` (owner ruling 2026-11-18). Read and edit them there; open no docs PRs. See `docs/20_engineering/AGENT_WORKFLOW.md`.
+
 # Code Review (general)
 
 ## Live sources (read these at task start)
