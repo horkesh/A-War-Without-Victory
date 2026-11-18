@@ -14,6 +14,7 @@ import { CRITICAL_MORALE_THRESHOLD } from './combat_math.js';
 import { munFromOsid } from './osid_adjacency.js';
 import { resolveMoraleDriftMaxPerTurn } from '../../state/formation_constants.js';
 import { emitPersonnelWriterRecord, isPersonnelDiagnosticSelected } from './personnel_diagnostic.js';
+import { getCoEthnicShare, type OsidEthnicComposition } from './ethnic_defense.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Constants
@@ -162,7 +163,8 @@ function receivesStandingOgHomeMoraleFloor(
  * Mutates state.formations[*].morale. Deterministic.
  *
  * Drift sources:
- * 1. Population affinity: +2 when defending own-ethnicity OSID (>70%), -2 when in enemy territory (<30%).
+ * 1. Population affinity: +2 when the municipality is >70% own people; -2 when in enemy territory,
+ *    i.e. both the municipality and the cell are <30% own people (defence fix D2).
  * 2. Encirclement reversal: +3 when encircled defending own population (>50%), -3 otherwise.
  * 3. Exhaustion penalty: -0.5 at 80%+ ops fatigue, -1.5 at 95%+.
  */
@@ -170,7 +172,8 @@ export function runMoraleDrift(
     state: GameState,
     engagedFormationIds: FormationId[] | Set<string>,
     munPopulation?: MunicipalityPopulation1991Map,
-    supplyStateByOsid?: SupplyStateByOsidReport
+    supplyStateByOsid?: SupplyStateByOsidReport,
+    ethnicCompositionByOsid?: OsidEthnicComposition
 ): MoraleDriftReport {
     // Build OSID→supply level lookup for critical supply check
     const osidSupplyLevel = new Map<string, string>();
@@ -205,9 +208,17 @@ export function runMoraleDrift(
         const affinity = munId
             ? getFactionAlignedPopulationShare(munId, f.faction, munPopulation, 0.5)
             : 0.5;
+        // Defence fix D2 (seats r2, 2026-11-18): "enemy territory" is read off the ground the
+        // brigade stands on as well as its municipality. The −2 applies only when the
+        // municipality AND the cell are both below the low threshold for the brigade's people.
+        // A VRS brigade holding a Serb village in a Bosniak-majority municipality (1st Krnjin on
+        // gracanica:petrovo_2: municipality 0.20 Serb, cell 0.88) is not in enemy territory, and
+        // drained 66 → 20 with no battle. The +2 and every other branch keep the municipality.
+        // Without cell data (null map) the old municipality rule applies unchanged.
+        const cellShare = ethnicCompositionByOsid ? getCoEthnicShare(osid, f.faction, ethnicCompositionByOsid) : 0;
         if (affinity > HIGH_AFFINITY_THRESHOLD) {
             drift += AFFINITY_DRIFT_UP;
-        } else if (affinity < LOW_AFFINITY_THRESHOLD) {
+        } else if (affinity < LOW_AFFINITY_THRESHOLD && cellShare < LOW_AFFINITY_THRESHOLD) {
             drift += AFFINITY_DRIFT_DOWN;
         }
 

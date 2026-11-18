@@ -136,6 +136,28 @@ describe('Morale Drift', () => {
         expect(formation.morale).toBeLessThan(50);
     });
 
+    it('defence fix D2: no enemy-territory drain on an own-people cell in an other-majority municipality', () => {
+        // Tuzla is 15% Serb (municipality), but this cell is 88% Serb: holding it is not enemy territory.
+        const ownCell = makeFormation({ id: 'bde1', faction: 'RS', morale: 50, location_osid: 'op:tuzla:serb_village' });
+        const enemyCell = makeFormation({ id: 'bde2', faction: 'RS', morale: 50, location_osid: 'op:tuzla:tuzla_2' });
+        const state = makeState({ bde1: ownCell, bde2: enemyCell });
+        const cells = new Map([
+            ['op:tuzla:serb_village', { bosniak: 0.08, serb: 0.88, croat: 0.04 }],
+            ['op:tuzla:tuzla_2', { bosniak: 0.60, serb: 0.10, croat: 0.15 }],
+        ]);
+        runMoraleDrift(state, [], TEST_CENSUS, undefined, cells);
+        expect(ownCell.morale).toBe(50);
+        expect(enemyCell.morale).toBeLessThan(50);
+    });
+
+    it('defence fix D2: the cell never adds the +2 (a high-share cell in a low-share municipality stays neutral)', () => {
+        const formation = makeFormation({ id: 'bde1', faction: 'RS', morale: 50, location_osid: 'op:tuzla:serb_village' });
+        const state = makeState({ bde1: formation });
+        const cells = new Map([['op:tuzla:serb_village', { bosniak: 0.0, serb: 1.0, croat: 0.0 }]]);
+        runMoraleDrift(state, [], TEST_CENSUS, undefined, cells);
+        expect(formation.morale).toBe(50);
+    });
+
     it('neutral affinity does not drift', () => {
         const formation = makeFormation({ id: 'bde1', faction: 'RS', morale: 50, location_osid: 'op:prijedor:prijedor_2' });
         const state = makeState({ bde1: formation });
