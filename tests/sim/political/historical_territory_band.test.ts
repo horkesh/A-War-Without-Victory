@@ -88,7 +88,7 @@ describe('historical band and gate', () => {
 
     it('opens when the map is far off history (pre-war start: read at war week 0)', () => {
         // A tiny map where RS holds everything: far outside every band. turn 30 with
-        // war_start_turn 30 is war week 0 (a sep1991-style start).
+        // war_start_turn 30 is war week 0 (the band is keyed on the war week, not the turn).
         const state = {
             meta: { turn: 30, war_start_turn: 30 },
             political: { political_controllers: { 'op:x:y': 'RS' } },

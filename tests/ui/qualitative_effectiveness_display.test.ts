@@ -111,7 +111,6 @@ function loadedState(): LoadedGameState {
     turnSummaries: [],
     corpsFrontSectors: [sector()],
     activeOperations: [],
-    factionReserves: {},
   } as unknown as LoadedGameState;
 }
 

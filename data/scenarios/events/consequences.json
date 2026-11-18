@@ -1038,6 +1038,7 @@
       "kind": "narrative",
       "text": "Deliberate Force triggers from cumulative war-crimes evidence, Markale, and RRF deployment rather than from Srebrenica."
     },
+    "effects": [],
     "dimension_shifts": [
       {
         "faction": "RS",
@@ -1318,7 +1319,7 @@
         "kind": "alliance_lock",
         "mode": "floor",
         "value": 0.55,
-        "duration_turns": 60
+        "duration_turns": 17
       }
     ],
     "dimension_shifts": [
@@ -7009,12 +7010,6 @@
       "text": "A back-channel communication line opens with the patron capital (RS variant); leverage accrues quietly."
     },
     "effects": [
-      {
-        "kind": "alliance_lock",
-        "mode": "floor",
-        "value": 0.15,
-        "duration_turns": 25
-      },
       {
         "kind": "cost_ledger_annotation",
         "tag": "back_channel_communication_RS",

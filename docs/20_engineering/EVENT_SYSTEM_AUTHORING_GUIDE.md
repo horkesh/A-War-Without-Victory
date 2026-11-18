@@ -205,7 +205,7 @@ Reference: `hrhb_camp_exposure_response_1993` Packet 42.
 
 ## 4. Loader validation guarantees (Packet 44 + Phase B passes)
 
-`event_loader.ts` runs twelve validation passes at catalog load. A failure throws and the catalog does NOT load, so authoring errors surface immediately. The passes most relevant to authoring:
+`event_loader.ts` runs thirteen validation passes at catalog load. A failure throws and the catalog does NOT load, so authoring errors surface immediately. The passes most relevant to authoring:
 
 | Pass | What it catches |
 |---|---|
@@ -220,6 +220,7 @@ Reference: `hrhb_camp_exposure_response_1993` Packet 42.
 | Camp-exposure freeze | Catalog row in `concentration_camps_revealed_1992` or camp-exposure family with non-canonical option ids |
 | Forbidden family slugs | Catalog row carrying `family: 'rs_drina_campaign'` (categorically rejected) |
 | Cross-faction option-id disjointness | Same option id appearing across faction-distinct rows with causality wiring |
+| `validateAllianceEffectParties` | An `alliance_change` or `alliance_lock` (they move only the RBiH-HRHB alliance) on a row whose `responding_faction` is not RBiH or HRHB, in `effect`, `effects[]` or any response option. A row with no `responding_faction` is global. A closed allowlist, `NON_PARTY_ALLIANCE_EFFECT_ALLOWLIST`, holds three authored RS options for the §6 card batch, and may only shrink (§6, 2026-11-17) |
 | Source-tier vocabulary | `source_tier` not in `VALID_SOURCE_TIERS` |
 | Emergence-class vocabulary | `emergence_class` not in `VALID_EMERGENCE_CLASSES` |
 | `bot_response_logic` vocabulary | Not in `VALID_BOT_RESPONSE_LOGIC` |

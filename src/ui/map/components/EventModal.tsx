@@ -99,29 +99,11 @@ function extractFactions(effects: EventDisplayData['effects']): string[] {
     return Array.from(factions).sort();
 }
 
-function formatAllianceLabel(): string {
-    return `${getPlayerSafePoliticalFactionName('RBiH')} / ${getPlayerSafePoliticalFactionName('HRHB')} alliance`;
-}
-
-/** Describe an EventEffect for display. Reuses logic from EventDecisionModal. */
-export function describeEventEffect(effect: EventEffect): string {
-    switch (effect.kind) {
-        case 'narrative': return effect.text;
-        case 'morale_change': return `${getPlayerSafePoliticalFactionName(effect.faction)} morale ${effect.delta > 0 ? '+' : ''}${effect.delta}`;
-        case 'supply_delta': return `${getPlayerSafePoliticalFactionName(effect.faction)} supply ${effect.delta > 0 ? '+' : ''}${effect.delta}`;
-        case 'cohesion_change': return `${getPlayerSafePoliticalFactionName(effect.faction)} cohesion ${effect.delta > 0 ? '+' : ''}${effect.delta}`;
-        case 'humanitarian_impact': return formatWarCrimesRecordLine(effect.faction, effect.war_crimes_delta);
-        case 'patron_support': return `${getPlayerSafePoliticalFactionName(effect.faction)} patron support ${effect.delta > 0 ? '+' : ''}${effect.delta}`;
-        case 'alliance_change': return `${formatAllianceLabel()} ${effect.delta > 0 ? '+' : ''}${effect.delta}`;
-    }
-    return effect.kind;
-}
-
 export function EventModal({ event, queuePosition, queueTotal, onAcknowledge }: EventModalProps) {
     const cat = CATEGORY_CONFIG[event.category] ?? { bg: '#444', color: '#aaa', labelKey: 'event.category.unknown', icon: 'star' as IconName };
     const factions = extractFactions(event.effects);
     const mechanicalEffects = event.effects.filter(
-        e => e.description.length > 0 && !e.description.startsWith('[narrative]') && isDisplayEventEffectKind(e.kind),
+        e => e.description.length > 0 && isDisplayEventEffectKind(e.kind),
     );
     // Optional documentary-realism illustration. Resolves to null when the event
     // authors no `image` key (every shipped event today) OR the asset is not yet

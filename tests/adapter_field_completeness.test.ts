@@ -133,14 +133,7 @@ describe.skipIf(!hasSave)('GameStateAdapter field completeness', () => {
         expect(typeof row?.killed).toBe('number');
     });
 
-    // ── Supply data ──────────────────────────────────────────────────
-    // factionReserves is player-scoped (same rationale as casualtyLedger above).
-    it.skipIf(!hasPlayerScope)('extracts faction supply reserves', () => {
-        expect(parsed.factionReserves).toBeDefined();
-        const row = parsed.factionReserves?.[playerFaction];
-        expect(row).toBeDefined();
-        expect(typeof row?.generalSupply).toBe('number');
-    });
+    // factionReserves retired 2026-11-17 with the supply-reserve economy (Fable consult 6).
 
     // ── Fired events ─────────────────────────────────────────────────
     it('extracts historical events by turn', () => {

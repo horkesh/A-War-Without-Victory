@@ -39,8 +39,6 @@ import type { ArmyLabel } from './identity.js';
 import type { RecruitmentResourceState } from './recruitment_types.js';
 import type { CommanderState } from '../sim/combat/commander/commander_state.js';
 
-// v40 is claimed by another lane (batch-b) and is not yet on this branch; §6 E2 took 41
-// and §6 E4 took 42 (patron_pressure -> patron_support in pending decisions).
 export const CURRENT_SCHEMA_VERSION = 42 as const;
 
 // --- ID types (canonical) ---
@@ -1552,6 +1550,19 @@ export interface InternationalVisibilityPressure {
     last_major_shift: number | null; // turn index
 }
 
+/** Retired smuggling-route record (moved from the deleted smuggling_routes.ts, 2026-11-17).
+ * Retired 2026-11-17 (Fable consult 6): the supply-reserve economy is not modelled in 1.0; kept optional so old saves load; no new game creates it.
+ * @persistence compatibility-only */
+export interface SmugglingRouteState {
+    id: string;
+    /** Capacity [0-100]. */
+    capacity: number;
+    /** Whether the route was disrupted that turn. */
+    disrupted: boolean;
+    /** Cumulative turns the route had been active. */
+    active_turns: number;
+}
+
 /** Retired F1i 2026-11-16: humanitarian convoys are not modelled in 1.0; kept optional so old saves load; nothing writes it. */
 export interface PendingConvoyDecision {
     id: string;
@@ -1992,6 +2003,12 @@ export interface RbihHrhbState {
     bilateral_diverted_corps?: Partial<Record<FactionId, FormationId>>;
     /** Per-faction release progress after ceasefire/Washington, in turns. */
     bilateral_corps_release_progress?: Partial<Record<FactionId, number>>;
+    /**
+     * A2b refugee compact (src/sim/early_war/refugee_compact.ts): the compact's refugee-pressure
+     * damping is suspended while turn < this value, after a bilateral flip during an active compact.
+     * Optional and written only while a compact is active, so saves without one never carry it.
+     */
+    refugee_compact_suspended_until?: number;
 }
 
 export interface NegotiationStatus {
@@ -2221,8 +2238,6 @@ export interface StateMeta {
     peace_scheduled_referendum_turn?: number | null;
     /** Phase 0: Optional scheduled war-start turn override used with scheduled referendum starts. */
     peace_scheduled_war_start_turn?: number | null;
-    /** Phase 0: Optional absolute path to a mun1990 control file to apply exactly when war starts. */
-    peace_war_start_control_path?: string | null;
     /** Phase 0: First turn when referendum became eligible (both RS and HRHB declared). */
     referendum_eligible_turn?: number | null;
     /** Phase 0: Deadline turn for referendum; if reached without referendum → non-war terminal. */
@@ -2277,11 +2292,13 @@ export interface StateMeta {
      * factual initial-control corrections.
      */
     avoided_osids_by_faction?: Record<string, string[]>;
-    /** Phase A: When true, supply reserves system is active (general supply + heavy munitions). */
+    /** Former supply-reserve economy switch.
+     * Retired 2026-11-17 (Fable consult 6): the supply-reserve economy is not modelled in 1.0; kept optional so old saves load; no new game creates it.
+     * @persistence compatibility-only */
     supply_reserves_enabled?: boolean;
     /**
      * When true, gates offensive-operation launch eligibility on the RBiH arms
-     * embargo phase (`EMBARGO_PHASE_CAPS`), independent of `supply_reserves_enabled`
+     * embargo phase (`EMBARGO_PHASE_CAPS`), independent of the retired supply-reserve economy
      * — does not touch the general-supply-reserve pipeline, siege counters, or
      * enclave resilience. A faction whose current embargo cap is below
      * `EMBARGO_OFFENSIVE_GATE_CAP_THRESHOLD` cannot launch new offensive corps
@@ -3017,13 +3034,17 @@ war_jna?: JNATransitionState;
  * Retired 2026-11-17 (§6 panel, Fable consult 6): siege counters / bombardment attrition / siege morale drain are not modelled in 1.0; kept optional so old saves load; nothing writes it.
  * @persistence compatibility-only */
 siege_turn_counters?: Record<string, number>;
-/** General supply reserves per faction [0..100]. Consumed by maintenance; replenished by facilities/patron. */
+/** General supply reserves per faction [0..100].
+ * Retired 2026-11-17 (Fable consult 6): the supply-reserve economy is not modelled in 1.0; kept optional so old saves load; no new game creates it.
+ * @persistence compatibility-only */
 general_supply_reserve?: Record<FactionId, number>;
 /** Scenario-authored must-hold OSIDs per corps. Set once at scenario load; read by commander briefing. Key: corps_id. */
 must_hold_osids_by_corps?: Record<string, string[]>;
 /** Per-corps comms quality override loaded from scenario. Key: corps_id. */
 comms_override_by_corps?: Record<string, { before_turn: number; mode: 'radio' | 'full' }>;
-/** Heavy munitions reserves per faction [0..100]. Consumed by combat; replenished by ammo facilities/patron. */
+/** Heavy munitions reserves per faction [0..100].
+ * Retired 2026-11-17 (Fable consult 6): the supply-reserve economy is not modelled in 1.0; kept optional so old saves load; no new game creates it.
+ * @persistence compatibility-only */
 heavy_munitions_reserve?: Record<FactionId, number>;
 /** Canonical front-edge snapshot for GUI rendering and deterministic diagnostics. */
 front_edges?: FrontEdgeState[];
@@ -3121,20 +3142,26 @@ war_timeline?: import('./war_timeline.js').WarTimeline;
 named_officer_data?: import('./officer_types.js').NamedOfficer[];
 /** Named officer mutable state keyed by officer ID. */
 named_officers?: Record<string, import('./officer_types.js').NamedOfficerState>;
-/** Player-entered humanitarian airdrop split by enclave id. */
+/** Humanitarian airdrop split by enclave id.
+ * Retired 2026-11-17 (Fable consult 6): the supply-reserve economy is not modelled in 1.0; kept optional so old saves load; no new game creates it.
+ * @persistence compatibility-only */
 airdrop_allocation?: Record<string, number>;
 /** Retired F1i 2026-11-16: humanitarian convoys are not modelled in 1.0; kept optional so old saves load; nothing writes it. */
 pending_convoy_decisions?: PendingConvoyDecision[];
 /** Retired F1i 2026-11-16: humanitarian convoys are not modelled in 1.0; kept optional so old saves load; nothing writes it. */
 convoy_decision_history?: ConvoyDecisionRecord[];
-/** Player-entered smuggling split by enclave id. */
+/** Smuggling split by enclave id.
+ * Retired 2026-11-17 (Fable consult 6): the supply-reserve economy is not modelled in 1.0; kept optional so old saves load; no new game creates it.
+ * @persistence compatibility-only */
 smuggling_allocation?: Record<string, { type: 'ammo' | 'food'; amount: number }>;
 /** One-turn municipality-targeted local support orders for asymmetric Phase E player agency. */
 municipality_support_orders?: Partial<Record<FactionId, MunicipalitySupportOrder>>;
 /** One-time Sarajevo tunnel unlock. */
 sarajevo_tunnel_operational?: boolean;
-/** Smuggling route capacity and disruption state per route id. */
-smuggling_routes?: import('../sim/economy/smuggling_routes.js').SmugglingRouteState[];
+/** Smuggling route capacity and disruption state per route id.
+ * Retired 2026-11-17 (Fable consult 6): the supply-reserve economy is not modelled in 1.0; kept optional so old saves load; no new game creates it.
+ * @persistence compatibility-only */
+smuggling_routes?: SmugglingRouteState[];
 /** Sector ids with OPSEC active. */
 opsec_sectors?: string[];
 /** Tracks which operation names have been used (name → turn used). Sequential consumption, no repeats. */

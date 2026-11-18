@@ -35,8 +35,10 @@ function strictCompare(a, b) {
 /**
  * Compute command strain for a corps from raw CJS-deserialized state.
  *
- * @param {object} state - Raw GameState (deserialized). Reads `state.corps_command`
- *                         and `state.military.{friction_events, named_officers}`.
+ * @param {object} state - Raw GameState (deserialized). Reads
+ *                         `state.military.{corps_command, friction_events, named_officers}`
+ *                         (corps command lives under `military`; a root `state.corps_command`
+ *                         is not a GameState key).
  * @param {string} corpsId - Corps formation id.
  * @param {number} currentTurn - Turn index used for decay (typically state.meta.turn).
  * @returns {{ totalStrain: number, isCompromised: boolean }}
@@ -47,7 +49,7 @@ function computeCorpsCommandStrain(state, corpsId, currentTurn) {
   let totalStrain = 0;
 
   // ── Source 1: force-launched active operations on this corps ──────────
-  const corpsCmd = state && state.corps_command ? state.corps_command[corpsId] : undefined;
+  const corpsCmd = state && state.military && state.military.corps_command ? state.military.corps_command[corpsId] : undefined;
   if (corpsCmd) {
     const activeOps = [...(corpsCmd.active_operations || [])].sort((a, b) => strictCompare(a.name, b.name));
     for (const op of activeOps) {

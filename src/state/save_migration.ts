@@ -889,6 +889,19 @@ registerMigration({
     },
 });
 
+registerMigration({
+    version: 40,
+    description: 'The September 1991 peace start is retired (campaign structure decision 2026-03-23; '
+        + 'scenario, runner path and scenario fields removed 2026-11-16). Deletes '
+        + 'meta.peace_war_start_control_path: only the peace start ever set it (an ABSOLUTE '
+        + 'filesystem path, which made the hash depend on the checkout location), and only the '
+        + 'peace-to-war transition read it. Every war-start save holds null. Sensitive: no.',
+    migrate: (state) => {
+        const meta = asRecord(state.meta);
+        if (meta) delete meta.peace_war_start_control_path;
+    },
+});
+
 /** §6 E2: strip retired `negotiation_capital` effects from one pending response option.
  *  Self-contained so the migration can be renumbered without touching anything else. */
 function stripRetiredNegotiationCapitalEffects(option: Record<string, any>): void {
@@ -900,8 +913,7 @@ function stripRetiredNegotiationCapitalEffects(option: Record<string, any>): voi
     }
 }
 
-// v40 is owned by another lane (batch-b) and is not on this branch yet. applyMigrations
-// filters `version > current` and sorts, so the gap at 40 is tolerated.
+// v41 runs after v40 (the September 1991 peace start retirement, #773).
 registerMigration({
     version: 41,
     description: 'Section 6 E2: the negotiation_capital event effect kind is retired (every catalog '

@@ -30,4 +30,7 @@
   - The three cards that say Srebrenica holds no longer fire after a recorded fall.
 - **Tests:** `s6_e2_negotiation_capital_retired` (4)-(6).
 - **Measured on main `ffe0fdb50`** (pin `6dbecd4913d6d7df` reproduced): historical `3e0e76d8a0197ae5` and emergent `c3437e5ffc7bd5dd`. Control is byte-identical to main, fired events and decisions are identical, 709/709/708/682, guards intact. Re-pinned.
+- **Re-measured on main `98c036da7`** (#773's schema v40 first, then E2's v41; #806 merged too). Base main pins `7c88ab2a9ba3b43f` / `141afc45b5695df4` were reproduced on `7e637ccc7`; #806 is byte-identical to that base, and #807 and #808 leave the manifest pin unchanged.
+  - E2: historical `afd86bf0035d7438`, emergent `8cd5e4c2b4c7d214`.
+  - Control is byte-identical to main in both modes (0 cells); the fired set is unchanged; 709/709/708/682; enclave and P-B guards intact. Re-pinned.
 - **Registered for the card batch:** the Drina double charge (`drina_cleansing_decision_1992#systematic`), the HVO camps weight, Markale I's early-NATO card firing after Markale, and the hands-off order of "The Enclave Holds". **For E3:** atrocity standing is charged through both the war-crimes base and the card shift.
