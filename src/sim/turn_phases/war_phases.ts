@@ -3349,12 +3349,25 @@ export const warPhases: NamedPhase[] = [
     },
     {
         name: 'morale-drift',
-        run: (context) => {
+        run: async (context) => {
             if (context.state.meta.phase !== 'war') return;
             const engagedIds = context.report.attack_resolution_osid?.engaged_formation_ids ?? [];
+            // Defence fix D2: the cell's 1991 composition, so "enemy territory" reads the ground
+            // (static data; the same loader and cache the combat phase uses).
+            let ethnicComp;
+            const od = getOperationalData(context);
+            if (od?.opData?.operationalToCanonical) {
+                try {
+                    const ethnicityData = await loadSettlementEthnicityData(turnDataFilePath(context, 'data/derived/settlement_ethnicity_data.json'));
+                    ethnicComp = computeOsidEthnicComposition(od.opData.operationalToCanonical, ethnicityData);
+                } catch {
+                    // Non-fatal: without cell data the municipality rule applies unchanged.
+                }
+            }
             context.report.morale_drift_report = runMoraleDrift(
                 context.state, engagedIds, context.input.municipalityPopulation1991,
-                context.report.supply_resolution?.supply_state_by_osid
+                context.report.supply_resolution?.supply_state_by_osid,
+                ethnicComp
             );
         }
     },
