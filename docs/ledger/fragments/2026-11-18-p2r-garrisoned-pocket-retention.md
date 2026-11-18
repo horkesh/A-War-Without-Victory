@@ -18,7 +18,8 @@ Pre-freeze fix, first step of the 1994-95 attack-and-defence package after P2 (#
 | historical | 03833ed22dee182f | f277a94aebd1513d | 694/686/685/656 → 694/685/683/655 |
 | hands-off emergent | 14515fd1837f05dd | 521c04be072198be | 694/686/683/656 → 694/685/683/655 |
 
-- **Hands-off.** The only state-changing firing is the Goražde pocket at t70, after RS takes Trnovo (Lukavac 93). On main, ARBiH 102nd, 181st, 182nd and 831st were moved through the captured cell to Tušila. Now they stay. The 102nd is destroyed defending Tošići. The others wither under the critical-supply path and later re-form in Sarajevo. Tošići is −1 at the later checkpoints; the rest is knock-on operation timing.
+- **Hands-off.** The first divergence is the Goražde pocket at t70, after RS takes Trnovo (Lukavac 93), and both modes are identical through t87. On main, ARBiH 102nd, 181st, 182nd and 831st were moved through the captured cell to Tušila, and the 802nd to Glamoč. Now they stay. The 102nd is destroyed defending Tošići. The others wither under the critical-supply path and later re-form in Sarajevo.
+- Checkpoint cells: Tošići −1 from w104, and Konjic Ljuta −1 from w156. Emergent at w156/w188 also loses Konjic Sitnik and hrusta_2. The oct95 swaps are knock-on operation timing (Kutanja and Lupnica gained, Golubići lost in historical).
 - **Unchanged:** Ozren and the Farz falls (t179-183); Bosanski Brod, Jajce and Lašva; Kupres ±1 turn.
 - **Played probe** (measured on the pre-#794 main): a four-brigade VRS garrison holds Ozren. The six cells cost ARBiH 3,321 dead against 2,567 VRS (before: about 146/80 each), and the garrison ends at cohesion 15-30.
 - **Guards** pass in both modes: enclaves H1.8, eastern provenance CLEAN (the one operation-owned variance, lopare jablanica_2 t77, is on main too), Farz P-A and P-B, HRHB western cascade (30 matched), run consistency.
