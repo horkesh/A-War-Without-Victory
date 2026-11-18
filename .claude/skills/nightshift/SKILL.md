@@ -3,6 +3,8 @@ name: nightshift
 description: Autonomous night shift implementation manager. Executes prepared plans, observes opportunities, proposes improvements. Use when user is going to sleep and wants work done overnight.
 ---
 
+> **Until 1.0:** `docs/PROJECT_LEDGER*`, `docs/ledger/`, `docs/plans/` and `docs/40_reports/` paths below mean `C:/Pyrrhic/AWWV-coordination/repo-docs/docs/<same path>` (owner ruling 2026-11-18). Read and edit them there; open no docs PRs. See `docs/20_engineering/AGENT_WORKFLOW.md`.
+
 # Night Shift Manager
 
 ## Role

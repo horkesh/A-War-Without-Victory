@@ -1,5 +1,4 @@
-import { createHash } from 'node:crypto';
-import { existsSync, readFileSync } from 'node:fs';
+import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 
 import {
@@ -8,7 +7,6 @@ import {
   type PresidentialPositiveHold,
 } from '../src/sim/presidency/presidential_cadence.js';
 import {
-  assertPositiveHoldBundle,
   type PositiveHoldEvidenceBundle,
 } from '../tools/diagnostics/presidential_cadence_provenance.js';
 
@@ -36,44 +34,6 @@ const headlessHoldFixture = JSON.parse(readFileSync(
 )) as HeadlessHoldFixture;
 
 describe('RS 104-week presidential decision cadence', () => {
-  it('binds the owner fixture to the actual save bytes, player, run, scenario, and evidence bytes', () => {
-    const save = readFileSync(
-      'docs/40_reports/playtests/evidence/20260731_session16_rs_104week_player/autosaves/final-autosave.json',
-      'utf8',
-    );
-    const contents = Object.fromEntries(fixture.evidence.map((row) => [row.path, readFileSync(row.path, 'utf8')]));
-    expect(() => assertPositiveHoldBundle(fixture, {
-      sourceId: 'final-autosave.json',
-      scenarioId: 'apr1992_definitive_104w',
-      runId: '20260731-session16c-rs-104w-player-final',
-      playerFaction: 'RS',
-      startTurn: 0,
-      endTurn: 104,
-      saveTurn: JSON.parse(save).meta.turn,
-      sourceSaveSha256: createHash('sha256').update(save).digest('hex'),
-    }, contents)).not.toThrow();
-  });
-
-  it('keeps every positive-hold evidence anchor resolvable in the repository', () => {
-    const evidenceIds = fixture.positiveHoldEvidenceIds;
-
-    expect(evidenceIds.length).toBeGreaterThan(0);
-    for (const evidenceId of evidenceIds) {
-      const [repositoryPath, anchor] = evidenceId.split('#');
-      expect(repositoryPath).toMatch(/^docs\//);
-      expect(existsSync(repositoryPath)).toBe(true);
-      if (anchor) {
-        const source = readFileSync(repositoryPath, 'utf8');
-        const headingAnchors = source
-          .split(/\r?\n/)
-          .filter((line) => /^#{1,6}\s/.test(line))
-          .map((line) => line.replace(/^#{1,6}\s+/, '').trim().toLowerCase())
-          .map((heading) => heading.replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-'));
-        expect(headingAnchors).toContain(anchor);
-      }
-    }
-  });
-
   it('reports every long source-backed gap as an explicit positive hold without inventing an initiative', () => {
     const report = buildPresidentialCadenceReport({
       faction: 'RS',
@@ -121,26 +81,6 @@ describe('RS 104-week presidential decision cadence', () => {
 });
 
 describe('all-faction 104-week headless positive holds', () => {
-  it('binds the retained headless hold fixture to the documented replay identity and attested audit bytes', () => {
-    const contents = Object.fromEntries(
-      headlessHoldFixture.evidence.map((row) => [row.path, readFileSync(row.path, 'utf8')]),
-    );
-    expect(() => assertPositiveHoldBundle(
-      headlessHoldFixture,
-      {
-        sourceId: 'final_save.json',
-        scenarioId: 'apr1992_definitive_104w',
-        runId: 'apr1992_definitive_104w__68d77163456892d1__w104',
-        playerFaction: null,
-        startTurn: 0,
-        endTurn: 104,
-        saveTurn: 104,
-        sourceSaveSha256: 'd83d10c983da384dd7f0e5f957da69e346f9d50df788e4fac8a90923b8260ccc',
-      },
-      contents,
-    )).not.toThrow();
-  });
-
   it('keeps the exact replay endpoints separate from the owner-play RS fixture', () => {
     expect(headlessHoldFixture.sourceTurn).toBe(104);
     expect(headlessHoldFixture.positiveHoldEvidenceIds).toEqual([

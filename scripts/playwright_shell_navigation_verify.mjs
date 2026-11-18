@@ -16,7 +16,7 @@ import { fileURLToPath } from 'url';
 
 const BASE_URL = 'http://localhost:3003';
 // Resolved from this file's location (scripts/ -> repo), so the checkout can live anywhere.
-const SCREENSHOT_DIR = fileURLToPath(new URL('../docs/40_reports/implemented/screenshots', import.meta.url));
+const SCREENSHOT_DIR = fileURLToPath(new URL('../runs/screenshots', import.meta.url));
 // Same browser choice as tools/ui/*.cjs: env override, then a standard Windows Chrome
 // install if present, else undefined so puppeteer uses its own downloaded browser.
 const CHROME_EXECUTABLE = process.env.PUPPETEER_EXECUTABLE_PATH

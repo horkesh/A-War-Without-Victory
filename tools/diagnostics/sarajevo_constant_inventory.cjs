@@ -2,7 +2,7 @@ const { mkdirSync, readdirSync, readFileSync, writeFileSync } = require('node:fs
 const { dirname, join, relative, resolve } = require('node:path');
 
 const ROOT = resolve(__dirname, '..', '..');
-const OUTPUT = resolve(ROOT, 'docs/40_reports/working/SARAJEVO_CONSTANT_INVENTORY.md');
+const OUTPUT = resolve(ROOT, 'tools/diagnostics/output/SARAJEVO_CONSTANT_INVENTORY.md');
 const SCAN_ROOTS = [resolve(ROOT, 'src/sim'), resolve(ROOT, 'src/state')];
 
 function walk(dir) {
