@@ -91,8 +91,8 @@ describe('Paramilitary review modal — i18n Car 3 (EN keys)', () => {
         expect(en['paramilitaryReview.allowPacket']).toBe('Allow packet');
         expect(en['paramilitaryReview.alwaysDeny']).toBe('Always deny');
         expect(en['paramilitaryReview.alwaysAllow']).toBe('Always allow');
-        // §6 D1 stage 2 (DRAFT for the §4 panel): the staff follow the standing order at every command level.
-        expect(en['paramilitaryReview.policyHint']).toBe('Use a standing order if you want future paramilitary packets resolved the same way. Your staff follow it at every command level: at Assisted, Delegated or Observer, Always allow sends sweeps without asking you, and Always deny or Review each deployment sends none.');
+        // §6 D1 stage 2 (signed by the SHDG §4 panel, 2026-11-18): the staff follows the standing order at every command level.
+        expect(en['paramilitaryReview.policyHint']).toBe('Use a standing order if you want future paramilitary packets resolved the same way. Your staff follows it at every command level: at Assisted, Delegated or Observer, Always allow sends sweeps without asking you, and each one counts against your side; Always deny, or no standing order, sends none.');
         expect(en['paramilitaryReview.close']).toBe('Close');
         expect(en['paramilitaryReview.submit']).toBe('Submit Decisions');
         expect(en['paramilitaryReview.submitting']).toBe('Submitting...');

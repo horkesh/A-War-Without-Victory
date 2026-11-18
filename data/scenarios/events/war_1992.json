@@ -970,7 +970,7 @@
     "bot_response_logic": "historical",
     "historical_default_response_id": "always_allow",
     "source_note": "ICTY Karadžić, Stakić, Brđanin, Tadić, Krajišnik, and Šešelj findings document the political leadership's tolerance of paramilitary methods. UN reports record the pattern contemporaneously. The historical RS posture was de-facto tolerance.",
-    "staff_assessment": "Standing authorization mirrors documented RS leadership posture. Per-deployment review introduces command friction; refusal forecloses paramilitary operations ordered in person and shifts the rear-area burden onto regular formations.",
+    "staff_assessment": "Standing authorization mirrors documented RS leadership posture. Per-deployment review introduces command friction; refusal forecloses paramilitary operations entirely and shifts the rear-area burden onto regular formations.",
     "trigger_evidence": [
       "The Six Strategic Goals platform has been recorded; rear-area operations follow.",
       "Crisis Staffs in Banja Luka and Prijedor are already coordinating with volunteer formations."

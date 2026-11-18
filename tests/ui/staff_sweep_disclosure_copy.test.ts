@@ -1,11 +1,14 @@
 /**
  * Staff-sweep disclosure. Stage 1 (Option B, §6 sitting 2026-11-16) told the player that at Assisted, Delegated or Observer the
  * staff decided rear-area paramilitary sweeps without consulting the standing order. §6 D1 stage 2 (ruling 2026-11-18, §8 and A1)
- * binds the staff to the standing order, so the copy states the new rule: staff follow the standing order; Always allow sends sweeps
- * and each counts against the side; Always deny and Review each deployment send none at Assisted, Delegated or Observer; nothing is
- * sent before the player answers; at Assisted operations need the President's approval; at Observer the side's forces act under the
- * standing order, answered automatically with the historical policy. The copy never calls a sweep "authorized" or the flag "ethnic
- * cleansing" (SENSITIVE_HISTORY_DESIGN_GATE.md §2a(0)). Every changed string is a DRAFT for the §4 copy panel.
+ * binds the staff to the standing order. The copy below is the text the SHDG §4 copy panel (narrative designer + historian) signed
+ * unanimously on 2026-11-18 after three rounds, EN and BCS in lockstep; it is pinned word for word. The rule: the staff follows
+ * the standing order; Always allow sends sweeps and each counts against the side; any other order, or none, sends none at
+ * Assisted, Delegated or Observer; the staff sends nothing before the order is answered; at Observer an order the player has not
+ * given is answered automatically with the historical policy, and an order the player gave stays in force; corps operations at
+ * Assisted still wait for the President. The copy never calls a sweep "authorized" or the flag "ethnic cleansing"
+ * (SENSITIVE_HISTORY_DESIGN_GATE.md §2a(0)), never names Operation Circle (ruling §6), and the RS policy card keeps its
+ * pre-#740 "entirely" (reverted by the same panel).
  */
 
 import { readFileSync } from 'node:fs';
@@ -45,6 +48,70 @@ const FLAG_AND_RECEIPT_KEYS = [
 
 const DELEGATING_LEVELS = ['autonomy.level.assisted.desc', 'autonomy.level.delegated.desc'] as const;
 
+/** The signed §4 copy (§6 D1 stage 2, 2026-11-18), EN and BCS. */
+const SIGNED: Record<'en' | 'bcs', Record<string, string>> = {
+    en: {
+        'autonomy.level.assisted.desc':
+            'Your staff runs corps and brigade orders. Corps commanders bring stance changes and operation plans to you, and operations wait for your approval. Recruitment stays yours. Rear-area paramilitary sweeps follow your standing order: under Always allow your staff sends them without asking you, and each one counts against your side; under any other order, or none, it sends none.',
+        'autonomy.level.delegated.desc':
+            'The default. Your staff runs the army, including operations and recruitment, without asking. Corps and OG commanders report their stance changes to you, and each change stands unless you answer. Event decisions still come to you. Rear-area paramilitary sweeps follow your standing order: under Always allow your staff sends them without asking you, and each one counts against your side; under any other order, or none, it sends none.',
+        'autonomy.level.observer.desc':
+            'As Delegated, except that stance changes are not reported to you and event decisions resolve to their historical response. A decision with no historical response still waits for you. If you have not given the paramilitary standing order, it is answered the same way when its decision comes up, with the historical policy. An order you gave stays in force. Your side\'s forces act under the order in force, and each sweep they carry out counts against your side.',
+        'eventDecision.paramilitaryPolicyRule':
+            'Your staff follows this order at every command level. If you allow deployment, rear-area sweeps are sent without asking you, and each one counts against your side. If you refuse it, none are sent. If you choose to review each deployment, each request comes to you at Full Control; at Assisted, Delegated or Observer no request comes to you, so none are sent. Your staff sends nothing before this order is answered. Your answer holds at every level, Observer included. At Observer, if you have not given a standing order, this order is answered automatically with the historical policy, and your side\'s forces act under it. At Assisted, corps operations still wait for your approval; this order does not cover them.',
+        'paramilitaryReview.policyHint':
+            'Use a standing order if you want future paramilitary packets resolved the same way. Your staff follows it at every command level: at Assisted, Delegated or Observer, Always allow sends sweeps without asking you, and each one counts against your side; Always deny, or no standing order, sends none.',
+        'decisionConsequences.detail.paramilitary.unrequested':
+            'In this campaign a paramilitary sweep was sent into the {place} area for {faction}. No request came to you: under the rule in force when it was sent, your staff at Assisted, Delegated or Observer decided rear-area sweeps without asking. It counts against your side. This is an event of the simulated war, not a statement about what happened in that place.',
+        'decisionConsequences.detail.paramilitary.unrequestedDissolved':
+            'In this campaign a paramilitary action was sent toward the {place} area for {faction}. No request came to you: under the rule in force when it was sent, your staff at Assisted, Delegated or Observer decided rear-area actions without asking. It was dissolved without taking its target. No harm to civilians was recorded and it does not count against your side. This is an event of the simulated war, not a statement about what happened in that place.',
+        'decisionConsequences.detail.paramilitary.unrequestedStandingOrder':
+            'In this campaign a paramilitary sweep was sent into the {place} area for {faction}. No request came to you: your standing order of Always allow sent it without one. It counts against your side. This is an event of the simulated war, not a statement about what happened in that place.',
+        'decisionConsequences.detail.paramilitary.unrequestedAutomaticOrder':
+            'In this campaign a paramilitary sweep was sent into the {place} area for {faction}. No request came to you: your side\'s forces acted under the standing order, answered automatically with the historical policy. It counts against your side. This is an event of the simulated war, not a statement about what happened in that place.',
+        'decisionConsequences.detail.paramilitary.unrequestedNeutral':
+            'In this campaign a paramilitary sweep was sent into the {place} area for {faction}. No request came to you. It counts against your side. This is an event of the simulated war, not a statement about what happened in that place.',
+        'decisionConsequences.detail.paramilitary.unrequestedDissolvedStandingOrder':
+            'In this campaign a paramilitary action was sent toward the {place} area for {faction}. No request came to you: your standing order of Always allow sent it without one. It was dissolved without taking its target. No harm to civilians was recorded and it does not count against your side. This is an event of the simulated war, not a statement about what happened in that place.',
+        'decisionConsequences.detail.paramilitary.unrequestedDissolvedAutomaticOrder':
+            'In this campaign a paramilitary action was sent toward the {place} area for {faction}. No request came to you: your side\'s forces acted under the standing order, answered automatically with the historical policy. It was dissolved without taking its target. No harm to civilians was recorded and it does not count against your side. This is an event of the simulated war, not a statement about what happened in that place.',
+        'decisionConsequences.detail.paramilitary.unrequestedDissolvedNeutral':
+            'In this campaign a paramilitary action was sent toward the {place} area for {faction}. No request came to you. It was dissolved without taking its target. No harm to civilians was recorded and it does not count against your side. This is an event of the simulated war, not a statement about what happened in that place.',
+    },
+    bcs: {
+        'autonomy.level.assisted.desc':
+            'Štab vodi naredbe korpusa i brigada. Komandanti korpusa vam iznose promjene stava i planove operacija, a operacije čekaju vaše odobrenje. Regrutacija ostaje vaša. Paravojne akcije u pozadini slijede vašu stalnu naredbu: uz Uvijek dozvoli štab ih šalje bez pitanja, a svaka takva akcija pada na teret vaše strane; uz bilo koju drugu naredbu, ili bez naredbe, ne šalje nijednu.',
+        'autonomy.level.delegated.desc':
+            'Zadani nivo. Štab vodi vojsku, uključujući operacije i regrutaciju, bez pitanja. Komandanti korpusa i OG vam prijavljuju promjene stava, a svaka promjena ostaje ako ne odgovorite. Odluke o događajima i dalje dolaze vama. Paravojne akcije u pozadini slijede vašu stalnu naredbu: uz Uvijek dozvoli štab ih šalje bez pitanja, a svaka takva akcija pada na teret vaše strane; uz bilo koju drugu naredbu, ili bez naredbe, ne šalje nijednu.',
+        'autonomy.level.observer.desc':
+            'Kao Delegirano, osim što vam se promjene stava ne prijavljuju, a odluke o događajima rješavaju se historijskim odgovorom. Odluka bez historijskog odgovora i dalje čeka vas. Ako niste izdali stalnu naredbu o paravojnim akcijama, na nju se odgovara na isti način kad dođe odluka o njoj, historijskom politikom. Naredba koju ste izdali ostaje na snazi. Snage vaše strane djeluju po naredbi koja vrijedi, a svaka akcija koju provedu pada na teret vaše strane.',
+        'eventDecision.paramilitaryPolicyRule':
+            'Štab slijedi ovu naredbu na svakom nivou komandovanja. Ako dozvolite raspoređivanje, paravojne akcije u pozadini šalju se bez pitanja, a svaka takva akcija pada na teret vaše strane. Ako ga odbijete, ne šalje se nijedna. Ako odaberete da pregledate svako raspoređivanje, na nivou Pune kontrole svaki zahtjev dolazi vama; na nivoima Asistirano, Delegirano i Posmatrač zahtjev vam ne stiže, pa se ne šalje nijedna. Prije odgovora na ovu naredbu štab ne šalje ništa. Vaš odgovor vrijedi na svakom nivou, i na nivou Posmatrač. Na nivou Posmatrač, ako niste izdali stalnu naredbu, na ovu naredbu se automatski odgovara historijskom politikom, a snage vaše strane djeluju po njoj. Na nivou Asistirano operacije korpusa i dalje čekaju vašu saglasnost; ova naredba ih ne obuhvata.',
+        'paramilitaryReview.policyHint':
+            'Koristite stalnu naredbu ako želite da se budući paravojni paketi riješe na isti način. Štab je slijedi na svakom nivou komandovanja: na nivoima Asistirano, Delegirano i Posmatrač uz Uvijek dozvoli šalje akcije bez pitanja, a svaka takva akcija pada na teret vaše strane; uz Uvijek odbij, ili bez stalne naredbe, ne šalje nijednu.',
+        'decisionConsequences.detail.paramilitary.unrequested':
+            'U ovoj kampanji paravojna akcija poslana je na područje {place} za {faction}. Zahtjev vam nije stigao: po pravilu koje je vrijedilo kad je poslana, štab je na nivoima Asistirano, Delegirano i Posmatrač o akcijama u pozadini odlučivao bez pitanja. Pada na teret vaše strane. Ovo je događaj simuliranog rata, a ne tvrdnja o tome šta se zaista desilo na tom mjestu.',
+        'decisionConsequences.detail.paramilitary.unrequestedDissolved':
+            'U ovoj kampanji paravojna akcija poslana je prema području {place} za {faction}. Zahtjev vam nije stigao: po pravilu koje je vrijedilo kad je poslana, štab je na nivoima Asistirano, Delegirano i Posmatrač o akcijama u pozadini odlučivao bez pitanja. Raspuštena je bez zauzimanja cilja. Nije zabilježena nikakva šteta po civile, a akcija se ne upisuje na teret vaše strane. Ovo je događaj simuliranog rata, a ne tvrdnja o tome šta se zaista desilo na tom mjestu.',
+        'decisionConsequences.detail.paramilitary.unrequestedStandingOrder':
+            'U ovoj kampanji paravojna akcija poslana je na područje {place} za {faction}. Zahtjev vam nije stigao: poslala ju je vaša stalna naredba Uvijek dozvoli. Pada na teret vaše strane. Ovo je događaj simuliranog rata, a ne tvrdnja o tome šta se zaista desilo na tom mjestu.',
+        'decisionConsequences.detail.paramilitary.unrequestedAutomaticOrder':
+            'U ovoj kampanji paravojna akcija poslana je na područje {place} za {faction}. Zahtjev vam nije stigao: snage vaše strane djelovale su po stalnoj naredbi, na koju je automatski odgovoreno historijskom politikom. Pada na teret vaše strane. Ovo je događaj simuliranog rata, a ne tvrdnja o tome šta se zaista desilo na tom mjestu.',
+        'decisionConsequences.detail.paramilitary.unrequestedNeutral':
+            'U ovoj kampanji paravojna akcija poslana je na područje {place} za {faction}. Zahtjev vam nije stigao. Pada na teret vaše strane. Ovo je događaj simuliranog rata, a ne tvrdnja o tome šta se zaista desilo na tom mjestu.',
+        'decisionConsequences.detail.paramilitary.unrequestedDissolvedStandingOrder':
+            'U ovoj kampanji paravojna akcija poslana je prema području {place} za {faction}. Zahtjev vam nije stigao: poslala ju je vaša stalna naredba Uvijek dozvoli. Raspuštena je bez zauzimanja cilja. Nije zabilježena nikakva šteta po civile, a akcija se ne upisuje na teret vaše strane. Ovo je događaj simuliranog rata, a ne tvrdnja o tome šta se zaista desilo na tom mjestu.',
+        'decisionConsequences.detail.paramilitary.unrequestedDissolvedAutomaticOrder':
+            'U ovoj kampanji paravojna akcija poslana je prema području {place} za {faction}. Zahtjev vam nije stigao: snage vaše strane djelovale su po stalnoj naredbi, na koju je automatski odgovoreno historijskom politikom. Raspuštena je bez zauzimanja cilja. Nije zabilježena nikakva šteta po civile, a akcija se ne upisuje na teret vaše strane. Ovo je događaj simuliranog rata, a ne tvrdnja o tome šta se zaista desilo na tom mjestu.',
+        'decisionConsequences.detail.paramilitary.unrequestedDissolvedNeutral':
+            'U ovoj kampanji paravojna akcija poslana je prema području {place} za {faction}. Zahtjev vam nije stigao. Raspuštena je bez zauzimanja cilja. Nije zabilježena nikakva šteta po civile, a akcija se ne upisuje na teret vaše strane. Ovo je događaj simuliranog rata, a ne tvrdnja o tome šta se zaista desilo na tom mjestu.',
+    },
+};
+
+/** The RS card's staff assessment before #740, restored byte for byte by the §4 panel (2026-11-18). */
+const RS_CARD_STAFF_ASSESSMENT =
+    'Standing authorization mirrors documented RS leadership posture. Per-deployment review introduces command friction; refusal forecloses paramilitary operations entirely and shifts the rear-area burden onto regular formations.';
+
 describe('staff-sweep disclosure copy', () => {
     it('never calls a sweep authorized or the flag ethnic cleansing, in either language', () => {
         for (const key of FLAG_AND_RECEIPT_KEYS) {
@@ -62,17 +129,31 @@ describe('staff-sweep disclosure copy', () => {
         expect(bcs['dayton.folder.condemnation.cleansing']).not.toMatch(/osuđen/i);
     });
 
-    it('Assisted and Delegated say the staff follow the standing order: Always allow sends sweeps that count, Always deny and Review send none, nothing before an answer (§6 D1 stage 2)', () => {
+    it('both catalogs carry the signed §4 copy word for word (EN and BCS in lockstep)', () => {
+        expect(Object.keys(SIGNED.bcs)).toEqual(Object.keys(SIGNED.en));
+        for (const [key, text] of Object.entries(SIGNED.en)) expect(en[key], key).toBe(text);
+        for (const [key, text] of Object.entries(SIGNED.bcs)) expect(bcs[key], `${key} (bcs)`).toBe(text);
+    });
+
+    it('the signed copy names no operation or place, keeps "your staff" singular, and drops the draft\'s retired phrases', () => {
+        for (const key of Object.keys(SIGNED.en)) {
+            for (const text of [en[key]!, bcs[key]!]) {
+                expect(text, key).not.toMatch(/Circle|Krug|KRUG|Glamo[čc]|Bukvik|Obadi/);
+            }
+            expect(en[key], key).not.toMatch(/[Yy]our staff follow\b/);
+            expect(en[key], key).not.toMatch(/Until you answer|Review each deployment|before you answer|ordered in person/);
+            expect(bcs[key], key).not.toMatch(/Dok ne odgovorite|Pregledaj svako raspoređivanje|Prije vašeg odgovora/);
+        }
+    });
+
+    it('Assisted and Delegated: the staff follows the standing order; Always allow sends sweeps that count; anything else sends none (§6 D1 stage 2)', () => {
         for (const key of DELEGATING_LEVELS) {
             expect(en[key], key).toMatch(/Rear-area paramilitary sweeps follow your standing order/);
             expect(en[key], key).toMatch(/under Always allow your staff sends them without asking you, and each one counts against your side/);
-            expect(en[key], key).toMatch(/under Always deny or Review each deployment it sends none/);
-            expect(en[key], key).toMatch(/Until you answer, it sends none\./);
+            expect(en[key], key).toMatch(/under any other order, or none, it sends none\./);
             expect(en[key], key).not.toMatch(/even when set to Always deny|does not apply/);
             expect(bcs[key], `${key} (bcs)`).toMatch(/slijede vašu stalnu naredbu/);
-            expect(bcs[key], `${key} (bcs)`).toMatch(/Uvijek dozvoli/);
-            expect(bcs[key], `${key} (bcs)`).toMatch(/Uvijek odbij ili Pregledaj svako raspoređivanje ne šalje nijednu/);
-            expect(bcs[key], `${key} (bcs)`).toMatch(/Dok ne odgovorite, ne šalje nijednu\./);
+            expect(bcs[key], `${key} (bcs)`).toMatch(/uz bilo koju drugu naredbu, ili bez naredbe, ne šalje nijednu\./);
             expect(bcs[key], `${key} (bcs)`).not.toMatch(/čak ni kad|ne odnosi/);
         }
         // At Assisted, operations still need the President's approval.
@@ -81,24 +162,25 @@ describe('staff-sweep disclosure copy', () => {
         expect(en['autonomy.level.fullControl.desc']).toMatch(/yours to decide/);
     });
 
-    it('Observer: the order is answered with the historical policy, the side\'s forces act under it, and what they do is charged', () => {
-        expect(en['autonomy.level.observer.desc']).toMatch(/answered the same way, with the historical policy: your side's forces act under it, and what they do counts against your side/);
-        expect(bcs['autonomy.level.observer.desc']).toMatch(/historijskom politikom: snage vaše strane djeluju po njoj, a ono što učine pada na teret vaše strane/);
+    it('Observer: an order not yet given is answered with the historical policy; an order given stays in force; each sweep carried out is charged', () => {
+        expect(en['autonomy.level.observer.desc']).toMatch(/If you have not given the paramilitary standing order, it is answered the same way when its decision comes up, with the historical policy\./);
+        expect(en['autonomy.level.observer.desc']).toMatch(/An order you gave stays in force\./);
+        expect(en['autonomy.level.observer.desc']).toMatch(/each sweep they carry out counts against your side/);
+        expect(bcs['autonomy.level.observer.desc']).toMatch(/Naredba koju ste izdali ostaje na snazi\./);
     });
 
-    it('the game-rule block states the new rule, in both languages', () => {
+    it('the game-rule block states the signed rule, in both languages', () => {
         const rule = en['eventDecision.paramilitaryPolicyRule']!;
-        expect(rule).toMatch(/Your staff follow this order at every command level\./);
-        expect(rule).toMatch(/Always allow sends rear-area sweeps without asking you, and each one counts against your side\./);
-        expect(rule).toMatch(/Always deny and Review each deployment send none at Assisted, Delegated or Observer/);
-        expect(rule).toMatch(/Nothing is sent before you answer\./);
-        expect(rule).toMatch(/At Assisted, operations still need your approval\./);
-        expect(rule).toMatch(/At Observer this order is answered automatically with the historical policy, and your side's forces act under it\./);
+        expect(rule).toMatch(/^Your staff follows this order at every command level\./);
+        expect(rule).toMatch(/Your staff sends nothing before this order is answered\./);
+        expect(rule).toMatch(/Your answer holds at every level, Observer included\./);
+        expect(rule).toMatch(/At Observer, if you have not given a standing order, this order is answered automatically with the historical policy, and your side's forces act under it\./);
+        expect(rule).toMatch(/At Assisted, corps operations still wait for your approval; this order does not cover them\./);
         expect(rule).not.toMatch(/even when|only what you decide in person/);
         const ruleBcs = bcs['eventDecision.paramilitaryPolicyRule']!;
         expect(ruleBcs).toMatch(/na svakom nivou komandovanja/);
-        expect(ruleBcs).toMatch(/Prije vašeg odgovora ne šalje se ništa\./);
-        expect(ruleBcs).toMatch(/historijskom politikom/);
+        expect(ruleBcs).toMatch(/Prije odgovora na ovu naredbu štab ne šalje ništa\./);
+        expect(ruleBcs).toMatch(/ako niste izdali stalnu naredbu, na ovu naredbu se automatski odgovara historijskom politikom/);
         expect(ruleBcs).not.toMatch(/čak i kad|samo ono o čemu odlučujete lično/);
     });
 
@@ -111,9 +193,14 @@ describe('staff-sweep disclosure copy', () => {
             expect(en[key], key).toMatch(/not a statement about what happened in that place/);
             expect(bcs[key], key).toMatch(/simuliranog rata/);
         }
-        // The stage-1 cause stays for an old save, stated as the rule in force when the sweep was sent.
-        expect(en['decisionConsequences.detail.paramilitary.unrequested']).toMatch(/under the rule in force when it was sent/);
-        expect(bcs['decisionConsequences.detail.paramilitary.unrequested']).toMatch(/po pravilu koje je vrijedilo kad je poslana/);
+        // The stage-1 cause stays for an old save, stated as the rule in force when the sweep was sent. It names no Full Control
+        // cause: a Full Control Always-allow sweep always has a derivable cause (tests/paramilitary_receipt_cause_paths.test.ts).
+        for (const key of ['decisionConsequences.detail.paramilitary.unrequested', 'decisionConsequences.detail.paramilitary.unrequestedDissolved']) {
+            expect(en[key], key).toMatch(/under the rule in force when it was sent/);
+            expect(bcs[key], key).toMatch(/po pravilu koje je vrijedilo kad je poslana/);
+            expect(en[key], key).not.toMatch(/Full Control|standing order/);
+            expect(bcs[key], key).not.toMatch(/Pune kontrole|stalna naredba/);
+        }
     });
 
     it('the receipt names one true cause, taken from the saved basis (A3)', () => {
@@ -157,8 +244,12 @@ describe('staff-sweep disclosure copy', () => {
         expect(bcs['eventDecision.gameRule']).toBe('Pravilo igre');
     });
 
-    it('the reviewed policy event text keeps no meta sentence (the rule lives in the game-rule block, not in the 1992 card)', () => {
-        const events = readFileSync('data/scenarios/events/war_1992.json', 'utf8');
-        expect(events).not.toMatch(/counts against your side/);
+    it('the reviewed policy event text keeps no meta sentence, and the RS card keeps its pre-#740 "entirely"', () => {
+        const raw = readFileSync('data/scenarios/events/war_1992.json', 'utf8');
+        expect(raw).not.toMatch(/counts against your side/);
+        expect(raw).not.toMatch(/ordered in person/);
+        const events = JSON.parse(raw) as { id?: string; staff_assessment?: string }[];
+        const rsCard = events.find((event) => event.id === 'rs_paramilitary_policy_1992');
+        expect(rsCard?.staff_assessment).toBe(RS_CARD_STAFF_ASSESSMENT);
     });
 });
