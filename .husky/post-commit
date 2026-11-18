@@ -2,10 +2,6 @@
 command -v git-lfs >/dev/null 2>&1 || { printf >&2 "\n%s\n\n" "This repository is configured for Git LFS but 'git-lfs' was not found on your path. If you no longer wish to use Git LFS, remove this hook by deleting the 'post-commit' file in the hooks directory (set by 'core.hookspath'; usually '.git/hooks')."; exit 2; }
 git lfs post-commit "$@"
 
-TODAY=$(date +%Y-%m-%d)
-if ! grep -q "$TODAY" docs/PROJECT_LEDGER.md 2>/dev/null; then
-  echo ""
-  echo "⚠  No ledger entry for today ($TODAY). Run /awwv-ledger-entry before ending the session."
-  echo ""
-fi
+# The ledger-entry reminder was retired: the ledger lives in the coordination repo
+# until 1.0 (owner 2026-11-18), so docs/PROJECT_LEDGER.md is not in this checkout.
 exit 0

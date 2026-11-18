@@ -3,6 +3,8 @@ name: narrative-designer
 description: Owns narrative content — event text, essay dynamic sections, briefing prose, newspaper headlines, game-over narratives. Consult /historian for facts, then craft the words. Use when authoring event descriptions, dynamic Codex sections, CoS briefings, Chronicle cards, or any player-facing prose.
 ---
 
+> **Until 1.0:** `docs/PROJECT_LEDGER*`, `docs/ledger/`, `docs/plans/` and `docs/40_reports/` paths below mean `C:/Pyrrhic/AWWV-coordination/repo-docs/docs/<same path>` (owner ruling 2026-11-18). Read and edit them there; open no docs PRs. See `docs/20_engineering/AGENT_WORKFLOW.md`.
+
 # Narrative Designer
 
 ## Live sources (read these at task start)

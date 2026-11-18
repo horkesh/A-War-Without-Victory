@@ -85,6 +85,9 @@ interface CliOptions {
     finalSaveDir?: string;
     /** Corps ids whose operation queue and live operations are recorded every turn (diagnostic only). */
     traceCorps?: string[];
+    /** Settlement ids whose controller is recorded every turn in both branches (diagnostic only;
+     *  `--watch-cells <id>[,<id>...]`), so a played probe shows when a cell fell, not just whether. */
+    watchCells?: string[];
     /**
      * ATTRIBUTION DIAGNOSTIC ONLY — never a calibration result (Pyrrhic panel 2026-11-05,
      * docs/40_reports/audits/20261105_live_jan1993/paramilitary_panel/DECISION.md). Gives the
@@ -112,7 +115,8 @@ interface CliOptions {
      * Played-test options for the President (package "1994-95 attack and defence"), opt-in:
      * `--request-axis <corps>[+<corps>...]:<mun>[,<mun>...]`, `--request-prefer-exhausted on` and
      * `--request-every <weeks>` (1-52; 1 = a sustained weekly push) and `--request-only on` (spend
-     * Authority on Request-ops only). With any of them,
+     * Authority on Request-ops only) and `--request-from <turn>` (no Request-op before that game
+     * turn, e.g. 91 ≈ 1 Jan 1994). With any of them,
      * the output adds `president_requests` (each order joined to its after-action report) and the
      * requested corps' exhaustion per turn. Without them the output is unchanged.
      */
@@ -331,6 +335,9 @@ function parseArgs(argv: string[]): CliOptions {
         ...(values.get('--trace-corps')
             ? { traceCorps: (values.get('--trace-corps') ?? '').split(',').filter(Boolean).sort(strictCompare) }
             : {}),
+        ...(values.get('--watch-cells')
+            ? { watchCells: (values.get('--watch-cells') ?? '').split(',').filter(Boolean).sort(strictCompare) }
+            : {}),
         autonomyLevel: (() => {
             const raw = parseEnum(values.get('--autonomy-level') ?? '1', ['0', '1', '2', '3', 'production'] as const, '--autonomy-level');
             return raw === 'production' ? 'production' : (Number(raw) as 0 | 1 | 2 | 3);
@@ -355,9 +362,15 @@ function parseArgs(argv: string[]): CliOptions {
             const exhaustedRaw = parseEnum(values.get('--request-prefer-exhausted') ?? 'off', ['off', 'on'] as const, '--request-prefer-exhausted');
             const everyRaw = values.get('--request-every');
             const onlyRaw = parseEnum(values.get('--request-only') ?? 'off', ['off', 'on'] as const, '--request-only');
-            if (!axisRaw && exhaustedRaw === 'off' && everyRaw == null && onlyRaw === 'off') return {};
+            const fromRaw = values.get('--request-from');
+            if (!axisRaw && exhaustedRaw === 'off' && everyRaw == null && onlyRaw === 'off' && fromRaw == null) return {};
             if (!presidentArg) {
-                throw new Error('--request-axis / --request-prefer-exhausted / --request-every / --request-only need --president engaged or meddler');
+                throw new Error('--request-axis / --request-prefer-exhausted / --request-every / --request-only / --request-from need --president engaged or meddler');
+            }
+            let requestFrom: number | undefined;
+            if (fromRaw != null) {
+                requestFrom = Number(fromRaw);
+                if (!Number.isInteger(requestFrom) || requestFrom < 0) throw new Error(`--request-from expects a game turn (integer >= 0), got ${fromRaw}`);
             }
             let requestAxis: PresidentPolicyOptions['requestAxis'];
             if (axisRaw) {
@@ -377,6 +390,7 @@ function parseArgs(argv: string[]): CliOptions {
                 ...(exhaustedRaw === 'on' ? { preferExhausted: true } : {}),
                 ...(requestEvery != null ? { requestEvery } : {}),
                 ...(onlyRaw === 'on' ? { requestOnly: true } : {}),
+                ...(requestFrom != null ? { requestFrom } : {}),
             } };
         })(),
     };
@@ -1118,6 +1132,11 @@ async function runComparison(baseDir: string, options: CliOptions) {
                 headless: corpsTrace(headlessState, options.traceCorps),
                 player: corpsTrace(playerState, options.traceCorps),
             };
+        }
+        if (options.watchCells) {
+            const watch = (state: GameState) => Object.fromEntries(options.watchCells!.map((id) =>
+                [id, state.political?.political_controllers?.[id] ?? null]));
+            row.watched_cells = { headless: watch(headlessState), player: watch(playerState) };
         }
         turns.push(row);
     }

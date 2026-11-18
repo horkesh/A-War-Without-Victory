@@ -3,6 +3,8 @@ name: propagate-to-canon
 description: After making changes (code, constants, mechanics, paths, schemas, or any behavioral change), propagate those changes to all relevant canon and engineering documentation. Keeps docs in sync with code.
 ---
 
+> **Until 1.0:** `docs/PROJECT_LEDGER*`, `docs/ledger/`, `docs/plans/` and `docs/40_reports/` paths below mean `C:/Pyrrhic/AWWV-coordination/repo-docs/docs/<same path>` (owner ruling 2026-11-18). Read and edit them there; open no docs PRs. See `docs/20_engineering/AGENT_WORKFLOW.md`.
+
 # Propagate to Canon
 
 ## When to use

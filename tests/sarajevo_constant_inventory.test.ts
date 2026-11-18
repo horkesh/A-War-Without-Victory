@@ -4,7 +4,7 @@ import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 const SCRIPT = resolve('tools/diagnostics/sarajevo_constant_inventory.cjs');
-const OUTPUT = resolve('docs/40_reports/working/SARAJEVO_CONSTANT_INVENTORY.md');
+const OUTPUT = resolve('tests/fixtures/diagnostics/SARAJEVO_CONSTANT_INVENTORY.md');
 
 describe('Sarajevo constant inventory diagnostic', () => {
     it('emits a deterministic inventory of Sarajevo-named numeric constants', () => {

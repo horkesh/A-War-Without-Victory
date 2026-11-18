@@ -30,11 +30,6 @@ const oobRows = JSON.parse(
   fs.readFileSync(path.join(repoRoot, 'data/source/oob_brigades.json'), 'utf8'),
 ) as OobBrigadeRow[];
 
-const projectLedgerKnowledge = fs.readFileSync(
-  path.join(repoRoot, 'docs/PROJECT_LEDGER_KNOWLEDGE.md'),
-  'utf8',
-);
-
 /**
  * Elite brigades that are knowingly carried WITHOUT an `elite_commander`.
  *
@@ -134,10 +129,6 @@ describe('OOB elite commander metadata contract', () => {
     });
     expect(row?.elite_commander).toBeUndefined();
     expect(row?.war_crimes_record).toBeUndefined();
-    expect(projectLedgerKnowledge).toContain('hrhb_vitezovi_brigade_vitez');
-    expect(projectLedgerKnowledge).toContain('PPN Vitezovi');
-    expect(projectLedgerKnowledge).toContain('Mario Cerkez');
-    expect(projectLedgerKnowledge).toContain('Darko Kraljevic');
   });
 
   test('keeps Vitezovi localization tied to the unresolved source-reviewed OOB row', () => {

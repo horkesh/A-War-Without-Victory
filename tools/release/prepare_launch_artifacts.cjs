@@ -24,10 +24,10 @@ const ROOT = path.resolve(__dirname, '..', '..');
 const TEMPLATE_PATHS = [
     'docs/50_launch/release/checklist.md',
     'docs/50_launch/release/launch_day_automation_template.md',
-    'docs/40_reports/release/20260517_RELEASE_EVIDENCE_TEMPLATE.md',
-    'docs/40_reports/release/20260518_CLEAN_VM_OPERATOR_EVIDENCE_TEMPLATE.md',
-    'docs/40_reports/playtest/20260517_EXTERNAL_PLAYTEST_DRY_RUN_TEMPLATE.md',
-    'docs/40_reports/playtest/20260518_EXTERNAL_PLAYTEST_ARTIFACT_DRY_RUN_TEMPLATE.md',
+    'docs/50_launch/release/20260517_RELEASE_EVIDENCE_TEMPLATE.md',
+    'docs/50_launch/release/20260518_CLEAN_VM_OPERATOR_EVIDENCE_TEMPLATE.md',
+    'docs/50_launch/release/20260517_EXTERNAL_PLAYTEST_DRY_RUN_TEMPLATE.md',
+    'docs/50_launch/release/20260518_EXTERNAL_PLAYTEST_ARTIFACT_DRY_RUN_TEMPLATE.md',
     'docs/playtesting/v092/tester_quickstart.md',
     'docs/playtesting/v092/feedback_form_schema.md',
 ];
@@ -194,9 +194,9 @@ function buildLaunchArtifactPlan(options) {
             noUploadPerformed: true,
         },
         outputs: {
-            releaseEvidence: 'docs/40_reports/release/20260517_RELEASE_EVIDENCE_TEMPLATE.md',
-            cleanVmEvidence: 'docs/40_reports/release/20260518_CLEAN_VM_OPERATOR_EVIDENCE_TEMPLATE.md',
-            playtestDryRun: 'docs/40_reports/playtest/20260518_EXTERNAL_PLAYTEST_ARTIFACT_DRY_RUN_TEMPLATE.md',
+            releaseEvidence: 'docs/50_launch/release/20260517_RELEASE_EVIDENCE_TEMPLATE.md',
+            cleanVmEvidence: 'docs/50_launch/release/20260518_CLEAN_VM_OPERATOR_EVIDENCE_TEMPLATE.md',
+            playtestDryRun: 'docs/50_launch/release/20260518_EXTERNAL_PLAYTEST_ARTIFACT_DRY_RUN_TEMPLATE.md',
         },
     };
 }

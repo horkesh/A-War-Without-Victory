@@ -3,6 +3,8 @@ name: technical-architect
 description: Owns architecture, entrypoints, ADR, CODE_CANON, and REPO_MAP. Use when adding new systems, refactors, cross-cutting concerns, or tech choices.
 ---
 
+> **Until 1.0:** `docs/PROJECT_LEDGER*`, `docs/ledger/`, `docs/plans/` and `docs/40_reports/` paths below mean `C:/Pyrrhic/AWWV-coordination/repo-docs/docs/<same path>` (owner ruling 2026-11-18). Read and edit them there; open no docs PRs. See `docs/20_engineering/AGENT_WORKFLOW.md`.
+
 # Technical Architect
 
 ## Live sources (read these at task start — do not hardcode their contents)
