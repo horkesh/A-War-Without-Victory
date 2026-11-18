@@ -65,6 +65,13 @@ export function evaluateRuptureConsequences(state: GameState): void {
     const turn = state.meta?.turn ?? 0;
     if (turn < SREBRENICA_MIN_TURN) return;
 
+    // The fall is recorded: set the same flag the scripted fall card sets (§6 E2 follow-up,
+    // 2026-11-17). On a combat fall it stops the card from scripting a second fall after a
+    // retake (one fall, one record, one standing cost), and stops the "Srebrenica holds" cards
+    // from firing after a recorded genocide. Left alone, the card has already set it.
+    if (!state.military.event_flags) state.military.event_flags = {};
+    state.military.event_flags.srebrenica_fell = true;
+
     // Record the rupture — locked, permanent, non-reversible
     negotiation.rupture_consequences.push({
         id: 'srebrenica_genocide_1995',

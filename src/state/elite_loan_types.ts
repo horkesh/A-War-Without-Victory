@@ -29,6 +29,12 @@ export interface EliteLoanState {
     permanently_degraded: boolean;
     /** Index of the current active episode in EliteBrigadeTracker.episodes (null when not on loan). */
     current_episode_id: number | null;
+    /**
+     * The defensive-gap sector this loan was granted for (package P2 step 2, Codex review on #774):
+     * deployment reinforces it before any operation staging or the highest pressure-index sector.
+     * Absent on other loans.
+     */
+    defend_sector_id?: string;
 }
 
 // ─── Constants ───────────────────────────────────────────────────────────────
@@ -95,6 +101,8 @@ export interface ArmyReserveRequest {
     commander_focus_zone_id?: string;
     /** Threat ratio observed when a thin sector triggered this request. */
     sector_threat_ratio?: number;
+    /** The defensive-gap sector chosen by the request (breach first; package P2 step 2). */
+    sector_id?: string;
     /** Number of brigades assigned to the threatened sector when the request fired. */
     sector_assigned_brigade_count?: number;
     /** Active operation name when reserve support is being driven by a live operation. */

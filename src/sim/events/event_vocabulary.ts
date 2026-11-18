@@ -22,11 +22,13 @@ export const KNOWN_EVENT_EFFECT_KINDS = [
     'humanitarian_impact',
     'morale_change',
     'narrative',
-    'negotiation_capital',
+    // 'negotiation_capital' retired (§6 E2, 2026-11-17): it wrote into raw
+    // NegotiationBreakdown counters under dimension names that never existed there,
+    // so every catalog use was a silent no-op. Strategic-dimension effects are
+    // authored as `dimension_shifts`; the loader now rejects the old kind.
     'offensive_ops_suppression',
     'patron_pressure',
     'recruitment_modifier',
-    'supply_delta',
 ] as const;
 
 export const KNOWN_EVENT_CONDITION_TYPES = [
@@ -34,7 +36,6 @@ export const KNOWN_EVENT_CONDITION_TYPES = [
     'alliance_below',
     'alliance_drift',
     'and',
-    'corridor_severed',
     'dimension_above',
     'dimension_below',
     'displaced_in_aggregate',
@@ -56,8 +57,6 @@ export const KNOWN_EVENT_CONDITION_TYPES = [
     'paramilitary_mode_equals',
     'patron_pressure_above',
     'rbih_hrhb_war_started',
-    'supply_above',
-    'supply_below',
     'territory_control',
     'territory_loss_window',
     'territory_percentage',

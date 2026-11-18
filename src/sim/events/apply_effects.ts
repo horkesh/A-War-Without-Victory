@@ -33,11 +33,11 @@ const EFFECT_KIND_ORDER: Record<string, number> = {
     humanitarian_impact: 12,
     morale_change: 13,
     narrative: 14,
-    negotiation_capital: 15,
+    // 15 was negotiation_capital (retired, §6 E2). The gap is kept so every
+    // later index, and so the relative order, is unchanged.
     offensive_ops_suppression: 16,
     patron_pressure: 17,
     recruitment_modifier: 18,
-    supply_delta: 19,
 };
 
 /** Robustness audit P1-B (task #95): clamp traps non-finite input (NaN/±Infinity)
@@ -84,10 +84,15 @@ export function applyEventEffects(
     effects: EventEffect[],
     targetFormationId?: string,
 ): void {
-    if (effects.length === 0) return;
+    // The `supply_delta` kind is retired (2026-11-17; supply is connection, not stock). A pending
+    // decision in an old save may still carry one in its staged response options. It was a silent
+    // no-op without the reserve layer, so it is dropped here, explicitly, so the decision can still be
+    // answered. The retired-field sweep migration strips staged entries; this filter goes with it.
+    const live = effects.filter((effect) => (effect as { kind?: unknown }).kind !== 'supply_delta');
+    if (live.length === 0) return;
 
     // Sort by kind for deterministic application order
-    const sorted = [...effects].sort((a, b) => {
+    const sorted = [...live].sort((a, b) => {
         const oa = EFFECT_KIND_ORDER[a.kind] ?? 99;
         const ob = EFFECT_KIND_ORDER[b.kind] ?? 99;
         return oa - ob;
@@ -107,9 +112,6 @@ function applySingleEffect(state: GameState, effect: EventEffect, targetFormatio
                 applyMoraleChange(state, effect.faction, effect.delta, effect.affected_corps);
             }
             break;
-        case 'supply_delta':
-            applySupplyDelta(state, effect.faction, effect.delta);
-            break;
         case 'cohesion_change':
             if (targetFormationId) {
                 applyTargetedFormationStatChange(state, targetFormationId, effect.faction, 'cohesion', effect.delta);
@@ -125,9 +127,6 @@ function applySingleEffect(state: GameState, effect: EventEffect, targetFormatio
             break;
         case 'alliance_change':
             applyAllianceChange(state, effect.delta);
-            break;
-        case 'negotiation_capital':
-            applyNegotiationBreakdown(state, effect.faction, effect.dimension, effect.delta);
             break;
         case 'equipment_grant':
             applyEquipmentGrant(state, effect.faction, effect.tanks, effect.artillery, effect.aa_systems, effect.target_municipality);
@@ -168,6 +167,12 @@ function applySingleEffect(state: GameState, effect: EventEffect, targetFormatio
         case 'narrative':
             // No mechanical effect; narrative text is logged via FiredEvent.
             break;
+        default: {
+            // §6 E2: an unknown kind must fail loudly, never be skipped silently.
+            // The `never` binding makes a new union member without a case a compile error.
+            const unknownEffect: never = effect;
+            throw new Error(`Unknown event effect kind: ${String((unknownEffect as { kind?: unknown }).kind)}`);
+        }
     }
 }
 
@@ -372,22 +377,6 @@ function applyCohesionChange(state: GameState, faction: FactionId, delta: number
     }
 }
 
-/** Add delta to faction's general supply reserve. Floor at 0.
- *  Un-clamped accumulator: non-finite delta is rejected (prior reserve kept) + logged
- *  — `Math.max(0, NaN)` is NaN and would persist (P1-B).
- *  Supply-reserve economy retired 2026-11-17 (Fable consult 6): no new game creates the reserve,
- *  so this is inert there. Kept unchanged because authored events in data/scenarios/events carry
- *  supply_delta effects; it only touches the compatibility-only field an old save may carry. */
-function applySupplyDelta(state: GameState, faction: FactionId, delta: number): void {
-    if (!Number.isFinite(delta)) {
-        recordNonFiniteEffectAnomaly(state, 'supply_delta', faction, delta);
-        return;
-    }
-    if (!state.military.general_supply_reserve) return;
-    const current = state.military.general_supply_reserve[faction] ?? 0;
-    state.military.general_supply_reserve[faction] = Math.max(0, current + delta);
-}
-
 /** Adjust war_crimes_events in faction's negotiation capital.
  *  Un-clamped accumulator: non-finite delta is rejected (prior value kept) + logged (P1-B). */
 function applyHumanitarianImpact(state: GameState, faction: FactionId, warCrimesDelta?: number): void {
@@ -532,29 +521,6 @@ function applyControlChange(state: GameState, faction: FactionId, osids: string[
             to: faction,
             mun_id: osid.split(':')[1] ?? undefined,
         } satisfies ControlEvent);
-    }
-}
-
-/** Adjust a specific negotiation capital dimension for a faction.
- *  Un-clamped accumulator: non-finite delta is rejected (prior value kept) + logged (P1-B). */
-function applyNegotiationBreakdown(
-    state: GameState,
-    faction: FactionId,
-    dimension: string,
-    delta: number
-): void {
-    if (!Number.isFinite(delta)) {
-        recordNonFiniteEffectAnomaly(state, 'negotiation_capital', faction, delta);
-        return;
-    }
-    const neg = state.military.negotiation;
-    if (!neg?.capital?.[faction]) return;
-    const cap = neg.capital[faction] as typeof neg.capital[typeof faction] & Record<string, unknown>;
-    if (dimension in cap) {
-        const current = cap[dimension];
-        if (typeof current === 'number') {
-            cap[dimension] = current + delta;
-        }
     }
 }
 

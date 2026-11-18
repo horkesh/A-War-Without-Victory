@@ -120,7 +120,8 @@ import { RootErrorBoundary } from './components/RootErrorBoundary';
 import { PanelBreadcrumb } from './components/PanelBreadcrumb';
 import { derivePanelRailState, shouldRenderCommandBriefing, shouldRenderInboxPanel, shouldRenderMapModeLegend, shouldRenderTacticalDetailRails } from './components/panelRail';
 import { useGameStore, isDevMode } from './store/gameStore';
-import { loadLatestRunSaveAsText, loadEventDefinitions, loadEventDefinitionsFull } from './data/DataLoader';
+import { loadLatestRunSaveAsText, loadEventDefinitions, loadEventDefinitionsFull, type EventDefinitionView } from './data/DataLoader';
+import { buildAcknowledgementDimensionShiftEntries } from './data/dimensionShiftDisplay';
 import type { EventDefinition } from '../../sim/events/event_types';
 import { buildConsequenceReceipts, receiptsRealizedOnTurn } from './data/consequenceReceipts';
 import { resolveEventDisplayNarrative, resolveEventDisplayTitle } from './data/eventDisplayCopy';
@@ -246,8 +247,6 @@ export function formatAcknowledgementEventEffect(
   switch (effect.kind) {
     case 'morale_change':
       return t('eventModal.effect.moraleChange', { faction: factionPrefix, delta });
-    case 'supply_delta':
-      return t('eventModal.effect.supplyDelta', { faction: factionPrefix, delta });
     case 'cohesion_change':
       return t('eventModal.effect.cohesionChange', { faction: factionPrefix, delta });
     case 'humanitarian_impact':
@@ -256,8 +255,6 @@ export function formatAcknowledgementEventEffect(
       return t('eventModal.effect.patronPressure', { faction: statePrefix, delta });
     case 'alliance_change':
       return t('eventModal.effect.allianceChange', { delta: formatSignedEventShare(effect.delta) });
-    case 'negotiation_capital':
-      return t('eventModal.effect.negotiationCapital', { faction: statePrefix, delta });
     case 'equipment_grant':
       return t('eventModal.effect.equipmentGrant', { faction: factionPrefix });
     case 'aggression_modifier':
@@ -291,6 +288,22 @@ export function buildAcknowledgementEffects(
       narrativeOrdinal: narrativeEffectOrdinal(effects, index),
     }),
   }));
+}
+
+/**
+ * Acknowledgement-list entries for a fired automatic card: its authored effects, then
+ * (§6 E2) its own `dimension_shifts`, so a standing or leverage cost the engine applies is
+ * shown on the card that applies it. Shift lines are ordered by faction then dimension
+ * (strictCompare) and zero deltas are omitted.
+ */
+export function buildAcknowledgementEventEffects(
+  eventId: string,
+  def: Pick<EventDefinitionView, 'effects' | 'dimension_shifts'>,
+): Array<{ kind: string; description: string }> {
+  return [
+    ...buildAcknowledgementEffects(eventId, def.effects ?? []),
+    ...buildAcknowledgementDimensionShiftEntries(def.dimension_shifts),
+  ];
 }
 
 function comparePendingEventDecisionPriority(a: PendingEventDecisionView, b: PendingEventDecisionView): number {
@@ -963,7 +976,7 @@ function App() {
           title: resolveEventDisplayTitle(e.id, def?.title ?? e.title),
           narrative: resolveEventDisplayNarrative(e.id, def?.narrative ?? e.narrative ?? ''),
           category: def?.category ?? e.category ?? 'military',
-          effects: def?.effects ? buildAcknowledgementEffects(e.id, def.effects) : e.effects,
+          effects: def ? buildAcknowledgementEventEffects(e.id, def) : e.effects,
           isDecision: false,
           image: def?.image,
         };

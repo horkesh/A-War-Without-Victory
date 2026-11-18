@@ -33,6 +33,16 @@ describe('save migration round-trip fixture contract', () => {
         );
     });
 
+    it('v40 fixture: the v41 migration strips the retired negotiation_capital effects from a pending decision', () => {
+        const migrated = deserializeState(readFileSync(resolve(fixtureDir, 'v40_negotiation_capital_pending.json'), 'utf8'));
+        const options = migrated.military.pending_event_decisions![0]!.response_options;
+        expect(options.map((option) => option.effects)).toEqual([
+            [{ kind: 'supply_delta', faction: 'RBiH', delta: 10 }],
+            [],
+        ]);
+        expect(serializeState(migrated)).not.toContain('negotiation_capital');
+    });
+
     it.each(fixtureFiles)('%s migrates and save/loads byte-stably', (fileName) => {
         const payload = readFileSync(resolve(fixtureDir, fileName), 'utf8');
 

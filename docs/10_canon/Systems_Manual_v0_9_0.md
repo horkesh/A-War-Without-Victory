@@ -707,12 +707,10 @@ Army HQ gathering follows the existing deterministic staff-execution boundary: i
 
 #### §7.10.1 v0.6.0 Expanded Condition Types
 
-14 additional condition types added to `EventCondition` union in `event_types.ts`:
+14 additional condition types were added to the `EventCondition` union in `event_types.ts`. Three are retired and the loader rejects them: `supply_below` and `supply_above` (2026-11-17, supply is connection, not stock) and `corridor_severed` (2026-11-18: its BFS ran over settlement edges but compared OSID ids, so it could never evaluate an OSID pair; no shipped event used it). The 11 live types:
 
 | Type | Parameters | Evaluates |
 |------|-----------|-----------|
-| `supply_below` | faction, threshold | inert in 1.0: read `general_supply_reserve[faction] < threshold`; the reserves are retired (2026-11-17), so the condition never fires; the authored events that used it are remapped or retired in the supply-events change (pending: the supply-events change, a Fable consult 6 follow-up; about 20 authored events still carry `supply_below` and ship inert until then) |
-| `supply_above` | faction, threshold | inert in 1.0: read `general_supply_reserve[faction] >= threshold`; never fires since the reserves were retired (2026-11-17) |
 | `territory_percentage` | faction, comparator (above/below), threshold | Fraction of all OSIDs controlled by faction |
 | `dimension_above` | faction, dimension, threshold | `strategic_dimensions[faction][dimension].effective_value >= threshold` |
 | `dimension_below` | faction, dimension, threshold | Same, `< threshold` |
@@ -724,7 +722,6 @@ Army HQ gathering follows the existing deterministic staff-execution boundary: i
 | `week_since_event` | event_id, min_weeks?, max_weeks? | Weeks since event last fired within range |
 | `event_fire_count` | event_id, min_count?, max_count? | Event fire count within range |
 | `enclave_supply_status` | municipality, status | Placeholder — deferred to supply integration |
-| `corridor_severed` | from_osid, to_osid, faction | Placeholder — deferred to BFS integration |
 
 All combinators (`and`, `or`, `not`) work with all condition types.
 
@@ -760,6 +757,12 @@ Events WITHOUT pressure config use legacy `triggerMatches()` (backward compatibl
 | `negotiating_leverage` | Weighted composite of the other five |
 
 Each dimension: `base_value` (computed from game state each turn) + `event_modifier` (accumulated from player decisions) = `effective_value` (clamped 0-100).
+
+The `event_modifier` is added after the base is clamped: `base_value` is clamped to 0-100 first, then `effective_value = clamp(base_value + event_modifier, 0, 100)`.
+
+`international_standing` base inputs (per faction, from `NegotiationBreakdown`): start at 50; war crimes `war_crimes_events × −10`; civilian casualties `civilian_casualties_caused ÷ 5000`, subtracted; peace plans accepted `+10` each; peace plans rejected `−15` each. An atrocity card's `humanitarian_impact.war_crimes_delta` therefore costs standing through this base until it reaches 0.
+
+Events write dimensions only through `dimension_shifts` (event level or response-option level), which add to `event_modifier`. The former `negotiation_capital` event effect kind is retired (§6 E2, 2026-11-17): it never reached the dimension store, the loader now rejects it, and an unknown dimension id in a shift throws. One carrier per effect: a row that already carries a live shift on a faction and dimension does not repeat it under another kind.
 
 Stored on `NegotiationState.strategic_dimensions`. Module: `src/sim/events/strategic_dimensions.ts`.
 
@@ -977,7 +980,7 @@ When the operational graph (OSID) is the base layer, “supply at OSID” is the
 
 ### 14.2c Supply is connection, not stock (supply-reserve economy retired 2026-11-17)
 
-**Retired (Fable consult 6, 2026-11-17).** Supply is modelled as connection, not stock. A formation is supplied if it can be reached from a source over the OSID graph; there are no depots, ammunition stocks or patron shipments. The faction-level reserve layer added in March 2026 (Phases A to E: `general_supply_reserve` and `heavy_munitions_reserve` per faction [0..100], maintenance drain, per-battle expenditure, production and patron-aid income, the embargo income multiplier and per-faction supply caps, production-facility combat damage, UN airdrops, the smuggling allocation and smuggling routes, the one-time JNA warehouse bonus, the reserve-blended effective supply state, the heavy-munitions scaling of bombardment and the artillery-preparation reserve spend) is not modelled in 1.0. Removed with it: the pipeline steps `compute-supply-reserves` and `update-smuggling-routes`, the airdrop button and IPC, the reserve bars of the Logistics panel and the Economy panel, and the `supply_reserves_enabled` scenario key (now ignored). It ran only under that scenario flag, which no apr1992 scenario sets (only `sep1991_to_dayton` and the retired `jan1993_to_dayton` did; no player can start either), so the retirement is byte-identical on apr1992 historical and hands-off emergent. The reserve fields stay optional, compatibility-only save fields so old saves load; no new game creates them, and an old save's value is read only by the retired `supply_below`/`supply_above` conditions and `supply_delta` effect, which the supply-events change retires (pending: the supply-events change, a Fable consult 6 follow-up; about 20 authored events still carry `supply_below` and ship inert until then). Do not revive this mechanism as it stood; the record of why is in `docs/40_reports/governance/20261115_FINAL_BEHAVIOUR_AT_1_0.md` (SB2).
+**Retired (Fable consult 6, 2026-11-17).** Supply is modelled as connection, not stock. A formation is supplied if it can be reached from a source over the OSID graph; there are no depots, ammunition stocks or patron shipments. The faction-level reserve layer added in March 2026 (Phases A to E: `general_supply_reserve` and `heavy_munitions_reserve` per faction [0..100], maintenance drain, per-battle expenditure, production and patron-aid income, the embargo income multiplier and per-faction supply caps, production-facility combat damage, UN airdrops, the smuggling allocation and smuggling routes, the one-time JNA warehouse bonus, the reserve-blended effective supply state, the heavy-munitions scaling of bombardment and the artillery-preparation reserve spend) is not modelled in 1.0. Removed with it: the pipeline steps `compute-supply-reserves` and `update-smuggling-routes`, the airdrop button and IPC, the reserve bars of the Logistics panel and the Economy panel, and the `supply_reserves_enabled` scenario key (now ignored). It ran only under that scenario flag, which no apr1992 scenario sets (only `sep1991_to_dayton` and the retired `jan1993_to_dayton` did; no player can start either), so the retirement is byte-identical on apr1992 historical and hands-off emergent. The reserve fields stay optional, compatibility-only save fields so old saves load; no new game creates them. The `supply_below` and `supply_above` event conditions and the `supply_delta` event effect were retired on 2026-11-17 with 18 authored events that could only fire on the reserve (the remaining events lost their `supply_delta` lines); the loader rejects all three. An old save's staged decision that still carries a `supply_delta` effect loads and resolves as a no-op, and the player is not shown it. The live supply condition is `enclave_supply_status` (per-OSID reachability). Do not revive this mechanism as it stood; the record of why is in `docs/40_reports/governance/20261115_FINAL_BEHAVIOUR_AT_1_0.md` (SB2).
 
 **Still live from that work.** Enclave resilience and hardening (Phase C: structured `EnclaveResilienceEntry`; +5% defense after 8+ isolation turns; exhaustion reduction for RBiH up to 30% at resilience 30; constants in `src/state/enclave_resilience_constants.ts`; pipeline step `enclave-resilience`). The supply map layer (map mode "supply" colours OSIDs by faction supply pressure, `buildSupplyGeoJSON.ts`) and the Logistics panel (`SupplyPanel.tsx`: corridor open/strained/cut counts and the Sarajevo lifeline indicator; the reserve bars are gone). Supply-aware bot targeting (a score multiplier on enemy targets by supply state, 1.10 critical and 1.05 strained, in `bot_corps_directives.ts`). The embargo offensive-launch gate (`embargo_offensive_gate_enabled`, the embargo-phase `general` cap), which reads only the embargo phase and never read a reserve.
 

@@ -4,14 +4,13 @@ import type { GameState } from '../src/state/game_state.js';
 
 function minState(): GameState {
     return {
-        meta: { supply_reserves_enabled: true, turn: 20, phase: 'war', scenario_start_date: '1992-04-06' },
+        meta: { turn: 20, phase: 'war', scenario_start_date: '1992-04-06' },
         political: {
             political_controllers: {},
             war_alliance_rbih_hrhb: 0.5,
         },
         military: {
             formations: {},
-            general_supply_reserve: { RS: 50, RBiH: 30, HRHB: 40 },
             negotiation: {
                 capital: {},
                 patron_relationships: {},
@@ -26,44 +25,8 @@ function minState(): GameState {
 }
 
 describe('evaluateCondition — new v0.6.0 condition types', () => {
-    it('supply_below: true when below threshold', () => {
-        const state = minState();
-        expect(evaluateCondition({ type: 'supply_below', faction: 'RBiH', threshold: 40 }, state)).toBe(true);
-    });
-
-    it('supply_below: false when above threshold', () => {
-        const state = minState();
-        expect(evaluateCondition({ type: 'supply_below', faction: 'RS', threshold: 40 }, state)).toBe(false);
-    });
-
-    it('supply_above: true when above threshold', () => {
-        const state = minState();
-        expect(evaluateCondition({ type: 'supply_above', faction: 'RS', threshold: 40 }, state)).toBe(true);
-    });
-
-    // F7 (2026-11-15): with the reserve model off there is no reserve, so neither condition holds.
-    it('supply_below and supply_above are false when the reserve model is off (shipping campaign)', () => {
-        const state = minState();
-        delete (state.meta as { supply_reserves_enabled?: boolean }).supply_reserves_enabled;
-        delete (state.military as { general_supply_reserve?: unknown }).general_supply_reserve;
-        for (const faction of ['RBiH', 'RS', 'HRHB'] as const) {
-            expect(evaluateCondition({ type: 'supply_below', faction, threshold: 30 }, state)).toBe(false);
-            expect(evaluateCondition({ type: 'supply_above', faction, threshold: 0 }, state)).toBe(false);
-        }
-    });
-
-    it('a reserve written while the model is off (a feint drain) does not make supply_below true', () => {
-        const state = minState();
-        delete (state.meta as { supply_reserves_enabled?: boolean }).supply_reserves_enabled;
-        (state.military as { general_supply_reserve?: Record<string, number> }).general_supply_reserve = { RS: 0 };
-        expect(evaluateCondition({ type: 'supply_below', faction: 'RS', threshold: 30 }, state)).toBe(false);
-    });
-
-    it('a faction with no reserve entry is not "below" even when the model is on', () => {
-        const state = minState();
-        (state.military as { general_supply_reserve?: Record<string, number> }).general_supply_reserve = { RBiH: 30 };
-        expect(evaluateCondition({ type: 'supply_below', faction: 'RS', threshold: 30 }, state)).toBe(false);
-    });
+    // supply_below / supply_above condition tests: retired 2026-11-17 (supply is connection, not stock)
+    // corridor_severed condition tests: retired 2026-11-18 (the condition is gone; the loader rejects it, see tests/events_corridor_severed_retired.test.ts)
 
     it('flag_equals: matches set flag', () => {
         const state = minState();
@@ -201,53 +164,5 @@ describe('evaluateCondition — new v0.6.0 condition types', () => {
     it('enclave_supply_status: false when no supply data', () => {
         const state = minState();
         expect(evaluateCondition({ type: 'enclave_supply_status', municipality: 'srebrenica', status: 'critical' }, state)).toBe(false);
-    });
-
-    // ── corridor_severed (v0.7.0) ────────────────────────────────────
-
-    it('corridor_severed: true when enemy OSID blocks path', () => {
-        const state = minState();
-        state.political.political_controllers = {
-            'op:a:a_1': 'RBiH',
-            'op:a:a_2': 'RS', // blocks path
-            'op:a:a_3': 'RBiH',
-        };
-        const edges = [
-            { a: 'op:a:a_1', b: 'op:a:a_2' },
-            { a: 'op:a:a_2', b: 'op:a:a_3' },
-        ] as any;
-        expect(evaluateCondition({ type: 'corridor_severed', from_osid: 'op:a:a_1', to_osid: 'op:a:a_3', faction: 'RBiH' }, state, edges)).toBe(true);
-    });
-
-    it('corridor_severed: false when path exists through friendly territory', () => {
-        const state = minState();
-        state.political.political_controllers = {
-            'op:a:a_1': 'RBiH',
-            'op:a:a_2': 'RBiH',
-            'op:a:a_3': 'RBiH',
-        };
-        const edges = [
-            { a: 'op:a:a_1', b: 'op:a:a_2' },
-            { a: 'op:a:a_2', b: 'op:a:a_3' },
-        ] as any;
-        expect(evaluateCondition({ type: 'corridor_severed', from_osid: 'op:a:a_1', to_osid: 'op:a:a_3', faction: 'RBiH' }, state, edges)).toBe(false);
-    });
-
-    it('corridor_severed: true when start OSID not held by faction', () => {
-        const state = minState();
-        state.political.political_controllers = {
-            'op:a:a_1': 'RS',
-            'op:a:a_3': 'RBiH',
-        };
-        expect(evaluateCondition({ type: 'corridor_severed', from_osid: 'op:a:a_1', to_osid: 'op:a:a_3', faction: 'RBiH' }, state)).toBe(true);
-    });
-
-    it('corridor_severed: false when no edges (cannot evaluate)', () => {
-        const state = minState();
-        state.political.political_controllers = {
-            'op:a:a_1': 'RBiH',
-            'op:a:a_3': 'RBiH',
-        };
-        expect(evaluateCondition({ type: 'corridor_severed', from_osid: 'op:a:a_1', to_osid: 'op:a:a_3', faction: 'RBiH' }, state)).toBe(false);
     });
 });

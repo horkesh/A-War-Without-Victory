@@ -39,7 +39,7 @@ import type { ArmyLabel } from './identity.js';
 import type { RecruitmentResourceState } from './recruitment_types.js';
 import type { CommanderState } from '../sim/combat/commander/commander_state.js';
 
-export const CURRENT_SCHEMA_VERSION = 40 as const;
+export const CURRENT_SCHEMA_VERSION = 41 as const;
 
 // --- ID types (canonical) ---
 export type FactionId = string;
@@ -1006,7 +1006,15 @@ export interface CorpsDirective {
     priority_sector_id?: string;
     /** Explicit brigade-to-sector reassignment orders from density equalization.
      *  Brigade AI reads these and issues column march orders to move brigades to their assigned sector. */
-    sector_reassignment_orders?: Array<{ brigade_id: string; to_sector_id: string }>;
+    sector_reassignment_orders?: Array<{
+        brigade_id: string;
+        to_sector_id: string;
+        /**
+         * Set on an empty-sector relief reassignment (computeEmptySectorReliefReassignments). Its
+         * march releases a dug-in donor, like an operation-authorized order (package P2 step 1).
+         */
+        empty_sector_relief?: true;
+    }>;
 }
 
 /**
