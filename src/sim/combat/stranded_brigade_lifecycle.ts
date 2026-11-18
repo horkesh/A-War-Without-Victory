@@ -23,7 +23,7 @@ import type { Osid } from './osid_adjacency.js';
 import { isFriendlyFaction } from '../early_war/alliance_update.js';
 import { createColumnMovementOrder } from './brigade_movement_order_helpers.js';
 import { getQueuedPrePlannedBrigadeIds } from './pre_planned_operations.js';
-import { SALIENT_GARRISON_RETENTION_MIN_BRIGADES } from './salient_withdrawal.js';
+import { SALIENT_GARRISON_RETENTION_MIN_BRIGADES, countsTowardPocketGarrison } from './salient_withdrawal.js';
 import {
     isMovementOwnedActiveLoanDeployment,
     isMovementOwnedHomeReturn,
@@ -156,8 +156,7 @@ function isGarrisonedCriticalPocket(
     let garrison = 0;
     for (const id of Object.keys(formations).sort(strictCompare)) {
         const formation = formations[id];
-        if (!formation || formation.status !== 'active' || formation.kind !== 'brigade') continue;
-        if (formation.faction !== faction || !formation.location_osid || !pocket.has(formation.location_osid)) continue;
+        if (!countsTowardPocketGarrison(formation, faction) || !pocket.has(formation.location_osid)) continue;
         garrison += 1;
         if (garrison >= SALIENT_GARRISON_RETENTION_MIN_BRIGADES) return true;
     }

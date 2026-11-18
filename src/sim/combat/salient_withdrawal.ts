@@ -19,6 +19,20 @@ import type { OperationalToCanonicalReverseMap } from '../../data/operational_da
 /** A cut-off component holding at least this many of the displaced faction's active brigades is retained. */
 export const SALIENT_GARRISON_RETENTION_MIN_BRIGADES = 2;
 
+/**
+ * One garrison count for every pocket rule (P2-R retention, P2-L stranding): an active brigade
+ * of the faction with a location, and no owner-authored evacuation rule (the 102nd Odžak→Orašje,
+ * whose authored relocation keeps precedence).
+ */
+export function countsTowardPocketGarrison(
+    formation: FormationState | undefined,
+    faction: FactionId,
+): formation is FormationState & { location_osid: string } {
+    if (!formation || formation.status !== 'active' || formation.kind !== 'brigade') return false;
+    if (formation.faction !== faction || !formation.location_osid) return false;
+    return !historicalEvacuationRuleFor(formation, formation.location_osid);
+}
+
 export interface SalientWithdrawalReport {
     evacuated_formation_ids: string[];
 }
@@ -321,9 +335,7 @@ export function evacuateFormationsSeveredByCapture(
     components.forEach((component, index) => { for (const osid of component) componentOf.set(osid, index); });
     for (const id of Object.keys(formations).sort(strictCompare)) {
         const formation = formations[id] as FormationState | undefined;
-        if (!formation || formation.status !== 'active' || formation.kind !== 'brigade') continue;
-        if (formation.faction !== displacedFaction || !formation.location_osid) continue;
-        if (historicalEvacuationRuleFor(formation, formation.location_osid)) continue;
+        if (!countsTowardPocketGarrison(formation, displacedFaction)) continue;
         const index = componentOf.get(formation.location_osid);
         if (index !== undefined) garrisonIds.set(index, [...(garrisonIds.get(index) ?? []), id]);
     }
