@@ -1075,6 +1075,10 @@ export function processOfficerSuccession(
                 can_improve: false,
                 improvement_rate: 0,
                 pool_tier: 'tier_c',
+                // The A2 defaults every other officer row carries (save migration v10). Without them
+                // a reload fills them in and the live and reloaded states differ (reload contract).
+                stubbornness: 3,
+                override_tolerance: 3,
             };
             officerData.push(genericData);
             officers[genericId] = {
@@ -1087,6 +1091,7 @@ export function processOfficerSuccession(
                 effective_competence_penalty: 0,
                 penalty_turns_remaining: 0,
                 acting_commander: true,
+                recent_overrides: [], // migration v10 default; keeps the reload contract exact
             };
             report.generic_replacements++;
         }
