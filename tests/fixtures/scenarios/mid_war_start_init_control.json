@@ -1,0 +1,7 @@
+{
+  "scenario_id": "test_mid_war_start_init_control",
+  "weeks": 4,
+  "init_control": "apr1995",
+  "init_formations": "apr1995",
+  "turns": []
+}

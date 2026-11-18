@@ -35,14 +35,22 @@ export function initializeStrategicDimensions(): DimensionStore {
     return store;
 }
 
+const DIMENSION_ID_SET: ReadonlySet<string> = new Set<string>(DIMENSION_IDS);
+
 /**
  * The one accumulator rule (§6 E3a1 D1; Systems Manual §7.10.3). Every writer of a
  * dimension's `event_modifier` goes through this function. The accumulator is NOT
  * clamped: a side at −110 that takes −30 more sits at −140, so a later +30 does not
  * erase it. Only `effective_value = clamp(base_value + event_modifier, 0, 100)` is clamped.
+ *
+ * §6 E2: an unknown dimension id THROWS (it used to be a silent dead write).
+ * A missing store or faction entry (state not yet initialised) stays a quiet no-op.
  */
 export function applyDimensionShift(store: DimensionStore, faction: string, dimension: string, delta: number): void {
-    if (!store[faction]?.[dimension]) return;
+    if (!DIMENSION_ID_SET.has(dimension)) {
+        throw new Error(`Unknown strategic dimension id in dimension shift: ${dimension}`);
+    }
+    if (!store?.[faction]?.[dimension]) return;
     const dim = store[faction][dimension];
     dim.event_modifier += delta;
     dim.effective_value = clamp(dim.base_value + dim.event_modifier, 0, 100);

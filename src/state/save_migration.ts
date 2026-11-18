@@ -888,3 +888,52 @@ registerMigration({
         }
     },
 });
+
+registerMigration({
+    version: 40,
+    description: 'The September 1991 peace start is retired (campaign structure decision 2026-03-23; '
+        + 'scenario, runner path and scenario fields removed 2026-11-16). Deletes '
+        + 'meta.peace_war_start_control_path: only the peace start ever set it (an ABSOLUTE '
+        + 'filesystem path, which made the hash depend on the checkout location), and only the '
+        + 'peace-to-war transition read it. Every war-start save holds null. Sensitive: no.',
+    migrate: (state) => {
+        const meta = asRecord(state.meta);
+        if (meta) delete meta.peace_war_start_control_path;
+    },
+});
+
+/** §6 E2: strip retired `negotiation_capital` effects from one pending response option.
+ *  Self-contained so the migration can be renumbered without touching anything else. */
+function stripRetiredNegotiationCapitalEffects(option: Record<string, any>): void {
+    if (Array.isArray(option.effects)) {
+        option.effects = option.effects.filter((effect: unknown) => asRecord(effect)?.kind !== 'negotiation_capital');
+    }
+    if (asRecord(option.effect)?.kind === 'negotiation_capital') {
+        delete option.effect;
+    }
+}
+
+// v41 runs after v40 (the September 1991 peace start retirement, #773).
+registerMigration({
+    version: 41,
+    description: 'Section 6 E2: the negotiation_capital event effect kind is retired (every catalog '
+        + 'use was a silent no-op; the loader now rejects the kind and the effect applier throws on '
+        + 'an unknown kind). Strips negotiation_capital entries from '
+        + 'military.pending_event_decisions[].response_options[].effects (and a singular .effect), '
+        + 'so a save holding an unanswered decision can still be answered. Accepted and recorded: '
+        + 'a decision pending at upgrade loses the strategic-dimension shift its catalog row now '
+        + 'carries instead, because pending options are stored snapshots. Idempotent; no change '
+        + 'on a state without such entries. Sensitive: yes (atrocity-card cost accounting).',
+    migrate: (state) => {
+        const mil = asRecord(state.military);
+        if (!mil || !Array.isArray(mil.pending_event_decisions)) return;
+        for (const decision of mil.pending_event_decisions) {
+            const d = asRecord(decision);
+            if (!d || !Array.isArray(d.response_options)) continue;
+            for (const option of d.response_options) {
+                const o = asRecord(option);
+                if (o) stripRetiredNegotiationCapitalEffects(o);
+            }
+        }
+    },
+});

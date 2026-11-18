@@ -33,11 +33,8 @@ const AutonomyPanel = lazy(() =>
 import { TurnAftermathModal } from './components/TurnAftermathModal';
 import { OperationBriefingModal } from './components/OperationBriefingModal';
 import { SupplyPanel } from './components/SupplyPanel';
-// War Footing opens on demand from the President's Desk (surface step 5), so it loads then
-// and stays out of the entry chunk like RecruitmentModal and AutonomyPanel.
-const EconomyPanel = lazy(() =>
-  import('./components/EconomyPanel').then(m => ({ default: m.EconomyPanel })),
-);
+// The War Footing (Economy) panel was retired 2026-11-17 with the supply-reserve economy
+// (Fable consult 6): it showed reserves, smuggling routes and facility damage that no longer exist.
 // The Humanitarian Ledger and the Enclave dashboard open on demand; they load in their own
 // chunk so the entry chunk stays under the vite.config.ts chunk-size limit, which the
 // player-experience gate blocks on (council fix 4 grew the entry chunk past it, 2026-11-14).
@@ -123,10 +120,12 @@ import { RootErrorBoundary } from './components/RootErrorBoundary';
 import { PanelBreadcrumb } from './components/PanelBreadcrumb';
 import { derivePanelRailState, shouldRenderCommandBriefing, shouldRenderInboxPanel, shouldRenderMapModeLegend, shouldRenderTacticalDetailRails } from './components/panelRail';
 import { useGameStore, isDevMode } from './store/gameStore';
-import { loadLatestRunSaveAsText, loadEventDefinitions, loadEventDefinitionsFull } from './data/DataLoader';
+import { loadLatestRunSaveAsText, loadEventDefinitions, loadEventDefinitionsFull, type EventDefinitionView } from './data/DataLoader';
+import { buildAcknowledgementDimensionShiftEntries } from './data/dimensionShiftDisplay';
 import type { EventDefinition } from '../../sim/events/event_types';
 import { buildConsequenceReceipts, receiptsRealizedOnTurn } from './data/consequenceReceipts';
 import { resolveEventDisplayNarrative, resolveEventDisplayTitle } from './data/eventDisplayCopy';
+import { narrativeEffectOrdinal, resolveNarrativeEffectText } from './data/eventEffectText';
 import { buildForcedOpReceipts, forcedOpReceiptsRealizedOnTurn } from './data/forcedOpReceipts';
 import {
   buildOfficerResentmentReceipts,
@@ -222,7 +221,16 @@ function formatSignedEventShare(share: number | undefined): string {
   return typeof share === 'number' && Number.isFinite(share) ? formatSignedEventDelta(Math.round(share * 100)) : '';
 }
 
-export function formatAcknowledgementEventEffect(effect: AcknowledgementEventEffect): string {
+/** Which card the line belongs to: a narrative line is looked up by event id and position. */
+type AcknowledgementEffectSource = { eventId: string; narrativeOrdinal: number };
+
+export function formatAcknowledgementEventEffect(
+  effect: AcknowledgementEventEffect,
+  source?: AcknowledgementEffectSource,
+): string {
+  if (effect.kind === 'narrative' && effect.text) {
+    return source ? resolveNarrativeEffectText(source.eventId, source.narrativeOrdinal, effect.text) : effect.text;
+  }
   if (effect.text) return effect.text;
   // Council fix 4 (C4/C11): army attributes name the army (ARBiH, VRS, HVO); state attributes
   // (patron pressure, negotiating position, territory, humanitarian record) name the state by
@@ -239,8 +247,6 @@ export function formatAcknowledgementEventEffect(effect: AcknowledgementEventEff
   switch (effect.kind) {
     case 'morale_change':
       return t('eventModal.effect.moraleChange', { faction: factionPrefix, delta });
-    case 'supply_delta':
-      return t('eventModal.effect.supplyDelta', { faction: factionPrefix, delta });
     case 'cohesion_change':
       return t('eventModal.effect.cohesionChange', { faction: factionPrefix, delta });
     case 'humanitarian_impact':
@@ -249,8 +255,6 @@ export function formatAcknowledgementEventEffect(effect: AcknowledgementEventEff
       return t('eventModal.effect.patronPressure', { faction: statePrefix, delta });
     case 'alliance_change':
       return t('eventModal.effect.allianceChange', { delta: formatSignedEventShare(effect.delta) });
-    case 'negotiation_capital':
-      return t('eventModal.effect.negotiationCapital', { faction: statePrefix, delta });
     case 'equipment_grant':
       return t('eventModal.effect.equipmentGrant', { faction: factionPrefix });
     case 'aggression_modifier':
@@ -270,6 +274,36 @@ export function formatAcknowledgementEventEffect(effect: AcknowledgementEventEff
     default:
       return t('eventModal.effect.default', { faction: factionPrefix });
   }
+}
+
+/** The lines under an acknowledgement card, in the active locale, for one event's displayed effects. */
+export function buildAcknowledgementEffects(
+  eventId: string,
+  effects: ReadonlyArray<AcknowledgementEventEffect>,
+): Array<{ kind: string; description: string }> {
+  return effects.map((effect, index) => ({
+    kind: effect.kind,
+    description: formatAcknowledgementEventEffect(effect, {
+      eventId,
+      narrativeOrdinal: narrativeEffectOrdinal(effects, index),
+    }),
+  }));
+}
+
+/**
+ * Acknowledgement-list entries for a fired automatic card: its authored effects, then
+ * (§6 E2) its own `dimension_shifts`, so a standing or leverage cost the engine applies is
+ * shown on the card that applies it. Shift lines are ordered by faction then dimension
+ * (strictCompare) and zero deltas are omitted.
+ */
+export function buildAcknowledgementEventEffects(
+  eventId: string,
+  def: Pick<EventDefinitionView, 'effects' | 'dimension_shifts'>,
+): Array<{ kind: string; description: string }> {
+  return [
+    ...buildAcknowledgementEffects(eventId, def.effects ?? []),
+    ...buildAcknowledgementDimensionShiftEntries(def.dimension_shifts),
+  ];
 }
 
 function comparePendingEventDecisionPriority(a: PendingEventDecisionView, b: PendingEventDecisionView): number {
@@ -327,38 +361,13 @@ function resolveEventDecisionAdvisor(
 function OperationBriefingModalWrapper() {
   const ctx = useGameStore((s) => s.operationBriefingContext);
   const close = useGameStore((s) => s.setOperationBriefingContext);
-  const setLoadError = useGameStore((s) => s.setLoadError);
-  const ipc = useIPC();
 
   if (!ctx) return <OperationBriefingModal isOpen={false} onClose={() => close(null)} />;
 
-  const handleDecision = async (decision: 'launch' | 'postpone' | 'abort' | 'probe') => {
-    if (!ipc.isAvailable) {
-      setLoadError(t('attention.bridgeUnavailableReadOnly'));
-      return;
-    }
-    const result = await ipc.stageOperationDecision({ corpsId: ctx.corpsId, operationName: ctx.operationName, decision });
-    if (!result.ok) {
-      setLoadError(result.error ?? t('attention.bridgeUnavailableReadOnly'));
-      return;
-    }
-    close(null);
-  };
-
-  // Force-launch (Level 3 Direct Intervention) is issued ONLY from the Presidential
-  // Decision Room (DirectiveCard, force_launch directive). This review modal stays
-  // read-only — it surfaces the commander's go/no-go callbacks but no override.
-  return (
-    <OperationBriefingModal
-      isOpen
-      onClose={() => close(null)}
-      onLaunch={() => handleDecision('launch')}
-      onPostpone={() => handleDecision('postpone')}
-      onAbort={() => handleDecision('abort')}
-      onOrderProbe={() => handleDecision('probe')}
-      commandBridgeAvailable={ipc.isAvailable}
-    />
-  );
+  // Force-launch (Level 3 Direct Intervention) and stop-op are issued ONLY from the Presidential
+  // Decision Room. This review modal is read-only: it shows the commander's go/no-go and the
+  // context, with no launch / postpone / abort / probe buttons (retired 2026-11-17).
+  return <OperationBriefingModal isOpen onClose={() => close(null)} />;
 }
 
 function CodexPanelWrapper({
@@ -723,7 +732,6 @@ function App() {
   const [summaryOpen, setSummaryOpen] = useState(false);
   const [summaryFocus, setSummaryFocus] = useState<SummaryFocusSection>('overview');
   const [enclaveDashboardOpen, setEnclaveDashboardOpen] = useState(false);
-  const [economyOpen, setEconomyOpen] = useState(false);
   // Item 2: National Humanitarian Ledger surface (read-model; 'U' hotkey toggle).
   const [humanitarianLedgerOpen, setHumanitarianLedgerOpen] = useState(false);
   const [aiSettingsOpen, setAiSettingsOpen] = useState(false);
@@ -968,10 +976,7 @@ function App() {
           title: resolveEventDisplayTitle(e.id, def?.title ?? e.title),
           narrative: resolveEventDisplayNarrative(e.id, def?.narrative ?? e.narrative ?? ''),
           category: def?.category ?? e.category ?? 'military',
-          effects: def?.effects?.map(eff => ({
-            kind: eff.kind,
-            description: formatAcknowledgementEventEffect(eff),
-          })) ?? e.effects,
+          effects: def ? buildAcknowledgementEventEffects(e.id, def) : e.effects,
           isDecision: false,
           image: def?.image,
         };
@@ -1025,7 +1030,6 @@ function App() {
     commandStripOpen ||
     summaryOpen ||
     enclaveDashboardOpen ||
-    economyOpen ||
     humanitarianLedgerOpen ||
     aiSettingsOpen ||
     diplomacyOpen ||
@@ -1057,7 +1061,6 @@ function App() {
     turnAftermathOpen ||
     summaryOpen ||
     enclaveDashboardOpen ||
-    economyOpen ||
     humanitarianLedgerOpen ||
     aiSettingsOpen ||
     diplomacyOpen ||
@@ -1410,7 +1413,6 @@ function App() {
     setTurnAftermathOpen(false);
     setSummaryOpen(false);
     setEnclaveDashboardOpen(false);
-    setEconomyOpen(false);
     setHumanitarianLedgerOpen(false);
     setAiAdvisorOpen(false);
     suppressCommandBriefingForCurrentTurn();
@@ -2131,11 +2133,6 @@ function App() {
       {mapMode === 'supply' && loadedGameState && (
         <SupplyPanel state={loadedGameState} />
       )}
-      {economyOpen && loadedGameState && (
-        <Suspense fallback={null}>
-          <EconomyPanel state={loadedGameState} onClose={() => setEconomyOpen(false)} />
-        </Suspense>
-      )}
       {loadedGameState && (
         <Suspense fallback={null}>
           <HumanitarianLedgerPanel
@@ -2408,7 +2405,6 @@ function App() {
                 }
                 leaveWarroomForGame();
               }}
-              onOpenEconomy={() => setEconomyOpen(true)}
               onClose={() => {
                 closeWarroomDesk();
               }}

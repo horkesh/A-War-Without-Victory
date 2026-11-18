@@ -97,7 +97,7 @@ describe('war-phase step ordering', () => {
 
         // SpatialContext: pre-combat after data load, post-combat after attack resolution
         assertBefore('supply-osid', 'compute-spatial-context-pre-combat');
-        assertBefore('compute-spatial-context-pre-combat', 'compute-supply-reserves');
+        assertBefore('compute-spatial-context-pre-combat', 'enclave-resilience');
         assertBefore('resolve-attack-orders', 'compute-spatial-context-post-combat');
         assertBefore('compute-spatial-context-post-combat', 'attribute-operation-casualties');
 
@@ -326,7 +326,11 @@ describe('war-phase step ordering', () => {
         // +1 from refresh-dimension-bases (2026-11-17, §6 phase-order ruling): the base owner
         //        directly after compute-negotiation-capital, before evaluate-dayton-trigger, so
         //        the Dayton menu and the turn boundary see the turn's plan, patron and capital writes.
-        expect(stepNames.length).toBe(193);
+        // -2 from retiring compute-supply-reserves and update-smuggling-routes (2026-11-17,
+        //        Fable consult 6: the supply-reserve economy is not modelled in 1.0).
+        expect(stepNames.length).toBe(191);
+        expect(stepNames).not.toContain('compute-supply-reserves');
+        expect(stepNames).not.toContain('update-smuggling-routes');
         expect(stepNames).not.toContain('produce-political-directive');
         expect(stepNames).not.toContain('apply-army-directive-interpretation');
         expect(stepNames).not.toContain('update-siege-counters');

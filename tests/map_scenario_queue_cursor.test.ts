@@ -46,12 +46,6 @@ describe('map and scenario FIFO queue cursor contracts', () => {
         expectNoTimingOrShift(region);
     });
 
-    it('event corridor-severed BFS uses a head cursor, not Array.shift()', () => {
-        const raw = readFileSync(resolve('src/sim/events/event_types.ts'), 'utf8');
-        const region = regionBetween(raw, "case 'corridor_severed':", 'default:');
-        expectNoTimingOrShift(region);
-    });
-
     it('desktop movement-order contiguity BFS uses a head cursor, not Array.shift()', () => {
         const raw = readFileSync(resolve('src/desktop/desktop_sim.ts'), 'utf8');
         const region = regionBetween(raw, 'export async function validateBrigadeMovementOrder', 'const startSid =');

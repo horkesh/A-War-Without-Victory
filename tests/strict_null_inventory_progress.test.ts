@@ -822,6 +822,10 @@ describe('strict null inventory progress', () => {
             // identity (absent on legacy TGs). No new type escape. 598 -> 599.
             // A2b refugee compact (2026-11-17): RbihHrhbState.refugee_compact_suspended_until, written
             // only while a played HRHB compact is active (absent in every bot run). No new type escape. 599 -> 600.
+            // Sep-1991 peace start retired (schema v40, 2026-11-17): StateMeta.peace_war_start_control_path
+            // removed. 600 -> 599.
+            // Package P2 (2026-11-17): CorpsDirective.sector_reassignment_orders[].empty_sector_relief,
+            // set only on an empty-sector relief order. No new type escape. 599 -> 600.
             optional_fields_game_state: 600,
         });
         // Reason-code instrumentation (item 3): +1, `OperationAxis.launch_blocker_detail`.
@@ -839,13 +843,15 @@ describe('strict null inventory progress', () => {
         // (MilitaryState.army_clash_state). 595 -> 598 / state 220 -> 222 / sim 365 -> 366.
         // Zombie-TG fix: +1 state (TacticalGroup.host_corps_id). 598 -> 599 / state 222 -> 223.
         // A2b: +1 state (RbihHrhbState.refugee_compact_suspended_until). 599 -> 600 / state 223 -> 224.
+        // Sep-1991 peace start retired (v40): -1 state (StateMeta.peace_war_start_control_path). 600 -> 599 / state 224 -> 223.
+        // Package P2: +1 sim (CorpsDirective.sector_reassignment_orders[].empty_sector_relief). 599 -> 600 / sim 366 -> 367.
         expect(current.optional_field_domains.total).toBe(600);
         expect(current.optional_field_domains.domain_counts).toMatchObject({
             derived: 10,
             ipc: 0,
             scenario: 0,
-            sim: 366,
-            state: 224,
+            sim: 367,
+            state: 223,
             ui_adapter: 0,
             unknown: 0,
         });

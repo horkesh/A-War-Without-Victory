@@ -35,10 +35,11 @@ function makeState(opts: {
   }
   return {
     meta: { turn: 10 },
-    corps_command: {
-      [CORPS]: { active_operations: opts.ops ?? [] },
-    },
     military: {
+      // Corps command lives under military (a root `corps_command` is not a GameState key).
+      corps_command: {
+        [CORPS]: { active_operations: opts.ops ?? [] },
+      },
       named_officers,
       friction_events: opts.frictions ?? [],
     },

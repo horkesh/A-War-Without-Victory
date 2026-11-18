@@ -90,10 +90,10 @@ describe('v0.9.3 a11y Lane E — Forms + inputs + live regions', () => {
         expect(src).toContain("aria-label={t('corpsCard.stanceAria')}");
     });
 
-    it('T8 — EnclaveDashboard allocation input is htmlFor-bound (per-enclave id)', () => {
+    it('T8 — EnclaveDashboard has no airdrop allocation input (retired 2026-11-17, Fable consult 6)', () => {
         const src = read(ENCLAVE_DASHBOARD_PATH);
-        expect(src).toContain('htmlFor={`enclave-allocation-${enclaveId}`}');
-        expect(src).toContain('id={`enclave-allocation-${enclaveId}`}');
+        expect(src).not.toContain('enclave-allocation-');
+        expect(src).not.toContain('<input');
     });
 
     it('T9 — SrAnnouncer renders both polite and assertive aria-live regions', () => {

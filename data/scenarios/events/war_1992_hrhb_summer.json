@@ -315,7 +315,7 @@
     "bot_response_logic": "historical",
     "historical_default_response_id": "deepen_patron_channel",
     "source_note": "Balkan Battlegrounds I, PDF p.181 / printed 144: Zagreb pursued 'a two-track plan to organize and arm indigenous Bosnian Croat military units — begun in 1991 by Croatian Army volunteers under Zagreb's control — while deploying regular Croatian Army (HV) and MUP troops to the republic.' The HVO is described as 'the Zagreb-controlled HVO' (same page). BB1 attributes the channel to Zagreb and to Croatian Army 'volunteers under Zagreb's control'; it does not name an individual minister, and no such attribution is made here. Historical bot deepens the patron channel — the documented summer-1992 posture.",
-    "staff_assessment": "Deepening the Zagreb channel is the documented posture: the guns, fuel, and seconded officers that keep the HVO in the field flow from Šušak's logistics, and with them comes patron confidence and a clearer order of battle — at the cost of binding the HVO ever more tightly to Zagreb's agenda. Diversifying the supply base buys autonomy at a real material cost. Asserting full HVO autonomy is the cleanest break and the most expensive one.",
+    "staff_assessment": "Deepening the Zagreb channel is the documented posture: the guns, fuel, and seconded officers that keep the HVO in the field flow from Šušak's logistics, and with them comes patron confidence and a clearer order of battle — at the cost of binding the HVO ever more tightly to Zagreb's agenda. Diversifying the supply base buys autonomy at a real cost in patron confidence. Asserting full HVO autonomy is the cleanest break and the most expensive one.",
     "trigger_evidence": [
       "Zagreb's two-track arming plan — Croatian Army volunteers plus regular HV/MUP deployments — is operative across summer 1992 (BB1 PDF p.181 / printed 144).",
       "The HVO depends on Šušak's logistics channel for arms, fuel, and seconded officers."
@@ -346,7 +346,7 @@
             "certainty": "guaranteed",
             "opens_flags": [ "hrhb_1992_patron_posture" ],
             "material_effect_refs": [ "cost_ledger_annotation.hrhb_zagreb_channel_deepened_1992" ],
-            "explanation": "Recording hrhb_1992_patron_posture=channel_deepened marks the documented Zagreb two-track arming channel (BB1 PDF p.181 / printed 144). Calibration-inert: the historical default carries only an audit-only annotation, a read-model flag, and political dimension shifts — NO supply_delta, equipment_grant, control, morale, or alliance change on the historical path, so the HVO order of battle and territory are byte-identical to the floor. The deepened patron dependence informs the 1993-94 Zagreb-direction branches (zagreb_restrains_boban_vopp, zagreb_orders_hrhb_ceasefire) without opening or closing them here."
+            "explanation": "Recording hrhb_1992_patron_posture=channel_deepened marks the documented Zagreb two-track arming channel (BB1 PDF p.181 / printed 144). Calibration-inert: the historical default carries only an audit-only annotation, a read-model flag, and political dimension shifts — NO equipment_grant, control, morale, or alliance change on the historical path, so the HVO order of battle and territory are byte-identical to the floor. The deepened patron dependence informs the 1993-94 Zagreb-direction branches (zagreb_restrains_boban_vopp, zagreb_orders_hrhb_ceasefire) without opening or closing them here."
           }
         ],
         "dimension_shifts": [
@@ -362,15 +362,14 @@
         "branch_tag": "hrhb_zagreb_diversify_supply",
         "historical_marker": "counterfactual",
         "label": "Diversify the supply base",
-        "description": "Keep the Zagreb channel open, but build alternatives — local production, battlefield recovery, quiet arrangements with the ARBiH over shared depots. It costs you materiel now and irritates Šušak, but it buys the HVO a measure of independence from Zagreb's agenda.",
+        "description": "Keep the Zagreb channel open, but build alternatives: local production, battlefield recovery, quiet arrangements with the ARBiH over shared depots. It irritates Šušak and costs patron confidence, but it buys the HVO a measure of independence from Zagreb's agenda.",
         "sets_flags": {
           "hrhb_1992_patron_posture": "supply_diversified"
         },
         "effects": [
           { "kind": "patron_pressure", "faction": "HRHB", "delta": -6 },
-          { "kind": "supply_delta", "faction": "HRHB", "delta": -5 },
           { "kind": "alliance_change", "delta": 0.05 },
-          { "kind": "cost_ledger_annotation", "tag": "hrhb_zagreb_diversify_1992", "text": "Summer 1992: the HVO diversified its supply base away from sole Zagreb dependence; a measure of autonomy bought at a material cost and Susak's irritation.", "faction": "HRHB" }
+          { "kind": "cost_ledger_annotation", "tag": "hrhb_zagreb_diversify_1992", "text": "Summer 1992: the HVO diversified its supply base away from sole Zagreb dependence; a measure of autonomy bought at the cost of patron confidence and Susak's irritation.", "faction": "HRHB" }
         ],
         "future_consequences": [
           {
@@ -379,8 +378,8 @@
             "timing": "future",
             "certainty": "conditional",
             "opens_flags": [ "hrhb_1992_patron_posture" ],
-            "material_effect_refs": [ "patron_pressure", "supply_delta", "alliance_change" ],
-            "explanation": "Counterfactual: diversifying away from sole Zagreb dependence costs materiel now (supply_delta -5) and patron confidence (patron_pressure -6) but buys autonomy and a small ARBiH-cooperation alliance gain. Structurally consistent with the united-front H1 line. Never fires on the historical default path."
+            "material_effect_refs": [ "patron_pressure", "alliance_change" ],
+            "explanation": "Counterfactual: diversifying away from sole Zagreb dependence costs patron confidence (patron_pressure -6) but buys autonomy and a small ARBiH-cooperation alliance gain. Structurally consistent with the united-front H1 line. Never fires on the historical default path."
           }
         ],
         "dimension_shifts": [
@@ -396,15 +395,14 @@
         "branch_tag": "hrhb_zagreb_assert_autonomy",
         "historical_marker": "counterfactual",
         "label": "Assert HVO autonomy from Zagreb",
-        "description": "Tell Šušak the HVO answers to Mostar, not Zagreb. Refuse the seconded officers; insist on Bosnian Croat command of Bosnian Croat units. It is the cleanest assertion of independence — and the most expensive: Zagreb throttles the channel, and the HVO order of battle pays for it.",
+        "description": "Tell Šušak the HVO answers to Mostar, not Zagreb. Refuse the seconded officers; insist on Bosnian Croat command of Bosnian Croat units. It is the cleanest assertion of independence and the most expensive: Zagreb throttles the channel, and patron confidence collapses.",
         "sets_flags": {
           "hrhb_1992_patron_posture": "autonomy_asserted"
         },
         "effects": [
           { "kind": "patron_pressure", "faction": "HRHB", "delta": -18 },
-          { "kind": "supply_delta", "faction": "HRHB", "delta": -12 },
           { "kind": "alliance_change", "delta": 0.1 },
-          { "kind": "cost_ledger_annotation", "tag": "hrhb_zagreb_autonomy_1992", "text": "Summer 1992: the HVO asserted command autonomy from Zagreb; the cleanest break, paid for by a throttled supply channel and a thinned order of battle.", "faction": "HRHB" }
+          { "kind": "cost_ledger_annotation", "tag": "hrhb_zagreb_autonomy_1992", "text": "Summer 1992: the HVO asserted command autonomy from Zagreb; the cleanest break, paid for by a throttled Zagreb channel and a collapse in patron confidence.", "faction": "HRHB" }
         ],
         "future_consequences": [
           {
@@ -413,8 +411,8 @@
             "timing": "future",
             "certainty": "conditional",
             "opens_flags": [ "hrhb_1992_patron_posture" ],
-            "material_effect_refs": [ "patron_pressure", "supply_delta", "alliance_change" ],
-            "explanation": "Counterfactual maximum-autonomy posture: refusing the Zagreb channel ruptures the patron relationship (patron_pressure -18) and thins the order of battle (supply_delta -12) for the cleanest independence. Structurally consistent with the united-front H1 line at maximum patron cost. Never fires on the historical default path."
+            "material_effect_refs": [ "patron_pressure", "alliance_change" ],
+            "explanation": "Counterfactual maximum-autonomy posture: refusing the Zagreb channel ruptures the patron relationship (patron_pressure -18) for the cleanest independence. Structurally consistent with the united-front H1 line at maximum patron cost. Never fires on the historical default path."
           }
         ],
         "dimension_shifts": [
@@ -511,7 +509,6 @@
           "hrhb_1992_posavina_posture": "counterattack_brod"
         },
         "effects": [
-          { "kind": "supply_delta", "faction": "HRHB", "delta": -8 },
           { "kind": "patron_pressure", "faction": "HRHB", "delta": 4 },
           { "kind": "cost_ledger_annotation", "tag": "hrhb_brod_counterattack_1992", "text": "October 1992: an immediate counterattack toward Bosanski Brod was ordered after the VRS breakthrough.", "faction": "HRHB" }
         ],

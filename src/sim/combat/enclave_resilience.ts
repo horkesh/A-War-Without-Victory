@@ -43,7 +43,7 @@ import {
     RESILIENCE_DECAY_ADEQUATE,
     RESILIENCE_GROWTH_CRITICAL,
     RESILIENCE_GROWTH_STRAINED,
-} from '../../state/supply_reserve_constants.js';
+} from '../../state/enclave_resilience_constants.js';
 import { ENCLAVE_MAX_PERSONNEL } from '../../state/formation_constants.js';
 import { SARAJEVO_CITY_CORE_MUN_IDS } from '../../state/enclave_integrity.js';
 import { strictCompare } from '../../state/validateGameState.js';

@@ -42,7 +42,6 @@ import type {
     SupplyStateDerivationReport,
     SupplyStateByOsidReport
 } from '../state/supply_state_derivation.js';
-import type { SupplyReservesReport } from '../state/supply_reserves.js';
 import type { Phase3DCollapseResolutionResult } from './collapse/phase3d_collapse_resolution.js';
 import type { SpawnFormationsReport, ReinforceBrigadesReport, WiaTricklebackReport } from './formation_spawn.js';
 import type { FormationHqRelocationReport } from './formation_hq_relocation.js';
@@ -285,7 +284,6 @@ export interface TurnReport {
      *  NOT read by any sim/combat/targeting path; feeds no stance or outcome.
      *  Byte-identity gate. See contain_diagnostic.ts. */
     contain_diagnostic?: ContainDiagnosticReport;
-    supply_reserves?: SupplyReservesReport;
     corps_ai_report?: CorpsAiReportEntry[];
     recruitment_report?: {
         accrual_by_faction: Record<FactionId, { capital_delta: number; equipment_delta: number }>;
