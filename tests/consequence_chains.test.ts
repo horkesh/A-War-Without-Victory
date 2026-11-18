@@ -277,13 +277,14 @@ describe('Chain 4 — Bihac Collapses: gated collapse', () => {
         expect(shifts.some(s => s.faction === 'RS' && s.add_objectives?.includes('zenica'))).toBe(true);
     });
 
-    it('csq_bihac_refugee_crisis_1994 fires after Bihac collapse and lands supply_delta', () => {
+    // Supply reserve stock retired 2026-11-17 (supply is connection, not stock): the refugee crisis lands
+    // as a cost-ledger annotation (and a patron-pressure shift), not as a reserve drain.
+    it('csq_bihac_refugee_crisis_1994 fires after Bihac collapse and lands its cost-ledger annotation', () => {
         const state = makeBihacChainState(125, { bihacCollapseFired: true });
-        const rbihBefore = state.military.general_supply_reserve!['RBiH'];
         evaluateEvents(state, rng, 125, ALL_EVENTS);
         expect(state.military.fired_event_ids).toContain('csq_bihac_refugee_crisis_1994');
-        const rbihAfter = state.military.general_supply_reserve!['RBiH'];
-        expect(rbihAfter).toBeLessThan(rbihBefore);
+        const notes = state.military.cost_ledger_annotations ?? [];
+        expect(notes.some(n => n.tag === 'bihac_refugee_crisis_1994' && n.faction === 'RBiH')).toBe(true);
     });
 
     it('all three Chain 4 events present in registry', () => {

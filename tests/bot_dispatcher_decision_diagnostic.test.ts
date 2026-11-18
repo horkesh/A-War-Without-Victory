@@ -88,7 +88,11 @@ function makeCounterattackCapState(): GameState {
         meta: { turn: 3, phase: 'war', seed: 'dispatcher-cap-boundaries' },
         political: {
             political_controllers: { F1: 'RS', F2: 'RS', T1: 'RBiH', T2: 'RBiH', E1: 'RS', E2: 'RS' },
-            control_events: [],
+            // The counter-attack is retake-only (package P2 step 3): T1/T2 were lost in combat at t2.
+            control_events: [
+                { turn: 2, settlement_id: 'T1', from: 'RS', to: 'RBiH', mechanism: 'combat' },
+                { turn: 2, settlement_id: 'T2', from: 'RS', to: 'RBiH', mechanism: 'combat' },
+            ],
         },
         factions: [],
         displacement: { settlement_displacement: {}, municipality_displacement: {}, displacement_state: {} },

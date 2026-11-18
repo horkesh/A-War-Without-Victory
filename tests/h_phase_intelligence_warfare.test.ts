@@ -173,11 +173,12 @@ describe('H phase intelligence warfare', () => {
         expect(op?.phase).toBe('execution');
     });
 
-    // F7 (2026-11-15): a feint's 0.5 supply cost exists only where the reserve model runs.
+    // F7 (2026-11-15) made the feint's 0.5 supply cost reserve-only; the supply-reserve economy was
+    // retired 2026-11-17 (Fable consult 6), so a feint never touches the reserve, even an old save's.
     it.each([
         { reserves: false, expected: undefined },
-        { reserves: true, expected: 9.5 },
-    ])('a finished feint drains the supply reserve only with reserves on (reserves=$reserves)', ({ reserves, expected }) => {
+        { reserves: true, expected: 10 },
+    ])('a finished feint never drains the supply reserve (old-save reserves=$reserves)', ({ reserves, expected }) => {
         const state = {
   schema_version: CURRENT_SCHEMA_VERSION,
   meta: { turn: 10, seed: 'feint-supply', phase: 'war', ...(reserves ? { supply_reserves_enabled: true } : {}) } as any,

@@ -3,7 +3,7 @@ import { getSarajevoSiegeParams } from '../sim/combat/sarajevo_siege_params.js';
 import type { EdgeRecord, LoadedSettlementGraph } from '../map/settlements.js';
 import { clamp01 } from '../utils/math.js';
 import type { EnclaveState, FactionId, GameState, MunicipalityId, SettlementId } from './game_state.js';
-import type { SupplyStateDerivationReport, SupplyStateLevel } from './supply_state_derivation.js';
+import type { SupplyStateByOsidReport, SupplyStateLevel } from './supply_state_derivation.js';
 import { strictCompare } from './validateGameState.js';
 
 export const SUPPLY_INTEGRITY_WEIGHT = 0.4;
@@ -62,16 +62,21 @@ function supplyStateToScore(state: SupplyStateLevel): number {
     return 0;
 }
 
-function getSettlementSupplyState(
-    supplyReport: SupplyStateDerivationReport | undefined,
-    factionId: FactionId,
-    sid: SettlementId
-): SupplyStateLevel | null {
-    if (!supplyReport) return null;
-    const entry = supplyReport.factions.find((f) => f.faction_id === factionId);
-    if (!entry) return null;
-    const found = entry.by_settlement.find((s) => s.sid === sid);
-    return found?.state ?? null;
+/**
+ * F1i (2026-11-16): political control is keyed by OSID, so the supply state must be the OSID
+ * report (`supply_state_by_osid`). The step used to read the legacy settlement report, which is
+ * empty under OSID control, so no settlement was ever 'critical' and `political.enclaves` stayed [].
+ */
+function buildCriticalOsidSet(
+    supplyReport: SupplyStateByOsidReport | undefined,
+    factionId: FactionId
+): Set<string> {
+    const out = new Set<string>();
+    const entry = supplyReport?.factions.find((f) => f.faction_id === factionId);
+    for (const row of entry?.by_osid ?? []) {
+        if (row.state === 'critical') out.add(row.osid);
+    }
+    return out;
 }
 
 function getMunicipalityIdForSettlement(graph: LoadedSettlementGraph, sid: SettlementId): MunicipalityId | null {
@@ -154,7 +159,7 @@ export function updateEnclaveIntegrity(
     state: GameState,
     graph: LoadedSettlementGraph,
     edges: EdgeRecord[],
-    supplyReport: SupplyStateDerivationReport | undefined
+    supplyByOsid: SupplyStateByOsidReport | undefined
 ): EnclaveIntegrityReport {
     const adjacency = buildAdjacencyMapCached(edges);
     const controllers = state.political.political_controllers ?? {};
@@ -162,11 +167,11 @@ export function updateEnclaveIntegrity(
     const enclaves: EnclaveState[] = [];
 
     for (const factionId of factions) {
+        const critical = buildCriticalOsidSet(supplyByOsid, factionId);
         const controlledCritical: SettlementId[] = [];
         for (const [sid, controller] of Object.entries(controllers)) {
             if (controller !== factionId) continue;
-            const supplyState = getSettlementSupplyState(supplyReport, factionId, sid as SettlementId);
-            if (supplyState === 'critical') {
+            if (critical.has(sid)) {
                 controlledCritical.push(sid as SettlementId);
             }
         }

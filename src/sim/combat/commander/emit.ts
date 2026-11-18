@@ -64,6 +64,7 @@ import { getPoliticalControllerOSID } from '../../../state/settlement_control.js
 import { isRbihHrhbCombatBlocked } from '../../early_war/alliance_update.js';
 import { shouldGrazBlockAttack } from '../../local_truces.js';
 import { getHeadQueuedPrePlannedBrigadeIds } from '../pre_planned_operations.js';
+import { corpsHasDueArmyHqReservation } from '../triggered_operations.js';
 import type {
     CommanderBeliefState,
     CommanderBriefing,
@@ -1889,9 +1890,10 @@ function buildSectorReassignmentOrders(
         }
     }
 
-    const orders: Array<{ brigade_id: string; to_sector_id: string }> = directRelief.map((relief) => ({
+    const orders: Array<{ brigade_id: string; to_sector_id: string; empty_sector_relief?: true }> = directRelief.map((relief) => ({
         brigade_id: relief.brigade_id,
         to_sector_id: relief.to_sector_id,
+        empty_sector_relief: true as const,
     }));
     const orderedBrigades = new Set(orders.map((order) => order.brigade_id));
 
@@ -1961,6 +1963,7 @@ function buildSectorReassignmentOrders(
 
 type CommanderCreationExit =
     | 'active_slot_full'
+    | 'reserved_for_army_hq'
     | 'below_min_participants'
     | 'no_objectives'
     | 'below_min_after_eligibility'
@@ -2400,6 +2403,19 @@ function buildOperationsImpl(
         }
         if (activeSlotUsage >= maxOperationSlots) {
             markCommanderCreationExit(obs, 'active_slot_full');
+            return ops;
+        }
+        // Authored-op precedence S2: while a dated Army HQ operation is due for this corps (within
+        // its planning lead, admissible except for the slot), the corps opens no new generic
+        // offensive, which has no execution cap and would still hold the slot when the operation is
+        // ordered. Authored (pre-planned) plans, running operations, probes, defence and posture are
+        // unaffected; a running offensive drains through its own lifecycle.
+        if (
+            activePlan.source !== 'pre_planned'
+            && briefing.state_ref
+            && corpsHasDueArmyHqReservation(briefing.state_ref, briefing.corps_id, briefing.turn)
+        ) {
+            markCommanderCreationExit(obs, 'reserved_for_army_hq');
             return ops;
         }
         // Brigades the due queue head holds for its authored operation never join a commander

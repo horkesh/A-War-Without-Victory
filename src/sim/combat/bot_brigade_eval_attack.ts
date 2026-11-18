@@ -778,6 +778,86 @@ export function getEnemyOsidsWithinHops(
     return enemyOsids;
 }
 
+/**
+ * Retake-only counter-attack, in ANY corps stance (package "1994-95 attack and defence", P2 step 3,
+ * ratified 2026-11-16; before, only a `defensive` corps could counter-attack, so the 1st Krajina
+ * stayed "offensive" while losing Ozren and never struck back).
+ *
+ * The one brigade-level exception to "attacks go through operations", unchanged in kind and gates:
+ *  - self-retreat (score 1000): the cell this brigade retreated from last turn, if adjacent and
+ *    enemy-held, the brigade not disrupted;
+ *  - sector (score 950): a healthy brigade (COUNTER_ATTACK_MIN_PERSONNEL / _MIN_COHESION, not
+ *    disrupted) on the front, at most MAX_SECTOR_COUNTER_ATTACKS_PER_TURN per sector.
+ * Both need a predicted outcome of at least costly_victory and respect the per-target attacker cap
+ * and the recent-repulse memory.
+ *
+ * Retake-only: every target must be in `recentLostCells`, a cell this faction lost in combat within
+ * COUNTER_ATTACK_RETREAT_WINDOW turns and has not taken back (militia-held losses included). The
+ * sector variant used to reach any enemy cell within COUNTER_ATTACK_MAX_HOPS of a retreat; it is now
+ * restricted to the lost cells themselves, so a counter-attack can never capture new ground.
+ */
+export function evaluateRetakeCounterAttack(ctx: BrigadeEvaluationContext): boolean {
+    const { brigade, counterAttackTarget, adjEnemy, directive, state, reverseMap, terrainCache, slopeByOsid, supplyStateByOsid, osidPopulationMap, ethnicMap, chosenTargets, result, adjacency, sectorCounterAttackCount } = ctx;
+    const lost = ctx.recentLostCells;
+    if (!lost || lost.size === 0 || adjEnemy.length === 0) return false;
+    const lostAdjacent = defensiveProfileTime('.defensive.sectorCounterAttackCollectTargets',
+        () => adjEnemy.filter((osid) => lost.has(osid)).sort(strictCompare));
+    if (lostAdjacent.length === 0) return false;
+
+    const disruptedTurns = (brigade as { disrupted_turns?: number }).disrupted_turns ?? 0;
+    if (disruptedTurns > 0) return false;
+    const maxAtt = (directive ?? effectiveDirectiveDefault).max_attackers_per_target;
+    const currentTurn = state.meta?.turn ?? 0;
+    let targets: ReturnType<typeof predictAllAdjacentTargets> | null = null;
+    const predicted = (label: string) => (targets ??= defensiveProfileTime(label, () => predictAllAdjacentTargets(
+        state, brigade.id, adjacency, reverseMap, terrainCache, 'attack', supplyStateByOsid, osidPopulationMap, slopeByOsid, ethnicMap,
+    )));
+    let sectorIdCache: string | null | undefined;
+    const sectorIdFor = (label: string): string | null => {
+        if (sectorIdCache === undefined) sectorIdCache = defensiveProfileTime(label, () => findBrigadeSectorId(state, brigade)) ?? null;
+        return sectorIdCache;
+    };
+
+    // Self-retreat: this brigade's own just-lost cell.
+    if (counterAttackTarget && lostAdjacent.includes(counterAttackTarget)) {
+        const counter = predicted('.defensive.selfRetreatPredictTargets').find((t) => t.osid === counterAttackTarget
+            && (chosenTargets.get(t.osid) ?? 0) < maxAtt
+            && isOutcomeSufficientForAttack(t.prediction.predicted_outcome, 'costly_victory'));
+        if (counter) {
+            result.posture_orders.push({ brigade_id: brigade.id, posture: 'attack' });
+            result.attack_orders[brigade.id] = counter.osid;
+            result.attack_scores[brigade.id] = 1000;
+            chosenTargets.set(counter.osid, (chosenTargets.get(counter.osid) ?? 0) + 1);
+            const sectorId = sectorIdFor('.defensive.selfRetreatSectorLookup');
+            if (sectorId) sectorCounterAttackCount.set(sectorId, (sectorCounterAttackCount.get(sectorId) ?? 0) + 1);
+            return true;
+        }
+    }
+
+    // Sector: a healthy front brigade retakes an adjacent just-lost cell.
+    if ((brigade.personnel ?? 0) < COUNTER_ATTACK_MIN_PERSONNEL || (brigade.cohesion ?? 0) < COUNTER_ATTACK_MIN_COHESION) return false;
+    const sectorId = sectorIdFor('.defensive.sectorCounterAttackSectorLookup');
+    if (!sectorId) return false;
+    const sectorCount = sectorCounterAttackCount.get(sectorId) ?? 0;
+    if (sectorCount >= MAX_SECTOR_COUNTER_ATTACKS_PER_TURN) return false;
+    let best: ReturnType<typeof predictAllAdjacentTargets>[number] | null = null;
+    for (const candidate of lostAdjacent) {
+        if (wasRecentlyRepulsedFromTarget(brigade, candidate, currentTurn)) continue;
+        const t = predicted('.defensive.sectorCounterAttackPredictTargets').find((p) => p.osid === candidate);
+        if (!t) continue;
+        if ((chosenTargets.get(t.osid) ?? 0) >= maxAtt) continue;
+        if (!isOutcomeSufficientForAttack(t.prediction.predicted_outcome, 'costly_victory')) continue;
+        if (!best || t.prediction.power_ratio > best.prediction.power_ratio) best = t;
+    }
+    if (!best) return false;
+    result.posture_orders.push({ brigade_id: brigade.id, posture: 'attack' });
+    result.attack_orders[brigade.id] = best.osid;
+    result.attack_scores[brigade.id] = 950;
+    chosenTargets.set(best.osid, (chosenTargets.get(best.osid) ?? 0) + 1);
+    sectorCounterAttackCount.set(sectorId, sectorCount + 1);
+    return true;
+}
+
 export function evaluateDefensive(ctx: BrigadeEvaluationContext): boolean {
     const { brigade, corpsStance, counterAttackTarget, adjEnemy, directive, faction, isAlliedWithRBiH, state, reverseMap, terrainCache, slopeByOsid, supplyStateByOsid, osidPopulationMap, ethnicMap, chosenTargets, result, adjacency, loc, graphAnalysis, sectorRecentRetreats, sectorCounterAttackCount } = ctx;
 
@@ -797,111 +877,8 @@ export function evaluateDefensive(ctx: BrigadeEvaluationContext): boolean {
             }
         }
 
-        const disruptedTurns = (brigade as { disrupted_turns?: number }).disrupted_turns ?? 0;
-        const effDir = directive ?? effectiveDirectiveDefault;
-        const maxAtt = effDir.max_attackers_per_target;
-
-        // ── Self-retreat counter-attack (score 1000) ────────────────────
-        // Only allow counter-attack if THIS brigade retreated from an adjacent OSID last turn
-        // AND the brigade is not disrupted (routed brigades can't counter-attack)
-        if (counterAttackTarget && adjEnemy.includes(counterAttackTarget) && disruptedTurns === 0) {
-            const targets = defensiveProfileTime(
-                '.defensive.selfRetreatPredictTargets',
-                () => predictAllAdjacentTargets(state, brigade.id, adjacency, reverseMap, terrainCache, 'attack', supplyStateByOsid, osidPopulationMap, slopeByOsid, ethnicMap)
-            );
-            const counter = targets.find(t => t.osid === counterAttackTarget &&
-                (chosenTargets.get(t.osid) ?? 0) < maxAtt &&
-                isOutcomeSufficientForAttack(t.prediction.predicted_outcome, 'costly_victory'));
-            if (counter) {
-                result.posture_orders.push({ brigade_id: brigade.id, posture: 'attack' });
-                result.attack_orders[brigade.id] = counter.osid;
-                result.attack_scores[brigade.id] = 1000; // Counter-attack: high priority
-                chosenTargets.set(counter.osid, (chosenTargets.get(counter.osid) ?? 0) + 1);
-                // Increment sector counter-attack count for cap enforcement
-                const sectorId = defensiveProfileTime(
-                    '.defensive.selfRetreatSectorLookup',
-                    () => findBrigadeSectorId(state, brigade)
-                );
-                if (sectorId) {
-                    sectorCounterAttackCount.set(sectorId, (sectorCounterAttackCount.get(sectorId) ?? 0) + 1);
-                }
-                return true;
-            }
-        }
-
-        // ── Broadened sector counter-attack (score 950) ─────────────────
-        // When ANY brigade in the same sector retreated recently, other healthy
-        // brigades on that sector's front can counter-attack adjacent enemy OSIDs
-        // within COUNTER_ATTACK_MAX_HOPS of the retreated-from OSID.
-        if (disruptedTurns === 0
-            && adjEnemy.length > 0
-            && (brigade.personnel ?? 0) >= COUNTER_ATTACK_MIN_PERSONNEL
-            && (brigade.cohesion ?? 0) >= COUNTER_ATTACK_MIN_COHESION
-        ) {
-            const sectorId = defensiveProfileTime(
-                '.defensive.sectorCounterAttackSectorLookup',
-                () => findBrigadeSectorId(state, brigade)
-            );
-            if (sectorId) {
-                const sectorRetreats = sectorRecentRetreats.get(sectorId);
-                const sectorCount = sectorCounterAttackCount.get(sectorId) ?? 0;
-                if (sectorRetreats && sectorRetreats.length > 0
-                    && sectorCount < MAX_SECTOR_COUNTER_ATTACKS_PER_TURN
-                ) {
-                    const candidateTargets = defensiveProfileTime('.defensive.sectorCounterAttackCollectTargets', () => {
-                        // Find enemy OSIDs within COUNTER_ATTACK_MAX_HOPS of any retreat OSID
-                        const retreatOsids = sectorRetreats.map(r => r.osid);
-                        const enemyTargetOsids = getEnemyOsidsWithinHops(
-                            retreatOsids,
-                            COUNTER_ATTACK_MAX_HOPS,
-                            adjacency,
-                            state,
-                            faction,
-                        );
-
-                        // Filter to only adjacent enemy OSIDs that are within range
-                        return adjEnemy
-                            .filter(e => enemyTargetOsids.has(e))
-                            .sort(strictCompare);
-                    });
-
-                    if (candidateTargets.length > 0) {
-                        const targets = defensiveProfileTime(
-                            '.defensive.sectorCounterAttackPredictTargets',
-                            () => predictAllAdjacentTargets(
-                                state, brigade.id, adjacency, reverseMap, terrainCache,
-                                'attack', supplyStateByOsid, osidPopulationMap, slopeByOsid, ethnicMap,
-                            )
-                        );
-
-                        // Find best target among candidates with sufficient predicted outcome
-                        let bestTarget: typeof targets[number] | null = null;
-                        let bestRatio = -Infinity;
-                        const currentTurn = state.meta?.turn ?? 0;
-                        for (const candidate of candidateTargets) {
-                            if (wasRecentlyRepulsedFromTarget(brigade, candidate, currentTurn)) continue;
-                            const t = targets.find(p => p.osid === candidate);
-                            if (!t) continue;
-                            if ((chosenTargets.get(t.osid) ?? 0) >= maxAtt) continue;
-                            if (!isOutcomeSufficientForAttack(t.prediction.predicted_outcome, 'costly_victory')) continue;
-                            if (t.prediction.power_ratio > bestRatio) {
-                                bestRatio = t.prediction.power_ratio;
-                                bestTarget = t;
-                            }
-                        }
-
-                        if (bestTarget) {
-                            result.posture_orders.push({ brigade_id: brigade.id, posture: 'attack' });
-                            result.attack_orders[brigade.id] = bestTarget.osid;
-                            result.attack_scores[brigade.id] = 950; // Below self-retreat (1000)
-                            chosenTargets.set(bestTarget.osid, (chosenTargets.get(bestTarget.osid) ?? 0) + 1);
-                            sectorCounterAttackCount.set(sectorId, sectorCount + 1);
-                            return true;
-                        }
-                    }
-                }
-            }
-        }
+        // Counter-attacks moved to evaluateRetakeCounterAttack (package P2 step 3): any stance,
+        // just-lost cells only. It runs before this evaluator.
 
         // Fill adjacent front gaps even in defensive stance
         const defHere = defensiveProfileTime(

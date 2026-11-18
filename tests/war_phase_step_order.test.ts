@@ -85,7 +85,7 @@ describe('war-phase step ordering', () => {
 
         // SpatialContext: pre-combat after data load, post-combat after attack resolution
         assertBefore('supply-osid', 'compute-spatial-context-pre-combat');
-        assertBefore('compute-spatial-context-pre-combat', 'compute-supply-reserves');
+        assertBefore('compute-spatial-context-pre-combat', 'enclave-resilience');
         assertBefore('resolve-attack-orders', 'compute-spatial-context-post-combat');
         assertBefore('compute-spatial-context-post-combat', 'attribute-operation-casualties');
 
@@ -305,11 +305,18 @@ describe('war-phase step ordering', () => {
         // -3 from retiring update-siege-counters, apply-siege-morale-drain and
         //        apply-siege-bombardment-attrition (2026-11-17, §6 panel: siege counters,
         //        siege defender morale drain and passive bombardment attrition).
-        expect(stepNames.length).toBe(192);
+        // -1 from retiring evaluate-humanitarian-convoys (2026-11-16, F1i §6 panel:
+        //        humanitarian convoys are not modelled in 1.0).
+        // -2 from retiring compute-supply-reserves and update-smuggling-routes (2026-11-17,
+        //        Fable consult 6: the supply-reserve economy is not modelled in 1.0).
+        expect(stepNames.length).toBe(189);
+        expect(stepNames).not.toContain('compute-supply-reserves');
+        expect(stepNames).not.toContain('update-smuggling-routes');
         expect(stepNames).not.toContain('produce-political-directive');
         expect(stepNames).not.toContain('apply-army-directive-interpretation');
         expect(stepNames).not.toContain('update-siege-counters');
         expect(stepNames).not.toContain('apply-siege-morale-drain');
         expect(stepNames).not.toContain('apply-siege-bombardment-attrition');
+        expect(stepNames).not.toContain('evaluate-humanitarian-convoys');
     });
 });

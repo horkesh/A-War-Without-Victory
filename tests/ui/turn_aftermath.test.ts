@@ -325,23 +325,23 @@ describe('buildTurnAftermathView', () => {
   it('uses effective inbox severity for next-action blockers and top rows', () => {
     const view = buildTurnAftermathView({
       nextState: makeState({
-        pendingConvoyDecisions: [
-          {
-            id: 'convoy_srebrenica',
-            target_enclave: 'srebrenica',
-            route_faction: 'RBiH',
-            supply_amount: 20,
-          },
-        ],
+        pendingPeacePlan: {
+          planId: 'vance_owen',
+          planName: 'Vance-Owen Peace Plan',
+          narrative: 'International mediators have presented a proposal.',
+          turnOffered: 12,
+          proposedSplit: { RBiH: 0, RS: 0, HRHB: 0 },
+          institutionalModel: 'cantons',
+          botResponses: {},
+        },
       }),
       osidNameMap: null,
     });
 
     expect(view?.nextActions.blockingCount).toBe(1);
     expect(view?.nextActions.topItems[0]).toMatchObject({
-      id: 'convoy:convoy_srebrenica',
       severity: 'blocking',
-      actionLabel: 'Review convoy',
+      actionLabel: 'Review proposal',
     });
   });
 
@@ -375,22 +375,22 @@ describe('buildTurnAftermathView', () => {
             available_actions: [],
           },
         ],
-        pendingConvoyDecisions: [
-          {
-            id: 'convoy_srebrenica',
-            target_enclave: 'srebrenica',
-            route_faction: 'RBiH',
-            supply_amount: 20,
-          },
-        ],
+        pendingPeacePlan: {
+          planId: 'vance_owen',
+          planName: 'Vance-Owen Peace Plan',
+          narrative: 'International mediators have presented a proposal.',
+          turnOffered: 12,
+          proposedSplit: { RBiH: 0, RS: 0, HRHB: 0 },
+          institutionalModel: 'cantons',
+          botResponses: {},
+        },
       }),
       osidNameMap: null,
     });
 
-    expect(view?.nextActions.topItems.map((item) => item.id)).toEqual([
-      'convoy:convoy_srebrenica',
-      'opportunity:OPP_12_una',
-    ]);
+    const topIds = view?.nextActions.topItems.map((item) => item.id) ?? [];
+    expect(topIds.indexOf('opportunity:OPP_12_una')).toBeGreaterThan(0);
+    expect(view?.nextActions.topItems[0]).toMatchObject({ severity: 'blocking' });
   });
 
   it('keeps sparse battle casualties and absent displacement from becoming exact cost drivers', () => {

@@ -1,10 +1,11 @@
 /**
  * @vitest-environment jsdom
  *
- * Warroom convoy/patron activity-art resolver (graceful fallback).
+ * Warroom patron activity-art resolver (graceful fallback). The convoy lane was
+ * retired with the convoy decision family (F1i, 2026-11-16).
  *
- * UI/data-only, calibration-INERT. The six faction-tagged stills
- * (event_supply_convoy_<faction>.webp / event_patron_relations_<faction>.webp)
+ * UI/data-only, calibration-INERT. The three faction-tagged stills
+ * (event_patron_relations_<faction>.webp)
  * already ship in src/ui/map/assets/event_illustrations/, so the resolver's real
  * eager glob is populated. This suite proves both halves of the graceful-fallback
  * contract:
@@ -26,12 +27,11 @@ import {
 } from '../../src/ui/map/data/warroomActivityArt.js';
 
 const FACTIONS: readonly WarroomActivityFaction[] = ['RBiH', 'RS', 'HRHB'];
-const KINDS: readonly WarroomActivityKind[] = ['convoy', 'patron'];
+const KINDS: readonly WarroomActivityKind[] = ['patron'];
 
 describe('warroomActivityArt — kind → basename stem mapping', () => {
   it('maps each activity kind to its event-illustration stem', () => {
     expect(WARROOM_ACTIVITY_TO_BASENAME_STEM).toEqual({
-      convoy: 'event_supply_convoy',
       patron: 'event_patron_relations',
     });
   });
@@ -40,33 +40,36 @@ describe('warroomActivityArt — kind → basename stem mapping', () => {
 describe('resolveWarroomActivityArtFrom — pure core (injected glob)', () => {
   it('resolves the mapped <stem>_<faction>.webp when present', () => {
     const glob: Record<string, string> = {
-      '../assets/event_illustrations/event_supply_convoy_RBiH.webp': '/assets/event_supply_convoy_RBiH-aaa.webp',
+      '../assets/event_illustrations/event_patron_relations_RBiH.webp': '/assets/event_patron_relations_RBiH-aaa.webp',
       '../assets/event_illustrations/event_patron_relations_RS.webp': '/assets/event_patron_relations_RS-bbb.webp',
     };
-    expect(resolveWarroomActivityArtFrom(glob, 'convoy', 'RBiH')).toBe('/assets/event_supply_convoy_RBiH-aaa.webp');
+    expect(resolveWarroomActivityArtFrom(glob, 'patron', 'RBiH')).toBe('/assets/event_patron_relations_RBiH-aaa.webp');
     expect(resolveWarroomActivityArtFrom(glob, 'patron', 'RS')).toBe('/assets/event_patron_relations_RS-bbb.webp');
   });
 
   it('returns null for an absent asset', () => {
-    expect(resolveWarroomActivityArtFrom({}, 'convoy', 'RBiH')).toBeNull();
-    // present convoy, asked for patron → no match
-    const glob = { '../assets/event_illustrations/event_supply_convoy_RBiH.webp': '/x.webp' };
+    expect(resolveWarroomActivityArtFrom({}, 'patron', 'RBiH')).toBeNull();
+    // present RS patron still, asked for RBiH → no match
+    const glob = { '../assets/event_illustrations/event_patron_relations_RS.webp': '/x.webp' };
     expect(resolveWarroomActivityArtFrom(glob, 'patron', 'RBiH')).toBeNull();
   });
 
   it('returns null for an unknown kind', () => {
     expect(resolveWarroomActivityArtFrom({}, 'siege' as unknown as WarroomActivityKind, 'RBiH')).toBeNull();
+    // the retired convoy lane resolves nothing, even when its still is present
+    const convoyGlob = { '../assets/event_illustrations/event_supply_convoy_RBiH.webp': '/x.webp' };
+    expect(resolveWarroomActivityArtFrom(convoyGlob, 'convoy' as unknown as WarroomActivityKind, 'RBiH')).toBeNull();
     expect(resolveWarroomActivityArtFrom({}, null, 'RBiH')).toBeNull();
     expect(resolveWarroomActivityArtFrom({}, undefined, 'RBiH')).toBeNull();
   });
 
   it('returns null for a non-canonical / nullish faction', () => {
-    expect(resolveWarroomActivityArtFrom({}, 'convoy', 'JNA')).toBeNull();
-    expect(resolveWarroomActivityArtFrom({}, 'convoy', null)).toBeNull();
-    expect(resolveWarroomActivityArtFrom({}, 'convoy', undefined)).toBeNull();
+    expect(resolveWarroomActivityArtFrom({}, 'patron', 'JNA')).toBeNull();
+    expect(resolveWarroomActivityArtFrom({}, 'patron', null)).toBeNull();
+    expect(resolveWarroomActivityArtFrom({}, 'patron', undefined)).toBeNull();
     // never resolves a partial/loose faction string against a real-shaped glob
-    const glob = { '../assets/event_illustrations/event_supply_convoy_RBiH.webp': '/x.webp' };
-    expect(resolveWarroomActivityArtFrom(glob, 'convoy', 'RB')).toBeNull();
+    const glob = { '../assets/event_illustrations/event_patron_relations_RBiH.webp': '/x.webp' };
+    expect(resolveWarroomActivityArtFrom(glob, 'patron', 'RB')).toBeNull();
   });
 });
 
@@ -84,7 +87,7 @@ describe('resolveWarroomActivityArt — real (shipped) glob', () => {
   });
 
   it('still returns null for a non-canonical faction against the real glob', () => {
-    expect(resolveWarroomActivityArt('convoy', 'JNA')).toBeNull();
+    expect(resolveWarroomActivityArt('patron', 'JNA')).toBeNull();
     expect(resolveWarroomActivityArt('patron', null)).toBeNull();
   });
 });

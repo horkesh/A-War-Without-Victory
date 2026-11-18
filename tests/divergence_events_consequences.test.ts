@@ -154,9 +154,8 @@ describe('LANE-NIGHTSHIFT-ROUND2: divergence event seeds', () => {
         expect(def.narrative).not.toMatch(/monitors|rare/i);
         expect(JSON.stringify(def.effect)).toMatch(/does not mean RS forces killed no one/);
         applyEventEffects(fires, effectsOf(def));
-        // No mechanical effect on negotiation_capital.international_credibility key needed —
-        // the negotiation_capital writer only mutates fields already present on the capital
-        // record, so we just check that the call did not throw and the state is intact.
+        // §6 E2: the negotiation_capital kind is retired; the row's +12 standing lives in its
+        // dimension_shifts, so we just check that the call did not throw and the state is intact.
         expect(fires.military.negotiation?.capital?.RS).toBeTruthy();
     });
 
@@ -245,8 +244,12 @@ describe('LANE-NIGHTSHIFT-ROUND2: divergence event seeds', () => {
         expect(evaluateCondition(cond, lapsed)).toBe(false);
 
         applyEventEffects(fires, effectsOf(def));
-        // negotiation_capital effect mutates the per-faction capital record in place.
+        // §6 E2: the military_credibility −6 is carried only by the row's live dimension
+        // shift; the retired negotiation_capital effect (which wrote this fixture-seeded
+        // capital key, a key real state never has) is gone, so the capital stays put.
         const cap = (fires.military.negotiation?.capital?.RS as any);
-        expect(cap?.military_credibility).toBeLessThan(50);
+        expect(cap?.military_credibility).toBe(50);
+        expect(effectsOf(def).some(e => (e.kind as string) === 'negotiation_capital')).toBe(false);
+        expect(def.dimension_shifts).toContainEqual({ faction: 'RS', dimension: 'military_credibility', delta: -6 });
     });
 });

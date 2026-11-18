@@ -434,6 +434,26 @@ export function withOperationAuthorizedDestinations(
  * `generate-bot-brigade-orders` later the same turn, while the T3 revalidation runs at
  * `osid-column-movement` early the NEXT turn — before the next regeneration.
  */
+/**
+ * True when this brigade holds an empty-sector relief reassignment (package P2 step 1) and the
+ * destination moves it toward that sector. Such a march releases a dug-in donor in
+ * `processOsidColumnMovement`, as an operation-authorized order does.
+ */
+export function isEmptySectorReliefColumnOrder(
+    state: GameState,
+    brigade: FormationState,
+    destinationOsid: string,
+    adjacency: Map<string, string[]>,
+    reverseMap?: OperationalToCanonicalReverseMap | null,
+): boolean {
+    const corpsId = brigade.corps_id;
+    if (!corpsId) return false;
+    const reassign = (state.military.corps_command?.[corpsId]?.directive?.sector_reassignment_orders ?? [])
+        .find((r) => r.brigade_id === brigade.id);
+    if (reassign?.empty_sector_relief !== true) return false;
+    return isMovementAuthorizedByCorpsReassignment(state, brigade, destinationOsid, adjacency, reverseMap);
+}
+
 export function isMovementAuthorizedByCorpsReassignment(
     state: GameState,
     brigade: FormationState,

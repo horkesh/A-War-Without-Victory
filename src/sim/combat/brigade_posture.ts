@@ -21,6 +21,7 @@ import type {
 import { strictCompare } from '../../state/validateGameState.js';
 import { isBrigadeAssignedToFront } from './front_assignment.js';
 import { HOME_GROUND_COHESION_BONUS } from './combat_math.js';
+import { findBrigadeLiveOperationAnywhere } from './corps_operation_helpers.js';
 
 // --- Types ---
 
@@ -188,8 +189,14 @@ export function applyPostureOrders(state: GameState): PostureReport {
             continue;
         }
         if (!isBrigadeAssignedToFront(state, brigadeId)) {
-            report.postures_rejected++;
-            continue;
+            // Package P2 step 2 (Codex review on #774): the one off-front posture change is an
+            // unloaned army-reserve elite taking its `hold` rest order; applyPostureCosts rests it.
+            const reserveRest = order.posture === 'hold'
+                && brigade.elite_loan_state != null && brigade.elite_loan_state.on_loan !== true;
+            if (!reserveRest) {
+                report.postures_rejected++;
+                continue;
+            }
         }
 
         // Home-ground auto-upgrade: hold → defend for home-defense brigades
@@ -248,7 +255,29 @@ export function applyPostureCosts(state: GameState): void {
         if (!brigade) continue;
         if (brigade.status !== 'active') continue;
         if ((brigade.kind ?? 'brigade') !== 'brigade') continue;
-        if (!isBrigadeAssignedToFront(state, id as FormationId)) continue;
+        const onFront = isBrigadeAssignedToFront(state, id as FormationId);
+        if (!onFront) {
+            // P2 step 2 (2026-11-16): an unassigned army-reserve brigade in `hold` rests off the front
+            // too (only the army reserve; every other off-front brigade still gets no posture effect).
+            if (brigade.elite_loan_state && brigade.elite_loan_state.on_loan !== true && normalizePosture(brigade.posture) === 'hold') {
+                const rested = Math.min(DEFEND_COHESION_CAP, (brigade.cohesion ?? 60) + POSTURE_COHESION_COST.hold);
+                if (rested > (brigade.cohesion ?? 60)) brigade.cohesion = Math.round(rested * 10) / 10;
+            }
+            // Ruling D, step 1 (orchestrator, 2026-11-17): `dig_in` is a front posture. A brigade off
+            // the front (reserve, rear or unassigned) and in no planning or execution operation stands
+            // down to `defend`. Off the front no posture order reaches it (`applyPostureOrders` rejects
+            // them), so a brigade reclassified while dug in (P2 step 1 digs in every static front
+            // brigade) kept `dig_in` for good, and every later multi-hop column order to it died at the
+            // dig_in lockout in `processOsidColumnMovement`. The lockout is unchanged, and a participant
+            // of a live operation keeps its posture: an authorized operation releases it through its own
+            // column order, and an emergent one must leave it where it is.
+            if (normalizePosture(brigade.posture) === 'dig_in'
+                && findBrigadeLiveOperationAnywhere(state, id) == null) {
+                brigade.posture = 'defend';
+                brigade.dig_in_progress = 0;
+            }
+            continue;
+        }
 
         const posture: BrigadePosture = normalizePosture(brigade.posture);
         // Migrate in-place so auto-downgrade and progress tracking use the canonical posture

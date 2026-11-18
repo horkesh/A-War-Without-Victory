@@ -128,60 +128,6 @@ describe('derivePresidentialBlockers', () => {
     ]);
   });
 
-  it('keeps convoy blockers player-facing and avoids raw faction/enclave ids', () => {
-    const blockers = derivePresidentialBlockers(makeState({
-      pendingConvoyDecisions: [
-        {
-          id: 'convoy_1',
-          target_enclave: 'srebrenica_enclave',
-          route_faction: 'RBiH',
-          supply_amount: 25,
-        },
-      ],
-    }), null);
-
-    expect(blockers).toHaveLength(1);
-    expect(blockers[0]).toMatchObject({
-      id: 'convoy:convoy_1',
-      action: 'convoy_decision_modal',
-      actionLabel: 'Review convoy',
-    });
-    expect(blockers[0].summary).toContain('A humanitarian convoy request needs your instruction');
-    expect(blockers[0].summary).not.toContain('RBiH route');
-    expect(blockers[0].summary).not.toContain('srebrenica_enclave');
-  });
-
-  it('does not block the player on foreign-route convoy decisions', () => {
-    const blockers = derivePresidentialBlockers(makeState({
-      pendingConvoyDecisions: [
-        {
-          id: 'convoy_foreign',
-          target_enclave: 'srebrenica_enclave',
-          route_faction: 'RS',
-          supply_amount: 25,
-        },
-      ],
-    }), null);
-
-    expect(blockers).toHaveLength(0);
-  });
-
-  it('does not block the player on already answered convoy decisions', () => {
-    const blockers = derivePresidentialBlockers(makeState({
-      pendingConvoyDecisions: [
-        {
-          id: 'convoy_answered',
-          target_enclave: 'srebrenica_enclave',
-          route_faction: 'RBiH',
-          supply_amount: 25,
-          decision: 'allow',
-        },
-      ],
-    }), null);
-
-    expect(blockers).toHaveLength(0);
-  });
-
   it('uses registry action copy for paramilitary blockers', () => {
     const blockers = derivePresidentialBlockers(makeState({
       pendingParamilitaryRequests: [
@@ -202,27 +148,26 @@ describe('derivePresidentialBlockers', () => {
     });
   });
 
-  it('localizes convoy blocker and registry action copy', async () => {
+  it('localizes blocker registry action copy (paramilitary; convoy blockers retired F1i)', async () => {
     const { setLocale } = await import('../../src/ui/map/i18n/index.js');
     try {
       setLocale('bcs', undefined);
       const blockers = derivePresidentialBlockers(makeState({
-        pendingConvoyDecisions: [
+        pendingParamilitaryRequests: [
           {
-            id: 'convoy_1',
-            target_enclave: 'srebrenica_enclave',
-            route_faction: 'RBiH',
-            supply_amount: 25,
+            faction: 'RBiH',
+            target_osid: 'bratunac_1',
+            strength: 120,
+            estimated_civilian_risk: 14,
           },
         ],
-      }), null);
+      }), { bratunac_1: 'Bratunac' });
 
       expect(blockers[0]).toMatchObject({
-        typeLabel: 'Humanitarni konvoj',
-        actionLabel: 'Pregledaj konvoj',
-        summary: 'Zahtjev za humanitarni konvoj treba vašu instrukciju prije napredovanja poteza.',
+        typeLabel: 'Paravojno odobrenje',
+        actionLabel: 'Pregledaj paravojsku',
       });
-      expect(`${blockers[0]?.typeLabel} ${blockers[0]?.actionLabel} ${blockers[0]?.summary}`).not.toMatch(/Humanitarian convoy|Review convoy|before the turn can proceed/);
+      expect(`${blockers[0]?.typeLabel} ${blockers[0]?.actionLabel}`).not.toMatch(/Paramilitary authorization|Review paramilitary/);
     } finally {
       setLocale('en', undefined);
     }

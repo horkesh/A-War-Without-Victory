@@ -511,6 +511,9 @@ function validateEventRow(row: unknown, filename: string, rowIndex: number): voi
             failRow(filename, rowIndex, 'enables_events must be a string array when present');
         }
     }
+    if (hasOwn(row, 'auto_resolve_turns')) {
+        failRow(filename, rowIndex, 'auto_resolve_turns is retired (2026-11-17): the engine never auto-resolves an unanswered decision after N turns');
+    }
     if (hasOwn(row.trigger, 'condition')) {
         validateCondition(row.trigger.condition, 'trigger.condition', filename, rowIndex);
     }
@@ -799,6 +802,65 @@ function validateImpossiblePrerequisiteWindows(rows: EventDefinition[]): void {
     }
 }
 
+/** The two parties of the one alliance the event layer can move. `alliance_change` and
+ *  `alliance_lock` act only on the RBiH-HRHB alliance (event_types.ts, EventEffectAllianceChange
+ *  and EventEffectAllianceLock; applyAllianceChange / applyAllianceLock take no faction). */
+const ALLIANCE_PARTIES: ReadonlySet<string> = new Set(['RBiH', 'HRHB']);
+const ALLIANCE_EFFECT_KINDS: ReadonlySet<string> = new Set(['alliance_change', 'alliance_lock']);
+
+/**
+ * Closed allowlist for `validateAllianceEffectParties`: three authored RS choice options whose
+ * RBiH-HRHB alliance effect is deliberate copy, held for the §6 card batch (one of them,
+ * propose_trilateral, says the alliance "frays" while its effect raises it). Entries are
+ * `event_id#option_id`. The list may only shrink: tests/event_alliance_effect_parties.test.ts
+ * fails when an entry no longer matches a non-party alliance effect in the shipped catalog.
+ */
+export const NON_PARTY_ALLIANCE_EFFECT_ALLOWLIST: ReadonlySet<string> = new Set([
+    'rs_autonomy_path_decision_1993#accept_federation_status',
+    'rs_owen_stoltenberg_response_1993#accept_with_modifications',
+    'rs_washington_rejection_1994#propose_trilateral',
+]);
+
+/**
+ * Alliance effects belong to a party of the alliance (§6, orchestrator ruling 2026-11-17).
+ * `csq_back_channel_communication_RS` carried an RBiH-HRHB floor copied from the RBiH variant,
+ * so an RS card propped up the Federation. A row keyed to a faction, by its
+ * `responding_faction`, that is not a party (RBiH, HRHB) may not carry an alliance effect: not
+ * in `effect`, not in `effects`, not in any response option. A row with no `responding_faction`
+ * is a global card and is not keyed to a faction.
+ */
+export function findNonPartyAllianceEffects(rows: EventDefinition[]): { violations: string[]; allowlisted: string[] } {
+    const hasAllianceEffect = (effects: unknown): boolean => {
+        const list = Array.isArray(effects) ? effects : effects ? [effects] : [];
+        return list.some((e) => isObject(e) && typeof e.kind === 'string' && ALLIANCE_EFFECT_KINDS.has(e.kind));
+    };
+    const violations: string[] = [];
+    const allowlisted: string[] = [];
+    for (const row of [...rows].sort((a, b) => strictCompare(a.id, b.id))) {
+        const faction = row.responding_faction;
+        if (!faction || ALLIANCE_PARTIES.has(faction)) continue;
+        if (hasAllianceEffect(row.effect) || hasAllianceEffect(row.effects)) {
+            violations.push(`${row.id} (${faction})`);
+        }
+        for (const option of row.response_options ?? []) {
+            if (!hasAllianceEffect(option.effects)) continue;
+            const key = `${row.id}#${option.id}`;
+            if (NON_PARTY_ALLIANCE_EFFECT_ALLOWLIST.has(key)) allowlisted.push(key);
+            else violations.push(`${key} (${faction})`);
+        }
+    }
+    return { violations, allowlisted };
+}
+
+export function validateAllianceEffectParties(rows: EventDefinition[]): void {
+    const { violations } = findNonPartyAllianceEffects(rows);
+    if (violations.length > 0) {
+        throw new Error(
+            `Alliance effect on a row keyed to a faction that is not a party of the RBiH-HRHB alliance: ${violations.join(', ')}`,
+        );
+    }
+}
+
 /**
  * Cross-faction option-id rejection (test plan gate 9). Two option ids
  * identical across rows of different `responding_faction` are rejected
@@ -1041,9 +1103,9 @@ function validateUnreachableGates(rows: EventDefinition[]): void {
  *
  * For every `dimension_shifts[].dimension` (event-level and option-level),
  * assert membership in the typed {@link DIMENSION_IDS} set. An unknown
- * dimension name is a DEAD write: `applyDimensionShift()` no-ops when the
- * dimension is not present in the typed `DimensionStore`, and the catalog
- * silently loses the authored effect.
+ * dimension name used to be a DEAD write (the catalog silently lost the
+ * authored effect); since §6 E2 `applyDimensionShift()` also throws on it at
+ * apply time, so this load-time check names the row before a run can reach it.
  *
  * Common authoring failure mode is to pass an `EffectKind` (e.g.
  * `'patron_pressure'`, `'alliance_change'`) into a dimension slot. The error
@@ -1245,6 +1307,7 @@ export function loadEventDefinitionsFromDir(scenarioStartWeek: number, eventsDir
     validateNoRepeatedEffect(allEvents);
     // ─── Phase B Sub-slice B1 catalog-level passes. ────────────────────────
     validateCrossFactionOptionIds(allEvents);
+    validateAllianceEffectParties(allEvents);
     validateRing3EnablingRejection(allEvents);
     validateRuptureForeclosurePolicy(allEvents);
     validateForbiddenFamilyExclusions(allEvents);

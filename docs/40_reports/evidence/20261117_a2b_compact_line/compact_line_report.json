@@ -1,0 +1,157 @@
+{
+  "errors": [],
+  "report": [
+    {
+      "phase": "active",
+      "locale": "en",
+      "size": "1280x720",
+      "file": "docs\\40_reports\\evidence\\20261117_a2b_compact_line\\compact_active_en_1280x720.png",
+      "minFontPx": 13,
+      "text": "Refugee compact until 7 Jun 1993. Only while it stands: Zagreb's pull and displacement strain on the alliance eased, HVO recruitment slowed. Ends: Washington Agreement or your answers.",
+      "compactPhase": "active",
+      "rect": {
+        "w": 842,
+        "h": 44
+      },
+      "overflowX": false
+    },
+    {
+      "phase": "suspended",
+      "locale": "en",
+      "size": "1280x720",
+      "file": "docs\\40_reports\\evidence\\20261117_a2b_compact_line\\compact_suspended_en_1280x720.png",
+      "minFontPx": 13,
+      "text": "Refugee compact: its easing of the strain that displacement adds to the alliance is suspended after a settlement changed hands between the HVO and the ARBiH. The recruitment cost still applies.",
+      "compactPhase": "suspended",
+      "rect": {
+        "w": 842,
+        "h": 44
+      },
+      "overflowX": false
+    },
+    {
+      "phase": "lapsed",
+      "locale": "en",
+      "size": "1280x720",
+      "file": "docs\\40_reports\\evidence\\20261117_a2b_compact_line\\compact_lapsed_en_1280x720.png",
+      "minFontPx": 13,
+      "text": "Refugee compact ended by your answer. Displacement strain and Zagreb's pull on the alliance are back; HVO recruitment has recovered.",
+      "compactPhase": "lapsed",
+      "rect": {
+        "w": 842,
+        "h": 26
+      },
+      "overflowX": false
+    },
+    {
+      "phase": "ran_out",
+      "locale": "en",
+      "size": "1280x720",
+      "file": "docs\\40_reports\\evidence\\20261117_a2b_compact_line\\compact_ran_out_en_1280x720.png",
+      "minFontPx": 13,
+      "text": "Refugee compact ran out on 7 Jun 1993: no answer renewed it. Displacement strain and Zagreb's pull on the alliance are back; HVO recruitment has recovered.",
+      "compactPhase": "ran_out",
+      "rect": {
+        "w": 842,
+        "h": 44
+      },
+      "overflowX": false
+    },
+    {
+      "phase": "signed",
+      "locale": "en",
+      "size": "1280x720",
+      "file": "docs\\40_reports\\evidence\\20261117_a2b_compact_line\\compact_signed_en_1280x720.png",
+      "minFontPx": 13,
+      "text": "Refugee compact ended with the Washington Agreement, which now binds the alliance. HVO recruitment has recovered.",
+      "compactPhase": "signed",
+      "rect": {
+        "w": 842,
+        "h": 26
+      },
+      "overflowX": false
+    },
+    {
+      "phase": "not_hrhb",
+      "locale": "en",
+      "size": "1280x720",
+      "lineRendered": false
+    },
+    {
+      "phase": "active",
+      "locale": "bcs",
+      "size": "1280x720",
+      "file": "docs\\40_reports\\evidence\\20261117_a2b_compact_line\\compact_active_bcs_1280x720.png",
+      "minFontPx": 13,
+      "text": "Dogovor o prihvatu raseljenih do 7 jun 1993. Samo dok traje: ublaženi zagrebački pritisak i napetost u savezu zbog raseljavanja, usporena regrutacija. Kraj: Washingtonski sporazum ili vaši odgovori.",
+      "compactPhase": "active",
+      "rect": {
+        "w": 842,
+        "h": 44
+      },
+      "overflowX": false
+    },
+    {
+      "phase": "suspended",
+      "locale": "bcs",
+      "size": "1280x720",
+      "file": "docs\\40_reports\\evidence\\20261117_a2b_compact_line\\compact_suspended_bcs_1280x720.png",
+      "minFontPx": 13,
+      "text": "Dogovor o prihvatu raseljenih: ublažavanje napetosti koju raseljavanje unosi u savez obustavljeno je nakon promjene kontrole nad naseljem između HVO-a i ARBiH-a. Cijena u regrutaciji i dalje važi.",
+      "compactPhase": "suspended",
+      "rect": {
+        "w": 842,
+        "h": 44
+      },
+      "overflowX": false
+    },
+    {
+      "phase": "lapsed",
+      "locale": "bcs",
+      "size": "1280x720",
+      "file": "docs\\40_reports\\evidence\\20261117_a2b_compact_line\\compact_lapsed_bcs_1280x720.png",
+      "minFontPx": 13,
+      "text": "Dogovor o prihvatu raseljenih je okončan vašim odgovorom. Napetost zbog raseljavanja i zagrebački pritisak na savez su se vratili; regrutacija se oporavila.",
+      "compactPhase": "lapsed",
+      "rect": {
+        "w": 842,
+        "h": 26
+      },
+      "overflowX": false
+    },
+    {
+      "phase": "ran_out",
+      "locale": "bcs",
+      "size": "1280x720",
+      "file": "docs\\40_reports\\evidence\\20261117_a2b_compact_line\\compact_ran_out_bcs_1280x720.png",
+      "minFontPx": 13,
+      "text": "Dogovor o prihvatu raseljenih istekao je (7 jun 1993): nijedan ga odgovor nije obnovio. Napetost zbog raseljavanja i zagrebački pritisak na savez su se vratili; regrutacija se oporavila.",
+      "compactPhase": "ran_out",
+      "rect": {
+        "w": 842,
+        "h": 44
+      },
+      "overflowX": false
+    },
+    {
+      "phase": "signed",
+      "locale": "bcs",
+      "size": "1280x720",
+      "file": "docs\\40_reports\\evidence\\20261117_a2b_compact_line\\compact_signed_bcs_1280x720.png",
+      "minFontPx": 13,
+      "text": "Dogovor o prihvatu raseljenih prestao je potpisivanjem Washingtonskog sporazuma, koji sada vezuje savez. Regrutacija HVO-a se oporavila.",
+      "compactPhase": "signed",
+      "rect": {
+        "w": 842,
+        "h": 26
+      },
+      "overflowX": false
+    },
+    {
+      "phase": "not_hrhb",
+      "locale": "bcs",
+      "size": "1280x720",
+      "lineRendered": false
+    }
+  ]
+}

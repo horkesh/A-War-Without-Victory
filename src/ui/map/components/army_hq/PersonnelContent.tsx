@@ -78,7 +78,6 @@ export function PersonnelContent({ onOpenRecruitment, onOpenAutonomy }: Personne
                 .filter((id): id is string => Boolean(id)),
         );
         const reserveOfficers = officers.filter(o => o.status === 'reserve' && !openingCommanderOfficerIds.has(o.id));
-        const reserves = state.factionReserves?.[faction];
         const mobilization = state.mobilizationSummary?.[faction];
         const commanderVacancies = officerRosterReported ? corpsFormations
             .filter((corps) => !resolveCorpsCommanderDisplay(corps.id, corps.faction, state))
@@ -104,7 +103,6 @@ export function PersonnelContent({ onOpenRecruitment, onOpenAutonomy }: Personne
             activeOfficers,
             reserveOfficers,
             officerRosterReported,
-            reserves,
             mobilization,
             commanderVacancies,
             lowReliabilityCommanders,
@@ -192,11 +190,11 @@ export function PersonnelContent({ onOpenRecruitment, onOpenAutonomy }: Personne
                 <div className="text-[13px] uppercase tracking-[0.2em] text-text-secondary font-bold mb-2 pb-1 border-b border-panel-border">
                     {t('personnel.forceOverview')}
                 </div>
-                <div className="grid grid-cols-4 gap-3">
+                <div className="grid grid-cols-3 gap-3">
                     <StatCard label={t('personnel.totalPersonnel')} value={data.totalPersonnelLabel} />
                     <StatCard label={t('personnel.activeBrigades')} value={String(data.brigades.length)} />
                     <StatCard label={t('personnel.corps')} value={String(data.corpsFormations.length)} />
-                    <StatCard label={t('personnel.supplyReserve')} value={data.reserves ? formatReportedWhole(data.reserves.generalSupply) : t('corpsFront.unreported')} />
+                    {/* Supply Reserve card retired 2026-11-17 with the supply-reserve economy (Fable consult 6). */}
                 </div>
             </div>
 

@@ -40,8 +40,6 @@ export interface PresidentDeskShellProps {
   onOpenRecords: () => void;
   onOpenDecisionRecords?: (recordId?: string) => void;
   onOpenChronicle?: (recordId?: string) => void;
-  /** Open the Economy ("War Footing") surface over the Desk (owner, 2026-11-12). */
-  onOpenEconomy?: () => void;
   onClose?: () => void;
   /** Open the advance-turn review modal for blockers or recommended staff review. */
   onReviewAdvance?: () => void;
@@ -66,7 +64,6 @@ export function PresidentDeskShell({
   onOpenRecords,
   onOpenDecisionRecords,
   onOpenChronicle,
-  onOpenEconomy,
   onClose,
   onReviewAdvance,
   reviewedAftermathTurn,
@@ -167,21 +164,7 @@ export function PresidentDeskShell({
             <div className="flex flex-col">
               <SurfaceStat label={t('desk.items.label')} value={actionableCount} />
             </div>
-            {/* Surface step 5 (owner, 2026-11-12): War Footing has its entry on the Desk;
-                it opens over the Desk and closes back to it. */}
-            {onOpenEconomy && (
-              <div data-testid="desk-economy-entry" className="flex flex-col gap-2 border-b border-[#262b35] pb-4">
-                <button
-                  type="button"
-                  onClick={onOpenEconomy}
-                  data-testid="desk-action-economy"
-                  className={`${SURFACE_SECONDARY_BUTTON} self-start`}
-                >
-                  {t('desk.action.openEconomy')}
-                </button>
-                <p className="m-0 text-[15px] leading-snug text-[#b9ad94]">{t('desk.economy.blurb')}</p>
-              </div>
-            )}
+            {/* The War Footing entry was retired 2026-11-17 with the supply-reserve economy (Fable consult 6). */}
             <ConsequenceStrip
               state={state}
               onOpenRecords={onOpenRecords}

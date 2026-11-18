@@ -27,7 +27,6 @@ import type { PresidentialDecisionRoomNavigationTarget } from '../../data/presid
 const SUMMARY_SECTIONS: Array<[SummaryFocusSection, MessageKey]> = [
     ['overview', 'warSummary.tab.overview'],
     ['ivp', 'warSummary.tab.ivp'],
-    ['convoys', 'warSummary.tab.convoys'],
     ['casualties', 'warSummary.tab.casualties'],
     ['support', 'warSummary.tab.support'],
     ['opsec', 'warSummary.tab.opsec'],

@@ -389,11 +389,10 @@ export function TurnAftermathRecordFace({
                     {enumLabel('turnAftermath.severity', view.cost.severity)}
                   </span>
                 </div>
-                <div className="grid grid-cols-2 gap-3 p-4 xl:grid-cols-4">
+                <div className="grid grid-cols-2 gap-3 p-4 xl:grid-cols-3">
                   <Metric label={t('turnAftermath.metric.ownCasualties')} value={formatPersonnel(view.cost.friendlyMilitaryCasualties)} detail={t('turnAftermath.detail.theater', { count: formatCount(view.cost.theaterMilitaryCasualties) })} compact />
                   <Metric label={t('turnAftermath.metric.displaced')} value={formatCount(view.cost.displacedThisTurn)} detail={t('turnAftermath.detail.thisTurn')} compact />
                   <Metric label={t('turnAftermath.metric.destroyed')} value={formatCount(view.cost.ownFormationsDestroyed)} detail={t('turnAftermath.detail.ownFormations')} compact />
-                  <Metric label={t('turnAftermath.metric.supplySpent')} value={formatCount(view.cost.ownSupplySpent + view.cost.ownHeavyMunitionsSpent)} detail={t('turnAftermath.detail.heavy', { count: formatCount(view.cost.ownHeavyMunitionsSpent) })} compact />
                 </div>
                 {view.cost.reasons.length > 0 && (
                   <div className="border-t border-[#262b35] px-5 py-3 text-[15px] leading-relaxed text-[#b9ad94]">
@@ -402,9 +401,8 @@ export function TurnAftermathRecordFace({
                 )}
               </section>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 gap-3">
                 <Metric label={t('turnAftermath.metric.formations')} value={`+${view.formations.ownSpawned} / -${view.formations.ownDestroyed}`} detail={t('turnAftermath.detail.spawnedTotal', { count: formatCount(view.formations.spawned) })} />
-                <Metric label={t('turnAftermath.metric.supply')} value={formatSigned(view.supply.ownSupplyDelta)} detail={t('turnAftermath.detail.heavyValue', { value: formatSigned(view.supply.ownHeavyMunitionsDelta) })} />
               </div>
             </SurfaceSections>
           </SurfaceContent>
