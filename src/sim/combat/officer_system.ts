@@ -918,6 +918,26 @@ export function processOfficerSuccession(
         }
     }
 
+    // 3b. A corps formation that is no longer active (retired by a corps_retire event, or a
+    // synthetic JNA command whose last subordinate withdrew) releases its commander: a generic
+    // acting commander retires, a named officer returns to the reserve without the old seat's
+    // assignment penalty. Before, the JNA Herzegovina Command's generic acting commander held
+    // the dead command for the rest of the war (commander attribution PR 2c). Not a departure:
+    // the officer leaves a seat that no longer exists, not the war. An id that is not a corps
+    // formation (none today) is left alone.
+    const releaseFormations = state.military.formations ?? {};
+    for (const id of officerIds) {
+        const os = officers[id]!;
+        if (os.status !== 'active' || !os.assigned_corps_id) continue;
+        const seat = releaseFormations[os.assigned_corps_id];
+        if (!seat || (seat.kind !== 'corps_asset' && seat.kind !== 'army_hq') || seat.status === 'active') continue;
+        os.status = id.startsWith('generic_') ? 'retired' : 'reserve';
+        os.assigned_corps_id = null;
+        os.acting_commander = false;
+        os.effective_competence_penalty = 0;
+        os.penalty_turns_remaining = 0;
+    }
+
     // 4. Advance turns_in_command and reduce penalties
     for (const id of officerIds) {
         const os = officers[id]!;
