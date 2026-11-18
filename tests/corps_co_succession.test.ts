@@ -1,8 +1,9 @@
 /**
  * Corps commander schedule (command-loop proposal §5E, owner decision 3).
  *
- * The mechanism ships with an EMPTY schedule: the first block proves it is inert. The
- * rest drive it with synthetic schedules: scheduled holders fill vacancies before the
+ * The shipped schedule is the historian's sourced table (commander attribution PR 2c); the
+ * first block pins it, the second proves an EMPTY schedule is inert. The rest drive the
+ * mechanism with synthetic schedules: scheduled holders fill vacancies before the
  * pool, take over from a fallback holder when their tenure starts, never displace the
  * President's appointee, become a matter (not a swap) for a manually controlled player,
  * historical deaths and reliefs are data, and officers who survived the war never
@@ -66,7 +67,7 @@ const tenure = (officer_id: string, tenure_start: number, tenure_end: number | n
     ({ officer_id, tenure_start, tenure_end, historical_fate, source: 'test' });
 
 describe('shipped schedule', () => {
-    it('is empty and validates against the real officer and corps ids', () => {
+    it('is populated and validates against the real officer and corps ids', () => {
         const officersJson = JSON.parse(readFileSync('data/scenarios/officers/apr1992_officers.json', 'utf8'));
         const officerRows = (officersJson.officers ?? officersJson) as Array<{ id: string }>;
         const officerIds = new Set<string>(officerRows.map((o) => o.id));
@@ -79,8 +80,26 @@ describe('shipped schedule', () => {
         // L8 must keep this test green with its data: ids, factions, ranks and availability all cross-checked.
         const loaded = loadCorpsCoRoster(undefined, { officerIds, corpsIds, officers, corpsFactions });
         expect(loaded).not.toBeNull();
-        expect(hasCorpsCoSchedule(loaded)).toBe(false);
-        expect(hasCorpsCoSchedule(CANONICAL_CORPS_CO_ROSTER)).toBe(false);
+        // Commander attribution PR 2c: the historian's table, ICTY dates read in the judgments.
+        expect(hasCorpsCoSchedule(loaded)).toBe(true);
+        expect(hasCorpsCoSchedule(CANONICAL_CORPS_CO_ROSTER)).toBe(true);
+        const span = (corps: string) => (loaded!.rosters[corps]?.schedule ?? [])
+            .map((t) => `${t.officer_id}:${t.tenure_start}-${t.tenure_end ?? 'end'}`);
+        // ICTY trial judgments: Galic TJ paras 604/607, D. Milosevic TJ para 2, Krstic TJ paras 98-99/331,
+        // Hadzihasanovic & Kubura TJ paras 2/330/340, Blaskic TJ para 745, Prlic TJ Vol.2 para 13.
+        expect(span('vrs_sarajevo_romanija')).toEqual(['vrs_sipcic:0-23', 'vrs_galic:23-123', 'vrs_d_milosevic:123-end']);
+        expect(span('vrs_drina')).toEqual(['vrs_zivanovic:30-171', 'vrs_krstic:171-end']);
+        // Historian source check (2026-11-18): Delic TJ para 117 / fn 294 (order of 26 Feb 1994, turn 99)
+        // closes the 3rd Corps gap; Dreković commanded the 4th Corps from January 1994 (his sworn
+        // testimony; Court of BiH S1 1 K 012247 19 Kri); Blaškić was Deputy Chief of Staff by June 1994
+        // (Blaskic TJ para 493); Lasić held the South-East Herzegovina OZ (Prlic TJ Vol.1 para 783).
+        expect(span('arbih_3rd_corps')).toEqual(['arbih_hadzihasanovic:24-82', 'arbih_alagic:82-99', 'arbih_mahmuljin:99-end']);
+        expect(span('arbih_4th_corps')).toEqual(['arbih_pasalic:24-80', 'arbih_drekovic:91-174']);
+        expect(span('hvo_central_bosnia')[0]).toBe('hvo_blaskic:12-113');
+        expect(span('hvo_southeast_herzegovina')).toEqual(['hvo_lasic:10-end']);
+        expect(span('hvo_tomislavgrad').slice(1, 2)).toEqual(['hvo_siljeg:26-89']);
+        // BB1 p.487, BB2 p.536: Boric first, relieved after Grmec-94; the 2026-03-15 order was reversed.
+        expect(span('vrs_2nd_krajina')).toEqual(['vrs_boric:0-135', 'vrs_tomanic:135-end']);
     });
 });
 
