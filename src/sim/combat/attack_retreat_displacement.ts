@@ -40,7 +40,7 @@ import {
     type Osid
 } from './osid_adjacency.js';
 import { getEnclaveCapitalOsid, isEnclaveBrigade, isOsidInSameEnclave } from './enclave_resilience.js';
-import { removeFromActiveOperation } from './brigade_dissolution.js';
+import { dissolveFormationAsDestroyed } from './brigade_dissolution.js';
 import { getCorpsHqOsid } from './corps_front_sectors.js';
 import { invalidateBrigadeJourney } from './brigade_journey_lifecycle.js';
 import type { CombatOutcome } from './combat_math.js';
@@ -460,7 +460,8 @@ export interface ForceRetreatOptions {
 
 /**
  * Force-retreat a formation to a friendly OSID with heavy penalties.
- * Never destroys the brigade — worst case it goes to reserve status with minimal personnel.
+ * Only when no friendly cell can be reached is the formation destroyed, through the canonical
+ * dissolution record (package P2-D).
  */
 export function forceRetreatWithPenalties(
     state: GameState,
@@ -482,12 +483,12 @@ export function forceRetreatWithPenalties(
         relocateFormationAfterCombat(state, formation, dest);
         f.last_retreat_from = { osid: sourceOsid, turn: state.meta?.turn ?? 0 };
     } else {
-        // Absolute last resort: no friendly territory exists at all — brigade disperses
-        // This should only happen if the entire faction's territory is lost
+        // Absolute last resort: no friendly ground it can reach — the formation is destroyed.
+        // Package P2-D (2026-11-18): it is dissolved through the canonical dissolution record
+        // (reserve share, destroyed lifecycle, destruction turn), so reconstitution can see it.
+        // It used to go inactive with no destroyed record and was lost for good.
         relocateFormationAfterCombat(state, formation, undefined);
-        removeFromActiveOperation(state, formation.id, formation.corps_id);
-        formation.status = 'inactive';
-        formation.destruction_turn = state.meta?.turn ?? 0;
+        dissolveFormationAsDestroyed(state, formation.id, opts?.adjacency);
     }
 }
 

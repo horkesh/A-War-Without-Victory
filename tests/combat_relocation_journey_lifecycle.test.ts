@@ -268,6 +268,28 @@ describe('T4 relocation invalidates only the journey it interrupts', () => {
         expect(state.military.brigade_movement_state?.rs_force_terminal).toBeUndefined();
     });
 
+    it('a formation with no retreat is destroyed through the canonical dissolution record (package P2-D)', () => {
+        const formation = makeFormation('rs_no_retreat', 'RS', A, 800, { stranded_status: 'holding' });
+        const state = makeState([formation], {});
+        state.meta.turn = 16;
+        (state.military as any).strategic_reserves = { RS: 1000 };
+
+        forceRetreatWithPenalties(state, formation, reverseMap, A, {
+            adjacency: new Map([[A, []]]),
+            friendlyOsids: new Set(),
+        });
+
+        // Reconstitution reads lifecycle_status 'destroyed' + destruction_turn; the old dead end left neither.
+        expect(formation.status).toBe('inactive');
+        expect(formation.lifecycle_status).toBe('destroyed');
+        expect(formation.destruction_turn).toBe(16);
+        expect(formation.personnel).toBe(0);
+        // Personnel after the emergency-retreat loss, half to the reserve, as in the dissolution pass.
+        expect((state.military as any).strategic_reserves.RS).toBeGreaterThan(1000);
+        // EH-3: the stranded record is never touched.
+        expect(formation.stranded_status).toBe('holding');
+    });
+
     it('does not clear transit for a sector-coverage defeat penalty with no physical relocation', () => {
         const covered = makeFormation('rs_cover', 'RS', K, 800);
         const state = makeState([covered], {});
