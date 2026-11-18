@@ -63,6 +63,7 @@ export function collectSectorDefenseBrigades(
     controller: FactionId,
     adjacency: Map<string, string[]>,
     defenderFormations: FormationState[],
+    options: { includeSeams?: boolean } = {},
 ): FormationState[] {
     const pc = state.political?.political_controllers ?? {};
     const corpsMustHoldOsids = sector ? (state.military.must_hold_osids_by_corps?.[sector.corps_id] ?? []) : [];
@@ -71,7 +72,9 @@ export function collectSectorDefenseBrigades(
     // defended by both rosters. The sector lookup returns one sector per cell, so the other
     // sector's line brigades never reacted, however close (Donja Bočinja: sector 1 alone, while
     // the 2nd Armored of sector 0 stood two hops away). Other corps' sectors are not added.
-    for (const rosterSector of sector ? [sector, ...findSameCorpsSeamSectors(state, sector, targetOsid)] : []) {
+    // `includeSeams: false` gives the owning sector's roster alone (see `collectAverageDefenseRoster`).
+    const seamSectors = sector && options.includeSeams !== false ? findSameCorpsSeamSectors(state, sector, targetOsid) : [];
+    for (const rosterSector of sector ? [sector, ...seamSectors] : []) {
         for (const id of getStandingOgDefenseBrigadeIds(rosterSector)) {
             const f = state.military.formations?.[id];
             if (f == null || f.status !== 'active' || !isStandingOgDefenseBrigadeAvailable(state, f.id)) continue;
@@ -98,4 +101,30 @@ export function collectSectorDefenseBrigades(
     }
     sectorBrigades.sort((a, b) => strictCompare(a.id, b.id));
     return sectorBrigades;
+}
+
+/**
+ * The roster whose average brigade power sets the reaction's cap and floor (Fable consult 7 bound
+ * on ruling D step 4, 2026-11-17): the owning sector's roster, without seam sectors. Seam brigades
+ * may only ADD to the reaction pool. Averaging over the union let weak, distant seam brigades
+ * dilute the average and so lower the cap and floor, making a seam cell weaker in 15 of 49 seam
+ * battles. With the owning roster the defence is never below the no-seam defence: cap and floor are
+ * unchanged and the pool only grows. Returns `null` (average over the full roster) when the owning
+ * roster is the full roster (no seam brigade added) or is empty. The resolver
+ * (`attack_resolution_osid.ts`) and the planner (`combat_predictor.ts`) both use it.
+ */
+export function collectAverageDefenseRoster(
+    state: GameState,
+    sector: NonNullable<GameState['military']['corps_front_sectors']>[string] | null | undefined,
+    targetOsid: string,
+    controller: FactionId,
+    adjacency: Map<string, string[]>,
+    defenderFormations: FormationState[],
+    fullRoster: FormationState[],
+): FormationState[] | null {
+    const owning = collectSectorDefenseBrigades(state, sector, targetOsid, controller, adjacency, defenderFormations, { includeSeams: false });
+    if (owning.length === 0) return null;
+    // Both lists are sorted by id; identical ids mean no seam brigade was added.
+    if (owning.length === fullRoster.length && owning.every((f, i) => f.id === fullRoster[i]!.id)) return null;
+    return owning;
 }

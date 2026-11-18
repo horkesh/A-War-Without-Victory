@@ -8,13 +8,18 @@
  *  P3. Front distribution spread only brigades on their arrival turn, so a stack that survived one
  *      turn was permanent beside empty front cells. A brigade that is surplus on its cell (another
  *      staying brigade outranks it) may now spread to an adjacent empty front cell.
+ *  4c. A cell on the seam of two sectors of one corps is defended by both rosters. Fable consult 7
+ *      bound: seam brigades only add; the reaction's cap and floor average the owning roster, so a
+ *      seam never makes a cell weaker.
  */
 import { describe, expect, it } from 'vitest';
 
 import { applyPostureCosts, applyPostureOrders } from '../src/sim/combat/brigade_posture.js';
 import { distributeBrigadesToFront } from '../src/sim/combat/brigade_front_distribution.js';
-import { collectSectorDefenseBrigades } from '../src/sim/combat/sector_defense_roster.js';
-import type { CorpsFrontSector, FactionId, FormationState, GameState } from '../src/state/game_state.js';
+import { collectAverageDefenseRoster, collectSectorDefenseBrigades } from '../src/sim/combat/sector_defense_roster.js';
+import { predictCombatOutcome } from '../src/sim/combat/combat_predictor.js';
+import type { CorpsFrontSector, FactionId, FormationId, FormationState, GameState } from '../src/state/game_state.js';
+import type { Osid } from '../src/sim/combat/osid_adjacency.js';
 
 const brigade = (id: string, faction: FactionId, loc: string, extra: Partial<FormationState> = {}): FormationState => ({
     id, faction, name: id, created_turn: 0, status: 'active', assignment: null, kind: 'brigade',
@@ -183,5 +188,74 @@ describe('Ruling D, step 4: a cell on a same-corps sector seam is defended by bo
 
     it('another corps fronting the same cell does not', () => {
         expect(roster(true)).toEqual(['on_cell']);
+    });
+});
+
+describe('Ruling D, 4c bound (Fable consult 7): seam brigades only add', () => {
+    // Line D-C1-C2-C3-C4-C5, all RS; the RBiH attacker stands on E next to D, which nobody holds.
+    // Sector s_a (owning, first by id) fronts D and holds `own` at C3 (3 hops). Sector s_b of the
+    // same corps holds two weak brigades at C4 and C5 (4 and 5 hops) and fronts D only when `seam`.
+    const chain = ['D', 'C1', 'C2', 'C3', 'C4', 'C5'];
+    const seamState = (seam: boolean): GameState => {
+        const formations: Record<string, FormationState> = {
+            own: brigade('own', 'RS', 'C3', { corps_id: 'corps_1', personnel: 2500, cohesion: 70 } as any),
+            weak_4: brigade('weak_4', 'RS', 'C4', { corps_id: 'corps_1', personnel: 250, cohesion: 20 } as any),
+            weak_5: brigade('weak_5', 'RS', 'C5', { corps_id: 'corps_1', personnel: 250, cohesion: 20 } as any),
+            attacker: brigade('attacker', 'RBiH', 'E', { corps_id: 'corps_x', personnel: 2500, cohesion: 70 } as any),
+        };
+        const sec = (id: string, front: string[], assigned: string[], territory: string[]) => ({
+            sector_id: id, corps_id: 'corps_1', faction: 'RS',
+            sub_segments: [{ sub_segment_id: `${id}:0`, friendly_osids: front, enemy_osids: ['E'], primary_brigade_ids: assigned }],
+            assigned_brigade_ids: assigned, reserve_brigade_ids: [], territory_osids: territory,
+        });
+        return {
+            meta: { turn: 9, phase: 'war' },
+            factions: [{ id: 'RS' }, { id: 'RBiH' }],
+            military: {
+                formations,
+                corps_front_sectors: {
+                    s_a: sec('s_a', ['D'], ['own'], ['D', 'C1', 'C2', 'C3']),
+                    s_b: sec('s_b', seam ? ['D', 'C4'] : ['C4'], ['weak_4', 'weak_5'], ['C4', 'C5']),
+                },
+            },
+            political: { political_controllers: { ...Object.fromEntries(chain.map((c) => [c, 'RS'])), E: 'RBiH' } },
+        } as unknown as GameState;
+    };
+    const adjacency = (): Map<Osid, Osid[]> => {
+        const adj = new Map<Osid, Osid[]>([['E' as Osid, ['D' as Osid]]]);
+        for (let i = 0; i < chain.length; i += 1) {
+            const n = [chain[i - 1], chain[i + 1], i === 0 ? 'E' : undefined].filter((x): x is string => !!x).sort();
+            adj.set(chain[i] as Osid, n as Osid[]);
+        }
+        return adj;
+    };
+    const predictDefence = (seam: boolean): number => {
+        const s = seamState(seam);
+        const p = predictCombatOutcome(s, 'attacker' as FormationId, 'D' as Osid, adjacency(), new Map(), {}, 'attack');
+        expect(p).not.toBeNull();
+        return p!.defender_power;
+    };
+
+    it('the seam roster has the two weak brigades; the average roster is the owning one', () => {
+        const s = seamState(true);
+        const sector = s.military.corps_front_sectors!.s_a!;
+        const full = collectSectorDefenseBrigades(s, sector, 'D', 'RS', adjacency(), []);
+        expect(full.map((f) => f.id)).toEqual(['own', 'weak_4', 'weak_5']);
+        expect(collectAverageDefenseRoster(s, sector, 'D', 'RS', adjacency(), [], full)?.map((f) => f.id)).toEqual(['own']);
+    });
+
+    it('with no seam brigade added there is no separate average roster', () => {
+        const s = seamState(false);
+        const sector = s.military.corps_front_sectors!.s_a!;
+        const full = collectSectorDefenseBrigades(s, sector, 'D', 'RS', adjacency(), []);
+        expect(full.map((f) => f.id)).toEqual(['own']);
+        expect(collectAverageDefenseRoster(s, sector, 'D', 'RS', adjacency(), [], full)).toBeNull();
+    });
+
+    it('two weak distant seam brigades never lower the defence of the seam cell (planner)', () => {
+        const without = predictDefence(false);
+        const withSeam = predictDefence(true);
+        expect(without).toBeGreaterThan(0);
+        expect(withSeam).toBeGreaterThanOrEqual(without);
     });
 });
