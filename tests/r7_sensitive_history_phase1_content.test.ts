@@ -87,9 +87,15 @@ describe('R7 Phase 1.1 sensitive-history content', () => {
         expect(event.requires_player_response).not.toBe(true);
         expect(event.effects.some((effect: any) => (
             effect.faction === 'RBiH'
-            && ['morale_change', 'negotiation_capital', 'dimension_shift'].includes(effect.kind)
+            && effect.kind === 'morale_change'
             && typeof effect.delta === 'number'
             && effect.delta > 0
+        ))).toBe(false);
+        // §6 E2: standing and leverage live only in `dimension_shifts` (the retired
+        // negotiation_capital kind never wrote anything), so no RBiH shift may be a gain.
+        expect(event.effects.some((effect: any) => effect.kind === 'negotiation_capital')).toBe(false);
+        expect((event.dimension_shifts ?? []).some((shift: any) => (
+            shift.faction === 'RBiH' && typeof shift.delta === 'number' && shift.delta > 0
         ))).toBe(false);
         expect(event.effects.some((effect: any) => (
             ['supply_delta', 'equipment_grant', 'territorial_legitimacy'].includes(effect.kind)

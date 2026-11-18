@@ -24,14 +24,15 @@ describe('consequence_substrate_inventory diagnostic', () => {
             effect: { kind: 'narrative', text: 'Primary' },
             effects: [{ kind: 'patron_pressure', faction: 'RS', delta: 1 }],
             responses: [
-                { id: 'accept', effects: [{ kind: 'negotiation_capital', faction: 'RBiH', dimension: 'international_standing', delta: 3 }] },
+                // §6 E2: was the retired negotiation_capital kind; any live kind serves here.
+                { id: 'accept', effects: [{ kind: 'morale_change', faction: 'RBiH', delta: 3 }] },
             ],
         });
 
         expect(effects.map(row => `${row.source}:${row.effect.kind}`)).toEqual([
             'primary:narrative',
             'additional:patron_pressure',
-            'response:accept:negotiation_capital',
+            'response:accept:morale_change',
         ]);
     });
 

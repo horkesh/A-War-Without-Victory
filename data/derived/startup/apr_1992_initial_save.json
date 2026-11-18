@@ -43790,6 +43790,6 @@
     "war_supply_condition": {},
     "war_supply_pressure": {}
   },
-  "schema_version": 40,
+  "schema_version": 41,
   "turn_summaries": []
 }

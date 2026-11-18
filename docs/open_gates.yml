@@ -540,8 +540,13 @@ gates:
       Independent closeout review confirmed two separate open §6 effects
       defects in the now reliably fired Grabovica/Uzdol row: duplicate
       war_crimes_delta 2 produces +4, and negotiation_capital targets absent
-      international_credibility. They need their own authorized correction,
-      exact-effect tests and measured proof before merge or adoption.
+      international_credibility. The second is RESOLVED by §6 E2 (2026-11-17,
+      branch claude/s6-e2-negotiation-capital): the negotiation_capital kind is
+      retired catalog-wide and the loader rejects it; Grabovica's live
+      international_standing -10 dimension shift is its single carrier
+      (tests/s6_e2_negotiation_capital_retired.test.ts). The first still needs
+      its own authorized correction, exact-effect tests and measured proof
+      before merge or adoption.
       n8 is not a one-field retiming control for the 1995 score delta. Clean
       combined-source reruns and final acceptance remain open; no gate or
       threshold is waived by the Doljani result or published inspection map.
